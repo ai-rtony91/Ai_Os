@@ -23,3 +23,10 @@
 ### Response
 - output: object
 - audit_id: string
+
+## Standardization
+
+- All requests must include intent, context, permissions
+- All responses must include status, result, logs
+- Execution must return audit_id
+- No agent runs without orchestrator approval.
