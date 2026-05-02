@@ -7,14 +7,4 @@ AI-OS is a multi-agent, voice-enabled system designed for safe automation and ex
 This white paper is being converted from PDF to Markdown.
 ## Process Tree (High Level)
 
-User Intent
-  → UI / Voice
-    → Orchestrator
-      → Planner Agent
-        → Security Agent
-          → Execution Agent
-            → Plugin
-              → Result
-                → Audit Log
-                → UI Feedback
-``
+User Intent → UI / Voice → Orchestrator → Planner Agent → Security Agent → Execution Agent → Plugin → Result → Audit Log → UI Feedback
