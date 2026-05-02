@@ -15,10 +15,13 @@ export default function App() {
   const [whitePaper, setWhitePaper] = useState(null);
   const [readme, setReadme] = useState(null);
 
+  // Step gating:
+  // - upload: Next disabled until both files selected
+  // - review: Next enabled
+  // - generate: Next disabled (generation happens via the button)
   const canNext = useMemo(() => {
     if (step.key === "upload") return !!whitePaper && !!readme;
     if (step.key === "review") return true;
-    if (step.key === "generate") return true;
     return false;
   }, [step.key, whitePaper, readme]);
 
@@ -29,9 +32,13 @@ export default function App() {
     <div className="page">
       <header className="topbar">
         <div className="brand">AI‑OS</div>
+
         <div className="stepper">
           {steps.map((s, i) => (
-            <div key={s.key} className={`step ${i === stepIndex ? "active" : i < stepIndex ? "done" : ""}`}>
+            <div
+              key={s.key}
+              className={`step ${i === stepIndex ? "active" : i < stepIndex ? "done" : ""}`}
+            >
               <span className="dot">{i + 1}</span>
               <span className="label">{s.title}</span>
             </div>
@@ -42,9 +49,10 @@ export default function App() {
       <main className="card">
         <h1>{step.title}</h1>
 
+        {/* STEP 1: Upload */}
         {step.key === "upload" && (
           <>
-            <p className="muted">Provide exactly two files. AI‑OS will build everything from them.</p>
+            <p className="muted">Upload both files to continue.</p>
 
             <div className="field">
               <label>White Paper (PDF/MD)</label>
@@ -52,7 +60,9 @@ export default function App() {
                 type="file"
                 onChange={(e) => setWhitePaper(e.target.files?.[0] || null)}
               />
-              <div className="hint">{whitePaper ? `Selected: ${whitePaper.name}` : "No file selected"}</div>
+              <div className="hint">
+                {whitePaper ? `Selected: ${whitePaper.name}` : "No file selected"}
+              </div>
             </div>
 
             <div className="field">
@@ -61,50 +71,91 @@ export default function App() {
                 type="file"
                 onChange={(e) => setReadme(e.target.files?.[0] || null)}
               />
-              <div className="hint">{readme ? `Selected: ${readme.name}` : "No file selected"}</div>
+              <div className="hint">
+                {readme ? `Selected: ${readme.name}` : "No file selected"}
+              </div>
             </div>
           </>
         )}
 
+        {/* STEP 2: Review */}
         {step.key === "review" && (
           <>
-            <p className="muted">Confirm inputs before generation.</p>
+            <p className="muted">Confirm what you uploaded, then click Next.</p>
             <div className="summary">
               <div><b>White Paper:</b> {whitePaper?.name || "—"}</div>
               <div><b>README:</b> {readme?.name || "—"}</div>
             </div>
-            <p className="muted">Next we’ll validate and extract intent/constraints.</p>
           </>
         )}
 
+        {/* STEP 3: Generate */}
         {step.key === "generate" && (
           <>
             <p className="muted">
-              This step will call the orchestrator API to validate → parse → scaffold.
-              For now, we simulate the pipeline click.
+              Generate runs only after Steps 1 & 2. Backend must be running on{" "}
+              <b>http://localhost:5050</b>.
             </p>
+
             <button
               className="primary"
-              onClick={() => {
-                // placeholder click
-                setTimeout(() => next(), 300);
+              disabled={!whitePaper || !readme}
+              onClick={async () => {
+                if (!whitePaper || !readme) return;
+
+                try {
+                  const form = new FormData();
+                  form.append("whitepaper", whitePaper);
+                  form.append("readme", readme);
+
+                  const resp = await fetch("http://localhost:5050/api/pipeline/run", {
+                    method: "POST",
+                    body: form,
+                  });
+
+                  const data = await resp.json();
+
+                  if (!data.ok) {
+                    alert(data.error || "Pipeline failed");
+                    return;
+                  }
+
+                  alert("✅ Pipeline stages: " + data.stages.map((s) => s.key).join(" → "));
+                  next(); // advance to Done only after success
+                } catch (e) {
+                  alert("Backend not reachable. Is it running on http://localhost:5050 ?");
+                }
               }}
             >
-              Run Generation (Simulated)
+              Run Generation (Backend)
             </button>
+
+            <p className="hint" style={{ marginTop: "10px" }}>
+              If this button is disabled, go Back and upload both files.
+            </p>
           </>
         )}
 
+        {/* STEP 4: Done */}
         {step.key === "done" && (
           <>
-            <h2>✅ Project Generated (Simulated)</h2>
-            <p className="muted">Next we wire a real backend endpoint.</p>
+            <h2>✅ Connected</h2>
+            <p className="muted">
+              UI → Backend pipeline wiring is working. Next we’ll replace alerts with on-screen progress.
+            </p>
           </>
         )}
 
+        {/* Navigation */}
         <div className="nav">
-          <button onClick={back} disabled={stepIndex === 0}>Back</button>
-          <button className="primary" onClick={next} disabled={!canNext || stepIndex === steps.length - 1}>
+          <button onClick={back} disabled={stepIndex === 0}>
+            Back
+          </button>
+
+          <button
+            onClick={next}
+            disabled={!canNext || step.key === "generate" || step.key === "done"}
+          >
             Next
           </button>
         </div>
