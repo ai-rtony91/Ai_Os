@@ -21,3 +21,11 @@
 - All actions logged
 - Fail-safe on any error
 - Retry logic controlled by orchestrator
+
+## Standardization
+
+- Pipeline stages must follow exact order (no skipping)
+- Each stage must log output
+- Failures stop pipeline (fail-safe)
+- Orchestrator controls retries only
+- Security approval required before execution stage
