@@ -29,3 +29,11 @@
 - Failures stop pipeline (fail-safe)
 - Orchestrator controls retries only
 - Security approval required before execution stage
+
+## Standardization
+
+- Pipeline stages must run in strict order (no skipping)
+- Each stage must produce a defined output before next stage
+- Any failure stops the pipeline immediately (fail-safe)
+- Orchestrator is the only component allowed to retry steps
+- Execution stage requires explicit security approval
