@@ -1,44 +1,23 @@
-# AI-OS Automation Pipeline (Internal)
+# Automation Pipeline
 
-## Goal
-Turn two user uploads into a generated project:
-- White Paper (architecture intent)
-- README.md (practical requirements)
+## Flow
 
-## Pipeline Stages (authoritative)
-1) Intake
-- Accept: whitepaper + README
-- Store originals
-- Create job id
+1. User Input
+2. Intent Parsing
+3. Orchestrator Routing
+4. Planner Agent
+5. Security Validation
+6. Execution Agent
+7. Plugin Execution
+8. Result Generation
+9. Audit Logging
+10. UI Feedback
 
-2) Validate
-- File types present
-- Size limits
-- Basic schema checks (non-empty)
+---
 
-3) Parse
-- Extract: goal, constraints, must-haves, non-goals
-- Extract: architecture hints, security requirements
+## Rules
 
-4) Classify
-- Determine project type: web app / api / agent system / hybrid
-- Select templates and generators
-
-5) Generate Scaffold
-- Create folders/files
-- Seed config files
-- Produce TODO list
-
-6) Environment Setup (later)
-- Local dependencies checklist
-- Optional cloud resources plan
-
-7) Output
-- Produce generated project folder/repo output
-- Produce summary + next actions + audit log
-
-## Human-in-the-loop
-Approvals required before:
-- running commands
-- provisioning cloud resources
-- writing secrets
+- No execution without security approval
+- All actions logged
+- Fail-safe on any error
+- Retry logic controlled by orchestrator
