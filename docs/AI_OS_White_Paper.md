@@ -1,5 +1,5 @@
 ## Executive Summary
-this doc describes the vision archistdechure and security mpodel of ai os;
+This document describes the vision, architecture, and security model of AI-OS.
 
 ## Purpose AI OS is a multi-agent, voice-enavble system desgined for safe automation and execution 
 
