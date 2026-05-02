@@ -37,3 +37,10 @@ Right panel: inspector (details + raw logs + approval actions)
 - Voice UI
 - Drag/drop builders
 - Multi-user RBAC UI (later)
+
+## Standardization
+
+- UI follows pipeline stages exactly
+- Status labels must match: Idle / Planning / Awaiting Approval / Executing / Completed / Error
+- All actions require audit logging
+- Approvals must block execution
