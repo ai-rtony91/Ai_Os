@@ -42,5 +42,5 @@ Right panel: inspector (details + raw logs + approval actions)
 
 - UI follows pipeline stages exactly
 - Status labels must match: Idle / Planning / Awaiting Approval / Executing / Completed / Error
-- All actions require audit logging
+- All actions require audit logginG
 - Approvals must block execution
