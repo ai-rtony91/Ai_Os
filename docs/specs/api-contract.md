@@ -1,22 +1,25 @@
-# AI-OS API Contract (V1 - Draft)
+# API Contract
 
-## Entities
-- Agent
-- Workflow
-- Step
-- Approval
-- LogEntry
+## Orchestrator → Agents
 
-## Endpoints (concept)
-GET  /status
-GET  /agents
-GET  /workflows
-GET  /workflows/{id}
-GET  /approvals
-POST /approvals/{id}/approve
-POST /approvals/{id}/deny
-GET  /logs?workflowId=&agentId=&limit=
+### Request
+- intent: string
+- context: object
+- permissions: object
 
-## Notes
-- UI reads from these.
-- Orchestrator owns workflow state.
+### Response
+- status: success | fail
+- result: object
+- logs: array
+
+---
+
+## Agents → Execution
+
+### Request
+- action: string
+- parameters: object
+
+### Response
+- output: object
+- audit_id: string
