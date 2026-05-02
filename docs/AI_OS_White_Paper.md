@@ -1,9 +1,9 @@
-##Execuove summary
+## Executive Summary
 this doc describes the vision archistdechure and security mpodel of ai os;
 
-##Purpose AI OS is a multi-agent, voice-enavble system desgined for safe automation and execution 
+## Purpose AI OS is a multi-agent, voice-enavble system desgined for safe automation and execution 
 
-## status 
+## Status 
 this white4 papare is being converted from pdf to markdown
 
 ## Process Tree (High Level)
