@@ -1,40 +1,24 @@
-# [S1] SYSTEM PURPOSE
-Define what AI_OS is and what it does.
+# START_HERE_AI_OS_CONTEXT_PACK (Legacy/Reference)
 
-# [S2] CURRENT STATE
-- What is built
-- What is not built
-- Active components
+> **Legacy/reference only.**
+>
+> The canonical START_HERE context-pack file is:
+> `docs/AI_OS/system_wizards/00_START_HERE_AI_OS_CONTEXT_PACK.md`
+>
+> **Users and AI agents should start with the numbered `00` file above.**
 
-# [S3] CHECKPOINT
-- Last completed step
-- Exact next step only
+## Why this file exists
+This legacy filename is kept only as a compatibility pointer for older references.
 
-# [S4] RULES (CRITICAL)
-- One script at a time
-- No assumptions
-- Verify before next step
-- No redundant outputs
+## Non-duplicated note worth preserving
+- Historical section labels used in older prompts: `S1` through `S8`.
 
-# [S5] HALLUCINATION PREVENTION
-- Only act on confirmed data
-- If unsure → stop and ask
-- Do not fabricate file paths, outputs, or results
-
-# [S6] REDUNDANCY PREVENTION
-- Do not repeat same instructions
-- Do not regenerate identical outputs
-
-# [S7] WORKFLOW ENGINE
-- ChatGPT = architect
-- Codex = builder
-- Claude = reviewer
-
-# [S8] DAILY REPORT RULES
-- Fixed
-- Changed
-- Errors
-- Mistakes
-- Prevention notes
-
-# [S
+## Legacy section labels (reference)
+- `S1` SYSTEM PURPOSE
+- `S2` CURRENT STATE
+- `S3` CHECKPOINT
+- `S4` RULES (CRITICAL)
+- `S5` HALLUCINATION PREVENTION
+- `S6` REDUNDANCY PREVENTION
+- `S7` WORKFLOW ENGINE
+- `S8` DAILY REPORT RULES
