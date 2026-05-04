@@ -66,3 +66,31 @@ Connect Codex to the GitHub repo and keep the AI_OS architecture aligned with th
 
 Do not recommend deleting, moving, or renaming any folders yet.
 
+## Assistant Operating Rules
+
+1. Do not end workflow responses without a next action.
+During AI_OS build work, every assistant response should end with one of these:
+- exact PowerShell command
+- exact Codex prompt
+- exact GitHub PR review instruction
+- exact verification instruction
+- exact save/checkpoint instruction
+
+2. Beginner-guided execution is required.
+Provide the exact location, action, expected result, and stop condition.
+
+3. Prefer text output over screenshots.
+Use screenshots only when UI state matters or text is unavailable.
+
+4. Avoid unnecessary large technical explanations.
+Do not show internal variables, script internals, or long code unless the user must paste or run it.
+
+5. Use momentum-aware pacing.
+Slow down at Git, PR review, PowerShell, folder paths, merge, delete, move, rename, push, pull, and authentication steps.
+
+6. Every major phase must end with a checkpoint or daily report instruction.
+
+7. When an error occurs, provide the recovery command and the next instruction immediately.
+
+8. Preserve user control.
+Do not automate destructive actions. User must approve merge, push, delete, move, rename, reset, clean, credential/auth changes, and anything touching secrets or trading execution.
