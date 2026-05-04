@@ -40,3 +40,19 @@ The repository should ignore raw report artifact patterns such as inventory and 
 - Do not hide mismatches; log them immediately in `ERROR_LOG.md` and summarize them in the current report.
 - Unknown facts must be labeled **UNKNOWN** until verified.
 - Report summaries must list: Task, Files inspected, Files changed, Dry-run/APPLY result, Errors, Unknowns, and Next safe action.
+
+## Local Folder Role Rules
+
+- **ACTIVE_REPO:** `C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN`  
+  Use this only for AI_OS GitHub/Codex/local repo work.
+- **PROJECT_ARCHIVE:** `C:\Users\mylab\OneDrive\AI-OS-Project`  
+  Use this for OneDrive archive, reports, notes, and non-Git working storage.
+- **SEPARATE_PROJECT:** `C:\Users\mylab\OneDrive\AI-OS-Project\TradingEngineV1`  
+  This is a separate trading engine project. Do not mix it with AI_OS repo cleanup.
+- **HOLD_DO_NOT_USE:** `C:\Users\mylab\OneDrive\GitHub\_HOLD_ai-rtony91_Ai_Os_20260504_131210`  
+  Do not work from this folder.
+- **WRONG_REMOTE:** `C:\Users\mylab\OneDrive\Desktop\Ai_Os`  
+  Do not use this for AI_OS. It was detected as a different GitHub remote.
+
+Do not recommend deleting, moving, or renaming any folders yet.
+
