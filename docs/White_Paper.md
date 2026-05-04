@@ -1,3 +1,5 @@
+<!-- STATUS: ACTIVE | OWNER: AI_OS | SYNC: Fix #2 clean -->
+
 # AI-OS: Technical White Paper
 **Complete Specification, APIs, Roadmap, and Scaling Architecture**
 
