@@ -1,3 +1,5 @@
+<!-- STATUS: ACTIVE | OWNER: AI_OS | SYNC: Fix #2 clean -->
+
 ## Executive Summary
 This document describes the vision, architecture, and security model of AI-OS.
 
