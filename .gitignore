@@ -1,2 +1,4 @@
 
 desktop.ini
+services/orchestrator/node_modules/
+apps/dashboard/node_modules/
