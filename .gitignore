@@ -2,3 +2,6 @@
 desktop.ini
 services/orchestrator/node_modules/
 apps/dashboard/node_modules/
+
+Reports/daily/*_INVENTORY_*.txt
+Reports/daily/*_DRY_RUN_REPORT*.txt
