@@ -42,7 +42,13 @@ $csvColumns = @(
     'manual_message_count_total',
     'checkpoint_file',
     'daily_report_file',
-    'notes'
+    'notes',
+    'script_runtime_seconds',
+    'bytes_created',
+    'kb_created',
+    'mb_created',
+    'apply_run_count',
+    'dry_run_count'
 )
 
 function Resolve-RepoRoot {
@@ -151,6 +157,53 @@ function New-MetricsObject {
     }
 
     return [pscustomobject]$object
+}
+
+function Get-RepoInventory {
+    param([string]$RepoRoot)
+
+    $allItems = @(Get-ChildItem -LiteralPath $RepoRoot -Force -Recurse | Where-Object {
+        -not (Test-ExcludedPath -Item $_ -RepoRoot $RepoRoot)
+    })
+    $files = @($allItems | Where-Object { -not $_.PSIsContainer })
+    $folders = @($allItems | Where-Object { $_.PSIsContainer })
+    $totalBytes = [int64](($files | Measure-Object -Property Length -Sum).Sum)
+
+    return [pscustomobject]@{
+        Items = $allItems
+        Files = $files
+        Folders = $folders
+        TotalBytes = $totalBytes
+        TotalKb = [math]::Round($totalBytes / 1KB, 2)
+        TotalMb = [math]::Round($totalBytes / 1MB, 2)
+    }
+}
+
+function Get-MetricsRunCounts {
+    param(
+        [object[]]$Rows
+    )
+
+    $applyRunCount = 0
+    $dryRunCount = 0
+
+    foreach ($row in $Rows) {
+        $rowApplyCount = 0
+        $rowDryCount = 0
+
+        if ($row.PSObject.Properties.Name -contains 'apply_run_count' -and [int]::TryParse([string]$row.apply_run_count, [ref]$rowApplyCount)) {
+            $applyRunCount = [math]::Max($applyRunCount, $rowApplyCount)
+        }
+
+        if ($row.PSObject.Properties.Name -contains 'dry_run_count' -and [int]::TryParse([string]$row.dry_run_count, [ref]$rowDryCount)) {
+            $dryRunCount = [math]::Max($dryRunCount, $rowDryCount)
+        }
+    }
+
+    return [pscustomobject]@{
+        ApplyRunCount = $applyRunCount
+        DryRunCount = $dryRunCount
+    }
 }
 
 function Read-NormalizedCsvRows {
@@ -319,14 +372,12 @@ try {
     $gitStatusClean = ($statusLines.Count -eq 0)
     $gitStatusSummary = if ($gitStatusClean) { 'clean' } else { 'dirty' }
 
-    $allItems = @(Get-ChildItem -LiteralPath $resolvedRepoRoot -Force -Recurse | Where-Object {
-        -not (Test-ExcludedPath -Item $_ -RepoRoot $resolvedRepoRoot)
-    })
-    $files = @($allItems | Where-Object { -not $_.PSIsContainer })
-    $folders = @($allItems | Where-Object { $_.PSIsContainer })
-    $totalBytes = [int64](($files | Measure-Object -Property Length -Sum).Sum)
-    $totalKb = [math]::Round($totalBytes / 1KB, 2)
-    $totalMb = [math]::Round($totalBytes / 1MB, 2)
+    $beforeInventory = Get-RepoInventory -RepoRoot $resolvedRepoRoot
+    $files = $beforeInventory.Files
+    $folders = $beforeInventory.Folders
+    $totalBytes = $beforeInventory.TotalBytes
+    $totalKb = $beforeInventory.TotalKb
+    $totalMb = $beforeInventory.TotalMb
 
     $lastModifiedRows = @(
         $files |
@@ -433,7 +484,16 @@ $statusMarkdown
 Review the generated checkpoint and confirm whether the next workflow should continue in DRY_RUN or APPLY.
 "@
 
-    $metricsRow = New-MetricsObject -Values @{
+    $normalizedRows = @(Read-NormalizedCsvRows -Path $metricsCsvPath)
+    $runCounts = Get-MetricsRunCounts -Rows $normalizedRows
+    $scriptRuntimeSeconds = [math]::Round(((Get-Date) - $scriptStart).TotalSeconds, 2)
+    $bytesCreated = 0
+    $kbCreated = 0
+    $mbCreated = 0
+    $applyRunCount = $runCounts.ApplyRunCount
+    $dryRunCount = $runCounts.DryRunCount
+
+    $metricsRowValues = @{
         date = $dateStamp
         timestamp = $timestampStamp
         mode = $Mode
@@ -454,7 +514,14 @@ Review the generated checkpoint and confirm whether the next workflow should con
         checkpoint_file = $checkpointRelativePath
         daily_report_file = $dailyRelativePath
         notes = $Notes
+        script_runtime_seconds = $scriptRuntimeSeconds
+        bytes_created = $bytesCreated
+        kb_created = $kbCreated
+        mb_created = $mbCreated
+        apply_run_count = $applyRunCount
+        dry_run_count = $dryRunCount
     }
+    $metricsRow = New-MetricsObject -Values $metricsRowValues
 
     $indexHeader = @"
 # AI_OS Checkpoint Index
@@ -483,7 +550,22 @@ Review the generated checkpoint and confirm whether the next workflow should con
     Write-TextFile -Path $checkpointPath -Content $checkpointContent
     Write-TextFile -Path $dailyReportPath -Content $dailyReportContent
 
-    $normalizedRows = @(Read-NormalizedCsvRows -Path $metricsCsvPath)
+    $afterInventory = Get-RepoInventory -RepoRoot $resolvedRepoRoot
+    $bytesCreated = [math]::Max(0, $afterInventory.TotalBytes - $beforeInventory.TotalBytes)
+    $kbCreated = [math]::Round($bytesCreated / 1KB, 2)
+    $mbCreated = [math]::Round($bytesCreated / 1MB, 2)
+    $scriptRuntimeSeconds = [math]::Round(((Get-Date) - $scriptStart).TotalSeconds, 2)
+    $applyRunCount = $runCounts.ApplyRunCount + 1
+    $dryRunCount = $runCounts.DryRunCount
+
+    $metricsRowValues.script_runtime_seconds = $scriptRuntimeSeconds
+    $metricsRowValues.bytes_created = $bytesCreated
+    $metricsRowValues.kb_created = $kbCreated
+    $metricsRowValues.mb_created = $mbCreated
+    $metricsRowValues.apply_run_count = $applyRunCount
+    $metricsRowValues.dry_run_count = $dryRunCount
+    $metricsRow = New-MetricsObject -Values $metricsRowValues
+
     $allCsvRows = @($normalizedRows + $metricsRow)
     $allCsvRows | Export-Csv -LiteralPath $metricsCsvPath -NoTypeInformation -Encoding UTF8
 
