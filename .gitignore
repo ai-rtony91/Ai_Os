@@ -5,3 +5,6 @@ apps/dashboard/node_modules/
 
 Reports/daily/*_INVENTORY_*.txt
 Reports/daily/*_DRY_RUN_REPORT*.txt
+
+# AI-OS generated runtime reports
+Reports/daily/MORNING_BRIEF_*.md
