@@ -1,0 +1,1 @@
+This folder stores read-only AI_OS repo health reports, future health summaries, and verification-chain outputs. It should not store secrets, credentials, broker tokens, private keys, or recovery keys.
