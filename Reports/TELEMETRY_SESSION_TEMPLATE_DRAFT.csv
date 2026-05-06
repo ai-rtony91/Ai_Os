@@ -1,0 +1,2 @@
+date,stage,session_start_time,session_end_time,codex_opened,user_input_char_count,ai_output_char_count,codex_prompt_char_count,codex_output_char_count,files_created,files_changed,files_deleted,git_commit_hash,git_status_final,progress_percent,screen_recording_used,screen_recording_path,privacy_review_required
+YYYY-MM-DD,STAGE_NAME,YYYY-MM-DD HH:MM:SS,YYYY-MM-DD HH:MM:SS,false,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,0,0,0,NONE,"## branch...origin/branch",UNKNOWN,false,,UNKNOWN
