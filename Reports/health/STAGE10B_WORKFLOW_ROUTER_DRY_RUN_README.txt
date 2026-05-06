@@ -1,0 +1,1 @@
+Stage 10B added a DRY_RUN-only controlled workflow router. The router maps named workflows to existing DRY_RUN helpers. No apps launched, no startup settings changed, no reports were written, no broker or trading actions were enabled, and no git commit was performed by Codex.
