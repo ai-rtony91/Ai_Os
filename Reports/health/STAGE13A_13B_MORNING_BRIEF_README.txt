@@ -1,0 +1,1 @@
+Stage 13A + 13B added Morning Brief integration and session-start orchestration architecture drafts plus a DRY_RUN Morning Brief state helper. No apps launched, no startup tasks executed, no reports were written, no approvals were executed, no broker or trading actions were enabled, no protected files changed, and no git commit was performed by Codex.
