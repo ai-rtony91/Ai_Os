@@ -1,0 +1,1 @@
+Stores session-level AI_OS work logs, future session summaries, and operator-reviewed session evidence indexes. Must not store secrets, broker tokens, passwords, private keys, or raw sensitive credentials.

@@ -1,0 +1,1 @@
+Stores approved evidence references, future screenshot/video indexes, verification notes, and work-session proof summaries. Must not store secrets, broker tokens, passwords, private keys, or uncontrolled screen recordings.
