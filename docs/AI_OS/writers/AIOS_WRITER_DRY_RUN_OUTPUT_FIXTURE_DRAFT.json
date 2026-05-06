@@ -1,0 +1,36 @@
+{
+  "target_file": "Reports\\daily\\DAILY_REPORT_yyyy-MM-dd_AI_OS.md",
+  "source_input": "DRY_RUN validator output",
+  "writer_name": "Preview-AiOsWriterExecution.DRY_RUN",
+  "proposed_action": "preview_only",
+  "proposed_fields": [
+    "header",
+    "repo_state",
+    "validator_summary",
+    "protected_file_status",
+    "next_safe_action"
+  ],
+  "blocked_fields": [
+    "secrets",
+    "credentials",
+    "broker_tokens",
+    "private_keys",
+    "recovery_keys",
+    "live_trading_data",
+    "uncontrolled_screen_contents"
+  ],
+  "preview_result": "PASS",
+  "validator_result": "PASS",
+  "protected_file_status": "CLEAN",
+  "approval_required": true,
+  "approval_status": "NOT_APPROVED",
+  "write_allowed": false,
+  "safety": {
+    "secrets_present": false,
+    "credentials_present": false,
+    "protected_file_target": false,
+    "trading_execution_data_present": false,
+    "telemetry_persistence_requested": false,
+    "report_write_requested": false
+  }
+}
