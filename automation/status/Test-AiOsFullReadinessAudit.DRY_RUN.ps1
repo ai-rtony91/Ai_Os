@@ -131,19 +131,37 @@ if (-not $gitCommand) {
 else {
     Push-Location -LiteralPath $script:ResolvedRepoRoot
     try {
+        Write-Host 'Unstaged protected-file diff check:'
         $protectedDiff = @(& git diff --name-only -- $protectedPaths 2>&1)
         if ($LASTEXITCODE -ne 0) {
-            Write-Host '[FAIL] protected-file diff check failed.'
+            Write-Host '[FAIL] unstaged protected-file diff check failed.'
             $protectedDiff | ForEach-Object { Write-Host $_ }
-            $failures.Add('protected-file diff check failed.') | Out-Null
+            $failures.Add('unstaged protected-file diff check failed.') | Out-Null
         }
         elseif ($protectedDiff.Count -gt 0) {
-            Write-Host '[FAIL] protected files changed.'
+            Write-Host '[FAIL] unstaged protected files changed.'
             $protectedDiff | ForEach-Object { Write-Host $_ }
-            $failures.Add('protected files changed.') | Out-Null
+            $failures.Add('unstaged protected files changed.') | Out-Null
         }
         else {
-            Write-Host '[PASS] protected-file diff is clean.'
+            Write-Host '[PASS] unstaged protected-file diff is clean.'
+        }
+
+        Write-Host ''
+        Write-Host 'Staged protected-file diff check:'
+        $cachedProtectedDiff = @(& git diff --cached --name-only -- $protectedPaths 2>&1)
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host '[FAIL] staged protected-file diff check failed.'
+            $cachedProtectedDiff | ForEach-Object { Write-Host $_ }
+            $failures.Add('staged protected-file diff check failed.') | Out-Null
+        }
+        elseif ($cachedProtectedDiff.Count -gt 0) {
+            Write-Host '[FAIL] staged protected files changed.'
+            $cachedProtectedDiff | ForEach-Object { Write-Host $_ }
+            $failures.Add('staged protected files changed.') | Out-Null
+        }
+        else {
+            Write-Host '[PASS] staged protected-file diff is clean.'
         }
 
         Write-Host ''
