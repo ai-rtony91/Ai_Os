@@ -1,353 +1,145 @@
-﻿<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI_OS Static Dashboard Preview</title>
-  <style>
-    :root {
-      --bg: #1b0f12;
-      --panel: #2b171c;
-      --panel2: #3a2027;
-      --accent: #00ff66;
-      --accent2: #2aff9a;
-      --warn: #ffcc66;
-      --danger: #ff5f6d;
-      --text: #d7ffe4;
-      --muted: #8abf9b;
-      --border: rgba(0, 255, 102, 0.25);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: radial-gradient(circle at top left, #44242c, var(--bg) 42%);
-      color: var(--text);
-      font-family: Consolas, "Courier New", monospace;
-    }
-
-    .shell {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      background: linear-gradient(180deg, #2a151a, #160b0e);
-      border-right: 1px solid var(--border);
-      padding: 22px;
-    }
-
-    .brand h1 {
-      color: var(--accent);
-      margin: 0 0 8px;
-      letter-spacing: 1px;
-    }
-
-    .brand p {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .nav {
-      display: grid;
-      gap: 10px;
-      margin-top: 24px;
-    }
-
-    .nav button {
-      background: #201015;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      text-align: left;
-      font-family: inherit;
-    }
-
-    .nav button:hover,
-    .nav button.active {
-      background: #123020;
-      color: var(--accent);
-      box-shadow: 0 0 16px rgba(0, 255, 102, 0.18);
-    }
-
-    .main {
-      padding: 22px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 22px;
-      padding: 14px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: rgba(43, 23, 28, 0.85);
-    }
-
-    .status-line {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .pill {
-      border: 1px solid var(--border);
-      color: var(--accent);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      background: #12090c;
-    }
-
-    .pill.blocked {
-      color: var(--danger);
-      border-color: rgba(255, 95, 109, 0.35);
-    }
-
-    .pill.ok {
-      color: var(--accent2);
-    }
-
-    .panel {
-      display: none;
-    }
-
-    .panel.active {
-      display: block;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: linear-gradient(180deg, var(--panel), #211116);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      min-height: 150px;
-      box-shadow: 0 0 24px rgba(0, 0, 0, 0.25);
-    }
-
-    .card.full {
-      grid-column: 1 / -1;
-    }
-
-    .card.wide {
-      grid-column: span 2;
-    }
-
-    h2 {
-      margin: 0 0 10px;
-      color: var(--accent);
-      font-size: 18px;
-    }
-
-    p, li {
-      color: var(--text);
-      line-height: 1.45;
-      font-size: 14px;
-    }
-
-    .metric {
-      font-size: 30px;
-      color: var(--accent2);
-      margin: 12px 0;
-      font-weight: bold;
-    }
-
-    .blocked-text {
-      color: var(--danger);
-    }
-
-    .terminal {
-      white-space: pre-wrap;
-      background: #090507;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      color: var(--accent);
-      line-height: 1.5;
-    }
-
-    @media (max-width: 900px) {
-      .shell {
-        grid-template-columns: 1fr;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .card.wide {
-        grid-column: 1 / -1;
-      }
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI_OS Electric Command Center Preview</title>
+  <link rel="stylesheet" href="css/aios-static-preview.css">
 </head>
 <body>
-  <div class="shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <h1>AI_OS NODE</h1>
-        <p>Static dashboard preview. Local UI only. No backend calls. No live automation.</p>
+  <div class="background-layer layer-base"></div>
+  <div class="background-layer layer-grid"></div>
+  <div class="background-layer layer-glow"></div>
+
+  <div class="dashboard-shell">
+    <aside class="command-sidebar">
+      <div class="brand-block">
+        <span class="eyebrow">LOCAL STATIC INTERFACE</span>
+        <h1>AI_OS</h1>
+        <p>No backend calls. No API calls. No credentials. No persistence. No live order path.</p>
       </div>
-      <nav class="nav" aria-label="Dashboard sections">
-        <button class="active" data-tab="node">AI_OS Node</button>
-        <button data-tab="engine">Trading Engine</button>
-        <button data-tab="bot">Trading Bot</button>
-        <button data-tab="reports">Reports</button>
-        <button data-tab="telemetry">Telemetry</button>
-        <button data-tab="admin">Admin</button>
+
+      <nav class="side-nav" aria-label="Primary command lanes">
+        <button class="active" data-tab="node" data-action="node">AI_OS Node</button>
+        <button data-tab="engine" data-action="engine">Trading Engine</button>
+        <button data-tab="bot" data-action="bot">Trading Bot</button>
+        <button data-tab="reports" data-action="reports">Reports</button>
+        <button data-tab="telemetry" data-action="telemetry">Telemetry</button>
+        <button data-tab="admin" data-action="admin">Admin</button>
       </nav>
+
+      <div class="sidebar-lock">
+        <strong>SAFETY LOCKS</strong>
+        <span>No OpenAI key</span>
+        <span>No Codex connection</span>
+        <span>No broker/trading automation</span>
+      </div>
     </aside>
 
-    <main class="main">
-      <header class="topbar">
-        <div class="status-line">
-          <span class="pill ok">STATIC PREVIEW</span>
-          <span class="pill blocked">NO BACKEND</span>
-          <span class="pill blocked">NO PERSISTENCE</span>
-          <span class="pill blocked">NO BROKER/TRADING INTEGRATION</span>
-          <span class="pill blocked">NO CREDENTIALS</span>
-        </div>
-        <div class="pill">DRY_RUN UI</div>
+    <main class="command-main">
+      <header class="status-strip">
+        <button class="status-chip active" data-action="system-status">System Status</button>
+        <button class="status-chip" data-action="diagnostics">Run Diagnostics</button>
+        <button class="status-chip" data-action="view-reports">View Reports</button>
+        <button class="status-chip" data-action="explain-telemetry">Explain Telemetry</button>
+        <button class="status-chip" data-action="strategy-insights">Strategy Insights</button>
       </header>
 
-      <section id="node" class="panel active">
-        <div class="grid">
-          <article class="card">
-            <h2>Node State</h2>
-            <div class="metric">REVIEW</div>
-            <p>Local-first AI_OS dashboard preview. Static placeholder data only.</p>
-          </article>
-          <article class="card">
-            <h2>Safety Boundary</h2>
-            <p class="blocked-text">No live automation. No startup task. No persistence. No credentials.</p>
-          </article>
-          <article class="card">
-            <h2>Operator Mode</h2>
-            <p>Manual review. Human approval required before APPLY behavior.</p>
-          </article>
-          <article class="card full">
-            <h2>Console</h2>
-            <div class="terminal">AI_OS> static preview loaded
-AI_OS> backend calls disabled
-AI_OS> writer activation disabled
-AI_OS> broker/trading integration disabled</div>
-          </article>
+      <section class="command-stage" aria-label="Central AI_OS command area">
+        <div class="core-card">
+          <div class="core-orbits" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="orbit orbit-three"></div>
+            <div class="core-pulse">AI_OS</div>
+          </div>
+          <div class="core-copy">
+            <span class="eyebrow">CENTRAL CORE</span>
+            <h2>AI_OS Command Center</h2>
+            <p>Static operator preview with local-only controls, mock status cards, chart placeholders, and assistant guidance lanes.</p>
+          </div>
         </div>
+
+        <aside class="assistant-rail" aria-label="AI Assistant panel">
+          <div class="assistant-head">
+            <span class="eyebrow">AI ASSISTANT</span>
+            <strong>Preview Lane</strong>
+          </div>
+          <div class="assistant-output" id="assistantOutput">AI_OS Node: core system overview and command center. Select any button to update this mock assistant panel.</div>
+          <div class="message-row">
+            <input id="mockMessage" type="text" value="Ask for local status..." aria-label="Mock assistant message">
+            <button data-action="send-message">Send</button>
+          </div>
+        </aside>
       </section>
 
-      <section id="engine" class="panel">
-        <div class="grid">
-          <article class="card">
-            <h2>Trading Engine</h2>
-            <div class="metric">BLOCKED</div>
-            <p>Separate future system. No live market execution path connected.</p>
-          </article>
-          <article class="card wide">
-            <h2>Boundary</h2>
-            <ul>
-              <li>No order placement.</li>
-              <li>No broker routing.</li>
-              <li>No live market data.</li>
-              <li>No execution decisions.</li>
-            </ul>
-          </article>
-        </div>
+      <section class="panel-grid" aria-label="Dashboard cards">
+        <article class="glass-card panel active" id="node">
+          <span class="card-label">AI_OS CORE</span>
+          <h3>AI_OS Node</h3>
+          <div class="metric">REVIEW</div>
+          <p>Core system overview and command center. Static placeholder data only.</p>
+        </article>
+
+        <article class="glass-card panel" id="engine">
+          <span class="card-label">ENGINE</span>
+          <h3>Trading Engine</h3>
+          <div class="metric warning">PAPER REVIEW</div>
+          <p>Future signal validation and paper execution review. No live execution path.</p>
+        </article>
+
+        <article class="glass-card panel" id="bot">
+          <span class="card-label">BOT</span>
+          <h3>Trading Bot</h3>
+          <div class="metric danger">BLOCKED</div>
+          <p>Future strategy/regime validation. No live trading. No real buy/sell execution.</p>
+        </article>
+
+        <article class="glass-card chart-card panel" id="reports">
+          <span class="card-label">REPORTS</span>
+          <h3>Checkpoint Flow</h3>
+          <div class="bar-chart" aria-label="Static reports chart placeholder">
+            <span style="--h: 48%"></span>
+            <span style="--h: 66%"></span>
+            <span style="--h: 40%"></span>
+            <span style="--h: 78%"></span>
+            <span style="--h: 58%"></span>
+          </div>
+          <p>Future health, checkpoint, and progress reporting.</p>
+        </article>
+
+        <article class="glass-card chart-card panel" id="telemetry">
+          <span class="card-label">TELEMETRY</span>
+          <h3>Event Visibility</h3>
+          <div class="telemetry-lines" aria-label="Static telemetry chart placeholder">
+            <i></i><i></i><i></i><i></i>
+          </div>
+          <p>Future system health/event visibility. No persistence yet.</p>
+        </article>
+
+        <article class="glass-card panel" id="admin">
+          <span class="card-label">ADMIN</span>
+          <h3>Safety Gates</h3>
+          <div class="metric">MANUAL</div>
+          <p>Approval gates, safety locks, and settings review. No automatic APPLY behavior.</p>
+        </article>
       </section>
 
-      <section id="bot" class="panel">
-        <div class="grid">
-          <article class="card">
-            <h2>Trading Bot</h2>
-            <div class="metric">NOT ACTIVE</div>
-            <p>Placeholder status only. The bot is not enabled by this dashboard.</p>
-          </article>
-          <article class="card wide">
-            <h2>LLM Boundary</h2>
-            <p>LLMs must not be placed in the live order path. This UI cannot approve, route, or place trades.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="reports" class="panel">
-        <div class="grid">
-          <article class="card">
-            <h2>Reports</h2>
-            <div class="metric">STATIC</div>
-            <p>No report writer is active. Report values are placeholders.</p>
-          </article>
-          <article class="card wide">
-            <h2>Sample Queue</h2>
-            <div class="terminal">Reports/health: REVIEW
-Reports/daily: REVIEW
-Audit evidence: STATIC PLACEHOLDER</div>
-          </article>
-        </div>
-      </section>
-
-      <section id="telemetry" class="panel">
-        <div class="grid">
-          <article class="card">
-            <h2>Telemetry</h2>
-            <div class="metric">DISABLED</div>
-            <p>No telemetry writer. No persistence. No private data collection.</p>
-          </article>
-          <article class="card wide">
-            <h2>Allowed Preview Fields</h2>
-            <p>Static session label, stage label, validator placeholder, operator note placeholder.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="admin" class="panel">
-        <div class="grid">
-          <article class="card">
-            <h2>Admin</h2>
-            <div class="metric">MANUAL</div>
-            <p>All APPLY, commit, push, writer activation, startup automation, and trading integration require human approval.</p>
-          </article>
-          <article class="card wide">
-            <h2>Blocked Actions</h2>
-            <ul>
-              <li>No backend calls.</li>
-              <li>No API calls.</li>
-              <li>No persistence.</li>
-              <li>No broker/trading automation.</li>
-              <li>No credentials.</li>
-            </ul>
-          </article>
+      <section class="console-panel">
+        <div>
+          <span class="eyebrow">TERMINAL HIGHLIGHTS</span>
+          <pre id="consoleOutput">AI_OS&gt; static command center loaded
+AI_OS&gt; no backend calls
+AI_OS&gt; no persistence
+AI_OS&gt; no broker/trading automation
+AI_OS&gt; no live order path</pre>
         </div>
       </section>
     </main>
   </div>
 
-  <script>
-    const buttons = document.querySelectorAll("[data-tab]");
-    const panels = document.querySelectorAll(".panel");
+  <footer class="dashboard-footer">Anthony R Meza</footer>
 
-    buttons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const target = button.dataset.tab;
-
-        buttons.forEach((item) => item.classList.remove("active"));
-        panels.forEach((panel) => panel.classList.remove("active"));
-
-        button.classList.add("active");
-        document.getElementById(target).classList.add("active");
-      });
-    });
-  </script>
+  <script src="js/aios-static-preview.js"></script>
 </body>
 </html>

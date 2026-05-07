@@ -1,0 +1,26 @@
+﻿{
+    "mode":  "static-preview-reference-only",
+    "loaded_by_dashboard":  false,
+    "safety":  {
+                   "backend_calls":  "blocked",
+                   "api_calls":  "blocked",
+                   "persistence":  "blocked",
+                   "credentials":  "blocked",
+                   "trading_automation":  "blocked",
+                   "live_order_path":  "blocked"
+               },
+    "tabs":  [
+                 "AI_OS Node",
+                 "Trading Engine",
+                 "Trading Bot",
+                 "Reports",
+                 "Telemetry",
+                 "Admin"
+             ],
+    "assistant_lanes":  [
+                            "ChatGPT Lane",
+                            "Codex Lane",
+                            "Safety Gate"
+                        ],
+    "note":  "Reference-only mock data. The static preview does not load this file yet."
+}
