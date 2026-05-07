@@ -1,0 +1,31 @@
+{
+  "fixture_name": "AI_OS tooltip content fixture draft",
+  "fixture_mode": "fixture-only",
+  "tooltips": {
+    "PASS": "The check completed successfully.",
+    "WARN": "The check needs human review but is not blocked by itself.",
+    "FAIL": "The check failed and must be resolved before proceeding.",
+    "BLOCKED": "A required safety gate prevents further action.",
+    "REVIEW REQUIRED": "Human review is required before any next step.",
+    "READY": "The item is ready for review, not automatically approved.",
+    "INFO": "Informational context for the operator.",
+    "protected files": "Protected files require special approval before changes.",
+    "DAILY_METRICS": "Reports/DAILY_METRICS.csv is protected and must not be edited by this prototype.",
+    "CHECKPOINT_INDEX": "Reports/CHECKPOINT_INDEX.md is protected and must not be edited by this prototype.",
+    "trading readiness": "Trading readiness is visibility-only and does not enable execution.",
+    "next safe action": "The next safe action is a human review instruction, not an automated action.",
+    "voice guide": "The voice guide is optional, non-blocking, and must not execute commands.",
+    "fixture-only data": "Fixture-only data is static test content and is not live telemetry or production data."
+  },
+  "blocked_content": [
+    "secrets",
+    "credentials",
+    "broker tokens",
+    "account IDs",
+    "recovery keys",
+    "live trading data",
+    "uncontrolled screen contents",
+    "real telemetry"
+  ],
+  "approval_status": "NOT_APPROVED_FOR_PRODUCTION_UI"
+}

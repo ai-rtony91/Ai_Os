@@ -1,0 +1,27 @@
+{
+  "fixture_name": "AI_OS operator tour script fixture draft",
+  "fixture_mode": "fixture-only",
+  "operator_tour": {
+    "welcome": "Welcome to the AI_OS static dashboard prototype tour. This is fixture-only, read-only planning data.",
+    "dashboard_regions": "The cockpit is organized into status, navigation, analytics, alerts, trading readiness, Morning Brief, assistant guide, and next safe action regions.",
+    "validator_status": "Validator status explains PASS, WARN, FAIL, BLOCKED, REVIEW REQUIRED, READY, and INFO before trusting displayed data.",
+    "protected-file_warnings": "Protected-file warnings show whether root governance files, DAILY_METRICS, or CHECKPOINT_INDEX are affected.",
+    "alert_hierarchy": "Alerts prioritize FAIL and BLOCKED states before WARN, REVIEW REQUIRED, READY, and INFO.",
+    "daily_analytics": "Daily analytics may later summarize repo size, stages, validators, errors, fixes, and progress using approved data only.",
+    "trading_readiness_boundary": "Trading readiness remains read-only and does not enable broker execution, live trading, strategy activation, or credential access.",
+    "voice_guide_concept": "The voice guide concept is optional, non-blocking, and text-equivalent when disabled.",
+    "next_safe_action": "The next safe action gives the operator a precise review or verification step without applying changes.",
+    "checkpoint_reminder": "Checkpoint only after human review. This fixture does not approve APPLY, git commit, production dashboard output, or automation."
+  },
+  "blocked_content": [
+    "secrets",
+    "credentials",
+    "broker tokens",
+    "account IDs",
+    "recovery keys",
+    "live trading data",
+    "uncontrolled screen contents",
+    "real telemetry"
+  ],
+  "approval_status": "NOT_APPROVED_FOR_PRODUCTION_UI"
+}

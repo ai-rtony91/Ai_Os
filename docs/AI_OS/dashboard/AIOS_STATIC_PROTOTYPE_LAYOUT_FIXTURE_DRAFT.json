@@ -1,0 +1,49 @@
+{
+  "fixture_name": "AI_OS static prototype layout fixture draft",
+  "fixture_mode": "fixture-only",
+  "safety": {
+    "contains_secrets": false,
+    "contains_credentials": false,
+    "contains_broker_tokens": false,
+    "contains_account_ids": false,
+    "contains_recovery_keys": false,
+    "contains_live_trading_data": false,
+    "contains_uncontrolled_screen_contents": false,
+    "contains_real_telemetry": false
+  },
+  "layout_regions": {
+    "top_status_bar": {
+      "purpose": "Show system status, validator state, protected-file status, and critical alerts first.",
+      "display_mode": "read-only"
+    },
+    "left_navigation": {
+      "purpose": "Provide static navigation labels for dashboard regions.",
+      "display_mode": "read-only"
+    },
+    "center_analytics_region": {
+      "purpose": "Show fixture-only daily analytics, repo health, and validator summary widgets.",
+      "display_mode": "read-only"
+    },
+    "right_alerts_region": {
+      "purpose": "Show alert hierarchy, warning explanations, and review-required items.",
+      "display_mode": "read-only"
+    },
+    "lower_trading_readiness_region": {
+      "purpose": "Show trading readiness boundary state without broker execution or live trading controls.",
+      "display_mode": "read-only"
+    },
+    "morning_brief_region": {
+      "purpose": "Show fixture-only Morning Brief preview concepts.",
+      "display_mode": "read-only"
+    },
+    "assistant_guide_region": {
+      "purpose": "Show non-blocking voice guide and operator help concepts.",
+      "display_mode": "read-only"
+    },
+    "next_safe_action_region": {
+      "purpose": "Show the next safe action for human review.",
+      "display_mode": "read-only"
+    }
+  },
+  "approval_status": "NOT_APPROVED_FOR_PRODUCTION_UI"
+}
