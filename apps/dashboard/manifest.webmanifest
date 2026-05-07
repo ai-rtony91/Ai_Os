@@ -1,0 +1,25 @@
+{
+  "name": "AI_OS Command Center",
+  "short_name": "AI_OS",
+  "description": "Static local AI_OS command center preview with no backend, no persistence, and no trading automation.",
+  "start_url": "AIOS_STATIC_PREVIEW.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#05070b",
+  "background_color": "#05070b",
+  "icons": [
+    {
+      "src": "icons/aios-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/aios-maskable-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

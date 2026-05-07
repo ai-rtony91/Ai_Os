@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AI_OS maskable icon">
+  <rect width="512" height="512" fill="#05070b"/>
+  <circle cx="256" cy="256" r="196" fill="#0b1020" stroke="#00a3ff" stroke-width="18"/>
+  <circle cx="256" cy="256" r="132" fill="none" stroke="#3b82f6" stroke-width="12"/>
+  <circle cx="256" cy="256" r="70" fill="#111827" stroke="#37ff88" stroke-width="10"/>
+  <path d="M96 256h88M328 256h88M256 96v88M256 328v88" stroke="#38bdf8" stroke-width="16" stroke-linecap="round"/>
+  <text x="256" y="276" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="58" font-weight="700" fill="#37ff88">AI</text>
+</svg>

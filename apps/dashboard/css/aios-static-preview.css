@@ -27,6 +27,7 @@
 html {
   min-height: 100%;
   background: var(--bg-0);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -37,6 +38,7 @@ body {
   background: var(--bg-0);
   font-family: Consolas, "Courier New", monospace;
   letter-spacing: 0;
+  touch-action: manipulation;
 }
 
 button,
@@ -84,6 +86,8 @@ input {
   display: grid;
   grid-template-columns: 270px minmax(0, 1fr);
   min-height: 100vh;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 .command-sidebar {
@@ -99,6 +103,7 @@ input {
 .brand-block {
   padding-bottom: 18px;
   border-bottom: 1px solid var(--line);
+  text-align: center;
 }
 
 .eyebrow {
@@ -144,22 +149,26 @@ input {
   cursor: pointer;
   transition: border-color 160ms ease, color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
   will-change: transform;
+  -webkit-tap-highlight-color: rgba(55, 255, 136, 0.16);
 }
 
 .side-nav button {
   min-height: 44px;
   padding: 11px 12px;
-  text-align: left;
+  text-align: center;
 }
 
 .side-nav button:hover,
 .side-nav button:focus,
 .side-nav button.active,
+.side-nav button.tap-pop,
 .status-chip:hover,
 .status-chip:focus,
 .status-chip.active,
+.status-chip.tap-pop,
 .message-row button:hover,
-.message-row button:focus {
+.message-row button:focus,
+.message-row button.tap-pop {
   color: var(--terminal);
   border-color: var(--line-hot);
   outline: none;
@@ -174,11 +183,13 @@ input {
   right: 20px;
   bottom: 20px;
   display: grid;
+  justify-items: center;
   gap: 6px;
   border: 1px solid rgba(255, 95, 122, 0.34);
   background: rgba(5, 7, 11, 0.82);
   padding: 12px;
   font-size: 12px;
+  text-align: center;
 }
 
 .sidebar-lock strong {
@@ -187,7 +198,7 @@ input {
 
 .command-main {
   min-width: 0;
-  padding: 20px 20px 54px;
+  padding: 20px 20px calc(54px + env(safe-area-inset-bottom));
 }
 
 .status-strip {
@@ -242,7 +253,7 @@ input {
 
 .core-orbits {
   position: absolute;
-  inset: 0;
+  inset: 74px 0 0;
   display: grid;
   place-items: center;
   transform: translate3d(calc(var(--mx) * 54px), calc(var(--my) * 42px + var(--scroll) * -18px), 0);
@@ -292,26 +303,29 @@ input {
   color: var(--terminal);
   background: rgba(5, 7, 11, 0.86);
   box-shadow: 0 0 58px rgba(0, 163, 255, 0.5), 0 0 24px rgba(55, 255, 136, 0.24), inset 0 0 42px rgba(55, 255, 136, 0.16);
+  font-size: 22px;
   text-shadow: 0 0 16px rgba(55, 255, 136, 0.54);
 }
 
 .core-copy {
   position: absolute;
-  left: 22px;
-  right: 22px;
-  bottom: 22px;
+  left: 24px;
+  right: 24px;
+  top: 20px;
   z-index: 2;
-  max-width: 620px;
+  max-width: none;
+  text-align: center;
 }
 
 .core-copy h2 {
-  margin: 8px 0;
+  margin: 8px 0 6px;
   color: var(--text);
-  font-size: clamp(28px, 4vw, 54px);
+  font-size: clamp(26px, 3.4vw, 46px);
 }
 
 .core-copy p {
-  max-width: 620px;
+  max-width: 720px;
+  margin: 0 auto;
   color: var(--muted);
   line-height: 1.58;
 }
@@ -375,6 +389,7 @@ input {
   padding: 14px;
   transition: border-color 170ms ease, box-shadow 170ms ease, transform 170ms ease, background 170ms ease;
   will-change: transform;
+  -webkit-tap-highlight-color: rgba(0, 163, 255, 0.14);
 }
 
 .chart-card {
@@ -408,8 +423,10 @@ input {
 
 .glass-card:hover,
 .glass-card:focus-within,
+.glass-card.tap-pop,
 .chart-card:hover,
-.chart-card:focus-within {
+.chart-card:focus-within,
+.chart-card.tap-pop {
   border-color: rgba(56, 189, 248, 0.78);
   background: linear-gradient(180deg, rgba(17, 24, 39, 0.92), rgba(5, 7, 11, 0.84));
   box-shadow: 0 26px 80px rgba(0, 0, 0, 0.46), 0 0 42px rgba(0, 163, 255, 0.32), 0 0 22px rgba(55, 255, 136, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -418,8 +435,10 @@ input {
 
 .glass-card:hover .metric,
 .glass-card:focus-within .metric,
+.glass-card.tap-pop .metric,
 .chart-card:hover h3,
-.chart-card:focus-within h3 {
+.chart-card:focus-within h3,
+.chart-card.tap-pop h3 {
   text-shadow: 0 0 22px rgba(55, 255, 136, 0.42), 0 0 16px rgba(0, 163, 255, 0.34);
 }
 
@@ -482,8 +501,8 @@ input {
 
 .dashboard-footer {
   position: fixed;
-  right: 18px;
-  bottom: 12px;
+  right: calc(18px + env(safe-area-inset-right));
+  bottom: calc(12px + env(safe-area-inset-bottom));
   color: rgba(229, 246, 255, 0.62);
   font-size: 12px;
   z-index: 4;
@@ -523,21 +542,125 @@ input {
 }
 
 @media (max-width: 720px) {
-  .command-main {
-    padding: 14px 14px 54px;
+  .background-layer {
+    inset: -6vh -18vw;
   }
 
-  .side-nav,
-  .status-strip {
+  .command-sidebar {
+    padding: calc(16px + env(safe-area-inset-top)) 14px 14px;
+  }
+
+  .command-main {
+    padding: 14px 14px calc(62px + env(safe-area-inset-bottom));
+  }
+
+  .side-nav {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .status-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .side-nav button,
+  .status-chip {
+    min-height: 48px;
+  }
+
+  .core-card,
+  .assistant-rail {
+    min-height: 340px;
+  }
+
+  .core-copy h2 {
+    font-size: 31px;
+  }
+
+  .orbit-three {
+    width: 360px;
+    height: 360px;
   }
 
   .glass-card,
   .chart-card {
     grid-column: 1 / -1;
+    min-height: 150px;
   }
 
   .message-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .brand-block h1 {
+    font-size: 27px;
+  }
+
+  .status-strip,
+  .side-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .command-main {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .core-pulse {
+    width: 116px;
+    height: 116px;
+  }
+
+  .orbit-one {
+    width: 176px;
+    height: 176px;
+  }
+
+  .orbit-two {
+    width: 260px;
+    height: 260px;
+  }
+
+  .orbit-three {
+    width: 320px;
+    height: 320px;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .side-nav button:hover,
+  .status-chip:hover,
+  .message-row button:hover,
+  .glass-card:hover,
+  .chart-card:hover {
+    transform: none;
+  }
+
+  .side-nav button.tap-pop,
+  .status-chip.tap-pop,
+  .message-row button.tap-pop,
+  .glass-card.tap-pop,
+  .chart-card.tap-pop {
+    transform: translateY(-8px) scale(1.025);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  .layer-base,
+  .layer-grid,
+  .layer-glow,
+  .core-orbits {
+    transform: none;
   }
 }

@@ -4,6 +4,7 @@ const panels = document.querySelectorAll(".panel");
 const assistantOutput = document.getElementById("assistantOutput");
 const consoleOutput = document.getElementById("consoleOutput");
 const mockMessage = document.getElementById("mockMessage");
+const tapTargets = document.querySelectorAll("button, .glass-card, .chart-card");
 
 const messages = {
   node: {
@@ -74,6 +75,11 @@ function updateOutput(action) {
   consoleOutput.textContent = message.console;
 }
 
+function pulseTap(target) {
+  target.classList.add("tap-pop");
+  window.setTimeout(() => target.classList.remove("tap-pop"), 520);
+}
+
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const target = button.dataset.tab;
@@ -94,6 +100,10 @@ actionButtons.forEach((button) => {
     }
     updateOutput(action);
   });
+});
+
+tapTargets.forEach((target) => {
+  target.addEventListener("pointerup", () => pulseTap(target));
 });
 
 window.addEventListener("mousemove", (event) => {
