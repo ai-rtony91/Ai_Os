@@ -1,0 +1,15 @@
+﻿{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Trading Lab Signal",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "signal_id": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "symbol": { "type": "string" },
+    "direction": { "enum": ["long", "short", "flat", "review"] },
+    "confidence_label": { "type": "string" },
+    "notes": { "type": "string" }
+  },
+  "required": ["signal_id", "timestamp", "symbol", "direction"]
+}

@@ -1,0 +1,13 @@
+﻿{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Trading Lab Regime Tag",
+  "type": "object",
+  "properties": {
+    "regime_id": { "type": "string" },
+    "timestamp": { "type": "string" },
+    "symbol": { "type": "string" },
+    "regime_label": { "type": "string" },
+    "evidence": { "type": "string" }
+  },
+  "required": ["regime_id", "timestamp", "symbol", "regime_label"]
+}

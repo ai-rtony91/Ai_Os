@@ -1,0 +1,15 @@
+﻿{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Trading Lab Paper Execution",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "execution_id": { "type": "string" },
+    "signal_id": { "type": "string" },
+    "mode": { "const": "paper" },
+    "entry_price": { "type": "number" },
+    "exit_price": { "type": ["number", "null"] },
+    "status": { "enum": ["OPEN", "CLOSED", "REVIEW"] }
+  },
+  "required": ["execution_id", "signal_id", "mode", "status"]
+}

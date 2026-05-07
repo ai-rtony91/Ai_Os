@@ -1,0 +1,12 @@
+﻿{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Trading Lab Trade Outcome",
+  "type": "object",
+  "properties": {
+    "trade_id": { "type": "string" },
+    "result_r": { "type": "number" },
+    "mistake_tag": { "type": "string" },
+    "postmortem_required": { "type": "boolean" }
+  },
+  "required": ["trade_id", "result_r", "postmortem_required"]
+}

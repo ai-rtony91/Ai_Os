@@ -1,0 +1,13 @@
+﻿{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Trading Lab Expectancy Metrics",
+  "type": "object",
+  "properties": {
+    "sample_size": { "type": "integer" },
+    "win_rate": { "type": "number" },
+    "avg_win_r": { "type": "number" },
+    "avg_loss_r": { "type": "number" },
+    "expectancy_r": { "type": "number" }
+  },
+  "required": ["sample_size", "win_rate", "expectancy_r"]
+}
