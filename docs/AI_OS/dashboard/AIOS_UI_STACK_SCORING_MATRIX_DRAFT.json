@@ -1,0 +1,84 @@
+{
+  "scoring_matrix": [
+    {
+      "candidate_name": "React",
+      "strengths": [
+        "modular widgets",
+        "large ecosystem",
+        "maintainable component model",
+        "strong operator cockpit layout potential"
+      ],
+      "weaknesses": [
+        "requires runtime packaging decision",
+        "dependency governance required"
+      ],
+      "latency_rating": "GOOD_PENDING_PROTOTYPE",
+      "memory_rating": "GOOD_PENDING_RUNTIME",
+      "maintainability_rating": "HIGH",
+      "offline_support": "POSSIBLE_WITH_LOCAL_RUNTIME",
+      "security_notes": "Must remain read-only dashboard and use mock data only until production approval.",
+      "operator_usability": "HIGH_FOR_MODULAR_PANELS",
+      "approval_status": "NOT_APPROVED"
+    },
+    {
+      "candidate_name": "Electron",
+      "strengths": [
+        "mature desktop packaging",
+        "web technology compatibility",
+        "straightforward debugging"
+      ],
+      "weaknesses": [
+        "higher memory usage risk",
+        "startup speed must be measured",
+        "GPU efficiency must be verified"
+      ],
+      "latency_rating": "UNKNOWN_PENDING_PROTOTYPE",
+      "memory_rating": "WARN_REVIEW_REQUIRED",
+      "maintainability_rating": "MEDIUM_HIGH",
+      "offline_support": "STRONG_LOCAL_DESKTOP_SUPPORT",
+      "security_notes": "Must disable uncontrolled plugins/extensions and isolate rendering from execution paths.",
+      "operator_usability": "HIGH_FOR_DESKTOP_WORKFLOWS",
+      "approval_status": "NOT_APPROVED"
+    },
+    {
+      "candidate_name": "Tauri",
+      "strengths": [
+        "low memory usage potential",
+        "small desktop footprint",
+        "local-first behavior"
+      ],
+      "weaknesses": [
+        "Windows workflow validation required",
+        "debugging simplicity must be reviewed",
+        "team familiarity may be lower"
+      ],
+      "latency_rating": "GOOD_PENDING_PROTOTYPE",
+      "memory_rating": "HIGH",
+      "maintainability_rating": "MEDIUM_PENDING_REVIEW",
+      "offline_support": "STRONG_LOCAL_DESKTOP_SUPPORT",
+      "security_notes": "Must keep dashboard read-only and separated from file-writing and trading systems.",
+      "operator_usability": "PROMISING_PENDING_OPERATOR_REVIEW",
+      "approval_status": "NOT_APPROVED"
+    },
+    {
+      "candidate_name": "HTML/CSS/JavaScript",
+      "strengths": [
+        "simple static prototype path",
+        "low deployment complexity",
+        "offline file-based review possible"
+      ],
+      "weaknesses": [
+        "modular widget scaling may require more structure",
+        "desktop packaging not defined",
+        "future extensibility must be reviewed"
+      ],
+      "latency_rating": "GOOD_FOR_STATIC_MOCKS",
+      "memory_rating": "HIGH_FOR_SIMPLE_LOCAL_PAGES",
+      "maintainability_rating": "MEDIUM",
+      "offline_support": "STRONG_FOR_STATIC_LOCAL_FILES",
+      "security_notes": "Must use fixture data only and avoid production data writes.",
+      "operator_usability": "GOOD_FOR_EARLY_VISUAL_REVIEW",
+      "approval_status": "NOT_APPROVED"
+    }
+  ]
+}
