@@ -1,0 +1,353 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI_OS Static Dashboard Preview</title>
+  <style>
+    :root {
+      --bg: #1b0f12;
+      --panel: #2b171c;
+      --panel2: #3a2027;
+      --accent: #00ff66;
+      --accent2: #2aff9a;
+      --warn: #ffcc66;
+      --danger: #ff5f6d;
+      --text: #d7ffe4;
+      --muted: #8abf9b;
+      --border: rgba(0, 255, 102, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #44242c, var(--bg) 42%);
+      color: var(--text);
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #2a151a, #160b0e);
+      border-right: 1px solid var(--border);
+      padding: 22px;
+    }
+
+    .brand h1 {
+      color: var(--accent);
+      margin: 0 0 8px;
+      letter-spacing: 1px;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .nav {
+      display: grid;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .nav button {
+      background: #201015;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: #123020;
+      color: var(--accent);
+      box-shadow: 0 0 16px rgba(0, 255, 102, 0.18);
+    }
+
+    .main {
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 22px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(43, 23, 28, 0.85);
+    }
+
+    .status-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      border: 1px solid var(--border);
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      background: #12090c;
+    }
+
+    .pill.blocked {
+      color: var(--danger);
+      border-color: rgba(255, 95, 109, 0.35);
+    }
+
+    .pill.ok {
+      color: var(--accent2);
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel), #211116);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      min-height: 150px;
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .card.full {
+      grid-column: 1 / -1;
+    }
+
+    .card.wide {
+      grid-column: span 2;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 18px;
+    }
+
+    p, li {
+      color: var(--text);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+
+    .metric {
+      font-size: 30px;
+      color: var(--accent2);
+      margin: 12px 0;
+      font-weight: bold;
+    }
+
+    .blocked-text {
+      color: var(--danger);
+    }
+
+    .terminal {
+      white-space: pre-wrap;
+      background: #090507;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      color: var(--accent);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card.wide {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>AI_OS NODE</h1>
+        <p>Static dashboard preview. Local UI only. No backend calls. No live automation.</p>
+      </div>
+      <nav class="nav" aria-label="Dashboard sections">
+        <button class="active" data-tab="node">AI_OS Node</button>
+        <button data-tab="engine">Trading Engine</button>
+        <button data-tab="bot">Trading Bot</button>
+        <button data-tab="reports">Reports</button>
+        <button data-tab="telemetry">Telemetry</button>
+        <button data-tab="admin">Admin</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="status-line">
+          <span class="pill ok">STATIC PREVIEW</span>
+          <span class="pill blocked">NO BACKEND</span>
+          <span class="pill blocked">NO PERSISTENCE</span>
+          <span class="pill blocked">NO BROKER/TRADING INTEGRATION</span>
+          <span class="pill blocked">NO CREDENTIALS</span>
+        </div>
+        <div class="pill">DRY_RUN UI</div>
+      </header>
+
+      <section id="node" class="panel active">
+        <div class="grid">
+          <article class="card">
+            <h2>Node State</h2>
+            <div class="metric">REVIEW</div>
+            <p>Local-first AI_OS dashboard preview. Static placeholder data only.</p>
+          </article>
+          <article class="card">
+            <h2>Safety Boundary</h2>
+            <p class="blocked-text">No live automation. No startup task. No persistence. No credentials.</p>
+          </article>
+          <article class="card">
+            <h2>Operator Mode</h2>
+            <p>Manual review. Human approval required before APPLY behavior.</p>
+          </article>
+          <article class="card full">
+            <h2>Console</h2>
+            <div class="terminal">AI_OS> static preview loaded
+AI_OS> backend calls disabled
+AI_OS> writer activation disabled
+AI_OS> broker/trading integration disabled</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="engine" class="panel">
+        <div class="grid">
+          <article class="card">
+            <h2>Trading Engine</h2>
+            <div class="metric">BLOCKED</div>
+            <p>Separate future system. No live market execution path connected.</p>
+          </article>
+          <article class="card wide">
+            <h2>Boundary</h2>
+            <ul>
+              <li>No order placement.</li>
+              <li>No broker routing.</li>
+              <li>No live market data.</li>
+              <li>No execution decisions.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="bot" class="panel">
+        <div class="grid">
+          <article class="card">
+            <h2>Trading Bot</h2>
+            <div class="metric">NOT ACTIVE</div>
+            <p>Placeholder status only. The bot is not enabled by this dashboard.</p>
+          </article>
+          <article class="card wide">
+            <h2>LLM Boundary</h2>
+            <p>LLMs must not be placed in the live order path. This UI cannot approve, route, or place trades.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="reports" class="panel">
+        <div class="grid">
+          <article class="card">
+            <h2>Reports</h2>
+            <div class="metric">STATIC</div>
+            <p>No report writer is active. Report values are placeholders.</p>
+          </article>
+          <article class="card wide">
+            <h2>Sample Queue</h2>
+            <div class="terminal">Reports/health: REVIEW
+Reports/daily: REVIEW
+Audit evidence: STATIC PLACEHOLDER</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="telemetry" class="panel">
+        <div class="grid">
+          <article class="card">
+            <h2>Telemetry</h2>
+            <div class="metric">DISABLED</div>
+            <p>No telemetry writer. No persistence. No private data collection.</p>
+          </article>
+          <article class="card wide">
+            <h2>Allowed Preview Fields</h2>
+            <p>Static session label, stage label, validator placeholder, operator note placeholder.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="admin" class="panel">
+        <div class="grid">
+          <article class="card">
+            <h2>Admin</h2>
+            <div class="metric">MANUAL</div>
+            <p>All APPLY, commit, push, writer activation, startup automation, and trading integration require human approval.</p>
+          </article>
+          <article class="card wide">
+            <h2>Blocked Actions</h2>
+            <ul>
+              <li>No backend calls.</li>
+              <li>No API calls.</li>
+              <li>No persistence.</li>
+              <li>No broker/trading automation.</li>
+              <li>No credentials.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const buttons = document.querySelectorAll("[data-tab]");
+    const panels = document.querySelectorAll(".panel");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.tab;
+
+        buttons.forEach((item) => item.classList.remove("active"));
+        panels.forEach((panel) => panel.classList.remove("active"));
+
+        button.classList.add("active");
+        document.getElementById(target).classList.add("active");
+      });
+    });
+  </script>
+</body>
+</html>
