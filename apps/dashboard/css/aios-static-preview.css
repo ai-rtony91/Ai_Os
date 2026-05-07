@@ -77,8 +77,8 @@ input {
 .layer-glow {
   z-index: -3;
   background:
-    radial-gradient(circle at 68% 32%, rgba(56, 189, 248, 0.22), transparent 16%),
-    radial-gradient(circle at 72% 36%, rgba(0, 163, 255, 0.19), transparent 24%),
+    radial-gradient(circle at 68% 24%, rgba(56, 189, 248, 0.22), transparent 16%),
+    radial-gradient(circle at 72% 28%, rgba(0, 163, 255, 0.19), transparent 24%),
     radial-gradient(circle at 64% 48%, rgba(55, 255, 136, 0.06), transparent 34%);
   transform: translate3d(calc(var(--mx) * 42px), calc(var(--my) * 32px + var(--scroll) * -10px), 0);
 }
@@ -333,8 +333,8 @@ body.sidebar-collapsed .sidebar-lock {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 82% 35%, rgba(56, 189, 248, 0.24), transparent 18%),
-    radial-gradient(circle at 86% 33%, rgba(0, 163, 255, 0.19), transparent 28%),
+    radial-gradient(circle at 82% 16%, rgba(56, 189, 248, 0.24), transparent 18%),
+    radial-gradient(circle at 86% 14%, rgba(0, 163, 255, 0.19), transparent 28%),
     radial-gradient(circle at 16% 84%, rgba(55, 255, 136, 0.08), transparent 28%);
   pointer-events: none;
 }
@@ -367,11 +367,14 @@ body.sidebar-collapsed .sidebar-lock {
 
 .work-table-core {
   position: relative;
+  top: 0;
   inset: auto;
+  align-self: start;
   justify-self: end;
   width: min(32vw, 340px);
-  min-height: 270px;
-  transform: translate3d(calc(var(--mx) * 28px), calc(var(--my) * 20px + var(--scroll) * -8px - 38px), 0);
+  min-height: 318px;
+  margin-bottom: 0;
+  transform: translate3d(calc(var(--mx) * 28px), calc(var(--my) * 20px + var(--scroll) * -8px), 0);
 }
 
 .work-table-core .orbit-one {
