@@ -142,6 +142,7 @@ input {
 
 .side-nav button,
 .status-chip,
+.registry-chip,
 .message-row button {
   border: 1px solid var(--line);
   color: var(--text);
@@ -166,6 +167,10 @@ input {
 .status-chip:focus,
 .status-chip.active,
 .status-chip.tap-pop,
+.registry-chip:hover,
+.registry-chip:focus,
+.registry-chip.active,
+.registry-chip.tap-pop,
 .message-row button:hover,
 .message-row button:focus,
 .message-row button.tap-pop {
@@ -227,8 +232,11 @@ input {
 }
 
 .core-card,
+.work-table,
 .assistant-rail,
+.registry-section,
 .glass-card,
+.work-card,
 .console-panel {
   border: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(17, 24, 39, 0.78), rgba(5, 7, 11, 0.76));
@@ -240,6 +248,106 @@ input {
   position: relative;
   min-height: 390px;
   overflow: hidden;
+}
+
+.work-table {
+  position: relative;
+  min-height: 390px;
+  overflow: hidden;
+  padding: 18px;
+}
+
+.work-table::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 82% 16%, rgba(0, 163, 255, 0.18), transparent 24%),
+    radial-gradient(circle at 16% 84%, rgba(55, 255, 136, 0.08), transparent 28%);
+  pointer-events: none;
+}
+
+.work-table-head {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  gap: 18px;
+  align-items: center;
+}
+
+.work-table-head h2,
+.section-head h2 {
+  margin: 8px 0 8px;
+  color: var(--text);
+}
+
+.work-table-head h2 {
+  font-size: clamp(30px, 4vw, 56px);
+}
+
+.work-table-head p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.58;
+}
+
+.work-table-core {
+  position: relative;
+  inset: auto;
+  min-height: 230px;
+  transform: translate3d(calc(var(--mx) * 38px), calc(var(--my) * 28px + var(--scroll) * -12px), 0);
+}
+
+.work-table-core .orbit-one {
+  width: 150px;
+  height: 150px;
+}
+
+.work-table-core .orbit-two {
+  width: 220px;
+  height: 220px;
+}
+
+.work-table-core .orbit-three {
+  width: 290px;
+  height: 290px;
+}
+
+.work-table-core .core-pulse {
+  width: 108px;
+  height: 108px;
+  font-size: 18px;
+}
+
+.work-table-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.work-card {
+  grid-column: span 2;
+  min-height: 136px;
+  padding: 13px;
+  transition: border-color 170ms ease, box-shadow 170ms ease, transform 170ms ease, background 170ms ease;
+  will-change: transform;
+  -webkit-tap-highlight-color: rgba(0, 163, 255, 0.14);
+}
+
+.work-card h3 {
+  margin: 8px 0 10px;
+  font-size: 17px;
+}
+
+.work-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.48;
 }
 
 .core-card::before {
@@ -338,6 +446,37 @@ input {
   padding: 14px;
 }
 
+.registry-section {
+  margin-top: 16px;
+  padding: 14px;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.section-head h2 {
+  font-size: 20px;
+}
+
+.registry-lane {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.registry-chip {
+  min-height: 48px;
+  padding: 10px;
+  text-align: center;
+}
+
 .assistant-head {
   display: flex;
   align-items: baseline;
@@ -392,6 +531,10 @@ input {
   -webkit-tap-highlight-color: rgba(0, 163, 255, 0.14);
 }
 
+.app-registry .glass-card {
+  grid-column: span 3;
+}
+
 .chart-card {
   grid-column: span 6;
 }
@@ -424,6 +567,9 @@ input {
 .glass-card:hover,
 .glass-card:focus-within,
 .glass-card.tap-pop,
+.work-card:hover,
+.work-card:focus-within,
+.work-card.tap-pop,
 .chart-card:hover,
 .chart-card:focus-within,
 .chart-card.tap-pop {
@@ -436,6 +582,9 @@ input {
 .glass-card:hover .metric,
 .glass-card:focus-within .metric,
 .glass-card.tap-pop .metric,
+.work-card:hover h3,
+.work-card:focus-within h3,
+.work-card.tap-pop h3,
 .chart-card:hover h3,
 .chart-card:focus-within h3,
 .chart-card.tap-pop h3 {
@@ -535,8 +684,28 @@ input {
     grid-template-columns: 1fr;
   }
 
+  .work-table-head {
+    grid-template-columns: 1fr;
+  }
+
+  .work-table-core {
+    min-height: 210px;
+  }
+
   .glass-card,
   .chart-card {
+    grid-column: span 6;
+  }
+
+  .work-card {
+    grid-column: span 3;
+  }
+
+  .registry-lane {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .app-registry .glass-card {
     grid-column: span 6;
   }
 }
@@ -569,6 +738,7 @@ input {
   }
 
   .core-card,
+  .work-table,
   .assistant-rail {
     min-height: 340px;
   }
@@ -583,9 +753,14 @@ input {
   }
 
   .glass-card,
-  .chart-card {
+  .chart-card,
+  .work-card {
     grid-column: 1 / -1;
     min-height: 150px;
+  }
+
+  .registry-lane {
+    grid-template-columns: 1fr 1fr;
   }
 
   .message-row {
@@ -600,6 +775,10 @@ input {
 
   .status-strip,
   .side-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .registry-lane {
     grid-template-columns: 1fr;
   }
 
@@ -634,6 +813,8 @@ input {
   .status-chip:hover,
   .message-row button:hover,
   .glass-card:hover,
+  .work-card:hover,
+  .registry-chip:hover,
   .chart-card:hover {
     transform: none;
   }
@@ -642,6 +823,8 @@ input {
   .status-chip.tap-pop,
   .message-row button.tap-pop,
   .glass-card.tap-pop,
+  .work-card.tap-pop,
+  .registry-chip.tap-pop,
   .chart-card.tap-pop {
     transform: translateY(-8px) scale(1.025);
   }

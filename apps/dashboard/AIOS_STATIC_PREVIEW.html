@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Ai_Os">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Ai_Os Electric Command Center Preview</title>
+  <title>Ai_Os Work Table Preview</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/aios-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/aios-icon.svg">
@@ -22,125 +22,154 @@
   <div class="dashboard-shell">
     <aside class="command-sidebar">
       <div class="brand-block">
-        <span class="eyebrow">LOCAL STATIC INTERFACE</span>
+        <span class="eyebrow">APP DOCK</span>
         <h1>Ai_Os</h1>
-        <p>No backend calls. No API calls. No credentials. No persistence. No live order path.</p>
+        <p>Static workspace dock for apps, connectors, generated work packets, and approval-safe build lanes.</p>
       </div>
 
-      <nav class="side-nav" aria-label="Primary command lanes">
-        <button class="active" data-tab="node" data-action="node">Ai_Os Node</button>
-        <button data-tab="engine" data-action="engine">Trading Engine</button>
-        <button data-tab="bot" data-action="bot">Trading Bot</button>
-        <button data-tab="reports" data-action="reports">Reports</button>
-        <button data-tab="telemetry" data-action="telemetry">Telemetry</button>
-        <button data-tab="admin" data-action="admin">Admin</button>
+      <nav class="side-nav" aria-label="App Dock">
+        <button class="active" data-tab="work-table" data-action="work-table">Work Table</button>
+        <button data-tab="app-store" data-action="app-store">App Store</button>
+        <button data-tab="connectors" data-action="connectors">Connectors</button>
+        <button data-tab="calendar" data-action="calendar">Calendar</button>
+        <button data-tab="notes" data-action="notes">Notes</button>
+        <button data-tab="build-queue" data-action="build-queue">Build Queue</button>
       </nav>
 
       <div class="sidebar-lock">
         <strong>SAFETY LOCKS</strong>
-        <span>No OpenAI key</span>
-        <span>No Codex connection</span>
+        <span>No backend/API calls</span>
+        <span>No persistence or service-worker registration</span>
         <span>No broker/trading automation</span>
       </div>
     </aside>
 
     <main class="command-main">
-      <header class="status-strip">
-        <button class="status-chip active" data-action="system-status">System Status</button>
+      <header class="status-strip" aria-label="Workspace modes and status">
+        <button class="status-chip active" data-tab="work-table" data-action="work-table">Work Table</button>
+        <button class="status-chip" data-tab="reports" data-action="reports">Reports</button>
+        <button class="status-chip" data-tab="telemetry" data-action="telemetry">Telemetry</button>
+        <button class="status-chip" data-tab="admin" data-action="admin">Admin</button>
+        <button class="status-chip" data-action="system-status">System Status</button>
         <button class="status-chip" data-action="diagnostics">Run Diagnostics</button>
-        <button class="status-chip" data-action="view-reports">View Reports</button>
-        <button class="status-chip" data-action="explain-telemetry">Explain Telemetry</button>
-        <button class="status-chip" data-action="strategy-insights">Strategy Insights</button>
       </header>
 
-      <section class="command-stage" aria-label="Central Ai_Os command area">
-        <div class="core-card">
-          <div class="core-copy">
-            <span class="eyebrow">CENTRAL CORE</span>
-            <h2>Ai_Os Command Center</h2>
-            <p>Static operator preview with local-only controls, mock status cards, chart placeholders, and assistant guidance lanes.</p>
+      <section class="command-stage" aria-label="Ai_Os Work Table">
+        <section class="work-table">
+          <div class="work-table-head">
+            <div>
+              <span class="eyebrow">CENTER WORKSPACE</span>
+              <h2>Ai_Os Work Table</h2>
+              <p>Static build surface for project briefs, prompts, instructions, tool outputs, validation queues, and approval gates.</p>
+            </div>
+            <div class="core-orbits work-table-core" aria-hidden="true">
+              <div class="orbit orbit-one"></div>
+              <div class="orbit orbit-two"></div>
+              <div class="orbit orbit-three"></div>
+              <div class="core-pulse">Ai_Os</div>
+            </div>
           </div>
-          <div class="core-orbits" aria-hidden="true">
-            <div class="orbit orbit-one"></div>
-            <div class="orbit orbit-two"></div>
-            <div class="orbit orbit-three"></div>
-            <div class="core-pulse">Ai_Os</div>
-          </div>
-        </div>
 
-        <aside class="assistant-rail" aria-label="AI Assistant panel">
-          <div class="assistant-head">
-            <span class="eyebrow">AI ASSISTANT</span>
-            <strong>Preview Lane</strong>
+          <div class="work-table-grid" aria-label="Work Table cards">
+            <article class="work-card" data-action="project-brief" tabindex="0">
+              <span class="card-label">PROJECT BRIEF</span>
+              <h3>Project Brief</h3>
+              <p>Selected objective, scope, allowed files, and expected result.</p>
+            </article>
+            <article class="work-card" data-action="prompt-stack" tabindex="0">
+              <span class="card-label">PROMPTS</span>
+              <h3>Prompt Stack</h3>
+              <p>Approved operator prompts and generated work packet instructions.</p>
+            </article>
+            <article class="work-card" data-action="build-instructions" tabindex="0">
+              <span class="card-label">BUILD</span>
+              <h3>Build Instructions</h3>
+              <p>Exact APPLY scope, blocked actions, validators, and stop conditions.</p>
+            </article>
+            <article class="work-card" data-action="tool-output" tabindex="0">
+              <span class="card-label">OUTPUT</span>
+              <h3>Tool Output</h3>
+              <p>Terminal-only summaries, mismatch notes, and static validation results.</p>
+            </article>
+            <article class="work-card" data-action="approval-gate" tabindex="0">
+              <span class="card-label">APPROVAL</span>
+              <h3>Approval Gate</h3>
+              <p>Human approval state before APPLY, commit, publishing, or activation.</p>
+            </article>
+            <article class="work-card" data-action="validation-queue" tabindex="0">
+              <span class="card-label">VALIDATION</span>
+              <h3>Validation Queue</h3>
+              <p>Path checks, JSON parse checks, unsafe scans, and visual preview steps.</p>
+            </article>
           </div>
-          <div class="assistant-output" id="assistantOutput">Ai_Os Node: core system overview and command center. Select any button to update this mock assistant panel.</div>
+        </section>
+
+        <aside class="assistant-rail" aria-label="AI Assistant Guide">
+          <div class="assistant-head">
+            <span class="eyebrow">AI ASSISTANT GUIDE</span>
+            <strong>Tour / Help</strong>
+          </div>
+          <div class="assistant-output" id="assistantOutput">Work Table: static center workspace for project packets, prompts, build instructions, tool output, approval gates, and validation queues.</div>
           <div class="message-row">
-            <input id="mockMessage" type="text" value="Ask for local status..." aria-label="Mock assistant message">
+            <input id="mockMessage" type="text" value="Preview only. Ask for guidance..." aria-label="Mock assistant message">
             <button data-action="send-message">Send</button>
           </div>
         </aside>
       </section>
 
-      <section class="panel-grid" aria-label="Dashboard cards">
-        <article class="glass-card panel active" id="node">
-          <span class="card-label">Ai_Os CORE</span>
-          <h3>Ai_Os Node</h3>
+      <section class="registry-section" aria-label="Tool Registry">
+        <div class="section-head">
+          <span class="eyebrow">STATIC TOOL REGISTRY</span>
+          <h2>Tool Registry Lane</h2>
+        </div>
+        <div class="registry-lane">
+          <button class="registry-chip" data-action="tool-chatgpt">ChatGPT</button>
+          <button class="registry-chip" data-action="tool-codex">Codex</button>
+          <button class="registry-chip" data-action="tool-claude">Claude</button>
+          <button class="registry-chip" data-action="tool-github">GitHub</button>
+          <button class="registry-chip" data-action="tool-powershell">PowerShell</button>
+          <button class="registry-chip" data-action="tool-web">Web/Research</button>
+          <button class="registry-chip" data-action="tool-files">Files/OneDrive</button>
+          <button class="registry-chip" data-action="tool-reports">Reports</button>
+          <button class="registry-chip" data-action="tool-telemetry">Telemetry</button>
+        </div>
+      </section>
+
+      <section class="panel-grid app-registry" aria-label="App Registry examples">
+        <article class="glass-card app-card" data-action="app-calendar" tabindex="0">
+          <span class="card-label">CALENDAR APP</span>
+          <h3>Calendar App</h3>
           <div class="metric">REVIEW</div>
-          <p>Core system overview and command center. Static placeholder data only.</p>
+          <p>Static schedule and checkpoint planning example. No provider API connected.</p>
         </article>
-
-        <article class="glass-card panel" id="engine">
-          <span class="card-label">ENGINE</span>
-          <h3>Trading Engine</h3>
-          <div class="metric warning">PAPER REVIEW</div>
-          <p>Future signal validation and paper execution review. No live execution path.</p>
+        <article class="glass-card app-card" data-action="app-notes" tabindex="0">
+          <span class="card-label">NOTES APP</span>
+          <h3>Notes App</h3>
+          <div class="metric">DRAFT</div>
+          <p>Future local note packet concept. No persistence or file writer active.</p>
         </article>
-
-        <article class="glass-card panel" id="bot">
-          <span class="card-label">BOT</span>
-          <h3>Trading Bot</h3>
+        <article class="glass-card app-card" data-action="app-reports" tabindex="0">
+          <span class="card-label">REPORTS APP</span>
+          <h3>Reports App</h3>
+          <div class="metric warning">GATED</div>
+          <p>Future health and checkpoint reporting surface. No report writer active.</p>
+        </article>
+        <article class="glass-card app-card" data-action="app-telemetry" tabindex="0">
+          <span class="card-label">TELEMETRY APP</span>
+          <h3>Telemetry App</h3>
           <div class="metric danger">BLOCKED</div>
-          <p>Future strategy/regime validation. No live trading. No real buy/sell execution.</p>
-        </article>
-
-        <article class="glass-card chart-card panel" id="reports">
-          <span class="card-label">REPORTS</span>
-          <h3>Checkpoint Flow</h3>
-          <div class="bar-chart" aria-label="Static reports chart placeholder">
-            <span style="--h: 48%"></span>
-            <span style="--h: 66%"></span>
-            <span style="--h: 40%"></span>
-            <span style="--h: 78%"></span>
-            <span style="--h: 58%"></span>
-          </div>
-          <p>Future health, checkpoint, and progress reporting.</p>
-        </article>
-
-        <article class="glass-card chart-card panel" id="telemetry">
-          <span class="card-label">TELEMETRY</span>
-          <h3>Event Visibility</h3>
-          <div class="telemetry-lines" aria-label="Static telemetry chart placeholder">
-            <i></i><i></i><i></i><i></i>
-          </div>
-          <p>Future system health/event visibility. No persistence yet.</p>
-        </article>
-
-        <article class="glass-card panel" id="admin">
-          <span class="card-label">ADMIN</span>
-          <h3>Safety Gates</h3>
-          <div class="metric">MANUAL</div>
-          <p>Approval gates, safety locks, and settings review. No automatic APPLY behavior.</p>
+          <p>Future event visibility only. No telemetry persistence enabled.</p>
         </article>
       </section>
 
       <section class="console-panel">
         <div>
-          <span class="eyebrow">TERMINAL HIGHLIGHTS</span>
-          <pre id="consoleOutput">Ai_Os&gt; static command center loaded
-Ai_Os&gt; no backend calls
-Ai_Os&gt; no persistence
-Ai_Os&gt; no broker/trading automation
-Ai_Os&gt; no live order path</pre>
+          <span class="eyebrow">WORK TABLE CONSOLE</span>
+          <pre id="consoleOutput">Ai_Os&gt; Work Table loaded
+Ai_Os&gt; App Dock: static mock only
+Ai_Os&gt; Tool Registry: display only
+Ai_Os&gt; App Registry: examples only
+Ai_Os&gt; no backend/API/persistence/trading automation</pre>
         </div>
       </section>
     </main>

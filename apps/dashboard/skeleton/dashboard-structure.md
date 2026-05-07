@@ -8,21 +8,24 @@
 
 This skeleton defines the preferred structure for future dashboard work. It is a design standard/reference only.
 
-## Core Areas
+## Current Structure
 
-- Sidebar navigation.
-- Top status bar.
-- Central command ring/tube visual area.
-- Dashboard cards layered around the center.
-- Floating AI Assistant button.
-- Chat drawer mockup for ChatGPT and Codex lanes.
-- Tab sections:
-  - AI_OS Node
-  - Trading Engine
-  - Trading Bot
-  - Reports
-  - Telemetry
-  - Admin
+- Left sidebar: App Dock, App Store, app categories, and connectors.
+- Top strip: workspace modes, reports, telemetry, admin, system status, and diagnostics.
+- Center/main area: Ai_Os Work Table.
+- Right rail: AI Assistant Guide for tour/help text.
+- Tool Registry lane: static tool list for ChatGPT, Codex, Claude, GitHub, PowerShell, Web/Research, Files/OneDrive, Reports, and Telemetry.
+- App Registry lane: static examples for Calendar App, Notes App, Reports App, and Telemetry App.
+- Console panel: static Work Table console output.
+
+## Work Table Areas
+
+- Project Brief.
+- Prompt Stack.
+- Build Instructions.
+- Tool Output.
+- Approval Gate.
+- Validation Queue.
 
 ## Future Folder Shape
 
@@ -33,4 +36,6 @@ This skeleton defines the preferred structure for future dashboard work. It is a
 
 ## Boundary
 
-This file does not approve splitting the current dashboard yet. Future restructuring requires explicit approval and validation.
+This file does not approve backend calls, API calls, credentials, persistence, service-worker registration, broker/trading automation, live order path behavior, or production dashboard activation.
+
+Future restructuring requires explicit approval and validation.
