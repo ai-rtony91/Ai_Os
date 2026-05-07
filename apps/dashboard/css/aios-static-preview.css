@@ -333,8 +333,9 @@ body.sidebar-collapsed .sidebar-lock {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 82% 16%, rgba(56, 189, 248, 0.24), transparent 18%),
-    radial-gradient(circle at 86% 14%, rgba(0, 163, 255, 0.19), transparent 28%),
+    linear-gradient(36deg, transparent 62%, rgba(56, 189, 248, 0.11) 70%, rgba(0, 163, 255, 0.05) 78%, transparent 88%),
+    radial-gradient(circle at 83% 18%, rgba(56, 189, 248, 0.26), transparent 17%),
+    radial-gradient(circle at 83% 18%, rgba(0, 163, 255, 0.19), transparent 30%),
     radial-gradient(circle at 16% 84%, rgba(55, 255, 136, 0.08), transparent 28%);
   pointer-events: none;
 }
@@ -345,7 +346,7 @@ body.sidebar-collapsed .sidebar-lock {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(250px, 340px);
   gap: 28px;
-  align-items: center;
+  align-items: start;
 }
 
 .work-table-head h2,
@@ -373,8 +374,9 @@ body.sidebar-collapsed .sidebar-lock {
   justify-self: end;
   width: min(32vw, 340px);
   min-height: 318px;
+  margin-top: -36px;
   margin-bottom: 0;
-  transform: translate3d(calc(var(--mx) * 28px), calc(var(--my) * 20px + var(--scroll) * -8px), 0);
+  transform: translate3d(calc(var(--mx) * 28px), calc(var(--my) * 20px), 0);
 }
 
 .work-table-core .orbit-one {
