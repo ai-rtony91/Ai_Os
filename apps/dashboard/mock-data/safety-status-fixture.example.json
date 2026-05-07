@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-05-07T00:00:00",
+  "status": "PASS",
+  "source": "Reports/daily/AIOS_PHASE12_STAGE12_14_DASHBOARD_STATUS_IMPLEMENTATION_DRY_RUN_2026-05-07.md",
+  "blocked_actions_confirmed": [
+    "no secrets",
+    "no broker connection",
+    "no live trading code",
+    "no trades",
+    "no protected root governance edits",
+    "no dashboard code edits",
+    "no deployment"
+  ],
+  "notes": "Example fixture only"
+}
+

@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-05-07T00:00:00",
+  "classification": "AI_OS project work only",
+  "phase": "Phase 12",
+  "stage": "Stage 12.14",
+  "overall_status": "PENDING_APPLY",
+  "validator_health": {
+    "status": "UNKNOWN",
+    "source": "Reports/health",
+    "summary": "Example fixture only"
+  },
+  "progress": {
+    "status": "DRY_RUN_COMPLETE_PENDING_APPLY",
+    "source": "Reports/progress",
+    "percent_complete": 33
+  },
+  "checkpoint": {
+    "status": "AVAILABLE",
+    "source": "Reports/checkpoints/CHECKPOINT_2026-05-07_PHASE12_STAGE12_14_DASHBOARD_STATUS_IMPLEMENTATION_DRY_RUN.md"
+  },
+  "safety": {
+    "status": "PASS",
+    "source": "DRY_RUN report",
+    "notes": "No secrets, broker connection, live trading, deployment, or dashboard code edits"
+  },
+  "next_action": {
+    "status": "PENDING_OPERATOR_APPROVAL",
+    "text": "Approve APPLY for Phase 12 Stage 12.14"
+  }
+}
+

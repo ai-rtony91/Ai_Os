@@ -1,0 +1,13 @@
+{
+  "generated_at": "2026-05-07T00:00:00",
+  "status": "UNKNOWN",
+  "source": "Reports/health",
+  "validators_discovered": 0,
+  "validators_run": 0,
+  "pass": 0,
+  "warn": 0,
+  "fail": 0,
+  "skipped": 0,
+  "next_action": "Run approved read-only validator before dashboard implementation"
+}
+
