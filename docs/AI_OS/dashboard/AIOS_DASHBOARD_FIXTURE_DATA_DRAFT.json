@@ -1,0 +1,62 @@
+{
+  "mode": "DRY_RUN",
+  "fixture_status": "PREVIEW_ONLY",
+  "system_status": {
+    "label": "System Status",
+    "state": "READY_FOR_REVIEW",
+    "details": "Static placeholder only."
+  },
+  "repo_health": {
+    "label": "Repo Health",
+    "branch_state": "UNKNOWN",
+    "protected_files_changed": false
+  },
+  "daily_analytics": {
+    "label": "Daily Analytics",
+    "summary_state": "PREVIEW_ONLY",
+    "progress_percent": "UNKNOWN"
+  },
+  "validator_status": {
+    "label": "Validator Status",
+    "pass": 0,
+    "warn": 0,
+    "fail": 0
+  },
+  "protected_file_status": {
+    "label": "Protected File Status",
+    "unstaged_diff_clean": true,
+    "staged_diff_clean": true
+  },
+  "morning_brief": {
+    "label": "Morning Brief",
+    "state": "PREVIEW_ONLY",
+    "file_written": false
+  },
+  "trading_readiness": {
+    "label": "Trading Readiness",
+    "execution_allowed": false,
+    "state": "BLOCKED_PENDING_SEPARATE_APPROVAL"
+  },
+  "azure_cloud_status": {
+    "label": "Azure/Cloud Status",
+    "state": "NOT_CONFIGURED",
+    "details": "Future contract required."
+  },
+  "alerts_emails": {
+    "label": "Alerts / Emails",
+    "state": "NOT_CONFIGURED",
+    "actions_enabled": false
+  },
+  "next_safe_action": {
+    "label": "Next Safe Action",
+    "instruction": "Review DRY_RUN fixture and validator output before UI rendering begins."
+  },
+  "safety": {
+    "secrets_present": false,
+    "credentials_present": false,
+    "broker_tokens_present": false,
+    "live_trading_execution_data_present": false,
+    "startup_actions_present": false,
+    "report_writing_actions_present": false
+  }
+}
