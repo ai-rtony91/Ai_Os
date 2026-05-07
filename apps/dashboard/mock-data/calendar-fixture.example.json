@@ -1,0 +1,44 @@
+{
+  "fixture_name": "AI_OS Calendar App Static Fixture Example",
+  "mode": "static_preview_reference_only",
+  "loaded_by_dashboard": false,
+  "calendar_provider": "none",
+  "safety": {
+    "backend_calls": "blocked",
+    "api_calls": "blocked",
+    "credentials": "blocked",
+    "oauth": "blocked",
+    "persistence": "blocked",
+    "service_worker_registration": "blocked",
+    "notifications": "blocked",
+    "startup_tasks": "blocked",
+    "broker_trading_automation": "blocked",
+    "live_order_path": "blocked"
+  },
+  "events": [
+    {
+      "event_id": "fixture-stage-review",
+      "title": "Stage Review Window",
+      "date": "2026-05-07",
+      "time": "09:00",
+      "status": "REVIEW",
+      "notes": "Static fixture event for Work Table planning."
+    },
+    {
+      "event_id": "fixture-validator-check",
+      "title": "Validator Check",
+      "date": "2026-05-08",
+      "time": "10:30",
+      "status": "PASS",
+      "notes": "Static placeholder for future validation schedule display."
+    },
+    {
+      "event_id": "fixture-approval-gate",
+      "title": "Human Approval Gate",
+      "date": "2026-05-09",
+      "time": "14:00",
+      "status": "BLOCKED",
+      "notes": "No APPLY action is approved by this fixture."
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "registry_name": "AI_OS Tool Use Boundary Matrix Draft",
+  "mode": "static_planning_only",
+  "valid_statuses": [
+    "PASS",
+    "REVIEW",
+    "NEEDS_REFACTOR",
+    "BLOCKED",
+    "INVALID DATA"
+  ],
+  "global_boundaries": {
+    "backend_calls": "blocked",
+    "api_calls": "blocked",
+    "credentials": "blocked",
+    "persistence": "blocked",
+    "service_worker_registration": "blocked",
+    "broker_trading_automation": "blocked",
+    "live_order_path": "blocked"
+  },
+  "tools": [
+    {
+      "tool_name": "ChatGPT",
+      "tool_purpose": "Planning, explanation, architecture, and operator guidance.",
+      "allowed_use": "DRY_RUN plans, draft work packets, documentation, and review notes.",
+      "blocked_use": "Direct execution, credential access, order approval, broker routing, and live order path.",
+      "credential_boundary": "No credentials, tokens, API keys, private keys, or private user data.",
+      "approval_required": "Human approval required before any APPLY work generated from its plan.",
+      "input_allowed": "Approved repo context and user-provided non-secret instructions.",
+      "output_allowed": "Static text plans, checklists, and proposed commands.",
+      "validation_required": "Human review and safety scan before APPLY.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "Codex",
+      "tool_purpose": "Approved code and documentation implementation in the active repo.",
+      "allowed_use": "File inspection, approved patches, validators, scoped git operations after approval.",
+      "blocked_use": "Protected root edits without approval, deletes, moves, renames, credentials, and trading automation.",
+      "credential_boundary": "No credential, token, browser profile, broker secret, or private data access.",
+      "approval_required": "Human approval required for APPLY, staging, commits, and pushes.",
+      "input_allowed": "Active repo files and approved instructions.",
+      "output_allowed": "Approved files and terminal validation results.",
+      "validation_required": "Git status, path allowlist, unsafe keyword scan, and explicit scope check.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "Claude",
+      "tool_purpose": "Optional future review and planning lane.",
+      "allowed_use": "Design review, critique, documentation review, and non-executing plans.",
+      "blocked_use": "Autonomous execution, protected file edits, credentials, and trading automation.",
+      "credential_boundary": "No secret or private user data access.",
+      "approval_required": "Human approval required before using its output for APPLY.",
+      "input_allowed": "Approved non-secret project context.",
+      "output_allowed": "Review notes and planning text.",
+      "validation_required": "Human review and mismatch labeling.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "GitHub",
+      "tool_purpose": "Source control and future static website publishing review.",
+      "allowed_use": "Approved commits, pushes, PRs, and repository status checks.",
+      "blocked_use": "Force push, destructive reset, deployment secrets, and unapproved workflow activation.",
+      "credential_boundary": "No token display or credential manipulation.",
+      "approval_required": "Human approval required before commit, push, deployment, or PR action.",
+      "input_allowed": "Git metadata and approved repo changes.",
+      "output_allowed": "Commit hashes, push results, PR links, and status summaries.",
+      "validation_required": "Clean status before stage and final status after push.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "PowerShell",
+      "tool_purpose": "Local validation and controlled operator commands.",
+      "allowed_use": "Read-only checks, validators, static scans, and approved commands.",
+      "blocked_use": "Startup tasks, registry/security setting changes, destructive operations, credentials, and trading execution.",
+      "credential_boundary": "No credential stores, browser profiles, tokens, or private keys.",
+      "approval_required": "Human approval required for file-changing or sensitive commands.",
+      "input_allowed": "Approved repo paths and explicit commands.",
+      "output_allowed": "Terminal-only validation output.",
+      "validation_required": "Exit-code review and command scope review.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "Web/Research",
+      "tool_purpose": "Public documentation and current information research.",
+      "allowed_use": "Public source review and citation gathering.",
+      "blocked_use": "Private account scraping, credential capture, broker account access, and trading actions.",
+      "credential_boundary": "No credentials, sessions, or private browser profiles.",
+      "approval_required": "Human approval required before using research to change files.",
+      "input_allowed": "Public URLs and non-secret queries.",
+      "output_allowed": "Cited summaries and planning notes.",
+      "validation_required": "Source quality review.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "Files/OneDrive",
+      "tool_purpose": "Approved local file inspection in allowed project paths.",
+      "allowed_use": "Read approved active repo and explicitly approved archive files.",
+      "blocked_use": "Private data, browser profiles, credential stores, wrong remote, delete, move, and rename.",
+      "credential_boundary": "No secrets, keys, tokens, or private recovery material.",
+      "approval_required": "Human approval required for APPLY changes.",
+      "input_allowed": "Allowed project files only.",
+      "output_allowed": "File summaries and approved new files.",
+      "validation_required": "Path boundary check.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "Reports",
+      "tool_purpose": "Display and planning for checkpoint/report outputs.",
+      "allowed_use": "Read approved reports and propose future report packets.",
+      "blocked_use": "Active report writer, protected root edits, and hidden report mutation.",
+      "credential_boundary": "No private data or credentials in reports.",
+      "approval_required": "Human approval required before report creation or writer activation.",
+      "input_allowed": "Approved static reports and fixture summaries.",
+      "output_allowed": "Planning documents and static report proposals.",
+      "validation_required": "Path allowlist and protected root exclusion.",
+      "status": "REVIEW"
+    },
+    {
+      "tool_name": "Telemetry",
+      "tool_purpose": "Future fixture-only health and event visibility.",
+      "allowed_use": "Static telemetry schemas, fixture previews, and non-live readiness maps.",
+      "blocked_use": "Active telemetry writer, persistence, private data, broker data, and live market execution data.",
+      "credential_boundary": "No credentials, tokens, private user data, browser profiles, or broker account data.",
+      "approval_required": "Human approval required before any telemetry collection or persistence.",
+      "input_allowed": "Static fixtures and approved non-live fields.",
+      "output_allowed": "Mock telemetry displays and schema drafts.",
+      "validation_required": "No persistence and no private data scan.",
+      "status": "REVIEW"
+    }
+  ]
+}

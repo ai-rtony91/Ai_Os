@@ -1,0 +1,56 @@
+{
+  "registry_name": "AI_OS App Registry Example",
+  "mode": "static_preview_reference_only",
+  "loaded_by_dashboard": false,
+  "valid_statuses": [
+    "PASS",
+    "REVIEW",
+    "NEEDS_REFACTOR",
+    "BLOCKED",
+    "INVALID DATA"
+  ],
+  "apps": [
+    {
+      "app_name": "Calendar",
+      "app_purpose": "Show static planning dates, checkpoint reminders, and operator task windows.",
+      "allowed_files": [
+        "apps/dashboard/mock-data/calendar-fixture.example.json",
+        "docs/AI_OS/dashboard/AIOS_CALENDAR_APP_STATIC_PACKET_EXAMPLE_DRAFT.md"
+      ],
+      "blocked_actions": [
+        "backend calls",
+        "API calls",
+        "credentials",
+        "OAuth",
+        "persistence",
+        "service-worker registration",
+        "notifications",
+        "startup tasks",
+        "broker/trading automation",
+        "live order path"
+      ],
+      "required_approvals": [
+        "DRY_RUN packet approval",
+        "APPLY approval",
+        "validator pass",
+        "visual confirmation",
+        "commit approval"
+      ],
+      "tools_needed": [
+        "Codex",
+        "PowerShell",
+        "GitHub"
+      ],
+      "validation_commands": [
+        "git status --short --branch",
+        "Get-Content -Raw \"apps/dashboard/mock-data/calendar-fixture.example.json\" | ConvertFrom-Json | Out-Null",
+        "Select-String -LiteralPath \"apps/dashboard/mock-data/calendar-fixture.example.json\" -Pattern \"fetch\\\\s*\\\\(\",\"XMLHttpRequest\",\"WebSocket\",\"localStorage\",\"sessionStorage\",\"serviceWorker\",\"caches\\\\.\",\"apiKey\",\"Bearer\",\"OPENAI_API_KEY\",\"brokerApi\",\"placeOrder\",\"tradeExecution\""
+      ],
+      "preview_command": "Start-Process \".\\\\apps\\\\dashboard\\\\AIOS_STATIC_PREVIEW.html\"",
+      "rollback_plan": "Rollback requires explicit human approval and must target only approved Calendar App files.",
+      "risk_level": "LOW",
+      "status": "REVIEW",
+      "notes": "Static fixture and documentation only. No real calendar provider is connected."
+    }
+  ]
+}
