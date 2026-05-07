@@ -1,0 +1,2 @@
+date,time,stage,task_id,task_name,planned_steps,completed_steps,percent_complete,status,blocked,blocker,next_action,checkpoint_file,commit_hash,git_status,notes
+2026-05-07,UNKNOWN,Phase 12 Pack A,AIOS-P12-PACK-A-APPLY,Phase 12 Pack A Stage 12.1-12.5 control layer expansion,5,5,100,APPLY_COMPLETE,NO,,Commit approved Phase 12 Pack A files,Reports/checkpoints/CHECKPOINT_2026-05-07_PHASE12_PACK_A_STAGE12_1_12_5_APPLY.md,UNKNOWN,UNKNOWN,APPLY created planning docs readiness validator reports checkpoint and progress CSV
