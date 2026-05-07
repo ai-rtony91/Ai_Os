@@ -1,0 +1,96 @@
+{
+  "analytics_summary_variants": [
+    {
+      "variant_name": "safe_baseline",
+      "expected_result": "PASS",
+      "sections": {
+        "Header": true,
+        "Repo Size": true,
+        "Work Completed": true,
+        "Stages Completed": true,
+        "Validator Status": true,
+        "Protected File Status": true,
+        "Errors and Fixes": true,
+        "Time Tracking": true,
+        "Progress Percent": true,
+        "Next Safe Action": true
+      },
+      "safety": {
+        "secrets_present": false,
+        "credentials_present": false,
+        "live_trading_data_present": false,
+        "report_file_written": false
+      },
+      "validation_notes": "Safe baseline includes all required sections and safe placeholder values only."
+    },
+    {
+      "variant_name": "blocked_missing_repo_size",
+      "expected_result": "FAIL",
+      "sections": {
+        "Header": true,
+        "Repo Size": false,
+        "Work Completed": true,
+        "Stages Completed": true,
+        "Validator Status": true,
+        "Protected File Status": true,
+        "Errors and Fixes": true,
+        "Time Tracking": true,
+        "Progress Percent": true,
+        "Next Safe Action": true
+      },
+      "safety": {
+        "secrets_present": false,
+        "credentials_present": false,
+        "live_trading_data_present": false,
+        "report_file_written": false
+      },
+      "validation_notes": "Intentional negative test: Repo Size section is missing."
+    },
+    {
+      "variant_name": "blocked_progress_percent_invalid",
+      "expected_result": "FAIL",
+      "sections": {
+        "Header": true,
+        "Repo Size": true,
+        "Work Completed": true,
+        "Stages Completed": true,
+        "Validator Status": true,
+        "Protected File Status": true,
+        "Errors and Fixes": true,
+        "Time Tracking": true,
+        "Progress Percent": "INVALID",
+        "Next Safe Action": true
+      },
+      "safety": {
+        "secrets_present": false,
+        "credentials_present": false,
+        "live_trading_data_present": false,
+        "report_file_written": false
+      },
+      "validation_notes": "Intentional negative test: Progress Percent is invalid."
+    },
+    {
+      "variant_name": "blocked_live_trading_data_present",
+      "expected_result": "FAIL",
+      "sections": {
+        "Header": true,
+        "Repo Size": true,
+        "Work Completed": true,
+        "Stages Completed": true,
+        "Validator Status": true,
+        "Protected File Status": true,
+        "Errors and Fixes": true,
+        "Time Tracking": true,
+        "Progress Percent": true,
+        "Next Safe Action": true
+      },
+      "safety": {
+        "secrets_present": false,
+        "credentials_present": false,
+        "live_trading_data_present": true,
+        "report_file_written": false
+      },
+      "validation_notes": "Intentional negative test: live trading data is present."
+    }
+  ]
+}
