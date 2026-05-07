@@ -1,0 +1,52 @@
+{
+  "Header": {
+    "title": "AI_OS Daily Analytics Summary",
+    "date": "yyyy-MM-dd",
+    "mode": "DRY_RUN",
+    "status": "PREVIEW_ONLY"
+  },
+  "Repo Size": {
+    "total_files": 0,
+    "total_folders": 0,
+    "total_bytes": 0,
+    "total_kb": 0,
+    "total_mb": 0
+  },
+  "Work Completed": {
+    "summary": "Placeholder only. No report file written."
+  },
+  "Stages Completed": {
+    "count": 0,
+    "items": []
+  },
+  "Validator Status": {
+    "pass": 0,
+    "warn": 0,
+    "fail": 0
+  },
+  "Protected File Status": {
+    "unstaged_diff_clean": true,
+    "staged_diff_clean": true
+  },
+  "Errors and Fixes": {
+    "errors": [],
+    "fixes": []
+  },
+  "Time Tracking": {
+    "time_started": "UNKNOWN",
+    "time_ended": "UNKNOWN",
+    "time_spent": "UNKNOWN"
+  },
+  "Progress Percent": {
+    "value": "UNKNOWN"
+  },
+  "Next Safe Action": {
+    "command": "Review DRY_RUN validator output before any future writer is considered."
+  },
+  "Safety": {
+    "secrets_present": false,
+    "credentials_present": false,
+    "live_trading_data_present": false,
+    "report_file_written": false
+  }
+}
