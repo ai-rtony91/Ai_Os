@@ -1,13 +1,83 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dashboard</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070b">
+  <meta name="color-scheme" content="dark">
+  <meta http-equiv="refresh" content="0; url=AIOS_STATIC_PREVIEW.html">
+  <title>Ai_Os Dashboard</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #05070b;
+      --panel: #0b1020;
+      --text: #e5f6ff;
+      --muted: #8aa7bf;
+      --blue: #00a3ff;
+      --terminal: #37ff88;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      display: grid;
+      min-height: 100vh;
+      margin: 0;
+      place-items: center;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 50% 36%, rgba(0, 163, 255, 0.22), transparent 28%),
+        linear-gradient(135deg, var(--bg), var(--panel));
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    main {
+      width: min(92vw, 620px);
+      border: 1px solid rgba(56, 189, 248, 0.34);
+      background: rgba(5, 7, 11, 0.78);
+      box-shadow: 0 0 48px rgba(0, 163, 255, 0.22);
+      padding: 28px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      color: var(--terminal);
+      text-shadow: 0 0 20px rgba(55, 255, 136, 0.34);
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    a {
+      display: inline-block;
+      border: 1px solid rgba(0, 163, 255, 0.64);
+      color: var(--terminal);
+      background: rgba(17, 24, 39, 0.78);
+      padding: 12px 16px;
+      text-decoration: none;
+      box-shadow: 0 0 24px rgba(0, 163, 255, 0.18);
+    }
+
+    a:focus,
+    a:hover {
+      outline: none;
+      border-color: var(--terminal);
+      box-shadow: 0 0 34px rgba(55, 255, 136, 0.22);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Ai_Os Dashboard</h1>
+    <p>Opening the static command center preview. No backend, API, persistence, service-worker registration, or trading automation is enabled.</p>
+    <a href="AIOS_STATIC_PREVIEW.html">Open Ai_Os Command Center</a>
+  </main>
+</body>
 </html>
