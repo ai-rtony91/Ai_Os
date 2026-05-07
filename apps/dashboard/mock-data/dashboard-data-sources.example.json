@@ -1,0 +1,63 @@
+{
+  "schema_version": "0.1-draft",
+  "classification": "AI_OS project work only",
+  "purpose": "Example local dashboard data-source registry for mock-data adapter planning.",
+  "architecture_flow": [
+    "Dashboard UI",
+    "local config / mock-data now",
+    "API adapter later",
+    "database/backend later"
+  ],
+  "safety": {
+    "local_files_only_now": true,
+    "external_apis_allowed_now": false,
+    "database_connections_allowed_from_browser": false,
+    "contains_secrets": false,
+    "broker_connections_allowed": false,
+    "live_trading_allowed": false
+  },
+  "sources": [
+    {
+      "id": "ui-registry",
+      "type": "local_config",
+      "path": "mock-data/dashboard-ui-registry.example.json",
+      "required": true,
+      "fallback_status": "UNKNOWN"
+    },
+    {
+      "id": "layout-registry",
+      "type": "local_config",
+      "path": "mock-data/dashboard-layout-registry.example.json",
+      "required": true,
+      "fallback_status": "UNKNOWN"
+    },
+    {
+      "id": "development-metrics",
+      "type": "local_fixture",
+      "path": "mock-data/development-metrics-fixture.example.json",
+      "required": false,
+      "fallback_status": "UNKNOWN"
+    },
+    {
+      "id": "validator-health",
+      "type": "local_fixture",
+      "path": "mock-data/validator-health-fixture.example.json",
+      "required": false,
+      "fallback_status": "UNKNOWN"
+    },
+    {
+      "id": "safety-status",
+      "type": "local_fixture",
+      "path": "mock-data/safety-status-fixture.example.json",
+      "required": false,
+      "fallback_status": "UNKNOWN"
+    }
+  ],
+  "future_api_boundary": {
+    "allowed_after_separate_approval": true,
+    "browser_to_database_direct_connection": false,
+    "server_side_database_only": true,
+    "secrets_managed_outside_browser": true
+  }
+}
+

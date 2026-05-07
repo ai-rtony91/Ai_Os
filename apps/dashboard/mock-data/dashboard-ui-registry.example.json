@@ -1,0 +1,99 @@
+{
+  "schema_version": "0.1-draft",
+  "classification": "AI_OS project work only",
+  "purpose": "Example dashboard UI registry for local mock-data driven labels, cards, buttons, actions, and future visual depth controls.",
+  "safety": {
+    "local_config_only": true,
+    "contains_secrets": false,
+    "external_apis_allowed": false,
+    "broker_connections_allowed": false,
+    "database_connections_allowed_from_browser": false,
+    "live_trading_allowed": false
+  },
+  "visual_depth_defaults": {
+    "visual_depth_tier": "2D_STATIC",
+    "parallax_enabled": false,
+    "motion_intensity": "low",
+    "card_elevation_level": 1,
+    "background_layer_behavior": "static_existing_layers",
+    "reduced_motion_fallback": "disable_parallax_and_nonessential_motion",
+    "mobile_safe_visual_depth": true,
+    "performance_heavy_animation_allowed": false,
+    "future_immersive_ui_boundary": "planning_only"
+  },
+  "sidebar_buttons": [
+    {
+      "id": "work-table",
+      "label": "Work Table",
+      "tab": "work-table",
+      "action": "work-table",
+      "order": 10,
+      "enabled": true
+    },
+    {
+      "id": "app-store",
+      "label": "App Store",
+      "tab": "app-store",
+      "action": "app-store",
+      "order": 20,
+      "enabled": true
+    },
+    {
+      "id": "connectors",
+      "label": "Connectors",
+      "tab": "connectors",
+      "action": "connectors",
+      "order": 30,
+      "enabled": true
+    }
+  ],
+  "status_buttons": [
+    {
+      "id": "system-status",
+      "label": "System Status",
+      "action": "system-status",
+      "order": 50,
+      "enabled": true
+    },
+    {
+      "id": "diagnostics",
+      "label": "Run Diagnostics",
+      "action": "diagnostics",
+      "order": 60,
+      "enabled": true
+    }
+  ],
+  "cards": [
+    {
+      "id": "project-brief",
+      "type": "work-card",
+      "label": "PROJECT BRIEF",
+      "title": "Project Brief",
+      "description": "Selected objective, scope, allowed files, and expected result.",
+      "action": "project-brief",
+      "order": 10,
+      "enabled": true,
+      "visual_depth_tier": "2D_STATIC",
+      "card_elevation_level": 1
+    },
+    {
+      "id": "approval-gate",
+      "type": "work-card",
+      "label": "APPROVAL",
+      "title": "Approval Gate",
+      "description": "Human approval state before APPLY, commit, publishing, or activation.",
+      "action": "approval-gate",
+      "order": 50,
+      "enabled": true,
+      "visual_depth_tier": "2D_STATIC",
+      "card_elevation_level": 1
+    }
+  ],
+  "messages": {
+    "system-status": {
+      "assistant": "System Status: local mock-data and config only. Backend, database, broker, deployment, and trading paths remain blocked.",
+      "console": "Ai_Os> System Status\nCONFIG: LOCAL MOCK\nDATABASE: BLOCKED IN BROWSER\nEXTERNAL API: BLOCKED\nTRADING: BLOCKED"
+    }
+  }
+}
+

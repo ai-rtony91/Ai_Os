@@ -1,0 +1,46 @@
+{
+  "schema_version": "0.1-draft",
+  "classification": "AI_OS project work only",
+  "purpose": "Example layout registry for dashboard ordering, visibility, and visual depth planning.",
+  "layout": {
+    "sections": [
+      {
+        "id": "status-strip",
+        "label": "Status Strip",
+        "order": 10,
+        "visible": true,
+        "layout_mode": "existing_flex_wrap"
+      },
+      {
+        "id": "command-stage",
+        "label": "Command Stage",
+        "order": 20,
+        "visible": true,
+        "layout_mode": "existing_grid"
+      },
+      {
+        "id": "registry-section",
+        "label": "Tool Registry",
+        "order": 30,
+        "visible": true,
+        "layout_mode": "existing_registry_lane"
+      }
+    ],
+    "visual_depth": {
+      "visual_depth_tier": "2D_STATIC",
+      "parallax_enabled": false,
+      "motion_intensity": "low",
+      "card_elevation_level": 1,
+      "background_layer_behavior": "use_existing_background_layers",
+      "reduced_motion_accessibility_fallback": "disable_parallax_and_reduce_transform_motion",
+      "mobile_safe_visual_depth_rules": [
+        "disable parallax on narrow screens",
+        "limit elevation effects to shadows and borders",
+        "avoid heavy animation on low-power devices"
+      ],
+      "no_performance_heavy_animation_rule": true,
+      "future_immersive_ui_boundary": "3D_4D_5D_labels_are_future_experience_tiers_only_not_active_effects"
+    }
+  }
+}
+
