@@ -1,0 +1,2 @@
+date,time,stage,task_id,task_name,planned_steps,completed_steps,percent_complete,status,blocked,blocker,next_action,checkpoint_file,commit_hash,git_status,notes
+2026-05-07,UNKNOWN,Stage 11.3-11.4,AIOS-STAGE11-3-11-4,Autonomous Layer Definition,2,2,100,APPLY_COMPLETE,NO,,Commit approved Stage 11.3 and 11.4 autonomous layer files,Reports/checkpoints/CHECKPOINT_2026-05-07_STAGE11_3_11_4_APPLY.md,UNKNOWN,UNKNOWN,APPLY created docs validators report checkpoint and progress CSV
