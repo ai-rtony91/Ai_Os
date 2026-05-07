@@ -4,6 +4,9 @@ const panels = document.querySelectorAll(".panel");
 const assistantOutput = document.getElementById("assistantOutput");
 const consoleOutput = document.getElementById("consoleOutput");
 const mockMessage = document.getElementById("mockMessage");
+const sidebarToggle = document.querySelector(".sidebar-toggle");
+const drawerBackdrop = document.querySelector(".drawer-backdrop");
+const mobileSidebarQuery = window.matchMedia("(max-width: 1120px)");
 const tapTargets = document.querySelectorAll("button, .glass-card, .chart-card, .work-card, .registry-chip, .app-card");
 
 const messages = {
@@ -150,6 +153,27 @@ function pulseTap(target) {
   window.setTimeout(() => target.classList.remove("tap-pop"), 520);
 }
 
+function syncSidebarState() {
+  const isMobile = mobileSidebarQuery.matches;
+  const isOpen = document.body.classList.contains("sidebar-open");
+  const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+  sidebarToggle.setAttribute("aria-expanded", isMobile ? String(isOpen) : String(!isCollapsed));
+}
+
+function closeMobileSidebar() {
+  document.body.classList.remove("sidebar-open");
+  syncSidebarState();
+}
+
+function toggleSidebar() {
+  if (mobileSidebarQuery.matches) {
+    document.body.classList.toggle("sidebar-open");
+  } else {
+    document.body.classList.toggle("sidebar-collapsed");
+  }
+  syncSidebarState();
+}
+
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const target = button.dataset.tab;
@@ -182,6 +206,21 @@ actionButtons.forEach((item) => {
 tapTargets.forEach((target) => {
   target.addEventListener("pointerup", () => pulseTap(target));
 });
+
+sidebarToggle.addEventListener("click", toggleSidebar);
+drawerBackdrop.addEventListener("click", closeMobileSidebar);
+mobileSidebarQuery.addEventListener("change", () => {
+  document.body.classList.remove("sidebar-open");
+  syncSidebarState();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && mobileSidebarQuery.matches) {
+    closeMobileSidebar();
+  }
+});
+
+syncSidebarState();
 
 window.addEventListener("mousemove", (event) => {
   const x = (event.clientX / window.innerWidth - 0.5).toFixed(3);
