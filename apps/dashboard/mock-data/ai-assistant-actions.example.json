@@ -1,0 +1,56 @@
+{
+  "schema_version": "0.1-draft",
+  "mode": "LOCAL_MOCK_ONLY",
+  "classification": "AI_OS project work only",
+  "safe_mock_actions": [
+    {
+      "id": "explain_current_stage",
+      "label": "Explain current stage",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "summarize_checkpoint",
+      "label": "Summarize checkpoint",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "explain_validator_result",
+      "label": "Explain validator result",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "explain_next_command",
+      "label": "Explain next command",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "show_safety_reminder",
+      "label": "Show safety reminder",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "explain_blocked_action",
+      "label": "Explain blocked action",
+      "executes_code": false,
+      "requires_approval": false
+    }
+  ],
+  "blocked_actions": [
+    "apply_changes",
+    "commit",
+    "push",
+    "deploy",
+    "connect_live_ai_api",
+    "read_secret",
+    "connect_broker",
+    "connect_database",
+    "place_trade",
+    "repair_files_automatically"
+  ]
+}
+

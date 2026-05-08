@@ -1,0 +1,34 @@
+{
+  "schema_version": "0.1-draft",
+  "mode": "LOCAL_MOCK_ONLY",
+  "classification": "AI_OS project work only",
+  "stage": "Phase 12 Stage 12.18",
+  "task_name": "AI Assistance Core Foundation",
+  "input_summary": {
+    "checkpoint": "Example checkpoint summary only",
+    "progress_status": "DRY_RUN_COMPLETE_PENDING_APPLY",
+    "validator_status": "UNKNOWN",
+    "safety_status": "No live AI API, broker, database, deployment, or trading connection"
+  },
+  "assistant_response": {
+    "type": "next_action_guidance",
+    "message": "Review the DRY_RUN report, confirm the APPLY scope, and approve only the missing AI Assistance planning docs and local mock fixtures.",
+    "next_safe_action": "Approve APPLY for Stage 12.18 or stop and review scope.",
+    "approval_required": true
+  },
+  "blocked_actions": [
+    "connect_live_ai_api",
+    "add_api_key",
+    "connect_broker",
+    "connect_database",
+    "place_trade",
+    "deploy",
+    "edit_dashboard_code_without_approval",
+    "mix_work_table_ai_scope"
+  ],
+  "source_references": [
+    "Reports/daily/AIOS_PHASE12_STAGE12_18_AI_ASSISTANCE_CORE_DRY_RUN_2026-05-07.md",
+    "Reports/checkpoints/CHECKPOINT_2026-05-07_PHASE12_STAGE12_18_AI_ASSISTANCE_CORE_DRY_RUN.md"
+  ]
+}
+
