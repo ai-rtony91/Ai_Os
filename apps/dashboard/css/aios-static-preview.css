@@ -452,21 +452,33 @@ body.sidebar-collapsed .status-strip {
   display: inline-flex;
   align-items: center;
   flex: 0 1 auto;
-  gap: 8px;
+  gap: 7px;
   min-height: 34px;
   min-width: 0;
-  padding: 7px 8px 7px 10px;
+  padding: 5px 7px 5px 10px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface-control);
   color: var(--text-muted);
   font-size: 11px;
+  line-height: 1;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
 }
 
+.theme-selector span {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 28px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .theme-selector select {
+  align-self: center;
+  height: 28px;
   min-width: 156px;
   max-width: min(240px, 52vw);
   border: 1px solid var(--line-strong);
@@ -475,9 +487,11 @@ body.sidebar-collapsed .status-strip {
   color: var(--text-primary);
   font: inherit;
   font-size: 11px;
+  line-height: 1.1;
   letter-spacing: 0;
   outline: none;
-  padding: 6px 24px 6px 10px;
+  padding: 4px 24px 4px 10px;
+  text-overflow: ellipsis;
 }
 
 .theme-selector select:focus {
@@ -1797,10 +1811,12 @@ body.sidebar-collapsed .status-strip {
     justify-content: space-between;
     width: 100%;
     min-height: 48px;
+    padding: 7px 9px 7px 11px;
   }
 
   .theme-selector select {
     flex: 1 1 190px;
+    height: 34px;
     min-width: 0;
     max-width: none;
     min-height: 34px;
@@ -1895,6 +1911,10 @@ body.sidebar-collapsed .status-strip {
     flex-direction: column;
     gap: 6px;
     border-radius: 14px;
+  }
+
+  .theme-selector span {
+    min-height: 16px;
   }
 
   .theme-selector select {
