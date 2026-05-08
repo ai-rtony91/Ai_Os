@@ -449,14 +449,15 @@ body.sidebar-collapsed .status-strip {
 }
 
 .theme-selector {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: max-content minmax(168px, 1fr);
   align-items: center;
   box-sizing: border-box;
   flex: 0 0 auto;
   gap: 8px;
   min-height: 34px;
-  width: max-content;
-  min-width: 232px;
+  width: 244px;
+  min-width: 244px;
   max-width: 100%;
   overflow: hidden;
   padding: 0 9px 0 11px;
@@ -469,15 +470,18 @@ body.sidebar-collapsed .status-strip {
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
+  justify-self: start;
 }
 
 .theme-selector span {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   flex: 0 0 auto;
   min-height: 32px;
   border: 0;
   outline: 0;
+  background: transparent;
+  box-shadow: none;
   line-height: 1;
   white-space: nowrap;
 }
@@ -485,11 +489,10 @@ body.sidebar-collapsed .status-strip {
 .theme-selector select {
   align-self: center;
   box-sizing: border-box;
-  flex: 0 0 162px;
-  width: 162px;
+  width: 100%;
   height: 32px;
-  min-width: 162px;
-  max-width: 162px;
+  min-width: 0;
+  max-width: 100%;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -1818,20 +1821,19 @@ body.sidebar-collapsed .status-strip {
 
   .theme-selector {
     grid-column: 1 / -1;
-    justify-content: flex-start;
-    width: fit-content;
-    min-width: 238px;
+    grid-template-columns: max-content minmax(174px, 1fr);
+    width: 254px;
+    min-width: 254px;
     max-width: 100%;
     min-height: 48px;
     padding: 0 10px 0 12px;
   }
 
   .theme-selector select {
-    flex: 0 0 174px;
-    width: 174px;
+    width: 100%;
     height: 38px;
-    min-width: 174px;
-    max-width: 174px;
+    min-width: 0;
+    max-width: 100%;
     min-height: 38px;
   }
 
@@ -1921,7 +1923,7 @@ body.sidebar-collapsed .status-strip {
 
   .theme-selector {
     align-items: center;
-    flex-direction: row;
+    grid-template-columns: max-content minmax(0, 1fr);
     gap: 8px;
     width: 100%;
     min-width: 0;
@@ -1933,8 +1935,7 @@ body.sidebar-collapsed .status-strip {
   }
 
   .theme-selector select {
-    flex: 1 1 auto;
-    width: auto;
+    width: 100%;
     min-width: 0;
     max-width: none;
   }
