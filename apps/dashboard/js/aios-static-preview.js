@@ -23,6 +23,9 @@ const workTableAiSafeActions = document.querySelector("[data-work-table-ai-safe-
 const workTableAiBlockedActions = document.querySelector("[data-work-table-ai-blocked-actions]");
 const workTableAiSources = document.querySelector("[data-work-table-ai-sources]");
 const dashboardThemeSelector = document.querySelector("[data-theme-selector]");
+const youtubeRadioDock = document.querySelector("[data-youtube-radio-dock]");
+const youtubeRadioState = document.querySelector("[data-youtube-radio-state]");
+const youtubeRadioControls = document.querySelectorAll("[data-youtube-radio-control]");
 const drawerStateKey = "aios.drawer.closed";
 const dashboardThemeKey = "aios.dashboard.theme";
 const dashboardThemeClasses = [
@@ -42,6 +45,12 @@ const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOG
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
+const youtubeRadioVideoId = "VFzsSbdS7Sk";
+const youtubeRadioPlaylistId = "RDVFzsSbdS7Sk";
+const youtubeRadioPlaylistUrl = `https://www.youtube.com/watch?v=${youtubeRadioVideoId}&list=${youtubeRadioPlaylistId}`;
+let youtubeRadioPlayer = null;
+let youtubeRadioScriptLoading = false;
+let youtubeRadioShouldPlay = false;
 
 const statusFixtures = {
   overall: {
@@ -738,6 +747,109 @@ function pulseTap(target) {
   window.setTimeout(() => target.classList.remove("tap-pop"), 520);
 }
 
+function setYouTubeRadioState(message) {
+  if (youtubeRadioState) youtubeRadioState.textContent = message;
+}
+
+function setYouTubePlayButton(isPlaying) {
+  const button = document.querySelector('[data-youtube-radio-control="play"]');
+  if (button) button.textContent = isPlaying ? "Pause" : "Play";
+}
+
+function loadYouTubeRadioApi() {
+  if (window.YT?.Player || youtubeRadioScriptLoading) return;
+  youtubeRadioScriptLoading = true;
+  const script = document.createElement("script");
+  script.src = "https://www.youtube.com/iframe_api";
+  script.async = true;
+  document.head.appendChild(script);
+}
+
+window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
+  if (!youtubeRadioDock || youtubeRadioPlayer) return;
+  youtubeRadioPlayer = new window.YT.Player("youtubeRadioPlayer", {
+    height: "120",
+    width: "214",
+    videoId: youtubeRadioVideoId,
+    playerVars: {
+      list: youtubeRadioPlaylistId,
+      listType: "playlist",
+      playsinline: 1,
+      rel: 0
+    },
+    events: {
+      onReady: () => {
+        setYouTubeRadioState("Ready - click Play");
+        if (youtubeRadioShouldPlay) {
+          youtubeRadioPlayer.playVideo();
+        }
+      },
+      onStateChange: (event) => {
+        if (event.data === window.YT.PlayerState.PLAYING) {
+          setYouTubeRadioState("Playing");
+          setYouTubePlayButton(true);
+        }
+        if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
+          setYouTubeRadioState("Paused");
+          setYouTubePlayButton(false);
+        }
+      }
+    }
+  });
+};
+
+function ensureYouTubeRadioPlayer() {
+  if (youtubeRadioPlayer) return true;
+  youtubeRadioShouldPlay = true;
+  setYouTubeRadioState("Loading YouTube player");
+  if (window.YT?.Player) {
+    window.onYouTubeIframeAPIReady();
+  } else {
+    loadYouTubeRadioApi();
+  }
+  return false;
+}
+
+function handleYouTubeRadioControl(action) {
+  if (!youtubeRadioDock) return;
+
+  if (action === "collapse") {
+    youtubeRadioDock.classList.toggle("is-collapsed");
+    const isCollapsed = youtubeRadioDock.classList.contains("is-collapsed");
+    const collapseButton = youtubeRadioDock.querySelector('[data-youtube-radio-control="collapse"]');
+    if (collapseButton) {
+      collapseButton.textContent = isCollapsed ? "+" : "−";
+      collapseButton.setAttribute("aria-label", isCollapsed ? "Expand YouTube Radio" : "Collapse YouTube Radio");
+    }
+    return;
+  }
+
+  if (action === "open") {
+    window.open(youtubeRadioPlaylistUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
+
+  const hasPlayer = ensureYouTubeRadioPlayer();
+  if (!hasPlayer) return;
+
+  if (action === "play") {
+    const state = youtubeRadioPlayer.getPlayerState();
+    if (state === window.YT.PlayerState.PLAYING) {
+      youtubeRadioPlayer.pauseVideo();
+    } else {
+      youtubeRadioPlayer.playVideo();
+    }
+  }
+
+  if (action === "next") {
+    youtubeRadioPlayer.nextVideo();
+  }
+
+  if (action === "back") {
+    youtubeRadioPlayer.previousVideo();
+  }
+}
+
 function readSavedDrawerClosed() {
   try {
     const value = window.sessionStorage.getItem(drawerStateKey);
@@ -870,6 +982,12 @@ if (dashboardThemeSelector) {
     applyDashboardTheme(dashboardThemeSelector.value);
   });
 }
+
+youtubeRadioControls.forEach((control) => {
+  control.addEventListener("click", () => {
+    handleYouTubeRadioControl(control.dataset.youtubeRadioControl);
+  });
+});
 
 sidebarToggle.addEventListener("click", closeSidebar);
 drawerReopen.addEventListener("click", openSidebar);
