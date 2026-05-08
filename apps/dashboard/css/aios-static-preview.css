@@ -501,6 +501,163 @@ body.sidebar-collapsed .status-strip {
   line-height: 1.48;
 }
 
+.work-table-ai-panel {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(5, 7, 11, 0.58);
+}
+
+.work-table-ai-head,
+.work-table-ai-card-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.work-table-ai-head h3,
+.work-table-ai-card h4 {
+  margin: 6px 0 0;
+}
+
+.work-table-ai-mode,
+.work-table-ai-approval,
+.work-table-ai-chip {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 7px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: var(--cyan);
+  font-size: 10px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.work-table-ai-message {
+  color: rgba(138, 167, 191, 0.86);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.work-table-ai-meta {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.work-table-ai-meta-item {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background: rgba(17, 24, 39, 0.58);
+}
+
+.work-table-ai-meta-item span,
+.work-table-ai-meta-item strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.work-table-ai-meta-item span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.work-table-ai-meta-item strong {
+  margin-top: 5px;
+  color: var(--terminal);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.work-table-ai-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.work-table-ai-card {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.76), rgba(5, 7, 11, 0.74)),
+    radial-gradient(circle at 92% 10%, rgba(55, 255, 136, 0.08), transparent 30%);
+}
+
+.work-table-ai-score {
+  flex: 0 0 auto;
+  color: var(--terminal);
+  font-size: 26px;
+  line-height: 1;
+  text-shadow: 0 0 18px rgba(55, 255, 136, 0.24);
+}
+
+.work-table-ai-status,
+.work-table-ai-confidence {
+  margin-top: 8px;
+  color: var(--cyan);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.work-table-ai-card p {
+  margin: 10px 0 0;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.work-table-ai-card small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.work-table-ai-approval {
+  margin-top: 10px;
+  color: var(--terminal);
+}
+
+.work-table-ai-approval.required,
+.work-table-ai-chip.approval {
+  color: var(--warning);
+  border-color: rgba(255, 209, 102, 0.36);
+}
+
+.work-table-ai-lists {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.work-table-ai-chip-list,
+.work-table-ai-source-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.work-table-ai-chip.blocked {
+  color: var(--danger);
+  border-color: rgba(255, 95, 122, 0.42);
+}
+
+.work-table-ai-source-list small {
+  display: block;
+  width: 100%;
+  color: rgba(138, 167, 191, 0.76);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
 .core-card::before {
   content: "";
   position: absolute;
@@ -1334,6 +1491,11 @@ body.sidebar-collapsed .status-strip {
     grid-column: span 3;
   }
 
+  .work-table-ai-meta,
+  .work-table-ai-lists {
+    grid-template-columns: 1fr;
+  }
+
   .registry-lane {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -1414,6 +1576,10 @@ body.sidebar-collapsed .status-strip {
 
   .status-panel-button {
     min-height: 44px;
+  }
+
+  .work-table-ai-cards {
+    grid-template-columns: 1fr;
   }
 
   .registry-lane {

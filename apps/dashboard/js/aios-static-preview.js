@@ -15,9 +15,18 @@ const statusPanels = document.querySelectorAll("[data-status-panel]");
 const toolRegistryMessage = document.querySelector("[data-tool-registry-message]");
 const toolRegistryGrid = document.querySelector("[data-tool-registry-grid]");
 const toolRegistrySummaryValues = document.querySelectorAll("[data-tool-summary]");
+const workTableAiMessage = document.querySelector("[data-work-table-ai-message]");
+const workTableAiMode = document.querySelector("[data-work-table-ai-mode]");
+const workTableAiMeta = document.querySelector("[data-work-table-ai-meta]");
+const workTableAiCards = document.querySelector("[data-work-table-ai-cards]");
+const workTableAiSafeActions = document.querySelector("[data-work-table-ai-safe-actions]");
+const workTableAiBlockedActions = document.querySelector("[data-work-table-ai-blocked-actions]");
+const workTableAiSources = document.querySelector("[data-work-table-ai-sources]");
 const drawerStateKey = "aios.drawer.closed";
 const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.json";
 const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
+const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
+const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
 
 const statusFixtures = {
   overall: {
@@ -440,6 +449,156 @@ async function loadToolRegistryStatus() {
   }
 }
 
+function clearNode(node) {
+  if (node) {
+    node.textContent = "";
+  }
+}
+
+function setWorkTableAiMessage(message) {
+  if (workTableAiMessage) {
+    workTableAiMessage.textContent = message;
+  }
+}
+
+function appendTextChip(parent, label, className = "") {
+  if (!parent) return;
+  const chip = document.createElement("span");
+  chip.className = `work-table-ai-chip${className ? ` ${className}` : ""}`;
+  chip.textContent = label || "UNKNOWN";
+  parent.appendChild(chip);
+}
+
+function renderWorkTableAiMeta(data) {
+  clearNode(workTableAiMeta);
+  if (!workTableAiMeta) return;
+
+  const fields = [
+    ["Mode", data.mode],
+    ["Classification", data.classification],
+    ["Stage", data.stage],
+    ["Task", data.task_name],
+    ["Scope", data.scope]
+  ];
+
+  fields.forEach(([label, value]) => {
+    const item = document.createElement("div");
+    item.className = "work-table-ai-meta-item";
+    const itemLabel = document.createElement("span");
+    const itemValue = document.createElement("strong");
+    itemLabel.textContent = label;
+    itemValue.textContent = formatMetricValue(value);
+    item.append(itemLabel, itemValue);
+    workTableAiMeta.appendChild(item);
+  });
+
+  if (workTableAiMode) {
+    workTableAiMode.textContent = data.mode || "LOCAL MOCK ONLY";
+  }
+}
+
+function renderWorkTableAiCards(cards) {
+  clearNode(workTableAiCards);
+  if (!workTableAiCards) return;
+
+  cards.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "work-table-ai-card";
+    card.tabIndex = 0;
+
+    const head = document.createElement("div");
+    head.className = "work-table-ai-card-head";
+
+    const titleWrap = document.createElement("div");
+    const label = document.createElement("span");
+    const title = document.createElement("h4");
+    label.className = "card-label";
+    label.textContent = item.label || "WORK CARD";
+    title.textContent = item.title || item.id || "UNKNOWN";
+    titleWrap.append(label, title);
+
+    const score = document.createElement("strong");
+    score.className = "work-table-ai-score";
+    score.textContent = formatMetricValue(item.score, "0");
+    head.append(titleWrap, score);
+
+    const status = document.createElement("div");
+    status.className = "work-table-ai-status";
+    status.textContent = `${item.interpreted_status || "UNKNOWN"} / ${item.priority_tier || "UNKNOWN"}`;
+
+    const confidence = document.createElement("div");
+    confidence.className = "work-table-ai-confidence";
+    confidence.textContent = `Confidence: ${formatMetricValue(item.confidence)}`;
+
+    const recommendation = document.createElement("p");
+    recommendation.textContent = item.recommendation || "No recommendation supplied.";
+
+    const reason = document.createElement("small");
+    reason.textContent = item.reason || "No reason supplied.";
+
+    const approval = document.createElement("span");
+    approval.className = `work-table-ai-approval${item.approval_required ? " required" : ""}`;
+    approval.textContent = item.approval_required ? "Approval required" : "No approval required";
+
+    card.append(head, status, confidence, recommendation, reason, approval);
+    workTableAiCards.appendChild(card);
+  });
+}
+
+function renderWorkTableAiActions(actionsData, fixtureData) {
+  clearNode(workTableAiSafeActions);
+  clearNode(workTableAiBlockedActions);
+  clearNode(workTableAiSources);
+
+  const safeActions = Array.isArray(actionsData.safe_mock_actions) ? actionsData.safe_mock_actions : [];
+  safeActions.forEach((action) => {
+    const label = `${action.label || action.id || "UNKNOWN"} | executes_code: ${Boolean(action.executes_code)} | approval: ${Boolean(action.requires_approval)}`;
+    appendTextChip(workTableAiSafeActions, label, action.requires_approval ? "approval" : "");
+  });
+
+  const blocked = [
+    ...(Array.isArray(fixtureData.blocked_actions) ? fixtureData.blocked_actions : []),
+    ...(Array.isArray(actionsData.blocked_actions) ? actionsData.blocked_actions : [])
+  ];
+  Array.from(new Set(blocked)).forEach((action) => appendTextChip(workTableAiBlockedActions, action, "blocked"));
+
+  const sources = Array.isArray(fixtureData.source_references) ? fixtureData.source_references : [];
+  sources.forEach((source) => {
+    if (!workTableAiSources) return;
+    const item = document.createElement("small");
+    item.textContent = source;
+    workTableAiSources.appendChild(item);
+  });
+}
+
+async function loadWorkTableAiInsights() {
+  if (!workTableAiCards) return;
+  try {
+    const [fixtureResponse, actionsResponse] = await Promise.all([
+      fetch(workTableAiFixturePath, { cache: "no-store" }),
+      fetch(workTableAiActionsFixturePath, { cache: "no-store" })
+    ]);
+
+    if (!fixtureResponse.ok || !actionsResponse.ok) throw new Error("Fixture unavailable");
+
+    const fixtureData = await fixtureResponse.json();
+    const actionsData = await actionsResponse.json();
+    const cards = Array.isArray(fixtureData.cards) ? fixtureData.cards : [];
+
+    setWorkTableAiMessage(`Fixture sources: ${workTableAiFixturePath}; ${workTableAiActionsFixturePath}`);
+    renderWorkTableAiMeta(fixtureData);
+    renderWorkTableAiCards(cards);
+    renderWorkTableAiActions(actionsData, fixtureData);
+  } catch (error) {
+    setWorkTableAiMessage("Work Table AI fixture unavailable — mock data only.");
+    clearNode(workTableAiMeta);
+    clearNode(workTableAiCards);
+    clearNode(workTableAiSafeActions);
+    clearNode(workTableAiBlockedActions);
+    clearNode(workTableAiSources);
+  }
+}
+
 function showStatusPanel(panelId) {
   statusPanelButtons.forEach((button) => {
     const isActive = button.dataset.statusPanelButton === panelId;
@@ -576,6 +735,7 @@ applySavedDrawerState();
 syncSidebarState();
 loadStatusOverview();
 loadToolRegistryStatus();
+loadWorkTableAiInsights();
 
 window.addEventListener("mousemove", (event) => {
   const x = (event.clientX / window.innerWidth - 0.5).toFixed(3);
