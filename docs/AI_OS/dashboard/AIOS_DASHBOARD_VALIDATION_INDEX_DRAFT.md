@@ -16,6 +16,7 @@ Dashboard-related DRY_RUN validators and helpers currently found in `automation/
 - `Test-AiOsDashboardStaticPreviewTransition.DRY_RUN.ps1`
 - `Test-AiOsDashboardThemeReadiness.DRY_RUN.ps1`
 - `Test-AiOsDashboardThemeSelector.DRY_RUN.ps1`
+- `Test-AiOsDashboardCommandCenterReadiness.DRY_RUN.ps1`
 - `Test-AiOsStaticDashboardMockContract.DRY_RUN.ps1`
 - `Test-AiOsStaticDashboardPrototypeArchitecture.DRY_RUN.ps1`
 - `Test-AiOsVisualDashboardRenderPrep.DRY_RUN.ps1`
@@ -89,6 +90,36 @@ These support earlier dashboard fixture, static preview, and visual render readi
 
 They do not replace the theme selector validator because they are broader dashboard readiness checks and do not specifically assert the Stage 21 theme selector polish details.
 
+## Command-Center Readiness Validator
+
+Validator:
+
+`automation/status/Test-AiOsDashboardCommandCenterReadiness.DRY_RUN.ps1`
+
+Supports:
+
+- Stage 31 command-center readiness validation.
+- Stage 34 reporting/index checkpoint.
+- Stage 35 control-plane readiness reporting.
+- Stage 36 push-readiness confirmation.
+
+Current checks:
+
+- Static dashboard HTML, JS, and CSS exist.
+- Core command-center areas exist.
+- Required dashboard safety labels exist.
+- Stage 29 control-panel organization doc exists.
+- Stage 30 operator action map doc exists.
+- Command-center scoped execution-looking forbidden patterns are absent.
+- Validator modifies no files when run.
+
+Does not cover:
+
+- Browser screenshots.
+- Real API/service readiness.
+- React implementation parity.
+- Live automation execution.
+
 ## 5. Checkpoint Reports
 
 Relevant dashboard and theme checkpoint reports:
@@ -97,6 +128,7 @@ Relevant dashboard and theme checkpoint reports:
 - `Reports/checkpoints/CHECKPOINT_STAGE17_20_DASHBOARD_THEME_SELECTOR.md`
 - `Reports/checkpoints/CHECKPOINT_STAGE22_23_DASHBOARD_THEME_SELECTOR_BROWSER_QA.md`
 - `Reports/checkpoints/CHECKPOINT_STAGE24_DASHBOARD_STATUS_VALIDATION_COVERAGE.md`
+- `Reports/checkpoints/CHECKPOINT_STAGE29_34_DASHBOARD_COMMAND_CENTER_INDEX.md`
 
 Earlier dashboard planning and implementation DRY_RUN checkpoint reports also exist in `Reports/checkpoints/`.
 
@@ -134,12 +166,20 @@ Does not cover:
 - Stage 25: `AIOS_DASHBOARD_THEME_SELECTOR_HANDOFF_PACKET.md`
 - Stage 26: `AIOS_STATIC_DASHBOARD_OPERATOR_QUICKSTART_DRAFT.md`
 - Stage 27: this validation index
+- Stage 29: `AIOS_DASHBOARD_CONTROL_PANEL_ORGANIZATION_DRAFT.md`
+- Stage 30: `AIOS_DASHBOARD_OPERATOR_ACTION_MAP_DRAFT.md`
+- Stage 31: `Test-AiOsDashboardCommandCenterReadiness.DRY_RUN.ps1`
+- Stage 32: `AIOS_DASHBOARD_MOCK_ACTION_SAFETY_REGISTRY_DRAFT.md`
+- Stage 33: `AIOS_DASHBOARD_COMMAND_CENTER_CONTROL_PLANE_DRAFT.md`
+- Stage 34: `CHECKPOINT_STAGE29_34_DASHBOARD_COMMAND_CENTER_INDEX.md`
 
 ## 8. What Each Validator Does Not Cover
 
 Theme readiness validator does not cover browser QA or selector JS.
 
 Theme selector validator does not cover rendered screenshots, accessibility scoring, or React parity.
+
+Command-center readiness validator does not cover executable automation, API readiness, React parity, or browser screenshots.
 
 Fixture validators do not cover local theme preference storage, body class switching, or Stage 21 selector polish.
 
