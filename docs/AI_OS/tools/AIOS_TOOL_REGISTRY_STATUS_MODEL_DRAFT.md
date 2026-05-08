@@ -43,3 +43,23 @@ Define a read-only status model for dashboard Tool Registry buttons.
 ## Safety Boundary
 
 This model is for detection and reporting only. It must not install software, store credentials, connect accounts, or call external APIs.
+
+## Dashboard Fixture Boundary
+
+The dashboard implementation uses the local mock fixture only:
+
+`apps/dashboard/mock-data/tool-registry-status-fixture.example.json`
+
+The current UI integration is limited to the static preview files:
+
+- `apps/dashboard/AIOS_STATIC_PREVIEW.html`
+- `apps/dashboard/js/aios-static-preview.js`
+- `apps/dashboard/css/aios-static-preview.css`
+
+React dashboard integration is deferred to a future approved stage. OANDA, broker integrations, live trading, webhook firing, real account checks, real API calls, installs, and credential storage remain blocked.
+
+## Contract Validator
+
+The fixture status model is validated by:
+
+`automation/tools/Test-AiOsToolRegistryFixtureContract.DRY_RUN.ps1`
