@@ -153,14 +153,12 @@ body > .sidebar-toggle {
 }
 
 .drawer-reopen {
-  position: fixed;
-  top: calc(14px + env(safe-area-inset-top));
-  left: calc(14px + env(safe-area-inset-left));
-  z-index: 12;
+  align-self: center;
   display: none;
+  justify-self: center;
   place-items: center;
   min-width: 52px;
-  height: 38px;
+  min-height: 34px;
   padding: 0 12px;
   border: 1px solid var(--line-hot);
   color: var(--terminal);
@@ -317,7 +315,9 @@ body.sidebar-collapsed .drawer-reopen {
 }
 
 body.sidebar-collapsed .status-strip {
-  padding-left: 86px;
+  display: grid;
+  grid-template-columns: 76px repeat(6, auto);
+  justify-content: start;
 }
 
 .status-chip {
@@ -1059,15 +1059,19 @@ body.sidebar-collapsed .status-strip {
   .status-strip {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding-left: 86px;
+    padding-left: 10px;
   }
 
-  body.sidebar-open .status-strip {
-    padding-left: 10px;
+  body.sidebar-collapsed .status-strip {
+    grid-template-columns: 76px 1fr;
   }
 
   .side-nav button,
   .status-chip {
+    min-height: 48px;
+  }
+
+  .drawer-reopen {
     min-height: 48px;
   }
 
@@ -1123,12 +1127,7 @@ body.sidebar-collapsed .status-strip {
   }
 
   .status-strip {
-    padding-top: 58px;
     padding-left: 10px;
-  }
-
-  body.sidebar-open .status-strip {
-    padding-top: 10px;
   }
 
   .registry-lane {
