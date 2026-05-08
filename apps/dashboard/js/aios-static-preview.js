@@ -12,7 +12,10 @@ const tapTargets = document.querySelectorAll("button, .glass-card, .chart-card, 
 const statusCards = document.querySelectorAll("[data-status-card]");
 const statusPanelButtons = document.querySelectorAll("[data-status-panel-button]");
 const statusPanels = document.querySelectorAll("[data-status-panel]");
+const toolRegistryMessage = document.querySelector("[data-tool-registry-message]");
+const toolRegistryGrid = document.querySelector("[data-tool-registry-grid]");
 const drawerStateKey = "aios.drawer.closed";
+const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.json";
 
 const statusFixtures = {
   overall: {
@@ -352,6 +355,66 @@ async function loadStatusOverview() {
   }));
 }
 
+function toolStatusState(value) {
+  const status = String(value || "UNKNOWN").toUpperCase();
+  if (status === "READY" || status === "INSTALLED" || status === "INTERNAL_MODULE") return "pass";
+  if (status === "NEEDS_LOGIN" || status === "NEEDS_CONFIG" || status === "NOT_APPLICABLE") return "warn";
+  if (status === "MISSING" || status === "BLOCKED") return "blocked";
+  return "unknown";
+}
+
+function setToolRegistryMessage(message) {
+  if (toolRegistryMessage) {
+    toolRegistryMessage.textContent = message;
+  }
+}
+
+function renderToolRegistry(tools, generatedAt) {
+  if (!toolRegistryGrid) return;
+
+  toolRegistryGrid.textContent = "";
+  tools.forEach((tool) => {
+    const status = tool.detected_status || "UNKNOWN";
+    const reason = tool.blocked_reason || tool.notes || "No notes supplied.";
+    const checked = tool.last_checked || generatedAt || "DRY_RUN";
+    const card = document.createElement("article");
+    card.className = `tool-status-card tool-status-${toolStatusState(status)}`;
+    card.tabIndex = 0;
+
+    card.innerHTML = `
+      <div class="tool-status-head">
+        <span class="tool-name"></span>
+        <span class="tool-status-pill"></span>
+      </div>
+      <div class="tool-meta"></div>
+      <p class="tool-reason"></p>
+      <small class="tool-checked"></small>
+    `;
+
+    card.querySelector(".tool-name").textContent = tool.label || tool.tool_id || "UNKNOWN";
+    card.querySelector(".tool-status-pill").textContent = status;
+    card.querySelector(".tool-meta").textContent = `Type: ${tool.category || "UNKNOWN"}`;
+    card.querySelector(".tool-reason").textContent = reason;
+    card.querySelector(".tool-checked").textContent = `Last checked: ${checked}`;
+    toolRegistryGrid.appendChild(card);
+  });
+}
+
+async function loadToolRegistryStatus() {
+  if (!toolRegistryGrid) return;
+  try {
+    const response = await fetch(toolRegistryFixturePath, { cache: "no-store" });
+    if (!response.ok) throw new Error("Fixture unavailable");
+    const data = await response.json();
+    const tools = Array.isArray(data.tools) ? data.tools : [];
+    setToolRegistryMessage(`Fixture source: ${toolRegistryFixturePath}`);
+    renderToolRegistry(tools, data.generated_at);
+  } catch (error) {
+    setToolRegistryMessage("Tool registry fixture unavailable — mock data only.");
+    toolRegistryGrid.textContent = "";
+  }
+}
+
 function showStatusPanel(panelId) {
   statusPanelButtons.forEach((button) => {
     const isActive = button.dataset.statusPanelButton === panelId;
@@ -487,6 +550,7 @@ document.addEventListener("keydown", (event) => {
 applySavedDrawerState();
 syncSidebarState();
 loadStatusOverview();
+loadToolRegistryStatus();
 
 window.addEventListener("mousemove", (event) => {
   const x = (event.clientX / window.innerWidth - 0.5).toFixed(3);
