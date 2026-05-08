@@ -41,6 +41,7 @@ const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.
 const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
+const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 
 const statusFixtures = {
   overall: {
@@ -57,6 +58,14 @@ const statusFixtures = {
       status: "UNKNOWN",
       value: "UNKNOWN",
       detail: "Progress status unavailable."
+    }
+  },
+  lifetimeTelemetry: {
+    path: lifetimeTelemetryFixturePath,
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Lifetime telemetry fixture unavailable — mock data only."
     }
   },
   validator: {
@@ -294,6 +303,13 @@ function summarizeStatus(cardId, payload) {
         detail: `${data.task_name || data.stage || "Progress"} - ${data.completed_steps || 0}/${data.planned_steps || 0} steps. Next: ${data.next_action || "UNKNOWN"}.`,
         source: payload.source
       };
+    case "lifetimeTelemetry":
+      return {
+        status: data.safety?.fixture_only ? "PASS" : payload.status,
+        value: `${formatMetricValue(data.git_totals?.commit_count)} commits`,
+        detail: `${data.evidence_scope || "UNKNOWN"} - complete lifetime time and bytes remain ${data.time_spent?.complete_lifetime_minutes || "UNKNOWN"}.`,
+        source: payload.source
+      };
     case "validator":
       return {
         status: data.status,
@@ -370,6 +386,96 @@ function setStatusCard(cardId, payload) {
   if (value) value.textContent = formatMetricValue(summary.value);
   if (detail) detail.textContent = summary.detail || "Status unavailable - local fixture missing.";
   if (source) source.textContent = summary.source || "local fixture";
+  if (cardId === "lifetimeTelemetry") {
+    renderLifetimeTelemetryPanel(card, payload);
+  }
+}
+
+function createLifetimeTelemetryMetric(label, value, detail = "") {
+  const item = document.createElement("div");
+  item.className = "lifetime-telemetry-metric";
+
+  const labelElement = document.createElement("span");
+  labelElement.textContent = label;
+
+  const valueElement = document.createElement("strong");
+  valueElement.textContent = formatMetricValue(value);
+
+  item.append(labelElement, valueElement);
+
+  if (detail) {
+    const detailElement = document.createElement("small");
+    detailElement.textContent = detail;
+    item.append(detailElement);
+  }
+
+  return item;
+}
+
+function createLifetimeTelemetryChip(label, value, className = "") {
+  const chip = document.createElement("span");
+  chip.className = `lifetime-telemetry-chip${className ? ` ${className}` : ""}`;
+  chip.textContent = `${label}: ${formatMetricValue(value)}`;
+  return chip;
+}
+
+function renderLifetimeTelemetryPanel(card, payload) {
+  const data = payload.data || payload;
+  const grid = card.querySelector("[data-lifetime-telemetry-grid]");
+  const unknowns = card.querySelector("[data-lifetime-telemetry-unknowns]");
+  const safety = card.querySelector("[data-lifetime-telemetry-safety]");
+
+  if (!grid || !unknowns || !safety) return;
+
+  if (!data || !data.git_totals) {
+    grid.textContent = "";
+    unknowns.textContent = "Lifetime telemetry fixture unavailable — mock data only.";
+    safety.textContent = "";
+    return;
+  }
+
+  const gitTotals = data.git_totals || {};
+  const reportTotals = data.report_totals || {};
+  const timeSpent = data.time_spent || {};
+  const sizeTotals = data.size_totals || {};
+  const qualitySignals = data.quality_signals || {};
+
+  grid.replaceChildren(
+    createLifetimeTelemetryMetric("Commits", gitTotals.commit_count, "Evidence-backed git total"),
+    createLifetimeTelemetryMetric("Tracked Files", gitTotals.tracked_file_count, "Evidence-backed git file count"),
+    createLifetimeTelemetryMetric("Numstat Rows", gitTotals.numstat_file_change_rows, "Not a byte total"),
+    createLifetimeTelemetryMetric("Insertions", gitTotals.insertions, "Git line evidence"),
+    createLifetimeTelemetryMetric("Deletions", gitTotals.deletions, "Git line evidence"),
+    createLifetimeTelemetryMetric("Checkpoints", reportTotals.checkpoint_files, "Reports/checkpoints"),
+    createLifetimeTelemetryMetric("Daily Reports", reportTotals.daily_report_files, "Reports/daily"),
+    createLifetimeTelemetryMetric("Progress Reports", reportTotals.progress_files, "Reports/progress"),
+    createLifetimeTelemetryMetric("Mock Fixtures", reportTotals.dashboard_mock_data_files, "apps/dashboard/mock-data"),
+    createLifetimeTelemetryMetric("Partial Minutes", timeSpent.partial_duration_minutes, `${timeSpent.partial_duration_row_count || 0} evidence rows`),
+    createLifetimeTelemetryMetric("Validators", qualitySignals.validators, "Partial evidence signal"),
+    createLifetimeTelemetryMetric("Pushes", qualitySignals.pushes, "Partial git/checkpoint signal")
+  );
+
+  unknowns.replaceChildren(
+    createLifetimeTelemetryChip("Complete minutes", timeSpent.complete_lifetime_minutes, "unknown"),
+    createLifetimeTelemetryChip("Complete hours", timeSpent.complete_lifetime_hours, "unknown"),
+    createLifetimeTelemetryChip("Bytes changed", sizeTotals.complete_lifetime_bytes_changed, "unknown"),
+    createLifetimeTelemetryChip("KB changed", sizeTotals.complete_lifetime_kb_changed, "unknown"),
+    createLifetimeTelemetryChip("MB changed", sizeTotals.complete_lifetime_mb_changed, "unknown"),
+    createLifetimeTelemetryChip("Blockers", qualitySignals.blockers, "unknown"),
+    createLifetimeTelemetryChip("Recovery notes", qualitySignals.recovery_notes, "unknown"),
+    createLifetimeTelemetryChip("Latest checkpoint", "CHECKPOINT_STAGE44_LIFETIME_TELEMETRY_PUSH_READINESS.md")
+  );
+
+  const safetyData = data.safety || {};
+  safety.replaceChildren(
+    createLifetimeTelemetryChip("Fixture only", safetyData.fixture_only === true ? "YES" : "UNKNOWN", "safe"),
+    createLifetimeTelemetryChip("Real collector", safetyData.real_telemetry_collector === false ? "BLOCKED" : "UNKNOWN", "blocked"),
+    createLifetimeTelemetryChip("APIs", safetyData.apis, "blocked"),
+    createLifetimeTelemetryChip("Secrets", safetyData.secrets, "blocked"),
+    createLifetimeTelemetryChip("Deployment", safetyData.deployment, "blocked"),
+    createLifetimeTelemetryChip("Broker/trading", safetyData.broker_trading_execution, "blocked"),
+    createLifetimeTelemetryChip("Live AI execution", safetyData.live_ai_execution, "blocked")
+  );
 }
 
 async function loadStatusOverview() {

@@ -71,6 +71,7 @@
         <div class="status-panel-tabs" role="tablist" aria-label="AI_OS status panels">
           <button class="status-panel-button active" type="button" role="tab" aria-selected="true" data-status-panel-button="overall">Status</button>
           <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="progress">Progress</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="lifetimeTelemetry">Lifetime Telemetry</button>
           <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="validator">Validator</button>
           <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="checkpoint">Checkpoint</button>
           <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="safety">Safety</button>
@@ -93,6 +94,16 @@
             <div class="status-value" data-status-value>UNKNOWN</div>
             <p class="status-detail" data-status-detail>Progress status unavailable.</p>
             <small class="status-source" data-status-source>mock-data/progress-ledger-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown lifetime-telemetry-panel" data-status-card="lifetimeTelemetry" data-status-panel="lifetimeTelemetry" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">LIFETIME TELEMETRY</span>
+            <h3>Lifetime Telemetry Panel</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Lifetime telemetry fixture unavailable — mock data only.</p>
+            <small class="status-source" data-status-source>mock-data/lifetime-telemetry-fixture.example.json</small>
+            <div class="lifetime-telemetry-grid" data-lifetime-telemetry-grid aria-label="Lifetime telemetry evidence summary"></div>
+            <div class="lifetime-telemetry-unknowns" data-lifetime-telemetry-unknowns aria-label="Lifetime telemetry unknown boundaries"></div>
+            <div class="lifetime-telemetry-safety" data-lifetime-telemetry-safety aria-label="Lifetime telemetry safety status"></div>
           </article>
           <article class="status-card status-panel status-state-unknown" data-status-card="validator" data-status-panel="validator" role="tabpanel" tabindex="0" hidden>
             <span class="card-label">VALIDATORS</span>
