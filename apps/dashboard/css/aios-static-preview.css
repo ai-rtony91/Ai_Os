@@ -15,6 +15,8 @@
   --panel-strong: rgba(17, 24, 39, 0.88);
   --line: rgba(56, 189, 248, 0.24);
   --line-hot: rgba(0, 163, 255, 0.72);
+  --depth-glow-soft: rgba(0, 163, 255, 0.24);
+  --depth-line-strong: rgba(56, 189, 248, 0.54);
   --mx: 0;
   --my: 0;
   --scroll: 0;
@@ -93,32 +95,42 @@ input {
 }
 
 body.sidebar-collapsed .dashboard-shell {
-  grid-template-columns: 86px minmax(0, 1fr);
+  grid-template-columns: 0 minmax(0, 1fr);
 }
 
 .command-sidebar {
   position: sticky;
   top: 0;
   height: 100vh;
+  min-width: 0;
   padding: 20px;
   border-right: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(5, 7, 11, 0.96), rgba(11, 16, 32, 0.88));
   box-shadow: 22px 0 70px rgba(0, 0, 0, 0.42);
-  transition: transform 180ms ease, padding 180ms ease, width 180ms ease;
+  overflow-x: hidden;
+  overflow-y: auto;
+  transition: transform 180ms ease, opacity 180ms ease, visibility 180ms ease;
   z-index: 8;
 }
 
+body > .sidebar-toggle {
+  display: none;
+}
+
 .sidebar-toggle {
-  position: fixed;
-  top: calc(14px + env(safe-area-inset-top));
-  left: calc(14px + env(safe-area-inset-left));
-  z-index: 12;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  min-width: 48px;
+  height: 34px;
+  padding: 0 10px;
   border: 1px solid var(--line-hot);
   color: var(--terminal);
+  font-size: 11px;
+  text-transform: uppercase;
   background: rgba(5, 7, 11, 0.86);
   box-shadow: 0 0 28px rgba(0, 163, 255, 0.28), inset 0 0 14px rgba(55, 255, 136, 0.08);
   cursor: pointer;
@@ -140,7 +152,35 @@ body.sidebar-collapsed .dashboard-shell {
   backdrop-filter: blur(4px);
 }
 
+.drawer-reopen {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top));
+  left: calc(14px + env(safe-area-inset-left));
+  z-index: 12;
+  display: none;
+  place-items: center;
+  min-width: 52px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line-hot);
+  color: var(--terminal);
+  font-size: 11px;
+  text-transform: uppercase;
+  background: rgba(5, 7, 11, 0.9);
+  box-shadow: 0 0 28px rgba(0, 163, 255, 0.28), inset 0 0 14px rgba(55, 255, 136, 0.08);
+  cursor: pointer;
+}
+
+.drawer-reopen:hover,
+.drawer-reopen:focus {
+  outline: none;
+  border-color: var(--terminal);
+  box-shadow: 0 0 34px rgba(55, 255, 136, 0.24), inset 0 0 16px rgba(0, 163, 255, 0.12);
+}
+
 .brand-block {
+  position: relative;
+  padding-top: 30px;
   padding-bottom: 18px;
   border-bottom: 1px solid var(--line);
   text-align: center;
@@ -242,34 +282,21 @@ body.sidebar-collapsed .dashboard-shell {
 }
 
 body.sidebar-collapsed .command-sidebar {
-  padding: 72px 10px 14px;
+  width: 0;
+  max-width: 0;
+  height: 0;
+  padding: 0;
+  border-right: 0;
+  box-shadow: none;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateX(-104%);
+  visibility: hidden;
 }
 
-body.sidebar-collapsed .brand-block p,
-body.sidebar-collapsed .sidebar-lock span {
-  display: none;
-}
-
-body.sidebar-collapsed .brand-block h1 {
-  font-size: 18px;
-}
-
-body.sidebar-collapsed .brand-block .eyebrow,
-body.sidebar-collapsed .sidebar-lock strong,
-body.sidebar-collapsed .side-nav button {
-  font-size: 10px;
-}
-
-body.sidebar-collapsed .side-nav button {
-  min-height: 52px;
-  padding: 8px 6px;
-  overflow-wrap: anywhere;
-}
-
-body.sidebar-collapsed .sidebar-lock {
-  left: 10px;
-  right: 10px;
-  padding: 8px 6px;
+body.sidebar-collapsed .drawer-reopen {
+  display: grid;
 }
 
 .command-main {
@@ -287,6 +314,10 @@ body.sidebar-collapsed .sidebar-lock {
   backdrop-filter: blur(14px);
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.34);
   padding: 10px;
+}
+
+body.sidebar-collapsed .status-strip {
+  padding-left: 86px;
 }
 
 .status-chip {
@@ -629,6 +660,148 @@ body.sidebar-collapsed .sidebar-lock {
   font-size: 18px;
 }
 
+.status-panel-system {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.status-panel-tabs {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: rgba(5, 7, 11, 0.68);
+  padding: 8px;
+}
+
+.status-panel-button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  color: var(--text);
+  background: rgba(17, 24, 39, 0.68);
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.status-panel-button:hover,
+.status-panel-button:focus,
+.status-panel-button.active,
+.status-panel-button.tap-pop {
+  color: var(--terminal);
+  border-color: var(--line-hot);
+  outline: none;
+  background: linear-gradient(90deg, rgba(0, 163, 255, 0.16), rgba(55, 255, 136, 0.08));
+  box-shadow: 0 0 24px rgba(0, 163, 255, 0.24), inset 0 0 14px rgba(56, 189, 248, 0.1);
+}
+
+.status-panel-frame {
+  display: grid;
+}
+
+.status-card {
+  position: relative;
+  min-height: 168px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.82), rgba(5, 7, 11, 0.78)),
+    radial-gradient(circle at 82% 12%, rgba(56, 189, 248, 0.12), transparent 32%);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34), 0 0 24px var(--depth-glow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  padding: 14px;
+  transition: border-color 170ms ease, box-shadow 170ms ease, transform 170ms ease, background 170ms ease;
+  will-change: transform;
+}
+
+.status-panel[hidden] {
+  display: none;
+}
+
+.status-panel.active {
+  display: block;
+}
+
+.status-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 0 58%, rgba(56, 189, 248, 0.08) 66%, transparent 78%),
+    radial-gradient(circle at 16% 100%, rgba(55, 255, 136, 0.07), transparent 34%);
+}
+
+.status-card h3,
+.status-card .card-label,
+.status-value,
+.status-detail,
+.status-source {
+  position: relative;
+  z-index: 1;
+}
+
+.status-card h3 {
+  margin: 8px 0 10px;
+  font-size: 17px;
+}
+
+.status-value {
+  margin: 8px 0;
+  color: var(--terminal);
+  font-size: 22px;
+  line-height: 1.1;
+  text-shadow: 0 0 18px rgba(55, 255, 136, 0.24);
+  overflow-wrap: anywhere;
+}
+
+.status-detail {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.status-source {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 10px;
+  color: rgba(138, 167, 191, 0.74);
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.status-state-pass .status-value {
+  color: var(--terminal);
+}
+
+.status-state-warn .status-value,
+.status-state-stale .status-value,
+.status-state-pending .status-value {
+  color: var(--warning);
+}
+
+.status-state-fail .status-value,
+.status-state-blocked .status-value {
+  color: var(--danger);
+}
+
+.status-state-unknown .status-value {
+  color: var(--muted);
+}
+
+.status-state-fail,
+.status-state-blocked {
+  border-color: rgba(255, 95, 122, 0.5);
+}
+
+.depth-tier-2d {
+  perspective: none;
+}
+
+.depth-parallax-ready .status-card {
+  transform: translate3d(calc(var(--mx) * 4px), calc(var(--my) * 3px), 0);
+}
+
 .metric {
   margin: 8px 0;
   color: var(--terminal);
@@ -647,6 +820,9 @@ body.sidebar-collapsed .sidebar-lock {
 .glass-card:hover,
 .glass-card:focus-within,
 .glass-card.tap-pop,
+.status-card:hover,
+.status-card:focus-within,
+.status-card.tap-pop,
 .work-card:hover,
 .work-card:focus-within,
 .work-card.tap-pop,
@@ -662,6 +838,9 @@ body.sidebar-collapsed .sidebar-lock {
 .glass-card:hover .metric,
 .glass-card:focus-within .metric,
 .glass-card.tap-pop .metric,
+.status-card:hover .status-value,
+.status-card:focus-within .status-value,
+.status-card.tap-pop .status-value,
 .work-card:hover h3,
 .work-card:focus-within h3,
 .work-card.tap-pop h3,
@@ -760,7 +939,14 @@ body.sidebar-collapsed .sidebar-lock {
     width: min(84vw, 320px);
     height: 100vh;
     padding-top: calc(72px + env(safe-area-inset-top));
+    opacity: 0;
+    pointer-events: none;
     transform: translateX(-104%);
+    visibility: hidden;
+  }
+
+  .drawer-reopen {
+    display: grid;
   }
 
   .sidebar-lock {
@@ -769,7 +955,14 @@ body.sidebar-collapsed .sidebar-lock {
   }
 
   body.sidebar-open .command-sidebar {
+    opacity: 1;
+    pointer-events: auto;
     transform: translateX(0);
+    visibility: visible;
+  }
+
+  body.sidebar-open .drawer-reopen {
+    display: none;
   }
 
   body.sidebar-open .drawer-backdrop {
@@ -777,7 +970,17 @@ body.sidebar-collapsed .sidebar-lock {
   }
 
   body.sidebar-collapsed .command-sidebar {
-    padding: calc(72px + env(safe-area-inset-top)) 20px 20px;
+    width: 0;
+    max-width: 0;
+    height: 0;
+    opacity: 0;
+    padding: 0;
+    border-right: 0;
+    box-shadow: none;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translateX(-104%);
+    visibility: hidden;
   }
 
   body.sidebar-collapsed .brand-block p,
@@ -813,8 +1016,13 @@ body.sidebar-collapsed .sidebar-lock {
   }
 
   .glass-card,
+  .status-card,
   .chart-card {
     grid-column: span 6;
+  }
+
+  .status-panel-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .work-card {
@@ -851,6 +1059,11 @@ body.sidebar-collapsed .sidebar-lock {
   .status-strip {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    padding-left: 86px;
+  }
+
+  body.sidebar-open .status-strip {
+    padding-left: 10px;
   }
 
   .side-nav button,
@@ -875,9 +1088,18 @@ body.sidebar-collapsed .sidebar-lock {
 
   .glass-card,
   .chart-card,
+  .status-card,
   .work-card {
     grid-column: 1 / -1;
     min-height: 150px;
+  }
+
+  .status-panel-tabs {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .status-panel-button {
+    min-height: 44px;
   }
 
   .registry-lane {
@@ -895,8 +1117,18 @@ body.sidebar-collapsed .sidebar-lock {
   }
 
   .status-strip,
+  .status-panel-tabs,
   .side-nav {
     grid-template-columns: 1fr;
+  }
+
+  .status-strip {
+    padding-top: 58px;
+    padding-left: 10px;
+  }
+
+  body.sidebar-open .status-strip {
+    padding-top: 10px;
   }
 
   .registry-lane {
@@ -932,8 +1164,10 @@ body.sidebar-collapsed .sidebar-lock {
 @media (hover: none), (pointer: coarse) {
   .side-nav button:hover,
   .status-chip:hover,
+  .status-panel-button:hover,
   .message-row button:hover,
   .glass-card:hover,
+  .status-card:hover,
   .work-card:hover,
   .registry-chip:hover,
   .chart-card:hover {
@@ -942,8 +1176,10 @@ body.sidebar-collapsed .sidebar-lock {
 
   .side-nav button.tap-pop,
   .status-chip.tap-pop,
+  .status-panel-button.tap-pop,
   .message-row button.tap-pop,
   .glass-card.tap-pop,
+  .status-card.tap-pop,
   .work-card.tap-pop,
   .registry-chip.tap-pop,
   .chart-card.tap-pop {
@@ -964,7 +1200,8 @@ body.sidebar-collapsed .sidebar-lock {
   .layer-base,
   .layer-grid,
   .layer-glow,
-  .core-orbits {
+  .core-orbits,
+  .depth-parallax-ready .status-card {
     transform: none;
   }
 }

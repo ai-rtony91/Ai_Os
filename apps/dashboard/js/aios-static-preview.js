@@ -4,10 +4,82 @@ const panels = document.querySelectorAll(".panel");
 const assistantOutput = document.getElementById("assistantOutput");
 const consoleOutput = document.getElementById("consoleOutput");
 const mockMessage = document.getElementById("mockMessage");
-const sidebarToggle = document.querySelector(".sidebar-toggle");
+const sidebarToggle = document.querySelector(".command-sidebar .sidebar-toggle");
+const drawerReopen = document.querySelector(".drawer-reopen");
 const drawerBackdrop = document.querySelector(".drawer-backdrop");
 const mobileSidebarQuery = window.matchMedia("(max-width: 1120px)");
-const tapTargets = document.querySelectorAll("button, .glass-card, .chart-card, .work-card, .registry-chip, .app-card");
+const tapTargets = document.querySelectorAll("button, .glass-card, .chart-card, .work-card, .status-card, .status-panel-button, .registry-chip, .app-card");
+const statusCards = document.querySelectorAll("[data-status-card]");
+const statusPanelButtons = document.querySelectorAll("[data-status-panel-button]");
+const statusPanels = document.querySelectorAll("[data-status-panel]");
+const drawerStateKey = "aios.drawer.closed";
+
+const statusFixtures = {
+  overall: {
+    path: "mock-data/aios-status-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Status unavailable - local fixture missing."
+    }
+  },
+  progress: {
+    path: "mock-data/progress-ledger-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Progress status unavailable."
+    }
+  },
+  validator: {
+    path: "mock-data/validator-health-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Validator health unknown."
+    }
+  },
+  checkpoint: {
+    path: "mock-data/checkpoint-status-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Checkpoint unknown."
+    }
+  },
+  safety: {
+    path: "mock-data/safety-status-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Safety status unknown."
+    }
+  },
+  nextAction: {
+    path: "mock-data/next-action-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Next action unavailable."
+    }
+  },
+  aiAssistance: {
+    path: "mock-data/ai-assistant-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "AI Assistance placeholder unavailable."
+    }
+  },
+  workTableAi: {
+    path: "mock-data/work-table-ai-fixture.example.json",
+    fallback: {
+      status: "UNKNOWN",
+      value: "UNKNOWN",
+      detail: "Work Table AI placeholder unavailable."
+    }
+  }
+};
 
 const messages = {
   "work-table": {
@@ -148,30 +220,215 @@ function updateOutput(action) {
   consoleOutput.textContent = message.console;
 }
 
+async function loadJsonFixture(path, fallback) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      return { ...fallback, status: "UNKNOWN", source: path };
+    }
+    const data = await response.json();
+    return { data, source: path };
+  } catch (error) {
+    return { ...fallback, status: "UNKNOWN", source: path };
+  }
+}
+
+function normalizeStatusState(value) {
+  const raw = String(value || "UNKNOWN").toUpperCase();
+  if (raw.includes("FAIL") || raw.includes("INVALID")) return "fail";
+  if (raw.includes("BLOCK")) return "blocked";
+  if (raw.includes("WARN") || raw.includes("REVIEW")) return "warn";
+  if (raw.includes("STALE")) return "stale";
+  if (raw.includes("PENDING") || raw.includes("APPLY")) return "pending";
+  if (raw.includes("PASS") || raw.includes("COMPLETE") || raw.includes("AVAILABLE")) return "pass";
+  return "unknown";
+}
+
+function formatMetricValue(value, fallbackText = "UNKNOWN") {
+  if (value === undefined || value === null || value === "") return fallbackText;
+  return String(value);
+}
+
+function summarizeStatus(cardId, payload) {
+  const data = payload.data || payload;
+  switch (cardId) {
+    case "overall":
+      return {
+        status: data.overall_status || data.status || payload.status,
+        value: data.overall_status || data.status || payload.value,
+        detail: `${data.phase || "AI_OS"} ${data.stage || "status"}`,
+        source: payload.source
+      };
+    case "progress":
+      return {
+        status: data.status || payload.status,
+        value: `${formatMetricValue(data.percent_complete)}%`,
+        detail: `${data.task_name || data.stage || "Progress"} - ${data.completed_steps || 0}/${data.planned_steps || 0} steps. Next: ${data.next_action || "UNKNOWN"}.`,
+        source: payload.source
+      };
+    case "validator":
+      return {
+        status: data.status,
+        value: data.status || "UNKNOWN",
+        detail: `${data.validators_run || 0} run, ${data.pass || 0} pass, ${data.warn || 0} warn, ${data.fail || 0} fail.`,
+        source: payload.source
+      };
+    case "checkpoint":
+      return {
+        status: data.status,
+        value: data.mode || data.status || "UNKNOWN",
+        detail: data.next_safe_action || data.source || "Checkpoint unknown.",
+        source: payload.source
+      };
+    case "safety":
+      return {
+        status: data.status,
+        value: data.status || "UNKNOWN",
+        detail: data.notes || (data.blocked_actions_confirmed || []).join(", ") || "Safety status unknown.",
+        source: payload.source
+      };
+    case "nextAction":
+      return {
+        status: data.status,
+        value: data.status || "UNKNOWN",
+        detail: data.next_action || "Next action unavailable.",
+        source: payload.source
+      };
+    case "aiAssistance":
+      return {
+        status: data.assistant_response?.approval_required ? "PENDING" : data.mode,
+        value: data.mode || "LOCAL MOCK",
+        detail: data.assistant_response?.message || "AI Assistance placeholder unavailable.",
+        source: payload.source
+      };
+    case "workTableAi":
+      return {
+        status: data.mode || "LOCAL MOCK",
+        value: `${(data.cards || []).length} cards`,
+        detail: data.cards?.[0]?.recommendation || "Work Table AI placeholder unavailable.",
+        source: payload.source
+      };
+    default:
+      return {
+        status: payload.status || "UNKNOWN",
+        value: payload.value || "UNKNOWN",
+        detail: payload.detail || "Status unavailable - local fixture missing.",
+        source: payload.source
+      };
+  }
+}
+
+function setStatusCard(cardId, payload) {
+  const card = document.querySelector(`[data-status-card="${cardId}"]`);
+  if (!card) return;
+
+  const summary = summarizeStatus(cardId, payload);
+  const state = normalizeStatusState(summary.status);
+  const value = card.querySelector("[data-status-value]");
+  const detail = card.querySelector("[data-status-detail]");
+  const source = card.querySelector("[data-status-source]");
+
+  card.classList.remove(
+    "status-state-pass",
+    "status-state-warn",
+    "status-state-fail",
+    "status-state-unknown",
+    "status-state-stale",
+    "status-state-blocked",
+    "status-state-pending"
+  );
+  card.classList.add(`status-state-${state}`);
+
+  if (value) value.textContent = formatMetricValue(summary.value);
+  if (detail) detail.textContent = summary.detail || "Status unavailable - local fixture missing.";
+  if (source) source.textContent = summary.source || "local fixture";
+}
+
+async function loadStatusOverview() {
+  if (!statusCards.length) return;
+  await Promise.all(Object.entries(statusFixtures).map(async ([cardId, fixture]) => {
+    const payload = await loadJsonFixture(fixture.path, fixture.fallback);
+    setStatusCard(cardId, payload);
+  }));
+}
+
+function showStatusPanel(panelId) {
+  statusPanelButtons.forEach((button) => {
+    const isActive = button.dataset.statusPanelButton === panelId;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-selected", String(isActive));
+  });
+
+  statusPanels.forEach((panel) => {
+    const isActive = panel.dataset.statusPanel === panelId;
+    panel.classList.toggle("active", isActive);
+    panel.hidden = !isActive;
+  });
+}
+
 function pulseTap(target) {
   target.classList.add("tap-pop");
   window.setTimeout(() => target.classList.remove("tap-pop"), 520);
+}
+
+function readSavedDrawerClosed() {
+  try {
+    const value = window.sessionStorage.getItem(drawerStateKey);
+    if (value === "true") return true;
+    if (value === "false") return false;
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function saveDrawerClosed(isClosed) {
+  try {
+    window.sessionStorage.setItem(drawerStateKey, String(isClosed));
+  } catch (error) {
+    // The drawer still works without persisted UI state.
+  }
+}
+
+function applySavedDrawerState() {
+  const savedClosed = readSavedDrawerClosed();
+  document.body.classList.remove("sidebar-open");
+  document.body.classList.toggle("sidebar-collapsed", savedClosed === true && !mobileSidebarQuery.matches);
+  if (savedClosed === false && mobileSidebarQuery.matches) {
+    document.body.classList.add("sidebar-open");
+  }
 }
 
 function syncSidebarState() {
   const isMobile = mobileSidebarQuery.matches;
   const isOpen = document.body.classList.contains("sidebar-open");
   const isCollapsed = document.body.classList.contains("sidebar-collapsed");
-  sidebarToggle.setAttribute("aria-expanded", isMobile ? String(isOpen) : String(!isCollapsed));
+  const expanded = isMobile ? isOpen : !isCollapsed;
+  sidebarToggle.setAttribute("aria-expanded", String(expanded));
+  drawerReopen.setAttribute("aria-expanded", String(expanded));
+}
+
+function closeSidebar() {
+  document.body.classList.remove("sidebar-open");
+  if (!mobileSidebarQuery.matches) {
+    document.body.classList.add("sidebar-collapsed");
+  }
+  saveDrawerClosed(true);
+  syncSidebarState();
+}
+
+function openSidebar() {
+  if (mobileSidebarQuery.matches) {
+    document.body.classList.add("sidebar-open");
+  } else {
+    document.body.classList.remove("sidebar-collapsed");
+  }
+  saveDrawerClosed(false);
+  syncSidebarState();
 }
 
 function closeMobileSidebar() {
-  document.body.classList.remove("sidebar-open");
-  syncSidebarState();
-}
-
-function toggleSidebar() {
-  if (mobileSidebarQuery.matches) {
-    document.body.classList.toggle("sidebar-open");
-  } else {
-    document.body.classList.toggle("sidebar-collapsed");
-  }
-  syncSidebarState();
+  closeSidebar();
 }
 
 tabButtons.forEach((button) => {
@@ -179,6 +436,12 @@ tabButtons.forEach((button) => {
     const target = button.dataset.tab;
     setActiveTab(target);
     updateOutput(button.dataset.action || target);
+  });
+});
+
+statusPanelButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    showStatusPanel(button.dataset.statusPanelButton);
   });
 });
 
@@ -207,10 +470,11 @@ tapTargets.forEach((target) => {
   target.addEventListener("pointerup", () => pulseTap(target));
 });
 
-sidebarToggle.addEventListener("click", toggleSidebar);
+sidebarToggle.addEventListener("click", closeSidebar);
+drawerReopen.addEventListener("click", openSidebar);
 drawerBackdrop.addEventListener("click", closeMobileSidebar);
 mobileSidebarQuery.addEventListener("change", () => {
-  document.body.classList.remove("sidebar-open");
+  applySavedDrawerState();
   syncSidebarState();
 });
 
@@ -220,7 +484,9 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+applySavedDrawerState();
 syncSidebarState();
+loadStatusOverview();
 
 window.addEventListener("mousemove", (event) => {
   const x = (event.clientX / window.innerWidth - 0.5).toFixed(3);

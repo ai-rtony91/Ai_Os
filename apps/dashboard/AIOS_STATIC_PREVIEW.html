@@ -20,10 +20,12 @@
   <div class="background-layer layer-glow"></div>
   <button class="sidebar-toggle" type="button" aria-label="Toggle App Dock" aria-expanded="true" aria-controls="appDock">☰</button>
   <div class="drawer-backdrop" data-sidebar-close></div>
+  <button class="drawer-reopen" type="button" aria-label="Open App Dock" aria-expanded="false" aria-controls="appDock">Menu</button>
 
   <div class="dashboard-shell">
     <aside class="command-sidebar" id="appDock">
       <div class="brand-block">
+        <button class="sidebar-toggle" type="button" aria-label="Close App Dock" aria-expanded="true" aria-controls="appDock">Hide</button>
         <span class="eyebrow">APP DOCK</span>
         <h1>Ai_Os</h1>
         <p>Static workspace dock for apps, connectors, generated work packets, and approval-safe build lanes.</p>
@@ -55,6 +57,78 @@
         <button class="status-chip" data-action="system-status">System Status</button>
         <button class="status-chip" data-action="diagnostics">Run Diagnostics</button>
       </header>
+
+      <section class="status-panel-system depth-tier-2d" aria-label="AI_OS dashboard panels" data-status-root>
+        <div class="status-panel-tabs" role="tablist" aria-label="AI_OS status panels">
+          <button class="status-panel-button active" type="button" role="tab" aria-selected="true" data-status-panel-button="overall">Status</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="progress">Progress</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="validator">Validator</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="checkpoint">Checkpoint</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="safety">Safety</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="aiAssistance">AI Assistance</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="workTableAi">Work Table AI</button>
+          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="nextAction">Next Action</button>
+        </div>
+
+        <div class="status-panel-frame">
+          <article class="status-card status-panel active status-state-unknown" data-status-card="overall" data-status-panel="overall" role="tabpanel" tabindex="0">
+            <span class="card-label">AI_OS STATUS</span>
+            <h3>Overall Status</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Status unavailable - local fixture missing.</p>
+            <small class="status-source" data-status-source>mock-data/aios-status-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown" data-status-card="progress" data-status-panel="progress" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">PROGRESS</span>
+            <h3>Progress Panel</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Progress status unavailable.</p>
+            <small class="status-source" data-status-source>mock-data/progress-ledger-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown" data-status-card="validator" data-status-panel="validator" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">VALIDATORS</span>
+            <h3>Validator Panel</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Validator health unknown.</p>
+            <small class="status-source" data-status-source>mock-data/validator-health-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown" data-status-card="checkpoint" data-status-panel="checkpoint" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">CHECKPOINT</span>
+            <h3>Checkpoint Panel</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Checkpoint unknown.</p>
+            <small class="status-source" data-status-source>mock-data/checkpoint-status-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown" data-status-card="safety" data-status-panel="safety" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">SAFETY</span>
+            <h3>Safety Panel</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Safety status unknown.</p>
+            <small class="status-source" data-status-source>mock-data/safety-status-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown" data-status-card="aiAssistance" data-status-panel="aiAssistance" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">AI ASSISTANCE</span>
+            <h3>AI Assistance Placeholder</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>AI Assistance placeholder unavailable.</p>
+            <small class="status-source" data-status-source>mock-data/ai-assistant-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown" data-status-card="workTableAi" data-status-panel="workTableAi" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">WORK TABLE AI</span>
+            <h3>Work Table AI Placeholder</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Work Table AI placeholder unavailable.</p>
+            <small class="status-source" data-status-source>mock-data/work-table-ai-fixture.example.json</small>
+          </article>
+          <article class="status-card status-panel status-state-unknown" data-status-card="nextAction" data-status-panel="nextAction" role="tabpanel" tabindex="0" hidden>
+            <span class="card-label">NEXT ACTION</span>
+            <h3>Next Action Panel</h3>
+            <div class="status-value" data-status-value>UNKNOWN</div>
+            <p class="status-detail" data-status-detail>Next action unavailable.</p>
+            <small class="status-source" data-status-source>mock-data/next-action-fixture.example.json</small>
+          </article>
+        </div>
+      </section>
 
       <section class="command-stage" aria-label="Ai_Os Work Table">
         <section class="work-table">
