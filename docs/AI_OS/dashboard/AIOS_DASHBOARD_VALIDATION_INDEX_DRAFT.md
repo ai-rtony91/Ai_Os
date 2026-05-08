@@ -17,6 +17,7 @@ Dashboard-related DRY_RUN validators and helpers currently found in `automation/
 - `Test-AiOsDashboardThemeReadiness.DRY_RUN.ps1`
 - `Test-AiOsDashboardThemeSelector.DRY_RUN.ps1`
 - `Test-AiOsDashboardCommandCenterReadiness.DRY_RUN.ps1`
+- `Test-AiOsLifetimeDevelopmentTelemetry.DRY_RUN.ps1`
 - `Test-AiOsStaticDashboardMockContract.DRY_RUN.ps1`
 - `Test-AiOsStaticDashboardPrototypeArchitecture.DRY_RUN.ps1`
 - `Test-AiOsVisualDashboardRenderPrep.DRY_RUN.ps1`
@@ -90,6 +91,12 @@ These support earlier dashboard fixture, static preview, and visual render readi
 
 They do not replace the theme selector validator because they are broader dashboard readiness checks and do not specifically assert the Stage 21 theme selector polish details.
 
+Lifetime telemetry fixture:
+
+- `apps/dashboard/mock-data/lifetime-telemetry-fixture.example.json`
+
+This fixture is mock-data only. Complete lifetime time-spent and complete lifetime bytes/KB/MB changed remain `UNKNOWN` unless future evidence-backed telemetry proves those values.
+
 ## Command-Center Readiness Validator
 
 Validator:
@@ -120,6 +127,41 @@ Does not cover:
 - React implementation parity.
 - Live automation execution.
 
+## Lifetime Development Telemetry Validator
+
+Validator:
+
+`automation/status/Test-AiOsLifetimeDevelopmentTelemetry.DRY_RUN.ps1`
+
+Supports:
+
+- Stage 40 lifetime telemetry fixture and contract validation.
+- Stage 42 lifetime telemetry checkpoint reporting.
+- Stage 43 dashboard validation index coverage.
+- Stage 44 lifetime telemetry push-readiness confirmation.
+
+Current checks:
+
+- Lifetime telemetry evidence model exists.
+- Lifetime telemetry storage contract exists.
+- Lifetime telemetry mock fixture exists.
+- Mock fixture is valid JSON.
+- Complete lifetime time-spent values are `UNKNOWN`.
+- Complete lifetime bytes/KB values are `UNKNOWN`.
+- Real telemetry collector behavior is disabled.
+- Evidence-backed commit count matches the inspected repository state used for Stage 37.
+- Execution-looking forbidden patterns are absent from the scoped telemetry files.
+- Validator modifies no files when run.
+
+Does not cover:
+
+- Real telemetry collection.
+- Complete lifetime time-spent proof.
+- Complete lifetime bytes/KB/MB proof.
+- Dashboard UI wiring for a Lifetime Telemetry panel.
+- React dashboard parity.
+- Canonical `Reports/telemetry/` ledger creation.
+
 ## 5. Checkpoint Reports
 
 Relevant dashboard and theme checkpoint reports:
@@ -129,6 +171,7 @@ Relevant dashboard and theme checkpoint reports:
 - `Reports/checkpoints/CHECKPOINT_STAGE22_23_DASHBOARD_THEME_SELECTOR_BROWSER_QA.md`
 - `Reports/checkpoints/CHECKPOINT_STAGE24_DASHBOARD_STATUS_VALIDATION_COVERAGE.md`
 - `Reports/checkpoints/CHECKPOINT_STAGE29_34_DASHBOARD_COMMAND_CENTER_INDEX.md`
+- `Reports/checkpoints/CHECKPOINT_STAGE37_42_LIFETIME_TELEMETRY_MODEL.md`
 
 Earlier dashboard planning and implementation DRY_RUN checkpoint reports also exist in `Reports/checkpoints/`.
 
@@ -172,6 +215,13 @@ Does not cover:
 - Stage 32: `AIOS_DASHBOARD_MOCK_ACTION_SAFETY_REGISTRY_DRAFT.md`
 - Stage 33: `AIOS_DASHBOARD_COMMAND_CENTER_CONTROL_PLANE_DRAFT.md`
 - Stage 34: `CHECKPOINT_STAGE29_34_DASHBOARD_COMMAND_CENTER_INDEX.md`
+- Stage 37: `AIOS_LIFETIME_DEVELOPMENT_TELEMETRY_EVIDENCE_MODEL_DRAFT.md`
+- Stage 38: `AIOS_LIFETIME_DEVELOPMENT_TELEMETRY_STORAGE_CONTRACT_DRAFT.md`
+- Stage 39: `lifetime-telemetry-fixture.example.json`
+- Stage 40: `Test-AiOsLifetimeDevelopmentTelemetry.DRY_RUN.ps1`
+- Stage 41: `AIOS_DASHBOARD_LIFETIME_TELEMETRY_PANEL_PLAN_DRAFT.md`
+- Stage 42: `CHECKPOINT_STAGE37_42_LIFETIME_TELEMETRY_MODEL.md`
+- Stage 43: this validation index update
 
 ## 8. What Each Validator Does Not Cover
 
@@ -180,6 +230,8 @@ Theme readiness validator does not cover browser QA or selector JS.
 Theme selector validator does not cover rendered screenshots, accessibility scoring, or React parity.
 
 Command-center readiness validator does not cover executable automation, API readiness, React parity, or browser screenshots.
+
+Lifetime telemetry validator does not cover real telemetry collection, complete lifetime time evidence, complete lifetime bytes/KB evidence, dashboard UI wiring, or React parity.
 
 Fixture validators do not cover local theme preference storage, body class switching, or Stage 21 selector polish.
 
@@ -196,6 +248,9 @@ Recommended future gaps:
 - Add accessibility checklist coverage without installing tools.
 - Add React parity DRY_RUN planning only after explicit React approval.
 - Add dashboard validation index maintenance rules when new validators are created.
+- Add fixture-only Lifetime Telemetry dashboard panel wiring only after separate DRY_RUN approval.
+- Create canonical `Reports/telemetry/` ledger and summary files only after separate APPLY approval.
+- Keep complete lifetime time and bytes/KB/MB changed as `UNKNOWN` until evidence exists.
 
 Blocked until separately approved:
 
