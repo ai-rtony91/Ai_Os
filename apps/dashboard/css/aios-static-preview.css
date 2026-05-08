@@ -425,9 +425,9 @@ body.sidebar-collapsed .drawer-reopen {
 }
 
 .status-strip {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, max-content) minmax(218px, auto) minmax(280px, 342px);
   gap: 9px;
-  flex-wrap: wrap;
   align-items: center;
   border: 1px solid var(--line);
   background: rgba(5, 7, 11, 0.74);
@@ -438,7 +438,7 @@ body.sidebar-collapsed .drawer-reopen {
 
 body.sidebar-collapsed .status-strip {
   display: grid;
-  grid-template-columns: 76px repeat(6, auto);
+  grid-template-columns: 76px repeat(6, max-content) minmax(218px, auto) minmax(280px, 342px);
   justify-content: start;
 }
 
@@ -1621,6 +1621,7 @@ body.sidebar-collapsed .status-strip {
 .youtube-radio-dock {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  justify-self: end;
   flex: 0 0 auto;
   width: min(100%, 342px);
   margin-left: auto;
