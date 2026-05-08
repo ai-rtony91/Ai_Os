@@ -1625,6 +1625,7 @@ body.sidebar-collapsed .status-strip {
   flex: 0 0 auto;
   width: min(100%, 342px);
   margin-left: auto;
+  transform: translateX(6px);
   border: 1px solid rgba(55, 255, 136, 0.42);
   border-radius: 16px;
   background:
@@ -2028,6 +2029,7 @@ body.sidebar-collapsed .status-strip {
     grid-column: 1 / -1;
     width: 100%;
     margin-left: 0;
+    transform: none;
   }
 }
 
