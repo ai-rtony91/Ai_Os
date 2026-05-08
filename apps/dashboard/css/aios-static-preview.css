@@ -450,14 +450,14 @@ body.sidebar-collapsed .status-strip {
 
 .theme-selector {
   display: inline-grid;
-  grid-template-columns: max-content minmax(168px, 1fr);
+  grid-template-columns: max-content minmax(142px, 1fr);
   align-items: center;
   box-sizing: border-box;
   flex: 0 0 auto;
   gap: 8px;
   min-height: 34px;
-  width: 244px;
-  min-width: 244px;
+  width: 218px;
+  min-width: 218px;
   max-width: 100%;
   overflow: hidden;
   padding: 0 9px 0 11px;
@@ -1932,9 +1932,9 @@ body.sidebar-collapsed .status-strip {
 
   .theme-selector {
     grid-column: 1 / -1;
-    grid-template-columns: max-content minmax(174px, 1fr);
-    width: 254px;
-    min-width: 254px;
+    grid-template-columns: max-content minmax(150px, 1fr);
+    width: 230px;
+    min-width: 230px;
     max-width: 100%;
     min-height: 48px;
     padding: 0 10px 0 12px;
