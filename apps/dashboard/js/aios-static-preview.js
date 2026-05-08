@@ -14,8 +14,10 @@ const statusPanelButtons = document.querySelectorAll("[data-status-panel-button]
 const statusPanels = document.querySelectorAll("[data-status-panel]");
 const toolRegistryMessage = document.querySelector("[data-tool-registry-message]");
 const toolRegistryGrid = document.querySelector("[data-tool-registry-grid]");
+const toolRegistrySummaryValues = document.querySelectorAll("[data-tool-summary]");
 const drawerStateKey = "aios.drawer.closed";
 const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.json";
+const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
 
 const statusFixtures = {
   overall: {
@@ -400,6 +402,27 @@ function renderToolRegistry(tools, generatedAt) {
   });
 }
 
+function renderToolRegistrySummary(tools) {
+  const counts = toolRegistrySummaryStatuses.reduce((result, status) => {
+    result[status] = 0;
+    return result;
+  }, {});
+
+  tools.forEach((tool) => {
+    const status = String(tool.detected_status || "UNKNOWN").toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(counts, status)) {
+      counts[status] += 1;
+    } else {
+      counts.UNKNOWN += 1;
+    }
+  });
+
+  toolRegistrySummaryValues.forEach((node) => {
+    const key = node.dataset.toolSummary;
+    node.textContent = key === "total" ? String(tools.length) : String(counts[key] || 0);
+  });
+}
+
 async function loadToolRegistryStatus() {
   if (!toolRegistryGrid) return;
   try {
@@ -408,9 +431,11 @@ async function loadToolRegistryStatus() {
     const data = await response.json();
     const tools = Array.isArray(data.tools) ? data.tools : [];
     setToolRegistryMessage(`Fixture source: ${toolRegistryFixturePath}`);
+    renderToolRegistrySummary(tools);
     renderToolRegistry(tools, data.generated_at);
   } catch (error) {
     setToolRegistryMessage("Tool registry fixture unavailable — mock data only.");
+    renderToolRegistrySummary([]);
     toolRegistryGrid.textContent = "";
   }
 }

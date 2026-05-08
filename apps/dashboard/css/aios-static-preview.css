@@ -742,6 +742,38 @@ body.sidebar-collapsed .status-strip {
   line-height: 1.4;
 }
 
+.tool-registry-summary {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.summary-tile {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(5, 7, 11, 0.58);
+}
+
+.summary-tile span,
+.summary-tile strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.summary-tile span {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.summary-tile strong {
+  margin-top: 6px;
+  color: var(--terminal);
+  font-size: 20px;
+  line-height: 1;
+}
+
 .tool-registry-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1306,6 +1338,11 @@ body.sidebar-collapsed .status-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
+  .tool-registry-summary,
+  .tool-registry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .app-registry .glass-card {
     grid-column: span 6;
   }
@@ -1383,6 +1420,10 @@ body.sidebar-collapsed .status-strip {
     grid-template-columns: 1fr 1fr;
   }
 
+  .tool-registry-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .message-row {
     grid-template-columns: 1fr;
   }
@@ -1404,6 +1445,11 @@ body.sidebar-collapsed .status-strip {
   }
 
   .registry-lane {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-registry-summary,
+  .tool-registry-grid {
     grid-template-columns: 1fr;
   }
 
