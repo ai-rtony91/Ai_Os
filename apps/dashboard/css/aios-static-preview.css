@@ -17,6 +17,7 @@
   --line-hot: rgba(0, 163, 255, 0.72);
   --depth-glow-soft: rgba(0, 163, 255, 0.24);
   --depth-line-strong: rgba(56, 189, 248, 0.54);
+  --font-terminal-display: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
   --mx: 0;
   --my: 0;
   --scroll: 0;
@@ -298,6 +299,9 @@ body.sidebar-collapsed .drawer-reopen {
 }
 
 .command-main {
+  box-sizing: border-box;
+  width: min(100%, 1440px);
+  margin-inline: auto;
   min-width: 0;
   padding: 20px 20px calc(54px + env(safe-area-inset-bottom));
 }
@@ -357,6 +361,13 @@ body.sidebar-collapsed .status-strip {
   min-height: 390px;
   overflow: hidden;
   padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(3, 7, 18, 0.94), rgba(5, 10, 24, 0.9)),
+    radial-gradient(circle at 84% 10%, rgba(0, 163, 255, 0.18), transparent 28%);
+  box-shadow:
+    0 28px 86px rgba(0, 0, 0, 0.52),
+    0 0 28px rgba(0, 163, 255, 0.2),
+    inset 0 1px 0 rgba(224, 242, 254, 0.05);
 }
 
 .work-table::before {
@@ -364,11 +375,27 @@ body.sidebar-collapsed .status-strip {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(36deg, transparent 62%, rgba(56, 189, 248, 0.11) 70%, rgba(0, 163, 255, 0.05) 78%, transparent 88%),
-    radial-gradient(circle at 83% 18%, rgba(56, 189, 248, 0.26), transparent 17%),
-    radial-gradient(circle at 83% 18%, rgba(0, 163, 255, 0.19), transparent 30%),
-    radial-gradient(circle at 16% 84%, rgba(55, 255, 136, 0.08), transparent 28%);
+    linear-gradient(36deg, transparent 66%, rgba(56, 189, 248, 0.08) 74%, transparent 86%),
+    radial-gradient(circle at 86% 8%, rgba(56, 189, 248, 0.32), transparent 15%),
+    radial-gradient(circle at 84% 18%, rgba(0, 163, 255, 0.22), transparent 28%),
+    radial-gradient(circle at 16% 84%, rgba(55, 255, 136, 0.04), transparent 26%);
   pointer-events: none;
+}
+
+.work-table::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 57%, rgba(125, 211, 252, 0.16) 58%, transparent 61%),
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(56, 189, 248, 0.08) 35px 36px, transparent 37px 78px),
+    repeating-linear-gradient(0deg, transparent 0 30px, rgba(0, 163, 255, 0.055) 31px 32px, transparent 33px 72px);
+  border: 1px solid rgba(125, 211, 252, 0.08);
+  opacity: 0.62;
+  mix-blend-mode: screen;
+  animation: heroScanSweep 7.5s ease-in-out infinite, heroDataDrift 15s linear infinite;
 }
 
 .work-table-head {
@@ -380,6 +407,11 @@ body.sidebar-collapsed .status-strip {
   align-items: start;
 }
 
+.work-table-head > div:first-child {
+  position: relative;
+  z-index: 4;
+}
+
 .work-table-head h2,
 .section-head h2 {
   margin: 8px 0 8px;
@@ -387,13 +419,21 @@ body.sidebar-collapsed .status-strip {
 }
 
 .work-table-head h2 {
-  font-size: clamp(30px, 4vw, 56px);
+  font-family: var(--font-terminal-display);
+  font-weight: 800;
+  color: #f4fbff;
+  font-size: clamp(34px, 4.4vw, 62px);
+  letter-spacing: 0.035em;
+  text-shadow:
+    0 0 22px rgba(56, 189, 248, 0.5),
+    0 0 10px rgba(229, 246, 255, 0.26),
+    0 0 42px rgba(0, 163, 255, 0.2);
 }
 
 .work-table-head p {
   max-width: 680px;
   margin: 0;
-  color: var(--muted);
+  color: #a8bfd0;
   line-height: 1.58;
 }
 
@@ -403,38 +443,38 @@ body.sidebar-collapsed .status-strip {
   inset: auto;
   align-self: start;
   justify-self: end;
-  width: min(32vw, 340px);
-  min-height: 318px;
-  margin-top: -36px;
+  z-index: 2;
+  width: min(35vw, 380px);
+  min-height: 360px;
+  margin-top: -92px;
   margin-bottom: 0;
   transform: translate3d(calc(var(--mx) * 28px), calc(var(--my) * 20px), 0);
 }
 
 .work-table-core .orbit-one {
-  width: 168px;
-  height: 168px;
+  width: 220px;
+  height: 220px;
 }
 
 .work-table-core .orbit-two {
-  width: 246px;
-  height: 246px;
+  width: 300px;
+  height: 300px;
 }
 
 .work-table-core .orbit-three {
-  width: 318px;
-  height: 318px;
-  opacity: 0.58;
+  width: 374px;
+  height: 374px;
+  opacity: 0.68;
 }
 
 .work-table-core .core-pulse {
-  width: 108px;
-  height: 108px;
-  font-size: 18px;
+  width: 156px;
+  height: 156px;
 }
 
 .work-table-grid {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px;
@@ -475,17 +515,18 @@ body.sidebar-collapsed .status-strip {
   inset: 74px 0 0;
   display: grid;
   place-items: center;
+  pointer-events: none;
   transform: translate3d(calc(var(--mx) * 54px), calc(var(--my) * 42px + var(--scroll) * -18px), 0);
 }
 
 .orbit {
   position: absolute;
-  border: 1px solid rgba(56, 189, 248, 0.58);
-  border-top-color: rgba(55, 255, 136, 0.96);
-  border-right-color: rgba(0, 163, 255, 1);
-  border-bottom-color: rgba(59, 130, 246, 0.74);
+  border: 1px solid rgba(56, 189, 248, 0.42);
+  border-top-color: rgba(186, 230, 253, 0.86);
+  border-right-color: rgba(0, 174, 255, 0.82);
+  border-bottom-color: rgba(37, 99, 235, 0.42);
   border-radius: 50%;
-  filter: drop-shadow(0 0 16px rgba(0, 163, 255, 0.28));
+  filter: drop-shadow(0 0 24px rgba(0, 163, 255, 0.48));
   transform: rotateX(64deg) rotateZ(0deg);
   animation: orbitSpin 12s linear infinite;
 }
@@ -498,16 +539,16 @@ body.sidebar-collapsed .status-strip {
 .orbit-two {
   width: 320px;
   height: 320px;
-  animation-duration: 20s;
+  animation-duration: 16s;
   animation-direction: reverse;
-  opacity: 0.86;
+  opacity: 0.82;
 }
 
 .orbit-three {
   width: 430px;
   height: 430px;
-  animation-duration: 28s;
-  opacity: 0.66;
+  animation-duration: 24s;
+  opacity: 0.58;
 }
 
 .core-pulse {
@@ -517,13 +558,114 @@ body.sidebar-collapsed .status-strip {
   place-items: center;
   width: 132px;
   height: 132px;
-  border: 1px solid rgba(55, 255, 136, 0.48);
+  border: 1px solid rgba(186, 230, 253, 0.76);
   border-radius: 50%;
-  color: var(--terminal);
-  background: rgba(5, 7, 11, 0.86);
-  box-shadow: 0 0 58px rgba(0, 163, 255, 0.5), 0 0 24px rgba(55, 255, 136, 0.24), inset 0 0 42px rgba(55, 255, 136, 0.16);
-  font-size: 22px;
-  text-shadow: 0 0 16px rgba(55, 255, 136, 0.54);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(224, 242, 254, 0.46), transparent 9%),
+    radial-gradient(circle at 54% 48%, rgba(0, 174, 255, 0.22), transparent 40%),
+    radial-gradient(circle at 50% 54%, rgba(1, 4, 13, 1), rgba(3, 8, 20, 0.94) 56%, rgba(0, 2, 8, 1) 100%);
+  box-shadow:
+    0 0 104px rgba(0, 174, 255, 0.62),
+    0 0 46px rgba(56, 189, 248, 0.5),
+    inset 0 0 48px rgba(56, 189, 248, 0.26),
+    inset -34px -30px 54px rgba(0, 0, 0, 0.95),
+    inset 18px 14px 28px rgba(186, 230, 253, 0.08);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  animation: globeBreathe 4.4s ease-in-out infinite;
+}
+
+.digital-globe::before,
+.digital-globe::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.digital-globe::before {
+  border: 1px solid rgba(186, 230, 253, 0.38);
+  box-shadow: inset 0 0 42px rgba(0, 174, 255, 0.28), 0 0 22px rgba(0, 174, 255, 0.2);
+  transform: rotateX(68deg);
+}
+
+.digital-globe::after {
+  background:
+    radial-gradient(circle at 23% 32%, rgba(224, 242, 254, 1) 0 2px, transparent 3px),
+    radial-gradient(circle at 68% 26%, rgba(125, 211, 252, 0.95) 0 2px, transparent 3px),
+    radial-gradient(circle at 44% 57%, rgba(0, 174, 255, 1) 0 2px, transparent 3px),
+    radial-gradient(circle at 72% 66%, rgba(186, 230, 253, 0.88) 0 2px, transparent 3px),
+    radial-gradient(circle at 34% 75%, rgba(56, 189, 248, 0.95) 0 2px, transparent 3px);
+  filter: drop-shadow(0 0 10px rgba(56, 189, 248, 1));
+  animation: globeNodePulse 2.8s ease-in-out infinite;
+}
+
+.globe-shell,
+.globe-grid,
+.globe-network,
+.globe-nodes {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.globe-shell {
+  border: 1px solid rgba(224, 242, 254, 0.34);
+  background:
+    linear-gradient(112deg, rgba(255, 255, 255, 0.22), transparent 18%, transparent 58%, rgba(56, 189, 248, 0.16)),
+    radial-gradient(circle at 31% 26%, rgba(186, 230, 253, 0.36), transparent 19%),
+    radial-gradient(circle at 70% 72%, rgba(0, 0, 0, 0.6), transparent 28%);
+  mix-blend-mode: screen;
+}
+
+.globe-grid {
+  inset: 9%;
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 15px, rgba(56, 189, 248, 0.32) 16px 17px, transparent 18px 31px),
+    repeating-linear-gradient(0deg, transparent 0 15px, rgba(125, 211, 252, 0.22) 16px 17px, transparent 18px 31px);
+  mask-image: radial-gradient(circle, #000 62%, transparent 65%);
+  opacity: 0.76;
+  animation: globeDrift 8s linear infinite;
+}
+
+.globe-grid-b {
+  transform: rotate(72deg) scaleX(0.72);
+  animation-duration: 14s;
+  animation-direction: reverse;
+  opacity: 0.45;
+}
+
+.globe-network {
+  inset: 11%;
+  background:
+    linear-gradient(32deg, transparent 22%, rgba(186, 230, 253, 0.72) 23%, transparent 24% 54%, rgba(0, 174, 255, 0.58) 55%, transparent 56%),
+    linear-gradient(142deg, transparent 27%, rgba(56, 189, 248, 0.68) 28%, transparent 29% 67%, rgba(125, 211, 252, 0.54) 68%, transparent 69%);
+  mask-image: radial-gradient(circle, #000 58%, transparent 61%);
+  opacity: 0.9;
+  animation: globeRotate 8.5s linear infinite;
+}
+
+.globe-network-b {
+  transform: rotate(38deg) scale(0.94);
+  animation-duration: 12s;
+  animation-direction: reverse;
+  opacity: 0.58;
+}
+
+.globe-nodes {
+  inset: 12%;
+  background:
+    radial-gradient(circle at 18% 42%, rgba(255, 255, 255, 1) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 38% 28%, rgba(125, 211, 252, 1) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 62% 39%, rgba(0, 174, 255, 1) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 79% 54%, rgba(186, 230, 253, 0.96) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 48% 72%, rgba(56, 189, 248, 0.96) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 27% 66%, rgba(0, 174, 255, 0.96) 0 2.5px, transparent 3.5px);
+  filter: drop-shadow(0 0 14px rgba(56, 189, 248, 1));
+  animation: globeNodePulse 2.3s ease-in-out infinite;
 }
 
 .core-copy {
@@ -920,6 +1062,35 @@ body.sidebar-collapsed .status-strip {
   to { transform: rotateX(64deg) rotateZ(360deg); }
 }
 
+@keyframes globeBreathe {
+  0%, 100% { filter: saturate(1) brightness(1); transform: scale(1); }
+  50% { filter: saturate(1.18) brightness(1.08); transform: scale(1.018); }
+}
+
+@keyframes globeDrift {
+  to { background-position: 68px 0, 0 68px; }
+}
+
+@keyframes globeRotate {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes globeNodePulse {
+  0%, 100% { opacity: 0.62; transform: scale(0.98); }
+  45% { opacity: 1; transform: scale(1.035); }
+  70% { opacity: 0.76; transform: scale(1.005); }
+}
+
+@keyframes heroScanSweep {
+  0%, 100% { opacity: 0.34; transform: translateX(-18%); }
+  45% { opacity: 0.74; transform: translateX(12%); }
+  60% { opacity: 0.5; transform: translateX(18%); }
+}
+
+@keyframes heroDataDrift {
+  to { background-position: 0 0, 96px 0, 0 84px; }
+}
+
 @keyframes gridDrift {
   to { background-position: 42px 42px; }
 }
@@ -1200,7 +1371,20 @@ body.sidebar-collapsed .status-strip {
   .layer-grid,
   .layer-glow,
   .core-orbits,
+  .digital-globe,
+  .globe-grid,
+  .globe-network,
+  .globe-nodes,
   .depth-parallax-ready .status-card {
+    transform: none;
+  }
+
+  .digital-globe {
+    filter: saturate(1) brightness(1);
+  }
+
+  .work-table::after {
+    opacity: 0.22;
     transform: none;
   }
 }
