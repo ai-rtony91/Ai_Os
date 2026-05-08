@@ -1,0 +1,21 @@
+{
+  "mode": "local_mock",
+  "active_panel": "command_center",
+  "navigation": [
+    { "id": "command_center", "label": "Command Center", "order": 1 },
+    { "id": "current_project", "label": "Current Project / About", "order": 2 },
+    { "id": "progress", "label": "Progress", "order": 3 },
+    { "id": "reports_telemetry", "label": "Reports + Telemetry", "order": 4 },
+    { "id": "validators", "label": "Validators", "order": 5 },
+    { "id": "safety", "label": "Safety", "order": 6 },
+    { "id": "ai_assistance", "label": "AI Assistance", "order": 7 },
+    { "id": "work_table_ai", "label": "Work Table AI", "order": 8 },
+    { "id": "apps_admin", "label": "Apps / Admin", "order": 9 }
+  ],
+  "safety": {
+    "external_apis": "blocked",
+    "database": "blocked",
+    "broker_connections": "blocked",
+    "live_ai_apis": "blocked"
+  }
+}

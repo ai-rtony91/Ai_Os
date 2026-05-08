@@ -1,0 +1,16 @@
+{
+  "mode": "local_mock",
+  "current_phase": "Phase 13",
+  "current_stage": "Stage 13.2",
+  "phase_progress_percent": 15,
+  "stage_progress_percent": 20,
+  "latest_commit": "UNKNOWN",
+  "latest_checkpoint": "Reports/checkpoints/CHECKPOINT_2026-05-07_PHASE13_STAGE13_2_INTERACTIVE_NAV_PANEL_SYSTEM_DRY_RUN.md",
+  "validator_status": "UNKNOWN",
+  "safety_status": "BLOCKED_ACTIONS_CONFIRMED",
+  "files_created_today": "UNKNOWN",
+  "kb_mb_created_today": "UNKNOWN",
+  "next_action": "Approve APPLY for planning docs and mock-data model files.",
+  "ai_assistance_status": "LOCAL_MOCK_ONLY",
+  "work_table_ai_status": "LOCAL_MOCK_ONLY"
+}

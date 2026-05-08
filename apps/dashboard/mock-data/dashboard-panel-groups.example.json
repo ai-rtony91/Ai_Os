@@ -1,0 +1,14 @@
+{
+  "mode": "local_mock",
+  "panel_groups": {
+    "command_center": ["current_status", "next_safe_action", "latest_checkpoint", "latest_commit", "major_stats"],
+    "current_project": ["what_aios_is", "current_phase_stage", "project_purpose", "system_boundaries"],
+    "progress": ["phase_completion", "stage_completion", "files_created", "kb_mb_created", "daily_growth"],
+    "reports_telemetry": ["daily_reports", "checkpoint_reports", "telemetry_snapshots", "progress_ledger"],
+    "validators": ["master_validator_status", "recent_pass_warn_fail", "validation_queue"],
+    "safety": ["no_secrets", "no_broker_live_trading", "blocked_actions", "approval_gates"],
+    "ai_assistance": ["assistant_status", "mock_output", "next_action_guidance"],
+    "work_table_ai": ["row_card_intelligence", "scoring_recommendations", "approval_required_flags"],
+    "apps_admin": ["app_registry", "tool_registry", "admin_system_actions"]
+  }
+}
