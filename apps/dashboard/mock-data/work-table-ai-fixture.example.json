@@ -1,0 +1,50 @@
+{
+  "schema_version": "0.1-draft",
+  "mode": "LOCAL_MOCK_ONLY",
+  "classification": "AI_OS project work only",
+  "stage": "Phase 12 Stage 12.19",
+  "task_name": "Work Table AI Foundation",
+  "scope": "work_table_ai_only",
+  "cards": [
+    {
+      "id": "project-brief",
+      "label": "PROJECT BRIEF",
+      "title": "Project Brief",
+      "interpreted_status": "NEEDS_REVIEW",
+      "score": 62,
+      "priority_tier": "review_candidate",
+      "confidence": 0.72,
+      "recommendation": "Review project brief evidence before APPLY.",
+      "reason": "Project brief defines objective and scope for the work packet.",
+      "approval_required": true
+    },
+    {
+      "id": "validation-queue",
+      "label": "VALIDATION",
+      "title": "Validation Queue",
+      "interpreted_status": "HIGH_PRIORITY_REVIEW",
+      "score": 84,
+      "priority_tier": "next_review",
+      "confidence": 0.81,
+      "recommendation": "Review validation queue before commit.",
+      "reason": "Validation evidence is required before commit or push.",
+      "approval_required": true
+    }
+  ],
+  "blocked_actions": [
+    "apply_changes",
+    "commit",
+    "push",
+    "deploy",
+    "connect_live_ai_api",
+    "connect_broker",
+    "connect_database",
+    "place_trade",
+    "mix_ai_assistance_scope"
+  ],
+  "source_references": [
+    "Reports/daily/AIOS_PHASE12_STAGE12_19_WORK_TABLE_AI_FOUNDATION_DRY_RUN_2026-05-07.md",
+    "Reports/checkpoints/CHECKPOINT_2026-05-07_PHASE12_STAGE12_19_WORK_TABLE_AI_FOUNDATION_DRY_RUN.md"
+  ]
+}
+

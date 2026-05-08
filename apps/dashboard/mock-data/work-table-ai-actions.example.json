@@ -1,0 +1,56 @@
+{
+  "schema_version": "0.1-draft",
+  "mode": "LOCAL_MOCK_ONLY",
+  "classification": "AI_OS project work only",
+  "safe_mock_actions": [
+    {
+      "id": "interpret_card_status",
+      "label": "Interpret card status",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "score_work_card",
+      "label": "Score work card",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "recommend_next_review",
+      "label": "Recommend next review",
+      "executes_code": false,
+      "requires_approval": true
+    },
+    {
+      "id": "explain_priority",
+      "label": "Explain priority",
+      "executes_code": false,
+      "requires_approval": false
+    },
+    {
+      "id": "suggest_sort_filter",
+      "label": "Suggest sort/filter",
+      "executes_code": false,
+      "requires_approval": true
+    },
+    {
+      "id": "flag_blocked_card",
+      "label": "Flag blocked card",
+      "executes_code": false,
+      "requires_approval": false
+    }
+  ],
+  "blocked_actions": [
+    "apply_changes",
+    "commit",
+    "push",
+    "deploy",
+    "connect_live_ai_api",
+    "read_secret",
+    "connect_broker",
+    "connect_database",
+    "place_trade",
+    "perform_ai_assistance_operator_chat"
+  ]
+}
+
