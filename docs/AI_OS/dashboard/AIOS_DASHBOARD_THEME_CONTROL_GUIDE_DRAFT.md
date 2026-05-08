@@ -60,9 +60,9 @@ This requires a separate approved APPLY stage because it changes the active visu
 
 ### JavaScript Toggle
 
-Scope: future local-only preference.
+Scope: local-only preference.
 
-A future toggle must remain local-only and must not connect to APIs, accounts, telemetry persistence, cloud services, or live AI services. Any preference storage requires a separate DRY_RUN and approval.
+Stage 17 adds a static dashboard selector that applies or removes approved `<body>` flavor classes. The selector may store only the local visual preference in `localStorage`. It must not connect to APIs, accounts, telemetry persistence, cloud services, or live AI services.
 
 ## Blocked Actions
 
@@ -90,4 +90,4 @@ Before committing theme work:
 
 ## Next Safe Extension
 
-The next safe extension is a DRY_RUN-only validator that checks for required theme tokens and inactive flavor classes without modifying files.
+The next safe extension is a DRY_RUN-only visual QA pass for selector placement, mobile wrapping, and theme contrast across the default and inactive flavor profiles.
