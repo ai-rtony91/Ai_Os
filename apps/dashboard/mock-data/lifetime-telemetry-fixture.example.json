@@ -1,0 +1,73 @@
+{
+  "mode": "local_mock",
+  "fixture_name": "AI_OS Lifetime Development Telemetry",
+  "generated_at": "2026-05-08T00:00:00",
+  "evidence_scope": "PARTIAL_REPO_EVIDENCE_ONLY",
+  "classification": "AI_OS development telemetry mock fixture only",
+  "sources": {
+    "git_commit_count": "git rev-list --count HEAD",
+    "tracked_file_count": "git ls-files | Measure-Object",
+    "git_numstat": "git log --pretty=tformat: --numstat",
+    "checkpoint_count": "Get-ChildItem Reports/checkpoints -File",
+    "daily_report_count": "Get-ChildItem Reports/daily -File",
+    "progress_report_count": "Get-ChildItem Reports/progress -File",
+    "mock_data_file_count": "Get-ChildItem apps/dashboard/mock-data -File",
+    "partial_duration_minutes": "Import-Csv Reports/DAILY_METRICS.csv | Measure-Object duration_minutes -Sum"
+  },
+  "git_totals": {
+    "commit_count": 187,
+    "tracked_file_count": 993,
+    "numstat_file_change_rows": 2530,
+    "insertions": 143842,
+    "deletions": 87507,
+    "notes": "Git line counts are not byte or KB totals."
+  },
+  "report_totals": {
+    "checkpoint_files": 47,
+    "daily_report_files": 53,
+    "progress_files": 10,
+    "dashboard_mock_data_files": 23
+  },
+  "time_spent": {
+    "complete_lifetime_minutes": "UNKNOWN",
+    "complete_lifetime_hours": "UNKNOWN",
+    "partial_duration_minutes": 139.65,
+    "partial_duration_row_count": 3,
+    "evidence_scope": "PARTIAL",
+    "rule": "Do not infer time from commit timestamps."
+  },
+  "size_totals": {
+    "complete_lifetime_bytes_changed": "UNKNOWN",
+    "complete_lifetime_kb_changed": "UNKNOWN",
+    "complete_lifetime_mb_changed": "UNKNOWN",
+    "evidence_scope": "NO_COMPLETE_BYTE_LEDGER_FOUND"
+  },
+  "quality_signals": {
+    "qa_results": "PARTIAL_CHECKPOINT_EVIDENCE_EXISTS",
+    "validators": "PARTIAL_VALIDATOR_EVIDENCE_EXISTS",
+    "pushes": "PARTIAL_GIT_AND_CHECKPOINT_EVIDENCE_EXISTS",
+    "blockers": "UNKNOWN",
+    "recovery_notes": "UNKNOWN"
+  },
+  "dashboard": {
+    "recommended_panel": "Lifetime Telemetry",
+    "recommended_placement": "Status panel area near Progress and Telemetry",
+    "ui_wired": false
+  },
+  "safety": {
+    "fixture_only": true,
+    "real_telemetry_collector": false,
+    "apis": "BLOCKED",
+    "secrets": "BLOCKED",
+    "deployment": "BLOCKED",
+    "broker_trading_execution": "BLOCKED",
+    "live_ai_execution": "BLOCKED"
+  },
+  "unknowns": [
+    "Complete lifetime time spent",
+    "Complete lifetime bytes or KB changed",
+    "Complete QA history",
+    "Complete blocker history",
+    "Complete recovery note history"
+  ]
+}
