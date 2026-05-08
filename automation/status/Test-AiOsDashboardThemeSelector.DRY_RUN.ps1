@@ -19,6 +19,37 @@ $RequiredCssClasses = @(
   "body.theme-high-contrast"
 )
 
+$Stage21CssPolishChecks = @(
+  @{
+    Name = "focus glow token"
+    Pattern = "--glow-focus"
+  },
+  @{
+    Name = "selector focus rule"
+    Pattern = "\.theme-selector\s+select:focus"
+  },
+  @{
+    Name = "720px mobile media query"
+    Pattern = "@media\s+\(max-width:\s*720px\)"
+  },
+  @{
+    Name = "mobile selector full-row placement"
+    Pattern = "\.theme-selector\s*\{[\s\S]*?grid-column:\s*1\s*/\s*-1"
+  },
+  @{
+    Name = "mobile selector full width"
+    Pattern = "\.theme-selector\s*\{[\s\S]*?width:\s*100%"
+  },
+  @{
+    Name = "430px narrow media query"
+    Pattern = "@media\s+\(max-width:\s*430px\)"
+  },
+  @{
+    Name = "narrow selector select full width"
+    Pattern = "\.theme-selector\s+select\s*\{[\s\S]*?width:\s*100%"
+  }
+)
+
 $ForbiddenTerms = @(
   "api_key",
   "password",
@@ -106,6 +137,12 @@ if ($Css) {
   foreach ($CssClass in $RequiredCssClasses) {
     Test-Contains -Content $Css -Needle $CssClass -Message "CSS theme class missing: $CssClass"
   }
+
+  foreach ($Check in $Stage21CssPolishChecks) {
+    if ($Css -notmatch $Check.Pattern) {
+      Add-Failure "Stage 21 CSS polish check missing: $($Check.Name)"
+    }
+  }
 }
 
 $SelectorScopedText = Get-SelectorScopedText -Html $Html -Js $Js -Css $Css
@@ -126,6 +163,7 @@ $Result = [ordered]@{
     "apps/dashboard/css/aios-static-preview.css"
   )
   approved_theme_classes = $ApprovedThemeClasses
+  stage21_css_polish_checks = ($Stage21CssPolishChecks | ForEach-Object { $_.Name })
   selector_scope_for_forbidden_terms = "theme selector/control snippets only"
   failures = @($Failures)
 }
