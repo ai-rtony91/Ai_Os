@@ -447,6 +447,42 @@ body.sidebar-collapsed .status-strip {
   font-size: 12px;
 }
 
+.theme-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  min-width: 0;
+  padding: 7px 8px 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-control);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.theme-selector select {
+  min-width: 156px;
+  max-width: min(220px, 48vw);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface-panel);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0;
+  outline: none;
+  padding: 6px 24px 6px 10px;
+}
+
+.theme-selector select:focus {
+  border-color: var(--accent-primary);
+  box-shadow: var(--glow-focus);
+}
+
 .command-stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;

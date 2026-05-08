@@ -55,6 +55,16 @@
         <button class="status-chip" data-tab="admin" data-action="admin">Admin</button>
         <button class="status-chip" data-action="system-status">System Status</button>
         <button class="status-chip" data-action="diagnostics">Run Diagnostics</button>
+        <label class="theme-selector" for="dashboardThemeSelector">
+          <span>Theme</span>
+          <select id="dashboardThemeSelector" data-theme-selector aria-label="Dashboard theme selector">
+            <option value="default">Default AI_OS Dark</option>
+            <option value="terminal-green">Terminal Green</option>
+            <option value="cyan-command">Cyan Command</option>
+            <option value="amber-warning">Amber Warning</option>
+            <option value="high-contrast">High Contrast</option>
+          </select>
+        </label>
       </header>
 
       <section class="status-panel-system depth-tier-2d" aria-label="AI_OS dashboard panels" data-status-root>

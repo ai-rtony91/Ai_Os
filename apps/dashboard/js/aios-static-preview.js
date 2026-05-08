@@ -22,7 +22,21 @@ const workTableAiCards = document.querySelector("[data-work-table-ai-cards]");
 const workTableAiSafeActions = document.querySelector("[data-work-table-ai-safe-actions]");
 const workTableAiBlockedActions = document.querySelector("[data-work-table-ai-blocked-actions]");
 const workTableAiSources = document.querySelector("[data-work-table-ai-sources]");
+const dashboardThemeSelector = document.querySelector("[data-theme-selector]");
 const drawerStateKey = "aios.drawer.closed";
+const dashboardThemeKey = "aios.dashboard.theme";
+const dashboardThemeClasses = [
+  "theme-terminal-green",
+  "theme-cyan-command",
+  "theme-amber-warning",
+  "theme-high-contrast"
+];
+const dashboardThemeMap = {
+  "terminal-green": "theme-terminal-green",
+  "cyan-command": "theme-cyan-command",
+  "amber-warning": "theme-amber-warning",
+  "high-contrast": "theme-high-contrast"
+};
 const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.json";
 const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
@@ -637,6 +651,34 @@ function saveDrawerClosed(isClosed) {
   }
 }
 
+function readSavedDashboardTheme() {
+  try {
+    return window.localStorage.getItem(dashboardThemeKey) || "default";
+  } catch (error) {
+    return "default";
+  }
+}
+
+function saveDashboardTheme(themeName) {
+  try {
+    window.localStorage.setItem(dashboardThemeKey, themeName);
+  } catch (error) {
+    // The selector still works without persisted visual preference.
+  }
+}
+
+function applyDashboardTheme(themeName) {
+  const nextTheme = dashboardThemeMap[themeName] ? themeName : "default";
+  document.body.classList.remove(...dashboardThemeClasses);
+  if (dashboardThemeMap[nextTheme]) {
+    document.body.classList.add(dashboardThemeMap[nextTheme]);
+  }
+  if (dashboardThemeSelector) {
+    dashboardThemeSelector.value = nextTheme;
+  }
+  saveDashboardTheme(nextTheme);
+}
+
 function applySavedDrawerState() {
   const savedClosed = readSavedDrawerClosed();
   document.body.classList.remove("sidebar-open");
@@ -717,6 +759,12 @@ tapTargets.forEach((target) => {
   target.addEventListener("pointerup", () => pulseTap(target));
 });
 
+if (dashboardThemeSelector) {
+  dashboardThemeSelector.addEventListener("change", () => {
+    applyDashboardTheme(dashboardThemeSelector.value);
+  });
+}
+
 sidebarToggle.addEventListener("click", closeSidebar);
 drawerReopen.addEventListener("click", openSidebar);
 drawerBackdrop.addEventListener("click", closeMobileSidebar);
@@ -731,6 +779,7 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+applyDashboardTheme(readSavedDashboardTheme());
 applySavedDrawerState();
 syncSidebarState();
 loadStatusOverview();
