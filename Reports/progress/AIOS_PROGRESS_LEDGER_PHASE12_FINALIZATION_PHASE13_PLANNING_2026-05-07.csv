@@ -1,0 +1,2 @@
+date,time,stage,task_id,task_name,planned_steps,completed_steps,percent_complete,status,blocked,blocker,next_action,checkpoint_file,commit_hash,git_status,notes
+2026-05-07,UNKNOWN,Phase 12 Finalization + Phase 13 Planning,AIOS-P12-FINAL-P13-PLAN-APPLY,Phase 12 Finalization and Phase 13 Dashboard Planning,6,6,100,APPLY_COMPLETE_PENDING_VALIDATION,NO,,Validate and commit finalization planning artifacts,Reports/checkpoints/CHECKPOINT_2026-05-07_PHASE12_CLOSEOUT_DRAFT.md,d21f614,UNKNOWN,Standalone finalization planning progress artifact
