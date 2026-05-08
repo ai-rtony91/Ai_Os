@@ -1619,33 +1619,40 @@ body.sidebar-collapsed .status-strip {
 }
 
 .youtube-radio-dock {
-  position: fixed;
-  right: calc(18px + env(safe-area-inset-right));
-  bottom: calc(42px + env(safe-area-inset-bottom));
-  z-index: 6;
-  width: min(286px, calc(100vw - 28px));
-  border: 1px solid rgba(55, 255, 136, 0.38);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 0 0 auto;
+  width: min(100%, 342px);
+  margin-left: auto;
+  border: 1px solid rgba(55, 255, 136, 0.42);
+  border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(5, 7, 11, 0.88)),
-    radial-gradient(circle at 18% 0%, rgba(56, 189, 248, 0.16), transparent 36%);
-  box-shadow: 0 0 24px rgba(0, 163, 255, 0.22), 0 0 18px rgba(55, 255, 136, 0.12), var(--shadow-panel);
-  backdrop-filter: blur(16px);
+    linear-gradient(180deg, rgba(17, 24, 39, 0.78), rgba(5, 7, 11, 0.72)),
+    radial-gradient(circle at 18% 0%, rgba(56, 189, 248, 0.14), transparent 34%);
+  box-shadow: 0 0 18px rgba(0, 163, 255, 0.2), 0 0 14px rgba(55, 255, 136, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
 }
 
 .youtube-radio-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 10px 10px 8px;
+  gap: 8px;
+  padding: 7px 8px 5px 10px;
+}
+
+.youtube-radio-head .eyebrow {
+  font-size: 9px;
 }
 
 .youtube-radio-head strong {
   display: block;
-  margin-top: 4px;
+  margin-top: 2px;
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .youtube-radio-icon,
@@ -1660,8 +1667,8 @@ body.sidebar-collapsed .status-strip {
 .youtube-radio-icon {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   flex: 0 0 auto;
   border-radius: 999px;
   font-weight: 800;
@@ -1679,19 +1686,18 @@ body.sidebar-collapsed .status-strip {
 
 .youtube-radio-body {
   display: grid;
-  gap: 8px;
-  padding: 0 10px 10px;
+  gap: 6px;
+  padding: 0 8px 8px;
 }
 
 .youtube-radio-player {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  min-height: 118px;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
   overflow: hidden;
-  border: 1px solid var(--line-panel);
-  background:
-    linear-gradient(135deg, rgba(56, 189, 248, 0.12), transparent 40%),
-    rgba(5, 7, 11, 0.7);
+  opacity: 0.01;
+  pointer-events: none;
 }
 
 .youtube-radio-player iframe {
@@ -1703,23 +1709,24 @@ body.sidebar-collapsed .status-strip {
 
 .youtube-radio-controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(5, minmax(0, auto));
+  justify-content: end;
+  gap: 5px;
 }
 
 .youtube-radio-controls button {
-  min-height: 32px;
-  padding: 6px 7px;
+  min-height: 28px;
+  padding: 5px 7px;
   font-size: 10px;
   line-height: 1.2;
 }
 
 .youtube-radio-controls button[data-youtube-radio-control="open"] {
-  grid-column: 1 / -1;
+  min-width: 88px;
 }
 
 .youtube-radio-dock.is-collapsed {
-  width: min(214px, calc(100vw - 28px));
+  width: min(100%, 218px);
 }
 
 .youtube-radio-dock.is-collapsed .youtube-radio-body {
@@ -2017,9 +2024,9 @@ body.sidebar-collapsed .status-strip {
   }
 
   .youtube-radio-dock {
-    right: calc(10px + env(safe-area-inset-right));
-    bottom: calc(74px + env(safe-area-inset-bottom));
-    width: min(286px, calc(100vw - 20px));
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-left: 0;
   }
 }
 
@@ -2077,9 +2084,7 @@ body.sidebar-collapsed .status-strip {
 
   .youtube-radio-dock,
   .youtube-radio-dock.is-collapsed {
-    right: calc(10px + env(safe-area-inset-right));
-    left: calc(10px + env(safe-area-inset-left));
-    width: auto;
+    width: 100%;
   }
 
   .youtube-radio-controls {

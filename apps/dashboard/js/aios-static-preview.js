@@ -784,6 +784,10 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
           youtubeRadioPlayer.playVideo();
         }
       },
+      onError: () => {
+        setYouTubeRadioState("Embed unavailable - open YouTube");
+        setYouTubePlayButton(false);
+      },
       onStateChange: (event) => {
         if (event.data === window.YT.PlayerState.PLAYING) {
           setYouTubeRadioState("Playing");
