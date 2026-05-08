@@ -45,6 +45,7 @@
   --glow-primary-strong: rgba(0, 163, 255, 0.34);
   --glow-action-soft: rgba(55, 255, 136, 0.08);
   --glow-action: rgba(55, 255, 136, 0.24);
+  --glow-focus: 0 0 0 2px rgba(56, 189, 248, 0.22), 0 0 22px rgba(0, 163, 255, 0.24);
   --shadow-panel: 0 22px 70px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.035);
   --shadow-panel-hover: 0 26px 80px rgba(0, 0, 0, 0.46), 0 0 42px rgba(0, 163, 255, 0.32), 0 0 22px rgba(55, 255, 136, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --grid-line: rgba(56, 189, 248, 0.12);
@@ -450,6 +451,7 @@ body.sidebar-collapsed .status-strip {
 .theme-selector {
   display: inline-flex;
   align-items: center;
+  flex: 0 1 auto;
   gap: 8px;
   min-height: 34px;
   min-width: 0;
@@ -466,7 +468,7 @@ body.sidebar-collapsed .status-strip {
 
 .theme-selector select {
   min-width: 156px;
-  max-width: min(220px, 48vw);
+  max-width: min(240px, 52vw);
   border: 1px solid var(--line-strong);
   border-radius: 999px;
   background: var(--surface-panel);
@@ -1712,6 +1714,20 @@ body.sidebar-collapsed .status-strip {
     padding-left: 10px;
   }
 
+  .theme-selector {
+    grid-column: 1 / -1;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .theme-selector select {
+    flex: 1 1 190px;
+    min-width: 0;
+    max-width: none;
+    min-height: 34px;
+  }
+
   body.sidebar-collapsed .status-strip {
     grid-template-columns: 76px 1fr;
   }
@@ -1794,6 +1810,17 @@ body.sidebar-collapsed .status-strip {
 
   .status-strip {
     padding-left: 10px;
+  }
+
+  .theme-selector {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+    border-radius: 14px;
+  }
+
+  .theme-selector select {
+    width: 100%;
   }
 
   .registry-lane {
