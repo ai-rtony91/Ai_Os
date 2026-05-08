@@ -28,6 +28,7 @@ const youtubeRadioState = document.querySelector("[data-youtube-radio-state]");
 const youtubeRadioControls = document.querySelectorAll("[data-youtube-radio-control]");
 const drawerStateKey = "aios.drawer.closed";
 const dashboardThemeKey = "aios.dashboard.theme";
+const youtubeDockCollapsedKey = "aios.youtubeDockCollapsed";
 const dashboardThemeClasses = [
   "theme-terminal-green",
   "theme-cyan-command",
@@ -756,6 +757,35 @@ function setYouTubePlayButton(isPlaying) {
   if (button) button.textContent = isPlaying ? "Pause" : "Play";
 }
 
+function setYouTubeDockCollapsed(isCollapsed) {
+  if (!youtubeRadioDock) return;
+  youtubeRadioDock.classList.toggle("is-collapsed", isCollapsed);
+  const collapseButton = youtubeRadioDock.querySelector('[data-youtube-radio-control="collapse"]');
+  if (collapseButton) {
+    collapseButton.textContent = isCollapsed ? "+" : "−";
+    collapseButton.setAttribute("aria-label", isCollapsed ? "Expand YouTube Radio" : "Collapse YouTube Radio");
+  }
+}
+
+function readSavedYouTubeDockCollapsed() {
+  try {
+    const value = window.localStorage.getItem(youtubeDockCollapsedKey);
+    if (value === "true") return true;
+    if (value === "false") return false;
+    return false;
+  } catch (error) {
+    return false;
+  }
+}
+
+function saveYouTubeDockCollapsed(isCollapsed) {
+  try {
+    window.localStorage.setItem(youtubeDockCollapsedKey, String(isCollapsed));
+  } catch (error) {
+    // Visual preference only; ignore unavailable storage.
+  }
+}
+
 function loadYouTubeRadioApi() {
   if (window.YT?.Player || youtubeRadioScriptLoading) return;
   youtubeRadioScriptLoading = true;
@@ -818,13 +848,9 @@ function handleYouTubeRadioControl(action) {
   if (!youtubeRadioDock) return;
 
   if (action === "collapse") {
-    youtubeRadioDock.classList.toggle("is-collapsed");
-    const isCollapsed = youtubeRadioDock.classList.contains("is-collapsed");
-    const collapseButton = youtubeRadioDock.querySelector('[data-youtube-radio-control="collapse"]');
-    if (collapseButton) {
-      collapseButton.textContent = isCollapsed ? "+" : "−";
-      collapseButton.setAttribute("aria-label", isCollapsed ? "Expand YouTube Radio" : "Collapse YouTube Radio");
-    }
+    const isCollapsed = !youtubeRadioDock.classList.contains("is-collapsed");
+    setYouTubeDockCollapsed(isCollapsed);
+    saveYouTubeDockCollapsed(isCollapsed);
     return;
   }
 
@@ -1008,6 +1034,7 @@ document.addEventListener("keydown", (event) => {
 });
 
 applyDashboardTheme(readSavedDashboardTheme());
+setYouTubeDockCollapsed(readSavedYouTubeDockCollapsed());
 applySavedDrawerState();
 syncSidebarState();
 loadStatusOverview();
