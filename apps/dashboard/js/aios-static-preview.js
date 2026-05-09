@@ -52,6 +52,8 @@ let youtubeRadioPlayer = null;
 let youtubeRadioScriptLoading = false;
 let youtubeRadioShouldPlay = false;
 let youtubeRadioPendingAction = null;
+let youtubeRadioEmbedMode = "playlist";
+let youtubeRadioSingleFallbackAttempted = false;
 
 const statusFixtures = {
   overall: {
@@ -795,6 +797,35 @@ function loadYouTubeRadioApi() {
   document.head.appendChild(script);
 }
 
+function getYouTubeRadioPlayerVars() {
+  const playerVars = {
+    autoplay: 0,
+    playsinline: 1,
+    rel: 0
+  };
+
+  if (youtubeRadioEmbedMode === "playlist") {
+    playerVars.list = youtubeRadioPlaylistId;
+    playerVars.listType = "playlist";
+  }
+
+  return playerVars;
+}
+
+function retryYouTubeRadioSingleVideo() {
+  if (!youtubeRadioPlayer || youtubeRadioSingleFallbackAttempted) return false;
+  youtubeRadioSingleFallbackAttempted = true;
+  youtubeRadioEmbedMode = "video";
+  setYouTubeRadioState("Playlist unavailable - trying video");
+
+  try {
+    youtubeRadioPlayer.loadVideoById(youtubeRadioVideoId);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 function runYouTubeRadioPlayerAction(action) {
   if (!youtubeRadioPlayer || !window.YT?.PlayerState) return;
 
@@ -818,16 +849,13 @@ function runYouTubeRadioPlayerAction(action) {
 
 window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
   if (!youtubeRadioDock || youtubeRadioPlayer) return;
+  youtubeRadioEmbedMode = "playlist";
+  youtubeRadioSingleFallbackAttempted = false;
   youtubeRadioPlayer = new window.YT.Player("youtubeRadioPlayer", {
     height: "120",
     width: "214",
     videoId: youtubeRadioVideoId,
-    playerVars: {
-      list: youtubeRadioPlaylistId,
-      listType: "playlist",
-      playsinline: 1,
-      rel: 0
-    },
+    playerVars: getYouTubeRadioPlayerVars(),
     events: {
       onReady: () => {
         setYouTubeRadioState("Ready - click Play");
@@ -838,12 +866,13 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
         }
       },
       onError: () => {
+        if (youtubeRadioEmbedMode === "playlist" && retryYouTubeRadioSingleVideo()) return;
         setYouTubeRadioState("Embed unavailable inside AI_OS — external handoff requires approval.");
         setYouTubePlayButton(false);
       },
       onStateChange: (event) => {
         if (event.data === window.YT.PlayerState.PLAYING) {
-          setYouTubeRadioState("Playing");
+          setYouTubeRadioState("Playing inside AI_OS");
           setYouTubePlayButton(true);
         }
         if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
@@ -859,7 +888,7 @@ function ensureYouTubeRadioPlayer(action) {
   if (youtubeRadioPlayer) return true;
   youtubeRadioPendingAction = action;
   youtubeRadioShouldPlay = true;
-  setYouTubeRadioState("Loading YouTube player");
+  setYouTubeRadioState("Loading inside AI_OS");
   if (window.YT?.Player) {
     window.onYouTubeIframeAPIReady();
   } else {
