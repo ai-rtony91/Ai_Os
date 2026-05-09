@@ -852,8 +852,8 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
   youtubeRadioEmbedMode = "playlist";
   youtubeRadioSingleFallbackAttempted = false;
   youtubeRadioPlayer = new window.YT.Player("youtubeRadioPlayer", {
-    height: "120",
-    width: "214",
+    height: "200",
+    width: "320",
     videoId: youtubeRadioVideoId,
     playerVars: getYouTubeRadioPlayerVars(),
     events: {
