@@ -48,7 +48,6 @@ const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.j
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 const youtubeRadioVideoId = "VFzsSbdS7Sk";
 const youtubeRadioPlaylistId = "RDVFzsSbdS7Sk";
-const youtubeRadioPlaylistUrl = `https://www.youtube.com/watch?v=${youtubeRadioVideoId}&list=${youtubeRadioPlaylistId}`;
 let youtubeRadioPlayer = null;
 let youtubeRadioScriptLoading = false;
 let youtubeRadioShouldPlay = false;
@@ -839,7 +838,7 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
         }
       },
       onError: () => {
-        setYouTubeRadioState("Embed unavailable - open YouTube");
+        setYouTubeRadioState("Embed unavailable inside AI_OS — external handoff requires approval.");
         setYouTubePlayButton(false);
       },
       onStateChange: (event) => {
@@ -880,7 +879,7 @@ function handleYouTubeRadioControl(action) {
   }
 
   if (action === "open") {
-    window.open(youtubeRadioPlaylistUrl, "_blank", "noopener,noreferrer");
+    setYouTubeRadioState("External handoff requires approval.");
     return;
   }
 
