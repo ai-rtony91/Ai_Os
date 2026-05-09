@@ -52,6 +52,7 @@ const youtubeRadioPlaylistUrl = `https://www.youtube.com/watch?v=${youtubeRadioV
 let youtubeRadioPlayer = null;
 let youtubeRadioScriptLoading = false;
 let youtubeRadioShouldPlay = false;
+let youtubeRadioPendingAction = null;
 
 const statusFixtures = {
   overall: {
@@ -795,6 +796,27 @@ function loadYouTubeRadioApi() {
   document.head.appendChild(script);
 }
 
+function runYouTubeRadioPlayerAction(action) {
+  if (!youtubeRadioPlayer || !window.YT?.PlayerState) return;
+
+  if (action === "play") {
+    const state = youtubeRadioPlayer.getPlayerState();
+    if (state === window.YT.PlayerState.PLAYING) {
+      youtubeRadioPlayer.pauseVideo();
+    } else {
+      youtubeRadioPlayer.playVideo();
+    }
+  }
+
+  if (action === "next") {
+    youtubeRadioPlayer.nextVideo();
+  }
+
+  if (action === "back") {
+    youtubeRadioPlayer.previousVideo();
+  }
+}
+
 window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
   if (!youtubeRadioDock || youtubeRadioPlayer) return;
   youtubeRadioPlayer = new window.YT.Player("youtubeRadioPlayer", {
@@ -810,8 +832,10 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
     events: {
       onReady: () => {
         setYouTubeRadioState("Ready - click Play");
-        if (youtubeRadioShouldPlay) {
-          youtubeRadioPlayer.playVideo();
+        if (youtubeRadioShouldPlay && youtubeRadioPendingAction) {
+          runYouTubeRadioPlayerAction(youtubeRadioPendingAction);
+          youtubeRadioPendingAction = null;
+          youtubeRadioShouldPlay = false;
         }
       },
       onError: () => {
@@ -832,8 +856,9 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
   });
 };
 
-function ensureYouTubeRadioPlayer() {
+function ensureYouTubeRadioPlayer(action) {
   if (youtubeRadioPlayer) return true;
+  youtubeRadioPendingAction = action;
   youtubeRadioShouldPlay = true;
   setYouTubeRadioState("Loading YouTube player");
   if (window.YT?.Player) {
@@ -859,25 +884,10 @@ function handleYouTubeRadioControl(action) {
     return;
   }
 
-  const hasPlayer = ensureYouTubeRadioPlayer();
+  const hasPlayer = ensureYouTubeRadioPlayer(action);
   if (!hasPlayer) return;
 
-  if (action === "play") {
-    const state = youtubeRadioPlayer.getPlayerState();
-    if (state === window.YT.PlayerState.PLAYING) {
-      youtubeRadioPlayer.pauseVideo();
-    } else {
-      youtubeRadioPlayer.playVideo();
-    }
-  }
-
-  if (action === "next") {
-    youtubeRadioPlayer.nextVideo();
-  }
-
-  if (action === "back") {
-    youtubeRadioPlayer.previousVideo();
-  }
+  runYouTubeRadioPlayerAction(action);
 }
 
 function readSavedDrawerClosed() {
