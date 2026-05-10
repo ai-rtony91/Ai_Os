@@ -18,25 +18,23 @@
   <div class="background-layer layer-base"></div>
   <div class="background-layer layer-grid"></div>
   <div class="background-layer layer-glow"></div>
-  <button class="sidebar-toggle" type="button" aria-label="Toggle App Dock" aria-expanded="true" aria-controls="appDock">☰</button>
+  <button class="sidebar-toggle" type="button" aria-label="Toggle Work Tab" aria-expanded="true" aria-controls="appDock">Work Tab</button>
   <div class="drawer-backdrop" data-sidebar-close></div>
   <div class="dashboard-shell">
     <aside class="command-sidebar" id="appDock">
-      <div class="brand-block">
-        <button class="sidebar-toggle" type="button" aria-label="Close App Dock" aria-expanded="true" aria-controls="appDock">Hide</button>
-        <span class="eyebrow">APP DOCK</span>
-        <h1>Ai_Os</h1>
-        <p>Static workspace dock for apps, connectors, generated work packets, and approval-safe build lanes.</p>
+      <div class="rail-header rail-header--work">
+        <div class="rail-header-top">
+          <span class="eyebrow">BUILD / DEVOPS / PROJECTS</span>
+          <button class="sidebar-toggle rail-internal-toggle rail-toggle-button" type="button" aria-label="Hide Work Tab" aria-expanded="true" aria-controls="appDock">Hide Work</button>
+        </div>
+        <h2 class="rail-header-title" data-context-rail-title>Work Tab</h2>
+        <p class="rail-header-summary" data-context-rail-summary>Productive work, DevOps, app building, projects, reports, safety, and approval-safe build lanes.</p>
+        <div class="rail-header-divider" aria-hidden="true"></div>
       </div>
 
-      <nav class="side-nav" aria-label="App Dock">
-        <button class="active" data-tab="work-table" data-action="work-table">Work Table</button>
-        <button data-tab="app-store" data-action="app-store">App Store</button>
-        <button data-tab="connectors" data-action="connectors">Connectors</button>
-        <button data-tab="calendar" data-action="calendar">Calendar</button>
-        <button data-tab="notes" data-action="notes">Notes</button>
-        <button data-tab="build-queue" data-action="build-queue">Build Queue</button>
-      </nav>
+      <div class="context-rail" aria-label="Build and DevOps tools">
+        <div class="side-nav context-rail-list" data-context-rail-list aria-label="Build rail tools"></div>
+      </div>
 
       <div class="sidebar-lock">
         <strong>SAFETY LOCKS</strong>
@@ -48,46 +46,140 @@
 
     <main class="command-main">
       <header class="status-strip" aria-label="Workspace modes and status">
-        <button class="drawer-reopen" type="button" aria-label="Open App Dock" aria-expanded="false" aria-controls="appDock">Menu</button>
-        <button class="status-chip active" data-tab="work-table" data-action="work-table">Work Table</button>
-        <button class="status-chip" data-tab="reports" data-action="reports">Reports</button>
-        <button class="status-chip" data-tab="telemetry" data-action="telemetry">Telemetry</button>
-        <button class="status-chip" data-tab="admin" data-action="admin">Admin</button>
-        <button class="status-chip" data-action="system-status">System Status</button>
-        <button class="status-chip" data-action="diagnostics">Run Diagnostics</button>
-        <label class="theme-selector" for="dashboardThemeSelector">
-          <span>Theme</span>
-          <select id="dashboardThemeSelector" data-theme-selector aria-label="Dashboard theme selector">
-            <option value="default">Default AI_OS Dark</option>
-            <option value="terminal-green">Terminal Green</option>
-            <option value="cyan-command">Cyan Command</option>
-            <option value="amber-warning">Amber Warning</option>
-            <option value="high-contrast">High Contrast</option>
-          </select>
-        </label>
-        <section class="youtube-radio-dock" data-youtube-radio-dock aria-label="YouTube Radio playlist dock">
-          <div class="youtube-radio-head">
-            <div>
-              <span class="eyebrow">YouTube Radio</span>
-              <strong data-youtube-radio-state>Ready - click Play</strong>
+        <button class="drawer-reopen mobile-tab-button mobile-tab-button--work" type="button" aria-label="Toggle Work Tab" aria-expanded="false" aria-controls="appDock">
+          <svg class="mobile-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 5h16v11H4z"></path>
+            <path d="M9 20h6"></path>
+            <path d="M12 16v4"></path>
+            <path d="M7 9l3 3-3 3"></path>
+            <path d="M12 15h5"></path>
+          </svg>
+          <span>Work Tab</span>
+        </button>
+        <div class="utility-status" aria-label="Dashboard mode">
+          <span>Local mock only</span>
+          <label class="theme-selector" for="dashboardThemeSelector">
+            <span>Theme</span>
+            <select id="dashboardThemeSelector" data-theme-selector aria-label="Dashboard theme selector">
+              <option value="default">Default AI_OS Dark</option>
+              <option value="terminal-green">Terminal Green</option>
+              <option value="cyan-command">Cyan Command</option>
+              <option value="amber-warning">Amber Warning</option>
+              <option value="high-contrast">High Contrast</option>
+            </select>
+          </label>
+          <button class="soft-refresh-button" type="button" data-action="soft-refresh">Soft Refresh</button>
+          <button class="music-companion-button" type="button" data-action="open-music-companion">Open Music Companion</button>
+          <section class="youtube-radio-dock" data-youtube-radio-dock aria-label="YouTube Radio playlist dock">
+            <div class="youtube-radio-head">
+              <div>
+                <span class="eyebrow">YouTube Radio</span>
+                <strong data-youtube-radio-state>Press Play to resume</strong>
+              </div>
+              <div class="youtube-radio-mini-controls" aria-label="Minimized YouTube Radio controls">
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="back" aria-label="Previous track" title="Previous track">
+                  <svg class="youtube-radio-control-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 5h2v14H6z"></path>
+                    <path d="M19 6v12L9 12z"></path>
+                  </svg>
+                  <span class="sr-only" data-youtube-radio-readable-state>Previous track</span>
+                </button>
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="play" aria-label="Play YouTube Radio" title="Play">
+                  <svg class="youtube-radio-control-icon youtube-radio-play-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 5v14l11-7z"></path>
+                  </svg>
+                  <svg class="youtube-radio-control-icon youtube-radio-pause-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 5h4v14H7z"></path>
+                    <path d="M13 5h4v14h-4z"></path>
+                  </svg>
+                  <span class="sr-only" data-youtube-radio-readable-state>Play</span>
+                </button>
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="restart" aria-label="Restart current track" title="Restart current track">
+                  <svg class="youtube-radio-control-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M7 7h7a5 5 0 1 1-4.5 7.2l1.8-.9A3 3 0 1 0 14 9H7v3L3 8l4-4z"></path>
+                  </svg>
+                  <span class="sr-only" data-youtube-radio-readable-state>Restart current track</span>
+                </button>
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="next" aria-label="Next track" title="Next track">
+                  <svg class="youtube-radio-control-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M16 5h2v14h-2z"></path>
+                    <path d="M5 6v12l10-6z"></path>
+                  </svg>
+                  <span class="sr-only" data-youtube-radio-readable-state>Next track</span>
+                </button>
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="mute" aria-label="Mute YouTube Radio" title="Mute">
+                  <svg class="youtube-radio-control-icon youtube-radio-volume-on-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9z"></path>
+                    <path d="M16 8.2a5 5 0 0 1 0 7.6l1.4 1.4a7 7 0 0 0 0-10.4z"></path>
+                  </svg>
+                  <svg class="youtube-radio-control-icon youtube-radio-volume-off-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9z"></path>
+                    <path d="M16 9l5 5"></path>
+                    <path d="M21 9l-5 5"></path>
+                  </svg>
+                  <span class="sr-only" data-youtube-radio-readable-state>Mute</span>
+                </button>
+                <label class="youtube-radio-volume" aria-label="YouTube Radio volume">
+                  <svg class="youtube-radio-volume-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9z"></path>
+                    <path d="M16 8.2a5 5 0 0 1 0 7.6l1.4 1.4a7 7 0 0 0 0-10.4z"></path>
+                  </svg>
+                  <span class="sr-only">Volume</span>
+                  <input type="range" min="0" max="100" value="70" data-youtube-radio-volume>
+                </label>
+              </div>
+              <button class="youtube-radio-icon" type="button" data-youtube-radio-control="collapse" aria-label="Collapse YouTube Radio">−</button>
             </div>
-            <button class="youtube-radio-icon" type="button" data-youtube-radio-control="collapse" aria-label="Collapse YouTube Radio">−</button>
-          </div>
-          <div class="youtube-radio-body" data-youtube-radio-body>
-            <div class="youtube-radio-player" id="youtubeRadioPlayer" data-youtube-radio-player aria-hidden="false"></div>
-            <div class="youtube-radio-controls" aria-label="YouTube Radio controls">
-              <button type="button" data-youtube-radio-control="back">Previous</button>
-              <button type="button" data-youtube-radio-control="play">Play</button>
-              <button type="button" data-youtube-radio-control="next">Next</button>
-              <button type="button" data-youtube-radio-control="open">External Handoff Locked</button>
+            <div class="youtube-radio-body" data-youtube-radio-body>
+              <div class="youtube-radio-player" id="youtubeRadioPlayer" data-youtube-radio-player aria-hidden="false"></div>
+              <p class="youtube-radio-preview-note" data-youtube-radio-preview-note>Local HTTP preview: python -m http.server 8080</p>
+              <p class="music-shortcuts-note">Space Play/Pause &bull; &larr; Previous &bull; &rarr; Next &bull; R Restart &bull; M Mute</p>
+              <div class="youtube-radio-controls" aria-label="YouTube Radio controls">
+                <button type="button" data-youtube-radio-control="back">Previous</button>
+                <button type="button" data-youtube-radio-control="play">Play</button>
+                <button type="button" data-youtube-radio-control="restart">Restart</button>
+                <button type="button" data-youtube-radio-control="next">Next</button>
+                <button type="button" data-youtube-radio-control="open">External Handoff Locked</button>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+          <small>Updates AI_OS without stopping music.</small>
+          <small>Keep Music Companion open to preserve music during dashboard refresh.</small>
+        </div>
+        <div class="refresh-guard-message" data-refresh-guard-message role="status" aria-live="polite" hidden>
+          Music is playing. Use Soft Refresh to keep audio running.
+        </div>
+        <div class="top-rail-controls" aria-label="Tab controls">
+          <button class="personal-rail-toggle mobile-tab-button mobile-tab-button--personal" type="button" data-action="toggle-personal-rail" data-rail-toggle-scope="personal-opener" aria-controls="personalRail" aria-expanded="true">
+            <svg class="mobile-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
+              <path d="M5 21a7 7 0 0 1 14 0"></path>
+            </svg>
+            <span>Personal Tab</span>
+          </button>
+        </div>
       </header>
 
-      <section class="status-panel-system depth-tier-2d" aria-label="AI_OS dashboard panels" data-status-root>
+      <section class="command-guide-strip" aria-label="Start Here tour guide" data-guide-panel>
+        <article class="guide-card guide-card-primary">
+          <span class="eyebrow">START HERE</span>
+          <h2>Secure guided command center</h2>
+          <p>Choose one workspace, review the locked actions, and keep every project packet visible before any approved APPLY step.</p>
+        </article>
+        <article class="guide-card">
+          <span class="card-label">SAFE BY DEFAULT</span>
+          <strong>No passwords or tokens stored</strong>
+          <p>Social, OneDrive, broker, API, and recovery secrets stay out of dashboard HTML, CSS, JS, localStorage, and mock data.</p>
+        </article>
+        <article class="guide-card">
+          <span class="card-label">LOCAL MOCK ONLY</span>
+          <strong>No backend execution</strong>
+          <p>OAuth, Microsoft Graph, social APIs, broker connectors, live trading, and file access are connector-locked placeholders.</p>
+        </article>
+      </section>
+
+      <section class="status-panel-system depth-tier-2d legacy-status-panels" aria-label="AI_OS dashboard panels" data-status-root hidden>
         <div class="status-panel-tabs" role="tablist" aria-label="AI_OS status panels">
-          <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="workTableAi">Work Table AI</button>
           <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="progress">Progress</button>
           <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="nextAction">Next Action</button>
           <button class="status-panel-button" type="button" role="tab" aria-selected="false" data-status-panel-button="checkpoint">Checkpoint</button>
@@ -151,13 +243,6 @@
             <p class="status-detail" data-status-detail>AI Assistance placeholder unavailable.</p>
             <small class="status-source" data-status-source>mock-data/ai-assistant-fixture.example.json</small>
           </article>
-          <article class="status-card status-panel status-state-unknown" data-status-card="workTableAi" data-status-panel="workTableAi" role="tabpanel" tabindex="0" hidden>
-            <span class="card-label">WORK TABLE AI</span>
-            <h3>Work Table AI Placeholder</h3>
-            <div class="status-value" data-status-value>UNKNOWN</div>
-            <p class="status-detail" data-status-detail>Work Table AI placeholder unavailable.</p>
-            <small class="status-source" data-status-source>mock-data/work-table-ai-fixture.example.json</small>
-          </article>
           <article class="status-card status-panel status-state-unknown" data-status-card="nextAction" data-status-panel="nextAction" role="tabpanel" tabindex="0" hidden>
             <span class="card-label">NEXT ACTION</span>
             <h3>Next Action Panel</h3>
@@ -168,104 +253,63 @@
         </div>
       </section>
 
-      <section class="command-stage" aria-label="Ai_Os Work Table">
-        <section class="work-table">
-          <div class="work-table-head">
-            <div>
-              <span class="eyebrow">CENTER WORKSPACE</span>
-              <h2>Ai_Os Work Table</h2>
-              <p>Static build surface for project briefs, prompts, instructions, tool outputs, validation queues, and approval gates.</p>
-            </div>
-            <div class="core-orbits work-table-core" aria-hidden="true">
-              <div class="orbit orbit-one"></div>
-              <div class="orbit orbit-two"></div>
-              <div class="orbit orbit-three"></div>
-              <div class="core-pulse digital-globe">
-                <span class="globe-shell"></span>
-                <span class="globe-grid globe-grid-a"></span>
-                <span class="globe-grid globe-grid-b"></span>
-                <span class="globe-network globe-network-a"></span>
-                <span class="globe-network globe-network-b"></span>
-                <span class="globe-nodes"></span>
-              </div>
-            </div>
+      <section class="command-stage command-workspace active" data-command-workspace="detail-panel" aria-label="Workspace detail panel">
+        <section class="workspace-section-card workspace-detail-card">
+          <div class="workspace-section-head">
+            <span class="eyebrow" data-detail-kicker>WORK TABLE</span>
+            <h2 data-detail-title>Project Brief</h2>
+            <p data-detail-subtitle>Define the project goal, allowed files, source evidence, and expected result before APPLY.</p>
           </div>
-
-          <div class="work-table-grid" aria-label="Work Table cards">
-            <article class="work-card" data-action="project-brief" tabindex="0">
-              <span class="card-label">PROJECT BRIEF</span>
-              <h3>Project Brief</h3>
-              <p>Selected objective, scope, allowed files, and expected result.</p>
+          <div class="workspace-detail-grid">
+            <article class="workspace-detail-main">
+              <span class="card-label" data-detail-status>LOCAL MOCK ONLY</span>
+              <div class="assistant-output" id="assistantOutput" data-detail-body>Work Table: static center workspace for project packets, prompts, build instructions, tool output, approval gates, and validation queues.</div>
+              <div class="workspace-placeholder" data-detail-note>APPLY, commit, push, publishing, and execution remain blocked until explicitly approved.</div>
+              <div class="project-hub-panel" data-project-hub hidden></div>
+              <div class="personal-gallery-panel" data-personal-gallery hidden></div>
+              <div class="personal-apps-panel" data-personal-apps hidden></div>
             </article>
-            <article class="work-card" data-action="prompt-stack" tabindex="0">
-              <span class="card-label">PROMPTS</span>
-              <h3>Prompt Stack</h3>
-              <p>Approved operator prompts and generated work packet instructions.</p>
-            </article>
-            <article class="work-card" data-action="build-instructions" tabindex="0">
-              <span class="card-label">BUILD</span>
-              <h3>Build Instructions</h3>
-              <p>Exact APPLY scope, blocked actions, validators, and stop conditions.</p>
-            </article>
-            <article class="work-card" data-action="tool-output" tabindex="0">
-              <span class="card-label">OUTPUT</span>
-              <h3>Tool Output</h3>
-              <p>Terminal-only summaries, mismatch notes, and static validation results.</p>
-            </article>
-            <article class="work-card" data-action="approval-gate" tabindex="0">
-              <span class="card-label">APPROVAL</span>
-              <h3>Approval Gate</h3>
-              <p>Human approval state before APPLY, commit, publishing, or activation.</p>
-            </article>
-            <article class="work-card" data-action="validation-queue" tabindex="0">
-              <span class="card-label">VALIDATION</span>
-              <h3>Validation Queue</h3>
-              <p>Path checks, JSON parse checks, unsafe scans, and visual preview steps.</p>
-            </article>
+            <aside class="workspace-detail-side" aria-label="Focused checklist">
+              <span class="card-label">CHECKLIST</span>
+              <ul data-detail-list>
+                <li>Set objective and scope.</li>
+                <li>Confirm allowed files.</li>
+                <li>List validation steps.</li>
+              </ul>
+            </aside>
           </div>
-
-          <section class="work-table-ai-panel" aria-label="Work Table AI fixture insights" data-work-table-ai-root>
-            <div class="work-table-ai-head">
-              <div>
-                <span class="eyebrow">WORK TABLE AI</span>
-                <h3>Fixture Insights</h3>
-              </div>
-              <span class="work-table-ai-mode" data-work-table-ai-mode>LOCAL MOCK ONLY</span>
+          <pre id="consoleOutput" class="workspace-detail-console">Ai_Os&gt; Work Table selected
+Ai_Os&gt; Project Brief
+Ai_Os&gt; Static mock-only detail panel</pre>
+          <div class="assistant-console-head" aria-label="AI_OS Assistant Console">
+            <span class="card-label">AI_OS ASSISTANT CONSOLE</span>
+            <strong data-assistant-mode-label>Tour Guide</strong>
+            <small data-assistant-mode-helper>Mock-only. Backend not connected.</small>
+          </div>
+          <div class="assistant-mode-row" aria-label="Assistant modes">
+            <button class="active" type="button" data-assistant-mode="tour-guide">Tour Guide</button>
+            <button type="button" data-assistant-mode="work-table-builder">Work Table Builder</button>
+            <button type="button" data-assistant-mode="research-chat">Research / Chat</button>
+            <button type="button" data-assistant-mode="system-engineer">System Engineer</button>
+            <button type="button" data-assistant-mode="trading-lab">Trading Lab</button>
+          </div>
+          <section class="assistant-context-packet" aria-label="Assistant context intake packet">
+            <div class="assistant-context-head">
+              <span class="card-label">CONTEXT INTAKE PACKET</span>
+              <strong>Answer simple questions. AI_OS structures the full context.</strong>
             </div>
-            <div class="work-table-ai-message" data-work-table-ai-message>Loading local Work Table AI fixtures...</div>
-            <div class="work-table-ai-meta" data-work-table-ai-meta></div>
-            <div class="work-table-ai-cards" data-work-table-ai-cards></div>
-            <div class="work-table-ai-lists">
-              <div>
-                <span class="card-label">SAFE MOCK ACTIONS</span>
-                <div class="work-table-ai-chip-list" data-work-table-ai-safe-actions></div>
-              </div>
-              <div>
-                <span class="card-label">BLOCKED ACTIONS</span>
-                <div class="work-table-ai-chip-list blocked" data-work-table-ai-blocked-actions></div>
-              </div>
-              <div>
-                <span class="card-label">SOURCE REFERENCES</span>
-                <div class="work-table-ai-source-list" data-work-table-ai-sources></div>
-              </div>
-            </div>
+            <div class="assistant-context-grid" data-assistant-context-fields></div>
+            <button class="assistant-context-generate" type="button" data-action="generate-context-packet">Generate Context Packet</button>
+            <pre class="assistant-context-output" data-context-packet-output>Context packet not generated yet.</pre>
           </section>
-        </section>
-
-        <aside class="assistant-rail" aria-label="AI Assistant Guide">
-          <div class="assistant-head">
-            <span class="eyebrow">AI ASSISTANT GUIDE</span>
-            <strong>Tour / Help</strong>
-          </div>
-          <div class="assistant-output" id="assistantOutput">Work Table: static center workspace for project packets, prompts, build instructions, tool output, approval gates, and validation queues.</div>
-          <div class="message-row">
+          <div class="message-row detail-message-row">
             <input id="mockMessage" type="text" value="Preview only. Ask for guidance..." aria-label="Mock assistant message">
             <button data-action="send-message">Send</button>
           </div>
-        </aside>
+        </section>
       </section>
 
-      <section class="registry-section" aria-label="Tool Registry">
+      <section class="registry-section legacy-section" aria-label="Tool Registry" hidden>
         <div class="section-head">
           <span class="eyebrow">STATIC TOOL REGISTRY</span>
           <h2>Tool Registry Lane</h2>
@@ -321,7 +365,7 @@
         </div>
       </section>
 
-      <section class="panel-grid app-registry" aria-label="App Registry examples">
+      <section class="panel-grid app-registry legacy-section" aria-label="App Registry examples" hidden>
         <article class="glass-card app-card" data-action="app-calendar" tabindex="0">
           <span class="card-label">CALENDAR APP</span>
           <h3>Calendar App</h3>
@@ -348,20 +392,34 @@
         </article>
       </section>
 
-      <section class="console-panel">
-        <div>
-          <span class="eyebrow">WORK TABLE CONSOLE</span>
-          <pre id="consoleOutput">Ai_Os&gt; Work Table loaded
-Ai_Os&gt; App Dock: static mock only
-Ai_Os&gt; Tool Registry: display only
-Ai_Os&gt; App Registry: examples only
-Ai_Os&gt; no backend/API/persistence/trading automation</pre>
-        </div>
-      </section>
     </main>
+
+    <aside class="personal-sidebar" id="personalRail" aria-label="Personal Social and Vault rail">
+      <div class="rail-header rail-header--personal">
+        <div class="rail-header-top">
+          <button class="personal-rail-close rail-internal-toggle rail-toggle-button" type="button" data-action="toggle-personal-rail" data-rail-toggle-scope="personal-internal" aria-controls="personalRail" aria-expanded="true">Hide Personal</button>
+          <span class="eyebrow">PERSONAL / SOCIAL / VAULT</span>
+        </div>
+        <h2 class="rail-header-title">Personal Tab</h2>
+        <p class="rail-header-summary">Social accounts, documents, personal apps, data, backups, and locked connector planning.</p>
+        <div class="rail-header-divider" aria-hidden="true"></div>
+      </div>
+      <div class="side-nav personal-rail-list" data-personal-rail-list aria-label="Personal rail tools"></div>
+      <div class="sidebar-lock personal-lock">
+        <strong>CONNECTOR LOCKS</strong>
+        <span>No social passwords</span>
+        <span>No OneDrive tokens</span>
+        <span>No OAuth/API connection</span>
+      </div>
+    </aside>
   </div>
 
-  <footer class="dashboard-footer">Anthony R Meza</footer>
+  <footer class="dashboard-footer">
+    Anthony R Meza &bull; Powered by
+    <a href="https://openai.com/" target="_blank" rel="noopener noreferrer">OpenAI</a>
+    /
+    <a href="https://developers.openai.com/codex/cli" target="_blank" rel="noopener noreferrer">Codex CLI</a>
+  </footer>
 
   <script src="js/aios-static-preview.js"></script>
 </body>

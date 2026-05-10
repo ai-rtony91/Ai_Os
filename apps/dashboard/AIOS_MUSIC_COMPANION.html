@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>AI_OS Music Companion</title>
+  <style>
+    :root {
+      --bg: #05070b;
+      --panel: rgba(17, 24, 39, 0.86);
+      --panel-strong: rgba(5, 7, 11, 0.88);
+      --line: rgba(56, 189, 248, 0.34);
+      --line-hot: rgba(55, 255, 136, 0.58);
+      --text: #e5f6ff;
+      --muted: #8aa7bf;
+      --cyan: #38bdf8;
+      --green: #37ff88;
+      --warn: #ffd166;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 78% 12%, rgba(56, 189, 248, 0.18), transparent 28%),
+        linear-gradient(135deg, #05070b, #0b1020 52%, #111827);
+      font-family: Consolas, "Courier New", monospace;
+      letter-spacing: 0;
+    }
+
+    .music-shell {
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      width: min(100%, 430px);
+      min-height: 100vh;
+      margin-inline: auto;
+      padding: 12px;
+    }
+
+    .music-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, var(--panel), rgba(5, 7, 11, 0.78));
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      padding: 12px;
+    }
+
+    .eyebrow,
+    .label {
+      color: var(--cyan);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 6px 0;
+      color: var(--green);
+      font-size: 21px;
+      line-height: 1.15;
+      text-shadow: 0 0 20px rgba(55, 255, 136, 0.24);
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .player {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 174px;
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      background: #02040a;
+    }
+
+    .player iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: var(--panel-strong);
+      font: inherit;
+      font-size: 10px;
+      cursor: pointer;
+      transition: border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    button:hover,
+    button:focus {
+      color: var(--green);
+      border-color: var(--line-hot);
+      outline: none;
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.24), inset 0 0 14px rgba(55, 255, 136, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .volume-row {
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--green);
+    }
+
+    .status {
+      margin-top: 10px;
+      border: 1px solid rgba(55, 255, 136, 0.28);
+      background: rgba(5, 7, 11, 0.64);
+      color: var(--green);
+      padding: 8px;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .shortcuts {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .note {
+      border-color: rgba(255, 209, 102, 0.38);
+      color: var(--warn);
+      padding: 10px 12px;
+    }
+
+    @media (max-width: 380px) {
+      .controls {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="music-shell">
+    <section class="music-card" aria-label="AI_OS Music Companion">
+      <span class="eyebrow">AI_OS</span>
+      <h1>Music Companion</h1>
+      <p>Keep this window open to preserve music during dashboard refresh.</p>
+      <div class="player" id="musicCompanionPlayer" aria-label="YouTube player"></div>
+      <div class="controls" aria-label="Music controls">
+        <button type="button" data-music-command="previous">Previous</button>
+        <button type="button" data-music-command="playPause">Play</button>
+        <button type="button" data-music-command="restart">Restart</button>
+        <button type="button" data-music-command="next">Next</button>
+        <button type="button" data-music-command="mute">Mute</button>
+      </div>
+      <label class="volume-row">
+        <span class="label">Volume</span>
+        <input type="range" min="0" max="100" value="70" data-music-volume>
+      </label>
+      <div class="status" data-music-status>Press Play to start companion</div>
+      <p class="shortcuts">Space Play/Pause &bull; &larr; Previous &bull; &rarr; Next &bull; R Restart &bull; M Mute</p>
+    </section>
+    <section class="music-card note">
+      <p>No forced audible autoplay. Browser policy controls startup media. Muted autoplay is a future experiment only and is not enabled.</p>
+    </section>
+  </main>
+
+  <script>
+    const musicStateKey = "AIOS_MUSIC_COMPANION_STATE_V1";
+    const videoId = "VFzsSbdS7Sk";
+    const playlistId = "RDVFzsSbdS7Sk";
+    const statusNode = document.querySelector("[data-music-status]");
+    const commandButtons = document.querySelectorAll("[data-music-command]");
+    const volumeControl = document.querySelector("[data-music-volume]");
+    let player = null;
+    let isMuted = false;
+    let lastKnownPlaying = false;
+    let restoreState = readSavedMusicState();
+    let restoreApplied = false;
+    let companionEmbedMode = "playlist";
+    let companionSingleFallbackAttempted = false;
+
+    function setStatus(message) {
+      if (statusNode) statusNode.textContent = message;
+    }
+
+    function readSavedMusicState() {
+      try {
+        const parsed = JSON.parse(window.localStorage.getItem(musicStateKey) || "{}");
+        if (!parsed || typeof parsed !== "object") return null;
+        return {
+          time: Math.max(0, Number(parsed.time) || 0),
+          volume: Math.max(0, Math.min(100, Number(parsed.volume) || 70)),
+          muted: parsed.muted === true,
+          savedAt: Number(parsed.savedAt) || 0
+        };
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function saveMusicState() {
+      try {
+        const state = {
+          time: 0,
+          volume: Number(volumeControl?.value) || 70,
+          muted: isMuted,
+          savedAt: Date.now()
+        };
+        if (player) {
+          if (typeof player.getCurrentTime === "function") state.time = Math.max(0, Number(player.getCurrentTime()) || 0);
+          if (typeof player.getVolume === "function") state.volume = Math.max(0, Math.min(100, Number(player.getVolume()) || state.volume));
+          if (typeof player.isMuted === "function") state.muted = player.isMuted();
+        }
+        window.localStorage.setItem(musicStateKey, JSON.stringify(state));
+      } catch (error) {
+        // Safe music UI state only; ignore unavailable storage.
+      }
+    }
+
+    function syncVolume(value) {
+      const normalized = Math.max(0, Math.min(100, Number(value) || 0));
+      if (volumeControl) volumeControl.value = String(normalized);
+      return normalized;
+    }
+
+    function isTypingTarget(target) {
+      if (!target) return false;
+      const element = target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement;
+      if (!element) return false;
+      return Boolean(element.closest("input, textarea, select, [contenteditable='true'], [contenteditable='']"));
+    }
+
+    function getKeyboardVolumeDelta(delta) {
+      let currentVolume = Number(volumeControl?.value) || 70;
+      if (player && typeof player.getVolume === "function") {
+        try {
+          currentVolume = Number(player.getVolume()) || currentVolume;
+        } catch (error) {
+          // Use the slider value while the YouTube player is not ready.
+        }
+      }
+      return Math.max(0, Math.min(100, currentVolume + delta));
+    }
+
+    function setPlayButton(playing) {
+      document.querySelector('[data-music-command="playPause"]').textContent = playing ? "Pause" : "Play";
+    }
+
+    function setMuteButton(muted) {
+      isMuted = muted;
+      document.querySelector('[data-music-command="mute"]').textContent = muted ? "Unmute" : "Mute";
+    }
+
+    function getPlayerVars() {
+      const playerVars = {
+        autoplay: 0,
+        playsinline: 1,
+        rel: 0
+      };
+      if (companionEmbedMode === "playlist") {
+        playerVars.list = playlistId;
+        playerVars.listType = "playlist";
+      }
+      return playerVars;
+    }
+
+    function applyRestoreState() {
+      if (!player || restoreApplied || !restoreState) return;
+      try {
+        if (typeof player.setVolume === "function") {
+          player.setVolume(restoreState.volume);
+          syncVolume(restoreState.volume);
+        }
+        if (restoreState.muted && typeof player.mute === "function") {
+          player.mute();
+          setMuteButton(true);
+        }
+        if (!restoreState.muted && typeof player.unMute === "function") {
+          player.unMute();
+          setMuteButton(false);
+        }
+        if (restoreState.time > 0 && typeof player.seekTo === "function") {
+          player.seekTo(restoreState.time, true);
+        }
+        restoreApplied = true;
+        setStatus("Press Play to start companion");
+      } catch (error) {
+        setStatus("Press Play to start companion");
+      }
+    }
+
+    function retrySingleVideo() {
+      if (!player || companionSingleFallbackAttempted) return false;
+      companionSingleFallbackAttempted = true;
+      companionEmbedMode = "video";
+      setStatus("Playlist unavailable - trying video");
+      try {
+        player.loadVideoById(videoId);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function runCommand(command, value) {
+      if (!player || !window.YT?.PlayerState) return;
+      try {
+        if (command === "playPause") {
+          const state = player.getPlayerState();
+          if (state === window.YT.PlayerState.PLAYING) {
+            player.pauseVideo();
+          } else {
+            player.playVideo();
+          }
+        }
+        if (command === "restart" && typeof player.seekTo === "function") {
+          player.seekTo(0, true);
+          if (typeof player.playVideo === "function") player.playVideo();
+        }
+        if (command === "next" && typeof player.nextVideo === "function") player.nextVideo();
+        if (command === "previous" && typeof player.previousVideo === "function") player.previousVideo();
+        if (command === "mute") {
+          const muted = typeof player.isMuted === "function" && player.isMuted();
+          if (muted && typeof player.unMute === "function") {
+            player.unMute();
+            setMuteButton(false);
+          } else if (typeof player.mute === "function") {
+            player.mute();
+            setMuteButton(true);
+          }
+        }
+        if (command === "volume" && typeof player.setVolume === "function") {
+          const volume = syncVolume(value);
+          player.setVolume(volume);
+          if (volume > 0 && typeof player.isMuted === "function" && player.isMuted()) {
+            player.unMute();
+            setMuteButton(false);
+          }
+        }
+        saveMusicState();
+      } catch (error) {
+        setStatus("Music control unavailable");
+      }
+    }
+
+    window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
+      if (player) return;
+      player = new window.YT.Player("musicCompanionPlayer", {
+        height: "240",
+        width: "384",
+        videoId,
+        playerVars: getPlayerVars(),
+        events: {
+          onReady: () => {
+            setStatus("Press Play to start companion");
+            applyRestoreState();
+          },
+          onError: () => {
+            if (companionEmbedMode === "playlist" && retrySingleVideo()) return;
+            setStatus("YouTube embed unavailable");
+            setPlayButton(false);
+          },
+          onStateChange: (event) => {
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              lastKnownPlaying = true;
+              setStatus("Playing in Music Companion");
+              setPlayButton(true);
+              saveMusicState();
+            }
+            if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
+              lastKnownPlaying = false;
+              setStatus("Paused");
+              setPlayButton(false);
+              saveMusicState();
+            }
+          }
+        }
+      });
+    };
+
+    commandButtons.forEach((button) => {
+      button.addEventListener("click", () => runCommand(button.dataset.musicCommand));
+    });
+
+    if (volumeControl) {
+      if (restoreState) {
+        syncVolume(restoreState.volume);
+        setMuteButton(restoreState.muted);
+      }
+      volumeControl.addEventListener("input", () => runCommand("volume", volumeControl.value));
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (isTypingTarget(event.target)) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+      const key = event.key;
+      const lowerKey = key.toLowerCase();
+
+      if (key === " " || key === "Spacebar") {
+        event.preventDefault();
+        runCommand("playPause");
+        return;
+      }
+      if (key === "ArrowLeft") {
+        event.preventDefault();
+        runCommand("previous");
+        return;
+      }
+      if (key === "ArrowRight") {
+        event.preventDefault();
+        runCommand("next");
+        return;
+      }
+      if (lowerKey === "r") {
+        event.preventDefault();
+        runCommand("restart");
+        return;
+      }
+      if (lowerKey === "m") {
+        event.preventDefault();
+        runCommand("mute");
+        return;
+      }
+      if (key === "ArrowUp") {
+        event.preventDefault();
+        runCommand("volume", getKeyboardVolumeDelta(5));
+        return;
+      }
+      if (key === "ArrowDown") {
+        event.preventDefault();
+        runCommand("volume", getKeyboardVolumeDelta(-5));
+      }
+    });
+
+    window.addEventListener("message", (event) => {
+      if (event.origin !== window.location.origin) return;
+      const data = event.data || {};
+      if (data.source !== "AI_OS_DASHBOARD" || data.type !== "music-command") return;
+      if (!["playPause", "previous", "next", "restart", "mute", "volume"].includes(data.command)) return;
+      runCommand(data.command, data.value);
+    });
+
+    window.addEventListener("pagehide", saveMusicState);
+    window.setInterval(() => {
+      if (lastKnownPlaying) saveMusicState();
+    }, 5000);
+
+    const script = document.createElement("script");
+    script.src = "https://www.youtube.com/iframe_api";
+    script.async = true;
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>

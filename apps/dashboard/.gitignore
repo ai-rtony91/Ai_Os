@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Private local dashboard media
+private-media/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
