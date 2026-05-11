@@ -1,0 +1,14 @@
+{
+  "latency_id": "LATENCY_001",
+  "mode": "paper_only",
+  "signal_source": "TradingView_mock_alert_source_only",
+  "alert_created_time": "2026-05-11T00:00:00Z",
+  "alert_received_time": "2026-05-11T00:00:00Z",
+  "ai_os_validation_start": "2026-05-11T00:00:00Z",
+  "ai_os_validation_end": "2026-05-11T00:00:00Z",
+  "traderspost_route_preview_time": "2026-05-11T00:00:00Z",
+  "simulated_order_time": "2026-05-11T00:00:00Z",
+  "total_delay_seconds": 0,
+  "latency_status": "acceptable",
+  "blocked_reason": "Paper-only latency review. Live execution remains BLOCKED. No broker, API key, real webhook, real order, or automatic route execution."
+}

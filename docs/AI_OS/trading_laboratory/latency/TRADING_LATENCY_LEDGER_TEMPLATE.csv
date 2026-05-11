@@ -1,0 +1,1 @@
+latency_id,mode,signal_source,alert_created_time,alert_received_time,ai_os_validation_start,ai_os_validation_end,traderspost_route_preview_time,simulated_order_time,total_delay_seconds,latency_status,blocked_reason
