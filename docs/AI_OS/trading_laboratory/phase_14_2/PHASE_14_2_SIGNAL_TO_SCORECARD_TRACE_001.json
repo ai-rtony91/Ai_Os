@@ -1,0 +1,97 @@
+{
+  "workflow_id": "PHASE_14_2_SIGNAL_TO_SCORECARD_TRACE_001",
+  "phase": "14.2",
+  "mode": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "execution_allowed": false,
+  "approved_for_live_execution": false,
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_webhooks",
+    "real_orders",
+    "live_market_data_dependency",
+    "live_trading",
+    "automatic_route_execution"
+  ],
+  "workflow": [
+    "mock_signal_intake",
+    "latency_timestamp_record",
+    "regime_tag_check",
+    "risk_gate_check",
+    "paper_trade_simulation_result",
+    "profitability_scorecard_update"
+  ],
+  "traceability": {
+    "strategy_id": "MOCK_STRATEGY_001",
+    "signal": {
+      "mock_signal_id": "MOCK_SIGNAL_001",
+      "profitability_signal_intake_ledger_id": "SIGNAL_INTAKE_LEDGER_001",
+      "intake_status": "accepted_for_paper_review_only"
+    },
+    "latency": {
+      "latency_id": "LATENCY_001",
+      "mode": "paper_only",
+      "latency_status": "acceptable"
+    },
+    "regime": {
+      "mock_regime_id": "MOCK_REGIME_001",
+      "profitability_regime_filter_id": "REGIME_FILTER_001",
+      "regime_status": "not_approved",
+      "regime_filter_status": "blocked"
+    },
+    "risk": {
+      "mock_risk_gate_id": "MOCK_RISK_GATE_001",
+      "profitability_risk_gate_id": "RISK_GATE_PROFITABILITY_001",
+      "risk_gate_status": "blocked",
+      "approved_for_mock_execution": false,
+      "approved_for_paper_simulation": false,
+      "approved_for_live_execution": false
+    },
+    "paper_result": {
+      "paper_trade_ledger_id": "PAPER_TRADE_SIMULATION_LEDGER_001",
+      "paper_trade_id": "PAPER_TRADE_SIM_001",
+      "result_status": "not_executed",
+      "entry_type": "simulated_only"
+    },
+    "scorecard": {
+      "scorecard_id": "PAPER_PROFITABILITY_SCORECARD_001",
+      "scorecard_decision": "blocked_for_live_execution",
+      "confidence_status": "insufficient_paper_sample_size"
+    }
+  },
+  "latency_fields_required": [
+    "signal_source",
+    "alert_created_time",
+    "alert_received_time",
+    "ai_os_validation_start",
+    "ai_os_validation_end",
+    "traderspost_route_preview_time",
+    "simulated_order_time",
+    "total_delay_seconds",
+    "latency_status",
+    "blocked_reason"
+  ],
+  "paper_metrics_required": [
+    "win_rate",
+    "average_win",
+    "average_loss",
+    "expectancy",
+    "profit_factor",
+    "max_drawdown",
+    "trade_count",
+    "confidence_score",
+    "blocked_reason"
+  ],
+  "safety_confirmation": {
+    "no_broker_connection": true,
+    "no_OANDA": true,
+    "no_API_keys": true,
+    "no_real_webhooks": true,
+    "no_real_orders": true,
+    "no_live_trading": true,
+    "live_execution_remains_blocked": true
+  },
+  "next_safe_action": "Run Phase 14.2 DRY_RUN validation, then review missing paper evidence before any scorecard confidence update."
+}
