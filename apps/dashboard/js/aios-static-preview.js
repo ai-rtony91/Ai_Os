@@ -14,12 +14,15 @@ const contextRailTitle = document.querySelector("[data-context-rail-title]");
 const contextRailSummary = document.querySelector("[data-context-rail-summary]");
 const contextRailList = document.querySelector("[data-context-rail-list]");
 const personalRailList = document.querySelector("[data-personal-rail-list]");
+const welcomeStartScreen = document.querySelector("[data-welcome-start]");
+const welcomeActionButtons = document.querySelectorAll("[data-welcome-action]");
 const detailKicker = document.querySelector("[data-detail-kicker]");
 const detailTitle = document.querySelector("[data-detail-title]");
 const detailSubtitle = document.querySelector("[data-detail-subtitle]");
 const detailStatus = document.querySelector("[data-detail-status]");
 const detailNote = document.querySelector("[data-detail-note]");
 const detailList = document.querySelector("[data-detail-list]");
+const tradingLabNextActionCard = document.querySelector("[data-trading-lab-next-action]");
 const projectHubPanel = document.querySelector("[data-project-hub]");
 const personalGalleryPanel = document.querySelector("[data-personal-gallery]");
 const personalAppsPanel = document.querySelector("[data-personal-apps]");
@@ -29,6 +32,8 @@ const drawerReopen = document.querySelector(".drawer-reopen");
 const drawerBackdrop = document.querySelector(".drawer-backdrop");
 const personalRailToggles = document.querySelectorAll("[data-action='toggle-personal-rail']");
 const mobileSidebarQuery = window.matchMedia("(max-width: 1120px)");
+const commandMain = document.querySelector(".command-main");
+const dashboardShell = document.querySelector(".dashboard-shell");
 const tapTargets = document.querySelectorAll("button, .glass-card, .chart-card, .work-card, .workspace-panel, .vault-card, .guide-card, .status-card, .status-panel-button, .registry-chip, .app-card");
 const statusCards = document.querySelectorAll("[data-status-card]");
 const statusPanelButtons = document.querySelectorAll("[data-status-panel-button]");
@@ -71,6 +76,7 @@ const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.
 const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
+const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 const personalGalleryManifestPath = "private-media/service-gallery/gallery.local.json";
 const youtubeRadioVideoId = "VFzsSbdS7Sk";
@@ -93,6 +99,9 @@ let activeDetailItemId = "project-brief";
 let activeAssistantMode = "tour-guide";
 let refreshGuardMessageTimer = null;
 let musicCompanionWindow = null;
+let mobileRailScrollLockY = 0;
+let mobileRailScrollLockActive = false;
+let mobileRailLastTouchY = null;
 
 const statusFixtures = {
   overall: {
@@ -216,7 +225,7 @@ const workspaceDetailConfig = {
     summary: "Important file planning with access locked and no OneDrive token storage.",
     overview: "Choose a file planning item from the tab. This workspace does not connect to OneDrive.",
     items: [
-      detailItem("important-documents", "Important Documents", "DOCUMENTS", "Plan which important documents need review, organization, and protection.", "No file sync or cloud connection is active.", ["List document groups.", "Mark protected items.", "Plan review order."]),
+      detailItem("important-documents", "Important Docs", "DOCUMENTS", "Plan which important documents need review, organization, and protection.", "No file sync or cloud connection is active.", ["List document groups.", "Mark protected items.", "Plan review order."]),
       detailItem("aios-project-files", "AI_OS Project Files", "AI_OS", "Organize AI_OS project docs and work packets by approved paths.", "No file writer runs from this panel.", ["Project docs.", "Work packets.", "Source logs."]),
       detailItem("trading-files", "Trading Files", "TRADING", "Separate trading planning files from execution or broker files.", "No broker files or credentials are touched.", ["Planning only.", "Execution separated.", "Risk docs later."]),
       detailItem("backups", "Backups", "BACKUPS", "Plan backup categories and checkpoint timing.", "No backup writer is active.", ["Backup categories.", "Checkpoint timing.", "Restore notes."]),
@@ -282,13 +291,14 @@ const workspaceDetailConfig = {
 
 const railDetailConfig = {
   build: {
-    title: "Work Tab",
+    title: "Work",
     summary: "Productive work, DevOps, app building, projects, reports, safety, and approval-safe build lanes.",
-    overview: "Choose a Build tab item to open one focused project or DevOps detail panel.",
+    overview: "Choose a Work item to open one focused project or DevOps detail panel.",
     items: [
-      detailItem("start-here", "Start Here", "GUIDE", "Begin with a simple command-center overview: pick a tab item, review the purpose, and keep APPLY blocked until approved.", "Static guide only. No backend or execution logic runs here.", ["Choose one tab item.", "Review purpose and locks.", "Use Soft Refresh for dashboard-only updates."]),
+      detailItem("start-here", "Start Here", "GUIDE", "Begin with a simple Workspace overview: pick an item, review the purpose, and keep APPLY blocked until approved.", "Static guide only. No backend or execution logic runs here.", ["Choose one item.", "Review purpose and locks.", "Use Soft Refresh for dashboard-only updates."]),
       detailItem("projects", "Projects", "PROJECTS", "Open active project folders for AI_OS, Trading Bot, App Builder, Web Dev, and future projects.", "Projects are static folders with mock telemetry, reports, validation, files, risks, and next actions.", ["Open a project folder.", "Review project telemetry.", "Keep execution locked."]),
       detailItem("work-table", "Work Table", "PROJECT", "Start or continue a guided project packet with brief, prompt stack, build instructions, tool output, approval gate, and validation queue.", "File edits remain blocked until explicit APPLY approval.", ["Define scope.", "Confirm allowed files.", "List validation steps."]),
+      detailItem("trading-bot", "Trading Bot", "MOCK LAB", "Mock-only Trading Lab card for strategy, signal, regime, risk, journal, and metrics planning.", "No broker, OANDA, API keys, or live orders.", ["Review one strategy.", "Score a mock signal.", "Keep execution blocked."]),
       detailItem("code-tools", "Code Tools", "CODE", "Use approved local coding tools for inspected files, syntax checks, and focused patches.", "Commits and pushes require separate explicit approval.", ["Inspect first.", "Patch approved scope.", "Run syntax checks."]),
       detailItem("source-control", "Source Control", "GIT", "Review git status, diff names, checkpoint needs, and future commit planning.", "No commit, push, merge, reset, or clean is performed from this static dashboard.", ["Check git status.", "Review diff names.", "Ask before commit or push."]),
       detailItem("reports", "Reports", "REPORTS", "Track daily reports, checkpoints, validation results, health summaries, metrics, and export planning.", "Report writers remain inactive until approved.", ["Summarize changes.", "List errors.", "Capture next safe action."]),
@@ -299,16 +309,16 @@ const railDetailConfig = {
     ]
   },
   personal: {
-    title: "Personal Tab",
-    summary: "Social accounts, documents, personal apps, data, backups, and locked connector planning.",
-    overview: "Choose a Personal tab item to open one focused Social, Vault, or personal data detail panel.",
+    title: "Gallery",
+    summary: "Social accounts, documents, apps, data, backups, and locked connector planning.",
+    overview: "Choose a Gallery item to open one focused Social, Vault, or data detail panel.",
     items: [
-      detailItem("personal-apps", "Personal Apps", "APPS", "Open connector-locked social, OneDrive, calendar, and notes planning cards.", "No external app login, API, OAuth, file sync, or persistence is enabled.", ["Open app cards.", "No passwords stored.", "Connectors locked."]),
-      detailItem("important-documents", "Important Documents", "DOCUMENTS", "Plan important document groups, review priority, and protected-file boundaries.", "No file access or cloud sync runs from this dashboard.", ["List document groups.", "Mark protected items.", "Plan review order."]),
-      detailItem("personal-gallery", "Personal Gallery", "LOCAL MEDIA", "Personal Gallery / Service Photos. Local-only private media area for service photos and approved personal images.", "Place images in apps/dashboard/private-media/service-gallery/. Do not add ID cards, credentials, documents, addresses, account screenshots, recovery codes, or sensitive identity files.", ["Local-only media.", "Manifest later: private-media/service-gallery/gallery.local.json.", "Sensitive images require REDACT REQUIRED."]),
+      detailItem("personal-apps", "Apps", "APPS", "Open connector-locked social, OneDrive, calendar, and notes planning cards.", "No external app login, API, OAuth, file sync, or persistence is enabled.", ["Open app cards.", "No passwords stored.", "Connectors locked."]),
+      detailItem("important-documents", "Important Docs", "DOCUMENTS", "Plan important document groups, review priority, and protected-file boundaries.", "No file access or cloud sync runs from this dashboard.", ["List document groups.", "Mark protected items.", "Plan review order."]),
+      detailItem("personal-gallery", "Gallery", "LOCAL MEDIA", "Gallery / Service Photos. Local-only private media area for service photos and approved local images.", "Place images in apps/dashboard/private-media/service-gallery/. Do not add ID cards, credentials, documents, addresses, account screenshots, recovery codes, or sensitive identity files.", ["Local-only media.", "Manifest later: private-media/service-gallery/gallery.local.json.", "Sensitive images require REDACT REQUIRED."]),
       detailItem("backups", "Backups", "BACKUPS", "Plan backup categories, checkpoint timing, and restore notes for important work.", "No backup writer or file mover is active.", ["Backup categories.", "Checkpoint timing.", "Restore notes."]),
-      detailItem("account-security", "Account Security", "SECURITY", "Keep account safety boundaries visible for social, OneDrive, and personal apps.", "Passwords, tokens, recovery codes, and private keys must stay out of dashboard files and localStorage.", ["No passwords.", "No tokens.", "No recovery codes."]),
-      detailItem("connector-status-locked", "Connector Status Locked", "LOCKED", "Show all personal connectors as locked until a future approved secure setup.", "No OAuth, API calls, token storage, or real account connection is active.", ["OAuth later.", "API calls blocked.", "Tokens not stored."])
+      detailItem("account-security", "Account Security", "SECURITY", "Keep account safety boundaries visible for social, OneDrive, and apps.", "Passwords, tokens, recovery codes, and private keys must stay out of dashboard files and localStorage.", ["No passwords.", "No tokens.", "No recovery codes."]),
+      detailItem("connector-status-locked", "Connector Status Locked", "LOCKED", "Show all Gallery connectors as locked until a future approved secure setup.", "No OAuth, API calls, token storage, or real account connection is active.", ["OAuth later.", "API calls blocked.", "Tokens not stored."])
     ]
   }
 };
@@ -320,7 +330,7 @@ const personalAppsItems = [
   detailItem("youtube", "YouTube", "ACCOUNT", "YouTube account planning and music workspace boundary notes.", "No YouTube account password or token is stored.", ["No credential capture.", "Music controls preserved.", "Connector locked."]),
   detailItem("onedrive-vault", "OneDrive Vault", "FILES", "OneDrive file planning and future approved Microsoft Graph/File Picker setup.", "No OneDrive password, Microsoft Graph token, or file sync is active.", ["Plan file groups.", "Keep access locked.", "Graph/File Picker later."]),
   detailItem("calendar", "Calendar", "CALENDAR", "Static calendar planning for review windows, checkpoints, and reminders.", "No Google, Microsoft, Outlook, or notification provider is connected.", ["Plan dates.", "Review checkpoints.", "Provider locked."]),
-  detailItem("notes", "Notes", "NOTES", "Static notes planning for personal reminders, project context, and future instruction packets.", "No note writer or persistence is active.", ["Draft notes.", "Keep secrets out.", "Writer locked."])
+  detailItem("notes", "Notes", "NOTES", "Static notes planning for reminders, project context, and future instruction packets.", "No note writer or persistence is active.", ["Draft notes.", "Keep secrets out.", "Writer locked."])
 ];
 
 const legacyWorkspaceRailMap = {
@@ -457,7 +467,7 @@ const projectSections = ["Project Brief", "Work Packets", "Telemetry", "Reports"
 
 const messages = {
   "work-table": {
-    assistant: "Work Table: static center workspace for project briefs, prompt stacks, build instructions, tool output, approval gates, and validation queues.",
+    assistant: "Work Table: static Workspace for project briefs, prompt stacks, build instructions, tool output, approval gates, and validation queues.",
     console: "Ai_Os> Work Table selected\nMode: static preview\nAPPLY: requires human approval\nWriters/persistence/trading: BLOCKED"
   },
   "app-store": {
@@ -664,18 +674,86 @@ function renderRailSelection(railId, selectedItemId) {
   if (contextRailTitle) contextRailTitle.textContent = railDetailConfig.build.title;
   if (contextRailSummary) contextRailSummary.textContent = railDetailConfig.build.summary;
 
-  if (mobileSidebarQuery.matches) {
-    if (activeWorkspaceId === "build") {
-      document.body.classList.remove("personal-rail-open");
-    } else {
-      document.body.classList.remove("sidebar-open");
-      document.body.classList.add("personal-rail-open");
-    }
-    syncSidebarState();
-    syncPersonalRailState();
+  renderDetailPanel(rail, selectedItem);
+}
+
+function setRailOwnership(railId) {
+  if (railId === "personal") {
+    document.body.classList.add("rail-owner-personal");
+    document.body.classList.remove("rail-owner-build");
+    document.body.classList.remove("sidebar-open");
+    document.body.classList.add("sidebar-collapsed");
+    return;
   }
 
-  renderDetailPanel(rail, selectedItem);
+  document.body.classList.add("rail-owner-build");
+  document.body.classList.remove("rail-owner-personal");
+  document.body.classList.remove("personal-rail-open");
+  document.body.classList.add("personal-rail-collapsed");
+}
+
+function closeRailsAfterRouteSelection() {
+  document.body.classList.remove("sidebar-open");
+  document.body.classList.remove("personal-rail-open");
+  document.body.classList.add("sidebar-collapsed");
+  document.body.classList.add("personal-rail-collapsed");
+  syncSidebarState();
+  syncPersonalRailState();
+  syncMobileRailScrollLock();
+}
+
+function routeWorkspaceModule(railId, item) {
+  if (!item) return;
+  setRailOwnership(railId);
+  renderRailSelection(railId, item.id);
+  clearFocusedStartView();
+  focusMainWorkspace();
+  closeRailsAfterRouteSelection();
+  saveCommandCenterState();
+}
+
+function showWelcomeStart() {
+  if (!welcomeStartScreen) return;
+  welcomeStartScreen.hidden = false;
+  document.body.classList.add("welcome-start-active");
+}
+
+function hideWelcomeStart() {
+  if (!welcomeStartScreen) return;
+  welcomeStartScreen.hidden = true;
+  document.body.classList.remove("welcome-start-active");
+}
+
+function setFocusedStartView(route = "") {
+  const isFocused = Boolean(route);
+  document.body.classList.remove("focused-route-start-project", "focused-route-archives", "focused-route-trading-lab");
+  document.body.classList.toggle("focused-start-view-active", isFocused);
+  if (isFocused) {
+    document.body.classList.add(`focused-route-${route}`);
+    document.body.dataset.focusedStartRoute = route;
+  } else {
+    delete document.body.dataset.focusedStartRoute;
+  }
+}
+
+function clearFocusedStartView() {
+  document.body.classList.remove("focused-start-view-active");
+  document.body.classList.remove("focused-route-start-project", "focused-route-archives", "focused-route-trading-lab");
+  delete document.body.dataset.focusedStartRoute;
+}
+
+function routeWelcomeAction(action) {
+  const routeMap = {
+    "start-project": { rail: "build", detail: "work-table", focusedRoute: "start-project" },
+    "view-archives": { rail: "build", detail: "projects", focusedRoute: "archives" },
+    "trading-lab": { rail: "build", detail: "trading-bot", focusedRoute: "trading-lab" }
+  };
+  const route = routeMap[action];
+  if (!route) return;
+  routeWorkspaceModule(route.rail, findRailItem(route.rail, route.detail));
+  hideWelcomeStart();
+  setFocusedStartView(route.focusedRoute);
+  focusMainWorkspace();
 }
 
 function renderRailButtons(container, railId, selectedItemId) {
@@ -691,14 +769,19 @@ function renderRailButtons(container, railId, selectedItemId) {
     button.textContent = item.title;
     if (item.id === selectedItemId) button.classList.add("active");
     button.addEventListener("click", () => {
-      renderRailSelection(railId, item.id);
-      saveCommandCenterState();
+      hideWelcomeStart();
+      clearFocusedStartView();
+      routeWorkspaceModule(railId, item);
+      if (mobileSidebarQuery.matches) {
+        closeActiveMobileRailAfterSelection();
+      }
     });
     container.append(button);
   });
 }
 
 function renderDetailPanel(workspace, item) {
+  hideTradingLabNextActionCard();
   hideProjectHub();
   hidePersonalGallery();
   hidePersonalApps();
@@ -726,6 +809,79 @@ function renderDetailPanel(workspace, item) {
   }
   if (item.id === "personal-apps") {
     renderPersonalApps();
+  }
+  if (item.id === "trading-bot") {
+    renderTradingLabNextActionCard();
+  }
+}
+
+function hideTradingLabNextActionCard() {
+  if (!tradingLabNextActionCard) return;
+  tradingLabNextActionCard.hidden = true;
+  tradingLabNextActionCard.replaceChildren();
+}
+
+function createTradingLabField(label, value) {
+  const item = document.createElement("div");
+  item.className = "trading-lab-field";
+  const fieldLabel = document.createElement("span");
+  fieldLabel.textContent = label;
+  const fieldValue = document.createElement("strong");
+  fieldValue.textContent = value || "UNKNOWN";
+  item.append(fieldLabel, fieldValue);
+  return item;
+}
+
+function renderTradingLabNextActionData(data) {
+  if (!tradingLabNextActionCard) return;
+  tradingLabNextActionCard.hidden = false;
+  const title = document.createElement("div");
+  title.className = "trading-lab-card-head";
+  const heading = document.createElement("strong");
+  heading.textContent = "Trading Lab";
+  const badge = document.createElement("span");
+  badge.textContent = data.badge || "MOCK ONLY";
+  title.append(heading, badge);
+
+  const fields = document.createElement("div");
+  fields.className = "trading-lab-field-grid";
+  fields.append(
+    createTradingLabField("Active Strategy", data.active_strategy),
+    createTradingLabField("Market Regime", data.market_regime),
+    createTradingLabField("Mock Execution", data.mock_execution_status),
+    createTradingLabField("Risk State", data.risk_state),
+    createTradingLabField("Last Journal Review", data.last_journal_review)
+  );
+
+  const nextAction = document.createElement("div");
+  nextAction.className = "trading-lab-next-step";
+  const nextLabel = document.createElement("span");
+  nextLabel.textContent = "Next Safe Action";
+  const nextValue = document.createElement("strong");
+  nextValue.textContent = data.next_safe_action || "Review one strategy and score a mock signal.";
+  nextAction.append(nextLabel, nextValue);
+
+  tradingLabNextActionCard.replaceChildren(title, fields, nextAction);
+}
+
+async function renderTradingLabNextActionCard() {
+  if (!tradingLabNextActionCard) return;
+  tradingLabNextActionCard.hidden = false;
+  tradingLabNextActionCard.textContent = "Loading Trading Lab mock card...";
+  try {
+    const response = await fetch(tradingLabNextActionFixturePath, { cache: "no-store" });
+    if (!response.ok) throw new Error("Trading Lab fixture unavailable");
+    renderTradingLabNextActionData(await response.json());
+  } catch (error) {
+    renderTradingLabNextActionData({
+      badge: "MOCK ONLY",
+      active_strategy: "Strategy review pending",
+      market_regime: "UNKNOWN",
+      mock_execution_status: "Not started",
+      risk_state: "Locked",
+      last_journal_review: "No journal review yet",
+      next_safe_action: "Review one strategy and score a mock signal."
+    });
   }
 }
 
@@ -784,7 +940,7 @@ function renderPersonalApps() {
   const notice = document.createElement("div");
   notice.className = "personal-apps-notice";
   const noticeTitle = document.createElement("strong");
-  noticeTitle.textContent = "Connector-locked personal apps";
+  noticeTitle.textContent = "Connector-locked apps";
   const noticeBody = document.createElement("span");
   noticeBody.textContent = "Launch and connector planning only. No passwords, OAuth, API calls, OneDrive tokens, social tokens, or persistence are enabled.";
   notice.append(noticeTitle, noticeBody);
@@ -826,6 +982,11 @@ function setAssistantMode(modeId) {
   if (assistantModeLabel) assistantModeLabel.textContent = mode.label;
   if (assistantModeHelper) assistantModeHelper.textContent = mode.helper;
   renderAssistantContextForm();
+  if (activeAssistantMode === "trading-lab") {
+    renderTradingLabNextActionCard();
+  } else if (activeDetailItemId !== "trading-bot") {
+    hideTradingLabNextActionCard();
+  }
   if (mockMessage) {
     mockMessage.placeholder = mode.placeholder;
     if (!mockMessage.value || mockMessage.value === "Preview only. No message sent.") {
@@ -2194,6 +2355,7 @@ function applySavedDrawerState() {
   if (savedClosed === false && mobileSidebarQuery.matches) {
     document.body.classList.add("sidebar-open");
   }
+  syncMobileRailScrollLock();
 }
 
 function syncSidebarState() {
@@ -2201,11 +2363,11 @@ function syncSidebarState() {
   const isOpen = document.body.classList.contains("sidebar-open");
   const isCollapsed = document.body.classList.contains("sidebar-collapsed");
   const expanded = isMobile ? isOpen : !isCollapsed;
-  const workOpenerLabel = "Work Tab";
-  const workOpenerAria = expanded ? "Toggle Work Tab" : "Open Work Tab";
+  const workOpenerLabel = "Work";
+  const workOpenerAria = expanded ? "Toggle Work" : "Open Work";
   sidebarToggle.setAttribute("aria-expanded", String(expanded));
-  sidebarToggle.setAttribute("aria-label", expanded ? "Hide Work Tab" : "Open Work Tab");
-  sidebarToggle.textContent = expanded ? "Hide Work" : "Work Tab";
+  sidebarToggle.setAttribute("aria-label", expanded ? "Close Work" : "Open Work");
+  sidebarToggle.textContent = expanded ? "Close Work" : "Work";
   drawerReopen.setAttribute("aria-expanded", String(expanded));
   drawerReopen.setAttribute("aria-label", workOpenerAria);
   const drawerReopenLabel = drawerReopen.querySelector("span");
@@ -2216,6 +2378,104 @@ function syncSidebarState() {
   }
 }
 
+function isMobileRailOpen() {
+  return mobileSidebarQuery.matches && (
+    document.body.classList.contains("sidebar-open") ||
+    document.body.classList.contains("personal-rail-open")
+  );
+}
+
+function getActiveMobileRail() {
+  if (!mobileSidebarQuery.matches) return null;
+  if (document.body.classList.contains("sidebar-open")) {
+    return document.querySelector(".command-sidebar");
+  }
+  if (document.body.classList.contains("personal-rail-open")) {
+    return document.querySelector(".personal-sidebar");
+  }
+  return null;
+}
+
+function getActiveMobileRailScrollTarget() {
+  const activeRail = getActiveMobileRail();
+  if (!activeRail) return null;
+  const preferredList = activeRail.querySelector(".context-rail-list, .personal-rail-list");
+  if (preferredList && preferredList.scrollHeight > preferredList.clientHeight) {
+    return preferredList;
+  }
+  return activeRail;
+}
+
+function isInsideActiveMobileRail(target) {
+  const activeRail = getActiveMobileRail();
+  if (!activeRail || !target) return false;
+  return activeRail.contains(target);
+}
+
+function stopMobileRailScrollEvent(event) {
+  event.stopPropagation();
+  if (typeof event.stopImmediatePropagation === "function") {
+    event.stopImmediatePropagation();
+  }
+}
+
+function blockMobileRailScrollEvent(event) {
+  event.preventDefault();
+  stopMobileRailScrollEvent(event);
+}
+
+function scrollActiveMobileRail(deltaY) {
+  const scrollTarget = getActiveMobileRailScrollTarget();
+  if (!scrollTarget || !Number.isFinite(deltaY)) return;
+  scrollTarget.scrollTop += deltaY;
+}
+
+function setMobileRailFixedBodyLock(isLocked) {
+  if (isLocked && !mobileRailScrollLockActive) {
+    mobileRailScrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${mobileRailScrollLockY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.width = "100%";
+    mobileRailScrollLockActive = true;
+    return;
+  }
+
+  if (!isLocked && mobileRailScrollLockActive) {
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.width = "";
+    window.scrollTo(0, mobileRailScrollLockY);
+    mobileRailScrollLockY = 0;
+    mobileRailScrollLockActive = false;
+    mobileRailLastTouchY = null;
+  }
+}
+
+function syncMobileRailScrollLock() {
+  const shouldLock = isMobileRailOpen();
+  document.documentElement.classList.toggle("mobile-rail-scroll-locked", shouldLock);
+  document.body.classList.toggle("mobile-rail-scroll-locked", shouldLock);
+  if (dashboardShell) {
+    dashboardShell.classList.toggle("mobile-rail-scroll-locked", shouldLock);
+  }
+  if (commandMain) {
+    commandMain.classList.toggle("mobile-rail-scroll-locked", shouldLock);
+  }
+  setMobileRailFixedBodyLock(shouldLock);
+}
+
+function focusMainWorkspace() {
+  if (!commandMain) return;
+  if (!commandMain.hasAttribute("tabindex")) {
+    commandMain.setAttribute("tabindex", "-1");
+  }
+  commandMain.focus({ preventScroll: true });
+}
+
 function closeSidebar() {
   document.body.classList.remove("sidebar-open");
   if (!mobileSidebarQuery.matches) {
@@ -2223,6 +2483,7 @@ function closeSidebar() {
   }
   saveDrawerClosed(true);
   syncSidebarState();
+  syncMobileRailScrollLock();
 }
 
 function openSidebar() {
@@ -2236,10 +2497,19 @@ function openSidebar() {
   saveDrawerClosed(false);
   syncSidebarState();
   syncPersonalRailState();
+  syncMobileRailScrollLock();
 }
 
 function closeMobileSidebar() {
   closeSidebar();
+  if (mobileSidebarQuery.matches) {
+    document.body.classList.remove("personal-rail-open");
+    document.body.classList.add("personal-rail-collapsed");
+    savePersonalRailClosed(true);
+    syncPersonalRailState();
+    syncMobileRailScrollLock();
+    focusMainWorkspace();
+  }
 }
 
 function toggleBuildRail() {
@@ -2257,12 +2527,14 @@ function toggleBuildRail() {
   }
   syncSidebarState();
   syncPersonalRailState();
+  syncMobileRailScrollLock();
 }
 
 function applySavedPersonalRailState() {
   const savedClosed = readSavedPersonalRailClosed();
   document.body.classList.remove("personal-rail-open");
   document.body.classList.toggle("personal-rail-collapsed", savedClosed === true || mobileSidebarQuery.matches);
+  syncMobileRailScrollLock();
 }
 
 function syncPersonalRailState() {
@@ -2274,8 +2546,8 @@ function syncPersonalRailState() {
     const scope = button.dataset.railToggleScope || "";
     const isInternalToggle = scope === "personal-internal";
     button.setAttribute("aria-expanded", String(expanded));
-    const personalLabel = isInternalToggle ? "Hide Personal" : "Personal Tab";
-    button.setAttribute("aria-label", isInternalToggle ? "Hide Personal Tab" : (expanded ? "Toggle Personal Tab" : "Open Personal Tab"));
+    const personalLabel = isInternalToggle ? "Close Gallery" : "Gallery";
+    button.setAttribute("aria-label", isInternalToggle ? "Close Gallery" : (expanded ? "Toggle Gallery" : "Open Gallery"));
     const textTarget = button.querySelector("span");
     if (textTarget) {
       textTarget.textContent = personalLabel;
@@ -2299,10 +2571,82 @@ function togglePersonalRail() {
   }
   syncSidebarState();
   syncPersonalRailState();
+  syncMobileRailScrollLock();
 }
 
+function closeActiveMobileRailAfterSelection() {
+  if (!mobileSidebarQuery.matches) return;
+  closeActiveMobileRail();
+}
+
+function closeActiveMobileRail() {
+  if (!mobileSidebarQuery.matches) return;
+  document.body.classList.remove("sidebar-open");
+  document.body.classList.remove("personal-rail-open");
+  document.body.classList.add("sidebar-collapsed");
+  document.body.classList.add("personal-rail-collapsed");
+  saveDrawerClosed(true);
+  savePersonalRailClosed(true);
+  syncSidebarState();
+  syncPersonalRailState();
+  syncMobileRailScrollLock();
+  focusMainWorkspace();
+}
+
+function handleMobileRailOutsidePointer(event) {
+  if (!isMobileRailOpen()) return;
+  if (isInsideActiveMobileRail(event.target)) return;
+  if (event.target?.closest?.(".drawer-reopen, .personal-rail-toggle, .rail-internal-toggle, .rail-toggle-button, .sidebar-toggle")) return;
+  closeActiveMobileRail();
+}
+
+function handleMobileRailListSelection(event) {
+  if (!mobileSidebarQuery.matches) return;
+  const railList = event.currentTarget;
+  const selectedButton = event.target?.closest?.("button");
+  if (!selectedButton || !railList.contains(selectedButton)) return;
+  if (selectedButton.matches(".rail-internal-toggle, .rail-toggle-button, .sidebar-toggle, .personal-rail-close")) return;
+  window.setTimeout(closeActiveMobileRailAfterSelection, 0);
+}
+
+function containMobileRailTouch(event) {
+  if (!isMobileRailOpen()) return;
+  if (isInsideActiveMobileRail(event.target)) {
+    const currentTouchY = event.touches?.[0]?.clientY;
+    if (typeof currentTouchY === "number" && typeof mobileRailLastTouchY === "number") {
+      scrollActiveMobileRail(mobileRailLastTouchY - currentTouchY);
+      mobileRailLastTouchY = currentTouchY;
+    }
+    blockMobileRailScrollEvent(event);
+    return;
+  }
+  mobileRailLastTouchY = null;
+  blockMobileRailScrollEvent(event);
+}
+
+function containMobileRailWheel(event) {
+  if (!isMobileRailOpen()) return;
+  if (isInsideActiveMobileRail(event.target)) {
+    scrollActiveMobileRail(event.deltaY || 0);
+    blockMobileRailScrollEvent(event);
+    return;
+  }
+  blockMobileRailScrollEvent(event);
+}
+
+function trackMobileRailTouchStart(event) {
+  if (!isMobileRailOpen() || !isInsideActiveMobileRail(event.target)) {
+    mobileRailLastTouchY = null;
+    return;
+  }
+  const touchY = event.touches?.[0]?.clientY;
+  mobileRailLastTouchY = typeof touchY === "number" ? touchY : null;
+  stopMobileRailScrollEvent(event);
+}
 tabButtons.forEach((button) => {
   button.addEventListener("click", () => {
+    hideWelcomeStart();
+    clearFocusedStartView();
     const target = button.dataset.tab;
     setActiveTab(target);
   });
@@ -2310,7 +2654,15 @@ tabButtons.forEach((button) => {
 
 statusPanelButtons.forEach((button) => {
   button.addEventListener("click", () => {
+    hideWelcomeStart();
+    clearFocusedStartView();
     showStatusPanel(button.dataset.statusPanelButton);
+  });
+});
+
+welcomeActionButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    routeWelcomeAction(button.dataset.welcomeAction);
   });
 });
 
@@ -2326,6 +2678,8 @@ actionButtons.forEach((item) => {
       return;
     }
     if (action === "toggle-personal-rail") {
+      hideWelcomeStart();
+      clearFocusedStartView();
       togglePersonalRail();
       return;
     }
@@ -2335,6 +2689,8 @@ actionButtons.forEach((item) => {
           target.classList.toggle("active", target === item);
         }
       });
+      hideWelcomeStart();
+      clearFocusedStartView();
       setActiveTab(item.dataset.tab);
       return;
     }
@@ -2387,6 +2743,8 @@ youtubeRadioVolumeControls.forEach((control) => {
 
 sidebarToggle.addEventListener("click", closeSidebar);
 drawerReopen.addEventListener("click", () => {
+  hideWelcomeStart();
+  clearFocusedStartView();
   if (mobileSidebarQuery.matches) {
     toggleBuildRail();
     return;
@@ -2417,6 +2775,13 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+document.addEventListener("pointerdown", handleMobileRailOutsidePointer, { capture: true });
+document.addEventListener("touchstart", trackMobileRailTouchStart, { passive: false, capture: true });
+document.addEventListener("touchmove", containMobileRailTouch, { passive: false, capture: true });
+document.addEventListener("wheel", containMobileRailWheel, { passive: false, capture: true });
+contextRailList?.addEventListener("click", handleMobileRailListSelection);
+personalRailList?.addEventListener("click", handleMobileRailListSelection);
+
 applyDashboardTheme(readSavedDashboardTheme());
 const savedCommandCenterState = readCommandCenterState();
 if (savedCommandCenterState) {
@@ -2441,6 +2806,7 @@ applySavedPersonalRailState();
 syncSidebarState();
 syncPersonalRailState();
 setAssistantMode(activeAssistantMode);
+showWelcomeStart();
 loadStatusOverview();
 loadToolRegistryStatus();
 loadWorkTableAiInsights();
@@ -2466,6 +2832,7 @@ window.addEventListener("beforeunload", (event) => {
 });
 
 window.addEventListener("mousemove", (event) => {
+  if (isMobileRailOpen()) return;
   const x = (event.clientX / window.innerWidth - 0.5).toFixed(3);
   const y = (event.clientY / window.innerHeight - 0.5).toFixed(3);
   document.documentElement.style.setProperty("--mx", x);
@@ -2473,6 +2840,7 @@ window.addEventListener("mousemove", (event) => {
 });
 
 window.addEventListener("scroll", () => {
+  if (isMobileRailOpen()) return;
   const ratio = Math.min(window.scrollY / 700, 1).toFixed(3);
   document.documentElement.style.setProperty("--scroll", ratio);
 }, { passive: true });

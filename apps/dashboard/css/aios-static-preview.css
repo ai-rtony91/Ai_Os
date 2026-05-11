@@ -222,7 +222,7 @@ body.personal-rail-collapsed .dashboard-shell {
 }
 
 body.sidebar-collapsed.personal-rail-collapsed .dashboard-shell {
-  grid-template-columns: 0 minmax(0, 1fr) 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .command-sidebar,
@@ -569,7 +569,7 @@ body.sidebar-collapsed .command-sidebar {
   max-width: 0;
   height: 0;
   padding: 0;
-  border-right: 0;
+  border: 0;
   box-shadow: none;
   opacity: 0;
   overflow: hidden;
@@ -583,12 +583,26 @@ body.personal-rail-collapsed .personal-sidebar {
   max-width: 0;
   height: 0;
   padding: 0;
-  border-left: 0;
+  border: 0;
   box-shadow: none;
   opacity: 0;
   overflow: hidden;
   pointer-events: none;
   transform: translateX(104%);
+  visibility: hidden;
+}
+
+body.rail-owner-build .personal-sidebar,
+body.rail-owner-personal .command-sidebar {
+  width: 0;
+  max-width: 0;
+  height: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
   visibility: hidden;
 }
 
@@ -755,6 +769,210 @@ body.sidebar-collapsed .top-rail-controls {
 
 body:not(.personal-rail-collapsed) .top-rail-controls .personal-rail-toggle {
   display: none;
+}
+
+.welcome-start-screen {
+  display: none;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: calc(100dvh - 124px - env(safe-area-inset-bottom));
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: clamp(28px, 7vw, 72px) 16px;
+  overflow: hidden;
+}
+
+.welcome-start-screen[hidden] {
+  display: none;
+}
+
+body.welcome-start-active .welcome-start-screen {
+  display: flex;
+}
+
+body.welcome-start-active .utility-status,
+body.welcome-start-active .refresh-guard-message,
+body.welcome-start-active .command-guide-strip,
+body.welcome-start-active .command-stage {
+  display: none;
+}
+
+body.welcome-start-active .dashboard-shell {
+  grid-template-columns: 1fr;
+  min-height: 100dvh;
+}
+
+body.welcome-start-active .command-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+body.welcome-start-active .command-sidebar,
+body.welcome-start-active .personal-sidebar {
+  display: none;
+}
+
+body.welcome-start-active .status-strip {
+  position: relative;
+  z-index: 3;
+  justify-content: space-between;
+  grid-template-columns: max-content max-content;
+}
+
+body.welcome-start-active .status-strip .drawer-reopen,
+body.welcome-start-active .top-rail-controls .personal-rail-toggle {
+  display: inline-flex;
+}
+
+body.welcome-start-active .top-rail-controls {
+  grid-column: 2;
+  justify-self: end;
+}
+
+.welcome-ghost-logo {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  margin: 0 0 34px;
+  color: rgba(229, 246, 255, 0.34);
+  font-family: var(--font-terminal-display);
+  font-size: clamp(68px, 18vw, 172px);
+  font-weight: 800;
+  line-height: 0.9;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.22), 0 0 62px rgba(56, 189, 248, 0.16);
+  user-select: none;
+}
+
+.welcome-ghost-logo::before {
+  content: "";
+  position: absolute;
+  inset: -22% -18%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.12), transparent 66%);
+  filter: blur(12px);
+}
+
+.welcome-logo-mark {
+  position: relative;
+  color: rgba(229, 246, 255, 0.42);
+}
+
+.welcome-logo-mark::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -0.07em;
+  height: 0.035em;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.72);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
+}
+
+.welcome-logo-os {
+  color: rgba(138, 167, 191, 0.2);
+  text-shadow: 0 0 24px rgba(138, 167, 191, 0.16);
+}
+
+.welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  width: min(100%, 520px);
+}
+
+.welcome-actions button {
+  min-width: min(100%, 152px);
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 1px solid rgba(56, 189, 248, 0.34);
+  color: var(--text-primary);
+  background: rgba(5, 7, 11, 0.54);
+  box-shadow: 0 0 26px rgba(0, 163, 255, 0.14), inset 0 0 16px rgba(56, 189, 248, 0.06);
+  cursor: pointer;
+}
+
+.welcome-actions button:hover,
+.welcome-actions button:focus {
+  color: var(--accent-action);
+  border-color: var(--line-hot);
+  outline: none;
+  box-shadow: var(--glow-focus);
+}
+
+body.focused-start-view-active .command-guide-strip,
+body.focused-start-view-active .workspace-detail-side,
+body.focused-start-view-active .workspace-detail-console,
+body.focused-start-view-active .assistant-console-head,
+body.focused-start-view-active .assistant-mode-row,
+body.focused-start-view-active .assistant-context-packet,
+body.focused-start-view-active .detail-message-row,
+body.focused-start-view-active .personal-gallery-panel,
+body.focused-start-view-active .personal-apps-panel {
+  display: none !important;
+}
+
+body.focused-start-view-active .command-stage.command-workspace.active {
+  justify-items: center;
+  align-content: center;
+  min-height: calc(100dvh - 140px - env(safe-area-inset-bottom));
+}
+
+body.focused-start-view-active .workspace-detail-card {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 720px);
+  min-height: auto;
+  margin-inline: auto;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.focused-start-view-active .workspace-section-head {
+  margin-bottom: 0;
+  text-align: center;
+}
+
+body.focused-start-view-active .workspace-detail-grid {
+  display: block;
+}
+
+body.focused-start-view-active .workspace-detail-main {
+  display: grid;
+  gap: 12px;
+  border-color: rgba(56, 189, 248, 0.28);
+  background: rgba(5, 7, 11, 0.54);
+}
+
+body.focused-route-start-project .project-hub-panel,
+body.focused-route-start-project .trading-lab-next-action-card,
+body.focused-route-archives .assistant-output,
+body.focused-route-archives .workspace-placeholder,
+body.focused-route-archives .trading-lab-next-action-card,
+body.focused-route-trading-lab .assistant-output,
+body.focused-route-trading-lab .workspace-placeholder,
+body.focused-route-trading-lab .project-hub-panel {
+  display: none;
+}
+
+body.focused-route-start-project .assistant-output,
+body.focused-route-start-project .workspace-placeholder,
+body.focused-route-archives .project-hub-panel,
+body.focused-route-trading-lab .trading-lab-next-action-card {
+  margin-top: 0;
+}
+
+body.focused-route-archives .project-hub-panel {
+  display: grid;
 }
 
 .utility-status small {
@@ -1294,6 +1512,64 @@ body:not(.personal-rail-collapsed) .top-rail-controls .personal-rail-toggle {
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.trading-lab-next-action-card {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--line-card);
+  background: rgba(5, 7, 11, 0.68);
+}
+
+.trading-lab-next-action-card[hidden] {
+  display: none;
+}
+
+.trading-lab-card-head,
+.trading-lab-next-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.trading-lab-card-head strong,
+.trading-lab-next-step strong {
+  color: var(--accent-action);
+}
+
+.trading-lab-card-head span,
+.trading-lab-field span,
+.trading-lab-next-step span {
+  color: var(--text-soft);
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.trading-lab-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.trading-lab-field {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line-subtle);
+  background: rgba(2, 6, 12, 0.52);
+}
+
+.trading-lab-field strong,
+.trading-lab-next-step strong {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .project-hub-panel {
@@ -3103,25 +3379,147 @@ body:not(.personal-rail-collapsed) .top-rail-controls .personal-rail-toggle {
 }
 
 @media (max-width: 1120px) {
+  body.welcome-start-active .dashboard-shell {
+    grid-template-columns: 1fr;
+  }
+
+  body.welcome-start-active .command-main {
+    min-height: 100dvh;
+  }
+
+  body.welcome-start-active .welcome-start-screen {
+    min-height: calc(100dvh - 142px - env(safe-area-inset-bottom));
+  }
+
+  body.focused-start-view-active .command-stage.command-workspace.active {
+    min-height: calc(100dvh - 154px - env(safe-area-inset-bottom));
+  }
+
   .dashboard-shell {
     grid-template-columns: 1fr;
+    transition: none;
   }
 
   body.sidebar-collapsed .dashboard-shell,
   body.personal-rail-collapsed .dashboard-shell,
-  body.sidebar-collapsed.personal-rail-collapsed .dashboard-shell {
+  body.sidebar-collapsed.personal-rail-collapsed .dashboard-shell,
+  body.rail-owner-build .dashboard-shell,
+  body.rail-owner-personal .dashboard-shell {
     grid-template-columns: 1fr;
+  }
+
+  body.sidebar-open .dashboard-shell,
+  body.personal-rail-open .dashboard-shell,
+  body.mobile-rail-scroll-locked .dashboard-shell {
+    grid-template-columns: 1fr;
+    transition: none;
   }
 
   .command-sidebar,
   .personal-sidebar {
     position: fixed;
+    grid-column: 1 / -1;
     width: min(84vw, 320px);
     height: 100vh;
     padding-top: calc(72px + env(safe-area-inset-top));
     opacity: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     pointer-events: none;
+    -webkit-overflow-scrolling: touch;
     visibility: hidden;
+    contain: layout paint;
+  }
+
+  html.mobile-rail-scroll-locked,
+  body.mobile-rail-scroll-locked {
+    height: 100vh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .dashboard-shell.mobile-rail-scroll-locked,
+  body.mobile-rail-scroll-locked .dashboard-shell {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .command-main.mobile-rail-scroll-locked,
+  body.mobile-rail-scroll-locked .command-main {
+    overflow: hidden;
+    overscroll-behavior: none;
+    pointer-events: none;
+    touch-action: none;
+    transition: none !important;
+  }
+
+  body.mobile-rail-scroll-locked .command-main *,
+  body.mobile-rail-scroll-locked .status-strip,
+  body.mobile-rail-scroll-locked .utility-status,
+  body.mobile-rail-scroll-locked .top-rail-controls {
+    transition: none !important;
+    animation-play-state: paused !important;
+  }
+
+  body.mobile-rail-scroll-locked .background-layer,
+  body.mobile-rail-scroll-locked .layer-base,
+  body.mobile-rail-scroll-locked .layer-grid,
+  body.mobile-rail-scroll-locked .layer-glow,
+  body.mobile-rail-scroll-locked .core-orbits,
+  body.mobile-rail-scroll-locked .depth-parallax-ready,
+  body.mobile-rail-scroll-locked .depth-parallax-ready .status-card {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  body.mobile-rail-scroll-locked .glass-card:hover,
+  body.mobile-rail-scroll-locked .glass-card:focus-within,
+  body.mobile-rail-scroll-locked .glass-card.tap-pop,
+  body.mobile-rail-scroll-locked .status-card:hover,
+  body.mobile-rail-scroll-locked .status-card:focus-within,
+  body.mobile-rail-scroll-locked .status-card.tap-pop,
+  body.mobile-rail-scroll-locked .work-card:hover,
+  body.mobile-rail-scroll-locked .work-card:focus-within,
+  body.mobile-rail-scroll-locked .work-card.tap-pop,
+  body.mobile-rail-scroll-locked .workspace-panel:hover,
+  body.mobile-rail-scroll-locked .workspace-panel:focus-within,
+  body.mobile-rail-scroll-locked .workspace-panel.tap-pop,
+  body.mobile-rail-scroll-locked .vault-card:hover,
+  body.mobile-rail-scroll-locked .vault-card:focus-within,
+  body.mobile-rail-scroll-locked .vault-card.tap-pop,
+  body.mobile-rail-scroll-locked .chart-card:hover,
+  body.mobile-rail-scroll-locked .chart-card:focus-within,
+  body.mobile-rail-scroll-locked .chart-card.tap-pop {
+    transform: none !important;
+  }
+
+  body.mobile-rail-scroll-locked .layer-grid,
+  body.mobile-rail-scroll-locked .core-orbits,
+  body.mobile-rail-scroll-locked .orbit,
+  body.mobile-rail-scroll-locked .digital-globe,
+  body.mobile-rail-scroll-locked .globe-grid,
+  body.mobile-rail-scroll-locked .globe-network,
+  body.mobile-rail-scroll-locked .globe-nodes {
+    animation-play-state: paused !important;
+  }
+
+  body.mobile-rail-scroll-locked .command-sidebar,
+  body.mobile-rail-scroll-locked .personal-sidebar {
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    pointer-events: auto;
+    touch-action: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .context-rail-list,
+  .personal-rail-list {
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: none;
+    -webkit-overflow-scrolling: touch;
   }
 
   .command-sidebar {
@@ -3226,7 +3624,9 @@ body:not(.personal-rail-collapsed) .top-rail-controls .personal-rail-toggle {
   }
 
   body.sidebar-collapsed .command-sidebar,
-  body.personal-rail-collapsed .personal-sidebar {
+  body.personal-rail-collapsed .personal-sidebar,
+  body.rail-owner-personal .command-sidebar,
+  body.rail-owner-build .personal-sidebar {
     width: 0;
     max-width: 0;
     height: 0;
@@ -3481,6 +3881,23 @@ body:not(.personal-rail-collapsed) .top-rail-controls .personal-rail-toggle {
 }
 
 @media (max-width: 430px) {
+  body.welcome-start-active .welcome-start-screen {
+    min-height: calc(100dvh - 118px - env(safe-area-inset-bottom));
+    padding-inline: 10px;
+  }
+
+  body.focused-start-view-active .command-stage.command-workspace.active {
+    min-height: calc(100dvh - 130px - env(safe-area-inset-bottom));
+  }
+
+  .welcome-actions {
+    flex-direction: column;
+  }
+
+  .welcome-actions button {
+    width: min(100%, 260px);
+  }
+
   .status-strip,
   .status-panel-tabs,
   .side-nav {
@@ -3543,6 +3960,10 @@ body:not(.personal-rail-collapsed) .top-rail-controls .personal-rail-toggle {
 
   .tool-registry-summary,
   .tool-registry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trading-lab-field-grid {
     grid-template-columns: 1fr;
   }
 
