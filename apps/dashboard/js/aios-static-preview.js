@@ -875,12 +875,19 @@ async function renderTradingLabNextActionCard() {
   } catch (error) {
     renderTradingLabNextActionData({
       badge: "MOCK ONLY",
-      active_strategy: "Strategy review pending",
-      market_regime: "UNKNOWN",
-      mock_execution_status: "Not started",
-      risk_state: "Locked",
-      last_journal_review: "No journal review yet",
-      next_safe_action: "Review one strategy and score a mock signal."
+      active_strategy: "Phase 14.1 strategy registry review",
+      market_regime: "Paper-only regime review pending",
+      mock_execution_status: "Simulation-only profitability validation",
+      risk_state: "Locked until Phase 14.1 risk gate review",
+      last_journal_review: "Profitability scorecard review pending",
+      next_safe_action: "Start Phase 14.1 paper-only edge validation: review strategy registry, signal intake, risk gate, and profitability scorecard.",
+      blocked: [
+        "No broker",
+        "No OANDA",
+        "No API keys",
+        "No live orders",
+        "Paper-only / simulation-only"
+      ]
     });
   }
 }
