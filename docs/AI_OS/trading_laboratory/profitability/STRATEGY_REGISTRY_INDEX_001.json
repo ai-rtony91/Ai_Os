@@ -1,0 +1,54 @@
+{
+  "registry_id": "STRATEGY_REGISTRY_INDEX_001",
+  "status": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_orders",
+    "live_market_data_dependency"
+  ],
+  "strategies": [
+    {
+      "strategy_id": "MOCK_STRATEGY_001",
+      "strategy_name": "Mock Trend Continuation Review",
+      "version": "0.1.0-paper",
+      "market": "mock_forex",
+      "timeframe": "mock_1h",
+      "status": "paper_review_only",
+      "linked_signal_ids": [
+        "MOCK_SIGNAL_001"
+      ],
+      "linked_result_ids": []
+    }
+  ],
+  "traceability_fields": [
+    "strategy_id",
+    "signal_id",
+    "regime_id",
+    "risk_gate_id",
+    "paper_trade_id",
+    "profitability_scorecard_id"
+  ],
+  "paper_metrics": {
+    "win_rate": null,
+    "average_win": null,
+    "average_loss": null,
+    "expectancy": null,
+    "profit_factor": null,
+    "max_drawdown": null,
+    "trade_count": 0,
+    "confidence_score": 0,
+    "blocked_reason": "Insufficient paper trade history."
+  },
+  "draft_validation_thresholds": {
+    "not_approved_for_live_trading": true,
+    "minimum_trade_count": 30,
+    "minimum_expectancy_r": 0.0,
+    "minimum_profit_factor": 1.2,
+    "maximum_drawdown_percent": 10,
+    "minimum_confidence_score": 70
+  },
+  "next_safe_action": "Add one paper signal intake record and keep execution blocked."
+}

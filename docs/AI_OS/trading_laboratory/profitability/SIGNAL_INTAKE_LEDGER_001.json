@@ -1,0 +1,55 @@
+{
+  "ledger_id": "SIGNAL_INTAKE_LEDGER_001",
+  "status": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_orders",
+    "live_market_data_dependency"
+  ],
+  "signals": [
+    {
+      "signal_id": "MOCK_SIGNAL_001",
+      "strategy_id": "MOCK_STRATEGY_001",
+      "source": "manual_mock_review",
+      "symbol": "MOCK_EUR_USD",
+      "timeframe": "mock_1h",
+      "direction": "long_review",
+      "intake_status": "accepted_for_paper_review_only",
+      "regime_id": "REGIME_FILTER_001",
+      "risk_gate_id": "RISK_GATE_PROFITABILITY_001",
+      "paper_trade_id": "PAPER_TRADE_SIM_001",
+      "profitability_scorecard_id": "PAPER_PROFITABILITY_SCORECARD_001",
+      "blocked_reason": "Paper validation not complete."
+    }
+  ],
+  "regime_tags": {
+    "trend_state": "trend_review_pending",
+    "volatility_state": "unknown",
+    "chop_risk": "unknown",
+    "session_context": "mock_only"
+  },
+  "risk_gate_status": {
+    "status": "blocked",
+    "reason": "Risk gate not completed for paper validation."
+  },
+  "paper_metrics": {
+    "win_rate": null,
+    "average_win": null,
+    "average_loss": null,
+    "expectancy": null,
+    "profit_factor": null,
+    "max_drawdown": null,
+    "trade_count": 0,
+    "confidence_score": 0,
+    "blocked_reason": "No completed simulated outcomes."
+  },
+  "draft_validation_thresholds": {
+    "not_approved_for_live_trading": true,
+    "minimum_trade_count": 30,
+    "minimum_confidence_score": 70
+  },
+  "next_safe_action": "Run paper regime filter and paper risk gate before recording simulated outcome."
+}

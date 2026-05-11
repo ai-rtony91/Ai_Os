@@ -1,0 +1,40 @@
+{
+  "scorecard_id": "PAPER_PROFITABILITY_SCORECARD_001",
+  "status": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_orders",
+    "live_market_data_dependency"
+  ],
+  "traceability": {
+    "strategy_id": "MOCK_STRATEGY_001",
+    "signal_id": "MOCK_SIGNAL_001",
+    "regime_id": "REGIME_FILTER_001",
+    "risk_gate_id": "RISK_GATE_PROFITABILITY_001",
+    "paper_trade_id": "PAPER_TRADE_SIM_001"
+  },
+  "paper_metrics": {
+    "win_rate": null,
+    "average_win": null,
+    "average_loss": null,
+    "expectancy": null,
+    "profit_factor": null,
+    "max_drawdown": null,
+    "trade_count": 0,
+    "confidence_score": 0,
+    "blocked_reason": "Insufficient paper sample size."
+  },
+  "draft_validation_thresholds": {
+    "not_approved_for_live_trading": true,
+    "minimum_trade_count": 30,
+    "minimum_expectancy_r": 0.0,
+    "minimum_profit_factor": 1.2,
+    "maximum_drawdown_percent": 10,
+    "minimum_confidence_score": 70
+  },
+  "scorecard_decision": "blocked_for_live_execution",
+  "next_safe_action": "Collect clean paper outcomes before reviewing profitability confidence."
+}

@@ -1,0 +1,45 @@
+{
+  "regime_id": "REGIME_FILTER_001",
+  "status": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_orders",
+    "live_market_data_dependency"
+  ],
+  "traceability": {
+    "strategy_id": "MOCK_STRATEGY_001",
+    "signal_id": "MOCK_SIGNAL_001"
+  },
+  "regime_tags": {
+    "trend_state": "trend_review_pending",
+    "volatility_state": "unknown",
+    "chop_risk": "unknown",
+    "liquidity_context": "unknown",
+    "session_context": "mock_only"
+  },
+  "regime_filter_status": {
+    "status": "blocked",
+    "approved_for_paper_simulation": false,
+    "blocked_reason": "Regime evidence is incomplete."
+  },
+  "paper_metrics": {
+    "win_rate": null,
+    "average_win": null,
+    "average_loss": null,
+    "expectancy": null,
+    "profit_factor": null,
+    "max_drawdown": null,
+    "trade_count": 0,
+    "confidence_score": 0,
+    "blocked_reason": "Regime filter is not approved."
+  },
+  "draft_validation_thresholds": {
+    "not_approved_for_live_trading": true,
+    "minimum_trade_count": 30,
+    "minimum_confidence_score": 70
+  },
+  "next_safe_action": "Tag mock trend, volatility, and chop risk before paper simulation."
+}

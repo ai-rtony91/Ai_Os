@@ -1,0 +1,46 @@
+{
+  "ledger_id": "PAPER_TRADE_SIMULATION_LEDGER_001",
+  "status": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_orders",
+    "live_market_data_dependency"
+  ],
+  "paper_trades": [
+    {
+      "paper_trade_id": "PAPER_TRADE_SIM_001",
+      "strategy_id": "MOCK_STRATEGY_001",
+      "signal_id": "MOCK_SIGNAL_001",
+      "regime_id": "REGIME_FILTER_001",
+      "risk_gate_id": "RISK_GATE_PROFITABILITY_001",
+      "symbol": "MOCK_EUR_USD",
+      "direction": "long_review",
+      "entry_type": "simulated_only",
+      "result_status": "not_executed",
+      "result_r": null,
+      "blocked_reason": "Risk gate and paper validation are incomplete."
+    }
+  ],
+  "paper_metrics": {
+    "win_rate": null,
+    "average_win": null,
+    "average_loss": null,
+    "expectancy": null,
+    "profit_factor": null,
+    "max_drawdown": null,
+    "trade_count": 0,
+    "confidence_score": 0,
+    "blocked_reason": "No simulated trades completed."
+  },
+  "draft_validation_thresholds": {
+    "not_approved_for_live_trading": true,
+    "minimum_trade_count": 30,
+    "minimum_expectancy_r": 0.0,
+    "minimum_profit_factor": 1.2,
+    "maximum_drawdown_percent": 10
+  },
+  "next_safe_action": "Complete paper-only risk gate before adding a simulated result."
+}

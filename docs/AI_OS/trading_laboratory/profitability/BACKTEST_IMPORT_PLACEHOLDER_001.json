@@ -1,0 +1,48 @@
+{
+  "import_id": "BACKTEST_IMPORT_PLACEHOLDER_001",
+  "status": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_orders",
+    "live_market_data_dependency"
+  ],
+  "source": {
+    "source_type": "manual_or_csv_placeholder",
+    "live_market_data_dependency": false,
+    "broker_dependency": false,
+    "api_key_dependency": false
+  },
+  "traceability_required_fields": [
+    "strategy_id",
+    "signal_id",
+    "regime_id",
+    "risk_gate_id",
+    "paper_trade_id",
+    "profitability_scorecard_id"
+  ],
+  "expected_metric_fields": [
+    "win_rate",
+    "average_win",
+    "average_loss",
+    "expectancy",
+    "profit_factor",
+    "max_drawdown",
+    "trade_count",
+    "confidence_score",
+    "blocked_reason"
+  ],
+  "draft_validation_thresholds": {
+    "not_approved_for_live_trading": true,
+    "minimum_trade_count": 30,
+    "minimum_expectancy_r": 0.0,
+    "minimum_profit_factor": 1.2,
+    "maximum_drawdown_percent": 10,
+    "minimum_confidence_score": 70
+  },
+  "import_status": "placeholder_not_connected",
+  "blocked_reason": "No validated paper dataset has been imported.",
+  "next_safe_action": "Prepare a clean mock backtest import sample without broker or live data dependencies."
+}
