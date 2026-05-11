@@ -79,8 +79,13 @@ const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.j
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 const personalGalleryManifestPath = "private-media/service-gallery/gallery.local.json";
-const youtubeRadioVideoId = "VFzsSbdS7Sk";
-const youtubeRadioPlaylistId = "RDVFzsSbdS7Sk";
+const youtubeRadioTracks = [
+  { videoId: "VFzsSbdS7Sk", playlistId: "RDVFzsSbdS7Sk" },
+  { videoId: "g5VSkAHGgF8", playlistId: "RDAMVMLwd7WQ8L5dQ" }
+];
+const youtubeRadioDefaultTrack = youtubeRadioTracks[0];
+const youtubeRadioVideoId = youtubeRadioDefaultTrack.videoId;
+const youtubeRadioPlaylistId = youtubeRadioDefaultTrack.playlistId;
 const youtubeRadioLocalFileFallback = "Embedded playback unavailable in local file preview. Use local server preview or External Handoff.";
 const youtubeRadioLocalServerCommand = "Local HTTP preview: python -m http.server 8080";
 const youtubeRadioResumeMessage = "Press Play to resume";
