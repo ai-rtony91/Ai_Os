@@ -1572,6 +1572,76 @@ body.focused-route-archives .project-hub-panel {
   overflow-wrap: anywhere;
 }
 
+.trading-stack-hub {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-subtle);
+}
+
+.trading-stack-hub-head,
+.trading-stack-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.trading-stack-hub-head strong,
+.trading-stack-panel-head strong {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.trading-stack-hub-head span,
+.trading-stack-panel-head span {
+  color: var(--state-warn);
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.trading-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trading-stack-panel {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line-subtle);
+  background: rgba(2, 6, 12, 0.56);
+}
+
+.trading-stack-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 16px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.trading-stack-list li,
+.trading-stack-note {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.trading-stack-note {
+  margin: 0;
+  color: var(--state-danger);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
 .project-hub-panel {
   display: grid;
   gap: 12px;
@@ -3964,6 +4034,10 @@ body.focused-route-archives .project-hub-panel {
   }
 
   .trading-lab-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trading-stack-grid {
     grid-template-columns: 1fr;
   }
 

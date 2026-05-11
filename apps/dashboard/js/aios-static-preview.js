@@ -837,6 +837,99 @@ function createTradingLabField(label, value) {
   return item;
 }
 
+function createTradingStackList(items) {
+  const list = document.createElement("ul");
+  list.className = "trading-stack-list";
+  items.forEach((item) => {
+    const entry = document.createElement("li");
+    entry.textContent = item;
+    list.append(entry);
+  });
+  return list;
+}
+
+function createTradingStackPanel(title, status, items, footer) {
+  const panel = document.createElement("article");
+  panel.className = "trading-stack-panel";
+
+  const heading = document.createElement("div");
+  heading.className = "trading-stack-panel-head";
+  const titleText = document.createElement("strong");
+  titleText.textContent = title;
+  const statusText = document.createElement("span");
+  statusText.textContent = status;
+  heading.append(titleText, statusText);
+
+  const body = createTradingStackList(items);
+  const note = document.createElement("p");
+  note.className = "trading-stack-note";
+  note.textContent = footer;
+
+  panel.append(heading, body, note);
+  return panel;
+}
+
+function renderTradingStackHub() {
+  const hub = document.createElement("section");
+  hub.className = "trading-stack-hub";
+  hub.setAttribute("aria-label", "AI_OS Trading Stack Hub");
+
+  const header = document.createElement("div");
+  header.className = "trading-stack-hub-head";
+  const title = document.createElement("strong");
+  title.textContent = "AI_OS Trading Stack Hub";
+  const badge = document.createElement("span");
+  badge.textContent = "mock-only / paper-only";
+  header.append(title, badge);
+
+  const grid = document.createElement("div");
+  grid.className = "trading-stack-grid";
+  grid.append(
+    createTradingStackPanel(
+      "TradingView Chart Panel",
+      "official widget placeholder",
+      [
+        "AI_OS-owned interface; no TradingView UI copied.",
+        "Official widget/embed placeholder only.",
+        "Symbol selector placeholder.",
+        "Timeframe notes and strategy notes.",
+        "Alert payload placeholder; no real webhook.",
+        "Partner/referral placeholder pending approval."
+      ],
+      "No API keys, no broker connection, no orders."
+    ),
+    createTradingStackPanel(
+      "AI_OS Validation Layer",
+      "live execution BLOCKED",
+      [
+        "Signal intake review.",
+        "Regime filter.",
+        "Risk gate.",
+        "Paper profitability scorecard.",
+        "Blocked/unblocked status remains paper-only.",
+        "No broker connected."
+      ],
+      "AI_OS validates; it does not place trades."
+    ),
+    createTradingStackPanel(
+      "TradersPost Route Panel",
+      "paper-only route status",
+      [
+        "Webhook JSON preview mock-only.",
+        "Setup checklist placeholder.",
+        "Manual external setup handoff placeholder.",
+        "Partner/referral placeholder pending approval.",
+        "No real webhook.",
+        "No API keys or orders."
+      ],
+      "Routing stays blocked until separate approval."
+    )
+  );
+
+  hub.append(header, grid);
+  return hub;
+}
+
 function renderTradingLabNextActionData(data) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
@@ -866,7 +959,7 @@ function renderTradingLabNextActionData(data) {
   nextValue.textContent = data.next_safe_action || "Review one strategy and score a mock signal.";
   nextAction.append(nextLabel, nextValue);
 
-  tradingLabNextActionCard.replaceChildren(title, fields, nextAction);
+  tradingLabNextActionCard.replaceChildren(title, fields, nextAction, renderTradingStackHub());
 }
 
 async function renderTradingLabNextActionCard() {
