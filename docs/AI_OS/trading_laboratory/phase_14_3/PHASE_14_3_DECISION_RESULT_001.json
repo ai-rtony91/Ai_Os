@@ -1,0 +1,82 @@
+{
+  "decision_id": "PHASE_14_3_DECISION_RESULT_001",
+  "phase": "14.3",
+  "mode": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "execution_allowed": false,
+  "approved_for_live_execution": false,
+  "decision_result": "BLOCKED",
+  "allowed_decision_results": [
+    "BLOCKED",
+    "PAPER_REVIEW_READY",
+    "INSUFFICIENT_DATA"
+  ],
+  "source_trace": {
+    "phase_14_2_workflow_id": "PHASE_14_2_SIGNAL_TO_SCORECARD_TRACE_001",
+    "strategy_id": "MOCK_STRATEGY_001",
+    "mock_signal_id": "MOCK_SIGNAL_001",
+    "latency_id": "LATENCY_001",
+    "mock_regime_id": "MOCK_REGIME_001",
+    "profitability_regime_filter_id": "REGIME_FILTER_001",
+    "mock_risk_gate_id": "MOCK_RISK_GATE_001",
+    "profitability_risk_gate_id": "RISK_GATE_PROFITABILITY_001",
+    "paper_trade_id": "PAPER_TRADE_SIM_001",
+    "scorecard_id": "PAPER_PROFITABILITY_SCORECARD_001"
+  },
+  "decision_inputs": {
+    "latency_status": "acceptable",
+    "signal_confidence_tier": "very_low",
+    "regime_status": "not_approved",
+    "regime_evidence_complete_for_paper_review": false,
+    "risk_gate_status": "blocked",
+    "risk_evidence_complete_for_paper_review": false,
+    "paper_trade_result_status": "not_executed",
+    "scorecard_decision": "blocked_for_live_execution",
+    "trade_count": 0,
+    "confidence_score": 0
+  },
+  "decision_rules": {
+    "blocked_if_live_execution_not_blocked": true,
+    "blocked_if_execution_allowed_true": true,
+    "blocked_if_risk_gate_incomplete": true,
+    "blocked_if_regime_not_approved": true,
+    "blocked_if_signal_confidence_very_low": true,
+    "blocked_if_scorecard_blocks_live_execution": true,
+    "paper_review_ready_requires_complete_traceability": true,
+    "paper_review_ready_requires_latency_acceptable_or_delayed": true,
+    "paper_review_ready_requires_regime_and_risk_paper_evidence": true,
+    "insufficient_data_if_paper_outcomes_missing": true,
+    "insufficient_data_if_trade_count_below_threshold": true,
+    "insufficient_data_if_confidence_score_too_low": true
+  },
+  "blocked_reasons": [
+    "Signal confidence tier is very_low.",
+    "Regime is not approved.",
+    "Risk gate is incomplete.",
+    "Scorecard blocks live execution.",
+    "No completed paper outcome exists."
+  ],
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "real_webhooks",
+    "real_orders",
+    "live_market_data_dependency",
+    "live_trading",
+    "automatic_route_execution"
+  ],
+  "safety_confirmation": {
+    "no_dashboard_change": true,
+    "no_music_companion_change": true,
+    "no_broker_connection": true,
+    "no_OANDA": true,
+    "no_API_keys": true,
+    "no_real_webhooks": true,
+    "no_real_orders": true,
+    "no_live_trading": true,
+    "validator_read_only": true,
+    "live_execution_remains_blocked": true
+  },
+  "next_safe_action": "Keep decision_result BLOCKED and collect paper-only regime, risk, and outcome evidence before any paper review readiness update."
+}
