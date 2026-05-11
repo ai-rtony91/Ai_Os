@@ -81,7 +81,9 @@ const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.examp
 const personalGalleryManifestPath = "private-media/service-gallery/gallery.local.json";
 const youtubeRadioTracks = [
   { videoId: "VFzsSbdS7Sk", playlistId: "RDVFzsSbdS7Sk" },
-  { videoId: "g5VSkAHGgF8", playlistId: "RDAMVMLwd7WQ8L5dQ" }
+  { videoId: "g5VSkAHGgF8", playlistId: "RDAMVMLwd7WQ8L5dQ" },
+  { videoId: "nZpdxwnQmjI", playlistId: "RDAMVMLwd7WQ8L5dQ", title: "97Kickstvr - Waiting For You" },
+  { videoId: "UaB9JBzgPPA", playlistId: "RDAMVMLwd7WQ8L5dQ", title: "Last Memory" }
 ];
 const youtubeRadioDefaultTrack = youtubeRadioTracks[0];
 const youtubeRadioVideoId = youtubeRadioDefaultTrack.videoId;
