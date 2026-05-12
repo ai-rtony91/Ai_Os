@@ -1,0 +1,92 @@
+{
+  "matrix_name": "AI_OS Agent Workflow Blocked Actions Matrix",
+  "matrix_version": "0.1",
+  "mode": "local_file_based",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "background_execution_status": "BLOCKED",
+  "scheduled_automation_status": "BLOCKED",
+  "startup_persistence_status": "BLOCKED",
+  "blocked_actions": [
+    {
+      "category": "live trading",
+      "status": "BLOCKED",
+      "reason": "AI_OS workflow planning cannot enable live trading."
+    },
+    {
+      "category": "broker execution",
+      "status": "BLOCKED",
+      "reason": "No broker connection or broker execution is allowed."
+    },
+    {
+      "category": "OANDA execution",
+      "status": "BLOCKED",
+      "reason": "OANDA execution is not enabled."
+    },
+    {
+      "category": "API keys",
+      "status": "BLOCKED",
+      "reason": "API keys must not be created, requested, stored, or enabled."
+    },
+    {
+      "category": "secrets",
+      "status": "BLOCKED",
+      "reason": "Secrets, tokens, passwords, and credentials must not be touched."
+    },
+    {
+      "category": "real webhooks",
+      "status": "BLOCKED",
+      "reason": "Real webhook execution is not allowed."
+    },
+    {
+      "category": "real orders",
+      "status": "BLOCKED",
+      "reason": "Real orders are not allowed."
+    },
+    {
+      "category": "external LLM install",
+      "status": "NOT_ENABLED",
+      "reason": "External LLM frameworks are not installed in this phase."
+    },
+    {
+      "category": "background execution",
+      "status": "BLOCKED",
+      "reason": "The workflow does not create background tasks."
+    },
+    {
+      "category": "scheduled automation",
+      "status": "BLOCKED",
+      "reason": "The workflow does not create scheduled tasks."
+    },
+    {
+      "category": "startup persistence",
+      "status": "BLOCKED",
+      "reason": "The workflow does not add startup persistence."
+    },
+    {
+      "category": "payments",
+      "status": "BLOCKED",
+      "reason": "Payment enablement is outside this phase."
+    },
+    {
+      "category": "account login systems",
+      "status": "BLOCKED",
+      "reason": "Account login systems are outside this phase."
+    },
+    {
+      "category": "Play Store submission",
+      "status": "BLOCKED",
+      "reason": "Play Store submission is not part of this workflow architecture phase."
+    },
+    {
+      "category": "profit guarantees",
+      "status": "BLOCKED",
+      "reason": "Profitability guarantees and financial claims are not allowed."
+    }
+  ]
+}
+

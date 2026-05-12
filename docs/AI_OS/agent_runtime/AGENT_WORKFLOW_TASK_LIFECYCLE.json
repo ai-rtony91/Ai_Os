@@ -1,0 +1,94 @@
+{
+  "schema_name": "AI_OS Agent Workflow Task Lifecycle",
+  "schema_version": "0.1",
+  "mode": "local_file_based",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "background_execution_status": "BLOCKED",
+  "workflow_states": [
+    "proposed",
+    "queued",
+    "ownership_checked",
+    "blocked_path_checked",
+    "ready_for_runner_preview",
+    "runner_previewed",
+    "ready_for_apply",
+    "apply_completed",
+    "validation_running",
+    "validation_passed",
+    "validation_failed",
+    "ready_for_review",
+    "done",
+    "blocked",
+    "deferred"
+  ],
+  "transitions": [
+    {
+      "from": "proposed",
+      "to": "queued",
+      "rule": "Task has required fields."
+    },
+    {
+      "from": "queued",
+      "to": "ownership_checked",
+      "rule": "Assigned agent exists in ownership rules."
+    },
+    {
+      "from": "ownership_checked",
+      "to": "blocked_path_checked",
+      "rule": "Assigned agent owns the lane or has an approved handoff."
+    },
+    {
+      "from": "blocked_path_checked",
+      "to": "ready_for_runner_preview",
+      "rule": "No blocked path or blocked action was requested."
+    },
+    {
+      "from": "ready_for_runner_preview",
+      "to": "runner_previewed",
+      "rule": "Read-only preview was produced."
+    },
+    {
+      "from": "runner_previewed",
+      "to": "ready_for_apply",
+      "rule": "Human approval is required before APPLY."
+    },
+    {
+      "from": "ready_for_apply",
+      "to": "apply_completed",
+      "rule": "User approved APPLY and files were changed inside approved paths."
+    },
+    {
+      "from": "apply_completed",
+      "to": "validation_running",
+      "rule": "Validator command is selected."
+    },
+    {
+      "from": "validation_running",
+      "to": "validation_passed",
+      "rule": "Validator exits PASS."
+    },
+    {
+      "from": "validation_running",
+      "to": "validation_failed",
+      "rule": "Validator exits FAIL."
+    },
+    {
+      "from": "validation_passed",
+      "to": "ready_for_review",
+      "rule": "Summary and next action are written."
+    },
+    {
+      "from": "ready_for_review",
+      "to": "done",
+      "rule": "Human review is complete."
+    }
+  ],
+  "blocked_transition_rule": "Any task requesting live trading, broker execution, OANDA execution, API keys, secrets, real webhooks, real orders, external LLM install, background execution, startup persistence, scheduled automation, account login systems, financial claims, or profitability guarantees must move to blocked.",
+  "deferred_transition_rule": "Any task with unclear scope must move to deferred or ready_for_review, not APPLY."
+}
+

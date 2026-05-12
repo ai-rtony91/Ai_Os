@@ -1,0 +1,42 @@
+{
+  "runtime_status": "WORKFLOW_PLANNED",
+  "active_lane": "agent_runtime",
+  "active_agent": "architecture_agent",
+  "queued_tasks": 0,
+  "blocked_tasks": 0,
+  "ready_for_review_tasks": 0,
+  "last_validator_status": "PENDING",
+  "next_safe_action": "Run the workflow readiness validator.",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "background_execution_status": "BLOCKED",
+  "scheduled_automation_status": "BLOCKED",
+  "startup_persistence_status": "BLOCKED",
+  "cards": [
+    {
+      "title": "Workflow State",
+      "status": "Planned",
+      "body": "The local file-based workflow architecture is ready for validation."
+    },
+    {
+      "title": "Runner Preview",
+      "status": "Read-only",
+      "body": "The runner preview can inspect one task and recommend the next action."
+    },
+    {
+      "title": "Validator Chain",
+      "status": "Pending",
+      "body": "The validator checks JSON, states, roles, blocked actions, and safety locks."
+    },
+    {
+      "title": "Safety Locks",
+      "status": "Blocked",
+      "body": "Live trading, brokers, OANDA, API keys, secrets, real webhooks, real orders, installs, and background execution are blocked."
+    }
+  ]
+}
+
