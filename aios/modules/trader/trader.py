@@ -71,9 +71,18 @@ class TraderEngine:
 
         try:
             self.config.validate_safety()
+            self._validate_market_bar(bar)
             signal = self.strategy.generate_signal(bar)
             permission = self.permission_filter.evaluate(bar)
-            risk = self.risk_manager.evaluate(signal, permission, self.config)
+            risk = self.risk_manager.evaluate(
+                signal,
+                permission,
+                self.config,
+                paper_cash=self.paper_broker.cash,
+                paper_positions=self.paper_broker.positions,
+                current_price=bar.close,
+                daily_paper_loss=self.paper_outcomes.daily_paper_loss(),
+            )
             if not risk.approved:
                 return TraderDecisionEvent(
                     symbol=symbol,
@@ -124,3 +133,22 @@ class TraderEngine:
             live_execution_status=self.config.live_execution_status,
             external_routing_enabled=self.config.external_routing_enabled,
         )
+
+    def _validate_market_bar(self, bar: MarketBar) -> None:
+        prices = {
+            "open": bar.open,
+            "high": bar.high,
+            "low": bar.low,
+            "close": bar.close,
+        }
+        for name, price in prices.items():
+            if price <= 0:
+                raise ValueError(f"Bad MarketBar data: {name} must be positive.")
+        if bar.high < bar.low:
+            raise ValueError("Bad MarketBar data: high is below low.")
+        if bar.high < max(bar.open, bar.close):
+            raise ValueError("Bad MarketBar data: high is below open or close.")
+        if bar.low > min(bar.open, bar.close):
+            raise ValueError("Bad MarketBar data: low is above open or close.")
+        if bar.volume < 0:
+            raise ValueError("Bad MarketBar data: volume must not be negative.")

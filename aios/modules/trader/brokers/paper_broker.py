@@ -29,8 +29,12 @@ class PaperBroker:
         signed_quantity = order.quantity if order.direction == "BUY_REVIEW" else -order.quantity
         notional = order.limit_price * order.quantity
         if order.direction == "BUY_REVIEW":
+            if self.cash < notional:
+                raise ValueError("PaperBroker rejects buy with insufficient paper cash.")
             self.cash -= notional
         else:
+            if self.positions.get(order.symbol, 0) < order.quantity:
+                raise ValueError("PaperBroker rejects sell without enough paper position.")
             self.cash += notional
         self.positions[order.symbol] = self.positions.get(order.symbol, 0) + signed_quantity
 

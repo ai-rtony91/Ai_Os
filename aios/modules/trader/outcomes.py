@@ -83,3 +83,6 @@ class PaperOutcomeTracker:
 
     def to_dicts(self) -> list[dict[str, object]]:
         return [outcome.to_dict() for outcome in self.outcomes]
+
+    def daily_paper_loss(self) -> float:
+        return abs(sum(outcome.pnl for outcome in self.outcomes if outcome.pnl < 0))
