@@ -1,0 +1,47 @@
+{
+  "contract_id": "STRATEGY_RANKING_CONTRACT_PHASE_15_9",
+  "phase": "15.9",
+  "mode": "paper_only",
+  "source_type": "local_fixture_outputs",
+  "required_fields": [
+    "strategy_id",
+    "strategy_name",
+    "total_paper_trades",
+    "paper_simulated_trades",
+    "blocked_trades",
+    "win_rate",
+    "expectancy_r",
+    "profit_factor",
+    "max_drawdown_r",
+    "average_latency_seconds",
+    "stale_signal_count",
+    "clock_skew_count",
+    "confidence_score_average",
+    "risk_gate_pass_rate",
+    "replay_review_status",
+    "rank_score",
+    "rank_status",
+    "blocked_reason",
+    "next_safe_action",
+    "live_execution_status",
+    "broker_status",
+    "oanda_status",
+    "api_key_status",
+    "secrets_status"
+  ],
+  "allowed_rank_statuses": [
+    "REVIEW",
+    "BLOCKED_REPLAY_REVIEW",
+    "NOT_ENOUGH_DATA"
+  ],
+  "blocked_status_requirements": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "readiness_rule": "Ranking cannot become ready while sample size is below 30 or replay has CLOCK_SKEW_DETECTED."
+}

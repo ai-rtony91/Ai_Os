@@ -1,0 +1,30 @@
+{
+  "contract_id": "PAPER_TRADING_READINESS_AUDIT_CONTRACT_PHASE_19_1",
+  "phase": "19.1",
+  "mode": "paper_only",
+  "source_type": "local_audit_artifacts",
+  "allowed_overall_readiness_statuses": [
+    "NOT_READY",
+    "REVIEW"
+  ],
+  "required_checks": [
+    "safety_locks",
+    "validator_coverage",
+    "latency_reliability",
+    "replay_consistency",
+    "strategy_ranking",
+    "dashboard_clarity",
+    "mobile_usability",
+    "paper_readiness_score"
+  ],
+  "blocked_status_requirements": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "readiness_rule": "Overall readiness must remain NOT_READY or REVIEW while replay clock skew exists or paper sample size is too small."
+}

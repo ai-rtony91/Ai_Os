@@ -1,0 +1,33 @@
+{
+  "summary_id": "REPLAY_FAILURE_SUMMARY_001",
+  "phase": "17.3",
+  "mode": "paper_only",
+  "source_type": "local_replay_result",
+  "failure_status": "REVIEW_REQUIRED",
+  "failures": [
+    {
+      "failure_id": "REPLAY_FAILURE_001",
+      "failure_type": "CLOCK_SKEW_DETECTED",
+      "latency_seconds": -30019,
+      "stale_signal_status": "BLOCKED_FOR_REVIEW",
+      "impact": "Ranking and readiness must remain blocked for review.",
+      "next_safe_action": "Correct fixture timestamps and rerun local replay validation."
+    }
+  ],
+  "counts": {
+    "total_replay_failures": 1,
+    "clock_skew_count": 1,
+    "negative_latency_count": 1,
+    "stale_signal_review_count": 1
+  },
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "generated_time": "2026-05-12T00:00:00Z"
+}

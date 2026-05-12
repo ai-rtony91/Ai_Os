@@ -1,0 +1,49 @@
+{
+  "panel_title": "Trading Lab Performance Review",
+  "phase": "17.1-17.3",
+  "mode": "paper_only",
+  "source": "mock-data only",
+  "review_status": "REVIEW_REQUIRED",
+  "no_profit_claim": true,
+  "cards": [
+    {
+      "label": "Paper Review Ledger",
+      "status": "REVIEW_REQUIRED",
+      "primary_metric": "1 paper sample",
+      "detail": "The latest paper result needs replay clock review before it can support ranking."
+    },
+    {
+      "label": "Strategy Performance Summary",
+      "status": "REVIEW_INCOMPLETE",
+      "primary_metric": "Win rate UNKNOWN",
+      "detail": "The paper sample size is too small for meaningful strategy comparison."
+    },
+    {
+      "label": "Replay Failure Summary",
+      "status": "REVIEW_REQUIRED",
+      "primary_metric": "CLOCK_SKEW_DETECTED",
+      "detail": "Negative latency keeps the strategy and readiness in review."
+    }
+  ],
+  "metrics": {
+    "total_paper_trades": 1,
+    "paper_simulated_trades": 1,
+    "blocked_trades": 0,
+    "win_rate": "UNKNOWN",
+    "expectancy_r": "UNKNOWN",
+    "profit_factor": "UNKNOWN",
+    "average_latency_seconds": -30019,
+    "clock_skew_count": 1
+  },
+  "next_safe_action": "Resolve replay timestamp mismatch, rerun local validators, and keep collecting paper-only samples.",
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "generated_time": "2026-05-12T00:00:00Z"
+}

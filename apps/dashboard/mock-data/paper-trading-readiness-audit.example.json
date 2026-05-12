@@ -1,0 +1,67 @@
+{
+  "panel_title": "Paper Trading Readiness Audit",
+  "phase": "19.1",
+  "mode": "paper_only",
+  "source": "mock-data only",
+  "overall_readiness_status": "NOT_READY",
+  "paper_readiness_score": 38,
+  "summary": {
+    "status": "NOT_READY",
+    "reason": "Replay clock skew is unresolved and the current paper sample count is too small.",
+    "next_safe_action": "Resolve replay timestamp mismatch, rerun local validators, and collect more paper-only samples."
+  },
+  "checks": [
+    {
+      "check_id": "safety_locks",
+      "label": "Safety Locks",
+      "status": "PASS_BLOCKED",
+      "result": "All execution and external connection paths remain blocked."
+    },
+    {
+      "check_id": "validator_coverage",
+      "label": "Validator Coverage",
+      "status": "REVIEW",
+      "result": "Local dry-run validators exist for the current batch."
+    },
+    {
+      "check_id": "latency_reliability",
+      "label": "Latency Reliability",
+      "status": "NOT_READY",
+      "result": "Negative latency was detected in replay output."
+    },
+    {
+      "check_id": "replay_consistency",
+      "label": "Replay Consistency",
+      "status": "NOT_READY",
+      "result": "CLOCK_SKEW_DETECTED requires timestamp review."
+    },
+    {
+      "check_id": "strategy_ranking",
+      "label": "Strategy Ranking",
+      "status": "REVIEW",
+      "result": "Ranking is blocked for replay review."
+    },
+    {
+      "check_id": "dashboard_clarity",
+      "label": "Dashboard Clarity",
+      "status": "REVIEW",
+      "result": "Mock-data fixtures are ready for later UI wiring."
+    },
+    {
+      "check_id": "mobile_usability",
+      "label": "Mobile Usability",
+      "status": "UNKNOWN",
+      "result": "No mobile UI changes were made in this batch."
+    }
+  ],
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "generated_time": "2026-05-12T00:00:00Z"
+}

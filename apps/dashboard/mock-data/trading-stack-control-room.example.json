@@ -1,0 +1,67 @@
+{
+  "panel_title": "Trading Stack Control Room",
+  "phase": "16",
+  "mode": "paper_only",
+  "source": "mock-data only",
+  "control_room_status": "CONTROL_ROOM_REVIEW",
+  "summary": {
+    "paper_runner_status": "PAPER_SIMULATED_REVIEW",
+    "strategy_ranking_status": "BLOCKED_REPLAY_REVIEW",
+    "readiness_status": "NOT_READY",
+    "next_safe_action": "Review replay clock skew, rerun validators, and keep all execution paths blocked."
+  },
+  "sections": [
+    {
+      "section_id": "signal_queue",
+      "label": "Signal Queue",
+      "status": "READY_FOR_REVIEW",
+      "source": "local signal fixture",
+      "description": "Tracks local fixture signal intake only."
+    },
+    {
+      "section_id": "validation_queue",
+      "label": "Validation Queue",
+      "status": "REVIEW_REQUIRED",
+      "source": "local dry-run validators",
+      "description": "Tracks validator output and replay review requirements."
+    },
+    {
+      "section_id": "paper_bot_status",
+      "label": "Paper Bot Status",
+      "status": "PAPER_ONLY",
+      "source": "paper runner mock result",
+      "description": "Shows local paper simulation status without any real order path."
+    },
+    {
+      "section_id": "safety_boundary",
+      "label": "Safety Boundary",
+      "status": "BLOCKED",
+      "source": "control room safety contract",
+      "description": "Shows live execution and external connection paths blocked."
+    },
+    {
+      "section_id": "runtime_workflow",
+      "label": "Runtime Workflow",
+      "status": "LOCAL_ONLY",
+      "source": "agent workflow architecture",
+      "description": "Shows the local queue path from intake through review."
+    },
+    {
+      "section_id": "next_safe_action",
+      "label": "Next Safe Action",
+      "status": "REVIEW_REQUIRED",
+      "source": "paper ranking and replay review",
+      "description": "Review fixture timestamps before expanding paper samples."
+    }
+  ],
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "generated_time": "2026-05-12T00:00:00Z"
+}

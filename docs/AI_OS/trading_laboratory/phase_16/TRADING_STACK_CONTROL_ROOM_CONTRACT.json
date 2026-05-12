@@ -1,0 +1,32 @@
+{
+  "contract_id": "TRADING_STACK_CONTROL_ROOM_CONTRACT_PHASE_16",
+  "phase": "16",
+  "mode": "paper_only",
+  "source_type": "mock_data_only",
+  "control_room_status": "CONTROL_ROOM_REVIEW",
+  "required_sections": [
+    "Signal Queue",
+    "Validation Queue",
+    "Paper Bot Status",
+    "Safety Boundary",
+    "Runtime Workflow",
+    "Next Safe Action"
+  ],
+  "allowed_section_statuses": [
+    "READY_FOR_REVIEW",
+    "REVIEW_REQUIRED",
+    "BLOCKED",
+    "LOCAL_ONLY",
+    "PAPER_ONLY"
+  ],
+  "blocked_status_requirements": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "readiness_rule": "The control room can summarize paper workflow only. It cannot enable external execution."
+}
