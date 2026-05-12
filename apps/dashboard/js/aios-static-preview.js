@@ -79,6 +79,7 @@ const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.j
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const tradingLabWorkstationFixturePath = "mock-data/trading-lab-workstation.example.json";
+const phase28TvTpPaperHandoffFixturePath = "mock-data/phase-28-tv-tp-paper-handoff.example.json";
 const tradingLabPaperRunnerFixturePath = "mock-data/trading-lab-paper-runner.example.json";
 const aiosOrchestrationControlRoomFixturePath = "mock-data/aios-orchestration-control-room.example.json";
 const paperBotCoreFixturePath = "mock-data/paper-bot-core.example.json";
@@ -1371,7 +1372,7 @@ function createTradingLabWindow(key, windowData = {}, engineData = null, safetyD
 function createHandoffStatusChip(label, value) {
   const chip = document.createElement("span");
   chip.className = "trading-lab-handoff-chip";
-  chip.textContent = `${label}: ${value || "BLOCKED"}`;
+  chip.textContent = `${label}: ${value === null || value === undefined || value === "" ? "BLOCKED" : value}`;
   return chip;
 }
 
@@ -1396,7 +1397,7 @@ function createExternalHandoffCard(panelData = {}) {
     const term = document.createElement("dt");
     term.textContent = label;
     const description = document.createElement("dd");
-    description.textContent = value || "UNKNOWN";
+    description.textContent = value === null || value === undefined || value === "" ? "UNKNOWN" : value;
     fields.append(term, description);
   });
 
@@ -1438,6 +1439,66 @@ function renderExternalHandoffPanels(handoffData) {
 
   section.append(head, blocked, grid);
   return section;
+}
+
+function normalizePhase28PaperHandoff(data) {
+  if (!data) return null;
+  return {
+    title: data.title || "Phase 28 TV/TP Paper Handoff",
+    status: data.status || data.mode || "PAPER ONLY",
+    mode: data.mode || "paper_only",
+    summary: data.summary || "TradingView-style signal -> AI_OS validation -> TradersPost-style paper route preview.",
+    blocked_fields: data.blocked_fields || {
+      live_execution: data.live_execution || "BLOCKED",
+      broker: data.broker || "BLOCKED",
+      real_order: data.real_order || "BLOCKED",
+      api_key_required: data.api_key_required === false ? "false" : "BLOCKED"
+    },
+    panels: Array.isArray(data.panels) ? data.panels : [
+      {
+        title: "Signal",
+        status: data.payload_valid ? "VALID" : "PENDING VALIDATION",
+        summary: "TradingView-style paper signal reviewed by AI_OS.",
+        fields: {
+          signal_id: data.signal_id,
+          source_platform: data.source_platform,
+          symbol: data.symbol,
+          timeframe: data.timeframe,
+          direction: data.direction,
+          strategy_name: data.strategy_name
+        },
+        next_action: "Validate required payload fields."
+      },
+      {
+        title: "Latency",
+        status: data.stale_status || "Pending validation",
+        summary: "Latency fields stay local and paper-only.",
+        fields: {
+          alert_created_time: data.alert_created_time || "Pending validation",
+          alert_received_time: data.alert_received_time || "Pending validation",
+          validation_start_time: data.validation_start_time || "Pending validation",
+          validation_end_time: data.validation_end_time || "Pending validation",
+          route_preview_time: data.route_preview_time || "Pending validation",
+          total_delay_seconds: data.total_delay_seconds ?? "Pending validation"
+        },
+        next_action: "Measure timestamps locally before trusting route timing."
+      },
+      {
+        title: "Paper Route",
+        status: data.paper_route_status || "PREVIEW_ONLY",
+        summary: "TradersPost-style paper route preview cannot execute orders.",
+        fields: {
+          route_style: data.route_style,
+          risk_gate_status: data.risk_gate_status,
+          operator_decision_required: data.operator_decision_required,
+          live_execution: data.live_execution,
+          broker: data.broker,
+          real_order: data.real_order
+        },
+        next_action: "Operator decision is required before any future paper review."
+      }
+    ]
+  };
 }
 
 function renderTradingLabWindowSystem(data) {
@@ -1754,7 +1815,7 @@ function createTradingLabAdvancedDiagnostics(items = []) {
   return details;
 }
 
-function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null) {
+function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null, phase28HandoffData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -1801,7 +1862,12 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   blockedActions.append(blockedTitle, blockedList);
 
   const advancedItems = [];
-  const handoffDetails = windowSystemData?.handoff_path ? renderExternalHandoffPanels(windowSystemData.handoff_path) : renderTradingStackHub();
+  const phase28Handoff = normalizePhase28PaperHandoff(phase28HandoffData);
+  const handoffDetails = phase28Handoff
+    ? renderExternalHandoffPanels(phase28Handoff)
+    : windowSystemData?.handoff_path
+      ? renderExternalHandoffPanels(windowSystemData.handoff_path)
+      : renderTradingStackHub();
   if (handoffDetails) {
     advancedItems.push(handoffDetails);
   }
@@ -1838,13 +1904,14 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse] = await Promise.all([
+    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse, phase28HandoffResponse] = await Promise.all([
       fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
       fetch(paperBotCoreFixturePath, { cache: "no-store" }),
       fetch(tradingLabWindowSystemFixturePath, { cache: "no-store" }),
       fetch(tradingLabPaperRunnerFixturePath, { cache: "no-store" }),
       fetch(aiosOrchestrationControlRoomFixturePath, { cache: "no-store" }),
-      fetch(tradingLabWorkstationFixturePath, { cache: "no-store" })
+      fetch(tradingLabWorkstationFixturePath, { cache: "no-store" }),
+      fetch(phase28TvTpPaperHandoffFixturePath, { cache: "no-store" })
     ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
@@ -1852,7 +1919,8 @@ async function renderTradingLabNextActionCard() {
     const paperRunnerData = paperRunnerResponse.ok ? await paperRunnerResponse.json() : null;
     const orchestrationData = orchestrationResponse.ok ? await orchestrationResponse.json() : null;
     const workstationData = workstationResponse.ok ? await workstationResponse.json() : null;
-    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData);
+    const phase28HandoffData = phase28HandoffResponse.ok ? await phase28HandoffResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",

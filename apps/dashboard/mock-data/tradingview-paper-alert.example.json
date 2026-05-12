@@ -1,0 +1,21 @@
+{
+  "schema_version": "0.1-phase-28",
+  "fixture_type": "tradingview_style_paper_alert",
+  "mode": "paper_only",
+  "signal_id": "PHASE28_TV_SIGNAL_001",
+  "source_platform": "TradingView-style",
+  "received_by": "AI_OS",
+  "symbol": "EUR/USD",
+  "timeframe": "M15",
+  "direction": "LONG_REVIEW",
+  "strategy_name": "EMA VWAP pullback paper review",
+  "alert_created_time": null,
+  "alert_received_time": null,
+  "payload_valid": false,
+  "operator_decision_required": true,
+  "live_execution": "BLOCKED",
+  "broker": "BLOCKED",
+  "real_order": "BLOCKED",
+  "api_key_required": false,
+  "notes": "Local fixture only. No TradingView login, webhook, API key, broker, or order path is active."
+}

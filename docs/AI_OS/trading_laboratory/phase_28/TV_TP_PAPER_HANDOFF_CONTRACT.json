@@ -1,0 +1,78 @@
+{
+  "schema_version": "0.1-phase-28",
+  "contract_id": "TV_TP_PAPER_HANDOFF_CONTRACT_PHASE_28",
+  "phase": "28",
+  "mode": "paper_only",
+  "required_fixtures": [
+    "apps/dashboard/mock-data/tradingview-paper-alert.example.json",
+    "apps/dashboard/mock-data/traderspost-paper-route-preview.example.json",
+    "apps/dashboard/mock-data/phase-28-tv-tp-paper-handoff.example.json"
+  ],
+  "required_fields": [
+    "signal_id",
+    "source_platform",
+    "received_by",
+    "route_style",
+    "symbol",
+    "timeframe",
+    "direction",
+    "strategy_name",
+    "alert_created_time",
+    "alert_received_time",
+    "validation_start_time",
+    "validation_end_time",
+    "route_preview_time",
+    "total_delay_seconds",
+    "stale_status",
+    "risk_gate_status",
+    "payload_valid",
+    "paper_route_status",
+    "operator_decision_required",
+    "live_execution",
+    "broker",
+    "real_order",
+    "api_key_required"
+  ],
+  "required_values": {
+    "source_platform": "TradingView-style",
+    "received_by": "AI_OS",
+    "route_style": "TradersPost-style paper preview",
+    "live_execution": "BLOCKED",
+    "broker": "BLOCKED",
+    "real_order": "BLOCKED",
+    "api_key_required": false,
+    "operator_decision_required": true
+  },
+  "required_workflow": [
+    "TradingView-style signal",
+    "AI_OS paper intake preview",
+    "latency timestamp",
+    "payload validation",
+    "risk gate",
+    "TradersPost-style paper route preview",
+    "operator decision required",
+    "journal/replay",
+    "scorecard update"
+  ],
+  "prohibited_fields": [
+    "api_key",
+    "secret",
+    "token",
+    "broker_account",
+    "account_id",
+    "webhook_url",
+    "order_id",
+    "live_order"
+  ],
+  "blocked_capabilities": [
+    "OANDA",
+    "broker connection",
+    "live trading",
+    "real webhooks",
+    "real orders",
+    "account connection",
+    "autonomous execution"
+  ],
+  "dashboard_placement": "Trading Lab Advanced or workstation secondary area only",
+  "next_safe_action": "Validate Phase 28 fixtures and keep the workflow paper-only."
+}

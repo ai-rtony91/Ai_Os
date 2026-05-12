@@ -1,0 +1,113 @@
+{
+  "schema_version": "0.1-phase-28",
+  "phase": "28",
+  "title": "Phase 28 TV/TP Paper Handoff",
+  "mode": "paper_only",
+  "status": "PAPER_HANDOFF_READY",
+  "summary": "TradingView-style signal review through AI_OS validation into a TradersPost-style paper route preview. Local mock data only.",
+  "signal_id": "PHASE28_TV_SIGNAL_001",
+  "source_platform": "TradingView-style",
+  "received_by": "AI_OS",
+  "route_style": "TradersPost-style paper preview",
+  "symbol": "EUR/USD",
+  "timeframe": "M15",
+  "direction": "LONG_REVIEW",
+  "strategy_name": "EMA VWAP pullback paper review",
+  "alert_created_time": null,
+  "alert_received_time": null,
+  "validation_start_time": null,
+  "validation_end_time": null,
+  "route_preview_time": null,
+  "total_delay_seconds": null,
+  "stale_status": "Pending validation",
+  "risk_gate_status": "REVIEW_REQUIRED",
+  "payload_valid": false,
+  "paper_route_status": "PREVIEW_ONLY",
+  "operator_decision_required": true,
+  "live_execution": "BLOCKED",
+  "broker": "BLOCKED",
+  "real_order": "BLOCKED",
+  "api_key_required": false,
+  "workflow": [
+    "TradingView-style signal",
+    "AI_OS paper intake preview",
+    "latency timestamp",
+    "payload validation",
+    "risk gate",
+    "TradersPost-style paper route preview",
+    "operator decision required",
+    "journal/replay",
+    "scorecard update"
+  ],
+  "latency": {
+    "alert_created_time": null,
+    "alert_received_time": null,
+    "validation_start_time": null,
+    "validation_end_time": null,
+    "route_preview_time": null,
+    "total_delay_seconds": null,
+    "stale_status": "Pending validation",
+    "display_badge": "Latency: Pending validation"
+  },
+  "panels": [
+    {
+      "title": "Signal",
+      "status": "PENDING VALIDATION",
+      "summary": "TradingView-style alert payload is reviewed locally before any paper route preview.",
+      "fields": {
+        "signal_id": "PHASE28_TV_SIGNAL_001",
+        "source_platform": "TradingView-style",
+        "symbol": "EUR/USD",
+        "timeframe": "M15",
+        "direction": "LONG_REVIEW",
+        "strategy_name": "EMA VWAP pullback paper review"
+      },
+      "next_action": "Validate required payload fields before route preview."
+    },
+    {
+      "title": "Latency / Validation",
+      "status": "REVIEW REQUIRED",
+      "summary": "Timestamp fields exist but are not measured in this local fixture.",
+      "fields": {
+        "alert_created_time": "Pending validation",
+        "alert_received_time": "Pending validation",
+        "validation_start_time": "Pending validation",
+        "validation_end_time": "Pending validation",
+        "total_delay_seconds": "Pending validation",
+        "stale_status": "Pending validation"
+      },
+      "next_action": "Keep latency compact until measured by a local validator."
+    },
+    {
+      "title": "Paper Route",
+      "status": "PREVIEW ONLY",
+      "summary": "TradersPost-style route preview remains local and cannot execute.",
+      "fields": {
+        "route_style": "TradersPost-style paper preview",
+        "risk_gate_status": "REVIEW_REQUIRED",
+        "paper_route_status": "PREVIEW_ONLY",
+        "operator_decision_required": true,
+        "journal_replay": "Pending validation",
+        "scorecard_update": "Pending validation"
+      },
+      "next_action": "Operator must approve any future paper-only review step."
+    }
+  ],
+  "blocked_fields": {
+    "live_execution": "BLOCKED",
+    "broker": "BLOCKED",
+    "real_order": "BLOCKED",
+    "api_key_required": false
+  },
+  "deferred": [
+    "real webhooks",
+    "broker connection",
+    "OANDA",
+    "API keys",
+    "account connection",
+    "live trading",
+    "real orders",
+    "autonomous execution"
+  ],
+  "next_safe_action": "Run the Phase 28 dry-run validator and keep the handoff inside Trading Lab Advanced only."
+}

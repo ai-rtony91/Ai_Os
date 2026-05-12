@@ -1,0 +1,23 @@
+{
+  "schema_version": "0.1-phase-28",
+  "fixture_type": "traderspost_style_paper_route_preview",
+  "mode": "paper_only",
+  "signal_id": "PHASE28_TV_SIGNAL_001",
+  "received_by": "AI_OS",
+  "route_style": "TradersPost-style paper preview",
+  "symbol": "EUR/USD",
+  "timeframe": "M15",
+  "direction": "LONG_REVIEW",
+  "strategy_name": "EMA VWAP pullback paper review",
+  "route_preview_time": null,
+  "risk_gate_status": "REVIEW_REQUIRED",
+  "paper_route_status": "PREVIEW_ONLY",
+  "operator_decision_required": true,
+  "journal_replay_status": "Pending validation",
+  "scorecard_update_status": "Pending validation",
+  "live_execution": "BLOCKED",
+  "broker": "BLOCKED",
+  "real_order": "BLOCKED",
+  "api_key_required": false,
+  "notes": "Paper route preview only. No TradersPost account connection, real webhook, broker, or order placement."
+}
