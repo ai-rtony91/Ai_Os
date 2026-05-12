@@ -1,21 +1,94 @@
 {
+  "schema_version": "0.2-guided-workspace",
   "mode": "local_mock",
-  "active_panel": "command_center",
+  "active_panel": "guided_workspace",
+  "navigation_model": "summary_first",
   "navigation": [
-    { "id": "command_center", "label": "Command Center", "order": 1 },
-    { "id": "current_project", "label": "Current Project / About", "order": 2 },
-    { "id": "progress", "label": "Progress", "order": 3 },
-    { "id": "reports_telemetry", "label": "Reports + Telemetry", "order": 4 },
-    { "id": "validators", "label": "Validators", "order": 5 },
-    { "id": "safety", "label": "Safety", "order": 6 },
-    { "id": "ai_assistance", "label": "AI Assistance", "order": 7 },
-    { "id": "work_table_ai", "label": "Work Table AI", "order": 8 },
-    { "id": "apps_admin", "label": "Apps / Admin", "order": 9 }
+    { "id": "start_here", "label": "Start Here", "zone": "center", "order": 1, "default_visible": true },
+    { "id": "work_table", "label": "Work Table", "zone": "left_work_navigation", "order": 2, "default_visible": true },
+    { "id": "trading_lab", "label": "Trading Lab", "zone": "center", "order": 3, "default_visible": true },
+    { "id": "gallery", "label": "Gallery", "zone": "right_personal_tools", "order": 4, "default_visible": false },
+    { "id": "tools", "label": "Tools", "zone": "right_personal_tools", "order": 5, "default_visible": false },
+    { "id": "connectors", "label": "Connectors", "zone": "right_personal_tools", "order": 6, "default_visible": false },
+    { "id": "reports", "label": "Reports", "zone": "center", "order": 7, "default_visible": false },
+    { "id": "validators", "label": "Validators", "zone": "center", "order": 8, "default_visible": false },
+    { "id": "music_radio", "label": "Music / Radio", "zone": "bottom_radio_utility", "order": 9, "default_visible": true }
+  ],
+  "visibility_rules": {
+    "show_one_center_workspace": true,
+    "hide_inactive_workspace_details": true,
+    "show_next_safe_action": true,
+    "show_connector_placeholders_only": true,
+    "external_trading_platforms_main_screen_buttons_allowed": false
+  },
+  "nested_navigation": {
+    "trading_lab": {
+      "tools_connectors": {
+        "label": "Tools / Connectors",
+        "default_visible": false,
+        "collapsed_by_default": true,
+        "requires_trading_lab_entry": true,
+        "external_trading_platforms": {
+          "label": "External Trading Platforms",
+          "path": "Trading Lab -> Tools / Connectors -> External Trading Platforms",
+          "default_visible": false,
+          "collapsed_by_default": true,
+          "planning_only": true,
+          "main_screen_buttons_allowed": false,
+          "platforms": [
+            {
+              "id": "metatrader_5",
+              "label": "MetaTrader 5",
+              "default_visible": false,
+              "collapsed_by_default": true,
+              "planning_only": true,
+              "login_prompt_allowed": false,
+              "credentials_requested": false,
+              "real_account_connection_allowed": false
+            },
+            {
+              "id": "tradingview",
+              "label": "TradingView",
+              "default_visible": false,
+              "collapsed_by_default": true,
+              "planning_only": true,
+              "login_prompt_allowed": false,
+              "credentials_requested": false,
+              "real_account_connection_allowed": false
+            },
+            {
+              "id": "traderspost",
+              "label": "TradersPost",
+              "default_visible": false,
+              "collapsed_by_default": true,
+              "planning_only": true,
+              "login_prompt_allowed": false,
+              "credentials_requested": false,
+              "real_account_connection_allowed": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  "external_trading_platform_progression_gates": [
+    "User understands AI_OS workspace basics.",
+    "User opens Trading Lab.",
+    "User reviews paper-only safety.",
+    "User reviews Signal Intake / Risk Gate.",
+    "User unlocks External Trading Platforms.",
+    "User may view MetaTrader 5 / TradingView / TradersPost planning cards.",
+    "Any real login or connection remains blocked until future approval."
   ],
   "safety": {
     "external_apis": "blocked",
     "database": "blocked",
     "broker_connections": "blocked",
-    "live_ai_apis": "blocked"
+    "credentials": "blocked",
+    "real_account_connections": "blocked",
+    "real_orders": "blocked",
+    "real_webhooks": "blocked",
+    "live_ai_apis": "blocked",
+    "live_execution": "blocked"
   }
 }

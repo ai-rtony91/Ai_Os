@@ -1,14 +1,27 @@
 {
-  "schema_version": "0.1-draft",
+  "schema_version": "0.2-guided-workspace",
   "classification": "AI_OS project work only",
-  "purpose": "Example dashboard UI registry for local mock-data driven labels, cards, buttons, actions, and future visual depth controls.",
+  "purpose": "Guided UI registry for calm local mock-data driven labels, cards, buttons, drawers, actions, and future visual depth controls.",
   "safety": {
     "local_config_only": true,
     "contains_secrets": false,
     "external_apis_allowed": false,
     "broker_connections_allowed": false,
     "database_connections_allowed_from_browser": false,
-    "live_trading_allowed": false
+    "live_trading_allowed": false,
+    "live_execution_allowed": false,
+    "credentials_requested": false,
+    "real_account_connection_allowed": false,
+    "real_orders_allowed": false,
+    "real_webhooks_allowed": false
+  },
+  "design_system": {
+    "color_style": "dark gamer-tech with restrained cyan, green, amber, and red state colors",
+    "button_style": "one unified bordered control style with clear hover and focus states",
+    "spacing_style": "breathing room first; dense debug views stay collapsed",
+    "typography_style": "short labels, plain English, no giant walls of text",
+    "card_style": "summary cards with expandable details",
+    "mobile_style": "single column, large touch targets, no horizontal scroll"
   },
   "visual_depth_defaults": {
     "visual_depth_tier": "2D_STATIC",
@@ -21,72 +34,129 @@
     "performance_heavy_animation_allowed": false,
     "future_immersive_ui_boundary": "planning_only"
   },
-  "sidebar_buttons": [
+  "zones": [
     {
-      "id": "work-table",
-      "label": "Work Table",
-      "tab": "work-table",
-      "action": "work-table",
+      "id": "guided_status",
+      "label": "Guided Status",
+      "default_visible": true,
+      "behavior": "shows workspace state and next safe action"
+    },
+    {
+      "id": "active_workspace",
+      "label": "Active Workspace",
+      "default_visible": true,
+      "behavior": "one selected workspace dominates the center"
+    },
+    {
+      "id": "details_drawers",
+      "label": "Details Drawers",
+      "default_visible": false,
+      "behavior": "assistant, validator, telemetry, and tool details expand only when needed"
+    },
+    {
+      "id": "bottom_radio_utility",
+      "label": "Radio Utility Dock",
+      "default_visible": true,
+      "behavior": "compact playback visibility with advanced controls tucked away"
+    }
+  ],
+  "primary_actions": [
+    {
+      "id": "start_project",
+      "label": "Start Project",
+      "action": "start-project",
       "order": 10,
       "enabled": true
     },
     {
-      "id": "app-store",
-      "label": "App Store",
-      "tab": "app-store",
-      "action": "app-store",
+      "id": "trading_lab",
+      "label": "Trading Lab",
+      "action": "trading-lab",
       "order": 20,
       "enabled": true
     },
     {
-      "id": "connectors",
-      "label": "Connectors",
-      "tab": "connectors",
-      "action": "connectors",
+      "id": "view_archives",
+      "label": "View Archives",
+      "action": "view-archives",
       "order": 30,
       "enabled": true
     }
   ],
-  "status_buttons": [
-    {
-      "id": "system-status",
-      "label": "System Status",
-      "action": "system-status",
-      "order": 50,
-      "enabled": true
-    },
-    {
-      "id": "diagnostics",
-      "label": "Run Diagnostics",
-      "action": "diagnostics",
-      "order": 60,
-      "enabled": true
-    }
-  ],
+  "external_trading_platform_placement_rule": {
+    "path": "Trading Lab -> Tools / Connectors -> External Trading Platforms -> MetaTrader 5 / TradingView / TradersPost",
+    "main_screen_buttons_allowed": false,
+    "default_visible": false,
+    "collapsed_by_default": true,
+    "visible_only_after_entering_trading_lab": true,
+    "connector_setup_locked_behind_learning_steps": true,
+    "login_prompts_on_first_screen_allowed": false,
+    "credentials_requested": false,
+    "live_setup_allowed": false,
+    "real_account_connection_allowed": false,
+    "planning_cards": [
+      {
+        "id": "metatrader_5",
+        "label": "MetaTrader 5",
+        "default_visible": false,
+        "collapsed_by_default": true,
+        "planning_only": true,
+        "gated": true
+      },
+      {
+        "id": "tradingview",
+        "label": "TradingView",
+        "default_visible": false,
+        "collapsed_by_default": true,
+        "planning_only": true,
+        "gated": true
+      },
+      {
+        "id": "traderspost",
+        "label": "TradersPost",
+        "default_visible": false,
+        "collapsed_by_default": true,
+        "planning_only": true,
+        "gated": true
+      }
+    ],
+    "progression_gates": [
+      "User understands AI_OS workspace basics.",
+      "User opens Trading Lab.",
+      "User reviews paper-only safety.",
+      "User reviews Signal Intake / Risk Gate.",
+      "User unlocks External Trading Platforms.",
+      "User may view MetaTrader 5 / TradingView / TradersPost planning cards.",
+      "Any real login or connection remains blocked until future approval."
+    ]
+  },
   "cards": [
     {
-      "id": "project-brief",
-      "type": "work-card",
-      "label": "PROJECT BRIEF",
-      "title": "Project Brief",
-      "description": "Selected objective, scope, allowed files, and expected result.",
-      "action": "project-brief",
-      "order": 10,
-      "enabled": true,
-      "visual_depth_tier": "2D_STATIC",
-      "card_elevation_level": 1
+      "id": "next_safe_action",
+      "type": "guided-summary",
+      "label": "NEXT ACTION",
+      "title": "Next Safe Action",
+      "description": "One clear next step before the user opens deeper details.",
+      "default_visible": true,
+      "expanded_by_default": false
     },
     {
-      "id": "approval-gate",
-      "type": "work-card",
-      "label": "APPROVAL",
-      "title": "Approval Gate",
-      "description": "Human approval state before APPLY, commit, publishing, or activation.",
-      "action": "approval-gate",
-      "order": 50,
-      "enabled": true,
-      "visual_depth_tier": "2D_STATIC",
-      "card_elevation_level": 1
+      "id": "trading_lab_flow",
+      "type": "guided-workflow",
+      "label": "TRADING LAB",
+      "title": "Paper-only Trading Lab",
+      "description": "Signal Intake, Latency, Regime, Risk Gate, Paper Result, Scorecard, Validator Status, and Next Action.",
+      "default_visible": true,
+      "expanded_by_default": false
+    },
+    {
+      "id": "system_status",
+      "type": "status-summary",
+      "label": "SYSTEM STATE",
+      "title": "System State",
+      "description": "Compact local mock status with detailed validator output hidden until requested.",
+      "default_visible": true,
+      "expanded_by_default": false
     }
   ],
   "messages": {
@@ -96,4 +166,3 @@
     }
   }
 }
-

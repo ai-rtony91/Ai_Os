@@ -1,0 +1,140 @@
+{
+  "title": "Trading Lab Workspace",
+  "summary": "Paper-only trading workflow using mock data. This panel explains the flow without connecting to a broker or placing orders.",
+  "badge": "MOCK ONLY",
+  "mode": "ACTIVE",
+  "paper_mode": "ACTIVE",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "display": {
+    "style": "summary_first",
+    "details": "expand_on_request",
+    "expanded_by_default": [
+      "signal_intake",
+      "next_action"
+    ],
+    "mobile": "single_column_no_horizontal_scroll"
+  },
+  "tools_connectors": {
+    "label": "Tools / Connectors",
+    "default_visible": false,
+    "collapsed_by_default": true,
+    "visible_only_after_entering_trading_lab": true,
+    "external_trading_platforms": {
+      "label": "External Trading Platforms",
+      "path": "Trading Lab -> Tools / Connectors -> External Trading Platforms -> MetaTrader 5 / TradingView / TradersPost",
+      "default_visible": false,
+      "collapsed_by_default": true,
+      "planning_only": true,
+      "main_screen_buttons_allowed": false,
+      "locked_until_progression_gates_pass": true,
+      "login_prompts_on_first_screen_allowed": false,
+      "credentials_requested": false,
+      "live_setup_allowed": false,
+      "real_account_connection_allowed": false,
+      "platforms": [
+        {
+          "id": "metatrader_5",
+          "label": "MetaTrader 5",
+          "default_visible": false,
+          "collapsed_by_default": true,
+          "planning_only": true,
+          "gated": true
+        },
+        {
+          "id": "tradingview",
+          "label": "TradingView",
+          "default_visible": false,
+          "collapsed_by_default": true,
+          "planning_only": true,
+          "gated": true
+        },
+        {
+          "id": "traderspost",
+          "label": "TradersPost",
+          "default_visible": false,
+          "collapsed_by_default": true,
+          "planning_only": true,
+          "gated": true
+        }
+      ],
+      "progression_gates": [
+        "User understands AI_OS workspace basics.",
+        "User opens Trading Lab.",
+        "User reviews paper-only safety.",
+        "User reviews Signal Intake / Risk Gate.",
+        "User unlocks External Trading Platforms.",
+        "User may view MetaTrader 5 / TradingView / TradersPost planning cards.",
+        "Any real login or connection remains blocked until future approval."
+      ]
+    }
+  },
+  "cards": [
+    {
+      "id": "signal_intake",
+      "title": "Signal Intake",
+      "status": "MOCK READY",
+      "meaning": "A sample trading signal can be reviewed without sending orders.",
+      "next_action": "Check the mock signal fields."
+    },
+    {
+      "id": "latency",
+      "title": "Latency",
+      "status": "REVIEW",
+      "meaning": "Latency means how long it took for a signal to be noticed. This is mock timing only.",
+      "next_action": "Confirm the timestamp labels are readable."
+    },
+    {
+      "id": "regime",
+      "title": "Regime",
+      "status": "PENDING REVIEW",
+      "meaning": "Regime means the market condition tag, such as trend, range, or unknown.",
+      "next_action": "Keep the regime tag paper-only."
+    },
+    {
+      "id": "risk_gate",
+      "title": "Risk Gate",
+      "status": "BLOCKED",
+      "meaning": "The safety gate blocks live action and keeps the lab in review mode.",
+      "next_action": "Do not weaken the safety lock."
+    },
+    {
+      "id": "paper_result",
+      "title": "Paper Result",
+      "status": "NOT EXECUTED",
+      "meaning": "No trade result is real. This card will show simulated outcomes only.",
+      "next_action": "Use a mock result before any scorecard note."
+    },
+    {
+      "id": "scorecard",
+      "title": "Scorecard",
+      "status": "WAITING",
+      "meaning": "The scorecard summarizes mock win/loss notes after enough samples exist.",
+      "next_action": "Require enough mock samples before judging an idea."
+    },
+    {
+      "id": "validator_status",
+      "title": "Validator Status",
+      "status": "REVIEW",
+      "meaning": "Validators check that JSON parses and safety locks remain visible.",
+      "next_action": "Run local checks after each approved edit."
+    },
+    {
+      "id": "next_action",
+      "title": "Next Action",
+      "status": "START HERE",
+      "meaning": "The safest next step is to review one mock signal through the risk gate.",
+      "next_action": "Keep Live Execution: BLOCKED."
+    }
+  ],
+  "blocked_actions": [
+    "No broker",
+    "No OANDA",
+    "No API keys",
+    "No credentials",
+    "No real account connection",
+    "No real orders",
+    "No real webhooks",
+    "No live execution"
+  ]
+}

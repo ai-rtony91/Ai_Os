@@ -58,18 +58,25 @@
         </button>
         <div class="utility-status" aria-label="Dashboard mode">
           <span>Local mock only</span>
-          <label class="theme-selector" for="dashboardThemeSelector">
-            <span>Theme</span>
-            <select id="dashboardThemeSelector" data-theme-selector aria-label="Dashboard theme selector">
-              <option value="default">Default AI_OS Dark</option>
-              <option value="terminal-green">Terminal Green</option>
-              <option value="cyan-command">Cyan Command</option>
-              <option value="amber-warning">Amber Warning</option>
-              <option value="high-contrast">High Contrast</option>
-            </select>
-          </label>
-          <button class="soft-refresh-button" type="button" data-action="soft-refresh">Soft Refresh</button>
-          <button class="music-companion-button" type="button" data-action="open-music-companion">Open Music Companion</button>
+          <details class="top-utility-drawer">
+            <summary>Utilities</summary>
+            <div class="top-utility-panel">
+              <label class="theme-selector" for="dashboardThemeSelector">
+                <span>Theme</span>
+                <select id="dashboardThemeSelector" data-theme-selector aria-label="Dashboard theme selector">
+                  <option value="default">Default AI_OS Dark</option>
+                  <option value="terminal-green">Terminal Green</option>
+                  <option value="cyan-command">Cyan Command</option>
+                  <option value="amber-warning">Amber Warning</option>
+                  <option value="high-contrast">High Contrast</option>
+                </select>
+              </label>
+              <button class="soft-refresh-button" type="button" data-action="soft-refresh">Soft Refresh</button>
+              <button class="music-companion-button" type="button" data-action="open-music-companion">Open Music Companion</button>
+              <small>Updates AI_OS without stopping music.</small>
+              <small>Keep Music Companion open to preserve music during dashboard refresh.</small>
+            </div>
+          </details>
           <section class="youtube-radio-dock" data-youtube-radio-dock aria-label="YouTube Radio playlist dock">
             <div class="youtube-radio-head">
               <div>
@@ -143,8 +150,6 @@
               </div>
             </div>
           </section>
-          <small>Updates AI_OS without stopping music.</small>
-          <small>Keep Music Companion open to preserve music during dashboard refresh.</small>
         </div>
         <div class="refresh-guard-message" data-refresh-guard-message role="status" aria-live="polite" hidden>
           Music is playing. Use Soft Refresh to keep audio running.
@@ -159,6 +164,30 @@
           </button>
         </div>
       </header>
+
+      <section class="guided-workspace-status" aria-label="Guided AI_OS workspace status">
+        <div>
+          <span class="eyebrow">GUIDED WORKSPACE</span>
+          <strong>One active workspace at a time</strong>
+        </div>
+        <p>Review the current workspace, keep blocked actions visible, and use the next safe action before expanding details.</p>
+        <div class="guided-status-chips" aria-label="Current safety state">
+          <span>Mock only</span>
+          <span>Connectors locked</span>
+          <span>Live execution blocked</span>
+        </div>
+      </section>
+
+      <section class="welcome-start-screen" data-welcome-start aria-label="AI_OS start screen" hidden>
+        <div class="welcome-ghost-logo" aria-hidden="true">
+          <span class="welcome-logo-mark">Ai&lt;</span><span class="welcome-logo-os">Os</span>
+        </div>
+        <div class="welcome-actions" aria-label="AI_OS start actions">
+          <button type="button" data-welcome-action="start-project">Start Project</button>
+          <button type="button" data-welcome-action="view-archives">View Archives</button>
+          <button type="button" data-welcome-action="trading-lab">Trading Lab</button>
+        </div>
+      </section>
 
       <section class="command-guide-strip" aria-label="Start Here tour guide" data-guide-panel>
         <article class="guide-card guide-card-primary">
@@ -265,6 +294,7 @@
               <span class="card-label" data-detail-status>LOCAL MOCK ONLY</span>
               <div class="assistant-output" id="assistantOutput" data-detail-body>Work Table: static center workspace for project packets, prompts, build instructions, tool output, approval gates, and validation queues.</div>
               <div class="workspace-placeholder" data-detail-note>APPLY, commit, push, publishing, and execution remain blocked until explicitly approved.</div>
+              <div class="trading-lab-next-action-card" data-trading-lab-next-action hidden></div>
               <div class="project-hub-panel" data-project-hub hidden></div>
               <div class="personal-gallery-panel" data-personal-gallery hidden></div>
               <div class="personal-apps-panel" data-personal-apps hidden></div>
@@ -281,27 +311,30 @@
           <pre id="consoleOutput" class="workspace-detail-console">Ai_Os&gt; Work Table selected
 Ai_Os&gt; Project Brief
 Ai_Os&gt; Static mock-only detail panel</pre>
-          <div class="assistant-console-head" aria-label="AI_OS Assistant Console">
-            <span class="card-label">AI_OS ASSISTANT CONSOLE</span>
-            <strong data-assistant-mode-label>Tour Guide</strong>
-            <small data-assistant-mode-helper>Mock-only. Backend not connected.</small>
-          </div>
-          <div class="assistant-mode-row" aria-label="Assistant modes">
-            <button class="active" type="button" data-assistant-mode="tour-guide">Tour Guide</button>
-            <button type="button" data-assistant-mode="work-table-builder">Work Table Builder</button>
-            <button type="button" data-assistant-mode="research-chat">Research / Chat</button>
-            <button type="button" data-assistant-mode="system-engineer">System Engineer</button>
-            <button type="button" data-assistant-mode="trading-lab">Trading Lab</button>
-          </div>
-          <section class="assistant-context-packet" aria-label="Assistant context intake packet">
-            <div class="assistant-context-head">
-              <span class="card-label">CONTEXT INTAKE PACKET</span>
-              <strong>Answer simple questions. AI_OS structures the full context.</strong>
+          <details class="workspace-detail-drawer">
+            <summary>Assistant details</summary>
+            <div class="assistant-console-head" aria-label="AI_OS Assistant Console">
+              <span class="card-label">AI_OS ASSISTANT CONSOLE</span>
+              <strong data-assistant-mode-label>Tour Guide</strong>
+              <small data-assistant-mode-helper>Mock-only. Backend not connected.</small>
             </div>
-            <div class="assistant-context-grid" data-assistant-context-fields></div>
-            <button class="assistant-context-generate" type="button" data-action="generate-context-packet">Generate Context Packet</button>
-            <pre class="assistant-context-output" data-context-packet-output>Context packet not generated yet.</pre>
-          </section>
+            <div class="assistant-mode-row" aria-label="Assistant modes">
+              <button class="active" type="button" data-assistant-mode="tour-guide">Tour Guide</button>
+              <button type="button" data-assistant-mode="work-table-builder">Work Table Builder</button>
+              <button type="button" data-assistant-mode="research-chat">Research / Chat</button>
+              <button type="button" data-assistant-mode="system-engineer">System Engineer</button>
+              <button type="button" data-assistant-mode="trading-lab">Trading Lab</button>
+            </div>
+            <section class="assistant-context-packet" aria-label="Assistant context intake packet">
+              <div class="assistant-context-head">
+                <span class="card-label">CONTEXT INTAKE PACKET</span>
+                <strong>Answer simple questions. AI_OS structures the full context.</strong>
+              </div>
+              <div class="assistant-context-grid" data-assistant-context-fields></div>
+              <button class="assistant-context-generate" type="button" data-action="generate-context-packet">Generate Context Packet</button>
+              <pre class="assistant-context-output" data-context-packet-output>Context packet not generated yet.</pre>
+            </section>
+          </details>
           <div class="message-row detail-message-row">
             <input id="mockMessage" type="text" value="Preview only. Ask for guidance..." aria-label="Mock assistant message">
             <button data-action="send-message">Send</button>

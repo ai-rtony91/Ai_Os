@@ -1,0 +1,30 @@
+{
+  "ledger_version": "0.1.0",
+  "default_status": "DRY_RUN_REQUIRED",
+  "allowed_status_values": [
+    "DRY_RUN_REQUIRED",
+    "DRY_RUN_COMPLETE",
+    "APPLY_APPROVED",
+    "APPLY_COMPLETE",
+    "VALIDATED",
+    "BLOCKED",
+    "DEFERRED",
+    "COMMIT_READY",
+    "COMMITTED"
+  ],
+  "changes": [],
+  "required_change_fields": [
+    "change_id",
+    "user_goal",
+    "change_type",
+    "owner_agent",
+    "allowed_files",
+    "blocked_files",
+    "dry_run_required",
+    "apply_approval_required",
+    "validation_required",
+    "commit_package",
+    "rollback_note",
+    "status"
+  ]
+}

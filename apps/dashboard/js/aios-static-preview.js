@@ -77,6 +77,7 @@ const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOG
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
+const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 const personalGalleryManifestPath = "private-media/service-gallery/gallery.local.json";
 const youtubeRadioTracks = [
@@ -201,10 +202,11 @@ const workspaceDetailConfig = {
     ]
   },
   "trading-bot": {
-    title: "Trading Bot",
-    summary: "Planning tools for strategy, signal rules, risk, backtests, and locked deployment readiness.",
-    overview: "Choose a Trading Bot tool from the tab. This workspace is planning only and cannot place trades.",
+    title: "Trading Lab",
+    summary: "Paper-only workspace for signal intake, latency, regime, risk gate, paper results, scorecard, validator status, and next action.",
+    overview: "Review the Trading Lab flow. This workspace uses mock data only and cannot place trades.",
     items: [
+      detailItem("trading-bot", "Trading Lab Workspace", "MOCK ONLY", "A paper-only command workspace for signal review, latency notes, regime tags, risk gate status, paper result, scorecard, validator status, and the next safe action.", "MOCK ONLY. PAPER ONLY. Live Execution: BLOCKED. Broker: BLOCKED.", ["Review mock signal intake.", "Check risk gate stays blocked.", "Use Next Action for the safest follow-up."]),
       detailItem("strategy-builder", "Strategy Builder", "STRATEGY", "Draft strategy ideas, assumptions, source evidence, and review notes.", "No live trading logic is enabled.", ["Describe market idea.", "Mark assumptions.", "Require backtest evidence."]),
       detailItem("signal-rules", "Signal Rules", "SIGNALS", "Plan entry, exit, filter, and invalidation rules without execution.", "Signals do not connect to any broker.", ["Entry rules.", "Exit rules.", "Invalidation rules."]),
       detailItem("backtest-files", "Backtest Files", "FILES", "Plan future approved backtest file references and result review.", "No file writer or file sync runs here.", ["Source files later.", "Result summaries.", "Review gaps."]),
@@ -839,6 +841,65 @@ function createTradingLabField(label, value) {
   return item;
 }
 
+function getTradingLabStateClass(status = "") {
+  const value = String(status).toLowerCase();
+  if (value.includes("blocked")) return "is-blocked";
+  if (value.includes("review") || value.includes("pending")) return "is-review";
+  if (value.includes("ready") || value.includes("pass")) return "is-ready";
+  return "is-unknown";
+}
+
+function createTradingLabSafetyChip(label, value) {
+  const chip = document.createElement("span");
+  chip.className = "trading-lab-safety-chip";
+  chip.textContent = `${label}: ${value}`;
+  return chip;
+}
+
+function createTradingLabWorkspaceCard(card, index, total) {
+  const item = document.createElement("details");
+  item.className = `trading-lab-workspace-card ${getTradingLabStateClass(card.status)}`;
+  item.setAttribute("aria-label", `${card.title} status card`);
+  if (index === 0 || card.id === "next_action") {
+    item.open = true;
+  }
+
+  const summary = document.createElement("summary");
+  summary.className = "trading-lab-card-summary";
+  const step = document.createElement("span");
+  step.className = "trading-lab-step";
+  step.textContent = `Step ${index + 1}`;
+
+  const title = document.createElement("h3");
+  title.textContent = card.title || "Trading Lab Step";
+
+  const status = document.createElement("strong");
+  status.className = "trading-lab-card-status";
+  status.textContent = card.status || "UNKNOWN";
+  summary.append(step, title, status);
+
+  const body = document.createElement("div");
+  body.className = "trading-lab-card-detail";
+  const meaning = document.createElement("p");
+  meaning.textContent = card.meaning || "Status needs review.";
+
+  const nextAction = document.createElement("small");
+  nextAction.textContent = card.next_action || "Review mock-only status.";
+
+  body.append(meaning, nextAction);
+  item.append(summary, body);
+
+  if (index < total - 1) {
+    const flow = document.createElement("span");
+    flow.className = "trading-lab-flow-arrow";
+    flow.setAttribute("aria-hidden", "true");
+    flow.textContent = "->";
+    item.append(flow);
+  }
+
+  return item;
+}
+
 function createTradingStackList(items) {
   const list = document.createElement("ul");
   list.className = "trading-stack-list";
@@ -935,58 +996,85 @@ function renderTradingStackHub() {
 function renderTradingLabNextActionData(data) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
-  const title = document.createElement("div");
-  title.className = "trading-lab-card-head";
+  const title = document.createElement("section");
+  title.className = "trading-lab-workspace-head";
   const heading = document.createElement("strong");
-  heading.textContent = "Trading Lab";
+  heading.textContent = data.title || "Trading Lab Workspace";
   const badge = document.createElement("span");
   badge.textContent = data.badge || "MOCK ONLY";
-  title.append(heading, badge);
 
-  const fields = document.createElement("div");
-  fields.className = "trading-lab-field-grid";
-  fields.append(
-    createTradingLabField("Active Strategy", data.active_strategy),
-    createTradingLabField("Market Regime", data.market_regime),
-    createTradingLabField("Mock Execution", data.mock_execution_status),
-    createTradingLabField("Risk State", data.risk_state),
-    createTradingLabField("Last Journal Review", data.last_journal_review)
+  const summary = document.createElement("p");
+  summary.textContent = data.summary || "Paper-only trading workflow using mock data. No orders can be placed.";
+  title.append(heading, badge, summary);
+
+  const safety = document.createElement("div");
+  safety.className = "trading-lab-safety-row";
+  safety.append(
+    createTradingLabSafetyChip("MOCK ONLY", data.mode || "ACTIVE"),
+    createTradingLabSafetyChip("PAPER ONLY", data.paper_mode || "ACTIVE"),
+    createTradingLabSafetyChip("Live Execution", data.live_execution_status || "BLOCKED"),
+    createTradingLabSafetyChip("Broker", data.broker_status || "BLOCKED")
   );
 
-  const nextAction = document.createElement("div");
-  nextAction.className = "trading-lab-next-step";
-  const nextLabel = document.createElement("span");
-  nextLabel.textContent = "Next Safe Action";
-  const nextValue = document.createElement("strong");
-  nextValue.textContent = data.next_safe_action || "Review one strategy and score a mock signal.";
-  nextAction.append(nextLabel, nextValue);
+  const cards = Array.isArray(data.cards) && data.cards.length ? data.cards : [];
+  const flowGrid = document.createElement("div");
+  flowGrid.className = "trading-lab-workspace-grid";
+  cards.forEach((card, index) => {
+    flowGrid.append(createTradingLabWorkspaceCard(card, index, cards.length));
+  });
 
-  tradingLabNextActionCard.replaceChildren(title, fields, nextAction, renderTradingStackHub());
+  const blockedActions = document.createElement("div");
+  blockedActions.className = "trading-lab-blocked-actions";
+  const blockedTitle = document.createElement("strong");
+  blockedTitle.textContent = "Blocked actions";
+  const blockedList = document.createElement("p");
+  blockedList.textContent = (data.blocked_actions || data.blocked || [
+    "No broker",
+    "No OANDA",
+    "No API keys",
+    "No real orders",
+    "No real webhooks",
+    "No live execution"
+  ]).join(" | ");
+  blockedActions.append(blockedTitle, blockedList);
+
+  tradingLabNextActionCard.replaceChildren(title, safety, flowGrid, blockedActions);
 }
 
 async function renderTradingLabNextActionCard() {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
-  tradingLabNextActionCard.textContent = "Loading Trading Lab mock card...";
+  tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const response = await fetch(tradingLabNextActionFixturePath, { cache: "no-store" });
+    const response = await fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" });
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     renderTradingLabNextActionData(await response.json());
   } catch (error) {
     renderTradingLabNextActionData({
+      title: "Trading Lab Workspace",
       badge: "MOCK ONLY",
-      active_strategy: "Phase 14.1 strategy registry review",
-      market_regime: "Paper-only regime review pending",
-      mock_execution_status: "Simulation-only profitability validation",
-      risk_state: "Locked until Phase 14.1 risk gate review",
-      last_journal_review: "Profitability scorecard review pending",
-      next_safe_action: "Start Phase 14.1 paper-only edge validation: review strategy registry, signal intake, risk gate, and profitability scorecard.",
-      blocked: [
+      mode: "ACTIVE",
+      paper_mode: "ACTIVE",
+      live_execution_status: "BLOCKED",
+      broker_status: "BLOCKED",
+      summary: "Paper-only trading workflow using mock data. No broker or live execution path is active.",
+      cards: [
+        { title: "Signal Intake", status: "MOCK READY", meaning: "A sample signal can be reviewed without sending orders.", next_action: "Check mock signal fields." },
+        { title: "Latency", status: "REVIEW", meaning: "Timing is tracked as a mock value only.", next_action: "Confirm timestamp labels are clear." },
+        { title: "Regime", status: "PENDING REVIEW", meaning: "Regime means the current market condition tag.", next_action: "Keep tag paper-only." },
+        { title: "Risk Gate", status: "BLOCKED", meaning: "The safety gate blocks live action.", next_action: "Do not weaken the lock." },
+        { title: "Paper Result", status: "NOT EXECUTED", meaning: "No real or paper trade has been run from the dashboard.", next_action: "Use mock result only." },
+        { title: "Scorecard", status: "WAITING", meaning: "Win/loss notes are not proven yet.", next_action: "Require enough mock samples." },
+        { title: "Validator Status", status: "REVIEW", meaning: "Checks must pass before any future change package.", next_action: "Run local validators after edits." },
+        { title: "Next Action", status: "START HERE", meaning: "Review one mock signal through the risk gate.", next_action: "Keep Live Execution: BLOCKED." }
+      ],
+      blocked_actions: [
         "No broker",
         "No OANDA",
         "No API keys",
-        "No live orders",
-        "Paper-only / simulation-only"
+        "No real orders",
+        "No real webhooks",
+        "No live execution"
       ]
     });
   }

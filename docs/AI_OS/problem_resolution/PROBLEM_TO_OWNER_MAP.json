@@ -1,0 +1,164 @@
+{
+  "map_version": "0.1.0",
+  "default_mode": "DRY_RUN",
+  "feeds_change_control_path": "docs/AI_OS/change_control/",
+  "problem_routes": [
+    {
+      "problem_category": "ui_only",
+      "example": "dock player has confusing labels, poor spacing, wrong placement, clutter, or mobile readability problems",
+      "owner": "UI Agent",
+      "agent_route": [
+        "UI readability role",
+        "UI Agent"
+      ],
+      "likely_affected_files": [
+        "docs/AI_OS/dashboard/",
+        "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+        "apps/dashboard/css/aios-static-preview.css",
+        "apps/dashboard/js/aios-static-preview.js"
+      ],
+      "blocked_files": [
+        "docs/AI_OS/trading_laboratory/",
+        "docs/AI_OS/product/",
+        "protected root files",
+        ".codex_backups/",
+        "secrets",
+        "broker files",
+        "OANDA files"
+      ],
+      "repair_type": "UI-only",
+      "validator_route": [
+        "dashboard boundary check",
+        "readability check",
+        "mobile layout check"
+      ],
+      "change_control_required": true
+    },
+    {
+      "problem_category": "logic_only",
+      "example": "dock player playback state mismatch or incorrect icon state",
+      "owner": "UI Agent",
+      "agent_route": [
+        "UI Agent",
+        "Validator Gap Agent if no check exists"
+      ],
+      "likely_affected_files": [
+        "apps/dashboard/js/aios-static-preview.js",
+        "apps/dashboard/src/"
+      ],
+      "blocked_files": [
+        "Trading Lab files",
+        "product docs",
+        "secrets",
+        "broker files",
+        "OANDA files",
+        "protected root files"
+      ],
+      "repair_type": "logic-only",
+      "validator_route": [
+        "state consistency check",
+        "dashboard boundary check"
+      ],
+      "change_control_required": true
+    },
+    {
+      "problem_category": "mock_data_only",
+      "example": "dock player reads a mock status value that does not match the UI state",
+      "owner": "Mock Data Agent",
+      "agent_route": [
+        "Mock Data Agent",
+        "Validator Gap Agent if JSON validation is missing"
+      ],
+      "likely_affected_files": [
+        "apps/dashboard/mock-data/"
+      ],
+      "blocked_files": [
+        "dashboard code",
+        "Trading Lab execution files",
+        "secrets",
+        "broker files",
+        "OANDA files"
+      ],
+      "repair_type": "mock-data-only",
+      "validator_route": [
+        "JSON parse check",
+        "fixture-only safety check"
+      ],
+      "change_control_required": true
+    },
+    {
+      "problem_category": "trading_lab_only",
+      "example": "Trading Lab paper-only status or scorecard wording is wrong",
+      "owner": "Trading Lab Agent",
+      "agent_route": [
+        "Trading Lab Agent",
+        "Validator Gap Agent"
+      ],
+      "likely_affected_files": [
+        "docs/AI_OS/trading_laboratory/"
+      ],
+      "blocked_files": [
+        "apps/dashboard/",
+        "secrets",
+        "broker files",
+        "OANDA files",
+        "live execution scripts"
+      ],
+      "repair_type": "Trading-Lab-only",
+      "validator_route": [
+        "Trading Lab DRY_RUN validator",
+        "paper-only boundary check"
+      ],
+      "change_control_required": true
+    },
+    {
+      "problem_category": "connector_api_only",
+      "example": "dock player request tries to use an external music service or API",
+      "owner": "Connector Planning Agent",
+      "agent_route": [
+        "Architecture Agent",
+        "Connector Planning Agent"
+      ],
+      "likely_affected_files": [
+        "docs/AI_OS/change_control/",
+        "docs/AI_OS/tools/",
+        "docs/AI_OS/dashboard/"
+      ],
+      "blocked_files": [
+        "real credentials",
+        "real tokens",
+        "API keys",
+        "account login files",
+        "broker files",
+        "OANDA files"
+      ],
+      "repair_type": "connector/API-only",
+      "validator_route": [
+        "connector boundary check",
+        "API boundary check",
+        "secrets check"
+      ],
+      "change_control_required": true
+    },
+    {
+      "problem_category": "mixed_scope",
+      "example": "dock player fix also edits Trading Lab, product docs, and dashboard files",
+      "owner": "Architecture Agent",
+      "agent_route": [
+        "Architecture Agent",
+        "Cleanup Agent"
+      ],
+      "likely_affected_files": [
+        "multiple unrelated paths"
+      ],
+      "blocked_files": [
+        "all files until scope is split"
+      ],
+      "repair_type": "invalid-mixed-scope",
+      "validator_route": [
+        "change collision check"
+      ],
+      "change_control_required": true
+    }
+  ]
+}

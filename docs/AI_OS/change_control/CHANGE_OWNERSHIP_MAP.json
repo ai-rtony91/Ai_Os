@@ -1,0 +1,192 @@
+{
+  "map_version": "0.1.0",
+  "default_mode": "DRY_RUN",
+  "global_blocked_actions": [
+    "delete_files",
+    "move_files",
+    "rename_files",
+    "edit_secrets",
+    "install_packages",
+    "connect_apis_without_approval",
+    "connect_brokers",
+    "connect_oanda",
+    "enable_live_trading",
+    "real_webhook_activation",
+    "git_add_dot",
+    "mixed_unrelated_commits",
+    "commit_without_approval",
+    "push_without_approval"
+  ],
+  "change_areas": [
+    {
+      "area": "ui_ux",
+      "owner_agent": "UI Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/change_control/",
+        "docs/AI_OS/dashboard/"
+      ],
+      "code_paths_require_exact_approval": [
+        "apps/dashboard/"
+      ],
+      "blocked": [
+        "trading_logic_changes",
+        "broker_actions",
+        "secrets",
+        "live_execution"
+      ]
+    },
+    {
+      "area": "tools",
+      "owner_agent": "Tools / Automation Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/tools/",
+        "docs/AI_OS/change_control/"
+      ],
+      "blocked": [
+        "installs_without_approval",
+        "credential_changes",
+        "background_services"
+      ]
+    },
+    {
+      "area": "gallery",
+      "owner_agent": "UI Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/dashboard/",
+        "docs/AI_OS/change_control/"
+      ],
+      "code_paths_require_exact_approval": [
+        "apps/dashboard/assets/",
+        "apps/dashboard/private-media/"
+      ],
+      "blocked": [
+        "private_media_commit_without_review",
+        "secrets",
+        "unapproved_dashboard_edits"
+      ]
+    },
+    {
+      "area": "radio_dock_player",
+      "owner_agent": "UI Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/dashboard/",
+        "docs/AI_OS/change_control/"
+      ],
+      "code_paths_require_exact_approval": [
+        "apps/dashboard/"
+      ],
+      "blocked": [
+        "streaming_credentials",
+        "unapproved_api_calls",
+        "mixed_dashboard_commits"
+      ]
+    },
+    {
+      "area": "dashboard_panels",
+      "owner_agent": "Dashboard / UI Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/dashboard/",
+        "docs/AI_OS/change_control/"
+      ],
+      "code_paths_require_exact_approval": [
+        "apps/dashboard/",
+        "apps/dashboard/mock-data/"
+      ],
+      "blocked": [
+        "hidden_execution",
+        "broker_controls",
+        "unapproved_api_calls",
+        "secrets"
+      ]
+    },
+    {
+      "area": "app_connectors",
+      "owner_agent": "Connector Planning Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/change_control/",
+        "docs/AI_OS/tools/"
+      ],
+      "blocked": [
+        "real_credentials",
+        "real_tokens",
+        "account_login",
+        "background_sync",
+        "broker_connector_activation"
+      ]
+    },
+    {
+      "area": "api_planning",
+      "owner_agent": "Architecture Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/change_control/",
+        "docs/AI_OS/dashboard/",
+        "docs/AI_OS/tools/"
+      ],
+      "blocked": [
+        "real_api_keys",
+        "live_endpoints",
+        "deployed_services",
+        "network_calls_without_approval"
+      ]
+    },
+    {
+      "area": "trading_lab",
+      "owner_agent": "Trading Lab Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/trading_laboratory/",
+        "docs/AI_OS/change_control/"
+      ],
+      "blocked": [
+        "live_trading",
+        "broker_routing",
+        "OANDA_execution",
+        "API_keys",
+        "real_orders",
+        "real_webhooks"
+      ]
+    },
+    {
+      "area": "product_docs",
+      "owner_agent": "Product / Reporting Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/product/",
+        "docs/AI_OS/change_control/"
+      ],
+      "blocked": [
+        "fake_claims",
+        "profit_guarantees",
+        "live_trading_claims"
+      ]
+    },
+    {
+      "area": "mock_data",
+      "owner_agent": "Mock Data Agent",
+      "allowed_planning_paths": [
+        "docs/AI_OS/trading_laboratory/",
+        "apps/dashboard/mock-data/",
+        "docs/AI_OS/change_control/"
+      ],
+      "blocked": [
+        "real_account_data",
+        "secrets",
+        "broker_tokens",
+        "live_market_execution_data"
+      ]
+    },
+    {
+      "area": "validators",
+      "owner_agent": "Validator Gap Agent",
+      "allowed_planning_paths": [
+        "automation/",
+        "docs/AI_OS/validators/",
+        "docs/AI_OS/change_control/"
+      ],
+      "blocked": [
+        "write_actions_without_approval",
+        "broker_actions",
+        "secret_scanning_output_with_secret_values",
+        "git_actions_without_approval"
+      ]
+    }
+  ]
+}

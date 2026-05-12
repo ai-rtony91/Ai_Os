@@ -1,31 +1,66 @@
 {
-  "schema_version": "0.1-draft",
+  "schema_version": "0.2-guided-workspace",
   "classification": "AI_OS project work only",
-  "purpose": "Example layout registry for dashboard ordering, visibility, and visual depth planning.",
+  "purpose": "Guided layout registry for calm workspace ordering, visibility, expansion behavior, and visual depth planning.",
   "layout": {
+    "philosophy": "Show one active workspace first. Keep details collapsed until the user asks for them.",
     "sections": [
       {
-        "id": "status-strip",
-        "label": "Status Strip",
+        "id": "top_status",
+        "label": "Welcome, System State, Next Safe Action",
         "order": 10,
         "visible": true,
-        "layout_mode": "existing_flex_wrap"
+        "layout_mode": "compact_guided_status",
+        "always_visible": true
       },
       {
-        "id": "command-stage",
-        "label": "Command Stage",
+        "id": "left_work_navigation",
+        "label": "Work Navigation",
         "order": 20,
         "visible": true,
-        "layout_mode": "existing_grid"
+        "layout_mode": "drawer_on_mobile",
+        "always_visible": true
       },
       {
-        "id": "registry-section",
-        "label": "Tool Registry",
+        "id": "center_active_workspace",
+        "label": "Active Workspace",
         "order": 30,
         "visible": true,
-        "layout_mode": "existing_registry_lane"
+        "layout_mode": "single_focus_workspace",
+        "always_visible": true
+      },
+      {
+        "id": "right_personal_tools",
+        "label": "Personal, Tools, Gallery, Connectors",
+        "order": 40,
+        "visible": true,
+        "layout_mode": "drawer_or_side_rail",
+        "always_visible": false
+      },
+      {
+        "id": "bottom_radio_utility",
+        "label": "Radio Dock and Utilities",
+        "order": 50,
+        "visible": true,
+        "layout_mode": "compact_bottom_dock",
+        "always_visible": true
       }
     ],
+    "collapse_defaults": {
+      "assistant_details": "collapsed",
+      "validator_details": "collapsed",
+      "telemetry_details": "collapsed",
+      "trading_lab_step_details": "collapsed_except_start_and_next_action",
+      "radio_advanced_controls": "collapsed",
+      "utility_controls": "collapsed"
+    },
+    "mobile_rules": {
+      "layout": "single_column",
+      "horizontal_scroll_allowed": false,
+      "minimum_touch_target_px": 44,
+      "rails": "drawers",
+      "details": "expand_on_request"
+    },
     "visual_depth": {
       "visual_depth_tier": "2D_STATIC",
       "parallax_enabled": false,
@@ -43,4 +78,3 @@
     }
   }
 }
-
