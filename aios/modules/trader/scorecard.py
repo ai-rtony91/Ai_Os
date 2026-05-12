@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+from aios.modules.trader.execution_quality import build_execution_quality_metrics
+
 
 def build_paper_scorecard(
     outcomes: list[dict[str, object]],
     starting_cash: float = 100000.0,
     blocked_decisions: int = 0,
+    execution_records: list[dict[str, object]] | None = None,
+    rejected_order_count: int = 0,
+    risk_block_count: int = 0,
     live_execution_status: str = "BLOCKED",
     execution_allowed: bool = False,
 ) -> dict[str, object]:
@@ -25,8 +30,13 @@ def build_paper_scorecard(
     gross_loss = abs(sum(losses))
     total_trades = len(pnl_values)
     ending_cash = starting_cash + sum(pnl_values)
+    execution_quality = build_execution_quality_metrics(
+        execution_records,
+        rejected_order_count=rejected_order_count,
+        risk_block_count=risk_block_count,
+    )
 
-    return {
+    scorecard = {
         "total_trades": total_trades,
         "paper_wins": len(wins),
         "paper_losses": len(losses),
@@ -43,6 +53,8 @@ def build_paper_scorecard(
         "live_execution_status": live_execution_status,
         "execution_allowed": execution_allowed,
     }
+    scorecard.update(execution_quality)
+    return scorecard
 
 
 def _paper_pnl(outcome: dict[str, object]) -> float:

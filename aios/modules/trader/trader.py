@@ -130,6 +130,8 @@ class TraderEngine:
             quantity=quantity,
             limit_price=bar.close,
             paper_order_id=f"PAPER-ORDER-{self._paper_order_sequence:06d}",
+            expected_fill_price=bar.close,
+            spread_estimate=bar.high - bar.low,
             live_execution_status=self.config.live_execution_status,
             external_routing_enabled=self.config.external_routing_enabled,
         )

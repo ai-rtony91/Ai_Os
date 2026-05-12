@@ -92,6 +92,8 @@ class PaperOrderIntent:
     quantity: int
     limit_price: float
     paper_order_id: str
+    expected_fill_price: float | None = None
+    spread_estimate: float = 0.0
     paper_only: bool = True
     live_execution_status: str = "BLOCKED"
     external_routing_enabled: bool = False
@@ -113,6 +115,11 @@ class PaperFillEvent:
     fill_price: float
     paper_order_id: str
     paper_fill_id: str
+    expected_fill_price: float
+    actual_paper_fill_price: float
+    paper_slippage: float = 0.0
+    spread_estimate: float = 0.0
+    fill_latency_ms: int = 0
     paper_only: bool = True
 
     def __post_init__(self) -> None:

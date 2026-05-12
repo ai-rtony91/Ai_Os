@@ -17,11 +17,23 @@ class BacktestEngine:
         total_paper_orders = sum(1 for decision in decisions if decision.get("paper_order") is not None)
         total_paper_fills = sum(1 for decision in decisions if decision.get("paper_fill") is not None)
         blocked_decisions = sum(1 for decision in decisions if decision.get("decision") == "BLOCKED")
+        risk_block_count = sum(
+            1 for decision in decisions
+            if decision.get("decision") == "BLOCKED" and decision.get("risk") is not None
+        )
+        execution_records = [
+            decision["paper_fill"]
+            for decision in decisions
+            if decision.get("paper_fill") is not None
+        ]
         paper_outcomes = self.trader.paper_outcomes.to_dicts()
         scorecard = build_paper_scorecard(
             paper_outcomes,
             starting_cash=self.trader.config.starting_cash,
             blocked_decisions=blocked_decisions,
+            execution_records=execution_records,
+            rejected_order_count=self.trader.paper_broker.rejected_order_count,
+            risk_block_count=risk_block_count,
             live_execution_status=self.trader.config.live_execution_status,
             execution_allowed=self.trader.config.execution_allowed,
         )
@@ -31,6 +43,9 @@ class BacktestEngine:
             "total_paper_orders": total_paper_orders,
             "total_paper_fills": total_paper_fills,
             "blocked_decisions": blocked_decisions,
+            "execution_records": execution_records,
+            "rejected_order_count": self.trader.paper_broker.rejected_order_count,
+            "risk_block_count": risk_block_count,
             "paper_outcomes": paper_outcomes,
             "scorecard": scorecard,
             "final_cash": self.trader.paper_broker.cash,
