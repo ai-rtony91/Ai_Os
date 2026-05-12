@@ -735,6 +735,10 @@ function hideWelcomeStart() {
   document.body.classList.remove("welcome-start-active");
 }
 
+function isWelcomeStartVisible() {
+  return Boolean(welcomeStartScreen && !welcomeStartScreen.hidden);
+}
+
 function setFocusedStartView(route = "") {
   const isFocused = Boolean(route);
   document.body.classList.remove("focused-route-start-project", "focused-route-archives", "focused-route-trading-lab");
@@ -1658,21 +1662,24 @@ async function renderPersonalGallery() {
 function readCommandCenterState() {
   try {
     const parsed = JSON.parse(window.sessionStorage.getItem(dashboardWorkspaceStateKey) || "{}");
-    if (!parsed) return null;
+    if (!parsed || typeof parsed !== "object") return null;
     if (railDetailConfig[parsed.rail]) {
       const hasRailDetail = railDetailConfig[parsed.rail].items.some((item) => item.id === parsed.detail);
+      if (!hasRailDetail) return null;
       return {
         rail: parsed.rail,
         workspace: parsed.rail,
-        detail: hasRailDetail ? parsed.detail : undefined
+        detail: parsed.detail
       };
     }
+    if (!parsed.workspace) return null;
     const legacyTarget = resolveRailTarget(parsed.workspace, parsed.detail);
     const hasDetail = railDetailConfig[legacyTarget.rail].items.some((item) => item.id === legacyTarget.detail);
+    if (!hasDetail) return null;
     return {
       rail: legacyTarget.rail,
       workspace: legacyTarget.rail,
-      detail: hasDetail ? legacyTarget.detail : undefined
+      detail: legacyTarget.detail
     };
   } catch (error) {
     return null;
@@ -1681,6 +1688,10 @@ function readCommandCenterState() {
 
 function saveCommandCenterState() {
   try {
+    if (isWelcomeStartVisible()) {
+      window.sessionStorage.removeItem(dashboardWorkspaceStateKey);
+      return;
+    }
     window.sessionStorage.setItem(dashboardWorkspaceStateKey, JSON.stringify({
       rail: activeWorkspaceId,
       workspace: activeWorkspaceId,
@@ -3196,8 +3207,10 @@ applyDashboardTheme(readSavedDashboardTheme());
 const savedCommandCenterState = readCommandCenterState();
 if (savedCommandCenterState) {
   setActiveTab(savedCommandCenterState.rail || savedCommandCenterState.workspace, savedCommandCenterState.detail);
+  hideWelcomeStart();
 } else {
   renderRailSelection("build", "start-here");
+  showWelcomeStart();
 }
 youtubeRadioRestoreState = readSavedYouTubeRadioState();
 setYouTubeDockCollapsed(youtubeRadioRestoreState?.collapsed ?? readSavedYouTubeDockCollapsed());
@@ -3216,7 +3229,6 @@ applySavedPersonalRailState();
 syncSidebarState();
 syncPersonalRailState();
 setAssistantMode(activeAssistantMode);
-showWelcomeStart();
 loadStatusOverview();
 loadToolRegistryStatus();
 loadWorkTableAiInsights();
