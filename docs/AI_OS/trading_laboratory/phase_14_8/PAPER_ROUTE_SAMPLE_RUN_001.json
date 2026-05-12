@@ -1,0 +1,46 @@
+{
+  "run_id": "paper_route_sample_001",
+  "mode": "paper_only",
+  "symbol": "EUR_USD",
+  "timeframe": "45m",
+  "direction_intent": "long_watch",
+  "strategy_name": "supertrend_permission_preview",
+  "alert_created_at": "2026-05-12T10:00:00-04:00",
+  "signal_received_at": "2026-05-12T10:00:02-04:00",
+  "validation_started_at": "2026-05-12T10:00:03-04:00",
+  "validation_completed_at": "2026-05-12T10:00:04-04:00",
+  "route_preview_created_at": "2026-05-12T10:00:05-04:00",
+  "paper_order_simulated_at": "2026-05-12T10:00:06-04:00",
+  "total_delay_seconds": 6,
+  "stale_signal_status": false,
+  "regime_tag": "trend_permission_only",
+  "trend_permission": "allowed_for_watchlist_only",
+  "risk_gate_status": "paper_allowed_live_blocked",
+  "blocked_reason": "live execution not approved",
+  "traderspost_style_route_preview": {
+    "status": "preview_only",
+    "destination": "paper_route_preview",
+    "not_sent_to_broker": true,
+    "not_live_order": true
+  },
+  "paper_result": {
+    "paper_trade_id": "paper_trade_sample_001",
+    "paper_result_status": "example_only_not_a_real_trade",
+    "paper_result_r": 0.0
+  },
+  "scorecard_snapshot": {
+    "win_rate": null,
+    "average_win": null,
+    "average_loss": null,
+    "expectancy": null,
+    "profit_factor": null,
+    "max_drawdown": null,
+    "trade_count": 0,
+    "confidence_score": 0,
+    "blocked_reason": "not enough paper trade evidence"
+  },
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

@@ -1,0 +1,150 @@
+{
+  "phase": "14",
+  "stage": "14.8",
+  "name": "Paper Route Evidence Consolidation",
+  "mode": "paper_only",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "webhook_status": "MOCK_ONLY",
+  "paper_route_status": "ENABLED_FOR_SIMULATION_ONLY",
+  "route_sequence": [
+    {
+      "step": 1,
+      "name": "TradingView-style alert mock",
+      "status": "mock_only",
+      "evidence_required": [
+        "symbol",
+        "timeframe",
+        "direction_intent",
+        "source_timestamp",
+        "strategy_name"
+      ]
+    },
+    {
+      "step": 2,
+      "name": "AI_OS signal intake",
+      "status": "paper_only",
+      "evidence_required": [
+        "signal_received_at",
+        "payload_parse_status",
+        "missing_field_status"
+      ]
+    },
+    {
+      "step": 3,
+      "name": "Latency timestamp check",
+      "status": "paper_only",
+      "evidence_required": [
+        "alert_created_at",
+        "signal_received_at",
+        "validation_started_at",
+        "validation_completed_at",
+        "total_delay_seconds",
+        "stale_signal_status"
+      ]
+    },
+    {
+      "step": 4,
+      "name": "Regime filter",
+      "status": "paper_only",
+      "evidence_required": [
+        "regime_tag",
+        "trend_permission",
+        "volatility_condition",
+        "session_context"
+      ]
+    },
+    {
+      "step": 5,
+      "name": "Risk gate",
+      "status": "paper_only",
+      "evidence_required": [
+        "risk_gate_status",
+        "blocked_reason",
+        "risk_per_trade_placeholder",
+        "max_loss_placeholder"
+      ]
+    },
+    {
+      "step": 6,
+      "name": "TradersPost-style route preview",
+      "status": "paper_preview_only",
+      "evidence_required": [
+        "route_preview_id",
+        "paper_destination",
+        "order_side_preview",
+        "order_type_preview",
+        "not_sent_to_broker"
+      ]
+    },
+    {
+      "step": 7,
+      "name": "Paper result",
+      "status": "simulation_only",
+      "evidence_required": [
+        "paper_trade_id",
+        "paper_entry_time",
+        "paper_exit_time",
+        "paper_result_r",
+        "paper_result_status"
+      ]
+    },
+    {
+      "step": 8,
+      "name": "Scorecard update",
+      "status": "paper_only",
+      "evidence_required": [
+        "win_rate",
+        "average_win",
+        "average_loss",
+        "expectancy",
+        "profit_factor",
+        "max_drawdown",
+        "trade_count",
+        "confidence_score"
+      ]
+    }
+  ],
+  "minimum_required_metrics": {
+    "latency": [
+      "alert_created_at",
+      "signal_received_at",
+      "validation_started_at",
+      "validation_completed_at",
+      "route_preview_created_at",
+      "paper_order_simulated_at",
+      "total_delay_seconds",
+      "stale_signal_status"
+    ],
+    "paper_profitability": [
+      "win_rate",
+      "average_win",
+      "average_loss",
+      "expectancy",
+      "profit_factor",
+      "max_drawdown",
+      "trade_count",
+      "confidence_score"
+    ],
+    "risk": [
+      "risk_gate_status",
+      "blocked_reason",
+      "live_execution_status"
+    ]
+  },
+  "blocked_actions": [
+    "live broker execution",
+    "OANDA connection",
+    "real order placement",
+    "real webhook URL creation",
+    "API key storage",
+    "secret storage",
+    "internet calls",
+    "automatic trade execution"
+  ],
+  "next_safe_action": "Later build a simple dashboard reader for this evidence, with one compact Trading Lab entry and no clutter."
+}
