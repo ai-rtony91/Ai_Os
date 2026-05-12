@@ -1,0 +1,49 @@
+{
+  "gap_log_name": "AI_OS Agent Runtime Gap Log",
+  "gap_log_version": "0.1",
+  "mode": "local_file_based",
+  "live_execution_status": "BLOCKED",
+  "gaps": [
+    {
+      "gap_id": "RUNTIME_GAP_001",
+      "title": "Missing local paper bot runner",
+      "assigned_agent": "automation_agent",
+      "priority": "HIGH",
+      "reason": "Trading Lab needs a local paper-only runner before stronger workflow demos.",
+      "next_action": "Plan runner in DRY_RUN before any backend edit."
+    },
+    {
+      "gap_id": "RUNTIME_GAP_002",
+      "title": "Missing chart panel with local candle fixture",
+      "assigned_agent": "ui_agent",
+      "priority": "HIGH",
+      "reason": "The dashboard needs a local chart fixture before any real market connection is considered.",
+      "next_action": "Plan chart panel using fixture candles only."
+    },
+    {
+      "gap_id": "RUNTIME_GAP_003",
+      "title": "TradingView and TradersPost need external handoff plan, not login embed",
+      "assigned_agent": "integration_agent",
+      "priority": "MEDIUM",
+      "reason": "External platforms must stay outside AI_OS login and credential handling.",
+      "next_action": "Draft handoff boundary plan."
+    },
+    {
+      "gap_id": "RUNTIME_GAP_004",
+      "title": "Business setup checklist for Play Store organization route missing",
+      "assigned_agent": "reporting_agent",
+      "priority": "MEDIUM",
+      "reason": "Business setup needs a checklist without legal claims or account automation.",
+      "next_action": "Draft checklist in product docs only after approval."
+    },
+    {
+      "gap_id": "RUNTIME_GAP_005",
+      "title": "Multi-agent runtime has no real LLM worker adapter yet",
+      "assigned_agent": "architecture_agent",
+      "priority": "LATER",
+      "reason": "This phase intentionally avoids external LLM framework installs.",
+      "next_action": "Keep worker adapter as a future boundary plan."
+    }
+  ]
+}
+

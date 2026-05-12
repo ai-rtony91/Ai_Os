@@ -1,0 +1,17 @@
+{
+  "validation_report_name": "AI_OS Agent Runtime Validation Report",
+  "phase": "15.1",
+  "stage": "APPLY",
+  "result": "PENDING",
+  "json_parse_status": "PENDING",
+  "required_files_status": "PENDING",
+  "blocked_actions_status": "PENDING",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "next_action": "Run automation/agent_runtime/Test-AiOsAgentRuntimeReadiness.DRY_RUN.ps1"
+}
+

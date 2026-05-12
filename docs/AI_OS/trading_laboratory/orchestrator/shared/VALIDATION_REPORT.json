@@ -1,5 +1,7 @@
 ﻿{
     "validation_id":  "PHASE_14_3_ORCHESTRATOR_VALIDATION_001",
+    "phase_15_1_runtime_validation_status":  "PENDING",
+    "phase_15_1_runtime_validation_command":  "powershell -ExecutionPolicy Bypass -File automation/agent_runtime/Test-AiOsAgentRuntimeReadiness.DRY_RUN.ps1",
     "mode":  "paper_only",
     "files_checked":  [
                           "docs/AI_OS/trading_laboratory/orchestrator/"

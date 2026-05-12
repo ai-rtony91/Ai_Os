@@ -28,6 +28,38 @@
                       "gap_policy":  "log_to_GLOBAL_GAP_LOG",
                       "validation_required":  true,
                       "output_file":  "shared/CODEX_SUMMARY.md"
+                  },
+                  {
+                      "task_id":  "PHASE_15_1_AGENT_RUNTIME_BRIDGE_001",
+                      "phase":  "15.1",
+                      "assigned_agent":  "architecture_agent",
+                      "task_type":  "runtime_bridge",
+                      "objective":  "Bridge Trading Lab orchestrator task flow to docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json.",
+                      "allowed_paths":  [
+                                            "docs/AI_OS/agent_runtime/",
+                                            "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                        ],
+                      "blocked_paths":  [
+                                            ".git/",
+                                            ".codex_backups/",
+                                            "apps/dashboard/css/",
+                                            "apps/dashboard/js/",
+                                            "apps/dashboard/assets/",
+                                            "apps/trading_lab/",
+                                            "secrets",
+                                            "env files",
+                                            "broker files",
+                                            "live execution scripts"
+                                        ],
+                      "dependencies":  [
+                                            "docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json"
+                                        ],
+                      "status":  "pending_validation",
+                      "gap_policy":  "log_to_GLOBAL_GAP_LOG",
+                      "validation_required":  true,
+                      "output_file":  "docs/AI_OS/agent_runtime/AGENT_RUNTIME_CODEX_SUMMARY.md",
+                      "live_execution_status":  "BLOCKED",
+                      "next_action":  "Run automation/agent_runtime/Test-AiOsAgentRuntimeReadiness.DRY_RUN.ps1 before selecting the next runtime task."
                   }
               ]
 }

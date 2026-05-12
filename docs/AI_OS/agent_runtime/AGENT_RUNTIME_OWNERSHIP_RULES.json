@@ -1,0 +1,152 @@
+{
+  "ownership_rules_name": "AI_OS Agent Runtime Ownership Rules",
+  "ownership_rules_version": "0.1",
+  "mode": "local_file_based",
+  "live_execution_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "global_blocked_actions": [
+    "live_trading",
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "secrets",
+    "real_webhooks",
+    "real_orders",
+    "external_llm_install",
+    "background_execution",
+    "scheduled_trading",
+    "startup_persistence",
+    "account_login_systems"
+  ],
+  "agents": {
+    "architecture_agent": {
+      "owns": ["runtime model", "routing rules", "ownership map"],
+      "may_read": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/orchestrator/"],
+      "may_write": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/orchestrator/shared/"],
+      "blocked_paths": [".git/", ".codex_backups/", "apps/trading_lab/", "apps/dashboard/css/", "apps/dashboard/js/", ".env"],
+      "blocked_actions": ["external_llm_install", "background_execution", "startup_persistence", "live_trading"],
+      "escalation_rule": "Ask the user before changing runtime boundaries or ownership scope."
+    },
+    "automation_agent": {
+      "owns": ["validators", "runner scripts", "local checks"],
+      "may_read": ["docs/AI_OS/agent_runtime/", "automation/agent_runtime/", "apps/dashboard/mock-data/"],
+      "may_write": ["automation/agent_runtime/", "docs/AI_OS/agent_runtime/"],
+      "blocked_paths": [".git/", ".codex_backups/", ".env", "broker files", "live execution files"],
+      "blocked_actions": ["package_install", "server_start", "scheduled_trading", "live_trading"],
+      "escalation_rule": "Ask the user before any script runs outside read-only validation."
+    },
+    "ui_agent": {
+      "owns": ["dashboard fixture planning", "readability", "local dashboard mock data"],
+      "may_read": ["apps/dashboard/mock-data/", "docs/AI_OS/agent_runtime/"],
+      "may_write": ["apps/dashboard/mock-data/", "docs/AI_OS/agent_runtime/"],
+      "blocked_paths": ["apps/dashboard/css/", "apps/dashboard/js/", "apps/dashboard/assets/", "apps/dashboard/AIOS_STATIC_PREVIEW.html"],
+      "blocked_actions": ["account_login_systems", "real_webhooks", "external_platform_login_embed"],
+      "escalation_rule": "Ask the user before editing dashboard code or visual assets."
+    },
+    "integration_agent": {
+      "owns": ["TradingView handoff boundaries", "TradersPost handoff boundaries", "external platform safety notes"],
+      "may_read": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/"],
+      "may_write": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/orchestrator/shared/"],
+      "blocked_paths": [".env", "credential files", "broker files", "live execution files"],
+      "blocked_actions": ["API_keys", "secrets", "real_webhooks", "account_login_systems", "external_platform_login_embed"],
+      "escalation_rule": "Keep external platforms as handoff notes until the user approves a separate integration phase."
+    },
+    "reporting_agent": {
+      "owns": ["summaries", "next actions", "business checklist drafts"],
+      "may_read": ["docs/AI_OS/", "apps/dashboard/mock-data/"],
+      "may_write": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/product/", "docs/AI_OS/trading_laboratory/orchestrator/shared/"],
+      "blocked_paths": [".git/", ".env", "payment code", "account login systems"],
+      "blocked_actions": ["legal_claims", "payment_enablement", "account_registration", "Play Store submission"],
+      "escalation_rule": "Ask the user before making business claims or account setup instructions."
+    },
+    "risk_gate_agent": {
+      "owns": ["safety gates", "blocked actions", "paper-only risk boundaries"],
+      "may_read": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/", "apps/trading_lab/"],
+      "may_write": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/orchestrator/shared/"],
+      "blocked_paths": [".env", "broker files", "live execution files"],
+      "blocked_actions": ["live_trading", "broker_execution", "OANDA_execution", "real_orders"],
+      "escalation_rule": "Block the task if live execution or broker enablement appears."
+    },
+    "backtest_agent": {
+      "owns": ["paper backtest metrics", "replay metrics", "paper-only result review"],
+      "may_read": ["docs/AI_OS/trading_laboratory/", "apps/trading_lab/"],
+      "may_write": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/"],
+      "blocked_paths": [".env", "broker files", "live execution files"],
+      "blocked_actions": ["live_trading", "real_orders", "real_webhooks"],
+      "escalation_rule": "Use fixture data only unless the user approves a separate data plan."
+    },
+    "trading_research_agent": {
+      "owns": ["paper strategy concepts", "evidence questions", "research notes"],
+      "may_read": ["docs/AI_OS/trading_laboratory/", "docs/AI_OS/agent_runtime/"],
+      "may_write": ["docs/AI_OS/trading_laboratory/", "docs/AI_OS/agent_runtime/"],
+      "blocked_paths": [".env", "broker files", "live execution files"],
+      "blocked_actions": ["investment_advice_claims", "live_trading", "real_orders"],
+      "escalation_rule": "Keep research paper-only and mark unknown facts as UNKNOWN."
+    },
+    "scaffold_gap_agent": {
+      "owns": ["missing folder and file scaffold notes"],
+      "may_read": ["docs/AI_OS/"],
+      "may_write": ["docs/AI_OS/agent_runtime/"],
+      "blocked_paths": [".git/", ".codex_backups/"],
+      "blocked_actions": ["delete", "move", "rename"],
+      "escalation_rule": "Ask the major agent owner before adding scaffold."
+    },
+    "schema_gap_agent": {
+      "owns": ["missing schema fields"],
+      "may_read": ["docs/AI_OS/", "apps/dashboard/mock-data/"],
+      "may_write": ["docs/AI_OS/agent_runtime/", "apps/dashboard/mock-data/"],
+      "blocked_paths": ["apps/dashboard/css/", "apps/dashboard/js/"],
+      "blocked_actions": ["schema_break_without_plan"],
+      "escalation_rule": "Ask before changing field names used by dashboard fixtures."
+    },
+    "validator_gap_agent": {
+      "owns": ["missing validator checks"],
+      "may_read": ["automation/", "docs/AI_OS/"],
+      "may_write": ["automation/agent_runtime/", "docs/AI_OS/agent_runtime/"],
+      "blocked_paths": [".env", ".git/"],
+      "blocked_actions": ["package_install", "server_start"],
+      "escalation_rule": "Keep validators read-only unless separately approved."
+    },
+    "mock_data_agent": {
+      "owns": ["mock data fixtures"],
+      "may_read": ["apps/dashboard/mock-data/", "docs/AI_OS/"],
+      "may_write": ["apps/dashboard/mock-data/"],
+      "blocked_paths": ["apps/dashboard/css/", "apps/dashboard/js/", "apps/dashboard/assets/"],
+      "blocked_actions": ["real_webhooks", "API_keys", "secrets"],
+      "escalation_rule": "Use fake local fixture values only."
+    },
+    "naming_agent": {
+      "owns": ["file naming notes", "schema naming notes"],
+      "may_read": ["docs/AI_OS/"],
+      "may_write": ["docs/AI_OS/agent_runtime/"],
+      "blocked_paths": ["all existing file rename operations"],
+      "blocked_actions": ["rename", "move"],
+      "escalation_rule": "Recommend names only; do not rename files."
+    },
+    "docs_patch_agent": {
+      "owns": ["small documentation patches"],
+      "may_read": ["docs/AI_OS/"],
+      "may_write": ["docs/AI_OS/agent_runtime/", "docs/AI_OS/trading_laboratory/orchestrator/shared/"],
+      "blocked_paths": ["root protected governance files"],
+      "blocked_actions": ["overwrite_without_review"],
+      "escalation_rule": "Preserve existing useful content."
+    },
+    "cleanup_agent": {
+      "owns": ["cleanup recommendations"],
+      "may_read": ["docs/AI_OS/", "apps/dashboard/mock-data/"],
+      "may_write": ["docs/AI_OS/agent_runtime/"],
+      "blocked_paths": ["all paths unless delete is explicitly approved"],
+      "blocked_actions": ["delete", "move", "rename"],
+      "escalation_rule": "Report cleanup candidates only."
+    },
+    "dependency_notes_agent": {
+      "owns": ["dependency notes", "future install warnings"],
+      "may_read": ["docs/AI_OS/", "apps/"],
+      "may_write": ["docs/AI_OS/agent_runtime/"],
+      "blocked_paths": ["package files unless separately approved"],
+      "blocked_actions": ["package_install", "external_llm_install"],
+      "escalation_rule": "Do not install packages; write notes only."
+    }
+  }
+}
+

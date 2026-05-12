@@ -2,6 +2,11 @@
     "ownership_map_version":  "0.1.0",
     "mode":  "paper_only",
     "live_execution_status":  "BLOCKED",
+    "phase_15_1_bridge":  {
+                              "status":  "PENDING_VALIDATION",
+                              "runtime_ownership_rules":  "docs/AI_OS/agent_runtime/AGENT_RUNTIME_OWNERSHIP_RULES.json",
+                              "note":  "Phase 15.1 adds a local AI_OS agent runtime ownership model. This file remains the Trading Lab orchestrator ownership map."
+                          },
     "agents":  [
                    {
                        "agent_name":  "architecture_agent",

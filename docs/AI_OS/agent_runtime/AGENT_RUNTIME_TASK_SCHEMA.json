@@ -1,0 +1,91 @@
+{
+  "schema_name": "AI_OS Agent Runtime Task Schema",
+  "schema_version": "0.1",
+  "mode": "local_file_based",
+  "live_execution_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "required_task_fields": [
+    "task_id",
+    "phase",
+    "stage",
+    "lane",
+    "assigned_agent",
+    "task_type",
+    "objective",
+    "allowed_paths",
+    "blocked_paths",
+    "required_inputs",
+    "expected_outputs",
+    "validation_required",
+    "validation_command",
+    "safety_status",
+    "current_status",
+    "next_action",
+    "user_approval_required"
+  ],
+  "valid_task_statuses": [
+    "proposed",
+    "queued",
+    "in_progress",
+    "blocked",
+    "validation_pending",
+    "validation_passed",
+    "validation_failed",
+    "ready_for_user_review",
+    "completed"
+  ],
+  "valid_safety_statuses": [
+    "SAFE_LOCAL_ONLY",
+    "PAPER_ONLY",
+    "REVIEW_REQUIRED",
+    "BLOCKED"
+  ],
+  "blocked_actions": [
+    "live_trading",
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "secrets",
+    "real_webhooks",
+    "real_orders",
+    "external_llm_install",
+    "background_execution",
+    "scheduled_trading",
+    "startup_persistence",
+    "account_login_systems"
+  ],
+  "example_task": {
+    "task_id": "PHASE_15_2_TRADING_LAB_CHART_PANEL_DRY_RUN_001",
+    "phase": "15.2",
+    "stage": "DRY_RUN",
+    "lane": "dashboard_trading_lab",
+    "assigned_agent": "ui_agent",
+    "task_type": "planning",
+    "objective": "Plan a local Trading Lab chart panel using fixture candles only.",
+    "allowed_paths": [
+      "apps/dashboard/mock-data/",
+      "docs/AI_OS/trading_laboratory/"
+    ],
+    "blocked_paths": [
+      "apps/dashboard/css/",
+      "apps/dashboard/js/",
+      "apps/trading_lab/",
+      ".git/",
+      ".codex_backups/"
+    ],
+    "required_inputs": [
+      "local candle fixture",
+      "Trading Lab evidence status fixture"
+    ],
+    "expected_outputs": [
+      "DRY_RUN plan only"
+    ],
+    "validation_required": true,
+    "validation_command": "DRY_RUN only; validation command to be selected after approval.",
+    "safety_status": "SAFE_LOCAL_ONLY",
+    "current_status": "proposed",
+    "next_action": "Ask user to approve or revise the chart panel plan.",
+    "user_approval_required": true
+  }
+}
+

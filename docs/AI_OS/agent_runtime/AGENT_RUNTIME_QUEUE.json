@@ -1,0 +1,186 @@
+{
+  "queue_name": "AI_OS Agent Runtime Queue",
+  "queue_version": "0.1",
+  "mode": "local_file_based",
+  "live_execution_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "tasks": [
+    {
+      "task_id": "PHASE_15_1_RUNTIME_VALIDATE_001",
+      "phase": "15.1",
+      "stage": "APPLY_VALIDATION",
+      "lane": "agent_runtime",
+      "assigned_agent": "automation_agent",
+      "task_type": "validation",
+      "objective": "Validate runtime files and JSON schemas.",
+      "allowed_paths": [
+        "docs/AI_OS/agent_runtime/",
+        "automation/agent_runtime/",
+        "apps/dashboard/mock-data/agent-runtime-status.example.json"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "apps/dashboard/css/",
+        "apps/dashboard/js/",
+        "apps/dashboard/assets/",
+        "apps/trading_lab/",
+        ".env"
+      ],
+      "required_inputs": [
+        "Phase 15.1 runtime files"
+      ],
+      "expected_outputs": [
+        "read-only validation result",
+        "compact runtime snapshot"
+      ],
+      "validation_required": true,
+      "validation_command": "powershell -ExecutionPolicy Bypass -File automation/agent_runtime/Test-AiOsAgentRuntimeReadiness.DRY_RUN.ps1",
+      "safety_status": "SAFE_LOCAL_ONLY",
+      "status": "queued",
+      "current_status": "queued",
+      "next_action": "Run the Phase 15.1 readiness validator.",
+      "user_approval_required": false
+    },
+    {
+      "task_id": "PHASE_15_2_TRADING_LAB_CHART_PANEL_DRY_RUN_001",
+      "phase": "15.2",
+      "stage": "DRY_RUN",
+      "lane": "dashboard_trading_lab",
+      "assigned_agent": "ui_agent",
+      "task_type": "planning",
+      "objective": "Plan local Trading Lab chart panel using fixture candles only.",
+      "allowed_paths": [
+        "apps/dashboard/mock-data/",
+        "docs/AI_OS/trading_laboratory/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/css/",
+        "apps/dashboard/js/",
+        "apps/dashboard/assets/",
+        "apps/trading_lab/",
+        ".git/",
+        ".codex_backups/"
+      ],
+      "required_inputs": [
+        "local fixture candles",
+        "paper-only dashboard fixture plan"
+      ],
+      "expected_outputs": [
+        "DRY_RUN chart panel plan"
+      ],
+      "validation_required": true,
+      "validation_command": "To be defined in DRY_RUN plan.",
+      "safety_status": "SAFE_LOCAL_ONLY",
+      "status": "proposed",
+      "current_status": "proposed",
+      "next_action": "Write a DRY_RUN chart panel plan before any dashboard code edit.",
+      "user_approval_required": true
+    },
+    {
+      "task_id": "PHASE_15_3_TV_TP_EXTERNAL_HANDOFF_DRY_RUN_001",
+      "phase": "15.3",
+      "stage": "DRY_RUN",
+      "lane": "external_platform_handoff",
+      "assigned_agent": "integration_agent",
+      "task_type": "planning",
+      "objective": "Plan safe external handoff buttons for TradingView and TradersPost without login embedding.",
+      "allowed_paths": [
+        "docs/AI_OS/agent_runtime/",
+        "docs/AI_OS/trading_laboratory/",
+        "apps/dashboard/mock-data/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/css/",
+        "apps/dashboard/js/",
+        "apps/dashboard/assets/",
+        "apps/trading_lab/",
+        ".env",
+        ".git/"
+      ],
+      "required_inputs": [
+        "external platform boundary notes"
+      ],
+      "expected_outputs": [
+        "DRY_RUN external handoff plan"
+      ],
+      "validation_required": true,
+      "validation_command": "To be defined in DRY_RUN plan.",
+      "safety_status": "REVIEW_REQUIRED",
+      "status": "proposed",
+      "current_status": "proposed",
+      "next_action": "Plan handoff buttons only; do not embed login or connect accounts.",
+      "user_approval_required": true
+    },
+    {
+      "task_id": "PHASE_15_4_PAPER_BOT_RUNNER_APPLY_001",
+      "phase": "15.4",
+      "stage": "PROPOSED_APPLY",
+      "lane": "trading_lab_backend",
+      "assigned_agent": "automation_agent",
+      "task_type": "local_paper_runner",
+      "objective": "Build local paper-only runner that loads sample candles and sample signal, runs evidence gate, and prints BLOCKED or PAPER_SIMULATED.",
+      "allowed_paths": [
+        "apps/trading_lab/",
+        "automation/trading_lab/",
+        "docs/AI_OS/trading_laboratory/"
+      ],
+      "blocked_paths": [
+        ".env",
+        ".git/",
+        ".codex_backups/",
+        "broker files",
+        "live execution files"
+      ],
+      "required_inputs": [
+        "sample candles",
+        "sample paper signal",
+        "evidence gate rules"
+      ],
+      "expected_outputs": [
+        "local paper-only runner",
+        "read-only validation result"
+      ],
+      "validation_required": true,
+      "validation_command": "To be defined after separate APPLY approval.",
+      "safety_status": "PAPER_ONLY",
+      "status": "proposed",
+      "current_status": "proposed",
+      "next_action": "Create a DRY_RUN implementation plan before editing backend files.",
+      "user_approval_required": true
+    },
+    {
+      "task_id": "BUSINESS_PLAY_STORE_ORG_SETUP_DRY_RUN_001",
+      "phase": "business",
+      "stage": "DRY_RUN",
+      "lane": "business_setup",
+      "assigned_agent": "reporting_agent",
+      "task_type": "checklist",
+      "objective": "Create business setup checklist for Google Play organization route.",
+      "allowed_paths": [
+        "docs/AI_OS/product/"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".env",
+        "payment code",
+        "account login systems",
+        "Play Store registration code"
+      ],
+      "required_inputs": [
+        "current product readiness docs"
+      ],
+      "expected_outputs": [
+        "DRY_RUN business setup checklist"
+      ],
+      "validation_required": true,
+      "validation_command": "To be defined in DRY_RUN plan.",
+      "safety_status": "REVIEW_REQUIRED",
+      "status": "proposed",
+      "current_status": "proposed",
+      "next_action": "Draft checklist only; do not create accounts or make legal claims.",
+      "user_approval_required": true
+    }
+  ]
+}
+

@@ -1,0 +1,40 @@
+{
+  "badge": "LOCAL RUNTIME",
+  "title": "Agent Runtime Status",
+  "runtime_status": "SCAFFOLD_CREATED",
+  "mode": "local_file_based",
+  "live_execution": "BLOCKED",
+  "broker": "BLOCKED",
+  "oanda": "BLOCKED",
+  "api_keys": "BLOCKED",
+  "secrets": "BLOCKED",
+  "external_llm_install": "NOT_ENABLED",
+  "active_lane": "agent_runtime",
+  "queued_tasks": 1,
+  "proposed_tasks": 4,
+  "blocked_tasks": 0,
+  "next_action": "Run the agent runtime readiness validator.",
+  "cards": [
+    {
+      "title": "Runtime Queue",
+      "status": "1 queued task",
+      "body": "The queue shows which safe work packet should happen next."
+    },
+    {
+      "title": "Trading Lab Bridge",
+      "status": "Paper-only",
+      "body": "Trading Lab work routes through evidence, risk, replay, ranking, and next-action files."
+    },
+    {
+      "title": "Safety Locks",
+      "status": "Blocked",
+      "body": "Live trading, brokers, OANDA, API keys, secrets, real webhooks, and real orders are blocked."
+    },
+    {
+      "title": "Next Build",
+      "status": "Validator first",
+      "body": "Run the read-only runtime validator before selecting the next task."
+    }
+  ]
+}
+

@@ -1,0 +1,21 @@
+{
+  "phase": "15.1",
+  "stage": "APPLY",
+  "runtime_status": "SCAFFOLD_CREATED",
+  "mode": "local_file_based",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "background_execution_status": "BLOCKED",
+  "total_tasks": 5,
+  "queued_tasks": 1,
+  "proposed_tasks": 4,
+  "blocked_tasks": 0,
+  "validation_status": "PENDING",
+  "current_focus": "Use runtime queue to choose next safe major build.",
+  "next_action": "Run the agent runtime DRY_RUN validator, then choose one task from the queue."
+}
+

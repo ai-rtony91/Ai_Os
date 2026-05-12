@@ -3,7 +3,19 @@
     "mode":  "paper_only",
     "live_execution_status":  "BLOCKED",
     "gaps":  [
-
+                 {
+                     "gap_id":  "PHASE_15_1_RUNTIME_BRIDGE_GAP_001",
+                     "found_by_agent":  "architecture_agent",
+                     "assigned_minor_agent":  "docs_patch_agent",
+                     "gap_type":  "runtime_bridge_reference",
+                     "description":  "Trading Lab orchestrator now needs a bridge reference to the local AI_OS agent runtime queue and ownership rules.",
+                     "affected_path":  "docs/AI_OS/trading_laboratory/orchestrator/shared/",
+                     "severity":  "MEDIUM",
+                     "proposed_fix":  "Reference docs/AI_OS/agent_runtime/TRADING_LAB_AGENT_RUNTIME_BRIDGE.md and run the Phase 15.1 runtime validator.",
+                     "status":  "pending_validation",
+                     "validation_required":  true,
+                     "live_execution_status":  "BLOCKED"
+                 }
              ],
     "required_fields":  [
                             "gap_id",
