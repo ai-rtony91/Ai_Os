@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Ai&lt;Os">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="62%">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="72%" stop-color="#05070b"/>
+      <stop offset="100%" stop-color="#02040a"/>
+    </radialGradient>
+    <filter id="ghost">
+      <feGaussianBlur stdDeviation="0.35"/>
+    </filter>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#bg)"/>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="#7f8ea3" stroke-width="1.5" opacity="0.76"/>
+  <circle cx="32" cy="32" r="23" fill="none" stroke="#38bdf8" stroke-width="0.8" opacity="0.42"/>
+  <text x="32" y="37" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="700" fill="#e5f6ff" opacity="0.94">Ai&lt;Os</text>
+  <text x="32" y="37" text-anchor="middle" font-family="Consolas, 'Courier New', monospace" font-size="13" font-weight="700" fill="#38bdf8" opacity="0.22" filter="url(#ghost)">Ai&lt;Os</text>
+  <path d="M29 41h6" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" opacity="0.88"/>
+</svg>
+
