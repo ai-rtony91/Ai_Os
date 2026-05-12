@@ -868,7 +868,7 @@ body:not(.personal-rail-collapsed) .top-rail-controls .personal-rail-toggle {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: clamp(28px, 7vw, 72px) 16px;
+  padding: clamp(16px, 4vw, 44px) 16px;
   overflow: hidden;
 }
 
@@ -883,7 +883,8 @@ body.welcome-start-active .welcome-start-screen {
 body.welcome-start-active .utility-status,
 body.welcome-start-active .refresh-guard-message,
 body.welcome-start-active .command-guide-strip,
-body.welcome-start-active .command-stage {
+body.welcome-start-active .command-stage,
+body.welcome-start-active .dashboard-footer {
   display: none;
 }
 
@@ -915,6 +916,10 @@ body.welcome-start-active .top-rail-controls .personal-rail-toggle {
   display: inline-flex;
 }
 
+body.welcome-start-active .home-start-button {
+  display: none;
+}
+
 body.welcome-start-active .top-rail-controls {
   grid-column: 2;
   justify-self: end;
@@ -926,14 +931,105 @@ body.welcome-start-active .top-rail-controls {
   display: inline-flex;
   align-items: baseline;
   justify-content: center;
-  margin: 0 0 34px;
+  margin: 0 0 14px;
   color: rgba(229, 246, 255, 0.34);
   font-family: var(--font-terminal-display);
-  font-size: clamp(68px, 18vw, 172px);
+  font-size: clamp(62px, 16vw, 148px);
   font-weight: 800;
   line-height: 0.9;
   text-shadow: 0 0 18px rgba(56, 189, 248, 0.22), 0 0 62px rgba(56, 189, 248, 0.16);
   user-select: none;
+}
+
+.welcome-command-workspace {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 12px;
+  width: min(100%, 620px);
+  padding: 16px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  background:
+    linear-gradient(180deg, rgba(3, 7, 18, 0.88), rgba(5, 10, 24, 0.82)),
+    radial-gradient(circle at 84% 0%, rgba(0, 163, 255, 0.15), transparent 34%);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38), 0 0 30px rgba(0, 163, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+}
+
+.welcome-command-head {
+  display: grid;
+  gap: 4px;
+  text-align: center;
+}
+
+.welcome-command-head strong {
+  color: var(--text-primary);
+  font-family: var(--font-terminal-display);
+  font-size: clamp(24px, 3.6vw, 36px);
+  line-height: 1.08;
+}
+
+.welcome-command-head p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.welcome-command-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.welcome-command-status span {
+  min-height: 24px;
+  padding: 5px 8px;
+  border: 1px solid rgba(55, 255, 136, 0.28);
+  color: var(--accent-action);
+  background: rgba(55, 255, 136, 0.06);
+  font-size: 9px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.progress-badge {
+  display: inline-grid;
+  place-items: center;
+  min-height: 24px;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 999px;
+  color: rgba(229, 246, 255, 0.82);
+  background: rgba(56, 189, 248, 0.08);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.welcome-command-status .progress-badge {
+  border-color: rgba(56, 189, 248, 0.32);
+  color: rgba(229, 246, 255, 0.82);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.trading-lab-card-summary .progress-badge,
+.paper-bot-core-step summary .progress-badge {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.trading-lab-window .trading-lab-window-summary .progress-badge,
+.paper-runner-card .paper-runner-card-head .progress-badge,
+.trading-lab-handoff-card-head .progress-badge {
+  width: fit-content;
+  border-color: rgba(56, 189, 248, 0.28);
+  color: rgba(229, 246, 255, 0.82);
+  background: rgba(56, 189, 248, 0.08);
 }
 
 .welcome-ghost-logo::before {
@@ -951,12 +1047,12 @@ body.welcome-start-active .top-rail-controls {
   color: rgba(229, 246, 255, 0.42);
 }
 
-.welcome-logo-mark::after {
+.welcome-ghost-logo::after {
   content: "";
   position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: -0.07em;
+  left: 22%;
+  right: 22%;
+  bottom: -0.015em;
   height: 0.035em;
   border-radius: 999px;
   background: rgba(56, 189, 248, 0.72);
@@ -969,29 +1065,63 @@ body.welcome-start-active .top-rail-controls {
 }
 
 .welcome-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 18px;
-  width: min(100%, 520px);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 0;
+  width: 100%;
 }
 
-.welcome-actions button {
+.welcome-next-safe-action {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.welcome-actions button,
+.welcome-advanced summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
   position: relative;
   overflow: hidden;
-  min-width: min(100%, 152px);
-  min-height: 44px;
-  padding: 11px 14px;
+  width: 100%;
+  min-width: 0;
+  min-height: 52px;
+  padding: 10px;
   border: 1px solid rgba(56, 189, 248, 0.34);
   color: var(--text-primary);
   background: rgba(5, 7, 11, 0.54);
   box-shadow: 0 0 26px rgba(0, 163, 255, 0.14), inset 0 0 16px rgba(56, 189, 248, 0.06);
   cursor: pointer;
+  list-style: none;
+  text-align: left;
 }
 
-.welcome-actions button::after {
+.welcome-action-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(55, 255, 136, 0.36);
+  color: var(--accent-action);
+  background: rgba(55, 255, 136, 0.07);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.welcome-advanced summary::-webkit-details-marker {
+  display: none;
+}
+
+.welcome-actions button::after,
+.welcome-advanced summary::after {
   content: "";
   position: absolute;
   left: 16px;
@@ -1009,7 +1139,9 @@ body.welcome-start-active .top-rail-controls {
 }
 
 .welcome-actions button:hover,
-.welcome-actions button:focus {
+.welcome-actions button:focus,
+.welcome-advanced summary:hover,
+.welcome-advanced summary:focus {
   color: var(--accent-action);
   border-color: var(--line-hot);
   outline: none;
@@ -1018,13 +1150,29 @@ body.welcome-start-active .top-rail-controls {
 
 .welcome-actions button:hover::after,
 .welcome-actions button:focus-visible::after,
-.welcome-actions button:active::after {
+.welcome-actions button:active::after,
+.welcome-advanced summary:hover::after,
+.welcome-advanced summary:focus-visible::after,
+.welcome-advanced summary:active::after {
   opacity: 1;
   transform: scaleX(1);
 }
 
+.welcome-advanced {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.welcome-advanced div {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line-subtle);
+  background: rgba(5, 7, 11, 0.5);
+}
+
 body.focused-start-view-active .command-guide-strip,
-body.focused-start-view-active .workspace-detail-side,
 body.focused-start-view-active .workspace-detail-console,
 body.focused-start-view-active .assistant-console-head,
 body.focused-start-view-active .assistant-mode-row,
@@ -1128,6 +1276,7 @@ body.focused-route-archives .project-hub-panel {
 }
 
 .status-strip .drawer-reopen,
+.home-start-button,
 .top-rail-controls .personal-rail-toggle {
   min-width: 112px;
   min-height: 34px;
@@ -1167,6 +1316,7 @@ body.focused-route-archives .project-hub-panel {
   }
 
   .status-strip .drawer-reopen.mobile-tab-button,
+  .home-start-button.mobile-tab-button,
   .top-rail-controls .personal-rail-toggle.mobile-tab-button {
     display: inline-flex;
     align-items: center;
@@ -1185,6 +1335,7 @@ body.focused-route-archives .project-hub-panel {
   }
 
   .status-strip .drawer-reopen.mobile-tab-button .mobile-tab-icon,
+  .home-start-button.mobile-tab-button .mobile-tab-icon,
   .top-rail-controls .personal-rail-toggle.mobile-tab-button .mobile-tab-icon {
     width: 14px;
     height: 14px;
@@ -1192,6 +1343,7 @@ body.focused-route-archives .project-hub-panel {
   }
 
   .status-strip .drawer-reopen.mobile-tab-button span,
+  .home-start-button.mobile-tab-button span,
   .top-rail-controls .personal-rail-toggle.mobile-tab-button span {
     display: inline-flex;
     align-items: center;
@@ -1200,6 +1352,8 @@ body.focused-route-archives .project-hub-panel {
 
   .status-strip .drawer-reopen.mobile-tab-button:hover,
   .status-strip .drawer-reopen.mobile-tab-button:focus,
+  .home-start-button.mobile-tab-button:hover,
+  .home-start-button.mobile-tab-button:focus,
   .top-rail-controls .personal-rail-toggle.mobile-tab-button:hover,
   .top-rail-controls .personal-rail-toggle.mobile-tab-button:focus {
     border-color: var(--accent-action);
@@ -1210,6 +1364,25 @@ body.focused-route-archives .project-hub-panel {
       radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.24), transparent 48%);
     box-shadow: 0 0 30px var(--glow-action), inset 0 0 16px rgba(0, 163, 255, 0.12);
   }
+}
+
+.rail-button-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(56, 189, 248, 0.34);
+  color: var(--accent-action);
+  background: rgba(0, 163, 255, 0.08);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.rail-button-label {
+  display: block;
+  min-width: 0;
 }
 
 .personal-rail-close {
@@ -1293,9 +1466,9 @@ body.focused-route-archives .project-hub-panel {
 
 .command-guide-strip {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.9fr) minmax(240px, 0.9fr);
-  gap: 16px;
-  margin-top: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  margin-top: 12px;
 }
 
 .guide-card,
@@ -1378,32 +1551,20 @@ body.focused-route-archives .project-hub-panel {
 
 .workspace-detail-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
 }
 
-.workspace-detail-main,
-.workspace-detail-side {
+.workspace-detail-main {
   min-width: 0;
   border: 1px solid var(--line-card);
   background: rgba(5, 7, 11, 0.62);
   padding: 16px;
 }
 
-.workspace-detail-side ul {
-  display: grid;
-  gap: 8px;
-  margin: 10px 0 0;
-  padding-left: 18px;
-  color: var(--text-soft);
-  line-height: 1.45;
-}
-
 .workspace-detail-card,
 .workspace-detail-grid,
 .workspace-detail-main,
-.workspace-detail-side,
-.workspace-detail-side li,
 .assistant-output,
 .workspace-placeholder {
   min-width: 0;
@@ -1930,6 +2091,14 @@ body.focused-route-archives .project-hub-panel {
   color: var(--state-pass);
 }
 
+.paper-bot-core-step .progress-badge,
+.paper-bot-core-step.is-blocked .progress-badge,
+.paper-bot-core-step.is-ready .progress-badge {
+  border-color: rgba(56, 189, 248, 0.28);
+  color: rgba(229, 246, 255, 0.82);
+  background: rgba(56, 189, 248, 0.08);
+}
+
 .paper-bot-core-step p {
   grid-column: 1 / -1;
   margin: 0;
@@ -2078,6 +2247,15 @@ body.focused-route-archives .project-hub-panel {
 
 .paper-runner-card.is-blocked .paper-runner-card-head span {
   color: var(--state-danger);
+}
+
+.paper-runner-card .paper-runner-card-head .progress-badge,
+.paper-runner-card.is-ready .paper-runner-card-head .progress-badge,
+.paper-runner-card.is-review .paper-runner-card-head .progress-badge,
+.paper-runner-card.is-blocked .paper-runner-card-head .progress-badge {
+  border-color: rgba(56, 189, 248, 0.28);
+  color: rgba(229, 246, 255, 0.82);
+  background: rgba(56, 189, 248, 0.08);
 }
 
 .paper-runner-field-grid {
@@ -2254,6 +2432,15 @@ body.focused-route-archives .project-hub-panel {
   color: var(--text-soft);
   font-size: 11px;
   line-height: 1.4;
+}
+
+.trading-lab-window .trading-lab-window-summary .progress-badge,
+.trading-lab-window.is-blocked .trading-lab-window-summary .progress-badge,
+.trading-lab-window.is-ready .trading-lab-window-summary .progress-badge,
+.trading-lab-window.is-review .trading-lab-window-summary .progress-badge {
+  border-color: rgba(56, 189, 248, 0.28);
+  color: rgba(229, 246, 255, 0.82);
+  background: rgba(56, 189, 248, 0.08);
 }
 
 .trading-lab-window-body {
@@ -4293,17 +4480,17 @@ body.focused-route-archives .project-hub-panel {
 
 body:not(.welcome-start-active) .youtube-radio-dock {
   position: fixed;
-  left: 50%;
-  right: auto;
+  left: auto;
+  right: max(14px, env(safe-area-inset-right));
   bottom: calc(14px + env(safe-area-inset-bottom));
   z-index: 6;
-  width: min(336px, calc(100vw - 28px));
-  transform: translateX(-50%);
+  width: min(286px, calc(100vw - 28px));
+  transform: none;
   background: rgba(5, 7, 11, 0.94);
 }
 
 body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
-  width: min(336px, calc(100vw - 28px));
+  width: min(300px, calc(100vw - 28px));
 }
 
 .youtube-radio-head {
@@ -4445,8 +4632,8 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
 .youtube-radio-player {
   position: relative;
   width: 100%;
-  height: 200px;
-  min-height: 200px;
+  height: 132px;
+  min-height: 132px;
   margin-left: 0;
   border: 1px solid rgba(56, 189, 248, 0.24);
   border-radius: 12px;
@@ -4460,7 +4647,7 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 200px;
+  min-height: 132px;
   border: 0;
 }
 
@@ -4482,14 +4669,14 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
 
 .youtube-radio-controls {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, auto));
-  justify-content: end;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-content: stretch;
   gap: 5px;
 }
 
 .youtube-radio-controls button {
-  min-height: 28px;
-  padding: 5px 7px;
+  min-height: 30px;
+  padding: 5px 6px;
   font-size: 10px;
   line-height: 1.2;
 }
@@ -5136,6 +5323,23 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
     transform: none;
   }
 
+  body:not(.welcome-start-active) .youtube-radio-dock,
+  body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
+    position: static;
+    right: auto;
+    bottom: auto;
+    z-index: auto;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 6px;
+  }
+
+  .youtube-radio-player,
+  .youtube-radio-player iframe {
+    height: 120px;
+    min-height: 120px;
+  }
+
   .youtube-radio-dock.is-collapsed .youtube-radio-mini-controls {
     flex-wrap: wrap;
     overflow: visible;
@@ -5153,11 +5357,16 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   }
 
   .welcome-actions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .welcome-actions button {
     width: min(100%, 260px);
+  }
+
+  .welcome-advanced {
+    width: min(100%, 260px);
+    justify-self: center;
   }
 
   .status-strip,

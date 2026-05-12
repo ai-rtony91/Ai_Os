@@ -110,7 +110,6 @@ let activeWorkspaceId = "work-table";
 let activeDetailItemId = "project-brief";
 let activeAssistantMode = "tour-guide";
 let refreshGuardMessageTimer = null;
-let musicCompanionWindow = null;
 let mobileRailScrollLockY = 0;
 let mobileRailScrollLockActive = false;
 let mobileRailLastTouchY = null;
@@ -727,8 +726,14 @@ function routeWorkspaceModule(railId, item) {
 
 function showWelcomeStart() {
   if (!welcomeStartScreen) return;
+  clearFocusedStartView();
   welcomeStartScreen.hidden = false;
   document.body.classList.add("welcome-start-active");
+  try {
+    window.sessionStorage.removeItem(dashboardWorkspaceStateKey);
+  } catch (error) {
+    // UI-only state; ignore unavailable storage.
+  }
 }
 
 function hideWelcomeStart() {
@@ -761,12 +766,20 @@ function clearFocusedStartView() {
 
 function routeWelcomeAction(action) {
   const routeMap = {
+    "start-here": { rail: "build", detail: "start-here", focusedRoute: "" },
     "start-project": { rail: "build", detail: "work-table", focusedRoute: "start-project" },
     "view-archives": { rail: "build", detail: "projects", focusedRoute: "archives" },
     "trading-lab": { rail: "build", detail: "trading-bot", focusedRoute: "trading-lab" }
   };
   const route = routeMap[action];
   if (!route) return;
+  if (action === "start-here") {
+    renderRailSelection(route.rail, route.detail);
+    closeRailsAfterRouteSelection();
+    showWelcomeStart();
+    focusMainWorkspace();
+    return;
+  }
   routeWorkspaceModule(route.rail, findRailItem(route.rail, route.detail));
   hideWelcomeStart();
   setFocusedStartView(route.focusedRoute);
@@ -783,7 +796,14 @@ function renderRailButtons(container, railId, selectedItemId) {
     button.className = railId === "personal" ? "rail-nav-button personal-rail-button" : "rail-nav-button context-rail-button";
     button.dataset.rail = railId;
     button.dataset.contextItem = item.id;
-    button.textContent = item.title;
+    const icon = document.createElement("span");
+    icon.className = "rail-button-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = item.title.trim().slice(0, 1) || "?";
+    const label = document.createElement("span");
+    label.className = "rail-button-label";
+    label.textContent = item.title;
+    button.append(icon, label);
     if (item.id === selectedItemId) button.classList.add("active");
     button.addEventListener("click", () => {
       hideWelcomeStart();
@@ -864,6 +884,51 @@ function createTradingLabSafetyChip(label, value) {
   return chip;
 }
 
+const progressValueKeys = [
+  "progress_percent",
+  "progressPercent",
+  "completion_percent",
+  "completionPercent",
+  "readiness_percent",
+  "readinessPercent",
+  "validation_percent",
+  "validationPercent",
+  "paper_workflow_percent",
+  "paperWorkflowPercent",
+  "safety_gate_percent",
+  "safetyGatePercent"
+];
+
+function normalizeProgressValue(source, fallback = "Pending validation") {
+  if (typeof source === "number" && Number.isFinite(source)) {
+    return `${Math.max(0, Math.min(100, Math.round(source)))}%`;
+  }
+  if (typeof source === "string") {
+    const trimmed = source.trim();
+    if (/^\d{1,3}%$/.test(trimmed)) {
+      const numeric = Number(trimmed.replace("%", ""));
+      return `${Math.max(0, Math.min(100, numeric))}%`;
+    }
+    return fallback;
+  }
+  if (!source || typeof source !== "object") {
+    return fallback;
+  }
+  for (const key of progressValueKeys) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      return normalizeProgressValue(source[key], fallback);
+    }
+  }
+  return fallback;
+}
+
+function createProgressBadge(label, source, fallback = "Pending validation") {
+  const badge = document.createElement("span");
+  badge.className = "progress-badge";
+  badge.textContent = `${label}: ${normalizeProgressValue(source, fallback)}`;
+  return badge;
+}
+
 function createTradingLabWorkspaceCard(card, index, total) {
   const item = document.createElement("details");
   item.className = `trading-lab-workspace-card ${getTradingLabStateClass(card.status)}`;
@@ -884,7 +949,7 @@ function createTradingLabWorkspaceCard(card, index, total) {
   const status = document.createElement("strong");
   status.className = "trading-lab-card-status";
   status.textContent = card.status || "UNKNOWN";
-  summary.append(step, title, status);
+  summary.append(step, title, status, createProgressBadge("Phase", card, "Pending validation"));
 
   const body = document.createElement("div");
   body.className = "trading-lab-card-detail";
@@ -920,9 +985,10 @@ function createPaperBotCoreStep(step) {
   title.textContent = step.title || "Paper Bot Step";
   const status = document.createElement("span");
   status.textContent = step.status || "UNKNOWN";
+  const progress = createProgressBadge("Progress", step, "Pending validation");
   const text = document.createElement("p");
   text.textContent = step.summary || "Review this paper-only step.";
-  summary.append(title, status, text);
+  summary.append(title, status, progress, text);
 
   const detail = document.createElement("small");
   detail.textContent = step.detail || "No detail provided.";
@@ -996,7 +1062,7 @@ function createPaperRunnerCard(title, status, fields, note = "") {
   heading.textContent = title;
   const badge = document.createElement("span");
   badge.textContent = status || "UNKNOWN";
-  head.append(heading, badge);
+  head.append(heading, badge, createProgressBadge("Validation", fields, "Not measured"));
 
   const grid = document.createElement("div");
   grid.className = "paper-runner-field-grid";
@@ -1026,9 +1092,10 @@ function renderTradingLabPaperRunnerPanel(data) {
   title.textContent = data.panel_title || "Trading Lab Paper Runner";
   const badge = document.createElement("span");
   badge.textContent = data.paper_decision || data.paper_runner_status || "UNKNOWN";
+  const progress = createProgressBadge("Paper workflow", data, "Pending validation");
   const summary = document.createElement("p");
   summary.textContent = `Source: ${data.source || "local fixture-only"}. The dashboard reads mock data only.`;
-  head.append(title, badge, summary);
+  head.append(title, badge, progress, summary);
 
   const safety = document.createElement("div");
   safety.className = "paper-runner-safety";
@@ -1232,11 +1299,12 @@ function createTradingLabWindow(key, windowData = {}, engineData = null, safetyD
 
   const status = document.createElement("span");
   status.textContent = windowData.status || "PLANNED";
+  const progress = createProgressBadge("Phase", windowData, "Pending validation");
 
   const summaryText = document.createElement("p");
   summaryText.textContent = windowData.summary || "Paper trading workspace window.";
 
-  summary.append(title, status, summaryText);
+  summary.append(title, status, progress, summaryText);
 
   const body = document.createElement("div");
   body.className = "trading-lab-window-body";
@@ -1316,7 +1384,7 @@ function createExternalHandoffCard(panelData = {}) {
   title.textContent = panelData.title || "External Handoff Panel";
   const status = document.createElement("span");
   status.textContent = panelData.status || "MOCK ONLY";
-  head.append(title, status);
+  head.append(title, status, createProgressBadge("Validation", panelData, "Pending validation"));
 
   const summary = document.createElement("p");
   summary.textContent = panelData.summary || "Local mock-only handoff planning panel.";
@@ -1350,9 +1418,10 @@ function renderExternalHandoffPanels(handoffData) {
   title.textContent = handoffData.title || "Paper Signal Handoff Path";
   const badge = document.createElement("span");
   badge.textContent = handoffData.status || handoffData.mode || "MOCK ONLY";
+  const progress = createProgressBadge("Paper workflow", handoffData, "Pending validation");
   const summary = document.createElement("p");
   summary.textContent = handoffData.summary || "TradingView signal idea -> AI_OS validation -> TradersPost paper route preview.";
-  head.append(title, badge, summary);
+  head.append(title, badge, progress, summary);
 
   const blocked = document.createElement("div");
   blocked.className = "trading-lab-handoff-blocks";
@@ -1382,9 +1451,10 @@ function renderTradingLabWindowSystem(data) {
   title.textContent = data.title || "Modular Trading Workspace";
   const badge = document.createElement("span");
   badge.textContent = data.layout_mode || "modular_windows";
+  const progress = createProgressBadge("Readiness", data, "Pending validation");
   const summary = document.createElement("p");
   summary.textContent = data.summary || "Flexible paper trading workspace windows.";
-  head.append(title, badge, summary);
+  head.append(title, badge, progress, summary);
 
   const flexibility = document.createElement("div");
   flexibility.className = "trading-lab-window-flexibility";
@@ -1567,10 +1637,11 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   heading.textContent = data.title || "Trading Lab Workspace";
   const badge = document.createElement("span");
   badge.textContent = data.badge || "MOCK ONLY";
+  const progress = createProgressBadge("Trading Lab readiness", data, "Pending validation");
 
   const summary = document.createElement("p");
   summary.textContent = data.summary || "Paper-only trading workflow using mock data. No orders can be placed.";
-  title.append(heading, badge, summary);
+  title.append(heading, badge, progress, summary);
 
   const safety = document.createElement("div");
   safety.className = "trading-lab-safety-row";
@@ -1603,8 +1674,11 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   ]).join(" | ");
   blockedActions.append(blockedTitle, blockedList);
 
-  const visibleHandoff = windowSystemData?.handoff_path ? renderExternalHandoffPanels(windowSystemData.handoff_path) : renderTradingStackHub();
   const advancedItems = [];
+  const handoffDetails = windowSystemData?.handoff_path ? renderExternalHandoffPanels(windowSystemData.handoff_path) : renderTradingStackHub();
+  if (handoffDetails) {
+    advancedItems.push(handoffDetails);
+  }
   if (flowGrid.childElementCount) {
     advancedItems.push(flowGrid);
   }
@@ -1625,7 +1699,6 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   const children = [
     title,
     safety,
-    visibleHandoff,
     createTradingLabCompactNextAction(data, windowSystemData, orchestrationData)
   ];
   if (advancedItems.length) {
@@ -1703,6 +1776,7 @@ function renderProjectHub() {
     card.className = "project-card";
     const title = document.createElement("h3");
     title.textContent = project.title;
+    const progress = createProgressBadge("Completion", project, "Not measured");
     const summary = document.createElement("p");
     summary.textContent = project.summary;
     const sections = document.createElement("div");
@@ -1719,7 +1793,7 @@ function renderProjectHub() {
       chip.textContent = item;
       telemetry.append(chip);
     });
-    card.append(title, summary, sections, telemetry);
+    card.append(title, progress, summary, sections, telemetry);
     grid.append(card);
   });
   projectHubPanel.replaceChildren(notice, grid);
@@ -2111,21 +2185,6 @@ function showRefreshGuardMessage() {
 function hideRefreshGuardMessage() {
   if (!refreshGuardMessage) return;
   refreshGuardMessage.hidden = true;
-}
-
-function openMusicCompanion() {
-  const companionUrl = new URL("AIOS_MUSIC_COMPANION.html", window.location.href).href;
-  const features = "popup=yes,width=430,height=620,resizable=yes,scrollbars=yes";
-
-  if (musicCompanionWindow && !musicCompanionWindow.closed) {
-    musicCompanionWindow.focus();
-    return;
-  }
-
-  musicCompanionWindow = window.open(companionUrl, "AIOS_MUSIC_COMPANION", features);
-  if (musicCompanionWindow) {
-    musicCompanionWindow.focus();
-  }
 }
 
 async function loadJsonFixture(path, fallback) {
@@ -2633,7 +2692,7 @@ function setYouTubePlayButton(isPlaying) {
     const readableState = button.querySelector("[data-youtube-radio-readable-state]");
     if (button.classList.contains("youtube-radio-mini-button")) {
       button.classList.toggle("is-playing", isPlaying);
-      button.setAttribute("aria-label", `${label} YouTube Radio`);
+      button.setAttribute("aria-label", `${label} Music Companion`);
       button.setAttribute("title", label);
       if (readableState) readableState.textContent = label;
     } else {
@@ -2649,7 +2708,7 @@ function setYouTubeMuteButton(isMuted) {
     const readableState = button.querySelector("[data-youtube-radio-readable-state]");
     if (button.classList.contains("youtube-radio-mini-button")) {
       button.classList.toggle("is-muted", isMuted);
-      button.setAttribute("aria-label", `${label} YouTube Radio`);
+      button.setAttribute("aria-label", `${label} Music Companion`);
       button.setAttribute("title", label);
       if (readableState) readableState.textContent = label;
     } else {
@@ -2686,8 +2745,18 @@ function setYouTubeDockCollapsed(isCollapsed) {
   const collapseButton = youtubeRadioDock.querySelector('[data-youtube-radio-control="collapse"]');
   if (collapseButton) {
     collapseButton.textContent = isCollapsed ? "+" : "−";
-    collapseButton.setAttribute("aria-label", isCollapsed ? "Expand YouTube Radio" : "Collapse YouTube Radio");
+    collapseButton.setAttribute("aria-label", isCollapsed ? "Expand Music Companion" : "Collapse Music Companion");
   }
+}
+
+function toggleMusicCompanionDock() {
+  if (!youtubeRadioDock) return;
+  const shouldCollapse = !youtubeRadioDock.classList.contains("is-collapsed");
+  setYouTubeDockCollapsed(shouldCollapse);
+  saveYouTubeDockCollapsed(shouldCollapse);
+  saveYouTubeRadioState();
+  youtubeRadioDock.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+  youtubeRadioDock.focus({ preventScroll: true });
 }
 
 function readSavedYouTubeDockCollapsed() {
@@ -3006,38 +3075,12 @@ function getDashboardMusicVolumeDelta(delta) {
   return Math.max(0, Math.min(100, currentVolume + delta));
 }
 
-function sendMusicCompanionCommand(command, value) {
-  if (!musicCompanionWindow || musicCompanionWindow.closed) return false;
-  try {
-    musicCompanionWindow.postMessage({
-      source: "AI_OS_DASHBOARD",
-      type: "music-command",
-      command,
-      value
-    }, window.location.origin);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-
 function runDashboardMusicShortcut(command, value) {
   if (command === "volume") {
     const volume = Math.max(0, Math.min(100, Number(value) || 0));
-    if (sendMusicCompanionCommand("volume", volume)) return;
     handleYouTubeRadioVolume(volume);
     return;
   }
-
-  const companionCommandMap = {
-    play: "playPause",
-    back: "previous",
-    next: "next",
-    restart: "restart",
-    mute: "mute"
-  };
-
-  if (sendMusicCompanionCommand(companionCommandMap[command] || command)) return;
   handleYouTubeRadioControl(command);
 }
 
@@ -3351,8 +3394,8 @@ function syncPersonalRailState() {
     const scope = button.dataset.railToggleScope || "";
     const isInternalToggle = scope === "personal-internal";
     button.setAttribute("aria-expanded", String(expanded));
-    const personalLabel = isInternalToggle ? "Close Gallery" : "Gallery";
-    button.setAttribute("aria-label", isInternalToggle ? "Close Gallery" : (expanded ? "Toggle Gallery" : "Open Gallery"));
+    const personalLabel = isInternalToggle ? "Close Personal" : "Personal";
+    button.setAttribute("aria-label", isInternalToggle ? "Close Personal" : (expanded ? "Toggle Personal" : "Open Personal"));
     const textTarget = button.querySelector("span");
     if (textTarget) {
       textTarget.textContent = personalLabel;
@@ -3479,13 +3522,17 @@ actionButtons.forEach((item) => {
       return;
     }
     if (action === "open-music-companion") {
-      openMusicCompanion();
+      toggleMusicCompanionDock();
       return;
     }
     if (action === "toggle-personal-rail") {
       hideWelcomeStart();
       clearFocusedStartView();
       togglePersonalRail();
+      return;
+    }
+    if (action === "home-start") {
+      routeWelcomeAction("start-here");
       return;
     }
     if (item.dataset.tab) {
@@ -3588,16 +3635,10 @@ contextRailList?.addEventListener("click", handleMobileRailListSelection);
 personalRailList?.addEventListener("click", handleMobileRailListSelection);
 
 applyDashboardTheme(readSavedDashboardTheme());
-const savedCommandCenterState = readCommandCenterState();
-if (savedCommandCenterState) {
-  setActiveTab(savedCommandCenterState.rail || savedCommandCenterState.workspace, savedCommandCenterState.detail);
-  hideWelcomeStart();
-} else {
-  renderRailSelection("build", "start-here");
-  showWelcomeStart();
-}
+renderRailSelection("build", "start-here");
+showWelcomeStart();
 youtubeRadioRestoreState = readSavedYouTubeRadioState();
-setYouTubeDockCollapsed(youtubeRadioRestoreState?.collapsed ?? readSavedYouTubeDockCollapsed());
+setYouTubeDockCollapsed(youtubeRadioRestoreState?.collapsed ?? true);
 if (isYouTubeRadioLocalFilePreview()) {
   setYouTubeRadioLocalFileFallback();
 } else {

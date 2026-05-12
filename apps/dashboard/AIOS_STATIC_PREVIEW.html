@@ -56,6 +56,14 @@
           </svg>
           <span>Work Tab</span>
         </button>
+        <button class="home-start-button mobile-tab-button" type="button" data-action="home-start" aria-label="Home / Start Here">
+          <svg class="mobile-tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 11l8-7 8 7"></path>
+            <path d="M6 10v9h12v-9"></path>
+            <path d="M10 19v-5h4v5"></path>
+          </svg>
+          <span>Start Here</span>
+        </button>
         <div class="utility-status" aria-label="Dashboard mode">
           <span>Local mock only</span>
           <details class="top-utility-drawer">
@@ -72,18 +80,17 @@
                 </select>
               </label>
               <button class="soft-refresh-button" type="button" data-action="soft-refresh">Soft Refresh</button>
-              <button class="music-companion-button" type="button" data-action="open-music-companion">Open Music Companion</button>
+              <button class="music-companion-button" type="button" data-action="open-music-companion">Music</button>
               <small>Updates AI_OS without stopping music.</small>
-              <small>Keep Music Companion open to preserve music during dashboard refresh.</small>
             </div>
           </details>
-          <section class="youtube-radio-dock" data-youtube-radio-dock aria-label="YouTube Radio playlist dock">
+          <section class="youtube-radio-dock" data-youtube-radio-dock aria-label="Music Companion playlist dock" tabindex="-1">
             <div class="youtube-radio-head">
               <div>
-                <span class="eyebrow">YouTube Radio</span>
+                <span class="eyebrow">Music Companion</span>
                 <strong data-youtube-radio-state>Press Play to resume</strong>
               </div>
-              <div class="youtube-radio-mini-controls" aria-label="Minimized YouTube Radio controls">
+              <div class="youtube-radio-mini-controls" aria-label="Minimized Music Companion controls">
                 <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="back" aria-label="Previous track" title="Previous track">
                   <svg class="youtube-radio-control-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M6 5h2v14H6z"></path>
@@ -91,7 +98,7 @@
                   </svg>
                   <span class="sr-only" data-youtube-radio-readable-state>Previous track</span>
                 </button>
-                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="play" aria-label="Play YouTube Radio" title="Play">
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="play" aria-label="Play Music Companion" title="Play">
                   <svg class="youtube-radio-control-icon youtube-radio-play-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8 5v14l11-7z"></path>
                   </svg>
@@ -114,7 +121,7 @@
                   </svg>
                   <span class="sr-only" data-youtube-radio-readable-state>Next track</span>
                 </button>
-                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="mute" aria-label="Mute YouTube Radio" title="Mute">
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="mute" aria-label="Mute Music Companion" title="Mute">
                   <svg class="youtube-radio-control-icon youtube-radio-volume-on-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 9v6h4l5 4V5L8 9z"></path>
                     <path d="M16 8.2a5 5 0 0 1 0 7.6l1.4 1.4a7 7 0 0 0 0-10.4z"></path>
@@ -126,7 +133,7 @@
                   </svg>
                   <span class="sr-only" data-youtube-radio-readable-state>Mute</span>
                 </button>
-                <label class="youtube-radio-volume" aria-label="YouTube Radio volume">
+                <label class="youtube-radio-volume" aria-label="Music Companion volume">
                   <svg class="youtube-radio-volume-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 9v6h4l5 4V5L8 9z"></path>
                     <path d="M16 8.2a5 5 0 0 1 0 7.6l1.4 1.4a7 7 0 0 0 0-10.4z"></path>
@@ -135,13 +142,13 @@
                   <input type="range" min="0" max="100" value="70" data-youtube-radio-volume>
                 </label>
               </div>
-              <button class="youtube-radio-icon" type="button" data-youtube-radio-control="collapse" aria-label="Collapse YouTube Radio">−</button>
+              <button class="youtube-radio-icon" type="button" data-youtube-radio-control="collapse" aria-label="Collapse Music Companion">−</button>
             </div>
             <div class="youtube-radio-body" data-youtube-radio-body>
               <div class="youtube-radio-player" id="youtubeRadioPlayer" data-youtube-radio-player aria-hidden="false"></div>
               <p class="youtube-radio-preview-note" data-youtube-radio-preview-note>Local HTTP preview: python -m http.server 8080</p>
               <p class="music-shortcuts-note">Space Play/Pause &bull; &larr; Previous &bull; &rarr; Next &bull; R Restart &bull; M Mute</p>
-              <div class="youtube-radio-controls" aria-label="YouTube Radio controls">
+              <div class="youtube-radio-controls" aria-label="Music Companion controls">
                 <button type="button" data-youtube-radio-control="back">Previous</button>
                 <button type="button" data-youtube-radio-control="play">Play</button>
                 <button type="button" data-youtube-radio-control="restart">Restart</button>
@@ -182,10 +189,35 @@
         <div class="welcome-ghost-logo" aria-hidden="true">
           <span class="welcome-logo-mark">Ai&lt;</span><span class="welcome-logo-os">Os</span>
         </div>
-        <div class="welcome-actions" aria-label="AI_OS start actions">
-          <button type="button" data-welcome-action="start-project">Start Project</button>
-          <button type="button" data-welcome-action="view-archives">View Archives</button>
-          <button type="button" data-welcome-action="trading-lab">Trading Lab</button>
+        <div class="welcome-command-workspace">
+          <div class="welcome-command-head">
+            <strong>Start Here</strong>
+            <p>Choose your workspace.</p>
+          </div>
+          <div class="welcome-actions" aria-label="AI_OS start actions">
+            <button type="button" data-welcome-action="trading-lab">
+              <span class="welcome-action-icon" aria-hidden="true">T</span>
+              <span>Trading Lab</span>
+            </button>
+            <button type="button" data-welcome-action="start-project">
+              <span class="welcome-action-icon" aria-hidden="true">W</span>
+              <span>Work Table</span>
+            </button>
+            <details class="welcome-advanced">
+              <summary>
+                <span class="welcome-action-icon" aria-hidden="true">A</span>
+                <span>Advanced</span>
+              </summary>
+              <div>
+                <button type="button" data-welcome-action="view-archives">Projects</button>
+              </div>
+            </details>
+          </div>
+          <div class="welcome-command-status" aria-label="AI_OS safety state">
+            <span>Paper only</span>
+            <span>Local only</span>
+            <span>Live blocked</span>
+          </div>
         </div>
       </section>
 
@@ -194,16 +226,6 @@
           <span class="eyebrow">START HERE</span>
           <h2>Secure guided command center</h2>
           <p>Choose one workspace, review the locked actions, and keep every project packet visible before any approved APPLY step.</p>
-        </article>
-        <article class="guide-card">
-          <span class="card-label">SAFE BY DEFAULT</span>
-          <strong>No passwords or tokens stored</strong>
-          <p>Social, OneDrive, broker, API, and recovery secrets stay out of dashboard HTML, CSS, JS, localStorage, and mock data.</p>
-        </article>
-        <article class="guide-card">
-          <span class="card-label">LOCAL MOCK ONLY</span>
-          <strong>No backend execution</strong>
-          <p>OAuth, Microsoft Graph, social APIs, broker connectors, live trading, and file access are connector-locked placeholders.</p>
         </article>
       </section>
 
@@ -291,7 +313,6 @@
           </div>
           <div class="workspace-detail-grid">
             <article class="workspace-detail-main">
-              <span class="card-label" data-detail-status>LOCAL MOCK ONLY</span>
               <div class="assistant-output" id="assistantOutput" data-detail-body>Work Table: static center workspace for project packets, prompts, build instructions, tool output, approval gates, and validation queues.</div>
               <div class="workspace-placeholder" data-detail-note>APPLY, commit, push, publishing, and execution remain blocked until explicitly approved.</div>
               <div class="trading-lab-next-action-card" data-trading-lab-next-action hidden></div>
@@ -299,14 +320,6 @@
               <div class="personal-gallery-panel" data-personal-gallery hidden></div>
               <div class="personal-apps-panel" data-personal-apps hidden></div>
             </article>
-            <aside class="workspace-detail-side" aria-label="Focused checklist">
-              <span class="card-label">CHECKLIST</span>
-              <ul data-detail-list>
-                <li>Set objective and scope.</li>
-                <li>Confirm allowed files.</li>
-                <li>List validation steps.</li>
-              </ul>
-            </aside>
           </div>
           <pre id="consoleOutput" class="workspace-detail-console">Ai_Os&gt; Work Table selected
 Ai_Os&gt; Project Brief
