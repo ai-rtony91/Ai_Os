@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pandas
+numpy
+pydantic
+sqlalchemy
+python-dotenv
+typer
+rich
+openpyxl

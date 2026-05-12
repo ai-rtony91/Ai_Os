@@ -1,0 +1,1 @@
+"""Paper-only strategy previews."""
