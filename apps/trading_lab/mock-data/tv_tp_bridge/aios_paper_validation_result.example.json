@@ -1,0 +1,13 @@
+{
+  "validation_status": "PAPER_ROUTE_READY",
+  "approved_for_paper": true,
+  "approved_for_live": false,
+  "blocked_reason": "",
+  "safety_status": {
+    "paper_only": true,
+    "live_execution": "BLOCKED",
+    "broker": "NOT_CONNECTED",
+    "webhook": "NOT_SENT",
+    "real_orders": "BLOCKED"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "destination": "TradersPost_READY_FORMAT_ONLY",
+  "action": "buy",
+  "ticker": "EUR_USD",
+  "direction": "BUY",
+  "quantity_mode": "paper_placeholder",
+  "order_type": "market_placeholder",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "NOT_CONNECTED",
+  "webhook_status": "NOT_SENT",
+  "reason": "AI_OS paper validation only",
+  "paper_validation_status": "PAPER_ROUTE_READY"
+}

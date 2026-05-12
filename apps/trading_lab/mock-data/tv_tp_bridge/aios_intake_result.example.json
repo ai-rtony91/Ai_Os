@@ -1,0 +1,13 @@
+{
+  "signal_id": "AIOS_TV_EUR_USD_20260512T130000",
+  "received_by": "AI_OS",
+  "source": "TradingView",
+  "pair": "EUR_USD",
+  "timeframe": "M15",
+  "direction": "BUY",
+  "signal_type": "EMA_VWAP_PULLBACK",
+  "source_alert_time": "2026-05-12T13:00:00Z",
+  "aios_received_time": "2026-05-12T13:00:01Z",
+  "paper_only": true,
+  "live_execution_allowed": false
+}

@@ -1,0 +1,13 @@
+{
+  "source": "TradingView",
+  "symbol": "EURUSD",
+  "pair": "EUR_USD",
+  "timeframe": "M15",
+  "signal_type": "EMA_VWAP_PULLBACK",
+  "direction": "BUY",
+  "price": 1.085,
+  "strategy_name": "AI_OS Paper EMA VWAP Pullback",
+  "alert_time": "2026-05-12T13:00:00Z",
+  "risk_mode": "paper_only",
+  "notes": "Paper-only template alert. No external connection is active."
+}
