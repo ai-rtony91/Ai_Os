@@ -1,0 +1,101 @@
+{
+  "review_id": "REPLAY_REVIEW_001",
+  "phase": "14.4",
+  "mode": "paper_only_simulation",
+  "live_execution_status": "BLOCKED",
+  "execution_allowed": false,
+  "approved_for_live_execution": false,
+  "strategy_id": "MOCK_STRATEGY_001",
+  "signal_id": "MOCK_SIGNAL_001",
+  "replay_status": "review_blocked",
+  "review_loop": [
+    "Pick one paper signal.",
+    "Replay the chain from signal to scorecard.",
+    "Mark missing facts as UNKNOWN.",
+    "Mark conflicting evidence as MISMATCH.",
+    "Mark unverifiable claims as INVALID DATA.",
+    "Record what blocked the signal.",
+    "Update the evidence score.",
+    "Re-rank the strategy only after review is complete."
+  ],
+  "replay_chain": [
+    {
+      "step": "signal_intake",
+      "source_id": "MOCK_SIGNAL_001",
+      "status": "accepted_for_paper_review_only",
+      "review_result": "present"
+    },
+    {
+      "step": "latency",
+      "source_id": "LATENCY_001",
+      "status": "partial",
+      "review_result": "timestamp_fields_present_but_identical",
+      "note": "Real latency bottleneck is UNKNOWN because the current sample uses identical timestamps."
+    },
+    {
+      "step": "regime",
+      "source_id": "REGIME_FILTER_001",
+      "status": "not_approved",
+      "review_result": "blocked",
+      "blocked_reason": "Trend, volatility, and chop evidence are incomplete."
+    },
+    {
+      "step": "risk_gate",
+      "source_id": "RISK_GATE_PROFITABILITY_001",
+      "status": "blocked",
+      "review_result": "blocked",
+      "blocked_reason": "Daily loss, position size, exposure, and drawdown review are incomplete."
+    },
+    {
+      "step": "paper_result",
+      "source_id": "PAPER_TRADE_SIM_001",
+      "status": "not_executed",
+      "review_result": "blocked",
+      "blocked_reason": "No completed paper outcome exists."
+    },
+    {
+      "step": "scorecard",
+      "source_id": "PAPER_PROFITABILITY_SCORECARD_001",
+      "status": "blocked_for_live_execution",
+      "review_result": "insufficient_data",
+      "blocked_reason": "Trade count is zero."
+    }
+  ],
+  "mismatches": [
+    {
+      "mismatch_id": "PHASE_14_4_MISMATCH_001",
+      "status": "MISMATCH",
+      "summary": "Documentation says the paper result is not executed while risk and regime are incomplete, but backend paper fill code can create a paper fill after a simple paper risk check if candle data exists.",
+      "live_execution_impact": "none_live_execution_remains_blocked",
+      "next_safe_action": "Review this mismatch before future implementation work."
+    }
+  ],
+  "invalid_data": [],
+  "unknowns": [
+    "Real latency bottleneck is UNKNOWN.",
+    "Final paper expectancy is UNKNOWN.",
+    "Strategy rank is UNKNOWN until enough paper outcomes exist."
+  ],
+  "blocked_actions": [
+    "broker_execution",
+    "OANDA_execution",
+    "API_keys",
+    "secrets",
+    "real_webhooks",
+    "real_orders",
+    "live_market_data_dependency",
+    "live_trading",
+    "automatic_route_execution"
+  ],
+  "safety_confirmation": {
+    "no_broker_connection": true,
+    "no_OANDA": true,
+    "no_API_keys": true,
+    "no_secrets": true,
+    "no_real_webhooks": true,
+    "no_real_orders": true,
+    "no_live_trading": true,
+    "live_execution_remains_blocked": true
+  },
+  "next_safe_action": "Review the blocked replay chain and collect missing paper-only evidence before strategy ranking."
+}

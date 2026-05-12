@@ -1,0 +1,88 @@
+{
+  "schema_version": "0.1-phase-14-4",
+  "title": "Paper Strategy Evidence Analyzer",
+  "mode": "paper_only_simulation",
+  "badge": "PAPER ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "credential_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "summary": "Reviews paper-only strategy evidence before any strategy can be trusted for paper ranking.",
+  "strategy": {
+    "strategy_id": "MOCK_STRATEGY_001",
+    "strategy_name": "Mock Trend Pullback Review",
+    "paper_only_rank_label": "not_ranked",
+    "ranking_status": "BLOCKED_INSUFFICIENT_DATA"
+  },
+  "evidence": {
+    "evidence_score": 30,
+    "evidence_status": "BLOCKED",
+    "missing_evidence_count": 4,
+    "mismatch_count": 1,
+    "invalid_data_count": 0,
+    "current_blocker": "Risk, regime, paper outcome, and expectancy evidence are incomplete."
+  },
+  "metrics": {
+    "trade_count": 0,
+    "expectancy_r": null,
+    "profit_factor": null,
+    "max_drawdown": null,
+    "consecutive_losses": null
+  },
+  "replay_review": {
+    "review_id": "REPLAY_REVIEW_001",
+    "status": "review_blocked",
+    "latest_step": "scorecard",
+    "latest_result": "insufficient_data"
+  },
+  "visibility_cards": [
+    {
+      "id": "live_execution",
+      "title": "Live Execution",
+      "status": "BLOCKED",
+      "meaning": "The analyzer cannot approve live trading."
+    },
+    {
+      "id": "evidence_score",
+      "title": "Evidence Score",
+      "status": "30 / 100",
+      "meaning": "The paper evidence is not complete enough to trust yet."
+    },
+    {
+      "id": "strategy_rank",
+      "title": "Strategy Rank",
+      "status": "NOT RANKED",
+      "meaning": "Ranking waits for enough paper samples and complete evidence."
+    },
+    {
+      "id": "replay_review",
+      "title": "Replay Review",
+      "status": "BLOCKED",
+      "meaning": "The paper signal chain has blockers that need review."
+    }
+  ],
+  "blocked_actions": [
+    "No live trading",
+    "No broker",
+    "No OANDA",
+    "No API keys",
+    "No secrets",
+    "No real webhooks",
+    "No real orders",
+    "No account connection",
+    "No background trading",
+    "No scheduled trading"
+  ],
+  "dashboard_rules": {
+    "fixture_only": true,
+    "no_dashboard_code_change": true,
+    "no_route_button": true,
+    "no_broker_login": true,
+    "no_webhook_activation": true,
+    "no_order_button": true
+  },
+  "next_safe_action": "Review Phase 14.4 evidence files and keep Live Execution BLOCKED."
+}
