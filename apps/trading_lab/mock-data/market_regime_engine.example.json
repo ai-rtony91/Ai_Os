@@ -1,0 +1,17 @@
+{
+  "phase": "14",
+  "stage": "14.13",
+  "name": "Market Regime Engine Example",
+  "mode": "paper_only",
+  "pair": "EUR_USD",
+  "timeframe": "45m",
+  "regime_state": "range_bound",
+  "volatility_regime": "compression",
+  "liquidity_regime": "normal",
+  "news_risk_state": "clear",
+  "confidence_score": 0.58,
+  "regime_allowed": false,
+  "blocked_reason": "range-bound compression does not match trend-continuation paper review",
+  "scorecard_ready": false,
+  "live_execution_status": "BLOCKED"
+}

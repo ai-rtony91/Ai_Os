@@ -1,0 +1,18 @@
+{
+  "phase": "14",
+  "stage": "14.12",
+  "name": "Edge Validation Engine Example",
+  "mode": "paper_only",
+  "pair": "EUR_USD",
+  "timeframe": "45m",
+  "session": "new_york",
+  "volatility_state": "normal",
+  "spread_state": "acceptable",
+  "latency_state": "fresh",
+  "expectancy_score": 0.18,
+  "confidence_score": 0.62,
+  "blocked_reason": "paper edge review only; minimum evidence not yet proven",
+  "trade_allowed": false,
+  "scorecard_ready": false,
+  "live_execution_status": "BLOCKED"
+}

@@ -1,0 +1,21 @@
+{
+  "replay_id": "PHASE_14_11_PAPER_ROUTE_REPLAY_001",
+  "mode": "paper_only",
+  "source": "TradingView",
+  "pair": "EUR_USD",
+  "timeframe": "M15",
+  "direction": "BUY",
+  "paper_validation_status": "PAPER_ROUTE_READY",
+  "traderspost_handoff_status": "NOT_SENT",
+  "broker_status": "NOT_CONNECTED",
+  "live_execution_status": "BLOCKED",
+  "expected_fill_price": 1.085,
+  "actual_fill_price": 1.085,
+  "spread_estimate": 0.0,
+  "slippage_estimate": 0.0,
+  "fill_latency_ms": 0,
+  "paper_result_status": "PAPER_REPLAY_READY",
+  "execution_quality_score": 100.0,
+  "scorecard_ready": true,
+  "blocked_reason": "Live execution blocked; paper replay only."
+}
