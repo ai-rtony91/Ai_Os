@@ -1,0 +1,45 @@
+﻿{
+    "agent_name":  "ui_agent",
+    "owns":  [
+                 "future Trading Lab UI placement map",
+                 "chart panel plan",
+                 "signal card plan",
+                 "paper result card plan",
+                 "beginner-readable labels",
+                 "color contrast",
+                 "readable labels",
+                 "button clarity",
+                 "beginner wording",
+                 "theme consistency",
+                 "mobile readability",
+                 "panel spacing",
+                 "clutter detection",
+                 "file/UI naming clarity",
+                 "keeping Trading Lab visually understandable for new users"
+             ],
+    "may_read":  [
+                     "docs/AI_OS/trading_laboratory/",
+                     "docs/AI_OS/product/",
+                     "docs/AI_OS/agents/",
+                     "docs/AI_OS/router/",
+                     "docs/AI_OS/validators/",
+                     "automation/trading_lab/"
+                 ],
+    "may_write":  [
+                      "docs/AI_OS/trading_laboratory/orchestrator/agents/major/ui_agent"
+                  ],
+    "blocked_paths":  [
+                          ".git/",
+                          ".codex_backups/",
+                          "apps/dashboard/",
+                          "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+                          "apps/dashboard/css/",
+                          "apps/dashboard/js/",
+                          "apps/dashboard/assets/",
+                          "secrets",
+                          "env files",
+                          "broker files",
+                          "live execution scripts"
+                      ],
+    "escalation_rule":  "Escalate any out-of-scope path to GLOBAL_GAP_LOG.json. Dashboard code edits require separate explicit approval."
+}

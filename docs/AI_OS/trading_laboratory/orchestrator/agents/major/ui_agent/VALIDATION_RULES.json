@@ -1,0 +1,23 @@
+﻿{
+    "agent_name":  "ui_agent",
+    "mode":  "paper_only",
+    "validation_rules":  [
+                             "JSON files must parse",
+                             "live_execution_status must remain BLOCKED",
+                             "broker_status must remain BLOCKED",
+                             "no secrets or API keys",
+                             "no real webhook activation",
+                             "no real orders",
+                             "no dashboard edits",
+                             "no protected root file edits",
+                             "readability review must not change trading logic",
+                             "readability review must check color contrast",
+                             "readability review must check beginner wording",
+                             "readability review must check button clarity",
+                             "readability review must check mobile readability",
+                             "readability review must check panel spacing",
+                             "readability review must check clutter detection",
+                             "readability review must check file/UI naming clarity",
+                             "theme consistency must remain planning-only until dashboard edits are separately approved"
+                         ]
+}

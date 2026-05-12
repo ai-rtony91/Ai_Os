@@ -1,0 +1,36 @@
+﻿{
+    "agent_name":  "trading_research_agent",
+    "owns":  [
+                 "strategy concepts",
+                 "indicator combinations",
+                 "regime labels",
+                 "signal theory",
+                 "variant ideas",
+                 "paper-only strategy templates"
+             ],
+    "may_read":  [
+                     "docs/AI_OS/trading_laboratory/",
+                     "docs/AI_OS/product/",
+                     "docs/AI_OS/agents/",
+                     "docs/AI_OS/router/",
+                     "docs/AI_OS/validators/",
+                     "automation/trading_lab/"
+                 ],
+    "may_write":  [
+                      "docs/AI_OS/trading_laboratory/orchestrator/agents/major/trading_research_agent"
+                  ],
+    "blocked_paths":  [
+                          ".git/",
+                          ".codex_backups/",
+                          "apps/dashboard/",
+                          "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+                          "apps/dashboard/css/",
+                          "apps/dashboard/js/",
+                          "apps/dashboard/assets/",
+                          "secrets",
+                          "env files",
+                          "broker files",
+                          "live execution scripts"
+                      ],
+    "escalation_rule":  "Escalate any out-of-scope path to GLOBAL_GAP_LOG.json."
+}

@@ -1,0 +1,14 @@
+﻿{
+    "agent_name":  "reporting_agent",
+    "mode":  "paper_only",
+    "validation_rules":  [
+                             "JSON files must parse",
+                             "live_execution_status must remain BLOCKED",
+                             "broker_status must remain BLOCKED",
+                             "no secrets or API keys",
+                             "no real webhook activation",
+                             "no real orders",
+                             "no dashboard edits",
+                             "no protected root file edits"
+                         ]
+}

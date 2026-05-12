@@ -1,0 +1,10 @@
+﻿{
+    "agent_name":  "trading_research_agent",
+    "mode":  "paper_only",
+    "status":  "ready",
+    "live_execution_status":  "BLOCKED",
+    "broker_status":  "BLOCKED",
+    "open_tasks":  0,
+    "open_gaps":  0,
+    "next_action":  "Wait for assigned paper-only task."
+}

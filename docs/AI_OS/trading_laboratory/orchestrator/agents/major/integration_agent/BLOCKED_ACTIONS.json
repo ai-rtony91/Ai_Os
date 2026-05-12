@@ -1,0 +1,20 @@
+﻿{
+    "agent_name":  "integration_agent",
+    "blocked_actions":  [
+                            "broker_execution",
+                            "OANDA_execution",
+                            "API_keys",
+                            "secrets",
+                            "real_webhook_activation",
+                            "real_orders",
+                            "live_market_execution",
+                            "background_execution",
+                            "scheduled_trading",
+                            "account_login_systems",
+                            "dashboard_edits",
+                            "protected_root_file_edits",
+                            "commit",
+                            "push"
+                        ],
+    "live_execution_status":  "BLOCKED"
+}

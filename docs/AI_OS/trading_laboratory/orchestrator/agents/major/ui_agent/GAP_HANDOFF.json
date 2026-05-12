@@ -1,0 +1,22 @@
+﻿{
+    "agent_name":  "ui_agent",
+    "mode":  "paper_only",
+    "handoffs":  [
+                     {
+                         "input":  "readability_or_theme_gap",
+                         "owner":  "ui_agent",
+                         "output":  "beginner-readable UI planning note or gap handoff",
+                         "blocker":  "dashboard code edits are blocked without separate approval",
+                         "validation_required":  true,
+                         "next_safe_action":  "Log readability, theme, spacing, contrast, clutter, label, button, mobile, or naming gaps without editing dashboard code."
+                     }
+                 ],
+    "required_fields":  [
+                            "input",
+                            "owner",
+                            "output",
+                            "blocker",
+                            "validation_required",
+                            "next_safe_action"
+                        ]
+}

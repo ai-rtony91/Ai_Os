@@ -1,0 +1,27 @@
+﻿{
+    "agent_name":  "ui_agent",
+    "mode":  "paper_only",
+    "tasks":  [
+                  {
+                      "task_id":  "UI_AGENT_READABILITY_ROLE_001",
+                      "task_type":  "readability_theme_planning",
+                      "objective":  "Review future Trading Lab labels, buttons, panels, spacing, contrast, theme consistency, mobile readability, clutter, and naming clarity before dashboard code is proposed.",
+                      "status":  "standing_responsibility",
+                      "allowed_paths":  [
+                                            "docs/AI_OS/trading_laboratory/orchestrator/agents/major/ui_agent/"
+                                        ],
+                      "blocked_actions":  [
+                                              "trading_logic_changes",
+                                              "broker_execution",
+                                              "OANDA_execution",
+                                              "API_keys",
+                                              "secrets",
+                                              "dashboard_code_edits",
+                                              "live_execution",
+                                              "real_webhook_activation",
+                                              "commit",
+                                              "push"
+                                          ]
+                  }
+              ]
+}

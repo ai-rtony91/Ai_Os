@@ -1,0 +1,33 @@
+﻿{
+    "queue_version":  "0.1.0",
+    "mode":  "paper_only",
+    "live_execution_status":  "BLOCKED",
+    "tasks":  [
+                  {
+                      "task_id":  "PHASE_14_3_TASK_001",
+                      "phase":  "14.3",
+                      "assigned_agent":  "architecture_agent",
+                      "task_type":  "scaffold_review",
+                      "objective":  "Review orchestrator scaffold and confirm ownership boundaries.",
+                      "allowed_paths":  [
+                                            "docs/AI_OS/trading_laboratory/orchestrator/"
+                                        ],
+                      "blocked_paths":  [
+                                            ".git/",
+                                            ".codex_backups/",
+                                            "apps/dashboard/",
+                                            "secrets",
+                                            "env files",
+                                            "broker files",
+                                            "live execution scripts"
+                                        ],
+                      "dependencies":  [
+
+                                       ],
+                      "status":  "open",
+                      "gap_policy":  "log_to_GLOBAL_GAP_LOG",
+                      "validation_required":  true,
+                      "output_file":  "shared/CODEX_SUMMARY.md"
+                  }
+              ]
+}

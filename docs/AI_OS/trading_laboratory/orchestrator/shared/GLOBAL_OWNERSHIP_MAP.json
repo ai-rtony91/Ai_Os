@@ -1,0 +1,517 @@
+﻿{
+    "ownership_map_version":  "0.1.0",
+    "mode":  "paper_only",
+    "live_execution_status":  "BLOCKED",
+    "agents":  [
+                   {
+                       "agent_name":  "architecture_agent",
+                       "owns":  [
+                                    "orchestrator structure",
+                                    "contracts",
+                                    "folder placement",
+                                    "system boundaries",
+                                    "build sequence",
+                                    "file ownership model"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/architecture_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "trading_research_agent",
+                       "owns":  [
+                                    "strategy concepts",
+                                    "indicator combinations",
+                                    "regime labels",
+                                    "signal theory",
+                                    "variant ideas",
+                                    "paper-only strategy templates"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/trading_research_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "backtest_agent",
+                       "owns":  [
+                                    "backtest plan",
+                                    "simulated trade rules",
+                                    "expectancy metrics",
+                                    "win rate",
+                                    "profit factor",
+                                    "max drawdown",
+                                    "trade count",
+                                    "sample-size warnings"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/backtest_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "risk_gate_agent",
+                       "owns":  [
+                                    "blocked actions",
+                                    "paper-only gates",
+                                    "risk rules",
+                                    "approval boundaries",
+                                    "live-trading lockout"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/risk_gate_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "ui_agent",
+                       "owns":  [
+                                    "future Trading Lab UI placement map",
+                                    "chart panel plan",
+                                    "signal card plan",
+                                    "paper result card plan",
+                                    "beginner-readable labels"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/ui_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "integration_agent",
+                       "owns":  [
+                                    "TradingView-style alert contract",
+                                    "TradersPost-style JSON reference model",
+                                    "mock webhook contract",
+                                    "external platform boundaries"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/integration_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "automation_agent",
+                       "owns":  [
+                                    "validators",
+                                    "local scripts",
+                                    "status generators",
+                                    "report generators",
+                                    "JSON parse checks"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/automation_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "reporting_agent",
+                       "owns":  [
+                                    "CODEX_SUMMARY.md",
+                                    "NEXT_ACTION.md",
+                                    "validation summaries",
+                                    "compact human-readable reports",
+                                    "status compression"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/",
+                                        "docs/AI_OS/product/",
+                                        "docs/AI_OS/agents/",
+                                        "docs/AI_OS/router/",
+                                        "docs/AI_OS/validators/",
+                                        "automation/trading_lab/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/major/reporting_agent/",
+                                         "docs/AI_OS/trading_laboratory/orchestrator/shared/"
+                                     ],
+                       "blocked":  [
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Log blocked or out-of-scope work to GLOBAL_GAP_LOG.json and request human approval before APPLY."
+                   },
+                   {
+                       "agent_name":  "scaffold_gap_agent",
+                       "owns":  [
+                                    "missing folders",
+                                    "missing placeholder files",
+                                    "missing README placement",
+                                    "broken expected tree"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/scaffold_gap_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   },
+                   {
+                       "agent_name":  "schema_gap_agent",
+                       "owns":  [
+                                    "missing JSON fields",
+                                    "inconsistent schema names",
+                                    "missing status fields",
+                                    "missing required keys"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/schema_gap_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   },
+                   {
+                       "agent_name":  "validator_gap_agent",
+                       "owns":  [
+                                    "missing validation checks",
+                                    "missing parse checks",
+                                    "missing no-live-trading checks"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/validator_gap_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   },
+                   {
+                       "agent_name":  "mock_data_agent",
+                       "owns":  [
+                                    "missing sample signal",
+                                    "missing paper trade sample",
+                                    "missing scorecard sample"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/mock_data_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   },
+                   {
+                       "agent_name":  "naming_agent",
+                       "owns":  [
+                                    "inconsistent labels",
+                                    "confusing file names",
+                                    "beginner-unfriendly titles"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/naming_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   },
+                   {
+                       "agent_name":  "docs_patch_agent",
+                       "owns":  [
+                                    "small doc alignment",
+                                    "missing explanation",
+                                    "cross-reference notes"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/docs_patch_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   },
+                   {
+                       "agent_name":  "cleanup_agent",
+                       "owns":  [
+                                    "duplicate proposed files",
+                                    "leftover junk detection",
+                                    "stale draft warnings"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/cleanup_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   },
+                   {
+                       "agent_name":  "dependency_notes_agent",
+                       "owns":  [
+                                    "missing tool notes",
+                                    "dependency warnings",
+                                    "local package notes"
+                                ],
+                       "may_read":  [
+                                        "docs/AI_OS/trading_laboratory/orchestrator/"
+                                    ],
+                       "may_write":  [
+                                         "docs/AI_OS/trading_laboratory/orchestrator/agents/minor/dependency_notes_agent/"
+                                     ],
+                       "blocked":  [
+                                       "system redesign",
+                                       "live broker execution",
+                                       "OANDA",
+                                       "API keys",
+                                       "secrets",
+                                       "real webhooks",
+                                       "real orders",
+                                       "dashboard edits",
+                                       "protected root file edits",
+                                       "commits",
+                                       "pushes"
+                                   ],
+                       "escalation_rule":  "Fix only assigned gap; otherwise log and stop."
+                   }
+               ]
+}

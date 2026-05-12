@@ -1,0 +1,23 @@
+﻿{
+    "agent_name":  "ui_agent",
+    "blocked_actions":  [
+                            "broker_execution",
+                            "OANDA_execution",
+                            "API_keys",
+                            "secrets",
+                            "real_webhook_activation",
+                            "real_orders",
+                            "live_market_execution",
+                            "background_execution",
+                            "scheduled_trading",
+                            "account_login_systems",
+                            "dashboard_edits",
+                            "protected_root_file_edits",
+                            "trading_logic_changes",
+                            "live_execution",
+                            "real_webhook_activation",
+                            "commit",
+                            "push"
+                        ],
+    "live_execution_status":  "BLOCKED"
+}

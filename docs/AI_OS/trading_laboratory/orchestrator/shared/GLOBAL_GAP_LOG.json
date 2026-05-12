@@ -1,0 +1,20 @@
+﻿{
+    "gap_log_version":  "0.1.0",
+    "mode":  "paper_only",
+    "live_execution_status":  "BLOCKED",
+    "gaps":  [
+
+             ],
+    "required_fields":  [
+                            "gap_id",
+                            "found_by_agent",
+                            "assigned_minor_agent",
+                            "gap_type",
+                            "description",
+                            "affected_path",
+                            "severity",
+                            "proposed_fix",
+                            "status",
+                            "validation_required"
+                        ]
+}

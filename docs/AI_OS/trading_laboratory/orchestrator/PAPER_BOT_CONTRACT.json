@@ -1,0 +1,41 @@
+﻿{
+    "contract_version":  "0.1.0",
+    "mode":  "paper_only",
+    "live_execution":  "blocked",
+    "signal_input":  {
+                         "signal_source_type":  "mock_or_manual_only",
+                         "strategy_id":  "UNKNOWN",
+                         "symbol":  "UNKNOWN",
+                         "timeframe":  "UNKNOWN",
+                         "direction":  "UNKNOWN"
+                     },
+    "entry_model":  "UNKNOWN",
+    "stop_loss_model":  "UNKNOWN",
+    "take_profit_model":  "UNKNOWN",
+    "regime_tag":  "UNKNOWN",
+    "confidence_score":  0,
+    "risk_gate_status":  "blocked",
+    "simulated_order":  {
+                            "allowed":  false,
+                            "status":  "not_created",
+                            "note":  "Simulated order is paper-only and must not route to a broker."
+                        },
+    "paper_result":  {
+                         "status":  "not_recorded",
+                         "win_loss":  "UNKNOWN"
+                     },
+    "latency":  {
+                    "status":  "UNKNOWN",
+                    "total_delay_ms":  null
+                },
+    "metrics":  {
+                    "trade_count":  0,
+                    "win_rate":  "UNKNOWN",
+                    "profit_factor":  "UNKNOWN",
+                    "max_drawdown":  "UNKNOWN",
+                    "expectancy":  "UNKNOWN"
+                },
+    "blocked_reason":  [
+                           "Live execution is blocked by default."
+                       ]
+}
