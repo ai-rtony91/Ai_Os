@@ -1,0 +1,12 @@
+{
+  "test_case_id": "PAPER_SIGNAL_BAD_DIRECTION_001",
+  "expected_batch_status": "REJECTED",
+  "signal_id": "PAPER_TEST_SIGNAL_006",
+  "symbol": "EUR_USD",
+  "timeframe": "M15",
+  "direction": "UP_FAST",
+  "strategy_id": "PAPER_EMA_VWAP_PULLBACK_001",
+  "confidence": 0.79,
+  "alert_time": "2026-05-12T00:00:00Z",
+  "source": "TRADINGVIEW_REFERENCE"
+}

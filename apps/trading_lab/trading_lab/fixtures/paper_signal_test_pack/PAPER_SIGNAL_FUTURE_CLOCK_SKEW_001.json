@@ -1,0 +1,12 @@
+{
+  "test_case_id": "PAPER_SIGNAL_FUTURE_CLOCK_SKEW_001",
+  "expected_batch_status": "REJECTED",
+  "signal_id": "PAPER_TEST_SIGNAL_005",
+  "symbol": "EUR_USD",
+  "timeframe": "M15",
+  "direction": "LONG_REVIEW",
+  "strategy_id": "PAPER_EMA_VWAP_PULLBACK_001",
+  "confidence": 0.83,
+  "alert_time": "2026-05-12T00:10:00Z",
+  "source": "TRADINGVIEW_REFERENCE"
+}

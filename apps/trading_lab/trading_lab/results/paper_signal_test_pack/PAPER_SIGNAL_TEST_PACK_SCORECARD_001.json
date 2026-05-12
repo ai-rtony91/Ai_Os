@@ -1,0 +1,28 @@
+{
+  "scorecard_id": "PAPER_SIGNAL_TEST_PACK_SCORECARD_001",
+  "phase": "22",
+  "mode": "paper_only",
+  "total_signals": 10,
+  "accepted": 2,
+  "rejected": 8,
+  "review_required": 0,
+  "blocked_reasons": [
+    "Missing required fields: timeframe.",
+    "Signal is stale.",
+    "Clock skew detected: alert time is too far ahead.",
+    "Direction is not a paper review value.",
+    "Confidence is below paper review threshold.",
+    "Symbol is not in the paper test allowlist.",
+    "Timeframe is not in the paper test allowlist.",
+    "Duplicate signal id."
+  ],
+  "next_safe_action": "Review rejected paper signals, then decide whether to expand Phase 21 gates.",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

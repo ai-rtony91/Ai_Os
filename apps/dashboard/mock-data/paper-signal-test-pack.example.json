@@ -1,0 +1,38 @@
+{
+  "panel_title": "Paper Signal Test Pack",
+  "phase": "22",
+  "mode": "paper_only",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "summary": "Ten saved paper signals are reviewed through the Phase 21 intake and Phase 22 batch gates.",
+  "scorecard": {
+    "total_signals": 10,
+    "accepted": 2,
+    "rejected": 8,
+    "review_required": 0,
+    "blocked_reasons": [
+      "Missing required fields: timeframe.",
+      "Signal is stale.",
+      "Clock skew detected: alert time is too far ahead.",
+      "Direction is not a paper review value.",
+      "Confidence is below paper review threshold.",
+      "Symbol is not in the paper test allowlist.",
+      "Timeframe is not in the paper test allowlist.",
+      "Duplicate signal id."
+    ],
+    "next_safe_action": "Review rejected paper signals, then decide whether to expand Phase 21 gates."
+  },
+  "outputs": {
+    "ledger": "apps/trading_lab/trading_lab/results/paper_signal_test_pack/PAPER_SIGNAL_TEST_PACK_LEDGER_001.json",
+    "scorecard": "apps/trading_lab/trading_lab/results/paper_signal_test_pack/PAPER_SIGNAL_TEST_PACK_SCORECARD_001.json",
+    "validation_report": "apps/trading_lab/trading_lab/results/paper_signal_test_pack/PAPER_SIGNAL_TEST_PACK_VALIDATION_REPORT_001.json"
+  },
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  }
+}

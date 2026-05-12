@@ -1,0 +1,30 @@
+{
+  "validation_report_id": "PAPER_SIGNAL_TEST_PACK_VALIDATION_REPORT_001",
+  "phase": "22",
+  "mode": "paper_only",
+  "result": "PASS",
+  "expected_total_signals": 10,
+  "actual_total_signals": 10,
+  "expected_accepted": 2,
+  "actual_accepted": 2,
+  "expected_rejected": 8,
+  "actual_rejected": 8,
+  "gates": [
+    "phase_21_required_fields",
+    "phase_21_stale_signal",
+    "phase_21_clock_skew",
+    "phase_21_direction",
+    "phase_22_confidence",
+    "phase_22_supported_symbol",
+    "phase_22_supported_timeframe",
+    "phase_22_duplicate_signal"
+  ],
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

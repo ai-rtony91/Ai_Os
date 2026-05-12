@@ -1,0 +1,43 @@
+{
+  "contract_id": "PAPER_SIGNAL_TEST_PACK_CONTRACT_PHASE_22",
+  "phase": "22",
+  "mode": "paper_only",
+  "fixture_count": 10,
+  "required_test_cases": [
+    "valid_long",
+    "valid_short",
+    "missing_field",
+    "stale_signal",
+    "future_clock_skew",
+    "bad_direction",
+    "low_confidence",
+    "unsupported_symbol",
+    "unsupported_timeframe",
+    "duplicate_signal"
+  ],
+  "batch_gates": [
+    "confidence_gate",
+    "supported_symbol_gate",
+    "supported_timeframe_gate",
+    "duplicate_signal_gate"
+  ],
+  "scorecard_fields": [
+    "total_signals",
+    "accepted",
+    "rejected",
+    "review_required",
+    "blocked_reasons",
+    "next_safe_action"
+  ],
+  "required_statuses": {
+    "route_mode": "PAPER_PREVIEW_ONLY",
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "next_safe_action": "Run the local test pack validator before expanding intake gates."
+}
