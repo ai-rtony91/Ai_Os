@@ -1520,6 +1520,44 @@ function renderTradingStackHub() {
   return hub;
 }
 
+function createTradingLabCompactNextAction(data = {}, windowSystemData = null, orchestrationData = null) {
+  const nextCard = Array.isArray(data.cards) ? data.cards.find((card) => card.id === "next_action" || card.title === "Next Action") : null;
+  const windowNext = windowSystemData?.windows?.next_action?.summary || windowSystemData?.windows?.next_action?.detail;
+  const actionText = orchestrationData?.next_safe_action || windowNext || nextCard?.next_action || "Review the paper-only route preview and keep execution blocked.";
+  const action = document.createElement("div");
+  action.className = "trading-lab-compact-next-action";
+
+  const title = document.createElement("strong");
+  title.textContent = "Next safe action";
+
+  const text = document.createElement("p");
+  text.textContent = actionText;
+
+  action.append(title, text);
+  return action;
+}
+
+function createTradingLabAdvancedDiagnostics(items = []) {
+  const details = document.createElement("details");
+  details.className = "trading-lab-advanced-diagnostics";
+
+  const summary = document.createElement("summary");
+  const title = document.createElement("strong");
+  title.textContent = "Advanced Diagnostics";
+  const badge = document.createElement("span");
+  badge.textContent = "collapsed";
+  const note = document.createElement("p");
+  note.textContent = "Paper runner, orchestration, queues, validators, replay, ranking, readiness, and repeated safety details stay here until opened.";
+  summary.append(title, badge, note);
+
+  const body = document.createElement("div");
+  body.className = "trading-lab-advanced-diagnostics-body";
+  items.filter(Boolean).forEach((item) => body.append(item));
+
+  details.append(summary, body);
+  return details;
+}
+
 function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
@@ -1565,20 +1603,34 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   ]).join(" | ");
   blockedActions.append(blockedTitle, blockedList);
 
-  const children = [title, safety, flowGrid];
+  const visibleHandoff = windowSystemData?.handoff_path ? renderExternalHandoffPanels(windowSystemData.handoff_path) : renderTradingStackHub();
+  const advancedItems = [];
+  if (flowGrid.childElementCount) {
+    advancedItems.push(flowGrid);
+  }
   if (paperRunnerData) {
-    children.push(renderTradingLabPaperRunnerPanel(paperRunnerData));
+    advancedItems.push(renderTradingLabPaperRunnerPanel(paperRunnerData));
   }
   if (orchestrationData) {
-    children.push(renderAiosOrchestrationControlRoom(orchestrationData));
+    advancedItems.push(renderAiosOrchestrationControlRoom(orchestrationData));
   }
   if (windowSystemData) {
-    children.push(renderTradingLabWindowSystem(windowSystemData));
+    advancedItems.push(renderTradingLabWindowSystem(windowSystemData));
   }
   if (paperBotCoreData) {
-    children.push(renderPaperBotCorePanel(paperBotCoreData));
+    advancedItems.push(renderPaperBotCorePanel(paperBotCoreData));
   }
-  children.push(blockedActions);
+  advancedItems.push(blockedActions);
+
+  const children = [
+    title,
+    safety,
+    visibleHandoff,
+    createTradingLabCompactNextAction(data, windowSystemData, orchestrationData)
+  ];
+  if (advancedItems.length) {
+    children.push(createTradingLabAdvancedDiagnostics(advancedItems));
+  }
   tradingLabNextActionCard.replaceChildren(...children);
 }
 
