@@ -80,17 +80,15 @@
                 </select>
               </label>
               <button class="soft-refresh-button" type="button" data-action="soft-refresh">Soft Refresh</button>
-              <button class="music-companion-button" type="button" data-action="open-music-companion">Music</button>
-              <small>Updates AI_OS without stopping music.</small>
             </div>
           </details>
-          <section class="youtube-radio-dock" data-youtube-radio-dock aria-label="Music Companion playlist dock" tabindex="-1">
+          <section class="youtube-radio-dock" data-youtube-radio-dock aria-label="Embedded Dock Player 1" tabindex="-1">
             <div class="youtube-radio-head">
               <div>
-                <span class="eyebrow">Music Companion</span>
+                <span class="eyebrow">Music Dock #1</span>
                 <strong data-youtube-radio-state>Press Play to resume</strong>
               </div>
-              <div class="youtube-radio-mini-controls" aria-label="Minimized Music Companion controls">
+              <div class="youtube-radio-mini-controls" aria-label="Dock Player controls">
                 <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="back" aria-label="Previous track" title="Previous track">
                   <svg class="youtube-radio-control-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M6 5h2v14H6z"></path>
@@ -98,7 +96,7 @@
                   </svg>
                   <span class="sr-only" data-youtube-radio-readable-state>Previous track</span>
                 </button>
-                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="play" aria-label="Play Music Companion" title="Play">
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="play" aria-label="Play Dock Player" title="Play">
                   <svg class="youtube-radio-control-icon youtube-radio-play-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M8 5v14l11-7z"></path>
                   </svg>
@@ -108,12 +106,6 @@
                   </svg>
                   <span class="sr-only" data-youtube-radio-readable-state>Play</span>
                 </button>
-                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="restart" aria-label="Restart current track" title="Restart current track">
-                  <svg class="youtube-radio-control-icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7 7h7a5 5 0 1 1-4.5 7.2l1.8-.9A3 3 0 1 0 14 9H7v3L3 8l4-4z"></path>
-                  </svg>
-                  <span class="sr-only" data-youtube-radio-readable-state>Restart current track</span>
-                </button>
                 <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="next" aria-label="Next track" title="Next track">
                   <svg class="youtube-radio-control-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M16 5h2v14h-2z"></path>
@@ -121,7 +113,7 @@
                   </svg>
                   <span class="sr-only" data-youtube-radio-readable-state>Next track</span>
                 </button>
-                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="mute" aria-label="Mute Music Companion" title="Mute">
+                <button class="youtube-radio-mini-button" type="button" data-youtube-radio-control="mute" aria-label="Mute Dock Player" title="Mute">
                   <svg class="youtube-radio-control-icon youtube-radio-volume-on-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 9v6h4l5 4V5L8 9z"></path>
                     <path d="M16 8.2a5 5 0 0 1 0 7.6l1.4 1.4a7 7 0 0 0 0-10.4z"></path>
@@ -133,7 +125,7 @@
                   </svg>
                   <span class="sr-only" data-youtube-radio-readable-state>Mute</span>
                 </button>
-                <label class="youtube-radio-volume" aria-label="Music Companion volume">
+                <label class="youtube-radio-volume" aria-label="Dock Player volume">
                   <svg class="youtube-radio-volume-icon" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 9v6h4l5 4V5L8 9z"></path>
                     <path d="M16 8.2a5 5 0 0 1 0 7.6l1.4 1.4a7 7 0 0 0 0-10.4z"></path>
@@ -141,20 +133,26 @@
                   <span class="sr-only">Volume</span>
                   <input type="range" min="0" max="100" value="70" data-youtube-radio-volume>
                 </label>
+                <button class="youtube-radio-mini-button youtube-radio-expand-button" type="button" data-youtube-radio-control="expand" aria-label="Expand Dock Player" title="Expand">
+                  <svg class="youtube-radio-control-icon youtube-radio-expand-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8 3H3v5"></path>
+                    <path d="M3 3l7 7"></path>
+                    <path d="M16 21h5v-5"></path>
+                    <path d="M21 21l-7-7"></path>
+                  </svg>
+                  <svg class="youtube-radio-control-icon youtube-radio-minimize-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 3v7H3"></path>
+                    <path d="M3 10l7-7"></path>
+                    <path d="M14 21v-7h7"></path>
+                    <path d="M21 14l-7 7"></path>
+                  </svg>
+                  <span class="sr-only" data-youtube-radio-readable-state>Expand</span>
+                </button>
               </div>
-              <button class="youtube-radio-icon" type="button" data-youtube-radio-control="collapse" aria-label="Collapse Music Companion">−</button>
             </div>
             <div class="youtube-radio-body" data-youtube-radio-body>
               <div class="youtube-radio-player" id="youtubeRadioPlayer" data-youtube-radio-player aria-hidden="false"></div>
               <p class="youtube-radio-preview-note" data-youtube-radio-preview-note>Local HTTP preview: python -m http.server 8080</p>
-              <p class="music-shortcuts-note">Space Play/Pause &bull; &larr; Previous &bull; &rarr; Next &bull; R Restart &bull; M Mute</p>
-              <div class="youtube-radio-controls" aria-label="Music Companion controls">
-                <button type="button" data-youtube-radio-control="back">Previous</button>
-                <button type="button" data-youtube-radio-control="play">Play</button>
-                <button type="button" data-youtube-radio-control="restart">Restart</button>
-                <button type="button" data-youtube-radio-control="next">Next</button>
-                <button type="button" data-youtube-radio-control="open">External Handoff Locked</button>
-              </div>
             </div>
           </section>
         </div>

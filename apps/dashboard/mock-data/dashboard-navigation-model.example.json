@@ -11,8 +11,7 @@
     { "id": "tools", "label": "Tools", "zone": "right_personal_tools", "order": 5, "default_visible": false },
     { "id": "connectors", "label": "Connectors", "zone": "right_personal_tools", "order": 6, "default_visible": false },
     { "id": "reports", "label": "Reports", "zone": "center", "order": 7, "default_visible": false },
-    { "id": "validators", "label": "Validators", "zone": "center", "order": 8, "default_visible": false },
-    { "id": "music_radio", "label": "Music / Radio", "zone": "bottom_radio_utility", "order": 9, "default_visible": true }
+    { "id": "validators", "label": "Validators", "zone": "center", "order": 8, "default_visible": false }
   ],
   "visibility_rules": {
     "show_one_center_workspace": true,

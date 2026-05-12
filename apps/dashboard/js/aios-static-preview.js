@@ -98,7 +98,7 @@ const youtubeRadioTracks = [
 const youtubeRadioDefaultTrack = youtubeRadioTracks[0];
 const youtubeRadioVideoId = youtubeRadioDefaultTrack.videoId;
 const youtubeRadioPlaylistId = youtubeRadioDefaultTrack.playlistId;
-const youtubeRadioLocalFileFallback = "Embedded playback unavailable in local file preview. Use local server preview or External Handoff.";
+const youtubeRadioLocalFileFallback = "Embedded playback unavailable in local file preview. Use local server preview.";
 const youtubeRadioLocalServerCommand = "Local HTTP preview: python -m http.server 8080";
 const youtubeRadioResumeMessage = "Press Play to resume";
 let youtubeRadioPlayer = null;
@@ -2989,7 +2989,7 @@ function setYouTubePlayButton(isPlaying) {
     const readableState = button.querySelector("[data-youtube-radio-readable-state]");
     if (button.classList.contains("youtube-radio-mini-button")) {
       button.classList.toggle("is-playing", isPlaying);
-      button.setAttribute("aria-label", `${label} Music Companion`);
+      button.setAttribute("aria-label", `${label} Dock Player`);
       button.setAttribute("title", label);
       if (readableState) readableState.textContent = label;
     } else {
@@ -3005,7 +3005,7 @@ function setYouTubeMuteButton(isMuted) {
     const readableState = button.querySelector("[data-youtube-radio-readable-state]");
     if (button.classList.contains("youtube-radio-mini-button")) {
       button.classList.toggle("is-muted", isMuted);
-      button.setAttribute("aria-label", `${label} Music Companion`);
+      button.setAttribute("aria-label", `${label} Dock Player`);
       button.setAttribute("title", label);
       if (readableState) readableState.textContent = label;
     } else {
@@ -3039,21 +3039,15 @@ function syncYouTubeAudioControls() {
 function setYouTubeDockCollapsed(isCollapsed) {
   if (!youtubeRadioDock) return;
   youtubeRadioDock.classList.toggle("is-collapsed", isCollapsed);
-  const collapseButton = youtubeRadioDock.querySelector('[data-youtube-radio-control="collapse"]');
-  if (collapseButton) {
-    collapseButton.textContent = isCollapsed ? "+" : "−";
-    collapseButton.setAttribute("aria-label", isCollapsed ? "Expand Music Companion" : "Collapse Music Companion");
+  const expandButton = youtubeRadioDock.querySelector('[data-youtube-radio-control="expand"]');
+  if (expandButton) {
+    const label = isCollapsed ? "Expand Dock Player" : "Minimize Dock Player";
+    const readableState = expandButton.querySelector("[data-youtube-radio-readable-state]");
+    expandButton.classList.toggle("is-expanded", !isCollapsed);
+    expandButton.setAttribute("aria-label", label);
+    expandButton.setAttribute("title", isCollapsed ? "Expand" : "Minimize");
+    if (readableState) readableState.textContent = isCollapsed ? "Expand" : "Minimize";
   }
-}
-
-function toggleMusicCompanionDock() {
-  if (!youtubeRadioDock) return;
-  const shouldCollapse = !youtubeRadioDock.classList.contains("is-collapsed");
-  setYouTubeDockCollapsed(shouldCollapse);
-  saveYouTubeDockCollapsed(shouldCollapse);
-  saveYouTubeRadioState();
-  youtubeRadioDock.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
-  youtubeRadioDock.focus({ preventScroll: true });
 }
 
 function readSavedYouTubeDockCollapsed() {
@@ -3208,13 +3202,6 @@ function runYouTubeRadioPlayerAction(action) {
       }
     }
 
-    if (action === "restart" && typeof youtubeRadioPlayer.seekTo === "function") {
-      youtubeRadioPlayer.seekTo(0, true);
-      if (typeof youtubeRadioPlayer.playVideo === "function") {
-        youtubeRadioPlayer.playVideo();
-      }
-    }
-
     if (action === "next") {
       youtubeRadioPlayer.nextVideo();
     }
@@ -3261,7 +3248,7 @@ window.onYouTubeIframeAPIReady = function onYouTubeIframeAPIReady() {
       },
       onError: () => {
         if (youtubeRadioEmbedMode === "playlist" && retryYouTubeRadioSingleVideo()) return;
-        setYouTubeRadioState("Embed unavailable inside AI_OS — external handoff requires approval.");
+        setYouTubeRadioState("Embed unavailable inside AI_OS.");
         setYouTubePlayButton(false);
       },
       onStateChange: (event) => {
@@ -3307,17 +3294,11 @@ function ensureYouTubeRadioPlayer(action) {
 function handleYouTubeRadioControl(action) {
   if (!youtubeRadioDock) return;
 
-  if (action === "collapse") {
+  if (action === "expand") {
     const isCollapsed = !youtubeRadioDock.classList.contains("is-collapsed");
     setYouTubeDockCollapsed(isCollapsed);
     saveYouTubeDockCollapsed(isCollapsed);
     saveYouTubeRadioState();
-    return;
-  }
-
-  if (action === "open") {
-    setYouTubeRadioState("External handoff requires approval.");
-    setYouTubeRadioPreviewNote(youtubeRadioLocalServerCommand);
     return;
   }
 
@@ -3401,11 +3382,6 @@ function handleDashboardMusicKeyboardShortcut(event) {
   if (key === "ArrowRight") {
     event.preventDefault();
     runDashboardMusicShortcut("next");
-    return true;
-  }
-  if (lowerKey === "r") {
-    event.preventDefault();
-    runDashboardMusicShortcut("restart");
     return true;
   }
   if (lowerKey === "m") {
@@ -3818,10 +3794,6 @@ actionButtons.forEach((item) => {
       runSoftRefresh();
       return;
     }
-    if (action === "open-music-companion") {
-      toggleMusicCompanionDock();
-      return;
-    }
     if (action === "toggle-personal-rail") {
       hideWelcomeStart();
       clearFocusedStartView();
@@ -3994,3 +3966,4 @@ window.addEventListener("scroll", () => {
   const ratio = Math.min(window.scrollY / 700, 1).toFixed(3);
   document.documentElement.style.setProperty("--scroll", ratio);
 }, { passive: true });
+

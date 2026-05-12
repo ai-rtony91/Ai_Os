@@ -421,7 +421,6 @@ body > .sidebar-toggle {
 .status-chip,
 .registry-chip,
 .soft-refresh-button,
-.music-companion-button,
 .personal-rail-toggle,
 .rail-toggle-button,
 .personal-rail-close,
@@ -524,9 +523,6 @@ body > .sidebar-toggle {
 .soft-refresh-button:hover,
 .soft-refresh-button:focus,
 .soft-refresh-button.tap-pop,
-.music-companion-button:hover,
-.music-companion-button:focus,
-.music-companion-button.tap-pop,
 .personal-rail-toggle:hover,
 .personal-rail-toggle:focus,
 .personal-rail-toggle.tap-pop,
@@ -1256,15 +1252,6 @@ body.focused-route-archives .project-hub-panel {
   min-height: 28px;
   padding: 5px 8px;
   color: var(--text-primary);
-  font-size: 10px;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.music-companion-button {
-  min-height: 28px;
-  padding: 5px 8px;
-  color: var(--accent-action);
   font-size: 10px;
   line-height: 1;
   text-transform: uppercase;
@@ -4635,8 +4622,6 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   border: 0;
 }
 
-.youtube-radio-icon,
-.youtube-radio-controls button,
 .youtube-radio-mini-controls button {
   border: 1px solid var(--line);
   background: var(--surface-control);
@@ -4645,20 +4630,6 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   transition: border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
 }
 
-.youtube-radio-icon {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  font-weight: 800;
-}
-
-.youtube-radio-icon:hover,
-.youtube-radio-icon:focus,
-.youtube-radio-controls button:hover,
-.youtube-radio-controls button:focus,
 .youtube-radio-mini-controls button:hover,
 .youtube-radio-mini-controls button:focus {
   border-color: var(--line-hot);
@@ -4672,6 +4643,11 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   align-items: center;
   gap: 4px;
   min-width: 0;
+}
+
+.youtube-radio-dock:hover .youtube-radio-mini-controls,
+.youtube-radio-dock:focus-within .youtube-radio-mini-controls {
+  display: flex;
 }
 
 .youtube-radio-mini-controls button {
@@ -4698,13 +4674,16 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
 
 .youtube-radio-pause-icon,
 .youtube-radio-volume-off-icon,
+.youtube-radio-minimize-icon,
 .youtube-radio-mini-button.is-playing .youtube-radio-play-icon,
-.youtube-radio-mini-button.is-muted .youtube-radio-volume-on-icon {
+.youtube-radio-mini-button.is-muted .youtube-radio-volume-on-icon,
+.youtube-radio-expand-button.is-expanded .youtube-radio-expand-icon {
   display: none;
 }
 
 .youtube-radio-mini-button.is-playing .youtube-radio-pause-icon,
-.youtube-radio-mini-button.is-muted .youtube-radio-volume-off-icon {
+.youtube-radio-mini-button.is-muted .youtube-radio-volume-off-icon,
+.youtube-radio-expand-button.is-expanded .youtube-radio-minimize-icon {
   display: block;
 }
 
@@ -4764,32 +4743,6 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   overflow-wrap: anywhere;
 }
 
-.music-shortcuts-note {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: 10px;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
-}
-
-.youtube-radio-controls {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  justify-content: stretch;
-  gap: 5px;
-}
-
-.youtube-radio-controls button {
-  min-height: 30px;
-  padding: 5px 6px;
-  font-size: 10px;
-  line-height: 1.2;
-}
-
-.youtube-radio-controls button[data-youtube-radio-control="open"] {
-  min-width: 88px;
-}
-
 .youtube-radio-dock.is-collapsed {
   flex-basis: 300px;
   width: min(100%, 300px);
@@ -4797,7 +4750,7 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
 
 .youtube-radio-dock.is-collapsed .youtube-radio-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 28px;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   padding: 6px;
 }
@@ -4812,14 +4765,6 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
-}
-
-.youtube-radio-dock.is-collapsed .youtube-radio-icon {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
-  width: 26px;
-  height: 26px;
 }
 
 .youtube-radio-dock.is-collapsed .youtube-radio-body {
@@ -5573,10 +5518,6 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   .youtube-radio-dock,
   .youtube-radio-dock.is-collapsed {
     width: 100%;
-  }
-
-  .youtube-radio-controls {
-    grid-template-columns: 1fr 1fr;
   }
 
   .youtube-radio-mini-controls button {
