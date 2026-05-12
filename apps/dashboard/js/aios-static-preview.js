@@ -118,6 +118,8 @@ let refreshGuardMessageTimer = null;
 let mobileRailScrollLockY = 0;
 let mobileRailScrollLockActive = false;
 let mobileRailLastTouchY = null;
+let mobileRailTouchStartX = null;
+let mobileRailTouchStartY = null;
 
 const statusFixtures = {
   overall: {
@@ -3554,6 +3556,23 @@ function getActiveMobileRailScrollTarget() {
   return activeRail;
 }
 
+function getMobileRailScrollableTarget(target) {
+  const activeRail = getActiveMobileRail();
+  if (!activeRail || !target) return null;
+  const startElement = target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement;
+  let current = startElement;
+  while (current && current !== document.body) {
+    if (activeRail.contains(current)) {
+      const style = window.getComputedStyle(current);
+      const canScrollY = /(auto|scroll)/.test(style.overflowY) && current.scrollHeight > current.clientHeight;
+      if (canScrollY) return current;
+    }
+    if (current === activeRail) break;
+    current = current.parentElement;
+  }
+  return activeRail.scrollHeight > activeRail.clientHeight ? activeRail : null;
+}
+
 function isInsideActiveMobileRail(target) {
   const activeRail = getActiveMobileRail();
   if (!activeRail || !target) return false;
@@ -3578,6 +3597,16 @@ function scrollActiveMobileRail(deltaY) {
   scrollTarget.scrollTop += deltaY;
 }
 
+function isMobileRailScrollBleed(scrollTarget, deltaY) {
+  if (!scrollTarget || !Number.isFinite(deltaY)) return true;
+  if (scrollTarget.scrollHeight <= scrollTarget.clientHeight) return true;
+  const scrollTop = scrollTarget.scrollTop;
+  const maxScrollTop = scrollTarget.scrollHeight - scrollTarget.clientHeight;
+  const atTop = scrollTop <= 0;
+  const atBottom = scrollTop >= maxScrollTop - 1;
+  return (atTop && deltaY < 0) || (atBottom && deltaY > 0);
+}
+
 function setMobileRailFixedBodyLock(isLocked) {
   if (isLocked && !mobileRailScrollLockActive) {
     mobileRailScrollLockY = window.scrollY || document.documentElement.scrollTop || 0;
@@ -3600,6 +3629,8 @@ function setMobileRailFixedBodyLock(isLocked) {
     mobileRailScrollLockY = 0;
     mobileRailScrollLockActive = false;
     mobileRailLastTouchY = null;
+    mobileRailTouchStartX = null;
+    mobileRailTouchStartY = null;
   }
 }
 
@@ -3760,23 +3791,56 @@ function handleMobileRailListSelection(event) {
 function containMobileRailTouch(event) {
   if (!isMobileRailOpen()) return;
   if (isInsideActiveMobileRail(event.target)) {
+    const currentTouchX = event.touches?.[0]?.clientX;
     const currentTouchY = event.touches?.[0]?.clientY;
-    if (typeof currentTouchY === "number" && typeof mobileRailLastTouchY === "number") {
-      scrollActiveMobileRail(mobileRailLastTouchY - currentTouchY);
+    const deltaY = typeof currentTouchY === "number" && typeof mobileRailLastTouchY === "number"
+      ? mobileRailLastTouchY - currentTouchY
+      : 0;
+    const driftX = typeof currentTouchX === "number" && typeof mobileRailTouchStartX === "number"
+      ? Math.abs(currentTouchX - mobileRailTouchStartX)
+      : 0;
+    const driftY = typeof currentTouchY === "number" && typeof mobileRailTouchStartY === "number"
+      ? Math.abs(currentTouchY - mobileRailTouchStartY)
+      : 0;
+
+    if (driftX > 10 && driftX > driftY) {
+      if (typeof currentTouchY === "number") {
+        mobileRailLastTouchY = currentTouchY;
+      }
+      blockMobileRailScrollEvent(event);
+      return;
+    }
+
+    const scrollTarget = getMobileRailScrollableTarget(event.target);
+    if (isMobileRailScrollBleed(scrollTarget, deltaY)) {
+      if (typeof currentTouchY === "number") {
+        mobileRailLastTouchY = currentTouchY;
+      }
+      blockMobileRailScrollEvent(event);
+      return;
+    }
+
+    if (typeof currentTouchY === "number") {
       mobileRailLastTouchY = currentTouchY;
     }
-    blockMobileRailScrollEvent(event);
+    stopMobileRailScrollEvent(event);
     return;
   }
   mobileRailLastTouchY = null;
+  mobileRailTouchStartX = null;
+  mobileRailTouchStartY = null;
   blockMobileRailScrollEvent(event);
 }
 
 function containMobileRailWheel(event) {
   if (!isMobileRailOpen()) return;
   if (isInsideActiveMobileRail(event.target)) {
-    scrollActiveMobileRail(event.deltaY || 0);
-    blockMobileRailScrollEvent(event);
+    const scrollTarget = getMobileRailScrollableTarget(event.target);
+    if (isMobileRailScrollBleed(scrollTarget, event.deltaY || 0)) {
+      blockMobileRailScrollEvent(event);
+      return;
+    }
+    stopMobileRailScrollEvent(event);
     return;
   }
   blockMobileRailScrollEvent(event);
@@ -3785,9 +3849,14 @@ function containMobileRailWheel(event) {
 function trackMobileRailTouchStart(event) {
   if (!isMobileRailOpen() || !isInsideActiveMobileRail(event.target)) {
     mobileRailLastTouchY = null;
+    mobileRailTouchStartX = null;
+    mobileRailTouchStartY = null;
     return;
   }
+  const touchX = event.touches?.[0]?.clientX;
   const touchY = event.touches?.[0]?.clientY;
+  mobileRailTouchStartX = typeof touchX === "number" ? touchX : null;
+  mobileRailTouchStartY = typeof touchY === "number" ? touchY : null;
   mobileRailLastTouchY = typeof touchY === "number" ? touchY : null;
   stopMobileRailScrollEvent(event);
 }
