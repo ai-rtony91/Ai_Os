@@ -8,3 +8,20 @@ Reports/daily/*_DRY_RUN_REPORT*.txt
 
 # AI-OS generated runtime reports
 Reports/daily/MORNING_BRIEF_*.md
+# Python cache files
+__pycache__/
+*.pyc
+
+# Python cache files
+__pycache__/
+*.pyc
+# Python cache files
+__pycache__/
+*.pyc
+# Python cache files
+__pycache__/
+*.pyc
+
+# Python cache files
+__pycache__/
+*.pyc
