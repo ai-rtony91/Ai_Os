@@ -6183,6 +6183,26 @@ body:not(.welcome-start-active) .youtube-radio-dock {
   }
 }
 
+.aios-frontdoor-hero-image {
+  display: block;
+  width: min(100%, 620px);
+  max-height: min(46vh, 520px);
+  object-fit: contain;
+  margin: 0 auto 16px;
+  border-radius: 24px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 20px rgba(47, 140, 255, 0.2)) drop-shadow(0 0 30px rgba(139, 92, 246, 0.16));
+  mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 88%, rgba(0, 0, 0, 0.72) 96%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 88%, rgba(0, 0, 0, 0.72) 96%, transparent 100%);
+}
+
+@media (max-width: 720px) {
+  .aios-frontdoor-hero-image {
+    width: min(100%, 380px);
+    max-height: 320px;
+  }
+}
+
 /* Round 3: AI_OS midnight purple signature polish. */
 :root {
   --bg-0: #03020b;
@@ -6477,6 +6497,216 @@ body {
 .trading-lab-entry-button {
   color: #ffffff;
   background: linear-gradient(135deg, var(--aios-electric-blue), var(--aios-violet-glow));
+}
+
+/* Start Here hero layout fix: artwork becomes the panel identity surface. */
+body.welcome-start-active .welcome-start-screen {
+  width: 100%;
+  min-height: calc(100dvh - 96px - env(safe-area-inset-bottom));
+  padding: 8px clamp(8px, 1vw, 14px) 16px;
+  background-image:
+    linear-gradient(180deg, rgba(3, 7, 18, 0.12), rgba(3, 7, 18, 0.34)),
+    url("../assets/ai_osgalaxy.theme.jpg");
+  background-size: cover, cover;
+  background-position: center, center 48%;
+  background-repeat: no-repeat;
+}
+
+body.welcome-start-active .welcome-ghost-logo {
+  display: none;
+}
+
+.welcome-command-workspace {
+  overflow: hidden;
+  width: min(100%, calc(100vw - 48px));
+  max-width: none;
+  min-height: min(76vh, 820px);
+  grid-template-rows: auto minmax(330px, 1fr) auto auto;
+  align-content: stretch;
+  gap: 10px;
+  padding: clamp(18px, 3vw, 30px) clamp(14px, 4vw, 52px) clamp(38px, 5vh, 56px);
+  border-color: rgba(47, 140, 255, 0.02);
+  border-radius: 20px;
+  background: transparent;
+  box-shadow:
+    0 18px 54px rgba(0, 0, 0, 0.18),
+    0 0 24px rgba(47, 140, 255, 0.04),
+    0 0 32px rgba(139, 92, 246, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.012);
+  backdrop-filter: none;
+}
+
+.welcome-command-workspace::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center 48%, transparent 0%, transparent 76%, rgba(5, 8, 20, 0.1) 100%),
+    linear-gradient(to bottom, transparent 0%, transparent 70%, rgba(5, 8, 20, 0.3) 100%);
+  opacity: 0.3;
+}
+
+.welcome-command-head {
+  position: relative;
+  z-index: 2;
+  grid-row: 1;
+  justify-self: center;
+  width: min(100%, 760px);
+  padding: 8px 12px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(5, 8, 20, 0.24), rgba(5, 8, 20, 0.04));
+  text-shadow: 0 0 22px rgba(47, 140, 255, 0.28), 0 0 28px rgba(139, 92, 246, 0.16);
+}
+
+.welcome-command-head strong {
+  font-size: clamp(28px, 4.4vw, 48px);
+}
+
+.welcome-command-head p {
+  color: rgba(229, 246, 255, 0.78);
+}
+
+.aios-frontdoor-hero-image {
+  display: none;
+}
+
+.welcome-actions {
+  position: relative;
+  z-index: 2;
+  grid-row: 3;
+  justify-self: center;
+  align-self: end;
+  width: min(100%, 620px);
+  gap: 7px;
+  padding: 6px;
+  border-radius: 999px;
+  background: rgba(5, 8, 20, 0.34);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(12px);
+}
+
+.welcome-actions button,
+.welcome-advanced summary {
+  min-height: 42px;
+  padding: 7px 9px;
+  gap: 7px;
+  border-color: rgba(120, 170, 255, 0.22);
+  color: #f8fbff;
+  font-size: 12px;
+  background:
+    linear-gradient(180deg, rgba(47, 140, 255, 0.08), rgba(139, 92, 246, 0.045)),
+    rgba(5, 12, 32, 0.78);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.24),
+    0 0 16px rgba(47, 140, 255, 0.08),
+    0 0 18px rgba(139, 92, 246, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.welcome-actions .welcome-action-icon {
+  width: 22px;
+  height: 22px;
+  border-color: rgba(120, 170, 255, 0.24);
+  color: rgba(229, 246, 255, 0.86);
+  background: rgba(5, 12, 32, 0.72);
+  font-size: 10px;
+  box-shadow:
+    0 0 14px rgba(47, 140, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.welcome-actions button:hover,
+.welcome-actions button:focus,
+.welcome-advanced summary:hover,
+.welcome-advanced summary:focus {
+  color: #ffffff;
+  border-color: rgba(125, 211, 252, 0.96);
+  background:
+    linear-gradient(180deg, rgba(47, 140, 255, 0.18), rgba(139, 92, 246, 0.1)),
+    rgba(3, 12, 34, 0.92);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(125, 211, 252, 0.48),
+    0 0 34px rgba(168, 85, 247, 0.44),
+    0 0 58px rgba(139, 92, 246, 0.28),
+    inset 0 0 18px rgba(47, 140, 255, 0.12);
+  outline: none;
+}
+
+.welcome-actions button:hover .welcome-action-icon,
+.welcome-actions button:focus .welcome-action-icon,
+.welcome-advanced summary:hover .welcome-action-icon,
+.welcome-advanced summary:focus .welcome-action-icon {
+  border-color: rgba(125, 211, 252, 0.98);
+  color: #ffffff;
+  background: rgba(47, 140, 255, 0.18);
+  box-shadow:
+    0 0 18px rgba(125, 211, 252, 0.52),
+    0 0 30px rgba(168, 85, 247, 0.44),
+    inset 0 0 14px rgba(47, 140, 255, 0.18);
+}
+
+.welcome-command-status {
+  position: relative;
+  z-index: 2;
+  grid-row: 4;
+  justify-self: center;
+  align-self: end;
+  width: min(100%, 330px);
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(5, 8, 20, 0.24);
+  backdrop-filter: blur(10px);
+}
+
+.welcome-command-status span {
+  min-height: 19px;
+  padding: 3px 7px;
+  font-size: 8px;
+}
+
+@media (max-width: 720px) {
+  body.welcome-start-active .welcome-start-screen {
+    min-height: calc(100dvh - 112px - env(safe-area-inset-bottom));
+    padding: 8px 6px 14px;
+    background-size: cover, auto 108%;
+    background-position: center, center 42%;
+  }
+
+  .welcome-command-workspace {
+    width: min(100%, calc(100vw - 12px));
+    min-height: 72vh;
+    grid-template-rows: auto minmax(280px, 1fr) auto auto;
+    padding: 14px 10px 28px;
+    border-radius: 20px;
+    background: transparent;
+  }
+
+  .welcome-command-workspace::before {
+    background:
+      radial-gradient(ellipse at center 38%, transparent 0%, transparent 68%, rgba(5, 8, 20, 0.16) 100%),
+      linear-gradient(to bottom, transparent 0%, transparent 62%, rgba(5, 8, 20, 0.48) 100%);
+  }
+
+  .welcome-command-head {
+    padding: 8px 10px;
+  }
+
+  .aios-frontdoor-hero-image {
+    display: none;
+  }
+
+  .welcome-actions {
+    width: min(100%, 260px);
+    grid-template-columns: 1fr;
+    border-radius: 22px;
+  }
+
+  .welcome-command-status {
+    width: min(100%, 260px);
+    border-radius: 20px;
+  }
 }
 
 /* Round 4B: desktop media dock containment fix. */
