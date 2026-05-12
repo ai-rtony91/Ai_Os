@@ -1,11 +1,72 @@
 {
   "fixture_name": "trading-lab-paper-runner.example.json",
+  "panel_title": "Trading Lab Paper Runner",
   "phase": "15.4",
   "mode": "paper_only",
+  "paper_runner_status": "PASS",
   "runner_status": "PASS",
   "paper_decision": "PAPER_SIMULATED",
   "blocked_reason": "",
   "latest_signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "source": "local fixture-only",
+  "generated_time": "2026-05-12T03:39:41Z",
+  "signal": {
+    "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+    "symbol": "EUR_USD_PAPER",
+    "direction": "long",
+    "confidence": 82,
+    "source": "local fixture-only",
+    "received_time": "2026-05-12T12:00:00Z"
+  },
+  "latency": {
+    "received_time": "2026-05-12T12:00:00Z",
+    "validation_start_time": "2026-05-12T03:39:41Z",
+    "validation_end_time": "2026-05-12T03:39:41Z",
+    "latency_seconds": -30019,
+    "stale_status": "PASS",
+    "warning": "Timestamp needs review because received_time is later than validation_start_time."
+  },
+  "regime": {
+    "regime": "TREND_UP",
+    "regime_status": "PASS",
+    "reason": "Observed regime matched expected regime and trend alignment was aligned."
+  },
+  "risk_gate": {
+    "risk_gate_status": "PASS",
+    "approved": true,
+    "reason": "Paper risk gate passed.",
+    "blocked_reason": ""
+  },
+  "decision": {
+    "decision": "PAPER_SIMULATED",
+    "simulated_result_status": "paper_fill_recorded",
+    "blocked_reason": "",
+    "live_execution_status": "BLOCKED"
+  },
+  "paper_result": {
+    "result_id": "PAPER_RESULT_LEDGER_001",
+    "paper_entry": 1.0848,
+    "paper_stop": "UNKNOWN",
+    "paper_target": "UNKNOWN",
+    "simulated_pnl_r": "UNKNOWN"
+  },
+  "scorecard": {
+    "total_paper_trades": 1,
+    "blocked_trades": 0,
+    "paper_simulated_trades": 1,
+    "win_rate": "UNKNOWN",
+    "expectancy_r": "UNKNOWN",
+    "profit_factor": "UNKNOWN",
+    "average_latency_seconds": -30019
+  },
+  "validation": {
+    "validator_status": "PASS",
+    "validation_report_id": "PAPER_VALIDATION_REPORT_001",
+    "errors": [],
+    "warnings": [
+      "Timestamp needs review because latency_seconds is negative."
+    ]
+  },
   "result_paths": {
     "ledger": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_RESULT_LEDGER_001.json",
     "scorecard": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_SCORECARD_001.json",
