@@ -1,0 +1,28 @@
+{
+  "replay_id": "PAPER_REPLAY_RESULT_001",
+  "phase": "15.8",
+  "mode": "paper_only",
+  "source_result_id": "PAPER_RESULT_LEDGER_001",
+  "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "symbol": "EUR_USD_PAPER",
+  "paper_decision": "PAPER_SIMULATED",
+  "latency_status": "CLOCK_SKEW_DETECTED",
+  "latency_seconds": -30019,
+  "clock_skew_status": "CLOCK_SKEW_DETECTED",
+  "stale_signal_status": "BLOCKED_FOR_REVIEW",
+  "regime_status": "PASS",
+  "risk_gate_status": "PASS",
+  "scorecard_status": "READY_FOR_REVIEW",
+  "replay_decision": "BLOCKED_FOR_REVIEW",
+  "blocked_reason": "The paper latency report shows a negative signal age. This means fixture time order should be reviewed before treating the paper signal as timely.",
+  "beginner_summary": "The paper bot simulated a trade, but the replay found a timing problem. The signal appears to come from the future compared with the validation time. This is a paper fixture issue to review, not a live trading signal.",
+  "next_safe_action": "Fix or review the paper fixture timestamps, then rerun the local replay validator.",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}
+

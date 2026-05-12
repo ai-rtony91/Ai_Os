@@ -1,0 +1,61 @@
+{
+  "contract_name": "Trading Lab Latency Replay Contract",
+  "contract_version": "0.1",
+  "phase": "15.8",
+  "mode": "paper_only",
+  "required_chain": [
+    "signal",
+    "latency",
+    "regime",
+    "risk_gate",
+    "paper_decision",
+    "scorecard"
+  ],
+  "required_replay_result_fields": [
+    "replay_id",
+    "mode",
+    "source_result_id",
+    "signal_id",
+    "symbol",
+    "paper_decision",
+    "latency_status",
+    "latency_seconds",
+    "clock_skew_status",
+    "stale_signal_status",
+    "regime_status",
+    "risk_gate_status",
+    "scorecard_status",
+    "replay_decision",
+    "blocked_reason",
+    "beginner_summary",
+    "next_safe_action",
+    "live_execution_status",
+    "broker_status",
+    "oanda_status",
+    "api_key_status",
+    "secrets_status",
+    "real_webhook_status",
+    "real_order_status"
+  ],
+  "latency_rules": {
+    "negative_age_status": "CLOCK_SKEW_DETECTED",
+    "missing_time_field_status": "MISSING_TIME_FIELD",
+    "invalid_time_format_status": "INVALID_TIME_FORMAT",
+    "delayed_threshold_seconds": 300,
+    "stale_threshold_seconds": 900,
+    "negative_age_decision": "BLOCKED_FOR_REVIEW",
+    "stale_decision": "BLOCKED_FOR_REVIEW",
+    "delayed_decision": "REVIEW_RECOMMENDED"
+  },
+  "safety_status": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "next_action": "Run the Phase 15.8 latency replay validator."
+}
+

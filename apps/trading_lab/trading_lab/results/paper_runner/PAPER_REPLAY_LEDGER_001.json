@@ -1,0 +1,55 @@
+{
+  "replay_ledger_id": "PAPER_REPLAY_LEDGER_001",
+  "phase": "15.8",
+  "mode": "paper_only",
+  "source_files": {
+    "paper_result_ledger": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_RESULT_LEDGER_001.json",
+    "latency_report": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_LATENCY_REPORT_001.json",
+    "regime_result": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_REGIME_RESULT_001.json",
+    "risk_gate_result": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_RISK_GATE_RESULT_001.json",
+    "scorecard": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_SCORECARD_001.json"
+  },
+  "replay_chain": [
+    {
+      "step": "signal",
+      "status": "READ_FROM_PAPER_RESULT",
+      "signal_id": "PAPER_SIGNAL_FIXTURE_001"
+    },
+    {
+      "step": "latency",
+      "status": "CLOCK_SKEW_DETECTED",
+      "detail": "Paper latency report has a negative signal age. The generated time is later than the validation time."
+    },
+    {
+      "step": "regime",
+      "status": "PASS",
+      "detail": "Observed regime matched expected paper fixture regime."
+    },
+    {
+      "step": "risk_gate",
+      "status": "PASS",
+      "detail": "Paper risk gate passed for paper simulation only."
+    },
+    {
+      "step": "paper_decision",
+      "status": "PAPER_SIMULATED",
+      "detail": "Paper result was simulated locally. No live execution was allowed."
+    },
+    {
+      "step": "scorecard",
+      "status": "READY_FOR_REVIEW",
+      "detail": "Paper scorecard is ready for review, but latency clock skew should be checked first."
+    }
+  ],
+  "replay_status": "BLOCKED_FOR_REVIEW",
+  "blocked_reason": "CLOCK_SKEW_DETECTED in paper latency report. Review fixture timestamps before trusting stale-signal status.",
+  "next_safe_action": "Review paper fixture timestamps, then rerun the paper-only latency replay validator.",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}
+
