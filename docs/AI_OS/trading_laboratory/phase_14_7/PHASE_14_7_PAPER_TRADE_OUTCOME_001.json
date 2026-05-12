@@ -1,0 +1,48 @@
+{
+  "outcome_id": "PHASE_14_7_PAPER_TRADE_OUTCOME_001",
+  "phase": "14.7",
+  "mode": "PAPER_ONLY",
+  "paper_only": true,
+  "execution_allowed": false,
+  "live_execution_status": "BLOCKED",
+  "source_payload_ref": "PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_001",
+  "route_preview_ref": "PHASE_14_6_TRADERSPOST_ROUTE_PREVIEW_001",
+  "phase_14_3_decision_ref": "PHASE_14_3_DECISION_RESULT_001",
+  "symbol": "EUR_USD",
+  "timeframe": "M15",
+  "direction_intent": "BUY_REVIEW",
+  "supertrend": {
+    "preview_ref": "PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001",
+    "output": "bullish",
+    "role": "permission_filter_only",
+    "not_a_trigger": true
+  },
+  "paper_outcome": {
+    "outcome_status": "PAPER_REVIEW_RECORDED",
+    "fill_status": "mock_only",
+    "entry_price": 1.085,
+    "exit_price": null,
+    "result_r": "UNKNOWN",
+    "review_note": "Minimum DRY_RUN paper outcome recorded. No execution occurred."
+  },
+  "latency_update": {
+    "latency_ref": "PHASE_14_7_LATENCY_OUTCOME_001",
+    "latency_seconds": 0,
+    "stale_status": "PASS",
+    "clock_skew_status": "PASS"
+  },
+  "scorecard_update": {
+    "scorecard_ref": "PAPER_SCORECARD_SUPERTREND_PREVIEW_001",
+    "scorecard_status": "PAPER_OUTCOME_APPENDED",
+    "paper_sample_count": 1,
+    "latest_outcome_ref": "PHASE_14_7_PAPER_TRADE_OUTCOME_001"
+  },
+  "outcome_ledger_ref": "PHASE_14_7_OUTCOME_LEDGER_001",
+  "safety": {
+    "paper_write_only": true,
+    "external_connection_status": "BLOCKED",
+    "external_delivery_status": "NOT_SENT",
+    "credential_status": "BLOCKED",
+    "order_delivery_status": "BLOCKED"
+  }
+}

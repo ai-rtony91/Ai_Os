@@ -1,0 +1,33 @@
+{
+  "route_preview_id": "PHASE_14_6_TRADERSPOST_ROUTE_PREVIEW_001",
+  "phase": "14.6",
+  "mode": "DRY_RUN",
+  "paper_only": true,
+  "execution_allowed": false,
+  "live_execution_status": "BLOCKED",
+  "source_payload_ref": "PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_001",
+  "destination": "TradersPost-style local preview",
+  "symbol": "EUR_USD",
+  "timeframe": "M15",
+  "direction_intent": "BUY_REVIEW",
+  "route_action": "paper_preview_only",
+  "quantity_mode": "paper_placeholder",
+  "order_type": "market_placeholder",
+  "supertrend": {
+    "preview_ref": "PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001",
+    "output": "bullish",
+    "role": "permission_filter_only",
+    "not_a_trigger": true
+  },
+  "phase_14_3_decision_ref": "PHASE_14_3_DECISION_RESULT_001",
+  "scorecard_ref": "PAPER_SCORECARD_SUPERTREND_PREVIEW_001",
+  "latency_ref": "PHASE_14_6_LATENCY_ROUTE_PREVIEW_001",
+  "outcome_ref": "PHASE_14_7_PAPER_TRADE_OUTCOME_001",
+  "route_status": {
+    "format_prepared": true,
+    "external_delivery_status": "NOT_SENT",
+    "external_connection_status": "BLOCKED",
+    "order_delivery_status": "BLOCKED",
+    "paper_route_preview_status": "READY_FOR_PAPER_OUTCOME"
+  }
+}

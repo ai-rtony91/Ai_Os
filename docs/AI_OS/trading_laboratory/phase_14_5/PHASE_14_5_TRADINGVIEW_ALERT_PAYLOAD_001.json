@@ -1,0 +1,35 @@
+{
+  "payload_id": "PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_001",
+  "phase": "14.5",
+  "mode": "DRY_RUN",
+  "paper_only": true,
+  "execution_allowed": false,
+  "live_execution_status": "BLOCKED",
+  "source": "TradingView-style local mock",
+  "symbol": "EUR_USD",
+  "timeframe": "M15",
+  "direction_intent": "BUY_REVIEW",
+  "alert_timestamp": "2026-05-12T14:15:00Z",
+  "strategy_name": "AI_OS SuperTrend MVP Paper Preview",
+  "strategy_metadata": {
+    "strategy_id": "SUPERTREND_MVP_001",
+    "version": "paper_mock_v1",
+    "notes": "SuperTrend provides trend permission only."
+  },
+  "supertrend": {
+    "preview_ref": "PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001",
+    "output": "bullish",
+    "role": "permission_filter_only",
+    "not_a_trigger": true
+  },
+  "latency_ref": "PHASE_14_5_LATENCY_MOCK_001",
+  "phase_14_3_decision_ref": "PHASE_14_3_DECISION_RESULT_001",
+  "scorecard_ref": "PAPER_SCORECARD_SUPERTREND_PREVIEW_001",
+  "outcome_ref": "PHASE_14_7_PAPER_TRADE_OUTCOME_001",
+  "safety": {
+    "template_only": true,
+    "external_delivery_status": "NOT_SENT",
+    "credential_status": "BLOCKED",
+    "order_delivery_status": "BLOCKED"
+  }
+}

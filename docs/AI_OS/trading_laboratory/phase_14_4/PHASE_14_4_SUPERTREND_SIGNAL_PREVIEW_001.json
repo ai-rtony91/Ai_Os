@@ -1,0 +1,75 @@
+{
+  "preview_id": "PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001",
+  "phase": "14.4",
+  "mode": "paper_only_simulation",
+  "execution_allowed": false,
+  "live_execution_status": "BLOCKED",
+  "strategy_component": "SuperTrend MVP",
+  "component_role": "trend_permission_only",
+  "strategy_permission_status": "allowed_for_paper_review",
+  "trend_permission": "bullish",
+  "direction_intent": "BUY_REVIEW",
+  "confidence_placeholder": "placeholder_confidence_for_paper_review_only",
+  "blocked_reason": "",
+  "regime_note": "Regime is placeholder context only; Phase 14.3 remains final paper decision authority.",
+  "not_a_trigger": true,
+  "allowed_outputs": [
+    "bullish",
+    "bearish",
+    "neutral",
+    "blocked"
+  ],
+  "supertrend_output": "bullish",
+  "operator_meaning": "Trend permission is bullish for paper review only. This is not a buy signal.",
+  "signal_intake": {
+    "signal_id": "PAPER_SIGNAL_SUPERTREND_PREVIEW_001",
+    "source": "local_fixture",
+    "symbol": "EUR_USD",
+    "timeframe": "M15",
+    "direction": "BUY_REVIEW",
+    "signal_type": "paper_review_candidate",
+    "paper_only": true
+  },
+  "latency": {
+    "latency_id": "PHASE_14_4_SUPERTREND_LATENCY_PREVIEW_001",
+    "latency_seconds": 0,
+    "stale_status": "PASS",
+    "clock_skew_status": "PASS",
+    "latency_source": "local_fixture"
+  },
+  "phase_14_3_decision_engine": {
+    "decision_result_id": "PHASE_14_3_DECISION_RESULT_001",
+    "decision_result": "PAPER_REVIEW_READY",
+    "decision_engine_role": "final paper decision authority",
+    "supertrend_can_override_decision_engine": false
+  },
+  "scorecard": {
+    "scorecard_id": "PAPER_SCORECARD_SUPERTREND_PREVIEW_001",
+    "evidence_score": 72,
+    "scorecard_status": "PAPER_REVIEW_READY",
+    "scorecard_note": "SuperTrend contributes trend permission evidence only."
+  },
+  "preview_result": {
+    "status": "bullish",
+    "approved_for_paper_review": true,
+    "approved_for_live_execution": false,
+    "blocked_reason": "",
+    "next_safe_action": "Review the paper signal through Phase 14.3 decision engine and scorecard before any further scaffold work."
+  },
+  "blocked_actions": [
+    "external_execution",
+    "credential_use",
+    "route_delivery",
+    "paper_to_live_conversion",
+    "live_trading",
+    "automatic_route_execution"
+  ],
+  "safety_confirmation": {
+    "paper_only": true,
+    "live_execution_status": "BLOCKED",
+    "external_connection_status": "BLOCKED",
+    "credential_status": "BLOCKED",
+    "route_delivery_status": "BLOCKED",
+    "order_delivery_status": "BLOCKED"
+  }
+}
