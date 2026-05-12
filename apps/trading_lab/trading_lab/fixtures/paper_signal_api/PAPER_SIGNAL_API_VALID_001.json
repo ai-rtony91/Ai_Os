@@ -1,0 +1,9 @@
+{
+  "symbol": "EUR_USD",
+  "timeframe": "M15",
+  "direction": "LONG_REVIEW",
+  "strategy_id": "PAPER_EMA_VWAP_PULLBACK_001",
+  "confidence": 0.82,
+  "alert_time": "2026-05-12T00:00:00Z",
+  "source": "TRADINGVIEW_REFERENCE"
+}

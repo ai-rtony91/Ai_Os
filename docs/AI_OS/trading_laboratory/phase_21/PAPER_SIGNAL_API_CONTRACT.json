@@ -1,0 +1,40 @@
+{
+  "contract_id": "PAPER_SIGNAL_API_CONTRACT_PHASE_21",
+  "phase": "21",
+  "endpoint": "POST /paper-signal",
+  "mode": "paper_only",
+  "source_model": "external_reference_only",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "required_request_fields": [
+    "symbol",
+    "timeframe",
+    "direction",
+    "strategy_id",
+    "confidence",
+    "alert_time",
+    "source"
+  ],
+  "validation_rules": [
+    "reject_missing_fields",
+    "reject_stale_signals",
+    "reject_clock_skew",
+    "normalize_direction_to_paper_review",
+    "route_only_to_paper_preview"
+  ],
+  "outputs": [
+    "paper_signal_intake_ledger",
+    "validation_result",
+    "paper_route_preview"
+  ],
+  "required_statuses": {
+    "route_mode": "PAPER_PREVIEW_ONLY",
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "next_safe_action": "Run the local dry-run validator before any dashboard wiring."
+}

@@ -1,0 +1,20 @@
+{
+  "paper_route_preview_id": "PAPER_ROUTE_PREVIEW_001",
+  "mode": "paper_only",
+  "paper_route_status": "PAPER_PREVIEW_ONLY",
+  "target_platform": "TRADERSPOST_REFERENCE",
+  "symbol": "EUR_USD",
+  "timeframe": "M15",
+  "direction": "LONG_REVIEW",
+  "strategy_id": "PAPER_EMA_VWAP_PULLBACK_001",
+  "validation_status": "PASS",
+  "next_safe_action": "Review the paper route preview and keep all execution paths blocked.",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

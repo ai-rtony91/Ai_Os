@@ -1,0 +1,39 @@
+{
+  "panel_title": "Paper Signal API Intake",
+  "phase": "21",
+  "mode": "paper_only",
+  "endpoint": "POST /paper-signal",
+  "source_model": "external_reference_only",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "summary": "AI_OS accepts a local alert reference, validates it, and creates a paper route preview.",
+  "required_fields": [
+    "symbol",
+    "timeframe",
+    "direction",
+    "strategy_id",
+    "confidence",
+    "alert_time",
+    "source"
+  ],
+  "latest_validation": {
+    "validation_status": "PASS",
+    "clock_skew_status": "PASS",
+    "stale_signal_status": "PASS",
+    "paper_route_status": "PAPER_PREVIEW_ONLY"
+  },
+  "outputs": {
+    "paper_signal_intake_ledger": "apps/trading_lab/trading_lab/results/paper_signal_api/PAPER_SIGNAL_INTAKE_LEDGER_001.json",
+    "validation_result": "apps/trading_lab/trading_lab/results/paper_signal_api/PAPER_SIGNAL_VALIDATION_RESULT_001.json",
+    "paper_route_preview": "apps/trading_lab/trading_lab/results/paper_signal_api/PAPER_ROUTE_PREVIEW_001.json"
+  },
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "next_safe_action": "Run the Phase 21 intake validator, then plan dashboard display in a separate approval."
+}
