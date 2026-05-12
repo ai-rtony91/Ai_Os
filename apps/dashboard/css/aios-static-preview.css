@@ -2783,6 +2783,28 @@ body.focused-route-archives .project-hub-panel {
   overflow-wrap: anywhere;
 }
 
+.trading-lab-entry-button {
+  width: fit-content;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid rgba(55, 255, 136, 0.46);
+  border-radius: 8px;
+  color: var(--bg-0);
+  background: var(--accent-action);
+  cursor: pointer;
+}
+
+.trading-lab-entry-button:focus-visible {
+  outline: none;
+  box-shadow: var(--glow-focus);
+}
+
+.trading-lab-compact-status-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .trading-lab-advanced-diagnostics {
   display: grid;
   gap: 10px;
@@ -2849,6 +2871,7 @@ body.focused-route-archives .project-hub-panel {
   }
 
   .trading-lab-safety-row,
+  .trading-lab-compact-status-row,
   .paper-bot-core-safety,
   .paper-runner-safety {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2890,6 +2913,7 @@ body.focused-route-archives .project-hub-panel {
   .trading-lab-workspace-grid,
   .trading-workstation-topbar,
   .trading-lab-safety-row,
+  .trading-lab-compact-status-row,
   .paper-bot-core-grid,
   .paper-bot-core-safety,
   .paper-runner-card-grid,
@@ -4687,41 +4711,532 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   display: block;
 }
 
-.youtube-radio-volume {
-  display: inline-grid;
-  grid-template-columns: max-content minmax(42px, 64px);
-  align-items: center;
-  gap: 4px;
-  min-height: 26px;
-  padding: 0 5px;
-  border: 1px solid var(--line);
-  color: var(--text-soft);
-  background: var(--surface-control);
-  font-size: 9px;
-  line-height: 1;
+/* AI_OS cosmic fintech visual pass: token-level refinements keep routing and markup intact. */
+:root {
+  --bg-0: #010204;
+  --bg-1: #02040d;
+  --bg-2: #040816;
+  --blue-glow: #2eb9f6;
+  --blue: #285ed6;
+  --cyan: #35c2f6;
+  --terminal: #39c6ff;
+  --terminal-soft: #7856e8;
+  --text: #f2f7ff;
+  --muted: #9aaac8;
+  --panel: rgba(2, 4, 13, 0.82);
+  --panel-strong: rgba(4, 8, 22, 0.92);
+  --line: rgba(194, 222, 255, 0.065);
+  --line-hot: rgba(53, 194, 246, 0.34);
+  --surface-page: #010204;
+  --surface-sidebar: rgba(1, 2, 7, 0.88);
+  --surface-panel: rgba(2, 4, 13, 0.76);
+  --surface-panel-raised: rgba(4, 8, 22, 0.82);
+  --surface-panel-strong: rgba(5, 10, 24, 0.94);
+  --surface-input: rgba(1, 3, 10, 0.86);
+  --accent-primary: #35c2f6;
+  --accent-hot: #7856e8;
+  --accent-action: #35c2f6;
+  --line-subtle: rgba(194, 222, 255, 0.06);
+  --line-panel: rgba(194, 222, 255, 0.065);
+  --line-card: rgba(194, 222, 255, 0.075);
+  --glow-primary: rgba(53, 194, 246, 0.095);
+  --glow-primary-strong: rgba(120, 86, 232, 0.14);
+  --glow-action-soft: rgba(120, 86, 232, 0.045);
+  --glow-action: rgba(53, 194, 246, 0.11);
+  --glow-focus: 0 0 0 2px rgba(53, 194, 246, 0.18), 0 0 22px rgba(120, 86, 232, 0.14);
+  --shadow-panel: 0 30px 96px rgba(0, 0, 0, 0.58), 0 8px 26px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  --shadow-panel-hover: 0 34px 110px rgba(0, 0, 0, 0.66), 0 0 30px rgba(53, 194, 246, 0.095), inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  --grid-line: rgba(194, 222, 255, 0.034);
+  --grid-line-soft: rgba(53, 194, 246, 0.026);
+  --font-terminal-display: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.youtube-radio-volume input {
-  width: 100%;
-  min-width: 42px;
-  accent-color: var(--accent-action);
+body {
+  background:
+    radial-gradient(circle at 18% 4%, rgba(53, 194, 246, 0.075), transparent 32%),
+    radial-gradient(circle at 86% 12%, rgba(120, 86, 232, 0.095), transparent 34%),
+    radial-gradient(circle at 54% 98%, rgba(40, 94, 214, 0.065), transparent 34%),
+    linear-gradient(135deg, #010204 0%, #02040d 48%, #050a18 100%);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.layer-base {
+  background:
+    radial-gradient(circle at 16% 10%, rgba(53, 194, 246, 0.08), transparent 30%),
+    radial-gradient(circle at 84% 16%, rgba(120, 86, 232, 0.08), transparent 34%),
+    radial-gradient(circle at 58% 82%, rgba(40, 94, 214, 0.05), transparent 32%),
+    linear-gradient(135deg, #010204, #02040d 52%, #050a18);
+}
+
+.layer-grid {
+  opacity: 0.105;
+  background-size: 84px 84px;
+}
+
+.layer-glow {
+  background:
+    linear-gradient(120deg, rgba(53, 194, 246, 0.06), transparent 36%),
+    linear-gradient(300deg, rgba(120, 86, 232, 0.065), transparent 40%);
+}
+
+.command-sidebar,
+.personal-sidebar,
+.main-stage,
+.status-strip,
+.glass-card,
+.status-card,
+.chart-card,
+.work-card,
+.workspace-panel,
+.workspace-detail-card,
+.assistant-console,
+.assistant-context-packet,
+.trading-lab-window-system,
+.trading-lab-handoff-system,
+.paper-runner-panel,
+.paper-bot-core-panel,
+.trading-workstation-panel,
+.trading-lab-advanced-diagnostics {
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(5, 10, 24, 0.86), rgba(1, 3, 10, 0.74)),
+    rgba(2, 4, 13, 0.82);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(20px);
+}
+
+.side-nav button,
+.rail-nav-button,
+.context-rail-button,
+.personal-rail-button,
+.workspace-button,
+.soft-refresh-button,
+.rail-toggle-button,
+.personal-rail-toggle,
+.personal-rail-close,
+.message-row button,
+.welcome-actions button,
+.welcome-advanced summary,
+.trading-lab-entry-button,
+.status-chip,
+.registry-chip,
+.youtube-radio-mini-controls button {
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.012)),
+    rgba(2, 4, 13, 0.76);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+  transition: border-color 180ms ease, color 180ms ease, background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.side-nav button:hover,
+.side-nav button:focus,
+.side-nav button.active,
+.rail-nav-button:hover,
+.rail-nav-button:focus,
+.rail-nav-button.active,
+.context-rail-button:hover,
+.context-rail-button:focus,
+.context-rail-button.active,
+.personal-rail-button:hover,
+.personal-rail-button:focus,
+.personal-rail-button.active,
+.workspace-button:hover,
+.workspace-button:focus,
+.workspace-button.active,
+.soft-refresh-button:hover,
+.soft-refresh-button:focus,
+.trading-lab-entry-button:hover,
+.trading-lab-entry-button:focus {
+  color: #f8fbff;
+  border-color: rgba(53, 194, 246, 0.34);
+  background:
+    linear-gradient(135deg, rgba(53, 194, 246, 0.105), rgba(120, 86, 232, 0.095)),
+    rgba(4, 8, 22, 0.86);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.44), 0 0 24px rgba(53, 194, 246, 0.09);
+  transform: translateY(-2px);
+}
+
+.rail-header-title,
+.workspace-section-head h2,
+.welcome-command-head strong,
+.trading-lab-workspace-head strong,
+.paper-runner-head strong,
+.trading-lab-handoff-head strong {
+  color: #f8fbff;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.eyebrow,
+.card-label,
+.workspace-button .card-label,
+.trading-lab-handoff-fields dt,
+.status-card .card-label {
+  color: #39c6ff;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.sidebar-lock,
+.trading-lab-blocked-actions,
+.paper-runner-safety,
+.paper-bot-core-safety,
+.trading-lab-safety-row {
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(12, 18, 38, 0.5);
+}
+
+.sidebar-lock strong {
+  color: #c86bff;
+}
+
+.trading-lab-safety-chip,
+.workstation-chip,
+.progress-badge,
+.tool-status-pill {
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  color: #dce8ff;
+}
+
+.trading-lab-entry-button {
+  color: #020617;
+  background: linear-gradient(135deg, #39c6ff, #8b5cff);
+  box-shadow: 0 18px 42px rgba(57, 198, 255, 0.22), 0 0 36px rgba(139, 92, 255, 0.18);
+}
+
+.trading-lab-workspace-grid,
+.trading-workstation-body,
+.trading-workstation-bottom,
+.paper-runner-card-grid,
+.paper-bot-core-grid,
+.trading-lab-handoff-grid {
+  gap: 14px;
+}
+
+.glass-card:hover,
+.glass-card:focus-within,
+.status-card:hover,
+.status-card:focus-within,
+.work-card:hover,
+.work-card:focus-within,
+.workspace-panel:hover,
+.workspace-panel:focus-within,
+.trading-workstation-panel:hover,
+.trading-workstation-panel:focus-within {
+  border-color: rgba(57, 198, 255, 0.24);
+  box-shadow: var(--shadow-panel-hover);
+}
+
+/* Immersive workspace pass: center-first spatial hierarchy with lighter rails. */
+@media (min-width: 1121px) {
+  .dashboard-shell {
+    grid-template-columns: 224px minmax(0, 1fr) 292px;
+    gap: 16px;
+    padding: 14px;
+  }
+
+  body.sidebar-collapsed .dashboard-shell {
+    grid-template-columns: 0 minmax(0, 1fr) 292px;
+  }
+
+  body.personal-rail-collapsed .dashboard-shell {
+    grid-template-columns: 224px minmax(0, 1fr) 0;
+  }
+
+  body.sidebar-collapsed.personal-rail-collapsed .dashboard-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .command-sidebar,
+  .personal-sidebar {
+    top: 14px;
+    height: calc(100vh - 28px);
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .command-main {
+    padding: 0;
+  }
+
+  .status-strip {
+    position: sticky;
+    top: 14px;
+    z-index: 12;
+    min-height: 42px;
+    margin-bottom: 16px;
+    padding: 6px 8px;
+    border-radius: 18px;
+  }
+
+  .utility-status {
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .utility-status small,
+  .refresh-guard-message,
+  .command-guide-strip {
+    opacity: 0.72;
+  }
+
+  .command-stage {
+    padding: 12px 0 104px;
+  }
+
+  .workspace-detail-card {
+    width: min(100%, 1540px);
+    min-height: calc(100vh - 126px);
+    padding: 22px;
+  }
+
+  .workspace-detail-grid {
+    gap: 18px;
+  }
+
+  .workspace-detail-main,
+  .assistant-console,
+  .assistant-context-packet {
+    min-height: 0;
+  }
+
+  .side-nav,
+  .rail-nav,
+  .context-rail,
+  .personal-rail-list {
+    gap: 8px;
+  }
+
+  .rail-nav-button,
+  .context-rail-button,
+  .personal-rail-button,
+  .workspace-button {
+    min-height: 38px;
+    padding: 9px 11px;
+  }
+
+  .rail-header {
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .rail-header-title {
+    font-size: 14px;
+  }
+
+  .rail-header-summary,
+  .sidebar-lock span {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+
+  .youtube-radio-dock {
+    right: 18px;
+    bottom: 18px;
+    border-radius: 18px;
+    box-shadow: 0 18px 54px rgba(0, 0, 0, 0.34), 0 0 36px rgba(57, 198, 255, 0.12);
+  }
+}
+
+.workspace-section-head,
+.workspace-detail-head,
+.assistant-console-head,
+.trading-lab-workspace-head,
+.paper-runner-head,
+.trading-lab-handoff-head {
+  margin-bottom: 12px;
+}
+
+.workspace-section-head h2,
+.trading-lab-workspace-head strong {
+  font-size: clamp(18px, 2vw, 28px);
+  line-height: 1.08;
+}
+
+.glass-card,
+.status-card,
+.chart-card,
+.work-card,
+.workspace-panel,
+.workspace-detail-card,
+.paper-runner-panel,
+.paper-bot-core-panel,
+.trading-lab-window-system,
+.trading-lab-handoff-system,
+.trading-lab-advanced-diagnostics {
+  transform: translateZ(0);
+}
+
+.trading-workstation {
+  gap: 16px;
+}
+
+.trading-workstation-topbar {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+}
+
+.trading-workstation-body {
+  grid-template-columns: minmax(180px, 0.7fr) minmax(420px, 1.75fr) minmax(210px, 0.82fr);
+  gap: 14px;
+}
+
+.trading-workstation-panel {
+  padding: 14px;
+}
+
+.trading-workstation-body .trading-workstation-panel:nth-child(2) {
+  min-height: 360px;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(57, 198, 255, 0.14), transparent 30%),
+    linear-gradient(180deg, rgba(12, 18, 38, 0.78), rgba(8, 13, 29, 0.66));
+}
+
+.trading-lab-compact-next-action,
+.trading-lab-compact-status-row,
+.trading-lab-safety-row {
+  margin-top: 4px;
+}
+
+.trading-lab-advanced-diagnostics summary {
+  min-height: 44px;
+  align-items: center;
+}
+
+.trading-lab-advanced-diagnostics-body {
+  gap: 16px;
+}
+
+.paper-runner-card-grid,
+.paper-bot-core-grid,
+.trading-lab-handoff-grid,
+.trading-lab-workspace-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.side-nav button,
+.rail-nav-button,
+.context-rail-button,
+.personal-rail-button,
+.workspace-button,
+.status-chip,
+.registry-chip,
+.soft-refresh-button,
+.trading-lab-entry-button {
+  will-change: transform, box-shadow;
+}
+
+@media (max-width: 1120px) {
+  .command-main {
+    padding-inline: 12px;
+  }
+
+  .workspace-detail-card,
+  .glass-card,
+  .status-card,
+  .chart-card,
+  .work-card,
+  .workspace-panel,
+  .paper-runner-panel,
+  .paper-bot-core-panel,
+  .trading-lab-window-system,
+  .trading-lab-handoff-system {
+    border-radius: 16px;
+  }
+
+  .trading-workstation-body {
+    grid-template-columns: 1fr;
+  }
+
+  .trading-workstation-body .trading-workstation-panel:nth-child(2) {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 720px) {
+  .command-main {
+    padding-inline: 10px;
+  }
+
+  .workspace-detail-card {
+    padding: 14px;
+  }
+
+  .status-strip {
+    gap: 8px;
+    border-radius: 16px;
+  }
+
+  .mobile-tab-button,
+  .top-utility-drawer summary {
+    min-height: 44px;
+  }
+}
+
+/* Authoritative media dock system after legacy dock states. */
+.youtube-radio-dock,
+body:not(.welcome-start-active) .youtube-radio-dock,
+body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
+  width: min(312px, calc(100vw - 44px));
+  flex-basis: 312px;
+  border: 1px solid rgba(198, 222, 255, 0.06);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(5, 10, 24, 0.88), rgba(1, 3, 10, 0.78)),
+    radial-gradient(circle at 20% 0%, rgba(53, 194, 246, 0.065), transparent 34%),
+    radial-gradient(circle at 88% 100%, rgba(120, 86, 232, 0.07), transparent 36%);
+  box-shadow:
+    0 24px 72px rgba(0, 0, 0, 0.58),
+    0 0 18px rgba(53, 194, 246, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  overflow: hidden;
+  backdrop-filter: blur(18px);
+}
+
+body:not(.welcome-start-active) .youtube-radio-dock {
+  right: max(22px, env(safe-area-inset-right));
+  bottom: calc(22px + env(safe-area-inset-bottom));
+}
+
+.youtube-radio-head {
+  gap: 8px;
+  padding: 10px;
+}
+
+.youtube-radio-head strong {
+  color: #f2f7ff;
+  font-weight: 620;
+}
+
+.youtube-radio-head small {
+  color: rgba(220, 232, 255, 0.66);
 }
 
 .youtube-radio-body {
   display: grid;
   gap: 6px;
-  padding: 0 8px 8px;
+  padding: 0 10px 10px;
+}
+
+.youtube-radio-player,
+.youtube-radio-player iframe {
+  min-height: 120px;
 }
 
 .youtube-radio-player {
   position: relative;
   width: 100%;
-  height: 132px;
-  min-height: 132px;
+  height: 120px;
   margin-left: 0;
-  border: 1px solid rgba(56, 189, 248, 0.24);
-  border-radius: 12px;
-  background: rgba(3, 7, 18, 0.72);
+  border: 1px solid rgba(198, 222, 255, 0.055);
+  border-radius: 16px;
+  background: rgba(1, 3, 10, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
   overflow: hidden;
   opacity: 1;
   pointer-events: auto;
@@ -4731,7 +5246,6 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   display: block;
   width: 100%;
   height: 100%;
-  min-height: 132px;
   border: 0;
 }
 
@@ -4744,8 +5258,8 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
 }
 
 .youtube-radio-dock.is-collapsed {
+  width: min(300px, calc(100vw - 44px));
   flex-basis: 300px;
-  width: min(100%, 300px);
 }
 
 .youtube-radio-dock.is-collapsed .youtube-radio-head {
@@ -4771,41 +5285,91 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   display: none;
 }
 
-.youtube-radio-dock.is-collapsed .youtube-radio-mini-controls {
+.youtube-radio-dock.is-collapsed .youtube-radio-mini-controls,
+.youtube-radio-mini-controls {
   display: flex;
-  grid-column: 1;
-  grid-row: 1;
-  justify-self: stretch;
-  gap: 3px;
-  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px;
   min-width: 0;
+  border: 1px solid rgba(198, 222, 255, 0.045);
+  border-radius: 18px;
+  background: rgba(1, 3, 10, 0.5);
   overflow: hidden;
 }
 
+.youtube-radio-mini-controls button,
 .youtube-radio-dock.is-collapsed .youtube-radio-mini-controls button {
-  flex: 0 0 24px;
-  width: 24px;
-  min-height: 24px;
-  padding: 3px;
+  flex: 0 0 28px;
+  width: 28px;
+  min-height: 28px;
+  padding: 5px;
+  border: 1px solid rgba(198, 222, 255, 0.055);
+  border-radius: 999px;
+  color: rgba(230, 240, 255, 0.9);
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: none;
 }
 
-.youtube-radio-dock.is-collapsed .youtube-radio-volume {
-  flex: 1 1 62px;
-  min-width: 58px;
-  max-width: 74px;
-  grid-template-columns: max-content minmax(34px, 1fr);
-  min-height: 24px;
-  padding: 0 4px;
+.youtube-radio-mini-controls button:hover,
+.youtube-radio-mini-controls button:focus {
+  color: #ffffff;
+  border-color: rgba(53, 194, 246, 0.28);
+  background: rgba(53, 194, 246, 0.095);
+  box-shadow: 0 0 14px rgba(53, 194, 246, 0.08);
+  transform: translateY(-1px);
 }
 
-.youtube-radio-dock.is-collapsed .youtube-radio-volume input {
-  min-width: 34px;
-}
-
+.youtube-radio-control-icon,
+.youtube-radio-volume-icon,
 .youtube-radio-dock.is-collapsed .youtube-radio-control-icon,
 .youtube-radio-dock.is-collapsed .youtube-radio-volume-icon {
   width: 14px;
   height: 14px;
+}
+
+.youtube-radio-volume,
+.youtube-radio-dock.is-collapsed .youtube-radio-volume {
+  display: inline-grid;
+  align-items: center;
+  flex: 1 1 92px;
+  min-width: 82px;
+  max-width: 118px;
+  min-height: 28px;
+  padding: 0 7px;
+  grid-template-columns: max-content minmax(48px, 1fr);
+  gap: 6px;
+  border: 1px solid rgba(198, 222, 255, 0.05);
+  border-radius: 999px;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.032);
+  font-size: 9px;
+  line-height: 1;
+}
+
+.youtube-radio-volume input,
+.youtube-radio-dock.is-collapsed .youtube-radio-volume input {
+  width: 100%;
+  min-width: 48px;
+  height: 18px;
+  accent-color: var(--accent-action);
+}
+
+@media (max-width: 720px) {
+  .youtube-radio-dock,
+  body:not(.welcome-start-active) .youtube-radio-dock,
+  body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed),
+  .youtube-radio-dock.is-collapsed {
+    width: min(100%, calc(100vw - 20px));
+    margin-inline: auto;
+    border-radius: 18px;
+  }
+
+  .youtube-radio-mini-controls {
+    flex-wrap: nowrap;
+    overflow: visible;
+  }
 }
 
 .dashboard-footer {
@@ -5391,7 +5955,7 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
   }
 
   .youtube-radio-dock.is-collapsed .youtube-radio-mini-controls {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     overflow: visible;
   }
 }
@@ -5616,5 +6180,410 @@ body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed) {
     visibility: visible;
     opacity: 1;
     pointer-events: auto;
+  }
+}
+
+/* Round 3: AI_OS midnight purple signature polish. */
+:root {
+  --bg-0: #03020b;
+  --bg-1: #09051a;
+  --bg-2: #120a2b;
+  --surface-page: #03020b;
+  --surface-sidebar: rgba(9, 5, 26, 0.78);
+  --surface-panel: rgba(16, 10, 36, 0.64);
+  --surface-panel-raised: rgba(18, 10, 43, 0.74);
+  --surface-panel-strong: rgba(22, 12, 52, 0.86);
+  --surface-input: rgba(9, 5, 26, 0.78);
+  --panel: rgba(18, 10, 43, 0.72);
+  --panel-strong: rgba(24, 14, 58, 0.86);
+  --line: rgba(226, 210, 255, 0.1);
+  --line-hot: rgba(200, 107, 255, 0.58);
+  --accent-primary: #c86bff;
+  --accent-hot: #d8b4fe;
+  --accent-action: #c86bff;
+  --glow-primary: rgba(139, 92, 255, 0.2);
+  --glow-primary-strong: rgba(200, 107, 255, 0.3);
+  --glow-action-soft: rgba(216, 180, 254, 0.12);
+  --glow-action: rgba(200, 107, 255, 0.28);
+  --glow-focus: 0 0 0 2px rgba(216, 180, 254, 0.28), 0 0 32px rgba(200, 107, 255, 0.26);
+  --grid-line: rgba(226, 210, 255, 0.055);
+  --grid-line-soft: rgba(200, 107, 255, 0.045);
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(139, 92, 255, 0.16), transparent 32%),
+    radial-gradient(circle at 88% 16%, rgba(200, 107, 255, 0.16), transparent 34%),
+    radial-gradient(circle at 54% 88%, rgba(61, 123, 255, 0.08), transparent 32%),
+    linear-gradient(135deg, #03020b 0%, #09051a 48%, #120a2b 100%);
+}
+
+.layer-base {
+  background:
+    radial-gradient(circle at 14% 10%, rgba(139, 92, 255, 0.18), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(200, 107, 255, 0.14), transparent 34%),
+    radial-gradient(circle at 54% 78%, rgba(61, 123, 255, 0.08), transparent 32%),
+    linear-gradient(135deg, #03020b, #09051a 52%, #120a2b);
+}
+
+.layer-glow {
+  background:
+    linear-gradient(118deg, rgba(139, 92, 255, 0.13), transparent 35%),
+    linear-gradient(302deg, rgba(200, 107, 255, 0.14), transparent 38%);
+}
+
+.side-nav button,
+.rail-nav-button,
+.context-rail-button,
+.personal-rail-button,
+.workspace-button,
+.soft-refresh-button,
+.rail-toggle-button,
+.personal-rail-toggle,
+.personal-rail-close,
+.message-row button,
+.welcome-actions button,
+.welcome-advanced summary,
+.trading-lab-entry-button,
+.status-chip,
+.registry-chip,
+.youtube-radio-mini-controls button {
+  border-color: rgba(216, 180, 254, 0.18);
+  background:
+    linear-gradient(180deg, rgba(216, 180, 254, 0.09), rgba(139, 92, 255, 0.035)),
+    rgba(16, 10, 36, 0.68);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.2),
+    0 0 18px rgba(139, 92, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.side-nav button.active,
+.rail-nav-button.active,
+.context-rail-button.active,
+.personal-rail-button.active,
+.workspace-button.active,
+.status-chip.active,
+.registry-chip.active {
+  color: #ffffff;
+  border-color: rgba(216, 180, 254, 0.52);
+  box-shadow:
+    0 14px 42px rgba(0, 0, 0, 0.28),
+    0 0 30px rgba(200, 107, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.side-nav button:hover,
+.side-nav button:focus,
+.rail-nav-button:hover,
+.rail-nav-button:focus,
+.context-rail-button:hover,
+.context-rail-button:focus,
+.personal-rail-button:hover,
+.personal-rail-button:focus,
+.workspace-button:hover,
+.workspace-button:focus,
+.soft-refresh-button:hover,
+.soft-refresh-button:focus,
+.trading-lab-entry-button:hover,
+.trading-lab-entry-button:focus,
+.youtube-radio-mini-controls button:hover,
+.youtube-radio-mini-controls button:focus {
+  color: #ffffff;
+  border-color: rgba(232, 213, 255, 0.64);
+  background:
+    linear-gradient(135deg, rgba(216, 180, 254, 0.18), rgba(200, 107, 255, 0.16)),
+    rgba(22, 12, 52, 0.78);
+  box-shadow:
+    0 16px 46px rgba(0, 0, 0, 0.3),
+    0 0 36px rgba(216, 180, 254, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.trading-lab-entry-button {
+  color: #ffffff;
+  background: linear-gradient(135deg, #8b5cff, #c86bff);
+  border-color: rgba(232, 213, 255, 0.52);
+  box-shadow:
+    0 16px 42px rgba(0, 0, 0, 0.28),
+    0 0 30px rgba(200, 107, 255, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+/* AI_OS official midnight / teal / electric blue token pass. */
+:root {
+  --aios-teal-glare: #37ffd0;
+  --aios-electric-blue: #2f8cff;
+  --aios-violet-glow: #8b5cf6;
+  --aios-midnight: #050814;
+  --aios-deep-panel: #090f22;
+  --bg-0: var(--aios-midnight);
+  --bg-1: #070c1a;
+  --bg-2: var(--aios-deep-panel);
+  --surface-page: var(--aios-midnight);
+  --surface-sidebar: rgba(5, 8, 20, 0.82);
+  --surface-panel: rgba(9, 15, 34, 0.66);
+  --surface-panel-raised: rgba(9, 15, 34, 0.76);
+  --surface-panel-strong: rgba(11, 18, 42, 0.88);
+  --surface-input: rgba(5, 8, 20, 0.8);
+  --panel: rgba(9, 15, 34, 0.72);
+  --panel-strong: rgba(11, 18, 42, 0.88);
+  --line: rgba(180, 205, 255, 0.1);
+  --line-hot: rgba(47, 140, 255, 0.52);
+  --accent-primary: var(--aios-electric-blue);
+  --accent-hot: var(--aios-violet-glow);
+  --accent-action: var(--aios-electric-blue);
+  --glow-primary: rgba(47, 140, 255, 0.2);
+  --glow-primary-strong: rgba(47, 140, 255, 0.28);
+  --glow-action-soft: rgba(55, 255, 208, 0.075);
+  --glow-action: rgba(47, 140, 255, 0.22);
+  --glow-focus: 0 0 0 2px rgba(47, 140, 255, 0.24), 0 0 26px rgba(139, 92, 246, 0.18);
+  --grid-line: rgba(180, 205, 255, 0.055);
+  --grid-line-soft: rgba(47, 140, 255, 0.04);
+  --shadow-panel: 0 24px 76px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --shadow-panel-hover: 0 28px 86px rgba(0, 0, 0, 0.42), 0 0 30px rgba(47, 140, 255, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+body {
+  background:
+    radial-gradient(circle at 3% 18%, rgba(55, 255, 208, 0.09), transparent 24%),
+    radial-gradient(circle at 42% 7%, rgba(47, 140, 255, 0.13), transparent 30%),
+    radial-gradient(circle at 90% 18%, rgba(139, 92, 246, 0.12), transparent 32%),
+    linear-gradient(135deg, #050814 0%, #070c1a 48%, #090f22 100%);
+}
+
+.layer-base {
+  background:
+    radial-gradient(circle at 0% 18%, rgba(55, 255, 208, 0.12), transparent 24%),
+    radial-gradient(circle at 44% 8%, rgba(47, 140, 255, 0.14), transparent 30%),
+    radial-gradient(circle at 88% 20%, rgba(139, 92, 246, 0.12), transparent 32%),
+    linear-gradient(135deg, #050814, #070c1a 52%, #090f22);
+}
+
+.layer-glow {
+  background:
+    linear-gradient(112deg, rgba(55, 255, 208, 0.065), transparent 24%),
+    linear-gradient(145deg, rgba(47, 140, 255, 0.12), transparent 36%),
+    linear-gradient(304deg, rgba(139, 92, 246, 0.11), transparent 40%);
+}
+
+.command-sidebar,
+.personal-sidebar,
+.main-stage,
+.status-strip,
+.glass-card,
+.status-card,
+.chart-card,
+.work-card,
+.workspace-panel,
+.workspace-detail-card,
+.assistant-console,
+.assistant-context-packet,
+.trading-lab-window-system,
+.trading-lab-handoff-system,
+.paper-runner-panel,
+.paper-bot-core-panel,
+.trading-workstation-panel,
+.trading-lab-advanced-diagnostics {
+  border-color: rgba(180, 205, 255, 0.1);
+  background:
+    linear-gradient(180deg, rgba(9, 15, 34, 0.8), rgba(5, 8, 20, 0.66)),
+    rgba(9, 15, 34, 0.72);
+  box-shadow: var(--shadow-panel);
+}
+
+.side-nav button,
+.rail-nav-button,
+.context-rail-button,
+.personal-rail-button,
+.workspace-button,
+.soft-refresh-button,
+.rail-toggle-button,
+.personal-rail-toggle,
+.personal-rail-close,
+.message-row button,
+.welcome-actions button,
+.welcome-advanced summary,
+.trading-lab-entry-button,
+.status-chip,
+.registry-chip,
+.youtube-radio-mini-controls button {
+  border-color: rgba(47, 140, 255, 0.2);
+  background:
+    linear-gradient(180deg, rgba(47, 140, 255, 0.075), rgba(139, 92, 246, 0.035)),
+    rgba(9, 15, 34, 0.7);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.2),
+    0 0 14px rgba(47, 140, 255, 0.095),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.side-nav button.active,
+.rail-nav-button.active,
+.context-rail-button.active,
+.personal-rail-button.active,
+.workspace-button.active,
+.status-chip.active,
+.registry-chip.active {
+  color: #ffffff;
+  border-color: rgba(55, 255, 208, 0.42);
+  box-shadow:
+    0 14px 42px rgba(0, 0, 0, 0.28),
+    -8px 0 22px rgba(55, 255, 208, 0.12),
+    0 0 26px rgba(47, 140, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.side-nav button:hover,
+.side-nav button:focus,
+.rail-nav-button:hover,
+.rail-nav-button:focus,
+.context-rail-button:hover,
+.context-rail-button:focus,
+.personal-rail-button:hover,
+.personal-rail-button:focus,
+.workspace-button:hover,
+.workspace-button:focus,
+.soft-refresh-button:hover,
+.soft-refresh-button:focus,
+.trading-lab-entry-button:hover,
+.trading-lab-entry-button:focus,
+.youtube-radio-mini-controls button:hover,
+.youtube-radio-mini-controls button:focus {
+  color: #ffffff;
+  border-color: rgba(47, 140, 255, 0.58);
+  background:
+    linear-gradient(135deg, rgba(47, 140, 255, 0.16), rgba(139, 92, 246, 0.12)),
+    rgba(11, 18, 42, 0.82);
+  box-shadow:
+    0 16px 44px rgba(0, 0, 0, 0.3),
+    0 0 28px rgba(47, 140, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.brand-mark,
+.logo-mark,
+.welcome-action-icon,
+.assistant-context-generate,
+.assistant-mode-row button.active,
+.trading-lab-entry-button {
+  border-color: rgba(55, 255, 208, 0.34);
+  box-shadow:
+    -10px 0 24px rgba(55, 255, 208, 0.13),
+    0 0 26px rgba(47, 140, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.trading-lab-entry-button {
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--aios-electric-blue), var(--aios-violet-glow));
+}
+
+/* Round 4B: desktop media dock containment fix. */
+@media (min-width: 1121px) {
+  body:not(.welcome-start-active) .youtube-radio-dock,
+  body:not(.welcome-start-active) .youtube-radio-dock:not(.is-collapsed),
+  .youtube-radio-dock,
+  .youtube-radio-dock.is-collapsed {
+    position: relative;
+    right: auto;
+    bottom: auto;
+    z-index: 1;
+    flex: 0 0 auto;
+    width: min(220px, 100%);
+    max-width: 220px;
+    min-height: 32px;
+    max-height: 34px;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 999px;
+    border-color: rgba(216, 180, 254, 0.12);
+    background:
+      linear-gradient(180deg, rgba(22, 12, 52, 0.7), rgba(6, 3, 18, 0.76)),
+      rgba(6, 3, 18, 0.78);
+    box-shadow:
+      0 6px 16px rgba(0, 0, 0, 0.22),
+      0 0 10px rgba(200, 107, 255, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  }
+
+  .youtube-radio-head,
+  .youtube-radio-dock.is-collapsed .youtube-radio-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    min-height: 32px;
+    padding: 3px 4px;
+  }
+
+  .youtube-radio-head > div:first-child,
+  .youtube-radio-dock.is-collapsed .youtube-radio-head > div:first-child,
+  .youtube-radio-body,
+  .youtube-radio-player,
+  .youtube-radio-preview-note {
+    display: none;
+  }
+
+  .youtube-radio-mini-controls,
+  .youtube-radio-dock.is-collapsed .youtube-radio-mini-controls {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    width: 100%;
+    min-height: 26px;
+    padding: 2px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .youtube-radio-mini-controls button,
+  .youtube-radio-dock.is-collapsed .youtube-radio-mini-controls button {
+    flex: 0 0 22px;
+    width: 22px;
+    min-height: 22px;
+    padding: 3px;
+    border-color: rgba(216, 180, 254, 0.14);
+    background: rgba(216, 180, 254, 0.055);
+    box-shadow: none;
+  }
+
+  .youtube-radio-mini-controls button:hover,
+  .youtube-radio-mini-controls button:focus {
+    border-color: rgba(232, 213, 255, 0.46);
+    background: rgba(200, 107, 255, 0.12);
+    box-shadow: 0 0 10px rgba(200, 107, 255, 0.12);
+    transform: none;
+  }
+
+  .youtube-radio-control-icon,
+  .youtube-radio-volume-icon,
+  .youtube-radio-dock.is-collapsed .youtube-radio-control-icon,
+  .youtube-radio-dock.is-collapsed .youtube-radio-volume-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .youtube-radio-volume,
+  .youtube-radio-dock.is-collapsed .youtube-radio-volume {
+    flex: 1 1 66px;
+    min-width: 60px;
+    max-width: 78px;
+    min-height: 22px;
+    padding: 0 4px;
+    grid-template-columns: max-content minmax(34px, 1fr);
+    gap: 3px;
+    border-color: rgba(216, 180, 254, 0.12);
+    background: rgba(216, 180, 254, 0.04);
+  }
+
+  .youtube-radio-volume input,
+  .youtube-radio-dock.is-collapsed .youtube-radio-volume input {
+    min-width: 34px;
+    height: 13px;
   }
 }
