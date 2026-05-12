@@ -78,6 +78,7 @@ const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
+const tradingLabWorkstationFixturePath = "mock-data/trading-lab-workstation.example.json";
 const tradingLabPaperRunnerFixturePath = "mock-data/trading-lab-paper-runner.example.json";
 const aiosOrchestrationControlRoomFixturePath = "mock-data/aios-orchestration-control-room.example.json";
 const paperBotCoreFixturePath = "mock-data/paper-bot-core.example.json";
@@ -1590,6 +1591,131 @@ function renderTradingStackHub() {
   return hub;
 }
 
+function createWorkstationChip(label, value, state = "") {
+  const chip = document.createElement("span");
+  chip.className = `trading-workstation-chip ${getTradingLabStateClass(state || value)}`;
+  chip.textContent = `${label}: ${value === null || value === undefined || value === "" ? "Pending validation" : value}`;
+  return chip;
+}
+
+function createWorkstationList(items = [], formatter = (item) => String(item)) {
+  const list = document.createElement("ul");
+  list.className = "trading-workstation-list";
+  items.forEach((item) => {
+    const entry = document.createElement("li");
+    entry.textContent = formatter(item);
+    list.append(entry);
+  });
+  return list;
+}
+
+function createWorkstationPanel(title, children = []) {
+  const panel = document.createElement("section");
+  panel.className = "trading-workstation-panel";
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+  panel.append(heading, ...children.filter(Boolean));
+  return panel;
+}
+
+function renderTradingLabWorkstation(data = {}) {
+  const section = document.createElement("section");
+  section.className = "trading-workstation";
+  section.setAttribute("aria-label", "Trading Lab Workstation");
+
+  const top = document.createElement("div");
+  top.className = "trading-workstation-topbar";
+  const topBar = data.top_bar || {};
+  [
+    ["Session", topBar.session],
+    ["Pair", topBar.selected_pair],
+    ["Market", topBar.market_state],
+    ["Latency", topBar.latency_status || data.latency?.stale_status],
+    ["Risk", topBar.risk_status],
+    ["Mode", topBar.paper_mode],
+    ["Validation", topBar.validation_state]
+  ].forEach(([label, value]) => top.append(createWorkstationChip(label, value, value)));
+
+  const left = data.left_panel || {};
+  const center = data.center_panel || {};
+  const right = data.right_panel || {};
+  const bottom = data.bottom_panel || {};
+  const latency = data.latency || {};
+  const safety = data.safety || {};
+
+  const leftPanel = createWorkstationPanel("Forex Desk", [
+    createWorkstationList(left.watchlist || [], (item) => `Watchlist: ${item}`),
+    createWorkstationList(left.forex_pairs || [], (item) => `${item.pair}: ${item.bias} / ${item.spread_status}`),
+    createWorkstationList(left.session_tracker || [], (item) => `${item.session}: ${item.status}`),
+    createWorkstationList(left.economic_events || [], (item) => `${item.time} - ${item.event} (${item.impact})`),
+    createWorkstationList(left.alerts || [], (item) => `${item.label}: ${item.status}`),
+    createWorkstationList(left.workspace_profiles || [], (item) => `Profile: ${item}`)
+  ]);
+
+  const centerPanel = createWorkstationPanel("Active Workflow", [
+    createWorkstationChip("Workflow", center.active_workflow || "Pending validation"),
+    createWorkstationChip("Signal", center.signal_intake?.status || "Pending validation"),
+    createWorkstationChip("Direction", center.signal_intake?.direction || "Pending validation"),
+    createWorkstationChip("Regime", center.market_context?.regime || "Pending validation"),
+    createWorkstationList(center.paper_execution_flow || [], (item) => `${item.step}: ${item.status}`),
+    createWorkstationChip("AI Guidance", center.ai_guidance_summary || "Pending validation"),
+    createWorkstationChip("Next", center.primary_next_action || data.next_safe_action)
+  ]);
+
+  const rightPanel = createWorkstationPanel("Risk Gate", [
+    createWorkstationChip("Gate", right.risk_gate?.status || "Pending validation", right.risk_gate?.status),
+    createWorkstationChip("Risk", right.risk_gate?.max_risk_per_trade || "Not measured"),
+    createWorkstationChip("Entry", right.position_model?.entry || "Pending validation"),
+    createWorkstationChip("Stop", right.position_model?.stop || "Pending validation"),
+    createWorkstationChip("Target", right.position_model?.target || "Pending validation"),
+    createWorkstationChip("Confluence", right.confluence_score?.score || "Not measured"),
+    createWorkstationList(right.setup_checklist || [], (item) => `Check: ${item}`),
+    createWorkstationChip("Live execution", right.blocked_live_execution_state || safety.live_trading || "BLOCKED", "BLOCKED")
+  ]);
+
+  const body = document.createElement("div");
+  body.className = "trading-workstation-body";
+  body.append(leftPanel, centerPanel, rightPanel);
+
+  const latencyPanel = createWorkstationPanel("Latency Core", [
+    createWorkstationChip("Signal source", latency.signal_source_time || "Pending validation"),
+    createWorkstationChip("Alert received", latency.alert_received_time || "Pending validation"),
+    createWorkstationChip("Validation", `${latency.validation_start_time || "Pending"} -> ${latency.validation_end_time || "validation"}`),
+    createWorkstationChip("AI review", `${latency.ai_review_start_time || "Parallel"} -> ${latency.ai_review_end_time || "not blocking"}`),
+    createWorkstationChip("Route preview", latency.route_preview_time || "Pending validation"),
+    createWorkstationChip("Paper execution", latency.paper_execution_time || "Pending validation"),
+    createWorkstationChip("Total delay", latency.total_delay_seconds === null || latency.total_delay_seconds === undefined ? "Pending validation" : `${latency.total_delay_seconds}s`, latency.stale_status),
+    createWorkstationChip("Stale status", latency.stale_status || "Pending validation", latency.stale_status),
+    createWorkstationChip("Decision time", latency.user_decision_time_seconds === null || latency.user_decision_time_seconds === undefined ? "Not measured" : `${latency.user_decision_time_seconds}s`)
+  ]);
+
+  const bottomPanel = createWorkstationPanel("Journal / Replay / Scorecard", [
+    createWorkstationChip("Journal", bottom.journal?.status || "Pending validation"),
+    createWorkstationChip("Replay", bottom.replay?.status || "Pending validation"),
+    createWorkstationChip("Scorecard", bottom.scorecard?.status || "Pending validation"),
+    createWorkstationChip("Paper trades", bottom.paper_metrics?.paper_trades ?? "Not measured"),
+    createWorkstationChip("Average latency", bottom.paper_metrics?.average_latency_seconds || "Not measured"),
+    createWorkstationList(bottom.validation_log || [], (item) => `Log: ${item}`)
+  ]);
+
+  const safetyPanel = createWorkstationPanel("Safety Locks", [
+    createWorkstationChip("Live trading", safety.live_trading || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Broker", safety.broker || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("OANDA", safety.oanda || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("API keys", safety.api_keys || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Real webhooks", safety.real_webhooks || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Real orders", safety.real_orders || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("AI execution", safety.ai_assisted_execution || "BLOCKED", "BLOCKED")
+  ]);
+
+  const bottomGrid = document.createElement("div");
+  bottomGrid.className = "trading-workstation-bottom";
+  bottomGrid.append(latencyPanel, bottomPanel, safetyPanel);
+
+  section.append(top, body, bottomGrid);
+  return section;
+}
+
 function createTradingLabCompactNextAction(data = {}, windowSystemData = null, orchestrationData = null) {
   const nextCard = Array.isArray(data.cards) ? data.cards.find((card) => card.id === "next_action" || card.title === "Next Action") : null;
   const windowNext = windowSystemData?.windows?.next_action?.summary || windowSystemData?.windows?.next_action?.detail;
@@ -1628,7 +1754,7 @@ function createTradingLabAdvancedDiagnostics(items = []) {
   return details;
 }
 
-function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null) {
+function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -1697,8 +1823,8 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   advancedItems.push(blockedActions);
 
   const children = [
-    title,
-    safety,
+    workstationData ? renderTradingLabWorkstation(workstationData) : title,
+    ...(workstationData ? [] : [safety]),
     createTradingLabCompactNextAction(data, windowSystemData, orchestrationData)
   ];
   if (advancedItems.length) {
@@ -1712,19 +1838,21 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse] = await Promise.all([
+    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse] = await Promise.all([
       fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
       fetch(paperBotCoreFixturePath, { cache: "no-store" }),
       fetch(tradingLabWindowSystemFixturePath, { cache: "no-store" }),
       fetch(tradingLabPaperRunnerFixturePath, { cache: "no-store" }),
-      fetch(aiosOrchestrationControlRoomFixturePath, { cache: "no-store" })
+      fetch(aiosOrchestrationControlRoomFixturePath, { cache: "no-store" }),
+      fetch(tradingLabWorkstationFixturePath, { cache: "no-store" })
     ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
     const windowSystemData = windowSystemResponse.ok ? await windowSystemResponse.json() : null;
     const paperRunnerData = paperRunnerResponse.ok ? await paperRunnerResponse.json() : null;
     const orchestrationData = orchestrationResponse.ok ? await orchestrationResponse.json() : null;
-    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData);
+    const workstationData = workstationResponse.ok ? await workstationResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",

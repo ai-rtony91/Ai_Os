@@ -1,0 +1,86 @@
+{
+  "schema_version": "0.1-phase-24",
+  "contract_name": "TRADING_LAB_WORKSTATION_CONTRACT",
+  "mode": "paper_only",
+  "required_fixture": "apps/dashboard/mock-data/trading-lab-workstation.example.json",
+  "required_sections": [
+    "top_bar",
+    "left_panel",
+    "center_panel",
+    "right_panel",
+    "bottom_panel",
+    "latency",
+    "safety"
+  ],
+  "required_top_bar_fields": [
+    "selected_pair",
+    "session",
+    "market_state",
+    "latency_status",
+    "risk_status",
+    "validation_state",
+    "paper_mode"
+  ],
+  "required_center_fields": [
+    "current_workflow_step",
+    "primary_next_action",
+    "workflow_rail"
+  ],
+  "required_risk_gate_fields": [
+    "status",
+    "max_risk_per_trade",
+    "block_reason",
+    "paper_only_state"
+  ],
+  "required_latency_fields": [
+    "priority_badge",
+    "signal_source_time",
+    "alert_received_time",
+    "validation_start_time",
+    "validation_end_time",
+    "ai_review_start_time",
+    "ai_review_end_time",
+    "route_preview_time",
+    "paper_execution_time",
+    "total_delay_seconds",
+    "stale_status",
+    "delayed_reason",
+    "user_decision_time_seconds"
+  ],
+  "required_blocked_safety_fields": {
+    "live_trading": "BLOCKED",
+    "broker": "BLOCKED",
+    "oanda": "BLOCKED",
+    "api_keys": "BLOCKED",
+    "real_webhooks": "BLOCKED",
+    "real_orders": "BLOCKED",
+    "ai_assisted_execution": "BLOCKED"
+  },
+  "required_workflow": [
+    "Signal Intake",
+    "Market Context",
+    "Risk Gate",
+    "Paper Result",
+    "Journal",
+    "Replay",
+    "Scorecard"
+  ],
+  "required_workspace_profiles": [
+    "Scalp Mode",
+    "Swing Mode",
+    "Replay Mode",
+    "Review Mode",
+    "Learning Mode",
+    "News Session Mode"
+  ],
+  "prohibited_states": [
+    "live_trading ENABLED",
+    "broker ENABLED",
+    "oanda ENABLED",
+    "api_keys ENABLED",
+    "real_webhooks ENABLED",
+    "real_orders ENABLED",
+    "ai_assisted_execution ENABLED"
+  ],
+  "execution_boundary": "Future live execution must never depend on slow LLM calls."
+}

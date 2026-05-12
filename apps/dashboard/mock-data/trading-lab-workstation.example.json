@@ -1,0 +1,169 @@
+{
+  "schema_version": "0.1-phase-24",
+  "phase": "24",
+  "title": "Trading Lab Workstation",
+  "mode": "paper_only",
+  "workstation_status": "PAPER_WORKSTATION_READY",
+  "selected_profile": "Scalp Mode",
+  "summary": "Professional forex workstation scaffold for paper-only signal review, risk gating, latency awareness, journal, replay, and scorecard loops.",
+  "top_bar": {
+    "selected_pair": "EUR/USD",
+    "session": "New York AM",
+    "market_state": "Trend pullback review",
+    "latency_status": "Pending validation",
+    "risk_status": "Risk gate review",
+    "validation_state": "Pending validation",
+    "paper_mode": "Paper only"
+  },
+  "left_panel": {
+    "active_profile": "Scalp Mode",
+    "watchlist": ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD"],
+    "forex_pairs": [
+      { "pair": "EUR/USD", "bias": "Long review", "spread_status": "Not measured" },
+      { "pair": "GBP/USD", "bias": "Neutral", "spread_status": "Not measured" },
+      { "pair": "USD/JPY", "bias": "News risk", "spread_status": "Not measured" }
+    ],
+    "session_tracker": [
+      { "session": "London", "status": "Closed" },
+      { "session": "New York", "status": "Active paper review" },
+      { "session": "Asia", "status": "Pending" }
+    ],
+    "economic_events": [
+      { "time": "Pending validation", "event": "USD high-impact check", "impact": "Review" },
+      { "time": "Pending validation", "event": "EUR event sweep", "impact": "Not measured" }
+    ],
+    "alerts": [
+      { "label": "EMA/VWAP pullback", "status": "Paper alert only" },
+      { "label": "Clock skew", "status": "Pending validation" }
+    ],
+    "workspace_profiles": ["Scalp Mode", "Swing Mode", "Replay Mode", "Review Mode", "Learning Mode", "News Session Mode"],
+    "profile_summary": "Scalp Mode active; other profiles stay compact."
+  },
+  "center_panel": {
+    "active_workflow": "Signal Intake -> Market Context -> Risk Gate -> Paper Result -> Journal -> Replay -> Scorecard",
+    "current_workflow_step": "Risk Gate",
+    "primary_next_action": "Review the risk gate, then run paper simulation only if validation passes.",
+    "signal_intake": {
+      "signal_id": "PAPER_SIGNAL_PHASE_24_001",
+      "source": "local fixture-only",
+      "direction": "LONG_REVIEW",
+      "confidence": "Not measured",
+      "status": "Pending validation"
+    },
+    "market_context": {
+      "trend": "Pullback review",
+      "regime": "Pending validation",
+      "session_context": "New York AM paper review",
+      "news_context": "Review economic events before simulation"
+    },
+    "workflow_rail": [
+      { "step": "Signal Intake", "status": "Pending validation" },
+      { "step": "Market Context", "status": "Pending validation" },
+      { "step": "Risk Gate", "status": "Review required" },
+      { "step": "Paper Result", "status": "Not executed" },
+      { "step": "Journal", "status": "Pending validation" },
+      { "step": "Replay", "status": "Pending validation" },
+      { "step": "Scorecard", "status": "Pending validation" }
+    ],
+    "paper_execution_flow": [
+      { "step": "Risk Gate", "status": "Review required" },
+      { "step": "Paper Result", "status": "Not executed" },
+      { "step": "Journal", "status": "Pending validation" }
+    ],
+    "ai_guidance_summary": "AI guidance summarizes context only; it must not block paper simulation."
+  },
+  "right_panel": {
+    "risk_gate": {
+      "status": "REVIEW_REQUIRED",
+      "max_risk_per_trade": "0.5% paper model",
+      "daily_loss_limit": "Not measured",
+      "blocking_rule": "Live execution remains blocked",
+      "block_reason": "Paper validation not complete",
+      "paper_only_state": "PAPER_ONLY"
+    },
+    "position_model": {
+      "entry": "Pending validation",
+      "stop": "Pending validation",
+      "target": "Pending validation",
+      "position_size": "Paper model only"
+    },
+    "confluence_score": {
+      "score": "Not measured",
+      "drivers": ["Trend context", "Session context", "Risk gate", "Latency"]
+    },
+    "notes": "Keep setup notes local and paper-only.",
+    "setup_checklist": [
+      "Confirm pair and session",
+      "Review latency status",
+      "Review risk gate",
+      "Record paper journal note",
+      "Replay before scorecard update"
+    ],
+    "blocked_live_execution_state": "BLOCKED"
+  },
+  "bottom_panel": {
+    "journal": {
+      "status": "Pending validation",
+      "latest_note": "No real trade journal entry."
+    },
+    "replay": {
+      "status": "Pending validation",
+      "latest_replay": "Latency replay required."
+    },
+    "scorecard": {
+      "status": "Pending validation",
+      "win_rate": "Not measured",
+      "expectancy_r": "Not measured",
+      "profit_factor": "Not measured"
+    },
+    "paper_metrics": {
+      "paper_trades": 0,
+      "blocked_trades": 0,
+      "average_latency_seconds": "Not measured"
+    },
+    "validation_log": [
+      "Phase 24 fixture pending validator run.",
+      "Safety states must remain BLOCKED."
+    ]
+  },
+  "latency": {
+    "priority_badge": "Latency: Pending validation",
+    "signal_source_time": null,
+    "alert_received_time": null,
+    "validation_start_time": null,
+    "validation_end_time": null,
+    "ai_review_start_time": null,
+    "ai_review_end_time": null,
+    "route_preview_time": null,
+    "paper_execution_time": null,
+    "total_delay_seconds": null,
+    "stale_status": "Pending validation",
+    "delayed_reason": "Not measured",
+    "user_decision_time_seconds": null,
+    "latency_reduction_rules": [
+      "Keep controls close together.",
+      "Do not block paper simulation on AI review.",
+      "Future live execution must never depend on slow LLM calls.",
+      "Show stale or delayed warnings compactly."
+    ]
+  },
+  "safety": {
+    "live_trading": "BLOCKED",
+    "broker": "BLOCKED",
+    "oanda": "BLOCKED",
+    "api_keys": "BLOCKED",
+    "real_webhooks": "BLOCKED",
+    "real_orders": "BLOCKED",
+    "ai_assisted_execution": "BLOCKED"
+  },
+  "hidden_by_default": [
+    "broker setup",
+    "OANDA setup",
+    "API keys",
+    "real webhooks",
+    "real orders",
+    "external platform login",
+    "raw diagnostics"
+  ],
+  "next_safe_action": "Run the Phase 24 workstation validator and keep the workflow paper-only."
+}
