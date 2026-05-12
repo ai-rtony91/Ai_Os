@@ -1068,7 +1068,7 @@ body.welcome-start-active .top-rail-controls {
 
 .welcome-actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: stretch;
   gap: 8px;
   margin-top: 0;
@@ -1084,7 +1084,8 @@ body.welcome-start-active .top-rail-controls {
 }
 
 .welcome-actions button,
-.welcome-advanced summary {
+.welcome-advanced summary,
+.welcome-apps-hub summary {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
@@ -1118,12 +1119,14 @@ body.welcome-start-active .top-rail-controls {
   text-transform: uppercase;
 }
 
-.welcome-advanced summary::-webkit-details-marker {
+.welcome-advanced summary::-webkit-details-marker,
+.welcome-apps-hub summary::-webkit-details-marker {
   display: none;
 }
 
 .welcome-actions button::after,
-.welcome-advanced summary::after {
+.welcome-advanced summary::after,
+.welcome-apps-hub summary::after {
   content: "";
   position: absolute;
   left: 16px;
@@ -1143,7 +1146,9 @@ body.welcome-start-active .top-rail-controls {
 .welcome-actions button:hover,
 .welcome-actions button:focus,
 .welcome-advanced summary:hover,
-.welcome-advanced summary:focus {
+.welcome-advanced summary:focus,
+.welcome-apps-hub summary:hover,
+.welcome-apps-hub summary:focus {
   color: var(--accent-action);
   border-color: var(--line-hot);
   outline: none;
@@ -1155,23 +1160,85 @@ body.welcome-start-active .top-rail-controls {
 .welcome-actions button:active::after,
 .welcome-advanced summary:hover::after,
 .welcome-advanced summary:focus-visible::after,
-.welcome-advanced summary:active::after {
+.welcome-advanced summary:active::after,
+.welcome-apps-hub summary:hover::after,
+.welcome-apps-hub summary:focus-visible::after,
+.welcome-apps-hub summary:active::after {
   opacity: 1;
   transform: scaleX(1);
 }
 
-.welcome-advanced {
+.welcome-advanced,
+.welcome-apps-hub {
   display: grid;
   gap: 8px;
   min-width: 0;
 }
 
-.welcome-advanced div {
+.welcome-advanced div,
+.welcome-apps-drawer {
   display: grid;
   gap: 8px;
   padding: 8px;
   border: 1px solid var(--line-subtle);
   background: rgba(5, 7, 11, 0.5);
+}
+
+.welcome-apps-drawer {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(520px, calc(100vw - 48px));
+  transform: translateX(calc(-75% - 12px));
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(47, 140, 255, 0.08), rgba(139, 92, 246, 0.055)),
+    rgba(4, 8, 22, 0.86);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.34),
+    0 0 20px rgba(47, 140, 255, 0.1),
+    0 0 26px rgba(139, 92, 246, 0.08);
+}
+
+.welcome-apps-drawer p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: rgba(229, 246, 255, 0.74);
+  font-size: 11px;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.welcome-apps-drawer section {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.welcome-apps-drawer strong {
+  color: rgba(248, 251, 255, 0.9);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.welcome-apps-drawer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 8px;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 999px;
+  color: rgba(229, 246, 255, 0.86);
+  background: rgba(5, 12, 32, 0.52);
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.welcome-apps-drawer a:hover,
+.welcome-apps-drawer a:focus {
+  color: #ffffff;
+  border-color: rgba(125, 211, 252, 0.64);
+  outline: none;
+  box-shadow: 0 0 16px rgba(125, 211, 252, 0.22);
 }
 
 body.focused-start-view-active .command-guide-strip,
@@ -4824,6 +4891,7 @@ body {
 .message-row button,
 .welcome-actions button,
 .welcome-advanced summary,
+.welcome-apps-hub summary,
 .trading-lab-entry-button,
 .status-chip,
 .registry-chip,
@@ -6012,7 +6080,8 @@ body:not(.welcome-start-active) .youtube-radio-dock {
     width: min(100%, 260px);
   }
 
-  .welcome-advanced {
+  .welcome-advanced,
+  .welcome-apps-hub {
     width: min(100%, 260px);
     justify-self: center;
   }
@@ -6298,6 +6367,7 @@ body {
 .message-row button,
 .welcome-actions button,
 .welcome-advanced summary,
+.welcome-apps-hub summary,
 .trading-lab-entry-button,
 .status-chip,
 .registry-chip,
@@ -6535,12 +6605,13 @@ body {
 
 /* Start Here hero layout fix: artwork becomes the panel identity surface. */
 body.welcome-start-active .welcome-start-screen {
-  width: 100%;
+  width: calc(100% + clamp(12px, 1.6vw, 28px));
   min-height: calc(100dvh - 96px - env(safe-area-inset-bottom));
+  margin-left: calc(clamp(12px, 1.6vw, 28px) * -1);
   padding: 0 0 16px;
   background-image:
     radial-gradient(ellipse at 44% 46%, rgba(47, 140, 255, 0.03) 0%, transparent 48%),
-    linear-gradient(90deg, rgba(3, 7, 18, 0.62) 0%, rgba(3, 7, 18, 0.1) 14%, rgba(3, 7, 18, 0.12) 80%, rgba(3, 7, 18, 0.78) 100%),
+    linear-gradient(90deg, rgba(3, 7, 18, 0.28) 0%, rgba(3, 7, 18, 0.08) 22%, rgba(3, 7, 18, 0.1) 78%, rgba(3, 7, 18, 0.34) 100%),
     linear-gradient(180deg, rgba(3, 7, 18, 0.08) 0%, rgba(3, 7, 18, 0.08) 54%, rgba(3, 7, 18, 0.34) 82%, rgba(3, 7, 18, 0.52) 100%),
     url("../assets/ai_osgalaxy.theme.jpg");
   background-size: cover, cover, cover, auto 106%;
@@ -6574,10 +6645,10 @@ body.welcome-start-active .welcome-ghost-logo {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 44% 46%, transparent 0%, transparent 58%, rgba(5, 8, 20, 0.1) 80%, rgba(5, 8, 20, 0.26) 100%),
-    linear-gradient(90deg, rgba(5, 8, 20, 0.18) 0%, transparent 12%, transparent 82%, rgba(5, 8, 20, 0.32) 100%),
+    radial-gradient(ellipse at 44% 46%, transparent 0%, transparent 64%, rgba(5, 8, 20, 0.14) 100%),
+    linear-gradient(90deg, rgba(5, 8, 20, 0.08) 0%, transparent 20%, transparent 80%, rgba(5, 8, 20, 0.12) 100%),
     linear-gradient(to bottom, transparent 0%, transparent 58%, rgba(5, 8, 20, 0.16) 74%, rgba(5, 8, 20, 0.38) 100%);
-  opacity: 0.72;
+  opacity: 0.46;
 }
 
 .welcome-command-head {
@@ -6629,7 +6700,8 @@ body.welcome-start-active .welcome-ghost-logo {
 }
 
 .welcome-actions button,
-.welcome-advanced summary {
+.welcome-advanced summary,
+.welcome-apps-hub summary {
   min-height: 46px;
   padding: 8px 12px;
   gap: 8px;
@@ -6661,7 +6733,9 @@ body.welcome-start-active .welcome-ghost-logo {
 .welcome-actions button:hover,
 .welcome-actions button:focus,
 .welcome-advanced summary:hover,
-.welcome-advanced summary:focus {
+.welcome-advanced summary:focus,
+.welcome-apps-hub summary:hover,
+.welcome-apps-hub summary:focus {
   color: #ffffff;
   border-color: rgba(125, 211, 252, 0.96);
   background:
@@ -6679,7 +6753,9 @@ body.welcome-start-active .welcome-ghost-logo {
 .welcome-actions button:hover .welcome-action-icon,
 .welcome-actions button:focus .welcome-action-icon,
 .welcome-advanced summary:hover .welcome-action-icon,
-.welcome-advanced summary:focus .welcome-action-icon {
+.welcome-advanced summary:focus .welcome-action-icon,
+.welcome-apps-hub summary:hover .welcome-action-icon,
+.welcome-apps-hub summary:focus .welcome-action-icon {
   border-color: rgba(125, 211, 252, 0.98);
   color: #ffffff;
   background: rgba(47, 140, 255, 0.18);
@@ -6718,28 +6794,52 @@ body.welcome-start-active .welcome-ghost-logo {
   }
 }
 
-@media (max-width: 720px) {
+@media (min-width: 721px) {
+  body.welcome-start-active .command-main {
+    width: min(100%, 1280px);
+    margin-inline: auto;
+  }
+
   body.welcome-start-active .welcome-start-screen {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  body.welcome-start-active .command-main {
+    max-width: 100vw;
+    overflow-x: hidden;
+    background-size: cover, min(92vw, 560px) auto;
+    background-position: center, center top 62px;
+  }
+
+  body.welcome-start-active .welcome-start-screen {
+    width: 100%;
+    max-width: 100vw;
     min-height: calc(100dvh - 112px - env(safe-area-inset-bottom));
-    padding: 8px 0 14px;
-    background-size: cover, cover, cover, auto 108%;
-    background-position: 46% center, center, center, 46% 42%;
+    margin-left: 0;
+    padding: 8px 8px 14px;
+    overflow-x: hidden;
+    background-size: cover, min(92vw, 560px) auto;
+    background-position: center, center top 62px;
   }
 
   .welcome-command-workspace {
     width: 100%;
-    min-height: 72vh;
-    grid-template-rows: auto minmax(340px, 1fr) auto auto;
-    padding: 14px 10px 22px;
+    max-width: 100%;
+    min-height: min(78vh, 680px);
+    grid-template-rows: auto minmax(clamp(300px, 52vh, 440px), 1fr) auto auto;
+    padding: 12px 8px 20px;
+    border: none;
     border-radius: 0;
     background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
   }
 
   .welcome-command-workspace::before {
-    background:
-      radial-gradient(ellipse at 46% 38%, transparent 0%, transparent 62%, rgba(5, 8, 20, 0.18) 100%),
-      linear-gradient(90deg, rgba(5, 8, 20, 0.16) 0%, transparent 14%, transparent 82%, rgba(5, 8, 20, 0.28) 100%),
-      linear-gradient(to bottom, transparent 0%, transparent 56%, rgba(5, 8, 20, 0.42) 100%);
+    display: none;
   }
 
   .welcome-command-head {
@@ -6751,14 +6851,23 @@ body.welcome-start-active .welcome-ghost-logo {
   }
 
   .welcome-actions {
-    width: min(100%, 260px);
+    width: min(100%, 320px);
     grid-template-columns: 1fr;
     border-radius: 22px;
+    justify-self: center;
+    align-self: end;
+  }
+
+  .welcome-apps-drawer {
+    grid-template-columns: 1fr;
+    width: min(100%, 300px);
+    transform: none;
   }
 
   .welcome-command-status {
-    width: min(100%, 260px);
+    width: min(100%, 320px);
     border-radius: 20px;
+    justify-self: center;
   }
 }
 
