@@ -1880,17 +1880,45 @@ function createTradingLabCompactNextAction(data = {}, windowSystemData = null, o
   return action;
 }
 
+function createTradingLabEntryButton(data = {}, windowSystemData = null, orchestrationData = null) {
+  const button = document.createElement("button");
+  button.className = "trading-lab-entry-button";
+  button.type = "button";
+  button.textContent = "Continue Paper Route";
+  button.addEventListener("click", () => {
+    const details = tradingLabNextActionCard?.querySelector(".trading-lab-advanced-diagnostics");
+    if (details) {
+      details.open = true;
+      details.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  });
+  return button;
+}
+
+function createTradingLabCompactStatusRow(data = {}, workstationData = null, paperRunnerData = null) {
+  const row = document.createElement("div");
+  row.className = "trading-lab-compact-status-row";
+  const topBar = workstationData?.top_bar || {};
+  [
+    ["Signal", topBar.validation_state || data.validation_state || "pending"],
+    ["Latency", topBar.latency_status || paperRunnerData?.latency_status || "pending"],
+    ["Risk", topBar.risk_status || "review required"],
+    ["Scorecard", paperRunnerData?.scorecard_status || "not ready"]
+  ].forEach(([label, value]) => row.append(createWorkstationChip(label, value, value)));
+  return row;
+}
+
 function createTradingLabAdvancedDiagnostics(items = []) {
   const details = document.createElement("details");
   details.className = "trading-lab-advanced-diagnostics";
 
   const summary = document.createElement("summary");
   const title = document.createElement("strong");
-  title.textContent = "Advanced Diagnostics";
+  title.textContent = "Trading Lab Details";
   const badge = document.createElement("span");
   badge.textContent = "collapsed";
   const note = document.createElement("p");
-  note.textContent = "Paper runner, orchestration, queues, validators, replay, ranking, readiness, and repeated safety details stay here until opened.";
+  note.textContent = "Latency, safety locks, risk gate, diagnostics, replay, checklist, and paper-only validation details stay here until opened.";
   summary.append(title, badge, note);
 
   const body = document.createElement("div");
@@ -1907,22 +1935,16 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   const title = document.createElement("section");
   title.className = "trading-lab-workspace-head";
   const heading = document.createElement("strong");
-  heading.textContent = data.title || "Trading Lab Workspace";
-  const badge = document.createElement("span");
-  badge.textContent = data.badge || "MOCK ONLY";
-  const progress = createProgressBadge("Trading Lab readiness", data, "Pending validation");
-
-  const summary = document.createElement("p");
-  summary.textContent = data.summary || "Paper-only trading workflow using mock data. No orders can be placed.";
-  title.append(heading, badge, progress, summary);
+  heading.textContent = "Trading Lab / Bot Builder";
+  title.append(heading);
 
   const safety = document.createElement("div");
   safety.className = "trading-lab-safety-row";
   safety.append(
-    createTradingLabSafetyChip("MOCK ONLY", data.mode || "ACTIVE"),
-    createTradingLabSafetyChip("PAPER ONLY", data.paper_mode || "ACTIVE"),
-    createTradingLabSafetyChip("Live Execution", data.live_execution_status || "BLOCKED"),
-    createTradingLabSafetyChip("Broker", data.broker_status || "BLOCKED")
+    createTradingLabSafetyChip("Paper only", data.paper_mode || "ACTIVE"),
+    createTradingLabSafetyChip("Live blocked", data.live_execution_status || "BLOCKED"),
+    createTradingLabSafetyChip("Broker blocked", data.broker_status || "BLOCKED"),
+    createTradingLabSafetyChip("Real orders blocked", "BLOCKED")
   );
 
   const cards = Array.isArray(data.cards) && data.cards.length ? data.cards : [];
@@ -1984,10 +2006,15 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   advancedItems.push(blockedActions);
 
   const children = [
-    workstationData ? renderTradingLabWorkstation(workstationData) : title,
-    ...(workstationData ? [] : [safety]),
-    createTradingLabCompactNextAction(data, windowSystemData, orchestrationData)
+    title,
+    safety,
+    createTradingLabCompactNextAction(data, windowSystemData, orchestrationData),
+    createTradingLabEntryButton(data, windowSystemData, orchestrationData),
+    createTradingLabCompactStatusRow(data, workstationData, paperRunnerData)
   ];
+  if (workstationData) {
+    advancedItems.unshift(renderTradingLabWorkstation(workstationData));
+  }
   if (advancedItems.length) {
     children.push(createTradingLabAdvancedDiagnostics(advancedItems));
   }
