@@ -17,16 +17,9 @@ New-Item -ItemType Directory -Force -Path (Split-Path -Parent $summaryPath) | Ou
 Set-Location $repoRoot
 $env:PYTHONPATH = Join-Path $repoRoot "apps\trading_lab"
 
-Write-Host "AI_OS Trading Lab Paper Runtime Status"
-Write-Host "Paper Only: YES"
-Write-Host "Local Only: YES"
-Write-Host "Live Trading: BLOCKED"
-Write-Host ""
-
 python $summaryScript --output $summaryPath
 if ($LASTEXITCODE -ne 0) {
     throw "AI_OS paper runtime status summary failed."
 }
 
-Write-Host ""
-Write-Host "Summary file: Reports\trading_lab\PAPER_RUNTIME_OPERATOR_SUMMARY.md"
+Write-Host "Saved: Reports\trading_lab\PAPER_RUNTIME_OPERATOR_SUMMARY.md"

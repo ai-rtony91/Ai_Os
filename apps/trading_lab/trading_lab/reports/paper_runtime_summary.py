@@ -82,26 +82,15 @@ def build_summary() -> str:
     generated_at = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return "\n".join(
         [
-            "# AI_OS Paper Runtime Operator Summary",
+            "# Paper Runtime Status",
             "",
             f"Generated at: {generated_at}",
-            "",
-            "Local paper runtime visibility:",
-            f"- Latest paper decision: {paper_decision}",
-            f"- Live trading status: {live_status}",
-            f"- Latest symbol: {symbol}",
-            f"- Latency seconds: {latency_seconds}",
-            f"- Stale status: {stale_status}",
-            f"- Clock skew status: {clock_skew_status}",
-            f"- Ledger path: {ledger_display}",
-            "",
-            "Local evidence files:",
-            f"- Status JSON: {STATUS_PATH.relative_to(REPO_ROOT).as_posix()} ({status_load})",
-            f"- Ledger JSON: {ledger_display} ({ledger_load})",
-            "",
+            f"Decision: {paper_decision} | Symbol: {symbol} | Live: {live_status}",
+            f"Latency: {latency_seconds}s | Stale: {stale_status} | Clock skew: {clock_skew_status}",
+            f"Ledger: {ledger_display}",
+            f"Evidence: status {status_load}, ledger {ledger_load}",
             f"Safety: {safety_note}",
-            "",
-            "Next safe action: Review this summary and keep all runtime work paper-only and local-only.",
+            "Next: Review paper output; keep runtime paper-only and local-only.",
             "",
         ]
     )
