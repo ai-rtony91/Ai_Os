@@ -1,0 +1,17 @@
+{
+  "regime_result_id": "PAPER_REGIME_RESULT_001",
+  "mode": "paper_only",
+  "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "expected_regime": "TREND_UP",
+  "observed_regime": "TREND_UP",
+  "trend_alignment": "aligned",
+  "regime_check_status": "PASS",
+  "blocked_reason": "",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

@@ -1,0 +1,15 @@
+{
+  "evidence_fixture_id": "PAPER_EVIDENCE_FIXTURE_001",
+  "mode": "paper_only",
+  "source": "local_fixture",
+  "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "evidence_score": 82,
+  "evidence_items": [
+    "local signal fixture present",
+    "local candle fixture present",
+    "paper regime fixture present"
+  ],
+  "missing_evidence": [],
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED"
+}

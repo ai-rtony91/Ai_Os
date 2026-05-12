@@ -1,0 +1,11 @@
+{
+  "regime_fixture_id": "PAPER_REGIME_FIXTURE_001",
+  "mode": "paper_only",
+  "source": "local_fixture",
+  "symbol": "EUR_USD_PAPER",
+  "regime_status": "TREND_UP",
+  "volatility_status": "NORMAL",
+  "session_status": "REVIEWABLE",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED"
+}

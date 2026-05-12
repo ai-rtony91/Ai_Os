@@ -1,0 +1,29 @@
+{
+  "validation_report_id": "PAPER_VALIDATION_REPORT_001",
+  "phase": "15.4",
+  "mode": "paper_only",
+  "result": "PASS",
+  "paper_decision": "PAPER_SIMULATED",
+  "required_flow": [
+    "signal fixture",
+    "candle fixture",
+    "latency stamp",
+    "stale signal check",
+    "regime check",
+    "risk gate",
+    "paper decision",
+    "paper result",
+    "scorecard",
+    "validator report",
+    "next action"
+  ],
+  "blocked_reason": "",
+  "validated_at": "2026-05-12T03:39:41Z",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

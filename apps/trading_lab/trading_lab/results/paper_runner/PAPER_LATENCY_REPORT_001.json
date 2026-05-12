@@ -1,0 +1,23 @@
+{
+  "latency_report_id": "PAPER_LATENCY_REPORT_001",
+  "mode": "paper_only",
+  "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "candle_fixture_id": "PAPER_CANDLE_FIXTURE_001",
+  "validation_started_at": "2026-05-12T03:39:41Z",
+  "validation_completed_at": "2026-05-12T03:39:41Z",
+  "stale_signal_check": {
+    "generated_at": "2026-05-12T12:00:00Z",
+    "validated_at": "2026-05-12T03:39:41Z",
+    "age_seconds": -30019,
+    "max_age_seconds": 31536000,
+    "stale_signal_status": "PASS",
+    "blocked_reason": ""
+  },
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

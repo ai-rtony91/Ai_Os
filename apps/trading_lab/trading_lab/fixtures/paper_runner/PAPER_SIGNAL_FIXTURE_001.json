@@ -1,0 +1,15 @@
+{
+  "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "mode": "paper_only",
+  "source": "local_fixture",
+  "strategy_id": "paper_ema_vwap_pullback_001",
+  "symbol": "EUR_USD_PAPER",
+  "side": "long",
+  "quantity": 1,
+  "generated_at": "2026-05-12T12:00:00Z",
+  "max_age_seconds": 31536000,
+  "expected_regime": "TREND_UP",
+  "confidence_score": 82,
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED"
+}

@@ -1,0 +1,21 @@
+{
+  "risk_gate_result_id": "PAPER_RISK_GATE_RESULT_001",
+  "mode": "paper_only",
+  "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "risk_gate_status": "PASS",
+  "risk_gate_source": "trading_lab.execution.risk_gate.check_paper_risk",
+  "approved_for": "paper_simulation_only",
+  "blocked_reason": "",
+  "risk_gate_detail": {
+    "approved": true,
+    "status": "paper_approved",
+    "reason": "Paper risk gate passed."
+  },
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

@@ -1,0 +1,23 @@
+{
+  "fixture_name": "trading-lab-paper-runner.example.json",
+  "phase": "15.4",
+  "mode": "paper_only",
+  "runner_status": "PASS",
+  "paper_decision": "PAPER_SIMULATED",
+  "blocked_reason": "",
+  "latest_signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "result_paths": {
+    "ledger": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_RESULT_LEDGER_001.json",
+    "scorecard": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_SCORECARD_001.json",
+    "validation": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_VALIDATION_REPORT_001.json",
+    "next_action": "apps/trading_lab/trading_lab/results/paper_runner/PAPER_NEXT_ACTION.md"
+  },
+  "next_safe_action": "Review paper runner outputs before adding more fixture cases.",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

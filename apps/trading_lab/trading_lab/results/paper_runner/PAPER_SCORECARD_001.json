@@ -1,0 +1,21 @@
+{
+  "scorecard_id": "PAPER_SCORECARD_001",
+  "mode": "paper_only",
+  "signal_id": "PAPER_SIGNAL_FIXTURE_001",
+  "paper_decision": "PAPER_SIMULATED",
+  "trade_count": 1,
+  "simulated_count": 1,
+  "blocked_count": 0,
+  "evidence_score": 82,
+  "risk_gate_status": "PASS",
+  "review_status": "READY_FOR_REVIEW",
+  "blocked_reason": "",
+  "next_safe_action": "Review the paper result ledger; keep all execution paper-only.",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED"
+}

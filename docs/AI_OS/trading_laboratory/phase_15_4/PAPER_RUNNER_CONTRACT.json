@@ -1,0 +1,42 @@
+{
+  "contract_id": "PAPER_RUNNER_CONTRACT",
+  "phase": "15.4",
+  "mode": "paper_only",
+  "runner_path": "apps/trading_lab/trading_lab/runner/paper_bot_runner.py",
+  "fixture_root": "apps/trading_lab/trading_lab/fixtures/paper_runner/",
+  "result_root": "apps/trading_lab/trading_lab/results/paper_runner/",
+  "required_flow": [
+    "signal_fixture",
+    "candle_fixture",
+    "latency_stamp",
+    "stale_signal_check",
+    "regime_check",
+    "risk_gate",
+    "paper_decision",
+    "paper_result",
+    "scorecard",
+    "validator_report",
+    "next_action"
+  ],
+  "valid_paper_decisions": [
+    "BLOCKED",
+    "PAPER_SIMULATED"
+  ],
+  "blocked_actions": [
+    "broker_execution",
+    "external_account_connection",
+    "API_keys",
+    "secrets",
+    "real_webhooks",
+    "real_orders",
+    "live_market_data",
+    "package_install"
+  ],
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "next_safe_action": "Run the Phase 15.4 paper runner validator."
+}
