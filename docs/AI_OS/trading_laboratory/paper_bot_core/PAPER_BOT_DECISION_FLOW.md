@@ -1,23 +1,22 @@
 # Paper Bot Decision Flow
 
-1. Signal Intake
-   - Read a mock signal only.
-2. Latency Check
-   - Record mock timing and mark unknown timing clearly.
-3. Regime Tag
+1. Paper Trade Signal
+   - Read a Paper Trade Signal from local paper-trade sample data only.
+2. Paper Simulation Timing
+   - Record Paper Simulation timing and mark unknown timing clearly.
+3. Paper Regime Review
    - Add a simple market condition label such as trend, range, volatile, or unknown.
-4. Risk Gate
-   - Block by default unless mock conditions pass.
+4. Paper Risk Gate
+   - Block by default unless paper trade review conditions pass.
 5. Paper Decision
    - Create a paper-only decision with no real order route.
 6. Paper Trade Result
    - Record a simulated result only.
-7. Scorecard
-   - Update review metrics and confidence.
+7. Paper Scorecard
+   - Update paper review metrics and confidence.
 8. Next Safe Action
    - Tell the user what to review next.
 
 ## Default Rule
 
-If any required mock field is missing or unsafe, the result is BLOCKED.
-
+If any required paper trade review field is missing or unsafe, the result is BLOCKED.

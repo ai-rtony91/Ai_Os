@@ -1,0 +1,17 @@
+{
+  "runtime_id": "paper_runtime_001",
+  "mode": "paper_only",
+  "signal_id": "mock_signal_001",
+  "signal_source": "mock",
+  "symbol": "EUR_USD_MOCK",
+  "timeframe": "M15",
+  "direction": "buy",
+  "confidence_score": 42,
+  "latency_ms": 1250,
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "credential_status": "BLOCKED"
+}
+

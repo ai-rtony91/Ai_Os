@@ -89,8 +89,9 @@ try {
   }
 
   Write-Output "AI_OS Paper Bot Core Readiness: PASS"
-  Write-Output "JSON parse: PASS"
-  Write-Output "Safety boundary: PASS"
+  Write-Output "Paper Trade JSON parse: PASS"
+  Write-Output "Paper Trade safety boundary: PASS"
+  Write-Output "Paper Trade sample data: PASS"
   Write-Output "Dashboard JS syntax: PASS"
   Write-Output "Git status:"
   $gitStatus | ForEach-Object { Write-Output $_ }

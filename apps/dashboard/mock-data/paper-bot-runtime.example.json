@@ -1,0 +1,50 @@
+{
+  "schema_version": "0.1-phase-18",
+  "title": "Paper Bot Runtime Simulation",
+  "summary": "Paper Trade Signal -> Paper Regime Review -> Paper Risk Gate -> Paper Decision -> Paper Trade Result -> Paper Scorecard -> Paper Runtime Review -> Next Safe Action.",
+  "mode": "paper_only",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "credential_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "steps": [
+    { "id": "mock_signal", "title": "Paper Trade Signal", "status": "PAPER READY", "detail": "Signal source is local paper-trade sample data only." },
+    { "id": "regime_tag", "title": "Paper Regime Review", "status": "REVIEW", "detail": "Regime is trend_review and requires paper review." },
+    { "id": "risk_gate", "title": "Paper Risk Gate", "status": "BLOCKED", "detail": "Confidence and sample size block the Paper Runtime." },
+    { "id": "paper_decision", "title": "Paper Decision", "status": "BLOCKED", "detail": "Paper Decision is do_not_simulate_trade." },
+    { "id": "paper_trade", "title": "Paper Trade Result", "status": "NOT EXECUTED", "detail": "No simulated paper fill occurs while risk is blocked." },
+    { "id": "scorecard", "title": "Paper Scorecard", "status": "BLOCKED", "detail": "Paper Scorecard remains neutral with blocked reason." },
+    { "id": "review_report", "title": "Paper Runtime Review", "status": "READY", "detail": "Paper Review Report explains blocked runtime result." }
+  ],
+  "scorecard": {
+    "trade_count": 0,
+    "win_rate": 0,
+    "average_win": 0,
+    "average_loss": 0,
+    "expectancy": 0,
+    "profit_factor": 0,
+    "max_drawdown": 0,
+    "confidence_score": 0,
+    "blocked_reason": "No Paper Trade Result was allowed.",
+    "review_status": "BLOCKED"
+  },
+  "blocked_actions": [
+    "No live trading",
+    "No broker",
+    "No OANDA",
+    "No MT5 login",
+    "No TradingView login",
+    "No TradersPost login",
+    "No API keys",
+    "No credentials",
+    "No real webhooks",
+    "No real orders",
+    "No installs",
+    "No background automation",
+    "No root/admin access"
+  ],
+  "next_safe_action": "Review blocked Paper Risk Gate result and rerun the DRY_RUN validator."
+}

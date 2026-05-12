@@ -1,0 +1,9 @@
+{
+  "runtime_id": "paper_runtime_001",
+  "mode": "paper_only",
+  "regime_result_id": "paper_runtime_regime_001",
+  "regime_tag": "trend_review",
+  "regime_status": "review",
+  "reason": "Paper Regime Review trend condition is not enough for approval.",
+  "live_execution_status": "BLOCKED"
+}

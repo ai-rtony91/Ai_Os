@@ -1,0 +1,10 @@
+{
+  "runtime_id": "paper_runtime_001",
+  "mode": "paper_only",
+  "decision_result_id": "paper_runtime_decision_001",
+  "risk_gate_status": "BLOCKED",
+  "paper_decision": "do_not_simulate_trade",
+  "decision_reason": "Paper Risk Gate blocks the sequence before Paper Trade Result recording.",
+  "blocked_reason": "Paper Risk Gate status is BLOCKED.",
+  "next_safe_action": "Review Paper Risk Gate inputs and keep live execution blocked."
+}

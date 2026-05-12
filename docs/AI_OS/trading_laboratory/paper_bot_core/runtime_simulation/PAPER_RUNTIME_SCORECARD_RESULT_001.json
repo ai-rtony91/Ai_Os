@@ -1,0 +1,15 @@
+{
+  "runtime_id": "paper_runtime_001",
+  "mode": "paper_only",
+  "scorecard_result_id": "paper_runtime_scorecard_001",
+  "trade_count": 0,
+  "win_rate": 0,
+  "average_win": 0,
+  "average_loss": 0,
+  "expectancy": 0,
+  "profit_factor": 0,
+  "max_drawdown": 0,
+  "confidence_score": 0,
+  "blocked_reason": "No Paper Trade Result was allowed.",
+  "review_status": "BLOCKED"
+}

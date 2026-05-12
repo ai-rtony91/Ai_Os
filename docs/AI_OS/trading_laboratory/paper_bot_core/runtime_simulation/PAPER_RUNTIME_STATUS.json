@@ -1,0 +1,15 @@
+{
+  "phase": "18",
+  "stage": "paper_runtime_simulation",
+  "mode": "paper_only",
+  "runtime_status": "created",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "credential_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "background_automation_status": "BLOCKED",
+  "next_action": "Run the Paper Runtime Simulation DRY_RUN validator."
+}

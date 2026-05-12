@@ -1,10 +1,9 @@
 # Paper Bot Next Action
 
-Review `MOCK_SIGNAL_001.json`, then compare it against `MOCK_RISK_GATE_001.json`.
+Review the Paper Trade Signal in `MOCK_SIGNAL_001.json`, then compare it against the Paper Risk Gate in `MOCK_RISK_GATE_001.json`.
 
-If the risk gate is blocked, do not create a paper decision.
+If the Paper Risk Gate is blocked, do not create a Paper Decision.
 
-If the risk gate passes in a future mock example, create a paper-only decision and update the scorecard.
+If the Paper Risk Gate passes in a future paper trade example, create a Paper Decision and update the Paper Scorecard.
 
-Current safe action: keep Live Execution BLOCKED and review the paper-only flow.
-
+Current safe action: keep Live Execution BLOCKED and review the Paper Trade workflow.

@@ -1,7 +1,7 @@
 {
   "schema_version": "0.1-phase-17",
   "title": "Paper Bot Core",
-  "summary": "Paper-only Trading Bot foundation. It reviews a mock signal, checks risk, creates a blocked paper decision, and points to the next safe action.",
+  "summary": "Paper trading foundation. It reviews a Paper Trade Signal, checks the Paper Risk Gate, creates a Paper Decision, records Paper Trade Results, and points to the Next Safe Action.",
   "mode": "paper_only",
   "badge": "PAPER ONLY",
   "live_execution_status": "BLOCKED",
@@ -14,44 +14,44 @@
   "steps": [
     {
       "id": "signal",
-      "title": "Signal",
-      "status": "MOCK READY",
-      "summary": "A sample signal exists for paper review only.",
-      "detail": "MOCK_SIGNAL_001.json uses mock symbol EUR_USD_MOCK and cannot route orders."
+      "title": "Paper Trade Signal",
+      "status": "PAPER READY",
+      "summary": "A Paper Trade Signal exists for paper review only.",
+      "detail": "MOCK_SIGNAL_001.json uses paper test symbol EUR_USD_MOCK and cannot route orders."
     },
     {
       "id": "decision",
-      "title": "Decision",
+      "title": "Paper Decision",
       "status": "BLOCKED",
-      "summary": "The paper decision is blocked until mock conditions pass.",
+      "summary": "The Paper Decision is blocked until paper trade review conditions pass.",
       "detail": "MOCK_DECISION_001.json blocks because confidence and sample size are not strong enough."
     },
     {
       "id": "risk_gate",
-      "title": "Risk Gate",
+      "title": "Paper Risk Gate",
       "status": "BLOCKED",
-      "summary": "Risk gate blocks by default.",
+      "summary": "The Paper Risk Gate blocks by default.",
       "detail": "Latency, regime, confidence, and sample size must pass before paper simulation."
     },
     {
       "id": "paper_trade",
       "title": "Paper Trade",
       "status": "NOT EXECUTED",
-      "summary": "No paper trade simulation runs while risk is blocked.",
+      "summary": "No Paper Trade Result is recorded while risk is blocked.",
       "detail": "MOCK_PAPER_TRADE_001.json records blocked_before_simulation."
     },
     {
       "id": "scorecard",
-      "title": "Scorecard",
+      "title": "Paper Scorecard",
       "status": "BLOCKED",
-      "summary": "No score can be trusted before enough paper samples exist.",
+      "summary": "No score can be trusted before enough paper trade samples exist.",
       "detail": "Scorecard fields include trade count, win rate, expectancy, profit factor, max drawdown, and confidence."
     },
     {
       "id": "next_action",
-      "title": "Next Action",
+      "title": "Next Safe Action",
       "status": "START HERE",
-      "summary": "Review the mock signal and risk gate before any paper simulation.",
+      "summary": "Review the Paper Trade Signal and Paper Risk Gate before any paper simulation.",
       "detail": "Keep Live Execution: BLOCKED and Broker/OANDA: BLOCKED."
     }
   ],

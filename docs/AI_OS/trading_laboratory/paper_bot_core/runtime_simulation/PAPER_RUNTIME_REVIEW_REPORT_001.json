@@ -1,0 +1,23 @@
+{
+  "runtime_id": "paper_runtime_001",
+  "mode": "paper_only",
+  "review_report_id": "paper_runtime_review_001",
+  "summary": "Paper Runtime Simulation stayed blocked before Paper Trade Result recording.",
+  "sequence": [
+    "Paper Trade Signal",
+    "Paper Regime Review",
+    "Paper Risk Gate",
+    "Paper Decision",
+    "Paper Trade Result",
+    "Paper Scorecard",
+    "Paper Runtime Review"
+  ],
+  "result": "BLOCKED",
+  "blocked_reason": "Paper Risk Gate status is BLOCKED.",
+  "next_safe_action": "Improve paper trade sample evidence and rerun DRY_RUN validation.",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "credential_status": "BLOCKED"
+}

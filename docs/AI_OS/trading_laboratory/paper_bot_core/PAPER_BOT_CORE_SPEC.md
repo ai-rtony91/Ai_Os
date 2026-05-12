@@ -2,28 +2,27 @@
 
 ## Purpose
 
-Paper Bot Core gives AI_OS a safe Trading Lab foundation for paper-only trading review.
+Paper Bot Core gives AI_OS a safe Trading Lab foundation for paper trading review. It uses local paper-trade sample data and never places real trades.
 
 ## Inputs
 
-- mock signal
-- latency note
-- regime tag
-- risk gate result
-- paper decision
-- paper trade result
-- scorecard values
+- Paper Trade Signal
+- Paper Simulation timing note
+- Paper Regime Review
+- Paper Risk Gate result
+- Paper Decision
+- Paper Trade Result
+- Paper Scorecard values
 
 ## Outputs
 
-- paper-only decision
-- blocked or allowed paper simulation state
-- scorecard summary
-- next safe action
+- Paper Decision only
+- blocked or allowed Paper Simulation state
+- Paper Scorecard summary
+- Next Safe Action
 
 ## Safety
 
-The default state is blocked. A paper decision can move forward only when mock conditions pass the risk gate.
+The Paper Risk Gate blocks by default. A Paper Decision can move forward only when paper trade review conditions pass.
 
-No real execution path exists in this folder.
-
+No real execution path exists in this folder. Broker, OANDA, MT5, TradingView, TradersPost, credentials, API keys, account login, real webhook, and real order paths remain BLOCKED.

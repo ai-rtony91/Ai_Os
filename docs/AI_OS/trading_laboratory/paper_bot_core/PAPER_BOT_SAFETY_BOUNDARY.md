@@ -1,6 +1,8 @@
 # Paper Bot Safety Boundary
 
-Paper Bot Core is not live trading.
+Paper Bot Core is a paper trading system. It is not live trading.
+
+It uses local paper-trade sample data. It does not request credentials, API keys, account login, real webhooks, or real orders. Live execution remains BLOCKED.
 
 Blocked:
 
@@ -24,4 +26,3 @@ External platform planning stays deeper under:
 Trading Lab -> Tools / Connectors -> External Trading Platforms -> MetaTrader 5 / TradingView / TradersPost
 
 Those cards remain hidden, collapsed, planning-only, and locked.
-

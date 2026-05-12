@@ -1,0 +1,14 @@
+{
+  "runtime_id": "paper_runtime_001",
+  "mode": "paper_only",
+  "risk_result_id": "paper_runtime_risk_001",
+  "latency_status": "review",
+  "regime_status": "review",
+  "confidence_status": "blocked",
+  "sample_size_status": "blocked",
+  "risk_gate_status": "BLOCKED",
+  "blocked_reason": "Confidence score is low and no paper trade sample history exists.",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED"
+}

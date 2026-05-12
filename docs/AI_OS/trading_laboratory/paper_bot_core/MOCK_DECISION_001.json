@@ -4,8 +4,7 @@
   "mode": "paper_only",
   "risk_gate_status": "BLOCKED",
   "paper_decision": "blocked",
-  "decision_reason": "Mock confidence and sample size are not strong enough.",
-  "blocked_reason": "Risk gate blocks by default until mock conditions pass.",
-  "next_safe_action": "Review risk gate and scorecard before any paper simulation."
+  "decision_reason": "Paper trade review confidence and sample size are not strong enough.",
+  "blocked_reason": "Risk gate blocks by default until paper trade review conditions pass.",
+  "next_safe_action": "Review the Paper Risk Gate and Paper Scorecard before any paper simulation."
 }
-
