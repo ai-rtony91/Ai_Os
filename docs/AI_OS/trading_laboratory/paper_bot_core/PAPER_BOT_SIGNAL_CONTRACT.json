@@ -1,0 +1,28 @@
+{
+  "contract_version": "0.1",
+  "mode": "paper_only",
+  "live_execution": "blocked",
+  "signal": {
+    "signal_id": "string",
+    "source_type": "mock",
+    "strategy_id": "string",
+    "symbol": "string",
+    "timeframe": "string",
+    "direction": "buy_or_sell_or_hold",
+    "entry_model": "string",
+    "stop_loss_model": "string",
+    "take_profit_model": "string",
+    "regime_tag": "trend_or_range_or_volatile_or_unknown",
+    "confidence_score": "number_0_to_100"
+  },
+  "blocked_actions": [
+    "No broker",
+    "No OANDA",
+    "No API keys",
+    "No credentials",
+    "No real webhooks",
+    "No real orders",
+    "No live execution"
+  ]
+}
+

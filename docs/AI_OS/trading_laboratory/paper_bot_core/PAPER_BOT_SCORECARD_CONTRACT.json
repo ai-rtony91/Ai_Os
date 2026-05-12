@@ -1,0 +1,18 @@
+{
+  "contract_version": "0.1",
+  "mode": "paper_only",
+  "scorecard": {
+    "scorecard_id": "string",
+    "trade_count": "number",
+    "win_rate": "number",
+    "average_win": "number",
+    "average_loss": "number",
+    "expectancy": "number",
+    "profit_factor": "number",
+    "max_drawdown": "number",
+    "confidence_score": "number_0_to_100",
+    "blocked_reason": "string",
+    "review_status": "blocked_or_review_or_ready"
+  }
+}
+

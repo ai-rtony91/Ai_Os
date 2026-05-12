@@ -1,0 +1,17 @@
+{
+  "phase": "17",
+  "stage": "paper_bot_core",
+  "mode": "paper_only",
+  "build_status": "foundation_created",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "credential_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "background_automation_status": "BLOCKED",
+  "validation_status": "dry_run_validator_required",
+  "next_action": "Run the paper bot core readiness validator."
+}
+

@@ -1,0 +1,15 @@
+{
+  "scorecard_id": "mock_scorecard_001",
+  "mode": "paper_only",
+  "trade_count": 0,
+  "win_rate": 0,
+  "average_win": 0,
+  "average_loss": 0,
+  "expectancy": 0,
+  "profit_factor": 0,
+  "max_drawdown": 0,
+  "confidence_score": 0,
+  "blocked_reason": "No paper trade sample exists yet.",
+  "review_status": "BLOCKED"
+}
+

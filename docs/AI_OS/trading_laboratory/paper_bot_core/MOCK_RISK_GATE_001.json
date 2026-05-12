@@ -1,0 +1,12 @@
+{
+  "risk_gate_id": "mock_risk_gate_001",
+  "signal_id": "mock_signal_001",
+  "mode": "paper_only",
+  "latency_status": "review",
+  "regime_status": "review",
+  "confidence_status": "blocked",
+  "sample_size_status": "blocked",
+  "risk_gate_status": "BLOCKED",
+  "blocked_reason": "Default block: confidence score is low and trade count is not established."
+}
+

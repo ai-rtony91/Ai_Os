@@ -1,0 +1,16 @@
+{
+  "signal_id": "mock_signal_001",
+  "mode": "paper_only",
+  "source_type": "mock",
+  "strategy_id": "paper_trend_review_001",
+  "symbol": "EUR_USD_MOCK",
+  "timeframe": "M15",
+  "direction": "buy",
+  "entry_model": "mock close above review level",
+  "stop_loss_model": "mock prior swing low",
+  "take_profit_model": "mock two-to-one review target",
+  "regime_tag": "trend_review",
+  "confidence_score": 42,
+  "live_execution": "BLOCKED"
+}
+

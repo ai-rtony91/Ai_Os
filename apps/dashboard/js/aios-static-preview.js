@@ -78,6 +78,7 @@ const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
+const paperBotCoreFixturePath = "mock-data/paper-bot-core.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 const personalGalleryManifestPath = "private-media/service-gallery/gallery.local.json";
 const youtubeRadioTracks = [
@@ -900,6 +901,72 @@ function createTradingLabWorkspaceCard(card, index, total) {
   return item;
 }
 
+function createPaperBotCoreStep(step) {
+  const card = document.createElement("details");
+  card.className = `paper-bot-core-step ${getTradingLabStateClass(step.status)}`;
+  if (step.id === "signal" || step.id === "next_action") {
+    card.open = true;
+  }
+
+  const summary = document.createElement("summary");
+  const title = document.createElement("strong");
+  title.textContent = step.title || "Paper Bot Step";
+  const status = document.createElement("span");
+  status.textContent = step.status || "UNKNOWN";
+  const text = document.createElement("p");
+  text.textContent = step.summary || "Review this paper-only step.";
+  summary.append(title, status, text);
+
+  const detail = document.createElement("small");
+  detail.textContent = step.detail || "No detail provided.";
+  card.append(summary, detail);
+  return card;
+}
+
+function renderPaperBotCorePanel(data) {
+  const panel = document.createElement("section");
+  panel.className = "paper-bot-core-panel";
+  panel.setAttribute("aria-label", "Paper Bot Core");
+
+  const head = document.createElement("div");
+  head.className = "paper-bot-core-head";
+  const title = document.createElement("strong");
+  title.textContent = data.title || "Paper Bot Core";
+  const badge = document.createElement("span");
+  badge.textContent = data.badge || "PAPER ONLY";
+  const summary = document.createElement("p");
+  summary.textContent = data.summary || "Paper-only bot core summary.";
+  head.append(title, badge, summary);
+
+  const safety = document.createElement("div");
+  safety.className = "paper-bot-core-safety";
+  [
+    ["Live Execution", data.live_execution_status || "BLOCKED"],
+    ["Broker", data.broker_status || "BLOCKED"],
+    ["OANDA", data.oanda_status || "BLOCKED"],
+    ["Secrets/API keys", data.api_key_status || "BLOCKED"]
+  ].forEach(([label, value]) => {
+    safety.append(createTradingLabSafetyChip(label, value));
+  });
+
+  const grid = document.createElement("div");
+  grid.className = "paper-bot-core-grid";
+  (Array.isArray(data.steps) ? data.steps : []).forEach((step) => {
+    grid.append(createPaperBotCoreStep(step));
+  });
+
+  const blocked = document.createElement("div");
+  blocked.className = "paper-bot-core-blocked";
+  const blockedTitle = document.createElement("strong");
+  blockedTitle.textContent = "Blocked";
+  const blockedText = document.createElement("p");
+  blockedText.textContent = (data.blocked_actions || []).join(" | ");
+  blocked.append(blockedTitle, blockedText);
+
+  panel.append(head, safety, grid, blocked);
+  return panel;
+}
+
 function createTradingStackList(items) {
   const list = document.createElement("ul");
   list.className = "trading-stack-list";
@@ -993,7 +1060,7 @@ function renderTradingStackHub() {
   return hub;
 }
 
-function renderTradingLabNextActionData(data) {
+function renderTradingLabNextActionData(data, paperBotCoreData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -1038,7 +1105,12 @@ function renderTradingLabNextActionData(data) {
   ]).join(" | ");
   blockedActions.append(blockedTitle, blockedList);
 
-  tradingLabNextActionCard.replaceChildren(title, safety, flowGrid, blockedActions);
+  const children = [title, safety, flowGrid];
+  if (paperBotCoreData) {
+    children.push(renderPaperBotCorePanel(paperBotCoreData));
+  }
+  children.push(blockedActions);
+  tradingLabNextActionCard.replaceChildren(...children);
 }
 
 async function renderTradingLabNextActionCard() {
@@ -1046,9 +1118,13 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const response = await fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" });
+    const [response, paperBotResponse] = await Promise.all([
+      fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
+      fetch(paperBotCoreFixturePath, { cache: "no-store" })
+    ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
-    renderTradingLabNextActionData(await response.json());
+    const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",

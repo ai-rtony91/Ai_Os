@@ -1,0 +1,15 @@
+{
+  "contract_version": "0.1",
+  "mode": "paper_only",
+  "live_execution": "blocked",
+  "decision": {
+    "decision_id": "string",
+    "signal_id": "string",
+    "risk_gate_status": "blocked_or_passed",
+    "paper_decision": "blocked_or_simulate_paper_trade",
+    "decision_reason": "string",
+    "blocked_reason": "string",
+    "next_safe_action": "string"
+  }
+}
+

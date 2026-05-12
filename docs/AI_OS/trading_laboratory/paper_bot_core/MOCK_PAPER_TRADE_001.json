@@ -1,0 +1,12 @@
+{
+  "paper_trade_id": "mock_paper_trade_001",
+  "mode": "paper_only",
+  "signal_id": "mock_signal_001",
+  "decision_id": "mock_decision_001",
+  "paper_trade_status": "not_executed",
+  "simulated_entry": null,
+  "simulated_exit": null,
+  "simulated_result": "blocked_before_simulation",
+  "blocked_reason": "Risk gate status is BLOCKED.",
+  "live_execution": "BLOCKED"
+}

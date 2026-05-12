@@ -1,0 +1,16 @@
+{
+  "contract_version": "0.1",
+  "mode": "paper_only",
+  "default_status": "blocked",
+  "risk_gate": {
+    "risk_gate_id": "string",
+    "signal_id": "string",
+    "latency_status": "pass_or_review_or_blocked",
+    "regime_status": "approved_or_review_or_blocked",
+    "confidence_status": "pass_or_review_or_blocked",
+    "sample_size_status": "pass_or_review_or_blocked",
+    "risk_gate_status": "blocked_or_passed",
+    "blocked_reason": "string"
+  }
+}
+
