@@ -2113,6 +2113,22 @@ body.focused-route-archives .project-hub-panel {
   overflow-wrap: anywhere;
 }
 
+.aios-orchestration-card {
+  min-height: 0;
+}
+
+.aios-orchestration-card .paper-runner-field strong {
+  font-size: 10.5px;
+}
+
+.paper-runner-panel[aria-label="AI_OS Orchestration Control Room"] .paper-bot-core-step {
+  margin-top: 2px;
+}
+
+.paper-runner-panel[aria-label="AI_OS Orchestration Control Room"] .paper-bot-core-step .paper-runner-card-grid {
+  margin-top: 10px;
+}
+
 .trading-lab-window-system {
   display: grid;
   gap: 16px;

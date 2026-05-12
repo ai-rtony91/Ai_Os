@@ -1,0 +1,124 @@
+{
+  "title": "AI_OS Orchestration Control Room",
+  "badge": "LOCAL MOCK",
+  "mode": "local_file_based",
+  "view_status": "MOCK_READY",
+  "summary": "A beginner-readable view of the local queue, assigned agent, validator status, blocked actions, and next safe action.",
+  "display": {
+    "default_mode": "beginner",
+    "critical_cards_visible_by_default": true,
+    "advanced_diagnostics_collapsed": true,
+    "mobile_layout": "single_column_no_horizontal_scroll",
+    "duplicate_safety_locks": "grouped"
+  },
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "secrets_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "background_execution_status": "BLOCKED",
+  "scheduled_automation_status": "BLOCKED",
+  "startup_persistence_status": "BLOCKED",
+  "external_llm_install_status": "NOT_ENABLED",
+  "source_references": [
+    "docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json",
+    "docs/AI_OS/agent_runtime/AGENT_RUNTIME_STATUS.json",
+    "docs/AI_OS/agent_runtime/AGENT_RUNTIME_OWNERSHIP_RULES.json",
+    "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_TASK_LIFECYCLE.json",
+    "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_BLOCKED_ACTIONS_MATRIX.json"
+  ],
+  "safety_locks": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED",
+    "background_execution_status": "BLOCKED",
+    "scheduled_automation_status": "BLOCKED",
+    "startup_persistence_status": "BLOCKED",
+    "external_llm_install_status": "NOT_ENABLED"
+  },
+  "cards": [
+    {
+      "title": "Active Queue",
+      "status": "QUEUED",
+      "meaning": "One local work packet can be selected for review.",
+      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json",
+      "next_action": "Preview one task before APPLY.",
+      "default_visible": true
+    },
+    {
+      "title": "Task State",
+      "status": "READY_FOR_PREVIEW",
+      "meaning": "The task must pass ownership and blocked-action checks before work starts.",
+      "source": "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_TASK_LIFECYCLE.json",
+      "next_action": "Keep unclear tasks in review instead of APPLY.",
+      "default_visible": true
+    },
+    {
+      "title": "Blocked Action Locks",
+      "status": "BLOCKED",
+      "meaning": "Live trading, brokers, OANDA, secrets, real webhooks, real orders, background tasks, and startup persistence are blocked.",
+      "source": "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_BLOCKED_ACTIONS_MATRIX.json",
+      "next_action": "Do not weaken the safety locks.",
+      "default_visible": true
+    },
+    {
+      "title": "Next Safe Action",
+      "status": "VALIDATOR_FIRST",
+      "meaning": "Run the read-only orchestration control room validator before commit planning.",
+      "source": "automation/agent_runtime/Test-AiOsOrchestrationControlRoom.DRY_RUN.ps1",
+      "next_action": "Run the local validator and review the result.",
+      "default_visible": true
+    },
+    {
+      "title": "Agent Ownership",
+      "status": "LOCAL_RULES",
+      "meaning": "Every task must stay inside its assigned agent ownership boundary.",
+      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_OWNERSHIP_RULES.json",
+      "next_action": "Review ownership before APPLY.",
+      "default_visible": false
+    },
+    {
+      "title": "Validator Status",
+      "status": "PENDING",
+      "meaning": "The validator checks local files and safety text only.",
+      "source": "automation/agent_runtime/Test-AiOsOrchestrationControlRoom.DRY_RUN.ps1",
+      "next_action": "Run validator after dashboard fixture changes.",
+      "default_visible": false
+    },
+    {
+      "title": "Runtime Health",
+      "status": "LOCAL_ONLY",
+      "meaning": "The runtime is a local control layer, not a background worker.",
+      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_STATUS.json",
+      "next_action": "Keep background execution blocked.",
+      "default_visible": false
+    },
+    {
+      "title": "Human Approval Gate",
+      "status": "REQUIRED",
+      "meaning": "The user must approve APPLY, commit, push, installs, integrations, and risky actions.",
+      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json",
+      "next_action": "Wait for explicit approval before risky steps.",
+      "default_visible": false
+    }
+  ],
+  "critical_cards": [
+    "Active Queue",
+    "Task State",
+    "Blocked Action Locks",
+    "Next Safe Action"
+  ],
+  "advanced_cards": [
+    "Agent Ownership",
+    "Validator Status",
+    "Runtime Health",
+    "Human Approval Gate"
+  ],
+  "next_safe_action": "Run automation/agent_runtime/Test-AiOsOrchestrationControlRoom.DRY_RUN.ps1, then review the dashboard diff before any commit."
+}

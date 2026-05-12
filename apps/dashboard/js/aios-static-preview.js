@@ -79,6 +79,7 @@ const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.j
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const tradingLabPaperRunnerFixturePath = "mock-data/trading-lab-paper-runner.example.json";
+const aiosOrchestrationControlRoomFixturePath = "mock-data/aios-orchestration-control-room.example.json";
 const paperBotCoreFixturePath = "mock-data/paper-bot-core.example.json";
 const tradingLabWindowSystemFixturePath = "mock-data/trading-lab-window-system.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
@@ -221,27 +222,27 @@ const workspaceDetailConfig = {
   },
   "social-vault": {
     title: "Social Vault",
-    summary: "Launch-only planning for social accounts with connectors locked and no passwords stored.",
-    overview: "Choose a social item from the tab. This workspace does not store passwords or tokens.",
+    summary: "Launch-only planning for social accounts with connectors locked and no credentials stored.",
+    overview: "Choose a social item from the tab. This workspace does not store credentials or access keys.",
     items: [
-      detailItem("facebook", "Facebook", "ACCOUNT", "Launch-only planning card for Facebook account access.", "No password stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
-      detailItem("instagram", "Instagram", "ACCOUNT", "Launch-only planning card for Instagram account access.", "No password stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
-      detailItem("x", "X", "ACCOUNT", "Launch-only planning card for X account access.", "No password stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
-      detailItem("youtube", "YouTube", "ACCOUNT", "Launch-only planning card for YouTube account access.", "No password stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
+      detailItem("facebook", "Facebook", "ACCOUNT", "Launch-only planning card for Facebook account access.", "No credentials stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
+      detailItem("instagram", "Instagram", "ACCOUNT", "Launch-only planning card for Instagram account access.", "No credentials stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
+      detailItem("x", "X", "ACCOUNT", "Launch-only planning card for X account access.", "No credentials stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
+      detailItem("youtube", "YouTube", "ACCOUNT", "Launch-only planning card for YouTube account access.", "No credentials stored. OAuth/API setup required later.", ["Connector locked.", "No credential capture.", "Setup later."]),
       detailItem("social-connector-status", "Connector Status Locked", "LOCKED", "Show social connectors as locked until a future approved secure OAuth setup.", "No real OAuth or social API connection is active.", ["OAuth later.", "API calls blocked.", "Tokens not stored."]),
-      detailItem("social-security-notes", "Security Notes", "SECURITY", "Keep account-safety notes and credential boundaries visible.", "Passwords, tokens, and recovery codes must stay out of dashboard files and localStorage.", ["No passwords.", "No tokens.", "No recovery codes."])
+      detailItem("social-security-notes", "Security Notes", "SECURITY", "Keep account-safety notes and credential boundaries visible.", "Credentials and recovery codes must stay out of dashboard files and localStorage.", ["No credentials.", "No access keys.", "No recovery codes."])
     ]
   },
   "onedrive-vault": {
     title: "OneDrive Vault",
-    summary: "Important file planning with access locked and no OneDrive token storage.",
+    summary: "Important file planning with access locked and no OneDrive credential storage.",
     overview: "Choose a file planning item from the tab. This workspace does not connect to OneDrive.",
     items: [
       detailItem("important-documents", "Important Docs", "DOCUMENTS", "Plan which important documents need review, organization, and protection.", "No file sync or cloud connection is active.", ["List document groups.", "Mark protected items.", "Plan review order."]),
       detailItem("aios-project-files", "AI_OS Project Files", "AI_OS", "Organize AI_OS project docs and work packets by approved paths.", "No file writer runs from this panel.", ["Project docs.", "Work packets.", "Source logs."]),
       detailItem("trading-files", "Trading Files", "TRADING", "Separate trading planning files from execution or broker files.", "No broker files or credentials are touched.", ["Planning only.", "Execution separated.", "Risk docs later."]),
       detailItem("backups", "Backups", "BACKUPS", "Plan backup categories and checkpoint timing.", "No backup writer is active.", ["Backup categories.", "Checkpoint timing.", "Restore notes."]),
-      detailItem("onedrive-access-status", "Access Status Locked", "LOCKED", "Show OneDrive/file access as locked.", "No OneDrive password, token, or file access is stored.", ["Access locked.", "No token.", "No sync."]),
+      detailItem("onedrive-access-status", "Access Status Locked", "LOCKED", "Show OneDrive/file access as locked.", "No OneDrive credentials or file access are stored.", ["Access locked.", "No access keys.", "No sync."]),
       detailItem("microsoft-graph-later", "Microsoft Graph Later", "LATER", "Placeholder for a future approved Microsoft Graph or file picker setup.", "Secure auth setup must be designed later.", ["Graph later.", "File picker later.", "Approval required."])
     ]
   },
@@ -257,7 +258,7 @@ const workspaceDetailConfig = {
       detailItem("calendar-app", "Calendar App", "CALENDAR", "Static planning example for review windows and checkpoints.", "No provider API connected.", ["Review windows.", "Checkpoint reminders.", "Provider locked."]),
       detailItem("notes-app", "Notes App", "NOTES", "Future instruction and context lane.", "No persistence or file writer active.", ["Instruction notes.", "Context notes.", "Writer locked."]),
       detailItem("apps-diagnostics", "Diagnostics", "DIAGNOSTICS", "Static diagnostics planning for app/tool lanes.", "No automatic repair is active.", ["Static checks.", "Fixture checks.", "Status summary."]),
-      detailItem("future-connectors", "Future Connectors", "CONNECTORS", "Placeholder for approved connector design later.", "Credentials and provider APIs remain blocked.", ["Design later.", "No tokens.", "Approval required."])
+      detailItem("future-connectors", "Future Connectors", "CONNECTORS", "Placeholder for approved connector design later.", "Credentials and provider APIs remain blocked.", ["Design later.", "No access keys.", "Approval required."])
     ]
   },
   reports: {
@@ -282,7 +283,7 @@ const workspaceDetailConfig = {
       detailItem("locked-actions", "Locked Actions", "LOCKED", "Deletes, moves, renames, pushes, merges, auth changes, and live execution remain blocked.", "User approval is mandatory for protected actions.", ["No delete.", "No move/rename.", "No push/merge."]),
       detailItem("approval-rules", "Approval Rules", "APPROVAL", "DRY_RUN first, then explicit APPLY approval.", "No default APPLY without approval.", ["Inspect.", "DRY_RUN.", "APPLY only after approval."]),
       detailItem("blocked-execution", "Blocked Execution", "EXECUTION", "Live trading, broker orders, automatic redirects, and production activation are blocked.", "No broker connection or order path is active.", ["No live trading.", "No broker orders.", "No automatic redirect."]),
-      detailItem("secret-rules", "Secret Rules", "SECRETS", "Passwords, tokens, API keys, broker keys, and recovery codes must not be stored.", "Secrets stay out of dashboard files, localStorage, and mock data.", ["No passwords.", "No tokens.", "No recovery codes."]),
+      detailItem("secret-rules", "Secret Rules", "SECRETS", "Credentials, API keys, broker keys, and recovery codes must not be stored.", "Secrets stay out of dashboard files, localStorage, and mock data.", ["No credentials.", "No access keys.", "No recovery codes."]),
       detailItem("safety-risk-policy", "Risk Policy", "RISK", "Risk and safety boundaries for AI_OS and future trading work.", "Trading execution is separate and locked.", ["Separate AI_OS/trading.", "Risk review.", "Approval gates."])
     ]
   },
@@ -325,22 +326,22 @@ const railDetailConfig = {
     summary: "Social accounts, documents, apps, data, backups, and locked connector planning.",
     overview: "Choose a Gallery item to open one focused Social, Vault, or data detail panel.",
     items: [
-      detailItem("personal-apps", "Apps", "APPS", "Open connector-locked social, OneDrive, calendar, and notes planning cards.", "No external app login, API, OAuth, file sync, or persistence is enabled.", ["Open app cards.", "No passwords stored.", "Connectors locked."]),
+      detailItem("personal-apps", "Apps", "APPS", "Open connector-locked social, OneDrive, calendar, and notes planning cards.", "No external app login, API, OAuth, file sync, or persistence is enabled.", ["Open app cards.", "No credentials stored.", "Connectors locked."]),
       detailItem("important-documents", "Important Docs", "DOCUMENTS", "Plan important document groups, review priority, and protected-file boundaries.", "No file access or cloud sync runs from this dashboard.", ["List document groups.", "Mark protected items.", "Plan review order."]),
       detailItem("personal-gallery", "Gallery", "LOCAL MEDIA", "Gallery / Service Photos. Local-only private media area for service photos and approved local images.", "Place images in apps/dashboard/private-media/service-gallery/. Do not add ID cards, credentials, documents, addresses, account screenshots, recovery codes, or sensitive identity files.", ["Local-only media.", "Manifest later: private-media/service-gallery/gallery.local.json.", "Sensitive images require REDACT REQUIRED."]),
       detailItem("backups", "Backups", "BACKUPS", "Plan backup categories, checkpoint timing, and restore notes for important work.", "No backup writer or file mover is active.", ["Backup categories.", "Checkpoint timing.", "Restore notes."]),
-      detailItem("account-security", "Account Security", "SECURITY", "Keep account safety boundaries visible for social, OneDrive, and apps.", "Passwords, tokens, recovery codes, and private keys must stay out of dashboard files and localStorage.", ["No passwords.", "No tokens.", "No recovery codes."]),
-      detailItem("connector-status-locked", "Connector Status Locked", "LOCKED", "Show all Gallery connectors as locked until a future approved secure setup.", "No OAuth, API calls, token storage, or real account connection is active.", ["OAuth later.", "API calls blocked.", "Tokens not stored."])
+      detailItem("account-security", "Account Security", "SECURITY", "Keep account safety boundaries visible for social, OneDrive, and apps.", "Credentials, recovery codes, and private keys must stay out of dashboard files and localStorage.", ["No credentials.", "No access keys.", "No recovery codes."]),
+      detailItem("connector-status-locked", "Connector Status Locked", "LOCKED", "Show all Gallery connectors as locked until a future approved secure setup.", "No OAuth, API calls, credential storage, or real account connection is active.", ["OAuth later.", "API calls blocked.", "Credentials not stored."])
     ]
   }
 };
 
 const personalAppsItems = [
-  detailItem("facebook", "Facebook", "ACCOUNT", "Facebook account planning card for future secure launch or connector design.", "No password stored. OAuth/API setup required later.", ["No credential capture.", "Connector locked.", "Setup later."]),
-  detailItem("instagram", "Instagram", "ACCOUNT", "Instagram account planning card for future secure launch or connector design.", "No password stored. OAuth/API setup required later.", ["No credential capture.", "Connector locked.", "Setup later."]),
-  detailItem("x", "X", "ACCOUNT", "X account planning card for future secure launch or connector design.", "No password stored. OAuth/API setup required later.", ["No credential capture.", "Connector locked.", "Setup later."]),
-  detailItem("youtube", "YouTube", "ACCOUNT", "YouTube account planning and music workspace boundary notes.", "No YouTube account password or token is stored.", ["No credential capture.", "Music controls preserved.", "Connector locked."]),
-  detailItem("onedrive-vault", "OneDrive Vault", "FILES", "OneDrive file planning and future approved Microsoft Graph/File Picker setup.", "No OneDrive password, Microsoft Graph token, or file sync is active.", ["Plan file groups.", "Keep access locked.", "Graph/File Picker later."]),
+  detailItem("facebook", "Facebook", "ACCOUNT", "Facebook account planning card for future secure launch or connector design.", "No credentials stored. OAuth/API setup required later.", ["No credential capture.", "Connector locked.", "Setup later."]),
+  detailItem("instagram", "Instagram", "ACCOUNT", "Instagram account planning card for future secure launch or connector design.", "No credentials stored. OAuth/API setup required later.", ["No credential capture.", "Connector locked.", "Setup later."]),
+  detailItem("x", "X", "ACCOUNT", "X account planning card for future secure launch or connector design.", "No credentials stored. OAuth/API setup required later.", ["No credential capture.", "Connector locked.", "Setup later."]),
+  detailItem("youtube", "YouTube", "ACCOUNT", "YouTube account planning and music workspace boundary notes.", "No YouTube account credentials are stored.", ["No credential capture.", "Music controls preserved.", "Connector locked."]),
+  detailItem("onedrive-vault", "OneDrive Vault", "FILES", "OneDrive file planning and future approved Microsoft Graph/File Picker setup.", "No OneDrive credentials, Microsoft Graph access key, or file sync is active.", ["Plan file groups.", "Keep access locked.", "Graph/File Picker later."]),
   detailItem("calendar", "Calendar", "CALENDAR", "Static calendar planning for review windows, checkpoints, and reminders.", "No Google, Microsoft, Outlook, or notification provider is connected.", ["Plan dates.", "Review checkpoints.", "Provider locked."]),
   detailItem("notes", "Notes", "NOTES", "Static notes planning for reminders, project context, and future instruction packets.", "No note writer or persistence is active.", ["Draft notes.", "Keep secrets out.", "Writer locked."])
 ];
@@ -504,11 +505,11 @@ const messages = {
   },
   "trading-bot": {
     assistant: "Trading Bot: static planning workspace for strategy, signals, backtest files, risk policy, deployment readiness, and validation. Broker connector status is locked.",
-    console: "Ai_Os> Trading Bot workspace\nBroker connector: LOCKED\nLive trading: BLOCKED\nSecrets/tokens/API keys: NOT STORED"
+    console: "Ai_Os> Trading Bot workspace\nBroker connector: LOCKED\nLive trading: BLOCKED\nSecrets/API keys: NOT STORED"
   },
   "social-vault": {
-    assistant: "Social Vault: launch-only planning cards for Facebook, Instagram, X, and YouTube. Connectors are locked and no passwords or OAuth tokens are stored.",
-    console: "Ai_Os> Social Vault workspace\nAccount passwords: NOT STORED\nOAuth/API setup: REQUIRED LATER\nConnectors: LOCKED"
+    assistant: "Social Vault: launch-only planning cards for Facebook, Instagram, X, and YouTube. Connectors are locked and no credentials are stored.",
+    console: "Ai_Os> Social Vault workspace\nAccount credentials: NOT STORED\nOAuth/API setup: REQUIRED LATER\nConnectors: LOCKED"
   },
   "onedrive-vault": {
     assistant: "OneDrive Vault: static file organization workspace for important documents, AI_OS files, trading files, and backups. Microsoft Graph and file picker setup are later locked steps.",
@@ -1116,6 +1117,106 @@ function renderTradingLabPaperRunnerPanel(data) {
   return panel;
 }
 
+function createAiosOrchestrationCard(card = {}) {
+  const status = card.status || "UNKNOWN";
+  const panel = createPaperRunnerCard(
+    card.title || "Runtime Card",
+    status,
+    [
+      ["Meaning", card.meaning || card.summary || "Local file-based orchestration status."],
+      ["Source", card.source || "local mock-data"],
+      ["Next", card.next_action || "Review the next safe action."]
+    ],
+    card.note || ""
+  );
+  panel.classList.add("aios-orchestration-card");
+  return panel;
+}
+
+function renderAiosOrchestrationControlRoom(data) {
+  if (!data) return null;
+  const section = document.createElement("section");
+  section.className = "paper-runner-panel";
+  section.setAttribute("aria-label", "AI_OS Orchestration Control Room");
+
+  const head = document.createElement("div");
+  head.className = "paper-runner-head";
+  const title = document.createElement("strong");
+  title.textContent = data.title || "AI_OS Orchestration Control Room";
+  const badge = document.createElement("span");
+  badge.textContent = data.view_status || data.mode || "LOCAL MOCK";
+  const summary = document.createElement("p");
+  summary.textContent = data.summary || "Local queue, ownership, validator, and next-action view. It is mock-data only.";
+  head.append(title, badge, summary);
+
+  const locks = data.safety_locks || {};
+  const safety = document.createElement("div");
+  safety.className = "paper-runner-safety";
+  [
+    ["Live Execution", locks.live_execution_status || data.live_execution_status || "BLOCKED"],
+    ["Broker", locks.broker_status || data.broker_status || "BLOCKED"],
+    ["OANDA", locks.oanda_status || data.oanda_status || "BLOCKED"],
+    ["API Keys", locks.api_key_status || data.api_key_status || "BLOCKED"],
+    ["Secrets", locks.secrets_status || data.secrets_status || "BLOCKED"],
+    ["Real Webhooks", locks.real_webhook_status || data.real_webhook_status || "BLOCKED"],
+    ["Real Orders", locks.real_order_status || data.real_order_status || "BLOCKED"],
+    ["Background", locks.background_execution_status || data.background_execution_status || "BLOCKED"],
+    ["Scheduled", locks.scheduled_automation_status || data.scheduled_automation_status || "BLOCKED"],
+    ["Startup", locks.startup_persistence_status || data.startup_persistence_status || "BLOCKED"],
+    ["External LLM", locks.external_llm_install_status || data.external_llm_install_status || "NOT_ENABLED"]
+  ].forEach(([label, value]) => {
+    safety.append(createTradingLabSafetyChip(label, value));
+  });
+
+  const cards = Array.isArray(data.cards) ? data.cards : [];
+  const defaultCards = cards.filter((card) => card.default_visible !== false);
+  const advancedCards = cards.filter((card) => card.default_visible === false);
+  const cardGrid = document.createElement("div");
+  cardGrid.className = "paper-runner-card-grid";
+  defaultCards.forEach((card) => {
+    cardGrid.append(createAiosOrchestrationCard(card));
+  });
+
+  const diagnostics = document.createElement("details");
+  diagnostics.className = "paper-bot-core-step";
+  const diagnosticsSummary = document.createElement("summary");
+  const diagnosticsTitle = document.createElement("strong");
+  diagnosticsTitle.textContent = "Advanced diagnostics";
+  const diagnosticsStatus = document.createElement("span");
+  diagnosticsStatus.textContent = "collapsed";
+  diagnosticsSummary.append(diagnosticsTitle, diagnosticsStatus);
+  const diagnosticsText = document.createElement("p");
+  diagnosticsText.textContent = "Agent ownership, validator chain, and raw source references stay hidden until needed.";
+  diagnostics.append(diagnosticsSummary, diagnosticsText);
+
+  if (advancedCards.length) {
+    const advancedGrid = document.createElement("div");
+    advancedGrid.className = "paper-runner-card-grid";
+    advancedCards.forEach((card) => {
+      advancedGrid.append(createAiosOrchestrationCard(card));
+    });
+    diagnostics.append(advancedGrid);
+  }
+
+  const sourceRefs = Array.isArray(data.source_references) ? data.source_references : [];
+  if (sourceRefs.length) {
+    const sourceList = createTradingStackList(sourceRefs);
+    sourceList.className = "trading-lab-window-safety";
+    diagnostics.append(sourceList);
+  }
+
+  const nextAction = document.createElement("div");
+  nextAction.className = "trading-lab-blocked-actions";
+  const nextTitle = document.createElement("strong");
+  nextTitle.textContent = "Next safe action";
+  const nextText = document.createElement("p");
+  nextText.textContent = data.next_safe_action || "Run the local orchestration control room validator.";
+  nextAction.append(nextTitle, nextText);
+
+  section.append(head, safety, cardGrid, diagnostics, nextAction);
+  return section;
+}
+
 function createTradingLabWindow(key, windowData = {}, engineData = null, safetyData = null) {
   const panel = document.createElement("details");
   panel.className = `trading-lab-window ${key === "next_action" ? "is-next-action" : ""} ${getTradingLabStateClass(windowData.status)}`;
@@ -1419,7 +1520,7 @@ function renderTradingStackHub() {
   return hub;
 }
 
-function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null) {
+function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -1468,6 +1569,9 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   if (paperRunnerData) {
     children.push(renderTradingLabPaperRunnerPanel(paperRunnerData));
   }
+  if (orchestrationData) {
+    children.push(renderAiosOrchestrationControlRoom(orchestrationData));
+  }
   if (windowSystemData) {
     children.push(renderTradingLabWindowSystem(windowSystemData));
   }
@@ -1483,17 +1587,19 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse] = await Promise.all([
+    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse] = await Promise.all([
       fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
       fetch(paperBotCoreFixturePath, { cache: "no-store" }),
       fetch(tradingLabWindowSystemFixturePath, { cache: "no-store" }),
-      fetch(tradingLabPaperRunnerFixturePath, { cache: "no-store" })
+      fetch(tradingLabPaperRunnerFixturePath, { cache: "no-store" }),
+      fetch(aiosOrchestrationControlRoomFixturePath, { cache: "no-store" })
     ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
     const windowSystemData = windowSystemResponse.ok ? await windowSystemResponse.json() : null;
     const paperRunnerData = paperRunnerResponse.ok ? await paperRunnerResponse.json() : null;
-    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData);
+    const orchestrationData = orchestrationResponse.ok ? await orchestrationResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",
@@ -1582,7 +1688,7 @@ function renderPersonalApps() {
   const noticeTitle = document.createElement("strong");
   noticeTitle.textContent = "Connector-locked apps";
   const noticeBody = document.createElement("span");
-  noticeBody.textContent = "Launch and connector planning only. No passwords, OAuth, API calls, OneDrive tokens, social tokens, or persistence are enabled.";
+  noticeBody.textContent = "Launch and connector planning only. No credentials, OAuth, API calls, OneDrive access keys, social access keys, or persistence are enabled.";
   notice.append(noticeTitle, noticeBody);
 
   const grid = document.createElement("div");
@@ -1712,7 +1818,7 @@ function generateContextPacket() {
     "User goal": values.userGoal || values.researchTopic || values.strategyIdea || values.desiredFix || values.target || "Missing context required",
     "Files/app area": values.filesOrArea || values.toolInvolved || values.screen || values.market || "Missing context required",
     "Desired output": values.desiredOutput || values.outputFormat || values.desiredFix || "Missing context required",
-    "Safety rules": "Local mock-only. Do not store secrets, tokens, passwords, API keys, broker keys, social tokens, OneDrive tokens, approvals, or execution state.",
+    "Safety rules": "Local mock-only. Do not store secrets, credentials, API keys, broker keys, social access keys, OneDrive access keys, approvals, or execution state.",
     "Allowed actions": "Explain, plan, draft prompts, organize DRY_RUN/APPLY scope, and propose validation steps.",
     "Blocked actions": "No backend/API call, no trading execution, no broker connection, no credential capture, no location.reload().",
     "Folder ownership": "ACTIVE_REPO dashboard files only unless future approval expands scope.",
