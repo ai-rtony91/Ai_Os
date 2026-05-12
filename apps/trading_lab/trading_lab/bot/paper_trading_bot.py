@@ -70,12 +70,49 @@ def build_paper_result(decision: str, intake_result: dict[str, Any]) -> dict[str
     }
 
 
+def build_latency_record(signal_payload: dict[str, Any], intake_result: dict[str, Any]) -> dict[str, Any]:
+    ledger = intake_result["ledger"]
+    validation = intake_result["validation_result"]
+    alert_created_time = signal_payload.get("alert_time")
+    alert_received_time = ledger.get("received_at")
+    validation_time = validation.get("validated_at")
+    total_delay_seconds = validation.get("signal_age_seconds")
+    return {
+        "alert_created_time": alert_created_time,
+        "alert_received_time": alert_received_time,
+        "validation_start_time": validation_time,
+        "validation_end_time": validation_time,
+        "route_preview_time": validation_time,
+        "total_delay_seconds": total_delay_seconds,
+        "stale_status": validation.get("stale_signal_status", "Pending validation"),
+        "clock_skew_status": validation.get("clock_skew_status", "Pending validation"),
+    }
+
+
+def build_journal_record(decision: str, intake_result: dict[str, Any], paper_result: dict[str, Any]) -> dict[str, Any]:
+    ledger = intake_result["ledger"]
+    validation = intake_result["validation_result"]
+    normalized_signal = ledger.get("normalized_signal", {})
+    blocked_reason = validation.get("blocked_reason", "")
+    return {
+        "journal_entry_id": "PAPER_TRADING_BOT_JOURNAL_001",
+        "paper_trade_id": "PAPER_TRADING_BOT_TRADE_001",
+        "normalized_signal_id": normalized_signal.get("signal_id", "PAPER_BOT_NORMALIZED_SIGNAL_001"),
+        "decision": decision,
+        "paper_result_status": paper_result.get("paper_result_status"),
+        "review_status": "READY_FOR_PAPER_REVIEW" if decision == "ACCEPT" else "BLOCKED_FOR_REVIEW",
+        "blocked_reason": blocked_reason or "No live execution. Paper review only.",
+    }
+
+
 def build_bot_outputs(signal_payload: dict[str, Any], intake_result: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     decision = bot_decision_from_intake(intake_result)
     ledger = intake_result["ledger"]
     validation = intake_result["validation_result"]
     route = intake_result["paper_route_preview"]
     paper_result = build_paper_result(decision, intake_result)
+    latency_record = build_latency_record(signal_payload, intake_result)
+    journal_record = build_journal_record(decision, intake_result, paper_result)
     normalized_signal = ledger.get("normalized_signal", {})
     status = {
         "bot_status_id": "PAPER_TRADING_BOT_STATUS_001",
@@ -92,6 +129,8 @@ def build_bot_outputs(signal_payload: dict[str, Any], intake_result: dict[str, A
         "paper_route_status": route.get("paper_route_status"),
         "paper_result_status": paper_result["paper_result_status"],
         "visible_status_output": f"{decision}: {paper_result['result_summary']}",
+        "latest_latency": latency_record,
+        "latest_journal": journal_record,
         "next_safe_action": "Review the paper bot status and keep all execution paths blocked.",
         **SAFETY_STATUS,
     }
@@ -104,6 +143,8 @@ def build_bot_outputs(signal_payload: dict[str, Any], intake_result: dict[str, A
         "validation_decision": validation,
         "paper_route_preview": route,
         "paper_result": paper_result,
+        "latency": latency_record,
+        "journal": journal_record,
         "live_execution": "BLOCKED",
         "broker": "BLOCKED",
         "oanda": "BLOCKED",
@@ -117,14 +158,22 @@ def build_bot_outputs(signal_payload: dict[str, Any], intake_result: dict[str, A
     return status, result_ledger
 
 
-def run_bot(signal_fixture: Path = DEFAULT_SIGNAL_FIXTURE, validation_time: datetime | None = None) -> dict[str, Any]:
-    signal_payload = read_json(signal_fixture)
-    intake_result = process_paper_signal(signal_payload, validation_time=validation_time, write_outputs=True)
-    status, ledger = build_bot_outputs(signal_payload, intake_result)
+def run_bot_for_payload(
+    signal_payload: dict[str, Any],
+    validation_time: datetime | None = None,
+    intake_result: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    result = intake_result or process_paper_signal(signal_payload, validation_time=validation_time, write_outputs=True)
+    status, ledger = build_bot_outputs(signal_payload, result)
     write_json(BOT_RESULT_ROOT / "PAPER_TRADING_BOT_STATUS_001.json", status)
     write_json(BOT_RESULT_ROOT / "PAPER_TRADING_BOT_LEDGER_001.json", ledger)
     write_json(DASHBOARD_STATUS_FIXTURE, status)
     return {"status": status, "ledger": ledger}
+
+
+def run_bot(signal_fixture: Path = DEFAULT_SIGNAL_FIXTURE, validation_time: datetime | None = None) -> dict[str, Any]:
+    signal_payload = read_json(signal_fixture)
+    return run_bot_for_payload(signal_payload, validation_time=validation_time)
 
 
 def main() -> int:
