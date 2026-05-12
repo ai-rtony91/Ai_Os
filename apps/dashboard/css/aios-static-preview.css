@@ -1050,8 +1050,8 @@ body.welcome-start-active .top-rail-controls {
 .welcome-ghost-logo::after {
   content: "";
   position: absolute;
-  left: 12%;
-  right: 30%;
+  left: 43%;
+  right: 43%;
   bottom: 0.02em;
   height: 0.035em;
   border-radius: 999px;

@@ -1,0 +1,47 @@
+{
+  "schema_version": "0.1-phase-25",
+  "phase": "25",
+  "title": "Phase 25 Latency Measurement Core",
+  "mode": "paper_only",
+  "summary": "Local paper-only latency measurement core for Trading Lab workflow delay across signal intake, validation, route preview, paper simulation, journal, and scorecard.",
+  "measurement_status": "PENDING_VALIDATION",
+  "signal_id": "PHASE23_NORMALIZED_SIGNAL_001",
+  "alert_created_time": null,
+  "alert_received_time": null,
+  "validation_start_time": null,
+  "validation_end_time": null,
+  "route_preview_time": null,
+  "paper_execution_time": null,
+  "journal_write_time": null,
+  "scorecard_update_time": null,
+  "total_delay_seconds": null,
+  "stale_status": "Pending validation",
+  "delayed_reason": "Not measured",
+  "clock_skew_status": "Pending validation",
+  "step_delays": {
+    "alert_to_receive_seconds": null,
+    "receive_to_validation_start_seconds": null,
+    "validation_duration_seconds": null,
+    "validation_to_route_preview_seconds": null,
+    "route_preview_to_paper_execution_seconds": null,
+    "paper_execution_to_journal_seconds": null,
+    "journal_to_scorecard_seconds": null
+  },
+  "measurement_rules": [
+    "Measure each major paper workflow step.",
+    "Treat negative delays as clock skew.",
+    "Do not allow latency status to unlock live trading.",
+    "Use Pending validation, Not measured, or null when no measured source exists."
+  ],
+  "live_execution": "BLOCKED",
+  "broker": "BLOCKED",
+  "real_order": "BLOCKED",
+  "api_key_required": false,
+  "blocked_fields": {
+    "live_execution": "BLOCKED",
+    "broker": "BLOCKED",
+    "real_order": "BLOCKED",
+    "api_key_required": false
+  },
+  "next_safe_action": "Run the Phase 25 dry-run validator before using latency measurement in replay, journal, scorecard, or handoff review."
+}

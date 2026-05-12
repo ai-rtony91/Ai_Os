@@ -1,0 +1,86 @@
+{
+  "schema_version": "0.1-phase-25",
+  "contract_id": "LATENCY_MEASUREMENT_CORE_CONTRACT_PHASE_25",
+  "phase": "25",
+  "mode": "paper_only",
+  "required_fixture": "apps/dashboard/mock-data/phase-25-latency-measurement-core.example.json",
+  "required_fields": [
+    "alert_created_time",
+    "alert_received_time",
+    "validation_start_time",
+    "validation_end_time",
+    "route_preview_time",
+    "paper_execution_time",
+    "journal_write_time",
+    "scorecard_update_time",
+    "total_delay_seconds",
+    "stale_status",
+    "delayed_reason",
+    "clock_skew_status",
+    "step_delays",
+    "live_execution",
+    "broker",
+    "real_order",
+    "api_key_required"
+  ],
+  "required_step_delays": [
+    "alert_to_receive_seconds",
+    "receive_to_validation_start_seconds",
+    "validation_duration_seconds",
+    "validation_to_route_preview_seconds",
+    "route_preview_to_paper_execution_seconds",
+    "paper_execution_to_journal_seconds",
+    "journal_to_scorecard_seconds"
+  ],
+  "timestamp_order": [
+    "alert_created_time",
+    "alert_received_time",
+    "validation_start_time",
+    "validation_end_time",
+    "route_preview_time",
+    "paper_execution_time",
+    "journal_write_time",
+    "scorecard_update_time"
+  ],
+  "required_values": {
+    "live_execution": "BLOCKED",
+    "broker": "BLOCKED",
+    "real_order": "BLOCKED",
+    "api_key_required": false
+  },
+  "allowed_statuses": {
+    "stale_status": [
+      "Pending validation",
+      "Fresh",
+      "Delayed",
+      "Stale",
+      "CLOCK_SKEW_DETECTED"
+    ],
+    "clock_skew_status": [
+      "Pending validation",
+      "PASS",
+      "CLOCK_SKEW_DETECTED"
+    ]
+  },
+  "prohibited_fields": [
+    "api_key",
+    "secret",
+    "token",
+    "broker_account",
+    "account_id",
+    "webhook_url",
+    "order_id",
+    "live_order"
+  ],
+  "blocked_capabilities": [
+    "OANDA",
+    "broker connection",
+    "live trading",
+    "real webhooks",
+    "real orders",
+    "account connection",
+    "autonomous execution"
+  ],
+  "dashboard_placement": "Trading Lab Advanced Diagnostics or workstation secondary panel only",
+  "next_safe_action": "Validate Phase 25 latency measurement before replay, journal, scorecard, or handoff review consumes it."
+}
