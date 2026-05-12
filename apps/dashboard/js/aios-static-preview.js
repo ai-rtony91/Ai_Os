@@ -79,6 +79,7 @@ const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.j
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const tradingLabWorkstationFixturePath = "mock-data/trading-lab-workstation.example.json";
+const paperTradingBotStatusFixturePath = "mock-data/paper-trading-bot-status.example.json";
 const phase23PaperSignalNormalizationFixturePath = "mock-data/phase-23-paper-signal-normalization.example.json";
 const phase25LatencyMeasurementCoreFixturePath = "mock-data/phase-25-latency-measurement-core.example.json";
 const phase28TvTpPaperHandoffFixturePath = "mock-data/phase-28-tv-tp-paper-handoff.example.json";
@@ -1741,6 +1742,29 @@ function renderPhase25LatencyMeasurementCore(data = {}) {
   ]);
 }
 
+function renderPaperTradingBotStatus(data = {}) {
+  return createWorkstationPanel("Paper Trading Bot Status", [
+    createWorkstationChip("Decision", data.decision || "Pending validation", data.decision),
+    createWorkstationChip("Bot status", data.bot_status || "Pending validation", data.bot_status),
+    createWorkstationChip("Signal source", data.signal_source || "local sample"),
+    createWorkstationChip("Symbol", data.symbol || "Pending validation"),
+    createWorkstationChip("Timeframe", data.timeframe || "Pending validation"),
+    createWorkstationChip("Direction", data.direction || "Pending validation"),
+    createWorkstationChip("Strategy", data.strategy_id || "Pending validation"),
+    createWorkstationChip("Validation", data.validation_status || "Pending validation", data.validation_status),
+    createWorkstationChip("Paper route", data.paper_route_status || "Pending validation", data.paper_route_status),
+    createWorkstationChip("Paper result", data.paper_result_status || "Pending validation", data.paper_result_status),
+    createWorkstationChip("Status output", data.visible_status_output || "Pending validation"),
+    createWorkstationChip("Live execution", data.live_execution_status || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Broker", data.broker_status || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("OANDA", data.oanda_status || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("API keys", data.api_key_status || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Real webhooks", data.real_webhook_status || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Real orders", data.real_order_status || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Next", data.next_safe_action || "Keep all execution paths blocked.")
+  ]);
+}
+
 function renderTradingLabWorkstation(data = {}) {
   const section = document.createElement("section");
   section.className = "trading-workstation";
@@ -1877,7 +1901,7 @@ function createTradingLabAdvancedDiagnostics(items = []) {
   return details;
 }
 
-function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null, phase28HandoffData = null, phase23NormalizationData = null, phase25LatencyData = null) {
+function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null, phase28HandoffData = null, phase23NormalizationData = null, phase25LatencyData = null, paperTradingBotStatusData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -1924,6 +1948,9 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   blockedActions.append(blockedTitle, blockedList);
 
   const advancedItems = [];
+  if (paperTradingBotStatusData) {
+    advancedItems.push(renderPaperTradingBotStatus(paperTradingBotStatusData));
+  }
   if (phase23NormalizationData) {
     advancedItems.push(renderPhase23PaperSignalNormalization(phase23NormalizationData));
   }
@@ -1972,7 +1999,7 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse, phase28HandoffResponse, phase23NormalizationResponse, phase25LatencyResponse] = await Promise.all([
+    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse, phase28HandoffResponse, phase23NormalizationResponse, phase25LatencyResponse, paperTradingBotStatusResponse] = await Promise.all([
       fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
       fetch(paperBotCoreFixturePath, { cache: "no-store" }),
       fetch(tradingLabWindowSystemFixturePath, { cache: "no-store" }),
@@ -1981,7 +2008,8 @@ async function renderTradingLabNextActionCard() {
       fetch(tradingLabWorkstationFixturePath, { cache: "no-store" }),
       fetch(phase28TvTpPaperHandoffFixturePath, { cache: "no-store" }),
       fetch(phase23PaperSignalNormalizationFixturePath, { cache: "no-store" }),
-      fetch(phase25LatencyMeasurementCoreFixturePath, { cache: "no-store" })
+      fetch(phase25LatencyMeasurementCoreFixturePath, { cache: "no-store" }),
+      fetch(paperTradingBotStatusFixturePath, { cache: "no-store" })
     ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
@@ -1992,7 +2020,8 @@ async function renderTradingLabNextActionCard() {
     const phase28HandoffData = phase28HandoffResponse.ok ? await phase28HandoffResponse.json() : null;
     const phase23NormalizationData = phase23NormalizationResponse.ok ? await phase23NormalizationResponse.json() : null;
     const phase25LatencyData = phase25LatencyResponse.ok ? await phase25LatencyResponse.json() : null;
-    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData, phase23NormalizationData, phase25LatencyData);
+    const paperTradingBotStatusData = paperTradingBotStatusResponse.ok ? await paperTradingBotStatusResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData, phase23NormalizationData, phase25LatencyData, paperTradingBotStatusData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",
@@ -3931,6 +3960,12 @@ window.setInterval(() => {
     saveYouTubeRadioState();
   }
 }, 5000);
+
+window.setInterval(() => {
+  if (activeWorkspaceId === "trading-bot" && !isWelcomeStartVisible()) {
+    renderTradingLabNextActionCard();
+  }
+}, 15000);
 
 window.addEventListener("pagehide", () => {
   saveCommandCenterState();
