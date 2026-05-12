@@ -5453,6 +5453,11 @@ body:not(.welcome-start-active) .youtube-radio-dock {
   .dashboard-shell {
     grid-template-columns: 1fr;
     transition: none;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+    touch-action: pan-y;
   }
 
   body.sidebar-collapsed .dashboard-shell,
@@ -5475,7 +5480,7 @@ body:not(.welcome-start-active) .youtube-radio-dock {
     position: fixed;
     grid-column: 1 / -1;
     width: min(84vw, 320px);
-    height: 100vh;
+    height: 100dvh;
     padding-top: calc(72px + env(safe-area-inset-top));
     opacity: 0;
     overflow-y: auto;
@@ -5484,28 +5489,41 @@ body:not(.welcome-start-active) .youtube-radio-dock {
     -webkit-overflow-scrolling: touch;
     visibility: hidden;
     contain: layout paint;
+    will-change: transform, opacity;
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 200ms ease,
+      visibility 200ms ease;
   }
 
   html.mobile-rail-scroll-locked,
   body.mobile-rail-scroll-locked {
-    height: 100vh;
+    width: 100%;
+    height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
+    touch-action: none;
   }
 
   .dashboard-shell.mobile-rail-scroll-locked,
   body.mobile-rail-scroll-locked .dashboard-shell {
+    width: 100%;
+    max-width: 100vw;
     overflow: hidden;
     overscroll-behavior: none;
+    transform: translate3d(0, 0, 0);
   }
 
   .command-main.mobile-rail-scroll-locked,
   body.mobile-rail-scroll-locked .command-main {
+    width: min(100%, 1760px);
+    margin-inline: auto;
     overflow: hidden;
     overscroll-behavior: none;
     pointer-events: none;
     touch-action: none;
     transition: none !important;
+    transform: translate3d(0, 0, 0);
   }
 
   body.mobile-rail-scroll-locked .command-main *,
@@ -5564,7 +5582,7 @@ body:not(.welcome-start-active) .youtube-radio-dock {
     overflow-y: auto;
     overscroll-behavior: contain;
     pointer-events: auto;
-    touch-action: none;
+    touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -5573,7 +5591,7 @@ body:not(.welcome-start-active) .youtube-radio-dock {
     max-height: 100dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    touch-action: none;
+    touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -5682,8 +5700,18 @@ body:not(.welcome-start-active) .youtube-radio-dock {
 
   body.sidebar-open .drawer-backdrop,
   body.personal-rail-open .drawer-backdrop {
-    display: none;
-    pointer-events: none;
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 200ms ease, backdrop-filter 200ms ease;
+  }
+
+  .drawer-backdrop {
+    display: block;
+    opacity: 0;
+    background: rgba(3, 7, 18, 0.72);
+    backdrop-filter: blur(8px);
+    transition: opacity 200ms ease, backdrop-filter 200ms ease;
   }
 
   body.sidebar-collapsed .command-sidebar,
@@ -6520,11 +6548,11 @@ body.welcome-start-active .welcome-ghost-logo {
   overflow: hidden;
   width: min(100%, calc(100vw - 48px));
   max-width: none;
-  min-height: min(76vh, 820px);
-  grid-template-rows: auto minmax(330px, 1fr) auto auto;
+  min-height: min(80vh, 900px);
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   align-content: stretch;
   gap: 10px;
-  padding: clamp(18px, 3vw, 30px) clamp(14px, 4vw, 52px) clamp(38px, 5vh, 56px);
+  padding: clamp(18px, 3vw, 30px) clamp(14px, 4vw, 52px) clamp(22px, 3vh, 36px);
   border-color: rgba(47, 140, 255, 0.02);
   border-radius: 20px;
   background: transparent;
@@ -6552,19 +6580,27 @@ body.welcome-start-active .welcome-ghost-logo {
   z-index: 2;
   grid-row: 1;
   justify-self: center;
-  width: min(100%, 760px);
-  padding: 8px 12px;
+  width: min(100%, 640px);
+  padding: 7px 12px;
   border-radius: 22px;
-  background: linear-gradient(180deg, rgba(5, 8, 20, 0.24), rgba(5, 8, 20, 0.04));
-  text-shadow: 0 0 22px rgba(47, 140, 255, 0.28), 0 0 28px rgba(139, 92, 246, 0.16);
+  background: linear-gradient(180deg, rgba(5, 8, 20, 0.16), rgba(5, 8, 20, 0.03));
+  text-shadow: 0 0 12px rgba(47, 140, 255, 0.18), 0 0 18px rgba(139, 92, 246, 0.1);
 }
 
 .welcome-command-head strong {
-  font-size: clamp(28px, 4.4vw, 48px);
+  color: rgba(231, 248, 255, 0.96);
+  font-size: clamp(18px, 2.4vw, 30px);
+  font-weight: 560;
+  letter-spacing: 0.12em;
+  text-shadow: 0 0 12px rgba(47, 140, 255, 0.22), 0 0 18px rgba(139, 92, 246, 0.1);
 }
 
 .welcome-command-head p {
-  color: rgba(229, 246, 255, 0.78);
+  color: rgba(180, 214, 255, 0.82);
+  font-size: clamp(11px, 1.35vw, 15px);
+  font-weight: 450;
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.18);
 }
 
 .aios-frontdoor-hero-image {
@@ -6577,7 +6613,9 @@ body.welcome-start-active .welcome-ghost-logo {
   grid-row: 3;
   justify-self: center;
   align-self: end;
-  width: min(100%, 620px);
+  width: min(100%, 560px);
+  margin-top: 0;
+  transform: translateY(-16px);
   gap: 7px;
   padding: 6px;
   border-radius: 999px;
@@ -6652,8 +6690,10 @@ body.welcome-start-active .welcome-ghost-logo {
   z-index: 2;
   grid-row: 4;
   justify-self: center;
-  align-self: end;
+  align-self: start;
   width: min(100%, 330px);
+  margin-top: 4px;
+  transform: translateY(-16px);
   padding: 4px;
   border-radius: 999px;
   background: rgba(5, 8, 20, 0.24);
@@ -6664,6 +6704,14 @@ body.welcome-start-active .welcome-ghost-logo {
   min-height: 19px;
   padding: 3px 7px;
   font-size: 8px;
+}
+
+@media (min-width: 1400px) and (min-height: 760px) {
+  .welcome-command-workspace {
+    min-height: min(82vh, 940px);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    padding-bottom: clamp(20px, 2.8vh, 36px);
+  }
 }
 
 @media (max-width: 720px) {
@@ -6677,8 +6725,8 @@ body.welcome-start-active .welcome-ghost-logo {
   .welcome-command-workspace {
     width: min(100%, calc(100vw - 12px));
     min-height: 72vh;
-    grid-template-rows: auto minmax(280px, 1fr) auto auto;
-    padding: 14px 10px 28px;
+    grid-template-rows: auto minmax(340px, 1fr) auto auto;
+    padding: 14px 10px 22px;
     border-radius: 20px;
     background: transparent;
   }
@@ -6707,6 +6755,101 @@ body.welcome-start-active .welcome-ghost-logo {
     width: min(100%, 260px);
     border-radius: 20px;
   }
+}
+
+/* Round 5M/5N: top bar transparent neon edge color pass only. */
+.status-strip {
+  border-color: rgba(125, 211, 252, 0.24);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(125, 211, 252, 0.08), rgba(139, 92, 246, 0.04) 48%, rgba(3, 12, 34, 0.04)),
+    rgba(3, 12, 34, 0.42);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.2),
+    0 0 12px rgba(47, 140, 255, 0.08),
+    0 0 18px rgba(139, 92, 246, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.status-strip .drawer-reopen.mobile-tab-button,
+.home-start-button.mobile-tab-button,
+.top-rail-controls .personal-rail-toggle.mobile-tab-button,
+.top-utility-drawer summary {
+  border-color: rgba(125, 211, 252, 0.34);
+  border-radius: 18px;
+  color: #f8fbff;
+  background:
+    linear-gradient(135deg, rgba(125, 211, 252, 0.08), rgba(139, 92, 246, 0.05) 62%, rgba(5, 12, 32, 0.02)),
+    rgba(5, 12, 32, 0.46);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.18),
+    0 0 9px rgba(47, 140, 255, 0.1),
+    0 0 12px rgba(139, 92, 246, 0.075),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+.status-strip .drawer-reopen.mobile-tab-button:hover,
+.status-strip .drawer-reopen.mobile-tab-button:focus,
+.home-start-button.mobile-tab-button:hover,
+.home-start-button.mobile-tab-button:focus,
+.top-rail-controls .personal-rail-toggle.mobile-tab-button:hover,
+.top-rail-controls .personal-rail-toggle.mobile-tab-button:focus,
+.top-utility-drawer summary:hover,
+.top-utility-drawer summary:focus {
+  border-color: rgba(186, 230, 253, 0.72);
+  color: #ffffff;
+  background:
+    linear-gradient(135deg, rgba(125, 211, 252, 0.14), rgba(139, 92, 246, 0.09) 60%, rgba(3, 12, 34, 0.04)),
+    rgba(3, 12, 34, 0.62);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.2),
+    0 0 14px rgba(125, 211, 252, 0.22),
+    0 0 22px rgba(168, 85, 247, 0.16),
+    inset 0 0 12px rgba(47, 140, 255, 0.07);
+  outline: none;
+}
+
+.status-strip .mobile-tab-icon {
+  width: 17px;
+  height: 17px;
+  filter: drop-shadow(0 0 5px rgba(125, 211, 252, 0.24)) drop-shadow(0 0 7px rgba(139, 92, 246, 0.16));
+}
+
+.utility-status > span,
+.guided-status-chips span,
+.status-chip {
+  border-color: rgba(125, 211, 252, 0.28);
+  color: rgba(238, 249, 255, 0.84);
+  background:
+    linear-gradient(135deg, rgba(47, 140, 255, 0.055), rgba(139, 92, 246, 0.035)),
+    rgba(3, 12, 34, 0.34);
+  box-shadow:
+    0 0 8px rgba(47, 140, 255, 0.06),
+    0 0 10px rgba(139, 92, 246, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.guided-workspace-status {
+  border-color: rgba(125, 211, 252, 0.22);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(125, 211, 252, 0.055), rgba(139, 92, 246, 0.035) 58%, rgba(3, 12, 34, 0.02)),
+    rgba(3, 12, 34, 0.34);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.18),
+    0 0 10px rgba(47, 140, 255, 0.07),
+    0 0 14px rgba(139, 92, 246, 0.055),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.guided-workspace-status .eyebrow,
+.guided-workspace-status strong {
+  color: rgba(186, 230, 253, 0.9);
+  text-shadow: 0 0 10px rgba(47, 140, 255, 0.14), 0 0 14px rgba(139, 92, 246, 0.08);
+}
+
+.guided-workspace-status p {
+  color: rgba(229, 246, 255, 0.72);
 }
 
 /* Round 4B: desktop media dock containment fix. */
