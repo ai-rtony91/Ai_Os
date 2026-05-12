@@ -1,0 +1,22 @@
+{
+  "score_id": "MOCK_CONFLUENCE_SCORE_001",
+  "signal_id": "MOCK_SIGNAL_001",
+  "strategy_id": "MOCK_STRATEGY_001",
+  "score_breakdown": {
+    "trend_alignment": 3,
+    "momentum": 0,
+    "structure_location": 0,
+    "volatility": 0,
+    "risk_quality": 0
+  },
+  "total_score": 3,
+  "confidence_tier": "very_low",
+  "rejection_flags": [
+    "risk_quality_below_threshold",
+    "trend_alignment_below_threshold",
+    "volatility_unknown_or_unsafe",
+    "regime_not_approved",
+    "missing_evidence"
+  ],
+  "next_safe_action": "Run mock regime assessment and mock risk gate before any mock ledger review."
+}

@@ -1,0 +1,10 @@
+{
+  "journal_id": "MOCK_JOURNAL_001",
+  "ledger_id": "MOCK_LEDGER_001",
+  "signal_id": "MOCK_SIGNAL_001",
+  "reason": "Mock trend pullback idea reviewed, but risk gate is incomplete.",
+  "mistake_risk": "Advancing to mock ledger before regime and risk checks are complete.",
+  "lesson": "Keep execution blocked until regime, risk, and journal evidence are clean.",
+  "review_status": "needs_review",
+  "next_safe_action": "Review risk gate fields, then update mock metrics confidence."
+}

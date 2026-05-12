@@ -1,0 +1,15 @@
+{
+  "signal_id": "MOCK_SIGNAL_001",
+  "strategy_id": "MOCK_STRATEGY_001",
+  "symbol": "EUR_USD_MOCK",
+  "timeframe": "H1",
+  "regime": "trend_review_pending",
+  "confluence_score_id": "MOCK_CONFLUENCE_SCORE_001",
+  "confluence_score": 3,
+  "total_score": 3,
+  "confidence_tier": "very_low",
+  "risk_state": "blocked_until_risk_gate_passes",
+  "approved_for_mock_execution": false,
+  "rejection_reason": "Risk gate not completed.",
+  "next_safe_action": "Run mock regime assessment and mock risk gate."
+}

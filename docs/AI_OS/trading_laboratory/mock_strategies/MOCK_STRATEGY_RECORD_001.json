@@ -1,0 +1,30 @@
+{
+  "strategy_id": "MOCK_STRATEGY_001",
+  "strategy_name": "Mock Trend Pullback Review",
+  "version": "0.1.0",
+  "market": "FOREX_MOCK_ONLY",
+  "timeframe": "H1",
+  "setup_rules": [
+    "Identify a mock trend condition before any signal review.",
+    "Require price to pull back into a planned review zone.",
+    "Mark market regime before scoring the mock signal."
+  ],
+  "entry_rules": [
+    "Entry is mock-only and may not place orders.",
+    "Signal must reach a confluence score of 70 or higher for mock ledger review.",
+    "Risk state must be approved by the Risk Agent before any mock execution ledger entry."
+  ],
+  "exit_rules": [
+    "Define invalidation before mock signal approval.",
+    "Record planned exit reason in the mock journal.",
+    "Close mock review if regime changes to UNKNOWN or unsafe."
+  ],
+  "blocked_actions": [
+    "No broker",
+    "No OANDA",
+    "No API keys",
+    "No real orders",
+    "No live market data"
+  ],
+  "status": "draft_mock_only"
+}

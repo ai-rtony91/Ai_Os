@@ -1,0 +1,104 @@
+{
+  "schema_version": "0.1-phase-19",
+  "mode": "paper_trade",
+  "title": "Modular Trading Workspace",
+  "summary": "A flexible paper trading workspace with safe windows for chart review, the AI_OS Paper Trade Engine, route planning, status telemetry, and the next safe action.",
+  "layout_mode": "modular_windows",
+  "window_flexibility": {
+    "resizable_planned": true,
+    "detachable_planned": true,
+    "layout_memory_planned": true,
+    "popout_planned": true
+  },
+  "windows": {
+    "tradingview_chart": {
+      "title": "TradingView Chart Window",
+      "status": "PLANNED",
+      "summary": "TradingView chart embed planned.",
+      "detail": "Safe placeholder only. No login, API key, webhook, broker, account connection, or real chart integration is active.",
+      "expanded_by_default": true,
+      "safety": ["No TradingView login", "No API key", "No webhook", "No account connection"]
+    },
+    "paper_trade_engine": {
+      "title": "AI_OS Paper Trade Engine Window",
+      "status": "PAPER READY",
+      "summary": "AI_OS-owned Paper Trade Engine remains the core paper trading system.",
+      "detail": "Shows Paper Trade Signal, Paper Risk Gate, Paper Decision, Paper Trade Result, Paper Scorecard, and Next Safe Action.",
+      "expanded_by_default": true,
+      "safety": ["Paper only", "No real orders", "Live execution BLOCKED"]
+    },
+    "traderspost_route_preview": {
+      "title": "TradersPost Route Preview",
+      "status": "PLANNING ONLY",
+      "summary": "Route preview planning area only.",
+      "detail": "No iframe assumption, login, broker, real route, webhook activation, or execution is enabled.",
+      "expanded_by_default": false,
+      "safety": ["Planning only", "No broker", "No real route", "No execution"]
+    },
+    "status_telemetry": {
+      "title": "Status / Telemetry Window",
+      "status": "BLOCKED SAFE",
+      "summary": "Safety and telemetry state for the paper trading workspace.",
+      "detail": "Live execution, broker, OANDA, credentials, real orders, and real webhooks remain blocked.",
+      "expanded_by_default": true,
+      "safety": ["Live Execution: BLOCKED", "Broker: BLOCKED", "OANDA: BLOCKED", "Real Orders: BLOCKED"]
+    },
+    "next_action": {
+      "title": "Next Action Window",
+      "status": "START HERE",
+      "summary": "Review the Paper Risk Gate before expanding any external platform planning.",
+      "detail": "Keep the workspace paper-only and use validators before future APPLY work.",
+      "expanded_by_default": true,
+      "safety": ["Human approval required", "Validators required", "No live setup"]
+    }
+  },
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "credential_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "external_platforms": {
+    "path": "Trading Lab -> Tools / Connectors -> External Trading Platforms -> MetaTrader 5 / TradingView / TradersPost",
+    "main_screen_buttons_allowed": false,
+    "default_visible": false,
+    "collapsed_by_default": true,
+    "platforms": {
+      "TradingView": {
+        "status": "planning_or_chart_embed_only",
+        "login_allowed": false,
+        "credentials_requested": false,
+        "api_key_requested": false,
+        "webhook_enabled": false,
+        "real_execution_enabled": false
+      },
+      "TradersPost": {
+        "status": "planning_only",
+        "login_allowed": false,
+        "credentials_requested": false,
+        "iframe_assumption_allowed": false,
+        "broker_connection_allowed": false,
+        "real_route_enabled": false,
+        "real_execution_enabled": false
+      },
+      "MetaTrader 5": {
+        "status": "planning_only",
+        "login_allowed": false,
+        "credentials_requested": false,
+        "broker_connection_allowed": false,
+        "real_execution_enabled": false
+      }
+    }
+  },
+  "paper_trade_engine": {
+    "signal": "Paper Trade Signal: review only",
+    "risk_gate": "Paper Risk Gate: BLOCKED by default",
+    "decision": "Paper Decision: do_not_simulate_trade until review conditions pass",
+    "paper_trade_result": "Paper Trade Result: not executed while risk is blocked",
+    "scorecard": "Paper Scorecard: neutral, no profitability claim",
+    "next_safe_action": "Review Paper Risk Gate and run DRY_RUN validators."
+  }
+}

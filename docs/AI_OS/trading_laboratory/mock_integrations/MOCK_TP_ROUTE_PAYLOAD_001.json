@@ -1,0 +1,23 @@
+{
+  "source": "TradersPost_mock_routing_layer_only",
+  "route_id": "MOCK_TP_ROUTE_001",
+  "signal_id": "MOCK_SIGNAL_001",
+  "strategy_id": "MOCK_STRATEGY_001",
+  "symbol": "EUR_USD_MOCK",
+  "timeframe": "H1",
+  "routing_mode": "mock_blocked",
+  "validation_status": "blocked_before_execution",
+  "blocked_reason": "No broker route, no webhook execution, and risk gate not completed.",
+  "blocked_fields": [
+    "broker",
+    "OANDA",
+    "API keys",
+    "secrets",
+    "live broker route",
+    "real webhook execution",
+    "real orders",
+    "live market data",
+    "account id"
+  ],
+  "next_safe_action": "Keep route blocked and complete mock regime and risk gates."
+}

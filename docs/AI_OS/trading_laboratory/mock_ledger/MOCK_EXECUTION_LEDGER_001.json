@@ -1,0 +1,17 @@
+{
+  "ledger_id": "MOCK_LEDGER_001",
+  "signal_id": "MOCK_SIGNAL_001",
+  "strategy_id": "MOCK_STRATEGY_001",
+  "ledger_type": "simulated_only",
+  "mock_execution_status": "blocked_not_executed",
+  "approved_for_mock_execution": false,
+  "reason": "Risk gate not completed.",
+  "blocked_actions": [
+    "No broker",
+    "No OANDA",
+    "No API keys",
+    "No real orders",
+    "No live market data"
+  ],
+  "next_safe_action": "Journal the blocked trade idea, then update mock metrics."
+}
