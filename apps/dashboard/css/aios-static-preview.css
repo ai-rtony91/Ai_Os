@@ -893,6 +893,12 @@ body.welcome-start-active .command-main {
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  background-image:
+    linear-gradient(180deg, rgba(3, 7, 18, 0.12), rgba(3, 7, 18, 0.34)),
+    url("../assets/ai_osgalaxy.theme.jpg");
+  background-size: cover, auto 106%;
+  background-position: center, center bottom;
+  background-repeat: no-repeat;
 }
 
 body.welcome-start-active .command-sidebar,
@@ -6531,12 +6537,12 @@ body {
 body.welcome-start-active .welcome-start-screen {
   width: 100%;
   min-height: calc(100dvh - 96px - env(safe-area-inset-bottom));
-  padding: 8px clamp(8px, 1vw, 14px) 16px;
+  padding: 0 clamp(8px, 1vw, 14px) 16px;
   background-image:
     linear-gradient(180deg, rgba(3, 7, 18, 0.12), rgba(3, 7, 18, 0.34)),
     url("../assets/ai_osgalaxy.theme.jpg");
-  background-size: cover, cover;
-  background-position: center, center 48%;
+  background-size: cover, auto 106%;
+  background-position: center, center bottom;
   background-repeat: no-repeat;
 }
 
@@ -6576,15 +6582,7 @@ body.welcome-start-active .welcome-ghost-logo {
 }
 
 .welcome-command-head {
-  position: relative;
-  z-index: 2;
-  grid-row: 1;
-  justify-self: center;
-  width: min(100%, 640px);
-  padding: 7px 12px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(5, 8, 20, 0.16), rgba(5, 8, 20, 0.03));
-  text-shadow: 0 0 12px rgba(47, 140, 255, 0.18), 0 0 18px rgba(139, 92, 246, 0.1);
+  display: none;
 }
 
 .welcome-command-head strong {
@@ -6613,44 +6611,51 @@ body.welcome-start-active .welcome-ghost-logo {
   grid-row: 3;
   justify-self: center;
   align-self: end;
-  width: min(100%, 560px);
+  width: min(100%, 600px);
   margin-top: 0;
-  transform: translateY(-16px);
-  gap: 7px;
-  padding: 6px;
+  transform: translateY(0);
+  gap: 8px;
+  padding: 7px;
   border-radius: 999px;
-  background: rgba(5, 8, 20, 0.34);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.045);
-  backdrop-filter: blur(12px);
+  background:
+    linear-gradient(135deg, rgba(47, 140, 255, 0.08), rgba(139, 92, 246, 0.055)),
+    rgba(4, 8, 22, 0.5);
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.34),
+    0 0 20px rgba(47, 140, 255, 0.1),
+    0 0 26px rgba(139, 92, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(14px);
 }
 
 .welcome-actions button,
 .welcome-advanced summary {
-  min-height: 42px;
-  padding: 7px 9px;
-  gap: 7px;
-  border-color: rgba(120, 170, 255, 0.22);
+  min-height: 46px;
+  padding: 8px 12px;
+  gap: 8px;
+  border-color: rgba(125, 211, 252, 0.24);
   color: #f8fbff;
   font-size: 12px;
   background:
-    linear-gradient(180deg, rgba(47, 140, 255, 0.08), rgba(139, 92, 246, 0.045)),
-    rgba(5, 12, 32, 0.78);
+    linear-gradient(180deg, rgba(47, 140, 255, 0.075), rgba(139, 92, 246, 0.04)),
+    rgba(5, 12, 32, 0.64);
   box-shadow:
     0 12px 30px rgba(0, 0, 0, 0.24),
-    0 0 16px rgba(47, 140, 255, 0.08),
-    0 0 18px rgba(139, 92, 246, 0.06),
+    0 0 12px rgba(47, 140, 255, 0.07),
+    0 0 14px rgba(139, 92, 246, 0.055),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
 .welcome-actions .welcome-action-icon {
-  width: 22px;
-  height: 22px;
-  border-color: rgba(120, 170, 255, 0.24);
+  width: 24px;
+  height: 24px;
+  border-color: rgba(125, 211, 252, 0.28);
   color: rgba(229, 246, 255, 0.86);
-  background: rgba(5, 12, 32, 0.72);
+  background: rgba(5, 12, 32, 0.62);
   font-size: 10px;
   box-shadow:
-    0 0 14px rgba(47, 140, 255, 0.08),
+    0 0 12px rgba(47, 140, 255, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
@@ -6692,18 +6697,18 @@ body.welcome-start-active .welcome-ghost-logo {
   justify-self: center;
   align-self: start;
   width: min(100%, 330px);
-  margin-top: 4px;
-  transform: translateY(-16px);
-  padding: 4px;
+  margin-top: 2px;
+  transform: translateY(0);
+  padding: 3px;
   border-radius: 999px;
-  background: rgba(5, 8, 20, 0.24);
+  background: rgba(5, 8, 20, 0.18);
   backdrop-filter: blur(10px);
 }
 
 .welcome-command-status span {
-  min-height: 19px;
-  padding: 3px 7px;
-  font-size: 8px;
+  min-height: 18px;
+  padding: 2px 7px;
+  font-size: 7.5px;
 }
 
 @media (min-width: 1400px) and (min-height: 760px) {
