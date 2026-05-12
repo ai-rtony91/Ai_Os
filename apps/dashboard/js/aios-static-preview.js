@@ -79,6 +79,7 @@ const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.j
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const paperBotCoreFixturePath = "mock-data/paper-bot-core.example.json";
+const tradingLabWindowSystemFixturePath = "mock-data/trading-lab-window-system.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 const personalGalleryManifestPath = "private-media/service-gallery/gallery.local.json";
 const youtubeRadioTracks = [
@@ -967,6 +968,139 @@ function renderPaperBotCorePanel(data) {
   return panel;
 }
 
+function createTradingLabWindow(key, windowData = {}, engineData = null, safetyData = null) {
+  const panel = document.createElement("details");
+  panel.className = `trading-lab-window ${key === "next_action" ? "is-next-action" : ""} ${getTradingLabStateClass(windowData.status)}`;
+  if (windowData.expanded_by_default || key === "next_action") {
+    panel.open = true;
+  }
+
+  const summary = document.createElement("summary");
+  summary.className = "trading-lab-window-summary";
+
+  const title = document.createElement("strong");
+  title.textContent = windowData.title || key.replaceAll("_", " ");
+
+  const status = document.createElement("span");
+  status.textContent = windowData.status || "PLANNED";
+
+  const summaryText = document.createElement("p");
+  summaryText.textContent = windowData.summary || "Paper trading workspace window.";
+
+  summary.append(title, status, summaryText);
+
+  const body = document.createElement("div");
+  body.className = "trading-lab-window-body";
+
+  if (key === "tradingview_chart") {
+    const chartPlaceholder = document.createElement("div");
+    chartPlaceholder.className = "trading-lab-chart-placeholder";
+    chartPlaceholder.textContent = "TradingView chart embed planned";
+    body.append(chartPlaceholder);
+  }
+
+  const detail = document.createElement("p");
+  detail.textContent = windowData.detail || "Details expand here when needed.";
+  body.append(detail);
+
+  if (key === "paper_trade_engine" && engineData) {
+    const engineList = document.createElement("dl");
+    engineList.className = "trading-lab-engine-list";
+    [
+      ["Signal", engineData.signal],
+      ["Paper Risk Gate", engineData.risk_gate],
+      ["Paper Decision", engineData.decision],
+      ["Paper Trade Result", engineData.paper_trade_result],
+      ["Paper Scorecard", engineData.scorecard],
+      ["Next Safe Action", engineData.next_safe_action]
+    ].forEach(([label, value]) => {
+      const term = document.createElement("dt");
+      term.textContent = label;
+      const description = document.createElement("dd");
+      description.textContent = value || "Review pending.";
+      engineList.append(term, description);
+    });
+    body.append(engineList);
+  }
+
+  if (key === "status_telemetry" && safetyData) {
+    const telemetry = document.createElement("div");
+    telemetry.className = "trading-lab-window-telemetry";
+    [
+      ["Live Execution", safetyData.live_execution_status],
+      ["Broker", safetyData.broker_status],
+      ["OANDA", safetyData.oanda_status],
+      ["Credentials", safetyData.credential_status],
+      ["Real Orders", safetyData.real_order_status],
+      ["Real Webhooks", safetyData.real_webhook_status]
+    ].forEach(([label, value]) => {
+      telemetry.append(createTradingLabSafetyChip(label, value || "BLOCKED"));
+    });
+    body.append(telemetry);
+  }
+
+  const safety = Array.isArray(windowData.safety) ? windowData.safety : [];
+  if (safety.length) {
+    const safetyList = createTradingStackList(safety);
+    safetyList.className = "trading-lab-window-safety";
+    body.append(safetyList);
+  }
+
+  panel.append(summary, body);
+  return panel;
+}
+
+function renderTradingLabWindowSystem(data) {
+  if (!data) return null;
+  const section = document.createElement("section");
+  section.className = "trading-lab-window-system";
+  section.setAttribute("aria-label", "Modular Trading Workspace");
+
+  const head = document.createElement("div");
+  head.className = "trading-lab-window-system-head";
+  const title = document.createElement("strong");
+  title.textContent = data.title || "Modular Trading Workspace";
+  const badge = document.createElement("span");
+  badge.textContent = data.layout_mode || "modular_windows";
+  const summary = document.createElement("p");
+  summary.textContent = data.summary || "Flexible paper trading workspace windows.";
+  head.append(title, badge, summary);
+
+  const flexibility = document.createElement("div");
+  flexibility.className = "trading-lab-window-flexibility";
+  const flexibilityData = data.window_flexibility || {};
+  [
+    ["Resizable", flexibilityData.resizable_planned],
+    ["Detachable", flexibilityData.detachable_planned],
+    ["Layout Memory", flexibilityData.layout_memory_planned],
+    ["Popout", flexibilityData.popout_planned]
+  ].forEach(([label, planned]) => {
+    const item = document.createElement("span");
+    item.textContent = `${label}: ${planned ? "planned" : "not active"}`;
+    flexibility.append(item);
+  });
+
+  const grid = document.createElement("div");
+  grid.className = "trading-lab-window-grid";
+  const windows = data.windows || {};
+  ["tradingview_chart", "paper_trade_engine", "traderspost_route_preview", "status_telemetry", "next_action"].forEach((key) => {
+    grid.append(createTradingLabWindow(key, windows[key], data.paper_trade_engine, data.safety));
+  });
+
+  const platformRule = document.createElement("div");
+  platformRule.className = "trading-lab-window-platform-rule";
+  const platformTitle = document.createElement("strong");
+  platformTitle.textContent = "External platform placement";
+  const platformText = document.createElement("p");
+  platformText.textContent = data.external_platforms?.path || "Trading Lab -> Tools / Connectors -> External Trading Platforms";
+  const platformStatus = document.createElement("small");
+  platformStatus.textContent = "Hidden/collapsed by default. Planning-only. No login, credentials, broker, real route, or execution.";
+  platformRule.append(platformTitle, platformText, platformStatus);
+
+  section.append(head, flexibility, grid, platformRule);
+  return section;
+}
+
 function createTradingStackList(items) {
   const list = document.createElement("ul");
   list.className = "trading-stack-list";
@@ -1060,7 +1194,7 @@ function renderTradingStackHub() {
   return hub;
 }
 
-function renderTradingLabNextActionData(data, paperBotCoreData = null) {
+function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -1106,6 +1240,9 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null) {
   blockedActions.append(blockedTitle, blockedList);
 
   const children = [title, safety, flowGrid];
+  if (windowSystemData) {
+    children.push(renderTradingLabWindowSystem(windowSystemData));
+  }
   if (paperBotCoreData) {
     children.push(renderPaperBotCorePanel(paperBotCoreData));
   }
@@ -1118,13 +1255,15 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const [response, paperBotResponse] = await Promise.all([
+    const [response, paperBotResponse, windowSystemResponse] = await Promise.all([
       fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
-      fetch(paperBotCoreFixturePath, { cache: "no-store" })
+      fetch(paperBotCoreFixturePath, { cache: "no-store" }),
+      fetch(tradingLabWindowSystemFixturePath, { cache: "no-store" })
     ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
-    renderTradingLabNextActionData(await response.json(), paperBotCoreData);
+    const windowSystemData = windowSystemResponse.ok ? await windowSystemResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",
