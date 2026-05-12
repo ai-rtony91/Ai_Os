@@ -8,22 +8,22 @@
     "direction": "LONG_REVIEW",
     "strategy_id": "PAPER_EMA_VWAP_PULLBACK_001",
     "confidence": 0.82,
-    "alert_time": "2026-05-12T00:00:00Z",
-    "source": "TRADINGVIEW_REFERENCE"
+    "alert_time": "2026-05-12T12:38:01Z",
+    "source": "LOCAL_FAKE_SIGNAL"
   },
   "paper_signal_intake": {
     "paper_signal_intake_ledger_id": "PAPER_SIGNAL_INTAKE_LEDGER_001",
     "mode": "paper_only",
     "intake_status": "ACCEPTED_FOR_PAPER_PREVIEW",
-    "received_at": "2026-05-12T00:05:00Z",
+    "received_at": "2026-05-12T12:38:01Z",
     "normalized_signal": {
       "symbol": "EUR_USD",
       "timeframe": "M15",
       "direction": "LONG_REVIEW",
       "strategy_id": "PAPER_EMA_VWAP_PULLBACK_001",
       "confidence": 0.82,
-      "alert_time": "2026-05-12T00:00:00Z",
-      "source": "TRADINGVIEW_REFERENCE"
+      "alert_time": "2026-05-12T12:38:01Z",
+      "source": "LOCAL_FAKE_SIGNAL"
     },
     "route_mode": "PAPER_PREVIEW_ONLY",
     "live_execution_status": "BLOCKED",
@@ -41,8 +41,8 @@
     "missing_fields": [],
     "clock_skew_status": "PASS",
     "stale_signal_status": "PASS",
-    "signal_age_seconds": 300,
-    "validated_at": "2026-05-12T00:05:00Z",
+    "signal_age_seconds": 0,
+    "validated_at": "2026-05-12T12:38:01Z",
     "route_mode": "PAPER_PREVIEW_ONLY",
     "live_execution_status": "BLOCKED",
     "broker_status": "BLOCKED",
@@ -87,6 +87,25 @@
     "secrets_status": "BLOCKED",
     "real_webhook_status": "BLOCKED",
     "real_order_status": "BLOCKED"
+  },
+  "latency": {
+    "alert_created_time": "2026-05-12T12:38:01Z",
+    "alert_received_time": "2026-05-12T12:38:01Z",
+    "validation_start_time": "2026-05-12T12:38:01Z",
+    "validation_end_time": "2026-05-12T12:38:01Z",
+    "route_preview_time": "2026-05-12T12:38:01Z",
+    "total_delay_seconds": 0,
+    "stale_status": "PASS",
+    "clock_skew_status": "PASS"
+  },
+  "journal": {
+    "journal_entry_id": "PAPER_TRADING_BOT_JOURNAL_001",
+    "paper_trade_id": "PAPER_TRADING_BOT_TRADE_001",
+    "normalized_signal_id": "PAPER_BOT_NORMALIZED_SIGNAL_001",
+    "decision": "ACCEPT",
+    "paper_result_status": "PAPER_RESULT_PREVIEW",
+    "review_status": "READY_FOR_PAPER_REVIEW",
+    "blocked_reason": "No live execution. Paper review only."
   },
   "live_execution": "BLOCKED",
   "broker": "BLOCKED",

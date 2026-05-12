@@ -186,11 +186,16 @@ def process_paper_signal(payload: dict[str, Any], validation_time: datetime | No
     return result
 
 
-if app:
+def paper_signal(payload: dict[str, Any]) -> dict[str, Any]:
+    result = process_paper_signal(payload, write_outputs=True)
+    from trading_lab.bot.paper_trading_bot import run_bot_for_payload
 
-    @app.post("/paper-signal")
-    def paper_signal(payload: dict[str, Any]) -> dict[str, Any]:
-        return process_paper_signal(payload, write_outputs=True)
+    result["paper_bot"] = run_bot_for_payload(payload, intake_result=result)["status"]
+    return result
+
+
+if app:
+    app.post("/paper-signal")(paper_signal)
 
 
 def main() -> int:

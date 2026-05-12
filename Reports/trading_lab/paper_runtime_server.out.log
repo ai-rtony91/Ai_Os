@@ -1,0 +1,7 @@
+AI_OS Trading Lab Local Paper Runtime
+Paper Only: YES
+Live Trading: BLOCKED
+URL: http://127.0.0.1:8765
+Press Ctrl+C to stop
+INFO:     127.0.0.1:57926 - "POST /paper-signal HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57927 - "POST /paper-signal HTTP/1.1" 200 OK

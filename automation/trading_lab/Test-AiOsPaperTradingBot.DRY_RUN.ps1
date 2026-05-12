@@ -11,6 +11,31 @@ if ($LASTEXITCODE -ne 0) {
     throw "Paper trading bot runner failed."
 }
 
+$apiCheck = @'
+import json
+from datetime import UTC, datetime
+from pathlib import Path
+
+from trading_lab.ingest.paper_signal_api import paper_signal
+
+repo = Path.cwd()
+payload_path = repo / "apps" / "trading_lab" / "trading_lab" / "fixtures" / "paper_signal_api" / "PAPER_SIGNAL_API_VALID_001.json"
+payload = json.loads(payload_path.read_text(encoding="utf-8"))
+payload["alert_time"] = datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+result = paper_signal(payload)
+
+if "paper_bot" not in result:
+    raise SystemExit("/paper-signal response missing paper_bot status.")
+if result["paper_bot"].get("decision") != "ACCEPT":
+    raise SystemExit("/paper-signal valid payload should update bot output with ACCEPT.")
+if result["paper_bot"].get("live_execution_status") != "BLOCKED":
+    raise SystemExit("/paper-signal bot output must keep live execution BLOCKED.")
+'@
+$apiCheck | python -
+if ($LASTEXITCODE -ne 0) {
+    throw "/paper-signal bot auto-update check failed."
+}
+
 $createdFiles = @(
     "apps/trading_lab/trading_lab/bot/paper_trading_bot.py",
     "apps/trading_lab/trading_lab/results/bot/PAPER_TRADING_BOT_STATUS_001.json",
@@ -58,6 +83,53 @@ if ($ledger.paper_result.paper_result_status -ne "PAPER_RESULT_PREVIEW") {
 
 if ($dashboard.bot_status_id -ne $status.bot_status_id) {
     throw "Dashboard bot status fixture does not mirror bot status output."
+}
+
+$latencyFields = @(
+    "alert_created_time",
+    "alert_received_time",
+    "validation_start_time",
+    "validation_end_time",
+    "route_preview_time",
+    "total_delay_seconds",
+    "stale_status",
+    "clock_skew_status"
+)
+
+foreach ($field in $latencyFields) {
+    if (-not ($ledger.latency.PSObject.Properties.Name -contains $field)) {
+        throw "Ledger latency missing $field."
+    }
+    if (-not ($status.latest_latency.PSObject.Properties.Name -contains $field)) {
+        throw "Status latest_latency missing $field."
+    }
+}
+
+$journalFields = @(
+    "journal_entry_id",
+    "paper_trade_id",
+    "normalized_signal_id",
+    "decision",
+    "paper_result_status",
+    "review_status",
+    "blocked_reason"
+)
+
+foreach ($field in $journalFields) {
+    if (-not ($ledger.journal.PSObject.Properties.Name -contains $field)) {
+        throw "Ledger journal missing $field."
+    }
+    if (-not ($status.latest_journal.PSObject.Properties.Name -contains $field)) {
+        throw "Status latest_journal missing $field."
+    }
+}
+
+if ($ledger.journal.decision -ne $status.decision) {
+    throw "Ledger journal decision must match status decision."
+}
+
+if ($dashboard.latest_journal.decision -ne $status.decision) {
+    throw "Dashboard journal decision must mirror status decision."
 }
 
 $blockedStatusFields = @(

@@ -2,15 +2,15 @@
   "paper_signal_intake_ledger_id": "PAPER_SIGNAL_INTAKE_LEDGER_001",
   "mode": "paper_only",
   "intake_status": "ACCEPTED_FOR_PAPER_PREVIEW",
-  "received_at": "2026-05-12T00:05:00Z",
+  "received_at": "2026-05-12T12:38:01Z",
   "normalized_signal": {
     "symbol": "EUR_USD",
     "timeframe": "M15",
     "direction": "LONG_REVIEW",
     "strategy_id": "PAPER_EMA_VWAP_PULLBACK_001",
     "confidence": 0.82,
-    "alert_time": "2026-05-12T00:00:00Z",
-    "source": "TRADINGVIEW_REFERENCE"
+    "alert_time": "2026-05-12T12:38:01Z",
+    "source": "LOCAL_FAKE_SIGNAL"
   },
   "route_mode": "PAPER_PREVIEW_ONLY",
   "live_execution_status": "BLOCKED",
