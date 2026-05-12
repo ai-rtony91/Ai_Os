@@ -1,0 +1,32 @@
+{
+  "schema_id": "TV_ALERT_REFERENCE_SCHEMA_PHASE_20",
+  "phase": "20",
+  "mode": "external_reference_only",
+  "source_status": "EXTERNAL_REFERENCE_ONLY",
+  "required_fields": [
+    "reference_id",
+    "source_name",
+    "symbol",
+    "timeframe",
+    "signal_label",
+    "direction",
+    "confidence",
+    "received_time",
+    "source_status",
+    "live_execution_status",
+    "real_webhook_status"
+  ],
+  "example": {
+    "reference_id": "TV_ALERT_REFERENCE_001",
+    "source_name": "TradingView Signal Reference",
+    "symbol": "EUR_USD",
+    "timeframe": "M15",
+    "signal_label": "EMA VWAP pullback review",
+    "direction": "LONG_REVIEW",
+    "confidence": 0.82,
+    "received_time": "2026-05-12T00:00:00Z",
+    "source_status": "EXTERNAL_REFERENCE_ONLY",
+    "live_execution_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED"
+  }
+}

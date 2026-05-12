@@ -1,0 +1,37 @@
+{
+  "schema_id": "TP_PAPER_ROUTE_PREVIEW_SCHEMA_PHASE_20",
+  "phase": "20",
+  "mode": "paper_preview_only",
+  "target_platform": "TRADERSPOST_REFERENCE",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "required_fields": [
+    "route_preview_id",
+    "target_platform",
+    "route_mode",
+    "paper_symbol",
+    "paper_direction",
+    "paper_risk_gate_status",
+    "paper_route_status",
+    "paper_result_review_status",
+    "next_safe_action",
+    "live_execution_status",
+    "broker_status",
+    "real_webhook_status",
+    "real_order_status"
+  ],
+  "example": {
+    "route_preview_id": "TP_PAPER_ROUTE_PREVIEW_001",
+    "target_platform": "TRADERSPOST_REFERENCE",
+    "route_mode": "PAPER_PREVIEW_ONLY",
+    "paper_symbol": "EUR_USD",
+    "paper_direction": "LONG_REVIEW",
+    "paper_risk_gate_status": "REVIEW_REQUIRED",
+    "paper_route_status": "PREVIEW_ONLY",
+    "paper_result_review_status": "REVIEW_REQUIRED",
+    "next_safe_action": "Review AI_OS validation output before any future route discussion.",
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  }
+}

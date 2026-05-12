@@ -1,0 +1,40 @@
+{
+  "contract_id": "TV_TP_PAPER_ROUTE_CONTRACT_PHASE_20",
+  "phase": "20",
+  "workflow_name": "AI_OS TV/TP Paper Route Workflow",
+  "mode": "paper_only",
+  "source_status": "EXTERNAL_REFERENCE_ONLY",
+  "target_platform": "TRADERSPOST_REFERENCE",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "workflow_steps": [
+    "TradingView Signal Reference",
+    "AI_OS Signal Intake",
+    "Latency Check",
+    "Clock Skew Check",
+    "Regime Check",
+    "Risk Gate",
+    "Strategy Ranking",
+    "Paper Route Preview",
+    "TradersPost Paper Route Reference",
+    "Paper Result Review",
+    "Next Safe Action"
+  ],
+  "required_statuses": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "blocked_capabilities": [
+    "external account connection",
+    "credential capture",
+    "broker connection",
+    "real route activation",
+    "real order execution",
+    "live market data"
+  ],
+  "next_safe_action": "Validate this paper route contract and keep display mock-data only."
+}

@@ -1,0 +1,108 @@
+{
+  "panel_title": "TV/TP Paper Route Workflow",
+  "phase": "20",
+  "mode": "paper_only",
+  "source_status": "EXTERNAL_REFERENCE_ONLY",
+  "target_platform": "TRADERSPOST_REFERENCE",
+  "route_mode": "PAPER_PREVIEW_ONLY",
+  "summary": "AI_OS shows a reference-only signal path, validates it locally, and previews a paper route without external execution.",
+  "workflow_steps": [
+    {
+      "step": 1,
+      "label": "TradingView Signal Reference",
+      "status": "EXTERNAL_REFERENCE_ONLY",
+      "detail": "Reference label only. No platform connection."
+    },
+    {
+      "step": 2,
+      "label": "AI_OS Signal Intake",
+      "status": "LOCAL_REVIEW",
+      "detail": "AI_OS reads local mock-data only."
+    },
+    {
+      "step": 3,
+      "label": "Latency Check",
+      "status": "REVIEW_REQUIRED",
+      "detail": "Latency must be reviewed before paper route confidence increases."
+    },
+    {
+      "step": 4,
+      "label": "Clock Skew Check",
+      "status": "REVIEW_REQUIRED",
+      "detail": "Clock skew remains a review gate."
+    },
+    {
+      "step": 5,
+      "label": "Regime Check",
+      "status": "PAPER_REVIEW",
+      "detail": "Regime label stays local and paper-only."
+    },
+    {
+      "step": 6,
+      "label": "Risk Gate",
+      "status": "REVIEW_REQUIRED",
+      "detail": "Risk gate decides whether paper preview may continue."
+    },
+    {
+      "step": 7,
+      "label": "Strategy Ranking",
+      "status": "BLOCKED_REPLAY_REVIEW",
+      "detail": "Ranking remains review-gated while sample size and clock skew are unresolved."
+    },
+    {
+      "step": 8,
+      "label": "Paper Route Preview",
+      "status": "PAPER_PREVIEW_ONLY",
+      "detail": "Preview only. No real route activation."
+    },
+    {
+      "step": 9,
+      "label": "TradersPost Paper Route Reference",
+      "status": "TRADERSPOST_REFERENCE",
+      "detail": "Reference label only. No account connection."
+    },
+    {
+      "step": 10,
+      "label": "Paper Result Review",
+      "status": "REVIEW_REQUIRED",
+      "detail": "Result review remains local and paper-only."
+    },
+    {
+      "step": 11,
+      "label": "Next Safe Action",
+      "status": "VALIDATE_CONTRACT",
+      "detail": "Run the Phase 20 dry-run validator before any dashboard wiring."
+    }
+  ],
+  "tv_signal_reference": {
+    "reference_id": "TV_ALERT_REFERENCE_001",
+    "source_name": "TradingView Signal Reference",
+    "symbol": "EUR_USD",
+    "timeframe": "M15",
+    "signal_label": "EMA VWAP pullback review",
+    "direction": "LONG_REVIEW",
+    "confidence": 0.82,
+    "received_time": "2026-05-12T00:00:00Z",
+    "source_status": "EXTERNAL_REFERENCE_ONLY"
+  },
+  "tp_paper_route_preview": {
+    "route_preview_id": "TP_PAPER_ROUTE_PREVIEW_001",
+    "target_platform": "TRADERSPOST_REFERENCE",
+    "route_mode": "PAPER_PREVIEW_ONLY",
+    "paper_symbol": "EUR_USD",
+    "paper_direction": "LONG_REVIEW",
+    "paper_risk_gate_status": "REVIEW_REQUIRED",
+    "paper_route_status": "PREVIEW_ONLY",
+    "paper_result_review_status": "REVIEW_REQUIRED"
+  },
+  "safety": {
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "secrets_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "next_safe_action": "Validate the Phase 20 paper route workflow, then keep display mock-data only until a separate UI APPLY."
+}
