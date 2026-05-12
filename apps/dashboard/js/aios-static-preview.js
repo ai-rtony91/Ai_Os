@@ -79,6 +79,7 @@ const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.j
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const tradingLabWorkstationFixturePath = "mock-data/trading-lab-workstation.example.json";
+const phase23PaperSignalNormalizationFixturePath = "mock-data/phase-23-paper-signal-normalization.example.json";
 const phase28TvTpPaperHandoffFixturePath = "mock-data/phase-28-tv-tp-paper-handoff.example.json";
 const tradingLabPaperRunnerFixturePath = "mock-data/trading-lab-paper-runner.example.json";
 const aiosOrchestrationControlRoomFixturePath = "mock-data/aios-orchestration-control-room.example.json";
@@ -1679,6 +1680,33 @@ function createWorkstationPanel(title, children = []) {
   return panel;
 }
 
+function renderPhase23PaperSignalNormalization(data = {}) {
+  const blocked = data.blocked_fields || {};
+  return createWorkstationPanel(data.title || "Phase 23 Signal Normalization", [
+    createWorkstationChip("Stage", "Stage 1 / Phase 23"),
+    createWorkstationChip("Normalized signal", data.normalized_signal_id || "Pending validation"),
+    createWorkstationChip("Source signal", data.source_signal_id || "Pending validation"),
+    createWorkstationChip("Source", data.source_platform || "Pending validation"),
+    createWorkstationChip("Received by", data.received_by || "AI_OS"),
+    createWorkstationChip("Symbol", data.symbol || "Pending validation"),
+    createWorkstationChip("Timeframe", data.timeframe || "Pending validation"),
+    createWorkstationChip("Direction", data.direction || "Pending validation"),
+    createWorkstationChip("Strategy", data.strategy_name || "Pending validation"),
+    createWorkstationChip("Signal type", data.signal_type || "Pending validation"),
+    createWorkstationChip("Confidence", data.confidence || "Not measured"),
+    createWorkstationChip("Payload valid", data.payload_valid === true ? "true" : "false", data.payload_valid ? "READY" : "REVIEW_REQUIRED"),
+    createWorkstationChip("Normalization", data.normalization_status || "Pending validation", data.normalization_status),
+    createWorkstationChip("Risk gate", data.risk_gate_status || "REVIEW_REQUIRED", data.risk_gate_status),
+    createWorkstationChip("Missing fields", Array.isArray(data.missing_fields) && data.missing_fields.length ? data.missing_fields.join(", ") : "None listed"),
+    createWorkstationChip("Rejected reason", data.rejected_reason || "Pending validation"),
+    createWorkstationList(data.downstream_targets || [], (item) => `Feeds: ${item}`),
+    createWorkstationChip("Live execution", data.live_execution || blocked.live_execution || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Broker", data.broker || blocked.broker || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("Real order", data.real_order || blocked.real_order || "BLOCKED", "BLOCKED"),
+    createWorkstationChip("API key required", data.api_key_required === false ? "false" : "BLOCKED", "BLOCKED")
+  ]);
+}
+
 function renderTradingLabWorkstation(data = {}) {
   const section = document.createElement("section");
   section.className = "trading-workstation";
@@ -1815,7 +1843,7 @@ function createTradingLabAdvancedDiagnostics(items = []) {
   return details;
 }
 
-function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null, phase28HandoffData = null) {
+function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null, phase28HandoffData = null, phase23NormalizationData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -1862,6 +1890,9 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   blockedActions.append(blockedTitle, blockedList);
 
   const advancedItems = [];
+  if (phase23NormalizationData) {
+    advancedItems.push(renderPhase23PaperSignalNormalization(phase23NormalizationData));
+  }
   const phase28Handoff = normalizePhase28PaperHandoff(phase28HandoffData);
   const handoffDetails = phase28Handoff
     ? renderExternalHandoffPanels(phase28Handoff)
@@ -1904,14 +1935,15 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse, phase28HandoffResponse] = await Promise.all([
+    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse, phase28HandoffResponse, phase23NormalizationResponse] = await Promise.all([
       fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
       fetch(paperBotCoreFixturePath, { cache: "no-store" }),
       fetch(tradingLabWindowSystemFixturePath, { cache: "no-store" }),
       fetch(tradingLabPaperRunnerFixturePath, { cache: "no-store" }),
       fetch(aiosOrchestrationControlRoomFixturePath, { cache: "no-store" }),
       fetch(tradingLabWorkstationFixturePath, { cache: "no-store" }),
-      fetch(phase28TvTpPaperHandoffFixturePath, { cache: "no-store" })
+      fetch(phase28TvTpPaperHandoffFixturePath, { cache: "no-store" }),
+      fetch(phase23PaperSignalNormalizationFixturePath, { cache: "no-store" })
     ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
@@ -1920,7 +1952,8 @@ async function renderTradingLabNextActionCard() {
     const orchestrationData = orchestrationResponse.ok ? await orchestrationResponse.json() : null;
     const workstationData = workstationResponse.ok ? await workstationResponse.json() : null;
     const phase28HandoffData = phase28HandoffResponse.ok ? await phase28HandoffResponse.json() : null;
-    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData);
+    const phase23NormalizationData = phase23NormalizationResponse.ok ? await phase23NormalizationResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData, phase23NormalizationData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",

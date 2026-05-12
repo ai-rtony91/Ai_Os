@@ -1,0 +1,66 @@
+{
+  "schema_version": "0.1-phase-23",
+  "contract_id": "PAPER_SIGNAL_NORMALIZATION_CONTRACT_PHASE_23",
+  "phase": "23",
+  "mode": "paper_only",
+  "required_fixture": "apps/dashboard/mock-data/phase-23-paper-signal-normalization.example.json",
+  "required_fields": [
+    "normalized_signal_id",
+    "source_signal_id",
+    "source_platform",
+    "received_by",
+    "symbol",
+    "timeframe",
+    "direction",
+    "strategy_name",
+    "signal_type",
+    "confidence",
+    "payload_valid",
+    "normalization_status",
+    "missing_fields",
+    "rejected_reason",
+    "risk_gate_status",
+    "live_execution",
+    "broker",
+    "real_order",
+    "api_key_required"
+  ],
+  "required_values": {
+    "received_by": "AI_OS",
+    "live_execution": "BLOCKED",
+    "broker": "BLOCKED",
+    "real_order": "BLOCKED",
+    "api_key_required": false
+  },
+  "allowed_directions": [
+    "LONG_REVIEW",
+    "SHORT_REVIEW",
+    "NEUTRAL_REVIEW"
+  ],
+  "allowed_normalization_statuses": [
+    "PENDING_VALIDATION",
+    "NORMALIZED",
+    "REJECTED"
+  ],
+  "prohibited_fields": [
+    "api_key",
+    "secret",
+    "token",
+    "broker_account",
+    "account_id",
+    "webhook_url",
+    "order_id",
+    "live_order"
+  ],
+  "blocked_capabilities": [
+    "OANDA",
+    "broker connection",
+    "live trading",
+    "real webhooks",
+    "real orders",
+    "account connection",
+    "autonomous execution"
+  ],
+  "dashboard_placement": "Trading Lab Advanced Diagnostics or workstation secondary panel only",
+  "next_safe_action": "Validate Phase 23 normalization before downstream Trading Lab phases consume normalized signals."
+}

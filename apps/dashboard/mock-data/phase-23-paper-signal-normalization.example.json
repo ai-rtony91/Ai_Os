@@ -1,0 +1,50 @@
+{
+  "schema_version": "0.1-phase-23",
+  "phase": "23",
+  "title": "Phase 23 Paper Signal Normalization",
+  "mode": "paper_only",
+  "summary": "Local paper-only normalization layer for Trading Lab signals before workstation display, latency measurement, replay, journal, scorecard, or TV/TP handoff.",
+  "normalized_signal_id": "PHASE23_NORMALIZED_SIGNAL_001",
+  "source_signal_id": "PHASE28_TV_SIGNAL_001",
+  "source_platform": "TradingView-style",
+  "received_by": "AI_OS",
+  "symbol": "EUR/USD",
+  "timeframe": "M15",
+  "direction": "LONG_REVIEW",
+  "strategy_name": "EMA VWAP pullback paper review",
+  "signal_type": "paper_alert_preview",
+  "confidence": "Not measured",
+  "payload_valid": false,
+  "normalization_status": "PENDING_VALIDATION",
+  "missing_fields": [],
+  "rejected_reason": "Pending validation",
+  "risk_gate_status": "REVIEW_REQUIRED",
+  "live_execution": "BLOCKED",
+  "broker": "BLOCKED",
+  "real_order": "BLOCKED",
+  "api_key_required": false,
+  "normalized_shape": {
+    "symbol_format": "BASE/QUOTE",
+    "direction_values": [
+      "LONG_REVIEW",
+      "SHORT_REVIEW",
+      "NEUTRAL_REVIEW"
+    ],
+    "timeframe_format": "TradingView-style timeframe label",
+    "route_scope": "paper_only"
+  },
+  "downstream_targets": [
+    "Phase 24 workstation display",
+    "Phase 25 latency measurement",
+    "Phase 26 paper replay",
+    "Phase 27 journal and scorecard",
+    "Phase 28 TV/TP paper handoff"
+  ],
+  "blocked_fields": {
+    "live_execution": "BLOCKED",
+    "broker": "BLOCKED",
+    "real_order": "BLOCKED",
+    "api_key_required": false
+  },
+  "next_safe_action": "Run the Phase 23 dry-run validator before feeding normalized paper signals into later Trading Lab phases."
+}
