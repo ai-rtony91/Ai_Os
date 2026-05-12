@@ -1198,6 +1198,77 @@ function createTradingLabWindow(key, windowData = {}, engineData = null, safetyD
   return panel;
 }
 
+function createHandoffStatusChip(label, value) {
+  const chip = document.createElement("span");
+  chip.className = "trading-lab-handoff-chip";
+  chip.textContent = `${label}: ${value || "BLOCKED"}`;
+  return chip;
+}
+
+function createExternalHandoffCard(panelData = {}) {
+  const card = document.createElement("article");
+  card.className = `trading-lab-handoff-card ${getTradingLabStateClass(panelData.status)}`;
+
+  const head = document.createElement("div");
+  head.className = "trading-lab-handoff-card-head";
+  const title = document.createElement("strong");
+  title.textContent = panelData.title || "External Handoff Panel";
+  const status = document.createElement("span");
+  status.textContent = panelData.status || "MOCK ONLY";
+  head.append(title, status);
+
+  const summary = document.createElement("p");
+  summary.textContent = panelData.summary || "Local mock-only handoff planning panel.";
+
+  const fields = document.createElement("dl");
+  fields.className = "trading-lab-handoff-fields";
+  Object.entries(panelData.fields || {}).forEach(([label, value]) => {
+    const term = document.createElement("dt");
+    term.textContent = label;
+    const description = document.createElement("dd");
+    description.textContent = value || "UNKNOWN";
+    fields.append(term, description);
+  });
+
+  const nextAction = document.createElement("small");
+  nextAction.textContent = panelData.next_action || "Keep this panel paper-only and mock-only.";
+
+  card.append(head, summary, fields, nextAction);
+  return card;
+}
+
+function renderExternalHandoffPanels(handoffData) {
+  if (!handoffData) return null;
+  const section = document.createElement("section");
+  section.className = "trading-lab-handoff-system";
+  section.setAttribute("aria-label", "Trading Lab External Handoff Panels");
+
+  const head = document.createElement("div");
+  head.className = "trading-lab-handoff-head";
+  const title = document.createElement("strong");
+  title.textContent = handoffData.title || "Paper Signal Handoff Path";
+  const badge = document.createElement("span");
+  badge.textContent = handoffData.status || handoffData.mode || "MOCK ONLY";
+  const summary = document.createElement("p");
+  summary.textContent = handoffData.summary || "TradingView signal idea -> AI_OS validation -> TradersPost paper route preview.";
+  head.append(title, badge, summary);
+
+  const blocked = document.createElement("div");
+  blocked.className = "trading-lab-handoff-blocks";
+  Object.entries(handoffData.blocked_fields || {}).forEach(([label, value]) => {
+    blocked.append(createHandoffStatusChip(label.replaceAll("_", " "), value));
+  });
+
+  const grid = document.createElement("div");
+  grid.className = "trading-lab-handoff-grid";
+  (Array.isArray(handoffData.panels) ? handoffData.panels : []).forEach((panelData) => {
+    grid.append(createExternalHandoffCard(panelData));
+  });
+
+  section.append(head, blocked, grid);
+  return section;
+}
+
 function renderTradingLabWindowSystem(data) {
   if (!data) return null;
   const section = document.createElement("section");
@@ -1245,7 +1316,13 @@ function renderTradingLabWindowSystem(data) {
   platformStatus.textContent = "Hidden/collapsed by default. Planning-only. No login, credentials, broker, real route, or execution.";
   platformRule.append(platformTitle, platformText, platformStatus);
 
-  section.append(head, flexibility, grid, platformRule);
+  const handoffPanels = renderExternalHandoffPanels(data.handoff_path);
+  const children = [head, flexibility, grid];
+  if (handoffPanels) {
+    children.push(handoffPanels);
+  }
+  children.push(platformRule);
+  section.append(...children);
   return section;
 }
 

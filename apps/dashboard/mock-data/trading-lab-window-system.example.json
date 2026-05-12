@@ -10,6 +10,69 @@
     "layout_memory_planned": true,
     "popout_planned": true
   },
+  "handoff_path": {
+    "title": "Paper Signal Handoff Path",
+    "summary": "TradingView signal idea -> AI_OS validation -> TradersPost paper route preview.",
+    "mode": "mock_only",
+    "status": "PAPER PLANNING",
+    "blocked_fields": {
+      "login_embed": "BLOCKED",
+      "credentials": "BLOCKED",
+      "api_keys": "BLOCKED",
+      "broker": "BLOCKED",
+      "oanda": "BLOCKED",
+      "real_webhook": "BLOCKED",
+      "real_order": "BLOCKED",
+      "live_trading": "BLOCKED"
+    },
+    "panels": [
+      {
+        "id": "tradingview_signal_source",
+        "title": "TradingView Signal Source",
+        "status": "MOCK SIGNAL IDEA",
+        "summary": "Shows where a future chart alert idea would start, using AI_OS-owned labels and local mock data only.",
+        "fields": {
+          "Signal Idea": "EMA/VWAP pullback review",
+          "Source": "Local mock signal idea",
+          "Payload": "Preview only",
+          "Login Embed": "BLOCKED",
+          "Credentials": "BLOCKED",
+          "API Keys": "BLOCKED"
+        },
+        "next_action": "Review the mock signal idea inside AI_OS before any external setup."
+      },
+      {
+        "id": "aios_validation_layer",
+        "title": "AI_OS Validation Layer",
+        "status": "PAPER VALIDATION",
+        "summary": "AI_OS checks latency, regime, risk gate, paper decision, scorecard, and safety locks before any route preview.",
+        "fields": {
+          "Validation": "Paper runner output",
+          "Risk Gate": "PASS or BLOCKED",
+          "Decision": "PAPER_SIMULATED or BLOCKED",
+          "Broker": "BLOCKED",
+          "OANDA": "BLOCKED",
+          "Live Trading": "BLOCKED"
+        },
+        "next_action": "Keep the paper runner validator as the source of truth."
+      },
+      {
+        "id": "traderspost_paper_route_preview",
+        "title": "TradersPost Paper Route Preview",
+        "status": "ROUTE PREVIEW ONLY",
+        "summary": "Shows a future paper route preview without login, webhook activation, broker connection, or order placement.",
+        "fields": {
+          "Route": "Preview only",
+          "Real Webhook": "BLOCKED",
+          "Real Order": "BLOCKED",
+          "Credentials": "BLOCKED",
+          "Broker": "BLOCKED",
+          "Live Trading": "BLOCKED"
+        },
+        "next_action": "Use this only as a paper-route planning view."
+      }
+    ]
+  },
   "windows": {
     "tradingview_chart": {
       "title": "TradingView Chart Window",

@@ -2327,6 +2327,154 @@ body.focused-route-archives .project-hub-panel {
   line-height: 1.35;
 }
 
+.trading-lab-handoff-system {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  background:
+    linear-gradient(135deg, rgba(2, 6, 12, 0.72), rgba(17, 24, 39, 0.56)),
+    radial-gradient(circle at 100% 0, rgba(56, 189, 248, 0.1), transparent 34%);
+}
+
+.trading-lab-handoff-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  align-items: start;
+}
+
+.trading-lab-handoff-head strong {
+  color: var(--accent-primary);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.trading-lab-handoff-head span {
+  justify-self: end;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid rgba(56, 189, 248, 0.42);
+  color: var(--accent-primary);
+  background: rgba(56, 189, 248, 0.08);
+  font-size: 10px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.trading-lab-handoff-head p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.trading-lab-handoff-blocks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.trading-lab-handoff-chip {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid rgba(255, 95, 122, 0.38);
+  color: var(--text-primary);
+  background: rgba(255, 95, 122, 0.08);
+  font-size: 10px;
+  line-height: 1.25;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.trading-lab-handoff-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.trading-lab-handoff-card {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--line-card);
+  background: rgba(2, 6, 12, 0.58);
+}
+
+.trading-lab-handoff-card-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.trading-lab-handoff-card-head strong {
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.trading-lab-handoff-card-head span {
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 6px;
+  border: 1px solid currentColor;
+  color: var(--state-unknown);
+  font-size: 10px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.trading-lab-handoff-card.is-ready .trading-lab-handoff-card-head span {
+  color: var(--state-pass);
+}
+
+.trading-lab-handoff-card.is-review .trading-lab-handoff-card-head span {
+  color: var(--state-warn);
+}
+
+.trading-lab-handoff-card.is-blocked .trading-lab-handoff-card-head span {
+  color: var(--state-danger);
+}
+
+.trading-lab-handoff-card p,
+.trading-lab-handoff-card small {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.trading-lab-handoff-fields {
+  display: grid;
+  grid-template-columns: minmax(96px, auto) minmax(0, 1fr);
+  gap: 6px 8px;
+  margin: 0;
+}
+
+.trading-lab-handoff-fields dt {
+  color: var(--accent-primary);
+  font-size: 10px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.trading-lab-handoff-fields dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 10px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 1120px) {
   .trading-lab-workspace-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2339,7 +2487,12 @@ body.focused-route-archives .project-hub-panel {
   }
 
   .paper-bot-core-grid,
-  .paper-runner-card-grid {
+  .paper-runner-card-grid,
+  .trading-lab-handoff-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trading-lab-handoff-blocks {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -2371,16 +2524,22 @@ body.focused-route-archives .project-hub-panel {
   .paper-bot-core-grid,
   .paper-bot-core-safety,
   .paper-runner-card-grid,
-  .paper-runner-safety {
+  .paper-runner-safety,
+  .trading-lab-handoff-grid,
+  .trading-lab-handoff-blocks {
     grid-template-columns: 1fr;
   }
 
   .paper-runner-head,
-  .paper-runner-card-head {
+  .paper-runner-card-head,
+  .trading-lab-handoff-head,
+  .trading-lab-handoff-card-head,
+  .trading-lab-handoff-fields {
     grid-template-columns: 1fr;
   }
 
-  .paper-runner-head span {
+  .paper-runner-head span,
+  .trading-lab-handoff-head span {
     justify-self: start;
   }
 
