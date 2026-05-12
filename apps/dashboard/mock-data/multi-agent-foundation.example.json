@@ -1,0 +1,87 @@
+{
+  "schema_version": "0.1",
+  "panel_title": "Multi-Agent Foundation",
+  "mode": "local_mock_only",
+  "summary": "Future-ready planning surface for ChatGPT orchestration, Codex implementation, and Claude review-only support.",
+  "basic_mode": {
+    "default_visible": true,
+    "show_cards": [
+      "current_lane",
+      "assigned_agent",
+      "safety_status",
+      "next_safe_action"
+    ],
+    "advanced_details_hidden": true
+  },
+  "advanced_mode": {
+    "default_visible": false,
+    "items": [
+      "role_matrix",
+      "routing_model",
+      "task_queue",
+      "validator_chain",
+      "blocked_actions",
+      "source_references"
+    ]
+  },
+  "agents": [
+    {
+      "id": "chatgpt_orchestrator",
+      "label": "ChatGPT",
+      "visible_label": "Planning",
+      "status": "PLANNING_ONLY",
+      "summary": "Plans and routes work. Cannot approve or apply protected actions."
+    },
+    {
+      "id": "codex_implementation_agent",
+      "label": "Codex",
+      "visible_label": "Implementation",
+      "status": "APPROVED_SCOPE_ONLY",
+      "summary": "Inspects and edits files only after DRY_RUN and explicit APPLY approval."
+    },
+    {
+      "id": "claude_review_agent",
+      "label": "Claude",
+      "visible_label": "Review",
+      "status": "REVIEW_ONLY",
+      "summary": "Future optional reviewer. No APPLY authority."
+    },
+    {
+      "id": "risk_gate_agent",
+      "label": "Risk Gate",
+      "visible_label": "Safety",
+      "status": "ACTIVE_REVIEW",
+      "summary": "Keeps protected actions and Trading Lab live execution blocked."
+    }
+  ],
+  "routing": {
+    "current_lane": "foundation_planning",
+    "assigned_agent": "chatgpt_orchestrator",
+    "implementation_agent": "codex_implementation_agent",
+    "review_agent": "claude_review_agent",
+    "review_agent_status": "REVIEW_ONLY",
+    "next_safe_action": "Run the multi-agent foundation validator before dashboard wiring."
+  },
+  "integration_status": {
+    "anthropic_integration": "NOT_ENABLED",
+    "openai_integration_changes": "NOT_CHANGED",
+    "api_keys": "BLOCKED",
+    "secrets": "BLOCKED",
+    "installs": "BLOCKED",
+    "deployment": "BLOCKED"
+  },
+  "trading_safety": {
+    "paper_only": "ACTIVE",
+    "live_trading": "BLOCKED",
+    "broker": "BLOCKED",
+    "oanda": "BLOCKED",
+    "real_webhooks": "BLOCKED",
+    "real_orders": "BLOCKED"
+  },
+  "source_files": [
+    "docs/AI_OS/multi_agent/AIOS_MULTI_AGENT_FOUNDATION_PLAN.md",
+    "docs/AI_OS/multi_agent/AIOS_AGENT_ROUTING_MODEL.md",
+    "docs/AI_OS/multi_agent/AIOS_AGENT_ROLE_MATRIX.json",
+    "docs/AI_OS/secrets/AIOS_LOCAL_ONLY_KEY_STORAGE_PLAN.md"
+  ]
+}

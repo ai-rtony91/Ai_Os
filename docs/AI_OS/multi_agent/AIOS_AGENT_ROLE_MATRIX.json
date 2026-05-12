@@ -1,0 +1,153 @@
+{
+  "schema_version": "0.1",
+  "matrix_name": "AI_OS Multi-Agent Role Matrix",
+  "mode": "local_first_planning_only",
+  "integration_status": {
+    "anthropic_integration": "NOT_ENABLED",
+    "openai_integration_changes": "NOT_CHANGED",
+    "api_keys": "BLOCKED",
+    "secrets": "BLOCKED",
+    "installs": "BLOCKED",
+    "deployment": "BLOCKED"
+  },
+  "trading_safety": {
+    "paper_only": "ACTIVE",
+    "live_trading": "BLOCKED",
+    "broker": "BLOCKED",
+    "oanda": "BLOCKED",
+    "real_webhooks": "BLOCKED",
+    "real_orders": "BLOCKED"
+  },
+  "roles": [
+    {
+      "id": "human_operator",
+      "label": "Human Operator",
+      "status": "FINAL_AUTHORITY",
+      "primary_function": "Approves APPLY, commits, pushes, secrets, deployment, and any protected action.",
+      "can_apply_changes": true,
+      "can_approve_protected_actions": true,
+      "can_access_secrets": false,
+      "allowed_actions": [
+        "approve_or_reject_apply",
+        "approve_or_reject_commit",
+        "approve_or_reject_push",
+        "review_validation_results"
+      ],
+      "blocked_actions": [
+        "none_by_agent_policy"
+      ]
+    },
+    {
+      "id": "chatgpt_orchestrator",
+      "label": "ChatGPT Orchestrator",
+      "status": "PLANNING_ONLY",
+      "primary_function": "Plans tasks, explains options, drafts prompts, and routes work to the correct lane.",
+      "can_apply_changes": false,
+      "can_approve_protected_actions": false,
+      "can_access_secrets": false,
+      "allowed_actions": [
+        "planning",
+        "task_routing",
+        "operator_guidance",
+        "prompt_drafting",
+        "report_summarization"
+      ],
+      "blocked_actions": [
+        "apply_changes",
+        "bypass_human_approval",
+        "handle_api_keys",
+        "enable_live_trading"
+      ]
+    },
+    {
+      "id": "codex_implementation_agent",
+      "label": "Codex Implementation Agent",
+      "status": "APPROVED_SCOPE_ONLY",
+      "primary_function": "Inspects files, produces DRY_RUN reports, and implements approved scoped file changes.",
+      "can_apply_changes": true,
+      "can_approve_protected_actions": false,
+      "can_access_secrets": false,
+      "allowed_actions": [
+        "inspect_repo",
+        "create_dry_run_report",
+        "edit_approved_files",
+        "run_local_validators",
+        "summarize_changes"
+      ],
+      "blocked_actions": [
+        "unapproved_edits",
+        "delete_move_rename_without_approval",
+        "handle_api_keys",
+        "connect_broker",
+        "place_orders",
+        "commit_without_approval",
+        "push_without_approval"
+      ]
+    },
+    {
+      "id": "claude_review_agent",
+      "label": "Claude Review Agent",
+      "status": "REVIEW_ONLY",
+      "primary_function": "Future optional reviewer for documentation, reasoning, risk review, and alternative analysis.",
+      "can_apply_changes": false,
+      "can_approve_protected_actions": false,
+      "can_access_secrets": false,
+      "allowed_actions": [
+        "review_docs",
+        "review_reasoning",
+        "raise_questions",
+        "summarize_risks"
+      ],
+      "blocked_actions": [
+        "apply_changes",
+        "approve_apply",
+        "handle_api_keys",
+        "start_integration",
+        "connect_external_services"
+      ]
+    },
+    {
+      "id": "risk_gate_agent",
+      "label": "Risk Gate Agent",
+      "status": "SAFETY_REVIEW",
+      "primary_function": "Checks blocked actions, paper-only Trading Lab state, and protected action gates.",
+      "can_apply_changes": false,
+      "can_approve_protected_actions": false,
+      "can_access_secrets": false,
+      "allowed_actions": [
+        "flag_blocked_actions",
+        "review_safety_status",
+        "mark_unknowns",
+        "mark_mismatches"
+      ],
+      "blocked_actions": [
+        "weaken_safety_rules",
+        "enable_live_trading",
+        "enable_broker",
+        "enable_oanda"
+      ]
+    },
+    {
+      "id": "validator_agent",
+      "label": "Validator Agent",
+      "status": "READ_ONLY_CHECKS",
+      "primary_function": "Runs local read-only validators and reports pass or fail status.",
+      "can_apply_changes": false,
+      "can_approve_protected_actions": false,
+      "can_access_secrets": false,
+      "allowed_actions": [
+        "json_parse_check",
+        "required_file_check",
+        "blocked_status_check",
+        "report_validation_result"
+      ],
+      "blocked_actions": [
+        "install_packages",
+        "write_secrets",
+        "deploy",
+        "trade"
+      ]
+    }
+  ],
+  "next_safe_action": "Run automation/agents/Test-AiOsMultiAgentFoundation.DRY_RUN.ps1 before dashboard wiring."
+}
