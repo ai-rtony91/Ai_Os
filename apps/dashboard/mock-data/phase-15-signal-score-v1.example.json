@@ -1,0 +1,39 @@
+{
+  "signal_score_id": "AIOS_PHASE15_SIGNAL_SCORE_V1_001",
+  "signal_id": "TV_PAPER_SIGNAL_V1_001",
+  "symbol": "EUR/USD",
+  "timeframe": "M15",
+  "direction_intent": "LONG_REVIEW",
+  "strategy_name": "EMA VWAP pullback paper review",
+  "regime_status": "PAPER_REVIEW_PASS",
+  "confluence_score": 72,
+  "confidence_score": 74,
+  "latency_status": "FRESH",
+  "risk_gate_status": "PAPER_ALLOWED_LIVE_BLOCKED",
+  "stale_signal": false,
+  "paper_route_allowed": true,
+  "blocked_reason": "Paper route preview only. Live execution remains BLOCKED. No broker, OANDA, API key, real webhook, real order, account connection, or autonomous execution path is active.",
+  "score_created_at": "2026-05-13T15:00:00Z",
+  "mode": "paper_only",
+  "score_notes": [
+    "Signal score is paper-only.",
+    "Paper route allowed means paper preview only.",
+    "Live execution remains blocked regardless of score."
+  ],
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_webhook_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "safety_gates": {
+    "paper_only": true,
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "next_safe_action": "Run automation/trading_lab/Test-AiOsPhase15SignalScoreContractV1.DRY_RUN.ps1 before using this score in paper route preview review."
+}

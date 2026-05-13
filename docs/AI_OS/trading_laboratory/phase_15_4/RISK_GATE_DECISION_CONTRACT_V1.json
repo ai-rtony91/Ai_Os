@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "AIOS_PHASE_15_RISK_GATE_DECISION_CONTRACT_V1",
+  "phase": "15",
+  "mode": "paper_only",
+  "purpose": "Record whether a paper signal passed, warned, or failed the AI_OS risk gate before any paper route preview is allowed.",
+  "required_fixture": "apps/dashboard/mock-data/risk-gate-decision-v1.example.json",
+  "required_fields": [
+    "risk_decision_id",
+    "signal_id",
+    "symbol",
+    "timeframe",
+    "direction_intent",
+    "strategy_name",
+    "risk_gate_status",
+    "account_mode",
+    "max_risk_allowed",
+    "proposed_paper_risk",
+    "drawdown_status",
+    "spread_status",
+    "volatility_status",
+    "session_status",
+    "latency_status",
+    "stale_signal",
+    "paper_route_allowed",
+    "blocked_reason",
+    "decision_created_at"
+  ],
+  "required_values": {
+    "account_mode": "paper_only",
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_required": false,
+    "real_order_status": "BLOCKED"
+  },
+  "allowed_risk_gate_statuses": [
+    "PASS",
+    "WARN",
+    "FAIL",
+    "REVIEW_REQUIRED"
+  ],
+  "allowed_context_statuses": [
+    "PASS",
+    "WARN",
+    "FAIL",
+    "REVIEW_REQUIRED",
+    "PENDING_VALIDATION",
+    "BLOCKED"
+  ],
+  "paper_route_rules": {
+    "paper_route_allowed_requires_risk_gate_status": "PASS",
+    "paper_route_allowed_requires_stale_signal": false,
+    "blocked_reason_required_when_route_not_allowed": true,
+    "warn_does_not_allow_paper_route": true,
+    "fail_does_not_allow_paper_route": true,
+    "review_required_does_not_allow_paper_route": true
+  },
+  "prohibited_fields": [
+    "api_key",
+    "secret",
+    "token",
+    "broker_account",
+    "account_id",
+    "webhook_url",
+    "order_id",
+    "live_order",
+    "oanda_account",
+    "credential",
+    "private_key"
+  ],
+  "blocked_capabilities": [
+    "broker",
+    "OANDA",
+    "API keys",
+    "real orders",
+    "live execution",
+    "real webhooks",
+    "account connection",
+    "autonomous execution"
+  ],
+  "workflow_position": "TradingView-style signal -> AI_OS validation -> latency check -> risk gate decision -> paper route preview allowed or blocked",
+  "next_safe_action": "Run the Phase 15 risk gate decision v1 dry-run validator before allowing any paper route preview."
+}

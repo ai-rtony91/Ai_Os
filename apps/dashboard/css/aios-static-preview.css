@@ -1678,6 +1678,102 @@ body.focused-route-archives .project-hub-panel {
   animation: aiosOrbitCounterDrift 34s linear infinite;
 }
 
+.aios-centerpiece-routes,
+.aios-centerpiece-nodes {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.aios-route {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(116px, 22vw, 250px);
+  height: 1px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(125, 211, 252, 0.1) 18%, rgba(125, 211, 252, 0.58) 48%, rgba(168, 85, 247, 0.42) 62%, transparent 100%);
+  background-size: 180% 100%;
+  opacity: 0.52;
+  filter: drop-shadow(0 0 8px rgba(47, 140, 255, 0.22));
+  transform-origin: left center;
+  animation: aiosRouteFlow 16s ease-in-out infinite;
+}
+
+.aios-route-a {
+  transform: rotate(-24deg) translateX(-12%);
+}
+
+.aios-route-b {
+  width: clamp(96px, 18vw, 210px);
+  opacity: 0.42;
+  transform: rotate(22deg) translateX(-9%);
+  animation-duration: 19s;
+  animation-delay: -5s;
+}
+
+.aios-route-c {
+  width: clamp(82px, 16vw, 180px);
+  opacity: 0.34;
+  transform: rotate(2deg) translateX(-42%);
+  animation-duration: 22s;
+  animation-delay: -9s;
+}
+
+.aios-node {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.aios-node-latency-a,
+.aios-node-latency-b {
+  width: 7px;
+  height: 7px;
+  background: rgba(125, 211, 252, 0.86);
+  box-shadow:
+    0 0 12px rgba(125, 211, 252, 0.58),
+    0 0 24px rgba(47, 140, 255, 0.24);
+  animation: aiosLatencyPulse 6.8s ease-in-out infinite;
+}
+
+.aios-node-latency-a {
+  left: 32%;
+  top: 38%;
+}
+
+.aios-node-latency-b {
+  right: 30%;
+  bottom: 36%;
+  animation-duration: 8.4s;
+  animation-delay: -2.8s;
+}
+
+.aios-node-session-a,
+.aios-node-session-b {
+  width: clamp(48px, 8vw, 96px);
+  aspect-ratio: 1;
+  background:
+    radial-gradient(circle, rgba(168, 85, 247, 0.16), rgba(47, 140, 255, 0.08) 42%, transparent 68%);
+  opacity: 0.46;
+  animation: marketSessionGlow 12s ease-in-out infinite;
+}
+
+.aios-node-session-a {
+  left: 22%;
+  bottom: 22%;
+}
+
+.aios-node-session-b {
+  right: 20%;
+  top: 20%;
+  animation-duration: 15s;
+  animation-delay: -6s;
+}
+
 .aios-centerpiece-core {
   position: relative;
   z-index: 1;
@@ -1763,6 +1859,37 @@ body.focused-route-archives .project-hub-panel {
   45%, 55% { background-position: -22% 0, 0 0; opacity: 0.76; }
 }
 
+@keyframes aiosRouteFlow {
+  0%, 100% { background-position: 110% 0; opacity: 0.28; }
+  48%, 58% { background-position: -20% 0; opacity: 0.58; }
+}
+
+@keyframes aiosLatencyPulse {
+  0%, 100% {
+    opacity: 0.44;
+    transform: scale(0.86);
+  }
+  45% {
+    opacity: 0.96;
+    transform: scale(1.18);
+  }
+  70% {
+    opacity: 0.58;
+    transform: scale(1);
+  }
+}
+
+@keyframes marketSessionGlow {
+  0%, 100% {
+    opacity: 0.28;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.52;
+    transform: scale(1.04);
+  }
+}
+
 @media (max-width: 720px) {
   .aios-centerpiece-shell {
     min-height: 128px;
@@ -1775,6 +1902,19 @@ body.focused-route-archives .project-hub-panel {
 
   .aios-centerpiece-orbit {
     width: 280px;
+  }
+
+  .aios-route-c {
+    display: none;
+  }
+
+  .aios-route {
+    opacity: 0.34;
+  }
+
+  .aios-node-session-a,
+  .aios-node-session-b {
+    width: 54px;
   }
 }
 
@@ -6779,7 +6919,9 @@ body:not(.welcome-start-active) .youtube-radio-dock {
   .aios-centerpiece-shell::before,
   .aios-centerpiece-shell::after,
   .aios-centerpiece-core::before,
-  .aios-centerpiece-orbit {
+  .aios-centerpiece-orbit,
+  .aios-route,
+  .aios-node {
     animation: none !important;
   }
 
@@ -6788,7 +6930,8 @@ body:not(.welcome-start-active) .youtube-radio-dock {
   }
 
   .aios-centerpiece-shell::after,
-  .aios-centerpiece-orbit {
+  .aios-centerpiece-orbit,
+  .aios-node {
     transform: none;
   }
 }
