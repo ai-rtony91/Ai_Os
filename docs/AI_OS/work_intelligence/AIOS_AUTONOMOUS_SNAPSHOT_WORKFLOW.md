@@ -87,12 +87,12 @@ Security warning evidence is limited to local repo evidence such as `.env` files
 Phase 16.7 separates warning noise into explicit classes:
 
 - `secret_material`
-- `secret_wording`
-- `execution_boundary`
+- `secret_wording_review`
+- `execution_boundary_review`
 - `git_safety`
 - `destructive_command`
 - `protected_file_status`
-- `policy_reference`
+- `policy_mention`
 
 Severity levels are:
 
@@ -101,7 +101,7 @@ Severity levels are:
 - `LOW`
 - `INFO`
 
-Broker, OANDA, and live execution wording belongs to `execution_boundary`, not `secret_material`. Protected root file changes belong to `protected_file_status`, not secret scanning. Normal policy-only documentation references are downgraded or suppressed so safety docs do not overwhelm actionable warning output.
+Broker, OANDA, and live execution wording belongs to `execution_boundary_review`, not `secret_material`. Protected root file changes belong to `protected_file_status`, not secret scanning. Normal policy-only documentation references are downgraded to `policy_mention` or suppressed after the detail cap so safety docs do not overwhelm actionable warning output.
 
 The snapshot summary includes:
 

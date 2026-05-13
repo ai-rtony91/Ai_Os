@@ -241,7 +241,7 @@ function Add-SecurityWarning {
     [string]$Path
   )
   $allowedSeverities = @("HIGH", "MEDIUM", "LOW", "INFO")
-  $allowedCategories = @("secret_material", "secret_wording", "execution_boundary", "git_safety", "destructive_command", "protected_file_status", "policy_reference")
+  $allowedCategories = @("secret_material", "secret_wording_review", "execution_boundary_review", "git_safety", "destructive_command", "protected_file_status", "policy_mention")
   if ($allowedSeverities -notcontains $Severity) {
     throw "Unknown security warning severity: $Severity"
   }
@@ -260,8 +260,7 @@ function Test-PolicyReferencePath {
   param([string]$Path)
   $normalized = ($Path -replace "\\", "/").ToLowerInvariant()
   return (
-    $normalized -match "^docs/" -or
-    $normalized -match "^reports/" -or
+    $normalized -match "^docs/ai_os/(security|secrets|governance|risk|risk_controls|compliance|legal|approval|change_control)" -or
     $normalized -match "readme" -or
     $normalized -match "policy" -or
     $normalized -match "workflow" -or
@@ -298,6 +297,8 @@ function Get-SecurityWarnings {
   )
   $warnings = New-Object System.Collections.Generic.List[object]
   $suppressedPolicyMentions = 0
+  $policyMentionCap = 25
+  $policyMentionDetailCount = 0
   $textExtensions = @(".ps1", ".json", ".md", ".txt", ".csv", ".yml", ".yaml", ".js", ".html", ".css")
   foreach ($file in @($Files)) {
     $relative = Get-RelativePath -Item $file
@@ -326,16 +327,24 @@ function Get-SecurityWarnings {
     } elseif ($hasSecretWording) {
       if ($isPolicyReference) {
         $suppressedPolicyMentions += 1
+        if ($policyMentionDetailCount -lt $policyMentionCap) {
+          Add-SecurityWarning -Warnings $warnings -Type "secret_wording_review" -Severity "INFO" -Category "policy_mention" -Path $relative
+          $policyMentionDetailCount += 1
+        }
+      } elseif ($relative -match "\.(ps1|json|yml|yaml|js)$|automation/|config") {
+        Add-SecurityWarning -Warnings $warnings -Type "secret_wording_review" -Severity "MEDIUM" -Category "secret_wording_review" -Path $relative
       } else {
-        Add-SecurityWarning -Warnings $warnings -Type "secret/API/token wording" -Severity "LOW" -Category "secret_wording" -Path $relative
+        Add-SecurityWarning -Warnings $warnings -Type "secret_wording_review" -Severity "LOW" -Category "secret_wording_review" -Path $relative
       }
     }
 
     if ($hasExecutionBoundaryWording) {
       if ($isPolicyReference) {
-        $suppressedPolicyMentions += 1
+        Add-SecurityWarning -Warnings $warnings -Type "execution boundary wording" -Severity "INFO" -Category "execution_boundary_review" -Path $relative
+      } elseif ($content -match "(?i)(enable|enabled|start|run|execute).{0,40}(broker|oanda|live execution|real orders|order execution)") {
+        Add-SecurityWarning -Warnings $warnings -Type "execution boundary wording" -Severity "HIGH" -Category "execution_boundary_review" -Path $relative
       } else {
-        Add-SecurityWarning -Warnings $warnings -Type "broker/OANDA/live execution wording" -Severity "MEDIUM" -Category "execution_boundary" -Path $relative
+        Add-SecurityWarning -Warnings $warnings -Type "execution boundary wording" -Severity "MEDIUM" -Category "execution_boundary_review" -Path $relative
       }
     }
     if ($content -match "(?i)git\s+add\s+\.") {

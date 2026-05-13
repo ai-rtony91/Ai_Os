@@ -176,7 +176,7 @@ if (Test-Path -LiteralPath $scannerPath) {
       Add-Failure "Scanner missing severity level: $severity"
     }
   }
-  foreach ($category in @("secret_material", "secret_wording", "execution_boundary", "git_safety", "destructive_command", "protected_file_status", "policy_reference")) {
+  foreach ($category in @("secret_material", "secret_wording_review", "execution_boundary_review", "git_safety", "destructive_command", "protected_file_status", "policy_mention")) {
     if (-not $scannerText.Contains($category)) {
       Add-Failure "Scanner missing security warning category: $category"
     }
@@ -216,7 +216,7 @@ try {
     if (@("HIGH", "MEDIUM", "LOW", "INFO") -notcontains $warning.severity) {
       Add-Failure "Security warning has invalid severity: $($warning.severity)"
     }
-    if (@("secret_material", "secret_wording", "execution_boundary", "git_safety", "destructive_command", "protected_file_status", "policy_reference") -notcontains $warning.category) {
+    if (@("secret_material", "secret_wording_review", "execution_boundary_review", "git_safety", "destructive_command", "protected_file_status", "policy_mention") -notcontains $warning.category) {
       Add-Failure "Security warning has invalid category: $($warning.category)"
     }
   }
