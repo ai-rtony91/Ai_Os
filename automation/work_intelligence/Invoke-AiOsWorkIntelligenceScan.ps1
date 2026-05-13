@@ -444,20 +444,116 @@ function Add-WorkQueueItem {
     [string]$Source,
     [string]$Priority,
     [string]$Status,
-    [string]$RecommendedAction
+    [string]$RecommendedAction,
+    [string]$SuggestedWorkerLane,
+    [string]$EvidenceStrength,
+    [string]$RouteReason
   )
   $allowedStatuses = @("REVIEW", "BLOCKED", "READY_FOR_DRY_RUN", "UNKNOWN")
+  $allowedLanes = @("Dashboard UI", "Trading Lab", "Operator Orchestration", "Work Intelligence", "Validators", "Reports", "Mock Data", "UNKNOWN")
   if ($allowedStatuses -notcontains $Status) {
     throw "Unknown work queue status: $Status"
   }
+  if ($allowedLanes -notcontains $SuggestedWorkerLane) {
+    throw "Unknown suggested worker lane: $SuggestedWorkerLane"
+  }
   $Queue.Add([pscustomobject]@{
+    queue_rank = 0
     task_id = $TaskId
     title = $Title
     source = $Source
     priority = $Priority
     status = $Status
     recommended_action = $RecommendedAction
+    suggested_worker_lane = $SuggestedWorkerLane
+    evidence_strength = $EvidenceStrength
+    route_reason = $RouteReason
   }) | Out-Null
+}
+
+function Get-SuggestedWorkerLane {
+  param([string]$Source)
+  $normalized = ($Source -replace "\\", "/").ToLowerInvariant()
+  if ($normalized -match "apps/dashboard/mock-data") { return "Mock Data" }
+  if ($normalized -match "apps/dashboard") { return "Dashboard UI" }
+  if ($normalized -match "trading_lab|trading_laboratory") { return "Trading Lab" }
+  if ($normalized -match "automation/operator|docs/ai_os/operator|reports/operator") { return "Operator Orchestration" }
+  if ($normalized -match "test-aios|validator|validation") { return "Validators" }
+  if ($normalized -match "reports/work_intelligence/daily|reports/work_intelligence/briefings|work_intelligence|recommended_operator_action") { return "Work Intelligence" }
+  if ($normalized -match "^reports/|report") { return "Reports" }
+  if ($normalized -match "worker_report") { return "Operator Orchestration" }
+  return "UNKNOWN"
+}
+
+function Get-RouteReason {
+  param([string]$Source)
+  $normalized = ($Source -replace "\\", "/").ToLowerInvariant()
+  if ($normalized -match "apps/dashboard/mock-data") { return "dashboard mock-data path evidence" }
+  if ($normalized -match "apps/dashboard") { return "dashboard path evidence" }
+  if ($normalized -match "trading_lab|trading_laboratory") { return "trading lab path evidence" }
+  if ($normalized -match "automation/operator|docs/ai_os/operator|reports/operator|worker_report") { return "operator orchestration path evidence" }
+  if ($normalized -match "test-aios|validator|validation") { return "validator evidence" }
+  if ($normalized -match "reports/work_intelligence/daily|reports/work_intelligence/briefings|work_intelligence|recommended_operator_action") { return "work intelligence evidence" }
+  if ($normalized -match "^reports/|report") { return "report path evidence" }
+  return "UNKNOWN"
+}
+
+function Get-QueuePriorityWeight {
+  param([string]$Priority)
+  switch ($Priority) {
+    "HIGH" { return 1 }
+    "MEDIUM" { return 2 }
+    "LOW" { return 3 }
+    default { return 9 }
+  }
+}
+
+function Get-QueueStatusWeight {
+  param([string]$Status)
+  switch ($Status) {
+    "BLOCKED" { return 1 }
+    "REVIEW" { return 2 }
+    "READY_FOR_DRY_RUN" { return 3 }
+    default { return 9 }
+  }
+}
+
+function Get-QueueSourceWeight {
+  param([object]$Item)
+  if ($Item.source -eq "security_warnings") { return 1 }
+  if ($Item.source -eq "git status") { return 2 }
+  if ($Item.task_id -match "^WI-STALE-") { return 3 }
+  if ($Item.source -eq "worker_report_presence") { return 4 }
+  return 9
+}
+
+function ConvertTo-RankedWorkQueue {
+  param([object[]]$Queue)
+  $ranked = @($Queue | Sort-Object `
+    @{ Expression = { Get-QueuePriorityWeight -Priority $_.priority }; Ascending = $true }, `
+    @{ Expression = { Get-QueueStatusWeight -Status $_.status }; Ascending = $true }, `
+    @{ Expression = { Get-QueueSourceWeight -Item $_ }; Ascending = $true }, `
+    @{ Expression = { $_.task_id }; Ascending = $true }, `
+    @{ Expression = { $_.source }; Ascending = $true })
+
+  $result = New-Object System.Collections.Generic.List[object]
+  $rank = 1
+  foreach ($item in $ranked) {
+    $result.Add([pscustomobject]@{
+      queue_rank = $rank
+      task_id = $item.task_id
+      title = $item.title
+      source = $item.source
+      priority = $item.priority
+      status = $item.status
+      recommended_action = $item.recommended_action
+      suggested_worker_lane = $item.suggested_worker_lane
+      evidence_strength = $item.evidence_strength
+      route_reason = $item.route_reason
+    }) | Out-Null
+    $rank += 1
+  }
+  return $result.ToArray()
 }
 
 function Get-WorkQueue {
@@ -473,37 +569,39 @@ function Get-WorkQueue {
   $queue = New-Object System.Collections.Generic.List[object]
 
   if ($TodoCount -gt 0) {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-TODO-REVIEW" -Title "Review unresolved TODO markers." -Source "TODO count" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review unresolved TODO markers."
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-TODO-REVIEW" -Title "Review unresolved TODO markers." -Source "TODO count" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review unresolved TODO markers." -SuggestedWorkerLane "Work Intelligence" -EvidenceStrength "MEDIUM" -RouteReason "TODO count evidence"
   }
   if ($FixmeCount -gt 0) {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-FIXME-REVIEW" -Title "Review unresolved FIXME markers." -Source "FIXME count" -Priority "HIGH" -Status "REVIEW" -RecommendedAction "Review unresolved FIXME markers."
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-FIXME-REVIEW" -Title "Review unresolved FIXME markers." -Source "FIXME count" -Priority "HIGH" -Status "REVIEW" -RecommendedAction "Review unresolved FIXME markers." -SuggestedWorkerLane "Work Intelligence" -EvidenceStrength "HIGH" -RouteReason "FIXME count evidence"
   }
   foreach ($item in @($StaleWorkItems)) {
     $taskId = "WI-STALE-{0}" -f (([string]$item.item_type).ToUpperInvariant() -replace "[^A-Z0-9]", "-")
-    Add-WorkQueueItem -Queue $queue -TaskId $taskId -Title "Review stale work evidence." -Source $item.path -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review latest briefing."
+    $lane = Get-SuggestedWorkerLane -Source $item.path
+    $reason = Get-RouteReason -Source $item.path
+    Add-WorkQueueItem -Queue $queue -TaskId $taskId -Title "Review stale work evidence." -Source $item.path -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review latest briefing." -SuggestedWorkerLane $lane -EvidenceStrength "MEDIUM" -RouteReason $reason
   }
   $highSecurityWarnings = @($SecurityWarnings | Where-Object { $_.severity -eq "HIGH" })
   $reviewSecurityWarnings = @($SecurityWarnings | Where-Object { $_.severity -in @("HIGH", "MEDIUM") })
   if (@($highSecurityWarnings).Count -gt 0) {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-SECURITY-HIGH" -Title "Review high-risk security warnings." -Source "security_warnings" -Priority "HIGH" -Status "BLOCKED" -RecommendedAction "Review security warnings."
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-SECURITY-HIGH" -Title "Review high-risk security warnings." -Source "security_warnings" -Priority "HIGH" -Status "BLOCKED" -RecommendedAction "Review security warnings." -SuggestedWorkerLane "Work Intelligence" -EvidenceStrength "HIGH" -RouteReason "high-risk security warning evidence"
   } elseif (@($reviewSecurityWarnings).Count -gt 0) {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-SECURITY-REVIEW" -Title "Review security warnings." -Source "security_warnings" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review security warnings."
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-SECURITY-REVIEW" -Title "Review security warnings." -Source "security_warnings" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review security warnings." -SuggestedWorkerLane "Work Intelligence" -EvidenceStrength "MEDIUM" -RouteReason "security warning evidence"
   }
   if (-not $CleanGitStatus) {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-GIT-DIRTY" -Title "Review dirty git status." -Source "git status" -Priority "HIGH" -Status "REVIEW" -RecommendedAction "Commit approved work."
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-GIT-DIRTY" -Title "Review dirty git status." -Source "git status" -Priority "HIGH" -Status "REVIEW" -RecommendedAction "Commit approved work." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "HIGH" -RouteReason "dirty git status evidence"
   }
   if ($WorkerReportPresence -eq "MISSING") {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-REPORTS-MISSING" -Title "Review missing worker reports." -Source "worker_report_presence" -Priority "MEDIUM" -Status "READY_FOR_DRY_RUN" -RecommendedAction "Run next DRY_RUN workload."
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-REPORTS-MISSING" -Title "Review missing worker reports." -Source "worker_report_presence" -Priority "MEDIUM" -Status "READY_FOR_DRY_RUN" -RecommendedAction "Run next DRY_RUN workload." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "MEDIUM" -RouteReason "missing worker report evidence"
   }
   if ($RecommendedOperatorAction -and $RecommendedOperatorAction -ne "UNKNOWN") {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-OPERATOR-ACTION" -Title $RecommendedOperatorAction -Source "recommended_operator_action" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction $RecommendedOperatorAction
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-OPERATOR-ACTION" -Title $RecommendedOperatorAction -Source "recommended_operator_action" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction $RecommendedOperatorAction -SuggestedWorkerLane "Work Intelligence" -EvidenceStrength "MEDIUM" -RouteReason "recommended operator action evidence"
   }
 
   if ($queue.Count -eq 0) {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-QUEUE-UNKNOWN" -Title "UNKNOWN" -Source "UNKNOWN" -Priority "UNKNOWN" -Status "UNKNOWN" -RecommendedAction "UNKNOWN"
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-QUEUE-UNKNOWN" -Title "UNKNOWN" -Source "UNKNOWN" -Priority "UNKNOWN" -Status "UNKNOWN" -RecommendedAction "UNKNOWN" -SuggestedWorkerLane "UNKNOWN" -EvidenceStrength "UNKNOWN" -RouteReason "UNKNOWN"
   }
 
-  return @($queue | Sort-Object task_id, source -Unique)
+  return ConvertTo-RankedWorkQueue -Queue @($queue | Sort-Object task_id, source -Unique)
 }
 
 function Get-SecurityWarnings {

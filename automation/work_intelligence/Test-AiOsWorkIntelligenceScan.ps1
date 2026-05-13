@@ -179,7 +179,7 @@ if (Test-Path -LiteralPath $scannerPath) {
   if (-not $scannerText.Contains("work_queue")) {
     Add-Failure "Scanner missing work_queue field."
   }
-  foreach ($queueField in @("task_id", "title", "source", "priority", "status", "recommended_action")) {
+  foreach ($queueField in @("queue_rank", "task_id", "title", "source", "priority", "status", "recommended_action", "suggested_worker_lane", "evidence_strength", "route_reason")) {
     if (-not $scannerText.Contains($queueField)) {
       Add-Failure "Scanner missing work queue item field: $queueField"
     }
@@ -188,6 +188,19 @@ if (Test-Path -LiteralPath $scannerPath) {
     if (-not $scannerText.Contains($queueStatus)) {
       Add-Failure "Scanner missing work queue status: $queueStatus"
     }
+  }
+  foreach ($workerLane in @("Dashboard UI", "Trading Lab", "Operator Orchestration", "Work Intelligence", "Validators", "Reports", "Mock Data", "UNKNOWN")) {
+    if (-not $scannerText.Contains($workerLane)) {
+      Add-Failure "Scanner missing suggested worker lane: $workerLane"
+    }
+  }
+  foreach ($sortToken in @("Get-QueuePriorityWeight", "Get-QueueStatusWeight", "Get-QueueSourceWeight", "ConvertTo-RankedWorkQueue")) {
+    if (-not $scannerText.Contains($sortToken)) {
+      Add-Failure "Scanner missing queue sorting logic: $sortToken"
+    }
+  }
+  if ($scannerText.Contains("Start-AiOsControlledApplyLane")) {
+    Add-Failure "Scanner must not contain auto-APPLY lane launch logic."
   }
   foreach ($severity in @("HIGH", "MEDIUM", "LOW", "INFO")) {
     if (-not $scannerText.Contains($severity)) {
@@ -236,8 +249,9 @@ try {
   if (-not ($scan.PSObject.Properties.Name -contains "work_queue")) {
     Add-Failure "Scan output missing work_queue."
   }
+  $expectedRank = 1
   foreach ($queueItem in @($scan.work_queue)) {
-    foreach ($requiredQueueField in @("task_id", "title", "source", "priority", "status", "recommended_action")) {
+    foreach ($requiredQueueField in @("queue_rank", "task_id", "title", "source", "priority", "status", "recommended_action", "suggested_worker_lane", "evidence_strength", "route_reason")) {
       if (-not ($queueItem.PSObject.Properties.Name -contains $requiredQueueField)) {
         Add-Failure "Work queue item missing field: $requiredQueueField"
       }
@@ -245,6 +259,13 @@ try {
     if (@("REVIEW", "BLOCKED", "READY_FOR_DRY_RUN", "UNKNOWN") -notcontains $queueItem.status) {
       Add-Failure "Work queue item has invalid status: $($queueItem.status)"
     }
+    if (@("Dashboard UI", "Trading Lab", "Operator Orchestration", "Work Intelligence", "Validators", "Reports", "Mock Data", "UNKNOWN") -notcontains $queueItem.suggested_worker_lane) {
+      Add-Failure "Work queue item has invalid suggested_worker_lane: $($queueItem.suggested_worker_lane)"
+    }
+    if ($queueItem.queue_rank -ne $expectedRank) {
+      Add-Failure "Work queue item rank is not sequential at task $($queueItem.task_id)."
+    }
+    $expectedRank += 1
   }
   if ($scan.security_warning_count -ne @($scan.security_warnings).Count) {
     Add-Failure "security_warning_count does not match security_warnings length."

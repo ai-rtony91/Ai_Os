@@ -170,12 +170,16 @@ Queue items are built only from evidence already collected by the scanner:
 
 Each queue item includes:
 
+- `queue_rank`
 - `task_id`
 - `title`
 - `source`
 - `priority`
 - `status`
 - `recommended_action`
+- `suggested_worker_lane`
+- `evidence_strength`
+- `route_reason`
 
 Allowed queue statuses are:
 
@@ -185,6 +189,39 @@ Allowed queue statuses are:
 - `UNKNOWN`
 
 When there is no evidence for a queue item, the scanner emits an `UNKNOWN` queue placeholder instead of inventing work.
+
+## Queue Prioritization And Lane Routing
+
+Phase 17.0 ranks the local work queue and suggests a likely worker lane for each item. Ranking is evidence-based and does not trigger APPLY, commit, push, or worker launch behavior.
+
+Queue ordering prefers:
+
+- `HIGH` before `MEDIUM` before `LOW`
+- `BLOCKED` before `REVIEW` before `READY_FOR_DRY_RUN`
+- security risk before lower-risk review work
+- dirty git status before stale work review
+- stale work before missing worker report review
+
+Allowed suggested worker lanes are:
+
+- `Dashboard UI`
+- `Trading Lab`
+- `Operator Orchestration`
+- `Work Intelligence`
+- `Validators`
+- `Reports`
+- `Mock Data`
+- `UNKNOWN`
+
+Routing examples:
+
+- stale snapshots or briefings route to `Work Intelligence`
+- validator evidence routes to `Validators`
+- dashboard mock-data paths route to `Mock Data`
+- `trading_lab` paths route to `Trading Lab`
+- operator scripts route to `Operator Orchestration`
+
+If route evidence is weak, the scanner keeps `UNKNOWN`.
 
 ## Validation
 
