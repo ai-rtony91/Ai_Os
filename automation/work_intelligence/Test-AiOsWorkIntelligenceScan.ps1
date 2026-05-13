@@ -171,6 +171,11 @@ if (Test-Path -LiteralPath $scannerPath) {
       Add-Failure "Scanner missing security summary field: $requiredField"
     }
   }
+  foreach ($requiredField in @("priority_score", "urgency_score", "dependency_blocked", "safe_to_apply", "recommended_operator_action", "stale_work_detected", "stale_work_items", "unfinished_phase_count", "unfinished_stage_count", "blocked_work_count", "active_priority_lane")) {
+    if (-not $scannerText.Contains($requiredField)) {
+      Add-Failure "Scanner missing priority field: $requiredField"
+    }
+  }
   foreach ($severity in @("HIGH", "MEDIUM", "LOW", "INFO")) {
     if (-not $scannerText.Contains($severity)) {
       Add-Failure "Scanner missing severity level: $severity"
@@ -203,6 +208,17 @@ try {
     if (-not ($scan.PSObject.Properties.Name -contains $requiredField)) {
       Add-Failure "Scan output missing security summary field: $requiredField"
     }
+  }
+  foreach ($requiredField in @("priority_score", "urgency_score", "dependency_blocked", "safe_to_apply", "recommended_operator_action", "stale_work_detected", "stale_work_items", "unfinished_phase_count", "unfinished_stage_count", "blocked_work_count", "active_priority_lane")) {
+    if (-not ($scan.PSObject.Properties.Name -contains $requiredField)) {
+      Add-Failure "Scan output missing priority field: $requiredField"
+    }
+  }
+  if ($null -eq $scan.safe_to_apply) {
+    Add-Failure "Scan output safe_to_apply must not be null."
+  }
+  if ([string]::IsNullOrWhiteSpace([string]$scan.recommended_operator_action)) {
+    Add-Failure "Scan output recommended_operator_action must not be blank."
   }
   if ($scan.security_warning_count -ne @($scan.security_warnings).Count) {
     Add-Failure "security_warning_count does not match security_warnings length."

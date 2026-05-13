@@ -112,6 +112,48 @@ The snapshot summary includes:
 - `info_count`
 - `suppressed_policy_mentions`
 
+## Autonomous Priority Engine
+
+Phase 16.8 adds lightweight workload ranking using local repo evidence only. The scanner does not invent phases or tasks. When evidence is weak, it keeps the conservative `UNKNOWN` fallback.
+
+The priority engine uses:
+
+- latest report references
+- latest checkpoint references
+- TODO and FIXME counts
+- git clean or dirty state
+- validator presence
+- report freshness
+- worker lane and worker report state
+- security warning counts
+
+The snapshot includes:
+
+- `priority_score`
+- `urgency_score`
+- `dependency_blocked`
+- `safe_to_apply`
+- `recommended_operator_action`
+- `stale_work_detected`
+- `stale_work_items`
+- `unfinished_phase_count`
+- `unfinished_stage_count`
+- `blocked_work_count`
+- `active_priority_lane`
+
+`safe_to_apply` is `false` when evidence shows a dirty git state, missing validators, protected root modifications, high-risk security warnings, or dependency blocking. It is `true` only when the local evidence supports safe progression.
+
+Stale work detection uses file timestamps only. The scanner can flag stale daily snapshots, operator briefings, reports, and checkpoints when their last-write time is older than the local freshness rule. It does not create stale claims without timestamp evidence.
+
+Recommended operator actions are conservative examples such as:
+
+- `Review latest briefing.`
+- `Run next DRY_RUN workload.`
+- `Resolve validator failure.`
+- `Commit approved work.`
+- `Review security warnings.`
+- `UNKNOWN`
+
 ## Validation
 
 Run from repo root:
