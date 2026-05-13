@@ -1,0 +1,19 @@
+{
+  "schema": "AIOS_CONTROLLED_APPLY_QUEUE.v1",
+  "batch_name": "Phase 15.1 controlled apply queue example",
+  "apply_mode": "SERIAL_OPERATOR_APPROVED",
+  "codex_command": "UNKNOWN",
+  "validation_commands": [
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "git_policy": {
+    "ask_before_git_add": true,
+    "git_add_dot_allowed": false,
+    "ask_before_git_commit": true,
+    "ask_before_git_push": true,
+    "push_once_only": true
+  },
+  "approved_workers": []
+}

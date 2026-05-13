@@ -1,0 +1,86 @@
+{
+  "schema": "AIOS_PARALLEL_WORKER_REGISTRY.v1",
+  "mode": "DRY_RUN_WORKERS_PARALLEL_APPLY_SERIAL",
+  "codex_command": "UNKNOWN",
+  "operator_rules": {
+    "dry_run_workers_may_run_parallel": true,
+    "apply_workers_must_run_one_at_a_time": true,
+    "validate_after_each_apply": true,
+    "commit_after_whole_batch_clean_only": true,
+    "push_once_only": true,
+    "git_add_dot_allowed": false,
+    "commit_allowed_without_operator_approval": false,
+    "push_allowed_without_operator_approval": false,
+    "external_execution_systems_blocked": true,
+    "secrets_blocked": true
+  },
+  "protected_files": [
+    "README.md",
+    "AGENTS.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "White_Paper.md"
+  ],
+  "workers": [
+    {
+      "id": 1,
+      "label": "Dashboard UI",
+      "lane": "apps/dashboard",
+      "mode": "DRY_RUN_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-01-dashboard-ui.json"
+    },
+    {
+      "id": 2,
+      "label": "TradingView",
+      "lane": "docs/AI_OS/trading_laboratory/tradingview",
+      "mode": "DRY_RUN_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-02-tradingview.json"
+    },
+    {
+      "id": 3,
+      "label": "TradersPost",
+      "lane": "docs/AI_OS/trading_laboratory/traderspost",
+      "mode": "DRY_RUN_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-03-traderspost.json"
+    },
+    {
+      "id": 4,
+      "label": "Latency",
+      "lane": "docs/AI_OS/trading_laboratory/latency",
+      "mode": "DRY_RUN_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-04-latency.json"
+    },
+    {
+      "id": 5,
+      "label": "Validators",
+      "lane": "automation/trading_lab",
+      "mode": "DRY_RUN_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-05-validators.json"
+    },
+    {
+      "id": 6,
+      "label": "Reports",
+      "lane": "Reports/checkpoints and Reports/daily",
+      "mode": "DRY_RUN_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-06-reports.json"
+    },
+    {
+      "id": 7,
+      "label": "Mock Data",
+      "lane": "apps/dashboard/mock-data",
+      "mode": "DRY_RUN_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-07-mock-data.json"
+    },
+    {
+      "id": 8,
+      "label": "Git QC",
+      "lane": "review/report only",
+      "mode": "DRY_RUN_ONLY_REVIEW_ONLY",
+      "report_path": "Reports/operator/worker-reports/worker-08-git-qc.json"
+    }
+  ]
+}
