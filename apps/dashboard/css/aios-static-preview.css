@@ -349,6 +349,26 @@ body > .sidebar-toggle {
   gap: 7px;
 }
 
+.home-start-copy {
+  display: grid;
+  gap: 2px;
+  justify-items: start;
+  min-width: 0;
+}
+
+.home-start-label,
+.home-start-mode {
+  display: block;
+  line-height: 1;
+}
+
+.home-start-mode {
+  color: rgba(186, 230, 253, 0.74);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
 .mobile-tab-icon {
   display: block;
   width: 15px;
@@ -1409,6 +1429,12 @@ body.focused-route-archives .project-hub-panel {
     display: inline-flex;
     align-items: center;
     line-height: 1;
+  }
+
+  .home-start-button.mobile-tab-button .home-start-copy {
+    display: grid;
+    gap: 2px;
+    justify-items: start;
   }
 
   .status-strip .drawer-reopen.mobile-tab-button:hover,
