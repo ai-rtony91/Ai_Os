@@ -223,6 +223,42 @@ Routing examples:
 
 If route evidence is weak, the scanner keeps `UNKNOWN`.
 
+## Queue History
+
+Phase 18 adds optional queue history persistence. It is disabled by default and writes only when the operator runs:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Invoke-AiOsWorkIntelligenceScan.ps1 -SaveQueueHistory
+```
+
+`-SaveQueueHistory` writes a queue-only JSON snapshot under:
+
+```text
+Reports/work_intelligence/queue/
+```
+
+The timestamped file name uses:
+
+```text
+WORK_QUEUE_SNAPSHOT_yyyyMMdd_HHmmss.json
+```
+
+The queue history snapshot includes:
+
+- `timestamp`
+- `branch`
+- `clean_git_status`
+- `queue_count`
+- `work_queue`
+
+When `-SaveQueueHistory` is used, the scanner also writes:
+
+```text
+Reports/work_intelligence/queue/LATEST_WORK_QUEUE.json
+```
+
+The latest pointer is only updated during explicit queue history saves. It does not run during normal scans and does not trigger daily snapshots, telemetry append, voice briefing generation, worker launch, APPLY, commit, or push.
+
 ## Phase 17.1C Worker Report Ingestion
 
 Phase 17.1C reads JSON worker reports from:

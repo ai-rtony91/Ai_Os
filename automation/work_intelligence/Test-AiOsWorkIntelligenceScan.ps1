@@ -26,6 +26,7 @@ $requiredFiles = @(
   "Reports/work_intelligence/REPO_HEALTH_SUMMARY.example.json",
   "Reports/work_intelligence/daily/.gitkeep",
   "Reports/work_intelligence/telemetry/.gitkeep",
+  "Reports/work_intelligence/queue/.gitkeep",
   "Reports/work_intelligence/daily/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
   "Reports/work_intelligence/telemetry/WORK_INTELLIGENCE_METRICS.example.csv",
   "Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.example.md",
@@ -41,6 +42,7 @@ $requiredFolders = @(
   "Reports/work_intelligence",
   "Reports/work_intelligence/daily",
   "Reports/work_intelligence/telemetry",
+  "Reports/work_intelligence/queue",
   "Reports/work_intelligence/briefings",
   "Reports/operator/worker-reports",
   "docs/AI_OS/work_intelligence"
@@ -163,6 +165,14 @@ if (Test-Path -LiteralPath $scannerPath) {
   if (-not $scannerText.Contains('[switch]$GenerateBriefing')) {
     Add-Failure "Scanner missing GenerateBriefing switch."
   }
+  if (-not $scannerText.Contains('[switch]$SaveQueueHistory')) {
+    Add-Failure "Scanner missing SaveQueueHistory switch."
+  }
+  foreach ($queueHistoryToken in @("Save-QueueHistory", "Reports/work_intelligence/queue", "WORK_QUEUE_SNAPSHOT_", "LATEST_WORK_QUEUE.json", "queue_count")) {
+    if (-not $scannerText.Contains($queueHistoryToken)) {
+      Add-Failure "Scanner missing queue history token: $queueHistoryToken"
+    }
+  }
   foreach ($requiredField in @("current_focus_area", "active_subsystem", "recommended_next_workload", "focus_evidence_sources", "security_warnings")) {
     if (-not $scannerText.Contains($requiredField)) {
       Add-Failure "Scanner missing required field: $requiredField"
@@ -213,6 +223,11 @@ if (Test-Path -LiteralPath $scannerPath) {
   }
   if ($scannerText.Contains("Start-AiOsControlledApplyLane")) {
     Add-Failure "Scanner must not contain auto-APPLY lane launch logic."
+  }
+  foreach ($blockedToken in @("git commit", "git push", "git add .", "Start-AiOsParallelDryRunCrew")) {
+    if ($scannerText.Contains($blockedToken)) {
+      Add-Failure "Scanner must not contain blocked automation token: $blockedToken"
+    }
   }
   foreach ($severity in @("HIGH", "MEDIUM", "LOW", "INFO")) {
     if (-not $scannerText.Contains($severity)) {

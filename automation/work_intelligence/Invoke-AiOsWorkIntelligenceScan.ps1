@@ -1,7 +1,8 @@
 param(
   [string]$ConfigPath = "automation/work_intelligence/AIOS_WORK_INTELLIGENCE_CONFIG.json",
   [switch]$SaveSnapshot,
-  [switch]$GenerateBriefing
+  [switch]$GenerateBriefing,
+  [switch]$SaveQueueHistory
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,6 +44,27 @@ function Save-DailySnapshot {
   $snapshotPath = Join-Path $snapshotDir ("DAILY_WORK_INTELLIGENCE_SNAPSHOT_{0}.json" -f (ConvertTo-SafeFileTimestamp))
   $Snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $snapshotPath -Encoding UTF8
   return $snapshotPath
+}
+
+function Save-QueueHistory {
+  param(
+    [pscustomobject]$Snapshot,
+    [string]$OutputDirectory = "Reports/work_intelligence/queue"
+  )
+  $queueDir = Join-Path $RepoRoot $OutputDirectory
+  New-Item -ItemType Directory -Force -Path $queueDir | Out-Null
+  $queueSnapshot = [pscustomobject]@{
+    timestamp = (Get-Date).ToString("o")
+    branch = $Snapshot.branch
+    clean_git_status = $Snapshot.clean_git_status
+    queue_count = @($Snapshot.work_queue).Count
+    work_queue = $Snapshot.work_queue
+  }
+  $queuePath = Join-Path $queueDir ("WORK_QUEUE_SNAPSHOT_{0}.json" -f (ConvertTo-SafeFileTimestamp))
+  $latestPath = Join-Path $queueDir "LATEST_WORK_QUEUE.json"
+  $queueSnapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $queuePath -Encoding UTF8
+  $queueSnapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $latestPath -Encoding UTF8
+  return $queuePath
 }
 
 function Save-OperatorVoiceBriefing {
@@ -1015,6 +1037,11 @@ $snapshot = [pscustomobject]@{
 if ($SaveSnapshot -or $config.scanner.save_to_reports_enabled -eq $true) {
   $savedSnapshotPath = Save-DailySnapshot -Snapshot $snapshot -OutputDirectory $config.snapshot_output_directory
   Write-Host "Saved daily work intelligence snapshot: $savedSnapshotPath" -ForegroundColor Green
+}
+
+if ($SaveQueueHistory) {
+  $savedQueueHistoryPath = Save-QueueHistory -Snapshot $snapshot
+  Write-Host "Saved work queue history snapshot: $savedQueueHistoryPath" -ForegroundColor Green
 }
 
 if ($config.scanner.telemetry_append_enabled -eq $true) {
