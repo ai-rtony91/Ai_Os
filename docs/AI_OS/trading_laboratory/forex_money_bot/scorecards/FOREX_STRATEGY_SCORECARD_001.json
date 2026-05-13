@@ -1,0 +1,43 @@
+{
+  "artifact": "FOREX_STRATEGY_SCORECARD_001",
+  "phase": "15",
+  "stage": "15.2",
+  "mode": "paper_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "external_request_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "strategies": [
+    {
+      "strategy_name": "EMA_RSI_V1",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "trade_count": 0,
+      "expectancy": 0.0,
+      "profit_factor": 0.0,
+      "blocked_reason": "not enough paper-only evidence"
+    },
+    {
+      "strategy_name": "LONDON_BREAKOUT_V1",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "trade_count": 0,
+      "expectancy": 0.0,
+      "profit_factor": 0.0,
+      "blocked_reason": "not enough paper-only evidence"
+    },
+    {
+      "strategy_name": "TREND_PULLBACK_V1",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "trade_count": 0,
+      "expectancy": 0.0,
+      "profit_factor": 0.0,
+      "blocked_reason": "not enough paper-only evidence"
+    }
+  ]
+}

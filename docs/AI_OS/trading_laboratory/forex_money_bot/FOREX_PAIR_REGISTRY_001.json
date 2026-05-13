@@ -1,0 +1,27 @@
+{
+  "artifact": "FOREX_PAIR_REGISTRY_001",
+  "phase": "15",
+  "stage": "15.1",
+  "mode": "simulation_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "allowed_pairs": [
+    "EUR_USD",
+    "GBP_USD",
+    "USD_JPY",
+    "AUD_USD",
+    "USD_CAD",
+    "USD_CHF",
+    "NZD_USD"
+  ],
+  "pair_policy": {
+    "pair_allowed_check": "required_before_paper_simulation",
+    "unknown_pair_status": "BLOCKED",
+    "blocked_reason": "pair must be present in local paper registry"
+  }
+}

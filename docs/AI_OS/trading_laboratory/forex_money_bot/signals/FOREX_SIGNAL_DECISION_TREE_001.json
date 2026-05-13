@@ -1,0 +1,70 @@
+{
+  "artifact": "FOREX_SIGNAL_DECISION_TREE_001",
+  "phase": "15",
+  "stage": "15.2",
+  "mode": "paper_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "external_request_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "decision_states": [
+    "ALLOW",
+    "REJECT",
+    "WAIT",
+    "LOW_CONFIDENCE",
+    "SESSION_BLOCK",
+    "RISK_BLOCK"
+  ],
+  "decision_rules": [
+    {
+      "decision_state": "RISK_BLOCK",
+      "condition": "risk_gate_status blocks paper review",
+      "blocked_reason": "risk gate blocked"
+    },
+    {
+      "decision_state": "SESSION_BLOCK",
+      "condition": "session filter fails",
+      "blocked_reason": "session not aligned"
+    },
+    {
+      "decision_state": "LOW_CONFIDENCE",
+      "condition": "confidence_score below 60",
+      "blocked_reason": "confluence score too low"
+    },
+    {
+      "decision_state": "WAIT",
+      "condition": "required placeholder condition is unclear",
+      "blocked_reason": "spread or volatility state needs paper review"
+    },
+    {
+      "decision_state": "REJECT",
+      "condition": "EMA and RSI conflict",
+      "blocked_reason": "trend and momentum conflict"
+    },
+    {
+      "decision_state": "ALLOW",
+      "condition": "confidence_score 70 or higher and paper risk gate allows review",
+      "blocked_reason": "paper review only; live execution remains blocked"
+    }
+  ],
+  "signal_output_fields": [
+    "signal_id",
+    "pair",
+    "timeframe",
+    "direction",
+    "confidence_score",
+    "decision_state",
+    "latency_seconds",
+    "strategy_name",
+    "session_name",
+    "regime_tag",
+    "risk_gate_status",
+    "paper_only_status",
+    "live_execution_status",
+    "blocked_reason"
+  ]
+}

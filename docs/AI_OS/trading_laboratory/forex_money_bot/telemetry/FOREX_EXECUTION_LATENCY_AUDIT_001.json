@@ -1,0 +1,27 @@
+{
+  "artifact": "FOREX_EXECUTION_LATENCY_AUDIT_001",
+  "phase": "15",
+  "stage": "15.3",
+  "mode": "paper_only_simulation",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "latency_audit": {
+    "signal_received_timestamp": "2026-05-12T10:00:00-04:00",
+    "decision_timestamp": "2026-05-12T10:00:02-04:00",
+    "execution_timestamp": "2026-05-12T10:00:04-04:00",
+    "close_timestamp": "2026-05-12T10:45:00-04:00",
+    "latency_seconds": 4.0,
+    "trade_duration_minutes": 45,
+    "confidence_score": 78,
+    "spread_placeholder": "normal_placeholder",
+    "slippage_placeholder": "paper_estimate_only",
+    "session_name": "london_new_york_overlap",
+    "market_regime": "trend_permission_only",
+    "paper_only_status": "PAPER_ONLY",
+    "blocked_reason": "latency audit is paper-only"
+  }
+}

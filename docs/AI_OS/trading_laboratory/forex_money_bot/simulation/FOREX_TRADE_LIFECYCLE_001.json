@@ -1,0 +1,33 @@
+{
+  "artifact": "FOREX_TRADE_LIFECYCLE_001",
+  "phase": "15",
+  "stage": "15.3",
+  "mode": "paper_only_simulation",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "trade_states": [
+    "PENDING",
+    "ACTIVE",
+    "PARTIAL",
+    "CLOSED_WIN",
+    "CLOSED_LOSS",
+    "SCRATCH",
+    "REJECTED",
+    "EXPIRED"
+  ],
+  "lifecycle_example": {
+    "paper_trade_id": "forex_lifecycle_001",
+    "pair": "EUR_USD",
+    "current_trade_state": "PENDING",
+    "simulated_rr": 0.0,
+    "simulated_profit_pips": 0.0,
+    "simulated_loss_pips": 0.0,
+    "close_condition": "not_reached",
+    "scorecard_write_status": "pending_paper_result",
+    "blocked_reason": "lifecycle is simulation-only"
+  }
+}

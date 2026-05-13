@@ -1,0 +1,65 @@
+{
+  "artifact": "FOREX_PAIR_PERFORMANCE_001",
+  "phase": "15",
+  "stage": "15.2",
+  "mode": "paper_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "external_request_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "pair_performance": [
+    {
+      "pair": "EUR_USD",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "paper_trade_count": 0,
+      "blocked_reason": "awaiting paper-only evidence"
+    },
+    {
+      "pair": "GBP_USD",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "paper_trade_count": 0,
+      "blocked_reason": "awaiting paper-only evidence"
+    },
+    {
+      "pair": "USD_JPY",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "paper_trade_count": 0,
+      "blocked_reason": "awaiting paper-only evidence"
+    },
+    {
+      "pair": "AUD_USD",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "paper_trade_count": 0,
+      "blocked_reason": "awaiting paper-only evidence"
+    },
+    {
+      "pair": "USD_CAD",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "paper_trade_count": 0,
+      "blocked_reason": "awaiting paper-only evidence"
+    },
+    {
+      "pair": "USD_CHF",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "paper_trade_count": 0,
+      "blocked_reason": "awaiting paper-only evidence"
+    },
+    {
+      "pair": "NZD_USD",
+      "confidence_score": 0,
+      "decision_state": "WAIT",
+      "paper_trade_count": 0,
+      "blocked_reason": "awaiting paper-only evidence"
+    }
+  ]
+}

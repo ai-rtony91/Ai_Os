@@ -1,0 +1,28 @@
+{
+  "artifact": "FOREX_PROFIT_SCORECARD_001",
+  "phase": "15",
+  "stage": "15.1",
+  "mode": "simulation_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "scorecard": {
+    "win_rate": 0.0,
+    "average_win": 0.0,
+    "average_loss": 0.0,
+    "expectancy": 0.0,
+    "profit_factor": 0.0,
+    "max_drawdown": 0.0,
+    "trade_count": 0,
+    "latency_seconds": 0.0,
+    "confidence_score": 0.0,
+    "risk_gate_status": "PAPER_REVIEW_ONLY",
+    "blocked_reason": "not enough paper trade evidence",
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "scorecard_updated": true
+}

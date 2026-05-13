@@ -1,0 +1,33 @@
+{
+  "artifact": "FOREX_SIGNAL_RULESET_001",
+  "phase": "15",
+  "stage": "15.1",
+  "mode": "simulation_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "signal_requirements": {
+    "required_fields": [
+      "signal_id",
+      "pair",
+      "timeframe",
+      "direction_intent",
+      "signal_received_at",
+      "strategy_id"
+    ],
+    "allowed_direction_intents": [
+      "long_review",
+      "short_review",
+      "flat_review"
+    ],
+    "signal_received": true,
+    "latency_timestamp_recorded": true,
+    "session_regime_tag_required": true,
+    "risk_gate_check_required": true,
+    "blocked_reason": "signal is for paper review only and cannot execute"
+  }
+}

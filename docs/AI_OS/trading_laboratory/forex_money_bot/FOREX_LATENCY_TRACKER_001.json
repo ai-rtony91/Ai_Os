@@ -1,0 +1,23 @@
+{
+  "artifact": "FOREX_LATENCY_TRACKER_001",
+  "phase": "15",
+  "stage": "15.1",
+  "mode": "simulation_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "latency_tracker": {
+    "signal_received_at": "2026-05-12T10:00:00-04:00",
+    "latency_timestamp_recorded": true,
+    "validation_started_at": "2026-05-12T10:00:01-04:00",
+    "validation_completed_at": "2026-05-12T10:00:02-04:00",
+    "paper_trade_simulated_at": "2026-05-12T10:00:03-04:00",
+    "latency_seconds": 3.0,
+    "stale_signal_status": false,
+    "blocked_reason": "latency tracker is paper-only"
+  }
+}

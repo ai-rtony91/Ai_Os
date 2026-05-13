@@ -1,0 +1,22 @@
+{
+  "artifact": "FOREX_RISK_GATE_001",
+  "phase": "15",
+  "stage": "15.1",
+  "mode": "simulation_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "risk_gate": {
+    "risk_gate_check": "required",
+    "risk_gate_status": "PAPER_ALLOWED_LIVE_BLOCKED",
+    "paper_trade_simulation_allowed": true,
+    "live_trade_allowed": false,
+    "max_loss_placeholder": 0.0,
+    "risk_per_trade_placeholder": 0.0,
+    "blocked_reason": "live trading is not approved"
+  }
+}

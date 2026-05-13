@@ -1,0 +1,72 @@
+{
+  "artifact": "FOREX_SIGNAL_CONFLUENCE_ENGINE_001",
+  "phase": "15",
+  "stage": "15.2",
+  "mode": "paper_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "external_request_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "confidence_model": {
+    "score_min": 0,
+    "score_max": 100,
+    "components": [
+      {
+        "name": "EMA trend alignment",
+        "points": 25
+      },
+      {
+        "name": "RSI momentum confirmation",
+        "points": 20
+      },
+      {
+        "name": "Session alignment",
+        "points": 20
+      },
+      {
+        "name": "Trend strength",
+        "points": 15
+      },
+      {
+        "name": "Volatility alignment",
+        "points": 10
+      },
+      {
+        "name": "Risk condition",
+        "points": 10
+      }
+    ]
+  },
+  "supported_filters": {
+    "ema_trend_alignment": true,
+    "rsi_momentum_confirmation": true,
+    "session_filter": true,
+    "spread_condition_placeholder": true,
+    "volatility_condition_placeholder": true,
+    "regime_tag": true,
+    "confidence_score": true,
+    "trade_direction_intent": true,
+    "reject_reason": true,
+    "paper_only_flag": true
+  },
+  "example_signal_output": {
+    "signal_id": "forex_signal_confluence_001",
+    "pair": "EUR_USD",
+    "timeframe": "45m",
+    "direction": "long_review",
+    "confidence_score": 78,
+    "decision_state": "ALLOW",
+    "latency_seconds": 2.4,
+    "strategy_name": "EMA_RSI_V1",
+    "session_name": "london_new_york_overlap",
+    "regime_tag": "trend_permission_only",
+    "risk_gate_status": "PAPER_ALLOWED_LIVE_BLOCKED",
+    "paper_only_status": "PAPER_ONLY",
+    "live_execution_status": "BLOCKED",
+    "blocked_reason": "paper-only confluence output; live execution blocked"
+  }
+}

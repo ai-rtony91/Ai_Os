@@ -1,0 +1,47 @@
+{
+  "artifact": "FOREX_SIGNAL_PRIORITY_MATRIX_001",
+  "phase": "15",
+  "stage": "15.2",
+  "mode": "paper_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "external_request_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "priority_order": [
+    {
+      "rank": 1,
+      "decision_state": "RISK_BLOCK",
+      "priority_reason": "risk gate must override every signal"
+    },
+    {
+      "rank": 2,
+      "decision_state": "SESSION_BLOCK",
+      "priority_reason": "session mismatch blocks strategy context"
+    },
+    {
+      "rank": 3,
+      "decision_state": "REJECT",
+      "priority_reason": "conflicting trend or momentum rejects the signal"
+    },
+    {
+      "rank": 4,
+      "decision_state": "LOW_CONFIDENCE",
+      "priority_reason": "score is too weak for paper review"
+    },
+    {
+      "rank": 5,
+      "decision_state": "WAIT",
+      "priority_reason": "missing placeholder context requires delay"
+    },
+    {
+      "rank": 6,
+      "decision_state": "ALLOW",
+      "priority_reason": "paper review may continue, but live execution remains blocked"
+    }
+  ],
+  "blocked_reason": "priority matrix is paper-only and cannot route orders"
+}

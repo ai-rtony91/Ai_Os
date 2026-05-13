@@ -1,0 +1,29 @@
+{
+  "artifact": "FOREX_PAPER_TRADE_LEDGER_001",
+  "phase": "15",
+  "stage": "15.1",
+  "mode": "simulation_only",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "api_key_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "ledger_entries": [
+    {
+      "paper_trade_id": "forex_paper_trade_001",
+      "pair": "EUR_USD",
+      "timeframe": "45m",
+      "direction_intent": "long_review",
+      "session": "new_york",
+      "regime_tag": "trend_permission_only",
+      "risk_gate_status": "PAPER_ALLOWED_LIVE_BLOCKED",
+      "paper_trade_simulation": "RECORDED",
+      "result_logged": true,
+      "scorecard_updated": true,
+      "paper_result_r": 0.0,
+      "blocked_reason": "example paper ledger entry only"
+    }
+  ]
+}

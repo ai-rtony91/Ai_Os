@@ -1,0 +1,37 @@
+{
+  "artifact": "FOREX_SIMULATED_TRADE_FLOW_001",
+  "phase": "15",
+  "stage": "15.3",
+  "mode": "paper_only_simulation",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "real_order_status": "BLOCKED",
+  "simulation_flow": [
+    "Signal generated",
+    "Confluence score calculated",
+    "Decision engine evaluates signal",
+    "Risk gate check",
+    "Simulated entry created",
+    "Simulated stop loss assigned",
+    "Simulated take profit assigned",
+    "Trade lifecycle tracked",
+    "Simulated close condition reached",
+    "Result written to scorecard",
+    "Telemetry updated"
+  ],
+  "example_simulation": {
+    "signal_id": "forex_sim_signal_001",
+    "pair": "EUR_USD",
+    "timeframe": "45m",
+    "decision_state": "ALLOW",
+    "risk_gate_status": "PAPER_ALLOWED_LIVE_BLOCKED",
+    "simulated_entry_created": true,
+    "simulated_stop_loss_assigned": true,
+    "simulated_take_profit_assigned": true,
+    "trade_state": "PENDING",
+    "blocked_reason": "paper simulation only"
+  }
+}
