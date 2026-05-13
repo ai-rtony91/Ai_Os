@@ -29,6 +29,7 @@ foreach ($Worker in $Layout.workers) {
 Set-Location '$Repo'
 Write-Host '$Title - $($Worker.role)' -ForegroundColor Cyan
 Write-Host '$($Worker.prompt)' -ForegroundColor Yellow
+powershell -ExecutionPolicy Bypass -File 'automation\operator\Start-AIOSWorkerQueueRunner.ps1' -WorkerId '$Title'
 Start-Sleep -Seconds 5
 codex --cd '$Repo'
 "@
