@@ -1,0 +1,34 @@
+{
+  "schema": "AIOS_WORKER_AUTO_ROUTING.v1",
+  "mode": "DRY_RUN_ONLY",
+  "generated_at": "2026-05-13T00:00:00-04:00",
+  "purpose": "Route each DRY_RUN worker from one orchestrator-generated packet instead of manual prompt copy and paste.",
+  "routing_packet_path": "Reports/operator/AIOS_WORKER_ROUTING_PACKET.json",
+  "routing_packet_required_fields": [
+    "worker_id",
+    "label",
+    "lane",
+    "allowed_paths",
+    "blocked_paths",
+    "dry_run_task",
+    "report_path",
+    "validation_commands",
+    "stop_condition"
+  ],
+  "worker_count": 8,
+  "worker_8_policy": "DRY_RUN_ONLY_REVIEW_ONLY",
+  "fallback_behavior": "If the routing packet is missing, Start-AiOsParallelDryRunCrew.ps1 falls back to AIOS_PARALLEL_WORKER_REGISTRY.json.",
+  "codex_prompt_delivery": "When Codex launch is enabled and prompt_argument_name is UNKNOWN, each worker prompt is delivered through AIOS_CODEX_WORKER_PROMPT.",
+  "blocked_actions": {
+    "autonomous_apply": true,
+    "autonomous_commit": true,
+    "autonomous_push": true,
+    "git_add_dot": true,
+    "broker_connection": true,
+    "live_trading": true,
+    "api_keys": true,
+    "secrets": true,
+    "protected_root_file_edits": true
+  },
+  "next_safe_action": "Generate the routing packet with Invoke-AiOsWorkflowOrchestrator.ps1, then launch DRY_RUN workers."
+}

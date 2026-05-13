@@ -1,16 +1,22 @@
 param(
-  [string]$RegistryPath = "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json"
+  [string]$RegistryPath = "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+  [string]$RoutingPacketPath = "Reports/operator/AIOS_WORKER_ROUTING_PACKET.json"
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path ".").Path
 $RegistryFullPath = Join-Path $RepoRoot $RegistryPath
+$RoutingPacketFullPath = Join-Path $RepoRoot $RoutingPacketPath
 
 if (-not (Test-Path -LiteralPath $RegistryFullPath)) {
   throw "Registry not found: $RegistryFullPath"
 }
 
 $registry = Get-Content -LiteralPath $RegistryFullPath -Raw | ConvertFrom-Json
+$routingPacket = $null
+if (Test-Path -LiteralPath $RoutingPacketFullPath -PathType Leaf) {
+  $routingPacket = Get-Content -LiteralPath $RoutingPacketFullPath -Raw | ConvertFrom-Json
+}
 $codexLaunch = $registry.codex_launch
 $codexLaunchEnabled = $codexLaunch -and $codexLaunch.enabled -eq $true -and $codexLaunch.command -and $codexLaunch.command -ne "UNKNOWN"
 
@@ -21,17 +27,48 @@ if ($codexLaunchEnabled) {
 } else {
   Write-Host "Codex launch: instruction-window fallback. Command is unavailable, disabled, or UNKNOWN."
 }
+if ($routingPacket) {
+  Write-Host "Worker routing: using $RoutingPacketPath"
+} else {
+  Write-Host "Worker routing: routing packet missing; falling back to registry."
+}
 Write-Host ""
 
-foreach ($worker in $registry.workers) {
-  $title = "AI_OS DRY_RUN Worker $($worker.id) - $($worker.label)"
+if ($routingPacket -and $routingPacket.workers) {
+  $workerRoutes = @($routingPacket.workers)
+} else {
+  $workerRoutes = @()
+  foreach ($worker in $registry.workers) {
+    $workerRoutes += [ordered]@{
+      worker_id = $worker.id
+      label = $worker.label
+      lane = $worker.lane
+      allowed_paths = @($worker.allowed_paths)
+      blocked_paths = @($worker.blocked_paths)
+      mode = $worker.mode
+      dry_run_task = $worker.codex_prompt_seed
+      report_path = $worker.report_path
+      validation_commands = @(
+        "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+        "git diff --check",
+        "git status --short --branch"
+      )
+      stop_condition = "Produce DRY_RUN report only. No APPLY, no commit, no push."
+    }
+  }
+}
+
+foreach ($worker in $workerRoutes) {
+  $title = "AI_OS DRY_RUN Worker $($worker.worker_id) - $($worker.label)"
   $lane = $worker.lane
   $reportPath = $worker.report_path
-  $workerId = $worker.id
+  $workerId = $worker.worker_id
   $workerLabel = $worker.label
   $allowedPaths = @($worker.allowed_paths) -join ", "
   $blockedPaths = @($worker.blocked_paths) -join ", "
-  $promptSeed = $worker.codex_prompt_seed
+  $dryRunTask = $worker.dry_run_task
+  $validationCommands = @($worker.validation_commands) -join "; "
+  $stopCondition = if ($worker.stop_condition) { $worker.stop_condition } else { "Produce DRY_RUN report only. No APPLY, no commit, no push." }
   $codexCommand = if ($codexLaunch.command) { $codexLaunch.command } else { "UNKNOWN" }
   $codexArgumentsJson = @($codexLaunch.arguments) | ConvertTo-Json -Compress
   $codexPromptArgumentName = if ($codexLaunch.prompt_argument_name) { $codexLaunch.prompt_argument_name } else { "UNKNOWN" }
@@ -43,6 +80,10 @@ Allowed paths: $allowedPaths
 Blocked paths: $blockedPaths
 Mode: DRY_RUN only. Do not edit files.
 Report target: $reportPath
+Assigned routing task:
+$dryRunTask
+Validation commands:
+$validationCommands
 Rules:
 - Inspect only the assigned lane.
 - Produce DRY_RUN findings only.
@@ -51,8 +92,8 @@ Rules:
 - Do not commit.
 - Do not push.
 - Do not touch protected root files.
-Prompt seed:
-$promptSeed
+Stop condition:
+$stopCondition
 "@
 
   Write-Host ("Opening Worker {0}: {1} :: {2}" -f $workerId, $workerLabel, $lane)
@@ -67,14 +108,16 @@ Write-Host 'Allowed paths: $allowedPaths'
 Write-Host 'Blocked paths: $blockedPaths'
 Write-Host 'Mode: DRY_RUN only. Do not edit files.'
 Write-Host 'Report target: $reportPath'
+Write-Host 'Assigned routing task:'
+Write-Host @'
+$dryRunTask
+'@
+Write-Host 'Validation commands: $validationCommands'
 Write-Host ''
 Write-Host 'DRY_RUN rules: inspect only assigned lane; no edits; no APPLY; no commit; no push; no protected root files.'
 Write-Host 'Required worker output JSON fields: worker_id, label, mode, files_planned, files_deleted, validation_commands, summary.'
 Write-Host ''
-Write-Host 'Codex prompt seed:'
-Write-Host @'
-$promptSeed
-'@
+Write-Host 'Stop condition: $stopCondition'
 Write-Host ''
 if ('$codexLaunchEnabled' -eq 'True') {
   `$codexCommand = '$codexCommand'
@@ -102,7 +145,7 @@ $dryRunPrompt
   Write-Host 'Codex command unavailable or disabled. Instruction-window fallback is active.'
 }
 Write-Host ''
-Write-Host 'Stop condition: produce a DRY_RUN report only. No APPLY, no commit, no push.'
+Write-Host 'Stop condition: $stopCondition'
 Read-Host 'Press Enter to close this worker window'
 "@
 
@@ -116,7 +159,7 @@ Read-Host 'Press Enter to close this worker window'
 }
 
 Write-Host ""
-Write-Host "Launched $($registry.workers.Count) labeled PowerShell worker windows."
+Write-Host "Launched $($workerRoutes.Count) labeled PowerShell worker windows."
 if ($codexLaunchEnabled) {
   Write-Host "Codex command is configured but not hardcoded by this script."
 } else {

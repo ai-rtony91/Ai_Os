@@ -6,7 +6,8 @@ param(
   [string]$ControlledApplyQueuePath = "automation/operator/AIOS_CONTROLLED_APPLY_QUEUE.example.json",
   [string]$CommitPackagePath = "automation/operator/AIOS_PHASE_27_COMMIT_PACKAGE.example.json",
   [string]$WorkerReportDirectory = "Reports/operator/worker-reports",
-  [string]$OutputPath = "Reports/operator/AIOS_OPERATOR_NEXT_ACTION_PACKET.md"
+  [string]$OutputPath = "Reports/operator/AIOS_OPERATOR_NEXT_ACTION_PACKET.md",
+  [string]$WorkerRoutingPacketPath = "Reports/operator/AIOS_WORKER_ROUTING_PACKET.json"
 )
 
 $ErrorActionPreference = "Stop"
@@ -37,6 +38,35 @@ function Add-Section {
   )
   $Lines.Add("") | Out-Null
   $Lines.Add("## $Title") | Out-Null
+}
+
+function ConvertTo-WorkerRoutingItem {
+  param(
+    [object]$Worker,
+    [object[]]$ValidationCommands
+  )
+
+  $reviewOnly = $Worker.mode -eq "DRY_RUN_ONLY_REVIEW_ONLY"
+  $task = if ($reviewOnly) {
+    "Review repo and orchestration status only. Do not plan file edits. Produce a DRY_RUN review report."
+  } elseif ($Worker.codex_prompt_seed) {
+    [string]$Worker.codex_prompt_seed
+  } else {
+    "Inspect assigned lane only and produce a DRY_RUN report. Do not edit files."
+  }
+
+  [ordered]@{
+    worker_id = $Worker.id
+    label = $Worker.label
+    lane = $Worker.lane
+    allowed_paths = @($Worker.allowed_paths)
+    blocked_paths = @($Worker.blocked_paths)
+    mode = $Worker.mode
+    dry_run_task = $task
+    report_path = $Worker.report_path
+    validation_commands = @($ValidationCommands)
+    stop_condition = "Produce DRY_RUN report only. No APPLY, no commit, no push."
+  }
 }
 
 $registry = Read-JsonOrNull -RelativePath $WorkerRegistryPath
@@ -105,6 +135,43 @@ if ($blockedReasons.Count -gt 0) {
   $nextSafeAction = "Review validation evidence and exact commit package paths before staging."
 }
 
+$defaultValidationCommands = @(
+  "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+  "git diff --check",
+  "git status --short --branch"
+)
+if ($applyQueue -and $applyQueue.validation_commands) {
+  $defaultValidationCommands = @($applyQueue.validation_commands)
+}
+
+$routingWorkers = @()
+if ($registry) {
+  foreach ($worker in @($registry.workers)) {
+    $routingWorkers += ConvertTo-WorkerRoutingItem -Worker $worker -ValidationCommands $defaultValidationCommands
+  }
+}
+
+$routingPacket = [ordered]@{
+  schema = "AIOS_WORKER_ROUTING_PACKET.v1"
+  mode = "DRY_RUN_ONLY"
+  generated_at = (Get-Date -Format s)
+  source = "Invoke-AiOsWorkflowOrchestrator.ps1"
+  worker_count = @($routingWorkers).Count
+  routing_source = if ($registry) { $WorkerRegistryPath } else { "MISSING" }
+  fallback_if_missing = "Start-AiOsParallelDryRunCrew.ps1 falls back to worker registry when this routing packet is missing."
+  workers = @($routingWorkers)
+  safety = [ordered]@{
+    autonomous_apply = "BLOCKED"
+    autonomous_commit = "BLOCKED"
+    autonomous_push = "BLOCKED"
+    git_add_dot = "BLOCKED"
+    live_trading = "BLOCKED"
+    broker = "BLOCKED"
+    api_keys = "BLOCKED"
+    secrets = "BLOCKED"
+  }
+}
+
 $lines = New-Object System.Collections.Generic.List[string]
 $lines.Add("# AI_OS Operator Next Action Packet") | Out-Null
 $lines.Add("") | Out-Null
@@ -131,6 +198,11 @@ if ($registry) {
 } else {
   $lines.Add("- Worker registry missing: $WorkerRegistryPath") | Out-Null
 }
+
+Add-Section -Lines $lines -Title "Worker Routing Packet"
+$lines.Add("- Routing packet: $WorkerRoutingPacketPath") | Out-Null
+$lines.Add("- Routing worker count: $(@($routingWorkers).Count)") | Out-Null
+$lines.Add("- Launcher fallback: registry is used when routing packet is missing") | Out-Null
 
 Add-Section -Lines $lines -Title "Work Queue"
 if ($workQueue) {
@@ -231,9 +303,17 @@ if (-not (Test-Path -LiteralPath $outputDirectory -PathType Container)) {
 }
 $lines | Set-Content -LiteralPath $outputFullPath -Encoding UTF8
 
+$routingFullPath = Join-Path $RepoRoot $WorkerRoutingPacketPath
+$routingDirectory = Split-Path -Parent $routingFullPath
+if (-not (Test-Path -LiteralPath $routingDirectory -PathType Container)) {
+  New-Item -ItemType Directory -Force -Path $routingDirectory | Out-Null
+}
+$routingPacket | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $routingFullPath -Encoding UTF8
+
 Write-Host "AI_OS Workflow Orchestrator" -ForegroundColor Cyan
 Write-Host "Mode: DRY_RUN / operator-approved only"
 Write-Host "Packet written: $OutputPath"
+Write-Host "Worker routing packet written: $WorkerRoutingPacketPath"
 Write-Host "Worker lanes: $(if ($registry) { @($registry.workers).Count } else { 0 })"
 Write-Host "Pending approvals: $($pendingApprovals.Count)"
 Write-Host "Worker reports: $($workerReports.Count)"

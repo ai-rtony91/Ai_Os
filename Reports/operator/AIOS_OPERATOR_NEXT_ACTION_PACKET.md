@@ -1,7 +1,7 @@
 ﻿# AI_OS Operator Next Action Packet
 
 Mode: DRY_RUN / operator-approved only
-Generated: 2026-05-13T10:37:01
+Generated: 2026-05-13T10:42:47
 Repo: C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
 Autonomous APPLY: BLOCKED
 Autonomous commit: BLOCKED
@@ -10,12 +10,13 @@ Trading execution: BLOCKED
 
 ## Current Repo Status
 - ## main...origin/main
-- ?? Reports/operator/AIOS_OPERATOR_NEXT_ACTION_PACKET.md
-- ?? Reports/operator/README_WORKFLOW_ORCHESTRATOR.md
-- ?? apps/dashboard/mock-data/aios-workflow-orchestrator-v1.example.json
-- ?? automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1
-- ?? automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1
-- ?? docs/AI_OS/orchestration/AIOS_WORKFLOW_ORCHESTRATOR_V1.md
+-  M Reports/operator/AIOS_OPERATOR_NEXT_ACTION_PACKET.md
+-  M automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1
+-  M automation/operator/Start-AiOsParallelDryRunCrew.ps1
+- ?? Reports/operator/AIOS_WORKER_ROUTING_PACKET.json
+- ?? apps/dashboard/mock-data/aios-worker-auto-routing-v1.example.json
+- ?? automation/operator/Test-AiOsWorkerAutoRouting.DRY_RUN.ps1
+- ?? docs/AI_OS/orchestration/AIOS_WORKER_AUTO_ROUTING_V1.md
 
 ## Active Worker Lanes
 - Worker #1 Dashboard UI: lane=apps/dashboard; mode=DRY_RUN_ONLY; allowed=apps/dashboard; blocked=README.md, AGENTS.md, RISK_POLICY.md
@@ -26,6 +27,11 @@ Trading execution: BLOCKED
 - Worker #6 Reports: lane=Reports/checkpoints and Reports/daily; mode=DRY_RUN_ONLY; allowed=Reports/checkpoints, Reports/daily; blocked=README.md, AGENTS.md, RISK_POLICY.md
 - Worker #7 Mock Data: lane=apps/dashboard/mock-data; mode=DRY_RUN_ONLY; allowed=apps/dashboard/mock-data; blocked=README.md, AGENTS.md, RISK_POLICY.md
 - Worker #8 Git QC: lane=review/report only; mode=DRY_RUN_ONLY_REVIEW_ONLY; allowed=NONE; blocked=*
+
+## Worker Routing Packet
+- Routing packet: Reports/operator/AIOS_WORKER_ROUTING_PACKET.json
+- Routing worker count: 8
+- Launcher fallback: registry is used when routing packet is missing
 
 ## Work Queue
 - #1 [READY_FOR_DRY_RUN] Phase 26 Workload Packet Generator -> Generate a reviewed Codex workload packet for the next safe DRY_RUN.

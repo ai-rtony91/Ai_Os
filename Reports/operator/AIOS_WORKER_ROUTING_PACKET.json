@@ -1,0 +1,196 @@
+﻿{
+    "schema":  "AIOS_WORKER_ROUTING_PACKET.v1",
+    "mode":  "DRY_RUN_ONLY",
+    "generated_at":  "2026-05-13T10:42:47",
+    "source":  "Invoke-AiOsWorkflowOrchestrator.ps1",
+    "worker_count":  8,
+    "routing_source":  "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+    "fallback_if_missing":  "Start-AiOsParallelDryRunCrew.ps1 falls back to worker registry when this routing packet is missing.",
+    "workers":  [
+                    {
+                        "worker_id":  1,
+                        "label":  "Dashboard UI",
+                        "lane":  "apps/dashboard",
+                        "allowed_paths":  [
+                                              "apps/dashboard"
+                                          ],
+                        "blocked_paths":  [
+                                              "README.md",
+                                              "AGENTS.md",
+                                              "RISK_POLICY.md"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY",
+                        "dry_run_task":  "Worker #1 Dashboard UI. Inspect apps/dashboard only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits.",
+                        "report_path":  "Reports/operator/worker-reports/worker-01-dashboard-ui.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    },
+                    {
+                        "worker_id":  2,
+                        "label":  "TradingView",
+                        "lane":  "docs/AI_OS/trading_laboratory/tradingview",
+                        "allowed_paths":  [
+                                              "docs/AI_OS/trading_laboratory/tradingview"
+                                          ],
+                        "blocked_paths":  [
+                                              "README.md",
+                                              "AGENTS.md",
+                                              "RISK_POLICY.md"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY",
+                        "dry_run_task":  "Worker #2 TradingView. Inspect the TradingView documentation lane only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits.",
+                        "report_path":  "Reports/operator/worker-reports/worker-02-tradingview.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    },
+                    {
+                        "worker_id":  3,
+                        "label":  "TradersPost",
+                        "lane":  "docs/AI_OS/trading_laboratory/traderspost",
+                        "allowed_paths":  [
+                                              "docs/AI_OS/trading_laboratory/traderspost"
+                                          ],
+                        "blocked_paths":  [
+                                              "README.md",
+                                              "AGENTS.md",
+                                              "RISK_POLICY.md"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY",
+                        "dry_run_task":  "Worker #3 TradersPost. Inspect the TradersPost documentation lane only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits.",
+                        "report_path":  "Reports/operator/worker-reports/worker-03-traderspost.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    },
+                    {
+                        "worker_id":  4,
+                        "label":  "Latency",
+                        "lane":  "docs/AI_OS/trading_laboratory/latency",
+                        "allowed_paths":  [
+                                              "docs/AI_OS/trading_laboratory/latency"
+                                          ],
+                        "blocked_paths":  [
+                                              "README.md",
+                                              "AGENTS.md",
+                                              "RISK_POLICY.md"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY",
+                        "dry_run_task":  "Worker #4 Latency. Inspect the latency documentation lane only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits.",
+                        "report_path":  "Reports/operator/worker-reports/worker-04-latency.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    },
+                    {
+                        "worker_id":  5,
+                        "label":  "Validators",
+                        "lane":  "automation/trading_lab",
+                        "allowed_paths":  [
+                                              "automation/trading_lab"
+                                          ],
+                        "blocked_paths":  [
+                                              "README.md",
+                                              "AGENTS.md",
+                                              "RISK_POLICY.md"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY",
+                        "dry_run_task":  "Worker #5 Validators. Inspect automation/trading_lab only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits.",
+                        "report_path":  "Reports/operator/worker-reports/worker-05-validators.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    },
+                    {
+                        "worker_id":  6,
+                        "label":  "Reports",
+                        "lane":  "Reports/checkpoints and Reports/daily",
+                        "allowed_paths":  [
+                                              "Reports/checkpoints",
+                                              "Reports/daily"
+                                          ],
+                        "blocked_paths":  [
+                                              "README.md",
+                                              "AGENTS.md",
+                                              "RISK_POLICY.md"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY",
+                        "dry_run_task":  "Worker #6 Reports. Inspect Reports/checkpoints and Reports/daily only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits.",
+                        "report_path":  "Reports/operator/worker-reports/worker-06-reports.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    },
+                    {
+                        "worker_id":  7,
+                        "label":  "Mock Data",
+                        "lane":  "apps/dashboard/mock-data",
+                        "allowed_paths":  [
+                                              "apps/dashboard/mock-data"
+                                          ],
+                        "blocked_paths":  [
+                                              "README.md",
+                                              "AGENTS.md",
+                                              "RISK_POLICY.md"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY",
+                        "dry_run_task":  "Worker #7 Mock Data. Inspect apps/dashboard/mock-data only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits.",
+                        "report_path":  "Reports/operator/worker-reports/worker-07-mock-data.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    },
+                    {
+                        "worker_id":  8,
+                        "label":  "Git QC",
+                        "lane":  "review/report only",
+                        "allowed_paths":  [
+
+                                          ],
+                        "blocked_paths":  [
+                                              "*"
+                                          ],
+                        "mode":  "DRY_RUN_ONLY_REVIEW_ONLY",
+                        "dry_run_task":  "Review repo and orchestration status only. Do not plan file edits. Produce a DRY_RUN review report.",
+                        "report_path":  "Reports/operator/worker-reports/worker-08-git-qc.json",
+                        "validation_commands":  [
+                                                    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+                                                    "git diff --check",
+                                                    "git status --short --branch"
+                                                ],
+                        "stop_condition":  "Produce DRY_RUN report only. No APPLY, no commit, no push."
+                    }
+                ],
+    "safety":  {
+                   "autonomous_apply":  "BLOCKED",
+                   "autonomous_commit":  "BLOCKED",
+                   "autonomous_push":  "BLOCKED",
+                   "git_add_dot":  "BLOCKED",
+                   "live_trading":  "BLOCKED",
+                   "broker":  "BLOCKED",
+                   "api_keys":  "BLOCKED",
+                   "secrets":  "BLOCKED"
+               }
+}
