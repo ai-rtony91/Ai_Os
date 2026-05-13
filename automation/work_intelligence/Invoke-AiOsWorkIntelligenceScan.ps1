@@ -289,6 +289,153 @@ function New-SecurityWarningSummary {
   }
 }
 
+function Get-StaleWorkItems {
+  param(
+    [object[]]$ReportRefs,
+    [object[]]$CheckpointRefs
+  )
+  $items = New-Object System.Collections.Generic.List[object]
+  $now = Get-Date
+  $rules = @(
+    @{ pattern = "Reports/work_intelligence/daily/"; item_type = "daily_snapshot"; stale_after_days = 1 },
+    @{ pattern = "Reports/work_intelligence/briefings/"; item_type = "operator_briefing"; stale_after_days = 1 },
+    @{ pattern = "Reports/"; item_type = "report"; stale_after_days = 7 },
+    @{ pattern = "checkpoint"; item_type = "checkpoint"; stale_after_days = 14 }
+  )
+
+  foreach ($ref in @($ReportRefs + $CheckpointRefs)) {
+    if (-not $ref.path -or -not $ref.last_write_time) { continue }
+    $matchedRule = $null
+    foreach ($rule in $rules) {
+      if (($ref.path -replace "\\", "/").StartsWith($rule.pattern) -or ($ref.path -replace "\\", "/").ToLowerInvariant().Contains($rule.pattern)) {
+        $matchedRule = $rule
+        break
+      }
+    }
+    if (-not $matchedRule) { continue }
+    $lastWrite = [datetime]::Parse($ref.last_write_time)
+    $ageDays = ($now - $lastWrite).TotalDays
+    if ($ageDays -gt $matchedRule.stale_after_days) {
+      $items.Add([pscustomobject]@{
+        item_type = $matchedRule.item_type
+        path = $ref.path
+        last_write_time = $ref.last_write_time
+        stale_after_days = $matchedRule.stale_after_days
+      }) | Out-Null
+    }
+  }
+
+  return @($items | Sort-Object item_type, path -Unique)
+}
+
+function Get-WorkMarkerCount {
+  param(
+    [object[]]$Refs,
+    [string]$Pattern
+  )
+  $count = 0
+  foreach ($ref in @($Refs)) {
+    if (-not $ref.path) { continue }
+    $fullPath = Join-Path $RepoRoot $ref.path
+    $pathMatches = $ref.path -match $Pattern
+    $contentMatches = $false
+    if (Test-Path -LiteralPath $fullPath) {
+      $content = Get-Content -LiteralPath $fullPath -Raw -ErrorAction SilentlyContinue
+      if (-not [string]::IsNullOrWhiteSpace($content)) {
+        $contentMatches = $content -match $Pattern
+      }
+    }
+    if ($pathMatches -or $contentMatches) {
+      $count += 1
+    }
+  }
+  return $count
+}
+
+function Get-PriorityEngineResult {
+  param(
+    [bool]$CleanGitStatus,
+    [int]$TodoCount,
+    [int]$FixmeCount,
+    [int]$ValidatorCount,
+    [string]$WorkerReportPresence,
+    [int]$WorkerLaneCount,
+    [int]$WorkerReportCount,
+    [object[]]$SecurityWarnings,
+    [pscustomobject]$SecuritySummary,
+    [object[]]$ReportRefs,
+    [object[]]$CheckpointRefs,
+    [pscustomobject]$FocusDetection
+  )
+
+  $staleItems = Get-StaleWorkItems -ReportRefs $ReportRefs -CheckpointRefs $CheckpointRefs
+  $unfinishedRefs = @($ReportRefs + $CheckpointRefs)
+  $unfinishedPhaseCount = Get-WorkMarkerCount -Refs $unfinishedRefs -Pattern "(?i)\b(DRY_RUN|WORKLOAD|PENDING|UNFINISHED)\b"
+  $unfinishedStageCount = Get-WorkMarkerCount -Refs $unfinishedRefs -Pattern "(?i)\b(TODO|FIXME|NEXT SAFE ACTION|NEXT_SAFE_ACTION)\b"
+  $blockedMarkerCount = Get-WorkMarkerCount -Refs $unfinishedRefs -Pattern "(?i)\b(BLOCKED|blocked_reason|dependency_blocked)\b"
+  $blockedWorkerCount = if ($WorkerLaneCount -gt 0 -and $WorkerReportPresence -eq "MISSING") { $WorkerLaneCount } else { 0 }
+  $blockedWorkCount = $blockedMarkerCount + $blockedWorkerCount
+  $highRiskWarnings = @($SecurityWarnings | Where-Object { $_.severity -eq "HIGH" })
+  $protectedRootChanges = @($SecurityWarnings | Where-Object { $_.category -eq "protected_file_status" })
+  $dependencyBlocked = ($blockedWorkCount -gt 0 -or $ValidatorCount -eq 0 -or $WorkerReportPresence -eq "MISSING")
+
+  $priorityScore = 0
+  $urgencyScore = 0
+  if (-not $CleanGitStatus) { $priorityScore += 20; $urgencyScore += 20 }
+  if ($TodoCount -gt 0) { $priorityScore += [Math]::Min(20, $TodoCount) }
+  if ($FixmeCount -gt 0) { $priorityScore += [Math]::Min(30, ($FixmeCount * 2)); $urgencyScore += [Math]::Min(20, $FixmeCount) }
+  if ($ValidatorCount -eq 0) { $priorityScore += 25; $urgencyScore += 25 }
+  if ($blockedWorkCount -gt 0) { $priorityScore += [Math]::Min(30, ($blockedWorkCount * 5)); $urgencyScore += [Math]::Min(30, ($blockedWorkCount * 5)) }
+  if (@($ReportRefs).Count -eq 0) { $priorityScore += 15 }
+  if (@($staleItems).Count -gt 0) { $priorityScore += [Math]::Min(25, (@($staleItems).Count * 5)); $urgencyScore += [Math]::Min(20, (@($staleItems).Count * 4)) }
+  if ($SecuritySummary.high_risk_count -gt 0) { $priorityScore += 40; $urgencyScore += 40 }
+  if ($WorkerLaneCount -gt 0 -and $WorkerReportCount -eq 0) { $priorityScore += 10 }
+  if ($SecuritySummary.suppressed_policy_mentions -gt 0) { $priorityScore += 0 }
+
+  $safeToApply = (
+    $CleanGitStatus -eq $true -and
+    $ValidatorCount -gt 0 -and
+    @($protectedRootChanges).Count -eq 0 -and
+    @($highRiskWarnings).Count -eq 0 -and
+    $dependencyBlocked -eq $false
+  )
+
+  $recommendedAction = "UNKNOWN"
+  if (@($highRiskWarnings).Count -gt 0) {
+    $recommendedAction = "Review security warnings."
+  } elseif ($ValidatorCount -eq 0) {
+    $recommendedAction = "Resolve validator failure."
+  } elseif (-not $CleanGitStatus) {
+    $recommendedAction = "Commit approved work."
+  } elseif (@($staleItems).Count -gt 0) {
+    $recommendedAction = "Review latest briefing."
+  } elseif ($dependencyBlocked) {
+    $recommendedAction = "Run next DRY_RUN workload."
+  } elseif ($FocusDetection.recommended_next_workload -and $FocusDetection.recommended_next_workload -ne "UNKNOWN") {
+    $recommendedAction = $FocusDetection.recommended_next_workload
+  }
+
+  $activeLane = if ($FocusDetection.current_focus_area -and $FocusDetection.current_focus_area -ne "UNKNOWN") {
+    $FocusDetection.current_focus_area
+  } else {
+    "UNKNOWN"
+  }
+
+  return [pscustomobject]@{
+    priority_score = $priorityScore
+    urgency_score = $urgencyScore
+    dependency_blocked = $dependencyBlocked
+    safe_to_apply = $safeToApply
+    recommended_operator_action = $recommendedAction
+    stale_work_detected = (@($staleItems).Count -gt 0)
+    stale_work_items = @($staleItems)
+    unfinished_phase_count = $unfinishedPhaseCount
+    unfinished_stage_count = $unfinishedStageCount
+    blocked_work_count = $blockedWorkCount
+    active_priority_lane = $activeLane
+  }
+}
+
 function Get-SecurityWarnings {
   param(
     [object[]]$Files,
@@ -415,6 +562,19 @@ $focusDetection = Get-FocusDetection -RecentFiles $recentFiles -CheckpointRefs $
 $securityWarningResult = Get-SecurityWarnings -Files $allFiles -GitStatusText $gitStatusShort -ProtectedFiles @($config.protected_files)
 $securityWarnings = @($securityWarningResult.warnings)
 $securityWarningSummary = $securityWarningResult.summary
+$priorityEngine = Get-PriorityEngineResult `
+  -CleanGitStatus $cleanGitStatus `
+  -TodoCount $unresolvedTodos `
+  -FixmeCount $unresolvedFixmes `
+  -ValidatorCount $validators.Count `
+  -WorkerReportPresence $workerReportPresence `
+  -WorkerLaneCount $workerLaneCount `
+  -WorkerReportCount $workerReportCount `
+  -SecurityWarnings $securityWarnings `
+  -SecuritySummary $securityWarningSummary `
+  -ReportRefs $latestReportRefs `
+  -CheckpointRefs $latestCheckpointRefs `
+  -FocusDetection $focusDetection
 
 $snapshot = [pscustomobject]@{
   schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2"
@@ -457,6 +617,17 @@ $snapshot = [pscustomobject]@{
   low_risk_count = $securityWarningSummary.low_risk_count
   info_count = $securityWarningSummary.info_count
   suppressed_policy_mentions = $securityWarningSummary.suppressed_policy_mentions
+  priority_score = $priorityEngine.priority_score
+  urgency_score = $priorityEngine.urgency_score
+  dependency_blocked = $priorityEngine.dependency_blocked
+  safe_to_apply = $priorityEngine.safe_to_apply
+  recommended_operator_action = $priorityEngine.recommended_operator_action
+  stale_work_detected = $priorityEngine.stale_work_detected
+  stale_work_items = $priorityEngine.stale_work_items
+  unfinished_phase_count = $priorityEngine.unfinished_phase_count
+  unfinished_stage_count = $priorityEngine.unfinished_stage_count
+  blocked_work_count = $priorityEngine.blocked_work_count
+  active_priority_lane = $priorityEngine.active_priority_lane
   current_operator_phase = "UNKNOWN"
   next_safe_action = "Review this read-only snapshot and run the work intelligence validator."
 }
