@@ -1,0 +1,16 @@
+{
+  "schema": "aios.conflict_center.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "conflicts": [
+    {
+      "conflict_id": "CONFLICT-001",
+      "file_path": "apps/dashboard/js/aios-static-preview.js",
+      "owning_worker": "codex-dashboard-02",
+      "blocked_worker": "codex-validation-03",
+      "conflict_severity": "HIGH",
+      "operator_required_action": "Confirm Command Center UI worker owns this file before another worker edits it."
+    }
+  ],
+  "next_safe_action": "Keep merge readiness blocked until overlapping ownership is resolved."
+}

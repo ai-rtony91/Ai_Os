@@ -1,0 +1,49 @@
+{
+  "schema": "aios.morning_execution_packet.v1",
+  "session_date": "2026-05-13",
+  "repo_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "current_phase": "PHASE-44",
+  "active_objective": "Apply the Operator Workflow Automation scaffold for morning packets, APPLY routing, session resume, and read-only orchestration guidance.",
+  "approved_scope": [
+    "docs/AI_OS/operator_workflows/",
+    "automation/orchestration/",
+    "apps/dashboard/mock-data/"
+  ],
+  "blocked_actions": [
+    "autonomous execution",
+    "merge execution",
+    "auto-commit",
+    "auto-push",
+    "git add .",
+    "startup tasks",
+    "background daemons",
+    "broker/OANDA/API keys/live trading"
+  ],
+  "pending_approvals": [
+    {
+      "approval_id": "PHASE-44-COMMIT",
+      "approval_type": "commit",
+      "status": "NOT_REQUESTED",
+      "next_safe_action": "Request exact-file commit approval only after validation passes."
+    },
+    {
+      "approval_id": "PHASE-44-PUSH",
+      "approval_type": "push",
+      "status": "NOT_REQUESTED",
+      "next_safe_action": "Push remains blocked until separate operator approval."
+    }
+  ],
+  "validator_sequence": [
+    "ConvertFrom-Json: aios-morning-execution-packet-v1.example.json",
+    "ConvertFrom-Json: aios-guided-action-queue-v1.example.json",
+    "ConvertFrom-Json: aios-validator-chain-v1.example.json",
+    "ConvertFrom-Json: aios-apply-routing-v1.example.json",
+    "ConvertFrom-Json: aios-session-resume-state-v1.example.json",
+    "powershell -ExecutionPolicy Bypass -File automation/orchestration/Test-AiOsOperatorWorkflowRouting.DRY_RUN.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "next_safe_action": "Run the Phase 44 JSON checks, DRY_RUN routing validator, git diff --check, and git status --short --branch.",
+  "checkpoint_reminder": "Before commit review, confirm exact changed files and unresolved errors.",
+  "commit_push_reminder": "Commit and push require separate explicit approval. Never use git add ."
+}

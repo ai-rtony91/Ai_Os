@@ -1,0 +1,29 @@
+{
+  "schema": "aios.approval_inbox.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "approval_requests": [
+    {
+      "request_id": "PHASE-43-UI-REVIEW",
+      "request_type": "APPLY_REVIEW",
+      "status": "WAITING_REVIEW",
+      "required_evidence": "JS check, JSON parse checks, git diff --check, visual review",
+      "next_safe_action": "Review Command Center readability and safety banner."
+    },
+    {
+      "request_id": "MERGE-PACKAGE-001",
+      "request_type": "MERGE_READY_PACKAGE",
+      "status": "BLOCKED",
+      "required_evidence": "conflict resolution and exact-file package",
+      "next_safe_action": "Resolve conflict center items before merge readiness."
+    },
+    {
+      "request_id": "STALE-WORKER-REVIEW",
+      "request_type": "STALE_WORKER",
+      "status": "REVIEW",
+      "required_evidence": "fresh worker report",
+      "next_safe_action": "Refresh or close stale worker before promotion."
+    }
+  ],
+  "next_safe_action": "Handle blocked approval requests before commit package approval."
+}

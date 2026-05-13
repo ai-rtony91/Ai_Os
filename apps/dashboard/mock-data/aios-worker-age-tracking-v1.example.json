@@ -1,0 +1,32 @@
+{
+  "schema": "aios.worker_age_tracking.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "worker_age_tracking": [
+    {
+      "worker_id": "codex-operator-01",
+      "last_report_age": "fresh",
+      "age_state": "READY",
+      "next_safe_action": "Review operator workflow scaffold."
+    },
+    {
+      "worker_id": "codex-dashboard-02",
+      "last_report_age": "fresh",
+      "age_state": "REVIEW",
+      "next_safe_action": "Validate Command Center UI."
+    },
+    {
+      "worker_id": "codex-validation-03",
+      "last_report_age": "unknown",
+      "age_state": "BLOCKED",
+      "next_safe_action": "Refresh validator evidence before merge readiness."
+    },
+    {
+      "worker_id": "codex-docs-04",
+      "last_report_age": "stale",
+      "age_state": "STALE",
+      "next_safe_action": "Refresh report or block promotion."
+    }
+  ],
+  "next_safe_action": "Block promotion for stale or unknown worker age."
+}

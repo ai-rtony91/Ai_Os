@@ -1,0 +1,47 @@
+{
+  "schema": "aios.worker_queue.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "queue_items": [
+    {
+      "queue_rank": 1,
+      "task_id": "PHASE-41-ORCHESTRATOR-WINDOW",
+      "assigned_worker": "codex-operator-01",
+      "lane": "Operator Orchestration",
+      "priority": "HIGH",
+      "status": "REVIEW",
+      "next_safe_action": "Review rendered Orchestrator Window and confirm it remains display-only.",
+      "blocked_reason": "NONE"
+    },
+    {
+      "queue_rank": 2,
+      "task_id": "WI-WORKER-FILE-CONFLICT",
+      "assigned_worker": "codex-validation-03",
+      "lane": "Validation",
+      "priority": "HIGH",
+      "status": "BLOCKED",
+      "next_safe_action": "Resolve exact file ownership before any commit package is approved.",
+      "blocked_reason": "Worker file ownership conflict requires operator decision."
+    },
+    {
+      "queue_rank": 3,
+      "task_id": "DASHBOARD-MOBILE-READABILITY",
+      "assigned_worker": "codex-dashboard-02",
+      "lane": "Dashboard UI",
+      "priority": "MEDIUM",
+      "status": "DRY_RUN",
+      "next_safe_action": "Validate compact queue and worker cards on mobile viewport.",
+      "blocked_reason": "NONE"
+    },
+    {
+      "queue_rank": 4,
+      "task_id": "PHASE-34-40-DOCS-APPLY",
+      "assigned_worker": "codex-docs-04",
+      "lane": "Documentation",
+      "priority": "MEDIUM",
+      "status": "STALE",
+      "next_safe_action": "Refresh worker report before approving docs APPLY.",
+      "blocked_reason": "Worker report stale relative to current phase."
+    }
+  ],
+  "next_safe_action": "Review blocked and stale queue items before approving any APPLY, commit, merge, or push."
+}

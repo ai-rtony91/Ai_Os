@@ -1,0 +1,21 @@
+{
+  "schema": "aios.command_center_state.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "title": "AI_OS Command Center",
+  "summary": "Single-pane operator surface for worker visibility, queue supervision, approval readiness, merge readiness, blocked conflicts, stale workers, and next safe actions.",
+  "command_center_status": "REVIEW",
+  "global_status": {
+    "total_workers": 4,
+    "active_workers": 3,
+    "blocked_workers": 1,
+    "stale_workers": 1,
+    "merge_ready_count": 0,
+    "approval_required_count": 3
+  },
+  "safety_banner": [
+    "LIVE EXECUTION BLOCKED",
+    "PAPER / LOCAL DEVELOPMENT ONLY"
+  ],
+  "next_safe_action": "Review conflicts and approval inbox before any APPLY, merge, commit, or push decision."
+}

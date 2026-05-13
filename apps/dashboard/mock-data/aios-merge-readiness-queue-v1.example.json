@@ -1,0 +1,29 @@
+{
+  "schema": "aios.merge_readiness_queue.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "merge_readiness_queue": [
+    {
+      "package_id": "PHASE-43-COMMAND-CENTER",
+      "worker_id": "codex-dashboard-02",
+      "lane": "Command Center UI",
+      "state": "VALIDATION_INCOMPLETE",
+      "next_safe_action": "Run requested validation and visual review."
+    },
+    {
+      "package_id": "PHASE-44-WORKFLOW-SCAFFOLD",
+      "worker_id": "codex-operator-01",
+      "lane": "Operator Workflows",
+      "state": "WAITING_APPROVAL",
+      "next_safe_action": "Review exact files before any commit package."
+    },
+    {
+      "package_id": "WORKER-FILE-CONFLICT-001",
+      "worker_id": "codex-validation-03",
+      "lane": "Validation",
+      "state": "BLOCKED",
+      "next_safe_action": "Resolve overlapping file ownership."
+    }
+  ],
+  "next_safe_action": "No package is merge-ready until conflicts and validation gaps are resolved."
+}

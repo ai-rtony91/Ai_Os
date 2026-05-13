@@ -1,0 +1,39 @@
+{
+  "schema": "aios.apply_routing.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "OPERATOR_APPROVED",
+  "routes": [
+    {
+      "route_id": "PHASE-44-APPLY-ROUTE",
+      "source_task": "Phase 44 Operator Workflow Automation scaffold",
+      "current_state": "APPLY_CANDIDATE",
+      "requested_files": [
+        "docs/AI_OS/operator_workflows/AIOS_OPERATOR_AUTOMATION_ROADMAP.md",
+        "docs/AI_OS/operator_workflows/AIOS_MORNING_EXECUTION_PACKET_STANDARD.md",
+        "docs/AI_OS/operator_workflows/AIOS_APPLY_ROUTING_CHAIN.md",
+        "docs/AI_OS/operator_workflows/AIOS_SAFE_SESSION_RESUME_STANDARD.md",
+        "docs/AI_OS/operator_workflows/AIOS_OPERATOR_FATIGUE_REDUCTION_PLAN.md",
+        "apps/dashboard/mock-data/aios-morning-execution-packet-v1.example.json",
+        "apps/dashboard/mock-data/aios-guided-action-queue-v1.example.json",
+        "apps/dashboard/mock-data/aios-validator-chain-v1.example.json",
+        "apps/dashboard/mock-data/aios-apply-routing-v1.example.json",
+        "apps/dashboard/mock-data/aios-session-resume-state-v1.example.json",
+        "automation/orchestration/Test-AiOsOperatorWorkflowRouting.DRY_RUN.ps1"
+      ],
+      "approved_files": [],
+      "blocked_files": [
+        "protected root files",
+        "broker/OANDA/API/live trading files"
+      ],
+      "validator_requirements": [
+        "JSON parses",
+        "operator workflow routing DRY_RUN validator",
+        "git diff --check",
+        "git status --short --branch"
+      ],
+      "validation_result": "PENDING",
+      "approval_required": true,
+      "next_safe_action": "Create approved scaffold, validate it, then review exact files before commit approval."
+    }
+  ]
+}

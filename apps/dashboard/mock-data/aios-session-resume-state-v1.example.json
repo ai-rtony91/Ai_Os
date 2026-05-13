@@ -1,0 +1,35 @@
+{
+  "schema": "aios.session_resume_state.v1",
+  "last_completed_phase": "PHASE-43",
+  "current_in_progress_phase": "PHASE-44",
+  "active_workers": [
+    {
+      "worker_id": "WORKER-3",
+      "lane": "Operator Workflow",
+      "status": "APPLY_APPROVED",
+      "owned_scope": [
+        "docs/AI_OS/operator_workflows/",
+        "automation/orchestration/",
+        "apps/dashboard/mock-data/"
+      ]
+    }
+  ],
+  "unresolved_conflicts": [],
+  "stale_workers": [],
+  "uncommitted_files": [
+    "docs/AI_OS/operator_workflows/AIOS_OPERATOR_AUTOMATION_ROADMAP.md",
+    "docs/AI_OS/operator_workflows/AIOS_MORNING_EXECUTION_PACKET_STANDARD.md",
+    "docs/AI_OS/operator_workflows/AIOS_APPLY_ROUTING_CHAIN.md",
+    "docs/AI_OS/operator_workflows/AIOS_SAFE_SESSION_RESUME_STANDARD.md",
+    "docs/AI_OS/operator_workflows/AIOS_OPERATOR_FATIGUE_REDUCTION_PLAN.md",
+    "apps/dashboard/mock-data/aios-morning-execution-packet-v1.example.json",
+    "apps/dashboard/mock-data/aios-guided-action-queue-v1.example.json",
+    "apps/dashboard/mock-data/aios-validator-chain-v1.example.json",
+    "apps/dashboard/mock-data/aios-apply-routing-v1.example.json",
+    "apps/dashboard/mock-data/aios-session-resume-state-v1.example.json",
+    "automation/orchestration/Test-AiOsOperatorWorkflowRouting.DRY_RUN.ps1"
+  ],
+  "last_known_git_status": "UNKNOWN until git status --short --branch is run after validation.",
+  "resume_warning_state": "REVIEW_REQUIRED",
+  "next_safe_action": "Resume at validation. Do not merge, commit, push, launch workers, or execute startup automation."
+}

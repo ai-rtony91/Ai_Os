@@ -1,0 +1,54 @@
+{
+  "schema": "aios.worker_registry.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "workers": [
+    {
+      "worker_id": "codex-operator-01",
+      "lane": "Operator Orchestration",
+      "branch": "worker/operator-orchestration",
+      "worktree": "isolated-worktree-planned",
+      "status": "REVIEW",
+      "current_task": "Phase 41 Orchestrator Window supervision surface",
+      "validator_state": "REVIEW",
+      "blocked_reason": "NONE",
+      "approval_state": "APPLY_REQUIRES_OPERATOR_APPROVAL",
+      "last_report": "2026-05-13T00:00:00Z"
+    },
+    {
+      "worker_id": "codex-dashboard-02",
+      "lane": "Dashboard UI",
+      "branch": "worker/dashboard-ui",
+      "worktree": "isolated-worktree-planned",
+      "status": "DRY_RUN",
+      "current_task": "Queue readability and mobile review",
+      "validator_state": "UNKNOWN",
+      "blocked_reason": "Awaiting visual review",
+      "approval_state": "REVIEW_REQUIRED",
+      "last_report": "2026-05-13T00:00:00Z"
+    },
+    {
+      "worker_id": "codex-validation-03",
+      "lane": "Validation",
+      "branch": "worker/validation",
+      "worktree": "isolated-worktree-planned",
+      "status": "BLOCKED",
+      "current_task": "Commit package readiness evidence",
+      "validator_state": "BLOCKED",
+      "blocked_reason": "No approved exact-file commit package yet",
+      "approval_state": "OPERATOR_REVIEW_REQUIRED",
+      "last_report": "2026-05-13T00:00:00Z"
+    },
+    {
+      "worker_id": "codex-docs-04",
+      "lane": "Documentation",
+      "branch": "worker/docs",
+      "worktree": "isolated-worktree-planned",
+      "status": "STALE",
+      "current_task": "Phase 34-40 planning docs follow-up",
+      "validator_state": "UNKNOWN",
+      "blocked_reason": "Report older than current operator phase",
+      "approval_state": "REVIEW_REQUIRED",
+      "last_report": "2026-05-12T20:00:00Z"
+    }
+  ]
+}

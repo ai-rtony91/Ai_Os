@@ -79,6 +79,16 @@ const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
 const devopsControlWindowFixturePath = "mock-data/aios-devops-control-window-v1.example.json";
 const workIntelligenceQueueFixturePath = "mock-data/work-intelligence-queue-v1.example.json";
+const orchestratorWindowFixturePath = "mock-data/aios-orchestrator-window-v1.example.json";
+const workerRegistryFixturePath = "mock-data/aios-worker-registry-v1.example.json";
+const workerQueueFixturePath = "mock-data/aios-worker-queue-v1.example.json";
+const validatorStateFixturePath = "mock-data/aios-validator-state-v1.example.json";
+const commandCenterStateFixturePath = "mock-data/aios-command-center-state-v1.example.json";
+const commandCenterApprovalInboxFixturePath = "mock-data/aios-approval-inbox-v1.example.json";
+const commandCenterMergeQueueFixturePath = "mock-data/aios-merge-readiness-queue-v1.example.json";
+const commandCenterConflictCenterFixturePath = "mock-data/aios-conflict-center-v1.example.json";
+const commandCenterOperatorGuidanceFixturePath = "mock-data/aios-operator-guidance-v1.example.json";
+const commandCenterWorkerAgeFixturePath = "mock-data/aios-worker-age-tracking-v1.example.json";
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const tradingLabWorkstationFixturePath = "mock-data/trading-lab-workstation.example.json";
@@ -337,7 +347,7 @@ const railDetailConfig = {
       detailItem("start-here", "Start Here", "GUIDE", "Begin with a simple Workspace overview: pick an item, review the purpose, and keep APPLY blocked until approved.", "Static guide only. No backend or execution logic runs here.", ["Choose one item.", "Review purpose and locks.", "Use Soft Refresh for dashboard-only updates."]),
       detailItem("projects", "Projects", "PROJECTS", "Open active project folders for AI_OS, Trading Bot, App Builder, Web Dev, and future projects.", "Projects are static folders with mock telemetry, reports, validation, files, risks, and next actions.", ["Open a project folder.", "Review project telemetry.", "Keep execution locked."]),
       detailItem("work-table", "Work Table", "PROJECT", "Start or continue a guided project packet with brief, prompt stack, build instructions, tool output, approval gate, and validation queue.", "File edits remain blocked until explicit APPLY approval.", ["Define scope.", "Confirm allowed files.", "List validation steps."]),
-      detailItem("devops-control-window", "DevOps Control", "DISPLAY", "Visible AI_OS DevOps Control Window for next workload, queue evidence, validation state, commit package preview, morning workflow, and approval locks.", "Display state only. No APPLY, shell execution, worker launch, commit, or push.", ["Review next workload.", "Check queue and validators.", "Approval required before APPLY, commit, or push."]),
+      detailItem("devops-control-window", "Command Center", "DISPLAY", "Visible AI_OS Command Center for workers, queue assignments, approvals, merge readiness, conflicts, stale evidence, and next safe actions.", "Display state only. No APPLY, shell execution, worker launch, commit, merge, or push.", ["Review active workers.", "Check approvals and conflicts.", "Use the Next Safe Action before any approval."]),
       detailItem("trading-bot", "Trading Bot", "MOCK LAB", "Mock-only Trading Lab card for strategy, signal, regime, risk, journal, and metrics planning.", "No broker, OANDA, API keys, or live orders.", ["Review one strategy.", "Score a mock signal.", "Keep execution blocked."]),
       detailItem("code-tools", "Code Tools", "CODE", "Use approved local coding tools for inspected files, syntax checks, and focused patches.", "Commits and pushes require separate explicit approval.", ["Inspect first.", "Patch approved scope.", "Run syntax checks."]),
       detailItem("source-control", "Source Control", "GIT", "Review git status, diff names, checkpoint needs, and future commit planning.", "No commit, push, merge, reset, or clean is performed from this static dashboard.", ["Check git status.", "Review diff names.", "Ask before commit or push."]),
@@ -912,6 +922,16 @@ function createDevOpsStatusPill(value = "UNKNOWN") {
   return pill;
 }
 
+function createDevOpsMetric(label, value) {
+  const metric = document.createElement("div");
+  metric.className = "devops-metric";
+  metric.append(
+    createDevOpsTextElement("span", "", label),
+    createDevOpsTextElement("strong", "", value ?? "UNKNOWN")
+  );
+  return metric;
+}
+
 function createDevOpsField(label, value) {
   const field = document.createElement("div");
   field.className = "devops-field";
@@ -930,6 +950,15 @@ function createDevOpsPanel(title, children = []) {
   heading.append(createDevOpsTextElement("strong", "", title));
   panel.append(heading, ...children.filter(Boolean));
   return panel;
+}
+
+function createDevOpsDetailsPanel(title, children = []) {
+  const details = document.createElement("details");
+  details.className = "devops-card command-center-details";
+  const summary = document.createElement("summary");
+  summary.append(createDevOpsTextElement("strong", "", title));
+  details.append(summary, ...children.filter(Boolean));
+  return details;
 }
 
 function renderDevOpsQueue(queueItems = []) {
@@ -1020,7 +1049,13 @@ function renderDevOpsMorningWorkflow(morning = {}) {
 function renderDevOpsSafetyStrip(locks = []) {
   const strip = document.createElement("div");
   strip.className = "devops-safety-strip";
-  locks.forEach((lock) => strip.append(createDevOpsTextElement("strong", "", lock)));
+  const visibleLocks = locks.length ? locks : [
+    "APPLY REQUIRES APPROVAL",
+    "COMMIT REQUIRES APPROVAL",
+    "PUSH REQUIRES APPROVAL",
+    "MERGE REQUIRES APPROVAL"
+  ];
+  visibleLocks.forEach((lock) => strip.append(createDevOpsTextElement("strong", "", lock)));
   return strip;
 }
 
@@ -1051,6 +1086,307 @@ function renderDevOpsQueueMeta(queueData = {}) {
     createDevOpsField("Queue Count", queueData.queue_count ?? (Array.isArray(queueData.queue_items) ? queueData.queue_items.length : "UNKNOWN"))
   );
   return meta;
+}
+
+function renderOrchestratorWorkerRegistry(workers = []) {
+  const list = document.createElement("div");
+  list.className = "orchestrator-worker-grid";
+  workers.forEach((worker) => {
+    const card = document.createElement("article");
+    card.className = "orchestrator-worker-card";
+    const head = document.createElement("div");
+    head.className = "orchestrator-worker-head";
+    head.append(
+      createDevOpsTextElement("strong", "", worker.worker_id || "UNKNOWN"),
+      createDevOpsStatusPill(worker.status || "UNKNOWN")
+    );
+    const meta = document.createElement("div");
+    meta.className = "orchestrator-worker-meta";
+    meta.append(
+      createDevOpsField("Lane", worker.lane),
+      createDevOpsField("Branch", worker.branch),
+      createDevOpsField("Worktree", worker.worktree),
+      createDevOpsField("Task", worker.current_task),
+      createDevOpsField("Validator", worker.validator_state),
+      createDevOpsField("Approval", worker.approval_state),
+      createDevOpsField("Blocked", worker.blocked_reason || "NONE"),
+      createDevOpsField("Last Report", worker.last_report)
+    );
+    card.append(head, meta);
+    list.append(card);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "No worker registry evidence available."));
+  }
+  return list;
+}
+
+function renderOrchestratorQueue(queueItems = []) {
+  const list = document.createElement("div");
+  list.className = "orchestrator-queue-list";
+  queueItems.forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "orchestrator-queue-row";
+    const title = createDevOpsTextElement("strong", "devops-queue-title", `#${item.queue_rank ?? "?"} ${item.task_id || "UNKNOWN"}`);
+    const meta = document.createElement("div");
+    meta.className = "orchestrator-inline-meta";
+    meta.append(
+      createDevOpsStatusPill(item.priority || "UNKNOWN"),
+      createDevOpsStatusPill(item.status || "UNKNOWN"),
+      createDevOpsTextElement("span", "devops-queue-lane", item.assigned_worker || "UNKNOWN"),
+      createDevOpsTextElement("span", "devops-queue-lane", item.lane || "UNKNOWN")
+    );
+    row.append(title, meta, createDevOpsTextElement("p", "devops-queue-action", item.next_safe_action || "UNKNOWN"));
+    if (String(item.status || "").toUpperCase() === "BLOCKED" || item.blocked_reason) {
+      row.append(createDevOpsTextElement("p", "orchestrator-blocked-reason", `Blocked: ${item.blocked_reason || "UNKNOWN"}`));
+    }
+    list.append(row);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "No queue assignment evidence available."));
+  }
+  return list;
+}
+
+function renderOrchestratorValidators(validators = []) {
+  const grid = document.createElement("div");
+  grid.className = "devops-validation-grid";
+  validators.forEach((validator) => {
+    const item = document.createElement("div");
+    item.className = "devops-validation-item";
+    item.append(
+      createDevOpsTextElement("span", "", validator.validator_name || "UNKNOWN"),
+      createDevOpsStatusPill(validator.state || "UNKNOWN"),
+      createDevOpsTextElement("small", "", validator.summary || "UNKNOWN"),
+      createDevOpsField("Last Run", validator.last_run),
+      createDevOpsField("Operator Action", validator.operator_action_required)
+    );
+    grid.append(item);
+  });
+  if (!grid.childElementCount) {
+    grid.append(createDevOpsTextElement("p", "devops-muted", "Validator state evidence unavailable."));
+  }
+  return grid;
+}
+
+function renderOrchestratorAlerts(alerts = []) {
+  const list = document.createElement("div");
+  list.className = "orchestrator-alert-list";
+  alerts.forEach((alert) => {
+    const item = document.createElement("div");
+    item.className = "orchestrator-alert-item";
+    item.append(
+      createDevOpsStatusPill(alert.state || "UNKNOWN"),
+      createDevOpsTextElement("span", "", alert.label || "UNKNOWN")
+    );
+    list.append(item);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "No active conflict or stale-worker alerts."));
+  }
+  return list;
+}
+
+function renderOrchestratorCommitState(commitState = {}) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "devops-commit-package";
+  wrapper.append(
+    createDevOpsField("Readiness", commitState.readiness),
+    createDevOpsField("Approved Files", commitState.approved_file_count ?? "UNKNOWN"),
+    createDevOpsField("Blocked Files", commitState.blocked_file_count ?? "UNKNOWN"),
+    createDevOpsTextElement("p", "devops-muted", commitState.summary || "Exact-file commit package is display-only and requires operator approval.")
+  );
+  return wrapper;
+}
+
+function getWorkerAge(workerId, workerAge = {}) {
+  return (workerAge.worker_age_tracking || []).find((item) => item.worker_id === workerId) || {};
+}
+
+function renderCommandCenterWorkers(workers = [], workerAge = {}) {
+  const list = document.createElement("div");
+  list.className = "command-center-worker-grid";
+  workers.forEach((worker) => {
+    const age = getWorkerAge(worker.worker_id, workerAge);
+    const card = document.createElement("article");
+    card.className = "command-center-worker-card";
+    const head = document.createElement("div");
+    head.className = "orchestrator-worker-head";
+    head.append(
+      createDevOpsTextElement("strong", "", worker.worker_id || "UNKNOWN"),
+      createDevOpsStatusPill(worker.status || "UNKNOWN")
+    );
+    card.append(
+      head,
+      createDevOpsField("Lane", worker.lane),
+      createDevOpsField("Task", worker.current_task),
+      createDevOpsField("Validator", worker.validator_state),
+      createDevOpsField("Blocked", worker.blocked_reason || "NONE"),
+      createDevOpsField("Last Report Age", age.last_report_age || "UNKNOWN"),
+      createDevOpsTextElement("p", "devops-muted", age.next_safe_action || worker.next_safe_action || "Review worker state before approval.")
+    );
+    const advanced = document.createElement("details");
+    advanced.className = "command-center-advanced";
+    advanced.append(
+      createDevOpsTextElement("summary", "", "Advanced worker details"),
+      createDevOpsField("Branch", worker.branch),
+      createDevOpsField("Worktree", worker.worktree),
+      createDevOpsField("Approval", worker.approval_state),
+      createDevOpsField("Last Report", worker.last_report)
+    );
+    card.append(advanced);
+    list.append(card);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "No worker evidence available."));
+  }
+  return list;
+}
+
+function renderCommandCenterMergeQueue(mergeQueue = {}) {
+  const list = document.createElement("div");
+  list.className = "command-center-list";
+  (mergeQueue.merge_readiness_queue || []).forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "orchestrator-queue-row";
+    row.append(
+      createDevOpsTextElement("strong", "devops-queue-title", item.package_id || "UNKNOWN"),
+      createDevOpsStatusPill(item.state || "UNKNOWN"),
+      createDevOpsField("Lane", item.lane),
+      createDevOpsField("Worker", item.worker_id),
+      createDevOpsTextElement("p", "devops-queue-action", item.next_safe_action || "UNKNOWN")
+    );
+    list.append(row);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "No merge readiness evidence available."));
+  }
+  return list;
+}
+
+function renderCommandCenterConflicts(conflictCenter = {}) {
+  const list = document.createElement("div");
+  list.className = "command-center-list";
+  (conflictCenter.conflicts || []).forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "orchestrator-queue-row";
+    row.append(
+      createDevOpsTextElement("strong", "devops-queue-title", item.file_path || "UNKNOWN"),
+      createDevOpsStatusPill(item.conflict_severity || "UNKNOWN"),
+      createDevOpsField("Owning Worker", item.owning_worker),
+      createDevOpsField("Blocked Worker", item.blocked_worker),
+      createDevOpsTextElement("p", "orchestrator-blocked-reason", item.operator_required_action || "UNKNOWN")
+    );
+    list.append(row);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "No unresolved conflicts in mock data."));
+  }
+  return list;
+}
+
+function renderCommandCenterApprovalInbox(approvalInbox = {}) {
+  const list = document.createElement("div");
+  list.className = "command-center-list";
+  (approvalInbox.approval_requests || []).forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "orchestrator-queue-row";
+    row.append(
+      createDevOpsTextElement("strong", "devops-queue-title", item.request_id || "UNKNOWN"),
+      createDevOpsStatusPill(item.status || "UNKNOWN"),
+      createDevOpsField("Type", item.request_type),
+      createDevOpsField("Evidence", item.required_evidence),
+      createDevOpsTextElement("p", "devops-queue-action", item.next_safe_action || "UNKNOWN")
+    );
+    list.append(row);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "No approval requests available."));
+  }
+  return list;
+}
+
+function renderCommandCenterGuidance(guidance = {}) {
+  const panel = document.createElement("div");
+  panel.className = "command-center-guidance";
+  panel.append(
+    createDevOpsStatusPill(guidance.warning_state || "UNKNOWN"),
+    createDevOpsField("Safe", guidance.what_is_safe),
+    createDevOpsField("Blocked", guidance.what_is_blocked),
+    createDevOpsTextElement("p", "devops-muted", guidance.next_recommended_action || "UNKNOWN")
+  );
+  return panel;
+}
+
+function renderCommandCenterSafetyBanner() {
+  const banner = document.createElement("section");
+  banner.className = "command-center-safety-banner";
+  banner.append(
+    createDevOpsTextElement("strong", "", "LIVE EXECUTION BLOCKED"),
+    createDevOpsTextElement("strong", "", "PAPER / LOCAL DEVELOPMENT ONLY")
+  );
+  return banner;
+}
+
+function renderOrchestratorWindowData(orchestrator = {}, registry = {}, queue = {}, validatorState = {}, commandCenter = {}, approvalInbox = {}, mergeQueue = {}, conflictCenter = {}, guidance = {}, workerAge = {}) {
+  if (!devopsControlWindowPanel) return;
+  const workers = registry.workers || [];
+  const queueItems = queue.queue_items || [];
+  const validators = validatorState.validator_states || [];
+  const conflictItems = conflictCenter.conflicts || [];
+  const conflictExists = conflictItems.length > 0 || queueItems.some((item) => String(item.status || "").toUpperCase() === "BLOCKED" || item.blocked_reason);
+  const staleWorkers = workers.filter((worker) => String(worker.status || "").toUpperCase() === "STALE");
+  const blockedWorkers = workers.filter((worker) => String(worker.status || "").toUpperCase() === "BLOCKED" || worker.blocked_reason);
+
+  const header = document.createElement("section");
+  header.className = "devops-window-header orchestrator-window-header";
+  const title = createDevOpsTextElement("h3", "", commandCenter.title || orchestrator.title || "AI_OS Command Center");
+  const summary = createDevOpsTextElement("p", "", commandCenter.summary || orchestrator.summary || "Single-pane operator surface for worker visibility, queue supervision, approvals, merge readiness, conflicts, stale evidence, and next safe actions.");
+  const badges = document.createElement("div");
+  badges.className = "devops-header-badges";
+  badges.append(
+    createDevOpsStatusPill(commandCenter.command_center_status || orchestrator.orchestrator_status || "REVIEW"),
+    createDevOpsStatusPill(commandCenter.mode || orchestrator.mode || "display_only"),
+    createDevOpsStatusPill(conflictExists ? "WORKER CONFLICT BLOCKED" : "CONFLICTS CLEAR")
+  );
+  header.append(title, summary, badges);
+
+  const overview = document.createElement("section");
+  overview.className = "orchestrator-overview";
+  const counts = commandCenter.global_status || {};
+  overview.append(
+    createDevOpsMetric("Total Workers", counts.total_workers ?? workers.length),
+    createDevOpsMetric("Active Workers", counts.active_workers ?? workers.length),
+    createDevOpsMetric("Blocked Workers", counts.blocked_workers ?? blockedWorkers.length),
+    createDevOpsMetric("Stale Workers", counts.stale_workers ?? staleWorkers.length),
+    createDevOpsMetric("Merge Ready", counts.merge_ready_count ?? "UNKNOWN"),
+    createDevOpsMetric("Approval Required", counts.approval_required_count ?? "UNKNOWN")
+  );
+
+  const registryPanel = createDevOpsPanel("Active Worker Grid", [renderCommandCenterWorkers(workers, workerAge)]);
+  const mergePanel = createDevOpsPanel("Merge Readiness Queue", [renderCommandCenterMergeQueue(mergeQueue)]);
+  const conflictPanel = createDevOpsPanel("Conflict Center", [renderCommandCenterConflicts(conflictCenter)]);
+  const approvalPanel = createDevOpsPanel("Approval Inbox", [renderCommandCenterApprovalInbox(approvalInbox)]);
+  const guidancePanel = createDevOpsPanel("Operator Guidance", [renderCommandCenterGuidance(guidance)]);
+  const validatorPanel = createDevOpsDetailsPanel("Advanced Validator Supervision", [renderOrchestratorValidators(validators)]);
+  const nextActionPanel = createDevOpsPanel("Next Safe Action", [
+    createDevOpsTextElement("p", "devops-muted", commandCenter.next_safe_action || guidance.next_recommended_action || orchestrator.next_safe_action || queue.next_safe_action || "Review mock data only. No backend execution.")
+  ]);
+
+  const safetyLocks = orchestrator.approval_locks || [
+    "APPLY REQUIRES APPROVAL",
+    "COMMIT REQUIRES APPROVAL",
+    "PUSH REQUIRES APPROVAL",
+    "MERGE REQUIRES APPROVAL"
+  ];
+  const safetyStrip = renderDevOpsSafetyStrip(conflictExists ? [...safetyLocks, "WORKER CONFLICT BLOCKED"] : safetyLocks);
+
+  const grid = document.createElement("div");
+  grid.className = "devops-window-grid orchestrator-window-grid";
+  grid.append(registryPanel, mergePanel, conflictPanel, approvalPanel, guidancePanel, validatorPanel);
+
+  devopsControlWindowPanel.hidden = false;
+  devopsControlWindowPanel.replaceChildren(renderCommandCenterSafetyBanner(), header, overview, nextActionPanel, grid, safetyStrip);
 }
 
 function renderDevOpsControlData(data = {}, queueData = {}) {
@@ -1103,23 +1439,39 @@ function renderDevOpsControlData(data = {}, queueData = {}) {
 async function renderDevOpsControlWindow() {
   if (!devopsControlWindowPanel) return;
   devopsControlWindowPanel.hidden = false;
-  devopsControlWindowPanel.textContent = "Loading DevOps Control Window mock data...";
+  devopsControlWindowPanel.textContent = "Loading AI_OS Orchestrator Window mock data...";
   try {
-    const [windowResponse, queueResponse] = await Promise.all([
-      fetch(devopsControlWindowFixturePath, { cache: "no-store" }),
-      fetch(workIntelligenceQueueFixturePath, { cache: "no-store" })
+    const [orchestratorResponse, registryResponse, queueResponse, validatorResponse, commandCenterResponse, approvalResponse, mergeResponse, conflictResponse, guidanceResponse, workerAgeResponse] = await Promise.all([
+      fetch(orchestratorWindowFixturePath, { cache: "no-store" }),
+      fetch(workerRegistryFixturePath, { cache: "no-store" }),
+      fetch(workerQueueFixturePath, { cache: "no-store" }),
+      fetch(validatorStateFixturePath, { cache: "no-store" }),
+      fetch(commandCenterStateFixturePath, { cache: "no-store" }),
+      fetch(commandCenterApprovalInboxFixturePath, { cache: "no-store" }),
+      fetch(commandCenterMergeQueueFixturePath, { cache: "no-store" }),
+      fetch(commandCenterConflictCenterFixturePath, { cache: "no-store" }),
+      fetch(commandCenterOperatorGuidanceFixturePath, { cache: "no-store" }),
+      fetch(commandCenterWorkerAgeFixturePath, { cache: "no-store" })
     ]);
-    const windowData = windowResponse.ok ? await windowResponse.json() : {};
+    const orchestratorData = orchestratorResponse.ok ? await orchestratorResponse.json() : {};
+    const registryData = registryResponse.ok ? await registryResponse.json() : {};
     const queueData = queueResponse.ok ? await queueResponse.json() : {};
-    renderDevOpsControlData(windowData, queueData);
+    const validatorData = validatorResponse.ok ? await validatorResponse.json() : {};
+    const commandCenterData = commandCenterResponse.ok ? await commandCenterResponse.json() : {};
+    const approvalData = approvalResponse.ok ? await approvalResponse.json() : {};
+    const mergeData = mergeResponse.ok ? await mergeResponse.json() : {};
+    const conflictData = conflictResponse.ok ? await conflictResponse.json() : {};
+    const guidanceData = guidanceResponse.ok ? await guidanceResponse.json() : {};
+    const workerAgeData = workerAgeResponse.ok ? await workerAgeResponse.json() : {};
+    renderOrchestratorWindowData(orchestratorData, registryData, queueData, validatorData, commandCenterData, approvalData, mergeData, conflictData, guidanceData, workerAgeData);
   } catch (error) {
-    renderDevOpsControlData({
-      title: "DevOps Control Window",
+    renderOrchestratorWindowData({
+      title: "AI_OS Command Center",
       summary: "Mock data unavailable. All actions remain blocked.",
-      control_window_status: "UNKNOWN",
+      orchestrator_status: "UNKNOWN",
       mode: "display_only",
-      approval_locks: ["APPLY REQUIRES APPROVAL", "COMMIT REQUIRES APPROVAL", "PUSH REQUIRES APPROVAL"]
-    }, { queue_items: [] });
+      approval_locks: ["APPLY REQUIRES APPROVAL", "COMMIT REQUIRES APPROVAL", "PUSH REQUIRES APPROVAL", "MERGE REQUIRES APPROVAL"]
+    }, { workers: [] }, { queue_items: [] }, { validator_states: [] });
   }
 }
 

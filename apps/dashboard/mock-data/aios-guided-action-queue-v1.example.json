@@ -1,0 +1,38 @@
+{
+  "schema": "aios.guided_action_queue.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "queue_items": [
+    {
+      "queue_rank": 1,
+      "action_type": "VALIDATE",
+      "title": "Validate Phase 44 scaffold",
+      "status": "READY",
+      "recommended_action": "Run JSON parsing checks and the DRY_RUN operator workflow validator.",
+      "blocked_action": "Do not commit before review.",
+      "approval_required": false,
+      "next_safe_action": "Run validation commands."
+    },
+    {
+      "queue_rank": 2,
+      "action_type": "APPROVAL",
+      "title": "Review exact-file package",
+      "status": "WAITING_APPROVAL",
+      "recommended_action": "Review the created docs, mock-data, and validator script.",
+      "blocked_action": "Do not use git add .",
+      "approval_required": true,
+      "next_safe_action": "Approve exact-file commit package only after validation passes."
+    },
+    {
+      "queue_rank": 3,
+      "action_type": "STALE_REVIEW",
+      "title": "Check stale worker evidence",
+      "status": "REVIEW",
+      "recommended_action": "Confirm no stale worker state is being promoted.",
+      "blocked_action": "Do not promote stale evidence.",
+      "approval_required": true,
+      "next_safe_action": "Review stale worker warnings."
+    }
+  ],
+  "next_safe_action": "Complete validation before any commit package decision."
+}

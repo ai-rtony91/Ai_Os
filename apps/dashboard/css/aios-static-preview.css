@@ -7441,6 +7441,186 @@ body {
   background: rgba(255, 95, 122, 0.08);
 }
 
+.orchestrator-overview,
+.orchestrator-worker-grid,
+.command-center-worker-grid,
+.command-center-list,
+.orchestrator-queue-list,
+.orchestrator-alert-list,
+.orchestrator-worker-meta,
+.orchestrator-inline-meta {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.orchestrator-overview {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.devops-metric {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(125, 211, 252, 0.16);
+  border-radius: 12px;
+  background: rgba(5, 8, 20, 0.42);
+}
+
+.devops-metric span {
+  color: var(--text-secondary);
+  font-size: 9px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.devops-metric strong {
+  min-width: 0;
+  color: var(--accent-action);
+  font-size: 15px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.orchestrator-window-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+
+.orchestrator-window-grid .devops-card:nth-child(1),
+.orchestrator-window-grid .devops-card:nth-child(2) {
+  grid-row: auto;
+}
+
+.orchestrator-worker-card,
+.command-center-worker-card,
+.orchestrator-queue-row,
+.orchestrator-alert-item {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid rgba(180, 205, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(5, 8, 20, 0.44);
+}
+
+.orchestrator-worker-head,
+.orchestrator-alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.orchestrator-worker-head strong {
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.orchestrator-worker-meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.orchestrator-worker-meta .devops-field {
+  padding: 6px 0;
+}
+
+.orchestrator-queue-row {
+  display: grid;
+  gap: 7px;
+}
+
+.orchestrator-inline-meta {
+  grid-template-columns: repeat(4, max-content);
+  align-items: center;
+}
+
+.orchestrator-blocked-reason {
+  margin: 0;
+  padding: 7px;
+  border: 1px solid rgba(255, 95, 122, 0.22);
+  border-radius: 10px;
+  color: var(--state-danger);
+  background: rgba(255, 95, 122, 0.06);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.orchestrator-alert-item span:last-child {
+  min-width: 0;
+  color: var(--text-soft);
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.command-center-safety-banner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 95, 122, 0.42);
+  border-radius: 14px;
+  background: rgba(255, 95, 122, 0.1);
+}
+
+.command-center-safety-banner strong {
+  display: grid;
+  place-items: center;
+  min-height: 34px;
+  padding: 8px;
+  border: 1px solid rgba(255, 95, 122, 0.28);
+  border-radius: 10px;
+  color: var(--state-danger);
+  background: rgba(5, 8, 20, 0.58);
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.command-center-worker-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.command-center-worker-card {
+  display: grid;
+  gap: 8px;
+}
+
+.command-center-advanced,
+.command-center-details {
+  min-width: 0;
+}
+
+.command-center-advanced summary,
+.command-center-details summary {
+  color: var(--text-secondary);
+  font-size: 10px;
+  line-height: 1.25;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.command-center-details {
+  border-style: dashed;
+}
+
+.command-center-details > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.command-center-guidance {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
 .devops-queue-list,
 .devops-validation-grid,
 .devops-morning-list,
@@ -7611,13 +7791,24 @@ body {
 }
 
 @media (max-width: 1120px) {
-  .devops-window-grid {
+  .devops-window-grid,
+  .orchestrator-window-grid {
     grid-template-columns: 1fr;
   }
 
   .devops-card:nth-child(2),
-  .devops-card:nth-child(4) {
+  .devops-card:nth-child(4),
+  .orchestrator-window-grid .devops-card:nth-child(1),
+  .orchestrator-window-grid .devops-card:nth-child(2) {
     grid-row: auto;
+  }
+
+  .orchestrator-overview {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .command-center-worker-grid {
+    grid-template-columns: 1fr;
   }
 
   .devops-window-header {
@@ -7647,8 +7838,15 @@ body {
   .devops-validation-grid,
   .devops-safety-lock-grid,
   .devops-queue-meta,
+  .orchestrator-overview,
+  .orchestrator-worker-meta,
+  .command-center-safety-banner,
   .devops-safety-strip {
     grid-template-columns: 1fr;
+  }
+
+  .orchestrator-inline-meta {
+    grid-template-columns: repeat(2, max-content);
   }
 
   .devops-field {

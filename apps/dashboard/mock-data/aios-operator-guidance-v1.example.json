@@ -1,0 +1,10 @@
+{
+  "schema": "aios.operator_guidance.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "warning_state": "REVIEW",
+  "what_is_safe": "Review mock data, read worker cards, inspect approval inbox, and run requested validators.",
+  "what_is_blocked": "No merge, commit, push, autonomous execution, background agents, broker, OANDA, API keys, or live trading.",
+  "next_recommended_action": "Validate the Command Center and visually confirm it remains compact and display-only.",
+  "beginner_note": "Start with the Next Safe Action. Open advanced details only when you need more evidence."
+}

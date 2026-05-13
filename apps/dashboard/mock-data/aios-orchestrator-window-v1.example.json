@@ -1,0 +1,34 @@
+{
+  "schema": "aios.orchestrator_window.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "title": "AI_OS Orchestrator Window",
+  "summary": "Single operational supervision surface for Codex workers, queue assignments, validators, blocked states, approval locks, and commit package readiness.",
+  "orchestrator_status": "REVIEW",
+  "validator_overview": "REVIEW",
+  "commit_package_readiness": "BLOCKED",
+  "approval_locks": [
+    "APPLY REQUIRES APPROVAL",
+    "COMMIT REQUIRES APPROVAL",
+    "PUSH REQUIRES APPROVAL",
+    "MERGE REQUIRES APPROVAL"
+  ],
+  "commit_package_state": {
+    "readiness": "BLOCKED",
+    "approved_file_count": 0,
+    "blocked_file_count": 2,
+    "summary": "Commit package remains blocked until APPLY evidence, validator results, exact-file review, and operator approval exist."
+  },
+  "safety_locks": {
+    "backend_execution": "LOCKED",
+    "shell_execution": "LOCKED",
+    "worker_launch": "LOCKED",
+    "automatic_apply": "LOCKED",
+    "automatic_commit": "LOCKED",
+    "automatic_push": "LOCKED",
+    "automatic_merge": "LOCKED",
+    "rollback_execution": "LOCKED",
+    "broker_oanda_api_live_trading": "LOCKED"
+  },
+  "next_safe_action": "Review worker assignments, blocked queue items, and validator state. No execution is available from this mock surface."
+}
