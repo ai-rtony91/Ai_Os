@@ -1610,6 +1610,100 @@ body.focused-route-archives .project-hub-panel {
   margin-inline: auto;
 }
 
+.aios-centerpiece-shell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: clamp(132px, 18vw, 190px);
+  margin: 0 0 14px;
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 52%, rgba(47, 140, 255, 0.22), transparent 30%),
+    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.2), transparent 46%),
+    linear-gradient(135deg, rgba(10, 5, 28, 0.92), rgba(5, 8, 20, 0.84));
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.28),
+    0 0 28px rgba(47, 140, 255, 0.16),
+    0 0 36px rgba(139, 92, 246, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.aios-centerpiece-shell::before,
+.aios-centerpiece-shell::after,
+.aios-centerpiece-orbit {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.aios-centerpiece-shell::before {
+  width: clamp(120px, 18vw, 190px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(125, 211, 252, 0.42);
+  box-shadow:
+    0 0 28px rgba(47, 140, 255, 0.32),
+    inset 0 0 34px rgba(139, 92, 246, 0.18);
+}
+
+.aios-centerpiece-shell::after {
+  width: clamp(190px, 30vw, 330px);
+  aspect-ratio: 1 / 0.42;
+  border: 1px solid rgba(168, 85, 247, 0.42);
+  transform: rotate(-10deg);
+  filter: drop-shadow(0 0 18px rgba(139, 92, 246, 0.28));
+}
+
+.aios-centerpiece-orbit {
+  width: clamp(220px, 38vw, 430px);
+  aspect-ratio: 1 / 0.36;
+  border: 1px solid rgba(47, 140, 255, 0.32);
+  transform: rotate(9deg);
+  filter: drop-shadow(0 0 18px rgba(47, 140, 255, 0.24));
+}
+
+.aios-centerpiece-core {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 7px;
+  justify-items: center;
+  max-width: min(100%, 640px);
+  padding: 18px;
+  text-align: center;
+}
+
+.aios-centerpiece-core span {
+  color: rgba(186, 230, 253, 0.92);
+  font-size: clamp(12px, 1.4vw, 16px);
+  text-transform: uppercase;
+  text-shadow: 0 0 18px rgba(47, 140, 255, 0.32);
+}
+
+.aios-centerpiece-core strong {
+  color: #f8fbff;
+  font-size: clamp(13px, 1.7vw, 20px);
+  line-height: 1.35;
+  text-shadow: 0 0 16px rgba(139, 92, 246, 0.34);
+}
+
+@media (max-width: 720px) {
+  .aios-centerpiece-shell {
+    min-height: 128px;
+    border-radius: 14px;
+  }
+
+  .aios-centerpiece-core {
+    padding: 16px 12px;
+  }
+
+  .aios-centerpiece-orbit {
+    width: 280px;
+  }
+}
+
 .workspace-detail-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -6604,6 +6698,11 @@ body:not(.welcome-start-active) .youtube-radio-dock {
 
   .work-table::after {
     opacity: 0.22;
+    transform: none;
+  }
+
+  .aios-centerpiece-shell::after,
+  .aios-centerpiece-orbit {
     transform: none;
   }
 }
