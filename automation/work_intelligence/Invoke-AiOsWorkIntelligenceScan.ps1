@@ -416,6 +416,8 @@ function Get-WorkerReportEvidence {
       worker_report_issue_count = $issueCount
       worker_report_evidence = [object[]]@()
       worker_report_issues = $issues.ToArray()
+      worker_conflict_count = 0
+      worker_conflicts = [object[]]@()
     }
   }
 
@@ -436,6 +438,8 @@ function Get-WorkerReportEvidence {
       worker_report_issue_count = $issueCount
       worker_report_evidence = [object[]]@()
       worker_report_issues = $issues.ToArray()
+      worker_conflict_count = 0
+      worker_conflicts = [object[]]@()
     }
   }
 
@@ -504,9 +508,12 @@ function Get-WorkerReportEvidence {
       if ([string]::IsNullOrWhiteSpace([string]$planned)) { continue }
       $normalizedPlanned = (([string]$planned) -replace "\\", "/").Trim().ToLowerInvariant()
       if (-not $plannedFileMap.ContainsKey($normalizedPlanned)) {
-        $plannedFileMap[$normalizedPlanned] = New-Object System.Collections.Generic.List[string]
+        $plannedFileMap[$normalizedPlanned] = New-Object System.Collections.Generic.List[object]
       }
-      $plannedFileMap[$normalizedPlanned].Add($relativePath) | Out-Null
+      $plannedFileMap[$normalizedPlanned].Add([pscustomobject]@{
+        worker_id = if ($parsed.worker_id) { $parsed.worker_id } else { "UNKNOWN" }
+        source_path = $relativePath
+      }) | Out-Null
     }
 
     $reports.Add([pscustomobject]@{
@@ -523,9 +530,20 @@ function Get-WorkerReportEvidence {
     }) | Out-Null
   }
 
+  $conflicts = New-Object System.Collections.Generic.List[object]
   foreach ($entry in $plannedFileMap.GetEnumerator()) {
-    $sources = @($entry.Value | Sort-Object -Unique)
+    $workers = @($entry.Value | ForEach-Object { [string]$_.worker_id } | Sort-Object -Unique)
+    $sources = @($entry.Value | ForEach-Object { [string]$_.source_path } | Sort-Object -Unique)
     if (@($sources).Count -gt 1) {
+      $conflictId = "WORKER-CONFLICT-{0}" -f (($entry.Key.ToUpperInvariant() -replace "[^A-Z0-9]", "-").Trim("-"))
+      $conflicts.Add([pscustomobject]@{
+        conflict_id = $conflictId
+        file_path = $entry.Key
+        workers = $workers
+        severity = "HIGH"
+        status = "BLOCKED"
+        recommended_action = "Resolve worker file ownership conflict."
+      }) | Out-Null
       $issues.Add([pscustomobject]@{
         issue_type = "worker_report_overlapping_planned_files"
         status = "BLOCKED"
@@ -546,6 +564,8 @@ function Get-WorkerReportEvidence {
     worker_report_issue_count = $issueCount
     worker_report_evidence = $reports.ToArray()
     worker_report_issues = $issues.ToArray()
+    worker_conflict_count = $conflicts.Count
+    worker_conflicts = $conflicts.ToArray()
   }
 }
 
@@ -765,7 +785,8 @@ function Get-WorkQueue {
     [bool]$CleanGitStatus,
     [string]$WorkerReportPresence,
     [object[]]$WorkerReportEvidence,
-    [object[]]$WorkerReportIssues
+    [object[]]$WorkerReportIssues,
+    [object[]]$WorkerConflicts
   )
   $queue = New-Object System.Collections.Generic.List[object]
 
@@ -799,6 +820,9 @@ function Get-WorkQueue {
     $priority = if ($status -eq "BLOCKED") { "HIGH" } else { "MEDIUM" }
     $taskSuffix = (([string]$issue.issue_type).ToUpperInvariant() -replace "[^A-Z0-9]", "-")
     Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-$taskSuffix" -Title "Review worker report evidence." -Source $issue.path -Priority $priority -Status $status -RecommendedAction "Review worker report evidence; this is not APPLY approval." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "HIGH" -RouteReason $issue.detail
+  }
+  if (@($WorkerConflicts).Count -gt 0) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-FILE-CONFLICT" -Title "Resolve worker file ownership conflict." -Source "worker_conflicts" -Priority "HIGH" -Status "BLOCKED" -RecommendedAction "Resolve worker file ownership conflict." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "HIGH" -RouteReason "overlapping files_planned evidence"
   }
   foreach ($report in @($WorkerReportEvidence)) {
     Add-WorkQueueItem -Queue $queue -TaskId ("WI-WORKER-REPORT-{0}" -f $report.worker_id) -Title "Review worker report evidence." -Source $report.source_path -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review worker report evidence; this is not APPLY approval." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "MEDIUM" -RouteReason "worker report evidence only"
@@ -935,6 +959,8 @@ $invalidWorkerReportCount = $workerReportResult.invalid_worker_report_count
 $workerReportIssueCount = $workerReportResult.worker_report_issue_count
 $workerReportEvidence = @($workerReportResult.worker_report_evidence)
 $workerReportIssues = @($workerReportResult.worker_report_issues)
+$workerConflictCount = $workerReportResult.worker_conflict_count
+$workerConflicts = @($workerReportResult.worker_conflicts)
 
 $latestCheckpointRefs = Get-LatestFileRefs -Roots @($config.checkpoint_roots)
 $latestReportRefs = Get-LatestFileRefs -Roots @($config.report_roots)
@@ -970,7 +996,8 @@ $workQueue = Get-WorkQueue `
   -CleanGitStatus $cleanGitStatus `
   -WorkerReportPresence $workerReportPresence `
   -WorkerReportEvidence $workerReportEvidence `
-  -WorkerReportIssues $workerReportIssues
+  -WorkerReportIssues $workerReportIssues `
+  -WorkerConflicts $workerConflicts
 
 $snapshot = [pscustomobject]@{
   schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2"
@@ -1003,6 +1030,8 @@ $snapshot = [pscustomobject]@{
   worker_report_presence = $workerReportPresence
   worker_report_evidence = $workerReportEvidence
   worker_report_issues = $workerReportIssues
+  worker_conflict_count = $workerConflictCount
+  worker_conflicts = $workerConflicts
   validation_health = "UNKNOWN_UNTIL_VALIDATOR_RUN"
   latest_checkpoint_reference = $latestCheckpointReference
   latest_checkpoint_references = $latestCheckpointRefs

@@ -188,9 +188,19 @@ if (Test-Path -LiteralPath $scannerPath) {
       Add-Failure "Scanner missing priority field: $requiredField"
     }
   }
-  foreach ($requiredField in @("worker_report_evidence", "worker_report_issues", "worker_report_issue_count", "valid_worker_report_count", "invalid_worker_report_count")) {
+  foreach ($requiredField in @("worker_report_evidence", "worker_report_issues", "worker_report_issue_count", "valid_worker_report_count", "invalid_worker_report_count", "worker_conflict_count", "worker_conflicts")) {
     if (-not $scannerText.Contains($requiredField)) {
       Add-Failure "Scanner missing worker report ingestion field: $requiredField"
+    }
+  }
+  foreach ($conflictField in @("conflict_id", "file_path", "workers", "severity", "status", "recommended_action")) {
+    if (-not $scannerText.Contains($conflictField)) {
+      Add-Failure "Scanner missing worker conflict field: $conflictField"
+    }
+  }
+  foreach ($conflictToken in @("WI-WORKER-FILE-CONFLICT", "Resolve worker file ownership conflict.", "worker_conflicts")) {
+    if (-not $scannerText.Contains($conflictToken)) {
+      Add-Failure "Scanner missing worker conflict queue token: $conflictToken"
     }
   }
   foreach ($requiredToken in @("Get-WorkerReportEvidence", "invalid_worker_report_json", "worker_report_missing_required_fields", "worker_report_files_deleted_present", "worker_report_missing_validation_commands", "worker_report_overlapping_planned_files", "worker_report_protected_file_path", "evidence_only", "approval_granted")) {
@@ -267,9 +277,28 @@ try {
       Add-Failure "Scan output missing priority field: $requiredField"
     }
   }
-  foreach ($requiredField in @("worker_report_evidence", "worker_report_issues", "worker_report_issue_count", "valid_worker_report_count", "invalid_worker_report_count")) {
+  foreach ($requiredField in @("worker_report_evidence", "worker_report_issues", "worker_report_issue_count", "valid_worker_report_count", "invalid_worker_report_count", "worker_conflict_count", "worker_conflicts")) {
     if (-not ($scan.PSObject.Properties.Name -contains $requiredField)) {
       Add-Failure "Scan output missing worker report ingestion field: $requiredField"
+    }
+  }
+  if ($scan.worker_conflict_count -ne @($scan.worker_conflicts).Count) {
+    Add-Failure "worker_conflict_count does not match worker_conflicts length."
+  }
+  foreach ($conflict in @($scan.worker_conflicts)) {
+    foreach ($requiredConflictField in @("conflict_id", "file_path", "workers", "severity", "status", "recommended_action")) {
+      if (-not ($conflict.PSObject.Properties.Name -contains $requiredConflictField)) {
+        Add-Failure "Worker conflict missing field: $requiredConflictField"
+      }
+    }
+    if ($conflict.status -ne "BLOCKED") {
+      Add-Failure "Worker conflict status must be BLOCKED."
+    }
+  }
+  if ($scan.worker_conflict_count -gt 0) {
+    $conflictQueueItems = @($scan.work_queue | Where-Object { $_.task_id -eq "WI-WORKER-FILE-CONFLICT" })
+    if (@($conflictQueueItems).Count -eq 0) {
+      Add-Failure "Worker conflicts must produce WI-WORKER-FILE-CONFLICT queue item."
     }
   }
   if ($null -eq $scan.safe_to_apply) {

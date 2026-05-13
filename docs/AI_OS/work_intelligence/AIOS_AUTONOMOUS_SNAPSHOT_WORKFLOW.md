@@ -285,6 +285,38 @@ Worker report evidence can add `REVIEW` or `BLOCKED` work queue items. Missing o
 
 Worker report evidence includes `evidence_only: true` and `approval_granted: false`.
 
+## Worker File Conflict Resolution
+
+Phase 19 promotes overlapping worker file plans into structured conflict evidence. The scanner keeps existing `worker_report_issues` output for compatibility and also emits:
+
+- `worker_conflict_count`
+- `worker_conflicts`
+
+Each `worker_conflicts` item includes:
+
+- `conflict_id`
+- `file_path`
+- `workers`
+- `severity`
+- `status`
+- `recommended_action`
+
+Conflicts are detected only from overlapping `files_planned` values across JSON reports in:
+
+```text
+Reports/operator/worker-reports/
+```
+
+When conflicts exist, the queue includes one blocked item:
+
+```text
+WI-WORKER-FILE-CONFLICT
+```
+
+That queue item is `HIGH` priority, `BLOCKED`, routed to `Operator Orchestration`, and recommends `Resolve worker file ownership conflict.`
+
+The scanner does not auto-resolve conflicts, does not approve APPLY, and does not edit worker report files.
+
 ## Validation
 
 Run from repo root:
