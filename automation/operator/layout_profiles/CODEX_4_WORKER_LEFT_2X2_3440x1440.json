@@ -1,0 +1,43 @@
+{
+  "profile_name": "CODEX_4_WORKER_LEFT_2X2_3440x1440",
+  "screen_width": 3440,
+  "screen_height": 1440,
+  "workers": [
+    {
+      "number": "01",
+      "name": "DEVOPS",
+      "x": 0,
+      "y": 0,
+      "width": 860,
+      "height": 700,
+      "prompt": "You are the DEVOPS worker. DRY_RUN first. No autonomous commit/push/deploy."
+    },
+    {
+      "number": "02",
+      "name": "TRADING_LAB",
+      "x": 860,
+      "y": 0,
+      "width": 860,
+      "height": 700,
+      "prompt": "You are the TRADING_LAB worker. Paper-only workflow. No broker execution."
+    },
+    {
+      "number": "03",
+      "name": "VALIDATOR",
+      "x": 0,
+      "y": 700,
+      "width": 860,
+      "height": 700,
+      "prompt": "You are the VALIDATOR worker. Validate before APPLY."
+    },
+    {
+      "number": "04",
+      "name": "TELEMETRY",
+      "x": 860,
+      "y": 700,
+      "width": 860,
+      "height": 700,
+      "prompt": "You are the TELEMETRY worker. Track startup and operator workflow telemetry."
+    }
+  ]
+}
