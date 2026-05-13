@@ -3,9 +3,12 @@
   "mode": "DRY_RUN_WORKERS_PARALLEL_APPLY_SERIAL",
   "codex_command": "UNKNOWN",
   "codex_launch": {
-    "enabled": false,
-    "command": "UNKNOWN",
-    "arguments": [],
+    "enabled": true,
+    "command": "codex",
+    "arguments": [
+      "--cd",
+      "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN"
+    ],
     "fallback_to_instruction_window": true,
     "prompt_argument_name": "UNKNOWN"
   },
