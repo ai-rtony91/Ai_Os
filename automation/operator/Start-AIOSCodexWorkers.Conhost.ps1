@@ -14,7 +14,38 @@ $LayoutPath = Join-Path $Repo "automation\operator\layout_profiles\CODEX_4_WORKE
 Set-Location $Repo
 $Layout = Get-Content $LayoutPath -Raw | ConvertFrom-Json
 
-Write-Host "AI_OS CONHOST CODEX LAUNCHER" -ForegroundColor Cyan
+function Move-WindowByTitle {
+    param(
+        [string]$Title,
+        [int]$X,
+        [int]$Y,
+        [int]$Width,
+        [int]$Height
+    )
+
+    $Target = $null
+
+    for ($i = 0; $i -lt 60; $i++) {
+        $Target = Get-Process | Where-Object {
+            $_.MainWindowTitle -like "*$Title*"
+        } | Select-Object -First 1
+
+        if ($Target -and $Target.MainWindowHandle -ne 0) {
+            break
+        }
+
+        Start-Sleep -Milliseconds 750
+    }
+
+    if ($Target -and $Target.MainWindowHandle -ne 0) {
+        [Win32]::MoveWindow($Target.MainWindowHandle, $X, $Y, $Width, $Height, $true) | Out-Null
+        Write-Host "MOVED: $Title -> X=$X Y=$Y W=$Width H=$Height" -ForegroundColor Green
+    } else {
+        Write-Host "FAILED TO FIND WINDOW: $Title" -ForegroundColor Red
+    }
+}
+
+Write-Host "AI_OS TITLE-BASED CODEX LAUNCHER" -ForegroundColor Cyan
 Write-Host "Layout: $($Layout.profile_name)" -ForegroundColor Cyan
 
 foreach ($Worker in $Layout.workers) {
@@ -30,25 +61,21 @@ codex --cd '$Repo'
 
     $Encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($InnerCommand))
 
-    $Process = Start-Process "conhost.exe" -PassThru -ArgumentList @(
+    Start-Process "conhost.exe" -ArgumentList @(
         "powershell.exe",
         "-NoExit",
         "-EncodedCommand",
         $Encoded
     )
 
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 4
 
-    if ($Process.MainWindowHandle -ne 0) {
-        [Win32]::MoveWindow(
-            $Process.MainWindowHandle,
-            [int]$Worker.x,
-            [int]$Worker.y,
-            [int]$Worker.width,
-            [int]$Worker.height,
-            $true
-        ) | Out-Null
-    }
+    Move-WindowByTitle `
+        -Title $Title `
+        -X ([int]$Worker.x) `
+        -Y ([int]$Worker.y) `
+        -Width ([int]$Worker.width) `
+        -Height ([int]$Worker.height)
 }
 
-Write-Host "AI_OS conhost Codex launch complete." -ForegroundColor Green
+Write-Host "AI_OS title-based Codex launch complete." -ForegroundColor Green
