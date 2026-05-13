@@ -1,0 +1,47 @@
+{
+  "schema": "AIOS_WORK_INTELLIGENCE_CONFIG.v1",
+  "mode": "READ_ONLY",
+  "scanner": {
+    "name": "AI_OS Work Intelligence Scan",
+    "writes_files": false,
+    "destructive_actions_allowed": false,
+    "default_output": "console_json"
+  },
+  "scan_roots": [
+    "."
+  ],
+  "report_roots": [
+    "Reports"
+  ],
+  "checkpoint_roots": [
+    "Reports/checkpoints",
+    "docs/AI_OS/checkpoints"
+  ],
+  "automation_roots": [
+    "automation"
+  ],
+  "worker_registry_path": "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+  "worker_report_directory": "Reports/operator/worker-reports",
+  "protected_files": [
+    "README.md",
+    "AGENTS.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "White_Paper.md"
+  ],
+  "generated_report_examples": [
+    "Reports/work_intelligence/MASTER_TODO_LEDGER.example.json",
+    "Reports/work_intelligence/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
+    "Reports/work_intelligence/WORKER_QUEUE_STATUS.example.json",
+    "Reports/work_intelligence/REPO_HEALTH_SUMMARY.example.json"
+  ],
+  "validation_commands": [
+    "powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ]
+}

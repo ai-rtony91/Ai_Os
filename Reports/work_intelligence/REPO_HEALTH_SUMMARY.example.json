@@ -1,0 +1,11 @@
+{
+  "schema": "AIOS_REPO_HEALTH_SUMMARY.v1",
+  "clean_git_status": "UNKNOWN",
+  "protected_file_violations": [],
+  "duplicate_worker_conflicts": [],
+  "missing_reports": [],
+  "missing_validators": [],
+  "unresolved_fixmes": 0,
+  "unresolved_todos": 0,
+  "validation_health": "UNKNOWN"
+}

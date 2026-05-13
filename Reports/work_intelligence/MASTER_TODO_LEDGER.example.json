@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_MASTER_TODO_LEDGER.v1",
+  "generated_by": "AI_OS Work Intelligence",
+  "mode": "READ_ONLY_EXAMPLE",
+  "tasks": [
+    {
+      "task_id": "TODO-EXAMPLE-001",
+      "phase": "Phase UNKNOWN",
+      "stage": "Stage UNKNOWN",
+      "title": "Review generated work intelligence snapshot",
+      "status": "PLANNED",
+      "priority": "MEDIUM",
+      "blocked_reason": "",
+      "depends_on": [],
+      "worker_lane": "operator",
+      "validation_required": [
+        "powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1"
+      ],
+      "safe_next_action": "Run the read-only scanner and review console output."
+    }
+  ]
+}

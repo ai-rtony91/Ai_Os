@@ -1,0 +1,15 @@
+{
+  "schema": "AIOS_WORKER_QUEUE_STATUS.v1",
+  "mode": "READ_ONLY_EXAMPLE",
+  "workers": [
+    {
+      "worker_id": 1,
+      "lane": "apps/dashboard",
+      "assigned_task": "UNKNOWN",
+      "status": "UNASSIGNED",
+      "blocked": false,
+      "blocked_reason": "",
+      "report_present": false
+    }
+  ]
+}
