@@ -1,0 +1,16 @@
+{
+  "profile_name": "CODEX_10_SIDE_RAILS_3440x1440",
+  "display_name": "CODEX_10",
+  "workers": [
+    {"number":"01","role":"DEVOPS","x":0,"y":0,"width":520,"height":288,"prompt":"DEVOPS. DRY_RUN first. No auto commit/push/deploy."},
+    {"number":"02","role":"TRADING_LAB","x":0,"y":288,"width":520,"height":288,"prompt":"TRADING LAB. Paper-only. No broker execution."},
+    {"number":"03","role":"VALIDATOR","x":0,"y":576,"width":520,"height":288,"prompt":"VALIDATOR. Check before APPLY."},
+    {"number":"04","role":"TELEMETRY","x":0,"y":864,"width":520,"height":288,"prompt":"TELEMETRY. Track startup and workflow."},
+    {"number":"05","role":"UI_UX","x":0,"y":1152,"width":520,"height":288,"prompt":"UI/UX. Simple user mode. No clutter."},
+    {"number":"06","role":"DOCS","x":2920,"y":0,"width":520,"height":288,"prompt":"DOCS. Keep factual notes and clean structure."},
+    {"number":"07","role":"REPORTING","x":2920,"y":288,"width":520,"height":288,"prompt":"REPORTING. EOD, status, blockers, next actions."},
+    {"number":"08","role":"SANDBOX","x":2920,"y":576,"width":520,"height":288,"prompt":"SANDBOX. Test safely. No production changes."},
+    {"number":"09","role":"SECURITY","x":2920,"y":864,"width":520,"height":288,"prompt":"SECURITY. Secrets blocked. Review safety gates."},
+    {"number":"10","role":"ORCHESTRATOR","x":2920,"y":1152,"width":520,"height":288,"prompt":"ORCHESTRATOR. Coordinate tasks. No autonomous apply."}
+  ]
+}

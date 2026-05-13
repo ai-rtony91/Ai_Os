@@ -1,0 +1,14 @@
+{
+  "profile_name": "CODEX_08_GRID_3440x1440",
+  "display_name": "CODEX_08",
+  "workers": [
+    {"number":"01","role":"DEVOPS","x":0,"y":0,"width":520,"height":360,"prompt":"DEVOPS. DRY_RUN first. No auto commit/push/deploy."},
+    {"number":"02","role":"TRADING_LAB","x":520,"y":0,"width":520,"height":360,"prompt":"TRADING LAB. Paper-only. No broker execution."},
+    {"number":"03","role":"VALIDATOR","x":0,"y":360,"width":520,"height":360,"prompt":"VALIDATOR. Check before APPLY."},
+    {"number":"04","role":"TELEMETRY","x":520,"y":360,"width":520,"height":360,"prompt":"TELEMETRY. Track startup and workflow."},
+    {"number":"05","role":"UI_UX","x":0,"y":720,"width":520,"height":360,"prompt":"UI/UX. Simple user mode. No clutter."},
+    {"number":"06","role":"DOCS","x":520,"y":720,"width":520,"height":360,"prompt":"DOCS. Keep factual notes and clean structure."},
+    {"number":"07","role":"REPORTING","x":0,"y":1080,"width":520,"height":360,"prompt":"REPORTING. EOD, status, blockers, next actions."},
+    {"number":"08","role":"SANDBOX","x":520,"y":1080,"width":520,"height":360,"prompt":"SANDBOX. Test safely. No production changes."}
+  ]
+}

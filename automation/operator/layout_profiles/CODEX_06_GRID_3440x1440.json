@@ -1,0 +1,12 @@
+{
+  "profile_name": "CODEX_06_GRID_3440x1440",
+  "display_name": "CODEX_06",
+  "workers": [
+    {"number":"01","role":"DEVOPS","x":0,"y":0,"width":620,"height":480,"prompt":"DEVOPS. DRY_RUN first. No auto commit/push/deploy."},
+    {"number":"02","role":"TRADING_LAB","x":620,"y":0,"width":620,"height":480,"prompt":"TRADING LAB. Paper-only. No broker execution."},
+    {"number":"03","role":"VALIDATOR","x":0,"y":480,"width":620,"height":480,"prompt":"VALIDATOR. Check before APPLY."},
+    {"number":"04","role":"TELEMETRY","x":620,"y":480,"width":620,"height":480,"prompt":"TELEMETRY. Track startup and workflow."},
+    {"number":"05","role":"UI_UX","x":0,"y":960,"width":620,"height":480,"prompt":"UI/UX. Simple user mode. No clutter."},
+    {"number":"06","role":"DOCS","x":620,"y":960,"width":620,"height":480,"prompt":"DOCS. Keep factual notes and clean structure."}
+  ]
+}
