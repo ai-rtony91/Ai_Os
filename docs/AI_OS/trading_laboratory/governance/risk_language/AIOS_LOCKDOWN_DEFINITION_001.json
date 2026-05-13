@@ -1,0 +1,21 @@
+{
+  "definition_id": "aios_lockdown_definition_001",
+  "terms": {
+    "LOCKDOWN": "A defensive paper-only state used when instability is severe enough to block promotion, suppress ranking, and require recovery evidence.",
+    "ELEVATED_RISK": "A risk state that requires caution, confidence suppression, or stronger confirmation.",
+    "PORTFOLIO_OVERLOAD": "A condition where concentration, correlation, or drawdown pressure threatens portfolio survivability.",
+    "SAFE": "A paper-only condition with no active critical warning, no execution leakage, and controlled risk pressure."
+  },
+  "portfolio_protection": [
+    "portfolio survivability prioritized over profit chasing",
+    "portfolio-first risk thinking",
+    "defensive architecture",
+    "cautious intelligence behavior"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

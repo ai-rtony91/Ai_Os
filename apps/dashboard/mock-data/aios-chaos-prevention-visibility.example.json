@@ -1,0 +1,29 @@
+{
+  "view_id": "aios_chaos_prevention_visibility_example",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "NO_EDGE",
+  "macro_state": "UNSTABLE",
+  "portfolio_state": "PORTFOLIO_OVERLOAD",
+  "replay_state": "FAILED",
+  "warning_state": "LOCKDOWN",
+  "freeze_triggered": true,
+  "lockdown_triggered": true,
+  "explanation_reason": "LOCKDOWN activated because edge failed replay, portfolio overload increased, and drawdown pressure became unstable.",
+  "visual_explanations": [
+    "why LOCKDOWN activated",
+    "why portfolio exposure reduced",
+    "why replay failed",
+    "why ranking dropped"
+  ],
+  "dashboard_concepts": [
+    "chaos prevention visibility",
+    "visible risk escalation",
+    "portfolio heat visibility",
+    "visibility reduces hidden chaos"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

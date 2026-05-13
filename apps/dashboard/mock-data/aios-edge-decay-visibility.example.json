@@ -1,0 +1,25 @@
+{
+  "surface_id": "aios_edge_decay_visibility_example",
+  "surface_name": "edge decay inspection",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "NORMAL",
+  "portfolio_state": "WATCH",
+  "replay_state": "FAILED",
+  "warning_state": "UNSTABLE",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "interaction_reason": "Edge decay inspection shows rolling expectancy and replay survival weakened.",
+  "decay_points": [
+    { "label": "Expectancy", "state": "WEAK_EDGE", "reason": "Rolling expectancy fell below watch threshold." },
+    { "label": "Replay", "state": "UNSTABLE", "reason": "Stress replay failed under volatility expansion." },
+    { "label": "Promotion", "state": "NO_EDGE", "reason": "Promotion remains blocked until edge re-proves itself." }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

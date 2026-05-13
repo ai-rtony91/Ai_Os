@@ -1,0 +1,25 @@
+{
+  "surface_id": "aios_risk_escalation_example",
+  "surface_name": "risk escalation playback",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "NO_EDGE",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "PORTFOLIO_OVERLOAD",
+  "replay_state": "FAILED",
+  "warning_state": "LOCKDOWN",
+  "freeze_triggered": true,
+  "lockdown_triggered": true,
+  "interaction_reason": "Risk escalation playback shows how WATCH became LOCKDOWN after replay failure and portfolio overload.",
+  "playback_steps": [
+    { "label": "WATCH", "state": "WATCH", "reason": "Initial instability detected." },
+    { "label": "UNSTABLE", "state": "UNSTABLE", "reason": "Replay failed and edge weakened." },
+    { "label": "LOCKDOWN", "state": "LOCKDOWN", "reason": "Portfolio overload and no-edge status require defensive lock." }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

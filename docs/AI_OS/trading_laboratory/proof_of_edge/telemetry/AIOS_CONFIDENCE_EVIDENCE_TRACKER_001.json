@@ -1,0 +1,28 @@
+{
+  "tracker_id": "aios_confidence_evidence_tracker_001",
+  "tracker_type": "CONFIDENCE_EVIDENCE",
+  "proof_state": "CONFIDENCE_RESTRICTED",
+  "confidence_promotion_rules": [
+    "confidence cannot increase without evidence",
+    "replay validation required",
+    "minimum sample size required",
+    "rolling stability required",
+    "regime reliability required",
+    "survivability audit required",
+    "drawdown pressure must remain acceptable"
+  ],
+  "edge_state": "WEAK_EDGE",
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "stability_state": "WATCH",
+  "drawdown_pressure": 0.38,
+  "replay_survivability": "PARTIAL",
+  "regime_reliability": "WATCH",
+  "portfolio_survivability": "SAFE",
+  "freeze_triggered": true,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

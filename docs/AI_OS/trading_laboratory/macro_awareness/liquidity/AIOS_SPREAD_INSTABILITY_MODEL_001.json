@@ -1,0 +1,33 @@
+{
+  "model_id": "aios_spread_instability_model_001",
+  "model_type": "SPREAD_INSTABILITY_AWARENESS",
+  "macro_state": "LIQUIDITY_WARNING",
+  "spread_state": "WIDENING",
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "SPREAD_RISK",
+    "macro_state": "LIQUIDITY_WARNING",
+    "volatility_state": "WATCH",
+    "liquidity_state": "STRESSED",
+    "spread_state": "WIDENING",
+    "confidence_state": "CONFIDENCE_REDUCED",
+    "portfolio_state": "REDUCED_EXPOSURE",
+    "freeze_triggered": false,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

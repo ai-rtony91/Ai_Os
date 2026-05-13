@@ -1,0 +1,37 @@
+{
+  "model_id": "aios_session_transition_event_model_001",
+  "model_type": "SESSION_TRANSITION_AWARENESS",
+  "macro_state": "ELEVATED_RISK",
+  "event_awareness": [
+    "session overlap awareness",
+    "pre-event caution window",
+    "post-event stabilization window"
+  ],
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "SESSION_TRANSITION",
+    "macro_state": "ELEVATED_RISK",
+    "volatility_state": "WATCH",
+    "liquidity_state": "TRANSITIONAL",
+    "spread_state": "WATCH",
+    "confidence_state": "CONFIDENCE_REDUCED",
+    "portfolio_state": "WATCH",
+    "freeze_triggered": false,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

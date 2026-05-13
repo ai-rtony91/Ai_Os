@@ -1,0 +1,44 @@
+{
+  "index_id": "aios_canonical_definition_index_001",
+  "purpose": "Machine-readable index of canonical AI_OS trading intelligence definitions.",
+  "definitions": [
+    "DANGEROUS",
+    "SAFE",
+    "UNSTABLE",
+    "STABLE",
+    "GOOD_EDGE",
+    "WEAK_EDGE",
+    "NO_EDGE",
+    "RECOVERY",
+    "FAKE_RECOVERY",
+    "LOCKDOWN",
+    "PORTFOLIO_OVERLOAD",
+    "CONFIDENCE_FREEZE"
+  ],
+  "semantic_categories": [
+    "RISK",
+    "CONFIDENCE",
+    "EDGE",
+    "REGIME",
+    "PORTFOLIO",
+    "EXECUTION",
+    "SURVIVABILITY",
+    "INSTABILITY",
+    "RECOVERY",
+    "MACRO"
+  ],
+  "governance_concepts": [
+    "shared meaning consistency",
+    "cross-module terminology alignment",
+    "validation-reference compatibility",
+    "adaptive reasoning anchors",
+    "governance memory persistence",
+    "machine-readable definitions",
+    "skepticism consistency",
+    "survivability-first semantics"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

@@ -1,0 +1,23 @@
+{
+  "alert_id": "aios_chaos_alerts_example",
+  "warning_state": "WATCH",
+  "alerts": [
+    {
+      "label": "Edge decay visibility",
+      "state": "WEAK_EDGE",
+      "reason": "Rolling stability weakened."
+    },
+    {
+      "label": "Chaos-prevention visibility",
+      "state": "WATCH",
+      "reason": "Prevent promotion until replay and edge evidence improve."
+    }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

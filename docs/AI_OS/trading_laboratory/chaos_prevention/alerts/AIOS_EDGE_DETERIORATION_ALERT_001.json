@@ -1,0 +1,48 @@
+{
+  "alert_id": "aios_edge_deterioration_alert_001",
+  "alert_type": "EDGE_DETERIORATION",
+  "warning_state": "WATCH",
+  "warning_states_supported": [
+    "NORMAL",
+    "CAUTION",
+    "WATCH",
+    "UNSTABLE",
+    "CRITICAL",
+    "LOCKDOWN"
+  ],
+  "detection_logic": [
+    "detect rolling stability degradation",
+    "detect unstable edge transitions",
+    "detect repeated weak-edge behavior"
+  ],
+  "prevention_actions": [
+    "freeze confidence increases",
+    "reduce ranking priority",
+    "reduce simulated exposure",
+    "reduce recommended paper size",
+    "require stronger confirmations",
+    "block unstable strategy promotion",
+    "trigger WATCH state",
+    "trigger LOCKDOWN state during severe instability"
+  ],
+  "telemetry": {
+    "warning_state": "WATCH",
+    "edge_state": "WEAK_EDGE",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "drawdown_pressure": 0.42,
+    "volatility_state": "NORMAL",
+    "portfolio_state": "SAFE",
+    "correlation_risk": 0.18,
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "blocked_reason": "edge deterioration requires additional paper evidence before confidence can recover",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED"
+}
+

@@ -1,0 +1,27 @@
+{
+  "model_id": "aios_portfolio_survivability_model_001",
+  "model_type": "PORTFOLIO_SURVIVABILITY",
+  "proof_state": "PARTIALLY_VERIFIED",
+  "verification_logic": [
+    "verify portfolio survivability",
+    "verify drawdown survivability",
+    "verify replay survivability",
+    "restrict unstable promotion"
+  ],
+  "portfolio_survivability": "SAFE",
+  "portfolio_stress_state": "WATCH",
+  "correlation_risk": 0.24,
+  "drawdown_pressure": 0.27,
+  "edge_state": "WEAK_EDGE",
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "stability_state": "WATCH",
+  "replay_survivability": "PARTIAL",
+  "regime_reliability": "WATCH",
+  "freeze_triggered": true,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

@@ -1,0 +1,51 @@
+{
+  "classifier_id": "aios_macro_regime_classifier_001",
+  "classifier_type": "MACRO_REGIME_CLASSIFIER",
+  "macro_states_supported": [
+    "NORMAL",
+    "ELEVATED_RISK",
+    "HIGH_IMPACT_EVENT",
+    "VOLATILITY_EXPANSION",
+    "LIQUIDITY_WARNING",
+    "RISK_OFF",
+    "UNSTABLE",
+    "LOCKDOWN"
+  ],
+  "classification_inputs": [
+    "event_risk_state",
+    "volatility_state",
+    "liquidity_state",
+    "spread_state",
+    "portfolio_state",
+    "session transition",
+    "cross-market stress behavior",
+    "macro uncertainty environment"
+  ],
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "MACRO_WATCH",
+    "macro_state": "ELEVATED_RISK",
+    "volatility_state": "WATCH",
+    "liquidity_state": "WATCH",
+    "spread_state": "NORMAL",
+    "confidence_state": "CONFIDENCE_REDUCED",
+    "portfolio_state": "WATCH",
+    "freeze_triggered": false,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

@@ -1,0 +1,29 @@
+{
+  "timeline_id": "aios_confidence_timeline_example",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "events": [
+    {
+      "label": "Signal reviewed",
+      "state": "CONFIDENCE_ACTIVE",
+      "reason": "Paper-only signal entered review."
+    },
+    {
+      "label": "Replay stress",
+      "state": "WATCH",
+      "reason": "Replay survivability was partial."
+    },
+    {
+      "label": "Freeze",
+      "state": "CONFIDENCE_FROZEN",
+      "reason": "Confidence freeze visibility active until edge re-proves itself."
+    }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

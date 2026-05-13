@@ -1,0 +1,23 @@
+{
+  "model_id": "aios_confidence_promotion_rules_001",
+  "model_type": "CONFIDENCE_PROMOTION_GOVERNANCE",
+  "confidence_promotion_rules": [
+    "confidence cannot increase without evidence",
+    "replay validation required",
+    "minimum sample size required",
+    "rolling stability required",
+    "regime reliability required",
+    "survivability audit required",
+    "drawdown pressure must remain acceptable"
+  ],
+  "proof_state": "CONFIDENCE_RESTRICTED",
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "promotion_allowed": false,
+  "blocked_reason": "confidence promotion is restricted until paper evidence passes proof-of-edge requirements",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

@@ -1,0 +1,33 @@
+{
+  "model_id": "aios_volatility_expansion_model_001",
+  "model_type": "VOLATILITY_EXPANSION_AWARENESS",
+  "macro_state": "VOLATILITY_EXPANSION",
+  "volatility_state": "EXPANDING",
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "VOLATILITY_RISK",
+    "macro_state": "VOLATILITY_EXPANSION",
+    "volatility_state": "EXPANDING",
+    "liquidity_state": "WATCH",
+    "spread_state": "WATCH",
+    "confidence_state": "CONFIDENCE_REDUCED",
+    "portfolio_state": "REDUCED_EXPOSURE",
+    "freeze_triggered": false,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

@@ -1,0 +1,13 @@
+{
+  "term": "NO_EDGE",
+  "category": "EDGE",
+  "definition": "A condition where paper evidence does not support a measurable trading advantage.",
+  "risk_implications": ["block strategy promotion", "reduce confidence", "prevent paper priority"],
+  "related_terms": ["WEAK_EDGE", "DANGEROUS", "LOCKDOWN"],
+  "validation_triggers": ["expectancy_negative", "profit_factor_unacceptable", "drawdown_pressure_high"],
+  "behavioral_effects": ["block trade recommendation", "require redesign or more evidence"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

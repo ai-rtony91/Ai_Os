@@ -1,0 +1,29 @@
+{
+  "registry_id": "aios_risk_language_registry_001",
+  "purpose": "Cross-module registry for risk language consistency.",
+  "risk_terms": [
+    "DANGEROUS",
+    "SAFE",
+    "UNSTABLE",
+    "STABLE",
+    "LOCKDOWN",
+    "PORTFOLIO_OVERLOAD"
+  ],
+  "edge_terms": [
+    "GOOD_EDGE",
+    "WEAK_EDGE",
+    "NO_EDGE"
+  ],
+  "confidence_terms": [
+    "CONFIDENCE_FREEZE"
+  ],
+  "recovery_terms": [
+    "RECOVERY",
+    "FAKE_RECOVERY"
+  ],
+  "alignment_rule": "Modules must use these definitions as canonical semantic anchors.",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

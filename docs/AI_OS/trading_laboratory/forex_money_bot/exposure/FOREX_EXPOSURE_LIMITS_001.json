@@ -1,0 +1,29 @@
+{
+  "artifact": "FOREX_EXPOSURE_LIMITS_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_exposure",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "exposure_states": [
+    "SAFE",
+    "WATCH",
+    "HIGH_EXPOSURE",
+    "LOCKDOWN"
+  ],
+  "limits": {
+    "max_pair_exposure_placeholder": 0.0,
+    "max_simultaneous_trades_placeholder": 0,
+    "correlation_conflict_detection": true,
+    "directional_exposure_tracking": true,
+    "session_concentration_tracking": true,
+    "pair_duplication_prevention": true,
+    "exposure_state": "SAFE",
+    "exposure_score": 0.0,
+    "paper_only_status": "PAPER_ONLY"
+  }
+}

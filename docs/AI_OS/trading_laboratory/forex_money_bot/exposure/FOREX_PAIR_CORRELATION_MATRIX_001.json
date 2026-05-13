@@ -1,0 +1,35 @@
+{
+  "artifact": "FOREX_PAIR_CORRELATION_MATRIX_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_exposure",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "exposure_states": [
+    "SAFE",
+    "WATCH",
+    "HIGH_EXPOSURE",
+    "LOCKDOWN"
+  ],
+  "correlation_matrix": [
+    {
+      "pair_a": "EUR_USD",
+      "pair_b": "GBP_USD",
+      "correlation_risk": 0.62,
+      "exposure_state": "WATCH",
+      "paper_only_status": "PAPER_ONLY"
+    },
+    {
+      "pair_a": "AUD_USD",
+      "pair_b": "NZD_USD",
+      "correlation_risk": 0.7,
+      "exposure_state": "HIGH_EXPOSURE",
+      "paper_only_status": "PAPER_ONLY"
+    }
+  ],
+  "blocked_reason": "correlation matrix is paper-only"
+}

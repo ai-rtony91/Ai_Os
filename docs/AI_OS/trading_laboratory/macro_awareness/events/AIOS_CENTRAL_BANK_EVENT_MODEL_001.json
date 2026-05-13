@@ -1,0 +1,47 @@
+{
+  "model_id": "aios_central_bank_event_model_001",
+  "model_type": "CENTRAL_BANK_EVENT_PRESSURE",
+  "macro_state": "HIGH_IMPACT_EVENT",
+  "event_awareness": [
+    "FOMC placeholder",
+    "ECB placeholder",
+    "BOJ placeholder",
+    "pre-event caution window",
+    "post-event stabilization window"
+  ],
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "CENTRAL_BANK_PRESSURE",
+    "macro_state": "HIGH_IMPACT_EVENT",
+    "volatility_state": "VOLATILITY_EXPANSION",
+    "liquidity_state": "LIQUIDITY_WARNING",
+    "spread_state": "WIDENING",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "portfolio_state": "REDUCED_EXPOSURE",
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "architecture_principles": [
+    "macro awareness informs risk",
+    "macro awareness does not directly execute trades",
+    "no LLM in direct live order path",
+    "no autonomous headline trading",
+    "market context modifies confidence only",
+    "execution isolation remains permanent"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

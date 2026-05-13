@@ -1,0 +1,28 @@
+{
+  "view_id": "aios_edge_verification_example",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "NORMAL",
+  "portfolio_state": "SAFE",
+  "replay_state": "REPLAY_REQUIRED",
+  "warning_state": "WATCH",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "explanation_reason": "Edge remains weak because sample size, replay survivability, and regime reliability are not strong enough for confidence promotion.",
+  "visual_explanations": [
+    "why edge degraded",
+    "why confidence froze",
+    "why replay failed"
+  ],
+  "dashboard_concepts": [
+    "explainable intelligence",
+    "edge decay visibility",
+    "regime reliability visibility",
+    "replay survivability visibility"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

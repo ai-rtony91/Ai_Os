@@ -1,0 +1,29 @@
+{
+  "replay_id": "aios_replay_workbench_example",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "replay_timeline": [
+    {
+      "step": "Signal",
+      "state": "GOOD_EDGE",
+      "reason": "Paper signal passed initial review."
+    },
+    {
+      "step": "Stress",
+      "state": "UNSTABLE",
+      "reason": "Volatility stress reduced replay survivability."
+    },
+    {
+      "step": "Action",
+      "state": "WATCH",
+      "reason": "Next Safe Action visibility recommends more paper review."
+    }
+  ],
+  "replay_scrubber_placeholder": "Paper replay scrubber placeholder only; no autoplay behavior.",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

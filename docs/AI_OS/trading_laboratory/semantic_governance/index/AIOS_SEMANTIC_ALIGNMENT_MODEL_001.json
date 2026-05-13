@@ -1,0 +1,29 @@
+{
+  "model_id": "aios_semantic_alignment_model_001",
+  "purpose": "Keep risk, confidence, portfolio, edge, macro, and execution terms aligned across AI_OS trading intelligence modules.",
+  "alignment_targets": [
+    "internal consistency",
+    "validation consistency",
+    "portfolio reasoning consistency",
+    "risk interpretation consistency",
+    "confidence interpretation consistency",
+    "survivability philosophy consistency"
+  ],
+  "semantic_categories": [
+    "RISK",
+    "CONFIDENCE",
+    "EDGE",
+    "REGIME",
+    "PORTFOLIO",
+    "EXECUTION",
+    "SURVIVABILITY",
+    "INSTABILITY",
+    "RECOVERY",
+    "MACRO"
+  ],
+  "behavioral_rule": "When a term maps to danger, weak edge, fake recovery, overload, or confidence freeze, the system must prefer survivability over promotion.",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

@@ -1,0 +1,38 @@
+{
+  "view_id": "aios_portfolio_heatmap_example",
+  "confidence_state": "CONFIDENCE_ACTIVE",
+  "edge_state": "GOOD_EDGE",
+  "macro_state": "NORMAL",
+  "portfolio_state": "PORTFOLIO_OVERLOAD",
+  "replay_state": "PASSED",
+  "warning_state": "WATCH",
+  "freeze_triggered": false,
+  "lockdown_triggered": false,
+  "explanation_reason": "Portfolio exposure was reduced because pair concentration and correlation heat increased despite acceptable edge.",
+  "portfolio_heat": [
+    {
+      "pair": "EUR_USD",
+      "heat_state": "ELEVATED_RISK",
+      "exposure_note": "correlated exposure watch"
+    },
+    {
+      "pair": "GBP_USD",
+      "heat_state": "WATCH",
+      "exposure_note": "session concentration watch"
+    }
+  ],
+  "visual_explanations": [
+    "why portfolio exposure reduced",
+    "why ranking dropped"
+  ],
+  "dashboard_concepts": [
+    "portfolio heat visibility",
+    "operator-readable survivability",
+    "visible risk escalation"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

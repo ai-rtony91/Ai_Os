@@ -1,0 +1,13 @@
+{
+  "term": "UNSTABLE",
+  "category": "INSTABILITY",
+  "definition": "A condition where edge, confidence, regime behavior, macro context, or portfolio pressure is unreliable.",
+  "risk_implications": ["reduce confidence", "freeze promotion", "require stronger confirmations"],
+  "related_terms": ["DANGEROUS", "WEAK_EDGE", "FAKE_RECOVERY", "LOCKDOWN"],
+  "validation_triggers": ["rolling_stability_degraded", "volatility_spike", "regime_transition_unreliable"],
+  "behavioral_effects": ["move to WATCH", "reduce ranking priority", "block confidence increases"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

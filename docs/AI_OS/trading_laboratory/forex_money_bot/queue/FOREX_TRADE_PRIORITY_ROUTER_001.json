@@ -1,0 +1,31 @@
+{
+  "artifact": "FOREX_TRADE_PRIORITY_ROUTER_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_queue",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "routing_rules": {
+    "trade_queue_ordering": true,
+    "rank_strongest_opportunities_first": true,
+    "suppress_weak_opportunities": true,
+    "drawdown_pressure_reduction": true,
+    "portfolio_exposure_awareness": true,
+    "paper_only_status": "PAPER_ONLY",
+    "blocked_reason": "router ranks paper opportunities only"
+  },
+  "route_outputs": [
+    "TOP_PRIORITY",
+    "MEDIUM_PRIORITY",
+    "LOW_PRIORITY",
+    "BLOCK_TRADE",
+    "WAIT_FOR_BETTER_SETUP",
+    "REDUCE_EXPOSURE",
+    "REDUCE_SIZE",
+    "ALLOW_PAPER_ENTRY"
+  ]
+}

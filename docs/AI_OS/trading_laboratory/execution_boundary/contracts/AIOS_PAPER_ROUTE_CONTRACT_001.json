@@ -1,0 +1,37 @@
+{
+  "artifact": "AIOS_PAPER_ROUTE_CONTRACT_001",
+  "phase": "15",
+  "stage": "15.7",
+  "contract_type": "paper_route",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "execution_permission": "PAPER_ALLOWED",
+  "broker_api_status": "BROKER_API_BLOCKED",
+  "webhook_execution_status": "WEBHOOK_EXECUTION_BLOCKED",
+  "autonomous_execution_status": "AUTONOMOUS_EXECUTION_BLOCKED",
+  "real_funds_status": "REAL_FUNDS_BLOCKED",
+  "blocked_execution_states": [
+    "LIVE_ORDER_BLOCKED",
+    "BROKER_API_BLOCKED",
+    "AUTONOMOUS_EXECUTION_BLOCKED",
+    "WEBHOOK_EXECUTION_BLOCKED",
+    "REAL_FUNDS_BLOCKED"
+  ],
+  "execution_permissions": [
+    "PAPER_ALLOWED",
+    "LIVE_BLOCKED",
+    "SIMULATION_ALLOWED",
+    "BROKER_DISCONNECTED"
+  ],
+  "paper_route": {
+    "signal_id": "aios_paper_route_contract_001",
+    "market": "forex",
+    "pair_or_asset": "EUR_USD",
+    "confidence_score": 78,
+    "recommendation": "SIMULATE_PAPER_ROUTE",
+    "paper_only_status": "PAPER_ONLY",
+    "execution_permission": "PAPER_ALLOWED",
+    "live_execution_status": "BLOCKED",
+    "blocked_reason": "paper route may simulate only; no broker or live order path"
+  }
+}

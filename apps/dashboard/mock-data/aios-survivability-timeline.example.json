@@ -1,0 +1,25 @@
+{
+  "surface_id": "aios_survivability_timeline_example",
+  "surface_name": "survivability timeline",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "PORTFOLIO_OVERLOAD",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "warning_state": "WATCH",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "interaction_reason": "Survivability timeline shows portfolio pressure and macro risk limiting confidence.",
+  "timeline": [
+    { "label": "Macro", "state": "ELEVATED_RISK", "reason": "Event risk placeholder increased." },
+    { "label": "Portfolio", "state": "PORTFOLIO_OVERLOAD", "reason": "Correlation heat increased." },
+    { "label": "Survival", "state": "WATCH", "reason": "Paper-only survivability requires reduced exposure." }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

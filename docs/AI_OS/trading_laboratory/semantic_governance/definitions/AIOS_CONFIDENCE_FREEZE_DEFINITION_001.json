@@ -1,0 +1,13 @@
+{
+  "term": "CONFIDENCE_FREEZE",
+  "category": "CONFIDENCE",
+  "definition": "A governance state where confidence may fall but cannot rise until enough paper evidence proves recovery.",
+  "risk_implications": ["prevent fast re-promotion", "require stronger confirmations", "maintain skepticism"],
+  "related_terms": ["WEAK_EDGE", "FAKE_RECOVERY", "RECOVERY"],
+  "validation_triggers": ["stability_score_low", "drawdown_pressure_high", "sample_size_below_minimum"],
+  "behavioral_effects": ["freeze confidence increases", "reduce simulated size", "require recovery evidence"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

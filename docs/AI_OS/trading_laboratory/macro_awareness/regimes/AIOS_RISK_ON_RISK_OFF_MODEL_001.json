@@ -1,0 +1,33 @@
+{
+  "model_id": "aios_risk_on_risk_off_model_001",
+  "model_type": "RISK_ON_RISK_OFF_CONTEXT",
+  "macro_state": "RISK_OFF",
+  "cross_market_stress_behavior": "paper-only risk context placeholder",
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "CROSS_MARKET_STRESS",
+    "macro_state": "RISK_OFF",
+    "volatility_state": "VOLATILITY_EXPANSION",
+    "liquidity_state": "LIQUIDITY_WARNING",
+    "spread_state": "WATCH",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "portfolio_state": "REDUCED_EXPOSURE",
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

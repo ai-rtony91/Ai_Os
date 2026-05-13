@@ -1,0 +1,19 @@
+{
+  "definition_id": "aios_recovery_definition_001",
+  "terms": {
+    "RECOVERY": "A paper-only state where prior instability improves, but trust remains evidence-gated until enough stable samples accumulate.",
+    "FAKE_RECOVERY": "A short-term improvement that appears healthy before paper evidence proves stability."
+  },
+  "confidence_rules": [
+    "confidence rises slowly and falls quickly",
+    "confidence hysteresis",
+    "evidence-gated trust",
+    "edge validation required before confidence increases"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

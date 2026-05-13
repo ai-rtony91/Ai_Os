@@ -1,0 +1,25 @@
+{
+  "artifact": "FOREX_VOLATILITY_WEIGHTING_MODEL_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_ranking",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "volatility_weighting": {
+    "portfolio_confidence_score": 0.0,
+    "pair_priority_score": 0.0,
+    "volatility_weight": 1.0,
+    "drawdown_pressure": 0.0,
+    "exposure_score": 0.0,
+    "correlation_risk": 0.0,
+    "queue_rank": 0,
+    "paper_only_status": "PAPER_ONLY",
+    "high_volatility_action": "REDUCE_SIZE",
+    "low_volatility_action": "WAIT_FOR_BETTER_SETUP",
+    "balanced_volatility_action": "ALLOW_PAPER_ENTRY"
+  }
+}

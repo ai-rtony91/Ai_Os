@@ -1,0 +1,30 @@
+{
+  "artifact": "FOREX_PORTFOLIO_RISK_MODEL_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_portfolio",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "portfolio_controls": {
+    "max_pair_exposure_placeholder": 0.0,
+    "max_simultaneous_trades_placeholder": 0,
+    "correlation_conflict_detection": true,
+    "directional_exposure_tracking": true,
+    "session_concentration_tracking": true,
+    "pair_duplication_prevention": true,
+    "exposure_state": "WATCH",
+    "portfolio_confidence_score": 0.0,
+    "pair_priority_score": 0.0,
+    "volatility_weight": 1.0,
+    "drawdown_pressure": 0.0,
+    "exposure_score": 0.0,
+    "correlation_risk": 0.0,
+    "queue_rank": 0,
+    "paper_only_status": "PAPER_ONLY",
+    "blocked_reason": "portfolio risk model is paper-only"
+  }
+}

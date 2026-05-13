@@ -1,0 +1,35 @@
+{
+  "artifact": "FOREX_CONFIDENCE_ADJUSTMENT_001",
+  "phase": "15",
+  "stage": "15.4",
+  "mode": "paper_only_recommendation",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_access_status": "BLOCKED",
+  "external_api_status": "BLOCKED",
+  "internet_learning_status": "BLOCKED",
+  "self_modifying_code_status": "BLOCKED",
+  "auto_deployment_status": "BLOCKED",
+  "confidence_adjustment_model": {
+    "rolling_win_rate": 0.0,
+    "rolling_expectancy": 0.0,
+    "strategy_strength_score": 0.0,
+    "pair_stability_score": 0.0,
+    "confidence_adjustment": 0.0,
+    "regime_reliability_score": 0.0,
+    "session_efficiency_score": 0.0,
+    "drawdown_pressure": 0.0,
+    "paper_only_status": "PAPER_ONLY",
+    "increase_confidence_rule": "winning conditions may increase paper confidence only",
+    "reduce_confidence_rule": "repeated losing conditions reduce paper confidence",
+    "blocked_reason": "confidence adjustment cannot enable execution"
+  },
+  "adaptive_outputs": [
+    "FAVORABLE_CONDITION",
+    "UNFAVORABLE_CONDITION",
+    "REDUCE_SIZE",
+    "INCREASE_CONFIDENCE",
+    "BLOCK_TRADE",
+    "WAIT_FOR_CONFIRMATION"
+  ]
+}

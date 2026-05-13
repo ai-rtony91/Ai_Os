@@ -1,0 +1,46 @@
+{
+  "view_id": "aios_confidence_visibility_example",
+  "visible_states": [
+    "CONFIDENCE_ACTIVE",
+    "CONFIDENCE_FROZEN",
+    "WATCH",
+    "UNSTABLE",
+    "LOCKDOWN",
+    "GOOD_EDGE",
+    "WEAK_EDGE",
+    "NO_EDGE",
+    "ELEVATED_RISK",
+    "PORTFOLIO_OVERLOAD"
+  ],
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "WATCH",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "warning_state": "WATCH",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "explanation_reason": "Confidence froze because rolling stability weakened and edge has not re-proven itself in paper replay.",
+  "visual_explanations": [
+    "why confidence changed",
+    "why confidence froze",
+    "why ranking dropped",
+    "why edge degraded",
+    "why replay failed",
+    "why macro risk increased",
+    "why WATCH activated",
+    "why LOCKDOWN activated",
+    "why portfolio exposure reduced"
+  ],
+  "dashboard_concepts": [
+    "explainable intelligence",
+    "readable confidence state",
+    "confidence freeze timeline",
+    "edge decay visibility"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

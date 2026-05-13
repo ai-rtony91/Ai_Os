@@ -1,0 +1,26 @@
+{
+  "engine_id": "aios_rolling_stability_engine_001",
+  "engine_type": "ROLLING_STABILITY",
+  "proof_state": "PARTIALLY_VERIFIED",
+  "verification_logic": [
+    "verify rolling stability",
+    "verify rolling expectancy",
+    "detect edge decay",
+    "detect fake recovery"
+  ],
+  "rolling_stability_score": 0.66,
+  "stability_state": "WATCH",
+  "edge_state": "WEAK_EDGE",
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "drawdown_pressure": 0.34,
+  "replay_survivability": "PARTIAL",
+  "regime_reliability": "WATCH",
+  "portfolio_survivability": "SAFE",
+  "freeze_triggered": true,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

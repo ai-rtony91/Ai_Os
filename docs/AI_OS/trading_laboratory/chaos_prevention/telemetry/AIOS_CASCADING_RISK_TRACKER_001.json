@@ -1,0 +1,30 @@
+{
+  "tracker_id": "aios_cascading_risk_tracker_001",
+  "tracked_risks": [
+    "edge deterioration early",
+    "fake recoveries",
+    "abnormal volatility",
+    "unstable portfolio behavior",
+    "confidence instability",
+    "cascading drawdown pressure",
+    "regime instability",
+    "ranking degradation"
+  ],
+  "warning_state": "CRITICAL",
+  "edge_state": "NO_EDGE",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "drawdown_pressure": 0.84,
+  "volatility_state": "HIGH_VOLATILITY",
+  "portfolio_state": "HIGH_PRESSURE",
+  "correlation_risk": 0.74,
+  "ranking_state": "DEGRADED",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED"
+}
+

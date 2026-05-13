@@ -1,0 +1,25 @@
+{
+  "scenario_id": "AIOS_REGIME_TRANSITION_SCENARIO_001",
+  "scenario_type": "regime_transition",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "scenario_states": ["NORMAL", "WATCH", "UNSTABLE", "EDGE_COLLAPSE", "DRAWDOWN_CRITICAL", "RECOVERY_REQUIRED", "CONFIDENCE_FROZEN"],
+  "stress_reactions": ["reduce_confidence", "freeze_confidence_increases", "reduce_ranking_priority", "reduce_simulated_size", "move_to_watch_state", "block_unstable_edge_promotion", "require_recovery_evidence"],
+  "telemetry": {
+    "scenario_id": "AIOS_REGIME_TRANSITION_SCENARIO_001",
+    "scenario_type": "regime_transition",
+    "stability_score": 49,
+    "drawdown_pressure": 0.24,
+    "edge_state": "WATCH",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "ranking_state": "WAIT_FOR_CONFIRMATION",
+    "portfolio_state": "WATCH",
+    "freeze_triggered": true,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "blocked_reason": "regime transition requires confirmation"
+}

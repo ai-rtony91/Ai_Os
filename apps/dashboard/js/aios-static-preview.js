@@ -87,6 +87,23 @@ const tradingLabPaperRunnerFixturePath = "mock-data/trading-lab-paper-runner.exa
 const aiosOrchestrationControlRoomFixturePath = "mock-data/aios-orchestration-control-room.example.json";
 const paperBotCoreFixturePath = "mock-data/paper-bot-core.example.json";
 const tradingLabWindowSystemFixturePath = "mock-data/trading-lab-window-system.example.json";
+const aiosOperatorWorkbenchFixturePath = "mock-data/aios-operator-workbench.example.json";
+const aiosConfidenceTimelineFixturePath = "mock-data/aios-confidence-timeline.example.json";
+const aiosPortfolioHeatFixturePath = "mock-data/aios-portfolio-heat.example.json";
+const aiosMacroOverlayFixturePath = "mock-data/aios-macro-overlay.example.json";
+const aiosChaosAlertsFixturePath = "mock-data/aios-chaos-alerts.example.json";
+const aiosReplayWorkbenchFixturePath = "mock-data/aios-replay-workbench.example.json";
+const aiosFreezeTimelineFixturePath = "mock-data/aios-freeze-timeline.example.json";
+const aiosEdgeDecayVisibilityFixturePath = "mock-data/aios-edge-decay-visibility.example.json";
+const aiosSurvivabilityTimelineFixturePath = "mock-data/aios-survivability-timeline.example.json";
+const aiosReplayScenariosFixturePath = "mock-data/aios-replay-scenarios.example.json";
+const aiosRiskEscalationFixturePath = "mock-data/aios-risk-escalation.example.json";
+const aiosNextSafeActionFlowFixturePath = "mock-data/aios-next-safe-action-flow.example.json";
+const aiosOperatorGuidanceFixturePath = "mock-data/aios-operator-guidance.example.json";
+const aiosSurvivabilityGuidanceFixturePath = "mock-data/aios-survivability-guidance.example.json";
+const aiosConfidenceGuidanceFixturePath = "mock-data/aios-confidence-guidance.example.json";
+const aiosRiskReductionGuidanceFixturePath = "mock-data/aios-risk-reduction-guidance.example.json";
+const aiosNextSafeActionGuidanceFixturePath = "mock-data/aios-next-safe-action-guidance.example.json";
 const lifetimeTelemetryFixturePath = "mock-data/lifetime-telemetry-fixture.example.json";
 const personalGalleryManifestPath = "private-media/service-gallery/gallery.local.json";
 const youtubeRadioTracks = [
@@ -1931,7 +1948,220 @@ function createTradingLabAdvancedDiagnostics(items = []) {
   return details;
 }
 
-function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null, phase28HandoffData = null, phase23NormalizationData = null, phase25LatencyData = null, paperTradingBotStatusData = null) {
+function createOperatorWorkbenchMetric(label, value, reason = "") {
+  const item = document.createElement("div");
+  item.className = "operator-workbench-metric";
+  const key = document.createElement("span");
+  key.textContent = label;
+  const state = document.createElement("strong");
+  state.textContent = value || "UNKNOWN";
+  item.append(key, state);
+  if (reason) {
+    const note = document.createElement("small");
+    note.textContent = reason;
+    item.append(note);
+  }
+  return item;
+}
+
+function createOperatorWorkbenchList(title, items = [], valueKey = "state") {
+  const panel = document.createElement("div");
+  panel.className = "operator-workbench-panel";
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+  const list = document.createElement("ul");
+  list.className = "operator-workbench-list";
+  items.slice(0, 3).forEach((item) => {
+    const row = document.createElement("li");
+    const label = document.createElement("span");
+    label.textContent = item.label || item.step || item.pair || "State";
+    const state = document.createElement("b");
+    state.textContent = item[valueKey] || item.state || item.heat_state || "WATCH";
+    row.append(label, state);
+    if (item.reason) {
+      const reason = document.createElement("small");
+      reason.textContent = item.reason;
+      row.append(reason);
+    }
+    list.append(row);
+  });
+  panel.append(heading, list);
+  return panel;
+}
+
+function createInteractiveSurfaceDetails(title, data = {}, items = []) {
+  const details = document.createElement("details");
+  details.className = "interactive-surface";
+  const summary = document.createElement("summary");
+  const label = document.createElement("strong");
+  label.textContent = title;
+  const state = document.createElement("span");
+  state.textContent = data.warning_state || data.confidence_state || data.edge_state || data.replay_state || "WATCH";
+  summary.append(label, state);
+
+  const reason = document.createElement("p");
+  reason.textContent = data.interaction_reason || data.replay_scrubber_placeholder || "Paper-only interaction reveals depth without execution controls.";
+
+  const list = document.createElement("ul");
+  list.className = "operator-workbench-list";
+  items.slice(0, 4).forEach((item) => {
+    const row = document.createElement("li");
+    const itemLabel = document.createElement("span");
+    itemLabel.textContent = item.label || item.step || "Interaction";
+    const itemState = document.createElement("b");
+    itemState.textContent = item.state || "WATCH";
+    row.append(itemLabel, itemState);
+    if (item.reason) {
+      const itemReason = document.createElement("small");
+      itemReason.textContent = item.reason;
+      row.append(itemReason);
+    }
+    list.append(row);
+  });
+
+  details.append(summary, reason, list);
+  return details;
+}
+
+function renderInteractiveSurfaces(freezeData = {}, edgeDecayData = {}, survivabilityData = {}, replayScenariosData = {}, riskEscalationData = {}, nextSafeActionData = {}) {
+  const section = document.createElement("section");
+  section.className = "interactive-surfaces";
+  section.setAttribute("aria-label", "Interactive intelligence surfaces");
+
+  const head = document.createElement("div");
+  head.className = "interactive-surfaces-head";
+  const title = document.createElement("strong");
+  title.textContent = "Interactive Intelligence Surfaces";
+  const note = document.createElement("span");
+  note.textContent = "Compact drilldowns only - no autoplay, broker controls, execution controls, or hidden live routing.";
+  head.append(title, note);
+
+  const grid = document.createElement("div");
+  grid.className = "interactive-surfaces-grid";
+  grid.append(
+    createInteractiveSurfaceDetails("Confidence freeze timeline", freezeData, freezeData.events || []),
+    createInteractiveSurfaceDetails("Edge decay inspection", edgeDecayData, edgeDecayData.decay_points || []),
+    createInteractiveSurfaceDetails("Survivability timeline", survivabilityData, survivabilityData.timeline || []),
+    createInteractiveSurfaceDetails("Replay scenario switching", replayScenariosData, replayScenariosData.scenarios || []),
+    createInteractiveSurfaceDetails("Risk escalation playback", riskEscalationData, riskEscalationData.playback_steps || []),
+    createInteractiveSurfaceDetails("Next Safe Action", nextSafeActionData, nextSafeActionData.next_safe_actions || [])
+  );
+
+  section.append(head, grid);
+  return section;
+}
+
+function createGuidanceCard(title, data = {}) {
+  const card = document.createElement("article");
+  card.className = "operator-guidance-card";
+  const head = document.createElement("div");
+  const label = document.createElement("strong");
+  label.textContent = title;
+  const state = document.createElement("span");
+  state.textContent = data.guidance_state || data.warning_state || "WATCH";
+  head.append(label, state);
+  const reason = document.createElement("p");
+  reason.textContent = data.guidance_reason || data.next_safe_action || "Guidance remains paper-only and defensive.";
+  const action = document.createElement("small");
+  action.textContent = data.next_safe_action || "Maintain paper-only mode.";
+  card.append(head, reason, action);
+  return card;
+}
+
+function renderOperatorGuidance(guidanceData = {}, survivabilityGuidanceData = {}, confidenceGuidanceData = {}, riskReductionGuidanceData = {}, nextSafeActionGuidanceData = {}) {
+  const section = document.createElement("section");
+  section.className = "operator-guidance";
+  section.setAttribute("aria-label", "Adaptive operator guidance");
+
+  const head = document.createElement("div");
+  head.className = "operator-guidance-head";
+  const title = document.createElement("strong");
+  title.textContent = guidanceData.panel_title || "Adaptive Operator Guidance";
+  const note = document.createElement("span");
+  note.textContent = "Guidance only - no execution urgency, broker controls, autonomous controls, or hidden live routing.";
+  head.append(title, note);
+
+  const strip = document.createElement("div");
+  strip.className = "operator-guidance-strip";
+  [
+    guidanceData.guidance_state || "WATCH",
+    confidenceGuidanceData.confidence_state || "CONFIDENCE_FROZEN",
+    survivabilityGuidanceData.macro_state || "ELEVATED_RISK",
+    riskReductionGuidanceData.portfolio_state || "WATCH"
+  ].forEach((item) => {
+    const chip = document.createElement("span");
+    chip.textContent = item;
+    strip.append(chip);
+  });
+
+  const grid = document.createElement("div");
+  grid.className = "operator-guidance-grid";
+  grid.append(
+    createGuidanceCard("Survivability", survivabilityGuidanceData),
+    createGuidanceCard("Confidence", confidenceGuidanceData),
+    createGuidanceCard("Risk reduction", riskReductionGuidanceData),
+    createGuidanceCard("Next Safe Action", nextSafeActionGuidanceData)
+  );
+
+  section.append(head, strip, grid);
+  return section;
+}
+
+function renderOperatorWorkbench(workbenchData = {}, confidenceData = {}, portfolioData = {}, macroData = {}, chaosData = {}, replayData = {}, freezeData = {}, edgeDecayData = {}, survivabilityData = {}, replayScenariosData = {}, riskEscalationData = {}, nextSafeActionData = {}, guidanceData = {}, survivabilityGuidanceData = {}, confidenceGuidanceData = {}, riskReductionGuidanceData = {}, nextSafeActionGuidanceData = {}) {
+  const section = document.createElement("section");
+  section.className = "operator-workbench";
+  section.setAttribute("aria-label", "AI_OS Trading Lab Operator Workbench");
+
+  const head = document.createElement("div");
+  head.className = "operator-workbench-head";
+  const title = document.createElement("strong");
+  title.textContent = workbenchData.panel_title || "AI_OS Operator Workbench";
+  const note = document.createElement("span");
+  note.textContent = workbenchData.next_safe_action || "Next Safe Action: continue paper review; live execution remains blocked.";
+  head.append(title, note);
+
+  const strip = document.createElement("div");
+  strip.className = "operator-workbench-strip";
+  (workbenchData.top_status_strip || ["Paper only", "Live blocked", "Broker blocked", "No execution controls"]).forEach((item) => {
+    const chip = document.createElement("span");
+    chip.textContent = item;
+    strip.append(chip);
+  });
+
+  const grid = document.createElement("div");
+  grid.className = "operator-workbench-grid";
+  grid.append(
+    createOperatorWorkbenchMetric("Confidence", confidenceData.confidence_state || "CONFIDENCE_FROZEN", confidenceData.events?.[confidenceData.events.length - 1]?.reason),
+    createOperatorWorkbenchMetric("Edge", confidenceData.edge_state || chaosData.alerts?.[0]?.state || "WEAK_EDGE", "Edge survivability visibility"),
+    createOperatorWorkbenchMetric("Macro", macroData.macro_state || "ELEVATED_RISK", macroData.overlay_items?.[0]?.reason),
+    createOperatorWorkbenchMetric("Portfolio", portfolioData.portfolio_state || "WATCH", portfolioData.heat_panels?.[0]?.reason),
+    createOperatorWorkbenchMetric("Replay", replayData.replay_state || "PARTIAL_SURVIVAL", replayData.replay_scrubber_placeholder),
+    createOperatorWorkbenchMetric("Warning", chaosData.warning_state || "WATCH", chaosData.alerts?.[0]?.reason)
+  );
+
+  const panels = document.createElement("div");
+  panels.className = "operator-workbench-panels";
+  panels.append(
+    createOperatorWorkbenchList("Confidence timeline", confidenceData.events || []),
+    createOperatorWorkbenchList("Replay timeline", replayData.replay_timeline || []),
+    createOperatorWorkbenchList("Portfolio heat", portfolioData.heat_panels || [], "heat_state"),
+    createOperatorWorkbenchList("Macro-risk overlay", macroData.overlay_items || []),
+    createOperatorWorkbenchList("Chaos alerts", chaosData.alerts || [])
+  );
+
+  const details = document.createElement("details");
+  details.className = "operator-workbench-details";
+  const summary = document.createElement("summary");
+  summary.textContent = "Workbench details";
+  const detailBody = document.createElement("p");
+  detailBody.textContent = "Progressive disclosure keeps advanced workbench context collapsed by default. No autoplay, execution controls, broker controls, autonomous controls, or network order routing are present.";
+  details.append(summary, detailBody);
+
+  section.append(head, strip, grid, panels, renderInteractiveSurfaces(freezeData, edgeDecayData, survivabilityData, replayScenariosData, riskEscalationData, nextSafeActionData), renderOperatorGuidance(guidanceData, survivabilityGuidanceData, confidenceGuidanceData, riskReductionGuidanceData, nextSafeActionGuidanceData), details);
+  return section;
+}
+
+function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSystemData = null, paperRunnerData = null, orchestrationData = null, workstationData = null, phase28HandoffData = null, phase23NormalizationData = null, phase25LatencyData = null, paperTradingBotStatusData = null, operatorWorkbenchData = null, confidenceTimelineData = null, portfolioHeatData = null, macroOverlayData = null, chaosAlertsData = null, replayWorkbenchData = null, freezeTimelineData = null, edgeDecayVisibilityData = null, survivabilityTimelineData = null, replayScenariosData = null, riskEscalationData = null, nextSafeActionFlowData = null, operatorGuidanceData = null, survivabilityGuidanceData = null, confidenceGuidanceData = null, riskReductionGuidanceData = null, nextSafeActionGuidanceData = null) {
   if (!tradingLabNextActionCard) return;
   tradingLabNextActionCard.hidden = false;
   const title = document.createElement("section");
@@ -2010,6 +2240,7 @@ function renderTradingLabNextActionData(data, paperBotCoreData = null, windowSys
   const children = [
     title,
     safety,
+    renderOperatorWorkbench(operatorWorkbenchData || {}, confidenceTimelineData || {}, portfolioHeatData || {}, macroOverlayData || {}, chaosAlertsData || {}, replayWorkbenchData || {}, freezeTimelineData || {}, edgeDecayVisibilityData || {}, survivabilityTimelineData || {}, replayScenariosData || {}, riskEscalationData || {}, nextSafeActionFlowData || {}, operatorGuidanceData || {}, survivabilityGuidanceData || {}, confidenceGuidanceData || {}, riskReductionGuidanceData || {}, nextSafeActionGuidanceData || {}),
     createTradingLabCompactNextAction(data, windowSystemData, orchestrationData),
     createTradingLabEntryButton(data, windowSystemData, orchestrationData),
     createTradingLabCompactStatusRow(data, workstationData, paperRunnerData)
@@ -2028,7 +2259,7 @@ async function renderTradingLabNextActionCard() {
   tradingLabNextActionCard.hidden = false;
   tradingLabNextActionCard.textContent = "Loading Trading Lab mock workspace...";
   try {
-    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse, phase28HandoffResponse, phase23NormalizationResponse, phase25LatencyResponse, paperTradingBotStatusResponse] = await Promise.all([
+    const [response, paperBotResponse, windowSystemResponse, paperRunnerResponse, orchestrationResponse, workstationResponse, phase28HandoffResponse, phase23NormalizationResponse, phase25LatencyResponse, paperTradingBotStatusResponse, operatorWorkbenchResponse, confidenceTimelineResponse, portfolioHeatResponse, macroOverlayResponse, chaosAlertsResponse, replayWorkbenchResponse, freezeTimelineResponse, edgeDecayVisibilityResponse, survivabilityTimelineResponse, replayScenariosResponse, riskEscalationResponse, nextSafeActionFlowResponse, operatorGuidanceResponse, survivabilityGuidanceResponse, confidenceGuidanceResponse, riskReductionGuidanceResponse, nextSafeActionGuidanceResponse] = await Promise.all([
       fetch(tradingLabWorkspaceFixturePath, { cache: "no-store" }),
       fetch(paperBotCoreFixturePath, { cache: "no-store" }),
       fetch(tradingLabWindowSystemFixturePath, { cache: "no-store" }),
@@ -2038,7 +2269,24 @@ async function renderTradingLabNextActionCard() {
       fetch(phase28TvTpPaperHandoffFixturePath, { cache: "no-store" }),
       fetch(phase23PaperSignalNormalizationFixturePath, { cache: "no-store" }),
       fetch(phase25LatencyMeasurementCoreFixturePath, { cache: "no-store" }),
-      fetch(paperTradingBotStatusFixturePath, { cache: "no-store" })
+      fetch(paperTradingBotStatusFixturePath, { cache: "no-store" }),
+      fetch(aiosOperatorWorkbenchFixturePath, { cache: "no-store" }),
+      fetch(aiosConfidenceTimelineFixturePath, { cache: "no-store" }),
+      fetch(aiosPortfolioHeatFixturePath, { cache: "no-store" }),
+      fetch(aiosMacroOverlayFixturePath, { cache: "no-store" }),
+      fetch(aiosChaosAlertsFixturePath, { cache: "no-store" }),
+      fetch(aiosReplayWorkbenchFixturePath, { cache: "no-store" }),
+      fetch(aiosFreezeTimelineFixturePath, { cache: "no-store" }),
+      fetch(aiosEdgeDecayVisibilityFixturePath, { cache: "no-store" }),
+      fetch(aiosSurvivabilityTimelineFixturePath, { cache: "no-store" }),
+      fetch(aiosReplayScenariosFixturePath, { cache: "no-store" }),
+      fetch(aiosRiskEscalationFixturePath, { cache: "no-store" }),
+      fetch(aiosNextSafeActionFlowFixturePath, { cache: "no-store" }),
+      fetch(aiosOperatorGuidanceFixturePath, { cache: "no-store" }),
+      fetch(aiosSurvivabilityGuidanceFixturePath, { cache: "no-store" }),
+      fetch(aiosConfidenceGuidanceFixturePath, { cache: "no-store" }),
+      fetch(aiosRiskReductionGuidanceFixturePath, { cache: "no-store" }),
+      fetch(aiosNextSafeActionGuidanceFixturePath, { cache: "no-store" })
     ]);
     if (!response.ok) throw new Error("Trading Lab fixture unavailable");
     const paperBotCoreData = paperBotResponse.ok ? await paperBotResponse.json() : null;
@@ -2050,7 +2298,24 @@ async function renderTradingLabNextActionCard() {
     const phase23NormalizationData = phase23NormalizationResponse.ok ? await phase23NormalizationResponse.json() : null;
     const phase25LatencyData = phase25LatencyResponse.ok ? await phase25LatencyResponse.json() : null;
     const paperTradingBotStatusData = paperTradingBotStatusResponse.ok ? await paperTradingBotStatusResponse.json() : null;
-    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData, phase23NormalizationData, phase25LatencyData, paperTradingBotStatusData);
+    const operatorWorkbenchData = operatorWorkbenchResponse.ok ? await operatorWorkbenchResponse.json() : null;
+    const confidenceTimelineData = confidenceTimelineResponse.ok ? await confidenceTimelineResponse.json() : null;
+    const portfolioHeatData = portfolioHeatResponse.ok ? await portfolioHeatResponse.json() : null;
+    const macroOverlayData = macroOverlayResponse.ok ? await macroOverlayResponse.json() : null;
+    const chaosAlertsData = chaosAlertsResponse.ok ? await chaosAlertsResponse.json() : null;
+    const replayWorkbenchData = replayWorkbenchResponse.ok ? await replayWorkbenchResponse.json() : null;
+    const freezeTimelineData = freezeTimelineResponse.ok ? await freezeTimelineResponse.json() : null;
+    const edgeDecayVisibilityData = edgeDecayVisibilityResponse.ok ? await edgeDecayVisibilityResponse.json() : null;
+    const survivabilityTimelineData = survivabilityTimelineResponse.ok ? await survivabilityTimelineResponse.json() : null;
+    const replayScenariosData = replayScenariosResponse.ok ? await replayScenariosResponse.json() : null;
+    const riskEscalationData = riskEscalationResponse.ok ? await riskEscalationResponse.json() : null;
+    const nextSafeActionFlowData = nextSafeActionFlowResponse.ok ? await nextSafeActionFlowResponse.json() : null;
+    const operatorGuidanceData = operatorGuidanceResponse.ok ? await operatorGuidanceResponse.json() : null;
+    const survivabilityGuidanceData = survivabilityGuidanceResponse.ok ? await survivabilityGuidanceResponse.json() : null;
+    const confidenceGuidanceData = confidenceGuidanceResponse.ok ? await confidenceGuidanceResponse.json() : null;
+    const riskReductionGuidanceData = riskReductionGuidanceResponse.ok ? await riskReductionGuidanceResponse.json() : null;
+    const nextSafeActionGuidanceData = nextSafeActionGuidanceResponse.ok ? await nextSafeActionGuidanceResponse.json() : null;
+    renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData, phase23NormalizationData, phase25LatencyData, paperTradingBotStatusData, operatorWorkbenchData, confidenceTimelineData, portfolioHeatData, macroOverlayData, chaosAlertsData, replayWorkbenchData, freezeTimelineData, edgeDecayVisibilityData, survivabilityTimelineData, replayScenariosData, riskEscalationData, nextSafeActionFlowData, operatorGuidanceData, survivabilityGuidanceData, confidenceGuidanceData, riskReductionGuidanceData, nextSafeActionGuidanceData);
   } catch (error) {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",

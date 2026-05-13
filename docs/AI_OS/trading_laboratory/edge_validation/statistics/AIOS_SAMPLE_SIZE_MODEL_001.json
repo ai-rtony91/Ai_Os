@@ -1,0 +1,36 @@
+{
+  "artifact": "AIOS_SAMPLE_SIZE_MODEL_001",
+  "phase": "15",
+  "stage": "15.8",
+  "model_type": "sample_size",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "self_modifying_logic_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "edge_states": ["NO_EDGE", "WEAK_EDGE", "MODERATE_EDGE", "STRONG_EDGE", "UNVERIFIED"],
+  "metrics": {
+    "expectancy": 0.0,
+    "profit_factor": 0.0,
+    "win_rate": 0.0,
+    "average_win": 0.0,
+    "average_loss": 0.0,
+    "max_drawdown": 0.0,
+    "sample_size": 0,
+    "edge_confidence_score": 0.0,
+    "regime_reliability_score": 0.0,
+    "stability_score": 0.0,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "evidence_requirements": {
+    "minimum_sample_size_placeholder": 100,
+    "paper_only_validation": true
+  },
+  "validation_logic": {
+    "reject_low_sample_sizes": true,
+    "require_evidence_accumulation_before_confidence_increases": true
+  },
+  "edge_state": "UNVERIFIED"
+}

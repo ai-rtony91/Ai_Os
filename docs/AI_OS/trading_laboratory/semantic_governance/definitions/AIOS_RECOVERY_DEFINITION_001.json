@@ -1,0 +1,13 @@
+{
+  "term": "RECOVERY",
+  "category": "RECOVERY",
+  "definition": "A paper-only improvement state after instability that still requires evidence before confidence can rise.",
+  "risk_implications": ["do not immediately restore trust", "require multiple paper confirmations"],
+  "related_terms": ["FAKE_RECOVERY", "STABLE", "CONFIDENCE_FREEZE"],
+  "validation_triggers": ["rolling_expectancy_recovered", "drawdown_pressure_reduced", "regime_reliability_recovered"],
+  "behavioral_effects": ["allow cautious review", "keep promotion evidence-gated"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

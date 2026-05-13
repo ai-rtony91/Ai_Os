@@ -1,0 +1,37 @@
+{
+  "artifact": "AIOS_EXECUTION_PERMISSION_CONTRACT_001",
+  "phase": "15",
+  "stage": "15.7",
+  "contract_type": "execution_permission",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "execution_permission": "LIVE_BLOCKED",
+  "broker_api_status": "BROKER_API_BLOCKED",
+  "webhook_execution_status": "WEBHOOK_EXECUTION_BLOCKED",
+  "autonomous_execution_status": "AUTONOMOUS_EXECUTION_BLOCKED",
+  "real_funds_status": "REAL_FUNDS_BLOCKED",
+  "blocked_execution_states": [
+    "LIVE_ORDER_BLOCKED",
+    "BROKER_API_BLOCKED",
+    "AUTONOMOUS_EXECUTION_BLOCKED",
+    "WEBHOOK_EXECUTION_BLOCKED",
+    "REAL_FUNDS_BLOCKED"
+  ],
+  "execution_permissions": [
+    "PAPER_ALLOWED",
+    "LIVE_BLOCKED",
+    "SIMULATION_ALLOWED",
+    "BROKER_DISCONNECTED"
+  ],
+  "permission_contract": {
+    "signal_id": "aios_permission_contract_001",
+    "market": "forex",
+    "pair_or_asset": "EUR_USD",
+    "confidence_score": 78,
+    "recommendation": "PAPER_ONLY_RECOMMENDATION",
+    "paper_only_status": "PAPER_ONLY",
+    "execution_permission": "LIVE_BLOCKED",
+    "live_execution_status": "BLOCKED",
+    "blocked_reason": "execution layer is disconnected and live execution is blocked"
+  }
+}

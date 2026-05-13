@@ -1,0 +1,36 @@
+{
+  "definition_id": "aios_danger_definition_001",
+  "term": "DANGEROUS",
+  "required_risk_language_definitions": [
+    "DANGEROUS",
+    "SAFE",
+    "UNSTABLE",
+    "STABLE",
+    "GOOD_EDGE",
+    "WEAK_EDGE",
+    "NO_EDGE",
+    "RECOVERY",
+    "LOCKDOWN",
+    "ELEVATED_RISK",
+    "PORTFOLIO_OVERLOAD",
+    "FAKE_RECOVERY"
+  ],
+  "meaning": "A condition where confidence, edge, volatility, drawdown, macro pressure, portfolio concentration, or execution leakage risk is too unstable for trust.",
+  "governance_philosophy": [
+    "survivability first",
+    "controlled adaptation",
+    "statistical skepticism",
+    "evidence-gated trust",
+    "confidence hysteresis",
+    "portfolio-first risk thinking",
+    "defensive architecture",
+    "controlled complexity",
+    "cautious intelligence behavior"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

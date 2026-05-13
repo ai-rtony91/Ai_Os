@@ -1,0 +1,23 @@
+{
+  "overlay_id": "aios_macro_overlay_example",
+  "macro_state": "ELEVATED_RISK",
+  "overlay_items": [
+    {
+      "label": "Event risk",
+      "state": "WATCH",
+      "reason": "High-impact placeholder window is active."
+    },
+    {
+      "label": "Spread",
+      "state": "ELEVATED_RISK",
+      "reason": "Spread instability can reduce paper confidence."
+    }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

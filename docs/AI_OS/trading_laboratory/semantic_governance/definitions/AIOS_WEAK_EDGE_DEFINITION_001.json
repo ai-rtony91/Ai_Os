@@ -1,0 +1,13 @@
+{
+  "term": "WEAK_EDGE",
+  "category": "EDGE",
+  "definition": "A condition with limited, deteriorating, noisy, or statistically insufficient paper evidence.",
+  "risk_implications": ["suppress ranking", "freeze confidence increases", "require more evidence"],
+  "related_terms": ["NO_EDGE", "UNSTABLE", "CONFIDENCE_FREEZE"],
+  "validation_triggers": ["expectancy_low", "sample_size_low", "stability_score_low"],
+  "behavioral_effects": ["move to WATCH", "block promotion", "reduce simulated size"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

@@ -1,0 +1,28 @@
+{
+  "model_id": "aios_recovery_validation_model_001",
+  "model_type": "RECOVERY_VALIDATION",
+  "proof_state": "RECOVERY_REQUIRED",
+  "verification_logic": [
+    "detect fake recovery",
+    "verify rolling stability",
+    "verify regime reliability",
+    "verify confidence freeze compliance",
+    "restrict unstable promotion"
+  ],
+  "recovery_validated": false,
+  "blocked_reason": "recovery requires more paper evidence before confidence can increase",
+  "edge_state": "WEAK_EDGE",
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "stability_state": "WATCH",
+  "drawdown_pressure": 0.41,
+  "replay_survivability": "PARTIAL",
+  "regime_reliability": "WATCH",
+  "portfolio_survivability": "SAFE",
+  "freeze_triggered": true,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

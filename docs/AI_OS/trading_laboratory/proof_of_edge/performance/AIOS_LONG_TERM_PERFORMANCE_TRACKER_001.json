@@ -1,0 +1,23 @@
+{
+  "tracker_id": "aios_long_term_performance_tracker_001",
+  "tracker_type": "LONG_TERM_PERFORMANCE",
+  "proof_state": "PARTIALLY_VERIFIED",
+  "rolling_expectancy": 0.18,
+  "rolling_win_rate": 0.54,
+  "profit_factor": 1.22,
+  "sample_size": 45,
+  "edge_state": "WEAK_EDGE",
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "stability_state": "WATCH",
+  "drawdown_pressure": 0.29,
+  "replay_survivability": "PARTIAL",
+  "regime_reliability": "WATCH",
+  "portfolio_survivability": "SAFE",
+  "freeze_triggered": true,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

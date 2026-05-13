@@ -1,0 +1,27 @@
+{
+  "guidance_id": "aios_risk_reduction_guidance_example",
+  "guidance_state": "UNSTABLE",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "PORTFOLIO_OVERLOAD",
+  "warning_state": "UNSTABLE",
+  "replay_state": "FAILED",
+  "next_safe_action": "Avoid concentrated portfolio risk and keep simulated exposure reduced.",
+  "guidance_reason": "Portfolio exposure reduced because concentration risk and replay weakness raised survivability pressure.",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "guidance_explanations": [
+    "why portfolio exposure reduced",
+    "why WATCH activated",
+    "why edge distrust increased",
+    "why macro risk reduced confidence"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "hidden_live_routing_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

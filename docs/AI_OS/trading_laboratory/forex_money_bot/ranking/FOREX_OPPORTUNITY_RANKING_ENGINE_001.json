@@ -1,0 +1,49 @@
+{
+  "artifact": "FOREX_OPPORTUNITY_RANKING_ENGINE_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_ranking",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "ranking_outputs": [
+    "TOP_PRIORITY",
+    "MEDIUM_PRIORITY",
+    "LOW_PRIORITY",
+    "BLOCK_TRADE",
+    "WAIT_FOR_BETTER_SETUP",
+    "REDUCE_EXPOSURE",
+    "REDUCE_SIZE",
+    "ALLOW_PAPER_ENTRY"
+  ],
+  "ranking_logic": {
+    "rank_strongest_opportunities_first": true,
+    "suppress_weak_opportunities": true,
+    "volatility_adjusted_confidence": true,
+    "pair_specific_weighting": true,
+    "session_specific_weighting": true,
+    "regime_specific_weighting": true,
+    "confidence_normalization": true,
+    "trade_queue_ordering": true,
+    "drawdown_pressure_reduction": true,
+    "portfolio_exposure_awareness": true
+  },
+  "example_ranked_opportunity": {
+    "signal_id": "forex_ranked_signal_001",
+    "pair": "EUR_USD",
+    "direction": "long_review",
+    "priority_state": "TOP_PRIORITY",
+    "portfolio_confidence_score": 78.0,
+    "pair_priority_score": 82.0,
+    "volatility_weight": 0.92,
+    "drawdown_pressure": 0.05,
+    "exposure_score": 0.12,
+    "correlation_risk": 0.1,
+    "queue_rank": 1,
+    "paper_only_status": "PAPER_ONLY",
+    "blocked_reason": "ranking is for paper queue only"
+  }
+}

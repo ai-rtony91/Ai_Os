@@ -1,0 +1,25 @@
+{
+  "surface_id": "aios_freeze_timeline_example",
+  "surface_name": "confidence freeze timeline",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "WATCH",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "warning_state": "WATCH",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "interaction_reason": "Confidence froze after replay survivability weakened and edge proof remained incomplete.",
+  "events": [
+    { "label": "Active", "state": "CONFIDENCE_ACTIVE", "reason": "Paper signal entered review." },
+    { "label": "Watch", "state": "WATCH", "reason": "Replay stress reduced stability." },
+    { "label": "Frozen", "state": "CONFIDENCE_FROZEN", "reason": "Confidence cannot rise without more paper evidence." }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

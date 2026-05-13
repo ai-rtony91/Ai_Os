@@ -1,0 +1,29 @@
+{
+  "telemetry_id": "aios_visual_intelligence_telemetry_001",
+  "required_telemetry_fields": [
+    "confidence_state",
+    "edge_state",
+    "macro_state",
+    "portfolio_state",
+    "replay_state",
+    "warning_state",
+    "freeze_triggered",
+    "lockdown_triggered",
+    "explanation_reason",
+    "paper_only_status"
+  ],
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "WATCH",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "warning_state": "WATCH",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "explanation_reason": "Operator view shows confidence freeze because edge proof and macro risk are not strong enough for promotion.",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

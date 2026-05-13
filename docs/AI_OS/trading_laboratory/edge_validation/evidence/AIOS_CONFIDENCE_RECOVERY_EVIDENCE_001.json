@@ -1,0 +1,51 @@
+{
+  "artifact": "AIOS_CONFIDENCE_RECOVERY_EVIDENCE_001",
+  "phase": "15",
+  "stage": "15.9",
+  "model_type": "confidence_recovery_evidence",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "secret_status": "BLOCKED",
+  "required_states": [
+    "CONFIDENCE_ACTIVE",
+    "CONFIDENCE_FROZEN",
+    "RECOVERY_REQUIRED",
+    "WATCH",
+    "WEAK_EDGE",
+    "NO_EDGE"
+  ],
+  "freeze_triggers": {
+    "stability_score_below_threshold": true,
+    "drawdown_pressure_above_threshold": true,
+    "regime_reliability_score_below_threshold": true,
+    "rolling_expectancy_below_threshold": true,
+    "sample_size_below_minimum": true,
+    "edge_state_is_watch": true,
+    "edge_state_is_weak_edge": true,
+    "edge_state_is_no_edge": true
+  },
+  "freeze_behavior": {
+    "block_confidence_increases": true,
+    "allow_confidence_decreases": true,
+    "lower_ranking_priority": true,
+    "reduce_recommended_paper_size": true,
+    "require_stronger_confirmations": true,
+    "require_more_paper_evidence": true,
+    "prevent_fast_re_promotion": true,
+    "force_watch_state_when_unstable": true
+  },
+  "recovery_conditions": {
+    "rolling_stability_recovered": false,
+    "drawdown_pressure_reduced": false,
+    "rolling_expectancy_positive": false,
+    "minimum_sample_size_met": false,
+    "regime_reliability_recovered": false,
+    "edge_confidence_recovered": false,
+    "multiple_paper_sessions_confirmed": false
+  },
+  "evidence_status": "RECOVERY_REQUIRED",
+  "blocked_reason": "recovery evidence is incomplete; confidence cannot be raised"
+}

@@ -1,0 +1,13 @@
+{
+  "term": "FAKE_RECOVERY",
+  "category": "RECOVERY",
+  "definition": "A short-term paper improvement that appears healthy before enough evidence proves stability.",
+  "risk_implications": ["block fast re-promotion", "freeze confidence increases", "require recovery evidence"],
+  "related_terms": ["RECOVERY", "UNSTABLE", "WEAK_EDGE"],
+  "validation_triggers": ["short_term_improvement_only", "sample_size_below_minimum", "stability_not_confirmed"],
+  "behavioral_effects": ["maintain WATCH", "suppress ranking", "extend recovery window"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

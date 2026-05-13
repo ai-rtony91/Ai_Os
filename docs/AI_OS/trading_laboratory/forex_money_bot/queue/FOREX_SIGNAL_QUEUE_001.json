@@ -1,0 +1,42 @@
+{
+  "artifact": "FOREX_SIGNAL_QUEUE_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_queue",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "queue": [
+    {
+      "signal_id": "forex_queue_signal_001",
+      "pair": "EUR_USD",
+      "direction": "long_review",
+      "confidence_score": 78,
+      "priority_state": "TOP_PRIORITY",
+      "queue_rank": 1,
+      "session_name": "london_new_york_overlap",
+      "market_regime": "TRENDING",
+      "portfolio_state": "SAFE",
+      "risk_state": "PAPER_ALLOWED_LIVE_BLOCKED",
+      "paper_only_status": "PAPER_ONLY",
+      "live_execution_status": "BLOCKED"
+    },
+    {
+      "signal_id": "forex_queue_signal_002",
+      "pair": "GBP_USD",
+      "direction": "short_review",
+      "confidence_score": 58,
+      "priority_state": "MEDIUM_PRIORITY",
+      "queue_rank": 2,
+      "session_name": "london_new_york_overlap",
+      "market_regime": "RANGING",
+      "portfolio_state": "WATCH",
+      "risk_state": "PAPER_REVIEW_ONLY",
+      "paper_only_status": "PAPER_ONLY",
+      "live_execution_status": "BLOCKED"
+    }
+  ]
+}

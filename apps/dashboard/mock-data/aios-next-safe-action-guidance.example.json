@@ -1,0 +1,38 @@
+{
+  "guidance_id": "aios_next_safe_action_guidance_example",
+  "guidance_state": "LOCKDOWN",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "PORTFOLIO_OVERLOAD",
+  "warning_state": "LOCKDOWN",
+  "replay_state": "FAILED",
+  "next_safe_action": "Maintain paper-only mode; wait for replay recovery and macro stabilization.",
+  "guidance_reason": "Next Safe Action changed because LOCKDOWN activated after replay failed and portfolio overload increased.",
+  "freeze_triggered": true,
+  "lockdown_triggered": true,
+  "guidance_explanations": [
+    "why LOCKDOWN activated",
+    "why Next Safe Action changed",
+    "why replay failed",
+    "why ranking decreased",
+    "why macro risk reduced confidence"
+  ],
+  "ux_philosophy": [
+    "guidance without pressure",
+    "explainability before authority",
+    "survivability-first recommendations",
+    "calm operator workflow",
+    "low cognitive overload",
+    "defensive guidance behavior",
+    "no hype language",
+    "no execution urgency"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "hidden_live_routing_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

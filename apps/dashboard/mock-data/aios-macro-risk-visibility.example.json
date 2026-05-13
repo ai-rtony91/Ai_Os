@@ -1,0 +1,27 @@
+{
+  "view_id": "aios_macro_risk_visibility_example",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "GOOD_EDGE",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "WATCH",
+  "replay_state": "PASSED",
+  "warning_state": "WATCH",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "explanation_reason": "Macro risk increased because high-impact event pressure and spread instability require paper-only confidence suppression.",
+  "visual_explanations": [
+    "why macro risk increased",
+    "why confidence changed",
+    "why WATCH activated"
+  ],
+  "dashboard_concepts": [
+    "macro risk visibility",
+    "visible risk escalation",
+    "operator-readable survivability"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

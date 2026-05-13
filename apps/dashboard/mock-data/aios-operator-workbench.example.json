@@ -1,0 +1,63 @@
+{
+  "panel_title": "AI_OS Operator Workbench",
+  "mode": "paper_only",
+  "top_status_strip": [
+    "Paper only",
+    "Live blocked",
+    "Broker blocked",
+    "No execution controls"
+  ],
+  "visible_states": [
+    "CONFIDENCE_ACTIVE",
+    "CONFIDENCE_FROZEN",
+    "WATCH",
+    "UNSTABLE",
+    "LOCKDOWN",
+    "GOOD_EDGE",
+    "WEAK_EDGE",
+    "NO_EDGE",
+    "ELEVATED_RISK",
+    "PORTFOLIO_OVERLOAD"
+  ],
+  "operator_surfaces": [
+    "top status strip",
+    "replay timeline",
+    "confidence timeline",
+    "portfolio heat panel",
+    "macro-risk overlay",
+    "chaos alert surface",
+    "replay scrubber placeholder",
+    "edge survivability visibility",
+    "Next Safe Action surface"
+  ],
+  "ui_concepts": [
+    "explainable intelligence",
+    "confidence visibility",
+    "macro-risk visibility",
+    "replay survivability visibility",
+    "portfolio heat visibility",
+    "confidence freeze visibility",
+    "edge decay visibility",
+    "chaos-prevention visibility",
+    "replay timeline visibility",
+    "Next Safe Action visibility"
+  ],
+  "ux_philosophy": [
+    "low chaos",
+    "progressive disclosure",
+    "simple front surface",
+    "deep drill-downs",
+    "visibility reduces hidden chaos",
+    "operator-first ergonomics",
+    "cognitive-load reduction",
+    "survivability-first UX"
+  ],
+  "next_safe_action": "Continue paper replay review; keep live execution blocked.",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

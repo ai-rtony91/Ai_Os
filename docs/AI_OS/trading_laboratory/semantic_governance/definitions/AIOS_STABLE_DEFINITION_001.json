@@ -1,0 +1,13 @@
+{
+  "term": "STABLE",
+  "category": "SURVIVABILITY",
+  "definition": "A paper-only state with rolling stability, repeatable behavior, controlled drawdown, and compatible regime context.",
+  "risk_implications": ["eligible for paper confidence maintenance", "not eligible for live execution"],
+  "related_terms": ["SAFE", "GOOD_EDGE", "RECOVERY"],
+  "validation_triggers": ["rolling_stability_ok", "drawdown_pressure_controlled", "regime_reliability_ok"],
+  "behavioral_effects": ["maintain cautious paper ranking", "continue evidence accumulation"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

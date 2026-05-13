@@ -1,0 +1,25 @@
+{
+  "scenario_id": "AIOS_DRAWDOWN_SPIRAL_SCENARIO_001",
+  "scenario_type": "drawdown_spiral",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "scenario_states": ["NORMAL", "WATCH", "UNSTABLE", "EDGE_COLLAPSE", "DRAWDOWN_CRITICAL", "RECOVERY_REQUIRED", "CONFIDENCE_FROZEN"],
+  "stress_reactions": ["reduce_confidence", "freeze_confidence_increases", "reduce_ranking_priority", "reduce_simulated_size", "move_to_watch_state", "block_unstable_edge_promotion", "require_recovery_evidence"],
+  "telemetry": {
+    "scenario_id": "AIOS_DRAWDOWN_SPIRAL_SCENARIO_001",
+    "scenario_type": "drawdown_spiral",
+    "stability_score": 18,
+    "drawdown_pressure": 0.78,
+    "edge_state": "DRAWDOWN_CRITICAL",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "ranking_state": "reduce_simulated_size",
+    "portfolio_state": "LOCKDOWN_PAPER_ONLY",
+    "freeze_triggered": true,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "blocked_reason": "drawdown pressure requires recovery evidence"
+}

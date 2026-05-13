@@ -1,0 +1,28 @@
+{
+  "guidance_id": "aios_confidence_guidance_example",
+  "guidance_state": "CONFIDENCE_FROZEN",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "macro_state": "NORMAL",
+  "portfolio_state": "WATCH",
+  "warning_state": "WATCH",
+  "replay_state": "REPLAY_REQUIRED",
+  "next_safe_action": "Require additional paper evidence before confidence can rise.",
+  "guidance_reason": "Confidence is restricted because edge has not survived enough replay and sample evidence.",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "guidance_explanations": [
+    "why confidence is restricted",
+    "why replay failed",
+    "why ranking decreased",
+    "why Next Safe Action changed",
+    "why edge distrust increased"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "hidden_live_routing_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

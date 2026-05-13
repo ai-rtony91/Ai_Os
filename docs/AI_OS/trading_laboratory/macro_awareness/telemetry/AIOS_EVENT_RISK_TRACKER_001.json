@@ -1,0 +1,28 @@
+{
+  "tracker_id": "aios_event_risk_tracker_001",
+  "event_awareness": [
+    "CPI placeholder",
+    "FOMC placeholder",
+    "NFP placeholder",
+    "ECB placeholder",
+    "BOJ placeholder",
+    "session overlap awareness",
+    "pre-event caution window",
+    "post-event stabilization window"
+  ],
+  "event_risk_state": "HIGH_IMPACT_EVENT",
+  "macro_state": "HIGH_IMPACT_EVENT",
+  "volatility_state": "VOLATILITY_EXPANSION",
+  "liquidity_state": "LIQUIDITY_WARNING",
+  "spread_state": "WIDENING",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "portfolio_state": "REDUCED_EXPOSURE",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

@@ -1,0 +1,38 @@
+{
+  "artifact": "FOREX_PAIR_PRIORITY_SCORE_001",
+  "phase": "15",
+  "stage": "15.5",
+  "mode": "paper_only_ranking",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "webhook_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "pair_scores": [
+    {
+      "pair": "EUR_USD",
+      "portfolio_confidence_score": 78.0,
+      "pair_priority_score": 82.0,
+      "volatility_weight": 0.92,
+      "drawdown_pressure": 0.05,
+      "exposure_score": 0.12,
+      "correlation_risk": 0.1,
+      "queue_rank": 1,
+      "paper_only_status": "PAPER_ONLY",
+      "priority_state": "TOP_PRIORITY"
+    },
+    {
+      "pair": "GBP_USD",
+      "portfolio_confidence_score": 58.0,
+      "pair_priority_score": 55.0,
+      "volatility_weight": 0.78,
+      "drawdown_pressure": 0.16,
+      "exposure_score": 0.24,
+      "correlation_risk": 0.22,
+      "queue_rank": 2,
+      "paper_only_status": "PAPER_ONLY",
+      "priority_state": "MEDIUM_PRIORITY"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "monitor_id": "aios_edge_decay_monitor_001",
+  "monitor_type": "EDGE_DECAY",
+  "proof_state": "EDGE_DECAY_DETECTED",
+  "edge_state": "WEAK_EDGE",
+  "decay_findings": [
+    "rolling expectancy deteriorated",
+    "stability score weakened",
+    "replay survivability declined"
+  ],
+  "verification_logic": [
+    "detect edge decay",
+    "verify rolling expectancy",
+    "verify rolling stability",
+    "restrict unstable promotion"
+  ],
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "stability_state": "UNSTABLE",
+  "drawdown_pressure": 0.61,
+  "replay_survivability": "FAILED",
+  "regime_reliability": "LOW",
+  "portfolio_survivability": "WATCH",
+  "freeze_triggered": true,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

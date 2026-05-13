@@ -1,0 +1,42 @@
+{
+  "guidance_id": "aios_operator_guidance_example",
+  "panel_title": "Adaptive Operator Guidance",
+  "guidance_state": "WATCH",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "WATCH",
+  "warning_state": "WATCH",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "next_safe_action": "Continue paper replay review; do not increase trust yet.",
+  "guidance_reason": "AI_OS distrusts the condition because confidence is frozen and replay evidence is incomplete.",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "guidance_states_supported": [
+    "NORMAL",
+    "CAUTION",
+    "WATCH",
+    "UNSTABLE",
+    "LOCKDOWN",
+    "CONFIDENCE_FROZEN",
+    "RECOVERY_REQUIRED",
+    "ELEVATED_RISK"
+  ],
+  "dashboard_concepts": [
+    "adaptive operator guidance",
+    "explainable survivability guidance",
+    "constrained-action explanation",
+    "low-chaos guidance visibility",
+    "replay-informed recommendations",
+    "confidence-aware guidance",
+    "macro-aware guidance",
+    "portfolio survivability guidance"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "hidden_live_routing_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

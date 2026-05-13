@@ -1,0 +1,33 @@
+{
+  "model_id": "aios_edge_trust_requirements_001",
+  "model_type": "EDGE_TRUST_REQUIREMENTS",
+  "trust_requirements": [
+    "minimum sample size required",
+    "rolling stability required",
+    "regime reliability required",
+    "replay validation required",
+    "survivability audit required",
+    "drawdown pressure must remain acceptable",
+    "confidence cannot increase without evidence"
+  ],
+  "verification_logic": [
+    "verify rolling expectancy",
+    "verify rolling stability",
+    "verify drawdown survivability",
+    "verify replay survivability",
+    "verify regime reliability",
+    "verify portfolio survivability",
+    "verify confidence freeze compliance",
+    "detect edge decay",
+    "detect fake recovery",
+    "restrict unstable promotion"
+  ],
+  "proof_state": "UNVERIFIED",
+  "blocked_reason": "edge has not met proof requirements",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

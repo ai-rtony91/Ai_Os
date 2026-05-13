@@ -1,0 +1,40 @@
+{
+  "alert_id": "aios_portfolio_overload_alert_001",
+  "alert_type": "PORTFOLIO_OVERLOAD",
+  "warning_state": "LOCKDOWN",
+  "detection_logic": [
+    "detect correlation overload",
+    "detect portfolio stress concentration",
+    "detect rapid drawdown expansion"
+  ],
+  "prevention_actions": [
+    "freeze confidence increases",
+    "reduce ranking priority",
+    "reduce simulated exposure",
+    "reduce recommended paper size",
+    "require stronger confirmations",
+    "block unstable strategy promotion",
+    "trigger WATCH state",
+    "trigger LOCKDOWN state during severe instability"
+  ],
+  "telemetry": {
+    "warning_state": "LOCKDOWN",
+    "edge_state": "NO_EDGE",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "drawdown_pressure": 0.93,
+    "volatility_state": "HIGH_VOLATILITY",
+    "portfolio_state": "OVERLOADED",
+    "correlation_risk": 0.91,
+    "freeze_triggered": true,
+    "lockdown_triggered": true,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "blocked_reason": "portfolio concentration and correlation overload require lockdown in paper simulation",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED"
+}
+

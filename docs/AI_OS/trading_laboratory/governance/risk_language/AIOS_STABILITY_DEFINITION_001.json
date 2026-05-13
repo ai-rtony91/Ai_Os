@@ -1,0 +1,19 @@
+{
+  "definition_id": "aios_stability_definition_001",
+  "terms": {
+    "STABLE": "A paper-only condition with rolling stability, reliable regime behavior, and controlled risk pressure.",
+    "UNSTABLE": "A paper-only condition with deteriorating edge, volatility disruption, drawdown expansion, or unreliable confidence."
+  },
+  "stability_requirements": [
+    "rolling stability required",
+    "replay testing required before trust increases",
+    "reject unstable strategies",
+    "preventing chaos is better than reacting late"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

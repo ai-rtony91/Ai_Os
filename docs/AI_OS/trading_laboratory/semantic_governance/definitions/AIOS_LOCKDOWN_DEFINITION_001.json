@@ -1,0 +1,13 @@
+{
+  "term": "LOCKDOWN",
+  "category": "EXECUTION",
+  "definition": "A severe defensive state that blocks promotion, suppresses ranking, reduces simulated exposure, and requires recovery evidence.",
+  "risk_implications": ["protect survivability", "stop confidence increases", "block unstable strategy promotion"],
+  "related_terms": ["DANGEROUS", "PORTFOLIO_OVERLOAD", "NO_EDGE"],
+  "validation_triggers": ["drawdown_critical", "portfolio_overload", "macro_instability_severe"],
+  "behavioral_effects": ["activate lockdown", "paper-only defensive posture", "require governance review"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

@@ -1,0 +1,40 @@
+{
+  "alert_id": "aios_drawdown_pressure_alert_001",
+  "alert_type": "DRAWDOWN_PRESSURE",
+  "warning_state": "CRITICAL",
+  "detection_logic": [
+    "detect rapid drawdown expansion",
+    "detect rolling stability degradation",
+    "detect portfolio stress concentration"
+  ],
+  "prevention_actions": [
+    "freeze confidence increases",
+    "reduce ranking priority",
+    "reduce simulated exposure",
+    "reduce recommended paper size",
+    "require stronger confirmations",
+    "block unstable strategy promotion",
+    "trigger WATCH state",
+    "trigger LOCKDOWN state during severe instability"
+  ],
+  "telemetry": {
+    "warning_state": "CRITICAL",
+    "edge_state": "NO_EDGE",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "drawdown_pressure": 0.87,
+    "volatility_state": "HIGH_VOLATILITY",
+    "portfolio_state": "HIGH_PRESSURE",
+    "correlation_risk": 0.61,
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "blocked_reason": "drawdown pressure is expanding too quickly for promotion or increased paper exposure",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED"
+}
+

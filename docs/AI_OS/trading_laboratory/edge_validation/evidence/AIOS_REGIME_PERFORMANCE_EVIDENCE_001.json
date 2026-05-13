@@ -1,0 +1,31 @@
+{
+  "artifact": "AIOS_REGIME_PERFORMANCE_EVIDENCE_001",
+  "phase": "15",
+  "stage": "15.8",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "self_modifying_logic_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "regime_states": ["TRENDING", "RANGING", "HIGH_VOLATILITY", "LOW_VOLATILITY", "SESSION_TRANSITION", "NEWS_RISK"],
+  "metrics": {
+    "expectancy": 0.0,
+    "profit_factor": 0.0,
+    "win_rate": 0.0,
+    "average_win": 0.0,
+    "average_loss": 0.0,
+    "max_drawdown": 0.0,
+    "sample_size": 0,
+    "edge_confidence_score": 0.0,
+    "regime_reliability_score": 0.0,
+    "stability_score": 0.0,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "validation_logic": {
+    "identify_unstable_regime_behavior": true,
+    "regime_specific_evidence_required": true
+  },
+  "edge_state": "UNVERIFIED"
+}

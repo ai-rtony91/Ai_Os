@@ -1,0 +1,40 @@
+{
+  "alert_id": "aios_regime_instability_alert_001",
+  "alert_type": "REGIME_INSTABILITY",
+  "warning_state": "UNSTABLE",
+  "detection_logic": [
+    "detect unstable edge transitions",
+    "detect volatility spikes",
+    "detect rolling stability degradation"
+  ],
+  "prevention_actions": [
+    "freeze confidence increases",
+    "reduce ranking priority",
+    "reduce simulated exposure",
+    "reduce recommended paper size",
+    "require stronger confirmations",
+    "block unstable strategy promotion",
+    "trigger WATCH state",
+    "trigger LOCKDOWN state during severe instability"
+  ],
+  "telemetry": {
+    "warning_state": "UNSTABLE",
+    "edge_state": "WEAK_EDGE",
+    "confidence_state": "RECOVERY_REQUIRED",
+    "drawdown_pressure": 0.52,
+    "volatility_state": "REGIME_TRANSITION",
+    "portfolio_state": "WATCH",
+    "correlation_risk": 0.33,
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "blocked_reason": "regime transition makes current edge unstable until paper evidence confirms adaptation",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED"
+}
+

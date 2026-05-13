@@ -1,0 +1,40 @@
+{
+  "tracker_id": "aios_operator_explanation_tracker_001",
+  "visible_operator_states": [
+    "CONFIDENCE_ACTIVE",
+    "CONFIDENCE_FROZEN",
+    "WATCH",
+    "UNSTABLE",
+    "LOCKDOWN",
+    "GOOD_EDGE",
+    "WEAK_EDGE",
+    "NO_EDGE",
+    "ELEVATED_RISK",
+    "PORTFOLIO_OVERLOAD"
+  ],
+  "tracked_explanations": [
+    "why confidence changed",
+    "why confidence froze",
+    "why ranking dropped",
+    "why edge degraded",
+    "why replay failed",
+    "why macro risk increased",
+    "why WATCH activated",
+    "why LOCKDOWN activated",
+    "why portfolio exposure reduced"
+  ],
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "WATCH",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "warning_state": "WATCH",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "explanation_reason": "Operator explanation tracker requires every visible warning to include a plain-English reason.",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

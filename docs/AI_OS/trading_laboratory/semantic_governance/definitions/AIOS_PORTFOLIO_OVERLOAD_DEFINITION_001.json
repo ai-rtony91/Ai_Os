@@ -1,0 +1,13 @@
+{
+  "term": "PORTFOLIO_OVERLOAD",
+  "category": "PORTFOLIO",
+  "definition": "A condition where pair concentration, correlation, drawdown, or simultaneous exposure threatens portfolio survivability.",
+  "risk_implications": ["reduce portfolio exposure", "suppress unstable pair ranking", "trigger WATCH or LOCKDOWN"],
+  "related_terms": ["LOCKDOWN", "DANGEROUS", "ELEVATED_RISK"],
+  "validation_triggers": ["correlation_risk_high", "exposure_score_high", "drawdown_pressure_high"],
+  "behavioral_effects": ["reduce simulated exposure", "reduce ranking priority", "block additional paper entries"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

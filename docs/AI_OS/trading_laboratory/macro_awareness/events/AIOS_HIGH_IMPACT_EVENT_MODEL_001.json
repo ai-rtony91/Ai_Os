@@ -1,0 +1,51 @@
+{
+  "model_id": "aios_high_impact_event_model_001",
+  "model_type": "HIGH_IMPACT_EVENT_AWARENESS",
+  "macro_states_supported": [
+    "NORMAL",
+    "ELEVATED_RISK",
+    "HIGH_IMPACT_EVENT",
+    "VOLATILITY_EXPANSION",
+    "LIQUIDITY_WARNING",
+    "RISK_OFF",
+    "UNSTABLE",
+    "LOCKDOWN"
+  ],
+  "event_awareness": [
+    "CPI placeholder",
+    "FOMC placeholder",
+    "NFP placeholder",
+    "ECB placeholder",
+    "BOJ placeholder",
+    "session overlap awareness",
+    "pre-event caution window",
+    "post-event stabilization window"
+  ],
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "HIGH_IMPACT_EVENT",
+    "macro_state": "ELEVATED_RISK",
+    "volatility_state": "WATCH",
+    "liquidity_state": "NORMAL",
+    "spread_state": "NORMAL",
+    "confidence_state": "CONFIDENCE_SUPPRESSED",
+    "portfolio_state": "WATCH",
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

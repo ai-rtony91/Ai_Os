@@ -1,0 +1,31 @@
+{
+  "guidance_id": "aios_survivability_guidance_example",
+  "guidance_state": "CAUTION",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "macro_state": "ELEVATED_RISK",
+  "portfolio_state": "WATCH",
+  "warning_state": "WATCH",
+  "replay_state": "PARTIAL_SURVIVAL",
+  "next_safe_action": "Reduce simulated exposure and wait for stronger paper evidence.",
+  "guidance_reason": "Survivability pressure is elevated because macro risk and replay weakness are both active.",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "recommendations": [
+    "reduce simulated exposure",
+    "wait for replay recovery",
+    "require additional evidence",
+    "avoid unstable edge",
+    "reduce confidence",
+    "avoid concentrated portfolio risk",
+    "wait for macro stabilization",
+    "maintain paper-only mode"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "hidden_live_routing_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

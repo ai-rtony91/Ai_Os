@@ -1,0 +1,40 @@
+{
+  "telemetry_id": "aios_macro_warning_telemetry_001",
+  "telemetry_fields_supported": [
+    "event_risk_state",
+    "macro_state",
+    "volatility_state",
+    "liquidity_state",
+    "spread_state",
+    "confidence_state",
+    "portfolio_state",
+    "freeze_triggered",
+    "lockdown_triggered",
+    "paper_only_status"
+  ],
+  "macro_states_supported": [
+    "NORMAL",
+    "ELEVATED_RISK",
+    "HIGH_IMPACT_EVENT",
+    "VOLATILITY_EXPANSION",
+    "LIQUIDITY_WARNING",
+    "RISK_OFF",
+    "UNSTABLE",
+    "LOCKDOWN"
+  ],
+  "event_risk_state": "MACRO_WATCH",
+  "macro_state": "ELEVATED_RISK",
+  "volatility_state": "WATCH",
+  "liquidity_state": "WATCH",
+  "spread_state": "NORMAL",
+  "confidence_state": "CONFIDENCE_REDUCED",
+  "portfolio_state": "WATCH",
+  "freeze_triggered": false,
+  "lockdown_triggered": false,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

@@ -1,0 +1,27 @@
+{
+  "view_id": "aios_replay_stress_visibility_example",
+  "confidence_state": "CONFIDENCE_FROZEN",
+  "edge_state": "WEAK_EDGE",
+  "macro_state": "VOLATILITY_EXPANSION",
+  "portfolio_state": "WATCH",
+  "replay_state": "FAILED",
+  "warning_state": "UNSTABLE",
+  "freeze_triggered": true,
+  "lockdown_triggered": false,
+  "explanation_reason": "Replay failed under volatility expansion, so confidence remains frozen and unstable promotion is blocked.",
+  "visual_explanations": [
+    "why replay failed",
+    "why confidence froze",
+    "why edge degraded"
+  ],
+  "dashboard_concepts": [
+    "replay survivability visibility",
+    "visible confidence degradation",
+    "edge decay visibility"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "network_routing_status": "BLOCKED"
+}
+

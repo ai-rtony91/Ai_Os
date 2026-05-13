@@ -1,0 +1,42 @@
+{
+  "model_id": "aios_news_risk_classification_001",
+  "model_type": "NEWS_RISK_CLASSIFICATION_PLACEHOLDER",
+  "macro_state": "UNSTABLE",
+  "classification_boundary": "risk-awareness only, no autonomous headline trading",
+  "event_awareness": [
+    "CPI placeholder",
+    "FOMC placeholder",
+    "NFP placeholder",
+    "ECB placeholder",
+    "BOJ placeholder",
+    "pre-event caution window",
+    "post-event stabilization window"
+  ],
+  "risk_reactions": [
+    "reduce confidence",
+    "freeze confidence increases",
+    "reduce simulated size",
+    "reduce portfolio exposure",
+    "suppress unstable pair ranking",
+    "activate WATCH state",
+    "activate LOCKDOWN during severe instability"
+  ],
+  "telemetry": {
+    "event_risk_state": "NEWS_RISK",
+    "macro_state": "UNSTABLE",
+    "volatility_state": "VOLATILITY_EXPANSION",
+    "liquidity_state": "WATCH",
+    "spread_state": "WIDENING",
+    "confidence_state": "CONFIDENCE_FROZEN",
+    "portfolio_state": "WATCH",
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

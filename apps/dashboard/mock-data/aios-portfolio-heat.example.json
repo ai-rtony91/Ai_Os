@@ -1,0 +1,23 @@
+{
+  "heatmap_id": "aios_portfolio_heat_example",
+  "portfolio_state": "PORTFOLIO_OVERLOAD",
+  "heat_panels": [
+    {
+      "pair": "EUR_USD",
+      "heat_state": "ELEVATED_RISK",
+      "reason": "Correlation and session concentration require exposure reduction."
+    },
+    {
+      "pair": "GBP_USD",
+      "heat_state": "WATCH",
+      "reason": "Similar directional exposure needs monitoring."
+    }
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "execution_controls_status": "BLOCKED",
+  "autonomous_controls_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

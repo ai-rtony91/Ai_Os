@@ -1,0 +1,40 @@
+{
+  "alert_id": "aios_fake_recovery_alert_001",
+  "alert_type": "FAKE_RECOVERY",
+  "warning_state": "CAUTION",
+  "detection_logic": [
+    "detect fake confidence recovery",
+    "detect unstable edge transitions",
+    "detect repeated weak-edge behavior"
+  ],
+  "prevention_actions": [
+    "freeze confidence increases",
+    "reduce ranking priority",
+    "reduce simulated exposure",
+    "reduce recommended paper size",
+    "require stronger confirmations",
+    "block unstable strategy promotion",
+    "trigger WATCH state",
+    "trigger LOCKDOWN state during severe instability"
+  ],
+  "telemetry": {
+    "warning_state": "CAUTION",
+    "edge_state": "UNVERIFIED_RECOVERY",
+    "confidence_state": "RECOVERY_REQUIRED",
+    "drawdown_pressure": 0.36,
+    "volatility_state": "NORMAL",
+    "portfolio_state": "WATCH",
+    "correlation_risk": 0.22,
+    "freeze_triggered": true,
+    "lockdown_triggered": false,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "blocked_reason": "confidence recovery is blocked until multiple paper sessions confirm stability",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "network_call_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED"
+}
+

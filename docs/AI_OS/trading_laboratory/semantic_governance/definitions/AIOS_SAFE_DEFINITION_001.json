@@ -1,0 +1,13 @@
+{
+  "term": "SAFE",
+  "category": "SURVIVABILITY",
+  "definition": "A paper-only condition with controlled risk pressure, no execution leakage, stable evidence, and no critical warning state.",
+  "risk_implications": ["allow paper review", "maintain normal confidence limits"],
+  "related_terms": ["STABLE", "GOOD_EDGE", "RECOVERY"],
+  "validation_triggers": ["live_execution_blocked", "broker_api_blocked", "rolling_stability_present"],
+  "behavioral_effects": ["continue paper-only evaluation", "do not bypass evidence gates"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

@@ -1,0 +1,20 @@
+{
+  "definition_id": "aios_edge_definition_001",
+  "terms": {
+    "GOOD_EDGE": "A paper-tested condition with sufficient evidence, stable expectancy, controlled drawdown, and repeatable behavior.",
+    "WEAK_EDGE": "A condition with limited, unstable, or deteriorating paper evidence.",
+    "NO_EDGE": "A condition where paper evidence does not support strategy trust."
+  },
+  "doctrine_principles": [
+    "strategies must continuously re-prove edge",
+    "edge validation required before confidence increases",
+    "confidence rises slowly and falls quickly",
+    "rolling stability required"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

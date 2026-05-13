@@ -1,0 +1,33 @@
+{
+  "artifact": "AIOS_DRAWDOWN_ANALYSIS_001",
+  "phase": "15",
+  "stage": "15.8",
+  "model_type": "drawdown_analysis",
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "real_execution_status": "BLOCKED",
+  "internet_call_status": "BLOCKED",
+  "self_modifying_logic_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "edge_states": ["NO_EDGE", "WEAK_EDGE", "MODERATE_EDGE", "STRONG_EDGE", "UNVERIFIED"],
+  "metrics": {
+    "expectancy": 0.0,
+    "profit_factor": 0.0,
+    "win_rate": 0.0,
+    "average_win": 0.0,
+    "average_loss": 0.0,
+    "max_drawdown": 0.0,
+    "sample_size": 0,
+    "edge_confidence_score": 0.0,
+    "regime_reliability_score": 0.0,
+    "stability_score": 0.0,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "validation_logic": {
+    "reduce_confidence_during_drawdown_pressure": true,
+    "reject_unstable_strategies": true,
+    "blocked_reason": "drawdown analysis cannot authorize execution"
+  },
+  "edge_state": "UNVERIFIED"
+}

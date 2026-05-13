@@ -1,0 +1,13 @@
+{
+  "term": "GOOD_EDGE",
+  "category": "EDGE",
+  "definition": "A paper-tested condition with positive expectancy, adequate sample size, controlled drawdown, stable regime behavior, and repeatable results.",
+  "risk_implications": ["eligible for paper priority", "confidence may rise slowly with evidence"],
+  "related_terms": ["STABLE", "SAFE", "RECOVERY"],
+  "validation_triggers": ["expectancy_positive", "sample_size_sufficient", "profit_factor_acceptable"],
+  "behavioral_effects": ["allow paper ranking improvement", "require continued validation"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

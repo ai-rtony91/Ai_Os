@@ -1,0 +1,13 @@
+{
+  "term": "DANGEROUS",
+  "category": "RISK",
+  "definition": "A condition where instability, weak edge, macro pressure, portfolio overload, confidence failure, or execution leakage risk can damage survivability.",
+  "risk_implications": ["block promotion", "freeze confidence increases", "reduce simulated exposure"],
+  "related_terms": ["UNSTABLE", "LOCKDOWN", "PORTFOLIO_OVERLOAD", "NO_EDGE"],
+  "validation_triggers": ["drawdown_pressure_high", "edge_state_no_edge", "execution_boundary_violation"],
+  "behavioral_effects": ["activate WATCH or LOCKDOWN", "suppress ranking", "require recovery evidence"],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED"
+}
+

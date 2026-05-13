@@ -1,0 +1,52 @@
+{
+  "model_id": "aios_edge_verification_model_001",
+  "model_type": "EDGE_VERIFICATION",
+  "proof_states_supported": [
+    "UNVERIFIED",
+    "PARTIALLY_VERIFIED",
+    "VERIFIED_PAPER_EDGE",
+    "EDGE_DECAY_DETECTED",
+    "UNSTABLE",
+    "RECOVERY_REQUIRED",
+    "CONFIDENCE_RESTRICTED"
+  ],
+  "verification_logic": [
+    "verify rolling expectancy",
+    "verify rolling stability",
+    "verify drawdown survivability",
+    "verify replay survivability",
+    "verify regime reliability",
+    "verify portfolio survivability",
+    "verify confidence freeze compliance",
+    "detect edge decay",
+    "detect fake recovery",
+    "restrict unstable promotion"
+  ],
+  "telemetry": {
+    "proof_state": "PARTIALLY_VERIFIED",
+    "edge_state": "WEAK_EDGE",
+    "confidence_state": "CONFIDENCE_RESTRICTED",
+    "stability_state": "WATCH",
+    "drawdown_pressure": 0.32,
+    "replay_survivability": "PARTIAL",
+    "regime_reliability": "WATCH",
+    "portfolio_survivability": "SAFE",
+    "freeze_triggered": true,
+    "paper_only_status": "PAPER_ONLY"
+  },
+  "governance_philosophy": [
+    "prove edge before trusting edge",
+    "survivability over aggressive profit",
+    "confidence must be earned slowly",
+    "unstable edge must be distrusted",
+    "replay survival required before promotion",
+    "portfolio survivability prioritized",
+    "skepticism remains permanent"
+  ],
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+

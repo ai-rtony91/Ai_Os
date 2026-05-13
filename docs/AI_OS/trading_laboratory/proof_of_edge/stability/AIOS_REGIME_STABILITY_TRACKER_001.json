@@ -1,0 +1,26 @@
+{
+  "tracker_id": "aios_regime_stability_tracker_001",
+  "tracker_type": "REGIME_STABILITY",
+  "proof_state": "RECOVERY_REQUIRED",
+  "verification_logic": [
+    "verify regime reliability",
+    "verify replay survivability",
+    "verify confidence freeze compliance",
+    "restrict unstable promotion"
+  ],
+  "regime_reliability": "LOW",
+  "regime_shift_detected": true,
+  "edge_state": "UNSTABLE",
+  "confidence_state": "CONFIDENCE_RESTRICTED",
+  "stability_state": "UNSTABLE",
+  "drawdown_pressure": 0.57,
+  "replay_survivability": "FAILED",
+  "portfolio_survivability": "WATCH",
+  "freeze_triggered": true,
+  "paper_only_status": "PAPER_ONLY",
+  "live_execution_status": "BLOCKED",
+  "broker_api_status": "BLOCKED",
+  "autonomous_execution_status": "BLOCKED",
+  "network_order_routing_status": "BLOCKED"
+}
+
