@@ -80,9 +80,37 @@ Allowed focus outputs are:
 
 When evidence is weak or tied, the scanner returns `UNKNOWN`.
 
-The scanner also emits a `security_warnings` array. Warnings report only the warning type and relative path. The scanner must not print actual secret values.
+The scanner also emits a `security_warnings` array. Warnings report only the warning type, severity, category, and relative path. The scanner must not print actual secret values and must not include matched secret text.
 
 Security warning evidence is limited to local repo evidence such as `.env` files, API key wording, secret/token/password wording, broker/OANDA/live execution wording, `git add .`, destructive command wording, and protected root file changes from `git status --short`.
+
+Phase 16.7 separates warning noise into explicit classes:
+
+- `secret_material`
+- `secret_wording`
+- `execution_boundary`
+- `git_safety`
+- `destructive_command`
+- `protected_file_status`
+- `policy_reference`
+
+Severity levels are:
+
+- `HIGH`
+- `MEDIUM`
+- `LOW`
+- `INFO`
+
+Broker, OANDA, and live execution wording belongs to `execution_boundary`, not `secret_material`. Protected root file changes belong to `protected_file_status`, not secret scanning. Normal policy-only documentation references are downgraded or suppressed so safety docs do not overwhelm actionable warning output.
+
+The snapshot summary includes:
+
+- `security_warning_count`
+- `high_risk_count`
+- `medium_risk_count`
+- `low_risk_count`
+- `info_count`
+- `suppressed_policy_mentions`
 
 ## Validation
 

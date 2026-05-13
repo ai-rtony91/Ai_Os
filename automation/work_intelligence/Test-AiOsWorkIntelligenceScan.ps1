@@ -166,14 +166,62 @@ if (Test-Path -LiteralPath $scannerPath) {
       Add-Failure "Scanner missing required field: $requiredField"
     }
   }
+  foreach ($requiredField in @("security_warning_count", "high_risk_count", "medium_risk_count", "low_risk_count", "info_count", "suppressed_policy_mentions")) {
+    if (-not $scannerText.Contains($requiredField)) {
+      Add-Failure "Scanner missing security summary field: $requiredField"
+    }
+  }
+  foreach ($severity in @("HIGH", "MEDIUM", "LOW", "INFO")) {
+    if (-not $scannerText.Contains($severity)) {
+      Add-Failure "Scanner missing severity level: $severity"
+    }
+  }
+  foreach ($category in @("secret_material", "secret_wording", "execution_boundary", "git_safety", "destructive_command", "protected_file_status", "policy_reference")) {
+    if (-not $scannerText.Contains($category)) {
+      Add-Failure "Scanner missing security warning category: $category"
+    }
+  }
   foreach ($allowedFocus in @("Work Intelligence", "Operator Orchestration", "Trading Lab", "Dashboard UI", "UNKNOWN")) {
     if (-not $scannerText.Contains($allowedFocus)) {
       Add-Failure "Scanner missing allowed focus fallback/value: $allowedFocus"
     }
   }
-  if (-not $scannerText.Contains("warning_type") -or -not $scannerText.Contains("path =")) {
-    Add-Failure "Security warnings must include warning_type and path only."
+  foreach ($warningProperty in @("warning_type", "severity", "category", "path =")) {
+    if (-not $scannerText.Contains($warningProperty)) {
+      Add-Failure "Security warnings must include $warningProperty."
+    }
   }
+  if ($scannerText -notmatch "suppressedPolicyMentions") {
+    Add-Failure "Scanner missing policy-only warning suppression counter."
+  }
+}
+
+try {
+  $scanJson = powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Invoke-AiOsWorkIntelligenceScan.ps1
+  $scan = $scanJson | ConvertFrom-Json
+  foreach ($requiredField in @("security_warning_count", "high_risk_count", "medium_risk_count", "low_risk_count", "info_count", "suppressed_policy_mentions")) {
+    if (-not ($scan.PSObject.Properties.Name -contains $requiredField)) {
+      Add-Failure "Scan output missing security summary field: $requiredField"
+    }
+  }
+  if ($scan.security_warning_count -ne @($scan.security_warnings).Count) {
+    Add-Failure "security_warning_count does not match security_warnings length."
+  }
+  foreach ($warning in @($scan.security_warnings)) {
+    foreach ($requiredWarningField in @("warning_type", "severity", "category", "path")) {
+      if (-not ($warning.PSObject.Properties.Name -contains $requiredWarningField)) {
+        Add-Failure "Security warning missing field: $requiredWarningField"
+      }
+    }
+    if (@("HIGH", "MEDIUM", "LOW", "INFO") -notcontains $warning.severity) {
+      Add-Failure "Security warning has invalid severity: $($warning.severity)"
+    }
+    if (@("secret_material", "secret_wording", "execution_boundary", "git_safety", "destructive_command", "protected_file_status", "policy_reference") -notcontains $warning.category) {
+      Add-Failure "Security warning has invalid category: $($warning.category)"
+    }
+  }
+} catch {
+  Add-Failure "Scanner output validation failed: $($_.Exception.Message)"
 }
 
 if ($failures.Count -gt 0) {

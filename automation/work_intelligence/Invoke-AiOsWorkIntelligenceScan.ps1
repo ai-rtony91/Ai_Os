@@ -236,12 +236,58 @@ function Add-SecurityWarning {
   param(
     [System.Collections.Generic.List[object]]$Warnings,
     [string]$Type,
+    [string]$Severity,
+    [string]$Category,
     [string]$Path
   )
+  $allowedSeverities = @("HIGH", "MEDIUM", "LOW", "INFO")
+  $allowedCategories = @("secret_material", "secret_wording", "execution_boundary", "git_safety", "destructive_command", "protected_file_status", "policy_reference")
+  if ($allowedSeverities -notcontains $Severity) {
+    throw "Unknown security warning severity: $Severity"
+  }
+  if ($allowedCategories -notcontains $Category) {
+    throw "Unknown security warning category: $Category"
+  }
   $Warnings.Add([pscustomobject]@{
     warning_type = $Type
+    severity = $Severity
+    category = $Category
     path = $Path
   }) | Out-Null
+}
+
+function Test-PolicyReferencePath {
+  param([string]$Path)
+  $normalized = ($Path -replace "\\", "/").ToLowerInvariant()
+  return (
+    $normalized -match "^docs/" -or
+    $normalized -match "^reports/" -or
+    $normalized -match "readme" -or
+    $normalized -match "policy" -or
+    $normalized -match "workflow" -or
+    $normalized -match "contract" -or
+    $normalized -match "safety" -or
+    $normalized -match "governance"
+  )
+}
+
+function New-SecurityWarningSummary {
+  param(
+    [object[]]$Warnings,
+    [int]$SuppressedPolicyMentions
+  )
+  $high = @($Warnings | Where-Object { $_.severity -eq "HIGH" }).Count
+  $medium = @($Warnings | Where-Object { $_.severity -eq "MEDIUM" }).Count
+  $low = @($Warnings | Where-Object { $_.severity -eq "LOW" }).Count
+  $info = @($Warnings | Where-Object { $_.severity -eq "INFO" }).Count
+  return [pscustomobject]@{
+    security_warning_count = @($Warnings).Count
+    high_risk_count = $high
+    medium_risk_count = $medium
+    low_risk_count = $low
+    info_count = $info
+    suppressed_policy_mentions = $SuppressedPolicyMentions
+  }
 }
 
 function Get-SecurityWarnings {
@@ -251,11 +297,12 @@ function Get-SecurityWarnings {
     [string[]]$ProtectedFiles
   )
   $warnings = New-Object System.Collections.Generic.List[object]
+  $suppressedPolicyMentions = 0
   $textExtensions = @(".ps1", ".json", ".md", ".txt", ".csv", ".yml", ".yaml", ".js", ".html", ".css")
   foreach ($file in @($Files)) {
     $relative = Get-RelativePath -Item $file
     if ($relative -match "(^|/)\.env($|\.|/)") {
-      Add-SecurityWarning -Warnings $warnings -Type ".env file present" -Path $relative
+      Add-SecurityWarning -Warnings $warnings -Type ".env file present" -Severity "HIGH" -Category "secret_material" -Path $relative
     }
     if ($textExtensions -notcontains $file.Extension.ToLowerInvariant()) {
       continue
@@ -264,20 +311,38 @@ function Get-SecurityWarnings {
     if ([string]::IsNullOrWhiteSpace($content)) {
       continue
     }
-    if ($content -match "(?i)api[_ -]?key") {
-      Add-SecurityWarning -Warnings $warnings -Type "API key wording" -Path $relative
+
+    $isPolicyReference = Test-PolicyReferencePath -Path $relative
+    $hasSecretWording = $content -match "(?i)(api[_ -]?key|\b(secret|token|password)\b)"
+    $hasExecutionBoundaryWording = $content -match "(?i)\b(broker|oanda|live execution)\b"
+    $hasLikelySecretMaterial = (
+      $relative -match "(^|/)\.env($|\.|/)" -or
+      $content -match '(?i)(api[_ -]?key|secret|token|password)\s*[:=]\s*[''"][^''"]{8,}' -or
+      $content -match "(?i)(bearer\s+[a-z0-9._~+/=-]{16,}|akia[0-9a-z]{16})"
+    )
+
+    if ($hasLikelySecretMaterial) {
+      Add-SecurityWarning -Warnings $warnings -Type "possible secret material present" -Severity "HIGH" -Category "secret_material" -Path $relative
+    } elseif ($hasSecretWording) {
+      if ($isPolicyReference) {
+        $suppressedPolicyMentions += 1
+      } else {
+        Add-SecurityWarning -Warnings $warnings -Type "secret/API/token wording" -Severity "LOW" -Category "secret_wording" -Path $relative
+      }
     }
-    if ($content -match "(?i)\b(secret|token|password)\b") {
-      Add-SecurityWarning -Warnings $warnings -Type "secret/token/password wording" -Path $relative
-    }
-    if ($content -match "(?i)\b(broker|oanda|live execution)\b") {
-      Add-SecurityWarning -Warnings $warnings -Type "broker/OANDA/live execution wording" -Path $relative
+
+    if ($hasExecutionBoundaryWording) {
+      if ($isPolicyReference) {
+        $suppressedPolicyMentions += 1
+      } else {
+        Add-SecurityWarning -Warnings $warnings -Type "broker/OANDA/live execution wording" -Severity "MEDIUM" -Category "execution_boundary" -Path $relative
+      }
     }
     if ($content -match "(?i)git\s+add\s+\.") {
-      Add-SecurityWarning -Warnings $warnings -Type "git add dot wording" -Path $relative
+      Add-SecurityWarning -Warnings $warnings -Type "git add dot wording" -Severity "MEDIUM" -Category "git_safety" -Path $relative
     }
     if ($content -match "(?i)\b(rm\s+-rf|remove-item\s+-recurse|git\s+reset\s+--hard|del\s+/s)\b") {
-      Add-SecurityWarning -Warnings $warnings -Type "destructive command wording" -Path $relative
+      Add-SecurityWarning -Warnings $warnings -Type "destructive command wording" -Severity "HIGH" -Category "destructive_command" -Path $relative
     }
   }
 
@@ -286,12 +351,16 @@ function Get-SecurityWarnings {
     $path = ($line.Substring(3).Trim() -replace "\\", "/")
     foreach ($protected in $ProtectedFiles) {
       if ($path -ieq ($protected -replace "\\", "/")) {
-        Add-SecurityWarning -Warnings $warnings -Type "protected root file change" -Path $path
+        Add-SecurityWarning -Warnings $warnings -Type "protected root file change" -Severity "MEDIUM" -Category "protected_file_status" -Path $path
       }
     }
   }
 
-  return @($warnings | Sort-Object warning_type, path -Unique)
+  $sortedWarnings = @($warnings | Sort-Object warning_type, severity, category, path -Unique)
+  return [pscustomobject]@{
+    warnings = $sortedWarnings
+    summary = (New-SecurityWarningSummary -Warnings $sortedWarnings -SuppressedPolicyMentions $suppressedPolicyMentions)
+  }
 }
 
 $gitBranch = Get-CommandText "git branch --show-current"
@@ -334,7 +403,9 @@ $unresolvedTodos = Count-Marker "TODO"
 $unresolvedFixmes = Count-Marker "FIXME"
 $recentFiles = @($allFiles | Where-Object { $_.FullName -notmatch "\\.git\\" } | Sort-Object LastWriteTime -Descending | Select-Object -First 25)
 $focusDetection = Get-FocusDetection -RecentFiles $recentFiles -CheckpointRefs $latestCheckpointRefs -ReportRefs $latestReportRefs -TodoCount $unresolvedTodos
-$securityWarnings = Get-SecurityWarnings -Files $allFiles -GitStatusText $gitStatusShort -ProtectedFiles @($config.protected_files)
+$securityWarningResult = Get-SecurityWarnings -Files $allFiles -GitStatusText $gitStatusShort -ProtectedFiles @($config.protected_files)
+$securityWarnings = @($securityWarningResult.warnings)
+$securityWarningSummary = $securityWarningResult.summary
 
 $snapshot = [pscustomobject]@{
   schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2"
@@ -371,6 +442,12 @@ $snapshot = [pscustomobject]@{
   recommended_next_workload = $focusDetection.recommended_next_workload
   focus_evidence_sources = $focusDetection.focus_evidence_sources
   security_warnings = $securityWarnings
+  security_warning_count = $securityWarningSummary.security_warning_count
+  high_risk_count = $securityWarningSummary.high_risk_count
+  medium_risk_count = $securityWarningSummary.medium_risk_count
+  low_risk_count = $securityWarningSummary.low_risk_count
+  info_count = $securityWarningSummary.info_count
+  suppressed_policy_mentions = $securityWarningSummary.suppressed_policy_mentions
   current_operator_phase = "UNKNOWN"
   next_safe_action = "Review this read-only snapshot and run the work intelligence validator."
 }
