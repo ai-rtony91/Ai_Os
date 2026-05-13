@@ -1,19 +1,15 @@
 # AI_OS Codex Worker Launcher v1
 
 Purpose:
-Launch 4 positioned governed Codex workers.
+Launch 4 governed Codex workers using a JSON layout profile.
 
-Layout:
-Left-side 2x2 Codex grid for 3440x1440 ultrawide.
+Active Layout:
+CODEX_4_WORKER_LEFT_VERTICAL_STACK_3440x1440
 
-Workers:
-- AIOS-01-DEVOPS = top-left
-- AIOS-02-TRADING_LAB = top-right
-- AIOS-03-VALIDATOR = bottom-left
-- AIOS-04-TELEMETRY = bottom-right
-
-Window Size:
-860x700
+Screen Role:
+- Left side: 4 slim Codex workers
+- Center: ChatGPT / dashboard / charts
+- Right side: operator PowerShell / monitoring
 
 Safety:
 - no autonomous commits
@@ -21,3 +17,6 @@ Safety:
 - no autonomous deploys
 - no broker execution
 - paper-only trading workflow
+
+Note:
+Window placement values now live in the JSON layout profile, not hardcoded directly inside the launcher.

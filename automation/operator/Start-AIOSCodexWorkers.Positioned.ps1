@@ -9,7 +9,7 @@ public class Win32 {
 "@
 
 $Repo = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
-$LayoutPath = Join-Path $Repo "automation\operator\layout_profiles\CODEX_4_WORKER_LEFT_2X2_3440x1440.json"
+$LayoutPath = Join-Path $Repo "automation\operator\layout_profiles\CODEX_4_WORKER_LEFT_VERTICAL_STACK_3440x1440.json"
 
 if (!(Test-Path $Repo)) {
     Write-Host "BLOCKED: Canonical repo missing." -ForegroundColor Red
