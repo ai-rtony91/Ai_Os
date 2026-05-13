@@ -1,5 +1,6 @@
 param(
-  [string]$ConfigPath = "automation/work_intelligence/AIOS_WORK_INTELLIGENCE_CONFIG.json"
+  [string]$ConfigPath = "automation/work_intelligence/AIOS_WORK_INTELLIGENCE_CONFIG.json",
+  [switch]$SaveSnapshot
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,6 +30,18 @@ function Count-Files {
 
 function ConvertTo-SafeFileTimestamp {
   return (Get-Date).ToString("yyyyMMdd_HHmmss")
+}
+
+function Save-DailySnapshot {
+  param(
+    [pscustomobject]$Snapshot,
+    [string]$OutputDirectory
+  )
+  $snapshotDir = Join-Path $RepoRoot $OutputDirectory
+  New-Item -ItemType Directory -Force -Path $snapshotDir | Out-Null
+  $snapshotPath = Join-Path $snapshotDir ("DAILY_WORK_INTELLIGENCE_SNAPSHOT_{0}.json" -f (ConvertTo-SafeFileTimestamp))
+  $Snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $snapshotPath -Encoding UTF8
+  return $snapshotPath
 }
 
 function Get-LatestFileRefs {
@@ -130,11 +143,9 @@ $snapshot = [pscustomobject]@{
   next_safe_action = "Review this read-only snapshot and run the work intelligence validator."
 }
 
-if ($config.scanner.save_to_reports_enabled -eq $true) {
-  $snapshotDir = Join-Path $RepoRoot $config.snapshot_output_directory
-  New-Item -ItemType Directory -Force -Path $snapshotDir | Out-Null
-  $snapshotPath = Join-Path $snapshotDir ("DAILY_WORK_INTELLIGENCE_SNAPSHOT_{0}.json" -f (ConvertTo-SafeFileTimestamp))
-  $snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $snapshotPath -Encoding UTF8
+if ($SaveSnapshot -or $config.scanner.save_to_reports_enabled -eq $true) {
+  $savedSnapshotPath = Save-DailySnapshot -Snapshot $snapshot -OutputDirectory $config.snapshot_output_directory
+  Write-Host "Saved daily work intelligence snapshot: $savedSnapshotPath" -ForegroundColor Green
 }
 
 if ($config.scanner.telemetry_append_enabled -eq $true) {

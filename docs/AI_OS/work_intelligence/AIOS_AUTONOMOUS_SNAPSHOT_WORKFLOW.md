@@ -22,6 +22,14 @@ The scanner always builds an in-memory snapshot object. When report saving is ex
 Reports/work_intelligence/daily/
 ```
 
+To write one real daily snapshot without changing the safe default config, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Invoke-AiOsWorkIntelligenceScan.ps1 -SaveSnapshot
+```
+
+`-SaveSnapshot` writes only the daily JSON snapshot. It does not append telemetry metrics and does not generate the operator briefing.
+
 ## Telemetry Metrics
 
 When telemetry append is explicitly enabled, the scanner appends one CSV row to:

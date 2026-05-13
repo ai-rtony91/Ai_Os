@@ -1,0 +1,76 @@
+﻿{
+    "schema":  "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2",
+    "timestamp":  "2026-05-13T06:50:34.3597449-04:00",
+    "read_only":  true,
+    "repo_root":  "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "branch":  "main",
+    "clean_git_status":  false,
+    "git_clean":  false,
+    "git_status_short":  "M automation/work_intelligence/AIOS_WORK_INTELLIGENCE_CONFIG.json\r\n M automation/work_intelligence/Invoke-AiOsWorkIntelligenceScan.ps1\r\n M automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1\r\n M docs/AI_OS/work_intelligence/AIOS_AUTONOMOUS_SNAPSHOT_WORKFLOW.md",
+    "latest_commit":  "2c6cf91 Add autonomous work intelligence snapshots",
+    "total_files":  1885,
+    "total_folders":  336,
+    "total_reports":  242,
+    "total_validators":  123,
+    "total_checkpoints":  76,
+    "total_scripts":  160,
+    "total_automation_scripts":  160,
+    "total_json_files":  455,
+    "total_markdown_files":  905,
+    "worker_lane_count":  8,
+    "worker_report_count":  0,
+    "unresolved_todos":  31,
+    "unresolved_fixmes":  10,
+    "unresolved_todo_markers":  31,
+    "unresolved_fixme_markers":  10,
+    "worker_report_presence":  "MISSING",
+    "validation_health":  "UNKNOWN_UNTIL_VALIDATOR_RUN",
+    "latest_checkpoint_reference":  "Reports\\checkpoints\\CHECKPOINT_PHASE_14_14_STRATEGY_MEMORY.md",
+    "latest_checkpoint_references":  [
+                                         {
+                                             "path":  "Reports\\checkpoints\\CHECKPOINT_PHASE_14_14_STRATEGY_MEMORY.md",
+                                             "last_write_time":  "2026-05-12T19:30:18.5246092-04:00"
+                                         },
+                                         {
+                                             "path":  "Reports\\checkpoints\\CHECKPOINT_PHASE_14_13_MARKET_REGIME.md",
+                                             "last_write_time":  "2026-05-12T17:33:31.0191233-04:00"
+                                         },
+                                         {
+                                             "path":  "Reports\\checkpoints\\CHECKPOINT_PHASE_14_12_EDGE_VALIDATION.md",
+                                             "last_write_time":  "2026-05-12T17:32:00.7249530-04:00"
+                                         },
+                                         {
+                                             "path":  "Reports\\checkpoints\\CHECKPOINT_PHASE_14_11_PAPER_ROUTE_REPLAY.md",
+                                             "last_write_time":  "2026-05-12T16:46:30.1573690-04:00"
+                                         },
+                                         {
+                                             "path":  "Reports\\checkpoints\\CHECKPOINT_PHASE_14_8_PAPER_ROUTE_EVIDENCE.md",
+                                             "last_write_time":  "2026-05-12T13:47:09.2701697-04:00"
+                                         }
+                                     ],
+    "latest_report_references":  [
+                                     {
+                                         "path":  "Reports\\work_intelligence\\MASTER_OPERATOR_BRIEFING.example.md",
+                                         "last_write_time":  "2026-05-13T06:43:49.5675947-04:00"
+                                     },
+                                     {
+                                         "path":  "Reports\\work_intelligence\\telemetry\\WORK_INTELLIGENCE_METRICS.example.csv",
+                                         "last_write_time":  "2026-05-13T06:43:49.4865537-04:00"
+                                     },
+                                     {
+                                         "path":  "Reports\\work_intelligence\\daily\\DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
+                                         "last_write_time":  "2026-05-13T06:43:49.4066899-04:00"
+                                     },
+                                     {
+                                         "path":  "Reports\\work_intelligence\\telemetry\\.gitkeep",
+                                         "last_write_time":  "2026-05-13T06:43:49.3313270-04:00"
+                                     },
+                                     {
+                                         "path":  "Reports\\work_intelligence\\daily\\.gitkeep",
+                                         "last_write_time":  "2026-05-13T06:43:49.2526416-04:00"
+                                     }
+                                 ],
+    "current_focus_area":  "UNKNOWN",
+    "current_operator_phase":  "UNKNOWN",
+    "next_safe_action":  "Review this read-only snapshot and run the work intelligence validator."
+}

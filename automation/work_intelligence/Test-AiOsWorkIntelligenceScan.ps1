@@ -127,6 +127,9 @@ if (Test-Path -LiteralPath $configFullPath) {
   if ($config.scanner.save_to_reports_enabled -ne $false) {
     Add-Failure "save_to_reports_enabled must be false by default."
   }
+  if ($config.scanner.manual_save_snapshot_flag -ne "-SaveSnapshot") {
+    Add-Failure "manual_save_snapshot_flag must be -SaveSnapshot."
+  }
   if ($config.scanner.telemetry_append_enabled -ne $false) {
     Add-Failure "telemetry_append_enabled must be false by default."
   }
