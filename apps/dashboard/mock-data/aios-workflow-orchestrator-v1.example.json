@@ -1,0 +1,55 @@
+{
+  "schema": "AIOS_WORKFLOW_ORCHESTRATOR.v1",
+  "mode": "DRY_RUN_OPERATOR_APPROVED_ONLY",
+  "generated_at": "2026-05-13T00:00:00-04:00",
+  "purpose": "Connect operator workflow inputs into one next-action packet without applying, committing, pushing, or trading.",
+  "systems_connected": [
+    "work_queue",
+    "worker_assignment",
+    "dry_run_report_collection",
+    "approval_inbox",
+    "validator_chain",
+    "controlled_apply_lane",
+    "commit_package_builder",
+    "final_git_status_check"
+  ],
+  "input_paths": {
+    "worker_registry": "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+    "work_queue": "apps/dashboard/mock-data/work-intelligence-queue-v1.example.json",
+    "approval_inbox": "apps/dashboard/mock-data/aios-approval-inbox-v1.example.json",
+    "validator_chain": "apps/dashboard/mock-data/aios-validator-chain-v1.example.json",
+    "controlled_apply_queue": "automation/operator/AIOS_CONTROLLED_APPLY_QUEUE.example.json",
+    "commit_package": "automation/operator/AIOS_PHASE_27_COMMIT_PACKAGE.example.json",
+    "worker_reports": "Reports/operator/worker-reports"
+  },
+  "output_paths": {
+    "operator_packet": "Reports/operator/AIOS_OPERATOR_NEXT_ACTION_PACKET.md"
+  },
+  "operator_packet_sections": [
+    "current_repo_status",
+    "active_worker_lanes",
+    "work_queue",
+    "dry_run_report_collection",
+    "pending_approvals",
+    "validation_status",
+    "controlled_apply_lane",
+    "commit_package",
+    "blocked_reasons",
+    "exact_files_ready_for_apply",
+    "exact_files_ready_for_commit",
+    "next_safe_action",
+    "safety_boundary"
+  ],
+  "blocked_actions": {
+    "autonomous_apply": true,
+    "autonomous_commit": true,
+    "autonomous_push": true,
+    "git_add_dot": true,
+    "broker_connection": true,
+    "live_trading": true,
+    "api_keys": true,
+    "secrets": true,
+    "protected_root_file_edits": true
+  },
+  "next_safe_action": "Run the orchestrator to generate the operator packet, then request explicit approval for any APPLY, commit, or push action."
+}
