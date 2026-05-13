@@ -2,15 +2,6 @@ param(
     [string]$Profile = "CODEX_08"
 )
 
-Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-public class Win32 {
-    [DllImport("user32.dll")]
-    public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool Repaint);
-}
-"@
-
 $Repo = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
 
 $Profiles = @{
@@ -51,24 +42,7 @@ codex --cd '$Repo'
         $Encoded
     )
 
-    for ($i = 0; $i -lt 30; $i++) {
-        if ($Process.MainWindowHandle -ne 0) { break }
-        Start-Sleep -Milliseconds 250
-    }
-
-    if ($Process.MainWindowHandle -ne 0) {
-        [Win32]::MoveWindow(
-            $Process.MainWindowHandle,
-            [int]$Worker.x,
-            [int]$Worker.y,
-            [int]$Worker.width,
-            [int]$Worker.height,
-            $true
-        ) | Out-Null
-        Write-Host "MOVED $Title to X=$($Worker.x) Y=$($Worker.y)" -ForegroundColor Green
-    } else {
-        Write-Host "WARN: could not move $Title" -ForegroundColor Yellow
-    }
+    Write-Host "LAUNCHED $Title" -ForegroundColor Green
 
     Start-Sleep -Milliseconds 700
 }
