@@ -161,6 +161,19 @@ if (Test-Path -LiteralPath $scannerPath) {
   if (-not $scannerText.Contains('[switch]$GenerateBriefing')) {
     Add-Failure "Scanner missing GenerateBriefing switch."
   }
+  foreach ($requiredField in @("current_focus_area", "active_subsystem", "recommended_next_workload", "focus_evidence_sources", "security_warnings")) {
+    if (-not $scannerText.Contains($requiredField)) {
+      Add-Failure "Scanner missing required field: $requiredField"
+    }
+  }
+  foreach ($allowedFocus in @("Work Intelligence", "Operator Orchestration", "Trading Lab", "Dashboard UI", "UNKNOWN")) {
+    if (-not $scannerText.Contains($allowedFocus)) {
+      Add-Failure "Scanner missing allowed focus fallback/value: $allowedFocus"
+    }
+  }
+  if (-not $scannerText.Contains("warning_type") -or -not $scannerText.Contains("path =")) {
+    Add-Failure "Security warnings must include warning_type and path only."
+  }
 }
 
 if ($failures.Count -gt 0) {

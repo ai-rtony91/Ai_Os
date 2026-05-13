@@ -106,6 +106,194 @@ function Count-Marker {
   return @($matches).Count
 }
 
+function Get-RelativePath {
+  param([System.IO.FileSystemInfo]$Item)
+  return ($Item.FullName.Substring($RepoRoot.Length + 1) -replace "\\", "/")
+}
+
+function Add-FocusScore {
+  param(
+    [hashtable]$Scores,
+    [System.Collections.Generic.List[object]]$Evidence,
+    [string]$Focus,
+    [string]$Subsystem,
+    [string]$Path,
+    [string]$Reason
+  )
+  if (-not $Scores.ContainsKey($Focus)) {
+    $Scores[$Focus] = 0
+  }
+  $Scores[$Focus] += 1
+  $Evidence.Add([pscustomobject]@{
+    focus = $Focus
+    subsystem = $Subsystem
+    path = $Path
+    reason = $Reason
+  }) | Out-Null
+}
+
+function Get-FocusSignalForPath {
+  param([string]$Path)
+  $normalized = ($Path -replace "\\", "/").ToLowerInvariant()
+  if ($normalized -match "work_intelligence") {
+    return @{ focus = "Work Intelligence"; subsystem = "work_intelligence" }
+  }
+  if ($normalized -match "automation/operator|docs/ai_os/operator|reports/operator") {
+    return @{ focus = "Operator Orchestration"; subsystem = "operator" }
+  }
+  if ($normalized -match "trading_lab|trading_laboratory|reports/trading_lab") {
+    return @{ focus = "Trading Lab"; subsystem = "trading_lab" }
+  }
+  if ($normalized -match "apps/dashboard") {
+    return @{ focus = "Dashboard UI"; subsystem = "dashboard" }
+  }
+  return $null
+}
+
+function Get-FocusRecommendation {
+  param(
+    [string]$Focus,
+    [int]$TodoCount
+  )
+  switch ($Focus) {
+    "Work Intelligence" { return "Review latest operator voice briefing." }
+    "Operator Orchestration" { return "Run morning startup flow." }
+    "Trading Lab" { return "Prepare next DRY_RUN workload." }
+    "Dashboard UI" { return "Review dashboard validation and preview." }
+    default {
+      if ($TodoCount -gt 0) {
+        return "Review unresolved TODO markers."
+      }
+      return "UNKNOWN"
+    }
+  }
+}
+
+function Get-FocusDetection {
+  param(
+    [object[]]$RecentFiles,
+    [object[]]$CheckpointRefs,
+    [object[]]$ReportRefs,
+    [int]$TodoCount
+  )
+  $scores = @{}
+  $evidence = New-Object System.Collections.Generic.List[object]
+
+  foreach ($file in @($RecentFiles)) {
+    $relative = Get-RelativePath -Item $file
+    $signal = Get-FocusSignalForPath -Path $relative
+    if ($signal) {
+      Add-FocusScore -Scores $scores -Evidence $evidence -Focus $signal.focus -Subsystem $signal.subsystem -Path $relative -Reason "recent_file"
+    }
+  }
+
+  foreach ($ref in @($CheckpointRefs)) {
+    $signal = Get-FocusSignalForPath -Path $ref.path
+    if ($signal) {
+      Add-FocusScore -Scores $scores -Evidence $evidence -Focus $signal.focus -Subsystem $signal.subsystem -Path $ref.path -Reason "latest_checkpoint"
+    }
+  }
+
+  foreach ($ref in @($ReportRefs)) {
+    $signal = Get-FocusSignalForPath -Path $ref.path
+    if ($signal) {
+      Add-FocusScore -Scores $scores -Evidence $evidence -Focus $signal.focus -Subsystem $signal.subsystem -Path $ref.path -Reason "latest_report"
+    }
+  }
+
+  if ($scores.Count -eq 0) {
+    return [pscustomobject]@{
+      current_focus_area = "UNKNOWN"
+      active_subsystem = "UNKNOWN"
+      recommended_next_workload = (Get-FocusRecommendation -Focus "UNKNOWN" -TodoCount $TodoCount)
+      focus_evidence_sources = @()
+    }
+  }
+
+  $ranked = @($scores.GetEnumerator() | Sort-Object Value -Descending)
+  $top = $ranked[0]
+  $isTie = $ranked.Count -gt 1 -and $ranked[1].Value -eq $top.Value
+  if ($top.Value -lt 2 -or $isTie) {
+    return [pscustomobject]@{
+      current_focus_area = "UNKNOWN"
+      active_subsystem = "UNKNOWN"
+      recommended_next_workload = (Get-FocusRecommendation -Focus "UNKNOWN" -TodoCount $TodoCount)
+      focus_evidence_sources = @($evidence)
+    }
+  }
+
+  $topEvidence = @($evidence | Where-Object { $_.focus -eq $top.Key })
+  $subsystem = if ($topEvidence.Count -gt 0) { $topEvidence[0].subsystem } else { "UNKNOWN" }
+  return [pscustomobject]@{
+    current_focus_area = $top.Key
+    active_subsystem = $subsystem
+    recommended_next_workload = (Get-FocusRecommendation -Focus $top.Key -TodoCount $TodoCount)
+    focus_evidence_sources = $topEvidence
+  }
+}
+
+function Add-SecurityWarning {
+  param(
+    [System.Collections.Generic.List[object]]$Warnings,
+    [string]$Type,
+    [string]$Path
+  )
+  $Warnings.Add([pscustomobject]@{
+    warning_type = $Type
+    path = $Path
+  }) | Out-Null
+}
+
+function Get-SecurityWarnings {
+  param(
+    [object[]]$Files,
+    [string]$GitStatusText,
+    [string[]]$ProtectedFiles
+  )
+  $warnings = New-Object System.Collections.Generic.List[object]
+  $textExtensions = @(".ps1", ".json", ".md", ".txt", ".csv", ".yml", ".yaml", ".js", ".html", ".css")
+  foreach ($file in @($Files)) {
+    $relative = Get-RelativePath -Item $file
+    if ($relative -match "(^|/)\.env($|\.|/)") {
+      Add-SecurityWarning -Warnings $warnings -Type ".env file present" -Path $relative
+    }
+    if ($textExtensions -notcontains $file.Extension.ToLowerInvariant()) {
+      continue
+    }
+    $content = Get-Content -LiteralPath $file.FullName -Raw -ErrorAction SilentlyContinue
+    if ([string]::IsNullOrWhiteSpace($content)) {
+      continue
+    }
+    if ($content -match "(?i)api[_ -]?key") {
+      Add-SecurityWarning -Warnings $warnings -Type "API key wording" -Path $relative
+    }
+    if ($content -match "(?i)\b(secret|token|password)\b") {
+      Add-SecurityWarning -Warnings $warnings -Type "secret/token/password wording" -Path $relative
+    }
+    if ($content -match "(?i)\b(broker|oanda|live execution)\b") {
+      Add-SecurityWarning -Warnings $warnings -Type "broker/OANDA/live execution wording" -Path $relative
+    }
+    if ($content -match "(?i)git\s+add\s+\.") {
+      Add-SecurityWarning -Warnings $warnings -Type "git add dot wording" -Path $relative
+    }
+    if ($content -match "(?i)\b(rm\s+-rf|remove-item\s+-recurse|git\s+reset\s+--hard|del\s+/s)\b") {
+      Add-SecurityWarning -Warnings $warnings -Type "destructive command wording" -Path $relative
+    }
+  }
+
+  foreach ($line in @($GitStatusText -split "`r?`n")) {
+    if (-not $line -or $line.Length -lt 4) { continue }
+    $path = ($line.Substring(3).Trim() -replace "\\", "/")
+    foreach ($protected in $ProtectedFiles) {
+      if ($path -ieq ($protected -replace "\\", "/")) {
+        Add-SecurityWarning -Warnings $warnings -Type "protected root file change" -Path $path
+      }
+    }
+  }
+
+  return @($warnings | Sort-Object warning_type, path -Unique)
+}
+
 $gitBranch = Get-CommandText "git branch --show-current"
 $gitStatusShort = Get-CommandText "git status --short"
 $latestCommit = Get-CommandText "git log -1 --oneline"
@@ -144,6 +332,9 @@ $latestCheckpointReference = if (@($latestCheckpointRefs).Count -gt 0) { $latest
 $cleanGitStatus = [string]::IsNullOrWhiteSpace($gitStatusShort)
 $unresolvedTodos = Count-Marker "TODO"
 $unresolvedFixmes = Count-Marker "FIXME"
+$recentFiles = @($allFiles | Where-Object { $_.FullName -notmatch "\\.git\\" } | Sort-Object LastWriteTime -Descending | Select-Object -First 25)
+$focusDetection = Get-FocusDetection -RecentFiles $recentFiles -CheckpointRefs $latestCheckpointRefs -ReportRefs $latestReportRefs -TodoCount $unresolvedTodos
+$securityWarnings = Get-SecurityWarnings -Files $allFiles -GitStatusText $gitStatusShort -ProtectedFiles @($config.protected_files)
 
 $snapshot = [pscustomobject]@{
   schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2"
@@ -175,7 +366,11 @@ $snapshot = [pscustomobject]@{
   latest_checkpoint_reference = $latestCheckpointReference
   latest_checkpoint_references = $latestCheckpointRefs
   latest_report_references = $latestReportRefs
-  current_focus_area = "UNKNOWN"
+  current_focus_area = $focusDetection.current_focus_area
+  active_subsystem = $focusDetection.active_subsystem
+  recommended_next_workload = $focusDetection.recommended_next_workload
+  focus_evidence_sources = $focusDetection.focus_evidence_sources
+  security_warnings = $securityWarnings
   current_operator_phase = "UNKNOWN"
   next_safe_action = "Review this read-only snapshot and run the work intelligence validator."
 }
@@ -238,7 +433,7 @@ if ($config.scanner.operator_briefing_enabled -eq $true) {
     $snapshot.next_safe_action,
     "",
     "## Recommended Next Workload",
-    "Review the generated work intelligence snapshot."
+    $snapshot.recommended_next_workload
   ) | Set-Content -LiteralPath $briefingPath -Encoding UTF8
 }
 

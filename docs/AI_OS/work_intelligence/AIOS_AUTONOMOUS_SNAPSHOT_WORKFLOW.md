@@ -66,6 +66,24 @@ Reports/work_intelligence/briefings/
 
 `-GenerateBriefing` writes only the plain-language briefing. It does not append telemetry metrics and does not write a daily snapshot unless `-SaveSnapshot` is also used.
 
+## Focus And Security Awareness
+
+The scanner uses local repo evidence to infer a conservative focus area. It checks recent files, latest checkpoints, latest reports, and known subsystem paths.
+
+Allowed focus outputs are:
+
+- `Work Intelligence`
+- `Operator Orchestration`
+- `Trading Lab`
+- `Dashboard UI`
+- `UNKNOWN`
+
+When evidence is weak or tied, the scanner returns `UNKNOWN`.
+
+The scanner also emits a `security_warnings` array. Warnings report only the warning type and relative path. The scanner must not print actual secret values.
+
+Security warning evidence is limited to local repo evidence such as `.env` files, API key wording, secret/token/password wording, broker/OANDA/live execution wording, `git add .`, destructive command wording, and protected root file changes from `git status --short`.
+
 ## Validation
 
 Run from repo root:
