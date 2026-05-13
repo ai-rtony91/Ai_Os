@@ -1,0 +1,16 @@
+{
+  "strategy_id": "supertrend_permission_memory_v001",
+  "pair": "EUR_USD",
+  "timeframe": "45m",
+  "regime_state": "trend_permission_only",
+  "session": "new_york",
+  "recent_expectancy": -0.12,
+  "recent_profit_factor": 0.86,
+  "degradation_state": "degrading",
+  "latency_penalty": 0.08,
+  "confidence_adjustment": -0.18,
+  "memory_block_reason": "recent paper expectancy and profit factor are below review threshold",
+  "strategy_allowed": false,
+  "scorecard_ready": true,
+  "live_execution_status": "BLOCKED"
+}
