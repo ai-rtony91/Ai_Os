@@ -1,0 +1,43 @@
+{
+  "schema": "AIOS_WORKER_TASK_QUEUE.v1",
+  "status": "DRAFT",
+  "safety": {
+    "autonomous_commits": "BLOCKED",
+    "autonomous_pushes": "BLOCKED",
+    "autonomous_deploys": "BLOCKED",
+    "broker_execution": "BLOCKED",
+    "live_trading": "BLOCKED",
+    "approval_required_for_apply": true
+  },
+  "workers": [
+    {
+      "id": "AIOS-01-DEVOPS",
+      "role": "DEVOPS",
+      "current_task": "Review operator infrastructure and prepare next safe APPLY pack.",
+      "allowed_paths": ["automation/operator"],
+      "blocked_actions": ["git add .", "git add -A", "git push without approval", "deploy"]
+    },
+    {
+      "id": "AIOS-02-TRADING_LAB",
+      "role": "TRADING_LAB",
+      "current_task": "Prepare paper-only TradingView/TradersPost handoff notes. No broker. No live execution.",
+      "allowed_paths": ["docs/AI_OS/trading_laboratory", "apps/dashboard/mock-data"],
+      "blocked_actions": ["broker connection", "OANDA live", "real orders", "API keys"]
+    },
+    {
+      "id": "AIOS-03-VALIDATOR",
+      "role": "VALIDATOR",
+      "current_task": "Run git status, diff checks, JSON validation, and report blockers before commit.",
+      "allowed_paths": ["automation", "docs", "apps/dashboard/mock-data"],
+      "blocked_actions": ["editing production files without approval", "auto-fixing without report"]
+    },
+    {
+      "id": "AIOS-04-TELEMETRY",
+      "role": "TELEMETRY",
+      "current_task": "Create startup/session telemetry plan for operator workflow.",
+      "allowed_paths": ["automation/operator/telemetry", "Reports"],
+      "blocked_actions": ["collect secrets", "track private credentials", "write outside repo"]
+    }
+  ],
+  "next_operator_action": "Use this queue to assign each worker a clear DRY_RUN task before APPLY."
+}
