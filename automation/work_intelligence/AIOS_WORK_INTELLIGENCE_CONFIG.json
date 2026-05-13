@@ -5,7 +5,10 @@
     "name": "AI_OS Work Intelligence Scan",
     "writes_files": false,
     "destructive_actions_allowed": false,
-    "default_output": "console_json"
+    "default_output": "console_json",
+    "save_to_reports_enabled": false,
+    "telemetry_append_enabled": false,
+    "operator_briefing_enabled": false
   },
   "scan_roots": [
     "."
@@ -22,6 +25,9 @@
   ],
   "worker_registry_path": "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
   "worker_report_directory": "Reports/operator/worker-reports",
+  "snapshot_output_directory": "Reports/work_intelligence/daily",
+  "telemetry_output_path": "Reports/work_intelligence/telemetry/WORK_INTELLIGENCE_METRICS.csv",
+  "operator_briefing_output_path": "Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.md",
   "protected_files": [
     "README.md",
     "AGENTS.md",
@@ -36,8 +42,11 @@
   "generated_report_examples": [
     "Reports/work_intelligence/MASTER_TODO_LEDGER.example.json",
     "Reports/work_intelligence/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
+    "Reports/work_intelligence/daily/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
     "Reports/work_intelligence/WORKER_QUEUE_STATUS.example.json",
-    "Reports/work_intelligence/REPO_HEALTH_SUMMARY.example.json"
+    "Reports/work_intelligence/REPO_HEALTH_SUMMARY.example.json",
+    "Reports/work_intelligence/telemetry/WORK_INTELLIGENCE_METRICS.example.csv",
+    "Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.example.md"
   ],
   "validation_commands": [
     "powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1",

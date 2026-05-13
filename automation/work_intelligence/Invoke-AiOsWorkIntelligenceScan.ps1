@@ -27,6 +27,10 @@ function Count-Files {
   return @(Get-ChildItem -LiteralPath $RepoRoot -Recurse -File -Filter $Filter -ErrorAction SilentlyContinue).Count
 }
 
+function ConvertTo-SafeFileTimestamp {
+  return (Get-Date).ToString("yyyyMMdd_HHmmss")
+}
+
 function Get-LatestFileRefs {
   param([string[]]$Roots, [int]$Take = 5)
   $items = @()
@@ -70,6 +74,7 @@ foreach ($checkpointRoot in @($config.checkpoint_roots)) {
 
 $workerLaneCount = 0
 $workerReportPresence = "UNKNOWN"
+$workerReportCount = 0
 $registryPath = Join-Path $RepoRoot $config.worker_registry_path
 if (Test-Path -LiteralPath $registryPath) {
   $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
@@ -78,17 +83,26 @@ if (Test-Path -LiteralPath $registryPath) {
 $workerReportDir = Join-Path $RepoRoot $config.worker_report_directory
 if (Test-Path -LiteralPath $workerReportDir) {
   $workerReportPresence = "PRESENT"
+  $workerReportCount = @(Get-ChildItem -LiteralPath $workerReportDir -File -Filter "*.json" -ErrorAction SilentlyContinue).Count
 } else {
   $workerReportPresence = "MISSING"
 }
 
+$latestCheckpointRefs = Get-LatestFileRefs -Roots @($config.checkpoint_roots)
+$latestReportRefs = Get-LatestFileRefs -Roots @($config.report_roots)
+$latestCheckpointReference = if (@($latestCheckpointRefs).Count -gt 0) { $latestCheckpointRefs[0].path } else { "UNKNOWN" }
+$cleanGitStatus = [string]::IsNullOrWhiteSpace($gitStatusShort)
+$unresolvedTodos = Count-Marker "TODO"
+$unresolvedFixmes = Count-Marker "FIXME"
+
 $snapshot = [pscustomobject]@{
-  schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v1"
+  schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2"
   timestamp = (Get-Date).ToString("o")
   read_only = $true
   repo_root = $RepoRoot
   branch = $gitBranch
-  git_clean = [string]::IsNullOrWhiteSpace($gitStatusShort)
+  clean_git_status = $cleanGitStatus
+  git_clean = $cleanGitStatus
   git_status_short = $gitStatusShort
   latest_commit = $latestCommit
   total_files = $allFiles.Count
@@ -96,18 +110,88 @@ $snapshot = [pscustomobject]@{
   total_reports = $reports.Count
   total_validators = $validators.Count
   total_checkpoints = $checkpoints.Count
+  total_scripts = $automationScripts.Count
   total_automation_scripts = $automationScripts.Count
   total_json_files = Count-Files "*.json"
   total_markdown_files = Count-Files "*.md"
   worker_lane_count = $workerLaneCount
-  unresolved_todo_markers = Count-Marker "TODO"
-  unresolved_fixme_markers = Count-Marker "FIXME"
+  worker_report_count = $workerReportCount
+  unresolved_todos = $unresolvedTodos
+  unresolved_fixmes = $unresolvedFixmes
+  unresolved_todo_markers = $unresolvedTodos
+  unresolved_fixme_markers = $unresolvedFixmes
   worker_report_presence = $workerReportPresence
   validation_health = "UNKNOWN_UNTIL_VALIDATOR_RUN"
-  latest_checkpoint_references = Get-LatestFileRefs -Roots @($config.checkpoint_roots)
-  latest_report_references = Get-LatestFileRefs -Roots @($config.report_roots)
+  latest_checkpoint_reference = $latestCheckpointReference
+  latest_checkpoint_references = $latestCheckpointRefs
+  latest_report_references = $latestReportRefs
+  current_focus_area = "UNKNOWN"
   current_operator_phase = "UNKNOWN"
   next_safe_action = "Review this read-only snapshot and run the work intelligence validator."
+}
+
+if ($config.scanner.save_to_reports_enabled -eq $true) {
+  $snapshotDir = Join-Path $RepoRoot $config.snapshot_output_directory
+  New-Item -ItemType Directory -Force -Path $snapshotDir | Out-Null
+  $snapshotPath = Join-Path $snapshotDir ("DAILY_WORK_INTELLIGENCE_SNAPSHOT_{0}.json" -f (ConvertTo-SafeFileTimestamp))
+  $snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $snapshotPath -Encoding UTF8
+}
+
+if ($config.scanner.telemetry_append_enabled -eq $true) {
+  $telemetryPath = Join-Path $RepoRoot $config.telemetry_output_path
+  $telemetryDir = Split-Path -Parent $telemetryPath
+  New-Item -ItemType Directory -Force -Path $telemetryDir | Out-Null
+  $header = "timestamp,branch,total_files,total_reports,total_json_files,total_markdown_files,total_scripts,worker_lane_count,unresolved_todos,unresolved_fixmes,clean_git_status"
+  if (-not (Test-Path -LiteralPath $telemetryPath)) {
+    $header | Set-Content -LiteralPath $telemetryPath -Encoding UTF8
+  }
+  $row = @(
+    $snapshot.timestamp,
+    $snapshot.branch,
+    $snapshot.total_files,
+    $snapshot.total_reports,
+    $snapshot.total_json_files,
+    $snapshot.total_markdown_files,
+    $snapshot.total_scripts,
+    $snapshot.worker_lane_count,
+    $snapshot.unresolved_todos,
+    $snapshot.unresolved_fixmes,
+    $snapshot.clean_git_status
+  ) -join ","
+  Add-Content -LiteralPath $telemetryPath -Value $row
+}
+
+if ($config.scanner.operator_briefing_enabled -eq $true) {
+  $briefingPath = Join-Path $RepoRoot $config.operator_briefing_output_path
+  $briefingDir = Split-Path -Parent $briefingPath
+  New-Item -ItemType Directory -Force -Path $briefingDir | Out-Null
+  @(
+    "# AI_OS Master Operator Briefing",
+    "",
+    "## Repo Health Summary",
+    "Clean git status: $($snapshot.clean_git_status)",
+    "",
+    "## Current Focus Area",
+    $snapshot.current_focus_area,
+    "",
+    "## Active Phases",
+    $snapshot.current_operator_phase,
+    "",
+    "## Active Worker Lanes",
+    "Worker lanes detected: $($snapshot.worker_lane_count)",
+    "",
+    "## Blocked Items",
+    "UNKNOWN",
+    "",
+    "## Validation Summary",
+    $snapshot.validation_health,
+    "",
+    "## Next Safest Action",
+    $snapshot.next_safe_action,
+    "",
+    "## Recommended Next Workload",
+    "Review the generated work intelligence snapshot."
+  ) | Set-Content -LiteralPath $briefingPath -Encoding UTF8
 }
 
 $snapshot | ConvertTo-Json -Depth 8

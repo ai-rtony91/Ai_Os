@@ -24,12 +24,20 @@ $requiredFiles = @(
   "Reports/work_intelligence/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
   "Reports/work_intelligence/WORKER_QUEUE_STATUS.example.json",
   "Reports/work_intelligence/REPO_HEALTH_SUMMARY.example.json",
-  "docs/AI_OS/work_intelligence/AIOS_WORK_INTELLIGENCE_ARCHITECTURE.md"
+  "Reports/work_intelligence/daily/.gitkeep",
+  "Reports/work_intelligence/telemetry/.gitkeep",
+  "Reports/work_intelligence/daily/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
+  "Reports/work_intelligence/telemetry/WORK_INTELLIGENCE_METRICS.example.csv",
+  "Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.example.md",
+  "docs/AI_OS/work_intelligence/AIOS_WORK_INTELLIGENCE_ARCHITECTURE.md",
+  "docs/AI_OS/work_intelligence/AIOS_AUTONOMOUS_SNAPSHOT_WORKFLOW.md"
 )
 
 $requiredFolders = @(
   "automation/work_intelligence",
   "Reports/work_intelligence",
+  "Reports/work_intelligence/daily",
+  "Reports/work_intelligence/telemetry",
   "docs/AI_OS/work_intelligence"
 )
 
@@ -49,6 +57,7 @@ $jsonFiles = @(
   "automation/work_intelligence/AIOS_WORK_INTELLIGENCE_CONFIG.json",
   "Reports/work_intelligence/MASTER_TODO_LEDGER.example.json",
   "Reports/work_intelligence/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
+  "Reports/work_intelligence/daily/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
   "Reports/work_intelligence/WORKER_QUEUE_STATUS.example.json",
   "Reports/work_intelligence/REPO_HEALTH_SUMMARY.example.json"
 )
@@ -114,6 +123,29 @@ if (Test-Path -LiteralPath $configFullPath) {
   }
   if ($config.scanner.destructive_actions_allowed -ne $false) {
     Add-Failure "Scanner config must declare destructive_actions_allowed false."
+  }
+  if ($config.scanner.save_to_reports_enabled -ne $false) {
+    Add-Failure "save_to_reports_enabled must be false by default."
+  }
+  if ($config.scanner.telemetry_append_enabled -ne $false) {
+    Add-Failure "telemetry_append_enabled must be false by default."
+  }
+  if ($config.scanner.operator_briefing_enabled -ne $false) {
+    Add-Failure "operator_briefing_enabled must be false by default."
+  }
+  foreach ($pathProperty in @("snapshot_output_directory", "telemetry_output_path", "operator_briefing_output_path")) {
+    if (-not $config.$pathProperty) {
+      Add-Failure "Config missing $pathProperty."
+    }
+  }
+}
+
+$metricsExample = Join-Path $RepoRoot "Reports/work_intelligence/telemetry/WORK_INTELLIGENCE_METRICS.example.csv"
+if (Test-Path -LiteralPath $metricsExample) {
+  $expectedHeader = "timestamp,branch,total_files,total_reports,total_json_files,total_markdown_files,total_scripts,worker_lane_count,unresolved_todos,unresolved_fixmes,clean_git_status"
+  $actualHeader = (Get-Content -LiteralPath $metricsExample -First 1)
+  if ($actualHeader -ne $expectedHeader) {
+    Add-Failure "Telemetry CSV header mismatch."
   }
 }
 

@@ -1,0 +1,2 @@
+timestamp,branch,total_files,total_reports,total_json_files,total_markdown_files,total_scripts,worker_lane_count,unresolved_todos,unresolved_fixmes,clean_git_status
+EXAMPLE,UNKNOWN,0,0,0,0,0,0,0,0,UNKNOWN

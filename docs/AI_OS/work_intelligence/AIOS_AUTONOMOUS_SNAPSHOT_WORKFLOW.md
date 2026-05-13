@@ -1,0 +1,53 @@
+# AI_OS Autonomous Snapshot Workflow
+
+## Purpose
+
+The autonomous snapshot workflow extends Work Intelligence with optional local report generation. It can create daily snapshots, append telemetry-friendly metrics, and generate an operator briefing after the scanner builds an in-memory snapshot.
+
+## Default Safety
+
+All write modes are disabled by default:
+
+- `save_to_reports_enabled`: false
+- `telemetry_append_enabled`: false
+- `operator_briefing_enabled`: false
+
+The scanner remains local-only and must not commit, push, stage files, touch protected root files, or run destructive commands.
+
+## Snapshot Generation
+
+The scanner always builds an in-memory snapshot object. When report saving is explicitly enabled in config, it writes timestamped JSON snapshots under:
+
+```text
+Reports/work_intelligence/daily/
+```
+
+## Telemetry Metrics
+
+When telemetry append is explicitly enabled, the scanner appends one CSV row to:
+
+```text
+Reports/work_intelligence/telemetry/WORK_INTELLIGENCE_METRICS.csv
+```
+
+The metrics are intended for future spreadsheet or BI use.
+
+## Operator Briefing
+
+When briefing generation is explicitly enabled, the scanner writes a local markdown briefing under:
+
+```text
+Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.md
+```
+
+The briefing summarizes repo health, focus area, active phases, worker lanes, blocked items, validation status, next safe action, and recommended next workload.
+
+## Validation
+
+Run from repo root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1
+git diff --check
+git status --short --branch
+```
