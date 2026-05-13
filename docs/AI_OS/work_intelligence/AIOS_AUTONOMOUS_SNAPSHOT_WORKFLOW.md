@@ -223,6 +223,32 @@ Routing examples:
 
 If route evidence is weak, the scanner keeps `UNKNOWN`.
 
+## Phase 17.1C Worker Report Ingestion
+
+Phase 17.1C reads JSON worker reports from:
+
+```text
+Reports/operator/worker-reports/
+```
+
+Worker reports are evidence only. They do not approve APPLY, do not mark work safe by themselves, do not commit, do not push, and do not edit queue history.
+
+The scanner detects:
+
+- missing worker report folder
+- empty worker report folder
+- invalid JSON reports
+- missing required report fields
+- `files_planned`
+- `files_deleted`
+- `validation_commands`
+- overlapping planned files across reports
+- protected root file paths
+
+Worker report evidence can add `REVIEW` or `BLOCKED` work queue items. Missing or empty reports keep the `WI-WORKER-REPORTS-MISSING` queue item. Conflicting planned files create blocked queue evidence.
+
+Worker report evidence includes `evidence_only: true` and `approval_granted: false`.
+
 ## Validation
 
 Run from repo root:

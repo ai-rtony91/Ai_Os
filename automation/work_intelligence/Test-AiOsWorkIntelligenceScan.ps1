@@ -31,6 +31,7 @@ $requiredFiles = @(
   "Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.example.md",
   "Reports/work_intelligence/briefings/.gitkeep",
   "Reports/work_intelligence/briefings/OPERATOR_VOICE_BRIEFING.example.md",
+  "Reports/operator/worker-reports/.gitkeep",
   "docs/AI_OS/work_intelligence/AIOS_WORK_INTELLIGENCE_ARCHITECTURE.md",
   "docs/AI_OS/work_intelligence/AIOS_AUTONOMOUS_SNAPSHOT_WORKFLOW.md"
 )
@@ -41,6 +42,7 @@ $requiredFolders = @(
   "Reports/work_intelligence/daily",
   "Reports/work_intelligence/telemetry",
   "Reports/work_intelligence/briefings",
+  "Reports/operator/worker-reports",
   "docs/AI_OS/work_intelligence"
 )
 
@@ -176,6 +178,16 @@ if (Test-Path -LiteralPath $scannerPath) {
       Add-Failure "Scanner missing priority field: $requiredField"
     }
   }
+  foreach ($requiredField in @("worker_report_evidence", "worker_report_issues", "worker_report_issue_count", "valid_worker_report_count", "invalid_worker_report_count")) {
+    if (-not $scannerText.Contains($requiredField)) {
+      Add-Failure "Scanner missing worker report ingestion field: $requiredField"
+    }
+  }
+  foreach ($requiredToken in @("Get-WorkerReportEvidence", "invalid_worker_report_json", "worker_report_missing_required_fields", "worker_report_files_deleted_present", "worker_report_missing_validation_commands", "worker_report_overlapping_planned_files", "worker_report_protected_file_path", "evidence_only", "approval_granted")) {
+    if (-not $scannerText.Contains($requiredToken)) {
+      Add-Failure "Scanner missing worker report ingestion token: $requiredToken"
+    }
+  }
   if (-not $scannerText.Contains("work_queue")) {
     Add-Failure "Scanner missing work_queue field."
   }
@@ -240,8 +252,44 @@ try {
       Add-Failure "Scan output missing priority field: $requiredField"
     }
   }
+  foreach ($requiredField in @("worker_report_evidence", "worker_report_issues", "worker_report_issue_count", "valid_worker_report_count", "invalid_worker_report_count")) {
+    if (-not ($scan.PSObject.Properties.Name -contains $requiredField)) {
+      Add-Failure "Scan output missing worker report ingestion field: $requiredField"
+    }
+  }
   if ($null -eq $scan.safe_to_apply) {
     Add-Failure "Scan output safe_to_apply must not be null."
+  }
+  if ($scan.worker_report_count -eq 0) {
+    $missingQueueItems = @($scan.work_queue | Where-Object { $_.task_id -eq "WI-WORKER-REPORTS-MISSING" })
+    if (@($missingQueueItems).Count -eq 0) {
+      Add-Failure "Missing or empty worker report folder must produce WI-WORKER-REPORTS-MISSING queue item."
+    }
+    foreach ($missingQueueItem in $missingQueueItems) {
+      if ($missingQueueItem.status -notin @("REVIEW", "BLOCKED")) {
+        Add-Failure "Worker report missing queue item must be REVIEW or BLOCKED."
+      }
+    }
+  }
+  foreach ($issue in @($scan.worker_report_issues)) {
+    foreach ($requiredIssueField in @("issue_type", "status", "path", "detail")) {
+      if (-not ($issue.PSObject.Properties.Name -contains $requiredIssueField)) {
+        Add-Failure "Worker report issue missing field: $requiredIssueField"
+      }
+    }
+    if (@("REVIEW", "BLOCKED") -notcontains $issue.status) {
+      Add-Failure "Worker report issue has invalid status: $($issue.status)"
+    }
+  }
+  foreach ($workerReport in @($scan.worker_report_evidence)) {
+    foreach ($requiredReportField in @("worker_id", "label", "mode", "source_path", "files_planned", "files_deleted", "validation_commands", "summary", "evidence_only", "approval_granted")) {
+      if (-not ($workerReport.PSObject.Properties.Name -contains $requiredReportField)) {
+        Add-Failure "Worker report evidence missing field: $requiredReportField"
+      }
+    }
+    if ($workerReport.evidence_only -ne $true -or $workerReport.approval_granted -ne $false) {
+      Add-Failure "Worker report evidence must remain evidence_only true and approval_granted false."
+    }
   }
   if ([string]::IsNullOrWhiteSpace([string]$scan.recommended_operator_action)) {
     Add-Failure "Scan output recommended_operator_action must not be blank."

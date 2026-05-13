@@ -352,6 +352,181 @@ function Get-WorkMarkerCount {
   return $count
 }
 
+function Test-ProtectedWorkerPath {
+  param(
+    [string]$Path,
+    [string[]]$ProtectedFiles
+  )
+  if ([string]::IsNullOrWhiteSpace($Path)) { return $false }
+  $normalized = ($Path -replace "\\", "/").Trim()
+  foreach ($protected in @($ProtectedFiles)) {
+    $protectedPath = ($protected -replace "\\", "/").Trim()
+    if ($normalized -ieq $protectedPath) {
+      return $true
+    }
+  }
+  return $false
+}
+
+function Get-WorkerReportEvidence {
+  param(
+    [string]$WorkerReportDir,
+    [string[]]$ProtectedFiles
+  )
+  $requiredFields = @("worker_id", "label", "mode", "files_planned", "files_deleted", "validation_commands", "summary")
+  $reports = New-Object System.Collections.Generic.List[object]
+  $issues = New-Object System.Collections.Generic.List[object]
+  $plannedFileMap = @{}
+
+  if (-not (Test-Path -LiteralPath $WorkerReportDir)) {
+    $issues.Add([pscustomobject]@{
+      issue_type = "missing_worker_report_folder"
+      status = "REVIEW"
+      path = "Reports/operator/worker-reports"
+      detail = "Worker report folder is missing."
+    }) | Out-Null
+    $issueCount = $issues.Count
+    return [pscustomobject]@{
+      worker_report_presence = "MISSING"
+      worker_report_count = 0
+      valid_worker_report_count = 0
+      invalid_worker_report_count = 0
+      worker_report_issue_count = $issueCount
+      worker_report_evidence = [object[]]@()
+      worker_report_issues = $issues.ToArray()
+    }
+  }
+
+  $reportFiles = @(Get-ChildItem -LiteralPath $WorkerReportDir -File -Filter "*.json" -ErrorAction SilentlyContinue)
+  if (@($reportFiles).Count -eq 0) {
+    $issues.Add([pscustomobject]@{
+      issue_type = "empty_worker_report_folder"
+      status = "REVIEW"
+      path = "Reports/operator/worker-reports"
+      detail = "Worker report folder exists but contains no JSON worker reports."
+    }) | Out-Null
+    $issueCount = $issues.Count
+    return [pscustomobject]@{
+      worker_report_presence = "EMPTY"
+      worker_report_count = 0
+      valid_worker_report_count = 0
+      invalid_worker_report_count = 0
+      worker_report_issue_count = $issueCount
+      worker_report_evidence = [object[]]@()
+      worker_report_issues = $issues.ToArray()
+    }
+  }
+
+  foreach ($file in $reportFiles) {
+    $relativePath = Get-RelativePath -Item $file
+    $parsed = $null
+    try {
+      $parsed = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json
+    } catch {
+      $issues.Add([pscustomobject]@{
+        issue_type = "invalid_worker_report_json"
+        status = "BLOCKED"
+        path = $relativePath
+        detail = "Worker report JSON did not parse."
+      }) | Out-Null
+      continue
+    }
+
+    $missingFields = @()
+    foreach ($field in $requiredFields) {
+      if (-not ($parsed.PSObject.Properties.Name -contains $field)) {
+        $missingFields += $field
+      }
+    }
+    if (@($missingFields).Count -gt 0) {
+      $issues.Add([pscustomobject]@{
+        issue_type = "worker_report_missing_required_fields"
+        status = "BLOCKED"
+        path = $relativePath
+        detail = "Missing required fields: $($missingFields -join ', ')"
+      }) | Out-Null
+    }
+
+    $filesPlanned = @($parsed.files_planned)
+    $filesDeleted = @($parsed.files_deleted)
+    $validationCommands = @($parsed.validation_commands)
+    $protectedPlannedFiles = @($filesPlanned | Where-Object { Test-ProtectedWorkerPath -Path ([string]$_) -ProtectedFiles $ProtectedFiles })
+    $protectedDeletedFiles = @($filesDeleted | Where-Object { Test-ProtectedWorkerPath -Path ([string]$_) -ProtectedFiles $ProtectedFiles })
+
+    if (@($filesDeleted).Count -gt 0) {
+      $issues.Add([pscustomobject]@{
+        issue_type = "worker_report_files_deleted_present"
+        status = "BLOCKED"
+        path = $relativePath
+        detail = "files_deleted must remain empty for worker evidence ingestion."
+      }) | Out-Null
+    }
+    if (@($validationCommands).Count -eq 0) {
+      $issues.Add([pscustomobject]@{
+        issue_type = "worker_report_missing_validation_commands"
+        status = "BLOCKED"
+        path = $relativePath
+        detail = "validation_commands is empty or missing."
+      }) | Out-Null
+    }
+    if (@($protectedPlannedFiles + $protectedDeletedFiles).Count -gt 0) {
+      $issues.Add([pscustomobject]@{
+        issue_type = "worker_report_protected_file_path"
+        status = "BLOCKED"
+        path = $relativePath
+        detail = "Worker report references protected root files."
+      }) | Out-Null
+    }
+
+    foreach ($planned in $filesPlanned) {
+      if ([string]::IsNullOrWhiteSpace([string]$planned)) { continue }
+      $normalizedPlanned = (([string]$planned) -replace "\\", "/").Trim().ToLowerInvariant()
+      if (-not $plannedFileMap.ContainsKey($normalizedPlanned)) {
+        $plannedFileMap[$normalizedPlanned] = New-Object System.Collections.Generic.List[string]
+      }
+      $plannedFileMap[$normalizedPlanned].Add($relativePath) | Out-Null
+    }
+
+    $reports.Add([pscustomobject]@{
+      worker_id = $parsed.worker_id
+      label = $parsed.label
+      mode = $parsed.mode
+      source_path = $relativePath
+      files_planned = $filesPlanned
+      files_deleted = $filesDeleted
+      validation_commands = $validationCommands
+      summary = $parsed.summary
+      evidence_only = $true
+      approval_granted = $false
+    }) | Out-Null
+  }
+
+  foreach ($entry in $plannedFileMap.GetEnumerator()) {
+    $sources = @($entry.Value | Sort-Object -Unique)
+    if (@($sources).Count -gt 1) {
+      $issues.Add([pscustomobject]@{
+        issue_type = "worker_report_overlapping_planned_files"
+        status = "BLOCKED"
+        path = $entry.Key
+        detail = "Planned file appears in multiple worker reports: $($sources -join ', ')"
+      }) | Out-Null
+    }
+  }
+
+  $invalidCount = @($issues | Where-Object { $_.status -eq "BLOCKED" }).Count
+  $issueCount = $issues.Count
+  $presence = if ($invalidCount -gt 0) { "PRESENT_WITH_ISSUES" } else { "PRESENT" }
+  return [pscustomobject]@{
+    worker_report_presence = $presence
+    worker_report_count = @($reportFiles).Count
+    valid_worker_report_count = $reports.Count
+    invalid_worker_report_count = $invalidCount
+    worker_report_issue_count = $issueCount
+    worker_report_evidence = $reports.ToArray()
+    worker_report_issues = $issues.ToArray()
+  }
+}
+
 function Get-PriorityEngineResult {
   param(
     [bool]$CleanGitStatus,
@@ -361,6 +536,7 @@ function Get-PriorityEngineResult {
     [string]$WorkerReportPresence,
     [int]$WorkerLaneCount,
     [int]$WorkerReportCount,
+    [int]$WorkerReportIssueCount,
     [object[]]$SecurityWarnings,
     [pscustomobject]$SecuritySummary,
     [object[]]$ReportRefs,
@@ -373,11 +549,11 @@ function Get-PriorityEngineResult {
   $unfinishedPhaseCount = Get-WorkMarkerCount -Refs $unfinishedRefs -Pattern "(?i)\b(DRY_RUN|WORKLOAD|PENDING|UNFINISHED)\b"
   $unfinishedStageCount = Get-WorkMarkerCount -Refs $unfinishedRefs -Pattern "(?i)\b(TODO|FIXME|NEXT SAFE ACTION|NEXT_SAFE_ACTION)\b"
   $blockedMarkerCount = Get-WorkMarkerCount -Refs $unfinishedRefs -Pattern "(?i)\b(BLOCKED|blocked_reason|dependency_blocked)\b"
-  $blockedWorkerCount = if ($WorkerLaneCount -gt 0 -and $WorkerReportPresence -eq "MISSING") { $WorkerLaneCount } else { 0 }
+  $blockedWorkerCount = if ($WorkerLaneCount -gt 0 -and $WorkerReportPresence -in @("MISSING", "EMPTY")) { $WorkerLaneCount } else { 0 }
   $blockedWorkCount = $blockedMarkerCount + $blockedWorkerCount
   $highRiskWarnings = @($SecurityWarnings | Where-Object { $_.severity -eq "HIGH" })
   $protectedRootChanges = @($SecurityWarnings | Where-Object { $_.category -eq "protected_file_status" })
-  $dependencyBlocked = ($blockedWorkCount -gt 0 -or $ValidatorCount -eq 0 -or $WorkerReportPresence -eq "MISSING")
+  $dependencyBlocked = ($blockedWorkCount -gt 0 -or $ValidatorCount -eq 0 -or $WorkerReportPresence -in @("MISSING", "EMPTY", "PRESENT_WITH_ISSUES") -or $WorkerReportIssueCount -gt 0)
 
   $priorityScore = 0
   $urgencyScore = 0
@@ -390,6 +566,7 @@ function Get-PriorityEngineResult {
   if (@($staleItems).Count -gt 0) { $priorityScore += [Math]::Min(25, (@($staleItems).Count * 5)); $urgencyScore += [Math]::Min(20, (@($staleItems).Count * 4)) }
   if ($SecuritySummary.high_risk_count -gt 0) { $priorityScore += 40; $urgencyScore += 40 }
   if ($WorkerLaneCount -gt 0 -and $WorkerReportCount -eq 0) { $priorityScore += 10 }
+  if ($WorkerReportIssueCount -gt 0) { $priorityScore += [Math]::Min(30, ($WorkerReportIssueCount * 5)); $urgencyScore += [Math]::Min(30, ($WorkerReportIssueCount * 5)) }
   if ($SecuritySummary.suppressed_policy_mentions -gt 0) { $priorityScore += 0 }
 
   $safeToApply = (
@@ -564,7 +741,9 @@ function Get-WorkQueue {
     [object[]]$SecurityWarnings,
     [string]$RecommendedOperatorAction,
     [bool]$CleanGitStatus,
-    [string]$WorkerReportPresence
+    [string]$WorkerReportPresence,
+    [object[]]$WorkerReportEvidence,
+    [object[]]$WorkerReportIssues
   )
   $queue = New-Object System.Collections.Generic.List[object]
 
@@ -590,8 +769,17 @@ function Get-WorkQueue {
   if (-not $CleanGitStatus) {
     Add-WorkQueueItem -Queue $queue -TaskId "WI-GIT-DIRTY" -Title "Review dirty git status." -Source "git status" -Priority "HIGH" -Status "REVIEW" -RecommendedAction "Commit approved work." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "HIGH" -RouteReason "dirty git status evidence"
   }
-  if ($WorkerReportPresence -eq "MISSING") {
-    Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-REPORTS-MISSING" -Title "Review missing worker reports." -Source "worker_report_presence" -Priority "MEDIUM" -Status "READY_FOR_DRY_RUN" -RecommendedAction "Run next DRY_RUN workload." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "MEDIUM" -RouteReason "missing worker report evidence"
+  if ($WorkerReportPresence -in @("MISSING", "EMPTY")) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-REPORTS-MISSING" -Title "Review missing worker reports." -Source "worker_report_presence" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Collect worker reports before APPLY review." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "MEDIUM" -RouteReason "missing worker report evidence"
+  }
+  foreach ($issue in @($WorkerReportIssues)) {
+    $status = if ($issue.status -eq "BLOCKED") { "BLOCKED" } else { "REVIEW" }
+    $priority = if ($status -eq "BLOCKED") { "HIGH" } else { "MEDIUM" }
+    $taskSuffix = (([string]$issue.issue_type).ToUpperInvariant() -replace "[^A-Z0-9]", "-")
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-$taskSuffix" -Title "Review worker report evidence." -Source $issue.path -Priority $priority -Status $status -RecommendedAction "Review worker report evidence; this is not APPLY approval." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "HIGH" -RouteReason $issue.detail
+  }
+  foreach ($report in @($WorkerReportEvidence)) {
+    Add-WorkQueueItem -Queue $queue -TaskId ("WI-WORKER-REPORT-{0}" -f $report.worker_id) -Title "Review worker report evidence." -Source $report.source_path -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review worker report evidence; this is not APPLY approval." -SuggestedWorkerLane "Operator Orchestration" -EvidenceStrength "MEDIUM" -RouteReason "worker report evidence only"
   }
   if ($RecommendedOperatorAction -and $RecommendedOperatorAction -ne "UNKNOWN") {
     Add-WorkQueueItem -Queue $queue -TaskId "WI-OPERATOR-ACTION" -Title $RecommendedOperatorAction -Source "recommended_operator_action" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction $RecommendedOperatorAction -SuggestedWorkerLane "Work Intelligence" -EvidenceStrength "MEDIUM" -RouteReason "recommended operator action evidence"
@@ -706,18 +894,25 @@ foreach ($checkpointRoot in @($config.checkpoint_roots)) {
 $workerLaneCount = 0
 $workerReportPresence = "UNKNOWN"
 $workerReportCount = 0
+$validWorkerReportCount = 0
+$invalidWorkerReportCount = 0
+$workerReportIssueCount = 0
+$workerReportEvidence = @()
+$workerReportIssues = @()
 $registryPath = Join-Path $RepoRoot $config.worker_registry_path
 if (Test-Path -LiteralPath $registryPath) {
   $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
   $workerLaneCount = @($registry.workers).Count
 }
 $workerReportDir = Join-Path $RepoRoot $config.worker_report_directory
-if (Test-Path -LiteralPath $workerReportDir) {
-  $workerReportPresence = "PRESENT"
-  $workerReportCount = @(Get-ChildItem -LiteralPath $workerReportDir -File -Filter "*.json" -ErrorAction SilentlyContinue).Count
-} else {
-  $workerReportPresence = "MISSING"
-}
+$workerReportResult = Get-WorkerReportEvidence -WorkerReportDir $workerReportDir -ProtectedFiles @($config.protected_files)
+$workerReportPresence = $workerReportResult.worker_report_presence
+$workerReportCount = $workerReportResult.worker_report_count
+$validWorkerReportCount = $workerReportResult.valid_worker_report_count
+$invalidWorkerReportCount = $workerReportResult.invalid_worker_report_count
+$workerReportIssueCount = $workerReportResult.worker_report_issue_count
+$workerReportEvidence = @($workerReportResult.worker_report_evidence)
+$workerReportIssues = @($workerReportResult.worker_report_issues)
 
 $latestCheckpointRefs = Get-LatestFileRefs -Roots @($config.checkpoint_roots)
 $latestReportRefs = Get-LatestFileRefs -Roots @($config.report_roots)
@@ -738,6 +933,7 @@ $priorityEngine = Get-PriorityEngineResult `
   -WorkerReportPresence $workerReportPresence `
   -WorkerLaneCount $workerLaneCount `
   -WorkerReportCount $workerReportCount `
+  -WorkerReportIssueCount $workerReportIssueCount `
   -SecurityWarnings $securityWarnings `
   -SecuritySummary $securityWarningSummary `
   -ReportRefs $latestReportRefs `
@@ -750,7 +946,9 @@ $workQueue = Get-WorkQueue `
   -SecurityWarnings $securityWarnings `
   -RecommendedOperatorAction $priorityEngine.recommended_operator_action `
   -CleanGitStatus $cleanGitStatus `
-  -WorkerReportPresence $workerReportPresence
+  -WorkerReportPresence $workerReportPresence `
+  -WorkerReportEvidence $workerReportEvidence `
+  -WorkerReportIssues $workerReportIssues
 
 $snapshot = [pscustomobject]@{
   schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2"
@@ -773,11 +971,16 @@ $snapshot = [pscustomobject]@{
   total_markdown_files = Count-Files "*.md"
   worker_lane_count = $workerLaneCount
   worker_report_count = $workerReportCount
+  valid_worker_report_count = $validWorkerReportCount
+  invalid_worker_report_count = $invalidWorkerReportCount
+  worker_report_issue_count = $workerReportIssueCount
   unresolved_todos = $unresolvedTodos
   unresolved_fixmes = $unresolvedFixmes
   unresolved_todo_markers = $unresolvedTodos
   unresolved_fixme_markers = $unresolvedFixmes
   worker_report_presence = $workerReportPresence
+  worker_report_evidence = $workerReportEvidence
+  worker_report_issues = $workerReportIssues
   validation_health = "UNKNOWN_UNTIL_VALIDATOR_RUN"
   latest_checkpoint_reference = $latestCheckpointReference
   latest_checkpoint_references = $latestCheckpointRefs
