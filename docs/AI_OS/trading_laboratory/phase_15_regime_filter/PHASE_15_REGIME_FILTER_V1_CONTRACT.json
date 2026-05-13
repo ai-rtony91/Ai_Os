@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "PHASE_15_REGIME_FILTER_V1_CONTRACT",
+  "phase": "15",
+  "mode": "paper_only",
+  "required_fixture": "apps/dashboard/mock-data/phase-15-regime-filter-v1.example.json",
+  "required_fields": [
+    "schema_version",
+    "contract_id",
+    "mode",
+    "regime_record_id",
+    "signal_id",
+    "symbol",
+    "timeframe",
+    "session",
+    "trend_state",
+    "volatility_state",
+    "liquidity_state",
+    "spread_state",
+    "news_risk_state",
+    "market_condition",
+    "regime_confidence",
+    "regime_status",
+    "paper_route_allowed",
+    "blocked_reason",
+    "regime_checked_at",
+    "live_execution_status",
+    "broker_status",
+    "oanda_status",
+    "api_key_status",
+    "real_webhook_status",
+    "real_order_status",
+    "safety_gates"
+  ],
+  "required_regime_fields": [
+    "regime_record_id",
+    "signal_id",
+    "symbol",
+    "timeframe",
+    "session",
+    "trend_state",
+    "volatility_state",
+    "liquidity_state",
+    "spread_state",
+    "news_risk_state",
+    "market_condition",
+    "regime_confidence",
+    "regime_status",
+    "paper_route_allowed",
+    "blocked_reason",
+    "regime_checked_at"
+  ],
+  "allowed_regime_statuses": [
+    "PASS",
+    "REVIEW",
+    "BLOCKED",
+    "UNKNOWN"
+  ],
+  "allowed_sessions": [
+    "ASIA",
+    "LONDON",
+    "NEW_YORK",
+    "SESSION_OVERLAP",
+    "OFF_HOURS",
+    "UNKNOWN"
+  ],
+  "allowed_trend_states": [
+    "TREND_UP",
+    "TREND_DOWN",
+    "RANGING",
+    "CHOP",
+    "REGIME_TRANSITION",
+    "UNKNOWN"
+  ],
+  "allowed_volatility_states": [
+    "LOW",
+    "NORMAL",
+    "VOLATILITY_EXPANSION",
+    "HIGH_VOLATILITY",
+    "UNKNOWN"
+  ],
+  "allowed_liquidity_states": [
+    "NORMAL",
+    "THIN",
+    "LIQUIDITY_WARNING",
+    "SEVERE_LIQUIDITY_WARNING",
+    "UNKNOWN"
+  ],
+  "allowed_spread_states": [
+    "NORMAL",
+    "WIDENING",
+    "SEVERE_WIDENING",
+    "UNKNOWN"
+  ],
+  "allowed_news_risk_states": [
+    "NONE",
+    "WATCH",
+    "HIGH_IMPACT_EVENT",
+    "POST_EVENT_STABILIZATION",
+    "UNKNOWN"
+  ],
+  "unsafe_states": {
+    "trend_state": [
+      "REGIME_TRANSITION"
+    ],
+    "liquidity_state": [
+      "SEVERE_LIQUIDITY_WARNING"
+    ],
+    "spread_state": [
+      "SEVERE_WIDENING"
+    ],
+    "news_risk_state": [
+      "HIGH_IMPACT_EVENT"
+    ]
+  },
+  "confidence_rules": {
+    "pass_minimum": 70,
+    "review_minimum": 40,
+    "blocked_below": 40
+  },
+  "required_values": {
+    "mode": "paper_only",
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED"
+  },
+  "prohibited_fields": [
+    "api_key",
+    "secret",
+    "token",
+    "broker_account",
+    "account_id",
+    "webhook_url",
+    "order_id",
+    "live_order",
+    "oanda_account"
+  ],
+  "blocked_capabilities": [
+    "OANDA",
+    "broker connection",
+    "live trading",
+    "real webhook",
+    "real order",
+    "account connection",
+    "API keys",
+    "secrets",
+    "autonomous execution"
+  ],
+  "next_safe_action": "Run the Phase 15 Regime Filter v1 dry-run validator before any paper route preview consumes this fixture."
+}

@@ -1,0 +1,42 @@
+{
+  "readiness_record_id": "AIOS_PHASE15_OPERATOR_READINESS_QUEUE_V1_EXAMPLE_001",
+  "workspace_mode": "paper_only",
+  "operator_mode": "review_required",
+  "dashboard_state": "mock_data_only",
+  "validator_status": "pending_validation",
+  "latency_system_status": "review_required",
+  "risk_gate_status": "blocked_review",
+  "regime_filter_status": "unknown_review",
+  "signal_queue_status": "paper_queue_review",
+  "unresolved_alerts": [
+    {
+      "alert_id": "PHASE15_OPERATOR_APPROVAL_REQUIRED",
+      "severity": "review",
+      "message": "Operator approval is required before advanced actions, paper-routing workflows, or future execution workflows continue."
+    },
+    {
+      "alert_id": "PHASE15_REGIME_FILTER_UNKNOWN",
+      "severity": "blocked",
+      "message": "Regime filter status is not ready and must remain review-only."
+    }
+  ],
+  "approval_required": true,
+  "blocked_reason": "Phase 15 remains paper-only. Advanced actions, broker access, OANDA access, API key handling, real orders, and live execution are blocked until separate approval.",
+  "readiness_score": 42,
+  "readiness_status": "BLOCKED_REVIEW",
+  "checked_at": "2026-05-13T00:00:00-04:00",
+  "safety_gates": {
+    "paper_only": true,
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "api_key_status": "BLOCKED",
+    "credential_status": "BLOCKED",
+    "real_order_status": "BLOCKED",
+    "dashboard_ui_edits": "BLOCKED",
+    "javascript_dashboard_edits": "BLOCKED",
+    "startup_tasks": "BLOCKED",
+    "installs": "BLOCKED"
+  },
+  "next_safe_action": "Run automation/status/Test-AiOsPhase15OperatorReadinessQueue.DRY_RUN.ps1 and keep Phase 15 in paper-only review."
+}
