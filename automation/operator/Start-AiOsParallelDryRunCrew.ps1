@@ -110,7 +110,7 @@ Read-Host 'Press Enter to close this worker window'
 
   if ($codexLaunchEnabled) {
     Write-Host "Configured Codex launch is enabled for worker #$workerId. Command is read from registry."
-    Write-Host "Prompt prepared for worker #$workerId:"
+    Write-Host "Prompt prepared for worker #${workerId}:"
     Write-Host $dryRunPrompt
   }
 }

@@ -1,0 +1,101 @@
+{
+  "schema": "aios.validator_chain.v1",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "mode": "DRY_RUN_FIRST",
+  "phase": "44",
+  "implementation_mode": "minimal_reuse_first",
+  "validator_chain": [
+    {
+      "order": 1,
+      "validator_id": "ownership",
+      "label": "Worker ownership validator",
+      "state": "READY",
+      "required": true
+    },
+    {
+      "order": 2,
+      "validator_id": "conflict",
+      "label": "File conflict validator",
+      "state": "READY",
+      "required": true
+    },
+    {
+      "order": 3,
+      "validator_id": "stale_worker",
+      "label": "Stale worker validator",
+      "state": "READY",
+      "required": true
+    },
+    {
+      "order": 4,
+      "validator_id": "merge_package",
+      "label": "Merge package validator",
+      "state": "READY",
+      "required": true
+    },
+    {
+      "order": 5,
+      "validator_id": "dashboard_integrity",
+      "label": "Dashboard integrity validator",
+      "state": "READY",
+      "required": true
+    },
+    {
+      "order": 6,
+      "validator_id": "protected_file_boundary",
+      "label": "Protected file boundary validator",
+      "state": "READY",
+      "required": true
+    },
+    {
+      "order": 7,
+      "validator_id": "approval_readiness",
+      "label": "Approval readiness validator",
+      "state": "READY",
+      "required": true
+    }
+  ],
+  "severity_values": [
+    "PASS",
+    "REVIEW",
+    "WARNING",
+    "BLOCKED",
+    "UNKNOWN"
+  ],
+  "merge_readiness": {
+    "state": "BLOCKED",
+    "severity_result": "BLOCKED",
+    "blocked_reasons": [
+      "unresolved conflict",
+      "stale evidence",
+      "protected file violation attempt",
+      "missing next safe action",
+      "missing blocked reason",
+      "invalid severity",
+      "missing approval readiness",
+      "automatic repair attempt"
+    ],
+    "auto_repair_allowed": false,
+    "validators_report_only": true,
+    "validators_recommend_only": true,
+    "merge_execution_allowed": false,
+    "commit_allowed": false,
+    "push_allowed": false
+  },
+  "validation_packet_standard": {
+    "required": true,
+    "standard_path": "docs/AI_OS/validators/AIOS_VALIDATION_PACKET_STANDARD_DRAFT.md",
+    "required_fields": [
+      "validator_name",
+      "result",
+      "blocked_reason",
+      "next_safe_action",
+      "timestamp",
+      "worker_reference",
+      "evidence_files"
+    ],
+    "blocked_when_missing": true
+  },
+  "blocked_if_missing": true,
+  "next_safe_action": "Run the chain only when explicitly requested by the operator."
+}
