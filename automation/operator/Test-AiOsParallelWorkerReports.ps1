@@ -38,8 +38,29 @@ if (-not (Test-Path -LiteralPath $RegistryFullPath)) {
   if (@($registry.workers).Count -ne 8) {
     Add-Failure "Registry must define exactly 8 workers."
   }
-  if ($registry.codex_command -ne "UNKNOWN") {
-    Add-Failure "Registry codex_command must remain UNKNOWN until approved."
+  if (-not $registry.codex_launch) {
+    Add-Failure "Registry missing codex_launch configuration."
+  } else {
+    if ($registry.codex_launch.enabled -eq $false -and $registry.codex_launch.command -ne "UNKNOWN") {
+      Add-Failure "Disabled codex_launch must keep command UNKNOWN by default."
+    }
+    if ($registry.codex_launch.fallback_to_instruction_window -ne $true) {
+      Add-Failure "codex_launch must keep fallback_to_instruction_window enabled."
+    }
+    if (-not $registry.codex_launch.arguments) {
+      Write-Host "INFO: codex_launch arguments are empty."
+    }
+  }
+  foreach ($worker in @($registry.workers)) {
+    if (-not ($worker.PSObject.Properties.Name -contains "allowed_paths")) {
+      Add-Failure "Worker #$($worker.id) missing allowed_paths."
+    }
+    if (-not ($worker.PSObject.Properties.Name -contains "blocked_paths")) {
+      Add-Failure "Worker #$($worker.id) missing blocked_paths."
+    }
+    if (-not $worker.codex_prompt_seed) {
+      Add-Failure "Worker #$($worker.id) missing codex_prompt_seed."
+    }
   }
 }
 

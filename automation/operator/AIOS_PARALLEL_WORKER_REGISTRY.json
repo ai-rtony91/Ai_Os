@@ -2,6 +2,13 @@
   "schema": "AIOS_PARALLEL_WORKER_REGISTRY.v1",
   "mode": "DRY_RUN_WORKERS_PARALLEL_APPLY_SERIAL",
   "codex_command": "UNKNOWN",
+  "codex_launch": {
+    "enabled": false,
+    "command": "UNKNOWN",
+    "arguments": [],
+    "fallback_to_instruction_window": true,
+    "prompt_argument_name": "UNKNOWN"
+  },
   "operator_rules": {
     "dry_run_workers_may_run_parallel": true,
     "apply_workers_must_run_one_at_a_time": true,
@@ -30,57 +37,126 @@
       "id": 1,
       "label": "Dashboard UI",
       "lane": "apps/dashboard",
+      "allowed_paths": [
+        "apps/dashboard"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "AGENTS.md",
+        "RISK_POLICY.md"
+      ],
       "mode": "DRY_RUN_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-01-dashboard-ui.json"
+      "report_path": "Reports/operator/worker-reports/worker-01-dashboard-ui.json",
+      "codex_prompt_seed": "Worker #1 Dashboard UI. Inspect apps/dashboard only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits."
     },
     {
       "id": 2,
       "label": "TradingView",
       "lane": "docs/AI_OS/trading_laboratory/tradingview",
+      "allowed_paths": [
+        "docs/AI_OS/trading_laboratory/tradingview"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "AGENTS.md",
+        "RISK_POLICY.md"
+      ],
       "mode": "DRY_RUN_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-02-tradingview.json"
+      "report_path": "Reports/operator/worker-reports/worker-02-tradingview.json",
+      "codex_prompt_seed": "Worker #2 TradingView. Inspect the TradingView documentation lane only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits."
     },
     {
       "id": 3,
       "label": "TradersPost",
       "lane": "docs/AI_OS/trading_laboratory/traderspost",
+      "allowed_paths": [
+        "docs/AI_OS/trading_laboratory/traderspost"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "AGENTS.md",
+        "RISK_POLICY.md"
+      ],
       "mode": "DRY_RUN_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-03-traderspost.json"
+      "report_path": "Reports/operator/worker-reports/worker-03-traderspost.json",
+      "codex_prompt_seed": "Worker #3 TradersPost. Inspect the TradersPost documentation lane only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits."
     },
     {
       "id": 4,
       "label": "Latency",
       "lane": "docs/AI_OS/trading_laboratory/latency",
+      "allowed_paths": [
+        "docs/AI_OS/trading_laboratory/latency"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "AGENTS.md",
+        "RISK_POLICY.md"
+      ],
       "mode": "DRY_RUN_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-04-latency.json"
+      "report_path": "Reports/operator/worker-reports/worker-04-latency.json",
+      "codex_prompt_seed": "Worker #4 Latency. Inspect the latency documentation lane only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits."
     },
     {
       "id": 5,
       "label": "Validators",
       "lane": "automation/trading_lab",
+      "allowed_paths": [
+        "automation/trading_lab"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "AGENTS.md",
+        "RISK_POLICY.md"
+      ],
       "mode": "DRY_RUN_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-05-validators.json"
+      "report_path": "Reports/operator/worker-reports/worker-05-validators.json",
+      "codex_prompt_seed": "Worker #5 Validators. Inspect automation/trading_lab only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits."
     },
     {
       "id": 6,
       "label": "Reports",
       "lane": "Reports/checkpoints and Reports/daily",
+      "allowed_paths": [
+        "Reports/checkpoints",
+        "Reports/daily"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "AGENTS.md",
+        "RISK_POLICY.md"
+      ],
       "mode": "DRY_RUN_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-06-reports.json"
+      "report_path": "Reports/operator/worker-reports/worker-06-reports.json",
+      "codex_prompt_seed": "Worker #6 Reports. Inspect Reports/checkpoints and Reports/daily only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits."
     },
     {
       "id": 7,
       "label": "Mock Data",
       "lane": "apps/dashboard/mock-data",
+      "allowed_paths": [
+        "apps/dashboard/mock-data"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "AGENTS.md",
+        "RISK_POLICY.md"
+      ],
       "mode": "DRY_RUN_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-07-mock-data.json"
+      "report_path": "Reports/operator/worker-reports/worker-07-mock-data.json",
+      "codex_prompt_seed": "Worker #7 Mock Data. Inspect apps/dashboard/mock-data only. Produce a DRY_RUN report with planned files, validation commands, risks, and no edits."
     },
     {
       "id": 8,
       "label": "Git QC",
       "lane": "review/report only",
+      "allowed_paths": [],
+      "blocked_paths": [
+        "*"
+      ],
       "mode": "DRY_RUN_ONLY_REVIEW_ONLY",
-      "report_path": "Reports/operator/worker-reports/worker-08-git-qc.json"
+      "report_path": "Reports/operator/worker-reports/worker-08-git-qc.json",
+      "codex_prompt_seed": "Worker #8 Git QC. Review status and report only. Do not plan file edits. Produce a DRY_RUN report with validation commands and risks."
     }
   ]
 }

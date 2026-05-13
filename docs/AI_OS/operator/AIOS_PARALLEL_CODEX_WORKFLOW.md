@@ -38,10 +38,32 @@ The launcher opens 8 labeled PowerShell windows. Each window prints:
 - worker number
 - worker label
 - lane
+- allowed paths
+- blocked paths
 - report target
+- DRY_RUN rules
+- Codex prompt seed
 - DRY_RUN-only stop condition
 
-The Codex launch command is intentionally `UNKNOWN`. Add the approved local Codex command later only after operator confirmation.
+The Codex launch command is configurable in `AIOS_PARALLEL_WORKER_REGISTRY.json`.
+
+Default launch config:
+
+```json
+{
+  "enabled": false,
+  "command": "UNKNOWN",
+  "arguments": [],
+  "fallback_to_instruction_window": true,
+  "prompt_argument_name": "UNKNOWN"
+}
+```
+
+When `enabled` is false or the command is `UNKNOWN`, the launcher uses instruction-window fallback mode.
+
+When `enabled` is true and the configured command is available on `PATH`, the worker window can launch that command using the configured argument list. If `prompt_argument_name` is set, the launcher appends that argument name and the worker prompt. If it remains `UNKNOWN`, the worker prompt is placed in `AIOS_CODEX_WORKER_PROMPT` for a future approved command wrapper.
+
+Do not hardcode a local Codex path in the script.
 
 ## Worker Report Contract
 
@@ -74,7 +96,10 @@ The validator checks:
 - registry exists
 - queue example exists
 - exactly 8 workers exist
-- Codex command remains `UNKNOWN`
+- Codex launch config exists
+- fallback mode remains enabled
+- disabled Codex launch keeps command `UNKNOWN`
+- each worker has allowed paths, blocked paths, and a prompt seed
 - no overlapping planned files between worker reports
 - no protected root files
 - no deletes
