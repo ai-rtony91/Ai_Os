@@ -1,6 +1,7 @@
 param(
   [string]$ConfigPath = "automation/work_intelligence/AIOS_WORK_INTELLIGENCE_CONFIG.json",
-  [switch]$SaveSnapshot
+  [switch]$SaveSnapshot,
+  [switch]$GenerateBriefing
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,6 +43,42 @@ function Save-DailySnapshot {
   $snapshotPath = Join-Path $snapshotDir ("DAILY_WORK_INTELLIGENCE_SNAPSHOT_{0}.json" -f (ConvertTo-SafeFileTimestamp))
   $Snapshot | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $snapshotPath -Encoding UTF8
   return $snapshotPath
+}
+
+function Save-OperatorVoiceBriefing {
+  param(
+    [pscustomobject]$Snapshot,
+    [string]$OutputDirectory
+  )
+  $briefingDir = Join-Path $RepoRoot $OutputDirectory
+  New-Item -ItemType Directory -Force -Path $briefingDir | Out-Null
+  $briefingPath = Join-Path $briefingDir ("OPERATOR_VOICE_BRIEFING_{0}.md" -f (ConvertTo-SafeFileTimestamp))
+  $repoState = if ($Snapshot.clean_git_status -eq $true) { "clean" } else { "dirty" }
+  $latestReport = if (@($Snapshot.latest_report_references).Count -gt 0) { $Snapshot.latest_report_references[0].path } else { "UNKNOWN" }
+  @(
+    "# AI_OS Operator Voice Briefing",
+    "",
+    "## Repo Health",
+    "AI_OS nervous system check: the repo is $repoState on branch `$($Snapshot.branch)`.",
+    "",
+    "## Current Counts",
+    "- Files: $($Snapshot.total_files)",
+    "- Reports: $($Snapshot.total_reports)",
+    "- Validators: $($Snapshot.total_validators)",
+    "- TODO markers: $($Snapshot.unresolved_todos)",
+    "- FIXME markers: $($Snapshot.unresolved_fixmes)",
+    "",
+    "## Latest Evidence",
+    "- Latest checkpoint: $($Snapshot.latest_checkpoint_reference)",
+    "- Latest report: $latestReport",
+    "",
+    "## Safety Notes",
+    "This briefing is informational only. It does not approve APPLY, commit, push, or external execution.",
+    "",
+    "## Next Safe Action",
+    $Snapshot.next_safe_action
+  ) | Set-Content -LiteralPath $briefingPath -Encoding UTF8
+  return $briefingPath
 }
 
 function Get-LatestFileRefs {
@@ -203,6 +240,11 @@ if ($config.scanner.operator_briefing_enabled -eq $true) {
     "## Recommended Next Workload",
     "Review the generated work intelligence snapshot."
   ) | Set-Content -LiteralPath $briefingPath -Encoding UTF8
+}
+
+if ($GenerateBriefing) {
+  $savedVoiceBriefingPath = Save-OperatorVoiceBriefing -Snapshot $snapshot -OutputDirectory "Reports/work_intelligence/briefings"
+  Write-Host "Saved operator voice briefing: $savedVoiceBriefingPath" -ForegroundColor Green
 }
 
 $snapshot | ConvertTo-Json -Depth 8

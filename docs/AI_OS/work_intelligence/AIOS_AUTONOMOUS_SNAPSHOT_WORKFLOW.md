@@ -50,6 +50,22 @@ Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.md
 
 The briefing summarizes repo health, focus area, active phases, worker lanes, blocked items, validation status, next safe action, and recommended next workload.
 
+## Operator Voice Briefing
+
+To write a beginner-readable operator voice briefing without changing default config, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Invoke-AiOsWorkIntelligenceScan.ps1 -GenerateBriefing
+```
+
+The voice briefing is written under:
+
+```text
+Reports/work_intelligence/briefings/
+```
+
+`-GenerateBriefing` writes only the plain-language briefing. It does not append telemetry metrics and does not write a daily snapshot unless `-SaveSnapshot` is also used.
+
 ## Validation
 
 Run from repo root:

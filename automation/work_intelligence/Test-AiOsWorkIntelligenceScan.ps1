@@ -29,6 +29,8 @@ $requiredFiles = @(
   "Reports/work_intelligence/daily/DAILY_WORK_INTELLIGENCE_SNAPSHOT.example.json",
   "Reports/work_intelligence/telemetry/WORK_INTELLIGENCE_METRICS.example.csv",
   "Reports/work_intelligence/MASTER_OPERATOR_BRIEFING.example.md",
+  "Reports/work_intelligence/briefings/.gitkeep",
+  "Reports/work_intelligence/briefings/OPERATOR_VOICE_BRIEFING.example.md",
   "docs/AI_OS/work_intelligence/AIOS_WORK_INTELLIGENCE_ARCHITECTURE.md",
   "docs/AI_OS/work_intelligence/AIOS_AUTONOMOUS_SNAPSHOT_WORKFLOW.md"
 )
@@ -38,6 +40,7 @@ $requiredFolders = @(
   "Reports/work_intelligence",
   "Reports/work_intelligence/daily",
   "Reports/work_intelligence/telemetry",
+  "Reports/work_intelligence/briefings",
   "docs/AI_OS/work_intelligence"
 )
 
@@ -149,6 +152,14 @@ if (Test-Path -LiteralPath $metricsExample) {
   $actualHeader = (Get-Content -LiteralPath $metricsExample -First 1)
   if ($actualHeader -ne $expectedHeader) {
     Add-Failure "Telemetry CSV header mismatch."
+  }
+}
+
+$scannerPath = Join-Path $RepoRoot "automation/work_intelligence/Invoke-AiOsWorkIntelligenceScan.ps1"
+if (Test-Path -LiteralPath $scannerPath) {
+  $scannerText = Get-Content -LiteralPath $scannerPath -Raw
+  if (-not $scannerText.Contains('[switch]$GenerateBriefing')) {
+    Add-Failure "Scanner missing GenerateBriefing switch."
   }
 }
 
