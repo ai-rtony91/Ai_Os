@@ -154,6 +154,38 @@ Recommended operator actions are conservative examples such as:
 - `Review security warnings.`
 - `UNKNOWN`
 
+## Work Queue Draft
+
+Phase 16.9 adds a local `work_queue` array to the scanner output. The queue is a draft for operator review only. It does not APPLY, commit, push, or change repo files.
+
+Queue items are built only from evidence already collected by the scanner:
+
+- TODO count
+- FIXME count
+- stale work items
+- security warnings
+- recommended operator action
+- dirty git status
+- missing worker reports
+
+Each queue item includes:
+
+- `task_id`
+- `title`
+- `source`
+- `priority`
+- `status`
+- `recommended_action`
+
+Allowed queue statuses are:
+
+- `REVIEW`
+- `BLOCKED`
+- `READY_FOR_DRY_RUN`
+- `UNKNOWN`
+
+When there is no evidence for a queue item, the scanner emits an `UNKNOWN` queue placeholder instead of inventing work.
+
 ## Validation
 
 Run from repo root:

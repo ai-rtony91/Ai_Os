@@ -436,6 +436,76 @@ function Get-PriorityEngineResult {
   }
 }
 
+function Add-WorkQueueItem {
+  param(
+    [System.Collections.Generic.List[object]]$Queue,
+    [string]$TaskId,
+    [string]$Title,
+    [string]$Source,
+    [string]$Priority,
+    [string]$Status,
+    [string]$RecommendedAction
+  )
+  $allowedStatuses = @("REVIEW", "BLOCKED", "READY_FOR_DRY_RUN", "UNKNOWN")
+  if ($allowedStatuses -notcontains $Status) {
+    throw "Unknown work queue status: $Status"
+  }
+  $Queue.Add([pscustomobject]@{
+    task_id = $TaskId
+    title = $Title
+    source = $Source
+    priority = $Priority
+    status = $Status
+    recommended_action = $RecommendedAction
+  }) | Out-Null
+}
+
+function Get-WorkQueue {
+  param(
+    [int]$TodoCount,
+    [int]$FixmeCount,
+    [object[]]$StaleWorkItems,
+    [object[]]$SecurityWarnings,
+    [string]$RecommendedOperatorAction,
+    [bool]$CleanGitStatus,
+    [string]$WorkerReportPresence
+  )
+  $queue = New-Object System.Collections.Generic.List[object]
+
+  if ($TodoCount -gt 0) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-TODO-REVIEW" -Title "Review unresolved TODO markers." -Source "TODO count" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review unresolved TODO markers."
+  }
+  if ($FixmeCount -gt 0) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-FIXME-REVIEW" -Title "Review unresolved FIXME markers." -Source "FIXME count" -Priority "HIGH" -Status "REVIEW" -RecommendedAction "Review unresolved FIXME markers."
+  }
+  foreach ($item in @($StaleWorkItems)) {
+    $taskId = "WI-STALE-{0}" -f (([string]$item.item_type).ToUpperInvariant() -replace "[^A-Z0-9]", "-")
+    Add-WorkQueueItem -Queue $queue -TaskId $taskId -Title "Review stale work evidence." -Source $item.path -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review latest briefing."
+  }
+  $highSecurityWarnings = @($SecurityWarnings | Where-Object { $_.severity -eq "HIGH" })
+  $reviewSecurityWarnings = @($SecurityWarnings | Where-Object { $_.severity -in @("HIGH", "MEDIUM") })
+  if (@($highSecurityWarnings).Count -gt 0) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-SECURITY-HIGH" -Title "Review high-risk security warnings." -Source "security_warnings" -Priority "HIGH" -Status "BLOCKED" -RecommendedAction "Review security warnings."
+  } elseif (@($reviewSecurityWarnings).Count -gt 0) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-SECURITY-REVIEW" -Title "Review security warnings." -Source "security_warnings" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction "Review security warnings."
+  }
+  if (-not $CleanGitStatus) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-GIT-DIRTY" -Title "Review dirty git status." -Source "git status" -Priority "HIGH" -Status "REVIEW" -RecommendedAction "Commit approved work."
+  }
+  if ($WorkerReportPresence -eq "MISSING") {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-WORKER-REPORTS-MISSING" -Title "Review missing worker reports." -Source "worker_report_presence" -Priority "MEDIUM" -Status "READY_FOR_DRY_RUN" -RecommendedAction "Run next DRY_RUN workload."
+  }
+  if ($RecommendedOperatorAction -and $RecommendedOperatorAction -ne "UNKNOWN") {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-OPERATOR-ACTION" -Title $RecommendedOperatorAction -Source "recommended_operator_action" -Priority "MEDIUM" -Status "REVIEW" -RecommendedAction $RecommendedOperatorAction
+  }
+
+  if ($queue.Count -eq 0) {
+    Add-WorkQueueItem -Queue $queue -TaskId "WI-QUEUE-UNKNOWN" -Title "UNKNOWN" -Source "UNKNOWN" -Priority "UNKNOWN" -Status "UNKNOWN" -RecommendedAction "UNKNOWN"
+  }
+
+  return @($queue | Sort-Object task_id, source -Unique)
+}
+
 function Get-SecurityWarnings {
   param(
     [object[]]$Files,
@@ -575,6 +645,14 @@ $priorityEngine = Get-PriorityEngineResult `
   -ReportRefs $latestReportRefs `
   -CheckpointRefs $latestCheckpointRefs `
   -FocusDetection $focusDetection
+$workQueue = Get-WorkQueue `
+  -TodoCount $unresolvedTodos `
+  -FixmeCount $unresolvedFixmes `
+  -StaleWorkItems $priorityEngine.stale_work_items `
+  -SecurityWarnings $securityWarnings `
+  -RecommendedOperatorAction $priorityEngine.recommended_operator_action `
+  -CleanGitStatus $cleanGitStatus `
+  -WorkerReportPresence $workerReportPresence
 
 $snapshot = [pscustomobject]@{
   schema = "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.v2"
@@ -628,6 +706,7 @@ $snapshot = [pscustomobject]@{
   unfinished_stage_count = $priorityEngine.unfinished_stage_count
   blocked_work_count = $priorityEngine.blocked_work_count
   active_priority_lane = $priorityEngine.active_priority_lane
+  work_queue = $workQueue
   current_operator_phase = "UNKNOWN"
   next_safe_action = "Review this read-only snapshot and run the work intelligence validator."
 }

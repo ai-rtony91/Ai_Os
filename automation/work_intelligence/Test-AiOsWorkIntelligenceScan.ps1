@@ -176,6 +176,19 @@ if (Test-Path -LiteralPath $scannerPath) {
       Add-Failure "Scanner missing priority field: $requiredField"
     }
   }
+  if (-not $scannerText.Contains("work_queue")) {
+    Add-Failure "Scanner missing work_queue field."
+  }
+  foreach ($queueField in @("task_id", "title", "source", "priority", "status", "recommended_action")) {
+    if (-not $scannerText.Contains($queueField)) {
+      Add-Failure "Scanner missing work queue item field: $queueField"
+    }
+  }
+  foreach ($queueStatus in @("REVIEW", "BLOCKED", "READY_FOR_DRY_RUN", "UNKNOWN")) {
+    if (-not $scannerText.Contains($queueStatus)) {
+      Add-Failure "Scanner missing work queue status: $queueStatus"
+    }
+  }
   foreach ($severity in @("HIGH", "MEDIUM", "LOW", "INFO")) {
     if (-not $scannerText.Contains($severity)) {
       Add-Failure "Scanner missing severity level: $severity"
@@ -219,6 +232,19 @@ try {
   }
   if ([string]::IsNullOrWhiteSpace([string]$scan.recommended_operator_action)) {
     Add-Failure "Scan output recommended_operator_action must not be blank."
+  }
+  if (-not ($scan.PSObject.Properties.Name -contains "work_queue")) {
+    Add-Failure "Scan output missing work_queue."
+  }
+  foreach ($queueItem in @($scan.work_queue)) {
+    foreach ($requiredQueueField in @("task_id", "title", "source", "priority", "status", "recommended_action")) {
+      if (-not ($queueItem.PSObject.Properties.Name -contains $requiredQueueField)) {
+        Add-Failure "Work queue item missing field: $requiredQueueField"
+      }
+    }
+    if (@("REVIEW", "BLOCKED", "READY_FOR_DRY_RUN", "UNKNOWN") -notcontains $queueItem.status) {
+      Add-Failure "Work queue item has invalid status: $($queueItem.status)"
+    }
   }
   if ($scan.security_warning_count -ne @($scan.security_warnings).Count) {
     Add-Failure "security_warning_count does not match security_warnings length."
