@@ -1,0 +1,10 @@
+{
+  "profile_name": "TRADING_COMMAND_CENTER",
+  "layout_type": "TRADING_FOCUS",
+  "description": "Prioritize charts and AI_OS dashboard while workers stay compact.",
+  "zones": {
+    "LEFT": "TradingView / Charts",
+    "CENTER": "AI_OS Dashboard",
+    "RIGHT": "Worker Stack"
+  }
+}

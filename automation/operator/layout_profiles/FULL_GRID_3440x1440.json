@@ -1,0 +1,36 @@
+{
+  "profile_name": "FULL_GRID_3440x1440",
+  "screen_width": 3440,
+  "screen_height": 1440,
+  "layout_type": "4_QUADRANT_GRID",
+  "workers": [
+    {
+      "worker": "DEVOPS",
+      "x": 0,
+      "y": 0,
+      "width": 1720,
+      "height": 720
+    },
+    {
+      "worker": "TRADING_LAB",
+      "x": 1720,
+      "y": 0,
+      "width": 1720,
+      "height": 720
+    },
+    {
+      "worker": "VALIDATOR",
+      "x": 0,
+      "y": 720,
+      "width": 1720,
+      "height": 720
+    },
+    {
+      "worker": "TELEMETRY",
+      "x": 1720,
+      "y": 720,
+      "width": 1720,
+      "height": 720
+    }
+  ]
+}
