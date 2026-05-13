@@ -1,0 +1,38 @@
+{
+  "schema_version": "0.1-route-preview-v1",
+  "fixture_type": "traderspost_style_paper_route_preview_v1",
+  "mode": "paper_only",
+  "route_id": "TP_PAPER_ROUTE_PREVIEW_V1_001",
+  "source_signal_id": "PHASE28_TV_SIGNAL_001",
+  "source": "TradingView-style paper alert",
+  "target": "TradersPost-style paper route preview",
+  "symbol": "EUR/USD",
+  "timeframe": "M15",
+  "direction_intent": "LONG_REVIEW",
+  "paper_only": true,
+  "risk_gate_status": "REVIEW_REQUIRED",
+  "latency_status": "Pending validation",
+  "route_preview_created_at": null,
+  "simulated_destination": "PAPER_ROUTE_PREVIEW_ONLY",
+  "live_execution_blocked": true,
+  "blocked_reason": "Paper-only route preview. No real TradersPost webhook, broker, OANDA, API key, real order, or live execution path is approved.",
+  "approval_required_before_live": true,
+  "workflow": [
+    "TradingView alert enters AI_OS",
+    "AI_OS validates signal",
+    "AI_OS measures latency",
+    "AI_OS checks risk gate",
+    "AI_OS creates paper route preview",
+    "AI_OS blocks live execution",
+    "Future TradersPost handoff remains placeholder only"
+  ],
+  "safety_gates": {
+    "real_traderspost_webhook": "BLOCKED",
+    "broker": "BLOCKED",
+    "oanda": "BLOCKED",
+    "api_keys": "BLOCKED",
+    "real_orders": "BLOCKED",
+    "live_execution": "BLOCKED"
+  },
+  "notes": "Local mock-data fixture only. Future TradersPost handoff remains placeholder-only."
+}

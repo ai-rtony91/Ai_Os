@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "AIOS_LATENCY_LEDGER_V1",
+  "title": "AI_OS Trading Lab Latency Ledger v1",
+  "mode": "paper_only",
+  "purpose": "Record every paper-only delay point from TradingView-style alert creation through AI_OS paper simulation.",
+  "required_fixture": "apps/dashboard/mock-data/latency-ledger-v1.example.json",
+  "required_fields": [
+    "schema_version",
+    "ledger_id",
+    "mode",
+    "source",
+    "symbol",
+    "timeframe",
+    "direction_intent",
+    "strategy_name",
+    "alert_created_at",
+    "alert_received_at",
+    "validation_started_at",
+    "validation_completed_at",
+    "route_preview_at",
+    "paper_trade_simulated_at",
+    "journal_recorded_at",
+    "scorecard_updated_at",
+    "alert_to_receive_seconds",
+    "receive_to_validation_start_seconds",
+    "validation_duration_seconds",
+    "validation_to_route_preview_seconds",
+    "route_preview_to_paper_simulation_seconds",
+    "paper_simulation_to_journal_seconds",
+    "journal_to_scorecard_seconds",
+    "total_delay_seconds",
+    "latency_status",
+    "stale_signal",
+    "stale_signal_status",
+    "delay_reason",
+    "delay_reason_code",
+    "blocked_reason",
+    "paper_only_validation_gate",
+    "risk_gate_status",
+    "future_traderspost_handoff_status",
+    "traderspost_route_preview_status",
+    "live_execution_status",
+    "broker_status",
+    "oanda_status",
+    "real_webhook_status",
+    "real_order_status",
+    "api_key_required",
+    "next_safe_action"
+  ],
+  "required_latency_fields": [
+    "alert_created_at",
+    "alert_received_at",
+    "validation_started_at",
+    "validation_completed_at",
+    "route_preview_at",
+    "paper_trade_simulated_at",
+    "journal_recorded_at",
+    "scorecard_updated_at",
+    "alert_to_receive_seconds",
+    "receive_to_validation_start_seconds",
+    "validation_duration_seconds",
+    "validation_to_route_preview_seconds",
+    "route_preview_to_paper_simulation_seconds",
+    "paper_simulation_to_journal_seconds",
+    "journal_to_scorecard_seconds",
+    "total_delay_seconds"
+  ],
+  "timestamp_order": [
+    "alert_created_at",
+    "alert_received_at",
+    "validation_started_at",
+    "validation_completed_at",
+    "route_preview_at",
+    "paper_trade_simulated_at",
+    "journal_recorded_at",
+    "scorecard_updated_at"
+  ],
+  "step_delay_map": {
+    "alert_to_receive_seconds": [
+      "alert_created_at",
+      "alert_received_at"
+    ],
+    "receive_to_validation_start_seconds": [
+      "alert_received_at",
+      "validation_started_at"
+    ],
+    "validation_duration_seconds": [
+      "validation_started_at",
+      "validation_completed_at"
+    ],
+    "validation_to_route_preview_seconds": [
+      "validation_completed_at",
+      "route_preview_at"
+    ],
+    "route_preview_to_paper_simulation_seconds": [
+      "route_preview_at",
+      "paper_trade_simulated_at"
+    ],
+    "paper_simulation_to_journal_seconds": [
+      "paper_trade_simulated_at",
+      "journal_recorded_at"
+    ],
+    "journal_to_scorecard_seconds": [
+      "journal_recorded_at",
+      "scorecard_updated_at"
+    ]
+  },
+  "stale_signal_rules": {
+    "fresh_status": "FRESH",
+    "delayed_status": "DELAYED_REVIEW",
+    "stale_status": "STALE_BLOCKED",
+    "missing_timestamp_status": "PENDING_VALIDATION",
+    "negative_delay_status": "CLOCK_SKEW_BLOCKED",
+    "delayed_from_seconds": 300,
+    "stale_from_seconds": 900,
+    "negative_delay_rule": "Any negative step delay is clock skew and blocks paper simulation review.",
+    "too_high_latency_rule": "When total_delay_seconds is at least stale_from_seconds, stale_signal must be true and blocked_reason must block live execution and paper route promotion."
+  },
+  "allowed_latency_statuses": [
+    "PENDING_VALIDATION",
+    "FRESH",
+    "DELAYED_REVIEW",
+    "STALE_BLOCKED",
+    "CLOCK_SKEW_BLOCKED"
+  ],
+  "delay_reason_codes": [
+    "NOT_MEASURED",
+    "NONE",
+    "ALERT_SOURCE_DELAY",
+    "AI_OS_INTAKE_DELAY",
+    "VALIDATION_DELAY",
+    "ROUTE_PREVIEW_DELAY",
+    "PAPER_SIMULATION_DELAY",
+    "JOURNAL_DELAY",
+    "SCORECARD_DELAY",
+    "CLOCK_SKEW",
+    "UNKNOWN"
+  ],
+  "required_values": {
+    "mode": "paper_only",
+    "paper_only_validation_gate": "REQUIRED",
+    "future_traderspost_handoff_status": "PLACEHOLDER_ONLY",
+    "traderspost_route_preview_status": "PAPER_PREVIEW_ONLY",
+    "live_execution_status": "BLOCKED",
+    "broker_status": "BLOCKED",
+    "oanda_status": "BLOCKED",
+    "real_webhook_status": "BLOCKED",
+    "real_order_status": "BLOCKED",
+    "api_key_required": false
+  },
+  "prohibited_fields": [
+    "api_key",
+    "secret",
+    "token",
+    "broker_account",
+    "account_id",
+    "webhook_url",
+    "order_id",
+    "live_order",
+    "oanda_account",
+    "private_key"
+  ],
+  "blocked_capabilities": [
+    "broker connection",
+    "OANDA",
+    "API keys",
+    "real webhooks",
+    "real orders",
+    "live execution",
+    "autonomous execution"
+  ],
+  "next_safe_action": "Validate the latency ledger v1 fixture locally before using it in paper replay, route preview, journal, or scorecard review."
+}

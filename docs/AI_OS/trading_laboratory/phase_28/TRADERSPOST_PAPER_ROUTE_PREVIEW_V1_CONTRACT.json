@@ -1,0 +1,65 @@
+{
+  "schema_version": "0.1-route-preview-v1",
+  "contract_id": "TRADERSPOST_PAPER_ROUTE_PREVIEW_V1_CONTRACT",
+  "phase": "28",
+  "mode": "paper_only",
+  "required_fixture": "apps/dashboard/mock-data/traderspost-paper-route-preview-v1.example.json",
+  "required_fields": [
+    "route_id",
+    "source_signal_id",
+    "source",
+    "target",
+    "symbol",
+    "timeframe",
+    "direction_intent",
+    "paper_only",
+    "risk_gate_status",
+    "latency_status",
+    "route_preview_created_at",
+    "simulated_destination",
+    "live_execution_blocked",
+    "blocked_reason",
+    "approval_required_before_live"
+  ],
+  "required_values": {
+    "source": "TradingView-style paper alert",
+    "target": "TradersPost-style paper route preview",
+    "paper_only": true,
+    "simulated_destination": "PAPER_ROUTE_PREVIEW_ONLY",
+    "live_execution_blocked": true,
+    "approval_required_before_live": true
+  },
+  "required_workflow": [
+    "TradingView alert enters AI_OS",
+    "AI_OS validates signal",
+    "AI_OS measures latency",
+    "AI_OS checks risk gate",
+    "AI_OS creates paper route preview",
+    "AI_OS blocks live execution",
+    "Future TradersPost handoff remains placeholder only"
+  ],
+  "prohibited_fields": [
+    "api_key",
+    "secret",
+    "token",
+    "broker_account",
+    "account_id",
+    "webhook_url",
+    "order_id",
+    "live_order",
+    "oanda_account",
+    "credential"
+  ],
+  "blocked_capabilities": [
+    "real TradersPost webhook",
+    "broker connection",
+    "OANDA",
+    "API keys",
+    "credentials",
+    "account connection",
+    "real orders",
+    "live execution",
+    "autonomous execution"
+  ],
+  "next_safe_action": "Run the route preview v1 dry-run validator and keep the scaffold paper-only."
+}
