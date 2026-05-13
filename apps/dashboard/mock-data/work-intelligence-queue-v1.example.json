@@ -1,0 +1,42 @@
+{
+  "schema": "AIOS_WORK_INTELLIGENCE_QUEUE.v1",
+  "generated_at": "2026-05-13T00:00:00-04:00",
+  "mode": "display_only_foundation_mock",
+  "source": "Work Intelligence queue example",
+  "queue_count": 4,
+  "queue_items": [
+    {
+      "queue_rank": 1,
+      "title": "Review high-risk security warnings.",
+      "priority": "HIGH",
+      "status": "REVIEW",
+      "suggested_worker_lane": "Work Intelligence",
+      "recommended_action": "Review high-risk security warning classes and decide whether a focused DRY_RUN is needed."
+    },
+    {
+      "queue_rank": 2,
+      "title": "Resolve worker file ownership conflict.",
+      "priority": "HIGH",
+      "status": "BLOCKED",
+      "suggested_worker_lane": "Operator Orchestration",
+      "recommended_action": "Resolve worker file ownership conflict before merge or APPLY review."
+    },
+    {
+      "queue_rank": 3,
+      "title": "Review missing worker reports.",
+      "priority": "MEDIUM",
+      "status": "REVIEW",
+      "suggested_worker_lane": "Operator Orchestration",
+      "recommended_action": "Collect or mark missing worker reports before commit package review."
+    },
+    {
+      "queue_rank": 4,
+      "title": "Run next DRY_RUN workload.",
+      "priority": "MEDIUM",
+      "status": "READY",
+      "suggested_worker_lane": "Work Intelligence",
+      "recommended_action": "Generate a reviewed Codex workload packet for the next safe DRY_RUN."
+    }
+  ],
+  "next_safe_action": "Display these queue items only. Do not launch workers, APPLY, commit, or push from this mock data."
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "AIOS_PHASE_27_COMMIT_PACKAGE.v1",
+  "package_id": "AIOS_PHASE_27_COMMIT_PACKAGE_EXAMPLE_001",
+  "created_at": "2026-05-13T00:00:00-04:00",
+  "mode": "example_only",
+  "approval_required": true,
+  "phase": "27",
+  "files_approved": [
+    "docs/AI_OS/operator/AIOS_PHASE_27_APPROVAL_COMMIT_PACKAGE_FLOW.md",
+    "automation/operator/AIOS_PHASE_27_COMMIT_PACKAGE.example.json"
+  ],
+  "files_blocked": [
+    "README.md",
+    "AGENTS.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "White_Paper.md",
+    "broker/OANDA/API/live execution files",
+    "unapproved dashboard code files"
+  ],
+  "validation_commands": [
+    "powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "exact_git_add_commands": [
+    "git add -- \"docs/AI_OS/operator/AIOS_PHASE_27_APPROVAL_COMMIT_PACKAGE_FLOW.md\"",
+    "git add -- \"automation/operator/AIOS_PHASE_27_COMMIT_PACKAGE.example.json\""
+  ],
+  "forbidden_commands": [
+    "git add .",
+    "git add -A",
+    "git reset --hard",
+    "git clean -fd",
+    "git push --force"
+  ],
+  "commit_message_draft": "docs: add AI_OS approval commit package flow",
+  "push_command": "git push",
+  "clean_status_command": "git status --short --branch",
+  "operator_checklist": [
+    "DRY_RUN report reviewed",
+    "APPLY approved for exact file list",
+    "APPLY completed",
+    "validators pass",
+    "git diff --check passes",
+    "operator reviews changed files",
+    "commit package generated",
+    "operator stages exact files only",
+    "operator reviews git diff --cached",
+    "operator commits",
+    "operator pushes",
+    "operator verifies clean status"
+  ],
+  "next_safe_action": "Review this example package and stage only exact approved files if validation passed. Never use git add ."
+}
