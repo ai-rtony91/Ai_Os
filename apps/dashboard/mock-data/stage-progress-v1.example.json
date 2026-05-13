@@ -1,0 +1,16 @@
+{
+  "schema": "AIOS_STAGE_PROGRESS.v1",
+  "status": "example_only",
+  "description": "Stage completion percentages for AI_OS progress tracking.",
+  "stages": [
+    {
+      "phase": "Phase 15",
+      "stage": "Stage 15.1",
+      "name": "Production Telemetry Engine",
+      "percent_complete": 10,
+      "status": "STARTED",
+      "blocked": false,
+      "next_safe_action": "Run production snapshot and validate telemetry ledgers."
+    }
+  ]
+}

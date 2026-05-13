@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_AI_VS_HUMAN_OUTPUT.v1",
+  "status": "example_only",
+  "description": "Compares manual, AI-assisted, monitored, and automated work output.",
+  "summary": {
+    "manual_percent": 70,
+    "ai_assisted_percent": 25,
+    "automated_percent": 5,
+    "estimated_manual_minutes_saved": 45
+  },
+  "items": [
+    {
+      "date": "2026-05-13",
+      "work_item": "Production Telemetry Engine scaffold",
+      "source_type": "mixed",
+      "ai_assisted": true,
+      "human_reviewed": true,
+      "automation_level": "monitored",
+      "estimated_manual_minutes_saved": 45
+    }
+  ]
+}

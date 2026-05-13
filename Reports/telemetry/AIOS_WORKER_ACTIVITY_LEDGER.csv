@@ -1,0 +1,1 @@
+date,timestamp,worker_id,assigned_packet,status,start_time,end_time,duration_minutes,files_touched,validator_result,notes

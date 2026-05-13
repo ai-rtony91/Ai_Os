@@ -1,0 +1,20 @@
+{
+  "schema": "AIOS_PRODUCTION_HEATMAP.v1",
+  "status": "example_only",
+  "description": "GitHub-style production heatmap data for AI_OS daily productivity.",
+  "days": [
+    {
+      "date": "2026-05-13",
+      "production_score": 72,
+      "activity_level": "high",
+      "dry_run_count": 4,
+      "apply_count": 2,
+      "validator_pass_count": 5,
+      "validator_fail_count": 0,
+      "commit_count": 2,
+      "push_count": 2,
+      "stage_progress_delta": 6,
+      "notes": "Example day only."
+    }
+  ]
+}
