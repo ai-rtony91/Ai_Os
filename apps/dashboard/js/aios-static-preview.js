@@ -23,6 +23,7 @@ const detailStatus = document.querySelector("[data-detail-status]");
 const detailNote = document.querySelector("[data-detail-note]");
 const detailList = document.querySelector("[data-detail-list]");
 const tradingLabNextActionCard = document.querySelector("[data-trading-lab-next-action]");
+const devopsControlWindowPanel = document.querySelector("[data-devops-control-window]");
 const projectHubPanel = document.querySelector("[data-project-hub]");
 const personalGalleryPanel = document.querySelector("[data-personal-gallery]");
 const personalAppsPanel = document.querySelector("[data-personal-apps]");
@@ -76,6 +77,8 @@ const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.
 const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
+const devopsControlWindowFixturePath = "mock-data/aios-devops-control-window-v1.example.json";
+const workIntelligenceQueueFixturePath = "mock-data/work-intelligence-queue-v1.example.json";
 const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const tradingLabWorkstationFixturePath = "mock-data/trading-lab-workstation.example.json";
@@ -334,6 +337,7 @@ const railDetailConfig = {
       detailItem("start-here", "Start Here", "GUIDE", "Begin with a simple Workspace overview: pick an item, review the purpose, and keep APPLY blocked until approved.", "Static guide only. No backend or execution logic runs here.", ["Choose one item.", "Review purpose and locks.", "Use Soft Refresh for dashboard-only updates."]),
       detailItem("projects", "Projects", "PROJECTS", "Open active project folders for AI_OS, Trading Bot, App Builder, Web Dev, and future projects.", "Projects are static folders with mock telemetry, reports, validation, files, risks, and next actions.", ["Open a project folder.", "Review project telemetry.", "Keep execution locked."]),
       detailItem("work-table", "Work Table", "PROJECT", "Start or continue a guided project packet with brief, prompt stack, build instructions, tool output, approval gate, and validation queue.", "File edits remain blocked until explicit APPLY approval.", ["Define scope.", "Confirm allowed files.", "List validation steps."]),
+      detailItem("devops-control-window", "DevOps Control", "DISPLAY", "Visible AI_OS DevOps Control Window for next workload, queue evidence, validation state, commit package preview, morning workflow, and approval locks.", "Display state only. No APPLY, shell execution, worker launch, commit, or push.", ["Review next workload.", "Check queue and validators.", "Approval required before APPLY, commit, or push."]),
       detailItem("trading-bot", "Trading Bot", "MOCK LAB", "Mock-only Trading Lab card for strategy, signal, regime, risk, journal, and metrics planning.", "No broker, OANDA, API keys, or live orders.", ["Review one strategy.", "Score a mock signal.", "Keep execution blocked."]),
       detailItem("code-tools", "Code Tools", "CODE", "Use approved local coding tools for inspected files, syntax checks, and focused patches.", "Commits and pushes require separate explicit approval.", ["Inspect first.", "Patch approved scope.", "Run syntax checks."]),
       detailItem("source-control", "Source Control", "GIT", "Review git status, diff names, checkpoint needs, and future commit planning.", "No commit, push, merge, reset, or clean is performed from this static dashboard.", ["Check git status.", "Review diff names.", "Ask before commit or push."]),
@@ -843,6 +847,7 @@ function renderRailButtons(container, railId, selectedItemId) {
 
 function renderDetailPanel(workspace, item) {
   hideTradingLabNextActionCard();
+  hideDevOpsControlWindow();
   hideProjectHub();
   hidePersonalGallery();
   hidePersonalApps();
@@ -868,11 +873,253 @@ function renderDetailPanel(workspace, item) {
   if (item.id === "projects") {
     renderProjectHub();
   }
+  if (item.id === "devops-control-window") {
+    renderDevOpsControlWindow();
+  }
   if (item.id === "personal-apps") {
     renderPersonalApps();
   }
   if (item.id === "trading-bot") {
     renderTradingLabNextActionCard();
+  }
+}
+
+function hideDevOpsControlWindow() {
+  if (!devopsControlWindowPanel) return;
+  devopsControlWindowPanel.hidden = true;
+  devopsControlWindowPanel.replaceChildren();
+}
+
+function createDevOpsTextElement(tagName, className, text) {
+  const element = document.createElement(tagName);
+  if (className) element.className = className;
+  element.textContent = text ?? "UNKNOWN";
+  return element;
+}
+
+function createDevOpsStatusPill(value = "UNKNOWN") {
+  const pill = document.createElement("span");
+  const normalized = String(value).toLowerCase();
+  pill.className = "devops-status-pill";
+  if (normalized.includes("blocked") || normalized.includes("fail")) {
+    pill.classList.add("is-blocked");
+  } else if (normalized.includes("ready") || normalized.includes("pass")) {
+    pill.classList.add("is-ready");
+  } else if (normalized.includes("review") || normalized.includes("pending")) {
+    pill.classList.add("is-review");
+  }
+  pill.textContent = value || "UNKNOWN";
+  return pill;
+}
+
+function createDevOpsField(label, value) {
+  const field = document.createElement("div");
+  field.className = "devops-field";
+  field.append(
+    createDevOpsTextElement("span", "", label),
+    createDevOpsTextElement("strong", "", value || "UNKNOWN")
+  );
+  return field;
+}
+
+function createDevOpsPanel(title, children = []) {
+  const panel = document.createElement("section");
+  panel.className = "devops-card";
+  const heading = document.createElement("div");
+  heading.className = "devops-card-head";
+  heading.append(createDevOpsTextElement("strong", "", title));
+  panel.append(heading, ...children.filter(Boolean));
+  return panel;
+}
+
+function renderDevOpsQueue(queueItems = []) {
+  const queue = document.createElement("div");
+  queue.className = "devops-queue-list";
+  const header = document.createElement("div");
+  header.className = "devops-queue-row devops-queue-row-head";
+  header.append(
+    createDevOpsTextElement("span", "devops-queue-rank", "Rank"),
+    createDevOpsTextElement("strong", "devops-queue-title", "Workload"),
+    createDevOpsTextElement("span", "devops-queue-label", "Priority"),
+    createDevOpsTextElement("span", "devops-queue-label", "Status"),
+    createDevOpsTextElement("span", "devops-queue-lane", "Lane"),
+    createDevOpsTextElement("p", "devops-queue-action", "Recommended action")
+  );
+  queue.append(header);
+  queueItems.slice(0, 6).forEach((item) => {
+    const row = document.createElement("article");
+    row.className = "devops-queue-row";
+    row.append(
+      createDevOpsTextElement("span", "devops-queue-rank", `#${item.queue_rank ?? "?"}`),
+      createDevOpsTextElement("strong", "devops-queue-title", item.title || "UNKNOWN"),
+      createDevOpsStatusPill(item.priority || "UNKNOWN"),
+      createDevOpsStatusPill(item.status || "UNKNOWN"),
+      createDevOpsTextElement("span", "devops-queue-lane", item.suggested_worker_lane || "UNKNOWN"),
+      createDevOpsTextElement("p", "devops-queue-action", item.recommended_action || "UNKNOWN")
+    );
+    queue.append(row);
+  });
+  if (queue.childElementCount === 1) {
+    header.remove();
+    queue.append(createDevOpsTextElement("p", "devops-muted", "No queue evidence available."));
+  }
+  return queue;
+}
+
+function renderDevOpsValidation(validation = {}) {
+  const grid = document.createElement("div");
+  grid.className = "devops-validation-grid";
+  [
+    ["Work Intelligence", validation.work_intelligence_validator],
+    ["Parallel Workers", validation.parallel_worker_validator],
+    ["git diff --check", validation.git_diff_check],
+    ["git status", validation.git_status]
+  ].forEach(([label, item]) => {
+    const card = document.createElement("div");
+    card.className = "devops-validation-item";
+    card.append(
+      createDevOpsTextElement("span", "", label),
+      createDevOpsStatusPill(item?.state || "UNKNOWN"),
+      createDevOpsTextElement("small", "", item?.detail || "UNKNOWN")
+    );
+    grid.append(card);
+  });
+  return grid;
+}
+
+function renderDevOpsCommitPackage(commitPackage = {}) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "devops-commit-package";
+  const note = createDevOpsTextElement("p", "devops-muted", commitPackage.note || "Display-only exact-file staging preview. No execution buttons.");
+  const commandList = document.createElement("pre");
+  commandList.className = "devops-command-preview";
+  const commands = Array.isArray(commitPackage.git_add_commands) ? commitPackage.git_add_commands : [];
+  commandList.textContent = commands.length ? commands.join("\n") : "No git add commands available.";
+  wrapper.append(note, commandList);
+  return wrapper;
+}
+
+function renderDevOpsMorningWorkflow(morning = {}) {
+  const list = document.createElement("div");
+  list.className = "devops-morning-list";
+  (morning.checks || []).forEach((check) => {
+    const item = document.createElement("div");
+    item.className = "devops-morning-item";
+    item.append(
+      createDevOpsStatusPill(check.state || "UNKNOWN"),
+      createDevOpsTextElement("span", "", check.label || "UNKNOWN")
+    );
+    list.append(item);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "Morning workflow evidence unavailable."));
+  }
+  return list;
+}
+
+function renderDevOpsSafetyStrip(locks = []) {
+  const strip = document.createElement("div");
+  strip.className = "devops-safety-strip";
+  locks.forEach((lock) => strip.append(createDevOpsTextElement("strong", "", lock)));
+  return strip;
+}
+
+function renderDevOpsSafetyLocks(safetyLocks = {}) {
+  const list = document.createElement("div");
+  list.className = "devops-safety-lock-grid";
+  Object.entries(safetyLocks).forEach(([label, state]) => {
+    const item = document.createElement("div");
+    item.className = "devops-safety-lock";
+    item.append(
+      createDevOpsTextElement("span", "", label.replaceAll("_", " ")),
+      createDevOpsStatusPill(state || "UNKNOWN")
+    );
+    list.append(item);
+  });
+  if (!list.childElementCount) {
+    list.append(createDevOpsTextElement("p", "devops-muted", "Safety lock evidence unavailable."));
+  }
+  return list;
+}
+
+function renderDevOpsQueueMeta(queueData = {}) {
+  const meta = document.createElement("div");
+  meta.className = "devops-queue-meta";
+  meta.append(
+    createDevOpsField("Source", queueData.source || "UNKNOWN"),
+    createDevOpsField("Mode", queueData.mode || "UNKNOWN"),
+    createDevOpsField("Queue Count", queueData.queue_count ?? (Array.isArray(queueData.queue_items) ? queueData.queue_items.length : "UNKNOWN"))
+  );
+  return meta;
+}
+
+function renderDevOpsControlData(data = {}, queueData = {}) {
+  if (!devopsControlWindowPanel) return;
+  const queueItems = queueData.queue_items || queueData.queue || data.work_queue || [];
+  const header = document.createElement("section");
+  header.className = "devops-window-header";
+  const title = createDevOpsTextElement("h3", "", data.title || "DevOps Control Window");
+  const summary = createDevOpsTextElement("p", "", data.summary || "Local mock-data DevOps state. Display only.");
+  const badges = document.createElement("div");
+  badges.className = "devops-header-badges";
+  badges.append(
+    createDevOpsStatusPill(data.control_window_status || "REVIEW"),
+    createDevOpsStatusPill(data.mode || "display_only")
+  );
+  header.append(title, summary, badges);
+
+  const nextWorkload = data.next_approved_workload || queueItems[0] || {};
+  const nextWorkloadPanel = createDevOpsPanel("Next Approved Workload", [
+    createDevOpsField("Rank", nextWorkload.queue_rank ? `#${nextWorkload.queue_rank}` : "UNKNOWN"),
+    createDevOpsField("Title", nextWorkload.title),
+    createDevOpsField("Priority", nextWorkload.priority),
+    createDevOpsField("Status", nextWorkload.status),
+    createDevOpsField("Lane", nextWorkload.suggested_worker_lane),
+    createDevOpsTextElement("p", "devops-muted", nextWorkload.recommended_action || "UNKNOWN")
+  ]);
+
+  const queuePanel = createDevOpsPanel("Work Queue", [renderDevOpsQueueMeta(queueData), renderDevOpsQueue(queueItems)]);
+  const validationPanel = createDevOpsPanel("Validation Status", [renderDevOpsValidation(data.validation_status)]);
+  const commitPanel = createDevOpsPanel("Commit Package Preview", [renderDevOpsCommitPackage(data.commit_package_preview)]);
+  const morningPanel = createDevOpsPanel("Morning Workflow Status", [renderDevOpsMorningWorkflow(data.morning_workflow_status)]);
+  const safetyPanel = createDevOpsPanel("Safety Locks", [renderDevOpsSafetyLocks(data.safety_locks)]);
+  const nextActionPanel = createDevOpsPanel("Next Safe Action", [
+    createDevOpsTextElement("p", "devops-muted", data.next_safe_action || queueData.next_safe_action || "Review mock data only. No backend execution.")
+  ]);
+  const safetyStrip = renderDevOpsSafetyStrip(data.approval_locks || [
+    "APPLY REQUIRES APPROVAL",
+    "COMMIT REQUIRES APPROVAL",
+    "PUSH REQUIRES APPROVAL"
+  ]);
+
+  const grid = document.createElement("div");
+  grid.className = "devops-window-grid";
+  grid.append(nextWorkloadPanel, queuePanel, validationPanel, commitPanel, morningPanel, safetyPanel, nextActionPanel);
+
+  devopsControlWindowPanel.hidden = false;
+  devopsControlWindowPanel.replaceChildren(header, grid, safetyStrip);
+}
+
+async function renderDevOpsControlWindow() {
+  if (!devopsControlWindowPanel) return;
+  devopsControlWindowPanel.hidden = false;
+  devopsControlWindowPanel.textContent = "Loading DevOps Control Window mock data...";
+  try {
+    const [windowResponse, queueResponse] = await Promise.all([
+      fetch(devopsControlWindowFixturePath, { cache: "no-store" }),
+      fetch(workIntelligenceQueueFixturePath, { cache: "no-store" })
+    ]);
+    const windowData = windowResponse.ok ? await windowResponse.json() : {};
+    const queueData = queueResponse.ok ? await queueResponse.json() : {};
+    renderDevOpsControlData(windowData, queueData);
+  } catch (error) {
+    renderDevOpsControlData({
+      title: "DevOps Control Window",
+      summary: "Mock data unavailable. All actions remain blocked.",
+      control_window_status: "UNKNOWN",
+      mode: "display_only",
+      approval_locks: ["APPLY REQUIRES APPROVAL", "COMMIT REQUIRES APPROVAL", "PUSH REQUIRES APPROVAL"]
+    }, { queue_items: [] });
   }
 }
 

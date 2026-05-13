@@ -1,157 +1,85 @@
 {
   "schema": "AIOS_DEVOPS_CONTROL_WINDOW.v1",
   "generated_at": "2026-05-13T00:00:00-04:00",
-  "mode": "display_only_foundation_mock",
+  "mode": "display_only_local_mock",
+  "title": "DevOps Control Window",
+  "summary": "Local Work Intelligence control surface for queue evidence, validation state, commit package preview, and approval locks.",
   "control_window_status": "REVIEW",
-  "current_phase": "25",
-  "active_queue_item": {
+  "next_approved_workload": {
     "queue_rank": 1,
-    "title": "Review high-risk security warnings.",
+    "title": "Phase 26 Workload Packet Generator",
     "priority": "HIGH",
-    "status": "REVIEW",
+    "status": "READY_FOR_DRY_RUN",
     "suggested_worker_lane": "Work Intelligence",
-    "recommended_action": "Review warnings and decide the next approved workload."
+    "recommended_action": "Generate a reviewed Codex workload packet from the selected queue item."
   },
-  "workflow_steps": [
-    {
-      "step_id": "next_approved_workload",
-      "label": "Next Approved Workload",
-      "status": "READY",
-      "required_evidence": [
-        "ranked queue item",
-        "operator selection"
-      ],
-      "allowed_action": "Display the selected queue item.",
-      "blocked_action": "Do not auto-start APPLY or launch a worker.",
-      "operator_approval_required": true,
-      "display_note": "Shows the next candidate only."
+  "validation_status": {
+    "work_intelligence_validator": {
+      "state": "PASS",
+      "detail": "Last known local validator path: automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1"
     },
-    {
-      "step_id": "generate_codex_prompt",
-      "label": "Generate Codex Prompt",
-      "status": "REVIEW",
-      "required_evidence": [
-        "queue item",
-        "allowed paths",
-        "blocked paths",
-        "validation commands"
-      ],
-      "allowed_action": "Display copy-ready prompt text.",
-      "blocked_action": "Do not send the prompt automatically.",
-      "operator_approval_required": true,
-      "display_note": "Prompt generation is review-only."
+    "parallel_worker_validator": {
+      "state": "REVIEW",
+      "detail": "Worker reports are evidence only; validation remains operator-controlled."
     },
-    {
-      "step_id": "run_dry_run",
-      "label": "Run DRY_RUN",
-      "status": "LOCKED",
-      "required_evidence": [
-        "approved prompt",
-        "operator instruction"
-      ],
-      "allowed_action": "Show DRY_RUN command or instruction text.",
-      "blocked_action": "Do not execute commands from the dashboard.",
-      "operator_approval_required": true,
-      "display_note": "DRY_RUN remains operator-controlled."
+    "git_diff_check": {
+      "state": "PENDING",
+      "detail": "Run git diff --check after approved dashboard edits."
     },
-    {
-      "step_id": "review_report",
-      "label": "Review Report",
-      "status": "LOCKED",
-      "required_evidence": [
-        "DRY_RUN report",
-        "files inspected",
-        "errors",
-        "unknowns"
-      ],
-      "allowed_action": "Display report summary.",
-      "blocked_action": "Do not approve APPLY automatically.",
-      "operator_approval_required": true,
-      "display_note": "Report review gates APPLY."
-    },
-    {
-      "step_id": "approve_apply",
-      "label": "Approve APPLY",
-      "status": "LOCKED",
-      "required_evidence": [
-        "reviewed DRY_RUN report",
-        "exact approved file list"
-      ],
-      "allowed_action": "Display approval state.",
-      "blocked_action": "Do not run APPLY from this mock.",
-      "operator_approval_required": true,
-      "display_note": "Only the operator can approve APPLY."
-    },
-    {
-      "step_id": "validate",
-      "label": "Validate",
-      "status": "LOCKED",
-      "required_evidence": [
-        "completed APPLY",
-        "validation commands"
-      ],
-      "allowed_action": "List validation commands.",
-      "blocked_action": "Do not run validation automatically.",
-      "operator_approval_required": true,
-      "display_note": "Validation is command text only in this phase."
-    },
-    {
-      "step_id": "commit_package",
-      "label": "Commit Package",
-      "status": "LOCKED",
-      "required_evidence": [
-        "passing validation",
-        "operator-reviewed changed files",
-        "exact file list"
-      ],
-      "allowed_action": "Display exact-file staging package.",
-      "blocked_action": "Do not stage or commit.",
-      "operator_approval_required": true,
-      "display_note": "Locked until validation passes and operator approval exists."
-    },
-    {
-      "step_id": "push",
-      "label": "Push",
-      "status": "LOCKED",
-      "required_evidence": [
-        "approved commit",
-        "post-commit status",
-        "operator push approval"
-      ],
-      "allowed_action": "Display push readiness.",
-      "blocked_action": "Do not push.",
-      "operator_approval_required": true,
-      "display_note": "Locked until validation passes and operator approval exists."
-    },
-    {
-      "step_id": "morning_workflow",
-      "label": "Morning Workflow",
-      "status": "READY",
-      "required_evidence": [
-        "repo status",
-        "latest reports",
-        "next safe action"
-      ],
-      "allowed_action": "Display morning checklist.",
-      "blocked_action": "Do not execute startup automation.",
-      "operator_approval_required": false,
-      "display_note": "Morning guidance is read-only."
+    "git_status": {
+      "state": "PENDING",
+      "detail": "Run git status --short --branch after approved dashboard edits."
     }
+  },
+  "commit_package_preview": {
+    "mode": "display_only",
+    "note": "Exact-file staging preview only. The dashboard has no execution buttons and cannot run shell commands.",
+    "git_add_commands": [
+      "git add apps/dashboard/AIOS_STATIC_PREVIEW.html",
+      "git add apps/dashboard/css/aios-static-preview.css",
+      "git add apps/dashboard/js/aios-static-preview.js",
+      "git add apps/dashboard/mock-data/aios-devops-control-window-v1.example.json",
+      "git add apps/dashboard/mock-data/work-intelligence-queue-v1.example.json"
+    ]
+  },
+  "morning_workflow_status": {
+    "state": "REVIEW",
+    "checks": [
+      {
+        "label": "Read latest Work Intelligence queue",
+        "state": "READY"
+      },
+      {
+        "label": "Pick one workload before APPLY",
+        "state": "REVIEW"
+      },
+      {
+        "label": "Run validators manually",
+        "state": "PENDING"
+      },
+      {
+        "label": "Review git status before commit",
+        "state": "PENDING"
+      }
+    ]
+  },
+  "approval_locks": [
+    "APPLY REQUIRES APPROVAL",
+    "COMMIT REQUIRES APPROVAL",
+    "PUSH REQUIRES APPROVAL"
   ],
   "safety_locks": {
-    "command_execution": "BLOCKED",
-    "hidden_shell_commands": "BLOCKED",
-    "worker_launch": "BLOCKED",
     "automatic_apply": "BLOCKED",
-    "automatic_merge": "BLOCKED",
-    "automatic_rollback": "BLOCKED",
     "automatic_commit": "BLOCKED",
     "automatic_push": "BLOCKED",
-    "git_add_dot": "BLOCKED",
-    "broker_live_trading": "BLOCKED",
+    "worker_launch": "BLOCKED",
+    "shell_execution": "BLOCKED",
+    "backend_execution": "BLOCKED",
+    "startup_tasks": "BLOCKED",
+    "broker_logic": "BLOCKED",
     "oanda": "BLOCKED",
     "api_keys": "BLOCKED",
-    "secrets": "BLOCKED"
+    "live_trading": "BLOCKED"
   },
-  "next_safe_action": "Review this display-only mock before any future dashboard implementation. No command execution is enabled."
+  "next_safe_action": "Review this display-only DevOps Control Window and run the requested validation commands manually."
 }
