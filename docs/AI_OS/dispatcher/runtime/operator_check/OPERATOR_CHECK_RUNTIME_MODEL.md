@@ -12,7 +12,8 @@ The operator check reads:
 
 - `git status --short --branch --untracked-files=all`
 - `automation/dispatcher/runtime/validators/Invoke-AIOSRuntimeValidatorDryRun.ps1`
-- Runtime status examples under `Reports/dispatcher/runtime/`
+- Live runtime status files under `Reports/dispatcher/runtime/`
+- Example runtime status files only when the matching live file is missing
 
 It reports:
 
@@ -26,7 +27,20 @@ It reports:
 - commit readiness
 - recovery state
 - snapshot bootstrap state
+- source labels: `LIVE`, `EXAMPLE_FALLBACK`, or `MISSING`
 - one next safe action
+
+## Live Runtime Inputs
+
+The command prefers these live files:
+
+- `Reports/dispatcher/runtime/packets/packet_runtime_table.json`
+- `Reports/dispatcher/runtime/packets/packet_queue.json`
+- `Reports/dispatcher/runtime/workers/active_worker_table.json`
+- `Reports/dispatcher/runtime/workers/worker_heartbeat_table.json`
+- `Reports/dispatcher/runtime/recovery/live_recovery_state.json`
+
+If a live file is unavailable, the command may read the matching example fallback. Fallback or missing sources keep the result at `REVIEW_REQUIRED`.
 
 ## Safety Rules
 
@@ -49,6 +63,10 @@ The command must not:
 
 Dirty files under `automation/operator/` are `REVIEW_REQUIRED` unless an approved package explicitly includes them.
 
+Missing or null worker heartbeats are `REVIEW_REQUIRED`.
+
+Stale workers in live recovery state are `REVIEW_REQUIRED`.
+
 ## Status Rules
 
 Overall status uses this precedence:
@@ -68,4 +86,3 @@ powershell -NoProfile -ExecutionPolicy Bypass -File automation/operator/Invoke-A
 ```
 
 If the report is not `PASS`, do not stage, commit, push, or resume APPLY work until the listed warning is reviewed.
-

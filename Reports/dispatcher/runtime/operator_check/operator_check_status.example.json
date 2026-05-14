@@ -13,11 +13,20 @@
   },
   "runtime": {
     "validator_status": "REVIEW_REQUIRED",
-    "packet_queue_status": "REVIEW_REQUIRED",
+    "packet_runtime_source": "LIVE",
+    "packet_queue_source": "LIVE",
+    "packet_queue_status": "QUEUED",
+    "queued_packet_count": 1,
+    "worker_source": "LIVE",
     "worker_status": "REVIEW_REQUIRED",
+    "worker_count": 10,
+    "worker_heartbeat_source": "LIVE",
+    "missing_or_null_heartbeat_count": 10,
     "approval_status": "REVIEW_REQUIRED",
     "commit_readiness": "BLOCKED",
+    "recovery_source": "LIVE",
     "recovery_status": "REVIEW_REQUIRED",
+    "stale_worker_count": 10,
     "snapshot_bootstrap_status": "REVIEW_REQUIRED"
   },
   "blocked_actions": [
