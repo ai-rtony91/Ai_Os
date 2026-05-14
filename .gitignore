@@ -25,3 +25,14 @@ __pycache__/
 # Python cache files
 __pycache__/
 *.pyc
+# Security sensitive files
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+.cloudflared/
+secrets/
+credentials/
