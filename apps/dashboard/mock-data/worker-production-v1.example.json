@@ -1,0 +1,25 @@
+{
+  "schema": "AIOS_WORKER_PRODUCTION.v1",
+  "status": "example_only",
+  "description": "Worker production card data for local AI_OS Codex worker queue visibility.",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "summary": {
+    "worker_count": 8,
+    "active_count": 4,
+    "complete_count": 2,
+    "blocked_count": 1,
+    "waiting_count": 1,
+    "stale_count": 0
+  },
+  "workers": [
+    {
+      "worker_id": "AIOS-01-DEVOPS",
+      "assigned_area": "DevOps",
+      "status_guess": "ACTIVE",
+      "stale_status": "FRESH",
+      "stale_minutes": 12,
+      "notes": "Example worker card only."
+    }
+  ],
+  "next_safe_action": "Review worker cards before assigning new work."
+}

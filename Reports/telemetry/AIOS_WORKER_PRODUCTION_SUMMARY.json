@@ -1,0 +1,16 @@
+﻿{
+    "schema":  "AIOS_WORKER_PRODUCTION_SUMMARY.v1",
+    "status":  "generated",
+    "generated_at":  "2026-05-13T18:19:34.1525061-04:00",
+    "worker_count":  8,
+    "active_count":  0,
+    "complete_count":  0,
+    "blocked_count":  0,
+    "waiting_count":  0,
+    "unknown_count":  8,
+    "fresh_count":  0,
+    "warm_count":  8,
+    "stale_count":  0,
+    "summary_text":  "Worker queue needs review.",
+    "next_safe_action":  "Review worker production summary before assigning new Codex workload."
+}

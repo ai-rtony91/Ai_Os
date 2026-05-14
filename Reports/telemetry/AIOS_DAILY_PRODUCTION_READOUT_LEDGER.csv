@@ -1,0 +1,2 @@
+date,timestamp,production_score,plain_language_status,branch,git_status_clean,modified_files,staged_files,untracked_files,latest_stage,latest_stage_percent,blocked_worker_count,notes
+"2026-05-13","2026-05-13T18:03:26.5580025-04:00","80","HAULING HARD","main","FALSE","10","0","9","Stage 15.1","10","0","Local production readout only. Does not perform execution."

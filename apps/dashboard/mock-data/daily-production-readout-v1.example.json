@@ -1,0 +1,31 @@
+{
+  "schema": "AIOS_DAILY_PRODUCTION_READOUT.v1",
+  "status": "example_only",
+  "description": "Plain-language daily production scoring for AI_OS.",
+  "generated_at": "2026-05-13T00:00:00Z",
+  "production_score": 76,
+  "plain_language_status": "HAULING",
+  "inputs": {
+    "production_daily_ledger": true,
+    "stage_progress_ledger": true,
+    "worker_snapshot": true,
+    "validator_scripts_found": true,
+    "git_status_readable": true
+  },
+  "git": {
+    "branch": "main",
+    "git_status_clean": false,
+    "modified_files": 2,
+    "staged_files": 0,
+    "untracked_files": 0
+  },
+  "stage": {
+    "latest_stage": "Stage 15.3",
+    "latest_stage_percent": 10
+  },
+  "workers": {
+    "worker_summary_available": true,
+    "blocked_worker_count": 1
+  },
+  "next_safe_action": "Review the production readout and fix blockers before assigning more work."
+}
