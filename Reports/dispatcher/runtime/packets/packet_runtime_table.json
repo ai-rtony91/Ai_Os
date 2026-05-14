@@ -1,0 +1,71 @@
+{
+  "schema": "AIOS_PACKET_RUNTIME_TABLE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "runtime_status": "ACTIVE",
+  "source_of_truth": true,
+  "automation_mode": "MANUAL_ASSIGNMENT_ONLY",
+  "safety": {
+    "auto_apply": false,
+    "auto_commit": false,
+    "auto_push": false,
+    "broker_execution": "BLOCKED",
+    "oanda_execution": "BLOCKED",
+    "api_key_collection": "BLOCKED",
+    "live_trading": "BLOCKED"
+  },
+  "packets": [
+    {
+      "packet_id": "PACKET-LIVE-QUEUE-001",
+      "phase_id": "PHASE_15_9",
+      "window_id": "WINDOW 02",
+      "worker_role": "PACKET_LOCK_RUNTIME",
+      "status": "QUEUED",
+      "priority": 10,
+      "mode": "DRY_RUN",
+      "task_goal": "Inspect live packet runtime state files and report whether the packet is safe to assign.",
+      "allowed_paths": [
+        "Reports/dispatcher/runtime/packets/",
+        "docs/AI_OS/dispatcher/runtime/packets/"
+      ],
+      "blocked_paths": [
+        "automation/operator/",
+        "automation/dispatcher/runtime/validators/",
+        "automation/dispatcher/runtime/workers/",
+        "automation/dispatcher/runtime/approval/",
+        "automation/dispatcher/runtime/commit_packages/",
+        "Reports/security/",
+        "apps/dashboard/",
+        "automation/telemetry/",
+        "Reports/telemetry/",
+        "README.md",
+        "RISK_POLICY.md",
+        "SOURCE_LOG.md",
+        "ERROR_LOG.md",
+        "HALLUCINATION_LOG.md",
+        "AAR.md",
+        "DAILY_REPORT.md",
+        "ARCHITECTURE.md",
+        "DEPLOYMENT.md",
+        "WHITEPAPER.md"
+      ],
+      "validation_steps": [
+        "git status --short --branch",
+        "git diff --check",
+        "Parse Reports/dispatcher/runtime/packets/*.json"
+      ],
+      "approval_required": true,
+      "apply_allowed": false,
+      "worker_id": null,
+      "assigned_worker_id": null,
+      "assignment_id": null,
+      "lock_ids": [],
+      "created_at": "2026-05-14T00:00:00Z",
+      "updated_at": "2026-05-14T00:00:00Z",
+      "assigned_at": null,
+      "last_status_change_at": "2026-05-14T00:00:00Z",
+      "next_safe_action": "Assign this packet to one available DRY_RUN worker only after confirming the worker has no active packet."
+    }
+  ],
+  "next_safe_action": "Use this table as packet runtime truth before assigning, approving, applying, validating, staging, committing, or pushing."
+}

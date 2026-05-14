@@ -1,0 +1,24 @@
+{
+  "schema": "AIOS_PACKET_STATUS_HISTORY.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "history_status": "ACTIVE",
+  "automation_mode": "MANUAL_ASSIGNMENT_ONLY",
+  "status_events": [
+    {
+      "event_id": "PACKET-LIVE-QUEUE-001-STATUS-001",
+      "packet_id": "PACKET-LIVE-QUEUE-001",
+      "from_status": null,
+      "to_status": "QUEUED",
+      "worker_id": null,
+      "lock_ids": [],
+      "changed_at": "2026-05-14T00:00:00Z",
+      "changed_by": "WINDOW 02 DRY_RUN_APPLY",
+      "reason": "Initial live packet runtime state created with packet waiting for manual assignment.",
+      "approval_required": true,
+      "apply_allowed": false,
+      "next_safe_action": "Assign this queued DRY_RUN packet to one idle worker after validating packet and worker state."
+    }
+  ],
+  "next_safe_action": "Append one status event for every future packet state transition."
+}
