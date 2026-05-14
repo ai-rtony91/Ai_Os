@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_VALIDATOR_RESULT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "validator": "stale_worker",
+  "stage": "recovery_review",
+  "status": "REVIEW_REQUIRED",
+  "worker": {
+    "id": "WINDOW_04_VALIDATOR_ROUTING",
+    "label": "WINDOW 04 - VALIDATOR ROUTING",
+    "last_heartbeat_age_minutes": 95,
+    "owned_files": [
+      "docs/AI_OS/dispatcher/runtime/validators/STALE_WORKER_VALIDATOR.md"
+    ]
+  },
+  "findings": [
+    {
+      "status": "REVIEW_REQUIRED",
+      "message": "Worker heartbeat is stale and owned files overlap the validator docs package."
+    }
+  ],
+  "next_safe_action": "Review worker ownership before reassignment."
+}

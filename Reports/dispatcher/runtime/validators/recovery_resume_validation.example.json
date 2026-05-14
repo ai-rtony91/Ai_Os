@@ -1,0 +1,32 @@
+{
+  "schema": "AIOS_RECOVERY_RESUME_VALIDATION_EXAMPLE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "validator": "recovery_resume",
+  "stage": "recovery_resume",
+  "status": "REVIEW_REQUIRED",
+  "packet": {
+    "packet_id": "PACKET-VALIDATOR-001",
+    "status": "APPLY_STARTED",
+    "worker_id": "AIOS-03-VALIDATOR",
+    "latest_validator_stage": "pre_apply"
+  },
+  "findings": [
+    {
+      "status": "REVIEW_REQUIRED",
+      "message": "Interrupted APPLY requires human review before resume."
+    },
+    {
+      "status": "REVIEW_REQUIRED",
+      "message": "Changed file evidence must be reconciled with git status."
+    }
+  ],
+  "blocked_actions": [
+    "resume_apply_without_review",
+    "reassign_packet_without_review",
+    "release_lock_without_review",
+    "commit",
+    "push"
+  ],
+  "next_safe_action": "Review packet, lock, heartbeat, and git status evidence before resuming work."
+}

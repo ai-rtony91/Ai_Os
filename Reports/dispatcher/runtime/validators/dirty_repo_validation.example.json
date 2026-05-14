@@ -1,0 +1,23 @@
+{
+  "schema": "AIOS_VALIDATOR_RESULT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "validator": "dirty_repo",
+  "stage": "pre_commit_package",
+  "status": "REVIEW_REQUIRED",
+  "git_status_short_branch_example": [
+    "## main...origin/main",
+    " M automation/operator/Start-AIOSWorkerQueueRunner.ps1",
+    "?? Reports/security/"
+  ],
+  "findings": [
+    {
+      "status": "REVIEW_REQUIRED",
+      "message": "Dirty repo state exists before commit packaging."
+    },
+    {
+      "status": "BLOCKED",
+      "message": "Unrelated blocked-path changes must not be included in this validator docs package."
+    }
+  ],
+  "next_safe_action": "Review dirty repo state and keep unrelated files out of exact-file staging."
+}

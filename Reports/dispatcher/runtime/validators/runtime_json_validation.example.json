@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_VALIDATOR_RESULT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "validator": "runtime_json",
+  "stage": "post_apply",
+  "status": "PASS",
+  "checked_files": [
+    "Reports/dispatcher/runtime/validators/validator_result_schema.example.json",
+    "Reports/dispatcher/runtime/validators/exact_file_staging_validation.example.json",
+    "Reports/dispatcher/runtime/validators/dirty_repo_validation.example.json",
+    "Reports/dispatcher/runtime/validators/runtime_json_validation.example.json",
+    "Reports/dispatcher/runtime/validators/stale_worker_validation.example.json",
+    "Reports/dispatcher/runtime/validators/stale_lock_validation.example.json"
+  ],
+  "findings": [
+    {
+      "status": "PASS",
+      "message": "Runtime validator example JSON files parse and use approved status values."
+    }
+  ],
+  "next_safe_action": "Continue to git diff --check and changed-file review."
+}

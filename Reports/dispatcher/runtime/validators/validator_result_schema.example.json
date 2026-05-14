@@ -1,0 +1,32 @@
+{
+  "schema": "AIOS_VALIDATOR_RESULT_SCHEMA_EXAMPLE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "allowed_statuses": [
+    "PASS",
+    "FAIL",
+    "BLOCKED",
+    "REVIEW_REQUIRED"
+  ],
+  "required_fields": [
+    "schema",
+    "validator",
+    "stage",
+    "status",
+    "findings",
+    "next_safe_action"
+  ],
+  "example": {
+    "schema": "AIOS_VALIDATOR_RESULT.v1",
+    "validator": "dirty_repo",
+    "stage": "pre_commit_package",
+    "status": "REVIEW_REQUIRED",
+    "findings": [
+      {
+        "status": "REVIEW_REQUIRED",
+        "message": "Untracked files require human review before exact-file staging."
+      }
+    ],
+    "next_safe_action": "Review dirty repo state before commit packaging."
+  }
+}

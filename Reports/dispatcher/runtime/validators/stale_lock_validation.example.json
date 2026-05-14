@@ -1,0 +1,23 @@
+{
+  "schema": "AIOS_VALIDATOR_RESULT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "validator": "stale_lock",
+  "stage": "recovery_review",
+  "status": "REVIEW_REQUIRED",
+  "lock": {
+    "id": "runtime-validator-docs-lock",
+    "owner": "WINDOW_04_VALIDATOR_ROUTING",
+    "last_heartbeat_age_minutes": 120,
+    "locked_paths": [
+      "docs/AI_OS/dispatcher/runtime/validators/",
+      "Reports/dispatcher/runtime/validators/"
+    ]
+  },
+  "findings": [
+    {
+      "status": "REVIEW_REQUIRED",
+      "message": "Stale lock overlaps the current validator docs package and must not be overridden automatically."
+    }
+  ],
+  "next_safe_action": "Review lock owner before override."
+}
