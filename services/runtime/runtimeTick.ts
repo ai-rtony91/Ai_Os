@@ -3,6 +3,7 @@ import { rebuildDispatcherState } from "../dispatcher/runtimeStateRebuilder";
 import { generateResumePlan } from "../dispatcher/packetResumeEngine";
 import { generateSchedulerPlan } from "../dispatcher/autonomousScheduler";
 import { generateSupervisorReport } from "../supervisor/runtimeSupervisor";
+import { evaluateRuntimeBackpressure } from "./runtimeBackpressure";
 import { updateRuntimeContext, type RuntimeContext } from "./runtimeContext";
 import type { DeadLetterQueueState } from "../dispatcher/deadLetterQueue";
 import type { WorkerLeaseResult } from "../dispatcher/workerLeaseEngine";
@@ -34,14 +35,31 @@ export function runRuntimeTick(
     input.deadLetterQueue
   );
 
+  const backpressure = evaluateRuntimeBackpressure({
+    schedulerPlan,
+    workerLeases: input.workerLeases,
+    deadLetterQueue: input.deadLetterQueue,
+    maxSchedulerActions: input.maxConcurrentPackets ?? 5,
+    maxExpiredWorkers: 2,
+    maxPoisonPackets: 1
+  });
+
+  const runtimeStatus =
+    backpressure.level === "blocked"
+      ? "blocked"
+      : supervisorReport.health.healthy
+        ? "running"
+        : "degraded";
+
   return updateRuntimeContext(input.context, {
-    status: supervisorReport.health.healthy ? "running" : "degraded",
+    status: runtimeStatus,
     dispatcherState,
     resumePlan,
     schedulerPlan,
     workerLeases: input.workerLeases,
     deadLetterQueue: input.deadLetterQueue,
     supervisorReport,
+    backpressure,
     lastTickAt: new Date().toISOString()
   });
 }
