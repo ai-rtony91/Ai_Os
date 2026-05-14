@@ -17,9 +17,9 @@ Set-Location $Repo
 $LayoutPath = Join-Path $Repo $Profiles[$Profile]
 $Layout = Get-Content $LayoutPath -Raw | ConvertFrom-Json
 
-Write-Host "AI_OS MULTI-CODEX LAUNCHER v2" -ForegroundColor Cyan
-Write-Host "Profile: $Profile" -ForegroundColor Cyan
-Write-Host "Layout: $($Layout.profile_name)" -ForegroundColor Cyan
+Write-Host "AI_OS WORKER LAUNCHER" -ForegroundColor Cyan
+Write-Host "Worker set: $Profile" -ForegroundColor Cyan
+Write-Host "Window plan: $($Layout.profile_name)" -ForegroundColor Cyan
 
 foreach ($Worker in $Layout.workers) {
     $Title = "AIOS-$($Worker.number)"
@@ -43,9 +43,9 @@ codex --cd '$Repo'
         $Encoded
     )
 
-    Write-Host "LAUNCHED $Title" -ForegroundColor Green
+    Write-Host "Opened $Title" -ForegroundColor Green
 
     Start-Sleep -Milliseconds 700
 }
 
-Write-Host "AI_OS multi-Codex launch complete." -ForegroundColor Green
+Write-Host "AI_OS worker launch complete." -ForegroundColor Green

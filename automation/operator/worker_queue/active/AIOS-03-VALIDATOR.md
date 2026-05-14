@@ -1,3 +1,21 @@
-# AIOS-03-VALIDATOR.md
+# AIOS-03 - Validator
 
-Run validation review. Check git status, JSON files, PowerShell script syntax risks, and report blockers. No edits unless approved.
+## Your job
+Check repo health and validation risk. Look for broken JSON, PowerShell syntax risks, dirty git state, or unsafe file changes.
+
+## Stay inside
+- automation/
+- docs/AI_OS/
+
+## Do not touch
+- apps/dashboard/
+- no commits
+- no pushes
+- no secrets
+- no API keys
+- no broker/OANDA/live trading
+
+## What to return
+- what you checked
+- what you found
+- what you recommend next

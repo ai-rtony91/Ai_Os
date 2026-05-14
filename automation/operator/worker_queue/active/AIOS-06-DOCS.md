@@ -1,3 +1,20 @@
-# AIOS-06-DOCS.md
+# AIOS-06 - Docs
 
-Review docs/AI_OS policies and operator docs. Find duplicate, stale, or missing governance notes. DRY_RUN only.
+## Your job
+Check AI_OS docs for duplicate, stale, confusing, or missing notes. Recommend cleanup without rewriting everything.
+
+## Stay inside
+- docs/AI_OS/
+
+## Do not touch
+- apps/dashboard/
+- no commits
+- no pushes
+- no secrets
+- no API keys
+- no broker/OANDA/live trading
+
+## What to return
+- what you checked
+- what you found
+- what you recommend next

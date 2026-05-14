@@ -9,7 +9,6 @@ if ($WorkerId -notmatch '^AIOS-\d{2}$') {
 }
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$Repo = Split-Path -Parent (Split-Path -Parent $ScriptDir)
 $ActiveQueue = Join-Path $ScriptDir "worker_queue\active"
 
 Write-Host "AI_OS WORKER JOB CARD" -ForegroundColor Cyan

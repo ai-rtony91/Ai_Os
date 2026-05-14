@@ -1,3 +1,24 @@
-# AIOS-02-TRADING-LAB.md
+# AIOS-02 - Trading Lab
 
-Review docs/AI_OS/trading_laboratory. DRY_RUN only. Find next paper-only TradingView/TradersPost workflow step. No broker, no OANDA, no live trading.
+## Your job
+Check the paper-only Trading Lab workflow. Find the next safe step for TradingView/TradersPost-style paper routing.
+
+## Stay inside
+- docs/AI_OS/trading_laboratory/
+- automation/trading_lab/
+
+## Do not touch
+- apps/dashboard/
+- no broker
+- no OANDA
+- no real orders
+- no commits
+- no pushes
+- no secrets
+- no API keys
+- no broker/OANDA/live trading
+
+## What to return
+- what you checked
+- what you found
+- what you recommend next
