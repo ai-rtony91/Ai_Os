@@ -1,0 +1,33 @@
+{
+  "schema": "AIOS_OPERATOR_CHECK_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "mode": "DRY_RUN_READ_ONLY",
+  "overall_status": "REVIEW_REQUIRED",
+  "repo": {
+    "branch": "## main...origin/main",
+    "status": "REVIEW_REQUIRED",
+    "dirty_paths_count": 1,
+    "untracked_paths_count": 1,
+    "dirty_operator_files": "REVIEW_REQUIRED",
+    "reports_security_detected": "REVIEW_REQUIRED"
+  },
+  "runtime": {
+    "validator_status": "REVIEW_REQUIRED",
+    "packet_queue_status": "REVIEW_REQUIRED",
+    "worker_status": "REVIEW_REQUIRED",
+    "approval_status": "REVIEW_REQUIRED",
+    "commit_readiness": "BLOCKED",
+    "recovery_status": "REVIEW_REQUIRED",
+    "snapshot_bootstrap_status": "REVIEW_REQUIRED"
+  },
+  "blocked_actions": [
+    "edit_files",
+    "stage_files",
+    "commit",
+    "push",
+    "startup_tasks",
+    "scheduled_tasks",
+    "inspect_reports_security_contents"
+  ],
+  "next_safe_action": "Review the listed warnings, then approve one exact APPLY or commit package only if needed."
+}
