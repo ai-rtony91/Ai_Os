@@ -36,3 +36,6 @@ __pycache__/
 .cloudflared/
 secrets/
 credentials/
+
+# Local security reports - do not commit
+Reports/security/
