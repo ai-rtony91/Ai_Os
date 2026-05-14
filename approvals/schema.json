@@ -1,0 +1,15 @@
+{
+  "approvalId": "string",
+  "packetId": "string",
+  "title": "string",
+  "actionType": "file_write|file_delete|commit|push|system_command|trading_action",
+  "risk": "low|medium|high|blocked",
+  "status": "pending",
+  "summary": "string",
+  "targetFiles": [],
+  "commandPreview": null,
+  "rollbackRef": null,
+  "requestedAt": "ISO-8601",
+  "decidedAt": null,
+  "decision": null
+}

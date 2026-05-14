@@ -1,0 +1,17 @@
+{
+  "approvalId": "approval_file_write_001",
+  "packetId": "trading_lab_latency_001",
+  "title": "Approve latency ledger file write",
+  "actionType": "file_write",
+  "risk": "medium",
+  "status": "pending",
+  "summary": "Allow AI_OS to write paper-only Trading Lab latency evidence into telemetry/work_ledger.jsonl.",
+  "targetFiles": [
+    "telemetry/work_ledger.jsonl"
+  ],
+  "commandPreview": "Set-Content telemetry/work_ledger.jsonl",
+  "rollbackRef": "git restore telemetry/work_ledger.jsonl",
+  "requestedAt": "2026-05-14T00:00:00Z",
+  "decidedAt": null,
+  "decision": null
+}
