@@ -1,0 +1,109 @@
+{
+  "schema": "AIOS_LIVE_RECOVERY_STATE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "source_of_truth": true,
+  "secrets_included": false,
+  "external_execution_enabled": false,
+  "automatic_resume_enabled": false,
+  "automatic_reassignment_enabled": false,
+  "automatic_lock_release_enabled": false,
+  "automatic_apply_enabled": false,
+  "human_approval_required": true,
+  "recovery_status": "REVIEW_REQUIRED",
+  "review_required_count": 10,
+  "runtime_sources": {
+    "packet_runtime_table": "Reports/dispatcher/runtime/packets/packet_runtime_table.json",
+    "active_worker_table": "Reports/dispatcher/runtime/workers/active_worker_table.json",
+    "worker_heartbeat_table": "Reports/dispatcher/runtime/workers/worker_heartbeat_table.json",
+    "worker_registration_status": "Reports/dispatcher/runtime/workers/worker_registration_status.json"
+  },
+  "runtime_summary": {
+    "packet_count": 1,
+    "queued_packet_count": 1,
+    "assigned_packet_count": 0,
+    "stale_packet_count": 0,
+    "worker_count": 10,
+    "stale_worker_count": 10,
+    "stale_lock_count": 0,
+    "interrupted_apply_count": 0
+  },
+  "stale_packets": [],
+  "stale_workers": [
+    {
+      "worker_id": "AIOS-01",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-02",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-03",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-04",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-05",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-06",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-07",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-08",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-09",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-10",
+      "assigned_packet_id": null,
+      "stale_reason": "Worker registration and heartbeat require review before assignment.",
+      "review_status": "REVIEW_REQUIRED"
+    }
+  ],
+  "stale_locks": [],
+  "interrupted_apply": [],
+  "recovery_review": {
+    "resume_allowed": false,
+    "reassignment_allowed": false,
+    "lock_release_allowed": false,
+    "apply_retry_allowed": false,
+    "required_human_review": [
+      "Confirm live worker registration before assignment.",
+      "Confirm live heartbeat before assignment.",
+      "Confirm no interrupted APPLY exists before recovery resume.",
+      "Confirm stale locks manually before release."
+    ]
+  },
+  "next_safe_action": "Human operator should review worker registration and heartbeat state before assigning or resuming runtime work."
+}

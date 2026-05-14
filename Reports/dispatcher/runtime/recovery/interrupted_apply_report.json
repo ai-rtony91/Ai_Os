@@ -1,0 +1,34 @@
+{
+  "schema": "AIOS_INTERRUPTED_APPLY_REPORT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "secrets_included": false,
+  "external_execution_enabled": false,
+  "automatic_resume_enabled": false,
+  "automatic_apply_enabled": false,
+  "human_approval_required": true,
+  "recovery_status": "REVIEW_REQUIRED",
+  "review_required_count": 0,
+  "interrupted_apply": [],
+  "interrupted_apply_placeholders": [
+    {
+      "packet_id": null,
+      "worker_id": null,
+      "apply_started_at": null,
+      "last_heartbeat_at": null,
+      "claimed_paths": [],
+      "lock_ids": [],
+      "changed_files_detected": [],
+      "validation_status": "NOT_RUN",
+      "review_status": "REVIEW_REQUIRED",
+      "next_safe_action": "If APPLY is interrupted, require human review before resume, reassignment, lock release, staging, commit, or push."
+    }
+  ],
+  "review_rules": [
+    "APPLY work without completed validation is REVIEW_REQUIRED.",
+    "Changed files must match the approved packet path list.",
+    "Locks tied to interrupted APPLY must not be released automatically.",
+    "Packets tied to interrupted APPLY must not be reassigned automatically."
+  ],
+  "next_safe_action": "Keep APPLY recovery blocked until a human operator reviews packet, worker, lock, and validation state."
+}

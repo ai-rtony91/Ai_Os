@@ -1,0 +1,110 @@
+{
+  "schema": "AIOS_STALE_RUNTIME_REPORT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "secrets_included": false,
+  "external_execution_enabled": false,
+  "automatic_resume_enabled": false,
+  "automatic_reassignment_enabled": false,
+  "automatic_lock_release_enabled": false,
+  "human_approval_required": true,
+  "recovery_status": "REVIEW_REQUIRED",
+  "review_required_count": 10,
+  "stale_packet_count": 0,
+  "stale_worker_count": 10,
+  "stale_lock_count": 0,
+  "stale_packets": [],
+  "stale_packet_placeholders": [
+    {
+      "packet_id": null,
+      "assigned_worker_id": null,
+      "packet_status": "UNKNOWN",
+      "stale_reason": "Populate when an assigned or running packet has missing, stale, or contradictory worker state.",
+      "review_status": "REVIEW_REQUIRED"
+    }
+  ],
+  "stale_workers": [
+    {
+      "worker_id": "AIOS-01",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-02",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-03",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-04",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-05",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-06",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-07",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-08",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-09",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    },
+    {
+      "worker_id": "AIOS-10",
+      "assigned_packet_id": null,
+      "heartbeat_status": "REVIEW_REQUIRED",
+      "stale_reason": "Missing live heartbeat.",
+      "review_status": "REVIEW_REQUIRED"
+    }
+  ],
+  "stale_locks": [],
+  "stale_lock_placeholders": [
+    {
+      "lock_id": null,
+      "packet_id": null,
+      "worker_id": null,
+      "claimed_paths": [],
+      "stale_reason": "Populate when a lock is expired, orphaned, overlapping, or tied to interrupted APPLY.",
+      "review_status": "REVIEW_REQUIRED"
+    }
+  ],
+  "next_safe_action": "Review stale worker heartbeat state before assigning packets, releasing locks, resuming recovery, or applying changes."
+}
