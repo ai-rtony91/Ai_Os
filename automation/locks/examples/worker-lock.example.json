@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_WORKER_LOCK.v1",
+  "lock_id": "LOCK-EXAMPLE-001",
+  "packet_id": "PACKET-EXAMPLE-001",
+  "worker_id": "AIOS-01",
+  "branch_name": "worker/example-packet",
+  "owned_paths": [
+    "automation/packets/"
+  ],
+  "blocked_paths": [
+    "Reports/security/",
+    "apps/dashboard/",
+    "broker/",
+    "OANDA/",
+    ".env"
+  ],
+  "created_at": "2026-05-14T00:00:00Z",
+  "expires_at": null,
+  "status": "REVIEW_REQUIRED",
+  "approval_reference": null,
+  "next_safe_action": "Confirm the worker owns exactly one packet before APPLY work."
+}

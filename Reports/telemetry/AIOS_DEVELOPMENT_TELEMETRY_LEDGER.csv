@@ -1,0 +1,2 @@
+date,run_id,worker_id,branch_name,mode,loc_changed,file_type_breakdown,commits_count,average_commit_loc,files_changed_count,dry_run_seconds,apply_seconds,validator_seconds,server_start_seconds,review_cycle_seconds,error_count,repeated_error_count,clean_state_result,next_safe_action
+2026-05-14,AIOS-TELEMETRY-FOUNDATION-001,WINDOW-01,main,APPLY,0,"md:0,json:0,ps1:0,csv:0",0,0,0,0,0,0,0,0,0,0,UNKNOWN,"Append real development telemetry after validation and human approval."

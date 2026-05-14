@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_VALIDATOR_RESULT.v1",
+  "validator": "example_validator",
+  "mode": "DRY_RUN",
+  "status": "REVIEW_REQUIRED",
+  "checked_paths": [
+    "automation/validators/"
+  ],
+  "findings": [
+    {
+      "status": "REVIEW_REQUIRED",
+      "message": "Example validator result. Replace with real evidence before APPLY."
+    }
+  ],
+  "blocked_actions": [
+    "stage_files",
+    "commit",
+    "push",
+    "live_trading"
+  ],
+  "next_safe_action": "Review validator findings before approving APPLY."
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "AIOS_DEVELOPMENT_TELEMETRY_LEDGER.v1",
+  "local_first": true,
+  "secrets_included": false,
+  "broker_execution": "BLOCKED",
+  "oanda_execution": "BLOCKED",
+  "api_key_collection": "BLOCKED",
+  "webhook_execution": "BLOCKED",
+  "live_trading": "BLOCKED",
+  "entries": [
+    {
+      "date": "2026-05-14",
+      "run_id": "AIOS-TELEMETRY-FOUNDATION-001",
+      "worker_id": "WINDOW-01",
+      "branch_name": "main",
+      "mode": "APPLY",
+      "loc_changed": 0,
+      "file_type_breakdown": {
+        "html": 0,
+        "css": 0,
+        "js": 0,
+        "ts": 0,
+        "md": 0,
+        "json": 0,
+        "ps1": 0,
+        "csv": 0
+      },
+      "commits_count": 0,
+      "average_commit_loc": 0,
+      "files_changed_count": 0,
+      "dry_run_seconds": 0,
+      "apply_seconds": 0,
+      "validator_seconds": 0,
+      "server_start_seconds": 0,
+      "review_cycle_seconds": 0,
+      "error_count": 0,
+      "repeated_error_count": 0,
+      "clean_state_result": "UNKNOWN",
+      "next_safe_action": "Append real development telemetry after validation and human approval."
+    }
+  ]
+}
