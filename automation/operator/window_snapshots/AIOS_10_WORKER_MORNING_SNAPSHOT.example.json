@@ -1,0 +1,89 @@
+{
+  "schema": "AIOS_CODEX_WINDOW_SNAPSHOT.v1",
+  "timestamp": "2026-05-14T00:00:00Z",
+  "repo_branch": "main",
+  "dirty_files_summary": {
+    "status": "REVIEW_REQUIRED",
+    "modified_count": 0,
+    "untracked_count": 0,
+    "note": "Populate from git status before launch."
+  },
+  "manual_approval_required": true,
+  "auto_apply": false,
+  "auto_commit": false,
+  "auto_push": false,
+  "workers": [
+    {
+      "worker_id": "AIOS-01",
+      "worker_label": "ORCHESTRATION CORE",
+      "last_task": "Coordinate dispatcher runtime work.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Check dispatcher runtime status before assigning packets."
+    },
+    {
+      "worker_id": "AIOS-02",
+      "worker_label": "PACKET LOCK RUNTIME",
+      "last_task": "Review packet and lock runtime plans.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Confirm packet and lock paths before proposing APPLY work."
+    },
+    {
+      "worker_id": "AIOS-03",
+      "worker_label": "RECOVERY HEARTBEATS",
+      "last_task": "Review recovery and heartbeat status.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Check stale worker and recovery state before packet assignment."
+    },
+    {
+      "worker_id": "AIOS-04",
+      "worker_label": "VALIDATOR ROUTING",
+      "last_task": "Review validator routing outputs.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Run safe validators and report blockers."
+    },
+    {
+      "worker_id": "AIOS-05",
+      "worker_label": "APPROVAL COMMIT ROUTING",
+      "last_task": "Review approval and commit package readiness.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Confirm human approval boundaries before commit packaging."
+    },
+    {
+      "worker_id": "AIOS-06",
+      "worker_label": "STATUS OUTPUTS",
+      "last_task": "Review dispatcher runtime status examples.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Validate status JSON before dashboard planning."
+    },
+    {
+      "worker_id": "AIOS-07",
+      "worker_label": "WORKER LAUNCH SUPERVISOR",
+      "last_task": "Review worker launch setup.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Preview window snapshot before launching workers."
+    },
+    {
+      "worker_id": "AIOS-08",
+      "worker_label": "QUEUE MONITORING",
+      "last_task": "Review queue health.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Check queued, assigned, blocked, and failed packet counts."
+    },
+    {
+      "worker_id": "AIOS-09",
+      "worker_label": "REPO SCOUT",
+      "last_task": "Review repo state and dirty files.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Run git status and identify files that need review."
+    },
+    {
+      "worker_id": "AIOS-10",
+      "worker_label": "INTEGRATOR MERGER",
+      "last_task": "Review integration readiness.",
+      "last_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Do not stage or commit until exact files are approved."
+    }
+  ],
+  "next_safe_action": "Run the snapshot launcher in preview mode and review the worker list."
+}
+
