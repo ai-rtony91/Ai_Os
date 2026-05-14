@@ -27,7 +27,8 @@ if (-not (Test-Path -LiteralPath $ManifestPath)) {
 }
 
 $manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
-$filesToStage = @($manifest.files_to_stage | ForEach-Object { ([string]$_) -replace "\\", "/" })
+$manifestFiles = @($manifest.files_to_stage | ForEach-Object { ([string]$_) -replace "\\", "/" })
+
 $statusLines = @(& git status --short)
 if ($LASTEXITCODE -ne 0) {
     throw "git status --short failed."
@@ -37,6 +38,14 @@ $changedFiles = @(
     foreach ($line in $statusLines) {
         $path = Get-AIOSChangedPath -StatusLine $line
         if ($null -ne $path) { $path }
+    }
+)
+
+$filesToStage = @(
+    foreach ($file in $manifestFiles) {
+        if ($changedFiles -contains $file) {
+            $file
+        }
     }
 )
 
@@ -53,15 +62,20 @@ else {
 
 Write-Host ""
 Write-Host "Approved files to stage:"
-foreach ($file in $filesToStage) {
-    Write-Host "- $file"
+if ($filesToStage.Count -eq 0) {
+    Write-Host "- none"
+}
+else {
+    foreach ($file in $filesToStage) {
+        Write-Host "- $file"
+    }
 }
 
 $untrackedNotInManifest = @(
     foreach ($line in $statusLines) {
         if ($line -like "?? *") {
             $path = Get-AIOSChangedPath -StatusLine $line
-            if ($null -ne $path -and $filesToStage -notcontains $path) {
+            if ($null -ne $path -and $manifestFiles -notcontains $path) {
                 $path
             }
         }
@@ -81,10 +95,14 @@ else {
 
 Write-Host ""
 Write-Host "Exact staging commands for human review only:"
-foreach ($file in $filesToStage) {
-    Write-Host ("git add -- `"{0}`"" -f $file)
+if ($filesToStage.Count -eq 0) {
+    Write-Host "- none"
+}
+else {
+    foreach ($file in $filesToStage) {
+        Write-Host ("git add -- `"{0}`"" -f $file)
+    }
 }
 
 Write-Host ""
 Write-Host "No files were staged. No commit was created. No push was performed."
-
