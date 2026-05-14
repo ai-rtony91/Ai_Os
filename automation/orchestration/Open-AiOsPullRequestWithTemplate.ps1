@@ -45,9 +45,12 @@ Branch:
 $branch
 "@
 
+$bodyPath = "automation/orchestration/PR_BODY_LAST_GENERATED.md"
+$body | Out-File -FilePath $bodyPath -Encoding utf8
 $body | Set-Clipboard
 
 Write-Host "PR body copied to clipboard."
+Write-Host "PR body saved to: $bodyPath"
 Write-Host "Paste it into the GitHub PR description box with CTRL+V."
 Write-Host ""
 Write-Host "Opening PR page:"
