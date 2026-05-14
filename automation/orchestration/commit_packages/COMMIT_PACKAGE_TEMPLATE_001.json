@@ -1,0 +1,19 @@
+{
+  "schema": "AIOS_COMMIT_PACKAGE_TEMPLATE.v1",
+  "commit_package_id": "COMMIT_PACKAGE_ID_PLACEHOLDER",
+  "packet_ids": [],
+  "files_to_stage": [],
+  "files_not_to_stage": [],
+  "commit_message": "COMMIT_MESSAGE_PLACEHOLDER",
+  "validation_summary": "VALIDATION_SUMMARY_PLACEHOLDER",
+  "human_review_required": true,
+  "git_add_strategy": "explicit_files_only",
+  "push_allowed_after_clean_validation": false,
+  "blocked_actions": [
+    "git_add_dot",
+    "git_add_all",
+    "blind_commit",
+    "push_without_approval"
+  ],
+  "next_action": "Review exact files before staging."
+}

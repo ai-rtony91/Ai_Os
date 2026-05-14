@@ -1,0 +1,28 @@
+{
+  "schema": "AIOS_WORKER_PACKET_TEMPLATE.v1",
+  "packet_id": "PACKET_ID_PLACEHOLDER",
+  "phase": "PHASE_PLACEHOLDER",
+  "stage": "STAGE_PLACEHOLDER",
+  "task_id": "TASK_ID_PLACEHOLDER",
+  "worker_id": "WORKER_ID_PLACEHOLDER",
+  "allowed_paths": [],
+  "blocked_paths": [
+    ".codex_backups/",
+    "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+    "apps/dashboard/assets/",
+    "broker/",
+    "OANDA/",
+    ".env"
+  ],
+  "objective": "OBJECTIVE_PLACEHOLDER",
+  "mode": "DRY_RUN",
+  "claim_status": "draft",
+  "approval_status": "human_approval_required",
+  "validator_status": "not_run",
+  "commit_package_status": "not_ready",
+  "clean_state_required": true,
+  "human_approval_required": true,
+  "result_summary": "",
+  "errors": [],
+  "next_action": "Complete DRY_RUN review before requesting APPLY."
+}

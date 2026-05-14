@@ -1,0 +1,91 @@
+# Validator Chain Runbook 001
+
+## Purpose
+
+The validator chain gives AI_OS one repeatable safety path before APPLY, commit, or push.
+
+It reduces manual checking by putting the required checks in a fixed order. A worker can still report context, but the same core checks must run every time.
+
+## Validator Order
+
+1. `git_clean_state`
+2. `allowed_paths`
+3. `blocked_paths`
+4. `json_integrity`
+5. `powershell_syntax`
+6. `markdown_exists`
+7. `no_secrets`
+8. `no_live_trading_enablement`
+9. `approval_gate`
+10. `commit_package_review`
+11. `final_git_status`
+
+## What Each Check Protects
+
+| Validator | Protects |
+| --- | --- |
+| `git_clean_state` | Prevents new work from hiding unrelated dirty files, staged files, or untracked files. |
+| `allowed_paths` | Confirms the worker stays inside the approved scope. |
+| `blocked_paths` | Stops edits to protected, dashboard, security, broker, API, or live trading areas. |
+| `json_integrity` | Confirms changed JSON files parse before they become runtime inputs. |
+| `powershell_syntax` | Confirms changed `.ps1` files parse before any later execution. |
+| `markdown_exists` | Confirms required docs and reports are present. |
+| `no_secrets` | Blocks secrets, credentials, tokens, private keys, and `.env` material. |
+| `no_live_trading_enablement` | Blocks broker, OANDA, webhook, live trading, and real order enablement. |
+| `approval_gate` | Confirms APPLY, commit, and push are controlled by human approval. |
+| `commit_package_review` | Confirms exact-file commit packaging and blocks blind staging. |
+| `final_git_status` | Gives the operator the final changed-file view before any next step. |
+
+## When To Stop
+
+Stop immediately when a validator reports `FAIL` for:
+
+- protected root files changed without explicit approval
+- blocked paths changed
+- JSON parse failure
+- PowerShell syntax failure
+- suspected secrets
+- broker, OANDA, API key, webhook, live trading, or real order enablement
+- missing approval before APPLY
+- missing commit package before staging or commit
+- requested `git add .` or `git add -A`
+
+## When Human Review Is Required
+
+Human review is required when:
+
+- the repo is dirty before work starts
+- untracked files exist
+- changed files are outside the active packet
+- two workers may own the same path
+- approval state is missing, stale, rejected, or unclear
+- a validator reports `WARN`
+- stale packet, stale lock, or stale worker state exists
+- commit or push is being considered
+
+## Why Failed Validation Blocks Commit And Push
+
+Commit and push publish state for other workers and for GitHub main review.
+
+If validation fails, the package may contain unrelated files, invalid runtime JSON, unsafe PowerShell, missing approval, or blocked trading/security changes. A failed validator therefore blocks commit and push until the operator reviews and corrects the issue.
+
+## Human Control Boundary
+
+This chain does not:
+
+- edit files
+- stage files
+- commit
+- push
+- install dependencies
+- call external services
+- create startup tasks
+- create scheduled tasks
+- connect to brokers
+- place orders
+- enable live trading
+
+## Next Safe Action
+
+Run `automation/orchestration/validators/Test-ValidatorChainConfig.DRY_RUN.ps1`, then run `automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1`.
+

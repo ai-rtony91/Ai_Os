@@ -1,0 +1,105 @@
+{
+  "schema": "AIOS_VALIDATOR_CHAIN_CONFIG.v1",
+  "chain_id": "PHASE_15_3_4_VALIDATOR_CHAIN_001",
+  "mode": "DRY_RUN_READ_ONLY",
+  "required_before_apply": true,
+  "required_before_commit": true,
+  "required_before_push": true,
+  "validators": [
+    {
+      "name": "git_clean_state",
+      "order": 1,
+      "required": true,
+      "severity_on_failure": "WARN",
+      "protects": "Dirty, staged, or untracked repo state must be visible before work continues."
+    },
+    {
+      "name": "allowed_paths",
+      "order": 2,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "Workers must stay inside the approved package scope."
+    },
+    {
+      "name": "blocked_paths",
+      "order": 3,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "Blocked paths must not be changed by the current package."
+    },
+    {
+      "name": "json_integrity",
+      "order": 4,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "JSON runtime and report files must parse before use."
+    },
+    {
+      "name": "powershell_syntax",
+      "order": 5,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "PowerShell files must parse before any later execution."
+    },
+    {
+      "name": "markdown_exists",
+      "order": 6,
+      "required": true,
+      "severity_on_failure": "WARN",
+      "protects": "Required docs and runbooks must be present for operator review."
+    },
+    {
+      "name": "no_secrets",
+      "order": 7,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "Secrets, credentials, private keys, tokens, and .env files must not enter the package."
+    },
+    {
+      "name": "no_live_trading_enablement",
+      "order": 8,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "Broker, OANDA, webhook, live trading, and real order enablement must stay blocked."
+    },
+    {
+      "name": "approval_gate",
+      "order": 9,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "APPLY, commit, and push require human approval at the correct stage."
+    },
+    {
+      "name": "commit_package_review",
+      "order": 10,
+      "required": true,
+      "severity_on_failure": "FAIL",
+      "protects": "Commit packages must use exact-file review and must not use blind staging."
+    },
+    {
+      "name": "final_git_status",
+      "order": 11,
+      "required": true,
+      "severity_on_failure": "WARN",
+      "protects": "Final repo state must be visible before the next safe action."
+    }
+  ],
+  "blocked_actions": [
+    "live_trading",
+    "broker_execution",
+    "oanda_execution",
+    "api_key_collection",
+    "real_webhook_execution",
+    "real_order_placement",
+    "installs",
+    "startup_tasks",
+    "scheduled_tasks",
+    "external_calls",
+    "git_add_dot",
+    "git_add_all",
+    "commit_without_approval",
+    "push_without_approval"
+  ],
+  "next_safe_action": "Run the validator chain in DRY_RUN_READ_ONLY mode before APPLY, commit, or push."
+}
+

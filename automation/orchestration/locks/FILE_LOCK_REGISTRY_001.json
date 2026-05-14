@@ -1,0 +1,13 @@
+{
+  "schema": "AIOS_FILE_LOCK_REGISTRY.v1",
+  "lock_id": "LOCK_ID_PLACEHOLDER",
+  "worker_id": "WORKER_ID_PLACEHOLDER",
+  "locked_paths": [],
+  "lock_reason": "Prevent file collision during worker packet execution.",
+  "created_at": "TIMESTAMP_PLACEHOLDER",
+  "expires_at_placeholder": "TIMESTAMP_PLACEHOLDER",
+  "status": "draft",
+  "conflict_policy": "blocked_until_human_review",
+  "blocked_if_locked": true,
+  "next_action": "Confirm no other worker owns the same paths before APPLY."
+}

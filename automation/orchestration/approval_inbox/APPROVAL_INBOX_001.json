@@ -1,0 +1,25 @@
+{
+  "schema": "AIOS_APPROVAL_INBOX.v1",
+  "approval_id": "APPROVAL_ID_PLACEHOLDER",
+  "packet_id": "PACKET_ID_PLACEHOLDER",
+  "requested_action": "APPLY_REQUEST_PLACEHOLDER",
+  "risk_level": "REVIEW_REQUIRED",
+  "approved_by_human": false,
+  "approval_status": "pending_human_review",
+  "approval_notes": "",
+  "blocked_actions": [
+    "live_trading",
+    "broker_connection",
+    "oanda_connection",
+    "api_key_collection",
+    "real_orders",
+    "real_webhooks",
+    "startup_tasks",
+    "scheduled_tasks",
+    "blind_commit",
+    "git_add_dot",
+    "push_without_approval"
+  ],
+  "timestamp_placeholder": "TIMESTAMP_PLACEHOLDER",
+  "next_action": "Operator must approve exact paths before APPLY."
+}

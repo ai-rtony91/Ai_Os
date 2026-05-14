@@ -1,0 +1,45 @@
+{
+  "approval_gate_id": "APPLY_APPROVAL_GATE_001",
+  "packet_id": "PHASE_15_3_3_APPROVAL_GATE",
+  "requested_mode": "APPLY",
+  "approved_mode": "DRY_RUN_ONLY",
+  "approval_status": "pending_review",
+  "approved_by_human": false,
+  "approval_timestamp_placeholder": null,
+  "risk_level": "medium",
+  "allowed_paths": [
+    "automation/orchestration/",
+    "docs/AI_OS/orchestration/"
+  ],
+  "blocked_paths": [
+    "automation/operator/",
+    "Reports/security/",
+    "apps/dashboard/",
+    "automation/telemetry/",
+    "Reports/telemetry/",
+    "README.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "ARCHITECTURE.md",
+    "DEPLOYMENT.md",
+    "WHITEPAPER.md",
+    "broker/",
+    "OANDA/",
+    "api_keys/",
+    "live_trading/"
+  ],
+  "validator_chain_required": true,
+  "commit_package_required": true,
+  "push_blocked_until_final_review": true,
+  "notes": [
+    "DRY_RUN may propose changes.",
+    "APPLY requires explicit human approval before execution.",
+    "Commit requires clean validation and an exact-file commit package.",
+    "Push requires final human review.",
+    "No live trading, broker, OANDA, API key, webhook, or real order action is allowed."
+  ]
+}

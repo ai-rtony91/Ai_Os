@@ -1,0 +1,2 @@
+timestamp,approval_id,packet_id,requested_action,approval_status,risk_level,human_reviewer,validation_result,notes
+2026-05-14T00:00:00Z,APPLY_APPROVAL_GATE_001,PHASE_15_3_3_APPROVAL_GATE,APPLY,pending_review,medium,,NOT_RUN,"Initial approval gate created; APPLY remains blocked until human approval and validator review."
