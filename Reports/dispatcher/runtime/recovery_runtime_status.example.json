@@ -1,0 +1,19 @@
+{
+  "schema": "AIOS_RECOVERY_RUNTIME_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "recovery_status": "REVIEW_REQUIRED",
+  "active_packets": [],
+  "active_locks": [],
+  "pending_approvals": [],
+  "failed_packets": [],
+  "stale_workers": [],
+  "interrupted_apply": [],
+  "orphaned_packets": [],
+  "last_known_git_state": {
+    "branch": "main",
+    "dirty_repo_status": "DIRTY",
+    "untracked_files": "REVIEW_REQUIRED"
+  },
+  "next_safe_action": "Run startup recovery scan before assigning new packets."
+}

@@ -1,0 +1,39 @@
+{
+  "schema": "AIOS_VALIDATOR_RUNTIME_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "validator_chain": [
+    {
+      "stage": "pre_claim",
+      "status": "REVIEW_REQUIRED",
+      "checks": [
+        "git status --short --branch",
+        "packet schema check",
+        "worker identity check"
+      ],
+      "next_safe_action": "Run pre-claim checks before assignment."
+    },
+    {
+      "stage": "pre_apply",
+      "status": "BLOCKED",
+      "checks": [
+        "approval status check",
+        "allowed path check",
+        "blocked path check",
+        "lock overlap check"
+      ],
+      "next_safe_action": "Require human approval before APPLY."
+    },
+    {
+      "stage": "post_apply",
+      "status": "QUEUED",
+      "checks": [
+        "git diff --check",
+        "JSON parse check",
+        "changed file list check"
+      ],
+      "next_safe_action": "Run after approved APPLY work completes."
+    }
+  ],
+  "next_safe_action": "Keep validator output local and review failed checks before proceeding."
+}

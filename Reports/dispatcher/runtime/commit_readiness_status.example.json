@@ -1,0 +1,23 @@
+{
+  "schema": "AIOS_COMMIT_READINESS_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "commit_readiness": "BLOCKED",
+  "dirty_repo_status": {
+    "state": "DIRTY",
+    "untracked_files": "REVIEW_REQUIRED",
+    "unrelated_dirty_files_present": true
+  },
+  "staging_policy": {
+    "stage_all_allowed": false,
+    "exact_files_only": true,
+    "human_approval_required": true
+  },
+  "commit_package": {
+    "commit_package_id": null,
+    "files_allowed_to_stage": [],
+    "validation_result": "REVIEW_REQUIRED",
+    "commit_message_draft": null
+  },
+  "next_safe_action": "Do not create a commit package until dirty repo state is reviewed."
+}

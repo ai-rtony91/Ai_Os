@@ -1,0 +1,40 @@
+{
+  "schema": "AIOS_PACKET_RUNTIME_TABLE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "allowed_status_values": [
+    "QUEUED",
+    "ASSIGNED",
+    "DRY_RUN_STARTED",
+    "DRY_RUN_COMPLETE",
+    "APPROVAL_REQUIRED",
+    "APPLY_APPROVED",
+    "APPLY_RUNNING",
+    "APPLY_COMPLETE",
+    "VALIDATED",
+    "COMMIT_READY",
+    "COMMITTED",
+    "FAILED",
+    "BLOCKED",
+    "REVIEW_REQUIRED"
+  ],
+  "packets": [
+    {
+      "packet_id": "PACKET-EXAMPLE-001",
+      "worker_id": null,
+      "status": "QUEUED",
+      "allowed_paths": [
+        "Reports/dispatcher/runtime/"
+      ],
+      "blocked_paths": [
+        "automation/operator/",
+        "Reports/security/",
+        "apps/dashboard/"
+      ],
+      "approval_required": true,
+      "dirty_repo_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Assign packet only after confirming allowed and blocked paths."
+    }
+  ],
+  "next_safe_action": "Claim only one queued packet per worker."
+}

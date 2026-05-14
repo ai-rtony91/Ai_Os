@@ -1,0 +1,25 @@
+{
+  "schema": "AIOS_APPROVAL_RUNTIME_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "approval_requests": [
+    {
+      "approval_id": "APPROVAL-EXAMPLE-001",
+      "packet_id": "PACKET-EXAMPLE-001",
+      "worker_id": "AIOS-01-DEVOPS",
+      "requested_changes": [
+        "Create dispatcher runtime JSON examples."
+      ],
+      "files_to_change": [
+        "Reports/dispatcher/runtime/dispatcher_runtime_status.example.json"
+      ],
+      "validation_summary": "DRY_RUN pending.",
+      "risk_summary": "Local example files only. Human approval required before APPLY.",
+      "approval_status": "REVIEW_REQUIRED",
+      "approved_by_human": false,
+      "approval_timestamp": null,
+      "next_safe_action": "Human must approve before APPLY."
+    }
+  ],
+  "next_safe_action": "Do not run APPLY until an approval record is approved."
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "AIOS_ACTIVE_WORKER_TABLE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "workers": [
+    {
+      "worker_id": "AIOS-01-DEVOPS",
+      "packet_id": "PACKET-EXAMPLE-001",
+      "status": "REVIEW_REQUIRED",
+      "claimed_paths": [],
+      "lock_ids": [],
+      "start_time": null,
+      "heartbeat_time": null,
+      "stale_worker_status": "REVIEW_REQUIRED",
+      "next_safe_action": "Worker must claim one packet and create a heartbeat before APPLY work."
+    }
+  ],
+  "next_safe_action": "Confirm worker heartbeat before assigning active runtime work."
+}

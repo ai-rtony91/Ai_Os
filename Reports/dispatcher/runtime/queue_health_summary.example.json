@@ -1,0 +1,27 @@
+{
+  "schema": "AIOS_QUEUE_HEALTH_SUMMARY.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "queue_health": "REVIEW_REQUIRED",
+  "packet_counts": {
+    "queued": 1,
+    "assigned": 0,
+    "approval_required": 0,
+    "apply_running": 0,
+    "commit_ready": 0,
+    "blocked": 0,
+    "failed": 0,
+    "review_required": 1
+  },
+  "worker_counts": {
+    "known_workers": 8,
+    "active_workers": 0,
+    "stale_workers": 0,
+    "review_required": 0
+  },
+  "dirty_repo_status": {
+    "state": "DIRTY",
+    "commit_packaging_allowed": false
+  },
+  "next_safe_action": "Review dirty files and untracked files before commit packaging."
+}

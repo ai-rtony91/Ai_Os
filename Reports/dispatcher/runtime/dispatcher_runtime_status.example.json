@@ -1,0 +1,33 @@
+{
+  "schema": "AIOS_DISPATCHER_RUNTIME_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "runtime_status": "REVIEW_REQUIRED",
+  "local_first": true,
+  "secrets_included": false,
+  "external_execution_enabled": false,
+  "dirty_repo_status": {
+    "state": "DIRTY",
+    "untracked_files": "REVIEW_REQUIRED",
+    "commit_packaging_allowed": false
+  },
+  "packet_summary": {
+    "queued": 1,
+    "assigned": 0,
+    "apply_running": 0,
+    "blocked": 0,
+    "failed": 0,
+    "review_required": 1
+  },
+  "lock_summary": {
+    "active": 0,
+    "expired": 0,
+    "review_required": 0
+  },
+  "approval_summary": {
+    "pending": 0,
+    "approved": 0,
+    "rejected": 0,
+    "review_required": 0
+  },
+  "next_safe_action": "Review dirty repo state before creating commit packages."
+}

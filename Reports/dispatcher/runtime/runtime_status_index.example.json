@@ -1,0 +1,45 @@
+{
+  "schema": "AIOS_RUNTIME_STATUS_INDEX.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "index_status": "REVIEW_REQUIRED",
+  "files": [
+    {
+      "name": "dispatcher_runtime_status.example.json",
+      "purpose": "Overall dispatcher runtime status."
+    },
+    {
+      "name": "active_worker_table.example.json",
+      "purpose": "Worker assignment and heartbeat table."
+    },
+    {
+      "name": "packet_runtime_table.example.json",
+      "purpose": "Packet queue and status table."
+    },
+    {
+      "name": "lock_runtime_table.example.json",
+      "purpose": "Runtime file ownership lock table."
+    },
+    {
+      "name": "approval_runtime_status.example.json",
+      "purpose": "APPLY approval queue status."
+    },
+    {
+      "name": "validator_runtime_status.example.json",
+      "purpose": "Validator routing and status."
+    },
+    {
+      "name": "recovery_runtime_status.example.json",
+      "purpose": "Crash and stale worker recovery state."
+    },
+    {
+      "name": "queue_health_summary.example.json",
+      "purpose": "Queue health summary."
+    },
+    {
+      "name": "commit_readiness_status.example.json",
+      "purpose": "Commit packaging readiness."
+    }
+  ],
+  "next_safe_action": "Parse all runtime JSON examples before using them as dashboard inputs."
+}
