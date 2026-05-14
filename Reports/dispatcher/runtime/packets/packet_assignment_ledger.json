@@ -1,27 +1,45 @@
-{
-  "schema": "AIOS_PACKET_ASSIGNMENT_LEDGER.v1",
-  "generated_at": "2026-05-14T00:00:00Z",
-  "local_first": true,
-  "ledger_status": "ACTIVE",
-  "automation_mode": "MANUAL_ASSIGNMENT_ONLY",
-  "safety": {
-    "auto_apply": false,
-    "auto_commit": false,
-    "auto_push": false,
-    "broker_execution": "BLOCKED",
-    "oanda_execution": "BLOCKED",
-    "api_key_collection": "BLOCKED",
-    "live_trading": "BLOCKED"
-  },
-  "assignments": [],
-  "next_assignment_requirements": [
-    "packet status must be QUEUED",
-    "worker must have no active packet",
-    "allowed_paths must be present and narrow",
-    "blocked_paths must be present",
-    "lock conflicts must be absent",
-    "approval_required must remain true",
-    "apply_allowed must remain false until explicit human approval"
-  ],
-  "next_safe_action": "Append an assignment entry only after a human operator selects one queued packet and one idle worker."
+﻿{
+    "schema":  "AIOS_PACKET_ASSIGNMENT_LEDGER.v1",
+    "generated_at":  "2026-05-14T18:51:28Z",
+    "local_first":  true,
+    "ledger_status":  "ACTIVE",
+    "automation_mode":  "MANUAL_ASSIGNMENT_ONLY",
+    "safety":  {
+                   "auto_apply":  false,
+                   "auto_commit":  false,
+                   "auto_push":  false,
+                   "broker_execution":  "BLOCKED",
+                   "oanda_execution":  "BLOCKED",
+                   "api_key_collection":  "BLOCKED",
+                   "live_trading":  "BLOCKED"
+               },
+    "assignments":  [
+                        {
+                            "assignment_id":  "ASSIGN-PACKET-LIVE-QUEUE-001-AIOS-01-20260514185128",
+                            "packet_id":  "PACKET-LIVE-QUEUE-001",
+                            "worker_id":  "AIOS-01",
+                            "from_status":  "QUEUED",
+                            "to_status":  "ASSIGNED",
+                            "assigned_at":  "2026-05-14T18:51:28Z",
+                            "assigned_by":  "AIOS Operator",
+                            "mode":  "DRY_RUN",
+                            "approval_required":  true,
+                            "apply_allowed":  false,
+                            "lock_ids":  [
+
+                                         ],
+                            "reason":  "Manual-safe packet assignment after worker heartbeat validation.",
+                            "next_safe_action":  "Worker AIOS-01 may start DRY_RUN for packet PACKET-LIVE-QUEUE-001 only. APPLY, locks, staging, commit, and push remain blocked."
+                        }
+                    ],
+    "next_assignment_requirements":  [
+                                         "packet status must be QUEUED",
+                                         "worker must have no active packet",
+                                         "allowed_paths must be present and narrow",
+                                         "blocked_paths must be present",
+                                         "lock conflicts must be absent",
+                                         "approval_required must remain true",
+                                         "apply_allowed must remain false until explicit human approval"
+                                     ],
+    "next_safe_action":  "Worker AIOS-01 may run DRY_RUN only for packet PACKET-LIVE-QUEUE-001."
 }
