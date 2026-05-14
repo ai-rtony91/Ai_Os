@@ -1,0 +1,2 @@
+timestamp,worker_id,packet_id,action,paths,status,validation_result,notes
+TIMESTAMP_PLACEHOLDER,WORKER_ID_PLACEHOLDER,PACKET_ID_PLACEHOLDER,claim,"PATHS_PLACEHOLDER",REVIEW_REQUIRED,NOT_RUN,"Initial ledger template. Replace placeholders only after worker activity is reviewed."

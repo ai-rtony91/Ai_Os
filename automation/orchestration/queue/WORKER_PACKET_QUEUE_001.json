@@ -1,0 +1,32 @@
+{
+  "schema": "AIOS_WORKER_PACKET_QUEUE.v1",
+  "queue_id": "WORKER_PACKET_QUEUE_001",
+  "created_at": "TIMESTAMP_PLACEHOLDER",
+  "mode": "paper_orchestration_only",
+  "status": "ready",
+  "workers_allowed": 8,
+  "current_worker_count": 0,
+  "packet_statuses": [
+    "draft",
+    "ready",
+    "claimed",
+    "blocked",
+    "completed",
+    "rejected"
+  ],
+  "blocked_actions": [
+    "live_trading",
+    "broker_connection",
+    "oanda_connection",
+    "api_key_collection",
+    "real_orders",
+    "real_webhooks",
+    "startup_tasks",
+    "scheduled_tasks",
+    "external_network_calls",
+    "blind_commit",
+    "git_add_dot"
+  ],
+  "approval_required": true,
+  "next_action": "Review packet template before assigning workers."
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "AIOS_VALIDATOR_CHAIN.v1",
+  "validator_chain_id": "VALIDATOR_CHAIN_001",
+  "required_checks": [
+    {
+      "check_id": "git_status_clean_before_work",
+      "description": "Run git status before work and review dirty or untracked files.",
+      "required": true
+    },
+    {
+      "check_id": "allowed_path_check",
+      "description": "Confirm all proposed changed files are inside approved paths.",
+      "required": true
+    },
+    {
+      "check_id": "blocked_path_check",
+      "description": "Confirm blocked paths are not changed.",
+      "required": true
+    },
+    {
+      "check_id": "json_parse_check",
+      "description": "Parse every created or changed JSON file.",
+      "required": true
+    },
+    {
+      "check_id": "markdown_file_exists_check",
+      "description": "Confirm required Markdown files exist.",
+      "required": true
+    },
+    {
+      "check_id": "no_secrets_check",
+      "description": "Confirm no secrets, credentials, tokens, or private keys are included.",
+      "required": true
+    },
+    {
+      "check_id": "no_broker_live_trading_enablement_check",
+      "description": "Confirm broker actions, OANDA actions, live trading, and real order paths remain blocked.",
+      "required": true
+    },
+    {
+      "check_id": "commit_package_review_check",
+      "description": "Confirm commit package lists exact files only.",
+      "required": true
+    },
+    {
+      "check_id": "final_git_status_check",
+      "description": "Run final git status and report exact changed files.",
+      "required": true
+    }
+  ],
+  "blocked_actions": [
+    "edit_outside_allowed_paths",
+    "stage_without_review",
+    "commit_without_package",
+    "push_without_approval",
+    "startup_tasks",
+    "scheduled_tasks"
+  ],
+  "next_action": "Run validators before any commit package is considered."
+}
