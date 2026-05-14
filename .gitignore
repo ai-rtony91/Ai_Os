@@ -39,3 +39,5 @@ credentials/
 
 # Local security reports - do not commit
 Reports/security/
+
+Reports/dry_runs/
