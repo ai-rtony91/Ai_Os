@@ -1,0 +1,14 @@
+{
+  "updated_at": "2026-05-14T00:00:00Z",
+  "active_packets": [],
+  "active_locks": [],
+  "pending_approvals": [],
+  "failed_packets": [],
+  "last_known_git_state": {
+    "branch": "main",
+    "dirty": true,
+    "untracked_files_status": "REVIEW_REQUIRED"
+  },
+  "next_safe_action": "Run dispatcher DRY_RUN validator from repo root before assigning new worker packets."
+}
+

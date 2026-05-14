@@ -1,0 +1,19 @@
+{
+  "commit_package_id": "COMMIT-PACKAGE-EXAMPLE-001",
+  "packet_ids": [
+    "PACKET-EXAMPLE-001"
+  ],
+  "files_allowed_to_stage": [
+    "automation/dispatcher/README.md"
+  ],
+  "validation_result": "REVIEW_REQUIRED",
+  "commit_message_draft": "Add dispatcher scaffold",
+  "repo_state": {
+    "dirty": true,
+    "untracked_files_status": "REVIEW_REQUIRED",
+    "commit_packaging_allowed": false
+  },
+  "approval_status": "PENDING",
+  "next_safe_action": "Human must review exact files before staging. Do not use git add dot."
+}
+

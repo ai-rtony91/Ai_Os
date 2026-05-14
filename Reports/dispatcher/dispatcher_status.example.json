@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-05-14T00:00:00Z",
+  "dispatcher_status": "REVIEW_REQUIRED",
+  "active_worker_count": 0,
+  "queued_packet_count": 1,
+  "active_lock_count": 0,
+  "pending_approval_count": 0,
+  "failed_packet_count": 0,
+  "commit_ready_count": 0,
+  "repo_state": {
+    "branch": "main",
+    "dirty": true,
+    "untracked_files_status": "REVIEW_REQUIRED",
+    "commit_packaging_allowed": false
+  },
+  "packets": [
+    {
+      "packet_id": "PACKET-EXAMPLE-001",
+      "worker_id": "UNASSIGNED",
+      "status": "QUEUED",
+      "task_goal": "Example dispatcher packet only."
+    }
+  ],
+  "next_safe_action": "Review dirty repo state before creating commit packages."
+}
+
