@@ -83,8 +83,13 @@ $allowedPrefixes = @(
     "docs/AI_OS/orchestration/"
 )
 $blockedPrefixes = @(
+    "apps/",
+    "services/",
+    "core/",
+    ".git/",
     ".codex_backups/",
-    "apps/dashboard/",
+    "package.json",
+    "tsconfig.json",
     "Reports/security/",
     "automation/operator/",
     "automation/telemetry/",
