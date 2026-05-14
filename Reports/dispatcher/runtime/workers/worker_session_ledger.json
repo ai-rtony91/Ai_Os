@@ -1,0 +1,37 @@
+{
+  "schema": "AIOS_WORKER_SESSION_LEDGER.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "secrets_included": false,
+  "ledger_purpose": "Append-style history for live worker session events.",
+  "events": [
+    {
+      "event_id": "WORKER-SESSION-BOOTSTRAP-20260514-0001",
+      "event_time": "2026-05-14T00:00:00Z",
+      "event_type": "BOOTSTRAP",
+      "worker_ids": [
+        "AIOS-01",
+        "AIOS-02",
+        "AIOS-03",
+        "AIOS-04",
+        "AIOS-05",
+        "AIOS-06",
+        "AIOS-07",
+        "AIOS-08",
+        "AIOS-09",
+        "AIOS-10"
+      ],
+      "previous_state": null,
+      "new_state": "REVIEW_REQUIRED",
+      "live_heartbeat_exists": false,
+      "human_approval_required_before_reassignment": true,
+      "startup_tasks_created": false,
+      "scheduled_tasks_created": false,
+      "auto_launch_created": false,
+      "apply_automation_created": false,
+      "next_safe_action": "Register live heartbeat records before assigning packets."
+    }
+  ],
+  "next_safe_action": "Append future worker events here; keep current state in active_worker_table.json."
+}
+
