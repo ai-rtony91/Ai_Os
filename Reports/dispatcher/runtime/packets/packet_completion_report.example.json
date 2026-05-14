@@ -1,0 +1,44 @@
+{
+  "schema": "AIOS_PACKET_COMPLETION_REPORT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "packet_id": "PACKET-QUEUE-EXAMPLE-001",
+  "worker_id": "WINDOW 08",
+  "worker_role": "QUEUE_MONITORING",
+  "final_status": "DRY_RUN_COMPLETE",
+  "status_flow": [
+    "QUEUED",
+    "ASSIGNED",
+    "DRY_RUN_STARTED",
+    "DRY_RUN_COMPLETE",
+    "APPROVAL_REQUIRED"
+  ],
+  "files_inspected": [
+    "automation/dispatcher/runtime/packets/",
+    "Reports/dispatcher/runtime/packets/",
+    "docs/AI_OS/dispatcher/runtime/packets/"
+  ],
+  "files_created": [],
+  "files_changed": [],
+  "validation_steps": [
+    {
+      "command": "git status --short --branch",
+      "result": "NOT_RUN_IN_EXAMPLE"
+    },
+    {
+      "command": "git diff --check",
+      "result": "NOT_RUN_IN_EXAMPLE"
+    },
+    {
+      "command": "Parse Reports/dispatcher/runtime/packets/*.json",
+      "result": "NOT_RUN_IN_EXAMPLE"
+    }
+  ],
+  "errors": [],
+  "unknowns": [
+    "Example report only. Runtime worker state is unknown until actual assignment."
+  ],
+  "approval_required": true,
+  "apply_allowed": false,
+  "next_safe_action": "Human operator reviews the DRY_RUN report before approving any APPLY work."
+}

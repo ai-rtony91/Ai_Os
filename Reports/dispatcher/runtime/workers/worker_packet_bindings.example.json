@@ -1,0 +1,19 @@
+{
+  "schema": "AIOS_WORKER_PACKET_BINDINGS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "bindings": [
+    {
+      "worker_id": "AIOS-07",
+      "launch_session_id": "LAUNCH-EXAMPLE-20260514-0007",
+      "assigned_packet_id": null,
+      "packet_status": "UNASSIGNED",
+      "binding_status": "IDLE",
+      "approval_required": true,
+      "approval_state": "NOT_REQUESTED",
+      "next_safe_action": "Bind one queued packet before DRY_RUN work starts."
+    }
+  ],
+  "next_safe_action": "If worker and packet records disagree, mark both REVIEW_REQUIRED."
+}
+

@@ -1,0 +1,41 @@
+{
+  "schema": "AIOS_STAGED_FILE_VERIFICATION.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "commit_package_id": "COMMIT-PACKAGE-EXAMPLE-001",
+  "verification_status": "REVIEW_REQUIRED",
+  "approved_files": [
+    "automation/dispatcher/runtime/approval/README.md",
+    "automation/dispatcher/runtime/commit_packages/README.md",
+    "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_RUNTIME_MODEL.md",
+    "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_INBOX_SCHEMA.md",
+    "docs/AI_OS/dispatcher/runtime/commit_packages/COMMIT_PACKAGE_RUNTIME_MODEL.md",
+    "docs/AI_OS/dispatcher/runtime/commit_packages/EXACT_FILE_COMMIT_RULES.md",
+    "Reports/dispatcher/runtime/approval/approval_inbox.example.json",
+    "Reports/dispatcher/runtime/approval/approval_history.example.json",
+    "Reports/dispatcher/runtime/commit_packages/commit_package.example.json",
+    "Reports/dispatcher/runtime/commit_packages/staged_file_verification.example.json"
+  ],
+  "actual_staged_files": [],
+  "unexpected_staged_files": [],
+  "missing_staged_files": [
+    "automation/dispatcher/runtime/approval/README.md",
+    "automation/dispatcher/runtime/commit_packages/README.md",
+    "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_RUNTIME_MODEL.md",
+    "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_INBOX_SCHEMA.md",
+    "docs/AI_OS/dispatcher/runtime/commit_packages/COMMIT_PACKAGE_RUNTIME_MODEL.md",
+    "docs/AI_OS/dispatcher/runtime/commit_packages/EXACT_FILE_COMMIT_RULES.md",
+    "Reports/dispatcher/runtime/approval/approval_inbox.example.json",
+    "Reports/dispatcher/runtime/approval/approval_history.example.json",
+    "Reports/dispatcher/runtime/commit_packages/commit_package.example.json",
+    "Reports/dispatcher/runtime/commit_packages/staged_file_verification.example.json"
+  ],
+  "staging_policy": {
+    "exact_files_only": true,
+    "git_add_dot_allowed": false,
+    "git_add_all_allowed": false,
+    "human_review_required": true
+  },
+  "next_safe_action": "Before commit, stage exact approved files only and verify staged files match this package."
+}
+

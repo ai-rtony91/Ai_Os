@@ -1,0 +1,42 @@
+{
+  "schema": "AIOS_ACTIVE_WORKER_TABLE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "source_of_truth": true,
+  "allowed_worker_states": [
+    "IDLE",
+    "ASSIGNED",
+    "DRY_RUN_STARTED",
+    "DRY_RUN_COMPLETE",
+    "WAITING_APPROVAL",
+    "APPLY_RUNNING",
+    "VALIDATING",
+    "VALIDATED",
+    "STALE",
+    "BLOCKED",
+    "FAILED",
+    "REVIEW_REQUIRED",
+    "STOPPED"
+  ],
+  "workers": [
+    {
+      "worker_id": "AIOS-07",
+      "worker_label": "WINDOW 07 - WORKER LAUNCH SUPERVISOR",
+      "launch_session_id": "LAUNCH-EXAMPLE-20260514-0007",
+      "assigned_role": "WORKER_LAUNCH_SUPERVISOR",
+      "assigned_packet_id": null,
+      "current_state": "IDLE",
+      "launch_time": "2026-05-14T00:00:00Z",
+      "heartbeat_time": null,
+      "heartbeat_age_seconds": null,
+      "claimed_paths": [],
+      "lock_ids": [],
+      "approval_state": "NOT_REQUESTED",
+      "validator_state": "NOT_RUN",
+      "terminal_window_name": "AIOS-07",
+      "next_safe_action": "Assign one packet before runtime work begins."
+    }
+  ],
+  "next_safe_action": "Use this table as the only current worker state table."
+}
+

@@ -1,0 +1,19 @@
+{
+  "schema": "AIOS_WORKER_LOCK_BINDINGS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "bindings": [
+    {
+      "worker_id": "AIOS-07",
+      "launch_session_id": "LAUNCH-EXAMPLE-20260514-0007",
+      "assigned_packet_id": null,
+      "lock_ids": [],
+      "claimed_paths": [],
+      "lock_status_summary": "NO_LOCKS",
+      "lock_overlap_status": "NOT_CHECKED",
+      "next_safe_action": "Claim locks only after packet assignment and before APPLY."
+    }
+  ],
+  "next_safe_action": "If worker and lock records disagree, mark both REVIEW_REQUIRED."
+}
+

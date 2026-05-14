@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_WORKER_REGISTRATION_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "registrations": [
+    {
+      "worker_id": "AIOS-07",
+      "worker_label": "WINDOW 07 - WORKER LAUNCH SUPERVISOR",
+      "launch_session_id": "LAUNCH-EXAMPLE-20260514-0007",
+      "assigned_role": "WORKER_LAUNCH_SUPERVISOR",
+      "terminal_window_name": "AIOS-07",
+      "repo_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "branch": "main",
+      "registration_time": "2026-05-14T00:00:00Z",
+      "registration_status": "REGISTERED",
+      "duplicate_identity_status": "CLEAR",
+      "next_safe_action": "Worker may enter IDLE state and wait for one packet."
+    }
+  ],
+  "next_safe_action": "Block duplicate worker IDs and mark conflicts REVIEW_REQUIRED."
+}
+

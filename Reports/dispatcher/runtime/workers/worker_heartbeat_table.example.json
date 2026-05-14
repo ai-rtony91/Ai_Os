@@ -1,0 +1,22 @@
+{
+  "schema": "AIOS_WORKER_HEARTBEAT_TABLE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "heartbeats": [
+    {
+      "worker_id": "AIOS-07",
+      "launch_session_id": "LAUNCH-EXAMPLE-20260514-0007",
+      "assigned_packet_id": null,
+      "current_state": "IDLE",
+      "heartbeat_time": "2026-05-14T00:00:00Z",
+      "heartbeat_age_seconds": 0,
+      "stale_after_seconds": 900,
+      "stale_status": "CURRENT",
+      "terminal_window_name": "AIOS-07",
+      "next_safe_action": "Heartbeat current; assign one packet only when runtime checks pass."
+    }
+  ],
+  "stale_worker_rule": "A stale worker is not safe to replace without human approval.",
+  "next_safe_action": "Mark assigned workers with missing heartbeat as REVIEW_REQUIRED."
+}
+

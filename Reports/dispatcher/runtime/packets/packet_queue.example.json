@@ -1,0 +1,71 @@
+{
+  "schema": "AIOS_PACKET_QUEUE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "queue_status": "REVIEW_REQUIRED",
+  "description": "Example packet queue intake. This file is not executable automation.",
+  "allowed_status_values": [
+    "QUEUED",
+    "ASSIGNED",
+    "DRY_RUN_STARTED",
+    "DRY_RUN_COMPLETE",
+    "APPROVAL_REQUIRED",
+    "BLOCKED",
+    "REVIEW_REQUIRED"
+  ],
+  "packets": [
+    {
+      "packet_id": "PACKET-QUEUE-EXAMPLE-001",
+      "phase_id": "PHASE_15_7",
+      "window_id": "WINDOW 08",
+      "worker_role": "QUEUE_MONITORING",
+      "status": "QUEUED",
+      "priority": 10,
+      "mode": "DRY_RUN",
+      "task_goal": "Review packet queue automation examples and report whether the packet is safe to assign.",
+      "allowed_paths": [
+        "automation/dispatcher/runtime/packets/",
+        "Reports/dispatcher/runtime/packets/",
+        "docs/AI_OS/dispatcher/runtime/packets/"
+      ],
+      "blocked_paths": [
+        "automation/operator/",
+        "Reports/security/",
+        "apps/dashboard/",
+        "automation/telemetry/",
+        "Reports/telemetry/",
+        "README.md",
+        "RISK_POLICY.md",
+        "SOURCE_LOG.md",
+        "ERROR_LOG.md",
+        "HALLUCINATION_LOG.md",
+        "AAR.md",
+        "DAILY_REPORT.md",
+        "ARCHITECTURE.md",
+        "DEPLOYMENT.md",
+        "WHITEPAPER.md"
+      ],
+      "validation_steps": [
+        "git status --short --branch",
+        "git diff --check",
+        "Parse Reports/dispatcher/runtime/packets/*.json"
+      ],
+      "expected_report_sections": [
+        "files inspected",
+        "files created",
+        "files changed",
+        "validation results",
+        "errors",
+        "unknowns",
+        "next safe action"
+      ],
+      "approval_required": true,
+      "apply_allowed": false,
+      "created_at": "2026-05-14T00:00:00Z",
+      "updated_at": "2026-05-14T00:00:00Z",
+      "assigned_worker_id": null,
+      "next_safe_action": "Assign this packet to one available DRY_RUN worker after confirming allowed and blocked paths."
+    }
+  ],
+  "next_safe_action": "Review queued packets and assign only one safe DRY_RUN packet per worker."
+}

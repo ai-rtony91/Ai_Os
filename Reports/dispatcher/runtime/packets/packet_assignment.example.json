@@ -1,0 +1,45 @@
+{
+  "schema": "AIOS_PACKET_ASSIGNMENT.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "assignment_status": "DRY_RUN_ONLY",
+  "description": "Example assignment recommendation. This file does not launch workers.",
+  "assignment_rules": {
+    "one_packet_per_worker": true,
+    "apply_requires_human_approval": true,
+    "auto_stage": false,
+    "auto_commit": false,
+    "auto_push": false
+  },
+  "recommended_assignments": [
+    {
+      "packet_id": "PACKET-QUEUE-EXAMPLE-001",
+      "recommended_worker_id": "WINDOW 08",
+      "worker_role": "QUEUE_MONITORING",
+      "from_status": "QUEUED",
+      "to_status": "ASSIGNED",
+      "assignment_reason": "Packet matches queue monitoring role and uses only packet runtime paths.",
+      "allowed_paths": [
+        "automation/dispatcher/runtime/packets/",
+        "Reports/dispatcher/runtime/packets/",
+        "docs/AI_OS/dispatcher/runtime/packets/"
+      ],
+      "blocked_paths": [
+        "automation/operator/",
+        "Reports/security/",
+        "apps/dashboard/",
+        "automation/telemetry/",
+        "Reports/telemetry/"
+      ],
+      "validation_steps": [
+        "git status --short --branch",
+        "git diff --check"
+      ],
+      "approval_required": true,
+      "apply_allowed": false,
+      "next_safe_action": "Tell WINDOW 08 to run PACKET-QUEUE-EXAMPLE-001 in DRY_RUN mode only."
+    }
+  ],
+  "blocked_assignments": [],
+  "next_safe_action": "Assign only the recommended packet if the worker has no active packet."
+}

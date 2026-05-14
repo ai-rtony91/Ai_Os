@@ -1,0 +1,23 @@
+{
+  "schema": "AIOS_WORKER_SESSION_LEDGER.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "ledger_purpose": "Append-style history for worker session events.",
+  "events": [
+    {
+      "event_id": "WORKER-EVENT-EXAMPLE-001",
+      "event_time": "2026-05-14T00:00:00Z",
+      "worker_id": "AIOS-07",
+      "launch_session_id": "LAUNCH-EXAMPLE-20260514-0007",
+      "event_type": "REGISTERED",
+      "previous_state": null,
+      "new_state": "IDLE",
+      "assigned_packet_id": null,
+      "lock_ids": [],
+      "human_approval_required": false,
+      "next_safe_action": "Worker may claim one approved packet."
+    }
+  ],
+  "next_safe_action": "Keep current worker state in active_worker_table.json and history in this ledger."
+}
+

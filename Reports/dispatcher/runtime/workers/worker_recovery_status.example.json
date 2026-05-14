@@ -1,0 +1,15 @@
+{
+  "schema": "AIOS_WORKER_RECOVERY_STATUS.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "recovery_status": "REVIEW_REQUIRED",
+  "stale_workers": [],
+  "missing_heartbeats": [],
+  "duplicate_worker_id_conflicts": [],
+  "packet_mismatches": [],
+  "lock_mismatches": [],
+  "interrupted_apply_workers": [],
+  "human_approval_required_before_reassignment": true,
+  "next_safe_action": "Review stale, missing, duplicate, packet, and lock states before reassignment."
+}
+

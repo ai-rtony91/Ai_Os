@@ -1,0 +1,33 @@
+{
+  "schema": "AIOS_APPROVAL_HISTORY.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "history": [
+    {
+      "event_id": "APPROVAL-HISTORY-EXAMPLE-001",
+      "approval_id": "APPROVAL-EXAMPLE-001",
+      "packet_id": "PACKET-EXAMPLE-001",
+      "worker_id": "AIOS-05-APPROVAL-ROUTER",
+      "event_type": "REQUESTED",
+      "event_status": "REVIEW_REQUIRED",
+      "approved_by_human": false,
+      "reason": "Example approval request is not a real approval.",
+      "created_at": "2026-05-14T00:00:00Z",
+      "next_safe_action": "Operator must approve, reject, or block the request before APPLY."
+    },
+    {
+      "event_id": "APPROVAL-HISTORY-EXAMPLE-002",
+      "approval_id": "APPROVAL-EXAMPLE-001",
+      "packet_id": "PACKET-EXAMPLE-001",
+      "worker_id": "AIOS-05-APPROVAL-ROUTER",
+      "event_type": "BLOCKED",
+      "event_status": "BLOCKED",
+      "approved_by_human": false,
+      "reason": "Missing validator, lock, or dirty repo evidence blocks APPLY.",
+      "created_at": "2026-05-14T00:00:00Z",
+      "next_safe_action": "Collect missing evidence and submit a corrected approval request."
+    }
+  ],
+  "next_safe_action": "Use history records to audit approval decisions before APPLY, commit, or push."
+}
+

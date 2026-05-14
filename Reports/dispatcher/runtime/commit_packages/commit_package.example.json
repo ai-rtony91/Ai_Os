@@ -1,0 +1,49 @@
+{
+  "schema": "AIOS_COMMIT_PACKAGE.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "commit_package": {
+    "commit_package_id": "COMMIT-PACKAGE-EXAMPLE-001",
+    "packet_ids": [
+      "PACKET-EXAMPLE-001"
+    ],
+    "worker_ids": [
+      "AIOS-05-APPROVAL-ROUTER"
+    ],
+    "package_status": "READY_FOR_COMMIT",
+    "approval_status": "REVIEW_REQUIRED",
+    "human_commit_approval_required": true,
+    "human_push_approval_required": true,
+    "files_allowed_to_stage": [
+      "automation/dispatcher/runtime/approval/README.md",
+      "automation/dispatcher/runtime/commit_packages/README.md",
+      "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_RUNTIME_MODEL.md",
+      "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_INBOX_SCHEMA.md",
+      "docs/AI_OS/dispatcher/runtime/commit_packages/COMMIT_PACKAGE_RUNTIME_MODEL.md",
+      "docs/AI_OS/dispatcher/runtime/commit_packages/EXACT_FILE_COMMIT_RULES.md",
+      "Reports/dispatcher/runtime/approval/approval_inbox.example.json",
+      "Reports/dispatcher/runtime/approval/approval_history.example.json",
+      "Reports/dispatcher/runtime/commit_packages/commit_package.example.json",
+      "Reports/dispatcher/runtime/commit_packages/staged_file_verification.example.json"
+    ],
+    "forbidden_staging_commands": [
+      "git add .",
+      "git add -A"
+    ],
+    "validator_evidence": {
+      "git_status_checked": true,
+      "git_diff_check_required": true,
+      "json_parse_required": true,
+      "status": "REVIEW_REQUIRED"
+    },
+    "dirty_repo_summary": {
+      "status": "REVIEW_REQUIRED",
+      "unrelated_dirty_files_must_be_excluded": true,
+      "untracked_files_require_review": true
+    },
+    "commit_message_draft": "Add approval and commit package runtime scaffold",
+    "next_safe_action": "Operator must review exact files before staging and must not use git add dot."
+  },
+  "next_safe_action": "Do not commit until human commit approval is recorded."
+}
+

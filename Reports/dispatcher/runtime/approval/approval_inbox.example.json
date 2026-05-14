@@ -1,0 +1,84 @@
+{
+  "schema": "AIOS_APPROVAL_INBOX.v1",
+  "generated_at": "2026-05-14T00:00:00Z",
+  "local_first": true,
+  "approval_requests": [
+    {
+      "approval_id": "APPROVAL-EXAMPLE-001",
+      "packet_id": "PACKET-EXAMPLE-001",
+      "worker_id": "AIOS-05-APPROVAL-ROUTER",
+      "task_id": "PHASE_15_7_APPROVAL_COMMIT_RUNTIME_APPLY",
+      "approval_status": "REVIEW_REQUIRED",
+      "approved_by_human": false,
+      "requested_changes": [
+        "Create docs and example JSON for approval and commit package runtime."
+      ],
+      "expected_outputs": [
+        "Approval runtime docs",
+        "Commit package runtime docs",
+        "Approval inbox example JSON",
+        "Commit package example JSON"
+      ],
+      "allowed_paths": [
+        "automation/dispatcher/runtime/approval/",
+        "automation/dispatcher/runtime/commit_packages/",
+        "Reports/dispatcher/runtime/approval/",
+        "Reports/dispatcher/runtime/commit_packages/",
+        "docs/AI_OS/dispatcher/runtime/approval/",
+        "docs/AI_OS/dispatcher/runtime/commit_packages/"
+      ],
+      "blocked_paths": [
+        "automation/operator/",
+        "Reports/security/",
+        "apps/dashboard/",
+        "automation/telemetry/",
+        "Reports/telemetry/",
+        "README.md",
+        "RISK_POLICY.md",
+        "SOURCE_LOG.md",
+        "ERROR_LOG.md",
+        "HALLUCINATION_LOG.md",
+        "AAR.md",
+        "DAILY_REPORT.md",
+        "ARCHITECTURE.md",
+        "DEPLOYMENT.md",
+        "WHITEPAPER.md"
+      ],
+      "files_expected_to_change": [
+        "automation/dispatcher/runtime/approval/README.md",
+        "automation/dispatcher/runtime/commit_packages/README.md",
+        "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_RUNTIME_MODEL.md",
+        "docs/AI_OS/dispatcher/runtime/approval/APPROVAL_INBOX_SCHEMA.md",
+        "docs/AI_OS/dispatcher/runtime/commit_packages/COMMIT_PACKAGE_RUNTIME_MODEL.md",
+        "docs/AI_OS/dispatcher/runtime/commit_packages/EXACT_FILE_COMMIT_RULES.md",
+        "Reports/dispatcher/runtime/approval/approval_inbox.example.json",
+        "Reports/dispatcher/runtime/approval/approval_history.example.json",
+        "Reports/dispatcher/runtime/commit_packages/commit_package.example.json",
+        "Reports/dispatcher/runtime/commit_packages/staged_file_verification.example.json"
+      ],
+      "validator_summary": {
+        "status": "REVIEW_REQUIRED",
+        "required_checks": [
+          "git status --short --branch",
+          "git diff --check",
+          "JSON parse check"
+        ]
+      },
+      "risk_summary": "Docs and examples only. No executable automation, commit, push, dashboard, telemetry, broker, OANDA, API key, or live trading changes.",
+      "lock_summary": {
+        "status": "REVIEW_REQUIRED",
+        "note": "Future runtime should require active worker locks before APPLY."
+      },
+      "dirty_repo_summary": {
+        "status": "REVIEW_REQUIRED",
+        "note": "Existing dirty operator files and untracked security reports must not enter this package."
+      },
+      "rollback_notes": "If a future APPLY fails, review exact files created in this package and do not use broad reset commands.",
+      "created_at": "2026-05-14T00:00:00Z",
+      "approval_timestamp": null,
+      "next_safe_action": "Human must review approval evidence before any future APPLY."
+    }
+  ],
+  "next_safe_action": "Do not start APPLY unless the request is APPROVED and approved_by_human is true."
+}
+
