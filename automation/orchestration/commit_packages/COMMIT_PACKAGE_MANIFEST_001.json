@@ -1,0 +1,51 @@
+{
+  "commit_package_id": "COMMIT_PACKAGE_001",
+  "phase": "15.3.5",
+  "stage": "Commit Package Builder",
+  "packet_ids": [],
+  "approved_files": [
+    "automation/orchestration/commit_packages/COMMIT_PACKAGE_RULES_001.md",
+    "automation/orchestration/commit_packages/COMMIT_PACKAGE_MANIFEST_001.json",
+    "automation/orchestration/validators/Test-CommitPackageManifest.DRY_RUN.ps1",
+    "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
+    "automation/orchestration/reports/COMMIT_PACKAGE_ACTIVITY_LEDGER_001.csv",
+    "docs/AI_OS/orchestration/PHASE_15_3_5_COMMIT_PACKAGE_BUILDER.md"
+  ],
+  "blocked_files": [
+    "README.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "ARCHITECTURE.md",
+    "DEPLOYMENT.md",
+    "WHITEPAPER.md",
+    "Reports/security/",
+    "apps/dashboard/",
+    "automation/operator/"
+  ],
+  "files_to_stage": [
+    "automation/orchestration/commit_packages/COMMIT_PACKAGE_RULES_001.md",
+    "automation/orchestration/commit_packages/COMMIT_PACKAGE_MANIFEST_001.json",
+    "automation/orchestration/validators/Test-CommitPackageManifest.DRY_RUN.ps1",
+    "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
+    "automation/orchestration/reports/COMMIT_PACKAGE_ACTIVITY_LEDGER_001.csv",
+    "docs/AI_OS/orchestration/PHASE_15_3_5_COMMIT_PACKAGE_BUILDER.md"
+  ],
+  "files_not_to_stage": [
+    "automation/operator/",
+    "Reports/security/",
+    "apps/dashboard/",
+    "automation/telemetry/",
+    "Reports/telemetry/"
+  ],
+  "git_add_strategy": "EXPLICIT_FILE_STAGING_ONLY",
+  "validator_chain_status": "DRY_RUN_REQUIRED",
+  "approval_gate_status": "HUMAN_REVIEW_REQUIRED",
+  "final_git_status_required": "git status --short --branch must be reviewed before staging",
+  "commit_message": "Add AI_OS commit package builder scaffold",
+  "push_allowed_after_human_review": false
+}
+
