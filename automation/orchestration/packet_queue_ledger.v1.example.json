@@ -1,0 +1,83 @@
+{
+  "system": "AI_OS",
+  "ledger_name": "phase_16_12_packet_queue_ledger_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example packet queue ledger for reviewing packet status, assignment, approval requirements, and validator requirements without changing queue state.",
+  "packets": [
+    {
+      "packet_id": "PHASE16_12_PACKET_001",
+      "packet_name": "Worker registry packet queue display",
+      "phase": "16.12",
+      "stage": "worker_registry_packet_queue",
+      "priority": "normal",
+      "status": "available",
+      "assigned_worker_id": null,
+      "approval_required": true,
+      "validator_required": true,
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "notes": "Example available packet. Display scripts must not claim it."
+    },
+    {
+      "packet_id": "PHASE16_12_PACKET_002",
+      "packet_name": "Example documentation review packet",
+      "phase": "16.12",
+      "stage": "worker_registry_packet_queue",
+      "priority": "low",
+      "status": "assigned_example",
+      "assigned_worker_id": "AIOS_WORKER_002",
+      "approval_required": true,
+      "validator_required": true,
+      "allowed_paths": [
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "notes": "Example assigned packet. This is not a live assignment."
+    },
+    {
+      "packet_id": "PHASE16_12_PACKET_003",
+      "packet_name": "Blocked live execution packet example",
+      "phase": "16.12",
+      "stage": "worker_registry_packet_queue",
+      "priority": "blocked",
+      "status": "blocked",
+      "assigned_worker_id": null,
+      "approval_required": false,
+      "validator_required": false,
+      "allowed_paths": [],
+      "blocked_paths": [
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "notes": "Blocked by AI_OS safety rules. Live execution is prohibited."
+    }
+  ]
+}
