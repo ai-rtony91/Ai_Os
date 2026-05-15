@@ -1,3 +1,5 @@
+import { writeTelemetryEvent } from "../telemetry/telemetryWriter";
+
 export type Capability =
   | "file_read"
   | "file_write"
@@ -67,63 +69,107 @@ function targetBlocked(target: string | undefined, patterns: string[] = []): boo
   });
 }
 
+function emitPolicyTelemetry(
+  request: PolicyRequest,
+  decision: PolicyDecision
+): void {
+  writeTelemetryEvent(
+    "policy_decision",
+    "policyEngine",
+    decision.reason,
+    {
+      packetId: request.packetId,
+      status: decision.allowed ? "allowed" : "denied",
+      risk: request.risk,
+      metadata: {
+        actorId: request.actorId,
+        capability: request.capability,
+        trustLevel: request.trustLevel,
+        target: request.target,
+        requiresApproval: decision.requiresApproval
+      }
+    }
+  );
+}
+
 export function evaluatePolicy(
   request: PolicyRequest,
   rules: PolicyRule[] = defaultPolicyRules
 ): PolicyDecision {
   if (request.risk === "blocked") {
-    return {
+    const decision: PolicyDecision = {
       allowed: false,
       reason: "Request risk is blocked",
       requiresApproval: true
     };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
   }
 
   const rule = rules.find((item) => item.capability === request.capability);
 
   if (!rule) {
-    return {
+    const decision: PolicyDecision = {
       allowed: false,
       reason: `No policy rule for capability: ${request.capability}`,
       requiresApproval: true
     };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
   }
 
   if (trustRank[request.trustLevel] < trustRank[rule.minimumTrustLevel]) {
-    return {
+    const decision: PolicyDecision = {
       allowed: false,
       reason: `Trust level ${request.trustLevel} cannot use ${request.capability}`,
       requiresApproval: rule.requiresApproval
     };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
   }
 
   if (targetBlocked(request.target, rule.blockedTargets)) {
-    return {
+    const decision: PolicyDecision = {
       allowed: false,
       reason: `Target is blocked by policy: ${request.target}`,
       requiresApproval: true
     };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
   }
 
   if (rule.requiresApproval && !request.approvalGranted) {
-    return {
+    const decision: PolicyDecision = {
       allowed: false,
       reason: "Approval required before capability use",
       requiresApproval: true
     };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
   }
 
   if (request.capability === "trading_order") {
-    return {
+    const decision: PolicyDecision = {
       allowed: false,
       reason: "Live trading orders are disabled by default policy",
       requiresApproval: true
     };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
   }
 
-  return {
+  const decision: PolicyDecision = {
     allowed: true,
     reason: "Policy allowed request",
     requiresApproval: rule.requiresApproval
   };
+
+  emitPolicyTelemetry(request, decision);
+  return decision;
 }

@@ -4,7 +4,8 @@ export type TelemetryEventType =
   | "approval_decided"
   | "clean_state_checked"
   | "packet_blocked"
-  | "packet_applied";
+  | "packet_applied"
+  | "policy_decision";
 
 export interface TelemetryEvent {
   eventId: string;
