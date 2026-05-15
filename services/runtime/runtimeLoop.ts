@@ -1,6 +1,9 @@
 import { runtimeEventBus } from "./eventBus";
+import { registerRuntimeAutomationHandlers } from "./runtimeAutomationHandlers";
+import { registerRuntimeAutomationDispatcher } from "./runtimeAutomationDispatcher";
 import { createRuntimeContext, type RuntimeContext } from "./runtimeContext";
 import { runRuntimeTick } from "./runtimeTick";
+
 import type { DeadLetterQueueState } from "../dispatcher/deadLetterQueue";
 import type { WorkerLeaseResult } from "../dispatcher/workerLeaseEngine";
 
@@ -24,6 +27,9 @@ export class RuntimeLoop {
     private readonly dependencies: RuntimeLoopDependencies
   ) {
     this.context = createRuntimeContext(config.runtimeId);
+
+    registerRuntimeAutomationHandlers();
+    registerRuntimeAutomationDispatcher();
   }
 
   public start(): void {
@@ -34,8 +40,8 @@ export class RuntimeLoop {
     this.context.status = "running";
 
     runtimeEventBus.emit("runtime_started", {
-  runtimeId: this.config.runtimeId
-});
+      runtimeId: this.config.runtimeId
+    });
 
     this.interval = setInterval(() => {
       this.context = runRuntimeTick({
@@ -54,11 +60,11 @@ export class RuntimeLoop {
     }
 
     this.context.status = "paused";
-  }
 
-  runtimeEventBus.emit("runtime_stopped", {
-  runtimeId: this.config.runtimeId
-});  
+    runtimeEventBus.emit("runtime_stopped", {
+      runtimeId: this.config.runtimeId
+    });
+  }
 
   public getContext(): RuntimeContext {
     return this.context;
