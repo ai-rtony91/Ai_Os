@@ -1,0 +1,75 @@
+{
+  "system": "AI_OS",
+  "supervisor_name": "phase_16_16_recovery_bootstrap_supervisor_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example recovery bootstrap supervisor for showing active branch visibility, queue restore visibility, worker restore visibility, packet restore visibility, recovery checkpoints, and orchestration continuity.",
+  "active_branch": "phase-16-15-16-worker-supervisor-recovery",
+  "orchestration_continuity_state": "recovery_safe_visibility_example",
+  "queue_restore": {
+    "restore_state": "visible_not_restored",
+    "restore_backlog": 2,
+    "interrupted_sessions": 1,
+    "queue_restore_state": "operator_review_required",
+    "notes": "Queue restore is visible only. Display script must not restore queue state."
+  },
+  "worker_restore": [
+    {
+      "worker_id": "AIOS_WORKER_002",
+      "restore_state": "needs_operator_review",
+      "last_known_packet": "PHASE16_15_PACKET_002",
+      "last_known_branch": "phase-16-15-16-worker-supervisor-recovery",
+      "safe_restart_visible": true,
+      "notes": "Worker restore candidate only. Do not launch worker."
+    },
+    {
+      "worker_id": "AIOS_WORKER_003",
+      "restore_state": "inactive_worker_visibility",
+      "last_known_packet": null,
+      "last_known_branch": "phase-16-15-16-worker-supervisor-recovery",
+      "safe_restart_visible": false,
+      "notes": "Inactive worker must remain stopped until separate approval."
+    }
+  ],
+  "packet_restore": [
+    {
+      "packet_id": "PHASE16_15_PACKET_001",
+      "restore_state": "continuity_visible",
+      "last_known_worker": "AIOS_WORKER_001",
+      "safe_restart_visible": true,
+      "notes": "Packet continuity is visible only."
+    },
+    {
+      "packet_id": "PHASE16_15_PACKET_002",
+      "restore_state": "stale_packet_visibility",
+      "last_known_worker": "AIOS_WORKER_002",
+      "safe_restart_visible": true,
+      "notes": "Stale packet requires operator review before continuation."
+    }
+  ],
+  "recovery_checkpoints": [
+    {
+      "checkpoint_id": "PHASE_16_14_CHECKPOINT",
+      "checkpoint_path": "Reports/checkpoints/CHECKPOINT_PHASE_16_14_VALIDATOR_ROUTING_QUEUE_HEALTH.md",
+      "checkpoint_state": "available_example"
+    }
+  ],
+  "telemetry": {
+    "recovery_checkpoints": 1,
+    "restore_backlog": 2,
+    "interrupted_sessions": 1,
+    "queue_restore_state": "operator_review_required",
+    "worker_restore_count": 2,
+    "packet_restore_count": 2
+  },
+  "blocked_actions": [
+    "restore queue state",
+    "restart workers",
+    "reassign packets",
+    "create scheduled tasks",
+    "create startup tasks",
+    "modify git state",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading",
+    "commit",
+    "push"
+  ]
+}
