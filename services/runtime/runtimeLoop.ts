@@ -1,3 +1,4 @@
+import { runtimeEventBus } from "./eventBus";
 import { createRuntimeContext, type RuntimeContext } from "./runtimeContext";
 import { runRuntimeTick } from "./runtimeTick";
 import type { DeadLetterQueueState } from "../dispatcher/deadLetterQueue";
@@ -32,6 +33,10 @@ export class RuntimeLoop {
 
     this.context.status = "running";
 
+    runtimeEventBus.emit("runtime_started", {
+  runtimeId: this.config.runtimeId
+});
+
     this.interval = setInterval(() => {
       this.context = runRuntimeTick({
         context: this.context,
@@ -50,6 +55,10 @@ export class RuntimeLoop {
 
     this.context.status = "paused";
   }
+
+  runtimeEventBus.emit("runtime_stopped", {
+  runtimeId: this.config.runtimeId
+});  
 
   public getContext(): RuntimeContext {
     return this.context;
