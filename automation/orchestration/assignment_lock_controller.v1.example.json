@@ -1,0 +1,106 @@
+{
+  "system": "AI_OS",
+  "controller_name": "phase_16_13_assignment_lock_controller_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example assignment lock controller state for detecting duplicate ownership, packet conflicts, stale locks, and release-rule visibility without modifying locks.",
+  "generated_for_phase": "16.13",
+  "assignment_locks": [
+    {
+      "packet_id": "PHASE16_13_PACKET_001",
+      "worker_id": "AIOS_WORKER_001",
+      "claim_status": "claimed_example",
+      "claimed_at": "2026-05-15T09:00:00-04:00",
+      "stale_after_minutes": 60,
+      "collision_status": "none",
+      "release_rule": "operator_approval_required",
+      "release_allowed_by_display": false,
+      "notes": "Healthy example claim. Display script must not release it."
+    },
+    {
+      "packet_id": "PHASE16_13_PACKET_002",
+      "worker_id": "AIOS_WORKER_002",
+      "claim_status": "claimed_example",
+      "claimed_at": "2026-05-15T07:30:00-04:00",
+      "stale_after_minutes": 60,
+      "collision_status": "stale_visibility_only",
+      "release_rule": "operator_approval_required",
+      "release_allowed_by_display": false,
+      "notes": "Stale example claim. Stale state is visible only."
+    },
+    {
+      "packet_id": "PHASE16_13_PACKET_003",
+      "worker_id": "AIOS_WORKER_003",
+      "claim_status": "conflict_example",
+      "claimed_at": "2026-05-15T09:15:00-04:00",
+      "stale_after_minutes": 60,
+      "collision_status": "duplicate_packet_owner",
+      "release_rule": "operator_approval_required",
+      "release_allowed_by_display": false,
+      "notes": "Conflict example part 1. Duplicate ownership is warning-only."
+    },
+    {
+      "packet_id": "PHASE16_13_PACKET_003",
+      "worker_id": "AIOS_WORKER_004",
+      "claim_status": "conflict_example",
+      "claimed_at": "2026-05-15T09:20:00-04:00",
+      "stale_after_minutes": 60,
+      "collision_status": "duplicate_packet_owner",
+      "release_rule": "operator_approval_required",
+      "release_allowed_by_display": false,
+      "notes": "Conflict example part 2. Display script must not resolve it."
+    },
+    {
+      "packet_id": "PHASE16_13_PACKET_004",
+      "worker_id": "UNASSIGNED",
+      "claim_status": "blocked",
+      "claimed_at": null,
+      "stale_after_minutes": 60,
+      "collision_status": "blocked_by_policy",
+      "release_rule": "no_release_needed",
+      "release_allowed_by_display": false,
+      "notes": "Blocked packet must not be claimed."
+    }
+  ],
+  "packet_conflict_checks": [
+    {
+      "check_id": "DUPLICATE_PACKET_OWNER",
+      "description": "One packet should not have more than one active owner.",
+      "severity": "warning",
+      "display_only": true
+    },
+    {
+      "check_id": "WORKER_MULTI_PACKET_OWNER",
+      "description": "One worker should not own more than one active packet without explicit approval.",
+      "severity": "warning",
+      "display_only": true
+    },
+    {
+      "check_id": "BLOCKED_PACKET_CLAIM",
+      "description": "Blocked packets must remain unclaimed.",
+      "severity": "blocked",
+      "display_only": true
+    }
+  ],
+  "release_rules": [
+    {
+      "rule_id": "OPERATOR_APPROVAL_REQUIRED",
+      "description": "A stale or conflicted lock can only be released by a separate explicit operator-approved APPLY workflow.",
+      "automatic_release_allowed": false
+    },
+    {
+      "rule_id": "DISPLAY_SCRIPTS_READ_ONLY",
+      "description": "Display scripts may show release candidates but must not release locks.",
+      "automatic_release_allowed": false
+    }
+  ],
+  "blocked_actions": [
+    "create locks",
+    "release locks",
+    "modify lock ownership",
+    "launch workers",
+    "launch packets",
+    "create scheduled tasks",
+    "create startup tasks",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading"
+  ]
+}
