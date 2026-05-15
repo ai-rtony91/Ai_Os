@@ -1,0 +1,35 @@
+{
+  "system": "AI_OS",
+  "registry_name": "phase_16_3_worker_registry_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example worker registry for checking whether worker records line up with packet queue and assignment lock examples.",
+  "workers": [
+    {
+      "worker_id": "AIOS_WORKER_EXAMPLE_001",
+      "worker_name": "Example standby worker",
+      "status": "standby",
+      "assigned_packet_id": null,
+      "last_seen": null,
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        "apps/dashboard/css/",
+        "apps/dashboard/js/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "notes": "Example only. This registry does not launch, assign, or claim worker tasks."
+    }
+  ]
+}
