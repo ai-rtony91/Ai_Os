@@ -1,0 +1,51 @@
+{
+  "system": "AI_OS",
+  "continuity_name": "phase_16_20_session_continuity_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example session continuity state for showing active sessions, interrupted sessions, packet continuity, worker continuity, queue continuity, branch continuity, and recovery-safe startup visibility without restoring anything.",
+  "sessions": [
+    {
+      "session_id": "SESSION_EXAMPLE_001",
+      "session_state": "active_example",
+      "active_branch": "phase-16-17-20-launch-startup-approval",
+      "packet_continuity": "visible",
+      "worker_continuity": "visible",
+      "queue_continuity": "visible",
+      "branch_continuity": "verified_example",
+      "interrupted": false,
+      "notes": "Active session visibility only."
+    },
+    {
+      "session_id": "SESSION_EXAMPLE_002",
+      "session_state": "interrupted_visibility",
+      "active_branch": "phase-16-17-20-launch-startup-approval",
+      "packet_continuity": "restore_visible_not_applied",
+      "worker_continuity": "needs_operator_review",
+      "queue_continuity": "restore_visible_not_applied",
+      "branch_continuity": "verified_example",
+      "interrupted": true,
+      "notes": "Interrupted session example. Display script must not restore it."
+    }
+  ],
+  "recovery_safe_startup": {
+    "startup_state": "recovery_safe_visibility",
+    "blocked_startup_state": false,
+    "startup_restore_visibility": "visible_not_restored",
+    "continuity_checkpoints": [
+      "Reports/checkpoints/CHECKPOINT_PHASE_16_15_16_WORKER_SUPERVISOR_RECOVERY.md"
+    ],
+    "next_safe_action": "Review continuity visibility before any separate approved startup or restore workflow."
+  },
+  "blocked_actions": [
+    "restore sessions",
+    "restart workers",
+    "reassign packets",
+    "restore queue state",
+    "switch branches",
+    "create startup tasks",
+    "create scheduled tasks",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading",
+    "commit",
+    "push"
+  ]
+}

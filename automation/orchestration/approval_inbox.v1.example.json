@@ -1,0 +1,54 @@
+{
+  "system": "AI_OS",
+  "inbox_name": "phase_16_19_approval_inbox_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example approval inbox for showing approval-required, pending, blocked, validator-required, and merge-required packet states without changing approvals.",
+  "approvals": [
+    {
+      "approval_id": "APPROVAL_PHASE16_19_001",
+      "packet_id": "PHASE16_19_PACKET_001",
+      "packet_name": "Launch supervisor display packet",
+      "approval_state": "pending_approval",
+      "approval_required": true,
+      "validator_required": true,
+      "merge_required": false,
+      "blocked": false,
+      "block_reason": null,
+      "notes": "Pending approval example. Display script must not approve it."
+    },
+    {
+      "approval_id": "APPROVAL_PHASE16_19_002",
+      "packet_id": "PHASE16_19_PACKET_002",
+      "packet_name": "Merge-required docs packet",
+      "approval_state": "merge_required",
+      "approval_required": true,
+      "validator_required": false,
+      "merge_required": true,
+      "blocked": false,
+      "block_reason": null,
+      "notes": "Merge-required example. Display script must not merge, commit, or push."
+    },
+    {
+      "approval_id": "APPROVAL_PHASE16_19_003",
+      "packet_id": "PHASE16_19_PACKET_003",
+      "packet_name": "Blocked live execution approval",
+      "approval_state": "blocked_approval",
+      "approval_required": false,
+      "validator_required": false,
+      "merge_required": false,
+      "blocked": true,
+      "block_reason": "Live trading, broker, OANDA, API key, webhook, or real order work is prohibited.",
+      "notes": "Blocked by AI_OS safety rules."
+    }
+  ],
+  "blocked_actions": [
+    "approve packets",
+    "block packets",
+    "run validators",
+    "merge pull requests",
+    "commit",
+    "push",
+    "launch workers",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading"
+  ]
+}

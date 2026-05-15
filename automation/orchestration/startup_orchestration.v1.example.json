@@ -1,0 +1,51 @@
+{
+  "system": "AI_OS",
+  "startup_name": "phase_16_18_startup_orchestration_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example startup orchestration state for showing startup packets, queue visibility, recovery visibility, continuity state, and startup-safe branch visibility without creating startup tasks.",
+  "active_branch": "phase-16-17-20-launch-startup-approval",
+  "startup_safe_branch_visibility": "visible_example",
+  "startup_continuity_state": "operator_review_required",
+  "startup_packets": [
+    {
+      "packet_id": "PHASE16_18_PACKET_001",
+      "packet_name": "Startup visibility review",
+      "startup_state": "visible_not_launched",
+      "startup_queue_visibility": "visible",
+      "startup_recovery_visibility": "operator_review_required",
+      "startup_safe_branch": "phase-16-17-20-launch-startup-approval",
+      "blocked_startup_state": false,
+      "notes": "Startup packet is visible only. Nothing is launched."
+    },
+    {
+      "packet_id": "PHASE16_18_PACKET_002",
+      "packet_name": "Recovery startup candidate",
+      "startup_state": "recovery_safe_visibility",
+      "startup_queue_visibility": "restore_visible_not_applied",
+      "startup_recovery_visibility": "needs_operator_review",
+      "startup_safe_branch": "phase-16-17-20-launch-startup-approval",
+      "blocked_startup_state": false,
+      "notes": "Recovery visibility only. Queue state is not restored."
+    },
+    {
+      "packet_id": "PHASE16_18_PACKET_003",
+      "packet_name": "Blocked live startup example",
+      "startup_state": "blocked_startup_state",
+      "startup_queue_visibility": "blocked",
+      "startup_recovery_visibility": "blocked_by_policy",
+      "startup_safe_branch": "UNKNOWN",
+      "blocked_startup_state": true,
+      "notes": "Blocked because live execution startup is prohibited."
+    }
+  ],
+  "blocked_actions": [
+    "create startup tasks",
+    "create scheduled tasks",
+    "launch workers",
+    "restore queue state",
+    "switch branches",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading",
+    "commit",
+    "push"
+  ]
+}
