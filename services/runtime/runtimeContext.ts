@@ -5,6 +5,8 @@ import type { RebuiltDispatcherState } from "../dispatcher/runtimeStateRebuilder
 import type { WorkerLeaseResult } from "../dispatcher/workerLeaseEngine";
 import type { SupervisorReport } from "../supervisor/runtimeSupervisor";
 import type { BackpressureDecision } from "./runtimeBackpressure";
+import type { RemediationPlan } from "./autonomousRemediation";
+
 
 export interface RuntimeContext {
   runtimeId: string;
@@ -16,6 +18,7 @@ export interface RuntimeContext {
   deadLetterQueue?: DeadLetterQueueState;
   supervisorReport?: SupervisorReport;
   backpressure?: BackpressureDecision;
+  remediationPlan?: RemediationPlan;
   lastTickAt?: string;
   createdAt: string;
   updatedAt: string;

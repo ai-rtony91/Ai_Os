@@ -4,6 +4,7 @@ import { generateResumePlan } from "../dispatcher/packetResumeEngine";
 import { generateSchedulerPlan } from "../dispatcher/autonomousScheduler";
 import { generateSupervisorReport } from "../supervisor/runtimeSupervisor";
 import { evaluateRuntimeBackpressure } from "./runtimeBackpressure";
+import { generateRemediationPlan } from "./autonomousRemediation";
 import { updateRuntimeContext, type RuntimeContext } from "./runtimeContext";
 import type { DeadLetterQueueState } from "../dispatcher/deadLetterQueue";
 import type { WorkerLeaseResult } from "../dispatcher/workerLeaseEngine";
@@ -44,6 +45,11 @@ export function runRuntimeTick(
     maxPoisonPackets: 1
   });
 
+  const remediationPlan = generateRemediationPlan(
+    backpressure,
+    supervisorReport
+  );
+
   const runtimeStatus =
     backpressure.level === "blocked"
       ? "blocked"
@@ -60,6 +66,7 @@ export function runRuntimeTick(
     deadLetterQueue: input.deadLetterQueue,
     supervisorReport,
     backpressure,
+    remediationPlan,
     lastTickAt: new Date().toISOString()
   });
 }
