@@ -1,0 +1,172 @@
+{
+  "system": "AI_OS",
+  "spine_name": "phase_16_11_orchestration_spine_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example Orchestration Spine v1 map for showing how AI_OS worker, packet, lock, approval, validator, launch, recovery, and commit package components fit together without launching anything or changing state.",
+  "spine_sections": [
+    {
+      "order": 1,
+      "section_id": "WORKER_REGISTRY",
+      "section_name": "Worker registry",
+      "status": "display_ready",
+      "source_example": "automation/orchestration/worker_registry.example.json",
+      "plain_english_purpose": "Shows which workers exist, whether they are standby or assigned, and what packet they are connected to.",
+      "allowed_actions": [
+        "read worker records",
+        "display worker status"
+      ],
+      "blocked_actions": [
+        "launch workers",
+        "create worker processes",
+        "change worker assignments"
+      ],
+      "next_safe_action": "Review worker records before any approved assignment workflow."
+    },
+    {
+      "order": 2,
+      "section_id": "PACKET_QUEUE_LEDGER",
+      "section_name": "Packet queue ledger",
+      "status": "display_ready",
+      "source_example": "automation/orchestration/packet_queue.example.json",
+      "plain_english_purpose": "Shows available work packets, allowed paths, blocked paths, approval needs, and validator needs.",
+      "allowed_actions": [
+        "read packet records",
+        "display queue status"
+      ],
+      "blocked_actions": [
+        "claim packets",
+        "launch packets",
+        "modify queue state"
+      ],
+      "next_safe_action": "Review packet status before approving any APPLY packet."
+    },
+    {
+      "order": 3,
+      "section_id": "ASSIGNMENT_LOCKING",
+      "section_name": "Assignment locking",
+      "status": "display_ready",
+      "source_example": "automation/orchestration/assignment_locks.example.json",
+      "plain_english_purpose": "Shows whether a packet is claimed, who owns it, and whether collision status is clean.",
+      "allowed_actions": [
+        "read lock records",
+        "display lock status"
+      ],
+      "blocked_actions": [
+        "create locks",
+        "remove locks",
+        "change ownership"
+      ],
+      "next_safe_action": "Confirm no collision before any later approved claim workflow."
+    },
+    {
+      "order": 4,
+      "section_id": "APPROVAL_INBOX",
+      "section_name": "Approval inbox skeleton",
+      "status": "display_ready",
+      "source_example": "automation/orchestration/approval_inbox.example.json",
+      "plain_english_purpose": "Shows pending, approved, and blocked APPLY decisions for operator review.",
+      "allowed_actions": [
+        "read approval records",
+        "display approval state"
+      ],
+      "blocked_actions": [
+        "approve packets",
+        "block packets",
+        "launch approved packets"
+      ],
+      "next_safe_action": "Review approval state and stop before any separate approval mutation."
+    },
+    {
+      "order": 5,
+      "section_id": "VALIDATOR_SUPERVISOR",
+      "section_name": "Validator supervisor skeleton",
+      "status": "display_ready",
+      "source_example": "automation/orchestration/validator_chain.example.json",
+      "plain_english_purpose": "Shows validator order, required validators, optional validators, and blocked validators.",
+      "allowed_actions": [
+        "read validator plan",
+        "display validator order"
+      ],
+      "blocked_actions": [
+        "run validators from spine display",
+        "skip required validators",
+        "run blocked validators"
+      ],
+      "next_safe_action": "Review validator order before running validators in a separate approved workflow."
+    },
+    {
+      "order": 6,
+      "section_id": "LAUNCH_SUPERVISOR",
+      "section_name": "Launch supervisor skeleton",
+      "status": "blocked_for_display_only",
+      "source_example": "none",
+      "plain_english_purpose": "Defines a future gate that would decide whether a packet is safe to launch after approval and validation.",
+      "allowed_actions": [
+        "display launch supervisor concept",
+        "show blocked launch status"
+      ],
+      "blocked_actions": [
+        "launch workers",
+        "launch packets",
+        "create startup tasks",
+        "create scheduled tasks"
+      ],
+      "next_safe_action": "Keep launch actions blocked until a separate safety-reviewed APPLY phase exists."
+    },
+    {
+      "order": 7,
+      "section_id": "RECOVERY_BOOTSTRAP",
+      "section_name": "Recovery bootstrap skeleton",
+      "status": "display_ready",
+      "source_example": "automation/orchestration/recovery_bootstrap.example.json",
+      "plain_english_purpose": "Shows last known orchestration state, unfinished packets, pending approvals, and recovery next action.",
+      "allowed_actions": [
+        "read recovery context",
+        "display recovery next action"
+      ],
+      "blocked_actions": [
+        "resume work automatically",
+        "launch recovery tasks",
+        "change approval state"
+      ],
+      "next_safe_action": "Review recovery state before any operator-approved continuation."
+    },
+    {
+      "order": 8,
+      "section_id": "COMMIT_PACKAGING",
+      "section_name": "Commit packaging skeleton",
+      "status": "display_ready",
+      "source_example": "automation/orchestration/commit_package.example.json",
+      "plain_english_purpose": "Shows a selective commit package recommendation without staging, committing, or pushing.",
+      "allowed_actions": [
+        "read commit package plan",
+        "display selective file list"
+      ],
+      "blocked_actions": [
+        "git add",
+        "git commit",
+        "git push",
+        "git add ."
+      ],
+      "next_safe_action": "Review package scope and require a separate explicit commit approval."
+    }
+  ],
+  "global_safety_rules": [
+    "Read-only display only.",
+    "No dashboard edits.",
+    "No protected root files.",
+    "No broker, OANDA, API keys, webhooks, real orders, or live trading.",
+    "No startup tasks.",
+    "No scheduled tasks.",
+    "No worker launching.",
+    "No validator launching from this spine display.",
+    "No assignment lock creation.",
+    "No commit.",
+    "No push."
+  ],
+  "next_safe_action": {
+    "action": "Run the read-only spine display and review git status before any later APPLY, commit, or push approval.",
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/show-orchestration-spine.ps1",
+    "stop_condition": "Stop if any requested action would modify protected files, launch workers, create scheduled tasks, touch broker or live trading, commit, or push."
+  }
+}
