@@ -1,6 +1,8 @@
 import { runtimeEventBus } from "./eventBus";
 import { registerRuntimeAutomationHandlers } from "./runtimeAutomationHandlers";
 import { registerRuntimeAutomationDispatcher } from "./runtimeAutomationDispatcher";
+import { processAutomationQueue } from "./runtimeAutomationExecutor";
+
 import { createRuntimeContext, type RuntimeContext } from "./runtimeContext";
 import { runRuntimeTick } from "./runtimeTick";
 
@@ -50,6 +52,8 @@ export class RuntimeLoop {
         workerLeases: this.dependencies.workerLeases,
         maxConcurrentPackets: this.config.maxConcurrentPackets
       });
+
+      processAutomationQueue();
     }, this.config.tickIntervalMs);
   }
 
