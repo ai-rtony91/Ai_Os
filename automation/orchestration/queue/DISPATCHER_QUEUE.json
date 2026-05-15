@@ -1,0 +1,16 @@
+﻿{
+  "system": "AI_OS",
+  "queue": "dispatcher_queue",
+  "purpose": "Holds work packets waiting for assignment to AI_OS workers.",
+  "status": "ACTIVE",
+  "items": [
+    {
+      "packet_id": "dispatcher-queue-core",
+      "title": "Build dispatcher queue foundation",
+      "priority": "high",
+      "status": "READY",
+      "assigned_worker": "",
+      "lane": "orchestration"
+    }
+  ]
+}
