@@ -1,0 +1,96 @@
+{
+  "system": "AI_OS",
+  "bootstrap_name": "phase_16_8_morning_bootstrap_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example morning bootstrap display data for reviewing the safe start-of-day orchestration checklist without launching tasks or changing state.",
+  "morning_startup_checklist": [
+    {
+      "order": 1,
+      "check_id": "MORNING_REVIEW_REPO_LOCATION",
+      "check_name": "Confirm active repo location",
+      "status": "operator_review_required",
+      "expected_result": "Working directory is the ACTIVE_REPO path for AI_OS.",
+      "command_display": "Get-Location",
+      "notes": "Display only. This example does not run the command."
+    },
+    {
+      "order": 2,
+      "check_id": "MORNING_REVIEW_GIT_STATUS",
+      "check_name": "Review git status",
+      "status": "operator_review_required",
+      "expected_result": "Operator sees current branch and uncommitted file list before any work.",
+      "command_display": "git status --short --branch",
+      "notes": "Review status before APPLY work, commit, or push decisions."
+    },
+    {
+      "order": 3,
+      "check_id": "MORNING_REVIEW_OPEN_PACKETS",
+      "check_name": "Review orchestration packets",
+      "status": "operator_review_required",
+      "expected_result": "Operator knows which packet, approval, validator, and checkpoint files are in scope.",
+      "command_display": "manual review",
+      "notes": "Use read-only display scripts only until an APPLY prompt is explicitly approved."
+    },
+    {
+      "order": 4,
+      "check_id": "MORNING_REVIEW_SAFETY_BOUNDARY",
+      "check_name": "Confirm safety boundary",
+      "status": "required",
+      "expected_result": "No startup task, scheduled task, dashboard edit, broker, OANDA, API key, live trading, commit, or push is planned.",
+      "command_display": "manual review",
+      "notes": "Stop if requested work touches blocked paths or live execution."
+    }
+  ],
+  "repo_health_checks": [
+    {
+      "order": 1,
+      "check_id": "REPO_HEALTH_GIT_STATUS",
+      "check_name": "Git status review",
+      "status": "read_only_check",
+      "command_display": "git status --short --branch",
+      "expected_result": "Branch and uncommitted files are visible to the operator.",
+      "stop_condition": "Stop before commit or push unless separately approved."
+    },
+    {
+      "order": 2,
+      "check_id": "REPO_HEALTH_DIFF_CHECK",
+      "check_name": "Whitespace diff check",
+      "status": "read_only_check",
+      "command_display": "git diff --check",
+      "expected_result": "No whitespace errors in changed files.",
+      "stop_condition": "Stop and fix scoped files if whitespace errors are reported."
+    },
+    {
+      "order": 3,
+      "check_id": "REPO_HEALTH_JSON_PARSE",
+      "check_name": "JSON example parse check",
+      "status": "read_only_check",
+      "command_display": "powershell -NoProfile -Command \"Get-Content -Raw -Path '<json_path>' | ConvertFrom-Json | Out-Null\"",
+      "expected_result": "Changed JSON examples parse cleanly.",
+      "stop_condition": "Stop and fix scoped JSON if parsing fails."
+    },
+    {
+      "order": 4,
+      "check_id": "REPO_HEALTH_SCRIPT_DISPLAY",
+      "check_name": "Display script run",
+      "status": "read_only_check",
+      "command_display": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/show-morning-bootstrap.ps1",
+      "expected_result": "Morning bootstrap display prints checklist, repo health checks, and next safe action.",
+      "stop_condition": "Stop if the display reports missing or invalid bootstrap data."
+    }
+  ],
+  "next_safe_action": {
+    "action": "Run the read-only morning bootstrap display and review git status before approving any separate APPLY, commit, or push.",
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/show-morning-bootstrap.ps1",
+    "stop_condition": "Stop if startup tasks, scheduled tasks, broker, OANDA, API keys, live trading, dashboard edits, commit, or push are requested without explicit approval."
+  },
+  "safety_notes": [
+    "Read-only display only.",
+    "No startup tasks are created.",
+    "No scheduled tasks are created.",
+    "No dashboard edits.",
+    "No broker, OANDA, API keys, webhooks, real orders, or live trading.",
+    "No files are launched from this display.",
+    "No commit or push is allowed without a separate explicit prompt."
+  ]
+}
