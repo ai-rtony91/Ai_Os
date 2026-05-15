@@ -1,0 +1,80 @@
+{
+  "system": "AI_OS",
+  "package_name": "phase_16_6_commit_package_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example commit package for reviewing approved files before a future selective commit.",
+  "commit_message": "Phase 16.6 commit package builder",
+  "approval_state": "approved_for_future_commit_review",
+  "packet_ids": [
+    "PHASE16_6_PACKET_001"
+  ],
+  "approved_files": [
+    {
+      "path": "automation/orchestration/commit_package.example.json",
+      "reason": "Example commit package manifest."
+    },
+    {
+      "path": "automation/orchestration/show-commit-package.ps1",
+      "reason": "Read-only commit package display script."
+    },
+    {
+      "path": "docs/AI_OS/orchestration/PHASE_16_6_COMMIT_PACKAGE_BUILDER.md",
+      "reason": "Phase 16.6 operator documentation."
+    },
+    {
+      "path": "Reports/checkpoints/CHECKPOINT_PHASE_16_6_COMMIT_PACKAGE_BUILDER.md",
+      "reason": "Phase 16.6 checkpoint report."
+    }
+  ],
+  "blocked_files": [
+    {
+      "path": "apps/dashboard/",
+      "reason": "Dashboard edits are outside this phase."
+    },
+    {
+      "path": "apps/dashboard/assets/",
+      "reason": "Dashboard asset edits are protected unless explicitly allowed."
+    },
+    {
+      "path": ".codex_backups/",
+      "reason": "Backup folder is protected."
+    },
+    {
+      "path": ".git/",
+      "reason": "Git internals are never edited directly."
+    },
+    {
+      "path": "broker/",
+      "reason": "Broker paths are blocked."
+    },
+    {
+      "path": "oanda/",
+      "reason": "OANDA integration is blocked."
+    },
+    {
+      "path": "webhooks/",
+      "reason": "Webhook execution is blocked."
+    },
+    {
+      "path": "live_trading/",
+      "reason": "Live trading is blocked."
+    },
+    {
+      "path": "secrets/",
+      "reason": "Secrets are blocked."
+    },
+    {
+      "path": ".env",
+      "reason": "Environment secrets are blocked."
+    }
+  ],
+  "safety_rules": [
+    "Read-only display only.",
+    "Do not stage files.",
+    "Do not run git add.",
+    "Do not commit.",
+    "Do not push.",
+    "No dashboard edits.",
+    "No broker, OANDA, API keys, or live trading."
+  ]
+}
