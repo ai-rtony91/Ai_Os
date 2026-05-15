@@ -13,36 +13,36 @@
                       "lane":  "orchestration"
                   },
                   {
-                      "assigned_worker":  "",
+                      "assigned_worker":  "WORKER-1",
                       "lane":  "orchestration",
                       "priority":  "high",
                       "packet_id":  "worker-registry-sync",
                       "title":  "Sync worker heartbeats into worker registry",
-                      "status":  "READY"
+                      "status":  "ASSIGNED"
                   },
                   {
-                      "assigned_worker":  "",
+                      "assigned_worker":  "WORKER-2",
                       "lane":  "orchestration",
                       "priority":  "high",
                       "packet_id":  "queue-auto-assignment",
                       "title":  "Auto-assign READY queue items to available workers",
-                      "status":  "READY"
+                      "status":  "ASSIGNED"
                   },
                   {
-                      "assigned_worker":  "",
+                      "assigned_worker":  "WORKER-3",
                       "lane":  "recovery",
                       "priority":  "medium",
                       "packet_id":  "stale-worker-cleanup",
                       "title":  "Detect stale workers and mark them for cleanup",
-                      "status":  "READY"
+                      "status":  "ASSIGNED"
                   },
                   {
-                      "assigned_worker":  "",
+                      "assigned_worker":  "WORKER-4",
                       "lane":  "startup",
                       "priority":  "medium",
                       "packet_id":  "morning-layout-bootstrap",
                       "title":  "Connect AI_OS startup shortcut, workers, and layout routine",
-                      "status":  "READY"
+                      "status":  "ASSIGNED"
                   }
               ]
 }
