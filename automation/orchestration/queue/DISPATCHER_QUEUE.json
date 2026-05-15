@@ -8,7 +8,7 @@
                       "packet_id":  "dispatcher-queue-core",
                       "title":  "Build dispatcher queue foundation",
                       "priority":  "high",
-                      "status":  "ASSIGNED",
+                      "status":  "DONE",
                       "assigned_worker":  "WORKER-1",
                       "lane":  "orchestration"
                   }
