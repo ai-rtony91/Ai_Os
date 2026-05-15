@@ -1,0 +1,84 @@
+{
+  "system": "AI_OS",
+  "inbox_name": "phase_16_4_approval_inbox_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example approval inbox for reviewing APPLY packet decisions without creating files, launching workers, or changing state.",
+  "packets": [
+    {
+      "packet_id": "PHASE16_4_PACKET_001",
+      "packet_name": "Approval inbox display",
+      "approval_state": "pending_apply_approval",
+      "apply_requested": true,
+      "approved_by": null,
+      "approval_timestamp": null,
+      "block_reason": null,
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "Read-only display only.",
+        "No dashboard edits.",
+        "No broker, OANDA, API keys, or live trading."
+      ]
+    },
+    {
+      "packet_id": "PHASE16_4_PACKET_002",
+      "packet_name": "Example approved documentation packet",
+      "approval_state": "approved",
+      "apply_requested": true,
+      "approved_by": "operator_example",
+      "approval_timestamp": "2026-05-15T00:00:00-04:00",
+      "block_reason": null,
+      "allowed_paths": [
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "broker/",
+        "oanda/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "Example only. Approval record is not a live authorization."
+      ]
+    },
+    {
+      "packet_id": "PHASE16_4_PACKET_003",
+      "packet_name": "Example blocked live execution packet",
+      "approval_state": "blocked",
+      "apply_requested": true,
+      "approved_by": null,
+      "approval_timestamp": null,
+      "block_reason": "Live trading and broker execution are prohibited.",
+      "allowed_paths": [],
+      "blocked_paths": [
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "Blocked because live execution paths are outside the AI_OS safety boundary."
+      ]
+    }
+  ]
+}
