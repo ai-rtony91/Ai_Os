@@ -1,0 +1,74 @@
+{
+  "system": "AI_OS",
+  "chain_name": "phase_16_5_validator_chain_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example validator chain for showing validator order, required checks, optional checks, and blocked checks without launching anything.",
+  "validators": [
+    {
+      "order": 1,
+      "validator_id": "VALIDATOR_GIT_DIFF_CHECK",
+      "validator_name": "Git diff whitespace check",
+      "validator_type": "required",
+      "command": "git diff --check",
+      "status": "ready",
+      "blocked": false,
+      "block_reason": null,
+      "notes": "Checks for whitespace errors only. Example display does not run the command."
+    },
+    {
+      "order": 2,
+      "validator_id": "VALIDATOR_POWERSHELL_PARSE",
+      "validator_name": "PowerShell script parse check",
+      "validator_type": "required",
+      "command": "powershell -NoProfile -Command \"[scriptblock]::Create((Get-Content -Raw -Path '<script_path>')) | Out-Null\"",
+      "status": "ready",
+      "blocked": false,
+      "block_reason": null,
+      "notes": "Validates script syntax when a specific script path is approved."
+    },
+    {
+      "order": 3,
+      "validator_id": "VALIDATOR_JSON_PARSE",
+      "validator_name": "JSON parse check",
+      "validator_type": "required",
+      "command": "powershell -NoProfile -Command \"Get-Content -Raw -Path '<json_path>' | ConvertFrom-Json | Out-Null\"",
+      "status": "ready",
+      "blocked": false,
+      "block_reason": null,
+      "notes": "Validates JSON syntax when a specific JSON path is approved."
+    },
+    {
+      "order": 4,
+      "validator_id": "VALIDATOR_GIT_STATUS",
+      "validator_name": "Git status review",
+      "validator_type": "required",
+      "command": "git status --short --branch",
+      "status": "ready",
+      "blocked": false,
+      "block_reason": null,
+      "notes": "Shows uncommitted changes for selective review."
+    },
+    {
+      "order": 5,
+      "validator_id": "VALIDATOR_DOC_REVIEW",
+      "validator_name": "Documentation review",
+      "validator_type": "optional",
+      "command": "manual review",
+      "status": "optional",
+      "blocked": false,
+      "block_reason": null,
+      "notes": "Optional human review for checkpoint and orchestration documentation clarity."
+    },
+    {
+      "order": 99,
+      "validator_id": "VALIDATOR_LIVE_BROKER_SMOKE_TEST",
+      "validator_name": "Live broker smoke test",
+      "validator_type": "blocked",
+      "command": "BLOCKED",
+      "status": "blocked",
+      "blocked": true,
+      "block_reason": "Live broker, OANDA, API key, and live trading actions are prohibited.",
+      "notes": "Blocked by AI_OS trading safety rules."
+    }
+  ]
+}
