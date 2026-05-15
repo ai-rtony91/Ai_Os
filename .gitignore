@@ -44,4 +44,4 @@ Reports/dry_runs/
 
 Reports/dry_runs/
 
-automation/orchestration/PR_BODY_LAST_GENERATED.md
+automation/orchestration/PR_BODY_LAST_GENERATED.mdautomation/orchestration/workers/*-heartbeat.json
