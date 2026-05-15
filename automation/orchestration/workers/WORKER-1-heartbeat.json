@@ -1,0 +1,9 @@
+﻿{
+    "host":  "THE_LAB",
+    "last_heartbeat":  "2026-05-15T15:20:17",
+    "worker_id":  "WORKER-1",
+    "packet":  "validator-test",
+    "role":  "Shell",
+    "status":  "ACTIVE",
+    "started_at":  "2026-05-15T15:20:17"
+}
