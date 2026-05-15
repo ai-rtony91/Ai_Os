@@ -1,0 +1,77 @@
+{
+  "system": "AI_OS",
+  "supervisor_name": "phase_16_14_validator_routing_supervisor_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example validator routing supervisor for showing validator categories, assignments, readiness, blocked validators, and validation backlog without running validators.",
+  "validator_routes": [
+    {
+      "validator_id": "VALIDATOR_JSON_PARSE",
+      "validator_name": "JSON parse check",
+      "category": "syntax",
+      "assigned_packet_id": "PHASE16_14_PACKET_001",
+      "required": true,
+      "ready": true,
+      "status": "ready_example",
+      "blocked": false,
+      "block_reason": null,
+      "backlog_position": 1,
+      "notes": "Ready example only. Display script must not run this validator."
+    },
+    {
+      "validator_id": "VALIDATOR_POWERSHELL_PARSE",
+      "validator_name": "PowerShell parse check",
+      "category": "script_syntax",
+      "assigned_packet_id": "PHASE16_14_PACKET_002",
+      "required": true,
+      "ready": false,
+      "status": "waiting_for_approval",
+      "blocked": false,
+      "block_reason": null,
+      "backlog_position": 2,
+      "notes": "Waiting example. Operator approval is required before a later validator run."
+    },
+    {
+      "validator_id": "VALIDATOR_GIT_DIFF_CHECK",
+      "validator_name": "Git diff whitespace check",
+      "category": "repo_health",
+      "assigned_packet_id": "PHASE16_14_PACKET_003",
+      "required": true,
+      "ready": true,
+      "status": "ready_example",
+      "blocked": false,
+      "block_reason": null,
+      "backlog_position": 3,
+      "notes": "Ready example only. Display script must not run git commands beyond its own validation."
+    },
+    {
+      "validator_id": "VALIDATOR_LIVE_BROKER_SMOKE_TEST",
+      "validator_name": "Live broker smoke test",
+      "category": "blocked_live_execution",
+      "assigned_packet_id": "PHASE16_14_PACKET_004",
+      "required": false,
+      "ready": false,
+      "status": "blocked",
+      "blocked": true,
+      "block_reason": "Live broker, OANDA, API key, webhook, real order, and live trading validators are prohibited.",
+      "backlog_position": null,
+      "notes": "Blocked by AI_OS safety rules."
+    }
+  ],
+  "validator_backlog": {
+    "total_routes": 4,
+    "required_routes": 3,
+    "ready_routes": 2,
+    "blocked_routes": 1,
+    "waiting_routes": 1,
+    "validation_backlog": 3
+  },
+  "blocked_actions": [
+    "run validators",
+    "launch workers",
+    "create scheduled tasks",
+    "create startup tasks",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading",
+    "commit",
+    "push"
+  ]
+}
