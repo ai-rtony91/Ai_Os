@@ -1,0 +1,61 @@
+{
+  "system": "AI_OS",
+  "registry_name": "phase_16_12_worker_registry_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example worker registry ledger for reviewing worker readiness and packet assignment without launching workers or changing state.",
+  "workers": [
+    {
+      "worker_id": "AIOS_WORKER_001",
+      "worker_name": "Primary orchestration worker example",
+      "status": "standby",
+      "assigned_packet_id": null,
+      "last_seen": null,
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "Example worker only.",
+        "No worker process is launched by this registry.",
+        "No packet assignment is changed by display scripts."
+      ]
+    },
+    {
+      "worker_id": "AIOS_WORKER_002",
+      "worker_name": "Secondary review worker example",
+      "status": "offline_example",
+      "assigned_packet_id": "PHASE16_12_PACKET_002",
+      "last_seen": null,
+      "allowed_paths": [
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "Example assignment only.",
+        "Offline examples must not be launched automatically."
+      ]
+    }
+  ]
+}

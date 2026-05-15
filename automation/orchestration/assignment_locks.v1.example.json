@@ -1,0 +1,38 @@
+{
+  "system": "AI_OS",
+  "lock_ledger_name": "phase_16_12_assignment_locks_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example assignment lock ledger for reviewing packet ownership and collision status without creating real locks.",
+  "locks": [
+    {
+      "packet_id": "PHASE16_12_PACKET_001",
+      "worker_id": "UNASSIGNED",
+      "claim_status": "not_claimed",
+      "claimed_at": null,
+      "collision_status": "none",
+      "approval_required": true,
+      "validator_required": true,
+      "notes": "Available packet has no worker claim."
+    },
+    {
+      "packet_id": "PHASE16_12_PACKET_002",
+      "worker_id": "AIOS_WORKER_002",
+      "claim_status": "claimed_example",
+      "claimed_at": null,
+      "collision_status": "none",
+      "approval_required": true,
+      "validator_required": true,
+      "notes": "Example only. This is not a real worker lock."
+    },
+    {
+      "packet_id": "PHASE16_12_PACKET_003",
+      "worker_id": "UNASSIGNED",
+      "claim_status": "blocked",
+      "claimed_at": null,
+      "collision_status": "blocked_by_policy",
+      "approval_required": false,
+      "validator_required": false,
+      "notes": "Blocked packet must not be claimed."
+    }
+  ]
+}
