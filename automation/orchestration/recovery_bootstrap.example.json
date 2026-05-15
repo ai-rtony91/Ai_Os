@@ -1,0 +1,61 @@
+{
+  "system": "AI_OS",
+  "bootstrap_name": "phase_16_7_recovery_bootstrap_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example recovery bootstrap display data for resuming orchestration review without launching tasks or changing state.",
+  "last_known_orchestration_state": {
+    "phase": "Phase 16",
+    "stage": "16.7",
+    "state": "recovery_bootstrap_display_ready",
+    "last_checkpoint": "Reports/checkpoints/CHECKPOINT_PHASE_16_7_RECOVERY_BOOTSTRAP.md",
+    "last_validated_at": null,
+    "git_state": "UNKNOWN until operator runs git status --short --branch"
+  },
+  "unfinished_packets": [
+    {
+      "packet_id": "PHASE16_7_PACKET_001",
+      "packet_name": "Recovery bootstrap display",
+      "status": "unfinished_example",
+      "owner": "operator",
+      "next_step": "Run the read-only recovery bootstrap display and review the output.",
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ]
+    }
+  ],
+  "pending_approvals": [
+    {
+      "approval_id": "PHASE16_7_APPROVAL_001",
+      "approval_name": "Selective commit approval",
+      "approval_state": "pending_operator_decision",
+      "required_before": "commit",
+      "notes": "No commit or push is allowed without a separate explicit prompt."
+    }
+  ],
+  "recovery_next_action": {
+    "action": "Review this display output, run validation, then decide whether to approve a separate selective commit prompt.",
+    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/show-recovery-bootstrap.ps1",
+    "stop_condition": "Stop if the display reports missing or invalid bootstrap data."
+  },
+  "safety_notes": [
+    "Read-only display only.",
+    "No startup tasks or scheduled tasks are created.",
+    "No dashboard edits.",
+    "No broker, OANDA, API keys, webhooks, real orders, or live trading.",
+    "No files are launched from this display."
+  ]
+}
