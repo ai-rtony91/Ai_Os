@@ -1,0 +1,36 @@
+{
+  "system": "AI_OS",
+  "queue_name": "phase_16_1_packet_queue_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example packet queue for assigning one safe work packet to one worker at a time.",
+  "packets": [
+    {
+      "packet_id": "PHASE16_1_PACKET_001",
+      "packet_name": "Orchestration backbone scaffold",
+      "status": "available",
+      "assigned_worker_id": null,
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        "apps/dashboard/css/",
+        "apps/dashboard/js/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "approval_required": true,
+      "validator_required": true,
+      "notes": "Example only. Do not use as a live assignment record."
+    }
+  ]
+}

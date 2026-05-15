@@ -1,0 +1,37 @@
+{
+  "system": "AI_OS",
+  "lock_name": "phase_16_1_assignment_locks_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example assignment locks for preventing two workers from claiming the same packet or unsafe paths.",
+  "locks": [
+    {
+      "packet_id": "PHASE16_1_PACKET_001",
+      "worker_id": "UNASSIGNED",
+      "claimed_at": null,
+      "claim_status": "not_claimed",
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        "apps/dashboard/css/",
+        "apps/dashboard/js/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "approval_required": true,
+      "validator_required": true,
+      "collision_status": "none",
+      "notes": "Example only. A real lock must be created by an approved APPLY workflow."
+    }
+  ]
+}
