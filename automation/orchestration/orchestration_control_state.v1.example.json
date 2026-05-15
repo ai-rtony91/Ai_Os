@@ -1,0 +1,106 @@
+{
+  "system": "AI_OS",
+  "control_state_name": "phase_16_13_orchestration_control_state_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example orchestration control state for heartbeat tracking, queue health, validator routing preparation, telemetry expansion, and PR workflow visibility.",
+  "worker_heartbeats": [
+    {
+      "worker_id": "AIOS_WORKER_001",
+      "health_state": "healthy_example",
+      "last_heartbeat": "2026-05-15T09:55:00-04:00",
+      "stale_after_minutes": 30,
+      "assigned_packet_id": "PHASE16_13_PACKET_001",
+      "notes": "Heartbeat is current in this example."
+    },
+    {
+      "worker_id": "AIOS_WORKER_002",
+      "health_state": "stale_example",
+      "last_heartbeat": "2026-05-15T08:00:00-04:00",
+      "stale_after_minutes": 30,
+      "assigned_packet_id": "PHASE16_13_PACKET_002",
+      "notes": "Heartbeat is stale in this example."
+    },
+    {
+      "worker_id": "AIOS_WORKER_005",
+      "health_state": "inactive_example",
+      "last_heartbeat": null,
+      "stale_after_minutes": 30,
+      "assigned_packet_id": null,
+      "notes": "Inactive worker example. Display script must not launch it."
+    }
+  ],
+  "queue_health": {
+    "packet_total": 4,
+    "available_packets": 1,
+    "assigned_packets": 2,
+    "blocked_packets": 1,
+    "stale_packets": 1,
+    "validator_required_packets": 3,
+    "approval_required_packets": 3,
+    "queue_pressure": "medium_example"
+  },
+  "validator_routing": [
+    {
+      "validator_id": "VALIDATOR_JSON_PARSE",
+      "category": "syntax",
+      "assigned_packet_id": "PHASE16_13_PACKET_001",
+      "required": true,
+      "status": "ready_example"
+    },
+    {
+      "validator_id": "VALIDATOR_POWERSHELL_PARSE",
+      "category": "script_syntax",
+      "assigned_packet_id": "PHASE16_13_PACKET_002",
+      "required": true,
+      "status": "ready_example"
+    },
+    {
+      "validator_id": "VALIDATOR_LIVE_BROKER_SMOKE_TEST",
+      "category": "blocked_live_execution",
+      "assigned_packet_id": "PHASE16_13_PACKET_004",
+      "required": false,
+      "status": "blocked"
+    }
+  ],
+  "telemetry": {
+    "worker_count": 3,
+    "stale_workers": 1,
+    "inactive_workers": 1,
+    "stale_packets": 1,
+    "queue_pressure": "medium_example",
+    "blocked_assignments": 1,
+    "validation_backlog": 2
+  },
+  "pr_workflow": [
+    {
+      "packet_id": "PHASE16_13_PACKET_001",
+      "pr_required": true,
+      "approval_needed": true,
+      "merge_required": false,
+      "status": "approval_needed_example"
+    },
+    {
+      "packet_id": "PHASE16_13_PACKET_002",
+      "pr_required": true,
+      "approval_needed": false,
+      "merge_required": true,
+      "status": "merge_required_example"
+    },
+    {
+      "packet_id": "PHASE16_13_PACKET_004",
+      "pr_required": false,
+      "approval_needed": false,
+      "merge_required": false,
+      "status": "blocked_no_pr"
+    }
+  ],
+  "blocked_actions": [
+    "launch workers",
+    "run validators from this display",
+    "create scheduled tasks",
+    "create startup tasks",
+    "commit",
+    "push",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading"
+  ]
+}
