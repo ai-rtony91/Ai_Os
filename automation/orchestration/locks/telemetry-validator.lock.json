@@ -1,7 +1,8 @@
 ﻿{
     "host":  "THE_LAB",
     "worker_id":  "WORKER-1",
-    "status":  "RELEASED",
     "packet_id":  "telemetry-validator",
-    "claimed_at":  "2026-05-15T15:52:11"
+    "claimed_at":  "2026-05-15T15:52:11",
+    "status":  "RELEASED",
+    "released_at":  "2026-05-15T15:54:59"
 }
