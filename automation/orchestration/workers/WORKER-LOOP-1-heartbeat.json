@@ -1,8 +1,0 @@
-﻿{
-    "host":  "THE_LAB",
-    "last_heartbeat":  "2026-05-15T15:42:00",
-    "worker_id":  "WORKER-LOOP-1",
-    "packet":  "heartbeat-loop-test",
-    "role":  "Shell",
-    "status":  "ACTIVE"
-}

@@ -1,5 +1,6 @@
 ﻿param(
     [int]$Workers = 1,
+    [int]$StartIndex = 1,
     [ValidateSet("Shell", "Codex")]
     [string]$Mode = "Shell",
     [string]$Packet = ""
@@ -10,9 +11,10 @@ $TempDir = Join-Path $env:TEMP "AIOS-worker-launcher"
 
 New-Item -ItemType Directory -Force -Path $TempDir | Out-Null
 
-for ($i = 1; $i -le $Workers; $i++) {
+for ($offset = 0; $offset -lt $Workers; $offset++) {
 
-    $WorkerName = "WORKER-$i"
+    $WorkerNumber = $StartIndex + $offset
+    $WorkerName = "WORKER-$WorkerNumber"
 
     if ([string]::IsNullOrWhiteSpace($Packet)) {
         $PacketText = "NO PACKET ASSIGNED"

@@ -1,9 +1,0 @@
-﻿{
-    "host":  "THE_LAB",
-    "last_heartbeat":  "2026-05-15T15:26:03",
-    "worker_id":  "WORKER-1",
-    "packet":  "heartbeat-auto-test",
-    "role":  "Shell",
-    "status":  "OFFLINE",
-    "started_at":  "2026-05-15T15:21:39"
-}
