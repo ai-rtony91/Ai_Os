@@ -1,0 +1,76 @@
+{
+  "system": "AI_OS",
+  "supervisor_name": "phase_16_14_queue_health_supervisor_v1_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example queue health supervisor for showing packet totals, stale packet visibility, backlog counts, queue pressure, and telemetry without modifying queue state.",
+  "queue_health": {
+    "packet_total": 5,
+    "available_packets": 1,
+    "assigned_packets": 2,
+    "blocked_packets": 1,
+    "inactive_packets": 1,
+    "stale_packets": 1,
+    "approval_required_packets": 3,
+    "validator_required_packets": 3,
+    "approval_backlog": 2,
+    "validation_backlog": 3,
+    "queue_pressure": "medium_example"
+  },
+  "stale_packet_visibility": [
+    {
+      "packet_id": "PHASE16_14_PACKET_002",
+      "packet_name": "Example assigned packet waiting for approval",
+      "packet_state": "assigned_example",
+      "last_updated": "2026-05-15T08:00:00-04:00",
+      "stale_after_minutes": 60,
+      "visibility_state": "stale_example",
+      "blocked_ownership": false,
+      "unresolved_state": true,
+      "notes": "Stale visibility only. Display script must not release ownership."
+    },
+    {
+      "packet_id": "PHASE16_14_PACKET_004",
+      "packet_name": "Blocked live execution packet",
+      "packet_state": "blocked",
+      "last_updated": "2026-05-15T09:00:00-04:00",
+      "stale_after_minutes": 60,
+      "visibility_state": "blocked_policy_state",
+      "blocked_ownership": true,
+      "unresolved_state": true,
+      "notes": "Blocked by AI_OS safety rules. Must not be assigned or launched."
+    },
+    {
+      "packet_id": "PHASE16_14_PACKET_005",
+      "packet_name": "Inactive packet example",
+      "packet_state": "inactive_example",
+      "last_updated": null,
+      "stale_after_minutes": 60,
+      "visibility_state": "inactive_visibility",
+      "blocked_ownership": false,
+      "unresolved_state": true,
+      "notes": "Inactive example. Operator review required before future work."
+    }
+  ],
+  "telemetry": {
+    "validator_count": 4,
+    "validator_backlog": 3,
+    "stale_packet_count": 1,
+    "inactive_packet_count": 1,
+    "queue_pressure": "medium_example",
+    "blocked_states": 1,
+    "approval_queue_size": 2,
+    "validation_backlog": 3
+  },
+  "blocked_actions": [
+    "modify queue records",
+    "assign packets",
+    "release ownership",
+    "run validators",
+    "launch workers",
+    "create scheduled tasks",
+    "create startup tasks",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading",
+    "commit",
+    "push"
+  ]
+}
