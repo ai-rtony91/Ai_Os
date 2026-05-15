@@ -1,0 +1,32 @@
+{
+  "system": "AI_OS",
+  "snapshot_name": "phase_16_9_orchestration_status_snapshot_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example status snapshot configuration for displaying orchestration summaries without changing state.",
+  "phase": "Phase 16",
+  "stage": "16.9",
+  "status_inputs": {
+    "queue": "packet_queue.example.json",
+    "worker_registry": "worker_registry.example.json",
+    "approval_inbox": "approval_inbox.example.json",
+    "validator_chain": "validator_chain.example.json",
+    "recovery_bootstrap": "recovery_bootstrap.example.json"
+  },
+  "summary_sections": [
+    "queue",
+    "worker",
+    "approval",
+    "validator",
+    "recovery"
+  ],
+  "safety_rules": [
+    "Read-only display only.",
+    "Do not create files from this script.",
+    "Do not modify files from this script.",
+    "Do not launch packets, validators, workers, recovery actions, or external processes.",
+    "No dashboard edits.",
+    "No broker, OANDA, API keys, webhooks, real orders, or live trading.",
+    "No commit or push."
+  ],
+  "next_safe_action": "Review the orchestration status snapshot, then run git status --short --branch before any separate approval workflow."
+}

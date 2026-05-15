@@ -1,0 +1,105 @@
+{
+  "system": "AI_OS",
+  "ledger_name": "phase_16_10_orchestration_gap_ledger_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example read-only ledger for reviewing orchestration gaps without modifying state or launching work.",
+  "open_gaps": [
+    {
+      "gap_id": "GAP-16-10-001",
+      "gap_name": "Operator recovery review cadence",
+      "status": "open",
+      "priority": 1,
+      "risk_level": "low",
+      "next_action": "Review recovery bootstrap and gap ledger outputs before approving any selective commit.",
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "apps/dashboard/assets/",
+        ".codex_backups/",
+        ".git/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "Read-only review gap.",
+        "No dashboard, broker, OANDA, API key, or live trading work."
+      ]
+    },
+    {
+      "gap_id": "GAP-16-10-002",
+      "gap_name": "Future production heatmap source mapping",
+      "status": "open",
+      "priority": 2,
+      "risk_level": "medium",
+      "next_action": "Draft source mapping in a separate approved documentation pack.",
+      "allowed_paths": [
+        "docs/AI_OS/orchestration/",
+        "Reports/checkpoints/"
+      ],
+      "blocked_paths": [
+        "apps/dashboard/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "Documentation only until separately approved.",
+        "Do not add UI panels during this gap review."
+      ]
+    }
+  ],
+  "blocked_gaps": [
+    {
+      "gap_id": "GAP-16-10-003",
+      "gap_name": "Live broker execution handoff",
+      "status": "blocked",
+      "block_reason": "Live trading, broker connections, OANDA integration, API keys, and real orders are prohibited.",
+      "next_action": "Keep blocked. Use paper-only simulation scope if future work is approved.",
+      "blocked_paths": [
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "safety_notes": [
+        "No live execution path.",
+        "No secrets or API keys."
+      ]
+    }
+  ],
+  "completed_gaps": [
+    {
+      "gap_id": "GAP-16-10-004",
+      "gap_name": "Read-only recovery bootstrap display",
+      "status": "completed",
+      "completed_checkpoint": "Reports/checkpoints/CHECKPOINT_PHASE_16_7_RECOVERY_BOOTSTRAP.md",
+      "completion_notes": "Recovery context display exists as read-only example data and script."
+    }
+  ],
+  "next_safest_gap": {
+    "gap_id": "GAP-16-10-001",
+    "reason": "Lowest-risk open gap because it is read-only and stays inside orchestration documentation and checkpoint paths.",
+    "next_action": "Run the read-only gap ledger display and review output before any separate approval."
+  },
+  "safety_rules": [
+    "Read-only display only.",
+    "Modify nothing.",
+    "Launch nothing.",
+    "No dashboard edits.",
+    "No broker, OANDA, API keys, webhooks, real orders, or live trading.",
+    "No commit or push."
+  ]
+}
