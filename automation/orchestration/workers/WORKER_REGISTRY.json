@@ -1,0 +1,12 @@
+﻿{
+  "system": "AI_OS",
+  "registry": "worker_registry",
+  "purpose": "Tracks AI_OS worker windows, worker roles, packet assignment, and safe routing state.",
+  "rules": [
+    "MAIN CONTROL receives normal ChatGPT commands.",
+    "SHELL WORKER runs validators, inspections, and helper scripts only.",
+    "CODEX WORKER receives Codex prompts/tasks only.",
+    "No worker may commit or push unless explicitly approved."
+  ],
+  "workers": []
+}
