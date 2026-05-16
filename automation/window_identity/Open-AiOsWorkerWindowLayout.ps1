@@ -13,7 +13,7 @@ try {
 }
 
 $repoPath = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN'
-$identityScript = 'automation/window_identity/Set-AiOsWindowIdentity.ps1'
+$identityScript = Join-Path $repoPath 'automation\window_identity\Set-AiOsWindowIdentity.ps1'
 
 $markers = @(
     'AI_OS MAIN CONTROL',
@@ -42,8 +42,9 @@ function New-WorkerCommand {
     )
 
     $escapedRepo = $repoPath.Replace("'", "''")
+    $escapedScript = $identityScript.Replace("'", "''")
     $escapedMarker = $Marker.Replace("'", "''")
-    return "Set-Location -LiteralPath '$escapedRepo'; & '.\$identityScript' -Marker '$escapedMarker'"
+    return "Set-Location -LiteralPath '$escapedRepo'; & '$escapedScript' -Marker '$escapedMarker'"
 }
 
 function New-WorkerArgs {
@@ -57,6 +58,8 @@ function New-WorkerArgs {
     $title = "$($emoji[$Marker]) $Marker"
     return @(
         $Prefix
+        '--startingDirectory'
+        $repoPath
         '--title'
         $title
         'powershell'
