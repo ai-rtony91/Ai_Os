@@ -10,6 +10,15 @@
                       "reason":  "Connect queue to worker inbox",
                       "status":  "inbox",
                       "created_utc":  "2026-05-16T19:33:30Z"
+                  },
+                  {
+                      "id":  "20260516T200246Z",
+                      "worker_id":  "validator_worker",
+                      "worker_type":  "validation",
+                      "task":  "Validate worker launcher changes",
+                      "reason":  "Route validation work to best worker",
+                      "status":  "inbox",
+                      "created_utc":  "2026-05-16T20:02:46Z"
                   }
               ]
 }
