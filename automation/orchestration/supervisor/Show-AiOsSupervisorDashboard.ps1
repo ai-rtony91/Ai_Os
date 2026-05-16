@@ -206,7 +206,11 @@ Write-Host "Repo state: $(if ($repoDirty) { 'DIRTY' } else { 'CLEAN' })" -Foregr
 Write-Host "Changed files: $($changedFiles.Count)" -ForegroundColor Gray
 Write-Host "Untracked files: $($untrackedFiles.Count)" -ForegroundColor Gray
 Write-Host "Latest commit: $latestCommit" -ForegroundColor Gray
-Write-List -Lines @($statusLines) -Color Gray
+if ($statusLines.Count -eq 0) {
+    Write-Host "No changed or untracked files." -ForegroundColor Gray
+} else {
+    Write-List -Lines @($statusLines) -Color Gray
+}
 
 Write-Section -Title "GitHub State"
 if ($ghAvailable) {
