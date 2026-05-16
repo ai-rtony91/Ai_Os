@@ -1,0 +1,59 @@
+{
+  "session_id": "AIOS_SESSION_STATE_EXAMPLE",
+  "version": "1.0",
+  "saved_at": "2026-05-15T00:00:00.0000000-04:00",
+  "mode": "manual_restore_only",
+  "source_registry": "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
+  "safety": {
+    "codex_auto_launch": false,
+    "scheduled_tasks": false,
+    "startup_tasks": false,
+    "broker_api_live_trading": false,
+    "destructive_actions": false
+  },
+  "lanes": [
+    {
+      "id": "main_control",
+      "name": "AI_OS MAIN CONTROL",
+      "role": "repo control, orchestration, merges, launcher, supervisor",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "branch": "main",
+      "codex_allowed": false,
+      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN'; $Host.UI.RawUI.WindowTitle = 'AI_OS MAIN CONTROL'; git status --short --branch\""
+    },
+    {
+      "id": "build_engine_git",
+      "name": "AI_OS BUILD ENGINE GIT",
+      "role": "git commands, validators, staging, commits",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+      "branch": "phase-221-260-mission-json-dashboard-ready",
+      "codex_allowed": false,
+      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json'; $Host.UI.RawUI.WindowTitle = 'AI_OS BUILD ENGINE GIT'; git status --short --branch\""
+    },
+    {
+      "id": "build_engine_codex",
+      "name": "AI_OS BUILD ENGINE CODEX",
+      "role": "APPLY work, planning, code edits, architecture work",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+      "branch": "phase-221-260-mission-json-dashboard-ready",
+      "codex_allowed": true,
+      "codex_launch": "manual only",
+      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json'; $Host.UI.RawUI.WindowTitle = 'AI_OS BUILD ENGINE CODEX'; git status --short --branch\""
+    },
+    {
+      "id": "validation",
+      "name": "AI_OS VALIDATION",
+      "role": "read-only audits, validators, cleanup reports",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+      "branch": "phase-validation-cleanup",
+      "codex_allowed": "manual only",
+      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation'; $Host.UI.RawUI.WindowTitle = 'AI_OS VALIDATION'; git status --short --branch\""
+    }
+  ],
+  "restart_commands": [
+    "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN'; $Host.UI.RawUI.WindowTitle = 'AI_OS MAIN CONTROL'; git status --short --branch\"",
+    "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json'; $Host.UI.RawUI.WindowTitle = 'AI_OS BUILD ENGINE GIT'; git status --short --branch\"",
+    "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json'; $Host.UI.RawUI.WindowTitle = 'AI_OS BUILD ENGINE CODEX'; git status --short --branch\"",
+    "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation'; $Host.UI.RawUI.WindowTitle = 'AI_OS VALIDATION'; git status --short --branch\""
+  ]
+}
