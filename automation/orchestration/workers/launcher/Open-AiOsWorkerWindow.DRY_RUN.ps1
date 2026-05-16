@@ -19,16 +19,25 @@ if ($null -eq $worker) {
     throw "Worker not found: $WorkerId"
 }
 
-$title = "AIOS WORKER - $WorkerId"
+$title = "AIOS | $WorkerId"
 $repoPath = (Get-Location).Path
 $workerScript = "automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1"
 
 $workerCommand = @"
 Set-Location -LiteralPath '$repoPath'
-Write-Host 'AIOS WORKER READY: $WorkerId'
-Write-Host 'Type: $($worker.type)'
-Write-Host 'Purpose: $($worker.purpose)'
+Clear-Host
+Write-Host '========================================' -ForegroundColor Cyan
+Write-Host 'AIOS WORKER ONLINE' -ForegroundColor Green
+Write-Host '========================================' -ForegroundColor Cyan
+Write-Host 'Worker ID : $WorkerId' -ForegroundColor Yellow
+Write-Host 'Type      : $($worker.type)' -ForegroundColor Yellow
+Write-Host 'Purpose   : $($worker.purpose)' -ForegroundColor White
+Write-Host 'Repo      : $repoPath' -ForegroundColor DarkGray
+Write-Host '========================================' -ForegroundColor Cyan
+Write-Host ''
 powershell -ExecutionPolicy Bypass -File '$workerScript' -WorkerId '$WorkerId'
+Write-Host ''
+Write-Host 'WORKER READY FOR NEXT TASK' -ForegroundColor Green
 "@
 
 Write-Host "COPY START - Open-AiOsWorkerWindow.DRY_RUN.ps1"
@@ -38,8 +47,8 @@ Write-Host "worker_id: $WorkerId"
 Write-Host "worker_type: $($worker.type)"
 Write-Host "title: $title"
 Write-Host ""
-Write-Host "Would open a worker terminal tab."
-Write-Host "Command:"
+Write-Host "Would open a clean worker terminal tab."
+Write-Host "Command preview:"
 Write-Host $workerCommand
 
 if ($Apply) {
