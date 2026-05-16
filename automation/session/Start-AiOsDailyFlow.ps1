@@ -18,8 +18,8 @@ Write-Host "STEP 2 - Resume"
 powershell -ExecutionPolicy Bypass -File automation/session/Resume-AiOsSession.ps1
 
 Write-Host ""
-Write-Host "STEP 3 - Recommendation"
-powershell -ExecutionPolicy Bypass -File automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1
+Write-Host "STEP 3 - Runtime"
+powershell -ExecutionPolicy Bypass -File automation/intake/Start-AiOsRuntimeLoop.ps1 -Goal "Run AIOS daily runtime orchestration"
 
 Write-Host ""
 Write-Host "STEP 4 - Self Heal"
@@ -46,3 +46,4 @@ Write-Host "DAILY FLOW READY" -ForegroundColor Green
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
 Write-Host "COPY END - Start-AiOsDailyFlow.ps1"
+
