@@ -3,6 +3,10 @@ $ErrorActionPreference = "Stop"
 
 $repoPath = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
 $roleName = "AI_OS WORKSTATION"
+$border = "#" * 100
+$commandIcon = [char]::ConvertFromUtf32(0x1F7E3)
+$buildIcon = [char]::ConvertFromUtf32(0x1F7E2)
+$validationIcon = [char]::ConvertFromUtf32(0x1F535)
 
 function Write-Section {
     param([Parameter(Mandatory = $true)][string]$Title)
@@ -62,18 +66,27 @@ if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
 Set-Location -LiteralPath $repoPath
 $Host.UI.RawUI.WindowTitle = $roleName
 
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "AI_OS TERMINAL WORKSTATION" -ForegroundColor Cyan
+Write-Host $border -ForegroundColor Cyan
+Write-Host ""
+Write-Host "AI_OS TERMINAL WORKSTATION MASTER" -ForegroundColor Cyan
+Write-Host "LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Yellow
+Write-Host ""
 Write-Host "Repo: $repoPath" -ForegroundColor Cyan
+Write-Host "ROLE: Master status launcher for Command Deck, Build Engine, and Validation Deck" -ForegroundColor Cyan
+Write-Host "MODE: Read-only startup summary" -ForegroundColor Gray
+Write-Host "STATUS: No Codex auto-launch, no extra windows, no scheduled/startup tasks" -ForegroundColor Gray
+Write-Host ""
 Write-Host "No Codex auto-launch. No extra windows. No scheduled/startup tasks." -ForegroundColor Gray
 Write-Host "No WScript.Shell, SendKeys, ALT+SPACE automation, Num Lock changes, or Windows Terminal settings edits." -ForegroundColor Gray
 Write-Host "No broker, OANDA, API keys, webhooks, real orders, or live trading." -ForegroundColor Red
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Yellow
+Write-Host ""
+Write-Host $border -ForegroundColor Cyan
+Write-Host $border -ForegroundColor Cyan
+Write-Host $border -ForegroundColor Yellow
 Write-Host "=== COPY START ===" -ForegroundColor Yellow
-Write-Host "Paste terminal output between COPY START and COPY END when sending to ChatGPT." -ForegroundColor Gray
+Write-Host "Paste terminal output between COPY START and COPY END when sending to ChatGPT." -ForegroundColor White
 Write-Host "=== COPY END ===" -ForegroundColor Yellow
-Write-Host "========================================" -ForegroundColor Yellow
+Write-Host $border -ForegroundColor Yellow
 
 Invoke-ReadOnlyCommand -Label "Current Git Branch" -Command {
     git branch --show-current
@@ -96,11 +109,11 @@ Invoke-ReadOnlyCommand -Label "Open GitHub PRs" -Command {
 }
 
 Write-Section -Title "Operator Lanes"
-Write-Host "AI_OS COMMAND DECK" -ForegroundColor Magenta
+Write-Host "$commandIcon Ai_Os COMMAND DECK" -ForegroundColor Magenta
 Write-Host "  Use for Git, GitHub CLI, issues, PRs, commits, merges, and operator decisions."
-Write-Host "AI_OS BUILD ENGINE" -ForegroundColor Green
+Write-Host "$buildIcon Ai_Os BUILD ENGINE" -ForegroundColor Green
 Write-Host "  Use for Codex work. Codex launch remains manual."
-Write-Host "AI_OS VALIDATION DECK" -ForegroundColor Cyan
+Write-Host "$validationIcon Ai_Os VALIDATION DECK" -ForegroundColor Cyan
 Write-Host "  Use for PowerShell status checks, validators, queue checks, and repo checks."
 
 Write-Section -Title "Exact Next Safe Action"
