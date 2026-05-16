@@ -1,0 +1,173 @@
+{
+  "purpose": "Map visible AI_OS worker windows to existing backend repo subsystems without restructuring folders.",
+  "rules": {
+    "visible_windows_are_operator_lanes": true,
+    "folders_are_backend_subsystems": true,
+    "do_not_move_folders": true,
+    "do_not_rename_folders": true,
+    "do_not_restructure_yet": true,
+    "use_mapping_first": true,
+    "consolidation_later_only_after_evidence": true
+  },
+  "workers": [
+    {
+      "marker": "AI_OS MAIN CONTROL",
+      "role": "Primary operator lane for runtime and supervisor control.",
+      "owned_subsystems": [
+        "automation/orchestration/runtime",
+        "automation/orchestration/supervisor",
+        "automation/orchestration/mission_control",
+        "automation/runtime/state"
+      ],
+      "allowed_actions": [
+        "Run runtime spine commands",
+        "Run supervisor commands",
+        "Review runtime state",
+        "Coordinate final status and next safe action"
+      ],
+      "blocked_actions": [
+        "No live trading",
+        "No broker or OANDA work",
+        "No startup tasks",
+        "No scheduled tasks",
+        "No broad cleanup"
+      ],
+      "next_command_hint": ".\\aios.ps1 -Mode runtime"
+    },
+    {
+      "marker": "CODEX BUILD LANE",
+      "role": "Temporary implementation lane for approved scoped edits.",
+      "owned_subsystems": [
+        "approved scoped repo edits only",
+        "no permanent subsystem ownership"
+      ],
+      "allowed_actions": [
+        "Make approved scoped repo edits",
+        "Follow the prompt allowed paths",
+        "Run relevant local validation",
+        "Report changed files and git status"
+      ],
+      "blocked_actions": [
+        "No unapproved subsystem ownership",
+        "No dashboard edits unless explicitly scoped",
+        "No Trading Lab edits unless explicitly scoped",
+        "No protected root file edits unless explicitly approved",
+        "No git add ."
+      ],
+      "next_command_hint": "git status --short --branch"
+    },
+    {
+      "marker": "VALIDATOR WORKER",
+      "role": "Validation lane for health checks, blockers, and pass/fail evidence.",
+      "owned_subsystems": [
+        "automation/orchestration/validators",
+        "automation/orchestration/health",
+        "automation/orchestration/blockers"
+      ],
+      "allowed_actions": [
+        "Run validators",
+        "Run health checks",
+        "Inspect blockers",
+        "Report PASS, WARN, FAIL, UNKNOWN, MISMATCH, or INVALID DATA"
+      ],
+      "blocked_actions": [
+        "No file edits by default",
+        "No staging",
+        "No commits",
+        "No pushes",
+        "No live trading paths"
+      ],
+      "next_command_hint": "git diff --check"
+    },
+    {
+      "marker": "PACKET QUEUE",
+      "role": "Queue lane for work packet review, task flow, and command queue visibility.",
+      "owned_subsystems": [
+        "automation/orchestration/queue",
+        "automation/orchestration/work_packets",
+        "automation/orchestration/task_generator",
+        "automation/orchestration/command_queue"
+      ],
+      "allowed_actions": [
+        "Review active work packets",
+        "Review queue state",
+        "Prepare DRY_RUN packet recommendations",
+        "Track next task candidates"
+      ],
+      "blocked_actions": [
+        "No APPLY without approval",
+        "No folder restructuring",
+        "No destructive cleanup",
+        "No broker or live trading actions"
+      ],
+      "next_command_hint": "Get-ChildItem automation\\orchestration\\work_packets"
+    },
+    {
+      "marker": "APPROVAL INBOX",
+      "role": "Approval lane for user-controlled gates and approval processing.",
+      "owned_subsystems": [
+        "automation/orchestration/approvals",
+        "automation/orchestration/approval_inbox",
+        "automation/orchestration/approval_processor",
+        "automation/orchestration/approval_detection"
+      ],
+      "allowed_actions": [
+        "Review approval requests",
+        "Confirm exact APPLY scopes",
+        "Confirm exact git commands",
+        "Track stop conditions"
+      ],
+      "blocked_actions": [
+        "No silent APPLY",
+        "No implicit commit",
+        "No implicit push",
+        "No merge, delete, move, rename, reset, clean, auth, or credential changes without direct approval"
+      ],
+      "next_command_hint": "git status --short --branch"
+    },
+    {
+      "marker": "RECOVERY HEALTH",
+      "role": "Recovery lane for self-heal, health review, and failed-state inspection.",
+      "owned_subsystems": [
+        "automation/orchestration/recovery",
+        "automation/orchestration/self_heal",
+        "automation/orchestration/health"
+      ],
+      "allowed_actions": [
+        "Review recovery state",
+        "Run health checks",
+        "Capture exact errors",
+        "Classify UNKNOWN, MISMATCH, or INVALID DATA"
+      ],
+      "blocked_actions": [
+        "No destructive repair",
+        "No credential changes",
+        "No startup or scheduled task changes",
+        "No live trading paths"
+      ],
+      "next_command_hint": "git status --short --branch"
+    },
+    {
+      "marker": "STANDBY WORKER",
+      "role": "Idle lane waiting for assignment.",
+      "owned_subsystems": [
+        "no active subsystem",
+        "waits for assignment",
+        "can become validator, packet queue, or recovery lane later"
+      ],
+      "allowed_actions": [
+        "Wait for a scoped task",
+        "Run read-only status checks when assigned",
+        "Switch to validator, packet queue, or recovery lane after explicit assignment"
+      ],
+      "blocked_actions": [
+        "No speculative edits",
+        "No autonomous cleanup",
+        "No staging",
+        "No commits",
+        "No pushes"
+      ],
+      "next_command_hint": "git status --short --branch"
+    }
+  ]
+}
