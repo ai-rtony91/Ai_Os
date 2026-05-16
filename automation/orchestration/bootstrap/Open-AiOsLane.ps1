@@ -45,12 +45,54 @@ function Get-LaneCommand {
     $laneJson = $Lane | ConvertTo-Json -Depth 8 -Compress
     $laneJsonBase64 = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($laneJson))
 
-    $command = "Set-Location -LiteralPath '$escapedPath'; & '$escapedIdentityScriptPath' -LaneJsonBase64 '$laneJsonBase64'; Write-Host 'Trust prompt path and Git branch, not stale terminal/tab title after cd.' -ForegroundColor Yellow; git status --short --branch"
+    $command = "Set-Location -LiteralPath '$escapedPath'; . '$escapedIdentityScriptPath' -LaneJsonBase64 '$laneJsonBase64'; git status --short --branch"
     if (Test-CodexLane -Lane $Lane) {
         $command += "; Write-Host 'Manual Codex lane needed: $escapedDisplayTitle' -ForegroundColor Yellow; Write-Host 'Command: cd $escapedPath; codex'"
     }
 
     return $command
+}
+
+function Get-EncodedLaneCommand {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$IdentityScriptPath
+    )
+
+    $command = Get-LaneCommand -Lane $Lane -IdentityScriptPath $IdentityScriptPath
+    return [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($command))
+}
+
+function ConvertTo-ProcessArgument {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    return '"' + $Value.Replace('"', '\"') + '"'
+}
+
+function Get-WtArgumentList {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$IdentityScriptPath
+    )
+
+    $encodedPayload = Get-EncodedLaneCommand -Lane $Lane -IdentityScriptPath $IdentityScriptPath
+    $arguments = @(
+        "-w",
+        "0",
+        "new-tab",
+        "--title",
+        [string]$Lane.tab_title,
+        "-d",
+        [string]$Lane.path,
+        "powershell.exe",
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        $encodedPayload
+    )
+
+    return (@($arguments) | ForEach-Object { ConvertTo-ProcessArgument -Value $_ }) -join " "
 }
 
 function Test-CodexLane {
@@ -81,19 +123,7 @@ function Open-LaneTab {
         [Parameter(Mandatory = $true)][string]$IdentityScriptPath
     )
 
-    Start-Process -FilePath "wt.exe" -ArgumentList @(
-        "-w",
-        "0",
-        "new-tab",
-        "--title",
-        $Lane.tab_title,
-        "powershell.exe",
-        "-NoExit",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-Command",
-        (Get-LaneCommand -Lane $Lane -IdentityScriptPath $IdentityScriptPath)
-    )
+    Start-Process -FilePath "wt.exe" -ArgumentList (Get-WtArgumentList -Lane $Lane -IdentityScriptPath $IdentityScriptPath)
 }
 
 if ($Preview -and $LaunchManualShells) {
