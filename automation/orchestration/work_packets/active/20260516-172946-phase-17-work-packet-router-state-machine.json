@@ -6,10 +6,10 @@
     "assigned_worker":  "codex_worker_1",
     "repo":  "ai-rtony91_Ai_Os_CLEAN",
     "branch":  "phase-17-work-packet-router-state-machine",
-    "status":  "dry_run_done",
+    "status":  "awaiting_approval",
     "priority":  "normal",
     "created_utc":  "2026-05-16T17:29:46Z",
-    "updated_utc":  "2026-05-16T17:42:45Z",
+    "updated_utc":  "2026-05-16T18:02:07Z",
     "validator":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "next_action":  "Build Move-AiOsPacketState.ps1 lifecycle engine.",
     "blocked_by":  [
@@ -37,6 +37,13 @@
                         "to_state":  "dry_run_done",
                         "utc":  "2026-05-16T17:42:45Z",
                         "worker":  "human_operator",
+                        "apply":  true
+                    },
+                    {
+                        "from_state":  "dry_run_done",
+                        "to_state":  "awaiting_approval",
+                        "utc":  "2026-05-16T18:02:07Z",
+                        "worker":  "supervisor_loop",
                         "apply":  true
                     }
                 ]
