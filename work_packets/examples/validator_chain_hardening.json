@@ -1,0 +1,61 @@
+{
+  "id": "AIOS-WP-VALIDATOR-CHAIN-HARDENING-001",
+  "version": "1.0",
+  "title": "Validator Chain Hardening",
+  "lane": "validation",
+  "mode": "DRY_RUN",
+  "status": "READY_FOR_DRY_RUN",
+  "objective": "Improve visibility into dry-run validator coverage, required validator commands, and blocked safety conditions without destructive actions.",
+  "allowed_actions": [
+    "inspect existing validator scripts",
+    "map validator inputs and outputs",
+    "identify missing dry-run visibility",
+    "propose scoped validator improvements",
+    "run read-only validators"
+  ],
+  "blocked_actions": [
+    "destructive file operation",
+    "automatic APPLY",
+    "commit",
+    "push",
+    "new branch",
+    "scheduled task",
+    "startup task",
+    "extra window",
+    "Codex auto-launch",
+    "credential access",
+    "secret access",
+    "broker connection",
+    "OANDA integration",
+    "API key use",
+    "webhook execution",
+    "real order",
+    "live trading"
+  ],
+  "files_in_scope": [
+    "automation/validators",
+    "automation/operator",
+    "automation/orchestration/validators",
+    "scripts/validation",
+    "apps/dashboard/mock-data/aios-validator-chain-v1.example.json"
+  ],
+  "validators": [
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsMissionJson.DRY_RUN.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "risks": [
+    "validator names are spread across automation folders",
+    "some validators may be planning-only and not part of a single chain",
+    "hardening must not convert DRY_RUN checks into APPLY behavior"
+  ],
+  "stop_condition": "Stop after producing a validator-chain hardening recommendation and command list. Do not create destructive or write-enabled validator behavior without separate APPLY approval.",
+  "approval_required": true,
+  "created_by": "Codex",
+  "notes": [
+    "This packet targets validator visibility only.",
+    "Validator actions must remain local and read-only unless separately approved.",
+    "No live trading or broker path may be added."
+  ]
+}

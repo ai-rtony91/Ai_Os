@@ -1,0 +1,60 @@
+{
+  "id": "AIOS-WP-TRADING-LAB-LATENCY-001",
+  "version": "1.0",
+  "title": "Trading Lab Latency Observability",
+  "lane": "trading_lab_latency",
+  "mode": "DRY_RUN",
+  "status": "READY_FOR_DRY_RUN",
+  "objective": "Inspect and improve paper-only Trading Lab latency observability without broker, OANDA, API, webhook, real order, or live trading behavior.",
+  "allowed_actions": [
+    "inspect paper-only latency fixtures",
+    "inspect paper-only latency validators",
+    "map latency evidence paths",
+    "propose telemetry-only improvements",
+    "run read-only validators"
+  ],
+  "blocked_actions": [
+    "broker connection",
+    "OANDA integration",
+    "API key use",
+    "webhook execution",
+    "real order",
+    "live trading",
+    "automatic APPLY",
+    "commit",
+    "push",
+    "new branch",
+    "scheduled task",
+    "startup task",
+    "extra window",
+    "Codex auto-launch"
+  ],
+  "files_in_scope": [
+    "apps/dashboard/mock-data/latency-ledger-v1.example.json",
+    "apps/dashboard/mock-data/phase-25-latency-measurement-core.example.json",
+    "apps/dashboard/mock-data/trading-lab-latency-replay.example.json",
+    "automation/trading_lab/Test-AiOsTradingLabLatencyReplay.DRY_RUN.ps1",
+    "automation/trading_lab/Test-AiOsTradingLabPhase25LatencyMeasurementCore.DRY_RUN.ps1",
+    "docs/AI_OS/trading_laboratory/latency"
+  ],
+  "validators": [
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsMissionJson.DRY_RUN.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/trading_lab/Test-AiOsTradingLabLatencyReplay.DRY_RUN.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/trading_lab/Test-AiOsTradingLabPhase25LatencyMeasurementCore.DRY_RUN.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "risks": [
+    "latency language could be mistaken for execution readiness",
+    "paper-only fixtures must remain disconnected from broker or webhook paths",
+    "telemetry changes must not collect secrets"
+  ],
+  "stop_condition": "Stop after latency observability recommendations and validator output. Do not connect broker, OANDA, API, webhook, real order, or live trading paths.",
+  "approval_required": true,
+  "created_by": "Codex",
+  "notes": [
+    "Paper-only Trading Lab workload.",
+    "Latency observability only.",
+    "No execution path is enabled."
+  ]
+}

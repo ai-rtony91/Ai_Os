@@ -1,0 +1,115 @@
+{
+  "queue_id": "AIOS-PHASE2-QUEUE-EXAMPLE",
+  "version": "1.0",
+  "created_at": "2026-05-16T00:00:00-04:00",
+  "updated_at": "2026-05-16T00:00:00-04:00",
+  "mode": "DRY_RUN",
+  "queue_status": "pending",
+  "packets": [
+    {
+      "packet_id": "trading_lab_latency",
+      "source_file": "work_packets/examples/trading_lab_latency.json",
+      "title": "Trading Lab Latency Observability",
+      "lane": "validation",
+      "status": "pending",
+      "priority": 1,
+      "approval_state": "requested",
+      "validator_state": "not_run",
+      "assigned_worker": "validation_lane",
+      "blocked_reason": "",
+      "next_action": "Run read-only packet validation and report latency fixture readiness."
+    },
+    {
+      "packet_id": "dashboard_orchestration_cleanup",
+      "source_file": "work_packets/examples/dashboard_orchestration_cleanup.json",
+      "title": "Dashboard Orchestration Cleanup",
+      "lane": "dashboard",
+      "status": "pending",
+      "priority": 2,
+      "approval_state": "not_requested",
+      "validator_state": "not_run",
+      "assigned_worker": "dashboard_lane",
+      "blocked_reason": "",
+      "next_action": "Prepare a display fixture cleanup plan before any UI work."
+    },
+    {
+      "packet_id": "validator_chain_hardening",
+      "source_file": "work_packets/examples/validator_chain_hardening.json",
+      "title": "Validator Chain Hardening",
+      "lane": "validation",
+      "status": "approved",
+      "priority": 3,
+      "approval_state": "approved",
+      "validator_state": "warning",
+      "assigned_worker": "validation_lane",
+      "blocked_reason": "",
+      "next_action": "Dispatch to validation lane for DRY_RUN command coverage review."
+    },
+    {
+      "packet_id": "worker_registry_consolidation",
+      "source_file": "work_packets/examples/worker_registry_consolidation.json",
+      "title": "Worker Registry Consolidation",
+      "lane": "operator_review",
+      "status": "blocked",
+      "priority": 4,
+      "approval_state": "requested",
+      "validator_state": "not_run",
+      "assigned_worker": "operator_review_lane",
+      "blocked_reason": "Needs operator review before worker registry routing changes.",
+      "next_action": "Confirm registry consolidation scope before assignment."
+    }
+  ],
+  "lanes": [
+    {
+      "lane": "main_control",
+      "role": "Operator command and git control",
+      "status": "idle",
+      "current_packet": ""
+    },
+    {
+      "lane": "build_engine",
+      "role": "Scoped APPLY implementation",
+      "status": "idle",
+      "current_packet": ""
+    },
+    {
+      "lane": "validation",
+      "role": "Read-only validators and status checks",
+      "status": "ready",
+      "current_packet": "validator_chain_hardening"
+    },
+    {
+      "lane": "docs",
+      "role": "Documentation updates",
+      "status": "idle",
+      "current_packet": ""
+    },
+    {
+      "lane": "dashboard",
+      "role": "Display fixture review",
+      "status": "idle",
+      "current_packet": ""
+    },
+    {
+      "lane": "operator_review",
+      "role": "Approval gate and stop decision",
+      "status": "blocked",
+      "current_packet": "worker_registry_consolidation"
+    }
+  ],
+  "approvals": {
+    "operator_gate_required": true,
+    "apply_requires_explicit_approval": true,
+    "commit_requires_explicit_approval": true,
+    "push_requires_explicit_approval": true
+  },
+  "validators": [
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsMissionJson.DRY_RUN.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsQueueDispatcher.DRY_RUN.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Invoke-AiOsPacketDispatcher.ps1 -QueuePath work_packets/queues/aios_phase2_queue.example.json -Explain",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "next_action": "Run queue dispatcher in DRY_RUN mode and review the printed dispatch plan.",
+  "stop_condition": "Stop after dispatch plan, validator output, git status, and diff stat are reported."
+}

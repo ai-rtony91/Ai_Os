@@ -1,0 +1,63 @@
+{
+  "id": "AIOS-WP-WORKER-REGISTRY-CONSOLIDATION-001",
+  "version": "1.0",
+  "title": "Worker Registry Consolidation",
+  "lane": "operator_orchestration",
+  "mode": "DRY_RUN",
+  "status": "READY_FOR_DRY_RUN",
+  "objective": "Map the worker registry and worker queues to the canonical work packet contract without launching new workers or changing worker startup behavior.",
+  "allowed_actions": [
+    "inspect worker registry fixtures",
+    "map worker lanes to work packet fields",
+    "identify duplicated worker queue fields",
+    "propose a consolidation path",
+    "run read-only validators"
+  ],
+  "blocked_actions": [
+    "new worker auto-launch",
+    "Codex auto-launch",
+    "worker process start",
+    "scheduled task",
+    "startup task",
+    "extra window",
+    "automatic APPLY",
+    "commit",
+    "push",
+    "new branch",
+    "credential access",
+    "secret access",
+    "broker connection",
+    "OANDA integration",
+    "API key use",
+    "webhook execution",
+    "real order",
+    "live trading"
+  ],
+  "files_in_scope": [
+    "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+    "automation/operator/AIOS_CONTROLLED_APPLY_QUEUE.example.json",
+    "apps/dashboard/mock-data/aios-worker-registry-v1.example.json",
+    "apps/dashboard/mock-data/aios-worker-queue-v1.example.json",
+    "automation/orchestration/worker_registry.v1.example.json",
+    "automation/orchestration/worker_registry.example.json"
+  ],
+  "validators": [
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsMissionJson.DRY_RUN.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "risks": [
+    "registry and dashboard worker fixtures may use different naming conventions",
+    "worker launch fields must remain inert",
+    "consolidation must preserve APPLY serial gating"
+  ],
+  "stop_condition": "Stop after producing a registry-to-packet mapping and no-launch consolidation recommendation. Do not launch workers or change startup behavior.",
+  "approval_required": true,
+  "created_by": "Codex",
+  "notes": [
+    "This packet is registry mapping only.",
+    "No worker launch is permitted.",
+    "APPLY remains serial and operator-approved."
+  ]
+}
