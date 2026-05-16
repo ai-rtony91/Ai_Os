@@ -1,0 +1,97 @@
+{
+  "schema": "AIOS_SUPERVISOR_ASSIGNMENT_PLAN.v1",
+  "mode": "DRY_RUN_ONLY",
+  "goal": "Create the supervisor layer that turns a work goal into assigned workers, packets, lanes, validators, and next actions.",
+  "workers_needed": [
+    {
+      "worker_id": "SUPERVISOR-PLANNER",
+      "lane": "main_control",
+      "does": "Breaks the work goal into packet previews, lane needs, validator routes, approval gates, and next safe actions.",
+      "files_in_scope": [
+        "automation/orchestration/supervisor",
+        "docs/AI_OS/orchestration",
+        "work_packets"
+      ],
+      "validator_runs": [
+        "git diff --check",
+        "git status --short"
+      ],
+      "approval_required": "Human review before APPLY, commit, push, PR creation, or worker launch."
+    },
+    {
+      "worker_id": "PACKET-AUTHOR",
+      "lane": "dispatch_queue",
+      "does": "Creates work-packet previews with objective, allowed paths, blocked actions, validators, risks, and stop conditions.",
+      "files_in_scope": [
+        "work_packets/examples",
+        "work_packets/queues",
+        "automation/orchestration/queue"
+      ],
+      "validator_runs": [
+        "JSON parse validation",
+        "git diff --check"
+      ],
+      "approval_required": "Human approval before moving a packet preview into any active queue."
+    },
+    {
+      "worker_id": "LANE-ROUTER",
+      "lane": "state_monitor",
+      "does": "Detects required lanes from packet scope and flags missing, ambiguous, or conflicting lanes.",
+      "files_in_scope": [
+        "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
+        "automation/orchestration/bootstrap",
+        "docs/AI_OS/orchestration/AIOS_WORKTREE_LANES.md"
+      ],
+      "validator_runs": [
+        "Lane registry JSON parse validation",
+        "git diff --check"
+      ],
+      "approval_required": "Human approval before opening lane shells or assigning workers."
+    },
+    {
+      "worker_id": "VALIDATOR-ROUTER",
+      "lane": "validation_audit",
+      "does": "Maps packet scope to read-only validators and reports PASS, WARN, or FAIL.",
+      "files_in_scope": [
+        "automation/orchestration/validators",
+        "scripts/validation",
+        "work_packets/schema.json"
+      ],
+      "validator_runs": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1",
+        "git diff --check"
+      ],
+      "approval_required": "Validator PASS does not approve APPLY, commit, push, or PR creation."
+    },
+    {
+      "worker_id": "GATEKEEPER",
+      "lane": "main_control",
+      "does": "Routes approval gates and produces commit or PR package previews without staging or publishing.",
+      "files_in_scope": [
+        "automation/orchestration/approval_inbox",
+        "automation/orchestration/commit_packages",
+        "Reports/dispatcher/runtime/commit_packages"
+      ],
+      "validator_runs": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-ApplyApprovalGate.DRY_RUN.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-CommitPackageManifest.DRY_RUN.ps1",
+        "git status --short"
+      ],
+      "approval_required": "Separate human approval required for APPLY, git add exact files, commit, push, and PR creation."
+    }
+  ],
+  "packet_creation_preview": {
+    "status": "PREVIEW_ONLY",
+    "target": "work_packets/examples/supervisor_worker_assignment_system.json",
+    "queue_mutation": "BLOCKED_UNTIL_APPROVED",
+    "required_stop_condition": "Stop after preview, validation, git status, and next safe action are reported."
+  },
+  "approval_gate_routing": {
+    "dry_run": "allowed",
+    "apply": "requires exact file approval",
+    "commit": "requires exact-file package and explicit commit approval",
+    "push": "requires explicit push approval",
+    "pull_request": "requires explicit PR creation approval"
+  },
+  "next_safe_action": "Run the DRY_RUN planner script and review the printed assignment plan."
+}
