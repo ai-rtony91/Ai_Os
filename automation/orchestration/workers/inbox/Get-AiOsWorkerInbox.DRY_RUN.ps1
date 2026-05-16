@@ -1,5 +1,7 @@
 ﻿param(
-    [string]$WorkerId = ""
+    [string]$WorkerId = "",
+    [ValidateSet("all","open","complete","inbox","claimed","running","failed")]
+    [string]$View = "open"
 )
 
 Set-StrictMode -Off
@@ -14,8 +16,17 @@ if (-not [string]::IsNullOrWhiteSpace($WorkerId)) {
     $items = @($items | Where-Object { $_.worker_id -eq $WorkerId })
 }
 
+if ($View -eq "open") {
+    $items = @($items | Where-Object { $_.status -ne "complete" -and $_.status -ne "failed" })
+}
+elseif ($View -ne "all") {
+    $items = @($items | Where-Object { $_.status -eq $View })
+}
+
 Write-Host "COPY START - Get-AiOsWorkerInbox.DRY_RUN.ps1"
 Write-Host "AI_OS Worker Inbox" -ForegroundColor Cyan
+Write-Host "view: $View"
+Write-Host "worker_id: $WorkerId"
 Write-Host "items: $($items.Count)"
 
 foreach ($item in $items) {
@@ -26,6 +37,9 @@ foreach ($item in $items) {
     Write-Host "status: $($item.status)"
     Write-Host "task: $($item.task)"
     Write-Host "reason: $($item.reason)"
+    if ($item.PSObject.Properties.Name -contains "state_note") {
+        Write-Host "state_note: $($item.state_note)"
+    }
 }
 
 Write-Host "Commit performed: NO"
