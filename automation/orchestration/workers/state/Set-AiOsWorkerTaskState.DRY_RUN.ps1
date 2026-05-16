@@ -46,8 +46,14 @@ if ($Apply) {
     foreach ($entry in $items) {
         if ($entry.id -eq $ItemId) {
             $entry.status = $State
-            $entry.state_note = $Note
-            $entry.updated_utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+            if ($entry.PSObject.Properties.Name -notcontains "state_note") {
+    $entry | Add-Member -NotePropertyName state_note -NotePropertyValue ""
+}
+$entry.state_note = $Note
+            if ($entry.PSObject.Properties.Name -notcontains "updated_utc") {
+    $entry | Add-Member -NotePropertyName updated_utc -NotePropertyValue ""
+}
+$entry.updated_utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
         }
     }
 
@@ -62,3 +68,4 @@ if ($Apply) {
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
 Write-Host "COPY END - Set-AiOsWorkerTaskState.DRY_RUN.ps1"
+
