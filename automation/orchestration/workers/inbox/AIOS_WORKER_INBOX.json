@@ -1,0 +1,15 @@
+﻿{
+    "inbox_id":  "AIOS_WORKER_INBOX",
+    "version":  "1.0",
+    "items":  [
+                  {
+                      "id":  "20260516T193330Z",
+                      "worker_id":  "task_generator",
+                      "worker_type":  "task_generation",
+                      "task":  "Review command queue and create next work packet if needed.",
+                      "reason":  "Connect queue to worker inbox",
+                      "status":  "inbox",
+                      "created_utc":  "2026-05-16T19:33:30Z"
+                  }
+              ]
+}
