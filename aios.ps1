@@ -1,6 +1,7 @@
 ﻿param(
-    [ValidateSet("help","daily","swarm","status","resume","workers")]
-    [string]$Mode = "help"
+    [ValidateSet("help","daily","swarm","status","resume","workers","runtime")]
+    [string]$Mode = "help",
+    [string]$Goal = "Build next AIOS runtime loop step"
 )
 
 Set-StrictMode -Off
@@ -18,6 +19,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode resume   # resume last session"
         Write-Host ".\aios.ps1 -Mode workers  # show worker list and inbox"
         Write-Host ".\aios.ps1 -Mode swarm    # launch worker swarm"
+        Write-Host ".\aios.ps1 -Mode runtime  # run goal intake + recommendation + health"
     }
 
     "daily" {
@@ -42,6 +44,11 @@ switch ($Mode) {
         powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/Get-AiOsWorkerRegistry.DRY_RUN.ps1
         powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1
     }
+
+    "runtime" {
+        powershell -ExecutionPolicy Bypass -File automation/intake/Start-AiOsRuntimeLoop.ps1 -Goal $Goal -Apply
+    }
 }
 
 Write-Host "AIOS SHORTCUT END" -ForegroundColor Green
+
