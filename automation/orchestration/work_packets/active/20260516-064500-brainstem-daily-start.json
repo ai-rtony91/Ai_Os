@@ -1,0 +1,24 @@
+{
+  "packet_id": "brainstem-daily-start",
+  "title": "Brainstem Daily Start Route",
+  "intent": "connect rulebook intent router supervisor and daily start",
+  "owner_lane": "rulebook_codex",
+  "assigned_worker": "codex_worker_1",
+  "repo": "aios-worker-brainstem",
+  "branch": "phase-brainstem-daily-start",
+  "status": "active",
+  "priority": "normal",
+  "created_utc": "2026-05-16T06:45:00Z",
+  "updated_utc": "2026-05-16T06:45:00Z",
+  "validator": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
+  "next_action": "Validate packet routing preview.",
+  "blocked_by": [],
+  "related_files": [
+    "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
+    "automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1"
+  ],
+  "related_packets": [],
+  "notes": [
+    "Example active packet."
+  ]
+}

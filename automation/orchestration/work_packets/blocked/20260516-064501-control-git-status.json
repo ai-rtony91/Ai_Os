@@ -1,0 +1,25 @@
+{
+  "packet_id": "control-git-status",
+  "title": "CONTROL Git Status Visibility",
+  "intent": "make control status visible when shell permissions allow",
+  "owner_lane": "main_control",
+  "assigned_worker": "",
+  "repo": "ai-rtony91_Ai_Os_CLEAN",
+  "branch": "main",
+  "status": "blocked",
+  "priority": "normal",
+  "created_utc": "2026-05-16T06:45:01Z",
+  "updated_utc": "2026-05-16T06:45:01Z",
+  "validator": "git status --short --branch",
+  "next_action": "Run git status from the human-owned CONTROL shell.",
+  "blocked_by": [
+    "Sandbox Git ownership boundary"
+  ],
+  "related_files": [
+    "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json"
+  ],
+  "related_packets": [],
+  "notes": [
+    "Example blocked packet."
+  ]
+}

@@ -42,6 +42,11 @@ COPY END
 - No scheduled/startup tasks.
 - No broker/API/live trading.
 
+## Brainstem Edit Rules
+
+- Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.
+- Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work.
+
 ## Rulebook Lane Identity
 
 ```text

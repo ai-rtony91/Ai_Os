@@ -1,0 +1,19 @@
+{
+  "packet_id": "",
+  "title": "",
+  "intent": "",
+  "owner_lane": "",
+  "assigned_worker": "",
+  "repo": "",
+  "branch": "",
+  "status": "active",
+  "priority": "normal",
+  "created_utc": "",
+  "updated_utc": "",
+  "validator": "",
+  "next_action": "",
+  "blocked_by": [],
+  "related_files": [],
+  "related_packets": [],
+  "notes": []
+}
