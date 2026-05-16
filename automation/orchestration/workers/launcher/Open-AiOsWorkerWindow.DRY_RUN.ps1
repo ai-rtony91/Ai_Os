@@ -22,7 +22,7 @@ if ($null -eq $worker) {
 $title = "AIOS WORKER - $WorkerId"
 $repoPath = (Get-Location).Path
 
-$workerCommand = "cd `"$repoPath`"; Write-Host 'AIOS WORKER READY: $WorkerId'; Write-Host 'Type: $($worker.type)'; Write-Host 'Purpose: $($worker.purpose)'; powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1 -WorkerId $WorkerId"
+$workerCommand = "Set-Location -LiteralPath `"$repoPath`"; Write-Host 'AIOS WORKER READY: $WorkerId'; Write-Host 'Type: $($worker.type)'; Write-Host 'Purpose: $($worker.purpose)'; powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1 -WorkerId $WorkerId"
 
 Write-Host "COPY START - Open-AiOsWorkerWindow.DRY_RUN.ps1"
 Write-Host "AI_OS Worker Window Launcher" -ForegroundColor Cyan
@@ -45,3 +45,4 @@ if ($Apply) {
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
 Write-Host "COPY END - Open-AiOsWorkerWindow.DRY_RUN.ps1"
+
