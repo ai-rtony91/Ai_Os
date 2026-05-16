@@ -34,6 +34,34 @@ function Write-LaneReport {
     Write-Host ""
 }
 
+function Get-LaneKind {
+    param([Parameter(Mandatory = $true)]$Lane)
+
+    return ([string]$Lane.display_title).Split([char]0x00b7)[0].Trim()
+}
+
+function Write-OperatorInstructionBlock {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$ExactNextCommand
+    )
+
+    Write-Host ""
+    Write-Host "== WHERE TO RUN NEXT ==" -ForegroundColor Yellow
+    Write-Host "Visible tab/window: $($Lane.tab_title)"
+    if (Test-CodexLane -Lane $Lane) {
+        Write-Host "Related Codex worker: Use Codex tab at $($Lane.path)"
+    } elseif ($ExactNextCommand -match "\bgit\s+(add|commit|push)\b" -or $Lane.lane_id -eq "save_git") {
+        Write-Host "Related Codex worker: Use Git/PowerShell tab tied to $($Lane.display_title)"
+    } else {
+        Write-Host "Related Codex worker: $($Lane.display_title)"
+    }
+    Write-Host "Required path: $($Lane.path)"
+    Write-Host "Required branch: $($Lane.branch)"
+    Write-Host "Role: $(Get-LaneKind -Lane $Lane) - $($Lane.role)"
+    Write-Host "Exact next command: $ExactNextCommand"
+}
+
 function Get-LaneCommand {
     param(
         [Parameter(Mandatory = $true)]$Lane,
@@ -165,15 +193,25 @@ if (-not (Test-Path -LiteralPath $identityScriptPath -PathType Leaf)) {
 $registry = Get-Content -LiteralPath $fullRegistryPath -Raw | ConvertFrom-Json
 $checkpoint = Get-Content -LiteralPath $fullCheckpointPath -Raw | ConvertFrom-Json
 
-$restorableLanes = @()
+$checkpointLaneIds = @()
 foreach ($checkpointLane in @($checkpoint.lanes)) {
+    if ($checkpointLaneIds -contains $checkpointLane.lane_id) {
+        continue
+    }
+    $checkpointLaneIds += $checkpointLane.lane_id
     $lane = Get-RegistryLaneById -Registry $registry -LaneId $checkpointLane.lane_id
     if ($null -eq $lane) {
         throw "Checkpoint references lane_id not found in registry: $($checkpointLane.lane_id)"
     }
-    $restorableLanes += $lane
 }
-$restorableLanes = @($restorableLanes | Where-Object { $_.lane_id -eq "main_control" }) + @($restorableLanes | Where-Object { $_.lane_id -ne "main_control" })
+if ($checkpointLaneIds -notcontains "main_control") {
+    throw "Checkpoint must include main_control so CONTROL opens first."
+}
+
+$restorableLanes = @($registry.lanes | Where-Object { $checkpointLaneIds -contains $_.lane_id })
+if (@($restorableLanes).Count -lt 1 -or @($restorableLanes)[0].lane_id -ne "main_control") {
+    throw "Resolved checkpoint lanes must open CONTROL first."
+}
 
 Write-Host ("COPY START " + [char]0x2014 + " $scriptName")
 Write-Host "AI_OS Workspace Checkpoint Restore" -ForegroundColor Cyan
@@ -192,6 +230,15 @@ Write-Host ""
 Write-Host "== Would Reopen ==" -ForegroundColor Yellow
 foreach ($lane in @($restorableLanes)) {
     Write-LaneReport -Lane $lane
+}
+
+Write-Host "== Tab Launch Preview ==" -ForegroundColor Yellow
+foreach ($lane in @($restorableLanes | Select-Object -First $MaxWindows)) {
+    Write-Host "lane_id: $($lane.lane_id)" -ForegroundColor Cyan
+    Write-Host "tab_title: $($lane.tab_title)"
+    Write-Host "starting_directory: $($lane.path)"
+    Write-Host "command: wt.exe `"-w`" `"0`" `"new-tab`" `"--title`" `"$($lane.tab_title)`" `"-d`" `"$($lane.path)`" `"powershell.exe`" `"-NoExit`" `"-ExecutionPolicy`" `"Bypass`" `"-EncodedCommand`" `"<base64 UTF-16LE lane payload>`""
+    Write-Host ""
 }
 
 Write-Host "== Manual Codex Instructions ==" -ForegroundColor Yellow
@@ -220,6 +267,21 @@ Write-Host "Pending workorders:"
 }
 Write-Host "Last validator status: $($checkpoint.last_validator_status)"
 Write-Host "Next safe action: $($checkpoint.next_safe_action)"
+
+$instructionLane = @($restorableLanes | Where-Object { Test-CodexLane -Lane $_ } | Select-Object -First 1)
+if ($instructionLane.Count -eq 0) {
+    $instructionLane = @($restorableLanes | Where-Object { $_.lane_id -eq "save_git" } | Select-Object -First 1)
+}
+if ($instructionLane.Count -eq 0) {
+    $instructionLane = @($restorableLanes | Select-Object -First 1)
+}
+
+if (Test-CodexLane -Lane $instructionLane[0]) {
+    $exactNextCommand = "cd $($instructionLane[0].path); codex"
+} else {
+    $exactNextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsWorkspaceCheckpoint.ps1 -LaunchManualShells -MaxWindows $MaxWindows"
+}
+Write-OperatorInstructionBlock -Lane $instructionLane[0] -ExactNextCommand $exactNextCommand
 
 if ($isPreview) {
     Write-Host ""

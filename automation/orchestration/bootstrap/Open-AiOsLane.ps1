@@ -33,6 +33,34 @@ function Write-LaneReport {
     Write-Host ""
 }
 
+function Get-LaneKind {
+    param([Parameter(Mandatory = $true)]$Lane)
+
+    return ([string]$Lane.display_title).Split([char]0x00b7)[0].Trim()
+}
+
+function Write-OperatorInstructionBlock {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$ExactNextCommand
+    )
+
+    Write-Host ""
+    Write-Host "== WHERE TO RUN NEXT ==" -ForegroundColor Yellow
+    Write-Host "Visible tab/window: $($Lane.tab_title)"
+    if (Test-CodexLane -Lane $Lane) {
+        Write-Host "Related Codex worker: Use Codex tab at $($Lane.path)"
+    } elseif ($ExactNextCommand -match "\bgit\s+(add|commit|push)\b" -or $Lane.lane_id -eq "save_git") {
+        Write-Host "Related Codex worker: Use Git/PowerShell tab tied to $($Lane.display_title)"
+    } else {
+        Write-Host "Related Codex worker: $($Lane.display_title)"
+    }
+    Write-Host "Required path: $($Lane.path)"
+    Write-Host "Required branch: $($Lane.branch)"
+    Write-Host "Role: $(Get-LaneKind -Lane $Lane) - $($Lane.role)"
+    Write-Host "Exact next command: $ExactNextCommand"
+}
+
 function Get-LaneCommand {
     param(
         [Parameter(Mandatory = $true)]$Lane,
@@ -187,6 +215,13 @@ if ($null -eq $selectedLane) {
 Write-Host ""
 Write-Host "== Selected Lane ==" -ForegroundColor Yellow
 Write-LaneReport -Lane $selectedLane
+
+if (Test-CodexLane -Lane $selectedLane) {
+    $exactNextCommand = "cd $($selectedLane.path); codex"
+} else {
+    $exactNextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId $($selectedLane.lane_id) -LaunchManualShells"
+}
+Write-OperatorInstructionBlock -Lane $selectedLane -ExactNextCommand $exactNextCommand
 
 if ($isPreview) {
     Write-Host "Preview complete. No tab opened." -ForegroundColor Green

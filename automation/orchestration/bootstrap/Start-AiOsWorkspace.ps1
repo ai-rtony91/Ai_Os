@@ -41,6 +41,33 @@ function Write-LaneReport {
     Write-Host ""
 }
 
+function Get-LaneKind {
+    param([Parameter(Mandatory = $true)]$Lane)
+
+    return ([string]$Lane.display_title).Split([char]0x00b7)[0].Trim()
+}
+
+function Write-OperatorInstructionBlock {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$ExactNextCommand
+    )
+
+    Write-AiOsSection -Title "WHERE TO RUN NEXT"
+    Write-Host "Visible tab/window: $($Lane.tab_title)"
+    if (Test-CodexLane -Lane $Lane) {
+        Write-Host "Related Codex worker: Use Codex tab at $($Lane.path)"
+    } elseif ($ExactNextCommand -match "\bgit\s+(add|commit|push)\b" -or $Lane.lane_id -eq "save_git") {
+        Write-Host "Related Codex worker: Use Git/PowerShell tab tied to $($Lane.display_title)"
+    } else {
+        Write-Host "Related Codex worker: $($Lane.display_title)"
+    }
+    Write-Host "Required path: $($Lane.path)"
+    Write-Host "Required branch: $($Lane.branch)"
+    Write-Host "Role: $(Get-LaneKind -Lane $Lane) - $($Lane.role)"
+    Write-Host "Exact next command: $ExactNextCommand"
+}
+
 function Get-LaneCommand {
     param(
         [Parameter(Mandatory = $true)]$Lane,
@@ -231,6 +258,21 @@ Write-AiOsSection -Title "Validators suggested"
 Write-AiOsSection -Title "Next safe action"
 Write-Host $intentResolution.next_safe_action
 
+$instructionLane = @($selectedLanes | Where-Object { $manualCodexLaneIds -contains $_.lane_id } | Select-Object -First 1)
+if ($instructionLane.Count -eq 0) {
+    $instructionLane = @($selectedLanes | Where-Object { $_.lane_id -eq "save_git" } | Select-Object -First 1)
+}
+if ($instructionLane.Count -eq 0) {
+    $instructionLane = @($selectedLanes | Select-Object -First 1)
+}
+
+if ((Test-CodexLane -Lane $instructionLane[0]) -and ($manualCodexLaneIds -contains $instructionLane[0].lane_id)) {
+    $exactNextCommand = "cd $($instructionLane[0].path); codex"
+} else {
+    $exactNextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -LaunchManualShells -Intent `"$Intent`" -MaxWindows $MaxWindows"
+}
+Write-OperatorInstructionBlock -Lane $instructionLane[0] -ExactNextCommand $exactNextCommand
+
 Write-AiOsSection -Title "Tab Launch Preview"
 foreach ($lane in @($selectedLanes | Select-Object -First $MaxWindows)) {
     Write-Host "lane_id: $($lane.lane_id)" -ForegroundColor Cyan
@@ -249,6 +291,8 @@ Write-Host "Preview one lane:"
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId save_git -Preview"
 Write-Host "Save session metadata:"
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsSession.ps1 -Apply"
+Write-Host "Save selected workspace checkpoint:"
+Write-Host '  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1 -Preview -Intent "<plain language work goal>"'
 Write-Host "Restore session preview:"
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1 -Preview"
 

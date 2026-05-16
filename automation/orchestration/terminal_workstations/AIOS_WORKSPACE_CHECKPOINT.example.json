@@ -19,17 +19,6 @@
                       "truth_source":  "path_and_branch"
                   },
                   {
-                      "lane_id":  "create_codex",
-                      "display_title":  "CREATE · codex",
-                      "window_title":  "CREATE · codex",
-                      "tab_title":  "CREATE · codex",
-                      "emoji_marker":  "🟨",
-                      "role":  "Manual Codex edit lane for approved changes.",
-                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-                      "branch":  "phase-bootstrap-workspace",
-                      "truth_source":  "path_and_branch"
-                  },
-                  {
                       "lane_id":  "save_git",
                       "display_title":  "SAVE · git",
                       "window_title":  "SAVE · git",
@@ -39,47 +28,14 @@
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
                       "branch":  "phase-bootstrap-workspace",
                       "truth_source":  "path_and_branch"
-                  },
-                  {
-                      "lane_id":  "route_dispatch",
-                      "display_title":  "ROUTE · dispatch",
-                      "window_title":  "ROUTE · dispatch",
-                      "tab_title":  "ROUTE · dispatch",
-                      "emoji_marker":  "🟧",
-                      "role":  "Queue, packet, and routing lane.",
-                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-                      "branch":  "phase-221-260-mission-json-dashboard-ready",
-                      "truth_source":  "path_and_branch"
-                  },
-                  {
-                      "lane_id":  "check_audit",
-                      "display_title":  "CHECK · audit",
-                      "window_title":  "CHECK · audit",
-                      "tab_title":  "CHECK · audit",
-                      "emoji_marker":  "🟪",
-                      "role":  "Validation and read-only audit lane.",
-                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
-                      "branch":  "phase-validation-cleanup",
-                      "truth_source":  "path_and_branch"
-                  },
-                  {
-                      "lane_id":  "watch_state",
-                      "display_title":  "WATCH · state",
-                      "window_title":  "WATCH · state",
-                      "tab_title":  "WATCH · state",
-                      "emoji_marker":  "⬜",
-                      "role":  "Progress and state monitor lane.",
-                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
-                      "branch":  "phase-3-stateful-orchestration",
-                      "truth_source":  "path_and_branch"
                   }
               ],
     "last_commands":  {
                           "workspace_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview",
                           "workspace_intent_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview -Intent \"\u003cplain language work goal\u003e\"",
                           "workspace_launch":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -LaunchManualShells -Intent \"\u003cplain language work goal\u003e\" -MaxWindows 3",
-                          "checkpoint_save_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Preview",
-                          "checkpoint_save_apply":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Apply",
+                          "checkpoint_save_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Preview -Intent \"\u003cplain language work goal\u003e\"",
+                          "checkpoint_save_apply":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Apply -Intent \"\u003cplain language work goal\u003e\"",
                           "checkpoint_restore_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Restore-AiOsWorkspaceCheckpoint.ps1 -Preview",
                           "validator":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
                       },

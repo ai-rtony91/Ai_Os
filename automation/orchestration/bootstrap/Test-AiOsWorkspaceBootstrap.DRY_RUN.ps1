@@ -104,10 +104,24 @@ function Assert-WtNewTabStartingDirectory {
     }
 }
 
+function Write-OperatorInstructionBlock {
+    param([Parameter(Mandatory = $true)]$Lane)
+
+    Write-Host ""
+    Write-Host "== WHERE TO RUN NEXT ==" -ForegroundColor Yellow
+    Write-Host "Visible tab/window: $($Lane.tab_title)"
+    Write-Host "Related Codex worker: $($Lane.display_title)"
+    Write-Host "Required path: $($Lane.path)"
+    Write-Host "Required branch: $($Lane.branch)"
+    Write-Host "Role: CONTROL - $($Lane.role)"
+    Write-Host 'Exact next command: powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview -Intent "workspace codex feature"'
+}
+
 $requiredFiles = @(
     "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
     "automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1",
     "automation/orchestration/bootstrap/Set-AiOsTerminalIdentity.ps1",
+    "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
     "automation/orchestration/bootstrap/Start-AiOsWorkspace.ps1",
     "automation/orchestration/bootstrap/Open-AiOsLane.ps1",
     "automation/orchestration/bootstrap/Save-AiOsSession.ps1",
@@ -189,6 +203,27 @@ if (@($registry.lanes)[0].lane_id -ne "main_control") {
 
 if (@($checkpointExample.lanes)[0].lane_id -ne "main_control") {
     throw "CONTROL lane must be leftmost in checkpoint example."
+}
+
+@(
+    "automation/orchestration/bootstrap/Start-AiOsWorkspace.ps1",
+    "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
+    "automation/orchestration/bootstrap/Open-AiOsLane.ps1",
+    "automation/orchestration/bootstrap/Save-AiOsWorkspaceCheckpoint.ps1",
+    "automation/orchestration/bootstrap/Restore-AiOsWorkspaceCheckpoint.ps1",
+    "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
+    "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md"
+) | ForEach-Object {
+    $operatorBlockPath = Resolve-AiOsPath -Path $_
+    $operatorBlockContent = Get-Content -LiteralPath $operatorBlockPath -Raw
+    if ($operatorBlockContent -notmatch "WHERE TO RUN NEXT") {
+        throw "Missing WHERE TO RUN NEXT operator block in $_"
+    }
+}
+
+$checkpointLaneIds = @($checkpointExample.lanes | ForEach-Object { $_.lane_id })
+if (($checkpointLaneIds | Select-Object -Unique).Count -ne $checkpointLaneIds.Count) {
+    throw "Checkpoint example must not contain duplicate lane_id values."
 }
 
 $requiredLaneIds = @(
@@ -368,6 +403,12 @@ Write-Host "== Checkpoint Lane Fields ==" -ForegroundColor Yellow
     Write-Host "PASS: $($lane.lane_id)"
 }
 
+Write-Host ""
+Write-Host "== Checkpoint Selected Lanes ==" -ForegroundColor Yellow
+@($checkpointExample.lanes) | ForEach-Object {
+    Write-Host "SELECTED: $($_.lane_id) - $($_.display_title)"
+}
+
 Write-Host "== Git Worktree List ==" -ForegroundColor Yellow
 git worktree list
 
@@ -396,6 +437,8 @@ powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Res
 
 Write-Host ""
 Write-Host "Workspace bootstrap DRY_RUN validation passed." -ForegroundColor Green
+$controlLane = @($registry.lanes | Where-Object { $_.lane_id -eq "main_control" } | Select-Object -First 1)
+Write-OperatorInstructionBlock -Lane $controlLane[0]
 Write-Host "Files staged: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"

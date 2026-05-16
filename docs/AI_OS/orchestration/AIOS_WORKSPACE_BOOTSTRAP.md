@@ -165,8 +165,42 @@ Intent preview output includes:
 - `Manual Codex instructions:`
 - `Validators suggested:`
 - `Next safe action:`
+- `WHERE TO RUN NEXT:`
+
+## Operator Context Block
+
+Bootstrap, lane open, checkpoint save, checkpoint restore, and validator output must print a clear operator context block so the operator does not need to remember which tab or worktree to use.
+
+Required block:
+
+```text
+WHERE TO RUN NEXT:
+- Visible tab/window:
+- Related Codex worker:
+- Required path:
+- Required branch:
+- Role:
+- Exact next command:
+```
+
+Rules for the block:
+
+- If the next action is Git-oriented, print `Use Git/PowerShell tab tied to <worker title>`.
+- If the next action is Codex editing, print `Use Codex tab at <path>`.
+- Always show the registry path and branch.
+- Always show whether the lane is `CONTROL`, `CREATE`, `SAVE`, `ROUTE`, `CHECK`, or `WATCH`.
+- Do not auto-launch Codex.
+- Do not commit or push from bootstrap output.
 
 ## Start Commands
+
+Preview the day bootstrap:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsDay.ps1 -Intent "build work packet state machine" -MaxTabs 3
+```
+
+`Start-AiOsDay.ps1` delegates tab launch behavior to `Start-AiOsWorkspace.ps1` so both entry points use the same safe Windows Terminal command structure.
 
 Preview workspace:
 
@@ -200,7 +234,7 @@ powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open
 
 ## Workspace Checkpoints
 
-Workspace checkpoints preserve the current lane identity model for tomorrow's restore flow.
+Workspace checkpoints preserve the selected lane identity model for tomorrow's restore flow. They do not create a separate workspace system; they save the lane IDs selected from the existing registry.
 
 Checkpoint example:
 
@@ -214,10 +248,24 @@ Checkpoint save preview:
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1 -Preview
 ```
 
+The default save selection uses the same fallback as workspace bootstrap: `CONTROL · main` and `SAVE · git`.
+
+Save an intent-selected checkpoint:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1 -Preview -Intent "workspace codex feature"
+```
+
+Save explicit lane IDs:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1 -Preview -LaneId main_control,check_audit
+```
+
 Checkpoint save apply:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1 -Apply
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1 -Apply -Intent "workspace codex feature"
 ```
 
 Checkpoint restore preview:
@@ -232,7 +280,7 @@ Checkpoint restore tab launch:
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsWorkspaceCheckpoint.ps1 -LaunchManualShells -MaxWindows 3
 ```
 
-Checkpoints store:
+Checkpoints store only selected lanes:
 
 - `checkpoint_id`
 - `created_at`
@@ -247,7 +295,15 @@ Checkpoints store:
 - `last_validator_status`
 - `next_safe_action`
 
-Restore resolves checkpoint `lane_id` values back through the locked registry and prints exactly what would reopen. Path and branch remain the operational truth source.
+Restore resolves checkpoint `lane_id` values back through the locked registry and prints exactly what would reopen. `CONTROL · main` must be present and opens first. `CREATE · codex`, `SAVE · git`, `CHECK · audit`, `ROUTE · dispatch`, and `WATCH · state` open only when their `lane_id` is present in the checkpoint.
+
+Restore uses Windows Terminal tabs with this command shape:
+
+```text
+wt.exe "-w" "0" "new-tab" "--title" "<lane.tab_title>" "-d" "<lane.path>" "powershell.exe" "-NoExit" "-ExecutionPolicy" "Bypass" "-EncodedCommand" "<base64 UTF-16LE lane payload>"
+```
+
+The encoded payload sets location to the registry path, applies terminal identity, runs `git status --short --branch`, and prints the manual Codex command for Codex lanes. It does not auto-launch Codex.
 
 ## Session Save And Restore
 
