@@ -6,9 +6,9 @@ Use `Start-AiOsWorkstation.ps1` first. It prints the startup banner, repo path, 
 
 ## Lanes
 
-- `AI_OS COMMAND DECK`: Magenta label. Git, GitHub CLI, issues, PRs, commits, merges.
-- `AI_OS BUILD ENGINE`: Green label. Codex work lane. Codex launch is manual only.
-- `AI_OS VALIDATION DECK`: Cyan label. PowerShell status checks, validators, queue checks, repo checks.
+- `Ai_Os COMMAND DECK`: Magenta label. Git, GitHub CLI, issues, PRs, commits, merges.
+- `Ai_Os BUILD ENGINE`: Green label. Codex work lane. Codex launch is manual only.
+- `Ai_Os VALIDATION DECK`: Cyan label. PowerShell status checks, validators, queue checks, repo checks.
 
 ## Launcher Rules
 
@@ -31,13 +31,15 @@ Paste terminal output between COPY START and COPY END when sending to ChatGPT.
 
 ## Color Rules
 
-- COMMAND DECK: Magenta border and title
-- BUILD ENGINE: Green border and title
-- VALIDATION DECK: Cyan border and title
-- COPY START / COPY END: Yellow border and marker text
+- COMMAND DECK: one long Magenta top border, two long Magenta bottom borders, and printed title `Ai_Os COMMAND DECK` with an emoji.
+- BUILD ENGINE: one long Green top border, two long Green bottom borders, and printed title `Ai_Os BUILD ENGINE` with an emoji.
+- VALIDATION DECK: one long Cyan top border, two long Cyan bottom borders, and printed title `Ai_Os VALIDATION DECK` with an emoji.
+- WORKSTATION MASTER: mixed Magenta, Green, Cyan, Yellow, and Red sections.
+- COPY START / COPY END: one Yellow line above, one Yellow line below, and Yellow marker text.
 - Blocked actions: Red
 - Allowed actions: Green
 - Repo, branch, and status: Cyan or Gray
+- Each deck prints: `LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW.`
 
 ## Blocked Actions
 

@@ -2,7 +2,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoPath = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
-$roleName = "AI_OS COMMAND DECK"
+$roleName = "Ai_Os COMMAND DECK"
+$border = "#" * 100
+$titleIcon = [char]::ConvertFromUtf32(0x1F7E3)
 
 if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
     throw "AI_OS repo path not found: $repoPath"
@@ -11,16 +13,23 @@ if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
 Set-Location -LiteralPath $repoPath
 $Host.UI.RawUI.WindowTitle = $roleName
 
-Write-Host "========================================" -ForegroundColor Magenta
-Write-Host $roleName -ForegroundColor Magenta
-Write-Host "Role: Main control window for Git, GitHub CLI, issues, PRs, commits, and merges" -ForegroundColor Cyan
+Write-Host $border -ForegroundColor Magenta
+Write-Host ""
+Write-Host "$titleIcon Ai_Os COMMAND DECK" -ForegroundColor Magenta
+Write-Host "LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Magenta
+Write-Host ""
+Write-Host "ROLE: Main control window for Git, GitHub CLI, issues, PRs, commits, and merges" -ForegroundColor Magenta
+Write-Host "MODE: Manual operator control only" -ForegroundColor Cyan
+Write-Host "STATUS: No Codex auto-launch, no scheduled tasks, no startup tasks" -ForegroundColor Cyan
 Write-Host "Repo: $repoPath" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Magenta
-Write-Host "========================================" -ForegroundColor Yellow
+Write-Host ""
+Write-Host $border -ForegroundColor Magenta
+Write-Host $border -ForegroundColor Magenta
+Write-Host $border -ForegroundColor Yellow
 Write-Host "=== COPY START ===" -ForegroundColor Yellow
-Write-Host "Paste terminal output between COPY START and COPY END when sending to ChatGPT." -ForegroundColor Gray
+Write-Host "Paste terminal output between COPY START and COPY END when sending to ChatGPT." -ForegroundColor White
 Write-Host "=== COPY END ===" -ForegroundColor Yellow
-Write-Host "========================================" -ForegroundColor Yellow
+Write-Host $border -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Allowed actions:" -ForegroundColor Green
 Write-Host "  git status --short --branch"
