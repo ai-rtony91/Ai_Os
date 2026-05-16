@@ -1,3 +1,7 @@
+param(
+    [switch]$Detailed
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -107,7 +111,7 @@ $Host.UI.RawUI.WindowTitle = "AI_OS ACTIVE SUPERVISION"
 
 Write-Host $border -ForegroundColor Cyan
 Write-Host "AI_OS ACTIVE SUPERVISION + ROUTING ENGINE" -ForegroundColor Cyan
-Write-Host "Read-only operator routing. No commits, pushes, merges, workers, or repo mutation." -ForegroundColor Gray
+Write-Host "$(if ($Detailed) { 'Detailed mode.' } else { 'Simple mode.' }) Read-only operator routing." -ForegroundColor Gray
 Write-Host $border -ForegroundColor Cyan
 
 $branch = (git branch --show-current)
@@ -190,14 +194,23 @@ if ($risk -eq "BLOCKED") {
     $nextSafeAction = "Use Ai_Os BUILD ENGINE only after the next APPLY task is explicitly approved."
 }
 
-Write-Section -Title "Risk Level" -Color $riskColor
-Write-Host "Risk: $risk" -ForegroundColor $riskColor
-Write-Host "Reasons:" -ForegroundColor Gray
-Write-List -Lines @($riskReasons) -Color Gray
+$primaryReason = if ($riskReasons.Count -gt 0) {
+    $riskReasons[0]
+} else {
+    "No blocking local condition is visible."
+}
 
-Write-Section -Title "Recommended Lane" -Color $laneColor
-Write-Host $recommendedLane -ForegroundColor $laneColor
-Write-Host "Next safe action: $nextSafeAction" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "Risk: $risk" -ForegroundColor $riskColor
+Write-Host "Recommended lane: $recommendedLane" -ForegroundColor $laneColor
+Write-Host "Exact next safe action: $nextSafeAction" -ForegroundColor Yellow
+Write-Host "Reason: $primaryReason" -ForegroundColor Gray
+
+if (-not $Detailed) {
+    Write-Host ""
+    Write-Host "Run with -Detailed for repo, GitHub, validation, stale, and blocked-action details." -ForegroundColor Gray
+    return
+}
 
 Write-Section -Title "Repo State"
 Write-Host "Repo path: $repoRoot" -ForegroundColor Gray
