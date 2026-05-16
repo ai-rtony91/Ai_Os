@@ -1,0 +1,8 @@
+﻿{
+    "mode":  "APPLY",
+    "goal":  "Build AIOS repo execution loop so AIOS can help build AIOS safely",
+    "goal_slug":  "build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely",
+    "next_action":  "Create repo-scoped work packet for: Build AIOS repo execution loop so AIOS can help build AIOS safely",
+    "safety":  "repo_scoped_only_no_live_trading_no_secrets_no_broker",
+    "created_utc":  "2026-05-16T21:58:22Z"
+}
