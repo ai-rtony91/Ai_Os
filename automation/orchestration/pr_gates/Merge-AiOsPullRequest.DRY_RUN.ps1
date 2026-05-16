@@ -1,4 +1,4 @@
-ï»¿param(
+param(
     [Parameter(Mandatory = $true)][int]$PrNumber,
     [string]$ApprovalPath = "",
     [switch]$Apply
@@ -7,7 +7,7 @@
 Set-StrictMode -Off
 $ErrorActionPreference = "Stop"
 
-Write-Host "COPY START â€” Merge-AiOsPullRequest.DRY_RUN.ps1"
+Write-Host "COPY START — Merge-AiOsPullRequest.DRY_RUN.ps1"
 Write-Host "AI_OS PR Merge Gate" -ForegroundColor Cyan
 Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
 
@@ -34,7 +34,7 @@ if ($status | Where-Object { $_ -match "server.py" }) {
     throw "Blocked: server.py is uncommitted and must not be included."
 }
 
-$checks = gh pr checks $PrNumber 2>&1
+$checks = cmd /c "gh pr checks $PrNumber 2>&1"; if ($LASTEXITCODE -ne 0 -and (($checks -join " ") -notmatch "no checks reported")) { throw "Blocked: PR checks failed or unavailable." }
 Write-Host $checks
 
 Write-Host "Approval: PASS"
@@ -50,4 +50,5 @@ if ($Apply) {
 
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
-Write-Host "COPY END â€” Merge-AiOsPullRequest.DRY_RUN.ps1"
+Write-Host "COPY END — Merge-AiOsPullRequest.DRY_RUN.ps1"
+
