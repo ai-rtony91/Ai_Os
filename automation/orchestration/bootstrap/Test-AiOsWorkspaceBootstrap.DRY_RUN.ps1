@@ -127,6 +127,7 @@ $requiredFiles = @(
     "automation/orchestration/bootstrap/Save-AiOsWorkspaceCheckpoint.ps1",
     "automation/orchestration/bootstrap/Restore-AiOsWorkspaceCheckpoint.ps1",
     "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
+    "automation/orchestration/git/Submit-AiOsWork.ps1",
     "automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1",
     "automation/orchestration/work_packets/New-AiOsWorkPacket.ps1",
     "automation/orchestration/work_packets/Get-AiOsWorkPacketState.ps1",
@@ -138,6 +139,7 @@ $requiredFiles = @(
     "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md",
     "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
     "docs/AI_OS/orchestration/AIOS_DAILY_START.md",
+    "docs/AI_OS/orchestration/AIOS_GITHUB_SAVE_AUTOMATION.md",
     "docs/AI_OS/orchestration/AIOS_WORK_PACKETS.md"
 )
 
@@ -344,7 +346,8 @@ $requiredRuleTexts = @(
     "No scheduled/startup tasks.",
     "No broker/API/live trading.",
     "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.",
-    "Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work."
+    "Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work.",
+    "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only."
 )
 
 Write-Host ""
