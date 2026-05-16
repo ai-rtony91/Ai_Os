@@ -29,6 +29,9 @@ Write-Host ""
 Write-Host "Show GitHub status:" -ForegroundColor Green
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Show-AiOsLauncherPreflight.ps1"
 Write-Host ""
+Write-Host "Show supervisor:" -ForegroundColor Green
+Write-Host "  powershell -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Start-AiOsSupervisor.ps1"
+Write-Host ""
 Write-Host "Launch Command Deck:" -ForegroundColor Magenta
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsCommandDeck.ps1"
 Write-Host ""
@@ -39,7 +42,7 @@ Write-Host "Launch Validation Deck:" -ForegroundColor Cyan
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsValidationDeck.ps1"
 Write-Host ""
 Write-Host "Next safe action:" -ForegroundColor Yellow
-Write-Host "  Run preflight, review status, then start decks. Launch Codex manually only in the Build Engine."
+Write-Host "  Use the launcher output. If safe, work from Command Deck, Build Engine, and Validation Deck. Launch Codex manually only in the Build Engine."
 Write-Host ""
 Write-Host "Blocked actions:" -ForegroundColor Red
 Write-Host "  no commit, push, merge, branch creation, issue creation, PR creation, installs, scheduled tasks, startup tasks, Codex auto-launch, dashboard edits, broker/OANDA/API/webhook/live trading work" -ForegroundColor Red
