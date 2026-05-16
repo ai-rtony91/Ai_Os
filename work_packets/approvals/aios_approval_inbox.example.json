@@ -1,0 +1,41 @@
+{
+  "schema": "AIOS_PHASE3_APPROVAL_INBOX.v1",
+  "mode": "DRY_RUN_ONLY",
+  "generated_at": "2026-05-16T00:00:00-04:00",
+  "approval_required_before": [
+    "APPLY",
+    "commit",
+    "push",
+    "worker_launch",
+    "state_mutation"
+  ],
+  "requests": [
+    {
+      "request_id": "APR-PHASE3-001",
+      "packet_id": "trading_lab_latency",
+      "approval_state": "requested",
+      "preview_transition": "hold_for_operator_approval",
+      "next_action": "Review requested approval before any APPLY work."
+    },
+    {
+      "request_id": "APR-PHASE3-002",
+      "packet_id": "validator_chain_hardening",
+      "approval_state": "approved",
+      "preview_transition": "preview_route_to_validation",
+      "next_action": "Allow DRY_RUN validation preview only."
+    },
+    {
+      "request_id": "APR-PHASE3-003",
+      "packet_id": "worker_registry_consolidation",
+      "approval_state": "requested",
+      "preview_transition": "blocked_until_operator_review",
+      "next_action": "Resolve blocked scope before routing."
+    }
+  ],
+  "safety": {
+    "autonomous_approval": "BLOCKED",
+    "autonomous_apply": "BLOCKED",
+    "commit": "BLOCKED",
+    "push": "BLOCKED"
+  }
+}

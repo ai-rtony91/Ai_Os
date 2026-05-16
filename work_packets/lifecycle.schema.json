@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PHASE3_LIFECYCLE.v1",
+  "title": "AI_OS Phase 3 Packet Lifecycle",
+  "type": "object",
+  "required": [
+    "schema",
+    "mode",
+    "packet_id",
+    "approval_state",
+    "queue_state",
+    "validator_state",
+    "routing_state",
+    "next_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PHASE3_LIFECYCLE.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_ONLY"
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_state": {
+      "type": "string",
+      "enum": [
+        "not_requested",
+        "requested",
+        "approved",
+        "rejected"
+      ]
+    },
+    "queue_state": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved",
+        "blocked",
+        "complete"
+      ]
+    },
+    "validator_state": {
+      "type": "string",
+      "enum": [
+        "not_run",
+        "pass",
+        "fail",
+        "warning"
+      ]
+    },
+    "routing_state": {
+      "type": "string",
+      "enum": [
+        "hold",
+        "preview_route",
+        "blocked",
+        "complete"
+      ]
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

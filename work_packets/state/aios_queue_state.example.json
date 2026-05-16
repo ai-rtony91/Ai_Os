@@ -1,0 +1,49 @@
+{
+  "schema": "AIOS_PHASE3_QUEUE_STATE.v1",
+  "mode": "DRY_RUN_ONLY",
+  "queue_id": "AIOS-PHASE3-STATE-EXAMPLE",
+  "generated_at": "2026-05-16T00:00:00-04:00",
+  "source_queue": "work_packets/queues/aios_phase2_queue.example.json",
+  "state": {
+    "pending": [
+      "trading_lab_latency",
+      "dashboard_orchestration_cleanup"
+    ],
+    "approved": [
+      "validator_chain_hardening"
+    ],
+    "blocked": [
+      "worker_registry_consolidation"
+    ],
+    "complete": []
+  },
+  "lanes": [
+    {
+      "lane": "validation",
+      "status": "ready",
+      "current_packet": "validator_chain_hardening",
+      "backlog_count": 2
+    },
+    {
+      "lane": "dashboard",
+      "status": "hold",
+      "current_packet": "",
+      "backlog_count": 1
+    },
+    {
+      "lane": "operator_review",
+      "status": "blocked",
+      "current_packet": "worker_registry_consolidation",
+      "backlog_count": 1
+    }
+  ],
+  "safety": {
+    "queue_mutation": "BLOCKED",
+    "autonomous_apply": "BLOCKED",
+    "codex_auto_launch": "BLOCKED",
+    "scheduled_tasks": "BLOCKED",
+    "startup_tasks": "BLOCKED",
+    "broker_oanda_api_webhook_live_trading": "BLOCKED"
+  },
+  "next_action": "Run Phase 3 state validator and stop."
+}
