@@ -1,0 +1,182 @@
+{
+  "system": "AI_OS",
+  "ruleset_name": "phase_16_56_70_active_supervision_routing_example",
+  "mode": "READ_ONLY_OPERATOR_ROUTING",
+  "purpose": "Example active supervision rules for repo risk, lane routing, validation routing, stale-state visibility, and exact next safe action display.",
+  "repo_root": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "risk_levels": [
+    {
+      "level": "SAFE",
+      "meaning": "Repo looks ready for an operator decision.",
+      "color": "Green"
+    },
+    {
+      "level": "WATCH",
+      "meaning": "Minor attention is needed before the next phase.",
+      "color": "Yellow"
+    },
+    {
+      "level": "WARNING",
+      "meaning": "Validation, approval, GitHub, or stale-state review is needed.",
+      "color": "Yellow"
+    },
+    {
+      "level": "BLOCKED",
+      "meaning": "A protected or unsafe condition is visible. Stop and route to operator review.",
+      "color": "Red"
+    }
+  ],
+  "risk_rules": [
+    {
+      "condition": "protected_or_blocked_file_changed",
+      "risk": "BLOCKED",
+      "reason": "Protected root, dashboard, broker, OANDA, API, webhook, or live trading paths require explicit approval."
+    },
+    {
+      "condition": "repo_dirty_with_validation_needed",
+      "risk": "WARNING",
+      "reason": "Changed files need git diff check and file-specific validation."
+    },
+    {
+      "condition": "untracked_files_present",
+      "risk": "WATCH",
+      "reason": "Untracked files need review before commit packaging."
+    },
+    {
+      "condition": "github_unavailable",
+      "risk": "WATCH",
+      "reason": "Supervisor should continue local-only and ask the operator to retry GitHub checks later."
+    },
+    {
+      "condition": "repo_clean_and_github_available",
+      "risk": "SAFE",
+      "reason": "Repo is clean and ready for an operator decision."
+    }
+  ],
+  "lane_routing": [
+    {
+      "lane": "COMMAND DECK",
+      "color": "Magenta",
+      "recommend_when": [
+        "branch mismatch",
+        "issue or PR decision needed",
+        "approval needed",
+        "merge needed",
+        "blocked action visible",
+        "GitHub state needs review"
+      ]
+    },
+    {
+      "lane": "BUILD ENGINE",
+      "color": "Green",
+      "recommend_when": [
+        "approved APPLY work is ready",
+        "repo is safe for code edits",
+        "no validation or approval decision is currently blocking"
+      ]
+    },
+    {
+      "lane": "VALIDATION DECK",
+      "color": "Cyan",
+      "recommend_when": [
+        "git diff check needed",
+        "JSON validation needed",
+        "PowerShell parse validation needed",
+        "repo clean check needed",
+        "dirty repo after APPLY"
+      ]
+    }
+  ],
+  "validation_routing": {
+    "always_when_dirty": [
+      "git diff --check",
+      "git status --short --branch"
+    ],
+    "json_extensions": [
+      ".json"
+    ],
+    "powershell_extensions": [
+      ".ps1"
+    ],
+    "documentation_extensions": [
+      ".md"
+    ]
+  },
+  "stale_state_rules": [
+    {
+      "state": "stale_branch",
+      "threshold_days": 7,
+      "route_to": "COMMAND DECK"
+    },
+    {
+      "state": "issue_without_pr",
+      "route_to": "COMMAND DECK"
+    },
+    {
+      "state": "pr_without_merge",
+      "route_to": "COMMAND DECK"
+    },
+    {
+      "state": "dirty_repo_after_apply",
+      "route_to": "VALIDATION DECK"
+    },
+    {
+      "state": "modified_files_after_validation",
+      "route_to": "VALIDATION DECK"
+    }
+  ],
+  "blocked_path_patterns": [
+    "README.md",
+    "AGENTS.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "ARCHITECTURE.md",
+    "DEPLOYMENT.md",
+    "WHITEPAPER.md",
+    "apps/dashboard/",
+    ".git/",
+    ".codex_backups/",
+    "broker",
+    "OANDA",
+    "webhook",
+    "live_trading",
+    "real_orders",
+    "api_key"
+  ],
+  "blocked_actions": [
+    "commit",
+    "push",
+    "merge",
+    "create branch",
+    "create issue",
+    "create pull request",
+    "edit dashboard files",
+    "edit protected root files",
+    "create startup task",
+    "create scheduled task",
+    "auto-launch Codex",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading"
+  ],
+  "next_safe_actions": [
+    {
+      "condition": "blocked",
+      "action": "Use Ai_Os COMMAND DECK and stop for operator review before any commit, push, merge, or edit."
+    },
+    {
+      "condition": "validation_needed",
+      "action": "Use Ai_Os VALIDATION DECK and run git diff --check plus file-specific parse checks."
+    },
+    {
+      "condition": "approval_needed",
+      "action": "Use Ai_Os COMMAND DECK to decide approval, PR, or merge status."
+    },
+    {
+      "condition": "repo_safe",
+      "action": "Use Ai_Os COMMAND DECK to choose the next approved phase or PR action."
+    }
+  ]
+}
