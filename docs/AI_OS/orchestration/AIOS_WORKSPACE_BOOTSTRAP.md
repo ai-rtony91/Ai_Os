@@ -30,6 +30,13 @@ automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1
 automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1
 ```
 
+Work packets:
+
+```text
+docs/AI_OS/orchestration/AIOS_WORK_PACKETS.md
+automation/orchestration/work_packets/
+```
+
 ## Lane Model
 
 Each lane records:
@@ -214,6 +221,23 @@ powershell -ExecutionPolicy Bypass -File automation\orchestration\supervisor\Res
 ```
 
 The planner answers what workers are needed, what each worker does, what lane each worker uses, what files are in scope, what validators run, what approval is required, and the exact next safe action.
+
+## Work Packets
+
+Work packets persist assignments as small JSON files:
+
+```text
+automation/orchestration/work_packets/
+```
+
+Packet commands:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\work_packets\Get-AiOsWorkPacketState.ps1
+powershell -ExecutionPolicy Bypass -File automation\orchestration\work_packets\Route-AiOsWorkPacket.DRY_RUN.ps1
+```
+
+The ROUTE lane acts as packet dispatcher. The WATCH lane acts as packet state observer. CONTROL remains the root lane.
 
 ## Start Commands
 

@@ -128,12 +128,45 @@ $requiredFiles = @(
     "automation/orchestration/bootstrap/Restore-AiOsWorkspaceCheckpoint.ps1",
     "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1",
+    "automation/orchestration/work_packets/New-AiOsWorkPacket.ps1",
+    "automation/orchestration/work_packets/Get-AiOsWorkPacketState.ps1",
+    "automation/orchestration/work_packets/Route-AiOsWorkPacket.DRY_RUN.ps1",
+    "automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json",
     "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
     "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json",
     "automation/orchestration/operator/AIOS_OPERATOR_RULES.json",
     "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md",
     "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
-    "docs/AI_OS/orchestration/AIOS_DAILY_START.md"
+    "docs/AI_OS/orchestration/AIOS_DAILY_START.md",
+    "docs/AI_OS/orchestration/AIOS_WORK_PACKETS.md"
+)
+
+$requiredDirectories = @(
+    "automation/orchestration/work_packets",
+    "automation/orchestration/work_packets/active",
+    "automation/orchestration/work_packets/blocked",
+    "automation/orchestration/work_packets/complete",
+    "automation/orchestration/work_packets/templates"
+)
+
+$requiredPacketFields = @(
+    "packet_id",
+    "title",
+    "intent",
+    "owner_lane",
+    "assigned_worker",
+    "repo",
+    "branch",
+    "status",
+    "priority",
+    "created_utc",
+    "updated_utc",
+    "validator",
+    "next_action",
+    "blocked_by",
+    "related_files",
+    "related_packets",
+    "notes"
 )
 
 $scriptName = Split-Path -Leaf $PSCommandPath
@@ -153,6 +186,17 @@ $requiredFiles | ForEach-Object {
         throw "Missing required file: $requiredFile"
     }
     Write-Host "FOUND: $requiredFile"
+}
+
+Write-Host ""
+Write-Host "== Required Directories ==" -ForegroundColor Yellow
+$requiredDirectories | ForEach-Object {
+    $requiredDirectory = $_
+    $fullPath = Resolve-AiOsPath -Path $requiredDirectory
+    if (-not (Test-Path -LiteralPath $fullPath -PathType Container)) {
+        throw "Missing required directory: $requiredDirectory"
+    }
+    Write-Host "FOUND: $requiredDirectory"
 }
 
 Write-Host ""
@@ -190,6 +234,56 @@ Assert-NoBlockedAutomation -Path $checkpointExampleFullPath
 Assert-NoAssistantAutoStart -Path $registryFullPath
 Assert-NoAssistantAutoStart -Path $sessionExampleFullPath
 Assert-NoAssistantAutoStart -Path $checkpointExampleFullPath
+
+Write-Host ""
+Write-Host "== Work Packet Template ==" -ForegroundColor Yellow
+$packetTemplatePath = Resolve-AiOsPath -Path "automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json"
+$packetTemplate = Get-Content -LiteralPath $packetTemplatePath -Raw | ConvertFrom-Json
+$requiredPacketFields | ForEach-Object {
+    $field = $_
+    if (-not ($packetTemplate.PSObject.Properties.Name -contains $field)) {
+        throw "Packet template missing field: $field"
+    }
+    Write-Host "PASS: template field $field"
+}
+
+Write-Host ""
+Write-Host "== Work Packet Examples ==" -ForegroundColor Yellow
+$packetExampleFiles = @()
+@("active", "blocked", "complete") | ForEach-Object {
+    $state = $_
+    $statePath = Resolve-AiOsPath -Path "automation/orchestration/work_packets/$state"
+    $files = @(Get-ChildItem -LiteralPath $statePath -Filter "*.json" -File)
+    if ($files.Count -lt 1) {
+        throw "Missing example packet in state folder: $state"
+    }
+    $packetExampleFiles += $files
+}
+
+$packetExampleFiles | ForEach-Object {
+    $packetFile = $_
+    if ($packetFile.Name -notmatch "^\d{8}-\d{6}-[a-z0-9-]+\.json$") {
+        throw "Packet filename does not match YYYYMMDD-HHMMSS-packet-id.json: $($packetFile.Name)"
+    }
+
+    $packet = Get-Content -LiteralPath $packetFile.FullName -Raw | ConvertFrom-Json
+    $requiredPacketFields | ForEach-Object {
+        $field = $_
+        if (-not ($packet.PSObject.Properties.Name -contains $field)) {
+            throw "Packet $($packetFile.Name) missing field: $field"
+        }
+    }
+
+    if ([string]::IsNullOrWhiteSpace($packet.repo) -or [string]::IsNullOrWhiteSpace($packet.branch)) {
+        throw "Packet must tie to repo and branch: $($packetFile.Name)"
+    }
+
+    if (@("active", "blocked", "complete") -notcontains $packet.status) {
+        throw "Packet has invalid status: $($packetFile.Name)"
+    }
+
+    Write-Host "PASS: $($packetFile.Name)"
+}
 
 if (-not $registry.lanes -or @($registry.lanes).Count -lt 1) {
     throw "Lane registry has no lanes."
@@ -248,7 +342,9 @@ $requiredRuleTexts = @(
     "Preview before launch.",
     "No commits/pushes without explicit command.",
     "No scheduled/startup tasks.",
-    "No broker/API/live trading."
+    "No broker/API/live trading.",
+    "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.",
+    "Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work."
 )
 
 Write-Host ""

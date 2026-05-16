@@ -1,0 +1,24 @@
+{
+  "packet_id": "rulebook-foundation",
+  "title": "Rulebook Foundation",
+  "intent": "preserve operator rules as durable files",
+  "owner_lane": "rulebook_codex",
+  "assigned_worker": "codex_worker_1",
+  "repo": "aios-worker-brainstem",
+  "branch": "phase-brainstem-daily-start",
+  "status": "complete",
+  "priority": "normal",
+  "created_utc": "2026-05-16T06:45:02Z",
+  "updated_utc": "2026-05-16T06:45:02Z",
+  "validator": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
+  "next_action": "Use rulebook as packet routing input.",
+  "blocked_by": [],
+  "related_files": [
+    "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
+    "automation/orchestration/operator/AIOS_OPERATOR_RULES.json"
+  ],
+  "related_packets": [],
+  "notes": [
+    "Example complete packet."
+  ]
+}
