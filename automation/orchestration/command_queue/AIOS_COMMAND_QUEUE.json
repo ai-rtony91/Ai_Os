@@ -1,0 +1,13 @@
+﻿{
+    "queue_id":  "AIOS_COMMAND_QUEUE",
+    "version":  "1.0",
+    "items":  [
+                  {
+                      "id":  "20260516T192852Z",
+                      "command":  "powershell -ExecutionPolicy Bypass -File automation/session/Start-AiOsSession.ps1",
+                      "reason":  "Session boot check",
+                      "status":  "queued",
+                      "created_utc":  "2026-05-16T19:28:52Z"
+                  }
+              ]
+}
