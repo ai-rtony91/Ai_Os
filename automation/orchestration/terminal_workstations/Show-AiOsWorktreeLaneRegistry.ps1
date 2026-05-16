@@ -41,17 +41,15 @@ git worktree list
 
 Write-Section -Title "Registered Lanes"
 foreach ($lane in @($registry.lanes)) {
-    Write-Host "ID: $($lane.id)" -ForegroundColor Cyan
-    Write-Host "Name: $($lane.name)"
+    Write-Host "lane_id: $($lane.lane_id)" -ForegroundColor Cyan
+    Write-Host "display_title: $($lane.display_title)"
+    Write-Host "window_title: $($lane.window_title)"
+    Write-Host "tab_title: $($lane.tab_title)"
+    Write-Host "emoji_marker: $($lane.emoji_marker)"
+    Write-Host "truth_source: $($lane.truth_source)"
     Write-Host "Role: $($lane.role)"
     Write-Host "Path: $($lane.path)"
     Write-Host "Branch: $($lane.branch)"
-    Write-Host "Codex allowed: $($lane.codex_allowed)"
-    if ($lane.PSObject.Properties.Name -contains "codex_launch") {
-        Write-Host "Codex launch: $($lane.codex_launch)"
-    }
-    Write-Host "Restart command:"
-    Write-Host "  $($lane.restart_command)"
     Write-Host ""
 }
 
@@ -65,7 +63,7 @@ if (-not $LaunchManualShells) {
 Write-Section -Title "Manual Shell Launch"
 foreach ($lane in @($registry.lanes)) {
     if (-not (Test-Path -LiteralPath $lane.path -PathType Container)) {
-        throw "Lane path not found for $($lane.id): $($lane.path)"
+        throw "Lane path not found for $($lane.lane_id): $($lane.path)"
     }
 
     Start-Process powershell.exe -ArgumentList @(
@@ -73,9 +71,9 @@ foreach ($lane in @($registry.lanes)) {
         "-ExecutionPolicy",
         "Bypass",
         "-Command",
-        "Set-Location -LiteralPath '$($lane.path)'; `$Host.UI.RawUI.WindowTitle = '$($lane.name)'; git status --short --branch"
+        "Set-Location -LiteralPath '$($lane.path)'; `$Host.UI.RawUI.WindowTitle = '$($lane.window_title)'; Write-Host 'lane_id: $($lane.lane_id)'; Write-Host 'display_title: $($lane.display_title)'; Write-Host 'window_title: $($lane.window_title)'; Write-Host 'tab_title: $($lane.tab_title)'; Write-Host 'emoji_marker: $($lane.emoji_marker)'; Write-Host 'truth_source: $($lane.truth_source)'; Write-Host 'path: $($lane.path)'; Write-Host 'branch: $($lane.branch)'; git status --short --branch"
     )
-    Write-Host "Opened manual PowerShell shell for $($lane.id)"
+    Write-Host "Opened manual PowerShell shell for $($lane.lane_id)"
 }
 
 Write-Host "Codex auto-launch performed: NO"

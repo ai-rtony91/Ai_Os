@@ -18,27 +18,34 @@ automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json
 
 Each lane records:
 
-- `id`
-- `name`
-- `role`
+- `lane_id`
+- `display_title`
+- `window_title`
+- `tab_title`
 - `path`
 - `branch`
-- `codex_policy`
-- `launch_policy`
-- `restart_command`
-- `allowed_actions`
-- `blocked_actions`
+- `role`
+- `emoji_marker`
+- `truth_source`
 
-Required lanes:
+`truth_source` must be `path_and_branch`.
 
-- `main_control`
-- `active_git`
-- `active_codex`
-- `validation`
-- `phase3_git`
-- `phase3_codex`
-- `bootstrap_git`
-- `bootstrap_codex`
+Required user-facing lane titles:
+
+- `CONTROL · main`
+- `BOOTSTRAP · git`
+- `BOOTSTRAP · codex`
+- `VALIDATE · audit`
+- `DISPATCH · queue`
+- `STATE · monitor`
+
+Do not put `filter` in user-facing names.
+
+## Truth Rule
+
+Trust the prompt path and Git branch, not a stale terminal or tab title after `cd`.
+
+Window titles and tab titles are operator labels only. The path and branch printed by the scripts are the source of truth for work location.
 
 ## Git And Codex Split
 
@@ -105,12 +112,29 @@ powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Rest
 Preview mode prints:
 
 - `git worktree list`
-- lane id, role, path, and branch
-- restart commands
+- `lane_id`, `display_title`, `window_title`, `tab_title`, `emoji_marker`, and `truth_source`
+- path and branch
 - last session commands
 - next safe action
 
 Launch mode opens PowerShell shells only. It does not mutate Git state, does not start assistant tooling, and does not run background launch hooks.
+
+## Copy Markers
+
+Report scripts print copy markers:
+
+```text
+COPY START — <script>
+COPY END — <script>
+```
+
+Marker-enabled scripts:
+
+- `Start-AiOsWorkspace.ps1`
+- `Open-AiOsLane.ps1`
+- `Save-AiOsSession.ps1`
+- `Restore-AiOsSession.ps1`
+- `Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1`
 
 ## Operator Workflow
 

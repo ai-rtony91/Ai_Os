@@ -1,130 +1,151 @@
 {
   "session_id": "AIOS_SESSION_STATE_EXAMPLE",
-  "version": "1.0",
-  "saved_at": "2026-05-15T00:00:00.0000000-04:00",
+  "version": "2.0",
+  "saved_at": "2026-05-16T00:00:00.0000000-04:00",
   "mode": "manual_restore_only",
   "source_registry": "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
   "active_workspace": "aios-worker-bootstrap",
   "active_worktree": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
   "active_branch": "phase-bootstrap-workspace",
+  "truth_rule": "Trust prompt path and Git branch, not stale terminal/tab title after cd.",
   "open_lanes": [
     "bootstrap_git",
     "bootstrap_codex"
   ],
   "last_known_roles": [
     {
-      "id": "main_control",
-      "role": "Repo control, operator review, PR review, merge approval, and final checkpoint lane.",
+      "lane_id": "main_control",
+      "display_title": "CONTROL \u00b7 main",
+      "window_title": "CONTROL \u00b7 main",
+      "tab_title": "CONTROL \u00b7 main",
       "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main"
+      "branch": "main",
+      "role": "Repo control, operator review, PR review, merge approval, and final checkpoint lane.",
+      "emoji_marker": "\ud83d\udfe6",
+      "truth_source": "path_and_branch"
     },
     {
-      "id": "active_git",
-      "role": "Git status, diffs, validator runs, selective staging guidance, and commit package review.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-      "branch": "phase-221-260-mission-json-dashboard-ready"
-    },
-    {
-      "id": "active_codex",
-      "role": "Manual assistant work lane for approved APPLY edits in the active worktree.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-      "branch": "phase-221-260-mission-json-dashboard-ready"
-    },
-    {
-      "id": "validation",
-      "role": "Read-only validation lane for audits, parser checks, and evidence review.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
-      "branch": "phase-validation-cleanup"
-    },
-    {
-      "id": "phase3_git",
-      "role": "Git and validator lane for the Phase 3 stateful orchestration worktree.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
-      "branch": "phase-3-stateful-orchestration"
-    },
-    {
-      "id": "phase3_codex",
-      "role": "Manual assistant work lane for approved Phase 3 orchestration edits.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
-      "branch": "phase-3-stateful-orchestration"
-    },
-    {
-      "id": "bootstrap_git",
+      "lane_id": "bootstrap_git",
+      "display_title": "BOOTSTRAP \u00b7 git",
+      "window_title": "BOOTSTRAP \u00b7 git",
+      "tab_title": "BOOTSTRAP \u00b7 git",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+      "branch": "phase-bootstrap-workspace",
       "role": "Git status, diffs, and validators for the workspace bootstrap worktree.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace"
+      "emoji_marker": "\ud83d\udfe9",
+      "truth_source": "path_and_branch"
     },
     {
-      "id": "bootstrap_codex",
-      "role": "Manual assistant work lane for approved Issue 60 bootstrap edits.",
+      "lane_id": "bootstrap_codex",
+      "display_title": "BOOTSTRAP \u00b7 codex",
+      "window_title": "BOOTSTRAP \u00b7 codex",
+      "tab_title": "BOOTSTRAP \u00b7 codex",
       "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace"
+      "branch": "phase-bootstrap-workspace",
+      "role": "Manual assistant work lane for approved bootstrap edits.",
+      "emoji_marker": "\ud83d\udfe8",
+      "truth_source": "path_and_branch"
+    },
+    {
+      "lane_id": "validation_audit",
+      "display_title": "VALIDATE \u00b7 audit",
+      "window_title": "VALIDATE \u00b7 audit",
+      "tab_title": "VALIDATE \u00b7 audit",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+      "branch": "phase-validation-cleanup",
+      "role": "Read-only validation lane for audits, parser checks, and evidence review.",
+      "emoji_marker": "\ud83d\udfea",
+      "truth_source": "path_and_branch"
+    },
+    {
+      "lane_id": "dispatch_queue",
+      "display_title": "DISPATCH \u00b7 queue",
+      "window_title": "DISPATCH \u00b7 queue",
+      "tab_title": "DISPATCH \u00b7 queue",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+      "branch": "phase-221-260-mission-json-dashboard-ready",
+      "role": "Queue and workload dispatch review lane.",
+      "emoji_marker": "\ud83d\udfe7",
+      "truth_source": "path_and_branch"
+    },
+    {
+      "lane_id": "state_monitor",
+      "display_title": "STATE \u00b7 monitor",
+      "window_title": "STATE \u00b7 monitor",
+      "tab_title": "STATE \u00b7 monitor",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
+      "branch": "phase-3-stateful-orchestration",
+      "role": "State, progress, and orchestration monitor lane.",
+      "emoji_marker": "\u2b1c",
+      "truth_source": "path_and_branch"
     }
   ],
   "lanes": [
     {
-      "id": "main_control",
-      "name": "AI_OS MAIN CONTROL",
-      "role": "Repo control, operator review, PR review, merge approval, and final checkpoint lane.",
+      "lane_id": "main_control",
+      "display_title": "CONTROL \u00b7 main",
+      "window_title": "CONTROL \u00b7 main",
+      "tab_title": "CONTROL \u00b7 main",
       "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
       "branch": "main",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN'; $Host.UI.RawUI.WindowTitle = 'AI_OS MAIN CONTROL'; git status --short --branch\""
+      "role": "Repo control, operator review, PR review, merge approval, and final checkpoint lane.",
+      "emoji_marker": "\ud83d\udfe6",
+      "truth_source": "path_and_branch"
     },
     {
-      "id": "active_git",
-      "name": "AI_OS ACTIVE GIT",
-      "role": "Git status, diffs, validator runs, selective staging guidance, and commit package review.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-      "branch": "phase-221-260-mission-json-dashboard-ready",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json'; $Host.UI.RawUI.WindowTitle = 'AI_OS ACTIVE GIT'; git status --short --branch\""
+      "lane_id": "bootstrap_git",
+      "display_title": "BOOTSTRAP \u00b7 git",
+      "window_title": "BOOTSTRAP \u00b7 git",
+      "tab_title": "BOOTSTRAP \u00b7 git",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+      "branch": "phase-bootstrap-workspace",
+      "role": "Git status, diffs, and validators for the workspace bootstrap worktree.",
+      "emoji_marker": "\ud83d\udfe9",
+      "truth_source": "path_and_branch"
     },
     {
-      "id": "active_codex",
-      "name": "AI_OS ACTIVE CODEX",
-      "role": "Manual assistant work lane for approved APPLY edits in the active worktree.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-      "branch": "phase-221-260-mission-json-dashboard-ready",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json'; $Host.UI.RawUI.WindowTitle = 'AI_OS ACTIVE CODEX'; git status --short --branch\""
+      "lane_id": "bootstrap_codex",
+      "display_title": "BOOTSTRAP \u00b7 codex",
+      "window_title": "BOOTSTRAP \u00b7 codex",
+      "tab_title": "BOOTSTRAP \u00b7 codex",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+      "branch": "phase-bootstrap-workspace",
+      "role": "Manual assistant work lane for approved bootstrap edits.",
+      "emoji_marker": "\ud83d\udfe8",
+      "truth_source": "path_and_branch"
     },
     {
-      "id": "validation",
-      "name": "AI_OS VALIDATION",
-      "role": "Read-only validation lane for audits, parser checks, and evidence review.",
+      "lane_id": "validation_audit",
+      "display_title": "VALIDATE \u00b7 audit",
+      "window_title": "VALIDATE \u00b7 audit",
+      "tab_title": "VALIDATE \u00b7 audit",
       "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
       "branch": "phase-validation-cleanup",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation'; $Host.UI.RawUI.WindowTitle = 'AI_OS VALIDATION'; git status --short --branch\""
+      "role": "Read-only validation lane for audits, parser checks, and evidence review.",
+      "emoji_marker": "\ud83d\udfea",
+      "truth_source": "path_and_branch"
     },
     {
-      "id": "phase3_git",
-      "name": "AI_OS PHASE 3 GIT",
-      "role": "Git and validator lane for the Phase 3 stateful orchestration worktree.",
+      "lane_id": "dispatch_queue",
+      "display_title": "DISPATCH \u00b7 queue",
+      "window_title": "DISPATCH \u00b7 queue",
+      "tab_title": "DISPATCH \u00b7 queue",
+      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+      "branch": "phase-221-260-mission-json-dashboard-ready",
+      "role": "Queue and workload dispatch review lane.",
+      "emoji_marker": "\ud83d\udfe7",
+      "truth_source": "path_and_branch"
+    },
+    {
+      "lane_id": "state_monitor",
+      "display_title": "STATE \u00b7 monitor",
+      "window_title": "STATE \u00b7 monitor",
+      "tab_title": "STATE \u00b7 monitor",
       "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
       "branch": "phase-3-stateful-orchestration",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3'; $Host.UI.RawUI.WindowTitle = 'AI_OS PHASE 3 GIT'; git status --short --branch\""
-    },
-    {
-      "id": "phase3_codex",
-      "name": "AI_OS PHASE 3 CODEX",
-      "role": "Manual assistant work lane for approved Phase 3 orchestration edits.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
-      "branch": "phase-3-stateful-orchestration",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3'; $Host.UI.RawUI.WindowTitle = 'AI_OS PHASE 3 CODEX'; git status --short --branch\""
-    },
-    {
-      "id": "bootstrap_git",
-      "name": "AI_OS BOOTSTRAP GIT",
-      "role": "Git status, diffs, and validators for the workspace bootstrap worktree.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap'; $Host.UI.RawUI.WindowTitle = 'AI_OS BOOTSTRAP GIT'; git status --short --branch\""
-    },
-    {
-      "id": "bootstrap_codex",
-      "name": "AI_OS BOOTSTRAP CODEX",
-      "role": "Manual assistant work lane for approved Issue 60 bootstrap edits.",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "restart_command": "powershell -NoExit -ExecutionPolicy Bypass -Command \"Set-Location -LiteralPath 'C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap'; $Host.UI.RawUI.WindowTitle = 'AI_OS BOOTSTRAP CODEX'; git status --short --branch\""
+      "role": "State, progress, and orchestration monitor lane.",
+      "emoji_marker": "\u2b1c",
+      "truth_source": "path_and_branch"
     }
   ],
   "last_commands": {
