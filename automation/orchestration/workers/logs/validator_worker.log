@@ -32,3 +32,7 @@
 2026-05-16T20:35:08Z [validator_worker] Cycle 1 started.
 2026-05-16T20:35:09Z [validator_worker] Safe execute previewed.
 2026-05-16T20:35:09Z [validator_worker] Worker cycle finished.
+2026-05-16T20:48:26Z [validator_worker] Worker cycle started. Apply=False Cycles=1
+2026-05-16T20:48:26Z [validator_worker] Cycle 1 started.
+2026-05-16T20:48:27Z [validator_worker] Safe execute previewed.
+2026-05-16T20:48:27Z [validator_worker] Worker cycle finished.
