@@ -1,0 +1,79 @@
+{
+  "purpose": "AI_OS worker window layout presets for Windows Terminal.",
+  "safe_default_preset": "compact",
+  "repo_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "identity_script": "automation/window_identity/Set-AiOsWindowIdentity.ps1",
+  "mode": {
+    "default": "DRY_RUN",
+    "apply_flag": "-Apply",
+    "dry_run_behavior": "Print wt.exe commands only.",
+    "apply_behavior": "Launch Windows Terminal worker windows or tabs."
+  },
+  "safety": {
+    "windows_terminal_only": true,
+    "startup_tasks": "BLOCKED",
+    "scheduled_tasks": "BLOCKED",
+    "external_apps_except_wt": "BLOCKED",
+    "dashboard_edits": "BLOCKED",
+    "trading_lab_edits": "BLOCKED",
+    "protected_root_file_edits": "BLOCKED",
+    "git_add_dot": "BLOCKED",
+    "commit": "BLOCKED",
+    "push": "BLOCKED"
+  },
+  "presets": {
+    "compact": {
+      "windows": 1,
+      "tabs": 7,
+      "description": "One Windows Terminal window with all AI_OS worker tabs."
+    },
+    "wide": {
+      "windows": 1,
+      "tabs": 7,
+      "description": "One wider Windows Terminal window with all AI_OS worker tabs."
+    },
+    "dual-monitor": {
+      "windows": 2,
+      "tabs": 7,
+      "description": "Two Windows Terminal windows split across operator/build and queue/recovery roles."
+    }
+  },
+  "workers": [
+    {
+      "title": "🧭 AI_OS MAIN CONTROL",
+      "marker": "AI_OS MAIN CONTROL",
+      "next_command": ".\\aios.ps1 -Mode runtime"
+    },
+    {
+      "title": "🛠 CODEX BUILD LANE",
+      "marker": "CODEX BUILD LANE",
+      "next_command": "git status --short --branch"
+    },
+    {
+      "title": "✅ VALIDATOR WORKER",
+      "marker": "VALIDATOR WORKER",
+      "next_command": "git diff --check"
+    },
+    {
+      "title": "📦 PACKET QUEUE",
+      "marker": "PACKET QUEUE",
+      "next_command": "Get-ChildItem automation\\packets"
+    },
+    {
+      "title": "📥 APPROVAL INBOX",
+      "marker": "APPROVAL INBOX",
+      "next_command": "git status --short --branch"
+    },
+    {
+      "title": "🩺 RECOVERY HEALTH",
+      "marker": "RECOVERY HEALTH",
+      "next_command": "git status --short --branch"
+    },
+    {
+      "title": "⏸ STANDBY WORKER",
+      "marker": "STANDBY WORKER",
+      "next_command": "git status --short --branch"
+    }
+  ],
+  "tomorrow_launch_command": "powershell -ExecutionPolicy Bypass -File automation/window_identity/Open-AiOsWorkerWindowLayout.ps1 -Preset compact -Apply"
+}
