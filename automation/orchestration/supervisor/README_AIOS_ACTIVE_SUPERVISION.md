@@ -1,6 +1,7 @@
 # AI_OS Active Supervision
 
 Phase 16.56-70 adds a read-only supervisor dashboard for operator routing.
+Phase 16.71-80 makes the default view simpler.
 
 The dashboard watches repo state, GitHub state when available, validation needs, blocked paths, and lane recommendations. It does not change files and does not automate commits, pushes, merges, issues, PRs, workers, scheduled tasks, startup tasks, broker work, OANDA work, API keys, webhooks, real orders, or live trading.
 
@@ -22,10 +23,20 @@ The dashboard watches repo state, GitHub state when available, validation needs,
 - `WARNING`: validation or approval work is needed.
 - `BLOCKED`: protected or unsafe work is visible and operator review is required.
 
-## Run
+## Run Simple Mode
+
+Simple mode is the default. It shows only the risk level, recommended lane, exact next safe action, and one short reason.
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Show-AiOsSupervisorDashboard.ps1
+```
+
+## Run Detailed Mode
+
+Detailed mode shows repo state, GitHub state, validation routing, stale routing, blocked actions, and blocked files when visible.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Show-AiOsSupervisorDashboard.ps1 -Detailed
 ```
 
 ## Safety
