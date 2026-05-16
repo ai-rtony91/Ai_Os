@@ -1,0 +1,77 @@
+{
+  "system": "AI_OS",
+  "stack": "Mission Control",
+  "mode": "READ_ONLY",
+  "risk": "SAFE",
+  "recommended_lane": "COMMAND DECK",
+  "next_safe_action": "Use Ai_Os COMMAND DECK to choose the next approved phase or PR action.",
+  "reason": "No blocking local condition is visible.",
+  "repo_state": {
+    "repo_root": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "branch": "phase-111-150-aios-operations-stack",
+    "clean": true,
+    "changed_files": 0,
+    "untracked_files": 0,
+    "latest_commit": "UNKNOWN",
+    "status_lines": []
+  },
+  "github_state": {
+    "gh_available": true,
+    "local_only_fallback": false,
+    "open_issues": 0,
+    "open_prs": 0,
+    "current_branch_prs": 0,
+    "unavailable_reason": null
+  },
+  "validation_state": {
+    "git_diff_needed": false,
+    "json_validation_needed": false,
+    "powershell_validation_needed": false,
+    "repo_clean_check_needed": true
+  },
+  "stale_state": {
+    "stale_branch_review_needed": false,
+    "issue_without_pr_review_needed": false,
+    "pr_without_merge_review_needed": false
+  },
+  "approval_state": {
+    "approval_needed": false,
+    "validation_needed": false,
+    "merge_needed": false
+  },
+  "routing_state": {
+    "command_deck_needed": true,
+    "build_engine_needed": false,
+    "validation_deck_needed": false
+  },
+  "queue_awareness": {
+    "known_queue_files": [
+      "automation/orchestration/packet_queue.example.json",
+      "automation/orchestration/packet_queue_ledger.v1.example.json",
+      "automation/orchestration/approval_inbox.v1.example.json",
+      "automation/orchestration/queue_health_supervisor.v1.example.json"
+    ],
+    "visible_queue_files": []
+  },
+  "recovery_awareness": {
+    "known_recovery_files": [
+      "automation/orchestration/recovery_bootstrap_supervisor.v1.example.json",
+      "automation/orchestration/session_continuity.v1.example.json"
+    ],
+    "visible_recovery_files": []
+  },
+  "blocked_state": {
+    "blocked": false,
+    "blocked_files": [],
+    "blocked_actions": [
+      "commit",
+      "push",
+      "merge",
+      "create branch",
+      "create issue",
+      "create pull request"
+    ]
+  },
+  "telemetry_ready": true,
+  "dashboard_ready": true
+}
