@@ -1,0 +1,102 @@
+﻿{
+  "registry_id": "AIOS_WORKER_REGISTRY",
+  "version": "1.0",
+  "workers": [
+    {
+      "worker_id": "supervisor_loop",
+      "type": "supervisor",
+      "purpose": "Reads next-step state and routes packet lifecycle movement.",
+      "allowed_actions": [
+        "read_next_step",
+        "preview_packet_transition",
+        "apply_safe_packet_transition"
+      ],
+      "blocked_actions": [
+        "merge_pr",
+        "delete_files",
+        "touch_secrets",
+        "live_trading"
+      ]
+    },
+    {
+      "worker_id": "approval_processor",
+      "type": "approval",
+      "purpose": "Detects approval files and advances awaiting_approval packets.",
+      "allowed_actions": [
+        "read_approval_files",
+        "preview_approval_transition",
+        "apply_approved_packet_transition"
+      ],
+      "blocked_actions": [
+        "create_approval_without_human",
+        "merge_pr",
+        "touch_secrets",
+        "live_trading"
+      ]
+    },
+    {
+      "worker_id": "task_generator",
+      "type": "task_generation",
+      "purpose": "Turns next-step output into future work packet drafts.",
+      "allowed_actions": [
+        "read_next_step",
+        "preview_task_packet",
+        "create_work_packet_when_approved"
+      ],
+      "blocked_actions": [
+        "auto_apply_code",
+        "merge_pr",
+        "touch_secrets",
+        "live_trading"
+      ]
+    },
+    {
+      "worker_id": "runtime_daemon",
+      "type": "runtime",
+      "purpose": "Runs bounded repeated AIOS runtime cycles.",
+      "allowed_actions": [
+        "run_bounded_cycles",
+        "call_runtime_cycle",
+        "call_health_monitor"
+      ],
+      "blocked_actions": [
+        "infinite_background_loop_without_approval",
+        "startup_task",
+        "scheduled_task",
+        "live_trading"
+      ]
+    },
+    {
+      "worker_id": "pr_gate",
+      "type": "pull_request",
+      "purpose": "Previews and applies safe pull request create/merge gates.",
+      "allowed_actions": [
+        "preview_pr_create",
+        "preview_pr_merge",
+        "merge_only_with_approval_file"
+      ],
+      "blocked_actions": [
+        "merge_without_approval",
+        "include_server_py",
+        "touch_secrets",
+        "live_trading"
+      ]
+    },
+    {
+      "worker_id": "health_monitor",
+      "type": "health",
+      "purpose": "Checks runtime health, missing files, repo branch, and working tree state.",
+      "allowed_actions": [
+        "read_repo_status",
+        "read_runtime_files",
+        "report_health"
+      ],
+      "blocked_actions": [
+        "modify_files",
+        "merge_pr",
+        "touch_secrets",
+        "live_trading"
+      ]
+    }
+  ]
+}
