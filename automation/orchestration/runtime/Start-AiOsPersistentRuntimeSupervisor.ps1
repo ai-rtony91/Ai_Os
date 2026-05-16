@@ -21,6 +21,12 @@ for ($i = 1; $i -le $Cycles; $i++) {
 
     powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1 -Apply
 
+    if ($Apply) {
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Invoke-AiOsRuntimePacketAdvancement.ps1 -Apply
+    } else {
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Invoke-AiOsRuntimePacketAdvancement.ps1
+    }
+
     if ($i -lt $Cycles) {
         Write-Host ""
         Write-Host "Sleeping $IntervalSeconds seconds..."
