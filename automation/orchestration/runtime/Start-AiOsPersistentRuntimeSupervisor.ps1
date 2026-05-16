@@ -19,6 +19,12 @@ for ($i = 1; $i -le $Cycles; $i++) {
     Write-Host "================================="
     Write-Host ""
 
+    powershell -ExecutionPolicy Bypass -File automation/runtime/path_registry/Test-AiOsPathRegistry.ps1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Runtime halted due to invalid path registry."
+        continue
+    }
+
     powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1 -Apply
 
     if ($Apply) {
