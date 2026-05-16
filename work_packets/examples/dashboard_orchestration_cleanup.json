@@ -1,0 +1,60 @@
+{
+  "id": "AIOS-WP-DASHBOARD-ORCHESTRATION-CLEANUP-001",
+  "version": "1.0",
+  "title": "Dashboard Orchestration Cleanup",
+  "lane": "dashboard_orchestration",
+  "mode": "DRY_RUN",
+  "status": "READY_FOR_DRY_RUN",
+  "objective": "Audit and plan consolidation of overlapping dashboard mock-data orchestration fixtures without redesigning or editing the dashboard UI.",
+  "allowed_actions": [
+    "inspect dashboard mock-data fixtures",
+    "map overlapping queue and orchestration fields",
+    "propose one cleanup plan",
+    "run read-only validators"
+  ],
+  "blocked_actions": [
+    "dashboard redesign",
+    "dashboard code edits",
+    "dashboard asset edits",
+    "automatic APPLY",
+    "commit",
+    "push",
+    "new branch",
+    "scheduled task",
+    "startup task",
+    "extra window",
+    "Codex auto-launch",
+    "broker connection",
+    "OANDA integration",
+    "API key use",
+    "webhook execution",
+    "real order",
+    "live trading"
+  ],
+  "files_in_scope": [
+    "apps/dashboard/mock-data/aios-workflow-orchestrator-v1.example.json",
+    "apps/dashboard/mock-data/work-intelligence-queue-v1.example.json",
+    "apps/dashboard/mock-data/aios-orchestrator-window-v1.example.json",
+    "apps/dashboard/mock-data/aios-worker-queue-v1.example.json",
+    "docs/AI_OS/orchestration/AIOS_WORKFLOW_ORCHESTRATOR_V1.md"
+  ],
+  "validators": [
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsMissionJson.DRY_RUN.ps1",
+    "powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "risks": [
+    "mock-data fields may be consumed by static dashboard JavaScript",
+    "fixture names overlap but may represent different operator views",
+    "cleanup must not remove display-only safety locks"
+  ],
+  "stop_condition": "Stop after producing a DRY_RUN cleanup recommendation and validator output. Do not edit dashboard code or fixtures without separate APPLY approval.",
+  "approval_required": true,
+  "created_by": "Codex",
+  "notes": [
+    "This packet is planning-only.",
+    "No UI redesign is included.",
+    "Dashboard remains local mock-data/display-only."
+  ]
+}
