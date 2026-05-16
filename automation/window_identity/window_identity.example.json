@@ -1,0 +1,110 @@
+{
+  "purpose": "Copy-paste friendly AI_OS terminal identity markers for Anthony's local runtime spine work.",
+  "safety": {
+    "repo_scoped_only": true,
+    "live_trading": "BLOCKED",
+    "broker_connection": "BLOCKED",
+    "oanda": "BLOCKED",
+    "api_keys": "BLOCKED",
+    "secrets": "BLOCKED",
+    "startup_tasks": "BLOCKED",
+    "scheduled_tasks": "BLOCKED",
+    "external_apps": "BLOCKED",
+    "dashboard_files": "BLOCKED",
+    "trading_lab_files": "BLOCKED",
+    "protected_root_governance_files": "BLOCKED"
+  },
+  "main_control_setup": [
+    "cd C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "powershell -ExecutionPolicy Bypass -File automation/window_identity/Set-AiOsWindowIdentity.ps1 -Marker \"AI_OS MAIN CONTROL\"",
+    ".\\aios.ps1 -Mode runtime"
+  ],
+  "markers": [
+    {
+      "name": "AI_OS MAIN CONTROL",
+      "color": "Cyan",
+      "emoji": "🧭",
+      "role": "Primary operator terminal for runtime spine commands and final coordination.",
+      "allowed_use": [
+        "Run .\\aios.ps1 -Mode runtime",
+        "Run .\\aios.ps1 -Mode supervisor",
+        "Check repo status and review validator output",
+        "Paste approved git commands with explicit file paths"
+      ],
+      "next_command_hint": ".\\aios.ps1 -Mode runtime"
+    },
+    {
+      "name": "CODEX BUILD LANE",
+      "color": "Yellow",
+      "emoji": "🛠️",
+      "role": "Focused build window for approved repo-scoped implementation work.",
+      "allowed_use": [
+        "Edit only approved files",
+        "Run targeted local validators",
+        "Report files created, changed, validation, git status, commit, and push state"
+      ],
+      "next_command_hint": "git status --short --branch"
+    },
+    {
+      "name": "VALIDATOR WORKER",
+      "color": "Green",
+      "emoji": "✅",
+      "role": "Validation-only window for checks, parser tests, and read-only verification.",
+      "allowed_use": [
+        "Run git diff --check",
+        "Run scoped validators",
+        "Parse changed JSON or PowerShell files",
+        "Report PASS, WARN, or FAIL plainly"
+      ],
+      "next_command_hint": "git diff --check"
+    },
+    {
+      "name": "PACKET QUEUE",
+      "color": "Magenta",
+      "emoji": "📦",
+      "role": "Queue review window for workload packets, command packs, and next safe tasks.",
+      "allowed_use": [
+        "Review queued packet text",
+        "Sort next work by runtime-spine value",
+        "Prepare DRY_RUN prompts for approval"
+      ],
+      "next_command_hint": "Get-ChildItem automation\\packets"
+    },
+    {
+      "name": "APPROVAL INBOX",
+      "color": "Blue",
+      "emoji": "📥",
+      "role": "Decision window for approvals, stop conditions, and user-controlled checkpoints.",
+      "allowed_use": [
+        "Review DRY_RUN reports",
+        "Approve or reject exact APPLY scopes",
+        "Confirm explicit git add, commit, push, or PR steps"
+      ],
+      "next_command_hint": "git status --short --branch"
+    },
+    {
+      "name": "RECOVERY HEALTH",
+      "color": "Red",
+      "emoji": "🩺",
+      "role": "Recovery and health-check window for failures, mismatches, and blocked states.",
+      "allowed_use": [
+        "Run repo health checks",
+        "Capture exact error output",
+        "Mark UNKNOWN, MISMATCH, or INVALID DATA when evidence requires it"
+      ],
+      "next_command_hint": "git status --short --branch"
+    },
+    {
+      "name": "STANDBY WORKER",
+      "color": "DarkGray",
+      "emoji": "⏸️",
+      "role": "Idle worker window reserved for approved next tasks only.",
+      "allowed_use": [
+        "Wait for a scoped task",
+        "Run read-only status checks when asked",
+        "Stay parked until assigned"
+      ],
+      "next_command_hint": "git status --short --branch"
+    }
+  ]
+}
