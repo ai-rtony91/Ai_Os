@@ -38,13 +38,23 @@ function Read-PacketFiles {
     return $packets
 }
 
+function Get-PacketStatusWarnings {
+    param([Parameter(Mandatory = $true)][array]$Packets)
+
+    return @($Packets | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_.packet.status) -and
+        $_.packet.status -ne $_.folder_state
+    })
+}
+
 $scriptName = Split-Path -Leaf $PSCommandPath
 $rootFullPath = Resolve-AiOsPath -Path $RootPath
 $packets = @(Read-PacketFiles -RootFullPath $rootFullPath)
 
-$activePackets = @($packets | Where-Object { $_.folder_state -eq "active" -or $_.packet.status -eq "active" })
-$blockedPackets = @($packets | Where-Object { $_.folder_state -eq "blocked" -or $_.packet.status -eq "blocked" })
-$completePackets = @($packets | Where-Object { $_.folder_state -eq "complete" -or $_.packet.status -eq "complete" })
+$activePackets = @($packets | Where-Object { $_.folder_state -eq "active" })
+$blockedPackets = @($packets | Where-Object { $_.folder_state -eq "blocked" })
+$completePackets = @($packets | Where-Object { $_.folder_state -eq "complete" })
+$statusWarnings = @(Get-PacketStatusWarnings -Packets $packets)
 $orphanPackets = @($packets | Where-Object {
     [string]::IsNullOrWhiteSpace($_.packet.owner_lane) -or
     [string]::IsNullOrWhiteSpace($_.packet.repo) -or
@@ -62,6 +72,16 @@ Write-Host "  active: $($activePackets.Count)"
 Write-Host "  blocked: $($blockedPackets.Count)"
 Write-Host "  complete: $($completePackets.Count)"
 Write-Host "  total: $($packets.Count)"
+
+Write-Host ""
+Write-Host "Folder/status warnings:" -ForegroundColor Yellow
+if ($statusWarnings.Count -eq 0) {
+    Write-Host "  NONE"
+} else {
+    $statusWarnings | ForEach-Object {
+        Write-Host "  WARN $($_.packet.packet_id) - folder: $($_.folder_state) - packet.status: $($_.packet.status) - using folder state"
+    }
+}
 
 Write-Host ""
 Write-Host "Owners:" -ForegroundColor Yellow

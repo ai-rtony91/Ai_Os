@@ -36,11 +36,21 @@ function Read-PacketFolder {
     })
 }
 
+function Get-PacketStatusWarnings {
+    param([Parameter(Mandatory = $true)][array]$Packets)
+
+    return @($Packets | Where-Object {
+        -not [string]::IsNullOrWhiteSpace($_.packet.status) -and
+        $_.packet.status -ne $_.folder_state
+    })
+}
+
 $scriptName = Split-Path -Leaf $PSCommandPath
 $rootFullPath = Resolve-AiOsPath -Path $RootPath
 $activePackets = @(Read-PacketFolder -RootFullPath $rootFullPath -State "active")
 $blockedPackets = @(Read-PacketFolder -RootFullPath $rootFullPath -State "blocked")
 $allPackets = @($activePackets + $blockedPackets)
+$statusWarnings = @(Get-PacketStatusWarnings -Packets $allPackets)
 
 $unassignedPackets = @($activePackets | Where-Object { [string]::IsNullOrWhiteSpace($_.packet.assigned_worker) })
 $duplicateOwners = @($activePackets | Where-Object { -not [string]::IsNullOrWhiteSpace($_.packet.owner_lane) } | Group-Object { $_.packet.owner_lane } | Where-Object { $_.Count -gt 1 })
@@ -53,6 +63,16 @@ Write-Host "Routing lane: route_dispatch"
 Write-Host "State observer lane: watch_state"
 Write-Host "CONTROL remains root lane."
 Write-Host "No files changed. No automation loops. No background processes."
+
+Write-Host ""
+Write-Host "Folder/status warnings:" -ForegroundColor Yellow
+if ($statusWarnings.Count -eq 0) {
+    Write-Host "  NONE"
+} else {
+    $statusWarnings | ForEach-Object {
+        Write-Host "  WARN $($_.packet.packet_id) - folder: $($_.folder_state) - packet.status: $($_.packet.status) - using folder state"
+    }
+}
 
 Write-Host ""
 Write-Host "Active packets inspected: $($activePackets.Count)" -ForegroundColor Yellow

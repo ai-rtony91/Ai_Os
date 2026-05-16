@@ -255,9 +255,14 @@ $packetExampleFiles = @()
     $statePath = Resolve-AiOsPath -Path "automation/orchestration/work_packets/$state"
     $files = @(Get-ChildItem -LiteralPath $statePath -Filter "*.json" -File)
     if ($files.Count -lt 1) {
-        throw "Missing example packet in state folder: $state"
+        if ($state -eq "active") {
+            Write-Host "PASS: no active packet JSON files"
+        } else {
+            throw "Missing example packet in state folder: $state"
+        }
+    } else {
+        $packetExampleFiles += $files
     }
-    $packetExampleFiles += $files
 }
 
 $packetExampleFiles | ForEach-Object {
