@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$LaneId,
     [switch]$Preview,
     [switch]$LaunchManualShells,
@@ -34,18 +34,66 @@ function Write-LaneReport {
 }
 
 function Get-LaneCommand {
-    param([Parameter(Mandatory = $true)]$Lane)
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$IdentityScriptPath
+    )
 
     $escapedPath = $Lane.path.Replace("'", "''")
-    $escapedWindowTitle = $Lane.window_title.Replace("'", "''")
+    $escapedIdentityScriptPath = $IdentityScriptPath.Replace("'", "''")
     $escapedDisplayTitle = $Lane.display_title.Replace("'", "''")
-    $escapedTabTitle = $Lane.tab_title.Replace("'", "''")
-    $escapedLaneId = $Lane.lane_id.Replace("'", "''")
-    $escapedEmoji = $Lane.emoji_marker.Replace("'", "''")
-    $escapedTruthSource = $Lane.truth_source.Replace("'", "''")
-    $escapedBranch = $Lane.branch.Replace("'", "''")
+    $laneJson = $Lane | ConvertTo-Json -Depth 8 -Compress
+    $laneJsonBase64 = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($laneJson))
 
-    return "Set-Location -LiteralPath '$escapedPath'; `$Host.UI.RawUI.WindowTitle = '$escapedWindowTitle'; Write-Host '$escapedEmoji $escapedDisplayTitle' -ForegroundColor Cyan; Write-Host 'lane_id: $escapedLaneId'; Write-Host 'display_title: $escapedDisplayTitle'; Write-Host 'window_title: $escapedWindowTitle'; Write-Host 'tab_title: $escapedTabTitle'; Write-Host 'emoji_marker: $escapedEmoji'; Write-Host 'truth_source: $escapedTruthSource'; Write-Host 'path: $escapedPath'; Write-Host 'branch: $escapedBranch'; Write-Host 'Trust prompt path and Git branch, not stale terminal/tab title after cd.' -ForegroundColor Yellow; git status --short --branch"
+    $command = "Set-Location -LiteralPath '$escapedPath'; & '$escapedIdentityScriptPath' -LaneJsonBase64 '$laneJsonBase64'; Write-Host 'Trust prompt path and Git branch, not stale terminal/tab title after cd.' -ForegroundColor Yellow; git status --short --branch"
+    if (Test-CodexLane -Lane $Lane) {
+        $command += "; Write-Host 'Manual Codex lane needed: $escapedDisplayTitle' -ForegroundColor Yellow; Write-Host 'Command: cd $escapedPath; codex'"
+    }
+
+    return $command
+}
+
+function Test-CodexLane {
+    param([Parameter(Mandatory = $true)]$Lane)
+
+    return (
+        $Lane.lane_id.IndexOf("codex", [System.StringComparison]::OrdinalIgnoreCase) -ge 0 -or
+        $Lane.display_title.IndexOf("codex", [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+    )
+}
+
+function Get-WtManualCommand {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$IdentityScriptPath
+    )
+
+    $escapedPath = $Lane.path.Replace('"', '\"')
+    $escapedIdentityScriptPath = $IdentityScriptPath.Replace('"', '\"')
+    $laneJson = $Lane | ConvertTo-Json -Depth 8 -Compress
+    $laneJsonBase64 = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($laneJson))
+    return "cd `"$escapedPath`"; powershell -ExecutionPolicy Bypass -File `"$escapedIdentityScriptPath`" -LaneJsonBase64 `"$laneJsonBase64`"; git status --short --branch"
+}
+
+function Open-LaneTab {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$IdentityScriptPath
+    )
+
+    Start-Process -FilePath "wt.exe" -ArgumentList @(
+        "-w",
+        "0",
+        "new-tab",
+        "--title",
+        $Lane.tab_title,
+        "powershell.exe",
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        (Get-LaneCommand -Lane $Lane -IdentityScriptPath $IdentityScriptPath)
+    )
 }
 
 if ($Preview -and $LaunchManualShells) {
@@ -60,10 +108,26 @@ if (-not (Test-Path -LiteralPath $fullRegistryPath -PathType Leaf)) {
 }
 
 $registry = Get-Content -LiteralPath $fullRegistryPath -Raw | ConvertFrom-Json
+$identityScriptPath = Join-Path $PSScriptRoot "Set-AiOsTerminalIdentity.ps1"
+if (-not (Test-Path -LiteralPath $identityScriptPath -PathType Leaf)) {
+    throw "Terminal identity helper not found: $identityScriptPath"
+}
+
+if (-not [string]::IsNullOrWhiteSpace($LaneId)) {
+    $identityLane = @($registry.lanes) | Where-Object { $_.lane_id -eq $LaneId } | Select-Object -First 1
+    if ($null -ne $identityLane) {
+        $Host.UI.RawUI.WindowTitle = $identityLane.window_title
+        $escape = [char]27
+        $bell = [char]7
+        Write-Host -NoNewline ("$escape]0;$($identityLane.tab_title)$bell")
+    }
+}
 
 Write-Host ("COPY START " + [char]0x2014 + " $scriptName")
 Write-Host "AI_OS Lane Opener" -ForegroundColor Cyan
 Write-Host "Mode: $(if ($isPreview) { 'PREVIEW - print only' } else { 'MANUAL SHELL LAUNCH' })"
+Write-Host "launch_policy: windows_terminal_tab_only"
+Write-Host "fallback_policy: print_manual_command"
 Write-Host "Safety: no assistant auto-launch. Background launch hooks are disabled."
 Write-Host ("Safety: no commits, no pushes, no startup tasks, no scheduled tasks, no " + "bro" + "ker/API/live trading.")
 Write-Host "Truth rule: trust prompt path and Git branch, not stale terminal/tab title after cd."
@@ -80,7 +144,7 @@ if ([string]::IsNullOrWhiteSpace($LaneId)) {
     }
     Write-Host ""
     Write-Host "Preview one lane:"
-    Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId validation_audit -Preview"
+    Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId check_audit -Preview"
     Write-Host ("COPY END " + [char]0x2014 + " $scriptName")
     exit 0
 }
@@ -95,7 +159,7 @@ Write-Host "== Selected Lane ==" -ForegroundColor Yellow
 Write-LaneReport -Lane $selectedLane
 
 if ($isPreview) {
-    Write-Host "Preview complete. No window opened." -ForegroundColor Green
+    Write-Host "Preview complete. No tab opened." -ForegroundColor Green
     Write-Host ("COPY END " + [char]0x2014 + " $scriptName")
     exit 0
 }
@@ -104,15 +168,20 @@ if (-not (Test-Path -LiteralPath $selectedLane.path -PathType Container)) {
     throw "Lane path not found: $($selectedLane.path)"
 }
 
-Start-Process powershell.exe -ArgumentList @(
-    "-NoExit",
-    "-ExecutionPolicy",
-    "Bypass",
-    "-Command",
-    (Get-LaneCommand -Lane $selectedLane)
-)
+$wtCommand = Get-Command wt.exe -ErrorAction SilentlyContinue
+if ($null -eq $wtCommand) {
+    Write-Host "Windows Terminal unavailable. Fallback manual command:" -ForegroundColor Yellow
+    Write-Host (Get-WtManualCommand -Lane $selectedLane -IdentityScriptPath $identityScriptPath)
+    Write-Host "Tabs opened: 0"
+    Write-Host "Assistant auto-start performed: NO"
+    Write-Host "Commit performed: NO"
+    Write-Host "Push performed: NO"
+    Write-Host ("COPY END " + [char]0x2014 + " $scriptName")
+    exit 0
+}
 
-Write-Host "Opened manual PowerShell lane: $($selectedLane.lane_id)"
+Open-LaneTab -Lane $selectedLane -IdentityScriptPath $identityScriptPath
+Write-Host "Opened Windows Terminal tab: $($selectedLane.lane_id)"
 Write-Host "Assistant auto-start performed: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"

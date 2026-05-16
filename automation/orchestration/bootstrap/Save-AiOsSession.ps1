@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$Preview,
     [switch]$Apply,
     [string]$RegistryPath = "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
@@ -59,12 +59,12 @@ $session = [ordered]@{
     active_worktree = (Get-Location).Path
     active_branch = (git branch --show-current)
     truth_rule = "Trust prompt path and Git branch, not stale terminal/tab title after cd."
-    open_lanes = @("bootstrap_git", "bootstrap_codex")
+    open_lanes = @("save_git", "create_codex")
     last_known_roles = @($registry.lanes | ForEach-Object { Convert-LaneForSession -Lane $_ })
     last_commands = [ordered]@{
         workspace_preview = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview"
         workspace_launch = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -LaunchManualShells"
-        lane_preview = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId bootstrap_git -Preview"
+        lane_preview = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId save_git -Preview"
         save_session = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsSession.ps1 -Apply"
         restore_preview = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1 -Preview"
         validator = "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"

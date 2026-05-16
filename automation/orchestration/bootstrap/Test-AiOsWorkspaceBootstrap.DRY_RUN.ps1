@@ -1,6 +1,7 @@
-param(
+﻿param(
     [string]$RegistryPath = "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
-    [string]$SessionExamplePath = "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json"
+    [string]$SessionExamplePath = "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
+    [string]$CheckpointExamplePath = "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json"
 )
 
 Set-StrictMode -Off
@@ -72,12 +73,17 @@ function Assert-NoAssistantAutoStart {
 
 $requiredFiles = @(
     "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
+    "automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1",
+    "automation/orchestration/bootstrap/Set-AiOsTerminalIdentity.ps1",
     "automation/orchestration/bootstrap/Start-AiOsWorkspace.ps1",
     "automation/orchestration/bootstrap/Open-AiOsLane.ps1",
     "automation/orchestration/bootstrap/Save-AiOsSession.ps1",
     "automation/orchestration/bootstrap/Restore-AiOsSession.ps1",
+    "automation/orchestration/bootstrap/Save-AiOsWorkspaceCheckpoint.ps1",
+    "automation/orchestration/bootstrap/Restore-AiOsWorkspaceCheckpoint.ps1",
     "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
+    "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json",
     "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md"
 )
 
@@ -117,14 +123,19 @@ Write-Host ""
 Write-Host "== JSON Parse ==" -ForegroundColor Yellow
 $registryFullPath = Resolve-AiOsPath -Path $RegistryPath
 $sessionExampleFullPath = Resolve-AiOsPath -Path $SessionExamplePath
+$checkpointExampleFullPath = Resolve-AiOsPath -Path $CheckpointExamplePath
 $registry = Get-Content -LiteralPath $registryFullPath -Raw | ConvertFrom-Json
 $sessionExample = Get-Content -LiteralPath $sessionExampleFullPath -Raw | ConvertFrom-Json
+$checkpointExample = Get-Content -LiteralPath $checkpointExampleFullPath -Raw | ConvertFrom-Json
 Write-Host "PASS: $RegistryPath"
 Write-Host "PASS: $SessionExamplePath"
+Write-Host "PASS: $CheckpointExamplePath"
 Assert-NoBlockedAutomation -Path $registryFullPath
 Assert-NoBlockedAutomation -Path $sessionExampleFullPath
+Assert-NoBlockedAutomation -Path $checkpointExampleFullPath
 Assert-NoAssistantAutoStart -Path $registryFullPath
 Assert-NoAssistantAutoStart -Path $sessionExampleFullPath
+Assert-NoAssistantAutoStart -Path $checkpointExampleFullPath
 
 if (-not $registry.lanes -or @($registry.lanes).Count -lt 1) {
     throw "Lane registry has no lanes."
@@ -134,23 +145,42 @@ if (-not $sessionExample.lanes -or @($sessionExample.lanes).Count -lt 1) {
     throw "Session example has no lanes."
 }
 
+if (-not $checkpointExample.lanes -or @($checkpointExample.lanes).Count -lt 1) {
+    throw "Checkpoint example has no lanes."
+}
+
+if (@($registry.lanes)[0].lane_id -ne "main_control") {
+    throw "CONTROL lane must be leftmost in registry."
+}
+
+if (@($checkpointExample.lanes)[0].lane_id -ne "main_control") {
+    throw "CONTROL lane must be leftmost in checkpoint example."
+}
+
 $requiredLaneIds = @(
     "main_control",
-    "bootstrap_git",
-    "bootstrap_codex",
-    "validation_audit",
-    "dispatch_queue",
-    "state_monitor"
+    "create_codex",
+    "save_git",
+    "route_dispatch",
+    "check_audit",
+    "watch_state"
 )
+
+$actualLaneOrder = @($registry.lanes | ForEach-Object { $_.lane_id })
+for ($index = 0; $index -lt $requiredLaneIds.Count; $index += 1) {
+    if ($actualLaneOrder[$index] -ne $requiredLaneIds[$index]) {
+        throw "Registry lane order mismatch at index $index`: expected $($requiredLaneIds[$index]), found $($actualLaneOrder[$index])"
+    }
+}
 
 $titleSeparator = " " + [char]0x00b7 + " "
 $requiredDisplayTitles = @(
     ("CONTROL" + $titleSeparator + "main"),
-    ("BOOTSTRAP" + $titleSeparator + "git"),
-    ("BOOTSTRAP" + $titleSeparator + "codex"),
-    ("VALIDATE" + $titleSeparator + "audit"),
-    ("DISPATCH" + $titleSeparator + "queue"),
-    ("STATE" + $titleSeparator + "monitor")
+    ("CREATE" + $titleSeparator + "codex"),
+    ("SAVE" + $titleSeparator + "git"),
+    ("ROUTE" + $titleSeparator + "dispatch"),
+    ("CHECK" + $titleSeparator + "audit"),
+    ("WATCH" + $titleSeparator + "state")
 )
 
 Write-Host ""
@@ -163,6 +193,23 @@ $requiredLaneIds | ForEach-Object {
     }
     Write-Host "PASS: $laneId"
 }
+
+Write-Host ""
+Write-Host "== Launch Policy ==" -ForegroundColor Yellow
+if ($registry.launch_policy -ne "windows_terminal_tab_only") {
+    throw "Registry launch_policy must be windows_terminal_tab_only."
+}
+if ($registry.fallback_policy -ne "print_manual_command") {
+    throw "Registry fallback_policy must be print_manual_command."
+}
+if ($checkpointExample.launch_policy -ne "windows_terminal_tab_only") {
+    throw "Checkpoint launch_policy must be windows_terminal_tab_only."
+}
+if ($checkpointExample.fallback_policy -ne "print_manual_command") {
+    throw "Checkpoint fallback_policy must be print_manual_command."
+}
+Write-Host "PASS: launch_policy windows_terminal_tab_only"
+Write-Host "PASS: fallback_policy print_manual_command"
 
 Write-Host ""
 Write-Host "== Required Display Titles ==" -ForegroundColor Yellow
@@ -188,12 +235,37 @@ $requiredSessionFields = @(
     "next_safe_action"
 )
 
+$requiredCheckpointFields = @(
+    "checkpoint_id",
+    "created_at",
+    "active_workspace",
+    "active_worktree",
+    "active_branch",
+    "launch_policy",
+    "fallback_policy",
+    "lanes",
+    "last_commands",
+    "pending_workorders",
+    "last_validator_status",
+    "next_safe_action"
+)
+
 Write-Host ""
 Write-Host "== Session State Fields ==" -ForegroundColor Yellow
 $requiredSessionFields | ForEach-Object {
     $field = $_
     if (-not ($sessionExample.PSObject.Properties.Name -contains $field)) {
         throw "Session example missing field: $field"
+    }
+    Write-Host "PASS: $field"
+}
+
+Write-Host ""
+Write-Host "== Workspace Checkpoint Fields ==" -ForegroundColor Yellow
+$requiredCheckpointFields | ForEach-Object {
+    $field = $_
+    if (-not ($checkpointExample.PSObject.Properties.Name -contains $field)) {
+        throw "Checkpoint example missing field: $field"
     }
     Write-Host "PASS: $field"
 }
@@ -221,6 +293,14 @@ Write-Host "== Lane Naming Fields ==" -ForegroundColor Yellow
         throw "Lane $($lane.lane_id) has blocked user-facing word: filter"
     }
 
+    @("display_title", "window_title", "tab_title") | ForEach-Object {
+        $titleField = $_
+        $titleValue = [string]$lane.PSObject.Properties[$titleField].Value
+        if ($titleValue -match "Windows PowerShell|PowerShell|aios-worker-|phase-") {
+            throw "Lane $($lane.lane_id) has generic or filesystem/branch title in $titleField`: $titleValue"
+        }
+    }
+
     Write-Host "lane_id: $($lane.lane_id)" -ForegroundColor Cyan
     Write-Host "display_title: $($lane.display_title)"
     Write-Host "window_title: $($lane.window_title)"
@@ -233,6 +313,27 @@ Write-Host "== Lane Naming Fields ==" -ForegroundColor Yellow
     Write-Host ""
 }
 
+Write-Host "== Checkpoint Lane Fields ==" -ForegroundColor Yellow
+@($checkpointExample.lanes) | ForEach-Object {
+    $lane = $_
+    @("lane_id", "display_title", "window_title", "tab_title", "emoji_marker", "role", "path", "branch", "truth_source") | ForEach-Object {
+        $field = $_
+        if (-not ($lane.PSObject.Properties.Name -contains $field)) {
+            throw "Checkpoint lane $($lane.lane_id) missing field: $field"
+        }
+    }
+
+    if ($actualLaneIds -notcontains $lane.lane_id) {
+        throw "Checkpoint lane_id is not in registry: $($lane.lane_id)"
+    }
+
+    if ($lane.truth_source -ne "path_and_branch") {
+        throw "Checkpoint lane $($lane.lane_id) has invalid truth_source: $($lane.truth_source)"
+    }
+
+    Write-Host "PASS: $($lane.lane_id)"
+}
+
 Write-Host "== Git Worktree List ==" -ForegroundColor Yellow
 git worktree list
 
@@ -241,12 +342,23 @@ Write-Host "== Bootstrap Preview Smoke Test ==" -ForegroundColor Yellow
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview
 
 Write-Host ""
+Write-Host "== Intent Preview Smoke Tests ==" -ForegroundColor Yellow
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "queue dispatcher automation"
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "validation cleanup audit"
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "edit feature with codex"
+
+Write-Host ""
 Write-Host "== Lane Preview Smoke Test ==" -ForegroundColor Yellow
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Open-AiOsLane.ps1" -LaneId bootstrap_git -Preview
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Open-AiOsLane.ps1" -LaneId save_git -Preview
 
 Write-Host ""
 Write-Host "== Restore Preview Smoke Test ==" -ForegroundColor Yellow
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Restore-AiOsSession.ps1" -Preview
+
+Write-Host ""
+Write-Host "== Workspace Checkpoint Preview Smoke Tests ==" -ForegroundColor Yellow
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1" -Preview
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Restore-AiOsWorkspaceCheckpoint.ps1" -Preview
 
 Write-Host ""
 Write-Host "Workspace bootstrap DRY_RUN validation passed." -ForegroundColor Green
