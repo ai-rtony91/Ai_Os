@@ -21,8 +21,15 @@ if ($null -eq $worker) {
 
 $title = "AIOS WORKER - $WorkerId"
 $repoPath = (Get-Location).Path
+$workerScript = "automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1"
 
-$workerCommand = "Set-Location -LiteralPath `"$repoPath`"; Write-Host 'AIOS WORKER READY: $WorkerId'; Write-Host 'Type: $($worker.type)'; Write-Host 'Purpose: $($worker.purpose)'; powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1 -WorkerId $WorkerId"
+$workerCommand = @"
+Set-Location -LiteralPath '$repoPath'
+Write-Host 'AIOS WORKER READY: $WorkerId'
+Write-Host 'Type: $($worker.type)'
+Write-Host 'Purpose: $($worker.purpose)'
+powershell -ExecutionPolicy Bypass -File '$workerScript' -WorkerId '$WorkerId'
+"@
 
 Write-Host "COPY START - Open-AiOsWorkerWindow.DRY_RUN.ps1"
 Write-Host "AI_OS Worker Window Launcher" -ForegroundColor Cyan
@@ -31,12 +38,13 @@ Write-Host "worker_id: $WorkerId"
 Write-Host "worker_type: $($worker.type)"
 Write-Host "title: $title"
 Write-Host ""
-Write-Host "Would open a worker terminal window."
+Write-Host "Would open a worker terminal tab."
 Write-Host "Command:"
 Write-Host $workerCommand
 
 if ($Apply) {
-    wt new-tab --title $title powershell -NoExit -Command $workerCommand
+    $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($workerCommand))
+    wt new-tab --title $title powershell -NoExit -EncodedCommand $encodedCommand
     Write-Host "Worker window opened: YES"
 } else {
     Write-Host "Worker window opened: NO"
@@ -45,4 +53,3 @@ if ($Apply) {
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
 Write-Host "COPY END - Open-AiOsWorkerWindow.DRY_RUN.ps1"
-
