@@ -1,0 +1,58 @@
+﻿{
+  "policy_id": "AIOS_WORKER_SAFETY_POLICY",
+  "version": "1.0",
+  "purpose": "Keep AIOS workers focused, safe, and inside approved repo work.",
+  "allowed_roots": [
+    "automation/",
+    "docs/",
+    ".github/"
+  ],
+  "blocked_roots": [
+    ".git/",
+    ".env",
+    "secrets/",
+    "keys/",
+    "credentials/",
+    "private/",
+    "node_modules/",
+    "__pycache__/"
+  ],
+  "allowed_actions": [
+    "read_status",
+    "read_inbox",
+    "create_dry_run_script",
+    "create_worker_template",
+    "create_work_packet",
+    "update_runtime_memory",
+    "preview_command",
+    "run_health_check"
+  ],
+  "approval_required_actions": [
+    "apply_packet_transition",
+    "create_pr",
+    "merge_pr",
+    "open_worker_window",
+    "run_worker_loop",
+    "write_to_main_branch"
+  ],
+  "human_only_actions": [
+    "merge_without_pr",
+    "delete_repo_files",
+    "touch_secrets",
+    "live_trading",
+    "change_credentials",
+    "run_unbounded_background_service",
+    "edit_outside_repo"
+  ],
+  "rules": [
+    "Workers only do tasks assigned through inbox or queue.",
+    "Workers preview before apply.",
+    "Workers only build what AIOS needs.",
+    "Workers cannot touch secrets.",
+    "Workers cannot live trade.",
+    "Workers cannot delete important files.",
+    "Workers cannot merge without PR gate.",
+    "Workers must stay inside the repo.",
+    "Main branch must stay protected by PR flow."
+  ]
+}
