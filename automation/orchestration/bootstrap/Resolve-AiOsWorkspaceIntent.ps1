@@ -27,18 +27,18 @@ $validatorsSuggested = [System.Collections.ArrayList]::new()
 
 Add-UniqueValue -List $selectedLaneIds -Value "main_control"
 
-if ($searchIntent -match "\b(queue|dispatcher|packet|routing)\b") {
+if ($searchIntent -match "\b(queue|dispatcher|packet|routing|route|dispatch|brainstem|daily|start)\b") {
     Add-UniqueValue -List $selectedLaneIds -Value "route_dispatch"
     Add-UniqueValue -List $selectedLaneIds -Value "watch_state"
     Add-UniqueValue -List $validatorsSuggested -Value "Route and watch preview"
 }
 
-if ($searchIntent -match "\b(validation|audit|cleanup|check)\b") {
+if ($searchIntent -match "\b(validation|validator|audit|cleanup|check|supervisor|daily|start|brainstem)\b") {
     Add-UniqueValue -List $selectedLaneIds -Value "check_audit"
     Add-UniqueValue -List $validatorsSuggested -Value "Workspace DRY_RUN validator"
 }
 
-if ($searchIntent -match "\b(bootstrap|workspace|lane|window|session)\b") {
+if ($searchIntent -match "\b(bootstrap|workspace|lane|window|session|daily|start|brainstem)\b") {
     Add-UniqueValue -List $selectedLaneIds -Value "save_git"
     Add-UniqueValue -List $validatorsSuggested -Value "Workspace bootstrap preview"
 }
@@ -49,7 +49,7 @@ if ($searchIntent -match "\b(codex|edit|feature|implement)\b") {
     Add-UniqueValue -List $validatorsSuggested -Value "Run relevant validators after manual assistant edits"
 }
 
-if ($searchIntent -match "\b(rulebook|operator|rules|memory|instructions)\b") {
+if ($searchIntent -match "\b(rulebook|operator|rules|memory|instructions|brainstem)\b") {
     Add-UniqueValue -List $selectedLaneIds -Value "rulebook_codex"
     Add-UniqueValue -List $manualCodexLaneIds -Value "rulebook_codex"
     Add-UniqueValue -List $validatorsSuggested -Value "Workspace bootstrap preview"

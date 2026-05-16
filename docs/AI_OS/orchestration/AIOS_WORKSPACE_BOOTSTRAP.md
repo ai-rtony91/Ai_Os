@@ -21,6 +21,15 @@ docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md
 automation/orchestration/operator/AIOS_OPERATOR_RULES.json
 ```
 
+Daily Start route:
+
+```text
+docs/AI_OS/orchestration/AIOS_DAILY_START.md
+automation/orchestration/bootstrap/Start-AiOsDay.ps1
+automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1
+automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1
+```
+
 ## Lane Model
 
 Each lane records:
@@ -176,6 +185,36 @@ Intent preview output includes:
 - `Validators suggested:`
 - `Next safe action:`
 
+## Daily Start
+
+`Start-AiOsDay.ps1` connects the Rulebook, Intent Router, and Supervisor route for the start of a work session.
+
+Preview command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsDay.ps1 -Intent "complete brainstem daily start route" -MaxTabs 3
+```
+
+Daily Start prints CONTROL git status, workspace intent route, supervisor assignment preview, suggested lanes, suggested validators, and a `WHERE TO RUN NEXT` block.
+
+Manual launch remains explicit:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsDay.ps1 -Intent "complete brainstem daily start route" -MaxTabs 3 -LaunchManualShells
+```
+
+It opens Windows Terminal tabs only, does not start Codex, does not commit, does not push, does not create scheduled/startup tasks, and does not touch broker/API/live trading.
+
+## Supervisor Planner
+
+Supervisor assignment preview:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\supervisor\Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1 -Intent "complete brainstem daily start route"
+```
+
+The planner answers what workers are needed, what each worker does, what lane each worker uses, what files are in scope, what validators run, what approval is required, and the exact next safe action.
+
 ## Start Commands
 
 Preview workspace:
@@ -309,6 +348,7 @@ COPY END — <script>
 Marker-enabled scripts:
 
 - `Start-AiOsWorkspace.ps1`
+- `Start-AiOsDay.ps1`
 - `Open-AiOsLane.ps1`
 - `Set-AiOsTerminalIdentity.ps1`
 - `Save-AiOsSession.ps1`

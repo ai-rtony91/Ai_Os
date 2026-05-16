@@ -71,22 +71,69 @@ function Assert-NoAssistantAutoStart {
     }
 }
 
+function Assert-NoScheduledOrStartupMutation {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $content = Get-Content -LiteralPath $Path -Raw
+    $blockedPatterns = @(
+        "Register-ScheduledTask",
+        "New-ScheduledTask",
+        "schtasks.exe",
+        "schtasks ",
+        "\Startup\",
+        "Start Menu\Programs\Startup"
+    )
+
+    $blockedPatterns | ForEach-Object {
+        $pattern = $_
+        if ($content.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            throw "Scheduled/startup mutation pattern found in $Path`: $pattern"
+        }
+    }
+}
+
+function Assert-NoBrokerLiveTradingMutation {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $content = Get-Content -LiteralPath $Path -Raw
+    $blockedPatterns = @(
+        "Invoke-RestMethod",
+        "Invoke-WebRequest",
+        "New-WebServiceProxy",
+        "Send-AiOsLiveOrder",
+        "Submit-LiveOrder",
+        "Place-LiveOrder",
+        "Connect-Oanda",
+        "Connect-Broker"
+    )
+
+    $blockedPatterns | ForEach-Object {
+        $pattern = $_
+        if ($content.IndexOf($pattern, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+            throw "Broker/API/live trading mutation pattern found in $Path`: $pattern"
+        }
+    }
+}
+
 $requiredFiles = @(
     "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
     "automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1",
     "automation/orchestration/bootstrap/Set-AiOsTerminalIdentity.ps1",
     "automation/orchestration/bootstrap/Start-AiOsWorkspace.ps1",
+    "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
     "automation/orchestration/bootstrap/Open-AiOsLane.ps1",
     "automation/orchestration/bootstrap/Save-AiOsSession.ps1",
     "automation/orchestration/bootstrap/Restore-AiOsSession.ps1",
     "automation/orchestration/bootstrap/Save-AiOsWorkspaceCheckpoint.ps1",
     "automation/orchestration/bootstrap/Restore-AiOsWorkspaceCheckpoint.ps1",
     "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
+    "automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1",
     "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
     "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json",
     "automation/orchestration/operator/AIOS_OPERATOR_RULES.json",
     "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md",
-    "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md"
+    "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
+    "docs/AI_OS/orchestration/AIOS_DAILY_START.md"
 )
 
 $scriptName = Split-Path -Leaf $PSCommandPath
@@ -117,6 +164,8 @@ $requiredFiles | Where-Object { $_ -like "*.ps1" } | ForEach-Object {
     if ((Split-Path -Leaf $fullPath) -ne "Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1") {
         Assert-NoBlockedAutomation -Path $fullPath
         Assert-NoAssistantAutoStart -Path $fullPath
+        Assert-NoScheduledOrStartupMutation -Path $fullPath
+        Assert-NoBrokerLiveTradingMutation -Path $fullPath
     }
     Write-Host "PASS: $scriptFile"
 }
@@ -158,6 +207,14 @@ if (@($registry.lanes)[0].lane_id -ne "main_control") {
     throw "CONTROL lane must be leftmost in registry."
 }
 
+if (@($registry.lanes)[0].path -ne "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN") {
+    throw "CONTROL lane path must remain fixed root."
+}
+
+if (@($registry.lanes)[0].branch -ne "main") {
+    throw "CONTROL lane branch must remain main."
+}
+
 if (@($checkpointExample.lanes)[0].lane_id -ne "main_control") {
     throw "CONTROL lane must be leftmost in checkpoint example."
 }
@@ -170,8 +227,39 @@ if ($operatorRules.lane_identity.lane_id -ne "rulebook_codex") {
     throw "Operator rules lane_identity must be rulebook_codex."
 }
 
+$titleSeparator = " " + [char]0x00b7 + " "
+
+if ($operatorRules.lane_identity.display_title -ne ("RULEBOOK" + $titleSeparator + "codex")) {
+    throw "Operator rules display_title must be RULEBOOK · codex."
+}
+
 if ($operatorRules.lane_identity.truth_source -ne "path_and_branch") {
     throw "Operator rules lane_identity truth_source must be path_and_branch."
+}
+
+$requiredRuleTexts = @(
+    "Always say WHERE before commands.",
+    "Always name the visible tab/window first.",
+    "Always include the path before commands.",
+    "Codex worker vs Git/PowerShell save tab must be distinct.",
+    "CONTROL is permanent root.",
+    "Path + branch are the truth source.",
+    "No Codex auto-launch.",
+    "Preview before launch.",
+    "No commits/pushes without explicit command.",
+    "No scheduled/startup tasks.",
+    "No broker/API/live trading."
+)
+
+Write-Host ""
+Write-Host "== Operator Rulebook Rules ==" -ForegroundColor Yellow
+$operatorRuleStrings = @($operatorRules.rules)
+$requiredRuleTexts | ForEach-Object {
+    $ruleText = $_
+    if ($operatorRuleStrings -notcontains $ruleText) {
+        throw "Operator rules missing required rule: $ruleText"
+    }
+    Write-Host "PASS: $ruleText"
 }
 
 $requiredLaneIds = @(
@@ -191,7 +279,6 @@ for ($index = 0; $index -lt ($requiredLaneIds.Count - 1); $index += 1) {
     }
 }
 
-$titleSeparator = " " + [char]0x00b7 + " "
 $requiredDisplayTitles = @(
     ("CONTROL" + $titleSeparator + "main"),
     ("CREATE" + $titleSeparator + "codex"),
@@ -229,6 +316,16 @@ if ($checkpointExample.fallback_policy -ne "print_manual_command") {
 }
 Write-Host "PASS: launch_policy windows_terminal_tab_only"
 Write-Host "PASS: fallback_policy print_manual_command"
+
+Write-Host ""
+Write-Host "== Codex Lanes Manual Only ==" -ForegroundColor Yellow
+@($registry.lanes | Where-Object { $_.lane_id -like "*codex*" -or $_.display_title -like "*codex*" }) | ForEach-Object {
+    $lane = $_
+    if ($lane.lane_id -eq "create_codex" -and $lane.role.IndexOf("Manual", [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+        throw "Codex lane must state manual use: $($lane.lane_id)"
+    }
+    Write-Host "PASS: $($lane.lane_id) manual lane"
+}
 
 Write-Host ""
 Write-Host "== Required Display Titles ==" -ForegroundColor Yellow
@@ -366,6 +463,34 @@ powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Sta
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "validation cleanup audit"
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "edit feature with codex"
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "operator rulebook memory"
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "complete brainstem daily start route"
+
+Write-Host ""
+Write-Host "== Supervisor Planner Smoke Test ==" -ForegroundColor Yellow
+$supervisorOutput = powershell -ExecutionPolicy Bypass -File "automation\orchestration\supervisor\Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1" -Intent "complete brainstem daily start route"
+$supervisorText = ($supervisorOutput -join [Environment]::NewLine)
+if ($supervisorText -notmatch "COPY START" -or $supervisorText -notmatch "COPY END") {
+    throw "Supervisor planner copy markers missing."
+}
+if ($supervisorText -notmatch "What workers are needed" -or $supervisorText -notmatch "Exact next safe action") {
+    throw "Supervisor planner required output blocks missing."
+}
+$supervisorOutput | ForEach-Object { Write-Host $_ }
+
+Write-Host ""
+Write-Host "== Daily Start Smoke Test ==" -ForegroundColor Yellow
+$dailyStartOutput = powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsDay.ps1" -Intent "complete brainstem daily start route" -MaxTabs 3
+$dailyStartText = ($dailyStartOutput -join [Environment]::NewLine)
+if ($dailyStartText -notmatch "COPY START" -or $dailyStartText -notmatch "COPY END") {
+    throw "Daily Start copy markers missing."
+}
+if ($dailyStartText -notmatch "WHERE TO RUN NEXT") {
+    throw "Daily Start WHERE TO RUN NEXT block missing."
+}
+if ($dailyStartText -notmatch "Codex auto-launch performed: NO") {
+    throw "Daily Start must report no Codex auto-launch."
+}
+$dailyStartOutput | ForEach-Object { Write-Host $_ }
 
 Write-Host ""
 Write-Host "== Lane Preview Smoke Test ==" -ForegroundColor Yellow
