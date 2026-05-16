@@ -34,3 +34,7 @@ Write-Host ""
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
 Write-Host "COPY END — Start-AiOsOperatorDay.ps1"
+
+Write-Host ""
+Write-Host "STEP 6 - APPROVAL PROCESSOR" -ForegroundColor Yellow
+powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1
