@@ -121,6 +121,7 @@ $requiredFiles = @(
     "automation/orchestration/bootstrap/Set-AiOsTerminalIdentity.ps1",
     "automation/orchestration/bootstrap/Start-AiOsWorkspace.ps1",
     "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
+    "automation/orchestration/bootstrap/Start-AiOsWork.ps1",
     "automation/orchestration/bootstrap/Open-AiOsLane.ps1",
     "automation/orchestration/bootstrap/Save-AiOsSession.ps1",
     "automation/orchestration/bootstrap/Restore-AiOsSession.ps1",
@@ -128,7 +129,12 @@ $requiredFiles = @(
     "automation/orchestration/bootstrap/Restore-AiOsWorkspaceCheckpoint.ps1",
     "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "automation/orchestration/git/Submit-AiOsWork.ps1",
+    "automation/orchestration/guard/Invoke-AiOsGuard.ps1",
     "automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1",
+    "automation/orchestration/workers/AIOS_WORKER_PROFILES.json",
+    "automation/orchestration/workers/Get-AiOsWorkerProfiles.ps1",
+    "automation/orchestration/workers/Resolve-AiOsNeededWorkers.DRY_RUN.ps1",
+    "automation/orchestration/workers/Resolve-AiOsWorkerForPacket.DRY_RUN.ps1",
     "automation/orchestration/work_packets/New-AiOsWorkPacket.ps1",
     "automation/orchestration/work_packets/Get-AiOsWorkPacketState.ps1",
     "automation/orchestration/work_packets/Route-AiOsWorkPacket.DRY_RUN.ps1",
@@ -139,11 +145,15 @@ $requiredFiles = @(
     "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md",
     "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
     "docs/AI_OS/orchestration/AIOS_DAILY_START.md",
+    "docs/AI_OS/orchestration/AIOS_ONE_COMMAND_WORKFLOW.md",
     "docs/AI_OS/orchestration/AIOS_GITHUB_SAVE_AUTOMATION.md",
+    "docs/AI_OS/orchestration/AIOS_GUARD.md",
+    "docs/AI_OS/orchestration/AIOS_WORKER_PROFILES.md",
     "docs/AI_OS/orchestration/AIOS_WORK_PACKETS.md"
 )
 
 $requiredDirectories = @(
+    "automation/orchestration/workers",
     "automation/orchestration/work_packets",
     "automation/orchestration/work_packets/active",
     "automation/orchestration/work_packets/blocked",
@@ -169,6 +179,23 @@ $requiredPacketFields = @(
     "related_files",
     "related_packets",
     "notes"
+)
+
+$requiredWorkerFields = @(
+    "worker_id",
+    "display_title",
+    "worker_type",
+    "default_path",
+    "default_branch",
+    "owns_paths",
+    "blocked_paths",
+    "can_run_parallel_with",
+    "cannot_overlap_with",
+    "launch_policy",
+    "codex_policy",
+    "guard_policy",
+    "save_policy",
+    "safety_notes"
 )
 
 $scriptName = Split-Path -Leaf $PSCommandPath
@@ -222,14 +249,17 @@ $registryFullPath = Resolve-AiOsPath -Path $RegistryPath
 $sessionExampleFullPath = Resolve-AiOsPath -Path $SessionExamplePath
 $checkpointExampleFullPath = Resolve-AiOsPath -Path $CheckpointExamplePath
 $operatorRulesFullPath = Resolve-AiOsPath -Path $OperatorRulesPath
+$workerProfilesFullPath = Resolve-AiOsPath -Path "automation/orchestration/workers/AIOS_WORKER_PROFILES.json"
 $registry = Get-Content -LiteralPath $registryFullPath -Raw | ConvertFrom-Json
 $sessionExample = Get-Content -LiteralPath $sessionExampleFullPath -Raw | ConvertFrom-Json
 $checkpointExample = Get-Content -LiteralPath $checkpointExampleFullPath -Raw | ConvertFrom-Json
 $operatorRules = Get-Content -LiteralPath $operatorRulesFullPath -Raw | ConvertFrom-Json
+$workerProfiles = Get-Content -LiteralPath $workerProfilesFullPath -Raw | ConvertFrom-Json
 Write-Host "PASS: $RegistryPath"
 Write-Host "PASS: $SessionExamplePath"
 Write-Host "PASS: $CheckpointExamplePath"
 Write-Host "PASS: $OperatorRulesPath"
+Write-Host "PASS: automation/orchestration/workers/AIOS_WORKER_PROFILES.json"
 Assert-NoBlockedAutomation -Path $registryFullPath
 Assert-NoBlockedAutomation -Path $sessionExampleFullPath
 Assert-NoBlockedAutomation -Path $checkpointExampleFullPath
@@ -347,7 +377,10 @@ $requiredRuleTexts = @(
     "No broker/API/live trading.",
     "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.",
     "Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work.",
-    "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only."
+    "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only.",
+    "Use Invoke-AiOsGuard.ps1 before risky actions. Guard checks path, branch, lane, command type, Apply requirement, and protected-root warnings before the operator proceeds.",
+    "Daily Start must connect intent, work packets, worker profiles, guard checks, and save/PR automation before asking the operator to act.",
+    "Prefer Start-AiOsWork.ps1 as the primary operator entrypoint. It should consolidate status, packets, routing, validation, next action, and exact commands before asking the operator to act."
 )
 
 Write-Host ""
@@ -436,6 +469,52 @@ $requiredDisplayTitles | ForEach-Object {
     }
     Write-Host "PASS: $displayTitle"
 }
+
+Write-Host ""
+Write-Host "== Worker Profiles ==" -ForegroundColor Yellow
+$requiredWorkerIds = @(
+    "main_control",
+    "create_codex",
+    "save_git",
+    "route_dispatch",
+    "check_audit",
+    "watch_state",
+    "rulebook_codex",
+    "brainstem_codex",
+    "safety_codex",
+    "orchestration_codex",
+    "forex_sim_codex",
+    "risk_codex",
+    "strategy_codex"
+)
+
+$actualWorkerIds = @($workerProfiles.workers | ForEach-Object { $_.worker_id })
+$requiredWorkerIds | ForEach-Object {
+    $workerId = $_
+    if ($actualWorkerIds -notcontains $workerId) {
+        throw "Missing required worker profile: $workerId"
+    }
+    Write-Host "PASS: worker profile $workerId"
+}
+
+@($workerProfiles.workers) | ForEach-Object {
+    $worker = $_
+    $requiredWorkerFields | ForEach-Object {
+        $field = $_
+        if (-not ($worker.PSObject.Properties.Name -contains $field)) {
+            throw "Worker profile $($worker.worker_id) missing field: $field"
+        }
+    }
+
+    if ($worker.worker_id -like "forex*" -or $worker.worker_id -in @("risk_codex", "strategy_codex")) {
+        $safetyText = [string]$worker.safety_notes
+        if ($safetyText.IndexOf("Broker/API/live trading blocked", [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+            throw "Forex/risk/strategy profile must state blocked live execution: $($worker.worker_id)"
+        }
+    }
+}
+Write-Host "PASS: required worker fields"
+Write-Host "PASS: forex/risk/strategy profiles are profile-only blocked"
 
 $requiredSessionFields = @(
     "active_workspace",
@@ -589,7 +668,41 @@ if ($dailyStartText -notmatch "WHERE TO RUN NEXT") {
 if ($dailyStartText -notmatch "Codex auto-launch performed: NO") {
     throw "Daily Start must report no Codex auto-launch."
 }
+if ($dailyStartText -notmatch "Worker Profile Resolution" -or $dailyStartText -notmatch "Later save/PR command") {
+    throw "Daily Start must reference worker profile resolution and save/PR automation."
+}
 $dailyStartOutput | ForEach-Object { Write-Host $_ }
+
+Write-Host ""
+Write-Host "== Worker Profile Smoke Tests ==" -ForegroundColor Yellow
+$workerProfileOutput = powershell -ExecutionPolicy Bypass -File "automation\orchestration\workers\Get-AiOsWorkerProfiles.ps1"
+$workerProfileText = ($workerProfileOutput -join [Environment]::NewLine)
+if ($workerProfileText -notmatch "COPY START" -or $workerProfileText -notmatch "Worker count") {
+    throw "Worker profile list output missing required blocks."
+}
+$workerProfileOutput | ForEach-Object { Write-Host $_ }
+
+$neededWorkersOutput = powershell -ExecutionPolicy Bypass -File "automation\orchestration\workers\Resolve-AiOsNeededWorkers.DRY_RUN.ps1" -Intent "resume AI_OS orchestration"
+$neededWorkersText = ($neededWorkersOutput -join [Environment]::NewLine)
+if ($neededWorkersText -notmatch "Primary worker" -or $neededWorkersText -notmatch "Guard check" -or $neededWorkersText -notmatch "Later save/PR command") {
+    throw "Needed worker resolver output missing connector blocks."
+}
+$neededWorkersOutput | ForEach-Object { Write-Host $_ }
+
+Write-Host ""
+Write-Host "== Guard Preview Smoke Test ==" -ForegroundColor Yellow
+$guardOutput = powershell -ExecutionPolicy Bypass -File "automation\orchestration\guard\Invoke-AiOsGuard.ps1" -ExpectedPath (Get-Location).Path -CommandType validate
+$guardText = ($guardOutput -join [Environment]::NewLine)
+if ($guardText -notmatch "COPY START" -or $guardText -notmatch "COPY END") {
+    throw "Guard copy markers missing."
+}
+if ($guardText -notmatch "WHERE TO RUN NEXT") {
+    throw "Guard WHERE TO RUN NEXT block missing."
+}
+if ($guardText -notmatch "Overall: PASS") {
+    throw "Guard expected path validate preview must pass."
+}
+$guardOutput | ForEach-Object { Write-Host $_ }
 
 Write-Host ""
 Write-Host "== Lane Preview Smoke Test ==" -ForegroundColor Yellow

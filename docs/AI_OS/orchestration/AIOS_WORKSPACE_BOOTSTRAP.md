@@ -30,11 +30,28 @@ automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1
 automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1
 ```
 
+Primary one-command workflow:
+
+```text
+docs/AI_OS/orchestration/AIOS_ONE_COMMAND_WORKFLOW.md
+automation/orchestration/bootstrap/Start-AiOsWork.ps1
+```
+
 Work packets:
 
 ```text
 docs/AI_OS/orchestration/AIOS_WORK_PACKETS.md
 automation/orchestration/work_packets/
+```
+
+Worker profiles:
+
+```text
+docs/AI_OS/orchestration/AIOS_WORKER_PROFILES.md
+automation/orchestration/workers/AIOS_WORKER_PROFILES.json
+automation/orchestration/workers/Get-AiOsWorkerProfiles.ps1
+automation/orchestration/workers/Resolve-AiOsNeededWorkers.DRY_RUN.ps1
+automation/orchestration/workers/Resolve-AiOsWorkerForPacket.DRY_RUN.ps1
 ```
 
 ## Lane Model
@@ -202,7 +219,7 @@ Preview command:
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsDay.ps1 -Intent "complete brainstem daily start route" -MaxTabs 3
 ```
 
-Daily Start prints CONTROL git status, workspace intent route, supervisor assignment preview, suggested lanes, suggested validators, and a `WHERE TO RUN NEXT` block.
+Daily Start prints CONTROL git status, workspace intent route, supervisor assignment preview, work packet summary, worker profile resolution, guard check recommendation, later save/PR command, suggested lanes, suggested validators, and a `WHERE TO RUN NEXT` block.
 
 Manual launch remains explicit:
 
@@ -211,6 +228,16 @@ powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Star
 ```
 
 It opens Windows Terminal tabs only, does not start Codex, does not commit, does not push, does not create scheduled/startup tasks, and does not touch broker/API/live trading.
+
+## One Command Workflow
+
+`Start-AiOsWork.ps1` is the preferred operator entrypoint. It runs status, validator, packet state, packet routing, Daily Start, worker profile resolution, and then prints one chosen next safe action with exact guard, Codex, validator, and save preview commands.
+
+Preview command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWork.ps1 -Intent "choose next AI_OS work"
+```
 
 ## Supervisor Planner
 
@@ -238,6 +265,8 @@ powershell -ExecutionPolicy Bypass -File automation\orchestration\work_packets\R
 ```
 
 The ROUTE lane acts as packet dispatcher. The WATCH lane acts as packet state observer. CONTROL remains the root lane.
+
+Worker profiles connect packets to standing worker IDs. Packet routing must flag unknown `owner_lane` or `assigned_worker` values before work continues.
 
 ## Start Commands
 

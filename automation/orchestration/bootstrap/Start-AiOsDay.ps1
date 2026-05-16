@@ -39,8 +39,10 @@ if (-not (Test-Path -LiteralPath $registryFullPath -PathType Leaf)) {
 $workspaceScript = Join-Path $PSScriptRoot "Start-AiOsWorkspace.ps1"
 $resolverScript = Join-Path $PSScriptRoot "Resolve-AiOsWorkspaceIntent.ps1"
 $supervisorScript = Join-Path (Split-Path -Parent $PSScriptRoot) "supervisor\Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1"
+$packetStateScript = Join-Path (Split-Path -Parent $PSScriptRoot) "work_packets\Get-AiOsWorkPacketState.ps1"
+$workerResolverScript = Join-Path (Split-Path -Parent $PSScriptRoot) "workers\Resolve-AiOsNeededWorkers.DRY_RUN.ps1"
 
-foreach ($requiredScript in @($workspaceScript, $resolverScript, $supervisorScript)) {
+foreach ($requiredScript in @($workspaceScript, $resolverScript, $supervisorScript, $packetStateScript, $workerResolverScript)) {
     if (-not (Test-Path -LiteralPath $requiredScript -PathType Leaf)) {
         throw "Required Daily Start script not found: $requiredScript"
     }
@@ -54,6 +56,7 @@ if ($null -eq $controlLane) {
 
 $intentResolution = (& $resolverScript -Intent $Intent -QuietJson | ConvertFrom-Json)
 $supervisorPlan = (& $supervisorScript -Intent $Intent -QuietJson | ConvertFrom-Json)
+$workerPlan = (& $workerResolverScript -Intent $Intent -QuietJson | ConvertFrom-Json)
 
 Write-Host ("COPY START " + [char]0x2014 + " $scriptName")
 Write-Host "AI_OS Brainstem Daily Start" -ForegroundColor Cyan
@@ -104,6 +107,28 @@ foreach ($worker in @($supervisorPlan.workers_needed)) {
 }
 Write-Host "Approval required: $($supervisorPlan.approval_required)"
 
+Write-AiOsSection -Title "Work Packet Summary"
+Write-Host "Active packets: $($workerPlan.active_packet_count)"
+if ($null -eq $workerPlan.next_packet) {
+    Write-Host "Next packet: NONE"
+} else {
+    Write-Host "Next packet: $($workerPlan.next_packet.packet_id) - $($workerPlan.next_packet.title)"
+    Write-Host "Packet repo: $($workerPlan.next_packet.repo)"
+    Write-Host "Packet branch: $($workerPlan.next_packet.branch)"
+}
+
+Write-AiOsSection -Title "Worker Profile Resolution"
+Write-Host "Primary worker: $($workerPlan.primary_worker.worker_id) - $($workerPlan.primary_worker.display_title)"
+Write-Host "Worker path: $($workerPlan.primary_worker.default_path)"
+Write-Host "Worker branch: $($workerPlan.primary_worker.default_branch)"
+Write-Host "Needed workers:"
+@($workerPlan.needed_workers) | ForEach-Object {
+    Write-Host "  $($_.worker_id) - $($_.display_title) - $($_.worker_type)"
+}
+Write-Host "Validator: $($workerPlan.validator)"
+Write-Host "Guard check: $($workerPlan.guard_command)"
+Write-Host "Later save/PR command: $($workerPlan.save_command)"
+
 Write-AiOsSection -Title "Suggested Lanes"
 foreach ($laneId in @($intentResolution.selected_lane_ids)) {
     $lane = @($registry.lanes) | Where-Object { $_.lane_id -eq $laneId } | Select-Object -First 1
@@ -120,7 +145,9 @@ Write-AiOsSection -Title "WHERE TO RUN NEXT"
 Write-Host ("Visible tab/window: SAVE " + [char]0x00b7 + " git")
 Write-Host "Path: $((Get-Location).Path)"
 Write-Host "Run:"
-Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+Write-Host "  $($workerPlan.guard_command)"
+Write-Host "Then:"
+Write-Host "  $($workerPlan.validator)"
 Write-Host "Stop condition: stop if validator fails, path or branch is unexpected, or any command proposes commit/push/launch without explicit approval."
 
 if ($LaunchManualShells) {

@@ -1,0 +1,413 @@
+{
+  "profile_set_id": "AIOS_WORKER_PROFILES",
+  "version": "1.0",
+  "truth_source": "path_and_branch",
+  "rules": [
+    "Do not open all workers by default.",
+    "Resolve workers from intent or active work packets.",
+    "One writer per overlapping file zone.",
+    "CONTROL remains fixed root.",
+    "Codex workers are manual only.",
+    "Git/save worker handles save/PR automation.",
+    "Forex workers are profiles only for now.",
+    "No broker/API/live trading code.",
+    "No secrets.",
+    "No background services, daemons, or scheduled tasks."
+  ],
+  "workers": [
+    {
+      "worker_id": "main_control",
+      "display_title": "CONTROL \u00b7 main",
+      "worker_type": "control",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_branch": "main",
+      "owns_paths": [],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "create_codex",
+        "rulebook_codex",
+        "brainstem_codex",
+        "safety_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "no_codex_from_control",
+      "guard_policy": "ExpectedLaneId main_control; CommandType validate",
+      "save_policy": "review_only",
+      "safety_notes": "Permanent root lane. Merge, protected root edits, and final approvals stay human-controlled."
+    },
+    {
+      "worker_id": "create_codex",
+      "display_title": "CREATE \u00b7 codex",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+      "default_branch": "phase-bootstrap-workspace",
+      "owns_paths": [
+        "automation/orchestration/bootstrap/",
+        "docs/AI_OS/orchestration/"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "ERROR_LOG.md",
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "rulebook_codex",
+        "brainstem_codex",
+        "safety_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId create_codex; CommandType codex",
+      "save_policy": "use Submit-AiOsWork.ps1 from save_git",
+      "safety_notes": "General approved Codex edit lane. One active overlapping packet at a time."
+    },
+    {
+      "worker_id": "save_git",
+      "display_title": "SAVE \u00b7 git",
+      "worker_type": "git_save",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+      "default_branch": "phase-bootstrap-workspace",
+      "owns_paths": [
+        ".git/",
+        "automation/orchestration/git/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "main_control",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "not_a_codex_lane",
+      "guard_policy": "CommandType git_save; RequireApply for save actions",
+      "save_policy": "Submit-AiOsWork.ps1 preview first; Apply only on explicit approval.",
+      "safety_notes": "Runs status, diff, validation, save preview, and explicit PR packaging."
+    },
+    {
+      "worker_id": "route_dispatch",
+      "display_title": "ROUTE \u00b7 dispatch",
+      "worker_type": "packet_dispatch",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+      "default_branch": "phase-221-260-mission-json-dashboard-ready",
+      "owns_paths": [
+        "automation/orchestration/work_packets/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "main_control",
+        "save_git",
+        "watch_state",
+        "check_audit"
+      ],
+      "cannot_overlap_with": [
+        "brainstem_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "not_a_codex_lane",
+      "guard_policy": "ExpectedLaneId route_dispatch; CommandType packet_update",
+      "save_policy": "use Submit-AiOsWork.ps1 from save_git",
+      "safety_notes": "Dispatches packets and flags unknown owners before work starts."
+    },
+    {
+      "worker_id": "check_audit",
+      "display_title": "CHECK \u00b7 audit",
+      "worker_type": "validation_audit",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+      "default_branch": "phase-validation-cleanup",
+      "owns_paths": [
+        "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "main_control",
+        "save_git",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "brainstem_codex",
+        "safety_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "not_a_codex_lane",
+      "guard_policy": "ExpectedLaneId check_audit; CommandType validate",
+      "save_policy": "read-only unless explicitly approved",
+      "safety_notes": "Validation and audit lane. Prefer read-only checks."
+    },
+    {
+      "worker_id": "watch_state",
+      "display_title": "WATCH \u00b7 state",
+      "worker_type": "state_observer",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
+      "default_branch": "phase-3-stateful-orchestration",
+      "owns_paths": [
+        "automation/orchestration/work_packets/",
+        "Reports/daily/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "main_control",
+        "save_git",
+        "route_dispatch",
+        "check_audit"
+      ],
+      "cannot_overlap_with": [],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "not_a_codex_lane",
+      "guard_policy": "ExpectedLaneId watch_state; CommandType validate",
+      "save_policy": "state reports only after approval",
+      "safety_notes": "Observes packet state and progress. Does not dispatch by itself."
+    },
+    {
+      "worker_id": "rulebook_codex",
+      "display_title": "RULEBOOK \u00b7 codex",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+      "default_branch": "phase-operator-rulebook",
+      "owns_paths": [
+        "automation/orchestration/operator/",
+        "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "create_codex",
+        "brainstem_codex",
+        "safety_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId rulebook_codex; CommandType codex",
+      "save_policy": "use Submit-AiOsWork.ps1 from save_git",
+      "safety_notes": "Durable operator rules and rulebook memory."
+    },
+    {
+      "worker_id": "brainstem_codex",
+      "display_title": "BRAINSTEM \u00b7 codex",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-brainstem",
+      "default_branch": "phase-brainstem-daily-start",
+      "owns_paths": [
+        "automation/orchestration/bootstrap/",
+        "automation/orchestration/supervisor/",
+        "automation/orchestration/operator/",
+        "automation/orchestration/work_packets/",
+        "automation/orchestration/workers/",
+        "automation/orchestration/guard/",
+        "automation/orchestration/git/",
+        "docs/AI_OS/orchestration/"
+      ],
+      "blocked_paths": [
+        "README.md",
+        "ERROR_LOG.md",
+        "package.json",
+        "package-lock.json",
+        ".gitignore",
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "create_codex",
+        "rulebook_codex",
+        "safety_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId brainstem_codex; CommandType codex",
+      "save_policy": "use Submit-AiOsWork.ps1 from save_git",
+      "safety_notes": "Primary AI_OS brainstem infrastructure worker. Single-writer rule applies."
+    },
+    {
+      "worker_id": "safety_codex",
+      "display_title": "SAFETY \u00b7 codex",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+      "default_branch": "phase-validation-cleanup",
+      "owns_paths": [
+        "RISK_POLICY.md",
+        "automation/orchestration/guard/",
+        "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "save_git",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "create_codex",
+        "rulebook_codex",
+        "brainstem_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId safety_codex; CommandType codex",
+      "save_policy": "use Submit-AiOsWork.ps1 from save_git",
+      "safety_notes": "Safety checks and guard policy updates only after explicit approval."
+    },
+    {
+      "worker_id": "orchestration_codex",
+      "display_title": "ORCH \u00b7 codex",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-brainstem",
+      "default_branch": "phase-brainstem-daily-start",
+      "owns_paths": [
+        "automation/orchestration/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/"
+      ],
+      "can_run_parallel_with": [
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "create_codex",
+        "rulebook_codex",
+        "brainstem_codex",
+        "safety_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId orchestration_codex; CommandType codex",
+      "save_policy": "use Submit-AiOsWork.ps1 from save_git",
+      "safety_notes": "General orchestration worker profile. Use brainstem_codex for brainstem packets."
+    },
+    {
+      "worker_id": "forex_sim_codex",
+      "display_title": "FOREX SIM \u00b7 codex",
+      "worker_type": "manual_codex_profile_only",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_branch": "main",
+      "owns_paths": [
+        "apps/trading_lab/",
+        "docs/trading_lab/"
+      ],
+      "blocked_paths": [
+        "secrets/",
+        ".env",
+        ".codex_backups/"
+      ],
+      "can_run_parallel_with": [
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "risk_codex",
+        "strategy_codex"
+      ],
+      "launch_policy": "profile_only",
+      "codex_policy": "manual_only_when_future_packet_is_approved",
+      "guard_policy": "ExpectedLaneId forex_sim_codex; CommandType codex",
+      "save_policy": "not active until future approved packet",
+      "safety_notes": "Profile only for paper simulation. Broker/API/live trading blocked. No secrets."
+    },
+    {
+      "worker_id": "risk_codex",
+      "display_title": "RISK \u00b7 codex",
+      "worker_type": "manual_codex_profile_only",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_branch": "main",
+      "owns_paths": [
+        "RISK_POLICY.md",
+        "docs/trading_lab/risk/"
+      ],
+      "blocked_paths": [
+        "secrets/",
+        ".env",
+        ".codex_backups/"
+      ],
+      "can_run_parallel_with": [
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "forex_sim_codex",
+        "strategy_codex"
+      ],
+      "launch_policy": "profile_only",
+      "codex_policy": "manual_only_when_future_packet_is_approved",
+      "guard_policy": "ExpectedLaneId risk_codex; CommandType codex",
+      "save_policy": "not active until future approved packet",
+      "safety_notes": "Profile only for risk docs and paper-only policy. Broker/API/live trading blocked. No secrets."
+    },
+    {
+      "worker_id": "strategy_codex",
+      "display_title": "STRATEGY \u00b7 codex",
+      "worker_type": "manual_codex_profile_only",
+      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_branch": "main",
+      "owns_paths": [
+        "docs/trading_lab/strategy/",
+        "apps/trading_lab/strategy/"
+      ],
+      "blocked_paths": [
+        "secrets/",
+        ".env",
+        ".codex_backups/"
+      ],
+      "can_run_parallel_with": [
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "forex_sim_codex",
+        "risk_codex"
+      ],
+      "launch_policy": "profile_only",
+      "codex_policy": "manual_only_when_future_packet_is_approved",
+      "guard_policy": "ExpectedLaneId strategy_codex; CommandType codex",
+      "save_policy": "not active until future approved packet",
+      "safety_notes": "Profile only for future paper strategy work. Broker/API/live trading blocked. No secrets."
+    }
+  ]
+}

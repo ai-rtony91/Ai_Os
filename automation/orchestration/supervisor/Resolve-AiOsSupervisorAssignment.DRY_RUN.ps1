@@ -37,8 +37,14 @@ if (-not (Test-Path -LiteralPath $resolverPath -PathType Leaf)) {
     throw "Intent resolver not found: $resolverPath"
 }
 
+$workerResolverPath = Join-Path (Split-Path -Parent $PSScriptRoot) "workers\Resolve-AiOsNeededWorkers.DRY_RUN.ps1"
+if (-not (Test-Path -LiteralPath $workerResolverPath -PathType Leaf)) {
+    throw "Worker profile resolver not found: $workerResolverPath"
+}
+
 $registry = Get-Content -LiteralPath $registryFullPath -Raw | ConvertFrom-Json
 $intentResolution = (& $resolverPath -Intent $Intent -QuietJson | ConvertFrom-Json)
+$workerPlan = (& $workerResolverPath -Intent $Intent -QuietJson | ConvertFrom-Json)
 $selectedLaneIds = @($intentResolution.selected_lane_ids)
 $manualCodexLaneIds = @($intentResolution.manual_codex_lane_ids)
 
@@ -56,6 +62,7 @@ $codexLane = Get-LaneById -Registry $registry -LaneId $codexLaneId
 $controlLane = Get-LaneById -Registry $registry -LaneId "main_control"
 $saveLane = Get-LaneById -Registry $registry -LaneId "save_git"
 $auditLane = Get-LaneById -Registry $registry -LaneId "check_audit"
+$primaryWorker = $workerPlan.primary_worker
 
 $filesInScope = @(
     "automation/orchestration/operator/AIOS_OPERATOR_RULES.json",
@@ -70,6 +77,7 @@ $filesInScope = @(
 )
 
 $validators = @(
+    $workerPlan.guard_command,
     "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsDay.ps1 -Intent ""$($intentResolution.intent)"" -MaxTabs 3",
     "git diff --check",
@@ -81,13 +89,16 @@ $plan = [pscustomobject]@{
     mode = "DRY_RUN"
     intent = $intentResolution.intent
     worker_count = 1
+    worker_profile_source = "automation/orchestration/workers/AIOS_WORKER_PROFILES.json"
     workers_needed = @(
         [pscustomobject]@{
-            worker_id = "codex_worker_1"
-            worker_type = "manual_codex"
-            lane_id = $codexLane.lane_id
-            lane_title = $codexLane.display_title
-            does = "Reconcile approved brainstem files only: Rulebook, Intent Router, Supervisor planner, Daily Start, validator, and docs."
+            worker_id = $primaryWorker.worker_id
+            worker_type = $primaryWorker.worker_type
+            lane_id = $primaryWorker.worker_id
+            lane_title = $primaryWorker.display_title
+            path = $primaryWorker.default_path
+            branch = $primaryWorker.default_branch
+            does = "Work the selected packet using the standing worker profile. Keep edits inside owned paths and obey overlap restrictions."
             files_in_scope = $filesInScope
         }
     )
@@ -98,8 +109,10 @@ $plan = [pscustomobject]@{
     )
     selected_lane_ids = $selectedLaneIds
     validators = $validators
+    guard_command = $workerPlan.guard_command
+    save_command = $workerPlan.save_command
     approval_required = ("Human approval required before LaunchManualShells, commit, push, protected edits, " + "bro" + "ker/API/live trading, scheduled tasks, or startup tasks.")
-    exact_next_safe_action = "Run: powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+    exact_next_safe_action = "Run: $($workerPlan.guard_command)"
 }
 
 if ($QuietJson) {
@@ -119,6 +132,8 @@ foreach ($worker in @($plan.workers_needed)) {
     Write-Host "  worker_type: $($worker.worker_type)"
     Write-Host "  lane_id: $($worker.lane_id)"
     Write-Host "  lane_title: $($worker.lane_title)"
+    Write-Host "  path: $($worker.path)"
+    Write-Host "  branch: $($worker.branch)"
     Write-Host "  does: $($worker.does)"
 }
 Write-Host ""
@@ -127,6 +142,12 @@ Write-Host "What files are in scope:" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Validators run:" -ForegroundColor Yellow
 @($validators) | ForEach-Object { Write-Host "  $_" }
+Write-Host ""
+Write-Host "Guard check:" -ForegroundColor Yellow
+Write-Host "  $($plan.guard_command)"
+Write-Host ""
+Write-Host "Later save/PR command:" -ForegroundColor Yellow
+Write-Host "  $($plan.save_command)"
 Write-Host ""
 Write-Host "Approval required:" -ForegroundColor Yellow
 Write-Host "  $($plan.approval_required)"

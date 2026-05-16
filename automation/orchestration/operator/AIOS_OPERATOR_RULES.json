@@ -25,7 +25,10 @@
     "No broker/API/live trading.",
     "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.",
     "Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work.",
-    "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only."
+    "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only.",
+    "Use Invoke-AiOsGuard.ps1 before risky actions. Guard checks path, branch, lane, command type, Apply requirement, and protected-root warnings before the operator proceeds.",
+    "Daily Start must connect intent, work packets, worker profiles, guard checks, and save/PR automation before asking the operator to act.",
+    "Prefer Start-AiOsWork.ps1 as the primary operator entrypoint. It should consolidate status, packets, routing, validation, next action, and exact commands before asking the operator to act."
   ],
   "lane_identity": {
     "lane_id": "rulebook_codex",
