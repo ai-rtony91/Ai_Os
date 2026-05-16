@@ -71,6 +71,39 @@ function Assert-NoAssistantAutoStart {
     }
 }
 
+function Assert-WtNewTabStartingDirectory {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $content = Get-Content -LiteralPath $Path -Raw
+    if ($content -notmatch '"new-tab"') {
+        return
+    }
+
+    if ($content -notmatch '"--title"\s*,\s*\[string\]\$Lane\.tab_title') {
+        throw "Windows Terminal tab title must come from registry tab_title in $Path"
+    }
+
+    if ($content -notmatch '"-d"\s*,\s*\[string\]\$Lane\.path') {
+        throw "Windows Terminal new-tab must set starting directory from registry lane.path in $Path"
+    }
+
+    if ($content -notmatch '"powershell\.exe"\s*,\s*"-NoExit"\s*,\s*"-ExecutionPolicy"\s*,\s*"Bypass"\s*,\s*"-EncodedCommand"\s*,\s*\$encodedPayload') {
+        throw "Windows Terminal must launch powershell.exe with -NoExit -ExecutionPolicy Bypass -EncodedCommand payload in $Path"
+    }
+
+    if ($content -notmatch 'Start-Process\s+-FilePath\s+"wt\.exe"\s+-ArgumentList\s+\(Get-WtArgumentList') {
+        throw "Windows Terminal new-tab must pass one Base64-encoded PowerShell payload in $Path"
+    }
+
+    if ($content -match '"-Command"\s*,\s*\(Get-LaneCommand') {
+        throw "Windows Terminal new-tab must not pass raw inline PowerShell fragments in $Path"
+    }
+
+    if ($content -match '"--title"\s*,\s*"Write-Host"|"--title"\s*,\s*"git"') {
+        throw "Windows Terminal tab title must not be Write-Host or git in $Path"
+    }
+}
+
 $requiredFiles = @(
     "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
     "automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1",
@@ -115,6 +148,7 @@ $requiredFiles | Where-Object { $_ -like "*.ps1" } | ForEach-Object {
     if ((Split-Path -Leaf $fullPath) -ne "Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1") {
         Assert-NoBlockedAutomation -Path $fullPath
         Assert-NoAssistantAutoStart -Path $fullPath
+        Assert-WtNewTabStartingDirectory -Path $fullPath
     }
     Write-Host "PASS: $scriptFile"
 }

@@ -53,12 +53,54 @@ function Get-LaneCommand {
     $laneJson = $Lane | ConvertTo-Json -Depth 8 -Compress
     $laneJsonBase64 = [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($laneJson))
 
-    $command = "Set-Location -LiteralPath '$escapedPath'; & '$escapedIdentityScriptPath' -LaneJsonBase64 '$laneJsonBase64'; Write-Host 'Trust prompt path and Git branch, not stale terminal/tab title after cd.' -ForegroundColor Yellow; git status --short --branch"
+    $command = "Set-Location -LiteralPath '$escapedPath'; . '$escapedIdentityScriptPath' -LaneJsonBase64 '$laneJsonBase64'; git status --short --branch"
     if (Test-CodexLane -Lane $Lane) {
         $command += "; Write-Host 'Manual Codex lane needed: $escapedDisplayTitle' -ForegroundColor Yellow; Write-Host 'Command: cd $escapedPath; codex'"
     }
 
     return $command
+}
+
+function Get-EncodedLaneCommand {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$IdentityScriptPath
+    )
+
+    $command = Get-LaneCommand -Lane $Lane -IdentityScriptPath $IdentityScriptPath
+    return [System.Convert]::ToBase64String([System.Text.Encoding]::Unicode.GetBytes($command))
+}
+
+function ConvertTo-ProcessArgument {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    return '"' + $Value.Replace('"', '\"') + '"'
+}
+
+function Get-WtArgumentList {
+    param(
+        [Parameter(Mandatory = $true)]$Lane,
+        [Parameter(Mandatory = $true)][string]$IdentityScriptPath
+    )
+
+    $encodedPayload = Get-EncodedLaneCommand -Lane $Lane -IdentityScriptPath $IdentityScriptPath
+    $arguments = @(
+        "-w",
+        "0",
+        "new-tab",
+        "--title",
+        [string]$Lane.tab_title,
+        "-d",
+        [string]$Lane.path,
+        "powershell.exe",
+        "-NoExit",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-EncodedCommand",
+        $encodedPayload
+    )
+
+    return (@($arguments) | ForEach-Object { ConvertTo-ProcessArgument -Value $_ }) -join " "
 }
 
 function Get-RegistryLaneById {
@@ -92,25 +134,21 @@ function Get-WtManualCommand {
     return "cd `"$escapedPath`"; powershell -ExecutionPolicy Bypass -File `"$escapedIdentityScriptPath`" -LaneJsonBase64 `"$laneJsonBase64`"; git status --short --branch"
 }
 
+function Get-WtPreviewCommand {
+    param([Parameter(Mandatory = $true)]$Lane)
+
+    $escapedTitle = $Lane.tab_title.Replace('"', '\"')
+    $escapedPath = $Lane.path.Replace('"', '\"')
+    return "wt.exe `"-w`" `"0`" `"new-tab`" `"--title`" `"$escapedTitle`" `"-d`" `"$escapedPath`" `"powershell.exe`" `"-NoExit`" `"-ExecutionPolicy`" `"Bypass`" `"-EncodedCommand`" `"<base64 UTF-16LE lane payload>`""
+}
+
 function Open-LaneTab {
     param(
         [Parameter(Mandatory = $true)]$Lane,
         [Parameter(Mandatory = $true)][string]$IdentityScriptPath
     )
 
-    Start-Process -FilePath "wt.exe" -ArgumentList @(
-        "-w",
-        "0",
-        "new-tab",
-        "--title",
-        $Lane.tab_title,
-        "powershell.exe",
-        "-NoExit",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-Command",
-        (Get-LaneCommand -Lane $Lane -IdentityScriptPath $IdentityScriptPath)
-    )
+    Start-Process -FilePath "wt.exe" -ArgumentList (Get-WtArgumentList -Lane $Lane -IdentityScriptPath $IdentityScriptPath)
 }
 
 if ($Preview -and $LaunchManualShells) {
@@ -140,15 +178,14 @@ if (-not (Test-Path -LiteralPath $identityScriptPath -PathType Leaf)) {
 }
 
 $intentResolution = (& $resolverPath -Intent $Intent -QuietJson | ConvertFrom-Json)
-$selectedLanes = @()
 foreach ($laneId in @($intentResolution.selected_lane_ids)) {
     $lane = Get-RegistryLaneById -Registry $registry -LaneId $laneId
     if ($null -eq $lane) {
         throw "Intent resolver selected unknown lane_id: $laneId"
     }
-    $selectedLanes += $lane
 }
-$selectedLanes = @($selectedLanes | Where-Object { $_.lane_id -eq "main_control" }) + @($selectedLanes | Where-Object { $_.lane_id -ne "main_control" })
+$selectedLaneIds = @($intentResolution.selected_lane_ids)
+$selectedLanes = @($registry.lanes | Where-Object { $selectedLaneIds -contains $_.lane_id })
 
 $manualCodexLaneIds = @($intentResolution.manual_codex_lane_ids)
 
@@ -193,6 +230,15 @@ Write-AiOsSection -Title "Validators suggested"
 
 Write-AiOsSection -Title "Next safe action"
 Write-Host $intentResolution.next_safe_action
+
+Write-AiOsSection -Title "Tab Launch Preview"
+foreach ($lane in @($selectedLanes | Select-Object -First $MaxWindows)) {
+    Write-Host "lane_id: $($lane.lane_id)" -ForegroundColor Cyan
+    Write-Host "tab_title: $($lane.tab_title)"
+    Write-Host "starting_directory: $($lane.path)"
+    Write-Host "command: $(Get-WtPreviewCommand -Lane $lane)"
+    Write-Host ""
+}
 
 Write-AiOsSection -Title "Operator Commands"
 Write-Host "Preview workspace:"
