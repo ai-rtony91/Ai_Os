@@ -1,0 +1,18 @@
+{
+  "approval_id": "APPROVE_PR_TEMPLATE",
+  "pr_number": 73,
+  "approved": true,
+  "approved_by": "Anthony Meza",
+  "approval_scope": "PR merge only",
+  "rules": [
+    "No server.py inclusion.",
+    "No live trading.",
+    "No secrets.",
+    "No protected root overwrite.",
+    "Squash merge only.",
+    "Delete branch after merge."
+  ],
+  "notes": [
+    "Copy this file to APPROVE_PR_<number>.json and set pr_number plus approved=true only when ready."
+  ]
+}
