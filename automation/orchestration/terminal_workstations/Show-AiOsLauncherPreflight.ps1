@@ -104,4 +104,4 @@ Write-Section -Title "Open GitHub PRs"
 Invoke-GhReadOnly -Arguments @("pr", "list", "--state", "open", "--limit", "100", "--json", "number", "--jq", "length")
 
 Write-Section -Title "Next Safe Action"
-Write-Host "Run the one-command launcher in preview first, then launch decks only when the preflight looks safe." -ForegroundColor Gray
+Write-Host "Continue to supervisor, operator menu, then deck launch. Codex remains manual." -ForegroundColor Gray

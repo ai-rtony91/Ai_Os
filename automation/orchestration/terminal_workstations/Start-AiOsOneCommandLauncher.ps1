@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 
 $repoPath = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
+$supervisorScript = Join-Path (Split-Path -Parent $scriptRoot) "supervisor\Start-AiOsSupervisor.ps1"
 $preflightScript = Join-Path $scriptRoot "Show-AiOsLauncherPreflight.ps1"
 $menuScript = Join-Path $scriptRoot "Show-AiOsOperatorMenu.ps1"
 $commandDeck = Join-Path $scriptRoot "Start-AiOsCommandDeck.ps1"
@@ -47,12 +48,14 @@ $Host.UI.RawUI.WindowTitle = "AI_OS ONE-COMMAND LAUNCHER"
 
 Write-Host $border -ForegroundColor Cyan
 Write-Host "AI_OS ONE-COMMAND LAUNCHER" -ForegroundColor Cyan
-Write-Host "Opens the Command Deck, Build Engine, and Validation Deck safely." -ForegroundColor Gray
+Write-Host "Runs preflight, supervisor, operator menu, then opens the three AI_OS decks safely." -ForegroundColor Gray
 Write-Host "Codex launch remains manual. PowerToys/FancyZones placement remains manual." -ForegroundColor Yellow
 Write-Host $border -ForegroundColor Cyan
 Write-Host ""
 
 & $preflightScript
+Write-Host ""
+& $supervisorScript
 Write-Host ""
 & $menuScript
 Write-Host ""
@@ -70,7 +73,7 @@ Start-Deck -Name "Ai_Os VALIDATION DECK" -Path $validationDeck
 Write-Host ""
 Write-Host "Exact next safe action:" -ForegroundColor Yellow
 if ($Preview) {
-    Write-Host "Preview complete. Run without -Preview only when you are ready to open the three deck windows." -ForegroundColor Gray
+    Write-Host "Preview complete. Run without -Preview only when you are ready to open Command Deck, Build Engine, and Validation Deck." -ForegroundColor Gray
 } else {
-    Write-Host "Place windows manually with PowerToys/FancyZones. Launch Codex manually only inside the Build Engine." -ForegroundColor Gray
+    Write-Host "Place windows manually with PowerToys/FancyZones. Launch Codex manually only inside Ai_Os BUILD ENGINE." -ForegroundColor Gray
 }

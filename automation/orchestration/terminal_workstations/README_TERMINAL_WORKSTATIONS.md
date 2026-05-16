@@ -2,7 +2,7 @@
 
 Phase 16.21-25 defines a practical three-lane terminal setup.
 
-Use `Start-AiOsOneCommandLauncher.ps1` first. It runs preflight, shows the operator menu, and opens the three deck windows when not in preview mode.
+Use `Start-AiOsOneCommandLauncher.ps1` first. It runs preflight, runs the supervisor, shows the operator menu, and opens the three deck windows when not in preview mode.
 
 Preview first:
 
@@ -32,11 +32,19 @@ The one-command launcher opens decks in this order:
 2. Build Engine
 3. Validation Deck
 
+Before opening decks, it runs:
+
+1. launcher preflight
+2. supervisor simple mode
+3. operator menu
+
 Codex is not launched automatically. Manual Codex launch prevents the wrong branch, packet, or prompt from starting work too early.
 
 PowerToys/FancyZones window placement remains manual.
 
 Branch changes, commits, pushes, merges, issue creation, and PR creation remain operator-approved.
+
+The exact next safe action is printed before the operator starts work.
 
 ## Launcher Rules
 
