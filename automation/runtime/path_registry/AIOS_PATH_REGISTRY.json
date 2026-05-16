@@ -1,0 +1,96 @@
+{
+  "schema": "aios_path_registry.v1",
+  "repo_root": ".",
+  "required_paths": [
+    {
+      "key": "repo_root",
+      "path": ".",
+      "type": "directory",
+      "description": "AI_OS repository root."
+    },
+    {
+      "key": "aios_shortcut",
+      "path": "aios.ps1",
+      "type": "file",
+      "description": "Main AI_OS shortcut entrypoint."
+    },
+    {
+      "key": "window_identity_script",
+      "path": "automation/window_identity/Set-AiOsWindowIdentity.ps1",
+      "type": "file",
+      "description": "Terminal identity marker script."
+    },
+    {
+      "key": "worker_window_launcher",
+      "path": "automation/window_identity/Open-AiOsWorkerWindowLayout.ps1",
+      "type": "file",
+      "description": "Simple PowerShell worker window launcher."
+    },
+    {
+      "key": "runtime_self_route",
+      "path": "automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1",
+      "type": "file",
+      "description": "Runtime self-route script."
+    },
+    {
+      "key": "persistent_runtime_supervisor",
+      "path": "automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1",
+      "type": "file",
+      "description": "Persistent runtime supervisor script."
+    },
+    {
+      "key": "runtime_state_writer",
+      "path": "automation/runtime/state/Write-AiOsRuntimeState.ps1",
+      "type": "file",
+      "description": "Runtime state writer."
+    },
+    {
+      "key": "runtime_packet_advancement",
+      "path": "automation/orchestration/runtime/Invoke-AiOsRuntimePacketAdvancement.ps1",
+      "type": "file",
+      "description": "Runtime packet advancement script."
+    },
+    {
+      "key": "work_packets_active",
+      "path": "automation/orchestration/work_packets/active",
+      "type": "directory",
+      "description": "Active runtime work packet folder."
+    },
+    {
+      "key": "orchestration_runtime_folder",
+      "path": "automation/orchestration/runtime",
+      "type": "directory",
+      "description": "Runtime orchestration folder."
+    },
+    {
+      "key": "orchestration_health_folder",
+      "path": "automation/orchestration/health",
+      "type": "directory",
+      "description": "Runtime health folder."
+    },
+    {
+      "key": "orchestration_validators_folder",
+      "path": "automation/orchestration/validators",
+      "type": "directory",
+      "description": "Runtime validators folder."
+    },
+    {
+      "key": "orchestration_approval_processor_folder",
+      "path": "automation/orchestration/approval_processor",
+      "type": "directory",
+      "description": "Approval processor folder."
+    },
+    {
+      "key": "orchestration_task_generator_folder",
+      "path": "automation/orchestration/task_generator",
+      "type": "directory",
+      "description": "Task generator folder."
+    },
+    {
+      "key": "orchestration_recovery_folder",
+      "path": "automation/orchestration/recovery",
+      "type": "directory",
+      "description": "Recovery folder."
+    }
+  ]
+}
