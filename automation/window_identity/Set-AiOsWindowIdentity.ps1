@@ -152,14 +152,29 @@ $markers = @{
     }
 }
 
+$repoPath = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN'
 $identity = $markers[$Marker]
-$Host.UI.RawUI.WindowTitle = $Marker
+
+$windowTitle = "$($identity.Emoji) $Marker"
+$Host.UI.RawUI.WindowTitle = $windowTitle
+
+$bannerWidth = 100
+try {
+    if ($Host.UI.RawUI.WindowSize.Width -gt 0) {
+        $bannerWidth = [Math]::Max(60, [Math]::Min(160, $Host.UI.RawUI.WindowSize.Width))
+    }
+} catch {
+    $bannerWidth = 100
+}
+
+$divider = '=' * $bannerWidth
 
 Write-Host ''
-Write-Host '========================================' -ForegroundColor $identity.Color
-Write-Host "$($identity.Emoji)  $Marker" -ForegroundColor $identity.Color
-Write-Host '========================================' -ForegroundColor $identity.Color
+Write-Host $divider -ForegroundColor $identity.Color
+Write-Host $windowTitle -ForegroundColor $identity.Color
+Write-Host $divider -ForegroundColor $identity.Color
 Write-Host "Role: $($identity.Role)"
+Write-Host "Repo path: $repoPath"
 Write-Host ''
 Write-Host 'Allowed actions:' -ForegroundColor $identity.Color
 foreach ($item in $identity.Allowed) {
