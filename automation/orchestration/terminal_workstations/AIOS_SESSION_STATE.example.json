@@ -1,168 +1,168 @@
-{
-  "session_id": "AIOS_SESSION_STATE_EXAMPLE",
-  "version": "2.0",
-  "saved_at": "2026-05-16T00:00:00.0000000-04:00",
-  "mode": "manual_restore_only",
-  "source_registry": "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
-  "active_workspace": "aios-worker-bootstrap",
-  "active_worktree": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-  "active_branch": "phase-bootstrap-workspace",
-  "truth_rule": "Trust prompt path and Git branch, not stale terminal/tab title after cd.",
-  "open_lanes": [
-    "bootstrap_git",
-    "bootstrap_codex"
-  ],
-  "last_known_roles": [
-    {
-      "lane_id": "main_control",
-      "display_title": "CONTROL \u00b7 main",
-      "window_title": "CONTROL \u00b7 main",
-      "tab_title": "CONTROL \u00b7 main",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Repo control, operator review, PR review, merge approval, and final checkpoint lane.",
-      "emoji_marker": "\ud83d\udfe6",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "bootstrap_git",
-      "display_title": "BOOTSTRAP \u00b7 git",
-      "window_title": "BOOTSTRAP \u00b7 git",
-      "tab_title": "BOOTSTRAP \u00b7 git",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "role": "Git status, diffs, and validators for the workspace bootstrap worktree.",
-      "emoji_marker": "\ud83d\udfe9",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "bootstrap_codex",
-      "display_title": "BOOTSTRAP \u00b7 codex",
-      "window_title": "BOOTSTRAP \u00b7 codex",
-      "tab_title": "BOOTSTRAP \u00b7 codex",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "role": "Manual assistant work lane for approved bootstrap edits.",
-      "emoji_marker": "\ud83d\udfe8",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "validation_audit",
-      "display_title": "VALIDATE \u00b7 audit",
-      "window_title": "VALIDATE \u00b7 audit",
-      "tab_title": "VALIDATE \u00b7 audit",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
-      "branch": "phase-validation-cleanup",
-      "role": "Read-only validation lane for audits, parser checks, and evidence review.",
-      "emoji_marker": "\ud83d\udfea",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "dispatch_queue",
-      "display_title": "DISPATCH \u00b7 queue",
-      "window_title": "DISPATCH \u00b7 queue",
-      "tab_title": "DISPATCH \u00b7 queue",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-      "branch": "phase-221-260-mission-json-dashboard-ready",
-      "role": "Queue and workload dispatch review lane.",
-      "emoji_marker": "\ud83d\udfe7",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "state_monitor",
-      "display_title": "STATE \u00b7 monitor",
-      "window_title": "STATE \u00b7 monitor",
-      "tab_title": "STATE \u00b7 monitor",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
-      "branch": "phase-3-stateful-orchestration",
-      "role": "State, progress, and orchestration monitor lane.",
-      "emoji_marker": "\u2b1c",
-      "truth_source": "path_and_branch"
-    }
-  ],
-  "lanes": [
-    {
-      "lane_id": "main_control",
-      "display_title": "CONTROL \u00b7 main",
-      "window_title": "CONTROL \u00b7 main",
-      "tab_title": "CONTROL \u00b7 main",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Repo control, operator review, PR review, merge approval, and final checkpoint lane.",
-      "emoji_marker": "\ud83d\udfe6",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "bootstrap_git",
-      "display_title": "BOOTSTRAP \u00b7 git",
-      "window_title": "BOOTSTRAP \u00b7 git",
-      "tab_title": "BOOTSTRAP \u00b7 git",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "role": "Git status, diffs, and validators for the workspace bootstrap worktree.",
-      "emoji_marker": "\ud83d\udfe9",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "bootstrap_codex",
-      "display_title": "BOOTSTRAP \u00b7 codex",
-      "window_title": "BOOTSTRAP \u00b7 codex",
-      "tab_title": "BOOTSTRAP \u00b7 codex",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "role": "Manual assistant work lane for approved bootstrap edits.",
-      "emoji_marker": "\ud83d\udfe8",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "validation_audit",
-      "display_title": "VALIDATE \u00b7 audit",
-      "window_title": "VALIDATE \u00b7 audit",
-      "tab_title": "VALIDATE \u00b7 audit",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
-      "branch": "phase-validation-cleanup",
-      "role": "Read-only validation lane for audits, parser checks, and evidence review.",
-      "emoji_marker": "\ud83d\udfea",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "dispatch_queue",
-      "display_title": "DISPATCH \u00b7 queue",
-      "window_title": "DISPATCH \u00b7 queue",
-      "tab_title": "DISPATCH \u00b7 queue",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-      "branch": "phase-221-260-mission-json-dashboard-ready",
-      "role": "Queue and workload dispatch review lane.",
-      "emoji_marker": "\ud83d\udfe7",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "state_monitor",
-      "display_title": "STATE \u00b7 monitor",
-      "window_title": "STATE \u00b7 monitor",
-      "tab_title": "STATE \u00b7 monitor",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
-      "branch": "phase-3-stateful-orchestration",
-      "role": "State, progress, and orchestration monitor lane.",
-      "emoji_marker": "\u2b1c",
-      "truth_source": "path_and_branch"
-    }
-  ],
-  "last_commands": {
-    "workspace_preview": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview",
-    "workspace_launch": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -LaunchManualShells",
-    "lane_preview": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Open-AiOsLane.ps1 -LaneId bootstrap_git -Preview",
-    "session_save": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsSession.ps1 -Apply",
-    "session_restore": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Restore-AiOsSession.ps1 -Preview",
-    "validator": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
-  },
-  "pending_workorders": [
-    {
-      "issue": 60,
-      "title": "AI_OS workspace bootstrap and lane recovery",
-      "status": "in_progress"
-    }
-  ],
-  "last_validator_status": "UNKNOWN",
-  "next_safe_action": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+﻿{
+    "session_id":  "AIOS_SESSION_STATE_EXAMPLE",
+    "version":  "2.0",
+    "saved_at":  "2026-05-16T00:00:00.0000000-04:00",
+    "mode":  "manual_restore_only",
+    "source_registry":  "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
+    "active_workspace":  "aios-worker-bootstrap",
+    "active_worktree":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+    "active_branch":  "phase-bootstrap-workspace",
+    "truth_rule":  "Trust prompt path and Git branch, not stale terminal/tab title after cd.",
+    "open_lanes":  [
+                       "save_git",
+                       "create_codex"
+                   ],
+    "last_known_roles":  [
+                             {
+                                 "lane_id":  "main_control",
+                                 "display_title":  "CONTROL · main",
+                                 "window_title":  "CONTROL · main",
+                                 "tab_title":  "CONTROL · main",
+                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+                                 "branch":  "main",
+                                 "role":  "Main operator lane for repo control, review, PR review, merge approval, and final checkpoint.",
+                                 "emoji_marker":  "🟦",
+                                 "truth_source":  "path_and_branch"
+                             },
+                             {
+                                 "lane_id":  "create_codex",
+                                 "display_title":  "CREATE · codex",
+                                 "window_title":  "CREATE · codex",
+                                 "tab_title":  "CREATE · codex",
+                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+                                 "branch":  "phase-bootstrap-workspace",
+                                 "role":  "Manual Codex edit lane for approved changes.",
+                                 "emoji_marker":  "🟨",
+                                 "truth_source":  "path_and_branch"
+                             },
+                             {
+                                 "lane_id":  "save_git",
+                                 "display_title":  "SAVE · git",
+                                 "window_title":  "SAVE · git",
+                                 "tab_title":  "SAVE · git",
+                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+                                 "branch":  "phase-bootstrap-workspace",
+                                 "role":  "Git status, commit package review, and push approval lane.",
+                                 "emoji_marker":  "🟩",
+                                 "truth_source":  "path_and_branch"
+                             },
+                             {
+                                 "lane_id":  "route_dispatch",
+                                 "display_title":  "ROUTE · dispatch",
+                                 "window_title":  "ROUTE · dispatch",
+                                 "tab_title":  "ROUTE · dispatch",
+                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+                                 "branch":  "phase-221-260-mission-json-dashboard-ready",
+                                 "role":  "Queue, packet, and routing lane.",
+                                 "emoji_marker":  "🟧",
+                                 "truth_source":  "path_and_branch"
+                             },
+                             {
+                                 "lane_id":  "check_audit",
+                                 "display_title":  "CHECK · audit",
+                                 "window_title":  "CHECK · audit",
+                                 "tab_title":  "CHECK · audit",
+                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+                                 "branch":  "phase-validation-cleanup",
+                                 "role":  "Validation and read-only audit lane.",
+                                 "emoji_marker":  "🟪",
+                                 "truth_source":  "path_and_branch"
+                             },
+                             {
+                                 "lane_id":  "watch_state",
+                                 "display_title":  "WATCH · state",
+                                 "window_title":  "WATCH · state",
+                                 "tab_title":  "WATCH · state",
+                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
+                                 "branch":  "phase-3-stateful-orchestration",
+                                 "role":  "Progress and state monitor lane.",
+                                 "emoji_marker":  "⬜",
+                                 "truth_source":  "path_and_branch"
+                             }
+                         ],
+    "lanes":  [
+                  {
+                      "lane_id":  "main_control",
+                      "display_title":  "CONTROL · main",
+                      "window_title":  "CONTROL · main",
+                      "tab_title":  "CONTROL · main",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+                      "branch":  "main",
+                      "role":  "Main operator lane for repo control, review, PR review, merge approval, and final checkpoint.",
+                      "emoji_marker":  "🟦",
+                      "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "create_codex",
+                      "display_title":  "CREATE · codex",
+                      "window_title":  "CREATE · codex",
+                      "tab_title":  "CREATE · codex",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+                      "branch":  "phase-bootstrap-workspace",
+                      "role":  "Manual Codex edit lane for approved changes.",
+                      "emoji_marker":  "🟨",
+                      "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "save_git",
+                      "display_title":  "SAVE · git",
+                      "window_title":  "SAVE · git",
+                      "tab_title":  "SAVE · git",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+                      "branch":  "phase-bootstrap-workspace",
+                      "role":  "Git status, commit package review, and push approval lane.",
+                      "emoji_marker":  "🟩",
+                      "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "route_dispatch",
+                      "display_title":  "ROUTE · dispatch",
+                      "window_title":  "ROUTE · dispatch",
+                      "tab_title":  "ROUTE · dispatch",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+                      "branch":  "phase-221-260-mission-json-dashboard-ready",
+                      "role":  "Queue, packet, and routing lane.",
+                      "emoji_marker":  "🟧",
+                      "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "check_audit",
+                      "display_title":  "CHECK · audit",
+                      "window_title":  "CHECK · audit",
+                      "tab_title":  "CHECK · audit",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+                      "branch":  "phase-validation-cleanup",
+                      "role":  "Validation and read-only audit lane.",
+                      "emoji_marker":  "🟪",
+                      "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "watch_state",
+                      "display_title":  "WATCH · state",
+                      "window_title":  "WATCH · state",
+                      "tab_title":  "WATCH · state",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
+                      "branch":  "phase-3-stateful-orchestration",
+                      "role":  "Progress and state monitor lane.",
+                      "emoji_marker":  "⬜",
+                      "truth_source":  "path_and_branch"
+                  }
+              ],
+    "last_commands":  {
+                          "workspace_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview",
+                          "workspace_launch":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -LaunchManualShells",
+                          "lane_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Open-AiOsLane.ps1 -LaneId save_git -Preview",
+                          "session_save":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsSession.ps1 -Apply",
+                          "session_restore":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Restore-AiOsSession.ps1 -Preview",
+                          "validator":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+                      },
+    "pending_workorders":  [
+                               {
+                                   "issue":  60,
+                                   "title":  "AI_OS workspace bootstrap and lane recovery",
+                                   "status":  "in_progress"
+                               }
+                           ],
+    "last_validator_status":  "UNKNOWN",
+    "next_safe_action":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
 }

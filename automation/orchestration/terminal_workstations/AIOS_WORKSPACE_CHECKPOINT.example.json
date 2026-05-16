@@ -1,7 +1,9 @@
 ﻿{
-    "registry_id":  "AIOS_WORKTREE_LANE_REGISTRY",
-    "version":  "3.0",
-    "mode":  "preview_first_manual_shells_only",
+    "checkpoint_id":  "AIOS_WORKSPACE_CHECKPOINT_EXAMPLE",
+    "created_at":  "2026-05-16T00:00:00.0000000-04:00",
+    "active_workspace":  "aios-worker-intent-router",
+    "active_worktree":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-intent-router",
+    "active_branch":  "phase-bootstrap-intent-router",
     "launch_policy":  "windows_terminal_tab_only",
     "fallback_policy":  "print_manual_command",
     "lanes":  [
@@ -10,10 +12,10 @@
                       "display_title":  "CONTROL · main",
                       "window_title":  "CONTROL · main",
                       "tab_title":  "CONTROL · main",
+                      "emoji_marker":  "🟦",
+                      "role":  "Main operator lane for repo control, review, PR review, merge approval, and final checkpoint.",
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
                       "branch":  "main",
-                      "role":  "Main operator lane for repo control, review, PR review, merge approval, and final checkpoint.",
-                      "emoji_marker":  "🟦",
                       "truth_source":  "path_and_branch"
                   },
                   {
@@ -21,10 +23,10 @@
                       "display_title":  "CREATE · codex",
                       "window_title":  "CREATE · codex",
                       "tab_title":  "CREATE · codex",
+                      "emoji_marker":  "🟨",
+                      "role":  "Manual Codex edit lane for approved changes.",
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
                       "branch":  "phase-bootstrap-workspace",
-                      "role":  "Manual Codex edit lane for approved changes.",
-                      "emoji_marker":  "🟨",
                       "truth_source":  "path_and_branch"
                   },
                   {
@@ -32,10 +34,10 @@
                       "display_title":  "SAVE · git",
                       "window_title":  "SAVE · git",
                       "tab_title":  "SAVE · git",
+                      "emoji_marker":  "🟩",
+                      "role":  "Git status, commit package review, and push approval lane.",
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
                       "branch":  "phase-bootstrap-workspace",
-                      "role":  "Git status, commit package review, and push approval lane.",
-                      "emoji_marker":  "🟩",
                       "truth_source":  "path_and_branch"
                   },
                   {
@@ -43,10 +45,10 @@
                       "display_title":  "ROUTE · dispatch",
                       "window_title":  "ROUTE · dispatch",
                       "tab_title":  "ROUTE · dispatch",
+                      "emoji_marker":  "🟧",
+                      "role":  "Queue, packet, and routing lane.",
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
                       "branch":  "phase-221-260-mission-json-dashboard-ready",
-                      "role":  "Queue, packet, and routing lane.",
-                      "emoji_marker":  "🟧",
                       "truth_source":  "path_and_branch"
                   },
                   {
@@ -54,10 +56,10 @@
                       "display_title":  "CHECK · audit",
                       "window_title":  "CHECK · audit",
                       "tab_title":  "CHECK · audit",
+                      "emoji_marker":  "🟪",
+                      "role":  "Validation and read-only audit lane.",
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
                       "branch":  "phase-validation-cleanup",
-                      "role":  "Validation and read-only audit lane.",
-                      "emoji_marker":  "🟪",
                       "truth_source":  "path_and_branch"
                   },
                   {
@@ -65,11 +67,28 @@
                       "display_title":  "WATCH · state",
                       "window_title":  "WATCH · state",
                       "tab_title":  "WATCH · state",
+                      "emoji_marker":  "⬜",
+                      "role":  "Progress and state monitor lane.",
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
                       "branch":  "phase-3-stateful-orchestration",
-                      "role":  "Progress and state monitor lane.",
-                      "emoji_marker":  "⬜",
                       "truth_source":  "path_and_branch"
                   }
-              ]
+              ],
+    "last_commands":  {
+                          "workspace_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview",
+                          "workspace_intent_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview -Intent \"\u003cplain language work goal\u003e\"",
+                          "workspace_launch":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -LaunchManualShells -Intent \"\u003cplain language work goal\u003e\" -MaxWindows 3",
+                          "checkpoint_save_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Preview",
+                          "checkpoint_save_apply":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Apply",
+                          "checkpoint_restore_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Restore-AiOsWorkspaceCheckpoint.ps1 -Preview",
+                          "validator":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+                      },
+    "pending_workorders":  [
+                               {
+                                   "title":  "Workspace cementing and sticky lane checkpoint",
+                                   "status":  "in_progress"
+                               }
+                           ],
+    "last_validator_status":  "UNKNOWN",
+    "next_safe_action":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
 }

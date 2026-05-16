@@ -1,9 +1,9 @@
-﻿param(
-    [string]$Intent = "",
+param(
     [switch]$Preview,
     [switch]$LaunchManualShells,
     [int]$MaxWindows = 3,
-    [string]$RegistryPath = "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json"
+    [string]$RegistryPath = "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
+    [string]$CheckpointPath = "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json"
 )
 
 Set-StrictMode -Off
@@ -17,13 +17,6 @@ function Resolve-AiOsPath {
     }
 
     return Join-Path (Get-Location).Path $Path
-}
-
-function Write-AiOsSection {
-    param([Parameter(Mandatory = $true)][string]$Title)
-
-    Write-Host ""
-    Write-Host "== $Title ==" -ForegroundColor Yellow
 }
 
 function Write-LaneReport {
@@ -124,14 +117,14 @@ if ($MaxWindows -lt 1) {
 $isPreview = -not $LaunchManualShells
 $scriptName = Split-Path -Leaf $PSCommandPath
 $fullRegistryPath = Resolve-AiOsPath -Path $RegistryPath
+$fullCheckpointPath = Resolve-AiOsPath -Path $CheckpointPath
+
 if (-not (Test-Path -LiteralPath $fullRegistryPath -PathType Leaf)) {
     throw "Lane registry not found: $fullRegistryPath"
 }
 
-$registry = Get-Content -LiteralPath $fullRegistryPath -Raw | ConvertFrom-Json
-$resolverPath = Join-Path $PSScriptRoot "Resolve-AiOsWorkspaceIntent.ps1"
-if (-not (Test-Path -LiteralPath $resolverPath -PathType Leaf)) {
-    throw "Intent resolver not found: $resolverPath"
+if (-not (Test-Path -LiteralPath $fullCheckpointPath -PathType Leaf)) {
+    throw "Workspace checkpoint not found: $fullCheckpointPath"
 }
 
 $identityScriptPath = Join-Path $PSScriptRoot "Set-AiOsTerminalIdentity.ps1"
@@ -139,76 +132,68 @@ if (-not (Test-Path -LiteralPath $identityScriptPath -PathType Leaf)) {
     throw "Terminal identity helper not found: $identityScriptPath"
 }
 
-$intentResolution = (& $resolverPath -Intent $Intent -QuietJson | ConvertFrom-Json)
-$selectedLanes = @()
-foreach ($laneId in @($intentResolution.selected_lane_ids)) {
-    $lane = Get-RegistryLaneById -Registry $registry -LaneId $laneId
-    if ($null -eq $lane) {
-        throw "Intent resolver selected unknown lane_id: $laneId"
-    }
-    $selectedLanes += $lane
-}
-$selectedLanes = @($selectedLanes | Where-Object { $_.lane_id -eq "main_control" }) + @($selectedLanes | Where-Object { $_.lane_id -ne "main_control" })
+$registry = Get-Content -LiteralPath $fullRegistryPath -Raw | ConvertFrom-Json
+$checkpoint = Get-Content -LiteralPath $fullCheckpointPath -Raw | ConvertFrom-Json
 
-$manualCodexLaneIds = @($intentResolution.manual_codex_lane_ids)
+$restorableLanes = @()
+foreach ($checkpointLane in @($checkpoint.lanes)) {
+    $lane = Get-RegistryLaneById -Registry $registry -LaneId $checkpointLane.lane_id
+    if ($null -eq $lane) {
+        throw "Checkpoint references lane_id not found in registry: $($checkpointLane.lane_id)"
+    }
+    $restorableLanes += $lane
+}
+$restorableLanes = @($restorableLanes | Where-Object { $_.lane_id -eq "main_control" }) + @($restorableLanes | Where-Object { $_.lane_id -ne "main_control" })
 
 Write-Host ("COPY START " + [char]0x2014 + " $scriptName")
-Write-Host "AI_OS Workspace Bootstrap" -ForegroundColor Cyan
-Write-Host "Issue: #60"
+Write-Host "AI_OS Workspace Checkpoint Restore" -ForegroundColor Cyan
 Write-Host "Mode: $(if ($isPreview) { 'PREVIEW - print only' } else { 'MANUAL SHELL LAUNCH' })"
 Write-Host "Registry: $fullRegistryPath"
-Write-Host "MaxWindows: $MaxWindows"
+Write-Host "Checkpoint path: $fullCheckpointPath"
+Write-Host "Checkpoint id: $($checkpoint.checkpoint_id)"
+Write-Host "Created at: $($checkpoint.created_at)"
 Write-Host "launch_policy: windows_terminal_tab_only"
 Write-Host "fallback_policy: print_manual_command"
 Write-Host "Safety: no assistant auto-launch. Background launch hooks are disabled."
 Write-Host ("Safety: no commits, no pushes, no startup tasks, no scheduled tasks, no " + "bro" + "ker/API/live trading.")
-Write-Host "Truth rule: trust prompt path and Git branch, not stale terminal/tab title after cd."
+Write-Host "Truth rule: registry lane titles are used; path and branch remain the operational truth source."
 
-Write-AiOsSection -Title "Intent"
-Write-Host $intentResolution.intent
-
-Write-AiOsSection -Title "Git Worktree List"
-git worktree list
-
-Write-AiOsSection -Title "Selected lanes"
-foreach ($lane in @($selectedLanes)) {
+Write-Host ""
+Write-Host "== Would Reopen ==" -ForegroundColor Yellow
+foreach ($lane in @($restorableLanes)) {
     Write-LaneReport -Lane $lane
 }
 
-Write-AiOsSection -Title "Manual Codex instructions"
-$manualCodexLanes = @($selectedLanes | Where-Object { $manualCodexLaneIds -contains $_.lane_id })
-if ($manualCodexLanes.Count -eq 0) {
+Write-Host "== Manual Codex Instructions ==" -ForegroundColor Yellow
+$codexLanes = @($restorableLanes | Where-Object { Test-CodexLane -Lane $_ })
+if ($codexLanes.Count -eq 0) {
     Write-Host "NONE"
 } else {
-    foreach ($lane in $manualCodexLanes) {
+    foreach ($lane in $codexLanes) {
         Write-Host "Manual Codex lane needed: $($lane.display_title)" -ForegroundColor Yellow
         Write-Host "Command: cd $($lane.path); codex"
     }
 }
 
-Write-AiOsSection -Title "Validators suggested"
-@($intentResolution.validators_suggested) | ForEach-Object {
-    Write-Host "  $_"
+Write-Host ""
+Write-Host "== Last Commands ==" -ForegroundColor Yellow
+if ($checkpoint.PSObject.Properties.Name -contains "last_commands") {
+    $checkpoint.last_commands.PSObject.Properties | ForEach-Object {
+        Write-Host "$($_.Name): $($_.Value)"
+    }
 }
 
-Write-AiOsSection -Title "Next safe action"
-Write-Host $intentResolution.next_safe_action
-
-Write-AiOsSection -Title "Operator Commands"
-Write-Host "Preview workspace:"
-Write-Host '  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview -Intent "<plain language work goal>"'
-Write-Host "Open selected lane tabs manually:"
-Write-Host '  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -LaunchManualShells -Intent "<plain language work goal>" -MaxWindows 3'
-Write-Host "Preview one lane:"
-Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId save_git -Preview"
-Write-Host "Save session metadata:"
-Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsSession.ps1 -Apply"
-Write-Host "Restore session preview:"
-Write-Host "  powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1 -Preview"
+Write-Host ""
+Write-Host "Pending workorders:"
+@($checkpoint.pending_workorders) | ForEach-Object {
+    Write-Host "  $($_.title) - $($_.status)"
+}
+Write-Host "Last validator status: $($checkpoint.last_validator_status)"
+Write-Host "Next safe action: $($checkpoint.next_safe_action)"
 
 if ($isPreview) {
     Write-Host ""
-    Write-Host "Preview complete. Tabs opened: NO" -ForegroundColor Green
+    Write-Host "Preview complete. No tabs opened." -ForegroundColor Green
     Write-Host "Assistant auto-start performed: NO"
     Write-Host "Commit performed: NO"
     Write-Host "Push performed: NO"
@@ -219,11 +204,11 @@ if ($isPreview) {
 $wtCommand = Get-Command wt.exe -ErrorAction SilentlyContinue
 if ($null -eq $wtCommand) {
     Write-Host "Windows Terminal unavailable. Fallback manual commands:" -ForegroundColor Yellow
-    foreach ($lane in @($selectedLanes | Select-Object -First $MaxWindows)) {
+    foreach ($lane in @($restorableLanes | Select-Object -First $MaxWindows)) {
         Write-Host (Get-WtManualCommand -Lane $lane -IdentityScriptPath $identityScriptPath)
     }
     Write-Host "Tabs opened: 0"
-    Write-Host "Workspace bootstrap complete. Assistant auto-start performed: NO"
+    Write-Host "Restore complete. Assistant auto-start performed: NO"
     Write-Host "Commit performed: NO"
     Write-Host "Push performed: NO"
     Write-Host ("COPY END " + [char]0x2014 + " $scriptName")
@@ -231,7 +216,7 @@ if ($null -eq $wtCommand) {
 }
 
 $openedTabs = 0
-foreach ($lane in @($selectedLanes)) {
+foreach ($lane in @($restorableLanes)) {
     if ($openedTabs -ge $MaxWindows) {
         Write-Host "Skipped lane due to MaxWindows limit: $($lane.display_title)"
         continue
@@ -247,7 +232,7 @@ foreach ($lane in @($selectedLanes)) {
 }
 
 Write-Host "Tabs opened: $openedTabs"
-Write-Host "Workspace bootstrap complete. Assistant auto-start performed: NO"
+Write-Host "Restore complete. Assistant auto-start performed: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
 Write-Host ("COPY END " + [char]0x2014 + " $scriptName")
