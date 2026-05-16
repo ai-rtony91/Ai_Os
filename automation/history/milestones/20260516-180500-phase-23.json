@@ -1,0 +1,10 @@
+﻿{
+    "utc":  "20260516-180500",
+    "phase":  "Phase 23",
+    "capability":  "Milestone Registry",
+    "pr_number":  "77",
+    "branch":  "phase-23-milestone-registry",
+    "commit":  "924d769e516773e3a2db14376619935e54a47014",
+    "operational_impact":  "AIOS can now persist and review historical capability evolution.",
+    "next_target":  "Auto approval processor"
+}
