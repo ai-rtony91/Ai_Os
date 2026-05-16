@@ -1,0 +1,82 @@
+{
+  "system": "AI_OS",
+  "supervisor_name": "phase_16_41_55_aios_supervisor_core_example",
+  "mode": "DRY_RUN",
+  "purpose": "Example read-only supervisor state for watching repo, GitHub, worker lanes, queue, validators, stale state, and next safe action.",
+  "repo_root": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "worker_lanes": [
+    {
+      "lane_id": "COMMAND_DECK",
+      "lane_name": "Ai_Os COMMAND DECK",
+      "purpose": "Main control for Git, GitHub CLI, issues, PRs, commits, merges, and operator decisions.",
+      "recommended_when": "GitHub, PR, issue, commit, merge, or branch decision is needed."
+    },
+    {
+      "lane_id": "BUILD_ENGINE",
+      "lane_name": "Ai_Os BUILD ENGINE",
+      "purpose": "Codex work lane.",
+      "recommended_when": "An approved APPLY or code task is ready."
+    },
+    {
+      "lane_id": "VALIDATION_DECK",
+      "lane_name": "Ai_Os VALIDATION DECK",
+      "purpose": "Checks lane for PowerShell validators, queue checks, and repo checks.",
+      "recommended_when": "Validation, git diff check, JSON parse, or PowerShell parse is needed."
+    }
+  ],
+  "watched_queue_files": [
+    "automation/orchestration/packet_queue.example.json",
+    "automation/orchestration/packet_queue_ledger.v1.example.json",
+    "automation/orchestration/approval_inbox.v1.example.json",
+    "automation/orchestration/queue_health_supervisor.v1.example.json"
+  ],
+  "watched_validator_files": [
+    "automation/orchestration/validator_chain.example.json",
+    "automation/orchestration/validator_routing_supervisor.v1.example.json"
+  ],
+  "stale_state_rules": [
+    {
+      "rule_id": "DIRTY_REPO_AFTER_APPLY",
+      "description": "Dirty repo after APPLY means validation and selective commit review are needed.",
+      "severity": "review"
+    },
+    {
+      "rule_id": "UNCOMMITTED_FILES_AFTER_VALIDATION",
+      "description": "Uncommitted files after validation require operator commit decision.",
+      "severity": "review"
+    },
+    {
+      "rule_id": "GH_UNAVAILABLE",
+      "description": "If GitHub CLI fails, continue local-only and ask operator to retry GitHub checks later.",
+      "severity": "warning"
+    }
+  ],
+  "blocked_actions": [
+    "commit",
+    "push",
+    "merge",
+    "create branches",
+    "create issues",
+    "create pull requests",
+    "edit dashboard files",
+    "edit protected root files",
+    "create startup tasks",
+    "create scheduled tasks",
+    "auto-launch Codex",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading"
+  ],
+  "next_action_rules": [
+    {
+      "condition": "repo_dirty",
+      "next_safe_action": "Use Ai_Os VALIDATION DECK and run git diff --check, then review changed files."
+    },
+    {
+      "condition": "repo_clean",
+      "next_safe_action": "Use Ai_Os COMMAND DECK to decide the next approved phase or PR action."
+    },
+    {
+      "condition": "github_unavailable",
+      "next_safe_action": "Continue local-only and retry GitHub status from Ai_Os COMMAND DECK later."
+    }
+  ]
+}
