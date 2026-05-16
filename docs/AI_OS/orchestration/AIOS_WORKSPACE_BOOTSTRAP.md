@@ -231,7 +231,16 @@ It opens Windows Terminal tabs only, does not start Codex, does not commit, does
 
 ## One Command Workflow
 
-`Start-AiOsWork.ps1` is the preferred operator entrypoint. It runs status, validator, packet state, packet routing, Daily Start, worker profile resolution, and then prints one chosen next safe action with exact guard, Codex, validator, and save preview commands.
+`Start-AiOsWork.ps1` is the preferred operator entrypoint. It runs status, validator, packet state, packet routing, Daily Start, worker profile resolution, branch/PR awareness, main freshness checks, and then prints one chosen next safe action with exact guard, Codex, validator, and save preview commands.
+
+The cockpit output is intentionally compact:
+
+- `STATUS`
+- `PACKETS`
+- `WORKER`
+- `GUARD`
+- `NEXT COMMAND`
+- `STOP CONDITION`
 
 Preview command:
 

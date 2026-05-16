@@ -50,6 +50,7 @@ COPY END
 - Use Invoke-AiOsGuard.ps1 before risky actions. Guard checks path, branch, lane, command type, Apply requirement, and protected-root warnings before the operator proceeds.
 - Daily Start must connect intent, work packets, worker profiles, guard checks, and save/PR automation before asking the operator to act.
 - Prefer Start-AiOsWork.ps1 as the primary operator entrypoint. It should consolidate status, packets, routing, validation, next action, and exact commands before asking the operator to act.
+- Start-AiOsWork.ps1 is the cockpit. It must check freshness, packets, worker, guard, save path, and next command before asking the operator to act.
 
 ## Rulebook Lane Identity
 

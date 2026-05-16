@@ -380,7 +380,8 @@ $requiredRuleTexts = @(
     "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only.",
     "Use Invoke-AiOsGuard.ps1 before risky actions. Guard checks path, branch, lane, command type, Apply requirement, and protected-root warnings before the operator proceeds.",
     "Daily Start must connect intent, work packets, worker profiles, guard checks, and save/PR automation before asking the operator to act.",
-    "Prefer Start-AiOsWork.ps1 as the primary operator entrypoint. It should consolidate status, packets, routing, validation, next action, and exact commands before asking the operator to act."
+    "Prefer Start-AiOsWork.ps1 as the primary operator entrypoint. It should consolidate status, packets, routing, validation, next action, and exact commands before asking the operator to act.",
+    "Start-AiOsWork.ps1 is the cockpit. It must check freshness, packets, worker, guard, save path, and next command before asking the operator to act."
 )
 
 Write-Host ""
@@ -703,6 +704,37 @@ if ($guardText -notmatch "Overall: PASS") {
     throw "Guard expected path validate preview must pass."
 }
 $guardOutput | ForEach-Object { Write-Host $_ }
+
+Write-Host ""
+Write-Host "== One Command Workflow Coverage ==" -ForegroundColor Yellow
+$oneCommandPath = Resolve-AiOsPath -Path "automation/orchestration/bootstrap/Start-AiOsWork.ps1"
+$oneCommandContent = Get-Content -LiteralPath $oneCommandPath -Raw
+$requiredOneCommandText = @(
+    "Main freshness:",
+    "Pull preview command:",
+    "Optional connector missing:",
+    "Guard unavailable",
+    "Submit-AiOsWork.ps1 -Preview",
+    "No active packet.",
+    "Folder/status mismatch detected:",
+    "STATUS",
+    "PACKETS",
+    "WORKER",
+    "GUARD",
+    "NEXT COMMAND",
+    "STOP CONDITION",
+    "Commit performed: NO",
+    "Push performed: NO",
+    "PR created: NO",
+    "Merge performed: NO"
+)
+$requiredOneCommandText | ForEach-Object {
+    $requiredText = $_
+    if ($oneCommandContent.IndexOf($requiredText, [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
+        throw "Start-AiOsWork.ps1 missing required workflow text: $requiredText"
+    }
+    Write-Host "PASS: Start-AiOsWork contains $requiredText"
+}
 
 Write-Host ""
 Write-Host "== Lane Preview Smoke Test ==" -ForegroundColor Yellow
