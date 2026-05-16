@@ -17,10 +17,10 @@
                       "worker_type":  "validation",
                       "task":  "Validate worker launcher changes",
                       "reason":  "Route validation work to best worker",
-                      "status":  "running",
+                      "status":  "complete",
                       "created_utc":  "2026-05-16T20:02:46Z",
-                      "state_note":  "Validator started task.",
-                      "updated_utc":  "2026-05-16T21:16:00Z"
+                      "state_note":  "Validator completed task.",
+                      "updated_utc":  "2026-05-16T21:19:16Z"
                   }
               ]
 }
