@@ -8,7 +8,7 @@ function Write-Section {
     param([Parameter(Mandatory = $true)][string]$Title)
 
     Write-Host ""
-    Write-Host "== $Title =="
+    Write-Host "== $Title ==" -ForegroundColor Cyan
 }
 
 function Invoke-ReadOnlyCommand {
@@ -62,16 +62,18 @@ if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
 Set-Location -LiteralPath $repoPath
 $Host.UI.RawUI.WindowTitle = $roleName
 
-Write-Host "========================================"
-Write-Host "AI_OS TERMINAL WORKSTATION"
-Write-Host "Repo: $repoPath"
-Write-Host "No Codex auto-launch. No extra windows. No scheduled/startup tasks."
-Write-Host "No WScript.Shell, SendKeys, ALT+SPACE automation, Num Lock changes, or Windows Terminal settings edits."
-Write-Host "No broker, OANDA, API keys, webhooks, real orders, or live trading."
-Write-Host "========================================"
-Write-Host "=== COPY START ==="
-Write-Host "Paste terminal output between COPY START and COPY END when sending to ChatGPT."
-Write-Host "=== COPY END ==="
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "AI_OS TERMINAL WORKSTATION" -ForegroundColor Cyan
+Write-Host "Repo: $repoPath" -ForegroundColor Cyan
+Write-Host "No Codex auto-launch. No extra windows. No scheduled/startup tasks." -ForegroundColor Gray
+Write-Host "No WScript.Shell, SendKeys, ALT+SPACE automation, Num Lock changes, or Windows Terminal settings edits." -ForegroundColor Gray
+Write-Host "No broker, OANDA, API keys, webhooks, real orders, or live trading." -ForegroundColor Red
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Yellow
+Write-Host "=== COPY START ===" -ForegroundColor Yellow
+Write-Host "Paste terminal output between COPY START and COPY END when sending to ChatGPT." -ForegroundColor Gray
+Write-Host "=== COPY END ===" -ForegroundColor Yellow
+Write-Host "========================================" -ForegroundColor Yellow
 
 Invoke-ReadOnlyCommand -Label "Current Git Branch" -Command {
     git branch --show-current
@@ -94,15 +96,15 @@ Invoke-ReadOnlyCommand -Label "Open GitHub PRs" -Command {
 }
 
 Write-Section -Title "Operator Lanes"
-Write-Host "AI_OS COMMAND DECK"
+Write-Host "AI_OS COMMAND DECK" -ForegroundColor Magenta
 Write-Host "  Use for Git, GitHub CLI, issues, PRs, commits, merges, and operator decisions."
-Write-Host "AI_OS BUILD ENGINE"
+Write-Host "AI_OS BUILD ENGINE" -ForegroundColor Green
 Write-Host "  Use for Codex work. Codex launch remains manual."
-Write-Host "AI_OS VALIDATION DECK"
+Write-Host "AI_OS VALIDATION DECK" -ForegroundColor Cyan
 Write-Host "  Use for PowerShell status checks, validators, queue checks, and repo checks."
 
 Write-Section -Title "Exact Next Safe Action"
-Write-Host "Run read-only validation before any commit or push:"
+Write-Host "Run read-only validation before any commit or push:" -ForegroundColor Gray
 Write-Host "  git diff --check"
 Write-Host "  git status --short --branch"
 Write-Host ""

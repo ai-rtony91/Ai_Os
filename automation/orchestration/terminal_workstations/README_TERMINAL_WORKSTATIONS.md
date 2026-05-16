@@ -6,9 +6,9 @@ Use `Start-AiOsWorkstation.ps1` first. It prints the startup banner, repo path, 
 
 ## Lanes
 
-- `AI_OS COMMAND DECK`: Git, GitHub CLI, issues, PRs, commits, merges.
-- `AI_OS BUILD ENGINE`: Codex work lane. Codex launch is manual only.
-- `AI_OS VALIDATION DECK`: PowerShell status checks, validators, queue checks, repo checks.
+- `AI_OS COMMAND DECK`: Magenta label. Git, GitHub CLI, issues, PRs, commits, merges.
+- `AI_OS BUILD ENGINE`: Green label. Codex work lane. Codex launch is manual only.
+- `AI_OS VALIDATION DECK`: Cyan label. PowerShell status checks, validators, queue checks, repo checks.
 
 ## Launcher Rules
 
@@ -28,6 +28,16 @@ Paste terminal output between COPY START and COPY END when sending to ChatGPT.
 - shows its role
 - shows allowed actions
 - shows blocked actions
+
+## Color Rules
+
+- COMMAND DECK: Magenta border and title
+- BUILD ENGINE: Green border and title
+- VALIDATION DECK: Cyan border and title
+- COPY START / COPY END: Yellow border and marker text
+- Blocked actions: Red
+- Allowed actions: Green
+- Repo, branch, and status: Cyan or Gray
 
 ## Blocked Actions
 
