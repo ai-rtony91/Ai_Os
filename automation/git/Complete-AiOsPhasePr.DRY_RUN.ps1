@@ -25,10 +25,24 @@ git status --short --branch
 
 Write-Host ""
 Write-Host "STEP 2 - add all safe changes"
-Write-Host "Would run: git add automation docs .github"
+Write-Host "Would run: $pathsToAdd = @("automation", "docs", ".github")
+foreach ($p in $pathsToAdd) {
+    if (Test-Path $p) {
+        git add $p
+    } else {
+        Write-Host "Skip missing path: $p"
+    }
+}"
 
 if ($Apply) {
-    git add automation docs .github
+    $pathsToAdd = @("automation", "docs", ".github")
+foreach ($p in $pathsToAdd) {
+    if (Test-Path $p) {
+        git add $p
+    } else {
+        Write-Host "Skip missing path: $p"
+    }
+}
 }
 
 Write-Host ""
@@ -66,3 +80,4 @@ Write-Host ""
 Write-Host "Commit performed: $(if ($Apply) { 'MAYBE' } else { 'NO' })"
 Write-Host "Push performed: $(if ($Apply) { 'YES' } else { 'NO' })"
 Write-Host "COPY END - Complete-AiOsPhasePr.DRY_RUN.ps1"
+
