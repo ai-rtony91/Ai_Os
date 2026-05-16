@@ -1,0 +1,43 @@
+﻿{
+    "packet_id":  "phase-17-work-packet-router-state-machine",
+    "title":  "phase 17 work packet router state machine",
+    "intent":  "phase 17 work packet router state machine",
+    "owner_lane":  "route_dispatch",
+    "assigned_worker":  "codex_worker_1",
+    "repo":  "ai-rtony91_Ai_Os_CLEAN",
+    "branch":  "phase-17-work-packet-router-state-machine",
+    "status":  "dry_run_done",
+    "priority":  "normal",
+    "created_utc":  "2026-05-16T17:29:46Z",
+    "updated_utc":  "2026-05-16T17:42:45Z",
+    "validator":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
+    "next_action":  "Build Move-AiOsPacketState.ps1 lifecycle engine.",
+    "blocked_by":  [
+
+                   ],
+    "related_files":  [
+
+                      ],
+    "related_packets":  [
+
+                        ],
+    "notes":  [
+
+              ],
+    "history":  [
+                    {
+                        "from_state":  "active",
+                        "to_state":  "routed",
+                        "utc":  "2026-05-16T17:42:06Z",
+                        "worker":  "human_operator",
+                        "apply":  true
+                    },
+                    {
+                        "from_state":  "routed",
+                        "to_state":  "dry_run_done",
+                        "utc":  "2026-05-16T17:42:45Z",
+                        "worker":  "human_operator",
+                        "apply":  true
+                    }
+                ]
+}
