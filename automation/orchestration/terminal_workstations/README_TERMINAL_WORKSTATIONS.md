@@ -2,13 +2,41 @@
 
 Phase 16.21-25 defines a practical three-lane terminal setup.
 
-Use `Start-AiOsWorkstation.ps1` first. It prints the startup banner, repo path, branch, git status, latest commits, open issues, open PRs, lane map, and next safe action.
+Use `Start-AiOsOneCommandLauncher.ps1` first. It runs preflight, shows the operator menu, and opens the three deck windows when not in preview mode.
+
+Preview first:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsOneCommandLauncher.ps1 -Preview
+```
+
+Start the workstation:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsOneCommandLauncher.ps1
+```
+
+`Start-AiOsWorkstation.ps1` remains a single-window status display.
 
 ## Lanes
 
 - `Ai_Os COMMAND DECK`: Magenta label. Git, GitHub CLI, issues, PRs, commits, merges.
 - `Ai_Os BUILD ENGINE`: Green label. Codex work lane. Codex launch is manual only.
 - `Ai_Os VALIDATION DECK`: Cyan label. PowerShell status checks, validators, queue checks, repo checks.
+
+## One-Command Launcher
+
+The one-command launcher opens decks in this order:
+
+1. Command Deck
+2. Build Engine
+3. Validation Deck
+
+Codex is not launched automatically. Manual Codex launch prevents the wrong branch, packet, or prompt from starting work too early.
+
+PowerToys/FancyZones window placement remains manual.
+
+Branch changes, commits, pushes, merges, issue creation, and PR creation remain operator-approved.
 
 ## Launcher Rules
 
