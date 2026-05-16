@@ -14,6 +14,13 @@ Session state example:
 automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json
 ```
 
+Operator rulebook:
+
+```text
+docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md
+automation/orchestration/operator/AIOS_OPERATOR_RULES.json
+```
+
 ## Lane Model
 
 Each lane records:
@@ -38,6 +45,7 @@ Required user-facing lane titles:
 - `ROUTE · dispatch`
 - `CHECK · audit`
 - `WATCH · state`
+- `RULEBOOK · codex`
 
 Do not put `filter` in user-facing names.
 
@@ -140,6 +148,7 @@ Intent keyword mapping by `lane_id`:
 - `validation`, `audit`, `cleanup`, `check` selects `check_audit`
 - `bootstrap`, `workspace`, `lane`, `window`, `session` selects `save_git`
 - `codex`, `edit`, `feature`, `implement` selects `create_codex` as manual instruction only
+- `rulebook`, `operator`, `rules`, `memory`, `instructions` selects `rulebook_codex` as manual instruction only
 - no matched keyword selects `main_control` and `save_git`
 
 `CONTROL · main` is always included in preview output.
@@ -150,6 +159,7 @@ Intent examples:
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview -Intent "queue dispatcher automation"
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview -Intent "validation cleanup audit"
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview -Intent "edit feature with codex"
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview -Intent "operator rulebook memory"
 ```
 
 Manual tab launch example:

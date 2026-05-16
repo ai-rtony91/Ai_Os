@@ -1,0 +1,45 @@
+{
+  "rulebook_id": "AIOS_OPERATOR_RULES",
+  "version": "1.0",
+  "mode": "persistent_operator_preferences",
+  "truth_source": "path_and_branch",
+  "rules": [
+    "Always say WHERE before commands.",
+    "Always name the visible tab/window first.",
+    "Always include path before commands.",
+    "Distinguish Codex worker vs Git/PowerShell save tab.",
+    "CONTROL is permanent root, not a normal worker.",
+    "Worker lanes are temporary/restorable.",
+    "Use COPY START / COPY END markers.",
+    "Never assume the user remembers lane names.",
+    "Use simple wording when debugging.",
+    "Prefer fixing scripts over explaining repeatedly.",
+    "Do not rely on manual tab/window renaming; it does not reliably stick.",
+    "Repo scripts/registry/checkpoints must own persistent titles.",
+    "Manual renaming is temporary only.",
+    "Use path + branch as truth source.",
+    "No Codex auto-launch.",
+    "Preview before launch.",
+    "No commits/pushes without explicit command.",
+    "No scheduled/startup tasks.",
+    "No broker/API/live trading."
+  ],
+  "lane_identity": {
+    "lane_id": "rulebook_codex",
+    "display_title": "RULEBOOK · codex",
+    "window_title": "RULEBOOK · codex",
+    "tab_title": "RULEBOOK · codex",
+    "role": "Operator rules, workflow memory, and durable instruction capture.",
+    "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+    "branch": "phase-operator-rulebook",
+    "truth_source": "path_and_branch",
+    "manual_codex_lane": true
+  },
+  "blocked_actions": {
+    "codex_auto_launch": "BLOCKED",
+    "commits_without_explicit_command": "BLOCKED",
+    "pushes_without_explicit_command": "BLOCKED",
+    "scheduled_or_startup_tasks": "BLOCKED",
+    "broker_api_live_trading": "BLOCKED"
+  }
+}

@@ -72,12 +72,24 @@
                       "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
                       "branch":  "phase-3-stateful-orchestration",
                       "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "rulebook_codex",
+                      "display_title":  "RULEBOOK · codex",
+                      "window_title":  "RULEBOOK · codex",
+                      "tab_title":  "RULEBOOK · codex",
+                      "emoji_marker":  "🟫",
+                      "role":  "Operator rules, workflow memory, and durable instruction capture.",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+                      "branch":  "phase-operator-rulebook",
+                      "truth_source":  "path_and_branch"
                   }
               ],
     "last_commands":  {
                           "workspace_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview",
                           "workspace_intent_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview -Intent \"\u003cplain language work goal\u003e\"",
                           "workspace_launch":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -LaunchManualShells -Intent \"\u003cplain language work goal\u003e\" -MaxWindows 3",
+                          "rulebook_lane_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Open-AiOsLane.ps1 -LaneId rulebook_codex -Preview",
                           "checkpoint_save_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Preview",
                           "checkpoint_save_apply":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsWorkspaceCheckpoint.ps1 -Apply",
                           "checkpoint_restore_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Restore-AiOsWorkspaceCheckpoint.ps1 -Preview",
