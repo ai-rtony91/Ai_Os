@@ -53,6 +53,8 @@ Each packet stays flat and compact:
 - CONTROL remains root lane.
 - ROUTE lane is packet dispatcher.
 - WATCH lane is packet state observer.
+- Packet routing references worker profiles before recommending a lane.
+- Packets with unknown `owner_lane` or `assigned_worker` must be corrected before APPLY work.
 - Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.
 
 Packet filenames use:
@@ -73,6 +75,12 @@ Preview routing:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File automation\orchestration\work_packets\Route-AiOsWorkPacket.DRY_RUN.ps1
+```
+
+Resolve the standing worker for a packet:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\workers\Resolve-AiOsWorkerForPacket.DRY_RUN.ps1 -PacketId "brainstem-daily-start"
 ```
 
 View packet state:
