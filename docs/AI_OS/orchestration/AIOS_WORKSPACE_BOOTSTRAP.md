@@ -1,121 +1,149 @@
 # AI_OS Workspace Bootstrap
 
-Issue #60 creates a preview-first workspace bootstrap and lane recovery system.
+Issue #60 defines a preview-first lane restore system for AI_OS worktrees.
 
-The source of truth for lane role, path, branch, and restart command is:
+Source of truth:
 
 ```text
 automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json
 ```
 
-## Safety Rules
+Session state example:
 
-- Preview mode is the default.
-- No Codex auto-launch.
-- No scheduled tasks.
-- No startup tasks.
-- No broker, API, webhook, real order, or live trading integration.
-- No destructive action.
-- No commit or push from bootstrap scripts.
-- `git worktree list` is printed during bootstrap, lane open, save, restore, and validation.
-
-## Files
-
-- `automation/orchestration/bootstrap/Start-AiOsWorkspace.ps1`
-- `automation/orchestration/bootstrap/Open-AiOsLane.ps1`
-- `automation/orchestration/bootstrap/Save-AiOsSession.ps1`
-- `automation/orchestration/bootstrap/Restore-AiOsSession.ps1`
-- `automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1`
-- `automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json`
-
-## Preview Workspace
-
-```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1
+```text
+automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json
 ```
 
-Expected result:
+## Lane Model
 
-- Prints safety rules.
-- Runs `git worktree list`.
-- Prints each lane role, path, branch, and restart command.
-- Prints session save and restore commands.
-- Opens no windows.
+Each lane records:
 
-## Open Workspace Lanes
+- `id`
+- `name`
+- `role`
+- `path`
+- `branch`
+- `codex_policy`
+- `launch_policy`
+- `restart_command`
+- `allowed_actions`
+- `blocked_actions`
+
+Required lanes:
+
+- `main_control`
+- `active_git`
+- `active_codex`
+- `validation`
+- `phase3_git`
+- `phase3_codex`
+- `bootstrap_git`
+- `bootstrap_codex`
+
+## Git And Codex Split
+
+Git lanes are for status, diffs, validators, and commit package review. They do not start the assistant.
+
+Codex lanes are manual work lanes. The scripts print the correct worktree and branch so the operator can start the assistant by hand after confirming the prompt and scope.
+
+The bootstrap layer opens PowerShell only when `-LaunchManualShells` is passed. Preview mode is the default.
+
+## Start Commands
+
+Preview workspace:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -OpenLanes
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview
 ```
 
-Expected result:
-
-- Opens manual PowerShell lane shells only.
-- Does not launch Codex.
-- Does not create scheduled or startup tasks.
-
-## Preview One Lane
+Open all lane shells manually:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId validation
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -LaunchManualShells
 ```
 
-Expected result:
-
-- Prints the selected lane role, path, branch, and restart command.
-- Opens no window unless `-Open` is passed.
-
-## Save Session
-
-Preview only:
+Preview one lane:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsSession.ps1
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId bootstrap_git -Preview
 ```
 
-Write a new local session file only when approved:
+Open one lane shell manually:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Open-AiOsLane.ps1 -LaneId bootstrap_git -LaunchManualShells
+```
+
+## Session Save And Restore
+
+Preview session metadata:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsSession.ps1 -Preview
+```
+
+Write session metadata:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsSession.ps1 -Apply
 ```
 
-The save script refuses to overwrite an existing session state file.
-
-## Restore Session
-
-Preview only:
+Restore preview:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1 -Preview
 ```
 
-Open manual lane shells only when approved:
+Restore manual shells:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1 -OpenLanes
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1 -LaunchManualShells
 ```
 
-If no local session state exists, restore preview reads `AIOS_SESSION_STATE.example.json`.
+## Preview Versus Launch
 
-## DRY_RUN Validator
+Preview mode prints:
+
+- `git worktree list`
+- lane id, role, path, and branch
+- restart commands
+- last session commands
+- next safe action
+
+Launch mode opens PowerShell shells only. It does not mutate Git state, does not start assistant tooling, and does not run background launch hooks.
+
+## Operator Workflow
+
+1. Run the validator:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1
 ```
 
-The validator checks:
-
-- Required files exist.
-- PowerShell files parse.
-- JSON files parse.
-- Lane registry has lane role, path, branch, and restart command.
-- `git worktree list` runs.
-- Workspace bootstrap preview runs without opening windows.
-
-## Next Safe Action
-
-Run the DRY_RUN validator before opening lanes:
+2. Preview the workspace:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -Preview
+```
+
+3. Confirm the intended lane, path, and branch.
+
+4. Open lane shells only if the preview is correct:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1 -LaunchManualShells
+```
+
+5. Start any assistant session manually in the correct lane after reading the role and branch.
+
+6. Save session metadata when the work state changes:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Save-AiOsSession.ps1 -Apply
+```
+
+7. Restore by preview first:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation\orchestration\bootstrap\Restore-AiOsSession.ps1 -Preview
 ```
