@@ -1,7 +1,7 @@
 param(
-    [switch]$OpenLanes,
-    [string]$SessionPath = "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.json",
-    [string]$FallbackExamplePath = "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json"
+    [switch]$Preview,
+    [switch]$LaunchManualShells,
+    [string]$SessionPath = "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json"
 )
 
 Set-StrictMode -Version Latest
@@ -17,24 +17,37 @@ function Resolve-AiOsPath {
     return Join-Path (Get-Location).Path $Path
 }
 
+function Get-RestartPayload {
+    param([Parameter(Mandatory = $true)][string]$Command)
+
+    $prefix = "powershell -NoExit -ExecutionPolicy Bypass -Command "
+    if ($Command.StartsWith($prefix)) {
+        return $Command.Substring($prefix.Length)
+    }
+
+    return $Command
+}
+
+if ($Preview -and $LaunchManualShells) {
+    throw "Use either -Preview or -LaunchManualShells, not both."
+}
+
+$isPreview = -not $LaunchManualShells
 $fullSessionPath = Resolve-AiOsPath -Path $SessionPath
-$fullFallbackExamplePath = Resolve-AiOsPath -Path $FallbackExamplePath
 
 if (Test-Path -LiteralPath $fullSessionPath -PathType Leaf) {
     $statePath = $fullSessionPath
-} elseif (Test-Path -LiteralPath $fullFallbackExamplePath -PathType Leaf) {
-    $statePath = $fullFallbackExamplePath
 } else {
-    throw "No session state found. Checked: $fullSessionPath and $fullFallbackExamplePath"
+    throw "No session state found: $fullSessionPath"
 }
 
 $session = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
 
 Write-Host "AI_OS Session Restore" -ForegroundColor Cyan
-Write-Host "Mode: $(if ($OpenLanes) { 'OPEN LANES - manual PowerShell shells only' } else { 'PREVIEW - no windows opened' })"
+Write-Host "Mode: $(if ($isPreview) { 'PREVIEW - print only' } else { 'MANUAL SHELL LAUNCH' })"
 Write-Host "State: $statePath"
-Write-Host "Safety: no Codex auto-launch, no scheduled tasks, no startup tasks."
-Write-Host "Safety: no broker/API/live trading, no commits, no pushes, no destructive actions."
+Write-Host "Safety: assistant start is manual. Background launch hooks are disabled."
+Write-Host "Safety: no commits, no pushes, no destructive cleanup, no external execution integration."
 
 Write-Host ""
 Write-Host "== Git Worktree List ==" -ForegroundColor Yellow
@@ -53,7 +66,18 @@ foreach ($lane in @($session.lanes)) {
     Write-Host ""
 }
 
-if (-not $OpenLanes) {
+Write-Host ""
+Write-Host "== Last Commands ==" -ForegroundColor Yellow
+if ($session.PSObject.Properties.Name -contains "last_commands") {
+    $session.last_commands.PSObject.Properties | ForEach-Object {
+        Write-Host "$($_.Name): $($_.Value)"
+    }
+}
+
+Write-Host ""
+Write-Host "Next safe action: $($session.next_safe_action)"
+
+if ($isPreview) {
     Write-Host "Preview complete. No windows opened." -ForegroundColor Green
     exit 0
 }
@@ -64,15 +88,15 @@ foreach ($lane in @($session.lanes)) {
     }
 
     Start-Process powershell.exe -ArgumentList @(
-        "-NoExit",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-Command",
-        $lane.restart_command.Replace("powershell -NoExit -ExecutionPolicy Bypass -Command ", "")
+    "-NoExit",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-Command",
+    (Get-RestartPayload -Command $lane.restart_command)
     )
     Write-Host "Opened manual PowerShell lane: $($lane.id)"
 }
 
-Write-Host "Restore complete. Codex auto-launch performed: NO"
+Write-Host "Restore complete. Assistant auto-start performed: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
