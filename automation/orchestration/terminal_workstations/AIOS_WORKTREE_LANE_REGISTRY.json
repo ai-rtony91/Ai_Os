@@ -70,6 +70,17 @@
                       "role":  "Progress and state monitor lane.",
                       "emoji_marker":  "⬜",
                       "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "rulebook_codex",
+                      "display_title":  "RULEBOOK · codex",
+                      "window_title":  "RULEBOOK · codex",
+                      "tab_title":  "RULEBOOK · codex",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+                      "branch":  "phase-operator-rulebook",
+                      "role":  "Operator rules, workflow memory, and durable instruction capture.",
+                      "emoji_marker":  "🟫",
+                      "truth_source":  "path_and_branch"
                   }
               ]
 }

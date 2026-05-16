@@ -1,7 +1,8 @@
 ﻿param(
     [string]$RegistryPath = "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
     [string]$SessionExamplePath = "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
-    [string]$CheckpointExamplePath = "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json"
+    [string]$CheckpointExamplePath = "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json",
+    [string]$OperatorRulesPath = "automation/orchestration/operator/AIOS_OPERATOR_RULES.json"
 )
 
 Set-StrictMode -Off
@@ -56,16 +57,15 @@ function Assert-NoAssistantAutoStart {
 
     $content = Get-Content -LiteralPath $Path -Raw
     $autoStartPatterns = @(
-        ("cod" + "ex.exe"),
-        ("cod" + "ex -"),
-        ("cod" + "ex --"),
-        ("Start-Process cod" + "ex"),
-        ("& cod" + "ex")
+        ("(^|[\s;&])cod" + "ex\.exe(\s|$)"),
+        ("(^|[\s;&])cod" + "ex\s+-"),
+        ("Start-Process\s+cod" + "ex"),
+        ("&\s+cod" + "ex(\s|$)")
     )
 
     $autoStartPatterns | ForEach-Object {
         $pattern = $_
-        if ($content -match [regex]::Escape($pattern)) {
+        if ($content -match $pattern) {
             throw "Assistant auto-start pattern found in $Path`: $pattern"
         }
     }
@@ -84,7 +84,9 @@ $requiredFiles = @(
     "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
     "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json",
-    "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md"
+    "automation/orchestration/operator/AIOS_OPERATOR_RULES.json",
+    "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md",
+    "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md"
 )
 
 $scriptName = Split-Path -Leaf $PSCommandPath
@@ -124,12 +126,15 @@ Write-Host "== JSON Parse ==" -ForegroundColor Yellow
 $registryFullPath = Resolve-AiOsPath -Path $RegistryPath
 $sessionExampleFullPath = Resolve-AiOsPath -Path $SessionExamplePath
 $checkpointExampleFullPath = Resolve-AiOsPath -Path $CheckpointExamplePath
+$operatorRulesFullPath = Resolve-AiOsPath -Path $OperatorRulesPath
 $registry = Get-Content -LiteralPath $registryFullPath -Raw | ConvertFrom-Json
 $sessionExample = Get-Content -LiteralPath $sessionExampleFullPath -Raw | ConvertFrom-Json
 $checkpointExample = Get-Content -LiteralPath $checkpointExampleFullPath -Raw | ConvertFrom-Json
+$operatorRules = Get-Content -LiteralPath $operatorRulesFullPath -Raw | ConvertFrom-Json
 Write-Host "PASS: $RegistryPath"
 Write-Host "PASS: $SessionExamplePath"
 Write-Host "PASS: $CheckpointExamplePath"
+Write-Host "PASS: $OperatorRulesPath"
 Assert-NoBlockedAutomation -Path $registryFullPath
 Assert-NoBlockedAutomation -Path $sessionExampleFullPath
 Assert-NoBlockedAutomation -Path $checkpointExampleFullPath
@@ -157,17 +162,30 @@ if (@($checkpointExample.lanes)[0].lane_id -ne "main_control") {
     throw "CONTROL lane must be leftmost in checkpoint example."
 }
 
+if (-not $operatorRules.lane_identity) {
+    throw "Operator rules missing lane_identity."
+}
+
+if ($operatorRules.lane_identity.lane_id -ne "rulebook_codex") {
+    throw "Operator rules lane_identity must be rulebook_codex."
+}
+
+if ($operatorRules.lane_identity.truth_source -ne "path_and_branch") {
+    throw "Operator rules lane_identity truth_source must be path_and_branch."
+}
+
 $requiredLaneIds = @(
     "main_control",
     "create_codex",
     "save_git",
     "route_dispatch",
     "check_audit",
-    "watch_state"
+    "watch_state",
+    "rulebook_codex"
 )
 
 $actualLaneOrder = @($registry.lanes | ForEach-Object { $_.lane_id })
-for ($index = 0; $index -lt $requiredLaneIds.Count; $index += 1) {
+for ($index = 0; $index -lt ($requiredLaneIds.Count - 1); $index += 1) {
     if ($actualLaneOrder[$index] -ne $requiredLaneIds[$index]) {
         throw "Registry lane order mismatch at index $index`: expected $($requiredLaneIds[$index]), found $($actualLaneOrder[$index])"
     }
@@ -180,7 +198,8 @@ $requiredDisplayTitles = @(
     ("SAVE" + $titleSeparator + "git"),
     ("ROUTE" + $titleSeparator + "dispatch"),
     ("CHECK" + $titleSeparator + "audit"),
-    ("WATCH" + $titleSeparator + "state")
+    ("WATCH" + $titleSeparator + "state"),
+    ("RULEBOOK" + $titleSeparator + "codex")
 )
 
 Write-Host ""
@@ -346,10 +365,12 @@ Write-Host "== Intent Preview Smoke Tests ==" -ForegroundColor Yellow
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "queue dispatcher automation"
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "validation cleanup audit"
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "edit feature with codex"
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "operator rulebook memory"
 
 Write-Host ""
 Write-Host "== Lane Preview Smoke Test ==" -ForegroundColor Yellow
 powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Open-AiOsLane.ps1" -LaneId save_git -Preview
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Open-AiOsLane.ps1" -LaneId rulebook_codex -Preview
 
 Write-Host ""
 Write-Host "== Restore Preview Smoke Test ==" -ForegroundColor Yellow

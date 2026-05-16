@@ -49,6 +49,12 @@ if ($searchIntent -match "\b(codex|edit|feature|implement)\b") {
     Add-UniqueValue -List $validatorsSuggested -Value "Run relevant validators after manual assistant edits"
 }
 
+if ($searchIntent -match "\b(rulebook|operator|rules|memory|instructions)\b") {
+    Add-UniqueValue -List $selectedLaneIds -Value "rulebook_codex"
+    Add-UniqueValue -List $manualCodexLaneIds -Value "rulebook_codex"
+    Add-UniqueValue -List $validatorsSuggested -Value "Workspace bootstrap preview"
+}
+
 if ($selectedLaneIds.Count -eq 1) {
     Add-UniqueValue -List $selectedLaneIds -Value "save_git"
     Add-UniqueValue -List $validatorsSuggested -Value "Workspace bootstrap preview"

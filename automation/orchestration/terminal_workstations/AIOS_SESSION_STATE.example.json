@@ -10,7 +10,8 @@
     "truth_rule":  "Trust prompt path and Git branch, not stale terminal/tab title after cd.",
     "open_lanes":  [
                        "save_git",
-                       "create_codex"
+                       "create_codex",
+                       "rulebook_codex"
                    ],
     "last_known_roles":  [
                              {
@@ -77,6 +78,17 @@
                                  "branch":  "phase-3-stateful-orchestration",
                                  "role":  "Progress and state monitor lane.",
                                  "emoji_marker":  "⬜",
+                                 "truth_source":  "path_and_branch"
+                             },
+                             {
+                                 "lane_id":  "rulebook_codex",
+                                 "display_title":  "RULEBOOK · codex",
+                                 "window_title":  "RULEBOOK · codex",
+                                 "tab_title":  "RULEBOOK · codex",
+                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+                                 "branch":  "phase-operator-rulebook",
+                                 "role":  "Operator rules, workflow memory, and durable instruction capture.",
+                                 "emoji_marker":  "🟫",
                                  "truth_source":  "path_and_branch"
                              }
                          ],
@@ -146,12 +158,24 @@
                       "role":  "Progress and state monitor lane.",
                       "emoji_marker":  "⬜",
                       "truth_source":  "path_and_branch"
+                  },
+                  {
+                      "lane_id":  "rulebook_codex",
+                      "display_title":  "RULEBOOK · codex",
+                      "window_title":  "RULEBOOK · codex",
+                      "tab_title":  "RULEBOOK · codex",
+                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+                      "branch":  "phase-operator-rulebook",
+                      "role":  "Operator rules, workflow memory, and durable instruction capture.",
+                      "emoji_marker":  "🟫",
+                      "truth_source":  "path_and_branch"
                   }
               ],
     "last_commands":  {
                           "workspace_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -Preview",
                           "workspace_launch":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Start-AiOsWorkspace.ps1 -LaunchManualShells",
                           "lane_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Open-AiOsLane.ps1 -LaneId save_git -Preview",
+                          "rulebook_lane_preview":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Open-AiOsLane.ps1 -LaneId rulebook_codex -Preview",
                           "session_save":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Save-AiOsSession.ps1 -Apply",
                           "session_restore":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Restore-AiOsSession.ps1 -Preview",
                           "validator":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
