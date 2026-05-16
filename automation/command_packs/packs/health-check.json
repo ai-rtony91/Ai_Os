@@ -1,0 +1,24 @@
+﻿{
+  "pack_id": "health-check",
+  "title": "AIOS Health Check Pack",
+  "steps": [
+    {
+      "id": 1,
+      "title": "Runtime health",
+      "command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
+      "requires_apply": false
+    },
+    {
+      "id": 2,
+      "title": "Next step",
+      "command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1",
+      "requires_apply": false
+    },
+    {
+      "id": 3,
+      "title": "Blocker resolver",
+      "command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/blockers/Resolve-AiOsRuntimeBlocker.DRY_RUN.ps1",
+      "requires_apply": false
+    }
+  ]
+}
