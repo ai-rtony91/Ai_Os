@@ -1,7 +1,12 @@
 ﻿param(
-    [ValidateSet("help","daily","swarm","status","resume","workers","runtime","supervisor")]
+    [ValidateSet("help","daily","swarm","status","resume","workers","runtime","supervisor","mission")]
     [string]$Mode = "help",
-    [string]$Goal = "Build next AIOS runtime loop step"
+    [string]$Goal = "Build next AIOS runtime loop step",
+    [string]$MissionName = "",
+    [int]$WorkerCount = 4,
+    [ValidateSet("auto","compact","wide","dual-monitor")]
+    [string]$Preset = "auto",
+    [switch]$ApplyMission
 )
 
 Set-StrictMode -Off
@@ -21,6 +26,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode swarm    # launch worker swarm"
         Write-Host ".\aios.ps1 -Mode runtime  # run goal intake + recommendation + health"
         Write-Host ".\aios.ps1 -Mode supervisor # run repeated runtime self-routing cycles"
+        Write-Host ".\aios.ps1 -Mode mission -Goal ""Improve AIOS runtime automation"" # create Mission Control plan DRY_RUN"
     }
 
     "daily" {
@@ -70,6 +76,31 @@ switch ($Mode) {
     }
 
     powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1 -Cycles 3 -Apply
+}
+
+   "mission" {
+    $missionArgs = @(
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "automation/mission_control/New-AiOsMissionPlan.ps1",
+        "-Goal",
+        $Goal,
+        "-WorkerCount",
+        $WorkerCount,
+        "-Preset",
+        $Preset
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($MissionName)) {
+        $missionArgs += @("-MissionName", $MissionName)
+    }
+
+    if ($ApplyMission) {
+        $missionArgs += "-Apply"
+    }
+
+    powershell @missionArgs
 }
 }
 
