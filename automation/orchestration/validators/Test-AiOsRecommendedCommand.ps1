@@ -29,6 +29,45 @@ function Test-IsRepoScopedPath {
     return ($expanded -eq $RepoRoot -or $expanded.StartsWith($repoPrefix, [System.StringComparison]::OrdinalIgnoreCase))
 }
 
+function ConvertTo-UnquotedToken {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return $Value
+    }
+
+    return ($Value.Trim() -replace '^[\x27"]|[\x27"]$', '')
+}
+
+function Test-IsSafePowerShellFileCommand {
+    param(
+        [string]$NormalizedCommand,
+        [string]$RepoRoot
+    )
+
+    if ($NormalizedCommand -match "(?i)\s-(?:Command|EncodedCommand|EncodedArguments|NoExit)\b") {
+        Block-Command "PowerShell recommended command contains a blocked PowerShell argument."
+    }
+
+    if ($NormalizedCommand -notmatch "(?i)^powershell(?:\.exe)?(?:\s+-NoProfile)?\s+-ExecutionPolicy\s+Bypass\s+-File\s+((?:'[^']+')|(?:`"[^`"]+`")|(?:\S+))(?:\s+.*)?$") {
+        Block-Command "PowerShell recommended command must use -ExecutionPolicy Bypass -File with a repo-scoped script."
+    }
+
+    $scriptPath = ConvertTo-UnquotedToken -Value $Matches[1]
+
+    if ($scriptPath -notmatch "(?i)\.ps1$") {
+        Block-Command "PowerShell recommended command must target a .ps1 script."
+    }
+
+    if (-not (Test-IsRepoScopedPath -Value $scriptPath -RepoRoot $RepoRoot)) {
+        Block-Command "PowerShell recommended command references a script outside the repo: $scriptPath"
+    }
+
+    if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
+        Block-Command "PowerShell recommended command references a missing script: $scriptPath"
+    }
+}
+
 $normalizedCommand = $Command.Trim()
 if ([string]::IsNullOrWhiteSpace($normalizedCommand)) {
     Block-Command "Recommended command is empty."
@@ -84,7 +123,9 @@ $allowedCommands = @(
     "Get-Item",
     "gi",
     "Resolve-Path",
-    "git"
+    "git",
+    "powershell",
+    "powershell.exe"
 )
 
 if ($commandTokens[0] -notin $allowedCommands) {
@@ -96,6 +137,11 @@ if ($commandTokens[0] -eq "git" -and $normalizedCommand -notmatch "(?i)^git\s+(?
 }
 
 $repoRoot = (Get-Location).ProviderPath
+
+if ($commandTokens[0] -in @("powershell", "powershell.exe")) {
+    Test-IsSafePowerShellFileCommand -NormalizedCommand $normalizedCommand -RepoRoot $repoRoot
+}
+
 $pathLikeTokens = @(
     $tokens |
         Where-Object {
@@ -108,7 +154,7 @@ $pathLikeTokens = @(
                 $_.Content -match "[\\/]"
             )
         } |
-        ForEach-Object { $_.Content.Trim("'`\"") }
+        ForEach-Object { ConvertTo-UnquotedToken -Value $_.Content }
 )
 
 foreach ($pathToken in $pathLikeTokens) {
