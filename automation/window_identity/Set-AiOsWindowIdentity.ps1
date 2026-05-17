@@ -29,6 +29,23 @@ function Get-AiOsPropertyValue {
     return $null
 }
 
+function Get-AiOsDisplayTitle {
+    param([Parameter(Mandatory = $true)]$Identity)
+
+    $emoji = "$($Identity.emoji)".Trim()
+    $title = "$($Identity.title)".Trim()
+
+    if ([string]::IsNullOrWhiteSpace($emoji)) {
+        return $title
+    }
+
+    if ($title.StartsWith($emoji, [System.StringComparison]::Ordinal)) {
+        return $title
+    }
+
+    return "$emoji $title"
+}
+
 function Get-AiOsMarkerWidth {
     param($Identity)
 
@@ -97,7 +114,7 @@ if (-not $identity) {
     throw "Unknown or disabled AI_OS worker marker '$Marker'. Enabled markers: $($enabledMarkers -join ', ')"
 }
 
-$windowTitle = "$($identity.emoji) $($identity.title)"
+$windowTitle = Get-AiOsDisplayTitle -Identity $identity
 $Host.UI.RawUI.WindowTitle = $windowTitle
 
 $bannerWidth = Get-AiOsMarkerWidth -Identity $identity
