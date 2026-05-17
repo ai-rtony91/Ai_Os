@@ -1,9 +1,10 @@
-﻿{
+{
     "registry_id":  "AIOS_WORKER_REGISTRY",
     "version":  "1.0",
     "workers":  [
                     {
                         "worker_id":  "supervisor_loop",
+                        "window_marker":  "STANDBY WORKER",
                         "type":  "supervisor",
                         "purpose":  "Reads next-step state and routes packet lifecycle movement.",
                         "allowed_actions":  [
@@ -20,6 +21,7 @@
                     },
                     {
                         "worker_id":  "approval_processor",
+                        "window_marker":  "APPROVAL INBOX",
                         "type":  "approval",
                         "purpose":  "Detects approval files and advances awaiting_approval packets.",
                         "allowed_actions":  [
@@ -36,6 +38,7 @@
                     },
                     {
                         "worker_id":  "task_generator",
+                        "window_marker":  "CODEX BUILD LANE",
                         "type":  "task_generation",
                         "purpose":  "Turns next-step output into future work packet drafts.",
                         "allowed_actions":  [
@@ -52,6 +55,7 @@
                     },
                     {
                         "worker_id":  "runtime_daemon",
+                        "window_marker":  "AI_OS MAIN CONTROL",
                         "type":  "runtime",
                         "purpose":  "Runs bounded repeated AIOS runtime cycles.",
                         "allowed_actions":  [
@@ -68,6 +72,7 @@
                     },
                     {
                         "worker_id":  "pr_gate",
+                        "window_marker":  "PACKET QUEUE",
                         "type":  "pull_request",
                         "purpose":  "Previews and applies safe pull request create/merge gates.",
                         "allowed_actions":  [
@@ -84,6 +89,7 @@
                     },
                     {
                         "worker_id":  "health_monitor",
+                        "window_marker":  "RECOVERY HEALTH",
                         "type":  "health",
                         "purpose":  "Checks runtime health, missing files, repo branch, and working tree state.",
                         "allowed_actions":  [
@@ -100,6 +106,7 @@
                     },
                     {
                         "worker_id":  "validator_worker",
+                        "window_marker":  "VALIDATOR WORKER",
                         "type":  "validation",
                         "purpose":  "Checks AIOS changes before commit or PR.",
                         "allowed_actions":  [
