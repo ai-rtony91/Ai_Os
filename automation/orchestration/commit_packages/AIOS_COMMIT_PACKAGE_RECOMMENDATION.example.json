@@ -1,0 +1,30 @@
+{
+  "schema": "aios_commit_package_recommendation.v1",
+  "mode": "DRY_RUN_READ_ONLY",
+  "generated_utc": "2026-05-17T00:00:00Z",
+  "approved_source_files": [
+    "aios.ps1",
+    "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+    "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1"
+  ],
+  "ignored_runtime_files": [
+    "automation/runtime/state/AIOS_RUNTIME_STATE.json",
+    "automation/orchestration/work_packets/active/example.json"
+  ],
+  "risky_files": [
+    "README.md"
+  ],
+  "suggested_git_add_commands": [
+    "git add -- \"aios.ps1\"",
+    "git add -- \"automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1\"",
+    "git add -- \"automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1\""
+  ],
+  "suggested_commit_message": "Add AIOS operator loop guidance tools",
+  "push_reminder": "Do not push until commit validation is clean and the operator explicitly approves push.",
+  "blocked_actions": [
+    "git_add_dot",
+    "git_add_all",
+    "commit_without_review",
+    "push_without_approval"
+  ]
+}

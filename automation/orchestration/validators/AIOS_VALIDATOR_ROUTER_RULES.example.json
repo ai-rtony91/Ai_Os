@@ -1,0 +1,32 @@
+{
+  "schema": "aios_validator_router_rules.v1",
+  "mode": "DRY_RUN_READ_ONLY",
+  "rules": [
+    {
+      "changed_path_pattern": "*.ps1",
+      "recommended_validator_command": "PowerShell parser check for changed .ps1 files, then git diff --check",
+      "reason": "PowerShell scripts must parse before staging."
+    },
+    {
+      "changed_path_pattern": "*.json",
+      "recommended_validator_command": "JSON parse check for changed .json files, then git diff --check",
+      "reason": "JSON artifacts must parse before staging."
+    },
+    {
+      "changed_path_pattern": ".gitignore",
+      "recommended_validator_command": "git diff --check; git check-ignore -v --no-index <runtime-paths>",
+      "reason": "Ignore rules must match runtime artifacts without hiding source files."
+    },
+    {
+      "changed_path_pattern": "automation/orchestration/commit_packages/*",
+      "recommended_validator_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+      "reason": "Commit package tooling should preview exact staging recommendations only."
+    }
+  ],
+  "blocked_actions": [
+    "run_apply_without_approval",
+    "stage_without_review",
+    "commit_without_package",
+    "push_without_approval"
+  ]
+}
