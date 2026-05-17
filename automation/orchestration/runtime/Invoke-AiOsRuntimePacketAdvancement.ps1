@@ -6,15 +6,7 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..\..')).Path
 $activePacketDir = Join-Path $repoRoot 'automation\orchestration\work_packets\active'
-
-$statusMoves = @{
-    'active' = 'routed'
-    'routed' = 'dry_run_done'
-    'dry_run_done' = 'awaiting_approval'
-    'approved' = 'applying'
-    'applying' = 'validated'
-    'validated' = 'complete'
-}
+$movePacketStateScript = Join-Path $repoRoot 'automation\orchestration\work_packets\Move-AiOsPacketState.ps1'
 
 if (-not (Test-Path -LiteralPath $activePacketDir)) {
     Write-Host 'No active packet found'
@@ -30,46 +22,25 @@ if (-not $packetFile) {
     exit 0
 }
 
-$packet = Get-Content -LiteralPath $packetFile.FullName -Raw | ConvertFrom-Json
-$currentStatus = [string]$packet.status
-
-if (-not $statusMoves.ContainsKey($currentStatus)) {
-    Write-Host "Packet: $($packetFile.FullName)"
-    Write-Host "Current status: $currentStatus"
-    Write-Host 'Next status: NONE'
-    Write-Host 'Result: BLOCKED - no legal status move exists.'
-    exit 1
+if (-not (Test-Path -LiteralPath $movePacketStateScript -PathType Leaf)) {
+    throw "Canonical packet state script not found: $movePacketStateScript"
 }
 
-$nextStatus = $statusMoves[$currentStatus]
+$moveArgs = @(
+    '-ExecutionPolicy',
+    'Bypass',
+    '-File',
+    $movePacketStateScript,
+    '-PacketPath',
+    $packetFile.FullName,
+    '-AdvanceToNext',
+    '-Worker',
+    'runtime_packet_advancement'
+)
 
-Write-Host "Packet: $($packetFile.FullName)"
-Write-Host "Current status: $currentStatus"
-Write-Host "Next status: $nextStatus"
-
-if (-not $Apply) {
-    Write-Host 'Mode: DRY_RUN'
-    Write-Host 'Packet updated: NO'
-    exit 0
+if ($Apply) {
+    $moveArgs += '-Apply'
 }
 
-$packet.status = $nextStatus
-$packet.updated_utc = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-
-$note = 'Advanced by runtime packet advancement.'
-if ($null -eq $packet.notes) {
-    $packet.notes = @($note)
-} elseif ($packet.notes -is [System.Array]) {
-    $packet.notes = @($packet.notes) + $note
-} else {
-    $packet.notes = @([string]$packet.notes, $note)
-}
-
-$packet |
-    ConvertTo-Json -Depth 20 |
-    Set-Content -LiteralPath $packetFile.FullName -Encoding UTF8
-
-Write-Host 'Mode: APPLY'
-Write-Host 'Packet updated: YES'
-Write-Host 'Commit performed: NO'
-Write-Host 'Push performed: NO'
+powershell @moveArgs
+exit $LASTEXITCODE
