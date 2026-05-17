@@ -86,6 +86,37 @@ $codexHandoff = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/hando
 $validatorRecommendation = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1"
 $commitPackageSummary = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
 
+if ($commitPackageSummary) {
+    $statusLines = @(git status --short --untracked-files=all)
+    $dirtyFiles = @(
+        foreach ($line in $statusLines) {
+            if ([string]::IsNullOrWhiteSpace($line) -or $line.Length -lt 4) { continue }
+            $path = $line.Substring(3).Trim()
+            if ($path -match " -> ") { $path = ($path -split " -> ")[-1].Trim() }
+            $path -replace "\\", "/"
+        }
+    )
+
+    $approvedSourceFiles = @($commitPackageSummary.approved_source_files)
+    foreach ($file in $dirtyFiles) {
+        if ($file -eq "aios.ps1" -or $file -like "automation/orchestration/session/*.ps1" -or $file -like "automation/orchestration/session/*.json") {
+            if ($approvedSourceFiles -notcontains $file) {
+                $approvedSourceFiles += $file
+            }
+        }
+    }
+
+    $approvedSourceFiles = @($approvedSourceFiles | Sort-Object -Unique)
+    $commitPackageSummary = [pscustomobject]@{
+        approved_source_files = $approvedSourceFiles
+        ignored_runtime_files = @($commitPackageSummary.ignored_runtime_files)
+        risky_files = @($commitPackageSummary.risky_files)
+        suggested_git_add_commands = @($approvedSourceFiles | ForEach-Object { "git add -- `"$_`"" })
+        suggested_commit_message = "Add AIOS operator session bootstrap"
+        push_reminder = if ($commitPackageSummary.push_reminder) { [string]$commitPackageSummary.push_reminder } else { "Do not push until commit validation is clean and the operator explicitly approves push." }
+    }
+}
+
 $nextCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
 if ($queueRunnerSummary -and $queueRunnerSummary.next_recommended_command) {
     $nextCommand = [string]$queueRunnerSummary.next_recommended_command
