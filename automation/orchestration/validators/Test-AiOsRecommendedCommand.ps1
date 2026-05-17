@@ -50,7 +50,7 @@ if ($normalizedCommand -match "(?i)\b(secret|secrets|api[_-]?key|apikey|token|cr
     Block-Command "Recommended command appears to reference secrets or credentials."
 }
 
-if ($normalizedCommand -match "(?i)\b(broker|oanda|traderspost|webhook|live\s*trading|real\s*order|place\s*order|submit\s*order|market\s*order|limit\s*order|buy|sell|trade\s*execution|execute\s*trade)\b") {
+if ($normalizedCommand -match "(?i)(^|[^A-Za-z0-9])(broker|oanda|traderspost|webhook|live[_ -]*trading|real[_ -]*order|place[_ -]*order|submit[_ -]*order|market[_ -]*order|limit[_ -]*order|buy|sell|trade[_ -]*execution|execute[_ -]*trade)([^A-Za-z0-9]|$)") {
     Block-Command "Recommended command appears to reference broker or trading execution actions."
 }
 
