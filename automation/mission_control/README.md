@@ -59,6 +59,32 @@ Show a specific task prompt:
 powershell -ExecutionPolicy Bypass -File automation/mission_control/Get-AiOsMissionNextAction.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-03 -ShowPrompt
 ```
 
+## Mission Progress Report Updater
+
+Preview a progress report update for an opened PR:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Update-AiOsMissionProgressReport.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -Status PR_OPENED -PullRequest "PR #146" -ValidationResult "PASS"
+```
+
+Apply a progress report update for an opened PR:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Update-AiOsMissionProgressReport.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -Status PR_OPENED -PullRequest "PR #146" -ValidationResult "PASS" -Apply
+```
+
+Apply a merged update:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Update-AiOsMissionProgressReport.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -Status MERGED -PullRequest "PR #146" -ValidationResult "PASS" -NextSafeAction "Run the next Mission Runner task." -Apply
+```
+
+Apply a blocked update with blocker text:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Update-AiOsMissionProgressReport.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -Status BLOCKED -Blocker "Validation proof is missing." -NextSafeAction "Attach validation proof before APPLY." -Apply
+```
+
 ## Safety
 
 The script is repo-scoped and file-generation only. It does not commit, push, merge, create scheduled tasks, create startup tasks, call external networks, touch secrets, call brokers, or perform trading actions.
