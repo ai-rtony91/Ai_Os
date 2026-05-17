@@ -1,0 +1,28 @@
+{
+  "presets": {
+    "compact": [
+      "AI_OS MAIN CONTROL",
+      "CODEX BUILD LANE",
+      "VALIDATOR WORKER",
+      "APPROVAL INBOX"
+    ],
+    "wide": [
+      "AI_OS MAIN CONTROL",
+      "CODEX BUILD LANE",
+      "VALIDATOR WORKER",
+      "PACKET QUEUE",
+      "APPROVAL INBOX",
+      "RECOVERY HEALTH",
+      "STANDBY WORKER"
+    ],
+    "dual-monitor": [
+      "AI_OS MAIN CONTROL",
+      "CODEX BUILD LANE",
+      "VALIDATOR WORKER",
+      "PACKET QUEUE",
+      "APPROVAL INBOX",
+      "RECOVERY HEALTH",
+      "STANDBY WORKER"
+    ]
+  }
+}

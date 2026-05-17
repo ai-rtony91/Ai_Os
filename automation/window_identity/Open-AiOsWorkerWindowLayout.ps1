@@ -1,5 +1,4 @@
 param(
-    [ValidateSet('compact', 'wide', 'dual-monitor')]
     [string]$Preset = 'compact',
 
     [switch]$Apply
@@ -12,25 +11,15 @@ try {
     # Older hosts may reject output encoding changes; command generation still works.
 }
 
-$repoPath = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN'
-$identityScript = Join-Path $repoPath 'automation\window_identity\Set-AiOsWindowIdentity.ps1'
+$repoPath = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+$identityScript = Join-Path $PSScriptRoot 'Set-AiOsWindowIdentity.ps1'
+$layoutPath = Join-Path $PSScriptRoot 'AIOS_WINDOW_LAYOUTS.json'
 
-$allMarkers = @(
-    'AI_OS MAIN CONTROL',
-    'CODEX BUILD LANE',
-    'VALIDATOR WORKER',
-    'PACKET QUEUE',
-    'APPROVAL INBOX',
-    'RECOVERY HEALTH',
-    'STANDBY WORKER'
-)
+if (-not (Test-Path -LiteralPath $layoutPath)) {
+    throw "Window layout registry not found: $layoutPath"
+}
 
-$compactMarkers = @(
-    'AI_OS MAIN CONTROL',
-    'CODEX BUILD LANE',
-    'VALIDATOR WORKER',
-    'APPROVAL INBOX'
-)
+$layoutConfig = Get-Content -LiteralPath $layoutPath -Raw | ConvertFrom-Json
 
 function Get-SelectedMarkers {
     param(
@@ -38,11 +27,13 @@ function Get-SelectedMarkers {
         [string]$SelectedPreset
     )
 
-    switch ($SelectedPreset) {
-        'compact' { return $compactMarkers }
-        'wide' { return $allMarkers }
-        'dual-monitor' { return $allMarkers }
+    $presetProperty = $layoutConfig.presets.PSObject.Properties[$SelectedPreset]
+    if (-not $presetProperty) {
+        $availablePresets = @($layoutConfig.presets.PSObject.Properties.Name)
+        throw "Unknown AI_OS window layout preset '$SelectedPreset'. Available presets: $($availablePresets -join ', ')"
     }
+
+    return @($presetProperty.Value)
 }
 
 function New-WorkerPowerShellArguments {
