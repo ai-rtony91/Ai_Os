@@ -165,7 +165,7 @@
                      "PR status placeholders must be replaced with real PR links before merge decisions.",
                      "No live trading, broker, secrets, startup tasks, scheduled tasks, or destructive actions are allowed."
                  ],
-    "next_safe_action":  "Review mission folder C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN\\automation\\mission_control\\missions\\mission-control-safe-apply-test and choose the first DRY_RUN worker prompt from codex_tasks.md.",
+    "next_safe_action":  "Review mission folder automation/mission_control/missions/mission-control-safe-apply-test and choose the first DRY_RUN worker prompt from codex_tasks.md.",
     "safety":  {
                    "mode":  "APPLY",
                    "repo_scoped_only":  true,

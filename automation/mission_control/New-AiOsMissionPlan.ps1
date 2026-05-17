@@ -145,6 +145,7 @@ $recommendedPreset = Get-RecommendedPreset -Count $WorkerCount -RequestedPreset 
 $timestampUtc = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
 $missionsRoot = Join-Path $PSScriptRoot 'missions'
 $missionFolder = Join-Path $missionsRoot $missionSlug
+$missionRelativeFolder = "automation/mission_control/missions/$missionSlug"
 
 $missionStages = @(
     [ordered]@{
@@ -219,10 +220,10 @@ $blockers = @(
 )
 
 $nextSafeAction = if ($Apply) {
-    "Review mission folder $missionFolder and choose the first DRY_RUN worker prompt from codex_tasks.md."
+    "Review mission folder $missionRelativeFolder and choose the first DRY_RUN worker prompt from codex_tasks.md."
 }
 else {
-    "Review this DRY_RUN output, then rerun with -Apply only after approving mission folder $missionFolder."
+    "Review this DRY_RUN output, then rerun with -Apply only after approving mission folder $missionRelativeFolder."
 }
 
 $missionPlan = [ordered]@{
@@ -366,11 +367,11 @@ $nextSafeAction
 "@
 
 $plannedFiles = @(
-    (Join-Path $missionFolder 'mission_plan.json')
-    (Join-Path $missionFolder 'codex_tasks.md')
-    (Join-Path $missionFolder 'validation_plan.md')
-    (Join-Path $missionFolder 'merge_order.md')
-    (Join-Path $missionFolder 'mission_dashboard.md')
+    "$missionRelativeFolder/mission_plan.json"
+    "$missionRelativeFolder/codex_tasks.md"
+    "$missionRelativeFolder/validation_plan.md"
+    "$missionRelativeFolder/merge_order.md"
+    "$missionRelativeFolder/mission_dashboard.md"
 )
 
 Write-Host 'AIOS Mission Control v1'
@@ -379,7 +380,7 @@ Write-Host "Mission name: $resolvedMissionName"
 Write-Host "Goal: $Goal"
 Write-Host "Worker count: $WorkerCount"
 Write-Host "Recommended worker layout preset: $recommendedPreset"
-Write-Host "Mission folder: $missionFolder"
+Write-Host "Mission folder: $missionRelativeFolder"
 Write-Host 'Safety: repo-scoped file generation only. No commits, pushes, merges, scheduled tasks, startup tasks, broker actions, trading actions, secrets, or external network calls.'
 Write-Host ''
 Write-Host 'Planned files:'

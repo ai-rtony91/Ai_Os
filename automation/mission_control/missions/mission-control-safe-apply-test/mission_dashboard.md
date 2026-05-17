@@ -41,4 +41,4 @@
 
 ## Next Safe Action
 
-Review mission folder C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN\automation\mission_control\missions\mission-control-safe-apply-test and choose the first DRY_RUN worker prompt from codex_tasks.md.
+Review mission folder automation/mission_control/missions/mission-control-safe-apply-test and choose the first DRY_RUN worker prompt from codex_tasks.md.
