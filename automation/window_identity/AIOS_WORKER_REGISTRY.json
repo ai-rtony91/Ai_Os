@@ -1,0 +1,145 @@
+{
+  "workers": [
+    {
+      "marker": "AI_OS MAIN CONTROL",
+      "title": "AI_OS MAIN CONTROL",
+      "emoji": "\uD83E\uDDED",
+      "color": "Cyan",
+      "role": "Primary operator terminal for runtime spine commands and final coordination.",
+      "allowedActions": [
+        "Run .\\aios.ps1 -Mode runtime",
+        "Run .\\aios.ps1 -Mode supervisor",
+        "Check repo status and review validator output",
+        "Paste approved git commands with explicit file paths"
+      ],
+      "blockedActions": [
+        "No live trading, broker, OANDA, API key, or secret actions",
+        "No startup tasks or scheduled tasks",
+        "No destructive cleanup",
+        "No git add ."
+      ],
+      "nextCommand": ".\\aios.ps1 -Mode runtime",
+      "enabled": true
+    },
+    {
+      "marker": "CODEX BUILD LANE",
+      "title": "CODEX BUILD LANE",
+      "emoji": "\uD83D\uDEE0",
+      "color": "Yellow",
+      "role": "Focused build window for approved repo-scoped implementation work.",
+      "allowedActions": [
+        "Edit only approved files",
+        "Run targeted local validators",
+        "Report files created, changed, validation, git status, commit, and push state"
+      ],
+      "blockedActions": [
+        "No protected root governance edits unless explicitly approved",
+        "No dashboard or Trading Lab changes unless scoped",
+        "No broad commits or pushes",
+        "No secrets or credential handling"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "VALIDATOR WORKER",
+      "title": "VALIDATOR WORKER",
+      "emoji": "\u2705",
+      "color": "Green",
+      "role": "Validation-only window for checks, parser tests, and read-only verification.",
+      "allowedActions": [
+        "Run git diff --check",
+        "Run scoped validators",
+        "Parse changed JSON or PowerShell files",
+        "Report PASS, WARN, or FAIL plainly"
+      ],
+      "blockedActions": [
+        "No file edits",
+        "No staging, commits, or pushes",
+        "No external app launches",
+        "No live trading or broker paths"
+      ],
+      "nextCommand": "git diff --check",
+      "enabled": true
+    },
+    {
+      "marker": "PACKET QUEUE",
+      "title": "PACKET QUEUE",
+      "emoji": "\uD83D\uDCE6",
+      "color": "Magenta",
+      "role": "Queue review window for workload packets, command packs, and next safe tasks.",
+      "allowedActions": [
+        "Review queued packet text",
+        "Sort next work by runtime-spine value",
+        "Prepare DRY_RUN prompts for approval"
+      ],
+      "blockedActions": [
+        "No APPLY without approval",
+        "No random dashboard or tool expansion",
+        "No destructive cleanup",
+        "No broker or trading execution actions"
+      ],
+      "nextCommand": "Get-ChildItem automation\\packets",
+      "enabled": true
+    },
+    {
+      "marker": "APPROVAL INBOX",
+      "title": "APPROVAL INBOX",
+      "emoji": "\uD83D\uDCE5",
+      "color": "Blue",
+      "role": "Decision window for approvals, stop conditions, and user-controlled checkpoints.",
+      "allowedActions": [
+        "Review DRY_RUN reports",
+        "Approve or reject exact APPLY scopes",
+        "Confirm explicit git add, commit, push, or PR steps"
+      ],
+      "blockedActions": [
+        "No silent APPLY",
+        "No implicit commits or pushes",
+        "No merge, delete, move, rename, reset, clean, or auth changes without direct approval"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "RECOVERY HEALTH",
+      "title": "RECOVERY HEALTH",
+      "emoji": "\uD83E\uDE7A",
+      "color": "Red",
+      "role": "Recovery and health-check window for failures, mismatches, and blocked states.",
+      "allowedActions": [
+        "Run repo health checks",
+        "Capture exact error output",
+        "Mark UNKNOWN, MISMATCH, or INVALID DATA when evidence requires it"
+      ],
+      "blockedActions": [
+        "No destructive repair commands",
+        "No credential or security setting changes",
+        "No startup or scheduled task changes",
+        "No live trading paths"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "STANDBY WORKER",
+      "title": "STANDBY WORKER",
+      "emoji": "\u23F8",
+      "color": "DarkGray",
+      "role": "Idle worker window reserved for approved next tasks only.",
+      "allowedActions": [
+        "Wait for a scoped task",
+        "Run read-only status checks when asked",
+        "Stay parked until assigned"
+      ],
+      "blockedActions": [
+        "No speculative edits",
+        "No autonomous cleanup",
+        "No staging, commits, pushes, or external launches",
+        "No broker or trading execution actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    }
+  ]
+}
