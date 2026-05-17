@@ -104,6 +104,11 @@ switch ($Mode) {
         Write-Host "powershell -ExecutionPolicy Bypass -File automation/orchestration/queue_runner/Invoke-AiOsOperatorQueueRunner.DRY_RUN.ps1"
 
         Write-Host ""
+        Write-Host "OPERATOR SESSION BOOTSTRAP AVAILABLE" -ForegroundColor Yellow
+        Write-Host "Run:"
+        Write-Host "powershell -ExecutionPolicy Bypass -File automation/orchestration/session/Start-AiOsOperatorSession.DRY_RUN.ps1"
+
+        Write-Host ""
         Write-Host "Approval reminders:"
         Write-Host "- No git add, commit, or push was run."
         Write-Host "- No dashboard, broker, trading execution, scheduled task, startup task, or secret path was touched."
