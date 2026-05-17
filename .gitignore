@@ -44,8 +44,31 @@ Reports/dry_runs/
 
 Reports/dry_runs/
 
-automation/orchestration/PR_BODY_LAST_GENERATED.mdautomation/orchestration/workers/*-heartbeat.json
+automation/orchestration/PR_BODY_LAST_GENERATED.md
 automation/orchestration/workers/*-heartbeat.json
 automation/orchestration/PR_BODY_LAST_GENERATED.md
 
 .local_hold/
+
+# AIOS live runtime state - generated locally
+automation/intake/AIOS_GOAL_INTAKE.json
+automation/outbox/AIOS_NEXT_ACTION.json
+automation/runtime/state/AIOS_RUNTIME_STATE.json
+proof/last_verified.txt
+
+# AIOS work packet runtime instances
+automation/orchestration/work_packets/active/*.json
+automation/orchestration/work_packets/blocked/*.json
+automation/orchestration/work_packets/complete/*.json
+!automation/orchestration/work_packets/**/.gitkeep
+
+# AIOS dispatcher/runtime generated state
+Reports/dispatcher/runtime/**/*.json
+!Reports/dispatcher/runtime/**/*.example.json
+
+# AIOS generated work intelligence outputs
+Reports/work_intelligence/daily/DAILY_WORK_INTELLIGENCE_SNAPSHOT_*.json
+Reports/work_intelligence/briefings/OPERATOR_VOICE_BRIEFING_*.md
+
+# AIOS generated logs
+Reports/trading_lab/*.log
