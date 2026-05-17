@@ -72,9 +72,25 @@ if ([string]::IsNullOrWhiteSpace($targetState)) {
     Write-Host "packet_path: $packetPath"
 
     if ($Apply) {
+        powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host ''
+            Write-Host 'SUPERVISOR BLOCKED: proof verification failed' -ForegroundColor Red
+            exit 1
+        }
+
         powershell -ExecutionPolicy Bypass -File automation/orchestration/work_packets/Move-AiOsPacketState.ps1 -PacketPath $packetPath -TargetState $targetState -Worker "supervisor_loop" -Apply
         Write-Host "Action taken: YES"
     } else {
+        powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
+
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host ''
+            Write-Host 'SUPERVISOR BLOCKED: proof verification failed' -ForegroundColor Red
+            exit 1
+        }
+
         powershell -ExecutionPolicy Bypass -File automation/orchestration/work_packets/Move-AiOsPacketState.ps1 -PacketPath $packetPath -TargetState $targetState -Worker "supervisor_loop"
         Write-Host "Action taken: NO"
     }
@@ -84,3 +100,4 @@ Write-Host ""
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
 Write-Host "COPY END — Invoke-AiOsSupervisorLoop.DRY_RUN.ps1"
+
