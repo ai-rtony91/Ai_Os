@@ -1,0 +1,32 @@
+{
+  "schema": "aios_approval_queue.v1",
+  "mode": "DRY_RUN_READ_ONLY",
+  "pending_approvals": [
+    {
+      "approval_id": "approval-001",
+      "packet_id": "packet-001",
+      "requested_action": "APPLY",
+      "approval_status": "pending_review",
+      "risk_level": "normal"
+    }
+  ],
+  "approved_actions": [
+    {
+      "approval_id": "approval-002",
+      "packet_id": "packet-002",
+      "requested_action": "APPLY",
+      "approval_status": "approved_for_apply",
+      "risk_level": "normal"
+    }
+  ],
+  "blocked_actions": [
+    {
+      "approval_id": "approval-003",
+      "packet_id": "packet-003",
+      "requested_action": "PUSH",
+      "approval_status": "blocked",
+      "risk_level": "high"
+    }
+  ],
+  "next_safe_command": "Operator reviews pending approvals; no APPLY is authorized by this summary."
+}

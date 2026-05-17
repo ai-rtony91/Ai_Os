@@ -86,6 +86,14 @@ switch ($Mode) {
         powershell -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1
 
         Write-Host ""
+        Write-Host "APPROVAL INBOX SUMMARY" -ForegroundColor Yellow
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1
+
+        Write-Host ""
+        Write-Host "WORKER LOCK STATUS" -ForegroundColor Yellow
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1
+
+        Write-Host ""
         Write-Host "Approval reminders:"
         Write-Host "- No git add, commit, or push was run."
         Write-Host "- No dashboard, broker, trading execution, scheduled task, startup task, or secret path was touched."
