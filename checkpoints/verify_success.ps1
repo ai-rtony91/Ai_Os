@@ -1,3 +1,7 @@
+param(
+    [switch]$WriteLastVerified
+)
+
 $ErrorActionPreference = "Stop"
 
 $RootDir = Resolve-Path "$PSScriptRoot\.."
@@ -86,8 +90,15 @@ if ($Blocked) {
     exit 1
 }
 
-Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ" |
-    Set-Content proof\last_verified.txt
+$timestamp = Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
+
+if ($WriteLastVerified) {
+    $timestamp | Set-Content proof\last_verified.txt
+    Write-Host "PASS: proof/last_verified.txt updated" -ForegroundColor Green
+}
+else {
+    Write-Host "PASS: read-only verification; proof/last_verified.txt not updated" -ForegroundColor Green
+}
 
 Write-Host ""
 Write-Host "AIOS VERIFY PASSED" -ForegroundColor Green
