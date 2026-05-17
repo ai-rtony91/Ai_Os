@@ -1,0 +1,65 @@
+{
+  "id": "AIOS-WP-SUPERVISOR-WORKER-ASSIGNMENT-001",
+  "version": "1.0",
+  "title": "Supervisor Worker Assignment System",
+  "lane": "main_control",
+  "mode": "DRY_RUN",
+  "status": "READY_FOR_DRY_RUN",
+  "objective": "Preview how a supervisor turns one work goal into assigned workers, packet previews, lanes, validators, approval gates, and next safe actions.",
+  "allowed_actions": [
+    "inspect existing supervisor, bootstrap, work packet, lane, validator, approval, and commit package files",
+    "generate a DRY_RUN assignment plan",
+    "preview worker roles and packet metadata",
+    "detect required lanes from file scope",
+    "route read-only validators",
+    "route approval gates",
+    "preview commit and PR packaging without staging or publishing"
+  ],
+  "blocked_actions": [
+    "destructive file operation",
+    "Codex auto-launch",
+    "automatic APPLY",
+    "commit",
+    "push",
+    "new branch",
+    "scheduled task",
+    "startup task",
+    "extra worker window launch",
+    "credential access",
+    "secret access",
+    "broker connection",
+    "OANDA integration",
+    "API key use",
+    "webhook execution",
+    "real order",
+    "live trading"
+  ],
+  "files_in_scope": [
+    "automation/orchestration/supervisor",
+    "automation/orchestration/bootstrap",
+    "work_packets",
+    "docs/AI_OS/orchestration"
+  ],
+  "validators": [
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Invoke-AiOsSupervisorPlanner.DRY_RUN.ps1",
+    "Validate changed JSON parses",
+    "Validate changed PowerShell parses",
+    "git diff --check",
+    "git status --short"
+  ],
+  "risks": [
+    "worker assignment could be mistaken for permission to launch workers",
+    "validator PASS could be mistaken for APPLY approval",
+    "commit or PR package preview could be mistaken for permission to stage, commit, push, or open a PR",
+    "trading-related paths must remain paper-only and must not enable broker or live execution"
+  ],
+  "stop_condition": "Stop after the supervisor assignment preview, validators, git status, approval requirement, and next safe action are reported.",
+  "approval_required": true,
+  "created_by": "Codex",
+  "notes": [
+    "This packet is preview-only.",
+    "No active queue mutation is allowed without separate approval.",
+    "No worker or Codex auto-launch is allowed.",
+    "Commit and PR packaging is preview-only."
+  ]
+}
