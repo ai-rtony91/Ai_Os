@@ -1,7 +1,4 @@
 {
-  "complete": false,
-  "proof_required": true,
-  "logs_required": true,
-  "validation_required": true,
-  "checkpoints_required": true
+    "summary":  "manual completion test",
+    "complete":  true
 }

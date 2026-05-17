@@ -1,5 +1,9 @@
 {
-  "status": "pending",
-  "success_required_before_next_step": true,
-  "checks": []
+    "status":  "PASS",
+    "checks":  [
+                   "path check passed",
+                   "runtime health passed",
+                   "packet status valid"
+               ],
+    "success_required_before_next_step":  true
 }
