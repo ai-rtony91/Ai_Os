@@ -1,12 +1,15 @@
 ﻿param(
-    [ValidateSet("help","daily","swarm","status","resume","workers","runtime","supervisor","mission")]
+    [ValidateSet("help","daily","swarm","status","resume","workers","runtime","supervisor","mission","runner")]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
     [string]$MissionName = "",
     [int]$WorkerCount = 4,
     [ValidateSet("auto","compact","wide","dual-monitor")]
     [string]$Preset = "auto",
-    [switch]$ApplyMission
+    [switch]$ApplyMission,
+    [string]$MissionPath = "",
+    [string]$TaskId = "",
+    [switch]$ShowPrompt
 )
 
 Set-StrictMode -Off
@@ -27,6 +30,8 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode runtime  # run goal intake + recommendation + health"
         Write-Host ".\aios.ps1 -Mode supervisor # run repeated runtime self-routing cycles"
         Write-Host ".\aios.ps1 -Mode mission -Goal ""Improve AIOS runtime automation"" # create Mission Control plan DRY_RUN"
+        Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation # show next safe mission action"
+        Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -ShowPrompt # show task prompt"
     }
 
     "daily" {
@@ -101,6 +106,32 @@ switch ($Mode) {
     }
 
     powershell @missionArgs
+}
+
+   "runner" {
+    if ([string]::IsNullOrWhiteSpace($MissionPath)) {
+        Write-Host "BLOCKED: -MissionPath is required for runner mode." -ForegroundColor Red
+        exit 1
+    }
+
+    $runnerArgs = @(
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "automation/mission_control/Get-AiOsMissionNextAction.ps1",
+        "-MissionPath",
+        $MissionPath
+    )
+
+    if (-not [string]::IsNullOrWhiteSpace($TaskId)) {
+        $runnerArgs += @("-TaskId", $TaskId)
+    }
+
+    if ($ShowPrompt) {
+        $runnerArgs += "-ShowPrompt"
+    }
+
+    powershell @runnerArgs
 }
 }
 
