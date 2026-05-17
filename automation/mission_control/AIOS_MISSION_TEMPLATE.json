@@ -1,0 +1,42 @@
+{
+  "template_name": "AIOS Mission Control v1",
+  "template_version": "1.0",
+  "purpose": "Turn one human goal into a repo-safe AIOS development mission with worker tasks, validation, merge order, dashboard status, and next safe action.",
+  "safety_rules": [
+    "DRY_RUN is default.",
+    "APPLY writes mission files only under automation/mission_control/missions/.",
+    "No commits.",
+    "No pushes.",
+    "No GitHub merges.",
+    "No scheduled tasks.",
+    "No startup tasks.",
+    "No broker actions.",
+    "No trading actions.",
+    "No secrets.",
+    "No external network calls."
+  ],
+  "default_validation_checklist": [
+    "PowerShell parser check for changed scripts.",
+    "JSON parse check for mission_plan.json and template JSON.",
+    "DRY_RUN mission generation review.",
+    "APPLY mission generation to a safe mission folder.",
+    "git diff --check."
+  ],
+  "default_blockers": [
+    "Human approval required before APPLY work.",
+    "No merge until validation proof is attached.",
+    "No live trading, broker, secrets, startup, scheduled task, or destructive action."
+  ],
+  "layout_presets": [
+    "compact",
+    "wide",
+    "dual-monitor"
+  ],
+  "mission_outputs": [
+    "mission_plan.json",
+    "codex_tasks.md",
+    "validation_plan.md",
+    "merge_order.md",
+    "mission_dashboard.md"
+  ]
+}

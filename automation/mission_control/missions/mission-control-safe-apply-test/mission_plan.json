@@ -1,0 +1,182 @@
+﻿{
+    "mission_name":  "Mission Control Safe Apply Test",
+    "goal":  "Validate Mission Control safe generation",
+    "generated_timestamp_utc":  "2026-05-17T19:24:51Z",
+    "recommended_worker_layout_preset":  "compact",
+    "requested_preset":  "compact",
+    "worker_count":  4,
+    "mission_stages":  [
+                           {
+                               "id":  "stage-01",
+                               "name":  "Goal intake",
+                               "purpose":  "Capture the human goal and convert it into a repo-safe mission.",
+                               "exit_criteria":  "Mission plan, worker tasks, validation plan, merge order, and dashboard are generated."
+                           },
+                           {
+                               "id":  "stage-02",
+                               "name":  "Worker execution planning",
+                               "purpose":  "Split the mission into Codex-ready worker prompts.",
+                               "exit_criteria":  "Each planned worker has a scoped task, blocked actions, and validation expectations."
+                           },
+                           {
+                               "id":  "stage-03",
+                               "name":  "Validation and proof",
+                               "purpose":  "Define safe verification before commit, push, PR review, or merge.",
+                               "exit_criteria":  "Validation proof is attached to the mission dashboard."
+                           },
+                           {
+                               "id":  "stage-04",
+                               "name":  "PR sequencing",
+                               "purpose":  "Recommend merge order and stop conditions.",
+                               "exit_criteria":  "Dependent PRs are ordered from foundation to validation to dashboard proof."
+                           }
+                       ],
+    "task_list":  [
+                      {
+                          "task_id":  "MC-01",
+                          "worker":  "WORKER-01",
+                          "lane":  "mission-planner",
+                          "title":  "Convert goal into scoped work packet",
+                          "status":  "PLANNED",
+                          "allowed_actions":  [
+                                                  "DRY_RUN planning",
+                                                  "Repo-scoped file inspection",
+                                                  "APPLY only after explicit approval",
+                                                  "Scoped validation"
+                                              ],
+                          "blocked_actions":  [
+                                                  "No commits from generated worker prompts unless separately approved",
+                                                  "No pushes",
+                                                  "No GitHub merges",
+                                                  "No scheduled tasks",
+                                                  "No startup tasks",
+                                                  "No broker actions",
+                                                  "No trading actions",
+                                                  "No secrets"
+                                              ],
+                          "prompt":  "Task ID: MC-01\nMode: DRY_RUN first, APPLY only after explicit approval.\nGoal: Validate Mission Control safe generation\nWorker lane: mission-planner\nObjective: Convert goal into scoped work packet\nAllowed paths: repo-scoped paths explicitly approved by the mission plan.\nBlocked paths: .aios_local_backup, protected root governance files unless approved, secrets, broker paths, live trading paths, startup tasks, scheduled tasks.\nValidation: run relevant parser/check commands and git diff --check after changes.\nRequired report: files inspected, files created, files changed, validation result, git status, commit status, push status, blockers, next safe action."
+                      },
+                      {
+                          "task_id":  "MC-02",
+                          "worker":  "WORKER-02",
+                          "lane":  "implementation-lane",
+                          "title":  "Implement approved mission slice",
+                          "status":  "PLANNED",
+                          "allowed_actions":  [
+                                                  "DRY_RUN planning",
+                                                  "Repo-scoped file inspection",
+                                                  "APPLY only after explicit approval",
+                                                  "Scoped validation"
+                                              ],
+                          "blocked_actions":  [
+                                                  "No commits from generated worker prompts unless separately approved",
+                                                  "No pushes",
+                                                  "No GitHub merges",
+                                                  "No scheduled tasks",
+                                                  "No startup tasks",
+                                                  "No broker actions",
+                                                  "No trading actions",
+                                                  "No secrets"
+                                              ],
+                          "prompt":  "Task ID: MC-02\nMode: DRY_RUN first, APPLY only after explicit approval.\nGoal: Validate Mission Control safe generation\nWorker lane: implementation-lane\nObjective: Implement approved mission slice\nAllowed paths: repo-scoped paths explicitly approved by the mission plan.\nBlocked paths: .aios_local_backup, protected root governance files unless approved, secrets, broker paths, live trading paths, startup tasks, scheduled tasks.\nValidation: run relevant parser/check commands and git diff --check after changes.\nRequired report: files inspected, files created, files changed, validation result, git status, commit status, push status, blockers, next safe action."
+                      },
+                      {
+                          "task_id":  "MC-03",
+                          "worker":  "WORKER-03",
+                          "lane":  "validator-lane",
+                          "title":  "Validate mission outputs and safety boundaries",
+                          "status":  "PLANNED",
+                          "allowed_actions":  [
+                                                  "DRY_RUN planning",
+                                                  "Repo-scoped file inspection",
+                                                  "APPLY only after explicit approval",
+                                                  "Scoped validation"
+                                              ],
+                          "blocked_actions":  [
+                                                  "No commits from generated worker prompts unless separately approved",
+                                                  "No pushes",
+                                                  "No GitHub merges",
+                                                  "No scheduled tasks",
+                                                  "No startup tasks",
+                                                  "No broker actions",
+                                                  "No trading actions",
+                                                  "No secrets"
+                                              ],
+                          "prompt":  "Task ID: MC-03\nMode: DRY_RUN first, APPLY only after explicit approval.\nGoal: Validate Mission Control safe generation\nWorker lane: validator-lane\nObjective: Validate mission outputs and safety boundaries\nAllowed paths: repo-scoped paths explicitly approved by the mission plan.\nBlocked paths: .aios_local_backup, protected root governance files unless approved, secrets, broker paths, live trading paths, startup tasks, scheduled tasks.\nValidation: run relevant parser/check commands and git diff --check after changes.\nRequired report: files inspected, files created, files changed, validation result, git status, commit status, push status, blockers, next safe action."
+                      },
+                      {
+                          "task_id":  "MC-04",
+                          "worker":  "WORKER-04",
+                          "lane":  "dashboard-and-proof-lane",
+                          "title":  "Update mission dashboard and proof checklist",
+                          "status":  "PLANNED",
+                          "allowed_actions":  [
+                                                  "DRY_RUN planning",
+                                                  "Repo-scoped file inspection",
+                                                  "APPLY only after explicit approval",
+                                                  "Scoped validation"
+                                              ],
+                          "blocked_actions":  [
+                                                  "No commits from generated worker prompts unless separately approved",
+                                                  "No pushes",
+                                                  "No GitHub merges",
+                                                  "No scheduled tasks",
+                                                  "No startup tasks",
+                                                  "No broker actions",
+                                                  "No trading actions",
+                                                  "No secrets"
+                                              ],
+                          "prompt":  "Task ID: MC-04\nMode: DRY_RUN first, APPLY only after explicit approval.\nGoal: Validate Mission Control safe generation\nWorker lane: dashboard-and-proof-lane\nObjective: Update mission dashboard and proof checklist\nAllowed paths: repo-scoped paths explicitly approved by the mission plan.\nBlocked paths: .aios_local_backup, protected root governance files unless approved, secrets, broker paths, live trading paths, startup tasks, scheduled tasks.\nValidation: run relevant parser/check commands and git diff --check after changes.\nRequired report: files inspected, files created, files changed, validation result, git status, commit status, push status, blockers, next safe action."
+                      }
+                  ],
+    "validation_checklist":  [
+                                 "Confirm generated mission_plan.json parses as JSON.",
+                                 "Confirm generated Markdown files are readable and contain next safe action.",
+                                 "Run PowerShell parser checks for any changed PowerShell files.",
+                                 "Run relevant scoped validators for implementation PRs.",
+                                 "Run git diff --check before commit.",
+                                 "Confirm no secrets, broker actions, trading actions, startup tasks, or scheduled tasks were introduced."
+                             ],
+    "merge_order":  [
+                        {
+                            "order":  1,
+                            "lane":  "foundation",
+                            "description":  "Merge config, schemas, or scaffolding PRs first because later implementation depends on stable structure."
+                        },
+                        {
+                            "order":  2,
+                            "lane":  "implementation",
+                            "description":  "Merge scoped implementation PRs after foundation validation passes."
+                        },
+                        {
+                            "order":  3,
+                            "lane":  "validation",
+                            "description":  "Merge validator or proof updates after implementation behavior is known."
+                        },
+                        {
+                            "order":  4,
+                            "lane":  "dashboard",
+                            "description":  "Merge dashboard/status updates last so they reflect the final accepted proof."
+                        }
+                    ],
+    "blockers":  [
+                     "Human approval required before APPLY implementation work.",
+                     "Validation proof missing until worker PRs run their checks.",
+                     "PR status placeholders must be replaced with real PR links before merge decisions.",
+                     "No live trading, broker, secrets, startup tasks, scheduled tasks, or destructive actions are allowed."
+                 ],
+    "next_safe_action":  "Review mission folder C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN\\automation\\mission_control\\missions\\mission-control-safe-apply-test and choose the first DRY_RUN worker prompt from codex_tasks.md.",
+    "safety":  {
+                   "mode":  "APPLY",
+                   "repo_scoped_only":  true,
+                   "commits_performed":  "NO",
+                   "pushes_performed":  "NO",
+                   "github_merges_performed":  "NO",
+                   "scheduled_tasks_created":  "NO",
+                   "startup_tasks_created":  "NO",
+                   "broker_actions_performed":  "NO",
+                   "trading_actions_performed":  "NO",
+                   "secrets_touched":  "NO",
+                   "external_network_calls":  "NO"
+               }
+}
