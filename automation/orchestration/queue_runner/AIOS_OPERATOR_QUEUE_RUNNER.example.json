@@ -1,0 +1,58 @@
+{
+  "schema": "aios_operator_queue_runner.v1",
+  "mode": "DRY_RUN_READ_ONLY",
+  "generated_utc": "2026-05-17T00:00:00Z",
+  "current_branch": "phase-75-operator-queue-runner",
+  "active_packet": {
+    "packet_id": "packet-001",
+    "packet_status": "active",
+    "file": "automation/orchestration/work_packets/active/packet-001.json",
+    "summary": "Continue AIOS operator loop work."
+  },
+  "packet_status": "active",
+  "next_recommended_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
+  "codex_handoff_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/handoff/New-AiOsCodexHandoff.DRY_RUN.ps1",
+  "ready_to_paste_codex_prompt": "PHASE NEXT - DRY_RUN first. Continue from the active packet and do not stage, commit, push, delete, touch dashboard, broker/trading execution, scheduled tasks, startup tasks, or secrets.",
+  "validator_recommendation": {
+    "recommended_validator_command": "PowerShell parser check for changed .ps1 files, then git diff --check",
+    "reason": "PowerShell files changed and should parse before staging.",
+    "approval_required": "NO"
+  },
+  "commit_package_recommendation": {
+    "approved_source_files": [
+      "automation/orchestration/queue_runner/Invoke-AiOsOperatorQueueRunner.DRY_RUN.ps1"
+    ],
+    "ignored_runtime_files": [
+      "automation/orchestration/work_packets/active/example.json"
+    ],
+    "risky_files": [],
+    "suggested_commit_message": "Add AIOS operator queue runner"
+  },
+  "approval_status": {
+    "pending_approvals": [],
+    "approved_actions": [],
+    "blocked_actions": [],
+    "next_safe_command": "No approval item is ready for APPLY."
+  },
+  "worker_lock_status": {
+    "locks": [
+      {
+        "worker_id": "codex-worker-01",
+        "claimed_packet": "packet-001",
+        "claimed_paths": [
+          "automation/orchestration/queue_runner/"
+        ],
+        "lock_status": "active",
+        "stale_lock_warning": "NO"
+      }
+    ]
+  },
+  "powershell_command_block": "git status --short --branch\npowershell -ExecutionPolicy Bypass -File automation/orchestration/handoff/New-AiOsCodexHandoff.DRY_RUN.ps1\npowershell -ExecutionPolicy Bypass -File automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1",
+  "stop_conditions": [
+    "Stop if any command requests APPLY without explicit operator approval.",
+    "Stop if validator recommendation says approval_required YES.",
+    "Stop before git add, commit, or push unless the operator provides exact commands."
+  ],
+  "commit_performed": "NO",
+  "push_performed": "NO"
+}
