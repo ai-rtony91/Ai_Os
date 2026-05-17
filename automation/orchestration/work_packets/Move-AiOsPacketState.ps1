@@ -1,7 +1,8 @@
 ﻿param(
     [Parameter(Mandatory = $true)][string]$PacketPath,
-    [Parameter(Mandatory = $true)][string]$TargetState,
+    [string]$TargetState = "",
     [string]$Worker = "human_operator",
+    [switch]$AdvanceToNext,
     [switch]$Apply
 )
 
@@ -33,15 +34,32 @@ if (-not (Test-Path -LiteralPath $PacketPath -PathType Leaf)) {
 $packet = Get-Content -LiteralPath $PacketPath -Raw | ConvertFrom-Json
 $currentState = $packet.status
 
+if (-not ($allowedTransitions.ContainsKey($currentState))) {
+    throw "Unknown current state: $currentState"
+}
+
+if ($AdvanceToNext) {
+    $nextStates = @($allowedTransitions[$currentState])
+    if ($nextStates.Count -eq 0) {
+        Write-Host ""
+        Write-Host "Packet: $($packet.packet_id)"
+        Write-Host "Current state: $currentState"
+        Write-Host "Target state: NONE"
+        throw "No legal automatic transition exists from current state: $currentState"
+    }
+
+    $TargetState = $nextStates[0]
+}
+
+if ([string]::IsNullOrWhiteSpace($TargetState)) {
+    throw "TargetState is required unless AdvanceToNext is used."
+}
+
 Write-Host ""
 Write-Host "Packet: $($packet.packet_id)"
 Write-Host "Current state: $currentState"
 Write-Host "Target state: $TargetState"
 Write-Host "Worker: $Worker"
-
-if (-not ($allowedTransitions.ContainsKey($currentState))) {
-    throw "Unknown current state: $currentState"
-}
 
 if ($allowedTransitions[$currentState] -notcontains $TargetState) {
     throw "Illegal transition: $currentState -> $TargetState"
