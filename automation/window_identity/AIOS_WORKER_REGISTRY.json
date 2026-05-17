@@ -2,13 +2,13 @@
   "workers": [
     {
       "marker": "AI_OS MAIN CONTROL",
-      "title": "AI_OS MAIN CONTROL",
-      "emoji": "\uD83E\uDDED\uD83C\uDF19",
+      "title": "🧭🌙 AI_OS MAIN CONTROL",
+      "emoji": "🧭🌙",
       "color": "Cyan",
       "theme": "midnight-main-control",
-      "identityBanner": "\uD83E\uDDED\uD83C\uDF19 AI_OS MAIN CONTROL :: ONLINE",
-      "beginMarker": "\uD83E\uDDED\uD83C\uDF19 AI_OS MAIN CONTROL :: BEGIN",
-      "endMarker": "\uD83E\uDDED\uD83C\uDF19 AI_OS MAIN CONTROL :: END OF CHAT ",
+      "identityBanner": "🧭🌙 AI_OS MAIN CONTROL :: ONLINE",
+      "beginMarker": "🧭🌙 AI_OS MAIN CONTROL :: BEGIN",
+      "endMarker": "🧭🌙 AI_OS MAIN CONTROL :: END OF CHAT ",
       "endMarkerFill": "=",
       "endMarkerWidth": 120,
       "role": "Primary operator terminal for runtime spine commands and final coordination.",
@@ -29,8 +29,8 @@
     },
     {
       "marker": "CODEX BUILD LANE",
-      "title": "CODEX BUILD LANE",
-      "emoji": "\uD83D\uDEE0",
+      "title": "🛠 CODEX BUILD LANE",
+      "emoji": "🛠",
       "color": "Yellow",
       "role": "Focused build window for approved repo-scoped implementation work.",
       "allowedActions": [
@@ -49,8 +49,8 @@
     },
     {
       "marker": "VALIDATOR WORKER",
-      "title": "VALIDATOR WORKER",
-      "emoji": "\u2705",
+      "title": "✅ VALIDATOR WORKER",
+      "emoji": "✅",
       "color": "Green",
       "role": "Validation-only window for checks, parser tests, and read-only verification.",
       "allowedActions": [
@@ -70,8 +70,8 @@
     },
     {
       "marker": "PACKET QUEUE",
-      "title": "PACKET QUEUE",
-      "emoji": "\uD83D\uDCE6",
+      "title": "📦 PACKET QUEUE",
+      "emoji": "📦",
       "color": "Magenta",
       "role": "Queue review window for workload packets, command packs, and next safe tasks.",
       "allowedActions": [
@@ -90,8 +90,8 @@
     },
     {
       "marker": "APPROVAL INBOX",
-      "title": "APPROVAL INBOX",
-      "emoji": "\uD83D\uDCE5",
+      "title": "📥 APPROVAL INBOX",
+      "emoji": "📥",
       "color": "Blue",
       "role": "Decision window for approvals, stop conditions, and user-controlled checkpoints.",
       "allowedActions": [
@@ -109,8 +109,8 @@
     },
     {
       "marker": "RECOVERY HEALTH",
-      "title": "RECOVERY HEALTH",
-      "emoji": "\uD83E\uDE7A",
+      "title": "🩺 RECOVERY HEALTH",
+      "emoji": "🩺",
       "color": "Red",
       "role": "Recovery and health-check window for failures, mismatches, and blocked states.",
       "allowedActions": [
@@ -129,8 +129,8 @@
     },
     {
       "marker": "STANDBY WORKER",
-      "title": "STANDBY WORKER",
-      "emoji": "\u23F8",
+      "title": "⏸ STANDBY WORKER",
+      "emoji": "⏸",
       "color": "DarkGray",
       "role": "Idle worker window reserved for approved next tasks only.",
       "allowedActions": [
