@@ -47,12 +47,30 @@ switch ($Mode) {
     }
 
     "runtime" {
-        powershell -ExecutionPolicy Bypass -File automation/intake/Start-AiOsRuntimeLoop.ps1 -Goal $Goal -Apply
+
+    powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host ""
+        Write-Host "BLOCKED: proof verification failed" -ForegroundColor Red
+        exit 1
     }
 
-    "supervisor" {
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1 -Cycles 3 -Apply
+    powershell -ExecutionPolicy Bypass -File automation/intake/Start-AiOsRuntimeLoop.ps1 -Goal $Goal -Apply
+}
+
+   "supervisor" {
+
+    powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
+
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host ""
+        Write-Host "BLOCKED: proof verification failed" -ForegroundColor Red
+        exit 1
     }
+
+    powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1 -Cycles 3 -Apply
+}
 }
 
 Write-Host "AIOS SHORTCUT END" -ForegroundColor Green
