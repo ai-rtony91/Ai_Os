@@ -3,8 +3,14 @@
     {
       "marker": "AI_OS MAIN CONTROL",
       "title": "AI_OS MAIN CONTROL",
-      "emoji": "\uD83E\uDDED",
+      "emoji": "\uD83E\uDDED\uD83C\uDF19",
       "color": "Cyan",
+      "theme": "midnight-main-control",
+      "identityBanner": "\uD83E\uDDED\uD83C\uDF19 AI_OS MAIN CONTROL :: ONLINE",
+      "beginMarker": "\uD83E\uDDED\uD83C\uDF19 AI_OS MAIN CONTROL :: BEGIN",
+      "endMarker": "\uD83E\uDDED\uD83C\uDF19 AI_OS MAIN CONTROL :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
       "role": "Primary operator terminal for runtime spine commands and final coordination.",
       "allowedActions": [
         "Run .\\aios.ps1 -Mode runtime",
