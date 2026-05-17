@@ -5,6 +5,7 @@ Mission Control turns one human goal into a repo-safe development mission. It cr
 ## Files
 
 - `New-AiOsMissionPlan.ps1` - DRY_RUN-first mission generator.
+- `Update-AiOsMissionStatusRefresh.ps1` - DRY_RUN-first local status refresher for `mission_dashboard.md`.
 - `AIOS_MISSION_TEMPLATE.json` - safety and output template metadata.
 - `missions/` - generated mission folders. Created only with `-Apply`.
 
@@ -84,6 +85,33 @@ Apply a blocked update with blocker text:
 ```powershell
 powershell -ExecutionPolicy Bypass -File automation/mission_control/Update-AiOsMissionProgressReport.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -Status BLOCKED -Blocker "Validation proof is missing." -NextSafeAction "Attach validation proof before APPLY." -Apply
 ```
+
+## Mission Status Refresh
+
+Preview the local Mission Control status refresh without writing files:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Update-AiOsMissionStatusRefresh.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation
+```
+
+Expected result:
+
+- Mode reports `DRY_RUN`.
+- Mission, proof, git, runtime, packet, blocker, and next safe action summaries are printed.
+- `mission_dashboard.md` is not changed.
+- No GitHub, network, commit, push, merge, broker, secret, startup task, or scheduled task action runs.
+
+Apply the local status refresh after approval:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Update-AiOsMissionStatusRefresh.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -Apply
+```
+
+Apply result:
+
+- Only `automation/mission_control/missions/improve-aios-runtime-automation/mission_dashboard.md` is updated.
+- `mission_plan.json` is not changed.
+- No GitHub, network, commit, push, merge, broker, secret, startup task, or scheduled task action runs.
 
 ## Safety
 
