@@ -39,6 +39,26 @@ Generated files:
 - `merge_order.md`
 - `mission_dashboard.md`
 
+## Mission Runner
+
+List the next safe action for an existing mission:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Get-AiOsMissionNextAction.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation
+```
+
+Show the copy/paste prompt for `MC-01`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Get-AiOsMissionNextAction.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -ShowPrompt
+```
+
+Show a specific task prompt:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/mission_control/Get-AiOsMissionNextAction.ps1 -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-03 -ShowPrompt
+```
+
 ## Safety
 
 The script is repo-scoped and file-generation only. It does not commit, push, merge, create scheduled tasks, create startup tasks, call external networks, touch secrets, call brokers, or perform trading actions.
