@@ -1,0 +1,51 @@
+{
+  "schema": "aios_job_packet.v1",
+  "packet_id": "repo-status-report",
+  "created_utc": "2026-05-17T00:00:00Z",
+  "status": "example",
+  "goal": "Generate operator repo status reports automatically.",
+  "trigger": "Operator runs a daily or phase-start status check.",
+  "inputs": [
+    "git status --short",
+    "automation/runtime/state/AIOS_RUNTIME_STATE.json",
+    "automation/orchestration/work_packets/active/",
+    "automation/orchestration/work_packets/templates/",
+    "automation/validators/",
+    "automation/orchestration/validators/",
+    "scripts/validation/"
+  ],
+  "manual_steps_to_replace": [
+    "Manually checking git status before each next command.",
+    "Manually opening active packet folders.",
+    "Manually reading runtime state before choosing the next command.",
+    "Manually looking for validator folders."
+  ],
+  "allowed_actions": [
+    "read_repo_status",
+    "read_runtime_state",
+    "read_packet_folders",
+    "read_validator_folders",
+    "write_operator_report_when_output_path_is_operator_approved"
+  ],
+  "blocked_actions": [
+    "no_secrets",
+    "no_live_trading",
+    "no_external_send_without_approval",
+    "no_delete_without_approval",
+    "no_git_stage",
+    "no_commit",
+    "no_push",
+    "no_startup_task_changes",
+    "no_scheduled_task_changes"
+  ],
+  "requires_approval_for": [
+    "writing report files outside automation/runtime/reports or Reports/",
+    "staging files",
+    "committing",
+    "pushing",
+    "changing startup orchestration",
+    "changing scheduled tasks"
+  ],
+  "expected_output": "A structured report with WHERE_WE_ARE, WHAT_CHANGED, ACTIVE_PACKETS, BLOCKERS, NEXT_COMMAND, and AUTOMATION_CANDIDATES.",
+  "next_recommended_command": "powershell -ExecutionPolicy Bypass -File automation/runtime/reports/Write-AiOsRepoStatusReport.ps1"
+}

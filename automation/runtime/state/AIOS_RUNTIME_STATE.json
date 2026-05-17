@@ -1,12 +1,17 @@
 ﻿{
     "mode":  "READ_ONLY",
-    "updated_utc":  "2026-05-16T22:30:03Z",
+    "updated_utc":  "2026-05-17T02:23:54Z",
     "health":  "WARNING",
-    "packet_id":  "goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely",
-    "packet_status":  "active",
+    "packet_id":  "goal-intake-build-next-aios-runtime-loop-step",
+    "packet_status":  "routed",
     "recommended_command":  "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
     "reason":  "Health is not clean.",
     "blocker":  "Runtime health warning.",
     "approval_matches":  1,
-    "safety":  "repo_scoped_only_no_live_trading_no_secrets_no_broker"
+    "safety":  "repo_scoped_only_no_live_trading_no_secrets_no_broker",
+    "operator_summary":  "Health: WARNING. Packet: goal-intake-build-next-aios-runtime-loop-step [routed]. Next: powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
+    "next_best_step":  "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
+    "fatigue_reduction_target":  "Reduce repeated manual checks across git status, packet state, runtime state, and validators.",
+    "automation_candidate":  "Runtime health is WARNING.",
+    "manual_work_removed":  "Points directly to the health check instead of requiring manual folder inspection."
 }
