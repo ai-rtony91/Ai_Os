@@ -57,7 +57,7 @@ switch ($Mode) {
     }
 
     "workers" {
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/Get-AiOsWorkerRegistry.DRY_RUN.ps1
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/Get-AiOsWorkerAddressBook.ps1
         powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1
     }
 
