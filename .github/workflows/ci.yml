@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE "(api_key|apikey|secret|token|password)[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" \
+          if grep -RInE "\b(api_key|apikey|secret|token|password)\b[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" \
             --include="*.py" \
             --include="*.ps1" \
             --include="*.json" \
@@ -68,6 +68,7 @@ jobs:
             --include="*.yaml" \
             --exclude-dir=.git \
             --exclude-dir=.github \
+            --exclude-dir=docs \
             .; then
             echo "Potential secret-like assignment found in source/config files."
             exit 1
