@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PACKET_RUNTIME_STATE.v1",
+  "title": "AI_OS Packet Runtime State",
+  "description": "Foundation schema stub for volatile packet state. Runtime state changes over time and should not replace the durable packet contract.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "packet_id",
+    "status",
+    "generated_at"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_RUNTIME_STATE.v1",
+      "description": "Identifies this object as AI_OS packet runtime state."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of this runtime state schema contract."
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Packet this runtime state describes."
+    },
+    "status": {
+      "type": "string",
+      "description": "Current runtime status."
+    },
+    "assigned_worker_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Worker currently assigned to the packet, if any."
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "Timestamp when this runtime view was generated."
+    }
+  }
+}

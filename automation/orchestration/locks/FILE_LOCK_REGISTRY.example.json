@@ -1,0 +1,98 @@
+{
+  "schema": "AIOS_FILE_LOCK_REGISTRY.v1",
+  "system": "AI_OS",
+  "mode": "DRY_RUN",
+  "purpose": "Example file lock registry for preventing AI worker collisions before APPLY work begins.",
+  "registry_notes": [
+    "Example data only.",
+    "DRY_RUN scripts may read this file and simulate outcomes.",
+    "No script in this folder claims, releases, or mutates real locks."
+  ],
+  "collision_policy": {
+    "same_file": "BLOCK",
+    "parent_child_path_overlap": "BLOCK",
+    "expired_lock": "REVIEW_REQUIRED",
+    "unknown_owner": "REVIEW_REQUIRED",
+    "same_worker_reclaim": "REVIEW_REQUIRED",
+    "default_safe_action": "Stop and ask the operator before APPLY."
+  },
+  "global_blocked_paths": [
+    ".codex_backups/",
+    ".git/",
+    "apps/dashboard/assets/",
+    "broker/",
+    "live_trading/",
+    "oanda/",
+    "secrets/",
+    "webhooks/",
+    ".env"
+  ],
+  "recommended_blocked_files": [
+    "README.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "ARCHITECTURE.md",
+    "DEPLOYMENT.md",
+    "WHITEPAPER.md",
+    "AGENTS.md"
+  ],
+  "locks": [
+    {
+      "lock_id": "LOCK-EXAMPLE-AUTOMATION-001",
+      "worker_id": "AIOS-WORKER-DEVOPS-01",
+      "packet_id": "PACKET-LOCK-FOUNDATION-001",
+      "mode": "DRY_RUN",
+      "status": "ACTIVE",
+      "claimed_paths": [
+        "automation/orchestration/locks/"
+      ],
+      "created_at": "2026-05-18T18:00:00-04:00",
+      "expires_at": "2026-05-18T22:00:00-04:00",
+      "release_reason": null,
+      "notes": "Example active folder claim. Any other worker requesting a file under automation/orchestration/locks/ should be blocked."
+    },
+    {
+      "lock_id": "LOCK-EXAMPLE-DOCS-001",
+      "worker_id": "AIOS-WORKER-DOCS-01",
+      "packet_id": "PACKET-DOCS-LEDGER-001",
+      "mode": "DRY_RUN",
+      "status": "ACTIVE",
+      "claimed_paths": [
+        "docs/AI_OS/orchestration/worker_locking.md"
+      ],
+      "created_at": "2026-05-18T18:05:00-04:00",
+      "expires_at": "2026-05-18T22:05:00-04:00",
+      "release_reason": null,
+      "notes": "Example active file claim."
+    },
+    {
+      "lock_id": "LOCK-EXAMPLE-RELEASED-001",
+      "worker_id": "AIOS-WORKER-TELEMETRY-01",
+      "packet_id": "PACKET-TELEMETRY-001",
+      "mode": "DRY_RUN",
+      "status": "RELEASED",
+      "claimed_paths": [
+        "telemetry/work_ledger.jsonl"
+      ],
+      "created_at": "2026-05-18T17:00:00-04:00",
+      "expires_at": "2026-05-18T18:00:00-04:00",
+      "released_at": "2026-05-18T17:30:00-04:00",
+      "release_reason": "Example release record. Not active.",
+      "notes": "Released example should not block new DRY_RUN claims."
+    }
+  ],
+  "validator_expectations": {
+    "json_parse_required": true,
+    "powershell_parse_required": true,
+    "scripts_must_remain_dry_run": true,
+    "no_live_trading": true,
+    "no_broker_connection": true,
+    "no_api_keys": true,
+    "no_dashboard_assets": true
+  },
+  "next_safe_action": "Run Get-AiOsWorkerLockStatus.DRY_RUN.ps1 to inspect the example lock state."
+}

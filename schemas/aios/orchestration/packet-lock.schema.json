@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PACKET_LOCK.v1",
+  "title": "AI_OS Packet Lock Ownership",
+  "description": "Foundation schema stub for packet and worker path ownership locks.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "lock_id",
+    "packet_id",
+    "worker_id",
+    "status",
+    "claimed_paths"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_LOCK.v1",
+      "description": "Identifies this object as an AI_OS packet lock."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of this lock schema contract."
+    },
+    "lock_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable lock identifier."
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Packet protected by this lock."
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Worker that owns or requested the lock."
+    },
+    "status": {
+      "type": "string",
+      "description": "Lock status, such as ACTIVE, RELEASED, EXPIRED, BLOCKED, or REVIEW_REQUIRED."
+    },
+    "claimed_paths": {
+      "type": "array",
+      "description": "Files or folders claimed by this lock.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PACKET_READ_MODEL.v1",
+  "title": "AI_OS Packet Dashboard Read Model",
+  "description": "Foundation schema stub for display-safe packet summaries used by dashboards and operator views.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "packet_id",
+    "title",
+    "status",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_READ_MODEL.v1",
+      "description": "Identifies this object as a dashboard-safe packet read model."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of this read-model schema contract."
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Packet displayed by the dashboard."
+    },
+    "title": {
+      "type": "string",
+      "description": "Display title."
+    },
+    "status": {
+      "type": "string",
+      "description": "Display status."
+    },
+    "display_severity": {
+      "type": "string",
+      "description": "Dashboard severity such as INFO, REVIEW, WARNING, BLOCKED, or UNKNOWN."
+    },
+    "next_safe_action": {
+      "type": "string",
+      "description": "Operator-safe next action shown in the UI."
+    }
+  }
+}

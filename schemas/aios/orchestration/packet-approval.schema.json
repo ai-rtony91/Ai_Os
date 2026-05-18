@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PACKET_APPROVAL.v1",
+  "title": "AI_OS Packet Approval Metadata",
+  "description": "Foundation schema stub for approval metadata attached to a packet or approval inbox item.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "packet_id",
+    "required",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_APPROVAL.v1",
+      "description": "Identifies this object as AI_OS packet approval metadata."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of this approval schema contract."
+    },
+    "approval_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Approval request identifier when an approval has been requested."
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Packet this approval belongs to."
+    },
+    "required": {
+      "type": "boolean",
+      "description": "Whether human approval is required before the next gated action."
+    },
+    "state": {
+      "type": "string",
+      "description": "Approval state, such as NOT_REQUESTED, PENDING, APPROVED, REJECTED, EXPIRED, or BLOCKED."
+    },
+    "required_for": {
+      "type": "array",
+      "description": "Actions requiring approval, such as APPLY, COMMIT, PUSH, PROTECTED_PATH, or LOCK_RELEASE.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

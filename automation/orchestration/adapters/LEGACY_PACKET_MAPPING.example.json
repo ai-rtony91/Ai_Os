@@ -1,0 +1,134 @@
+{
+  "system": "AI_OS",
+  "mode": "DRY_RUN",
+  "mapping_name": "legacy_packet_to_canonical_work_packet_example",
+  "purpose": "Document packet dialect detection and simulated normalization into the canonical AI_OS work packet shape.",
+  "canonical_shape": {
+    "id": "string",
+    "version": "string",
+    "title": "string",
+    "lane": "string",
+    "mode": "DRY_RUN_or_APPLY",
+    "status": "READY_FOR_DRY_RUN_or_READY_FOR_APPLY_or_BLOCKED_or_REVIEW",
+    "objective": "string",
+    "allowed_actions": "array",
+    "blocked_actions": "array",
+    "files_in_scope": "array",
+    "validators": "array",
+    "risks": "array",
+    "stop_condition": "string",
+    "approval_required": "boolean",
+    "created_by": "string",
+    "notes": "array"
+  },
+  "dialect_detection_examples": [
+    {
+      "dialect": "canonical_work_packet_v1",
+      "detected_when_all_fields_exist": [
+        "id",
+        "version",
+        "title",
+        "lane",
+        "mode",
+        "status",
+        "objective"
+      ],
+      "normalization_action": "pass_through_with_safety_checks"
+    },
+    {
+      "dialect": "legacy_orchestration_packet_template",
+      "detected_when_any_fields_exist": [
+        "packet_id",
+        "intent",
+        "owner_lane",
+        "assigned_worker",
+        "related_files",
+        "validator"
+      ],
+      "normalization_action": "map_known_fields_and_warn_for_lossy_fields"
+    },
+    {
+      "dialect": "queue_packet_entry",
+      "detected_when_any_fields_exist": [
+        "source_file",
+        "approval_state",
+        "validator_state",
+        "blocked_reason"
+      ],
+      "normalization_action": "map_queue_entry_fields_and_mark_review"
+    },
+    {
+      "dialect": "unknown_packet",
+      "detected_when": "No canonical, legacy template, or queue entry signatures match.",
+      "normalization_action": "create REVIEW simulation with warnings"
+    }
+  ],
+  "field_mapping_examples": [
+    {
+      "legacy_field": "packet_id",
+      "canonical_field": "id",
+      "lossy": false,
+      "warning": null
+    },
+    {
+      "legacy_field": "intent",
+      "canonical_field": "objective",
+      "lossy": false,
+      "warning": null
+    },
+    {
+      "legacy_field": "owner_lane",
+      "canonical_field": "lane",
+      "lossy": false,
+      "warning": "Legacy owner_lane may refer to worker ownership instead of canonical execution lane."
+    },
+    {
+      "legacy_field": "related_files",
+      "canonical_field": "files_in_scope",
+      "lossy": false,
+      "warning": null
+    },
+    {
+      "legacy_field": "validator",
+      "canonical_field": "validators",
+      "lossy": false,
+      "warning": "Single validator string becomes a one-item validators array."
+    },
+    {
+      "legacy_field": "blocked_by",
+      "canonical_field": "risks",
+      "lossy": true,
+      "warning": "blocked_by explains current blocker state, not full risk inventory."
+    },
+    {
+      "legacy_field": "assigned_worker",
+      "canonical_field": "notes",
+      "lossy": true,
+      "warning": "Canonical packet schema has no assigned_worker field."
+    },
+    {
+      "legacy_field": "repo",
+      "canonical_field": "notes",
+      "lossy": true,
+      "warning": "Canonical packet schema has no repo field."
+    },
+    {
+      "legacy_field": "branch",
+      "canonical_field": "notes",
+      "lossy": true,
+      "warning": "Canonical packet schema has no branch field."
+    }
+  ],
+  "blocked_actions": [
+    "dispatcher edit",
+    "runtime integration",
+    "schema edit under schemas/aios/orchestration/",
+    "commit",
+    "push",
+    "broker connection",
+    "live trading",
+    "API key access",
+    "webhook execution"
+  ],
+  "next_safe_action": "Run Normalize-AiOsPacket.DRY_RUN.ps1 against one packet file and review the adapter report."
+}

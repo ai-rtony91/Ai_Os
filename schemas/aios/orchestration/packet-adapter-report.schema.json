@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PACKET_ADAPTER_REPORT.v1",
+  "title": "AI_OS Packet Adapter Report",
+  "description": "Foundation schema stub for read-only reports that explain how legacy packet shapes map into the canonical packet contract.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "source_path",
+    "source_dialect",
+    "result",
+    "warnings"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_ADAPTER_REPORT.v1",
+      "description": "Identifies this object as an AI_OS packet adapter report."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of this adapter report schema contract."
+    },
+    "source_path": {
+      "type": "string",
+      "description": "Legacy packet, fixture, or runtime file inspected by the adapter."
+    },
+    "source_dialect": {
+      "type": "string",
+      "description": "Detected source format, such as work_packets_v1, dispatcher_runtime_v1, or dashboard_fixture_v1."
+    },
+    "result": {
+      "type": "string",
+      "description": "Adapter result, such as PASS, WARNING, FAIL, or REVIEW_REQUIRED."
+    },
+    "warnings": {
+      "type": "array",
+      "description": "Human-readable mapping warnings or missing fields.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

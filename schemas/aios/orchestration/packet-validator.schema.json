@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PACKET_VALIDATOR.v1",
+  "title": "AI_OS Packet Validator Contract",
+  "description": "Foundation schema stub for one validator entry attached to a canonical packet.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "validator_id",
+    "order",
+    "required",
+    "mode",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_VALIDATOR.v1",
+      "description": "Identifies this object as an AI_OS packet validator contract."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of this validator schema contract."
+    },
+    "validator_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable validator identifier, such as git_diff_check or no_secrets."
+    },
+    "label": {
+      "type": "string",
+      "description": "Beginner-readable validator name."
+    },
+    "order": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Execution order in the validator chain."
+    },
+    "command": {
+      "type": "string",
+      "description": "Command or named validator action to run."
+    },
+    "required": {
+      "type": "boolean",
+      "description": "Whether this validator must pass before the packet can advance."
+    },
+    "mode": {
+      "type": "string",
+      "description": "Validator mode, normally DRY_RUN_READ_ONLY for safety checks."
+    },
+    "state": {
+      "type": "string",
+      "description": "Current validator state, such as NOT_RUN, PASS, WARNING, FAIL, BLOCKED, or REVIEW_REQUIRED."
+    }
+  }
+}

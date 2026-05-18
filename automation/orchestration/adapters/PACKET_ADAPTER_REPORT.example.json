@@ -1,0 +1,90 @@
+{
+  "task": "Simulate AI_OS packet normalization",
+  "mode": "DRY_RUN",
+  "adapter": "Normalize-AiOsPacket.DRY_RUN.ps1",
+  "source_packet_path": "automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json",
+  "detected_dialect": "legacy_orchestration_packet_template",
+  "canonical_status": "REVIEW",
+  "normalization_summary": {
+    "mapped_field_count": 8,
+    "missing_field_count": 4,
+    "warning_count": 5,
+    "lossy_conversion_count": 3
+  },
+  "field_mappings": [
+    {
+      "source_field": "packet_id",
+      "target_field": "id",
+      "source_value_present": true,
+      "lossy": false,
+      "note": "Direct legacy packet ID mapping."
+    },
+    {
+      "source_field": "intent",
+      "target_field": "objective",
+      "source_value_present": true,
+      "lossy": false,
+      "note": "Direct objective mapping."
+    },
+    {
+      "source_field": "assigned_worker",
+      "target_field": "notes",
+      "source_value_present": true,
+      "lossy": true,
+      "note": "Canonical packet schema does not carry assignment ownership."
+    }
+  ],
+  "normalization_warnings": [
+    "Legacy status values are folder-state oriented and may not match canonical READY_FOR_DRY_RUN or REVIEW states.",
+    "Missing validators default to git diff --check for DRY_RUN review only."
+  ],
+  "lossy_conversion_warnings": [
+    "assigned_worker is preserved in notes only.",
+    "repo and branch are preserved in notes only."
+  ],
+  "canonical_packet_preview": {
+    "id": "PACKET_ID_PLACEHOLDER",
+    "version": "1.0",
+    "title": "Legacy packet normalization preview",
+    "lane": "operator_review",
+    "mode": "DRY_RUN",
+    "status": "REVIEW",
+    "objective": "Review legacy packet fields before canonical conversion.",
+    "allowed_actions": [
+      "inspect packet",
+      "simulate normalization",
+      "report warnings"
+    ],
+    "blocked_actions": [
+      "dispatcher edit",
+      "runtime integration",
+      "commit",
+      "push"
+    ],
+    "files_in_scope": [
+      "UNKNOWN"
+    ],
+    "validators": [
+      "git diff --check"
+    ],
+    "risks": [
+      "legacy packet may omit canonical required fields"
+    ],
+    "stop_condition": "Stop after DRY_RUN adapter report.",
+    "approval_required": true,
+    "created_by": "Codex",
+    "notes": [
+      "Example report only."
+    ]
+  },
+  "safety": {
+    "writes_performed": 0,
+    "dispatcher_edits": "NO",
+    "runtime_integration": "NO",
+    "commits_performed": 0,
+    "pushes_performed": 0,
+    "broker_or_live_api_work": "NO"
+  },
+  "validator_friendly": true,
+  "next_safe_action": "Review warnings and keep normalization simulation-only until an explicit APPLY packet is approved."
+}

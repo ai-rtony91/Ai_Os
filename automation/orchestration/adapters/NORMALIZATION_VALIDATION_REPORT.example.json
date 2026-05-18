@@ -1,0 +1,86 @@
+{
+  "task": "Validate AI_OS packet normalization simulations",
+  "mode": "DRY_RUN",
+  "adapter": "Test-AiOsPacketNormalization.DRY_RUN.ps1",
+  "summary": {
+    "total_packets": 3,
+    "passed": 1,
+    "warnings": 1,
+    "failed": 1,
+    "unsupported_dialects": 1,
+    "average_confidence_score": 62
+  },
+  "results": [
+    {
+      "packet_path": "work_packets/examples/worker_registry_consolidation.json",
+      "detected_dialect": "canonical_work_packet_v1",
+      "validation_status": "PASS",
+      "confidence_score": 100,
+      "missing_field_warnings": [],
+      "normalization_warnings": [],
+      "lossy_conversion_warnings": [],
+      "unsupported_dialect_warnings": []
+    },
+    {
+      "packet_path": "automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json",
+      "detected_dialect": "legacy_orchestration_packet_template",
+      "validation_status": "WARN",
+      "confidence_score": 54,
+      "missing_field_warnings": [
+        "allowed_actions",
+        "approval_required",
+        "created_by",
+        "files_in_scope",
+        "risks",
+        "stop_condition",
+        "validators"
+      ],
+      "normalization_warnings": [
+        "Legacy packet template detected; review lane, status, assignment, repo, and branch fields before any APPLY conversion.",
+        "No file scope was found; files_in_scope set to UNKNOWN.",
+        "No validators were found; defaulted to git diff --check for DRY_RUN review only."
+      ],
+      "lossy_conversion_warnings": [
+        "assigned_worker is preserved in notes only; canonical packet schema does not carry worker assignment.",
+        "priority is preserved in notes only."
+      ],
+      "unsupported_dialect_warnings": []
+    },
+    {
+      "packet_path": "automation/orchestration/adapters/LEGACY_PACKET_MAPPING.example.json",
+      "detected_dialect": "unknown_packet",
+      "validation_status": "FAIL",
+      "confidence_score": 33,
+      "missing_field_warnings": [
+        "allowed_actions",
+        "approval_required",
+        "created_by",
+        "files_in_scope",
+        "risks",
+        "stop_condition",
+        "validators"
+      ],
+      "normalization_warnings": [
+        "Legacy status was missing or unknown; simulated status set to REVIEW.",
+        "No file scope was found; files_in_scope set to UNKNOWN.",
+        "No validators were found; defaulted to git diff --check for DRY_RUN review only.",
+        "Unknown packet dialect detected; adapter produced REVIEW-only preview."
+      ],
+      "lossy_conversion_warnings": [],
+      "unsupported_dialect_warnings": [
+        "Unsupported packet dialect: unknown_packet"
+      ]
+    }
+  ],
+  "safety": {
+    "writes_performed": 0,
+    "runtime_edits": "NO",
+    "dispatcher_edits": "NO",
+    "schema_edits": "NO",
+    "commits_performed": 0,
+    "pushes_performed": 0,
+    "broker_or_live_api_work": "NO"
+  },
+  "validator_friendly": true,
+  "next_safe_action": "Review failed or warning packet results before proposing any APPLY conversion."
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_ORCHESTRATION_PACKET.v1",
+  "title": "AI_OS Canonical Orchestration Packet",
+  "description": "Foundation schema stub for the one canonical AI_OS packet contract. This file defines the stable work request a worker, validator, dashboard, and approval gate can all understand.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "packet_id",
+    "title",
+    "objective",
+    "mode",
+    "status",
+    "scope",
+    "safety",
+    "validators",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_ORCHESTRATION_PACKET.v1",
+      "description": "Identifies this object as the canonical AI_OS orchestration packet."
+    },
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of this schema contract, such as 1.0.0."
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable unique packet identifier used by queues, workers, approvals, locks, validators, and dashboards."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Short human-readable packet title."
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Plain-language goal for the packet."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY"
+      ],
+      "description": "Current operating mode. DRY_RUN means inspect, plan, and validate only."
+    },
+    "status": {
+      "type": "string",
+      "description": "Canonical lifecycle status such as QUEUED, ASSIGNED, DRY_RUN_COMPLETE, BLOCKED, or REVIEW_REQUIRED."
+    },
+    "scope": {
+      "type": "object",
+      "description": "Allowed and blocked paths/actions for this packet."
+    },
+    "safety": {
+      "type": "object",
+      "description": "Safety flags for approvals, APPLY, commit, push, secrets, broker access, and live trading boundaries."
+    },
+    "validators": {
+      "type": "array",
+      "description": "Validator contracts required for this packet.",
+      "items": {
+        "$ref": "packet-validator.schema.json"
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exact next operator-safe action after reading this packet."
+    }
+  }
+}
