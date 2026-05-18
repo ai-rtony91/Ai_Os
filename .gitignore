@@ -34,3 +34,6 @@ credentials/
 
 # Local workstation state
 .local_hold/
+
+# Claude Code local/session state
+.claude/
