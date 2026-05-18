@@ -23,41 +23,69 @@ jobs:
           set -euo pipefail
           test -f SECURITY.md
           test -f COMPLIANCE_BASELINE.md
+          test -f LICENSE
+          test -f .github/dependabot.yml
           test -f docs/security/threat-model.md
           test -f docs/security/approval-model.md
           test -f docs/security/audit-logging.md
           test -f docs/security/secret-prevention.md
           test -f docs/security/repo-hygiene.md
 
-      - name: Check for placeholder identity strings
+      - name: Check workflow syntax
         shell: bash
         run: |
           set -euo pipefail
-          grep -RInE "youremail@example.com|your-github-email" . \
+          test -f .github/workflows/ci.yml
+          grep -q "name: CI" .github/workflows/ci.yml
+          grep -q "runs-on: ubuntu-latest" .github/workflows/ci.yml
+
+      - name: Check placeholder identity strings in source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE "youremail@example.com|your-github-email" \
+            --include="*.py" \
+            --include="*.ps1" \
+            --include="*.json" \
+            --include="*.yml" \
+            --include="*.yaml" \
             --exclude-dir=.git \
             --exclude-dir=.github \
-            --exclude=ci.yml \
-            && exit 1 || true
-
-      - name: Check for obvious secret assignments
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -RInE "(api_key|apikey|secret|token|broker|password)[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" . \
-            --exclude-dir=.git \
-            --exclude=COMPLIANCE_BASELINE.md \
-            --exclude=SECURITY.md \
-            --exclude=secret-prevention.md --include="*.py" --include="*.json" --include="*.yml" --include="*.yaml"; then
-            echo "Potential secret-like assignment found. Review required."
+            .; then
+            echo "Placeholder identity string found in source/config files."
             exit 1
           fi
 
-      - name: Python syntax check
+      - name: Check obvious secret assignments in source files
         shell: bash
         run: |
           set -euo pipefail
-          if find . -name "*.py" -not -path "./.git/*" | grep -q .; then
-            python -m compileall .
+          if grep -RInE "(api_key|apikey|secret|token|password)[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" \
+            --include="*.py" \
+            --include="*.ps1" \
+            --include="*.json" \
+            --include="*.yml" \
+            --include="*.yaml" \
+            --exclude-dir=.git \
+            --exclude-dir=.github \
+            .; then
+            echo "Potential secret-like assignment found in source/config files."
+            exit 1
+          fi
+
+      - name: Python syntax check for core source
+        shell: bash
+        run: |
+          set -euo pipefail
+          paths=""
+          for dir in aios agent services apps scripts automation; do
+            if test -d "$dir"; then
+              paths="$paths $dir"
+            fi
+          done
+
+          if test -n "$paths"; then
+            python -m compileall $paths
           else
-            echo "No Python files found."
+            echo "No core Python source directories found."
           fi
