@@ -1,5 +1,6 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet")]
+    [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
     [string]$MissionName = "",
@@ -9,7 +10,15 @@
     [switch]$ApplyMission,
     [string]$MissionPath = "",
     [string]$TaskId = "",
-    [switch]$ShowPrompt
+    [switch]$ShowPrompt,
+
+    # packet command params — used with: .\aios.ps1 packet <worker> <preset>
+    [Parameter(Position=1)]
+    [string]$Worker = "",
+    [Parameter(Position=2)]
+    [string]$PacketPreset = "",
+    [ValidateSet("DRY_RUN","APPLY")]
+    [string]$ExecutionMode = "DRY_RUN"
 )
 
 Set-StrictMode -Off
@@ -136,6 +145,133 @@ switch ($Mode) {
     }
 
     powershell @runnerArgs
+}
+
+   "packet" {
+    # Validate worker
+    $supportedWorkers = @("claude")
+    if ([string]::IsNullOrWhiteSpace($Worker) -or $supportedWorkers -notcontains $Worker) {
+        Write-Host ""
+        Write-Host "BLOCKED: unknown or missing worker." -ForegroundColor Red
+        Write-Host "  Supported workers : $($supportedWorkers -join ', ')"
+        Write-Host "  Usage             : .\aios.ps1 packet <worker> <preset>"
+        Write-Host "  Example           : .\aios.ps1 packet claude audit-docs"
+        Write-Host ""
+        exit 1
+    }
+
+    # Validate preset
+    $supportedPresets = @("audit-docs")
+    if ([string]::IsNullOrWhiteSpace($PacketPreset) -or $supportedPresets -notcontains $PacketPreset) {
+        Write-Host ""
+        Write-Host "BLOCKED: unknown or missing preset." -ForegroundColor Red
+        Write-Host "  Supported presets for '$Worker' : $($supportedPresets -join ', ')"
+        Write-Host "  Usage                          : .\aios.ps1 packet <worker> <preset>"
+        Write-Host "  Example                        : .\aios.ps1 packet claude audit-docs"
+        Write-Host ""
+        exit 1
+    }
+
+    # APPLY mode — not yet supported
+    if ($ExecutionMode -eq "APPLY") {
+        Write-Host ""
+        Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Red
+        Write-Host "║  [ APPLY PACKET — NOT SUPPORTED YET ]                           ║" -ForegroundColor Red
+        Write-Host "║  APPLY mode is not implemented in packet generation yet.        ║" -ForegroundColor Red
+        Write-Host "║  All packets are DRY_RUN only at this stage.                   ║" -ForegroundColor Red
+        Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Rerun without -ExecutionMode APPLY to generate a DRY_RUN packet." -ForegroundColor Yellow
+        Write-Host ""
+        exit 1
+    }
+
+    $ts  = Get-Date -Format "yyyy-MM-dd HH:mm"
+    $sep = "=" * 68
+
+    $packet = @"
+
+$sep
+  AI_OS CLAUDE DELEGATION PACKET
+  Generated : $ts
+  Preset    : $PacketPreset
+  Worker    : $Worker
+  Mode      : DRY_RUN
+  STATUS    : REVIEW BEFORE SENDING -- do not auto-paste
+$sep
+
+ROLE:
+  Isolated documentation auditor.
+
+MODE:
+  DRY_RUN. No files changed. Output is preview-only.
+
+SCOPE:
+  Allowed paths:
+    docs/AI_OS/
+    docs/governance/
+    docs/infrastructure/
+    docs/workflows/
+    docs/audits/
+    docs/decisions/
+  Blocked paths:
+    apps/
+    services/
+    automation/
+    scripts/
+    agent/
+    aios/
+    Reports/  (read allowed, write blocked)
+    Any file containing: credentials, secrets, tokens, keys, .env
+  Blocked actions:
+    No commits. No pushes. No git staging.
+    No file edits. No automation creation. No frontend code.
+    No live trading. No broker connections.
+
+RULES:
+  - DRY_RUN only. Do not edit any file.
+  - Report findings first. One finding per line.
+  - Mark unverified facts as UNKNOWN.
+  - Mark conflicting evidence as MISMATCH.
+  - One role. One purpose. One output.
+
+TASK:
+  1. Inspect docs/AI_OS/ for files that do not carry a status label
+     (DRAFT, CANDIDATE, CURRENT, HISTORICAL, SUPERSEDED).
+  2. List files that reference live trading, OANDA, or broker
+     execution as an active capability without a HISTORICAL or
+     SUPERSEDED label.
+  3. List files with no clear stop point or ownership declaration.
+  Report only. Do not edit any file.
+
+RETURN FORMAT:
+  7-region worker layout per:
+  docs/AI_OS/interface/AI_OS_WORKER_INTERFACE_SPECIFICATION_DRAFT.md
+  Findings: one per line, PASS/WARN/FAIL/UNKNOWN label.
+  Next Safe Action: one exact instruction.
+
+STOP POINT:
+  Stop after producing the findings report.
+  Do not edit files. Do not proceed to APPLY without a separate
+  explicit operator instruction.
+
+ESCALATION PATH:
+  If a protected governance file (AGENTS.md, RISK_POLICY.md,
+  SECURITY.md, COMPLIANCE_BASELINE.md) requires labeling:
+  output WARN and stop. Do not edit the file.
+
+APPROVAL STATE:
+  NOT_REQUIRED (DRY_RUN -- no files changed).
+
+$sep
+  NEXT OPERATOR ACTION:
+  Review this packet. Confirm the allowed paths match your intent.
+  Copy the text above. Paste into Claude Code manually.
+  Do NOT send without reading the full packet.
+$sep
+"@
+
+    Write-Host $packet
 }
 }
 
