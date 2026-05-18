@@ -30,42 +30,45 @@ $repo = try { (Resolve-Path ".").Path } catch { "UNKNOWN" }
 
 try { $Host.UI.RawUI.WindowTitle = "AI_OS | $Worker | $Mode | $Status" } catch {}
 
+# Separator for capability lists — built from [char] to avoid UTF-8/codepage mismatch
+$d = " $([char]0x00B7) "
+
 # Worker identity table: role, color, scope, next action
 $workerMap = @{
     "AI_OS MAIN CONTROL" = @{
         Color      = "Cyan"
         Role       = "orchestrator"
-        Allowed    = "status display  packet generation  next action"
-        Blocked    = "autonomous APPLY  commit  push  broker  api_keys  secrets"
-        NextAction = "Run: .\aios.ps1 packet  to generate operator routing packet"
+        Allowed    = "display status${d}display packet output${d}report next action"
+        Blocked    = "autonomous APPLY${d}commit${d}push${d}broker${d}api_keys${d}secrets"
+        NextAction = "Run: .\aios.ps1 packet -- generates operator routing packet"
     }
     "CODEX BUILD LANE"   = @{
         Color      = "Blue"
         Role       = "executor"
-        Allowed    = "file edits in approved scope  build tasks"
-        Blocked    = "autonomous APPLY  commit  push  review  validate"
-        NextAction = "Await task assignment from operator via MAIN CONTROL"
+        Allowed    = "file edits in approved scope${d}build tasks"
+        Blocked    = "autonomous APPLY${d}git commit${d}git push${d}out-of-scope writes"
+        NextAction = "No task assigned -- request task from MAIN CONTROL first"
     }
     "CLAUDE REVIEWER"    = @{
         Color      = "Magenta"
         Role       = "reviewer"
-        Allowed    = "DRY_RUN inspection  audit  read docs"
-        Blocked    = "file edits  git staging  commit  push  APPLY"
-        NextAction = "Await review target assignment from operator"
+        Allowed    = "DRY_RUN inspection${d}audit${d}read docs"
+        Blocked    = "file edits${d}git staging${d}git commit${d}git push${d}APPLY"
+        NextAction = "No target assigned -- await task packet from MAIN CONTROL"
     }
     "VALIDATOR WORKER"   = @{
         Color      = "Yellow"
         Role       = "validator"
-        Allowed    = "git diff  git status  CI checks  validation chain"
-        Blocked    = "file edits  commit  push  APPLY"
-        NextAction = "Run: git diff --check  then: git status --short"
+        Allowed    = "run: git diff${d}git status${d}CI checks${d}validation chain"
+        Blocked    = "file edits${d}git commit${d}git push${d}APPLY"
+        NextAction = "Run: git diff --check${d}then: git status --short"
     }
     "APPROVAL INBOX"     = @{
         Color      = "Green"
         Role       = "approval gate"
-        Allowed    = "operator YES/NO decisions only"
-        Blocked    = "autonomous execution  file writes  commit  push"
-        NextAction = "No pending approvals -- await operator instruction"
+        Allowed    = "read inbox${d}accept operator YES/NO${d}display gate"
+        Blocked    = "autonomous execution${d}file writes${d}git commit${d}git push"
+        NextAction = "No pending approvals -- await operator YES/NO instruction"
     }
 }
 
