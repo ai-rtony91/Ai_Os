@@ -2,9 +2,11 @@ param(
     [string]$Preset = "morning"
 )
 
-$RepoRoot = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$ErrorActionPreference = "Stop"
 
+$RepoRoot = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
 $PresetPath = Join-Path $RepoRoot "automation\windows_workstation\presets\$Preset.json"
+$IdentityScript = Join-Path $RepoRoot "automation\window_identity\Set-AiOsWindowIdentity.ps1"
 
 if (-not (Test-Path $PresetPath)) {
     throw "Preset not found: $PresetPath"
@@ -12,16 +14,23 @@ if (-not (Test-Path $PresetPath)) {
 
 $PresetData = Get-Content $PresetPath | ConvertFrom-Json
 
-$IdentityScript = Join-Path $RepoRoot "automation\window_identity\Set-AiOsWindowIdentity.ps1"
-
 Write-Host ""
 Write-Host "AI_OS Workspace Launcher"
 Write-Host "Preset: $($PresetData.name)"
 Write-Host ""
 
 foreach ($Worker in $PresetData.workers) {
+    if ($Worker -is [string]) {
+        $Marker = $Worker
+    } else {
+        $Marker = $Worker.marker
+    }
 
-    Write-Host "Launching: $Worker"
+    if ([string]::IsNullOrWhiteSpace($Marker)) {
+        throw "Worker entry missing marker in preset: $PresetPath"
+    }
+
+    Write-Host "Launching: $Marker"
 
     Start-Process powershell.exe `
         -WorkingDirectory $RepoRoot `
@@ -29,7 +38,7 @@ foreach ($Worker in $PresetData.workers) {
             "-NoExit",
             "-ExecutionPolicy", "Bypass",
             "-Command",
-            "& '$IdentityScript' -Marker '$Worker'"
+            "& '$IdentityScript' -Marker '$Marker'"
         )
 
     Start-Sleep -Milliseconds 120
