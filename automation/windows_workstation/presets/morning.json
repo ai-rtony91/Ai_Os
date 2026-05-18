@@ -1,9 +1,33 @@
 {
   "name": "Ai_Os-Morning",
   "workers": [
-    "AI_OS MAIN CONTROL",
-    "CODEX BUILD LANE",
-    "VALIDATOR WORKER",
-    "APPROVAL INBOX"
+    {
+      "marker": "AI_OS MAIN CONTROL",
+      "x": 640,
+      "y": 0,
+      "width": 640,
+      "height": 520
+    },
+    {
+      "marker": "CODEX BUILD LANE",
+      "x": 0,
+      "y": 0,
+      "width": 640,
+      "height": 360
+    },
+    {
+      "marker": "VALIDATOR WORKER",
+      "x": 0,
+      "y": 360,
+      "width": 640,
+      "height": 360
+    },
+    {
+      "marker": "APPROVAL INBOX",
+      "x": 0,
+      "y": 720,
+      "width": 640,
+      "height": 360
+    }
   ]
 }
