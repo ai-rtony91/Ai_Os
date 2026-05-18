@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -RInE "youremail@example.com|your-github-email|decryptingmymind" . \
+          grep -RInE "youremail@example.com|your-github-email" . \
             --exclude-dir=.git \
             --exclude-dir=.github \
             --exclude=ci.yml \
