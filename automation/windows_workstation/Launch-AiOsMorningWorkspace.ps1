@@ -32,13 +32,13 @@ Write-Host "Mode: DRY_RUN workstation launch only"
 Write-Host "No commits. No pushes. No broker execution."
 
 Start-AiOsLane -Marker "AI_OS MAIN CONTROL"
-Start-Sleep -Milliseconds 500
+Start-Sleep -Milliseconds 100
 
 Start-AiOsLane -Marker "CODEX BUILD LANE"
-Start-Sleep -Milliseconds 500
+Start-Sleep -Milliseconds 100
 
 Start-AiOsLane -Marker "VALIDATOR WORKER"
-Start-Sleep -Milliseconds 500
+Start-Sleep -Milliseconds 100
 
 Start-AiOsLane -Marker "APPROVAL INBOX"
 
