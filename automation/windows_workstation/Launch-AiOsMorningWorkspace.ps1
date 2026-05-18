@@ -1,46 +1,33 @@
 param(
-    [string]$RepoRoot = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+    [switch]$Apply
 )
 
 $ErrorActionPreference = "Stop"
 
-if (-not (Test-Path $RepoRoot)) {
-    throw "RepoRoot not found: $RepoRoot"
+$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+$WindowLayoutScript = Join-Path $RepoRoot "automation\window_identity\Open-AiOsWorkerWindowLayout.ps1"
+
+if (-not (Test-Path -LiteralPath $WindowLayoutScript -PathType Leaf)) {
+    throw "Window layout launcher not found: $WindowLayoutScript"
 }
 
-$IdentityScript = Join-Path $RepoRoot "automation\window_identity\Set-AiOsWindowIdentity.ps1"
+Write-Host "AI_OS Morning Workspace Launcher"
+Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Delegating to canonical window identity launcher."
+Write-Host ""
 
-function Start-AiOsLane {
-    param(
-        [Parameter(Mandatory=$true)][string]$Marker
-    )
+$launcherArgs = @(
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    $WindowLayoutScript,
+    "-Preset",
+    "compact"
+)
 
-    $Command = "if (Test-Path '$IdentityScript') { & '$IdentityScript' -Marker '$Marker' }; Set-Location '$RepoRoot'; git status"
-
-    Start-Process powershell.exe `
-        -WorkingDirectory $RepoRoot `
-        -ArgumentList @(
-            "-NoExit",
-            "-ExecutionPolicy", "Bypass",
-            "-Command", $Command
-        )
+if ($Apply) {
+    $launcherArgs += "-Apply"
 }
 
-Write-Host "Launching AI_OS morning workspace..."
-Write-Host "RepoRoot: $RepoRoot"
-Write-Host "Mode: DRY_RUN workstation launch only"
-Write-Host "No commits. No pushes. No broker execution."
-
-Start-AiOsLane -Marker "AI_OS MAIN CONTROL"
-Start-Sleep -Milliseconds 100
-
-Start-AiOsLane -Marker "CODEX BUILD LANE"
-Start-Sleep -Milliseconds 100
-
-Start-AiOsLane -Marker "VALIDATOR WORKER"
-Start-Sleep -Milliseconds 100
-
-Start-AiOsLane -Marker "APPROVAL INBOX"
-
-Write-Host "Launch requested."
-Write-Host "Use PowerToys FancyZones to snap windows into the saved morning layout."
+powershell @launcherArgs
