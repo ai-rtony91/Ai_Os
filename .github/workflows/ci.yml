@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check required governance files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f SECURITY.md
+          test -f COMPLIANCE_BASELINE.md
+          test -f docs/security/threat-model.md
+          test -f docs/security/approval-model.md
+          test -f docs/security/audit-logging.md
+          test -f docs/security/secret-prevention.md
+          test -f docs/security/repo-hygiene.md
+
+      - name: Check for placeholder identity strings
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE "youremail@example.com|your-github-email|decryptingmymind" . --exclude-dir=.git --exclude=.github/workflows/ci.yml; then
+            echo "Placeholder or wrong identity string found."
+            exit 1
+          fi
+
+      - name: Check for obvious secret assignments
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE "(api_key|apikey|secret|token|broker|password)[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" . \
+            --exclude-dir=.git \
+            --exclude=COMPLIANCE_BASELINE.md \
+            --exclude=SECURITY.md \
+            --exclude=secret-prevention.md; then
+            echo "Potential secret-like assignment found. Review required."
+            exit 1
+          fi
+
+      - name: Python syntax check
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find . -name "*.py" -not -path "./.git/*" | grep -q .; then
+            python -m compileall .
+          else
+            echo "No Python files found."
+          fi
