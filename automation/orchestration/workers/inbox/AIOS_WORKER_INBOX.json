@@ -8,8 +8,10 @@
                       "worker_type":  "task_generation",
                       "task":  "Review command queue and create next work packet if needed.",
                       "reason":  "Connect queue to worker inbox",
-                      "status":  "inbox",
-                      "created_utc":  "2026-05-16T19:33:30Z"
+                      "status":  "complete",
+                      "created_utc":  "2026-05-16T19:33:30Z",
+                      "state_note":  "Superseded by existing work packet router/state-machine work and workers-mode Address Book connection.",
+                      "updated_utc":  "2026-05-18T17:08:29Z"
                   },
                   {
                       "id":  "20260516T200246Z",
