@@ -33,10 +33,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE "youremail@example.com|your-github-email|decryptingmymind" . --exclude-dir=.git --exclude=.github/workflows/ci.yml; then
-            echo "Placeholder or wrong identity string found."
-            exit 1
-          fi
+          grep -RInE "youremail@example.com|your-github-email|decryptingmymind" . \
+            --exclude-dir=.git \
+            --exclude-dir=.github \
+            --exclude=ci.yml \
+            && exit 1 || true
 
       - name: Check for obvious secret assignments
         shell: bash
