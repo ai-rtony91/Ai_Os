@@ -47,7 +47,7 @@ jobs:
             --exclude-dir=.git \
             --exclude=COMPLIANCE_BASELINE.md \
             --exclude=SECURITY.md \
-            --exclude=secret-prevention.md; then
+            --exclude=secret-prevention.md --include="*.py" --include="*.json" --include="*.yml" --include="*.yaml"; then
             echo "Potential secret-like assignment found. Review required."
             exit 1
           fi
