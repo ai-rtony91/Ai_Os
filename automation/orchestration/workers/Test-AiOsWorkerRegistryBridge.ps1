@@ -186,11 +186,21 @@ if ($windowWorkers.Count -eq 0) {
 }
 
 $orchestrationByKey = @{}
+$orchestrationMatchSources = @{}
 foreach ($worker in $orchestrationWorkers) {
     $workerId = "$($worker.worker_id)"
-    $key = ConvertTo-BridgeKey -Value $workerId
+    $windowMarker = "$($worker.window_marker)"
+    $matchSource = "worker_id"
+    $matchValue = $workerId
+    if (-not [string]::IsNullOrWhiteSpace($windowMarker)) {
+        $matchSource = "window_marker"
+        $matchValue = $windowMarker
+    }
+
+    $key = ConvertTo-BridgeKey -Value $matchValue
     if (-not [string]::IsNullOrWhiteSpace($key)) {
         $orchestrationByKey[$key] = $worker
+        $orchestrationMatchSources[$key] = $matchSource
     }
 }
 
@@ -219,9 +229,11 @@ foreach ($key in @($orchestrationByKey.Keys | Sort-Object)) {
 }
 
 $windowOnly = @()
-foreach ($key in @($windowByKey.Keys | Sort-Object)) {
-    if (-not $orchestrationByKey.ContainsKey($key)) {
-        $windowWorker = $windowByKey[$key]
+foreach ($windowWorker in $windowWorkers) {
+    $markerKey = ConvertTo-BridgeKey -Value "$($windowWorker.marker)"
+    $titleKey = ConvertTo-BridgeKey -Value "$($windowWorker.title)"
+    if (([string]::IsNullOrWhiteSpace($markerKey) -or -not $orchestrationByKey.ContainsKey($markerKey)) -and
+        ([string]::IsNullOrWhiteSpace($titleKey) -or -not $orchestrationByKey.ContainsKey($titleKey))) {
         $windowName = "$($windowWorker.marker)"
         if ([string]::IsNullOrWhiteSpace($windowName)) {
             $windowName = "$($windowWorker.title)"
@@ -233,11 +245,30 @@ foreach ($key in @($windowByKey.Keys | Sort-Object)) {
 }
 
 $matchedKeys = @($orchestrationByKey.Keys | Where-Object { $windowByKey.ContainsKey($_) } | Sort-Object)
+$matchSourceCounts = [ordered]@{
+    window_marker = 0
+    worker_id = 0
+}
+$matchedBy = @()
 foreach ($key in $matchedKeys) {
     $orchestrationWorker = $orchestrationByKey[$key]
     $windowWorker = $windowByKey[$key]
+    $matchSource = "$($orchestrationMatchSources[$key])"
+    if ($matchSourceCounts.Contains($matchSource)) {
+        $matchSourceCounts[$matchSource]++
+    }
+    $matchedBy += [pscustomobject]@{
+        worker_id = "$($orchestrationWorker.worker_id)"
+        window_marker = "$($orchestrationWorker.window_marker)"
+        window_registry_marker = "$($windowWorker.marker)"
+        match_key = $key
+        match_key_source = $matchSource
+    }
 
-    $orchestrationName = "$($orchestrationWorker.worker_id)"
+    $orchestrationName = "$($orchestrationWorker.window_marker)"
+    if ([string]::IsNullOrWhiteSpace($orchestrationName)) {
+        $orchestrationName = "$($orchestrationWorker.worker_id)"
+    }
     $windowTitle = "$($windowWorker.title)"
     $windowMarker = "$($windowWorker.marker)"
     if ((ConvertTo-BridgeKey -Value $orchestrationName) -ne (ConvertTo-BridgeKey -Value $windowTitle) -and
@@ -321,6 +352,8 @@ $result = [pscustomobject]@{
         orchestration_workers = $orchestrationWorkers.Count
         window_workers = $windowWorkers.Count
         matched_workers = $matchedKeys.Count
+        matched_by_window_marker = $matchSourceCounts["window_marker"]
+        matched_by_worker_id = $matchSourceCounts["worker_id"]
         orchestration_only = $orchestrationOnly.Count
         window_only = $windowOnly.Count
         drift_items = $drifts.Count
@@ -329,6 +362,7 @@ $result = [pscustomobject]@{
     }
     orchestration_only = $orchestrationOnly
     window_only = $windowOnly
+    matched_by = @($matchedBy)
     drift = @($drifts)
     missing_layout_markers = @($missingLayoutMarkers)
     blockers = @($blockedReasons)
@@ -343,6 +377,8 @@ if ($QuietJson) {
     Write-Host "Orchestration workers: $($orchestrationWorkers.Count)"
     Write-Host "Window workers: $($windowWorkers.Count)"
     Write-Host "Matched workers: $($matchedKeys.Count)"
+    Write-Host "Matched by window_marker: $($matchSourceCounts["window_marker"])"
+    Write-Host "Matched by worker_id fallback: $($matchSourceCounts["worker_id"])"
     Write-Host ""
 
     Write-Host "Workers only in orchestration registry:"
