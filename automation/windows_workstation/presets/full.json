@@ -1,0 +1,13 @@
+{
+  "name": "Ai_Os-Full",
+  "workers": [
+    "AI_OS MAIN CONTROL",
+    "CODEX BUILD LANE",
+    "VALIDATOR WORKER",
+    "APPROVAL INBOX",
+    "MISSION CONTROL",
+    "QUEUE WATCHER",
+    "REPORT WORKER",
+    "RUNTIME AUDITOR"
+  ]
+}

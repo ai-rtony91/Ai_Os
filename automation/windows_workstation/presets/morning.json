@@ -1,0 +1,9 @@
+{
+  "name": "Ai_Os-Morning",
+  "workers": [
+    "AI_OS MAIN CONTROL",
+    "CODEX BUILD LANE",
+    "VALIDATOR WORKER",
+    "APPROVAL INBOX"
+  ]
+}
