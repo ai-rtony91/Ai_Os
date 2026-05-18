@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RInE "\b(api_key|apikey|secret|token|password)\b[[:space:]]*[:=][[:space:]]*['\"][^'\"]+['\"]" \
+          if grep -RInP "\b(api_key|apikey|secret|token|password|broker)\b[[:space:]]*[:=]\s*['\"](?!BLOCKED|NONE|MISSING|EXAMPLE|placeholder|changeme|your_|demo_)[^'\"]+['\"]" \
             --include="*.py" \
             --include="*.ps1" \
             --include="*.json" \

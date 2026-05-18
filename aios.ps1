@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -42,6 +42,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode mission -Goal ""Improve AIOS runtime automation"" # create Mission Control plan DRY_RUN"
         Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation # show next safe mission action"
         Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -ShowPrompt # show task prompt"
+        Write-Host ".\aios.ps1 -Mode layout  # show 5-worker terminal layout plan and banner commands"
     }
 
     "daily" {
@@ -146,6 +147,55 @@ switch ($Mode) {
 
     powershell @runnerArgs
 }
+
+   "layout" {
+        $sep = "-" * 79
+        Write-Host ""
+        Write-Host "  AI_OS 5-WORKER TERMINAL LAYOUT" -ForegroundColor Cyan
+        Write-Host "  $sep"
+        Write-Host ""
+        Write-Host "  ZONE MAP (1920x1080 reference)" -ForegroundColor White
+        Write-Host "  +-----------------------+---------------------------+"
+        Write-Host "  |                       |  2. CODEX BUILD LANE      |"
+        Write-Host "  |  1. AI_OS MAIN        +-------------+-------------+"
+        Write-Host "  |     CONTROL           | 3. CLAUDE   | 4. VALIDATOR|"
+        Write-Host "  |  left, full height    +-------------+-------------+"
+        Write-Host "  |  [0,0  960x1080]      |  5. APPROVAL INBOX        |"
+        Write-Host "  +-----------------------+---------------------------+"
+        Write-Host ""
+        Write-Host "  WORKER IDENTITIES" -ForegroundColor White
+        Write-Host "  $sep"
+        Write-Host "  #  Worker                 Color    Role" -ForegroundColor DarkGray
+        Write-Host "  1  AI_OS MAIN CONTROL   " -NoNewline; Write-Host "Cyan   " -NoNewline -ForegroundColor Cyan;    Write-Host "  orchestrator -- NEXT ACTION owner"
+        Write-Host "  2  CODEX BUILD LANE     " -NoNewline; Write-Host "Blue   " -NoNewline -ForegroundColor Blue;    Write-Host "  executor     -- file edits, build tasks"
+        Write-Host "  3  CLAUDE REVIEWER      " -NoNewline; Write-Host "Magenta" -NoNewline -ForegroundColor Magenta; Write-Host "  reviewer     -- DRY_RUN inspection"
+        Write-Host "  4  VALIDATOR WORKER     " -NoNewline; Write-Host "Yellow " -NoNewline -ForegroundColor Yellow;  Write-Host "  validator    -- CI checks, git diff/status"
+        Write-Host "  5  APPROVAL INBOX       " -NoNewline; Write-Host "Green  " -NoNewline -ForegroundColor Green;   Write-Host "  approval gate -- operator decisions only"
+        Write-Host ""
+        Write-Host "  BANNER COMMANDS (run in each worker terminal)" -ForegroundColor White
+        Write-Host "  $sep"
+        Write-Host '  powershell -File automation/operator/Show-AiOsWorkerBanner.ps1 -Worker "AI_OS MAIN CONTROL" -Mode DRY_RUN'
+        Write-Host '  powershell -File automation/operator/Show-AiOsWorkerBanner.ps1 -Worker "CODEX BUILD LANE"   -Mode DRY_RUN'
+        Write-Host '  powershell -File automation/operator/Show-AiOsWorkerBanner.ps1 -Worker "CLAUDE REVIEWER"    -Mode DRY_RUN'
+        Write-Host '  powershell -File automation/operator/Show-AiOsWorkerBanner.ps1 -Worker "VALIDATOR WORKER"   -Mode DRY_RUN'
+        Write-Host '  powershell -File automation/operator/Show-AiOsWorkerBanner.ps1 -Worker "APPROVAL INBOX"     -Mode DRY_RUN'
+        Write-Host ""
+        Write-Host "  WINDOWS TERMINAL PROFILE DRAFT" -ForegroundColor White
+        Write-Host "  $sep"
+        Write-Host "  docs/AI_OS/interface/WINDOWS_TERMINAL_PROFILES_DRAFT.md"
+        Write-Host "  Copy profile entries manually to settings.json -- do not auto-edit."
+        Write-Host ""
+        Write-Host "  WINDOW SNAPPING" -ForegroundColor White
+        Write-Host "  $sep"
+        Write-Host "  Manual snap recommended until zones are validated."
+        Write-Host "  FancyZones scripting deferred to next implementation step."
+        Write-Host ""
+        Write-Host "  STOP POINT" -ForegroundColor Yellow
+        Write-Host "  $sep"
+        Write-Host "  DRY_RUN display only. No windows launched. No files changed." -ForegroundColor Yellow
+        Write-Host "  Open each worker manually in a new Windows Terminal tab." -ForegroundColor Yellow
+        Write-Host ""
+    }
 
    "packet" {
     # Validate worker
