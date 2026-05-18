@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","swarm","status","resume","workers","runtime","supervisor","mission","runner")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner")]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
     [string]$MissionName = "",
@@ -23,6 +23,7 @@ switch ($Mode) {
         Write-Host ""
         Write-Host "Available commands:"
         Write-Host ".\aios.ps1 -Mode daily    # run normal daily flow"
+        Write-Host ".\aios.ps1 -Mode morning  # run morning operations intelligence"
         Write-Host ".\aios.ps1 -Mode status   # show health, next action, inbox"
         Write-Host ".\aios.ps1 -Mode resume   # resume last session"
         Write-Host ".\aios.ps1 -Mode workers  # show worker list and inbox"
@@ -36,6 +37,9 @@ switch ($Mode) {
 
     "daily" {
         powershell -ExecutionPolicy Bypass -File automation/session/Start-AiOsDailyFlow.ps1 -RunWorkerPreview
+    }
+    "morning" {
+    powershell -ExecutionPolicy Bypass -File automation/operator/Start-AiOsMorningOperations.ps1
     }
 
     "swarm" {
