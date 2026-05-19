@@ -1,0 +1,41 @@
+{
+  "schema": "AIOS_VALIDATOR_CHAIN_RUN_REPORT.v1",
+  "mode": "DRY_RUN",
+  "generated_at": "2026-05-18T00:00:00Z",
+  "repo_root": "C:/path/to/AIOS",
+  "current_branch": "codex/example-branch",
+  "overall_result": "REVIEW",
+  "pass_count": 4,
+  "review_count": 2,
+  "blocked_count": 0,
+  "changed_files": [
+    "automation/orchestration/example.ps1"
+  ],
+  "validators_run": [
+    {
+      "validator_id": "git_diff_check",
+      "result": "PASS",
+      "command": "git diff --check",
+      "message": "git diff --check passed.",
+      "evidence": [],
+      "next_safe_action": "Review this validator result before APPLY, commit, or push."
+    },
+    {
+      "validator_id": "clean_state_verifier",
+      "result": "REVIEW",
+      "command": "Test-AiOsCleanState.DRY_RUN.ps1 -Json",
+      "message": "Clean-state verifier returned REVIEW.",
+      "evidence": [
+        "Review warnings before declaring the repo clean or starting new work."
+      ],
+      "next_safe_action": "Review warnings before declaring the repo clean or starting new work."
+    }
+  ],
+  "failed_validators": [
+    "clean_state_verifier"
+  ],
+  "files_changed_by_runner": [],
+  "commit_performed": false,
+  "push_performed": false,
+  "next_safe_action": "Review validator warnings before approving APPLY, commit, or push."
+}

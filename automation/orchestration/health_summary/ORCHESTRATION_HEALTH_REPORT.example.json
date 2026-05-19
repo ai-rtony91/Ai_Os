@@ -1,0 +1,97 @@
+{
+  "system": "AI_OS",
+  "task": "Show AI_OS orchestration health summary",
+  "mode": "DRY_RUN",
+  "result": "REVIEW",
+  "summary": {
+    "tool_count": 9,
+    "present_count": 8,
+    "missing_count": 1,
+    "risk_count": 2
+  },
+  "tools": [
+    {
+      "tool_id": "clean_state_verifier",
+      "label": "Clean-state verifier",
+      "status": "PASS",
+      "path": "automation/orchestration/clean_state_gate.ps1"
+    },
+    {
+      "tool_id": "approval_runner",
+      "label": "Approval runner",
+      "status": "PASS",
+      "path": "automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1"
+    },
+    {
+      "tool_id": "commit_package_recommender",
+      "label": "Commit package recommender",
+      "status": "PASS",
+      "path": "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
+    },
+    {
+      "tool_id": "validator_chain_runner",
+      "label": "Validator chain runner",
+      "status": "PASS",
+      "path": "automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1"
+    },
+    {
+      "tool_id": "post_push_verifier",
+      "label": "Post-push verifier",
+      "status": "PASS",
+      "path": "automation/orchestration/post_push/Test-AiOsPostPushVerification.DRY_RUN.ps1"
+    },
+    {
+      "tool_id": "worker_lane_checker",
+      "label": "Worker lane checker",
+      "status": "PASS",
+      "path": "automation/orchestration/worker_lanes/Get-AiOsWorkerLaneStatus.DRY_RUN.ps1"
+    },
+    {
+      "tool_id": "compliance_checker",
+      "label": "Compliance checker",
+      "status": "MISSING",
+      "path": "automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1"
+    },
+    {
+      "tool_id": "adapter_tools",
+      "label": "Adapter tools",
+      "status": "PASS",
+      "path": "automation/orchestration/adapters/Normalize-AiOsPacket.DRY_RUN.ps1"
+    },
+    {
+      "tool_id": "lock_tools",
+      "label": "Lock tools",
+      "status": "PASS",
+      "path": "automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1"
+    }
+  ],
+  "missing_tools": [
+    "compliance_checker"
+  ],
+  "repo_status": {
+    "branch": "codex/worker-02",
+    "state": "dirty",
+    "untracked_count": 10,
+    "dirty_count": 0
+  },
+  "risks": [
+    {
+      "severity": "REVIEW",
+      "risk": "Compliance checker script is missing."
+    },
+    {
+      "severity": "REVIEW",
+      "risk": "Repository has untracked files."
+    }
+  ],
+  "safety": {
+    "writes_performed": 0,
+    "commits_performed": 0,
+    "pushes_performed": 0,
+    "dispatcher_edits": "NO",
+    "runtime_integration": "NO",
+    "dashboard_edits": "NO"
+  },
+  "validator_friendly": true,
+  "next_safe_action": "Review missing tools and dirty repo status before running APPLY, commit, or push work."
+}

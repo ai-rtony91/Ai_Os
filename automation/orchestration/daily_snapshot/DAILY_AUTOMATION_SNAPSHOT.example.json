@@ -1,0 +1,51 @@
+{
+  "schema": "AIOS_DAILY_AUTOMATION_SNAPSHOT.v1",
+  "mode": "DRY_RUN",
+  "generated_at": "2026-05-18T00:00:00Z",
+  "today_status": "REVIEW",
+  "repo_root": "C:/path/to/AIOS",
+  "current_branch": "codex/example-branch",
+  "git_status_lines": [
+    "## codex/example-branch",
+    "?? automation/orchestration/daily_snapshot/"
+  ],
+  "changed_files": [
+    "automation/orchestration/daily_snapshot/"
+  ],
+  "latest_commit": "abc123|2026-05-18 00:00:00 -0400|Example commit",
+  "worked_minutes": null,
+  "worked_minutes_note": "Placeholder only. Fill manually in a future approved report workflow.",
+  "completed_automation": [
+    {
+      "automation_id": "validator_chain_runner",
+      "label": "Validator chain runner",
+      "status": "PRESENT",
+      "paths": [
+        "automation/orchestration/validator_chain_runner/Invoke-AiOsValidatorChain.DRY_RUN.ps1"
+      ],
+      "candidate_paths": [
+        "automation/orchestration/validator_chain_runner/Invoke-AiOsValidatorChain.DRY_RUN.ps1"
+      ]
+    }
+  ],
+  "missing_automation": [
+    {
+      "automation_id": "post_push_verifier",
+      "label": "Post-push verifier",
+      "status": "MISSING",
+      "paths": [],
+      "candidate_paths": [
+        "automation/orchestration/post_push/Test-AiOsPostPush.DRY_RUN.ps1",
+        "automation/orchestration/post_push_verifier/Test-AiOsPostPush.DRY_RUN.ps1"
+      ]
+    }
+  ],
+  "review_reasons": [
+    "git status has changed or untracked files"
+  ],
+  "blocked_reasons": [],
+  "files_changed_by_snapshot": [],
+  "commit_performed": false,
+  "push_performed": false,
+  "next_safe_action": "Review changed files and missing automation before approving APPLY, commit, or push."
+}
