@@ -1,6 +1,8 @@
 import { runtimeEventBus, type RuntimeEvent } from "./eventBus";
 import { submitApproval } from "../approvals/approvalInbox";
 
+export type ExecutionMode = "dry_run" | "apply";
+
 export type SafeExecutionState =
   | "queued"
   | "scheduled"
@@ -26,21 +28,37 @@ export interface AutomationDispatchPacket {
   priority: "low" | "medium" | "high";
   action: string;
   payload: Record<string, unknown>;
+  mode: ExecutionMode;
   state: SafeExecutionState;
+  idempotencyKey: string;
   retryCount: number;
   executionCount: number;
   maxRetries: number;
   maxExecutions: number;
   approvalRequired: boolean;
   approvalGranted: boolean;
+  approvalId?: string | null;
+  approvalDecidedAt?: string | null;
+  approvalDecision?: string | null;
   lockedBy?: string | null;
   lockedAt?: string | null;
+  lockExpiresAt?: string | null;
   rollback: RollbackMetadata;
 }
 
 const automationPacketQueue: AutomationDispatchPacket[] = [];
+const closedIdempotencyKeys = new Set<string>();
 let queueLockedBy: string | null = null;
+let queueLockedAt: string | null = null;
 let packetSequence = 0;
+let dispatcherRegistered = false;
+const defaultQueueLockLeaseMs = 30000;
+const terminalStates: SafeExecutionState[] = [
+  "completed",
+  "blocked",
+  "failed",
+  "rolled_back"
+];
 
 function createRollbackMetadata(action: string): RollbackMetadata {
   return {
@@ -54,14 +72,40 @@ function createRollbackMetadata(action: string): RollbackMetadata {
   };
 }
 
+function stableSerialize(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableSerialize(item)).join(",")}]`;
+  }
+
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => `${JSON.stringify(key)}:${stableSerialize(item)}`)
+      .join(",")}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function createIdempotencyKey(
+  type: AutomationDispatchPacket["type"],
+  runtimeId: string,
+  action: string,
+  payload: Record<string, unknown>
+): string {
+  return `${type}:${runtimeId}:${action}:${stableSerialize(payload)}`;
+}
+
 function createPacket(
   type: AutomationDispatchPacket["type"],
   runtimeId: string,
   priority: AutomationDispatchPacket["priority"],
   action: string,
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
+  mode: ExecutionMode = "dry_run"
 ): AutomationDispatchPacket {
   packetSequence += 1;
+  const idempotencyKey = createIdempotencyKey(type, runtimeId, action, payload);
 
   return {
     packetId: `packet_${Date.now()}_${packetSequence}`,
@@ -71,15 +115,21 @@ function createPacket(
     priority,
     action,
     payload,
+    mode,
     state: "queued",
+    idempotencyKey,
     retryCount: 0,
     executionCount: 0,
     maxRetries: type === "remediation" ? 2 : 0,
     maxExecutions: 1,
     approvalRequired: priority === "high" || type === "policy",
     approvalGranted: false,
+    approvalId: null,
+    approvalDecidedAt: null,
+    approvalDecision: null,
     lockedBy: null,
     lockedAt: null,
+    lockExpiresAt: null,
     rollback: createRollbackMetadata(action)
   };
 }
@@ -89,7 +139,7 @@ function submitPacketApproval(packet: AutomationDispatchPacket): void {
     return;
   }
 
-  submitApproval({
+  const approval = submitApproval({
     approvalId: `approval_${packet.packetId}`,
     packetId: packet.packetId,
     title: `Approve ${packet.action}`,
@@ -112,6 +162,62 @@ function submitPacketApproval(packet: AutomationDispatchPacket): void {
     decidedAt: null,
     decision: null
   });
+
+  packet.approvalId = approval.approvalId;
+}
+
+function enqueueAutomationPacket(packet: AutomationDispatchPacket): AutomationDispatchPacket | null {
+  if (closedIdempotencyKeys.has(packet.idempotencyKey)) {
+    return null;
+  }
+
+  const duplicate = automationPacketQueue.find(
+    (item) =>
+      item.idempotencyKey === packet.idempotencyKey &&
+      !terminalStates.includes(item.state)
+  );
+
+  if (duplicate) {
+    return null;
+  }
+
+  automationPacketQueue.push(packet);
+  submitPacketApproval(packet);
+
+  return packet;
+}
+
+function queueLockExpired(now: Date): boolean {
+  if (!queueLockedAt) {
+    return false;
+  }
+
+  return now.getTime() - new Date(queueLockedAt).getTime() > defaultQueueLockLeaseMs;
+}
+
+function reclaimExpiredLocks(now: Date): void {
+  for (const packet of automationPacketQueue) {
+    if (!packet.lockExpiresAt) {
+      continue;
+    }
+
+    if (new Date(packet.lockExpiresAt).getTime() > now.getTime()) {
+      continue;
+    }
+
+    packet.lockedBy = null;
+    packet.lockedAt = null;
+    packet.lockExpiresAt = null;
+
+    if (packet.state === "scheduled" || packet.state === "executing") {
+      packet.state = "queued";
+    }
+  }
+
+  if (queueLockedBy && queueLockExpired(now)) {
+    queueLockedBy = null;
+    queueLockedAt = null;
+  }
 }
 
 export function getAutomationPacketQueue(): AutomationDispatchPacket[] {
@@ -120,13 +226,18 @@ export function getAutomationPacketQueue(): AutomationDispatchPacket[] {
 
 export function claimAutomationQueue(
   workerId: string,
-  maxPackets: number
+  maxPackets: number,
+  lockLeaseMs = defaultQueueLockLeaseMs
 ): AutomationDispatchPacket[] {
+  const now = new Date();
+  reclaimExpiredLocks(now);
+
   if (queueLockedBy && queueLockedBy !== workerId) {
     return [];
   }
 
   queueLockedBy = workerId;
+  queueLockedAt = now.toISOString();
 
   const claimLimit = Math.max(0, maxPackets);
   const claimed: AutomationDispatchPacket[] = [];
@@ -150,7 +261,8 @@ export function claimAutomationQueue(
 
     packet.state = "scheduled";
     packet.lockedBy = workerId;
-    packet.lockedAt = new Date().toISOString();
+    packet.lockedAt = now.toISOString();
+    packet.lockExpiresAt = new Date(now.getTime() + lockLeaseMs).toISOString();
     claimed.push({ ...packet });
   }
 
@@ -179,6 +291,7 @@ export function completeAutomationPacket(
   packet.state = nextState;
   packet.lockedBy = null;
   packet.lockedAt = null;
+  packet.lockExpiresAt = null;
 
   if (
     nextState === "completed" ||
@@ -186,6 +299,7 @@ export function completeAutomationPacket(
     nextState === "failed" ||
     nextState === "rolled_back"
   ) {
+    closedIdempotencyKeys.add(packet.idempotencyKey);
     automationPacketQueue.splice(packetIndex, 1);
   }
 
@@ -197,6 +311,7 @@ export function releaseAutomationQueue(workerId: string): void {
     if (packet.lockedBy === workerId) {
       packet.lockedBy = null;
       packet.lockedAt = null;
+      packet.lockExpiresAt = null;
 
       if (packet.state === "scheduled" || packet.state === "executing") {
         packet.state = "queued";
@@ -206,6 +321,7 @@ export function releaseAutomationQueue(workerId: string): void {
 
   if (queueLockedBy === workerId) {
     queueLockedBy = null;
+    queueLockedAt = null;
   }
 }
 
@@ -214,6 +330,12 @@ export function isAutomationQueueLocked(): boolean {
 }
 
 export function registerRuntimeAutomationDispatcher(): void {
+  if (dispatcherRegistered) {
+    return;
+  }
+
+  dispatcherRegistered = true;
+
   runtimeEventBus.subscribe(
     "runtime_tick_completed",
     (
@@ -236,8 +358,14 @@ export function registerRuntimeAutomationDispatcher(): void {
           }
         );
 
-        automationPacketQueue.push(packet);
-        submitPacketApproval(packet);
+        const queuedPacket = enqueueAutomationPacket(packet);
+
+        if (!queuedPacket) {
+          console.log(
+            `[AUTOMATION DISPATCH] duplicate remediation packet skipped for ${packet.runtimeId}`
+          );
+          return;
+        }
 
         console.log(
           `[AUTOMATION DISPATCH] queued remediation packet ${packet.packetId}`
@@ -263,8 +391,14 @@ export function registerRuntimeAutomationDispatcher(): void {
           }
         );
 
-        automationPacketQueue.push(packet);
-        submitPacketApproval(packet);
+        const queuedPacket = enqueueAutomationPacket(packet);
+
+        if (!queuedPacket) {
+          console.log(
+            `[AUTOMATION DISPATCH] duplicate policy packet skipped for ${packet.runtimeId}`
+          );
+          return;
+        }
 
         console.log(
           `[AUTOMATION DISPATCH] queued policy packet ${packet.packetId}`

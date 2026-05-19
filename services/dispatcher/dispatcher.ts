@@ -3,11 +3,16 @@ import { writeTelemetryEvent } from "../telemetry/telemetryWriter";
 
 export type PacketStatus =
   | "queued"
+  | "scheduled"
+  | "executing"
+  | "retrying"
+  | "failed"
+  | "blocked"
+  | "completed"
+  | "rolled_back"
   | "dry_run"
   | "waiting_approval"
-  | "approved"
-  | "applied"
-  | "blocked";
+  | "approved";
 
 export interface WorkPacket {
   packetId: string;
@@ -95,7 +100,7 @@ export function dispatchPacket(packet: WorkPacket): DispatchResult {
   );
 
   return {
-    packet: { ...packet, status: "dry_run" },
+    packet: { ...packet, status: "completed" },
     nextAction: "dry_run"
   };
 }

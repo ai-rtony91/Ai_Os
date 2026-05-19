@@ -10,7 +10,7 @@ import {
   executionAllowed,
   type Capability
 } from "../policy/policyEngine";
-import { getApproval } from "../approvals/approvalInbox";
+import { getApproval, type ApprovalRequest } from "../approvals/approvalInbox";
 import { isApprovalGranted } from "../approvals/approvalDecision";
 import { writeTelemetryEvent } from "../telemetry/telemetryWriter";
 
@@ -22,6 +22,8 @@ export interface AutomationExecutionResult {
   state: SafeExecutionState;
   retryCount: number;
   executionCount: number;
+  mode: AutomationDispatchPacket["mode"];
+  approvalId?: string | null;
 }
 
 const executionLedger: AutomationExecutionResult[] = [];
@@ -55,14 +57,26 @@ function riskForPacket(packet: AutomationDispatchPacket): "low" | "medium" | "hi
   return "low";
 }
 
+function getApprovalForPacket(packet: AutomationDispatchPacket): ApprovalRequest | undefined {
+  return getApproval(packet.approvalId ?? `approval_${packet.packetId}`);
+}
+
 function approvalGrantedForPacket(packet: AutomationDispatchPacket): boolean {
   if (packet.approvalGranted) {
     return true;
   }
 
-  const approval = getApproval(`approval_${packet.packetId}`);
+  const approval = getApprovalForPacket(packet);
 
-  return approval ? isApprovalGranted(approval) : false;
+  if (approval && isApprovalGranted(approval)) {
+    packet.approvalGranted = true;
+    packet.approvalId = approval.approvalId;
+    packet.approvalDecidedAt = approval.decidedAt ?? null;
+    packet.approvalDecision = approval.decision ?? null;
+    return true;
+  }
+
+  return false;
 }
 
 function blockPacket(
@@ -77,7 +91,9 @@ function blockPacket(
     message: reason,
     state,
     retryCount: packet.retryCount,
-    executionCount: packet.executionCount
+    executionCount: packet.executionCount,
+    mode: packet.mode,
+    approvalId: packet.approvalId ?? null
   };
 
   completeAutomationPacket(packet.packetId, executorId, state);
@@ -91,6 +107,7 @@ function blockPacket(
       status: state,
       metadata: {
         action: packet.action,
+        mode: packet.mode,
         retryCount: packet.retryCount,
         executionCount: packet.executionCount
       }
@@ -111,6 +128,7 @@ function executePacket(
     target: packet.action,
     risk: riskForPacket(packet),
     approvalGranted: approvalGrantedForPacket(packet),
+    mode: packet.mode,
     executionCount: packet.executionCount,
     retryCount: packet.retryCount,
     maxExecutions: packet.maxExecutions,
@@ -120,6 +138,43 @@ function executePacket(
 
   if (!policyDecision.allowed) {
     return blockPacket(packet, policyDecision.reason);
+  }
+
+  if (packet.mode === "dry_run") {
+    const result: AutomationExecutionResult = {
+      packetId: packet.packetId,
+      success: true,
+      executedAt: new Date().toISOString(),
+      message: `Dry run validated action ${packet.action}`,
+      state: "completed",
+      retryCount: packet.retryCount,
+      executionCount: packet.executionCount,
+      mode: packet.mode,
+      approvalId: packet.approvalId ?? null
+    };
+
+    completeAutomationPacket(packet.packetId, executorId, "completed");
+
+    writeTelemetryEvent(
+      "packet_applied",
+      "runtimeAutomationExecutor",
+      `Dry run validated automation packet ${packet.packetId}`,
+      {
+        packetId: packet.packetId,
+        status: "dry_run",
+        metadata: {
+          action: packet.action,
+          priority: packet.priority,
+          runtimeId: packet.runtimeId,
+          mode: packet.mode,
+          retryCount: packet.retryCount,
+          executionCount: packet.executionCount,
+          rollbackStrategy: packet.rollback.strategy
+        }
+      }
+    );
+
+    return result;
   }
 
   packet.state = packet.retryCount > 0 ? "retrying" : "executing";
@@ -136,7 +191,9 @@ function executePacket(
     message: `Executed action ${packet.action}`,
     state: "completed",
     retryCount: packet.retryCount,
-    executionCount: packet.executionCount
+    executionCount: packet.executionCount,
+    mode: packet.mode,
+    approvalId: packet.approvalId ?? null
   };
 
   completeAutomationPacket(packet.packetId, executorId, "completed");
@@ -152,8 +209,11 @@ function executePacket(
         action: packet.action,
         priority: packet.priority,
         runtimeId: packet.runtimeId,
+        mode: packet.mode,
         retryCount: packet.retryCount,
         executionCount: packet.executionCount,
+        approvalId: packet.approvalId,
+        approvalDecidedAt: packet.approvalDecidedAt,
         rollbackStrategy: packet.rollback.strategy
       }
     }
