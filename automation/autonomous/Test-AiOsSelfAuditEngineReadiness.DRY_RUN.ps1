@@ -1,11 +1,7 @@
 $ErrorActionPreference = "Stop"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $RequiredFiles = @(
-  "docs\AI_OS\autonomous\AIOS_REPO_SCAN_DRAFT.md",
-  "docs\AI_OS\autonomous\AIOS_MISSING_FILE_DETECTION_DRAFT.md",
-  "docs\AI_OS\autonomous\AIOS_DUPLICATE_DETECTION_DRAFT.md",
-  "docs\AI_OS\autonomous\AIOS_STALE_REPORT_DETECTION_DRAFT.md",
-  "docs\AI_OS\autonomous\AIOS_NEXT_ACTION_RECOMMENDATION_DRAFT.md"
+  "docs\concepts\aios-autonomous-safety-concepts.md"
 )
 $Results = foreach ($RelativePath in $RequiredFiles) {
   $FullPath = Join-Path $RepoRoot $RelativePath
