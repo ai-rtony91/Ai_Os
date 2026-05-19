@@ -23,14 +23,35 @@ Near-term product focus:
 
 The dashboard should become an operator control center, not a cluttered marketing surface.
 
-Current direction:
+Near-term direction:
 
-- show system status,
-- show validator state,
-- show protected-file and blocked-action warnings,
-- show work packets, approvals, and next safe action,
+- preserve useful doctrine from legacy dashboard drafts in compact canonical docs,
+- keep `apps/dashboard` separate from legacy planning docs,
+- define a small read-only dashboard data contract before wiring more UI,
+- show system status, validator state, protected-file warnings, blocked-action warnings, and next safe action,
+- show work packets, approvals, worker status, and commit package recommendations only from approved local/canonical sources,
 - keep controls read-only until separately approved,
-- prefer fixture/local data before real adapters.
+- prefer fixture/local data before real adapters,
+- archive legacy dashboard draft swarms only after extraction and reference checks.
+
+Medium-term operator control center direction:
+
+- command-center layout with stable status, work, safety, telemetry, and assistance panels,
+- validator-first display logic,
+- paper-only Trading Lab readiness visibility,
+- local telemetry and work-intelligence panels,
+- mobile-readable status stack,
+- restrained theme system with clear PASS/WARN/FAIL/BLOCKED/UNKNOWN states.
+
+Blocked until architecture review:
+
+- dashboard-triggered APPLY actions,
+- live AI assistant integration,
+- external API/database integrations,
+- account integrations,
+- deployment/publishing automation,
+- broker/OANDA/live trading visibility or execution,
+- real webhook execution.
 
 ## Operator Control Center Direction
 
@@ -99,10 +120,11 @@ Blocked direction:
 ## Near-Term Next Steps
 
 1. Human review of these canonical summaries.
-2. Pass 12 folder-based archive of clearly generated docs.
-3. Separate review for dashboard, dispatcher, and orchestration docs.
-4. Promote security and governance docs into canonical locations.
-5. Continue orchestration cleanup for v1 examples and direct display dependencies.
+2. Complete dashboard summary extraction and decide whether a compact dashboard data-contract spec is needed.
+3. Archive or retire legacy `docs/AI_OS/dashboard` drafts only after reference checks.
+4. Separate review for dispatcher and orchestration docs.
+5. Promote security and governance docs into canonical locations.
+6. Continue orchestration cleanup for v1 examples and direct display dependencies.
 
 ## Human-Review Items
 
