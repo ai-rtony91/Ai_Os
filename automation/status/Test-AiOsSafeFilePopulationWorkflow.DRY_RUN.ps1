@@ -56,18 +56,16 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
-Test-RequiredFile -Label 'safe file population workflow' -RelativePath 'docs\AI_OS\writers\AIOS_SAFE_FILE_POPULATION_WORKFLOW_DRAFT.md'
+Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 Test-RequiredFile -Label 'file population approval gate' -RelativePath 'docs\AI_OS\automation\AIOS_FILE_POPULATION_APPROVAL_GATE_DRAFT.md'
-Test-RequiredFile -Label 'file input ownership contract' -RelativePath 'docs\AI_OS\writers\AIOS_FILE_INPUT_OWNERSHIP_CONTRACT_DRAFT.md'
 Test-RequiredFile -Label 'controlled automation writer plan' -RelativePath 'docs\AI_OS\automation\AIOS_CONTROLLED_AUTOMATION_WRITER_PLAN_DRAFT.md'
 Test-RequiredFile -Label 'report writer preview contract' -RelativePath 'docs\AI_OS\reporting\AIOS_REPORT_WRITER_PREVIEW_CONTRACT_DRAFT.md'
 Test-RequiredFile -Label 'telemetry preview contract' -RelativePath 'docs\AI_OS\telemetry\AIOS_TELEMETRY_PREVIEW_CONTRACT_DRAFT.md'
 Test-RequiredFile -Label 'Morning Brief preview generator draft' -RelativePath 'docs\AI_OS\morning_brief\AIOS_MORNING_BRIEF_PREVIEW_GENERATOR_DRAFT.md'
 
 $filesToScan = @(
-    'docs\AI_OS\writers\AIOS_SAFE_FILE_POPULATION_WORKFLOW_DRAFT.md',
+    'docs\concepts\aios-writer-system-concepts.md',
     'docs\AI_OS\automation\AIOS_FILE_POPULATION_APPROVAL_GATE_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_FILE_INPUT_OWNERSHIP_CONTRACT_DRAFT.md',
     'docs\AI_OS\automation\AIOS_CONTROLLED_AUTOMATION_WRITER_PLAN_DRAFT.md',
     'docs\AI_OS\reporting\AIOS_REPORT_WRITER_PREVIEW_CONTRACT_DRAFT.md',
     'docs\AI_OS\telemetry\AIOS_TELEMETRY_PREVIEW_CONTRACT_DRAFT.md',
