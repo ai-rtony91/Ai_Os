@@ -1,0 +1,72 @@
+{
+  "system": "AI_OS",
+  "mode": "DRY_RUN",
+  "status_name": "worker_lane_status_example",
+  "purpose": "Example worker lane status model for showing operator-safe lane activity without launching workers or changing runtime state.",
+  "lanes": [
+    {
+      "lane_id": "CODEX_01",
+      "lane_name": "Codex worker 01",
+      "purpose": "Primary Codex implementation lane for approved scoped edits.",
+      "expected_branch_patterns": [
+        "codex/worker-01",
+        "codex/worker-1"
+      ],
+      "status": "UNKNOWN",
+      "current_activity": "No local live lane telemetry is connected in DRY_RUN.",
+      "safe_next_action": "Verify branch and git status before assigning work."
+    },
+    {
+      "lane_id": "CODEX_02",
+      "lane_name": "Codex worker 02",
+      "purpose": "Secondary Codex implementation lane for isolated scaffold or validation work.",
+      "expected_branch_patterns": [
+        "codex/worker-02",
+        "codex/worker-2"
+      ],
+      "status": "UNKNOWN",
+      "current_activity": "No local live lane telemetry is connected in DRY_RUN.",
+      "safe_next_action": "Use this lane only for explicitly scoped files."
+    },
+    {
+      "lane_id": "CLAUDE_01",
+      "lane_name": "Claude worker 01",
+      "purpose": "Review or companion-worker lane. Do not assume it owns local files unless evidence exists.",
+      "expected_branch_patterns": [
+        "claude/worker-01",
+        "claude/worker-1"
+      ],
+      "status": "UNKNOWN",
+      "current_activity": "No local live lane telemetry is connected in DRY_RUN.",
+      "safe_next_action": "Confirm ownership before editing overlapping files."
+    },
+    {
+      "lane_id": "MAIN_CONTROL",
+      "lane_name": "Main Control",
+      "purpose": "Operator control lane for review, approvals, safety gates, commits, and push decisions.",
+      "expected_branch_patterns": [
+        "main",
+        "master",
+        "release/*"
+      ],
+      "status": "UNKNOWN",
+      "current_activity": "No local live lane telemetry is connected in DRY_RUN.",
+      "safe_next_action": "Keep commit, push, merge, and approval decisions under operator control."
+    }
+  ],
+  "status_rules": {
+    "PASS": "Lane is current and git status is clean.",
+    "WARN": "Lane is current but git status is dirty, or lane evidence is incomplete.",
+    "FAIL": "Multiple dirty lanes are detected from supplied lane evidence.",
+    "UNKNOWN": "Lane has no verified local evidence in this DRY_RUN checker."
+  },
+  "safety": {
+    "writes_performed_by_checker": 0,
+    "commits_allowed": false,
+    "pushes_allowed": false,
+    "runtime_edits_allowed": false,
+    "dispatcher_edits_allowed": false,
+    "schema_edits_allowed": false
+  },
+  "next_safe_action": "Run Get-AiOsWorkerLaneStatus.DRY_RUN.ps1 before assigning or applying lane work."
+}

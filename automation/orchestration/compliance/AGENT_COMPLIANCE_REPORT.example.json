@@ -1,0 +1,52 @@
+{
+  "schema": "AIOS_AGENT_COMPLIANCE_REPORT.v1",
+  "mode": "DRY_RUN",
+  "generated_at": "2026-05-18T00:00:00Z",
+  "repo_root": "C:/path/to/AIOS",
+  "evidence_paths": [
+    "Reports/operator/worker-reports/example.md"
+  ],
+  "evidence_files_inspected": [
+    "Reports/operator/worker-reports/example.md"
+  ],
+  "overall_result": "WARN",
+  "pass_count": 5,
+  "warn_count": 1,
+  "fail_count": 0,
+  "checks": [
+    {
+      "check_id": "git_add_dot_detection",
+      "result": "PASS",
+      "message": "No git add . usage was detected in supplied evidence.",
+      "evidence": [],
+      "next_safe_action": "Review this compliance result before approving APPLY, commit, or push."
+    },
+    {
+      "check_id": "unauthorized_push_detection",
+      "result": "PASS",
+      "message": "No git push usage was detected in supplied evidence.",
+      "evidence": [],
+      "next_safe_action": "Review this compliance result before approving APPLY, commit, or push."
+    },
+    {
+      "check_id": "missing_dry_run_apply_report",
+      "result": "PASS",
+      "message": "Evidence includes DRY_RUN/APPLY language and report-field language.",
+      "evidence": [],
+      "next_safe_action": "Review this compliance result before approving APPLY, commit, or push."
+    },
+    {
+      "check_id": "protected_path_violations",
+      "result": "WARN",
+      "message": "Evidence mentions protected paths. This may be allowed if it is report-only.",
+      "evidence": [
+        "Reports/operator/worker-reports/example.md:12: Blocked paths: README.md, AGENTS.md, RISK_POLICY.md"
+      ],
+      "next_safe_action": "Confirm no protected path was edited without explicit approval."
+    }
+  ],
+  "files_changed_by_checker": [],
+  "commit_performed": false,
+  "push_performed": false,
+  "next_safe_action": "Resolve WARN/FAIL compliance findings before approving APPLY, commit, or push."
+}
