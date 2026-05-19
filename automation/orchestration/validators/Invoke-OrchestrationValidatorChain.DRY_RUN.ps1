@@ -80,7 +80,10 @@ $changedPaths = @(
 
 $allowedPrefixes = @(
     "automation/orchestration/",
-    "docs/AI_OS/orchestration/"
+    "docs/concepts/",
+    "docs/workflows/",
+    "docs/architecture/",
+    "docs/audits/"
 )
 $blockedPrefixes = @(
     "apps/",
@@ -170,7 +173,7 @@ else {
 
 $requiredMarkdown = @(
     "automation/orchestration/validators/VALIDATOR_CHAIN_RUNBOOK_001.md",
-    "docs/AI_OS/orchestration/PHASE_15_3_4_VALIDATOR_CHAIN_AUTOMATION.md"
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md"
 )
 $missingMarkdown = @($requiredMarkdown | Where-Object { -not (Test-Path -LiteralPath (Join-Path $repoRoot $_)) })
 if ($missingMarkdown.Count -eq 0) {

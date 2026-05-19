@@ -71,9 +71,9 @@ $filesInScope = @(
     "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
     "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1",
-    "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
-    "docs/AI_OS/orchestration/AIOS_DAILY_START.md",
-    "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md"
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md",
+    "docs/workflows/aios-operator-workflows.md",
+    "docs/architecture/aios-system-architecture.md"
 )
 
 $validators = @(

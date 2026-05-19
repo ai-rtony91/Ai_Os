@@ -142,14 +142,11 @@ $requiredFiles = @(
     "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
     "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json",
     "automation/orchestration/operator/AIOS_OPERATOR_RULES.json",
-    "docs/AI_OS/orchestration/AIOS_WORKSPACE_BOOTSTRAP.md",
-    "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
-    "docs/AI_OS/orchestration/AIOS_DAILY_START.md",
-    "docs/AI_OS/orchestration/AIOS_ONE_COMMAND_WORKFLOW.md",
-    "docs/AI_OS/orchestration/AIOS_GITHUB_SAVE_AUTOMATION.md",
-    "docs/AI_OS/orchestration/AIOS_GUARD.md",
-    "docs/AI_OS/orchestration/AIOS_WORKER_PROFILES.md",
-    "docs/AI_OS/orchestration/AIOS_WORK_PACKETS.md"
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md",
+    "docs/workflows/aios-operator-workflows.md",
+    "docs/architecture/aios-system-architecture.md",
+    "docs/audits/phase-92-dispatcher-orchestration-tree-cleanup.md",
+    "docs/audits/phase-93-dispatcher-orchestration-reference-retirement.md"
 )
 
 $requiredDirectories = @(
@@ -380,7 +377,7 @@ $requiredRuleTexts = @(
     "No commits/pushes without explicit command.",
     "No scheduled/startup tasks.",
     "No broker/API/live trading.",
-    "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.",
+    "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, docs/concepts, docs/workflows, or docs/architecture overlap, stop extra Codex workers before continuing.",
     "Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work.",
     "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only.",
     "Use Invoke-AiOsGuard.ps1 before risky actions. Guard checks path, branch, lane, command type, Apply requirement, and protected-root warnings before the operator proceeds.",

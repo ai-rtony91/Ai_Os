@@ -52,7 +52,9 @@
       "default_branch": "phase-bootstrap-workspace",
       "owns_paths": [
         "automation/orchestration/bootstrap/",
-        "docs/AI_OS/orchestration/"
+        "docs/concepts/aios-dispatcher-orchestration-concepts.md",
+        "docs/workflows/aios-operator-workflows.md",
+        "docs/architecture/aios-system-architecture.md"
       ],
       "blocked_paths": [
         "README.md",
@@ -196,7 +198,7 @@
       "default_branch": "phase-operator-rulebook",
       "owns_paths": [
         "automation/orchestration/operator/",
-        "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md"
+        "docs/workflows/aios-operator-workflows.md"
       ],
       "blocked_paths": [
         ".codex_backups/",
@@ -233,7 +235,9 @@
         "automation/orchestration/workers/",
         "automation/orchestration/guard/",
         "automation/orchestration/git/",
-        "docs/AI_OS/orchestration/"
+        "docs/concepts/aios-dispatcher-orchestration-concepts.md",
+        "docs/workflows/aios-operator-workflows.md",
+        "docs/architecture/aios-system-architecture.md"
       ],
       "blocked_paths": [
         "README.md",

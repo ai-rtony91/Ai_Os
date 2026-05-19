@@ -23,7 +23,7 @@
     "No commits/pushes without explicit command.",
     "No scheduled/startup tasks.",
     "No broker/API/live trading.",
-    "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, or docs/AI_OS/orchestration overlap, stop extra Codex workers before continuing.",
+    "Single-writer brainstem rule: only one Codex worker may edit overlapping orchestration/brainstem files at a time. If files under automation/orchestration/bootstrap, automation/orchestration/supervisor, automation/orchestration/operator, automation/orchestration/work_packets, docs/concepts, docs/workflows, or docs/architecture overlap, stop extra Codex workers before continuing.",
     "Any newly discovered operator workflow rule must be added to the operator rulebook or validator before continuing major work.",
     "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only.",
     "Use Invoke-AiOsGuard.ps1 before risky actions. Guard checks path, branch, lane, command type, Apply requirement, and protected-root warnings before the operator proceeds.",
