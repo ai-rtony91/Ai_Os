@@ -22,7 +22,7 @@ export interface RuntimeLoopDependencies {
 
 export class RuntimeLoop {
   private context: RuntimeContext;
-  private interval?: NodeJS.Timeout;
+  private interval?: ReturnType<typeof setInterval>;
 
   constructor(
     private readonly config: RuntimeLoopConfig,
@@ -53,7 +53,7 @@ export class RuntimeLoop {
         maxConcurrentPackets: this.config.maxConcurrentPackets
       });
 
-      processAutomationQueue();
+      processAutomationQueue(this.config.maxConcurrentPackets);
     }, this.config.tickIntervalMs);
   }
 

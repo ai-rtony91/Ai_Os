@@ -4,7 +4,8 @@ export type RuntimeEventType =
   | "runtime_tick_started"
   | "runtime_tick_completed"
   | "runtime_blocked"
-  | "runtime_degraded";
+  | "runtime_degraded"
+  | "policy_decision";
 
 export interface RuntimeEvent<TPayload = unknown> {
   type: RuntimeEventType;
