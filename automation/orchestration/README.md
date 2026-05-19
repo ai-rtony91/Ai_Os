@@ -47,7 +47,15 @@ Display and status tools should prefer these active paths first:
 - commit packages: `automation/orchestration/commit_packages/`
 - operator status: `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1`
 
-Legacy root examples remain compatibility fallbacks until every reference is updated and reviewed. Archiving is deferred to a later pass.
+Legacy root fallback examples were archived after canonical paths became the preferred source and fallback reads were made optional:
+
+- `archive/orchestration_legacy/root_examples/packet_queue.example.json`
+- `archive/orchestration_legacy/root_examples/worker_registry.example.json`
+- `archive/orchestration_legacy/root_examples/approval_inbox.example.json`
+- `archive/orchestration_legacy/root_examples/validator_chain.example.json`
+- `archive/orchestration_legacy/root_examples/commit_package.example.json`
+
+Status and display scripts may still mention those filenames as optional compatibility labels, but canonical paths above are the active source of truth.
 
 ## Safe Use
 
