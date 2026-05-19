@@ -21,7 +21,8 @@ if ([string]::IsNullOrWhiteSpace($branch)) {
 }
 
 $statusLines = @(git status --short)
-$packetQueueExists = Test-Path (Join-Path $repoPath "automation\orchestration\packet_queue.example.json")
+$workPacketsPath = Join-Path $repoPath "automation\orchestration\work_packets"
+$packetQueueExists = Test-Path -LiteralPath $workPacketsPath -PathType Container
 $assignmentLocksExist = Test-Path (Join-Path $repoPath "automation\orchestration\assignment_locks.example.json")
 
 $blocked = $false
@@ -34,7 +35,7 @@ if ($statusLines.Count -gt 0) {
 
 if (-not $packetQueueExists) {
     $blocked = $true
-    $blockReasons.Add("packet queue example is missing")
+    $blockReasons.Add("canonical work packet folder is missing")
 }
 
 if (-not $assignmentLocksExist) {
@@ -48,7 +49,7 @@ Write-Host ""
 Write-Result "Repo path" $repoPath
 Write-Result "Current branch" $branch
 Write-Result "Git status entries" $statusLines.Count
-Write-Result "Packet queue exists" $packetQueueExists
+Write-Result "Canonical work packet folder exists" $packetQueueExists
 Write-Result "Assignment locks exist" $assignmentLocksExist
 
 if ($blocked) {
