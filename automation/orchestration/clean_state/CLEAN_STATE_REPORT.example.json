@@ -1,0 +1,47 @@
+{
+  "schema": "AIOS_CLEAN_STATE_REPORT.v1",
+  "mode": "DRY_RUN",
+  "generated_at": "2026-05-18T00:00:00Z",
+  "repo_root": "C:/path/to/AIOS",
+  "result": "REVIEW",
+  "current_branch": "codex/example-branch",
+  "branch_status_line": "## codex/example-branch...origin/codex/example-branch [ahead 1]",
+  "ahead_behind_state": "AHEAD",
+  "remote_sync_likely_ok": false,
+  "changed_files": [
+    "automation/orchestration/example-file.ps1"
+  ],
+  "staged_files": [],
+  "untracked_files": [
+    "automation/orchestration/example-file.ps1"
+  ],
+  "recent_commit": "abc123|2026-05-18 00:00:00 -0400|Example commit",
+  "worker_lane_paths_checked": [
+    "automation/orchestration"
+  ],
+  "info_count": 5,
+  "warn_count": 4,
+  "blocked_count": 0,
+  "risks": [
+    {
+      "level": "WARN",
+      "check_id": "git_status",
+      "message": "Working tree has changed or untracked files.",
+      "evidence": [
+        "automation/orchestration/example-file.ps1"
+      ],
+      "next_safe_action": "Review or clear changed files before declaring the repo clean."
+    },
+    {
+      "level": "INFO",
+      "check_id": "staged_files",
+      "message": "No staged files detected.",
+      "evidence": [],
+      "next_safe_action": "Continue clean-state review."
+    }
+  ],
+  "files_changed_by_verifier": [],
+  "commit_performed": false,
+  "push_performed": false,
+  "next_safe_action": "Review warnings before declaring the repo clean or starting new work."
+}
