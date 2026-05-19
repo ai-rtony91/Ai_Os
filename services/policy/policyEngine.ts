@@ -9,7 +9,9 @@ export type Capability =
   | "system_command"
   | "network_call"
   | "trading_signal"
-  | "trading_order";
+  | "trading_order"
+  | "runtime_remediation"
+  | "policy_review";
 
 export type TrustLevel = "guest" | "operator" | "maintainer" | "owner";
 
@@ -21,6 +23,11 @@ export interface PolicyRequest {
   target?: string;
   risk: "low" | "medium" | "high" | "blocked";
   approvalGranted: boolean;
+  executionCount?: number;
+  retryCount?: number;
+  maxExecutions?: number;
+  maxRetries?: number;
+  rollbackPrepared?: boolean;
 }
 
 export interface PolicyRule {
@@ -52,7 +59,9 @@ export const defaultPolicyRules: PolicyRule[] = [
   { capability: "system_command", minimumTrustLevel: "maintainer", requiresApproval: true },
   { capability: "network_call", minimumTrustLevel: "operator", requiresApproval: true },
   { capability: "trading_signal", minimumTrustLevel: "operator", requiresApproval: true },
-  { capability: "trading_order", minimumTrustLevel: "owner", requiresApproval: true }
+  { capability: "trading_order", minimumTrustLevel: "owner", requiresApproval: true },
+  { capability: "runtime_remediation", minimumTrustLevel: "maintainer", requiresApproval: true },
+  { capability: "policy_review", minimumTrustLevel: "operator", requiresApproval: true }
 ];
 
 function targetBlocked(target: string | undefined, patterns: string[] = []): boolean {
@@ -96,6 +105,28 @@ export function evaluatePolicy(
   request: PolicyRequest,
   rules: PolicyRule[] = defaultPolicyRules
 ): PolicyDecision {
+  if ((request.executionCount ?? 0) >= (request.maxExecutions ?? 1)) {
+    const decision: PolicyDecision = {
+      allowed: false,
+      reason: "Execution ceiling reached",
+      requiresApproval: true
+    };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
+  }
+
+  if ((request.retryCount ?? 0) > (request.maxRetries ?? 0)) {
+    const decision: PolicyDecision = {
+      allowed: false,
+      reason: "Retry ceiling reached",
+      requiresApproval: true
+    };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
+  }
+
   if (request.risk === "blocked") {
     const decision: PolicyDecision = {
       allowed: false,
@@ -142,6 +173,17 @@ export function evaluatePolicy(
     return decision;
   }
 
+  if (request.capability === "trading_order") {
+    const decision: PolicyDecision = {
+      allowed: false,
+      reason: "Live trading orders are disabled by default policy",
+      requiresApproval: true
+    };
+
+    emitPolicyTelemetry(request, decision);
+    return decision;
+  }
+
   if (rule.requiresApproval && !request.approvalGranted) {
     const decision: PolicyDecision = {
       allowed: false,
@@ -153,10 +195,10 @@ export function evaluatePolicy(
     return decision;
   }
 
-  if (request.capability === "trading_order") {
+  if (!request.rollbackPrepared && request.capability !== "file_read") {
     const decision: PolicyDecision = {
       allowed: false,
-      reason: "Live trading orders are disabled by default policy",
+      reason: "Rollback metadata must be prepared before execution",
       requiresApproval: true
     };
 
@@ -172,4 +214,11 @@ export function evaluatePolicy(
 
   emitPolicyTelemetry(request, decision);
   return decision;
+}
+
+export function executionAllowed(
+  request: PolicyRequest,
+  rules: PolicyRule[] = defaultPolicyRules
+): PolicyDecision {
+  return evaluatePolicy(request, rules);
 }
