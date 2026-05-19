@@ -1,6 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const {
+  getAuditTimeline,
+  getControlSummary,
+  getQueueStatus,
+  getRuntimeHealth,
+  getRuntimeStatus,
+  getVisibilitySnapshot
+} = require("./runtimeApiService");
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -11,6 +19,30 @@ app.use(express.json());
 // Quick check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, service: "orchestrator", ts: Date.now() });
+});
+
+app.get("/api/runtime/status", (req, res) => {
+  res.json(getRuntimeStatus());
+});
+
+app.get("/api/runtime/queue", (req, res) => {
+  res.json(getQueueStatus());
+});
+
+app.get("/api/runtime/audit", (req, res) => {
+  res.json(getAuditTimeline({ recent: req.query.recent }));
+});
+
+app.get("/api/runtime/health", (req, res) => {
+  res.json(getRuntimeHealth({ staleHeartbeatMinutes: req.query.staleHeartbeatMinutes }));
+});
+
+app.get("/api/runtime/visibility", (req, res) => {
+  res.json(getVisibilitySnapshot());
+});
+
+app.get("/api/runtime/control", (req, res) => {
+  res.json(getControlSummary());
 });
 
 // Pipeline endpoint (accepts 2 uploads)
