@@ -33,7 +33,7 @@ $requiredPaths = @(
     "docs/AI_OS/execution",
     "docs/AI_OS/agents",
     "docs/AI_OS/production",
-    "docs/AI_OS/autonomous",
+    "docs/concepts/aios-autonomous-safety-concepts.md",
     "docs/roadmap/aios-product-roadmap.md",
     "docs/concepts/aios-dashboard-and-interface-concepts.md",
     "docs/AI_OS/validators",
