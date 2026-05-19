@@ -34,7 +34,7 @@ $requiredPaths = @(
     "docs/AI_OS/agents",
     "docs/AI_OS/production",
     "docs/AI_OS/autonomous",
-    "docs/AI_OS/progress",
+    "docs/roadmap/aios-product-roadmap.md",
     "docs/AI_OS/dashboard",
     "docs/AI_OS/validators",
     "Reports/daily",
@@ -89,4 +89,3 @@ if ($results.Status -contains "FAIL") {
 }
 
 exit 0
-

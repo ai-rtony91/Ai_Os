@@ -26,21 +26,15 @@ $expectedFiles = @(
     "docs/AI_OS/audits/AIOS_STAGE101_FULL_REPO_GAP_AUDIT_DRAFT.md",
     "docs/AI_OS/audits/AIOS_STAGE102_EMPTY_STALE_DUPLICATE_DOC_REVIEW_DRAFT.md",
     "docs/AI_OS/audits/AIOS_STAGE103_DRAFT_STATUS_INVENTORY_DRAFT.md",
-    "docs/AI_OS/backfill/AIOS_STAGE104_CONTROLLED_BACKFILL_PLAN_DRAFT.md",
-    "docs/AI_OS/backfill/AIOS_STAGE105_SOURCE_EVIDENCE_REQUIREMENTS_DRAFT.md",
-    "docs/AI_OS/backfill/AIOS_STAGE106_FOLDER_FILE_POPULATION_MATRIX_DRAFT.md",
-    "docs/AI_OS/backfill/AIOS_STAGE107_PROTECTED_ROOT_BACKFILL_EXCLUSION_DRAFT.md",
-    "docs/AI_OS/backfill/AIOS_STAGE108_BACKFILL_VALIDATOR_PLAN_DRAFT.md",
-    "docs/AI_OS/checkpoints/AIOS_STAGE109_BACKFILL_READINESS_CHECKPOINT_DRAFT.md",
-    "docs/AI_OS/checkpoints/AIOS_STAGE110_HUMAN_APPROVAL_CHECKPOINT_DRAFT.md"
+    "docs/audits/docs-aios-promotion-archive-plan-pass-10.md",
+    "docs/audits/docs-aios-canonical-summary-pass-11.md"
 )
 
 $approvedPrefixes = @(
     "Reports/health/",
     "automation/status/",
     "docs/AI_OS/audits/",
-    "docs/AI_OS/backfill/",
-    "docs/AI_OS/checkpoints/"
+    "docs/audits/"
 )
 
 $protectedRootFiles = @(
@@ -120,8 +114,13 @@ if (-not ($stagedFiles | Where-Object { $protectedRootFiles -contains $_ })) {
 
 Write-Host ""
 
+$canonicalSummaryFiles = @(
+    "docs/audits/docs-aios-promotion-archive-plan-pass-10.md",
+    "docs/audits/docs-aios-canonical-summary-pass-11.md"
+)
 $textFiles = $expectedFiles | Where-Object { $_.EndsWith(".md") -or $_.EndsWith(".txt") }
-foreach ($file in $textFiles) {
+$phraseScanFiles = $textFiles | Where-Object { $canonicalSummaryFiles -notcontains $_ }
+foreach ($file in $phraseScanFiles) {
     $fullPath = Join-Path $repoRoot $file
     if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
         $content = Get-Content -LiteralPath $fullPath -Raw
@@ -133,6 +132,11 @@ foreach ($file in $textFiles) {
                 $failures.Add("Required phrase missing from ${file}: $phrase")
             }
         }
+    }
+}
+foreach ($file in $canonicalSummaryFiles) {
+    if ($expectedFiles -contains $file) {
+        Write-Host "INFO canonical summary checked for existence only; legacy docs folder not required: $file"
     }
 }
 

@@ -19,7 +19,7 @@
   ],
   "checkpoint_roots": [
     "Reports/checkpoints",
-    "docs/AI_OS/checkpoints"
+    "docs/audits"
   ],
   "automation_roots": [
     "automation"
