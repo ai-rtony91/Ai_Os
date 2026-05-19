@@ -22,6 +22,13 @@ export interface ReplayedRuntimeState {
   invalidLineCount: number;
 }
 
+export interface TelemetryInspection {
+  events: TelemetryEvent[];
+  replayedState: ReplayedRuntimeState;
+  invalidLineCount: number;
+  lastEventAt?: string;
+}
+
 export function parseTelemetryLedger(content: string): {
   events: TelemetryEvent[];
   invalidLineCount: number;
@@ -93,6 +100,45 @@ export function replayTelemetryEvents(
   state.appliedPackets = [...new Set(state.appliedPackets)];
 
   return state;
+}
+
+function findLastEventAt(events: TelemetryEvent[]): string | undefined {
+  const timestamps = events
+    .map((event) => event.ts)
+    .filter(Boolean)
+    .sort();
+
+  return timestamps[timestamps.length - 1];
+}
+
+export function inspectTelemetryEvents(
+  events: TelemetryEvent[],
+  invalidLineCount = 0
+): TelemetryInspection {
+  return {
+    events,
+    replayedState: replayTelemetryEvents(events, invalidLineCount),
+    invalidLineCount,
+    lastEventAt: findLastEventAt(events)
+  };
+}
+
+export function inspectTelemetryLedgerContent(
+  content: string
+): TelemetryInspection {
+  const { events, invalidLineCount } = parseTelemetryLedger(content);
+
+  return inspectTelemetryEvents(events, invalidLineCount);
+}
+
+export function inspectTelemetryLedgerFile(
+  ledgerPath = "telemetry/work_ledger.jsonl"
+): TelemetryInspection {
+  if (!existsSync(ledgerPath)) {
+    return inspectTelemetryEvents([]);
+  }
+
+  return inspectTelemetryLedgerContent(readFileSync(ledgerPath, "utf-8"));
 }
 
 export function replayTelemetryLedgerFile(

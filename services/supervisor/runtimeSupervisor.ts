@@ -1,6 +1,13 @@
 import type { SchedulerPlan } from "../dispatcher/autonomousScheduler";
 import type { WorkerLeaseResult } from "../dispatcher/workerLeaseEngine";
+import type { WorkerHeartbeat } from "../dispatcher/workerLeaseEngine";
 import type { DeadLetterQueueState } from "../dispatcher/deadLetterQueue";
+import type { RuntimeContext } from "../runtime/runtimeContext";
+import type { TelemetryEvent } from "../telemetry/telemetryEvent";
+import {
+  buildRuntimeVisibilitySnapshot,
+  type RuntimeVisibilitySnapshot
+} from "../telemetry/runtimeVisibility";
 
 export interface RuntimeHealthSnapshot {
   schedulerActions: number;
@@ -103,4 +110,36 @@ export function generateSupervisorReport(
     health,
     alerts
   };
+}
+
+export function buildSupervisorVisibilityReport(
+  context: RuntimeContext,
+  workerHeartbeats: WorkerHeartbeat[],
+  telemetryEvents: TelemetryEvent[],
+  telemetryInvalidLineCount = 0
+): RuntimeVisibilitySnapshot | null {
+  if (
+    !context.supervisorReport ||
+    !context.schedulerPlan ||
+    !context.workerLeases ||
+    !context.deadLetterQueue ||
+    !context.backpressure
+  ) {
+    return null;
+  }
+
+  return buildRuntimeVisibilitySnapshot({
+    runtimeId: context.runtimeId,
+    runtimeStatus: context.status,
+    lastTickAt: context.lastTickAt,
+    queueSource: "runtime_context",
+    supervisorReport: context.supervisorReport,
+    schedulerPlan: context.schedulerPlan,
+    workerHeartbeats,
+    workerLeases: context.workerLeases,
+    deadLetterQueue: context.deadLetterQueue,
+    backpressure: context.backpressure,
+    telemetryEvents,
+    telemetryInvalidLineCount
+  });
 }

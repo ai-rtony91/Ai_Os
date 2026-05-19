@@ -16,18 +16,39 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+function formatDuration(ms) {
+  if (ms === undefined || ms === null) {
+    return "UNKNOWN";
+  }
+
+  const absMs = Math.abs(ms);
+  const minutes = Math.floor(absMs / 60000);
+  const seconds = Math.floor((absMs % 60000) / 1000);
+  const value = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+
+  return ms < 0 ? `${value} overdue` : value;
+}
+
 function statusTone(value) {
   const normalized = String(value).toLowerCase();
 
-  if (["critical", "blocked", "hard", "expired", "manual_review"].includes(normalized)) {
+  if (
+    ["critical", "blocked", "hard", "expired", "manual_review", "degraded"].includes(
+      normalized
+    )
+  ) {
     return "danger";
   }
 
-  if (["warning", "soft", "stale", "retry", "wait_for_approval"].includes(normalized)) {
+  if (
+    ["warning", "soft", "stale", "retry", "wait_for_approval", "paused"].includes(
+      normalized
+    )
+  ) {
     return "warn";
   }
 
-  if (["active", "running", "dispatch", "none", "low"].includes(normalized)) {
+  if (["active", "running", "dispatch", "none", "low", "fresh"].includes(normalized)) {
     return "good";
   }
 
@@ -88,6 +109,7 @@ export default function App() {
   }, [eventQuery]);
 
   const healthTone = runtimeVisibility.health.healthy ? "good" : "danger";
+  const failedGroups = runtimeVisibility.failedPackets;
 
   return (
     <div className="runtimePage">
@@ -101,12 +123,32 @@ export default function App() {
           </p>
         </div>
         <div className="headerStatus">
-          <StatusPill value={runtimeVisibility.health.healthy ? "healthy" : "attention"} />
+          <StatusPill value={runtimeVisibility.runtime.status} />
+          <StatusPill value={`freshness: ${runtimeVisibility.runtime.freshness}`} />
           <StatusPill value={`backpressure: ${runtimeVisibility.backpressure.level}`} />
         </div>
       </header>
 
       <main className="runtimeGrid">
+        <Section title="Runtime Status">
+          <div className="metricsGrid">
+            <Metric label="Runtime ID" value={runtimeVisibility.runtime.runtimeId} />
+            <Metric
+              label="Status"
+              value={runtimeVisibility.runtime.status}
+              tone={statusTone(runtimeVisibility.runtime.status)}
+            />
+            <Metric
+              label="Freshness"
+              value={runtimeVisibility.runtime.freshness}
+              tone={statusTone(runtimeVisibility.runtime.freshness)}
+            />
+            <Metric label="Queue source" value={runtimeVisibility.runtime.queueSource} />
+            <Metric label="Last tick" value={formatTime(runtimeVisibility.runtime.lastTickAt)} />
+            <Metric label="Last event" value={formatTime(runtimeVisibility.telemetry.lastEventAt)} />
+          </div>
+        </Section>
+
         <Section title="Health Summary">
           <div className="metricsGrid">
             <Metric
@@ -168,8 +210,12 @@ export default function App() {
         </Section>
 
         <Section title="Failed Packets">
+          <div className="failureSplit">
+            <Metric label="Retryable" value={failedGroups.retryable.length} tone="warn" />
+            <Metric label="Manual review" value={failedGroups.poison.length} tone="danger" />
+          </div>
           <div className="stackList">
-            {runtimeVisibility.failedPackets.map((packet) => (
+            {failedGroups.all.map((packet) => (
               <article className="listItem" key={packet.packetId}>
                 <div>
                   <strong>{packet.packetId}</strong>
@@ -178,6 +224,7 @@ export default function App() {
                 <div className="itemMeta">
                   <StatusPill value={packet.retryable ? "retryable" : "manual_review"} />
                   <span>{packet.failureCount} failures</span>
+                  <span>{packet.source}</span>
                   <span>{formatTime(packet.lastFailedAt)}</span>
                 </div>
               </article>
@@ -196,7 +243,9 @@ export default function App() {
                 <p>{worker.packetId ?? "No active packet"}</p>
                 <div className="workerMeta">
                   <span>Heartbeat {formatTime(worker.lastHeartbeatAt)}</span>
+                  <span>Age {formatDuration(worker.heartbeatAgeMs)}</span>
                   <span>Lease {worker.leaseExpiresAt ? formatTime(worker.leaseExpiresAt) : "UNKNOWN"}</span>
+                  <span>Expires in {formatDuration(worker.leaseExpiresInMs)}</span>
                   <span>{worker.reclaimablePacket ? "Packet reclaimable" : "Lease normal"}</span>
                 </div>
               </article>
@@ -214,6 +263,11 @@ export default function App() {
               </p>
             </div>
             <StatusPill value={runtimeVisibility.backpressure.level} />
+          </div>
+          <div className="pressureGrid">
+            {Object.entries(runtimeVisibility.backpressure.pressureInputs).map(([key, value]) => (
+              <Metric key={key} label={key} value={value} />
+            ))}
           </div>
           <div className="alerts">
             {runtimeVisibility.alerts.map((alert) => (
