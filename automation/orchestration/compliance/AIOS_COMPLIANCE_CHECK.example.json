@@ -1,0 +1,77 @@
+{
+  "schema": "AIOS_COMPLIANCE_CHECK.v1",
+  "task": "AI_OS general compliance check",
+  "mode": "DRY_RUN",
+  "checker_mode": "DRY_RUN",
+  "generated_at": "2026-05-18T00:00:00Z",
+  "repo_root": "C:/path/to/AIOS",
+  "result": "REVIEW",
+  "changed_files": [
+    "automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1"
+  ],
+  "staged_files": [],
+  "untracked_files": [
+    "automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1"
+  ],
+  "blocked_files": [],
+  "warning_files": [
+    {
+      "path": "automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1",
+      "pattern": "untracked_files",
+      "reason": "Untracked file requires scope review before APPLY, commit, or push."
+    }
+  ],
+  "warnings": [
+    {
+      "check_id": "warning_files",
+      "message": "One or more changed files match warning patterns.",
+      "evidence": [
+        "automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1"
+      ]
+    }
+  ],
+  "missing_evidence": [
+    {
+      "evidence_type": "worker_report",
+      "path": "",
+      "reason": "worker_report path was not supplied."
+    },
+    {
+      "evidence_type": "validation_evidence",
+      "path": "",
+      "reason": "validation_evidence path was not supplied."
+    }
+  ],
+  "blocked_path_patterns": [
+    {
+      "pattern": "^README\\.md$",
+      "reason": "Protected root governance document."
+    },
+    {
+      "pattern": "(^|/)broker(/|$)",
+      "reason": "Broker path is blocked."
+    }
+  ],
+  "warning_path_patterns": [
+    {
+      "pattern": "^apps/dashboard/",
+      "reason": "Dashboard work needs explicit scope review."
+    },
+    {
+      "pattern": "^automation/orchestration/validators/",
+      "reason": "Validator logic changes need operator review."
+    }
+  ],
+  "safety": {
+    "writes_performed": 0,
+    "git_add_performed": "NO",
+    "commit_performed": "NO",
+    "push_performed": "NO",
+    "broker_or_live_api_work": "NO",
+    "webhook_execution": "NO",
+    "dashboard_edits": "NO"
+  },
+  "commit_performed": false,
+  "push_performed": false,
+  "next_safe_action": "Review warnings and missing evidence before APPLY, commit, or push. No commit or push is approved."
+}
