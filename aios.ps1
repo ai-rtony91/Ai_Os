@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout","control")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -43,6 +43,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation # show next safe mission action"
         Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -ShowPrompt # show task prompt"
         Write-Host ".\aios.ps1 -Mode layout  # show 5-worker terminal layout plan and banner commands"
+        Write-Host ".\aios.ps1 -Mode control # show operator control loop cockpit"
     }
 
     "daily" {
@@ -69,6 +70,10 @@ switch ($Mode) {
     "workers" {
         powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/Get-AiOsWorkerAddressBook.ps1
         powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1
+    }
+
+    "control" {
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1
     }
 
     "runtime" {

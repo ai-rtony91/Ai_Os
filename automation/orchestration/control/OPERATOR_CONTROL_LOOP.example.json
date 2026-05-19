@@ -1,0 +1,67 @@
+{
+  "schema": "AIOS_OPERATOR_CONTROL_LOOP.v1",
+  "mode": "DRY_RUN",
+  "result": "REVIEW",
+  "branch": "main",
+  "repo_state": "dirty",
+  "dirty_file_count": 1,
+  "untracked_file_count": 2,
+  "tool_availability": [
+    {
+      "id": "runtime_health",
+      "label": "Runtime health",
+      "status": "AVAILABLE",
+      "path": "automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
+    }
+  ],
+  "missing_tools": [
+    "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1"
+  ],
+  "worker_packet_status": {
+    "open_item_count": 0,
+    "recommendation_packet_id": "UNKNOWN",
+    "recommendation_packet_status": "UNKNOWN"
+  },
+  "lock_status": {
+    "active_lock_count": 0,
+    "collision_risk_count": 0
+  },
+  "approval_inbox_status": {
+    "decision": "REVIEW",
+    "warn_count": 1,
+    "blocked_count": 0
+  },
+  "validator_recommendation": {
+    "status": "MISSING",
+    "note": "Use automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1 when present."
+  },
+  "commit_package_recommendation": {
+    "git_status": "dirty",
+    "recommended_file_count": 3,
+    "risk_count": 1
+  },
+  "clean_state_result": {
+    "result": "REVIEW",
+    "warn_count": 2,
+    "blocked_count": 0
+  },
+  "github_status_result": {
+    "result": "REVIEW",
+    "check_count": 0,
+    "fallback_message": "Confirm checks in GitHub UI if needed."
+  },
+  "blocked_reasons": [],
+  "review_reasons": [
+    "Repository has changed or untracked files."
+  ],
+  "next_safe_action": "Review dirty state, missing tools, and tool warnings before APPLY, commit, push, or handoff.",
+  "safety": {
+    "writes_performed": 0,
+    "files_staged": 0,
+    "git_add_performed": "NO",
+    "commits_performed": 0,
+    "pushes_performed": 0,
+    "dashboard_edits": "NO",
+    "broker_oanda_api_webhook_live_trading": "NO"
+  }
+}
