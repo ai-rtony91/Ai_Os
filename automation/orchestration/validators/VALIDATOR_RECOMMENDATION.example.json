@@ -1,0 +1,97 @@
+{
+  "schema": "AIOS_VALIDATOR_RECOMMENDATION.v1",
+  "task": "Recommend AI_OS validators from changed files",
+  "mode": "DRY_RUN",
+  "generated_at": "2026-05-19T00:00:00Z",
+  "repo_root": "C:/Users/mylab/OneDrive/GitHub/ai-rtony91_Ai_Os_CLEAN",
+  "result": "REVIEW",
+  "summary": {
+    "changed_file_count": 2,
+    "tracked_changed_file_count": 0,
+    "untracked_file_count": 2,
+    "powershell_file_count": 1,
+    "json_file_count": 1,
+    "markdown_file_count": 0,
+    "recommendation_count": 5,
+    "blocked_finding_count": 0,
+    "review_finding_count": 2
+  },
+  "changed_paths": [
+    "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1",
+    "automation/orchestration/validators/VALIDATOR_RECOMMENDATION.example.json"
+  ],
+  "tracked_changed_paths": [],
+  "untracked_paths": [
+    "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1",
+    "automation/orchestration/validators/VALIDATOR_RECOMMENDATION.example.json"
+  ],
+  "blocked_findings": [],
+  "review_findings": [
+    {
+      "path": "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1",
+      "pattern": "^automation/orchestration/validators/",
+      "reason": "Validator logic changed."
+    },
+    {
+      "path": "automation/orchestration/validators/VALIDATOR_RECOMMENDATION.example.json",
+      "pattern": "^automation/orchestration/validators/",
+      "reason": "Validator logic changed."
+    }
+  ],
+  "recommendations": [
+    {
+      "id": "powershell_syntax",
+      "label": "PowerShell syntax validation",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1",
+      "reason": "Changed PowerShell files should parse before any APPLY, commit, or push.",
+      "severity": "REVIEW"
+    },
+    {
+      "id": "json_integrity",
+      "label": "JSON parse validation",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1",
+      "reason": "Changed JSON files should parse before any APPLY, commit, or push.",
+      "severity": "REVIEW"
+    },
+    {
+      "id": "validator_chain_config",
+      "label": "Validator chain config check",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-ValidatorChainConfig.DRY_RUN.ps1",
+      "reason": "Validator-area changes should verify the validator chain configuration.",
+      "severity": "REVIEW"
+    },
+    {
+      "id": "operator_control_loop",
+      "label": "Operator control loop check",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1 -OutputJson",
+      "reason": "Orchestration changes should be checked by the operator control loop.",
+      "severity": "REVIEW"
+    },
+    {
+      "id": "diff_check",
+      "label": "Git diff whitespace check",
+      "command": "git diff --check",
+      "reason": "Changed files should pass git diff whitespace validation.",
+      "severity": "REVIEW"
+    }
+  ],
+  "recommended_commands": [
+    "git diff --check",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1 -OutputJson",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-ValidatorChainConfig.DRY_RUN.ps1"
+  ],
+  "git_warnings": [],
+  "safety": {
+    "writes_performed": 0,
+    "git_add_performed": "NO",
+    "commit_performed": "NO",
+    "push_performed": "NO",
+    "dashboard_edits": "NO",
+    "broker_oanda_api_webhook_live_trading": "NO"
+  },
+  "commit_performed": false,
+  "push_performed": false,
+  "validator_friendly": true,
+  "next_safe_action": "Run the recommended validation commands and review results before APPLY, commit, or push."
+}
