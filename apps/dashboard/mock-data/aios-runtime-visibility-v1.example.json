@@ -1,0 +1,172 @@
+{
+  "schema": "aios.runtime_visibility.v1",
+  "generatedAt": "2026-05-18T23:45:00Z",
+  "health": {
+    "schedulerActions": 6,
+    "staleWorkers": 1,
+    "expiredWorkers": 1,
+    "reclaimablePackets": 1,
+    "retryablePackets": 2,
+    "poisonPackets": 1,
+    "healthy": false,
+    "generatedAt": "2026-05-18T23:45:00Z"
+  },
+  "queue": {
+    "scheduled": 6,
+    "dispatchable": 2,
+    "waitingForApproval": 1,
+    "retryable": 2,
+    "manualReview": 1,
+    "reclaimable": 1,
+    "poison": 1
+  },
+  "activePackets": [
+    {
+      "packetId": "PKT-RUNTIME-042",
+      "status": "running",
+      "action": "dispatch",
+      "risk": "LOW",
+      "reason": "Packet is inside the approved runtime visibility lane.",
+      "lastEventType": "packet_dispatched",
+      "lastUpdatedAt": "2026-05-18T23:43:31Z"
+    },
+    {
+      "packetId": "PKT-QUEUE-019",
+      "status": "wait_for_approval",
+      "action": "wait_for_approval",
+      "risk": "MEDIUM",
+      "reason": "Operator approval required before APPLY.",
+      "lastEventType": "approval_requested",
+      "lastUpdatedAt": "2026-05-18T23:41:04Z"
+    },
+    {
+      "packetId": "PKT-LEASE-007",
+      "status": "retry",
+      "action": "retry",
+      "risk": "LOW",
+      "reason": "Packet is retryable and inside retry budget.",
+      "lastEventType": "packet_blocked",
+      "lastUpdatedAt": "2026-05-18T23:39:12Z"
+    }
+  ],
+  "failedPackets": [
+    {
+      "packetId": "PKT-POISON-003",
+      "reason": "Validator failed after retry budget.",
+      "failureCount": 4,
+      "lastFailedAt": "2026-05-18T23:37:20Z",
+      "retryable": false,
+      "source": "runtime_executor"
+    },
+    {
+      "packetId": "PKT-LEASE-007",
+      "reason": "Worker lease expired before completion.",
+      "failureCount": 1,
+      "lastFailedAt": "2026-05-18T23:39:12Z",
+      "retryable": true,
+      "source": "worker_lease_engine"
+    }
+  ],
+  "workers": [
+    {
+      "workerId": "codex-observability-01",
+      "packetId": "PKT-RUNTIME-042",
+      "status": "running",
+      "lastHeartbeatAt": "2026-05-18T23:44:45Z",
+      "leaseExpiresAt": "2026-05-18T23:55:00Z",
+      "leaseState": "active",
+      "reclaimablePacket": false
+    },
+    {
+      "workerId": "codex-validation-03",
+      "packetId": "PKT-LEASE-007",
+      "status": "expired",
+      "lastHeartbeatAt": "2026-05-18T23:28:00Z",
+      "leaseExpiresAt": "2026-05-18T23:35:00Z",
+      "leaseState": "expired",
+      "reclaimablePacket": true
+    },
+    {
+      "workerId": "codex-dashboard-02",
+      "status": "stale",
+      "lastHeartbeatAt": "2026-05-18T23:20:00Z",
+      "leaseState": "stale",
+      "reclaimablePacket": false
+    }
+  ],
+  "backpressure": {
+    "throttled": true,
+    "level": "hard",
+    "reason": "Expired worker pressure exceeds safe threshold",
+    "allowedConcurrentPackets": 1,
+    "checkedAt": "2026-05-18T23:45:00Z"
+  },
+  "alerts": [
+    {
+      "severity": "warning",
+      "category": "worker",
+      "message": "1 workers have expired leases",
+      "generatedAt": "2026-05-18T23:45:00Z"
+    },
+    {
+      "severity": "critical",
+      "category": "dead_letter_queue",
+      "message": "1 poison packets require manual review",
+      "generatedAt": "2026-05-18T23:45:00Z"
+    },
+    {
+      "severity": "warning",
+      "category": "backpressure",
+      "message": "Runtime is throttled to 1 concurrent packet",
+      "generatedAt": "2026-05-18T23:45:00Z"
+    }
+  ],
+  "telemetry": {
+    "eventCount": 128,
+    "invalidLineCount": 0,
+    "recentEvents": [
+      {
+        "eventId": "evt_1779167011000",
+        "eventType": "packet_dispatched",
+        "system": "AI_OS",
+        "source": "dispatcher",
+        "summary": "PKT-RUNTIME-042 dispatched to codex-observability-01",
+        "packetId": "PKT-RUNTIME-042",
+        "status": "running",
+        "risk": "LOW",
+        "ts": "2026-05-18T23:43:31Z"
+      },
+      {
+        "eventId": "evt_1779166864000",
+        "eventType": "approval_requested",
+        "system": "AI_OS",
+        "source": "approval_inbox",
+        "summary": "PKT-QUEUE-019 requires operator approval",
+        "packetId": "PKT-QUEUE-019",
+        "approvalId": "APP-918",
+        "status": "wait_for_approval",
+        "risk": "MEDIUM",
+        "ts": "2026-05-18T23:41:04Z"
+      },
+      {
+        "eventId": "evt_1779166752000",
+        "eventType": "packet_blocked",
+        "system": "AI_OS",
+        "source": "worker_lease_engine",
+        "summary": "PKT-LEASE-007 blocked by expired worker lease",
+        "packetId": "PKT-LEASE-007",
+        "status": "retryable",
+        "risk": "LOW",
+        "ts": "2026-05-18T23:39:12Z"
+      }
+    ]
+  },
+  "executionLedger": {
+    "packetCount": 42,
+    "approvalCount": 9,
+    "blockedPacketCount": 3,
+    "appliedPacketCount": 18,
+    "lastUpdatedAt": "2026-05-18T23:43:31Z"
+  },
+  "nextSafeAction": "Review poison packets and expired worker leases before increasing concurrency."
+}

@@ -20,7 +20,8 @@ export interface SupervisorAlert {
     | "worker"
     | "recovery"
     | "policy"
-    | "dead_letter_queue";
+    | "dead_letter_queue"
+    | "backpressure";
   message: string;
   generatedAt: string;
 }
