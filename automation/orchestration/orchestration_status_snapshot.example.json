@@ -6,6 +6,8 @@
   "phase": "Phase 16",
   "stage": "16.9",
   "status_inputs": {
+    "legacy_fallbacks_optional": true,
+    "fallback_behavior": "Prefer canonical paths. If a legacy fallback is missing, report that the canonical source was used instead of failing.",
     "queue": "automation/orchestration/work_packets/",
     "legacy_queue_fallback": "packet_queue.example.json",
     "worker_registry": "automation/orchestration/workers/AIOS_WORKER_REGISTRY.json",

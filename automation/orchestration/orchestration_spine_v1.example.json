@@ -11,6 +11,7 @@
       "status": "display_ready",
       "source_example": "automation/orchestration/workers/AIOS_WORKER_REGISTRY.json",
       "legacy_source_example": "automation/orchestration/worker_registry.example.json",
+      "legacy_fallback_required": false,
       "plain_english_purpose": "Shows which workers exist, whether they are standby or assigned, and what packet they are connected to.",
       "allowed_actions": [
         "read worker records",
@@ -30,6 +31,7 @@
       "status": "display_ready",
       "source_example": "automation/orchestration/work_packets/",
       "legacy_source_example": "automation/orchestration/packet_queue.example.json",
+      "legacy_fallback_required": false,
       "plain_english_purpose": "Shows available work packets, allowed paths, blocked paths, approval needs, and validator needs.",
       "allowed_actions": [
         "read packet records",
@@ -67,6 +69,7 @@
       "status": "display_ready",
       "source_example": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
       "legacy_source_example": "automation/orchestration/approval_inbox.example.json",
+      "legacy_fallback_required": false,
       "plain_english_purpose": "Shows pending, approved, and blocked APPLY decisions for operator review.",
       "allowed_actions": [
         "read approval records",
@@ -86,6 +89,7 @@
       "status": "display_ready",
       "source_example": "automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json",
       "legacy_source_example": "automation/orchestration/validator_chain.example.json",
+      "legacy_fallback_required": false,
       "plain_english_purpose": "Shows validator order, required validators, optional validators, and blocked validators.",
       "allowed_actions": [
         "read validator plan",
@@ -142,6 +146,7 @@
       "status": "display_ready",
       "source_example": "automation/orchestration/commit_packages/",
       "legacy_source_example": "automation/orchestration/commit_package.example.json",
+      "legacy_fallback_required": false,
       "plain_english_purpose": "Shows a selective commit package recommendation without staging, committing, or pushing.",
       "allowed_actions": [
         "read commit package plan",

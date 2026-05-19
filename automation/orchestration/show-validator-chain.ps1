@@ -72,7 +72,32 @@ function Write-ValidatorSection {
     }
 }
 
-$chain = if (Test-Path -LiteralPath $chainPath -PathType Leaf) { Read-JsonFile -Path $chainPath } else { Read-JsonFile -Path $legacyChainPath }
+$usedLegacyChain = $false
+$chain = if (Test-Path -LiteralPath $chainPath -PathType Leaf) {
+    Read-JsonFile -Path $chainPath
+} elseif (Test-Path -LiteralPath $legacyChainPath -PathType Leaf) {
+    $usedLegacyChain = $true
+    Read-JsonFile -Path $legacyChainPath
+} else {
+    $null
+}
+
+if ($null -eq $chain) {
+    Write-Host "AI_OS Validator Chain Display"
+    Write-Host "Mode: UNKNOWN"
+    Write-Host "Chain: unavailable"
+    Write-Host "Purpose: Display validator chain order without running validators."
+    Write-Host ""
+    Write-Host "Safety: display-only. No validators are run. No files are modified. No workers are launched."
+    Write-Host ""
+    Write-Host "Validator summary:"
+    Write-Host "  Canonical source missing: automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json"
+    Write-Host "  Legacy fallback not found; no validator chain source available."
+    Write-Host ""
+    Write-Host "Next safe action: restore or create the canonical validator chain through an approved workflow."
+    exit 0
+}
+
 $validators = @($chain.validators)
 
 Write-Host "AI_OS Validator Chain Display"
@@ -83,8 +108,17 @@ Write-Host ""
 Write-Host "Safety: display-only. No validators are run. No files are modified. No workers are launched."
 Write-Host ""
 
+if ($usedLegacyChain) {
+    Write-Host "Validator source: legacy validator_chain.example.json used because canonical source was unavailable."
+} elseif (Test-Path -LiteralPath $legacyChainPath -PathType Leaf) {
+    Write-Host "Legacy fallback: validator_chain.example.json available"
+} else {
+    Write-Host "Legacy fallback not found; canonical source used."
+}
+Write-Host ""
+
 if ($validators.Count -eq 0) {
-    Write-Host "Validators: none found in validator_chain.example.json"
+    Write-Host "Validators: none found in selected validator chain source."
     exit 0
 }
 

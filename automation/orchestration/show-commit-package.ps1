@@ -60,7 +60,32 @@ function Write-FileList {
     Write-Host ""
 }
 
-$package = if (Test-Path -LiteralPath $packagePath -PathType Leaf) { Read-JsonFile -Path $packagePath } else { Read-JsonFile -Path $legacyPackagePath }
+$usedLegacyPackage = $false
+$package = if (Test-Path -LiteralPath $packagePath -PathType Leaf) {
+    Read-JsonFile -Path $packagePath
+} elseif (Test-Path -LiteralPath $legacyPackagePath -PathType Leaf) {
+    $usedLegacyPackage = $true
+    Read-JsonFile -Path $legacyPackagePath
+} else {
+    $null
+}
+
+if ($null -eq $package) {
+    Write-Host "AI_OS Commit Package Display"
+    Write-Host "Mode: UNKNOWN"
+    Write-Host "Package: unavailable"
+    Write-Host "Purpose: Display commit package recommendation without staging, committing, or pushing."
+    Write-Host ""
+    Write-Host "Safety: display-only. No files are staged. No git add is run. No commit is created. No push is performed."
+    Write-Host ""
+    Write-Host "Commit package summary:"
+    Write-Host "  Canonical source missing: automation/orchestration/commit_packages/COMMIT_PACKAGE_RECOMMENDATION.example.json"
+    Write-Host "  Legacy fallback not found; no commit package source available."
+    Write-Host ""
+    Write-Host "Next safe action: create a canonical commit package recommendation through an approved workflow."
+    exit 0
+}
+
 $approvedFiles = if ($package.PSObject.Properties.Name -contains "approved_files") { @($package.approved_files) } else { @($package.recommended_files) }
 $blockedFiles = if ($package.PSObject.Properties.Name -contains "blocked_files") { @($package.blocked_files) } else { @($package.excluded_files) }
 $packetIds = if ($package.PSObject.Properties.Name -contains "packet_ids") { @($package.packet_ids) } else { @() }
@@ -72,6 +97,15 @@ Write-Host "Purpose: $($package.purpose)"
 Write-Host "Approval state: $(Get-JsonValue -Object $package -Name 'approval_state' -Default 'recommendation_only')"
 Write-Host ""
 Write-Host "Safety: display-only. No files are staged. No git add is run. No commit is created. No push is performed."
+Write-Host ""
+
+if ($usedLegacyPackage) {
+    Write-Host "Commit package source: legacy commit_package.example.json used because canonical source was unavailable."
+} elseif (Test-Path -LiteralPath $legacyPackagePath -PathType Leaf) {
+    Write-Host "Legacy fallback: commit_package.example.json available"
+} else {
+    Write-Host "Legacy fallback not found; canonical source used."
+}
 Write-Host ""
 
 Write-Host "Commit message:"

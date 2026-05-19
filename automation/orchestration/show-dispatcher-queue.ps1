@@ -41,9 +41,35 @@ if (Test-Path -LiteralPath $queuePath -PathType Container) {
     Write-Host "  Active packets: $($activePackets.Count)"
     Write-Host "  Blocked packets: $($blockedPackets.Count)"
     Write-Host "  Complete packets: $($completePackets.Count)"
-    Write-Host "  Legacy detail fallback: packet_queue.example.json"
+    if (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
+        Write-Host "  Legacy detail fallback: packet_queue.example.json available"
+    } else {
+        Write-Host "  Legacy fallback not found; canonical source used."
+    }
     Write-Host ""
-    Write-Host "Next safe action: review canonical work packet folder state; use legacy queue display only if packet detail fields are needed."
+    Write-Host "Available packet files:"
+    $packetFiles = @($activePackets) + @($blockedPackets) + @($completePackets)
+    foreach ($packetFile in @($packetFiles | Select-Object -First 10)) {
+        Write-Host "  - $($packetFile.Directory.Name)/$($packetFile.Name)"
+    }
+    if ($packetFiles.Count -eq 0) {
+        Write-Host "  None"
+    }
+    Write-Host ""
+    Write-Host "Next safe action: review canonical work packet folder state."
+    exit 0
+}
+
+if (-not (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf)) {
+    Write-Host "Mode: UNKNOWN"
+    Write-Host "Queue: unavailable"
+    Write-Host "Purpose: display packet folder state counts."
+    Write-Host ""
+    Write-Host "Packet summary:"
+    Write-Host "  Canonical source missing: automation/orchestration/work_packets/"
+    Write-Host "  Legacy fallback not found; no queue source available."
+    Write-Host ""
+    Write-Host "Next safe action: restore or create the canonical work_packets folder through an approved workflow."
     exit 0
 }
 

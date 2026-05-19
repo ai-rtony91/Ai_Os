@@ -45,13 +45,27 @@ if ($null -ne $registry) {
 
 $packets = @()
 if (Test-Path -LiteralPath $queuePath -PathType Container) {
+    $activePackets = @(Get-ChildItem -LiteralPath (Join-Path $queuePath "active") -Filter "*.json" -File -ErrorAction SilentlyContinue)
+    $blockedPackets = @(Get-ChildItem -LiteralPath (Join-Path $queuePath "blocked") -Filter "*.json" -File -ErrorAction SilentlyContinue)
+    $completePackets = @(Get-ChildItem -LiteralPath (Join-Path $queuePath "complete") -Filter "*.json" -File -ErrorAction SilentlyContinue)
     Write-Host "Canonical packet source: automation/orchestration/work_packets/"
-    Write-Host "Legacy packet detail fallback: packet_queue.example.json"
+    Write-Host "  Active packets: $($activePackets.Count)"
+    Write-Host "  Blocked packets: $($blockedPackets.Count)"
+    Write-Host "  Complete packets: $($completePackets.Count)"
+    if (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
+        Write-Host "Legacy packet detail fallback: packet_queue.example.json available"
+    } else {
+        Write-Host "Legacy fallback not found; canonical source used."
+    }
     Write-Host ""
 } elseif (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
     $queue = Read-JsonFile -Path $legacyQueuePath
     $packets = @($queue.packets)
     Write-Host "Fallback packet source: packet_queue.example.json"
+    Write-Host ""
+} else {
+    Write-Host "Packet source: unavailable"
+    Write-Host "Legacy fallback not found; worker lock and registry status only."
     Write-Host ""
 }
 

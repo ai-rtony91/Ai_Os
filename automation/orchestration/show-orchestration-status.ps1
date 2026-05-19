@@ -43,17 +43,22 @@ function Resolve-WithFallback {
 
     $primaryPath = Resolve-InputPath -FileName $Primary
     if (Test-Path -LiteralPath $primaryPath) {
-        return [pscustomobject]@{ Path = $primaryPath; Source = $Primary; UsedFallback = $false }
+        $fallbackMissing = $false
+        if (-not [string]::IsNullOrWhiteSpace($Fallback)) {
+            $fallbackPath = Resolve-InputPath -FileName $Fallback
+            $fallbackMissing = -not (Test-Path -LiteralPath $fallbackPath)
+        }
+        return [pscustomobject]@{ Path = $primaryPath; Source = $Primary; UsedFallback = $false; FallbackMissing = $fallbackMissing }
     }
 
     if (-not [string]::IsNullOrWhiteSpace($Fallback)) {
         $fallbackPath = Resolve-InputPath -FileName $Fallback
         if (Test-Path -LiteralPath $fallbackPath) {
-            return [pscustomobject]@{ Path = $fallbackPath; Source = $Fallback; UsedFallback = $true }
+            return [pscustomobject]@{ Path = $fallbackPath; Source = $Fallback; UsedFallback = $true; FallbackMissing = $false }
         }
     }
 
-    return [pscustomobject]@{ Path = $primaryPath; Source = $Primary; UsedFallback = $false }
+    return [pscustomobject]@{ Path = $primaryPath; Source = $Primary; UsedFallback = $false; FallbackMissing = $true }
 }
 
 function Get-WorkPacketFolderSummary {
@@ -149,7 +154,11 @@ if ($null -eq $queue) {
     Write-Host "  Active packets: $($queue.counts.active)"
     Write-Host "  Blocked packets: $($queue.counts.blocked)"
     Write-Host "  Complete packets: $($queue.counts.complete)"
-    Write-Host "  Note: canonical queue is a folder; legacy packet details remain in fallback file if needed."
+    if ($queueRef.FallbackMissing) {
+        Write-Host "  Legacy fallback not found; canonical source used."
+    } else {
+        Write-Host "  Legacy fallback: available but not required."
+    }
     Write-Host ""
 } else {
     $packets = @($queue.packets)
@@ -181,6 +190,7 @@ if ($null -eq $workerRegistry) {
     Write-Host "Worker summary:"
     Write-Host "  Source: $($workerRef.Source)"
     if ($workerRef.UsedFallback) { Write-Host "  Fallback: legacy worker registry file used because canonical path was unavailable." }
+    if (-not $workerRef.UsedFallback -and $workerRef.FallbackMissing) { Write-Host "  Legacy fallback not found; canonical source used." }
     Write-Host "  Registry: $(Get-JsonValue -Object $workerRegistry -Name 'registry_name' -Default (Get-JsonValue -Object $workerRegistry -Name 'registry_id' -Default 'UNKNOWN'))"
     Write-Host "  Mode: $(Get-JsonValue -Object $workerRegistry -Name 'mode' -Default 'canonical registry')"
     Write-Host "  Total workers: $($workers.Count)"
@@ -200,6 +210,7 @@ if ($null -eq $approvalInbox) {
     Write-Host "Approval summary:"
     Write-Host "  Source: $($approvalRef.Source)"
     if ($approvalRef.UsedFallback) { Write-Host "  Fallback: legacy approval inbox file used because canonical path was unavailable." }
+    if (-not $approvalRef.UsedFallback -and $approvalRef.FallbackMissing) { Write-Host "  Legacy fallback not found; canonical source used." }
     Write-Host "  Inbox: $($approvalInbox.inbox_name)"
     Write-Host "  Mode: $($approvalInbox.mode)"
     Write-Host "  Total approval packets: $($approvalPackets.Count)"
@@ -210,6 +221,7 @@ if ($null -eq $approvalInbox) {
 } else {
     Write-Host "Approval summary:"
     Write-Host "  Source: $($approvalRef.Source)"
+    if ($approvalRef.FallbackMissing) { Write-Host "  Legacy fallback not found; canonical source used." }
     Write-Host "  Inbox: $($approvalInbox.schema)"
     Write-Host "  Mode: canonical single approval record"
     Write-Host "  Approval ID: $($approvalInbox.approval_id)"
@@ -231,6 +243,7 @@ if ($null -eq $validatorChain) {
     Write-Host "Validator summary:"
     Write-Host "  Source: $($validatorRef.Source)"
     if ($validatorRef.UsedFallback) { Write-Host "  Fallback: legacy validator chain file used because canonical path was unavailable." }
+    if (-not $validatorRef.UsedFallback -and $validatorRef.FallbackMissing) { Write-Host "  Legacy fallback not found; canonical source used." }
     Write-Host "  Chain: $(Get-JsonValue -Object $validatorChain -Name 'chain_name' -Default (Get-JsonValue -Object $validatorChain -Name 'chain_id' -Default 'UNKNOWN'))"
     Write-Host "  Mode: $(Get-JsonValue -Object $validatorChain -Name 'mode' -Default 'DRY_RUN_READ_ONLY')"
     Write-Host "  Total validators: $($validators.Count)"

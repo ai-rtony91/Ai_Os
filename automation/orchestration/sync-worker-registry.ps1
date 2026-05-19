@@ -2,8 +2,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
-$queuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
 $canonicalQueuePath = Join-Path $orchestrationRoot "work_packets"
+$legacyQueuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
 $locksPath = Join-Path $orchestrationRoot "assignment_locks.example.json"
 $registryPath = Join-Path $orchestrationRoot "workers\AIOS_WORKER_REGISTRY.json"
 $legacyRegistryPath = Join-Path $orchestrationRoot "worker_registry.example.json"
@@ -19,6 +19,57 @@ function Read-JsonFile {
     }
 
     Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
+}
+
+function Read-OptionalJsonFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $null
+    }
+
+    Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
+}
+
+function Get-NormalizedWorkPackets {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return @()
+    }
+
+    $packets = @()
+    foreach ($state in @("active", "blocked", "complete")) {
+        $statePath = Join-Path $Path $state
+        if (-not (Test-Path -LiteralPath $statePath -PathType Container)) {
+            continue
+        }
+
+        foreach ($file in @(Get-ChildItem -LiteralPath $statePath -Filter "*.json" -File -ErrorAction SilentlyContinue)) {
+            $packet = Read-OptionalJsonFile -Path $file.FullName
+            if ($null -eq $packet) {
+                continue
+            }
+
+            $assignedWorker = Get-JsonValue -Object $packet -Name "assigned_worker_id" -Default (Get-JsonValue -Object $packet -Name "assigned_worker")
+            $packetName = Get-JsonValue -Object $packet -Name "packet_name" -Default (Get-JsonValue -Object $packet -Name "title" -Default $file.BaseName)
+            $packets += [pscustomobject]@{
+                packet_id = Get-JsonValue -Object $packet -Name "packet_id" -Default $file.BaseName
+                packet_name = $packetName
+                status = Get-JsonValue -Object $packet -Name "status" -Default $state
+                assigned_worker_id = $assignedWorker
+                source_file = $file.FullName
+            }
+        }
+    }
+
+    return $packets
 }
 
 function Is-BlankAssignment {
@@ -44,19 +95,37 @@ function Get-JsonValue {
     return $Default
 }
 
-$queue = Read-JsonFile -Path $queuePath
 $locks = Read-JsonFile -Path $locksPath
 $registry = if (Test-Path -LiteralPath $registryPath -PathType Leaf) { Read-JsonFile -Path $registryPath } else { Read-JsonFile -Path $legacyRegistryPath }
 
-$packets = @($queue.packets)
+$queue = $null
+$queueSource = "none"
+$packets = @()
+if (Test-Path -LiteralPath $canonicalQueuePath -PathType Container) {
+    $packets = @(Get-NormalizedWorkPackets -Path $canonicalQueuePath)
+    $queueSource = "automation/orchestration/work_packets/"
+} elseif (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
+    $queue = Read-JsonFile -Path $legacyQueuePath
+    $packets = @($queue.packets)
+    $queueSource = "packet_queue.example.json"
+}
 $lockItems = @($locks.locks)
 $workers = @($registry.workers)
 
 Write-Host "AI_OS Worker Registry Sync Display"
-Write-Host "Queue: $($queue.queue_name)"
+Write-Host "Queue source: $queueSource"
 if (Test-Path -LiteralPath $canonicalQueuePath -PathType Container) {
     Write-Host "Canonical queue folder: automation/orchestration/work_packets/"
-    Write-Host "Queue detail fallback: packet_queue.example.json"
+    if (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
+        Write-Host "Queue detail fallback: packet_queue.example.json available"
+    } else {
+        Write-Host "Legacy fallback not found; canonical source used."
+    }
+} elseif ($null -ne $queue) {
+    Write-Host "Fallback queue: $($queue.queue_name)"
+} else {
+    Write-Host "Queue detail: unavailable"
+    Write-Host "Legacy fallback not found; lock and registry checks only."
 }
 Write-Host "Locks: $($locks.lock_name)"
 Write-Host "Registry: $(Get-JsonValue -Object $registry -Name 'registry_name' -Default (Get-JsonValue -Object $registry -Name 'registry_id' -Default 'UNKNOWN'))"
@@ -83,7 +152,7 @@ foreach ($lock in $lockItems) {
     if (-not (Is-BlankAssignment $workerId)) {
         $worker = $workers | Where-Object { $_.worker_id -eq $workerId } | Select-Object -First 1
         if ($null -eq $worker) {
-            $missingWorkerRecords += "Packet $($lock.packet_id) is locked by worker '$workerId', but that worker is missing from worker_registry.example.json."
+            $missingWorkerRecords += "Packet $($lock.packet_id) is locked by worker '$workerId', but that worker is missing from the selected worker registry source."
         }
     }
 
@@ -92,7 +161,7 @@ foreach ($lock in $lockItems) {
     }
 
     if ($null -eq $packet) {
-        $staleOwnership += "Lock references packet $($lock.packet_id), but that packet is missing from packet_queue.example.json."
+        $staleOwnership += "Lock references packet $($lock.packet_id), but that packet is missing from the selected packet source."
     }
 
     $workerAssignedPacketId = Get-JsonValue -Object $worker -Name "assigned_packet_id"
@@ -108,7 +177,7 @@ foreach ($packet in $packets) {
     if (-not (Is-BlankAssignment $packetWorkerId)) {
         $packetWorker = $workers | Where-Object { $_.worker_id -eq $packetWorkerId } | Select-Object -First 1
         if ($null -eq $packetWorker) {
-            $missingWorkerRecords += "Packet $($packet.packet_id) is assigned to worker '$packetWorkerId', but that worker is missing from worker_registry.example.json."
+            $missingWorkerRecords += "Packet $($packet.packet_id) is assigned to worker '$packetWorkerId', but that worker is missing from the selected worker registry source."
         }
 
         if ($null -eq $packetLock) {
