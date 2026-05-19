@@ -4,11 +4,11 @@ Status: canonical concept summary extracted from legacy `docs/AI_OS/dashboard`
 
 ## Purpose
 
-This document captures useful dashboard/interface ideas from legacy `docs/AI_OS/dashboard`. It is a concept summary, not an implementation spec.
+This document captures useful dashboard and operator-interface ideas from legacy `docs/AI_OS/dashboard`. It is a concept summary, not an implementation spec, and it does not claim that planned dashboard behavior is implemented.
 
 ## Current Doctrine
 
-The dashboard should help the operator understand current AI_OS state and next safe action.
+The dashboard should help MAIN CONTROL understand current AI_OS state, trust level, blocked actions, and next safe action.
 
 It must not:
 
@@ -19,22 +19,146 @@ It must not:
 - imply actions are approved when they are not,
 - make fixture data look like trusted runtime truth.
 
-## Dashboard Ideas Extracted
+## Current Implemented vs Concept-Only
 
-Useful ideas from the dashboard draft swarm:
+Implemented or partially grounded:
+
+- `apps/dashboard` exists as an active app surface.
+- static/mock dashboard planning exists.
+- local fixture concepts exist.
+- orchestration display scripts exist for terminal/operator status.
+- canonical summaries now exist outside the legacy `docs/AI_OS/dashboard` swarm.
+
+Concept-only until separately approved:
+
+- full operator cockpit,
+- dashboard command-center control plane,
+- dashboard-driven actions,
+- dynamic adapter layer,
+- AI assistant panel connected to live AI,
+- floating/docking panels,
+- production telemetry dashboard,
+- execution monitor,
+- external account, API, or broker visibility.
+
+## UI and Operator Surface Principles
+
+The dashboard should be a local-first operator surface, not a marketing page and not an autonomous control plane.
+
+Principles:
+
+- show the highest-risk state first: FAIL, BLOCKED, WARN, REVIEW REQUIRED, READY, INFO,
+- keep next safe action visible,
+- keep DRY_RUN/APPLY mode visible,
+- show missing data as `UNKNOWN`,
+- show corrupted or conflicting data as `INVALID DATA`,
+- show stale data explicitly,
+- keep protected-file and blocked-action warnings near the top,
+- keep Trading Lab language paper-only,
+- keep controls read-only until a separate approved APPLY pass creates executable behavior,
+- prefer compact, repeatable panels over decorative dashboard clutter.
+
+## Visual Identity Direction
+
+Anthony's preferred AI_OS visual identity should be preserved before any dashboard legacy docs are archived.
+
+Canonical visual identity reference: `docs/concepts/aios-visual-identity.md`
+
+Preserved direction:
+
+- deep space / midnight dark background,
+- neon blue and violet glow accents,
+- orbital energy, electric signal, tower, connectivity, telemetry, and network motifs,
+- futuristic control-center / operator cockpit feel,
+- global/system-scale imagery where it reinforces AI_OS as a control environment,
+- premium but readable dark UI,
+- clean card-based dashboard layout,
+- strong visual hierarchy,
+- high-contrast status and safety indicators,
+- blue/purple worker, status, validator, and telemetry accents,
+- tagline tone similar to `Intelligent. Adaptive. Yours.`
+
+Implementation guardrails:
+
+- preserve readability over visual effects,
+- use glow, glass, and restrained parallax only when they clarify depth or status,
+- avoid excessive motion or visual noise,
+- keep critical FAIL, BLOCKED, WARN, REVIEW REQUIRED, and next-action states visible without hunting,
+- keep dashboard visuals separate from live broker/trading activation,
+- do not archive or down-rank branding, theme, layout, mockup, or visual-direction docs unless the design intent is preserved here or in a future canonical visual identity doc.
+
+## Panel Taxonomy
+
+Preserved panel ideas from the dashboard draft swarm:
+
+Core operator panels:
 
 - command center landing panel,
 - validator-first status,
 - next safe action card,
 - protected-file warning placement,
 - work packet and approval visibility,
-- report and telemetry grouping,
 - safety status card,
-- assistant/help panel,
+- clean-state status,
+- source/data freshness.
+
+Work and orchestration panels:
+
+- packet queue,
+- approval inbox,
+- validator chain,
+- commit package recommendation,
+- worker status,
 - work table / task view,
+- worker activity and lane visibility.
+
+Telemetry and reporting panels:
+
+- report and telemetry grouping,
+- lifetime telemetry fixture panel,
+- progress and checkpoint status,
+- validator history,
+- work intelligence display.
+
+Assistance and guidance panels:
+
+- assistant/help panel,
+- contextual warnings,
+- blocked-action explanations,
+- operator onboarding/tour concepts,
+- beginner-readable panel help.
+
+Interface system ideas:
+
 - compact operator cockpit,
+- command-center layout,
+- left navigation rail / collapsible sidebar,
 - mobile-responsive status behavior,
-- fixture-first data contracts.
+- theme system and alert color hierarchy,
+- fixture-first data contracts,
+- static preview and publishing-readiness boundary.
+
+## Data Source Boundary
+
+The dashboard should start with local, read-only sources and fixtures. Legacy drafts proposed report/checkpoint/health/progress sources, but PR #180 moved legacy reports into archive. Any future implementation must refresh allowed source paths before wiring dashboard adapters.
+
+Allowed direction:
+
+- local fixtures,
+- canonical audit and roadmap summaries,
+- orchestration status outputs after validation,
+- explicit approved JSON contracts.
+
+Blocked direction:
+
+- secrets, credentials, API keys, broker tokens, private keys, or recovery keys,
+- live broker APIs or account endpoints,
+- trading execution engines or order-routing interfaces,
+- unapproved external network sources,
+- Windows registry, firewall, VPN, browser policy, BIOS, UEFI, or security settings,
+- temporary files outside approved paths.
+
+If a desired panel requires a blocked or missing source, it should display `UNKNOWN` and explain the limitation.
 
 ## Terminal Dashboard Readability Direction
 
@@ -47,37 +171,29 @@ Terminal/operator displays should stay:
 - explicit about missing or stale data,
 - clear about next safe action.
 
-## Operator Panels
+## Static Preview Direction
 
-Potential panels:
+The safe dashboard path remains:
 
-- system status,
-- clean-state status,
-- packet queue,
-- approval inbox,
-- validator chain,
-- commit package recommendation,
-- worker status,
-- safety and blocked actions,
-- Trading Lab paper-only readiness,
-- dashboard data freshness.
+1. Static preview.
+2. Fixture-backed visibility.
+3. Mock action registry.
+4. Approval-gated local automation, future only.
+5. Service integration, future only.
 
-## Concept vs Implemented
+The current safe maturity is best treated as fixture-backed/static concept work unless a separate implementation review proves more.
 
-Implemented or partially grounded:
+## Mobile and Accessibility Direction
 
-- `apps/dashboard` exists as an active app surface.
-- static/mock dashboard planning exists.
-- orchestration display scripts exist for some terminal views.
+Preserved mobile/accessibility ideas:
 
-Concept only:
-
-- full operator cockpit,
-- dynamic dashboard adapter layer,
-- voice/tour guide,
-- floating/docking panels,
-- production telemetry dashboard,
-- execution monitor.
+- single-column status stack on narrow screens,
+- safety, validator failure, blocked state, and next action above lower-priority metrics,
+- no horizontal scrolling for status content,
+- high-contrast status labels,
+- keyboard navigation expectation,
+- visible stop conditions,
+- plain warning language.
 
 ## Human-Review Items
 
@@ -85,3 +201,6 @@ Concept only:
 - Confirm which dashboard data sources are allowed.
 - Ensure any Trading Lab panel says paper-only.
 - Confirm app docs in `apps/dashboard` remain separate from legacy planning docs.
+- Decide whether to create a compact dashboard data-contract spec before archiving `docs/AI_OS/dashboard`.
+- Decide whether AI assistant and command-center action concepts remain mock-only or become future approved workflows.
+- Review legacy dashboard docs for archive after this extraction.

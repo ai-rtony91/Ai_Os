@@ -68,7 +68,7 @@ Test-RequiredFile -Label 'Stage 36 dashboard prep contract' -RelativePath 'docs\
 Test-RequiredFile -Label 'Stage 36 dashboard input map' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_INPUT_MAP_DRAFT.md'
 Test-RequiredFile -Label 'Stage 37 dashboard fixture data' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_FIXTURE_DATA_DRAFT.json'
 Test-RequiredFile -Label 'Stage 37 dashboard panel layout' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_PANEL_LAYOUT_DRAFT.md'
-Test-RequiredFile -Label 'Stage 38 static dashboard mock contract' -RelativePath 'docs\AI_OS\dashboard\AIOS_STATIC_DASHBOARD_MOCK_CONTRACT_DRAFT.md'
+Test-RequiredFile -Label 'Stage 38 static dashboard mock contract' -RelativePath 'docs\specs\aios-dashboard-data-contracts.md'
 Test-RequiredFile -Label 'Stage 38 operator view layout' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_OPERATOR_VIEW_LAYOUT_DRAFT.md'
 Test-RequiredFile -Label 'Stage 38 static dashboard mock validator' -RelativePath 'automation\status\Test-AiOsStaticDashboardMockContract.DRY_RUN.ps1'
 

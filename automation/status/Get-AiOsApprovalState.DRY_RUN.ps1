@@ -44,7 +44,7 @@ Test-ApprovalComponent -Label 'workflow registry' -RelativePath 'docs\AI_OS\rout
 Test-ApprovalComponent -Label 'workflow router' -RelativePath 'automation\router\Invoke-AiOsWorkflowRouter.DRY_RUN.ps1'
 Test-ApprovalComponent -Label 'dashboard workflow state draft' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_WORKFLOW_STATE_DRAFT.md'
 Test-ApprovalComponent -Label 'approval queue draft' -RelativePath 'docs\AI_OS\approval\AIOS_APPROVAL_QUEUE_DRAFT.md'
-Test-ApprovalComponent -Label 'dashboard data contract' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_CONTRACT_DRAFT.md'
+Test-ApprovalComponent -Label 'dashboard data contract' -RelativePath 'docs\specs\aios-dashboard-data-contracts.md'
 
 Write-Host ''
 Write-Host 'Git status check:'

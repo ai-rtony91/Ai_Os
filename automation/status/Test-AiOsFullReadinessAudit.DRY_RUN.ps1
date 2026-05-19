@@ -56,7 +56,7 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'Major component checks:'
-Test-RequiredFile -Label 'dashboard data contract' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_CONTRACT_DRAFT.md'
+Test-RequiredFile -Label 'dashboard data contract' -RelativePath 'docs\specs\aios-dashboard-data-contracts.md'
 Test-RequiredFile -Label 'operator panel mapping' -RelativePath 'docs\AI_OS\dashboard\AIOS_OPERATOR_PANEL_MAPPING_DRAFT.md'
 Test-RequiredFile -Label 'production telemetry roadmap' -RelativePath 'docs\AI_OS\telemetry\AIOS_PRODUCTION_TELEMETRY_ROADMAP_DRAFT.md'
 Test-RequiredFile -Label 'Morning Brief text contract' -RelativePath 'docs\AI_OS\morning_brief\AIOS_MORNING_BRIEF_TEXT_CONTRACT_DRAFT.md'

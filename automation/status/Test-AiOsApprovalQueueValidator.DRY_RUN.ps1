@@ -58,7 +58,7 @@ Write-Host 'Approval component checks:'
 Test-Component -Label 'approval queue draft' -RelativePath 'docs\AI_OS\approval\AIOS_APPROVAL_QUEUE_DRAFT.md'
 Test-Component -Label 'workflow registry' -RelativePath 'docs\AI_OS\router\AIOS_WORKFLOW_REGISTRY_DRAFT.md'
 Test-Component -Label 'workflow router' -RelativePath 'automation\router\Invoke-AiOsWorkflowRouter.DRY_RUN.ps1'
-Test-Component -Label 'dashboard data contract' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_CONTRACT_DRAFT.md'
+Test-Component -Label 'dashboard data contract' -RelativePath 'docs\specs\aios-dashboard-data-contracts.md'
 Test-Component -Label 'dashboard workflow state draft' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_WORKFLOW_STATE_DRAFT.md'
 Test-Component -Label 'approval-state helper' -RelativePath 'automation\status\Get-AiOsApprovalState.DRY_RUN.ps1'
 

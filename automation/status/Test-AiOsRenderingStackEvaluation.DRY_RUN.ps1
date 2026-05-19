@@ -69,7 +69,7 @@ try {
     Test-RequiredFile "Stage 36 dashboard input map" "docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_INPUT_MAP_DRAFT.md" | Out-Null
     Test-RequiredFile "Stage 37 dashboard fixture data" "docs\AI_OS\dashboard\AIOS_DASHBOARD_FIXTURE_DATA_DRAFT.json" | Out-Null
     Test-RequiredFile "Stage 37 dashboard panel layout" "docs\AI_OS\dashboard\AIOS_DASHBOARD_PANEL_LAYOUT_DRAFT.md" | Out-Null
-    Test-RequiredFile "Stage 38 static dashboard mock contract" "docs\AI_OS\dashboard\AIOS_STATIC_DASHBOARD_MOCK_CONTRACT_DRAFT.md" | Out-Null
+    Test-RequiredFile "Stage 38 static dashboard mock contract" "docs\specs\aios-dashboard-data-contracts.md" | Out-Null
     Test-RequiredFile "Stage 38 operator view layout" "docs\AI_OS\dashboard\AIOS_DASHBOARD_OPERATOR_VIEW_LAYOUT_DRAFT.md" | Out-Null
     Test-RequiredFile "Stage 39 visual render plan" "docs\AI_OS\dashboard\AIOS_VISUAL_DASHBOARD_RENDER_PLAN_DRAFT.md" | Out-Null
     Test-RequiredFile "Stage 39 dashboard theme system" "docs\AI_OS\dashboard\AIOS_DASHBOARD_THEME_SYSTEM_DRAFT.md" | Out-Null

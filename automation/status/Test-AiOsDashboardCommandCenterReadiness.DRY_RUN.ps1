@@ -4,8 +4,8 @@ $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $HtmlPath = Join-Path $RepoRoot "apps\dashboard\AIOS_STATIC_PREVIEW.html"
 $JsPath = Join-Path $RepoRoot "apps\dashboard\js\aios-static-preview.js"
 $CssPath = Join-Path $RepoRoot "apps\dashboard\css\aios-static-preview.css"
-$Stage29DocPath = Join-Path $RepoRoot "docs\AI_OS\dashboard\AIOS_DASHBOARD_CONTROL_PANEL_ORGANIZATION_DRAFT.md"
-$Stage30DocPath = Join-Path $RepoRoot "docs\AI_OS\dashboard\AIOS_DASHBOARD_OPERATOR_ACTION_MAP_DRAFT.md"
+$Stage29DocPath = Join-Path $RepoRoot "docs\concepts\aios-dashboard-and-interface-concepts.md"
+$Stage30DocPath = Join-Path $RepoRoot "docs\specs\aios-dashboard-data-contracts.md"
 
 $Failures = New-Object System.Collections.Generic.List[string]
 
@@ -43,8 +43,8 @@ function Test-Contains {
 $Html = Read-RequiredFile -Path $HtmlPath -Label "Static dashboard HTML"
 $Js = Read-RequiredFile -Path $JsPath -Label "Static dashboard JS"
 $Css = Read-RequiredFile -Path $CssPath -Label "Static dashboard CSS"
-$Stage29Doc = Read-RequiredFile -Path $Stage29DocPath -Label "Stage 29 control-panel organization doc"
-$Stage30Doc = Read-RequiredFile -Path $Stage30DocPath -Label "Stage 30 operator action map doc"
+$Stage29Doc = Read-RequiredFile -Path $Stage29DocPath -Label "canonical dashboard concept summary"
+$Stage30Doc = Read-RequiredFile -Path $Stage30DocPath -Label "canonical dashboard data contract spec"
 
 if ($Html) {
   $RequiredHtmlMarkers = @(
@@ -75,13 +75,13 @@ if ($Html) {
 }
 
 if ($Stage29Doc) {
-  Test-Contains -Content $Stage29Doc -Needle "App Dock" -Message "Stage 29 doc missing App Dock section."
-  Test-Contains -Content $Stage29Doc -Needle "Human Approval Gates" -Message "Stage 29 doc missing human approval gates."
+  Test-Contains -Content $Stage29Doc -Needle "command-center" -Message "Canonical dashboard concept summary missing command-center concept."
+  Test-Contains -Content $Stage29Doc -Needle "approval" -Message "Canonical dashboard concept summary missing approval concept."
 }
 
 if ($Stage30Doc) {
-  Test-Contains -Content $Stage30Doc -Needle "Action Categories" -Message "Stage 30 doc missing action categories."
-  Test-Contains -Content $Stage30Doc -Needle "Assistant Rail Send Control" -Message "Stage 30 doc missing assistant rail send control."
+  Test-Contains -Content $Stage30Doc -Needle "Command Center" -Message "Canonical dashboard data contract missing command center contract."
+  Test-Contains -Content $Stage30Doc -Needle "AI Assistant Panel Contract" -Message "Canonical dashboard data contract missing AI assistant panel contract."
 }
 
 $ForbiddenPatterns = @(
@@ -120,8 +120,8 @@ $Result = [ordered]@{
     "apps/dashboard/AIOS_STATIC_PREVIEW.html",
     "apps/dashboard/js/aios-static-preview.js",
     "apps/dashboard/css/aios-static-preview.css",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_CONTROL_PANEL_ORGANIZATION_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_OPERATOR_ACTION_MAP_DRAFT.md"
+    "docs/concepts/aios-dashboard-and-interface-concepts.md",
+    "docs/specs/aios-dashboard-data-contracts.md"
   )
   safety = @{
     apis = "BLOCKED"

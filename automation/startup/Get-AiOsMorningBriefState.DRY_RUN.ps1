@@ -44,7 +44,7 @@ Test-MorningBriefComponent -Label 'workflow router' -RelativePath 'automation\ro
 Test-MorningBriefComponent -Label 'workflow registry' -RelativePath 'docs\AI_OS\router\AIOS_WORKFLOW_REGISTRY_DRAFT.md'
 Test-MorningBriefComponent -Label 'approval queue draft' -RelativePath 'docs\AI_OS\approval\AIOS_APPROVAL_QUEUE_DRAFT.md'
 Test-MorningBriefComponent -Label 'dashboard workflow state draft' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_WORKFLOW_STATE_DRAFT.md'
-Test-MorningBriefComponent -Label 'dashboard data contract' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_CONTRACT_DRAFT.md'
+Test-MorningBriefComponent -Label 'dashboard data contract' -RelativePath 'docs\specs\aios-dashboard-data-contracts.md'
 Test-MorningBriefComponent -Label 'approval validator' -RelativePath 'automation\status\Test-AiOsApprovalQueueValidator.DRY_RUN.ps1'
 Test-MorningBriefComponent -Label 'workflow-state helper' -RelativePath 'automation\status\Get-AiOsWorkflowState.DRY_RUN.ps1'
 

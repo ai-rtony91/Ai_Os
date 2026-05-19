@@ -15,7 +15,7 @@
       "app_purpose": "Show static planning dates, checkpoint reminders, and operator task windows.",
       "allowed_files": [
         "apps/dashboard/mock-data/calendar-fixture.example.json",
-        "docs/AI_OS/dashboard/AIOS_CALENDAR_APP_STATIC_PACKET_EXAMPLE_DRAFT.md"
+        "docs/specs/aios-dashboard-data-contracts.md"
       ],
       "blocked_actions": [
         "backend calls",

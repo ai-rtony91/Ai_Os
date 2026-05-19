@@ -23,23 +23,19 @@ Write-Host ""
 $expectedFiles = @(
     "Reports/health/STAGE71_80_DASHBOARD_STATIC_PREVIEW_README.txt",
     "automation/status/Test-AiOsDashboardStaticPreviewTransition.DRY_RUN.ps1",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_STATIC_PREVIEW_GOALS_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_FIXTURE_DATA_RULES_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_STATIC_PREVIEW_VALIDATION_CHECKLIST_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_OPERATOR_READABILITY_ACCESSIBILITY_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_SCREENSHOT_DEMO_SAFETY_RULES_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_STACK_DEPENDENCY_GOVERNANCE_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_PREVIEW_OUTPUT_LOCATION_RULES_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_NO_AUTOMATION_NO_TRADING_VALIDATION_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_STAGE79_DASHBOARD_STATIC_PREVIEW_CHECKPOINT_DRAFT.md",
-    "docs/concepts/aios-dashboard-and-interface-concepts.md"
+    "docs/specs/aios-dashboard-data-contracts.md",
+    "docs/concepts/aios-dashboard-and-interface-concepts.md",
+    "docs/roadmap/aios-product-roadmap.md",
+    "docs/audits/phase-84-dashboard-summary-extraction.md"
 )
 
 $approvedPrefixes = @(
     "Reports/health/",
     "automation/status/",
-    "docs/AI_OS/dashboard/",
-    "docs/concepts/"
+    "docs/specs/",
+    "docs/concepts/",
+    "docs/roadmap/",
+    "docs/audits/"
 )
 
 $protectedRootFiles = @(
@@ -119,7 +115,10 @@ if (-not ($stagedFiles | Where-Object { $protectedRootFiles -contains $_ })) {
 Write-Host ""
 
 $canonicalSummaryFiles = @(
-    "docs/concepts/aios-dashboard-and-interface-concepts.md"
+    "docs/specs/aios-dashboard-data-contracts.md",
+    "docs/concepts/aios-dashboard-and-interface-concepts.md",
+    "docs/roadmap/aios-product-roadmap.md",
+    "docs/audits/phase-84-dashboard-summary-extraction.md"
 )
 $textFiles = $expectedFiles | Where-Object { $_.EndsWith(".md") -or $_.EndsWith(".txt") }
 $phraseScanFiles = $textFiles | Where-Object { $canonicalSummaryFiles -notcontains $_ }

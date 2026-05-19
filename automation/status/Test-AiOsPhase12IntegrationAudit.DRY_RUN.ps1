@@ -33,7 +33,7 @@ $requiredFolders = @(
     "docs/AI_OS/governance",
     "docs/AI_OS/operator",
     "docs/AI_OS/roadmap",
-    "docs/AI_OS/dashboard",
+    "docs/concepts/aios-dashboard-and-interface-concepts.md",
     "docs/AI_OS/validators",
     "docs/roadmap/aios-product-roadmap.md",
     "Reports/daily",
