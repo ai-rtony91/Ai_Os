@@ -6,10 +6,16 @@
   "phase": "Phase 16",
   "stage": "16.9",
   "status_inputs": {
-    "queue": "packet_queue.example.json",
-    "worker_registry": "worker_registry.example.json",
-    "approval_inbox": "approval_inbox.example.json",
-    "validator_chain": "validator_chain.example.json",
+    "queue": "automation/orchestration/work_packets/",
+    "legacy_queue_fallback": "packet_queue.example.json",
+    "worker_registry": "automation/orchestration/workers/AIOS_WORKER_REGISTRY.json",
+    "legacy_worker_registry_fallback": "worker_registry.example.json",
+    "approval_inbox": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+    "legacy_approval_inbox_fallback": "approval_inbox.example.json",
+    "validator_chain": "automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json",
+    "legacy_validator_chain_fallback": "validator_chain.example.json",
+    "commit_package": "automation/orchestration/commit_packages/",
+    "legacy_commit_package_fallback": "commit_package.example.json",
     "recovery_bootstrap": "recovery_bootstrap.example.json"
   },
   "summary_sections": [

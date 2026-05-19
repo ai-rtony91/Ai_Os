@@ -2,8 +2,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
-$queuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
+$queuePath = Join-Path $orchestrationRoot "work_packets"
+$legacyQueuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
 $locksPath = Join-Path $orchestrationRoot "assignment_locks.example.json"
+$registryPath = Join-Path $orchestrationRoot "workers\AIOS_WORKER_REGISTRY.json"
 
 function Read-JsonFile {
     param(
@@ -18,10 +20,9 @@ function Read-JsonFile {
     Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
 }
 
-$queue = Read-JsonFile -Path $queuePath
 $locks = Read-JsonFile -Path $locksPath
-$packets = @($queue.packets)
 $lockItems = @($locks.locks)
+$registry = if (Test-Path -LiteralPath $registryPath -PathType Leaf) { Read-JsonFile -Path $registryPath } else { $null }
 
 Write-Host "AI_OS Worker Status Display"
 Write-Host "Mode: $($locks.mode)"
@@ -30,6 +31,29 @@ Write-Host "Purpose: $($locks.purpose)"
 Write-Host ""
 Write-Host "Safety: display-only. No files are modified. No locks are created. No workers are launched."
 Write-Host ""
+
+if ($null -ne $registry) {
+    $workers = @($registry.workers)
+    Write-Host "Canonical worker registry:"
+    Write-Host "  Source: automation/orchestration/workers/AIOS_WORKER_REGISTRY.json"
+    Write-Host "  Workers: $($workers.Count)"
+    foreach ($worker in $workers) {
+        Write-Host "  - $($worker.worker_id): $($worker.type) - $($worker.purpose)"
+    }
+    Write-Host ""
+}
+
+$packets = @()
+if (Test-Path -LiteralPath $queuePath -PathType Container) {
+    Write-Host "Canonical packet source: automation/orchestration/work_packets/"
+    Write-Host "Legacy packet detail fallback: packet_queue.example.json"
+    Write-Host ""
+} elseif (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
+    $queue = Read-JsonFile -Path $legacyQueuePath
+    $packets = @($queue.packets)
+    Write-Host "Fallback packet source: packet_queue.example.json"
+    Write-Host ""
+}
 
 if ($lockItems.Count -eq 0) {
     Write-Host "Worker locks: none found in assignment_locks.example.json"

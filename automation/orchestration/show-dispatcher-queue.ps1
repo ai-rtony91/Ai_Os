@@ -2,7 +2,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
-$queuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
+$queuePath = Join-Path $orchestrationRoot "work_packets"
+$legacyQueuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
 $locksPath = Join-Path $orchestrationRoot "assignment_locks.example.json"
 
 function Read-JsonFile {
@@ -18,17 +19,41 @@ function Read-JsonFile {
     Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
 }
 
-$queue = Read-JsonFile -Path $queuePath
 $locks = Read-JsonFile -Path $locksPath
-$packets = @($queue.packets)
 $lockItems = @($locks.locks)
 
 Write-Host "AI_OS Dispatcher Queue Display"
+Write-Host ""
+Write-Host "Safety: display-only. No files are modified. No locks are created. No workers are launched."
+Write-Host ""
+
+if (Test-Path -LiteralPath $queuePath -PathType Container) {
+    $activePackets = @(Get-ChildItem -LiteralPath (Join-Path $queuePath "active") -Filter "*.json" -File -ErrorAction SilentlyContinue)
+    $blockedPackets = @(Get-ChildItem -LiteralPath (Join-Path $queuePath "blocked") -Filter "*.json" -File -ErrorAction SilentlyContinue)
+    $completePackets = @(Get-ChildItem -LiteralPath (Join-Path $queuePath "complete") -Filter "*.json" -File -ErrorAction SilentlyContinue)
+
+    Write-Host "Mode: FOLDER_STATE"
+    Write-Host "Queue: canonical work_packets folder"
+    Write-Host "Purpose: display packet folder state counts."
+    Write-Host ""
+    Write-Host "Packet summary:"
+    Write-Host "  Source: automation/orchestration/work_packets/"
+    Write-Host "  Active packets: $($activePackets.Count)"
+    Write-Host "  Blocked packets: $($blockedPackets.Count)"
+    Write-Host "  Complete packets: $($completePackets.Count)"
+    Write-Host "  Legacy detail fallback: packet_queue.example.json"
+    Write-Host ""
+    Write-Host "Next safe action: review canonical work packet folder state; use legacy queue display only if packet detail fields are needed."
+    exit 0
+}
+
+$queue = Read-JsonFile -Path $legacyQueuePath
+$packets = @($queue.packets)
+
 Write-Host "Mode: $($queue.mode)"
 Write-Host "Queue: $($queue.queue_name)"
 Write-Host "Purpose: $($queue.purpose)"
-Write-Host ""
-Write-Host "Safety: display-only. No files are modified. No locks are created. No workers are launched."
+Write-Host "Fallback: legacy packet_queue.example.json used because canonical work_packets folder was unavailable."
 Write-Host ""
 
 if ($packets.Count -eq 0) {

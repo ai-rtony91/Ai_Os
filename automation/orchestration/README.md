@@ -32,6 +32,23 @@ Areas that require consolidation before further scaling:
 
 See `docs/audits/orchestration-consolidation-plan.md` for the cleanup plan.
 
+## Canonical Paths
+
+Display and status tools should prefer these active paths first:
+
+- worker registry: `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json`
+- worker profiles: `automation/orchestration/workers/AIOS_WORKER_PROFILES.json`
+- worker inbox: `automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json`
+- queue/work packets: `automation/orchestration/work_packets/`
+- command queue: `automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json`
+- approval inbox: `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json`
+- approval gate: `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json`
+- validator chain: `automation/orchestration/validators/`
+- commit packages: `automation/orchestration/commit_packages/`
+- operator status: `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1`
+
+Legacy root examples remain compatibility fallbacks until every reference is updated and reviewed. Archiving is deferred to a later pass.
+
 ## Safe Use
 
 Run the clean-state gate before assigning work:
