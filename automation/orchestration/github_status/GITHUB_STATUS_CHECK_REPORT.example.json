@@ -1,0 +1,42 @@
+{
+  "system": "AI_OS",
+  "task": "Read GitHub status checks for current HEAD",
+  "mode": "DRY_RUN",
+  "result": "REVIEW",
+  "current_branch": "codex/worker-02",
+  "current_commit_sha": "29dbaa6",
+  "origin_main_sha": "9948e6c",
+  "repository": {
+    "remote_url_available": true,
+    "owner": "ai-rtony91",
+    "name": "Ai_Os"
+  },
+  "github_cli": {
+    "exists": true,
+    "auth_status": "UNKNOWN_OR_FAILED",
+    "checks_query_status": "SKIPPED_OR_FAILED"
+  },
+  "checks": [],
+  "summary": {
+    "check_count": 0,
+    "pass_count": 0,
+    "fail_count": 0,
+    "pending_count": 0,
+    "unknown_count": 0
+  },
+  "risks": [
+    "GitHub CLI auth or API query was unavailable, so checks could not be confirmed."
+  ],
+  "fallback_message": "GitHub checks are unavailable from this machine. Confirm checks in GitHub UI or fix gh auth before relying on this signal.",
+  "safety": {
+    "tokens_printed": "NO",
+    "writes_performed": 0,
+    "commits_performed": 0,
+    "pushes_performed": 0,
+    "dispatcher_edits": "NO",
+    "runtime_integration": "NO",
+    "dashboard_edits": "NO"
+  },
+  "validator_friendly": true,
+  "next_safe_action": "If checks are unavailable, run gh auth status manually or verify the commit checks in GitHub UI."
+}
