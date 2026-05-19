@@ -1,11 +1,7 @@
 $ErrorActionPreference = "Stop"
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $RequiredFiles = @(
-  "docs\AI_OS\bootstrap_engine\AIOS_PROJECT_IDENTITY_INFERENCE_DRAFT.md",
-  "docs\AI_OS\bootstrap_engine\AIOS_FOLDER_OWNERSHIP_INFERENCE_DRAFT.md",
-  "docs\AI_OS\bootstrap_engine\AIOS_PROTECTED_FILE_INFERENCE_DRAFT.md",
-  "docs\AI_OS\bootstrap_engine\AIOS_SCAFFOLD_PROPOSAL_GENERATION_DRAFT.md",
-  "docs\AI_OS\bootstrap_engine\AIOS_HUMAN_APPROVAL_BEFORE_APPLY_DRAFT.md"
+  "docs\concepts\aios-bootstrap-engine-concepts.md"
 )
 $Results = foreach ($RelativePath in $RequiredFiles) {
   $FullPath = Join-Path $RepoRoot $RelativePath
