@@ -256,7 +256,7 @@ else {
 
 if ($currentBranch -eq "main") {
     $postPushVerifierCandidates = @(
-        "automation/orchestration/post_push/Test-AiOsPostPush.DRY_RUN.ps1",
+        "automation/orchestration/post_push/Test-AiOsPostPushVerification.DRY_RUN.ps1",
         "automation/orchestration/post_push_verifier/Test-AiOsPostPush.DRY_RUN.ps1"
     )
     $postPushVerifier = @($postPushVerifierCandidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1)

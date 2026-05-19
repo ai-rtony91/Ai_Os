@@ -89,6 +89,7 @@ $latestCommit = if ($latestCommitResult.Lines.Count -gt 0) { [string]$latestComm
 
 $automationItems = @(
     New-AiOsAutomationItem -Id "worker_lane_status_tool" -Label "Worker lane status tool" -CandidatePaths @(
+        "automation/orchestration/worker_lanes/Get-AiOsWorkerLaneStatus.DRY_RUN.ps1",
         "automation/orchestration/show-worker-status.ps1",
         "scripts/show-worker-status.ps1"
     )
@@ -99,6 +100,7 @@ $automationItems = @(
         "automation/orchestration/approval_runner/Get-AiOsApprovalDecision.DRY_RUN.ps1"
     )
     New-AiOsAutomationItem -Id "commit_package_recommender" -Label "Commit package recommender or preview tool" -CandidatePaths @(
+        "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
         "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
         "automation/orchestration/show-commit-package.ps1",
         "automation/orchestration/commit_package.example.json"
@@ -108,10 +110,11 @@ $automationItems = @(
         "automation/orchestration/clean_state_gate.ps1"
     )
     New-AiOsAutomationItem -Id "post_push_verifier" -Label "Post-push verifier" -CandidatePaths @(
-        "automation/orchestration/post_push/Test-AiOsPostPush.DRY_RUN.ps1",
+        "automation/orchestration/post_push/Test-AiOsPostPushVerification.DRY_RUN.ps1",
         "automation/orchestration/post_push_verifier/Test-AiOsPostPush.DRY_RUN.ps1"
     )
     New-AiOsAutomationItem -Id "orchestration_health_summary" -Label "Orchestration health summary if present" -CandidatePaths @(
+        "automation/orchestration/health_summary/Get-AiOsOrchestrationHealth.DRY_RUN.ps1",
         "Reports/dispatcher/runtime/queue_health_summary.example.json",
         "automation/orchestration/orchestration_status_snapshot.example.json",
         "automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"

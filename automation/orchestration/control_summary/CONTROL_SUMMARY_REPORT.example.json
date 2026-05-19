@@ -1,0 +1,71 @@
+{
+  "system": "AI_OS",
+  "task": "Show AI_OS orchestration control summary",
+  "mode": "DRY_RUN",
+  "result": "REVIEW",
+  "repo_state": {
+    "branch": "codex/worker-02",
+    "git_status": "dirty",
+    "dirty_count": 0,
+    "untracked_count": 12
+  },
+  "checks": [
+    {
+      "check_id": "worker_lane_status",
+      "label": "Worker lane status",
+      "status": "REVIEW",
+      "summary": "Current branch maps to CODEX_02 and worktree has untracked files."
+    },
+    {
+      "check_id": "compliance_status",
+      "label": "Compliance status",
+      "status": "REVIEW",
+      "summary": "Compliance checker is missing."
+    },
+    {
+      "check_id": "validator_status",
+      "label": "Validator status",
+      "status": "READY",
+      "summary": "Validator chain runner exists."
+    },
+    {
+      "check_id": "approval_readiness",
+      "label": "Approval readiness",
+      "status": "READY",
+      "summary": "Approval processor exists."
+    },
+    {
+      "check_id": "commit_package_readiness",
+      "label": "Commit package readiness",
+      "status": "READY",
+      "summary": "Commit package recommender exists."
+    },
+    {
+      "check_id": "clean_state_result",
+      "label": "Clean-state result",
+      "status": "REVIEW",
+      "summary": "Clean-state gate exists, but repo is dirty."
+    },
+    {
+      "check_id": "post_push_result",
+      "label": "Post-push result",
+      "status": "BLOCKED",
+      "summary": "Post-push verification is blocked because current branch is not main."
+    }
+  ],
+  "risks": [
+    "Repository has untracked files.",
+    "Compliance checker is missing.",
+    "Post-push verification is not valid from the current worker branch."
+  ],
+  "safety": {
+    "writes_performed": 0,
+    "commits_performed": 0,
+    "pushes_performed": 0,
+    "dispatcher_edits": "NO",
+    "runtime_integration": "NO",
+    "dashboard_edits": "NO"
+  },
+  "validator_friendly": true,
+  "next_safe_command": "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\health_summary\\Get-AiOsOrchestrationHealth.DRY_RUN.ps1"
+}
