@@ -261,7 +261,7 @@ if ($currentBranch -eq "main") {
     )
     $postPushVerifier = @($postPushVerifierCandidates | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1)
     if ($postPushVerifier.Count -gt 0) {
-        $postPushRun = Invoke-AiOsJsonScript -CommandArguments @("-ExecutionPolicy", "Bypass", "-File", $postPushVerifier[0], "-Json")
+        $postPushRun = Invoke-AiOsJsonScript -CommandArguments @("-ExecutionPolicy", "Bypass", "-File", $postPushVerifier[0], "-OutputJson")
         if ($null -eq $postPushRun.Parsed) {
             Add-AiOsValidatorResult -Results $validators -ValidatorId "post_push_verifier_main_only" -Result "REVIEW" -Command "$($postPushVerifier[0]) -Json" -Message "Post-push verifier ran but JSON output could not be parsed." -Evidence @($postPushRun.ParseError) -NextSafeAction "Run post-push verifier directly and review output."
         }
