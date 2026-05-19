@@ -9,7 +9,10 @@
   "risk_level": "medium",
   "allowed_paths": [
     "automation/orchestration/",
-    "docs/AI_OS/orchestration/"
+    "docs/concepts/",
+    "docs/workflows/",
+    "docs/architecture/",
+    "docs/audits/"
   ],
   "blocked_paths": [
     "automation/operator/",

@@ -14,7 +14,7 @@
   "next_action": "Use rulebook as packet routing input.",
   "blocked_by": [],
   "related_files": [
-    "docs/AI_OS/orchestration/AIOS_OPERATOR_RULEBOOK.md",
+    "docs/workflows/aios-operator-workflows.md",
     "automation/orchestration/operator/AIOS_OPERATOR_RULES.json"
   ],
   "related_packets": [],

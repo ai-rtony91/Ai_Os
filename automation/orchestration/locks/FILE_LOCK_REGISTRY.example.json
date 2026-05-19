@@ -62,7 +62,7 @@
       "mode": "DRY_RUN",
       "status": "ACTIVE",
       "claimed_paths": [
-        "docs/AI_OS/orchestration/worker_locking.md"
+        "docs/concepts/aios-dispatcher-orchestration-concepts.md"
       ],
       "created_at": "2026-05-18T18:05:00-04:00",
       "expires_at": "2026-05-18T22:05:00-04:00",

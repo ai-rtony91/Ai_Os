@@ -43,7 +43,7 @@ Write-Host 'Workflow component checks:'
 Test-Component -Label 'workflow router' -RelativePath 'automation\router\Invoke-AiOsWorkflowRouter.DRY_RUN.ps1'
 Test-Component -Label 'workflow registry' -RelativePath 'docs\AI_OS\router\AIOS_WORKFLOW_REGISTRY_DRAFT.md'
 Test-Component -Label 'operator command map' -RelativePath 'docs\AI_OS\operator\AIOS_OPERATOR_COMMAND_MAP_DRAFT.md'
-Test-Component -Label 'orchestration framework' -RelativePath 'docs\AI_OS\orchestration\AIOS_ORCHESTRATION_FRAMEWORK_DRAFT.md'
+Test-Component -Label 'orchestration framework' -RelativePath 'docs\concepts\aios-dispatcher-orchestration-concepts.md'
 Test-Component -Label 'repo health helper' -RelativePath 'automation\health\Test-AiOsRepoHealthChain.DRY_RUN.ps1'
 
 Write-Host ''

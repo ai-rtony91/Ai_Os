@@ -2,7 +2,7 @@
 
 Status: canonical concept summary extracted from legacy `docs/AI_OS/dispatcher` and `docs/AI_OS/orchestration`
 
-Last reviewed: Phase 93 dispatcher/orchestration reference retirement
+Last reviewed: Phase 95 orchestration doc blocker retirement
 
 ## Purpose
 
@@ -72,7 +72,7 @@ Retired orchestration references in allowed files:
 - `automation/operator/Test-AiOsPhase3State.DRY_RUN.ps1`
 - root metadata/example files under `automation/orchestration/*.json` that were in scope for this phase.
 
-Remaining blockers are outside Phase 93 allowed edits. They are listed in `docs/audits/phase-93-dispatcher-orchestration-reference-retirement.md`.
+Phase 95 retired additional orchestration references in status checks, orchestration validators, orchestration metadata JSON, worker profile ownership metadata, and historical packet references. Remaining blockers are listed in `docs/audits/phase-95-orchestration-doc-blocker-retirement.md`.
 
 ## Current Doctrine
 

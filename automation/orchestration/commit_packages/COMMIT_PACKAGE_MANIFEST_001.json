@@ -9,7 +9,7 @@
     "automation/orchestration/validators/Test-CommitPackageManifest.DRY_RUN.ps1",
     "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
     "automation/orchestration/reports/COMMIT_PACKAGE_ACTIVITY_LEDGER_001.csv",
-    "docs/AI_OS/orchestration/PHASE_15_3_5_COMMIT_PACKAGE_BUILDER.md"
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md"
   ],
   "blocked_files": [
     "README.md",
@@ -32,7 +32,7 @@
     "automation/orchestration/validators/Test-CommitPackageManifest.DRY_RUN.ps1",
     "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
     "automation/orchestration/reports/COMMIT_PACKAGE_ACTIVITY_LEDGER_001.csv",
-    "docs/AI_OS/orchestration/PHASE_15_3_5_COMMIT_PACKAGE_BUILDER.md"
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md"
   ],
   "files_not_to_stage": [
     "automation/operator/",
