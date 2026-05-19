@@ -5,8 +5,8 @@
     "runtimeId": "runtime-local-001",
     "status": "degraded",
     "lastTickAt": "2026-05-18T23:44:55Z",
-    "freshness": "fresh",
-    "queueSource": "runtime_context"
+    "freshness": "stale",
+    "queueSource": "fixture"
   },
   "health": {
     "schedulerActions": 6,
@@ -167,6 +167,16 @@
     "eventCount": 128,
     "invalidLineCount": 0,
     "lastEventAt": "2026-05-18T23:43:31Z",
+    "ledger": {
+      "path": "telemetry/work_ledger.jsonl",
+      "exists": true,
+      "sizeBytes": 0,
+      "modifiedAt": "2026-05-18T23:32:00Z",
+      "lineCount": 0,
+      "validLineCount": 0,
+      "invalidLineCount": 0,
+      "empty": true
+    },
     "recentEvents": [
       {
         "eventId": "evt_1779167011000",
@@ -211,5 +221,21 @@
     "appliedPacketCount": 18,
     "lastUpdatedAt": "2026-05-18T23:43:31Z"
   },
+  "provenance": {
+    "runtime": "fixture",
+    "queue": "fixture",
+    "packets": "fixture",
+    "failedPackets": "fixture",
+    "workers": "fixture",
+    "backpressure": "fixture",
+    "telemetry": "fixture",
+    "executionLedger": "fixture",
+    "fixture": true
+  },
+  "warnings": [
+    "Fixture data is loaded; this is not live runtime truth.",
+    "Runtime visibility freshness is stale.",
+    "Telemetry event count is present but ledger inspection reports an empty ledger."
+  ],
   "nextSafeAction": "Review poison packets and expired worker leases before increasing concurrency."
 }

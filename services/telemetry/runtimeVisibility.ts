@@ -7,6 +7,19 @@ import type { TelemetryEvent } from "./telemetryEvent";
 import { replayTelemetryEvents, type ReplayedRuntimeState } from "./telemetryReplay";
 
 export type VisibilityFreshness = "fresh" | "stale" | "unknown";
+export type VisibilitySource = "observed" | "reconstructed" | "inferred" | "fixture";
+
+export interface VisibilityProvenance {
+  runtime: VisibilitySource;
+  queue: VisibilitySource;
+  packets: VisibilitySource;
+  failedPackets: VisibilitySource;
+  workers: VisibilitySource;
+  backpressure: VisibilitySource;
+  telemetry: VisibilitySource;
+  executionLedger: VisibilitySource;
+  fixture: boolean;
+}
 
 export interface RuntimeQueueCounters {
   scheduled: number;
@@ -72,6 +85,16 @@ export interface RuntimeVisibilitySnapshot {
     invalidLineCount: number;
     lastEventAt?: string;
     recentEvents: TelemetryEvent[];
+    ledger: {
+      path?: string;
+      exists: boolean;
+      sizeBytes: number;
+      modifiedAt?: string;
+      lineCount: number;
+      validLineCount: number;
+      invalidLineCount: number;
+      empty: boolean;
+    };
   };
   executionLedger: {
     packetCount: number;
@@ -80,6 +103,8 @@ export interface RuntimeVisibilitySnapshot {
     appliedPacketCount: number;
     lastUpdatedAt?: string;
   };
+  provenance: VisibilityProvenance;
+  warnings: string[];
 }
 
 export interface RuntimeVisibilityInput {
@@ -100,6 +125,8 @@ export interface RuntimeVisibilityInput {
   };
   telemetryEvents: TelemetryEvent[];
   telemetryInvalidLineCount?: number;
+  telemetryLedger?: RuntimeVisibilitySnapshot["telemetry"]["ledger"];
+  provenance?: Partial<VisibilityProvenance>;
   recentEventLimit?: number;
   staleAfterMs?: number;
   now?: Date;
@@ -264,6 +291,52 @@ function buildFreshness(
   return now.getTime() - lastEventTime > staleAfterMs ? "stale" : "fresh";
 }
 
+function buildProvenance(input: RuntimeVisibilityInput): VisibilityProvenance {
+  return {
+    runtime: input.runtimeStatus ? "observed" : "inferred",
+    queue: input.queueSource === "runtime_context" ? "observed" : "reconstructed",
+    packets: "reconstructed",
+    failedPackets: "observed",
+    workers: "observed",
+    backpressure: "inferred",
+    telemetry: "observed",
+    executionLedger: "reconstructed",
+    fixture: false,
+    ...input.provenance
+  };
+}
+
+function buildWarnings(
+  freshness: VisibilityFreshness,
+  provenance: VisibilityProvenance,
+  telemetryLedger: RuntimeVisibilitySnapshot["telemetry"]["ledger"],
+  eventCount: number
+): string[] {
+  const warnings: string[] = [];
+
+  if (provenance.fixture) {
+    warnings.push("Fixture data is loaded; this is not live runtime truth.");
+  }
+
+  if (freshness !== "fresh") {
+    warnings.push(`Runtime visibility freshness is ${freshness}.`);
+  }
+
+  if (!telemetryLedger.exists) {
+    warnings.push("Telemetry ledger file is missing.");
+  }
+
+  if (telemetryLedger.empty && eventCount > 0) {
+    warnings.push("Telemetry event count is present but ledger inspection reports an empty ledger.");
+  }
+
+  if (telemetryLedger.invalidLineCount > 0) {
+    warnings.push(`${telemetryLedger.invalidLineCount} invalid telemetry ledger lines were detected.`);
+  }
+
+  return warnings;
+}
+
 export function buildRuntimeVisibilitySnapshot(
   input: RuntimeVisibilityInput
 ): RuntimeVisibilitySnapshot {
@@ -272,6 +345,16 @@ export function buildRuntimeVisibilitySnapshot(
   const recentEventLimit = input.recentEventLimit ?? 20;
   const replayedState = replayTelemetryEvents(input.telemetryEvents);
   const lastEventAt = findLedgerLastUpdatedAt(input.telemetryEvents);
+  const freshness = buildFreshness(now, lastEventAt, staleAfterMs);
+  const provenance = buildProvenance(input);
+  const telemetryLedger = input.telemetryLedger ?? {
+    exists: input.telemetryEvents.length > 0,
+    sizeBytes: 0,
+    lineCount: input.telemetryEvents.length + (input.telemetryInvalidLineCount ?? 0),
+    validLineCount: input.telemetryEvents.length,
+    invalidLineCount: input.telemetryInvalidLineCount ?? replayedState.invalidLineCount,
+    empty: input.telemetryEvents.length === 0
+  };
 
   return {
     schema: "aios.runtime_visibility.v1",
@@ -280,7 +363,7 @@ export function buildRuntimeVisibilitySnapshot(
       runtimeId: input.runtimeId,
       status: input.runtimeStatus ?? "unknown",
       lastTickAt: input.lastTickAt,
-      freshness: buildFreshness(now, lastEventAt, staleAfterMs),
+      freshness,
       queueSource: input.queueSource ?? "scheduler_replay"
     },
     health: input.supervisorReport.health,
@@ -294,7 +377,8 @@ export function buildRuntimeVisibilitySnapshot(
       eventCount: input.telemetryEvents.length,
       invalidLineCount: input.telemetryInvalidLineCount ?? replayedState.invalidLineCount,
       lastEventAt,
-      recentEvents: input.telemetryEvents.slice(-recentEventLimit).reverse()
+      recentEvents: input.telemetryEvents.slice(-recentEventLimit).reverse(),
+      ledger: telemetryLedger
     },
     executionLedger: {
       packetCount: Object.keys(replayedState.packets).length,
@@ -302,6 +386,13 @@ export function buildRuntimeVisibilitySnapshot(
       blockedPacketCount: replayedState.blockedPackets.length,
       appliedPacketCount: replayedState.appliedPackets.length,
       lastUpdatedAt: lastEventAt
-    }
+    },
+    provenance,
+    warnings: buildWarnings(
+      freshness,
+      provenance,
+      telemetryLedger,
+      input.telemetryEvents.length
+    )
   };
 }

@@ -33,9 +33,15 @@ function statusTone(value) {
   const normalized = String(value).toLowerCase();
 
   if (
-    ["critical", "blocked", "hard", "expired", "manual_review", "degraded"].includes(
-      normalized
-    )
+    [
+      "critical",
+      "blocked",
+      "hard",
+      "expired",
+      "manual_review",
+      "degraded",
+      "fixture"
+    ].includes(normalized)
   ) {
     return "danger";
   }
@@ -64,15 +70,22 @@ function Metric({ label, value, tone = "neutral" }) {
   );
 }
 
+function SourceLabel({ value }) {
+  return <span className={`sourceLabel ${value} ${statusTone(value)}`}>{value}</span>;
+}
+
 function StatusPill({ value }) {
   return <span className={`pill ${statusTone(value)}`}>{value}</span>;
 }
 
-function Section({ title, action, children }) {
+function Section({ title, source, action, children }) {
   return (
     <section className="section">
       <div className="sectionHeader">
-        <h2>{title}</h2>
+        <div className="sectionTitle">
+          <h2>{title}</h2>
+          {source && <SourceLabel value={source} />}
+        </div>
         {action}
       </div>
       {children}
@@ -110,6 +123,7 @@ export default function App() {
 
   const healthTone = runtimeVisibility.health.healthy ? "good" : "danger";
   const failedGroups = runtimeVisibility.failedPackets;
+  const isFixture = runtimeVisibility.provenance?.fixture;
 
   return (
     <div className="runtimePage">
@@ -129,8 +143,23 @@ export default function App() {
         </div>
       </header>
 
+      {isFixture && (
+        <div className="mockWarning">
+          <strong>Fixture data loaded.</strong>
+          <span>This dashboard is showing mock visibility, not live runtime truth.</span>
+        </div>
+      )}
+
+      {runtimeVisibility.warnings?.length > 0 && (
+        <div className="warningStrip">
+          {runtimeVisibility.warnings.map((warning) => (
+            <span key={warning}>{warning}</span>
+          ))}
+        </div>
+      )}
+
       <main className="runtimeGrid">
-        <Section title="Runtime Status">
+        <Section title="Runtime Status" source={runtimeVisibility.provenance.runtime}>
           <div className="metricsGrid">
             <Metric label="Runtime ID" value={runtimeVisibility.runtime.runtimeId} />
             <Metric
@@ -149,7 +178,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Health Summary">
+        <Section title="Health Summary" source={runtimeVisibility.provenance.runtime}>
           <div className="metricsGrid">
             <Metric
               label="Runtime"
@@ -164,7 +193,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Queue Counters">
+        <Section title="Queue Counters" source={runtimeVisibility.provenance.queue}>
           <div className="queueStrip">
             {Object.entries(runtimeVisibility.queue).map(([key, value]) => (
               <Metric key={key} label={key.replaceAll("_", " ")} value={value} />
@@ -174,6 +203,7 @@ export default function App() {
 
         <Section
           title="Active Packets"
+          source={runtimeVisibility.provenance.packets}
           action={
             <div className="segmented">
               {packetFilters.map((filter) => (
@@ -209,7 +239,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Failed Packets">
+        <Section title="Failed Packets" source={runtimeVisibility.provenance.failedPackets}>
           <div className="failureSplit">
             <Metric label="Retryable" value={failedGroups.retryable.length} tone="warn" />
             <Metric label="Manual review" value={failedGroups.poison.length} tone="danger" />
@@ -232,7 +262,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Worker Leases">
+        <Section title="Worker Leases" source={runtimeVisibility.provenance.workers}>
           <div className="workerGrid">
             {runtimeVisibility.workers.map((worker) => (
               <article className="workerCard" key={worker.workerId}>
@@ -253,7 +283,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Backpressure Alerts">
+        <Section title="Backpressure Alerts" source={runtimeVisibility.provenance.backpressure}>
           <div className={`backpressure ${statusTone(runtimeVisibility.backpressure.level)}`}>
             <div>
               <strong>{runtimeVisibility.backpressure.reason}</strong>
@@ -281,6 +311,7 @@ export default function App() {
 
         <Section
           title="Telemetry Log"
+          source={runtimeVisibility.provenance.telemetry}
           action={
             <input
               className="search"
@@ -294,6 +325,12 @@ export default function App() {
           <div className="ledgerSummary">
             <Metric label="Events" value={runtimeVisibility.telemetry.eventCount} />
             <Metric label="Invalid lines" value={runtimeVisibility.telemetry.invalidLineCount} />
+            <Metric label="Ledger lines" value={runtimeVisibility.telemetry.ledger.lineCount} />
+            <Metric
+              label="Ledger size"
+              value={`${runtimeVisibility.telemetry.ledger.sizeBytes} B`}
+              tone={runtimeVisibility.telemetry.ledger.empty ? "warn" : "neutral"}
+            />
           </div>
           <div className="eventList">
             {filteredEvents.map((event) => (
@@ -312,7 +349,7 @@ export default function App() {
           </div>
         </Section>
 
-        <Section title="Execution Ledger">
+        <Section title="Execution Ledger" source={runtimeVisibility.provenance.executionLedger}>
           <div className="ledgerSummary">
             <Metric label="Packets" value={runtimeVisibility.executionLedger.packetCount} />
             <Metric label="Approvals" value={runtimeVisibility.executionLedger.approvalCount} />
