@@ -1,3 +1,5 @@
+import type { PacketIdentity, PacketQueueRecord } from "./packetQueue";
+
 export interface DeadLetterPacket {
   packetId: string;
   reason: string;
@@ -5,6 +7,23 @@ export interface DeadLetterPacket {
   lastFailedAt: string;
   retryable: boolean;
   source: string;
+}
+
+export function createDeadLetterPacketFromQueueRecord<
+  TPacket extends PacketIdentity
+>(
+  record: PacketQueueRecord<TPacket>,
+  source: string,
+  retryable = false
+): DeadLetterPacket {
+  return {
+    packetId: record.packetId,
+    reason: record.lastReason ?? "Packet moved from canonical queue",
+    failureCount: record.failureCount,
+    lastFailedAt: record.failedAt ?? record.updatedAt,
+    retryable,
+    source
+  };
 }
 
 export interface DeadLetterQueueState {

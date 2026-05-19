@@ -1,5 +1,6 @@
 import type { ScheduledAction, SchedulerPlan } from "../dispatcher/autonomousScheduler";
 import type { DeadLetterPacket, DeadLetterQueueState } from "../dispatcher/deadLetterQueue";
+import type { PacketQueueSnapshot } from "../dispatcher/packetQueue";
 import type { WorkerHeartbeat, WorkerLeaseResult } from "../dispatcher/workerLeaseEngine";
 import type { BackpressureDecision } from "../runtime/runtimeBackpressure";
 import type { SupervisorAlert, SupervisorReport } from "../supervisor/runtimeSupervisor";
@@ -54,7 +55,7 @@ export interface RuntimeVisibilitySnapshot {
     status: "idle" | "running" | "paused" | "degraded" | "blocked" | "unknown";
     lastTickAt?: string;
     freshness: VisibilityFreshness;
-    queueSource: "runtime_context" | "scheduler_replay" | "fixture" | "unknown";
+    queueSource: "packet_queue" | "runtime_context" | "scheduler_replay" | "fixture" | "unknown";
   };
   health: SupervisorReport["health"];
   queue: RuntimeQueueCounters;
@@ -89,6 +90,7 @@ export interface RuntimeVisibilityInput {
   queueSource?: RuntimeVisibilitySnapshot["runtime"]["queueSource"];
   supervisorReport: SupervisorReport;
   schedulerPlan: SchedulerPlan;
+  packetQueueSnapshot?: PacketQueueSnapshot;
   workerHeartbeats: WorkerHeartbeat[];
   workerLeases: WorkerLeaseResult;
   deadLetterQueue: DeadLetterQueueState;
@@ -114,8 +116,21 @@ function countActions(
 
 function buildQueueCounters(
   schedulerPlan: SchedulerPlan,
-  deadLetterQueue: DeadLetterQueueState
+  deadLetterQueue: DeadLetterQueueState,
+  packetQueueSnapshot?: PacketQueueSnapshot
 ): RuntimeQueueCounters {
+  if (packetQueueSnapshot) {
+    return {
+      scheduled: packetQueueSnapshot.counters.scheduled,
+      dispatchable: packetQueueSnapshot.counters.claimable,
+      waitingForApproval: packetQueueSnapshot.counters.waitingForApproval,
+      retryable: packetQueueSnapshot.counters.retrying + packetQueueSnapshot.counters.failed,
+      manualReview: packetQueueSnapshot.counters.manualReview + packetQueueSnapshot.counters.deadLetter,
+      reclaimable: schedulerPlan.reclaimablePackets.length,
+      poison: deadLetterQueue.packets.filter((packet) => !packet.retryable).length
+    };
+  }
+
   return {
     scheduled: schedulerPlan.actions.length,
     dispatchable: countActions(schedulerPlan.actions, "dispatch"),
@@ -129,11 +144,30 @@ function buildQueueCounters(
 
 function buildPacketVisibility(
   schedulerPlan: SchedulerPlan,
-  replayedState: ReplayedRuntimeState
+  replayedState: ReplayedRuntimeState,
+  packetQueueSnapshot?: PacketQueueSnapshot
 ): RuntimePacketVisibility[] {
   const packets = new Map<string, RuntimePacketVisibility>();
 
+  if (packetQueueSnapshot) {
+    for (const record of packetQueueSnapshot.records) {
+      const packet = record.packet as { risk?: string; priority?: string };
+
+      packets.set(record.packetId, {
+        packetId: record.packetId,
+        status: record.status,
+        risk: String(packet.risk ?? packet.priority ?? "UNKNOWN"),
+        reason: record.lastReason,
+        lastUpdatedAt: record.updatedAt
+      });
+    }
+  }
+
   for (const packet of Object.values(replayedState.packets)) {
+    if (packets.has(packet.packetId)) {
+      continue;
+    }
+
     packets.set(packet.packetId, {
       packetId: packet.packetId,
       status: packet.status,
@@ -281,11 +315,21 @@ export function buildRuntimeVisibilitySnapshot(
       status: input.runtimeStatus ?? "unknown",
       lastTickAt: input.lastTickAt,
       freshness: buildFreshness(now, lastEventAt, staleAfterMs),
-      queueSource: input.queueSource ?? "scheduler_replay"
+      queueSource: input.packetQueueSnapshot
+        ? "packet_queue"
+        : input.queueSource ?? "scheduler_replay"
     },
     health: input.supervisorReport.health,
-    queue: buildQueueCounters(input.schedulerPlan, input.deadLetterQueue),
-    activePackets: buildPacketVisibility(input.schedulerPlan, replayedState),
+    queue: buildQueueCounters(
+      input.schedulerPlan,
+      input.deadLetterQueue,
+      input.packetQueueSnapshot
+    ),
+    activePackets: buildPacketVisibility(
+      input.schedulerPlan,
+      replayedState,
+      input.packetQueueSnapshot
+    ),
     failedPackets: buildFailedPacketGroups(input.deadLetterQueue),
     workers: buildWorkerVisibility(input.workerHeartbeats, input.workerLeases, now),
     backpressure: buildBackpressureVisibility(input),

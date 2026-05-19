@@ -1,4 +1,11 @@
 import type { ReplayedRuntimeState } from "../telemetry/telemetryReplay";
+import {
+  createPacketQueueState,
+  enqueuePacket,
+  getQueueSnapshot,
+  type PacketQueueSnapshot,
+  type PacketStatus
+} from "./packetQueue";
 
 export interface RebuiltDispatcherState {
   queuedPackets: string[];
@@ -9,6 +16,18 @@ export interface RebuiltDispatcherState {
   pendingApprovals: string[];
   rebuiltAt: string;
   sourceEventCount: number;
+  reconstructedQueueSnapshot: PacketQueueSnapshot;
+}
+
+function isPacketStatus(status: string): status is PacketStatus {
+  return [
+    "queued",
+    "dry_run",
+    "waiting_approval",
+    "approved",
+    "applied",
+    "blocked"
+  ].includes(status);
 }
 
 export function rebuildDispatcherState(
@@ -20,8 +39,21 @@ export function rebuildDispatcherState(
   const blockedPackets = [...replayed.blockedPackets];
   const appliedPackets = [...replayed.appliedPackets];
   const pendingApprovals: string[] = [];
+  let reconstructedQueue = createPacketQueueState();
 
   for (const packet of Object.values(replayed.packets)) {
+    const status = isPacketStatus(packet.status) ? packet.status : "queued";
+    reconstructedQueue = enqueuePacket(
+      reconstructedQueue,
+      {
+        packetId: packet.packetId
+      },
+      {
+        status,
+        reason: `Reconstructed from telemetry event ${packet.lastEventType}`
+      }
+    ).state;
+
     switch (packet.status) {
       case "queued":
         queuedPackets.push(packet.packetId);
@@ -60,6 +92,7 @@ export function rebuildDispatcherState(
     appliedPackets: [...new Set(appliedPackets)],
     pendingApprovals: [...new Set(pendingApprovals)],
     rebuiltAt: new Date().toISOString(),
-    sourceEventCount: replayed.eventCount
+    sourceEventCount: replayed.eventCount,
+    reconstructedQueueSnapshot: getQueueSnapshot(reconstructedQueue)
   };
 }

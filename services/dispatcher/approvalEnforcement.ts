@@ -1,6 +1,7 @@
 import { getApproval } from "../approvals/approvalInbox";
 import { isApprovalGranted, isApprovalRejected } from "../approvals/approvalDecision";
 import type { WorkPacket } from "./dispatcher";
+import { movePacketStatus } from "./packetQueue";
 
 export interface PacketDecisionResult {
   packet: WorkPacket;
@@ -14,7 +15,7 @@ export function enforceApprovalDecision(
 ): PacketDecisionResult {
   if (!packet.requiresApproval) {
     return {
-      packet: { ...packet, status: "dry_run" },
+      packet: movePacketStatus(packet, "dry_run"),
       nextAction: "dry_run",
       reason: "Packet does not require approval"
     };
@@ -22,7 +23,7 @@ export function enforceApprovalDecision(
 
   if (!approvalRequestId) {
     return {
-      packet: { ...packet, status: "blocked" },
+      packet: movePacketStatus(packet, "blocked"),
       nextAction: "blocked",
       reason: "Missing approval request id"
     };
@@ -32,7 +33,7 @@ export function enforceApprovalDecision(
 
   if (!approval) {
     return {
-      packet: { ...packet, status: "waiting_approval" },
+      packet: movePacketStatus(packet, "waiting_approval"),
       nextAction: "wait_for_approval",
       reason: "Approval request not found yet"
     };
@@ -40,7 +41,7 @@ export function enforceApprovalDecision(
 
   if (isApprovalRejected(approval)) {
     return {
-      packet: { ...packet, status: "blocked" },
+      packet: movePacketStatus(packet, "blocked"),
       nextAction: "blocked",
       reason: "Approval was rejected or expired"
     };
@@ -48,14 +49,14 @@ export function enforceApprovalDecision(
 
   if (isApprovalGranted(approval)) {
     return {
-      packet: { ...packet, status: "approved" },
+      packet: movePacketStatus(packet, "approved"),
       nextAction: "apply",
       reason: "Approval granted"
     };
   }
 
   return {
-    packet: { ...packet, status: "waiting_approval" },
+    packet: movePacketStatus(packet, "waiting_approval"),
     nextAction: "wait_for_approval",
     reason: "Approval still pending"
   };
