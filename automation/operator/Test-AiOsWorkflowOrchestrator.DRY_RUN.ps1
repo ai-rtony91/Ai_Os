@@ -34,7 +34,7 @@ $requiredFiles = @(
   "automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1",
   "automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1",
   "apps/dashboard/mock-data/aios-workflow-orchestrator-v1.example.json",
-  "docs/AI_OS/orchestration/AIOS_WORKFLOW_ORCHESTRATOR_V1.md",
+  "docs/concepts/aios-dispatcher-orchestration-concepts.md",
   "Reports/operator/README_WORKFLOW_ORCHESTRATOR.md"
 )
 
@@ -99,10 +99,10 @@ if (Test-Path -LiteralPath $invokePath -PathType Leaf) {
   }
 }
 
-$docPath = Join-Path $ResolvedRepoRoot "docs/AI_OS/orchestration/AIOS_WORKFLOW_ORCHESTRATOR_V1.md"
+$docPath = Join-Path $ResolvedRepoRoot "docs/concepts/aios-dispatcher-orchestration-concepts.md"
 if (Test-Path -LiteralPath $docPath -PathType Leaf) {
   $docText = Get-Content -LiteralPath $docPath -Raw
-  foreach ($requiredText in @("DRY_RUN", "operator approval", "work queue", "approval inbox", "validator chain", "controlled APPLY", "commit package", "AIOS_OPERATOR_NEXT_ACTION_PACKET.md")) {
+  foreach ($requiredText in @("DRY_RUN", "operator control", "work packets", "approval inbox", "validator chains", "commit packages")) {
     if (-not $docText.Contains($requiredText)) {
       Add-Failure "Documentation missing required text: $requiredText"
     }

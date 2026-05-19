@@ -20,7 +20,7 @@
       "next_step": "Run the read-only recovery bootstrap display and review the output.",
       "allowed_paths": [
         "automation/orchestration/",
-        "docs/AI_OS/orchestration/",
+        "docs/audits/phase-92-dispatcher-orchestration-tree-cleanup.md",
         "Reports/checkpoints/"
       ],
       "blocked_paths": [

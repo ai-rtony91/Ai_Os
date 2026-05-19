@@ -13,7 +13,7 @@
       "next_action": "Review recovery bootstrap and gap ledger outputs before approving any selective commit.",
       "allowed_paths": [
         "automation/orchestration/",
-        "docs/AI_OS/orchestration/",
+        "docs/concepts/aios-dispatcher-orchestration-concepts.md",
         "Reports/checkpoints/"
       ],
       "blocked_paths": [
@@ -41,7 +41,7 @@
       "risk_level": "medium",
       "next_action": "Draft source mapping in a separate approved documentation pack.",
       "allowed_paths": [
-        "docs/AI_OS/orchestration/",
+        "docs/audits/phase-92-dispatcher-orchestration-tree-cleanup.md",
         "Reports/checkpoints/"
       ],
       "blocked_paths": [

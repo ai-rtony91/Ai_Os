@@ -20,7 +20,7 @@ $requiredFiles = @(
     "automation/operator/window_snapshots/AIOS_10_WORKER_MORNING_SNAPSHOT.example.json",
     "automation/operator/Start-AIOSCodexWindowSnapshot.ps1",
     "automation/operator/Test-AIOSCodexWindowSnapshot.DRY_RUN.ps1",
-    "docs/AI_OS/dispatcher/runtime/CODEX_WINDOW_SNAPSHOT_BOOTSTRAP.md",
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md",
     "Reports/dispatcher/runtime/codex_window_snapshot_status.example.json"
 )
 
@@ -117,4 +117,3 @@ foreach ($failure in $failures) {
     Write-Host " - $failure"
 }
 exit 1
-

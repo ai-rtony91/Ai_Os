@@ -34,7 +34,7 @@ $requiredFolders = @(
     "automation/dispatcher/commit_packages",
     "automation/dispatcher/recovery",
     "automation/dispatcher/validators",
-    "docs/AI_OS/dispatcher",
+    "docs/concepts",
     "Reports/dispatcher"
 )
 
@@ -54,14 +54,10 @@ $requiredDocs = @(
     "automation/dispatcher/commit_packages/README.md",
     "automation/dispatcher/recovery/README.md",
     "automation/dispatcher/validators/README.md",
-    "docs/AI_OS/dispatcher/PHASE_15_3_DISPATCHER_CORE.md",
-    "docs/AI_OS/dispatcher/DISPATCHER_PACKET_SCHEMA.md",
-    "docs/AI_OS/dispatcher/DISPATCHER_LOCK_SCHEMA.md",
-    "docs/AI_OS/dispatcher/DISPATCHER_APPROVAL_SCHEMA.md",
-    "docs/AI_OS/dispatcher/DISPATCHER_COMMIT_PACKAGE_SCHEMA.md",
-    "docs/AI_OS/dispatcher/DISPATCHER_RECOVERY_BOOTSTRAP.md",
-    "docs/AI_OS/dispatcher/DISPATCHER_VALIDATOR_CHAIN.md",
-    "docs/AI_OS/dispatcher/DISPATCHER_DASHBOARD_DATA_CONTRACT.md"
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md",
+    "docs/architecture/aios-system-architecture.md",
+    "docs/workflows/aios-operator-workflows.md",
+    "docs/audits/phase-92-dispatcher-orchestration-tree-cleanup.md"
 )
 
 Write-Host ""
@@ -125,7 +121,9 @@ $blockedTerms = @(
 
 $scanRoots = @(
     "automation/dispatcher",
-    "docs/AI_OS/dispatcher",
+    "docs/concepts",
+    "docs/architecture",
+    "docs/workflows",
     "Reports/dispatcher"
 )
 
@@ -160,4 +158,3 @@ foreach ($failure in $failures) {
     Write-Host " - $failure"
 }
 exit 1
-
