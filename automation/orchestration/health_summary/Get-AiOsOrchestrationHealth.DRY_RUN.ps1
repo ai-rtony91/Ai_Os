@@ -95,7 +95,7 @@ $toolChecks = @(
     Test-AiOsTool -ToolId "validator_chain_runner" -Label "Validator chain runner" -Paths @("automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1", "automation/orchestration/show-validator-chain.ps1") -MissingSeverity "BLOCKED"
     Test-AiOsTool -ToolId "post_push_verifier" -Label "Post-push verifier" -Paths @("automation/orchestration/post_push/Test-AiOsPostPushVerification.DRY_RUN.ps1") -MissingSeverity "REVIEW"
     Test-AiOsTool -ToolId "worker_lane_checker" -Label "Worker lane checker" -Paths @("automation/orchestration/worker_lanes/Get-AiOsWorkerLaneStatus.DRY_RUN.ps1") -MissingSeverity "REVIEW"
-    Test-AiOsTool -ToolId "compliance_checker" -Label "Compliance checker" -Paths @("automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1", "automation/compliance/Test-AiOsCompliance.DRY_RUN.ps1") -MissingSeverity "REVIEW"
+    Test-AiOsTool -ToolId "compliance_checker" -Label "Compliance checker" -Paths @("automation/orchestration/compliance/Test-AiOsAgentCompliance.DRY_RUN.ps1", "automation/compliance/Test-AiOsCompliance.DRY_RUN.ps1") -MissingSeverity "REVIEW"
     Test-AiOsTool -ToolId "adapter_tools" -Label "Adapter tools" -Paths @("automation/orchestration/adapters/Normalize-AiOsPacket.DRY_RUN.ps1", "automation/orchestration/adapters/Test-AiOsPacketNormalization.DRY_RUN.ps1") -MissingSeverity "REVIEW"
     Test-AiOsTool -ToolId "lock_tools" -Label "Lock tools" -Paths @("automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1", "automation/orchestration/locks/FILE_LOCK_REGISTRY.example.json") -MissingSeverity "REVIEW"
 )
@@ -252,3 +252,4 @@ Write-Host ""
 
 Write-Host "Validator note: no files were changed by this DRY_RUN check."
 Write-Host "Next safe action: $nextSafeAction"
+
