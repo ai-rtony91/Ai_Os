@@ -58,6 +58,35 @@ Principles:
 - keep controls read-only until a separate approved APPLY pass creates executable behavior,
 - prefer compact, repeatable panels over decorative dashboard clutter.
 
+## Visual Identity Direction
+
+Anthony's preferred AI_OS visual identity should be preserved before any dashboard legacy docs are archived.
+
+Canonical visual identity reference: `docs/concepts/aios-visual-identity.md`
+
+Preserved direction:
+
+- deep space / midnight dark background,
+- neon blue and violet glow accents,
+- orbital energy, electric signal, tower, connectivity, telemetry, and network motifs,
+- futuristic control-center / operator cockpit feel,
+- global/system-scale imagery where it reinforces AI_OS as a control environment,
+- premium but readable dark UI,
+- clean card-based dashboard layout,
+- strong visual hierarchy,
+- high-contrast status and safety indicators,
+- blue/purple worker, status, validator, and telemetry accents,
+- tagline tone similar to `Intelligent. Adaptive. Yours.`
+
+Implementation guardrails:
+
+- preserve readability over visual effects,
+- use glow, glass, and restrained parallax only when they clarify depth or status,
+- avoid excessive motion or visual noise,
+- keep critical FAIL, BLOCKED, WARN, REVIEW REQUIRED, and next-action states visible without hunting,
+- keep dashboard visuals separate from live broker/trading activation,
+- do not archive or down-rank branding, theme, layout, mockup, or visual-direction docs unless the design intent is preserved here or in a future canonical visual identity doc.
+
 ## Panel Taxonomy
 
 Preserved panel ideas from the dashboard draft swarm:
