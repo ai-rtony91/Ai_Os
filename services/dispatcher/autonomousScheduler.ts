@@ -25,6 +25,7 @@ export interface ScheduledAction {
 export interface SchedulerPlan {
   actions: ScheduledAction[];
   poisonPackets: string[];
+  staleWorkerPackets?: string[];
   reclaimablePackets: string[];
   generatedAt: string;
 }
@@ -52,6 +53,7 @@ export function generateSchedulerPlan(input: SchedulerInput): SchedulerPlan {
   const retryablePackets = listRetryableDeadLetters(input.deadLetterQueue).map(
     (packet) => packet.packetId
   );
+  const staleWorkerPackets = input.workerLeases.staleAssignedPackets ?? [];
   const reclaimablePackets = input.workerLeases.reclaimablePackets;
 
   for (const candidate of input.resumePlan.candidates) {
@@ -86,6 +88,15 @@ export function generateSchedulerPlan(input: SchedulerInput): SchedulerPlan {
     });
   }
 
+  for (const packetId of staleWorkerPackets) {
+    actions.push({
+      packetId,
+      action: "manual_review",
+      reason: "Packet is assigned to a stale worker and needs operator review",
+      priority: 70
+    });
+  }
+
   for (const packetId of reclaimablePackets) {
     actions.push({
       packetId,
@@ -106,13 +117,23 @@ export function generateSchedulerPlan(input: SchedulerInput): SchedulerPlan {
   }
 
   const scheduledActions = [...deduped.values()]
-    .sort((a, b) => b.priority - a.priority)
+    .sort(
+      (a, b) =>
+        b.priority - a.priority ||
+        a.packetId.localeCompare(b.packetId) ||
+        a.action.localeCompare(b.action)
+    )
     .slice(0, Math.max(0, input.maxConcurrentPackets));
 
   return {
     actions: scheduledActions,
-    poisonPackets: [...new Set(poisonPackets)],
-    reclaimablePackets: [...new Set(reclaimablePackets)],
+    poisonPackets: [...new Set(poisonPackets)].sort((a, b) => a.localeCompare(b)),
+    staleWorkerPackets: [...new Set(staleWorkerPackets)].sort((a, b) =>
+      a.localeCompare(b)
+    ),
+    reclaimablePackets: [...new Set(reclaimablePackets)].sort((a, b) =>
+      a.localeCompare(b)
+    ),
     generatedAt: new Date().toISOString()
   };
 }

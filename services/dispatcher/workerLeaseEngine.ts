@@ -9,6 +9,7 @@ export interface WorkerHeartbeat {
 export interface WorkerLeaseResult {
   activeWorkers: string[];
   staleWorkers: string[];
+  staleAssignedPackets?: string[];
   expiredWorkers: string[];
   reclaimablePackets: string[];
   checkedAt: string;
@@ -20,6 +21,7 @@ export function evaluateWorkerLeases(
 ): WorkerLeaseResult {
   const activeWorkers: string[] = [];
   const staleWorkers: string[] = [];
+  const staleAssignedPackets: string[] = [];
   const expiredWorkers: string[] = [];
   const reclaimablePackets: string[] = [];
 
@@ -50,6 +52,11 @@ export function evaluateWorkerLeases(
 
     if (worker.status === "stale") {
       staleWorkers.push(worker.workerId);
+
+      if (worker.packetId) {
+        staleAssignedPackets.push(worker.packetId);
+      }
+
       continue;
     }
 
@@ -59,6 +66,7 @@ export function evaluateWorkerLeases(
   return {
     activeWorkers: [...new Set(activeWorkers)],
     staleWorkers: [...new Set(staleWorkers)],
+    staleAssignedPackets: [...new Set(staleAssignedPackets)],
     expiredWorkers: [...new Set(expiredWorkers)],
     reclaimablePackets: [...new Set(reclaimablePackets)],
     checkedAt: now.toISOString()

@@ -52,8 +52,19 @@ export function generateResumePlan(
     });
   }
 
+  for (const packet of runtime.invalidPacketStatuses) {
+    candidates.push({
+      packetId: packet.packetId,
+      reason: `Packet has invalid replayed status ${packet.status}`,
+      recommendedAction: "manual_review"
+    });
+  }
+
   return {
     generatedAt: new Date().toISOString(),
-    candidates
+    candidates: candidates.sort((a, b) =>
+      a.packetId.localeCompare(b.packetId) ||
+      a.recommendedAction.localeCompare(b.recommendedAction)
+    )
   };
 }
