@@ -5,6 +5,10 @@ export interface DeadLetterPacket {
   lastFailedAt: string;
   retryable: boolean;
   source: string;
+  severity: "warning" | "critical";
+  manualReviewRequired: boolean;
+  escalationRequired: boolean;
+  lastAction?: string;
 }
 
 export interface DeadLetterQueueState {
@@ -17,15 +21,22 @@ export function createDeadLetterPacket(
   reason: string,
   source: string,
   failureCount = 1,
-  retryable = true
+  retryable = true,
+  lastAction?: string
 ): DeadLetterPacket {
+  const poison = !retryable || failureCount >= 3;
+
   return {
     packetId,
     reason,
     failureCount,
     lastFailedAt: new Date().toISOString(),
-    retryable,
-    source
+    retryable: retryable && !poison,
+    source,
+    severity: poison ? "critical" : "warning",
+    manualReviewRequired: poison,
+    escalationRequired: poison,
+    lastAction
   };
 }
 
@@ -39,14 +50,7 @@ export function addToDeadLetterQueue(
     return {
       packets: state.packets.map((item) =>
         item.packetId === packet.packetId
-          ? {
-              ...item,
-              reason: packet.reason,
-              failureCount: item.failureCount + packet.failureCount,
-              lastFailedAt: packet.lastFailedAt,
-              retryable: packet.retryable,
-              source: packet.source
-            }
+          ? mergeDeadLetterPacket(item, packet)
           : item
       ),
       checkedAt: new Date().toISOString()
@@ -64,7 +68,10 @@ export function listRetryableDeadLetters(
   maxFailures = 3
 ): DeadLetterPacket[] {
   return state.packets.filter(
-    (packet) => packet.retryable && packet.failureCount <= maxFailures
+    (packet) =>
+      packet.retryable &&
+      !packet.manualReviewRequired &&
+      packet.failureCount < maxFailures
   );
 }
 
@@ -73,6 +80,37 @@ export function listPoisonPackets(
   maxFailures = 3
 ): DeadLetterPacket[] {
   return state.packets.filter(
-    (packet) => !packet.retryable || packet.failureCount > maxFailures
+    (packet) =>
+      !packet.retryable ||
+      packet.manualReviewRequired ||
+      packet.escalationRequired ||
+      packet.failureCount >= maxFailures
   );
+}
+
+function mergeDeadLetterPacket(
+  existing: DeadLetterPacket,
+  next: DeadLetterPacket,
+  maxFailures = 3
+): DeadLetterPacket {
+  const failureCount = existing.failureCount + next.failureCount;
+  const poison =
+    !existing.retryable ||
+    !next.retryable ||
+    failureCount >= maxFailures ||
+    existing.manualReviewRequired ||
+    next.manualReviewRequired;
+
+  return {
+    ...existing,
+    reason: next.reason,
+    failureCount,
+    lastFailedAt: next.lastFailedAt,
+    retryable: !poison,
+    source: next.source,
+    severity: poison ? "critical" : "warning",
+    manualReviewRequired: poison,
+    escalationRequired: poison,
+    lastAction: next.lastAction ?? existing.lastAction
+  };
 }

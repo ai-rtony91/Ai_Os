@@ -13,6 +13,55 @@ Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
 Write-Host ""
 
 $approvalFiles = Get-ChildItem -LiteralPath $ApprovalRoot -Filter "APPROVE_PR_*.json" -File -ErrorAction SilentlyContinue
+$applyApprovalStatuses = @("approved", "approved_for_apply", "apply_approved", "completed")
+
+function Get-AiOsApprovalPacketId {
+    param([object]$Approval)
+
+    foreach ($name in @("packet_id", "packetId", "work_packet_id", "approved_packet_id")) {
+        if ($Approval.PSObject.Properties.Name -contains $name) {
+            return [string]$Approval.$name
+        }
+    }
+
+    return ""
+}
+
+function Test-AiOsApprovalAppliesToPacket {
+    param(
+        [object]$Approval,
+        [object]$Packet,
+        [bool]$ApplyMode
+    )
+
+    $approvalPacketId = Get-AiOsApprovalPacketId -Approval $Approval
+    $packetId = [string]$Packet.packet_id
+
+    if ([string]::IsNullOrWhiteSpace($approvalPacketId)) {
+        Write-Host "Approval skipped: missing packet_id binding"
+        return $false
+    }
+
+    if ($approvalPacketId -ne $packetId) {
+        Write-Host "Approval skipped: packet_id mismatch approval=$approvalPacketId packet=$packetId"
+        return $false
+    }
+
+    if ($ApplyMode) {
+        if ([string]$Approval.approved_mode -eq "DRY_RUN_ONLY") {
+            Write-Host "Approval skipped: approved_mode is DRY_RUN_ONLY"
+            return $false
+        }
+
+        if (($Approval.PSObject.Properties.Name -contains "approval_status") -and
+            [string]$Approval.approval_status -notin $applyApprovalStatuses) {
+            Write-Host "Approval skipped: approval_status is not APPLY-approved"
+            return $false
+        }
+    }
+
+    return $true
+}
 
 if ($approvalFiles.Count -eq 0) {
     Write-Host "No approval files found."
@@ -47,6 +96,10 @@ foreach ($approvalFile in $approvalFiles) {
         Write-Host "packet_id: $($packet.packet_id)"
         Write-Host "status: $($packet.status)"
         Write-Host "approval_pr: $($approval.pr_number)"
+
+        if (-not (Test-AiOsApprovalAppliesToPacket -Approval $approval -Packet $packet -ApplyMode ([bool]$Apply))) {
+            continue
+        }
 
         if ($Apply) {
 
