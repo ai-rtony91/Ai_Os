@@ -36,7 +36,7 @@ $requiredFiles = @(
   "automation/operator/Start-AiOsParallelDryRunCrew.ps1",
   "automation/operator/Test-AiOsWorkerAutoRouting.DRY_RUN.ps1",
   "apps/dashboard/mock-data/aios-worker-auto-routing-v1.example.json",
-  "docs/AI_OS/orchestration/AIOS_WORKER_AUTO_ROUTING_V1.md"
+  "docs/concepts/aios-dispatcher-orchestration-concepts.md"
 )
 
 foreach ($file in $requiredFiles) {

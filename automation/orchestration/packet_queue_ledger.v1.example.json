@@ -16,7 +16,7 @@
       "validator_required": true,
       "allowed_paths": [
         "automation/orchestration/",
-        "docs/AI_OS/orchestration/",
+        "docs/concepts/aios-dispatcher-orchestration-concepts.md",
         "Reports/checkpoints/"
       ],
       "blocked_paths": [
@@ -44,7 +44,7 @@
       "approval_required": true,
       "validator_required": true,
       "allowed_paths": [
-        "docs/AI_OS/orchestration/",
+        "docs/workflows/aios-operator-workflows.md",
         "Reports/checkpoints/"
       ],
       "blocked_paths": [

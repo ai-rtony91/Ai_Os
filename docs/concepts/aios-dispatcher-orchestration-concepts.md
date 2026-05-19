@@ -2,7 +2,7 @@
 
 Status: canonical concept summary extracted from legacy `docs/AI_OS/dispatcher` and `docs/AI_OS/orchestration`
 
-Last reviewed: Phase 92 dispatcher/orchestration tree cleanup
+Last reviewed: Phase 93 dispatcher/orchestration reference retirement
 
 ## Purpose
 
@@ -58,15 +58,21 @@ Old root fallback examples were archived to `archive/orchestration_legacy/root_e
 
 ## Active Reference Status
 
-Phase 92 found active references from automation into both legacy doc trees. Because those references are runtime-adjacent validation and operator workflow inputs, the source folders should not be archived until the references are either redirected to canonical docs or explicitly retired.
+Phase 92 found active references from automation into both legacy doc trees. Phase 93 retired the references that were in the allowed edit scope by redirecting them to canonical docs.
 
-Current blockers:
+Retired dispatcher references:
 
-- `automation/dispatcher/validators/Test-AIOSDispatcherDryRun.ps1` references `docs/AI_OS/dispatcher` and specific dispatcher docs.
-- `automation/operator/Test-AIOSCodexWindowSnapshot.DRY_RUN.ps1` references `docs/AI_OS/dispatcher/runtime/CODEX_WINDOW_SNAPSHOT_BOOTSTRAP.md`.
-- `automation/status/Get-AiOsWorkflowState.DRY_RUN.ps1` references `docs/AI_OS/orchestration/AIOS_ORCHESTRATION_FRAMEWORK_DRAFT.md`.
-- `automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1`, `Test-AiOsWorkerAutoRouting.DRY_RUN.ps1`, and `Test-AiOsPhase3State.DRY_RUN.ps1` reference orchestration docs.
-- `automation/orchestration` scripts, configs, ledgers, and worker profile files reference `docs/AI_OS/orchestration` as an active coordination path.
+- `automation/dispatcher/validators/Test-AIOSDispatcherDryRun.ps1`
+- `automation/operator/Test-AIOSCodexWindowSnapshot.DRY_RUN.ps1`
+
+Retired orchestration references in allowed files:
+
+- `automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1`
+- `automation/operator/Test-AiOsWorkerAutoRouting.DRY_RUN.ps1`
+- `automation/operator/Test-AiOsPhase3State.DRY_RUN.ps1`
+- root metadata/example files under `automation/orchestration/*.json` that were in scope for this phase.
+
+Remaining blockers are outside Phase 93 allowed edits. They are listed in `docs/audits/phase-93-dispatcher-orchestration-reference-retirement.md`.
 
 ## Current Doctrine
 

@@ -53,7 +53,7 @@ $required = @(
     "automation/operator/Invoke-AiOsApprovalGate.ps1",
     "automation/operator/Invoke-AiOsStatefulDispatcher.ps1",
     "automation/operator/Test-AiOsPhase3State.DRY_RUN.ps1",
-    "docs/AI_OS/orchestration/AIOS_PHASE3_STATEFUL_ORCHESTRATION.md"
+    "docs/concepts/aios-dispatcher-orchestration-concepts.md"
 )
 
 foreach ($file in $required) {

@@ -11,7 +11,7 @@
       "claim_status": "not_claimed",
       "allowed_paths": [
         "automation/orchestration/",
-        "docs/AI_OS/orchestration/",
+        "docs/concepts/aios-dispatcher-orchestration-concepts.md",
         "Reports/checkpoints/"
       ],
       "blocked_paths": [
