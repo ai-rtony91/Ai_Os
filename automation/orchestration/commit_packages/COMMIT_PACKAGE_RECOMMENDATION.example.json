@@ -1,0 +1,56 @@
+{
+  "system": "AI_OS",
+  "mode": "DRY_RUN",
+  "recommendation_name": "commit_package_recommendation_example",
+  "purpose": "Example selective commit package recommendation. This does not stage, commit, or push files.",
+  "current_branch": "codex/worker-02",
+  "git_status": "dirty",
+  "worker_lane": {
+    "lane_id": "CODEX_02",
+    "ownership_status": "WARN",
+    "reason": "Branch maps to CODEX_02, but the worktree has untracked files."
+  },
+  "summary": {
+    "changed_file_count": 0,
+    "new_file_count": 3,
+    "recommended_file_count": 3,
+    "excluded_file_count": 0,
+    "risk_count": 1
+  },
+  "recommended_files": [
+    {
+      "path": "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+      "reason": "DRY_RUN recommendation script.",
+      "git_add_command": "git add -- automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
+    },
+    {
+      "path": "automation/orchestration/commit_packages/COMMIT_PACKAGE_RECOMMENDATION.example.json",
+      "reason": "Validator-friendly recommendation example.",
+      "git_add_command": "git add -- automation/orchestration/commit_packages/COMMIT_PACKAGE_RECOMMENDATION.example.json"
+    },
+    {
+      "path": "automation/orchestration/commit_packages/README.md",
+      "reason": "Beginner-readable usage notes.",
+      "git_add_command": "git add -- automation/orchestration/commit_packages/README.md"
+    }
+  ],
+  "excluded_files": [],
+  "risks": [
+    {
+      "path": "UNKNOWN",
+      "risk": "Worktree may include files from multiple objectives. Review recommendations before staging."
+    }
+  ],
+  "commit_message_suggestion": "Add commit package recommendation DRY_RUN scaffold",
+  "safety": {
+    "git_add_dot_used": "NO",
+    "files_staged": 0,
+    "commits_performed": 0,
+    "pushes_performed": 0,
+    "dispatcher_edits": "NO",
+    "runtime_integration": "NO",
+    "dashboard_edits": "NO"
+  },
+  "validator_friendly": true,
+  "next_safe_action": "Review recommended git add commands before any selective staging approval."
+}

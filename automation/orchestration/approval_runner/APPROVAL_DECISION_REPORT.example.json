@@ -1,0 +1,44 @@
+{
+  "schema": "AIOS_APPROVAL_DECISION_REPORT.v1",
+  "mode": "DRY_RUN",
+  "generated_at": "2026-05-18T00:00:00Z",
+  "repo_root": "C:/path/to/AIOS",
+  "decision": "REVIEW",
+  "decision_label": "NEEDS REVIEW",
+  "info_count": 5,
+  "warn_count": 3,
+  "blocked_count": 0,
+  "changed_files": [
+    "automation/orchestration/example-file.ps1"
+  ],
+  "staged_files": [],
+  "untracked_files": [
+    "automation/orchestration/example-file.ps1"
+  ],
+  "validation_evidence_path": "Reports/validation/example.json",
+  "worker_report_path": "Reports/operator/worker-reports/example.md",
+  "worker_lane_path": "automation/orchestration",
+  "approval_reason_supplied": true,
+  "risks": [
+    {
+      "level": "WARN",
+      "check_id": "git_status_cleanliness",
+      "message": "Working tree has changed or untracked files.",
+      "evidence": [
+        "automation/orchestration/example-file.ps1"
+      ],
+      "next_safe_action": "Review exact changed files before approving APPLY."
+    },
+    {
+      "level": "INFO",
+      "check_id": "staged_files",
+      "message": "No staged files detected.",
+      "evidence": [],
+      "next_safe_action": "Continue approval review."
+    }
+  ],
+  "files_changed_by_runner": [],
+  "commit_performed": false,
+  "push_performed": false,
+  "next_safe_action": "Resolve review warnings or explicitly accept them before approving APPLY. No commit or push is approved."
+}
