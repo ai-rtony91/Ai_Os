@@ -1,13 +1,6 @@
 import { routePacketApproval } from "./approvalRouter";
 import { writeTelemetryEvent } from "../telemetry/telemetryWriter";
-
-export type PacketStatus =
-  | "queued"
-  | "dry_run"
-  | "waiting_approval"
-  | "approved"
-  | "applied"
-  | "blocked";
+import { movePacketStatus, type PacketStatus } from "./packetQueue";
 
 export interface WorkPacket {
   packetId: string;
@@ -55,7 +48,7 @@ export function dispatchPacket(packet: WorkPacket): DispatchResult {
     );
 
     return {
-      packet: { ...packet, status: "waiting_approval" },
+      packet: movePacketStatus(packet, "waiting_approval"),
       approvalRequestId: approval?.approvalId,
       nextAction: "wait_for_approval"
     };
@@ -77,7 +70,7 @@ export function dispatchPacket(packet: WorkPacket): DispatchResult {
     );
 
     return {
-      packet: { ...packet, status: "waiting_approval" },
+      packet: movePacketStatus(packet, "waiting_approval"),
       approvalRequestId: approval?.approvalId,
       nextAction: "wait_for_approval"
     };
@@ -95,7 +88,7 @@ export function dispatchPacket(packet: WorkPacket): DispatchResult {
   );
 
   return {
-    packet: { ...packet, status: "dry_run" },
+    packet: movePacketStatus(packet, "dry_run"),
     nextAction: "dry_run"
   };
 }

@@ -1,6 +1,7 @@
 import {
   claimAutomationQueue,
   completeAutomationPacket,
+  markAutomationPacketState,
   releaseAutomationQueue,
   type AutomationDispatchPacket,
   type SafeExecutionState
@@ -124,6 +125,7 @@ function executePacket(
 
   packet.state = packet.retryCount > 0 ? "retrying" : "executing";
   packet.executionCount += 1;
+  markAutomationPacketState(packet.packetId, executorId, packet.state);
 
   console.log(
     `[AUTOMATION EXECUTOR] executing ${packet.packetId} (${packet.action})`

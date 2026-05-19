@@ -1,15 +1,21 @@
 import { runtimeEventBus, type RuntimeEvent } from "./eventBus";
 import { submitApproval } from "../approvals/approvalInbox";
+import {
+  claimPackets,
+  createPacketQueueState,
+  enqueuePacket,
+  getQueueSnapshot,
+  releasePacketClaims,
+  removeTerminalPackets,
+  setPacketQueueStatus,
+  completePacket,
+  type PacketExecutionStatus,
+  type PacketQueueRecord,
+  type PacketQueueSnapshot,
+  type PacketQueueState
+} from "../dispatcher/packetQueue";
 
-export type SafeExecutionState =
-  | "queued"
-  | "scheduled"
-  | "executing"
-  | "retrying"
-  | "failed"
-  | "blocked"
-  | "completed"
-  | "rolled_back";
+export type SafeExecutionState = PacketExecutionStatus;
 
 export interface RollbackMetadata {
   strategy: "none" | "manual" | "git_restore" | "compensating_action";
@@ -38,9 +44,23 @@ export interface AutomationDispatchPacket {
   rollback: RollbackMetadata;
 }
 
-const automationPacketQueue: AutomationDispatchPacket[] = [];
+let automationPacketQueue: PacketQueueState<AutomationDispatchPacket> =
+  createPacketQueueState<AutomationDispatchPacket>();
 let queueLockedBy: string | null = null;
 let packetSequence = 0;
+
+function packetFromQueueRecord(
+  record: PacketQueueRecord<AutomationDispatchPacket>
+): AutomationDispatchPacket {
+  return {
+    ...record.packet,
+    state: record.status as SafeExecutionState,
+    retryCount: record.retryCount,
+    maxRetries: record.maxRetries ?? record.packet.maxRetries,
+    lockedBy: record.claimedBy ?? null,
+    lockedAt: record.claimedAt ?? null
+  };
+}
 
 function createRollbackMetadata(action: string): RollbackMetadata {
   return {
@@ -115,7 +135,11 @@ function submitPacketApproval(packet: AutomationDispatchPacket): void {
 }
 
 export function getAutomationPacketQueue(): AutomationDispatchPacket[] {
-  return [...automationPacketQueue];
+  return automationPacketQueue.records.map(packetFromQueueRecord);
+}
+
+export function getAutomationPacketQueueSnapshot(): PacketQueueSnapshot<AutomationDispatchPacket> {
+  return getQueueSnapshot(automationPacketQueue);
 }
 
 export function claimAutomationQueue(
@@ -129,32 +153,14 @@ export function claimAutomationQueue(
   queueLockedBy = workerId;
 
   const claimLimit = Math.max(0, maxPackets);
-  const claimed: AutomationDispatchPacket[] = [];
+  const result = claimPackets(automationPacketQueue, {
+    workerId,
+    maxPackets: claimLimit
+  });
 
-  for (const packet of automationPacketQueue) {
-    if (claimed.length >= claimLimit) {
-      break;
-    }
+  automationPacketQueue = result.state;
 
-    if (packet.lockedBy || packet.state === "executing") {
-      continue;
-    }
-
-    if (
-      packet.state !== "queued" &&
-      packet.state !== "scheduled" &&
-      packet.state !== "retrying"
-    ) {
-      continue;
-    }
-
-    packet.state = "scheduled";
-    packet.lockedBy = workerId;
-    packet.lockedAt = new Date().toISOString();
-    claimed.push({ ...packet });
-  }
-
-  return claimed;
+  return (result.records ?? []).map(packetFromQueueRecord);
 }
 
 export function completeAutomationPacket(
@@ -162,23 +168,24 @@ export function completeAutomationPacket(
   workerId: string,
   nextState: SafeExecutionState
 ): AutomationDispatchPacket | undefined {
-  const packetIndex = automationPacketQueue.findIndex(
-    (packet) => packet.packetId === packetId
+  const existing = automationPacketQueue.records.find(
+    (record) => record.packetId === packetId
   );
 
-  if (packetIndex < 0) {
+  if (!existing) {
     return undefined;
   }
 
-  const packet = automationPacketQueue[packetIndex];
-
-  if (packet.lockedBy !== workerId) {
-    return { ...packet };
+  if (existing.claimedBy !== workerId) {
+    return packetFromQueueRecord(existing);
   }
 
-  packet.state = nextState;
-  packet.lockedBy = null;
-  packet.lockedAt = null;
+  const result = completePacket(
+    automationPacketQueue,
+    packetId,
+    workerId,
+    nextState
+  );
 
   if (
     nextState === "completed" ||
@@ -186,23 +193,44 @@ export function completeAutomationPacket(
     nextState === "failed" ||
     nextState === "rolled_back"
   ) {
-    automationPacketQueue.splice(packetIndex, 1);
+    automationPacketQueue = removeTerminalPackets(result.state);
+  } else {
+    automationPacketQueue = result.state;
   }
 
-  return { ...packet };
+  return result.record ? packetFromQueueRecord(result.record) : undefined;
+}
+
+export function markAutomationPacketState(
+  packetId: string,
+  workerId: string,
+  nextState: SafeExecutionState
+): AutomationDispatchPacket | undefined {
+  const existing = automationPacketQueue.records.find(
+    (record) => record.packetId === packetId
+  );
+
+  if (!existing) {
+    return undefined;
+  }
+
+  if (existing.claimedBy !== workerId) {
+    return packetFromQueueRecord(existing);
+  }
+
+  const result = setPacketQueueStatus(
+    automationPacketQueue,
+    packetId,
+    nextState
+  );
+  automationPacketQueue = result.state;
+
+  return result.record ? packetFromQueueRecord(result.record) : undefined;
 }
 
 export function releaseAutomationQueue(workerId: string): void {
-  for (const packet of automationPacketQueue) {
-    if (packet.lockedBy === workerId) {
-      packet.lockedBy = null;
-      packet.lockedAt = null;
-
-      if (packet.state === "scheduled" || packet.state === "executing") {
-        packet.state = "queued";
-      }
-    }
-  }
+  const result = releasePacketClaims(automationPacketQueue, workerId);
+  automationPacketQueue = result.state;
 
   if (queueLockedBy === workerId) {
     queueLockedBy = null;
@@ -236,7 +264,12 @@ export function registerRuntimeAutomationDispatcher(): void {
           }
         );
 
-        automationPacketQueue.push(packet);
+        const result = enqueuePacket(automationPacketQueue, packet, {
+          status: "queued",
+          maxRetries: packet.maxRetries,
+          reason: "Runtime remediation packet created"
+        });
+        automationPacketQueue = result.state;
         submitPacketApproval(packet);
 
         console.log(
@@ -263,7 +296,12 @@ export function registerRuntimeAutomationDispatcher(): void {
           }
         );
 
-        automationPacketQueue.push(packet);
+        const result = enqueuePacket(automationPacketQueue, packet, {
+          status: "queued",
+          maxRetries: packet.maxRetries,
+          reason: "Policy review packet created"
+        });
+        automationPacketQueue = result.state;
         submitPacketApproval(packet);
 
         console.log(

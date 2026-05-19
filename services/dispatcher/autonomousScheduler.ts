@@ -1,6 +1,7 @@
 import type { DeadLetterQueueState } from "./deadLetterQueue";
 import { listRetryableDeadLetters, listPoisonPackets } from "./deadLetterQueue";
 import type { ResumePlan } from "./packetResumeEngine";
+import type { PacketQueueSnapshot } from "./packetQueue";
 import type { WorkerLeaseResult } from "./workerLeaseEngine";
 
 export interface SchedulerInput {
@@ -8,6 +9,7 @@ export interface SchedulerInput {
   deadLetterQueue: DeadLetterQueueState;
   workerLeases: WorkerLeaseResult;
   maxConcurrentPackets: number;
+  packetQueueSnapshot?: PacketQueueSnapshot;
 }
 
 export interface ScheduledAction {
@@ -53,6 +55,55 @@ export function generateSchedulerPlan(input: SchedulerInput): SchedulerPlan {
     (packet) => packet.packetId
   );
   const reclaimablePackets = input.workerLeases.reclaimablePackets;
+
+  if (input.packetQueueSnapshot) {
+    for (const record of input.packetQueueSnapshot.records) {
+      if (record.status === "queued" || record.status === "scheduled") {
+        actions.push({
+          packetId: record.packetId,
+          action: "dispatch",
+          reason: record.lastReason ?? "Packet is dispatchable from canonical queue",
+          priority: priorityForAction("dispatch")
+        });
+      }
+
+      if (record.status === "waiting_approval") {
+        actions.push({
+          packetId: record.packetId,
+          action: "wait_for_approval",
+          reason: record.lastReason ?? "Packet is waiting for approval in canonical queue",
+          priority: priorityForAction("wait_for_approval")
+        });
+      }
+
+      if (record.status === "approved" || record.status === "dry_run") {
+        actions.push({
+          packetId: record.packetId,
+          action: "resume_dry_run",
+          reason: record.lastReason ?? "Packet can resume validation from canonical queue",
+          priority: priorityForAction("resume_dry_run")
+        });
+      }
+
+      if (record.status === "retrying" || record.status === "failed") {
+        actions.push({
+          packetId: record.packetId,
+          action: "retry",
+          reason: record.lastReason ?? "Packet is retryable from canonical queue",
+          priority: priorityForAction("retry")
+        });
+      }
+
+      if (record.status === "dead_letter" || record.status === "manual_review") {
+        actions.push({
+          packetId: record.packetId,
+          action: "manual_review",
+          reason: record.lastReason ?? "Packet requires manual review from canonical queue",
+          priority: priorityForAction("manual_review")
+        });
+      }
+    }
+  }
 
   for (const candidate of input.resumePlan.candidates) {
     const action =
