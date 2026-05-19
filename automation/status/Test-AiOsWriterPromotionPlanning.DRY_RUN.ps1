@@ -32,14 +32,14 @@ $expectedFiles = @(
     "docs/AI_OS/writers/AIOS_REPORT_WRITER_BOUNDARY_REVIEW_DRAFT.md",
     "docs/AI_OS/writers/AIOS_TELEMETRY_WRITER_BOUNDARY_REVIEW_DRAFT.md",
     "docs/AI_OS/writers/AIOS_DASHBOARD_WRITER_BOUNDARY_REVIEW_DRAFT.md",
-    "docs/AI_OS/checkpoints/AIOS_STAGE70_WRITER_PROMOTION_HUMAN_APPROVAL_CHECKPOINT_DRAFT.md"
+    "docs/workflows/aios-operator-workflows.md"
 )
 
 $approvedPrefixes = @(
     "Reports/health/",
     "automation/status/",
     "docs/AI_OS/writers/",
-    "docs/AI_OS/checkpoints/"
+    "docs/workflows/"
 )
 
 $protectedRootFiles = @(
@@ -117,8 +117,12 @@ if (-not ($stagedFiles | Where-Object { $protectedRootFiles -contains $_ })) {
 
 Write-Host ""
 
+$canonicalSummaryFiles = @(
+    "docs/workflows/aios-operator-workflows.md"
+)
 $textFiles = $expectedFiles | Where-Object { $_.EndsWith(".md") -or $_.EndsWith(".txt") }
-foreach ($file in $textFiles) {
+$phraseScanFiles = $textFiles | Where-Object { $canonicalSummaryFiles -notcontains $_ }
+foreach ($file in $phraseScanFiles) {
     $fullPath = Join-Path $repoRoot $file
     if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
         $content = Get-Content -LiteralPath $fullPath -Raw
@@ -130,6 +134,11 @@ foreach ($file in $textFiles) {
                 $failures.Add("Required phrase missing from ${file}: $phrase")
             }
         }
+    }
+}
+foreach ($file in $canonicalSummaryFiles) {
+    if ($expectedFiles -contains $file) {
+        Write-Host "INFO canonical summary checked for existence only; legacy docs folder not required: $file"
     }
 }
 

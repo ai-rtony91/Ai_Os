@@ -32,6 +32,9 @@ Write-Host ""
 Write-Host "Show supervisor:" -ForegroundColor Green
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Start-AiOsSupervisor.ps1"
 Write-Host ""
+Write-Host "Show canonical operator status:" -ForegroundColor Green
+Write-Host "  powershell -ExecutionPolicy Bypass -File automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1"
+Write-Host ""
 Write-Host "Launch Command Deck:" -ForegroundColor Magenta
 Write-Host "  powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsCommandDeck.ps1"
 Write-Host ""

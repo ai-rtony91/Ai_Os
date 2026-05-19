@@ -11,10 +11,14 @@ Reports/daily/*_DRY_RUN_REPORT*.txt
 Reports/daily/MORNING_BRIEF_*.md
 Reports/security/
 Reports/dry_runs/
+archive/reports_legacy/daily/MORNING_BRIEF_*.md
+archive/reports_legacy/dry_runs/
+archive/reports_legacy/security/
 
 # Runtime orchestration state
 automation/orchestration/PR_BODY_LAST_GENERATED.md
 automation/orchestration/workers/*-heartbeat.json
+*-heartbeat.json
 
 # Python cache
 __pycache__/
@@ -37,3 +41,15 @@ credentials/
 
 # Claude Code local/session state
 .claude/
+
+# Runtime logs
+*.log
+logs/
+**/logs/*.log
+
+# Local repo audit scratch files
+repo-file-map.txt
+repo-top-level.txt
+reports-readable-list.txt
+trading-lab-file-list.txt
+trading-lab-readable-list.txt

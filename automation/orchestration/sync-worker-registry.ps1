@@ -2,9 +2,11 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
-$queuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
+$canonicalQueuePath = Join-Path $orchestrationRoot "work_packets"
+$legacyQueuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
 $locksPath = Join-Path $orchestrationRoot "assignment_locks.example.json"
-$registryPath = Join-Path $orchestrationRoot "worker_registry.example.json"
+$registryPath = Join-Path $orchestrationRoot "workers\AIOS_WORKER_REGISTRY.json"
+$legacyRegistryPath = Join-Path $orchestrationRoot "worker_registry.example.json"
 
 function Read-JsonFile {
     param(
@@ -19,25 +21,115 @@ function Read-JsonFile {
     Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
 }
 
+function Read-OptionalJsonFile {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $null
+    }
+
+    Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
+}
+
+function Get-NormalizedWorkPackets {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return @()
+    }
+
+    $packets = @()
+    foreach ($state in @("active", "blocked", "complete")) {
+        $statePath = Join-Path $Path $state
+        if (-not (Test-Path -LiteralPath $statePath -PathType Container)) {
+            continue
+        }
+
+        foreach ($file in @(Get-ChildItem -LiteralPath $statePath -Filter "*.json" -File -ErrorAction SilentlyContinue)) {
+            $packet = Read-OptionalJsonFile -Path $file.FullName
+            if ($null -eq $packet) {
+                continue
+            }
+
+            $assignedWorker = Get-JsonValue -Object $packet -Name "assigned_worker_id" -Default (Get-JsonValue -Object $packet -Name "assigned_worker")
+            $packetName = Get-JsonValue -Object $packet -Name "packet_name" -Default (Get-JsonValue -Object $packet -Name "title" -Default $file.BaseName)
+            $packets += [pscustomobject]@{
+                packet_id = Get-JsonValue -Object $packet -Name "packet_id" -Default $file.BaseName
+                packet_name = $packetName
+                status = Get-JsonValue -Object $packet -Name "status" -Default $state
+                assigned_worker_id = $assignedWorker
+                source_file = $file.FullName
+            }
+        }
+    }
+
+    return $packets
+}
+
 function Is-BlankAssignment {
     param($Value)
 
     return ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value) -or [string]$Value -eq "UNASSIGNED")
 }
 
-$queue = Read-JsonFile -Path $queuePath
-$locks = Read-JsonFile -Path $locksPath
-$registry = Read-JsonFile -Path $registryPath
+function Get-JsonValue {
+    param(
+        [AllowNull()]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Default = ""
+    )
 
-$packets = @($queue.packets)
+    if ($null -eq $Object) { return $Default }
+    if ($Object.PSObject.Properties.Name -contains $Name) {
+        $value = $Object.$Name
+        if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace([string]$value)) {
+            return $value
+        }
+    }
+    return $Default
+}
+
+$locks = Read-JsonFile -Path $locksPath
+$registry = if (Test-Path -LiteralPath $registryPath -PathType Leaf) { Read-JsonFile -Path $registryPath } else { Read-JsonFile -Path $legacyRegistryPath }
+
+$queue = $null
+$queueSource = "none"
+$packets = @()
+if (Test-Path -LiteralPath $canonicalQueuePath -PathType Container) {
+    $packets = @(Get-NormalizedWorkPackets -Path $canonicalQueuePath)
+    $queueSource = "automation/orchestration/work_packets/"
+} elseif (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
+    $queue = Read-JsonFile -Path $legacyQueuePath
+    $packets = @($queue.packets)
+    $queueSource = "packet_queue.example.json"
+}
 $lockItems = @($locks.locks)
 $workers = @($registry.workers)
 
 Write-Host "AI_OS Worker Registry Sync Display"
-Write-Host "Queue: $($queue.queue_name)"
+Write-Host "Queue source: $queueSource"
+if (Test-Path -LiteralPath $canonicalQueuePath -PathType Container) {
+    Write-Host "Canonical queue folder: automation/orchestration/work_packets/"
+    if (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
+        Write-Host "Queue detail fallback: packet_queue.example.json available"
+    } else {
+        Write-Host "Legacy fallback not found; canonical source used."
+    }
+} elseif ($null -ne $queue) {
+    Write-Host "Fallback queue: $($queue.queue_name)"
+} else {
+    Write-Host "Queue detail: unavailable"
+    Write-Host "Legacy fallback not found; lock and registry checks only."
+}
 Write-Host "Locks: $($locks.lock_name)"
-Write-Host "Registry: $($registry.registry_name)"
-Write-Host "Mode: $($registry.mode)"
+Write-Host "Registry: $(Get-JsonValue -Object $registry -Name 'registry_name' -Default (Get-JsonValue -Object $registry -Name 'registry_id' -Default 'UNKNOWN'))"
+Write-Host "Mode: $(Get-JsonValue -Object $registry -Name 'mode' -Default 'canonical registry')"
 Write-Host ""
 Write-Host "Safety: display-only. No files are modified. No locks are created. No workers are launched."
 Write-Host ""
@@ -60,7 +152,7 @@ foreach ($lock in $lockItems) {
     if (-not (Is-BlankAssignment $workerId)) {
         $worker = $workers | Where-Object { $_.worker_id -eq $workerId } | Select-Object -First 1
         if ($null -eq $worker) {
-            $missingWorkerRecords += "Packet $($lock.packet_id) is locked by worker '$workerId', but that worker is missing from worker_registry.example.json."
+            $missingWorkerRecords += "Packet $($lock.packet_id) is locked by worker '$workerId', but that worker is missing from the selected worker registry source."
         }
     }
 
@@ -69,11 +161,12 @@ foreach ($lock in $lockItems) {
     }
 
     if ($null -eq $packet) {
-        $staleOwnership += "Lock references packet $($lock.packet_id), but that packet is missing from packet_queue.example.json."
+        $staleOwnership += "Lock references packet $($lock.packet_id), but that packet is missing from the selected packet source."
     }
 
-    if ($null -ne $worker -and -not (Is-BlankAssignment $worker.assigned_packet_id) -and $worker.assigned_packet_id -ne $lock.packet_id) {
-        $staleOwnership += "Worker $($worker.worker_id) is locked to packet $($lock.packet_id), but registry says assigned packet is $($worker.assigned_packet_id)."
+    $workerAssignedPacketId = Get-JsonValue -Object $worker -Name "assigned_packet_id"
+    if ($null -ne $worker -and -not (Is-BlankAssignment $workerAssignedPacketId) -and $workerAssignedPacketId -ne $lock.packet_id) {
+        $staleOwnership += "Worker $($worker.worker_id) is locked to packet $($lock.packet_id), but registry says assigned packet is $workerAssignedPacketId."
     }
 }
 
@@ -84,7 +177,7 @@ foreach ($packet in $packets) {
     if (-not (Is-BlankAssignment $packetWorkerId)) {
         $packetWorker = $workers | Where-Object { $_.worker_id -eq $packetWorkerId } | Select-Object -First 1
         if ($null -eq $packetWorker) {
-            $missingWorkerRecords += "Packet $($packet.packet_id) is assigned to worker '$packetWorkerId', but that worker is missing from worker_registry.example.json."
+            $missingWorkerRecords += "Packet $($packet.packet_id) is assigned to worker '$packetWorkerId', but that worker is missing from the selected worker registry source."
         }
 
         if ($null -eq $packetLock) {
@@ -98,31 +191,33 @@ foreach ($packet in $packets) {
 }
 
 foreach ($worker in $workers) {
-    if (-not (Is-BlankAssignment $worker.assigned_packet_id)) {
-        $workerPacket = $packets | Where-Object { $_.packet_id -eq $worker.assigned_packet_id } | Select-Object -First 1
-        $workerLock = $lockItems | Where-Object { $_.packet_id -eq $worker.assigned_packet_id -and $_.worker_id -eq $worker.worker_id } | Select-Object -First 1
+    $workerAssignedPacketId = Get-JsonValue -Object $worker -Name "assigned_packet_id"
+    if (-not (Is-BlankAssignment $workerAssignedPacketId)) {
+        $workerPacket = $packets | Where-Object { $_.packet_id -eq $workerAssignedPacketId } | Select-Object -First 1
+        $workerLock = $lockItems | Where-Object { $_.packet_id -eq $workerAssignedPacketId -and $_.worker_id -eq $worker.worker_id } | Select-Object -First 1
 
         if ($null -eq $workerPacket) {
-            $staleOwnership += "Worker $($worker.worker_id) is assigned to missing packet $($worker.assigned_packet_id)."
+            $staleOwnership += "Worker $($worker.worker_id) is assigned to missing packet $workerAssignedPacketId."
         }
 
         if ($null -eq $workerLock) {
-            $staleOwnership += "Worker $($worker.worker_id) is assigned to packet $($worker.assigned_packet_id), but no matching lock confirms that ownership."
+            $staleOwnership += "Worker $($worker.worker_id) is assigned to packet $workerAssignedPacketId, but no matching lock confirms that ownership."
         }
     }
 }
 
 Write-Host "Worker-to-packet status:"
 foreach ($worker in $workers) {
-    $assignedPacket = if (Is-BlankAssignment $worker.assigned_packet_id) { "none" } else { $worker.assigned_packet_id }
+    $workerAssignedPacketId = Get-JsonValue -Object $worker -Name "assigned_packet_id"
+    $assignedPacket = if (Is-BlankAssignment $workerAssignedPacketId) { "none" } else { $workerAssignedPacketId }
     $matchingPacket = if ($assignedPacket -eq "none") { $null } else { $packets | Where-Object { $_.packet_id -eq $assignedPacket } | Select-Object -First 1 }
     $matchingLock = if ($assignedPacket -eq "none") { $null } else { $lockItems | Where-Object { $_.packet_id -eq $assignedPacket -and $_.worker_id -eq $worker.worker_id } | Select-Object -First 1 }
     $packetStatus = if ($null -eq $matchingPacket) { "none" } else { $matchingPacket.status }
     $lockStatus = if ($null -eq $matchingLock) { "none" } else { $matchingLock.claim_status }
 
     Write-Host "  Worker: $($worker.worker_id)"
-    Write-Host "    Name: $($worker.worker_name)"
-    Write-Host "    Status: $($worker.status)"
+    Write-Host "    Name: $(Get-JsonValue -Object $worker -Name 'worker_name' -Default $worker.worker_id)"
+    Write-Host "    Status: $(Get-JsonValue -Object $worker -Name 'status' -Default 'canonical')"
     Write-Host "    Assigned packet: $assignedPacket"
     Write-Host "    Packet status: $packetStatus"
     Write-Host "    Matching lock status: $lockStatus"

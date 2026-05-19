@@ -35,7 +35,7 @@ $requiredFolders = @(
     "docs/AI_OS/roadmap",
     "docs/AI_OS/dashboard",
     "docs/AI_OS/validators",
-    "docs/AI_OS/progress",
+    "docs/roadmap/aios-product-roadmap.md",
     "Reports/daily",
     "Reports/checkpoints",
     "Reports/progress",
@@ -84,4 +84,3 @@ if ($results.Status -contains "FAIL") {
 }
 
 exit 0
-

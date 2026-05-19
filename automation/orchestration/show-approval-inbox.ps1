@@ -2,7 +2,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
-$inboxPath = Join-Path $orchestrationRoot "approval_inbox.example.json"
+$inboxPath = Join-Path $orchestrationRoot "approval_inbox\APPROVAL_INBOX_001.json"
+$legacyInboxPath = Join-Path $orchestrationRoot "approval_inbox.example.json"
 
 function Read-JsonFile {
     param(
@@ -15,6 +16,23 @@ function Read-JsonFile {
     }
 
     Get-Content -Raw -LiteralPath $Path | ConvertFrom-Json
+}
+
+function Get-JsonValue {
+    param(
+        [AllowNull()]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [string]$Default = ""
+    )
+
+    if ($null -eq $Object) { return $Default }
+    if ($Object.PSObject.Properties.Name -contains $Name) {
+        $value = $Object.$Name
+        if ($null -ne $value -and -not [string]::IsNullOrWhiteSpace([string]$value)) {
+            return $value
+        }
+    }
+    return $Default
 }
 
 function Write-PacketSection {
@@ -62,16 +80,66 @@ function Write-PacketSection {
     }
 }
 
-$inbox = Read-JsonFile -Path $inboxPath
-$packets = @($inbox.packets)
+$usedLegacyInbox = $false
+$inbox = if (Test-Path -LiteralPath $inboxPath -PathType Leaf) {
+    Read-JsonFile -Path $inboxPath
+} elseif (Test-Path -LiteralPath $legacyInboxPath -PathType Leaf) {
+    $usedLegacyInbox = $true
+    Read-JsonFile -Path $legacyInboxPath
+} else {
+    $null
+}
+
+if ($null -eq $inbox) {
+    Write-Host "AI_OS Approval Inbox Display"
+    Write-Host "Mode: UNKNOWN"
+    Write-Host "Inbox: unavailable"
+    Write-Host "Purpose: Display approval inbox state without modifying approvals."
+    Write-Host ""
+    Write-Host "Safety: display-only. No files are created. No approvals are changed. No packets are launched."
+    Write-Host ""
+    Write-Host "Approval summary:"
+    Write-Host "  Canonical source missing: automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+    Write-Host "  Legacy fallback not found; no approval source available."
+    Write-Host ""
+    Write-Host "Next safe action: restore or create the canonical approval inbox through an approved workflow."
+    exit 0
+}
+
+$isLegacyPacketInbox = $inbox.PSObject.Properties.Name -contains "packets"
+$packets = if ($isLegacyPacketInbox) { @($inbox.packets) } else { @() }
 
 Write-Host "AI_OS Approval Inbox Display"
-Write-Host "Mode: $($inbox.mode)"
-Write-Host "Inbox: $($inbox.inbox_name)"
-Write-Host "Purpose: $($inbox.purpose)"
+Write-Host "Mode: $(Get-JsonValue -Object $inbox -Name 'mode' -Default 'canonical approval record')"
+Write-Host "Inbox: $(Get-JsonValue -Object $inbox -Name 'inbox_name' -Default (Get-JsonValue -Object $inbox -Name 'schema' -Default 'UNKNOWN'))"
+Write-Host "Purpose: $(Get-JsonValue -Object $inbox -Name 'purpose' -Default 'Canonical approval inbox item for operator review.')"
 Write-Host ""
 Write-Host "Safety: display-only. No files are created. No approvals are changed. No packets are launched."
 Write-Host ""
+
+if (-not $isLegacyPacketInbox) {
+    Write-Host "Approval summary:"
+    Write-Host "  Source: automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+    Write-Host "  Approval ID: $($inbox.approval_id)"
+    Write-Host "  Packet ID: $($inbox.packet_id)"
+    Write-Host "  Requested action: $($inbox.requested_action)"
+    Write-Host "  Risk level: $($inbox.risk_level)"
+    Write-Host "  Approval status: $($inbox.approval_status)"
+    Write-Host "  Approved by human: $($inbox.approved_by_human)"
+    if (Test-Path -LiteralPath $legacyInboxPath -PathType Leaf) {
+        Write-Host "  Legacy packet-list fallback: approval_inbox.example.json available"
+    } else {
+        Write-Host "  Legacy fallback not found; canonical source used."
+    }
+    Write-Host ""
+    Write-Host "Next safe action: review approval state only; use a separate approved APPLY workflow before changing packet state."
+    exit 0
+}
+
+if ($usedLegacyInbox) {
+    Write-Host "Approval source: legacy approval_inbox.example.json used because canonical source was unavailable."
+    Write-Host ""
+}
 
 if ($packets.Count -eq 0) {
     Write-Host "Approval packets: none found in approval_inbox.example.json"

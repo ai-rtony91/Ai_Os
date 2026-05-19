@@ -171,9 +171,9 @@ if ($risk -eq "BLOCKED") {
 }
 
 $knownQueueFiles = @(
-    "automation/orchestration/packet_queue.example.json",
-    "automation/orchestration/packet_queue_ledger.v1.example.json",
-    "automation/orchestration/approval_inbox.v1.example.json",
+    "automation/orchestration/work_packets/",
+    "automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json",
+    "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
     "automation/orchestration/queue_health_supervisor.v1.example.json"
 )
 $knownRecoveryFiles = @(
@@ -229,7 +229,7 @@ $state = [pscustomobject]@{
     }
     queue_awareness = [pscustomobject]@{
         known_queue_files = @($knownQueueFiles)
-        visible_queue_files = @($knownQueueFiles | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf })
+        visible_queue_files = @($knownQueueFiles | Where-Object { Test-Path -LiteralPath $_ })
     }
     recovery_awareness = [pscustomobject]@{
         known_recovery_files = @($knownRecoveryFiles)

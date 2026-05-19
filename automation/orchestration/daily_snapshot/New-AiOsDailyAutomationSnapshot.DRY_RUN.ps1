@@ -101,9 +101,10 @@ $automationItems = @(
     )
     New-AiOsAutomationItem -Id "commit_package_recommender" -Label "Commit package recommender or preview tool" -CandidatePaths @(
         "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+        "automation/orchestration/commit_packages/COMMIT_PACKAGE_RECOMMENDATION.example.json",
+        "automation/orchestration/commit_packages",
         "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
-        "automation/orchestration/show-commit-package.ps1",
-        "automation/orchestration/commit_package.example.json"
+        "automation/orchestration/show-commit-package.ps1"
     )
     New-AiOsAutomationItem -Id "clean_state_verifier" -Label "Clean-state verifier" -CandidatePaths @(
         "automation/orchestration/clean_state/Test-AiOsCleanState.DRY_RUN.ps1",
