@@ -100,13 +100,15 @@ $untrackedFiles = @($statusLines | Where-Object { $_.StartsWith("?? ") })
 $gitStatus = if ($statusLines.Count -eq 0) { "clean" } else { "dirty" }
 $lane = Get-LaneFromBranch -Branch $currentBranch
 
-$cleanStateExists = Test-ToolPresent -Paths @("automation/orchestration/clean_state_gate.ps1", "checkpoints/verify_success.ps1")
-$approvalExists = Test-ToolPresent -Paths @("automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1")
+$cleanStateExists = Test-ToolPresent -Paths @("automation/orchestration/clean_state/Test-AiOsCleanState.DRY_RUN.ps1")
+$approvalExists = Test-ToolPresent -Paths @("automation/orchestration/approval_runner/Get-AiOsApprovalDecision.DRY_RUN.ps1")
 $commitPackageExists = Test-ToolPresent -Paths @("automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1")
-$validatorExists = Test-ToolPresent -Paths @("automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1")
+$validatorExists = Test-ToolPresent -Paths @("automation/orchestration/validator_chain_runner/Invoke-AiOsValidatorChain.DRY_RUN.ps1")
 $postPushExists = Test-ToolPresent -Paths @("automation/orchestration/post_push/Test-AiOsPostPushVerification.DRY_RUN.ps1")
 $workerLaneExists = Test-ToolPresent -Paths @("automation/orchestration/worker_lanes/Get-AiOsWorkerLaneStatus.DRY_RUN.ps1")
-$complianceExists = Test-ToolPresent -Paths @("automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1", "automation/compliance/Test-AiOsCompliance.DRY_RUN.ps1")
+$complianceExists = Test-ToolPresent -Paths @("automation/orchestration/compliance/Test-AiOsAgentCompliance.DRY_RUN.ps1")
+$dailySnapshotExists = Test-ToolPresent -Paths @("automation/orchestration/daily_snapshot/New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1")
+$healthSummaryExists = Test-ToolPresent -Paths @("automation/orchestration/health_summary/Get-AiOsOrchestrationHealth.DRY_RUN.ps1")
 
 $checks = @()
 $risks = @()
@@ -141,6 +143,20 @@ if (-not $validatorExists) {
     $risks += "Validator chain runner is missing."
 }
 Add-Check -Checks ([ref]$checks) -CheckId "validator_status" -Label "Validator status" -Status $validatorStatus -Summary $validatorSummary
+
+$healthStatus = if ($healthSummaryExists) { "READY" } else { "REVIEW" }
+$healthSummary = if ($healthSummaryExists) { "Health summary exists." } else { "Health summary tool is missing." }
+if (-not $healthSummaryExists) {
+    $risks += "Health summary tool is missing."
+}
+Add-Check -Checks ([ref]$checks) -CheckId "health_summary_readiness" -Label "Health summary readiness" -Status $healthStatus -Summary $healthSummary
+
+$dailySnapshotStatus = if ($dailySnapshotExists) { "READY" } else { "REVIEW" }
+$dailySnapshotSummary = if ($dailySnapshotExists) { "Daily snapshot tool exists." } else { "Daily snapshot tool is missing." }
+if (-not $dailySnapshotExists) {
+    $risks += "Daily snapshot tool is missing."
+}
+Add-Check -Checks ([ref]$checks) -CheckId "daily_snapshot_readiness" -Label "Daily snapshot readiness" -Status $dailySnapshotStatus -Summary $dailySnapshotSummary
 
 $approvalStatus = if ($approvalExists) { "READY" } else { "BLOCKED" }
 $approvalSummary = if ($approvalExists) { "Approval processor exists." } else { "Approval processor is missing." }
@@ -191,9 +207,9 @@ if (@($checks | Where-Object { $_.status -eq "BLOCKED" }).Count -gt 0) {
 
 $nextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\health_summary\Get-AiOsOrchestrationHealth.DRY_RUN.ps1"
 if ($resultStatus -eq "READY") {
-    $nextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\validators\Invoke-OrchestrationValidatorChain.DRY_RUN.ps1"
+    $nextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\validator_chain_runner\Invoke-AiOsValidatorChain.DRY_RUN.ps1"
 } elseif ($resultStatus -eq "BLOCKED") {
-    $nextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\worker_lanes\Get-AiOsWorkerLaneStatus.DRY_RUN.ps1"
+    $nextCommand = "powershell -ExecutionPolicy Bypass -File automation\orchestration\health_summary\Get-AiOsOrchestrationHealth.DRY_RUN.ps1"
 }
 
 $result = [pscustomobject]@{
