@@ -59,21 +59,12 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
-Test-RequiredFile -Label 'writer fixture review summary' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_REVIEW_SUMMARY_DRAFT.md'
-Test-RequiredFile -Label 'writer fixture next-step plan' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_NEXT_STEP_PLAN_DRAFT.md'
-Test-RequiredFile -Label 'Stage 29 baseline fixture' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_DRY_RUN_OUTPUT_FIXTURE_DRAFT.json'
-Test-RequiredFile -Label 'Stage 29 fixture policy' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_POLICY_DRAFT.md'
+Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 Test-RequiredFile -Label 'Stage 29 fixture validator' -RelativePath 'automation\status\Test-AiOsWriterDryRunFixture.DRY_RUN.ps1'
-Test-RequiredFile -Label 'Stage 30 fixture variants' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_VARIANTS_DRAFT.json'
-Test-RequiredFile -Label 'Stage 30 variant policy' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_VARIANT_POLICY_DRAFT.md'
 Test-RequiredFile -Label 'Stage 30 variant validator' -RelativePath 'automation\status\Test-AiOsWriterFixtureVariants.DRY_RUN.ps1'
 
 $filesToScan = @(
-    'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_REVIEW_SUMMARY_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_NEXT_STEP_PLAN_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_POLICY_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_VARIANT_POLICY_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_WRITER_DRY_RUN_OUTPUT_FIXTURE_DRAFT.json'
+    'docs\concepts\aios-writer-system-concepts.md'
 )
 
 $text = ''

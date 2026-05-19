@@ -57,16 +57,14 @@ $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
 Test-RequiredFile -Label 'writer execution preview helper' -RelativePath 'automation\writers\Preview-AiOsWriterExecution.DRY_RUN.ps1'
-Test-RequiredFile -Label 'writer execution preview draft' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_EXECUTION_PREVIEW_DRAFT.md'
-Test-RequiredFile -Label 'writer validator chain draft' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_VALIDATOR_CHAIN_DRAFT.md'
+Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 Test-RequiredFile -Label 'file population approval gate draft' -RelativePath 'docs\AI_OS\automation\AIOS_FILE_POPULATION_APPROVAL_GATE_DRAFT.md'
 Test-RequiredFile -Label 'writer validator chain checker' -RelativePath 'automation\status\Test-AiOsWriterValidatorChain.DRY_RUN.ps1'
 Test-RequiredFile -Label 'safe file-population validator' -RelativePath 'automation\status\Test-AiOsSafeFilePopulationWorkflow.DRY_RUN.ps1'
 
 $filesToScan = @(
     'automation\writers\Preview-AiOsWriterExecution.DRY_RUN.ps1',
-    'docs\AI_OS\writers\AIOS_WRITER_EXECUTION_PREVIEW_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_WRITER_VALIDATOR_CHAIN_DRAFT.md',
+    'docs\concepts\aios-writer-system-concepts.md',
     'docs\AI_OS\automation\AIOS_FILE_POPULATION_APPROVAL_GATE_DRAFT.md'
 )
 

@@ -58,7 +58,7 @@ Write-Host 'File checks:'
 Test-RequiredFile -Label 'daily report preview generator' -RelativePath 'automation\reporting\Preview-AiOsDailyReport.DRY_RUN.ps1'
 Test-RequiredFile -Label 'daily report preview generator draft' -RelativePath 'docs\AI_OS\reporting\AIOS_DAILY_REPORT_PREVIEW_GENERATOR_DRAFT.md'
 Test-RequiredFile -Label 'report writer preview contract' -RelativePath 'docs\AI_OS\reporting\AIOS_REPORT_WRITER_PREVIEW_CONTRACT_DRAFT.md'
-Test-RequiredFile -Label 'report writer input contract' -RelativePath 'docs\AI_OS\writers\AIOS_REPORT_WRITER_INPUT_CONTRACT_DRAFT.md'
+Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 
 $previewScriptPath = Join-Path $script:ResolvedRepoRoot 'automation\reporting\Preview-AiOsDailyReport.DRY_RUN.ps1'
 $previewScriptText = ''

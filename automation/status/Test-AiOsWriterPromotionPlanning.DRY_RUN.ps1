@@ -23,22 +23,14 @@ Write-Host ""
 $expectedFiles = @(
     "Reports/health/STAGE61_70_CONTROLLED_WRITER_PROMOTION_README.txt",
     "automation/status/Test-AiOsWriterPromotionPlanning.DRY_RUN.ps1",
-    "docs/AI_OS/writers/AIOS_WRITER_CONCEPT_INVENTORY_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_WRITER_SAFETY_REQUIREMENTS_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_WRITER_OUTPUT_PATH_ALLOWLIST_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_PROTECTED_FILE_EXCLUSION_RULES_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_WRITER_ROLLBACK_AND_ERROR_LOGGING_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_WRITER_DRY_RUN_FIXTURE_STRATEGY_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_REPORT_WRITER_BOUNDARY_REVIEW_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_TELEMETRY_WRITER_BOUNDARY_REVIEW_DRAFT.md",
-    "docs/AI_OS/writers/AIOS_DASHBOARD_WRITER_BOUNDARY_REVIEW_DRAFT.md",
+    "docs/concepts/aios-writer-system-concepts.md",
     "docs/workflows/aios-operator-workflows.md"
 )
 
 $approvedPrefixes = @(
     "Reports/health/",
     "automation/status/",
-    "docs/AI_OS/writers/",
+    "docs/concepts/",
     "docs/workflows/"
 )
 

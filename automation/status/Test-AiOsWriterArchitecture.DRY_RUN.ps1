@@ -57,7 +57,7 @@ $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
 Test-RequiredFile -Label 'controlled automation writer plan' -RelativePath 'docs\AI_OS\automation\AIOS_CONTROLLED_AUTOMATION_WRITER_PLAN_DRAFT.md'
-Test-RequiredFile -Label 'file input ownership contract' -RelativePath 'docs\AI_OS\writers\AIOS_FILE_INPUT_OWNERSHIP_CONTRACT_DRAFT.md'
+Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 Test-RequiredFile -Label 'automation input ownership map' -RelativePath 'docs\AI_OS\readiness\AIOS_AUTOMATION_INPUT_OWNERSHIP_MAP_DRAFT.md'
 Test-RequiredFile -Label 'full readiness audit validator' -RelativePath 'automation\status\Test-AiOsFullReadinessAudit.DRY_RUN.ps1'
 Test-RequiredFile -Label 'production telemetry roadmap' -RelativePath 'docs\AI_OS\telemetry\AIOS_PRODUCTION_TELEMETRY_ROADMAP_DRAFT.md'
@@ -65,7 +65,7 @@ Test-RequiredFile -Label 'report writer boundary' -RelativePath 'docs\AI_OS\repo
 
 $filesToScan = @(
     'docs\AI_OS\automation\AIOS_CONTROLLED_AUTOMATION_WRITER_PLAN_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_FILE_INPUT_OWNERSHIP_CONTRACT_DRAFT.md',
+    'docs\concepts\aios-writer-system-concepts.md',
     'docs\AI_OS\readiness\AIOS_AUTOMATION_INPUT_OWNERSHIP_MAP_DRAFT.md',
     'docs\AI_OS\telemetry\AIOS_PRODUCTION_TELEMETRY_ROADMAP_DRAFT.md',
     'docs\AI_OS\reporting\AIOS_REPORT_WRITER_BOUNDARY_DRAFT.md'

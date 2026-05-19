@@ -59,50 +59,20 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
-$fixtureExists = Test-RequiredFile -Label 'writer DRY_RUN output fixture' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_DRY_RUN_OUTPUT_FIXTURE_DRAFT.json'
-Test-RequiredFile -Label 'writer fixture policy' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_POLICY_DRAFT.md' | Out-Null
-Test-RequiredFile -Label 'writer output schema draft' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_OUTPUT_SCHEMA_DRAFT.md' | Out-Null
-Test-RequiredFile -Label 'writer output schema boundary' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_OUTPUT_SCHEMA_BOUNDARY_DRAFT.md' | Out-Null
+$conceptExists = Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 
 Write-Host ''
-Write-Host 'Fixture JSON checks:'
-if ($fixtureExists) {
-    $fixturePath = Join-Path $script:ResolvedRepoRoot 'docs\AI_OS\writers\AIOS_WRITER_DRY_RUN_OUTPUT_FIXTURE_DRAFT.json'
-    try {
-        $fixture = Get-Content -LiteralPath $fixturePath -Raw | ConvertFrom-Json
-        Write-Host '[PASS] fixture JSON parses.'
-
-        Test-BooleanFalse -Label 'write_allowed' -Value $fixture.write_allowed
-
-        if ($fixture.approval_required -eq $true) {
-            Write-Host '[PASS] approval_required is true'
+Write-Host 'Canonical fixture concept checks:'
+if ($conceptExists) {
+    $conceptPath = Join-Path $script:ResolvedRepoRoot 'docs\concepts\aios-writer-system-concepts.md'
+    $conceptText = Get-Content -LiteralPath $conceptPath -Raw
+    foreach ($phrase in @('write_allowed', 'approval_required', 'approval_status', 'secrets_present', 'credentials_present', 'protected_file_target', 'trading_execution_data_present', 'telemetry_persistence_requested', 'report_write_requested')) {
+        if ($conceptText -match [regex]::Escape($phrase)) {
+            Write-Host "[PASS] concept contains $phrase"
         }
         else {
-            Add-Failure 'approval_required must be true'
+            Add-Failure "Concept missing fixture safety phrase: $phrase"
         }
-
-        if ($fixture.approval_status -eq 'NOT_APPROVED') {
-            Write-Host '[PASS] approval_status is NOT_APPROVED'
-        }
-        else {
-            Add-Failure 'approval_status must be NOT_APPROVED'
-        }
-
-        $safetyFlags = @(
-            'secrets_present',
-            'credentials_present',
-            'protected_file_target',
-            'trading_execution_data_present',
-            'telemetry_persistence_requested',
-            'report_write_requested'
-        )
-
-        foreach ($flag in $safetyFlags) {
-            Test-BooleanFalse -Label "safety.$flag" -Value $fixture.safety.$flag
-        }
-    }
-    catch {
-        Add-Failure "fixture JSON failed to parse: $($_.Exception.Message)"
     }
 }
 

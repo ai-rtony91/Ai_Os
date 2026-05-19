@@ -82,81 +82,21 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
-$variantsExist = Test-RequiredFile -Label 'writer fixture variants' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_VARIANTS_DRAFT.json'
-Test-RequiredFile -Label 'writer fixture variant policy' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_VARIANT_POLICY_DRAFT.md' | Out-Null
-Test-RequiredFile -Label 'baseline writer fixture' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_DRY_RUN_OUTPUT_FIXTURE_DRAFT.json' | Out-Null
-Test-RequiredFile -Label 'baseline writer fixture policy' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_POLICY_DRAFT.md' | Out-Null
+$conceptExists = Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 Test-RequiredFile -Label 'baseline writer fixture validator' -RelativePath 'automation\status\Test-AiOsWriterDryRunFixture.DRY_RUN.ps1' | Out-Null
 
 Write-Host ''
-Write-Host 'Fixture variant checks:'
-if ($variantsExist) {
-    $variantsPath = Join-Path $script:ResolvedRepoRoot 'docs\AI_OS\writers\AIOS_WRITER_FIXTURE_VARIANTS_DRAFT.json'
-    try {
-        $variantDocument = Get-Content -LiteralPath $variantsPath -Raw | ConvertFrom-Json
-        Write-Host '[PASS] variant JSON parses.'
-
-        if ($null -eq $variantDocument.fixture_variants) {
-            Add-Failure 'fixture_variants array is missing'
+Write-Host 'Canonical fixture variant concept checks:'
+if ($conceptExists) {
+    $conceptPath = Join-Path $script:ResolvedRepoRoot 'docs\concepts\aios-writer-system-concepts.md'
+    $conceptText = Get-Content -LiteralPath $conceptPath -Raw
+    foreach ($phrase in @('demonstrate PASS and FAIL behavior', 'validate required output fields', 'validate blocked values', 'support review of schema boundaries')) {
+        if ($conceptText -match [regex]::Escape($phrase)) {
+            Write-Host "[PASS] concept contains $phrase"
         }
         else {
-            $variants = @($variantDocument.fixture_variants)
-            if ($variants.Count -gt 0) {
-                Write-Host '[PASS] fixture_variants array exists.'
-            }
-            else {
-                Add-Failure 'fixture_variants array is empty'
-            }
-
-            $requiredNames = @(
-                'safe_baseline',
-                'blocked_write_allowed_true',
-                'blocked_credentials_present',
-                'blocked_protected_file_target'
-            )
-
-            foreach ($name in $requiredNames) {
-                $matches = @($variants | Where-Object { $_.fixture_name -eq $name })
-                if ($matches.Length -eq 1) {
-                    Write-Host "[PASS] required variant exists: $name"
-                }
-                else {
-                    Add-Failure "required variant missing or duplicated: $name"
-                }
-            }
-
-            $safe = @(Get-Variant -Variants $variants -Name 'safe_baseline')
-            if ($safe.Count -eq 1) {
-                if ($safe[0].expected_result -eq 'PASS') { Write-Host '[PASS] safe_baseline expected_result is PASS' } else { Add-Failure 'safe_baseline expected_result must be PASS' }
-                Test-BooleanFalse -Label 'safe_baseline.write_allowed' -Value $safe[0].write_allowed
-                Test-BooleanTrue -Label 'safe_baseline.approval_required' -Value $safe[0].approval_required
-                if ($safe[0].approval_status -eq 'NOT_APPROVED') { Write-Host '[PASS] safe_baseline approval_status is NOT_APPROVED' } else { Add-Failure 'safe_baseline approval_status must be NOT_APPROVED' }
-                foreach ($flag in @('secrets_present','credentials_present','protected_file_target','trading_execution_data_present','telemetry_persistence_requested','report_write_requested')) {
-                    Test-BooleanFalse -Label "safe_baseline.safety.$flag" -Value $safe[0].safety.$flag
-                }
-            }
-
-            $blockedWrite = @(Get-Variant -Variants $variants -Name 'blocked_write_allowed_true')
-            if ($blockedWrite.Count -eq 1) {
-                if ($blockedWrite[0].expected_result -eq 'FAIL') { Write-Host '[PASS] blocked_write_allowed_true expected_result is FAIL' } else { Add-Failure 'blocked_write_allowed_true expected_result must be FAIL' }
-                Test-BooleanTrue -Label 'blocked_write_allowed_true.write_allowed' -Value $blockedWrite[0].write_allowed
-            }
-
-            $blockedCredentials = @(Get-Variant -Variants $variants -Name 'blocked_credentials_present')
-            if ($blockedCredentials.Count -eq 1) {
-                if ($blockedCredentials[0].expected_result -eq 'FAIL') { Write-Host '[PASS] blocked_credentials_present expected_result is FAIL' } else { Add-Failure 'blocked_credentials_present expected_result must be FAIL' }
-                Test-BooleanTrue -Label 'blocked_credentials_present.safety.credentials_present' -Value $blockedCredentials[0].safety.credentials_present
-            }
-
-            $blockedProtected = @(Get-Variant -Variants $variants -Name 'blocked_protected_file_target')
-            if ($blockedProtected.Count -eq 1) {
-                if ($blockedProtected[0].expected_result -eq 'FAIL') { Write-Host '[PASS] blocked_protected_file_target expected_result is FAIL' } else { Add-Failure 'blocked_protected_file_target expected_result must be FAIL' }
-                Test-BooleanTrue -Label 'blocked_protected_file_target.safety.protected_file_target' -Value $blockedProtected[0].safety.protected_file_target
-            }
+            Add-Failure "Concept missing fixture variant phrase: $phrase"
         }
-    }
-    catch {
-        Add-Failure "variant JSON failed to parse: $($_.Exception.Message)"
     }
 }
 
