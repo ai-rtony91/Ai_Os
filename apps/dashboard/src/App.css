@@ -102,7 +102,8 @@ h2 {
 }
 
 .section:nth-child(3),
-.section:nth-child(7) {
+.section:nth-child(4),
+.section:nth-child(8) {
   grid-column: span 12;
 }
 
@@ -113,7 +114,9 @@ h2 {
 
 .metricsGrid,
 .queueStrip,
-.workerGrid {
+.workerGrid,
+.pressureGrid,
+.failureSplit {
   display: grid;
   gap: 10px;
 }
@@ -128,6 +131,12 @@ h2 {
 
 .workerGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pressureGrid,
+.failureSplit {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 12px;
 }
 
 .metric {
@@ -147,8 +156,9 @@ h2 {
 }
 
 .metric strong {
-  font-size: 24px;
+  font-size: clamp(18px, 3vw, 24px);
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .good {
@@ -329,13 +339,16 @@ h2 {
 
   .section,
   .section:nth-child(3),
-  .section:nth-child(7) {
+  .section:nth-child(4),
+  .section:nth-child(8) {
     grid-column: span 12;
   }
 
   .metricsGrid,
   .queueStrip,
-  .workerGrid {
+  .workerGrid,
+  .pressureGrid,
+  .failureSplit {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -351,7 +364,9 @@ h2 {
 
   .metricsGrid,
   .queueStrip,
-  .workerGrid {
+  .workerGrid,
+  .pressureGrid,
+  .failureSplit {
     grid-template-columns: 1fr;
   }
 

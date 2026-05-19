@@ -6,6 +6,8 @@ import type { SupervisorAlert, SupervisorReport } from "../supervisor/runtimeSup
 import type { TelemetryEvent } from "./telemetryEvent";
 import { replayTelemetryEvents, type ReplayedRuntimeState } from "./telemetryReplay";
 
+export type VisibilityFreshness = "fresh" | "stale" | "unknown";
+
 export interface RuntimeQueueCounters {
   scheduled: number;
   dispatchable: number;
@@ -14,6 +16,17 @@ export interface RuntimeQueueCounters {
   manualReview: number;
   reclaimable: number;
   poison: number;
+}
+
+export interface RuntimeBackpressureVisibility extends BackpressureDecision {
+  pressureInputs: {
+    scheduledActions: number;
+    expiredWorkers: number;
+    poisonPackets: number;
+    maxSchedulerActions: number;
+    maxExpiredWorkers: number;
+    maxPoisonPackets: number;
+  };
 }
 
 export interface RuntimePacketVisibility {
@@ -29,21 +42,35 @@ export interface RuntimePacketVisibility {
 export interface WorkerLeaseVisibility extends WorkerHeartbeat {
   leaseState: "active" | "stale" | "expired";
   reclaimablePacket: boolean;
+  heartbeatAgeMs?: number;
+  leaseExpiresInMs?: number;
 }
 
 export interface RuntimeVisibilitySnapshot {
   schema: "aios.runtime_visibility.v1";
   generatedAt: string;
+  runtime: {
+    runtimeId?: string;
+    status: "idle" | "running" | "paused" | "degraded" | "blocked" | "unknown";
+    lastTickAt?: string;
+    freshness: VisibilityFreshness;
+    queueSource: "runtime_context" | "scheduler_replay" | "fixture" | "unknown";
+  };
   health: SupervisorReport["health"];
   queue: RuntimeQueueCounters;
   activePackets: RuntimePacketVisibility[];
-  failedPackets: DeadLetterPacket[];
+  failedPackets: {
+    retryable: DeadLetterPacket[];
+    poison: DeadLetterPacket[];
+    all: DeadLetterPacket[];
+  };
   workers: WorkerLeaseVisibility[];
-  backpressure: BackpressureDecision;
+  backpressure: RuntimeBackpressureVisibility;
   alerts: SupervisorAlert[];
   telemetry: {
     eventCount: number;
     invalidLineCount: number;
+    lastEventAt?: string;
     recentEvents: TelemetryEvent[];
   };
   executionLedger: {
@@ -56,15 +83,26 @@ export interface RuntimeVisibilitySnapshot {
 }
 
 export interface RuntimeVisibilityInput {
+  runtimeId?: string;
+  runtimeStatus?: RuntimeVisibilitySnapshot["runtime"]["status"];
+  lastTickAt?: string;
+  queueSource?: RuntimeVisibilitySnapshot["runtime"]["queueSource"];
   supervisorReport: SupervisorReport;
   schedulerPlan: SchedulerPlan;
   workerHeartbeats: WorkerHeartbeat[];
   workerLeases: WorkerLeaseResult;
   deadLetterQueue: DeadLetterQueueState;
   backpressure: BackpressureDecision;
+  backpressureThresholds?: {
+    maxSchedulerActions: number;
+    maxExpiredWorkers: number;
+    maxPoisonPackets: number;
+  };
   telemetryEvents: TelemetryEvent[];
   telemetryInvalidLineCount?: number;
   recentEventLimit?: number;
+  staleAfterMs?: number;
+  now?: Date;
 }
 
 function countActions(
@@ -126,7 +164,8 @@ function buildPacketVisibility(
 
 function buildWorkerVisibility(
   workers: WorkerHeartbeat[],
-  workerLeases: WorkerLeaseResult
+  workerLeases: WorkerLeaseResult,
+  now: Date
 ): WorkerLeaseVisibility[] {
   return workers.map((worker) => {
     const leaseState = workerLeases.expiredWorkers.includes(worker.workerId)
@@ -138,6 +177,13 @@ function buildWorkerVisibility(
     return {
       ...worker,
       leaseState,
+      heartbeatAgeMs: Number.isNaN(new Date(worker.lastHeartbeatAt).getTime())
+        ? undefined
+        : now.getTime() - new Date(worker.lastHeartbeatAt).getTime(),
+      leaseExpiresInMs: worker.leaseExpiresAt &&
+        !Number.isNaN(new Date(worker.leaseExpiresAt).getTime())
+        ? new Date(worker.leaseExpiresAt).getTime() - now.getTime()
+        : undefined,
       reclaimablePacket: worker.packetId
         ? workerLeases.reclaimablePackets.includes(worker.packetId)
         : false
@@ -169,25 +215,85 @@ function buildVisibilityAlerts(input: RuntimeVisibilityInput): SupervisorAlert[]
   return alerts;
 }
 
+function buildFailedPacketGroups(deadLetterQueue: DeadLetterQueueState): RuntimeVisibilitySnapshot["failedPackets"] {
+  const retryable = deadLetterQueue.packets.filter((packet) => packet.retryable);
+  const poison = deadLetterQueue.packets.filter((packet) => !packet.retryable);
+
+  return {
+    retryable,
+    poison,
+    all: deadLetterQueue.packets
+  };
+}
+
+function buildBackpressureVisibility(
+  input: RuntimeVisibilityInput
+): RuntimeBackpressureVisibility {
+  const thresholds = input.backpressureThresholds ?? {
+    maxSchedulerActions: input.schedulerPlan.actions.length,
+    maxExpiredWorkers: 2,
+    maxPoisonPackets: 1
+  };
+
+  return {
+    ...input.backpressure,
+    pressureInputs: {
+      scheduledActions: input.schedulerPlan.actions.length,
+      expiredWorkers: input.workerLeases.expiredWorkers.length,
+      poisonPackets: input.deadLetterQueue.packets.filter((packet) => !packet.retryable).length,
+      ...thresholds
+    }
+  };
+}
+
+function buildFreshness(
+  now: Date,
+  lastEventAt: string | undefined,
+  staleAfterMs: number
+): VisibilityFreshness {
+  if (!lastEventAt) {
+    return "unknown";
+  }
+
+  const lastEventTime = new Date(lastEventAt).getTime();
+
+  if (Number.isNaN(lastEventTime)) {
+    return "unknown";
+  }
+
+  return now.getTime() - lastEventTime > staleAfterMs ? "stale" : "fresh";
+}
+
 export function buildRuntimeVisibilitySnapshot(
   input: RuntimeVisibilityInput
 ): RuntimeVisibilitySnapshot {
+  const now = input.now ?? new Date();
+  const staleAfterMs = input.staleAfterMs ?? 300000;
   const recentEventLimit = input.recentEventLimit ?? 20;
   const replayedState = replayTelemetryEvents(input.telemetryEvents);
+  const lastEventAt = findLedgerLastUpdatedAt(input.telemetryEvents);
 
   return {
     schema: "aios.runtime_visibility.v1",
-    generatedAt: new Date().toISOString(),
+    generatedAt: now.toISOString(),
+    runtime: {
+      runtimeId: input.runtimeId,
+      status: input.runtimeStatus ?? "unknown",
+      lastTickAt: input.lastTickAt,
+      freshness: buildFreshness(now, lastEventAt, staleAfterMs),
+      queueSource: input.queueSource ?? "scheduler_replay"
+    },
     health: input.supervisorReport.health,
     queue: buildQueueCounters(input.schedulerPlan, input.deadLetterQueue),
     activePackets: buildPacketVisibility(input.schedulerPlan, replayedState),
-    failedPackets: input.deadLetterQueue.packets,
-    workers: buildWorkerVisibility(input.workerHeartbeats, input.workerLeases),
-    backpressure: input.backpressure,
+    failedPackets: buildFailedPacketGroups(input.deadLetterQueue),
+    workers: buildWorkerVisibility(input.workerHeartbeats, input.workerLeases, now),
+    backpressure: buildBackpressureVisibility(input),
     alerts: buildVisibilityAlerts(input),
     telemetry: {
       eventCount: input.telemetryEvents.length,
       invalidLineCount: input.telemetryInvalidLineCount ?? replayedState.invalidLineCount,
+      lastEventAt,
       recentEvents: input.telemetryEvents.slice(-recentEventLimit).reverse()
     },
     executionLedger: {
@@ -195,7 +301,7 @@ export function buildRuntimeVisibilitySnapshot(
       approvalCount: Object.keys(replayedState.approvals).length,
       blockedPacketCount: replayedState.blockedPackets.length,
       appliedPacketCount: replayedState.appliedPackets.length,
-      lastUpdatedAt: findLedgerLastUpdatedAt(input.telemetryEvents)
+      lastUpdatedAt: lastEventAt
     }
   };
 }

@@ -1,6 +1,13 @@
 {
   "schema": "aios.runtime_visibility.v1",
   "generatedAt": "2026-05-18T23:45:00Z",
+  "runtime": {
+    "runtimeId": "runtime-local-001",
+    "status": "degraded",
+    "lastTickAt": "2026-05-18T23:44:55Z",
+    "freshness": "fresh",
+    "queueSource": "runtime_context"
+  },
   "health": {
     "schedulerActions": 6,
     "staleWorkers": 1,
@@ -49,24 +56,46 @@
       "lastUpdatedAt": "2026-05-18T23:39:12Z"
     }
   ],
-  "failedPackets": [
-    {
-      "packetId": "PKT-POISON-003",
-      "reason": "Validator failed after retry budget.",
-      "failureCount": 4,
-      "lastFailedAt": "2026-05-18T23:37:20Z",
-      "retryable": false,
-      "source": "runtime_executor"
-    },
-    {
-      "packetId": "PKT-LEASE-007",
-      "reason": "Worker lease expired before completion.",
-      "failureCount": 1,
-      "lastFailedAt": "2026-05-18T23:39:12Z",
-      "retryable": true,
-      "source": "worker_lease_engine"
-    }
-  ],
+  "failedPackets": {
+    "retryable": [
+      {
+        "packetId": "PKT-LEASE-007",
+        "reason": "Worker lease expired before completion.",
+        "failureCount": 1,
+        "lastFailedAt": "2026-05-18T23:39:12Z",
+        "retryable": true,
+        "source": "worker_lease_engine"
+      }
+    ],
+    "poison": [
+      {
+        "packetId": "PKT-POISON-003",
+        "reason": "Validator failed after retry budget.",
+        "failureCount": 4,
+        "lastFailedAt": "2026-05-18T23:37:20Z",
+        "retryable": false,
+        "source": "runtime_executor"
+      }
+    ],
+    "all": [
+      {
+        "packetId": "PKT-POISON-003",
+        "reason": "Validator failed after retry budget.",
+        "failureCount": 4,
+        "lastFailedAt": "2026-05-18T23:37:20Z",
+        "retryable": false,
+        "source": "runtime_executor"
+      },
+      {
+        "packetId": "PKT-LEASE-007",
+        "reason": "Worker lease expired before completion.",
+        "failureCount": 1,
+        "lastFailedAt": "2026-05-18T23:39:12Z",
+        "retryable": true,
+        "source": "worker_lease_engine"
+      }
+    ]
+  },
   "workers": [
     {
       "workerId": "codex-observability-01",
@@ -75,6 +104,8 @@
       "lastHeartbeatAt": "2026-05-18T23:44:45Z",
       "leaseExpiresAt": "2026-05-18T23:55:00Z",
       "leaseState": "active",
+      "heartbeatAgeMs": 15000,
+      "leaseExpiresInMs": 600000,
       "reclaimablePacket": false
     },
     {
@@ -84,6 +115,8 @@
       "lastHeartbeatAt": "2026-05-18T23:28:00Z",
       "leaseExpiresAt": "2026-05-18T23:35:00Z",
       "leaseState": "expired",
+      "heartbeatAgeMs": 1015000,
+      "leaseExpiresInMs": -595000,
       "reclaimablePacket": true
     },
     {
@@ -91,6 +124,7 @@
       "status": "stale",
       "lastHeartbeatAt": "2026-05-18T23:20:00Z",
       "leaseState": "stale",
+      "heartbeatAgeMs": 1495000,
       "reclaimablePacket": false
     }
   ],
@@ -99,7 +133,15 @@
     "level": "hard",
     "reason": "Expired worker pressure exceeds safe threshold",
     "allowedConcurrentPackets": 1,
-    "checkedAt": "2026-05-18T23:45:00Z"
+    "checkedAt": "2026-05-18T23:45:00Z",
+    "pressureInputs": {
+      "scheduledActions": 6,
+      "expiredWorkers": 1,
+      "poisonPackets": 1,
+      "maxSchedulerActions": 5,
+      "maxExpiredWorkers": 0,
+      "maxPoisonPackets": 0
+    }
   },
   "alerts": [
     {
@@ -124,6 +166,7 @@
   "telemetry": {
     "eventCount": 128,
     "invalidLineCount": 0,
+    "lastEventAt": "2026-05-18T23:43:31Z",
     "recentEvents": [
       {
         "eventId": "evt_1779167011000",
