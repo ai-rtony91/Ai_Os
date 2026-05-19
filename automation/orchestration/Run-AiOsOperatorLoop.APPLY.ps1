@@ -32,11 +32,12 @@ if ($preflightOutput -match '"overall_result":\s+"FAIL"') {
 
 Write-Host ""
 Write-Host "Step 3: Stage changed orchestration/docs files only"
+$approvedPathPattern = "automation/orchestration/|docs/concepts/aios-dispatcher-orchestration-concepts\.md|docs/architecture/aios-system-architecture\.md|docs/workflows/aios-operator-workflows\.md|docs/audits/"
 $files = git status --short | ForEach-Object {
-    if ($_ -match "^\?\? (automation/orchestration/|docs/AI_OS/orchestration/)") {
+    if ($_ -match "^\?\? ($approvedPathPattern)") {
         $_.Substring(3).Trim()
     }
-    elseif ($_ -match "^ M (automation/orchestration/|docs/AI_OS/orchestration/)") {
+    elseif ($_ -match "^ M ($approvedPathPattern)") {
         $_.Substring(3).Trim()
     }
 }
