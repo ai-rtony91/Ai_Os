@@ -1,164 +1,272 @@
 import { useMemo, useState } from "react";
+import runtimeVisibility from "../mock-data/aios-runtime-visibility-v1.example.json";
 import "./App.css";
 
-const steps = [
-  { key: "upload", title: "Upload Inputs" },
-  { key: "review", title: "Review & Confirm" },
-  { key: "generate", title: "Generate Project" },
-  { key: "done", title: "Done" },
-];
+const packetFilters = ["all", "dispatch", "wait_for_approval", "retry", "manual_review"];
+
+function formatTime(value) {
+  if (!value) {
+    return "UNKNOWN";
+  }
+
+  return new Intl.DateTimeFormat("en", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(new Date(value));
+}
+
+function statusTone(value) {
+  const normalized = String(value).toLowerCase();
+
+  if (["critical", "blocked", "hard", "expired", "manual_review"].includes(normalized)) {
+    return "danger";
+  }
+
+  if (["warning", "soft", "stale", "retry", "wait_for_approval"].includes(normalized)) {
+    return "warn";
+  }
+
+  if (["active", "running", "dispatch", "none", "low"].includes(normalized)) {
+    return "good";
+  }
+
+  return "neutral";
+}
+
+function Metric({ label, value, tone = "neutral" }) {
+  return (
+    <div className={`metric ${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function StatusPill({ value }) {
+  return <span className={`pill ${statusTone(value)}`}>{value}</span>;
+}
+
+function Section({ title, action, children }) {
+  return (
+    <section className="section">
+      <div className="sectionHeader">
+        <h2>{title}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 export default function App() {
-  const [stepIndex, setStepIndex] = useState(0);
-  const step = steps[stepIndex];
+  const [packetFilter, setPacketFilter] = useState("all");
+  const [eventQuery, setEventQuery] = useState("");
 
-  const [whitePaper, setWhitePaper] = useState(null);
-  const [readme, setReadme] = useState(null);
+  const filteredPackets = useMemo(() => {
+    if (packetFilter === "all") {
+      return runtimeVisibility.activePackets;
+    }
 
-  // Step gating:
-  // - upload: Next disabled until both files selected
-  // - review: Next enabled
-  // - generate: Next disabled (generation happens via the button)
-  const canNext = useMemo(() => {
-    if (step.key === "upload") return !!whitePaper && !!readme;
-    if (step.key === "review") return true;
-    return false;
-  }, [step.key, whitePaper, readme]);
+    return runtimeVisibility.activePackets.filter(
+      (packet) => packet.action === packetFilter
+    );
+  }, [packetFilter]);
 
-  const next = () => setStepIndex((i) => Math.min(i + 1, steps.length - 1));
-  const back = () => setStepIndex((i) => Math.max(i - 1, 0));
+  const filteredEvents = useMemo(() => {
+    const query = eventQuery.trim().toLowerCase();
+
+    if (!query) {
+      return runtimeVisibility.telemetry.recentEvents;
+    }
+
+    return runtimeVisibility.telemetry.recentEvents.filter((event) =>
+      [event.eventType, event.source, event.summary, event.packetId]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(query))
+    );
+  }, [eventQuery]);
+
+  const healthTone = runtimeVisibility.health.healthy ? "good" : "danger";
 
   return (
-    <div className="page">
-      <header className="topbar">
-        <div className="brand">AI‑OS</div>
-
-        <div className="stepper">
-          {steps.map((s, i) => (
-            <div
-              key={s.key}
-              className={`step ${i === stepIndex ? "active" : i < stepIndex ? "done" : ""}`}
-            >
-              <span className="dot">{i + 1}</span>
-              <span className="label">{s.title}</span>
-            </div>
-          ))}
+    <div className="runtimePage">
+      <header className="runtimeHeader">
+        <div>
+          <p className="eyebrow">AI_OS runtime visibility</p>
+          <h1>Runtime Operations</h1>
+          <p className="summary">
+            Local-first, paper-only execution visibility. Generated{" "}
+            {formatTime(runtimeVisibility.generatedAt)}.
+          </p>
+        </div>
+        <div className="headerStatus">
+          <StatusPill value={runtimeVisibility.health.healthy ? "healthy" : "attention"} />
+          <StatusPill value={`backpressure: ${runtimeVisibility.backpressure.level}`} />
         </div>
       </header>
 
-      <main className="card">
-        <h1>{step.title}</h1>
+      <main className="runtimeGrid">
+        <Section title="Health Summary">
+          <div className="metricsGrid">
+            <Metric
+              label="Runtime"
+              value={runtimeVisibility.health.healthy ? "Healthy" : "Attention"}
+              tone={healthTone}
+            />
+            <Metric label="Scheduler actions" value={runtimeVisibility.health.schedulerActions} />
+            <Metric label="Expired workers" value={runtimeVisibility.health.expiredWorkers} tone="danger" />
+            <Metric label="Poison packets" value={runtimeVisibility.health.poisonPackets} tone="danger" />
+            <Metric label="Retryable packets" value={runtimeVisibility.health.retryablePackets} tone="warn" />
+            <Metric label="Reclaimable" value={runtimeVisibility.health.reclaimablePackets} tone="warn" />
+          </div>
+        </Section>
 
-        {/* STEP 1: Upload */}
-        {step.key === "upload" && (
-          <>
-            <p className="muted">Upload both files to continue.</p>
+        <Section title="Queue Counters">
+          <div className="queueStrip">
+            {Object.entries(runtimeVisibility.queue).map(([key, value]) => (
+              <Metric key={key} label={key.replaceAll("_", " ")} value={value} />
+            ))}
+          </div>
+        </Section>
 
-            <div className="field">
-              <label>White Paper (PDF/MD)</label>
-              <input
-                type="file"
-                onChange={(e) => setWhitePaper(e.target.files?.[0] || null)}
-              />
-              <div className="hint">
-                {whitePaper ? `Selected: ${whitePaper.name}` : "No file selected"}
+        <Section
+          title="Active Packets"
+          action={
+            <div className="segmented">
+              {packetFilters.map((filter) => (
+                <button
+                  key={filter}
+                  className={filter === packetFilter ? "selected" : ""}
+                  onClick={() => setPacketFilter(filter)}
+                  type="button"
+                >
+                  {filter.replaceAll("_", " ")}
+                </button>
+              ))}
+            </div>
+          }
+        >
+          <div className="table">
+            <div className="tableRow tableHead">
+              <span>Packet</span>
+              <span>Status</span>
+              <span>Risk</span>
+              <span>Last update</span>
+              <span>Reason</span>
+            </div>
+            {filteredPackets.map((packet) => (
+              <div className="tableRow" key={packet.packetId}>
+                <strong>{packet.packetId}</strong>
+                <StatusPill value={packet.action ?? packet.status} />
+                <span>{packet.risk ?? "UNKNOWN"}</span>
+                <span>{formatTime(packet.lastUpdatedAt)}</span>
+                <span>{packet.reason ?? packet.lastEventType ?? "No scheduler reason"}</span>
               </div>
-            </div>
+            ))}
+          </div>
+        </Section>
 
-            <div className="field">
-              <label>README.md</label>
-              <input
-                type="file"
-                onChange={(e) => setReadme(e.target.files?.[0] || null)}
-              />
-              <div className="hint">
-                {readme ? `Selected: ${readme.name}` : "No file selected"}
+        <Section title="Failed Packets">
+          <div className="stackList">
+            {runtimeVisibility.failedPackets.map((packet) => (
+              <article className="listItem" key={packet.packetId}>
+                <div>
+                  <strong>{packet.packetId}</strong>
+                  <p>{packet.reason}</p>
+                </div>
+                <div className="itemMeta">
+                  <StatusPill value={packet.retryable ? "retryable" : "manual_review"} />
+                  <span>{packet.failureCount} failures</span>
+                  <span>{formatTime(packet.lastFailedAt)}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Worker Leases">
+          <div className="workerGrid">
+            {runtimeVisibility.workers.map((worker) => (
+              <article className="workerCard" key={worker.workerId}>
+                <div className="workerTop">
+                  <strong>{worker.workerId}</strong>
+                  <StatusPill value={worker.leaseState} />
+                </div>
+                <p>{worker.packetId ?? "No active packet"}</p>
+                <div className="workerMeta">
+                  <span>Heartbeat {formatTime(worker.lastHeartbeatAt)}</span>
+                  <span>Lease {worker.leaseExpiresAt ? formatTime(worker.leaseExpiresAt) : "UNKNOWN"}</span>
+                  <span>{worker.reclaimablePacket ? "Packet reclaimable" : "Lease normal"}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Backpressure Alerts">
+          <div className={`backpressure ${statusTone(runtimeVisibility.backpressure.level)}`}>
+            <div>
+              <strong>{runtimeVisibility.backpressure.reason}</strong>
+              <p>
+                Allowed concurrent packets:{" "}
+                {runtimeVisibility.backpressure.allowedConcurrentPackets}
+              </p>
+            </div>
+            <StatusPill value={runtimeVisibility.backpressure.level} />
+          </div>
+          <div className="alerts">
+            {runtimeVisibility.alerts.map((alert) => (
+              <div className="alert" key={`${alert.category}-${alert.message}`}>
+                <StatusPill value={alert.severity} />
+                <span>{alert.message}</span>
               </div>
-            </div>
-          </>
-        )}
+            ))}
+          </div>
+        </Section>
 
-        {/* STEP 2: Review */}
-        {step.key === "review" && (
-          <>
-            <p className="muted">Confirm what you uploaded, then click Next.</p>
-            <div className="summary">
-              <div><b>White Paper:</b> {whitePaper?.name || "—"}</div>
-              <div><b>README:</b> {readme?.name || "—"}</div>
-            </div>
-          </>
-        )}
+        <Section
+          title="Telemetry Log"
+          action={
+            <input
+              className="search"
+              value={eventQuery}
+              onChange={(event) => setEventQuery(event.target.value)}
+              placeholder="Filter telemetry"
+              aria-label="Filter telemetry events"
+            />
+          }
+        >
+          <div className="ledgerSummary">
+            <Metric label="Events" value={runtimeVisibility.telemetry.eventCount} />
+            <Metric label="Invalid lines" value={runtimeVisibility.telemetry.invalidLineCount} />
+          </div>
+          <div className="eventList">
+            {filteredEvents.map((event) => (
+              <article className="eventItem" key={event.eventId}>
+                <div>
+                  <strong>{event.eventType}</strong>
+                  <p>{event.summary}</p>
+                </div>
+                <div className="itemMeta">
+                  <span>{event.source}</span>
+                  <span>{event.packetId ?? "No packet"}</span>
+                  <span>{formatTime(event.ts)}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Section>
 
-        {/* STEP 3: Generate */}
-        {step.key === "generate" && (
-          <>
-            <p className="muted">
-              Generate runs only after Steps 1 & 2. Backend must be running on{" "}
-              <b>http://localhost:5050</b>.
-            </p>
-
-            <button
-              className="primary"
-              disabled={!whitePaper || !readme}
-              onClick={async () => {
-                if (!whitePaper || !readme) return;
-
-                try {
-                  const form = new FormData();
-                  form.append("whitepaper", whitePaper);
-                  form.append("readme", readme);
-
-                  const resp = await fetch("http://localhost:5050/api/pipeline/run", {
-                    method: "POST",
-                    body: form,
-                  });
-
-                  const data = await resp.json();
-
-                  if (!data.ok) {
-                    alert(data.error || "Pipeline failed");
-                    return;
-                  }
-
-                  alert("✅ Pipeline stages: " + data.stages.map((s) => s.key).join(" → "));
-                  next(); // advance to Done only after success
-                } catch (e) {
-                  alert("Backend not reachable. Is it running on http://localhost:5050 ?");
-                }
-              }}
-            >
-              Run Generation (Backend)
-            </button>
-
-            <p className="hint" style={{ marginTop: "10px" }}>
-              If this button is disabled, go Back and upload both files.
-            </p>
-          </>
-        )}
-
-        {/* STEP 4: Done */}
-        {step.key === "done" && (
-          <>
-            <h2>✅ Connected</h2>
-            <p className="muted">
-              UI → Backend pipeline wiring is working. Next we’ll replace alerts with on-screen progress.
-            </p>
-          </>
-        )}
-
-        {/* Navigation */}
-        <div className="nav">
-          <button onClick={back} disabled={stepIndex === 0}>
-            Back
-          </button>
-
-          <button
-            onClick={next}
-            disabled={!canNext || step.key === "generate" || step.key === "done"}
-          >
-            Next
-          </button>
-        </div>
+        <Section title="Execution Ledger">
+          <div className="ledgerSummary">
+            <Metric label="Packets" value={runtimeVisibility.executionLedger.packetCount} />
+            <Metric label="Approvals" value={runtimeVisibility.executionLedger.approvalCount} />
+            <Metric label="Blocked" value={runtimeVisibility.executionLedger.blockedPacketCount} tone="warn" />
+            <Metric label="Applied" value={runtimeVisibility.executionLedger.appliedPacketCount} tone="good" />
+          </div>
+          <p className="nextAction">{runtimeVisibility.nextSafeAction}</p>
+        </Section>
       </main>
     </div>
   );
