@@ -2,7 +2,7 @@
 
 Status: canonical concept summary extracted from legacy `docs/AI_OS/writers`
 
-Last reviewed: Phase 99 writers doc cleanup
+Last reviewed: Phase 100 writers validator reference retirement
 
 ## Purpose
 
@@ -67,7 +67,72 @@ Required fixture intent:
 - validate blocked values,
 - support review of schema boundaries.
 
+## Validator Phrase Map
+
+Legacy writer validators now use this canonical concept document for documentation presence and phrase validation. Required validation concepts include:
+
+- validator-chain PASS does not equal APPLY approval,
+- human approval is still required,
+- protected file write without approval,
+- report write without approval,
+- telemetry write without approval,
+- secrets or credentials present,
+- write_allowed must remain false,
+- schema validation does not approve APPLY,
+- target_file,
+- source_input,
+- proposed_action,
+- proposed_fields,
+- protected_file_status,
+- approval_required,
+- secrets_present,
+- credentials_present,
+- trading_execution_data_present,
+- NO FILES WERE WRITTEN,
+- protected file without approval,
+- missing validator,
+- blocked fields present,
+- verify ownership contract,
+- run validator chain,
+- verify approval gate,
+- future APPLY consideration,
+- DRY_RUN preview mode,
+- APPLY mode,
+- target file,
+- source input,
+- allowed fields,
+- blocked fields,
+- validator to run after writing,
+- future telemetry writer after approval,
+- future report writer after approval,
+- identify target file,
+- identify source input,
+- generate DRY_RUN preview,
+- validate blocked fields,
+- pause for human approval,
+- static test data only,
+- negative tests,
+- does not approve APPLY,
+- write_allowed false,
+- approval_status NOT_APPROVED,
+- backup_required,
+- validator_to_run,
+- report writers may not write until separate approval.
+
+## Fixture Safety Fields
+
+Writer fixtures should continue to model these fields as blocked or review-gated concepts:
+
+- write_allowed,
+- approval_required,
+- approval_status,
+- secrets_present,
+- credentials_present,
+- protected_file_target,
+- trading_execution_data_present,
+- telemetry_persistence_requested,
+- report_write_requested.
+
 ## Current Cleanup Status
 
-Phase 99 redirected the writer promotion planning validator to this canonical concept document. Other active status validators still reference individual legacy writer drafts and must be retired before `docs/AI_OS/writers` can move safely.
-
+Phase 99 redirected the writer promotion planning validator to this canonical concept document. Phase 100 redirected the remaining writer status validators from individual legacy writer drafts to this canonical concept document.

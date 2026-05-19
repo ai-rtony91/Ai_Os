@@ -57,17 +57,15 @@ $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
 Test-RequiredFile -Label 'report writer preview contract' -RelativePath 'docs\AI_OS\reporting\AIOS_REPORT_WRITER_PREVIEW_CONTRACT_DRAFT.md'
-Test-RequiredFile -Label 'report writer input contract' -RelativePath 'docs\AI_OS\writers\AIOS_REPORT_WRITER_INPUT_CONTRACT_DRAFT.md'
+Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 Test-RequiredFile -Label 'controlled automation writer plan' -RelativePath 'docs\AI_OS\automation\AIOS_CONTROLLED_AUTOMATION_WRITER_PLAN_DRAFT.md'
-Test-RequiredFile -Label 'file input ownership contract' -RelativePath 'docs\AI_OS\writers\AIOS_FILE_INPUT_OWNERSHIP_CONTRACT_DRAFT.md'
 Test-RequiredFile -Label 'report writer boundary' -RelativePath 'docs\AI_OS\reporting\AIOS_REPORT_WRITER_BOUNDARY_DRAFT.md'
 Test-RequiredFile -Label 'writer architecture validator' -RelativePath 'automation\status\Test-AiOsWriterArchitecture.DRY_RUN.ps1'
 
 $filesToScan = @(
     'docs\AI_OS\reporting\AIOS_REPORT_WRITER_PREVIEW_CONTRACT_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_REPORT_WRITER_INPUT_CONTRACT_DRAFT.md',
+    'docs\concepts\aios-writer-system-concepts.md',
     'docs\AI_OS\automation\AIOS_CONTROLLED_AUTOMATION_WRITER_PLAN_DRAFT.md',
-    'docs\AI_OS\writers\AIOS_FILE_INPUT_OWNERSHIP_CONTRACT_DRAFT.md',
     'docs\AI_OS\reporting\AIOS_REPORT_WRITER_BOUNDARY_DRAFT.md'
 )
 

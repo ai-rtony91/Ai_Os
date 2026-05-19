@@ -56,7 +56,7 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
-Test-RequiredFile -Label 'writer validator chain draft' -RelativePath 'docs\AI_OS\writers\AIOS_WRITER_VALIDATOR_CHAIN_DRAFT.md'
+Test-RequiredFile -Label 'writer system concepts' -RelativePath 'docs\concepts\aios-writer-system-concepts.md'
 Test-RequiredFile -Label 'writer chain approval boundary' -RelativePath 'docs\AI_OS\automation\AIOS_WRITER_CHAIN_APPROVAL_BOUNDARY_DRAFT.md'
 Test-RequiredFile -Label 'writer architecture validator' -RelativePath 'automation\status\Test-AiOsWriterArchitecture.DRY_RUN.ps1'
 Test-RequiredFile -Label 'report writer preview validator' -RelativePath 'automation\status\Test-AiOsReportWriterPreviewContract.DRY_RUN.ps1'
@@ -66,7 +66,7 @@ Test-RequiredFile -Label 'safe file-population validator' -RelativePath 'automat
 Test-RequiredFile -Label 'full readiness validator' -RelativePath 'automation\status\Test-AiOsFullReadinessAudit.DRY_RUN.ps1'
 
 $filesToScan = @(
-    'docs\AI_OS\writers\AIOS_WRITER_VALIDATOR_CHAIN_DRAFT.md',
+    'docs\concepts\aios-writer-system-concepts.md',
     'docs\AI_OS\automation\AIOS_WRITER_CHAIN_APPROVAL_BOUNDARY_DRAFT.md'
 )
 
