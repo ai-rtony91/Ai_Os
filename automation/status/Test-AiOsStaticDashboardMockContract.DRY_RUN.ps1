@@ -59,7 +59,7 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $script:ResolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 
 Write-Host 'File checks:'
-Test-RequiredFile -Label 'static dashboard mock contract' -RelativePath 'docs\AI_OS\dashboard\AIOS_STATIC_DASHBOARD_MOCK_CONTRACT_DRAFT.md'
+Test-RequiredFile -Label 'static dashboard mock contract' -RelativePath 'docs\specs\aios-dashboard-data-contracts.md'
 Test-RequiredFile -Label 'dashboard operator view layout' -RelativePath 'docs\AI_OS\dashboard\AIOS_DASHBOARD_OPERATOR_VIEW_LAYOUT_DRAFT.md'
 Test-RequiredFile -Label 'static dashboard mock validator' -RelativePath 'automation\status\Test-AiOsStaticDashboardMockContract.DRY_RUN.ps1'
 Test-RequiredFile -Label 'Stage 38 health README' -RelativePath 'Reports\health\STAGE38A_38D_STATIC_DASHBOARD_MOCK_CONTRACT_README.txt'
@@ -70,7 +70,7 @@ Test-RequiredFile -Label 'Stage 37 dashboard panel layout' -RelativePath 'docs\A
 Test-RequiredFile -Label 'Stage 37 dashboard fixture validator' -RelativePath 'automation\status\Test-AiOsDashboardFixtureLayer.DRY_RUN.ps1'
 
 $filesToScan = @(
-    'docs\AI_OS\dashboard\AIOS_STATIC_DASHBOARD_MOCK_CONTRACT_DRAFT.md',
+    'docs\specs\aios-dashboard-data-contracts.md',
     'docs\AI_OS\dashboard\AIOS_DASHBOARD_OPERATOR_VIEW_LAYOUT_DRAFT.md',
     'Reports\health\STAGE38A_38D_STATIC_DASHBOARD_MOCK_CONTRACT_README.txt'
 )

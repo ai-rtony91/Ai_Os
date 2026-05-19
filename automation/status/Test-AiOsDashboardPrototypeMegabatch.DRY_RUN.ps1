@@ -95,7 +95,7 @@ try {
         "docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_INPUT_MAP_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_DASHBOARD_FIXTURE_DATA_DRAFT.json",
         "docs\AI_OS\dashboard\AIOS_DASHBOARD_PANEL_LAYOUT_DRAFT.md",
-        "docs\AI_OS\dashboard\AIOS_STATIC_DASHBOARD_MOCK_CONTRACT_DRAFT.md",
+        "docs\specs\aios-dashboard-data-contracts.md",
         "docs\AI_OS\dashboard\AIOS_DASHBOARD_OPERATOR_VIEW_LAYOUT_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_VISUAL_DASHBOARD_RENDER_PLAN_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_DASHBOARD_THEME_SYSTEM_DRAFT.md",

@@ -45,7 +45,7 @@ if (-not (Test-Path -LiteralPath $RepoRoot -PathType Container)) {
 $resolvedRepoRoot = (Resolve-Path -LiteralPath $RepoRoot).Path
 $routerPath = Join-Path $resolvedRepoRoot 'automation\router\Invoke-AiOsWorkflowRouter.DRY_RUN.ps1'
 $registryPath = Join-Path $resolvedRepoRoot 'docs\AI_OS\router\AIOS_WORKFLOW_REGISTRY_DRAFT.md'
-$dataContractPath = Join-Path $resolvedRepoRoot 'docs\AI_OS\dashboard\AIOS_DASHBOARD_DATA_CONTRACT_DRAFT.md'
+$dataContractPath = Join-Path $resolvedRepoRoot 'docs\specs\aios-dashboard-data-contracts.md'
 
 $routerAvailable = Test-Path -LiteralPath $routerPath -PathType Leaf
 $registryAvailable = Test-Path -LiteralPath $registryPath -PathType Leaf

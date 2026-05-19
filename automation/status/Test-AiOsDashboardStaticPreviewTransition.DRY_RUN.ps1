@@ -24,7 +24,7 @@ $expectedFiles = @(
     "Reports/health/STAGE71_80_DASHBOARD_STATIC_PREVIEW_README.txt",
     "automation/status/Test-AiOsDashboardStaticPreviewTransition.DRY_RUN.ps1",
     "docs/AI_OS/dashboard/AIOS_DASHBOARD_STATIC_PREVIEW_GOALS_DRAFT.md",
-    "docs/AI_OS/dashboard/AIOS_DASHBOARD_FIXTURE_DATA_RULES_DRAFT.md",
+    "docs/specs/aios-dashboard-data-contracts.md",
     "docs/AI_OS/dashboard/AIOS_DASHBOARD_STATIC_PREVIEW_VALIDATION_CHECKLIST_DRAFT.md",
     "docs/AI_OS/dashboard/AIOS_DASHBOARD_OPERATOR_READABILITY_ACCESSIBILITY_DRAFT.md",
     "docs/AI_OS/dashboard/AIOS_DASHBOARD_SCREENSHOT_DEMO_SAFETY_RULES_DRAFT.md",
