@@ -43,6 +43,17 @@ Live broker execution is blocked.
 - Main control is the only place for merge/push approval.
 - Never let two workers edit the same file tree at the same time.
 
+## UI Action Confirmation Rule
+
+After any UI click, button press, launcher action, or automation trigger:
+
+1. Confirm the expected result happened.
+2. If no result is detected, retry once only if the action is safe and idempotent.
+3. If the second attempt fails, stop.
+4. Capture the visible state or error.
+5. Report what was attempted, what was expected, what happened, and the next safe recovery step.
+6. Never repeatedly click destructive, payment, delete, trading, broker, commit, push, or approval buttons.
+
 ## AI_OS Daily Operating Rules
 
 1. Start every day from one source of truth:
