@@ -1,0 +1,14 @@
+{
+  "schema": "AIOS_MASTER_TODO_LEDGER.example.v1",
+  "generated": false,
+  "items": [
+    {
+      "task_id": "WI-EXAMPLE-TODO",
+      "title": "Example work intelligence TODO item",
+      "source": "template",
+      "priority": "LOW",
+      "status": "REVIEW",
+      "recommended_action": "Replace this example with generated or approved evidence when scoped."
+    }
+  ]
+}

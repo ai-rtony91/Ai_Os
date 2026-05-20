@@ -1,0 +1,10 @@
+{
+  "schema": "AIOS_WORK_INTELLIGENCE_DAILY_SNAPSHOT.example.v1",
+  "generated": false,
+  "read_only": true,
+  "branch": "v2/aios",
+  "clean_git_status": true,
+  "latest_checkpoint_reference": "UNKNOWN",
+  "latest_report_references": [],
+  "next_safe_action": "This example is scaffold only, not a generated snapshot."
+}

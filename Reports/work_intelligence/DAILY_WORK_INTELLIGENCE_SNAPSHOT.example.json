@@ -1,0 +1,16 @@
+{
+  "schema": "AIOS_WORK_INTELLIGENCE_SCAN_RESULT.example.v1",
+  "generated": false,
+  "read_only": true,
+  "branch": "v2/aios",
+  "clean_git_status": true,
+  "total_files": 0,
+  "total_reports": 0,
+  "total_validators": 0,
+  "worker_lane_count": 0,
+  "unresolved_todos": 0,
+  "unresolved_fixmes": 0,
+  "security_warning_count": 0,
+  "recommended_operator_action": "Review this template only; it is not runtime evidence.",
+  "work_queue": []
+}

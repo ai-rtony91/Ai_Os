@@ -1,0 +1,19 @@
+{
+  "schema": "AIOS_WORKER_QUEUE_STATUS.example.v1",
+  "generated": false,
+  "queue_count": 1,
+  "work_queue": [
+    {
+      "queue_rank": 1,
+      "task_id": "WI-EXAMPLE-QUEUE",
+      "title": "Example queued work item",
+      "source": "template",
+      "priority": "LOW",
+      "status": "REVIEW",
+      "recommended_action": "Use generated queue evidence only after an approved scan.",
+      "suggested_worker_lane": "Work Intelligence",
+      "evidence_strength": "LOW",
+      "route_reason": "template"
+    }
+  ]
+}

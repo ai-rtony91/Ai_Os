@@ -1,0 +1,9 @@
+{
+  "schema": "AIOS_REPO_HEALTH_SUMMARY.example.v1",
+  "generated": false,
+  "branch": "v2/aios",
+  "clean_git_status": true,
+  "validation_health": "UNKNOWN_UNTIL_VALIDATOR_RUN",
+  "protected_action_involved": false,
+  "next_safe_action": "Run the approved validator only when scoped."
+}
