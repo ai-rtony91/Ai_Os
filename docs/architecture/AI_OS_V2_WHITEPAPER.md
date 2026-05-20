@@ -1,231 +1,225 @@
 # AI_OS_V2 Whitepaper
 
-## What AI_OS Is
+## Purpose
 
-AI_OS is a governed automation platform for building and managing projects through human-readable prompts.
+AI_OS_V2 is a governed automation platform for helping humans build and manage projects through human-readable prompts, structured worker orchestration, validation, and clear authority boundaries.
 
-It is designed to help a person describe a goal in normal language, then turn that goal into structured work: repo mapping, ownership decisions, planning, safe implementation, validation, review, and improvement.
+This whitepaper defines the long-term architectural vision. It is not a claim that AI_OS is conscious, sentient, AGI, or independently autonomous. AI_OS is a controlled system for AI-assisted systems engineering.
 
-AI_OS_V2 is both the platform and the first major project being shaped by that platform. It uses its own rules to become more organized, safer, and easier to build on over time.
+## Core Idea
 
-## Why AI_OS Exists
+AI_OS exists to turn intent into safe project work.
 
-Modern projects can become hard to manage because important decisions scatter across files, branches, chats, scripts, dashboards, and generated reports. AI tools can help, but without governance they can also create duplicate docs, conflicting instructions, unsafe automation, and unclear ownership.
+A human should be able to describe a goal in normal language. AI_OS should help translate that goal into:
 
-AI_OS exists to make AI-assisted work more controlled.
+- repo inspection
+- ownership discovery
+- source-of-truth selection
+- scoped planning
+- bounded worker execution
+- validation
+- review
+- reporting
+- safe continuation
 
-Its purpose is to help humans:
+The core pattern is simple: understand before changing, validate before mutating, and keep humans in control of risk.
 
-- identify the real goal
-- understand the current project structure
+## Why It Exists
+
+Modern projects often fail to stay legible. Decisions scatter across README files, chat history, branches, dashboards, scripts, generated reports, runtime state, and abandoned drafts. AI tools can accelerate this problem when they create new authority instead of finding the existing one.
+
+AI_OS exists to reduce that drift.
+
+It is designed to help humans:
+
 - find the file or system that already owns a topic
-- avoid duplicate authority
-- plan before changing
-- validate before mutation
-- protect runtime and high-risk systems
-- improve a project through controlled phases
+- prevent duplicate brains
+- distinguish active, draft, generated, archive, runtime, and legacy material
+- protect high-risk systems
+- organize work into phases and lanes
+- validate outputs before relying on them
+- continue work safely across sessions
 
-## Human + AI Collaboration Model
+## Human Control
 
-AI_OS keeps the human in control.
+AI_OS is human-first.
 
-The human sets direction, approves risk, decides priorities, and owns final judgment. AI workers help inspect, plan, edit, validate, and summarize, but they do not become the authority.
+Humans define the mission, approve risk, decide priorities, and own final judgment. AI workers can inspect, plan, edit, validate, and summarize, but they do not become the governing authority.
 
-The intended model is simple:
+The intended workflow is:
 
-1. The human describes the goal.
+1. The human describes the objective.
 2. AI_OS maps the current state.
-3. AI_OS identifies ownership and risk.
-4. A bounded worker performs one approved job.
-5. Validation proves what changed.
-6. The human decides whether to continue, commit, merge, push, archive, or stop.
+3. AI_OS identifies authority, ownership, and risk.
+4. A worker receives one bounded task.
+5. The worker operates only inside its approved lane.
+6. Validation proves the result.
+7. The human decides whether to continue, commit, merge, push, archive, or stop.
 
-## The Worker System
+## Governance Model
+
+Governance is part of the architecture.
+
+AI_OS relies on canonical authority files so both humans and workers know where truth lives:
+
+- `README.md` is the human front door.
+- `AGENTS.md` governs AI and Codex worker behavior.
+- `docs/governance/` owns source-of-truth maps, ownership rules, and doctrine.
+- `docs/workflows/` owns operator and development workflows.
+- `docs/security/` owns approval, credential, access, and safety boundaries.
+- `docs/architecture/` owns durable architecture and system vision.
+- `docs/audits/` records inspection history and cleanup decisions.
+
+When an existing canonical file owns a topic, that file should be updated instead of creating another document with overlapping authority.
+
+## Worker Orchestration
 
 AI_OS workers are controlled contributors, not free agents.
 
-Each worker must know:
+Each worker should have:
 
-- its lane
-- its task
-- its allowed files
-- its blocked files
-- its branch or worktree
-- its validation requirements
-- its output format
-- when to stop and ask
+- one lane
+- one branch or worktree
+- one task
+- one file ownership boundary
+- one validation chain
+- one expected output
+- one stop condition
 
-A worker should do one kind of job at a time: inspect, plan, edit, or validate. It should not silently expand scope, invent a roadmap, create a new source of truth, or edit the same file tree as another worker.
+This model lets multiple workers contribute without overwriting each other, duplicating authority, or silently expanding scope. Main control remains responsible for merge and push approval.
 
-Main control owns merge and push approval.
+## Validation-Driven Building
 
-## Governance and Safety
+AI_OS treats validation as a prerequisite for trust.
 
-AI_OS treats governance as part of the system, not as an afterthought.
+Before a change is accepted, the system should know:
 
-Core safety rules include:
+- what files were inspected
+- what files were allowed
+- what files were blocked
+- what changed
+- what validators ran
+- what errors or unknowns remain
+- whether commit or push happened
 
-- DRY_RUN before APPLY
-- smallest safe edit first
-- explicit approval before risky changes
-- no duplicate active authority
-- no secrets or credentials in repo work
-- no live trading enablement without separate reviewed approval
-- no runtime, orchestration, dashboard, telemetry, or trading changes unless explicitly scoped
-- no mass delete, mass move, or mass rename
+Validation may include `git status --short --branch`, `git diff --check`, targeted tests, JSON parsing, PowerShell parsing, dashboard checks, runtime health checks, and exact-file evidence.
 
-Safety is enforced through clear boundaries, not trust in memory.
+Validation does not replace human approval. It gives the human evidence for the next decision.
 
-## Canonical Authority
+## Self-Healing and Self-Automation
 
-AI_OS relies on canonical files so workers know where truth lives.
+AI_OS is designed to become more maintainable over time.
 
-Examples:
+In this context, "self-healing" does not mean uncontrolled self-repair. It means governed detection and recommendation:
 
-- `README.md` is the human project front door.
-- `AGENTS.md` is the AI and worker behavior authority.
-- `docs/governance/` owns repo doctrine, ownership, and source-of-truth rules.
-- `docs/workflows/` owns operator and development workflows.
-- `docs/security/` owns access, approval, credential, and execution boundaries.
-- `docs/architecture/` owns durable system architecture.
-- `docs/audits/` records decisions, inspections, and cleanup history.
+- identify missing ownership
+- detect duplicate authority
+- flag stale references
+- recommend the next safe step
+- route work to the correct workflow
+- preserve audit evidence
+- improve structure through approved changes
 
-When an existing canonical file owns a topic, that file should be edited instead of creating a duplicate.
+"Self-automation" means repeatable, validated workflows that reduce manual chaos without bypassing approval.
 
-## Validation Before Mutation
+## The Recursive Principle
 
-AI_OS is validation-driven.
+AI_OS eventually recognizes that AI_OS itself is also a project.
 
-Before work changes the repo, the system should know:
+The same governance, validation, workflow, ownership, and orchestration systems used to build a trading bot, dashboard, or automation tool should also help AI_OS improve and organize itself safely.
 
-- what files are allowed
-- what files are blocked
-- what existing file owns the topic
-- what validators prove the change is safe
-- what rollback path exists if the change is wrong
-
-Validation can include:
-
-- `git status --short --branch`
-- `git diff --check`
-- targeted tests
-- JSON parsing
-- PowerShell parsing
-- dashboard checks
-- runtime health checks
-- exact-file evidence
-
-Validation does not replace approval. It gives the human evidence.
-
-## Self-Improvement Principles
-
-AI_OS_V2 should improve itself the same way it improves other projects.
-
-That means it should:
-
-- inspect before editing
-- map before moving
-- classify before deleting
-- promote useful source material into canonical files
-- archive only after needed content is absorbed
-- protect runtime systems while improving documentation
-- reduce duplicate brains over time
-- make future work easier to understand
-
-Self-improvement is not automatic self-rule. It is governed maintenance supported by AI workers and approved by humans.
-
-## AI_OS Building AI_OS
-
-The recursive idea is practical: AI_OS itself is a project.
-
-The same process AI_OS would use to help build another system can be applied to AI_OS_V2:
+That recursive idea is practical, not mystical:
 
 1. Define the mission.
 2. Map the repo.
 3. Identify active authority.
 4. Classify source material.
 5. Protect runtime and high-risk paths.
-6. Promote useful content into canonical homes.
+6. Promote useful material into canonical homes.
 7. Validate changes.
-8. Record decisions.
+8. Report evidence.
 9. Repeat in controlled phases.
 
-This gives AI_OS a path to become more stable without pretending to be self-aware or fully autonomous.
+This gives AI_OS a path to become more stable without pretending to be self-aware.
 
-## Real-World Use Cases
+## Realistic Use Cases
 
-AI_OS_V2 is intended to support practical project building, including:
+AI_OS_V2 may eventually help build and manage:
 
-- trading research systems
-- paper-trading labs
+- trading bots and paper-trading research systems
+- orchestration systems
 - dashboards
 - automation systems
-- orchestration tools
-- developer workflows
+- operational tooling
 - validation pipelines
-- operational reporting
-- repo cleanup and restructuring
-- AI worker coordination
+- developer workflows
+- telemetry and reporting systems
+- repo cleanup and restructuring efforts
 
-Each use case should follow the same governance model: clear ownership, bounded edits, validation, and human approval.
+Every use case follows the same rule: authority first, scope second, validation before mutation.
 
-## Trading System Example
+## Trading Lab Example
 
-A long-term example is helping the repo owner build an industry-standard forex trading platform.
+Trading Lab is the first production vertical.
 
-AI_OS could help:
+AI_OS may help humans build a paper-only trading environment by:
 
-- define the trading-system goal
-- separate research from execution
-- build a paper-only Trading Lab
-- validate signal and risk workflows
-- track latency, results, and operational evidence
-- protect broker boundaries
-- keep live trading disabled until separately reviewed and approved
+- separating research from execution
+- validating signal and risk workflows
+- tracking paper results and latency
+- preserving broker boundaries
+- producing operator-readable evidence
+- keeping live execution disabled unless a future reviewed policy explicitly approves it
 
-AI_OS must not place real trades, handle broker credentials, enable live execution, or route orders unless a separate future policy explicitly approves that work.
-
-For now, Trading Lab remains paper-only and safety-first.
+AI_OS must not place real trades, handle broker credentials, enable live execution, or route real orders. LLMs must not be placed directly in live order execution paths.
 
 ## Long-Term Direction
 
-The long-term direction is a governed project-building environment where human-readable prompts can be converted into safe, structured work.
+The long-term direction is a governed project-building environment where human-readable prompts become structured, auditable work.
 
 AI_OS should become better at:
 
-- understanding repo structure
-- identifying ownership
-- detecting missing pieces
+- analyzing project structure
+- identifying missing ownership
+- detecting duplicate authority
 - recommending next safe steps
 - routing work to the right lane
-- validating output
-- preventing duplicate authority
+- improving maintainability
 - preserving audit history
-- improving organization over time
+- stabilizing itself over time
 
 This is practical automation. The goal is not to remove humans from decisions. The goal is to make complex work easier to control.
 
-## What AI_OS Is NOT
+## What AI_OS Is Not
 
 AI_OS is not:
 
-- self-aware
+- conscious
 - sentient
-- magical AGI
+- AGI
+- magical intelligence
+- unchecked autonomy
 - a replacement for human judgment
-- an unchecked autonomous agent
-- a live trading engine
-- a broker execution system
+- a live trading system
+- a broker execution platform
 - a secret manager
 - a tool for bypassing validation or approval
 
-AI_OS should not promise what it cannot safely do.
+AI_OS should not claim capabilities it cannot safely prove.
 
-## Final Vision
+## Architectural Vision
 
-AI_OS_V2 is a governed operating layer for AI-assisted project work.
+AI_OS_V2 should feel like a professional operating layer for AI-assisted project work.
 
-Its strength is not fantasy autonomy. Its strength is structure: canonical authority, scoped workers, protected systems, validation, and human approval.
+Its strength is structure:
+
+- canonical authority
+- scoped workers
+- protected systems
+- human approval
+- validation chains
+- audit trails
+- clear continuation paths
 
 The vision is a system where a person can describe what they want to build, and AI_OS helps turn that intent into organized, validated, auditable progress.
 
