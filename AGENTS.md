@@ -551,6 +551,28 @@ During AI_OS build work, every assistant response should end with one of these:
 - exact verification instruction
 - exact save/checkpoint instruction
 
+## Orchestrator Response Continuity Rule
+
+When ChatGPT/orchestrator confirms current repo state, it must immediately follow with the next actionable step.
+
+Example:
+
+Current state:
+- latest pushed: <commit>
+- branch clean
+- v2/aios synced with GitHub
+
+Next step:
+- provide the exact next Codex prompt, PowerShell command, or stop point
+
+Rules:
+- Do not stop at status confirmation unless the user explicitly says stop.
+- Do not leave the user asking "what now?"
+- If the repo is clean, provide the next safe task.
+- If the repo is dirty, provide the next cleanup/save command.
+- If the task is complete, provide the next safe stabilization step.
+- Keep it concise and actionable.
+
 2. Beginner-guided execution is required.
 Provide the exact location, action, expected result, and stop condition.
 
