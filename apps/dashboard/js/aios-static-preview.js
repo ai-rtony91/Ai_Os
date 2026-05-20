@@ -77,8 +77,8 @@ const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.
 const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
-const devopsControlWindowFixturePath = "mock-data/aios-devops-control-window-v1.example.json";
-const workIntelligenceQueueFixturePath = "mock-data/work-intelligence-queue-v1.example.json";
+const _devopsControlWindowFixturePath = "mock-data/aios-devops-control-window-v1.example.json";
+const _workIntelligenceQueueFixturePath = "mock-data/work-intelligence-queue-v1.example.json";
 const orchestratorWindowFixturePath = "mock-data/aios-orchestrator-window-v1.example.json";
 const workerRegistryFixturePath = "mock-data/aios-worker-registry-v1.example.json";
 const workerQueueFixturePath = "mock-data/aios-worker-queue-v1.example.json";
@@ -89,7 +89,7 @@ const commandCenterMergeQueueFixturePath = "mock-data/aios-merge-readiness-queue
 const commandCenterConflictCenterFixturePath = "mock-data/aios-conflict-center-v1.example.json";
 const commandCenterOperatorGuidanceFixturePath = "mock-data/aios-operator-guidance-v1.example.json";
 const commandCenterWorkerAgeFixturePath = "mock-data/aios-worker-age-tracking-v1.example.json";
-const tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
+const _tradingLabNextActionFixturePath = "mock-data/trading-lab-next-action.example.json";
 const tradingLabWorkspaceFixturePath = "mock-data/trading-lab-workspace.example.json";
 const tradingLabWorkstationFixturePath = "mock-data/trading-lab-workstation.example.json";
 const paperTradingBotStatusFixturePath = "mock-data/paper-trading-bot-status.example.json";
@@ -226,7 +226,7 @@ const statusFixtures = {
   }
 };
 
-const workspaceDetailConfig = {
+const _workspaceDetailConfig = {
   "work-table": {
     title: "Work Table",
     summary: "Project packet tools for planning, instructions, output, approvals, and validation.",
@@ -686,7 +686,7 @@ function updateOutput(action) {
   if (consoleOutput) consoleOutput.textContent = message.console;
 }
 
-function renderWorkspaceRail(workspaceId, selectedItemId) {
+function _renderWorkspaceRail(workspaceId, selectedItemId) {
   const railTarget = resolveRailTarget(workspaceId, selectedItemId);
   renderRailSelection(railTarget.rail, railTarget.detail);
 }
@@ -769,7 +769,7 @@ function showWelcomeStart() {
   document.body.classList.add("welcome-start-active");
   try {
     window.sessionStorage.removeItem(dashboardWorkspaceStateKey);
-  } catch (error) {
+  } catch {
     // UI-only state; ignore unavailable storage.
   }
 }
@@ -1088,7 +1088,7 @@ function renderDevOpsQueueMeta(queueData = {}) {
   return meta;
 }
 
-function renderOrchestratorWorkerRegistry(workers = []) {
+function _renderOrchestratorWorkerRegistry(workers = []) {
   const list = document.createElement("div");
   list.className = "orchestrator-worker-grid";
   workers.forEach((worker) => {
@@ -1121,7 +1121,7 @@ function renderOrchestratorWorkerRegistry(workers = []) {
   return list;
 }
 
-function renderOrchestratorQueue(queueItems = []) {
+function _renderOrchestratorQueue(queueItems = []) {
   const list = document.createElement("div");
   list.className = "orchestrator-queue-list";
   queueItems.forEach((item) => {
@@ -1169,7 +1169,7 @@ function renderOrchestratorValidators(validators = []) {
   return grid;
 }
 
-function renderOrchestratorAlerts(alerts = []) {
+function _renderOrchestratorAlerts(alerts = []) {
   const list = document.createElement("div");
   list.className = "orchestrator-alert-list";
   alerts.forEach((alert) => {
@@ -1187,7 +1187,7 @@ function renderOrchestratorAlerts(alerts = []) {
   return list;
 }
 
-function renderOrchestratorCommitState(commitState = {}) {
+function _renderOrchestratorCommitState(commitState = {}) {
   const wrapper = document.createElement("div");
   wrapper.className = "devops-commit-package";
   wrapper.append(
@@ -1389,7 +1389,7 @@ function renderOrchestratorWindowData(orchestrator = {}, registry = {}, queue = 
   devopsControlWindowPanel.replaceChildren(renderCommandCenterSafetyBanner(), header, overview, nextActionPanel, grid, safetyStrip);
 }
 
-function renderDevOpsControlData(data = {}, queueData = {}) {
+function _renderDevOpsControlData(data = {}, queueData = {}) {
   if (!devopsControlWindowPanel) return;
   const queueItems = queueData.queue_items || queueData.queue || data.work_queue || [];
   const header = document.createElement("section");
@@ -1464,7 +1464,7 @@ async function renderDevOpsControlWindow() {
     const guidanceData = guidanceResponse.ok ? await guidanceResponse.json() : {};
     const workerAgeData = workerAgeResponse.ok ? await workerAgeResponse.json() : {};
     renderOrchestratorWindowData(orchestratorData, registryData, queueData, validatorData, commandCenterData, approvalData, mergeData, conflictData, guidanceData, workerAgeData);
-  } catch (error) {
+  } catch {
     renderOrchestratorWindowData({
       title: "AI_OS Command Center",
       summary: "Mock data unavailable. All actions remain blocked.",
@@ -1481,7 +1481,7 @@ function hideTradingLabNextActionCard() {
   tradingLabNextActionCard.replaceChildren();
 }
 
-function createTradingLabField(label, value) {
+function _createTradingLabField(label, value) {
   const item = document.createElement("div");
   item.className = "trading-lab-field";
   const fieldLabel = document.createElement("span");
@@ -2498,7 +2498,7 @@ function createTradingLabCompactNextAction(data = {}, windowSystemData = null, o
   return action;
 }
 
-function createTradingLabEntryButton(data = {}, windowSystemData = null, orchestrationData = null) {
+function createTradingLabEntryButton() {
   const button = document.createElement("button");
   button.className = "trading-lab-entry-button";
   button.type = "button";
@@ -2915,7 +2915,7 @@ async function renderTradingLabNextActionCard() {
     const riskReductionGuidanceData = riskReductionGuidanceResponse.ok ? await riskReductionGuidanceResponse.json() : null;
     const nextSafeActionGuidanceData = nextSafeActionGuidanceResponse.ok ? await nextSafeActionGuidanceResponse.json() : null;
     renderTradingLabNextActionData(await response.json(), paperBotCoreData, windowSystemData, paperRunnerData, orchestrationData, workstationData, phase28HandoffData, phase23NormalizationData, phase25LatencyData, paperTradingBotStatusData, operatorWorkbenchData, confidenceTimelineData, portfolioHeatData, macroOverlayData, chaosAlertsData, replayWorkbenchData, freezeTimelineData, edgeDecayVisibilityData, survivabilityTimelineData, replayScenariosData, riskEscalationData, nextSafeActionFlowData, operatorGuidanceData, survivabilityGuidanceData, confidenceGuidanceData, riskReductionGuidanceData, nextSafeActionGuidanceData);
-  } catch (error) {
+  } catch {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",
       badge: "MOCK ONLY",
@@ -3299,7 +3299,7 @@ async function renderPersonalGallery() {
       return;
     }
     personalGalleryPanel.append(createPersonalGalleryCategoryCard(armyCategory, armyImages));
-  } catch (error) {
+  } catch {
     personalGalleryPanel.replaceChildren(
       createPersonalGalleryNotice(),
       createPersonalGalleryEmpty("Local gallery manifest not found. Add images to private-media/service-gallery and create gallery.local.json.")
@@ -3329,7 +3329,7 @@ function readCommandCenterState() {
       workspace: legacyTarget.rail,
       detail: legacyTarget.detail
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -3345,7 +3345,7 @@ function saveCommandCenterState() {
       workspace: activeWorkspaceId,
       detail: activeDetailItemId
     }));
-  } catch (error) {
+  } catch {
     // UI-only state; ignore unavailable storage.
   }
 }
@@ -3385,7 +3385,7 @@ async function loadJsonFixture(path, fallback) {
     }
     const data = await response.json();
     return { data, source: path };
-  } catch (error) {
+  } catch {
     return { ...fallback, status: "UNKNOWN", source: path };
   }
 }
@@ -3682,7 +3682,7 @@ async function loadToolRegistryStatus() {
     setToolRegistryMessage(`Fixture source: ${toolRegistryFixturePath}`);
     renderToolRegistrySummary(tools);
     renderToolRegistry(tools, data.generated_at);
-  } catch (error) {
+  } catch {
     setToolRegistryMessage("Tool registry fixture unavailable — mock data only.");
     renderToolRegistrySummary([]);
     toolRegistryGrid.textContent = "";
@@ -3829,7 +3829,7 @@ async function loadWorkTableAiInsights() {
     renderWorkTableAiMeta(fixtureData);
     renderWorkTableAiCards(cards);
     renderWorkTableAiActions(actionsData, fixtureData);
-  } catch (error) {
+  } catch {
     setWorkTableAiMessage("Work Table AI fixture unavailable — mock data only.");
     clearNode(workTableAiMeta);
     clearNode(workTableAiCards);
@@ -3924,7 +3924,7 @@ function syncYouTubeAudioControls() {
     if (typeof youtubeRadioPlayer.isMuted === "function") {
       setYouTubeMuteButton(youtubeRadioPlayer.isMuted());
     }
-  } catch (error) {
+  } catch {
     // YouTube state can be unavailable during player startup.
   }
 }
@@ -3949,7 +3949,7 @@ function readSavedYouTubeDockCollapsed() {
     if (value === "true") return true;
     if (value === "false") return false;
     return false;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -3957,7 +3957,7 @@ function readSavedYouTubeDockCollapsed() {
 function saveYouTubeDockCollapsed(isCollapsed) {
   try {
     window.localStorage.setItem(youtubeDockCollapsedKey, String(isCollapsed));
-  } catch (error) {
+  } catch {
     // Visual preference only; ignore unavailable storage.
   }
 }
@@ -3974,7 +3974,7 @@ function readSavedYouTubeRadioState() {
       wasPlaying: parsed.wasPlaying === true,
       savedAt: Number(parsed.savedAt) || 0
     };
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -3992,7 +3992,7 @@ function getYouTubeRadioPlayerState() {
       volume: typeof youtubeRadioPlayer.getVolume === "function" ? youtubeRadioPlayer.getVolume() : 70,
       muted: typeof youtubeRadioPlayer.isMuted === "function" ? youtubeRadioPlayer.isMuted() : youtubeRadioMuted
     };
-  } catch (error) {
+  } catch {
     return { isPlaying: youtubeRadioLastKnownPlaying };
   }
 }
@@ -4009,7 +4009,7 @@ function saveYouTubeRadioState() {
       collapsed,
       savedAt: Date.now()
     }));
-  } catch (error) {
+  } catch {
     // Safe UI/player state only; ignore unavailable storage.
   }
 }
@@ -4038,7 +4038,7 @@ function applyYouTubeRadioRestoreState() {
     setYouTubeDockCollapsed(saved.collapsed);
     setYouTubeRadioState(youtubeRadioResumeMessage);
     youtubeRadioRestoreApplied = true;
-  } catch (error) {
+  } catch {
     setYouTubeRadioState(youtubeRadioResumeMessage);
   }
 }
@@ -4077,7 +4077,7 @@ function retryYouTubeRadioSingleVideo() {
   try {
     youtubeRadioPlayer.loadVideoById(youtubeRadioVideoId);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -4114,7 +4114,7 @@ function runYouTubeRadioPlayerAction(action) {
       }
     }
     saveYouTubeRadioState();
-  } catch (error) {
+  } catch {
     setYouTubeRadioState("YouTube control unavailable.");
   }
 }
@@ -4222,7 +4222,7 @@ function handleYouTubeRadioVolume(value) {
       setYouTubeMuteButton(false);
     }
     saveYouTubeRadioState();
-  } catch (error) {
+  } catch {
     setYouTubeRadioState("Volume control unavailable.");
   }
 }
@@ -4239,7 +4239,7 @@ function getDashboardMusicVolumeDelta(delta) {
   if (youtubeRadioPlayer && typeof youtubeRadioPlayer.getVolume === "function") {
     try {
       currentVolume = Number(youtubeRadioPlayer.getVolume()) || currentVolume;
-    } catch (error) {
+    } catch {
       // Use the current slider value when the YouTube player is not ready.
     }
   }
@@ -4302,7 +4302,7 @@ function readSavedDrawerClosed() {
     if (value === "true") return true;
     if (value === "false") return false;
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -4310,7 +4310,7 @@ function readSavedDrawerClosed() {
 function saveDrawerClosed(isClosed) {
   try {
     window.sessionStorage.setItem(drawerStateKey, String(isClosed));
-  } catch (error) {
+  } catch {
     // The drawer still works without persisted UI state.
   }
 }
@@ -4321,7 +4321,7 @@ function readSavedPersonalRailClosed() {
     if (value === "true") return true;
     if (value === "false") return false;
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -4329,7 +4329,7 @@ function readSavedPersonalRailClosed() {
 function savePersonalRailClosed(isClosed) {
   try {
     window.sessionStorage.setItem(personalRailStateKey, String(isClosed));
-  } catch (error) {
+  } catch {
     // The rail still works without persisted UI state.
   }
 }
@@ -4337,7 +4337,7 @@ function savePersonalRailClosed(isClosed) {
 function readSavedDashboardTheme() {
   try {
     return window.localStorage.getItem(dashboardThemeKey) || "default";
-  } catch (error) {
+  } catch {
     return "default";
   }
 }
@@ -4345,7 +4345,7 @@ function readSavedDashboardTheme() {
 function saveDashboardTheme(themeName) {
   try {
     window.localStorage.setItem(dashboardThemeKey, themeName);
-  } catch (error) {
+  } catch {
     // The selector still works without persisted visual preference.
   }
 }
@@ -4455,7 +4455,7 @@ function blockMobileRailScrollEvent(event) {
   stopMobileRailScrollEvent(event);
 }
 
-function scrollActiveMobileRail(deltaY) {
+function _scrollActiveMobileRail(deltaY) {
   const scrollTarget = getActiveMobileRailScrollTarget();
   if (!scrollTarget || !Number.isFinite(deltaY)) return;
   scrollTarget.scrollTop += deltaY;
