@@ -19,6 +19,129 @@ Live broker execution is blocked.
 - Never use git add .
 - Always report files created, files updated, validation result, git status, commit status, and push status.
 
+## AI_OS Operating Rules
+
+- Existing canonical file first.
+- Do not create duplicate docs.
+- Do not create duplicate authority.
+- Edit existing files whenever possible.
+- New files only when no proper home exists.
+- Do not create another brain.
+- Runtime systems are protected.
+- Trading systems are protected.
+- Orchestration systems are protected.
+- Validate before mutation.
+- DRY_RUN before APPLY.
+- Smallest safe edit first.
+- One responsibility per file/folder.
+- Archive only after V2 absorbs needed content.
+- No mass delete.
+- No mass rename.
+- No mass move.
+- Ask before uncertain changes.
+- If multiple Codex workers are used, each worker must have one lane, one branch/worktree, one task, and one output.
+- Main control is the only place for merge/push approval.
+- Never let two workers edit the same file tree at the same time.
+
+## AI_OS Daily Operating Rules
+
+1. Start every day from one source of truth:
+   - `README.md`
+   - `docs/governance/source-of-truth-map.md`
+
+2. Never let a new session create a new "brain." Resume from the existing source of truth.
+
+3. Before adding any file, ask: "Does this already exist somewhere?"
+
+4. Every file must have a role:
+   - active
+   - draft
+   - archive
+   - runtime
+   - generated
+   - test
+
+5. Branches are work lanes, not memory storage. Finish or close the branch before starting the next idea.
+
+6. Do not automate until ownership is clear. Map first. Automate second.
+
+7. Never delete because something "looks old." Compare, classify, validate references, then remove.
+
+8. Keep generated junk out of authority. Logs, reports, cache, telemetry, and checkpoints are not instructions.
+
+9. Never start by creating. Start by checking where you are.
+
+10. Morning startup command:
+
+    ```powershell
+    cd "C:\Users\mylab\OneDrive\GitHub\AI_OS_V2"
+    git status --short --branch
+    ```
+
+11. Never work from memory. Open the current source-of-truth files first:
+    - `docs/governance/source-of-truth-map.md`
+    - `docs/audits/active-system-map.md`
+
+12. One session equals one mission. Do not mix cleanup, features, docs, runtime, and branch work.
+
+13. Codex gets one job only: inspect, plan, edit, or validate.
+
+14. No branch guessing. Confirm branch before work.
+
+15. Resume, do not recreate.
+
+16. If a file already exists and owns the topic, edit that file.
+
+17. Do not create a new doc unless no correct home exists.
+
+18. Do not create another brain.
+
+19. Planning docs are only for risky repo-wide changes.
+
+20. Branches are only for meaningful work batches, not tiny edits.
+
+21. Use the existing canonical file first.
+
+22. Create a new file only when the repo has no proper place for that responsibility.
+
+23. If an existing canonical file already owns the topic: EDIT THAT FILE. DO NOT create another file.
+
+24. If multiple Codex workers are used:
+    - one worker
+    - one lane
+    - one branch/worktree
+    - one task
+    - one output
+
+25. Main control is the only place for merge/push approval.
+
+26. Never let two workers edit the same file tree at the same time.
+
+## Codex Window Creation Rules
+
+Any person or AI responsible for opening or assigning Codex work must obey these rules before starting another Codex window, branch, or worker lane.
+
+- Before every Codex task, read `AGENTS.md` first.
+- Follow AI_OS Operating Rules and AI_OS Deviation Guardrails.
+- If the task conflicts with `AGENTS.md`, stop and report the conflict.
+- One Codex run gets one task only.
+- Existing canonical file first.
+- No new file unless justified.
+- End every Codex run with one next safe step only.
+- If unsure, ask: "Which existing file owns this?"
+- No next phase unless the user approves it.
+- Do not open another Codex window inside the same branch unless ownership is clear.
+- Do not assign two Codex workers to the same file tree.
+- One worker equals one lane, one branch/worktree, one task, one output.
+- Main Control owns merge/push approval.
+- Before creating a new Codex worker, identify:
+  - worker purpose
+  - branch/worktree
+  - allowed files
+  - blocked files
+  - expected output
+  - stop condition
+
 ## 3. Big Pack Mode
 
 - Default to Big Pack Mode for evolved AI_OS work.
