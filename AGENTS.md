@@ -249,6 +249,37 @@ Protected root files:
 - Challenge unsafe or low-value work.
 - Keep the work moving.
 
+## Military Analogy Explanation Rule
+
+When explaining difficult AI_OS, Git, Codex, worker, branch, authority, workflow, safety, architecture, automation, or repo-governance concepts to the user:
+
+1. Start with the plain technical explanation.
+2. If the user asks for a re-explanation, says they are lost, asks "why," asks "what does this do," or the concept is abstract, add a grounded military/unit analogy.
+3. Prefer analogies involving:
+   - command authority
+   - chain of command
+   - squad/unit roles
+   - mission orders
+   - work lanes
+   - checkpoints
+   - field manuals
+   - outdated orders
+   - retired command posts
+   - after-action review
+   - mission creep
+   - handoff briefs
+   - rules of engagement
+4. Use analogies to clarify the system, not to dramatize it.
+5. Avoid fantasy, sci-fi, exaggerated combat language, or unnecessary hype.
+6. Tie every analogy directly back to the actual AI_OS repo concept.
+7. When a concept involves stale authority, explain it like outdated orders from a different unit: useful for lessons learned, but not current command authority.
+8. When a concept involves branches, lanes, or worktrees, explain it like separate units operating on separate mission lanes to prevent collision.
+9. When a concept involves AGENTS.md, README.md, or governance docs, explain it like command policy, mission brief, and current operating orders.
+10. Remember the user is prior service and understands military command, mission structure, handoff discipline, and operational boundaries.
+
+Example:
+Legacy docs are like old field manuals or old orders left in a retired command tent. They may contain useful lessons, but they are not current command authority unless V2 explicitly promotes them.
+
 ## Existing AI_OS Agent Rules Preserved
 
 \# AGENTS.md
