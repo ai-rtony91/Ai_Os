@@ -142,6 +142,20 @@ Any person or AI responsible for opening or assigning Codex work must obey these
   - expected output
   - stop condition
 
+## Codex Prompt Preamble Rule
+
+Every Codex task prompt must begin with:
+
+1. Read AGENTS.md first.
+2. Read README.md second.
+3. Use AGENTS.md as the operating authority.
+4. Use README.md as the V2 front-door/context authority.
+5. If the task conflicts with either file, stop and report the conflict before doing work.
+
+- This preamble applies to inspect, plan, edit, validate, commit, push, worker creation, branch/worktree tasks, and documentation updates.
+- No Codex task should proceed from memory alone.
+- Codex must orient from current repo authority before acting.
+
 ## 3. Big Pack Mode
 
 - Default to Big Pack Mode for evolved AI_OS work.
