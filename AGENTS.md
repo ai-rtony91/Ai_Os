@@ -144,13 +144,19 @@ Any person or AI responsible for opening or assigning Codex work must obey these
 
 ## Codex Prompt Preamble Rule
 
-Every Codex task prompt must begin with:
+Every Codex task prompt must begin with this exact preamble:
 
-1. Read AGENTS.md first.
-2. Read README.md second.
-3. Use AGENTS.md as the operating authority.
-4. Use README.md as the V2 front-door/context authority.
-5. If the task conflicts with either file, stop and report the conflict before doing work.
+```text
+Read AGENTS.md first.
+Read README.md second.
+
+Use AGENTS.md as operating authority.
+Use README.md as V2 front-door/context authority.
+
+If task context conflicts with either file:
+STOP.
+Report the conflict before continuing.
+```
 
 - This preamble applies to inspect, plan, edit, validate, commit, push, worker creation, branch/worktree tasks, and documentation updates.
 - No Codex task should proceed from memory alone.
