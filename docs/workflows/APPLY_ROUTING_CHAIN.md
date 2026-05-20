@@ -18,6 +18,20 @@ DRY_RUN
 -> review package
 ```
 
+## State Definitions
+
+`DRY_RUN` means the task has a plan and no files are changed.
+
+`validation` means required validators are identified or run by explicit operator instruction.
+
+`approval request` means the operator is asked to approve exact files and scope.
+
+`APPLY candidate` means the task is ready for approved file edits only.
+
+`exact-file evidence` means changed files and validation output are available for review.
+
+`review package` means evidence is complete enough for operator review. It does not execute merge, commit, push, or APPLY.
+
 ## Required Evidence
 
 Each route should include:
@@ -48,4 +62,3 @@ Routing is blocked by:
 ## Non-Automation Statement
 
 This chain does not approve APPLY, edit files, stage files, commit, push, merge, run broker logic, or run live trading logic.
-

@@ -31,6 +31,20 @@ Before APPLY review, each lane should declare:
 - report path.
 - validation commands.
 
+## Allowed Worker Lanes
+
+Allowed worker lanes are:
+
+- Work Intelligence
+- Operator Orchestration
+- Dashboard UI
+- Trading Lab
+- Validators
+- Reports
+- Mock Data
+
+Any lane outside this list is `UNKNOWN` until the operator approves and documents it.
+
 ## Path Ownership
 
 Workers must stay inside declared allowed paths and must not edit:
@@ -46,3 +60,15 @@ Workers must stay inside declared allowed paths and must not edit:
 
 If two workers declare the same planned file, the conflict is blocked until the operator assigns ownership. Stale worker state must be reviewed before resuming.
 
+## Validation
+
+Worker branch and lane reviews may use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Test-AiOsWorkIntelligenceScan.ps1
+powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1
+git diff --check
+git status --short --branch
+```
+
+These commands validate evidence only. They do not approve APPLY, create branches, create worktrees, stage files, commit, push, merge, or change runtime state.
