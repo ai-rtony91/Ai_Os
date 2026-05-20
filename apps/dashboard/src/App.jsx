@@ -1,8 +1,15 @@
 import { useMemo, useState } from "react";
-import runtimeVisibility from "../mock-data/aios-runtime-visibility-v1.example.json";
+import mockRuntimeVisibility from "../mock-data/aios-runtime-visibility-v1.example.json";
+import {
+  RUNTIME_VISIBILITY_SOURCE_LABELS,
+  mapRuntimeVisibilityDisplayModel
+} from "./runtimeVisibilityAdapter";
 import "./App.css";
 
 const packetFilters = ["all", "dispatch", "wait_for_approval", "retry", "manual_review"];
+const runtimeVisibility = mapRuntimeVisibilityDisplayModel(mockRuntimeVisibility, {
+  sourceLabel: RUNTIME_VISIBILITY_SOURCE_LABELS.MOCK_DATA
+});
 
 function formatTime(value) {
   if (!value) {
