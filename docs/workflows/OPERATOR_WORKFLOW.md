@@ -34,6 +34,54 @@ Status checks should be used at major checkpoints only:
 
 This protects operator focus, reduces unnecessary interruptions, and keeps guided work grouped into practical mission blocks.
 
+## Operator Intent Protection Doctrine
+
+AI_OS workflow guidance must protect the operator's intent before solving the technical task.
+
+The operator-visible success condition must be defined before implementation. A change is not complete just because code was edited, validation passed, or a command succeeded. A change is complete only when the operator's real workflow behaves as intended.
+
+Before a work batch begins, identify:
+
+- What the operator is trying to do.
+- What the operator should visibly see when it works.
+- What should remain unchanged.
+- What system component is responsible.
+- What assumptions are being made.
+- What should be inspected before action.
+
+Workflow rules:
+
+1. Do not solve from the first symptom alone.
+   Inspect the responsible boundary before changing files or behavior.
+
+2. Use precise operational language.
+   "Exit," "disable," "pause," "close," "hide," "launch," and "remove" are not interchangeable.
+
+3. Define visible success.
+   Examples:
+   - The tray icon disappears.
+   - The terminal opens in the expected repo.
+   - The PR shows the expected files.
+   - The game launches while the helper is no longer running.
+   - Only one helper icon exists.
+
+4. Change one behavior at a time.
+   Avoid stacking multiple fixes before testing the operator-visible outcome.
+
+5. Protect do-not-touch boundaries.
+   Each task should state what must not be edited, deleted, committed, pushed, recreated, or automated.
+
+6. Separate task classes.
+   Repo features, local machine tools, launcher behavior, documentation, temporary workarounds, and operator preferences must not be mixed unless explicitly approved.
+
+7. Stop on drift.
+   If the operator says the direction is wrong, stop and realign. Do not defend the current design or add more workarounds.
+
+8. Prefer the smallest safe change.
+   Avoid new scripts, watchdogs, dependencies, repo features, or automation layers unless they are required by the operator-visible success condition.
+
+This doctrine applies globally to AI_OS work, Codex prompts, assistant guidance, local tooling, repo edits, automation planning, and troubleshooting.
+
 ## Human Approval Gates
 
 Explicit approval is required before:

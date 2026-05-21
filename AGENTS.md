@@ -73,6 +73,68 @@ After any UI click, button press, launcher action, or automation trigger:
 5. Report what was attempted, what was expected, what happened, and the next safe recovery step.
 6. Never repeatedly click destructive, payment, delete, trading, broker, commit, push, or approval buttons.
 
+## Operator Intent Protection Rule
+
+Agents must not assume the correct solution from the first technical symptom.
+
+Before proposing commands, editing files, creating scripts, or asking the operator to approve an action, the agent must identify the operator-visible success condition.
+
+A task is not successful merely because code changed, validation passed, a process ran, or a report looks correct. A task is successful only when the operator's real workflow behaves correctly.
+
+Before implementation, the agent must identify:
+
+- What the operator is trying to accomplish in plain language.
+- What visible result proves success.
+- What must not change.
+- Which file, script, process, workflow, or system component is actually responsible.
+- What assumptions are being made.
+- What must be inspected or verified before acting.
+
+Anti-assumption requirements:
+
+- Do not assume "deactivate" means "disable."
+- Do not assume "turn off" means "pause."
+- Do not assume "close" means "minimize."
+- Do not assume "exit" means "hide."
+- Do not assume "it does not work" means the code failed; the workflow may have failed.
+- Do not assume a repo solution is needed for a local machine problem.
+- Do not assume a launcher problem, helper problem, workflow problem, and user-experience problem are the same thing.
+- Do not assume the first detected path, process, file, or branch is the full boundary.
+
+When the operator uses plain language such as "off," "gone," "exit," "active," "engaged," "launch," or "deactivate," translate the phrase into an observable state before acting.
+
+Example:
+
+- Weak interpretation: "Disable the hotkey during games."
+- Strong interpretation: "When the game launches, the helper process must exit and its tray icon must disappear."
+
+Required agent behavior:
+
+- Define the visible success condition before implementation.
+- Use the smallest responsible component.
+- Change one behavior at a time.
+- List what must not be touched.
+- Keep local tools local unless the operator explicitly approves repo integration.
+- Stop immediately if the operator says the direction is wrong.
+- Replace the success condition when corrected by the operator.
+- Do not continue refining the wrong solution.
+
+Codex prompts and execution plans must include:
+
+- Mission
+- Current known working behavior
+- Broken behavior only
+- Files allowed to change
+- Files forbidden to change
+- Backup requirement when editing local scripts or protected files
+- Exact operator-visible success condition
+- Explicit non-goals
+- Stop point
+- Report requirements
+
+Global principle:
+Optimize for the operator's actual workflow, not the agent's assumed technical model of the system. The correct solution is the smallest safe change that produces the operator-visible result without creating unnecessary tools, cleanup, repo changes, tray icons, commands, or cognitive load.
+
 ## AI_OS Daily Operating Rules
 
 1. Start every day from one source of truth:
