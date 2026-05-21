@@ -18,7 +18,7 @@ $item = @($items | Where-Object { $_.id -eq $ItemId }) | Select-Object -First 1
 
 Write-Host "COPY START - Set-AiOsWorkerTaskState.DRY_RUN.ps1"
 Write-Host "AI_OS Worker Task State Machine" -ForegroundColor Cyan
-Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Mode: DRY_RUN"
 Write-Host "item_id: $ItemId"
 Write-Host "target_state: $State"
 
@@ -42,30 +42,32 @@ if (-not $allowed) {
     throw "Blocked state move: $($item.status) -> $State"
 }
 
+$updatedUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$proposedUpdate = [pscustomobject]@{
+    id = $ItemId
+    current_state = $item.status
+    target_state = $State
+    note = $Note
+    proposed_updated_utc = $updatedUtc
+}
+
+Write-Host ""
+Write-Host "Would-be state update:"
+$proposedUpdate | ConvertTo-Json -Depth 6 | Write-Host
+Write-Host ""
+
 if ($Apply) {
-    foreach ($entry in $items) {
-        if ($entry.id -eq $ItemId) {
-            $entry.status = $State
-            if ($entry.PSObject.Properties.Name -notcontains "state_note") {
-    $entry | Add-Member -NotePropertyName state_note -NotePropertyValue ""
-}
-$entry.state_note = $Note
-            if ($entry.PSObject.Properties.Name -notcontains "updated_utc") {
-    $entry | Add-Member -NotePropertyName updated_utc -NotePropertyValue ""
-}
-$entry.updated_utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-        }
-    }
-
-    $inbox.items = $items
-    $inbox | ConvertTo-Json -Depth 10 | Set-Content $inboxPath -Encoding UTF8
-
-    Write-Host "State updated: YES" -ForegroundColor Green
+    Write-Host "Requested mutation: update worker task state"
+    Write-Host "Mutation skipped: YES - this .DRY_RUN.ps1 script cannot change worker inbox state."
 } else {
-    Write-Host "State updated: NO"
+    Write-Host "Requested mutation: update worker task state"
+    Write-Host "Mutation skipped: YES"
 }
 
+Write-Host "State updated: NO"
+Write-Host "Files changed: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
+Write-Host "Next safe action: Request a separately approved APPLY worker state command if this state change should be persisted."
 Write-Host "COPY END - Set-AiOsWorkerTaskState.DRY_RUN.ps1"
 
