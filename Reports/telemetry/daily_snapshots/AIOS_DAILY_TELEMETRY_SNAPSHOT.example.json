@@ -1,0 +1,33 @@
+{
+  "schema": "aios.daily_telemetry_snapshot.v1",
+  "snapshotDate": "2026-05-21",
+  "generatedAt": "2026-05-21T00:00:00Z",
+  "mode": "DRY_RUN",
+  "repo": "ai-rtony91/Ai_Os",
+  "workingFolder": "C:\\Users\\mylab\\OneDrive\\GitHub\\AI_OS_V2",
+  "branch": "v2/aios",
+  "git": {
+    "statusShortBranch": "## v2/aios...origin/v2/aios",
+    "modifiedEntryCount": 0,
+    "untrackedEntryCount": 0,
+    "commitStatus": "NOT_COMMITTED",
+    "pushStatus": "NOT_PUSHED"
+  },
+  "evidenceInbox": {
+    "path": "Reports/telemetry/session_archives/inbox_evidence/",
+    "scanMode": "METADATA_ONLY_NON_RECURSIVE",
+    "fileCount": 0,
+    "countByExtension": {}
+  },
+  "telemetryScripts": {
+    "path": "automation/telemetry/",
+    "inventoryMode": "FILE_NAME_ONLY",
+    "fileNames": []
+  },
+  "workflowStatus": {
+    "dryRunStatus": "EXAMPLE_ONLY",
+    "applyStatus": "NOT_RUN",
+    "safetyStatus": "PASS"
+  },
+  "nextSafeAction": "Run the DRY_RUN snapshot script and review console output before approving any APPLY output file."
+}
