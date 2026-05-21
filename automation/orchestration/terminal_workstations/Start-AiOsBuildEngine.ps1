@@ -1,7 +1,14 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$repoPath = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$repoRootResolverPath = Join-Path (Split-Path -Parent $PSScriptRoot) "bootstrap\Resolve-AiOsRepoRoot.ps1"
+if (-not (Test-Path -LiteralPath $repoRootResolverPath -PathType Leaf)) {
+    throw "AI_OS repo root resolver not found: $repoRootResolverPath"
+}
+
+. $repoRootResolverPath
+
+$repoPath = Resolve-AiOsRepoRoot -StartPath $PSScriptRoot
 $roleName = "Ai_Os BUILD ENGINE"
 $border = "#" * 100
 $titleIcon = [char]::ConvertFromUtf32(0x1F7E2)
