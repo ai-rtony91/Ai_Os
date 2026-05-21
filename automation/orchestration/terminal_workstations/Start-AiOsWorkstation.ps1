@@ -1,7 +1,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$repoPath = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$repoRootResolverPath = Join-Path (Split-Path -Parent $PSScriptRoot) "bootstrap\Resolve-AiOsRepoRoot.ps1"
 $roleName = "AI_OS WORKSTATION"
 $border = "#" * 100
 $commandIcon = [char]::ConvertFromUtf32(0x1F7E3)
@@ -59,9 +59,13 @@ function Invoke-GhReadOnly {
     }
 }
 
-if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
-    throw "AI_OS repo path not found: $repoPath"
+if (-not (Test-Path -LiteralPath $repoRootResolverPath -PathType Leaf)) {
+    throw "AI_OS repo root resolver not found: $repoRootResolverPath"
 }
+
+. $repoRootResolverPath
+
+$repoPath = Resolve-AiOsRepoRoot -StartPath $PSScriptRoot
 
 Set-Location -LiteralPath $repoPath
 $Host.UI.RawUI.WindowTitle = $roleName
