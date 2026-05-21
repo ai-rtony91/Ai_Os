@@ -231,6 +231,35 @@
       "next_safe_action": "Extend in a future approved task to check execution registry classifications."
     },
     {
+      "path": "automation/orchestration/validators/Invoke-AiOsExecutionRegistryGuard.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Report-only execution classification validator.",
+      "owner_area": "automation/orchestration/validators",
+      "execution_mode": "report_only_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "auto_repair",
+        "runtime_execution",
+        "worker_launch",
+        "startup_launch",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Report-only guard. Output is evidence only and does not approve script execution.",
+      "topology_guard_requirement": "May be run as a validation guard before launcher or script execution decisions.",
+      "validator_consumption": "Approved execution registry guard entry point.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep report-only and review STOP findings before any execution decision."
+    },
+    {
       "path": "automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1",
       "classification": "ACTIVE",
       "purpose": "Runs orchestration validator chain in DRY_RUN mode.",
@@ -1187,7 +1216,7 @@
     }
   ],
   "counts_by_classification_at_creation": {
-    "ACTIVE": 11,
+    "ACTIVE": 12,
     "HELPER": 9,
     "BLOCKED": 14,
     "LEGACY": 2,
