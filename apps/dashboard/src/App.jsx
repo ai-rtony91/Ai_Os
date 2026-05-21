@@ -62,6 +62,10 @@ function statusTone(value) {
   return "neutral";
 }
 
+function metricTone(value, tone) {
+  return value === "UNKNOWN" ? "neutral" : tone;
+}
+
 function Metric({ label, value, tone = "neutral" }) {
   return (
     <div className={`metric ${tone}`}>
@@ -87,9 +91,15 @@ function Section({ title, action, children }) {
   );
 }
 
+function UnavailableMessage({ children }) {
+  return <p className="nextAction">{children}</p>;
+}
+
 export default function App() {
   const [packetFilter, setPacketFilter] = useState("all");
   const [eventQuery, setEventQuery] = useState("");
+  const isLocalApiReadOnly =
+    runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.LOCAL_API_READ_ONLY;
 
   const filteredPackets = useMemo(() => {
     if (packetFilter === "all") {
@@ -165,10 +175,26 @@ export default function App() {
               tone={healthTone}
             />
             <Metric label="Scheduler actions" value={runtimeVisibility.health.schedulerActions} />
-            <Metric label="Expired workers" value={runtimeVisibility.health.expiredWorkers} tone="danger" />
-            <Metric label="Poison packets" value={runtimeVisibility.health.poisonPackets} tone="danger" />
-            <Metric label="Retryable packets" value={runtimeVisibility.health.retryablePackets} tone="warn" />
-            <Metric label="Reclaimable" value={runtimeVisibility.health.reclaimablePackets} tone="warn" />
+            <Metric
+              label="Expired workers"
+              value={runtimeVisibility.health.expiredWorkers}
+              tone={metricTone(runtimeVisibility.health.expiredWorkers, "danger")}
+            />
+            <Metric
+              label="Poison packets"
+              value={runtimeVisibility.health.poisonPackets}
+              tone={metricTone(runtimeVisibility.health.poisonPackets, "danger")}
+            />
+            <Metric
+              label="Retryable packets"
+              value={runtimeVisibility.health.retryablePackets}
+              tone={metricTone(runtimeVisibility.health.retryablePackets, "warn")}
+            />
+            <Metric
+              label="Reclaimable"
+              value={runtimeVisibility.health.reclaimablePackets}
+              tone={metricTone(runtimeVisibility.health.reclaimablePackets, "warn")}
+            />
           </div>
         </Section>
 
@@ -183,7 +209,8 @@ export default function App() {
         <Section
           title="Active Packets"
           action={
-            <div className="segmented">
+            isLocalApiReadOnly ? null : (
+              <div className="segmented">
               {packetFilters.map((filter) => (
                 <button
                   key={filter}
@@ -194,71 +221,92 @@ export default function App() {
                   {filter.replaceAll("_", " ")}
                 </button>
               ))}
-            </div>
+              </div>
+            )
           }
         >
-          <div className="table">
-            <div className="tableRow tableHead">
-              <span>Packet</span>
-              <span>Status</span>
-              <span>Risk</span>
-              <span>Last update</span>
-              <span>Reason</span>
-            </div>
-            {filteredPackets.map((packet) => (
-              <div className="tableRow" key={packet.packetId}>
-                <strong>{packet.packetId}</strong>
-                <StatusPill value={packet.action ?? packet.status} />
-                <span>{packet.risk ?? "UNKNOWN"}</span>
-                <span>{formatTime(packet.lastUpdatedAt)}</span>
-                <span>{packet.reason ?? packet.lastEventType ?? "No scheduler reason"}</span>
+          {isLocalApiReadOnly ? (
+            <UnavailableMessage>
+              Active packet state is not available from LOCAL_API_READ_ONLY.
+            </UnavailableMessage>
+          ) : (
+            <div className="table">
+              <div className="tableRow tableHead">
+                <span>Packet</span>
+                <span>Status</span>
+                <span>Risk</span>
+                <span>Last update</span>
+                <span>Reason</span>
               </div>
-            ))}
-          </div>
+              {filteredPackets.map((packet) => (
+                <div className="tableRow" key={packet.packetId}>
+                  <strong>{packet.packetId}</strong>
+                  <StatusPill value={packet.action ?? packet.status} />
+                  <span>{packet.risk ?? "UNKNOWN"}</span>
+                  <span>{formatTime(packet.lastUpdatedAt)}</span>
+                  <span>{packet.reason ?? packet.lastEventType ?? "No scheduler reason"}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </Section>
 
         <Section title="Failed Packets">
-          <div className="failureSplit">
-            <Metric label="Retryable" value={failedGroups.retryable.length} tone="warn" />
-            <Metric label="Manual review" value={failedGroups.poison.length} tone="danger" />
-          </div>
-          <div className="stackList">
-            {failedGroups.all.map((packet) => (
-              <article className="listItem" key={packet.packetId}>
-                <div>
-                  <strong>{packet.packetId}</strong>
-                  <p>{packet.reason}</p>
-                </div>
-                <div className="itemMeta">
-                  <StatusPill value={packet.retryable ? "retryable" : "manual_review"} />
-                  <span>{packet.failureCount} failures</span>
-                  <span>{packet.source}</span>
-                  <span>{formatTime(packet.lastFailedAt)}</span>
-                </div>
-              </article>
-            ))}
-          </div>
+          {isLocalApiReadOnly ? (
+            <UnavailableMessage>
+              Failure grouping is not available from LOCAL_API_READ_ONLY.
+            </UnavailableMessage>
+          ) : (
+            <>
+              <div className="failureSplit">
+                <Metric label="Retryable" value={failedGroups.retryable.length} tone="warn" />
+                <Metric label="Manual review" value={failedGroups.poison.length} tone="danger" />
+              </div>
+              <div className="stackList">
+                {failedGroups.all.map((packet) => (
+                  <article className="listItem" key={packet.packetId}>
+                    <div>
+                      <strong>{packet.packetId}</strong>
+                      <p>{packet.reason}</p>
+                    </div>
+                    <div className="itemMeta">
+                      <StatusPill value={packet.retryable ? "retryable" : "manual_review"} />
+                      <span>{packet.failureCount} failures</span>
+                      <span>{packet.source}</span>
+                      <span>{formatTime(packet.lastFailedAt)}</span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </>
+          )}
         </Section>
 
         <Section title="Worker Leases">
-          <div className="workerGrid">
-            {runtimeVisibility.workers.map((worker) => (
-              <article className="workerCard" key={worker.workerId}>
-                <div className="workerTop">
-                  <strong>{worker.workerId}</strong>
-                  <StatusPill value={worker.leaseState} />
-                </div>
-                <p>{worker.packetId ?? "No active packet"}</p>
-                <div className="workerMeta">
-                  <span>Heartbeat {formatTime(worker.lastHeartbeatAt)}</span>
-                  <span>Age {formatDuration(worker.heartbeatAgeMs)}</span>
-                  <span>Lease {worker.leaseExpiresAt ? formatTime(worker.leaseExpiresAt) : "UNKNOWN"}</span>
-                  <span>Expires in {formatDuration(worker.leaseExpiresInMs)}</span>
-                  <span>{worker.reclaimablePacket ? "Packet reclaimable" : "Lease normal"}</span>
-                </div>
-              </article>
-            ))}
-          </div>
+          {isLocalApiReadOnly ? (
+            <UnavailableMessage>
+              Worker lease state is not exposed by LOCAL_API_READ_ONLY.
+            </UnavailableMessage>
+          ) : (
+            <div className="workerGrid">
+              {runtimeVisibility.workers.map((worker) => (
+                <article className="workerCard" key={worker.workerId}>
+                  <div className="workerTop">
+                    <strong>{worker.workerId}</strong>
+                    <StatusPill value={worker.leaseState} />
+                  </div>
+                  <p>{worker.packetId ?? "No active packet"}</p>
+                  <div className="workerMeta">
+                    <span>Heartbeat {formatTime(worker.lastHeartbeatAt)}</span>
+                    <span>Age {formatDuration(worker.heartbeatAgeMs)}</span>
+                    <span>Lease {worker.leaseExpiresAt ? formatTime(worker.leaseExpiresAt) : "UNKNOWN"}</span>
+                    <span>Expires in {formatDuration(worker.leaseExpiresInMs)}</span>
+                    <span>{worker.reclaimablePacket ? "Packet reclaimable" : "Lease normal"}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </Section>
 
         <Section title="Backpressure Alerts">
@@ -273,9 +321,13 @@ export default function App() {
             <StatusPill value={runtimeVisibility.backpressure.level} />
           </div>
           <div className="pressureGrid">
-            {Object.entries(runtimeVisibility.backpressure.pressureInputs).map(([key, value]) => (
-              <Metric key={key} label={key} value={value} />
-            ))}
+            {isLocalApiReadOnly ? (
+              <Metric label="Backpressure inputs" value="UNKNOWN" />
+            ) : (
+              Object.entries(runtimeVisibility.backpressure.pressureInputs).map(([key, value]) => (
+                <Metric key={key} label={key} value={value} />
+              ))
+            )}
           </div>
           <div className="alerts">
             {runtimeVisibility.alerts.map((alert) => (
@@ -321,12 +373,18 @@ export default function App() {
         </Section>
 
         <Section title="Execution Ledger">
-          <div className="ledgerSummary">
-            <Metric label="Packets" value={runtimeVisibility.executionLedger.packetCount} />
-            <Metric label="Approvals" value={runtimeVisibility.executionLedger.approvalCount} />
-            <Metric label="Blocked" value={runtimeVisibility.executionLedger.blockedPacketCount} tone="warn" />
-            <Metric label="Applied" value={runtimeVisibility.executionLedger.appliedPacketCount} tone="good" />
-          </div>
+          {isLocalApiReadOnly ? (
+            <UnavailableMessage>
+              Execution ledger summary is not available from LOCAL_API_READ_ONLY.
+            </UnavailableMessage>
+          ) : (
+            <div className="ledgerSummary">
+              <Metric label="Packets" value={runtimeVisibility.executionLedger.packetCount} />
+              <Metric label="Approvals" value={runtimeVisibility.executionLedger.approvalCount} />
+              <Metric label="Blocked" value={runtimeVisibility.executionLedger.blockedPacketCount} tone="warn" />
+              <Metric label="Applied" value={runtimeVisibility.executionLedger.appliedPacketCount} tone="good" />
+            </div>
+          )}
           <p className="nextAction">{runtimeVisibility.nextSafeAction}</p>
         </Section>
       </main>
