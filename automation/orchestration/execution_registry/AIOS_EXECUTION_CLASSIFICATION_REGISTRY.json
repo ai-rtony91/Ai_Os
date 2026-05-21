@@ -1,0 +1,1203 @@
+{
+  "registry_id": "AIOS_EXECUTION_CLASSIFICATION_REGISTRY",
+  "schema_version": "1.0",
+  "status": "canonical_execution_classification_registry",
+  "last_reviewed": "2026-05-21",
+  "branch": "v2/aios",
+  "authority": [
+    "AGENTS.md",
+    "README.md",
+    "RISK_POLICY.md",
+    "docs/workflows/OPERATOR_WORKFLOW.md"
+  ],
+  "default_policy": {
+    "unregistered_executable_scripts": "BLOCKED",
+    "unknown_execution_risk": "REVIEW_REQUIRED",
+    "dry_run_scripts_that_write_files": "BLOCKED",
+    "apply_scripts": "BLOCKED_WITHOUT_EXPLICIT_APPROVAL",
+    "runtime_or_worker_launch_scripts": "BLOCKED_WITHOUT_EXPLICIT_APPROVAL",
+    "git_commit_or_push_scripts": "BLOCKED_WITHOUT_EXPLICIT_APPROVAL",
+    "legacy_imports": "LEGACY",
+    "archive_candidates": "ARCHIVE"
+  },
+  "allowed_classifications": [
+    "ACTIVE",
+    "HELPER",
+    "BLOCKED",
+    "LEGACY",
+    "ARCHIVE",
+    "REVIEW_REQUIRED"
+  ],
+  "classification_definitions": {
+    "ACTIVE": "Clearly governed script allowed only within its documented DRY_RUN or validation role. ACTIVE does not approve APPLY, worker launch, runtime execution, commit, or push.",
+    "HELPER": "Support script intended to be called by an approved script, validator, or operator workflow. Not an independent operator entry point.",
+    "BLOCKED": "Must not be run until separately reviewed, repaired, or explicitly approved with exact scope, validation, and stop point.",
+    "LEGACY": "Historical or imported script retained as reference evidence only. Not active authority and not safe to run by default.",
+    "ARCHIVE": "Candidate for future reference-only handling after dependency review. No move, delete, or rename is approved by this registry.",
+    "REVIEW_REQUIRED": "Insufficient evidence to classify as safe. Treat as blocked from execution until reviewed."
+  },
+  "required_fields_per_script": [
+    "path",
+    "classification",
+    "purpose",
+    "owner_area",
+    "execution_mode",
+    "writes_files",
+    "launches_process",
+    "runs_git",
+    "requires_human_approval",
+    "allowed_callers",
+    "blocked_actions",
+    "risk_policy_notes",
+    "topology_guard_requirement",
+    "validator_consumption",
+    "review_status",
+    "next_safe_action"
+  ],
+  "risk_policy_interaction": {
+    "policy": "RISK_POLICY.md overrides this registry. If a registry entry appears to weaken RISK_POLICY.md, the stricter safety rule wins.",
+    "blocked_boundaries": [
+      "live trading",
+      "broker execution",
+      "OANDA or live order execution",
+      "real webhook execution",
+      "real orders",
+      "secrets or credentials",
+      "destructive actions without explicit approval",
+      "runtime mutation without validation",
+      "hidden automation",
+      "startup tasks",
+      "scheduled tasks",
+      "validation bypass",
+      "automatic escalation from output into execution authority"
+    ]
+  },
+  "topology_guard_interaction": {
+    "policy": "Launcher and lane topology checks should reject commands that target unregistered scripts or scripts classified as BLOCKED, LEGACY, ARCHIVE, or REVIEW_REQUIRED.",
+    "allowed_direct_classifications": [
+      "ACTIVE"
+    ],
+    "allowed_dependency_classifications": [
+      "HELPER"
+    ],
+    "guard_reference": "automation/orchestration/validators/Invoke-AiOsTopologyGuard.ps1"
+  },
+  "validator_consumption": {
+    "policy": "Validators may read this registry as evidence only. Validator output does not approve execution.",
+    "future_checks": [
+      "Confirm every executable script under scoped orchestration paths has a registry entry.",
+      "Block unregistered executable scripts.",
+      "Block DRY_RUN scripts that write files unless a separate approved repair changes the behavior or classification.",
+      "Block APPLY, git commit, git push, runtime, worker launch, browser launch, or process launch scripts unless explicit approval evidence is supplied.",
+      "Report unknown or malformed registry values as BLOCKED or REVIEW_REQUIRED.",
+      "Never auto-repair registry entries."
+    ]
+  },
+  "scripts": [
+    {
+      "path": "automation/orchestration/clean_state_gate.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Clean-state gate for operator launch readiness.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "validation_gate",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_status_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Allowed as a readiness check only; output is evidence, not approval.",
+      "topology_guard_requirement": "May be used before launcher decisions.",
+      "validator_consumption": "Validators may treat this as an approved readiness gate.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep read-only and validate before routing from launchers."
+    },
+    {
+      "path": "automation/orchestration/Run-AiOsPreflight.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Preflight preview for AI_OS orchestration readiness.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "DRY_RUN",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_status_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "workflow_router"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN preflight only.",
+      "topology_guard_requirement": "Allowed only as preview evidence.",
+      "validator_consumption": "May be checked for presence by router validators.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep as DRY_RUN-only."
+    },
+    {
+      "path": "automation/orchestration/Run-AiOsOperatorLoop.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Operator loop preview without APPLY.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "DRY_RUN",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "prints_or_previews_git_commands_only",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "actual_commit",
+        "actual_push",
+        "APPLY",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Allowed only because it is the DRY_RUN counterpart, not the APPLY script.",
+      "topology_guard_requirement": "Must remain preview-only.",
+      "validator_consumption": "Validators should confirm it does not execute git mutation.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep separate from APPLY loop."
+    },
+    {
+      "path": "automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Read-only operator control-loop status.",
+      "owner_area": "automation/orchestration/control",
+      "execution_mode": "DRY_RUN",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Status evidence only.",
+      "topology_guard_requirement": "May be referenced as a status helper.",
+      "validator_consumption": "May be treated as safe status evidence if unchanged.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep read-only."
+    },
+    {
+      "path": "automation/orchestration/validators/Invoke-AiOsTopologyGuard.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Validates terminal lane topology before launch decisions.",
+      "owner_area": "automation/orchestration/validators",
+      "execution_mode": "validation_only",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_branch_check",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "launcher_preflight"
+      ],
+      "blocked_actions": [
+        "lane_launch",
+        "worker_launch",
+        "runtime_launch",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Guard output is evidence only and cannot approve launch.",
+      "topology_guard_requirement": "Primary topology guard.",
+      "validator_consumption": "May consume topology registry and should later consume this execution registry.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Extend in a future approved task to check execution registry classifications."
+    },
+    {
+      "path": "automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Runs orchestration validator chain in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/validators",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "auto_repair",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Validator output does not approve protected action.",
+      "topology_guard_requirement": "May be called after topology preflight.",
+      "validator_consumption": "Approved validator-chain entry point.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep DRY_RUN and read-only."
+    },
+    {
+      "path": "automation/orchestration/validator_chain_runner/Invoke-AiOsValidatorChain.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Central DRY_RUN validator-chain runner.",
+      "owner_area": "automation/orchestration/validator_chain_runner",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "auto_repair",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Read-only validation evidence only.",
+      "topology_guard_requirement": "Can be used after registry and topology checks.",
+      "validator_consumption": "Approved validator-chain runner entry point.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep report writing disabled unless separately approved."
+    },
+    {
+      "path": "automation/orchestration/router/Invoke-AiOsTaskRouter.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "DRY_RUN task router preview.",
+      "owner_area": "automation/orchestration/router",
+      "execution_mode": "DRY_RUN_ROUTING",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "workflow_router"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "unregistered_helper_execution"
+      ],
+      "risk_policy_notes": "Router output is not execution approval.",
+      "topology_guard_requirement": "Should only route to registered DRY_RUN helpers.",
+      "validator_consumption": "Workflow registry validators may inspect helper mappings.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Future validator should confirm routed helpers are registered here."
+    },
+    {
+      "path": "automation/startup/Preview-AiOsMorningBrief.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Morning brief preview helper.",
+      "owner_area": "automation/startup",
+      "execution_mode": "DRY_RUN",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "worker_launch",
+        "runtime_mutation",
+        "APPLY"
+      ],
+      "risk_policy_notes": "Startup helpers are helpers, not authority.",
+      "topology_guard_requirement": "Not a lane launcher.",
+      "validator_consumption": "May be used as preview evidence only.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep DRY_RUN and non-writing."
+    },
+    {
+      "path": "automation/startup/Get-AiOsMorningBriefState.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Read-only morning brief state inspection.",
+      "owner_area": "automation/startup",
+      "execution_mode": "DRY_RUN",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "startup_preview"
+      ],
+      "blocked_actions": [
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "worker_launch",
+        "runtime_mutation",
+        "APPLY"
+      ],
+      "risk_policy_notes": "State inspection only.",
+      "topology_guard_requirement": "Not a lane launcher.",
+      "validator_consumption": "May be used as startup preview evidence.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep non-writing."
+    },
+    {
+      "path": "automation/startup/Test-AiOsMorningBriefTextContract.DRY_RUN.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Validates morning brief text contract in DRY_RUN mode.",
+      "owner_area": "automation/startup",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Text-contract validation only.",
+      "topology_guard_requirement": "Not a lane launcher.",
+      "validator_consumption": "May be included in startup validators.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep DRY_RUN and read-only."
+    },
+    {
+      "path": "automation/orchestration/bootstrap/Resolve-AiOsRepoRoot.ps1",
+      "classification": "HELPER",
+      "purpose": "Resolve the active AI_OS repo root for other governed scripts.",
+      "owner_area": "automation/orchestration/bootstrap",
+      "execution_mode": "helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "topology_guard",
+        "bootstrap_helpers",
+        "validators"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_workflow",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Resolver helper only.",
+      "topology_guard_requirement": "Used by topology guard.",
+      "validator_consumption": "May be loaded by validators.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep dependency-only."
+    },
+    {
+      "path": "automation/orchestration/bootstrap/Resolve-AiOsWorkspaceIntent.ps1",
+      "classification": "HELPER",
+      "purpose": "Resolve workspace intent for bootstrap flows.",
+      "owner_area": "automation/orchestration/bootstrap",
+      "execution_mode": "helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "bootstrap_helpers"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_workflow",
+        "worker_launch",
+        "runtime_launch",
+        "APPLY"
+      ],
+      "risk_policy_notes": "Helper only; not launch authority.",
+      "topology_guard_requirement": "Callers must be separately classified.",
+      "validator_consumption": "May be inspected as bootstrap dependency.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep helper-only."
+    },
+    {
+      "path": "automation/orchestration/workers/Get-AiOsWorkerAddressBook.ps1",
+      "classification": "HELPER",
+      "purpose": "Read worker address book details for worker tooling.",
+      "owner_area": "automation/orchestration/workers",
+      "execution_mode": "helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "worker_registry_helpers",
+        "validators"
+      ],
+      "blocked_actions": [
+        "worker_launch",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Read helper only.",
+      "topology_guard_requirement": "Not a topology launcher.",
+      "validator_consumption": "May support worker registry checks.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep non-launching."
+    },
+    {
+      "path": "automation/orchestration/workers/Get-AiOsWorkerProfiles.ps1",
+      "classification": "HELPER",
+      "purpose": "Read worker profile registry data.",
+      "owner_area": "automation/orchestration/workers",
+      "execution_mode": "helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "worker_registry_helpers",
+        "validators"
+      ],
+      "blocked_actions": [
+        "worker_launch",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Read helper only.",
+      "topology_guard_requirement": "Not a topology launcher.",
+      "validator_consumption": "May support worker registry checks.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep non-launching."
+    },
+    {
+      "path": "automation/orchestration/workers/Get-AiOsWorkerRegistry.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "DRY_RUN worker registry reader.",
+      "owner_area": "automation/orchestration/workers",
+      "execution_mode": "DRY_RUN_HELPER",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "validators",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "worker_launch",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "DRY_RUN read helper.",
+      "topology_guard_requirement": "Can be used as status evidence only.",
+      "validator_consumption": "May be read by worker validators.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep read-only."
+    },
+    {
+      "path": "automation/orchestration/work_packets/Get-AiOsWorkPacketState.ps1",
+      "classification": "HELPER",
+      "purpose": "Read work packet state.",
+      "owner_area": "automation/orchestration/work_packets",
+      "execution_mode": "helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "packet_helpers",
+        "validators",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "packet_state_mutation",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Read helper only.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May support packet-state validators.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep read-only."
+    },
+    {
+      "path": "automation/orchestration/approval_detection/Find-AiOsApprovalMatch.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "DRY_RUN approval evidence matching helper.",
+      "owner_area": "automation/orchestration/approval_detection",
+      "execution_mode": "DRY_RUN_HELPER",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "approval_helpers",
+        "validators"
+      ],
+      "blocked_actions": [
+        "grant_approval",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Detection is not approval.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May support approval checks.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep evidence-only."
+    },
+    {
+      "path": "automation/orchestration/approval_runner/Get-AiOsApprovalDecision.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "DRY_RUN approval decision reader.",
+      "owner_area": "automation/orchestration/approval_runner",
+      "execution_mode": "DRY_RUN_HELPER",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "approval_helpers",
+        "validators"
+      ],
+      "blocked_actions": [
+        "grant_approval",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Decision reader does not create approval.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May support approval checks.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep evidence-only."
+    },
+    {
+      "path": "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Recommend validators in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/validators",
+      "execution_mode": "DRY_RUN_HELPER",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "validator_chain",
+        "operator"
+      ],
+      "blocked_actions": [
+        "auto_repair",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Recommendation is evidence, not authorization.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May be consumed by validator chain.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep recommendation-only."
+    },
+    {
+      "path": "automation/orchestration/Run-AiOsOperatorLoop.APPLY.ps1",
+      "classification": "BLOCKED",
+      "purpose": "APPLY operator loop.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "APPLY",
+      "writes_files": "UNKNOWN",
+      "launches_process": "UNKNOWN",
+      "runs_git": true,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_without_explicit_approval",
+        "commit_without_explicit_approval",
+        "push_without_explicit_approval"
+      ],
+      "risk_policy_notes": "APPLY plus git behavior requires separate explicit approval.",
+      "topology_guard_requirement": "Must not be launcher-connected by default.",
+      "validator_consumption": "Validators should block unless approval evidence is supplied.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Use DRY_RUN counterpart before any explicit APPLY request."
+    },
+    {
+      "path": "automation/orchestration/git/Submit-AiOsWork.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Submit work through git commit and push flow.",
+      "owner_area": "automation/orchestration/git",
+      "execution_mode": "git_mutation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": true,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "git_commit_without_explicit_approval",
+        "git_push_without_explicit_approval",
+        "direct_execution_from_router"
+      ],
+      "risk_policy_notes": "Commit and push are protected actions.",
+      "topology_guard_requirement": "Must not be launcher-connected by default.",
+      "validator_consumption": "Validators should block direct use.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Use only after explicit commit and push approval."
+    },
+    {
+      "path": "automation/orchestration/Open-AiOsPullRequestWithTemplate.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Open pull request URL with a template.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "browser_launch",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "browser_launch_without_explicit_approval",
+        "direct_router_connection"
+      ],
+      "risk_policy_notes": "Opening browser/app is a protected launcher action under workflow routing rules.",
+      "topology_guard_requirement": "Must not be topology-connected by default.",
+      "validator_consumption": "Validators should require explicit approval evidence.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Review as a future approved PR helper if needed."
+    },
+    {
+      "path": "automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Start persistent runtime supervisor.",
+      "owner_area": "automation/orchestration/runtime",
+      "execution_mode": "runtime_launch",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "runtime_launch_without_explicit_approval",
+        "background_execution_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Runtime and background execution are protected.",
+      "topology_guard_requirement": "Must not be topology-connected by default.",
+      "validator_consumption": "Validators should block unless runtime launch approval exists.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Keep blocked until runtime execution task is explicitly approved."
+    },
+    {
+      "path": "automation/orchestration/runtime/Invoke-AiOsRuntimePacketAdvancement.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Advance runtime packet state.",
+      "owner_area": "automation/orchestration/runtime",
+      "execution_mode": "runtime_mutation",
+      "writes_files": true,
+      "launches_process": "UNKNOWN",
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "runtime_mutation_without_explicit_approval",
+        "packet_state_mutation_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Runtime mutation requires explicit scope and validation.",
+      "topology_guard_requirement": "Must not be launcher-connected by default.",
+      "validator_consumption": "Validators should block unapproved packet advancement.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Use DRY_RUN packet checks first."
+    },
+    {
+      "path": "automation/orchestration/work_packets/New-AiOsWorkPacket.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Create a work packet.",
+      "owner_area": "automation/orchestration/work_packets",
+      "execution_mode": "state_mutation",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "packet_creation_without_explicit_approval",
+        "router_auto_creation"
+      ],
+      "risk_policy_notes": "File creation is APPLY and requires approval.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "Validators should require approval evidence for packet creation.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Create packets only through approved APPLY workflow."
+    },
+    {
+      "path": "automation/orchestration/work_packets/Move-AiOsPacketState.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Move or update packet state.",
+      "owner_area": "automation/orchestration/work_packets",
+      "execution_mode": "state_mutation",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "packet_state_mutation_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Packet state mutation requires explicit approval.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "Validators should block unapproved state movement.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Preview packet state before approved mutation."
+    },
+    {
+      "path": "automation/orchestration/command_queue/Add-AiOsCommandQueueItem.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Add item to command queue despite DRY_RUN filename.",
+      "owner_area": "automation/orchestration/command_queue",
+      "execution_mode": "DRY_RUN_NAME_WITH_WRITE_BEHAVIOR",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "queue_mutation_without_explicit_approval",
+        "DRY_RUN_write_behavior"
+      ],
+      "risk_policy_notes": "DRY_RUN scripts that write files are invalid until repaired or reclassified through approved work.",
+      "topology_guard_requirement": "Must not be routed as DRY_RUN helper.",
+      "validator_consumption": "Validators should flag DRY_RUN write behavior.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Repair naming or behavior in a separate approved task."
+    },
+    {
+      "path": "automation/orchestration/memory/Update-AiOsRuntimeMemory.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Update runtime memory despite DRY_RUN filename.",
+      "owner_area": "automation/orchestration/memory",
+      "execution_mode": "DRY_RUN_NAME_WITH_WRITE_BEHAVIOR",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "runtime_memory_mutation_without_explicit_approval",
+        "DRY_RUN_write_behavior"
+      ],
+      "risk_policy_notes": "Runtime mutation and DRY_RUN write behavior are blocked.",
+      "topology_guard_requirement": "Must not be routed as DRY_RUN helper.",
+      "validator_consumption": "Validators should flag DRY_RUN write behavior.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Repair naming or behavior in a separate approved task."
+    },
+    {
+      "path": "automation/orchestration/worker_builder/New-AiOsWorker.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Create worker script and update registry despite DRY_RUN filename.",
+      "owner_area": "automation/orchestration/worker_builder",
+      "execution_mode": "DRY_RUN_NAME_WITH_WRITE_BEHAVIOR",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "worker_creation_without_explicit_approval",
+        "DRY_RUN_write_behavior"
+      ],
+      "risk_policy_notes": "Worker creation is protected and must not hide under DRY_RUN naming.",
+      "topology_guard_requirement": "Must not be routed as DRY_RUN helper.",
+      "validator_consumption": "Validators should flag DRY_RUN write behavior.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Repair naming or behavior in a separate approved task."
+    },
+    {
+      "path": "automation/startup/Start-AiOsMorningWorkflow.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Morning workflow startup script.",
+      "owner_area": "automation/startup",
+      "execution_mode": "startup_workflow",
+      "writes_files": true,
+      "launches_process": "UNKNOWN",
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "startup_behavior_without_explicit_approval",
+        "report_write_without_explicit_approval",
+        "worker_launch_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Startup helpers must not silently mutate runtime state or write from DRY_RUN flow.",
+      "topology_guard_requirement": "Must not be auto-launched.",
+      "validator_consumption": "Validators should review before any startup connection.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Use DRY_RUN startup preview helpers."
+    },
+    {
+      "path": "automation/operator/Start-AiOsControlledApplyLane.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Controlled APPLY lane with commit and push prompts.",
+      "owner_area": "automation/operator",
+      "execution_mode": "APPLY_AND_GIT_MUTATION",
+      "writes_files": true,
+      "launches_process": "UNKNOWN",
+      "runs_git": true,
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "APPLY_without_explicit_approval",
+        "commit_without_explicit_approval",
+        "push_without_explicit_approval"
+      ],
+      "risk_policy_notes": "APPLY, commit, and push are protected actions.",
+      "topology_guard_requirement": "Must not be launcher-connected by default.",
+      "validator_consumption": "Validators should block direct execution.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Use only through a future approved controlled APPLY workflow."
+    },
+    {
+      "path": "automation/operator/Start-AIOSMultiCodexWorkers.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Launch multiple Codex workers.",
+      "owner_area": "automation/operator",
+      "execution_mode": "worker_launch",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "worker_launch_without_explicit_approval",
+        "process_launch_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Worker launch requires explicit lane, branch, task, output, and stop condition.",
+      "topology_guard_requirement": "Must be blocked unless topology and execution registry permit it.",
+      "validator_consumption": "Validators should reject by default.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Use manual worker assignment unless separately approved."
+    },
+    {
+      "path": "automation/operator/Start-AiOsParallelDryRunCrew.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Launch parallel DRY_RUN worker crew.",
+      "owner_area": "automation/operator",
+      "execution_mode": "worker_launch",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "worker_launch_without_explicit_approval",
+        "process_launch_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Parallel worker launch is protected even when DRY_RUN scoped.",
+      "topology_guard_requirement": "Must be blocked unless topology and execution registry permit it.",
+      "validator_consumption": "Validators should reject by default.",
+      "review_status": "blocked_by_policy",
+      "next_safe_action": "Use manual scoped Codex prompt unless separately approved."
+    },
+    {
+      "path": "automation/operator/legacy_imports/AM_workflow.LEGACY.ps1",
+      "classification": "LEGACY",
+      "purpose": "Legacy imported morning workflow.",
+      "owner_area": "automation/operator/legacy_imports",
+      "execution_mode": "legacy_reference_only",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution",
+        "browser_launch",
+        "startup_connection",
+        "workflow_promotion_without_review"
+      ],
+      "risk_policy_notes": "Legacy imports are reference-only unless promoted through approved V2 workflow.",
+      "topology_guard_requirement": "Must not be topology-connected.",
+      "validator_consumption": "Validators should treat as blocked legacy evidence.",
+      "review_status": "legacy_reference_only",
+      "next_safe_action": "Do not run; review only as source material if needed."
+    },
+    {
+      "path": "automation/operator/legacy_imports/TradeMode.LEGACY.ps1",
+      "classification": "LEGACY",
+      "purpose": "Legacy imported trade mode script.",
+      "owner_area": "automation/operator/legacy_imports",
+      "execution_mode": "legacy_reference_only",
+      "writes_files": "UNKNOWN",
+      "launches_process": "UNKNOWN",
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution",
+        "broker_or_trading_execution",
+        "workflow_promotion_without_review"
+      ],
+      "risk_policy_notes": "Trading-related legacy script is reference-only; live trading and broker paths remain blocked.",
+      "topology_guard_requirement": "Must not be topology-connected.",
+      "validator_consumption": "Validators should treat as blocked legacy evidence.",
+      "review_status": "legacy_reference_only",
+      "next_safe_action": "Do not run; review only as source material if needed."
+    },
+    {
+      "path": "automation/operator/Start-AIOSCodexWorkers.Conhost.ps1",
+      "classification": "ARCHIVE",
+      "purpose": "Older operator worker launcher candidate.",
+      "owner_area": "automation/operator",
+      "execution_mode": "launcher_candidate",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution",
+        "worker_launch_without_explicit_approval",
+        "archive_move_without_approval"
+      ],
+      "risk_policy_notes": "Archive classification does not approve move, delete, or rename.",
+      "topology_guard_requirement": "Must not be topology-connected.",
+      "validator_consumption": "Validators should treat as not active.",
+      "review_status": "archive_candidate",
+      "next_safe_action": "Dependency-review before any archive action."
+    },
+    {
+      "path": "automation/operator/Start-AIOSCodexWorkers.Positioned.ps1",
+      "classification": "ARCHIVE",
+      "purpose": "Older positioned worker launcher candidate.",
+      "owner_area": "automation/operator",
+      "execution_mode": "launcher_candidate",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution",
+        "worker_launch_without_explicit_approval",
+        "archive_move_without_approval"
+      ],
+      "risk_policy_notes": "Archive classification does not approve move, delete, or rename.",
+      "topology_guard_requirement": "Must not be topology-connected.",
+      "validator_consumption": "Validators should treat as not active.",
+      "review_status": "archive_candidate",
+      "next_safe_action": "Dependency-review before any archive action."
+    },
+    {
+      "path": "automation/operator/Start-AIOSCodexWorkers.Profile.ps1",
+      "classification": "ARCHIVE",
+      "purpose": "Older profile worker launcher candidate.",
+      "owner_area": "automation/operator",
+      "execution_mode": "launcher_candidate",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution",
+        "worker_launch_without_explicit_approval",
+        "archive_move_without_approval"
+      ],
+      "risk_policy_notes": "Archive classification does not approve move, delete, or rename.",
+      "topology_guard_requirement": "Must not be topology-connected.",
+      "validator_consumption": "Validators should treat as not active.",
+      "review_status": "archive_candidate",
+      "next_safe_action": "Dependency-review before any archive action."
+    },
+    {
+      "path": "automation/orchestration/sync-worker-registry.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Worker registry synchronization.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "UNKNOWN",
+      "writes_files": "UNKNOWN",
+      "launches_process": "UNKNOWN",
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_until_reviewed",
+        "registry_mutation_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Registry sync behavior needs review before classification.",
+      "topology_guard_requirement": "Must not be launcher-connected until reviewed.",
+      "validator_consumption": "Validators should treat as blocked until classified.",
+      "review_status": "needs_review",
+      "next_safe_action": "Inspect in a future DRY_RUN classification task."
+    },
+    {
+      "path": "automation/orchestration/Sync-AiOsMain.CLEANUP.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Cleanup/sync script with cleanup marker.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "UNKNOWN_CLEANUP",
+      "writes_files": "UNKNOWN",
+      "launches_process": "UNKNOWN",
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_until_reviewed",
+        "cleanup_without_explicit_approval",
+        "git_sync_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Cleanup and sync behavior require review and explicit approval.",
+      "topology_guard_requirement": "Must not be launcher-connected until reviewed.",
+      "validator_consumption": "Validators should treat as blocked until classified.",
+      "review_status": "needs_review",
+      "next_safe_action": "Inspect in a future DRY_RUN classification task."
+    },
+    {
+      "path": "automation/orchestration/Test-AiOsReadyForWork.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Readiness test without DRY_RUN marker.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "UNKNOWN_VALIDATION",
+      "writes_files": "UNKNOWN",
+      "launches_process": "UNKNOWN",
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_until_reviewed"
+      ],
+      "risk_policy_notes": "Non-DRY_RUN validator-like script needs behavior review before ACTIVE classification.",
+      "topology_guard_requirement": "Must not be launcher-connected until reviewed.",
+      "validator_consumption": "Validators should treat as blocked until classified.",
+      "review_status": "needs_review",
+      "next_safe_action": "Inspect in a future DRY_RUN classification task."
+    },
+    {
+      "path": "automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Operator workflow orchestrator.",
+      "owner_area": "automation/operator",
+      "execution_mode": "UNKNOWN_ORCHESTRATOR",
+      "writes_files": true,
+      "launches_process": "UNKNOWN",
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_until_reviewed",
+        "orchestration_mutation_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Operator orchestrator writes evidence or routing files and needs review before use.",
+      "topology_guard_requirement": "Must not be launcher-connected until reviewed.",
+      "validator_consumption": "Validators should treat as blocked until classified.",
+      "review_status": "needs_review",
+      "next_safe_action": "Inspect in a future DRY_RUN classification task."
+    },
+    {
+      "path": "automation/operator/Invoke-AiOsStatefulDispatcher.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Stateful dispatcher.",
+      "owner_area": "automation/operator",
+      "execution_mode": "UNKNOWN_DISPATCHER",
+      "writes_files": "UNKNOWN",
+      "launches_process": "UNKNOWN",
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_until_reviewed",
+        "state_mutation_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Dispatcher behavior needs review before use.",
+      "topology_guard_requirement": "Must not be launcher-connected until reviewed.",
+      "validator_consumption": "Validators should treat as blocked until classified.",
+      "review_status": "needs_review",
+      "next_safe_action": "Inspect in a future DRY_RUN classification task."
+    },
+    {
+      "path": "automation/operator/Start-AIOSGovernedWorkerLauncher.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Governed worker launcher.",
+      "owner_area": "automation/operator",
+      "execution_mode": "launcher_candidate",
+      "writes_files": true,
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_until_reviewed",
+        "worker_launch_without_explicit_approval",
+        "report_write_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Launcher behavior requires topology and execution registry validation before use.",
+      "topology_guard_requirement": "Must not be topology-connected until reviewed.",
+      "validator_consumption": "Validators should treat as blocked until classified.",
+      "review_status": "needs_review",
+      "next_safe_action": "Inspect in a future DRY_RUN launcher classification task."
+    },
+    {
+      "path": "automation/operator/Start-AIOSGovernedWorkerLauncher.Positioned.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Positioned governed worker launcher.",
+      "owner_area": "automation/operator",
+      "execution_mode": "launcher_candidate",
+      "writes_files": "UNKNOWN",
+      "launches_process": true,
+      "runs_git": "UNKNOWN",
+      "requires_human_approval": true,
+      "allowed_callers": [],
+      "blocked_actions": [
+        "direct_execution_until_reviewed",
+        "worker_launch_without_explicit_approval"
+      ],
+      "risk_policy_notes": "Launcher behavior requires topology and execution registry validation before use.",
+      "topology_guard_requirement": "Must not be topology-connected until reviewed.",
+      "validator_consumption": "Validators should treat as blocked until classified.",
+      "review_status": "needs_review",
+      "next_safe_action": "Inspect in a future DRY_RUN launcher classification task."
+    }
+  ],
+  "counts_by_classification_at_creation": {
+    "ACTIVE": 11,
+    "HELPER": 9,
+    "BLOCKED": 14,
+    "LEGACY": 2,
+    "ARCHIVE": 3,
+    "REVIEW_REQUIRED": 7
+  },
+  "notes": [
+    "This registry is intentionally conservative.",
+    "Entries not listed here remain blocked by default if executable.",
+    "This registry does not approve script execution, worker launch, runtime execution, APPLY, commit, push, move, rename, delete, or archive actions.",
+    "Future validators should compare scoped executable files against this registry and fail closed on missing or unsafe entries."
+  ]
+}
