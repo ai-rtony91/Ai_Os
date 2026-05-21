@@ -19,6 +19,21 @@ This workflow defines the human-controlled AI_OS operating loop. It does not app
 8. Run required validation.
 9. Report files changed, validation, commit status, push status, and next safe action.
 
+## Git Status Checkpoint Discipline
+
+AI_OS guidance should avoid repetitive status checks after every minor step.
+
+Status checks should be used at major checkpoints only:
+
+- start of a work batch
+- pre-commit
+- post-push or post-merge
+- error recovery
+- lane switch
+- session shutdown
+
+This protects operator focus, reduces unnecessary interruptions, and keeps guided work grouped into practical mission blocks.
+
 ## Human Approval Gates
 
 Explicit approval is required before:
@@ -57,4 +72,3 @@ Every substantial workflow report should include:
 - Commit status.
 - Push status.
 - Next safe action.
-

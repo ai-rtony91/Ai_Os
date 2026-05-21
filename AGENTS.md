@@ -19,6 +19,25 @@ Live broker execution is blocked.
 - Never use git add .
 - Always report files created, files updated, validation result, git status, commit status, and push status.
 
+## Git Status Check Frequency
+
+When guiding or executing Git workflow tasks, do not request or run `git status --short --branch` after every minor step.
+
+Use status checks only:
+
+- before starting a new work batch
+- before commit
+- after push or merge
+- when an error occurs
+- when switching lanes
+- when ending the session / calling it a day
+
+Exception:
+Run status checks more often only when recovering from Git errors, merge conflicts, branch confusion, untracked-file risk, or user-requested verification.
+
+Purpose:
+Reduce operator fatigue and keep repo work moving in meaningful batches.
+
 ## AI_OS Operating Rules
 
 - Existing canonical file first.
