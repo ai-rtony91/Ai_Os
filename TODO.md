@@ -1,192 +1,24 @@
-\# AI\_OS\_V2 TODO
+# AI_OS V2 TODO
 
+Status: active task index only
 
+TODO.md is not a governance source of truth. It tracks short active tasks and points to the canonical documents that own the rules, roadmap, architecture, and metrics.
 
-\## GOVERNANCE HARDENING
+## Authority References
 
+- DRY_RUN behavior: `docs/workflows/DRY_RUN_CONTRACT_STANDARD.md`
+- Stabilization roadmap: `docs/roadmap/AIOS_V2_STABILIZATION_PHASES.md`
+- Runtime boundary: `docs/architecture/runtime/RUNTIME_ISOLATION_MODEL.md`
+- Governance metrics: `docs/metrics/AIOS_GOVERNANCE_METRICS.md`
 
+## Active Tasks
 
-\- \[ ] Wire Invoke-AiOsExecutionRegistryGuard.ps1 into VALIDATOR\_CHAIN\_001.json
+- [ ] Register safe report-only validators.
+- [ ] Map launcher paths referencing BLOCKED scripts.
+- [ ] Repair DRY_RUN scripts that write files.
 
-\- \[ ] Reduce STOP findings from 106 -> under 75
+## Notes
 
-\- \[ ] Reclassify remaining REVIEW\_REQUIRED scripts
-
-\- \[ ] Audit all launcher\_references\_blocked\_script findings
-
-\- \[ ] Quarantine unsafe runtime/supervisor paths
-
-\- \[ ] Repair DRY\_RUN scripts that mutate files
-
-\- \[ ] Remove legacy CLEAN repo assumptions
-
-\- \[ ] Validate ACTIVE trust boundary remains minimal
-
-
-
-\- \[ ] Add execution registry guard into validator chain config
-
-\- \[ ] Create VALIDATOR\_CHAIN\_002 governed flow
-
-\- \[ ] Define validator execution order
-
-\- \[ ] Separate report-only validators from mutation-capable validators
-
-\- \[ ] Add validator severity levels (INFO/WARN/STOP)
-
-\- \[ ] Create validator output normalization standard
-
-
-
-
-
-\## VALIDATOR CHAIN
-
-
-
-\- \[ ] Confirm validator execution order
-
-\- \[ ] Ensure report-only validators cannot mutate state
-
-\- \[ ] Add execution registry guard to governed validator flow
-
-\- \[ ] Validate chain output formatting consistency
-
-
-
-\- \[ ] Wire Invoke-AiOsExecutionRegistryGuard.ps1 into VALIDATOR\_CHAIN\_001.json
-
-\- \[ ] Ensure execution registry guard runs before topology guard
-
-\- \[ ] Define validator fail-closed behavior
-
-\- \[ ] Add validator chain rollback strategy
-
-\- \[ ] Define validator execution timeout policy
-
-
-
-
-
-\## VALIDATOR INTEGRATION
-
-
-
-\- \[ ] Create VALIDATOR\_CHAIN\_001 governance map
-
-\- \[ ] Register validator execution order
-
-\- \[ ] Define validator dependency model
-
-\- \[ ] Separate mutation validators from report-only validators
-
-\- \[ ] Add validator failure escalation policy
-
-\- \[ ] Add validator chain audit logging strategy
-
-
-
-
-
-\## TERMINAL WORKSTATIONS
-
-
-
-\- \[ ] Audit Start-AiOsWorktreeLanes.ps1
-
-\- \[ ] Register remaining workstation helpers
-
-\- \[ ] Remove retired lane references
-
-\- \[ ] Standardize workstation launcher behavior
-
-
-
-\## WORKER SAFETY
-
-
-
-\- \[ ] Audit worker loop execution paths
-
-\- \[ ] Audit inbox mutation paths
-
-\- \[ ] Audit runtime routing paths
-
-\- \[ ] Identify autonomous execution risks
-
-\- \[ ] Restrict unsafe worker escalation paths
-
-
-
-\## EXECUTION METRICS
-
-
-
-\- \[ ] Track total scripts scanned
-
-\- \[ ] Track ACTIVE percentage
-
-\- \[ ] Track HELPER percentage
-
-\- \[ ] Track BLOCKED percentage
-
-\- \[ ] Track DRY\_RUN violations
-
-\- \[ ] Track launcher bypass paths
-
-\- \[ ] Track legacy CLEAN/main assumptions
-
-\- \[ ] Create governance stabilization score
-
-\- \[ ] Create checkpoint completion model
-
-\- \[ ] Estimate AI\_OS V2 stabilization timeline
-
-
-
-\## DOCUMENTATION
-
-
-
-\- \[ ] Align AGENTS.md with execution registry
-
-\- \[ ] Document ACTIVE vs HELPER authority model
-
-\- \[ ] Create validator chain architecture diagram
-
-\- \[ ] Create execution governance flow documentation
-
-
-
-\## PHASE TARGET
-
-
-
-Goal:
-
-Stable governed orchestration layer with trusted validator chain and controlled execution boundaries before expanding autonomous worker/runtime systems.
-
-
-
-
-
-\## DRY\_RUN REPAIR CAMPAIGN
-
-
-
-\- \[ ] Repair Add-AiOsCommandQueueItem.DRY\_RUN.ps1 mutation behavior
-
-\- \[ ] Repair Update-AiOsRuntimeMemory.DRY\_RUN.ps1 mutation behavior
-
-\- \[ ] Repair Invoke-AiOsSelfHeal.DRY\_RUN.ps1 mutation behavior
-
-\- \[ ] Repair Start-AiOsAutonomousWorkerCycle.DRY\_RUN.ps1 mutation behavior
-
-\- \[ ] Repair Add-AiOsWorkerInboxItem.DRY\_RUN.ps1 mutation behavior
-
-\- \[ ] Repair Set-AiOsWorkerTaskState.DRY\_RUN.ps1 mutation behavior
-
-\- \[ ] Repair Complete-AiOsWorkerInboxItem.DRY\_RUN.ps1 mutation behavior
-
-\- \[ ] Define universal DRY\_RUN contract standard
-
+- Keep this file short.
+- Put policy, standards, architecture, roadmap, and metrics details in their canonical documents.
+- Do not use TODO.md to approve execution, redefine governance, or replace source-of-truth docs.
