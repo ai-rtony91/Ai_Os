@@ -34,6 +34,24 @@ Status checks should be used at major checkpoints only:
 
 This protects operator focus, reduces unnecessary interruptions, and keeps guided work grouped into practical mission blocks.
 
+## Operator Command Presentation
+
+Operator-facing instructions should make the next action easy to execute without relying on memory of lane names, terminal titles, or prior context.
+
+Before giving commands, state:
+
+- WHERE the command should run.
+- The visible tab, window, lane, or terminal role the operator should use.
+- The exact path or repo root expected for the command.
+
+When a command or output block is intended to be copied, wrap it with `COPY START` and `COPY END` markers when that helps the operator distinguish the copyable text from surrounding explanation.
+
+Do not assume the operator remembers lane names. Use the current V2 lane title or role from active topology and avoid stale legacy lane names.
+
+If the same manual workaround must be explained repeatedly, prefer fixing or documenting the responsible script or workflow so the operator does not carry that burden manually.
+
+Persistent window and tab identity should be owned by repo scripts, registry files, checkpoint/session evidence, or other approved workflow artifacts. Manual window or tab renaming is temporary and should not be treated as durable authority.
+
 ## Operator Intent Protection Doctrine
 
 AI_OS workflow guidance must protect the operator's intent before solving the technical task.
