@@ -8,11 +8,41 @@ Trading Lab is the first production vertical. It is paper-only. Live broker exec
 
 ## Current Status
 
+- GitHub repo: `ai-rtony91/Ai_Os`
 - Active branch: `v2/aios`
 - Active repo path: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
 - Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, and paper-only Trading Lab
 - Operating model: Phase -> Stage -> Workload Pack -> Task ID -> DRY_RUN/APPLY -> validation -> selective commit
 - Commit/push rule: never commit or push unless explicitly approved
+
+## Repository Identity Rule
+
+AI_OS_V2 is not a separate GitHub repository.
+
+Current identity:
+
+- GitHub repo: `ai-rtony91/Ai_Os`
+- Active V2 branch: `v2/aios`
+- Current local folder: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+
+Future desired naming is not active yet:
+
+- GitHub repo may later be renamed to `AiOS`.
+- Local folder may later be renamed to `AIOS`.
+- Do not assume those names are active until an approved rename pass occurs.
+
+Do not search for or assume:
+
+- `aiosv2`
+- `ai-rtony91_aiosv2`
+- `AI-OS-Project`
+- `ai-rtony91_Ai_Os_CLEAN`
+
+Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `v2/aios` unless the user explicitly says otherwise.
+
+If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `v2/aios` before judging project state.
+
+CLEAN/main/legacy paths are historical unless `v2/aios` promotes them.
 
 ## Start Here
 
