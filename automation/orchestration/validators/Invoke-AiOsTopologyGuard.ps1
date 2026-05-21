@@ -1,7 +1,6 @@
 param(
     [string]$RegistryPath = "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
-    [string]$RepoRootResolverPath = "automation/orchestration/bootstrap/Resolve-AiOsRepoRoot.ps1",
-    [switch]$Preview
+    [string]$RepoRootResolverPath = "automation/orchestration/bootstrap/Resolve-AiOsRepoRoot.ps1"
 )
 
 Set-StrictMode -Version Latest
@@ -27,9 +26,13 @@ function Stop-AiOsTopologyGuard {
 
 function Assert-RequiredValue {
     param(
+        [Parameter(Mandatory = $true)]
+        [AllowNull()]
         [object]$Value,
+
         [Parameter(Mandatory = $true)]
         [string]$LaneId,
+
         [Parameter(Mandatory = $true)]
         [string]$Field
     )
@@ -43,15 +46,24 @@ function Resolve-GuardPath {
     param(
         [Parameter(Mandatory = $true)]
         [string]$Path,
+
         [Parameter(Mandatory = $true)]
-        [string]$RepoRoot
+        [string[]]$BasePaths
     )
 
     if ([System.IO.Path]::IsPathRooted($Path)) {
         return $Path
     }
 
-    return Join-Path $RepoRoot $Path
+    foreach ($basePath in $BasePaths) {
+        Assert-RequiredValue -Value $basePath -LaneId "registry" -Field "BasePaths"
+        $candidatePath = Join-Path $basePath $Path
+        if (Test-Path -LiteralPath $candidatePath) {
+            return $candidatePath
+        }
+    }
+
+    return Join-Path $BasePaths[0] $Path
 }
 
 function Get-CurrentBranch {
@@ -182,16 +194,13 @@ function Test-AiOsTopologyRegistry {
 }
 
 $orchestrationRoot = Split-Path -Parent $PSScriptRoot
-if ([System.IO.Path]::IsPathRooted($RepoRootResolverPath)) {
-    $resolvedResolverPath = $RepoRootResolverPath
-} else {
-    $cwdResolverPath = Join-Path (Get-Location).Path $RepoRootResolverPath
-    if (Test-Path -LiteralPath $cwdResolverPath -PathType Leaf) {
-        $resolvedResolverPath = $cwdResolverPath
-    } else {
-        $resolvedResolverPath = Join-Path $orchestrationRoot "bootstrap\Resolve-AiOsRepoRoot.ps1"
-    }
-}
+$automationRoot = Split-Path -Parent $orchestrationRoot
+$scriptRepoRootCandidate = Split-Path -Parent $automationRoot
+$resolvedResolverPath = Resolve-GuardPath -Path $RepoRootResolverPath -BasePaths @(
+    (Get-Location).Path,
+    $scriptRepoRootCandidate,
+    $orchestrationRoot
+)
 
 if (-not (Test-Path -LiteralPath $resolvedResolverPath -PathType Leaf)) {
     Stop-AiOsTopologyGuard -Reason "Repo root resolver not found: $resolvedResolverPath" -LaneId "registry" -Field "RepoRootResolverPath"
@@ -200,7 +209,7 @@ if (-not (Test-Path -LiteralPath $resolvedResolverPath -PathType Leaf)) {
 . $resolvedResolverPath
 
 $repoRoot = Resolve-AiOsRepoRoot -StartPath $PSScriptRoot
-$resolvedRegistryPath = Resolve-GuardPath -Path $RegistryPath -RepoRoot $repoRoot
+$resolvedRegistryPath = Resolve-GuardPath -Path $RegistryPath -BasePaths @($repoRoot)
 
 if (-not (Test-Path -LiteralPath $resolvedRegistryPath -PathType Leaf)) {
     Stop-AiOsTopologyGuard -Reason "Topology registry not found: $resolvedRegistryPath" -LaneId "registry" -Field "RegistryPath"
@@ -215,10 +224,13 @@ try {
 $result = Test-AiOsTopologyRegistry -Registry $registry -RepoRoot $repoRoot
 
 Write-Host "AI_OS TOPOLOGY GUARD: PASS" -ForegroundColor Green
-Write-Host "Mode: $(if ($Preview) { 'Preview validation only' } else { 'Validation only' })"
+Write-Host "Mode: Validation only"
 Write-Host "Registry: $resolvedRegistryPath"
 Write-Host "Schema: $($result.SchemaVersion)"
 Write-Host "Active lanes validated: $($result.ActiveLaneCount)"
 Write-Host "Optional inactive lanes observed: $($result.OptionalInactiveLaneCount)"
 Write-Host "Repo root: $($result.RepoRoot)"
 Write-Host "No launchers, lanes, workers, runtime, telemetry, dashboard, or Codex actions were executed."
+
+$result | Add-Member -NotePropertyName RegistryPath -NotePropertyValue $resolvedRegistryPath -PassThru |
+    Add-Member -NotePropertyName Registry -NotePropertyValue $registry -PassThru

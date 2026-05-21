@@ -63,12 +63,14 @@ if (-not (Test-Path -LiteralPath $topologyGuardPath -PathType Leaf)) {
     throw "AI_OS topology guard not found: $topologyGuardPath"
 }
 
-& $topologyGuardPath -RegistryPath $registryPath -RepoRootResolverPath $repoRootResolverPath -Preview
+$guardResult = & $topologyGuardPath -RegistryPath $registryPath -RepoRootResolverPath $repoRootResolverPath
 
-. $repoRootResolverPath
+if ($null -eq $guardResult -or $guardResult.Status -ne "PASS") {
+    throw "AI_OS topology guard did not return PASS. Launcher stopped before consuming topology."
+}
 
-$repoRoot = Resolve-AiOsRepoRoot -StartPath $PSScriptRoot
-$registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+$repoRoot = [string]$guardResult.RepoRoot
+$registry = $guardResult.Registry
 
 $activeLanes = @($registry.active_lanes)
 $resolvedLanes = @()

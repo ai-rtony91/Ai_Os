@@ -23,6 +23,27 @@ A lane is not a person and is not approval authority. A terminal worker is a she
 
 MAIN CONTROL is an operator-control lane/window concept, not a separate person, autonomous agent, or runtime authority. Runtime behavior alone must not create authority. Approval authority remains with the OPERATOR.
 
+## Morning Startup Workflow
+
+The current canonical AI_OS V2 startup workflow is manual and operator-controlled.
+
+Startup authority currently lives in `AGENTS.md`, `README.md`, and this operator workflow. Startup scripts are helpers, not authority.
+
+Canonical first actions:
+
+1. Open the active V2 repo.
+2. Run `git status --short --branch`.
+3. Read current authority and workflow docs before mutation.
+4. Inspect repo state before automation or worker launch.
+
+No startup helper may silently mutate runtime state, auto-launch workers or Codex, or auto-register scheduled tasks or startup behavior.
+
+DRY_RUN startup helpers must not write files. Any DRY_RUN helper that writes files is invalid until repaired.
+
+Report generation, telemetry generation, work-intelligence scans, worker launch, or app launch require explicit approval.
+
+Future startup automation must remain preview-first, fail-closed, and operator-approved.
+
 ## Standard Loop
 
 1. Inspect current state.
