@@ -1,203 +1,321 @@
 {
   "registry_id": "AIOS_WORKTREE_LANE_REGISTRY",
-  "version": "3.3",
+  "schema_version": "4.0",
+  "status": "canonical_topology_authority",
+  "repo_identity_authority": [
+    "README.md",
+    "AGENTS.md"
+  ],
+  "behavior_authority": [
+    "docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md"
+  ],
   "mode": "preview_first_manual_shells_only",
-  "launch_policy": "windows_terminal_tab_only",
+  "launch_policy": "manual_preview_required",
   "fallback_policy": "print_manual_command",
-  "edit_rule": "Edit all worker window display fields here first: display_title, window_title, tab_title, tab_color, emoji_marker, path, branch, role.",
-  "lanes": [
+  "topology_rules": [
+    "README.md and AGENTS.md define active repo identity.",
+    "Workflow governance docs define worker behavior and allowed lane categories.",
+    "This registry defines terminal lane topology only.",
+    "Launchers consume this registry and must not define duplicate lane arrays.",
+    "Session and checkpoint files are evidence only, not topology authority.",
+    "No lane may auto-launch Codex, workers, scheduled tasks, startup tasks, broker/API actions, webhooks, real orders, or live trading."
+  ],
+  "allowed_lane_categories": [
+    "Main Control",
+    "Operator Orchestration",
+    "Validators",
+    "Reports",
+    "Work Intelligence",
+    "Dashboard UI",
+    "Trading Lab",
+    "Mock Data"
+  ],
+  "allowed_launch_policies": [
+    "manual_preview_required",
+    "manual_launch_allowed",
+    "display_only",
+    "disabled"
+  ],
+  "allowed_path_modes": [
+    "repo_root",
+    "explicit_worktree",
+    "display_only",
+    "disabled"
+  ],
+  "active_lanes": [
     {
       "lane_id": "main_control",
-      "display_title": "MAIN CONTROL · main",
-      "window_title": "MAIN CONTROL · main",
-      "tab_title": "MAIN CONTROL · main",
+      "lane_category": "Main Control",
+      "display_title": "MAIN CONTROL - v2/aios",
+      "window_title": "MAIN CONTROL - v2/aios",
+      "tab_title": "MAIN CONTROL - v2/aios",
       "tab_color": "#2563EB",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Primary operator lane for runtime control, supervisor control, repo control, final checkpoint, and clean-state verification.",
-      "repo_subsystems": [
-        "automation/orchestration/runtime",
-        "automation/orchestration/supervisor",
-        "automation/orchestration/mission_control",
-        "automation/runtime/state"
+      "emoji_marker": "BLUE",
+      "role": "Operator-owned coordination lane for repo checkpointing, final review, commit approval, push approval, and V2 orchestration oversight.",
+      "path_mode": "repo_root",
+      "branch": "v2/aios",
+      "allowed_paths": [],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
       ],
-      "emoji_marker": "🟦",
-      "desktop_launcher_path": "C:\\Users\\mylab\\AI_OS_MAIN_CONTROL.ps1",
-      "truth_source": "path_and_branch"
+      "launch_policy": "manual_preview_required",
+      "truth_source": "repo_root_and_branch",
+      "validation_commands": [
+        "git status --short --branch",
+        "git diff --check"
+      ],
+      "notes": "Main Control is not a worker lane and does not grant edit authority."
     },
     {
-      "lane_id": "create_codex",
-      "display_title": "CREATE · codex",
-      "window_title": "CREATE · codex",
-      "tab_title": "CREATE · codex",
-      "tab_color": "#EAB308",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "role": "Manual Codex edit lane for approved changes.",
-      "emoji_marker": "🟨",
-      "truth_source": "path_and_branch"
+      "lane_id": "operator_orchestration",
+      "lane_category": "Operator Orchestration",
+      "display_title": "ORCHESTRATION - v2/aios",
+      "window_title": "ORCHESTRATION - v2/aios",
+      "tab_title": "ORCHESTRATION - v2/aios",
+      "tab_color": "#F97316",
+      "emoji_marker": "ORANGE",
+      "role": "Approved orchestration workflow, launcher, routing, and operator-control work only.",
+      "path_mode": "repo_root",
+      "branch": "v2/aios",
+      "allowed_paths": [
+        "automation/orchestration/",
+        "docs/workflows/",
+        "docs/governance/"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "apps/dashboard/",
+        "services/",
+        "telemetry/",
+        "Reports/telemetry/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "launch_policy": "manual_preview_required",
+      "truth_source": "repo_root_and_branch",
+      "validation_commands": [
+        "git diff --check",
+        "git status --short --branch"
+      ],
+      "notes": "Orchestration edits still require task-specific APPLY approval."
     },
     {
-      "lane_id": "save_git",
-      "display_title": "SAVE · git",
-      "window_title": "SAVE · git",
-      "tab_title": "SAVE · git",
+      "lane_id": "validators",
+      "lane_category": "Validators",
+      "display_title": "VALIDATORS - v2/aios",
+      "window_title": "VALIDATORS - v2/aios",
+      "tab_title": "VALIDATORS - v2/aios",
+      "tab_color": "#A855F7",
+      "emoji_marker": "PURPLE",
+      "role": "Read-only validation, scans, evidence checks, and pass/fail reporting.",
+      "path_mode": "repo_root",
+      "branch": "v2/aios",
+      "allowed_paths": [
+        "automation/",
+        "docs/",
+        "Reports/",
+        "telemetry/"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "launch_policy": "manual_preview_required",
+      "truth_source": "repo_root_and_branch",
+      "validation_commands": [
+        "git diff --check",
+        "git status --short --branch"
+      ],
+      "notes": "Validators produce evidence only and do not approve APPLY."
+    },
+    {
+      "lane_id": "reports",
+      "lane_category": "Reports",
+      "display_title": "REPORTS - v2/aios",
+      "window_title": "REPORTS - v2/aios",
+      "tab_title": "REPORTS - v2/aios",
       "tab_color": "#22C55E",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
-      "branch": "phase-bootstrap-workspace",
-      "role": "Git status, commit package review, and push approval lane.",
-      "emoji_marker": "🟩",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "route_dispatch",
-      "display_title": "ROUTE · dispatch",
-      "window_title": "ROUTE · dispatch",
-      "tab_title": "ROUTE · dispatch",
-      "tab_color": "#F97316",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
-      "branch": "phase-221-260-mission-json-dashboard-ready",
-      "role": "Queue, packet, and routing lane.",
-      "emoji_marker": "🟧",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "check_audit",
-      "display_title": "CHECK · audit",
-      "window_title": "CHECK · audit",
-      "tab_title": "CHECK · audit",
-      "tab_color": "#A855F7",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
-      "branch": "phase-validation-cleanup",
-      "role": "Validation and read-only audit lane.",
-      "emoji_marker": "🟪",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "watch_state",
-      "display_title": "WATCH · state",
-      "window_title": "WATCH · state",
-      "tab_title": "WATCH · state",
-      "tab_color": "#E5E7EB",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
-      "branch": "phase-3-stateful-orchestration",
-      "role": "Progress and state monitor lane.",
-      "emoji_marker": "⬜",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "rulebook_codex",
-      "display_title": "RULEBOOK · codex",
-      "window_title": "RULEBOOK · codex",
-      "tab_title": "RULEBOOK · codex",
-      "tab_color": "#92400E",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
-      "branch": "phase-operator-rulebook",
-      "role": "Operator rules, workflow memory, and durable instruction capture.",
-      "emoji_marker": "🟫",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "codex_build_lane",
-      "display_title": "CODEX BUILD LANE",
-      "window_title": "CODEX BUILD LANE",
-      "tab_title": "CODEX BUILD LANE",
-      "tab_color": "#FACC15",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Temporary implementation lane for approved scoped edits only.",
-      "repo_subsystems": [
-        "approved scoped repo edits only",
-        "no permanent subsystem ownership"
+      "emoji_marker": "GREEN",
+      "role": "Approved audit, progress report, review artifact, and summary work only.",
+      "path_mode": "repo_root",
+      "branch": "v2/aios",
+      "allowed_paths": [
+        "docs/audits/",
+        "Reports/",
+        "SOURCE_LOG.md",
+        "ERROR_LOG.md",
+        "AAR.md",
+        "DAILY_REPORT.md"
       ],
-      "emoji_marker": "🟨",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "validator_worker",
-      "display_title": "VALIDATOR WORKER",
-      "window_title": "VALIDATOR WORKER",
-      "tab_title": "VALIDATOR WORKER",
-      "tab_color": "#A855F7",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Validation lane for health checks, blockers, and pass/fail evidence.",
-      "repo_subsystems": [
-        "automation/orchestration/validators",
-        "automation/orchestration/health",
-        "automation/orchestration/blockers"
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "apps/dashboard/",
+        "services/",
+        "automation/runtime/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
       ],
-      "emoji_marker": "🟪",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "packet_queue",
-      "display_title": "PACKET QUEUE",
-      "window_title": "PACKET QUEUE",
-      "tab_title": "PACKET QUEUE",
-      "tab_color": "#F97316",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Queue lane for work packet review, task flow, and command queue visibility.",
-      "repo_subsystems": [
-        "automation/orchestration/queue",
-        "automation/orchestration/work_packets",
-        "automation/orchestration/task_generator",
-        "automation/orchestration/command_queue"
+      "launch_policy": "manual_preview_required",
+      "truth_source": "repo_root_and_branch",
+      "validation_commands": [
+        "git diff --check",
+        "git status --short --branch"
       ],
-      "emoji_marker": "🟧",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "approval_inbox",
-      "display_title": "APPROVAL INBOX",
-      "window_title": "APPROVAL INBOX",
-      "tab_title": "APPROVAL INBOX",
-      "tab_color": "#38BDF8",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Approval lane for user-controlled gates and approval processing.",
-      "repo_subsystems": [
-        "automation/orchestration/approvals",
-        "automation/orchestration/approval_inbox",
-        "automation/orchestration/approval_processor",
-        "automation/orchestration/approval_detection"
-      ],
-      "emoji_marker": "🔷",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "recovery_health",
-      "display_title": "RECOVERY HEALTH",
-      "window_title": "RECOVERY HEALTH",
-      "tab_title": "RECOVERY HEALTH",
-      "tab_color": "#EF4444",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Recovery lane for self-heal, health review, and failed-state inspection.",
-      "repo_subsystems": [
-        "automation/orchestration/recovery",
-        "automation/orchestration/self_heal",
-        "automation/orchestration/health"
-      ],
-      "emoji_marker": "🟥",
-      "truth_source": "path_and_branch"
-    },
-    {
-      "lane_id": "standby_worker",
-      "display_title": "STANDBY WORKER",
-      "window_title": "STANDBY WORKER",
-      "tab_title": "STANDBY WORKER",
-      "tab_color": "#64748B",
-      "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
-      "branch": "main",
-      "role": "Idle lane waiting for assignment; can become validator, packet queue, or recovery later.",
-      "repo_subsystems": [
-        "no active subsystem",
-        "waits for assignment"
-      ],
-      "emoji_marker": "⬛",
-      "truth_source": "path_and_branch"
+      "notes": "Report lane does not create governance authority unless explicitly approved."
     }
+  ],
+  "optional_inactive_lanes": [
+    {
+      "lane_id": "dashboard_ui",
+      "lane_category": "Dashboard UI",
+      "display_title": "DASHBOARD UI - inactive",
+      "window_title": "DASHBOARD UI - inactive",
+      "tab_title": "DASHBOARD UI - inactive",
+      "tab_color": "#38BDF8",
+      "emoji_marker": "CYAN",
+      "role": "Optional dashboard UI lane, inactive until explicitly assigned.",
+      "path_mode": "disabled",
+      "branch": "v2/aios",
+      "allowed_paths": [
+        "apps/dashboard/"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "launch_policy": "disabled",
+      "truth_source": "approval_required",
+      "notes": "Do not activate without dashboard-specific APPLY approval."
+    },
+    {
+      "lane_id": "trading_lab",
+      "lane_category": "Trading Lab",
+      "display_title": "TRADING LAB - inactive",
+      "window_title": "TRADING LAB - inactive",
+      "tab_title": "TRADING LAB - inactive",
+      "tab_color": "#EF4444",
+      "emoji_marker": "RED",
+      "role": "Optional paper-only Trading Lab lane, inactive until explicitly assigned.",
+      "path_mode": "disabled",
+      "branch": "v2/aios",
+      "allowed_paths": [
+        "apps/",
+        "docs/",
+        "Reports/"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "launch_policy": "disabled",
+      "truth_source": "approval_required",
+      "notes": "Paper-only; live broker execution remains blocked."
+    },
+    {
+      "lane_id": "work_intelligence",
+      "lane_category": "Work Intelligence",
+      "display_title": "WORK INTELLIGENCE - inactive",
+      "window_title": "WORK INTELLIGENCE - inactive",
+      "tab_title": "WORK INTELLIGENCE - inactive",
+      "tab_color": "#EAB308",
+      "emoji_marker": "YELLOW",
+      "role": "Optional inspection and classification lane, inactive until explicitly assigned.",
+      "path_mode": "disabled",
+      "branch": "v2/aios",
+      "allowed_paths": [
+        "automation/work_intelligence/",
+        "docs/audits/",
+        "Reports/"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "launch_policy": "disabled",
+      "truth_source": "approval_required",
+      "notes": "Inspection-only unless an APPLY task explicitly scopes changes."
+    },
+    {
+      "lane_id": "mock_data",
+      "lane_category": "Mock Data",
+      "display_title": "MOCK DATA - inactive",
+      "window_title": "MOCK DATA - inactive",
+      "tab_title": "MOCK DATA - inactive",
+      "tab_color": "#64748B",
+      "emoji_marker": "GRAY",
+      "role": "Optional mock data lane, inactive until explicitly assigned.",
+      "path_mode": "disabled",
+      "branch": "v2/aios",
+      "allowed_paths": [
+        "mock_data/",
+        "tests/",
+        "Reports/"
+      ],
+      "blocked_paths": [
+        ".git/",
+        ".codex_backups/",
+        "broker/",
+        "oanda/",
+        "webhooks/",
+        "live_trading/",
+        "secrets/",
+        ".env"
+      ],
+      "launch_policy": "disabled",
+      "truth_source": "approval_required",
+      "notes": "Do not activate without explicit mock-data task approval."
+    }
+  ],
+  "retired_lanes": [
+    "codex_build_lane",
+    "validator_worker",
+    "packet_queue",
+    "approval_inbox",
+    "recovery_health",
+    "standby_worker"
   ]
 }
