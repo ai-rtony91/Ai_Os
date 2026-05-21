@@ -1213,6 +1213,1086 @@
       "validator_consumption": "Validators should treat as blocked until classified.",
       "review_status": "needs_review",
       "next_safe_action": "Inspect in a future DRY_RUN launcher classification task."
+    },
+    {
+      "path": "automation/orchestration/clean_state/Test-AiOsCleanState.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\clean_state",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/command_queue/Get-AiOsCommandQueue.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only status helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\command_queue",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/compliance/Test-AiOsCompliance.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\compliance",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/github_status/Get-AiOsGitHubStatusCheck.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only status helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\github_status",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/health_summary/Get-AiOsOrchestrationHealth.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only status helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\health_summary",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only status helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\locks",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/mission_control/Show-AiOsMissionStatus.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration\\mission_control",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/policy/Test-AiOsWorkerSafetyPolicy.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\policy",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-approval-inbox.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-approval-inbox-v1.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-assignment-lock-controller.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-dispatcher-queue.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-launch-supervisor.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-orchestration-control-state.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-orchestration-gaps.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-orchestration-spine.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-orchestration-status.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-packet-queue-ledger.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-persistent-worker-supervisor.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-queue-health-supervisor.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-session-continuity.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-validator-chain.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-validator-routing-supervisor.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-worker-registry-v1.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/show-worker-status.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only orchestration status or registry information.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/Test-AiOsCommandCenterState.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/Test-AiOsOperatorWorkflowRouting.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/validators/Test-ApplyApprovalGate.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\validators",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/validators/Test-ApprovalInboxIntegrity.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\validators",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/validators/Test-CommitPackageManifest.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\validators",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\validators",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/validators/Test-ValidatorChainConfig.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\validators",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\validators",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/worker_lanes/Get-AiOsWorkerLaneStatus.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only status helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\worker_lanes",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only status helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\workers\\inbox",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/workers/Test-AiOsWorkerRegistryBridge.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only validation helper for orchestration governance checks.",
+      "owner_area": "automation\\orchestration\\workers",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "direct_operator_execution_as_authority",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Output is evidence, not approval or execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "safe_helper_expansion_static_review",
+      "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
     }
   ],
   "counts_by_classification_at_creation": {
