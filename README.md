@@ -147,6 +147,24 @@ Root authority files such as `README.md`, `AGENTS.md`, `RISK_POLICY.md`, `ARCHIT
 
 If a draft, archive, generated report, legacy CLEAN-era document, or runtime artifact conflicts with active root or governance authority, active authority wins unless the user approves a promotion.
 
+
+## Prompt Routing Visual Rule
+
+Any prompt intended to be pasted into Codex must begin with:
+
+🧩 CODEX-ONLY PROMPT
+
+This marker is for operator visualization and routing discipline.
+
+Rules:
+- Only use `🧩 CODEX-ONLY PROMPT` on instructions meant to be pasted directly into Codex.
+- Do not use this marker for Claude/overwatch analysis.
+- Do not use this marker for ChatGPT planning notes.
+- Do not use this marker for human-only explanations.
+- If a prompt does not begin with `🧩 CODEX-ONLY PROMPT`, Codex should treat it as not authorized for execution unless the operator explicitly says otherwise.
+- After reading `AGENTS.md`, `README.md`, or any governance file, Codex must preserve this routing rule.
+
+
 ## Worker Model
 
 AI_OS workers are controlled contributors. A worker should know:
