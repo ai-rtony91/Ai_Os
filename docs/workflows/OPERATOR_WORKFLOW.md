@@ -7,6 +7,22 @@ Sources: `docs/AI_OS/operator`, `docs/AI_OS/operator_workflows`, `docs/workflows
 
 This workflow defines the human-controlled AI_OS operating loop. It does not approve commits, pushes, merges, deployments, worker launches, broker execution, or live trading.
 
+## Role Naming Standard
+
+Use these role names when clarity matters:
+
+- OPERATOR = human in control of the repo, session, or workflow.
+- END USER = future customer or user of AI_OS applications, dashboards, or tools.
+- AI WORKER = Codex, Claude, ChatGPT, or automation agent performing scoped tasks.
+- TERMINAL WORKER = shell or window assigned to one lane or work category.
+- LANE = job category or work area assigned to a terminal worker or AI worker.
+
+Use OPERATOR for repo/session authority and approvals. Use END USER for future product or customer context. Avoid using "user" alone when ambiguity matters.
+
+A lane is not a person and is not approval authority. A terminal worker is a shell or window role, not autonomous authority. AI workers may inspect, recommend, validate, and edit when approved, but may not approve protected actions for themselves.
+
+MAIN CONTROL is an operator-control lane/window concept, not a separate person, autonomous agent, or runtime authority. Runtime behavior alone must not create authority. Approval authority remains with the OPERATOR.
+
 ## Standard Loop
 
 1. Inspect current state.
