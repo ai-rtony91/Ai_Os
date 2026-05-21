@@ -42,6 +42,27 @@ input {
   padding: 24px 32px;
 }
 
+.mockWarning,
+.warningStrip {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 32px;
+}
+
+.mockWarning {
+  background: rgba(224, 93, 93, 0.16);
+  color: var(--text);
+}
+
+.warningStrip {
+  background: rgba(227, 179, 65, 0.12);
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .eyebrow {
   color: var(--neutral);
   font-size: 12px;
@@ -75,6 +96,7 @@ h2 {
 
 .headerStatus,
 .sectionHeader,
+.sectionTitle,
 .workerTop,
 .itemMeta,
 .alerts,
@@ -110,6 +132,10 @@ h2 {
 .sectionHeader {
   justify-content: space-between;
   margin-bottom: 14px;
+}
+
+.sectionTitle {
+  gap: 8px;
 }
 
 .metricsGrid,
@@ -204,6 +230,22 @@ h2 {
 .pill.danger {
   background: rgba(224, 93, 93, 0.16);
   border-color: var(--danger);
+}
+
+.sourceLabel {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 7px;
+  text-transform: uppercase;
+}
+
+.sourceLabel.fixture,
+.sourceLabel.danger {
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .segmented {

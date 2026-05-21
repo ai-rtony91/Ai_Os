@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "fs";
+import { statSync } from "fs";
 import type { TelemetryEvent } from "./telemetryEvent";
 
 export interface ReplayedRuntimeState {
@@ -27,14 +28,26 @@ export interface TelemetryInspection {
   replayedState: ReplayedRuntimeState;
   invalidLineCount: number;
   lastEventAt?: string;
+  ledger: {
+    path?: string;
+    exists: boolean;
+    sizeBytes: number;
+    modifiedAt?: string;
+    lineCount: number;
+    validLineCount: number;
+    invalidLineCount: number;
+    empty: boolean;
+  };
 }
 
 export function parseTelemetryLedger(content: string): {
   events: TelemetryEvent[];
   invalidLineCount: number;
+  lineCount: number;
 } {
   const events: TelemetryEvent[] = [];
   let invalidLineCount = 0;
+  let lineCount = 0;
 
   for (const line of content.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -43,6 +56,8 @@ export function parseTelemetryLedger(content: string): {
       continue;
     }
 
+    lineCount += 1;
+
     try {
       events.push(JSON.parse(trimmed) as TelemetryEvent);
     } catch {
@@ -50,7 +65,7 @@ export function parseTelemetryLedger(content: string): {
     }
   }
 
-  return { events, invalidLineCount };
+  return { events, invalidLineCount, lineCount };
 }
 
 export function replayTelemetryEvents(
@@ -113,32 +128,66 @@ function findLastEventAt(events: TelemetryEvent[]): string | undefined {
 
 export function inspectTelemetryEvents(
   events: TelemetryEvent[],
-  invalidLineCount = 0
+  invalidLineCount = 0,
+  ledger: Partial<TelemetryInspection["ledger"]> = {}
 ): TelemetryInspection {
+  const lineCount = ledger.lineCount ?? events.length + invalidLineCount;
+
   return {
     events,
     replayedState: replayTelemetryEvents(events, invalidLineCount),
     invalidLineCount,
-    lastEventAt: findLastEventAt(events)
+    lastEventAt: findLastEventAt(events),
+    ledger: {
+      exists: ledger.exists ?? true,
+      sizeBytes: ledger.sizeBytes ?? 0,
+      lineCount,
+      validLineCount: events.length,
+      invalidLineCount,
+      empty: lineCount === 0,
+      path: ledger.path,
+      modifiedAt: ledger.modifiedAt
+    }
   };
 }
 
 export function inspectTelemetryLedgerContent(
   content: string
 ): TelemetryInspection {
-  const { events, invalidLineCount } = parseTelemetryLedger(content);
+  const { events, invalidLineCount, lineCount } = parseTelemetryLedger(content);
 
-  return inspectTelemetryEvents(events, invalidLineCount);
+  return inspectTelemetryEvents(events, invalidLineCount, {
+    exists: true,
+    sizeBytes: Buffer.byteLength(content, "utf-8"),
+    lineCount
+  });
 }
 
 export function inspectTelemetryLedgerFile(
   ledgerPath = "telemetry/work_ledger.jsonl"
 ): TelemetryInspection {
   if (!existsSync(ledgerPath)) {
-    return inspectTelemetryEvents([]);
+    return inspectTelemetryEvents([], 0, {
+      path: ledgerPath,
+      exists: false,
+      sizeBytes: 0,
+      lineCount: 0
+    });
   }
 
-  return inspectTelemetryLedgerContent(readFileSync(ledgerPath, "utf-8"));
+  const stats = statSync(ledgerPath);
+  const inspection = inspectTelemetryLedgerContent(readFileSync(ledgerPath, "utf-8"));
+
+  return {
+    ...inspection,
+    ledger: {
+      ...inspection.ledger,
+      path: ledgerPath,
+      exists: true,
+      sizeBytes: stats.size,
+      modifiedAt: stats.mtime.toISOString()
+    }
+  };
 }
 
 export function replayTelemetryLedgerFile(

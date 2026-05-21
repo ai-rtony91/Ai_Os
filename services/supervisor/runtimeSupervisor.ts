@@ -163,7 +163,8 @@ export function buildSupervisorVisibilityReport(
   context: RuntimeContext,
   workerHeartbeats: WorkerHeartbeat[],
   telemetryEvents: TelemetryEvent[],
-  telemetryInvalidLineCount = 0
+  telemetryInvalidLineCount = 0,
+  telemetryLedger?: RuntimeVisibilitySnapshot["telemetry"]["ledger"]
 ): RuntimeVisibilitySnapshot | null {
   if (
     !context.supervisorReport ||
@@ -187,6 +188,7 @@ export function buildSupervisorVisibilityReport(
     deadLetterQueue: context.deadLetterQueue,
     backpressure: context.backpressure,
     telemetryEvents,
-    telemetryInvalidLineCount
+    telemetryInvalidLineCount,
+    telemetryLedger
   });
 }
