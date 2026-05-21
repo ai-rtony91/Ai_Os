@@ -56,6 +56,57 @@ Future startup automation must remain preview-first, fail-closed, and operator-a
 8. Run required validation.
 9. Report files changed, validation, commit status, push status, and next safe action.
 
+## Prompt Scope Calibration
+
+Prompt width must match risk, uncertainty, system depth, and mutation scope.
+
+Core formula:
+
+```text
+prompt scope = risk + uncertainty + system depth + mutation scope
+```
+
+Use four scope levels:
+
+- `narrow`: one known file, one known behavior, low risk, low uncertainty.
+- `scoped`: bounded multi-file work with clear allowed paths, blocked paths, validation, and stop point.
+- `broad`: discovery, audit, classification, ownership mapping, or stale/conflicting authority review only.
+- `architecture-level`: authority, topology, runtime, safety, orchestration, workflow doctrine, cross-system ownership, or role-boundary work.
+
+Use `narrow` prompts for known one-file fixes, small wording changes, single JSON updates, or one validator repair.
+
+Use `scoped` prompts for bounded multi-file documentation updates, workflow standards, registry updates, validator additions, and small refactors where ownership is clear.
+
+Use `broad` prompts for discovery, audit, classification, and ownership mapping. Broad prompts do not authorize APPLY. They should end with findings, recommended scope, and one next safe action.
+
+Use `architecture-level` prompts only when authority, topology, runtime, safety, orchestration, workflow doctrine, cross-system ownership, or role boundaries are involved. Architecture-level prompts require explicit justification in the report.
+
+Prompts must widen or include more detail when:
+
+- risk increases.
+- uncertainty increases.
+- ownership is unclear.
+- protected files or protected systems enter scope.
+- multiple file trees are involved.
+- runtime, dashboard, telemetry, trading, or orchestration behavior is involved.
+- worker delegation is involved.
+- APPLY may be requested later.
+
+Prompts should stay short when:
+
+- the task is a direct answer.
+- the task is one command.
+- the task is one known file.
+- the work is DRY_RUN-only verification.
+- no protected boundary is involved.
+- the next safe action is obvious.
+
+Scope drift must be reported as `REVIEW_REQUIRED` when a task needs files outside the approved scope, a second unrelated problem appears, protected systems enter scope unexpectedly, or the work shifts from narrow/scoped into broad/architecture-level analysis.
+
+Scope expansion cannot be silent. A justified expansion must state why the original scope is insufficient, what new path or system is needed, what risk is added, what validation is added, whether approval is required, and the new stop point.
+
+Timeline estimates must use uncertainty ranges. Prefer checkpoint timelines over completion-date promises. Do not invent deadlines. Valid timeline language includes `same session`, `1-2 work sessions`, `2-4 work sessions`, or `multi-checkpoint` when exact duration is unknown.
+
 ## Git Status Checkpoint Discipline
 
 AI_OS guidance should avoid repetitive status checks after every minor step.

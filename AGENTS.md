@@ -281,6 +281,52 @@ Report the conflict before continuing.
 - No Codex task should proceed from memory alone.
 - Codex must orient from current repo authority before acting.
 
+## Prompt Scope Calibration Rule
+
+Prompt width must match risk, uncertainty, system depth, and mutation scope.
+
+Core formula:
+
+```text
+prompt scope = risk + uncertainty + system depth + mutation scope
+```
+
+Use these prompt scope levels:
+
+- `narrow`: one known file, one known behavior, low risk, low uncertainty. Use for known one-file fixes, small wording changes, single validator repairs, or one exact JSON/doc update.
+- `scoped`: bounded multi-file work with clear allowed paths, blocked paths, validation, and stop point. Use for small features, registry updates, workflow updates, or bounded refactors.
+- `broad`: discovery, audit, classification, ownership mapping, or stale/conflicting authority review. Broad prompts are for discovery, audit, and classification only; they do not authorize APPLY.
+- `architecture-level`: authority, topology, runtime, safety, orchestration, workflow doctrine, cross-system ownership, or role-boundary work. Architecture-level prompts require explicit justification.
+
+Prompts must widen or add detail when risk increases, ownership is unclear, protected files or systems enter scope, multiple file trees are involved, runtime/dashboard/telemetry/trading/orchestration behavior is involved, worker delegation is involved, or APPLY may be requested later.
+
+Prompts should stay short when the task is a direct answer, one command, one known file, DRY_RUN-only verification, or a low-risk status check with an obvious stop point.
+
+Scope drift detection:
+
+- Stop and report `REVIEW_REQUIRED` when a task needs files outside the approved scope.
+- Stop and report when a second unrelated problem appears.
+- Stop and report when protected systems, protected files, or protected actions enter scope unexpectedly.
+- Do not silently turn a narrow or scoped prompt into broad or architecture-level work.
+
+Justified scope expansion must state:
+
+- why the original scope is insufficient.
+- what new path, system, or authority layer is needed.
+- what risk is added.
+- what validation is added.
+- whether approval is required.
+- the new stop point.
+
+Scope expansion cannot be silent.
+
+Timeline doctrine:
+
+- Do not invent deadlines.
+- Timeline estimates must use uncertainty ranges.
+- Prefer checkpoint timelines over completion-date promises.
+- Use checkpoint ranges such as `same session`, `1-2 work sessions`, `2-4 work sessions`, or `multi-checkpoint` when evidence is incomplete.
+
 ## 3. Big Pack Mode
 
 - Default to Big Pack Mode for evolved AI_OS work.
@@ -847,6 +893,21 @@ Claude responses should end with:
    - validate
    - defer
    next.
+
+Claude "next 3 best moves" responses must include:
+
+- project depth assessment.
+- current checkpoint awareness.
+- dependency awareness.
+- risk level.
+- expected effort range.
+- uncertainty range.
+- suggested order.
+- rough checkpoint timeline range.
+
+Claude must estimate project depth from subsystem count, authority level, dependency uncertainty, runtime/topology involvement, safety risk, stale legacy material, and whether the task changes behavior or only documents it.
+
+Claude must use checkpoint timelines instead of fake completion dates. It may estimate ranges, but it must label uncertainty and avoid pretending a deadline is known.
 
 Military Analogy:
 Claude is strategic overwatch and command-staff review.

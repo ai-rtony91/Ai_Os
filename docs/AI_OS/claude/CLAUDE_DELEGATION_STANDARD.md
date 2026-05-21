@@ -34,6 +34,78 @@ packet and should be revised before sending.
 
 ---
 
+## Prompt Scope Calibration
+
+Claude delegation scope must match risk, uncertainty, system depth, and mutation scope.
+
+Core formula:
+
+```text
+prompt scope = risk + uncertainty + system depth + mutation scope
+```
+
+Claude delegation packets should use these scope levels:
+
+- `narrow`: one known file, one known behavior, low risk, low uncertainty.
+- `scoped`: bounded multi-file work with clear allowed paths, blocked paths, validation, and stop point.
+- `broad`: discovery, audit, classification, ownership mapping, or stale/conflicting authority review only.
+- `architecture-level`: authority, topology, runtime, safety, orchestration, workflow doctrine, cross-system ownership, or role-boundary work.
+
+Broad Claude prompts are for discovery, audit, and classification only. They do not authorize APPLY.
+
+Architecture-level Claude prompts require justification. The packet must state why authority, topology, runtime, safety, orchestration, workflow doctrine, cross-system ownership, or role boundaries are in scope.
+
+Scope expansion cannot be silent. If Claude determines that a task requires paths, systems, risks, or authority layers outside the packet, Claude must stop, report `REVIEW_REQUIRED`, and explain the proposed expansion instead of continuing.
+
+Timeline estimates must use uncertainty ranges. Claude must not invent deadlines or promise completion dates. Checkpoint estimates are preferred over completion-date promises.
+
+---
+
+## Claude Next 3 Best Moves Requirements
+
+When Claude is asked for the "next 3 best moves," the response must include:
+
+- project depth assessment.
+- current checkpoint awareness.
+- dependency awareness.
+- risk level.
+- expected effort range.
+- uncertainty range.
+- suggested order.
+- rough checkpoint timeline range.
+
+Claude should estimate project depth from:
+
+- number of subsystems affected.
+- authority level touched.
+- dependency uncertainty.
+- runtime or topology involvement.
+- safety risk.
+- stale or legacy material involved.
+- whether the task changes behavior or only documents it.
+
+Use these project depth labels:
+
+- `LOW`: one file or one isolated document.
+- `MEDIUM`: one subsystem or bounded workflow.
+- `HIGH`: multiple subsystems, orchestration, worker routing, validators, or runtime-adjacent work.
+- `STRATEGIC`: authority, topology, safety, architecture, or repo-wide sequencing.
+
+Claude checkpoint timeline ranges should use practical ranges such as:
+
+- `same session`: narrow or scoped inspection, small documentation update, or single validation pass.
+- `1-2 work sessions`: bounded multi-file workflow, registry, validator, or documentation update.
+- `2-4 work sessions`: broad audit followed by a controlled APPLY pass.
+- `multi-checkpoint`: architecture, topology, runtime, safety doctrine, or cross-system ownership work.
+
+Each timeline should name checkpoints rather than fake completion dates. Example checkpoint order:
+
+1. Inspect and classify.
+2. Update the existing canonical files.
+3. Validate and decide whether a commit package is ready.
+
+---
+
 ## Delegation Packet Structure
 
 Every Claude task must include all nine fields. Fields may not be omitted. If a value is genuinely
