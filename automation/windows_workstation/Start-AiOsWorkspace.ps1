@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$RepoRoot = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$RepoRoot = "C:\Dev\Ai-Os"
 $PresetPath = Join-Path $RepoRoot "automation\windows_workstation\presets\$Preset.json"
 $IdentityScript = Join-Path $RepoRoot "automation\window_identity\Set-AiOsWindowIdentity.ps1"
 

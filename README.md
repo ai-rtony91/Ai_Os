@@ -9,11 +9,49 @@ Trading Lab is the first production vertical. It is paper-only. Live broker exec
 ## Current Status
 
 - GitHub repo: `ai-rtony91/Ai_Os`
-- Active branch: `v2/aios`
-- Active repo path: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+- Active branch: `main`
+- Active repo path: `C:\Dev\Ai-Os`
+- Legacy inactive path: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
 - Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, and paper-only Trading Lab
 - Operating model: Phase -> Stage -> Workload Pack -> Task ID -> DRY_RUN/APPLY -> validation -> selective commit
 - Commit/push rule: never commit or push unless explicitly approved
+
+## Active Repository Location
+
+Active repo path:
+
+```text
+C:\Dev\Ai-Os
+```
+
+Active branch:
+
+```text
+main
+```
+
+Legacy inactive path:
+
+```text
+C:\Users\mylab\OneDrive\GitHub\AI_OS_V2
+```
+
+The legacy OneDrive path must not be used for active repo work. It is backup/reference only until the operator explicitly deletes it. Any worker that starts under the OneDrive path must STOP and report before running Git, Codex, merge, push, startup, or automation commands.
+
+Before any repo task, workers must confirm:
+
+```powershell
+pwd
+git status --short --branch
+git branch --show-current
+git remote -v
+```
+
+Expected state:
+
+- path: `C:\Dev\Ai-Os`
+- branch: `main`
+- status: clean and synced with `origin/main`
 
 ## Repository Identity Rule
 
@@ -22,8 +60,9 @@ AI_OS_V2 is not a separate GitHub repository.
 Current identity:
 
 - GitHub repo: `ai-rtony91/Ai_Os`
-- Active V2 branch: `v2/aios`
-- Current local folder: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+- Active branch: `main`
+- Current local folder: `C:\Dev\Ai-Os`
+- Legacy inactive local folder: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
 
 Future desired naming is not active yet:
 
@@ -38,11 +77,11 @@ Do not search for or assume:
 - `AI-OS-Project`
 - `ai-rtony91_Ai_Os_CLEAN`
 
-Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `v2/aios` unless the user explicitly says otherwise.
+Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
 
-If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `v2/aios` before judging project state.
+If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `main` before judging project state.
 
-CLEAN/main/legacy paths are historical unless `v2/aios` promotes them.
+The old `v2/aios` branch is legacy/reference unless the operator explicitly instructs otherwise.
 
 ## Start Here
 

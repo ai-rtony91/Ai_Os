@@ -27,8 +27,9 @@ AI_OS_V2 is not a separate GitHub repository.
 Current identity:
 
 - GitHub repo: `ai-rtony91/Ai_Os`
-- Active V2 branch: `v2/aios`
-- Current local folder: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+- Active branch: `main`
+- Current local folder: `C:\Dev\Ai-Os`
+- Legacy inactive local folder: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
 
 Future desired naming is not active yet:
 
@@ -43,11 +44,11 @@ Do not search for or assume:
 - `AI-OS-Project`
 - `ai-rtony91_Ai_Os_CLEAN`
 
-Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `v2/aios` unless the user explicitly says otherwise.
+Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
 
-If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `v2/aios` before judging project state.
+If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `main` before judging project state.
 
-CLEAN/main/legacy paths are historical unless `v2/aios` promotes them.
+The old `v2/aios` branch is legacy/reference unless the operator explicitly instructs otherwise.
 
 Trading Lab is the first production vertical. The current active direction is paper-only Trading Lab, telemetry, workflow orchestration, and safe automation.
 
@@ -61,6 +62,43 @@ Live broker execution is blocked.
 - Never commit or push unless the prompt explicitly says to.
 - Never use git add .
 - Always report files created, files updated, validation result, git status, commit status, and push status.
+
+## Active Repository Location
+
+Active repo path:
+
+```text
+C:\Dev\Ai-Os
+```
+
+Active branch:
+
+```text
+main
+```
+
+Legacy inactive path:
+
+```text
+C:\Users\mylab\OneDrive\GitHub\AI_OS_V2
+```
+
+The legacy OneDrive path must not be used for active repo work. It is backup/reference only until the operator explicitly deletes it. Any worker that starts under the OneDrive path must STOP and report before running Git, Codex, merge, push, startup, or automation commands.
+
+Before any repo task, workers must confirm:
+
+```powershell
+pwd
+git status --short --branch
+git branch --show-current
+git remote -v
+```
+
+Expected state:
+
+- path: `C:\Dev\Ai-Os`
+- branch: `main`
+- status: clean and synced with `origin/main`
 
 ## Git Status Check Frequency
 
@@ -209,7 +247,7 @@ Optimize for the operator's actual workflow, not the agent's assumed technical m
 10. Morning startup command:
 
     ```powershell
-    cd "C:\Users\mylab\OneDrive\GitHub\AI_OS_V2"
+    cd "C:\Dev\Ai-Os"
     git status --short --branch
     ```
 
@@ -740,8 +778,10 @@ Active rule file for Codex and AI coding agents.
 
 ## Local Folder Role Rules
 
-- **ACTIVE_REPO:** `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
-  Use this only for active AI_OS_V2 GitHub/Codex/local repo work on the approved branch.
+- **ACTIVE_REPO:** `C:\Dev\Ai-Os`
+  Use this only for active AI_OS GitHub/Codex/local repo work on branch `main`.
+- **LEGACY_INACTIVE_REPO:** `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+  Backup/reference only. Workers must STOP if `pwd` resolves under this path and must not perform repo operations from it.
 - **PROJECT_ARCHIVE:** `C:\Users\mylab\OneDrive\AI-OS-Project`  
   Use this for OneDrive archive, reports, notes, and non-Git working storage.
 - **SEPARATE_PROJECT:** `C:\Users\mylab\OneDrive\AI-OS-Project\TradingEngineV1`  
@@ -772,7 +812,7 @@ Example:
 Current state:
 - latest pushed: <commit>
 - branch clean
-- v2/aios synced with GitHub
+- main synced with GitHub
 
 Next step:
 - provide the exact next Codex prompt, PowerShell command, or stop point
