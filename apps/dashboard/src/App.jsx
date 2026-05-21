@@ -131,6 +131,7 @@ export default function App() {
         </div>
         <div className="headerStatus">
           <StatusPill value={runtimeVisibility.runtime.status} />
+          <StatusPill value={`source: ${runtimeVisibility.sourceLabel}`} />
           <StatusPill value={`freshness: ${runtimeVisibility.runtime.freshness}`} />
           <StatusPill value={`backpressure: ${runtimeVisibility.backpressure.level}`} />
         </div>
