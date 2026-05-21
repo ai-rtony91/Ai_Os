@@ -15,6 +15,10 @@ archive/reports_legacy/daily/MORNING_BRIEF_*.md
 archive/reports_legacy/dry_runs/
 archive/reports_legacy/security/
 
+# Raw local telemetry intake
+Reports/telemetry/session_archives/inbox_evidence/
+Reports/telemetry/session_archives/inbox_screenshots/
+
 # Runtime orchestration state
 automation/orchestration/PR_BODY_LAST_GENERATED.md
 automation/orchestration/workers/*-heartbeat.json
