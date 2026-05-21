@@ -54,6 +54,20 @@
 
 
 
+\- \[ ] Wire Invoke-AiOsExecutionRegistryGuard.ps1 into VALIDATOR\_CHAIN\_001.json
+
+\- \[ ] Ensure execution registry guard runs before topology guard
+
+\- \[ ] Define validator fail-closed behavior
+
+\- \[ ] Add validator chain rollback strategy
+
+\- \[ ] Define validator execution timeout policy
+
+
+
+
+
 \## TERMINAL WORKSTATIONS
 
 
