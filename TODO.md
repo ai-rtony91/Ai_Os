@@ -68,6 +68,26 @@
 
 
 
+\## VALIDATOR INTEGRATION
+
+
+
+\- \[ ] Create VALIDATOR\_CHAIN\_001 governance map
+
+\- \[ ] Register validator execution order
+
+\- \[ ] Define validator dependency model
+
+\- \[ ] Separate mutation validators from report-only validators
+
+\- \[ ] Add validator failure escalation policy
+
+\- \[ ] Add validator chain audit logging strategy
+
+
+
+
+
 \## TERMINAL WORKSTATIONS
 
 
@@ -98,6 +118,32 @@
 
 
 
+\## EXECUTION METRICS
+
+
+
+\- \[ ] Track total scripts scanned
+
+\- \[ ] Track ACTIVE percentage
+
+\- \[ ] Track HELPER percentage
+
+\- \[ ] Track BLOCKED percentage
+
+\- \[ ] Track DRY\_RUN violations
+
+\- \[ ] Track launcher bypass paths
+
+\- \[ ] Track legacy CLEAN/main assumptions
+
+\- \[ ] Create governance stabilization score
+
+\- \[ ] Create checkpoint completion model
+
+\- \[ ] Estimate AI\_OS V2 stabilization timeline
+
+
+
 \## DOCUMENTATION
 
 
@@ -119,4 +165,28 @@
 Goal:
 
 Stable governed orchestration layer with trusted validator chain and controlled execution boundaries before expanding autonomous worker/runtime systems.
+
+
+
+
+
+\## DRY\_RUN REPAIR CAMPAIGN
+
+
+
+\- \[ ] Repair Add-AiOsCommandQueueItem.DRY\_RUN.ps1 mutation behavior
+
+\- \[ ] Repair Update-AiOsRuntimeMemory.DRY\_RUN.ps1 mutation behavior
+
+\- \[ ] Repair Invoke-AiOsSelfHeal.DRY\_RUN.ps1 mutation behavior
+
+\- \[ ] Repair Start-AiOsAutonomousWorkerCycle.DRY\_RUN.ps1 mutation behavior
+
+\- \[ ] Repair Add-AiOsWorkerInboxItem.DRY\_RUN.ps1 mutation behavior
+
+\- \[ ] Repair Set-AiOsWorkerTaskState.DRY\_RUN.ps1 mutation behavior
+
+\- \[ ] Repair Complete-AiOsWorkerInboxItem.DRY\_RUN.ps1 mutation behavior
+
+\- \[ ] Define universal DRY\_RUN contract standard
 
