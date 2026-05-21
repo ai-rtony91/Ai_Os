@@ -13,20 +13,20 @@ $logPath = Join-Path $logRoot "$WorkerId.log"
 $executeScript = "automation/orchestration/workers/execution/Invoke-AiOsWorkerSafeExecute.DRY_RUN.ps1"
 $inboxScript = "automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1"
 
-New-Item -ItemType Directory -Force -Path $logRoot | Out-Null
-
 function Write-AiOsLog {
     param([string]$Message)
     $utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-    "$utc [$WorkerId] $Message" | Add-Content $logPath
+    Write-Host "LOG PREVIEW: $utc [$WorkerId] $Message"
 }
 
 Write-Host "COPY START - Start-AiOsAutonomousWorkerCycle.DRY_RUN.ps1"
 Write-Host "AI_OS Autonomous Worker Cycle" -ForegroundColor Cyan
 Write-Host "Worker: $WorkerId"
 Write-Host "Cycles: $Cycles"
-Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Mode: DRY_RUN"
+Write-Host "Apply requested: $(if ($Apply) { 'YES - SKIPPED' } else { 'NO' })"
 Write-Host "Log: $logPath"
+Write-Host "SKIPPED: Log directory/file mutation is not allowed in DRY_RUN."
 
 Write-AiOsLog "Worker cycle started. Apply=$Apply Cycles=$Cycles"
 
@@ -35,19 +35,22 @@ for ($i = 1; $i -le $Cycles; $i++) {
     Write-Host "WORKER CYCLE $i" -ForegroundColor Yellow
     Write-AiOsLog "Cycle $i started."
 
-    powershell -ExecutionPolicy Bypass -File $inboxScript -WorkerId $WorkerId
+    Write-Host "Inbox inspection script: $inboxScript"
+    Write-Host "SKIPPED: Child script launch is not allowed in DRY_RUN."
 
     if ($Apply) {
-        powershell -ExecutionPolicy Bypass -File $executeScript -WorkerId $WorkerId -Apply
-        Write-AiOsLog "Safe execute attempted with Apply."
+        Write-Host "Safe execute script: $executeScript"
+        Write-Host "SKIPPED: Apply execution is not allowed in DRY_RUN."
+        Write-AiOsLog "Safe execute apply request skipped."
     } else {
-        powershell -ExecutionPolicy Bypass -File $executeScript -WorkerId $WorkerId
-        Write-AiOsLog "Safe execute previewed."
+        Write-Host "Safe execute script: $executeScript"
+        Write-Host "SKIPPED: Child script launch is not allowed in DRY_RUN."
+        Write-AiOsLog "Safe execute preview launch skipped."
     }
 
     if ($i -lt $Cycles) {
-        Write-Host "Sleeping $IntervalSeconds seconds..."
-        Start-Sleep -Seconds $IntervalSeconds
+        Write-Host "Requested interval: $IntervalSeconds seconds"
+        Write-Host "SKIPPED: Autonomous wait loop delay is not allowed in DRY_RUN."
     }
 }
 
@@ -55,6 +58,8 @@ Write-AiOsLog "Worker cycle finished."
 
 Write-Host ""
 Write-Host "Worker cycle complete."
+Write-Host "Files changed: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
+Write-Host "Next safe action: Request APPLY approval before any worker cycle launch or log mutation."
 Write-Host "COPY END - Start-AiOsAutonomousWorkerCycle.DRY_RUN.ps1"
