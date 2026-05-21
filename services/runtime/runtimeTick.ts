@@ -18,34 +18,47 @@ export interface RuntimeTickInput {
 }
 
 export function runRuntimeTick(input: RuntimeTickInput): RuntimeContext {
-  // Emit tick started event
+  const tickAt = new Date().toISOString();
+
   runtimeEventBus.emit("runtime_tick_started", {
     runtimeId: input.context.runtimeId,
-    tickAt: new Date().toISOString()
+    tickAt
   });
 
   const replayed = replayTelemetryLedgerFile();
   const dispatcherState = rebuildDispatcherState(replayed);
   const resumePlan = generateResumePlan(dispatcherState);
+  const maxConcurrentPackets = input.maxConcurrentPackets ?? 5;
+  const runtimeSnapshot = {
+    dispatcherState,
+    resumePlan,
+    workerLeases: input.workerLeases,
+    deadLetterQueue: input.deadLetterQueue,
+    replayDiagnostics: {
+      replayInvalidLines: dispatcherState.invalidLineCount,
+      invalidPacketStatuses: dispatcherState.invalidPacketStatuses.length
+    }
+  };
 
   const schedulerPlan = generateSchedulerPlan({
-    resumePlan,
-    deadLetterQueue: input.deadLetterQueue,
-    workerLeases: input.workerLeases,
-    maxConcurrentPackets: input.maxConcurrentPackets ?? 5
+    resumePlan: runtimeSnapshot.resumePlan,
+    deadLetterQueue: runtimeSnapshot.deadLetterQueue,
+    workerLeases: runtimeSnapshot.workerLeases,
+    maxConcurrentPackets
   });
 
   const supervisorReport = generateSupervisorReport(
     schedulerPlan,
-    input.workerLeases,
-    input.deadLetterQueue
+    runtimeSnapshot.workerLeases,
+    runtimeSnapshot.deadLetterQueue,
+    runtimeSnapshot.replayDiagnostics
   );
 
   const backpressure = evaluateRuntimeBackpressure({
     schedulerPlan,
-    workerLeases: input.workerLeases,
-    deadLetterQueue: input.deadLetterQueue,
-    maxSchedulerActions: input.maxConcurrentPackets ?? 5,
+    workerLeases: runtimeSnapshot.workerLeases,
+    deadLetterQueue: runtimeSnapshot.deadLetterQueue,
+    maxSchedulerActions: maxConcurrentPackets,
     maxExpiredWorkers: 2,
     maxPoisonPackets: 1
   });
@@ -64,21 +77,20 @@ export function runRuntimeTick(input: RuntimeTickInput): RuntimeContext {
 
   const updatedContext = updateRuntimeContext(input.context, {
     status: runtimeStatus,
-    dispatcherState,
-    resumePlan,
+    dispatcherState: runtimeSnapshot.dispatcherState,
+    resumePlan: runtimeSnapshot.resumePlan,
     schedulerPlan,
-    workerLeases: input.workerLeases,
-    deadLetterQueue: input.deadLetterQueue,
+    workerLeases: runtimeSnapshot.workerLeases,
+    deadLetterQueue: runtimeSnapshot.deadLetterQueue,
     supervisorReport,
     backpressure,
     remediationPlan,
-    lastTickAt: new Date().toISOString()
+    lastTickAt: tickAt
   });
 
-  // Emit tick completed event
   runtimeEventBus.emit("runtime_tick_completed", {
     runtimeId: input.context.runtimeId,
-    tickAt: new Date().toISOString(),
+    tickAt,
     status: runtimeStatus
   });
 

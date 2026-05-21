@@ -40,40 +40,83 @@ function parseArgs(argv) {
 
 function createRuntimeState(config, previousState, restoration) {
   const now = new Date().toISOString();
+  const recovery = evaluateRecovery(previousState);
 
   return {
     runtimeId: config.runtimeId,
     status: "running",
     bootedAt: now,
     updatedAt: now,
+    lastTickAt: null,
     tickCount: 0,
-    previousStateStatus: previousState ? previousState.status : "none",
-    recoveredAfterInterruption:
-      Boolean(previousState) && !["shutdown", "stopped"].includes(previousState.status),
+    statePath: previousState.statePath,
+    ledgerPath: restoration.ledgerPath,
+    previousStateStatus: recovery.previousStateStatus,
+    recoveredAfterInterruption: recovery.recoveredAfterInterruption,
+    recoveryReason: recovery.recoveryReason,
+    recoveryWarning: recovery.recoveryWarning,
     restoration
+  };
+}
+
+function evaluateRecovery(previousState) {
+  if (previousState.status === "missing") {
+    return {
+      previousStateStatus: "none",
+      recoveredAfterInterruption: false,
+      recoveryReason: "no_previous_runtime_state"
+    };
+  }
+
+  if (previousState.status === "invalid") {
+    return {
+      previousStateStatus: "invalid",
+      recoveredAfterInterruption: true,
+      recoveryReason: "invalid_runtime_state_recovered_from_telemetry",
+      recoveryWarning: previousState.warning
+    };
+  }
+
+  const previousStatus = previousState.state?.status || "unknown";
+  const wasCleanShutdown = ["shutdown", "stopped"].includes(previousStatus);
+
+  return {
+    previousStateStatus: previousStatus,
+    recoveredAfterInterruption: !wasCleanShutdown,
+    recoveryReason: wasCleanShutdown
+      ? "previous_runtime_shutdown_cleanly"
+      : `previous_runtime_status_${previousStatus}`
   };
 }
 
 function tick(state) {
   const restoration = restorePacketsFromTelemetry();
+  const now = new Date().toISOString();
   const updated = {
     ...state,
     status: "running",
-    updatedAt: new Date().toISOString(),
+    updatedAt: now,
+    lastTickAt: now,
+    ledgerPath: restoration.ledgerPath,
     tickCount: state.tickCount + 1,
     restoration
   };
 
   writeExecutionState(updated);
   writeHeartbeat(updated.runtimeId, updated.status, {
+    statePath: updated.statePath,
+    ledgerPath: restoration.ledgerPath,
     tickCount: updated.tickCount,
+    lastTickAt: updated.lastTickAt,
     restoredPacketCount: restoration.restoredPackets.length,
     resumeCandidateCount: restoration.resumeCandidates.length,
-    pendingApprovalCount: restoration.pendingApprovals.length
+    pendingApprovalCount: restoration.pendingApprovals.length,
+    invalidLedgerLineCount: restoration.invalidLineCount,
+    recoveryWarning: updated.recoveryWarning
   });
 
   console.log(
-    `[AI_OS] heartbeat tick=${updated.tickCount} restored=${restoration.restoredPackets.length} resume=${restoration.resumeCandidates.length} pendingApprovals=${restoration.pendingApprovals.length}`
+    `[AI_OS] heartbeat tick=${updated.tickCount} restored=${restoration.restoredPackets.length} resume=${restoration.resumeCandidates.length} pendingApprovals=${restoration.pendingApprovals.length} invalidLedgerLines=${restoration.invalidLineCount}`
   );
 
   return updated;
@@ -90,7 +133,10 @@ function shutdown(state, reason = "shutdown") {
 
   writeExecutionState(stopped);
   writeHeartbeat(stopped.runtimeId, stopped.status, {
+    statePath: stopped.statePath,
+    ledgerPath: stopped.ledgerPath,
     tickCount: stopped.tickCount,
+    lastTickAt: stopped.lastTickAt,
     shutdownReason: reason
   });
 
@@ -102,18 +148,30 @@ function main() {
   const previousState = loadExecutionState(DEFAULT_STATE_PATH);
   const restoration = restorePacketsFromTelemetry();
   let state = createRuntimeState(config, previousState, restoration);
+  let shutdownStarted = false;
 
   writeExecutionState(state);
   writeHeartbeat(state.runtimeId, state.status, {
+    statePath: state.statePath,
+    ledgerPath: restoration.ledgerPath,
     tickCount: state.tickCount,
-    recoveredAfterInterruption: state.recoveredAfterInterruption
+    lastTickAt: state.lastTickAt,
+    recoveredAfterInterruption: state.recoveredAfterInterruption,
+    recoveryReason: state.recoveryReason,
+    recoveryWarning: state.recoveryWarning,
+    invalidLedgerLineCount: restoration.invalidLineCount
   });
 
   console.log(
-    `[AI_OS] runtime booted recovered=${state.recoveredAfterInterruption} restored=${restoration.restoredPackets.length}`
+    `[AI_OS] runtime booted recovered=${state.recoveredAfterInterruption} reason=${state.recoveryReason} restored=${restoration.restoredPackets.length}`
   );
 
   const stop = (reason) => {
+    if (shutdownStarted) {
+      return;
+    }
+
+    shutdownStarted = true;
     shutdown(state, reason);
     process.exit(0);
   };

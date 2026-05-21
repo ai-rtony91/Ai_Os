@@ -1,6 +1,8 @@
 param(
   [string]$RuntimeId = "aios-runtime-local",
+  [ValidateRange(250, 2147483647)]
   [int]$TickIntervalMs = 5000,
+  [ValidateRange(0, 2147483647)]
   [int]$MaxTicks = 0,
   [switch]$Once
 )
@@ -39,4 +41,8 @@ Write-Host "[AI_OS] Starting runtime bootstrap from $RepoRoot"
 Write-Host "[AI_OS] RuntimeId=$RuntimeId TickIntervalMs=$TickIntervalMs"
 
 & node @Arguments
+if ($LASTEXITCODE -ne 0) {
+  Write-Error "[AI_OS] Runtime bootstrap failed with exit code $LASTEXITCODE"
+}
+
 exit $LASTEXITCODE

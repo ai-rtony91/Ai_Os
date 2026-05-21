@@ -12,42 +12,51 @@ function ensureRuntimeStateDirectory(statePath = DEFAULT_STATE_PATH) {
 
 function loadExecutionState(statePath = DEFAULT_STATE_PATH) {
   if (!fs.existsSync(statePath)) {
-    return null;
+    return {
+      status: "missing",
+      state: null,
+      statePath
+    };
   }
 
   try {
-    return JSON.parse(fs.readFileSync(statePath, "utf8"));
+    const content = fs.readFileSync(statePath, "utf8").replace(/^\uFEFF/, "");
+
+    return {
+      status: "valid",
+      state: JSON.parse(content),
+      statePath
+    };
   } catch (error) {
     return {
-      runtimeId: "unknown",
-      status: "degraded",
-      loadedAt: new Date().toISOString(),
-      recoveryWarning: `Existing runtime state could not be parsed: ${error.message}`
+      status: "invalid",
+      state: null,
+      statePath,
+      warning: `Existing runtime state could not be parsed: ${error.message}`
     };
   }
 }
 
+function writeJsonAtomic(targetPath, value) {
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+  const tempPath = `${targetPath}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tempPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  fs.renameSync(tempPath, targetPath);
+}
+
 function writeExecutionState(state, statePath = DEFAULT_STATE_PATH) {
   ensureRuntimeStateDirectory(statePath);
-  fs.writeFileSync(statePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
+  writeJsonAtomic(statePath, state);
 }
 
 function writeHeartbeat(runtimeId, status, details = {}, heartbeatPath = DEFAULT_HEARTBEAT_PATH) {
-  fs.mkdirSync(path.dirname(heartbeatPath), { recursive: true });
-  fs.writeFileSync(
-    heartbeatPath,
-    `${JSON.stringify(
-      {
-        runtimeId,
-        status,
-        heartbeatAt: new Date().toISOString(),
-        ...details
-      },
-      null,
-      2
-    )}\n`,
-    "utf8"
-  );
+  writeJsonAtomic(heartbeatPath, {
+    runtimeId,
+    status,
+    heartbeatAt: new Date().toISOString(),
+    ...details
+  });
 }
 
 module.exports = {
