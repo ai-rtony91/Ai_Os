@@ -1,0 +1,63 @@
+{
+  "schema": "aios.telemetry_validation_report.v1",
+  "generatedAt": "2026-05-21T00:00:00Z",
+  "mode": "DRY_RUN",
+  "repo": "ai-rtony91/Ai_Os",
+  "branch": "v2/aios",
+  "workingFolder": "C:\\Users\\mylab\\OneDrive\\GitHub\\AI_OS_V2",
+  "validatedPaths": [
+    "Reports/telemetry/",
+    "automation/telemetry/"
+  ],
+  "forbiddenPaths": [
+    "apps/dashboard/",
+    "apps/dashboard/assets/",
+    ".codex_backups/",
+    "broker/",
+    "OANDA",
+    "webhooks",
+    "live_trading",
+    "real_orders",
+    "secrets",
+    "credentials"
+  ],
+  "results": [
+    {
+      "validatorId": "example_json_schema_parse",
+      "category": "json_schema_parse",
+      "target": "Reports/telemetry/TELEMETRY_VALIDATION_REPORT.example.json",
+      "status": "PASS",
+      "severity": "info",
+      "message": "Example validation report JSON parses.",
+      "evidence": "metadata_only",
+      "safeToProceed": true
+    },
+    {
+      "validatorId": "example_non_recursive_scan",
+      "category": "non_recursive_scan",
+      "target": "Reports/telemetry/session_archives/",
+      "status": "PASS",
+      "severity": "info",
+      "message": "Evidence folders must not be scanned recursively.",
+      "evidence": "metadata_only",
+      "safeToProceed": true
+    },
+    {
+      "validatorId": "example_broker_guard",
+      "category": "broker_live_trading_guard",
+      "target": "forbidden_paths",
+      "status": "PASS",
+      "severity": "info",
+      "message": "Broker, OANDA, live trading, webhook, and real-order systems are forbidden.",
+      "evidence": "metadata_only",
+      "safeToProceed": true
+    }
+  ],
+  "summary": {
+    "passCount": 3,
+    "warnCount": 0,
+    "failCount": 0,
+    "safetyStatus": "PASS"
+  },
+  "nextSafeAction": "Run the DRY_RUN validator script and review console output before approving any telemetry APPLY."
+}
