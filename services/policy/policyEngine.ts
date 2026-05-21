@@ -14,6 +14,7 @@ export type Capability =
   | "policy_review";
 
 export type TrustLevel = "guest" | "operator" | "maintainer" | "owner";
+export type PolicyExecutionMode = "dry_run" | "apply";
 
 export interface PolicyRequest {
   actorId: string;
@@ -23,6 +24,7 @@ export interface PolicyRequest {
   target?: string;
   risk: "low" | "medium" | "high" | "blocked";
   approvalGranted: boolean;
+  mode?: PolicyExecutionMode;
   executionCount?: number;
   retryCount?: number;
   maxExecutions?: number;
@@ -184,7 +186,11 @@ export function evaluatePolicy(
     return decision;
   }
 
-  if (rule.requiresApproval && !request.approvalGranted) {
+  if (
+    rule.requiresApproval &&
+    !request.approvalGranted &&
+    request.mode !== "dry_run"
+  ) {
     const decision: PolicyDecision = {
       allowed: false,
       reason: "Approval required before capability use",

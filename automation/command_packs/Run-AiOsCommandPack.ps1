@@ -7,6 +7,55 @@ Set-StrictMode -Off
 $ErrorActionPreference = "Stop"
 
 $packPath = "automation/command_packs/packs/$Pack.json"
+$commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommendedCommand.ps1"
+
+function Invoke-AiOsValidatedCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$Command
+    )
+
+    if (-not (Test-Path -LiteralPath $commandValidatorPath -PathType Leaf)) {
+        throw "Command validator missing: $commandValidatorPath"
+    }
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File $commandValidatorPath $Command
+    if ($LASTEXITCODE -ne 0) {
+        throw "Command validator blocked command: $Command"
+    }
+
+    $normalizedCommand = $Command.Trim()
+
+    if ($normalizedCommand -match "(?i)^git\s+(status|diff|log|show)\b(.*)$") {
+        $gitArgs = @($Matches[1])
+        if (-not [string]::IsNullOrWhiteSpace($Matches[2])) {
+            $gitArgs += @($Matches[2].Trim() -split "\s+")
+        }
+
+        & git @gitArgs
+        return
+    }
+
+    if ($normalizedCommand -notmatch "(?i)^powershell(?:\.exe)?(?:\s+-NoProfile)?\s+-ExecutionPolicy\s+Bypass\s+-File\s+((?:'[^']+')|(?:`"[^`"]+`")|(?:\S+))(.*)$") {
+        throw "Only validated read-only git commands and repo-scoped PowerShell file commands are executable."
+    }
+
+    $scriptPath = $Matches[1].Trim("'`"")
+    $argumentText = $Matches[2].Trim()
+    $arguments = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $scriptPath)
+
+    if (-not [string]::IsNullOrWhiteSpace($argumentText)) {
+        $parseErrors = $null
+        $argumentTokens = [System.Management.Automation.PSParser]::Tokenize($argumentText, [ref]$parseErrors) |
+            Where-Object { $_.Type -in @("CommandArgument", "String", "Number", "Parameter") } |
+            ForEach-Object { $_.Content.Trim("'`"") }
+        if ($parseErrors.Count -gt 0) {
+            throw "Command arguments are not valid PowerShell syntax."
+        }
+        $arguments += @($argumentTokens)
+    }
+
+    & powershell @arguments
+}
 
 Write-Host "COPY START - Run-AiOsCommandPack.ps1"
 Write-Host "AI_OS Command Pack Runner" -ForegroundColor Cyan
@@ -34,7 +83,7 @@ foreach ($step in @($packData.steps)) {
     }
 
     if ($Apply -or -not $step.requires_apply) {
-        Invoke-Expression $step.command
+        Invoke-AiOsValidatedCommand -Command ([string]$step.command)
     }
 }
 

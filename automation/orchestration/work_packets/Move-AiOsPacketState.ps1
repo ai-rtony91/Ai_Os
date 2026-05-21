@@ -23,6 +23,100 @@ $allowedTransitions = @{
     "complete"            = @()
 }
 
+$applyProtectedStates = @("approved", "applying", "validated", "complete")
+$approvedStatuses = @("approved", "approved_for_apply", "apply_approved", "completed")
+$passingStatuses = @("PASS", "pass", "passed", "validation_passed")
+$hardBlockedTerms = @(
+    "broker",
+    "oanda",
+    "live_trading",
+    "api_key",
+    "webhook",
+    "startup_task",
+    "scheduled_task"
+)
+
+function Test-AiOsTruthy {
+    param([object]$Value)
+    return ($Value -eq $true -or [string]$Value -match "^(?i:true|yes|approved|approved_for_apply|apply_approved)$")
+}
+
+function Get-AiOsPacketField {
+    param(
+        [object]$Packet,
+        [string[]]$Names
+    )
+
+    foreach ($name in $Names) {
+        if ($Packet.PSObject.Properties.Name -contains $name) {
+            return $Packet.$name
+        }
+    }
+
+    return $null
+}
+
+function Assert-AiOsNoHardBlockedAction {
+    param([object]$Packet)
+
+    $values = @()
+    foreach ($property in @("blocked_actions", "requested_actions", "actions", "command", "goal", "title")) {
+        if ($Packet.PSObject.Properties.Name -contains $property) {
+            $values += @($Packet.$property)
+        }
+    }
+
+    $joined = ($values | ForEach-Object { [string]$_ }) -join " "
+    foreach ($term in $hardBlockedTerms) {
+        if ($joined -match "(?i)$term") {
+            throw "APPLY blocked: packet references hard-blocked action term '$term'."
+        }
+    }
+}
+
+function Assert-AiOsApplyGate {
+    param(
+        [object]$Packet,
+        [string]$CurrentState,
+        [string]$TargetState
+    )
+
+    Assert-AiOsNoHardBlockedAction -Packet $Packet
+
+    if ($TargetState -notin $applyProtectedStates) {
+        return
+    }
+
+    $packetMode = [string](Get-AiOsPacketField -Packet $Packet -Names @("mode", "requested_mode"))
+    if ($packetMode -eq "DRY_RUN" -and $TargetState -in @("applying", "validated", "complete")) {
+        throw "APPLY blocked: DRY_RUN packet cannot advance into $TargetState."
+    }
+
+    $approvalRequired = Get-AiOsPacketField -Packet $Packet -Names @("approval_required", "requiresApproval")
+    $approvedByHuman = Get-AiOsPacketField -Packet $Packet -Names @("approved_by_human", "human_approved")
+    $approvalStatus = [string](Get-AiOsPacketField -Packet $Packet -Names @("approval_status", "approval_state", "approval"))
+
+    if (($approvalRequired -eq $true -or $TargetState -in @("applying", "validated", "complete")) -and
+        -not (Test-AiOsTruthy -Value $approvedByHuman) -and
+        $approvalStatus -notin $approvedStatuses) {
+        throw "APPLY blocked: packet lacks human approval for protected transition $CurrentState -> $TargetState."
+    }
+
+    if ($TargetState -in @("validated", "complete")) {
+        $validatorStatus = [string](Get-AiOsPacketField -Packet $Packet -Names @("validator_chain_status", "validation_status", "validator_status"))
+        if ($validatorStatus -notin $passingStatuses) {
+            throw "APPLY blocked: validator status is not passing for transition $CurrentState -> $TargetState."
+        }
+    }
+
+    if ($TargetState -eq "complete") {
+        $proofStatus = [string](Get-AiOsPacketField -Packet $Packet -Names @("proof_status", "proof_gate_status"))
+        if (-not [string]::IsNullOrWhiteSpace($proofStatus) -and $proofStatus -notin $passingStatuses) {
+            throw "APPLY blocked: proof status is not passing for completion."
+        }
+    }
+}
+
 Write-Host ("COPY START " + [char]0x2014 + " Move-AiOsPacketState.ps1")
 Write-Host "AI_OS Packet State Transition" -ForegroundColor Cyan
 Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
@@ -63,6 +157,10 @@ Write-Host "Worker: $Worker"
 
 if ($allowedTransitions[$currentState] -notcontains $TargetState) {
     throw "Illegal transition: $currentState -> $TargetState"
+}
+
+if ($Apply) {
+    Assert-AiOsApplyGate -Packet $packet -CurrentState $currentState -TargetState $TargetState
 }
 
 $utcNow = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")

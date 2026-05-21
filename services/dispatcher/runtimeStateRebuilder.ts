@@ -68,11 +68,14 @@ export function rebuildDispatcherState(
         break;
 
       case "blocked":
+      case "failed":
         blockedPackets.push(packet.packetId);
         break;
 
       case "applied":
       case "dry_run":
+      case "completed":
+      case "rolled_back":
         appliedPackets.push(packet.packetId);
         break;
     }

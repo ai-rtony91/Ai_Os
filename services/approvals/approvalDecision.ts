@@ -13,6 +13,10 @@ export function applyApprovalDecision(
   decision: ApprovalDecision
 ): ApprovalRequest {
   if (request.approvalId !== decision.approvalId) {
+    request.status = "rejected";
+    request.decidedAt = decision.decidedAt;
+    request.decision = "Approval decision mismatch";
+
     writeTelemetryEvent(
       "packet_blocked",
       "approval_decision",
@@ -25,34 +29,26 @@ export function applyApprovalDecision(
       }
     );
 
-    return {
-      ...request,
-      status: "rejected",
-      decidedAt: decision.decidedAt,
-      decision: "Approval decision mismatch"
-    };
+    return { ...request };
   }
 
-  const updatedRequest: ApprovalRequest = {
-    ...request,
-    status: decision.approved ? "approved" : "rejected",
-    decidedAt: decision.decidedAt,
-    decision: decision.reason ?? null
-  };
+  request.status = decision.approved ? "approved" : "rejected";
+  request.decidedAt = decision.decidedAt;
+  request.decision = decision.reason ?? null;
 
   writeTelemetryEvent(
     "approval_decided",
     "approval_decision",
-    `Approval ${updatedRequest.status} for ${request.packetId}`,
+    `Approval ${request.status} for ${request.packetId}`,
     {
       packetId: request.packetId,
       approvalId: request.approvalId,
-      status: updatedRequest.status,
+      status: request.status,
       risk: request.risk
     }
   );
 
-  return updatedRequest;
+  return { ...request };
 }
 
 export function isApprovalGranted(request: ApprovalRequest): boolean {

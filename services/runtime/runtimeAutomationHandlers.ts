@@ -3,6 +3,8 @@ import { generateRemediationPlan } from "./autonomousRemediation";
 import type { SupervisorReport } from "../supervisor/runtimeSupervisor";
 import type { BackpressureDecision } from "./runtimeBackpressure";
 
+let handlersRegistered = false;
+
 function createEmptySupervisorReport(): SupervisorReport {
   const generatedAt = new Date().toISOString();
 
@@ -22,6 +24,12 @@ function createEmptySupervisorReport(): SupervisorReport {
 }
 
 export function registerRuntimeAutomationHandlers(): void {
+  if (handlersRegistered) {
+    return;
+  }
+
+  handlersRegistered = true;
+
   runtimeEventBus.subscribe("policy_decision", (event: RuntimeEvent<any>) => {
     console.log(`[AUTOMATION] Policy decision for packet ${event.payload.packetId || "N/A"}: allowed=${event.payload.status}, reason=${event.payload.reason}`);
     if (event.payload.status === "denied" || event.payload.requiresApproval) {

@@ -17,6 +17,11 @@ export function routePacketApproval(packet: WorkPacket) {
     targetFiles: packet.allowedFiles,
     commandPreview: null,
     rollbackRef: "git restore <target-files>",
+    rollbackPrepared: true,
+    executionLimits: {
+      maxRetries: 0,
+      maxExecutions: 1
+    },
     requestedAt: new Date().toISOString(),
     decidedAt: null,
     decision: null
