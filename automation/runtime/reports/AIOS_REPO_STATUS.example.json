@@ -1,0 +1,30 @@
+{
+  "schema": "aios_repo_status_report.v1",
+  "generated_utc": "2026-05-17T00:00:00Z",
+  "WHERE_WE_ARE": {
+    "branch": "main",
+    "repo_clean": false,
+    "runtime_health": "WARNING",
+    "runtime_state_path": "automation/runtime/state/AIOS_RUNTIME_STATE.json"
+  },
+  "WHAT_CHANGED": [
+    "M automation/runtime/state/AIOS_RUNTIME_STATE.json"
+  ],
+  "ACTIVE_PACKETS": [
+    {
+      "file": "automation/orchestration/work_packets/active/example.packet.json",
+      "packet_id": "example",
+      "status": "active",
+      "goal": "Generate operator repo status reports automatically."
+    }
+  ],
+  "BLOCKERS": [
+    "Working tree has changes."
+  ],
+  "NEXT_COMMAND": "powershell -ExecutionPolicy Bypass -File automation/runtime/recommendation/Get-AiOsNextCommand.ps1",
+  "AUTOMATION_CANDIDATES": [
+    "Create a recurring DRY_RUN repo status report packet."
+  ],
+  "commit_performed": "NO",
+  "push_performed": "NO"
+}

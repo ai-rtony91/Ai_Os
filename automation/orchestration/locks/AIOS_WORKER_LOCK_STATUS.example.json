@@ -1,0 +1,18 @@
+{
+  "schema": "aios_worker_lock_status.v1",
+  "mode": "DRY_RUN_READ_ONLY",
+  "generated_utc": "2026-05-17T00:00:00Z",
+  "locks": [
+    {
+      "worker_id": "codex-worker-01",
+      "claimed_packet": "packet-001",
+      "claimed_paths": [
+        "automation/orchestration/commit_packages/"
+      ],
+      "lock_status": "active",
+      "stale_lock_warning": "NO"
+    }
+  ],
+  "commit_performed": "NO",
+  "push_performed": "NO"
+}

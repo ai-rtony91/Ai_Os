@@ -1,0 +1,102 @@
+{
+  "schema": "aios_packet_state_rules.v1",
+  "mode": "DRY_RUN_READ_ONLY",
+  "target_states": [
+    "draft",
+    "routed",
+    "validation_ready",
+    "approval_ready",
+    "commit_ready",
+    "blocked",
+    "complete"
+  ],
+  "legacy_state_mapping": {
+    "active": "draft",
+    "new": "draft",
+    "dry_run_done": "validation_ready",
+    "validated": "validation_ready",
+    "awaiting_approval": "approval_ready",
+    "approved": "commit_ready",
+    "applying": "commit_ready",
+    "failed": "blocked"
+  },
+  "transition_rules": [
+    {
+      "from": "draft",
+      "to": "routed",
+      "required_signals": [
+        "packet_id",
+        "title_or_intent",
+        "owner_lane",
+        "repo",
+        "branch"
+      ]
+    },
+    {
+      "from": "routed",
+      "to": "validation_ready",
+      "required_signals": [
+        "validator_recommendation",
+        "no_blocked_by_entries"
+      ]
+    },
+    {
+      "from": "validation_ready",
+      "to": "approval_ready",
+      "required_signals": [
+        "validator_recommendation",
+        "approval_required_no",
+        "no_risky_files"
+      ]
+    },
+    {
+      "from": "approval_ready",
+      "to": "commit_ready",
+      "required_signals": [
+        "approved_action_for_packet_or_operator_approval",
+        "approved_source_files",
+        "no_blocked_actions"
+      ]
+    },
+    {
+      "from": "commit_ready",
+      "to": "complete",
+      "required_signals": [
+        "final_git_status_reviewed",
+        "commit_or_closeout_reported",
+        "no_risky_files"
+      ]
+    },
+    {
+      "from": "blocked",
+      "to": "routed",
+      "required_signals": [
+        "blocker_cleared",
+        "no_stale_lock_warning",
+        "next_safe_command_available"
+      ]
+    }
+  ],
+  "blocker_signals": [
+    "json_parse_failure",
+    "missing_required_packet_fields",
+    "blocked_by_entries",
+    "risky_files",
+    "approval_blocked_or_rejected",
+    "stale_lock_warning",
+    "dashboard_broker_trading_secret_or_startup_path"
+  ],
+  "blocked_actions": [
+    "packet_mutation",
+    "Move-AiOsPacketState.ps1 execution",
+    "git_add",
+    "commit",
+    "push",
+    "delete",
+    "dashboard_work",
+    "broker_trading_execution",
+    "scheduled_tasks",
+    "startup_task_changes",
+    "secrets"
+  ]
+}

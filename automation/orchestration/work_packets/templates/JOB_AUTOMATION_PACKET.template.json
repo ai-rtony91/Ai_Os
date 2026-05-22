@@ -1,0 +1,20 @@
+{
+  "schema": "aios_job_packet.v1",
+  "packet_id": "",
+  "created_utc": "",
+  "status": "draft",
+  "goal": "",
+  "trigger": "",
+  "inputs": [],
+  "manual_steps_to_replace": [],
+  "allowed_actions": [],
+  "blocked_actions": [
+    "no_secrets",
+    "no_live_trading",
+    "no_external_send_without_approval",
+    "no_delete_without_approval"
+  ],
+  "requires_approval_for": [],
+  "expected_output": "",
+  "next_recommended_command": ""
+}

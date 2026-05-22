@@ -1,0 +1,126 @@
+{
+  "schema": "aios.telemetry_registry.v1",
+  "generatedAt": "2026-05-21T00:00:00Z",
+  "mode": "DRY_RUN",
+  "repo": "ai-rtony91/Ai_Os",
+  "branch": "v2/aios",
+  "registryRoot": "Reports/telemetry/",
+  "objects": [
+    {
+      "type": "ledger",
+      "description": "Append-safe tabular record of workflow, evidence, validation, or progress events.",
+      "authorityRole": "supporting_telemetry"
+    },
+    {
+      "type": "snapshot",
+      "description": "Point-in-time metadata summary for repo, evidence, workflow, or worker state.",
+      "authorityRole": "supporting_telemetry"
+    },
+    {
+      "type": "session_correlation",
+      "description": "Metadata link between sessions, tasks, workers, snapshots, evidence counts, and git state.",
+      "authorityRole": "supporting_telemetry"
+    },
+    {
+      "type": "evidence_intake",
+      "description": "Metadata-only intake record for supporting evidence files.",
+      "authorityRole": "supporting_material"
+    },
+    {
+      "type": "script",
+      "description": "Telemetry helper script with declared mode and validation requirements.",
+      "authorityRole": "tooling"
+    },
+    {
+      "type": "registry",
+      "description": "Index of telemetry object types, categories, validations, retention, and relationships.",
+      "authorityRole": "supporting_index"
+    },
+    {
+      "type": "heatmap_source",
+      "description": "Metadata source approved for future aggregate activity metrics.",
+      "authorityRole": "supporting_telemetry"
+    },
+    {
+      "type": "replay_source",
+      "description": "Metadata source approved for future session replay without evidence content reads.",
+      "authorityRole": "supporting_telemetry"
+    }
+  ],
+  "categories": [
+    {
+      "name": "daily_snapshots",
+      "path": "Reports/telemetry/daily_snapshots/",
+      "objectTypes": [
+        "snapshot"
+      ]
+    },
+    {
+      "name": "session_archives",
+      "path": "Reports/telemetry/session_archives/",
+      "objectTypes": [
+        "evidence_intake",
+        "session_correlation",
+        "replay_source"
+      ]
+    },
+    {
+      "name": "telemetry_scripts",
+      "path": "automation/telemetry/",
+      "objectTypes": [
+        "script"
+      ]
+    },
+    {
+      "name": "future_heatmaps",
+      "path": "Reports/telemetry/",
+      "objectTypes": [
+        "heatmap_source"
+      ]
+    }
+  ],
+  "validation": {
+    "json": [
+      "Get-Content -Raw \"Reports/telemetry/TELEMETRY_REGISTRY.example.json\" | ConvertFrom-Json | Out-Null"
+    ],
+    "repoHygiene": [
+      "git diff --check",
+      "git status --short --branch"
+    ],
+    "safety": [
+      "No evidence content reading",
+      "No OCR",
+      "No URL opening",
+      "No recursive scanning",
+      "No broker, OANDA, live trading, webhook, or real-order access"
+    ]
+  },
+  "retention": {
+    "activeTelemetry": {
+      "path": "Reports/telemetry/",
+      "strategy": "Keep current telemetry indexes and daily snapshots available for operator review."
+    },
+    "archives": {
+      "path": "Reports/telemetry/session_archives/",
+      "strategy": "Archive by date and session only after a separate approved APPLY task."
+    },
+    "evidence": {
+      "strategy": "Treat evidence as supporting material only, never authority."
+    }
+  },
+  "relationships": {
+    "replaySources": [
+      "session_correlation",
+      "snapshot",
+      "evidence_intake",
+      "ledger"
+    ],
+    "heatmapSources": [
+      "snapshot",
+      "ledger",
+      "script",
+      "session_correlation"
+    ]
+  },
+  "nextSafeAction": "Validate the registry JSON, review the diff, then approve a selective commit only if the scaffold is accepted."
+}

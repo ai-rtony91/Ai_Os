@@ -1,0 +1,37 @@
+{
+  "schema": "aios_operator_session_bootstrap.v1",
+  "mode": "DRY_RUN_READ_ONLY",
+  "generated_utc": "2026-05-17T00:00:00Z",
+  "branch": "phase-76-operator-session-bootstrap",
+  "active_packet": {
+    "packet_id": "packet-001",
+    "packet_status": "active",
+    "file": "automation/orchestration/work_packets/active/packet-001.json",
+    "summary": "Continue AIOS operator loop work."
+  },
+  "next_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
+  "queue_runner_summary": {
+    "packet_status": "active",
+    "next_recommended_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
+    "codex_handoff_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/handoff/New-AiOsCodexHandoff.DRY_RUN.ps1"
+  },
+  "codex_handoff_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/handoff/New-AiOsCodexHandoff.DRY_RUN.ps1",
+  "validator_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1",
+  "commit_package_command": "powershell -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+  "commit_package_summary": {
+    "approved_source_files": [
+      "automation/orchestration/session/Start-AiOsOperatorSession.DRY_RUN.ps1"
+    ],
+    "ignored_runtime_files": [
+      "automation/orchestration/work_packets/active/example.json"
+    ],
+    "risky_files": []
+  },
+  "stop_conditions": [
+    "Stop if any output asks for APPLY without explicit operator approval.",
+    "Stop before git add, commit, or push unless the operator provides exact commands."
+  ],
+  "exact_next_safe_action": "powershell -ExecutionPolicy Bypass -File automation/orchestration/queue_runner/Invoke-AiOsOperatorQueueRunner.DRY_RUN.ps1",
+  "commit_performed": "NO",
+  "push_performed": "NO"
+}
