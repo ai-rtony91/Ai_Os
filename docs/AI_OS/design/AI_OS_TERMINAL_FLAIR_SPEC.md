@@ -1,5 +1,4 @@
 ﻿+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # AI_OS Terminal Flair and Visual Language Spec
 
 ## Purpose
@@ -50,10 +49,9 @@ The design must improve safety clarity, not obscure it.
 
 Major operator-facing text blocks should begin with a start marker.
 
-The marker uses two rows of plus signs:
+The marker uses one row of plus signs across the block:
 
 ```text
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ```
 
@@ -68,7 +66,7 @@ Marker color guidance:
 - Use either the active theme accent or the shared Dark Tan / Bronze marker color when color is available.
 - Shared marker color: Dark Tan / Bronze #B08A57.
 - The marker color is a visual boundary cue, not a fifth active UI color.
-- Plain text fallback is the two plus-sign rows with no color.
+- Plain text fallback is the one plus-sign row with no color.
 
 Rules:
 - The marker must appear at the very beginning of the block.
@@ -82,7 +80,6 @@ Rules:
 Example:
 
 ```text
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
 â•‘  CODEX PROMPT  â—†  TERMINAL FLAIR RULE                    â•‘
