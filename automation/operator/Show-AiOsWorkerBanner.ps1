@@ -28,7 +28,7 @@ Set-StrictMode -Off
 $ts   = Get-Date -Format "yyyy-MM-dd HH:mm"
 $repo = try { (Resolve-Path ".").Path } catch { "UNKNOWN" }
 
-try { $Host.UI.RawUI.WindowTitle = "AI_OS | $Worker | $Mode | $Status" } catch {}
+try { $Host.UI.RawUI.WindowTitle = "$Worker | $Mode | $Status" } catch {}
 
 # Separator for capability lists — built from [char] to avoid UTF-8/codepage mismatch
 $d = " $([char]0x00B7) "
