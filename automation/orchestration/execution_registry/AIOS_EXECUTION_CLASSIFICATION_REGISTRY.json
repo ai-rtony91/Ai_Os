@@ -2562,6 +2562,36 @@
       "next_safe_action": "Keep DRY_RUN routing-preview only."
     },
     {
+      "path": "automation/orchestration/workers/Test-AiOsWorkerSelfAwareness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only worker self-awareness preflight for identity, lane, scope, lock, stale-state, and protected-path risk.",
+      "owner_area": "automation/orchestration/workers",
+      "execution_mode": "DRY_RUN_READ_ONLY",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_status_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "worker_preflight"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "status_mutation",
+        "trading_execution"
+      ],
+      "risk_policy_notes": "Output is evidence only and cannot approve APPLY, worker launch, runtime mutation, commit, push, or protected actions.",
+      "topology_guard_requirement": "May be run before worker task execution; must not launch lanes.",
+      "validator_consumption": "May be consumed as read-only worker preflight evidence.",
+      "review_status": "active_after_apply_if_validated",
+      "next_safe_action": "Keep read-only and use as preflight evidence before worker escalation."
+    },
+    {
       "path": "automation/orchestration/adapters/Test-AiOsPacketNormalization.DRY_RUN.ps1",
       "classification": "HELPER",
       "purpose": "Validate packet normalization behavior in DRY_RUN mode.",
