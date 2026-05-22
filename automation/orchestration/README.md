@@ -57,6 +57,18 @@ Legacy root fallback examples were archived after canonical paths became the pre
 
 Status and display scripts may still mention those filenames as optional compatibility labels, but canonical paths above are the active source of truth.
 
+## Local-First Orchestration Primitives
+
+Append-only ledgers, runtime logs, and telemetry artifacts are evidence/audit records only and are not command authority.
+
+`approval_inbox` and `APPLY_APPROVAL_GATE_001.json` remain the APPLY authority checkpoint.
+
+Validator-chain output is evidence and validation guidance only; validators do not grant APPLY authority.
+
+Worker registry, worker profiles, lock registry, lane status, and path-conflict policy remain worker-boundary enforcement mechanisms.
+
+Canonical orchestration event schema and state projection authority are still unresolved consolidation work and must not be invented ad hoc.
+
 ## Safe Use
 
 Run the clean-state gate before assigning work:
