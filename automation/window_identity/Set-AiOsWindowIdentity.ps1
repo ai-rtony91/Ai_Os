@@ -32,8 +32,28 @@ function Get-AiOsPropertyValue {
 function Get-AiOsDisplayTitle {
     param([Parameter(Mandatory = $true)]$Identity)
 
-    $emoji = "$($Identity.emoji)".Trim()
     $title = "$($Identity.title)".Trim()
+    $fallbackTitle = "$(Get-AiOsPropertyValue -Object $Identity -Name 'fallbackTitle')".Trim()
+    $emojiCodePoint = "$(Get-AiOsPropertyValue -Object $Identity -Name 'emojiCodePoint')".Trim()
+
+    if (-not [string]::IsNullOrWhiteSpace($emojiCodePoint)) {
+        try {
+            $codePoint = if ($emojiCodePoint.StartsWith('0x', [System.StringComparison]::OrdinalIgnoreCase)) {
+                [Convert]::ToInt32($emojiCodePoint.Substring(2), 16)
+            } else {
+                [Convert]::ToInt32($emojiCodePoint, 10)
+            }
+
+            $emoji = [System.Char]::ConvertFromUtf32($codePoint)
+            return "$emoji $title"
+        } catch {
+            if (-not [string]::IsNullOrWhiteSpace($fallbackTitle)) {
+                return $fallbackTitle
+            }
+        }
+    }
+
+    $emoji = "$(Get-AiOsPropertyValue -Object $Identity -Name 'emoji')".Trim()
 
     if ([string]::IsNullOrWhiteSpace($emoji)) {
         return $title
@@ -115,7 +135,17 @@ if (-not $identity) {
 }
 
 $windowTitle = Get-AiOsDisplayTitle -Identity $identity
-$Host.UI.RawUI.WindowTitle = $windowTitle
+try {
+    $Host.UI.RawUI.WindowTitle = $windowTitle
+    [Console]::Title = $windowTitle
+} catch {
+    $fallbackTitle = "$(Get-AiOsPropertyValue -Object $identity -Name 'fallbackTitle')".Trim()
+    if (-not [string]::IsNullOrWhiteSpace($fallbackTitle)) {
+        $Host.UI.RawUI.WindowTitle = $fallbackTitle
+    } else {
+        throw
+    }
+}
 
 $bannerWidth = Get-AiOsMarkerWidth -Identity $identity
 $divider = '=' * $bannerWidth

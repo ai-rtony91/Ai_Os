@@ -2,12 +2,14 @@
   "workers": [
     {
       "marker": "AI_OS MAIN CONTROL",
-      "title": "\uD83E\uDDD1\u200D\uD83D\uDCBB CREW OPERATOR",
+      "title": "MAIN CONTROL | OPERATOR",
+      "emojiCodePoint": "0x1F451",
+      "fallbackTitle": "MAIN CONTROL | OPERATOR | DAILY",
       "color": "Cyan",
       "theme": "midnight-main-control",
-      "identityBanner": "[CREW] CREW OPERATOR :: ONLINE",
-      "beginMarker": "[CREW] CREW OPERATOR :: BEGIN",
-      "endMarker": "[CREW] CREW OPERATOR :: END OF CHAT ",
+      "identityBanner": "[MAIN CONTROL] MAIN CONTROL | OPERATOR :: ONLINE",
+      "beginMarker": "[MAIN CONTROL] MAIN CONTROL | OPERATOR :: BEGIN",
+      "endMarker": "[MAIN CONTROL] MAIN CONTROL | OPERATOR :: END OF CHAT ",
       "endMarkerFill": "=",
       "endMarkerWidth": 120,
       "role": "Primary operator terminal for runtime spine commands, human direction, and final coordination.",
