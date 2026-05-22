@@ -170,6 +170,7 @@ Every work session should end with:
 | `AGENTS.md` | Required behavior rules for Codex and AI coding workers |
 | `docs/governance/` | Source-of-truth maps, ownership, doctrine, file placement rules |
 | `docs/workflows/` | Operator workflows, resume flow, APPLY routing, branch/lane rules |
+| `docs/AI_OS/design/` | Visual language specs for terminal flair, worker HUDs, and operator-facing command presentation |
 | `docs/security/` | Security posture, approval model, secret prevention, access boundaries |
 | `docs/architecture/` | Durable system architecture and long-term AI_OS vision |
 | `docs/audits/` | Inspection history, cleanup decisions, active system maps |

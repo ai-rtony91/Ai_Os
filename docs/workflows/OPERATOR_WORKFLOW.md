@@ -142,6 +142,8 @@ Do not mix destructive or armed commands into inspection flows. Remote branch de
 
 When the operator says "make that a rule," treat it as a request to identify the correct AI_OS instruction source and propose or apply the smallest safe repo update. Do not preserve durable operator rules as chat memory only.
 
+For emoji labels, PowerShell paste markers, worker HUD fields, and terminal/window flair rules, follow `docs/AI_OS/design/AI_OS_TERMINAL_FLAIR_SPEC.md`.
+
 Do not assume the operator remembers lane names. Use the current V2 lane title or role from active topology and avoid stale legacy lane names.
 
 If the same manual workaround must be explained repeatedly, prefer fixing or documenting the responsible script or workflow so the operator does not carry that burden manually.

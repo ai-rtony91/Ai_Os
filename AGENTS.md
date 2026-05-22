@@ -298,6 +298,8 @@ Suggested signal vocabulary:
 - `COMMIT / RECORDKEEPING`
 - `STOP POINT`
 
+Operator-facing terminal flair, emoji labels, PowerShell paste markers, worker HUD fields, and terminal/window visual language must follow `docs/AI_OS/design/AI_OS_TERMINAL_FLAIR_SPEC.md`.
+
 ## AI_OS Daily Operating Rules
 
 1. Start every day from one source of truth:
