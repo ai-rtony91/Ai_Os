@@ -32,7 +32,7 @@ Append each block into the `"profiles"` → `"list"` array.
     "name": "AIOS-MAIN-CONTROL",
     "colorScheme": "AIOS-Dark-Cyan",
     "tabTitle": "AI_OS | MAIN CONTROL | DRY_RUN",
-    "startingDirectory": "%USERPROFILE%\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "startingDirectory": "C:\\Dev\\Ai.Os",
     "commandline": "powershell.exe -NoExit -ExecutionPolicy Bypass -File automation\\operator\\Show-AiOsWorkerBanner.ps1 -Worker \"AI_OS MAIN CONTROL\" -Mode DRY_RUN"
 }
 ```
@@ -45,7 +45,7 @@ Append each block into the `"profiles"` → `"list"` array.
     "name": "AIOS-CODEX-BUILD",
     "colorScheme": "AIOS-Dark-Blue",
     "tabTitle": "AI_OS | CODEX BUILD LANE | DRY_RUN",
-    "startingDirectory": "%USERPROFILE%\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "startingDirectory": "C:\\Dev\\Ai.Os",
     "commandline": "powershell.exe -NoExit -ExecutionPolicy Bypass -File automation\\operator\\Show-AiOsWorkerBanner.ps1 -Worker \"CODEX BUILD LANE\" -Mode DRY_RUN"
 }
 ```
@@ -58,7 +58,7 @@ Append each block into the `"profiles"` → `"list"` array.
     "name": "AIOS-CLAUDE-REVIEWER",
     "colorScheme": "AIOS-Dark-Magenta",
     "tabTitle": "AI_OS | CLAUDE REVIEWER | DRY_RUN",
-    "startingDirectory": "%USERPROFILE%\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "startingDirectory": "C:\\Dev\\Ai.Os",
     "commandline": "powershell.exe -NoExit -ExecutionPolicy Bypass -File automation\\operator\\Show-AiOsWorkerBanner.ps1 -Worker \"CLAUDE REVIEWER\" -Mode DRY_RUN"
 }
 ```
@@ -71,7 +71,7 @@ Append each block into the `"profiles"` → `"list"` array.
     "name": "AIOS-VALIDATOR",
     "colorScheme": "AIOS-Dark-Amber",
     "tabTitle": "AI_OS | VALIDATOR WORKER | DRY_RUN",
-    "startingDirectory": "%USERPROFILE%\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "startingDirectory": "C:\\Dev\\Ai.Os",
     "commandline": "powershell.exe -NoExit -ExecutionPolicy Bypass -File automation\\operator\\Show-AiOsWorkerBanner.ps1 -Worker \"VALIDATOR WORKER\" -Mode DRY_RUN"
 }
 ```
@@ -84,7 +84,7 @@ Append each block into the `"profiles"` → `"list"` array.
     "name": "AIOS-APPROVAL-INBOX",
     "colorScheme": "AIOS-Dark-Green",
     "tabTitle": "AI_OS | APPROVAL INBOX | DRY_RUN",
-    "startingDirectory": "%USERPROFILE%\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "startingDirectory": "C:\\Dev\\Ai.Os",
     "commandline": "powershell.exe -NoExit -ExecutionPolicy Bypass -File automation\\operator\\Show-AiOsWorkerBanner.ps1 -Worker \"APPROVAL INBOX\" -Mode DRY_RUN"
 }
 ```

@@ -4,7 +4,7 @@
   "mode": "DRY_RUN",
   "repo": "ai-rtony91/Ai_Os",
   "branch": "v2/aios",
-  "workingFolder": "C:\\Users\\mylab\\OneDrive\\GitHub\\AI_OS_V2",
+  "workingFolder": "C:\\Dev\\Ai.Os",
   "validatedPaths": [
     "Reports/telemetry/",
     "automation/telemetry/"

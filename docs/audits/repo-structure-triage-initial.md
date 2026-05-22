@@ -1,7 +1,7 @@
-﻿# AI_OS Repo Structure Triage - Initial Findings
+# AI_OS Repo Structure Triage - Initial Findings
 
 ## Current Control Repo
-C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+C:\Dev\Ai.Os
 
 ## Current Branch
 phase-82-copy-paste-reduction-runner

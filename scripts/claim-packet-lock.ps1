@@ -1,9 +1,9 @@
-﻿param(
+param(
     [string]$PacketId = "dispatcher-runtime",
     [string]$WorkerId = "WORKER-1"
 )
 
-$Root = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Root = "C:\Dev\Ai.Os"
 $LockDir = Join-Path $Root "automation\orchestration\locks"
 
 New-Item -ItemType Directory -Force -Path $LockDir | Out-Null

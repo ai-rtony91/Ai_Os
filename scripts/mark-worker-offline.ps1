@@ -1,8 +1,8 @@
-﻿param(
+param(
     [string]$WorkerId = "WORKER-1"
 )
 
-$Root = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Root = "C:\Dev\Ai.Os"
 $WorkerDir = Join-Path $Root "automation\orchestration\workers"
 $HeartbeatPath = Join-Path $WorkerDir "$WorkerId-heartbeat.json"
 

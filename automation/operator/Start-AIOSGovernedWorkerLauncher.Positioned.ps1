@@ -8,7 +8,7 @@ public class Win32 {
 }
 "@
 
-$Repo = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Repo = "C:\Dev\Ai.Os"
 
 if (!(Test-Path $Repo)) {
     Write-Host "BLOCKED: Canonical repo path missing." -ForegroundColor Red

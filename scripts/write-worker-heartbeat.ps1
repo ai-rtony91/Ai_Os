@@ -4,7 +4,7 @@
     [string]$Packet = "none"
 )
 
-$Root = "C:\Dev\Ai-Os"
+$Root = "C:\Dev\Ai.Os"
 $WorkerDir = Join-Path $Root "automation\orchestration\workers"
 
 New-Item -ItemType Directory -Force -Path $WorkerDir | Out-Null

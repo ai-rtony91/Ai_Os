@@ -99,7 +99,7 @@ Promote as a concise quality-gate subsection:
 ### What NOT To Copy
 
 - Do not copy the standard chain as mandatory push/commit sequence. V2 separates commit and push approval.
-- Do not copy `Active repo: C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN`.
+- Do not copy `Active repo: C:\Dev\Ai.Os`.
 - Do not copy CLEAN-era repo identity.
 - Do not copy wording that implies all work must proceed to commit/push.
 

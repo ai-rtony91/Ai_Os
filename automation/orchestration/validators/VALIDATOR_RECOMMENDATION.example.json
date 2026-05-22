@@ -3,7 +3,7 @@
   "task": "Recommend AI_OS validators from changed files",
   "mode": "DRY_RUN",
   "generated_at": "2026-05-19T00:00:00Z",
-  "repo_root": "C:/Users/mylab/OneDrive/GitHub/ai-rtony91_Ai_Os_CLEAN",
+  "repo_root": "C:/Dev/Ai.Os",
   "result": "REVIEW",
   "summary": {
     "changed_file_count": 2,

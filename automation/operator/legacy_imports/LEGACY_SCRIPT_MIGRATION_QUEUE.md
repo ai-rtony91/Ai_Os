@@ -15,7 +15,7 @@ Migration Rules:
 - No direct production deployment.
 - All migrated scripts must support DRY_RUN-first workflow.
 - Canonical repo path only:
-  C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+  C:\Dev\Ai.Os
 
 Planned Categories:
 - workspace_profiles

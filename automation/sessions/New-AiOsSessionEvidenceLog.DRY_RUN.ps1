@@ -1,5 +1,5 @@
 param(
-    [string]$RepoRoot = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN',
+    [string]$RepoRoot = 'C:\Dev\Ai.Os',
     [string]$SessionType = 'AI_OS_WORK_SESSION',
     [string]$Stage = 'STAGE9D',
     [string]$Mode = 'DRY_RUN',

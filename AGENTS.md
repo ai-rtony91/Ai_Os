@@ -28,8 +28,10 @@ Current identity:
 
 - GitHub repo: `ai-rtony91/Ai_Os`
 - Active branch: `main`
-- Current local folder: `C:\Dev\Ai-Os`
-- Legacy inactive local folder: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+- Current local folder: `C:\Dev\Ai.Os`
+- Legacy inactive local folders:
+  - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
+  - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
 
 Future desired naming is not active yet:
 
@@ -68,7 +70,7 @@ Live broker execution is blocked.
 Active repo path:
 
 ```text
-C:\Dev\Ai-Os
+C:\Dev\Ai.Os
 ```
 
 Active branch:
@@ -80,7 +82,7 @@ main
 Legacy inactive path:
 
 ```text
-C:\Users\mylab\OneDrive\GitHub\AI_OS_V2
+C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE
 ```
 
 The legacy OneDrive path must not be used for active repo work. It is backup/reference only until the operator explicitly deletes it. Any worker that starts under the OneDrive path must STOP and report before running Git, Codex, merge, push, startup, or automation commands.
@@ -96,7 +98,7 @@ git remote -v
 
 Expected state:
 
-- path: `C:\Dev\Ai-Os`
+- path: `C:\Dev\Ai.Os`
 - branch: `main`
 - status: clean and synced with `origin/main`
 
@@ -251,7 +253,7 @@ Required behavior:
 Temporary worktree cleanup standard:
 
 ```powershell
-Set-Location C:\Dev\Ai-Os
+Set-Location C:\Dev\Ai.Os
 git worktree list
 git worktree prune
 Remove-Item -LiteralPath C:\Dev\<TEMP_WORKTREE_NAME> -Recurse -Force -ErrorAction SilentlyContinue
@@ -299,7 +301,7 @@ Good:
 10. Morning startup command:
 
     ```powershell
-    cd "C:\Dev\Ai-Os"
+    cd "C:\Dev\Ai.Os"
     git status --short --branch
     ```
 
@@ -830,9 +832,11 @@ Active rule file for Codex and AI coding agents.
 
 ## Local Folder Role Rules
 
-- **ACTIVE_REPO:** `C:\Dev\Ai-Os`
+- **ACTIVE_REPO:** `C:\Dev\Ai.Os`
   Use this only for active AI_OS GitHub/Codex/local repo work on branch `main`.
-- **LEGACY_INACTIVE_REPO:** `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+- **LEGACY_INACTIVE_REPO:** `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
+  Backup/reference only. Workers must STOP if `pwd` resolves under this path and must not perform repo operations from it.
+- **LEGACY_INACTIVE_REPO:** `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
   Backup/reference only. Workers must STOP if `pwd` resolves under this path and must not perform repo operations from it.
 - **PROJECT_ARCHIVE:** `C:\Users\mylab\OneDrive\AI-OS-Project`  
   Use this for OneDrive archive, reports, notes, and non-Git working storage.

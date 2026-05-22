@@ -21,7 +21,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$expectedRepoRoot = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN'
+$expectedRepoRoot = 'C:\Dev\Ai.Os'
 $csvColumns = @(
     'date',
     'timestamp',

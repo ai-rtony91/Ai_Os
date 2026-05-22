@@ -50,7 +50,7 @@ The exact next safe action is printed before the operator starts work.
 
 Each launcher:
 
-- sets repo path to `C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN`
+- sets repo path to `C:\Dev\Ai.Os`
 - sets a clean window title
 - prints a clear banner
 - prints copy/paste markers:

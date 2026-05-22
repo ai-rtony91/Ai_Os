@@ -1,5 +1,5 @@
 param(
-    [string]$RepoRoot = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN',
+    [string]$RepoRoot = 'C:\Dev\Ai.Os',
     [string]$CurrentStage = 'STAGE9D_CHECKPOINT_DRAFT',
     [string]$CompletedItems = 'Session evidence and checkpoint helper draft proposed.',
     [string]$ChangedFilesPlaceholder = 'REVIEW_GIT_STATUS_OUTPUT',

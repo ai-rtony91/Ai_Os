@@ -9,7 +9,7 @@ The marker script only changes the current terminal title and prints a banner. I
 From the repo root:
 
 ```powershell
-cd C:\Dev\Ai-Os
+cd C:\Dev\Ai.Os
 powershell -ExecutionPolicy Bypass -File automation/window_identity/Set-AiOsWindowIdentity.ps1 -Marker "AI_OS MAIN CONTROL"
 ```
 

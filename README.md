@@ -10,8 +10,10 @@ Trading Lab is the first production vertical. It is paper-only. Live broker exec
 
 - GitHub repo: `ai-rtony91/Ai_Os`
 - Active branch: `main`
-- Active repo path: `C:\Dev\Ai-Os`
-- Legacy inactive path: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+- Active repo path: `C:\Dev\Ai.Os`
+- Legacy inactive paths:
+  - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
+  - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
 - Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, and paper-only Trading Lab
 - Operating model: Phase -> Stage -> Workload Pack -> Task ID -> DRY_RUN/APPLY -> validation -> selective commit
 - Commit/push rule: never commit or push unless explicitly approved
@@ -21,7 +23,7 @@ Trading Lab is the first production vertical. It is paper-only. Live broker exec
 Active repo path:
 
 ```text
-C:\Dev\Ai-Os
+C:\Dev\Ai.Os
 ```
 
 Active branch:
@@ -33,7 +35,7 @@ main
 Legacy inactive path:
 
 ```text
-C:\Users\mylab\OneDrive\GitHub\AI_OS_V2
+C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE
 ```
 
 The legacy OneDrive path must not be used for active repo work. It is backup/reference only until the operator explicitly deletes it. Any worker that starts under the OneDrive path must STOP and report before running Git, Codex, merge, push, startup, or automation commands.
@@ -49,7 +51,7 @@ git remote -v
 
 Expected state:
 
-- path: `C:\Dev\Ai-Os`
+- path: `C:\Dev\Ai.Os`
 - branch: `main`
 - status: clean and synced with `origin/main`
 
@@ -61,8 +63,10 @@ Current identity:
 
 - GitHub repo: `ai-rtony91/Ai_Os`
 - Active branch: `main`
-- Current local folder: `C:\Dev\Ai-Os`
-- Legacy inactive local folder: `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`
+- Current local folder: `C:\Dev\Ai.Os`
+- Legacy inactive local folders:
+  - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
+  - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
 
 Future desired naming is not active yet:
 

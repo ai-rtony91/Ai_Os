@@ -1,7 +1,7 @@
 # AIOS_PROJECT_ASSUMPTIONS_AND_DEFAULTS
 
 ## DEFAULT REPOSITORY
-C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+C:\Dev\Ai.Os
 
 ## DEFAULT EXECUTION MODE
 DRY_RUN unless explicitly approved otherwise.

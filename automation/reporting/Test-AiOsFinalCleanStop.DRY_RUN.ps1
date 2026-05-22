@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$RepoRoot = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN'
+    [string]$RepoRoot = 'C:\Dev\Ai.Os'
 )
 
 $ErrorActionPreference = 'Stop'

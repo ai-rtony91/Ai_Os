@@ -2,7 +2,7 @@ param(
     [string]$Profile = "CODEX_08"
 )
 
-$Repo = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Repo = "C:\Dev\Ai.Os"
 
 $Profiles = @{
     "CODEX_06" = "automation\operator\layout_profiles\CODEX_06_GRID_3440x1440.json"

@@ -4,7 +4,7 @@
 Minimal packet for restoring AI_OS continuity in a new ChatGPT session without relying on saved assistant memory.
 
 ## ACTIVE REPO
-C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+C:\Dev\Ai.Os
 
 ## CORE RULES
 - DRY_RUN first unless APPLY is explicitly approved.

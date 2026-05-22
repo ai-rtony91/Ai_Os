@@ -1,4 +1,4 @@
-﻿param(
+param(
     [string]$RegistryPath = "automation/orchestration/terminal_workstations/AIOS_WORKTREE_LANE_REGISTRY.json",
     [string]$SessionExamplePath = "automation/orchestration/terminal_workstations/AIOS_SESSION_STATE.example.json",
     [string]$CheckpointExamplePath = "automation/orchestration/terminal_workstations/AIOS_WORKSPACE_CHECKPOINT.example.json",
@@ -335,7 +335,7 @@ if (@($registry.lanes)[0].lane_id -ne "main_control") {
     throw "CONTROL lane must be leftmost in registry."
 }
 
-if (@($registry.lanes)[0].path -ne "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN") {
+if (@($registry.lanes)[0].path -ne "C:\Dev\Ai.Os") {
     throw "CONTROL lane path must remain fixed root."
 }
 

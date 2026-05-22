@@ -200,7 +200,7 @@ confirm that the worker considered and cleared them.
 ─────────────────────────────────────────────────────────────────────
 [2] SCOPE DECLARATION
 
-  Files in scope:    C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN\
+  Files in scope:    C:\Dev\Ai.Os\
   Files out of scope: C:\Users\mylab\OneDrive\AI-OS-Project\TradingEngineV1\
   Protected:         Root files, AGENTS.md, secrets, credentials
   Escalation path:   This worker → ChatGPT-Architect → User (Tony)

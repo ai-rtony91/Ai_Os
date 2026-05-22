@@ -7,7 +7,7 @@
     "command": "codex",
     "arguments": [
       "--cd",
-      "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN"
+      "C:\\Dev\\Ai.Os"
     ],
     "fallback_to_instruction_window": true,
     "prompt_argument_name": "UNKNOWN"

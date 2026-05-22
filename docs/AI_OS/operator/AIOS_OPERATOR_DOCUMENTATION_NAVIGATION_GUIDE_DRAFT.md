@@ -11,7 +11,7 @@
 This beginner-readable guide helps the operator find AI_OS documentation without changing files manually.
 
 Repo root:
-`C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN`
+`C:\Dev\Ai.Os`
 
 No protected root files are edited by this guide. Human approval is required before any APPLY promotion or protected edit. This guide creates no live automation.
 

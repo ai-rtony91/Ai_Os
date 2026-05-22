@@ -1,7 +1,7 @@
 {
   "purpose": "AI_OS worker window layout presets for Windows Terminal.",
   "safe_default_preset": "compact",
-  "repo_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "repo_path": "C:\\Dev\\Ai.Os",
   "identity_script": "automation/window_identity/Set-AiOsWindowIdentity.ps1",
   "mode": {
     "default": "DRY_RUN",

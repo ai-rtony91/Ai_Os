@@ -9,7 +9,7 @@ The launcher is DRY_RUN by default. It prints the Windows Terminal commands firs
 From the repo root:
 
 ```powershell
-cd C:\Dev\Ai-Os
+cd C:\Dev\Ai.Os
 powershell -ExecutionPolicy Bypass -File automation/window_identity/Open-AiOsWorkerWindowLayout.ps1 -Preset compact -Apply
 ```
 
@@ -32,7 +32,7 @@ powershell -ExecutionPolicy Bypass -File automation/window_identity/Open-AiOsWor
 Each spawned worker changes into:
 
 ```text
-C:\Dev\Ai-Os
+C:\Dev\Ai.Os
 ```
 
 Each worker runs:

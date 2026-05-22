@@ -1,7 +1,7 @@
 {
   "schema": "aios.morning_execution_packet.v1",
   "session_date": "2026-05-13",
-  "repo_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "repo_path": "C:\\Dev\\Ai.Os",
   "current_phase": "PHASE-44",
   "active_objective": "Apply the Operator Workflow Automation scaffold for morning packets, APPLY routing, session resume, and read-only orchestration guidance.",
   "approved_scope": [

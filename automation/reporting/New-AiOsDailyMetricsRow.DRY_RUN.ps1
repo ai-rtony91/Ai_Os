@@ -1,5 +1,5 @@
 param(
-    [string]$RepoRoot = 'C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN',
+    [string]$RepoRoot = 'C:\Dev\Ai.Os',
     [int]$ProgressPercent = 50,
     [string]$Mode = 'DRY_RUN',
     [string]$Notes = 'DRY_RUN proposed daily metrics row only.'

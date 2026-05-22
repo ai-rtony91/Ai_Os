@@ -3,7 +3,7 @@
   "supervisor_name": "phase_16_41_55_aios_supervisor_core_example",
   "mode": "DRY_RUN",
   "purpose": "Example read-only supervisor state for watching repo, GitHub, worker lanes, queue, validators, stale state, and next safe action.",
-  "repo_root": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "repo_root": "C:\\Dev\\Ai.Os",
   "worker_lanes": [
     {
       "lane_id": "COMMAND_DECK",

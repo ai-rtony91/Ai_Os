@@ -286,7 +286,7 @@ Active rule file for Codex and AI coding agents.
 
 ## Local Folder Role Rules
 
-- **ACTIVE_REPO:** `C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN`  
+- **ACTIVE_REPO:** `C:\Dev\Ai.Os`
   Use this only for AI_OS GitHub/Codex/local repo work.
 - **PROJECT_ARCHIVE:** `C:\Users\mylab\OneDrive\AI-OS-Project`  
   Use this for OneDrive archive, reports, notes, and non-Git working storage.

@@ -2,7 +2,7 @@
 # Purpose: launch named PowerShell worker windows inside canonical AI_OS repo.
 # Safety: no commits, no pushes, no deploys, no broker, no live trading.
 
-$Repo = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Repo = "C:\Dev\Ai.Os"
 
 if (!(Test-Path $Repo)) {
     Write-Host "BLOCKED: Canonical repo path not found." -ForegroundColor Red

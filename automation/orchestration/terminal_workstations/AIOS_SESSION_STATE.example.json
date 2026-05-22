@@ -1,4 +1,4 @@
-﻿{
+{
     "session_id":  "AIOS_SESSION_STATE_EXAMPLE",
     "version":  "2.0",
     "saved_at":  "2026-05-16T00:00:00.0000000-04:00",
@@ -19,7 +19,7 @@
                                  "display_title":  "CONTROL · main",
                                  "window_title":  "CONTROL · main",
                                  "tab_title":  "CONTROL · main",
-                                 "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+                                 "path":  "C:\\Dev\\Ai.Os",
                                  "branch":  "main",
                                  "role":  "Main operator lane for repo control, review, PR review, merge approval, and final checkpoint.",
                                  "emoji_marker":  "🟦",
@@ -98,7 +98,7 @@
                       "display_title":  "CONTROL · main",
                       "window_title":  "CONTROL · main",
                       "tab_title":  "CONTROL · main",
-                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+                      "path":  "C:\\Dev\\Ai.Os",
                       "branch":  "main",
                       "role":  "Main operator lane for repo control, review, PR review, merge approval, and final checkpoint.",
                       "emoji_marker":  "🟦",

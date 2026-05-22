@@ -1,4 +1,4 @@
-﻿{
+{
     "checkpoint_id":  "AIOS_WORKSPACE_CHECKPOINT_EXAMPLE",
     "created_at":  "2026-05-16T00:00:00.0000000-04:00",
     "active_workspace":  "aios-worker-intent-router",
@@ -14,7 +14,7 @@
                       "tab_title":  "CONTROL · main",
                       "emoji_marker":  "🟦",
                       "role":  "Main operator lane for repo control, review, PR review, merge approval, and final checkpoint.",
-                      "path":  "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+                      "path":  "C:\\Dev\\Ai.Os",
                       "branch":  "main",
                       "truth_source":  "path_and_branch"
                   },

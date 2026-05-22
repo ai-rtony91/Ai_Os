@@ -4,7 +4,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$RepoRoot = "C:\Dev\Ai-Os"
+$RepoRoot = "C:\Dev\Ai.Os"
 $PresetPath = Join-Path $RepoRoot "automation\windows_workstation\presets\$Preset.json"
 $IdentityScript = Join-Path $RepoRoot "automation\window_identity\Set-AiOsWindowIdentity.ps1"
 

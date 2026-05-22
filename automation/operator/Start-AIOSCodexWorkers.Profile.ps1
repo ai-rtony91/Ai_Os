@@ -2,7 +2,7 @@ param(
     [string]$Profile = "LEFT_VERTICAL"
 )
 
-$Repo = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Repo = "C:\Dev\Ai.Os"
 
 $Profiles = @{
     "LEFT_VERTICAL" = "automation\operator\layout_profiles\CODEX_4_WORKER_LEFT_VERTICAL_STACK_3440x1440.json"

@@ -48,4 +48,4 @@ Defines Codex orchestration standards, execution boundaries, and workflow sequen
 
 ## REPOSITORY STANDARD
 Active repo:
-C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+C:\Dev\Ai.Os

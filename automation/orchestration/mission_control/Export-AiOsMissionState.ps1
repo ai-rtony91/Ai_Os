@@ -1,7 +1,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-$repoRoot = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$repoRoot = "C:\Dev\Ai.Os"
 $supervisorRulesPath = Join-Path $repoRoot "automation\orchestration\supervisor\aios_supervision_rules.example.json"
 
 function Invoke-Capture {

@@ -1,8 +1,8 @@
-﻿param(
+param(
     [string]$PacketId = "telemetry-validator"
 )
 
-$Root = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Root = "C:\Dev\Ai.Os"
 $LockDir = Join-Path $Root "automation\orchestration\locks"
 $LockPath = Join-Path $LockDir "$PacketId.lock.json"
 

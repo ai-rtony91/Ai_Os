@@ -7,7 +7,7 @@
   "next_safe_action": "Use Ai_Os COMMAND DECK to choose the next approved phase or PR action.",
   "reason": "No blocking local condition is visible.",
   "repo_state": {
-    "repo_root": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+    "repo_root": "C:\\Dev\\Ai.Os",
     "branch": "phase-111-150-aios-operations-stack",
     "clean": true,
     "changed_files": 0,

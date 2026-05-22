@@ -4,10 +4,10 @@
 Beginner-safe quickstart for continuing AI_OS work.
 
 ## DEFAULT REPO
-C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+C:\Dev\Ai.Os
 
 ## FIRST POWERSHELL CHECK
-Set-Location "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+Set-Location "C:\Dev\Ai.Os"
 git status --short --branch
 
 ## NORMAL WORKFLOW

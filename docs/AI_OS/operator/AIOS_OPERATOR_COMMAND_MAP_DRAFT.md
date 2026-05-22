@@ -72,7 +72,7 @@ Stop and require a separate approval before asking Codex to create files, edit f
 Use PowerShell to run approved DRY_RUN commands from the active repo path:
 
 ```powershell
-C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+C:\Dev\Ai.Os
 ```
 
 Use PowerShell output as evidence for the next decision.

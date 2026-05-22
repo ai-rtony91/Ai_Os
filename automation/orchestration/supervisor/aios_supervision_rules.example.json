@@ -3,7 +3,7 @@
   "ruleset_name": "phase_16_56_70_active_supervision_routing_example",
   "mode": "READ_ONLY_OPERATOR_ROUTING",
   "purpose": "Example active supervision rules for repo risk, lane routing, validation routing, stale-state visibility, and exact next safe action display.",
-  "repo_root": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+  "repo_root": "C:\\Dev\\Ai.Os",
   "risk_levels": [
     {
       "level": "SAFE",

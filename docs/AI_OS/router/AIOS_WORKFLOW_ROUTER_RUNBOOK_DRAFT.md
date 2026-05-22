@@ -15,7 +15,7 @@ Router output is evidence only unless later saved by an approved reporting helpe
 All commands in this runbook must be run from:
 
 ```powershell
-C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+C:\Dev\Ai.Os
 ```
 
 Stop if PowerShell is not in that folder.

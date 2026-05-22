@@ -1,11 +1,11 @@
-﻿param(
+param(
     [string]$WorkerId = "WORKER-1",
     [string]$Role = "Shell",
     [string]$Packet = "none",
     [int]$IntervalSeconds = 15
 )
 
-$Root = "C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN"
+$Root = "C:\Dev\Ai.Os"
 $WorkerDir = Join-Path $Root "automation\orchestration\workers"
 
 New-Item -ItemType Directory -Force -Path $WorkerDir | Out-Null

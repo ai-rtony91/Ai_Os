@@ -19,7 +19,7 @@
       "worker_id": "main_control",
       "display_title": "CONTROL \u00b7 main",
       "worker_type": "control",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "main",
       "owns_paths": [],
       "blocked_paths": [
@@ -330,7 +330,7 @@
       "worker_id": "forex_sim_codex",
       "display_title": "FOREX SIM \u00b7 codex",
       "worker_type": "manual_codex_profile_only",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "main",
       "owns_paths": [
         "apps/trading_lab/",
@@ -359,7 +359,7 @@
       "worker_id": "risk_codex",
       "display_title": "RISK \u00b7 codex",
       "worker_type": "manual_codex_profile_only",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "main",
       "owns_paths": [
         "RISK_POLICY.md",
@@ -388,7 +388,7 @@
       "worker_id": "strategy_codex",
       "display_title": "STRATEGY \u00b7 codex",
       "worker_type": "manual_codex_profile_only",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "main",
       "owns_paths": [
         "docs/trading_lab/strategy/",

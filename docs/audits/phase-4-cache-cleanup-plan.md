@@ -85,7 +85,7 @@ Stop if:
 - `apps/dashboard/package.json` is missing.
 - `apps/dashboard/package-lock.json` is missing and the user does not approve reinstall risk.
 - `git status --short` shows unexpected changes outside planning docs.
-- Any command points outside `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2`.
+- Any command points outside `C:\Dev\Ai.Os`.
 
 ## Exact proposed cleanup commands
 
