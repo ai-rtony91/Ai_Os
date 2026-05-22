@@ -235,6 +235,197 @@ The start marker may use the active theme accent or the shared Dark Tan / Bronze
 
 The four theme colors still stay clean. The Dark Tan / Bronze marker is like tape on the floor: it marks the boundary of an important block, but it is not part of the active theme palette.
 
+Bezel panels use the existing palette. They do not introduce a new theme color.
+Use contrast, spacing, and placement to create screen depth instead of adding extra colors.
+
+## Bezel Panel Rule
+
+A bezel is an inner frame or rim around an important information area, like the frame around a monitor, instrument cluster, phone screen, cockpit display, or watch face.
+
+In AI_OS terminal HUDs, a bezel panel is used to make important text feel intentionally mounted inside the dashboard instead of floating loosely in the terminal.
+
+The bezel creates:
+
+- visual boundary
+- readable grouping
+- depth
+- separation from the outer frame
+- operator focus
+- command-center feel
+
+The bezel must support safety clarity. It must never become messy decoration.
+
+### HUD Layering Model
+
+AI_OS terminal HUDs should use a layered screen model:
+
+1. Terminal background - plain black or midnight base; lowest visual layer.
+2. Outer frame - main dashboard shell; defines the full HUD boundary.
+3. Bezel frame - inner rim around important information; separates status content from the outer frame.
+4. Status plate - darker or contrasting text background area; holds high-value readable fields.
+5. Accent/state text - clean, synced, warning, blocked, or destructive labels; colored only where status meaning matters.
+6. Mascot/character - optional; never more important than status text.
+
+### When To Use A Bezel Panel
+
+Use bezel panels around grouped high-value information:
+
+- repo path
+- worktree
+- branch
+- sync status
+- remote
+- lane
+- worker
+- mode
+- stop rule
+- safety state
+- inbox summary
+- open PR count
+- pending feature lanes
+- approval gate status
+- validator status
+
+Do not use bezel panels around every paragraph.
+
+### When Not To Use A Bezel Panel
+
+Do not add a bezel panel when:
+
+- the terminal is too narrow
+- the panel causes wrapping
+- the panel hides critical text
+- the panel makes output harder to copy
+- the output is a simple command result
+- the content is a long log
+- the section is temporary/debug output
+- the decoration distracts from safety status
+
+### Bezel Color Guidance
+
+Use the existing four-color theme rule.
+
+Recommended mapping:
+
+- Terminal background: Midnight base
+- Outer frame: Midnight base or secondary dark tone
+- Bezel border: Accent color or soft steel/cyan edge
+- Status plate background: Secondary dark tone
+- Main text: Readable text tone
+- State accents:
+  - clean/synced: green
+  - review/pending: amber
+  - blocked/destructive: red
+  - inspect/read-only: blue/cyan
+
+The bezel should contrast enough to be visible, but not glow so hard that it steals focus.
+
+### Bezel Shape Guidance
+
+Preferred:
+
+- one clean rectangular inner frame
+- short labels aligned left
+- values aligned after labels
+- status words spaced with readable separators
+
+Avoid:
+
+- too many nested boxes
+- broken borders
+- wide ASCII art that wraps
+- emoji inside border math
+- long dynamic strings that push the right edge out
+
+### Text Plate Layout
+
+Preferred text plate style:
+
+```text
+PATH    C:\Dev\Ai.Os
+BRANCH  main  >>  CLEAN  >>  SYNCED
+REMOTE  ai-rtony91/Ai_Os
+```
+
+Rules:
+
+- labels should be short and uppercase
+- values should be readable
+- status words should be visually distinct
+- the plate should still make sense with no color
+- do not rely on color alone for meaning
+
+### Bezel Safety Rule
+
+Safety state wins over aesthetics.
+
+If a bezel panel makes a STOP, BLOCKED, DESTRUCTIVE, or REVIEW state harder to see, simplify the panel.
+
+For destructive actions:
+
+- use Safety Gate theme
+- use red accent
+- keep approval requirement plain text
+- do not hide destructive state inside art
+
+### Responsive Layout Rule
+
+Use different layout levels depending on terminal width:
+
+- Level 1 - narrow: no inner bezel; plain labeled rows only.
+- Level 2 - normal: one bezel around the primary status plate.
+- Level 3 - wide: two-panel HUD allowed; left status plate and right mascot/state plate.
+
+If wrapping occurs, downgrade one level.
+
+### Compact Bezel Example
+
+```text
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++ MAIN CONTROL | OPERATOR ------------------------------++
+|                                                        |
+|  +-- STATUS PLATE ----------------------------------+  |
+|  | PATH    C:\Dev\Ai.Os                            |  |
+|  | BRANCH  main  >>  CLEAN  >>  SYNCED             |  |
+|  | REMOTE  ai-rtony91/Ai_Os                        |  |
+|  | STOP    report only                             |  |
+|  +--------------------------------------------------+  |
+|                                                        |
++--------------------------------------------------------++
+```
+
+### Wide Two-Panel Bezel Example
+
+```text
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++ TERMINAL FLAIR GOVERNANCE ----------------------------++
+|                                                        |
+|  +-- STATUS PLATE ----------------+  +-- STATE ------+ |
+|  | LANE    Terminal Flair Gov     |  | [o_o]        | |
+|  | WORKER  CODEX                  |  | reading      | |
+|  | MODE    APPLY - docs only      |  | no runtime   | |
+|  | STOP    report only            |  | no push      | |
+|  +--------------------------------+  +--------------+ |
+|                                                        |
++--------------------------------------------------------++
+```
+
+### Safety Bezel Example
+
+```text
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++ SAFETY GATE | BLOCKED --------------------------------++
+|                                                        |
+|  +-- REQUIRED STOP ---------------------------------+  |
+|  | STATE   BLOCKED / DESTRUCTIVE                   |  |
+|  | ACTION  branch deletion                         |  |
+|  | NEEDS   explicit human approval                 |  |
+|  | NEXT    inspect >> report >> decide >> approve  |  |
+|  +--------------------------------------------------+  |
+|                                                        |
++--------------------------------------------------------++
+```
+
 ## Midnight Themes
 
 ### Theme A - Midnight Indigo / Steel
@@ -292,10 +483,18 @@ Rules:
 - If the mascot causes wrapping, remove or simplify it.
 - Mascot must never hide commands or imply approval.
 - If emoji causes encoding problems, use ASCII mascot states only.
+- Mascot may sit inside its own small bezel in wide layouts.
+- Mascot panel should include state text such as reading, blocked, done, or error.
+- Mascot must not compete with safety state.
 
 ## Compact HUD Layout
 
 Use compact HUDs in docs, chat examples, or narrow terminals.
+
+Use bezel panels for grouped status text only when terminal width supports it.
+If the box wraps, remove the inner bezel before removing critical status fields.
+Do not place emoji where it affects border alignment.
+Prefer ASCII mascot states like [o_o] inside narrow fixed-width panels.
 
 Example:
 
@@ -318,6 +517,12 @@ Example:
 ## Wide HUD Layout
 
 Use wide HUDs only in real terminal windows with enough width.
+
+Wide layouts may use two panels: a left status plate and a right mascot/state plate.
+Use bezel panels for grouped status text only when terminal width supports it.
+If the box wraps, remove the inner bezel before removing critical status fields.
+Do not place emoji where it affects border alignment.
+Prefer ASCII mascot states like [o_o] inside fixed-width panels.
 
 Example:
 
