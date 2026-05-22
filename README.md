@@ -217,7 +217,7 @@ AI_OS workers are controlled contributors. A worker should know:
 - expected output
 - stop condition
 
-Codex workers must read `AGENTS.md` first. They should not create new docs when an existing canonical file owns the topic. They should not edit the same file tree as another worker. Main control owns merge and push approval.
+Codex workers must read `AGENTS.md` first. They should not create new docs when an existing canonical file owns the topic. They should not edit the same file tree as another worker. Main control owns merge and push approval. Workers must also follow the `AGENTS.md` Operator Efficiency and Modern CLI-First Workflow Rule: prefer the simplest safe local CLI path, distinguish Git state from filesystem/process locks, and avoid browser workflows when CLI can complete the work safely.
 
 ## Branch Philosophy
 

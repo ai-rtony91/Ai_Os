@@ -216,6 +216,58 @@ Codex prompts and execution plans must include:
 Global principle:
 Optimize for the operator's actual workflow, not the agent's assumed technical model of the system. The correct solution is the smallest safe change that produces the operator-visible result without creating unnecessary tools, cleanup, repo changes, tray icons, commands, or cognitive load.
 
+## Operator Efficiency and Modern CLI-First Workflow Rule
+
+AI workers must prefer the simplest safe operator path, avoid outdated or overcomplicated methods, and avoid redirecting the operator to slower browser workflows when a safe local CLI path exists.
+
+Required behavior:
+
+1. Prefer the simplest safe path.
+   AI workers must continually reassess whether a task has become simpler than the original plan. Do not keep applying old methods after the state changes.
+
+2. Do not confuse Git state with filesystem/process-lock state.
+   For temporary worktrees:
+   - Use `git worktree list` to determine whether Git still tracks a worktree.
+   - If Git no longer lists the worktree, stop using `git worktree remove`.
+   - Treat remaining folder deletion as plain Windows filesystem cleanup.
+   - Close any Codex, terminal, or Explorer process holding the folder.
+   - Run `git worktree prune` once.
+   - Remove leftover folders with `Remove-Item -LiteralPath <path> -Recurse -Force`.
+   - Verify with `Test-Path <path>`.
+   - Do not repeatedly retry failed Git worktree removal when the folder is locked by Windows.
+
+3. Use CLI before browser.
+   When Git/GitHub operations can be performed safely through Git CLI or GitHub CLI, prefer CLI over sending the operator to the GitHub web browser. Use the browser only when CLI cannot complete the task, authentication/permissions require browser approval, the operator explicitly asks for browser steps, or visual PR review is specifically needed.
+
+4. Treat operator friction as a safety concern.
+   Do not create unnecessary operator work. Avoid long command chains when one safe command block is enough. Prefer concise, verifiable commands and clear stop points.
+
+5. Give parallel workers cleanup plans.
+   Using multiple Codex workers/worktrees is allowed when scoped. Every temporary worktree task must include a unique worktree path, no push/no commit unless approved, a cleanup plan, verification commands, and a rule to close worker sessions before folder deletion.
+
+6. Learn from completed state.
+   If verification shows the target condition is already achieved, stop. Do not keep issuing redundant commands.
+
+Temporary worktree cleanup standard:
+
+```powershell
+Set-Location C:\Dev\Ai-Os
+git worktree list
+git worktree prune
+Remove-Item -LiteralPath C:\Dev\<TEMP_WORKTREE_NAME> -Recurse -Force -ErrorAction SilentlyContinue
+Test-Path C:\Dev\<TEMP_WORKTREE_NAME>
+git worktree list
+git status --short --branch
+```
+
+Failure example:
+
+Bad:
+- Git no longer lists a worktree, but the assistant keeps recommending `git worktree remove`.
+
+Good:
+- Git no longer lists the worktree, so close processes holding the folder, run `git worktree prune`, remove the leftover folder with `Remove-Item`, and verify with `Test-Path`.
+
 ## AI_OS Daily Operating Rules
 
 1. Start every day from one source of truth:
