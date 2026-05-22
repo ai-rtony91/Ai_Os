@@ -238,6 +238,240 @@ The four theme colors still stay clean. The Dark Tan / Bronze marker is like tap
 Bezel panels use the existing palette. They do not introduce a new theme color.
 Use contrast, spacing, and placement to create screen depth instead of adding extra colors.
 
+## Semantic Color Routing Rule
+
+Every operator-facing AI_OS block must declare or infer its semantic state before choosing a color.
+
+Color is state routing, not decoration.
+
+A section's border, header, and background plate should communicate the highest attention state inside that section.
+
+### Semantic States
+
+#### NEUTRAL / NOTE / EXPLANATION
+
+Purpose:
+
+- normal explanation
+- context
+- summary
+- stable values
+- what this means
+
+Foreground:
+
+- white / gray
+
+Background plate:
+
+- charcoal / dark gray
+
+Rules:
+
+- must not look like a command
+- must not steal attention from warnings or success
+- use for plain notes and explanations
+
+#### ACTION / INSPECT / COMMAND
+
+Purpose:
+
+- pasteable commands
+- Codex prompts
+- read-only inspection
+- discovery
+- operator action blocks
+
+Foreground:
+
+- blue / cyan
+
+Background plate:
+
+- dark navy / charcoal blue
+
+Rules:
+
+- should be obvious as actionable
+- not the same as success
+- examples: PASTE INTO POWERSHELL, CODEX PROMPT, INSPECT ONLY
+
+#### SUCCESS / CLEAN / GOOD
+
+Purpose:
+
+- clean repo
+- synced
+- pass
+- none
+- done
+- safe
+- approved
+
+Foreground:
+
+- lime green / forest green / foliage
+
+Background plate:
+
+- dark forest green
+
+Rules:
+
+- use only for confirmed good states
+- do not use green for a panel if unresolved amber or red state exists inside it
+
+#### REVIEW / CAUTION / PENDING
+
+Purpose:
+
+- pending
+- dirty
+- stale
+- uncertain
+- partial success
+- needs review
+- needs decision
+
+Foreground:
+
+- amber / yellow
+
+Background plate:
+
+- dark bronze / dark amber
+
+Rules:
+
+- use when operator attention is needed
+- not dangerous enough for red
+- beats green in mixed-state panels
+
+#### STOP / BLOCKED / DESTRUCTIVE / FAIL
+
+Purpose:
+
+- destructive actions
+- blocked state
+- failed validation
+- merge conflict
+- approval gates
+- do not proceed
+
+Foreground:
+
+- red
+
+Background plate:
+
+- dark maroon / dark red
+
+Rules:
+
+- highest priority
+- must be visually dominant
+- commands must not be hidden inside the same block as inspection
+- destructive actions require explicit approval flow
+
+### Highest-Attention Panel State Priority
+
+When a panel or section contains mixed states, route the panel border/header/background to the highest attention state present:
+
+```text
+RED > AMBER > GREEN > BLUE > NEUTRAL
+```
+
+Examples:
+
+- Inbox has NONE, SYNCED, and 2 PENDING -> panel state is AMBER.
+- Repo has CLEAN and SYNCED only -> panel state is GREEN.
+- Any destructive/delete/blocked action -> panel state is RED.
+- A command/paste section with no risk -> panel state is BLUE.
+- A plain explanation -> panel state is NEUTRAL.
+
+## Complementary Dark Background Plate Rule
+
+Semantic panels should use a subtle complementary dark background when the terminal supports it.
+
+Background color is not the same as the status accent. It is a darker supporting plate behind the text.
+
+Recommended background mapping:
+
+- ACTION / INSPECT / COMMAND: dark navy / charcoal blue plate
+- SUCCESS / CLEAN / GOOD: dark forest plate
+- REVIEW / CAUTION / PENDING: dark bronze / dark amber plate
+- STOP / BLOCKED / DESTRUCTIVE: dark maroon / dark red plate
+- NEUTRAL / NOTE: charcoal / dark gray plate
+
+Rules:
+
+- foreground text must remain readable
+- do not use bright full-panel backgrounds
+- do not let background color bleed into the prompt line
+- if PowerShell background colors make spacing ugly, prefer foreground-only borders and document the limitation
+- background fill is allowed for status plates and section headers, not every paragraph
+- panel border still routes to the highest attention state
+- panel background should support the state without overpowering the text
+- background color must not be used as the only signal; labels and state words must remain explicit
+
+## Main Control HUD Semantic Mapping
+
+Rules:
+
+- title/header: blue/white identity
+- repo panel: green when clean/synced
+- repo panel: amber when dirty/ahead/behind
+- inbox panel: green only when all rows are clear
+- inbox panel: amber when open PRs or feature lanes are pending
+- future blocked/destructive panel: red
+- labels: cyan
+- normal values: white/gray
+- individual status words: semantic colors
+
+Panel examples:
+
+- Repo panel with CLEAN + SYNCED -> green border/header/background plate
+- Repo panel with DIRTY or AHEAD/BEHIND -> amber border/header/background plate
+- Inbox panel with NONE + SYNCED + no pending lanes -> green panel
+- Inbox panel with 2 PENDING -> amber panel
+
+Important prohibition:
+
+A green panel must not contain unresolved amber or red state. If any row inside a panel is pending, dirty, stale, or needs review, the panel escalates to amber. If any row is blocked, destructive, or failed, the panel escalates to red.
+
+## Assistant and Codex Prompt Semantic Mapping
+
+Rules:
+
+- PASTE INTO POWERSHELL: blue/cyan action panel
+- CODEX PROMPT: blue/cyan action panel
+- INSPECT ONLY: blue/cyan action panel
+- SUCCESS LOOKS LIKE: green success panel
+- REVIEW FIRST / PENDING / DECISION / CAUTION: amber review panel
+- STOP / BLOCKED / DESTRUCTIVE: red safety panel
+- notes, explanations, and summaries: neutral white/gray text
+- do not wrap every paragraph in the same color
+- separate semantic sections should have separate visual identity
+- command blocks must stay visually distinct from notes
+- notes must not look like commands
+
+## Semantic Color Routing Rollout
+
+Recommended rollout:
+
+1. Docs authority first: define semantic color and background plate rules.
+2. Local Main Control HUD second: apply panel-state routing and optional background plate toggle.
+3. Tracked launcher/template third: promote the proven local behavior into repo-owned source.
+
+For the local HUD phase:
+
+- add a red palette variable
+- compute repo panel state
+- compute inbox panel state
+- route panel border/header/background by highest attention state
+- add a toggle such as `$UsePanelBackground = $true`
+- if background fill makes PowerShell output ugly, turn it off and keep semantic borders/headers
+
 ## Bezel Panel Rule
 
 A bezel is an inner frame or rim around an important information area, like the frame around a monitor, instrument cluster, phone screen, cockpit display, or watch face.
