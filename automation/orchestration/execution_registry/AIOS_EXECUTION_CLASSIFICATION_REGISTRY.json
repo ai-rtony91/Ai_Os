@@ -2293,6 +2293,302 @@
       "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
       "review_status": "safe_helper_expansion_static_review",
       "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/operator/Test-AiOsMissionJson.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate mission and queue JSON structure in DRY_RUN mode.",
+      "owner_area": "automation/operator",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Validation guard only. Output is evidence, not execution approval.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed as mission JSON validation evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Inspect approval inbox JSON and summarize approval state in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/approval_inbox",
+      "execution_mode": "read_only_inspection",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "approval_mutation",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Summary evidence only; does not approve APPLY. Printed command text is not execution authority.",
+      "topology_guard_requirement": "Not a launcher; approval processor remains separately governed.",
+      "validator_consumption": "May be consumed as read-only approval inbox evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep read-only and non-mutating."
+    },
+    {
+      "path": "automation/orchestration/control_summary/Get-AiOsControlSummary.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Summarize operator control state with read-only status checks.",
+      "owner_area": "automation/orchestration/control_summary",
+      "execution_mode": "read_only_summary",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_status_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Read-only control summary. Git use is limited to status-style evidence. Printed command text is not execution authority.",
+      "topology_guard_requirement": "Not a launcher; output cannot approve execution.",
+      "validator_consumption": "May be consumed as operator control summary evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep read-only."
+    },
+    {
+      "path": "automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate runtime health prerequisites in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/health",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_status_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "runtime_launch",
+        "runtime_mutation",
+        "commit",
+        "push",
+        "worker_launch",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Health validation only. Does not start runtime. Printed next command is not execution authority.",
+      "topology_guard_requirement": "Not a runtime launcher.",
+      "validator_consumption": "May be consumed as runtime health evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep DRY_RUN and non-launching."
+    },
+    {
+      "path": "automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Inspect packet state and recommend next step in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/next_step",
+      "execution_mode": "read_only_recommendation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "packet_mutation",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Recommendation only; does not move packet state.",
+      "topology_guard_requirement": "Not a launcher or state mover.",
+      "validator_consumption": "May be consumed as read-only next-step evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep read-only recommendation-only."
+    },
+    {
+      "path": "automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Combine DRY_RUN helper outputs into an operator action recommendation.",
+      "owner_area": "automation/orchestration/recommendations",
+      "execution_mode": "read_only_recommendation",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "recommended_command_execution",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Recommendation output is not approval and must not be auto-executed. Process launch is limited to governed DRY_RUN helper calls.",
+      "topology_guard_requirement": "Not a launcher; helper calls must remain DRY_RUN/read-only.",
+      "validator_consumption": "May be consumed as recommendation evidence only.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep recommendation-only."
+    },
+    {
+      "path": "automation/orchestration/work_packets/Get-AiOsPacketMetadataSyncRecommendation.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Inspect packet metadata and recommend metadata sync action without applying it.",
+      "owner_area": "automation/orchestration/work_packets",
+      "execution_mode": "read_only_recommendation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_branch_check",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "metadata_sync_apply",
+        "packet_mutation",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Recommendation only. Printed APPLY command is not approval.",
+      "topology_guard_requirement": "Not a packet mutator.",
+      "validator_consumption": "May be consumed as packet metadata review evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep read-only and recommendation-only."
+    },
+    {
+      "path": "automation/orchestration/work_packets/Get-AiOsPacketStateRecommendation.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Inspect packet state and recommend state transition without moving files.",
+      "owner_area": "automation/orchestration/work_packets",
+      "execution_mode": "read_only_recommendation",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": "read_only_status_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "packet_state_move",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Recommendation only. Printed state-move command is not approval. Process launch is limited to governed DRY_RUN helper calls.",
+      "topology_guard_requirement": "Not a packet state mover.",
+      "validator_consumption": "May be consumed as packet state recommendation evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep read-only and non-mutating."
+    },
+    {
+      "path": "automation/orchestration/work_packets/Route-AiOsWorkPacket.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Preview work packet routing recommendations in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/work_packets",
+      "execution_mode": "read_only_routing_preview",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "packet_mutation",
+        "worker_launch",
+        "runtime_mutation",
+        "commit",
+        "push",
+        "startup_launch"
+      ],
+      "risk_policy_notes": "Routing preview only; does not assign, move, or mutate packets.",
+      "topology_guard_requirement": "Not a worker launcher.",
+      "validator_consumption": "May be consumed as routing preview evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep DRY_RUN routing-preview only."
+    },
+    {
+      "path": "automation/orchestration/adapters/Test-AiOsPacketNormalization.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate packet normalization behavior in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/adapters",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "packet_mutation",
+        "auto_repair",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Validation guard only. Normalization output is evidence, not mutation approval. Process launch is limited to the governed DRY_RUN normalizer helper.",
+      "topology_guard_requirement": "Not a launcher; normalizer helper must remain DRY_RUN/read-only.",
+      "validator_consumption": "May be consumed as packet normalization validation evidence.",
+      "review_status": "approved_10_dry_run_registry_batch_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
     }
   ],
   "counts_by_classification_at_creation": {
