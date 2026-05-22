@@ -132,7 +132,15 @@ Before giving commands, state:
 - The visible tab, window, lane, or terminal role the operator should use.
 - The exact path or repo root expected for the command.
 
-When a command or output block is intended to be copied, wrap it with `COPY START` and `COPY END` markers when that helps the operator distinguish the copyable text from surrounding explanation.
+When a command block is intended to be copied into PowerShell, place the visual label `PASTE INTO POWERSHELL` above it and put the command itself inside a fenced code block. Keep emojis and visual signals outside the command text unless the command explicitly requires them.
+
+Plain notes, explanations, status examples, and success descriptions must stay outside command blocks. Do not make notes look like commands.
+
+Use short visual labels when they help the operator scan the workflow, such as `SUCCESS / CLEAN`, `REVIEW FIRST`, `STOP / BLOCKED / DESTRUCTIVE`, `INSPECT ONLY`, `CLEANUP`, `DECISION`, `CODEX PROMPT`, `COMMIT / RECORDKEEPING`, and `STOP POINT`.
+
+Do not mix destructive or armed commands into inspection flows. Remote branch deletion commands are destructive and require this sequence: inspect -> report -> decide -> explicit human approval -> deletion command in a separate step.
+
+When the operator says "make that a rule," treat it as a request to identify the correct AI_OS instruction source and propose or apply the smallest safe repo update. Do not preserve durable operator rules as chat memory only.
 
 Do not assume the operator remembers lane names. Use the current V2 lane title or role from active topology and avoid stale legacy lane names.
 

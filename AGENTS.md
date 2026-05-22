@@ -270,6 +270,34 @@ Bad:
 Good:
 - Git no longer lists the worktree, so close processes holding the folder, run `git worktree prune`, remove the leftover folder with `Remove-Item`, and verify with `Test-Path`.
 
+## Operator-Facing Response Formatting Rule
+
+When the operator says "make that a rule," AI workers must not treat it as chat memory only. They must identify the correct AI_OS repo location where the rule belongs, then propose or apply the smallest safe update to the active instruction source so the rule takes effect globally.
+
+Operator-facing commands and action blocks must be formatted for safe copy/paste use:
+
+- Use emoji visual signals above action blocks when they help the operator scan the next action.
+- Use `PASTE INTO POWERSHELL` above any command block intended to be copied into PowerShell.
+- Keep emojis outside actual commands unless explicitly required.
+- Keep plain notes plain. Notes, explanations, status examples, and success descriptions must stay outside command blocks.
+- Put commands inside fenced code blocks.
+- Do not make plain notes look like commands.
+- Do not mix destructive or armed commands into inspection flows.
+- Remote branch deletion commands are destructive and require this sequence: inspect -> report -> decide -> explicit human approval -> deletion command in a separate step.
+
+Suggested signal vocabulary:
+
+- `PASTE INTO POWERSHELL`
+- `SUCCESS / CLEAN`
+- `REVIEW FIRST`
+- `STOP / BLOCKED / DESTRUCTIVE`
+- `INSPECT ONLY`
+- `CLEANUP`
+- `DECISION`
+- `CODEX PROMPT`
+- `COMMIT / RECORDKEEPING`
+- `STOP POINT`
+
 ## AI_OS Daily Operating Rules
 
 1. Start every day from one source of truth:
