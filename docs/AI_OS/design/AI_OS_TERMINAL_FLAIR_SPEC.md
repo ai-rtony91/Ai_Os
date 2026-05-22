@@ -122,6 +122,30 @@ Plain notes, explanations, status examples, and success descriptions must stay o
 
 Do not make notes look like commands.
 
+## Unicode-Safe Emoji Title Rule
+
+Terminal tab titles may use emoji labels, but implementation must not depend on fragile raw emoji text.
+
+Rules:
+- Store or generate emoji labels using Unicode-safe code point handling when used in scripts, launchers, tab titles, or terminal profiles.
+- Provide plain-text fallback titles for every emoji title.
+- If an emoji renders as ??, falls back incorrectly, or breaks terminal title encoding, use the plain-text fallback.
+- Do not place emoji inside executable commands unless explicitly required.
+- Emoji in docs may remain visible as examples, but implementation should prefer code point mappings.
+
+Example code point map:
+- Crown / MAIN CONTROL: U+1F451
+- Robot / CODEX: U+1F916
+- Brain / CLAUDE: U+1F9E0
+- Red Circle / SAFETY GATE: U+1F534
+- Blue Circle / POWERSHELL ACTION: U+1F535
+- Green Circle / CLEAN: U+1F7E2
+- Yellow Circle / REVIEW: U+1F7E1
+- Broom / CLEANUP: U+1F9F9
+- Receipt / RECORDKEEPING: U+1F9FE
+- Eyes / INSPECT: U+1F440
+- Pushpin / STOP POINT: U+1F4CC
+
 ## Terminal Tab Title Convention
 
 Use this pattern:
@@ -132,12 +156,12 @@ Use this pattern:
 
 Examples:
 
-- ðŸ§­ MAIN CONTROL | OPERATOR | DAILY
-- ðŸ§© CODEX | READ ONLY | BRANCH AUDIT
-- ðŸŸ£ CLAUDE | REVIEW ONLY | ARCHITECTURE
-- ðŸ›‘ SAFETY GATE | BLOCKED | BRANCH DELETE
-- ðŸ§¹ CLEANUP | REVIEW FIRST | TEMP FILES
-- ðŸ“‹ POWERSHELL ACTION | APPLY | APPROVED COMMAND
+- 👑 MAIN CONTROL | OPERATOR | DAILY
+- 🤖 CODEX | READ ONLY | BRANCH AUDIT
+- 🧠 CLAUDE | REVIEW ONLY | ARCHITECTURE
+- 🔴 SAFETY GATE | BLOCKED | BRANCH DELETE
+- 🧹 CLEANUP | REVIEW FIRST | TEMP FILES
+- 🔵 POWERSHELL ACTION | APPLY | APPROVED COMMAND
 
 Plain text fallbacks:
 
@@ -152,17 +176,17 @@ Emoji code point reference for tab titles:
 
 | Emoji | Code point | Label | Plain fallback |
 |---|---:|---|---|
-| ðŸ§­ | U+1F9ED | MAIN CONTROL / DECISION | MAIN CONTROL |
-| ðŸ§© | U+1F9E9 | CODEX / CODEX PROMPT | CODEX |
-| ðŸŸ£ | U+1F7E3 | CLAUDE | CLAUDE |
-| ðŸ›‘ | U+1F6D1 | SAFETY GATE / STOP | SAFETY GATE |
-| ðŸ”Ž | U+1F50E | INSPECT | INSPECT |
-| ðŸ§¹ | U+1F9F9 | CLEANUP | CLEANUP |
-| ðŸ“ | U+1F4DD | RECORDKEEPING | RECORDKEEPING |
-| âœ… | U+2705 | CLEAN / SUCCESS | CLEAN |
-| âš ï¸ | U+26A0 U+FE0F | REVIEW FIRST | REVIEW FIRST |
-| ðŸ“‹ | U+1F4CB | PASTE INTO POWERSHELL | PASTE INTO POWERSHELL |
-| âš¡ | U+26A1 | POWERSHELL ACTION | POWERSHELL ACTION |
+| 👑 | U+1F451 | MAIN CONTROL | MAIN CONTROL |
+| 🤖 | U+1F916 | CODEX | CODEX |
+| 🧠 | U+1F9E0 | CLAUDE | CLAUDE |
+| 🔴 | U+1F534 | SAFETY GATE / STOP | SAFETY GATE |
+| 🔵 | U+1F535 | POWERSHELL ACTION | POWERSHELL ACTION |
+| 🟢 | U+1F7E2 | CLEAN / SUCCESS | CLEAN |
+| 🟡 | U+1F7E1 | REVIEW FIRST | REVIEW FIRST |
+| 🧹 | U+1F9F9 | CLEANUP | CLEANUP |
+| 🧾 | U+1F9FE | RECORDKEEPING | RECORDKEEPING |
+| 👀 | U+1F440 | INSPECT | INSPECT |
+| 📌 | U+1F4CC | STOP POINT | STOP POINT |
 
 ## Terminal Tab Color Convention
 
@@ -325,6 +349,8 @@ Safety Gate theme must be used when discussing destructive actions.
 ## Implementation Boundary
 
 This spec is design guidance only.
+
+Terminal title implementation must be done in a separate approved APPLY task. This spec only defines the naming, fallback, and Unicode-safety rules.
 
 Do not implement terminal rendering, tab color changes, launcher edits, runtime behavior, or worker banner output from this document without a separate approved APPLY task.
 
