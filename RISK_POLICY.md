@@ -173,4 +173,4 @@ Draft risk-control and governance matrices may inform future updates, but they d
 
 ## Last Verified
 
-Updated on 2026-05-21 for AI_OS V2 on branch `v2/aios`.
+Updated on 2026-05-22 for AI_OS V2 active repo authority on branch `main`.
