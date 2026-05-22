@@ -148,10 +148,19 @@ Example code point map:
 
 ## Terminal Tab Title Convention
 
+Working terminal titles should identify the role and purpose of the window, not repeat the project name.
+
+Rules:
+- Do not include AI_OS in active working terminal, tab, or window title strings.
+- Use role, mode, and lane or purpose instead.
+- Keep AI_OS in documentation titles, project names, repo paths, and normal repo references.
+- Automation and window matching should use stable plain-text role tokens, not emoji.
+- Emoji is optional display flair and must have a plain-text fallback.
+
 Use this pattern:
 
 ```text
-<emoji> <WORKER> | <MODE> | <LANE>
+<emoji> <ROLE> | <MODE> | <LANE>
 ```
 
 Examples:
