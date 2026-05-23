@@ -143,33 +143,102 @@ Example code point map:
 - Eyes / INSPECT: U+1F440
 - Pushpin / STOP POINT: U+1F4CC
 
-## Terminal Tab Title Convention
+## AI_OS Role Marker and Worker Window Title Standard
 
-Working terminal titles should identify the role and purpose of the window, not repeat the project name.
+Role markers, terminal titles, worker HUD labels, dashboard labels, and control-screen labels must use the same AI_OS role language.
+
+The role marker is an identity cue only. It does not grant authority, approve work, bypass safety gates, or change the worker's assigned lane.
+
+### Canonical Role Markers
+
+Use these role markers whenever an AI_OS worker, control surface, terminal window, dashboard panel, or handoff packet identifies an actor:
+
+| Actor | Canonical marker | Plain role | Authority |
+|---|---|---|---|
+| Operator | Operator - Commander | Commander / final authority | Final approval authority |
+| ChatGPT | ChatGPT - Orchestrator | Orchestrator / squad lead | Task shaping and coordination |
+| Claude | Claude - Inspector | Inspector / reviewer | Review, critique, instruction, risk inspection |
+| Codex | Codex - Engineer | Engineer / builder | Scoped repo implementation when assigned |
 
 Rules:
-- Do not include AI_OS in active working terminal, tab, or window title strings.
+- Use the canonical marker in documentation, dashboard labels, worker banners, and structured handoff packets.
+- Use the plain role when title width is limited.
+- Do not invent new primary role names for these actors without updating this standard.
+- Do not use a role marker to imply permission to stage, commit, push, merge, delete, move, rename, run automation, or bypass protected main.
+- If a worker changes purpose inside a lane, update the purpose portion of the title, not the actor role.
+
+### Window Title Pattern
+
+Use this title pattern for terminal windows, tabs, worker HUDs, and control-screen headings:
+
+```text
+<ACTOR> - <ROLE OR PURPOSE>
+```
+
+For task-specific Codex windows, keep `CODEX` as the actor and put the lane purpose after the separator.
+
+Canonical examples:
+
+- AI_OS MAIN CONTROL
+- CHATGPT - ORCHESTRATOR
+- CLAUDE - INSPECTOR
+- CODEX - ENGINEER
+- CODEX - PR Lane Runner
+- CODEX - Commit Gate
+- CODEX - Handoff Exporter
+
+Unicode display variants may use an em dash when rendering is reliable:
+
+- CHATGPT — ORCHESTRATOR
+- CLAUDE — INSPECTOR
+- CODEX — ENGINEER
+- CODEX — PR Lane Runner
+- CODEX — Commit Gate
+- CODEX — Handoff Exporter
+
+Plain text fallback titles must always be valid. If the em dash, emoji, or other Unicode marker renders incorrectly, use the ASCII hyphen version.
+
+### Dashboard and Control-Screen Labels
+
+Dashboard panels and control screens should use the same role terms:
+
+- `AI_OS MAIN CONTROL` for the operator-owned control lane.
+- `CHATGPT - ORCHESTRATOR` for orchestration, prompt shaping, and next-step guidance.
+- `CLAUDE - INSPECTOR` for review, critique, and quality-control lanes.
+- `CODEX - ENGINEER` for implementation lanes.
+- `CODEX - <lane purpose>` for scoped Codex tooling lanes such as PR Lane Runner, Commit Gate, or Handoff Exporter.
+
+Labels must remain readable without color, emoji, or font-specific glyphs.
+
+## Terminal Tab Title Convention
+
+Working terminal titles should identify the role and purpose of the window.
+
+Rules:
+- Use `AI_OS MAIN CONTROL` for the operator-owned main control window.
+- For worker windows, use the actor and role or lane purpose without repeating the repo path.
 - Use role, mode, and lane or purpose instead.
-- Keep AI_OS in documentation titles, project names, repo paths, and normal repo references.
+- Keep repo path details in HUD fields such as `WORKTREE` or `REPO`, not in the window title.
 - Automation and window matching should use stable plain-text role tokens, not emoji.
 - Emoji is optional display flair and must have a plain-text fallback.
 
 Use this pattern:
 
 ```text
-<emoji> <ROLE> | <MODE> | <LANE>
+<ROLE> | <MODE> | <LANE>
 ```
 
 Examples:
 
-- 👑 MAIN CONTROL | OPERATOR | DAILY
-- 🤖 CODEX | READ ONLY | BRANCH AUDIT
-- 🧠 CLAUDE | REVIEW ONLY | ARCHITECTURE
-- 🔴 SAFETY GATE | BLOCKED | BRANCH DELETE
-- 🧹 CLEANUP | REVIEW FIRST | TEMP FILES
-- 🔵 POWERSHELL ACTION | APPLY | APPROVED COMMAND
+- AI_OS MAIN CONTROL
+- CHATGPT - ORCHESTRATOR
+- CLAUDE - INSPECTOR
+- CODEX - ENGINEER
+- CODEX - PR Lane Runner
+- CODEX - Commit Gate
+- CODEX - Handoff Exporter
 
-Plain text fallbacks:
+Expanded HUD/title examples:
 
 - MAIN CONTROL | OPERATOR | DAILY
 - CODEX | READ ONLY | BRANCH AUDIT
