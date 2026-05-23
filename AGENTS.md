@@ -22,7 +22,7 @@ This repository is AI_OS.
 
 AI_OS is a guided AI operating environment and development orchestration layer.
 
-AI_OS_V2 is not a separate GitHub repository.
+Ai.Os is not a separate GitHub repository.
 
 Current identity:
 
@@ -31,7 +31,6 @@ Current identity:
 - Current local folder: `C:\Dev\Ai.Os`
 - Legacy inactive local folders:
   - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
-  - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
 
 Future desired naming is not active yet:
 
@@ -44,7 +43,7 @@ Do not search for or assume:
 - `aiosv2`
 - `ai-rtony91_aiosv2`
 - `AI-OS-Project`
-- `ai-rtony91_Ai_Os_CLEAN`
+- `Ai.Os`
 
 Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
 
