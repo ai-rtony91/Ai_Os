@@ -242,6 +242,36 @@ When a worker produces or summarizes a handoff packet, the output should preserv
 
 Unknown values must be marked `UNKNOWN`. A handoff packet must not invent authority, approval, or evidence.
 
+## Codex-to-ChatGPT SITREP Packet
+
+Codex final reports should use a Codex-to-ChatGPT SITREP packet when handing lane status back to ChatGPT, the operator, logs, or future dashboards. The packet should capture the useful state without requiring screenshots, raw terminal dumps, or repeated operator relay work.
+
+The SITREP packet should include:
+
+- Lane name.
+- Worker role.
+- Branch.
+- Worktree.
+- Files read.
+- Files changed.
+- Validation result.
+- Mutation status.
+- Commit status.
+- Push status.
+- PR status if applicable.
+- Blockers.
+- Next safe action.
+- Stop condition.
+- Screenshots needed: yes/no.
+- Screenshot reason if yes.
+- Authority stack loaded.
+- Approval state.
+- Timestamp if available.
+
+PR-specific merge, check, and cleanup details should reference `docs/workflows/AI_OS_PR_HANDOFF_REPORTER.md` instead of duplicating that workflow in this standard.
+
+Future automation may update `automation/orchestration/handoff/New-AiOsCodexHandoff.DRY_RUN.ps1` to emit this SITREP packet. That helper must remain DRY_RUN/report-only until a separate approved APPLY lane changes its behavior.
+
 ## Worker Output Schema Future Direction
 
 AI_OS may later define a machine-readable worker output schema.
