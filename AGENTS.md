@@ -53,6 +53,43 @@ Security behavior:
 Reliability behavior:
 Codex should use the token as a work-order boundary marker to reduce accidental execution, stale-context execution, and prompt confusion.
 
+## AI_OS Failure Recovery Response Rule
+
+When Codex stops, refuses, blocks execution, detects missing context, detects missing files, encounters sandbox failure, hits GitHub or Git errors, receives incomplete tokenized work packets, or cannot continue safely, Codex must produce a structured recovery response.
+
+Required failure response format:
+
+```text
+WHAT FAILED:
+Describe the exact failed command, missing file, blocked condition, or incomplete packet.
+
+WHY IT FAILED:
+Explain the governing reason in plain language.
+
+WHAT NEEDS TO HAPPEN NEXT:
+Give the next safe action, not a vague statement.
+
+WHERE TO REFERENCE:
+Point to the relevant AI_OS authority file, workflow file, or rule.
+
+SAFE NEXT COMMAND OR PROMPT:
+Provide either the next safe command or the corrected tokenized prompt. If no command is safe, say "No command recommended."
+```
+
+Recovery rules:
+
+- Do not guess missing authority.
+- Do not continue after a blocked condition.
+- Do not retry blindly.
+- Do not run broad inventory unless explicitly required.
+- Do not turn failures into long unrelated explanations.
+- Keep the recovery response short enough for the operator to act.
+- If the issue is an incomplete `AI_OS EXECUTION TOKEN` packet, list the missing required fields.
+- If the issue is GitHub PR, check, or merge related, reference `docs/workflows/AI_OS_PR_LANE_RUNNER.md`.
+- If the issue is commit or push related, reference `docs/workflows/AI_OS_COMMIT_PUSH_GATE.md`.
+- If the issue is stale state or known backlog, reference `docs/governance/AI_OS_REPO_MEMORY.md`.
+- If the issue is prompt routing or execution authorization, reference `AGENTS.md`.
+
 ## 1. Project Identity
 
 This repository is AI_OS.
