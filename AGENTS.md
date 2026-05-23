@@ -433,6 +433,39 @@ Optimize for the operator's actual workflow, not the agent's assumed technical m
 
 AI workers must prefer the simplest safe operator path, avoid outdated or overcomplicated methods, and avoid redirecting the operator to slower browser workflows when a safe local CLI path exists.
 
+### Operator Effort Reduction Principle
+
+AI_OS must continuously evolve from manual operator effort into guided, safe, scoped automation.
+
+Every AI_OS improvement must ask:
+
+- Does this reduce manual operator clicks?
+- Does this reduce manual pasting?
+- Does this reduce screenshots as the primary handoff format?
+- Does this reduce repeated terminal approval loops?
+- Does this help Codex, Claude, ChatGPT, logs, or dashboards self-serve from structured context?
+- Does this prevent the operator from becoming the reviewer, clerk, or relay?
+- Does it preserve protected main, scope boundaries, CI/validate, commit gates, and safety rules?
+
+AI_OS should convert repeated operator actions into safe workflow specifications, structured handoff packets, DRY_RUN/report-only helpers, reviewed APPLY lanes, and later automation only after proven safe.
+
+Examples:
+
+- Screenshots of PR state should become structured PR handoff packets.
+- Repeated PR command sequences should become a PR Lane Runner helper.
+- Repeated stop/failure confusion should become structured recovery responses.
+- Repeated approval decisions should become a governed approval gate.
+- Repeated status relay work should become machine-readable handoff output.
+
+Operator effort reduction must never bypass AI_OS safety. Reducing clicks is not permission to skip validation, scope, protected main, review, or human authority over destructive actions.
+
+Worker guidance:
+
+- ChatGPT should identify repeated operator burden and propose safer abstractions.
+- Claude should inspect whether proposed automation reduces burden without weakening safety.
+- Codex should implement only the assigned scoped lane.
+- The operator remains final authority, not the routine clerk.
+
 Required behavior:
 
 1. Prefer the simplest safe path.
