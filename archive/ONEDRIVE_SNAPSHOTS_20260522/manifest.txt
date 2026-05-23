@@ -1,0 +1,25 @@
+# OneDrive Snapshots Manifest
+# Date moved: 2026-05-23
+# Total files: 14
+
+## Files
+
+- 00_START_HERE_AI_OS_CONTEXT_PACK_ONEDRIVE_COPY_20260522.md (0 bytes)
+- 01_CURRENT_STATE_ONEDRIVE_COPY_20260522.md (0 bytes)
+- 02_CHECKPOINT_ONEDRIVE_COPY_20260522.md (0 bytes)
+- 03_ARCHITECTURE_LOCK_ONEDRIVE_COPY_20260522.md (0 bytes)
+- 04_AGENT_ROLES_ONEDRIVE_COPY_20260522.md (0 bytes)
+- 05_RULES_AND_GUARDRAILS_ONEDRIVE_COPY_20260522.md (0 bytes)
+- 06_PROJECT_PATHS_ONEDRIVE_COPY_20260522.md (0 bytes)
+- 07_DAILY_REPORT_PROMPT_ONEDRIVE_COPY_20260522.md (0 bytes)
+- AGENTS_ONEDRIVE_COPY_20260522.md (2547 bytes)
+- AI-OS_MASTER_GUIDELINES_ONEDRIVE_COPY_20260522.md (15676 bytes)
+- README.md (955 bytes)
+- README_ONEDRIVE_COPY_20260522.md (631 bytes)
+- RISK_POLICY_ONEDRIVE_COPY_20260522.md (822 bytes)
+- White_Paper_ONEDRIVE_COPY_20260522.md (536 bytes)
+
+## Notes
+All files are OneDrive snapshots from 2026-05-22.
+These are duplicates of canonical repository files.
+Preserved for audit trail and historical reference.
