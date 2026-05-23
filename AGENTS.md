@@ -120,6 +120,31 @@ Run status checks more often only when recovering from Git errors, merge conflic
 Purpose:
 Reduce operator fatigue and keep repo work moving in meaningful batches.
 
+## Redundant State Revalidation Loop Prevention Rule
+
+A Redundant State Revalidation Loop means repeating repo-state checks, push-state checks, or dirty-tree warnings after the same state has already been confirmed, recorded, and no state-changing event occurred.
+
+Once repo state is confirmed and recorded in `docs/governance/AI_OS_REPO_MEMORY.md`, workers must treat it as the starting truth.
+
+Workers must not ask the operator to repeatedly confirm the same pushed, synced, dirty, or untracked state.
+
+Workers may refresh state only when:
+
+- the branch changes
+- a new commit occurs
+- a push occurs
+- the operator requests a fresh check
+- visible evidence contradicts repo memory
+- the worker needs file-level evidence for a new scoped task
+
+If state was checked once in the current task and no state-changing action occurred afterward, do not check it again.
+
+Do not convert local untracked backlog into a repeated alarm after it has been classified. When known untracked files remain intentionally uncommitted, report them as "known local backlog," not as a new warning.
+
+Before recommending another git status, workers must ask: "Has anything happened since the last known state that would make this check necessary?"
+
+If the answer is no, continue from the repo memory and next queue instead.
+
 ## AI_OS Operating Rules
 
 - Existing canonical file first.
