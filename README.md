@@ -1,6 +1,6 @@
-# AI_OS_V2
+# AI_OS
 
-AI_OS_V2 is a governed AI-assisted operating environment for building, managing, and improving projects through human-readable prompts, scoped worker lanes, canonical authority files, and validation before mutation.
+AI_OS is a governed AI-assisted operating environment for building, managing, and improving projects through human-readable prompts, scoped worker lanes, canonical authority files, and validation before mutation.
 
 It is not an autonomous replacement for human judgment. It is a structured project operating system: humans set direction, AI workers perform bounded work, governance defines safe behavior, and validation proves what changed.
 
@@ -13,6 +13,7 @@ Trading Lab is the first production vertical. It is paper-only. Live broker exec
 - Active repo path: `C:\Dev\Ai.Os`
 - Legacy inactive paths:
   - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
+  - `C:\Dev\Ai.Os_OLD_DO_NOT_USE`
   - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
 - Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, and paper-only Trading Lab
 - Operating model: Phase -> Stage -> Workload Pack -> Task ID -> DRY_RUN/APPLY -> validation -> selective commit
@@ -32,9 +33,10 @@ Active branch:
 main
 ```
 
-Legacy inactive path:
+Legacy inactive paths:
 
 ```text
+C:\Dev\Ai.Os_OLD_DO_NOT_USE
 C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE
 ```
 
@@ -57,7 +59,9 @@ Expected state:
 
 ## Repository Identity Rule
 
-AI_OS_V2 is not a separate GitHub repository.
+AI_OS is the project/system identity.
+
+Ai.Os is the active local folder name, not a separate GitHub repository.
 
 Current identity:
 
@@ -66,6 +70,7 @@ Current identity:
 - Current local folder: `C:\Dev\Ai.Os`
 - Legacy inactive local folders:
   - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
+  - `C:\Dev\Ai.Os_OLD_DO_NOT_USE`
   - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
 
 Future desired naming is not active yet:
@@ -79,9 +84,10 @@ Do not search for or assume:
 - `aiosv2`
 - `ai-rtony91_aiosv2`
 - `AI-OS-Project`
+- `Ai.Os`
 - `ai-rtony91_Ai_Os_CLEAN`
 
-Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
+Any AI, Codex, Claude, or assistant inspecting AI_OS must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
 
 If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `main` before judging project state.
 
