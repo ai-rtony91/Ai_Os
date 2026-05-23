@@ -144,6 +144,59 @@ Reduce operator fatigue and keep repo work moving in meaningful batches.
 - Main control is the only place for merge/push approval.
 - Never let two workers edit the same file tree at the same time.
 
+## Hard Duplicate-Prevention Rule
+
+Before creating any new file, Codex must run a duplicate-intent search.
+
+Codex must not create a new file just because the planned filename does not already exist. Codex must first search for an existing file, folder, prompt, validator, workflow, report, or governance document that already serves the same purpose.
+
+This rule applies before file creation and during work. If Codex discovers a nearby file that may already serve the same purpose, it must re-check before continuing.
+
+Codex must search around:
+
+- Proposed file title.
+- Proposed filename.
+- Proposed folder name.
+- Lane name.
+- Worktree name.
+- Branch name.
+- Worker name.
+- Worker lane.
+- Intended document purpose.
+- Intended output type.
+- Related synonyms.
+- Nearby governance terms.
+- Matching doc names under `docs/`.
+- Matching audit names under `docs/audits/`.
+- Matching prompt names under prompt or context folders.
+- Matching validator names under `tools/`, `automation/`, `scripts/`, or `.github/`.
+- Matching UI names under terminal UI or dashboard folders.
+
+Codex must treat a file as a possible duplicate when it has the same purpose, even if:
+
+- The filename is different.
+- The folder is different.
+- The title is different.
+- The wording is different.
+- The document is older.
+- The file is incomplete.
+- The file is in a nearby lane folder.
+- The file appears to be a draft.
+
+If Codex finds a possible duplicate before creating a file, Codex must stop and report:
+
+1. Proposed new file.
+2. Possible existing duplicate file.
+3. Why they may overlap.
+4. Whether the existing file should be updated instead.
+5. What decision is needed from the orchestrator.
+
+Codex must not create the new file unless the duplicate search is clean. If a file already exists and owns the topic, update that file when it is inside the approved write boundary. If the existing file is outside the approved write boundary, stop and report the overlap instead of creating a duplicate.
+
+Codex must not create backup copies, alternate versions, numbered variants, scratch duplicates, or renamed clones such as `file-new.md`, `file-final.md`, `file-v2.md`, `file-copy.md`, `file-updated.md`, `file-draft.md`, `file-temp.md`, `old-file.md`, or `archive-file.md`.
+
+No new folders are allowed unless duplicate-intent search proves that no existing folder already serves the purpose.
+
 ## UI Action Confirmation Rule
 
 After any UI click, button press, launcher action, or automation trigger:
