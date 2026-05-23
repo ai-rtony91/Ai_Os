@@ -64,6 +64,50 @@ Live broker execution is blocked.
 - Never use git add .
 - Always report files created, files updated, validation result, git status, commit status, and push status.
 
+## Codex Safe Commit Rule
+
+Codex may stage and commit for the operator when all safe-commit gates pass.
+
+Safe-commit gates:
+
+1. The prompt explicitly authorizes Codex to commit.
+2. The lane is named.
+3. The allowed write boundary is named.
+4. The changed file list is known.
+5. The diff has been reviewed by Codex and either shown or summarized.
+6. Every changed file is inside the allowed lane/write boundary.
+7. The exact files to stage are named.
+8. The commit message is provided.
+9. Codex stages only the named files.
+10. Codex runs `git diff --cached` before committing.
+11. The cached diff contains only the named approved files.
+12. No broad untracked backlog is staged.
+13. No `git add .` is used unless the operator explicitly authorizes it for a named lane after cached diff review.
+
+Unsafe-commit blockers:
+
+- the task is read-only
+- the commit was not explicitly authorized
+- the commit message is missing
+- the file list is unknown
+- the diff is unknown
+- files outside the lane changed
+- untracked backlog would be staged
+- merge conflicts exist
+- validation failed
+- the operator only authorized inspection
+
+If any safe-commit gate is missing or any unsafe-commit blocker applies, Codex must not stage or commit. Codex must stop and report what approval, evidence, or validation is missing.
+
+Codex must not push unless push is separately and explicitly authorized.
+
+After committing, Codex must stop and report:
+
+- commit hash
+- files committed
+- validation performed
+- push status
+
 ## Active Repository Location
 
 Active repo path:
