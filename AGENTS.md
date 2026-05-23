@@ -395,6 +395,42 @@ Good:
 
 When the operator says "make that a rule," AI workers must not treat it as chat memory only. They must identify the correct AI_OS repo location where the rule belongs, then propose or apply the smallest safe update to the active instruction source so the rule takes effect globally.
 
+## AI_OS Approval Advisor Rule
+
+When Codex requests command approval and the UI presents numbered options, Codex must help the operator by stating the recommended option and why.
+
+Codex must not physically auto-select options. Codex must advise only.
+
+Before any approval prompt, Codex should include:
+
+- Recommended option:
+- Reason:
+- Risk level:
+- Scope match:
+- State-changing command: yes/no
+
+Default guidance:
+
+- Option 1: use for one-time approval of a safe, scoped command.
+  Examples: read-only file inspection, `git diff` for a named file, `git diff --cached` after staging named files, `git add` for one explicitly approved file, `git commit` when safe-commit gates already passed, or `git push` only when push was separately authorized.
+- Option 2: use rarely. Only recommend when the command family is harmless, read-only, repetitive, and inside a trusted scoped lane.
+  Examples: repeated read-only metadata checks or repeated diff checks during a narrow validation lane.
+- Option 3: use when the command is unsafe, out of scope, redundant, destructive, or not needed.
+  Examples: `git add .`, staging untracked backlog, pushing without explicit push authorization, running unreviewed `.ps1` scripts, deleting/moving/renaming files, editing outside the lane boundary, repeating known state checks after repo memory already records the state, or continuing a placeholder task such as `Implement {feature}`.
+
+Never recommend Option 2 for:
+
+- `git add`
+- `git commit`
+- `git push`
+- script execution
+- delete/move/rename commands
+- broad file operations
+- automation launchers
+- untracked backlog handling
+
+Codex must treat approval advice as part of operator safety. Codex must reduce repeated approval confusion, but must not remove the human decision.
+
 Operator-facing commands and action blocks must be formatted for safe copy/paste use:
 
 - Use emoji visual signals above action blocks when they help the operator scan the next action.
@@ -521,6 +557,39 @@ Any person or AI responsible for opening or assigning Codex work must obey these
   - stop condition
 
 ## Codex Prompt Preamble Rule
+
+## AI_OS Bootstrap Contract
+
+Before any AI_OS worker processes a task, it must load the AI_OS authority stack:
+
+1. `AGENTS.md`
+2. `docs/governance/AI_OS_REPO_MEMORY.md`
+3. the assigned lane/worktree prompt
+4. the operator's current instruction
+
+The worker must treat this authority stack as mandatory task context.
+
+If the worker cannot read `AGENTS.md` or `docs/governance/AI_OS_REPO_MEMORY.md`, it must stop and report:
+
+- missing file
+- attempted path
+- why AI_OS context could not be loaded
+- what operator decision is needed
+
+No worker may treat a task as AI_OS-governed unless it has loaded or been given the AI_OS authority stack.
+
+Every reusable Codex, Claude, ChatGPT, lane, and worktree prompt should include this bootstrap block near the top:
+
+```text
+AI_OS BOOTSTRAP REQUIRED
+Before processing this task, read and follow:
+1. AGENTS.md
+2. docs/governance/AI_OS_REPO_MEMORY.md
+3. assigned lane instructions
+4. operator instruction
+
+If unavailable, stop and report missing AI_OS context.
+```
 
 Every Codex task prompt must begin with this exact preamble:
 
