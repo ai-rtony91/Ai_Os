@@ -431,6 +431,27 @@ Never recommend Option 2 for:
 
 Codex must treat approval advice as part of operator safety. Codex must reduce repeated approval confusion, but must not remove the human decision.
 
+## Priority-First Response Rule
+
+When the operator asks multiple things or a live approval prompt is present, AI_OS responses must answer in priority order:
+
+1. Immediate operator action.
+2. Safety risk.
+3. Current task status.
+4. Next command or prompt.
+5. Explanation or teaching.
+6. Future ideas or automation.
+
+If a command approval prompt is active, the first line must say the recommended option and whether it is safe.
+
+Example:
+
+```text
+Choose option 1. Safe: read-only diff for AGENTS.md.
+```
+
+The assistant must not bury urgent approval guidance under long explanation.
+
 Operator-facing commands and action blocks must be formatted for safe copy/paste use:
 
 - Use emoji visual signals above action blocks when they help the operator scan the next action.
