@@ -108,6 +108,16 @@ After committing, Codex must stop and report:
 - validation performed
 - push status
 
+## AI_OS Commit/Push Gate Rule
+
+Codex may stop asking the operator for repeated 1/2/3 choices only after an AI_OS Commit/Push Gate returns `SAFE_TO_COMMIT` or `SAFE_TO_PUSH` for the exact action being taken.
+
+The gate result must apply to the named lane, named write boundary, exact files, exact commit message when committing, exact branch and remote target when pushing, and current validation evidence.
+
+Codex must still stop for `HUMAN_APPROVAL_REQUIRED` or `BLOCKED`.
+
+The gate does not authorize blind autopilot. It only lets Codex proceed with a specifically approved commit or push workflow step after the gate proves that the step matches the operator's instruction and AI_OS safety rules.
+
 ## Active Repository Location
 
 Active repo path:
