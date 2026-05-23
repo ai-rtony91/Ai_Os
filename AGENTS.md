@@ -155,6 +155,12 @@ Codex must still stop for `HUMAN_APPROVAL_REQUIRED` or `BLOCKED`.
 
 The gate does not authorize blind autopilot. It only lets Codex proceed with a specifically approved commit or push workflow step after the gate proves that the step matches the operator's instruction and AI_OS safety rules.
 
+## Protected Main PR Lane Rule
+
+Protected main requires PR lane flow. AI_OS workers must not push directly to `main` for protected work.
+
+Use `docs/workflows/AI_OS_PR_LANE_RUNNER.md` for branch, PR, validate, merge, and local sync workflow.
+
 ## Active Repository Location
 
 Active repo path:
