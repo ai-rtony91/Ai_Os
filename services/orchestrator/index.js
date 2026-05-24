@@ -63,24 +63,25 @@ app.post(
       });
     }
 
-    // The pipeline stages (muscle wiring starts here)
+    // Planned pipeline stages only; this endpoint does not execute them yet.
     const stages = [
-      { key: "validate", label: "Validate inputs" },
-      { key: "parse", label: "Parse intent & constraints" },
-      { key: "classify", label: "Classify project type" },
-      { key: "scaffold", label: "Generate scaffold" },
-      { key: "done", label: "Done" },
+      { key: "validate", label: "Validate inputs", status: "PLANNED_NOT_EXECUTED" },
+      { key: "parse", label: "Parse intent & constraints", status: "PLANNED_NOT_EXECUTED" },
+      { key: "classify", label: "Classify project type", status: "PLANNED_NOT_EXECUTED" },
+      { key: "scaffold", label: "Generate scaffold", status: "PLANNED_NOT_EXECUTED" },
+      { key: "done", label: "Done", status: "PLANNED_NOT_EXECUTED" },
     ];
 
-    // For now: return metadata + stages (real API plumbing)
     return res.json({
       ok: true,
+      status: "STUB",
       received: {
         whitepaper: { name: wp.originalname, size: wp.size, type: wp.mimetype },
         readme: { name: rm.originalname, size: rm.size, type: rm.mimetype },
       },
       stages,
-      message: "Pipeline wired. Next step will run these stages progressively.",
+      message:
+        "Pipeline run endpoint accepts inputs, but it is currently a stub and does not execute pipeline stages yet.",
     });
   }
 );
