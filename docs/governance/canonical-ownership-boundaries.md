@@ -1,4 +1,4 @@
-# AI_OS_V2 Canonical Ownership Boundaries
+# AI_OS Canonical Ownership Boundaries
 
 ## Purpose
 

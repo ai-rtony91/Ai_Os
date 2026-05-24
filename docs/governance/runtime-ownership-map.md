@@ -1,4 +1,4 @@
-# AI_OS_V2 Runtime Ownership Map
+# AI_OS Runtime Ownership Map
 
 ## Purpose
 
