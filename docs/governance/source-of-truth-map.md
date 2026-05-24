@@ -1,4 +1,4 @@
-# AI_OS_V2 Source of Truth Map
+# AI_OS Source of Truth Map
 
 ## Purpose
 

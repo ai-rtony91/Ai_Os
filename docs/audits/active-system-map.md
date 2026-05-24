@@ -1,4 +1,4 @@
-# AI_OS_V2 Active System Map
+# AI_OS Active System Map
 
 ## Executive summary
 
