@@ -4,7 +4,7 @@
     "intent":  "Goal intake: Build AIOS repo execution loop so AIOS can help build AIOS safely",
     "owner_lane":  "goal_intake",
     "assigned_worker":  "dispatcher",
-    "repo":  "ai-rtony91_Ai_Os_CLEAN",
+    "repo":  "Ai.Os",
     "branch":  "phase-67-aios-goal-intake-runner",
     "status":  "active",
     "priority":  "normal",

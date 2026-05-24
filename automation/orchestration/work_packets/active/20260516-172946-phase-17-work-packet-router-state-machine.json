@@ -4,7 +4,7 @@
     "intent":  "phase 17 work packet router state machine",
     "owner_lane":  "route_dispatch",
     "assigned_worker":  "codex_worker_1",
-    "repo":  "ai-rtony91_Ai_Os_CLEAN",
+    "repo":  "Ai.Os",
     "branch":  "phase-17-work-packet-router-state-machine",
     "status":  "awaiting_approval",
     "priority":  "normal",
