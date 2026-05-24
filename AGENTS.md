@@ -518,6 +518,77 @@ Good:
 
 When the operator says "make that a rule," AI workers must not treat it as chat memory only. They must identify the correct AI_OS repo location where the rule belongs, then propose or apply the smallest safe update to the active instruction source so the rule takes effect globally.
 
+## AI_OS Approval Friction Reduction Standard
+
+Inside an approved read-only lane, Codex should group and proceed with `SAFE_READ_ONLY` commands without asking one-by-one unless the command crosses a safety boundary.
+
+When a lane is read-only and includes `AI_OS EXECUTION TOKEN`, Codex should:
+
+1. Treat in-scope `SAFE_READ_ONLY` commands as approved for that lane.
+2. Group read-only checks into the smallest practical number of commands.
+3. Avoid repeated operator prompts for harmless inspection commands.
+4. Still report what it read.
+5. Still stop before any mutation.
+
+`SAFE_READ_ONLY` examples:
+
+- `git status --short --branch`
+- `git branch --show-current`
+- `git rev-parse`
+- `git log`
+- `git show`
+- `git diff --name-only`
+- `git diff --cached --name-only`
+- `git ls-files`
+- `rg`
+- `Test-Path`
+- `Get-Item`
+- `Get-ChildItem`
+- `Get-Content -TotalCount`
+- `gh pr view`
+- `gh pr checks`
+- `gh pr list`
+
+`SAFE_READ_ONLY` limits:
+
+Codex must still stop or ask if a command:
+
+- executes a script
+- touches secrets or credentials
+- accesses external drives unless the lane explicitly authorizes that drive
+- performs network mutation
+- creates, edits, stages, commits, pushes, merges, resets, cleans, stashes, deletes, moves, renames, copies, schedules, or runs backups
+- reads unusually sensitive paths
+- exceeds the lane scope
+
+`SCOPED_APPROVED_MUTATION` means ask once for the exact approved mutation.
+
+Examples:
+
+- `git add <specific-file>`
+- `git commit -m "<exact message>"`
+- `git switch -c <approved-branch>`
+- `git push <approved-branch>`
+- `gh pr create`
+- `gh pr merge` with an exact PR number
+- approved folder creation on `D:` in a T9 APPLY lane
+
+`HARD_STOP_MUTATION` means stop and report; do not proceed automatically.
+
+Examples:
+
+- `git reset`
+- `git clean`
+- force push
+- delete branches
+- delete backups
+- remove evidence
+- write secrets
+- run unapproved scripts
+- run `robocopy` with destructive mirror mode
+- create scheduled tasks without an APPLY lane
+- modify the canonical repo from T9 logic
+
 ## AI_OS Approval Advisor Rule
 
 When Codex requests command approval and the UI presents numbered options, Codex must help the operator by stating the recommended option and why.
