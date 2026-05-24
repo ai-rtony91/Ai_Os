@@ -1,4 +1,4 @@
 {
-    "approved":  true,
-    "reason":  "manual approval test"
+    "approved":  false,
+    "reason":  "reset: no live approval recorded"
 }
