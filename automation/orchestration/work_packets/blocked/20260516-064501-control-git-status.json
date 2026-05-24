@@ -4,7 +4,7 @@
   "intent": "make control status visible when shell permissions allow",
   "owner_lane": "main_control",
   "assigned_worker": "",
-  "repo": "ai-rtony91_Ai_Os_CLEAN",
+  "repo": "Ai.Os",
   "branch": "main",
   "status": "blocked",
   "priority": "normal",
