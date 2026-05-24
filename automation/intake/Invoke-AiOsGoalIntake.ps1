@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory = $true)][string]$Goal,
     [switch]$Apply
 )
@@ -30,7 +30,7 @@ if ($Apply) {
         -Title "Goal Intake - $slug" `
         -OwnerLane "goal_intake" `
         -AssignedWorker "dispatcher" `
-        -Repo "ai-rtony91_Ai_Os_CLEAN" `
+        -Repo "ai-rtony91/Ai_Os" `
         -Branch (git branch --show-current) `
         -Validator "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1" `
         -NextAction "Plan and execute next repo-scoped step for: $Goal"
