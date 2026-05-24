@@ -136,6 +136,33 @@ git status --short --branch
 
 - Untracked backlog may remain and must be reported as known local backlog, not as a new emergency.
 
+## No-Editor Git Safety Rule
+
+- No Vim.
+- No Nano.
+- No Notepad.
+- No plain `git pull`.
+- No plain `git merge` if it can open an editor.
+- Use `gh pr merge --squash --delete-branch` for approved PRs.
+- After each PR merge, sync local main with:
+
+```powershell
+git fetch origin
+git switch main
+git reset --hard origin/main
+git status --short --branch
+```
+
+- If an editor opens unexpectedly, exit with:
+
+```text
+Esc
+:q!
+Enter
+```
+
+- Then stop and report the command that opened the editor, repo path, branch, and next safe non-editor command.
+
 ### 10. Final Report
 
 The final report must include:
