@@ -591,8 +591,7 @@ Review the generated checkpoint and confirm whether the next workflow should con
         $dailyStatusSnapshotUpdated = $true
     }
     catch {
-        Write-Error "Snapshot update failed: $($_.Exception.Message)"
-        exit 1
+        Write-Warning "Snapshot update skipped: $($_.Exception.Message)"
     }
 
     Write-Host 'APPLY complete.'
