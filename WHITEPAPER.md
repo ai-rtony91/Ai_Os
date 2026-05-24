@@ -7,7 +7,7 @@ This file is a protected pointer only. It identifies the current AIOS foundation
 PROTECTED POINTER - updated by scoped APPLY after DRY_RUN whitepaper authority review.
 
 ## Current Canonical Candidate
-`docs/architecture/AI_OS_V2_WHITEPAPER.md` is the current canonical AIOS foundation whitepaper candidate.
+`docs/architecture/AI_OS_WHITEPAPER.md` is the current canonical AIOS foundation whitepaper candidate.
 
 It describes AI_OS_V2 as a governed, human-controlled automation and project orchestration environment with validation before mutation.
 

@@ -262,7 +262,7 @@ For a documentation-only change to this front door, run:
 
 ```powershell
 git diff --check
-git diff -- README.md docs/architecture/AI_OS_V2_WHITEPAPER.md
+git diff -- README.md docs/architecture/AI_OS_WHITEPAPER.md
 git status --short --branch
 ```
 
