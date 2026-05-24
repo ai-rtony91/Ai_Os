@@ -1,4 +1,4 @@
 {
-    "summary":  "manual completion test",
-    "complete":  true
+    "summary":  "reset: no live completion report recorded",
+    "complete":  false
 }
