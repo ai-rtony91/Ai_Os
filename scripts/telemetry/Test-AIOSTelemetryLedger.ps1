@@ -9,7 +9,6 @@ $LegacyFields = @(
   "eventType",
   "status",
   "ts",
-  "source",
   "system",
   "summary",
   "packetId",
