@@ -1,4 +1,4 @@
-# AI_OS_V2 Whitepaper
+# AI_OS Whitepaper
 
 ## Purpose
 
