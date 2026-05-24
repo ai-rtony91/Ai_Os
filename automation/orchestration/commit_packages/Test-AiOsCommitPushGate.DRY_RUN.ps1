@@ -104,13 +104,20 @@ function Invoke-ReadOnlyCommand {
         [Parameter(Mandatory = $false)][switch] $AllowFailure
     )
 
+    $ErrorActionPreference = "Continue"
     $output = & $CommandName @Arguments 2>&1
     $exitCode = $LASTEXITCODE
-    $text = ($output | Out-String).Trim()
+    $ErrorActionPreference = "Stop"
+
+    $stdoutItems = @($output | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
+    $stderrItems = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
+    $text = ($stdoutItems | Out-String).Trim()
+    $stderrText = ($stderrItems | ForEach-Object { $_.Exception.Message } | Out-String).Trim()
 
     if ($exitCode -ne 0 -and -not $AllowFailure) {
+        $failDetail = if ($stderrText) { "$text`n$stderrText" } else { $text }
         Write-FailureRecovery `
-            -WhatFailed "Command failed: $DisplayCommand`n$text" `
+            -WhatFailed "Command failed: $DisplayCommand`n$failDetail" `
             -WhyItFailed "The gate evaluator could not collect required read-only Git state." `
             -NextAction "Review the Git error, then rerun this DRY_RUN helper after the local repo issue is corrected." `
             -Reference "docs/workflows/AI_OS_COMMIT_PUSH_GATE.md; AGENTS.md -> AI_OS Failure Recovery Response Rule" `
@@ -118,10 +125,14 @@ function Invoke-ReadOnlyCommand {
         exit 1
     }
 
+    if ($stderrText) {
+        Write-Warning "[$DisplayCommand] $stderrText"
+    }
+
     return [pscustomobject] @{
         exit_code = $exitCode
         output = $text
-        lines = @($output | ForEach-Object { [string] $_ })
+        lines = @($stdoutItems | ForEach-Object { [string] $_ })
     }
 }
 
