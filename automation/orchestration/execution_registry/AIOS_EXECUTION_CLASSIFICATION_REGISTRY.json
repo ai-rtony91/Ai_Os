@@ -2619,6 +2619,541 @@
       "validator_consumption": "May be consumed as packet normalization validation evidence.",
       "review_status": "approved_10_dry_run_registry_batch_static_review",
       "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/operator/Get-AiOsCommandApprovalRecommendation.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Recommend operator approval options from command text and scoped context without executing commands.",
+      "owner_area": "automation/operator",
+      "execution_mode": "DRY_RUN_RECOMMENDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "command_execution",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Recommendation only. Command strings and approval advice are not execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed as approval-advice evidence only.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep recommendation-only and non-executing."
+    },
+    {
+      "path": "automation/operator/Show-AiOsWorkerBanner.ps1",
+      "classification": "HELPER",
+      "purpose": "Display operator/worker banner text and safety boundaries.",
+      "owner_area": "automation/operator",
+      "execution_mode": "display_only",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Display-only helper. Printed blocked-action text is not execution authority.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May be consumed as display helper evidence only.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep display-only."
+    },
+    {
+      "path": "automation/operator/Test-AIOSCodexWindowSnapshot.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate Codex window snapshot behavior in DRY_RUN mode.",
+      "owner_area": "automation/operator",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "window_capture_mutation",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Validation helper only; does not approve window automation.",
+      "topology_guard_requirement": "Not a window launcher.",
+      "validator_consumption": "May be consumed as DRY_RUN validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/operator/Test-AiOsMorningOperations.ps1",
+      "classification": "HELPER",
+      "purpose": "Statically validate morning operations safety expectations.",
+      "owner_area": "automation/operator",
+      "execution_mode": "validation_only",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "morning_operations_launch",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Static validation only. Does not launch morning operations.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May be consumed as safety validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep validation-only."
+    },
+    {
+      "path": "automation/operator/Test-AiOsParallelWorkerReports.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate parallel worker report and queue safety expectations.",
+      "owner_area": "automation/operator",
+      "execution_mode": "validation_only",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "parallel_worker_launch",
+        "APPLY",
+        "commit",
+        "push",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Validation helper only; does not start parallel workers.",
+      "topology_guard_requirement": "Not a worker launcher.",
+      "validator_consumption": "May be consumed as report validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep validation-only."
+    },
+    {
+      "path": "automation/operator/Test-AiOsPhase3State.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Inspect Phase 3 state expectations in DRY_RUN mode.",
+      "owner_area": "automation/operator",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "state_mutation",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN state inspection only.",
+      "topology_guard_requirement": "Not a launcher or state mutator.",
+      "validator_consumption": "May be consumed as DRY_RUN state validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN and non-mutating."
+    },
+    {
+      "path": "automation/operator/Test-AiOsWorkerAutoRouting.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate worker auto-routing safety expectations in DRY_RUN mode.",
+      "owner_area": "automation/operator",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "worker_auto_routing",
+        "APPLY",
+        "commit",
+        "push",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Validation helper only; does not route or launch workers.",
+      "topology_guard_requirement": "Not a worker launcher.",
+      "validator_consumption": "May be consumed as worker routing validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate workflow orchestrator safety expectations in DRY_RUN mode.",
+      "owner_area": "automation/operator",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "workflow_orchestration",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Validation helper only; does not execute workflow orchestration.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May be consumed as workflow validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/orchestration/adapters/Normalize-AiOsPacket.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Normalize packet data and emit normalized output in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/adapters",
+      "execution_mode": "DRY_RUN_TRANSFORM",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "packet_validation"
+      ],
+      "blocked_actions": [
+        "packet_write",
+        "packet_move",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN transform output is evidence only and must not mutate packet state.",
+      "topology_guard_requirement": "Not a packet mutator.",
+      "validator_consumption": "May be consumed as packet normalization evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN transform-only."
+    },
+    {
+      "path": "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Build commit package recommendations from read-only repo evidence.",
+      "owner_area": "automation/orchestration/commit_packages",
+      "execution_mode": "DRY_RUN_RECOMMENDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "git_add",
+        "commit",
+        "push",
+        "APPLY",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Recommendation only. Suggested git add commands are not approval.",
+      "topology_guard_requirement": "Not a commit executor.",
+      "validator_consumption": "May be consumed as commit package recommendation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep recommendation-only; require separate exact-file staging approval."
+    },
+    {
+      "path": "automation/orchestration/commit_packages/Test-AiOsCommitPushGate.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate commit/push gate decisions in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/commit_packages",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "git_add",
+        "commit",
+        "push",
+        "APPLY",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Gate validation only. Does not approve or perform commit/push actions.",
+      "topology_guard_requirement": "Not a git mutator.",
+      "validator_consumption": "May be consumed as commit/push gate evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/orchestration/compliance/Test-AiOsAgentCompliance.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate agent compliance evidence in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/compliance",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "compliance_mutation",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Validation only. Compliance findings are evidence, not execution approval.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May be consumed as compliance validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/orchestration/control_summary/Get-AiOsKnownStateFilter.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Filter known repo/control state from read-only evidence in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/control_summary",
+      "execution_mode": "DRY_RUN_READ_ONLY",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "state_mutation",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Read-only state filtering only.",
+      "topology_guard_requirement": "Not a state mutator.",
+      "validator_consumption": "May be consumed as known-state filtering evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep read-only."
+    },
+    {
+      "path": "automation/orchestration/daily_snapshot/New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Generate a daily automation snapshot from read-only repo and file-presence evidence.",
+      "owner_area": "automation/orchestration/daily_snapshot",
+      "execution_mode": "DRY_RUN_READ_ONLY_SNAPSHOT",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "snapshot_write",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Prints snapshot output only; does not record or persist it.",
+      "topology_guard_requirement": "Not a launcher or writer.",
+      "validator_consumption": "May be consumed as daily automation snapshot evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN and non-writing."
+    },
+    {
+      "path": "automation/orchestration/operator_menu/Show-AiOsOperatorActionMenu.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Display operator action menu options and copyable DRY_RUN command text.",
+      "owner_area": "automation/orchestration/operator_menu",
+      "execution_mode": "display_only",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "menu_command_execution",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Menu output is not command approval.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May be consumed as menu display evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep display-only."
+    },
+    {
+      "path": "automation/orchestration/post_push/Test-AiOsPostPushVerification.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate post-push evidence in DRY_RUN mode without pushing.",
+      "owner_area": "automation/orchestration/post_push",
+      "execution_mode": "DRY_RUN_VALIDATION",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "push",
+        "post_push_mutation",
+        "APPLY",
+        "commit",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Post-push verification evidence only; does not approve or perform push.",
+      "topology_guard_requirement": "Not a git mutator.",
+      "validator_consumption": "May be consumed as post-push validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep DRY_RUN validation-only."
+    },
+    {
+      "path": "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Preview commit package contents and exact-file staging suggestions in DRY_RUN mode.",
+      "owner_area": "automation/orchestration/validators",
+      "execution_mode": "DRY_RUN_PREVIEW",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "git_add",
+        "commit",
+        "push",
+        "APPLY",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Preview only. Printed staging commands are not approval.",
+      "topology_guard_requirement": "Not a git mutator.",
+      "validator_consumption": "May be consumed as commit package preview evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep preview-only and require separate exact-file staging approval."
+    },
+    {
+      "path": "automation/orchestration/validators/Test-AiOsRecommendedCommand.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate recommended command text against safety patterns.",
+      "owner_area": "automation/orchestration/validators",
+      "execution_mode": "validation_only",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "recommended_command_execution",
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Command validation only; does not run the recommended command.",
+      "topology_guard_requirement": "Not a launcher.",
+      "validator_consumption": "May be consumed as command safety validation evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep validation-only."
+    },
+    {
+      "path": "automation/orchestration/show-commit-package.ps1",
+      "classification": "HELPER",
+      "purpose": "Display commit package contents and safety notes without staging files.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "display_only",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "git_add",
+        "commit",
+        "push",
+        "APPLY",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Display-only helper. Printed safety notes and paths are not staging approval.",
+      "topology_guard_requirement": "Not a git mutator.",
+      "validator_consumption": "May be consumed as commit package display evidence.",
+      "review_status": "execution_registry_cleanup_static_review",
+      "next_safe_action": "Keep display-only."
     }
   ],
   "counts_by_classification_at_creation": {
