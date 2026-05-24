@@ -340,7 +340,7 @@ function New-Packet {
     )
 
     return [pscustomobject] @{
-        schema = "AIOS_PR_LANE_RUNNER_DRY_RUN_PACKET.v2"
+        schema = "AIOS_PR_LANE_RUNNER_DRY_RUN_PACKET.v3"
         timestamp = $Timestamp
         repo_path = $RepoPath
         repo_path_result = $RepoPathResult
@@ -383,6 +383,14 @@ function New-Packet {
             resets_performed = 0
             files_deleted = 0
             reports_written = 0
+        }
+        gate_references = [pscustomobject] @{
+            preflight            = ".\automation\orchestration\pr_gates\Invoke-AiOsPrLaneRunner.DRY_RUN.ps1"
+            commit_push_gate     = ".\automation\orchestration\commit_packages\Test-AiOsCommitPushGate.DRY_RUN.ps1"
+            pr_creation          = ".\automation\orchestration\pr_gates\Open-AiOsPullRequest.DRY_RUN.ps1"
+            status_checks        = ".\automation\orchestration\github_status\Get-AiOsGitHubStatusCheck.DRY_RUN.ps1"
+            merge                = ".\automation\orchestration\pr_gates\Merge-AiOsPullRequest.DRY_RUN.ps1"
+            post_merge_verification = ".\automation\orchestration\post_push\Test-AiOsPostPushVerification.DRY_RUN.ps1"
         }
     }
 }
@@ -428,6 +436,14 @@ function Format-MarkdownPacket {
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine("PR: $($Packet.pr_detected)")
     [void]$sb.AppendLine("CI: $($Packet.ci_validate)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("GATE REFERENCES")
+    [void]$sb.AppendLine("  Preflight:      $($Packet.gate_references.preflight)")
+    [void]$sb.AppendLine("  Commit/Push:    $($Packet.gate_references.commit_push_gate)")
+    [void]$sb.AppendLine("  PR Creation:    $($Packet.gate_references.pr_creation)")
+    [void]$sb.AppendLine("  Status Checks:  $($Packet.gate_references.status_checks)")
+    [void]$sb.AppendLine("  Merge:          $($Packet.gate_references.merge)")
+    [void]$sb.AppendLine("  Post-Merge:     $($Packet.gate_references.post_merge_verification)")
     [void]$sb.AppendLine("")
     [void]$sb.AppendLine("Mutation: none (DRY_RUN)")
 
@@ -487,6 +503,7 @@ try {
     $behindCount = 0
     if ($branchStatus -match 'ahead\s+(\d+)') { $aheadCount = [int]$Matches[1] }
     if ($branchStatus -match 'behind\s+(\d+)') { $behindCount = [int]$Matches[1] }
+    $hasUpstream = $branchStatus -match '\.\.\.'
 
     $untrackedFileList = @($untrackedStatusLines | ForEach-Object {
         if ($_.Length -ge 4) { $_.Substring(3).Trim() } else { $_ }
@@ -546,6 +563,12 @@ try {
         $recommended = "Run the AI_OS Commit/Push Gate review for exact approved files; do not stage broad backlog."
         $stopCondition = "Stop before staging or committing until exact files and commit message are approved."
     }
+    elseif (-not $prInfo.detected -and $hasUpstream -and $aheadCount -eq 0) {
+        $laneState = "READY_FOR_PR_CREATION"
+        $approvalClass = "HUMAN_APPROVAL_REQUIRED"
+        $recommended = ".\automation\orchestration\pr_gates\Open-AiOsPullRequest.DRY_RUN.ps1 -Title `"<PR title>`""
+        $stopCondition = "Create PR only after the operator approves the title, body, and scope. Run the PR creation gate first."
+    }
     elseif (-not $prInfo.detected) {
         $laneState = "READY_FOR_PUSH_LANE_BRANCH"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
@@ -573,14 +596,14 @@ try {
     elseif ($prInfo.detected -and $prInfo.pr.state -eq "OPEN" -and $prInfo.validate -eq "success") {
         $laneState = "READY_FOR_MERGE_APPROVAL"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
-        $recommended = "gh pr merge $($prInfo.pr.number) --squash --delete-branch"
-        $stopCondition = "Merge requires explicit operator approval."
+        $recommended = ".\automation\orchestration\pr_gates\Merge-AiOsPullRequest.DRY_RUN.ps1 -PrNumber $($prInfo.pr.number); then gh pr merge $($prInfo.pr.number) --squash --delete-branch"
+        $stopCondition = "Merge requires explicit operator approval. Run the merge gate first to validate readiness."
     }
     elseif ($prInfo.detected -and $prInfo.pr.state -eq "MERGED") {
         $laneState = "READY_FOR_LOCAL_MAIN_SYNC"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
-        $recommended = "git fetch origin; git switch main; git reset --hard origin/main"
-        $stopCondition = "Local main sync requires explicit operator approval because it includes branch switch and reset."
+        $recommended = "git fetch origin; git switch main; git reset --hard origin/main; then .\automation\orchestration\post_push\Test-AiOsPostPushVerification.DRY_RUN.ps1 -PrNumber $($prInfo.pr.number)"
+        $stopCondition = "Local main sync requires explicit operator approval because it includes branch switch and reset. Run post-merge verification after sync."
     }
     else {
         $laneState = "HUMAN_APPROVAL_REQUIRED"
