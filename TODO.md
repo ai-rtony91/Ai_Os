@@ -1,4 +1,4 @@
-# AI_OS V2 TODO
+# AI_OS TODO
 
 Status: active task index only
 
