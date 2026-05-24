@@ -1,0 +1,61 @@
+{
+  "schema": "aios.operator_status.v1",
+  "version": "1.0.0",
+  "generated_at": "2026-05-24T00:00:00Z",
+  "mode": "DISPLAY_ONLY",
+  "source_label": "MOCK_DATA",
+  "provenance": {
+    "fixture_name": "AI_OS Operator Status Dashboard Fixture",
+    "source_path": "apps/dashboard/mock-data/aios-operator-status-v1.example.json",
+    "classification": "local fixture only",
+    "authority": "non-authoritative dashboard display sample"
+  },
+  "registry_safety": {
+    "status": "PASS",
+    "label": "Registry Safety",
+    "summary": "Registry state is represented by static fixture data only.",
+    "source": "MOCK_DATA",
+    "blocked_actions": [
+      "No registry writes",
+      "No runtime registry mutation",
+      "No service calls"
+    ]
+  },
+  "telemetry_status": {
+    "status": "MOCK_DATA",
+    "label": "Telemetry Status",
+    "summary": "Telemetry values are example display fields and are not collected by this dashboard.",
+    "latest_event_at": "2026-05-24T00:00:00Z",
+    "collector_state": "NOT_CONNECTED",
+    "source": "DISPLAY_ONLY"
+  },
+  "worker_status": {
+    "status": "REVIEW",
+    "label": "Worker Status",
+    "summary": "Worker state is fixture-backed and cannot launch, assign, pause, or stop workers.",
+    "active_workers": 0,
+    "blocked_workers": 0,
+    "source": "MOCK_DATA"
+  },
+  "pr_branch_status": {
+    "status": "DISPLAY_ONLY",
+    "label": "PR Branch Status",
+    "summary": "Branch context is shown as sample operator context only.",
+    "branch": "apply/dashboard-operator-status-fixture-contract-20260524",
+    "base": "origin/main",
+    "merge_state": "NOT_EVALUATED",
+    "source": "MOCK_DATA"
+  },
+  "next_safe_action": {
+    "status": "REVIEW",
+    "label": "Next Safe Action",
+    "summary": "Review the display-only Operator Status slice and validate the fixture shape before any commit decision.",
+    "action_type": "OPERATOR_REVIEW_ONLY",
+    "source": "DISPLAY_ONLY"
+  },
+  "warnings": [
+    "This dashboard slice is not authoritative.",
+    "No live wiring, GitHub calls, execution buttons, services, scripts, telemetry writers, or automation are connected.",
+    "All values come from local MOCK_DATA fixture content."
+  ]
+}
