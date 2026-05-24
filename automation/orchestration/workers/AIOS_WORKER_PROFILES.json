@@ -48,7 +48,7 @@
       "worker_id": "create_codex",
       "display_title": "CREATE \u00b7 codex",
       "worker_type": "manual_codex",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-bootstrap-workspace",
       "owns_paths": [
         "automation/orchestration/bootstrap/",
@@ -83,7 +83,7 @@
       "worker_id": "save_git",
       "display_title": "SAVE \u00b7 git",
       "worker_type": "git_save",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-bootstrap",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-bootstrap-workspace",
       "owns_paths": [
         ".git/",
@@ -109,7 +109,7 @@
       "worker_id": "route_dispatch",
       "display_title": "ROUTE \u00b7 dispatch",
       "worker_type": "packet_dispatch",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-mission-json",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-221-260-mission-json-dashboard-ready",
       "owns_paths": [
         "automation/orchestration/work_packets/"
@@ -138,7 +138,7 @@
       "worker_id": "check_audit",
       "display_title": "CHECK \u00b7 audit",
       "worker_type": "validation_audit",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-validation-cleanup",
       "owns_paths": [
         "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
@@ -167,7 +167,7 @@
       "worker_id": "watch_state",
       "display_title": "WATCH \u00b7 state",
       "worker_type": "state_observer",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-phase3",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-3-stateful-orchestration",
       "owns_paths": [
         "automation/orchestration/work_packets/",
@@ -194,7 +194,7 @@
       "worker_id": "rulebook_codex",
       "display_title": "RULEBOOK \u00b7 codex",
       "worker_type": "manual_codex",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-operator-rulebook",
       "owns_paths": [
         "automation/orchestration/operator/",
@@ -225,7 +225,7 @@
       "worker_id": "brainstem_codex",
       "display_title": "BRAINSTEM \u00b7 codex",
       "worker_type": "manual_codex",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-brainstem",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-brainstem-daily-start",
       "owns_paths": [
         "automation/orchestration/bootstrap/",
@@ -269,7 +269,7 @@
       "worker_id": "safety_codex",
       "display_title": "SAFETY \u00b7 codex",
       "worker_type": "manual_codex",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-validation",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-validation-cleanup",
       "owns_paths": [
         "RISK_POLICY.md",
@@ -300,7 +300,7 @@
       "worker_id": "orchestration_codex",
       "display_title": "ORCH \u00b7 codex",
       "worker_type": "manual_codex",
-      "default_path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-brainstem",
+      "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "phase-brainstem-daily-start",
       "owns_paths": [
         "automation/orchestration/"
