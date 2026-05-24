@@ -272,7 +272,18 @@ function Get-CurrentBranchPr {
     }
 
     $pr = $items[0]
-    $checks = @(Convert-CheckRollup -StatusCheckRollup $pr.statusCheckRollup)
+    if ($null -eq $pr -or $null -eq $pr.PSObject.Properties['number']) {
+        return [pscustomobject] @{
+            available = $true
+            detected = $false
+            reason = "No PR found for current branch"
+            pr = $null
+            checks = @()
+            validate = "UNKNOWN"
+        }
+    }
+    $rollup = if ($pr.PSObject.Properties['statusCheckRollup']) { $pr.statusCheckRollup } else { @() }
+    $checks = @(Convert-CheckRollup -StatusCheckRollup $rollup)
     return [pscustomobject] @{
         available = $true
         detected = $true
