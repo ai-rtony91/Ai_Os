@@ -1,248 +1,455 @@
+<#
+.SYNOPSIS
+Evaluates AI_OS post-merge local-main sync state without mutating the repo.
+
+.DESCRIPTION
+Test-AiOsPostPushVerification.DRY_RUN.ps1 validates repo identity, branch
+state, HEAD vs origin/main sync, working tree cleanliness, and optionally
+confirms the PR is merged on GitHub. It classifies the result as
+POST_MERGE_SYNCED, HUMAN_APPROVAL_REQUIRED, or BLOCKED.
+
+This helper is DRY_RUN/report-only. It does not edit files, stage, commit,
+push, switch branches, reset, clean files, or run automation scripts.
+
+.PARAMETER ExpectedBranch
+Expected branch for post-merge verification. Default is main.
+
+.PARAMETER PrNumber
+Optional GitHub PR number to verify merge state. When supplied, the script
+queries gh pr view to confirm the PR was merged.
+
+.PARAMETER Json
+Emit JSON instead of the default Markdown report.
+
+.EXAMPLE
+.\automation\orchestration\post_push\Test-AiOsPostPushVerification.DRY_RUN.ps1
+
+.EXAMPLE
+.\automation\orchestration\post_push\Test-AiOsPostPushVerification.DRY_RUN.ps1 -PrNumber 241
+
+.EXAMPLE
+.\automation\orchestration\post_push\Test-AiOsPostPushVerification.DRY_RUN.ps1 -PrNumber 241 -Json
+#>
+
+[CmdletBinding()]
 param(
-    [string]$ExpectedBranch = "main",
-    [switch]$OutputJson
+    [Parameter(Mandatory = $false)]
+    [string] $ExpectedBranch = "main",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateRange(1, [int]::MaxValue)]
+    [int] $PrNumber = 0,
+
+    [Parameter(Mandatory = $false)]
+    [switch] $Json
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-function Invoke-GitText {
-    param([Parameter(Mandatory = $true)][string[]]$Arguments)
+$scriptName = Split-Path -Leaf $PSCommandPath
+$expectedRepoPath = "C:\Dev\Ai.Os"
+$expectedRemoteUrl = "https://github.com/ai-rtony91/Ai_Os.git"
 
-    $previousErrorActionPreference = $ErrorActionPreference
+function Write-FailureRecovery {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $WhatFailed,
+
+        [Parameter(Mandatory = $true)]
+        [string] $WhyItFailed,
+
+        [Parameter(Mandatory = $true)]
+        [string] $NextAction,
+
+        [Parameter(Mandatory = $true)]
+        [string] $Reference,
+
+        [Parameter(Mandatory = $false)]
+        [string] $SafeCommandOrPrompt = "No command recommended."
+    )
+
+    Write-Output "WHAT FAILED:"
+    Write-Output $WhatFailed
+    Write-Output ""
+    Write-Output "WHY IT FAILED:"
+    Write-Output $WhyItFailed
+    Write-Output ""
+    Write-Output "WHAT NEEDS TO HAPPEN NEXT:"
+    Write-Output $NextAction
+    Write-Output ""
+    Write-Output "WHERE TO REFERENCE:"
+    Write-Output $Reference
+    Write-Output ""
+    Write-Output "SAFE NEXT COMMAND OR PROMPT:"
+    Write-Output $SafeCommandOrPrompt
+}
+
+function Assert-CommandAvailable {
+    param([Parameter(Mandatory = $true)][string] $CommandName)
+
+    $command = Get-Command $CommandName -ErrorAction SilentlyContinue
+    if ($null -eq $command) {
+        Write-FailureRecovery `
+            -WhatFailed "Required command '$CommandName' was not found." `
+            -WhyItFailed "The post-merge verification gate needs '$CommandName' for state inspection." `
+            -NextAction "Install or restore '$CommandName', then rerun this helper." `
+            -Reference "AGENTS.md -> AI_OS Failure Recovery Response Rule; docs/workflows/AI_OS_PR_LANE_RUNNER.md" `
+            -SafeCommandOrPrompt "No command recommended."
+        exit 1
+    }
+}
+
+function Invoke-NativeCommand {
+    param(
+        [Parameter(Mandatory = $true)][string] $CommandName,
+        [Parameter(Mandatory = $true)][string[]] $Arguments,
+        [Parameter(Mandatory = $true)][string] $DisplayCommand,
+        [Parameter(Mandatory = $false)][switch] $AllowFailure
+    )
+
     $ErrorActionPreference = "Continue"
-    $output = & git @Arguments 2>&1
+    $output = & $CommandName @Arguments 2>&1
     $exitCode = $LASTEXITCODE
-    $ErrorActionPreference = $previousErrorActionPreference
+    $ErrorActionPreference = "Stop"
 
-    return [pscustomobject]@{
-        Output = @($output | ForEach-Object { [string]$_ })
-        ExitCode = $exitCode
+    $stdoutItems = @($output | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
+    $stderrItems = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
+    $text = ($stdoutItems | Out-String).Trim()
+    $stderrText = ($stderrItems | ForEach-Object { $_.Exception.Message } | Out-String).Trim()
+
+    if ($exitCode -ne 0 -and -not $AllowFailure) {
+        $failDetail = if ($stderrText) { "$text`n$stderrText" } else { $text }
+        Write-FailureRecovery `
+            -WhatFailed "Command failed: $DisplayCommand`n$failDetail" `
+            -WhyItFailed "The post-merge verification gate could not collect required state." `
+            -NextAction "Review the error, then rerun this helper after the issue is corrected." `
+            -Reference "docs/workflows/AI_OS_PR_LANE_RUNNER.md; AGENTS.md -> AI_OS Failure Recovery Response Rule" `
+            -SafeCommandOrPrompt "No command recommended."
+        exit 1
+    }
+
+    if ($stderrText) {
+        Write-Warning "[$DisplayCommand] $stderrText"
+    }
+
+    return [pscustomobject] @{
+        exit_code = $exitCode
+        output = $text
+        lines = @($stdoutItems | ForEach-Object { [string] $_ })
     }
 }
 
-function Remove-GitWarnings {
-    param([string[]]$Lines)
+function Get-ObjectValue {
+    param(
+        [Parameter(Mandatory = $false)]
+        [AllowNull()]
+        [object] $InputObject,
 
-    return @($Lines | Where-Object { $_ -notmatch "^warning:" })
-}
+        [Parameter(Mandatory = $true)]
+        [string[]] $Names,
 
-function Get-GitWarnings {
-    param([string[]]$Lines)
+        [Parameter(Mandatory = $false)]
+        [string] $Default = ""
+    )
 
-    return @($Lines | Where-Object { $_ -match "^warning:" })
-}
-
-function Get-FirstCleanLine {
-    param([string[]]$Lines)
-
-    $cleanLines = @(Remove-GitWarnings -Lines $Lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-    if ($cleanLines.Count -eq 0) {
-        return "UNKNOWN"
+    if ($null -eq $InputObject) {
+        return $Default
     }
 
-    return $cleanLines[0]
-}
-
-function Get-ChangedPathFromStatusLine {
-    param([Parameter(Mandatory = $true)][string]$Line)
-
-    if ($Line.Length -lt 4) {
-        return $Line
+    foreach ($name in $Names) {
+        $property = $InputObject.PSObject.Properties[$name]
+        if ($null -ne $property -and $null -ne $property.Value) {
+            return [string] $property.Value
+        }
     }
 
-    return $Line.Substring(3).Replace("\", "/")
+    return $Default
 }
 
-$branchResult = Invoke-GitText -Arguments @("branch", "--show-current")
-$headHashResult = Invoke-GitText -Arguments @("rev-parse", "--short", "HEAD")
-$headFullHashResult = Invoke-GitText -Arguments @("rev-parse", "HEAD")
-$messageResult = Invoke-GitText -Arguments @("log", "-1", "--pretty=%s")
-$statusResult = Invoke-GitText -Arguments @("status", "--short")
-$originMainResult = Invoke-GitText -Arguments @("rev-parse", "--short", "origin/main")
-$originMainFullResult = Invoke-GitText -Arguments @("rev-parse", "origin/main")
+function Format-MarkdownReport {
+    param([Parameter(Mandatory = $true)][pscustomobject] $Packet)
 
-$gitWarnings = @(
-    @(
-        Get-GitWarnings -Lines $branchResult.Output
-        Get-GitWarnings -Lines $headHashResult.Output
-        Get-GitWarnings -Lines $messageResult.Output
-        Get-GitWarnings -Lines $statusResult.Output
-        Get-GitWarnings -Lines $originMainResult.Output
-    ) | Sort-Object -Unique
-)
+    $blockerText = if ($Packet.blockers.Count -gt 0) {
+        ($Packet.blockers | ForEach-Object { "- $_" }) -join "`n"
+    }
+    else {
+        "- none"
+    }
 
-$currentBranch = Get-FirstCleanLine -Lines $branchResult.Output
-$latestCommitHash = Get-FirstCleanLine -Lines $headHashResult.Output
-$latestCommitFullHash = Get-FirstCleanLine -Lines $headFullHashResult.Output
-$latestCommitMessage = Get-FirstCleanLine -Lines $messageResult.Output
-$statusLines = @(Remove-GitWarnings -Lines $statusResult.Output | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-$dirtyFiles = @($statusLines | Where-Object { -not $_.StartsWith("?? ") } | ForEach-Object { Get-ChangedPathFromStatusLine -Line $_ })
-$untrackedFiles = @($statusLines | Where-Object { $_.StartsWith("?? ") } | ForEach-Object { Get-ChangedPathFromStatusLine -Line $_ })
-$gitState = if ($statusLines.Count -eq 0) { "clean" } else { "dirty" }
+    $prSection = ""
+    if ($null -ne $Packet.pr_merge_state) {
+        $prSection = @"
 
-$originMainAvailable = ($originMainResult.ExitCode -eq 0)
-$originMainHash = if ($originMainAvailable) { Get-FirstCleanLine -Lines $originMainResult.Output } else { "UNKNOWN" }
-$originMainFullHash = if ($originMainFullResult.ExitCode -eq 0) { Get-FirstCleanLine -Lines $originMainFullResult.Output } else { "UNKNOWN" }
-$headMatchesOriginMain = ($originMainAvailable -and $latestCommitFullHash -eq $originMainFullHash)
-$originMainSyncStatus = if (-not $originMainAvailable) {
-    "UNKNOWN"
-} elseif ($headMatchesOriginMain) {
-    "MATCH"
-} else {
-    "DIFFERENT"
+## PR Merge State
+- PR: #$($Packet.pr_merge_state.pr_number)
+- URL: $($Packet.pr_merge_state.url)
+- State: $($Packet.pr_merge_state.state)
+- Merge commit: $($Packet.pr_merge_state.merge_commit)
+"@
+    }
+
+    return @"
+# AI_OS Post-Merge Verification Gate
+
+- Mode: DRY_RUN
+- Gate state: $($Packet.gate_state)
+- Safety: $($Packet.safety_classification)
+- Generated: $($Packet.generated_at)
+
+## Repo Identity
+- Path: $($Packet.repo_identity.repo_path) [$($Packet.repo_identity.path_result)]
+- Remote: $($Packet.repo_identity.remote_url) [$($Packet.repo_identity.remote_result)]
+
+## Branch State
+- Current: $($Packet.branch_state.current_branch)
+- Expected: $($Packet.branch_state.expected_branch)
+- Branch check: $($Packet.branch_state.branch_result)
+
+## Sync State
+- HEAD: $($Packet.sync_state.head_hash)
+- origin/$($Packet.branch_state.expected_branch): $($Packet.sync_state.origin_main_hash)
+- Sync: $($Packet.sync_state.sync_status)
+- Latest commit: $($Packet.sync_state.latest_commit_message)
+$prSection
+
+## Git Status
+- State: $($Packet.git_status.state)
+- Dirty files: $($Packet.git_status.dirty_count)
+- Untracked: $($Packet.git_status.untracked_count)
+- Conflicts: $($Packet.git_status.conflict_count)
+
+## Blockers
+$blockerText
+
+## Next Action
+- $($Packet.recommended_next_action)
+- Stop: $($Packet.stop_condition)
+
+---
+Commit performed: NO
+Push performed: NO
+"@
 }
 
-$risks = @()
+try {
+    Assert-CommandAvailable -CommandName "git"
 
-if ($currentBranch -ne $ExpectedBranch) {
-    $risks += [pscustomobject]@{
-        risk = "Current branch is '$currentBranch', expected '$ExpectedBranch' for post-push main verification."
-        severity = "BLOCKED"
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $blockers = @()
+
+    # --- Repo identity ---
+    $repoTopLevelResult = Invoke-NativeCommand -CommandName "git" -Arguments @("rev-parse", "--show-toplevel") -DisplayCommand "git rev-parse --show-toplevel"
+    $repoPath = $repoTopLevelResult.output.Trim().Replace("/", "\")
+    $repoPathResult = if ($repoPath -ieq $expectedRepoPath) { "PASS" } else { "BLOCKED" }
+    if ($repoPathResult -ne "PASS") {
+        $blockers += "Repo path mismatch: expected $expectedRepoPath, got $repoPath"
+    }
+
+    $remoteUrlResult = Invoke-NativeCommand -CommandName "git" -Arguments @("remote", "get-url", "origin") -DisplayCommand "git remote get-url origin" -AllowFailure
+    $remoteUrl = if ($remoteUrlResult.exit_code -eq 0) { $remoteUrlResult.output.Trim() } else { "NOT_CONFIGURED" }
+    $remoteResult = if ($remoteUrl -eq $expectedRemoteUrl) { "PASS" } else { "BLOCKED" }
+    if ($remoteResult -ne "PASS") {
+        $blockers += "Remote mismatch: expected $expectedRemoteUrl, got $remoteUrl"
+    }
+
+    # --- Branch state ---
+    $branchResult = Invoke-NativeCommand -CommandName "git" -Arguments @("branch", "--show-current") -DisplayCommand "git branch --show-current"
+    $branch = $branchResult.output.Trim()
+    if ([string]::IsNullOrWhiteSpace($branch)) {
+        $branch = "UNKNOWN"
+        $blockers += "Could not determine current branch."
+    }
+
+    $branchCheck = if ($branch -eq $ExpectedBranch) { "PASS" } else { "BLOCKED" }
+    if ($branchCheck -ne "PASS") {
+        $blockers += "Branch mismatch: expected $ExpectedBranch, got $branch"
+    }
+
+    # --- HEAD and origin sync ---
+    $headResult = Invoke-NativeCommand -CommandName "git" -Arguments @("rev-parse", "--short", "HEAD") -DisplayCommand "git rev-parse --short HEAD"
+    $headFullResult = Invoke-NativeCommand -CommandName "git" -Arguments @("rev-parse", "HEAD") -DisplayCommand "git rev-parse HEAD"
+    $messageResult = Invoke-NativeCommand -CommandName "git" -Arguments @("log", "-1", "--pretty=%s") -DisplayCommand "git log -1 --pretty=%s"
+
+    $headHash = $headResult.output.Trim()
+    $headFullHash = $headFullResult.output.Trim()
+    $latestMessage = $messageResult.output.Trim()
+
+    $originRef = "origin/$ExpectedBranch"
+    $originResult = Invoke-NativeCommand -CommandName "git" -Arguments @("rev-parse", $originRef) -DisplayCommand "git rev-parse $originRef" -AllowFailure
+    $originShortResult = Invoke-NativeCommand -CommandName "git" -Arguments @("rev-parse", "--short", $originRef) -DisplayCommand "git rev-parse --short $originRef" -AllowFailure
+
+    $originAvailable = $originResult.exit_code -eq 0
+    $originFullHash = if ($originAvailable) { $originResult.output.Trim() } else { "UNKNOWN" }
+    $originHash = if ($originShortResult.exit_code -eq 0) { $originShortResult.output.Trim() } else { "UNKNOWN" }
+    $headMatchesOrigin = $originAvailable -and ($headFullHash -eq $originFullHash)
+
+    $syncStatus = if (-not $originAvailable) {
+        "UNKNOWN"
+    } elseif ($headMatchesOrigin) {
+        "SYNCED"
+    } else {
+        "OUT_OF_SYNC"
+    }
+
+    if (-not $originAvailable) {
+        $blockers += "$originRef ref is unavailable. Cannot verify sync state."
+    } elseif (-not $headMatchesOrigin) {
+        $blockers += "HEAD ($headHash) does not match $originRef ($originHash). Local main is not synced."
+    }
+
+    # --- Git status ---
+    $statusResult = Invoke-NativeCommand -CommandName "git" -Arguments @("status", "--short") -DisplayCommand "git status --short"
+    $statusLines = @($statusResult.lines | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    $dirtyFiles = @($statusLines | Where-Object { -not $_.StartsWith("?? ") } | ForEach-Object {
+        if ($_.Length -ge 4) { $_.Substring(3).Replace("\", "/") } else { $_ }
+    })
+    $untrackedFiles = @($statusLines | Where-Object { $_.StartsWith("?? ") } | ForEach-Object {
+        if ($_.Length -ge 4) { $_.Substring(3).Replace("\", "/") } else { $_ }
+    })
+    $conflictLines = @($statusLines | Where-Object { $_ -match "^(UU|AA|DD|AU|UA|DU|UD) " })
+    $gitState = if ($dirtyFiles.Count -eq 0 -and $conflictLines.Count -eq 0) { "clean" } else { "dirty" }
+
+    if ($conflictLines.Count -gt 0) {
+        $blockers += "Merge conflicts detected ($($conflictLines.Count) file(s))."
+    }
+
+    if ($dirtyFiles.Count -gt 0) {
+        $blockers += "Working tree has $($dirtyFiles.Count) dirty file(s) after expected sync."
+    }
+
+    # --- Optional PR merge state ---
+    $prMergeState = $null
+    if ($PrNumber -gt 0) {
+        Assert-CommandAvailable -CommandName "gh"
+
+        $prViewResult = Invoke-NativeCommand `
+            -CommandName "gh" `
+            -Arguments @("pr", "view", "$PrNumber", "--json", "number,state,mergeCommit,url") `
+            -DisplayCommand "gh pr view $PrNumber --json number,state,mergeCommit,url" `
+            -AllowFailure
+
+        if ($prViewResult.exit_code -ne 0) {
+            $blockers += "Could not query PR #$PrNumber state: $($prViewResult.output)"
+        } else {
+            try {
+                $pr = $prViewResult.output | ConvertFrom-Json
+
+                $prState = Get-ObjectValue -InputObject $pr -Names @("state") -Default "UNKNOWN"
+                $prUrl = Get-ObjectValue -InputObject $pr -Names @("url") -Default ""
+                $mergeCommitObj = if ($null -ne $pr -and $pr.PSObject.Properties["mergeCommit"] -and $null -ne $pr.mergeCommit) {
+                    $pr.mergeCommit
+                } else {
+                    $null
+                }
+                $mergeCommitOid = if ($null -ne $mergeCommitObj -and $mergeCommitObj.PSObject.Properties["oid"]) {
+                    [string] $mergeCommitObj.oid
+                } else {
+                    "UNKNOWN"
+                }
+
+                $prMergeState = [pscustomobject] @{
+                    pr_number    = $PrNumber
+                    state        = $prState
+                    url          = $prUrl
+                    merge_commit = $mergeCommitOid
+                }
+
+                if ($prState -ne "MERGED") {
+                    $blockers += "PR #$PrNumber is not merged: state=$prState"
+                }
+            }
+            catch {
+                $blockers += "PR #$PrNumber JSON parse failed: $($_.Exception.Message)"
+            }
+        }
+    }
+
+    # --- Classification ---
+    $gateState = if ($blockers.Count -gt 0) { "BLOCKED" } else { "POST_MERGE_SYNCED" }
+    $safetyClassification = if ($gateState -eq "BLOCKED") { "BLOCKED" } else { "SAFE_READ_ONLY" }
+
+    $recommendedNextAction = if ($gateState -eq "POST_MERGE_SYNCED") {
+        "Post-merge sync verified. Safe to proceed with next task or close PR lane."
+    } else {
+        "Resolve blockers before declaring post-merge sync complete."
+    }
+
+    $stopCondition = if ($gateState -eq "POST_MERGE_SYNCED") {
+        "Verification complete. No mutation needed."
+    } else {
+        "Do not proceed until blockers are resolved and verification passes."
+    }
+
+    # --- Build packet ---
+    $packet = [pscustomobject] @{
+        schema                 = "AIOS_POST_MERGE_VERIFICATION_PACKET.v1"
+        generated_at           = $generatedAt
+        script                 = $scriptName
+        mode                   = "DRY_RUN"
+        gate_state             = $gateState
+        safety_classification  = $safetyClassification
+        repo_identity          = [pscustomobject] @{
+            repo_path     = $repoPath
+            path_result   = $repoPathResult
+            remote_url    = $remoteUrl
+            remote_result = $remoteResult
+        }
+        branch_state           = [pscustomobject] @{
+            current_branch  = $branch
+            expected_branch = $ExpectedBranch
+            branch_result   = $branchCheck
+        }
+        sync_state             = [pscustomobject] @{
+            head_hash             = $headHash
+            head_full_hash        = $headFullHash
+            origin_main_hash      = $originHash
+            origin_main_full_hash = $originFullHash
+            origin_main_available = $originAvailable
+            head_matches_origin   = $headMatchesOrigin
+            sync_status           = $syncStatus
+            latest_commit_message = $latestMessage
+        }
+        git_status             = [pscustomobject] @{
+            state           = $gitState
+            dirty_count     = $dirtyFiles.Count
+            untracked_count = $untrackedFiles.Count
+            conflict_count  = $conflictLines.Count
+            dirty_files     = @($dirtyFiles)
+            untracked_files = @($untrackedFiles)
+        }
+        pr_merge_state         = $prMergeState
+        blockers               = @($blockers)
+        recommended_next_action = $recommendedNextAction
+        stop_condition         = $stopCondition
+        safety                 = [pscustomobject] @{
+            files_edited      = 0
+            files_staged      = 0
+            commits_performed = 0
+            pushes_performed  = 0
+            branch_switches   = 0
+            resets_performed   = 0
+            files_deleted     = 0
+            reports_written   = 0
+        }
+    }
+
+    # --- Output ---
+    if ($Json) {
+        $jsonText = $packet | ConvertTo-Json -Depth 10
+        $null = $jsonText | ConvertFrom-Json
+        Write-Output $jsonText
+    }
+    else {
+        Write-Output (Format-MarkdownReport -Packet $packet).TrimEnd()
     }
 }
-
-if ($gitState -ne "clean") {
-    $risks += [pscustomobject]@{
-        risk = "Worktree is dirty after supposed push."
-        severity = "REVIEW"
-    }
+catch {
+    Write-FailureRecovery `
+        -WhatFailed "Unhandled error in post-merge verification gate." `
+        -WhyItFailed $_.Exception.Message `
+        -NextAction "Review the error and rerun this helper after the issue is corrected." `
+        -Reference "AGENTS.md -> AI_OS Failure Recovery Response Rule; docs/workflows/AI_OS_PR_LANE_RUNNER.md" `
+        -SafeCommandOrPrompt "No command recommended."
+    exit 1
 }
-
-if (-not $originMainAvailable) {
-    $risks += [pscustomobject]@{
-        risk = "Local origin/main ref is unavailable; push success cannot be inferred locally."
-        severity = "REVIEW"
-    }
-} elseif (-not $headMatchesOriginMain) {
-    $risks += [pscustomobject]@{
-        risk = "HEAD does not match local origin/main. Push to main is not verified by local refs."
-        severity = "REVIEW"
-    }
-}
-
-$githubStatusCheckWarning = "UNKNOWN: GitHub checks were not queried by this DRY_RUN scaffold."
-$risks += [pscustomobject]@{
-    risk = "GitHub status checks may still be running or unavailable."
-    severity = "REVIEW"
-}
-
-$remotePushLikelySucceeded = "UNKNOWN"
-if ($currentBranch -eq $ExpectedBranch -and $headMatchesOriginMain) {
-    $remotePushLikelySucceeded = "YES"
-} elseif ($currentBranch -ne $ExpectedBranch) {
-    $remotePushLikelySucceeded = "NO"
-}
-
-$resultStatus = "PASS"
-if (@($risks | Where-Object { $_.severity -eq "BLOCKED" }).Count -gt 0) {
-    $resultStatus = "BLOCKED"
-} elseif ($risks.Count -gt 0 -or $gitState -ne "clean") {
-    $resultStatus = "REVIEW"
-}
-
-$nextSafeAction = "Post-push state looks locally safe. Confirm GitHub checks before closing the task."
-if ($resultStatus -eq "REVIEW") {
-    $nextSafeAction = "Review risks, confirm GitHub checks, and verify origin/main before declaring push complete."
-} elseif ($resultStatus -eq "BLOCKED") {
-    $nextSafeAction = "Stop. Switch to MAIN CONTROL on main or resolve branch mismatch before post-push verification."
-}
-
-$result = [pscustomobject]@{
-    system = "AI_OS"
-    task = "Verify AI_OS post-push state"
-    mode = "DRY_RUN"
-    result = $resultStatus
-    expected_branch = $ExpectedBranch
-    current_branch = $currentBranch
-    latest_commit_hash = $latestCommitHash
-    latest_commit_message = $latestCommitMessage
-    origin_main = [pscustomobject]@{
-        available = $originMainAvailable
-        hash = $originMainHash
-        head_matches_origin_main = $headMatchesOriginMain
-        sync_status = $originMainSyncStatus
-    }
-    git_status = [pscustomobject]@{
-        state = $gitState
-        dirty_count = $dirtyFiles.Count
-        untracked_count = $untrackedFiles.Count
-        dirty_files = $dirtyFiles
-        untracked_files = $untrackedFiles
-    }
-    remote_push_likely_succeeded = $remotePushLikelySucceeded
-    github_status_check_warning = $githubStatusCheckWarning
-    risks = $risks
-    git_warnings = $gitWarnings
-    safety = [pscustomobject]@{
-        writes_performed = 0
-        commits_performed = 0
-        pushes_performed = 0
-        dispatcher_edits = "NO"
-        runtime_integration = "NO"
-        dashboard_edits = "NO"
-    }
-    validator_friendly = $true
-    next_safe_action = $nextSafeAction
-}
-
-if ($OutputJson) {
-    $result | ConvertTo-Json -Depth 8
-    exit 0
-}
-
-Write-Host "AI_OS Post-Push Verification"
-Write-Host "Mode: DRY_RUN"
-Write-Host "Result: $resultStatus"
-Write-Host "Expected branch: $ExpectedBranch"
-Write-Host "Current branch: $currentBranch"
-Write-Host "Latest commit: $latestCommitHash"
-Write-Host "Latest message: $latestCommitMessage"
-Write-Host "origin/main sync: $originMainSyncStatus"
-Write-Host "Git status: $gitState"
-Write-Host "Remote push likely succeeded: $remotePushLikelySucceeded"
-Write-Host "GitHub status check warning: $githubStatusCheckWarning"
-Write-Host ""
-
-Write-Host "Dirty files:"
-if ($dirtyFiles.Count -eq 0) {
-    Write-Host "  NONE"
-} else {
-    foreach ($file in $dirtyFiles) {
-        Write-Host "  - $file"
-    }
-}
-Write-Host ""
-
-Write-Host "Untracked files:"
-if ($untrackedFiles.Count -eq 0) {
-    Write-Host "  NONE"
-} else {
-    foreach ($file in $untrackedFiles) {
-        Write-Host "  - $file"
-    }
-}
-Write-Host ""
-
-Write-Host "Risks:"
-if ($risks.Count -eq 0) {
-    Write-Host "  NONE"
-} else {
-    foreach ($risk in $risks) {
-        Write-Host "  - [$($risk.severity)] $($risk.risk)"
-    }
-}
-Write-Host ""
-
-Write-Host "Git warnings:"
-if ($gitWarnings.Count -eq 0) {
-    Write-Host "  NONE"
-} else {
-    foreach ($warning in $gitWarnings) {
-        Write-Host "  - $warning"
-    }
-}
-Write-Host ""
-
-Write-Host "Validator note: no files were changed by this DRY_RUN check."
-Write-Host "Next safe action: $nextSafeAction"
