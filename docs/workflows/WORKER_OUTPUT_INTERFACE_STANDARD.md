@@ -16,6 +16,8 @@ Worker output must make the current task state readable at a glance. A human ope
 - What approval is required?
 - What is the next safe action?
 
+Worker output, queue views, reports, and dashboards should project the canonical operator-facing queue field `current_status` from `docs/workflows/WORKER_TASK_LIFECYCLE_STANDARD.md`. They may display state; they must not become command authority.
+
 ## Authority Boundary
 
 Worker output is evidence and communication. It is not independent authority.
@@ -25,6 +27,8 @@ Terminal output, logs, dashboard panels, reports, and handoff packets must not o
 Workers and supervisors may recommend actions, summarize evidence, and request approval. They must not approve protected actions for themselves or for other workers.
 
 Only the user can approve APPLY, protected edits, commit, push, merge, deployment, broker execution, live trading, secret handling, or a change to current authority.
+
+Queue status and approval status are separate. Output surfaces should show both when relevant: `current_status` for lifecycle position, and approval state for whether a gated action has operator approval.
 
 ## Required Identity Header
 
@@ -36,9 +40,12 @@ Every worker output should begin with an identity header that includes:
 - session or timestamp when available.
 - execution mode.
 - approval state.
+- current status.
 - scope summary.
 
 The authority chain must trace back to the user. If the chain cannot be verified, the worker must stop and mark the output `BLOCKED` or `UNKNOWN`.
+
+`current_status` values must come from `docs/workflows/WORKER_TASK_LIFECYCLE_STANDARD.md`. Worker output must not invent additional lifecycle values.
 
 ## Execution Mode Labels
 
@@ -107,6 +114,7 @@ Audit detail should include:
 - files changed, if any.
 - commands run.
 - validation result.
+- current status.
 - protected files encountered.
 - approval state.
 - errors.
@@ -211,6 +219,8 @@ Dashboards may display worker output, validation evidence, lifecycle state, appr
 Dashboards must not create independent findings, approvals, authority, or workflow state. If dashboard output conflicts with terminal output, logs, active workflow standards, or active governance, the conflict must be marked `MISMATCH` and resolved against active authority.
 
 Dashboard panels should be projections of the same evidence used by terminal and log output, not a separate command source.
+
+Dashboard, report, and queue views should display `current_status` as the canonical queue projection. They may filter, group, sort, or summarize that value, but must not transform it into a new status vocabulary or use it to authorize APPLY, commit, push, merge, deployment, trading, secret handling, or runtime actions.
 
 ## Handoff Packet Display
 

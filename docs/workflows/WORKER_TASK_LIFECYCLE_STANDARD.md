@@ -4,15 +4,19 @@ Status: canonical workflow
 
 ## Purpose
 
-This document defines the standard lifecycle for AI_OS worker tasks.
+This document defines the canonical queue/status lifecycle for AI_OS worker tasks.
 
 The lifecycle keeps worker activity bounded, reviewable, and safe. It separates task intake, ownership checks, read-only preview, validation, human approval, APPLY, review, and completion.
+
+This file is the canonical authority for operator-facing queue status. Worker inboxes, operator queues, work packets, approval inboxes, queue runners, reports, and dashboards should project this lifecycle through `current_status` instead of inventing separate command-state vocabularies.
 
 ## Authority Boundary
 
 Worker lifecycle state is workflow evidence. It does not approve APPLY, commit, push, merge, deployment, broker execution, live trading, secret handling, or any protected action.
 
 A worker, runner, queue, packet, or validator may recommend a next safe action. Only the user can approve APPLY or other protected actions.
+
+Approval status is separate from queue status. The lifecycle answers "where is this task in the queue?" Approval status answers "has the operator approved the gated action?"
 
 ## Lifecycle Overview
 
@@ -36,7 +40,7 @@ The runner previews what would happen. The validator checks whether rules are br
 
 ## Standard Task States
 
-Worker tasks should use these standard states:
+Worker tasks must use this exact canonical lifecycle list for `current_status`:
 
 - `proposed`: A task idea exists, but it is not ready to run.
 - `queued`: The task has enough fields to enter the queue.
@@ -55,6 +59,84 @@ Worker tasks should use these standard states:
 - `deferred`: The task is unclear or should wait.
 
 Workers should not invent new state names without an approved update to this standard.
+
+## Operator Queue Item Fields
+
+Operator-facing queue items should preserve enough structure for humans, workers, reports, and dashboards to read the same task state without granting command authority.
+
+Required queue item fields:
+
+- `task_id`
+- `title`
+- `created_utc`
+- `updated_utc`
+- `source`
+- `lane`
+- `assigned_worker`
+- `task_type`
+- `objective`
+- `allowed_paths`
+- `blocked_paths`
+- `current_status`
+- `approval_status`
+- `validation_required`
+- `validation_command`
+- `next_action`
+
+Optional queue item fields:
+
+- `phase`
+- `stage`
+- `priority`
+- `repo`
+- `branch`
+- `worktree`
+- `owner_lane`
+- `required_inputs`
+- `expected_outputs`
+- `safety_status`
+- `blocked_reason`
+- `user_approval_required`
+- `output_summary_path`
+- `validation_report_path`
+- `related_files`
+- `related_packets`
+- `notes`
+- `legacy_status`
+- `legacy_state`
+
+If a required value is not known at intake time, keep the field and set the value to `UNKNOWN`. Do not remove useful existing metadata to fit this model.
+
+## Approval Status Values
+
+Approval status must stay separate from `current_status`.
+
+Use these approval status values:
+
+- `NOT_REQUIRED`: No operator approval is required for the current read-only or report-only step.
+- `PENDING`: Operator approval is required before continuing.
+- `APPROVED`: The operator approved the exact mode, files, paths, and action.
+- `DENIED`: Approval was denied or not granted.
+- `EXPIRED`: A prior approval is stale and must be renewed.
+
+Approval status must not be used as a lifecycle state. `APPROVED` does not mean `ready_for_apply`, and `done` does not imply approval for commit, push, merge, deployment, or any other protected action.
+
+## Legacy Field Mapping
+
+Existing producers may have older status fields. They should be projected into `current_status` without deleting the legacy evidence until the owning producer is updated in a separate approved lane.
+
+| Source | Legacy field | Canonical projection |
+|---|---|---|
+| Worker inbox | `status: complete` | `current_status: done` |
+| Worker inbox | `status: active` | `current_status: queued` unless a more specific lifecycle state is known |
+| Worker inbox | `status: blocked` | `current_status: blocked` |
+| Worker inbox | `status: deferred` | `current_status: deferred` |
+| Operator queue | top-level `status` | Queue/schema lifecycle marker only; item state belongs in `current_status` |
+| Work packet | `status` | Preserve as `legacy_status`; add `current_status` for operator-facing queue state |
+| Approval inbox | approval result/status | Map only to `approval_status`; do not map approval to `current_status` |
+| Queue runner | preview/result state | Project read-only progress through `current_status`, usually `runner_previewed`, `validation_running`, `validation_passed`, `validation_failed`, or `blocked` |
+
+When a legacy value cannot be safely mapped, use `current_status: deferred` and include the unresolved source value in `legacy_status`, `legacy_state`, `blocked_reason`, or `notes`.
 
 ## State Transition Rules
 
