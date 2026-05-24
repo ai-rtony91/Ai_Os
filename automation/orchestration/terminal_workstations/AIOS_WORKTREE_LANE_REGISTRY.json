@@ -1,34 +1,38 @@
 {
   "registry_id": "AIOS_WORKTREE_LANE_REGISTRY",
-  "schema_version": "4.0",
+  "schema_version": "5.0",
   "status": "canonical_topology_authority",
+  "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
+  "mode": "preview_first_manual_shells_only",
+  "launch_policy": "manual_preview_required",
+  "codex_policy": "manual_only",
+  "create_policy": "never_from_launcher",
+  "fallback_policy": "print_manual_command",
   "repo_identity_authority": [
     "README.md",
     "AGENTS.md"
   ],
   "behavior_authority": [
-    "docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md"
+    "docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md",
+    "docs/workflows/AI_OS_PR_LANE_RUNNER.md"
   ],
-  "mode": "preview_first_manual_shells_only",
-  "launch_policy": "manual_preview_required",
-  "fallback_policy": "print_manual_command",
   "topology_rules": [
     "README.md and AGENTS.md define active repo identity.",
-    "Workflow governance docs define worker behavior and allowed lane categories.",
     "This registry defines terminal lane topology only.",
     "Launchers consume this registry and must not define duplicate lane arrays.",
-    "Session and checkpoint files are evidence only, not topology authority.",
-    "No lane may auto-launch Codex, workers, scheduled tasks, startup tasks, broker/API actions, webhooks, real orders, or live trading."
+    "Main Control may remain on main only as a non-worker manual/display lane.",
+    "Worker lanes must use path_mode explicit_worktree and a non-main branch.",
+    "No lane may auto-launch Codex, workers, scheduled tasks, startup tasks, broker/API actions, webhooks, real orders, or live trading.",
+    "If a target folder exists but is not listed by git worktree list --porcelain, report a stale leftover folder and stop."
   ],
-  "allowed_lane_categories": [
-    "Main Control",
-    "Operator Orchestration",
-    "Validators",
-    "Reports",
-    "Work Intelligence",
-    "Dashboard UI",
-    "Trading Lab",
-    "Mock Data"
+  "allowed_modes": [
+    "REPORT",
+    "APPLY"
+  ],
+  "allowed_path_modes": [
+    "main_control",
+    "explicit_worktree",
+    "disabled"
   ],
   "allowed_launch_policies": [
     "manual_preview_required",
@@ -36,24 +40,21 @@
     "display_only",
     "disabled"
   ],
-  "allowed_path_modes": [
-    "repo_root",
-    "explicit_worktree",
-    "display_only",
-    "disabled"
-  ],
   "active_lanes": [
     {
       "lane_id": "main_control",
-      "lane_category": "Main Control",
+      "worker_id": "main_control",
+      "mode": "REPORT",
+      "path_mode": "main_control",
+      "worktree_path": "C:\\Dev\\Ai.Os",
+      "base_branch": "main",
+      "branch": "main",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
       "display_title": "MAIN CONTROL - main",
       "window_title": "MAIN CONTROL - main",
       "tab_title": "MAIN CONTROL - main",
       "tab_color": "#2563EB",
-      "emoji_marker": "BLUE",
       "role": "Operator-owned coordination lane for repo checkpointing, final review, commit approval, push approval, and V2 orchestration oversight.",
-      "path_mode": "repo_root",
-      "branch": "main",
       "allowed_paths": [],
       "blocked_paths": [
         ".git/",
@@ -66,25 +67,28 @@
         "secrets/",
         ".env"
       ],
-      "launch_policy": "manual_preview_required",
-      "truth_source": "repo_root_and_branch",
-      "validation_commands": [
-        "git status --short --branch",
-        "git diff --check"
-      ],
+      "launch_policy": "display_only",
+      "codex_policy": "manual_only",
+      "create_policy": "never_from_launcher",
+      "stop_rule": "Manual control only. Do not start workers or Codex from this lane.",
       "notes": "Main Control is not a worker lane and does not grant edit authority."
-    },
+    }
+  ],
+  "optional_inactive_lanes": [
     {
       "lane_id": "operator_orchestration",
-      "lane_category": "Operator Orchestration",
-      "display_title": "ORCHESTRATION - main",
-      "window_title": "ORCHESTRATION - main",
-      "tab_title": "ORCHESTRATION - main",
+      "worker_id": "operator_orchestration_worker",
+      "mode": "APPLY",
+      "path_mode": "disabled",
+      "worktree_path": "",
+      "base_branch": "main",
+      "branch": "",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
+      "display_title": "ORCHESTRATION - inactive",
+      "window_title": "ORCHESTRATION - inactive",
+      "tab_title": "ORCHESTRATION - inactive",
       "tab_color": "#F97316",
-      "emoji_marker": "ORANGE",
       "role": "Approved orchestration workflow, launcher, routing, and operator-control work only.",
-      "path_mode": "repo_root",
-      "branch": "main",
       "allowed_paths": [
         "automation/orchestration/",
         "docs/workflows/",
@@ -104,25 +108,26 @@
         "secrets/",
         ".env"
       ],
-      "launch_policy": "manual_preview_required",
-      "truth_source": "repo_root_and_branch",
-      "validation_commands": [
-        "git diff --check",
-        "git status --short --branch"
-      ],
-      "notes": "Orchestration edits still require task-specific APPLY approval."
+      "launch_policy": "disabled",
+      "codex_policy": "manual_only",
+      "create_policy": "approval_required",
+      "stop_rule": "Activate only with an explicit worktree path and non-main branch.",
+      "notes": "Disabled template lane; not launchable."
     },
     {
       "lane_id": "validators",
-      "lane_category": "Validators",
-      "display_title": "VALIDATORS - main",
-      "window_title": "VALIDATORS - main",
-      "tab_title": "VALIDATORS - main",
+      "worker_id": "validators_worker",
+      "mode": "REPORT",
+      "path_mode": "disabled",
+      "worktree_path": "",
+      "base_branch": "main",
+      "branch": "",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
+      "display_title": "VALIDATORS - inactive",
+      "window_title": "VALIDATORS - inactive",
+      "tab_title": "VALIDATORS - inactive",
       "tab_color": "#A855F7",
-      "emoji_marker": "PURPLE",
       "role": "Read-only validation, scans, evidence checks, and pass/fail reporting.",
-      "path_mode": "repo_root",
-      "branch": "main",
       "allowed_paths": [
         "automation/",
         "docs/",
@@ -140,25 +145,26 @@
         "secrets/",
         ".env"
       ],
-      "launch_policy": "manual_preview_required",
-      "truth_source": "repo_root_and_branch",
-      "validation_commands": [
-        "git diff --check",
-        "git status --short --branch"
-      ],
-      "notes": "Validators produce evidence only and do not approve APPLY."
+      "launch_policy": "disabled",
+      "codex_policy": "manual_only",
+      "create_policy": "approval_required",
+      "stop_rule": "Activate only with an explicit worktree path and non-main branch.",
+      "notes": "Disabled template lane; not launchable."
     },
     {
       "lane_id": "reports",
-      "lane_category": "Reports",
-      "display_title": "REPORTS - main",
-      "window_title": "REPORTS - main",
-      "tab_title": "REPORTS - main",
+      "worker_id": "reports_worker",
+      "mode": "REPORT",
+      "path_mode": "disabled",
+      "worktree_path": "",
+      "base_branch": "main",
+      "branch": "",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
+      "display_title": "REPORTS - inactive",
+      "window_title": "REPORTS - inactive",
+      "tab_title": "REPORTS - inactive",
       "tab_color": "#22C55E",
-      "emoji_marker": "GREEN",
       "role": "Approved audit, progress report, review artifact, and summary work only.",
-      "path_mode": "repo_root",
-      "branch": "main",
       "allowed_paths": [
         "docs/audits/",
         "Reports/",
@@ -180,27 +186,26 @@
         "secrets/",
         ".env"
       ],
-      "launch_policy": "manual_preview_required",
-      "truth_source": "repo_root_and_branch",
-      "validation_commands": [
-        "git diff --check",
-        "git status --short --branch"
-      ],
-      "notes": "Report lane does not create governance authority unless explicitly approved."
-    }
-  ],
-  "optional_inactive_lanes": [
+      "launch_policy": "disabled",
+      "codex_policy": "manual_only",
+      "create_policy": "approval_required",
+      "stop_rule": "Activate only with an explicit worktree path and non-main branch.",
+      "notes": "Disabled template lane; not launchable."
+    },
     {
       "lane_id": "dashboard_ui",
-      "lane_category": "Dashboard UI",
+      "worker_id": "dashboard_ui_worker",
+      "mode": "APPLY",
+      "path_mode": "disabled",
+      "worktree_path": "",
+      "base_branch": "main",
+      "branch": "",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
       "display_title": "DASHBOARD UI - inactive",
       "window_title": "DASHBOARD UI - inactive",
       "tab_title": "DASHBOARD UI - inactive",
       "tab_color": "#38BDF8",
-      "emoji_marker": "CYAN",
       "role": "Optional dashboard UI lane, inactive until explicitly assigned.",
-      "path_mode": "disabled",
-      "branch": "main",
       "allowed_paths": [
         "apps/dashboard/"
       ],
@@ -215,20 +220,25 @@
         ".env"
       ],
       "launch_policy": "disabled",
-      "truth_source": "approval_required",
+      "codex_policy": "manual_only",
+      "create_policy": "approval_required",
+      "stop_rule": "Activate only with an explicit worktree path and non-main branch.",
       "notes": "Do not activate without dashboard-specific APPLY approval."
     },
     {
       "lane_id": "trading_lab",
-      "lane_category": "Trading Lab",
+      "worker_id": "trading_lab_worker",
+      "mode": "APPLY",
+      "path_mode": "disabled",
+      "worktree_path": "",
+      "base_branch": "main",
+      "branch": "",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
       "display_title": "TRADING LAB - inactive",
       "window_title": "TRADING LAB - inactive",
       "tab_title": "TRADING LAB - inactive",
       "tab_color": "#EF4444",
-      "emoji_marker": "RED",
       "role": "Optional paper-only Trading Lab lane, inactive until explicitly assigned.",
-      "path_mode": "disabled",
-      "branch": "main",
       "allowed_paths": [
         "apps/",
         "docs/",
@@ -245,20 +255,25 @@
         ".env"
       ],
       "launch_policy": "disabled",
-      "truth_source": "approval_required",
+      "codex_policy": "manual_only",
+      "create_policy": "approval_required",
+      "stop_rule": "Activate only with an explicit worktree path and non-main branch.",
       "notes": "Paper-only; live broker execution remains blocked."
     },
     {
       "lane_id": "work_intelligence",
-      "lane_category": "Work Intelligence",
+      "worker_id": "work_intelligence_worker",
+      "mode": "REPORT",
+      "path_mode": "disabled",
+      "worktree_path": "",
+      "base_branch": "main",
+      "branch": "",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
       "display_title": "WORK INTELLIGENCE - inactive",
       "window_title": "WORK INTELLIGENCE - inactive",
       "tab_title": "WORK INTELLIGENCE - inactive",
       "tab_color": "#EAB308",
-      "emoji_marker": "YELLOW",
       "role": "Optional inspection and classification lane, inactive until explicitly assigned.",
-      "path_mode": "disabled",
-      "branch": "main",
       "allowed_paths": [
         "automation/work_intelligence/",
         "docs/audits/",
@@ -276,20 +291,25 @@
         ".env"
       ],
       "launch_policy": "disabled",
-      "truth_source": "approval_required",
+      "codex_policy": "manual_only",
+      "create_policy": "approval_required",
+      "stop_rule": "Activate only with an explicit worktree path and non-main branch.",
       "notes": "Inspection-only unless an APPLY task explicitly scopes changes."
     },
     {
       "lane_id": "mock_data",
-      "lane_category": "Mock Data",
+      "worker_id": "mock_data_worker",
+      "mode": "APPLY",
+      "path_mode": "disabled",
+      "worktree_path": "",
+      "base_branch": "main",
+      "branch": "",
+      "repo_remote": "https://github.com/ai-rtony91/Ai_Os.git",
       "display_title": "MOCK DATA - inactive",
       "window_title": "MOCK DATA - inactive",
       "tab_title": "MOCK DATA - inactive",
       "tab_color": "#64748B",
-      "emoji_marker": "GRAY",
       "role": "Optional mock data lane, inactive until explicitly assigned.",
-      "path_mode": "disabled",
-      "branch": "main",
       "allowed_paths": [
         "mock_data/",
         "tests/",
@@ -306,7 +326,9 @@
         ".env"
       ],
       "launch_policy": "disabled",
-      "truth_source": "approval_required",
+      "codex_policy": "manual_only",
+      "create_policy": "approval_required",
+      "stop_rule": "Activate only with an explicit worktree path and non-main branch.",
       "notes": "Do not activate without explicit mock-data task approval."
     }
   ],

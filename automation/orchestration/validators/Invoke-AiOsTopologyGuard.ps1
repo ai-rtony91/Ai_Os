@@ -66,33 +66,95 @@ function Resolve-GuardPath {
     return Join-Path $BasePaths[0] $Path
 }
 
-function Get-CurrentBranch {
+function ConvertTo-NormalizedPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path
+    )
+
+    return ([System.IO.Path]::GetFullPath($Path)).TrimEnd("\", "/").ToLowerInvariant()
+}
+
+function Invoke-GitChecked {
     param(
         [Parameter(Mandatory = $true)]
         [string]$Path,
+
         [Parameter(Mandatory = $true)]
-        [string]$LaneId
+        [string[]]$Arguments,
+
+        [Parameter(Mandatory = $true)]
+        [string]$LaneId,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Field
     )
 
-    $branchOutput = & git -C $Path branch --show-current 2>&1
+    $output = & git -C $Path @Arguments 2>&1
     if ($LASTEXITCODE -ne 0) {
-        Stop-AiOsTopologyGuard -Reason "Unable to read git branch for path: $Path" -LaneId $LaneId -Field "branch"
+        Stop-AiOsTopologyGuard -Reason "git -C '$Path' $($Arguments -join ' ') failed: $output" -LaneId $LaneId -Field $Field
     }
 
-    return [string]$branchOutput
+    return $output
+}
+
+function Get-GitWorktreeMap {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot
+    )
+
+    $output = Invoke-GitChecked -Path $RepoRoot -Arguments @("worktree", "list", "--porcelain") -LaneId "registry" -Field "worktree"
+    $map = @{}
+    $currentPath = $null
+    $currentBranch = $null
+
+    foreach ($line in @($output)) {
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            if ($currentPath) {
+                $map[(ConvertTo-NormalizedPath -Path $currentPath)] = [pscustomobject]@{
+                    Path = $currentPath
+                    Branch = $currentBranch
+                }
+            }
+            $currentPath = $null
+            $currentBranch = $null
+            continue
+        }
+
+        if ($line -like "worktree *") {
+            $currentPath = $line.Substring("worktree ".Length)
+            continue
+        }
+
+        if ($line -like "branch refs/heads/*") {
+            $currentBranch = $line.Substring("branch refs/heads/".Length)
+        }
+    }
+
+    if ($currentPath) {
+        $map[(ConvertTo-NormalizedPath -Path $currentPath)] = [pscustomobject]@{
+            Path = $currentPath
+            Branch = $currentBranch
+        }
+    }
+
+    return $map
 }
 
 function Resolve-LanePath {
     param(
         [Parameter(Mandatory = $true)]
         [object]$Lane,
+
         [Parameter(Mandatory = $true)]
         [string]$RepoRoot
     )
 
     switch ($Lane.path_mode) {
-        "repo_root" {
-            return $RepoRoot
+        "main_control" {
+            Assert-RequiredValue -Value $Lane.worktree_path -LaneId $Lane.lane_id -Field "worktree_path"
+            return [string]$Lane.worktree_path
         }
         "explicit_worktree" {
             Assert-RequiredValue -Value $Lane.worktree_path -LaneId $Lane.lane_id -Field "worktree_path"
@@ -104,10 +166,38 @@ function Resolve-LanePath {
     }
 }
 
+function Assert-NoDuplicateValue {
+    param(
+        [Parameter()]
+        [AllowEmptyCollection()]
+        [object[]]$Items,
+
+        [Parameter(Mandatory = $true)]
+        [string]$PropertyName,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Scope
+    )
+
+    if ($null -eq $Items -or $Items.Count -eq 0) {
+        return
+    }
+
+    $duplicates = $Items |
+        Where-Object { $null -ne $_.$PropertyName -and -not [string]::IsNullOrWhiteSpace([string]$_.$PropertyName) } |
+        Group-Object -Property $PropertyName |
+        Where-Object { $_.Count -gt 1 }
+
+    if ($duplicates) {
+        Stop-AiOsTopologyGuard -Reason "Duplicate $PropertyName in $Scope`: $($duplicates[0].Name)" -LaneId $duplicates[0].Group[0].lane_id -Field $PropertyName
+    }
+}
+
 function Test-AiOsTopologyRegistry {
     param(
         [Parameter(Mandatory = $true)]
         [object]$Registry,
+
         [Parameter(Mandatory = $true)]
         [string]$RepoRoot
     )
@@ -115,9 +205,12 @@ function Test-AiOsTopologyRegistry {
     Assert-RequiredValue -Value $Registry.registry_id -LaneId "registry" -Field "registry_id"
     Assert-RequiredValue -Value $Registry.schema_version -LaneId "registry" -Field "schema_version"
     Assert-RequiredValue -Value $Registry.status -LaneId "registry" -Field "status"
+    Assert-RequiredValue -Value $Registry.repo_remote -LaneId "registry" -Field "repo_remote"
     Assert-RequiredValue -Value $Registry.launch_policy -LaneId "registry" -Field "launch_policy"
+    Assert-RequiredValue -Value $Registry.codex_policy -LaneId "registry" -Field "codex_policy"
+    Assert-RequiredValue -Value $Registry.create_policy -LaneId "registry" -Field "create_policy"
 
-    if ($Registry.schema_version -ne "4.0") {
+    if ($Registry.schema_version -ne "5.0") {
         Stop-AiOsTopologyGuard -Reason "Unsupported registry schema version: $($Registry.schema_version)" -LaneId "registry" -Field "schema_version"
     }
 
@@ -129,7 +222,15 @@ function Test-AiOsTopologyRegistry {
         Stop-AiOsTopologyGuard -Reason "Top-level launch policy must be manual_preview_required." -LaneId "registry" -Field "launch_policy"
     }
 
-    $registryJson = $Registry | ConvertTo-Json -Depth 60
+    if ($Registry.codex_policy -ne "manual_only") {
+        Stop-AiOsTopologyGuard -Reason "Top-level codex_policy must be manual_only." -LaneId "registry" -Field "codex_policy"
+    }
+
+    if ($Registry.create_policy -ne "never_from_launcher") {
+        Stop-AiOsTopologyGuard -Reason "Top-level create_policy must be never_from_launcher." -LaneId "registry" -Field "create_policy"
+    }
+
+    $registryJson = $Registry | ConvertTo-Json -Depth 80
     $legacyRepoToken = "ai-rtony91_" + "Ai_Os_" + "CLEAN"
     if ($registryJson -match $legacyRepoToken) {
         Stop-AiOsTopologyGuard -Reason "Legacy CLEAN path reference found in registry." -LaneId "registry" -Field "path"
@@ -140,21 +241,39 @@ function Test-AiOsTopologyRegistry {
         Stop-AiOsTopologyGuard -Reason "Registry has no active lanes." -LaneId "registry" -Field "active_lanes"
     }
 
-    $duplicateLaneIds = $activeLanes.lane_id | Group-Object | Where-Object { $_.Count -gt 1 }
-    if ($duplicateLaneIds) {
-        Stop-AiOsTopologyGuard -Reason "Duplicate active lane_id: $($duplicateLaneIds[0].Name)" -LaneId $duplicateLaneIds[0].Name -Field "lane_id"
+    Assert-NoDuplicateValue -Items $activeLanes -PropertyName "lane_id" -Scope "active_lanes"
+    Assert-NoDuplicateValue -Items $activeLanes -PropertyName "window_title" -Scope "active_lanes"
+    Assert-NoDuplicateValue -Items $activeLanes -PropertyName "tab_title" -Scope "active_lanes"
+
+    $activeWorkerLanes = @($activeLanes | Where-Object { $_.path_mode -eq "explicit_worktree" })
+    Assert-NoDuplicateValue -Items $activeWorkerLanes -PropertyName "branch" -Scope "active worker lanes"
+    Assert-NoDuplicateValue -Items $activeWorkerLanes -PropertyName "worktree_path" -Scope "active worker lanes"
+
+    $worktreeMap = Get-GitWorktreeMap -RepoRoot $RepoRoot
+    $branchToWorktree = @{}
+    foreach ($key in $worktreeMap.Keys) {
+        $entry = $worktreeMap[$key]
+        if (-not [string]::IsNullOrWhiteSpace($entry.Branch)) {
+            $branchToWorktree[$entry.Branch] = $entry.Path
+        }
     }
 
     foreach ($lane in $activeLanes) {
         Assert-RequiredValue -Value $lane.lane_id -LaneId "UNKNOWN" -Field "lane_id"
         $laneId = [string]$lane.lane_id
 
-        foreach ($field in @("lane_category", "display_title", "window_title", "tab_title", "tab_color", "role", "path_mode", "branch", "launch_policy", "truth_source")) {
+        foreach ($field in @("worker_id", "mode", "path_mode", "worktree_path", "base_branch", "branch", "repo_remote", "display_title", "window_title", "tab_title", "role", "launch_policy", "codex_policy", "create_policy", "stop_rule")) {
             Assert-RequiredValue -Value $lane.$field -LaneId $laneId -Field $field
         }
 
-        if (@($Registry.allowed_lane_categories) -notcontains $lane.lane_category) {
-            Stop-AiOsTopologyGuard -Reason "Lane category is not allowed: $($lane.lane_category)" -LaneId $laneId -Field "lane_category"
+        foreach ($arrayField in @("allowed_paths", "blocked_paths")) {
+            if (@($lane.PSObject.Properties.Name) -notcontains $arrayField) {
+                Stop-AiOsTopologyGuard -Reason "Required field is missing." -LaneId $laneId -Field $arrayField
+            }
+        }
+
+        if (@($Registry.allowed_modes) -notcontains $lane.mode) {
+            Stop-AiOsTopologyGuard -Reason "Lane mode is not allowed: $($lane.mode)" -LaneId $laneId -Field "mode"
         }
 
         if (@($Registry.allowed_launch_policies) -notcontains $lane.launch_policy) {
@@ -165,8 +284,20 @@ function Test-AiOsTopologyRegistry {
             Stop-AiOsTopologyGuard -Reason "Path mode is not allowed: $($lane.path_mode)" -LaneId $laneId -Field "path_mode"
         }
 
-        if ($lane.branch -eq "main") {
-            Stop-AiOsTopologyGuard -Reason "Active lane targets main branch." -LaneId $laneId -Field "branch"
+        if ($lane.codex_policy -ne "manual_only") {
+            Stop-AiOsTopologyGuard -Reason "codex_policy must be manual_only." -LaneId $laneId -Field "codex_policy"
+        }
+
+        if ($lane.path_mode -eq "main_control") {
+            if ($lane.lane_id -ne "main_control" -or $lane.branch -ne "main") {
+                Stop-AiOsTopologyGuard -Reason "main_control path_mode is reserved for lane_id main_control on branch main." -LaneId $laneId -Field "path_mode"
+            }
+        } elseif ($lane.path_mode -eq "explicit_worktree") {
+            if ($lane.branch -eq "main") {
+                Stop-AiOsTopologyGuard -Reason "Worker lane targets main branch. Worker lanes require a non-main branch." -LaneId $laneId -Field "branch"
+            }
+        } else {
+            Stop-AiOsTopologyGuard -Reason "Active lane is not launchable." -LaneId $laneId -Field "path_mode"
         }
 
         if ($lane.launch_policy -eq "disabled") {
@@ -174,20 +305,46 @@ function Test-AiOsTopologyRegistry {
         }
 
         $resolvedPath = Resolve-LanePath -Lane $lane -RepoRoot $RepoRoot
+        $normalizedPath = ConvertTo-NormalizedPath -Path $resolvedPath
+
         if (-not (Test-Path -LiteralPath $resolvedPath -PathType Container)) {
-            Stop-AiOsTopologyGuard -Reason "Resolved lane path does not exist: $resolvedPath" -LaneId $laneId -Field "path_mode"
+            Stop-AiOsTopologyGuard -Reason "Resolved lane path does not exist: $resolvedPath" -LaneId $laneId -Field "worktree_path"
         }
 
-        $currentBranch = Get-CurrentBranch -Path $resolvedPath -LaneId $laneId
-        if ($currentBranch -ne $lane.branch) {
-            Stop-AiOsTopologyGuard -Reason "Branch mismatch. Expected '$($lane.branch)', found '$currentBranch'." -LaneId $laneId -Field "branch"
+        if (-not $worktreeMap.ContainsKey($normalizedPath)) {
+            Stop-AiOsTopologyGuard -Reason "Folder exists but is not listed by git worktree list --porcelain. Treat as stale leftover folder; do not repair or delete from this lane: $resolvedPath" -LaneId $laneId -Field "worktree_path"
         }
+
+        $listedWorktree = $worktreeMap[$normalizedPath]
+        if ($listedWorktree.Branch -ne $lane.branch) {
+            Stop-AiOsTopologyGuard -Reason "Git worktree branch mismatch. Expected '$($lane.branch)', found '$($listedWorktree.Branch)'." -LaneId $laneId -Field "branch"
+        }
+
+        if ($lane.path_mode -eq "explicit_worktree" -and $branchToWorktree.ContainsKey([string]$lane.branch)) {
+            $listedPath = ConvertTo-NormalizedPath -Path $branchToWorktree[[string]$lane.branch]
+            if ($listedPath -ne $normalizedPath) {
+                Stop-AiOsTopologyGuard -Reason "Branch '$($lane.branch)' is already checked out in a different worktree: $($branchToWorktree[[string]$lane.branch])" -LaneId $laneId -Field "branch"
+            }
+        }
+
+        $currentBranch = (Invoke-GitChecked -Path $resolvedPath -Arguments @("branch", "--show-current") -LaneId $laneId -Field "branch") -join "`n"
+        if ($currentBranch.Trim() -ne $lane.branch) {
+            Stop-AiOsTopologyGuard -Reason "Absolute git -C branch mismatch. Expected '$($lane.branch)', found '$currentBranch'." -LaneId $laneId -Field "branch"
+        }
+
+        $remote = (Invoke-GitChecked -Path $resolvedPath -Arguments @("remote", "get-url", "origin") -LaneId $laneId -Field "repo_remote") -join "`n"
+        if ($remote.Trim() -ne $lane.repo_remote -or $remote.Trim() -ne $Registry.repo_remote) {
+            Stop-AiOsTopologyGuard -Reason "Remote mismatch. Registry '$($Registry.repo_remote)', lane '$($lane.repo_remote)', found '$remote'." -LaneId $laneId -Field "repo_remote"
+        }
+
+        [void](Invoke-GitChecked -Path $resolvedPath -Arguments @("status", "--short", "--branch") -LaneId $laneId -Field "status")
     }
 
     return [pscustomobject]@{
         Status = "PASS"
         SchemaVersion = $Registry.schema_version
         ActiveLaneCount = $activeLanes.Count
+        ActiveWorkerLaneCount = $activeWorkerLanes.Count
         OptionalInactiveLaneCount = @($Registry.optional_inactive_lanes).Count
         RepoRoot = $RepoRoot
     }
@@ -228,9 +385,10 @@ Write-Host "Mode: Validation only"
 Write-Host "Registry: $resolvedRegistryPath"
 Write-Host "Schema: $($result.SchemaVersion)"
 Write-Host "Active lanes validated: $($result.ActiveLaneCount)"
+Write-Host "Active worker lanes validated: $($result.ActiveWorkerLaneCount)"
 Write-Host "Optional inactive lanes observed: $($result.OptionalInactiveLaneCount)"
 Write-Host "Repo root: $($result.RepoRoot)"
-Write-Host "No launchers, lanes, workers, runtime, telemetry, dashboard, or Codex actions were executed."
+Write-Host "No launchers, lanes, workers, runtime, telemetry, dashboard, worktree creation/deletion, or Codex actions were executed."
 
 $result | Add-Member -NotePropertyName RegistryPath -NotePropertyValue $resolvedRegistryPath -PassThru |
     Add-Member -NotePropertyName Registry -NotePropertyValue $registry -PassThru

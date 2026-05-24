@@ -22,11 +22,14 @@ Worker:
 Lane:
 [lane name]
 
-Branch:
-[expected branch name]
+Repo:
+[exact absolute repo path]
 
 Worktree:
-[absolute worktree path]
+[exact absolute worktree path]
+
+Branch:
+[expected branch name]
 
 Valid active worktrees:
 - C:\Dev\Ai.Os-agent1-registry-dryrun
@@ -37,6 +40,9 @@ Valid active worktrees:
 Allowed write boundary:
 [absolute allowed path or read-only]
 
+Blocked paths:
+[absolute or repo-relative blocked paths]
+
 Mission:
 [one scoped mission]
 
@@ -44,12 +50,16 @@ Rules:
 - Use the assigned active worktree path only.
 - Do not use C:\Dev\.workers paths.
 - Do not trust Get-Location inside Codex as proof of the active worktree.
-- Use git -C <absolute worktree path> for branch, status, and diff checks.
+- Use git -C <exact absolute worktree path> for branch, status, remote, and diff checks.
 - Use absolute file paths for reads and writes.
 - Use PowerShell Select-String for text search; do not use Bash grep.
 - Promotion is PR-based only.
 - Do not merge directly to main.
 - Do not push directly to main.
+- Do not open Vim, Nano, Notepad, or any editor.
+- Do not auto-launch Codex, worker loops, daemons, startup tasks, terminals, or launchers unless separately approved.
+- If the target folder exists but is not listed by git worktree list --porcelain, report a stale leftover folder and stop.
+- If a folder is locked after worktree cleanup, close processes holding it, run git worktree prune once, and request explicit cleanup approval before deletion.
 - If pre-flight fails, stop and report.
 - Do not self-repair failed pre-flight state.
 
@@ -58,6 +68,7 @@ Required pre-flight:
 git -C "[absolute worktree path]" status --short --branch
 git -C "[absolute worktree path]" branch --show-current
 git -C "[absolute worktree path]" remote -v
+git -C "[repo path]" worktree list --porcelain
 Test-Path "[absolute allowed path]"
 Select-String -Path "[absolute file path]" -Pattern "[pattern]" -SimpleMatch
 ```

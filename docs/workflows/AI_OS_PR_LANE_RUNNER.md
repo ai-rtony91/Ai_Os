@@ -51,12 +51,17 @@ Every PR lane must load:
 - Confirm base branch: `main`.
 - Confirm GitHub CLI is authenticated.
 - Confirm `main` is synced before branch creation.
+- For worktree lanes, confirm the exact worktree with `git -C <absolute-worktree-path>` checks for status, branch, and remote.
+- Do not use `Get-Location` alone as proof of the active repo or worktree.
 - Do not re-check known state unnecessarily if `docs/governance/AI_OS_REPO_MEMORY.md` already covers it.
 
 ### 2. Branch
 
 - Create a lane branch using naming pattern: `lane/<short-purpose>`.
 - Never work directly on `main` for protected changes.
+- Worker lanes must use a non-main branch. `main` is reserved for Main Control/manual control only.
+- Before assigning a worker lane, reject duplicate lane IDs, branches, worktree paths, and window/tab titles.
+- If a target folder exists but is not listed by `git worktree list --porcelain`, treat it as a stale leftover folder and stop; do not delete it from the PR lane.
 
 ### 3. Stage
 
