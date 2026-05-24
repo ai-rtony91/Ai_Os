@@ -176,10 +176,10 @@
     },
     {
       "path": "automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1",
-      "classification": "ACTIVE",
+      "classification": "HELPER",
       "purpose": "Read-only operator control-loop status.",
       "owner_area": "automation/orchestration/control",
-      "execution_mode": "DRY_RUN",
+      "execution_mode": "read_only_helper",
       "writes_files": false,
       "launches_process": false,
       "runs_git": false,
@@ -192,14 +192,19 @@
         "APPLY",
         "commit",
         "push",
+        "merge",
         "worker_launch",
-        "runtime_mutation"
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "process_launch",
+        "git_mutation"
       ],
-      "risk_policy_notes": "Status evidence only.",
-      "topology_guard_requirement": "May be referenced as a status helper.",
-      "validator_consumption": "May be treated as safe status evidence if unchanged.",
-      "review_status": "initial_apply_reviewed",
-      "next_safe_action": "Keep read-only."
+      "risk_policy_notes": "Registered as HELPER only. Control-loop status output is evidence, not execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and read-only."
     },
     {
       "path": "automation/orchestration/validators/Invoke-AiOsTopologyGuard.ps1",
@@ -229,6 +234,43 @@
       "validator_consumption": "May consume topology registry and should later consume this execution registry.",
       "review_status": "initial_apply_reviewed",
       "next_safe_action": "Extend in a future approved task to check execution registry classifications."
+    },
+    {
+      "path": "automation/orchestration/guard/Invoke-AiOsGuard.ps1",
+      "classification": "HELPER",
+      "purpose": "Read-only guard status helper for operator and validator consumption.",
+      "owner_area": "automation/orchestration/guard",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "packet_mutation",
+        "queue_mutation",
+        "state_mutation",
+        "approval_mutation",
+        "process_launch",
+        "git_mutation"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Guard output is evidence, not approval or mutation authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and read-only."
     },
     {
       "path": "automation/orchestration/validators/Invoke-AiOsExecutionRegistryGuard.ps1",
@@ -345,36 +387,43 @@
     },
     {
       "path": "automation/startup/Preview-AiOsMorningBrief.DRY_RUN.ps1",
-      "classification": "ACTIVE",
+      "classification": "HELPER",
       "purpose": "Morning brief preview helper.",
       "owner_area": "automation/startup",
-      "execution_mode": "DRY_RUN",
+      "execution_mode": "read_only_helper",
       "writes_files": false,
       "launches_process": false,
-      "runs_git": "read_only_expected",
+      "runs_git": "read_only_status_expected",
       "requires_human_approval": false,
       "allowed_callers": [
-        "operator"
+        "operator",
+        "validator_chain",
+        "status_display"
       ],
       "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
         "startup_task_registration",
         "scheduled_task_creation",
-        "worker_launch",
-        "runtime_mutation",
-        "APPLY"
+        "process_launch",
+        "git_mutation"
       ],
-      "risk_policy_notes": "Startup helpers are helpers, not authority.",
-      "topology_guard_requirement": "Not a lane launcher.",
-      "validator_consumption": "May be used as preview evidence only.",
-      "review_status": "initial_apply_reviewed",
-      "next_safe_action": "Keep DRY_RUN and non-writing."
+      "risk_policy_notes": "Registered as HELPER only. Morning brief preview output is evidence, not startup authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and non-writing."
     },
     {
       "path": "automation/startup/Get-AiOsMorningBriefState.DRY_RUN.ps1",
-      "classification": "ACTIVE",
+      "classification": "HELPER",
       "purpose": "Read-only morning brief state inspection.",
       "owner_area": "automation/startup",
-      "execution_mode": "DRY_RUN",
+      "execution_mode": "read_only_helper",
       "writes_files": false,
       "launches_process": false,
       "runs_git": false,
@@ -384,24 +433,30 @@
         "startup_preview"
       ],
       "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
         "startup_task_registration",
         "scheduled_task_creation",
-        "worker_launch",
-        "runtime_mutation",
-        "APPLY"
+        "state_mutation",
+        "process_launch",
+        "git_mutation"
       ],
-      "risk_policy_notes": "State inspection only.",
-      "topology_guard_requirement": "Not a lane launcher.",
-      "validator_consumption": "May be used as startup preview evidence.",
-      "review_status": "initial_apply_reviewed",
-      "next_safe_action": "Keep non-writing."
+      "risk_policy_notes": "Registered as HELPER only. Morning brief state output is evidence, not mutation authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and non-writing."
     },
     {
       "path": "automation/startup/Test-AiOsMorningBriefTextContract.DRY_RUN.ps1",
-      "classification": "ACTIVE",
+      "classification": "HELPER",
       "purpose": "Validates morning brief text contract in DRY_RUN mode.",
       "owner_area": "automation/startup",
-      "execution_mode": "DRY_RUN_VALIDATION",
+      "execution_mode": "read_only_validation_helper",
       "writes_files": false,
       "launches_process": false,
       "runs_git": false,
@@ -412,16 +467,21 @@
       ],
       "blocked_actions": [
         "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
         "startup_task_registration",
         "scheduled_task_creation",
-        "worker_launch",
-        "runtime_mutation"
+        "process_launch",
+        "git_mutation"
       ],
-      "risk_policy_notes": "Text-contract validation only.",
-      "topology_guard_requirement": "Not a lane launcher.",
-      "validator_consumption": "May be included in startup validators.",
-      "review_status": "initial_apply_reviewed",
-      "next_safe_action": "Keep DRY_RUN and read-only."
+      "risk_policy_notes": "Registered as HELPER only. Text-contract validation output is evidence, not startup authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and read-only."
     },
     {
       "path": "automation/orchestration/bootstrap/Resolve-AiOsRepoRoot.ps1",
@@ -1423,6 +1483,40 @@
       "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
       "review_status": "safe_helper_expansion_static_review",
       "next_safe_action": "Keep helper-only unless a future DRY_RUN review promotes or downgrades it."
+    },
+    {
+      "path": "automation/orchestration/mission_control/Export-AiOsMissionState.ps1",
+      "classification": "HELPER",
+      "purpose": "Export read-only mission state evidence for operator and validator consumption without file mutation.",
+      "owner_area": "automation/orchestration/mission_control",
+      "execution_mode": "read_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "state_mutation",
+        "process_launch",
+        "git_mutation"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Mission state output is evidence, not approval or mutation authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and non-writing."
     },
     {
       "path": "automation/orchestration/policy/Test-AiOsWorkerSafetyPolicy.DRY_RUN.ps1",
@@ -2667,13 +2761,18 @@
         "APPLY",
         "commit",
         "push",
+        "merge",
         "worker_launch",
-        "runtime_mutation"
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "process_launch",
+        "git_mutation"
       ],
-      "risk_policy_notes": "Display-only helper. Printed blocked-action text is not execution authority.",
-      "topology_guard_requirement": "Not a launcher.",
+      "risk_policy_notes": "Registered as HELPER only. Printed blocked-action text is not execution authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
       "validator_consumption": "May be consumed as display helper evidence only.",
-      "review_status": "execution_registry_cleanup_static_review",
+      "review_status": "registry_helper_batch_apply_20260524",
       "next_safe_action": "Keep display-only."
     },
     {
@@ -3157,59 +3256,75 @@
     },
     {
       "path": "automation/operator/Invoke-AiOsApprovalGate.ps1",
-      "classification": "REVIEW_REQUIRED",
+      "classification": "HELPER",
       "purpose": "Inspect operator approval inbox requests and report approval-gate status.",
       "owner_area": "automation/operator",
-      "execution_mode": "approval_gate",
+      "execution_mode": "read_only_approval_helper",
       "writes_files": false,
       "launches_process": false,
       "runs_git": false,
       "requires_human_approval": true,
       "allowed_callers": [
-        "operator"
+        "operator",
+        "validator_chain"
       ],
       "blocked_actions": [
         "APPLY",
         "commit",
         "push",
+        "merge",
         "git_mutation",
         "packet_mutation",
         "queue_mutation",
-        "runtime_mutation"
+        "state_mutation",
+        "approval_mutation",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "process_launch"
       ],
-      "risk_policy_notes": "Approval gate touches approval decision flow; keep approval-gated until exact operator authorization.",
-      "topology_guard_requirement": "Treat as blocked from automated launch unless explicitly approved for a scoped review.",
-      "validator_consumption": "May be registered as approval-required evidence only; output does not approve execution.",
-      "review_status": "batch_4_static_review",
-      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+      "risk_policy_notes": "Registered as HELPER only. Approval status output is evidence, not approval mutation authority.",
+      "topology_guard_requirement": "Not a launcher; automated callers must not treat output as approval.",
+      "validator_consumption": "May be consumed as approval-gate status evidence only.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and non-mutating."
     },
     {
       "path": "automation/operator/Invoke-AiOsPacketDispatcher.ps1",
-      "classification": "REVIEW_REQUIRED",
+      "classification": "HELPER",
       "purpose": "Read queue and packet metadata to produce a packet dispatch plan.",
       "owner_area": "automation/operator",
-      "execution_mode": "dispatch_planning",
+      "execution_mode": "read_only_dispatch_helper",
       "writes_files": false,
       "launches_process": false,
       "runs_git": false,
       "requires_human_approval": true,
       "allowed_callers": [
-        "operator"
+        "operator",
+        "validator_chain"
       ],
       "blocked_actions": [
         "APPLY",
         "commit",
         "push",
+        "merge",
         "git_mutation",
         "packet_mutation",
         "queue_mutation",
-        "runtime_mutation"
+        "state_mutation",
+        "approval_mutation",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "process_launch"
       ],
-      "risk_policy_notes": "Packet dispatch affects queue routing decisions even when currently read-only.",
-      "topology_guard_requirement": "Do not auto-dispatch packets from this entry without explicit operator approval.",
-      "validator_consumption": "May be registered as approval-required dispatch evidence only.",
-      "review_status": "batch_4_static_review",
-      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+      "risk_policy_notes": "Registered as HELPER only. Dispatch-plan output is evidence, not packet or queue mutation authority.",
+      "topology_guard_requirement": "Not a launcher; automated callers must not dispatch packets from this entry.",
+      "validator_consumption": "May be consumed as read-only dispatch evidence only.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and non-mutating."
     },
     {
       "path": "automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1",
@@ -3662,6 +3777,78 @@
       "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
     },
     {
+      "path": "automation/orchestration/supervisor/Show-AiOsSupervisorStatus.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only supervisor status for operator and validator consumption.",
+      "owner_area": "automation/orchestration/supervisor",
+      "execution_mode": "display_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "packet_mutation",
+        "queue_mutation",
+        "state_mutation",
+        "process_launch",
+        "git_mutation"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Supervisor status output is evidence, not packet or runtime authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and display-only."
+    },
+    {
+      "path": "automation/orchestration/supervisor/Show-AiOsSupervisorDashboard.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only supervisor dashboard information for operator and validator consumption.",
+      "owner_area": "automation/orchestration/supervisor",
+      "execution_mode": "display_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "packet_mutation",
+        "queue_mutation",
+        "state_mutation",
+        "process_launch",
+        "git_mutation"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Supervisor dashboard output is evidence, not packet or runtime authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and display-only."
+    },
+    {
       "path": "automation/orchestration/supervisor/Invoke-AiOsSupervisorLoop.DRY_RUN.ps1",
       "classification": "BLOCKED",
       "purpose": "Supervisor loop can advance packet state through Move-AiOsPacketState.",
@@ -4090,6 +4277,72 @@
       "validator_consumption": "Validators must treat this as blocked worker window launcher evidence.",
       "review_status": "registry_blocked_rebuild_static_review",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
+    },
+    {
+      "path": "automation/orchestration/terminal_workstations/Show-AiOsLauncherPreflight.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only launcher preflight status without starting terminals or workers.",
+      "owner_area": "automation/orchestration/terminal_workstations",
+      "execution_mode": "display_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "read_only_status_expected",
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "process_launch",
+        "git_mutation"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Preflight display output is evidence, not launcher authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and display-only."
+    },
+    {
+      "path": "automation/orchestration/terminal_workstations/Show-AiOsOperatorMenu.ps1",
+      "classification": "HELPER",
+      "purpose": "Display read-only operator menu information without starting terminals or workers.",
+      "owner_area": "automation/orchestration/terminal_workstations",
+      "execution_mode": "display_only_helper",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain",
+        "status_display"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "merge",
+        "worker_launch",
+        "runtime_launch",
+        "startup_task_registration",
+        "scheduled_task_creation",
+        "process_launch",
+        "git_mutation"
+      ],
+      "risk_policy_notes": "Registered as HELPER only. Operator menu output is evidence, not launcher authority.",
+      "topology_guard_requirement": "Not a launcher; callers must remain separately classified and governed.",
+      "validator_consumption": "May be consumed by validators or status displays as read-only helper evidence.",
+      "review_status": "registry_helper_batch_apply_20260524",
+      "next_safe_action": "Keep helper-only and display-only."
     },
     {
       "path": "automation/orchestration/terminal_workstations/Start-AiOsWorktreeLanes.ps1",
