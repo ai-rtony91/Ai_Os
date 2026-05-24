@@ -9,6 +9,8 @@
                       "task":  "Review command queue and create next work packet if needed.",
                       "reason":  "Connect queue to worker inbox",
                       "status":  "complete",
+                      "current_status":  "done",
+                      "approval_status":  "NOT_REQUIRED",
                       "created_utc":  "2026-05-16T19:33:30Z",
                       "state_note":  "Superseded by existing work packet router/state-machine work and workers-mode Address Book connection.",
                       "updated_utc":  "2026-05-18T17:08:29Z"
@@ -20,6 +22,8 @@
                       "task":  "Validate worker launcher changes",
                       "reason":  "Route validation work to best worker",
                       "status":  "complete",
+                      "current_status":  "done",
+                      "approval_status":  "NOT_REQUIRED",
                       "created_utc":  "2026-05-16T20:02:46Z",
                       "state_note":  "Validator completed task.",
                       "updated_utc":  "2026-05-16T21:19:16Z"
