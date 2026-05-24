@@ -2,7 +2,7 @@ param()
 
 $ErrorActionPreference = "Stop"
 
-$ExpectedRootName = "ai-rtony91_Ai_Os_CLEAN"
+$ExpectedRootName = "Ai.Os"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $RepoName = Split-Path -Leaf $RepoRoot
 
