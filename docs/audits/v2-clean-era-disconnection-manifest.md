@@ -1,4 +1,4 @@
-# V2 CLEAN-Era Disconnection Manifest
+# CLEAN-Era Disconnection Manifest
 
 ## Executive summary
 
