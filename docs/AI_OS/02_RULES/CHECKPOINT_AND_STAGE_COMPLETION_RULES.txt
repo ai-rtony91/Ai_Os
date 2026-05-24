@@ -1,0 +1,170 @@
+// CHECKPOINT AND STAGE COMPLETION RULES
+
+// PURPOSE
+A checkpoint is a verified save point in the AI_OS build.
+
+It confirms that a stage, folder, file, script, report, or setup step was completed correctly before continuing.
+
+// WHY CHECKPOINTS EXIST
+Checkpoints prevent:
+- Bad data from being accepted
+- Wrong-folder saves
+- Duplicate folder creation
+- Corrupted files
+- Unverified reports
+- Script stacking
+- Terminal parser-state errors
+- Moving too fast without proof
+- AI hallucination based on incomplete evidence
+
+// CHECKPOINT TYPES
+
+// TYPE 1: FOLDER CHECKPOINT
+Used after creating or organizing folders.
+
+Required proof:
+- Folder path
+- Screenshot
+- File Explorer location
+- Folder purpose file exists if required
+
+// TYPE 2: FILE CHECKPOINT
+Used after creating or editing a file.
+
+Required proof:
+- Full file path
+- Correct filename
+- File size greater than 0 KB
+- File opens correctly
+- Content matches intended purpose
+
+// TYPE 3: SCRIPT CHECKPOINT
+Used after running PowerShell, Python, VS Code terminal, or batch files.
+
+Required proof:
+- Script name
+- Terminal output
+- Error or success result
+- Report file created
+- No protected action executed unless approved
+
+// TYPE 4: REPORT CHECKPOINT
+Used after generating inventory, daily, error, source, AAR, or hallucination reports.
+
+Required proof:
+- Report path
+- Summary section
+- Report count makes sense
+- Report does not conflict with screenshot or File Explorer
+
+// TYPE 5: INCIDENT CHECKPOINT
+Used after bad data, corrupt output, wrong folder, failed script, or suspicious result.
+
+Required proof:
+- What failed
+- Evidence
+- Root cause candidates
+- Correction
+- Prevention rule
+- Where it was logged
+
+// TYPE 6: APPROVAL CHECKPOINT
+Used before any protected action.
+
+Protected actions:
+- Delete files
+- Move files
+- Modify registry
+- Change Windows settings
+- Change browser policies
+- Change firewall
+- Change VPN
+- Edit secrets or API keys
+- Create scheduled tasks
+- Install software
+- Modify BitLocker
+- Modify BIOS / UEFI
+- Place broker orders
+- Enable live trading
+
+Rule:
+No approval means no protected action.
+
+// CHECKPOINT STATUS LABELS
+
+PASS:
+The evidence matches the expected result.
+
+PARTIAL:
+Some evidence is correct, but something still needs review.
+
+FAIL:
+The result is wrong, missing, corrupt, or unsafe.
+
+INVALID DATA:
+The report or output conflicts with File Explorer, screenshots, terminal output, or known project state.
+
+BLOCKED:
+The next step requires approval, missing data, or a corrected file.
+
+// REQUIRED CHECKPOINT FORMAT
+
+AI_OS CHECKPOINT
+
+Checkpoint name:
+[Name]
+
+Date/time:
+[Date and time]
+
+Stage:
+[AI_OS build / system wizard / reports / policy / trading system / backtest / paper trading]
+
+Path:
+[Full folder or file path]
+
+What changed:
+[Short description]
+
+Evidence:
+[Screenshot / terminal output / uploaded file / report]
+
+Validation:
+[PASS / PARTIAL / FAIL / INVALID DATA / BLOCKED]
+
+Errors:
+[List errors or write NONE]
+
+Risk:
+[LOW / MEDIUM / HIGH]
+
+Protected action involved:
+[YES / NO]
+
+Approval required:
+[YES / NO]
+
+Next safe action:
+[One action only]
+
+// CHECKPOINT RULES
+1. One checkpoint per stage.
+2. Verify before continuing.
+3. Never accept impossible report counts.
+4. Never continue from invalid data.
+5. Never stack scripts after an error.
+6. Restart or inspect terminal if parser errors appear.
+7. Save evidence before moving forward.
+8. Log major failures in ERROR_LOG.md.
+9. Log source evidence in SOURCE_LOG.md.
+10. Log major lessons in AAR.md.
+11. Log suspected AI false claims in HALLUCINATION_LOG.md.
+12. Log daily work in DAILY_REPORT.md.
+
+// PROJECT RULE
+AI_OS is built first.
+The trading system is built on top of AI_OS later.
+Checkpoints must keep those separated.
+
+// STATUS
+Active policy.

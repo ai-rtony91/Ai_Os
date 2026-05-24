@@ -1,5 +1,3 @@
-$ErrorActionPreference = "Stop"
-
 param(
     [string]$Stage = "UNKNOWN",
     [string]$TaskId = "UNKNOWN",
@@ -15,6 +13,11 @@ param(
     [string]$GitStatus = "UNKNOWN",
     [string]$Notes = "DRY_RUN preview only"
 )
+
+$ErrorActionPreference = "Stop"
+
+
+
 
 if ($PlannedSteps -gt 0) {
     $PercentComplete = [math]::Round(($CompletedSteps / $PlannedSteps) * 100)

@@ -1,0 +1,184 @@
+================================================================
+  AI_OS CODEX SURGICAL PROMPT
+  Packet ID  : STALE-REPO-REF-FIX-001
+  Date       : 2026-05-22
+  Author     : Operator (Tony)
+  Mode       : APPLY — surgical edit, no commits, no pushes
+  Risk level : LOW — docs only, no scripts, no git config
+================================================================
+
+READ AGENTS.md BEFORE STARTING.
+STOP if any instruction conflicts with AGENTS.md.
+
+----------------------------------------------------------------
+OBJECTIVE
+----------------------------------------------------------------
+
+Fix stale repo redirection references in README.md and AGENTS.md.
+
+Workers and AI agents are being misdirected to a dead repo path:
+  C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+
+That repo no longer exists. The canonical active repo is now:
+  C:\Dev\Ai.Os
+
+This prompt corrects that redirection. One surgical line change.
+
+----------------------------------------------------------------
+ROLE
+----------------------------------------------------------------
+
+Documentation Corrector.
+Scope: README.md and AGENTS.md only.
+No scripts. No git operations. No remotes. No commits.
+
+----------------------------------------------------------------
+ACTIVE REPO
+----------------------------------------------------------------
+
+  C:\Dev\Ai.Os
+
+----------------------------------------------------------------
+SCOPE — ALLOWED FILES
+----------------------------------------------------------------
+
+Edit allowed:
+  C:\Dev\Ai.Os\AGENTS.md
+  C:\Dev\Ai.Os\README.md
+
+Read only:
+  All other files (for reference only)
+
+----------------------------------------------------------------
+SCOPE — BLOCKED
+----------------------------------------------------------------
+
+BLOCKED — do not touch:
+  Any .ps1, .lua, .py, .sh, or other script files
+  .git/config
+  .git/ internals (objects, refs, index)
+  Any remotes, credentials, tokens, branches
+  Any GitHub CLI (gh) commands
+  RISK_POLICY.md (read only — do not edit)
+  SECURITY.md (read only — do not edit)
+  COMPLIANCE_BASELINE.md (read only — do not edit)
+
+BLOCKED ACTIONS:
+  No git add
+  No git commit
+  No git push
+  No git remote commands
+  No gh commands
+  No deletions
+
+----------------------------------------------------------------
+STALE REFERENCES TO FIND AND REPLACE
+----------------------------------------------------------------
+
+Search both files for ALL of the following patterns:
+
+  PATTERN 1 : ai-rtony91_Ai_Os_CLEAN
+  PATTERN 2 : Ai_Os_CLEAN
+  PATTERN 3 : AI_OS_CLEAN
+  PATTERN 4 : CLEAN   (as an ACTIVE_REPO target — not history)
+  PATTERN 5 : C:\Users\mylab\OneDrive\GitHub\AI_OS_V2
+  PATTERN 6 : C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+  PATTERN 7 : Any line that sets ACTIVE_REPO to a CLEAN path
+
+REPLACEMENT RULE:
+  Replace ACTIVE_REPO path stale references with:
+    C:\Dev\Ai.Os
+
+DO NOT REPLACE if the reference:
+  - Is inside a HOLD_DO_NOT_USE label
+  - Is inside a WRONG_REMOTE label
+  - Is clearly marked as historical, archived, or superseded
+  - Is a GitHub REMOTE name (e.g. ai-rtony91/Ai_Os) — leave remote names alone
+
+----------------------------------------------------------------
+KNOWN CONFIRMED STALE REFERENCE (pre-identified)
+----------------------------------------------------------------
+
+FILE    : AGENTS.md
+LINE    : ## Local Folder Role Rules section
+BEFORE  : - **ACTIVE_REPO:** `C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN`
+AFTER   : - **ACTIVE_REPO:** `C:\Dev\Ai.Os`
+
+NOTE: This edit has already been applied as of 2026-05-22.
+Verify it is correct, then scan for any additional instances
+missed by the pre-identification.
+
+----------------------------------------------------------------
+RULES
+----------------------------------------------------------------
+
+1.  Do NOT change the GitHub remote name reference:
+      ai-rtony91/Ai_Os
+    That is the remote repo identifier, not a local path.
+    Changing it would break remote tracking context in the docs.
+
+2.  Do NOT remove HOLD_DO_NOT_USE or WRONG_REMOTE entries.
+    Those are safety warning labels — they must stay.
+
+3.  Do NOT rewrite sentences. Change the path string only.
+    Surrounding prose stays intact.
+
+4.  If a CLEAN reference is ambiguous (could be archive context),
+    label it UNKNOWN and stop. Do not change it without
+    operator confirmation.
+
+5.  README.md currently contains no stale path references.
+    Scan it anyway and report CLEAN if nothing found.
+
+6.  End with the full validation output listed below.
+
+----------------------------------------------------------------
+VALIDATION — RUN THESE AFTER EDITS
+----------------------------------------------------------------
+
+1. Show all remaining matches (expected: zero for ACTIVE_REPO context):
+   grep -n "CLEAN\|AI_OS_CLEAN\|Ai_Os_CLEAN\|ai-rtony91_Ai_Os_CLEAN\|AI_OS_V2" AGENTS.md README.md
+
+2. Show git diff:
+   git diff -- README.md AGENTS.md
+
+3. Run whitespace check:
+   git diff --check -- README.md AGENTS.md
+
+4. Show working tree state:
+   git status --short
+
+----------------------------------------------------------------
+RETURN FORMAT
+----------------------------------------------------------------
+
+Report must include:
+
+  Task:
+  Files inspected:
+  Files changed:
+  Exact stale references replaced: (list each one — file, line, before, after)
+  CLEAN references left unchanged and why:
+  Confirmation — no gh commands run: YES/NO
+  Confirmation — no .git/config or remotes changed: YES/NO
+  Validation output: (paste grep results, git diff, git status)
+  Dry-run result: N/A (APPLY mode — edits are live)
+  Errors:
+  Unknowns:
+  Next safe action:
+
+----------------------------------------------------------------
+STOP POINT
+----------------------------------------------------------------
+
+Stop after validation output is delivered.
+Do not commit.
+Do not push.
+Do not proceed to any other task.
+
+================================================================
+  NEXT OPERATOR ACTION:
+  Open Codex in C:\Dev\Ai.Os repo.
+  Paste this prompt.
+  Review the reported diff before approving any commit.
+================================================================

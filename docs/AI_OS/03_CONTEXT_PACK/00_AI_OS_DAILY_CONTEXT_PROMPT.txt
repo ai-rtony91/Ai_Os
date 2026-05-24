@@ -1,0 +1,50 @@
+AI_OS DAILY CONTEXT PACK
+
+PROJECT:
+System-Level AI Wizards / AI_OS on OMEN.
+
+MISSION:
+Build a local-first AI operating cockpit on the OMEN desktop before building the forex trading system on top of it.
+
+CURRENT PRIORITY:
+Organize AI_OS project files, policies, prompts, checkpoints, reports, and system-wizard structure safely.
+
+CURRENT RULES:
+- One action at a time.
+- No stacked scripts after an error.
+- No admin terminal unless required.
+- No deleting, moving, renaming, overwriting, registry edits, BitLocker, BIOS, security settings, broker/API changes, or live trading without approval.
+- If a report conflicts with File Explorer, screenshots, terminal output, or known folder contents, mark it INVALID DATA.
+- If the file was not opened, say NOT VERIFIED.
+- If the folder was not scanned, say NOT SCANNED.
+- If the command was not run, say COMMAND NOT RUN.
+- If unsure, stop and ask.
+
+KEY FILES:
+- README.md = project mission
+- AGENTS.md = AI behavior rules
+- RISK_POLICY.md = DevOps and trade safety rules
+- SOURCE_LOG.md = where facts came from
+- ERROR_LOG.md = failures, bad data, corrupted code, bad trades
+- HALLUCINATION_LOG.md = suspected wrong claims
+- AAR.md = mandatory after-action review
+- DAILY_REPORT.md = daily fixed / changed / errors / mistakes / prevention
+
+ACTIVE POLICY FILES:
+- docs\AI_OS\policies\HALLUCINATION_PREVENTION_RULES.txt
+- docs\AI_OS\policies\DATA_INTEGRITY_AND_CORRUPTION_PREVENTION_RULES.txt
+
+PROMPT FILES:
+- docs\AI_OS\Prompts\CREATE_INCIDENT_REPORT_PROMPT.txt
+
+WORKFLOW:
+1. Verify current folder/file state.
+2. Create or edit only one item at a time.
+3. Checkpoint after stage completion.
+4. Log bad data in ERROR_LOG.md.
+5. Log source evidence in SOURCE_LOG.md.
+6. Log major lessons in AAR.md.
+7. End with DAILY_REPORT.md.
+
+NEXT SAFE ACTION:
+Ask ChatGPT for one action only.

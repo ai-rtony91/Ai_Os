@@ -1,0 +1,8 @@
+﻿"Action","Status","Reason"
+"MOVE","BLOCKED","No approved execution file exists."
+"MERGE","BLOCKED","No approved execution file exists."
+"DELETE","BLOCKED","Requires backup plus explicit approval."
+"RENAME","BLOCKED","No approved execution file exists."
+"ARCHIVE_EXECUTION","BLOCKED","No approved archive plan exists."
+"GIT_ADD_COMMIT_PUSH_PULL","BLOCKED","No repo operation approved."
+"WINDOWS_STARTUP_LOGIN_CHANGE","BLOCKED","Not part of current approved scope."

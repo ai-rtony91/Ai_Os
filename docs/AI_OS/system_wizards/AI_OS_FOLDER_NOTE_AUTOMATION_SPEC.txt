@@ -1,0 +1,275 @@
+AI_OS FOLDER NOTE AUTOMATION SPEC
+
+// PURPOSE
+This file defines the automation plan for creating README_FOLDER_PURPOSE.txt notes across the AI_OS project.
+
+This is a SPECIFICATION FILE ONLY.
+It does not execute code.
+It does not move files.
+It does not delete files.
+It does not rename files.
+It does not overwrite files.
+
+
+// PROJECT
+Project name:
+System-Level AI Wizards / AI_OS
+
+Local project path:
+C:\Users\mylab\OneDrive\AI-OS-Project
+
+GitHub project target:
+https://github.com/ai-rtony91/Ai_Os
+
+Primary machine:
+OMEN Desktop
+
+Primary build goal:
+Build the local AI_OS first, then build the forex trading system on top of it.
+
+
+// CORE RULE
+AI_OS is the workshop.
+The trading bot is the machine built inside the workshop.
+
+Do not mix AI_OS operating files with trading execution files unless the file clearly explains why.
+
+
+// AUTOMATION GOAL
+Create a safe automation script that adds one README_FOLDER_PURPOSE.txt file into approved folders.
+
+Each README_FOLDER_PURPOSE.txt explains:
+- what the folder is for
+- what belongs inside
+- what does not belong inside
+- owner/context
+- risk level
+- whether the folder is AI_OS, TRADING_SYSTEM, REPORTING, SECURITY, BACKUP, or REVIEW
+- whether automation may write to the folder
+
+
+// REQUIRED MODE DESIGN
+The automation must support two modes:
+
+1. DRY_RUN
+   - scans folders
+   - shows what it would create
+   - shows what it would skip
+   - writes a report
+   - makes no changes
+
+2. APPLY
+   - creates README_FOLDER_PURPOSE.txt only after approval
+   - does not overwrite existing README_FOLDER_PURPOSE.txt files
+   - writes a final report
+   - opens report in Notepad
+
+
+// ABSOLUTE SAFETY RULES
+1. Never delete files.
+2. Never move files.
+3. Never rename files.
+4. Never overwrite existing files.
+5. Never edit README.md, AGENTS.md, RISK_POLICY.md, SOURCE_LOG.md, ERROR_LOG.md, HALLUCINATION_LOG.md, AAR.md, DAILY_REPORT.md, or White_Paper.md without backup.
+6. Never touch BitLocker, BIOS, registry, firewall, VPN, browser policies, broker API keys, or live trading settings.
+7. Never assume a folder purpose without labeling it REVIEW_NEEDED when unclear.
+8. Never accept inventory reports that conflict with File Explorer, screenshots, terminal output, or known folder state.
+9. If PowerShell shows parser errors, continuation prompts, or impossible counts, stop and inspect.
+10. One script at a time.
+
+
+// APPROVED FOLDER NOTE FORMAT
+Every folder note must use this structure:
+
+// FOLDER PURPOSE
+[Explain what this folder is for]
+
+// USE THIS FOLDER FOR
+- [Allowed content]
+
+// DO NOT USE THIS FOLDER FOR
+- [Disallowed content]
+
+// CATEGORY
+[AI_OS / TRADING_SYSTEM / REPORTING / SECURITY / BACKUP / REVIEW / SOURCE_CODE / TOOLS / CONFIG / UNKNOWN]
+
+// RISK LEVEL
+[LOW / MEDIUM / HIGH]
+
+// AUTOMATION PERMISSION
+[READ_ONLY / SAFE_WRITE_ALLOWED / APPROVAL_REQUIRED]
+
+// RELATED FILES
+[List related files if known]
+
+// STATUS
+[ACTIVE / REVIEW_NEEDED / LEGACY / ARCHIVE_CANDIDATE]
+
+
+// ROOT FOLDER CLASSIFICATION
+Expected root folders and classifications:
+
+_REVIEW
+Category: REVIEW
+Purpose: temporary review queue for files/folders that need classification.
+
+Ai_Os Node
+Category: LEGACY / REVIEW_NEEDED
+Purpose: older AI_OS node material. Must be inspected before merge.
+
+Ai_Os Robot
+Category: LEGACY / REVIEW_NEEDED
+Purpose: older AI_OS robot material. Must be inspected before merge.
+
+approvals
+Category: APPROVAL_GATE
+Purpose: approval records, pending approvals, approved actions, rejected actions.
+
+backtest results
+Category: TRADING_SYSTEM
+Purpose: older or current trading backtest results. Must stay separated from AI_OS build reports.
+
+backups
+Category: BACKUP
+Purpose: project backup files and recovery copies.
+
+control
+Category: CONTROL_AUTOMATION
+Purpose: possible control/automation material. Requires review before automation use.
+
+docs
+Category: AI_OS_DOCUMENTATION
+Purpose: project documentation, policies, architecture, prompts, setup notes.
+
+FixesChanges
+Category: CHANGE_HISTORY
+Purpose: older fixed/changed notes. Review before merging into logs or changelog.
+
+logo.icons
+Category: ASSETS
+Purpose: visual assets, logos, icons.
+
+logs
+Category: LOGS
+Purpose: system and project logs.
+
+Reports
+Category: REPORTING
+Purpose: AI_OS daily reports, AARs, incident reports, and progress records.
+
+scripts
+Category: LEGACY_SCRIPTS
+Purpose: older scripts. Review before moving into tools.
+
+src
+Category: SOURCE_CODE
+Purpose: source code for AI_OS and later trading bot modules.
+
+Tasks
+Category: TASKS
+Purpose: task lists, work queues, project actions.
+
+tools
+Category: TOOLS
+Purpose: approved PowerShell, Python, task scheduler, browser-policy, and utility tools.
+
+TradingEngineV1
+Category: TRADING_SYSTEM
+Purpose: trading engine legacy or current prototype. Must be reviewed before merge.
+
+Yubikey
+Category: SECURITY
+Purpose: YubiKey/security notes. Must not contain secrets or exposed credentials.
+
+files.zip
+Category: ARCHIVE_REVIEW_NEEDED
+Purpose: archive file. Do not extract/delete until reviewed.
+
+desktop.ini
+Category: WINDOWS_SYSTEM_FILE
+Purpose: Windows folder metadata. Ignore.
+
+
+// REPORT OUTPUT REQUIREMENTS
+The automation must create reports in:
+
+C:\Users\mylab\OneDrive\AI-OS-Project\Reports\daily
+
+Report names:
+FOLDER_NOTE_DRY_RUN_REPORT.txt
+FOLDER_NOTE_APPLY_REPORT.txt
+
+Reports must include:
+- generated date/time
+- root scanned
+- mode used
+- folders found
+- notes that would be created
+- notes skipped because they already exist
+- unknown folders
+- errors
+- protected actions blocked
+- final status
+
+
+// CODE REQUIREMENTS
+Preferred language:
+Python
+
+Acceptable backup language:
+PowerShell
+
+Python script target location:
+C:\Users\mylab\OneDrive\AI-OS-Project\tools\python\create_folder_purpose_notes.py
+
+PowerShell launcher target:
+C:\Users\mylab\OneDrive\AI-OS-Project\tools\powershell\RUN_FOLDER_NOTE_AUTOMATION.ps1
+
+The launcher must run DRY_RUN first by default.
+
+APPLY mode must require explicit user approval.
+
+
+// CODEX SETUP REQUIREMENTS
+Before Codex works on this project:
+
+1. GitHub repo must be confirmed:
+   https://github.com/ai-rtony91/Ai_Os
+
+2. Project root must contain AGENTS.md.
+
+3. AGENTS.md must tell Codex:
+   - do not delete files
+   - do not move files
+   - do not overwrite critical files
+   - use DRY_RUN before APPLY
+   - create reports for every automation
+   - keep AI_OS and TRADING_SYSTEM separated
+   - require approval for protected actions
+
+4. Codex must work only inside:
+   C:\Users\mylab\OneDrive\AI-OS-Project
+
+5. Codex must not access unrelated OMEN folders.
+
+
+// DONE DEFINITION
+This automation is complete only when:
+
+1. DRY_RUN report is created.
+2. DRY_RUN report shows expected folders.
+3. No impossible 0-item report occurs.
+4. User approves APPLY mode.
+5. APPLY creates README_FOLDER_PURPOSE.txt files only where missing.
+6. Existing files are not overwritten.
+7. Final APPLY report opens in Notepad.
+8. User verifies folder notes in File Explorer.
+9. DAILY_REPORT.md is updated.
+10. ERROR_LOG.md is updated if any failure occurred.
+
+
+// STATUS
+SPEC CREATED.
+CODE NOT CREATED YET.
+AUTOMATION NOT RUN YET.
+AWAITING DRY_RUN SCRIPT BUILD.

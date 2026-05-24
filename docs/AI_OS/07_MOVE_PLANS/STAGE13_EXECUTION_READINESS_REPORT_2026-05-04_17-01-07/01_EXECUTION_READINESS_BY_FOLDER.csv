@@ -1,0 +1,2 @@
+﻿"Directory","FileCount","ProposedAuthority","Readiness","ExecutionStatus","Reason","RiskLevels","TargetZones","HumanDecision","HumanNotes"
+"","92","REVIEW_REQUIRED","UNKNOWN_REVIEW_REQUIRED","BLOCK_EXECUTION","Not enough evidence for automated action.","LOW | MEDIUM | HIGH","DOWNLOADS_AI_OS | ACTIVE_PROJECT_ROOT | WINDOWS_METADATA | TOOLS_INVENTORY | BRANDING_ASSETS | SECRETS_CONFIG | TRADING_ENGINE_V1 | DESKTOP_WORKING_COPY | DESKTOP_LOOSE_AI_OS | DOCUMENTS_AI_OS","PENDING_REVIEW",""

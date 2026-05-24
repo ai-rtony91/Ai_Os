@@ -80,3 +80,9 @@ Reports/work_intelligence/briefings/OPERATOR_VOICE_BRIEFING_*.md
 
 # AIOS generated logs
 Reports/trading_lab/*.log
+
+# Service build artifacts
+services/node_modules/
+services/dist/
+node_modules/
+dist/

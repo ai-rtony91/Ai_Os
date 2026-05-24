@@ -1,0 +1,14 @@
+{
+  "name": "aios-services",
+  "version": "1.0.0",
+  "description": "AI_OS TypeScript service layer — runtime, dispatcher, telemetry, supervisor.",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/runtime/index.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

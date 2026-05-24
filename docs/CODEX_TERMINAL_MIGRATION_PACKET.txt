@@ -1,0 +1,538 @@
+================================================================
+  AI_OS CODEX DELEGATION PACKET
+  Packet ID  : TERMINAL-MIGRATION-001
+  Date       : 2026-05-22
+  Author     : Operator (Tony)
+  Mode       : PHASED — DRY_RUN gates before every APPLY
+  Status     : READY FOR EXECUTION
+  Risk level : MEDIUM — touches shell layer only, not AIOS engine
+================================================================
+
+READ AGENTS.md BEFORE STARTING.
+READ RISK_POLICY.md BEFORE STARTING.
+STOP if any instruction conflicts with AGENTS.md.
+
+----------------------------------------------------------------
+OBJECTIVE
+----------------------------------------------------------------
+
+Migrate the AI_OS terminal environment from Windows Terminal
+to WezTerm + PowerShell 7 without touching the AIOS engine,
+automation scripts, or repo content.
+
+AIOS engine = UNCHANGED.
+Cockpit layer = REBUILT BETTER.
+
+This packet covers six sequential phases. Each phase has a
+DRY_RUN gate. Do not execute the APPLY step of any phase
+until you have reported the DRY_RUN findings and the operator
+has given explicit written approval.
+
+----------------------------------------------------------------
+ROLE
+----------------------------------------------------------------
+
+Terminal Environment Upgrade Executor.
+Isolated scope: shell layer, launcher files, WezTerm config.
+No autonomy outside listed allowed paths.
+No commits without explicit operator approval per phase.
+
+----------------------------------------------------------------
+ACTIVE REPO
+----------------------------------------------------------------
+
+CORRECT active repo path:
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01
+
+NOTE — AGENTS.md MISMATCH DETECTED:
+  AGENTS.md currently lists:
+    ACTIVE_REPO = C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN
+  That path no longer exists. The correct active repo is AIOS_CLAUDE_01.
+  Flag this as MISMATCH in your report.
+  Do NOT edit AGENTS.md without separate explicit operator approval.
+  Proceed with AIOS_CLAUDE_01 as the canonical repo for this packet.
+
+PROJECT_ARCHIVE (non-git, reports, scripts):
+  C:\Users\mylab\OneDrive\AI-OS-Project
+
+----------------------------------------------------------------
+SCOPE — ALLOWED PATHS
+----------------------------------------------------------------
+
+Read and write allowed:
+  C:\Users\mylab\OneDrive\AI-OS-Project\scripts\
+  C:\Users\mylab\OneDrive\AI-OS-Project\logs\
+  C:\Users\mylab\OneDrive\AI-OS-Project\docs\
+  C:\Users\mylab\.wezterm.lua                  (WezTerm config)
+  C:\Users\mylab\AI_OS_MAIN_CONTROL.ps1        (launcher root)
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\automation\operator\
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\automation\session\
+
+Read only (inspect, do not edit without approval):
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\AGENTS.md
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\RISK_POLICY.md
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\aios.ps1
+
+----------------------------------------------------------------
+SCOPE — BLOCKED PATHS
+----------------------------------------------------------------
+
+BLOCKED — do not touch:
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\automation\agents\
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\automation\mission_control\
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\automation\intake\
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\automation\orchestration\
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\agent\
+  C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\checkpoints\
+  C:\Users\mylab\OneDrive\GitHub\_HOLD_ai-rtony91_Ai_Os_20260504_131210\
+  C:\Users\mylab\OneDrive\Desktop\Ai_Os\
+  C:\Users\mylab\OneDrive\AI-OS-Project\TradingEngineV1\
+  Any file containing: credentials, secrets, tokens, keys, .env
+  Any .git internals (index, objects, refs) — do not manipulate directly
+
+BLOCKED ACTIONS:
+  No live trading code.
+  No broker connections.
+  No git add . (selective staging only, and only with approval).
+  No git push without explicit approval.
+  No deletion of any repo folder.
+  No modification of AGENTS.md, RISK_POLICY.md, SECURITY.md
+    without a separate explicit operator instruction.
+
+----------------------------------------------------------------
+RULES
+----------------------------------------------------------------
+
+1.  DRY_RUN first on every phase. Report findings. Wait for
+    operator approval before running APPLY.
+
+2.  If a file already exists at a target location, report it
+    as MISMATCH before overwriting. Do not overwrite blindly.
+
+3.  If any winget command fails, log the exact exit code and
+    error output. Do not proceed to the next phase.
+
+4.  Never shorten or summarize existing AIOS script content.
+    If editing operator scripts, ADD only — do not remove
+    existing logic without explicit approval.
+
+5.  Every output file must be UTF-8, no BOM, Windows line
+    endings (CRLF) for .ps1 files, LF for .lua files.
+
+6.  Label all findings: PASS / WARN / FAIL / MISMATCH /
+    UNKNOWN per AGENTS.md reporting standard.
+
+7.  One phase at a time. Do not start phase N+1 until phase N
+    is reported and approved.
+
+8.  If a protected governance file requires modification,
+    output WARN and stop. Do not edit it.
+
+9.  Preserve operator control at all Git, delete, move, rename,
+    push, and authentication steps.
+
+10. End every phase report with exactly one NEXT SAFE ACTION.
+
+----------------------------------------------------------------
+PHASE SEQUENCE
+----------------------------------------------------------------
+
+PHASE 0 — PREFLIGHT VERIFICATION
+  Mode: DRY_RUN (read only, no changes)
+
+  0A. Verify active repo path:
+      Confirm AIOS_CLAUDE_01 exists and contains aios.ps1.
+      Report git status output verbatim.
+      Report any uncommitted changes.
+
+  0B. Verify fixed launcher exists at:
+      C:\Users\mylab\OneDrive\AI-OS-Project\AI_OS_MAIN_CONTROL.ps1
+      Confirm it references AIOS_CLAUDE_01 (not ai-rtony91_Ai_Os_CLEAN).
+      Report: PASS or FAIL.
+
+  0C. Verify shortcut installer exists at:
+      C:\Users\mylab\OneDrive\AI-OS-Project\scripts\Create-MainControlShortcut.ps1
+      Report: PASS or FAIL.
+
+  0D. Check if PowerShell 7 is already installed:
+      Run: pwsh --version
+      Report version string or FAIL if not found.
+
+  0E. Check if WezTerm is already installed:
+      Run: winget list --id wez.wezterm
+      Report: INSTALLED / NOT_INSTALLED.
+
+  0F. Check if Windows Terminal is installed:
+      Run: winget list --id Microsoft.WindowsTerminal
+      Report: INSTALLED / NOT_INSTALLED.
+
+  0G. Check for AGENTS.md path mismatch:
+      Open AGENTS.md, find ACTIVE_REPO line.
+      Compare to AIOS_CLAUDE_01.
+      Report: MISMATCH if different (expected).
+
+  STOP — Report all preflight findings.
+  Wait for operator approval before Phase 1.
+
+----------------------------------------------------------------
+
+PHASE 1 — STABILIZE CURRENT LAUNCHER
+  Mode: DRY_RUN first, then APPLY if approved
+
+  DRY_RUN:
+  1A. Read AI_OS_MAIN_CONTROL.ps1 from:
+        C:\Users\mylab\OneDrive\AI-OS-Project\AI_OS_MAIN_CONTROL.ps1
+      Confirm Set-Location points to AIOS_CLAUDE_01.
+      Confirm Test-Path guard is present.
+      Confirm banner and git status block are present.
+      Report: PASS / FAIL / MISMATCH per check.
+
+  1B. Inspect Create-MainControlShortcut.ps1.
+      Confirm targetScript = C:\Users\mylab\AI_OS_MAIN_CONTROL.ps1
+      Confirm WorkingDirectory = AIOS_CLAUDE_01
+      Confirm shortcut path uses Desktop environment variable.
+      Report: PASS / FAIL / MISMATCH per check.
+
+  1C. Confirm no shortcut currently exists at Desktop pointing
+      to ai-rtony91_Ai_Os_CLEAN.
+      Report: FOUND_STALE / CLEAN.
+
+  OPERATOR APPROVAL GATE — report findings before continuing.
+
+  APPLY (if approved):
+  1D. Run Create-MainControlShortcut.ps1 as Administrator.
+      Report: exit code, shortcut path created, PASS/FAIL.
+
+  1E. Manually verify shortcut launches correctly.
+      Report: banner displayed YES/NO, git status shown YES/NO.
+
+  STOP — report Phase 1 results.
+
+----------------------------------------------------------------
+
+PHASE 2 — INSTALL POWERSHELL 7
+  Mode: DRY_RUN first, then APPLY if approved
+
+  DRY_RUN:
+  2A. Run: winget show Microsoft.PowerShell
+      Report: version available, publisher, install location.
+
+  2B. Check if C:\Program Files\PowerShell\7\pwsh.exe exists.
+      Report: FOUND or NOT_FOUND.
+
+  2C. Check current default shell in Windows Terminal profiles
+      (if Windows Terminal settings.json exists).
+      Report: default shell path.
+
+  OPERATOR APPROVAL GATE.
+
+  APPLY (if approved):
+  2D. Run:
+      winget install --id Microsoft.PowerShell
+        --silent
+        --accept-package-agreements
+        --accept-source-agreements
+      Report: exit code, installation path confirmed.
+
+  2E. Verify install:
+      Run: pwsh --version
+      Expected: PowerShell 7.x.x
+      Report: PASS / FAIL with version string.
+
+  2F. Do NOT change any AIOS scripts to require PS7 yet.
+      PS7 is installed as an available option only at this stage.
+      AIOS engine continues on Windows PowerShell 5.1 until
+      explicitly migrated in a separate packet.
+
+  STOP — report Phase 2 results.
+
+----------------------------------------------------------------
+
+PHASE 3 — INSTALL WEZTERM
+  Mode: DRY_RUN first, then APPLY if approved
+
+  DRY_RUN:
+  3A. Run: winget show wez.wezterm
+      Report: version available, install location, publisher.
+
+  3B. Check if wezterm.exe already exists at:
+      C:\Program Files\WezTerm\wezterm.exe
+      or
+      C:\Users\mylab\AppData\Local\WezTerm\wezterm.exe
+      Report: FOUND or NOT_FOUND and path.
+
+  3C. Confirm Install-WezTerm.ps1 exists at:
+      C:\Users\mylab\OneDrive\AI-OS-Project\scripts\Install-WezTerm.ps1
+      Report: PASS / FAIL.
+
+  OPERATOR APPROVAL GATE.
+
+  APPLY (if approved):
+  3D. Run Install-WezTerm.ps1 as Administrator.
+      That script handles:
+        - Windows Terminal removal
+        - WezTerm installation via winget
+        - wezterm.lua deployment to C:\Users\mylab\.wezterm.lua
+      Report: each step exit code, PASS/FAIL.
+
+  3E. Verify WezTerm binary exists post-install:
+      Run: winget list --id wez.wezterm
+      Run: wezterm --version
+      Report: version string, PASS / FAIL.
+
+  3F. Verify wezterm.lua was deployed:
+      Confirm file exists at C:\Users\mylab\.wezterm.lua
+      Report: FOUND / MISSING.
+
+  3G. Verify Windows Terminal is no longer listed:
+      Run: winget list --id Microsoft.WindowsTerminal
+      Report: REMOVED / STILL_PRESENT.
+
+  STOP — report Phase 3 results.
+
+----------------------------------------------------------------
+
+PHASE 4 — BUILD WEZTERM AI_OS COCKPIT CONFIG
+  Mode: DRY_RUN first, then APPLY if approved
+  Builds on the starter wezterm.lua already deployed.
+  This phase expands it with full 5-worker layout automation.
+
+  DRY_RUN:
+  4A. Read existing wezterm.lua from:
+      C:\Users\mylab\.wezterm.lua
+      Confirm presence of:
+        - worker_colors table
+        - format-tab-title event handler
+        - PowerShell default_prog
+        - GPU front_end setting
+        - key bindings for split/zoom/rename
+      Report: PASS / MISSING per item.
+
+  4B. Read aios.ps1 -Mode layout output to extract:
+      - Zone map (5 worker positions)
+      - Worker names and color identities
+      - Banner commands per worker
+      Do NOT run any APPLY mode. Read layout output only.
+      Report: confirmed worker list and colors.
+
+  OPERATOR APPROVAL GATE.
+
+  APPLY (if approved):
+  4C. Add the following sections to wezterm.lua
+      (append only — do not remove existing content):
+
+      SECTION A — STARTUP LAYOUT LAUNCHER
+      Add a wezterm.on("gui-startup") handler that:
+        - Opens Tab 1: "MAIN CONTROL" pane, cyan identity
+          Runs: powershell.exe -ExecutionPolicy Bypass -NoExit
+                  -File "C:\Users\mylab\AI_OS_MAIN_CONTROL.ps1"
+        - Adds Tab 2: "BUILD LANE" pane, blue identity
+          Runs: powershell.exe -ExecutionPolicy Bypass -NoExit
+                  -File "C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01\aios.ps1"
+                  -Mode help
+        - Adds Tab 3: "CLAUDE" pane, magenta identity
+          Runs: pwsh.exe -NoLogo (PS7 reviewer pane, idle at prompt)
+        - Adds Tab 4: "VALIDATOR" pane, amber identity
+          Runs: powershell.exe -ExecutionPolicy Bypass -NoLogo
+                  (validator pane, idle at repo root)
+        - Adds Tab 5: "APPROVAL" pane, green identity
+          Runs: powershell.exe -ExecutionPolicy Bypass -NoLogo
+                  (approval inbox pane, idle at repo root)
+        - Set working directory for tabs 2-5 to AIOS_CLAUDE_01
+        - Tab 1 focused on launch
+
+      SECTION B — DYNAMIC TITLE UPDATER
+      Add a wezterm.on("update-right-status") handler that:
+        - Shows current git branch in right status if inside
+          a git repo
+        - Shows HH:MM clock in right status
+        - Uses cyan color for MAIN CONTROL pane identity
+        - Uses dim styling for non-active panes
+
+      SECTION C — WORKER SPAWN KEYBINDINGS
+      Add keybindings:
+        - CTRL+SHIFT+1  spawn MAIN CONTROL tab
+        - CTRL+SHIFT+2  spawn BUILD LANE tab
+        - CTRL+SHIFT+3  spawn CLAUDE REVIEWER tab
+        - CTRL+SHIFT+4  spawn VALIDATOR tab
+        - CTRL+SHIFT+5  spawn APPROVAL INBOX tab
+        Each binding sets the correct tab title and runs the
+        correct worker startup command.
+
+  4D. Save updated wezterm.lua to:
+      C:\Users\mylab\.wezterm.lua  (deploy, overwrite)
+      AND backup original to:
+      C:\Users\mylab\OneDrive\AI-OS-Project\scripts\wezterm.lua.bak
+
+  4E. Validate: open WezTerm and confirm all 5 tabs appear
+      with correct colors and titles.
+      Report: PASS / FAIL per tab.
+
+  STOP — report Phase 4 results.
+
+----------------------------------------------------------------
+
+PHASE 5 — DISCONNECT AND CLEAN OLD TERMINAL LAYER
+  Mode: DRY_RUN first, then APPLY if approved
+
+  DRY_RUN:
+  5A. Locate all Windows Terminal settings files:
+      Check: C:\Users\mylab\AppData\Local\Packages\
+               Microsoft.WindowsTerminal_*\LocalState\settings.json
+      Report: FOUND / NOT_FOUND, full path if found.
+
+  5B. Locate any .lnk shortcuts pointing to Windows Terminal:
+      Search Desktop, Start Menu, Taskbar pinned items.
+      Report: list of stale shortcuts found.
+
+  5C. Check for any AIOS scripts that hardcode wt.exe
+      (Windows Terminal executable):
+      Search: grep -r "wt.exe" in AIOS_CLAUDE_01
+      Report: files found with hardcoded wt references.
+
+  5D. Check for any AIOS scripts that reference WT_SESSION
+      or WindowsTerminal profile names:
+      Report: files found.
+
+  OPERATOR APPROVAL GATE.
+
+  APPLY (if approved):
+  5E. Archive Windows Terminal settings (do not delete):
+      Copy settings.json (if found) to:
+      C:\Users\mylab\OneDrive\AI-OS-Project\backups\
+        wt_settings_backup_YYYYMMDD.json
+      Report: backup path.
+
+  5F. Remove stale Windows Terminal .lnk shortcuts
+      from Desktop and Start Menu (if any found in 5B).
+      Report: shortcuts removed.
+
+  5G. For any AIOS scripts found in 5C that reference wt.exe:
+      Report each as WARN.
+      Do NOT auto-edit. Flag for separate operator review.
+      These will be patched in a future surgical prompt.
+
+  5H. Verify WezTerm shortcut is pinned to taskbar or
+      accessible from Start. Report: PASS / FAIL.
+
+  STOP — report Phase 5 results.
+
+----------------------------------------------------------------
+
+PHASE 6 — FINAL VALIDATION AND CHECKPOINT
+  Mode: DRY_RUN (read and verify only)
+
+  6A. Full system state report:
+      - PowerShell 7 version: pwsh --version
+      - WezTerm version: wezterm --version
+      - Windows Terminal: winget list Microsoft.WindowsTerminal
+      - Active launcher path: confirm AI_OS_MAIN_CONTROL.ps1
+        at C:\Users\mylab\AI_OS_MAIN_CONTROL.ps1
+      - wezterm.lua exists: C:\Users\mylab\.wezterm.lua
+      - git status of AIOS_CLAUDE_01 repo
+
+  6B. AIOS engine integrity check:
+      Confirm aios.ps1 is unchanged (no edits made to it).
+      Confirm automation/ folder was not touched.
+      Confirm AGENTS.md was not edited.
+      Report: PASS / FAIL per item.
+
+  6C. AGENTS.md mismatch note:
+      Re-confirm ACTIVE_REPO mismatch still exists in AGENTS.md.
+      Report as KNOWN_MISMATCH (pending separate correction packet).
+      Output the exact line that needs changing for operator review.
+
+  6D. Generate checkpoint file at:
+      C:\Users\mylab\OneDrive\AI-OS-Project\logs\
+        TERMINAL_MIGRATION_CHECKPOINT_YYYYMMDD.txt
+      Contents:
+        - Date
+        - Phase completion status (0-6)
+        - Files created
+        - Files changed
+        - Known mismatches
+        - Remaining items (wt.exe script refs from 5G)
+        - Next safe action
+
+  6E. Output daily report entry for DAILY_REPORT.md:
+      Format: one paragraph, no bullet points, plain English.
+      Content: what was completed, what remains, one next step.
+      Do NOT write to DAILY_REPORT.md yet. Output text only.
+      Operator will copy it in.
+
+  STOP — report Phase 6 results. Packet complete.
+
+----------------------------------------------------------------
+BLOCKED UNTIL SEPARATE PACKET
+----------------------------------------------------------------
+
+The following items are OUT OF SCOPE for this packet.
+Do not attempt them here.
+
+  - Migrating AIOS engine scripts from PS5.1 to PS7
+  - Editing AGENTS.md to correct ACTIVE_REPO path
+  - Installing Oh-My-Posh (deferred — post-stabilization)
+  - Zellij or tmux integration (deferred)
+  - Any live trading code
+  - Any broker API connection
+  - Any git commit or push
+
+These are flagged for future packets in dependency order.
+
+----------------------------------------------------------------
+RETURN FORMAT
+----------------------------------------------------------------
+
+Per AGENTS.md, every task ends with:
+
+  Task:
+  Files inspected:
+  Files created:
+  Files changed:
+  Dry-run result:
+  Errors:
+  Unknowns:
+  Mismatches:
+  Protected action involved: YES/NO
+  Approval required: YES/NO
+  Next safe action:
+
+Use this format at the end of EVERY phase report.
+Do not deviate.
+
+----------------------------------------------------------------
+ESCALATION PATH
+----------------------------------------------------------------
+
+If any of the following occur, STOP immediately and report:
+
+  - winget fails with non-zero exit code on install steps
+  - WezTerm binary not found after install
+  - Any AIOS automation script is accidentally modified
+  - Git working tree shows unexpected changes after any phase
+  - RISK_POLICY.md or AGENTS.md is triggered as requiring edit
+  - Any file outside allowed paths is touched
+
+Output: ESCALATION — [reason] and stop.
+Do not attempt to self-recover from escalation conditions.
+Wait for operator instruction.
+
+----------------------------------------------------------------
+STOP POINT — PACKET BOUNDARY
+----------------------------------------------------------------
+
+This packet ends after Phase 6 checkpoint is delivered.
+Do not proceed to any further work after Phase 6.
+Do not open new objectives.
+Do not begin Oh-My-Posh, PS7 engine migration, or git work.
+Output only: PACKET COMPLETE and the Phase 6 report.
+
+================================================================
+  NEXT OPERATOR ACTION:
+  Read this packet in full.
+  Confirm the allowed paths match your intent.
+  Open Claude Code (Codex) in AIOS_CLAUDE_01 repo.
+  Paste this packet.
+  Begin at Phase 0 DRY_RUN only.
+  Do not approve APPLY steps until DRY_RUN is reported.
+================================================================

@@ -1,0 +1,2 @@
+﻿"HumanDecision","AllowedDecisions","Directory","FileCount","ProposedAuthority","ExecutionStatus","Reason","HumanNotes"
+"HOLD","HOLD | KEEP | APPROVE_AS_ARCHIVE | BLOCK | NEEDS_MORE_EVIDENCE","C:\Users\mylab\OneDrive\AI-OS-Project\backups","1","ARCHIVE_OR_BACKUP_CANDIDATE","BLOCK_UNTIL_ARCHIVE_APPROVAL","Archive/backup candidate. No action until manually approved.",""

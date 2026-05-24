@@ -1,0 +1,67 @@
+﻿"SourceType","Name","State","Trigger","Command","KeepHint"
+"ScheduledTask","\Microsoft\Windows\LanguageComponentsInstaller\Installation","Ready","Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : PeriodicInstallationAfterLogonUntilDone
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+Delay              : PT15M
+UserId             : 
+PSComputerName     :","Execute=; Arguments=; WorkingDirectory=","REVIEW"
+"ScheduledTask","\Microsoft\Windows\Windows Error Reporting\QueueReporting","Ready","Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingBootTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+Delay              : PT3M
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingWnfTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingFreeNetworkTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingACPowerTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingTimeTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 2014-12-31T20:00:00-04:00
+RandomDelay        : PT1H
+PSComputerName     :","Execute=%windir%\system32\wermgr.exe; Arguments=-upload; WorkingDirectory=","REVIEW"
