@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import operatorStatusFixture from "../mock-data/aios-operator-status-v1.example.json";
 import mockRuntimeVisibility from "../mock-data/aios-runtime-visibility-v1.example.json";
 import {
   RUNTIME_VISIBILITY_SOURCE_LABELS,
@@ -10,6 +11,13 @@ const packetFilters = ["all", "dispatch", "wait_for_approval", "retry", "manual_
 const runtimeVisibility = mapRuntimeVisibilityDisplayModel(mockRuntimeVisibility, {
   sourceLabel: RUNTIME_VISIBILITY_SOURCE_LABELS.MOCK_DATA
 });
+const operatorStatusPanels = [
+  operatorStatusFixture.registry_safety,
+  operatorStatusFixture.telemetry_status,
+  operatorStatusFixture.worker_status,
+  operatorStatusFixture.pr_branch_status,
+  operatorStatusFixture.next_safe_action
+];
 
 function formatTime(value) {
   if (!value) {
@@ -59,6 +67,10 @@ function statusTone(value) {
     return "good";
   }
 
+  if (["pass", "mock_data", "display_only", "not_connected", "not_evaluated"].includes(normalized)) {
+    return "good";
+  }
+
   return "neutral";
 }
 
@@ -93,6 +105,47 @@ function Section({ title, action, children }) {
 
 function UnavailableMessage({ children }) {
   return <p className="nextAction">{children}</p>;
+}
+
+function OperatorStatusPanel({ panel }) {
+  const detailRows = [
+    ["Source", panel.source],
+    ["Branch", panel.branch],
+    ["Base", panel.base],
+    ["Merge", panel.merge_state],
+    ["Collector", panel.collector_state],
+    ["Latest event", panel.latest_event_at ? formatTime(panel.latest_event_at) : null],
+    ["Active workers", panel.active_workers],
+    ["Blocked workers", panel.blocked_workers],
+    ["Action type", panel.action_type]
+  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
+
+  return (
+    <article className="operatorStatusCard">
+      <div className="operatorStatusTop">
+        <h3>{panel.label}</h3>
+        <StatusPill value={panel.status} />
+      </div>
+      <p>{panel.summary}</p>
+      {detailRows.length > 0 ? (
+        <dl className="operatorStatusMeta">
+          {detailRows.map(([label, value]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+      {panel.blocked_actions?.length ? (
+        <ul className="blockedList">
+          {panel.blocked_actions.map((action) => (
+            <li key={action}>{action}</li>
+          ))}
+        </ul>
+      ) : null}
+    </article>
+  );
 }
 
 export default function App() {
@@ -146,6 +199,34 @@ export default function App() {
           <StatusPill value={`backpressure: ${runtimeVisibility.backpressure.level}`} />
         </div>
       </header>
+
+      <section className="operatorStatusSlice" aria-labelledby="operator-status-title">
+        <div className="operatorStatusIntro">
+          <div>
+            <p className="eyebrow">Operator status</p>
+            <h2 id="operator-status-title">Display-Only Fixture</h2>
+            <p>
+              {operatorStatusFixture.provenance.classification}.{" "}
+              {operatorStatusFixture.provenance.authority}.
+            </p>
+          </div>
+          <div className="headerStatus">
+            <StatusPill value={operatorStatusFixture.mode} />
+            <StatusPill value={`source: ${operatorStatusFixture.source_label}`} />
+            <StatusPill value={`schema: ${operatorStatusFixture.schema}`} />
+          </div>
+        </div>
+        <div className="operatorStatusGrid">
+          {operatorStatusPanels.map((panel) => (
+            <OperatorStatusPanel key={panel.label} panel={panel} />
+          ))}
+        </div>
+        <div className="warningStrip operatorWarnings">
+          {operatorStatusFixture.warnings.map((warning) => (
+            <span key={warning}>{warning}</span>
+          ))}
+        </div>
+      </section>
 
       <main className="runtimeGrid">
         <Section title="Runtime Status">
