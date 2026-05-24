@@ -3880,7 +3880,7 @@
       "risk_policy_notes": "Contains a repeated daemon loop and invokes runtime cycle scripts through powershell, including an Apply route.",
       "topology_guard_requirement": "Must remain blocked until daemon and runtime topology are separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked daemon launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -3906,7 +3906,7 @@
       "risk_policy_notes": "Contains a repeated daemon loop and invokes worker cycle scripts through powershell, including an Apply route.",
       "topology_guard_requirement": "Must remain blocked until worker daemon topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked worker daemon evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -3932,7 +3932,7 @@
       "risk_policy_notes": "Contains a cycle loop, Start-Sleep delay, and powershell invocation of worker inbox script.",
       "topology_guard_requirement": "Must remain blocked until worker loop behavior is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked worker loop evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -3958,7 +3958,7 @@
       "risk_policy_notes": "Builds lane commands and uses Start-Process with wt.exe when not in preview mode.",
       "topology_guard_requirement": "Must remain blocked until worker crew launch topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked worker crew launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -3984,7 +3984,7 @@
       "risk_policy_notes": "Delegates to workspace bootstrap with LaunchManualShells and invokes worker planning scripts for startup routing.",
       "topology_guard_requirement": "Must remain blocked until startup topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked startup launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -4010,7 +4010,7 @@
       "risk_policy_notes": "Runs validators and delegates to Start-AiOsDay.ps1, which can open manual shell launch flow.",
       "topology_guard_requirement": "Must remain blocked until work bootstrap topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked work bootstrap evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -4036,7 +4036,7 @@
       "risk_policy_notes": "Uses Start-Process with wt.exe when LaunchManualShells is supplied.",
       "topology_guard_requirement": "Must remain blocked until workspace launcher topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked workspace launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -4062,7 +4062,7 @@
       "risk_policy_notes": "Contains repeated worker cycles and an Apply branch for worker safe-execute flow, even though current DRY_RUN output skips child execution.",
       "topology_guard_requirement": "Must remain blocked until autonomous worker cycle architecture is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked autonomous worker cycle evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -4088,7 +4088,7 @@
       "risk_policy_notes": "Uses wt new-tab with powershell -NoExit and encoded command when Apply is supplied.",
       "topology_guard_requirement": "Must remain blocked until worker window launch topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked worker window launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -4114,7 +4114,7 @@
       "risk_policy_notes": "Builds Start-Process powershell.exe commands with -NoExit for lane terminals.",
       "topology_guard_requirement": "Must remain blocked until worktree lane launch topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked worktree lane launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -4140,7 +4140,7 @@
       "risk_policy_notes": "Runs PowerShell workflow-intelligence scripts and references parallel worker crew startup behavior.",
       "topology_guard_requirement": "Must remain blocked until morning operations launch topology is separately reviewed.",
       "validator_consumption": "Validators must treat this as blocked morning operations launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and separate architecture review."
     },
     {
@@ -4166,7 +4166,7 @@
       "risk_policy_notes": "Uses Start-Process powershell to launch worker Codex windows when Launch is supplied.",
       "topology_guard_requirement": "Must remain blocked until worker window launch topology is reviewed.",
       "validator_consumption": "Validators must treat this as blocked worker window launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
     },
     {
@@ -4192,7 +4192,7 @@
       "risk_policy_notes": "Builds lane terminal commands and uses wt.exe/Start-Process behavior for lane opening.",
       "topology_guard_requirement": "Must remain blocked until lane launcher topology is reviewed.",
       "validator_consumption": "Validators must treat this as blocked lane launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
     },
     {
@@ -4218,7 +4218,7 @@
       "risk_policy_notes": "Builds lane restore commands and uses wt.exe/Start-Process behavior for terminal restoration.",
       "topology_guard_requirement": "Must remain blocked until session restore topology is reviewed.",
       "validator_consumption": "Validators must treat this as blocked session restore launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
     },
     {
@@ -4244,7 +4244,7 @@
       "risk_policy_notes": "Builds checkpoint lane commands and uses wt.exe/Start-Process behavior for workspace restoration.",
       "topology_guard_requirement": "Must remain blocked until workspace restore topology is reviewed.",
       "validator_consumption": "Validators must treat this as blocked workspace checkpoint restore launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
     },
     {
@@ -4270,7 +4270,7 @@
       "risk_policy_notes": "Builds worker launcher commands and can invoke worker window launch through powershell when Apply is set.",
       "topology_guard_requirement": "Must remain blocked until worker swarm launch topology is reviewed.",
       "validator_consumption": "Validators must treat this as blocked worker swarm launcher evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
     },
     {
@@ -4296,7 +4296,7 @@
       "risk_policy_notes": "Reads git worktree state and contains Start-Process powershell.exe behavior for lane terminal launch.",
       "topology_guard_requirement": "Must remain blocked until worktree lane registry launch behavior is reviewed.",
       "validator_consumption": "Validators must treat this as blocked worktree lane registry evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
     },
     {
@@ -4322,7 +4322,7 @@
       "risk_policy_notes": "Reads active worker job cards and displays operator work instructions, including APPLY-gated workflow text; printed instructions are not execution approval.",
       "topology_guard_requirement": "Must remain blocked until worker queue routing and job-card execution boundaries are reviewed.",
       "validator_consumption": "Validators must treat this as blocked worker queue runner evidence.",
-      "review_status": "registry_blocked_rebuild_static_review",
+      "review_status": "registry_blocked_rebuild_20260524",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
     }
   ],
