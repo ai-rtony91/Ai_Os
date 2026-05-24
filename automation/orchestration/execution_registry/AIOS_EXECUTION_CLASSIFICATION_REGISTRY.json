@@ -3154,6 +3154,708 @@
       "validator_consumption": "May be consumed as commit package display evidence.",
       "review_status": "execution_registry_cleanup_static_review",
       "next_safe_action": "Keep display-only."
+    },
+    {
+      "path": "automation/operator/Invoke-AiOsApprovalGate.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Inspect operator approval inbox requests and report approval-gate status.",
+      "owner_area": "automation/operator",
+      "execution_mode": "approval_gate",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Approval gate touches approval decision flow; keep approval-gated until exact operator authorization.",
+      "topology_guard_requirement": "Treat as blocked from automated launch unless explicitly approved for a scoped review.",
+      "validator_consumption": "May be registered as approval-required evidence only; output does not approve execution.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/operator/Invoke-AiOsPacketDispatcher.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Read queue and packet metadata to produce a packet dispatch plan.",
+      "owner_area": "automation/operator",
+      "execution_mode": "dispatch_planning",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Packet dispatch affects queue routing decisions even when currently read-only.",
+      "topology_guard_requirement": "Do not auto-dispatch packets from this entry without explicit operator approval.",
+      "validator_consumption": "May be registered as approval-required dispatch evidence only.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Process approval files against active packets and optionally route packet state changes.",
+      "owner_area": "automation/orchestration/approval_processor",
+      "execution_mode": "DRY_RUN_with_apply_switch",
+      "writes_files": "apply_mode_can_mutate_packet_state",
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Has an Apply path that invokes packet state mutation; approval processing must remain approval-gated.",
+      "topology_guard_requirement": "Block automated use unless scoped approval explicitly permits approval processing.",
+      "validator_consumption": "May be registered as approval-required; validators should treat Apply mode as blocked.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/pr_gates/Invoke-AiOsPrLaneRunner.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Build a PR lane readiness packet and recommend next PR or Git commands.",
+      "owner_area": "automation/orchestration/pr_gates",
+      "execution_mode": "DRY_RUN_pr_lane_planner",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": "read_only_and_recommends_mutation",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "PR lane runner emits recommendations for git push, PR merge, and reset flows; recommendations are not approval.",
+      "topology_guard_requirement": "Keep as approval-required PR flow evidence; never auto-run recommended mutation commands.",
+      "validator_consumption": "May be consumed as PR readiness evidence only.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/pr_gates/Open-AiOsPullRequest.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Open or preview opening a GitHub pull request for the current branch.",
+      "owner_area": "automation/orchestration/pr_gates",
+      "execution_mode": "DRY_RUN_with_apply_switch",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": "reads_git_and_can_call_gh_pr_create",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "PR_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Apply mode can call gh pr create; PR mutation is blocked without exact explicit approval.",
+      "topology_guard_requirement": "Block from automated launch until a scoped PR creation approval exists.",
+      "validator_consumption": "May be registered as blocked PR mutation risk.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/pr_gates/Merge-AiOsPullRequest.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Merge or preview merging a GitHub pull request after approval checks.",
+      "owner_area": "automation/orchestration/pr_gates",
+      "execution_mode": "DRY_RUN_with_apply_switch",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": "reads_git_and_can_call_gh_pr_merge",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "PR_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Apply mode can call gh pr merge --squash --delete-branch; PR merge mutation is blocked without exact explicit approval.",
+      "topology_guard_requirement": "Block from automated launch until a scoped merge approval exists.",
+      "validator_consumption": "May be registered as blocked PR mutation risk.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Validate and execute a runtime self-route recommended command.",
+      "owner_area": "automation/orchestration/runtime",
+      "execution_mode": "runtime_command_execution",
+      "writes_files": "depends_on_recommended_command",
+      "launches_process": true,
+      "runs_git": "depends_on_recommended_command",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Uses Invoke-Expression on a recommended command after validation; runtime command execution must remain blocked.",
+      "topology_guard_requirement": "Do not permit automated runtime self-routing from registry classification alone.",
+      "validator_consumption": "May be registered as blocked runtime mutation and process execution risk.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/advancement/Invoke-AiOsPacketAdvancement.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Invoke approval processing for packet advancement planning or Apply-mode progression.",
+      "owner_area": "automation/orchestration/advancement",
+      "execution_mode": "DRY_RUN_with_apply_switch",
+      "writes_files": "apply_mode_can_mutate_packet_state",
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Can pass Apply to approval processor, which can move packet state.",
+      "topology_guard_requirement": "Keep packet advancement approval-gated and block Apply mode without exact operator approval.",
+      "validator_consumption": "May be registered as approval-required packet advancement risk.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/queue_runner/Invoke-AiOsOperatorQueueRunner.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Read operator queue, approvals, packet state, and Git status to recommend next operator commands.",
+      "owner_area": "automation/orchestration/queue_runner",
+      "execution_mode": "DRY_RUN_queue_planner",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": "read_only_and_recommends_mutation",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Queue runner reads queue and approval state and emits suggested git add/commit commands; suggestions are not approval.",
+      "topology_guard_requirement": "Keep as approval-required queue planning evidence only.",
+      "validator_consumption": "May be registered as approval-required queue runner evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/workers/inbox/Add-AiOsWorkerInboxItem.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Preview adding an item to a worker inbox queue.",
+      "owner_area": "automation/orchestration/workers/inbox",
+      "execution_mode": "DRY_RUN_queue_mutation_preview",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Queue-add intent is approval-required even when this DRY_RUN only prints the proposed item.",
+      "topology_guard_requirement": "Block any Apply counterpart or queue mutation without explicit approval.",
+      "validator_consumption": "May be registered as approval-required queue mutation preview.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/workers/state/Set-AiOsWorkerTaskState.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Preview worker task state transitions.",
+      "owner_area": "automation/orchestration/workers/state",
+      "execution_mode": "DRY_RUN_state_mutation_preview",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "State transition intent is approval-required even when this DRY_RUN only prints the proposed update.",
+      "topology_guard_requirement": "Block any persisted worker task state change without explicit approval.",
+      "validator_consumption": "May be registered as approval-required worker state mutation preview.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/New-AiOsPullRequestTemplate.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Creates or updates a pull request template artifact.",
+      "owner_area": "automation/orchestration",
+      "execution_mode": "artifact_write",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Writes PR-flow template state and must not be run automatically from registry coverage alone.",
+      "topology_guard_requirement": "Block until explicit operator approval names the PR artifact scope.",
+      "validator_consumption": "May be registered only as blocked PR artifact writer evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/bootstrap/Save-AiOsSession.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Saves AI_OS session state to JSON.",
+      "owner_area": "automation/orchestration/bootstrap",
+      "execution_mode": "state_write",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Writes session JSON state and includes launch/restore command routing metadata.",
+      "topology_guard_requirement": "Block persisted session writes unless a scoped APPLY packet approves the state path.",
+      "validator_consumption": "May be registered only as blocked session state writer evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/bootstrap/Save-AiOsWorkspaceCheckpoint.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Saves workspace checkpoint state to JSON.",
+      "owner_area": "automation/orchestration/bootstrap",
+      "execution_mode": "state_write",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Writes checkpoint JSON state and records workspace launch/restore commands.",
+      "topology_guard_requirement": "Block persisted checkpoint writes unless a scoped APPLY packet approves the checkpoint path.",
+      "validator_consumption": "May be registered only as blocked checkpoint state writer evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/bootstrap/Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Validates workspace bootstrap behavior and references worker launch, packet, and git-save routes.",
+      "owner_area": "automation/orchestration/bootstrap",
+      "execution_mode": "DRY_RUN_validation_with_dispatch_references",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Bootstrap validation references launch, packet creation, and git-save scripts; output is not execution approval.",
+      "topology_guard_requirement": "Keep launcher and packet references approval-gated until the full bootstrap route is reviewed.",
+      "validator_consumption": "May be registered as review-required bootstrap validation evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/handoff/New-AiOsCodexHandoff.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Generates Codex handoff text with suggested validation and git staging commands.",
+      "owner_area": "automation/orchestration/handoff",
+      "execution_mode": "DRY_RUN_handoff_generation",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": "suggests_git_add_commands_only",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Produces operator handoff and suggested git add commands; suggestions must not become approval.",
+      "topology_guard_requirement": "Keep handoff generation review-gated until command recommendation boundaries are validated.",
+      "validator_consumption": "May be registered as review-required handoff evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/runtime/Start-AiOsRuntimeCycle.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Coordinates runtime cycle steps and can invoke approval processor or supervisor loop Apply paths.",
+      "owner_area": "automation/orchestration/runtime",
+      "execution_mode": "DRY_RUN_runtime_dispatcher",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Runtime cycle dispatch can route into approval processing and supervisor packet advancement.",
+      "topology_guard_requirement": "Block automated runtime cycle use until exact runtime and Apply boundaries are approved.",
+      "validator_consumption": "May be registered only as blocked runtime dispatcher evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/session/Start-AiOsOperatorSession.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Builds an operator session plan with queue runner, handoff, validator, and git staging recommendations.",
+      "owner_area": "automation/orchestration/session",
+      "execution_mode": "DRY_RUN_session_planner",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": "suggests_git_add_commands_only",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Session plan surfaces queue, handoff, validator, and git-add commands; none are approved by registry classification.",
+      "topology_guard_requirement": "Keep session routing review-gated until queue and git command boundaries are validated.",
+      "validator_consumption": "May be registered as review-required session planning evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/supervisor/Invoke-AiOsSupervisorLoop.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Supervisor loop can advance packet state through Move-AiOsPacketState.",
+      "owner_area": "automation/orchestration/supervisor",
+      "execution_mode": "DRY_RUN_supervisor_packet_dispatcher",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Supervisor loop contains packet state advancement paths, including Apply routing.",
+      "topology_guard_requirement": "Block packet advancement from supervisor automation without exact operator approval.",
+      "validator_consumption": "May be registered only as blocked supervisor packet dispatcher evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/supervisor/Invoke-AiOsSupervisorPlanner.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Creates supervisor plans with Apply, validation, commit, push, and PR creation gates.",
+      "owner_area": "automation/orchestration/supervisor",
+      "execution_mode": "DRY_RUN_supervisor_planner",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "recommends_git_add_only",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Planner emits approval requirements and git-add gate recommendations; it must not authorize mutation.",
+      "topology_guard_requirement": "Keep supervisor planning review-gated until command recommendations are validated.",
+      "validator_consumption": "May be registered as review-required supervisor planning evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/task_generator/New-AiOsTaskFromNextStep.DRY_RUN.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Generates a task from the next-step resolver and can call New-AiOsWorkPacket.",
+      "owner_area": "automation/orchestration/task_generator",
+      "execution_mode": "DRY_RUN_packet_generation_dispatcher",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Task generation may dispatch to work-packet creation; packet creation is approval-required.",
+      "topology_guard_requirement": "Block task-to-packet generation until exact packet mutation scope is approved.",
+      "validator_consumption": "May be registered only as blocked task generator evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/workers/Resolve-AiOsNeededWorkers.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Resolves needed workers and emits guard/save commands including Submit-AiOsWork preview.",
+      "owner_area": "automation/orchestration/workers",
+      "execution_mode": "DRY_RUN_worker_planner",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "references_git_save_workflow",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Worker planning emits save workflow commands tied to git/package handling; recommendations are not approval.",
+      "topology_guard_requirement": "Keep worker planning review-gated until save workflow command boundaries are validated.",
+      "validator_consumption": "May be registered as review-required worker planning evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/orchestration/workers/Resolve-AiOsWorkerForPacket.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Resolves a worker for a packet and emits guard/save commands including Submit-AiOsWork preview.",
+      "owner_area": "automation/orchestration/workers",
+      "execution_mode": "DRY_RUN_worker_packet_planner",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": "references_git_save_workflow",
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Worker-to-packet planning emits save workflow commands and packet routing context; recommendations are not approval.",
+      "topology_guard_requirement": "Keep worker packet planning review-gated until packet and save workflow boundaries are validated.",
+      "validator_consumption": "May be registered as review-required worker packet planning evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/operator/Capture-AIOSCodexWindowLayout.ps1",
+      "classification": "BLOCKED",
+      "purpose": "Captures Codex window layout to JSON profile state.",
+      "owner_area": "automation/operator",
+      "execution_mode": "state_write",
+      "writes_files": true,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Writes local operator/window layout JSON state and should not run from automated classification.",
+      "topology_guard_requirement": "Block layout state writes unless an operator explicitly approves the output path.",
+      "validator_consumption": "May be registered only as blocked window layout writer evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
+    },
+    {
+      "path": "automation/operator/Test-AiOsQueueDispatcher.DRY_RUN.ps1",
+      "classification": "REVIEW_REQUIRED",
+      "purpose": "Tests queue dispatcher behavior by invoking the dispatcher against queue and packet paths.",
+      "owner_area": "automation/operator",
+      "execution_mode": "DRY_RUN_queue_dispatcher_validation",
+      "writes_files": false,
+      "launches_process": true,
+      "runs_git": false,
+      "requires_human_approval": true,
+      "allowed_callers": [
+        "operator"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "git_mutation",
+        "packet_mutation",
+        "queue_mutation",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "Dispatcher validation invokes queue dispatcher logic over queue and packet roots; no queue mutation is approved by this entry.",
+      "topology_guard_requirement": "Keep dispatcher validation review-gated until queue and packet boundaries are confirmed.",
+      "validator_consumption": "May be registered as review-required queue dispatcher validation evidence.",
+      "review_status": "batch_4_static_review",
+      "next_safe_action": "Keep blocked or approval-gated until explicit operator approval."
     }
   ],
   "counts_by_classification_at_creation": {
