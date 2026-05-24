@@ -299,14 +299,27 @@ function Format-PrSummary {
 
 function New-Packet {
     param(
+        [string] $Timestamp,
+        [string] $RepoPath,
+        [string] $RepoPathResult,
+        [string] $RemoteUrl,
+        [string] $RemoteResult,
         [string] $CurrentBranch,
         [string] $LocalStatus,
         [string] $LatestCommit,
+        [int] $AheadCount,
+        [int] $BehindCount,
+        [string[]] $StagedFileList,
+        [string[]] $UnstagedTrackedFileList,
+        [string[]] $UntrackedFileList,
         [string] $KnownUntrackedBacklog,
         [string] $PrDetected,
         [string] $CiValidate,
         [string] $LaneState,
         [string] $ApprovalClass,
+        [string] $SafetyClassification,
+        [string] $CommitGateRef,
+        [string] $PushGateRef,
         [string] $RecommendedNextCommand,
         [string] $StopCondition,
         [object] $PrInfo,
@@ -316,14 +329,28 @@ function New-Packet {
     )
 
     return [pscustomobject] @{
+        schema = "AIOS_PR_LANE_RUNNER_DRY_RUN_PACKET.v2"
+        timestamp = $Timestamp
+        repo_path = $RepoPath
+        repo_path_result = $RepoPathResult
+        remote_url = $RemoteUrl
+        remote_result = $RemoteResult
         current_branch = $CurrentBranch
         local_status = $LocalStatus
         latest_commit = $LatestCommit
+        ahead_count = $AheadCount
+        behind_count = $BehindCount
+        staged_files = @($StagedFileList)
+        unstaged_tracked_files = @($UnstagedTrackedFileList)
+        untracked_files = @($UntrackedFileList)
         known_untracked_backlog = $KnownUntrackedBacklog
         pr_detected = $PrDetected
         ci_validate = $CiValidate
         lane_state = $LaneState
         approval_class = $ApprovalClass
+        safety_classification = $SafetyClassification
+        commit_gate_ref = $CommitGateRef
+        push_gate_ref = $PushGateRef
         recommended_next_command = $RecommendedNextCommand
         stop_condition = $StopCondition
         evidence = [pscustomobject] @{
@@ -352,20 +379,48 @@ function New-Packet {
 function Format-MarkdownPacket {
     param([Parameter(Mandatory = $true)][pscustomobject] $Packet)
 
-    return @"
-# AI_OS PR Lane Runner DRY_RUN Packet
+    $sb = [System.Text.StringBuilder]::new()
+    [void]$sb.AppendLine("# AI_OS PR Lane Runner - DRY_RUN")
+    [void]$sb.AppendLine("Timestamp: $($Packet.timestamp)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("REPO IDENTITY")
+    [void]$sb.AppendLine("  Path:   $($Packet.repo_path)  $($Packet.repo_path_result)")
+    [void]$sb.AppendLine("  Branch: $($Packet.current_branch)")
+    [void]$sb.AppendLine("  Remote: $($Packet.remote_url)  $($Packet.remote_result)")
+    [void]$sb.AppendLine("  Commit: $($Packet.latest_commit)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("GIT STATE")
+    [void]$sb.AppendLine("  Status: $($Packet.local_status)")
+    [void]$sb.AppendLine("  Ahead: $($Packet.ahead_count) | Behind: $($Packet.behind_count)")
+    [void]$sb.AppendLine("  Staged: $($Packet.staged_files.Count) files")
+    foreach ($f in $Packet.staged_files) { [void]$sb.AppendLine("    $f") }
+    [void]$sb.AppendLine("  Unstaged tracked: $($Packet.unstaged_tracked_files.Count) files")
+    foreach ($f in $Packet.unstaged_tracked_files) { [void]$sb.AppendLine("    $f") }
+    [void]$sb.AppendLine("  Untracked: $($Packet.untracked_files.Count) files")
+    if ($Packet.untracked_files.Count -le 20) {
+        foreach ($f in $Packet.untracked_files) { [void]$sb.AppendLine("    $f") }
+    } else {
+        foreach ($f in $Packet.untracked_files | Select-Object -First 20) { [void]$sb.AppendLine("    $f") }
+        [void]$sb.AppendLine("    ... and $($Packet.untracked_files.Count - 20) more (use -Json for full list)")
+    }
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("LANE STATE: $($Packet.lane_state)")
+    [void]$sb.AppendLine("  Approval class: $($Packet.approval_class)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("SAFETY: $($Packet.safety_classification)")
+    [void]$sb.AppendLine("  Commit gate: $($Packet.commit_gate_ref)")
+    [void]$sb.AppendLine("  Push gate:   $($Packet.push_gate_ref)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("NEXT SAFE ACTION")
+    [void]$sb.AppendLine("  $($Packet.recommended_next_command)")
+    [void]$sb.AppendLine("  Stop: $($Packet.stop_condition)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("PR: $($Packet.pr_detected)")
+    [void]$sb.AppendLine("CI: $($Packet.ci_validate)")
+    [void]$sb.AppendLine("")
+    [void]$sb.AppendLine("Mutation: none (DRY_RUN)")
 
-- Current branch: $($Packet.current_branch)
-- Local status: $($Packet.local_status)
-- Latest commit: $($Packet.latest_commit)
-- Known untracked backlog: $($Packet.known_untracked_backlog)
-- PR detected: $($Packet.pr_detected)
-- CI/validate: $($Packet.ci_validate)
-- Lane state: $($Packet.lane_state)
-- Approval class: $($Packet.approval_class)
-- Recommended next command: $($Packet.recommended_next_command)
-- Stop condition: $($Packet.stop_condition)
-"@
+    return $sb.ToString().TrimEnd()
 }
 
 try {
@@ -380,6 +435,16 @@ try {
     }
 
     Assert-CommandAvailable -CommandName "git"
+
+    $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+
+    $repoTopLevelResult = Invoke-ReadOnlyCommand -CommandName "git" -Arguments @("rev-parse", "--show-toplevel") -DisplayCommand "git rev-parse --show-toplevel"
+    $repoPath = $repoTopLevelResult.output.Trim().Replace("/", "\")
+    $repoPathResult = if ($repoPath -ieq "C:\Dev\Ai.Os") { "PASS" } else { "BLOCKED" }
+
+    $remoteUrlResult = Invoke-ReadOnlyCommand -CommandName "git" -Arguments @("remote", "get-url", "origin") -DisplayCommand "git remote get-url origin" -AllowFailure
+    $remoteUrl = if ($remoteUrlResult.exit_code -eq 0) { $remoteUrlResult.output.Trim() } else { "NOT_CONFIGURED" }
+    $remoteResult = if ($remoteUrl -eq "https://github.com/ai-rtony91/Ai_Os.git") { "PASS" } else { "BLOCKED" }
 
     $branchResult = Invoke-ReadOnlyCommand -CommandName "git" -Arguments @("branch", "--show-current") -DisplayCommand "git branch --show-current"
     $statusResult = Invoke-ReadOnlyCommand -CommandName "git" -Arguments @("status", "--short", "--branch") -DisplayCommand "git status --short --branch"
@@ -405,7 +470,16 @@ try {
     $hasUntracked = $untrackedStatusLines.Count -gt 0
     $hasTrackedStatus = $trackedStatusLines.Count -gt 0
     $hasAnyLocalChange = $hasStaged -or $hasUnstagedTracked -or $hasUntracked -or $hasTrackedStatus
-    $knownBacklog = if ($hasUntracked) { "exists; not enumerated; do not stage or treat as a new emergency" } else { "none" }
+    $knownBacklog = if ($hasUntracked) { "exists; do not stage or treat as a new emergency" } else { "none" }
+
+    $aheadCount = 0
+    $behindCount = 0
+    if ($branchStatus -match 'ahead\s+(\d+)') { $aheadCount = [int]$Matches[1] }
+    if ($branchStatus -match 'behind\s+(\d+)') { $behindCount = [int]$Matches[1] }
+
+    $untrackedFileList = @($untrackedStatusLines | ForEach-Object {
+        if ($_.Length -ge 4) { $_.Substring(3).Trim() } else { $_ }
+    })
 
     $conflictLines = @($trackedStatusLines | Where-Object {
         $_ -match "^(UU|AA|DD|AU|UA|DU|UD) "
@@ -504,16 +578,40 @@ try {
         $stopCondition = "PR lane state is unclear; operator should inspect the branch and PR state."
     }
 
-    $localStatus = "$branchStatus; staged=$($stagedFiles.Count); unstaged_tracked=$($unstagedTrackedFiles.Count); untracked=$($untrackedStatusLines.Count)"
+    $safetyClassification = "HUMAN_APPROVAL_REQUIRED"
+    if ($repoPathResult -ne "PASS" -or $remoteResult -ne "PASS") {
+        $safetyClassification = "BLOCKED"
+    } elseif ($approvalClass -eq "BLOCKED") {
+        $safetyClassification = "BLOCKED"
+    } elseif (-not $hasAnyLocalChange -and $aheadCount -eq 0 -and $behindCount -eq 0 -and $conflictLines.Count -eq 0) {
+        $safetyClassification = "SAFE_READ_ONLY"
+    }
+
+    $commitGateRef = ".\automation\orchestration\commit_packages\Test-AiOsCommitPushGate.DRY_RUN.ps1"
+    $pushGateRef = ".\automation\orchestration\commit_packages\Test-AiOsCommitPushGate.DRY_RUN.ps1"
+
     $packet = New-Packet `
+        -Timestamp $timestamp `
+        -RepoPath $repoPath `
+        -RepoPathResult $repoPathResult `
+        -RemoteUrl $remoteUrl `
+        -RemoteResult $remoteResult `
         -CurrentBranch $branch `
-        -LocalStatus $localStatus `
+        -LocalStatus $branchStatus `
         -LatestCommit $latestCommitResult.output `
+        -AheadCount $aheadCount `
+        -BehindCount $behindCount `
+        -StagedFileList $stagedFiles `
+        -UnstagedTrackedFileList $unstagedTrackedFiles `
+        -UntrackedFileList $untrackedFileList `
         -KnownUntrackedBacklog $knownBacklog `
         -PrDetected (Format-PrSummary -PrInfo $prInfo) `
         -CiValidate $prInfo.validate `
         -LaneState $laneState `
         -ApprovalClass $approvalClass `
+        -SafetyClassification $safetyClassification `
+        -CommitGateRef $commitGateRef `
+        -PushGateRef $pushGateRef `
         -RecommendedNextCommand $recommended `
         -StopCondition $stopCondition `
         -PrInfo $prInfo `
