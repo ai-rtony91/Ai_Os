@@ -44,7 +44,7 @@ $lnk     = $shell.CreateShortcut($shortcutPath)
 
 $lnk.TargetPath       = $pwshExe
 $lnk.Arguments        = "-ExecutionPolicy Bypass -NoExit -File `"$targetScript`""
-$lnk.WorkingDirectory = "C:\Users\mylab\OneDrive\GitHub\AIOS_CLAUDE_01"
+$lnk.WorkingDirectory = "C:\Dev\Ai.Os"
 $lnk.WindowStyle      = 1   # 1 = Normal window
 $lnk.Description      = "AI_OS MAIN CONTROL - ORCHESTRATOR"
 $lnk.Save()
