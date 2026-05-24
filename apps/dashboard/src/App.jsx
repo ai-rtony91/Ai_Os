@@ -1,14 +1,19 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import operatorStatusFixture from "../mock-data/aios-operator-status-v1.example.json";
 import mockRuntimeVisibility from "../mock-data/aios-runtime-visibility-v1.example.json";
 import {
   RUNTIME_VISIBILITY_SOURCE_LABELS,
   mapRuntimeVisibilityDisplayModel
 } from "./runtimeVisibilityAdapter";
+import {
+  fetchRuntimeVisibilityReadOnly,
+  getRuntimeVisibilityClientConfig
+} from "./runtimeVisibilityClient";
 import "./App.css";
 
 const packetFilters = ["all", "dispatch", "wait_for_approval", "retry", "manual_review"];
-const runtimeVisibility = mapRuntimeVisibilityDisplayModel(mockRuntimeVisibility, {
+
+const mockVisibilityDisplay = mapRuntimeVisibilityDisplayModel(mockRuntimeVisibility, {
   sourceLabel: RUNTIME_VISIBILITY_SOURCE_LABELS.MOCK_DATA
 });
 const operatorStatusPanels = [
@@ -149,8 +154,26 @@ function OperatorStatusPanel({ panel }) {
 }
 
 export default function App() {
+  const [runtimeVisibility, setRuntimeVisibility] = useState(mockVisibilityDisplay);
+  const [visibilityLoading, setVisibilityLoading] = useState(false);
   const [packetFilter, setPacketFilter] = useState("all");
   const [eventQuery, setEventQuery] = useState("");
+
+  useEffect(() => {
+    const config = getRuntimeVisibilityClientConfig();
+    setVisibilityLoading(true);
+    fetchRuntimeVisibilityReadOnly(config)
+      .then((result) => {
+        setRuntimeVisibility(
+          mapRuntimeVisibilityDisplayModel(result.data, { sourceLabel: result.sourceLabel })
+        );
+      })
+      .catch(() => {
+        // API unavailable: retain mock data already in state
+      })
+      .finally(() => setVisibilityLoading(false));
+  }, []);
+
   const isLocalApiReadOnly =
     runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.LOCAL_API_READ_ONLY;
 
@@ -197,6 +220,7 @@ export default function App() {
           <StatusPill value={`source: ${runtimeVisibility.sourceLabel}`} />
           <StatusPill value={`freshness: ${runtimeVisibility.runtime.freshness}`} />
           <StatusPill value={`backpressure: ${runtimeVisibility.backpressure.level}`} />
+          {visibilityLoading && <StatusPill value="loading…" />}
         </div>
       </header>
 
