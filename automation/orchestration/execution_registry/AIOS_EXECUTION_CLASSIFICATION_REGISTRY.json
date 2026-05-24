@@ -3154,6 +3154,465 @@
       "validator_consumption": "May be consumed as commit package display evidence.",
       "review_status": "execution_registry_cleanup_static_review",
       "next_safe_action": "Keep display-only."
+    },
+    {
+      "path": "automation/agents/Test-AiOsAgentAuditLogReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate agent audit log readiness in DRY_RUN mode.",
+      "owner_area": "automation/agents",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/agents/Test-AiOsMultiAgentRoleMatrixReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate multi-agent role matrix readiness in DRY_RUN mode.",
+      "owner_area": "automation/agents",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/analytics/Preview-AiOsDailyAnalyticsSummary.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Preview daily analytics summary output in DRY_RUN mode.",
+      "owner_area": "automation/analytics",
+      "execution_mode": "dry_run_report_preview",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN preview helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only report preview evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/azure/Test-AiOsAzureProductionBoundaryReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate Azure production boundary readiness in DRY_RUN mode.",
+      "owner_area": "automation/azure",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/backtesting/Test-AiOsBacktestEvidenceLayerReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate backtest evidence layer readiness in DRY_RUN mode.",
+      "owner_area": "automation/backtesting",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/backtesting/Test-AiOsBacktestIngestionReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate backtest ingestion readiness in DRY_RUN mode.",
+      "owner_area": "automation/backtesting",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/bootstrap_engine/Test-AiOsBootstrapEngineReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate bootstrap engine readiness in DRY_RUN mode.",
+      "owner_area": "automation/bootstrap_engine",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/metrics/Preview-AiOsDailyMetricsAnalytics.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Preview daily metrics analytics output in DRY_RUN mode.",
+      "owner_area": "automation/metrics",
+      "execution_mode": "dry_run_report_preview",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN preview helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only report preview evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/production/Test-AiOsObservabilityReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate observability readiness in DRY_RUN mode.",
+      "owner_area": "automation/production",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/progress/Test-AiOsProgressLedgerAutomationReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate progress ledger automation readiness in DRY_RUN mode.",
+      "owner_area": "automation/progress",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/progress/Test-AiOsProgressLedgerReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate progress ledger readiness in DRY_RUN mode.",
+      "owner_area": "automation/progress",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/router/Test-AiOsRouterCommandMap.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate router command map readiness in DRY_RUN mode.",
+      "owner_area": "automation/router",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/router/Test-AiOsWorkflowRegistry.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate workflow registry readiness in DRY_RUN mode.",
+      "owner_area": "automation/router",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/signal_intelligence/Test-AiOsSignalIntelligenceReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate signal intelligence readiness in DRY_RUN mode.",
+      "owner_area": "automation/signal_intelligence",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/signal_intelligence/Test-AiOsSignalPipelineReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate signal pipeline readiness in DRY_RUN mode.",
+      "owner_area": "automation/signal_intelligence",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/signal_intelligence/Test-AiOsStrategyRegistryExpansionReadiness.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Validate strategy registry expansion readiness in DRY_RUN mode.",
+      "owner_area": "automation/signal_intelligence",
+      "execution_mode": "dry_run_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN validation helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only validation evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
+    },
+    {
+      "path": "automation/writers/Preview-AiOsWriterExecution.DRY_RUN.ps1",
+      "classification": "HELPER",
+      "purpose": "Preview writer execution output in DRY_RUN mode.",
+      "owner_area": "automation/writers",
+      "execution_mode": "dry_run_report_preview",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "APPLY",
+        "commit",
+        "push",
+        "worker_launch",
+        "runtime_mutation"
+      ],
+      "risk_policy_notes": "DRY_RUN preview helper; output is evidence, not approval.",
+      "topology_guard_requirement": "Not a launcher or runtime mutator.",
+      "validator_consumption": "May be consumed as read-only report preview evidence.",
+      "review_status": "execution_registry_batch_2_static_review",
+      "next_safe_action": "Keep as HELPER; do not promote to ACTIVE without separate review."
     }
   ],
   "counts_by_classification_at_creation": {
