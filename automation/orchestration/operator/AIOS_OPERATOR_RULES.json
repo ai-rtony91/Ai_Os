@@ -36,7 +36,7 @@
     "window_title": "RULEBOOK \u00b7 codex",
     "tab_title": "RULEBOOK \u00b7 codex",
     "role": "Operator rules, workflow memory, and durable instruction capture.",
-    "path": "C:\\Users\\mylab\\OneDrive\\GitHub\\aios-worker-rulebook",
+    "path": "C:\\Dev\\Ai.Os",
     "branch": "phase-operator-rulebook",
     "truth_source": "path_and_branch",
     "manual_codex_lane": true
