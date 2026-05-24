@@ -1,4 +1,4 @@
-﻿param(
+param(
     [switch]$Apply
 )
 
@@ -15,7 +15,7 @@ $intent = "Auto task from next step: $($next.next_step)"
 $title = "Auto Task - $($next.status)"
 $ownerLane = "route_dispatch"
 $worker = "task_generator"
-$repo = "ai-rtony91_Ai_Os_CLEAN"
+$repo = "ai-rtony91/Ai_Os"
 $branch = git branch --show-current
 $validator = "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
 $nextAction = $next.next_step
