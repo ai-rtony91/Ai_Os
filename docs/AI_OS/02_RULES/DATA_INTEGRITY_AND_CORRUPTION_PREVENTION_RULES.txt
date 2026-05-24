@@ -1,0 +1,16 @@
+Create an AI_OS incident report for the invalid root inventory report.
+
+Include:
+1. What happened
+2. Which report/file was invalid
+3. What data was bad or missing
+4. Root cause candidates
+5. Confirmed root cause, if known
+6. Evidence from screenshots / terminal output
+7. Impact on the AI_OS build
+8. Corrective action taken
+9. Prevention rules
+10. Where this should be logged: ERROR_LOG.md, SOURCE_LOG.md, HALLUCINATION_LOG.md, DAILY_REPORT.md, or AAR.md
+
+Topic:
+PowerShell inventory report returned 0 items even though File Explorer showed 19 root items. Later a direct Get-ChildItem visibility check showed PowerShell could see the project root. Bad data collection, suspected stale/bad terminal state, path handling, and report validation failure need to be documented.

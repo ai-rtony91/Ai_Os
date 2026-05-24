@@ -1,0 +1,83 @@
+﻿"SourceType","Name","State","Trigger","Command","KeepHint"
+"ScheduledTask","\Microsoft\Windows\LanguageComponentsInstaller\Installation","Ready","Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : PeriodicInstallationAfterLogonUntilDone
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+Delay              : PT15M
+UserId             : 
+PSComputerName     :","Execute=; Arguments=; WorkingDirectory=","REVIEW"
+"ScheduledTask","\Microsoft\Windows\Windows Error Reporting\QueueReporting","Ready","Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingBootTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+Delay              : PT3M
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingWnfTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingFreeNetworkTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingACPowerTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 
+PSComputerName     : 
+
+
+
+ || 
+
+Enabled            : True
+EndBoundary        : 
+ExecutionTimeLimit : 
+Id                 : QueueReportingTimeTrigger
+Repetition         : MSFT_TaskRepetitionPattern
+StartBoundary      : 2014-12-31T20:00:00-04:00
+RandomDelay        : PT1H
+PSComputerName     :","Execute=%windir%\system32\wermgr.exe; Arguments=-upload; WorkingDirectory=","REVIEW"
+"RegistryRunKey","HPSEU_Host_Launcher","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","C:\Program Files\HP\HP System Event Utility\Host Launcher\HpseuHostLauncher.exe","REVIEW"
+"RegistryRunKey","OneDrive","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","""C:\Program Files\Microsoft OneDrive\OneDrive.exe"" /background","REVIEW"
+"RegistryRunKey","Proton VPN","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","C:\Program Files\Proton\VPN\ProtonVPN.Launcher.exe ""----ms-protocol:ms-encodedlaunch:App?ContractId=Windows.StartupTask&TaskId=Proton%20VPN""","REVIEW"
+"RegistryRunKey","Mozilla-Firefox-308046B0AF4A39CB","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","""C:\Program Files\Mozilla Firefox\firefox.exe"" -os-autostart","REVIEW"
+"RegistryRunKey","electron.app.Bitwarden","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","C:\Users\mylab\AppData\Local\Programs\Bitwarden\Bitwarden.exe","REVIEW"
+"RegistryRunKey","EADM","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","""C:\Program Files\Electronic Arts\EA Desktop\EA Desktop\EALauncher.exe"" -silent","REVIEW"
+"RegistryRunKey","Docker Desktop","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","C:\Program Files\Docker\Docker\Docker Desktop.exe","REVIEW"
+"RegistryRunKey","Teams","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","""C:\Users\mylab\AppData\Local\Microsoft\WindowsApps\MSTeams_8wekyb3d8bbwe\ms-teams.exe"" msteams:system-initiated","REVIEW"
+"RegistryRunKey","Battle.net","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","""C:\Program Files (x86)\Battle.net\Battle.net.exe"" --autostarted","REVIEW"
+"RegistryRunKey","MicrosoftEdgeAutoLaunch_A126EAE96A34808393F2F31D53B00B2C","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","""C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"" --win-session-start","REVIEW"
+"RegistryRunKey","Microsoft.Lists","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","C:\Program Files\Microsoft OneDrive\26.074.0420.0001\OneDrive.Sync.Service.exe","REVIEW"
+"RegistryRunKey","MicrosoftCopilotAutoLaunch_B972E99B4AA6F2366F1DF58CCF57A29A","EnabledIfPresent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","""C:\Program Files (x86)\Microsoft\Copilot\Application\mscopilot.exe"" --no-startup-window --win-session-start","REVIEW"
+"RegistryRunKey","SecurityHealth","EnabledIfPresent","HKLM:\Software\Microsoft\Windows\CurrentVersion\Run","C:\WINDOWS\system32\SecurityHealthSystray.exe","REVIEW"
+"StartupFolder","desktop.ini","EnabledIfPresent","C:\Users\mylab\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup","C:\Users\mylab\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\desktop.ini","REVIEW"
+"StartupFolder","desktop.ini","EnabledIfPresent","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup\desktop.ini","REVIEW"
+"BrowserStartupSetting","Firefox / oo6fj6x9.default-release","BrowserControlled","C:\Users\mylab\AppData\Roaming\Mozilla\Firefox\Profiles\oo6fj6x9.default-release\prefs.js","browser.startup.homepage=tradingview.com","REVIEW_BROWSER_SETTING"

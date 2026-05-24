@@ -1,0 +1,45 @@
+// CREATE INCIDENT REPORT PROMPT
+
+Use this prompt when AI_OS, terminal, VS Code, PowerShell, file inventory, trading bot code, backtest data, or reports produce bad data, conflicting results, corrupted files, or suspicious output.
+
+Prompt:
+
+Create an AI_OS incident report.
+
+Topic:
+[Describe what happened here]
+
+Include:
+1. What happened
+2. What file, folder, report, script, or command was involved
+3. What data was missing, wrong, corrupted, or suspicious
+4. Root cause candidates
+5. Confirmed root cause, if known
+6. Evidence used, including screenshots, terminal output, file paths, reports, or uploaded files
+7. Impact on AI_OS build, trading bot build, backtesting, paper trading, or live-trade safety
+8. Corrective action taken
+9. Preventive measures
+10. Whether this belongs in:
+   - ERROR_LOG.md
+   - SOURCE_LOG.md
+   - HALLUCINATION_LOG.md
+   - DAILY_REPORT.md
+   - AAR.md
+   - RISK_POLICY.md
+
+Special rule:
+If a report conflicts with File Explorer, screenshots, terminal output, or known folder contents, mark it INVALID DATA.
+
+Do not continue automation until the bad data source is identified or isolated.
+
+Applies to:
+- AI_OS construction
+- System-level AI wizard construction
+- Forex trading bot construction
+- Trading strategy files
+- Backtest reports
+- Paper-trading reports
+- Broker/API logs
+- PowerShell scripts
+- Python scripts
+- VS Code project files

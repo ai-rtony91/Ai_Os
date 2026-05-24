@@ -1,0 +1,9 @@
+Read AGENTS.md and AI_OS_FOLDER_NOTE_AUTOMATION_SPEC.txt.
+
+Create a DRY_RUN-only Python script that scans C:\Users\mylab\OneDrive\AI-OS-Project and reports folder classifications.
+
+Do not move, rename, delete, or overwrite anything.
+
+Create only a report in Reports\daily.
+
+Open the report in Notepad after generation.

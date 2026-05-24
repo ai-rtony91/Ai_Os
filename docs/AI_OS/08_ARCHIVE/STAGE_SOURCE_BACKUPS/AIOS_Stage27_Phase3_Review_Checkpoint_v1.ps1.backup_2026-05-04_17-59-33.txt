@@ -1,0 +1,10 @@
+﻿# AIOS_Stage27_Phase3_Review_Checkpoint_v1.ps1
+# Purpose: Root-visible stage marker for AI_OS workflow continuity.
+# Safety: This script performs no move, delete, rename, merge, archive, GitHub, or overwrite action.
+
+Write-Host ""
+Write-Host "Stage 27 was executed inside AIOS_Phase3_Run_Stages24_to_27_ReportOnly_v1.ps1. Output is in docs\AI_OS\00_START_HERE and docs\AI_OS\01_CURRENT_STATE."
+Write-Host ""
+Write-Host "This stage was already executed by its mini-master script."
+Write-Host "No action is being performed."
+Write-Host ""

@@ -1,0 +1,8 @@
+﻿"BlockedAction","Status","RequiredBeforeAllowed"
+"MOVE","BLOCKED","Explicit approval file"
+"MERGE","BLOCKED","Explicit approval file and backup"
+"DELETE","BLOCKED","Backup confirmation and explicit approval file"
+"RENAME","BLOCKED","Explicit approval file"
+"ARCHIVE_EXECUTION","BLOCKED","Archive plan and approval file"
+"GIT_PUSH","BLOCKED","Repo approval and git review"
+"GIT_PULL","BLOCKED","Repo approval and backup/working-tree status check"

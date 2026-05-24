@@ -1,0 +1,2 @@
+﻿"HumanDecision","AllowedDecisions","Directory","FileCount","ProposedAuthority","ExecutionStatus","Reason","ProposedActions","RiskLevels","TargetZones","ExampleFiles","HumanNotes"
+"HOLD","HOLD | KEEP | APPROVE_AS_GITHUB_REPO | APPROVE_AS_ARCHIVE | APPROVE_DUPLICATE_REVIEW | BLOCK_NO_TOUCH | NEEDS_MORE_EVIDENCE","C:\Users\mylab\OneDrive\AI-OS-Project\backups","1","ARCHIVE_OR_BACKUP_CANDIDATE","BLOCK_UNTIL_ARCHIVE_APPROVAL","Folder path suggests backup/archive/older material.","KEEP_READ_ONLY_ARCHIVE","MEDIUM","BACKUP_ARCHIVE","TradingEngineV1.zip",""

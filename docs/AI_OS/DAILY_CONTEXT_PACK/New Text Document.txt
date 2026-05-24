@@ -1,0 +1,18 @@
+DAILY_REPORT.md entry:
+
+Changed:
+- Connected GitHub / Codex connector to ai-rtony91/Ai_Os.
+- Confirmed repository access.
+- Attempted to begin AGENTS.md safety-rule setup.
+- Identified local folder structure confusion and naming disorder as an active AI_OS organization issue.
+
+Errors / Issues:
+- Local AI-OS-Project directory contains mixed old/new folders and inconsistent naming.
+- AGENTS.md is still missing from GitHub repo after attempted setup.
+- Automation must not continue until root structure and guardrail files are verified.
+
+Prevention:
+- Do not let Codex edit yet.
+- Create AGENTS.md before Codex work.
+- Use DRY_RUN before APPLY for all folder cleanup.
+- Do not move, rename, delete, or overwrite files until inventory is valid.

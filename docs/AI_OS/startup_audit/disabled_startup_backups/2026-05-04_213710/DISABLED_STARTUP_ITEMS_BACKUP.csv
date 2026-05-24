@@ -1,0 +1,8 @@
+﻿"Name","Value","RegistryPath","DisabledAt"
+"EADM","""C:\Program Files\Electronic Arts\EA Desktop\EA Desktop\EALauncher.exe"" -silent","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","5/4/2026 9:37:11 PM"
+"Battle.net","""C:\Program Files (x86)\Battle.net\Battle.net.exe"" --autostarted","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","5/4/2026 9:37:11 PM"
+"Docker Desktop","C:\Program Files\Docker\Docker\Docker Desktop.exe","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","5/4/2026 9:37:11 PM"
+"Teams","""C:\Users\mylab\AppData\Local\Microsoft\WindowsApps\MSTeams_8wekyb3d8bbwe\ms-teams.exe"" msteams:system-initiated","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","5/4/2026 9:37:11 PM"
+"MicrosoftEdgeAutoLaunch_A126EAE96A34808393F2F31D53B00B2C","""C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"" --win-session-start","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","5/4/2026 9:37:11 PM"
+"MicrosoftCopilotAutoLaunch_B972E99B4AA6F2366F1DF58CCF57A29A","""C:\Program Files (x86)\Microsoft\Copilot\Application\mscopilot.exe"" --no-startup-window --win-session-start","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","5/4/2026 9:37:11 PM"
+"Microsoft.Lists","C:\Program Files\Microsoft OneDrive\26.074.0420.0001\OneDrive.Sync.Service.exe","HKCU:\Software\Microsoft\Windows\CurrentVersion\Run","5/4/2026 9:37:11 PM"

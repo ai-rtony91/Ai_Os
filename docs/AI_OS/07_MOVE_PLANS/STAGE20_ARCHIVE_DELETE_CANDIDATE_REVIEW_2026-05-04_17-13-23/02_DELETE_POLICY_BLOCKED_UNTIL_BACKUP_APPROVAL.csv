@@ -1,0 +1,5 @@
+﻿"RuleID","Status","Rule"
+"DELETE_RULE_001","BLOCKED","No delete action is approved during Phase 2."
+"DELETE_RULE_002","BLOCKED","Delete candidates require backup confirmation first."
+"DELETE_RULE_003","BLOCKED","Delete candidates require explicit human approval in 06_APPROVALS."
+"DELETE_RULE_004","BLOCKED","No-touch files cannot be delete candidates."

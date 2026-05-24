@@ -1,0 +1,32 @@
+﻿AIOS Startup Cleanup Report
+Generated: 05/04/2026 21:38:38
+
+Disabled startup items:
+EADM
+Battle.net
+Docker Desktop
+Teams
+MicrosoftEdgeAutoLaunch_A126EAE96A34808393F2F31D53B00B2C
+MicrosoftCopilotAutoLaunch_B972E99B4AA6F2366F1DF58CCF57A29A
+Microsoft.Lists
+
+Kept:
+HPSEU_Host_Launcher
+OneDrive
+Proton VPN
+Mozilla Firefox
+Bitwarden
+SecurityHealth
+Startup folder desktop.ini
+Firefox homepage tradingview.com
+
+Backup CSV:
+C:\Users\mylab\OneDrive\AI-OS-Project\docs\AI_OS\startup_audit\disabled_startup_backups\2026-05-04_213838\DISABLED_STARTUP_ITEMS_BACKUP.csv
+
+Full registry backup:
+C:\Users\mylab\OneDrive\AI-OS-Project\docs\AI_OS\startup_audit\disabled_startup_backups\2026-05-04_213838\HKCU_Run_Full_Backup.reg
+
+System note:
+Nothing was uninstalled.
+Only selected startup launch entries were removed from HKCU Run.
+No YouTube startup source was removed.

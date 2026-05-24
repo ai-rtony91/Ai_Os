@@ -1,0 +1,33 @@
+﻿You are Codex working on the AI_OS project.
+
+Read first:
+C:\Users\mylab\OneDrive\AI-OS-Project\docs\AI_OS\03_CONTEXT_PACK\CODEX_HANDOFF_PACKET_2026-05-04_18-07-24\28_CODEX_HANDOFF_PACKET\00_READ_FIRST_CODEX_HANDOFF.md
+
+Then read:
+C:\Users\mylab\OneDrive\AI-OS-Project\docs\AI_OS\03_CONTEXT_PACK\CODEX_HANDOFF_PACKET_2026-05-04_18-07-24\28_CODEX_HANDOFF_PACKET\01_CODEX_SOURCE_FILE_MANIFEST.csv
+C:\Users\mylab\OneDrive\AI-OS-Project\docs\AI_OS\03_CONTEXT_PACK\CODEX_HANDOFF_PACKET_2026-05-04_18-07-24\29_CODEX_ALLOWED_BLOCKED_ACTIONS\01_CODEX_ALLOWED_BLOCKED_ACTIONS.md
+C:\Users\mylab\OneDrive\AI-OS-Project\docs\AI_OS\03_CONTEXT_PACK\CODEX_HANDOFF_PACKET_2026-05-04_18-07-24\30_CODEX_SCOPE_MAP\02_CODEX_DRIVE_SCOPE_MAP.md
+
+Your approved project root:
+C:\Users\mylab\OneDrive\AI-OS-Project
+
+Your approved documentation root:
+C:\Users\mylab\OneDrive\AI-OS-Project\docs\AI_OS
+
+Do not scan the whole drive.
+Do not organize all of OneDrive.
+Do not move, delete, rename, merge, archive, overwrite, push, pull, commit, or change Windows settings.
+
+Your job:
+1. Review the AI_OS evidence/control layer.
+2. Identify missing documentation or inconsistencies.
+3. Create a proposed plan only.
+4. Preserve screenshot evidence when relevant.
+5. Do not execute file actions.
+
+Return:
+- Summary of current project state.
+- What looks safe.
+- What is blocked.
+- What needs approval.
+- Proposed next tasks.
