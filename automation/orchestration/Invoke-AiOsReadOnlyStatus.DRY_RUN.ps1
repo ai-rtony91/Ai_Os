@@ -57,7 +57,7 @@ function Invoke-GateScript {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         Write-Output "SKIPPED: $Label"
         Write-Output "  Script not found: $Path"
-        return $false
+        $script:lastGateResult = $false; return
     }
 
     $ErrorActionPreference = "Continue"
@@ -81,10 +81,10 @@ function Invoke-GateScript {
     if ($exitCode -ne 0) {
         Write-Output ""
         Write-Output "EXIT CODE: $exitCode (FAILED)"
-        return $false
+        $script:lastGateResult = $false; return
     }
 
-    return $true
+    $script:lastGateResult = $true
 }
 
 Write-Output "# AI_OS Read-Only Status"
@@ -126,8 +126,8 @@ $postMergePath = Join-Path $scriptDir "post_push\Test-AiOsPostPushVerification.D
 $postMergeArgs = @()
 if ($Json) { $postMergeArgs += "-Json" }
 
-$postMergeResult = Invoke-GateScript -Path $postMergePath -Label "Post-Merge Verification" -ExtraArgs $postMergeArgs
-if (-not $postMergeResult) {
+Invoke-GateScript -Path $postMergePath -Label "Post-Merge Verification" -ExtraArgs $postMergeArgs
+if (-not $script:lastGateResult) {
     $overallSuccess = $false
 }
 
@@ -138,8 +138,8 @@ $laneRunnerPath = Join-Path $scriptDir "pr_gates\Invoke-AiOsPrLaneRunner.DRY_RUN
 $laneRunnerArgs = @()
 if ($Json) { $laneRunnerArgs += "-Json" }
 
-$laneRunnerResult = Invoke-GateScript -Path $laneRunnerPath -Label "PR Lane Runner" -ExtraArgs $laneRunnerArgs
-if (-not $laneRunnerResult) {
+Invoke-GateScript -Path $laneRunnerPath -Label "PR Lane Runner" -ExtraArgs $laneRunnerArgs
+if (-not $script:lastGateResult) {
     $overallSuccess = $false
 }
 
