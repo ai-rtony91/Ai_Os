@@ -1,5 +1,3 @@
-$ErrorActionPreference = "Stop"
-
 param(
     [string]$Stage = "UNKNOWN",
     [string]$TaskId = "UNKNOWN",
@@ -15,6 +13,11 @@ param(
     [string]$GitStatus = "UNKNOWN",
     [string]$Notes = "DRY_RUN preview only"
 )
+
+$ErrorActionPreference = "Stop"
+
+
+
 
 if ($PlannedSteps -gt 0) {
     $PercentComplete = [math]::Round(($CompletedSteps / $PlannedSteps) * 100)
@@ -46,4 +49,3 @@ Write-Host "AI_OS Progress Snapshot DRY_RUN"
 $Snapshot | ConvertTo-Csv -NoTypeInformation
 Write-Host "Result: PREVIEW_ONLY"
 exit 0
-
