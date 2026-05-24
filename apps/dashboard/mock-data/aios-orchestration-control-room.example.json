@@ -23,11 +23,11 @@
   "startup_persistence_status": "BLOCKED",
   "external_llm_install_status": "NOT_ENABLED",
   "source_references": [
-    "docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json",
-    "docs/AI_OS/agent_runtime/AGENT_RUNTIME_STATUS.json",
-    "docs/AI_OS/agent_runtime/AGENT_RUNTIME_OWNERSHIP_RULES.json",
-    "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_TASK_LIFECYCLE.json",
-    "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_BLOCKED_ACTIONS_MATRIX.json"
+    "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
+    "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
+    "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
+    "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
+    "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md"
   ],
   "safety_locks": {
     "live_execution_status": "BLOCKED",
@@ -47,7 +47,7 @@
       "title": "Active Queue",
       "status": "QUEUED",
       "meaning": "One local work packet can be selected for review.",
-      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json",
+      "source": "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
       "next_action": "Preview one task before APPLY.",
       "default_visible": true
     },
@@ -55,7 +55,7 @@
       "title": "Task State",
       "status": "READY_FOR_PREVIEW",
       "meaning": "The task must pass ownership and blocked-action checks before work starts.",
-      "source": "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_TASK_LIFECYCLE.json",
+      "source": "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
       "next_action": "Keep unclear tasks in review instead of APPLY.",
       "default_visible": true
     },
@@ -63,7 +63,7 @@
       "title": "Blocked Action Locks",
       "status": "BLOCKED",
       "meaning": "Live trading, brokers, OANDA, secrets, real webhooks, real orders, background tasks, and startup persistence are blocked.",
-      "source": "docs/AI_OS/agent_runtime/AGENT_WORKFLOW_BLOCKED_ACTIONS_MATRIX.json",
+      "source": "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
       "next_action": "Do not weaken the safety locks.",
       "default_visible": true
     },
@@ -79,7 +79,7 @@
       "title": "Agent Ownership",
       "status": "LOCAL_RULES",
       "meaning": "Every task must stay inside its assigned agent ownership boundary.",
-      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_OWNERSHIP_RULES.json",
+      "source": "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
       "next_action": "Review ownership before APPLY.",
       "default_visible": false
     },
@@ -95,7 +95,7 @@
       "title": "Runtime Health",
       "status": "LOCAL_ONLY",
       "meaning": "The runtime is a local control layer, not a background worker.",
-      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_STATUS.json",
+      "source": "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
       "next_action": "Keep background execution blocked.",
       "default_visible": false
     },
@@ -103,7 +103,7 @@
       "title": "Human Approval Gate",
       "status": "REQUIRED",
       "meaning": "The user must approve APPLY, commit, push, installs, integrations, and risky actions.",
-      "source": "docs/AI_OS/agent_runtime/AGENT_RUNTIME_QUEUE.json",
+      "source": "docs/architecture/AGENT_RUNTIME_ARCHITECTURE.md",
       "next_action": "Wait for explicit approval before risky steps.",
       "default_visible": false
     }
