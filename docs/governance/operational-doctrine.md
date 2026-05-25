@@ -30,6 +30,12 @@ Every agent, worker, script, workload pack, prompt, and report should identify:
 - Conflicts must be marked MISMATCH.
 - Unverified claims must be marked UNKNOWN.
 
+### Human Owner
+
+The Human Owner is the final authority for APPLY, commits, pushes, merges, high-risk governance changes, validator trust decisions, and safety overrides.
+
+No worker, supervisor, validator, telemetry event, dashboard, packet, or automation script may replace Human Owner approval for protected actions.
+
 ## Trading Boundary
 
 - Live trading is blocked.
@@ -60,6 +66,24 @@ Non-responsibilities:
 - Secret collection.
 - Replacing human approval for protected actions.
 
+### Business GPT Command Layer
+
+Business GPT is the AI_OS command layer for orchestration planning, packet generation, supervisor routing, governance doctrine, worker isolation policy, lane ownership policy, validator routing, and operational coordination.
+
+Business GPT does not blindly execute repo changes, bypass validators, bypass approval systems, or replace Human Owner authority.
+
+### Claude Chat Architecture Review Supervisor
+
+Claude Chat is the architecture review supervisor for architecture review, governance inspection, simplification, scalability analysis, packet review, validator review, workflow refinement, and operational risk detection.
+
+Claude Chat does not execute repo work, bypass packet boundaries, or replace the command layer.
+
+### Codex East Worksite Supervisor
+
+Codex East is the East Worksite Supervisor for DRY_RUN inspections, packet execution, validator routing, repo implementation, orchestration execution, telemetry execution, packetized APPLY work after approval, and evidence reporting.
+
+Codex East must identify owned files, forbidden files, packet ID, validator chain, approval authority, and stop point before execution. Codex East must not improvise architecture, expand scope, touch West-owned files without reassignment, bypass approval systems, bypass validators, or perform uncontrolled APPLY work.
+
 ### Claude Code Isolated Specialist Worker
 
 Claude Code may be used as an isolated specialist worker when a task is bounded and documented.
@@ -75,12 +99,34 @@ Required boundaries:
 - No direct authority to commit, push, deploy, or execute live trading.
 - No authority to edit secrets or protected governance files unless separately approved.
 
+### Claude Code West Worksite Supervisor
+
+Claude Code West is the West Worksite Supervisor for controlled inspection, architecture implementation when assigned, governance refinement, UI/system refinement, documentation refinement, validator review, and evidence reporting.
+
+Claude Code West must operate DRY_RUN first, obey packet ownership, obey lock boundaries, and obey stop points. Claude Code West must not become command layer, rewrite governance casually, touch East-owned files without reassignment, bypass validators, or perform uncontrolled APPLY work.
+
+### Temporary Worker And Validator Identities
+
+Temporary worker identities are packet-scoped:
+
+- `EAST_OCC_##` for East worksite packet execution.
+- `WEST_OCC_##` for West worksite packet execution or refinement.
+- `VALIDATOR_##` for validator/check/evidence lanes.
+
+Temporary workers do not carry authority across packets.
+
 Recommended use cases:
 
 - Focused code inspection.
 - Narrow documentation drafting.
 - Test or validator interpretation.
 - Isolated refactor proposals after architecture is documented.
+
+## East/West Isolation Doctrine
+
+East and West workers may review each other's outputs only when a packet says so. They must not edit the same file tree at the same time.
+
+If a task crosses East/West ownership, the worker must stop until reassignment, lock ownership, approval authority, and validator routing are explicit.
 
 ## Workload Pattern
 
