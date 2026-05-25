@@ -1,156 +1,78 @@
-\# AI\_OS DRY\_RUN Contract
+# AI_OS DRY_RUN Contract
 
+## Purpose
 
+DRY_RUN mode exists to guarantee safe preview execution without mutation, launch, routing, persistence, commit activity, or autonomous behavior.
 
-\## Purpose
+DRY_RUN must simulate only.
 
+---
 
+# DRY_RUN Rules
 
-DRY\_RUN mode exists to guarantee safe preview execution without mutation, launch, routing, persistence, commit activity, or autonomous behavior.
+A DRY_RUN script must NEVER:
 
+- write files
+- modify files
+- delete files
+- launch workers
+- launch terminals
+- mutate queues
+- mutate runtime memory
+- route packets
+- create commits
+- push branches
+- open pull requests
+- invoke APPLY-only execution paths
+- perform hidden side effects
 
+---
 
-DRY\_RUN must simulate only.
+# Allowed DRY_RUN Behavior
 
+DRY_RUN scripts MAY:
 
+- inspect state
+- validate topology
+- validate configuration
+- preview planned actions
+- generate report-only output
+- simulate routing
+- simulate mutation
+- print execution plans
+- emit WARN or STOP findings
 
-\---
+---
 
+# Required DRY_RUN Output
 
+Every DRY_RUN script should clearly report:
 
-\# DRY\_RUN Rules
+- mode
+- scope
+- inspected targets
+- simulated actions
+- validation findings
+- mutation risk
+- blocked dependencies
+- next safe action
 
+---
 
-
-A DRY\_RUN script must NEVER:
-
-
-
-\- write files
-
-\- modify files
-
-\- delete files
-
-\- launch workers
-
-\- launch terminals
-
-\- mutate queues
-
-\- mutate runtime memory
-
-\- route packets
-
-\- create commits
-
-\- push branches
-
-\- open pull requests
-
-\- invoke APPLY-only execution paths
-
-\- perform hidden side effects
-
-
-
-\---
-
-
-
-\# Allowed DRY\_RUN Behavior
-
-
-
-DRY\_RUN scripts MAY:
-
-
-
-\- inspect state
-
-\- validate topology
-
-\- validate configuration
-
-\- preview planned actions
-
-\- generate report-only output
-
-\- simulate routing
-
-\- simulate mutation
-
-\- print execution plans
-
-\- emit WARN or STOP findings
-
-
-
-\---
-
-
-
-\# Required DRY\_RUN Output
-
-
-
-Every DRY\_RUN script should clearly report:
-
-
-
-\- mode
-
-\- scope
-
-\- inspected targets
-
-\- simulated actions
-
-\- validation findings
-
-\- mutation risk
-
-\- blocked dependencies
-
-\- next safe action
-
-
-
-\---
-
-
-
-\# Fail-Closed Principle
-
-
+# Fail-Closed Principle
 
 If uncertainty exists:
+- STOP
+- do not mutate
+- require explicit APPLY approval
 
-\- STOP
+---
 
-\- do not mutate
+# Long-Term Goal
 
-\- require explicit APPLY approval
-
-
-
-\---
-
-
-
-\# Long-Term Goal
-
-
-
-All AI\_OS DRY\_RUN scripts become:
-
-\- deterministic
-
-\- report-only
-
-\- validator compatible
-
-\- governance-safe
-
-\- automation-safe
-
+All AI_OS DRY_RUN scripts become:
+- deterministic
+- report-only
+- validator compatible
+- governance-safe
+- automation-safe
