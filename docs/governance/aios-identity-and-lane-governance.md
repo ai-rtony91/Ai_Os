@@ -86,6 +86,112 @@ East and West may review each other's outputs only when the packet says so. They
 
 If a packet needs a file owned by another zone, the worker must stop and request reassignment or an explicit cross-zone approval. The lock registry, claim registry, allowed paths, blocked paths, and validator chain must all agree before APPLY.
 
+## Claude Code West Territory Doctrine
+
+Claude Code West territory is proposed, governed, limited, packet-driven, DRY_RUN-first, approval-gated for APPLY, subordinate to repo governance, subordinate to Business GPT command routing, and subordinate to Human Owner final authority.
+
+Claude Code West is not autonomous. It is not runtime owner, orchestration owner, governance owner, East replacement, main-branch authority, live trading authority, broker authority, OANDA authority, API-key authority, or real-money execution authority.
+
+Claude Code West may be proposed for these lane types:
+
+- documentation refinement.
+- architecture refinement.
+- UI refinement.
+- bounded inspection.
+- bounded refinement.
+- controlled DRY_RUN-first review.
+
+Proposed West-owned path classes:
+
+| Path | Status | Boundary |
+|---|---|---|
+| `docs/concepts/` | Proposed West-owned path | Conceptual source material; promotion still requires governance review |
+| `docs/architecture/` | Proposed West-owned path | Architecture refinement only |
+| `docs/roadmap/` | Proposed West-owned path | Planning direction only, not safety authority |
+| `docs/specs/` | Proposed West-owned path | Specification refinement only |
+| `docs/standards/` | Proposed West-owned path after classification | Must be classified before APPLY |
+| `apps/dashboard/` | Proposed West UI path only | UI layer only, tightly scoped by packet; no runtime, telemetry persistence, broker, or trading execution work |
+
+Shared or approval-required paths:
+
+| Path | Boundary |
+|---|---|
+| `docs/governance/` | Shared canonical governance; Human Owner approval required for APPLY |
+| `docs/workflows/` | Shared canonical workflow authority; Human Owner approval required for APPLY |
+| `docs/security/` | Shared security and approval boundary authority |
+| `schemas/aios/orchestration/` | Shared packet, validator, lock, and approval contracts |
+| `apps/dashboard/mock-data/` | Shared dashboard evidence/fixture area; classification required before APPLY |
+
+Forbidden West paths:
+
+- `automation/orchestration/`
+- `automation/operator/`
+- `services/`
+- `telemetry/`
+- `scripts/`
+- root authority files except explicitly approved pointer changes.
+- trading execution paths.
+- broker, OANDA, API-key, real-order, live-order, and live-routing paths.
+- `aios/modules/trader/` until Human Owner decision.
+
+Unclear paths pending Human Owner or Business GPT classification:
+
+- `approvals/`
+- `work_packets/`
+- `checkpoints/`
+- `.local_hold/`
+- `internal/`
+- `docs/AI_OS/`
+- `docs/standards/`
+- `apps/dashboard/mock-data/`
+- `aios/modules/trader/`
+
+West APPLY gate requirements:
+
+- DRY_RUN packet first.
+- explicit Human Owner approval before APPLY.
+- exact allowed paths and forbidden paths.
+- packet identity validation.
+- lane identity validation.
+- path ownership validation.
+- forbidden path validation.
+- lock validation when shared or APPLY paths are involved.
+- approval-gate validation.
+- stop-point validation.
+- PR-lane validation before push or PR.
+- paper-only trading boundary validation.
+
+West packet routing must stop when lock, validator, approval, ownership, or stop-point status is missing, unclear, stale, rejected, or conflicting. West packet routing must stop after the packet-defined output and must not continue into side quests.
+
+West branch naming is governed by the PR lane workflow. Recommended West branch pattern:
+
+```text
+west/<packet-id>-<short-topic>
+```
+
+Example:
+
+```text
+west/PKT-WEST-DOCS-001-architecture-map
+```
+
+West worktree doctrine remains proposed until activated by a packet that names the branch, worktree path, allowed paths, forbidden paths, validator chain, lock plan, approval authority, and stop point.
+
+West locks must follow the existing lock identity standard. Recommended West lock examples:
+
+```text
+LOCK_WEST_DOCS_OCC01
+LOCK_WEST_ARCH_OCC01
+LOCK_WEST_DASHBOARD_UI_OCC01
+```
+
+East/West collision prevention:
+
+- East and West must not edit the same file tree at the same time.
+- West cannot overlap East paths without explicit packet authorization.
+- West cannot claim shared canonical paths as owned territory.
+- Cross-zone work requires matching packet identity, lock identity, allowed paths, approval authority, validator chain, and stop point.
+
 ## Approval Authority
 
 DRY_RUN can inspect, plan, and report under a tokenized packet or explicit operator instruction.

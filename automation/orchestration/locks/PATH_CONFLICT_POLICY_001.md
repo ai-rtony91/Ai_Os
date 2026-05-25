@@ -20,6 +20,16 @@ LOCK_VALIDATOR_GOV_01
 
 Locks with missing, placeholder, or ambiguous identity fields are not sufficient for APPLY readiness.
 
+West lock examples must use the same identity standard:
+
+```text
+LOCK_WEST_DOCS_OCC01
+LOCK_WEST_ARCH_OCC01
+LOCK_WEST_DASHBOARD_UI_OCC01
+```
+
+West locks may be proposed only by packet. They become active only when an approved APPLY packet names exact paths, lock owner, validator chain, approval authority, and release condition.
+
 ## Rules
 
 - No dual ownership of the same file or folder path.
@@ -30,6 +40,7 @@ Locks with missing, placeholder, or ambiguous identity fields are not sufficient
 - If ownership is unclear, mark the work `REVIEW_REQUIRED`.
 - East and West workers must not edit the same file tree at the same time without explicit reassignment.
 - Cross-zone work requires matching packet identity, lock identity, allowed paths, validator chain, and approval authority.
+- West cannot claim shared canonical governance, workflow, security, schema, dashboard mock-data, or East/runtime paths as owned territory.
 
 ## Escalation
 

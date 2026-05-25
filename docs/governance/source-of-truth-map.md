@@ -43,6 +43,36 @@ When a root authority file conflicts with a draft, generated report, or CLEAN-er
 | `docs/concepts/` | Conceptual design material | MERGE INTO CANONICAL | Keep as source material unless promoted to architecture/specs |
 | `docs/infrastructure/` | Infrastructure maps | MERGE INTO CANONICAL | Useful source for architecture/runtime docs |
 
+## West Territory Classification
+
+Claude Code West territory remains proposed until approved by Human Owner packet authority. The canonical doctrine lives in `docs/governance/aios-identity-and-lane-governance.md`; workflow details belong in `docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md`.
+
+| Path | Proposed classification | Notes |
+|---|---|---|
+| `docs/concepts/` | Proposed West-owned path | Conceptual refinement only; promotion still requires canonical review |
+| `docs/architecture/` | Proposed West-owned path | Architecture refinement only |
+| `docs/roadmap/` | Proposed West-owned path | Planning direction only, not safety authority |
+| `docs/specs/` | Proposed West-owned path | Specification refinement only |
+| `docs/standards/` | Proposed West-owned path after classification | Must be classified before APPLY |
+| `apps/dashboard/` | Proposed West UI path only | UI layer only; no runtime, telemetry persistence, broker, or trading execution authority |
+| `docs/governance/` | Shared / approval-required path | Canonical governance authority |
+| `docs/workflows/` | Shared / approval-required path | Canonical workflow authority |
+| `docs/security/` | Shared / approval-required path | Security and approval boundary authority |
+| `schemas/aios/orchestration/` | Shared / approval-required path | Packet, validator, lock, and approval contracts |
+| `apps/dashboard/mock-data/` | Shared / unclear path | Needs classification before APPLY |
+| `automation/orchestration/` | Forbidden West path | East/runtime orchestration machinery |
+| `automation/operator/` | Forbidden West path | Operator tooling and unresolved legacy risk |
+| `services/` | Forbidden West path | Backend/runtime services |
+| `telemetry/` | Forbidden West path | Evidence layer, not West authority |
+| `scripts/` | Forbidden West path | Developer/operator helper scripts |
+| `aios/modules/trader/` | Forbidden until Human Owner decision | Trading Lab overlap remains unresolved |
+| `approvals/` | Unclear path needing classification | Root approval area outside active approval inbox |
+| `work_packets/` | Unclear path needing classification | Root packet area outside active orchestration packet state |
+| `checkpoints/` | Unclear path needing classification | Authority role unresolved |
+| `.local_hold/` | Unclear local state | Local workstation state, not authority |
+| `internal/` | Unclear / archive-source candidate | Source-artifact role requires classification |
+| `docs/AI_OS/` | Source material, not active authority | CLEAN-era source pending merge/archive classification |
+
 ## Workflow authority
 
 | Path | Role | Classification | Notes |
@@ -54,6 +84,7 @@ When a root authority file conflicts with a draft, generated report, or CLEAN-er
 | `docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md` | Worker branch/lane rules | KEEP ACTIVE | Canonical branch/lane candidate |
 | `docs/workflows/WORKER_TASK_LIFECYCLE_STANDARD.md` | Worker task lifecycle | KEEP ACTIVE | Canonical lifecycle, approval-status, handoff, and stop-condition standard |
 | `docs/workflows/VALIDATOR_EXECUTION_STANDARD.md` | Validator execution | KEEP ACTIVE | Canonical validator behavior, evidence, severity, and stop-condition standard |
+| `docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md` | West branch/worktree/lock doctrine | KEEP ACTIVE | Canonical workflow location for West PR-lane branch naming, proposed worktree naming, lock naming, and lane metadata |
 | `docs/AI_OS/operator/` | CLEAN-era operator workflow source | MERGE INTO CANONICAL | Not active authority by default |
 | `docs/AI_OS/operator_workflows/` | CLEAN-era workflow source | MERGE INTO CANONICAL | Not active authority by default |
 | `automation/operator/` | Operator launcher/tooling area | NEEDS USER DECISION | Contains active-looking scripts and legacy/imported content |

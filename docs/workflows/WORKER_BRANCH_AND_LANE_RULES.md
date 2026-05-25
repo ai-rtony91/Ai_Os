@@ -17,6 +17,24 @@ worker/<lane>/<phase>-<short-task>
 
 Branch names must be lowercase, short, descriptive, and free of secrets, tokens, account identifiers, or private data.
 
+West branch naming must remain PR-lane compliant and packet-scoped. Recommended West branch pattern:
+
+```text
+west/<packet-id>-<short-topic>
+```
+
+Example:
+
+```text
+west/PKT-WEST-DOCS-001-architecture-map
+```
+
+Codex East governance APPLY branches may use packet-specific East branch names when executing approved governance hardening:
+
+```text
+east/<packet-id>-<short-topic>
+```
+
 ## Required Lane Metadata
 
 Before APPLY review, each lane should declare:
@@ -64,6 +82,18 @@ Packet-scoped worker identities must use the canonical identity spine:
 - `VALIDATOR_##` for validator/check/evidence lanes.
 
 Permanent supervisor identities are `Human Owner`, `Business GPT`, `Claude Chat`, `Codex East`, and `Claude Code West`.
+
+## Claude Code West Lane Boundary
+
+Claude Code West is a governed, limited, DRY_RUN-first inspection/refinement lane. It is not autonomous and does not own runtime, orchestration, governance, main-branch, broker, OANDA, API-key, live-order, or real-money execution authority.
+
+Proposed West path classes must be packet-scoped and may include `docs/concepts/`, `docs/architecture/`, `docs/roadmap/`, `docs/specs/`, `docs/standards/` after classification, and tightly scoped `apps/dashboard/` UI work.
+
+Shared or approval-required West paths include `docs/governance/`, `docs/workflows/`, `docs/security/`, `schemas/aios/orchestration/`, and `apps/dashboard/mock-data/`.
+
+Forbidden West paths include `automation/orchestration/`, `automation/operator/`, `services/`, `telemetry/`, `scripts/`, root authority files except approved pointer changes, trading execution paths, broker/OANDA/API-key/live-order paths, and `aios/modules/trader/` until Human Owner decision.
+
+West worktree doctrine remains proposed until an approved packet names the exact branch, worktree path, allowed paths, forbidden paths, validator chain, lock plan, approval authority, and stop point.
 
 ## Path Ownership
 

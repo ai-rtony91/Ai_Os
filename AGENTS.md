@@ -175,6 +175,8 @@ Temporary workers must use packet-scoped identities:
 
 Workers must treat validator output as evidence only. Validator PASS does not approve APPLY, commit, push, merge, or protected actions.
 
+Claude Code West territory is governed by `docs/governance/aios-identity-and-lane-governance.md`. West territory is proposed, packet-driven, DRY_RUN-first, and approval-gated; it does not grant runtime, orchestration, governance, main-branch, or live trading authority.
+
 ## Codex Safe Commit Rule
 
 Codex may stage and commit for the operator when all safe-commit gates pass.
