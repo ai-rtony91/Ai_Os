@@ -53,6 +53,22 @@ Stop immediately when a validator reports `FAIL` for:
 - missing commit package before staging or commit
 - requested `git add .` or `git add -A`
 
+## West Territory Validator Routing
+
+West territory packets must route through:
+
+- packet identity validation.
+- lane identity validation.
+- path ownership validation.
+- forbidden path validation.
+- lock validation when shared or APPLY paths are involved.
+- approval-gate validation.
+- stop-point validation.
+- PR-lane validation before push or PR.
+- paper-only trading boundary validation.
+
+West territory validation must block APPLY when West attempts to claim `automation/orchestration/`, `automation/operator/`, `services/`, `telemetry/`, `scripts/`, root authority files outside explicit pointer changes, trading execution paths, broker/OANDA/API-key/live-order paths, or `aios/modules/trader/` before Human Owner decision.
+
 ## When Human Review Is Required
 
 Human review is required when:
