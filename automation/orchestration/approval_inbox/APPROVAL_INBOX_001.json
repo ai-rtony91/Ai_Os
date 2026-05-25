@@ -1,12 +1,28 @@
 {
   "schema": "AIOS_APPROVAL_INBOX.v1",
-  "approval_id": "APPROVAL_ID_PLACEHOLDER",
-  "packet_id": "PACKET_ID_PLACEHOLDER",
-  "requested_action": "APPLY_REQUEST_PLACEHOLDER",
+  "approval_gate_id": "APPROVAL_INBOX_001",
+  "approval_id": "APPROVAL_EAST_CLEANUP_PLACEHOLDER_001",
+  "packet_id": "PKT-EAST-LOCK-APPROVAL-CLEANUP-APPLY-001",
+  "requested_action": "PLACEHOLDER_CLEANUP_REVIEW",
+  "requested_mode": "APPLY",
+  "approved_mode": "DRY_RUN_ONLY",
   "risk_level": "REVIEW_REQUIRED",
   "approved_by_human": false,
-  "approval_status": "pending_human_review",
-  "approval_notes": "",
+  "approval_status": "blocked",
+  "approval_timestamp_placeholder": null,
+  "allowed_paths": [
+    "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+  ],
+  "blocked_paths": [
+    "broker/",
+    "OANDA/",
+    "api_keys/",
+    "live_trading/"
+  ],
+  "validator_chain_required": true,
+  "commit_package_required": true,
+  "push_blocked_until_final_review": true,
+  "approval_notes": "Former placeholder approval item retained as blocked cleanup evidence; it does not authorize APPLY.",
   "blocked_actions": [
     "live_trading",
     "broker_connection",
@@ -20,6 +36,9 @@
     "git_add_dot",
     "push_without_approval"
   ],
-  "timestamp_placeholder": "TIMESTAMP_PLACEHOLDER",
-  "next_action": "Operator must approve exact paths before APPLY."
+  "notes": [
+    "This item preserves placeholder cleanup evidence.",
+    "It is blocked and cannot authorize APPLY."
+  ],
+  "next_action": "Business GPT may approve archival in a future cleanup packet."
 }
