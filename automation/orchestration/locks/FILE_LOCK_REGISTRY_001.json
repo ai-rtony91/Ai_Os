@@ -1,13 +1,16 @@
 {
   "schema": "AIOS_FILE_LOCK_REGISTRY.v1",
-  "lock_id": "LOCK_ID_PLACEHOLDER",
-  "worker_id": "WORKER_ID_PLACEHOLDER",
-  "locked_paths": [],
-  "lock_reason": "Prevent file collision during worker packet execution.",
-  "created_at": "TIMESTAMP_PLACEHOLDER",
-  "expires_at_placeholder": "TIMESTAMP_PLACEHOLDER",
-  "status": "draft",
+  "lock_id": "LOCK_EAST_ORCH_CLEANUP_001",
+  "worker_id": "EAST_OCC_01",
+  "packet_id": "PKT-EAST-LOCK-APPROVAL-CLEANUP-APPLY-001",
+  "locked_paths": [
+    "automation/orchestration/locks/FILE_LOCK_REGISTRY_001.json"
+  ],
+  "lock_reason": "Governed cleanup record replacing placeholder lock identity metadata.",
+  "created_at": "2026-05-25T00:00:00-04:00",
+  "released_at": "2026-05-25T00:00:00-04:00",
+  "status": "released",
   "conflict_policy": "blocked_until_human_review",
   "blocked_if_locked": true,
-  "next_action": "Confirm no other worker owns the same paths before APPLY."
+  "next_action": "Keep as released cleanup evidence unless Business GPT approves archival."
 }
