@@ -5,7 +5,7 @@
   "current_phase": "PHASE-44",
   "active_objective": "Apply the Operator Workflow Automation scaffold for morning packets, APPLY routing, session resume, and read-only orchestration guidance.",
   "approved_scope": [
-    "docs/AI_OS/operator_workflows/",
+    "docs/workflows/",
     "automation/orchestration/",
     "apps/dashboard/mock-data/"
   ],

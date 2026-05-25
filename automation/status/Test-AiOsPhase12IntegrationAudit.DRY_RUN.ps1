@@ -30,8 +30,8 @@ $results = New-Object System.Collections.Generic.List[object]
 
 $requiredFolders = @(
     "docs/AI_OS/productization",
-    "docs/AI_OS/governance",
-    "docs/AI_OS/operator",
+    "docs/governance",
+    "docs/workflows",
     "docs/AI_OS/roadmap",
     "docs/concepts/aios-dashboard-and-interface-concepts.md",
     "docs/AI_OS/validators",
