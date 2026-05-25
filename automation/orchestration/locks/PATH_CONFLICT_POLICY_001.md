@@ -2,6 +2,24 @@
 
 Path ownership prevents worker collisions.
 
+## Lock Naming
+
+Lock IDs must use:
+
+```text
+LOCK_<ZONE>_<LANE>_<WORKER>
+```
+
+Examples:
+
+```text
+LOCK_EAST_ORCH_OCC01
+LOCK_WEST_DOCS_OCC01
+LOCK_VALIDATOR_GOV_01
+```
+
+Locks with missing, placeholder, or ambiguous identity fields are not sufficient for APPLY readiness.
+
 ## Rules
 
 - No dual ownership of the same file or folder path.
@@ -10,6 +28,8 @@ Path ownership prevents worker collisions.
 - Validator paths must stay isolated so validation behavior is not changed by unrelated worker packets.
 - Overwrites are blocked unless the operator explicitly approves exact files.
 - If ownership is unclear, mark the work `REVIEW_REQUIRED`.
+- East and West workers must not edit the same file tree at the same time without explicit reassignment.
+- Cross-zone work requires matching packet identity, lock identity, allowed paths, validator chain, and approval authority.
 
 ## Escalation
 

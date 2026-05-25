@@ -60,6 +60,21 @@ Each validator result should include:
 - timestamp when available.
 - worker or session reference, or `UNKNOWN`.
 
+Identity-spine validators should also report:
+
+- packet ID.
+- supervisor identity.
+- worker identity.
+- zone.
+- lane.
+- mode.
+- approval authority.
+- validator chain.
+- lock ID when APPLY or shared paths are involved.
+- stop point.
+
+Missing identity-spine fields must be reported as `BLOCKED` for APPLY readiness.
+
 ## Blocked Result Requirements
 
 A `BLOCKED` result must include:
@@ -153,6 +168,7 @@ A validator or validation pass must stop and report when:
 - a validator attempts to repair or mutate state.
 - the current branch or repo root cannot be verified.
 - the next safe action is missing.
+- required identity, lane, approval, lock, validator, or stop-point fields are missing for a packet under review.
 
 ## Next Safe Action Requirement
 

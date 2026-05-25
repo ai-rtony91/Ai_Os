@@ -181,6 +181,11 @@ Blocked work must include a blocked reason and one next safe recovery step.
 A worker handoff packet should include:
 
 - `task_id`
+- `packet_id`
+- `identity_marker`
+- `supervisor_identity`
+- `worker_identity`
+- `zone`
 - `created_time`
 - `source`
 - `user_goal`
@@ -192,6 +197,9 @@ A worker handoff packet should include:
 - `objective`
 - `allowed_paths`
 - `blocked_paths`
+- `approval_authority`
+- `validator_chain`
+- `lock_id`
 - `required_inputs`
 - `expected_outputs`
 - `validation_required`
@@ -201,6 +209,7 @@ A worker handoff packet should include:
 - `blocked_reason`
 - `user_approval_required`
 - `next_action`
+- `stop_point`
 - `output_summary_path`
 - `validation_report_path`
 
@@ -294,6 +303,8 @@ Stop and report when:
 - a runner attempts to mutate files.
 - a worker attempts to self-approve APPLY.
 - next safe action is missing.
+- identity, supervisor, worker, zone, lane, approval authority, validator chain, or stop point is missing from an executable packet.
+- East/West ownership overlaps without explicit reassignment and lock review.
 
 ## Next Safe Action Requirement
 
