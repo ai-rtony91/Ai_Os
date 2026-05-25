@@ -22,14 +22,20 @@ Branch names must be lowercase, short, descriptive, and free of secrets, tokens,
 Before APPLY review, each lane should declare:
 
 - worker ID.
+- supervisor identity.
+- zone.
 - worker lane.
 - branch name.
 - base branch.
 - worktree path.
 - allowed paths.
 - blocked paths.
+- packet ID.
+- lock ID when shared paths or APPLY work are involved.
+- approval authority.
 - report path.
 - validation commands.
+- stop point.
 
 ## Allowed Worker Lanes
 
@@ -42,8 +48,22 @@ Allowed worker lanes are:
 - Validators
 - Reports
 - Mock Data
+- Codex East
+- Claude Code West
+- Command Control
+- Validator Lane
 
 Any lane outside this list is `UNKNOWN` until the operator approves and documents it.
+
+## Worker Identity Names
+
+Packet-scoped worker identities must use the canonical identity spine:
+
+- `EAST_OCC_##` for East worksite packet execution.
+- `WEST_OCC_##` for West worksite packet execution or refinement.
+- `VALIDATOR_##` for validator/check/evidence lanes.
+
+Permanent supervisor identities are `Human Owner`, `Business GPT`, `Claude Chat`, `Codex East`, and `Claude Code West`.
 
 ## Path Ownership
 
@@ -60,6 +80,10 @@ Workers must stay inside declared allowed paths and must not edit:
 
 If two workers declare the same planned file, the conflict is blocked until the operator assigns ownership. Stale worker state must be reviewed before resuming.
 
+East and West workers must not edit the same file tree at the same time. Cross-zone edits require explicit reassignment, matching allowed paths, lock review, validator review, and Human Owner approval when APPLY is involved.
+
+No lock, packet, validator, or worker claim may be treated as authority when its identity fields are missing or placeholder-only.
+
 ## Validation
 
 Worker branch and lane reviews may use:
@@ -69,6 +93,7 @@ powershell -ExecutionPolicy Bypass -File automation/work_intelligence/Test-AiOsW
 powershell -ExecutionPolicy Bypass -File automation/operator/Test-AiOsParallelWorkerReports.ps1
 git diff --check
 git status --short --branch
+automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1
 ```
 
 These commands validate evidence only. They do not approve APPLY, create branches, create worktrees, stage files, commit, push, merge, or change runtime state.

@@ -13,6 +13,7 @@ It is governance only. It does not move, delete, rename, archive, or rewrite fil
 | `README.md` | Human front door | KEEP ACTIVE | Project overview, current mission, and repo orientation only |
 | `AGENTS.md` | AI/tool behavior | KEEP ACTIVE | Single active behavior authority for Codex and AI coding agents |
 | `docs/governance/` | Rules, doctrine, ownership | KEEP ACTIVE | Repo rules, ownership, source-of-truth maps, placement rules |
+| `docs/governance/aios-identity-and-lane-governance.md` | Identity and lane governance | KEEP ACTIVE | Canonical Human Owner, Business GPT, Claude Chat, Codex East, Claude Code West, temporary worker, validator, lock, packet, and stop-point identity spine |
 | `docs/workflows/` | Operator/development workflows | KEEP ACTIVE | Workflow instructions and safe operating sequences |
 | `docs/security/` | Access and safety boundaries | KEEP ACTIVE | Secrets, credentials, approval, privacy, access, no-live-trading boundaries |
 | `docs/architecture/` | System architecture | KEEP ACTIVE | Durable architecture and runtime design |
@@ -33,6 +34,8 @@ No file under `docs/AI_OS/`, `automation/`, `telemetry/`, `logs/`, `proof/`, `va
 | `services/telemetry/` | Telemetry code | KEEP ACTIVE | Telemetry models, replay, writers, and visibility builders |
 | `scripts/control/` | Runtime control wrappers | KEEP ACTIVE | Start/stop/status/health commands only |
 | `automation/orchestration/` | Orchestration machinery and state | KEEP ACTIVE | Worker, packet, approval, validator, supervisor, and control-loop machinery |
+| `automation/orchestration/locks/` | Lock registry and conflict checks | KEEP ACTIVE | File-lock evidence, lock naming, and path conflict policy |
+| `automation/orchestration/validators/` | Orchestration validator source | KEEP ACTIVE | DRY_RUN validators and validator-chain configuration for orchestration packets |
 
 Runtime rule:
 

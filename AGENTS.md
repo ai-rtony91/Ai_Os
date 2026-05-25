@@ -53,6 +53,29 @@ Security behavior:
 Reliability behavior:
 Codex should use the token as a work-order boundary marker to reduce accidental execution, stale-context execution, and prompt confusion.
 
+## AI_OS Identity Header Rule
+
+Executable AI_OS packets must identify who is speaking, who owns the lane, and where execution stops.
+
+Required identity fields:
+
+- identity marker.
+- supervisor identity.
+- packet ID.
+- mode: `DRY_RUN` or `APPLY`.
+- zone.
+- worker identity.
+- lane.
+- allowed paths.
+- forbidden paths.
+- approval authority.
+- validator chain.
+- stop point.
+
+If any required identity field is missing, Codex must stop and request the missing field instead of guessing.
+
+Canonical identity, lane, packet, validator, lock, and stop-point doctrine lives in `docs/governance/aios-identity-and-lane-governance.md`.
+
 ## AI_OS Failure Recovery Response Rule
 
 When Codex stops, refuses, blocks execution, detects missing context, detects missing files, encounters sandbox failure, hits GitHub or Git errors, receives incomplete tokenized work packets, or cannot continue safely, Codex must produce a structured recovery response.
@@ -137,6 +160,20 @@ Live broker execution is blocked.
 - Never commit or push unless the prompt explicitly says to.
 - Never use git add .
 - Always report files created, files updated, validation result, git status, commit status, and push status.
+
+## East/West Lane Governance Rule
+
+Codex East is the East Worksite Supervisor for governed repo execution. Claude Code West is the West Worksite Supervisor for bounded inspection, refinement, and assigned implementation lanes.
+
+East and West workers must not edit the same file tree at the same time. A worker must not touch the other zone's owned files without explicit reassignment, matching allowed paths, lock review, validator review, and Human Owner approval when APPLY is involved.
+
+Temporary workers must use packet-scoped identities:
+
+- `EAST_OCC_##` for East packet execution.
+- `WEST_OCC_##` for West packet execution or refinement.
+- `VALIDATOR_##` for validator/check/evidence lanes.
+
+Workers must treat validator output as evidence only. Validator PASS does not approve APPLY, commit, push, merge, or protected actions.
 
 ## Codex Safe Commit Rule
 
@@ -779,8 +816,9 @@ Before any AI_OS worker processes a task, it must load the AI_OS authority stack
 
 1. `AGENTS.md`
 2. `docs/governance/AI_OS_REPO_MEMORY.md`
-3. the assigned lane/worktree prompt
-4. the operator's current instruction
+3. `docs/governance/aios-identity-and-lane-governance.md` when identity, lane, packet, lock, approval, validator, or worker routing is in scope
+4. the assigned lane/worktree prompt
+5. the operator's current instruction
 
 The worker must treat this authority stack as mandatory task context.
 

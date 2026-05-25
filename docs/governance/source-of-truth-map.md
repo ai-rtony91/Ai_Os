@@ -33,6 +33,7 @@ When a root authority file conflicts with a draft, generated report, or CLEAN-er
 | Path | Role | Classification | Notes |
 |---|---|---|---|
 | `docs/governance/` | Repo rules, ownership, doctrine | KEEP ACTIVE | Canonical policy and ownership home |
+| `docs/governance/aios-identity-and-lane-governance.md` | Identity and lane governance | KEEP ACTIVE | Canonical identity spine for Human Owner, Business GPT, Claude Chat, Codex East, Claude Code West, temporary workers, validators, locks, packets, and stop points |
 | `docs/workflows/` | Operator and development workflows | KEEP ACTIVE | Canonical workflow home |
 | `docs/security/` | Access and safety boundaries | KEEP ACTIVE | Canonical security documentation home |
 | `docs/architecture/` | System architecture | KEEP ACTIVE | Canonical architecture home |
@@ -51,6 +52,8 @@ When a root authority file conflicts with a draft, generated report, or CLEAN-er
 | `docs/workflows/APPLY_ROUTING_CHAIN.md` | DRY_RUN/APPLY routing | KEEP ACTIVE | Canonical apply-routing candidate |
 | `docs/workflows/PARALLEL_CODEX_WORKFLOW.md` | Parallel Codex workflow | KEEP ACTIVE | Canonical multi-agent workflow candidate |
 | `docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md` | Worker branch/lane rules | KEEP ACTIVE | Canonical branch/lane candidate |
+| `docs/workflows/WORKER_TASK_LIFECYCLE_STANDARD.md` | Worker task lifecycle | KEEP ACTIVE | Canonical lifecycle, approval-status, handoff, and stop-condition standard |
+| `docs/workflows/VALIDATOR_EXECUTION_STANDARD.md` | Validator execution | KEEP ACTIVE | Canonical validator behavior, evidence, severity, and stop-condition standard |
 | `docs/AI_OS/operator/` | CLEAN-era operator workflow source | MERGE INTO CANONICAL | Not active authority by default |
 | `docs/AI_OS/operator_workflows/` | CLEAN-era workflow source | MERGE INTO CANONICAL | Not active authority by default |
 | `automation/operator/` | Operator launcher/tooling area | NEEDS USER DECISION | Contains active-looking scripts and legacy/imported content |

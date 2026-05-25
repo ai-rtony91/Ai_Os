@@ -11,14 +11,15 @@ It reduces manual checking by putting the required checks in a fixed order. A wo
 1. `git_clean_state`
 2. `allowed_paths`
 3. `blocked_paths`
-4. `json_integrity`
-5. `powershell_syntax`
-6. `markdown_exists`
-7. `no_secrets`
-8. `no_live_trading_enablement`
-9. `approval_gate`
-10. `commit_package_review`
-11. `final_git_status`
+4. `identity_spine`
+5. `json_integrity`
+6. `powershell_syntax`
+7. `markdown_exists`
+8. `no_secrets`
+9. `no_live_trading_enablement`
+10. `approval_gate`
+11. `commit_package_review`
+12. `final_git_status`
 
 ## What Each Check Protects
 
@@ -27,6 +28,7 @@ It reduces manual checking by putting the required checks in a fixed order. A wo
 | `git_clean_state` | Prevents new work from hiding unrelated dirty files, staged files, or untracked files. |
 | `allowed_paths` | Confirms the worker stays inside the approved scope. |
 | `blocked_paths` | Stops edits to protected, dashboard, security, broker, API, or live trading areas. |
+| `identity_spine` | Confirms packet identity, supervisor identity, worker identity, zone, approval authority, validator chain, lock identity when needed, and stop point are present. |
 | `json_integrity` | Confirms changed JSON files parse before they become runtime inputs. |
 | `powershell_syntax` | Confirms changed `.ps1` files parse before any later execution. |
 | `markdown_exists` | Confirms required docs and reports are present. |
@@ -47,6 +49,7 @@ Stop immediately when a validator reports `FAIL` for:
 - suspected secrets
 - broker, OANDA, API key, webhook, live trading, or real order enablement
 - missing approval before APPLY
+- missing identity, lane, approval, validator, lock, or stop-point fields before APPLY
 - missing commit package before staging or commit
 - requested `git add .` or `git add -A`
 
@@ -87,5 +90,5 @@ This chain does not:
 
 ## Next Safe Action
 
-Run `automation/orchestration/validators/Test-ValidatorChainConfig.DRY_RUN.ps1`, then run `automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1`.
+Run `automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1`, run `automation/orchestration/validators/Test-ValidatorChainConfig.DRY_RUN.ps1`, then run `automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1`.
 
