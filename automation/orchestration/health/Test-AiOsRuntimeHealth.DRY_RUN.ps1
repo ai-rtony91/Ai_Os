@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 $health = "HEALTHY"
 $reasons = @()
-$nextCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/operator/Start-AiOsOperatorDay.ps1"
+$nextCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/bootstrap/Start-AiOsDay.ps1"
 
 $branch = git branch --show-current
 $status = @(git status --short)
@@ -24,7 +24,7 @@ if ($status.Count -gt 0) {
 }
 
 $requiredFiles = @(
-    "automation/orchestration/operator/Start-AiOsOperatorDay.ps1",
+    "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
     "automation/orchestration/runtime/Start-AiOsRuntimeCycle.DRY_RUN.ps1",
     "automation/orchestration/daemon/Start-AiOsRuntimeDaemon.DRY_RUN.ps1",
     "automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1",

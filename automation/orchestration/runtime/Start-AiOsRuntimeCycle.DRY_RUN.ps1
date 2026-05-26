@@ -19,7 +19,7 @@ for ($i = 1; $i -le $Cycles; $i++) {
 
     Write-Host ""
     Write-Host "STEP 1 - OPERATOR OBSERVE" -ForegroundColor Yellow
-    powershell -ExecutionPolicy Bypass -File automation/orchestration/operator/Start-AiOsOperatorDay.ps1
+    powershell -ExecutionPolicy Bypass -File automation/orchestration/bootstrap/Start-AiOsDay.ps1
 
     Write-Host ""
     Write-Host "STEP 2 - APPROVAL PROCESSOR" -ForegroundColor Yellow
