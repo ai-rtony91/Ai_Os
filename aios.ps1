@@ -27,6 +27,45 @@ $ErrorActionPreference = "Stop"
 Write-Host "AIOS SHORTCUT START" -ForegroundColor Cyan
 Write-Host "Mode: $Mode"
 
+function Show-AiOsCrewRecommendation {
+    $crewHelper = "automation/orchestration/crew/Get-AiOsCrewIntegrationRecommendation.DRY_RUN.ps1"
+
+    Write-Host ""
+    Write-Host "== Crew Recommendation ==" -ForegroundColor Yellow
+    Write-Host "Mode: DRY_RUN_READ_ONLY"
+    Write-Host "Authority: evidence only; Human Owner approval is required before APPLY, commit, push, merge, lock, or approval changes."
+
+    if (-not (Test-Path -LiteralPath $crewHelper -PathType Leaf)) {
+        Write-Host "Crew helper: unavailable" -ForegroundColor Yellow
+        Write-Host "Next safe action: continue with existing status checks; do not infer Crew readiness."
+        return
+    }
+
+    try {
+        $rawOutput = powershell -NoProfile -File $crewHelper -OutputJson 2>&1
+        $crew = ($rawOutput | Out-String) | ConvertFrom-Json
+
+        Write-Host "overall_readiness: $($crew.overall_readiness)"
+        Write-Host "next_safe_action: $($crew.next_safe_action)"
+        Write-Host "recommended_worker: $($crew.recommended_worker)"
+        Write-Host "recommended_lane: $($crew.recommended_lane)"
+        Write-Host "recommended_validators:"
+        if (@($crew.recommended_validators).Count -eq 0) {
+            Write-Host "  NONE"
+        } else {
+            @($crew.recommended_validators) | ForEach-Object { Write-Host "  $_" }
+        }
+        Write-Host "approval_summary: pending=$($crew.approval_state_summary.pending_approvals); approved=$($crew.approval_state_summary.approved_actions); blocked=$($crew.approval_state_summary.blocked_actions)"
+        Write-Host "collision_warning: $($crew.collision_warning)"
+        Write-Host "commit_package_preview: status=$($crew.commit_package_preview.status); git_status=$($crew.commit_package_preview.git_status); recommended_files=$($crew.commit_package_preview.recommended_file_count); risks=$($crew.commit_package_preview.risk_count)"
+    }
+    catch {
+        Write-Host "Crew helper: failed" -ForegroundColor Yellow
+        Write-Host "Reason: $($_.Exception.Message)"
+        Write-Host "Next safe action: continue with existing status checks; do not infer Crew readiness."
+    }
+}
+
 switch ($Mode) {
     "help" {
         Write-Host ""
@@ -61,6 +100,7 @@ switch ($Mode) {
         powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1
         powershell -ExecutionPolicy Bypass -File automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1
         powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1
+        Show-AiOsCrewRecommendation
     }
 
     "resume" {
