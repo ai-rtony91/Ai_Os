@@ -1,0 +1,22 @@
+{
+  "packet_id": "OCC_AI_OS_CREW_CORE_DRYRUN_001",
+  "summary": "Preview Crew Core files and validation plan without mutating repo state.",
+  "files_to_create": [
+    "docs/AI_OS/orchestration/crew/README.md",
+    "automation/orchestration/crew/schemas/crew-task-intake.schema.json"
+  ],
+  "files_to_modify": [],
+  "files_to_delete": [],
+  "risk_level": "normal",
+  "validator_needed": [
+    "Test-AiOsIdentitySpine.DRY_RUN.ps1",
+    "Test-LockRegistryIntegrity.DRY_RUN.ps1",
+    "Test-ApprovalInboxIntegrity.DRY_RUN.ps1",
+    "Test-CommitPackageManifest.DRY_RUN.ps1",
+    "Invoke-OrchestrationValidatorChain.DRY_RUN.ps1"
+  ],
+  "apply_command_preview": [
+    "Create approved Crew Core files only after Human Owner APPLY approval."
+  ],
+  "stop_point": "DRY_RUN_REPORT_ONLY"
+}

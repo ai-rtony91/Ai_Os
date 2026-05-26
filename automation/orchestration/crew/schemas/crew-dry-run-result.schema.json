@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_CREW_DRY_RUN_RESULT.v1",
+  "title": "AI_OS Crew DRY_RUN Result",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "packet_id",
+    "summary",
+    "files_to_create",
+    "files_to_modify",
+    "files_to_delete",
+    "risk_level",
+    "validator_needed",
+    "apply_command_preview",
+    "stop_point"
+  ],
+  "properties": {
+    "packet_id": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "files_to_create": { "type": "array", "items": { "type": "string" } },
+    "files_to_modify": { "type": "array", "items": { "type": "string" } },
+    "files_to_delete": { "type": "array", "items": { "type": "string" } },
+    "risk_level": { "type": "string", "enum": ["low", "normal", "medium", "high", "blocked"] },
+    "validator_needed": { "type": "array", "items": { "type": "string" } },
+    "apply_command_preview": { "type": "array", "items": { "type": "string" } },
+    "stop_point": { "type": "string", "minLength": 1 }
+  }
+}

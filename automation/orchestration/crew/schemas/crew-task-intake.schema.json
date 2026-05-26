@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_CREW_TASK_INTAKE.v1",
+  "title": "AI_OS Crew Task Intake",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "task_id",
+    "title",
+    "purpose",
+    "owner",
+    "status",
+    "priority",
+    "allowed_paths",
+    "blocked_paths",
+    "stop_point"
+  ],
+  "properties": {
+    "task_id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "owner": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PROPOSED",
+        "QUEUED",
+        "ASSIGNED",
+        "DRY_RUN_COMPLETE",
+        "APPROVED_FOR_APPLY",
+        "APPLY_COMPLETE",
+        "VALIDATED",
+        "READY_FOR_COMMIT",
+        "DONE",
+        "BLOCKED"
+      ]
+    },
+    "priority": { "type": "string" },
+    "allowed_paths": { "type": "array", "items": { "type": "string" } },
+    "blocked_paths": { "type": "array", "items": { "type": "string" } },
+    "stop_point": { "type": "string", "minLength": 1 }
+  }
+}

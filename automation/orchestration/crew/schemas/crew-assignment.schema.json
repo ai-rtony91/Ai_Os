@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_CREW_ASSIGNMENT.v1",
+  "title": "AI_OS Crew Assignment",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "assignment_id",
+    "worker_id",
+    "packet_id",
+    "assigned_paths",
+    "lock_status",
+    "started_at",
+    "completed_at"
+  ],
+  "properties": {
+    "assignment_id": { "type": "string", "minLength": 1 },
+    "worker_id": { "type": "string", "minLength": 1 },
+    "packet_id": { "type": "string", "minLength": 1 },
+    "assigned_paths": { "type": "array", "items": { "type": "string" } },
+    "lock_status": {
+      "type": "string",
+      "enum": ["UNCLAIMED", "CLEAR", "LOCKED", "REVIEW_REQUIRED", "BLOCKED"]
+    },
+    "started_at": { "type": "string" },
+    "completed_at": { "type": ["string", "null"] }
+  }
+}

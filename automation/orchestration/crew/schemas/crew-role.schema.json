@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_CREW_ROLE.v1",
+  "title": "AI_OS Crew Role",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "role_id",
+    "role_name",
+    "purpose",
+    "allowed_actions",
+    "blocked_actions",
+    "output"
+  ],
+  "properties": {
+    "role_id": { "type": "string", "minLength": 1 },
+    "role_name": { "type": "string", "minLength": 1 },
+    "purpose": { "type": "string", "minLength": 1 },
+    "allowed_actions": { "type": "array", "items": { "type": "string" } },
+    "blocked_actions": { "type": "array", "items": { "type": "string" } },
+    "output": { "type": "string", "minLength": 1 }
+  }
+}

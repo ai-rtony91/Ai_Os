@@ -1,0 +1,12 @@
+{
+  "assignment_id": "CREW-ASSIGNMENT-EXAMPLE-001",
+  "worker_id": "EAST_OCC_01",
+  "packet_id": "OCC_AI_OS_CREW_CORE_APPLY_001",
+  "assigned_paths": [
+    "docs/AI_OS/orchestration/crew/",
+    "automation/orchestration/crew/"
+  ],
+  "lock_status": "REVIEW_REQUIRED",
+  "started_at": "2026-05-26T00:00:00Z",
+  "completed_at": null
+}
