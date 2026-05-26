@@ -9,7 +9,16 @@ Current purpose:
 - define the planned schema file set
 - keep packet, validator, approval, lock, runtime state, read-model, and adapter-report contracts separate
 - define read-only orchestration report contracts such as the Overnight Supervisor report
+- define read-only runtime aggregation contracts such as the Runtime State Bundle
 - prepare a safe future migration path
+
+## Runtime State Bundle Schema
+
+`runtime_state_bundle.schema.json` defines the future generated evidence shape for AI_OS runtime aggregation.
+
+It may describe packet state, worker state, lock state, validator state, approval state, escalation state, git state, supervisor state, next safe actions, stale conditions, and confidence state.
+
+It is read-only evidence only. It does not authorize runtime writes, heartbeat writes, packet movement, lock release, worker launch, router enforcement, escalation persistence, APPLY, commit, push, merge, broker execution, live trading, secret handling, or runtime persistence.
 
 ## Overnight Supervisor Schema
 
