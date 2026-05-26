@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/auto_git_policy.schema.json",
+  "title": "AI_OS Auto-Git Policy Decision",
+  "description": "Read-only decision contract for future safe auto commit, push, and merge eligibility. This schema does not authorize execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schema_version",
+    "generated_at",
+    "mode",
+    "requested_action",
+    "decision",
+    "auto_git_allowed",
+    "candidate_files",
+    "safe_auto_allowed_classes",
+    "human_required_classes",
+    "validator_requirements",
+    "stop_conditions",
+    "evidence",
+    "next_safe_action",
+    "authority_boundary"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_AUTO_GIT_POLICY_DECISION.v1"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN"
+    },
+    "requested_action": {
+      "type": "string",
+      "enum": [
+        "commit",
+        "push",
+        "merge"
+      ]
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "SAFE_AUTO_ALLOWED",
+        "HUMAN_REQUIRED",
+        "BLOCKED"
+      ]
+    },
+    "auto_git_allowed": {
+      "type": "boolean"
+    },
+    "candidate_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safe_auto_allowed_classes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_required_classes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validator_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "git_status",
+        "validator_result",
+        "runtime_confidence",
+        "pr_checks_status",
+        "review_findings",
+        "blocked_findings"
+      ],
+      "properties": {
+        "git_status": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "validator_result": {
+          "type": "string"
+        },
+        "runtime_confidence": {
+          "type": "string"
+        },
+        "pr_checks_status": {
+          "type": "string"
+        },
+        "review_findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blocked_findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_enabled",
+        "approval_authority",
+        "blocked_capabilities"
+      ],
+      "properties": {
+        "execution_enabled": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_authority": {
+          "type": "string"
+        },
+        "blocked_capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

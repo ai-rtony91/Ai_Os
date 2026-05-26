@@ -10,7 +10,16 @@ Current purpose:
 - keep packet, validator, approval, lock, runtime state, read-model, and adapter-report contracts separate
 - define read-only orchestration report contracts such as the Overnight Supervisor report
 - define read-only runtime aggregation contracts such as the Runtime State Bundle
+- define read-only auto-git eligibility contracts without enabling execution
 - prepare a safe future migration path
+
+## Auto-Git Policy Schema
+
+`auto_git_policy.schema.json` defines the future decision shape for `SAFE_AUTO_ALLOWED` commit, push, and merge eligibility.
+
+It is decision evidence only. It may classify a candidate as `SAFE_AUTO_ALLOWED`, `HUMAN_REQUIRED`, or `BLOCKED`, and it must include validator requirements, stop conditions, candidate files, review findings, blocked findings, and authority boundaries.
+
+It does not authorize staging, committing, pushing, pull request creation, merging, direct push to `main`, validator bypass, protected-path mutation, broker execution, live trading, secret handling, or credential handling.
 
 ## Runtime State Bundle Schema
 
