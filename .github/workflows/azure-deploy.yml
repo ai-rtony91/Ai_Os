@@ -1,0 +1,50 @@
+name: Azure Deploy AI_OS Dashboard
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azure-deploy-aios-dashboard
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Preflight repo structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f apps/dashboard/package.json
+          test -f apps/dashboard/index.html
+          test -f apps/dashboard/package-lock.json
+          ls -la apps/dashboard
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: apps/dashboard/package-lock.json
+
+      - name: Install dashboard dependencies
+        working-directory: apps/dashboard
+        run: npm ci
+
+      - name: Build dashboard
+        working-directory: apps/dashboard
+        run: npm run build
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: algotradez-aios
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ALGOTRADEZ_AIOS }}
+          package: apps/dashboard/dist
