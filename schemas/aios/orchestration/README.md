@@ -8,7 +8,16 @@ Current purpose:
 
 - define the planned schema file set
 - keep packet, validator, approval, lock, runtime state, read-model, and adapter-report contracts separate
+- define read-only orchestration report contracts such as the Overnight Supervisor report
 - prepare a safe future migration path
+
+## Overnight Supervisor Schema
+
+`overnight_supervisor.schema.json` defines the future report shape for read-only Overnight Supervisor output.
+
+It is report-oriented only. It may describe supervisor status, repo health, stale packets, validator recommendations, escalation items, next safe actions, packet draft previews, morning brief content, mode, generated timestamp, and authority boundary.
+
+It does not authorize APPLY, packet movement, queue mutation, worker launch, commit, push, merge, broker execution, live trading, secret handling, or runtime persistence.
 
 Safety rules:
 
