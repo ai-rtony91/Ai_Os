@@ -21,7 +21,14 @@
     "supervisor_state",
     "next_safe_actions",
     "stale_conditions",
-    "confidence_state"
+    "confidence_state",
+    "validator_confidence",
+    "auto_git_eligibility",
+    "blocking_signals",
+    "human_required_signals",
+    "source_freshness",
+    "bundle_integrity",
+    "required_evidence_present"
   ],
   "properties": {
     "schema": {
@@ -137,9 +144,185 @@
           }
         }
       }
+    },
+    "validator_confidence": {
+      "$ref": "#/$defs/validator_confidence"
+    },
+    "auto_git_eligibility": {
+      "$ref": "#/$defs/auto_git_eligibility"
+    },
+    "blocking_signals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_required_signals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source_freshness": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source_freshness_item"
+      }
+    },
+    "bundle_integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "parse_errors",
+        "missing_sources"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REVIEW",
+            "BLOCKED"
+          ]
+        },
+        "parse_errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missing_sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required_evidence_present": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validator_config",
+        "validator_confidence",
+        "git_state",
+        "lock_registry",
+        "approval_evidence",
+        "packet_evidence"
+      ],
+      "properties": {
+        "validator_config": {
+          "type": "boolean"
+        },
+        "validator_confidence": {
+          "type": "boolean"
+        },
+        "git_state": {
+          "type": "boolean"
+        },
+        "lock_registry": {
+          "type": "boolean"
+        },
+        "approval_evidence": {
+          "type": "boolean"
+        },
+        "packet_evidence": {
+          "type": "boolean"
+        }
+      }
     }
   },
   "$defs": {
+    "validator_confidence": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "overall_result",
+        "confidence_score",
+        "confidence_band",
+        "safe_auto_allowed_eligible"
+      ],
+      "properties": {
+        "overall_result": {
+          "type": "string"
+        },
+        "confidence_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "confidence_band": {
+          "type": "string"
+        },
+        "safe_auto_allowed_eligible": {
+          "type": "boolean"
+        }
+      }
+    },
+    "auto_git_eligibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "safe_auto_allowed",
+        "minimum_confidence_score",
+        "eligible_actions",
+        "blocked_actions",
+        "stop_conditions"
+      ],
+      "properties": {
+        "safe_auto_allowed": {
+          "type": "boolean"
+        },
+        "minimum_confidence_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "eligible_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blocked_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stop_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "source_freshness_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "checked_at",
+        "is_present",
+        "is_stale"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "checked_at": {
+          "type": "string"
+        },
+        "is_present": {
+          "type": "boolean"
+        },
+        "is_stale": {
+          "type": "boolean"
+        }
+      }
+    },
     "runtime_section": {
       "type": "object",
       "additionalProperties": false,

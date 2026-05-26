@@ -86,6 +86,21 @@ function Get-JsonFiles {
     @(Get-ChildItem -LiteralPath $Path -File -Filter "*.json" -ErrorAction SilentlyContinue | Sort-Object Name)
 }
 
+function Convert-StatusLineToPath {
+    param([string]$Line)
+
+    if ([string]::IsNullOrWhiteSpace($Line) -or $Line.Length -lt 4 -or $Line.StartsWith("##")) {
+        return ""
+    }
+
+    $path = $Line.Substring(3).Trim()
+    if ($path -match " -> ") {
+        $path = ($path -split " -> ")[-1].Trim()
+    }
+
+    return ($path -replace "\\", "/")
+}
+
 $runtimeStatePath = Join-Path $repoRoot.Path "automation\runtime\state\AIOS_RUNTIME_STATE.json"
 $packetActivePath = Join-Path $repoRoot.Path "automation\orchestration\work_packets\active"
 $packetBlockedPath = Join-Path $repoRoot.Path "automation\orchestration\work_packets\blocked"
@@ -97,6 +112,7 @@ $lockRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\locks\FIL
 $validatorConfigPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_CHAIN_CONFIG_001.json"
 $validatorRecommendationPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_RECOMMENDATION.example.json"
 $validatorRunReportPath = Join-Path $repoRoot.Path "automation\orchestration\validator_chain_runner\VALIDATOR_CHAIN_RUN_REPORT.example.json"
+$validatorConfidenceHelperPath = Join-Path $repoRoot.Path "automation\orchestration\validators\Get-AiOsValidatorConfidence.DRY_RUN.ps1"
 $approvalInboxPath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox.v1.example.json"
 $approvalQueuePath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox\AIOS_APPROVAL_QUEUE.example.json"
 $supervisorSchemaPath = Join-Path $repoRoot.Path "schemas\aios\orchestration\overnight_supervisor.schema.json"
@@ -117,6 +133,26 @@ $supervisorRules = Read-JsonSafe -Path $supervisorRulesPath
 $gitLines = @(& git -C $repoRoot.Path status --short --branch 2>&1 | ForEach-Object { [string]$_ })
 $branchLine = @($gitLines | Where-Object { $_ -like "## *" } | Select-Object -First 1)
 $changedLines = @($gitLines | Where-Object { $_ -notlike "## *" })
+$candidateFiles = @($changedLines | ForEach-Object { Convert-StatusLineToPath -Line $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and $_ -ne ".codex_worktrees/" })
+
+$validatorConfidence = $null
+if (Test-Path -LiteralPath $validatorConfidenceHelperPath -PathType Leaf) {
+    try {
+        $validatorConfidenceJson = & $validatorConfidenceHelperPath -CandidateFile $candidateFiles -Json
+        $validatorConfidence = $validatorConfidenceJson | ConvertFrom-Json
+    }
+    catch {
+        $validatorConfidence = [pscustomobject]@{
+            overall_result = "BLOCKED"
+            confidence_score = 0
+            confidence_band = "BLOCKED"
+            safe_auto_allowed_eligible = $false
+            blocked_findings = @("Validator confidence helper failed: $($_.Exception.Message)")
+            review_findings = @()
+            stop_conditions = @("validator confidence helper failure")
+        }
+    }
+}
 
 $activePackets = Get-JsonFiles -Path $packetActivePath
 $blockedPackets = Get-JsonFiles -Path $packetBlockedPath
@@ -182,7 +218,13 @@ $approvalItems = @(
 )
 
 $staleConditions = @()
+$blockingSignals = @()
+$humanRequiredSignals = @()
+$parseErrors = @()
+$missingSources = @()
+
 if ($null -eq $runtimeState) {
+    $missingSources += ConvertTo-RelativePath -Path $runtimeStatePath
     $staleConditions += [pscustomobject]@{
         source = ConvertTo-RelativePath -Path $runtimeStatePath
         condition = "runtime_state_missing"
@@ -191,6 +233,7 @@ if ($null -eq $runtimeState) {
     }
 }
 if ($changedLines.Count -gt 0) {
+    $humanRequiredSignals += "working_tree_has_visible_changes"
     $staleConditions += [pscustomobject]@{
         source = "git status"
         condition = "working_tree_has_visible_changes"
@@ -207,6 +250,19 @@ if ($activePackets.Count -eq 0) {
     }
 }
 
+foreach ($sourceObject in @($runtimeState, $workerRegistry, $workerProfiles, $workerInbox, $lockRegistry, $validatorConfig, $validatorRecommendation, $validatorRunReport, $approvalInbox, $approvalQueue, $supervisorRules)) {
+    if ($sourceObject -and $sourceObject.parse_error) {
+        $parseErrors += ("{0}: {1}" -f $sourceObject.path, $sourceObject.parse_error)
+    }
+}
+
+if ($validatorConfidence -and $validatorConfidence.blocked_findings) {
+    $blockingSignals += @($validatorConfidence.blocked_findings | ForEach-Object { [string]$_ })
+}
+if ($validatorConfidence -and $validatorConfidence.review_findings) {
+    $humanRequiredSignals += @($validatorConfidence.review_findings | ForEach-Object { [string]$_ })
+}
+
 $confidenceScore = 80
 $confidenceReasons = @("Runtime bundle is generated from read-only evidence.")
 if ($staleConditions.Count -gt 0) {
@@ -221,6 +277,18 @@ if ($null -eq $runtimeState) {
     $confidenceScore -= 10
     $confidenceReasons += "Runtime state source is missing."
 }
+if ($validatorConfidence) {
+    $confidenceScore = [Math]::Min($confidenceScore, [int]$validatorConfidence.confidence_score)
+    $confidenceReasons += "Validator confidence evidence is included."
+    if ($validatorConfidence.overall_result -eq "BLOCKED") {
+        $confidenceReasons += "Validator confidence is blocked."
+    }
+}
+else {
+    $confidenceScore -= 20
+    $confidenceReasons += "Validator confidence evidence is missing."
+    $humanRequiredSignals += "validator_confidence_missing"
+}
 if ($confidenceScore -lt 0) {
     $confidenceScore = 0
 }
@@ -229,6 +297,38 @@ $overallConfidence = "HIGH"
 if ($confidenceScore -lt 75) { $overallConfidence = "MEDIUM" }
 if ($confidenceScore -lt 50) { $overallConfidence = "LOW" }
 if (@($staleConditions | Where-Object { $_.severity -eq "BLOCKED" }).Count -gt 0) { $overallConfidence = "BLOCKED" }
+if ($validatorConfidence -and $validatorConfidence.overall_result -eq "BLOCKED") { $overallConfidence = "BLOCKED" }
+if ($blockingSignals.Count -gt 0) { $overallConfidence = "BLOCKED" }
+
+$autoGitStopConditions = @(
+    "confidence score below 90",
+    "blocked validator finding",
+    "human-required signal present",
+    "validator result is not PASS",
+    "runtime confidence is not HIGH",
+    "exact-file scope missing",
+    "gate result is not clean"
+)
+$safeAutoAllowed = (
+    $confidenceScore -ge 90 -and
+    $overallConfidence -eq "HIGH" -and
+    $validatorConfidence -and
+    $validatorConfidence.overall_result -eq "PASS" -and
+    $blockingSignals.Count -eq 0 -and
+    $humanRequiredSignals.Count -eq 0
+)
+
+$sourceFreshness = @(
+    [pscustomobject]@{ source = ConvertTo-RelativePath -Path $runtimeStatePath; checked_at = $checkedAt; is_present = [bool]($null -ne $runtimeState); is_stale = [bool]($null -eq $runtimeState) },
+    [pscustomobject]@{ source = ConvertTo-RelativePath -Path $validatorConfigPath; checked_at = $checkedAt; is_present = [bool]($null -ne $validatorConfig); is_stale = [bool]($null -eq $validatorConfig) },
+    [pscustomobject]@{ source = ConvertTo-RelativePath -Path $validatorConfidenceHelperPath; checked_at = $checkedAt; is_present = [bool](Test-Path -LiteralPath $validatorConfidenceHelperPath -PathType Leaf); is_stale = [bool]($null -eq $validatorConfidence) },
+    [pscustomobject]@{ source = ConvertTo-RelativePath -Path $lockRegistryPath; checked_at = $checkedAt; is_present = [bool]($null -ne $lockRegistry); is_stale = [bool]($null -eq $lockRegistry) },
+    [pscustomobject]@{ source = ConvertTo-RelativePath -Path $approvalQueuePath; checked_at = $checkedAt; is_present = [bool]($null -ne $approvalQueue); is_stale = [bool]($null -eq $approvalQueue) }
+)
+
+$bundleIntegrityStatus = "PASS"
+if ($missingSources.Count -gt 0 -or $humanRequiredSignals.Count -gt 0) { $bundleIntegrityStatus = "REVIEW" }
+if ($parseErrors.Count -gt 0 -or $blockingSignals.Count -gt 0) { $bundleIntegrityStatus = "BLOCKED" }
 
 $blockedRuntimeActions = @(
     "write_runtime_state",
@@ -283,6 +383,37 @@ $bundle = [pscustomobject]@{
         confidence_score = $confidenceScore
         confidence_reasons = $confidenceReasons
     }
+    validator_confidence = if ($validatorConfidence) { $validatorConfidence } else {
+        [pscustomobject]@{
+            overall_result = "UNKNOWN"
+            confidence_score = 0
+            confidence_band = "BLOCKED"
+            safe_auto_allowed_eligible = $false
+        }
+    }
+    auto_git_eligibility = [pscustomobject]@{
+        safe_auto_allowed = [bool]$safeAutoAllowed
+        minimum_confidence_score = 90
+        eligible_actions = if ($safeAutoAllowed) { @("commit") } else { @() }
+        blocked_actions = @("push", "merge", "direct_push_to_main", "protected_path_change", "validator_bypass")
+        stop_conditions = $autoGitStopConditions
+    }
+    blocking_signals = @($blockingSignals | Select-Object -Unique)
+    human_required_signals = @($humanRequiredSignals | Select-Object -Unique)
+    source_freshness = $sourceFreshness
+    bundle_integrity = [pscustomobject]@{
+        status = $bundleIntegrityStatus
+        parse_errors = @($parseErrors)
+        missing_sources = @($missingSources)
+    }
+    required_evidence_present = [pscustomobject]@{
+        validator_config = [bool]($null -ne $validatorConfig)
+        validator_confidence = [bool]($null -ne $validatorConfidence)
+        git_state = [bool]($gitLines.Count -gt 0)
+        lock_registry = [bool]($null -ne $lockRegistry)
+        approval_evidence = [bool]($null -ne $approvalInbox -or $null -ne $approvalQueue)
+        packet_evidence = [bool](($activePackets.Count + $blockedPackets.Count + $completePackets.Count) -gt 0)
+    }
 }
 
 if ($QuietJson) {
@@ -294,6 +425,8 @@ Write-Host "AI_OS Runtime State Bundle"
 Write-Host "Mode: DRY_RUN"
 Write-Host "Schema: $($bundle.schema)"
 Write-Host "Confidence: $($bundle.confidence_state.overall_confidence) $($bundle.confidence_state.confidence_score)"
+Write-Host "Validator confidence: $($bundle.validator_confidence.overall_result) $($bundle.validator_confidence.confidence_score)"
+Write-Host "Auto-git eligible: $($bundle.auto_git_eligibility.safe_auto_allowed)"
 Write-Host "Git: $branchLine"
 Write-Host "Packets: $($packetItems.Count)"
 Write-Host "Workers sources: $($workerItems.Count)"

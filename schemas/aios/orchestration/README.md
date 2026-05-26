@@ -10,6 +10,7 @@ Current purpose:
 - keep packet, validator, approval, lock, runtime state, read-model, and adapter-report contracts separate
 - define read-only orchestration report contracts such as the Overnight Supervisor report
 - define read-only runtime aggregation contracts such as the Runtime State Bundle
+- define read-only validator confidence evidence for runtime and auto-git decisions
 - define read-only auto-git eligibility contracts without enabling execution
 - prepare a safe future migration path
 
@@ -21,11 +22,19 @@ It is decision evidence only. It may classify a candidate as `SAFE_AUTO_ALLOWED`
 
 It does not authorize staging, committing, pushing, pull request creation, merging, direct push to `main`, validator bypass, protected-path mutation, broker execution, live trading, secret handling, or credential handling.
 
+## Validator Confidence Schema
+
+`validator_confidence.schema.json` defines the read-only confidence evidence shape for validator chain results.
+
+It may describe overall validator result, confidence score, confidence band, required validator gaps, failed validators, blocked findings, review findings, weighted findings, source reports, SAFE_AUTO_ALLOWED eligibility, and stop conditions.
+
+It is evidence only. It does not authorize APPLY, staging, committing, pushing, merging, approval mutation, packet movement, runtime writes, broker execution, live trading, secret handling, or credential handling.
+
 ## Runtime State Bundle Schema
 
 `runtime_state_bundle.schema.json` defines the future generated evidence shape for AI_OS runtime aggregation.
 
-It may describe packet state, worker state, lock state, validator state, approval state, escalation state, git state, supervisor state, next safe actions, stale conditions, and confidence state.
+It may describe packet state, worker state, lock state, validator state, approval state, escalation state, git state, supervisor state, next safe actions, stale conditions, confidence state, validator confidence, auto-git eligibility, blocking signals, human-required signals, source freshness, bundle integrity, and required evidence presence.
 
 It is read-only evidence only. It does not authorize runtime writes, heartbeat writes, packet movement, lock release, worker launch, router enforcement, escalation persistence, APPLY, commit, push, merge, broker execution, live trading, secret handling, or runtime persistence.
 

@@ -94,6 +94,12 @@
         "git_status",
         "validator_result",
         "runtime_confidence",
+        "runtime_bundle_path",
+        "runtime_bundle_confidence_score",
+        "validator_confidence_score",
+        "minimum_confidence_score",
+        "required_bundle_sections_present",
+        "bundle_stop_conditions",
         "pr_checks_status",
         "review_findings",
         "blocked_findings"
@@ -110,6 +116,42 @@
         },
         "runtime_confidence": {
           "type": "string"
+        },
+        "runtime_bundle_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "runtime_bundle_confidence_score": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "validator_confidence_score": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "minimum_confidence_score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "required_bundle_sections_present": {
+          "type": "boolean"
+        },
+        "bundle_stop_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "pr_checks_status": {
           "type": "string"

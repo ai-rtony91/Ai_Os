@@ -6,6 +6,8 @@ param(
     [string]$ValidatorResult = "UNKNOWN",
     [ValidateSet("HIGH", "MEDIUM", "LOW", "BLOCKED", "UNKNOWN")]
     [string]$RuntimeConfidence = "UNKNOWN",
+    [string]$RuntimeBundlePath = "",
+    [int]$MinimumConfidenceScore = 90,
     [ValidateSet("PASS", "PENDING", "FAIL", "MISSING", "UNKNOWN")]
     [string]$PrChecksStatus = "UNKNOWN",
     [switch]$Json
@@ -37,6 +39,24 @@ function Convert-StatusLineToPath {
 function Normalize-PathText {
     param([string]$Path)
     return (($Path -replace "\\", "/").Trim().Trim("/"))
+}
+
+function Read-JsonSafe {
+    param([string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    }
+    catch {
+        return [pscustomobject]@{
+            parse_error = $_.Exception.Message
+            path = $Path
+        }
+    }
 }
 
 function Test-PathPrefix {
@@ -151,6 +171,48 @@ $protectedPathPrefixes = @(
 
 $blockedPathPattern = "(?i)(broker|oanda|live[_-]?trading|api[_-]?key|secret|credential|webhook|real[_-]?order|order[_-]?execution)"
 
+$runtimeBundle = Read-JsonSafe -Path $RuntimeBundlePath
+$runtimeBundleConfidenceScore = $null
+$validatorConfidenceScore = $null
+$requiredBundleSectionsPresent = $false
+$bundleStopConditions = @()
+
+if ($runtimeBundle) {
+    if ($runtimeBundle.parse_error) {
+        $RuntimeConfidence = "BLOCKED"
+        $bundleStopConditions += "runtime bundle parse failure"
+    }
+    else {
+        if ($runtimeBundle.confidence_state -and $runtimeBundle.confidence_state.overall_confidence) {
+            $RuntimeConfidence = [string]$runtimeBundle.confidence_state.overall_confidence
+        }
+        if ($runtimeBundle.confidence_state -and $null -ne $runtimeBundle.confidence_state.confidence_score) {
+            $runtimeBundleConfidenceScore = [int]$runtimeBundle.confidence_state.confidence_score
+        }
+        if ($runtimeBundle.validator_confidence) {
+            if ($runtimeBundle.validator_confidence.overall_result) {
+                $ValidatorResult = if ($runtimeBundle.validator_confidence.overall_result -eq "REVIEW_REQUIRED") { "REVIEW" } else { [string]$runtimeBundle.validator_confidence.overall_result }
+            }
+            if ($null -ne $runtimeBundle.validator_confidence.confidence_score) {
+                $validatorConfidenceScore = [int]$runtimeBundle.validator_confidence.confidence_score
+            }
+        }
+        if ($runtimeBundle.auto_git_eligibility -and $runtimeBundle.auto_git_eligibility.stop_conditions) {
+            $bundleStopConditions += @($runtimeBundle.auto_git_eligibility.stop_conditions | ForEach-Object { [string]$_ })
+        }
+        $requiredBundleSectionsPresent = [bool](
+            $runtimeBundle.packet_state -and
+            $runtimeBundle.worker_state -and
+            $runtimeBundle.lock_state -and
+            $runtimeBundle.validator_state -and
+            $runtimeBundle.approval_state -and
+            $runtimeBundle.git_state -and
+            $runtimeBundle.confidence_state -and
+            $runtimeBundle.validator_confidence
+        )
+    }
+}
+
 $gitStatus = Get-GitStatusLines
 $statusPaths = @($gitStatus | ForEach-Object { Convert-StatusLineToPath -Line $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 $untrackedPaths = @($gitStatus | Where-Object { $_ -like "??*" } | ForEach-Object { Convert-StatusLineToPath -Line $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
@@ -174,6 +236,30 @@ if ($ValidatorResult -ne "PASS") {
 
 if ($RuntimeConfidence -ne "HIGH") {
     $blockedFindings.Add("Runtime confidence is $RuntimeConfidence, not HIGH.") | Out-Null
+}
+
+if ($null -ne $runtimeBundleConfidenceScore -and $runtimeBundleConfidenceScore -lt $MinimumConfidenceScore) {
+    $blockedFindings.Add("Runtime bundle confidence score is $runtimeBundleConfidenceScore, below $MinimumConfidenceScore.") | Out-Null
+}
+
+if ($null -ne $validatorConfidenceScore -and $validatorConfidenceScore -lt $MinimumConfidenceScore) {
+    $blockedFindings.Add("Validator confidence score is $validatorConfidenceScore, below $MinimumConfidenceScore.") | Out-Null
+}
+
+if ($runtimeBundle -and -not $requiredBundleSectionsPresent) {
+    $blockedFindings.Add("Runtime bundle is missing required decision sections.") | Out-Null
+}
+
+if ($runtimeBundle -and $runtimeBundle.blocking_signals) {
+    foreach ($signal in @($runtimeBundle.blocking_signals)) {
+        $blockedFindings.Add("Runtime bundle blocking signal: $signal") | Out-Null
+    }
+}
+
+if ($runtimeBundle -and $runtimeBundle.human_required_signals) {
+    foreach ($signal in @($runtimeBundle.human_required_signals)) {
+        $reviewFindings.Add("Runtime bundle human-required signal: $signal") | Out-Null
+    }
 }
 
 if ($Action -eq "merge" -and $PrChecksStatus -ne "PASS") {
@@ -249,6 +335,12 @@ $result = [pscustomobject]@{
         git_status = $gitStatus
         validator_result = $ValidatorResult
         runtime_confidence = $RuntimeConfidence
+        runtime_bundle_path = if ([string]::IsNullOrWhiteSpace($RuntimeBundlePath)) { $null } else { $RuntimeBundlePath }
+        runtime_bundle_confidence_score = $runtimeBundleConfidenceScore
+        validator_confidence_score = $validatorConfidenceScore
+        minimum_confidence_score = $MinimumConfidenceScore
+        required_bundle_sections_present = $requiredBundleSectionsPresent
+        bundle_stop_conditions = @($bundleStopConditions | Select-Object -Unique)
         pr_checks_status = $PrChecksStatus
         review_findings = @($reviewFindings)
         blocked_findings = @($blockedFindings)
@@ -259,10 +351,10 @@ $result = [pscustomobject]@{
         approval_authority = "ANTHONY_ONLY"
         blocked_capabilities = @(
             "git add",
-            "git commit",
-            "git push",
-            "gh pr create",
-            "gh pr merge",
+            "commit operation",
+            "push operation",
+            "pull request creation",
+            "pull request merge",
             "direct push to main",
             "validator bypass",
             "protected path mutation",
