@@ -1,0 +1,333 @@
+{
+  "schema": "AIOS_APPROVAL_TIER_POLICY.v1",
+  "schema_version": "1.0.0",
+  "policy_id": "AIOS_APPROVAL_TIER_POLICY",
+  "generated_at": "2026-05-25",
+  "packet_id": "PKT-WEST-APPLY-004",
+  "owner": "Claude Code West — West Worksite Supervisor",
+  "purpose": "Define the canonical three-tier command approval model for AI_OS workers. Reduces repetitive low-risk read-only approval friction while preserving all protected-mutation and governance gates. This file is the machine-readable authority bridging AGENTS.md behavioral rules and settings.local.json enforcement.",
+  "authority_references": [
+    "AGENTS.md — AI_OS Approval Friction Reduction Standard",
+    "automation/orchestration/policy/AIOS_WORKER_SAFETY_POLICY.json",
+    "docs/workflows/AI_OS_COMMIT_PUSH_GATE.md",
+    "docs/governance/aios-identity-and-lane-governance.md"
+  ],
+
+  "tiers": {
+
+    "TIER_0_AUTO": {
+      "label": "SAFE_READ_ONLY",
+      "policy": "Proceed automatically without prompting the operator.",
+      "conditions": [
+        "Command is strictly read-only — no writes, no mutations, no side effects.",
+        "Command path is scoped to C:\\Dev\\Ai.Os\\ or GitHub CLI state.",
+        "No scope guard triggers apply.",
+        "An active AI_OS EXECUTION TOKEN packet is present OR command is a plain inspection."
+      ],
+      "command_patterns": {
+        "git_read": [
+          "git status *",
+          "git log *",
+          "git diff *",
+          "git diff --name-only *",
+          "git diff --cached --name-only *",
+          "git diff --check *",
+          "git diff --stat *",
+          "git show *",
+          "git branch *",
+          "git remote -v",
+          "git remote *",
+          "git ls-files *",
+          "git rev-parse *",
+          "git stash list",
+          "git tag --list",
+          "git worktree list",
+          "git log --oneline *",
+          "git log --format=* *"
+        ],
+        "filesystem_read": [
+          "ls /c/Dev/Ai.Os/*",
+          "Get-ChildItem /c/Dev/Ai.Os/*",
+          "Get-ChildItem C:\\Dev\\Ai.Os\\*",
+          "Get-Content /c/Dev/Ai.Os/*",
+          "Get-Content C:\\Dev\\Ai.Os\\*",
+          "cat /c/Dev/Ai.Os/*",
+          "Test-Path /c/Dev/Ai.Os/*",
+          "Test-Path C:\\Dev\\Ai.Os\\*",
+          "Get-Item /c/Dev/Ai.Os/*",
+          "Get-Item C:\\Dev\\Ai.Os\\*"
+        ],
+        "content_search": [
+          "rg *",
+          "grep * /c/Dev/Ai.Os/*",
+          "Select-String * /c/Dev/Ai.Os/*",
+          "Select-String -Path C:\\Dev\\Ai.Os\\*"
+        ],
+        "github_cli_read": [
+          "gh pr view *",
+          "gh pr list *",
+          "gh pr checks *",
+          "gh pr diff *",
+          "gh pr status *",
+          "gh pr comment *",
+          "gh run view *",
+          "gh run list *",
+          "gh repo view *",
+          "gh release list *",
+          "gh release view *",
+          "gh --version"
+        ],
+        "dry_run_scripts": [
+          "PowerShell(*C:\\Dev\\Ai.Os\\automation\\* .DRY_RUN.ps1*)",
+          "powershell * C:\\Dev\\Ai.Os\\automation\\* .DRY_RUN.ps1*"
+        ]
+      },
+      "notes": "TIER_0 commands may be grouped and executed in sequence without per-command operator approval. Worker must still report what was read. Worker must still stop before any mutation."
+    },
+
+    "TIER_1_LOW_RISK": {
+      "label": "SCOPED_APPROVED_MUTATION",
+      "policy": "Ask once per packet context. Proceed after single operator approval. Do not ask again for the same action class within the same approved lane.",
+      "conditions": [
+        "An active AI_OS EXECUTION TOKEN packet is in scope.",
+        "The command target is within the packet's allowed_paths.",
+        "The command is bounded, scoped, and reversible.",
+        "No scope guard triggers apply.",
+        "Operator has not overridden to TIER_2 for this session."
+      ],
+      "command_patterns": {
+        "git_bounded_mutation": [
+          "git switch *",
+          "git switch -c *",
+          "git pull origin *",
+          "git add <exact-named-file>",
+          "git stash push *",
+          "git reset HEAD <exact-named-file>"
+        ],
+        "commit_after_gate": [
+          "git commit -m *"
+        ],
+        "push_non_main": [
+          "git push origin west/*",
+          "git push -u origin west/*",
+          "git push origin feature/*",
+          "git push -u origin feature/*"
+        ],
+        "pr_creation": [
+          "gh pr create *"
+        ],
+        "branch_creation": [
+          "git switch -c west/*",
+          "git switch -c feature/*"
+        ],
+        "named_scripts_non_apply": [
+          "PowerShell(*C:\\Dev\\Ai.Os\\automation\\orchestration\\*.ps1*)"
+        ]
+      },
+      "hard_exclusions": [
+        "git add .",
+        "git add -A",
+        "git add --all"
+      ],
+      "notes": "TIER_1 auto-proceed expires at packet boundary. A new packet requires fresh approval. git commit requires safe-commit gate PASS before TIER_1 applies. git add must name exact files — never broad staging."
+    },
+
+    "TIER_2_HUMAN_REQUIRED": {
+      "label": "HARD_STOP_MUTATION",
+      "policy": "Stop. Report. Wait for explicit Human Owner instruction in the active session. No auto-proceed path exists.",
+      "conditions": "Any one of the following triggers TIER_2 regardless of tier classification.",
+      "command_patterns": {
+        "destructive_git": [
+          "git reset --hard *",
+          "git clean -f *",
+          "git clean -fd *",
+          "git push --force *",
+          "git push -f *",
+          "git push origin main",
+          "git push origin main *",
+          "git branch -D *",
+          "git push origin --delete *",
+          "git rebase *",
+          "git cherry-pick *",
+          "git merge --no-ff *",
+          "git merge *"
+        ],
+        "file_destruction": [
+          "Remove-Item *",
+          "rm -rf *",
+          "del *",
+          "rmdir *"
+        ],
+        "pr_merge": [
+          "gh pr merge *"
+        ],
+        "apply_scripts": [
+          "*.APPLY.ps1*",
+          "*-APPLY.ps1*"
+        ],
+        "broad_staging": [
+          "git add .",
+          "git add -A",
+          "git add --all"
+        ]
+      },
+      "notes": "Human Owner instruction overrides TIER_2 for the specific action named, in the current session only. This override does not persist across sessions."
+    }
+  },
+
+  "scope_guards": {
+    "description": "These guards override tier classification and force TIER_2 regardless of command type. They are non-overridable.",
+    "guards": [
+      {
+        "guard_id": "credential_guard",
+        "triggers_on": ["secrets/", ".env", "keys/", "credentials/", "private/", ".env.*", "*.key", "*.pem", "*.pfx"],
+        "action": "TIER_2",
+        "reason": "Credential and key paths are always human-gated."
+      },
+      {
+        "guard_id": "trading_guard",
+        "triggers_on": ["trading/", "broker/", "oanda/", "live_order/", "order_execution/", "live_trading/", "broker_adapters/"],
+        "action": "TIER_2",
+        "reason": "Trading and broker execution paths are permanently blocked."
+      },
+      {
+        "guard_id": "root_authority_guard",
+        "triggers_on": ["AGENTS.md", "README.md", "docs/governance/"],
+        "action": "TIER_2",
+        "reason": "Root authority and canonical governance files require Human Owner approval."
+      },
+      {
+        "guard_id": "validator_integrity_guard",
+        "triggers_on": ["automation/orchestration/validators/", "automation/orchestration/policy/"],
+        "action": "TIER_2",
+        "reason": "Validator and policy mutation requires Human Owner approval."
+      },
+      {
+        "guard_id": "live_runtime_guard",
+        "triggers_on": ["automation/agent_runtime/", "automation/operator/", "services/", "runtime/"],
+        "action": "TIER_2",
+        "reason": "Live runtime and operator automation paths require Human Owner approval."
+      },
+      {
+        "guard_id": "broad_staging_guard",
+        "triggers_on": ["git add .", "git add -A", "git add --all"],
+        "action": "TIER_2",
+        "reason": "Broad staging is never permitted in AI_OS workflows."
+      },
+      {
+        "guard_id": "out_of_repo_guard",
+        "triggers_on": ["paths outside C:\\Dev\\Ai.Os\\"],
+        "action": "TIER_2",
+        "reason": "Commands targeting paths outside the active repo require explicit Human Owner authorization."
+      }
+    ]
+  },
+
+  "rollback_protections": [
+    {
+      "rp_id": "RP-01",
+      "name": "Tier Override is Packet-Scoped Only",
+      "rule": "A TIER_0 classification can only be demoted to TIER_1 or TIER_2 — never promoted. Promotion of TIER_2 to any lower tier is not permitted under any condition."
+    },
+    {
+      "rp_id": "RP-02",
+      "name": "Scope Guards are Non-Overridable",
+      "rule": "All seven scope guards cannot be waived by packet configuration, AGENTS.md update, or settings.local.json entry. They are hardcoded constraints in this policy."
+    },
+    {
+      "rp_id": "RP-03",
+      "name": "Allow List Must Not Permit Mutations",
+      "rule": "No settings.local.json allow-list entry may permit git reset, git clean, git push --force, Remove-Item, file writes, file deletes, or credential-path reads. A proposed allow entry matching any TIER_2 command pattern must be rejected."
+    },
+    {
+      "rp_id": "RP-04",
+      "name": "TIER_1 Requires Active Packet Context",
+      "rule": "TIER_1 auto-proceed applies only when an active AI_OS EXECUTION TOKEN packet is in scope. Without an active packet, all mutation commands fall back to TIER_2 regardless of tier classification."
+    },
+    {
+      "rp_id": "RP-05",
+      "name": "Validator Chain Cannot Be Bypassed by Tier",
+      "rule": "Tier classification does not substitute for the validator chain. VALIDATOR_CHAIN_001 must run before every APPLY regardless of which commands were auto-approved during the session."
+    },
+    {
+      "rp_id": "RP-06",
+      "name": "Human Owner Override is Session-Scoped",
+      "rule": "If the Human Owner declares 'ask me before every git command' in a session, all git commands revert to TIER_2 for that session. Session-level operator overrides take precedence over tier classification."
+    },
+    {
+      "rp_id": "RP-07",
+      "name": "Policy File Writes are TIER_2",
+      "rule": "This policy file itself is in a protected path (automation/orchestration/policy/). Writes to this file require Human Owner APPLY authorization. Workers may not self-modify their own tier policy."
+    },
+    {
+      "rp_id": "RP-08",
+      "name": "settings.local.json Changes Require Human Owner Authorization",
+      "rule": "The settings.local.json allow list is a protected governance file. Changes require an approved APPLY packet. Workers cannot self-authorize changes to their own permission list."
+    }
+  ],
+
+  "audit_schema": {
+    "schema_id": "AIOS_APPROVAL_AUDIT.v1",
+    "fields": {
+      "audit_id": "AUDIT_<ISO_TIMESTAMP>_<WORKER_IDENTITY>",
+      "session_packet_id": "Active packet ID from AI_OS EXECUTION TOKEN",
+      "worker_identity": "Worker identity string from packet",
+      "timestamp": "ISO-8601",
+      "tier": "TIER_0 | TIER_1 | TIER_2",
+      "command": "Exact command string",
+      "tool": "Bash | PowerShell | Read | Edit | Write | ...",
+      "decision": "AUTO_PROCEED | APPROVED_ONCE | HUMAN_STOP | BLOCKED",
+      "scope_guard_triggered": "boolean",
+      "scope_guard_reason": "string or null",
+      "packet_allowed_paths": "array of allowed path strings",
+      "operator_instruction": "Operator instruction text or null"
+    },
+    "retention": "Retain for lifetime of packet plus 90 days. Do not delete without Human Owner authorization.",
+    "placement": "automation/orchestration/session/<SESSION_DATE>/<PACKET_ID>_APPROVAL_AUDIT.jsonl"
+  },
+
+  "protected_paths": [
+    "AGENTS.md",
+    "README.md",
+    "docs/governance/",
+    "docs/specs/",
+    "docs/workflows/",
+    "schemas/aios/orchestration/",
+    "automation/orchestration/validators/",
+    "automation/orchestration/policy/",
+    "automation/agent_runtime/",
+    "automation/operator/",
+    "services/",
+    "secrets/",
+    "trading/",
+    "broker/"
+  ],
+
+  "forbidden_patterns": [
+    "git reset --hard",
+    "git clean -f",
+    "git push --force",
+    "git push -f",
+    "git push origin main",
+    "git branch -D",
+    "git push origin --delete",
+    "Remove-Item",
+    "rm -rf",
+    "git add .",
+    "git add -A",
+    "git add --all",
+    "*.APPLY.ps1",
+    "gh pr merge",
+    "New-ScheduledTask",
+    "Start-Service",
+    "Stop-Service",
+    "Invoke-WebRequest * -OutFile *",
+    "curl * -o *"
+  ],
+
+  "settings_local_json_reference": {
+    "purpose": "The settings.local.json allow list at ~/.claude/settings.local.json is the Claude Code machine-level enforcement layer. This policy file is the canonical human-readable authority. The allow list entries should reflect TIER_0 command patterns from this policy with repo-scoped path anchors.",
+    "scope_anchor": "C:\\Dev\\Ai.Os",
+    "note": "settings.local.json is not tracked by git. This policy file provides the auditable record of intended allow-list coverage."
+  }
+}
