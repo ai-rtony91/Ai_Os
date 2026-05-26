@@ -1,6 +1,5 @@
 ﻿param(
-    [int]$Cycles = 1,
-    [switch]$Apply
+    [int]$Cycles = 1
 )
 
 Set-StrictMode -Off
@@ -8,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "COPY START — Start-AiOsRuntimeCycle.DRY_RUN.ps1"
 Write-Host "AI_OS Autonomous Runtime Cycle" -ForegroundColor Cyan
-Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Mode: DRY_RUN"
 Write-Host "Cycles: $Cycles"
 Write-Host ""
 
@@ -23,19 +22,11 @@ for ($i = 1; $i -le $Cycles; $i++) {
 
     Write-Host ""
     Write-Host "STEP 2 - APPROVAL PROCESSOR" -ForegroundColor Yellow
-    if ($Apply) {
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1 -Apply
-    } else {
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1
-    }
+    powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1
 
     Write-Host ""
     Write-Host "STEP 3 - SUPERVISOR LOOP" -ForegroundColor Yellow
-    if ($Apply) {
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Invoke-AiOsSupervisorLoop.DRY_RUN.ps1 -Apply
-    } else {
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Invoke-AiOsSupervisorLoop.DRY_RUN.ps1
-    }
+    powershell -ExecutionPolicy Bypass -File automation/orchestration/supervisor/Invoke-AiOsSupervisorLoop.DRY_RUN.ps1
 
     Write-Host ""
     Write-Host "STEP 4 - NEXT STEP AFTER ACTION" -ForegroundColor Yellow

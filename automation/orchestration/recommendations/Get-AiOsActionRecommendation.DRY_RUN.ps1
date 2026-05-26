@@ -18,8 +18,8 @@ if ($health.health -ne "HEALTHY") {
     $reason = "Health is not clean."
 }
 elseif ($approval.matches_found -gt 0) {
-    $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1 -Apply"
-    $reason = "Approval exists for waiting packet."
+    $recommendedCommand = "No command recommended. Use separately approved APPLY helper for approval processing."
+    $reason = "Approval exists for waiting packet; DRY_RUN cannot process approval."
 }
 elseif ($next.status -eq "awaiting_approval") {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_detection/Find-AiOsApprovalMatch.DRY_RUN.ps1"

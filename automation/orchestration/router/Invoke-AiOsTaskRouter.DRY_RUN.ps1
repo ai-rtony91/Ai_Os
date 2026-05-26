@@ -1,14 +1,12 @@
 ﻿param(
     [Parameter(Mandatory = $true)][string]$Task,
-    [Parameter(Mandatory = $true)][string]$Reason,
-    [switch]$Apply
+    [Parameter(Mandatory = $true)][string]$Reason
 )
 
 Set-StrictMode -Off
 $ErrorActionPreference = "Stop"
 
 $registryPath = "automation/orchestration/workers/AIOS_WORKER_REGISTRY.json"
-$inboxScript = "automation/orchestration/workers/inbox/Add-AiOsWorkerInboxItem.DRY_RUN.ps1"
 
 $registry = Get-Content -Raw $registryPath | ConvertFrom-Json
 
@@ -42,18 +40,8 @@ Write-Host "  type: $($worker.type)"
 Write-Host "  purpose: $($worker.purpose)"
 Write-Host ""
 
-if ($Apply) {
-    powershell -ExecutionPolicy Bypass -File $inboxScript `
-        -WorkerId $selectedWorker `
-        -Task $Task `
-        -Reason $Reason `
-        -Apply
-
-    Write-Host "Inbox assignment: YES" -ForegroundColor Green
-}
-else {
-    Write-Host "Inbox assignment: NO"
-}
+Write-Host "Inbox assignment: NO"
+Write-Host "Mutation skipped: YES - DRY_RUN router cannot enqueue worker inbox items."
 
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"

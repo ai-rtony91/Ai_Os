@@ -21,17 +21,11 @@ log between base and HEAD.
 .PARAMETER BaseBranch
 Target branch for the PR. Default is main.
 
-.PARAMETER Apply
-Switch to actually create the PR. Without this flag, the script is DRY_RUN only.
-
 .PARAMETER Json
 Emit JSON instead of the default Markdown report.
 
 .EXAMPLE
 .\automation\orchestration\pr_gates\Open-AiOsPullRequest.DRY_RUN.ps1 -Title "Add feature X"
-
-.EXAMPLE
-.\automation\orchestration\pr_gates\Open-AiOsPullRequest.DRY_RUN.ps1 -Title "Add feature X" -Apply
 
 .EXAMPLE
 .\automation\orchestration\pr_gates\Open-AiOsPullRequest.DRY_RUN.ps1 -Title "Add feature X" -Body "Custom body" -Json
@@ -49,9 +43,6 @@ param(
     [string] $BaseBranch = "main",
 
     [Parameter(Mandatory = $false)]
-    [switch] $Apply,
-
-    [Parameter(Mandatory = $false)]
     [switch] $Json
 )
 
@@ -59,7 +50,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $scriptName = Split-Path -Leaf $PSCommandPath
-$mode = if ($Apply) { "APPLY" } else { "DRY_RUN" }
+$mode = "DRY_RUN"
 
 function Write-FailureRecovery {
     param(
@@ -247,30 +238,11 @@ try {
 
     $gateState = if ($blockers.Count -gt 0) { "BLOCKED" } else { "READY" }
 
-    # --- PR creation (APPLY only) ---
+    # --- PR creation blocked in DRY_RUN ---
     $prCreated = $false
     $prUrl = ""
     $prError = ""
-    if ($Apply -and $gateState -eq "READY") {
-        Assert-CommandAvailable -CommandName "gh"
-        $ErrorActionPreference = "Continue"
-        $ghOutput = & gh pr create --base $BaseBranch --head $branch --title $Title --body $resolvedBody 2>&1
-        $ghExitCode = $LASTEXITCODE
-        $ErrorActionPreference = "Stop"
-
-        $ghStdout = @($ghOutput | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] }) | Out-String
-        $ghStderr = @($ghOutput | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] }) | ForEach-Object { $_.Exception.Message } | Out-String
-
-        if ($ghExitCode -eq 0) {
-            $prCreated = $true
-            $prUrl = $ghStdout.Trim()
-        } else {
-            $prError = if ($ghStderr.Trim()) { $ghStderr.Trim() } else { $ghStdout.Trim() }
-            $blockers += "gh pr create failed: $prError"
-        }
-    } elseif ($Apply -and $gateState -ne "READY") {
-        $blockers += "Cannot create PR in APPLY mode: gate state is $gateState."
-    }
+    $prError = "PR creation skipped: this .DRY_RUN.ps1 helper is report-only."
 
     # --- Build packet ---
     $packet = [pscustomobject] @{
@@ -305,7 +277,7 @@ try {
         recommended_next_action = if ($gateState -eq "BLOCKED") {
             "Resolve blockers before creating PR."
         } elseif ($mode -eq "DRY_RUN") {
-            "Rerun with -Apply to create the pull request."
+            "Use a separately approved APPLY helper to create the pull request."
         } else {
             "PR created. Monitor checks and request review."
         }

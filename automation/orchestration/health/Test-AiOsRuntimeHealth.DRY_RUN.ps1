@@ -1,6 +1,5 @@
 param(
-    [switch]$QuietJson,
-    [switch]$RecordTelemetry
+    [switch]$QuietJson
 )
 
 Set-StrictMode -Off
@@ -49,57 +48,6 @@ $result = [pscustomobject]@{
     branch = $branch
     reasons = $reasons
     next_command = $nextCommand
-}
-
-if ($RecordTelemetry) {
-    $telemetryWriter = "scripts/telemetry/Write-AIOSTelemetryEvent.ps1"
-    if (-not (Test-Path -LiteralPath $telemetryWriter)) {
-        throw "Telemetry writer not found: $telemetryWriter"
-    }
-
-    $mappedResult = switch ($health) {
-        "HEALTHY" { "PASS" }
-        "WARNING" { "WARN" }
-        "BLOCKED" { "BLOCKED" }
-        default { "WARN" }
-    }
-
-    $validationStatus = switch ($health) {
-        "HEALTHY" { "PASS" }
-        "WARNING" { "WARN" }
-        "BLOCKED" { "FAIL" }
-        default { "WARN" }
-    }
-
-    $riskLevel = switch ($health) {
-        "HEALTHY" { "LOW" }
-        "WARNING" { "MEDIUM" }
-        "BLOCKED" { "HIGH" }
-        default { "MEDIUM" }
-    }
-
-    $currentBranch = if ([string]::IsNullOrWhiteSpace($branch)) { "unknown" } else { $branch }
-    $nextSafeAction = if ([string]::IsNullOrWhiteSpace($nextCommand)) {
-        "Report health state to operator: $health"
-    } else {
-        $nextCommand
-    }
-
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $telemetryWriter `
-        -EventType "telemetry_health_checked" `
-        -Source "automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1" `
-        -Result $mappedResult `
-        -Actor "script" `
-        -Lane "orchestration_health" `
-        -RepoPath "C:\Dev\Ai.Os" `
-        -Branch $currentBranch `
-        -Mode "READ_ONLY" `
-        -AuthorityToken "operator-authorized-telemetry-health" `
-        -InputReference (($requiredFiles + @("git branch --show-current", "git status --short")) -join ", ") `
-        -OutputReference "telemetry/work_ledger.jsonl" `
-        -RiskLevel $riskLevel `
-        -NextSafeAction $nextSafeAction `
-        -ValidationStatus $validationStatus | Out-Null
 }
 
 if ($QuietJson) {

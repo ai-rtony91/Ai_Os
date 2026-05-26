@@ -548,7 +548,7 @@ try {
     elseif ($isMain) {
         $laneState = "READY_FOR_BRANCH"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
-        $recommended = "git switch -c lane/<short-purpose>"
+        $recommended = "Branch creation approval required; use separately approved branch workflow."
         $stopCondition = "Create a lane branch only after the operator names the lane purpose."
     }
     elseif (-not $isLaneBranch) {
@@ -566,13 +566,13 @@ try {
     elseif (-not $prInfo.detected -and $hasUpstream -and $aheadCount -eq 0) {
         $laneState = "READY_FOR_PR_CREATION"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
-        $recommended = ".\automation\orchestration\pr_gates\Open-AiOsPullRequest.DRY_RUN.ps1 -Title `"<PR title>`""
+        $recommended = "PR creation approval required; use separately approved PR opening workflow."
         $stopCondition = "Create PR only after the operator approves the title, body, and scope. Run the PR creation gate first."
     }
     elseif (-not $prInfo.detected) {
         $laneState = "READY_FOR_PUSH_LANE_BRANCH"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
-        $recommended = "git push -u origin $branch"
+        $recommended = "Push approval required for lane branch; use separately approved push workflow."
         $stopCondition = "Push only after push is explicitly authorized for this lane branch."
     }
     elseif ($prInfo.detected -and $prInfo.pr.state -eq "OPEN" -and $prInfo.validate -eq "UNKNOWN") {
@@ -596,13 +596,13 @@ try {
     elseif ($prInfo.detected -and $prInfo.pr.state -eq "OPEN" -and $prInfo.validate -eq "success") {
         $laneState = "READY_FOR_MERGE_APPROVAL"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
-        $recommended = ".\automation\orchestration\pr_gates\Merge-AiOsPullRequest.DRY_RUN.ps1 -PrNumber $($prInfo.pr.number); then gh pr merge $($prInfo.pr.number) --squash --delete-branch"
+        $recommended = "Merge approval required; run merge readiness gate, then use separately approved APPLY merge helper."
         $stopCondition = "Merge requires explicit operator approval. Run the merge gate first to validate readiness."
     }
     elseif ($prInfo.detected -and $prInfo.pr.state -eq "MERGED") {
         $laneState = "READY_FOR_LOCAL_MAIN_SYNC"
         $approvalClass = "HUMAN_APPROVAL_REQUIRED"
-        $recommended = "git fetch origin; git switch main; git reset --hard origin/main; then .\automation\orchestration\post_push\Test-AiOsPostPushVerification.DRY_RUN.ps1 -PrNumber $($prInfo.pr.number)"
+        $recommended = "Local main sync approval required; use separately approved sync workflow, then run post-merge verification."
         $stopCondition = "Local main sync requires explicit operator approval because it includes branch switch and reset. Run post-merge verification after sync."
     }
     else {

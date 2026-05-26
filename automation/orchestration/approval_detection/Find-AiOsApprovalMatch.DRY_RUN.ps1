@@ -29,7 +29,7 @@ foreach ($packetFile in $packets) {
                 packet_status = $packet.status
                 approval_file = $approvalFile.FullName
                 pr_number = $approval.pr_number
-                recommended_next = "Run approval processor with -Apply"
+        recommended_next = "Use separately approved APPLY helper after packet approval is verified."
             }
         }
     }

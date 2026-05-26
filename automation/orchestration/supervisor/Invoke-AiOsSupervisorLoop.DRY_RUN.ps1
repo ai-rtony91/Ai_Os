@@ -1,5 +1,4 @@
 ﻿param(
-    [switch]$Apply
 )
 
 Set-StrictMode -Off
@@ -7,7 +6,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "COPY START — Invoke-AiOsSupervisorLoop.DRY_RUN.ps1"
 Write-Host "AI_OS Autonomous Supervisor Loop" -ForegroundColor Cyan
-Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Mode: DRY_RUN"
 Write-Host ""
 
 $nextJson = powershell -ExecutionPolicy Bypass -File automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
@@ -71,29 +70,9 @@ if ([string]::IsNullOrWhiteSpace($targetState)) {
     $packetPath = $nextJson.latest_packet_file
     Write-Host "packet_path: $packetPath"
 
-    if ($Apply) {
-        powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
-
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host ''
-            Write-Host 'SUPERVISOR BLOCKED: proof verification failed' -ForegroundColor Red
-            exit 1
-        }
-
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/work_packets/Move-AiOsPacketState.ps1 -PacketPath $packetPath -TargetState $targetState -Worker "supervisor_loop" -Apply
-        Write-Host "Action taken: YES"
-    } else {
-        powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
-
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host ''
-            Write-Host 'SUPERVISOR BLOCKED: proof verification failed' -ForegroundColor Red
-            exit 1
-        }
-
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/work_packets/Move-AiOsPacketState.ps1 -PacketPath $packetPath -TargetState $targetState -Worker "supervisor_loop"
-        Write-Host "Action taken: NO"
-    }
+    Write-Host "Would move packet to: $targetState"
+    Write-Host "Action taken: NO"
+    Write-Host "Mutation skipped: YES - DRY_RUN supervisor cannot verify proof or move packet state."
 }
 
 Write-Host ""

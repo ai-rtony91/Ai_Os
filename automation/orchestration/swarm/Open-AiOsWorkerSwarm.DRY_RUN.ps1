@@ -1,5 +1,4 @@
 ﻿param(
-    [switch]$Apply
 )
 
 Set-StrictMode -Off
@@ -14,7 +13,7 @@ $workers = @(
 
 Write-Host "COPY START - Open-AiOsWorkerSwarm.DRY_RUN.ps1"
 Write-Host "AI_OS Supervisor Worker Swarm" -ForegroundColor Cyan
-Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Mode: DRY_RUN"
 Write-Host ""
 
 foreach ($workerId in $workers) {
@@ -24,13 +23,8 @@ foreach ($workerId in $workers) {
 
     $command = "powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/launcher/Open-AiOsWorkerWindow.DRY_RUN.ps1 -WorkerId $workerId"
 
-    if ($Apply) {
-        powershell -ExecutionPolicy Bypass -File automation/orchestration/workers/launcher/Open-AiOsWorkerWindow.DRY_RUN.ps1 -WorkerId $workerId -Apply
-        Write-Host "  launched: YES" -ForegroundColor Green
-    }
-    else {
-        Write-Host "  would_launch: YES"
-    }
+    Write-Host "  would_launch: YES"
+    Write-Host "  launched: NO"
 
     Write-Host "  command: $command"
     Write-Host ""

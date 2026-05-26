@@ -1,7 +1,6 @@
 ﻿param(
     [string]$ApprovalRoot = "automation/orchestration/approvals",
-    [string]$PacketRoot = "automation/orchestration/work_packets",
-    [switch]$Apply
+    [string]$PacketRoot = "automation/orchestration/work_packets"
 )
 
 Set-StrictMode -Off
@@ -9,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "COPY START — Invoke-AiOsApprovalProcessor.DRY_RUN.ps1"
 Write-Host "AI_OS Approval Processor" -ForegroundColor Cyan
-Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Mode: DRY_RUN"
 Write-Host ""
 
 $approvalFiles = Get-ChildItem -LiteralPath $ApprovalRoot -Filter "APPROVE_PR_*.json" -File -ErrorAction SilentlyContinue
@@ -30,8 +29,7 @@ function Get-AiOsApprovalPacketId {
 function Test-AiOsApprovalAppliesToPacket {
     param(
         [object]$Approval,
-        [object]$Packet,
-        [bool]$ApplyMode
+        [object]$Packet
     )
 
     $approvalPacketId = Get-AiOsApprovalPacketId -Approval $Approval
@@ -45,19 +43,6 @@ function Test-AiOsApprovalAppliesToPacket {
     if ($approvalPacketId -ne $packetId) {
         Write-Host "Approval skipped: packet_id mismatch approval=$approvalPacketId packet=$packetId"
         return $false
-    }
-
-    if ($ApplyMode) {
-        if ([string]$Approval.approved_mode -eq "DRY_RUN_ONLY") {
-            Write-Host "Approval skipped: approved_mode is DRY_RUN_ONLY"
-            return $false
-        }
-
-        if (($Approval.PSObject.Properties.Name -contains "approval_status") -and
-            [string]$Approval.approval_status -notin $applyApprovalStatuses) {
-            Write-Host "Approval skipped: approval_status is not APPLY-approved"
-            return $false
-        }
     }
 
     return $true
@@ -97,31 +82,13 @@ foreach ($approvalFile in $approvalFiles) {
         Write-Host "status: $($packet.status)"
         Write-Host "approval_pr: $($approval.pr_number)"
 
-        if (-not (Test-AiOsApprovalAppliesToPacket -Approval $approval -Packet $packet -ApplyMode ([bool]$Apply))) {
+        if (-not (Test-AiOsApprovalAppliesToPacket -Approval $approval -Packet $packet)) {
             continue
         }
 
-        if ($Apply) {
-
-            powershell -ExecutionPolicy Bypass -File `
-            automation/orchestration/work_packets/Move-AiOsPacketState.ps1 `
-            -PacketPath $packetFile.FullName `
-            -TargetState approved `
-            -Worker approval_processor `
-            -Apply
-
-            Write-Host "Approval action applied: YES"
-
-        } else {
-
-            powershell -ExecutionPolicy Bypass -File `
-            automation/orchestration/work_packets/Move-AiOsPacketState.ps1 `
-            -PacketPath $packetFile.FullName `
-            -TargetState approved `
-            -Worker approval_processor
-
-            Write-Host "Approval action applied: NO"
-        }
+        Write-Host "Would move packet to: approved"
+        Write-Host "Approval action applied: NO"
+        Write-Host "Mutation skipped: YES - DRY_RUN approval processor cannot move packet state."
     }
 }
 

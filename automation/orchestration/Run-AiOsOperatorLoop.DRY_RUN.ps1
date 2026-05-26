@@ -15,7 +15,7 @@ git branch --show-current
 
 Write-Host ""
 Write-Host "Step 2: Planned branch creation"
-Write-Host ("git checkout -b {0}" -f $BranchName)
+Write-Host ("Branch creation proposal for '{0}' requires separately approved branch workflow." -f $BranchName)
 
 Write-Host ""
 Write-Host "Step 3: Running preflight"
@@ -27,11 +27,11 @@ git status --short
 
 Write-Host ""
 Write-Host "Step 5: Planned commit"
-Write-Host ('git commit -m "{0}"' -f $CommitMessage)
+Write-Host ('Commit proposal with message "{0}" requires separately approved commit gate.' -f $CommitMessage)
 
 Write-Host ""
 Write-Host "Step 6: Planned push"
-Write-Host ("git push -u origin {0}" -f $BranchName)
+Write-Host ("Push proposal for branch '{0}' requires separately approved push gate." -f $BranchName)
 
 Write-Host ""
 Write-Host "Step 7: Planned PR URL"

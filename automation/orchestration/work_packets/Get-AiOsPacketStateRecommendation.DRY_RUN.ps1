@@ -71,7 +71,7 @@ $recommendedNextState = "blocked"
 $transitionAllowed = $false
 $reason = "Packet could not be evaluated."
 $requiredOperatorAction = "Review packet path and JSON parse result."
-$commandToApplyLater = "No apply command recommended."
+$commandToApplyLater = "No APPLY command recommended."
 
 if ([string]::IsNullOrWhiteSpace($PacketPath) -or -not (Test-Path -LiteralPath $PacketPath -PathType Leaf)) {
     $warnings += "No active packet JSON file found."
@@ -207,7 +207,7 @@ else {
 
 if ($transitionAllowed -and $packet -and $recommendedNextState -ne $normalizedState) {
     $relativePacketPath = Resolve-AiOsRelativePath -Path $PacketPath
-    $commandToApplyLater = "powershell -ExecutionPolicy Bypass -File automation/orchestration/work_packets/Move-AiOsPacketState.ps1 -PacketPath `"$relativePacketPath`" -TargetState `"$recommendedNextState`" -Worker `"human_operator`" -Apply"
+    $commandToApplyLater = "Separate APPLY packet-state helper required after operator approval."
 }
 
 $result = [ordered]@{

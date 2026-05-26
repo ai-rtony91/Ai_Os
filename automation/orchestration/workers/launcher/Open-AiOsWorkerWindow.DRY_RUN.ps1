@@ -1,6 +1,5 @@
 ﻿param(
-    [Parameter(Mandatory = $true)][string]$WorkerId,
-    [switch]$Apply
+    [Parameter(Mandatory = $true)][string]$WorkerId
 )
 
 Set-StrictMode -Off
@@ -42,7 +41,7 @@ Write-Host 'WORKER READY FOR NEXT TASK' -ForegroundColor Green
 
 Write-Host "COPY START - Open-AiOsWorkerWindow.DRY_RUN.ps1"
 Write-Host "AI_OS Worker Window Launcher" -ForegroundColor Cyan
-Write-Host "Mode: $(if ($Apply) { 'APPLY' } else { 'DRY_RUN' })"
+Write-Host "Mode: DRY_RUN"
 Write-Host "worker_id: $WorkerId"
 Write-Host "worker_type: $($worker.type)"
 Write-Host "title: $title"
@@ -51,13 +50,8 @@ Write-Host "Would open a clean worker terminal tab."
 Write-Host "Command preview:"
 Write-Host $workerCommand
 
-if ($Apply) {
-    $encodedCommand = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($workerCommand))
-    wt new-tab --title $title powershell -NoExit -EncodedCommand $encodedCommand
-    Write-Host "Worker window opened: YES"
-} else {
-    Write-Host "Worker window opened: NO"
-}
+Write-Host "Worker window opened: NO"
+Write-Host "Mutation skipped: YES - DRY_RUN worker launcher cannot launch windows."
 
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"

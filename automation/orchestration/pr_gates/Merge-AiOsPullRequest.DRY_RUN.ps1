@@ -18,18 +18,12 @@ GitHub pull request number to inspect or merge.
 Path to an approval JSON file. Defaults to
 automation/orchestration/approvals/APPROVE_PR_<PrNumber>.json.
 
-.PARAMETER Apply
-Actually perform the merge after all blockers are clear. Without this flag, the
-script is DRY_RUN/report-only.
-
 .PARAMETER Json
 Emit JSON instead of the default Markdown report.
 
 .EXAMPLE
 .\automation\orchestration\pr_gates\Merge-AiOsPullRequest.DRY_RUN.ps1 -PrNumber 240
 
-.EXAMPLE
-.\automation\orchestration\pr_gates\Merge-AiOsPullRequest.DRY_RUN.ps1 -PrNumber 240 -Apply
 #>
 
 [CmdletBinding()]
@@ -42,9 +36,6 @@ param(
     [string] $ApprovalPath = "",
 
     [Parameter(Mandatory = $false)]
-    [switch] $Apply,
-
-    [Parameter(Mandatory = $false)]
     [switch] $Json
 )
 
@@ -52,7 +43,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $scriptName = Split-Path -Leaf $PSCommandPath
-$mode = if ($Apply) { "APPLY" } else { "DRY_RUN" }
+$mode = "DRY_RUN"
 $expectedRepoPath = "C:\Dev\Ai.Os"
 $expectedRemoteUrl = "https://github.com/ai-rtony91/Ai_Os.git"
 $baseBranch = "main"
@@ -461,17 +452,11 @@ try {
     $recommendedNextAction = if ($gateState -eq "BLOCKED") {
         "Resolve blockers before merge."
     }
-    elseif ($Apply) {
-        "Merge command completed. Verify PR merge result and sync local main only with explicit approval."
-    }
     else {
-        "Rerun with -Apply only after operator confirms merge approval remains current."
+        "Use a separately approved APPLY helper only after operator confirms merge approval remains current."
     }
     $stopCondition = if ($gateState -eq "BLOCKED") {
         "Stop before merge until blockers are resolved."
-    }
-    elseif ($Apply) {
-        "Stop after merge attempt; do not reset or sync local main in this helper."
     }
     else {
         "Stop before mutation; DRY_RUN only."
@@ -480,23 +465,7 @@ try {
     $mergeAttempted = "NO"
     $mergeExitCode = $null
     $mergeOutput = ""
-    if ($Apply -and $gateState -eq "READY_FOR_MERGE") {
-        $mergeResult = Invoke-NativeCommand `
-            -CommandName "gh" `
-            -Arguments @("pr", "merge", "$PrNumber", "--squash", "--delete-branch") `
-            -DisplayCommand "gh pr merge $PrNumber --squash --delete-branch" `
-            -AllowFailure
-        $mergeAttempted = "YES"
-        $mergeExitCode = $mergeResult.exit_code
-        $mergeOutput = $mergeResult.output
-        if ($mergeResult.exit_code -ne 0) {
-            $blockers += "gh pr merge failed: $($mergeResult.output)"
-            $gateState = "BLOCKED"
-            $safetyClassification = "BLOCKED"
-            $recommendedNextAction = "Review the GitHub merge error before retrying."
-            $stopCondition = "Stop after failed merge attempt."
-        }
-    }
+    $mergeOutput = "Merge skipped: this .DRY_RUN.ps1 helper is report-only."
 
     $packet = [pscustomobject] @{
         schema = "AIOS_PR_MERGE_GATE_PACKET.v1"
@@ -539,7 +508,7 @@ try {
         blockers = @($blockers)
         merge = [pscustomobject] @{
             merge_attempted = $mergeAttempted
-            merge_command = "gh pr merge $PrNumber --squash --delete-branch"
+            merge_command = "Separate APPLY merge helper required."
             merge_exit_code = $mergeExitCode
             merge_output = $mergeOutput
         }
