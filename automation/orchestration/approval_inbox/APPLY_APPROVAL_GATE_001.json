@@ -3,9 +3,11 @@
   "packet_id": "PHASE_15_3_3_APPROVAL_GATE",
   "requested_mode": "APPLY",
   "approved_mode": "DRY_RUN_ONLY",
-  "approval_status": "pending_review",
+  "approval_status": "expired",
   "approved_by_human": false,
-  "approval_timestamp_placeholder": null,
+  "approval_timestamp_placeholder": "2026-05-26T00:00:00Z",
+  "archival_timestamp": "2026-05-26T00:00:00Z",
+  "archival_reason": "Phase 15 gate (PHASE_15_3_3_APPROVAL_GATE) never actioned. Expired as stale per APPROVAL_STATUS_RULES_001.md. A new gate must be created for any future APPLY in this scope.",
   "risk_level": "medium",
   "allowed_paths": [
     "automation/orchestration/",

@@ -8,8 +8,10 @@
   "approved_mode": "DRY_RUN_ONLY",
   "risk_level": "REVIEW_REQUIRED",
   "approved_by_human": false,
-  "approval_status": "blocked",
-  "approval_timestamp_placeholder": null,
+  "approval_status": "expired",
+  "approval_timestamp_placeholder": "2026-05-26T00:00:00Z",
+  "archival_timestamp": "2026-05-26T00:00:00Z",
+  "archival_reason": "Stale East placeholder retained since Phase 15. No APPLY action taken. Expired per APPROVAL_STATUS_RULES_001.md. All original fields preserved.",
   "allowed_paths": [
     "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
   ],
