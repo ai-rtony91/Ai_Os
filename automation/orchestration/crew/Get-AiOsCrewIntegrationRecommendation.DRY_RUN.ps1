@@ -26,6 +26,17 @@ function ConvertTo-AiOsRepoPath {
     return $Path.Replace("\", "/").Trim()
 }
 
+function ConvertTo-ProcessArgument {
+    param([AllowNull()][object]$Value)
+
+    $text = if ($null -eq $Value) { "" } else { [string]$Value }
+    if ($text -notmatch '[\s"]') {
+        return $text
+    }
+
+    return '"' + ($text -replace '"', '\"') + '"'
+}
+
 function Invoke-AiOsCrewJsonHelper {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -41,16 +52,36 @@ function Invoke-AiOsCrewJsonHelper {
         }
     }
 
+    $resolvedPath = (Resolve-Path -LiteralPath $Path).Path
+    $argumentItems = @("-NoProfile", "-File", $resolvedPath) + @($HelperArguments)
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = "powershell"
+    $psi.Arguments = (($argumentItems | ForEach-Object { ConvertTo-ProcessArgument -Value $_ }) -join " ")
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $psi
+
     try {
-        $output = & powershell -NoProfile -File $Path @HelperArguments
-        $jsonText = ($output | Out-String).Trim()
+        $null = $process.Start()
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $stderr = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+
+        $jsonText = $stdout.Trim()
         $parsed = if ([string]::IsNullOrWhiteSpace($jsonText)) { $null } else { $jsonText | ConvertFrom-Json }
+        $status = if ($process.ExitCode -eq 0 -and [string]::IsNullOrWhiteSpace($stderr)) { "PASS" } else { "FAIL" }
+        $errorText = @($stderr.Trim(), $(if ($process.ExitCode -ne 0) { "Exit code: $($process.ExitCode)" } else { "" })) |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 
         return [pscustomobject]@{
             helper = $Path
-            status = "PASS"
+            status = $status
             result = $parsed
-            error = $null
+            error = if ($errorText.Count -gt 0) { $errorText -join "`n" } else { $null }
         }
     }
     catch {
@@ -59,6 +90,11 @@ function Invoke-AiOsCrewJsonHelper {
             status = "FAIL"
             result = $null
             error = $_.Exception.Message
+        }
+    }
+    finally {
+        if ($process) {
+            $process.Dispose()
         }
     }
 }
@@ -164,6 +200,7 @@ else {
 
 $commitPackagePreview = if ($commitPreview.result) {
     [pscustomobject]@{
+        status = "AVAILABLE"
         current_branch = $commitPreview.result.current_branch
         git_status = $commitPreview.result.git_status
         recommended_file_count = $commitPreview.result.summary.recommended_file_count
@@ -175,6 +212,7 @@ $commitPackagePreview = if ($commitPreview.result) {
 }
 else {
     [pscustomobject]@{
+        status = if ($commitPreview.status -eq "FAIL") { "UNAVAILABLE_CLEAN_WORKTREE" } else { "UNAVAILABLE" }
         current_branch = "UNKNOWN"
         git_status = "UNKNOWN"
         recommended_file_count = 0
@@ -186,7 +224,12 @@ else {
 }
 
 $overallReadiness = if ($blockedMatches.Count -gt 0 -or $failedHelpers.Count -gt 0) {
-    "BLOCKED"
+    if ($commitPreview.status -eq "FAIL" -and $failedHelpers.Count -eq 1) {
+        "REVIEW_REQUIRED"
+    }
+    else {
+        "BLOCKED"
+    }
 }
 else {
     "REVIEW_REQUIRED"
