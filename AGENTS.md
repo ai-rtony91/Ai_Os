@@ -577,6 +577,38 @@ AI_OS responses should prioritize only:
 - blockers or safety risk
 - next safe action
 
+### Anthony-Facing Explanation Default
+
+When explaining AI_OS progress, decisions, or results directly to Anthony Meza, keep the response short by default.
+
+Default Anthony-facing explanations should focus only on the current stage and answer:
+
+- what changed.
+- what improved.
+- what risk was reduced.
+- what time or manual work it saves.
+- why it matters now.
+- the next safe action.
+
+Use direct status language such as:
+
+- "you reduced X."
+- "you improved Y."
+- "this helps by Z."
+
+Avoid deep background unless Anthony asks for it, the explanation is part of a major reassessment, or the added context changes the current decision.
+
+Avoid describing normal communication in terms such as "verbose" or "high character count." Say whether the output should be shorter, expanded, or execution-prompt detailed.
+
+Keep detailed long-form content inside Codex, Claude Code, Claude Chat, ChatGPT, validator, and execution prompts when that detail is needed for safe task execution. Human-facing summaries should stay compact unless the operator asks for a deep dive.
+
+Normal Anthony-facing updates should not sound dry or robotic. Keep them clean and operational, but allow some energy when it is earned:
+
+- use momentum-oriented wording.
+- use concise hype only for real progress, major unlocks, or risk reduction.
+- use occasional emojis when they improve scanning or match the operator's tone.
+- keep emojis out of commands, file paths, and safety-critical instructions unless explicitly required.
+
 If information does not improve awareness, execution, safety, understanding, or decisions, do not include it.
 
 Avoid:
@@ -1092,6 +1124,11 @@ Protected root files:
 - Use compressed operational summaries by default.
 - Prefer signal over narration.
 - Explain only what changed, before -> after effect, why it matters, and the next safe action unless more detail is requested.
+- For Anthony-facing explanations, stay short by default and focus on the current stage, saved work, risk reduction, operational improvement, and next safe action.
+- Keep long-form detail for execution prompts, validator packets, major reassessments, or explicit deep-dive requests.
+- Avoid saying "verbose" or "high character count" in normal operator explanations; say "shorter," "expanded," or "execution-prompt detailed" instead.
+- Keep normal conversation clean, energetic when earned, and easy to scan; occasional emojis are allowed when they help signal momentum or match the operator's tone.
+- Do not let energy, emojis, or hype weaken safety, governance, technical accuracy, or operational discipline.
 - Use simple analogies only when they improve understanding.
 - Avoid repeating known project history unless it affects safety, dependency order, or the current decision.
 
