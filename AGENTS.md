@@ -559,40 +559,56 @@ When the operator says "make that a rule," AI workers must not treat it as chat 
 
 ## AI_OS Approval Friction Reduction Standard
 
-Inside an approved read-only lane, Codex should group and proceed with `SAFE_READ_ONLY` commands without asking one-by-one unless the command crosses a safety boundary.
+Codex approval behavior must align with the machine-readable approval tier authority in `automation/orchestration/policy/AIOS_APPROVAL_TIER_POLICY.json`.
+
+Canonical tier mapping:
+
+- `SAFE_READ_ONLY` maps to `TIER_0_AUTO`.
+- `SCOPED_APPROVED_MUTATION` maps to `TIER_1_LOW_RISK`.
+- `HARD_STOP_MUTATION` maps to `TIER_2_HUMAN_REQUIRED`.
+
+TIER names are canonical for command routing. The older behavior labels remain useful operator-facing shorthand.
+
+### `TIER_0_AUTO` / `SAFE_READ_ONLY`
+
+Inside an approved read-only lane, Codex should group and proceed with `TIER_0_AUTO` commands without asking one-by-one unless the command crosses a safety boundary.
 
 When a lane is read-only and includes `AI_OS EXECUTION TOKEN`, Codex should:
 
-1. Treat in-scope `SAFE_READ_ONLY` commands as approved for that lane.
+1. Treat in-scope `TIER_0_AUTO` / `SAFE_READ_ONLY` commands as approved for that lane.
 2. Group read-only checks into the smallest practical number of commands.
 3. Avoid repeated operator prompts for harmless inspection commands.
 4. Still report what it read.
 5. Still stop before any mutation.
 
-`SAFE_READ_ONLY` examples:
+`TIER_0_AUTO` examples:
 
 - `git status --short --branch`
 - `git branch --show-current`
 - `git rev-parse`
 - `git log`
 - `git show`
+- `git diff`
+- `git diff --stat`
 - `git diff --name-only`
 - `git diff --cached --name-only`
+- `git diff --check`
 - `git ls-files`
 - `rg`
 - `Test-Path`
 - `Get-Item`
 - `Get-ChildItem`
-- `Get-Content -TotalCount`
+- `Get-Content`
 - `gh pr view`
 - `gh pr checks`
 - `gh pr list`
+- repo-scoped `.DRY_RUN.ps1` validator scripts when validation is explicitly requested by the active packet
 
-`SAFE_READ_ONLY` limits:
+`TIER_0_AUTO` limits:
 
 Codex must still stop or ask if a command:
 
-- executes a script
+- executes a non-DRY_RUN script
 - touches secrets or credentials
 - accesses external drives unless the lane explicitly authorizes that drive
 - performs network mutation
@@ -600,7 +616,19 @@ Codex must still stop or ask if a command:
 - reads unusually sensitive paths
 - exceeds the lane scope
 
-`SCOPED_APPROVED_MUTATION` means ask once for the exact approved mutation.
+If a `TIER_0_AUTO` read fails because of a sandbox spawn or refresh issue, Codex may retry the same read-only command with scoped escalation when the command remains repo-local, read-only, and in packet scope. This retry is not approval to mutate state.
+
+### `TIER_1_LOW_RISK` / `SCOPED_APPROVED_MUTATION`
+
+`TIER_1_LOW_RISK` means ask once for the exact approved mutation class inside the active packet. After approval, Codex may remember that approval only for the same packet, same action class, same branch or target, and same exact file/path set.
+
+Packet-scoped approval memory:
+
+- starts only after explicit operator approval in the active `AI_OS EXECUTION TOKEN` packet.
+- applies only to the exact command family and scope that was approved.
+- expires at the packet stop point.
+- does not transfer across branches, files, sessions, packets, or workers.
+- cannot authorize broad staging, direct push to `main`, destructive commands, protected-path changes, APPLY scripts, or any `TIER_2_HUMAN_REQUIRED` action.
 
 Examples:
 
@@ -612,13 +640,22 @@ Examples:
 - `gh pr merge` with an exact PR number
 - approved folder creation on `D:` in a T9 APPLY lane
 
-`HARD_STOP_MUTATION` means stop and report; do not proceed automatically.
+`TIER_1_LOW_RISK` does not bypass the AI_OS Commit/Push Gate. Commit and push still require exact-file evidence, cached diff review when committing, validation evidence, named branch/remote targets, and explicit operator authorization.
+
+### `TIER_2_HUMAN_REQUIRED` / `HARD_STOP_MUTATION`
+
+`TIER_2_HUMAN_REQUIRED` means stop and report; do not proceed automatically.
 
 Examples:
 
-- `git reset`
+- `git reset --hard`
 - `git clean`
 - force push
+- `git push origin main`
+- `git add .`
+- `git add -A`
+- `git add --all`
+- `Remove-Item`
 - delete branches
 - delete backups
 - remove evidence
@@ -627,6 +664,9 @@ Examples:
 - run `robocopy` with destructive mirror mode
 - create scheduled tasks without an APPLY lane
 - modify the canonical repo from T9 logic
+- mutate governance, validator, runtime, trading, broker, OANDA, credential, API-key, or live-order paths
+
+`TIER_2_HUMAN_REQUIRED` protections cannot be downgraded by packet wording, packet-scoped approval memory, validator output, local settings, or convenience. Validators remain evidence, not approval. A validator `PASS` does not approve APPLY, staging, commit, push, merge, destructive cleanup, live infrastructure, broker execution, OANDA, API-key handling, real-money execution, or live order routing.
 
 ## AI_OS Approval Advisor Rule
 
