@@ -153,6 +153,18 @@ The morning brief should summarize:
 
 The morning brief must be report-only unless a separate approved APPLY pack explicitly changes behavior.
 
+Compact morning brief output should stay short and operator-facing. It should show:
+
+- `STATUS`.
+- `WHAT CHANGED`.
+- `BLOCKED BY`.
+- `NEEDS ANTHONY APPROVAL`.
+- `SAFE NEXT ACTION`.
+- `SAFE TO IGNORE`.
+- `TODAY FOCUS`.
+
+The compact brief may recommend a next step. It must not approve, execute, write files, move packet state, launch workers, stage, commit, push, merge, schedule work, or touch protected trading, broker, secret, credential, or live execution scope.
+
 ## Packet Drafting Rules
 
 Packet drafts must remain previews.

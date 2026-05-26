@@ -136,18 +136,24 @@
     "morning_brief": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["summary", "blockers", "review_items", "recommended_first_action"],
+      "required": ["summary", "blockers", "approval_needed", "review_items", "recommended_first_action", "safe_to_ignore", "today_focus"],
       "properties": {
         "summary": { "type": "string" },
         "blockers": {
           "type": "array",
           "items": { "type": "string" }
         },
+        "approval_needed": { "type": "boolean" },
         "review_items": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "recommended_first_action": { "type": "string" }
+        "recommended_first_action": { "type": "string" },
+        "safe_to_ignore": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "today_focus": { "type": "string" }
       }
     },
     "generated_at": {

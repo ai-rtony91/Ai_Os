@@ -131,6 +131,27 @@ $nextSafeActions = @(
     }
 )
 
+$approvalNeeded = $false
+if ($escalationItems.Count -gt 0) {
+    $approvalNeeded = $true
+}
+
+$safeToIgnore = @()
+if (@($untrackedItems | Where-Object { $_ -eq ".codex_worktrees/" }).Count -gt 0) {
+    $safeToIgnore += ".codex_worktrees/ known local backlog; do not stage."
+}
+if ($changedFiles.Count -eq 0) {
+    $safeToIgnore += "No modified tracked files."
+}
+if ($safeToIgnore.Count -eq 0) {
+    $safeToIgnore += "No safe-to-ignore items identified."
+}
+
+$todayFocus = "Review escalation items, then choose one safe next action."
+if ($escalationItems.Count -eq 0) {
+    $todayFocus = "Repo looks clear for the next approved planning or validation step."
+}
+
 $packetDrafts = @(
     [pscustomobject]@{
         title = "Review Overnight Supervisor Escalation Items"
@@ -159,6 +180,7 @@ $report = [pscustomobject]@{
     morning_brief = [pscustomobject]@{
         summary = "Overnight Supervisor DRY_RUN inspected repo status, queue health evidence, validator configuration, approval count, and worker count."
         blockers = @($escalationItems | Where-Object { $_.severity -eq "BLOCKED" } | ForEach-Object { $_.trigger })
+        approval_needed = $approvalNeeded
         review_items = @(
             "changed_files=$($changedFiles.Count)",
             "untracked_items=$($untrackedItems.Count)",
@@ -168,6 +190,8 @@ $report = [pscustomobject]@{
             "workers=$workerCount"
         )
         recommended_first_action = "Review escalation summary before approving any validator, APPLY, commit, push, merge, worker launch, or packet movement."
+        safe_to_ignore = $safeToIgnore
+        today_focus = $todayFocus
     }
     generated_at = (Get-Date).ToString("s")
     mode = "DRY_RUN"
@@ -212,8 +236,30 @@ foreach ($item in $report.next_safe_actions) {
 }
 Write-Host ""
 Write-Host "Morning brief preview:"
-Write-Host $report.morning_brief.summary
-Write-Host ("Review items: {0}" -f ($report.morning_brief.review_items -join "; "))
-Write-Host ("Recommended first action: {0}" -f $report.morning_brief.recommended_first_action)
+Write-Host "STATUS"
+Write-Host ("{0} - risk {1}" -f $report.supervisor_status, $report.repo_health.risk_level)
+Write-Host ""
+Write-Host "WHAT CHANGED"
+Write-Host ("Changed files: {0}" -f $report.repo_health.changed_files.Count)
+Write-Host ("Untracked items: {0}" -f $report.repo_health.untracked_items.Count)
+Write-Host ""
+Write-Host "BLOCKED BY"
+if ($report.morning_brief.blockers.Count -gt 0) {
+    $report.morning_brief.blockers | ForEach-Object { Write-Host ("- {0}" -f $_) }
+} else {
+    Write-Host "None."
+}
+Write-Host ""
+Write-Host "NEEDS ANTHONY APPROVAL"
+Write-Host $(if ($report.morning_brief.approval_needed) { "YES - review escalation items before protected action." } else { "NO - no escalation item requires approval right now." })
+Write-Host ""
+Write-Host "SAFE NEXT ACTION"
+Write-Host $report.next_safe_actions[0].action
+Write-Host ""
+Write-Host "SAFE TO IGNORE"
+$report.morning_brief.safe_to_ignore | ForEach-Object { Write-Host ("- {0}" -f $_) }
+Write-Host ""
+Write-Host "TODAY FOCUS"
+Write-Host ("⚡ {0}" -f $report.morning_brief.today_focus)
 Write-Host ""
 Write-Host "Mutation skipped: Overnight Supervisor DRY_RUN is read-only."
