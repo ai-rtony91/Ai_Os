@@ -147,8 +147,8 @@ $safePathPrefixes = @(
     "automation/orchestration/reports/",
     "automation/orchestration/validators/VALIDATOR_CHAIN_RUNBOOK_001.md",
     "automation/orchestration/work_packets/complete/",
-    "work_packets/examples/",
-    "work_packets/state/"
+    "automation/orchestration/work_packets/examples/",
+    "automation/orchestration/work_packets/state/"
 )
 
 $protectedPathPrefixes = @(
