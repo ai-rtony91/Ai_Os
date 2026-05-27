@@ -430,17 +430,17 @@ $packet = [pscustomobject]@{
     }
     approval_tokens_required = @(
         [pscustomobject]@{
-            token = "APPROVE_COMMIT"
+            approval_marker = "APPROVE_COMMIT"
             required_for = "future exact git add and git commit execution"
             does_not_authorize = @("push", "PR create", "merge", "git add .")
         }
         [pscustomobject]@{
-            token = "APPROVE_PUSH"
+            approval_marker = "APPROVE_PUSH"
             required_for = "future exact git push execution"
             does_not_authorize = @("commit", "PR create", "merge", "direct protected-main bypass")
         }
         [pscustomobject]@{
-            token = "APPROVE_PR_CREATE"
+            approval_marker = "APPROVE_PR_CREATE"
             required_for = "future exact gh pr create execution"
             does_not_authorize = @("commit", "push", "merge")
         }
