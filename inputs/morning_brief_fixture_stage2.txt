@@ -1,0 +1,20 @@
+AI_OS Stage 2 end-to-end preview fixture
+
+Inspection request:
+Inspect the Stage 2 self-build preview chain and report helper readiness.
+
+DRY_RUN request:
+Run the preview chain in DRY_RUN mode and emit structured evidence only.
+
+APPLY_PREVIEW_REQUIRED request:
+Prepare a preview-only packet recommendation for a future scoped APPLY lane. Do not execute the APPLY.
+
+HARD_GATE_REQUIRED request:
+If the brief mentions API keys, .env files, secrets, broker systems, OANDA, live trading, webhooks, real orders, merge, autonomous push, or destructive actions, mark the result as hard-gate required and stop.
+
+Safety notes:
+This fixture contains no credentials.
+This fixture contains no real API keys.
+This fixture contains no broker execution instructions.
+This fixture contains no live trading instructions.
+This fixture contains no destructive action instructions.
