@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.v0.1",
+  "title": "AI_OS Orchestration Schema Index",
+  "description": "Machine-readable v0.1 index for AI_OS orchestration schema contract files. This index is documentation and discovery metadata only; it does not execute, approve, validate, commit, push, deploy, or mutate runtime state.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "contracts",
+    "safety"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "name",
+          "path",
+          "kind",
+          "purpose"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json_schema",
+              "index"
+            ]
+          },
+          "purpose": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "contract_only",
+        "runtime_mutation",
+        "approval_authority",
+        "execution_authority"
+      ],
+      "properties": {
+        "contract_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "runtime_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_authority": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_authority": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  },
+  "contracts": [
+    {
+      "name": "README",
+      "path": "schemas/aios/orchestration/README.md",
+      "kind": "markdown",
+      "purpose": "Folder purpose and safety boundary."
+    },
+    {
+      "name": "EVENT_SCHEMA",
+      "path": "schemas/aios/orchestration/EVENT_SCHEMA.md",
+      "kind": "markdown",
+      "purpose": "Plain-English orchestration event family contract."
+    },
+    {
+      "name": "STATE_PROJECTION_RULES",
+      "path": "schemas/aios/orchestration/STATE_PROJECTION_RULES.md",
+      "kind": "markdown",
+      "purpose": "State projection rules for local-first orchestration evidence."
+    },
+    {
+      "name": "WORKER_REGISTRY_SCHEMA",
+      "path": "schemas/aios/orchestration/WORKER_REGISTRY_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Worker registry structure."
+    },
+    {
+      "name": "WORKER_PROFILE_SCHEMA",
+      "path": "schemas/aios/orchestration/WORKER_PROFILE_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Worker profile and capability structure."
+    },
+    {
+      "name": "WORKER_INBOX_SCHEMA",
+      "path": "schemas/aios/orchestration/WORKER_INBOX_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Worker inbox task assignment records."
+    },
+    {
+      "name": "WORK_PACKET_SCHEMA",
+      "path": "schemas/aios/orchestration/WORK_PACKET_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Work packet structure."
+    },
+    {
+      "name": "COMMAND_QUEUE_SCHEMA",
+      "path": "schemas/aios/orchestration/COMMAND_QUEUE_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Command queue entries."
+    },
+    {
+      "name": "APPROVAL_INBOX_SCHEMA",
+      "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Approval inbox records."
+    },
+    {
+      "name": "APPLY_APPROVAL_GATE_SCHEMA",
+      "path": "schemas/aios/orchestration/APPLY_APPROVAL_GATE_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Apply approval gate records."
+    },
+    {
+      "name": "VALIDATOR_OUTPUT_SCHEMA",
+      "path": "schemas/aios/orchestration/VALIDATOR_OUTPUT_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Validator output records."
+    },
+    {
+      "name": "COMMIT_PACKAGE_SCHEMA",
+      "path": "schemas/aios/orchestration/COMMIT_PACKAGE_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Commit package recommendation records."
+    },
+    {
+      "name": "LOCK_REGISTRY_SCHEMA",
+      "path": "schemas/aios/orchestration/LOCK_REGISTRY_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "File and path lock records."
+    },
+    {
+      "name": "RUNTIME_VISIBILITY_SCHEMA",
+      "path": "schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.json",
+      "kind": "json_schema",
+      "purpose": "Dashboard and runtime visibility projection."
+    }
+  ],
+  "safety": {
+    "contract_only": true,
+    "runtime_mutation": false,
+    "approval_authority": false,
+    "execution_authority": false
+  }
+}

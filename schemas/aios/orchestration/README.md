@@ -1,6 +1,10 @@
 # AI_OS Orchestration Schemas
 
-This folder contains foundation schema stubs for the future canonical AI_OS packet contract.
+This folder contains v0.1 schema and documentation contracts for the existing local-first AI_OS orchestration spine.
+
+These contracts describe expected shapes for worker registries, worker profiles, worker inbox records, work packets, command queue entries, approval records, approval gates, validator output, commit package recommendations, locks, runtime visibility projections, state projection rules, and orchestration events.
+
+This folder is not runtime authority by itself. Schema files and markdown contracts here do not move packets, approve work, execute commands, validate work, commit, push, deploy, start services, mutate runtime state, claim locks, release locks, alter approvals, or grant live trading/broker/OANDA/secret access.
 
 These files are not wired into dispatcher runtime, dashboard fixtures, worker assignment, approvals, locks, or validators yet.
 
@@ -56,3 +60,24 @@ Safety rules:
 - no commit or push without explicit approval
 
 Next safe action: review these schema stubs before approving any adapter or migration work.
+
+## v0.1 Event And State Projection Contract Pack
+
+The uppercase files in this folder define the first broad orchestration schema contract pack:
+
+- `EVENT_SCHEMA.md`
+- `STATE_PROJECTION_RULES.md`
+- `ORCHESTRATION_SCHEMA_INDEX.json`
+- `WORKER_REGISTRY_SCHEMA.json`
+- `WORKER_PROFILE_SCHEMA.json`
+- `WORKER_INBOX_SCHEMA.json`
+- `WORK_PACKET_SCHEMA.json`
+- `COMMAND_QUEUE_SCHEMA.json`
+- `APPROVAL_INBOX_SCHEMA.json`
+- `APPLY_APPROVAL_GATE_SCHEMA.json`
+- `VALIDATOR_OUTPUT_SCHEMA.json`
+- `COMMIT_PACKAGE_SCHEMA.json`
+- `LOCK_REGISTRY_SCHEMA.json`
+- `RUNTIME_VISIBILITY_SCHEMA.json`
+
+These files are contract documentation and schema scaffolds only. They are intended to make existing AI_OS data boundaries easier to validate later without inventing a second orchestration brain.

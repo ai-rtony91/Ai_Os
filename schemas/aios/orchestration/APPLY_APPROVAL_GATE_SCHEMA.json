@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/APPLY_APPROVAL_GATE_SCHEMA.v0.1",
+  "title": "AI_OS Apply Approval Gate Schema",
+  "description": "v0.1 JSON Schema for AI_OS apply approval gate records. Contract scaffold only; gate records describe approval checks and do not bypass Human Owner authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "gate_id",
+    "packet_id",
+    "gate_status",
+    "approved_by_human",
+    "created_at"
+  ],
+  "properties": {
+    "gate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_id": {
+      "type": "string"
+    },
+    "gate_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approved_by_human": {
+      "type": "boolean"
+    },
+    "mode_allowed": {
+      "type": "string"
+    },
+    "validator_chain_passed": {
+      "type": "boolean"
+    },
+    "scope_match": {
+      "type": "boolean"
+    },
+    "blocked_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "checked_at": {
+      "type": "string"
+    }
+  }
+}

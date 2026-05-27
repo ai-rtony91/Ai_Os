@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.v0.1",
+  "title": "AI_OS Runtime Visibility Projection Schema",
+  "description": "v0.1 JSON Schema for AI_OS dashboard and runtime visibility projection. Contract scaffold only; visibility projections are evidence and display data, not command authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "projection_id",
+    "schema_version",
+    "generated_at",
+    "source_paths",
+    "workers",
+    "packets",
+    "approvals",
+    "validators",
+    "locks",
+    "overall_status"
+  ],
+  "properties": {
+    "projection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "source_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "validators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "commit_packages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "locks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "overall_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stale_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/LOCK_REGISTRY_SCHEMA.v0.1",
+  "title": "AI_OS Lock Registry Schema",
+  "description": "v0.1 JSON Schema for AI_OS file and path lock records. Contract scaffold only; it does not claim, release, or override locks.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "lock_registry_id",
+    "version",
+    "locks"
+  ],
+  "properties": {
+    "lock_registry_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "locks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "lock_id",
+          "owner",
+          "paths",
+          "status",
+          "created_at"
+        ],
+        "properties": {
+          "lock_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "packet_id": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expires_at": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

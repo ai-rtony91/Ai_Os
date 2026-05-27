@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/COMMIT_PACKAGE_SCHEMA.v0.1",
+  "title": "AI_OS Commit Package Recommendation Schema",
+  "description": "v0.1 JSON Schema for AI_OS commit package recommendation records. Contract scaffold only; it does not stage, commit, push, create PRs, merge, or bypass protected main.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "commit_package_id",
+    "packet_id",
+    "status",
+    "recommended_files",
+    "excluded_files",
+    "risk_findings",
+    "created_at"
+  ],
+  "properties": {
+    "commit_package_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommended_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "excluded_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risk_findings": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "commit_message_suggestion": {
+      "type": "string"
+    },
+    "validation_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  }
+}
