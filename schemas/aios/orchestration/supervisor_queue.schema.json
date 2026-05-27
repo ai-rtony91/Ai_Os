@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/supervisor_queue.schema.json",
+  "title": "AI_OS Supervisor Queue Item",
+  "description": "Preview contract for supervised AI_OS queue routing. Queue records are routing evidence only and do not authorize execution, worker launch, approval mutation, queue mutation, commit, push, merge, cloud deployment, secrets handling, or trading actions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "queue_id",
+    "packet_id",
+    "worker_id",
+    "lane",
+    "status",
+    "priority",
+    "dependency_ids",
+    "lock_id",
+    "validator_required",
+    "approval_required",
+    "created_at",
+    "assigned_at",
+    "completed_at",
+    "stale_after_seconds",
+    "escalation_target",
+    "telemetry_event_id"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_SUPERVISOR_QUEUE.v1"
+    },
+    "queue_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "ASSIGNED",
+        "BLOCKED",
+        "WAITING_APPROVAL",
+        "VALIDATING",
+        "COMPLETE",
+        "FAILED",
+        "STALE"
+      ]
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "dependency_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lock_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "validator_required": {
+      "type": "boolean"
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "assigned_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stale_after_seconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "escalation_target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "telemetry_event_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/command_audit_ledger.schema.json",
+  "title": "AI_OS Command Audit Ledger Entry",
+  "description": "Append-only audit evidence for governed AI_OS command requests and future approved command execution receipts. This ledger schema does not authorize execution. It must not contain secrets, raw credentials, broker tokens, live trading payloads, destructive execution authority, or hidden approval grants.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "audit_id",
+    "command_id",
+    "packet_id",
+    "requester",
+    "supervisor",
+    "worker",
+    "lane",
+    "approval_required",
+    "approval_token",
+    "approval_status",
+    "command_preview",
+    "execution_mode",
+    "dry_run_first",
+    "stdout_path",
+    "stderr_path",
+    "exit_code",
+    "files_touched",
+    "validation_result",
+    "telemetry_event_id",
+    "git_branch",
+    "git_commit",
+    "pr_number",
+    "runtime_session_id",
+    "failure_reason",
+    "stop_point",
+    "created_at",
+    "completed_at"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_COMMAND_AUDIT_LEDGER.v1"
+    },
+    "audit_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requester": {
+      "type": "string",
+      "minLength": 1
+    },
+    "supervisor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "approval_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "REQUIRED_NOT_GRANTED",
+        "GRANTED",
+        "REJECTED",
+        "EXPIRED"
+      ]
+    },
+    "command_preview": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exact reviewed command text. This field is audit evidence only."
+    },
+    "execution_mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "PREVIEW_ONLY",
+        "APPROVED_EXECUTION",
+        "BLOCKED"
+      ]
+    },
+    "dry_run_first": {
+      "type": "boolean",
+      "const": true
+    },
+    "stdout_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stderr_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "exit_code": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "files_touched": {
+      "type": "array",
+      "description": "Files touched by a future approved execution. Empty for preview-only records.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validation_result": {
+      "type": "string",
+      "enum": [
+        "NOT_RUN",
+        "PASS",
+        "REVIEW",
+        "WARNING",
+        "FAILED",
+        "BLOCKED",
+        "UNKNOWN"
+      ]
+    },
+    "telemetry_event_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "git_branch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "git_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pr_number": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "runtime_session_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "failure_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stop_point": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
