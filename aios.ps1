@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout","control")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout","control","finish-pr")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -10,6 +10,7 @@
     [switch]$ApplyMission,
     [string]$MissionPath = "",
     [string]$TaskId = "",
+    [int]$Pr = 0,
     [switch]$ShowPrompt,
 
     # packet command params — used with: .\aios.ps1 packet <worker> <preset>
@@ -83,6 +84,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -ShowPrompt # show task prompt"
         Write-Host ".\aios.ps1 -Mode layout  # show 5-worker terminal layout plan and banner commands"
         Write-Host ".\aios.ps1 -Mode control # show operator control loop cockpit"
+        Write-Host ".\aios.ps1 -Mode finish-pr -Pr 273 # preview PR finish steps"
     }
 
     "daily" {
@@ -114,6 +116,15 @@ switch ($Mode) {
 
     "control" {
         powershell -ExecutionPolicy Bypass -File automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1
+    }
+
+    "finish-pr" {
+        if ($Pr -le 0) {
+            Write-Host "BLOCKED: -Pr must be a positive PR number." -ForegroundColor Red
+            exit 1
+        }
+
+        powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/pr_gates/Invoke-AiOsPrFinisher.DRY_RUN.ps1 -Pr $Pr
     }
 
     "runtime" {
