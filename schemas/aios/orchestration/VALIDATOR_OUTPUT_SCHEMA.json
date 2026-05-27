@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/VALIDATOR_OUTPUT_SCHEMA.v0.1",
+  "title": "AI_OS Validator Output Schema",
+  "description": "v0.1 JSON Schema for AI_OS validator output records. Validator output is evidence only and does not approve APPLY, commit, push, merge, deployment, or protected-path mutation.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "validator_id",
+    "packet_id",
+    "validator_name",
+    "status",
+    "severity",
+    "evidence_paths",
+    "errors",
+    "warnings",
+    "recommendation",
+    "created_at"
+  ],
+  "properties": {
+    "validator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validator_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "WARN",
+        "FAIL",
+        "BLOCKED",
+        "NEEDS_REVIEW"
+      ]
+    },
+    "severity": {
+      "type": "string"
+    },
+    "evidence_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "recommendation": {
+      "type": "string"
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  }
+}

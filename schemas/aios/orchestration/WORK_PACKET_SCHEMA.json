@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/WORK_PACKET_SCHEMA.v0.1",
+  "title": "AI_OS Work Packet Schema",
+  "description": "v0.1 JSON Schema for AI_OS work packet structure. Contract scaffold only; it does not approve APPLY, assign workers, run validators, commit, push, or execute work.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "packet_id",
+    "title",
+    "mode",
+    "lane",
+    "worker_identity",
+    "allowed_paths",
+    "forbidden_paths",
+    "mission",
+    "status",
+    "approval_required",
+    "validator_chain",
+    "stop_condition",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY",
+        "DRY_RUN_THEN_APPLY"
+      ]
+    },
+    "lane": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbidden_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "mission": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "validator_chain": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "stop_condition": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "expected_output": {
+      "type": [
+        "string",
+        "array",
+        "object"
+      ]
+    }
+  }
+}

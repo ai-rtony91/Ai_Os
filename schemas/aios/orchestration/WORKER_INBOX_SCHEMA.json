@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/WORKER_INBOX_SCHEMA.v0.1",
+  "title": "AI_OS Worker Inbox Schema",
+  "description": "v0.1 JSON Schema for AI_OS worker inbox task assignment records. Contract scaffold only; it does not assign, launch, or execute workers.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "inbox_id",
+    "version",
+    "items"
+  ],
+  "properties": {
+    "inbox_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "worker_id",
+          "task",
+          "status",
+          "created_utc"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "worker_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "worker_type": {
+            "type": "string"
+          },
+          "packet_id": {
+            "type": "string"
+          },
+          "task": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "minLength": 1
+          },
+          "current_status": {
+            "type": "string"
+          },
+          "approval_status": {
+            "type": "string"
+          },
+          "allowed_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blocked_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "created_utc": {
+            "type": "string"
+          },
+          "updated_utc": {
+            "type": "string"
+          },
+          "state_note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

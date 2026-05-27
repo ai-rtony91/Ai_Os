@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.v0.1",
+  "title": "AI_OS Approval Inbox Schema",
+  "description": "v0.1 JSON Schema for AI_OS approval inbox records. Contract scaffold only; it does not grant approval or mutate approval state.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "approval_id",
+    "packet_id",
+    "approval_status",
+    "requested_action",
+    "created_at"
+  ],
+  "properties": {
+    "approval_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_mode": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approved_by_human": {
+      "type": "boolean"
+    },
+    "approval_authority": {
+      "type": "string"
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validator_chain_required": {
+      "type": "boolean"
+    },
+    "commit_package_required": {
+      "type": "boolean"
+    },
+    "push_blocked_until_final_review": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    }
+  }
+}
