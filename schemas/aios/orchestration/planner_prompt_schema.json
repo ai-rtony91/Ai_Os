@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/aios/orchestration/planner_prompt_schema.json",
+  "title": "AIOS_PLANNER_PROMPT_PREVIEW.v1",
+  "description": "Preview-only planner prompt schema for AI_OS Stage 2. This schema describes inert planner recommendations only. It provides no runtime authority and no execution authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "authority_boundary",
+    "autonomy_level",
+    "execution_enabled",
+    "brief_input",
+    "inferred_objective",
+    "proposed_packet_id",
+    "proposed_lane",
+    "proposed_mode",
+    "allowed_paths_preview",
+    "forbidden_paths_preview",
+    "approval_requirements",
+    "blocked_actions",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_PLANNER_PROMPT_PREVIEW.v1"
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Preview-only authority boundary. This must state that the planner has no runtime or execution authority."
+    },
+    "autonomy_level": {
+      "type": "string",
+      "description": "The safest applicable AI_OS autonomy level for the planner recommendation."
+    },
+    "execution_enabled": {
+      "type": "boolean",
+      "const": false,
+      "default": false,
+      "description": "Execution is always disabled for this preview schema."
+    },
+    "brief_input": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Plain local brief evidence used to infer the preview recommendation."
+    },
+    "inferred_objective": {
+      "type": "string"
+    },
+    "proposed_packet_id": {
+      "type": "string"
+    },
+    "proposed_lane": {
+      "type": "string"
+    },
+    "proposed_mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY_PREVIEW_REQUIRED",
+        "CONTROLLER_PREVIEW_REQUIRED",
+        "HARD_GATE_REQUIRED"
+      ]
+    },
+    "allowed_paths_preview": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbidden_paths_preview": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "approval_requirements": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}
