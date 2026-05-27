@@ -1,0 +1,227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/command_request.schema.json",
+  "title": "AI_OS Command Request",
+  "description": "Canonical governed command request contract shared by future MCP, Python supervisor, local runner, approval gate, telemetry, and worker handoff layers. A command request is evidence and routing metadata only; it does not authorize execution by itself. Execution must be allowlisted and separately approved when required. Arbitrary shell is blocked. Delete, remove, move, and rename actions are blocked. git reset --hard and git clean are blocked. Commit, push, pull request creation, merge, and installs require explicit approval. Azure or cloud provisioning is blocked. Secrets are blocked. Broker, OANDA, trading, webhook, and live order actions are blocked. Unknown scripts are blocked.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "command_id",
+    "packet_id",
+    "requester",
+    "supervisor",
+    "lane",
+    "worker",
+    "cwd",
+    "command_preview",
+    "command_class",
+    "autonomy_level",
+    "approval_required",
+    "approval_token_required",
+    "approval_token_status",
+    "timeout_seconds",
+    "allowed_paths",
+    "blocked_paths",
+    "dry_run_first",
+    "stdout_path",
+    "stderr_path",
+    "exit_code",
+    "result",
+    "receipt_id",
+    "telemetry_event_id",
+    "stop_point",
+    "created_at",
+    "expires_at"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_COMMAND_REQUEST.v1",
+      "description": "Identifies this object as the AI_OS command request contract."
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable unique identifier for this command request."
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "AI_OS packet that produced or owns this command request."
+    },
+    "requester": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human, worker, supervisor, or service identity requesting command review."
+    },
+    "supervisor": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Supervisor identity responsible for routing and stop-point enforcement."
+    },
+    "lane": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Governed work lane associated with the command request."
+    },
+    "worker": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Worker identity assigned to this request, or UNKNOWN when not assigned."
+    },
+    "cwd": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Intended working directory. This must stay inside the approved repo or worktree boundary."
+    },
+    "command_preview": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exact command text for review. This preview is inert and does not authorize execution."
+    },
+    "command_class": {
+      "type": "string",
+      "enum": [
+        "READ_ONLY",
+        "VALIDATION",
+        "PREVIEW",
+        "APPLY_CANDIDATE",
+        "COMMIT_CANDIDATE",
+        "PUSH_CANDIDATE",
+        "PR_CANDIDATE",
+        "MERGE_CANDIDATE",
+        "SECRET_BLOCKED",
+        "TRADING_BLOCKED",
+        "CLOUD_BLOCKED",
+        "DESTRUCTIVE_BLOCKED"
+      ],
+      "description": "Governed classification used by approval gates and runners before any execution decision."
+    },
+    "autonomy_level": {
+      "type": "string",
+      "enum": [
+        "LEVEL_1_AUTO_READ_ONLY",
+        "LEVEL_2_AUTO_REPORT_PREVIEW_FILES",
+        "LEVEL_3_AUTO_PREP",
+        "LEVEL_4_APPROVED_EXECUTION",
+        "LEVEL_5_HARD_GATE"
+      ],
+      "description": "AI_OS autonomy level classification. The level does not override approval, safety, branch protection, or blocked-action rules."
+    },
+    "approval_required": {
+      "type": "boolean",
+      "description": "True when human approval is required before the requested command may execute."
+    },
+    "approval_token_required": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Required approval token, such as APPROVE_COMMIT, APPROVE_PUSH, APPROVE_PR_CREATE, or APPROVE_MERGE. Null only when approval is not required."
+    },
+    "approval_token_status": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "REQUIRED_NOT_GRANTED",
+        "GRANTED",
+        "REJECTED",
+        "EXPIRED"
+      ],
+      "description": "Current approval-token state. GRANTED is necessary but still not sufficient when validators, scope, or stop conditions fail."
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600,
+      "description": "Maximum execution time if a future approved runner executes this allowlisted command."
+    },
+    "allowed_paths": {
+      "type": "array",
+      "description": "Approved path boundaries for reading or future approved execution.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_paths": {
+      "type": "array",
+      "description": "Forbidden paths. Secrets, broker, OANDA, trading, webhook, live order, destructive, cloud provisioning, and out-of-lane paths must be represented here when relevant.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dry_run_first": {
+      "type": "boolean",
+      "const": true,
+      "description": "AI_OS command requests must be previewed or validated before any approved execution."
+    },
+    "stdout_path": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Future approved path for captured stdout evidence, or null before execution."
+    },
+    "stderr_path": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Future approved path for captured stderr evidence, or null before execution."
+    },
+    "exit_code": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "description": "Process exit code after execution, or null before execution."
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "REQUESTED",
+        "CLASSIFIED",
+        "PREVIEWED",
+        "APPROVAL_REQUIRED",
+        "APPROVED",
+        "EXECUTING",
+        "COMPLETE",
+        "FAILED",
+        "BLOCKED",
+        "EXPIRED"
+      ],
+      "description": "Lifecycle result for this command request."
+    },
+    "receipt_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Execution receipt identifier after an approved runner records the outcome, or null before receipt creation."
+    },
+    "telemetry_event_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Telemetry event identifier associated with this command request or its execution receipt."
+    },
+    "stop_point": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exact condition where the runner, supervisor, or worker must stop."
+    },
+    "created_at": {
+      "type": "string",
+      "description": "UTC timestamp when the command request was created."
+    },
+    "expires_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "UTC timestamp when the request or approval expires, or null when expiration is not set."
+    }
+  }
+}
