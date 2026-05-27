@@ -64,7 +64,7 @@ function Get-WorkerLaneFromBranch {
 }
 
 function Get-CommitMessageSuggestion {
-    param([Parameter(Mandatory = $true)][object[]]$RecommendedFiles)
+    param([AllowEmptyCollection()][object[]]$RecommendedFiles = @())
 
     $paths = @($RecommendedFiles | ForEach-Object { $_.path })
     $scopes = @($paths | ForEach-Object {

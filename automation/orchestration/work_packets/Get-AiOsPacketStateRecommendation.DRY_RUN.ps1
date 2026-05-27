@@ -27,13 +27,27 @@ function Get-AiOsNewestActivePacketPath {
 }
 
 function Invoke-AiOsQuietJson {
-    param([string]$ScriptPath)
+    param(
+        [string]$ScriptPath,
+        [string]$JsonSwitch = "-QuietJson"
+    )
 
     if (-not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
         return $null
     }
 
-    return powershell -ExecutionPolicy Bypass -File $ScriptPath -QuietJson | ConvertFrom-Json
+    $raw = powershell -ExecutionPolicy Bypass -File $ScriptPath $JsonSwitch
+    try {
+        return ($raw | ConvertFrom-Json)
+    }
+    catch {
+        return [pscustomobject]@{
+            helper_status = "NON_JSON_OUTPUT"
+            script_path = $ScriptPath
+            json_switch = $JsonSwitch
+            parse_error = $_.Exception.Message
+        }
+    }
 }
 
 function Normalize-AiOsPacketState {
@@ -90,10 +104,10 @@ else {
 
 $repoBranch = git branch --show-current
 $gitStatus = @(git status --short --untracked-files=all)
-$validatorRecommendation = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1"
-$commitPackageRecommendation = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
+$validatorRecommendation = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1" -JsonSwitch "-OutputJson"
+$commitPackageRecommendation = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1" -JsonSwitch "-OutputJson"
 $approvalSummary = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1"
-$workerLockStatus = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1"
+$workerLockStatus = Invoke-AiOsQuietJson -ScriptPath "automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1" -JsonSwitch "-OutputJson"
 
 if ($packet) {
     $missingFields = @()
