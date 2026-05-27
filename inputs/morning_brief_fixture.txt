@@ -1,0 +1,19 @@
+AI_OS morning brief fixture
+
+Inspection example:
+Inspect the current Stage 2 foundation bridge and report missing preview-only files.
+
+DRY_RUN example:
+Review the API planner adapter boundary and recommend validators. Do not edit files.
+
+APPLY_PREVIEW_REQUIRED example:
+Create a preview-only workflow document for safe API integration. Do not execute integrations.
+
+HARD_GATE_REQUIRED example:
+If a request mentions API keys, .env files, secrets, broker systems, OANDA, live trading, webhooks, or real orders, mark HARD_GATE_REQUIRED and stop.
+
+Safety notes:
+No real credentials are present.
+No broker instructions are present.
+No live trading instructions are present.
+No webhooks or real API calls are authorized by this fixture.
