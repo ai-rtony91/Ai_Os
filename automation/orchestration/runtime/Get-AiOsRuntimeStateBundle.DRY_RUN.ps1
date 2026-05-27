@@ -102,6 +102,55 @@ function Normalize-PathText {
     return (($Path -replace "\\", "/").Trim().Trim("/"))
 }
 
+function Test-PathOverlap {
+    param(
+        [string]$LeftPath,
+        [string]$RightPath
+    )
+
+    $left = Normalize-PathText -Path $LeftPath
+    $right = Normalize-PathText -Path $RightPath
+
+    if ([string]::IsNullOrWhiteSpace($left) -or [string]::IsNullOrWhiteSpace($right)) {
+        return $false
+    }
+
+    return ($left -eq $right -or $left.StartsWith("$right/") -or $right.StartsWith("$left/"))
+}
+
+function Get-ActiveLocks {
+    param([AllowNull()]$Registry)
+
+    if ($null -eq $Registry -or $Registry.parse_error) {
+        return @()
+    }
+
+    $locks = if ($Registry.PSObject.Properties.Name -contains "locks") { @($Registry.locks) } else { @($Registry) }
+
+    @($locks | Where-Object {
+        $status = if ($_.PSObject.Properties.Name -contains "status") { [string]$_.status } else { "" }
+        $status -notin @("released", "RELEASED", "expired", "EXPIRED")
+    })
+}
+
+function Get-LockPaths {
+    param([AllowNull()]$Lock)
+
+    if ($null -eq $Lock) {
+        return @()
+    }
+
+    $paths = @()
+    if ($Lock.PSObject.Properties.Name -contains "locked_paths") {
+        $paths += @($Lock.locked_paths)
+    }
+    if ($Lock.PSObject.Properties.Name -contains "claimed_paths") {
+        $paths += @($Lock.claimed_paths)
+    }
+
+    @($paths | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | ForEach-Object { Normalize-PathText -Path ([string]$_) } | Select-Object -Unique)
+}
+
 function Test-ExamplePath {
     param([string]$Path)
 
@@ -289,6 +338,33 @@ $blockingSignals = @()
 $humanRequiredSignals = @()
 $parseErrors = @()
 $missingSources = @()
+$lockConflictSignals = @()
+
+$lockCandidateFiles = @(
+    @($candidateFiles)
+    @($approvedCandidateFiles)
+) | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | ForEach-Object { Normalize-PathText -Path ([string]$_) } | Select-Object -Unique
+
+foreach ($lock in @(Get-ActiveLocks -Registry $lockRegistry)) {
+    $workerId = if ($lock.PSObject.Properties.Name -contains "worker_id" -and -not [string]::IsNullOrWhiteSpace([string]$lock.worker_id)) {
+        [string]$lock.worker_id
+    }
+    else {
+        "UNKNOWN_WORKER"
+    }
+
+    foreach ($lockPath in @(Get-LockPaths -Lock $lock)) {
+        foreach ($candidateFile in $lockCandidateFiles) {
+            if (Test-PathOverlap -LeftPath $candidateFile -RightPath $lockPath) {
+                $lockConflictSignals += "lock_conflict: $candidateFile held by $workerId"
+            }
+        }
+    }
+}
+
+if ($lockConflictSignals.Count -gt 0) {
+    $blockingSignals += @($lockConflictSignals | Select-Object -Unique)
+}
 
 if ($null -eq $runtimeState) {
     $missingSources += ConvertTo-RelativePath -Path $runtimeStatePath
