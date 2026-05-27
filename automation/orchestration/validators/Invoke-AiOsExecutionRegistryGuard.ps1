@@ -225,7 +225,7 @@ $findings = @()
 try {
     $repoRoot = Resolve-AiOsRepoRoot -StartPath $PSScriptRoot
 } catch {
-    Add-Finding -Findings ([ref]$findings) -Severity "STOP" -CheckId "repo_root_resolution_failed" -Message "Could not resolve AI_OS repo root." -Evidence $_.Exception.Message -NextSafeAction "Run from the AI_OS V2 repo and verify AGENTS.md and README.md exist."
+    Add-Finding -Findings ([ref]$findings) -Severity "STOP" -CheckId "repo_root_resolution_failed" -Message "Could not resolve AI_OS repo root." -Evidence $_.Exception.Message -NextSafeAction "Run from the active AI_OS repo and verify AGENTS.md and README.md exist."
     $repoRoot = (Get-Location).Path
 }
 

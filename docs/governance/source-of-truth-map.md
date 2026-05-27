@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the proposed active source-of-truth map for AI_OS_V2.
+This document defines the proposed active source-of-truth map for AI_OS.
 
 It is a planning/control document only. It does not move, delete, rename, or promote files by itself.
 
@@ -131,7 +131,7 @@ No file in `docs/AI_OS/`, `apps/`, `services/`, `automation/`, or `scripts/` may
 
 Runtime/code rule:
 
-V2 should keep one canonical code path per job. Current overlap between `aios/modules/trader/` and `apps/trading_lab/trading_lab/` needs a user decision before any cleanup.
+AI_OS should keep one canonical code path per job. Current overlap between `aios/modules/trader/` and `apps/trading_lab/trading_lab/` needs a user decision before any cleanup.
 
 ## Archive/reference-only areas
 
@@ -167,7 +167,7 @@ Default classification:
 
 `docs/AI_OS/` rule:
 
-Do not blindly replace CLEAN-era names with V2. Evaluate each file as source material, then merge, archive, or remove only through approved cleanup batches.
+Do not blindly replace CLEAN-era names with current AI_OS authority language. Evaluate each file as source material, then merge, archive, or remove only through approved cleanup batches.
 
 ## What files should not be treated as active authority
 

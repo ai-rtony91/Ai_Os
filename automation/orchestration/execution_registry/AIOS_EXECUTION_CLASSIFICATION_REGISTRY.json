@@ -3,7 +3,7 @@
   "schema_version": "1.0",
   "status": "canonical_execution_classification_registry",
   "last_reviewed": "2026-05-21",
-  "branch": "v2/aios",
+  "branch": "main",
   "authority": [
     "AGENTS.md",
     "README.md",
@@ -1244,7 +1244,7 @@
         "startup_connection",
         "workflow_promotion_without_review"
       ],
-      "risk_policy_notes": "Legacy imports are reference-only unless promoted through approved V2 workflow.",
+      "risk_policy_notes": "Legacy imports are reference-only unless promoted through an approved AI_OS workflow.",
       "topology_guard_requirement": "Must not be topology-connected.",
       "validator_consumption": "Validators should treat as blocked legacy evidence.",
       "review_status": "legacy_reference_only",

@@ -2,7 +2,7 @@
 
 ## Executive summary
 
-This map identifies the active launch, runtime, worker, dashboard, Trading Lab, authority, and generated-state surfaces observed in AI_OS_V2.
+This map identifies the active launch, runtime, worker, dashboard, Trading Lab, authority, and generated-state surfaces observed in AI_OS.
 
 This is a planning document only. It does not approve moves, deletes, renames, archive actions, launcher rewrites, runtime rewrites, or CLEAN-to-V2 replacements.
 
@@ -127,8 +127,8 @@ Dangerous Trading Lab boundaries:
 | `docs/security/` | Security authority | Access, credentials, approvals | high | KEEP ACTIVE | Canonical security docs |
 | `docs/architecture/` | Architecture authority | System architecture | medium | KEEP ACTIVE | Canonical architecture |
 | `docs/audits/` | Audit trail | Cleanup decisions and history | medium | KEEP ACTIVE | Records decisions; not day-to-day command authority |
-| `docs/governance/source-of-truth-map.md` | Proposed V2 authority map | Current planning layer | high | KEEP ACTIVE | Keep as planning authority pending approval |
-| `docs/governance/runtime-ownership-map.md` | Proposed V2 runtime ownership map | This mapping pass | high | KEEP ACTIVE | Use for future cleanup boundaries |
+| `docs/governance/source-of-truth-map.md` | Proposed AI_OS authority map | Current planning layer | high | KEEP ACTIVE | Keep as planning authority pending approval |
+| `docs/governance/runtime-ownership-map.md` | Proposed AI_OS runtime ownership map | This mapping pass | high | KEEP ACTIVE | Use for future cleanup boundaries |
 
 ## Duplicate authority map
 
@@ -203,7 +203,7 @@ Dangerous Trading Lab boundaries:
 
 ## Recommended future cleanup order
 
-1. Freeze authority: keep root `AGENTS.md` and proposed V2 docs authority map.
+1. Freeze authority: keep root `AGENTS.md` and proposed AI_OS docs authority map.
 2. Create a full file-by-file `docs/AI_OS/` classification table.
 3. Identify all launcher references from `aios.ps1`, `automation/session/`, `automation/operator/`, `automation/orchestration/`, and `scripts/control/`.
 4. Decide canonical Trading Lab package path.
@@ -222,7 +222,7 @@ Dangerous Trading Lab boundaries:
 - Whether dashboard should remain fixture-driven or connect to `services/orchestrator` runtime API.
 - Whether root runtime/report JSON files are evidence, stale generated state, or active inputs.
 - Whether old `docs/AI_OS/trading_laboratory/` paths referenced by dashboard mock data exist only historically.
-- Whether `packages/`, `tools/`, and `agents/` should be introduced later as V2 top-level folders.
+- Whether `packages/`, `tools/`, and `agents/` should be introduced later as AI_OS top-level folders.
 
 ## Explicit non-actions
 

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This file is the canonical root safety and execution authority for AI_OS V2.
+This file is the canonical root safety and execution authority for AI_OS.
 
 It defines the default safety posture, blocked execution boundaries, emergency-stop conditions, approval-gate doctrine, validation expectations, and fail-closed behavior for AI_OS development and operation.
 
@@ -156,7 +156,7 @@ Audit evidence must not contain secrets, broker credentials, private data, or li
 These documents support this root policy with implementation detail:
 
 - `AGENTS.md` - agent operating behavior and protected-action rules.
-- `README.md` - V2 front-door context, project boundary, and paper-only Trading Lab statement.
+- `README.md` - AI_OS front-door context, project boundary, and paper-only Trading Lab statement.
 - `docs/security/approval-model.md` - approval workflow details.
 - `docs/security/threat-model.md` - threat categories and required security controls.
 - `docs/security/secret-prevention.md` - secret-handling procedures.
@@ -167,10 +167,10 @@ These documents support this root policy with implementation detail:
 
 ## Non-Authority / Draft References
 
-Draft, legacy, generated, archived, or planning documents are evidence only unless explicitly promoted by a future approved V2 workflow.
+Draft, legacy, generated, archived, or planning documents are evidence only unless explicitly promoted by a future approved AI_OS workflow.
 
 Draft risk-control and governance matrices may inform future updates, but they do not authorize execution, weaken this policy, activate live trading, approve broker connectivity, approve secrets handling, approve runtime mutation, or replace root authority.
 
 ## Last Verified
 
-Updated on 2026-05-22 for AI_OS V2 active repo authority on branch `main`.
+Updated on 2026-05-22 for AI_OS active repo authority on branch `main`. Historical AI_OS V2 terminology is migration context only.
