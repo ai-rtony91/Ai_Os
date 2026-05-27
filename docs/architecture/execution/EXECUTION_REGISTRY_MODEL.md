@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The execution registry defines which scripts are trusted, restricted, review-required, legacy, or blocked inside AI_OS V2.
+The execution registry defines which scripts are trusted, restricted, review-required, legacy, or blocked inside AI_OS.
 
 It is the execution authority map for orchestration.
 

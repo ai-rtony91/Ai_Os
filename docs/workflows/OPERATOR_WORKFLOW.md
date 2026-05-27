@@ -25,13 +25,13 @@ MAIN CONTROL is an operator-control lane/window concept, not a separate person, 
 
 ## Morning Startup Workflow
 
-The current canonical AI_OS V2 startup workflow is manual and operator-controlled.
+The current canonical AI_OS startup workflow is manual and operator-controlled.
 
 Startup authority currently lives in `AGENTS.md`, `README.md`, and this operator workflow. Startup scripts are helpers, not authority.
 
 Canonical first actions:
 
-1. Open the active V2 repo.
+1. Open the active AI_OS repo.
 2. Run `git status --short --branch`.
 3. Read current authority and workflow docs before mutation.
 4. Inspect repo state before automation or worker launch.
@@ -144,7 +144,7 @@ When the operator says "make that a rule," treat it as a request to identify the
 
 For emoji labels, PowerShell paste markers, worker HUD fields, and terminal/window flair rules, follow `docs/AI_OS/design/AI_OS_TERMINAL_FLAIR_SPEC.md`.
 
-Do not assume the operator remembers lane names. Use the current V2 lane title or role from active topology and avoid stale legacy lane names.
+Do not assume the operator remembers lane names. Use the current AI_OS lane title or role from active topology and avoid stale legacy lane names.
 
 If the same manual workaround must be explained repeatedly, prefer fixing or documenting the responsible script or workflow so the operator does not carry that burden manually.
 

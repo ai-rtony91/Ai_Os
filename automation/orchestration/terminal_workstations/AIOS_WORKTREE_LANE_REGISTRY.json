@@ -54,7 +54,7 @@
       "window_title": "MAIN CONTROL - main",
       "tab_title": "MAIN CONTROL - main",
       "tab_color": "#2563EB",
-      "role": "Operator-owned coordination lane for repo checkpointing, final review, commit approval, push approval, and V2 orchestration oversight.",
+      "role": "Operator-owned coordination lane for repo checkpointing, final review, commit approval, push approval, and AI_OS orchestration oversight.",
       "allowed_paths": [],
       "blocked_paths": [
         ".git/",

@@ -4,7 +4,7 @@ Status: canonical workflow
 
 ## Purpose
 
-This document defines the AI_OS_V2 standard for safe repair, rollback planning, recovery, collision handling, and post-repair validation.
+This document defines the AI_OS standard for safe repair, rollback planning, recovery, collision handling, and post-repair validation.
 
 The goal is to make repairs controlled, scoped, reviewable, and reversible before deeper orchestration or automation integration occurs.
 
@@ -56,7 +56,7 @@ Before APPLY, each repair must identify:
 - approval requirement.
 - next safe action.
 
-Ownership must be scoped to the current V2 repo structure and active authority. Legacy role names may inform routing, but they do not become active V2 worker authority unless current governance explicitly defines them.
+Ownership must be scoped to the current AI_OS repo structure and active authority. Legacy role names may inform routing, but they do not become active AI_OS worker authority unless current governance explicitly defines them.
 
 If owner or lane cannot be identified, stop and mark the repair `UNKNOWN` or `BLOCKED`.
 

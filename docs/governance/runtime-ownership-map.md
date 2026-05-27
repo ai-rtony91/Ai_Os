@@ -2,13 +2,13 @@
 
 ## Purpose
 
-This document proposes ownership boundaries for AI_OS_V2 runtime, authority, generated state, operator tooling, and reference-only material.
+This document proposes ownership boundaries for AI_OS runtime, authority, generated state, operator tooling, and reference-only material.
 
 This is a planning/control document only. It does not approve restructuring.
 
 ## Ownership model
 
-AI_OS_V2 should use one owner per responsibility:
+AI_OS should use one owner per responsibility:
 
 - Root files own project identity and top-level rules.
 - `docs/` owns active documentation authority.
@@ -122,7 +122,7 @@ AI_OS_V2 should use one owner per responsibility:
 | `schemas/` | KEEP ACTIVE | Contracts only |
 | `tests/` | KEEP ACTIVE | Test code only |
 
-## Proposed V2 ownership boundaries
+## Proposed AI_OS ownership boundaries
 
 | Responsibility | Proposed canonical owner | Secondary/source areas | Notes |
 |---|---|---|---|

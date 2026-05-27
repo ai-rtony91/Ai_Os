@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the Phase 2 proposed ownership boundaries for AI_OS_V2.
+This document defines the Phase 2 proposed ownership boundaries for AI_OS.
 
 It is governance only. It does not move, delete, rename, archive, or rewrite files.
 

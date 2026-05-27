@@ -2,7 +2,7 @@
 
 ## Purpose
 
-AI_OS_V2 is a governed automation platform for helping humans build and manage projects through human-readable prompts, structured worker orchestration, validation, and clear authority boundaries.
+AI_OS is a governed automation platform for helping humans build and manage projects through human-readable prompts, structured worker orchestration, validation, and clear authority boundaries.
 
 This whitepaper defines the long-term architectural vision. It is not a claim that AI_OS is conscious, sentient, AGI, or independently autonomous. AI_OS is a controlled system for AI-assisted systems engineering.
 
@@ -144,7 +144,7 @@ This gives AI_OS a path to become more stable without pretending to be self-awar
 
 ## Realistic Use Cases
 
-AI_OS_V2 may eventually help build and manage:
+AI_OS may eventually help build and manage:
 
 - trading bots and paper-trading research systems
 - orchestration systems
@@ -209,7 +209,7 @@ AI_OS should not claim capabilities it cannot safely prove.
 
 ## Architectural Vision
 
-AI_OS_V2 should feel like a professional operating layer for AI-assisted project work.
+AI_OS should feel like a professional operating layer for AI-assisted project work.
 
 Its strength is structure:
 

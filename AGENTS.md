@@ -184,7 +184,7 @@ Do not search for or assume:
 - `AI-OS-Project`
 - `Ai.Os`
 
-Any AI, Codex, Claude, or assistant inspecting AI_OS_V2 must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
+Any AI, Codex, Claude, or assistant inspecting legacy AI_OS_V2 material must target repo `ai-rtony91/Ai_Os` on branch `main` unless the user explicitly says otherwise.
 
 If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check branch `main` before judging project state.
 
@@ -375,7 +375,7 @@ If the answer is no, continue from the repo memory and next queue instead.
 - DRY_RUN before APPLY.
 - Smallest safe edit first.
 - One responsibility per file/folder.
-- Archive only after V2 absorbs needed content.
+- Archive only after AI_OS absorbs needed content.
 - No mass delete.
 - No mass rename.
 - No mass move.
@@ -1089,7 +1089,7 @@ Read AGENTS.md first.
 Read README.md second.
 
 Use AGENTS.md as operating authority.
-Use README.md as V2 front-door/context authority.
+Use README.md as AI_OS front-door/context authority.
 
 If task context conflicts with either file:
 STOP.
@@ -1261,7 +1261,7 @@ When explaining difficult AI_OS, Git, Codex, worker, branch, authority, workflow
 10. Remember the user is prior service and understands military command, mission structure, handoff discipline, and operational boundaries.
 
 Example:
-Legacy docs are like old field manuals or old orders left in a retired command tent. They may contain useful lessons, but they are not current command authority unless V2 explicitly promotes them.
+Legacy docs are like old field manuals or old orders left in a retired command tent. They may contain useful lessons, but they are not current command authority unless AI_OS explicitly promotes them.
 
 ## Report and Mismatch Rules
 

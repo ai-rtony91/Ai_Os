@@ -9,7 +9,7 @@ PROTECTED POINTER - updated by scoped APPLY after DRY_RUN whitepaper authority r
 ## Current Canonical Candidate
 `docs/architecture/AI_OS_WHITEPAPER.md` is the current canonical AIOS foundation whitepaper candidate.
 
-It describes AI_OS_V2 as a governed, human-controlled automation and project orchestration environment with validation before mutation.
+It describes AI_OS as a governed, human-controlled automation and project orchestration environment with validation before mutation.
 
 ## Legacy / Reference Material
 `docs/AI_OS_White_Paper.md` is legacy/partial source material pending consolidation. It should not override current root, governance, architecture, security, or risk authority.

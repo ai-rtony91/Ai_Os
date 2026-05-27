@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document hardens V2 runtime ownership boundaries before relocation.
+This document hardens AI_OS runtime ownership boundaries before relocation.
 
 It is governance only. It does not change runtime code, launchers, telemetry, packet routing, dashboard code, or Trading Lab code.
 

@@ -4,7 +4,7 @@
 
 The validator chain exists to enforce governed execution boundaries before runtime mutation, worker launch, orchestration routing, commit operations, or autonomous execution.
 
-The validator layer is the trust spine of AI_OS V2.
+The validator layer is the trust spine of AI_OS.
 
 ---
 

@@ -4,7 +4,7 @@ Status: canonical workflow
 
 ## Purpose
 
-This document defines the AI_OS_V2 standard for workflow routers and workflow registries.
+This document defines the AI_OS standard for workflow routers and workflow registries.
 
 A workflow router maps a registered workflow name to approved DRY_RUN helper checks. A workflow registry defines which workflow names exist, what they may do, which helpers they may preview, what risks they carry, and what approval gates apply.
 
@@ -72,7 +72,7 @@ Workflow risk levels should use these values:
 - `MEDIUM`: approved file creation or approved report writing without git staging, commit, push, merge, deployment, broker execution, live trading, secret handling, app launch, browser open, startup changes, or settings changes.
 - `HIGH`: any workflow that proposes protected edits, launcher behavior, settings changes, scheduled tasks, credential handling, broker/trading contact, deployment, destructive operations, or other protected actions.
 
-New router-connected workflows should default to `LOW` until a separate approved V2 standard explicitly allows a higher risk level.
+New router-connected workflows should default to `LOW` until a separate approved AI_OS standard explicitly allows a higher risk level.
 
 ## Approved Helper Mapping Rules
 
@@ -91,7 +91,7 @@ Mapped helpers must be reviewed as part of workflow registration. A router must 
 
 ## DRY_RUN Helper Requirement
 
-Router-called helpers must be DRY_RUN helpers unless a future approved canonical V2 document explicitly changes the boundary.
+Router-called helpers must be DRY_RUN helpers unless a future approved canonical AI_OS document explicitly changes the boundary.
 
 The helper path must contain `.DRY_RUN.` or the router must block the helper with a FAIL result.
 
@@ -171,7 +171,7 @@ The router should report the missing path, workflow name, and next safe action.
 
 ## Blocked Workflow Types
 
-The following workflow types are blocked from router connection unless a future approved canonical V2 document explicitly changes the boundary:
+The following workflow types are blocked from router connection unless a future approved canonical AI_OS document explicitly changes the boundary:
 
 - broker order placement.
 - live trading.
