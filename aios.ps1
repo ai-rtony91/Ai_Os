@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout","control","finish-pr","hud")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -78,10 +78,13 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode workers  # show worker list and inbox"
         Write-Host ".\aios.ps1 -Mode swarm    # launch worker swarm"
         Write-Host ".\aios.ps1 -Mode runtime  # run goal intake + recommendation + health"
-        Write-Host ".\aios.ps1 -Mode supervisor # run repeated runtime self-routing cycles"
+        Write-Host ".\aios.ps1 -Mode supervisor # preview supervised scheduler/runtime events"
         Write-Host ".\aios.ps1 -Mode mission -Goal ""Improve AIOS runtime automation"" # create Mission Control plan DRY_RUN"
+        Write-Host ".\aios.ps1 -Mode runner # preview allowlisted command runner"
         Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation # show next safe mission action"
         Write-Host ".\aios.ps1 -Mode runner -MissionPath automation/mission_control/missions/improve-aios-runtime-automation -TaskId MC-01 -ShowPrompt # show task prompt"
+        Write-Host ".\aios.ps1 -Mode queue # show command queue read-only"
+        Write-Host ".\aios.ps1 -Mode telemetry # show telemetry viewer read-only"
         Write-Host ".\aios.ps1 -Mode layout  # show 5-worker terminal layout plan and banner commands"
         Write-Host ".\aios.ps1 -Mode control # show operator control loop cockpit"
         Write-Host ".\aios.ps1 -Mode finish-pr -Pr 273 # preview PR finish steps"
@@ -146,16 +149,7 @@ switch ($Mode) {
 }
 
    "supervisor" {
-
-    powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host ""
-        Write-Host "BLOCKED: proof verification failed" -ForegroundColor Red
-        exit 1
-    }
-
-    powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1 -Cycles 3 -Apply
+    powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/scheduler/Invoke-AiOsSchedulerPreview.DRY_RUN.ps1
 }
 
    "mission" {
@@ -185,8 +179,8 @@ switch ($Mode) {
 
    "runner" {
     if ([string]::IsNullOrWhiteSpace($MissionPath)) {
-        Write-Host "BLOCKED: -MissionPath is required for runner mode." -ForegroundColor Red
-        exit 1
+        powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/command_runner/Invoke-AiOsCommandRunner.DRY_RUN.ps1
+        break
     }
 
     $runnerArgs = @(
@@ -207,6 +201,14 @@ switch ($Mode) {
     }
 
     powershell @runnerArgs
+}
+
+   "queue" {
+        powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/command_queue/Get-AiOsCommandQueue.DRY_RUN.ps1
+}
+
+   "telemetry" {
+        powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/telemetry_viewer/Show-AiOsTelemetryViewer.DRY_RUN.ps1
 }
 
    "layout" {
