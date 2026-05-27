@@ -1,0 +1,686 @@
+{
+  "schema": "AIOS_STRATEGIC_CAMPAIGN_REGISTRY.v1",
+  "registry_id": "AIOS_STRATEGIC_CAMPAIGN_REGISTRY",
+  "system": "AI_OS",
+  "repo": "ai-rtony91/Ai_Os",
+  "active_branch": "main",
+  "active_worktree": "C:\\Dev\\Ai.Os",
+  "mode": "PLANNING_AUTHORITY_ONLY",
+  "status_values": [
+    "NOT_STARTED",
+    "READY",
+    "IN_PROGRESS",
+    "BLOCKED",
+    "NEEDS_REVIEW",
+    "COMPLETE",
+    "DEFERRED"
+  ],
+  "timeline_values": [
+    "same session",
+    "1-2 work sessions",
+    "2-4 work sessions",
+    "multi-checkpoint",
+    "blocked until decision"
+  ],
+  "selection_policy": {
+    "ready_status": "READY",
+    "ignored_statuses": [
+      "BLOCKED",
+      "DEFERRED",
+      "COMPLETE"
+    ],
+    "priority_order": [
+      "critical",
+      "high",
+      "normal",
+      "low"
+    ],
+    "dependency_rule": "A stage is selectable only when all stage-level depends_on items point to COMPLETE stages or are empty.",
+    "blocker_rule": "A stage is selectable only when blocked_by is empty."
+  },
+  "safety": {
+    "planning_only": true,
+    "can_approve_apply": false,
+    "can_execute_code": false,
+    "can_create_workers": false,
+    "can_create_branches": false,
+    "can_commit": false,
+    "can_push": false,
+    "can_merge": false,
+    "trading_lab_boundary": "paper-only",
+    "forex_boundary": "documentation-boundary only",
+    "protected_action_authority": "Human Owner"
+  },
+  "campaigns": [
+    {
+      "campaign_id": "CAMPAIGN-AIOS-GOVERNANCE",
+      "title": "AI_OS Governance Authority",
+      "objective": "Keep AI_OS identity, authority, safety, and source-of-truth rules clear before expanding automation.",
+      "status": "IN_PROGRESS",
+      "priority": "critical",
+      "phases": [
+        {
+          "phase_id": "PHASE-GOV-FOUNDATION",
+          "title": "Authority Foundation",
+          "status": "IN_PROGRESS"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-GOV-NAMING-AUTHORITY",
+          "phase_id": "PHASE-GOV-FOUNDATION",
+          "title": "Normalize active AI_OS naming authority",
+          "status": "COMPLETE",
+          "priority": "critical",
+          "depends_on": [],
+          "blocked_by": [],
+          "next_packet_candidate": null
+        },
+        {
+          "stage_id": "STAGE-GOV-SOURCE-OF-TRUTH-REVIEW",
+          "phase_id": "PHASE-GOV-FOUNDATION",
+          "title": "Review source-of-truth map against current orchestration state",
+          "status": "NEEDS_REVIEW",
+          "priority": "high",
+          "depends_on": [
+            "STAGE-GOV-NAMING-AUTHORITY"
+          ],
+          "blocked_by": [],
+          "next_packet_candidate": "PKT-GOV-SOURCE-OF-TRUTH-REVIEW-DRYRUN"
+        }
+      ],
+      "depends_on": [],
+      "blocked_by": [],
+      "unlock_conditions": [
+        "AGENTS.md and README.md identify AI_OS on main as current authority.",
+        "RISK_POLICY.md identifies AI_OS as current safety authority."
+      ],
+      "allowed_paths": [
+        "AGENTS.md",
+        "README.md",
+        "RISK_POLICY.md",
+        "docs/governance/",
+        "docs/workflows/"
+      ],
+      "blocked_paths": [
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "credentials/",
+        "live-order paths"
+      ],
+      "safety_rules": [
+        "Human Owner remains final authority.",
+        "Validator output is evidence only.",
+        "No protected action is approved by this registry."
+      ],
+      "validation_commands": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1",
+        "git diff --check"
+      ],
+      "evidence_paths": [
+        "AGENTS.md",
+        "README.md",
+        "RISK_POLICY.md",
+        "docs/governance/source-of-truth-map.md"
+      ],
+      "completion_percent": 70,
+      "progress_basis": "Core identity authority is normalized; source-of-truth review remains open.",
+      "timeline_estimate": "1-2 work sessions",
+      "next_packet_candidate": "PKT-GOV-SOURCE-OF-TRUTH-REVIEW-DRYRUN",
+      "crew_lane": "governance-authority-review",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after DRY_RUN report unless Human Owner approves APPLY."
+    },
+    {
+      "campaign_id": "CAMPAIGN-AIOS-ORCHESTRATION",
+      "title": "AI_OS Orchestration Runtime Wiring",
+      "objective": "Connect operator input, packet proposals, validation, approval preview, worker-ready preview, and status recommendations.",
+      "status": "IN_PROGRESS",
+      "priority": "critical",
+      "phases": [
+        {
+          "phase_id": "PHASE-ORCH-SUPERVISED-PIPELINE",
+          "title": "Supervised Pipeline",
+          "status": "IN_PROGRESS"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-ORCH-INPUT-TO-PACKET",
+          "phase_id": "PHASE-ORCH-SUPERVISED-PIPELINE",
+          "title": "Wire input reader to packet proposal preview",
+          "status": "COMPLETE",
+          "priority": "critical",
+          "depends_on": [],
+          "blocked_by": [],
+          "next_packet_candidate": null
+        },
+        {
+          "stage_id": "STAGE-ORCH-CAMPAIGN-REGISTRY",
+          "phase_id": "PHASE-ORCH-SUPERVISED-PIPELINE",
+          "title": "Create strategic campaign registry and next-task source",
+          "status": "READY",
+          "priority": "critical",
+          "depends_on": [
+            "STAGE-ORCH-INPUT-TO-PACKET"
+          ],
+          "blocked_by": [],
+          "next_packet_candidate": "PKT-EAST-STRATEGIC-CAMPAIGN-REGISTRY-APPLY-001"
+        }
+      ],
+      "depends_on": [],
+      "blocked_by": [],
+      "unlock_conditions": [
+        "Packet proposal helpers exist.",
+        "Approval and worker-ready preview helpers exist.",
+        "Campaign registry can recommend one safe next packet."
+      ],
+      "allowed_paths": [
+        "automation/orchestration/",
+        "automation/intake/",
+        "schemas/aios/orchestration/"
+      ],
+      "blocked_paths": [
+        "services/",
+        "runtime/",
+        "telemetry/",
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "credentials/"
+      ],
+      "safety_rules": [
+        "No autonomous APPLY.",
+        "No worker launch from registry recommendations.",
+        "No approval mutation from recommendations."
+      ],
+      "validation_commands": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1 -OutputJson",
+        "git diff --check"
+      ],
+      "evidence_paths": [
+        "automation/intake/Convert-AiOsInputToPacketProposal.DRY_RUN.ps1",
+        "automation/orchestration/recommendations/Get-AiOsNextPacketRecommendation.DRY_RUN.ps1",
+        "automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json"
+      ],
+      "completion_percent": 65,
+      "progress_basis": "Runtime wiring exists; campaign-level next-task source is being established.",
+      "timeline_estimate": "same session",
+      "next_packet_candidate": "PKT-EAST-STRATEGIC-CAMPAIGN-REGISTRY-APPLY-001",
+      "crew_lane": "campaign-registry-foundation",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after PR creation and verification."
+    },
+    {
+      "campaign_id": "CAMPAIGN-CREW-CORE",
+      "title": "Crew Core Supervised Routing",
+      "objective": "Let Crew Core consume approved recommendation sources and produce preview-only task intake records.",
+      "status": "READY",
+      "priority": "high",
+      "phases": [
+        {
+          "phase_id": "PHASE-CREW-READINESS",
+          "title": "Crew Readiness",
+          "status": "READY"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+          "phase_id": "PHASE-CREW-READINESS",
+          "title": "Design Crew Core campaign registry bridge",
+          "status": "READY",
+          "priority": "high",
+          "depends_on": [
+            "STAGE-ORCH-CAMPAIGN-REGISTRY"
+          ],
+          "blocked_by": [],
+          "next_packet_candidate": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN"
+        }
+      ],
+      "depends_on": [
+        "CAMPAIGN-AIOS-ORCHESTRATION"
+      ],
+      "blocked_by": [],
+      "unlock_conditions": [
+        "Campaign next-task helper returns a single JSON recommendation.",
+        "Crew integration remains preview-only."
+      ],
+      "allowed_paths": [
+        "automation/orchestration/crew/",
+        "automation/orchestration/campaign_registry/"
+      ],
+      "blocked_paths": [
+        "automation/orchestration/approval_inbox/",
+        "automation/orchestration/locks/",
+        "broker/",
+        "OANDA/",
+        "secrets/"
+      ],
+      "safety_rules": [
+        "Crew Core may preview tasks only.",
+        "Crew Core may not create workers or approve protected actions."
+      ],
+      "validation_commands": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/crew/Get-AiOsCrewIntegrationRecommendation.DRY_RUN.ps1 -OutputJson"
+      ],
+      "evidence_paths": [
+        "automation/orchestration/crew/",
+        "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
+      ],
+      "completion_percent": 35,
+      "progress_basis": "Crew preview helpers exist; campaign bridge is not wired yet.",
+      "timeline_estimate": "1-2 work sessions",
+      "next_packet_candidate": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+      "crew_lane": "crew-core-campaign-bridge",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after DRY_RUN bridge plan."
+    },
+    {
+      "campaign_id": "CAMPAIGN-TELEMETRY-REPORTING",
+      "title": "Telemetry And Reporting Evidence Layer",
+      "objective": "Create safe evidence contracts for progress, validation, reporting, and future dashboard visibility.",
+      "status": "NEEDS_REVIEW",
+      "priority": "high",
+      "phases": [
+        {
+          "phase_id": "PHASE-TELEMETRY-CONTRACTS",
+          "title": "Telemetry Contracts",
+          "status": "NEEDS_REVIEW"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-TELEMETRY-CONTRACT-REVIEW",
+          "phase_id": "PHASE-TELEMETRY-CONTRACTS",
+          "title": "Review telemetry contract before new writers",
+          "status": "NEEDS_REVIEW",
+          "priority": "high",
+          "depends_on": [],
+          "blocked_by": [],
+          "next_packet_candidate": "PKT-TELEMETRY-CONTRACT-REVIEW-DRYRUN"
+        }
+      ],
+      "depends_on": [
+        "CAMPAIGN-AIOS-GOVERNANCE"
+      ],
+      "blocked_by": [],
+      "unlock_conditions": [
+        "Telemetry contract reviewed.",
+        "Privacy and credential exclusions confirmed."
+      ],
+      "allowed_paths": [
+        "docs/governance/telemetry-contract.md",
+        "docs/specs/",
+        "automation/orchestration/reports/"
+      ],
+      "blocked_paths": [
+        "telemetry/",
+        "services/",
+        "apps/",
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "credentials/"
+      ],
+      "safety_rules": [
+        "No background collector from campaign planning.",
+        "No private data collection from campaign planning."
+      ],
+      "validation_commands": [
+        "git diff --check"
+      ],
+      "evidence_paths": [
+        "docs/governance/telemetry-contract.md",
+        "docs/specs/aios-dashboard-data-contracts.md"
+      ],
+      "completion_percent": 30,
+      "progress_basis": "Contract docs exist; implementation boundaries need review.",
+      "timeline_estimate": "2-4 work sessions",
+      "next_packet_candidate": "PKT-TELEMETRY-CONTRACT-REVIEW-DRYRUN",
+      "crew_lane": "telemetry-reporting-planning",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after review report."
+    },
+    {
+      "campaign_id": "CAMPAIGN-DASHBOARD-OPERATOR-CONTROL",
+      "title": "Dashboard Operator Control Center",
+      "objective": "Make dashboard visibility source-backed and read-only before any control actions are proposed.",
+      "status": "NEEDS_REVIEW",
+      "priority": "normal",
+      "phases": [
+        {
+          "phase_id": "PHASE-DASHBOARD-VISIBILITY",
+          "title": "Dashboard Visibility",
+          "status": "NEEDS_REVIEW"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-DASHBOARD-DATA-CONTRACT-REVIEW",
+          "phase_id": "PHASE-DASHBOARD-VISIBILITY",
+          "title": "Review dashboard data contract against current app",
+          "status": "NEEDS_REVIEW",
+          "priority": "normal",
+          "depends_on": [],
+          "blocked_by": [],
+          "next_packet_candidate": "PKT-DASHBOARD-DATA-CONTRACT-REVIEW-DRYRUN"
+        }
+      ],
+      "depends_on": [
+        "CAMPAIGN-TELEMETRY-REPORTING"
+      ],
+      "blocked_by": [],
+      "unlock_conditions": [
+        "Dashboard data contract reviewed.",
+        "Read-only data source path confirmed."
+      ],
+      "allowed_paths": [
+        "docs/specs/aios-dashboard-data-contracts.md",
+        "apps/dashboard/"
+      ],
+      "blocked_paths": [
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "credentials/",
+        "live-order paths"
+      ],
+      "safety_rules": [
+        "Dashboard may display evidence only unless separately approved.",
+        "Dashboard must not trigger protected actions from this registry."
+      ],
+      "validation_commands": [
+        "git diff --check"
+      ],
+      "evidence_paths": [
+        "docs/specs/aios-dashboard-data-contracts.md",
+        "apps/dashboard/"
+      ],
+      "completion_percent": 25,
+      "progress_basis": "Data-contract summary exists; app wiring needs separate review.",
+      "timeline_estimate": "2-4 work sessions",
+      "next_packet_candidate": "PKT-DASHBOARD-DATA-CONTRACT-REVIEW-DRYRUN",
+      "crew_lane": "dashboard-operator-control-review",
+      "recommended_worker": "WEST_OCC_01",
+      "stop_condition": "Stop after DRY_RUN review."
+    },
+    {
+      "campaign_id": "CAMPAIGN-TRADING-LAB-PAPER",
+      "title": "Trading Lab Paper System",
+      "objective": "Advance Trading Lab as a paper-only proving ground with evidence, risk controls, and no live path.",
+      "status": "BLOCKED",
+      "priority": "normal",
+      "phases": [
+        {
+          "phase_id": "PHASE-TRADING-PAPER-READINESS",
+          "title": "Paper Readiness",
+          "status": "BLOCKED"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-TRADING-PAPER-BOUNDARY-REVIEW",
+          "phase_id": "PHASE-TRADING-PAPER-READINESS",
+          "title": "Review paper-only Trading Lab boundary",
+          "status": "BLOCKED",
+          "priority": "normal",
+          "depends_on": [
+            "STAGE-TELEMETRY-CONTRACT-REVIEW"
+          ],
+          "blocked_by": [
+            "Telemetry/reporting evidence boundary not reviewed"
+          ],
+          "next_packet_candidate": "PKT-TRADING-PAPER-BOUNDARY-REVIEW-DRYRUN"
+        }
+      ],
+      "depends_on": [
+        "CAMPAIGN-TELEMETRY-REPORTING"
+      ],
+      "blocked_by": [
+        "Telemetry/reporting evidence boundary not reviewed"
+      ],
+      "unlock_conditions": [
+        "Telemetry/reporting contract reviewed.",
+        "Paper-only boundary confirmed."
+      ],
+      "allowed_paths": [
+        "apps/trading_lab/",
+        "docs/roadmap/",
+        "docs/specs/"
+      ],
+      "blocked_paths": [
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "credentials/",
+        "live-order paths"
+      ],
+      "safety_rules": [
+        "Trading Lab remains paper-only.",
+        "No real funds or external trade routing from campaign planning."
+      ],
+      "validation_commands": [
+        "git diff --check"
+      ],
+      "evidence_paths": [
+        "apps/trading_lab/README.md",
+        "RISK_POLICY.md"
+      ],
+      "completion_percent": 20,
+      "progress_basis": "Paper-only direction exists; dependency gates remain.",
+      "timeline_estimate": "multi-checkpoint",
+      "next_packet_candidate": "PKT-TRADING-PAPER-BOUNDARY-REVIEW-DRYRUN",
+      "crew_lane": "trading-lab-paper-review",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after paper-boundary review."
+    },
+    {
+      "campaign_id": "CAMPAIGN-FOREX-BOUNDARY",
+      "title": "Forex Boundary Documentation",
+      "objective": "Represent future Forex/OANDA interest as documentation-boundary planning only.",
+      "status": "DEFERRED",
+      "priority": "low",
+      "phases": [
+        {
+          "phase_id": "PHASE-FOREX-DOCS-ONLY",
+          "title": "Forex Docs Boundary",
+          "status": "DEFERRED"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-FOREX-DOCS-BOUNDARY",
+          "phase_id": "PHASE-FOREX-DOCS-ONLY",
+          "title": "Draft Forex/OANDA documentation boundary only",
+          "status": "DEFERRED",
+          "priority": "low",
+          "depends_on": [
+            "STAGE-TRADING-PAPER-BOUNDARY-REVIEW"
+          ],
+          "blocked_by": [
+            "Trading Lab paper boundary not reviewed"
+          ],
+          "next_packet_candidate": "PKT-FOREX-DOCS-BOUNDARY-DRYRUN"
+        }
+      ],
+      "depends_on": [
+        "CAMPAIGN-TRADING-LAB-PAPER"
+      ],
+      "blocked_by": [
+        "Trading Lab paper boundary not reviewed"
+      ],
+      "unlock_conditions": [
+        "Human Owner separately approves documentation-boundary review.",
+        "No implementation scope is included."
+      ],
+      "allowed_paths": [
+        "docs/roadmap/",
+        "docs/specs/"
+      ],
+      "blocked_paths": [
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "credentials/",
+        "live-order paths"
+      ],
+      "safety_rules": [
+        "Forex/OANDA stays documentation-boundary only.",
+        "No external account connection from this campaign."
+      ],
+      "validation_commands": [
+        "git diff --check"
+      ],
+      "evidence_paths": [
+        "RISK_POLICY.md",
+        "docs/roadmap/aios-product-roadmap.md"
+      ],
+      "completion_percent": 5,
+      "progress_basis": "Boundary interest is known but intentionally deferred.",
+      "timeline_estimate": "blocked until decision",
+      "next_packet_candidate": "PKT-FOREX-DOCS-BOUNDARY-DRYRUN",
+      "crew_lane": "forex-boundary-docs",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after docs-only boundary review."
+    },
+    {
+      "campaign_id": "CAMPAIGN-PRODUCTION-HARDENING",
+      "title": "Production Hardening",
+      "objective": "Improve rollback, dependency, security, validation, and release readiness after lower layers are stable.",
+      "status": "NOT_STARTED",
+      "priority": "normal",
+      "phases": [
+        {
+          "phase_id": "PHASE-PRODUCTION-READINESS",
+          "title": "Production Readiness",
+          "status": "NOT_STARTED"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-PRODUCTION-READINESS-REVIEW",
+          "phase_id": "PHASE-PRODUCTION-READINESS",
+          "title": "Review production hardening prerequisites",
+          "status": "NOT_STARTED",
+          "priority": "normal",
+          "depends_on": [
+            "STAGE-DASHBOARD-DATA-CONTRACT-REVIEW"
+          ],
+          "blocked_by": [],
+          "next_packet_candidate": "PKT-PRODUCTION-READINESS-REVIEW-DRYRUN"
+        }
+      ],
+      "depends_on": [
+        "CAMPAIGN-DASHBOARD-OPERATOR-CONTROL",
+        "CAMPAIGN-TELEMETRY-REPORTING"
+      ],
+      "blocked_by": [],
+      "unlock_conditions": [
+        "Telemetry and dashboard visibility are stable.",
+        "Protected action gates remain enforced."
+      ],
+      "allowed_paths": [
+        "docs/workflows/",
+        "docs/security/",
+        "docs/specs/"
+      ],
+      "blocked_paths": [
+        "secrets/",
+        "credentials/",
+        "broker/",
+        "OANDA/",
+        "live-order paths"
+      ],
+      "safety_rules": [
+        "No deployment or release from campaign planning.",
+        "No credential handling from campaign planning."
+      ],
+      "validation_commands": [
+        "git diff --check"
+      ],
+      "evidence_paths": [
+        "RISK_POLICY.md",
+        "docs/workflows/SAFE_REPAIR_AND_RECOVERY_STANDARD.md"
+      ],
+      "completion_percent": 10,
+      "progress_basis": "Readiness concepts exist; hardening is gated behind lower layers.",
+      "timeline_estimate": "multi-checkpoint",
+      "next_packet_candidate": "PKT-PRODUCTION-READINESS-REVIEW-DRYRUN",
+      "crew_lane": "production-hardening-review",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after readiness review."
+    },
+    {
+      "campaign_id": "CAMPAIGN-SUPERVISED-AUTONOMY",
+      "title": "Supervised AI_OS Autonomy",
+      "objective": "Advance from recommendation and packet previews toward supervised, validator-first orchestration without removing Human Owner authority.",
+      "status": "NEEDS_REVIEW",
+      "priority": "high",
+      "phases": [
+        {
+          "phase_id": "PHASE-AUTONOMY-LADDER",
+          "title": "Autonomy Ladder",
+          "status": "NEEDS_REVIEW"
+        }
+      ],
+      "stages": [
+        {
+          "stage_id": "STAGE-AUTONOMY-LEVEL-REVIEW",
+          "phase_id": "PHASE-AUTONOMY-LADDER",
+          "title": "Review supervised autonomy level and next safe upgrade",
+          "status": "NEEDS_REVIEW",
+          "priority": "high",
+          "depends_on": [
+            "STAGE-CREW-CAMPAIGN-BRIDGE-DRYRUN"
+          ],
+          "blocked_by": [],
+          "next_packet_candidate": "PKT-AUTONOMY-LEVEL-REVIEW-DRYRUN"
+        }
+      ],
+      "depends_on": [
+        "CAMPAIGN-CREW-CORE",
+        "CAMPAIGN-TELEMETRY-REPORTING"
+      ],
+      "blocked_by": [],
+      "unlock_conditions": [
+        "Crew Core bridge is reviewed.",
+        "Telemetry/reporting evidence is stable.",
+        "Human Owner approval gates remain final."
+      ],
+      "allowed_paths": [
+        "docs/architecture/AI_OS_SEMI_AUTONOMY_MODEL.md",
+        "docs/governance/AI_OS_AUTONOMY_LEVELS.md",
+        "automation/orchestration/"
+      ],
+      "blocked_paths": [
+        "services/",
+        "runtime/",
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "credentials/"
+      ],
+      "safety_rules": [
+        "No hidden background process from campaign planning.",
+        "No autonomous protected action.",
+        "Human Owner approval remains final."
+      ],
+      "validation_commands": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1"
+      ],
+      "evidence_paths": [
+        "docs/architecture/AI_OS_SEMI_AUTONOMY_MODEL.md",
+        "docs/governance/AI_OS_AUTONOMY_LEVELS.md"
+      ],
+      "completion_percent": 25,
+      "progress_basis": "Semi-autonomy model exists; operational integration needs evidence.",
+      "timeline_estimate": "multi-checkpoint",
+      "next_packet_candidate": "PKT-AUTONOMY-LEVEL-REVIEW-DRYRUN",
+      "crew_lane": "supervised-autonomy-review",
+      "recommended_worker": "EAST_OCC_01",
+      "stop_condition": "Stop after autonomy-level review."
+    }
+  ]
+}

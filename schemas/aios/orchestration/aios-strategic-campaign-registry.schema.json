@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_STRATEGIC_CAMPAIGN_REGISTRY.v1",
+  "title": "AI_OS Strategic Campaign Registry",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "registry_id",
+    "system",
+    "repo",
+    "active_branch",
+    "mode",
+    "status_values",
+    "timeline_values",
+    "selection_policy",
+    "safety",
+    "campaigns"
+  ],
+  "properties": {
+    "schema": { "const": "AIOS_STRATEGIC_CAMPAIGN_REGISTRY.v1" },
+    "registry_id": { "type": "string", "minLength": 1 },
+    "system": { "const": "AI_OS" },
+    "repo": { "const": "ai-rtony91/Ai_Os" },
+    "active_branch": { "const": "main" },
+    "active_worktree": { "type": "string", "minLength": 1 },
+    "mode": { "const": "PLANNING_AUTHORITY_ONLY" },
+    "status_values": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "NOT_STARTED",
+          "READY",
+          "IN_PROGRESS",
+          "BLOCKED",
+          "NEEDS_REVIEW",
+          "COMPLETE",
+          "DEFERRED"
+        ]
+      }
+    },
+    "timeline_values": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "same session",
+          "1-2 work sessions",
+          "2-4 work sessions",
+          "multi-checkpoint",
+          "blocked until decision"
+        ]
+      }
+    },
+    "campaigns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "campaign_id",
+          "title",
+          "objective",
+          "status",
+          "priority",
+          "phases",
+          "stages",
+          "depends_on",
+          "blocked_by",
+          "unlock_conditions",
+          "allowed_paths",
+          "blocked_paths",
+          "safety_rules",
+          "validation_commands",
+          "evidence_paths",
+          "completion_percent",
+          "progress_basis",
+          "timeline_estimate",
+          "next_packet_candidate",
+          "crew_lane",
+          "recommended_worker",
+          "stop_condition"
+        ],
+        "properties": {
+          "campaign_id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "objective": { "type": "string", "minLength": 1 },
+          "status": {
+            "enum": [
+              "NOT_STARTED",
+              "READY",
+              "IN_PROGRESS",
+              "BLOCKED",
+              "NEEDS_REVIEW",
+              "COMPLETE",
+              "DEFERRED"
+            ]
+          },
+          "priority": {
+            "enum": [
+              "critical",
+              "high",
+              "normal",
+              "low"
+            ]
+          },
+          "phases": { "type": "array" },
+          "stages": { "type": "array" },
+          "depends_on": { "type": "array", "items": { "type": "string" } },
+          "blocked_by": { "type": "array", "items": { "type": "string" } },
+          "unlock_conditions": { "type": "array", "items": { "type": "string" } },
+          "allowed_paths": { "type": "array", "items": { "type": "string" } },
+          "blocked_paths": { "type": "array", "items": { "type": "string" } },
+          "safety_rules": { "type": "array", "items": { "type": "string" } },
+          "validation_commands": { "type": "array", "items": { "type": "string" } },
+          "evidence_paths": { "type": "array", "items": { "type": "string" } },
+          "completion_percent": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "progress_basis": { "type": "string", "minLength": 1 },
+          "timeline_estimate": {
+            "enum": [
+              "same session",
+              "1-2 work sessions",
+              "2-4 work sessions",
+              "multi-checkpoint",
+              "blocked until decision"
+            ]
+          },
+          "next_packet_candidate": { "type": ["string", "null"] },
+          "crew_lane": { "type": "string", "minLength": 1 },
+          "recommended_worker": { "type": "string", "minLength": 1 },
+          "stop_condition": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
