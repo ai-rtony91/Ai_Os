@@ -335,8 +335,8 @@ if ($blockedFindings.Count -gt 0) {
     $decision = "BLOCKED"
 }
 
-$autoGitAllowed = ($decision -eq "SAFE_AUTO_ALLOWED" -and $Action -eq "commit")
-$nextSafeAction = if ($autoGitAllowed) {
+$autoGitEligible = ($decision -eq "SAFE_AUTO_ALLOWED" -and $Action -eq "commit")
+$nextSafeAction = if ($autoGitEligible) {
     "Future auto commit could be allowed after a separate execution APPLY helper is approved. This helper cannot execute it."
 }
 elseif ($decision -eq "HUMAN_REQUIRED") {
@@ -353,7 +353,7 @@ $result = [pscustomobject]@{
     mode = "DRY_RUN"
     requested_action = $Action
     decision = $decision
-    auto_git_allowed = $autoGitAllowed
+    auto_git_eligible = $autoGitEligible
     candidate_files = $candidateFiles
     safe_auto_allowed_classes = $safeAutoAllowedClasses
     human_required_classes = $humanRequiredClasses
@@ -403,7 +403,7 @@ Write-Host "AI_OS Auto-Git Decision"
 Write-Host "Mode: DRY_RUN"
 Write-Host "Action: $($result.requested_action)"
 Write-Host "Decision: $($result.decision)"
-Write-Host "auto_git_allowed: $($result.auto_git_allowed)"
+Write-Host "auto_git_eligible: $($result.auto_git_eligible)"
 Write-Host "Candidate files: $($result.candidate_files.Count)"
 Write-Host "Review findings: $($result.evidence.review_findings.Count)"
 Write-Host "Blocked findings: $($result.evidence.blocked_findings.Count)"
