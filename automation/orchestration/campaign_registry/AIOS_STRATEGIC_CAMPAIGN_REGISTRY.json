@@ -160,13 +160,15 @@
           "stage_id": "STAGE-ORCH-CAMPAIGN-REGISTRY",
           "phase_id": "PHASE-ORCH-SUPERVISED-PIPELINE",
           "title": "Create strategic campaign registry and next-task source",
-          "status": "READY",
+          "status": "COMPLETE",
           "priority": "critical",
           "depends_on": [
             "STAGE-ORCH-INPUT-TO-PACKET"
           ],
           "blocked_by": [],
-          "next_packet_candidate": "PKT-EAST-STRATEGIC-CAMPAIGN-REGISTRY-APPLY-001"
+          "next_packet_candidate": null,
+          "completed_by_pr": "https://github.com/ai-rtony91/Ai_Os/pull/284",
+          "completed_by_commit": "0035e02e9ba0ee6d00618822716d3aefbf38adad"
         }
       ],
       "depends_on": [],
@@ -202,15 +204,19 @@
       "evidence_paths": [
         "automation/intake/Convert-AiOsInputToPacketProposal.DRY_RUN.ps1",
         "automation/orchestration/recommendations/Get-AiOsNextPacketRecommendation.DRY_RUN.ps1",
-        "automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json"
+        "automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json",
+        "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1",
+        "docs/roadmap/aios-strategic-campaign-registry.md",
+        "PR #284",
+        "merge commit 0035e02e9ba0ee6d00618822716d3aefbf38adad"
       ],
-      "completion_percent": 65,
-      "progress_basis": "Runtime wiring exists; campaign-level next-task source is being established.",
-      "timeline_estimate": "same session",
-      "next_packet_candidate": "PKT-EAST-STRATEGIC-CAMPAIGN-REGISTRY-APPLY-001",
-      "crew_lane": "campaign-registry-foundation",
+      "completion_percent": 80,
+      "progress_basis": "Runtime wiring exists and the strategic campaign registry foundation is live on main through PR #284.",
+      "timeline_estimate": "1-2 work sessions",
+      "next_packet_candidate": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+      "crew_lane": "crew-core-campaign-bridge",
       "recommended_worker": "EAST_OCC_01",
-      "stop_condition": "Stop after PR creation and verification."
+      "stop_condition": "Stop after Crew Core campaign bridge DRY_RUN report."
     },
     {
       "campaign_id": "CAMPAIGN-CREW-CORE",

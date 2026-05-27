@@ -24,6 +24,17 @@ Read-only recommender:
 automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1
 ```
 
+## Current Status
+
+The Campaign Registry foundation is live on `main`.
+
+Evidence:
+
+- PR: `https://github.com/ai-rtony91/Ai_Os/pull/284`
+- Merge commit: `0035e02e9ba0ee6d00618822716d3aefbf38adad`
+
+The next-task helper is active on `main` and can select the next highest-priority `READY` stage from the registry. The original foundation packet `PKT-EAST-STRATEGIC-CAMPAIGN-REGISTRY-APPLY-001` is complete and must not remain the active recommendation.
+
 ## Campaign Model
 
 The registry uses this hierarchy:
