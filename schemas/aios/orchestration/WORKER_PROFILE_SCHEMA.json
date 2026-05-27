@@ -1,71 +1,126 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/WORKER_PROFILE_SCHEMA.v0.1",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/WORKER_PROFILE_SCHEMA.v0.1.1",
   "title": "AI_OS Worker Profile Schema",
-  "description": "v0.1 JSON Schema for AI_OS worker profile and capability records. Contract scaffold only; it does not grant authority, create workers, or execute work.",
+  "description": "v0.1.1 JSON Schema for AI_OS worker profile-set and worker capability records. Contract scaffold only; it does not grant authority, create workers, or execute work.",
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "profile_id",
-    "worker_id",
-    "capabilities"
+    "profile_set_id",
+    "version",
+    "workers"
   ],
   "properties": {
-    "profile_id": {
+    "profile_set_id": {
       "type": "string",
       "minLength": 1
     },
-    "worker_id": {
+    "version": {
       "type": "string",
       "minLength": 1
     },
-    "display_name": {
+    "truth_source": {
       "type": "string"
     },
-    "role": {
-      "type": "string"
-    },
-    "zone": {
-      "type": "string"
-    },
-    "lane": {
-      "type": "string"
-    },
-    "capabilities": {
+    "rules": {
       "type": "array",
       "items": {
         "type": "string"
       }
     },
-    "allowed_actions": {
+    "workers": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "worker_id"
+        ],
+        "properties": {
+          "worker_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "profile_id": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "display_title": {
+            "type": "string"
+          },
+          "worker_type": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "zone": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "default_path": {
+            "type": "string"
+          },
+          "default_branch": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "owns_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blocked_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blocked_actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "launch_policy": {
+            "type": "string"
+          },
+          "codex_policy": {
+            "type": "string"
+          },
+          "guard_policy": {
+            "type": "string"
+          },
+          "save_policy": {
+            "type": "string"
+          },
+          "safety_notes": {
+            "type": "string"
+          }
+        }
       }
-    },
-    "blocked_actions": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "allowed_paths": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "blocked_paths": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "approval_required": {
-      "type": "boolean"
-    },
-    "notes": {
-      "type": "string"
     }
   }
 }

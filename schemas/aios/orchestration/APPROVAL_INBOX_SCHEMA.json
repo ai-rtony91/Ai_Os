@@ -1,29 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.v0.1",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.v0.1.1",
   "title": "AI_OS Approval Inbox Schema",
-  "description": "v0.1 JSON Schema for AI_OS approval inbox records. Contract scaffold only; it does not grant approval or mutate approval state.",
+  "description": "v0.1.1 JSON Schema for AI_OS approval inbox records. This is a future/optional contract because an active APPROVAL_INBOX_001.json may be absent; absence must project as UNKNOWN or NEEDS_REVIEW, not PASS. Contract scaffold only; it does not grant approval or mutate approval state.",
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "approval_id",
-    "packet_id",
-    "approval_status",
-    "requested_action",
-    "created_at"
+    "approval_status"
   ],
   "properties": {
     "approval_id": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "packet_id": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "requested_action": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "requested_mode": {
       "type": "string"
@@ -62,7 +55,13 @@
     "created_at": {
       "type": "string"
     },
+    "created_utc": {
+      "type": "string"
+    },
     "updated_at": {
+      "type": "string"
+    },
+    "updated_utc": {
       "type": "string"
     }
   }

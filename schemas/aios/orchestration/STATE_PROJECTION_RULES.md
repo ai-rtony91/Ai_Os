@@ -1,4 +1,4 @@
-# AI_OS Orchestration State Projection Rules v0.1
+# AI_OS Orchestration State Projection Rules v0.1.1
 
 This document defines how AI_OS should project orchestration state from existing local-first files without inventing a new brain.
 
@@ -21,6 +21,17 @@ AI_OS state projection should prefer direct local evidence in this order:
 11. Dashboard visibility examples or API projections.
 
 Lower-precedence generated projections must not override higher-precedence authority.
+
+## Current Reality Aliases
+
+The v0.1.1 schema reconciliation recognizes current AI_OS file shapes and aliases:
+
+- `items` and `commands` both represent command queue entries depending on source age.
+- `created_utc` and `updated_utc` are current packet timestamps; `created_at` and `updated_at` remain supported newer aliases.
+- `approval_gate_id`, `approval_status`, and timestamp placeholder fields are current approval gate fields; `gate_id`, `gate_status`, and `created_at` remain supported newer aliases.
+- `activePackets`, `failedPackets`, and `backpressure` are dashboard/runtime visibility fields; `packets` and `overall_status` remain supported projection aliases.
+
+Schema reconciliation does not change runtime authority. These aliases only let read-only validators and future adapters understand current evidence without mutating runtime state.
 
 ## Worker State Projection
 

@@ -1,25 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/WORK_PACKET_SCHEMA.v0.1",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/WORK_PACKET_SCHEMA.v0.1.1",
   "title": "AI_OS Work Packet Schema",
-  "description": "v0.1 JSON Schema for AI_OS work packet structure. Contract scaffold only; it does not approve APPLY, assign workers, run validators, commit, push, or execute work.",
+  "description": "v0.1.1 JSON Schema for AI_OS work packet structure. Supports current packet aliases such as owner_lane, assigned_worker, created_utc, and updated_utc. Contract scaffold only; it does not approve APPLY, assign workers, run validators, commit, push, or execute work.",
   "type": "object",
   "additionalProperties": true,
   "required": [
     "packet_id",
     "title",
-    "mode",
-    "lane",
-    "worker_identity",
-    "allowed_paths",
-    "forbidden_paths",
-    "mission",
-    "status",
-    "approval_required",
-    "validator_chain",
-    "stop_condition",
-    "created_at",
-    "updated_at"
+    "status"
   ],
   "properties": {
     "packet_id": {
@@ -30,23 +19,49 @@
       "type": "string",
       "minLength": 1
     },
+    "task_id": {
+      "type": "string"
+    },
+    "intent": {
+      "type": "string"
+    },
+    "mission": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
     "mode": {
-      "type": "string",
-      "enum": [
-        "DRY_RUN",
-        "APPLY",
-        "DRY_RUN_THEN_APPLY"
-      ]
+      "type": "string"
     },
     "lane": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
+    },
+    "owner_lane": {
+      "type": "string"
     },
     "worker_identity": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
+    },
+    "assigned_worker": {
+      "type": "string"
+    },
+    "repo": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "worktree": {
+      "type": "string"
     },
     "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "allowed_write_boundary": {
       "type": "array",
       "items": {
         "type": "string"
@@ -58,19 +73,24 @@
         "type": "string"
       }
     },
-    "mission": {
-      "type": "string",
-      "minLength": 1
-    },
-    "objective": {
-      "type": "string"
+    "blocked_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "status": {
       "type": "string",
       "minLength": 1
     },
+    "current_status": {
+      "type": "string"
+    },
     "approval_required": {
       "type": "boolean"
+    },
+    "approval_status": {
+      "type": "string"
     },
     "validator_chain": {
       "type": "array",
@@ -81,15 +101,36 @@
         ]
       }
     },
+    "validator": {
+      "type": "string"
+    },
+    "validation_commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "stop_condition": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "created_at": {
       "type": "string"
     },
+    "created_utc": {
+      "type": "string"
+    },
     "updated_at": {
       "type": "string"
+    },
+    "updated_utc": {
+      "type": "string"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
     },
     "safety": {
       "type": "object",
@@ -101,6 +142,15 @@
         "array",
         "object"
       ]
+    },
+    "next_action": {
+      "type": "string"
+    },
+    "blocked_by": {
+      "type": "array"
+    },
+    "notes": {
+      "type": "array"
     }
   }
 }
