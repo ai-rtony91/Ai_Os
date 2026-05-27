@@ -42,9 +42,23 @@ jobs:
         working-directory: apps/dashboard
         run: npm run build
 
+      - name: Verify dashboard deploy artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f apps/dashboard/dist/server.js
+          test -f apps/dashboard/dist/index.html
+          test -f apps/dashboard/dist/AIOS_STATIC_PREVIEW.html
+          test -d apps/dashboard/dist/css
+          test -d apps/dashboard/dist/js
+          test -d apps/dashboard/dist/assets
+          test -d apps/dashboard/dist/mock-data
+          find apps/dashboard/dist -maxdepth 2 -type f | sort
+
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: algotradez-aios
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ALGOTRADEZ_AIOS }}
           package: apps/dashboard/dist
+          startup-command: node server.js
