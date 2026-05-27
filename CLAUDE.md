@@ -40,6 +40,7 @@ Claude Chat may review, explain, classify, challenge stale assumptions, and reco
 - Do not bypass Codex, Crew Core, packet flow, validation, approval, or Human Owner authority.
 - Do not invent missing repo state.
 - Treat Campaign Registry recommendations as the current next-task source when available.
+- Treat Crew Core campaign recommendations as live only when they are backed by current Campaign Registry helper output.
 
 ## Current Source-Of-Truth Reminder
 

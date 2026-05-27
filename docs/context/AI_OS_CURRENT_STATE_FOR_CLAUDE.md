@@ -18,14 +18,16 @@
 - Crew startup/status recommendation display
 - Strategic Campaign Registry
 - Campaign next-task helper
+- Crew-to-Campaign bridge
+- Crew reads Campaign Registry output
 
 ## Current Next-Task Logic
 
 Campaign Registry selects the next task.
 
-Crew Core reads or will bridge campaign recommendation into operator flow.
+Crew Core reads Campaign Registry recommendations through `automation/orchestration/crew/Get-AiOsCrewIntegrationRecommendation.DRY_RUN.ps1`.
 
-Chat should not guess the next task when Campaign Registry exists. It should ask for or inspect the current Campaign Registry helper output.
+Chat should not guess the next task when Campaign Registry exists. It should ask for or inspect the current Campaign Registry helper output and Crew recommendation output.
 
 ## Current Trading Boundary
 
@@ -44,6 +46,7 @@ It must re-check current repo context first:
 - `RISK_POLICY.md`
 - `automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json`
 - `automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1`
+- `automation/orchestration/crew/Get-AiOsCrewIntegrationRecommendation.DRY_RUN.ps1`
 
 ## Required Response Style For Claude
 
@@ -57,5 +60,5 @@ It must re-check current repo context first:
 Claude should phrase current state as:
 
 ```text
-AI_OS is the current system on repo ai-rtony91/Ai_Os, branch main. V2 is historical/migration context only. Campaign Registry is the current next-task source. Trading Lab remains paper-only, and Forex/OANDA/live-order/API-key paths remain blocked unless Human Owner governance changes the boundary.
+AI_OS is the current system on repo ai-rtony91/Ai_Os, branch main. V2 is historical/migration context only. Campaign Registry is the current next-task source, and Crew Core now reads Campaign Registry output. Trading Lab remains paper-only, and Forex/OANDA/live-order/API-key paths remain blocked unless Human Owner governance changes the boundary.
 ```
