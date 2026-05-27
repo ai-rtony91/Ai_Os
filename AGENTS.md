@@ -16,6 +16,8 @@ Rules:
 - If a prompt does not begin with `🧩 CODEX-ONLY PROMPT`, Codex should treat it as not authorized for execution unless the operator explicitly says otherwise.
 - After reading `AGENTS.md`, `README.md`, or any governance file, Codex must preserve this routing rule.
 
+Detailed communication-lane doctrine lives in `docs/AI_OS/governance/AIOS_AGENT_COMMUNICATION_RULES.md`. AI_OS agents must keep executable prompts, chat explanation, and operator copy/paste message boxes visibly separated when more than one lane appears in a response.
+
 ## AI_OS Execution Token Rule
 
 Codex must treat a pasted block as an executable AI_OS task only when one of these is true:
@@ -650,6 +652,64 @@ Scale output by task size:
 - Medium task: compressed bullets.
 - Major milestone: expanded strategic summary allowed.
 - Deep technical explanation: only on explicit request.
+
+### AI_OS Autonomy Update / What's New Rule
+
+When the operator asks plain-language update phrases such as "what's up", "what's new", "update", "where are we", "what changed", "what should we do next", "get me closer to autonomy", "automate", "automation", "repo update", "review", "inspect for review", "analyze", "reassess", or similar language, AI_OS agents must treat the request as a governed AI_OS Autonomy Brief.
+
+The brief must answer the Golden Question:
+
+```text
+Based on current repo evidence, what changed since the last known baseline, what does it unlock or risk, and what are the top five next safe tasks that move AI_OS closer to governed autonomy without bypassing human approval, validation, protected paths, or safety boundaries?
+```
+
+The brief must inspect evidence before ranking tasks:
+
+- `README.md`
+- `AGENTS.md`
+- `docs/architecture/AI_OS_WHITEPAPER.md`
+- `docs/governance/source-of-truth-map.md`
+- `docs/audits/active-system-map.md`
+- recent commits
+- recent PRs
+- open PRs
+- open issues
+- validator, approval, and packet state when locally available
+- Morning Brief output when locally available
+
+The brief must rank exactly five tasks unless fewer than five safe tasks exist.
+
+Each ranked task must include:
+
+- task name
+- why it moves AI_OS closer to governed autonomy
+- repo evidence
+- owning path or likely canonical authority
+- risk level
+- validator or proof needed
+- stop condition
+- next safe action
+
+The brief must not claim unchecked autonomy, AGI, consciousness, sentience, live trading authority, broker execution authority, credential authority, or permission to bypass validation.
+
+The brief must prefer read-only inspection first. Mutation requires a separate scoped APPLY packet.
+
+The brief must preserve AI_OS communication lanes:
+
+- `CODEX / AGENT PROMPT` for executable prompts
+- `CHAT EXPLANATION` for normal explanation
+- `OPERATOR MESSAGE BOX` for terminal-ready commands
+
+If repo evidence is missing, stale, contradictory, or inaccessible, the agent must say what is unknown and provide the next safe read-only command or inspection path.
+
+The default operator-facing Autonomy Brief format must stay compact:
+
+- What changed
+- Before -> after effect
+- Why it matters
+- Top 5 autonomy tasks
+- Blockers / risks
+- Next safe action
 
 ## AI_OS Approval Friction Reduction Standard
 
