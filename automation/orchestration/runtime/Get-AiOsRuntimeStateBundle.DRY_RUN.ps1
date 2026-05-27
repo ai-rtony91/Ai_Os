@@ -1,4 +1,7 @@
 param(
+    [string[]]$CandidateFile = @(),
+    [string]$ValidatorRecommendationPath = "",
+    [string]$ValidatorRunReportPath = "",
     [switch]$QuietJson
 )
 
@@ -10,6 +13,10 @@ $checkedAt = (Get-Date).ToString("s")
 
 function ConvertTo-RelativePath {
     param([string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
 
     $resolved = Resolve-Path -LiteralPath $Path -ErrorAction SilentlyContinue
     if (-not $resolved) {
@@ -27,6 +34,10 @@ function ConvertTo-RelativePath {
 
 function Read-JsonSafe {
     param([string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $null
+    }
 
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         return $null
@@ -86,6 +97,43 @@ function Get-JsonFiles {
     @(Get-ChildItem -LiteralPath $Path -File -Filter "*.json" -ErrorAction SilentlyContinue | Sort-Object Name)
 }
 
+function Normalize-PathText {
+    param([string]$Path)
+    return (($Path -replace "\\", "/").Trim().Trim("/"))
+}
+
+function Test-ExamplePath {
+    param([string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $false
+    }
+
+    return ((Normalize-PathText -Path $Path) -match "(?i)(^|[./_-])example([./_-]|$)")
+}
+
+function Get-TrustedJsonEvidencePath {
+    param(
+        [string]$Path,
+        [string]$Filter
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return ""
+    }
+
+    $file = @(Get-ChildItem -LiteralPath $Path -File -Filter $Filter -ErrorAction SilentlyContinue |
+        Where-Object { -not (Test-ExamplePath -Path $_.FullName) } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1)
+
+    if ($file.Count -eq 0) {
+        return ""
+    }
+
+    return [string]$file[0].FullName
+}
+
 function Convert-StatusLineToPath {
     param([string]$Line)
 
@@ -110,8 +158,12 @@ $workerProfilesPath = Join-Path $repoRoot.Path "automation\orchestration\workers
 $workerInboxPath = Join-Path $repoRoot.Path "automation\orchestration\workers\inbox\AIOS_WORKER_INBOX.json"
 $lockRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\locks\FILE_LOCK_REGISTRY_001.json"
 $validatorConfigPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_CHAIN_CONFIG_001.json"
-$validatorRecommendationPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_RECOMMENDATION.example.json"
-$validatorRunReportPath = Join-Path $repoRoot.Path "automation\orchestration\validator_chain_runner\VALIDATOR_CHAIN_RUN_REPORT.example.json"
+if ([string]::IsNullOrWhiteSpace($ValidatorRecommendationPath)) {
+    $ValidatorRecommendationPath = Get-TrustedJsonEvidencePath -Path (Join-Path $repoRoot.Path "automation\orchestration\validators") -Filter "VALIDATOR_RECOMMENDATION*.json"
+}
+if ([string]::IsNullOrWhiteSpace($ValidatorRunReportPath)) {
+    $ValidatorRunReportPath = Get-TrustedJsonEvidencePath -Path (Join-Path $repoRoot.Path "automation\orchestration\validator_chain_runner") -Filter "VALIDATOR_CHAIN_RUN_REPORT*.json"
+}
 $validatorConfidenceHelperPath = Join-Path $repoRoot.Path "automation\orchestration\validators\Get-AiOsValidatorConfidence.DRY_RUN.ps1"
 $approvalInboxPath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox.v1.example.json"
 $approvalQueuePath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox\AIOS_APPROVAL_QUEUE.example.json"
@@ -124,8 +176,8 @@ $workerProfiles = Read-JsonSafe -Path $workerProfilesPath
 $workerInbox = Read-JsonSafe -Path $workerInboxPath
 $lockRegistry = Read-JsonSafe -Path $lockRegistryPath
 $validatorConfig = Read-JsonSafe -Path $validatorConfigPath
-$validatorRecommendation = Read-JsonSafe -Path $validatorRecommendationPath
-$validatorRunReport = Read-JsonSafe -Path $validatorRunReportPath
+$validatorRecommendation = Read-JsonSafe -Path $ValidatorRecommendationPath
+$validatorRunReport = Read-JsonSafe -Path $ValidatorRunReportPath
 $approvalInbox = Read-JsonSafe -Path $approvalInboxPath
 $approvalQueue = Read-JsonSafe -Path $approvalQueuePath
 $supervisorRules = Read-JsonSafe -Path $supervisorRulesPath
@@ -134,11 +186,24 @@ $gitLines = @(& git -C $repoRoot.Path status --short --branch 2>&1 | ForEach-Obj
 $branchLine = @($gitLines | Where-Object { $_ -like "## *" } | Select-Object -First 1)
 $changedLines = @($gitLines | Where-Object { $_ -notlike "## *" })
 $candidateFiles = @($changedLines | ForEach-Object { Convert-StatusLineToPath -Line $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and $_ -ne ".codex_worktrees/" })
+$approvedCandidateFiles = @($CandidateFile | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { Normalize-PathText -Path $_ } | Select-Object -Unique)
+$validatorCandidateFiles = if ($approvedCandidateFiles.Count -gt 0) { @($approvedCandidateFiles) } else { @() }
+$unexpectedDirtyFiles = @()
+if ($approvedCandidateFiles.Count -gt 0) {
+    $unexpectedDirtyFiles = @($candidateFiles | Where-Object { $approvedCandidateFiles -notcontains (Normalize-PathText -Path $_) })
+}
+else {
+    $unexpectedDirtyFiles = @($candidateFiles)
+}
 
 $validatorConfidence = $null
-if (Test-Path -LiteralPath $validatorConfidenceHelperPath -PathType Leaf) {
+if (
+    -not [string]::IsNullOrWhiteSpace($ValidatorRecommendationPath) -and
+    -not [string]::IsNullOrWhiteSpace($ValidatorRunReportPath) -and
+    (Test-Path -LiteralPath $validatorConfidenceHelperPath -PathType Leaf)
+) {
     try {
-        $validatorConfidenceJson = & $validatorConfidenceHelperPath -CandidateFile $candidateFiles -Json
+        $validatorConfidenceJson = & $validatorConfidenceHelperPath -CandidateFile $validatorCandidateFiles -ValidatorRecommendationPath $ValidatorRecommendationPath -ValidatorRunReportPath $ValidatorRunReportPath -Json
         $validatorConfidence = $validatorConfidenceJson | ConvertFrom-Json
     }
     catch {
@@ -193,14 +258,16 @@ $validatorItems = @(
         count = if ($validatorConfig -and $validatorConfig.validators) { @($validatorConfig.validators).Count } else { 0 }
     },
     [pscustomobject]@{
-        source = ConvertTo-RelativePath -Path $validatorRecommendationPath
+        source = ConvertTo-RelativePath -Path $ValidatorRecommendationPath
         kind = "recommendation"
         result = if ($validatorRecommendation -and $validatorRecommendation.result) { [string]$validatorRecommendation.result } else { "UNKNOWN" }
+        trusted_runtime_evidence = [bool](-not [string]::IsNullOrWhiteSpace($ValidatorRecommendationPath))
     },
     [pscustomobject]@{
-        source = ConvertTo-RelativePath -Path $validatorRunReportPath
+        source = ConvertTo-RelativePath -Path $ValidatorRunReportPath
         kind = "run_report"
         result = if ($validatorRunReport -and $validatorRunReport.overall_result) { [string]$validatorRunReport.overall_result } else { "UNKNOWN" }
+        trusted_runtime_evidence = [bool](-not [string]::IsNullOrWhiteSpace($ValidatorRunReportPath))
     }
 )
 
@@ -233,12 +300,21 @@ if ($null -eq $runtimeState) {
     }
 }
 if ($changedLines.Count -gt 0) {
-    $humanRequiredSignals += "working_tree_has_visible_changes"
     $staleConditions += [pscustomobject]@{
         source = "git status"
         condition = "working_tree_has_visible_changes"
         severity = "REVIEW"
         next_safe_action = "Review changed and untracked files before protected actions."
+    }
+}
+if ($unexpectedDirtyFiles.Count -gt 0) {
+    $humanRequiredSignals += "working_tree_has_unexpected_changes"
+    $staleConditions += [pscustomobject]@{
+        source = "git status"
+        condition = "working_tree_has_unexpected_changes"
+        severity = "BLOCKED"
+        next_safe_action = "Resolve or explicitly approve unexpected dirty files before protected actions."
+        files = @($unexpectedDirtyFiles)
     }
 }
 if ($activePackets.Count -eq 0) {
@@ -358,10 +434,10 @@ $bundle = [pscustomobject]@{
     packet_state = New-Section -Status "REVIEW" -SourcePaths @($packetActivePath, $packetBlockedPath, $packetCompletePath) -Summary "Packet folders inspected as read-only runtime evidence." -Items $packetItems -BlockedActions @("packet_state_change", "packet_assignment")
     worker_state = New-Section -Status "REVIEW" -SourcePaths @($workerRegistryPath, $workerProfilesPath, $workerInboxPath) -Summary "Worker registry, profiles, and inbox inspected without heartbeat writes." -Items $workerItems -BlockedActions @("worker_launch", "heartbeat_write", "worker_state_change")
     lock_state = New-Section -Status "REVIEW" -SourcePaths @($lockRegistryPath) -Summary "Lock registry evidence inspected without lock release." -Items @($lockRegistry) -BlockedActions @("lock_claim", "lock_release", "force_unlock")
-    validator_state = New-Section -Status "REVIEW" -SourcePaths @($validatorConfigPath, $validatorRecommendationPath, $validatorRunReportPath) -Summary "Validator config and report evidence inspected without running mutation paths." -Items $validatorItems -BlockedActions @("apply_repair", "approval_grant")
+    validator_state = New-Section -Status "REVIEW" -SourcePaths @($validatorConfigPath, $ValidatorRecommendationPath, $ValidatorRunReportPath) -Summary "Validator config and report evidence inspected without running mutation paths." -Items $validatorItems -BlockedActions @("apply_repair", "approval_grant")
     approval_state = New-Section -Status "REVIEW" -SourcePaths @($approvalInboxPath, $approvalQueuePath) -Summary "Approval evidence inspected without creating or resolving approvals." -Items $approvalItems -BlockedActions @("approval_create", "approval_resolve")
     escalation_state = New-Section -Status $(if ($staleConditions.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @() -Summary "Escalation persistence is not enabled; review conditions are included in stale_conditions." -Items @($staleConditions) -BlockedActions @("escalation_append", "escalation_resolve")
-    git_state = New-Section -Status $(if ($changedLines.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @("git status --short --branch") -Summary "Git status inspected read-only." -Items @([pscustomobject]@{ branch = [string]$branchLine; changed_lines = $changedLines }) -BlockedActions @("stage_files", "commit_changes", "push_changes")
+    git_state = New-Section -Status $(if ($unexpectedDirtyFiles.Count -gt 0) { "BLOCKED" } elseif ($changedLines.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @("git status --short --branch") -Summary "Git status inspected read-only." -Items @([pscustomobject]@{ branch = [string]$branchLine; changed_lines = $changedLines; candidate_files = $candidateFiles; approved_candidate_files = $approvedCandidateFiles; unexpected_dirty_files = $unexpectedDirtyFiles }) -BlockedActions @("stage_files", "commit_changes", "push_changes")
     supervisor_state = New-Section -Status "READY" -SourcePaths @($supervisorSchemaPath, $supervisorRulesPath) -Summary "Supervisor schema and rules inspected as read-only authority evidence." -Items @($supervisorRules) -BlockedActions @("start_loop", "start_daemon", "launch_worker")
     next_safe_actions = @(
         [pscustomobject]@{
@@ -409,10 +485,16 @@ $bundle = [pscustomobject]@{
     required_evidence_present = [pscustomobject]@{
         validator_config = [bool]($null -ne $validatorConfig)
         validator_confidence = [bool]($null -ne $validatorConfidence)
+        validator_recommendation = [bool]($null -ne $validatorRecommendation -and -not [string]::IsNullOrWhiteSpace($ValidatorRecommendationPath))
+        validator_run_report = [bool]($null -ne $validatorRunReport -and -not [string]::IsNullOrWhiteSpace($ValidatorRunReportPath))
         git_state = [bool]($gitLines.Count -gt 0)
         lock_registry = [bool]($null -ne $lockRegistry)
         approval_evidence = [bool]($null -ne $approvalInbox -or $null -ne $approvalQueue)
         packet_evidence = [bool](($activePackets.Count + $blockedPackets.Count + $completePackets.Count) -gt 0)
+    }
+    validator_evidence_paths = [pscustomobject]@{
+        recommendation = ConvertTo-RelativePath -Path $ValidatorRecommendationPath
+        run_report = ConvertTo-RelativePath -Path $ValidatorRunReportPath
     }
 }
 
@@ -421,24 +503,30 @@ if ($QuietJson) {
     exit 0
 }
 
+Write-Host "[RUNTIME HEALTH]"
 Write-Host "AI_OS Runtime State Bundle"
 Write-Host "Mode: DRY_RUN"
 Write-Host "Schema: $($bundle.schema)"
 Write-Host "Confidence: $($bundle.confidence_state.overall_confidence) $($bundle.confidence_state.confidence_score)"
-Write-Host "Validator confidence: $($bundle.validator_confidence.overall_result) $($bundle.validator_confidence.confidence_score)"
 Write-Host "Auto-git eligible: $($bundle.auto_git_eligibility.safe_auto_allowed)"
 Write-Host "Git: $branchLine"
 Write-Host "Packets: $($packetItems.Count)"
 Write-Host "Workers sources: $($workerItems.Count)"
-Write-Host "Validator sources: $($validatorItems.Count)"
 Write-Host "Approval sources: $($approvalItems.Count)"
 Write-Host "Stale/review conditions: $($staleConditions.Count)"
 Write-Host ""
+Write-Host "[VALIDATOR RESULT]"
+Write-Host "Validator confidence: $($bundle.validator_confidence.overall_result) $($bundle.validator_confidence.confidence_score)"
+Write-Host "Validator sources: $($validatorItems.Count)"
+Write-Host "Bundle integrity: $($bundle.bundle_integrity.status)"
+Write-Host ""
+Write-Host "[CREW RECOMMENDATION]"
 Write-Host "Next safe actions:"
 foreach ($action in $bundle.next_safe_actions) {
     Write-Host ("{0}. {1}" -f $action.rank, $action.action)
 }
 Write-Host ""
+Write-Host "[VALIDATOR RESULT]"
 Write-Host "Runtime mutation skipped: Runtime State Bundle DRY_RUN is read-only."
 Write-Host "Files changed by helper: NO"
 Write-Host "Commit performed: NO"

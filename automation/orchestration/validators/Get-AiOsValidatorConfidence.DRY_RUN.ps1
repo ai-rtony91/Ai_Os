@@ -15,10 +15,10 @@ if ([string]::IsNullOrWhiteSpace($ValidatorConfigPath)) {
     $ValidatorConfigPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_CHAIN_CONFIG_001.json"
 }
 if ([string]::IsNullOrWhiteSpace($ValidatorRecommendationPath)) {
-    $ValidatorRecommendationPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_RECOMMENDATION.example.json"
+    $ValidatorRecommendationPath = ""
 }
 if ([string]::IsNullOrWhiteSpace($ValidatorRunReportPath)) {
-    $ValidatorRunReportPath = Join-Path $repoRoot.Path "automation\orchestration\validator_chain_runner\VALIDATOR_CHAIN_RUN_REPORT.example.json"
+    $ValidatorRunReportPath = ""
 }
 
 function ConvertTo-RelativePath {
@@ -59,6 +59,44 @@ function Read-JsonSafe {
 function Normalize-PathText {
     param([string]$Path)
     return (($Path -replace "\\", "/").Trim().Trim("/"))
+}
+
+function Test-ExamplePath {
+    param([string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $false
+    }
+
+    return ((Normalize-PathText -Path $Path) -match "(?i)(^|[./_-])example([./_-]|$)")
+}
+
+function Test-MockEvidence {
+    param([object]$Evidence)
+
+    if ($null -eq $Evidence) {
+        return $false
+    }
+
+    $json = ($Evidence | ConvertTo-Json -Depth 12 -Compress)
+    return ($json -match '(?i)"(mock|sample|example|fixture)[^"]*"\s*:\s*(true|"true")' -or $json -match '(?i)"mode"\s*:\s*"(mock|sample|example|fixture)"')
+}
+
+function Test-StaleEvidence {
+    param([object]$Evidence)
+
+    if ($null -eq $Evidence) {
+        return $false
+    }
+
+    if ($Evidence.freshness -and $Evidence.freshness.is_stale -eq $true) {
+        return $true
+    }
+    if ($Evidence.is_stale -eq $true -or $Evidence.stale -eq $true) {
+        return $true
+    }
+
+    return $false
 }
 
 function Add-WeightedFinding {
@@ -117,12 +155,46 @@ elseif ($config.parse_error) {
 }
 
 if ($null -eq $runReport) {
-    $reviewFindings.Add("Validator run report is missing; confidence cannot prove a current validator pass.") | Out-Null
-    Add-WeightedFinding -Findings $weightedFindings -Source "validator_run_report" -Severity "REVIEW_REQUIRED" -Weight 20 -Reason "Missing validator run report."
+    $blockedFindings.Add("Validator run report is missing; confidence cannot prove a current validator pass.") | Out-Null
+    Add-WeightedFinding -Findings $weightedFindings -Source "validator_run_report" -Severity "BLOCKED" -Weight 100 -Reason "Missing validator run report."
 }
 elseif ($runReport.parse_error) {
     $blockedFindings.Add("Validator run report could not parse.") | Out-Null
     Add-WeightedFinding -Findings $weightedFindings -Source "validator_run_report" -Severity "BLOCKED" -Weight 100 -Reason $runReport.parse_error
+}
+
+if ($null -eq $recommendation) {
+    $blockedFindings.Add("Validator recommendation report is missing; confidence cannot prove trusted validator evidence.") | Out-Null
+    Add-WeightedFinding -Findings $weightedFindings -Source "validator_recommendation" -Severity "BLOCKED" -Weight 100 -Reason "Missing validator recommendation report."
+}
+elseif ($recommendation.parse_error) {
+    $blockedFindings.Add("Validator recommendation report could not parse.") | Out-Null
+    Add-WeightedFinding -Findings $weightedFindings -Source "validator_recommendation" -Severity "BLOCKED" -Weight 100 -Reason $recommendation.parse_error
+}
+
+$trustedEvidencePaths = @(
+    [pscustomobject]@{ kind = "validator_recommendation"; path = $ValidatorRecommendationPath },
+    [pscustomobject]@{ kind = "validator_run_report"; path = $ValidatorRunReportPath }
+)
+foreach ($source in $trustedEvidencePaths) {
+    if (Test-ExamplePath -Path $source.path) {
+        $blockedFindings.Add("$($source.kind) points to example evidence and cannot be trusted: $(ConvertTo-RelativePath -Path $source.path)") | Out-Null
+        Add-WeightedFinding -Findings $weightedFindings -Source $source.kind -Severity "BLOCKED" -Weight 100 -Reason ".example evidence is not trusted runtime evidence."
+    }
+}
+
+foreach ($evidenceSource in @(
+    [pscustomobject]@{ kind = "validator_recommendation"; evidence = $recommendation },
+    [pscustomobject]@{ kind = "validator_run_report"; evidence = $runReport }
+)) {
+    if (Test-MockEvidence -Evidence $evidenceSource.evidence) {
+        $blockedFindings.Add("$($evidenceSource.kind) contains mock/sample/example evidence markers.") | Out-Null
+        Add-WeightedFinding -Findings $weightedFindings -Source $evidenceSource.kind -Severity "BLOCKED" -Weight 100 -Reason "Mock evidence cannot establish validator confidence."
+    }
+    if (Test-StaleEvidence -Evidence $evidenceSource.evidence) {
+        $blockedFindings.Add("$($evidenceSource.kind) is marked stale.") | Out-Null
+        Add-WeightedFinding -Findings $weightedFindings -Source $evidenceSource.kind -Severity "BLOCKED" -Weight 100 -Reason "Stale evidence cannot establish validator confidence."
+    }
 }
 
 foreach ($missing in $requiredMissing) {
@@ -315,6 +387,7 @@ if ($Json) {
     exit 0
 }
 
+Write-Host "[VALIDATOR RESULT]"
 Write-Host "AI_OS Validator Confidence"
 Write-Host "Mode: DRY_RUN"
 Write-Host "Overall result: $($result.overall_result)"

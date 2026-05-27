@@ -121,6 +121,8 @@ $validatorRequirements = @(
     "no live trading or broker enablement PASS",
     "commit package exact-file review PASS",
     "runtime bundle confidence HIGH",
+    "runtime bundle path supplied",
+    "runtime bundle generated from trusted non-example evidence",
     "PR checks PASS before merge",
     "auto-git decision SAFE_AUTO_ALLOWED"
 )
@@ -128,6 +130,8 @@ $validatorRequirements = @(
 $stopConditions = @(
     "validator result is not PASS",
     "runtime confidence is not HIGH",
+    "runtime bundle path is missing",
+    "runtime bundle evidence is missing, stale, mock, example, or unverifiable",
     "PR checks are required and not PASS",
     "merge conflict or unmerged file is present",
     "protected path is present",
@@ -141,13 +145,10 @@ $stopConditions = @(
 $safePathPrefixes = @(
     "Reports/",
     "automation/orchestration/reports/",
-    "automation/orchestration/validator_chain_runner/",
-    "automation/orchestration/validators/VALIDATOR_RECOMMENDATION.example.json",
     "automation/orchestration/validators/VALIDATOR_CHAIN_RUNBOOK_001.md",
     "automation/orchestration/work_packets/complete/",
     "work_packets/examples/",
-    "work_packets/state/",
-    "docs/workflows/"
+    "work_packets/state/"
 )
 
 $protectedPathPrefixes = @(
@@ -157,6 +158,7 @@ $protectedPathPrefixes = @(
     "docs/security/",
     "automation/orchestration/policy/",
     "automation/orchestration/validators/",
+    "automation/orchestration/validator_chain_runner/",
     "schemas/aios/orchestration/",
     "apps/",
     "services/",
@@ -176,8 +178,14 @@ $runtimeBundleConfidenceScore = $null
 $validatorConfidenceScore = $null
 $requiredBundleSectionsPresent = $false
 $bundleStopConditions = @()
+$runtimeEvidenceTrusted = $false
 
-if ($runtimeBundle) {
+if ([string]::IsNullOrWhiteSpace($RuntimeBundlePath)) {
+    $RuntimeConfidence = "BLOCKED"
+    $ValidatorResult = "BLOCKED"
+    $bundleStopConditions += "runtime bundle path missing"
+}
+elseif ($runtimeBundle) {
     if ($runtimeBundle.parse_error) {
         $RuntimeConfidence = "BLOCKED"
         $bundleStopConditions += "runtime bundle parse failure"
@@ -210,7 +218,20 @@ if ($runtimeBundle) {
             $runtimeBundle.confidence_state -and
             $runtimeBundle.validator_confidence
         )
+        $runtimeEvidenceTrusted = [bool](
+            $runtimeBundle.required_evidence_present -and
+            $runtimeBundle.required_evidence_present.validator_confidence -eq $true -and
+            $runtimeBundle.bundle_integrity -and
+            $runtimeBundle.bundle_integrity.status -eq "PASS" -and
+            $runtimeBundle.auto_git_eligibility -and
+            $runtimeBundle.auto_git_eligibility.safe_auto_allowed -eq $true
+        )
     }
+}
+else {
+    $RuntimeConfidence = "BLOCKED"
+    $ValidatorResult = "BLOCKED"
+    $bundleStopConditions += "runtime bundle missing or unreadable"
 }
 
 $gitStatus = Get-GitStatusLines
@@ -219,15 +240,22 @@ $untrackedPaths = @($gitStatus | Where-Object { $_ -like "??*" } | ForEach-Objec
 $conflictLines = @($gitStatus | Where-Object { $_ -match "^(UU|AA|DD|AU|UA|DU|UD) " })
 
 $candidateFiles = @($CandidateFile | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { Normalize-PathText -Path $_ } | Select-Object -Unique)
-if ($candidateFiles.Count -eq 0) {
-    $candidateFiles = @($statusPaths | Where-Object { $_ -ne ".codex_worktrees/" } | ForEach-Object { Normalize-PathText -Path $_ } | Select-Object -Unique)
-}
 
 $reviewFindings = New-Object System.Collections.Generic.List[string]
 $blockedFindings = New-Object System.Collections.Generic.List[string]
 
 if ($candidateFiles.Count -eq 0) {
-    $blockedFindings.Add("No candidate files were supplied or discovered.") | Out-Null
+    $blockedFindings.Add("No candidate files were supplied; auto-git will not infer candidates from git status.") | Out-Null
+}
+
+if ([string]::IsNullOrWhiteSpace($RuntimeBundlePath)) {
+    $blockedFindings.Add("Runtime bundle path is required for SAFE_AUTO_ALLOWED eligibility.") | Out-Null
+}
+elseif ($null -eq $runtimeBundle) {
+    $blockedFindings.Add("Runtime bundle evidence is missing or unreadable.") | Out-Null
+}
+elseif (-not $runtimeEvidenceTrusted) {
+    $blockedFindings.Add("Runtime bundle does not prove trusted SAFE_AUTO_ALLOWED evidence.") | Out-Null
 }
 
 if ($ValidatorResult -ne "PASS") {
@@ -370,6 +398,7 @@ if ($Json) {
     exit 0
 }
 
+Write-Host "[VALIDATOR RESULT]"
 Write-Host "AI_OS Auto-Git Decision"
 Write-Host "Mode: DRY_RUN"
 Write-Host "Action: $($result.requested_action)"
@@ -379,7 +408,9 @@ Write-Host "Candidate files: $($result.candidate_files.Count)"
 Write-Host "Review findings: $($result.evidence.review_findings.Count)"
 Write-Host "Blocked findings: $($result.evidence.blocked_findings.Count)"
 Write-Host ""
+Write-Host "[CREW RECOMMENDATION]"
 Write-Host "Next safe action: $($result.next_safe_action)"
+Write-Host "[VALIDATOR RESULT]"
 Write-Host "Auto-git execution enabled: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
