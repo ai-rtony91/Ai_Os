@@ -11,6 +11,8 @@ const staticDashboardOutputs = [
   'icons',
   'assets',
   'mock-data',
+  'package.json',
+  'server.js',
 ]
 
 function copyStaticDashboardRuntime() {
