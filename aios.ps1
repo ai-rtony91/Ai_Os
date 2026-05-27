@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout","control","finish-pr")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","packet","layout","control","finish-pr","hud")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -85,6 +85,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode layout  # show 5-worker terminal layout plan and banner commands"
         Write-Host ".\aios.ps1 -Mode control # show operator control loop cockpit"
         Write-Host ".\aios.ps1 -Mode finish-pr -Pr 273 # preview PR finish steps"
+        Write-Host ".\aios.ps1 -Mode hud -Worker CLAUDE # preview worker HUD"
     }
 
     "daily" {
@@ -125,6 +126,10 @@ switch ($Mode) {
         }
 
         powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/pr_gates/Invoke-AiOsPrFinisher.DRY_RUN.ps1 -Pr $Pr
+    }
+
+    "hud" {
+        powershell -NoProfile -ExecutionPolicy Bypass -File automation/window_identity/Show-AiOsWorkerHud.DRY_RUN.ps1 -Worker $Worker
     }
 
     "runtime" {
