@@ -1,14 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/COMMAND_QUEUE_SCHEMA.v0.1",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/COMMAND_QUEUE_SCHEMA.v0.1.1",
   "title": "AI_OS Command Queue Schema",
-  "description": "v0.1 JSON Schema for AI_OS command queue entries. Contract scaffold only; queued commands are not execution authority.",
+  "description": "v0.1.1 JSON Schema for AI_OS command queue entries. Supports current items[] shape and optional legacy commands[] alias. Contract scaffold only; queued commands are not execution authority.",
   "type": "object",
   "additionalProperties": true,
   "required": [
     "queue_id",
-    "version",
-    "commands"
+    "version"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "items"
+      ]
+    },
+    {
+      "required": [
+        "commands"
+      ]
+    }
   ],
   "properties": {
     "queue_id": {
@@ -19,59 +30,73 @@
       "type": "string",
       "minLength": 1
     },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/command_item"
+      }
+    },
     "commands": {
       "type": "array",
       "items": {
-        "type": "object",
-        "additionalProperties": true,
-        "required": [
-          "command_id",
-          "command",
-          "status",
-          "created_at"
-        ],
-        "properties": {
-          "command_id": {
-            "type": "string",
-            "minLength": 1
-          },
-          "packet_id": {
-            "type": "string"
-          },
-          "command": {
-            "type": [
-              "string",
-              "array"
-            ]
-          },
-          "mode": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "minLength": 1
-          },
-          "requested_by": {
-            "type": "string"
-          },
-          "approval_required": {
-            "type": "boolean"
-          },
-          "created_at": {
-            "type": "string"
-          },
-          "updated_at": {
-            "type": "string"
-          },
-          "evidence_paths": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "next_safe_action": {
-            "type": "string"
-          }
+        "$ref": "#/$defs/command_item"
+      }
+    }
+  },
+  "$defs": {
+    "command_item": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "command",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "command_id": {
+          "type": "string"
+        },
+        "packet_id": {
+          "type": "string"
+        },
+        "command": {
+          "type": [
+            "string",
+            "array"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requested_by": {
+          "type": "string"
+        },
+        "approval_required": {
+          "type": "boolean"
+        },
+        "created_utc": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_utc": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "next_safe_action": {
+          "type": "string"
         }
       }
     }

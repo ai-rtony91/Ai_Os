@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.v0.1",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.v0.1.1",
   "title": "AI_OS Orchestration Schema Index",
-  "description": "Machine-readable v0.1 index for AI_OS orchestration schema contract files. This index is documentation and discovery metadata only; it does not execute, approve, validate, commit, push, deploy, or mutate runtime state.",
+  "description": "Machine-readable v0.1.1 index for AI_OS orchestration schema contract files. This index is documentation and discovery metadata only; it does not execute, approve, validate, commit, push, deploy, or mutate runtime state.",
   "type": "object",
   "additionalProperties": true,
   "required": [
@@ -13,7 +13,7 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "0.1"
+      "const": "0.1.1"
     },
     "contracts": {
       "type": "array",
@@ -42,6 +42,9 @@
             ]
           },
           "purpose": {
+            "type": "string"
+          },
+          "reconciliation_version": {
             "type": "string"
           }
         }
@@ -76,90 +79,105 @@
       }
     }
   },
+  "schema_version": "0.1.1",
   "contracts": [
     {
       "name": "README",
       "path": "schemas/aios/orchestration/README.md",
       "kind": "markdown",
-      "purpose": "Folder purpose and safety boundary."
+      "purpose": "Folder purpose and safety boundary.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "EVENT_SCHEMA",
       "path": "schemas/aios/orchestration/EVENT_SCHEMA.md",
       "kind": "markdown",
-      "purpose": "Plain-English orchestration event family contract."
+      "purpose": "Plain-English orchestration event family contract.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "STATE_PROJECTION_RULES",
       "path": "schemas/aios/orchestration/STATE_PROJECTION_RULES.md",
       "kind": "markdown",
-      "purpose": "State projection rules for local-first orchestration evidence."
+      "purpose": "State projection rules for local-first orchestration evidence.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "WORKER_REGISTRY_SCHEMA",
       "path": "schemas/aios/orchestration/WORKER_REGISTRY_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Worker registry structure."
+      "purpose": "Worker registry structure.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "WORKER_PROFILE_SCHEMA",
       "path": "schemas/aios/orchestration/WORKER_PROFILE_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Worker profile and capability structure."
+      "purpose": "Worker profile-set and capability structure.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "WORKER_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/WORKER_INBOX_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Worker inbox task assignment records."
+      "purpose": "Worker inbox task assignment records.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "WORK_PACKET_SCHEMA",
       "path": "schemas/aios/orchestration/WORK_PACKET_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Work packet structure."
+      "purpose": "Work packet structure with current field aliases.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "COMMAND_QUEUE_SCHEMA",
       "path": "schemas/aios/orchestration/COMMAND_QUEUE_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Command queue entries."
+      "purpose": "Command queue entries with items/commands aliases.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "APPROVAL_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Approval inbox records."
+      "purpose": "Optional approval inbox records.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "APPLY_APPROVAL_GATE_SCHEMA",
       "path": "schemas/aios/orchestration/APPLY_APPROVAL_GATE_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Apply approval gate records."
+      "purpose": "Apply approval gate records with current aliases.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "VALIDATOR_OUTPUT_SCHEMA",
       "path": "schemas/aios/orchestration/VALIDATOR_OUTPUT_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Validator output records."
+      "purpose": "Validator output records.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "COMMIT_PACKAGE_SCHEMA",
       "path": "schemas/aios/orchestration/COMMIT_PACKAGE_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Commit package recommendation records."
+      "purpose": "Commit package manifest and recommendation records.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "LOCK_REGISTRY_SCHEMA",
       "path": "schemas/aios/orchestration/LOCK_REGISTRY_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "File and path lock records."
+      "purpose": "Registry-wrapper and single-lock file/path records.",
+      "reconciliation_version": "0.1.1"
     },
     {
       "name": "RUNTIME_VISIBILITY_SCHEMA",
       "path": "schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.json",
       "kind": "json_schema",
-      "purpose": "Dashboard and runtime visibility projection."
+      "purpose": "Dashboard and runtime API visibility read model.",
+      "reconciliation_version": "0.1.1"
     }
   ],
   "safety": {

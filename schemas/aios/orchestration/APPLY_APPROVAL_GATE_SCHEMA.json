@@ -1,21 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/APPLY_APPROVAL_GATE_SCHEMA.v0.1",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/APPLY_APPROVAL_GATE_SCHEMA.v0.1.1",
   "title": "AI_OS Apply Approval Gate Schema",
-  "description": "v0.1 JSON Schema for AI_OS apply approval gate records. Contract scaffold only; gate records describe approval checks and do not bypass Human Owner authority.",
+  "description": "v0.1.1 JSON Schema for AI_OS apply approval gate records. Supports current aliases such as approval_gate_id and approval_status. Contract scaffold only; gate records describe approval checks and do not bypass Human Owner authority.",
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "gate_id",
     "packet_id",
-    "gate_status",
-    "approved_by_human",
-    "created_at"
+    "approved_by_human"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "approval_gate_id"
+      ]
+    },
+    {
+      "required": [
+        "gate_id"
+      ]
+    }
   ],
   "properties": {
+    "approval_gate_id": {
+      "type": "string"
+    },
     "gate_id": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "packet_id": {
       "type": "string",
@@ -24,17 +35,49 @@
     "approval_id": {
       "type": "string"
     },
+    "approval_status": {
+      "type": "string"
+    },
     "gate_status": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "approved_by_human": {
       "type": "boolean"
     },
+    "requested_mode": {
+      "type": "string"
+    },
+    "approved_mode": {
+      "type": "string"
+    },
     "mode_allowed": {
       "type": "string"
     },
+    "risk_level": {
+      "type": "string"
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validator_chain_required": {
+      "type": "boolean"
+    },
     "validator_chain_passed": {
+      "type": "boolean"
+    },
+    "commit_package_required": {
+      "type": "boolean"
+    },
+    "push_blocked_until_final_review": {
       "type": "boolean"
     },
     "scope_match": {
@@ -46,7 +89,7 @@
         "type": "string"
       }
     },
-    "evidence_paths": {
+    "notes": {
       "type": "array",
       "items": {
         "type": "string"
@@ -54,6 +97,15 @@
     },
     "created_at": {
       "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "approval_timestamp_placeholder": {
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "checked_at": {
       "type": "string"

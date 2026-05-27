@@ -1,18 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/COMMIT_PACKAGE_SCHEMA.v0.1",
-  "title": "AI_OS Commit Package Recommendation Schema",
-  "description": "v0.1 JSON Schema for AI_OS commit package recommendation records. Contract scaffold only; it does not stage, commit, push, create PRs, merge, or bypass protected main.",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/COMMIT_PACKAGE_SCHEMA.v0.1.1",
+  "title": "AI_OS Commit Package Schema",
+  "description": "v0.1.1 JSON Schema for AI_OS commit package manifest and recommendation records. Contract scaffold only; it does not stage, commit, push, create PRs, merge, or bypass protected main.",
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "commit_package_id",
-    "packet_id",
-    "status",
-    "recommended_files",
-    "excluded_files",
-    "risk_findings",
-    "created_at"
+    "commit_package_id"
   ],
   "properties": {
     "commit_package_id": {
@@ -20,12 +14,46 @@
       "minLength": 1
     },
     "packet_id": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
+    },
+    "packet_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "phase": {
+      "type": "string"
+    },
+    "stage": {
+      "type": "string"
     },
     "status": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
+    },
+    "approved_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "files_to_stage": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "files_not_to_stage": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "recommended_files": {
       "type": "array",
@@ -48,17 +76,26 @@
         ]
       }
     },
+    "git_add_strategy": {
+      "type": "string"
+    },
+    "validator_chain_status": {
+      "type": "string"
+    },
+    "approval_gate_status": {
+      "type": "string"
+    },
+    "final_git_status_required": {
+      "type": "string"
+    },
+    "commit_message": {
+      "type": "string"
+    },
     "commit_message_suggestion": {
       "type": "string"
     },
-    "validation_evidence": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "next_safe_action": {
-      "type": "string"
+    "push_allowed_after_human_review": {
+      "type": "boolean"
     },
     "created_at": {
       "type": "string"

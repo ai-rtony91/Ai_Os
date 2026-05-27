@@ -1,32 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.v0.1",
-  "title": "AI_OS Runtime Visibility Projection Schema",
-  "description": "v0.1 JSON Schema for AI_OS dashboard and runtime visibility projection. Contract scaffold only; visibility projections are evidence and display data, not command authority.",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.v0.1.1",
+  "title": "AI_OS Runtime Visibility Read Model Schema",
+  "description": "v0.1.1 JSON Schema for AI_OS runtime API and dashboard visibility read models. Supports current API and mock shapes. Contract scaffold only; visibility projections are evidence and display data, not command authority.",
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "projection_id",
-    "schema_version",
-    "generated_at",
-    "source_paths",
-    "workers",
-    "packets",
-    "approvals",
-    "validators",
-    "locks",
-    "overall_status"
+    "schema"
   ],
   "properties": {
+    "schema": {
+      "type": "string"
+    },
     "projection_id": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "schema_version": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
+    },
+    "generatedAt": {
+      "type": "string"
     },
     "generated_at": {
+      "type": "string"
+    },
+    "mode": {
       "type": "string"
     },
     "source_paths": {
@@ -35,12 +33,35 @@
         "type": "string"
       }
     },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "queue": {
+      "type": "object",
+      "additionalProperties": true
+    },
     "workers": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": true
       }
+    },
+    "activePackets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "failedPackets": {
+      "type": "object",
+      "additionalProperties": true
     },
     "packets": {
       "type": "array",
@@ -70,13 +91,6 @@
         "additionalProperties": true
       }
     },
-    "commit_packages": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": true
-      }
-    },
     "locks": {
       "type": "array",
       "items": {
@@ -84,17 +98,19 @@
         "additionalProperties": true
       }
     },
-    "overall_status": {
-      "type": "string",
-      "minLength": 1
+    "audit": {
+      "type": "object",
+      "additionalProperties": true
     },
-    "stale_sources": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "controls": {
+      "type": "object",
+      "additionalProperties": true
     },
-    "conflicts": {
+    "backpressure": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "alerts": {
       "type": "array",
       "items": {
         "type": [
@@ -102,6 +118,32 @@
           "object"
         ]
       }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "executionLedger": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "overall_status": {
+      "type": "string"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "nextSafeAction": {
+      "type": "string"
     },
     "next_safe_action": {
       "type": "string"

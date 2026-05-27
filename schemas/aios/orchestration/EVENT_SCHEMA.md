@@ -1,10 +1,16 @@
-# AI_OS Orchestration Event Schema v0.1
+# AI_OS Orchestration Event Schema v0.1.1
 
 This document defines the first canonical AI_OS orchestration event family in plain English.
 
 This is contract documentation only. It is not executable authority, does not approve work, does not move packets, does not mutate runtime state, does not start services, does not commit or push, and does not grant broker, OANDA, secret, API-key, live-order, or live-trading access.
 
 Events are evidence, not approval. Validator PASS events are evidence only; validator PASS does not approve APPLY, commit, push, merge, deployment, approval mutation, worker execution, broker access, OANDA access, API-key access, or live trading.
+
+## v0.1.1 Reconciliation Note
+
+The event family currently describes target contracts while current AI_OS orchestration state is projected from local JSON files, markdown contracts, telemetry ledgers, runtime API read models, and dashboard mock data.
+
+Events remain evidence, not approval. Validator PASS does not approve APPLY, commit, push, deploy, protected-path mutation, approval mutation, lock changes, worker execution, broker access, OANDA access, API-key access, live-order access, or live trading.
 
 ## Event Family
 
