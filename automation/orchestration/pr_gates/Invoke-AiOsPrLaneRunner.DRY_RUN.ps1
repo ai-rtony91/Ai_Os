@@ -115,7 +115,7 @@ function Invoke-ReadOnlyCommand {
         exit 1
     }
 
-    if ($stderrText) {
+    if ($stderrText -and -not $Json) {
         Write-Warning "[$DisplayCommand] $stderrText"
     }
 
@@ -653,13 +653,11 @@ try {
         -HasUnstagedTracked $hasUnstagedTracked `
         -HasUntracked $hasUntracked
 
-    Write-Output (Format-MarkdownPacket -Packet $packet)
-
     if ($Json) {
-        Write-Output ""
-        Write-Output "---"
-        Write-Output ""
         $packet | ConvertTo-Json -Depth 10
+    }
+    else {
+        Write-Output (Format-MarkdownPacket -Packet $packet)
     }
 }
 catch {

@@ -91,9 +91,13 @@ function Test-AiOsPathStartsWith {
 
 function Test-AiOsAnyPathStartsWith {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Paths,
+        [string[]]$Paths = @(),
         [Parameter(Mandatory = $true)][string]$Prefix
     )
+
+    if ($Paths.Count -eq 0) {
+        return $false
+    }
 
     foreach ($path in $Paths) {
         if (Test-AiOsPathStartsWith -Path $path -Prefix $Prefix) {
@@ -106,9 +110,13 @@ function Test-AiOsAnyPathStartsWith {
 
 function Test-AiOsAnyPathMatches {
     param(
-        [Parameter(Mandatory = $true)][string[]]$Paths,
+        [string[]]$Paths = @(),
         [Parameter(Mandatory = $true)][string]$Pattern
     )
+
+    if ($Paths.Count -eq 0) {
+        return $false
+    }
 
     foreach ($path in $Paths) {
         if ($path -match $Pattern) {
@@ -289,6 +297,7 @@ $report = [pscustomobject]@{
     schema = "AIOS_VALIDATOR_RECOMMENDATION.v1"
     task = "Recommend AI_OS validators from changed files"
     mode = "DRY_RUN"
+    execution_enabled = $false
     generated_at = $generatedAt
     repo_root = $repoRoot
     result = $result

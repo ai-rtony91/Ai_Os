@@ -64,7 +64,7 @@ function Get-WorkerLaneFromBranch {
 }
 
 function Get-CommitMessageSuggestion {
-    param([Parameter(Mandatory = $true)][object[]]$RecommendedFiles)
+    param([object[]]$RecommendedFiles = @())
 
     $paths = @($RecommendedFiles | ForEach-Object { $_.path })
     $scopes = @($paths | ForEach-Object {
@@ -238,12 +238,21 @@ if ($recommendedTopScopes.Count -gt 1) {
     }
 }
 
-$commitMessage = Get-CommitMessageSuggestion -RecommendedFiles $recommendedFiles
+$commitMessage = if ($recommendedFiles.Count -eq 0) {
+    ""
+}
+else {
+    Get-CommitMessageSuggestion -RecommendedFiles $recommendedFiles
+}
 $gitStatus = if ($statusLines.Count -eq 0) { "clean" } else { "dirty" }
+$resultState = if ($recommendedFiles.Count -eq 0) { "NO_CHANGES" } else { "REVIEW" }
 
 $result = [pscustomobject]@{
+    schema = "AIOS_COMMIT_PACKAGE_RECOMMENDATION.v1"
     task = "Recommend AI_OS selective commit package"
     mode = "DRY_RUN"
+    result = $resultState
+    execution_enabled = $false
     current_branch = $currentBranch
     git_status = $gitStatus
     worker_lane = [pscustomobject]@{
@@ -267,6 +276,7 @@ $result = [pscustomobject]@{
     excluded_files = $excludedFiles
     risks = $risks
     git_warnings = $gitWarnings
+    suggested_commit_message = $commitMessage
     commit_message_suggestion = $commitMessage
     safety = [pscustomobject]@{
         git_add_dot_used = "NO"
