@@ -54,6 +54,33 @@
       "enabled": true
     },
     {
+      "marker": "CLAUDE REVIEWER",
+      "title": "CLAUDE - INSPECTOR",
+      "emojiCodePoint": "0x1F9E0",
+      "fallbackTitle": "CLAUDE - INSPECTOR | REVIEW",
+      "color": "Magenta",
+      "theme": "midnight-violet-ember",
+      "identityBanner": "[REVIEW] CLAUDE - INSPECTOR :: ONLINE",
+      "beginMarker": "[REVIEW] CLAUDE - INSPECTOR :: BEGIN",
+      "endMarker": "[REVIEW] CLAUDE - INSPECTOR :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
+      "role": "Review-only worker for architecture inspection, critique, risk review, and DRY_RUN refinement.",
+      "allowedActions": [
+        "Inspect assigned files and docs",
+        "Review architecture, governance, and workflow risk",
+        "Recommend DRY_RUN refinements for operator approval"
+      ],
+      "blockedActions": [
+        "No file edits unless explicitly reassigned in an APPLY packet",
+        "No staging, commits, pushes, or merges",
+        "No approval mutation or queue mutation",
+        "No broker, OANDA, live trading, webhook, API key, or secret actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
       "marker": "VALIDATOR WORKER",
       "title": "\u2705 VALIDATOR",
       "color": "Green",
