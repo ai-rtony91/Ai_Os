@@ -99,6 +99,29 @@ function Invoke-AiOsCrewJsonHelper {
     }
 }
 
+function Get-AiOsCampaignRegistryDetails {
+    param(
+        [Parameter(Mandatory = $true)][string]$RegistryPath,
+        [Parameter(Mandatory = $false)][AllowNull()][string]$CampaignId
+    )
+
+    if ([string]::IsNullOrWhiteSpace($CampaignId)) {
+        return $null
+    }
+
+    if (-not (Test-Path -LiteralPath $RegistryPath -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $registry = Get-Content -Raw -LiteralPath $RegistryPath | ConvertFrom-Json
+        return @($registry.campaigns | Where-Object { $_.campaign_id -eq $CampaignId } | Select-Object -First 1)
+    }
+    catch {
+        return $null
+    }
+}
+
 $crewRoot = "automation/orchestration/crew"
 $taskHelper = Join-Path $crewRoot "New-AiOsCrewTask.DRY_RUN.ps1"
 $assignmentHelper = Join-Path $crewRoot "Get-AiOsCrewAssignmentRecommendation.DRY_RUN.ps1"
@@ -106,54 +129,143 @@ $validatorHelper = Join-Path $crewRoot "Get-AiOsCrewValidatorRecommendation.DRY_
 $dryRunResultHelper = Join-Path $crewRoot "New-AiOsCrewDryRunResult.DRY_RUN.ps1"
 $approvalSummaryHelper = "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1"
 $commitPackageHelper = "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
+$campaignHelper = "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
+$campaignRegistryPath = "automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json"
 
-$normalizedAllowedPaths = @($AllowedPaths | ForEach-Object { ConvertTo-AiOsRepoPath -Path $_ } | Where-Object { $_ })
-$normalizedBlockedPaths = @($BlockedPaths | ForEach-Object { ConvertTo-AiOsRepoPath -Path $_ } | Where-Object { $_ })
-$normalizedChangedPaths = @($ChangedPaths | ForEach-Object { ConvertTo-AiOsRepoPath -Path $_ } | Where-Object { $_ })
+$campaignPreview = Invoke-AiOsCrewJsonHelper -Path $campaignHelper -HelperArguments @("-OutputJson")
+$campaignResult = $campaignPreview.result
+$campaignReady = (
+    $campaignPreview.status -eq "PASS" -and
+    $null -ne $campaignResult -and
+    $campaignResult.overall_readiness -eq "READY_FOR_PACKET_PREVIEW" -and
+    -not [string]::IsNullOrWhiteSpace([string]$campaignResult.next_packet_candidate)
+)
+$campaignId = if ($campaignResult -and $campaignResult.recommended_campaign) {
+    [string]$campaignResult.recommended_campaign.campaign_id
+}
+else {
+    ""
+}
+$campaignDetails = Get-AiOsCampaignRegistryDetails -RegistryPath $campaignRegistryPath -CampaignId $campaignId
+
+$effectiveTaskId = $TaskId
+$effectiveTitle = $Title
+$effectivePurpose = $Purpose
+$effectivePacketId = $PacketId
+$effectiveRecommendedWorker = $RecommendedWorker
+$effectiveRecommendedLane = $RecommendedLane
+$effectiveAllowedPaths = @($AllowedPaths)
+$effectiveBlockedPaths = @($BlockedPaths)
+$effectiveChangedPaths = @($ChangedPaths)
+
+if ($campaignReady) {
+    $effectivePacketId = [string]$campaignResult.next_packet_candidate
+    if ($campaignResult.recommended_stage -and -not [string]::IsNullOrWhiteSpace([string]$campaignResult.recommended_stage.stage_id)) {
+        $effectiveTaskId = [string]$campaignResult.recommended_stage.stage_id
+    }
+    if ($campaignResult.recommended_stage -and -not [string]::IsNullOrWhiteSpace([string]$campaignResult.recommended_stage.title)) {
+        $effectiveTitle = [string]$campaignResult.recommended_stage.title
+    }
+    if (-not [string]::IsNullOrWhiteSpace([string]$campaignResult.reason)) {
+        $effectivePurpose = [string]$campaignResult.reason
+    }
+    if (-not [string]::IsNullOrWhiteSpace([string]$campaignResult.recommended_worker)) {
+        $effectiveRecommendedWorker = [string]$campaignResult.recommended_worker
+    }
+    if (-not [string]::IsNullOrWhiteSpace([string]$campaignResult.recommended_lane)) {
+        $effectiveRecommendedLane = [string]$campaignResult.recommended_lane
+    }
+    if ($effectiveAllowedPaths.Count -eq 0 -and $campaignDetails -and $campaignDetails.allowed_paths) {
+        $effectiveAllowedPaths = @($campaignDetails.allowed_paths)
+    }
+    if ($effectiveBlockedPaths.Count -eq 0 -and $campaignDetails -and $campaignDetails.blocked_paths) {
+        $effectiveBlockedPaths = @($campaignDetails.blocked_paths)
+    }
+    if ($effectiveChangedPaths.Count -eq 0) {
+        $effectiveChangedPaths = @($effectiveAllowedPaths)
+    }
+}
+
+$campaignNextTask = if ($campaignReady -or ($campaignPreview.status -eq "PASS" -and $null -ne $campaignResult)) {
+    [pscustomobject]@{
+        status = if ($campaignReady) { "AVAILABLE" } else { "REVIEW_REQUIRED" }
+        recommended_campaign = $campaignResult.recommended_campaign
+        recommended_phase = $campaignResult.recommended_phase
+        recommended_stage = $campaignResult.recommended_stage
+        next_packet_candidate = $campaignResult.next_packet_candidate
+        recommended_worker = $campaignResult.recommended_worker
+        recommended_lane = $campaignResult.recommended_lane
+        reason = $campaignResult.reason
+        blockers = @($campaignResult.blockers)
+        overall_readiness = $campaignResult.overall_readiness
+    }
+}
+else {
+    [pscustomobject]@{
+        status = "UNAVAILABLE"
+        recommended_campaign = $null
+        recommended_phase = $null
+        recommended_stage = $null
+        next_packet_candidate = $null
+        recommended_worker = $null
+        recommended_lane = $null
+        reason = "Campaign Registry next-task helper unavailable."
+        blockers = @($campaignPreview.error)
+        overall_readiness = "UNAVAILABLE"
+    }
+}
+
+$normalizedAllowedPaths = @($effectiveAllowedPaths | ForEach-Object { ConvertTo-AiOsRepoPath -Path $_ } | Where-Object { $_ })
+$normalizedBlockedPaths = @($effectiveBlockedPaths | ForEach-Object { ConvertTo-AiOsRepoPath -Path $_ } | Where-Object { $_ })
+$normalizedChangedPaths = @($effectiveChangedPaths | ForEach-Object { ConvertTo-AiOsRepoPath -Path $_ } | Where-Object { $_ })
 if ($normalizedChangedPaths.Count -eq 0) {
     $normalizedChangedPaths = @($normalizedAllowedPaths)
 }
 
+$helperAllowedPaths = @($normalizedAllowedPaths | Select-Object -First 1)
+$helperBlockedPaths = @($normalizedBlockedPaths | Select-Object -First 1)
+$helperChangedPaths = @($normalizedChangedPaths | Select-Object -First 1)
+
 $taskArgs = @(
-    "-TaskId", $TaskId,
-    "-Title", $Title,
-    "-Purpose", $Purpose,
+    "-TaskId", $effectiveTaskId,
+    "-Title", $effectiveTitle,
+    "-Purpose", $effectivePurpose,
     "-Owner", $Owner,
     "-StopPoint", $StopPoint
 )
-if ($normalizedAllowedPaths.Count -gt 0) {
+if ($helperAllowedPaths.Count -gt 0) {
     $taskArgs += "-AllowedPaths"
-    $taskArgs += $normalizedAllowedPaths
+    $taskArgs += $helperAllowedPaths
 }
-if ($normalizedBlockedPaths.Count -gt 0) {
+if ($helperBlockedPaths.Count -gt 0) {
     $taskArgs += "-BlockedPaths"
-    $taskArgs += $normalizedBlockedPaths
+    $taskArgs += $helperBlockedPaths
 }
 
 $assignmentArgs = @(
-    "-WorkerId", $RecommendedWorker,
-    "-PacketId", $PacketId
+    "-WorkerId", $effectiveRecommendedWorker,
+    "-PacketId", $effectivePacketId
 )
-if ($normalizedAllowedPaths.Count -gt 0) {
+if ($helperAllowedPaths.Count -gt 0) {
     $assignmentArgs += "-AssignedPaths"
-    $assignmentArgs += $normalizedAllowedPaths
+    $assignmentArgs += $helperAllowedPaths
 }
 
 $validatorArgs = @()
-if ($normalizedChangedPaths.Count -gt 0) {
+if ($helperChangedPaths.Count -gt 0) {
     $validatorArgs += "-ChangedPaths"
-    $validatorArgs += $normalizedChangedPaths
+    $validatorArgs += $helperChangedPaths
 }
 
 $dryRunArgs = @(
-    "-PacketId", $PacketId,
+    "-PacketId", $effectivePacketId,
     "-Summary", "Crew integration recommendation preview.",
     "-RiskLevel", "normal",
     "-StopPoint", $StopPoint
 )
-if ($normalizedChangedPaths.Count -gt 0) {
+if ($helperChangedPaths.Count -gt 0) {
     $dryRunArgs += "-FilesToModify"
-    $dryRunArgs += $normalizedChangedPaths
+    $dryRunArgs += $helperChangedPaths
 }
 
 $taskPreview = Invoke-AiOsCrewJsonHelper -Path $taskHelper -HelperArguments $taskArgs
@@ -163,7 +275,7 @@ $dryRunPreview = Invoke-AiOsCrewJsonHelper -Path $dryRunResultHelper -HelperArgu
 $approvalPreview = Invoke-AiOsCrewJsonHelper -Path $approvalSummaryHelper -HelperArguments @("-QuietJson")
 $commitPreview = Invoke-AiOsCrewJsonHelper -Path $commitPackageHelper -HelperArguments @("-OutputJson")
 
-$helperResults = @($taskPreview, $assignmentPreview, $validatorPreview, $dryRunPreview, $approvalPreview, $commitPreview)
+$helperResults = @($campaignPreview, $taskPreview, $assignmentPreview, $validatorPreview, $dryRunPreview, $approvalPreview, $commitPreview)
 $failedHelpers = @($helperResults | Where-Object { $_.status -ne "PASS" })
 
 $blockedMatches = @(
@@ -246,24 +358,27 @@ $result = [pscustomobject]@{
     schema = "AIOS_CREW_INTEGRATION_RECOMMENDATION.v1"
     mode = "DRY_RUN_READ_ONLY"
     generated_utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    campaign_next_task = $campaignNextTask
     packet_summary = [pscustomobject]@{
-        task_id = $TaskId
-        packet_id = $PacketId
-        title = $Title
-        purpose = $Purpose
+        task_id = $effectiveTaskId
+        packet_id = $effectivePacketId
+        title = $effectiveTitle
+        purpose = $effectivePurpose
         owner = $Owner
         allowed_paths = @($normalizedAllowedPaths)
         blocked_paths = @($normalizedBlockedPaths)
         changed_paths = @($normalizedChangedPaths)
         stop_point = $StopPoint
     }
-    recommended_worker = $RecommendedWorker
-    recommended_lane = $RecommendedLane
+    next_packet_candidate = $campaignNextTask.next_packet_candidate
+    recommended_worker = $effectiveRecommendedWorker
+    recommended_lane = $effectiveRecommendedLane
     recommended_validators = @($validatorPreview.result.recommended_validators)
     approval_state_summary = $approvalStateSummary
     commit_package_preview = $commitPackagePreview
     collision_warning = $collisionWarning
     helper_outputs = [pscustomobject]@{
+        campaign_next_task = $campaignResult
         task_intake = $taskPreview.result
         worker_assignment = $assignmentPreview.result
         validator_recommendation = $validatorPreview.result
@@ -290,8 +405,8 @@ $result = [pscustomobject]@{
     modifies_files = $false
     commits = $false
     pushes = $false
-    next_safe_action = $nextSafeAction
-    overall_readiness = $overallReadiness
+    next_safe_action = if ($campaignReady -and -not [string]::IsNullOrWhiteSpace([string]$campaignResult.next_safe_action)) { $campaignResult.next_safe_action } else { $nextSafeAction }
+    overall_readiness = if ($campaignReady) { $campaignResult.overall_readiness } else { $overallReadiness }
 }
 
 if ($OutputJson) {
