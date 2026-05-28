@@ -61,4 +61,3 @@ jobs:
           app-name: algotradez-aios
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ALGOTRADEZ_AIOS }}
           package: apps/dashboard/dist
-          startup-command: node server.js
