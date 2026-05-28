@@ -1,6 +1,10 @@
 ﻿param(
-    [int]$Cycles = 1
+    [ValidateRange(1, 5)][int]$Cycles = 1
 )
+# RECURSION GUARD: Maximum 5 cycles enforced by ValidateRange.
+# Each cycle spawns 14+ subprocesses.
+# If supervisor_status = BLOCKED, the supervisor loop must not call
+# Resolve-AiOsNextStep for that cycle. See Invoke-AiOsSupervisorLoop.DRY_RUN.ps1.
 
 Set-StrictMode -Off
 $ErrorActionPreference = "Stop"

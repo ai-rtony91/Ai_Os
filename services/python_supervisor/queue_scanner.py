@@ -21,17 +21,19 @@ from packet_risk_classifier import classify_packet_risk
 
 QUEUE_SCHEMA = "AIOS_SUPERVISOR_QUEUE.v1"
 DEFAULT_STALE_AFTER_SECONDS = 24 * 60 * 60
-QUEUE_PRIORITY = {
-    "BLOCKED": 100,
-    "FAILED": 100,
-    "STALE": 80,
-    "WAITING_APPROVAL": 60,
-    "VALIDATING": 50,
-    "PENDING": 40,
-    "ASSIGNED": 20,
-    "COMPLETE": 5,
-    "UNKNOWN": 10,
+QUEUE_STATUS_PRIORITY = {
+    "BLOCKED":          100,
+    "FAILED":           100,
+    "STALE":             80,
+    "WAITING_APPROVAL":  60,
+    "VALIDATING":        45,
+    "PENDING":           40,
+    "ASSIGNED":          20,
+    "COMPLETE":           5,
+    "UNKNOWN":           10,
 }
+# Backward-compatible alias — internal callers use QUEUE_STATUS_PRIORITY.
+QUEUE_PRIORITY = QUEUE_STATUS_PRIORITY
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -148,7 +150,7 @@ def scan_queue(repo_root: str | Path = ".") -> list[dict[str, Any]]:
             "worker_id": worker_id,
             "lane": lane,
             "status": status,
-            "priority": QUEUE_PRIORITY.get(status, QUEUE_PRIORITY["UNKNOWN"]),
+            "priority": QUEUE_STATUS_PRIORITY.get(status, QUEUE_STATUS_PRIORITY["UNKNOWN"]),
             "dependency_ids": [str(value) for value in _as_list(packet.get("dependency_ids"))],
             "lock_id": packet.get("lock_id"),
             "validator_required": status in {"PENDING", "VALIDATING", "ASSIGNED"},
