@@ -20,6 +20,14 @@ This HTML file is a static preview only. It does not replace Windows Terminal, d
 
 Real worker runtime remains PowerShell/terminal-based for now.
 
+## Terminal Control Surface v3
+
+The v3 preview is static only. It does not change Windows Terminal settings, edit PowerShell profiles, launch workers, or replace the existing terminal runtime.
+
+It shows the desired app-like terminal direction: a dark AI_OS shell with translucent code cards, operation deck rail, OCC worker rail, validation and risk panels, lifecycle rows, progress badges, command input strip, visible operator status, and a right-side customization studio.
+
+Future versions may connect to worker status JSON after approval. The customization target includes panel color, blur, radius, size, placement, badges, and layout density.
+
 Open persistent deck windows manually as needed:
 
 ```powershell
