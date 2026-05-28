@@ -10,6 +10,16 @@ Preview first:
 powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsWorkstation.ps1
 ```
 
+Static UI shell preview:
+
+```text
+automation/orchestration/terminal_workstations/AIOS_TERMINAL_CONTROL_SURFACE_PREVIEW.html
+```
+
+This HTML file is a static preview only. It does not replace Windows Terminal, does not launch workers, and does not change runtime behavior. It is the design target for future terminal workstation UI: translucent panels, side rails, worker cards, status badges, progress bars, command input strip, and customization controls.
+
+Real worker runtime remains PowerShell/terminal-based for now.
+
 Open persistent deck windows manually as needed:
 
 ```powershell

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI_OS Terminal Control Surface Preview</title>
+  <style>
+    :root {
+      --base-dark: #05070b;
+      --panel: rgba(18, 22, 28, 0.65);
+      --panel-strong: rgba(22, 29, 40, 0.82);
+      --panel-soft: rgba(56, 189, 248, 0.08);
+      --text: #d7e6ff;
+      --muted: #8ca3bd;
+      --cyan: #38bdf8;
+      --blue-glow: #00a3ff;
+      --green: #37ff88;
+      --pink: #ff4d9d;
+      --orange: #ffb347;
+      --red: #ff5f7a;
+      --violet: #a855f7;
+      --border: rgba(56, 189, 248, 0.36);
+      --radius: 8px;
+      --gap: 14px;
+      --shadow: 0 0 24px rgba(0, 163, 255, 0.16);
+      color-scheme: dark;
+      font-family: "Cascadia Mono", "Cascadia Code", Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(115deg, rgba(168, 85, 247, 0.14), transparent 34%),
+        linear-gradient(245deg, rgba(56, 189, 248, 0.12), transparent 38%),
+        var(--base-dark);
+      color: var(--text);
+    }
+
+    .surface {
+      min-height: 100vh;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 220px minmax(460px, 1fr) 290px;
+      grid-template-rows: auto 1fr auto;
+      gap: var(--gap);
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar {
+      grid-column: 1 / -1;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: minmax(260px, 1fr) auto;
+      gap: var(--gap);
+      align-items: center;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+      color: var(--text);
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .badge-row,
+    .status-strip,
+    .worker-row,
+    .command-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 9px;
+      border-radius: 6px;
+      border: 1px solid currentColor;
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .cyan { color: var(--cyan); }
+    .green { color: var(--green); }
+    .pink { color: var(--pink); }
+    .orange { color: var(--orange); }
+    .red { color: var(--red); }
+    .violet { color: var(--violet); }
+
+    .sidebar,
+    .studio {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      color: var(--cyan);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .deck,
+    .worker-card,
+    .note,
+    .token-card {
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(215, 230, 255, 0.12);
+      border-radius: 7px;
+    }
+
+    .deck strong,
+    .worker-card strong,
+    .token-card strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .deck span,
+    .worker-card span,
+    .token-card span,
+    .note {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto minmax(360px, 1fr) auto;
+      gap: var(--gap);
+    }
+
+    .command-panel {
+      padding: 16px;
+      background:
+        linear-gradient(180deg, rgba(56, 189, 248, 0.08), transparent 42%),
+        var(--panel-strong);
+      overflow: hidden;
+    }
+
+    .terminal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--gap);
+      margin-bottom: 12px;
+    }
+
+    .terminal-code {
+      min-height: 280px;
+      padding: 14px;
+      border-radius: 7px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      background: rgba(5, 7, 11, 0.74);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      box-shadow: inset 0 0 28px rgba(0, 163, 255, 0.08);
+    }
+
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--gap);
+    }
+
+    .risk-grid .note {
+      min-height: 92px;
+    }
+
+    .status-strip {
+      grid-column: 1 / -1;
+      min-height: 58px;
+      padding: 12px 14px;
+      justify-content: space-between;
+    }
+
+    .workers {
+      padding: 14px;
+    }
+
+    .worker-row {
+      justify-content: space-between;
+      padding: 8px 0;
+      border-top: 1px solid rgba(215, 230, 255, 0.08);
+    }
+
+    .worker-row:first-of-type {
+      border-top: 0;
+    }
+
+    .progress {
+      width: 140px;
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(215, 230, 255, 0.12);
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+    }
+
+    .command-input {
+      padding: 12px 14px;
+      background: rgba(5, 7, 11, 0.78);
+      border-top: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 0 0 var(--radius) var(--radius);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .prompt {
+      color: var(--green);
+    }
+
+    .input-text {
+      color: var(--text);
+    }
+
+    @media (max-width: 1120px) {
+      .surface {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar,
+      .status-strip {
+        grid-column: 1;
+      }
+
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="surface">
+    <header class="panel topbar">
+      <div>
+        <h1 class="title">MAIN CONTROL / Command Throne</h1>
+        <div class="subtitle">Static AI_OS Terminal Control Surface v2 preview. Design target only; runtime remains PowerShell/terminal-based.</div>
+      </div>
+      <div class="badge-row">
+        <span class="badge cyan">CI</span>
+        <span class="badge green">PASS</span>
+        <span class="badge orange">WORKING</span>
+        <span class="badge red">BLOCKED</span>
+        <span class="badge violet">HUMAN-GATED</span>
+      </div>
+    </header>
+
+    <aside class="panel sidebar">
+      <section>
+        <h2 class="section-title">Operation Decks</h2>
+        <div class="deck"><strong>MAIN CONTROL</strong><span>Command throne, routing, approval, final safe action.</span></div>
+        <div class="deck"><strong>VALIDATION DECK</strong><span>Evidence shield, parse checks, test status.</span></div>
+        <div class="deck"><strong>TELEMETRY DECK</strong><span>Data pulse, read-only state surfaces.</span></div>
+        <div class="deck"><strong>SAFETY DECK</strong><span>Vault gate, blocked action review.</span></div>
+      </section>
+      <section>
+        <h2 class="section-title">OCC Workers</h2>
+        <div class="worker-card"><strong>EAST_OCC_01</strong><span class="green">WORKING - terminal UI shell</span></div>
+        <div class="worker-card"><strong>WEST_OCC_01</strong><span class="cyan">IDLE - strategy review</span></div>
+        <div class="worker-card"><strong>VALIDATOR_01</strong><span class="orange">WAITING - proof chain</span></div>
+      </section>
+    </aside>
+
+    <section class="main">
+      <div class="panel command-panel">
+        <div class="terminal-head">
+          <div>
+            <h2 class="section-title">Central Terminal / Code Panel</h2>
+            <div class="subtitle">Repo path: C:\Dev\Ai.Os | Branch: phase-night-supervisor-layer2-memory</div>
+          </div>
+          <span class="badge violet">COMMAND THRONE</span>
+        </div>
+        <div class="terminal-code">PS C:\Dev\Ai.Os&gt; git status --short --branch
+## phase-night-supervisor-layer2-memory...origin/phase-night-supervisor-layer2-memory
+
+AI_OS CONTROL SURFACE
+  - Persistent decks stay visible.
+  - Temporary OCC windows stay open for the assigned task lifecycle.
+  - BLOCKED workers park visibly for operator review.
+  - No Windows Terminal settings are edited by this preview.
+
+NEXT SAFE ACTION
+  Review diff, validate, then commit only approved files.</div>
+        <div class="command-input">
+          <span class="prompt">AI_OS&gt;</span>
+          <span class="input-text"> operator-approved command appears here</span>
+        </div>
+      </div>
+
+      <div class="risk-grid">
+        <div class="panel note"><strong class="orange">Risk Notes</strong><br>No installs, no profile edits, no startup tasks, no auto-launch.</div>
+        <div class="panel note"><strong class="cyan">Validation Plan</strong><br>Run diff checks, parser checks, JSON checks, then report status.</div>
+        <div class="panel note"><strong class="red">Blocked Paths</strong><br>Trading, broker, OANDA, API-key, live-order, telemetry backup.</div>
+      </div>
+
+      <div class="panel workers">
+        <h2 class="section-title">Worker Activity Rows</h2>
+        <div class="worker-row">
+          <span>EAST_OCC_01 / APPLY</span>
+          <div class="progress"><span style="width: 72%"></span></div>
+          <span class="badge orange">WORKING</span>
+        </div>
+        <div class="worker-row">
+          <span>VALIDATOR_01 / PROOF</span>
+          <div class="progress"><span style="width: 45%"></span></div>
+          <span class="badge cyan">CI</span>
+        </div>
+        <div class="worker-row">
+          <span>MAIN_CONTROL / APPROVAL</span>
+          <div class="progress"><span style="width: 88%"></span></div>
+          <span class="badge violet">GATED</span>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel studio">
+      <h2 class="section-title">Customization Studio</h2>
+      <div class="token-card"><strong>Color</strong><span>Base, panel, accent, pass, warning, blocked, glow.</span></div>
+      <div class="token-card"><strong>Shape</strong><span>Panel radius, border weight, badge density, progress bars.</span></div>
+      <div class="token-card"><strong>Size</strong><span>Compact, comfort, spacious, and wide terminal layouts.</span></div>
+      <div class="token-card"><strong>Position</strong><span>Side rail, status strip, bottom worker row, command input strip.</span></div>
+      <div class="token-card"><strong>Badge Style</strong><span>CI, PASS, WORKING, COMPLETE, BLOCKED, HUMAN-GATED.</span></div>
+      <div class="token-card"><strong>Safety</strong><span>Static preview only. Does not replace Windows Terminal or run workers.</span></div>
+    </aside>
+
+    <footer class="panel status-strip">
+      <span>AI_OS Terminal Control Surface v2 Preview</span>
+      <span class="badge cyan">STATIC HTML</span>
+      <span class="badge green">REPO-OWNED</span>
+      <span class="badge red">NO AUTO-LAUNCH</span>
+    </footer>
+  </main>
+</body>
+</html>
