@@ -32,11 +32,15 @@ Persistent deck scripts print their banner, show a final visible state, and wait
 
 Default persistent deck state is `IDLE`.
 
-Persistent decks stay open. Temporary OCC workers close after completed APPLY/commit workflow or park on BLOCKED.
+Persistent decks stay open all day. Temporary OCC workers close after completed APPLY/commit workflow or park on BLOCKED.
 
-Temporary OCC workers remain packet-scoped. Temporary OCC windows may stay visible while `WORKING`, should show `COMPLETE` after APPLY plus commit/push reporting, then close or allow operator close. Failed or blocked workers should park on `BLOCKED`.
+Temporary OCC workers remain packet-scoped and should stay open for one assigned task or project phase. The same visible OCC worker window should cover APPLY, validation, commit, push, PR/merge if used, and the final sync/status report for that task.
 
-Anti-pileup rule: do not allow unlimited stacked worker windows. Completed temporary worker windows should be closed or explicitly dismissed after the report is captured.
+Temporary OCC windows may stay visible while `WORKING`. They should show `COMPLETE` only after the final APPLY/commit/push or merge/sync report is done, then close once or allow the operator to close. Failed or blocked workers should park on `BLOCKED` for operator review.
+
+Do not open and close the same worker every 5, 10, or 20 minutes for the same active task. Prefer reusing the same worker window and lane until that task reaches final `COMPLETE` or `BLOCKED`.
+
+Anti-pileup rule: future launcher logic should cap the maximum visible temporary workers. Do not spawn unlimited new windows. Completed temporary worker windows should be closed or explicitly dismissed after the final report is captured.
 
 Allowed visible states:
 

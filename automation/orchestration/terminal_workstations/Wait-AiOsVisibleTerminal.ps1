@@ -28,9 +28,10 @@ Write-Host $border -ForegroundColor $color
 Write-Host ("  AI_OS VISIBLE TERMINAL STATE: {0}" -f $State) -ForegroundColor $color
 Write-Host ("  {0}" -f $Message) -ForegroundColor $color
 Write-Host "  Persistent decks stay open in IDLE for the operator session."
-Write-Host "  Temporary OCC workers may stay visible while WORKING."
-Write-Host "  Temporary OCC workers close after completed APPLY/commit workflow or park on BLOCKED."
-Write-Host "  Anti-pileup: do not stack unlimited completed worker windows."
+Write-Host "  Temporary OCC workers stay open for one assigned task lifecycle."
+Write-Host "  OCC lifecycle covers APPLY, validation, commit, push, PR/merge if used, and final sync/status."
+Write-Host "  OCC workers close only after final COMPLETE, or park visibly on BLOCKED."
+Write-Host "  Anti-pileup: reuse the active worker lane; do not spawn unlimited new windows."
 Write-Host "  No Codex auto-launch. No startup tasks. No scheduled tasks."
 Write-Host $border -ForegroundColor $color
 
