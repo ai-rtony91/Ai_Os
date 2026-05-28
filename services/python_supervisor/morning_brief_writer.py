@@ -71,8 +71,19 @@ def _path_allowed(path: Path, directory: bool = False) -> tuple[bool, str]:
 
 
 def _brief_file_content(report: dict[str, Any]) -> dict[str, Any]:
+    escalations = report.get("escalation_items") or []
+    packets = report.get("packet_flow") or []
+    status = str(report.get("supervisor_status") or "UNKNOWN")
     return {
         "schema": BRIEF_SCHEMA,
+        "_executive_summary": {
+            "supervisor_status": status,
+            "packet_count": len(packets),
+            "escalation_count": len(escalations),
+            "mode": str(report.get("mode") or "DRY_RUN"),
+            "generated_at": str(report.get("generated_at") or _utc_now()),
+            "human_review_required": bool(escalations) or status in ("BLOCKED", "WARNING", "REVIEW"),
+        },
         "generated_at": str(report.get("generated_at") or _utc_now()),
         "report": report,
     }
