@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$RepoRoot = "C:\Dev\Ai.Os",
+    [string]$RepoRoot = "",
     [string]$EvidenceRoot = "automation/orchestration/overnight_evidence",
     [string]$ReportRoot = "automation/orchestration/reports",
     [switch]$PlanOnly,
@@ -13,6 +13,27 @@ $ErrorActionPreference = "Stop"
 $schema = "AIOS_OVERNIGHT_EVIDENCE_COLLECTOR_PLAN.v1"
 $dateKey = (Get-Date).ToString("yyyy-MM-dd")
 $effectivePlanOnly = -not $Collect
+
+function Resolve-AiOsRepoRoot {
+    param([AllowEmptyString()][string]$RequestedRoot)
+
+    if (-not [string]::IsNullOrWhiteSpace($RequestedRoot)) {
+        $resolvedOverride = Resolve-Path -LiteralPath $RequestedRoot -ErrorAction Stop
+        return $resolvedOverride.ProviderPath
+    }
+
+    $gitOutput = & git rev-parse --show-toplevel 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to resolve AI_OS repo root with git rev-parse --show-toplevel. Run this script from inside the active repository or pass -RepoRoot explicitly."
+    }
+
+    $resolvedRoot = ($gitOutput | Select-Object -First 1)
+    if ([string]::IsNullOrWhiteSpace($resolvedRoot)) {
+        throw "Git returned an empty repo root. Pass -RepoRoot explicitly or rerun from inside the active repository."
+    }
+
+    return [string]$resolvedRoot
+}
 
 function ConvertTo-AiOsRelativePath {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -36,6 +57,8 @@ function Test-AiOsPathPresent {
     $fullPath = Join-Path -Path $RepoRoot -ChildPath $Path
     return Test-Path -LiteralPath $fullPath
 }
+
+$RepoRoot = Resolve-AiOsRepoRoot -RequestedRoot $RepoRoot
 
 $sourceDefinitions = @(
     [ordered]@{
@@ -139,6 +162,7 @@ $plannedSources = foreach ($source in $sourceDefinitions) {
 
 $approvalInboxSeedPresent = Test-AiOsPathPresent -Path "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
 $approvalGatePresent = Test-AiOsPathPresent -Path "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json"
+$approvalInboxSeedStatus = if ($approvalInboxSeedPresent) { "present" } else { "deferred_missing" }
 
 $plannedDateFolder = Join-AiOsPlanPath -Root $EvidenceRoot -Child @($dateKey)
 $plannedOutputPaths = [ordered]@{
@@ -150,13 +174,21 @@ $plannedOutputPaths = [ordered]@{
     source_outputs = @($plannedSources | ForEach-Object { $_.planned_output_path })
 }
 
+# These blocked actions are permanent safety boundaries for this collector.
+# Any future Collect implementation must enforce them with explicit guards
+# before file writes, child command execution, or network calls. Do not remove
+# blocked actions without a separate West safety review.
 $blockedActions = @(
     "runtime_start",
     "scheduler_change",
     "backup_execution",
     "packet_state_change",
     "approval_state_change",
+    "lock_state_change",
+    "worker_lane_mutation",
     "worker_start",
+    "webhook_execution",
+    "dashboard_edit",
     "repository_stage_commit_or_remote_update",
     "protected_root_edit",
     "live_trading_or_broker_scope",
@@ -188,6 +220,7 @@ $report = [ordered]@{
     planned_sources = @($plannedSources)
     planned_output_paths = $plannedOutputPaths
     approval_inbox_001_present = $approvalInboxSeedPresent
+    approval_inbox_seed_status = $approvalInboxSeedStatus
     apply_approval_gate_present = $approvalGatePresent
     github_status_optional = $true
     backup_source_rule = "Backup status may be represented by status-line evidence only; backup script execution is out of scope."
