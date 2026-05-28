@@ -17,6 +17,7 @@ Write-Host ""
 
 if ($Apply) {
     $commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommendedCommand.ps1"
+    $gateRunnerPath = "automation/orchestration/gates/gate_runner.ps1"
 
     if (-not (Test-Path -LiteralPath $commandValidatorPath)) {
         Write-Host "BLOCKED"
@@ -53,6 +54,45 @@ if ($Apply) {
 
     if ($validationExitCode -ne 0 -or $validationBlocked) {
         Write-Host "BLOCKED"
+        exit 1
+    }
+
+    if (-not (Test-Path -LiteralPath $gateRunnerPath)) {
+        Write-Host "BLOCKED"
+        Write-Host "Gate runner missing: $gateRunnerPath"
+        exit 1
+    }
+
+    $gateOutput = @(powershell -NoProfile -ExecutionPolicy Bypass -File $gateRunnerPath `
+        -Mode APPLY `
+        -CommandText ([string]$recommendation.recommended_command) `
+        -WorkerId "RUNTIME_SELF_ROUTE" `
+        -TaskId "Invoke-AiOsRuntimeSelfRoute" `
+        -RepoRoot (Get-Location).Path)
+    $gateExitCode = $LASTEXITCODE
+    $gateText = $gateOutput -join [Environment]::NewLine
+    $gateDecision = $null
+
+    if ($gateExitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($gateText)) {
+        try {
+            $gateDecision = $gateText | ConvertFrom-Json
+        }
+        catch {
+            $gateDecision = $null
+        }
+    }
+
+    if ($null -eq $gateDecision) {
+        Write-Host "BLOCKED"
+        Write-Host "Gate runner failed or returned invalid JSON."
+        exit 1
+    }
+
+    Write-Host "Gate decision: $($gateDecision.decision)"
+    Write-Host "Gate tier: $($gateDecision.tier)"
+    if ($gateDecision.decision -ne "AUTO_PROCEED") {
+        Write-Host "BLOCKED"
+        Write-Host "Gate blocked execution: $($gateDecision.blocked_reason)"
         exit 1
     }
 

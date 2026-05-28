@@ -24,9 +24,15 @@ if (!$Profiles.ContainsKey($Profile)) {
 Set-Location $Repo
 
 $LayoutPath = Join-Path $Repo $Profiles[$Profile]
+$IdentityScriptPath = Join-Path $Repo "automation\orchestration\bootstrap\Set-AiOsTerminalIdentity.ps1"
 
 if (!(Test-Path $LayoutPath)) {
     Write-Host "BLOCKED: Layout file missing: $LayoutPath" -ForegroundColor Red
+    exit 1
+}
+
+if (!(Test-Path $IdentityScriptPath)) {
+    Write-Host "BLOCKED: Terminal identity script missing: $IdentityScriptPath" -ForegroundColor Red
     exit 1
 }
 
@@ -43,10 +49,13 @@ git status --short --branch
 
 foreach ($Worker in $Layout.workers) {
     $Title = "AIOS-$($Worker.number)-$($Worker.name)"
+    $WorkerId = "CODEX_$($Worker.name)"
+    $WorkerRole = "$($Worker.name)"
 
     $Command = @"
-`$Host.UI.RawUI.WindowTitle = '$Title'
 Set-Location '$Repo'
+. '$IdentityScriptPath'
+Set-AiOsTerminalIdentity -WorkerId '$WorkerId' -WorkerZone 'EAST' -WorkerRole '$WorkerRole' -Mode 'DRY_RUN' -WindowTitle '$Title'
 Write-Host ''
 Write-Host '$Title' -ForegroundColor Cyan
 Write-Host '$($Worker.prompt)' -ForegroundColor Yellow
