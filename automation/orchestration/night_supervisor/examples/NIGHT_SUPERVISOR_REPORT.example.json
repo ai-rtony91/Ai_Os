@@ -1,0 +1,137 @@
+{
+  "schema": "AIOS_NIGHT_SUPERVISOR_REPORT",
+  "schema_version": "1.0",
+  "report_id": "NSR-EXAMPLE-001",
+  "generated_at": "2026-05-28T00:00:00Z",
+  "generated_by": "NIGHT_SUPERVISOR",
+  "mode": "DRY_RUN",
+  "repo_root": "C:\\Dev\\Ai.Os",
+  "branch": "phase-night-supervisor-layer2-memory",
+  "git_status_summary": {
+    "branch": "phase-night-supervisor-layer2-memory",
+    "status_lines": [],
+    "changed_files": [],
+    "untracked_files": []
+  },
+  "hard_stop": {
+    "helper_present": true,
+    "helper_status": "OK",
+    "hard_stop_present": false,
+    "decision": "CLEAR"
+  },
+  "queue_summary": {
+    "packet_files_found": 1,
+    "counts_by_status": {
+      "WAITING": 0,
+      "IN_PROGRESS": 0,
+      "BLOCKED": 1,
+      "REVIEW_REQUIRED": 0,
+      "COMPLETE": 0,
+      "FAILED": 0,
+      "UNKNOWN": 0
+    },
+    "blocked": [
+      {
+        "path": "automation\\orchestration\\work_packets\\active\\PKT-EXAMPLE.json",
+        "packet_id": "PKT-EXAMPLE",
+        "status": "BLOCKED",
+        "assigned_worker": "EAST_OCC_01",
+        "next_action": "Review blocker",
+        "blocked_reason": "Pending approval",
+        "approval_required": true,
+        "validation_required": true,
+        "last_write_time": "2026-05-28T00:00:00Z",
+        "stale_candidate": false
+      }
+    ]
+  },
+  "lock_summary": {
+    "lock_files_found": 1,
+    "stale_candidates": [
+      {
+        "path": "automation\\orchestration\\locks\\LOCK_EXAMPLE.json",
+        "lock_id": "LOCK_EXAMPLE",
+        "locked_path": "automation/orchestration/work_packets",
+        "owner": "EAST_OCC_01",
+        "stale_candidate": true,
+        "expired_candidate": false,
+        "target_exists": true
+      }
+    ]
+  },
+  "approval_summary": {
+    "approval_files_found": 1,
+    "counts_by_status": {
+      "PENDING": 1,
+      "APPROVED": 0,
+      "REJECTED": 0,
+      "EXPIRED": 0,
+      "UNKNOWN": 0
+    },
+    "pending": [
+      {
+        "path": "automation\\orchestration\\approval_inbox\\APPROVAL_EXAMPLE.json",
+        "approval_id": "APPROVAL_EXAMPLE",
+        "status": "PENDING",
+        "requested_by": "EAST_OCC_01",
+        "requested_action": "Apply exact file change",
+        "tier": "TIER_2",
+        "requires_user_review": true
+      }
+    ]
+  },
+  "gate_summary": {
+    "gate_runner_present": true,
+    "hard_stop_helper_present": true,
+    "policy_present": true,
+    "decision_telemetry_present": false,
+    "decisions_by_type": {}
+  },
+  "worker_summary": {
+    "worker_files_found": 1
+  },
+  "blocker_summary": {
+    "total_blockers": 3,
+    "blocked_packets": 1,
+    "pending_approvals": 1,
+    "stale_locks": 1,
+    "hard_stop_present": false,
+    "gate_blocked_events": 0,
+    "critical_items": [],
+    "operator_required_items": [
+      {
+        "type": "PENDING_TIER_2_APPROVAL",
+        "summary": "automation\\orchestration\\approval_inbox\\APPROVAL_EXAMPLE.json",
+        "source": "APPROVAL_EXAMPLE"
+      }
+    ],
+    "worker_followup_items": [
+      {
+        "type": "STALE_LOCK",
+        "summary": "automation\\orchestration\\locks\\LOCK_EXAMPLE.json",
+        "source": "LOCK_EXAMPLE"
+      }
+    ]
+  },
+  "next_safe_action": {
+    "action_id": "NSA-EXAMPLE-001",
+    "priority": "HIGH",
+    "summary": "Review pending Tier 2 approval requests.",
+    "reason": "Pending Tier 2 approvals require Human Owner review.",
+    "recommended_mode": "DRY_RUN",
+    "requires_human": true,
+    "allowed_to_auto_execute": false,
+    "suggested_codex_prompt": "AI_OS EXECUTION TOKEN\nRun a DRY_RUN review for pending Tier 2 approvals. Do not mutate operational state.",
+    "source_findings": [
+      "approval_summary.pending"
+    ]
+  },
+  "report_paths": {
+    "json_report": "telemetry\\night_supervisor\\NIGHT_SUPERVISOR_REPORT_20260528T000000Z.json",
+    "morning_brief": "telemetry\\night_supervisor\\MORNING_BRIEF_20260528T000000Z.md",
+    "blocker_summary": "telemetry\\night_supervisor\\BLOCKER_SUMMARY_20260528T000000Z.json",
+    "next_safe_action": "telemetry\\night_supervisor\\NEXT_SAFE_ACTION_20260528T000000Z.json"
+  },
+  "warnings": [],
+  "errors": []
+}
