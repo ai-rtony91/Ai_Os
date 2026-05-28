@@ -354,3 +354,102 @@ It must not store secrets unless separately approved.
 It must not run destructive backup commands.
 It must not cut power to the OMEN.
 It must not bypass Human Owner approval.
+
+## 18. Raspberry Pi Local Storage Node Concept
+
+Human Owner is exploring a Raspberry Pi 5 local storage node as a future AI_OS infrastructure asset.
+
+Referenced hardware:
+
+- Geekworm X1004 PCIe to Dual M.2 NVMe HAT / shield for Raspberry Pi 5
+- Amazon ASIN / product reference: B0D3LP9KBH
+- This is not an external hard drive by itself.
+- It is a Raspberry Pi 5 expansion board that can hold up to two M.2 NVMe SSDs.
+- It requires a Raspberry Pi 5, NVMe SSD drive or drives, power supply, case/cooling, operating system setup, and network configuration.
+- Product documentation indicates it supports M.2 NVMe SSDs only, not M.2 SATA SSDs.
+- Product listing indicates Raspberry Pi 5 compatibility and dual M.2 NVMe SSD support.
+
+AI_OS classification:
+
+- Future AI_OS Asset
+- Infrastructure Support Node
+- Optional local storage node
+- Optional wake / backup / recovery companion
+- Not primary AI_OS authority
+
+Conceptual role:
+
+This device could act like a local private storage node or mini-storage server for AI_OS, not a commercial cloud service by itself.
+
+Possible future uses:
+
+- local AI_OS backup copy
+- telemetry archive
+- backup report archive
+- Night Supervisor evidence archive
+- Backup Officer observation node
+- Wake Commander companion
+- Health Beacon companion
+- Recovery Assistant companion
+- optional local mini-cloud style storage reachable over the local network
+
+Architecture doctrine:
+
+OMEN:
+
+- primary AI_OS command center
+- owns active repo work
+- owns Codex/Claude/dev workflows
+
+GitHub:
+
+- official remote code archive
+
+T9:
+
+- direct physical backup target
+
+Raspberry Pi local storage node:
+
+- optional support infrastructure
+- may hold secondary copies or logs
+- may observe OMEN status
+- may help wake OMEN if needed
+- must not replace GitHub or T9
+
+Authority limits:
+
+- must not own commits
+- must not own pushes
+- must not approve work
+- must not own trading authority
+- must not own broker authority
+- must not store secrets unless separately approved
+- must not run destructive backup commands
+- must not cut power to OMEN
+- must not bypass Human Owner approval
+- must not become required dependency unless future evidence supports it
+
+Safety notes:
+
+- Treat this as future planning only.
+- Do not implement Raspberry Pi setup now.
+- Do not install software.
+- Do not change network settings.
+- Do not change ProtonVPN.
+- Do not change adapter settings.
+- Do not run backup.
+- Do not run robocopy.
+- Do not create scripts.
+- Documentation only.
+
+Future evaluation questions:
+
+- Should the Pi be used only as Wake Commander?
+- Should the Pi also store backup copies?
+- Should the Pi remain local-network only?
+- Should ProtonVPN affect access to the Pi?
+- Should Fold 6 view Pi status?
+- Should the Pi use NVMe storage or simpler USB storage first?
+- Should UPS/battery support be prioritized over storage capacity?
+- Should this remain optional until Task Scheduler / Modern Standby / Hibernate wake proves unreliable?
