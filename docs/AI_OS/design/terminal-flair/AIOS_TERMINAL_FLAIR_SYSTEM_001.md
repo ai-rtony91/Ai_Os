@@ -74,6 +74,47 @@ In both cases, the visual identity is a cue, not authority. Approval, validation
    - Must still fit in ordinary terminals.
    - Must not add loops, animation, sound, network calls, or automation triggers.
 
+## Terminal UI Panels
+
+Terminal UI panels are text sections rendered as command-line safe blocks. They simulate modern translucent DevOps panels without changing the real terminal profile.
+
+Use panels for:
+
+- MAIN CONTROL command-throne identity
+- validation plans and result strips
+- risk notes and blocked action summaries
+- status badges such as `CI`, `PASS`, `WORKING`, `COMPLETE`, and `BLOCKED`
+- bottom worker activity rows
+- command input bars that keep copyable commands plain
+- customization guide panels in documentation
+
+The repo-owned token authority is `AIOS_TERMINAL_UI_THEME_TOKENS_001.json`.
+
+## Translucent-Panel Simulation
+
+PowerShell cannot create true acrylic or transparent panels by itself. Repo scripts may simulate translucent bluish-gray panels with ANSI background blocks, borders, and spacing while leaving the dark terminal background visible around the blocks.
+
+True transparency, opacity, acrylic blur, font changes, and terminal profile icons require Windows Terminal profile settings. AI_OS scripts must not edit those settings automatically. Any real Windows Terminal appearance change requires a separate operator-approved lane.
+
+## Customization Knobs
+
+Terminal UI customization should be represented as tokens before it becomes implementation:
+
+- color: base, text, panel background, accent, warning, blocked, pass/activity
+- shape: thin border, strong border, boss border, square badge, compact activity card
+- size: compact, comfort, spacious, or wide layout mode
+- position: top banner, side-like panel, status strip, bottom worker row, command input bar
+- badge style: `CI`, `PASS`, `WORKING`, `COMPLETE`, `BLOCKED`, or `GATED`
+- spacing: panel padding, gap lines, status badge gaps, maximum banner width
+
+MAIN CONTROL may use the richest panel treatment. OCC workers should use compact activity cards so the operator can track task lifecycle without clutter.
+
+## Optional Install/Download Lane
+
+Oh My Posh, Nerd Fonts, Windows Terminal acrylic/opacity, and real terminal profile templates are optional future improvements only. They must not be installed, downloaded, or applied by this preview kit.
+
+Any install/download lane must be separate, explicit, operator-approved, and must define rollback, validation, and no-startup/no-profile-edit boundaries before execution.
+
 ## Intensity Modes
 
 `CLEAN` is compact and calm. Use it for routine work, narrow terminals, or screens where output density matters.

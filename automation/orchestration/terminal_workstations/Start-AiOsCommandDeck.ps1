@@ -31,6 +31,36 @@ function Write-AiOsAnsiBlock {
     Write-Host "$($escape)[$BackgroundCode;$ForegroundCode`m $Text $($escape)[0m"
 }
 
+function Write-AiOsPanelLine {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Label,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Text,
+
+        [string]$ForegroundCode = "97",
+
+        [string]$BackgroundCode = "48;5;24"
+    )
+
+    $escape = [char]27
+    $line = ("  {0,-14} {1}" -f $Label, $Text)
+    Write-Host "$($escape)[$BackgroundCode;$ForegroundCode`m$line$($escape)[0m"
+}
+
+function Write-AiOsStatusBadge {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Text,
+
+        [string]$Code = "96"
+    )
+
+    $escape = [char]27
+    Write-Host "$($escape)[$Code`m[$Text]$($escape)[0m" -NoNewline
+}
+
 if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
     throw "AI_OS repo path not found: $repoPath"
 }
@@ -40,21 +70,33 @@ $Host.UI.RawUI.WindowTitle = $roleName
 
 Write-Host $border -ForegroundColor Magenta
 Write-Host ""
-Write-AiOsAnsiBlock -Text "  $titleIcon  MAIN CONTROL · COMMAND THRONE  " -BackgroundCode "45"
-Write-AiOsAnsiBlock -Text "  $orchestratorIcon  ORCHESTRATOR  " -BackgroundCode "44"
-Write-AiOsAnsiBlock -Text "  $gateIcon  HUMAN-GATED  " -BackgroundCode "43" -ForegroundCode "30"
-Write-AiOsAnsiBlock -Text "  $routingIcon  WORKER ROUTING  " -BackgroundCode "46" -ForegroundCode "30"
-Write-AiOsAnsiBlock -Text "  $nextActionIcon  NEXT SAFE ACTION  " -BackgroundCode "44"
+Write-AiOsAnsiBlock -Text "  $titleIcon  MAIN CONTROL · COMMAND THRONE  " -BackgroundCode "48;5;93"
+Write-AiOsAnsiBlock -Text "  $orchestratorIcon  ORCHESTRATOR  " -BackgroundCode "48;5;24"
+Write-AiOsAnsiBlock -Text "  $gateIcon  HUMAN-GATED  " -BackgroundCode "48;5;220" -ForegroundCode "30"
+Write-AiOsAnsiBlock -Text "  $routingIcon  WORKER ROUTING  " -BackgroundCode "48;5;45" -ForegroundCode "30"
+Write-AiOsAnsiBlock -Text "  $nextActionIcon  NEXT SAFE ACTION  " -BackgroundCode "48;5;33"
 Write-Host ""
 Write-Host "  LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Magenta
 Write-Host ""
-Write-Host "  AIOS BASE : #05070b  TEXT #e5f6ff  VIOLET #a855f7  ACTION #38bdf8" -ForegroundColor Cyan
-Write-Host "  GOLD      : #ffd166  BLUE GLOW #00a3ff  RED #ff5f7a" -ForegroundColor Yellow
-Write-Host "  OCC LANE  : MAIN_CONTROL  |  Persistent deck remains open for operator session" -ForegroundColor Magenta
-Write-Host "  MODE      : [ MANUAL ]  Operator control only - no auto-launch" -ForegroundColor Cyan
-Write-Host "  STATUS    : [ READ-ONLY ]  No Codex auto-launch, no scheduled/startup tasks" -ForegroundColor Cyan
-Write-Host "  Repo      : $repoPath" -ForegroundColor Cyan
-Write-Host "  WINDOWS   : Acrylic/transparent appearance is template-only; this script edits no settings." -ForegroundColor Gray
+Write-AiOsPanelLine -Label "PALETTE" -Text "base #05070b | text #e5f6ff | violet #a855f7 | cyan #38bdf8 | glow #00a3ff"
+Write-AiOsPanelLine -Label "SIGNALS" -Text "green=PASS/OCC | amber=warning/gate | red=blocked/danger | gold=command authority" -ForegroundCode "93"
+Write-AiOsPanelLine -Label "OCC LANE" -Text "MAIN_CONTROL | persistent deck remains open for operator session" -ForegroundCode "95"
+Write-AiOsPanelLine -Label "MODE" -Text "[ MANUAL ] operator control only - no auto-launch" -ForegroundCode "96"
+Write-AiOsPanelLine -Label "STATUS" -Text "[ READ-ONLY ] no Codex auto-launch, no scheduled/startup tasks" -ForegroundCode "96"
+Write-AiOsPanelLine -Label "REPO" -Text $repoPath -ForegroundCode "96"
+Write-AiOsPanelLine -Label "WINDOWS" -Text "Acrylic/transparent appearance is template-only; this script edits no settings." -ForegroundCode "37"
+Write-Host ""
+Write-Host "  STATUS STRIP  " -NoNewline -ForegroundColor DarkCyan
+Write-AiOsStatusBadge -Text "CI" -Code "96"
+Write-Host "  " -NoNewline
+Write-AiOsStatusBadge -Text "GATED" -Code "93"
+Write-Host "  " -NoNewline
+Write-AiOsStatusBadge -Text "WORKING" -Code "38;5;208"
+Write-Host "  " -NoNewline
+Write-AiOsStatusBadge -Text "COMPLETE" -Code "92"
+Write-Host "  " -NoNewline
+Write-AiOsStatusBadge -Text "BLOCKED" -Code "91"
+Write-Host ""
 Write-Host ""
 Write-Host $border -ForegroundColor Magenta
 Write-Host $border -ForegroundColor Magenta
@@ -72,6 +114,10 @@ Write-Host "    [ PASS ]  gh issue list --state open" -ForegroundColor Green
 Write-Host "    [ PASS ]  gh pr list --state open" -ForegroundColor Green
 Write-Host "    [ GATE ]  selective commit/merge only after explicit Human Owner approval" -ForegroundColor Yellow
 Write-Host "    [ ROUTE ]  route temporary OCC workers; workers remain IDLE, COMPLETE, BLOCKED, or CLOSED" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  Worker activity row:" -ForegroundColor Cyan
+Write-AiOsPanelLine -Label "OCC ACTIVE" -Text "reuse the same worker lane through APPLY -> validate -> commit -> push/sync -> final COMPLETE" -ForegroundCode "92"
+Write-AiOsPanelLine -Label "OCC BLOCKED" -Text "park visibly for operator review; do not stack unlimited new worker windows" -ForegroundCode "91"
 Write-Host ""
 Write-Host "  Blocked actions:" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  Codex auto-launch, extra windows, startup/scheduled tasks" -ForegroundColor Red

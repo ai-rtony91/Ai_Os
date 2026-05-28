@@ -13,6 +13,24 @@ $roleName = "BUILD ENGINE / BUILDER FORGE"
 $border = "#" * 100
 $titleIcon = [char]::ConvertFromUtf32(0x2699)
 
+function Write-AiOsActivityCard {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Label,
+
+        [Parameter(Mandatory = $true)]
+        [string]$Text,
+
+        [string]$ForegroundCode = "92",
+
+        [string]$BackgroundCode = "48;5;24"
+    )
+
+    $escape = [char]27
+    $line = ("  [{0,-8}] {1}" -f $Label, $Text)
+    Write-Host "$($escape)[$BackgroundCode;$ForegroundCode`m$line$($escape)[0m"
+}
+
 if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
     throw "AI_OS repo path not found: $repoPath"
 }
@@ -30,6 +48,10 @@ Write-Host "  OCC LANE  : EAST_OCC  |  Temporary packet-scoped worker forge" -Fo
 Write-Host "  MODE      : [ MANUAL ]  Manual Codex start only - no auto-launch" -ForegroundColor Cyan
 Write-Host "  STATUS    : [ READ-ONLY ]  No Codex auto-launch, no worker launch, no scheduled tasks" -ForegroundColor Cyan
 Write-Host "  Repo      : $repoPath" -ForegroundColor Cyan
+Write-Host ""
+Write-AiOsActivityCard -Label "WORKING" -Text "temporary OCC worker stays visible for the assigned task lifecycle" -ForegroundCode "38;5;208"
+Write-AiOsActivityCard -Label "COMPLETE" -Text "close after final APPLY/commit/push/sync report" -ForegroundCode "92"
+Write-AiOsActivityCard -Label "BLOCKED" -Text "park visibly for operator review; do not spawn unlimited windows" -ForegroundCode "91"
 Write-Host ""
 Write-Host $border -ForegroundColor Green
 Write-Host $border -ForegroundColor Green
