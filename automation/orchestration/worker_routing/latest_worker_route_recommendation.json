@@ -1,0 +1,474 @@
+{
+  "blocked_capabilities": [
+    "packet_execution",
+    "worker_launch",
+    "codex_or_claude_calls",
+    "packet_mutation",
+    "queue_mutation",
+    "approval_mutation",
+    "network_calls",
+    "commit",
+    "push",
+    "merge",
+    "broker_or_trading_execution"
+  ],
+  "execution_enabled": false,
+  "generated_at": "2026-05-28T18:21:25Z",
+  "git_state": {
+    "branch": "phase-night-supervisor-layer2-memory",
+    "changed_files": [
+      "automation/orchestration/terminal_workstations/README_TERMINAL_WORKSTATIONS.md"
+    ],
+    "git_error": "",
+    "status_line": "## phase-night-supervisor-layer2-memory...origin/phase-night-supervisor-layer2-memory",
+    "untracked_files": [
+      "automation/orchestration/terminal_workstations/AIOS_TERMINAL_CONTROL_SURFACE_PREVIEW.html",
+      "automation/orchestration/worker_routing/",
+      "services/python_supervisor/worker_route_recommender.py",
+      "telemetry/backup_reports/AIOS_POST_MAIN_UPDATE_BACKUP_STATE.json"
+    ]
+  },
+  "mode": "DRY_RUN",
+  "packet_mutation_enabled": false,
+  "recommendations": [
+    {
+      "blocked_actions": [
+        "approval"
+      ],
+      "file_path": "automation/orchestration/work_packets/active/20260516-172946-phase-17-work-packet-router-state-machine.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/active/20260516-172946-phase-17-work-packet-router-state-machine.json",
+      "reason": "Human-gated terms found: approval.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [],
+      "file_path": "automation/orchestration/work_packets/active/20260516-215823-goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely.json",
+      "needs_human_approval": false,
+      "next_safe_action": "Route to validator for read-only evidence, parse, test, check, or audit output.",
+      "packet_id": "automation/orchestration/work_packets/active/20260516-215823-goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely.json",
+      "reason": "Validation terms found: test, validator.",
+      "recommended_worker": "VALIDATOR",
+      "risk_level": "MEDIUM"
+    },
+    {
+      "blocked_actions": [
+        "broker",
+        "delete",
+        "push",
+        "secret"
+      ],
+      "file_path": "automation/orchestration/work_packets/AIOS_PACKET_METADATA_SYNC_RULES.example.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/AIOS_PACKET_METADATA_SYNC_RULES.example.json",
+      "reason": "Human-gated terms found: broker, delete, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve",
+        "broker",
+        "delete",
+        "push",
+        "secret"
+      ],
+      "file_path": "automation/orchestration/work_packets/AIOS_PACKET_STATE_RULES.example.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/AIOS_PACKET_STATE_RULES.example.json",
+      "reason": "Human-gated terms found: approval, approve, broker, delete, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [],
+      "file_path": "automation/orchestration/work_packets/blocked/20260516-064501-control-git-status.json",
+      "needs_human_approval": false,
+      "next_safe_action": "Route to validator for read-only evidence, parse, test, check, or audit output.",
+      "packet_id": "automation/orchestration/work_packets/blocked/20260516-064501-control-git-status.json",
+      "reason": "Validation terms found: validator.",
+      "recommended_worker": "VALIDATOR",
+      "risk_level": "MEDIUM"
+    },
+    {
+      "blocked_actions": [],
+      "file_path": "automation/orchestration/work_packets/complete/20260516-064500-brainstem-daily-start.json",
+      "needs_human_approval": false,
+      "next_safe_action": "Route to validator for read-only evidence, parse, test, check, or audit output.",
+      "packet_id": "automation/orchestration/work_packets/complete/20260516-064500-brainstem-daily-start.json",
+      "reason": "Validation terms found: test, validate, validator.",
+      "recommended_worker": "VALIDATOR",
+      "risk_level": "MEDIUM"
+    },
+    {
+      "blocked_actions": [],
+      "file_path": "automation/orchestration/work_packets/complete/20260516-064502-rulebook-foundation.json",
+      "needs_human_approval": false,
+      "next_safe_action": "Route to validator for read-only evidence, parse, test, check, or audit output.",
+      "packet_id": "automation/orchestration/work_packets/complete/20260516-064502-rulebook-foundation.json",
+      "reason": "Validation terms found: test, validator.",
+      "recommended_worker": "VALIDATOR",
+      "risk_level": "MEDIUM"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve",
+        "delete",
+        "push",
+        "secret"
+      ],
+      "file_path": "automation/orchestration/work_packets/examples/REPO_STATUS_REPORT.packet.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/examples/REPO_STATUS_REPORT.packet.json",
+      "reason": "Human-gated terms found: approval, approve, delete, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/Get-AiOsPacketMetadataSyncRecommendation.DRY_RUN.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "$packetId",
+      "reason": "Human-gated terms found: push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve",
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/Get-AiOsPacketStateRecommendation.DRY_RUN.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "$packetId",
+      "reason": "Human-gated terms found: approval, approve, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/Get-AiOsWorkPacketState.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/Get-AiOsWorkPacketState.ps1",
+      "reason": "Human-gated terms found: push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve",
+        "broker",
+        "oanda",
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/Move-AiOsPacketState.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/Move-AiOsPacketState.ps1",
+      "reason": "Human-gated terms found: approval, approve, broker, oanda, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/New-AiOsWorkPacket.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "$safePacketId",
+      "reason": "Human-gated terms found: push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/Route-AiOsWorkPacket.DRY_RUN.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/Route-AiOsWorkPacket.DRY_RUN.ps1",
+      "reason": "Human-gated terms found: approval, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json",
+      "reason": "Human-gated terms found: approval, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "delete",
+        "secret"
+      ],
+      "file_path": "automation/orchestration/work_packets/templates/JOB_AUTOMATION_PACKET.template.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/templates/JOB_AUTOMATION_PACKET.template.json",
+      "reason": "Human-gated terms found: approval, delete, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve",
+        "broker",
+        "delete",
+        "live trading",
+        "push",
+        "secret"
+      ],
+      "file_path": "automation/orchestration/work_packets/templates/README.md",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/templates/README.md",
+      "reason": "Human-gated terms found: approval, approve, broker, delete, live trading, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "api key",
+        "approval",
+        "approve",
+        "broker",
+        "live trading",
+        "oanda",
+        "push",
+        "secret"
+      ],
+      "file_path": "automation/orchestration/work_packets/Test-AiOsPacketSchema.DRY_RUN.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "automation/orchestration/work_packets/Test-AiOsPacketSchema.DRY_RUN.ps1",
+      "reason": "Human-gated terms found: api key, approval, approve, broker, live trading, oanda, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approve",
+        "push"
+      ],
+      "file_path": "automation/orchestration/work_packets/Test-AiOsWorkPacket.ps1",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "if ($packet.packet_id) { $packet.packet_id } else {",
+      "reason": "Human-gated terms found: approve, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve",
+        "push"
+      ],
+      "file_path": "work_packets/approvals/aios_approval_inbox.example.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/approvals/aios_approval_inbox.example.json",
+      "reason": "Human-gated terms found: approval, approve, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "api key",
+        "approval",
+        "broker",
+        "live trading",
+        "oanda",
+        "push"
+      ],
+      "file_path": "work_packets/examples/dashboard_orchestration_cleanup.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/examples/dashboard_orchestration_cleanup.json",
+      "reason": "Human-gated terms found: api key, approval, broker, live trading, oanda, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "api key",
+        "approval",
+        "broker",
+        "credential",
+        "destructive",
+        "live trading",
+        "oanda",
+        "push",
+        "secret"
+      ],
+      "file_path": "work_packets/examples/supervisor_worker_assignment_system.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/examples/supervisor_worker_assignment_system.json",
+      "reason": "Human-gated terms found: api key, approval, broker, credential, destructive, live trading, oanda, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "api key",
+        "approval",
+        "broker",
+        "live trading",
+        "oanda",
+        "push",
+        "secret"
+      ],
+      "file_path": "work_packets/examples/trading_lab_latency.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/examples/trading_lab_latency.json",
+      "reason": "Human-gated terms found: api key, approval, broker, live trading, oanda, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "api key",
+        "approval",
+        "approve",
+        "broker",
+        "credential",
+        "destructive",
+        "live trading",
+        "oanda",
+        "push",
+        "secret"
+      ],
+      "file_path": "work_packets/examples/validator_chain_hardening.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/examples/validator_chain_hardening.json",
+      "reason": "Human-gated terms found: api key, approval, approve, broker, credential, destructive, live trading, oanda, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "api key",
+        "approval",
+        "approve",
+        "broker",
+        "credential",
+        "live trading",
+        "oanda",
+        "push",
+        "secret"
+      ],
+      "file_path": "work_packets/examples/worker_registry_consolidation.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/examples/worker_registry_consolidation.json",
+      "reason": "Human-gated terms found: api key, approval, approve, broker, credential, live trading, oanda, push, secret.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve"
+      ],
+      "file_path": "work_packets/lifecycle.schema.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/lifecycle.schema.json",
+      "reason": "Human-gated terms found: approval, approve.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve"
+      ],
+      "file_path": "work_packets/queue.schema.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/queue.schema.json",
+      "reason": "Human-gated terms found: approval, approve.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval",
+        "approve",
+        "push"
+      ],
+      "file_path": "work_packets/queues/aios_phase2_queue.example.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/queues/aios_phase2_queue.example.json",
+      "reason": "Human-gated terms found: approval, approve, push.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approval"
+      ],
+      "file_path": "work_packets/schema.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/schema.json",
+      "reason": "Human-gated terms found: approval.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    },
+    {
+      "blocked_actions": [
+        "approve",
+        "broker",
+        "oanda"
+      ],
+      "file_path": "work_packets/state/aios_queue_state.example.json",
+      "needs_human_approval": true,
+      "next_safe_action": "Human Owner must review and explicitly approve the next action. Do not launch workers automatically.",
+      "packet_id": "work_packets/state/aios_queue_state.example.json",
+      "reason": "Human-gated terms found: approve, broker, oanda.",
+      "recommended_worker": "HUMAN_OWNER",
+      "risk_level": "HIGH"
+    }
+  ],
+  "repo_root": "C:\\Dev\\Ai.Os",
+  "scanned_packet_folders": [
+    "automation/orchestration/work_packets",
+    "work_packets"
+  ],
+  "schema": "AIOS_WORKER_ROUTE_RECOMMENDER.v1",
+  "worker_launch_enabled": false
+}
