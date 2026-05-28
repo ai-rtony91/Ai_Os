@@ -16,7 +16,7 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 
 SCHEMA = "AIOS_WORKER_ROUTE_RECOMMENDER.v1"
@@ -24,6 +24,10 @@ REPORT_RELATIVE_PATH = Path("automation/orchestration/worker_routing/latest_work
 PACKET_FOLDERS = (
     Path("automation/orchestration/work_packets"),
     Path("work_packets"),
+)
+ACTIVE_PACKET_FOLDERS = (
+    Path("automation/orchestration/work_packets/active"),
+    Path("work_packets/active"),
 )
 
 HUMAN_OWNER_TERMS = (
@@ -191,22 +195,34 @@ def read_text_safely(path: Path, max_bytes: int = 200_000) -> str:
     return data.decode("utf-8", errors="replace")
 
 
+def packet_scan_roots(repo_root: Path) -> tuple[Path, ...]:
+    active_roots = tuple(path for path in ACTIVE_PACKET_FOLDERS if (repo_root / path).is_dir())
+    if active_roots:
+        return active_roots
+    return tuple(path for path in PACKET_FOLDERS if (repo_root / path).is_dir())
+
+
 def iter_packet_files(repo_root: Path) -> Iterable[Path]:
-    allowed_suffixes = {".json", ".md", ".txt", ".ps1", ".yaml", ".yml"}
-    for folder in PACKET_FOLDERS:
+    allowed_suffixes = {".json", ".md", ".txt", ".yaml", ".yml"}
+    for folder in packet_scan_roots(repo_root):
         full_folder = repo_root / folder
-        if not full_folder.exists() or not full_folder.is_dir():
-            continue
-        for path in sorted(full_folder.rglob("*")):
+        for path in sorted(full_folder.glob("*")):
             if path.is_file() and path.suffix.lower() in allowed_suffixes:
                 yield path
 
 
 def find_packet_id(text: str, fallback: str) -> str:
+    try:
+        payload = json.loads(text)
+        if isinstance(payload, dict) and payload.get("packet_id"):
+            return str(payload["packet_id"])
+    except json.JSONDecodeError:
+        pass
+
     match = re.search(r"(?im)^\s*PACKET ID\s*:\s*(.+?)\s*$", text)
     if match:
         return match.group(1).strip()
-    match = re.search(r"(?im)^\s*packet_id\s*[=:]\s*[\"']?([^\"'\n\r,]+)", text)
+    match = re.search(r"(?im)^\s*[\"']?packet_id[\"']?\s*[:=]\s*[\"']?([^\"'\n\r,}]+)", text)
     if match:
         return match.group(1).strip()
     return fallback
@@ -286,6 +302,64 @@ def build_recommendation(packet_id: str, file_path: str, text: str) -> RouteReco
     )
 
 
+def _packet_text(packet: dict[str, Any]) -> str:
+    parts = []
+    for key in (
+        "packet_id",
+        "task_id",
+        "title",
+        "packet_title",
+        "mode",
+        "status",
+        "lane",
+        "summary",
+        "description",
+        "next_safe_action",
+        "status_reason",
+    ):
+        value = packet.get(key)
+        if value:
+            parts.append(f"{key}: {value}")
+    for value in packet.get("related_files") or []:
+        parts.append(f"related_file: {value}")
+    return "\n".join(parts)
+
+
+def recommend_route_for_packet(packet: dict[str, Any], repo_root: Path) -> dict[str, Any]:
+    """Return routing recommendation for one queue_scanner packet object."""
+    root = Path(repo_root).resolve()
+    packet_id = str(packet.get("packet_id") or packet.get("task_id") or "UNKNOWN")
+    file_path = normalize_path(packet.get("source_path") or packet.get("packet_path") or packet_id)
+    text = _packet_text(packet)
+    if not text and file_path:
+        candidate = root / file_path
+        if candidate.is_file():
+            text = read_text_safely(candidate)
+    recommendation = build_recommendation(packet_id, file_path, text)
+    return asdict(recommendation)
+
+
+def recommend_routes_for_packets(packets: list[dict[str, Any]], repo_root: Path) -> list[dict[str, Any]]:
+    """Return route recommendations for queue_scanner packet objects."""
+    return [recommend_route_for_packet(packet, repo_root) for packet in packets]
+
+
+def merge_route_with_worker_profile(route: dict[str, Any], profiles: dict[str, Any]) -> dict[str, Any]:
+    """Attach assigned_worker/profile evidence without overriding classifier blindly."""
+    workers = profiles.get("workers", profiles if isinstance(profiles, list) else [])
+    by_id = {str(worker.get("worker_id")): worker for worker in workers if isinstance(worker, dict) and worker.get("worker_id")}
+    recommended = str(route.get("recommended_worker") or "")
+    profile = by_id.get(recommended)
+    if not profile:
+        return {**route, "assigned_worker": "", "profile_match": False}
+    return {
+        **route,
+        "assigned_worker": recommended,
+        "profile_match": True,
+        "profile_display_title": str(profile.get("display_title") or recommended),
+    }
+
+
 def build_git_state_recommendation(git_state: GitState) -> RouteRecommendation:
     if git_state.git_error:
         return RouteRecommendation(
@@ -327,7 +401,7 @@ def build_git_state_recommendation(git_state: GitState) -> RouteRecommendation:
 def build_route_report(repo_root: str | Path) -> RouteReport:
     resolved_root = Path(repo_root).resolve()
     git_state = run_git_status(resolved_root)
-    scanned_folders = [normalize_path(path) for path in PACKET_FOLDERS if (resolved_root / path).exists()]
+    scanned_folders = [normalize_path(path) for path in packet_scan_roots(resolved_root)]
     recommendations: list[RouteRecommendation] = []
 
     if not resolved_root.exists() or not resolved_root.is_dir():

@@ -135,6 +135,44 @@
       "safety_notes": "Dispatches packets and flags unknown owners before work starts."
     },
     {
+      "worker_id": "dispatcher",
+      "display_title": "AI_OS Packet Dispatcher",
+      "worker_type": "packet_dispatch",
+      "default_path": "C:\\Dev\\Ai.Os",
+      "default_branch": "phase-night-supervisor-layer2-memory",
+      "owns_paths": [
+        "automation/orchestration/worker_inboxes/",
+        "automation/orchestration/dispatch_receipts/",
+        "automation/orchestration/runtime/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "api_keys/",
+        "live_trading/"
+      ],
+      "can_run_parallel_with": [
+        "main_control",
+        "save_git",
+        "watch_state",
+        "check_audit"
+      ],
+      "cannot_overlap_with": [
+        "brainstem_codex",
+        "orchestration_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "not_a_codex_lane",
+      "guard_policy": "ExpectedLaneId dispatcher; CommandType packet_dispatch",
+      "save_policy": "DRY_RUN receipts only unless future APPLY inbox write is explicitly approved.",
+      "default_mode": "DRY_RUN",
+      "apply_enabled": false,
+      "safety_notes": "Night Supervisor V2 dispatch profile. Builds dispatch previews only by default; no worker launch, broker, OANDA, secrets, API keys, live orders, commits, or pushes."
+    },
+    {
       "worker_id": "check_audit",
       "display_title": "CHECK \u00b7 audit",
       "worker_type": "validation_audit",

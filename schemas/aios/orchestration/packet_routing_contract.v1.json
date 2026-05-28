@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/packet_routing_contract.v1.json",
+  "title": "AIOS_PACKET_ROUTING_CONTRACT_V1",
+  "description": "Shared DRY_RUN-first routing object passed from queue scanning through worker routing, locks, approvals, dispatch previews, and telemetry previews. This contract does not authorize execution, approval, worker launch, queue mutation, commits, pushes, broker execution, webhooks, or live trading.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "packet_id",
+    "packet_path",
+    "packet_title",
+    "packet_state",
+    "source",
+    "risk_level",
+    "risk_reasons",
+    "recommended_worker",
+    "assigned_worker",
+    "routing_source",
+    "routing_confidence",
+    "lock_status",
+    "lock_owner",
+    "lock_id",
+    "approval_required",
+    "approval_status",
+    "approval_id",
+    "dispatch_status",
+    "dispatch_mode",
+    "dispatch_receipt_id",
+    "telemetry_status",
+    "blocked_reason",
+    "timestamp"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_ROUTING_CONTRACT_V1"
+    },
+    "schema_version": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "packet_id": {
+      "type": "string"
+    },
+    "packet_path": {
+      "type": "string"
+    },
+    "packet_title": {
+      "type": "string"
+    },
+    "packet_state": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string",
+      "default": "queue_scanner"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL",
+        "UNKNOWN"
+      ]
+    },
+    "risk_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommended_worker": {
+      "type": "string"
+    },
+    "assigned_worker": {
+      "type": "string"
+    },
+    "routing_source": {
+      "type": "string",
+      "enum": [
+        "worker_route_recommender",
+        "worker_assignment",
+        "combined",
+        "legacy_worker_router",
+        "unknown"
+      ]
+    },
+    "routing_confidence": {
+      "type": "string"
+    },
+    "lock_status": {
+      "type": "string",
+      "enum": [
+        "FREE",
+        "CLAIMED",
+        "CONFLICT",
+        "EXPIRED",
+        "UNKNOWN"
+      ]
+    },
+    "lock_owner": {
+      "type": "string"
+    },
+    "lock_id": {
+      "type": "string"
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "APPROVED",
+        "PENDING",
+        "BLOCKED",
+        "EXPIRED",
+        "UNKNOWN"
+      ]
+    },
+    "approval_id": {
+      "type": "string"
+    },
+    "dispatch_status": {
+      "type": "string",
+      "enum": [
+        "NOT_READY",
+        "DRY_RUN_PREVIEW",
+        "DISPATCHED",
+        "BLOCKED_BY_LOCK",
+        "BLOCKED_BY_APPROVAL",
+        "BLOCKED_BY_RISK",
+        "BLOCKED_BY_CONFIG",
+        "FAILED"
+      ]
+    },
+    "dispatch_mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY"
+      ],
+      "default": "DRY_RUN"
+    },
+    "dispatch_receipt_id": {
+      "type": "string"
+    },
+    "telemetry_status": {
+      "type": "string",
+      "enum": [
+        "NOT_WRITTEN",
+        "DRY_RUN_PREVIEW",
+        "WRITTEN",
+        "FAILED"
+      ]
+    },
+    "blocked_reason": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    }
+  }
+}
