@@ -2,18 +2,20 @@
 
 Phase 16.21-25 defines a practical three-lane terminal setup.
 
-Use `Start-AiOsOneCommandLauncher.ps1` first. It runs preflight, runs the supervisor, shows the operator menu, and opens the three deck windows when not in preview mode.
+Use the workstation and deck scripts directly. The older `Start-AiOsOneCommandLauncher.ps1` reference is not active in this folder.
 
 Preview first:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsOneCommandLauncher.ps1 -Preview
+powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsWorkstation.ps1
 ```
 
-Start the workstation:
+Open persistent deck windows manually as needed:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsOneCommandLauncher.ps1
+powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsCommandDeck.ps1
+powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsBuildEngine.ps1
+powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_workstations/Start-AiOsValidationDeck.ps1
 ```
 
 `Start-AiOsWorkstation.ps1` remains a single-window status display.
@@ -24,19 +26,25 @@ powershell -ExecutionPolicy Bypass -File automation/orchestration/terminal_works
 - `Ai_Os BUILD ENGINE`: Green label. Codex work lane. Codex launch is manual only.
 - `Ai_Os VALIDATION DECK`: Cyan label. PowerShell status checks, validators, queue checks, repo checks.
 
-## One-Command Launcher
+## Visible Persistent Windows
 
-The one-command launcher opens decks in this order:
+Persistent deck scripts print their banner, show a final visible state, and wait for the operator to press Enter before closing. This prevents visible worker/deck windows from flashing open and disappearing.
 
-1. Command Deck
-2. Build Engine
-3. Validation Deck
+Default persistent deck state is `IDLE`.
 
-Before opening decks, it runs:
+Persistent decks stay open. Temporary OCC workers close after completed APPLY/commit workflow or park on BLOCKED.
 
-1. launcher preflight
-2. supervisor simple mode
-3. operator menu
+Temporary OCC workers remain packet-scoped. Temporary OCC windows may stay visible while `WORKING`, should show `COMPLETE` after APPLY plus commit/push reporting, then close or allow operator close. Failed or blocked workers should park on `BLOCKED`.
+
+Anti-pileup rule: do not allow unlimited stacked worker windows. Completed temporary worker windows should be closed or explicitly dismissed after the report is captured.
+
+Allowed visible states:
+
+- `IDLE`
+- `WORKING`
+- `COMPLETE`
+- `BLOCKED`
+- `CLOSED`
 
 Codex is not launched automatically. Manual Codex launch prevents the wrong branch, packet, or prompt from starting work too early.
 

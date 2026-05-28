@@ -45,3 +45,6 @@ Write-Host "  Blocked actions:" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  secret collection, startup/scheduled tasks" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  broker, OANDA, API keys, webhooks, real orders, live trading" -ForegroundColor Red
 Write-Host ""
+
+$waitScriptPath = Join-Path $PSScriptRoot "Wait-AiOsVisibleTerminal.ps1"
+& $waitScriptPath -State "IDLE" -Message "Telemetry Deck remains visible for data-pulse review."

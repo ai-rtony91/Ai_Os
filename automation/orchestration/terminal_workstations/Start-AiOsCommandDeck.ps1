@@ -78,3 +78,6 @@ Write-Host "    [ BLOCKED ]  Codex auto-launch, extra windows, startup/scheduled
 Write-Host "    [ BLOCKED ]  dashboard edits" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  broker, OANDA, API keys, webhooks, real orders, live trading" -ForegroundColor Red
 Write-Host ""
+
+$waitScriptPath = Join-Path $PSScriptRoot "Wait-AiOsVisibleTerminal.ps1"
+& $waitScriptPath -State "IDLE" -Message "MAIN CONTROL remains visible for human-gated routing and next safe action review."

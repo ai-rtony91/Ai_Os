@@ -91,3 +91,6 @@ Write-Host "  Blocked actions:" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  commit, push, merge, branch creation, PR/issue creation" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  installs, scheduled tasks, startup tasks, Codex auto-launch" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  broker, OANDA, API keys, webhooks, live trading" -ForegroundColor Red
+
+$waitScriptPath = Join-Path $PSScriptRoot "Wait-AiOsVisibleTerminal.ps1"
+& $waitScriptPath -State "IDLE" -Message "Operator menu remains visible for command routing."

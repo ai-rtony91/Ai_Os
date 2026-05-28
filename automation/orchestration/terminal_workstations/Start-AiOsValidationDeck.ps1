@@ -51,3 +51,6 @@ Write-Host "    [ BLOCKED ]  Codex auto-launch, extra windows, startup/scheduled
 Write-Host "    [ BLOCKED ]  dashboard edits, commit or push without explicit approval" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  broker, OANDA, API keys, webhooks, real orders, live trading" -ForegroundColor Red
 Write-Host ""
+
+$waitScriptPath = Join-Path $PSScriptRoot "Wait-AiOsVisibleTerminal.ps1"
+& $waitScriptPath -State "IDLE" -Message "Validation Deck remains visible for evidence-shield review."

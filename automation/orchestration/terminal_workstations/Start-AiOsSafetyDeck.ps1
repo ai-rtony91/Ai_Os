@@ -45,3 +45,6 @@ Write-Host "  Blocked actions:" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  broker, OANDA, API keys, webhooks, real orders, live trading" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  startup tasks, scheduled tasks, commit, push" -ForegroundColor Red
 Write-Host ""
+
+$waitScriptPath = Join-Path $PSScriptRoot "Wait-AiOsVisibleTerminal.ps1"
+& $waitScriptPath -State "IDLE" -Message "Safety Deck remains visible for vault-gate review."

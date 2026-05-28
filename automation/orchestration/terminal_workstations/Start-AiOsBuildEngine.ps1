@@ -53,3 +53,6 @@ Write-Host "    [ BLOCKED ]  dashboard edits unless explicitly scoped" -Foregrou
 Write-Host "    [ BLOCKED ]  broker, OANDA, API keys, webhooks, real orders, live trading" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  commit or push without explicit Human Owner approval" -ForegroundColor Red
 Write-Host ""
+
+$waitScriptPath = Join-Path $PSScriptRoot "Wait-AiOsVisibleTerminal.ps1"
+& $waitScriptPath -State "IDLE" -Message "Build Engine remains visible. Temporary OCC workers stay open on COMPLETE or BLOCKED."

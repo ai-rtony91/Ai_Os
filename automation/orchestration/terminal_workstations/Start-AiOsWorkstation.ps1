@@ -128,3 +128,6 @@ Write-Host "    git status --short --branch"
 Write-Host "  [ STEP 2 ]  Open relevant deck (Command, Build, or Validation)."
 Write-Host "  [ STEP 3 ]  Launch Codex manually from Build Engine only when ready."
 Write-Host ""
+
+$waitScriptPath = Join-Path $PSScriptRoot "Wait-AiOsVisibleTerminal.ps1"
+& $waitScriptPath -State "IDLE" -Message "Workstation master remains visible for operator orientation."
