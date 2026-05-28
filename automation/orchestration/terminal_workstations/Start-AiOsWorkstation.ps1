@@ -76,7 +76,7 @@ Write-Host "  $commandIcon $buildIcon $validationIcon  AI_OS TERMINAL WORKSTATIO
 Write-Host "  LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  AIOS BASE : #05070b  TEXT #e5f6ff  CYAN #38bdf8  BLUE #00a3ff" -ForegroundColor DarkCyan
-Write-Host "  OCC LANE  : ALL LANES  |  Master status launcher for all OCC decks" -ForegroundColor Cyan
+Write-Host "  OCC LANE  : ALL LANES  |  Persistent decks remain open for the operator session" -ForegroundColor Cyan
 Write-Host "  ROLE      : Read-only startup summary — launches Command Deck, Build Engine, Validation Deck" -ForegroundColor DarkCyan
 Write-Host "  MODE      : [ DRY_RUN ]  Read-only startup summary" -ForegroundColor DarkCyan
 Write-Host "  STATUS    : [ READ-ONLY ]  No Codex auto-launch, no extra windows, no scheduled/startup tasks" -ForegroundColor DarkCyan
@@ -115,7 +115,7 @@ Invoke-ReadOnlyCommand -Label "Open GitHub PRs" -Command {
 
 Write-Section -Title "Operator Lanes"
 Write-Host "  $commandIcon  [ MAGENTA ]  MAIN CONTROL / COMMAND THRONE" -ForegroundColor Magenta
-Write-Host "    MAIN_CONTROL  |  Persistent all-day command-deck window"
+Write-Host "    MAIN_CONTROL  |  Persistent all-day command-deck window with human-gated routing"
 Write-Host "  $buildIcon  [ GREEN   ]  BUILD ENGINE / BUILDER FORGE" -ForegroundColor Green
 Write-Host "    EAST_OCC  |  Temporary packet-scoped worker lane - Codex launch remains manual"
 Write-Host "  $validationIcon  [ CYAN    ]  VALIDATION DECK / EVIDENCE SHIELD" -ForegroundColor Cyan

@@ -58,6 +58,7 @@ In both cases, the visual identity is a cue, not authority. Approval, validation
    - Names the worker profile and role.
    - May use CLEAN, HYPE, or BOSS mode styling.
    - Must avoid clutter that hides commands or warnings.
+   - MAIN CONTROL may use ANSI background color blocks behind major headings when readable.
 
 5. Command safety reminder
    - Shows the safe command hint.
@@ -115,7 +116,7 @@ Do not use emoji when:
 
 Persistent command-deck windows may stay open all day for operator orientation. Their visual identity should remain stable:
 
-- `MAIN CONTROL / COMMAND THRONE`
+- `MAIN CONTROL · COMMAND THRONE`
 - `QUEUE CONTROL / SIGNAL ROUTER`
 - `VALIDATION DECK / EVIDENCE SHIELD`
 - `TELEMETRY DECK / DATA PULSE`
@@ -124,6 +125,37 @@ Persistent command-deck windows may stay open all day for operator orientation. 
 - `BUILD ENGINE / BUILDER FORGE`
 
 Temporary OCC workers remain packet-scoped. Their banners must show the worker lane and one of these plain states when lifecycle state is displayed: `IDLE`, `COMPLETE`, `BLOCKED`, or `CLOSED`. Temporary worker flair must not imply permanent authority.
+
+MAIN CONTROL identity stack:
+
+- `👑 MAIN CONTROL · COMMAND THRONE`
+- `🧭 ORCHESTRATOR`
+- `🛡️ HUMAN-GATED`
+- `📡 WORKER ROUTING`
+- `⚡ NEXT SAFE ACTION`
+
+MAIN CONTROL uses cyan, violet, blue-glow, and gold accents. Green remains reserved for safe/pass/OCC activity, amber for warning or dirty state, and red for blocked/danger.
+
+## Transparent/Acrylic Template Guidance
+
+Transparent or acrylic terminal appearance is allowed only as documentation or template guidance. Repo scripts must not edit Windows Terminal settings, PowerShell profiles, registry keys, fonts, startup tasks, or scheduled tasks.
+
+Suggested Windows Terminal template-only settings for MAIN CONTROL:
+
+```json
+{
+  "name": "AI_OS MAIN CONTROL",
+  "tabTitle": "MAIN CONTROL · COMMAND THRONE",
+  "colorScheme": "AIOS Command Throne",
+  "opacity": 88,
+  "useAcrylic": true,
+  "acrylicOpacity": 0.84,
+  "font": {
+    "face": "Cascadia Mono"
+  },
+  "notes": "template only, not applied automatically"
+}
+```
 
 ## Animation Limits
 

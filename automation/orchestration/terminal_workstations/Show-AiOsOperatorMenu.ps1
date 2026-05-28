@@ -4,6 +4,24 @@ $ErrorActionPreference = "Stop"
 $repoRootResolverPath = Join-Path (Split-Path -Parent $PSScriptRoot) "bootstrap\Resolve-AiOsRepoRoot.ps1"
 $border = "#" * 100
 $titleIcon = [char]::ConvertFromUtf32(0x1F451)  # Crown - MAIN CONTROL / COMMAND THRONE
+$orchestratorIcon = [char]::ConvertFromUtf32(0x1F9ED)
+$gateIcon = [char]::ConvertFromUtf32(0x1F6E1)
+$routingIcon = [char]::ConvertFromUtf32(0x1F4E1)
+$nextActionIcon = [char]::ConvertFromUtf32(0x26A1)
+
+function Write-AiOsAnsiBlock {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Text,
+
+        [string]$ForegroundCode = "97",
+
+        [string]$BackgroundCode = "46"
+    )
+
+    $escape = [char]27
+    Write-Host "$($escape)[$BackgroundCode;$ForegroundCode`m $Text $($escape)[0m"
+}
 
 if (-not (Test-Path -LiteralPath $repoRootResolverPath -PathType Leaf)) {
     throw "AI_OS repo root resolver not found: $repoRootResolverPath"
@@ -18,14 +36,21 @@ $Host.UI.RawUI.WindowTitle = "AI_OS OPERATOR MENU"
 
 Write-Host $border -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  $titleIcon  MAIN CONTROL / COMMAND THRONE" -ForegroundColor Cyan
+Write-AiOsAnsiBlock -Text "  $titleIcon  MAIN CONTROL · COMMAND THRONE  " -BackgroundCode "45"
+Write-AiOsAnsiBlock -Text "  $orchestratorIcon  ORCHESTRATOR  " -BackgroundCode "44"
+Write-AiOsAnsiBlock -Text "  $gateIcon  HUMAN-GATED  " -BackgroundCode "43" -ForegroundCode "30"
+Write-AiOsAnsiBlock -Text "  $routingIcon  WORKER ROUTING  " -BackgroundCode "46" -ForegroundCode "30"
+Write-AiOsAnsiBlock -Text "  $nextActionIcon  NEXT SAFE ACTION  " -BackgroundCode "44"
+Write-Host ""
 Write-Host "  LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  AIOS BASE : #05070b  TEXT #e5f6ff  ACTION #38bdf8  GLOW #00a3ff" -ForegroundColor DarkCyan
-Write-Host "  OCC LANE  : ALL LANES  |  Persistent command throne for all-day operator control" -ForegroundColor Cyan
+Write-Host "  GOLD      : #ffd166  VIOLET #a855f7  RED #ff5f7a" -ForegroundColor Yellow
+Write-Host "  OCC LANE  : ALL LANES  |  Persistent deck remains open for operator session" -ForegroundColor Cyan
 Write-Host "  MODE      : [ DRY_RUN ]  Simple read-only commands only" -ForegroundColor DarkCyan
 Write-Host "  STATUS    : [ READ-ONLY ]  No destructive actions" -ForegroundColor DarkCyan
 Write-Host "  Repo      : $repoPath" -ForegroundColor DarkCyan
+Write-Host "  WINDOWS   : Acrylic/transparent appearance is template-only; this script edits no settings." -ForegroundColor Gray
 Write-Host ""
 Write-Host $border -ForegroundColor Cyan
 Write-Host ""
@@ -60,6 +85,7 @@ Write-Host ""
 Write-Host "  Next safe action:" -ForegroundColor Yellow
 Write-Host "  Run preflight, then work from Command Deck, Build Engine, or Validation Deck."
 Write-Host "  Launch Codex manually only inside the Build Engine."
+Write-Host "  Keep persistent decks open all day unless the operator closes them."
 Write-Host ""
 Write-Host "  Blocked actions:" -ForegroundColor Red
 Write-Host "    [ BLOCKED ]  commit, push, merge, branch creation, PR/issue creation" -ForegroundColor Red
