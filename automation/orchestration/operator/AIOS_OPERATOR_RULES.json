@@ -28,7 +28,11 @@
     "Prefer repo-owned save/PR automation over repeated manual gh CLI commands. Manual gh commands should be fallback only.",
     "Use Invoke-AiOsGuard.ps1 before risky actions. Guard checks path, branch, lane, command type, Apply requirement, and protected-root warnings before the operator proceeds.",
     "Daily Start must connect intent, work packets, worker profiles, guard checks, and save/PR automation before asking the operator to act.",
-    "Prefer Start-AiOsWork.ps1 as the primary operator entrypoint. It should consolidate status, packets, routing, validation, next action, and exact commands before asking the operator to act."
+    "Prefer Start-AiOsWork.ps1 as the primary operator entrypoint. It should consolidate status, packets, routing, validation, next action, and exact commands before asking the operator to act.",
+    "Protect operator token and credit usage; do not resend full prompts for small corrections.",
+    "Use patch-only corrections for branch, path, token, marker, identity, allowed-path, forbidden-path, validator, or typo fixes.",
+    "Patch-only Codex corrections must include CODEX-ONLY PROMPT, AI_OS EXECUTION TOKEN when executable, exact replacement lines, and the phrase PASTE WITH LONGER PROMPT I PROVIDED PRIOR.",
+    "Before generating executable prompts, check the latest visible path and branch from terminal evidence; path and branch are the truth source."
   ],
   "lane_identity": {
     "lane_id": "rulebook_codex",

@@ -55,6 +55,45 @@ Security behavior:
 Reliability behavior:
 Codex should use the token as a work-order boundary marker to reduce accidental execution, stale-context execution, and prompt confusion.
 
+## AI_OS Token Conservation and Prompt Delta Rule
+
+AI_OS agents must protect operator token and credit usage.
+
+When a prior Codex, Claude, validator, or worker prompt needs only a small correction, the agent must not reprint the full prompt. The agent must send the smallest usable correction only.
+
+Patch-only corrections must be used for:
+
+- branch name corrections
+- worktree/path corrections
+- missing AI_OS EXECUTION TOKEN
+- missing CODEX-ONLY marker
+- missing identity field
+- missing allowed path
+- missing forbidden path
+- missing validator command
+- typo corrections
+- small rule insertions
+- small safety insertions
+- follow-up instructions that belong with a longer prior prompt
+
+Patch-only corrections must include:
+
+- `CODEX-ONLY PROMPT` when intended for Codex
+- `AI_OS EXECUTION TOKEN` when executable
+- the exact line to replace, add, or remove
+- the phrase: `PASTE WITH LONGER PROMPT I PROVIDED PRIOR`
+- a short note that all other prior instructions remain unchanged
+
+Full prompt resend is allowed only when:
+
+- the operator explicitly asks for the full prompt again
+- more than 25 percent of the prompt changed
+- the prior prompt is unavailable or unsafe to reuse
+- the correction would be ambiguous without full context
+- the original prompt mixed unrelated lanes and must be rebuilt cleanly
+
+Before generating any executable prompt, the agent must check the latest visible path and branch from the user's terminal output. If path or branch is missing, the agent must either ask for git status or write a patch-only placeholder instead of guessing.
+
 ## AI_OS Identity Header Rule
 
 Executable AI_OS packets must identify who is speaking, who owns the lane, and where execution stops.
