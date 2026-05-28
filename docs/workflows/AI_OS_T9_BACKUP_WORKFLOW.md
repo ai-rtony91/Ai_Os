@@ -140,18 +140,22 @@ No Task Scheduler registration may occur until a future APPLY lane explicitly au
 
 The next helper should start as DRY_RUN/report-only.
 
-Recommended future script path:
+Approved controlled snapshot script path:
 
 ```text
-automation/orchestration/backup_t9/Invoke-AiOsT9Backup.DRY_RUN.ps1
+scripts/backup/Start-AiOsT9SnapshotBackup.ps1
 ```
 
-Initial DRY_RUN behavior should:
+The first implementation is a manual operator-triggered snapshot helper with
+preview support. It must not register scheduled tasks, create a daemon, move
+the active repo, change remotes, or perform retention deletion.
+
+Initial preview behavior should:
 
 - confirm `C:\Dev\Ai.Os` exists
 - confirm `D:` exists and is labeled `T9_FOB`
-- confirm the recommended destination paths
-- print the planned mirror and snapshot paths
+- confirm `D:\T9_FOB` exists
+- print the planned snapshot path
 - print the planned exclusions
 - print the planned robocopy command as text only
 - refuse to run robocopy
@@ -159,7 +163,8 @@ Initial DRY_RUN behavior should:
 - refuse to touch known untracked backlog
 - produce console output only
 
-An APPLY version must be separate and explicitly approved later.
+Manual APPLY backup behavior may create one timestamped snapshot only after
+explicit operator approval.
 
 ## Robocopy Safety Notes
 
@@ -192,4 +197,3 @@ Future robocopy use should avoid destructive mirror behavior until proven safe. 
 3. Validate that the helper prints paths, exclusions, and planned commands without mutation.
 4. Run a separate APPLY lane only after operator approval.
 5. Consider Task Scheduler only after the manual APPLY path is reliable.
-

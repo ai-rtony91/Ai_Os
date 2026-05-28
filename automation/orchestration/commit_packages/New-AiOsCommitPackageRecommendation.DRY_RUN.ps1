@@ -281,6 +281,33 @@ $result = [pscustomobject]@{
     next_safe_action = "Review recommended git add commands. Stage only selected files after explicit approval; never use git add ."
 }
 
+$result | Add-Member -NotePropertyName orchestration_result_contract -NotePropertyValue ([pscustomobject]@{
+    status = if ($risks.Count -gt 0) { "REVIEW" } elseif ($recommendedFiles.Count -gt 0) { "READY" } else { "PASS" }
+    severity = if ($excludedFiles.Count -gt 0) { "BLOCKED" } elseif ($risks.Count -gt 0) { "REVIEW" } else { "INFO" }
+    packet_id = "COMMIT_PACKAGE_RECOMMENDATION"
+    worker_identity = $workerLane
+    validator_results = @()
+    approval_required = ($recommendedFiles.Count -gt 0 -or $excludedFiles.Count -gt 0 -or $risks.Count -gt 0)
+    blocked_reason = if ($excludedFiles.Count -gt 0) { "Protected or blocked paths were excluded from the package recommendation." } else { "none" }
+    escalation_reason = if ($recommendedFiles.Count -gt 0) { "Exact-file commit package requires Human Owner review before staging or commit." } else { "none" }
+    commit_candidate = ($recommendedFiles.Count -gt 0)
+    next_safe_action = $result.next_safe_action
+    stop_condition = "REPORT_ONLY_NO_STAGING_NO_COMMIT_NO_PUSH"
+    runtime_notes = @(
+        "DRY_RUN",
+        "No files were staged.",
+        "No commit or push was performed."
+    )
+    evidence = [pscustomobject]@{
+        recommended_file_count = $recommendedFiles.Count
+        excluded_file_count = $excludedFiles.Count
+        risk_count = $risks.Count
+        git_status = $gitStatus
+        commit_message_suggestion = $commitMessage
+    }
+    generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+})
+
 if ($OutputJson) {
     $result | ConvertTo-Json -Depth 8
     exit 0

@@ -45,6 +45,36 @@ $result = [pscustomobject]@{
     blocker = $blocker.blocker
 }
 
+$approvalRequired = ($approval.matches_found -gt 0 -or $next.status -eq "awaiting_approval")
+$blockedReason = if ($health.health -ne "HEALTHY") { "Runtime health is not clean." } elseif ($next.status -eq "blocked" -or $next.status -eq "failed") { "Packet is blocked or failed." } else { "none" }
+$status = if ($blockedReason -ne "none") { "BLOCKED" } elseif ($approvalRequired) { "REVIEW" } else { "READY" }
+$result | Add-Member -NotePropertyName orchestration_result_contract -NotePropertyValue ([pscustomobject]@{
+    status = $status
+    severity = if ($status -eq "BLOCKED") { "BLOCKED" } elseif ($status -eq "REVIEW") { "REVIEW" } else { "INFO" }
+    packet_id = if ($next.packet_id) { [string]$next.packet_id } else { "UNKNOWN" }
+    worker_identity = "UNKNOWN"
+    validator_results = @()
+    approval_required = $approvalRequired
+    blocked_reason = $blockedReason
+    escalation_reason = if ($approvalRequired) { "Approval evidence requires Human Owner review." } elseif ($blockedReason -ne "none") { $blockedReason } else { "none" }
+    commit_candidate = $false
+    next_safe_action = $recommendedCommand
+    stop_condition = "REPORT_ONLY_NO_PACKET_ADVANCEMENT"
+    runtime_notes = @(
+        "READ_ONLY",
+        "Recommendation only.",
+        "No packet advancement, APPLY, commit, or push was performed."
+    )
+    evidence = [pscustomobject]@{
+        health = $health.health
+        packet_status = $next.status
+        approval_matches = $approval.matches_found
+        blocker = $blocker.blocker
+        reason = $reason
+    }
+    generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+})
+
 if ($QuietJson) {
     $result | ConvertTo-Json -Depth 8
     exit 0

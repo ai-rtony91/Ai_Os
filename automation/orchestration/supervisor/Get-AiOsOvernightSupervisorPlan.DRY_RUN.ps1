@@ -15,7 +15,11 @@ function Get-RelativePathSafe {
         return $Path
     }
 
-    return [System.IO.Path]::GetRelativePath($repoRoot.Path, $resolved.Path).Replace("\", "/")
+    $rootPath = $repoRoot.Path.TrimEnd("\") + "\"
+    $rootUri = [System.Uri]::new($rootPath)
+    $pathUri = [System.Uri]::new($resolved.Path)
+
+    return [System.Uri]::UnescapeDataString($rootUri.MakeRelativeUri($pathUri).ToString()).Replace("\", "/")
 }
 
 function Read-JsonFile {
@@ -41,12 +45,134 @@ $untrackedItems = @($statusLines | Where-Object { $_ -match "^\?\?\s+" } | ForEa
 $queueHealthPath = Join-Path $repoRoot.Path "automation\orchestration\queue_health_supervisor.v1.example.json"
 $validatorConfigPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_CHAIN_CONFIG_001.json"
 $approvalInboxPath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox.v1.example.json"
+$approvalInboxFolder = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox"
+$workPacketFolder = Join-Path $repoRoot.Path "automation\orchestration\work_packets"
+$commitPackageFolder = Join-Path $repoRoot.Path "automation\orchestration\commit_packages"
 $workerRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\workers\AIOS_WORKER_REGISTRY.json"
 
 $queueHealth = Read-JsonFile -Path $queueHealthPath
 $validatorConfig = Read-JsonFile -Path $validatorConfigPath
 $approvalInbox = Read-JsonFile -Path $approvalInboxPath
 $workerRegistry = Read-JsonFile -Path $workerRegistryPath
+
+function Get-JsonLeafFiles {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return @()
+    }
+
+    return @(Get-ChildItem -LiteralPath $Path -File -Filter "*.json" -ErrorAction SilentlyContinue)
+}
+
+function Get-PropertyValue {
+    param(
+        [object]$Object,
+        [string[]]$Names,
+        [string]$Default = "UNKNOWN"
+    )
+
+    if (-not $Object) {
+        return $Default
+    }
+
+    foreach ($name in $Names) {
+        $property = $Object.PSObject.Properties[$name]
+        if ($property -and $null -ne $property.Value -and [string]$property.Value -ne "") {
+            return [string]$property.Value
+        }
+    }
+
+    return $Default
+}
+
+function Get-ValidatorChainNames {
+    param([object]$ValidatorConfig)
+
+    if ($ValidatorConfig -and $ValidatorConfig.validators) {
+        return @($ValidatorConfig.validators | Select-Object -First 5 | ForEach-Object { [string]$_.name })
+    }
+
+    return @("UNKNOWN")
+}
+
+$validatorChainNames = Get-ValidatorChainNames -ValidatorConfig $validatorConfig
+
+$packetJsonFiles = Get-JsonLeafFiles -Path $workPacketFolder
+$packetFlow = @()
+foreach ($file in $packetJsonFiles) {
+    $packet = Read-JsonFile -Path $file.FullName
+    $packetId = Get-PropertyValue -Object $packet -Names @("packet_id", "id", "task_id") -Default $file.BaseName
+    $lane = Get-PropertyValue -Object $packet -Names @("lane", "worker_lane", "assigned_lane")
+    $workerIdentity = Get-PropertyValue -Object $packet -Names @("worker_identity", "worker", "assigned_worker")
+    $packetState = Get-PropertyValue -Object $packet -Names @("packet_state", "state", "status") -Default "UNKNOWN"
+    $approvalRequired = $false
+    $commitPackageCandidate = $false
+    $escalationReason = "none"
+    $stopCondition = "REPORT_ONLY_NO_MUTATION"
+
+    if ($packetState -match "APPROVAL|APPLY|PROTECTED") {
+        $approvalRequired = $true
+        $packetState = "APPROVAL_REQUIRED"
+        $escalationReason = "Packet state indicates approval or protected action."
+    } elseif ($packetState -match "VALIDATOR|VALIDATION") {
+        $packetState = "VALIDATOR_REQUIRED"
+        $escalationReason = "Packet state indicates validator review is required."
+    } elseif ($packetState -match "COMMIT") {
+        $approvalRequired = $true
+        $commitPackageCandidate = $true
+        $packetState = "COMMIT_PACKAGE_CANDIDATE"
+        $escalationReason = "Packet state indicates commit package review is required."
+    } elseif ($packetState -match "BLOCK") {
+        $approvalRequired = $true
+        $packetState = "BLOCKED"
+        $escalationReason = "Packet state is blocked."
+    } elseif ($packetState -match "STALE") {
+        $packetState = "STALE"
+        $escalationReason = "Packet state is stale."
+    } else {
+        $packetState = "READY_FOR_REVIEW"
+    }
+
+    if ($lane -eq "UNKNOWN" -or $workerIdentity -eq "UNKNOWN") {
+        $packetState = "BLOCKED"
+        $approvalRequired = $true
+        $escalationReason = "Packet is missing lane or worker identity evidence."
+        $stopCondition = "MISSING_PACKET_IDENTITY"
+    }
+
+    $packetFlow += [pscustomobject]@{
+        packet_id = $packetId
+        lane = $lane
+        worker_identity = $workerIdentity
+        validator_chain = $validatorChainNames
+        approval_required = $approvalRequired
+        escalation_reason = $escalationReason
+        stop_condition = $stopCondition
+        packet_state = $packetState
+        report_target = "morning_brief"
+        commit_package_candidate = $commitPackageCandidate
+        next_safe_action = "Review packet evidence; do not move packet state without separate APPLY approval."
+    }
+}
+
+if ($packetFlow.Count -eq 0) {
+    $packetFlow = @(
+        [pscustomobject]@{
+            packet_id = "NO_PACKET_FILES_FOUND"
+            lane = "UNKNOWN"
+            worker_identity = "UNKNOWN"
+            validator_chain = $validatorChainNames
+            approval_required = $false
+            escalation_reason = "No work packet JSON files were available for classification."
+            stop_condition = "REPORT_ONLY_NO_PACKET_MOVEMENT"
+            packet_state = "UNKNOWN"
+            report_target = "morning_brief"
+            commit_package_candidate = $false
+            next_safe_action = "Add or route a packet through the approved work packet workflow before execution."
+        }
+    )
+}
 
 $stalePackets = @()
 if ($queueHealth -and $queueHealth.stale_packet_visibility) {
@@ -70,6 +196,27 @@ if ($validatorConfig -and $validatorConfig.validators) {
             next_safe_action = "Use a separately approved validator workflow before running validators."
         }
     })
+}
+
+$validatorResults = @()
+if ($validatorConfig -and $validatorConfig.validators) {
+    $validatorResults = @($validatorConfig.validators | Select-Object -First 5 | ForEach-Object {
+        [pscustomobject]@{
+            validator_id = [string]$_.name
+            state = "NOT_RUN"
+            evidence = "Validator is configured; Overnight Supervisor does not execute validators automatically."
+            next_safe_action = "Run only through a separately approved DRY_RUN validator packet."
+        }
+    })
+} else {
+    $validatorResults = @(
+        [pscustomobject]@{
+            validator_id = "UNKNOWN"
+            state = "UNKNOWN"
+            evidence = "Validator chain configuration was unavailable."
+            next_safe_action = "Restore validator chain evidence before APPLY, commit, push, or merge."
+        }
+    )
 }
 
 $escalationItems = @()
@@ -103,9 +250,51 @@ if ($approvalInbox -and $approvalInbox.items) {
     $approvalCount = @($approvalInbox.items).Count
 }
 
+$approvalJsonFiles = Get-JsonLeafFiles -Path $approvalInboxFolder
+$approvalRequired = @($packetFlow | Where-Object { $_.approval_required } | ForEach-Object {
+    [pscustomobject]@{
+        packet_id = [string]$_.packet_id
+        reason = [string]$_.escalation_reason
+        approval_authority = "Anthony Meza"
+        next_safe_action = "Request Human Owner review before any protected action or mutation."
+    }
+})
+if ($approvalRequired.Count -eq 0 -and ($approvalCount -gt 0 -or $approvalJsonFiles.Count -gt 0)) {
+    $approvalRequired = @(
+        [pscustomobject]@{
+            packet_id = "APPROVAL_INBOX_REVIEW"
+            reason = "Approval inbox evidence exists and should be reviewed before protected actions."
+            approval_authority = "Anthony Meza"
+            next_safe_action = "Inspect approval inbox through a read-only approval workflow."
+        }
+    )
+}
+
 $workerCount = 0
 if ($workerRegistry -and $workerRegistry.workers) {
     $workerCount = @($workerRegistry.workers).Count
+}
+
+$commitPackageJsonFiles = Get-JsonLeafFiles -Path $commitPackageFolder
+$commitPackageCandidates = @($packetFlow | Where-Object { $_.commit_package_candidate } | ForEach-Object {
+    [pscustomobject]@{
+        packet_id = [string]$_.packet_id
+        lane = [string]$_.lane
+        candidate_files = @()
+        status = "NEEDS_APPROVAL"
+        next_safe_action = "Prepare exact-file package only after validation and Human Owner approval."
+    }
+})
+if ($commitPackageCandidates.Count -eq 0 -and $commitPackageJsonFiles.Count -gt 0) {
+    $commitPackageCandidates = @($commitPackageJsonFiles | Select-Object -First 5 | ForEach-Object {
+        [pscustomobject]@{
+            packet_id = $_.BaseName
+            lane = "UNKNOWN"
+            candidate_files = @((Get-RelativePathSafe -Path $_.FullName))
+            status = "READY_FOR_REVIEW"
+            next_safe_action = "Review existing commit package candidate; do not stage, commit, push, or merge."
+        }
+    })
 }
 
 $riskLevel = "SAFE"
@@ -173,7 +362,11 @@ $report = [pscustomobject]@{
         risk_level = $riskLevel
     }
     stale_packets = $stalePackets
+    packet_flow = $packetFlow
     validator_recommendations = $validatorRecommendations
+    validator_results = $validatorResults
+    approval_required = $approvalRequired
+    commit_package_candidates = $commitPackageCandidates
     escalation_items = $escalationItems
     next_safe_actions = $nextSafeActions
     packet_drafts = $packetDrafts
@@ -185,7 +378,11 @@ $report = [pscustomobject]@{
             "changed_files=$($changedFiles.Count)",
             "untracked_items=$($untrackedItems.Count)",
             "stale_packets=$($stalePackets.Count)",
+            "classified_packets=$($packetFlow.Count)",
             "validator_recommendations=$($validatorRecommendations.Count)",
+            "validator_results=$($validatorResults.Count)",
+            "approval_required=$($approvalRequired.Count)",
+            "commit_package_candidates=$($commitPackageCandidates.Count)",
             "approval_items=$approvalCount",
             "workers=$workerCount"
         )
@@ -228,6 +425,9 @@ Write-Host "Repo state: $($report.repo_health.branch)"
 Write-Host "Changed files: $($report.repo_health.changed_files.Count)"
 Write-Host "Untracked items: $($report.repo_health.untracked_items.Count)"
 Write-Host "Stale packets: $($report.stale_packets.Count)"
+Write-Host "Classified packets: $($report.packet_flow.Count)"
+Write-Host "Approval-required items: $($report.approval_required.Count)"
+Write-Host "Commit package candidates: $($report.commit_package_candidates.Count)"
 Write-Host "Escalation items: $($report.escalation_items.Count)"
 Write-Host ""
 Write-Host "Next safe actions:"

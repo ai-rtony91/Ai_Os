@@ -81,6 +81,35 @@ $result = [ordered]@{
     push_performed = "NO"
 }
 
+$approvalRequired = ($pendingApprovals.Count -gt 0 -or $approvedActions.Count -gt 0 -or $blockedActions.Count -gt 0)
+$blockedReason = if ($blockedActions.Count -gt 0) { "Blocked approval items are present." } else { "none" }
+$severity = if ($blockedActions.Count -gt 0) { "BLOCKED" } elseif ($approvalRequired) { "REVIEW" } else { "INFO" }
+$status = if ($blockedActions.Count -gt 0) { "BLOCKED" } elseif ($approvalRequired) { "REVIEW" } else { "PASS" }
+$result["orchestration_result_contract"] = [ordered]@{
+    status = $status
+    severity = $severity
+    packet_id = "APPROVAL_INBOX_SUMMARY"
+    worker_identity = "UNKNOWN"
+    validator_results = @()
+    approval_required = $approvalRequired
+    blocked_reason = $blockedReason
+    escalation_reason = if ($approvalRequired) { "Approval inbox contains items requiring Human Owner review." } else { "none" }
+    commit_candidate = $false
+    next_safe_action = $nextSafeCommand
+    stop_condition = "REPORT_ONLY_NO_APPROVAL_MUTATION"
+    runtime_notes = @(
+        "DRY_RUN_READ_ONLY",
+        "No approval state was created, updated, cleared, or approved.",
+        "No commit or push was performed."
+    )
+    evidence = [ordered]@{
+        pending_approval_count = $pendingApprovals.Count
+        approved_action_count = $approvedActions.Count
+        blocked_action_count = $blockedActions.Count
+    }
+    generated_at = $result.generated_utc
+}
+
 if ($QuietJson) {
     $result | ConvertTo-Json -Depth 10
     exit 0

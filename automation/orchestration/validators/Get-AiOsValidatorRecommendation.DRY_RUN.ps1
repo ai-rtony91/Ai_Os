@@ -325,6 +325,40 @@ $report = [pscustomobject]@{
     next_safe_action = $nextSafeAction
 }
 
+$report | Add-Member -NotePropertyName orchestration_result_contract -NotePropertyValue ([pscustomobject]@{
+    status = $result
+    severity = if ($result -eq "BLOCKED") { "BLOCKED" } elseif ($result -eq "REVIEW") { "REVIEW" } else { "INFO" }
+    packet_id = "VALIDATOR_RECOMMENDATION"
+    worker_identity = "UNKNOWN"
+    validator_results = @($recommendations | ForEach-Object {
+        [pscustomobject]@{
+            validator_id = [string]$_.id
+            status = "NOT_RUN"
+            severity = [string]$_.severity
+            evidence = [string]$_.reason
+            next_safe_action = "Run only after the operator approves the recommended DRY_RUN validator route."
+        }
+    })
+    approval_required = ($result -ne "PASS")
+    blocked_reason = if ($blockedFindings.Count -gt 0) { "Blocked findings are present." } else { "none" }
+    escalation_reason = if ($result -eq "PASS") { "none" } else { "Validation recommendations require review before protected action." }
+    commit_candidate = $false
+    next_safe_action = $nextSafeAction
+    stop_condition = "REPORT_ONLY_NO_VALIDATOR_AUTO_RUN"
+    runtime_notes = @(
+        "DRY_RUN",
+        "Recommendations only.",
+        "No APPLY, commit, push, or validator auto-run was performed."
+    )
+    evidence = [pscustomobject]@{
+        changed_file_count = $changedPaths.Count
+        recommendation_count = $recommendations.Count
+        blocked_finding_count = $blockedFindings.Count
+        review_finding_count = $reviewFindings.Count
+    }
+    generated_at = $generatedAt
+})
+
 if ($OutputJson) {
     $report | ConvertTo-Json -Depth 12
     exit 0

@@ -159,6 +159,13 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "orchestration_result_contract",
+      "path": "schemas/aios/orchestration/orchestration_result_contract.schema.json",
+      "kind": "json_schema",
+      "purpose": "Shared read-only result adapter shape for validators, approvals, commit-package planners, recommendations, and supervisor reports.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "COMMIT_PACKAGE_SCHEMA",
       "path": "schemas/aios/orchestration/COMMIT_PACKAGE_SCHEMA.json",
       "kind": "json_schema",

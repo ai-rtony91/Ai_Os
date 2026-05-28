@@ -10,6 +10,8 @@ It reduces routine operator workload by inspecting state, classifying risk, rank
 
 Overnight Supervisor is not autonomous APPLY authority.
 
+Overnight Supervisor is report-first supervised autonomy. It may connect work packet evidence, worker routing evidence, validator-chain evidence, approval inbox evidence, commit-package candidate evidence, and overnight reporting into one read-only plan. It must stop at the report boundary until the Human Owner approves a separate exact APPLY, commit, push, merge, or worker-launch packet.
+
 ## Scope
 
 This workflow applies to future overnight supervisor reports, planner scripts, schemas, morning brief output, escalation packets, and semi-autonomous orchestration proposals.
@@ -18,11 +20,15 @@ It governs read-only intelligence for:
 
 - repo state.
 - packet queues.
+- packet intake and packet classification.
 - worker state.
+- worker resolution and lane routing evidence.
 - approval state.
-- validator recommendations.
+- validator-chain configuration, execution recommendations, and validator result evidence.
 - stale packet detection.
 - blocker detection.
+- approval escalation requirements.
+- commit package candidate preparation.
 - next safe action ranking.
 - packet draft previews.
 - morning brief generation.
@@ -56,12 +62,16 @@ If evidence is missing, stale, conflicting, or unverifiable, the supervisor must
 The Overnight Supervisor may output:
 
 - supervisor status.
+- packet intake summary.
+- packet classification summary.
+- worker resolution summary.
 - repo health summary.
 - stale packet summary.
 - worker and lane review summary.
 - approval state summary.
-- validator recommendation summary.
+- validator-chain recommendation and result summary.
 - escalation item list.
+- commit package candidate summary.
 - ranked next safe actions.
 - packet draft previews.
 - morning brief preview.
@@ -76,6 +86,8 @@ The Overnight Supervisor must not:
 
 - APPLY changes.
 - write files.
+- perform blind APPLY.
+- perform blind commit.
 - move packet state.
 - create, update, or clear approvals.
 - create, update, or clear queues.
@@ -91,6 +103,8 @@ The Overnight Supervisor must not:
 - stage files.
 - commit.
 - push.
+- merge.
+- edit protected roots without explicit approved APPLY authority.
 - delete files.
 - move files.
 - rename files.
@@ -120,11 +134,25 @@ The Overnight Supervisor must escalate to Anthony Meza when any of these appear:
 
 Escalation output must include the reason, evidence, affected scope, recommended human decision, and the next safe recovery step.
 
+## Canonical Packet Flow
+
+The Overnight Supervisor must describe the packet flow in this order:
+
+1. Packet intake: read available work packet evidence and classify each packet as `READY_FOR_REVIEW`, `VALIDATOR_REQUIRED`, `APPROVAL_REQUIRED`, `COMMIT_PACKAGE_CANDIDATE`, `BLOCKED`, `STALE`, or `UNKNOWN`.
+2. Worker resolution: identify the named worker identity, lane, zone, and allowed path boundary from packet evidence. Missing or conflicting worker identity must become `BLOCKED`.
+3. Validator execution planning: summarize the required validator chain and any available validator result evidence. The supervisor may recommend validators, but must not run a validator automatically unless a separate approved DRY_RUN validator packet authorizes it.
+4. Approval escalation: mark any packet requiring APPLY, protected path work, worker launch, commit, push, merge, packet movement, or authority change as `approval_required = true`.
+5. Commit package preparation: identify exact-file commit package candidates only from reviewed evidence. This is planning only and must not stage files, create commits, push branches, open PRs, or merge.
+6. Overnight reporting: produce the morning brief, escalation list, blocked action list, and next safe action.
+
+If any step lacks evidence, the supervisor must report `UNKNOWN` or `BLOCKED` and stop at report output.
+
 ## Stop Conditions
 
 The Overnight Supervisor must stop when:
 
 - required authority chain is missing.
+- packet identity, lane, worker identity, allowed paths, forbidden paths, approval authority, validator chain, or stop point is missing for executable work.
 - execution mode is missing or inconsistent.
 - approval state is missing for protected work.
 - evidence is stale, invalid, or contradictory.
@@ -134,6 +162,7 @@ The Overnight Supervisor must stop when:
 - protected trading, broker, secret, credential, or live execution scope appears.
 - validator chain is missing or fails.
 - output would imply APPLY without visible human approval.
+- output would imply commit, push, merge, or protected-root edits without explicit human approval and an exact-file package.
 
 ## Morning Brief Responsibilities
 
@@ -152,6 +181,8 @@ The morning brief should summarize:
 - stop conditions encountered overnight.
 
 The morning brief must be report-only unless a separate approved APPLY pack explicitly changes behavior.
+
+The morning brief may name commit package candidates, validator candidates, and approval-needed packets. These are planning signals only. They are not permission to APPLY, stage, commit, push, merge, or edit protected roots.
 
 Compact morning brief output should stay short and operator-facing. It should show:
 
@@ -189,6 +220,7 @@ Packet drafts must not be moved into an active queue, assigned to a worker, or t
 Only Anthony Meza may approve:
 
 - APPLY changes.
+- protected-root edits.
 - protected-path work.
 - commit.
 - push.

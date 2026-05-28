@@ -16,6 +16,10 @@ The queue reader will eventually load approved queue evidence and normalize it i
 
 The telemetry writer currently builds in-memory preview events only. Future APPLY work may add append-only writes after schema validation and approval.
 
+## Contract normalizer role
+
+The contract normalizer reads existing DRY_RUN/report JSON evidence and emits one normalized `orchestration_result_contract`-compatible object. It is read-only and report-only. It must not write files, start subprocesses, mutate packets, mutate approvals, launch workers, run schedulers, stage files, commit, push, merge, or control runtime behavior.
+
 ## Worker routing role
 
 The worker router chooses a suggested worker from packet metadata and registry evidence. It does not launch Codex, terminals, daemons, or subprocesses.
