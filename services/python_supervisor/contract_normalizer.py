@@ -14,105 +14,22 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
-STATUS_ALIASES = {
-    "PASS": "PASS",
-    "READY": "PASS",
-    "SAFE_TO_COMMIT": "PASS",
-    "SAFE_TO_PUSH": "PASS",
-    "INFO": "PASS",
-    "RECOMMENDED": "REVIEW",
-    "REVIEW": "REVIEW",
-    "WARN": "REVIEW",
-    "WARNING": "REVIEW",
-    "REVIEW_REQUIRED": "REVIEW",
-    "HUMAN_APPROVAL_REQUIRED": "REVIEW",
-    "PENDING": "REVIEW",
-    "PENDING_REVIEW": "REVIEW",
-    "WAITING_APPROVAL": "REVIEW",
-    "AWAITING_APPROVAL": "REVIEW",
-    "FAIL": "BLOCKED",
-    "FAILED": "BLOCKED",
-    "BLOCKER": "BLOCKED",
-    "BLOCKED": "BLOCKED",
-    "STOP": "BLOCKED",
-    "STOPPED": "BLOCKED",
-    "ERROR": "BLOCKED",
-    "MISSING": "UNKNOWN",
-    "UNKNOWN": "UNKNOWN",
-    "NO_ACTION": "UNKNOWN",
-    "NOT_RUN": "NOT_RUN",
-}
-
-SEVERITY_ALIASES = {
-    "PASS": "INFO",
-    "READY": "INFO",
-    "INFO": "INFO",
-    "RECOMMENDED": "REVIEW",
-    "REVIEW": "REVIEW",
-    "WARN": "REVIEW",
-    "WARNING": "REVIEW",
-    "REVIEW_REQUIRED": "REVIEW",
-    "HUMAN_APPROVAL_REQUIRED": "REVIEW",
-    "PENDING": "REVIEW",
-    "PENDING_REVIEW": "REVIEW",
-    "FAIL": "BLOCKED",
-    "FAILED": "BLOCKED",
-    "BLOCKER": "BLOCKED",
-    "BLOCKED": "BLOCKED",
-    "STOP": "BLOCKED",
-    "STOPPED": "BLOCKED",
-    "ERROR": "BLOCKED",
-    "MISSING": "UNKNOWN",
-    "UNKNOWN": "UNKNOWN",
-    "NO_ACTION": "UNKNOWN",
-    "NOT_RUN": "UNKNOWN",
-}
-
-STATUS_RANK = {
-    "BLOCKED": 4,
-    "REVIEW": 3,
-    "UNKNOWN": 2,
-    "NOT_RUN": 1,
-    "PASS": 0,
-}
-
-SEVERITY_RANK = {
-    "BLOCKED": 3,
-    "REVIEW": 2,
-    "UNKNOWN": 1,
-    "INFO": 0,
-}
+from decision_vocabulary import (
+    SEVERITY_ALIASES,
+    STATUS_ALIASES,
+    build_decision_summary,
+    choose_severity,
+    choose_status,
+    normalize_approval_class,
+    normalize_severity,
+    normalize_status,
+    normalize_stop_condition,
+    requires_human_review,
+)
 
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def normalize_token(value: Any, aliases: dict[str, str], default: str) -> str:
-    if value is None:
-        return default
-
-    token = str(value).strip().upper().replace("-", "_").replace(" ", "_")
-    if not token:
-        return default
-
-    return aliases.get(token, default)
-
-
-def normalize_status(value: Any) -> str:
-    return normalize_token(value, STATUS_ALIASES, "UNKNOWN")
-
-
-def normalize_severity(value: Any) -> str:
-    return normalize_token(value, SEVERITY_ALIASES, "UNKNOWN")
-
-
-def choose_ranked(values: list[str], ranks: dict[str, int], default: str) -> str:
-    if not values:
-        return default
-
-    return sorted(values, key=lambda item: ranks.get(item, -1), reverse=True)[0]
 
 
 def read_json_report(path: Path) -> dict[str, Any]:
@@ -279,13 +196,15 @@ def normalize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
         statuses.extend(item["status"] for item in validator_results)
         severities.extend(item["severity"] for item in validator_results)
 
-    status = choose_ranked(statuses, STATUS_RANK, "UNKNOWN")
-    severity = choose_ranked(severities, SEVERITY_RANK, "UNKNOWN")
+    status = choose_status(statuses, "UNKNOWN")
+    severity = choose_severity(severities, "UNKNOWN")
 
-    if status == "BLOCKED":
+    approval_class = normalize_approval_class(approval_required)
+    stop_condition = normalize_stop_condition("REPORT_ONLY_NO_MUTATION")
+    if requires_human_review(status, severity, approval_class):
         approval_required = True
-    elif status == "REVIEW":
-        approval_required = True
+        if status == "PASS" and severity == "INFO":
+            approval_required = approval_class != "none"
 
     blocked_reason = "; ".join(blocked_reasons) if blocked_reasons else "none"
     escalation_reason = (
@@ -319,6 +238,12 @@ def normalize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
                 "status": sorted(STATUS_ALIASES.keys()),
                 "severity": sorted(SEVERITY_ALIASES.keys()),
             },
+            "decision_summary": build_decision_summary(
+                status,
+                severity,
+                approval_class,
+                stop_condition,
+            ),
         },
         "generated_at": utc_now(),
     }

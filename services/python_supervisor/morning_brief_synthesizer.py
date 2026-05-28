@@ -14,70 +14,20 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from decision_vocabulary import (
+    build_decision_summary,
+    choose_severity,
+    normalize_approval_class,
+    normalize_severity,
+    normalize_status,
+    normalize_stop_condition,
+    requires_human_review,
+    severity_rank,
+)
+
 
 SCHEMA = "AIOS_MORNING_BRIEF_SYNTHESIS.v1"
 MODE = "DRY_RUN"
-
-STATUS_ALIASES = {
-    "PASS": "PASS",
-    "READY": "PASS",
-    "SAFE_TO_COMMIT": "PASS",
-    "SAFE_TO_PUSH": "PASS",
-    "INFO": "PASS",
-    "RECOMMENDED": "REVIEW",
-    "REVIEW": "REVIEW",
-    "WARN": "REVIEW",
-    "WARNING": "REVIEW",
-    "REVIEW_REQUIRED": "REVIEW",
-    "HUMAN_APPROVAL_REQUIRED": "REVIEW",
-    "PENDING": "REVIEW",
-    "PENDING_REVIEW": "REVIEW",
-    "WAITING_APPROVAL": "REVIEW",
-    "AWAITING_APPROVAL": "REVIEW",
-    "FAIL": "BLOCKED",
-    "FAILED": "BLOCKED",
-    "BLOCKER": "BLOCKED",
-    "BLOCKED": "BLOCKED",
-    "STOP": "BLOCKED",
-    "STOPPED": "BLOCKED",
-    "ERROR": "BLOCKED",
-    "MISSING": "UNKNOWN",
-    "UNKNOWN": "UNKNOWN",
-    "NO_ACTION": "UNKNOWN",
-    "NOT_RUN": "NOT_RUN",
-}
-
-SEVERITY_ALIASES = {
-    "PASS": "INFO",
-    "READY": "INFO",
-    "INFO": "INFO",
-    "RECOMMENDED": "REVIEW",
-    "REVIEW": "REVIEW",
-    "WARN": "REVIEW",
-    "WARNING": "REVIEW",
-    "REVIEW_REQUIRED": "REVIEW",
-    "HUMAN_APPROVAL_REQUIRED": "REVIEW",
-    "PENDING": "REVIEW",
-    "PENDING_REVIEW": "REVIEW",
-    "FAIL": "BLOCKED",
-    "FAILED": "BLOCKED",
-    "BLOCKER": "BLOCKED",
-    "BLOCKED": "BLOCKED",
-    "STOP": "BLOCKED",
-    "STOPPED": "BLOCKED",
-    "ERROR": "BLOCKED",
-    "MISSING": "UNKNOWN",
-    "UNKNOWN": "UNKNOWN",
-    "NO_ACTION": "UNKNOWN",
-    "NOT_RUN": "UNKNOWN",
-}
-
-SEVERITY_RANK = {
-    "BLOCKED": 0,
-    "REVIEW": 1,
-    "INFO": 2,
-    "UNKNOWN": 3,
-}
 
 PROTECTED_TERMS = (
     "commit",
@@ -102,23 +52,6 @@ def utc_now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def normalize_token(value: Any, aliases: dict[str, str], default: str) -> str:
-    if value is None:
-        return default
-    token = str(value).strip().upper().replace("-", "_").replace(" ", "_")
-    if not token:
-        return default
-    return aliases.get(token, default)
-
-
-def normalize_status(value: Any) -> str:
-    return normalize_token(value, STATUS_ALIASES, "UNKNOWN")
-
-
-def normalize_severity(value: Any) -> str:
-    return normalize_token(value, SEVERITY_ALIASES, "UNKNOWN")
-
-
 def boolish(value: Any) -> bool:
     if isinstance(value, bool):
         return value
@@ -129,7 +62,7 @@ def boolish(value: Any) -> bool:
 
 def rank_key(item: dict[str, Any]) -> tuple[int, str]:
     severity = normalize_severity(item.get("severity") or item.get("status"))
-    return (SEVERITY_RANK.get(severity, 3), str(item.get("source_path", "")))
+    return (-severity_rank(severity), str(item.get("source_path", "")))
 
 
 def read_json_object(path: Path) -> dict[str, Any]:
@@ -265,6 +198,13 @@ def summarize_source(item: dict[str, Any]) -> dict[str, Any]:
         "status": status,
         "severity": severity,
         "approval_required": boolish(contract.get("approval_required")),
+        "approval_class": normalize_approval_class(
+            contract.get("approval_class")
+            or contract.get("approval_required")
+            or contract.get("requires_approval")
+            or contract.get("requiresApproval")
+        ),
+        "stop_condition_class": normalize_stop_condition(contract.get("stop_condition")),
         "commit_candidate": boolish(contract.get("commit_candidate")),
         "next_safe_action": next_safe_action,
         "raw": contract,
@@ -318,7 +258,9 @@ def synthesize_approval_needed(sources: list[dict[str, Any]]) -> list[dict[str, 
                     }
                 )
         elif source["approval_required"]:
-            approval_type = "blocked_until_fixed" if source["severity"] == "BLOCKED" else "review_only"
+            approval_type = normalize_approval_class(
+                "blocked_until_fixed" if source["severity"] == "BLOCKED" else source["approval_class"]
+            )
             approvals.append(
                 {
                     "approval_type": approval_type,
@@ -400,7 +342,7 @@ def synthesize_health(sources: list[dict[str, Any]]) -> dict[str, Any]:
     statuses = [source["status"] for source in sources]
     severities = [source["severity"] for source in sources]
     status = "BLOCKED" if "BLOCKED" in statuses else ("REVIEW" if "REVIEW" in statuses else ("UNKNOWN" if "UNKNOWN" in statuses else "PASS"))
-    severity = sorted(severities, key=lambda item: SEVERITY_RANK.get(item, 3))[0] if severities else "UNKNOWN"
+    severity = choose_severity(severities, "UNKNOWN")
     return {
         "status": status,
         "severity": severity,
@@ -424,7 +366,11 @@ def synthesize_next_actions(sources: list[dict[str, Any]]) -> list[dict[str, Any
                 "rank": len(ranked) + 1,
                 "severity": source["severity"],
                 "action": action,
-                "requires_human_approval": source["approval_required"] or source["severity"] in {"BLOCKED", "REVIEW"},
+                "requires_human_approval": requires_human_review(
+                    source["status"],
+                    source["severity"],
+                    source["approval_class"],
+                ),
                 "source_path": source["source_path"],
             }
         )
@@ -470,11 +416,18 @@ def build_summary(sources: list[dict[str, Any]]) -> dict[str, Any]:
 
     status = health["status"]
     severity = health["severity"]
+    approval_class = (
+        "blocked_until_fixed"
+        if status == "BLOCKED"
+        else ("human_before_mutation" if approval_needed or commit_candidates else "none")
+    )
+    stop_condition = "blocked_until_fixed" if status == "BLOCKED" else "report_only"
     if approval_needed and status == "PASS":
         status = "REVIEW"
         severity = "REVIEW"
     if protected_warnings and severity == "INFO":
         severity = "REVIEW"
+        approval_class = "review_only"
 
     return {
         "schema": SCHEMA,
@@ -497,6 +450,12 @@ def build_summary(sources: list[dict[str, Any]]) -> dict[str, Any]:
         "orchestration_health": health,
         "recommended_next_actions": next_actions,
         "protected_action_warnings": protected_warnings,
+        "decision_summary": build_decision_summary(
+            status,
+            severity,
+            approval_class,
+            stop_condition,
+        ),
         "evidence_sources": [
             {
                 "source_path": source["source_path"],
