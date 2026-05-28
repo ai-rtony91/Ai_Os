@@ -32,7 +32,12 @@
     "Protect operator token and credit usage; do not resend full prompts for small corrections.",
     "Use patch-only corrections for branch, path, token, marker, identity, allowed-path, forbidden-path, validator, or typo fixes.",
     "Patch-only Codex corrections must include CODEX-ONLY PROMPT, AI_OS EXECUTION TOKEN when executable, exact replacement lines, and the phrase PASTE WITH LONGER PROMPT I PROVIDED PRIOR.",
-    "Before generating executable prompts, check the latest visible path and branch from terminal evidence; path and branch are the truth source."
+    "Before generating executable prompts, check the latest visible path and branch from terminal evidence; path and branch are the truth source.",
+    "Use token and credit budget conservatively but effectively; every word must serve the operator objective.",
+    "Conservative but extremely effective.",
+    "Avoid redundancy, filler, generic framing, repeated unchanged prompt sections, and unnecessary explanation.",
+    "Keep prompts long only when extra detail improves safety, clarity, execution, validation, or reporting.",
+    "Never save tokens by removing needed safety boundaries or details required to prevent worker confusion."
   ],
   "lane_identity": {
     "lane_id": "rulebook_codex",

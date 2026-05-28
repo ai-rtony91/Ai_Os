@@ -92,6 +92,25 @@ Full prompt resend is allowed only when:
 
 Before generating any executable prompt, the agent must check the latest visible path and branch from the user's terminal output. If path or branch is missing, the agent must either ask for git status or write a patch-only placeholder instead of guessing.
 
+## AI_OS Token Efficiency Golden Rule
+
+AI_OS agents must use token/credit budget conservatively but effectively. This does not mean weak, vague, or underpowered prompts. It means every word must serve the operator's objective.
+
+Required behavior:
+
+- avoid redundancy
+- avoid repeating unchanged prompt sections
+- avoid filler, hype, generic framing, and unnecessary explanation
+- use short chat responses unless a full workload prompt is needed
+- make prompts long only when the extra words improve safety, clarity, execution, or validation
+- every prompt line must support objective, scope, safety, validation, or reporting
+- prefer patch-only corrections when prior context is still usable
+- preserve enough detail to prevent worker confusion
+- never save tokens by removing needed safety boundaries
+
+Operator phrase to preserve:
+`Conservative but extremely effective.`
+
 ## CHAT EXPLANATION
 
 Use this lane for normal assistant/user discussion.
