@@ -18,6 +18,10 @@ const contentTypes = new Map([
   ['.webmanifest', 'application/manifest+json; charset=utf-8'],
 ])
 
+function logRequest(request, message) {
+  console.log(`[request] ${request.method} ${request.url} ${message}`)
+}
+
 function sendText(response, statusCode, message) {
   response.writeHead(statusCode, {
     'content-type': 'text/plain; charset=utf-8',
@@ -40,7 +44,10 @@ function getFilePath(requestUrl) {
 }
 
 const server = http.createServer((request, response) => {
+  logRequest(request, 'received')
+
   if (request.method !== 'GET' && request.method !== 'HEAD') {
+    logRequest(request, 'status=405')
     sendText(response, 405, 'Method not allowed')
     return
   }
@@ -50,17 +57,22 @@ const server = http.createServer((request, response) => {
   try {
     filePath = getFilePath(request.url)
   } catch {
+    logRequest(request, 'status=400')
     sendText(response, 400, 'Bad request')
     return
   }
 
   if (!filePath) {
+    logRequest(request, 'resolved=BLOCKED status=403')
     sendText(response, 403, 'Forbidden')
     return
   }
 
+  logRequest(request, `resolved=${filePath}`)
+
   fs.stat(filePath, (statError, stats) => {
     if (statError || !stats.isFile()) {
+      logRequest(request, 'status=404')
       sendText(response, 404, 'Not found')
       return
     }
@@ -72,6 +84,8 @@ const server = http.createServer((request, response) => {
       'content-type': contentType,
       'cache-control': 'no-store',
     })
+
+    logRequest(request, 'status=200')
 
     if (request.method === 'HEAD') {
       response.end()
