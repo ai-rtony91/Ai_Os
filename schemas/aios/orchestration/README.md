@@ -15,6 +15,7 @@ Current purpose:
 - define read-only orchestration report contracts such as the Overnight Supervisor report
 - define read-only runtime aggregation contracts such as the Runtime State Bundle
 - define read-only validator confidence evidence for runtime and auto-git decisions
+- define one shared orchestration result contract for validators, approval summaries, commit-package planners, recommendations, and supervisor consumption
 - define read-only auto-git eligibility contracts without enabling execution
 - prepare a safe future migration path
 
@@ -33,6 +34,14 @@ It does not authorize staging, committing, pushing, pull request creation, mergi
 It may describe overall validator result, confidence score, confidence band, required validator gaps, failed validators, blocked findings, review findings, weighted findings, source reports, SAFE_AUTO_ALLOWED eligibility, and stop conditions.
 
 It is evidence only. It does not authorize APPLY, staging, committing, pushing, merging, approval mutation, packet movement, runtime writes, broker execution, live trading, secret handling, or credential handling.
+
+## Orchestration Result Contract Schema
+
+`orchestration_result_contract.schema.json` defines the shared report object shape for DRY_RUN validators, approval summaries, commit-package planners, recommendation systems, and Overnight Supervisor adapters.
+
+It may normalize status, severity, packet identity, worker identity, validator results, approval requirement, blocked reason, escalation reason, commit-package candidacy, next safe action, stop condition, runtime notes, evidence, and generated timestamp.
+
+It is compatibility evidence only. It does not replace native subsystem schemas, move packets, approve work, run validators, stage files, commit, push, merge, launch workers, schedule loops, mutate runtime, handle credentials, or enable broker/live trading behavior.
 
 ## Runtime State Bundle Schema
 
@@ -76,6 +85,7 @@ The uppercase files in this folder define the first broad orchestration schema c
 - `APPROVAL_INBOX_SCHEMA.json`
 - `APPLY_APPROVAL_GATE_SCHEMA.json`
 - `VALIDATOR_OUTPUT_SCHEMA.json`
+- `orchestration_result_contract.schema.json`
 - `COMMIT_PACKAGE_SCHEMA.json`
 - `LOCK_REGISTRY_SCHEMA.json`
 - `RUNTIME_VISIBILITY_SCHEMA.json`

@@ -8,7 +8,11 @@
     "supervisor_status",
     "repo_health",
     "stale_packets",
+    "packet_flow",
     "validator_recommendations",
+    "validator_results",
+    "approval_required",
+    "commit_package_candidates",
     "escalation_items",
     "next_safe_actions",
     "packet_drafts",
@@ -57,6 +61,54 @@
         }
       }
     },
+    "packet_flow": {
+      "type": "array",
+      "description": "Read-only packet intake, worker resolution, validator, approval, stop-condition, and reporting summary.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "lane",
+          "worker_identity",
+          "validator_chain",
+          "approval_required",
+          "escalation_reason",
+          "stop_condition",
+          "packet_state",
+          "report_target",
+          "commit_package_candidate",
+          "next_safe_action"
+        ],
+        "properties": {
+          "packet_id": { "type": "string" },
+          "lane": { "type": "string" },
+          "worker_identity": { "type": "string" },
+          "validator_chain": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "approval_required": { "type": "boolean" },
+          "escalation_reason": { "type": "string" },
+          "stop_condition": { "type": "string" },
+          "packet_state": {
+            "type": "string",
+            "enum": [
+              "READY_FOR_REVIEW",
+              "VALIDATOR_REQUIRED",
+              "APPROVAL_REQUIRED",
+              "COMMIT_PACKAGE_CANDIDATE",
+              "BLOCKED",
+              "STALE",
+              "UNKNOWN"
+            ]
+          },
+          "report_target": { "type": "string" },
+          "commit_package_candidate": { "type": "boolean" },
+          "next_safe_action": { "type": "string" }
+        }
+      }
+    },
     "validator_recommendations": {
       "type": "array",
       "items": {
@@ -70,6 +122,61 @@
             "enum": ["LOW", "MEDIUM", "HIGH", "BLOCKING"]
           },
           "reason": { "type": "string" },
+          "next_safe_action": { "type": "string" }
+        }
+      }
+    },
+    "validator_results": {
+      "type": "array",
+      "description": "Read-only summary of validator state evidence when available.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["validator_id", "state", "evidence", "next_safe_action"],
+        "properties": {
+          "validator_id": { "type": "string" },
+          "state": {
+            "type": "string",
+            "enum": ["PASS", "WARN", "FAIL", "BLOCKED", "UNKNOWN", "NOT_RUN"]
+          },
+          "evidence": { "type": "string" },
+          "next_safe_action": { "type": "string" }
+        }
+      }
+    },
+    "approval_required": {
+      "type": "array",
+      "description": "Packets or actions that require Human Owner approval before mutation or protected action.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["packet_id", "reason", "approval_authority", "next_safe_action"],
+        "properties": {
+          "packet_id": { "type": "string" },
+          "reason": { "type": "string" },
+          "approval_authority": { "type": "string" },
+          "next_safe_action": { "type": "string" }
+        }
+      }
+    },
+    "commit_package_candidates": {
+      "type": "array",
+      "description": "Exact-file commit package candidates only; this does not authorize staging, commit, push, PR creation, or merge.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["packet_id", "lane", "candidate_files", "status", "next_safe_action"],
+        "properties": {
+          "packet_id": { "type": "string" },
+          "lane": { "type": "string" },
+          "candidate_files": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["READY_FOR_REVIEW", "NEEDS_VALIDATION", "NEEDS_APPROVAL", "BLOCKED", "UNKNOWN"]
+          },
           "next_safe_action": { "type": "string" }
         }
       }

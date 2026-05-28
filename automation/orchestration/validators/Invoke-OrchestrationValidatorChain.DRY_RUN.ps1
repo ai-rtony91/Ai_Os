@@ -229,5 +229,37 @@ foreach ($result in $results) {
     commits = $false
     pushes = $false
     next_safe_action = if ($overall -eq "PASS") { "Validation passed. Human approval is still required before APPLY, commit, or push." } else { "Review WARN and FAIL results before APPLY, commit, or push." }
+    orchestration_result_contract = [pscustomobject]@{
+        status = $overall
+        severity = if ($overall -eq "FAIL") { "BLOCKED" } elseif ($overall -eq "WARN") { "REVIEW" } else { "INFO" }
+        packet_id = "VALIDATOR_CHAIN"
+        worker_identity = "UNKNOWN"
+        validator_results = @($results | ForEach-Object {
+            [pscustomobject]@{
+                validator_id = [string]$_.validator_name
+                status = [string]$_.result
+                severity = [string]$_.severity
+                evidence = [string]$_.notes
+                next_safe_action = "Review validator result before APPLY, commit, or push."
+            }
+        })
+        approval_required = $true
+        blocked_reason = if ($failCount -gt 0) { "One or more validator results failed." } else { "none" }
+        escalation_reason = if ($overall -eq "PASS") { "Human approval is still required before protected actions." } else { "Validator chain returned WARN or FAIL." }
+        commit_candidate = $false
+        next_safe_action = if ($overall -eq "PASS") { "Validation passed. Human approval is still required before APPLY, commit, or push." } else { "Review WARN and FAIL results before APPLY, commit, or push." }
+        stop_condition = "REPORT_ONLY_NO_APPLY_NO_COMMIT_NO_PUSH"
+        runtime_notes = @(
+            "DRY_RUN_READ_ONLY",
+            "No APPLY, commit, or push was performed."
+        )
+        evidence = [pscustomobject]@{
+            pass_count = @($results | Where-Object { $_.result -eq "PASS" }).Count
+            warn_count = $warnCount
+            fail_count = $failCount
+            changed_path_count = $changedPaths.Count
+        }
+        generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    }
 } | ConvertTo-Json -Depth 5
 
