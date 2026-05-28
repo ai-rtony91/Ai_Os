@@ -23,6 +23,7 @@ from typing import Any
 
 LEDGER_SCHEMA = "AIOS_WORK_LEDGER_EVENT.v1"
 RECEIPT_SCHEMA = "AIOS_TELEMETRY_WRITE_RECEIPT.v1"
+ALLOWED_LEDGER = Path("telemetry/work_ledger.jsonl")
 
 
 def _utc_now() -> str:
@@ -32,6 +33,17 @@ def _utc_now() -> str:
 def _payload_hash(payload: dict[str, Any]) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(raw.encode()).hexdigest()[:8]
+
+
+def _path_allowed(path: Path) -> tuple[bool, str]:
+    try:
+        resolved = path.resolve()
+        allowed = ALLOWED_LEDGER.resolve()
+        if resolved == allowed:
+            return True, ""
+        return False, "output_path_outside_allowlist"
+    except OSError as exc:
+        return False, str(exc)
 
 
 def build_supervisor_event(
@@ -61,6 +73,7 @@ def preview_event(
     ledger_path: Path,
 ) -> dict[str, Any]:
     """Return what would be appended without writing. Always safe."""
+    allowed, blocked_reason = _path_allowed(ledger_path)
     record = {
         "schema": LEDGER_SCHEMA,
         "event_type": event_type,
@@ -72,6 +85,8 @@ def preview_event(
         "written": False,
         "mode": "DRY_RUN",
         "ledger_path": str(ledger_path),
+        "path_allowed": allowed,
+        "blocked_reason": blocked_reason,
         "event_type": event_type,
         "generated_at": _utc_now(),
         "record_preview": record,
@@ -103,6 +118,18 @@ def append_event(
         "generated_at": payload.get("generated_at") or _utc_now(),
         **{k: v for k, v in payload.items() if k not in {"schema", "event_type"}},
     }
+
+    allowed, blocked_reason = _path_allowed(ledger_path)
+    if not allowed:
+        return {
+            "schema": RECEIPT_SCHEMA,
+            "written": False,
+            "mode": "BLOCKED_PATH",
+            "ledger_path": str(ledger_path),
+            "event_type": event_type,
+            "generated_at": _utc_now(),
+            "blocked_reason": blocked_reason,
+        }
 
     if not apply_enabled:
         return {

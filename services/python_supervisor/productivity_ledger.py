@@ -21,6 +21,7 @@ from typing import Any
 
 ENTRY_SCHEMA = "AIOS_PRODUCTIVITY_TIMER_ENTRY.v1"
 RECEIPT_SCHEMA = "AIOS_LEDGER_APPEND_RECEIPT.v1"
+ALLOWED_LEDGER_ROOT = Path("telemetry/productivity")
 
 
 def _utc_now() -> str:
@@ -64,6 +65,17 @@ def _elapsed_seconds(start: str | None, stop: str | None) -> float | None:
         return round(delta.total_seconds(), 2)
     except ValueError:
         return None
+
+
+def _path_allowed(path: Path) -> tuple[bool, str]:
+    try:
+        resolved = path.resolve()
+        allowed_root = ALLOWED_LEDGER_ROOT.resolve()
+        if resolved.parent == allowed_root:
+            return True, ""
+        return False, "output_path_outside_allowlist"
+    except OSError as exc:
+        return False, str(exc)
 
 
 def build_entry(
@@ -118,6 +130,26 @@ def validate_entry(
         if field not in entry:
             errors.append(f"Missing required field: {field}")
 
+    string_fields = [
+        "session_id", "date_key", "operator_start_time", "active_packet_id",
+        "worker_lane", "task_label", "output_summary",
+    ]
+    nullable_string_fields = [
+        "operator_stop_time", "validator_started_at", "validator_finished_at", "blocked_reason",
+    ]
+    nullable_number_fields = ["elapsed_minutes", "validator_elapsed_seconds"]
+    for field in string_fields:
+        if field in entry and not isinstance(entry[field], str):
+            errors.append(f"Field must be string: {field}")
+    for field in nullable_string_fields:
+        if field in entry and entry[field] is not None and not isinstance(entry[field], str):
+            errors.append(f"Field must be string or null: {field}")
+    for field in nullable_number_fields:
+        if field in entry and entry[field] is not None and not isinstance(entry[field], (int, float)):
+            errors.append(f"Field must be number or null: {field}")
+    if "evidence_ready_for_collect" in entry and not isinstance(entry["evidence_ready_for_collect"], bool):
+        errors.append("Field must be boolean: evidence_ready_for_collect")
+
     if schema_path is not None and schema_path.exists():
         try:
             import jsonschema  # type: ignore[import]
@@ -139,6 +171,7 @@ def preview_append(
 ) -> dict[str, Any]:
     """Return preview of what would be appended. No write."""
     valid, errors = validate_entry(entry, schema_path)
+    allowed, blocked_reason = _path_allowed(ledger_path)
     return {
         "schema": RECEIPT_SCHEMA,
         "written": False,
@@ -146,6 +179,8 @@ def preview_append(
         "valid": valid,
         "errors": errors,
         "would_append_to": str(ledger_path),
+        "path_allowed": allowed,
+        "blocked_reason": blocked_reason,
         "jsonl_preview": json.dumps(entry, separators=(",", ":")),
         "generated_at": _utc_now(),
         "next_safe_action": "Pass apply_enabled=True with Human Owner approval to append.",
@@ -165,6 +200,7 @@ def append_entry(
     The apply_enabled flag is the APPLY gate — never default True.
     """
     valid, errors = validate_entry(entry, schema_path)
+    allowed, blocked_reason = _path_allowed(ledger_path)
 
     if not valid:
         return {
@@ -176,6 +212,19 @@ def append_entry(
             "ledger_path": str(ledger_path),
             "generated_at": _utc_now(),
             "next_safe_action": "Fix validation errors before appending.",
+        }
+
+    if not allowed:
+        return {
+            "schema": RECEIPT_SCHEMA,
+            "written": False,
+            "mode": "BLOCKED_PATH",
+            "valid": True,
+            "errors": [],
+            "ledger_path": str(ledger_path),
+            "generated_at": _utc_now(),
+            "blocked_reason": blocked_reason,
+            "next_safe_action": "Use telemetry/productivity/ as the ledger output root.",
         }
 
     if not apply_enabled:

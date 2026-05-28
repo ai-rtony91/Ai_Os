@@ -26,6 +26,7 @@ from typing import Any
 
 BRIEF_SCHEMA = "AIOS_MORNING_BRIEF_FILE.v1"
 RECEIPT_SCHEMA = "AIOS_BRIEF_WRITE_RECEIPT.v1"
+ALLOWED_OUTPUT_DIR = Path("telemetry/supervisor_briefs")
 _SAFE_CHARS = re.compile(r"[^A-Za-z0-9_\-]")
 
 
@@ -57,16 +58,39 @@ def _resolve_output_path(report: dict[str, Any], output_dir: Path) -> Path:
     return output_dir / f"{stem}_overflow.json"
 
 
+def _path_allowed(path: Path, directory: bool = False) -> tuple[bool, str]:
+    try:
+        resolved = path.resolve()
+        allowed_root = ALLOWED_OUTPUT_DIR.resolve()
+        target = resolved if directory else resolved.parent
+        if target == allowed_root or str(target).startswith(str(allowed_root) + "\\"):
+            return True, ""
+        return False, "output_path_outside_allowlist"
+    except OSError as exc:
+        return False, str(exc)
+
+
+def _brief_file_content(report: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "schema": BRIEF_SCHEMA,
+        "generated_at": str(report.get("generated_at") or _utc_now()),
+        "report": report,
+    }
+
+
 def preview_brief(report: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     """Return preview of what would be written. No filesystem access."""
     generated_at = str(report.get("generated_at") or _utc_now())
     filename = build_brief_filename(generated_at)
-    content_bytes = len(json.dumps(report).encode("utf-8"))
+    content_bytes = len(json.dumps(_brief_file_content(report)).encode("utf-8"))
+    allowed, blocked_reason = _path_allowed(output_dir / filename)
     return {
         "schema": RECEIPT_SCHEMA,
         "written": False,
         "mode": "DRY_RUN",
         "would_write_to": str(output_dir / filename),
+        "path_allowed": allowed,
+        "blocked_reason": blocked_reason,
         "filename": filename,
         "content_size_bytes": content_bytes,
         "supervisor_status": str(report.get("supervisor_status") or "UNKNOWN"),
@@ -91,9 +115,29 @@ def write_brief(
         return preview_brief(report, output_dir)
 
     try:
+        allowed, blocked_reason = _path_allowed(output_dir, directory=True)
+        if not allowed:
+            return {
+                "schema": RECEIPT_SCHEMA,
+                "written": False,
+                "mode": "BLOCKED_PATH",
+                "output_dir": str(output_dir),
+                "generated_at": _utc_now(),
+                "blocked_reason": blocked_reason,
+            }
         output_dir.mkdir(parents=True, exist_ok=True)
         output_path = _resolve_output_path(report, output_dir)
-        content = json.dumps(report, indent=2)
+        allowed_file, blocked_reason = _path_allowed(output_path)
+        if not allowed_file:
+            return {
+                "schema": RECEIPT_SCHEMA,
+                "written": False,
+                "mode": "BLOCKED_PATH",
+                "output_path": str(output_path),
+                "generated_at": _utc_now(),
+                "blocked_reason": blocked_reason,
+            }
+        content = json.dumps(_brief_file_content(report), indent=2)
         output_path.write_text(content, encoding="utf-8")
         return {
             "schema": RECEIPT_SCHEMA,
