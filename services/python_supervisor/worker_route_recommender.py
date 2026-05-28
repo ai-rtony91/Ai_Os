@@ -1,8 +1,10 @@
 """Read-only AI_OS worker route recommender.
 
-Standard library only. Emits JSON to stdout by default. It does not execute
-packets, launch workers, edit packets, mutate queues, commit, push, merge,
-touch trading systems, or call Codex/Claude.
+Standard library only. Emits JSON to stdout by default. If --write-report is
+passed, it writes latest_worker_route_recommendation.json under
+automation/orchestration/worker_routing/. It does not execute packets, launch
+workers, edit packets, mutate queues, commit, push, merge, touch trading
+systems, or call Codex/Claude.
 """
 
 from __future__ import annotations
@@ -378,7 +380,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--write-report",
         action="store_true",
-        help="Write report only to automation/orchestration/worker_routing/latest_worker_route_recommendation.json.",
+        help=(
+            "Write latest_worker_route_recommendation.json under "
+            "automation/orchestration/worker_routing/."
+        ),
     )
     return parser.parse_args()
 
