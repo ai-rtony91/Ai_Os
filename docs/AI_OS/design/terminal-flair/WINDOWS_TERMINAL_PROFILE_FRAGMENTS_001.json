@@ -1,0 +1,112 @@
+{
+  "schema_id": "AIOS_WINDOWS_TERMINAL_PROFILE_FRAGMENTS_001",
+  "schema_purpose": "Template-only Windows Terminal profile fragments for AI_OS worker profile previews.",
+  "safety_note": "TEMPLATE ONLY. These fragments are not applied by this repository and do not edit Windows Terminal settings.",
+  "startingDirectory": "C:\\Dev\\Ai.Os",
+  "fragments": [
+    {
+      "profile_id": "MAIN_CONTROL",
+      "name": "AI_OS MAIN CONTROL",
+      "tabTitle": "AI_OS MAIN CONTROL | COMMAND THRONE",
+      "colorScheme": "AIOS Command Throne Gold Violet Cyan",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved AI_OS main control command here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 92,
+      "useAcrylic": true,
+      "notes": "template only, not applied"
+    },
+    {
+      "profile_id": "EAST_OCC",
+      "name": "AI_OS EAST OCC BUILDER",
+      "tabTitle": "EAST_OCC_01 | BUILDER FORGE",
+      "colorScheme": "AIOS Builder Forge Orange Red Gold",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved East OCC worker command here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 94,
+      "useAcrylic": true,
+      "notes": "template only, not applied"
+    },
+    {
+      "profile_id": "WEST_OCC",
+      "name": "AI_OS WEST OCC STRATEGIST",
+      "tabTitle": "WEST_OCC_01 | STRATEGY NEBULA",
+      "colorScheme": "AIOS Strategy Nebula Violet Blue Cyan",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved West OCC worker command here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 94,
+      "useAcrylic": true,
+      "notes": "template only, not applied"
+    },
+    {
+      "profile_id": "VALIDATOR",
+      "name": "AI_OS VALIDATOR SHIELD",
+      "tabTitle": "VALIDATOR_01 | EVIDENCE SHIELD",
+      "colorScheme": "AIOS Evidence Shield Green Cyan White",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved validator command here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 96,
+      "useAcrylic": false,
+      "notes": "template only, not applied"
+    },
+    {
+      "profile_id": "DISPATCHER",
+      "name": "AI_OS DISPATCHER SIGNAL",
+      "tabTitle": "DISPATCHER | SIGNAL TOWER",
+      "colorScheme": "AIOS Signal Tower Blue Magenta Cyan",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved dispatcher command here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 94,
+      "useAcrylic": true,
+      "notes": "template only, not applied"
+    },
+    {
+      "profile_id": "APPROVAL",
+      "name": "AI_OS APPROVAL VAULT",
+      "tabTitle": "APPROVAL | VAULT GATE",
+      "colorScheme": "AIOS Vault Gate Gold Red White",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved approval review command here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 96,
+      "useAcrylic": false,
+      "notes": "template only, not applied"
+    },
+    {
+      "profile_id": "SHELL",
+      "name": "AI_OS SHELL MECHANIC",
+      "tabTitle": "SHELL | MECHANIC BAY",
+      "colorScheme": "AIOS Mechanic Bay Steel Cyan Yellow",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved local shell helper here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 96,
+      "useAcrylic": false,
+      "notes": "template only, not applied"
+    },
+    {
+      "profile_id": "TELEMETRY",
+      "name": "AI_OS TELEMETRY PULSE",
+      "tabTitle": "TELEMETRY | DATA PULSE",
+      "colorScheme": "AIOS Data Pulse Green Purple Cyan",
+      "startingDirectory": "C:\\Dev\\Ai.Os",
+      "commandline": "powershell.exe -NoExit -Command \"# Placeholder only: launch approved telemetry view command here\"",
+      "icon": "PLACEHOLDER_ICON_PATH_OR_EMOJI",
+      "fontFace": "PLACEHOLDER_FONT_FACE",
+      "opacity": 92,
+      "useAcrylic": true,
+      "notes": "template only, not applied"
+    }
+  ]
+}
