@@ -28,9 +28,7 @@ DEFAULT_BLOCKED_PREFIXES = (
     "automation/orchestration/terminal_workstations/",
 )
 
-DEFAULT_BLOCKED_EXACT = (
-    "services/python_supervisor/morning_brief_writer.py",
-)
+DEFAULT_BLOCKED_EXACT: tuple[str, ...] = ()
 
 
 @dataclass
