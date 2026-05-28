@@ -17,10 +17,11 @@ function Resolve-AiOsPath {
 }
 
 function Write-Section {
-    param([string]$Title)
+    param([string]$Title, [System.ConsoleColor]$Color = "Yellow")
 
     Write-Host ""
-    Write-Host "== $Title ==" -ForegroundColor Yellow
+    Write-Host "  ── $Title ──" -ForegroundColor $Color
+    Write-Host ""
 }
 
 $fullRegistryPath = Resolve-AiOsPath -Path $RegistryPath
@@ -30,26 +31,38 @@ if (-not (Test-Path -LiteralPath $fullRegistryPath -PathType Leaf)) {
 
 $registry = Get-Content -LiteralPath $fullRegistryPath -Raw | ConvertFrom-Json
 
-Write-Host "AI_OS Worktree Lane Registry" -ForegroundColor Cyan
-Write-Host "Mode: default print-only"
-Write-Host "Registry: $fullRegistryPath"
-Write-Host "No Codex auto-launch. No startup tasks. No scheduled tasks. No automatic extra windows."
-Write-Host "No commits. No pushes. No broker/OANDA/API/webhook/live trading."
+$border = "#" * 100
+$titleIcon = [char]::ConvertFromUtf32(0x1F5FA)  # World map - lane topology overview
 
-Write-Section -Title "Git Worktree List"
+Write-Host $border -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  $titleIcon  AI_OS WORKTREE LANE REGISTRY" -ForegroundColor Yellow
+Write-Host "  LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  AIOS BASE : #05070b  TEXT #e5f6ff  WARNING #ffd166  ACTION #38bdf8" -ForegroundColor DarkYellow
+Write-Host "  OCC LANE  : ALL LANES  |  Lane topology and worktree registry" -ForegroundColor Yellow
+Write-Host "  MODE      : [ PRINT-ONLY ]  Default print-only — no windows opened" -ForegroundColor DarkYellow
+Write-Host "  STATUS    : [ READ-ONLY ]  No Codex launch, no startup/scheduled tasks" -ForegroundColor DarkYellow
+Write-Host "  Registry  : $fullRegistryPath" -ForegroundColor DarkYellow
+Write-Host ""
+Write-Host $border -ForegroundColor Yellow
+Write-Host "  No Codex auto-launch. No startup tasks. No scheduled tasks. No automatic extra windows."
+Write-Host "  No commits. No pushes. No broker/OANDA/API/webhook/live trading."
+
+Write-Section -Title "Git Worktree List" -Color Cyan
 git worktree list
 
-Write-Section -Title "Registered Lanes"
+Write-Section -Title "Registered Lanes" -Color Yellow
 foreach ($lane in @($registry.lanes)) {
-    Write-Host "lane_id: $($lane.lane_id)" -ForegroundColor Cyan
-    Write-Host "display_title: $($lane.display_title)"
-    Write-Host "window_title: $($lane.window_title)"
-    Write-Host "tab_title: $($lane.tab_title)"
-    Write-Host "emoji_marker: $($lane.emoji_marker)"
-    Write-Host "truth_source: $($lane.truth_source)"
-    Write-Host "Role: $($lane.role)"
-    Write-Host "Path: $($lane.path)"
-    Write-Host "Branch: $($lane.branch)"
+    Write-Host "  lane_id       : $($lane.lane_id)" -ForegroundColor Cyan
+    Write-Host "  display_title : $($lane.display_title)"
+    Write-Host "  window_title  : $($lane.window_title)"
+    Write-Host "  tab_title     : $($lane.tab_title)"
+    Write-Host "  emoji_marker  : $($lane.emoji_marker)"
+    Write-Host "  truth_source  : $($lane.truth_source)"
+    Write-Host "  role          : $($lane.role)"
+    Write-Host "  path          : $($lane.path)"
+    Write-Host "  branch        : $($lane.branch)"
     Write-Host ""
 }
 

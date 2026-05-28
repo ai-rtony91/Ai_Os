@@ -67,9 +67,15 @@ function Invoke-GhReadOnly {
     }
 }
 
+$titleIcon = [char]::ConvertFromUtf32(0x1F50D)  # Magnifying glass - preflight inspection
+
 Write-Host $border -ForegroundColor Cyan
-Write-Host "AI_OS LAUNCHER PREFLIGHT" -ForegroundColor Cyan
-Write-Host "Read-only checks before opening the AI_OS decks." -ForegroundColor Gray
+Write-Host ""
+Write-Host "  $titleIcon  AI_OS LAUNCHER PREFLIGHT" -ForegroundColor Cyan
+Write-Host "  AIOS BASE : #05070b  TEXT #e5f6ff  ACTION #38bdf8  WARNING #ffd166" -ForegroundColor DarkCyan
+Write-Host "  OCC LANE  : ALL LANES  |  Read-only checks before opening AI_OS decks" -ForegroundColor DarkCyan
+Write-Host "  MODE      : [ DRY_RUN ]  Read-only — no mutation, no launch" -ForegroundColor DarkCyan
+Write-Host ""
 Write-Host $border -ForegroundColor Cyan
 
 Write-Section -Title "Repo Path"
@@ -111,4 +117,6 @@ Write-Section -Title "Open GitHub PRs"
 Invoke-GhReadOnly -Arguments @("pr", "list", "--state", "open", "--limit", "100", "--json", "number", "--jq", "length")
 
 Write-Section -Title "Next Safe Action"
-Write-Host "Continue to supervisor, operator menu, then deck launch. Codex remains manual." -ForegroundColor Gray
+Write-Host "  [ STEP 1 ]  Review preflight output above." -ForegroundColor Gray
+Write-Host "  [ STEP 2 ]  Open Operator Menu or launch the appropriate deck." -ForegroundColor Gray
+Write-Host "  [ STEP 3 ]  Codex launch remains manual — Build Engine only." -ForegroundColor Gray

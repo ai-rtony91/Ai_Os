@@ -9,9 +9,9 @@ if (-not (Test-Path -LiteralPath $repoRootResolverPath -PathType Leaf)) {
 . $repoRootResolverPath
 
 $repoPath = Resolve-AiOsRepoRoot -StartPath $PSScriptRoot
-$roleName = "Ai_Os BUILD ENGINE"
+$roleName = "BUILD ENGINE / BUILDER FORGE"
 $border = "#" * 100
-$titleIcon = [char]::ConvertFromUtf32(0x1F7E2)
+$titleIcon = [char]::ConvertFromUtf32(0x2699)
 
 if (-not (Test-Path -LiteralPath $repoPath -PathType Container)) {
     throw "AI_OS repo path not found: $repoPath"
@@ -22,35 +22,34 @@ $Host.UI.RawUI.WindowTitle = $roleName
 
 Write-Host $border -ForegroundColor Green
 Write-Host ""
-Write-Host "$titleIcon Ai_Os BUILD ENGINE" -ForegroundColor Green
-Write-Host "LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Green
+Write-Host "  $titleIcon  BUILD ENGINE / BUILDER FORGE" -ForegroundColor Green
+Write-Host "  LOOK FOR THIS COLOR TO IDENTIFY THIS WINDOW." -ForegroundColor Green
 Write-Host ""
-Write-Host "ROLE: Codex work lane. Manual Codex launch only." -ForegroundColor Green
-Write-Host "MODE: Manual Codex start only" -ForegroundColor Cyan
-Write-Host "STATUS: No Codex auto-launch, no worker launch, no scheduled tasks" -ForegroundColor Cyan
-Write-Host "Repo: $repoPath" -ForegroundColor Cyan
+Write-Host "  AIOS BASE : #05070b  TEXT #e5f6ff  OCC/PASS #37ff88  ACTION #38bdf8" -ForegroundColor Cyan
+Write-Host "  OCC LANE  : EAST_OCC  |  Temporary packet-scoped worker forge" -ForegroundColor Green
+Write-Host "  MODE      : [ MANUAL ]  Manual Codex start only - no auto-launch" -ForegroundColor Cyan
+Write-Host "  STATUS    : [ READ-ONLY ]  No Codex auto-launch, no worker launch, no scheduled tasks" -ForegroundColor Cyan
+Write-Host "  Repo      : $repoPath" -ForegroundColor Cyan
 Write-Host ""
 Write-Host $border -ForegroundColor Green
 Write-Host $border -ForegroundColor Green
 Write-Host $border -ForegroundColor Yellow
-Write-Host "=== COPY START ===" -ForegroundColor Yellow
-Write-Host "Paste terminal output between COPY START and COPY END when sending to ChatGPT." -ForegroundColor White
-Write-Host "=== COPY END ===" -ForegroundColor Yellow
+Write-Host "  === COPY START ===" -ForegroundColor Yellow
+Write-Host "  Paste terminal output between COPY START and COPY END when sending to Claude." -ForegroundColor White
+Write-Host "  === COPY END ===" -ForegroundColor Yellow
 Write-Host $border -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Allowed actions:" -ForegroundColor Green
-Write-Host "  review assigned prompt"
-Write-Host "  inspect files"
-Write-Host "  run approved APPLY work"
-Write-Host "  run scoped validators"
-Write-Host "  launch Codex manually only when the operator chooses"
+Write-Host "  Allowed actions:" -ForegroundColor Green
+Write-Host "    [ PASS ]  review assigned prompt" -ForegroundColor Green
+Write-Host "    [ PASS ]  inspect files" -ForegroundColor Green
+Write-Host "    [ PASS ]  run scoped validators" -ForegroundColor Green
+Write-Host "    [ GATE ]  run approved APPLY work after Human Owner approval" -ForegroundColor Yellow
+Write-Host "    [ GATE ]  launch Codex manually only when operator chooses" -ForegroundColor Yellow
+Write-Host "    [ OCC  ]  temporary workers must show IDLE, COMPLETE, BLOCKED, or CLOSED state" -ForegroundColor Green
 Write-Host ""
-Write-Host "Blocked actions:" -ForegroundColor Red
-Write-Host "  no Codex auto-launch" -ForegroundColor Red
-Write-Host "  no extra windows" -ForegroundColor Red
-Write-Host "  no startup tasks" -ForegroundColor Red
-Write-Host "  no scheduled tasks" -ForegroundColor Red
-Write-Host "  no dashboard edits unless explicitly scoped" -ForegroundColor Red
-Write-Host "  no broker, OANDA, API keys, webhooks, real orders, or live trading" -ForegroundColor Red
-Write-Host "  no commit or push without explicit approval" -ForegroundColor Red
+Write-Host "  Blocked actions:" -ForegroundColor Red
+Write-Host "    [ BLOCKED ]  Codex auto-launch, extra windows, startup/scheduled tasks" -ForegroundColor Red
+Write-Host "    [ BLOCKED ]  dashboard edits unless explicitly scoped" -ForegroundColor Red
+Write-Host "    [ BLOCKED ]  broker, OANDA, API keys, webhooks, real orders, live trading" -ForegroundColor Red
+Write-Host "    [ BLOCKED ]  commit or push without explicit Human Owner approval" -ForegroundColor Red
 Write-Host ""

@@ -34,6 +34,16 @@ In both cases, the visual identity is a cue, not authority. Approval, validation
    - Dark gamer terminal base.
    - High-contrast text.
    - Neon accents only where they improve scanning.
+   - AIOS dashboard-aligned palette:
+     - base dark: `#05070b`
+     - text: `#e5f6ff`
+     - cyan action accent: `#38bdf8`
+     - blue glow: `#00a3ff`
+     - OCC/pass/activity green: `#37ff88`
+     - orchestration violet/magenta: `#a855f7`
+     - danger red: `#ff5f7a`
+     - warning amber: `#ffd166`
+   - Font guidance: Cascadia Mono or Cascadia Code first; MesloLGS Nerd Font Mono is optional only for Oh My Posh previews.
 
 2. Worker identity badge
    - Short profile badge such as `MC`, `EAST`, or `VAL`.
@@ -89,15 +99,31 @@ Use emoji when:
 
 - the output is a visual banner, profile list, or preview
 - the emoji improves quick recognition
+- the emoji identifies a deck or worker profile
 - a `-NoEmoji` or plain-text fallback exists
 - the emoji is not inside an executable command
 
 Do not use emoji when:
 
+- it repeats on every command
 - it appears inside a command to be copied
 - it could break title matching or automation
 - the terminal renders it as broken replacement characters
 - the output is safety-critical and the emoji makes it harder to read
+
+## Persistent Decks and Temporary OCC Workers
+
+Persistent command-deck windows may stay open all day for operator orientation. Their visual identity should remain stable:
+
+- `MAIN CONTROL / COMMAND THRONE`
+- `QUEUE CONTROL / SIGNAL ROUTER`
+- `VALIDATION DECK / EVIDENCE SHIELD`
+- `TELEMETRY DECK / DATA PULSE`
+- `SAFETY DECK / VAULT GATE`
+- `RECOVERY DECK / RESTORE BAY`
+- `BUILD ENGINE / BUILDER FORGE`
+
+Temporary OCC workers remain packet-scoped. Their banners must show the worker lane and one of these plain states when lifecycle state is displayed: `IDLE`, `COMPLETE`, `BLOCKED`, or `CLOSED`. Temporary worker flair must not imply permanent authority.
 
 ## Animation Limits
 
@@ -137,3 +163,5 @@ Future animation experiments require separate human approval and must include st
 ## Future Integration Rule
 
 This kit is preview-only. A later APPLY packet may wire these banners into launch scripts, worker windows, or terminal profile generation after human approval and validation. Until then, these files are design/spec and no-write preview helpers only.
+
+The repo-owned Oh My Posh template at `AIOS_OMP_THEME_TEMPLATE_001.json` is a template only. It is not applied automatically, does not install Oh My Posh, does not install fonts, and does not edit Windows Terminal or PowerShell profiles.
