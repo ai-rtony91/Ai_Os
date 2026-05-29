@@ -30,6 +30,11 @@ from packet_dispatcher import dispatch_packets  # noqa: E402
 from queue_scanner import scan_queue  # noqa: E402
 from telemetry_writer import build_supervisor_event, preview_event  # noqa: E402
 from worker_assignment import assign_workers  # noqa: E402
+from worker_health_monitor import (  # noqa: E402
+    apply_worker_health_to_report,
+    build_worker_health_summary,
+    scan_worker_health,
+)
 from worker_route_recommender import recommend_routes_for_packets  # noqa: E402
 
 
@@ -154,6 +159,11 @@ def run_dispatch_stage(
     return dispatch_packets(contracts, repo_root, apply_enabled=apply_enabled)
 
 
+def run_worker_health_stage(repo_root: Path) -> dict[str, Any]:
+    """Return read-only worker health evidence for Gate 1 qualification."""
+    return build_worker_health_summary(scan_worker_health(repo_root))
+
+
 def run_telemetry_stage(report: dict[str, Any], repo_root: Path, apply_enabled: bool = False) -> dict[str, Any]:
     """Return telemetry preview unless apply_enabled is true and separately approved."""
     event = build_supervisor_event(
@@ -178,6 +188,7 @@ def build_supervisor_v2_report(repo_root: Path, apply_enabled: bool = False) -> 
     locked = run_lock_stage(routed, root)
     approved = run_approval_stage(locked, root)
     dispatch_receipts = run_dispatch_stage(approved, root, apply_enabled=apply_enabled)
+    worker_health_summary = run_worker_health_stage(root)
 
     for contract, receipt in zip(approved, dispatch_receipts, strict=False):
         contract["dispatch_status"] = str(receipt.get("dispatch_status") or "FAILED")
@@ -201,6 +212,7 @@ def build_supervisor_v2_report(repo_root: Path, apply_enabled: bool = False) -> 
             "lock_manager",
             "approval_officer",
             "packet_dispatcher",
+            "worker_health_monitor",
             "telemetry_preview",
         ],
         "queue_packets": packets,
@@ -213,5 +225,6 @@ def build_supervisor_v2_report(repo_root: Path, apply_enabled: bool = False) -> 
         "approval_mutation_enabled": False,
         "lock_mutation_enabled": False,
     }
+    report = apply_worker_health_to_report(report, worker_health_summary)
     report["telemetry_preview"] = run_telemetry_stage(report, root, apply_enabled=apply_enabled)
     return report
