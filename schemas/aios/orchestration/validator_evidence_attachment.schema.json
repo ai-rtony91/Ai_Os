@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/validator_evidence_attachment.schema.json",
+  "title": "AI_OS Validator Evidence Attachment",
+  "description": "Preview-only validator evidence attachment contract for assignment preview records. This schema does not authorize approval, commit, push, merge, runtime mutation, telemetry mutation, trading execution, broker execution, secret access, credential access, packet mutation, queue mutation, worker dispatch, or inbox mutation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "source",
+    "attachment_mode",
+    "preview_only",
+    "assignment_reference",
+    "validator_results",
+    "packet_evidence",
+    "summary",
+    "warnings",
+    "human_required_next_step"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_VALIDATOR_EVIDENCE_ATTACHMENT.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "attachment_mode": {
+      "type": "string",
+      "const": "preview_evidence_record_only"
+    },
+    "preview_only": {
+      "type": "boolean",
+      "const": true
+    },
+    "assignment_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "generated_at",
+        "persistence_mode",
+        "preview_only"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "AIOS_ASSIGNMENT_PREVIEW_PERSISTENCE.v1"
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "persistence_mode": {
+          "type": "string",
+          "const": "preview_record_only"
+        },
+        "preview_only": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "validator_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "validator_id",
+          "validator_name",
+          "packet_id",
+          "status",
+          "severity",
+          "evidence_ref",
+          "message",
+          "ran_at",
+          "blocking"
+        ],
+        "properties": {
+          "validator_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validator_name": {
+            "type": "string"
+          },
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed",
+              "warning",
+              "skipped",
+              "unknown"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical",
+              "unknown"
+            ]
+          },
+          "evidence_ref": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "ran_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "blocking": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "packet_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "assignment_preview_refs",
+          "validator_result_count",
+          "passed_count",
+          "failed_count",
+          "warning_count",
+          "skipped_count",
+          "blocking_count",
+          "highest_severity",
+          "evidence_status",
+          "approval_ready",
+          "commit_ready",
+          "preview_only"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "assignment_preview_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "validator_result_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "passed_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "warning_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "skipped_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "blocking_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "highest_severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical",
+              "unknown"
+            ]
+          },
+          "evidence_status": {
+            "type": "string",
+            "enum": [
+              "evidence_passed",
+              "evidence_failed",
+              "evidence_warning",
+              "evidence_incomplete",
+              "evidence_unknown"
+            ]
+          },
+          "approval_ready": {
+            "type": "boolean"
+          },
+          "commit_ready": {
+            "type": "boolean",
+            "const": false
+          },
+          "preview_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_packets",
+        "total_validator_results",
+        "packets_with_passed_evidence",
+        "packets_with_failed_evidence",
+        "packets_with_blocking_evidence",
+        "approval_ready_count",
+        "commit_ready_count",
+        "preview_only",
+        "approval_authorized",
+        "commit_authorized",
+        "runtime_mutation_authorized",
+        "telemetry_mutation_authorized"
+      ],
+      "properties": {
+        "total_packets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_validator_results": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packets_with_passed_evidence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packets_with_failed_evidence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packets_with_blocking_evidence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "approval_ready_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "commit_ready_count": {
+          "type": "integer",
+          "const": 0
+        },
+        "preview_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "approval_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "commit_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "runtime_mutation_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "telemetry_mutation_authorized": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_required_next_step": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
