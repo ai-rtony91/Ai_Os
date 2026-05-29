@@ -1,0 +1,59 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "created_at": "YYYY-MM-DDTHH:mm:ssZ",
+  "goal_text": "",
+  "mode": "DRY_RUN",
+  "lane": "Auto-Loop Closure Lane",
+  "worker_identity": "Codex Finish-Line Auto-Loop Worker",
+  "branch": "main",
+  "worktree": "C:\\Dev\\Ai.Os",
+  "allowed_paths": [
+    "automation/orchestration/auto_loop/",
+    "telemetry/auto_loop/"
+  ],
+  "forbidden_paths": [
+    "automation/orchestration/work_packets/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/command_queue/",
+    "automation/orchestration/workers/",
+    "runtime/",
+    "services/runtime/",
+    "services/supervisor/",
+    "services/orchestrator/",
+    "apps/trading_lab/trading_lab/execution/",
+    "aios/modules/trader/",
+    "secrets/",
+    "credentials/",
+    "broker/",
+    "OANDA/"
+  ],
+  "protected_paths": [
+    "AGENTS.md",
+    "README.md",
+    "WHITEPAPER.md",
+    "docs/governance/",
+    "docs/workflows/",
+    "docs/security/",
+    "docs/architecture/",
+    "docs/audits/"
+  ],
+  "required_reads": [
+    "AGENTS.md",
+    "README.md",
+    "WHITEPAPER.md",
+    "docs/governance/source-of-truth-map.md",
+    "docs/audits/active-system-map.md",
+    "automation/orchestration/README.md"
+  ],
+  "validator_chain": [
+    "automation/orchestration/auto_loop/scripts/Test-AiOsAutoLoopPreflight.DRY_RUN.ps1",
+    "automation/orchestration/auto_loop/scripts/Get-AiOsAutoLoopValidatorRoute.DRY_RUN.ps1"
+  ],
+  "approval_required": true,
+  "risk_tier": "low",
+  "stop_condition": "Stop after DRY_RUN report and operator next action. Do not mutate active state.",
+  "final_report_required": true,
+  "live_trading_blocked": true,
+  "commit_allowed": false,
+  "push_allowed": false
+}
