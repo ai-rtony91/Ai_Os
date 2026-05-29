@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/night_supervisor_report.schema.json",
+  "title": "AI_OS Night Supervisor Nightly Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "mode",
+    "supervisor_status",
+    "run_id",
+    "generated_at",
+    "repo",
+    "phases",
+    "alerts",
+    "safety_confirmation",
+    "next_safe_action",
+    "authority_boundary"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_NIGHT_SUPERVISOR_REPORT.v1" },
+    "mode": { "type": "string", "const": "DRY_RUN" },
+    "supervisor_status": {
+      "type": "string",
+      "enum": ["READY", "REVIEW", "WARNING", "BLOCKED", "UNKNOWN"]
+    },
+    "run_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "repo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo_root", "branch", "head_sha", "ahead_commits", "changed_files", "untracked_items"],
+      "properties": {
+        "repo_root": { "type": "string" },
+        "branch": { "type": "string" },
+        "head_sha": { "type": "string" },
+        "ahead_commits": { "type": "integer" },
+        "changed_files": { "type": "array", "items": { "type": "string" } },
+        "untracked_items": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "phases": {
+      "type": "array",
+      "description": "One entry per nightly supervision phase in execution order.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["phase", "step", "status", "summary", "mutations", "next_safe_action"],
+        "properties": {
+          "phase": { "type": "string" },
+          "step": { "type": "integer", "minimum": 1, "maximum": 10 },
+          "status": {
+            "type": "string",
+            "enum": ["PASS", "PLANNED", "WARN", "FAIL", "BLOCKED", "DEFERRED", "SKIPPED"]
+          },
+          "summary": { "type": "string" },
+          "mutations": {
+            "type": "array",
+            "description": "Sandbox-only writes performed (all confined to telemetry/night_supervisor/). Empty when read-only.",
+            "items": { "type": "string" }
+          },
+          "detail": { "type": "object" },
+          "next_safe_action": { "type": "string" }
+        }
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["severity", "trigger", "evidence", "next_safe_action"],
+        "properties": {
+          "severity": { "type": "string", "enum": ["INFO", "REVIEW", "WARNING", "CRITICAL"] },
+          "trigger": { "type": "string" },
+          "evidence": { "type": "string" },
+          "next_safe_action": { "type": "string" }
+        }
+      }
+    },
+    "safety_confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_live_trading",
+        "no_broker_execution",
+        "no_secrets_exposed",
+        "no_active_state_mutation",
+        "no_commit_or_push",
+        "writes_within_allowed_paths_only",
+        "forbidden_write_attempts"
+      ],
+      "properties": {
+        "no_live_trading": { "type": "boolean", "const": true },
+        "no_broker_execution": { "type": "boolean", "const": true },
+        "no_secrets_exposed": { "type": "boolean", "const": true },
+        "no_active_state_mutation": { "type": "boolean", "const": true },
+        "no_commit_or_push": { "type": "boolean", "const": true },
+        "writes_within_allowed_paths_only": { "type": "boolean", "const": true },
+        "forbidden_write_attempts": { "type": "integer", "const": 0 }
+      }
+    },
+    "next_safe_action": { "type": "string" },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["read_only_outside_sandbox", "approval_authority", "blocked_capabilities"],
+      "properties": {
+        "read_only_outside_sandbox": { "type": "boolean", "const": true },
+        "approval_authority": { "type": "string" },
+        "blocked_capabilities": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    }
+  }
+}

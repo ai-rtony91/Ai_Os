@@ -1,0 +1,47 @@
+{
+  "schema": "AIOS_NIGHT_SUPERVISOR_SAFETY_POLICY.v1",
+  "title": "AI_OS Night Supervisor Safety Policy",
+  "authority_note": "This policy is subordinate to RISK_POLICY.md and AGENTS.md. If it conflicts with root authority, the stricter safety rule wins. This policy does not grant APPLY, commit, push, merge, runtime mutation, trading, or secret-handling authority.",
+  "default_mode": "DRY_RUN",
+  "approval_authority": "Anthony Meza",
+  "allowed_write_roots": [
+    "automation/orchestration/night_supervisor/",
+    "telemetry/night_supervisor/"
+  ],
+  "runtime_write_root": "telemetry/night_supervisor/",
+  "forbidden_write_note": "Any path outside allowed_write_roots is forbidden for night supervision runtime writes. Resume records and runtime snapshots are sandboxed under telemetry/night_supervisor/ until a separate approved packet promotes them to a canonical runtime location.",
+  "blocked_actions": [
+    "live_trading",
+    "broker_execution",
+    "real_order_placement",
+    "oanda_or_live_broker_client",
+    "real_webhook_execution",
+    "secret_or_credential_access",
+    "secret_or_credential_exposure_in_reports",
+    "git_stage_commit_push_merge_or_remote_update",
+    "protected_root_file_edit",
+    "active_runtime_state_mutation_without_validation",
+    "active_packet_state_change",
+    "active_approval_state_change",
+    "active_lock_release_or_mutation",
+    "worker_launch_or_lane_mutation",
+    "scheduled_task_or_hidden_background_execution",
+    "validation_bypass",
+    "automatic_escalation_from_report_into_execution",
+    "destructive_action_delete_move_rename_overwrite_reset_clean_force_push"
+  ],
+  "auto_approval_rules": {
+    "enabled_in_dry_run": false,
+    "max_auto_approval_risk_tier": "LOW",
+    "medium_and_high_remain_pending_human_review": true,
+    "note": "Night supervision only PLANS approval routing in DRY_RUN. It never changes approval state. Even LOW-risk auto-approval requires a separate approved APPLY packet before any state change."
+  },
+  "fail_closed": {
+    "on_validation_failure": "STOP_AND_ALERT",
+    "on_secret_suspicion": "STOP_AND_ALERT",
+    "on_forbidden_write_attempt": "ABORT_RUN",
+    "on_branch_or_repo_mismatch": "STOP_AND_ALERT",
+    "safe_result_states": ["BLOCKED", "REVIEW", "INVALID_DATA"]
+  },
+  "last_verified": "2026-05-29"
+}

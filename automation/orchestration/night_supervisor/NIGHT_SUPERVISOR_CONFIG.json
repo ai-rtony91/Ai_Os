@@ -1,0 +1,46 @@
+{
+  "schema": "AIOS_NIGHT_SUPERVISOR_CONFIG.v1",
+  "title": "AI_OS Night Supervisor Configuration",
+  "mode": "DRY_RUN",
+  "telemetry_root": "telemetry/night_supervisor",
+  "outputs": {
+    "checkpoint_subdir": "{date}",
+    "runtime_snapshot_file": "{date}/runtime_snapshot.json",
+    "checkpoint_file": "{date}/checkpoint.json",
+    "resume_subdir": "resume",
+    "resume_file": "resume/resume_{date}.json",
+    "ledger_file": "night_ledger.jsonl",
+    "report_subdir": "reports",
+    "report_file": "reports/night_summary_{date}.json",
+    "alert_subdir": "alerts",
+    "alert_file": "alerts/night_alert_{date}.json"
+  },
+  "retention": {
+    "checkpoint_days": 30,
+    "report_days": 90,
+    "ledger_is_append_only": true,
+    "cleanup_is_dry_run_plan_only": true
+  },
+  "read_only_inspection_sources": {
+    "work_packets_dir": "automation/orchestration/work_packets",
+    "approval_inbox_dir": "automation/orchestration/approval_inbox",
+    "approval_tier_policy": "automation/orchestration/policy/AIOS_APPROVAL_TIER_POLICY.json",
+    "worker_safety_policy": "automation/orchestration/policy/AIOS_WORKER_SAFETY_POLICY.json",
+    "locks_dir": "automation/orchestration/locks",
+    "validator_chain_config": "automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json",
+    "runtime_memory": "automation/orchestration/memory/AIOS_RUNTIME_MEMORY.json",
+    "work_ledger": "telemetry/work_ledger.jsonl"
+  },
+  "validation": {
+    "json_parse_sample_limit": 400,
+    "run_git_diff_check": true,
+    "run_repo_integrity_check": true,
+    "powershell_parse": "DEFERRED_NO_PWSH_IN_THIS_ENVIRONMENT"
+  },
+  "lock_expiry": {
+    "default_ttl_minutes": 720,
+    "release_mode": "DRY_RUN_PLAN_ONLY"
+  },
+  "approval_authority": "Anthony Meza",
+  "last_verified": "2026-05-29"
+}

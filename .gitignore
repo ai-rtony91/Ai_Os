@@ -86,3 +86,6 @@ services/node_modules/
 services/dist/
 node_modules/
 dist/
+
+# AIOS night supervisor DRY_RUN runtime outputs (evidence, not source)
+telemetry/night_supervisor/
