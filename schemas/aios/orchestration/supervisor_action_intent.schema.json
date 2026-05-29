@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/supervisor_action_intent.v0.2.0",
+  "title": "AI_OS Night Supervisor Effector Intent",
+  "description": "Wire contract between the canonical Codex V2 spine and the Claude effector layer. An effector intent is a PROPOSAL ONLY, derived from an approved packet_routing_contract.v1. It never executes by itself. Execution requires, all at once: kill_switch_clear, effector_actionable, capability_allowed, execution_enabled, env_apply_armed, and contract_cleared (the spine already judged approval + lock). The effector layer never re-reads the approval inbox or re-scans locks; approval_officer and lock_manager own that authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "intent_id",
+    "packet_id",
+    "effector",
+    "risk_tier",
+    "blocked_by_default",
+    "source_contract"
+  ],
+  "properties": {
+    "intent_id": { "type": "string", "minLength": 1 },
+    "packet_id": { "type": "string", "minLength": 1 },
+    "worker_id": { "type": "string" },
+    "effector": {
+      "type": "string",
+      "description": "Logical effector name. Maps to exactly one hand-script.",
+      "enum": ["heartbeat", "claim_lock", "assign", "mark_done", "release_lock", "noop"]
+    },
+    "effector_script": {
+      "type": "string",
+      "description": "Repo-relative path of the PowerShell hand-script this intent would invoke."
+    },
+    "args": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Named arguments passed to the effector script."
+    },
+    "risk_tier": { "type": "string", "enum": ["read_only", "low", "medium", "high"] },
+    "blocked_by_default": {
+      "type": "boolean",
+      "const": true,
+      "description": "Always true. Only the dispatcher, with all gates satisfied, may override at run time."
+    },
+    "source_contract": {
+      "type": "object",
+      "description": "The Codex spine verdict this intent trusts. References packet_routing_contract.v1. The effector layer does not re-derive these.",
+      "additionalProperties": true,
+      "required": ["packet_id", "dispatch_status", "approval_status", "lock_status"],
+      "properties": {
+        "packet_id": { "type": "string" },
+        "dispatch_status": { "type": "string" },
+        "approval_status": { "type": "string" },
+        "lock_status": { "type": "string" },
+        "dispatch_mode": { "type": "string" }
+      }
+    },
+    "reason": { "type": "string" }
+  }
+}
