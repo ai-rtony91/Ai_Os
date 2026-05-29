@@ -1,6 +1,6 @@
 # AI_OS Night Supervisor Qualification Gates
 
-Status: Gate 1 foundation governance.
+Status: Gates 1-2 runtime evidence foundation governance.
 
 This document records the approved Gate 1 foundation decisions. It does not
 authorize autonomy, schedulers, daemons, backup execution, Raspberry Pi
@@ -60,6 +60,7 @@ Gate 1 may add:
 - a worker heartbeat schema;
 - a qualification ledger schema;
 - a read-only worker health monitor;
+- a System 2 runtime table bootstrap that creates conservative no-live-heartbeat evidence;
 - Supervisor V2 report fields for worker health evidence;
 - tests proving read-only behavior and stale/unknown classification.
 
@@ -74,6 +75,83 @@ Gate 1 must not:
 - run backup;
 - create schedules;
 - create daemons.
+
+Runtime table bootstrap is blood supply, not qualification. Bootstrap rows prove
+that Night Supervisor has a canonical place to read worker evidence; they do not
+prove that any worker is alive, active, idle, stale, missing, crashed, trusted,
+or qualified. Initial bootstrap rows must remain conservative and must not mark
+any worker `ACTIVE`, `APPLY_RUNNING`, `VALIDATING`, or `HEALTHY`.
+
+The canonical System 2 runtime worker files are:
+
+- `Reports/dispatcher/runtime/workers/worker_heartbeat_table.json`
+- `Reports/dispatcher/runtime/workers/active_worker_table.json`
+- `Reports/dispatcher/runtime/workers/worker_registration_status.json`
+- `Reports/dispatcher/runtime/workers/worker_session_ledger.json`
+
+Gate 1 does not pass from bootstrap alone. Gate 1 requires live heartbeat
+evidence, stale/missing behavior proof, read-only monitor proof, and Human Owner
+review.
+
+## Gate 2 Packet Integrity Scope
+
+Gate 2 may add:
+
+- a read-only packet integrity monitor;
+- a packet integrity evidence schema when the routing contract is not enough;
+- Supervisor V2 report fields for packet integrity evidence;
+- tests proving packet integrity classification is conservative and read-only.
+
+Gate 2 reuses Gate 1 worker health evidence. It must not create a second worker
+health model, infer worker crashes without worker health evidence, mutate
+packets, claim locks, approve packets, block dispatch by new policy, enable
+effectors, or expand authority.
+
+Gate 2 does not pass from the packet monitor alone. It requires packet ownership
+evidence, lock/approval corroboration, stale/abandoned/orphaned packet drills,
+and Human Owner review.
+
+## Gates 1-7 Controlled Evidence Scope
+
+The first seven Night Supervisor gates are:
+
+1. Gate 1 - Worker Health / Heartbeat Evidence.
+2. Gate 2 - Packet Integrity / Ownership Evidence.
+3. Gate 3 - Crash / Recovery Awareness.
+4. Gate 4 - Single Overnight Simulation.
+5. Gate 5 - Multi-Night Evidence Model.
+6. Gate 6 - Morning Handoff Preview.
+7. Gate 7 - Qualification Ledger / Promotion Package Preview.
+
+Controlled drills are allowed for TESTED evidence. Controlled drills may use
+fixtures, temp directories, read-only monitor functions, and preview reports.
+Controlled drills do not equal real-world overnight trust.
+
+Real-world TRUSTED or QUALIFIED status still requires live evidence windows,
+reviewed qualification ledger entries, recovery proof, morning handoff evidence,
+and explicit Human Owner approval. No AI worker, validator, green test run,
+simulated overnight report, or promotion package can grant that approval.
+
+Gate 3 remains awareness-only. It may detect recovery need, but must not clear
+locks, reassign packets, kill processes, launch workers, approve work, or run a
+recovery executor.
+
+Gate 4 may simulate overnight cycles. It must not wait overnight, schedule work,
+start daemons, launch workers, or enable effectors.
+
+Gate 5 defines the multi-night evidence model. It must reject fake
+qualification when evidence windows are simulated or lack explicit real-world
+window markers.
+
+Gate 6 creates a morning handoff preview only. It must state that Night
+Supervisor remains PROVISIONAL unless ledger evidence and Human Owner approval
+prove otherwise.
+
+Gate 7 may build preview ledger entries and promotion packages. It must not
+forge Human Owner approval, write trusted/qualified status, or grant authority.
+
+No authority expands before Gate 1 and Gate 2 have reviewed evidence. The
+effector layer remains disabled.
 
 ## Required Worker States
 
@@ -99,6 +177,8 @@ evidence-linked, and promotion-neutral until Human Owner approval.
 
 ## Stop Rule
 
-Gate 1 completion means the read-only evidence foundation is ready for review.
-It does not promote Night Supervisor beyond PROVISIONAL and does not authorize
-Gate 2, overnight runs, backup execution, scheduler work, or effectors.
+Gate 1 or Gate 2 foundation completion means the read-only evidence foundation
+is ready for review. It does not promote Night Supervisor beyond PROVISIONAL and
+does not authorize overnight runs, backup execution, scheduler work, daemon
+work, effectors, broker execution, trading, commits, pushes, merges, or any
+autonomous authority.

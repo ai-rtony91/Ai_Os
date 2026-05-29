@@ -26,8 +26,14 @@ from approval_officer import (  # noqa: E402
     read_approval_inbox,
 )
 from lock_manager import apply_lock_status, check_packet_lock, scan_locks  # noqa: E402
+from morning_handoff_report import build_morning_handoff_preview  # noqa: E402
+from multi_night_evidence_model import evaluate_multi_night_evidence  # noqa: E402
+from night_supervisor_overnight_simulator import build_overnight_simulation  # noqa: E402
 from packet_dispatcher import dispatch_packets  # noqa: E402
+from packet_integrity_monitor import apply_packet_integrity_to_report, scan_packet_integrity  # noqa: E402
+from qualification_ledger import build_promotion_package, build_qualification_entry  # noqa: E402
 from queue_scanner import scan_queue  # noqa: E402
+from recovery_awareness_monitor import scan_recovery_awareness  # noqa: E402
 from telemetry_writer import build_supervisor_event, preview_event  # noqa: E402
 from worker_assignment import assign_workers  # noqa: E402
 from worker_health_monitor import (  # noqa: E402
@@ -164,6 +170,24 @@ def run_worker_health_stage(repo_root: Path) -> dict[str, Any]:
     return build_worker_health_summary(scan_worker_health(repo_root))
 
 
+def run_packet_integrity_stage(
+    repo_root: Path,
+    contracts: list[dict[str, Any]],
+    worker_health_summary: dict[str, Any],
+) -> dict[str, Any]:
+    """Return read-only packet integrity evidence for Gate 2 qualification."""
+    return scan_packet_integrity(
+        repo_root,
+        worker_health_summary=worker_health_summary,
+        routing_contracts=contracts,
+    )
+
+
+def run_recovery_awareness_stage(repo_root: Path, worker_health_summary: dict[str, Any]) -> dict[str, Any]:
+    """Return read-only recovery awareness evidence for Gate 3."""
+    return scan_recovery_awareness(repo_root, worker_health_summary=worker_health_summary)
+
+
 def run_telemetry_stage(report: dict[str, Any], repo_root: Path, apply_enabled: bool = False) -> dict[str, Any]:
     """Return telemetry preview unless apply_enabled is true and separately approved."""
     event = build_supervisor_event(
@@ -189,6 +213,25 @@ def build_supervisor_v2_report(repo_root: Path, apply_enabled: bool = False) -> 
     approved = run_approval_stage(locked, root)
     dispatch_receipts = run_dispatch_stage(approved, root, apply_enabled=apply_enabled)
     worker_health_summary = run_worker_health_stage(root)
+    packet_integrity_summary = run_packet_integrity_stage(root, approved, worker_health_summary)
+    recovery_awareness_summary = run_recovery_awareness_stage(root, worker_health_summary)
+    overnight_simulation = build_overnight_simulation()
+    multi_night_model = evaluate_multi_night_evidence()
+    qualification_entries = [
+        build_qualification_entry("GATE_1_WORKER_HEALTH", worker_health_summary["worker_health_status"], metrics={"score": 4}),
+        build_qualification_entry("GATE_2_PACKET_INTEGRITY", packet_integrity_summary["packet_integrity_status"], metrics={"score": 3}),
+        build_qualification_entry("GATE_3_RECOVERY_AWARENESS", recovery_awareness_summary["recovery_status"], metrics={"score": 3}),
+        build_qualification_entry("GATE_4_OVERNIGHT_SIMULATION", overnight_simulation["simulation_result"], metrics={"score": 4}),
+        build_qualification_entry("GATE_5_MULTI_NIGHT_MODEL", multi_night_model["classification"], metrics={"score": 2}),
+    ]
+    qualification_summary = build_promotion_package(qualification_entries)
+    morning_handoff_preview = build_morning_handoff_preview(
+        worker_health_summary=worker_health_summary,
+        packet_integrity_summary=packet_integrity_summary,
+        recovery_summary=recovery_awareness_summary,
+        overnight_summary=overnight_simulation,
+        qualification_summary=qualification_summary,
+    )
 
     for contract, receipt in zip(approved, dispatch_receipts, strict=False):
         contract["dispatch_status"] = str(receipt.get("dispatch_status") or "FAILED")
@@ -213,6 +256,11 @@ def build_supervisor_v2_report(repo_root: Path, apply_enabled: bool = False) -> 
             "approval_officer",
             "packet_dispatcher",
             "worker_health_monitor",
+            "packet_integrity_monitor",
+            "recovery_awareness_monitor",
+            "overnight_simulation_preview",
+            "morning_handoff_preview",
+            "qualification_summary_preview",
             "telemetry_preview",
         ],
         "queue_packets": packets,
@@ -226,5 +274,12 @@ def build_supervisor_v2_report(repo_root: Path, apply_enabled: bool = False) -> 
         "lock_mutation_enabled": False,
     }
     report = apply_worker_health_to_report(report, worker_health_summary)
+    report = apply_packet_integrity_to_report(report, packet_integrity_summary)
+    report["recovery_awareness"] = recovery_awareness_summary.get("recovery_awareness", [])
+    report["recovery_awareness_status"] = recovery_awareness_summary.get("recovery_status", "UNKNOWN")
+    report["recovery_awareness_summary"] = recovery_awareness_summary
+    report["overnight_simulation"] = overnight_simulation
+    report["morning_handoff_preview"] = morning_handoff_preview
+    report["qualification_summary"] = qualification_summary
     report["telemetry_preview"] = run_telemetry_stage(report, root, apply_enabled=apply_enabled)
     return report

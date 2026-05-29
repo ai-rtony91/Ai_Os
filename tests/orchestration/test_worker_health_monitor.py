@@ -85,6 +85,36 @@ class WorkerHealthMonitorTests(unittest.TestCase):
             self.assertEqual(summary["worker_health_evidence_count"], 1)
             self.assertFalse(summary["write_performed"])
 
+    def test_bootstrap_table_reads_as_bootstrap_only(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "Reports" / "dispatcher" / "runtime" / "workers"
+            path.mkdir(parents=True)
+            heartbeat = path / "worker_heartbeat_table.json"
+            payload = {
+                "heartbeats": [
+                    {
+                        "worker_id": "AIOS-01",
+                        "status": "UNKNOWN",
+                        "heartbeat_source": "system2_runtime_bootstrap",
+                        "blocked_reason": "Bootstrap row only. No live heartbeat observed.",
+                    }
+                ]
+            }
+            heartbeat.write_text(json.dumps(payload), encoding="utf-8")
+            before = heartbeat.read_text(encoding="utf-8")
+
+            rows = scan_worker_health(temp_dir)
+            summary = build_worker_health_summary(rows)
+
+            self.assertEqual(heartbeat.read_text(encoding="utf-8"), before)
+            self.assertEqual(rows[0]["status"], "UNKNOWN")
+            self.assertEqual(rows[0]["heartbeat_source"], "system2_runtime_bootstrap")
+            self.assertEqual(summary["worker_health_status"], "BOOTSTRAP_ONLY")
+            self.assertEqual(
+                summary["qualification_gate_hint"],
+                "GATE_1_BOOTSTRAP_EVIDENCE_PRESENT_BUT_NEEDS_LIVE_HEARTBEAT",
+            )
+
     def test_v2_report_includes_worker_health_section(self) -> None:
         packet = {
             "packet_id": "packet-1",
@@ -105,6 +135,10 @@ class WorkerHealthMonitorTests(unittest.TestCase):
             self.assertIn("worker_health_evidence_count", report)
             self.assertIn("qualification_gate_hint", report)
             self.assertEqual(report["worker_health_status"], "NO_EVIDENCE")
+            self.assertIn("packet_integrity_monitor", report["stage_order"])
+            self.assertIn("packet_integrity", report)
+            self.assertIn("packet_integrity_status", report)
+            self.assertIn("qualification_gate_2_hint", report)
 
 
 if __name__ == "__main__":

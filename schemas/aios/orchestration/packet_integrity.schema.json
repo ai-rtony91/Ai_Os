@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/packet_integrity.schema.json",
+  "title": "AIOS_PACKET_INTEGRITY_RECORD",
+  "description": "Read-only Gate 2 packet integrity evidence. This schema does not authorize packet mutation, dispatch blocking, worker launch, effectors, commits, pushes, broker execution, or live trading.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "packet_id",
+    "packet_path",
+    "packet_title",
+    "assigned_worker",
+    "recommended_worker",
+    "packet_state",
+    "packet_health_status",
+    "packet_integrity_status",
+    "worker_health_status",
+    "lock_status",
+    "approval_status",
+    "ownership_status",
+    "evidence_paths",
+    "classification_reason",
+    "blocked_reason",
+    "timestamp"
+  ],
+  "properties": {
+    "packet_id": {
+      "type": "string"
+    },
+    "packet_path": {
+      "type": "string"
+    },
+    "packet_title": {
+      "type": "string"
+    },
+    "assigned_worker": {
+      "type": "string"
+    },
+    "recommended_worker": {
+      "type": "string"
+    },
+    "packet_state": {
+      "type": "string"
+    },
+    "packet_health_status": {
+      "type": "string",
+      "enum": [
+        "HEALTHY",
+        "STALE",
+        "ABANDONED",
+        "ORPHANED",
+        "DUPLICATE_OWNER",
+        "OWNERSHIP_DRIFT",
+        "BLOCKED",
+        "UNKNOWN"
+      ]
+    },
+    "packet_integrity_status": {
+      "type": "string",
+      "enum": [
+        "HEALTHY",
+        "STALE",
+        "ABANDONED",
+        "ORPHANED",
+        "DUPLICATE_OWNER",
+        "OWNERSHIP_DRIFT",
+        "BLOCKED",
+        "UNKNOWN"
+      ]
+    },
+    "worker_health_status": {
+      "type": "string"
+    },
+    "lock_status": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string"
+    },
+    "ownership_status": {
+      "type": "string"
+    },
+    "evidence_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "classification_reason": {
+      "type": "string"
+    },
+    "blocked_reason": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    }
+  }
+}

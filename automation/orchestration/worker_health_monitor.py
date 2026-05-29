@@ -176,7 +176,7 @@ def normalize_worker_heartbeat(
         "branch": _string_field(record, "branch"),
         "runtime_seconds": _int_field(record, "runtime_seconds", default=0),
         "host": _string_field(record, "host", "terminal_window_name"),
-        "heartbeat_source": heartbeat_source,
+        "heartbeat_source": _string_field(record, "heartbeat_source") or heartbeat_source,
         "evidence_path": evidence_path,
         "blocked_reason": _string_field(record, "blocked_reason"),
         "progress_marker": _string_field(record, "progress_marker", "next_safe_action"),
@@ -253,9 +253,18 @@ def build_worker_health_summary(worker_health: list[dict[str, Any]] | None = Non
 
     evidence_count = len(rows)
     review_count = counts["STALE"] + counts["MISSING"] + counts["CRASHED"] + counts["UNKNOWN"]
+    bootstrap_only = bool(rows) and all(
+        str(row.get("heartbeat_source") or "").lower() == "system2_runtime_bootstrap"
+        or "bootstrap" in str(row.get("blocked_reason") or "").lower()
+        for row in rows
+    )
+
     if evidence_count == 0:
         status = "NO_EVIDENCE"
         hint = "GATE_1_NEEDS_CANONICAL_HEARTBEAT_EVIDENCE"
+    elif bootstrap_only:
+        status = "BOOTSTRAP_ONLY"
+        hint = "GATE_1_BOOTSTRAP_EVIDENCE_PRESENT_BUT_NEEDS_LIVE_HEARTBEAT"
     elif review_count > 0:
         status = "REVIEW_REQUIRED"
         hint = "GATE_1_REVIEW_WORKER_HEALTH_EVIDENCE"

@@ -29,10 +29,15 @@ class SupervisorEngineV2Tests(unittest.TestCase):
 
             self.assertEqual(report["stage_order"][0], "queue_scanner")
             self.assertEqual(report["stage_order"][-1], "telemetry_preview")
+            self.assertIn("worker_health_monitor", report["stage_order"])
+            self.assertIn("packet_integrity_monitor", report["stage_order"])
             self.assertFalse(report["write_performed"])
             self.assertFalse(report["worker_launch_enabled"])
+            self.assertFalse(report["packet_integrity_summary"]["write_performed"])
             self.assertEqual(report["routing_contracts"][0]["telemetry_status"], "DRY_RUN_PREVIEW")
             self.assertNotEqual(report["routing_contracts"][0]["dispatch_status"], "DISPATCHED")
+            self.assertNotEqual(report["qualification_gate_hint"], "GATE_1_PASSED")
+            self.assertNotEqual(report["qualification_gate_2_hint"], "GATE_2_PASSED")
 
     def test_preserves_blocked_reason(self) -> None:
         contract = {
@@ -68,4 +73,3 @@ class SupervisorEngineV2Tests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
