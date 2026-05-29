@@ -1,0 +1,56 @@
+{
+  "schema": "AIOS_NIGHT_SUPERVISOR_CONFIG",
+  "schema_version": "1.0",
+  "config_id": "AIOS_NIGHT_SUPERVISOR_V1_CONFIG",
+  "mode": "DRY_RUN",
+  "output_root": "telemetry/night_supervisor",
+  "max_report_files_to_scan": 200,
+  "stale_lock_minutes": 120,
+  "stale_packet_minutes": 240,
+  "stale_worker_minutes": 120,
+  "read_only": true,
+  "write_reports": true,
+  "write_markdown_brief": true,
+  "allow_mutation": false,
+  "forbidden_actions": [
+    "git add",
+    "git commit",
+    "git push",
+    "git merge",
+    "git rebase",
+    "git reset --hard",
+    "Remove-Item",
+    "Invoke-Expression",
+    "Start-Process",
+    "broker",
+    "OANDA",
+    "live order",
+    "api key",
+    "secret"
+  ],
+  "scan_paths": {
+    "work_packets": [
+      "automation/orchestration/work_packets",
+      "automation/orchestration/packets",
+      "automation/orchestration/queues"
+    ],
+    "locks": [
+      "automation/orchestration/locks",
+      "automation/orchestration/file_locks",
+      "automation/orchestration/work_packets/locks",
+      "telemetry/locks"
+    ],
+    "approvals": [
+      "automation/orchestration/approval_inbox"
+    ],
+    "gate_reports": [
+      "telemetry/gates",
+      "telemetry/night_supervisor",
+      "automation/orchestration/gates"
+    ],
+    "workers": [
+      "automation/orchestration/workers",
+      "telemetry/workers"
+    ]
+  }
+}

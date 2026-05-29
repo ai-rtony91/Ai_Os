@@ -1,0 +1,73 @@
+{
+  "schema": "AIOS_HANDOFF_PACKET.v1",
+  "schema_version": "0.1.0",
+  "packet_id": "PKT-HANDOFF-EXAMPLE-001",
+  "task_id": "TASK-HANDOFF-EXAMPLE-001",
+  "created_at": "2026-05-28T00:00:00Z",
+  "created_by": "CODEX_EAST",
+  "source_system": "AI_OS",
+  "handoff_type": "worker_relay",
+  "supervisor_identity": "Codex East",
+  "worker_identity": "CODEX_EAST",
+  "assigned_worker": "CODEX_EAST",
+  "worker_zone": "EAST",
+  "worker_role": "CODEX",
+  "lane": "runtime_governance",
+  "priority": "normal",
+  "user_goal": "Relay safety gate work to the next worker.",
+  "objective": "Provide structured handoff evidence without granting execution authority.",
+  "phase": "runtime_governance",
+  "stage": "handoff_schema",
+  "task_type": "handoff",
+  "current_status": "ready_for_review",
+  "next_action": "Review handoff packet before assigning a downstream worker.",
+  "stop_point": "Stop after report; no commit or push.",
+  "repo_root": "C:\\Dev\\Ai.Os",
+  "branch": "UNKNOWN",
+  "worktree": "C:\\Dev\\Ai.Os",
+  "allowed_paths": [
+    "automation/orchestration/",
+    "schemas/aios/orchestration/"
+  ],
+  "blocked_paths": [
+    "secrets/",
+    "broker/",
+    "OANDA/",
+    "apps/"
+  ],
+  "touched_files": [],
+  "expected_outputs": [
+    "structured handoff packet"
+  ],
+  "approval_authority": "Human Owner",
+  "approval_status": "NOT_REQUIRED",
+  "user_approval_required": false,
+  "safety_status": "SAFE_LOCAL_ONLY",
+  "blocked_reason": "",
+  "hard_stop_checked": true,
+  "hard_stop_present": false,
+  "gate_required": true,
+  "gate_decision": "AUTO_PROCEED",
+  "policy_id": "AIOS_APPROVAL_TIER_POLICY",
+  "policy_version": "1.0.0",
+  "validator_chain": [],
+  "validation_required": true,
+  "validation_commands": [
+    "Get-Content -Raw schemas/aios/orchestration/AIOS_HANDOFF_PACKET_SCHEMA.json | ConvertFrom-Json | Out-Null"
+  ],
+  "validation_report_path": "",
+  "expected_validation_result": "PASS",
+  "required_inputs": [],
+  "output_summary_path": "",
+  "handoff_notes": [
+    "Example only. This packet does not authorize execution."
+  ],
+  "previous_packet_id": "",
+  "next_packet_id": "",
+  "downstream_worker": "",
+  "relay_ready": true,
+  "audit_required": false,
+  "audit_log_path": "",
+  "completed_at": "",
+  "completion_summary": ""
+}

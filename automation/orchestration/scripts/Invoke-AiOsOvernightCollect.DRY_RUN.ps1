@@ -7,6 +7,16 @@ param(
     [switch]$Collect
 )
 
+if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+    $gitResult = & git rev-parse --show-toplevel 2>$null
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($gitResult)) {
+        $RepoRoot = $gitResult.Trim()
+    } else {
+        $RepoRoot = (Get-Item $PSScriptRoot).Parent.Parent.Parent.FullName
+    }
+}
+$RepoRoot = (Resolve-Path -LiteralPath $RepoRoot -ErrorAction Stop).Path
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -56,6 +66,96 @@ function Test-AiOsPathPresent {
 
     $fullPath = Join-Path -Path $RepoRoot -ChildPath $Path
     return Test-Path -LiteralPath $fullPath
+}
+
+function Resolve-AiOsAllowedWritePath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $repoFull = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd("\")
+    $candidate = if ([System.IO.Path]::IsPathRooted($Path)) {
+        [System.IO.Path]::GetFullPath($Path)
+    } else {
+        [System.IO.Path]::GetFullPath((Join-Path -Path $repoFull -ChildPath $Path))
+    }
+
+    $allowedDirectories = @(
+        [System.IO.Path]::GetFullPath((Join-Path -Path $repoFull -ChildPath "telemetry\evidence")).TrimEnd("\"),
+        [System.IO.Path]::GetFullPath((Join-Path -Path $repoFull -ChildPath "telemetry\supervisor_briefs")).TrimEnd("\"),
+        [System.IO.Path]::GetFullPath((Join-Path -Path $repoFull -ChildPath "telemetry\productivity")).TrimEnd("\")
+    )
+    $allowedFiles = @(
+        [System.IO.Path]::GetFullPath((Join-Path -Path $repoFull -ChildPath "telemetry\work_ledger.jsonl"))
+    )
+
+    foreach ($allowedFile in $allowedFiles) {
+        if ($candidate.Equals($allowedFile, [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $candidate
+        }
+    }
+
+    foreach ($allowedRoot in $allowedDirectories) {
+        if ($candidate.Equals($allowedRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+            $candidate.StartsWith("$allowedRoot\", [System.StringComparison]::OrdinalIgnoreCase)) {
+            return $candidate
+        }
+    }
+
+    throw "Blocked write path outside approved telemetry roots: $Path"
+}
+
+function Invoke-AiOsEvidenceSourceWithTimeout {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptPath,
+        [int]$TimeoutSeconds = 30
+    )
+
+    $job = Start-Job -ScriptBlock {
+        param([string]$InnerScriptPath)
+
+        $processInfo = [System.Diagnostics.ProcessStartInfo]::new()
+        $processInfo.FileName = "powershell"
+        $processInfo.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$InnerScriptPath`" -OutputJson"
+        $processInfo.RedirectStandardOutput = $true
+        $processInfo.RedirectStandardError = $true
+        $processInfo.UseShellExecute = $false
+        $processInfo.CreateNoWindow = $true
+
+        $process = [System.Diagnostics.Process]::new()
+        $process.StartInfo = $processInfo
+        $null = $process.Start()
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $stderr = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+
+        [pscustomobject]@{
+            stdout = $stdout
+            stderr = $stderr
+            exit_code = $process.ExitCode
+        }
+    } -ArgumentList $ScriptPath
+
+    $completed = Wait-Job -Job $job -Timeout $TimeoutSeconds
+    if (-not $completed) {
+        Stop-Job -Job $job -ErrorAction SilentlyContinue | Out-Null
+        Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
+        return [pscustomobject]@{
+            stdout = ""
+            stderr = "Timed out after $TimeoutSeconds seconds."
+            exit_code = 124
+            timed_out = $true
+            timeout_seconds = $TimeoutSeconds
+        }
+    }
+
+    $result = Receive-Job -Job $job
+    Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
+    return [pscustomobject]@{
+        stdout = [string]$result.stdout
+        stderr = [string]$result.stderr
+        exit_code = [int]$result.exit_code
+        timed_out = $false
+        timeout_seconds = $TimeoutSeconds
+    }
 }
 
 $RepoRoot = Resolve-AiOsRepoRoot -RequestedRoot $RepoRoot
@@ -160,7 +260,7 @@ $plannedSources = foreach ($source in $sourceDefinitions) {
     }
 }
 
-$approvalInboxSeedPresent = Test-AiOsPathPresent -Path "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+$approvalInboxSeedPresent = Test-AiOsPathPresent -Path "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json"
 $approvalGatePresent = Test-AiOsPathPresent -Path "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json"
 $approvalInboxSeedStatus = if ($approvalInboxSeedPresent) { "present" } else { "deferred_missing" }
 
@@ -173,6 +273,11 @@ $plannedOutputPaths = [ordered]@{
     morning_brief_report = Join-AiOsPlanPath -Root $ReportRoot -Child @("morning_brief_$dateKey.json")
     source_outputs = @($plannedSources | ForEach-Object { $_.planned_output_path })
 }
+
+# ENFORCEMENT CONTRACT — NOT DECORATIVE:
+# The actions listed in $blockedActions are hard stops for this script.
+# Any future edit that causes this script to perform a blocked action
+# is unauthorized and must be blocked by West review before merging.
 
 # These blocked actions are permanent safety boundaries for this collector.
 # Any future Collect implementation must enforce them with explicit guards
@@ -195,16 +300,111 @@ $blockedActions = @(
     "secret_or_credential_access"
 )
 
-$collectStatus = if ($Collect) {
-    "COLLECT_REQUESTED_BUT_NOT_ENABLED_IN_SCAFFOLD"
-} else {
-    "PLAN_ONLY_PREVIEW"
-}
+$collectStatus = "PLAN_ONLY_PREVIEW"
+$nextSafeAction = "Review this plan, then approve one future collection packet if the output paths and source list are acceptable."
+$collectOutputPaths = @()
+$collectionResults = @()
 
-$nextSafeAction = if ($Collect) {
-    "Request a separate exact APPLY packet before enabling evidence writes."
-} else {
-    "Review this plan, then approve one future collection packet if the output paths and source list are acceptable."
+if ($Collect) {
+    $gateFile = Join-Path -Path $RepoRoot -ChildPath "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json"
+    if (-not (Test-Path -LiteralPath $gateFile)) {
+        $collectStatus = "COLLECT_BLOCKED_NO_APPROVAL_GATE"
+        $nextSafeAction = "Approval gate file not found. No evidence files written."
+    } else {
+        $collectStatus = "COLLECT_IN_PROGRESS"
+        $datestamp = (Get-Date -Format "yyyyMMdd_HHmm")
+        $evidenceDir = Resolve-AiOsAllowedWritePath -Path "telemetry/evidence"
+        if (-not (Test-Path -LiteralPath $evidenceDir)) {
+            New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
+        }
+
+        $sourcesAttempted = @()
+        $sourcesSucceeded = @()
+        $sourcesFailed = @()
+        $timeoutSeconds = 30
+
+        foreach ($source in $sourceDefinitions) {
+            # Always skip t9_snapshot_backup unconditionally
+            if ($source.id -eq "t9_snapshot_backup") { continue }
+            # Only collect sources marked safe_for_unattended_dry_run or safe_for_future_collection
+            $safeFlag = $source["safe_for_unattended_dry_run"]
+            if ($null -eq $safeFlag) { $safeFlag = $source["safe_for_future_collection"] }
+            if (-not $safeFlag) { continue }
+
+            $sourcesAttempted += $source.id
+            $sourceScriptPath = Join-Path -Path $RepoRoot -ChildPath $source.source_path
+            $outFile = Resolve-AiOsAllowedWritePath -Path (Join-Path -Path "telemetry/evidence" -ChildPath "$($source.id)_${datestamp}Z.json")
+
+            try {
+                if (-not (Test-Path -LiteralPath $sourceScriptPath)) {
+                    throw "Source script not found: $sourceScriptPath"
+                }
+
+                $result = Invoke-AiOsEvidenceSourceWithTimeout -ScriptPath $sourceScriptPath -TimeoutSeconds $timeoutSeconds
+                if ($result.timed_out) {
+                    throw "Source timed out after $($result.timeout_seconds) seconds."
+                }
+                if ($result.exit_code -ne 0) {
+                    throw "Source exited with code $($result.exit_code). stderr: $($result.stderr)"
+                }
+                if ([string]::IsNullOrWhiteSpace($result.stdout)) {
+                    throw "Source produced empty stdout."
+                }
+                if ($source.command_mode -notmatch "text_stdout") {
+                    try {
+                        $null = $result.stdout | ConvertFrom-Json
+                    } catch {
+                        throw "Source stdout was not valid JSON. stderr: $($result.stderr)"
+                    }
+                }
+
+                $result.stdout | Out-File -FilePath $outFile -Encoding utf8 -Force
+                $collectOutputPaths += $outFile
+                $sourcesSucceeded += $source.id
+                $collectionResults += [ordered]@{
+                    id = $source.id
+                    collection_status = "COLLECTED"
+                    output_path = $outFile
+                    timeout_seconds = $result.timeout_seconds
+                    timed_out = $result.timed_out
+                    stderr = $result.stderr
+                    blocked_reason = ""
+                }
+            } catch {
+                $sourcesFailed += $source.id
+                $collectionResults += [ordered]@{
+                    id = $source.id
+                    collection_status = "FAILED"
+                    output_path = $outFile
+                    timeout_seconds = $timeoutSeconds
+                    timed_out = ($_.Exception.Message -match "timed out")
+                    stderr = ""
+                    blocked_reason = $_.Exception.Message
+                }
+            }
+        }
+
+        $manifestPath = Resolve-AiOsAllowedWritePath -Path (Join-Path -Path "telemetry/evidence" -ChildPath "COLLECTION_MANIFEST_${datestamp}.json")
+        $manifest = [ordered]@{
+            schema             = "AIOS_COLLECTION_MANIFEST.v1"
+            collected_at       = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+            source_count       = $sourcesAttempted.Count
+            sources_attempted  = $sourcesAttempted
+            sources_succeeded  = $sourcesSucceeded
+            sources_failed     = $sourcesFailed
+            collection_results = $collectionResults
+            output_paths       = $collectOutputPaths
+        }
+        $manifest | ConvertTo-Json -Depth 5 | Out-File -FilePath $manifestPath -Encoding utf8 -Force
+        $collectOutputPaths += $manifestPath
+        if ($sourcesFailed.Count -gt 0) {
+            $collectStatus = "COLLECT_PARTIAL_FAILURE"
+            $nextSafeAction = "Review failed sources before relying on collected evidence."
+        } else {
+            $collectStatus = "COLLECT_COMPLETE"
+            $nextSafeAction = "Review evidence files in telemetry/evidence/ before any mutation."
+        }
+    }
 }
 
 $report = [ordered]@{
@@ -215,9 +415,10 @@ $report = [ordered]@{
     report_root = $ReportRoot
     date_key = $dateKey
     plan_only = $effectivePlanOnly
-    collect_enabled = $false
+    collect_enabled = ($collectStatus -eq "COLLECT_COMPLETE")
     collect_request_status = $collectStatus
     planned_sources = @($plannedSources)
+    collection_results = @($collectionResults)
     planned_output_paths = $plannedOutputPaths
     approval_inbox_001_present = $approvalInboxSeedPresent
     approval_inbox_seed_status = $approvalInboxSeedStatus

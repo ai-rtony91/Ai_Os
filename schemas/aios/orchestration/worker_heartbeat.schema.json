@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/worker_heartbeat.schema.json",
+  "title": "AI_OS Canonical Worker Heartbeat",
+  "description": "Canonical Gate 1 worker heartbeat evidence contract. This schema describes evidence only; it does not authorize worker launch, reassignment, APPLY, commit, push, scheduler behavior, daemon behavior, backup execution, or effector execution.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "worker_id",
+    "status",
+    "last_seen",
+    "heartbeat_source",
+    "evidence_path"
+  ],
+  "properties": {
+    "heartbeat_id": {
+      "type": "string"
+    },
+    "worker_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker_type": {
+      "type": "string"
+    },
+    "last_seen": {
+      "type": "string",
+      "description": "UTC timestamp for the latest observed worker heartbeat."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "IDLE",
+        "STARTING",
+        "STOPPING",
+        "STALE",
+        "MISSING",
+        "CRASHED",
+        "UNKNOWN"
+      ]
+    },
+    "packet_id": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "runtime_seconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "host": {
+      "type": "string"
+    },
+    "heartbeat_source": {
+      "type": "string",
+      "description": "System 2 source path or source identifier. System 1 scripts are legacy/reference-only."
+    },
+    "evidence_path": {
+      "type": "string"
+    },
+    "blocked_reason": {
+      "type": "string"
+    },
+    "progress_marker": {
+      "type": "string"
+    },
+    "lock_corroboration": {
+      "type": "string"
+    },
+    "approval_context": {
+      "type": "string"
+    },
+    "stale_after_seconds": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "observed_age_seconds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "classification_reason": {
+      "type": "string"
+    }
+  }
+}

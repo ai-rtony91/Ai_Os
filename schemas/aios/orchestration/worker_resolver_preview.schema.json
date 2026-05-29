@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/worker_resolver_preview.schema.json",
+  "title": "AI_OS Worker Resolver Preview",
+  "description": "Read-only scheduler-to-worker resolver preview contract. This schema does not authorize persistence, assignment, dispatch, approval, commit, push, runtime mutation, packet mutation, queue mutation, telemetry mutation, trading execution, or secret access.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "source",
+    "preview_mode",
+    "assignments",
+    "unmatched_actions",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_WORKER_RESOLVER_PREVIEW.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheduler_plan_generated_at",
+        "scheduler_ready_packets",
+        "worker_count",
+        "preview_only"
+      ],
+      "properties": {
+        "scheduler_plan_generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "scheduler_ready_packets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "worker_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "preview_only": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "preview_mode": {
+      "type": "string",
+      "const": "read_only_preview"
+    },
+    "assignments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "recommended_worker_id",
+          "recommended_worker_name",
+          "match_score",
+          "matched_capabilities",
+          "missing_capabilities",
+          "risk_allowed",
+          "status_allowed",
+          "lane_match",
+          "reason",
+          "preview_only"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recommended_worker_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "recommended_worker_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "match_score": {
+            "type": "number",
+            "minimum": 0
+          },
+          "matched_capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "missing_capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risk_allowed": {
+            "type": "boolean"
+          },
+          "status_allowed": {
+            "type": "boolean"
+          },
+          "lane_match": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "preview_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    },
+    "unmatched_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "required_capabilities",
+          "risk_level",
+          "reason"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "required_capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "protected",
+              "unknown"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_actions",
+        "assigned_preview_count",
+        "unmatched_count",
+        "active_worker_count",
+        "unavailable_worker_count"
+      ],
+      "properties": {
+        "total_actions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "assigned_preview_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unmatched_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "active_worker_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unavailable_worker_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

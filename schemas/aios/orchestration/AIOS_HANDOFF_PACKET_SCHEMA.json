@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/AIOS_HANDOFF_PACKET_SCHEMA.v0.1.0",
+  "title": "AI_OS Handoff Packet Schema",
+  "description": "Canonical runtime handoff packet schema for structured AI_OS worker relay. This contract is evidence and routing metadata only; it does not approve APPLY, execute commands, commit, push, merge, deploy, handle secrets, or enable broker/live trading behavior.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "packet_id",
+    "task_id",
+    "created_at",
+    "worker_identity",
+    "objective",
+    "current_status",
+    "next_action",
+    "allowed_paths",
+    "blocked_paths",
+    "safety_status",
+    "validation_required"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_HANDOFF_PACKET.v1"
+    },
+    "schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "source_system": {
+      "type": "string"
+    },
+    "handoff_type": {
+      "type": "string"
+    },
+    "supervisor_identity": {
+      "type": "string"
+    },
+    "worker_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assigned_worker": {
+      "type": "string"
+    },
+    "worker_zone": {
+      "type": "string"
+    },
+    "worker_role": {
+      "type": "string"
+    },
+    "lane": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string"
+    },
+    "user_goal": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "type": "string"
+    },
+    "stage": {
+      "type": "string"
+    },
+    "task_type": {
+      "type": "string"
+    },
+    "current_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stop_point": {
+      "type": "string"
+    },
+    "repo_root": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "worktree": {
+      "type": "string"
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "touched_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expected_outputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "approval_authority": {
+      "type": "string"
+    },
+    "approval_status": {
+      "type": "string"
+    },
+    "user_approval_required": {
+      "type": "boolean"
+    },
+    "safety_status": {
+      "type": "string",
+      "enum": [
+        "SAFE_LOCAL_ONLY",
+        "PAPER_ONLY",
+        "REVIEW_REQUIRED",
+        "BLOCKED",
+        "UNKNOWN"
+      ]
+    },
+    "blocked_reason": {
+      "type": "string"
+    },
+    "hard_stop_checked": {
+      "type": "boolean"
+    },
+    "hard_stop_present": {
+      "type": "boolean"
+    },
+    "gate_required": {
+      "type": "boolean"
+    },
+    "gate_decision": {
+      "type": "string"
+    },
+    "policy_id": {
+      "type": "string"
+    },
+    "policy_version": {
+      "type": "string"
+    },
+    "validator_chain": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "object"
+        ]
+      }
+    },
+    "validation_required": {
+      "type": "boolean"
+    },
+    "validation_commands": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validation_report_path": {
+      "type": "string"
+    },
+    "expected_validation_result": {
+      "type": "string"
+    },
+    "required_inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "output_summary_path": {
+      "type": "string"
+    },
+    "handoff_notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "previous_packet_id": {
+      "type": "string"
+    },
+    "next_packet_id": {
+      "type": "string"
+    },
+    "downstream_worker": {
+      "type": "string"
+    },
+    "relay_ready": {
+      "type": "boolean"
+    },
+    "audit_required": {
+      "type": "boolean"
+    },
+    "audit_log_path": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string"
+    },
+    "completion_summary": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/commit_package_preview.schema.json",
+  "title": "AI_OS Commit Package Preview",
+  "description": "Preview-only commit package contract for approval package preview records. This schema does not authorize staging, commit, push, merge, deployment, runtime mutation, telemetry mutation, trading execution, broker execution, secret access, credential access, packet mutation, queue mutation, worker dispatch, or inbox mutation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "preview_only",
+    "source",
+    "commit_candidates",
+    "pull_request_candidates",
+    "validation_summary",
+    "warnings",
+    "human_required_next_step"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_COMMIT_PACKAGE_PREVIEW.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "preview_only": {
+      "type": "boolean",
+      "const": true
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "approval_package_schema",
+        "approval_package_generated_at",
+        "preview_only"
+      ],
+      "properties": {
+        "approval_package_schema": {
+          "type": "string",
+          "const": "AIOS_APPROVAL_PACKAGE_PREVIEW.v1"
+        },
+        "approval_package_generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "preview_only": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "commit_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "proposed_commit_message",
+          "evidence_status",
+          "approval_status",
+          "preview_only"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposed_commit_message": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_status": {
+            "type": "string",
+            "enum": [
+              "evidence_passed",
+              "evidence_failed",
+              "evidence_warning",
+              "evidence_incomplete",
+              "evidence_unknown"
+            ]
+          },
+          "approval_status": {
+            "type": "string",
+            "const": "approval_ready"
+          },
+          "preview_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    },
+    "pull_request_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "proposed_title",
+          "proposed_summary",
+          "preview_only"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposed_title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "proposed_summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "preview_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    },
+    "validation_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_candidates",
+        "approval_ready_count",
+        "commit_authorized",
+        "push_authorized",
+        "merge_authorized"
+      ],
+      "properties": {
+        "total_candidates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "approval_ready_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "commit_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "push_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "merge_authorized": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_required_next_step": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

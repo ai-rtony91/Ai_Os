@@ -1,0 +1,239 @@
+{
+  "schema_id": "AIOS_TERMINAL_UI_THEME_TOKENS_001",
+  "template_only": true,
+  "not_applied_automatically": true,
+  "purpose": "Repo-owned terminal UI theme tokens for AI_OS workstation banners, preview scripts, and future approved terminal profile templates.",
+  "safety_note": "These tokens do not install tools, download assets, edit Windows Terminal settings, edit PowerShell profiles, create startup tasks, or auto-launch Codex.",
+  "colors": {
+    "base_dark": "#05070b",
+    "terminal_text": "#e5f6ff",
+    "panel_blue_gray": "#111827",
+    "panel_blue_gray_soft": "#172033",
+    "panel_blue_gray_deep": "#0b1220",
+    "cyan_action": "#38bdf8",
+    "blue_glow": "#00a3ff",
+    "violet_orchestration": "#a855f7",
+    "pink_signal": "#ff4fd8",
+    "occ_pass_green": "#37ff88",
+    "warning_amber": "#ffd166",
+    "danger_red": "#ff5f7a",
+    "orange_activity": "#ff9f1c",
+    "gold_command": "#ffd166",
+    "muted_text": "#93a4b8"
+  },
+  "ansi_suggestions": {
+    "panel_background": "48;5;24",
+    "panel_background_soft": "48;5;236",
+    "panel_background_deep": "48;5;17",
+    "text_bright": "97",
+    "text_dark": "30",
+    "cyan": "96",
+    "violet": "95",
+    "green": "92",
+    "amber": "93",
+    "red": "91",
+    "orange": "38;5;208",
+    "gold_block": "48;5;220;30",
+    "cyan_block": "48;5;45;30",
+    "violet_block": "48;5;93;97",
+    "green_block": "48;5;42;30",
+    "red_block": "48;5;203;30",
+    "amber_block": "48;5;220;30"
+  },
+  "panel_background_suggestions": {
+    "terminal_safe": "Use ANSI background blocks to simulate translucent bluish-gray panels.",
+    "true_transparency": "True acrylic or opacity requires Windows Terminal profile settings and must be applied only in a separate operator-approved lane.",
+    "fallback": "If ANSI is unavailable, render plain text with brackets and ASCII borders."
+  },
+  "border_styles": {
+    "thin": "-",
+    "strong": "=",
+    "boss": "#",
+    "panel_left": "[",
+    "panel_right": "]",
+    "section_prefix": "||",
+    "progress_marker": ">>"
+  },
+  "badge_styles": {
+    "PASS": {
+      "label": "PASS",
+      "semantic_color": "occ_pass_green",
+      "ansi": "92"
+    },
+    "CI": {
+      "label": "CI",
+      "semantic_color": "cyan_action",
+      "ansi": "96"
+    },
+    "WORKING": {
+      "label": "WORKING",
+      "semantic_color": "orange_activity",
+      "ansi": "38;5;208"
+    },
+    "COMPLETE": {
+      "label": "COMPLETE",
+      "semantic_color": "occ_pass_green",
+      "ansi": "92"
+    },
+    "BLOCKED": {
+      "label": "BLOCKED",
+      "semantic_color": "danger_red",
+      "ansi": "91"
+    },
+    "GATED": {
+      "label": "GATED",
+      "semantic_color": "warning_amber",
+      "ansi": "93"
+    }
+  },
+  "typography_guidance": {
+    "preferred_fonts": [
+      "Cascadia Mono",
+      "Cascadia Code"
+    ],
+    "optional_future_font": "MesloLGS Nerd Font Mono",
+    "font_install_required": false,
+    "uppercase_for": [
+      "deck title",
+      "status badges",
+      "blocked action labels"
+    ],
+    "plain_text_required_for": [
+      "copyable commands",
+      "paths",
+      "safety instructions"
+    ]
+  },
+  "spacing_padding": {
+    "panel_horizontal_padding": 2,
+    "panel_vertical_padding": 1,
+    "status_gap": 2,
+    "section_gap_lines": 1,
+    "max_banner_width": 100,
+    "compact_width": 72,
+    "comfort_width": 88,
+    "spacious_width": 100,
+    "wide_width": 116
+  },
+  "layout_modes": {
+    "compact": {
+      "width": 72,
+      "use_multiline_panels": false,
+      "best_for": "narrow worker windows"
+    },
+    "comfort": {
+      "width": 88,
+      "use_multiline_panels": true,
+      "best_for": "default terminal workstation preview"
+    },
+    "spacious": {
+      "width": 100,
+      "use_multiline_panels": true,
+      "best_for": "persistent command decks"
+    },
+    "wide": {
+      "width": 116,
+      "use_multiline_panels": true,
+      "best_for": "large monitor command-center layout"
+    }
+  },
+  "components": {
+    "MAIN_CONTROL_PANEL": {
+      "role": "Rich orchestrator panel for MAIN CONTROL / COMMAND THRONE.",
+      "background": "panel_blue_gray_deep",
+      "border": "boss",
+      "accent_colors": [
+        "violet_orchestration",
+        "cyan_action",
+        "blue_glow",
+        "gold_command"
+      ],
+      "badges": [
+        "CI",
+        "GATED",
+        "WORKING",
+        "COMPLETE",
+        "BLOCKED"
+      ]
+    },
+    "VALIDATION_PLAN_PANEL": {
+      "role": "Validator steps, parse checks, and evidence review.",
+      "background": "panel_blue_gray",
+      "border": "strong",
+      "accent_colors": [
+        "cyan_action",
+        "occ_pass_green"
+      ],
+      "badges": [
+        "CI",
+        "PASS",
+        "BLOCKED"
+      ]
+    },
+    "RISK_NOTES_PANEL": {
+      "role": "Warnings, blocked actions, dirty state, and human gates.",
+      "background": "panel_blue_gray_soft",
+      "border": "strong",
+      "accent_colors": [
+        "warning_amber",
+        "danger_red"
+      ],
+      "badges": [
+        "GATED",
+        "BLOCKED"
+      ]
+    },
+    "STATUS_STRIP": {
+      "role": "Single-line repo, branch, mode, and state strip.",
+      "background": "panel_blue_gray_deep",
+      "border": "thin",
+      "accent_colors": [
+        "cyan_action",
+        "violet_orchestration",
+        "warning_amber"
+      ]
+    },
+    "WORKER_ACTIVITY_ROW": {
+      "role": "Bottom row showing temporary worker lifecycle activity.",
+      "background": "panel_blue_gray",
+      "border": "thin",
+      "accent_colors": [
+        "occ_pass_green",
+        "orange_activity",
+        "danger_red"
+      ],
+      "states": [
+        "IDLE",
+        "WORKING",
+        "COMPLETE",
+        "BLOCKED",
+        "CLOSED"
+      ]
+    },
+    "COMMAND_INPUT_BAR": {
+      "role": "Readable command suggestion area; no emoji inside copyable command text.",
+      "background": "panel_blue_gray_deep",
+      "border": "thin",
+      "accent_colors": [
+        "cyan_action",
+        "gold_command"
+      ]
+    },
+    "CUSTOMIZATION_GUIDE_PANEL": {
+      "role": "Documentation-only token guidance for color, shape, size, position, badge style, and spacing.",
+      "background": "panel_blue_gray_soft",
+      "border": "strong",
+      "accent_colors": [
+        "violet_orchestration",
+        "cyan_action",
+        "gold_command"
+      ]
+    }
+  },
+  "optional_future_operator_approved_install_plan": {
+    "oh_my_posh": "Optional future install lane only. Do not install automatically.",
+    "nerd_font": "Optional future font lane only. Cascadia Mono/Cascadia Code remain the default.",
+    "windows_terminal_acrylic_opacity": "Optional future Windows Terminal settings lane only. Repo scripts must not edit settings.json.",
+    "terminal_profile_templates": "Templates may be generated in repo docs only until separately approved for manual application."
+  }
+}

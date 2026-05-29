@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/qualification_ledger.schema.json",
+  "title": "AI_OS Night Supervisor Qualification Ledger Entry",
+  "description": "Schema for future append-only qualification ledger entries. This schema does not create a ledger and does not grant promotion, APPLY, commit, push, merge, scheduler, backup, or effector authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gate",
+    "attempt_id",
+    "date_utc",
+    "status",
+    "evidence_paths",
+    "metrics",
+    "approved_by",
+    "approval_time",
+    "next_gate"
+  ],
+  "properties": {
+    "gate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "date_utc": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "WARN",
+        "FAIL",
+        "BLOCKED",
+        "NOT_RUN"
+      ]
+    },
+    "score": {
+      "type": "number",
+      "minimum": 0
+    },
+    "evidence_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "approved_by": {
+      "type": "string",
+      "description": "Human Owner approval identity when promotion is requested. Empty string is allowed for non-promotion evidence entries."
+    },
+    "approval_time": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "blocked_reason": {
+      "type": "string"
+    },
+    "next_gate": {
+      "type": "string"
+    },
+    "demotion_trigger": {
+      "type": "string"
+    }
+  }
+}

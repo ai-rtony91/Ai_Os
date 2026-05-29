@@ -55,6 +55,10 @@ Before APPLY review, each lane should declare:
 - validation commands.
 - stop point.
 
+## Prompt Branch Echo Rule
+
+Executable prompts must echo the branch and worktree shown in the latest operator terminal evidence. If the branch or worktree is unknown, the prompt must not guess. If a previous prompt used the wrong branch or worktree, the correction must be patch-only and must say: PASTE WITH LONGER PROMPT I PROVIDED PRIOR.
+
 ## Allowed Worker Lanes
 
 Allowed worker lanes are:

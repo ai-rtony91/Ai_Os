@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_MORNING_BRIEF_SCHEMA.json",
+  "title": "AI_OS Morning Brief",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "report_id",
+    "generated_at",
+    "title",
+    "executive_summary",
+    "status_board",
+    "critical_blockers",
+    "operator_required",
+    "worker_followup",
+    "next_safe_action",
+    "safety_notes",
+    "report_paths"
+  ],
+  "properties": {
+    "schema": { "const": "AIOS_MORNING_BRIEF" },
+    "schema_version": { "type": "string" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "title": { "type": "string" },
+    "executive_summary": { "type": "string" },
+    "status_board": { "type": "object" },
+    "critical_blockers": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "operator_required": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "worker_followup": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "next_safe_action": { "type": "object" },
+    "safety_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "report_paths": { "type": "object" }
+  }
+}

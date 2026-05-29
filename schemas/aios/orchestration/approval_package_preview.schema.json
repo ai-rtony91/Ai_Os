@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/approval_package_preview.schema.json",
+  "title": "AI_OS Approval Package Preview",
+  "description": "Preview-only approval package contract for validator evidence. This schema does not authorize approval, commit, push, merge, runtime mutation, telemetry mutation, trading execution, broker execution, secret access, credential access, packet mutation, queue mutation, worker dispatch, or inbox mutation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "preview_only",
+    "source",
+    "approval_items",
+    "blocked_items",
+    "summary",
+    "warnings",
+    "human_required_next_step"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_APPROVAL_PACKAGE_PREVIEW.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "preview_only": {
+      "type": "boolean",
+      "const": true
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "validator_evidence_schema",
+        "validator_evidence_generated_at",
+        "preview_only"
+      ],
+      "properties": {
+        "validator_evidence_schema": {
+          "type": "string",
+          "const": "AIOS_VALIDATOR_EVIDENCE_ATTACHMENT.v1"
+        },
+        "validator_evidence_generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "preview_only": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "approval_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "approval_ready",
+          "evidence_status",
+          "highest_severity",
+          "blocking_count",
+          "recommended_action",
+          "preview_only"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approval_ready": {
+            "type": "boolean",
+            "const": true
+          },
+          "evidence_status": {
+            "type": "string",
+            "enum": [
+              "evidence_passed",
+              "evidence_failed",
+              "evidence_warning",
+              "evidence_incomplete",
+              "evidence_unknown"
+            ]
+          },
+          "highest_severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical",
+              "unknown"
+            ]
+          },
+          "blocking_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "recommended_action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "preview_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    },
+    "blocked_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "reason",
+          "evidence_status",
+          "preview_only"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_status": {
+            "type": "string",
+            "enum": [
+              "evidence_passed",
+              "evidence_failed",
+              "evidence_warning",
+              "evidence_incomplete",
+              "evidence_unknown"
+            ]
+          },
+          "preview_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_packets",
+        "approval_ready_count",
+        "blocked_count",
+        "preview_only",
+        "approval_authorized",
+        "commit_authorized",
+        "push_authorized"
+      ],
+      "properties": {
+        "total_packets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "approval_ready_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "preview_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "approval_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "commit_authorized": {
+          "type": "boolean",
+          "const": false
+        },
+        "push_authorized": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_required_next_step": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

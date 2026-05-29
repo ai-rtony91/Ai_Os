@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_NIGHT_SUPERVISOR_REPORT_SCHEMA.json",
+  "title": "AI_OS Night Supervisor Report",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "schema_version",
+    "report_id",
+    "generated_at",
+    "generated_by",
+    "mode",
+    "repo_root",
+    "branch",
+    "hard_stop",
+    "queue_summary",
+    "lock_summary",
+    "approval_summary",
+    "gate_summary",
+    "blocker_summary",
+    "next_safe_action",
+    "report_paths",
+    "warnings",
+    "errors"
+  ],
+  "properties": {
+    "schema": { "const": "AIOS_NIGHT_SUPERVISOR_REPORT" },
+    "schema_version": { "type": "string" },
+    "report_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "generated_by": { "type": "string" },
+    "mode": { "const": "DRY_RUN" },
+    "repo_root": { "type": "string" },
+    "branch": { "type": "string" },
+    "git_status_summary": { "type": "object" },
+    "hard_stop": { "type": "object" },
+    "queue_summary": { "type": "object" },
+    "lock_summary": { "type": "object" },
+    "approval_summary": { "type": "object" },
+    "gate_summary": { "type": "object" },
+    "worker_summary": { "type": "object" },
+    "blocker_summary": { "type": "object" },
+    "next_safe_action": {
+      "type": "object",
+      "required": [
+        "action_id",
+        "priority",
+        "summary",
+        "reason",
+        "recommended_mode",
+        "requires_human",
+        "allowed_to_auto_execute",
+        "suggested_codex_prompt",
+        "source_findings"
+      ],
+      "properties": {
+        "action_id": { "type": "string" },
+        "priority": { "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+        "summary": { "type": "string" },
+        "reason": { "type": "string" },
+        "recommended_mode": { "const": "DRY_RUN" },
+        "requires_human": { "type": "boolean" },
+        "allowed_to_auto_execute": { "const": false },
+        "suggested_codex_prompt": { "type": "string" },
+        "source_findings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "report_paths": { "type": "object" },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

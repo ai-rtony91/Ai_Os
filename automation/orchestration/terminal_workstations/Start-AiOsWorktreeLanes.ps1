@@ -91,15 +91,27 @@ foreach ($lane in $activeLanes) {
     }
 }
 
-Write-Host "AI_OS WORKTREE LANE RESTORE" -ForegroundColor Yellow
-Write-Host "Mode: $(if ($OpenShells) { 'OpenShells requested - manual shell launch after registry validation' } else { 'Preview/report-only - no windows opened' })"
-Write-Host "Registry: $registryPath"
-Write-Host "Schema: $($registry.schema_version)"
-Write-Host "Topology authority: $($registry.status)"
-Write-Host "Repo root: $repoRoot"
-Write-Host "No Codex auto-launch. No startup tasks. No scheduled tasks. No commits. No pushes."
-Write-Host "No installs. No broker/API/live trading."
-Write-Host "Opening PowerShell shells requires the explicit -OpenShells switch."
+$border = "#" * 100
+$titleIcon = [char]::ConvertFromUtf32(0x1F5FA)  # World map - lane topology
+
+Write-Host $border -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  $titleIcon  AI_OS WORKTREE LANE RESTORE" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  AIOS BASE : #05070b  TEXT #e5f6ff  WARNING #ffd166  OCC/PASS #37ff88" -ForegroundColor DarkYellow
+Write-Host "  OCC LANE  : ALL LANES  |  Worktree lane topology restore and shell launcher" -ForegroundColor Yellow
+Write-Host "  MODE      : $(if ($OpenShells) { '[ OPEN_SHELLS ]  Manual shell launch after registry validation' } else { '[ PREVIEW    ]  Preview/report-only — no windows opened' })" -ForegroundColor DarkYellow
+Write-Host "  STATUS    : [ READ-ONLY ]  No Codex auto-launch, no startup/scheduled tasks" -ForegroundColor DarkYellow
+Write-Host "  Registry  : $registryPath" -ForegroundColor DarkYellow
+Write-Host "  Schema    : $($registry.schema_version)" -ForegroundColor DarkYellow
+Write-Host "  Authority : $($registry.status)" -ForegroundColor DarkYellow
+Write-Host "  Repo root : $repoRoot" -ForegroundColor DarkYellow
+Write-Host ""
+Write-Host "  No Codex auto-launch. No startup tasks. No scheduled tasks. No commits. No pushes." -ForegroundColor Gray
+Write-Host "  No installs. No broker/API/live trading." -ForegroundColor Gray
+Write-Host "  Opening PowerShell shells requires the explicit -OpenShells switch." -ForegroundColor Gray
+Write-Host ""
+Write-Host $border -ForegroundColor Yellow
 
 Write-Section -Title "Active Lane Mapping"
 foreach ($resolvedLane in $resolvedLanes) {
@@ -141,8 +153,10 @@ foreach ($resolvedLane in $resolvedLanes) {
 
 if ($OpenShells) {
     Write-Host ""
-    Write-Host "Lane windows opened from registry active_lanes only. Codex was not launched." -ForegroundColor Green
+    Write-Host "  [ COMPLETE ]  Lane windows opened from registry active_lanes only." -ForegroundColor Green
+    Write-Host "  [ CONFIRM  ]  Codex was NOT launched. Commit: NO. Push: NO." -ForegroundColor Green
 } else {
     Write-Host ""
-    Write-Host "Preview complete. No PowerShell windows opened." -ForegroundColor Green
+    Write-Host "  [ COMPLETE ]  Preview complete. No PowerShell windows opened." -ForegroundColor Green
+    Write-Host "  [ CONFIRM  ]  Run with -OpenShells to open lane windows. Commit: NO. Push: NO." -ForegroundColor Green
 }

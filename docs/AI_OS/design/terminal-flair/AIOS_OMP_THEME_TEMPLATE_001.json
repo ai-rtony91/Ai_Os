@@ -1,0 +1,121 @@
+{
+  "schema_id": "AIOS_OMP_THEME_TEMPLATE_001",
+  "template_only": true,
+  "not_applied_automatically": true,
+  "safety_note": "Repo-owned Oh My Posh preview template only. This file does not install Oh My Posh, install fonts, edit Windows Terminal settings, edit PowerShell profiles, create startup tasks, or auto-launch Codex.",
+  "font_guidance": {
+    "preferred": [
+      "Cascadia Mono",
+      "Cascadia Code"
+    ],
+    "optional_for_omp": [
+      "MesloLGS Nerd Font Mono"
+    ],
+    "install_required": false
+  },
+  "aios_palette": {
+    "base_dark": "#05070b",
+    "text": "#e5f6ff",
+    "cyan_accent": "#38bdf8",
+    "blue_glow": "#00a3ff",
+    "occ_worker_pass_green": "#37ff88",
+    "magenta_violet": "#a855f7",
+    "danger_red": "#ff5f7a",
+    "warning_amber": "#ffd166"
+  },
+  "semantic_rules": {
+    "green": "OCC worker, pass, and activity signals only.",
+    "amber": "Warning, dirty state, or review-needed state.",
+    "red": "Blocked, danger, destructive, or forbidden state.",
+    "cyan": "Operator action and read-only command guidance.",
+    "violet_magenta": "Orchestration and persistent deck identity.",
+    "emoji": "Deck and worker identity only, not every command."
+  },
+  "persistent_decks": [
+    {
+      "deck_id": "MAIN_CONTROL",
+      "display": "MAIN CONTROL / COMMAND THRONE",
+      "emoji": "👑",
+      "color": "#a855f7",
+      "window_behavior": "Persistent all-day command deck."
+    },
+    {
+      "deck_id": "QUEUE_CONTROL",
+      "display": "QUEUE CONTROL / SIGNAL ROUTER",
+      "emoji": "📡",
+      "color": "#38bdf8",
+      "window_behavior": "Persistent queue and routing view."
+    },
+    {
+      "deck_id": "VALIDATION_DECK",
+      "display": "VALIDATION DECK / EVIDENCE SHIELD",
+      "emoji": "🛡️",
+      "color": "#38bdf8",
+      "window_behavior": "Persistent validation and evidence view."
+    },
+    {
+      "deck_id": "TELEMETRY_DECK",
+      "display": "TELEMETRY DECK / DATA PULSE",
+      "emoji": "💠",
+      "color": "#00a3ff",
+      "window_behavior": "Persistent read-only telemetry view."
+    },
+    {
+      "deck_id": "SAFETY_DECK",
+      "display": "SAFETY DECK / VAULT GATE",
+      "emoji": "🔐",
+      "color": "#ffd166",
+      "window_behavior": "Persistent safety and blocked-action view."
+    },
+    {
+      "deck_id": "RECOVERY_DECK",
+      "display": "RECOVERY DECK / RESTORE BAY",
+      "emoji": "🔧",
+      "color": "#ffd166",
+      "window_behavior": "Persistent recovery and restore review view."
+    },
+    {
+      "deck_id": "BUILD_ENGINE",
+      "display": "BUILD ENGINE / BUILDER FORGE",
+      "emoji": "⚙️",
+      "color": "#37ff88",
+      "window_behavior": "Persistent build lane shell; temporary OCC workers remain packet-scoped."
+    }
+  ],
+  "occ_worker_states": [
+    "IDLE",
+    "COMPLETE",
+    "BLOCKED",
+    "CLOSED"
+  ],
+  "sample_omp_blocks": [
+    {
+      "type": "text",
+      "style": "powerline",
+      "foreground": "#e5f6ff",
+      "background": "#a855f7",
+      "template": " {{ .Env.AIOS_DECK | default \"AIOS\" }} "
+    },
+    {
+      "type": "text",
+      "style": "powerline",
+      "foreground": "#05070b",
+      "background": "#37ff88",
+      "template": " {{ .Env.AIOS_WORKER_STATE | default \"IDLE\" }} "
+    },
+    {
+      "type": "path",
+      "style": "plain",
+      "foreground": "#38bdf8",
+      "background": "#05070b",
+      "template": " {{ .Path }} "
+    },
+    {
+      "type": "git",
+      "style": "plain",
+      "foreground": "#ffd166",
+      "background": "#05070b",
+      "template": " {{ .HEAD }}{{ if .Working.Changed }} DIRTY{{ end }} "
+    }
+  ]
+}

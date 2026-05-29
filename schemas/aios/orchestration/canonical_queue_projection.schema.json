@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/canonical_queue_projection.schema.json",
+  "title": "AI_OS Canonical Queue Projection",
+  "description": "Read-only packet-to-queue projection contract. This schema does not authorize packet mutation, queue mutation, worker dispatch, scheduler execution, approval, commit, push, telemetry mutation, or trading execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "source",
+    "projection_mode",
+    "packets",
+    "summary",
+    "warnings"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_CANONICAL_QUEUE_PROJECTION.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packet_root",
+        "read_only"
+      ],
+      "properties": {
+        "packet_root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "packet_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "read_only": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "projection_mode": {
+      "type": "string",
+      "const": "read_only"
+    },
+    "packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "packet_id",
+          "title",
+          "state",
+          "source_path",
+          "risk_level",
+          "dependencies",
+          "blockers",
+          "allowed_paths",
+          "forbidden_paths",
+          "scheduler_eligible",
+          "resolver_eligible",
+          "recommended_next_action",
+          "warnings"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "proposed",
+              "queued",
+              "blocked",
+              "ready",
+              "assigned",
+              "running",
+              "validator_pending",
+              "validated",
+              "validation_failed",
+              "approval_pending",
+              "approved",
+              "rejected",
+              "completed",
+              "failed",
+              "unknown"
+            ]
+          },
+          "source_state": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lane": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "protected",
+              "unknown"
+            ]
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "blockers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "allowed_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "forbidden_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scheduler_eligible": {
+            "type": "boolean"
+          },
+          "resolver_eligible": {
+            "type": "boolean"
+          },
+          "recommended_next_action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "ready",
+        "blocked",
+        "unknown",
+        "by_state"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ready": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknown": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "by_state": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

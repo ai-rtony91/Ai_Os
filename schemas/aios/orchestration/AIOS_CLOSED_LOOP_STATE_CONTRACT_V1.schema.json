@@ -1,0 +1,472 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_CLOSED_LOOP_STATE_CONTRACT_V1.schema.json",
+  "schema": "AIOS_CLOSED_LOOP_STATE_CONTRACT_V1",
+  "contract_version": "1.0.0",
+  "generated_at": "2026-05-29T00:00:00-04:00",
+  "authority": {
+    "repo_authority": [
+      "AGENTS.md",
+      "README.md",
+      "docs/governance/source-of-truth-map.md",
+      "docs/audits/active-system-map.md"
+    ],
+    "source_evidence": [
+      "docs/reports/CLOSED_LOOP_STATE_CONTRACT_V1.md",
+      "docs/reports/MASTER_RECONCILIATION_ROADMAP.md",
+      "docs/reports/OPERATION_GLUE_FORENSICS.md",
+      "docs/reports/CLOSED_LOOP_BREAKPOINTS.md"
+    ],
+    "precedence_rule": "Repository authority wins over generated reports and historical architecture assumptions.",
+    "scope_rule": "This contract standardizes state continuity only and does not authorize runtime mutation."
+  },
+  "purpose": "Standardize packet-to-queue-to-scheduler-to-worker state continuity.",
+  "state_vocabulary": {
+    "canonical_states": [
+      "proposed",
+      "queued",
+      "assigned",
+      "running",
+      "validated",
+      "approval_pending",
+      "approved",
+      "completed",
+      "blocked",
+      "failed"
+    ],
+    "extended_states": [
+      "validator_pending",
+      "validation_failed",
+      "rejected",
+      "commit_ready",
+      "unknown"
+    ],
+    "scheduler_eligible_states": [
+      "queued"
+    ],
+    "terminal_states": [
+      "completed",
+      "failed"
+    ],
+    "human_gate_states": [
+      "approval_pending",
+      "approved",
+      "rejected",
+      "commit_ready"
+    ],
+    "unknown_state_rule": "Unknown, conflicting, or unmapped states must project to unknown or blocked, never to assigned or running."
+  },
+  "packet_contract": {
+    "description": "Packet owns the original work request identity and minimum state needed for downstream projection.",
+    "required_fields": [
+      "contract_version",
+      "packet_id",
+      "title",
+      "current_state",
+      "state_source",
+      "risk_level",
+      "forbidden_paths",
+      "created_at",
+      "updated_at"
+    ],
+    "fields": {
+      "contract_version": {
+        "type": "string",
+        "const": "AIOS_CLOSED_LOOP_STATE_CONTRACT_V1"
+      },
+      "packet_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "goal_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "title": {
+        "type": "string",
+        "minLength": 1
+      },
+      "current_state": {
+        "type": "string",
+        "enum_ref": "state_vocabulary.canonical_states plus state_vocabulary.extended_states"
+      },
+      "legacy_state": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "state_source": {
+        "type": "string",
+        "description": "Source file or subsystem used to project current_state."
+      },
+      "lane": {
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "risk_level": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "protected",
+          "unknown"
+        ]
+      },
+      "allowed_paths": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "forbidden_paths": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "dependencies": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "blockers": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "validator_hooks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "approval_hooks": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "created_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updated_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "queue_projection_id": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "queue_projection_contract": {
+    "description": "Queue projection owns the normalized scheduling view. It is a read model, not packet mutation authority.",
+    "required_fields": [
+      "contract_version",
+      "projection_id",
+      "generated_at",
+      "source_roots",
+      "records",
+      "counters",
+      "blocked_records",
+      "scheduler_ready_records",
+      "manual_review_records",
+      "warnings",
+      "errors"
+    ],
+    "record_required_fields": [
+      "packet_id",
+      "current_state",
+      "risk_level",
+      "scheduler_eligible",
+      "resolver_eligible",
+      "recommended_next_action"
+    ],
+    "scheduler_eligibility_rule": "Only queued records with clear dependencies, safe paths, and non-protected risk may become scheduler_ready_records.",
+    "manual_review_rule": "Unknown ownership, protected risk, missing state, or forbidden path overlap must route to manual_review_records or blocked_records."
+  },
+  "scheduler_input_contract": {
+    "description": "Scheduler owns recommendation and plan output only.",
+    "input_source": "queue_projection_contract.scheduler_ready_records",
+    "required_fields": [
+      "packet_id",
+      "current_state",
+      "priority",
+      "risk_level",
+      "dependencies",
+      "allowed_paths",
+      "forbidden_paths",
+      "blockers"
+    ],
+    "input_rules": [
+      "current_state must equal queued.",
+      "risk_level must not equal protected or unknown for autonomous preview routing.",
+      "dependencies must be clear before scheduler preview.",
+      "forbidden path overlap blocks scheduler eligibility."
+    ],
+    "output_fields": [
+      "packet_id",
+      "scheduler_action",
+      "reason",
+      "resolver_input"
+    ],
+    "allowed_scheduler_actions": [
+      "preview_assignment",
+      "manual_review",
+      "blocked"
+    ]
+  },
+  "worker_resolution_contract": {
+    "description": "Worker resolver owns assignment recommendation only until a future assignment persistence lane.",
+    "input_source": "scheduler_input_contract.resolver_input",
+    "required_fields": [
+      "packet_id",
+      "lane",
+      "allowed_paths",
+      "forbidden_paths",
+      "risk_level",
+      "required_capabilities",
+      "dependencies_clear"
+    ],
+    "output_fields": [
+      "packet_id",
+      "recommended_worker_id",
+      "resolver_status",
+      "reason",
+      "assignment_preview"
+    ],
+    "allowed_resolver_statuses": [
+      "resolved",
+      "manual_review",
+      "blocked"
+    ],
+    "unknown_ownership_rule": "Unknown ownership must produce manual_review or blocked, not fallback-to-default worker assignment."
+  },
+  "validator_evidence_contract": {
+    "description": "Validator evidence owns test and evidence attachment for packet-scoped validation.",
+    "required_fields": [
+      "packet_id",
+      "validator_id",
+      "trigger_state",
+      "required_for_states",
+      "evidence_path",
+      "validator_status",
+      "fail_state"
+    ],
+    "allowed_statuses": [
+      "not_requested",
+      "pending",
+      "passed",
+      "failed",
+      "blocked"
+    ],
+    "hook_rules": [
+      "V1 reserves validator hooks and does not execute validators.",
+      "Protected or unknown risk must block scheduler eligibility until validator and approval hooks are explicit.",
+      "Validator evidence must be packet-scoped before approval or commit package consumption."
+    ]
+  },
+  "approval_contract": {
+    "description": "Approval owns human decision state and never self-approves.",
+    "required_fields": [
+      "packet_id",
+      "approval_id",
+      "required_for_transition",
+      "approval_status",
+      "risk_summary",
+      "evidence_paths"
+    ],
+    "allowed_statuses": [
+      "not_requested",
+      "pending",
+      "approved",
+      "rejected",
+      "blocked"
+    ],
+    "human_authority_rule": "Approval hooks prepare the human decision only. They do not authorize APPLY, commit, push, merge, deploy, trading execution, or secret access."
+  },
+  "commit_package_contract": {
+    "description": "Commit package owns prepared commit evidence only.",
+    "required_fields": [
+      "packet_id",
+      "commit_package_id",
+      "approval_id",
+      "validator_evidence_paths",
+      "candidate_files",
+      "excluded_files",
+      "recommended_message",
+      "human_review_required"
+    ],
+    "rules": [
+      "Commit package output is recommendation evidence only.",
+      "Candidate files must remain inside approved lane boundaries.",
+      "Protected, forbidden, telemetry backlog, secrets, and trading paths must be excluded unless a separate human-approved lane explicitly allows them.",
+      "Human owner retains commit, push, merge, protected action, and deployment authority."
+    ]
+  },
+  "transitions": {
+    "allowed": [
+      {
+        "from": "proposed",
+        "to": "queued",
+        "owner": "queue_projection_or_future_intake_acceptor",
+        "required_evidence": "valid packet id, safe paths, and no protected blocker"
+      },
+      {
+        "from": "proposed",
+        "to": "blocked",
+        "owner": "goal_intake_or_queue_projection",
+        "required_evidence": "missing required fields, protected path, unresolved blocker, or unsafe goal"
+      },
+      {
+        "from": "queued",
+        "to": "assigned",
+        "owner": "future_assignment_writer",
+        "required_evidence": "scheduler preview and worker resolver recommendation"
+      },
+      {
+        "from": "queued",
+        "to": "blocked",
+        "owner": "scheduler_or_queue_projection",
+        "required_evidence": "dependency, risk, ownership, path, or policy blocker"
+      },
+      {
+        "from": "assigned",
+        "to": "running",
+        "owner": "future_worker_execution_gate",
+        "required_evidence": "approved execution lane and persisted assignment"
+      },
+      {
+        "from": "assigned",
+        "to": "blocked",
+        "owner": "worker_resolver_or_assignment_writer",
+        "required_evidence": "missing worker, stale worker, capability mismatch, or unsafe assignment"
+      },
+      {
+        "from": "running",
+        "to": "validator_pending",
+        "owner": "validator_router",
+        "required_evidence": "worker result ready for packet-scoped validation"
+      },
+      {
+        "from": "running",
+        "to": "failed",
+        "owner": "worker_or_recovery_supervisor",
+        "required_evidence": "execution failure, timeout, or unrecoverable worker result"
+      },
+      {
+        "from": "validator_pending",
+        "to": "validated",
+        "owner": "validator_evidence_writer",
+        "required_evidence": "packet-scoped validator pass evidence"
+      },
+      {
+        "from": "validator_pending",
+        "to": "validation_failed",
+        "owner": "validator_evidence_writer",
+        "required_evidence": "packet-scoped validator failure evidence"
+      },
+      {
+        "from": "validation_failed",
+        "to": "blocked",
+        "owner": "validator_router_or_recovery_supervisor",
+        "required_evidence": "failed validator result requiring human review or retry decision"
+      },
+      {
+        "from": "validated",
+        "to": "approval_pending",
+        "owner": "approval_request_writer",
+        "required_evidence": "validator evidence and approval requirement"
+      },
+      {
+        "from": "approval_pending",
+        "to": "approved",
+        "owner": "human_approval_gate",
+        "required_evidence": "human approval decision record"
+      },
+      {
+        "from": "approval_pending",
+        "to": "rejected",
+        "owner": "human_approval_gate",
+        "required_evidence": "human rejection decision record"
+      },
+      {
+        "from": "approved",
+        "to": "commit_ready",
+        "owner": "commit_package_builder",
+        "required_evidence": "approval id, packet id, validator evidence, and candidate file list"
+      },
+      {
+        "from": "commit_ready",
+        "to": "completed",
+        "owner": "human_owner_or_future_packet_completion_writer",
+        "required_evidence": "human-reviewed completion evidence"
+      },
+      {
+        "from": "blocked",
+        "to": "queued",
+        "owner": "human_or_recovery_gate",
+        "required_evidence": "blocker cleared evidence"
+      },
+      {
+        "from": "failed",
+        "to": "blocked",
+        "owner": "recovery_supervisor_or_human_gate",
+        "required_evidence": "failure classified for retry, quarantine, or escalation"
+      },
+      {
+        "from": "unknown",
+        "to": "blocked",
+        "owner": "queue_projection_or_self_audit",
+        "required_evidence": "unmapped state or conflicting source evidence"
+      }
+    ],
+    "forbidden": [
+      "queued -> running without assigned",
+      "proposed -> assigned without queued",
+      "validated -> completed without approval check when approval is required",
+      "approval_pending -> approved without human decision evidence",
+      "commit_ready -> pushed",
+      "any state -> deploy",
+      "any state -> trading_execution",
+      "any state -> secret_access"
+    ]
+  },
+  "ownership": {
+    "packet": "packet owns original work request identity",
+    "queue_projection": "queue projection owns normalized scheduling view",
+    "scheduler": "scheduler owns recommendation/plan only",
+    "worker_resolver": "worker resolver owns assignment recommendation only until future assignment persistence lane",
+    "validator_evidence": "validator evidence owns test/evidence attachment",
+    "approval": "approval owns human decision state",
+    "commit_package": "commit package owns prepared commit evidence only",
+    "human_owner": "human owner owns approval, commit, push, merge, protected actions"
+  },
+  "forbidden_authority": [
+    "schema does not authorize runtime mutation",
+    "schema does not authorize worker dispatch",
+    "schema does not authorize queue mutation",
+    "schema does not authorize approval",
+    "schema does not authorize commit",
+    "schema does not authorize push",
+    "schema does not authorize trading execution",
+    "schema does not authorize secret access"
+  ],
+  "notes": [
+    "V1 is a read-model state contract.",
+    "Packet files, queue files, scheduler code, worker inboxes, validator outputs, approval inboxes, commit packages, runtime state, and telemetry remain unchanged by this schema.",
+    "Later APPLY lanes may build projection and consumer integrations against this contract only after separate human approval.",
+    "The next recommended APPLY lane is AIOS-CANONICAL-QUEUE-PROJECTION-APPLY-001."
+  ]
+}
