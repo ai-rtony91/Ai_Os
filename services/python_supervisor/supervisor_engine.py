@@ -164,12 +164,23 @@ def build_supervisor_report(repo_root: str | Path = ".") -> dict[str, Any]:
     )
     health = _repo_health(runtime_state)
     supervisor_status = _supervisor_status(escalations, health)
+    packet_flow = _packet_flow(queue_items, assignments)
+
+    # Wire the brainstem to the gated effector layer: emit blocked-by-default
+    # action intents. Building intents executes nothing (see action_intent.py).
+    try:
+        from action_intent import build_action_intents
+
+        action_intents = build_action_intents(packet_flow)
+    except Exception:  # noqa: BLE001 - intents are advisory; never fail the read-only report
+        action_intents = []
 
     return {
         "supervisor_status": supervisor_status,
         "repo_health": health,
         "stale_packets": _stale_packets(queue_items),
-        "packet_flow": _packet_flow(queue_items, assignments),
+        "packet_flow": packet_flow,
+        "action_intents": action_intents,
         "validator_recommendations": [
             {
                 "validator_id": "orchestration_validator_chain",

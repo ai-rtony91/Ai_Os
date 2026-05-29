@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/supervisor_action_intent.v0.1.0",
+  "title": "AI_OS Night Supervisor Action Intent",
+  "description": "Wire contract between the read-only Night Supervisor brainstem and the gated effector layer (the 'arms and hands'). An action intent is a PROPOSAL ONLY. It never executes by itself. Execution requires (1) execution_enabled, (2) a matching Human-Owner approval record, (3) an available/held lock, and (4) the effector capability being on the explicit allowlist. Default state of every intent is blocked.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "intent_id",
+    "packet_id",
+    "effector",
+    "risk_tier",
+    "requires_approval",
+    "blocked_by_default"
+  ],
+  "properties": {
+    "intent_id": { "type": "string", "minLength": 1 },
+    "packet_id": { "type": "string", "minLength": 1 },
+    "lane": { "type": "string" },
+    "worker_id": { "type": "string" },
+    "effector": {
+      "type": "string",
+      "description": "Logical effector name. Maps to exactly one hand-script.",
+      "enum": ["heartbeat", "claim_lock", "assign", "mark_done", "release_lock", "noop"]
+    },
+    "effector_script": {
+      "type": "string",
+      "description": "Repo-relative path of the PowerShell hand-script this intent would invoke."
+    },
+    "args": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Named arguments passed to the effector script."
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": ["read_only", "low", "medium", "high"]
+    },
+    "requires_approval": { "type": "boolean" },
+    "requires_lock": { "type": "boolean" },
+    "blocked_by_default": {
+      "type": "boolean",
+      "const": true,
+      "description": "Always true. Only the dispatcher, with all gates satisfied, may override at run time."
+    },
+    "reason": { "type": "string" },
+    "source_packet_state": { "type": "string" }
+  }
+}
