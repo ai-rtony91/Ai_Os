@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/night_supervisor_hands_checklist.schema.json",
+  "title": "AI_OS Night Supervisor Hands Checklist",
+  "description": "Repo-grounded checklist contract for Night Supervisor supervised overnight builder readiness. This schema does not authorize runtime mutation, worker dispatch, packet mutation, queue mutation, telemetry mutation, approval, commit, push, merge, deployment, trading execution, broker execution, secret access, or credential access.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "source",
+    "checklist_mode",
+    "current_chain",
+    "checklist_items",
+    "next_lanes",
+    "forbidden_authority",
+    "human_gates",
+    "summary"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_NIGHT_SUPERVISOR_HANDS_CHECKLIST.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "repo_grounded",
+        "preview_only",
+        "authority_paths"
+      ],
+      "properties": {
+        "repo_grounded": {
+          "type": "boolean",
+          "const": true
+        },
+        "preview_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "authority_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "checklist_mode": {
+      "type": "string",
+      "const": "repo_grounded_checklist"
+    },
+    "current_chain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "layer",
+          "status",
+          "evidence_paths",
+          "preview_only"
+        ],
+        "properties": {
+          "layer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "partial",
+              "missing",
+              "blocked",
+              "forbidden",
+              "superseded"
+            ]
+          },
+          "evidence_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "preview_only": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      }
+    },
+    "checklist_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "item_id",
+          "name",
+          "status",
+          "evidence_paths",
+          "human_step_removed",
+          "human_gate_preserved",
+          "remaining_gap",
+          "next_apply_lane",
+          "priority"
+        ],
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "done",
+              "partial",
+              "missing",
+              "blocked",
+              "forbidden",
+              "superseded"
+            ]
+          },
+          "evidence_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "human_step_removed": {
+            "type": "string"
+          },
+          "human_gate_preserved": {
+            "type": "string",
+            "minLength": 1
+          },
+          "remaining_gap": {
+            "type": "string",
+            "minLength": 1
+          },
+          "next_apply_lane": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low",
+              "none"
+            ]
+          }
+        }
+      }
+    },
+    "next_lanes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rank",
+          "lane_id",
+          "purpose",
+          "human_step_removed",
+          "human_gate_preserved",
+          "why_next"
+        ],
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "lane_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "human_step_removed": {
+            "type": "string"
+          },
+          "human_gate_preserved": {
+            "type": "string",
+            "minLength": 1
+          },
+          "why_next": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "forbidden_authority": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "live trading execution",
+          "broker execution",
+          "OANDA execution",
+          "secret access",
+          "credential access",
+          "push to protected main",
+          "production deployment",
+          "autonomous merge",
+          "autonomous approval"
+        ]
+      },
+      "contains": {
+        "const": "live trading execution"
+      },
+      "allOf": [
+        {
+          "contains": {
+            "const": "broker execution"
+          }
+        },
+        {
+          "contains": {
+            "const": "OANDA execution"
+          }
+        },
+        {
+          "contains": {
+            "const": "secret access"
+          }
+        },
+        {
+          "contains": {
+            "const": "credential access"
+          }
+        },
+        {
+          "contains": {
+            "const": "push to protected main"
+          }
+        },
+        {
+          "contains": {
+            "const": "production deployment"
+          }
+        },
+        {
+          "contains": {
+            "const": "autonomous merge"
+          }
+        },
+        {
+          "contains": {
+            "const": "autonomous approval"
+          }
+        }
+      ]
+    },
+    "human_gates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "done_count",
+        "partial_count",
+        "missing_count",
+        "blocked_count",
+        "forbidden_count",
+        "next_top_lane"
+      ],
+      "properties": {
+        "done_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missing_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "forbidden_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_top_lane": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
