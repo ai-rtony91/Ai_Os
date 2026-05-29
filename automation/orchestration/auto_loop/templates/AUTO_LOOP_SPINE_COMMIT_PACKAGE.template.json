@@ -1,0 +1,14 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "safe_files_to_stage": [],
+  "files_to_exclude": [],
+  "risky_files_to_review": [],
+  "generated_files_to_exclude": [],
+  "forbidden_files": [],
+  "suggested_commit_message": "Describe the approved scoped change",
+  "git_add_dot_allowed": false,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "human_approval_required": true,
+  "next_safe_action": "Review explicit path staging recommendation before any commit package action."
+}

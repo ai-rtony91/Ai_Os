@@ -1,0 +1,17 @@
+{
+  "resume_id": "RESUME_PACKET_ID",
+  "packet_id": "PACKET_ID",
+  "created_at": "2026-05-29T00:00:00Z",
+  "current_step": "HUMAN_APPROVAL_REQUIRED",
+  "last_completed_step": "SANDBOX_GATED_WRITE_RECORDS_CREATED",
+  "next_required_step": "Human Owner reviews and approves or rejects promotion packet.",
+  "stop_reason": "Supervised auto-loop stopped at human gate.",
+  "packet_record_path": "automation/orchestration/auto_loop/state/packets/PACKET_PACKET_ID.json",
+  "approval_record_path": "automation/orchestration/auto_loop/state/approvals/APPROVAL_PACKET_ID.json",
+  "validator_record_path": "automation/orchestration/auto_loop/state/validator_runs/VALIDATOR_RUN_PACKET_ID.json",
+  "runtime_snapshot_path": "automation/orchestration/auto_loop/state/runtime_snapshots/RUNTIME_SNAPSHOT_PACKET_ID.json",
+  "report_path": "telemetry/auto_loop/reports/AUTO_LOOP_GATED_WRITE_REPORT_YYYYMMDDTHHMMSSZ.json",
+  "human_resume_instruction": "Review the gated-write report and decide whether to promote sandbox records into active gated systems.",
+  "codex_resume_prompt": "Resume from packet_id PACKET_ID using automation/orchestration/auto_loop/state/resume/RESUME_PACKET_ID.json. Do not guess missing state.",
+  "resume_state": "READY_FOR_HUMAN_REVIEW"
+}

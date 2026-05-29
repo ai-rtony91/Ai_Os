@@ -1,0 +1,18 @@
+{
+  "assignment_id": "ASSIGNMENT_PACKET_ID",
+  "packet_id": "PACKET_ID",
+  "created_at": "2026-05-29T00:00:00Z",
+  "worker_hint": null,
+  "recommended_worker_id": "manual_review",
+  "recommended_worker_type": "manual_review",
+  "recommended_lane": "manual review lane",
+  "assigned_paths": [],
+  "assignment_reason": "No confident worker route was identified.",
+  "assignment_state": "RECOMMENDATION_ONLY",
+  "worker_registry_checked": false,
+  "worker_profiles_checked": false,
+  "worker_inbox_checked": false,
+  "active_registry_mutation_performed": false,
+  "human_approval_required": true,
+  "next_safe_action": "Human Owner reviews worker recommendation before any active assignment or inbox write."
+}

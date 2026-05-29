@@ -1,0 +1,16 @@
+{
+  "approval_id": "APPROVAL_PACKET_ID",
+  "packet_id": "PACKET_ID",
+  "created_at": "2026-05-29T00:00:00Z",
+  "requested_action": "Review gated-write sandbox records and decide whether to promote through a future approved lane.",
+  "risk_tier": "MEDIUM",
+  "validator_result": "PASS",
+  "approval_state": "APPROVAL_REQUIRED",
+  "approval_required": true,
+  "required_approver": "Human Owner",
+  "active_inbox_mutation_performed": false,
+  "active_inbox_path": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+  "sandbox_approval_record_path": "automation/orchestration/auto_loop/state/approvals/APPROVAL_PACKET_ID.json",
+  "blocked_reason": null,
+  "next_safe_action": "Human Owner approval required before APPLY, commit, push, merge, runtime mutation, worker dispatch, or protected action."
+}

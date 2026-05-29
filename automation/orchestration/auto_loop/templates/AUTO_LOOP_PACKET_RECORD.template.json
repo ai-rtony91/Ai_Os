@@ -1,0 +1,52 @@
+{
+  "packet_id": "AIOS-AUTO-LOOP-GATED-YYYYMMDDTHHMMSSZ",
+  "created_at": "2026-05-29T00:00:00Z",
+  "updated_at": "2026-05-29T00:00:00Z",
+  "goal_text": "Plain-language operator goal.",
+  "packet_state": "APPROVAL_REQUIRED",
+  "branch": "main",
+  "worktree": "C:\\Dev\\Ai.Os",
+  "repo": "ai-rtony91/Ai_Os",
+  "worker_recommendation": {},
+  "changed_paths": [],
+  "allowed_paths": [
+    "automation/orchestration/auto_loop/",
+    "telemetry/auto_loop/"
+  ],
+  "forbidden_paths": [
+    "automation/orchestration/work_packets/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/workers/",
+    "automation/orchestration/command_queue/",
+    "telemetry/runtime/",
+    "telemetry/work_ledger.jsonl"
+  ],
+  "protected_paths": [
+    "AGENTS.md",
+    "README.md",
+    "docs/governance/",
+    "docs/workflows/",
+    "docs/security/",
+    "apps/trading_lab/trading_lab/execution/"
+  ],
+  "risk_tier": "MEDIUM",
+  "validator_status": "PLAN_ONLY",
+  "approval_status": "APPROVAL_REQUIRED",
+  "lock_status": "LOCK_RECORD_READY",
+  "commit_package_status": "RECOMMENDATION_ONLY",
+  "runtime_state_status": "SANDBOX_SNAPSHOT_READY",
+  "resume_status": "RESUME_RECORD_READY",
+  "human_approval_required": true,
+  "blocked_actions": [
+    "commit",
+    "push",
+    "merge",
+    "live_trading",
+    "broker_execution",
+    "secret_access",
+    "active_queue_mutation",
+    "active_inbox_mutation",
+    "runtime_mutation"
+  ],
+  "next_safe_action": "Human Owner reviews sandbox records before any promotion."
+}

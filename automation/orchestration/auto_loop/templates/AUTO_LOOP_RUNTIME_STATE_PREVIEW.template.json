@@ -1,0 +1,14 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "active_goal_preview": "",
+  "active_worker_preview": "manual_review",
+  "active_branch": "main",
+  "active_stop_point": "DRY_RUN report only",
+  "next_safe_action": "Review runtime preview before any runtime state write.",
+  "last_validator_result_preview": null,
+  "last_commit_package_preview": null,
+  "approval_status_preview": "APPROVAL_REQUIRED",
+  "resume_pointer_preview": null,
+  "active_runtime_mutation_allowed": false,
+  "active_runtime_mutation_performed": false
+}

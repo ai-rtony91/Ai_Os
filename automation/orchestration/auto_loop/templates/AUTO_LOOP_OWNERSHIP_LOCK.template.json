@@ -1,0 +1,15 @@
+{
+  "lock_preview_id": "LOCK_PREVIEW_000",
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "worker_id": "manual_review",
+  "paths_requested": [],
+  "lock_scope": "path_preview_only",
+  "existing_lock_sources_checked": [],
+  "overlapping_paths": [],
+  "conflict_detected": false,
+  "conflict_reason": null,
+  "lock_state": "LOCK_PREVIEW_READY",
+  "expires_at_preview": "YYYY-MM-DDTHH:mm:ssZ",
+  "human_approval_required": true,
+  "next_safe_action": "Review lock preview before any active lock write."
+}

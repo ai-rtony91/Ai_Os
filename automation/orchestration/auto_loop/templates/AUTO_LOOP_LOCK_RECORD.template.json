@@ -1,0 +1,17 @@
+{
+  "lock_id": "LOCK_PACKET_ID",
+  "packet_id": "PACKET_ID",
+  "worker_id": "manual_review",
+  "created_at": "2026-05-29T00:00:00Z",
+  "expires_at_preview": "2026-05-29T08:00:00Z",
+  "paths_requested": [],
+  "lock_scope": "auto_loop_sandbox_path_record",
+  "existing_lock_sources_checked": [],
+  "overlapping_paths": [],
+  "conflict_detected": false,
+  "conflict_reason": null,
+  "lock_state": "LOCK_RECORD_READY",
+  "active_lock_mutation_performed": false,
+  "human_approval_required": true,
+  "next_safe_action": "Human Owner reviews lock record before promotion to active lock registry."
+}

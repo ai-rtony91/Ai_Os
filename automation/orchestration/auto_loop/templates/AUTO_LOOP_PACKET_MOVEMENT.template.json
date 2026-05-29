@@ -1,0 +1,27 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "goal_text": "",
+  "current_state": "DRAFT",
+  "previous_state": null,
+  "next_allowed_states": [
+    "READY_FOR_ASSIGNMENT"
+  ],
+  "requested_transition": "READY_FOR_ASSIGNMENT",
+  "transition_allowed": true,
+  "transition_blocked_reason": null,
+  "required_worker_status": "worker_recommendation_required",
+  "required_lock_status": "lock_preview_required",
+  "required_validator_status": "validator_plan_required",
+  "required_approval_status": "approval_plan_required",
+  "required_commit_package_status": "commit_package_required",
+  "human_approval_required": true,
+  "blocked_actions": [
+    "active_packet_queue_mutation",
+    "worker_dispatch",
+    "approval_execution",
+    "commit",
+    "push",
+    "merge"
+  ],
+  "next_safe_action": "Review movement preview before any active packet movement."
+}

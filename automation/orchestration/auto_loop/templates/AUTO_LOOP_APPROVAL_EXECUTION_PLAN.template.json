@@ -1,0 +1,15 @@
+{
+  "approval_preview_id": "APPROVAL_PREVIEW_000",
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "requested_action": "Review DRY_RUN repo-loop spine report.",
+  "risk_tier": "MEDIUM",
+  "validator_state": "VALIDATOR_PLAN_READY",
+  "approval_required": true,
+  "required_approver": "Human Owner",
+  "approval_state": "APPROVAL_REQUIRED",
+  "approval_inbox_found": false,
+  "active_inbox_mutation_allowed": false,
+  "active_inbox_mutation_performed": false,
+  "blocked_reason": null,
+  "next_safe_action": "Human Owner reviews approval preview before APPLY, commit, push, merge, or protected action."
+}
