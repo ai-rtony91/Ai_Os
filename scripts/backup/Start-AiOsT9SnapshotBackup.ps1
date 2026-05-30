@@ -268,9 +268,11 @@ function Write-AiOsBackupManifest {
         [Parameter(Mandatory = $true)][int]$RobocopyExitCode,
         [Parameter(Mandatory = $true)][object]$GitInfo,
         [Parameter(Mandatory = $true)][object]$GitStatus,
-        [Parameter(Mandatory = $true)][object[]]$ProtectedLocks,
+        [AllowEmptyCollection()][AllowNull()][object[]]$ProtectedLocks = @(),
         [Parameter(Mandatory = $true)][string]$Message
     )
+
+    $protectedLocksForManifest = if ($null -eq $ProtectedLocks) { @() } else { @($ProtectedLocks) }
 
     $manifest = [ordered]@{
         schema = "AIOS_T9_SNAPSHOT_BACKUP_MANIFEST.v1"
@@ -290,7 +292,7 @@ function Write-AiOsBackupManifest {
         excluded_dirs = @($excludedDirs)
         robocopy_log_path = $robocopyLogPath
         backup_lock_path = $backupLockPath
-        protected_action_locks_found = @($ProtectedLocks)
+        protected_action_locks_found = $protectedLocksForManifest
         operator = "Anthony"
         script = $PSCommandPath
     }
