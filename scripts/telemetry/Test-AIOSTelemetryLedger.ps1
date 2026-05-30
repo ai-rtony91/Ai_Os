@@ -222,6 +222,10 @@ if (-not (Test-Path -LiteralPath $ResolvedLedgerPath)) {
   [pscustomobject]@{
     ledgerPath = $ResolvedLedgerPath
     totalLines = 0
+    validCanonicalLines = 0
+    validLegacyMappedLines = 0
+    invalidLines = 0
+    firstInvalidReason = $null
     validEventLines = 0
     invalidJsonLines = 0
     legacyEvents = 0
@@ -243,6 +247,10 @@ if ($NonEmptyLines.Count -eq 0) {
   [pscustomobject]@{
     ledgerPath = $ResolvedLedgerPath
     totalLines = 0
+    validCanonicalLines = 0
+    validLegacyMappedLines = 0
+    invalidLines = 0
+    firstInvalidReason = $null
     validEventLines = 0
     invalidJsonLines = 0
     legacyEvents = 0
@@ -258,6 +266,10 @@ if ($NonEmptyLines.Count -eq 0) {
 }
 
 $ValidEventLines = 0
+$ValidCanonicalLines = 0
+$ValidLegacyMappedLines = 0
+$InvalidLines = 0
+$FirstInvalidReason = $null
 $InvalidJsonLines = 0
 $SchemaWarnings = 0
 $SchemaErrors = 0
@@ -279,7 +291,11 @@ foreach ($Line in $Lines) {
     $Event = $Line | ConvertFrom-Json
   } catch {
     $InvalidJsonLines += 1
+    $InvalidLines += 1
     $SchemaErrors += 1
+    if ($null -eq $FirstInvalidReason) {
+      $FirstInvalidReason = "Line ${LineNumber}: Invalid JSON line."
+    }
     $IssueRows.Add([pscustomobject]@{
       line = $LineNumber
       severity = "error"
@@ -300,6 +316,18 @@ foreach ($Line in $Lines) {
 
   if ($Result.isValid) {
     $ValidEventLines += 1
+
+    if ($Result.shape -eq "canonical") {
+      $ValidCanonicalLines += 1
+    } elseif ($Result.shape -eq "legacy" -or $Result.shape -eq "mixed") {
+      $ValidLegacyMappedLines += 1
+    }
+  } else {
+    $InvalidLines += 1
+
+    if ($null -eq $FirstInvalidReason -and $Result.errors.Count -gt 0) {
+      $FirstInvalidReason = "Line ${LineNumber}: $($Result.errors[0])"
+    }
   }
 
   foreach ($Warning in $Result.warnings) {
@@ -342,6 +370,10 @@ $NextSafeAction = if ($FinalStatus -eq "FAIL") {
 [pscustomobject]@{
   ledgerPath = $ResolvedLedgerPath
   totalLines = $NonEmptyLines.Count
+  validCanonicalLines = $ValidCanonicalLines
+  validLegacyMappedLines = $ValidLegacyMappedLines
+  invalidLines = $InvalidLines
+  firstInvalidReason = $FirstInvalidReason
   validEventLines = $ValidEventLines
   invalidJsonLines = $InvalidJsonLines
   legacyEvents = $LegacyEvents

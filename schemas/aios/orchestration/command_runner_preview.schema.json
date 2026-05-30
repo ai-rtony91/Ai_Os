@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/command_runner_preview.schema.json",
+  "title": "AI_OS Command Runner Preview",
+  "description": "Read-only preview contract for a governed command runner. This object records classification and safety evidence only. It does not execute commands, grant approval, mutate queues, mutate locks, mutate approvals, write runtime telemetry, commit, push, merge, touch secrets, or enable live trading.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "preview_id",
+    "command_id",
+    "packet_id",
+    "lane",
+    "worker",
+    "cwd",
+    "command_preview",
+    "command_class",
+    "path_boundary_result",
+    "approval_required",
+    "approval_status",
+    "validator_status",
+    "telemetry_status",
+    "forbidden_paths_touched",
+    "blocked_reasons",
+    "final_preview_result",
+    "created_at",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_COMMAND_RUNNER_PREVIEW.v1"
+    },
+    "preview_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cwd": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_preview": {
+      "type": "string",
+      "minLength": 1
+    },
+    "command_class": {
+      "type": "string",
+      "enum": [
+        "READ_ONLY",
+        "VALIDATION",
+        "PREVIEW",
+        "APPLY_CANDIDATE",
+        "COMMIT_CANDIDATE",
+        "PUSH_CANDIDATE",
+        "MERGE_CANDIDATE",
+        "BLOCKED"
+      ]
+    },
+    "path_boundary_result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "REVIEW",
+        "BLOCKED"
+      ]
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": [
+        "NOT_REQUIRED",
+        "REQUIRED_NOT_GRANTED",
+        "GRANTED",
+        "REJECTED",
+        "EXPIRED"
+      ]
+    },
+    "validator_status": {
+      "type": "string",
+      "enum": [
+        "NOT_RUN",
+        "PASS",
+        "REVIEW",
+        "FAILED",
+        "BLOCKED"
+      ]
+    },
+    "telemetry_status": {
+      "type": "string",
+      "enum": [
+        "NOT_WRITTEN",
+        "READ_ONLY",
+        "VALIDATED",
+        "REVIEW",
+        "BLOCKED"
+      ]
+    },
+    "forbidden_paths_touched": {
+      "type": "boolean",
+      "const": false
+    },
+    "blocked_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "final_preview_result": {
+      "type": "string",
+      "enum": [
+        "READY_FOR_READ_ONLY_PREVIEW",
+        "READY_FOR_HUMAN_REVIEW",
+        "BLOCKED_FORBIDDEN_PATH",
+        "BLOCKED_APPROVAL_REQUIRED",
+        "BLOCKED_VALIDATOR_FAILURE",
+        "BLOCKED_UNKNOWN"
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
