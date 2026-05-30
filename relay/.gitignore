@@ -1,0 +1,18 @@
+# AI_OS Relay — ignore runtime/generated artifacts.
+# Only the durable scaffold (scripts, README, format spec, templates) is tracked.
+# The runner recreates these folders on start (Initialize-Tree), so they need
+# no .keep files.
+
+inbox/
+running/
+outbox/
+done/
+error/
+logs/
+reports/
+approvals/
+handoffs/processed/
+
+# Dropped handoff packets are runtime input, not durable scaffold.
+# (handoffs/PACKET_FORMAT.md is the durable spec and stays tracked.)
+handoffs/*.handoff.json

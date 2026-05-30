@@ -1,0 +1,8 @@
+{
+  "id": "task-000",
+  "worker": "codex",
+  "mode": "exec",
+  "prompt": "Describe the scoped task for the Codex worker here. One lane, one task, one output. DRY_RUN before APPLY.",
+  "context": [],
+  "output": "text"
+}

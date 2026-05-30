@@ -1,0 +1,8 @@
+{
+  "id": "claude-task-000",
+  "worker": "claude",
+  "mode": "plan",
+  "prompt": "Describe the read-only / analysis task for Claude here. Claude runs with --permission-mode plan (no writes).",
+  "context": [],
+  "output": "text"
+}
