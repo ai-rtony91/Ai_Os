@@ -182,14 +182,22 @@ function Get-AiOsRobocopyCounts {
     # Robocopy still prints its summary table under /NFL /NDL. Parse the
     # "Files :" row for Copied and Skipped counts. Columns are:
     # Total Copied Skipped Mismatch FAILED Extras
-    param([Parameter(Mandatory = $true)][string[]]$Output)
+    param([AllowEmptyCollection()][AllowNull()][string[]]$Output = @())
 
     $counts = [pscustomobject]@{
         files_copied = -1
         files_skipped = -1
     }
 
+    if ($null -eq $Output -or $Output.Count -eq 0) {
+        return $counts
+    }
+
     foreach ($line in $Output) {
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+
         if ($line -match '^\s*Files\s*:\s+(\d+)\s+(\d+)\s+(\d+)') {
             $counts.files_copied = [int]$Matches[2]
             $counts.files_skipped = [int]$Matches[3]
@@ -448,11 +456,18 @@ try {
             "/XD"
         ) + $excludedDirs
 
-        $robocopyOutput = & robocopy @robocopyArgs 2>&1
+        $robocopyOutput = @(& robocopy @robocopyArgs 2>&1)
         $robocopyExitCode = $LASTEXITCODE
         $robocopyOutput | ForEach-Object { Write-Host $_ }
 
-        $counts = Get-AiOsRobocopyCounts -Output @($robocopyOutput | ForEach-Object { "$_" })
+        $robocopyLines = @($robocopyOutput | ForEach-Object {
+            if ($null -eq $_) {
+                ""
+            } else {
+                "$_"
+            }
+        })
+        $counts = Get-AiOsRobocopyCounts -Output $robocopyLines
         $copiedBytes = Get-AiOsDirectorySize -Path $snapshotPath
         $destBytesAfter = $destBytesBefore + $copiedBytes
 
