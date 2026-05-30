@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_EVIDENCE_MANIFEST.v1.schema.json",
+  "title": "AI_OS Evidence Manifest v1",
+  "description": "Read-only evidence manifest summary contract for Python-side orchestration intelligence.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "source_count",
+    "morning_brief_enabled_count",
+    "safe_for_unattended_dry_run_count",
+    "category_counts",
+    "risk_level_counts",
+    "format_counts",
+    "blocked_capabilities"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_EVIDENCE_MANIFEST.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN"
+    },
+    "source_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "morning_brief_enabled_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "safe_for_unattended_dry_run_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "category_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "risk_level_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "format_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "blocked_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}

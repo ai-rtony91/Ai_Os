@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_FRESHNESS_SUMMARY.v1.schema.json",
+  "title": "AI_OS Freshness Summary v1",
+  "description": "Summary contract for read-only freshness classification of existing evidence.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "item_count",
+    "counts",
+    "worst_freshness",
+    "fresh_threshold_seconds",
+    "usable_threshold_seconds"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_FRESHNESS_SUMMARY.v1"
+    },
+    "item_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "worst_freshness": {
+      "type": "string",
+      "enum": [
+        "fresh",
+        "usable",
+        "stale",
+        "missing",
+        "unknown"
+      ]
+    },
+    "fresh_threshold_seconds": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "usable_threshold_seconds": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

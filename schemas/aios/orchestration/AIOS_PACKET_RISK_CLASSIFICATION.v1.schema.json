@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_PACKET_RISK_CLASSIFICATION.v1.schema.json",
+  "title": "AI_OS Packet Risk Classification v1",
+  "description": "Read-only packet/task risk classification contract. This object does not authorize APPLY, packet movement, approval mutation, worker launch, runtime mutation, or scheduler mutation.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "status",
+    "primary_class",
+    "classes",
+    "safe_for_unattended_dry_run",
+    "requires_human_approval",
+    "signals",
+    "blocked_capabilities"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PACKET_RISK_CLASSIFICATION.v1"
+    },
+    "status": {
+      "type": "string"
+    },
+    "primary_class": {
+      "type": "string"
+    },
+    "classes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safe_for_unattended_dry_run": {
+      "type": "boolean"
+    },
+    "requires_human_approval": {
+      "type": "boolean"
+    },
+    "signals": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "blocked_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

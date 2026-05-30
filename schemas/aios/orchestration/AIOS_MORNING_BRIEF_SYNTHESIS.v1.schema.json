@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_MORNING_BRIEF_SYNTHESIS.v1.schema.json",
+  "title": "AI_OS Morning Brief Synthesis v1",
+  "description": "DRY_RUN-only Morning Brief synthesis contract for existing orchestration evidence. Report only; it does not mutate packets, approvals, runtime, telemetry, or workers.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_at",
+    "status",
+    "severity",
+    "overnight_summary",
+    "recommended_next_actions",
+    "authority_boundary"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_MORNING_BRIEF_SYNTHESIS.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN"
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string"
+    },
+    "overnight_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "validator_alerts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "approval_needed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "stale_packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "commit_package_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "orchestration_health": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "recommended_next_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "protected_action_warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "decision_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "evidence_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "read_only",
+        "stdout_only",
+        "blocked_capabilities"
+      ],
+      "properties": {
+        "read_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "stdout_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "blocked_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

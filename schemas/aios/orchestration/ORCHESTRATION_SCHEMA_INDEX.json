@@ -159,6 +159,62 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "AIOS_WORK_LEDGER_EVENT.v1",
+      "path": "schemas/aios/orchestration/AIOS_WORK_LEDGER_EVENT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Python supervisor work-ledger event contract. Evidence only; grants no execution or approval authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_TELEMETRY_WRITE_RECEIPT.v1",
+      "path": "schemas/aios/orchestration/AIOS_TELEMETRY_WRITE_RECEIPT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Python supervisor telemetry write/preview receipt contract. Evidence only; grants no telemetry mutation authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_MORNING_BRIEF_SYNTHESIS.v1",
+      "path": "schemas/aios/orchestration/AIOS_MORNING_BRIEF_SYNTHESIS.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "DRY_RUN Morning Brief synthesis contract for existing orchestration evidence.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_MORNING_BRIEF_FILE.v1",
+      "path": "schemas/aios/orchestration/AIOS_MORNING_BRIEF_FILE.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Python supervisor Morning Brief file contract for approved evidence persistence.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_BRIEF_WRITE_RECEIPT.v1",
+      "path": "schemas/aios/orchestration/AIOS_BRIEF_WRITE_RECEIPT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Python supervisor Morning Brief write/preview receipt contract.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_FRESHNESS_SUMMARY.v1",
+      "path": "schemas/aios/orchestration/AIOS_FRESHNESS_SUMMARY.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Freshness summary contract for read-only evidence age classification.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PACKET_RISK_CLASSIFICATION.v1",
+      "path": "schemas/aios/orchestration/AIOS_PACKET_RISK_CLASSIFICATION.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Packet risk classification contract for read-only route and safety evidence.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_EVIDENCE_MANIFEST.v1",
+      "path": "schemas/aios/orchestration/AIOS_EVIDENCE_MANIFEST.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Read-only evidence manifest summary contract for Morning Brief source discovery.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "APPROVAL_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
       "kind": "json_schema",

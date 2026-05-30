@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_MORNING_BRIEF_FILE.v1.schema.json",
+  "title": "AI_OS Morning Brief File v1",
+  "description": "Flexible contract for persisted Python supervisor Morning Brief report files. Evidence only; writing still requires explicit APPLY approval in code.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_MORNING_BRIEF_FILE.v1"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "supervisor_status": {
+      "type": "string"
+    },
+    "packet_flow": {
+      "type": "array"
+    },
+    "escalation_items": {
+      "type": "array"
+    }
+  }
+}

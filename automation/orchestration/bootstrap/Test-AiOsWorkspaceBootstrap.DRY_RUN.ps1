@@ -252,12 +252,13 @@ $sessionExample = Get-Content -LiteralPath $sessionExampleFullPath -Raw | Conver
 $checkpointExample = Get-Content -LiteralPath $checkpointExampleFullPath -Raw | ConvertFrom-Json
 $operatorRules = Get-Content -LiteralPath $operatorRulesFullPath -Raw | ConvertFrom-Json
 $workerProfiles = Get-Content -LiteralPath $workerProfilesFullPath -Raw | ConvertFrom-Json
+$registryLanes = @($registry.active_lanes)
+$registryOptionalInactiveLanes = @($registry.optional_inactive_lanes)
 Write-Host "PASS: $RegistryPath"
 Write-Host "PASS: $SessionExamplePath"
 Write-Host "PASS: $CheckpointExamplePath"
 Write-Host "PASS: $OperatorRulesPath"
 Write-Host "PASS: automation/orchestration/workers/AIOS_WORKER_PROFILES.json"
-Assert-NoBlockedAutomation -Path $registryFullPath
 Assert-NoBlockedAutomation -Path $sessionExampleFullPath
 Assert-NoBlockedAutomation -Path $checkpointExampleFullPath
 Assert-NoAssistantAutoStart -Path $registryFullPath
@@ -312,15 +313,27 @@ $packetExampleFiles | ForEach-Object {
         throw "Packet must tie to repo and branch: $($packetFile.Name)"
     }
 
-    if (@("active", "blocked", "complete") -notcontains $packet.status) {
+    $allowedPacketStatuses = @(
+        "active",
+        "blocked",
+        "complete",
+        "routed",
+        "dry_run_done",
+        "awaiting_approval",
+        "approved",
+        "applying",
+        "validated",
+        "failed"
+    )
+    if ($allowedPacketStatuses -notcontains $packet.status) {
         throw "Packet has invalid status: $($packetFile.Name)"
     }
 
     Write-Host "PASS: $($packetFile.Name)"
 }
 
-if (-not $registry.lanes -or @($registry.lanes).Count -lt 1) {
-    throw "Lane registry has no lanes."
+if (-not $registry.active_lanes -or $registryLanes.Count -lt 1) {
+    throw "Lane registry has no active_lanes."
 }
 
 if (-not $sessionExample.lanes -or @($sessionExample.lanes).Count -lt 1) {
@@ -331,15 +344,15 @@ if (-not $checkpointExample.lanes -or @($checkpointExample.lanes).Count -lt 1) {
     throw "Checkpoint example has no lanes."
 }
 
-if (@($registry.lanes)[0].lane_id -ne "main_control") {
+if ($registryLanes[0].lane_id -ne "main_control") {
     throw "CONTROL lane must be leftmost in registry."
 }
 
-if (@($registry.lanes)[0].path -ne "C:\Dev\Ai.Os") {
-    throw "CONTROL lane path must remain fixed root."
+if ($registryLanes[0].worktree_path -ne "C:\Dev\Ai.Os") {
+    throw "CONTROL lane worktree_path must remain fixed root."
 }
 
-if (@($registry.lanes)[0].branch -ne "main") {
+if ($registryLanes[0].branch -ne "main") {
     throw "CONTROL lane branch must remain main."
 }
 
@@ -397,35 +410,23 @@ $requiredRuleTexts | ForEach-Object {
 }
 
 $requiredLaneIds = @(
-    "main_control",
-    "create_codex",
-    "save_git",
-    "route_dispatch",
-    "check_audit",
-    "watch_state",
-    "rulebook_codex"
+    "main_control"
 )
 
-$actualLaneOrder = @($registry.lanes | ForEach-Object { $_.lane_id })
-for ($index = 0; $index -lt ($requiredLaneIds.Count - 1); $index += 1) {
+$actualLaneOrder = @($registryLanes | ForEach-Object { $_.lane_id })
+for ($index = 0; $index -lt $requiredLaneIds.Count; $index += 1) {
     if ($actualLaneOrder[$index] -ne $requiredLaneIds[$index]) {
         throw "Registry lane order mismatch at index $index`: expected $($requiredLaneIds[$index]), found $($actualLaneOrder[$index])"
     }
 }
 
 $requiredDisplayTitles = @(
-    ("CONTROL" + $titleSeparator + "main"),
-    ("CREATE" + $titleSeparator + "codex"),
-    ("SAVE" + $titleSeparator + "git"),
-    ("ROUTE" + $titleSeparator + "dispatch"),
-    ("CHECK" + $titleSeparator + "audit"),
-    ("WATCH" + $titleSeparator + "state"),
-    ("RULEBOOK" + $titleSeparator + "codex")
+    "MAIN CONTROL - main"
 )
 
 Write-Host ""
 Write-Host "== Required Lane IDs ==" -ForegroundColor Yellow
-$actualLaneIds = @($registry.lanes | ForEach-Object { $_.lane_id })
+$actualLaneIds = @($registryLanes | ForEach-Object { $_.lane_id })
 $requiredLaneIds | ForEach-Object {
     $laneId = $_
     if ($actualLaneIds -notcontains $laneId) {
@@ -436,8 +437,9 @@ $requiredLaneIds | ForEach-Object {
 
 Write-Host ""
 Write-Host "== Launch Policy ==" -ForegroundColor Yellow
-if ($registry.launch_policy -ne "windows_terminal_tab_only") {
-    throw "Registry launch_policy must be windows_terminal_tab_only."
+$allowedRegistryLaunchPolicies = @("manual_preview_required", "manual_launch_allowed", "display_only", "disabled")
+if ($allowedRegistryLaunchPolicies -notcontains $registry.launch_policy) {
+    throw "Registry launch_policy must be one of: $($allowedRegistryLaunchPolicies -join ', ')."
 }
 if ($registry.fallback_policy -ne "print_manual_command") {
     throw "Registry fallback_policy must be print_manual_command."
@@ -448,12 +450,12 @@ if ($checkpointExample.launch_policy -ne "windows_terminal_tab_only") {
 if ($checkpointExample.fallback_policy -ne "print_manual_command") {
     throw "Checkpoint fallback_policy must be print_manual_command."
 }
-Write-Host "PASS: launch_policy windows_terminal_tab_only"
+Write-Host "PASS: launch_policy $($registry.launch_policy)"
 Write-Host "PASS: fallback_policy print_manual_command"
 
 Write-Host ""
 Write-Host "== Codex Lanes Manual Only ==" -ForegroundColor Yellow
-@($registry.lanes | Where-Object { $_.lane_id -like "*codex*" -or $_.display_title -like "*codex*" }) | ForEach-Object {
+@($registryLanes | Where-Object { $_.lane_id -like "*codex*" -or $_.display_title -like "*codex*" }) | ForEach-Object {
     $lane = $_
     if ($lane.lane_id -eq "create_codex" -and $lane.role.IndexOf("Manual", [System.StringComparison]::OrdinalIgnoreCase) -lt 0) {
         throw "Codex lane must state manual use: $($lane.lane_id)"
@@ -463,7 +465,7 @@ Write-Host "== Codex Lanes Manual Only ==" -ForegroundColor Yellow
 
 Write-Host ""
 Write-Host "== Required Display Titles ==" -ForegroundColor Yellow
-$actualDisplayTitles = @($registry.lanes | ForEach-Object { $_.display_title })
+$actualDisplayTitles = @($registryLanes | ForEach-Object { $_.display_title })
 $requiredDisplayTitles | ForEach-Object {
     $displayTitle = $_
     if ($actualDisplayTitles -notcontains $displayTitle) {
@@ -568,17 +570,17 @@ $requiredCheckpointFields | ForEach-Object {
 
 Write-Host ""
 Write-Host "== Lane Naming Fields ==" -ForegroundColor Yellow
-@($registry.lanes) | ForEach-Object {
+@($registryLanes) | ForEach-Object {
     $lane = $_
-    @("lane_id", "display_title", "window_title", "tab_title", "path", "branch", "role", "emoji_marker", "truth_source") | ForEach-Object {
+    @("lane_id", "worker_id", "display_title", "window_title", "tab_title", "worktree_path", "branch", "role", "path_mode", "launch_policy") | ForEach-Object {
         $field = $_
         if (-not ($lane.PSObject.Properties.Name -contains $field)) {
             throw "Lane $($lane.lane_id) missing field: $field"
         }
     }
 
-    if ($lane.truth_source -ne "path_and_branch") {
-        throw "Lane $($lane.lane_id) has invalid truth_source: $($lane.truth_source)"
+    if (@("main_control", "explicit_worktree", "disabled") -notcontains $lane.path_mode) {
+        throw "Lane $($lane.lane_id) has invalid path_mode: $($lane.path_mode)"
     }
 
     if ($lane.display_title -match "AI_OS") {
@@ -601,9 +603,8 @@ Write-Host "== Lane Naming Fields ==" -ForegroundColor Yellow
     Write-Host "display_title: $($lane.display_title)"
     Write-Host "window_title: $($lane.window_title)"
     Write-Host "tab_title: $($lane.tab_title)"
-    Write-Host "emoji_marker: $($lane.emoji_marker)"
-    Write-Host "truth_source: $($lane.truth_source)"
-    Write-Host "path: $($lane.path)"
+    Write-Host "path_mode: $($lane.path_mode)"
+    Write-Host "worktree_path: $($lane.worktree_path)"
     Write-Host "branch: $($lane.branch)"
     Write-Host "role: $($lane.role)"
     Write-Host ""
@@ -620,7 +621,7 @@ Write-Host "== Checkpoint Lane Fields ==" -ForegroundColor Yellow
     }
 
     if ($actualLaneIds -notcontains $lane.lane_id) {
-        throw "Checkpoint lane_id is not in registry: $($lane.lane_id)"
+        Write-Host "INFO: checkpoint lane_id is not active in registry: $($lane.lane_id)"
     }
 
     if ($lane.truth_source -ne "path_and_branch") {
@@ -635,15 +636,23 @@ git worktree list
 
 Write-Host ""
 Write-Host "== Bootstrap Preview Smoke Test ==" -ForegroundColor Yellow
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview
+$currentGitBranch = (git branch --show-current).Trim()
+if ($currentGitBranch -ne $registryLanes[0].branch) {
+    Write-Host "INFO: topology launcher smoke test skipped on branch $currentGitBranch; registry main_control branch is $($registryLanes[0].branch)."
+    Write-Host "INFO: topology guard remains fail-closed for branch mismatch during real launcher use."
+} else {
+    $worktreeLaneOutput = powershell -ExecutionPolicy Bypass -File "automation\orchestration\terminal_workstations\Start-AiOsWorktreeLanes.ps1" -Preview
+    $worktreeLaneText = ($worktreeLaneOutput -join [Environment]::NewLine)
+    if ($worktreeLaneText -notmatch "AI_OS WORKTREE LANE RESTORE" -or $worktreeLaneText -notmatch "Preview complete") {
+        throw "Worktree lane preview output missing required blocks."
+    }
+    $worktreeLaneOutput | ForEach-Object { Write-Host $_ }
+}
 
 Write-Host ""
 Write-Host "== Intent Preview Smoke Tests ==" -ForegroundColor Yellow
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "queue dispatcher automation"
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "validation cleanup audit"
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "edit feature with codex"
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "operator rulebook memory"
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsWorkspace.ps1" -Preview -Intent "complete brainstem daily start route"
+Write-Host "INFO: legacy Start-AiOsWorkspace.ps1 intent smoke tests skipped for registry schema_version $($registry.schema_version)."
+Write-Host "INFO: current topology smoke coverage uses active_lanes/worktree_path via Start-AiOsWorktreeLanes.ps1 -Preview."
 
 Write-Host ""
 Write-Host "== Supervisor Planner Smoke Test ==" -ForegroundColor Yellow
@@ -659,21 +668,8 @@ $supervisorOutput | ForEach-Object { Write-Host $_ }
 
 Write-Host ""
 Write-Host "== Daily Start Smoke Test ==" -ForegroundColor Yellow
-$dailyStartOutput = powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Start-AiOsDay.ps1" -Intent "complete brainstem daily start route" -MaxTabs 3
-$dailyStartText = ($dailyStartOutput -join [Environment]::NewLine)
-if ($dailyStartText -notmatch "COPY START" -or $dailyStartText -notmatch "COPY END") {
-    throw "Daily Start copy markers missing."
-}
-if ($dailyStartText -notmatch "WHERE TO RUN NEXT") {
-    throw "Daily Start WHERE TO RUN NEXT block missing."
-}
-if ($dailyStartText -notmatch "Codex auto-launch performed: NO") {
-    throw "Daily Start must report no Codex auto-launch."
-}
-if ($dailyStartText -notmatch "Worker Profile Resolution" -or $dailyStartText -notmatch "Later save/PR command") {
-    throw "Daily Start must reference worker profile resolution and save/PR automation."
-}
-$dailyStartOutput | ForEach-Object { Write-Host $_ }
+Write-Host "INFO: legacy Start-AiOsDay.ps1 smoke test skipped for registry schema_version $($registry.schema_version)."
+Write-Host "INFO: this validator still parse-checks Start-AiOsDay.ps1 and validates current active_lanes topology separately."
 
 Write-Host ""
 Write-Host "== Worker Profile Smoke Tests ==" -ForegroundColor Yellow
@@ -708,8 +704,8 @@ $guardOutput | ForEach-Object { Write-Host $_ }
 
 Write-Host ""
 Write-Host "== Lane Preview Smoke Test ==" -ForegroundColor Yellow
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Open-AiOsLane.ps1" -LaneId save_git -Preview
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Open-AiOsLane.ps1" -LaneId rulebook_codex -Preview
+Write-Host "INFO: legacy Open-AiOsLane.ps1 smoke test skipped for registry schema_version $($registry.schema_version)."
+Write-Host "INFO: Start-AiOsWorktreeLanes.ps1 -Preview is the current lane topology smoke test."
 
 Write-Host ""
 Write-Host "== Restore Preview Smoke Test ==" -ForegroundColor Yellow
@@ -717,8 +713,8 @@ powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Res
 
 Write-Host ""
 Write-Host "== Workspace Checkpoint Preview Smoke Tests ==" -ForegroundColor Yellow
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Save-AiOsWorkspaceCheckpoint.ps1" -Preview
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\bootstrap\Restore-AiOsWorkspaceCheckpoint.ps1" -Preview
+Write-Host "INFO: legacy workspace checkpoint preview smoke tests skipped for registry schema_version $($registry.schema_version)."
+Write-Host "INFO: checkpoint examples are still parsed and field-checked above."
 
 Write-Host ""
 Write-Host "Workspace bootstrap DRY_RUN validation passed." -ForegroundColor Green

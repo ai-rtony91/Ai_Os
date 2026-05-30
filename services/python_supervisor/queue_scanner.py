@@ -83,7 +83,7 @@ def _packet_text(packet: dict[str, Any]) -> str:
 def _queue_status(packet: dict[str, Any], risk: dict[str, Any], freshness: dict[str, Any]) -> tuple[str, str]:
     raw_status = str(packet.get("status") or packet.get("state") or "").lower()
     primary_class = str(risk.get("primary_class") or "").lower()
-    freshness_class = str(freshness.get("freshness_class") or freshness.get("class") or "").lower()
+    freshness_class = str(freshness.get("freshness") or freshness.get("freshness_class") or freshness.get("class") or "").lower()
 
     if primary_class == "blocked" or "block" in raw_status:
         return "BLOCKED", "Packet or risk classifier indicates blocked state."

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_WORK_LEDGER_EVENT.v1.schema.json",
+  "title": "AI_OS Work Ledger Event v1",
+  "description": "Flexible contract for Python supervisor work-ledger event records. Evidence only; this schema does not approve APPLY, mutate telemetry, commit, push, launch workers, or grant runtime authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "event_type",
+    "generated_at"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_WORK_LEDGER_EVENT.v1"
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "supervisor_status": {
+      "type": "string"
+    },
+    "packet_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "escalation_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mode": {
+      "type": "string"
+    },
+    "payload_hash": {
+      "type": "string"
+    }
+  }
+}
