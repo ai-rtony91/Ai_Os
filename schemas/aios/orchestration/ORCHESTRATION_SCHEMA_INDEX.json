@@ -138,6 +138,27 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "command_request",
+      "path": "schemas/aios/orchestration/command_request.schema.json",
+      "kind": "json_schema",
+      "purpose": "Governed command request contract for future preview, approval, and runner handoff metadata.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "command_audit_ledger",
+      "path": "schemas/aios/orchestration/command_audit_ledger.schema.json",
+      "kind": "json_schema",
+      "purpose": "Append-only command audit ledger entry contract for preview and approved execution receipts.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "command_runner_preview",
+      "path": "schemas/aios/orchestration/command_runner_preview.schema.json",
+      "kind": "json_schema",
+      "purpose": "Read-only command runner preview contract. It records safety evidence only and grants no execution authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "APPROVAL_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
       "kind": "json_schema",

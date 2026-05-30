@@ -103,6 +103,24 @@ This mismatch is intentional to document, not resolve, in this governance lane. 
 
 No document, dashboard, script, or runtime component should claim production-ready telemetry until schema reconciliation and validator coverage are implemented.
 
+## LEGACY FIELD MAPPING
+
+Phase 1 read-side validators may classify existing camelCase records as legacy-mapped evidence when the core legacy fields are present and parseable. This mapping is compatibility evidence only; it must not rewrite `telemetry/work_ledger.jsonl`, silently repair prior events, or promote legacy records into command authority.
+
+| Legacy field | Canonical field | Mapping note |
+|---|---|---|
+| `eventId` | `event_id` | Direct identifier mapping. |
+| `eventType` | `event_type` | Direct event-type mapping. |
+| `ts` | `timestamp_utc` | Must parse as an ISO 8601 timestamp. |
+| `status` | `result` | Legacy status is evidence-only until taxonomy reconciliation. |
+| `risk` | `risk_level` | Legacy risk is evidence-only until taxonomy reconciliation. |
+| `packetId` | `authority_token` or `input_reference` | Packet reference only; it does not grant approval. |
+| `approvalId` | `authority_token` or `input_reference` | Approval reference only; it does not replace approval inbox authority. |
+| `source` | `source` | Direct source mapping when present. |
+| `summary` | `output_reference` or `next_safe_action` | Human-readable evidence summary, not command authority. |
+
+Canonical snake_case records are preferred for new writers. Legacy camelCase records remain readable as evidence-only until a separate approved migration or corrective-event strategy exists.
+
 ## TARGET CANONICAL EVENT FIELDS
 
 Every durable telemetry event should converge on these target canonical fields:
