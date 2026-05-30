@@ -12,6 +12,7 @@ logs/
 reports/
 approvals/
 handoffs/processed/
+goals/
 
 # Dropped handoff packets are runtime input, not durable scaffold.
 # (handoffs/PACKET_FORMAT.md is the durable spec and stays tracked.)

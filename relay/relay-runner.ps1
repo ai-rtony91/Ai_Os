@@ -42,7 +42,8 @@ $Dirs = [ordered]@{
     packets   = Join-Path $Config.Root 'packets'
 }
 
-# Bring in the packetizer (handoff -> inbox task) as a function.
+# Bring in goal intake (goal -> handoff) and packetizer (handoff -> task).
+. (Join-Path $Config.Root 'goal-intake.ps1')
 . (Join-Path $Config.Root 'packetize.ps1')
 
 # Ultimate blockers: any task containing these stops and creates an approval.
@@ -259,7 +260,11 @@ Write-Log "Relay start. DryRun=$($Config.DryRun) Watch=$Watch Report=$Report" 'I
 if ($Report) { Write-Rollup; return }
 
 function Invoke-Pass {
-    # 1. auto-packetize any pending handoffs so one drop -> one result
+    # 1. auto-intake any pending goals -> handoff/approval packets
+    $g = Invoke-GoalIntake -Root $Config.Root -Apply -Logger { param($m) Write-Log $m 'GOAL' }
+    if ($g -gt 0) { Write-Log "intook $g goal(s) into handoffs/approvals" 'OK' }
+
+    # 2. auto-packetize any pending handoffs so one drop -> one result
     $n = Invoke-Packetize -Root $Config.Root -Apply -Logger { param($m) Write-Log $m 'PKT' }
     if ($n -gt 0) { Write-Log "packetized $n handoff(s) into inbox" 'OK' }
 

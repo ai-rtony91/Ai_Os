@@ -40,6 +40,31 @@ inbox\ -> running\ -> outbox\ (report) -> done\        (success)
   "prompt": "the instructions", "context": ["C:\\path\\file"], "output": "text" }
 ```
 
+## One-drop goal flow (easiest path)
+
+Write a plain goal — no packets, no worker choice, no handoff authoring:
+
+```powershell
+'Build a validator for worker packet ownership.' |
+  Out-File relay\goals\my-goal.goal.txt -Encoding utf8
+```
+
+With the watcher running (`relay-runner.ps1 -Watch`), the relay does the rest:
+
+```
+goals\*.goal.txt
+  -> goal-intake.ps1   (decides who/what/worker/approval level)
+  -> handoffs\*.handoff.json
+  -> packetize.ps1     -> inbox\*.task.json
+  -> relay-runner.ps1  -> outbox\*.report.txt -> done\
+```
+
+Routing the intake applies automatically:
+- analyze verbs (review/inspect/audit/plan…)  -> Claude plan only      (TIER_0)
+- build verbs (build/create/fix/wire…)         -> Claude plan + Codex   (TIER_1)
+- blocker words (commit/push/trade/secret/merge/delete…) -> STOP, write
+  an approval packet only, NO worker packet                            (TIER_2)
+
 ## Run it
 
 Safe by default (DRY_RUN — no model is called, only plumbing moves):
