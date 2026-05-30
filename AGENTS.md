@@ -277,6 +277,32 @@ Codex must still stop for `HUMAN_APPROVAL_REQUIRED` or `BLOCKED`.
 
 The gate does not authorize blind autopilot. It only lets Codex proceed with a specifically approved commit or push workflow step after the gate proves that the step matches the operator's instruction and AI_OS safety rules.
 
+## AI_OS Protected Action Gate Rule
+
+Protected repo actions require current-session Human Owner approval and a Protected Action Gate review before execution.
+
+Protected actions include:
+
+- `git add`
+- `git commit`
+- `git push`
+- `gh pr create`
+- `gh pr merge`
+- `git merge`
+- `git reset`
+- `git clean`
+- branch deletion
+
+Validator PASS is evidence only. It is not approval. A dashboard card, telemetry event, supervisor report, queue state, packet state, or validator result must not be treated as permission to execute a protected action.
+
+Approval does not transfer between actions. Approval to stage exact files does not approve commit. Commit approval does not approve push. Push approval does not approve PR creation. PR creation approval does not approve merge. Merge approval does not approve branch deletion, reset, clean, or local sync.
+
+Direct push to `main` is blocked for protected work. Use the protected main PR lane unless the Human Owner provides a separate explicit protected-action approval for an exact emergency exception.
+
+Merge requires separate explicit approval. CI passing, PR readiness, branch protection, validator output, or merge-readiness preview does not authorize merge by itself.
+
+Any AI worker, script, supervisor, Relay runner, dashboard projection, future MCP/API tool, or automation loop that encounters a protected action must stop unless the current packet includes exact action scope, the required approval marker, validator evidence, and a clear stop point.
+
 ## Protected Main PR Lane Rule
 
 Protected main requires PR lane flow. AI_OS workers must not push directly to `main` for protected work.
