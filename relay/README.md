@@ -101,3 +101,44 @@ pwsh -File relay\night-supervisor.ps1 -Apply     # also create missing relay fol
 Reads the repo, sorts the relay, detects stale/duplicate/dirty state, and writes
 a report. Any risky condition (dirty tree, needed commit) produces an approval
 item instead of acting.
+
+### Night Supervisor Goal Feeder
+
+The Night Supervisor is a safe **goal creator**, not an executor. It never calls
+Codex/Claude directly and never writes results. With `-GenerateGoals` it writes
+plain goal files into `relay\goals\`; the normal relay chain takes it from there.
+
+```powershell
+pwsh -File relay\night-supervisor.ps1                  # report-only (no goals)
+pwsh -File relay\night-supervisor.ps1 -GenerateGoals   # write safe goals
+pwsh -File relay\relay-runner.ps1                      # process the goals
+```
+
+Flow:
+```
+night-supervisor.ps1 -GenerateGoals
+  -> relay\goals\night-<ts>-*.goal.txt
+  -> goal-intake -> handoffs -> packetize -> inbox -> runner -> outbox result
+  -> approvals catches anything risky
+```
+
+Each goal is classified before it is written:
+- **GREEN**  read-only summary/checks ....... auto-created
+- **YELLOW** relay-only packets/reports ...... auto-created
+- **ORANGE** suggests a future change ........ approval only
+- **RED**    source change outside relay ..... approval only
+- **BLACK**  commit/push/merge/delete/trade/secret/etc. ... approval only
+
+Only GREEN/YELLOW are auto-created; everything else (and anything uncertain)
+becomes an approval item in `relay\approvals\` with reason, proposed action, and
+a "no action taken" statement. Generated goals are also re-checked by goal-intake,
+so a blocker word is caught twice.
+
+**Why this reduces copy/paste:** overnight, Anthony no longer hand-writes
+maintenance packets. The supervisor proposes safe goals, the relay turns them
+into worker results, and only genuine decisions surface as approvals. Anthony
+reads outbox results and approvals in the morning instead of authoring packets.
+
+Still blocked (always): commits, pushes, merges, rebases, deletes, scheduled
+tasks, background services, source edits outside `relay\`, trading/broker/OANDA,
+API keys, and secrets.
