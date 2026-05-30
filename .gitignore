@@ -98,3 +98,18 @@ telemetry/auto_loop/reports/*.json
 telemetry/backup_reports/*.json
 telemetry/night_supervisor/*.json
 telemetry/night_supervisor/*.md
+
+# AI_OS Relay runtime evidence
+relay/approvals/
+relay/done/
+relay/error/
+relay/goals/processed/
+relay/handoffs/processed/
+relay/inbox/
+relay/logs/
+relay/outbox/
+relay/reports/
+relay/running/
+
+# AI_OS generated morning digest evidence
+telemetry/morning_digest/
