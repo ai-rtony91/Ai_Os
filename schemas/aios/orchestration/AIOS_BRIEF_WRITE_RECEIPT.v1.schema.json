@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_BRIEF_WRITE_RECEIPT.v1.schema.json",
+  "title": "AI_OS Brief Write Receipt v1",
+  "description": "Receipt contract for Python supervisor Morning Brief preview/write attempts. Evidence only; it does not approve writes or alter protected state.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "written",
+    "mode",
+    "generated_at"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_BRIEF_WRITE_RECEIPT.v1"
+    },
+    "written": {
+      "type": "boolean"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY"
+      ]
+    },
+    "would_write_to": {
+      "type": "string"
+    },
+    "output_path": {
+      "type": "string"
+    },
+    "output_dir": {
+      "type": "string"
+    },
+    "filename": {
+      "type": "string"
+    },
+    "content_size_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "file_size_bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "supervisor_status": {
+      "type": "string"
+    },
+    "packet_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "escalation_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "error": {
+      "type": "string"
+    }
+  }
+}

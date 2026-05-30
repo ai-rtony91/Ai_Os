@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_TELEMETRY_WRITE_RECEIPT.v1.schema.json",
+  "title": "AI_OS Telemetry Write Receipt v1",
+  "description": "Receipt contract for Python supervisor telemetry preview/write attempts. Evidence only; it does not grant approval or telemetry authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "written",
+    "mode",
+    "ledger_path",
+    "event_type",
+    "generated_at"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_TELEMETRY_WRITE_RECEIPT.v1"
+    },
+    "written": {
+      "type": "boolean"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY"
+      ]
+    },
+    "ledger_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_preview": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "blocked_capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "bytes_written": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "record_hash": {
+      "type": "string"
+    },
+    "error": {
+      "type": "string"
+    }
+  }
+}
