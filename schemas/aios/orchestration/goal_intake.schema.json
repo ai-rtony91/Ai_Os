@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/goal_intake.schema.json",
+  "title": "AI_OS Goal Intake",
+  "description": "File-based goal intake contract for Operation Glue v0.1. A goal intake file is operator intent evidence; it does not approve protected actions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "goal_id",
+    "created_at",
+    "operator",
+    "objective",
+    "urgency",
+    "target_area",
+    "allowed_paths",
+    "blocked_paths",
+    "mode_requested",
+    "worker_preference",
+    "approval_required",
+    "protected_action_expected",
+    "notes"
+  ],
+  "properties": {
+    "goal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "urgency": {
+      "type": "string",
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "BLOCKED"
+      ]
+    },
+    "target_area": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowed_paths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blocked_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "mode_requested": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY_DOCS_ONLY",
+        "APPLY_SCRIPT_ONLY",
+        "APPLY_INTEGRATION",
+        "PROTECTED_ACTION_REQUIRED"
+      ]
+    },
+    "worker_preference": {
+      "type": "string",
+      "enum": [
+        "Codex East",
+        "Claude West",
+        "Supervisor",
+        "Validator",
+        "AUTO"
+      ]
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "protected_action_expected": {
+      "type": "boolean"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

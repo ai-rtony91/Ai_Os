@@ -1,0 +1,11 @@
+{
+  "operation_glue_status": "WARN",
+  "latest_goal_id": "goal-operation-glue-v0-1",
+  "active_worker_packets": 1,
+  "pending_worker_results": 0,
+  "approval_items_pending": 1,
+  "blocked_items": 0,
+  "next_safe_action": "Review the generated worker packet and worker result before approving any protected action.",
+  "copy_paste_reduction_estimate": "One goal file can generate a worker packet, result intake, approval inbox state, and supervisor summary without re-pasting the full mission.",
+  "supervisor_summary": "Operation Glue v0.1 connects goal intake, packet preview, result intake, approval inbox state, and next safe action through local files."
+}
