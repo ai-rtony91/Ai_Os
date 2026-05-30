@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/night_supervisor_approval_queue.schema.json",
+  "title": "AI_OS Night Supervisor Approval Queue",
+  "description": "Read-only Night Supervisor projection over local Relay approval evidence. This schema does not approve, reject, mutate approvals, stage files, commit, push, merge, open PRs, launch workers, or grant live trading, broker, webhook, API key, real order, or secret authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "queue_id",
+    "repo_status",
+    "approval_counts",
+    "approval_items",
+    "stale_items",
+    "unsafe_items",
+    "next_safe_action",
+    "raw_evidence_refs",
+    "safety_flags"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_NIGHT_SUPERVISOR_APPROVAL_QUEUE.v1"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "queue_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["branch", "repo_dirty", "changed_files", "untracked_files", "status_summary"],
+      "properties": {
+        "branch": { "type": "string" },
+        "repo_dirty": { "type": "boolean" },
+        "changed_files": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "untracked_files": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "status_summary": { "type": "string" }
+      }
+    },
+    "approval_counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total",
+        "waiting_review",
+        "approved",
+        "rejected",
+        "stale",
+        "unsafe_blocked",
+        "already_handled",
+        "needs_more_context",
+        "unknown"
+      ],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "waiting_review": { "type": "integer", "minimum": 0 },
+        "approved": { "type": "integer", "minimum": 0 },
+        "rejected": { "type": "integer", "minimum": 0 },
+        "stale": { "type": "integer", "minimum": 0 },
+        "unsafe_blocked": { "type": "integer", "minimum": 0 },
+        "already_handled": { "type": "integer", "minimum": 0 },
+        "needs_more_context": { "type": "integer", "minimum": 0 },
+        "unknown": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "approval_items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/approval_item" }
+    },
+    "stale_items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/approval_item" }
+    },
+    "unsafe_items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/approval_item" }
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "dashboard_cards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dashboard_card" }
+    },
+    "raw_evidence_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "safety_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projection_only",
+        "does_not_mutate_approvals",
+        "no_live_trading",
+        "no_broker_execution",
+        "no_oanda",
+        "no_api_keys",
+        "no_real_webhooks",
+        "no_real_orders",
+        "no_secrets",
+        "no_stage",
+        "no_commit",
+        "no_push",
+        "no_merge",
+        "no_pr"
+      ],
+      "properties": {
+        "projection_only": { "type": "boolean", "const": true },
+        "does_not_mutate_approvals": { "type": "boolean", "const": true },
+        "no_live_trading": { "type": "boolean", "const": true },
+        "no_broker_execution": { "type": "boolean", "const": true },
+        "no_oanda": { "type": "boolean", "const": true },
+        "no_api_keys": { "type": "boolean", "const": true },
+        "no_real_webhooks": { "type": "boolean", "const": true },
+        "no_real_orders": { "type": "boolean", "const": true },
+        "no_secrets": { "type": "boolean", "const": true },
+        "no_stage": { "type": "boolean", "const": true },
+        "no_commit": { "type": "boolean", "const": true },
+        "no_push": { "type": "boolean", "const": true },
+        "no_merge": { "type": "boolean", "const": true },
+        "no_pr": { "type": "boolean", "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "WAITING_REVIEW",
+        "APPROVED",
+        "REJECTED",
+        "STALE",
+        "UNSAFE_BLOCKED",
+        "ALREADY_HANDLED",
+        "NEEDS_MORE_CONTEXT",
+        "UNKNOWN"
+      ]
+    },
+    "risk": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "BLOCKED", "UNKNOWN"]
+    },
+    "approval_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_path",
+        "title",
+        "requested_action",
+        "risk_level",
+        "status",
+        "reason",
+        "evidence_refs",
+        "recommended_operator_action"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "source_path": { "type": "string" },
+        "title": { "type": "string" },
+        "requested_action": { "type": "string" },
+        "risk_level": { "$ref": "#/$defs/risk" },
+        "status": { "$ref": "#/$defs/status" },
+        "reason": { "type": "string" },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "recommended_operator_action": { "type": "string" }
+      }
+    },
+    "dashboard_card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "status",
+        "waiting_count",
+        "stale_count",
+        "unsafe_blocked_count",
+        "approved_count",
+        "rejected_count",
+        "next_safe_action",
+        "details_ref"
+      ],
+      "properties": {
+        "title": { "type": "string" },
+        "status": { "type": "string" },
+        "waiting_count": { "type": "integer", "minimum": 0 },
+        "stale_count": { "type": "integer", "minimum": 0 },
+        "unsafe_blocked_count": { "type": "integer", "minimum": 0 },
+        "approved_count": { "type": "integer", "minimum": 0 },
+        "rejected_count": { "type": "integer", "minimum": 0 },
+        "next_safe_action": { "type": "string" },
+        "details_ref": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "schema": "AIOS_NIGHT_SUPERVISOR_APPROVAL_QUEUE.v1",
+  "generated_at": "2026-05-30T00:00:00Z",
+  "queue_id": "night-supervisor-approval-queue-sample",
+  "repo_status": {
+    "branch": "main",
+    "repo_dirty": false,
+    "changed_files": [],
+    "untracked_files": [],
+    "status_summary": "Repo tree is clean."
+  },
+  "approval_counts": {
+    "total": 7,
+    "waiting_review": 2,
+    "approved": 1,
+    "rejected": 0,
+    "stale": 2,
+    "unsafe_blocked": 1,
+    "already_handled": 1,
+    "needs_more_context": 1,
+    "unknown": 0
+  },
+  "approval_items": [
+    {
+      "id": "20260530-165822-danger.approval",
+      "source_path": "relay/approvals/20260530-165822-danger.approval.md",
+      "title": "Approval Required - danger",
+      "requested_action": "Unsafe live-order-style request",
+      "risk_level": "BLOCKED",
+      "status": "UNSAFE_BLOCKED",
+      "reason": "Approval evidence contains live trading, broker, webhook, API key, real order, or secret language.",
+      "evidence_refs": [
+        "relay/approvals/20260530-165822-danger.approval.md"
+      ],
+      "recommended_operator_action": "Leave blocked. Do not approve into execution."
+    }
+  ],
+  "stale_items": [
+    {
+      "id": "20260530-165828-dirty-repo.approval",
+      "source_path": "relay/approvals/20260530-165828-dirty-repo.approval.md",
+      "title": "Approval Required - dirty repo",
+      "requested_action": "Git stage/commit request",
+      "risk_level": "BLOCKED",
+      "status": "STALE",
+      "reason": "Approval refers to a dirty repo state, but current git status is clean.",
+      "evidence_refs": [
+        "relay/approvals/20260530-165828-dirty-repo.approval.md"
+      ],
+      "recommended_operator_action": "Treat as historical runtime evidence; do not act on it without a fresh approval request."
+    }
+  ],
+  "unsafe_items": [
+    {
+      "id": "20260530-165822-danger.approval",
+      "source_path": "relay/approvals/20260530-165822-danger.approval.md",
+      "title": "Approval Required - danger",
+      "requested_action": "Unsafe live-order-style request",
+      "risk_level": "BLOCKED",
+      "status": "UNSAFE_BLOCKED",
+      "reason": "Approval evidence contains live trading, broker, webhook, API key, real order, or secret language.",
+      "evidence_refs": [
+        "relay/approvals/20260530-165822-danger.approval.md"
+      ],
+      "recommended_operator_action": "Leave blocked. Do not approve into execution."
+    }
+  ],
+  "next_safe_action": "Review unsafe and waiting approval items before any APPLY, commit, push, merge, PR, or worker launch.",
+  "dashboard_cards": [
+    {
+      "title": "Approval Queue",
+      "status": "BLOCKED",
+      "waiting_count": 2,
+      "stale_count": 2,
+      "unsafe_blocked_count": 1,
+      "approved_count": 1,
+      "rejected_count": 0,
+      "next_safe_action": "Review unsafe and waiting approval items before any APPLY, commit, push, merge, PR, or worker launch.",
+      "details_ref": "telemetry/morning_digest/APPROVAL_QUEUE_SUMMARY.md"
+    }
+  ],
+  "raw_evidence_refs": [
+    "relay/approvals/20260530-165822-danger.approval.md",
+    "relay/approvals/20260530-165828-dirty-repo.approval.md"
+  ],
+  "safety_flags": {
+    "projection_only": true,
+    "does_not_mutate_approvals": true,
+    "no_live_trading": true,
+    "no_broker_execution": true,
+    "no_oanda": true,
+    "no_api_keys": true,
+    "no_real_webhooks": true,
+    "no_real_orders": true,
+    "no_secrets": true,
+    "no_stage": true,
+    "no_commit": true,
+    "no_push": true,
+    "no_merge": true,
+    "no_pr": true
+  }
+}
