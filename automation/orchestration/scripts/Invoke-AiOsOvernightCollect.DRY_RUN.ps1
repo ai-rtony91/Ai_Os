@@ -220,56 +220,78 @@ if ($Collect) {
         $collectStatus = "COLLECT_BLOCKED_NO_APPROVAL_GATE"
         $nextSafeAction = "Approval gate file not found. No evidence files written."
     } else {
-        $collectStatus = "COLLECT_IN_PROGRESS"
-        $datestamp = (Get-Date -Format "yyyyMMdd_HHmm")
-        $evidenceDir = Join-Path -Path $RepoRoot -ChildPath "telemetry/evidence"
-        if (-not (Test-Path -LiteralPath $evidenceDir)) {
-            New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
+        # ── GATE CONTENT VERIFICATION ───────────────────────────────────
+        # Existence check passed. Now verify the gate is actually authorized.
+        # Both conditions must be true before any collection executes:
+        #   approved_by_human  = $true
+        #   approval_status    = "approved_for_apply"
+        # A gate file that exists but is still in pending/review state is NOT
+        # an authorization to collect — it is an unauthorized gate.
+        $gateContent  = $null
+        $gateApproved = $false
+        try {
+            $gateContent  = Get-Content -LiteralPath $gateFile -Raw -Encoding utf8 | ConvertFrom-Json
+            $gateApproved = ($gateContent.approved_by_human -eq $true) -and
+                            ($gateContent.approval_status   -eq "approved_for_apply")
+        } catch {
+            $gateApproved = $false
         }
 
-        $sourcesAttempted = @()
-        $sourcesSucceeded = @()
-        $sourcesFailed = @()
-
-        foreach ($source in $sourceDefinitions) {
-            # Always skip t9_snapshot_backup unconditionally
-            if ($source.id -eq "t9_snapshot_backup") { continue }
-            # Only collect sources marked safe_for_unattended_dry_run or safe_for_future_collection
-            $safeFlag = $source["safe_for_unattended_dry_run"]
-            if ($null -eq $safeFlag) { $safeFlag = $source["safe_for_future_collection"] }
-            if (-not $safeFlag) { continue }
-
-            $sourcesAttempted += $source.id
-            $sourceScriptPath = Join-Path -Path $RepoRoot -ChildPath $source.source_path
-
-            try {
-                if (-not (Test-Path -LiteralPath $sourceScriptPath)) {
-                    throw "Source script not found: $sourceScriptPath"
-                }
-                $stdout = & powershell -ExecutionPolicy Bypass -File $sourceScriptPath 2>&1
-                $outFile = Join-Path -Path $evidenceDir -ChildPath "$($source.id)_${datestamp}Z.json"
-                $stdout | Out-File -FilePath $outFile -Encoding utf8 -Force
-                $collectOutputPaths += $outFile
-                $sourcesSucceeded += $source.id
-            } catch {
-                $sourcesFailed += $source.id
+        if (-not $gateApproved) {
+            $collectStatus  = "COLLECT_BLOCKED_GATE_NOT_AUTHORIZED"
+            $nextSafeAction = "Gate file present but not authorized. Human Owner must set approved_by_human=true and approval_status='approved_for_apply' before collection may run. No evidence files written."
+        } else {
+            $collectStatus = "COLLECT_IN_PROGRESS"
+            $datestamp = (Get-Date -Format "yyyyMMdd_HHmm")
+            $evidenceDir = Join-Path -Path $RepoRoot -ChildPath "telemetry/evidence"
+            if (-not (Test-Path -LiteralPath $evidenceDir)) {
+                New-Item -ItemType Directory -Path $evidenceDir -Force | Out-Null
             }
-        }
 
-        $manifestPath = Join-Path -Path $evidenceDir -ChildPath "COLLECTION_MANIFEST_${datestamp}.json"
-        $manifest = [ordered]@{
-            schema             = "AIOS_COLLECTION_MANIFEST.v1"
-            collected_at       = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
-            source_count       = $sourcesAttempted.Count
-            sources_attempted  = $sourcesAttempted
-            sources_succeeded  = $sourcesSucceeded
-            sources_failed     = $sourcesFailed
-            output_paths       = $collectOutputPaths
+            $sourcesAttempted = @()
+            $sourcesSucceeded = @()
+            $sourcesFailed = @()
+
+            foreach ($source in $sourceDefinitions) {
+                # Always skip t9_snapshot_backup unconditionally
+                if ($source.id -eq "t9_snapshot_backup") { continue }
+                # Only collect sources marked safe_for_unattended_dry_run or safe_for_future_collection
+                $safeFlag = $source["safe_for_unattended_dry_run"]
+                if ($null -eq $safeFlag) { $safeFlag = $source["safe_for_future_collection"] }
+                if (-not $safeFlag) { continue }
+
+                $sourcesAttempted += $source.id
+                $sourceScriptPath = Join-Path -Path $RepoRoot -ChildPath $source.source_path
+
+                try {
+                    if (-not (Test-Path -LiteralPath $sourceScriptPath)) {
+                        throw "Source script not found: $sourceScriptPath"
+                    }
+                    $stdout = & powershell -ExecutionPolicy Bypass -File $sourceScriptPath 2>&1
+                    $outFile = Join-Path -Path $evidenceDir -ChildPath "$($source.id)_${datestamp}Z.json"
+                    $stdout | Out-File -FilePath $outFile -Encoding utf8 -Force
+                    $collectOutputPaths += $outFile
+                    $sourcesSucceeded += $source.id
+                } catch {
+                    $sourcesFailed += $source.id
+                }
+            }
+
+            $manifestPath = Join-Path -Path $evidenceDir -ChildPath "COLLECTION_MANIFEST_${datestamp}.json"
+            $manifest = [ordered]@{
+                schema             = "AIOS_COLLECTION_MANIFEST.v1"
+                collected_at       = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+                source_count       = $sourcesAttempted.Count
+                sources_attempted  = $sourcesAttempted
+                sources_succeeded  = $sourcesSucceeded
+                sources_failed     = $sourcesFailed
+                output_paths       = $collectOutputPaths
+            }
+            $manifest | ConvertTo-Json -Depth 5 | Out-File -FilePath $manifestPath -Encoding utf8 -Force
+            $collectOutputPaths += $manifestPath
+            $collectStatus  = "COLLECT_COMPLETE"
+            $nextSafeAction = "Review evidence files in telemetry/evidence/ before any mutation."
         }
-        $manifest | ConvertTo-Json -Depth 5 | Out-File -FilePath $manifestPath -Encoding utf8 -Force
-        $collectOutputPaths += $manifestPath
-        $collectStatus = "COLLECT_COMPLETE"
-        $nextSafeAction = "Review evidence files in telemetry/evidence/ before any mutation."
     }
 }
 

@@ -12,7 +12,7 @@ from pathlib import Path
 
 from queue_reader import read_queue_preview
 from runtime_state import build_runtime_state
-from telemetry_writer import build_preview_event
+from telemetry_writer import preview_event
 from worker_router import route_worker_preview
 
 
@@ -22,10 +22,10 @@ def build_supervisor_preview(repo_root: Path) -> dict[str, object]:
     queue = read_queue_preview(queue_path)
     first_packet = queue["items"][0] if queue.get("items") else None
     routing = route_worker_preview(first_packet if isinstance(first_packet, dict) else None)
-    telemetry = build_preview_event(
+    telemetry = preview_event(
         "python_supervisor_preview",
-        "services/python_supervisor/main.py",
         {"queue_status": queue["status"], "recommended_worker": routing["recommended_worker"]},
+        repo_root / "telemetry" / "work_ledger.jsonl",
     )
 
     return {
