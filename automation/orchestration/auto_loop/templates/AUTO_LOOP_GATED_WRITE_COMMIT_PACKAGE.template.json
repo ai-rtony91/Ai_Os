@@ -1,0 +1,21 @@
+{
+  "packet_id": "PACKET_ID",
+  "safe_files_to_stage": [],
+  "files_to_exclude": [
+    "telemetry/auto_loop/reports/",
+    "telemetry/backup_reports/",
+    "telemetry/night_supervisor/"
+  ],
+  "risky_files_to_review": [],
+  "generated_files_to_exclude": [
+    "telemetry/auto_loop/reports/"
+  ],
+  "forbidden_files": [],
+  "suggested_commit_message": "Add repo-loop gated-write sandbox",
+  "recommended_git_add_commands": [],
+  "git_add_dot_allowed": false,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "human_approval_required": true,
+  "next_safe_action": "Human Owner reviews explicit commit package recommendation in a separate commit packet."
+}

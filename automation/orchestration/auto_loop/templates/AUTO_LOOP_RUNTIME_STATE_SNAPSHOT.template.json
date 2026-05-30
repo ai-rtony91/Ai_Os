@@ -1,0 +1,19 @@
+{
+  "snapshot_id": "RUNTIME_SNAPSHOT_PACKET_ID",
+  "packet_id": "PACKET_ID",
+  "created_at": "2026-05-29T00:00:00Z",
+  "active_goal": "Plain-language operator goal.",
+  "active_worker": "manual_review",
+  "active_branch": "main",
+  "active_step": "GATED_WRITE_SANDBOX_RECORDS_CREATED",
+  "active_stop_point": "HUMAN_APPROVAL_REQUIRED",
+  "next_safe_action": "Human Owner reviews sandbox records before any active system promotion.",
+  "last_validator_result": "PASS",
+  "approval_status": "APPROVAL_REQUIRED",
+  "commit_package_status": "RECOMMENDATION_ONLY",
+  "resume_record_path": "automation/orchestration/auto_loop/state/resume/RESUME_PACKET_ID.json",
+  "source_report_path": "telemetry/auto_loop/reports/AUTO_LOOP_GATED_WRITE_REPORT_YYYYMMDDTHHMMSSZ.json",
+  "active_runtime_mutation_performed": false,
+  "active_runtime_target_path": "telemetry/runtime/",
+  "safe_to_promote_later": false
+}

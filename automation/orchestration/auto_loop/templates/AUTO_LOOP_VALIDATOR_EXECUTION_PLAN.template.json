@@ -1,0 +1,13 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "changed_paths": [],
+  "validator_route": [],
+  "validators_found": [],
+  "validators_missing": [],
+  "required_commands": [],
+  "optional_commands": [],
+  "execution_mode": "DRY_RUN_PLAN_ONLY",
+  "validation_state": "VALIDATOR_PLAN_READY",
+  "blocked_if_missing": [],
+  "next_safe_action": "Run recommended validators only after human approval for the lane."
+}

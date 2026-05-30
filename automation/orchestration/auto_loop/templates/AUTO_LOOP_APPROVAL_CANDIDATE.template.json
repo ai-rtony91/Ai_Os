@@ -1,0 +1,28 @@
+{
+  "approval_id": "AUTO_LOOP_APPROVAL_CANDIDATE_000",
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "proposed_action": "Review DRY_RUN packet candidate and validator recommendation.",
+  "proposed_files": [],
+  "risk_tier": "low",
+  "validator_recommendation": {
+    "required_validators": [],
+    "manual_review_required": true
+  },
+  "blocked_actions": [
+    "commit",
+    "push",
+    "merge",
+    "live_trading",
+    "broker_execution",
+    "secret_access",
+    "active_queue_mutation",
+    "active_approval_inbox_mutation",
+    "worker_dispatch"
+  ],
+  "human_approval_required": true,
+  "apply_allowed": false,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "reason": "DRY_RUN approval candidate only. Human Owner must approve any APPLY, commit, push, merge, or protected action.",
+  "next_safe_command": "Review the generated packet candidate and validator route before approving any APPLY lane."
+}

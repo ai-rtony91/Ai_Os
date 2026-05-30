@@ -1,0 +1,12 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "resume_id": "RESUME_POINTER_000",
+  "current_step": "RESUME_READY",
+  "last_completed_step": "runtime_state_preview",
+  "next_required_step": "human_review",
+  "stop_reason": "DRY_RUN complete",
+  "report_path": "telemetry/auto_loop/reports/example.json",
+  "human_prompt_to_resume": "Review the report and approve the next gated packet.",
+  "codex_prompt_to_resume": "Resume from telemetry auto-loop report path X. Do not guess missing state.",
+  "created_at": "YYYY-MM-DDTHH:mm:ssZ"
+}

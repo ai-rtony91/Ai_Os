@@ -1,0 +1,15 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "changed_path_patterns": [],
+  "recommended_validators": [],
+  "required_validators": [
+    "git diff --check"
+  ],
+  "optional_validators": [],
+  "blocked_if_missing": [
+    "manual review required when no validator route matches the changed paths"
+  ],
+  "notes": [
+    "This route recommends validators only. It does not execute validators or authorize APPLY."
+  ]
+}

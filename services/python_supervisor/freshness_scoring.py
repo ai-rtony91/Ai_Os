@@ -32,6 +32,7 @@ TIMESTAMP_FIELDS = (
 
 FRESH_SECONDS = 2 * 60 * 60
 USABLE_SECONDS = 24 * 60 * 60
+_MAX_ITER_DEPTH = 10
 
 
 def _normalize_datetime(value: datetime) -> datetime:
@@ -71,19 +72,21 @@ def parse_timestamp(value: object) -> datetime | None:
     return None
 
 
-def _iter_values(payload: object) -> list[object]:
+def _iter_values(payload: object, _depth: int = 0) -> list[object]:
+    if _depth >= _MAX_ITER_DEPTH:
+        return []
     if isinstance(payload, dict):
         values: list[object] = []
         for field in TIMESTAMP_FIELDS:
             if field in payload:
                 values.append(payload[field])
         for value in payload.values():
-            values.extend(_iter_values(value))
+            values.extend(_iter_values(value, _depth + 1))
         return values
     if isinstance(payload, list):
         values = []
         for item in payload:
-            values.extend(_iter_values(item))
+            values.extend(_iter_values(item, _depth + 1))
         return values
     return []
 

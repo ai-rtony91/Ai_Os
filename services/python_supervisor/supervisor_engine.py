@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from decision_vocabulary import normalize_status, normalize_supervisor_status
 from escalation_engine import build_escalation_items
 from freshness_scoring import summarize_freshness
 from queue_scanner import scan_queue
@@ -134,12 +135,12 @@ def _approval_required(queue_items: list[dict[str, Any]]) -> list[dict[str, str]
 def _supervisor_status(escalations: list[dict[str, str]], repo_health: dict[str, Any]) -> str:
     severities = {item["severity"] for item in escalations}
     if "BLOCKED" in severities or repo_health["risk_level"] == "BLOCKED":
-        return "BLOCKED"
+        return normalize_supervisor_status("BLOCKED")
     if "WARNING" in severities or repo_health["risk_level"] == "WARNING":
-        return "WARNING"
+        return normalize_supervisor_status("WARNING")
     if severities or repo_health["risk_level"] == "WATCH":
-        return "REVIEW"
-    return "READY"
+        return normalize_supervisor_status("REVIEW")
+    return normalize_supervisor_status("READY")
 
 
 def build_supervisor_report(repo_root: str | Path = ".") -> dict[str, Any]:
@@ -206,6 +207,13 @@ def build_supervisor_report(repo_root: str | Path = ".") -> dict[str, Any]:
             "read_only": True,
             "approval_authority": "Anthony Meza",
             "blocked_capabilities": BLOCKED_CAPABILITIES,
+            "human_owner": "Anthony Meza",
+            "worker_launch_enabled": False,
+            "packet_movement_enabled": False,
+            "approval_mutation_enabled": False,
+            "telemetry_append_enabled": False,
+            "commit_performed": "NO",
+            "push_performed": "NO",
         },
     }
 

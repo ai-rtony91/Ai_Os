@@ -1,0 +1,13 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "safe_files_to_stage": [],
+  "risky_files_to_review": [],
+  "generated_files_to_exclude": [],
+  "forbidden_files": [],
+  "suggested_commit_message": "Describe the approved scoped change",
+  "recommended_git_add_commands": [],
+  "git_add_dot_allowed": false,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "human_approval_required": true
+}

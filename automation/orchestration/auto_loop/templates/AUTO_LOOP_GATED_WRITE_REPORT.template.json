@@ -1,0 +1,31 @@
+{
+  "report_id": "AUTO_LOOP_GATED_WRITE_REPORT_YYYYMMDDTHHMMSSZ",
+  "created_at": "2026-05-29T00:00:00Z",
+  "packet_id": "PACKET_ID",
+  "goal_text": "Plain-language operator goal.",
+  "repo": "ai-rtony91/Ai_Os",
+  "branch": "main",
+  "worktree": "C:\\Dev\\Ai.Os",
+  "packet_record_path": "automation/orchestration/auto_loop/state/packets/PACKET_PACKET_ID.json",
+  "lock_record_path": "automation/orchestration/auto_loop/state/locks/LOCK_PACKET_ID.json",
+  "approval_record_path": "automation/orchestration/auto_loop/state/approvals/APPROVAL_PACKET_ID.json",
+  "validator_run_record_path": "automation/orchestration/auto_loop/state/validator_runs/VALIDATOR_RUN_PACKET_ID.json",
+  "runtime_snapshot_path": "automation/orchestration/auto_loop/state/runtime_snapshots/RUNTIME_SNAPSHOT_PACKET_ID.json",
+  "resume_record_path": "automation/orchestration/auto_loop/state/resume/RESUME_PACKET_ID.json",
+  "commit_package_recommendation": {},
+  "safety_status": {},
+  "blocked_actions": [
+    "commit",
+    "push",
+    "merge",
+    "live_trading",
+    "broker_execution",
+    "secret_access",
+    "active_queue_mutation",
+    "active_approval_inbox_mutation",
+    "active_worker_registry_mutation",
+    "runtime_mutation"
+  ],
+  "active_state_mutation_summary": "No active production queue, inbox, registry, runtime, telemetry/runtime, or work ledger mutation performed. Sandbox records only.",
+  "next_human_action": "Review gated-write sandbox records and approve a future promotion packet if acceptable."
+}

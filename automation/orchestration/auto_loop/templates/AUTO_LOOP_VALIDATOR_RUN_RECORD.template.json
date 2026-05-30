@@ -1,0 +1,17 @@
+{
+  "validator_run_id": "VALIDATOR_RUN_PACKET_ID",
+  "packet_id": "PACKET_ID",
+  "created_at": "2026-05-29T00:00:00Z",
+  "changed_paths": [],
+  "validator_plan": [],
+  "validators_required": [],
+  "validators_optional": [],
+  "validators_run": [],
+  "validators_skipped": [],
+  "validation_state": "PLAN_ONLY",
+  "validation_result": "PASS",
+  "blocked_reason": null,
+  "commands_run": [],
+  "commands_recommended": [],
+  "next_safe_action": "Human Owner reviews validator run record before approving APPLY, commit, push, merge, or protected action."
+}

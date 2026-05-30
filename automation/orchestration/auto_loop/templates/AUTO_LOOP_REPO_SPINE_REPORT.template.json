@@ -1,0 +1,20 @@
+{
+  "report_id": "AUTO_LOOP_REPO_SPINE_REPORT_000",
+  "created_at": "YYYY-MM-DDTHH:mm:ssZ",
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "goal_text": "",
+  "repo": "ai-rtony91/Ai_Os",
+  "branch": "main",
+  "worktree": "C:\\Dev\\Ai.Os",
+  "movement_result": {},
+  "worker_assignment_result": {},
+  "ownership_lock_result": {},
+  "validator_execution_plan": {},
+  "approval_execution_plan": {},
+  "commit_package_result": {},
+  "runtime_state_preview": {},
+  "resume_pointer": {},
+  "safety_status": "PASS",
+  "blocked_actions": [],
+  "next_human_action": "Review report and approve the next gated packet."
+}

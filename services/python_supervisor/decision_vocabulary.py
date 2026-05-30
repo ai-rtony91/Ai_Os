@@ -59,7 +59,30 @@ STATUS_ALIASES = {
     "UNKNOWN": STATUS_UNKNOWN,
     "NO_ACTION": STATUS_UNKNOWN,
     "NOT_RUN": STATUS_NOT_RUN,
+    "ASSIGNED":   STATUS_PASS,    # Worker attached — healthy routing state
+    "COMPLETE":   STATUS_PASS,    # Terminal success — no escalation
+    "VALIDATING": STATUS_REVIEW,  # In-flight — monitor, not block
+    "STALE":      STATUS_REVIEW,  # Evidence stale — refresh required
 }
+
+# Supervisor-context status values from overnight_supervisor.schema.json.
+# READY = system healthy. MUST NOT be mapped through STATUS_ALIASES.
+# Use normalize_supervisor_status() wherever supervisor_status is produced/consumed.
+SUPERVISOR_STATUS_PASSTHROUGH: frozenset[str] = frozenset({
+    "READY", "REVIEW", "WARNING", "BLOCKED", "UNKNOWN"
+})
+
+
+def normalize_supervisor_status(value: object) -> str:
+    """Normalize overnight_supervisor supervisor_status.
+
+    Preserves READY as the healthy state — does NOT map READY to REVIEW.
+    Use this instead of normalize_status() anywhere the value is
+    overnight_supervisor.schema.json:supervisor_status.
+    """
+    token = _token(value)
+    return token if token in SUPERVISOR_STATUS_PASSTHROUGH else STATUS_UNKNOWN
+
 
 SEVERITY_ALIASES = {
     "INFO": SEVERITY_INFO,

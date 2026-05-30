@@ -1,0 +1,15 @@
+{
+  "packet_id": "AUTO_LOOP_PACKET_CANDIDATE_000",
+  "worker_hint": null,
+  "recommended_worker_id": "manual_review",
+  "recommended_worker_type": "manual_review",
+  "recommended_lane": "manual review lane",
+  "reason": "No confident worker route was identified.",
+  "assigned_paths": [],
+  "worker_registry_found": false,
+  "worker_profiles_found": false,
+  "worker_inbox_found": false,
+  "assignment_state": "RECOMMENDATION_ONLY",
+  "human_approval_required": true,
+  "blocked_reason": null
+}
