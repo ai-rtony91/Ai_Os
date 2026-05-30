@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/autonomy_bridge_state.schema.json",
+  "title": "AI_OS Autonomy Bridge State",
+  "description": "Dashboard-safe bridge state for Relay input, Night Supervisor review, Morning Digest output, and next safe action visibility. This is evidence only and does not authorize APPLY, commit, push, merge, worker launch, broker execution, live trading, webhook execution, or secret handling.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "cycle_id",
+    "source_paths",
+    "supervisor_status",
+    "night_supervisor_status",
+    "plain_summary",
+    "must_see",
+    "relay_items_seen",
+    "items_completed",
+    "items_blocked",
+    "items_needing_approval",
+    "repo_state",
+    "wins_count",
+    "blocked_count",
+    "approval_needed_count",
+    "worker_notes_count",
+    "next_safe_action",
+    "dashboard_cards",
+    "morning_digest_path",
+    "raw_evidence",
+    "safety_flags",
+    "authority_boundary"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_AUTONOMY_BRIDGE_STATE.v1" },
+    "generated_at": { "type": "string" },
+    "cycle_id": { "type": "string" },
+    "source_paths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "supervisor_status": {
+      "type": "string",
+      "enum": ["PASS", "WARN", "BLOCKED", "ERROR", "UNKNOWN"]
+    },
+    "night_supervisor_status": {
+      "type": "string",
+      "enum": ["PASS", "WARN", "BLOCKED", "ERROR", "UNKNOWN"]
+    },
+    "plain_summary": { "type": "string" },
+    "must_see": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "relay_items_seen": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bridge_item" }
+    },
+    "items_completed": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bridge_item" }
+    },
+    "items_blocked": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bridge_item" }
+    },
+    "items_needing_approval": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bridge_item" }
+    },
+    "repo_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["branch", "repo_dirty", "changed_files", "untracked_files", "status_summary"],
+      "properties": {
+        "branch": { "type": "string" },
+        "repo_dirty": { "type": "boolean" },
+        "changed_files": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "untracked_files": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "status_summary": { "type": "string" }
+      }
+    },
+    "wins_count": { "type": "integer", "minimum": 0 },
+    "blocked_count": { "type": "integer", "minimum": 0 },
+    "approval_needed_count": { "type": "integer", "minimum": 0 },
+    "worker_notes_count": { "type": "integer", "minimum": 0 },
+    "next_safe_action": { "type": "string" },
+    "dashboard_cards": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dashboard_card" }
+    },
+    "morning_digest_path": { "type": "string" },
+    "raw_evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/raw_evidence" }
+    },
+    "safety_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_live_trading",
+        "no_broker_execution",
+        "no_oanda",
+        "no_api_keys",
+        "no_real_webhooks",
+        "no_real_orders",
+        "no_secrets",
+        "no_commit",
+        "no_push",
+        "writes_within_allowed_paths_only"
+      ],
+      "properties": {
+        "no_live_trading": { "type": "boolean", "const": true },
+        "no_broker_execution": { "type": "boolean", "const": true },
+        "no_oanda": { "type": "boolean", "const": true },
+        "no_api_keys": { "type": "boolean", "const": true },
+        "no_real_webhooks": { "type": "boolean", "const": true },
+        "no_real_orders": { "type": "boolean", "const": true },
+        "no_secrets": { "type": "boolean", "const": true },
+        "no_commit": { "type": "boolean", "const": true },
+        "no_push": { "type": "boolean", "const": true },
+        "writes_within_allowed_paths_only": { "type": "boolean", "const": true }
+      }
+    },
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_only", "approval_authority", "blocked_capabilities"],
+      "properties": {
+        "evidence_only": { "type": "boolean", "const": true },
+        "approval_authority": { "type": "string" },
+        "blocked_capabilities": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "bridge_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "status", "category", "summary", "source_path", "next_safe_action"],
+      "properties": {
+        "title": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "WARN", "BLOCKED", "NEEDS_APPROVAL", "UNKNOWN"]
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "relay_input",
+            "worker_output",
+            "validator_output",
+            "blocked_action",
+            "approval_request",
+            "repo_state",
+            "dashboard_note",
+            "morning_digest",
+            "unknown"
+          ]
+        },
+        "summary": { "type": "string" },
+        "source_path": { "type": "string" },
+        "next_safe_action": { "type": "string" }
+      }
+    },
+    "dashboard_card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "status", "summary", "metrics", "next_action", "details_ref"],
+      "properties": {
+        "title": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "WARN", "BLOCKED", "ERROR", "UNKNOWN"]
+        },
+        "summary": { "type": "string" },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["wins", "blocked", "approval_needed", "worker_notes"],
+          "properties": {
+            "wins": { "type": "integer", "minimum": 0 },
+            "blocked": { "type": "integer", "minimum": 0 },
+            "approval_needed": { "type": "integer", "minimum": 0 },
+            "worker_notes": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "next_action": { "type": "string" },
+        "details_ref": { "type": "string" }
+      }
+    },
+    "raw_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_path", "evidence_type", "status"],
+      "properties": {
+        "source_path": { "type": "string" },
+        "evidence_type": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["PASS", "WARN", "BLOCKED", "NEEDS_APPROVAL", "UNKNOWN"]
+        }
+      }
+    }
+  }
+}

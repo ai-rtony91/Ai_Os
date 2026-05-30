@@ -1,0 +1,120 @@
+{
+  "schema": "AIOS_AUTONOMY_BRIDGE_STATE.v1",
+  "generated_at": "2026-05-30T00:00:00Z",
+  "cycle_id": "autonomy-bridge-sample",
+  "source_paths": [
+    "relay/reports/night-sample.md",
+    "telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json"
+  ],
+  "supervisor_status": "WARN",
+  "night_supervisor_status": "WARN",
+  "plain_summary": "3 items completed, 1 blocked, 2 need approval, 6 evidence items seen.",
+  "must_see": [
+    "Review approval-needed items before APPLY.",
+    "Resolve blocked action before commit or push."
+  ],
+  "relay_items_seen": [
+    {
+      "title": "Relay Night Sample",
+      "status": "WARN",
+      "category": "relay_input",
+      "summary": "Relay produced overnight evidence that needs operator review.",
+      "source_path": "relay/reports/night-sample.md",
+      "next_safe_action": "Review relay evidence before protected action."
+    }
+  ],
+  "items_completed": [
+    {
+      "title": "Worker Output Sample",
+      "status": "PASS",
+      "category": "worker_output",
+      "summary": "A safe worker output completed in DRY_RUN.",
+      "source_path": "relay/done/sample.task.json",
+      "next_safe_action": "Review output before commit approval."
+    }
+  ],
+  "items_blocked": [
+    {
+      "title": "Blocked Action Sample",
+      "status": "BLOCKED",
+      "category": "blocked_action",
+      "summary": "A protected action was stopped for operator review.",
+      "source_path": "relay/reports/night-sample.md",
+      "next_safe_action": "Resolve the blocker before APPLY."
+    }
+  ],
+  "items_needing_approval": [
+    {
+      "title": "Approval Sample",
+      "status": "NEEDS_APPROVAL",
+      "category": "approval_request",
+      "summary": "A task is ready for review but needs Anthony approval.",
+      "source_path": "relay/approvals/sample.approval.json",
+      "next_safe_action": "Anthony reviews and approves or rejects the request."
+    }
+  ],
+  "repo_state": {
+    "branch": "main",
+    "repo_dirty": false,
+    "changed_files": [],
+    "untracked_files": [],
+    "status_summary": "Repo tree is clean."
+  },
+  "wins_count": 3,
+  "blocked_count": 1,
+  "approval_needed_count": 2,
+  "worker_notes_count": 4,
+  "next_safe_action": "Review blocked and approval-needed items before any APPLY, commit, push, merge, or worker launch.",
+  "dashboard_cards": [
+    {
+      "title": "Night Supervisor Brief",
+      "status": "WARN",
+      "summary": "3 items completed, 1 blocked, 2 need approval.",
+      "metrics": {
+        "wins": 3,
+        "blocked": 1,
+        "approval_needed": 2,
+        "worker_notes": 4
+      },
+      "next_action": "Review approval queue before running APPLY.",
+      "details_ref": "telemetry/morning_digest/MORNING_DIGEST_LATEST.md"
+    }
+  ],
+  "morning_digest_path": "telemetry/morning_digest/MORNING_DIGEST_LATEST.md",
+  "raw_evidence": [
+    {
+      "source_path": "relay/reports/night-sample.md",
+      "evidence_type": "relay_input",
+      "status": "WARN"
+    }
+  ],
+  "safety_flags": {
+    "no_live_trading": true,
+    "no_broker_execution": true,
+    "no_oanda": true,
+    "no_api_keys": true,
+    "no_real_webhooks": true,
+    "no_real_orders": true,
+    "no_secrets": true,
+    "no_commit": true,
+    "no_push": true,
+    "writes_within_allowed_paths_only": true
+  },
+  "authority_boundary": {
+    "evidence_only": true,
+    "approval_authority": "Anthony Meza",
+    "blocked_capabilities": [
+      "live_trading",
+      "broker_execution",
+      "oanda_integration",
+      "api_key_handling",
+      "real_webhook_execution",
+      "real_order_routing",
+      "secret_handling",
+      "worker_launch",
+      "packet_mutation",
+      "approval_mutation",
+      "git_stage_commit_push"
+    ]
+  }
+}

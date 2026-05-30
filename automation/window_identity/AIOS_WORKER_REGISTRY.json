@@ -199,6 +199,30 @@
       ],
       "nextCommand": "git status --short --branch",
       "enabled": true
+    },
+    {
+      "marker": "T9 BACKUP",
+      "title": "💾 T9 BACKUP",
+      "color": "DarkCyan",
+      "identityBanner": "[BACKUP] T9 BACKUP :: ONLINE",
+      "beginMarker": "[BACKUP] T9 BACKUP :: BEGIN",
+      "endMarker": "[BACKUP] T9 BACKUP :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 84,
+      "role": "Snapshot worker for read-only repo copies to the T9_FOB drive. Active repo is never mutated.",
+      "allowedActions": [
+        "Copy C:\\Dev\\Ai.Os to a timestamped D:\\T9_FOB snapshot",
+        "Exclude node_modules, __pycache__, .pytest_cache, .codex, .git\\logs",
+        "Report source data size, copied data size, and verification result"
+      ],
+      "blockedActions": [
+        "No edits, staging, commits, or pushes to the active repo",
+        "No destructive cleanup or deletion of prior snapshots",
+        "No startup or scheduled task changes",
+        "No broker, OANDA, live trading, API key, or secret actions"
+      ],
+      "nextCommand": ".\\scripts\\backup\\Start-AiOsT9SnapshotBackup.ps1",
+      "enabled": true
     }
   ]
 }

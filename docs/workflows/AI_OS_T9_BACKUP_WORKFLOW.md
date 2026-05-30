@@ -166,6 +166,41 @@ Initial preview behavior should:
 Manual APPLY backup behavior may create one timestamped snapshot only after
 explicit operator approval.
 
+## Backup-Session Data-Size Telemetry
+
+Every backup run must report data-size telemetry so the operator can confirm
+what was measured, what already exists on the T9, and what this run produced.
+
+Required fields:
+
+- **Source data measured** — repo size after exclusions.
+- **Current backup size (T9)** — cumulative size of `D:\T9_FOB` after this run.
+- **Copied this run** — file count and byte size copied this session.
+- **Skipped (already current)** — file count robocopy left unchanged.
+- **Produced this backup session** — byte size written by this run.
+
+The same summary must appear in Preview/DRY_RUN where measurable. In Preview,
+`Copied this run`, `Skipped`, and `Produced this backup session` read
+`pending (preview — robocopy not run)` because robocopy does not execute.
+
+Required readable text (console window and report):
+
+```text
+Source data measured:        1.39 GB
+Current backup size (T9):    1.42 GB
+Copied this run:             18 files / 42.7 MB
+Skipped (already current):   1,204 files
+Produced this backup session: 248 MB
+```
+
+Automation mode (`-OutputJson`) must expose these as machine fields without
+dirtying stdout: `source_bytes`, `dest_bytes`, `copied_bytes`, `files_copied`,
+`files_skipped`, plus the `_human` formatted variants.
+
+Implemented in `scripts/backup/Start-AiOsT9SnapshotBackup.ps1`. File counts are
+parsed from the robocopy summary `Files :` row; when unavailable the script
+reports `count unavailable` rather than a misleading zero.
+
 ## Robocopy Safety Notes
 
 Robocopy must not run in this specification lane.
