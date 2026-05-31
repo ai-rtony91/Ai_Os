@@ -2,6 +2,7 @@ param(
     [switch]$Apply,
     [switch]$AllowNonMain,
     [switch]$AlertApply,
+    [switch]$StateApply,
     [switch]$AlertSelfTest
 )
 
@@ -123,7 +124,7 @@ $gitStatus = (& git status --short --branch) -join "`n"
 
 Write-AiosLine "INFO" "repo_path=$repoRoot"
 Write-AiosLine "INFO" "branch=$branch"
-Write-AiosLine "INFO" "mode=$(if ($Apply) { 'APPLY' } elseif ($AlertApply) { 'ALERT_APPLY' } else { 'DRY_RUN' })"
+Write-AiosLine "INFO" "mode=$(if ($Apply) { 'APPLY' } elseif ($AlertApply -or $StateApply) { 'PARTIAL_APPLY' } else { 'DRY_RUN' })"
 
 if ($branch -ne "main" -and -not $AllowNonMain) {
     Write-AiosLine "BLOCKED" "Autonomy Bridge only runs on main unless -AllowNonMain is explicitly passed."
@@ -181,6 +182,17 @@ if (-not $receipt.bridge_state.dashboard_cards -or $receipt.bridge_state.dashboa
 
 $alertMarkdown = ConvertTo-AiosAlertMarkdown -BridgeState $receipt.bridge_state
 $alertPath = Join-Path $repoRoot $alertOutput
+$bridgeStateOutput = "telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json"
+$bridgeStatePath = Join-Path $repoRoot $bridgeStateOutput
+
+if ($StateApply -and -not $Apply) {
+    $stateDir = Split-Path -Parent $bridgeStatePath
+    if (-not (Test-Path $stateDir)) {
+        New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+    }
+    $receipt.bridge_state | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $bridgeStatePath -Encoding UTF8
+    Write-AiosLine "PASS" "bridge_state_written=$bridgeStateOutput"
+}
 
 if ($Apply -or $AlertApply) {
     $alertDir = Split-Path -Parent $alertPath
@@ -197,8 +209,8 @@ Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"
 Write-AiosLine "PASS" "planned_output_paths=$($receipt.planned_output_paths -join ', ')"
 if ($Apply) {
     Write-AiosLine "PASS" "written_output_paths=$($receipt.written_output_paths -join ', ')"
-} elseif ($AlertApply) {
-    Write-AiosLine "PASS" "bridge DRY_RUN only; alert file written."
+} elseif ($AlertApply -or $StateApply) {
+    Write-AiosLine "PASS" "bridge DRY_RUN only; partial local outputs written."
 } else {
     Write-AiosLine "PASS" "DRY_RUN only; no files written."
 }

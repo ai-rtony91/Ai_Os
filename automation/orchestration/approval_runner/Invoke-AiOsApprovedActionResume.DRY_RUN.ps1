@@ -33,12 +33,14 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Path
 $relayRoot = Join-Path $repoRoot "relay"
 $approvedDir = Join-Path $relayRoot "approvals\approved"
+$resumedDir = Join-Path $approvedDir "resumed"
 $doneDir = Join-Path $relayRoot "done"
 $handoffDirs = @(
     (Join-Path $relayRoot "handoffs"),
     (Join-Path $relayRoot "handoffs\processed")
 )
 $inboxDir = Join-Path $relayRoot "inbox"
+$runnerLogPath = Join-Path $relayRoot "logs\approval_resume.log"
 
 $originFields = @(
     "origin_id",
@@ -211,14 +213,37 @@ function New-AiOsResumePacket {
     }
 }
 
+function Write-AiOsApprovalResumeLog {
+    param([Parameter(Mandatory = $true)][string]$Message)
+
+    $line = "{0} {1}" -f (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"), $Message
+    if ($Apply) {
+        $logDir = Split-Path -Parent $runnerLogPath
+        if (-not (Test-Path -LiteralPath $logDir -PathType Container)) {
+            New-Item -ItemType Directory -Path $logDir -Force | Out-Null
+        }
+        Add-Content -LiteralPath $runnerLogPath -Value $line
+    }
+    Write-Host $line
+}
+
 if (-not (Test-Path -LiteralPath $approvedDir -PathType Container)) {
-    throw "Approved approval folder not found: $approvedDir"
+    if ($Apply) {
+        New-Item -ItemType Directory -Path $approvedDir -Force | Out-Null
+    } else {
+        Write-Host "[DRY_RUN] approved approval folder not found: $approvedDir"
+    }
+}
+
+$approvalCandidates = @()
+if (Test-Path -LiteralPath $approvedDir -PathType Container) {
+    $approvalCandidates = @(Get-ChildItem -LiteralPath $approvedDir -File -ErrorAction SilentlyContinue)
 }
 
 $approvalFiles = @(
-    Get-ChildItem -LiteralPath $approvedDir -File -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -ne ".keep" } |
-        Sort-Object Name
+    $approvalCandidates |
+    Where-Object { $_.Name -ne ".keep" } |
+    Sort-Object Name
 )
 
 $mappings = @()
@@ -246,17 +271,27 @@ foreach ($file in $approvalFiles) {
     $originPayload = Read-AiOsOriginPayload -Origin $origin
     $resumePacket = New-AiOsResumePacket -Approval $approval -Origin $origin -OriginPayload $originPayload
     $resumeTarget = Join-Path $inboxDir ("{0}.task.json" -f $resumePacket.id)
+    $resumedTarget = Join-Path $resumedDir $file.Name
+    $alreadyResumed = (Test-Path -LiteralPath $resumeTarget -PathType Leaf) -or (Test-Path -LiteralPath $resumedTarget -PathType Leaf)
 
     $mappings += [pscustomobject]@{
         approval = $file.Name
         origin = $origin.path.Substring($repoRoot.Length + 1) -replace "\\", "/"
         resume_target = $resumeTarget.Substring($repoRoot.Length + 1) -replace "\\", "/"
-        status = "MATCHED"
-        reason = "explicit origin matched"
+        status = if ($alreadyResumed) { "ALREADY_RESUMED" } else { "MATCHED" }
+        reason = if ($alreadyResumed) { "resume target or resumed approval already exists" } else { "explicit origin matched" }
     }
 
-    if ($Apply) {
+    if ($Apply -and -not $alreadyResumed) {
+        if (-not (Test-Path -LiteralPath $inboxDir -PathType Container)) {
+            New-Item -ItemType Directory -Path $inboxDir -Force | Out-Null
+        }
+        if (-not (Test-Path -LiteralPath $resumedDir -PathType Container)) {
+            New-Item -ItemType Directory -Path $resumedDir -Force | Out-Null
+        }
         $resumePacket | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $resumeTarget -Encoding UTF8
+        Move-Item -LiteralPath $file.FullName -Destination $resumedTarget
+        Write-AiOsApprovalResumeLog -Message ("RESUMED approval={0} origin={1} target={2}" -f $file.Name, $originPayload.id, ($resumeTarget.Substring($repoRoot.Length + 1) -replace "\\", "/"))
     }
 }
 

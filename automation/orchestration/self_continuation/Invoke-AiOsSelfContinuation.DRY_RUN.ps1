@@ -212,6 +212,13 @@ try {
         exit 0
     }
 
+    if (-not (Test-Path -LiteralPath $bridgeStatePath -PathType Leaf)) {
+        $result.status = "STOPPED"
+        $result.reason = "bridge state missing: $bridgeStateRel"
+        [pscustomobject]$result | ConvertTo-Json -Depth 8
+        exit 0
+    }
+
     $bridgeState = Read-JsonFile -Path $bridgeStatePath
     $cycle = Test-CycleClean -BridgeState $bridgeState
     $result.cycle = $cycle
