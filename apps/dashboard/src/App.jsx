@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import operatorStatusFixture from "../mock-data/aios-operator-status-v1.example.json";
 import mockRuntimeVisibility from "../mock-data/aios-runtime-visibility-v1.example.json";
+import { autonomyBridgeStatePayload } from "virtual:aios-autonomy-bridge-state";
 import {
   RUNTIME_VISIBILITY_SOURCE_LABELS,
   mapRuntimeVisibilityDisplayModel
@@ -23,6 +24,12 @@ const operatorStatusPanels = [
   operatorStatusFixture.pr_branch_status,
   operatorStatusFixture.next_safe_action
 ];
+
+const autonomyBridgeState = autonomyBridgeStatePayload.data ?? {};
+const autonomyBridgeCards = Array.isArray(autonomyBridgeState.dashboard_cards)
+  ? autonomyBridgeState.dashboard_cards
+  : [];
+const autonomyBridgeSourceIsLive = autonomyBridgeStatePayload.sourceLabel === "LIVE";
 
 function formatTime(value) {
   if (!value) {
@@ -153,6 +160,45 @@ function OperatorStatusPanel({ panel }) {
   );
 }
 
+function AutonomyBridgeCard({ card }) {
+  const metrics = card.metrics ?? {};
+
+  return (
+    <article className="autonomyBridgeCard">
+      <div className="operatorStatusTop">
+        <h3>{card.title ?? "Autonomy Bridge"}</h3>
+        <StatusPill value={card.status ?? "UNKNOWN"} />
+      </div>
+      <p>{card.summary ?? autonomyBridgeState.plain_summary ?? "No bridge summary available."}</p>
+      <div className="metricsGrid autonomyMetrics">
+        <Metric label="Wins" value={metrics.wins ?? autonomyBridgeState.wins_count ?? "UNKNOWN"} />
+        <Metric
+          label="Blocked"
+          value={metrics.blocked ?? autonomyBridgeState.blocked_count ?? "UNKNOWN"}
+          tone={metricTone(metrics.blocked ?? autonomyBridgeState.blocked_count, "danger")}
+        />
+        <Metric
+          label="Approval needed"
+          value={
+            metrics.approval_needed ??
+            autonomyBridgeState.approval_needed_count ??
+            "UNKNOWN"
+          }
+          tone={metricTone(
+            metrics.approval_needed ?? autonomyBridgeState.approval_needed_count,
+            "warn"
+          )}
+        />
+        <Metric
+          label="Worker notes"
+          value={metrics.worker_notes ?? autonomyBridgeState.worker_notes_count ?? "UNKNOWN"}
+        />
+      </div>
+      <p className="nextAction">{card.next_action ?? autonomyBridgeState.next_safe_action}</p>
+    </article>
+  );
+}
+
 export default function App() {
   const [runtimeVisibility, setRuntimeVisibility] = useState(mockVisibilityDisplay);
   const [visibilityLoading, setVisibilityLoading] = useState(false);
@@ -249,6 +295,38 @@ export default function App() {
           {operatorStatusFixture.warnings.map((warning) => (
             <span key={warning}>{warning}</span>
           ))}
+        </div>
+      </section>
+
+      <section className="autonomyBridgeSlice" aria-labelledby="autonomy-bridge-title">
+        <div className="operatorStatusIntro">
+          <div>
+            <p className="eyebrow">Autonomy bridge</p>
+            <h2 id="autonomy-bridge-title">Night Supervisor State</h2>
+            <p>
+              {autonomyBridgeState.plain_summary ??
+                "Autonomy bridge state is unavailable."}
+            </p>
+          </div>
+          <div className="headerStatus">
+            <StatusPill value={autonomyBridgeSourceIsLive ? "LIVE" : "sample"} />
+            <StatusPill value={`source: ${autonomyBridgeStatePayload.sourcePath}`} />
+            <StatusPill value={`schema: ${autonomyBridgeState.schema ?? "UNKNOWN"}`} />
+          </div>
+        </div>
+        {autonomyBridgeStatePayload.fallbackReason ? (
+          <div className="warningStrip bridgeWarning">
+            <span>Live bridge state unavailable; showing sample data.</span>
+          </div>
+        ) : null}
+        <div className="autonomyBridgeGrid">
+          {autonomyBridgeCards.length > 0 ? (
+            autonomyBridgeCards.map((card) => (
+              <AutonomyBridgeCard key={card.title ?? "autonomy-bridge-card"} card={card} />
+            ))
+          ) : (
+            <AutonomyBridgeCard card={{ title: "Night Supervisor Brief" }} />
+          )}
         </div>
       </section>
 

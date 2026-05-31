@@ -126,6 +126,13 @@ h3 {
   padding: 18px 32px;
 }
 
+.autonomyBridgeSlice {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
+  padding: 18px 32px;
+}
+
 .operatorStatusIntro,
 .operatorStatusTop {
   align-items: flex-start;
@@ -152,6 +159,36 @@ h3 {
   border-radius: 8px;
   min-width: 0;
   padding: 14px;
+}
+
+.autonomyBridgeGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.autonomyBridgeCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.autonomyBridgeCard p {
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.autonomyMetrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.bridgeWarning {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
 }
 
 .operatorStatusMeta {
@@ -484,6 +521,10 @@ h3 {
     padding: 16px;
   }
 
+  .autonomyBridgeSlice {
+    padding: 16px;
+  }
+
   .operatorStatusIntro,
   .operatorStatusTop {
     flex-direction: column;
@@ -497,6 +538,7 @@ h3 {
   .queueStrip,
   .workerGrid,
   .operatorStatusGrid,
+  .autonomyMetrics,
   .pressureGrid,
   .failureSplit {
     grid-template-columns: 1fr;
