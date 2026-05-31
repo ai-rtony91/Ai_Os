@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/governance/protected_action_packet.schema.json",
+  "title": "AI_OS Protected Action Packet",
+  "description": "Review contract for protected repo actions. This packet is evidence and routing metadata only; it does not authorize execution by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "packet_id",
+    "generated_at",
+    "requested_action",
+    "approval_marker_required",
+    "approval_marker_status",
+    "exact_command_preview",
+    "repo_path",
+    "branch",
+    "target_files",
+    "target_branch",
+    "target_pr",
+    "validator_evidence",
+    "blocked_paths",
+    "risk_flags",
+    "decision",
+    "reason",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_PROTECTED_ACTION_PACKET.v1"
+    },
+    "packet_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requested_action": {
+      "type": "string",
+      "enum": [
+        "STAGE_EXACT_FILES",
+        "COMMIT",
+        "PUSH",
+        "PR_CREATE",
+        "MERGE",
+        "BRANCH_DELETE",
+        "RESET_OR_CLEAN",
+        "UNKNOWN"
+      ]
+    },
+    "approval_marker_required": {
+      "type": "string",
+      "enum": [
+        "APPROVE_STAGE_EXACT_FILES",
+        "APPROVE_COMMIT",
+        "APPROVE_PUSH",
+        "APPROVE_PR_CREATE",
+        "APPROVE_MERGE",
+        "APPROVE_BRANCH_DELETE",
+        "APPROVE_RESET_OR_CLEAN",
+        "BLOCK_PROTECTED_ACTION"
+      ]
+    },
+    "approval_marker_status": {
+      "type": "string",
+      "enum": [
+        "MISSING",
+        "GRANTED",
+        "REJECTED",
+        "EXPIRED",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "exact_command_preview": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "target_branch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_pr": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "validator_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "name",
+          "result"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "type": "string",
+            "minLength": 1
+          },
+          "details_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "blocked_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risk_flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "SAFE_TO_RUN",
+        "HUMAN_APPROVAL_REQUIRED",
+        "BLOCKED"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}

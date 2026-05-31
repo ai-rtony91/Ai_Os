@@ -45,6 +45,63 @@ FORBIDDEN_PATH_TERMS = (
     "real order",
 )
 STATUS_ORDER = {"BLOCKED": 4, "NEEDS_APPROVAL": 3, "WARN": 2, "UNKNOWN": 1, "PASS": 0}
+EXPLICIT_STATUS_MAP = {
+    "BLOCKED": "BLOCKED",
+    "UNSAFE_BLOCKED": "BLOCKED",
+    "FAILED": "BLOCKED",
+    "FAIL": "BLOCKED",
+    "ERROR": "BLOCKED",
+    "NEEDS_APPROVAL": "NEEDS_APPROVAL",
+    "WAITING_APPROVAL": "NEEDS_APPROVAL",
+    "WAITING_REVIEW": "NEEDS_APPROVAL",
+    "APPROVAL_REQUIRED": "NEEDS_APPROVAL",
+    "PENDING_APPROVAL": "NEEDS_APPROVAL",
+    "WAITING": "NEEDS_APPROVAL",
+    "WARN": "WARN",
+    "WARNING": "WARN",
+    "REVIEW": "WARN",
+    "STALE": "WARN",
+    "UNKNOWN": "UNKNOWN",
+    "PASS": "PASS",
+    "READY": "PASS",
+    "COMPLETE": "PASS",
+    "DONE": "PASS",
+    "READY_FOR_NEXT_SAFE_ACTION": "PASS",
+}
+RISK_STATUS_MAP = {
+    "BLOCKED": "BLOCKED",
+    "BLOCKER": "BLOCKED",
+    "HIGH": "NEEDS_APPROVAL",
+    "MEDIUM": "NEEDS_APPROVAL",
+    "LOW": "WARN",
+}
+BLOCKER_FALLBACK_TERMS = (
+    "risk level: blocker",
+    "risk level:** blocker",
+    "live now",
+    "real order",
+    "buy order",
+    "sell order",
+    "place a buy",
+    "place a sell",
+    "broker execution",
+    "live trading",
+    "oanda",
+    "api key",
+    "secret",
+    "credential",
+    "webhook",
+)
+APPROVAL_FALLBACK_TERMS = (
+    "approval required",
+    "needs approval",
+    "waiting approval",
+    "waiting_approval",
+    "approval_required",
+    "human approval",
+    "human_review_required",
+)
+WARN_FALLBACK_TERMS = ("warn", "review", "stale", "unknown")
 
 
 def utc_now() -> str:
@@ -81,36 +138,90 @@ def read_text_preview(path: Path, limit: int = 900) -> str:
     return " ".join(text.split())[:limit]
 
 
+def _normalize_token(value: Any) -> str:
+    return str(value or "").strip().upper().replace("-", "_").replace(" ", "_")
+
+
+def _iter_explicit_values(item: dict[str, Any]) -> list[str]:
+    values: list[str] = []
+    for key in (
+        "status",
+        "state",
+        "supervisor_status",
+        "night_supervisor_status",
+        "classification",
+        "result",
+    ):
+        if item.get(key) is not None:
+            values.append(_normalize_token(item.get(key)))
+    for key in ("risk_level", "risk"):
+        if item.get(key) is not None:
+            values.append(_normalize_token(item.get(key)))
+    for key in ("gate_flags", "flags"):
+        raw_flags = item.get(key)
+        if isinstance(raw_flags, list):
+            values.extend(_normalize_token(flag) for flag in raw_flags)
+        elif raw_flags is not None:
+            values.append(_normalize_token(raw_flags))
+    return values
+
+
+def _status_category(status: str, path: str, text: str) -> str:
+    if status == "BLOCKED":
+        return "blocked_action"
+    if status == "NEEDS_APPROVAL":
+        return "approval_request"
+    if status == "WARN":
+        return "validator_output" if "validator" in text or "validator" in path else "worker_output"
+    if status == "PASS":
+        return "worker_output"
+    if path.startswith("relay/"):
+        return "relay_input"
+    return "unknown"
+
+
+def _max_status(*statuses: str) -> str:
+    known = [status for status in statuses if status in STATUS_ORDER]
+    if not known:
+        return "UNKNOWN"
+    return max(known, key=lambda status: STATUS_ORDER[status])
+
+
+def _explicit_status(item: dict[str, Any]) -> str | None:
+    status: str | None = None
+    for value in _iter_explicit_values(item):
+        if value in EXPLICIT_STATUS_MAP:
+            status = _max_status(status or "PASS", EXPLICIT_STATUS_MAP[value])
+        if value in RISK_STATUS_MAP:
+            status = _max_status(status or "PASS", RISK_STATUS_MAP[value])
+        if "APPROVAL" in value or "HUMAN_REVIEW" in value:
+            status = _max_status(status or "PASS", "NEEDS_APPROVAL")
+        if any(term in value for term in ("BLOCK", "UNSAFE", "PROTECTED_ACTION")):
+            status = _max_status(status or "PASS", "BLOCKED")
+    return status
+
+
+def _fallback_status(path: str, text: str, raw_status: str) -> str:
+    if "/error/" in path or any(term in text for term in BLOCKER_FALLBACK_TERMS):
+        return "BLOCKED"
+    if "approval" in path or any(term in text for term in APPROVAL_FALLBACK_TERMS):
+        return "NEEDS_APPROVAL"
+    if raw_status in {"PASS", "READY", "COMPLETE", "DONE"} or any(term in path for term in ("/done/", "/processed/")):
+        return "PASS"
+    if any(term in text for term in WARN_FALLBACK_TERMS):
+        return "NEEDS_APPROVAL"
+    return "NEEDS_APPROVAL"
+
+
 def classify_item(item: dict[str, Any]) -> dict[str, str]:
     text = " ".join(str(value) for value in item.values()).lower()
     path = str(item.get("source_path", "")).lower().replace("\\", "/")
     raw_status = str(item.get("status") or item.get("state") or item.get("supervisor_status") or "").upper()
 
-    explicit_blocker = (
-        raw_status in {"BLOCKED", "FAILED", "FAIL", "ERROR"}
-        or "/error/" in path
-        or "approval required" in text
-        or "risk level: blocker" in text
-        or "live now" in text
-        or "real order" in text
-        or "place a buy order" in text
-    )
-
-    if "approval" in path or "needs approval" in text or "waiting_approval" in text or raw_status in {"WAITING_APPROVAL", "APPROVAL_REQUIRED"}:
-        status = "NEEDS_APPROVAL"
-        category = "approval_request"
-    elif explicit_blocker:
-        status = "BLOCKED"
-        category = "blocked_action"
-    elif raw_status in {"PASS", "READY", "COMPLETE", "DONE"} or any(term in path for term in ("/done/", "/processed/")):
-        status = "PASS"
-        category = "worker_output"
-    elif any(term in text for term in ("warn", "review", "stale", "unknown")):
-        status = "WARN"
-        category = "validator_output" if "validator" in text else "worker_output"
-    else:
-        status = "UNKNOWN"
-        category = "relay_input" if path.startswith("relay/") else "unknown"
+    explicit = _explicit_status(item)
+    fallback = _fallback_status(path, text, _normalize_token(raw_status))
+    status = _max_status(explicit or "PASS", fallback)
+    category = _status_category(status, path, text)
 
     if "dashboard" in path:
         category = "dashboard_note"
@@ -151,6 +262,8 @@ def collect_source_files(repo_root: str | Path) -> list[Path]:
         ("telemetry/night_supervisor", "*.json"),
         ("telemetry/supervisor_briefs", "*.json"),
         ("telemetry/morning_digest", "*.json"),
+        ("control/operation_glue", "**/*.json"),
+        ("telemetry/operation_glue", "**/*.json"),
         ("automation/orchestration/night_supervisor", "*.json"),
         ("automation/orchestration/night_supervisor", "*.md"),
     ]

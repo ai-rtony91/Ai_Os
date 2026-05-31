@@ -1,0 +1,13 @@
+{
+  "protected_action_gate_status": "WARN",
+  "pending_protected_actions": 3,
+  "pending_commit_packages": 1,
+  "pending_push_requests": 1,
+  "pending_pr_create_requests": 0,
+  "pending_merge_requests": 1,
+  "blocked_unsafe_requests": 2,
+  "last_gate_decision": "BLOCKED",
+  "last_approval_marker": "APPROVE_MERGE",
+  "last_block_reason": "Merge approval does not include branch deletion or local reset.",
+  "next_safe_action": "Review the protected action packet and provide exact current-session approval before execution."
+}

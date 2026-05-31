@@ -5,6 +5,14 @@ import { fileURLToPath } from 'node:url'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 const port = Number(process.env.PORT || 8080)
+const repoRootDir = path.basename(rootDir) === 'dist'
+  ? path.resolve(rootDir, '..', '..', '..')
+  : path.resolve(rootDir, '..', '..')
+const liveAutonomyBridgeStatePath = path.resolve(
+  repoRootDir,
+  process.env.AIOS_AUTONOMY_BRIDGE_STATE_PATH
+    || 'telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json',
+)
 
 const contentTypes = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -39,9 +47,36 @@ function getFilePath(requestUrl) {
   return requestedPath
 }
 
+function isLiveAutonomyBridgeStateRequest(requestUrl) {
+  const parsedUrl = new URL(requestUrl, 'http://localhost')
+  return parsedUrl.pathname === '/live-data/autonomy_bridge_state.json'
+}
+
 const server = http.createServer((request, response) => {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     sendText(response, 405, 'Method not allowed')
+    return
+  }
+
+  if (isLiveAutonomyBridgeStateRequest(request.url)) {
+    fs.stat(liveAutonomyBridgeStatePath, (statError, stats) => {
+      if (statError || !stats.isFile()) {
+        sendText(response, 404, 'Not found')
+        return
+      }
+
+      response.writeHead(200, {
+        'content-type': 'application/json; charset=utf-8',
+        'cache-control': 'no-store',
+      })
+
+      if (request.method === 'HEAD') {
+        response.end()
+        return
+      }
+
+      fs.createReadStream(liveAutonomyBridgeStatePath).pipe(response)
+    })
     return
   }
 

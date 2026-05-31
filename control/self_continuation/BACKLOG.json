@@ -1,0 +1,85 @@
+{
+  "schema": "AIOS_SELF_CONTINUATION_BACKLOG.v1",
+  "enabled": true,
+  "stop_flag_path": "control/self_continuation/STOP",
+  "policy": "docs/governance/SELF_CONTINUATION_POLICY.md",
+  "selection_rule": "highest_priority_ready_green_only",
+  "candidates": [
+    {
+      "id": "AIOS-SC-001",
+      "title": "Review unified approvals for stale or duplicate approval records",
+      "status": "READY",
+      "priority": 10,
+      "risk_level": "GREEN",
+      "gate_flags": [
+        "HUMAN_APPROVAL_REQUIRED",
+        "READ_ONLY_REVIEW",
+        "NO_SOURCE_STORE_MUTATION",
+        "NO_GIT_WRITE"
+      ],
+      "allowed_paths": [
+        "telemetry/approvals/",
+        "relay/approvals/",
+        "docs/governance/"
+      ],
+      "forbidden_paths": [
+        "relay/inbox/",
+        ".git/",
+        "broker/",
+        "secrets/"
+      ],
+      "goal": "Inspect UNIFIED_APPROVALS.json and propose a cleanup plan for stale or duplicate approval records without modifying source approval stores.",
+      "why": "Approval visibility is now unified, but stale or duplicate records should be reviewed before more automation depends on the projection."
+    },
+    {
+      "id": "AIOS-SC-002",
+      "title": "Audit relay reports for missing latest-state summaries",
+      "status": "READY",
+      "priority": 8,
+      "risk_level": "GREEN",
+      "gate_flags": [
+        "HUMAN_APPROVAL_REQUIRED",
+        "READ_ONLY_REVIEW",
+        "NO_GIT_WRITE"
+      ],
+      "allowed_paths": [
+        "relay/reports/",
+        "telemetry/night_supervisor/",
+        "docs/governance/"
+      ],
+      "forbidden_paths": [
+        "relay/inbox/",
+        ".git/",
+        "broker/",
+        "secrets/"
+      ],
+      "goal": "Inspect relay reports and bridge telemetry to identify whether the latest operator-facing state summary is complete and current.",
+      "why": "Self-continuation should only rely on current, scannable state before proposing the next cycle."
+    },
+    {
+      "id": "AIOS-SC-003",
+      "title": "Draft scheduler registration readiness checklist",
+      "status": "READY",
+      "priority": 5,
+      "risk_level": "YELLOW",
+      "gate_flags": [
+        "HUMAN_APPROVAL_REQUIRED",
+        "SCHEDULER_REVIEW_REQUIRED",
+        "NO_TASK_REGISTRATION",
+        "NO_GIT_WRITE"
+      ],
+      "allowed_paths": [
+        "automation/orchestration/scheduler/",
+        "docs/governance/"
+      ],
+      "forbidden_paths": [
+        "relay/inbox/",
+        ".git/",
+        "broker/",
+        "secrets/"
+      ],
+      "goal": "Prepare a review-only readiness checklist for manual scheduler approval without registering, enabling, or starting any scheduled task.",
+      "why": "Scheduler activation is gated and must remain operator-approved."
+    }
+  ]
+}

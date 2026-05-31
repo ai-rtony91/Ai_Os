@@ -36,6 +36,25 @@ The Human Owner is the final authority for APPLY, commits, pushes, merges, high-
 
 No worker, supervisor, validator, telemetry event, dashboard, packet, or automation script may replace Human Owner approval for protected actions.
 
+### Protected Action Packet
+
+A Protected Action Packet is the required review contract for staging, committing, pushing, PR creation, merge, reset, clean, branch deletion, and any equivalent protected repo action.
+
+A packet must name:
+
+- packet ID
+- operator approval marker
+- exact action
+- exact command preview
+- exact files, branch, or PR
+- validator evidence
+- expiry or stop point
+- blocked paths
+- risk flags
+- final decision
+
+The packet is evidence and routing metadata. It does not approve itself. Human Owner approval remains required, and approval for one protected action does not transfer to another protected action.
+
 ## AI Tool Routing Contract
 
 This contract defines the current standard routing pattern for AI_OS tool use. It prevents tool-role confusion and keeps source authority, runtime evidence, and protected actions separated.

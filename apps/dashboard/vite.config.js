@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { cpSync, existsSync } from 'node:fs'
+import { cpSync, existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+
+const autonomyBridgeStateModuleId = 'virtual:aios-autonomy-bridge-state'
+const resolvedAutonomyBridgeStateModuleId = `\0${autonomyBridgeStateModuleId}`
 
 const staticDashboardOutputs = [
   'AIOS_STATIC_PREVIEW.html',
@@ -14,6 +17,70 @@ const staticDashboardOutputs = [
   'package.json',
   'server.js',
 ]
+
+function readJsonFile(filePath) {
+  return JSON.parse(readFileSync(filePath, 'utf8'))
+}
+
+function autonomyBridgeStateLoader() {
+  let rootDir = process.cwd()
+  let repoRootDir = path.resolve(rootDir, '..', '..')
+
+  return {
+    name: 'aios-autonomy-bridge-state-loader',
+    configResolved(config) {
+      rootDir = config.root
+      repoRootDir = path.resolve(rootDir, '..', '..')
+    },
+    resolveId(id) {
+      if (id === autonomyBridgeStateModuleId) {
+        return resolvedAutonomyBridgeStateModuleId
+      }
+
+      return null
+    },
+    load(id) {
+      if (id !== resolvedAutonomyBridgeStateModuleId) {
+        return null
+      }
+
+      const configuredLivePath = process.env.AIOS_AUTONOMY_BRIDGE_STATE_PATH
+      const livePath = configuredLivePath
+        ? path.resolve(repoRootDir, configuredLivePath)
+        : path.resolve(
+            repoRootDir,
+            'telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json',
+          )
+      const samplePath = path.resolve(
+        rootDir,
+        'mock-data/autonomy_bridge_state.sample.json',
+      )
+
+      this.addWatchFile(livePath)
+      this.addWatchFile(samplePath)
+
+      let payload
+
+      try {
+        payload = {
+          sourceLabel: 'LIVE',
+          sourcePath: path.relative(repoRootDir, livePath).replaceAll('\\', '/'),
+          fallbackReason: null,
+          data: readJsonFile(livePath),
+        }
+      } catch (error) {
+        payload = {
+          sourceLabel: 'sample',
+          sourcePath: path.relative(repoRootDir, samplePath).replaceAll('\\', '/'),
+          fallbackReason: error?.message ?? 'Live autonomy bridge state unavailable.',
+          data: readJsonFile(samplePath),
+        }
+      }
+
+      return `export const autonomyBridgeStatePayload = ${JSON.stringify(payload)};`
+    },
+  }
+}
 
 function copyStaticDashboardRuntime() {
   let rootDir = process.cwd()
@@ -49,7 +116,7 @@ function copyStaticDashboardRuntime() {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), copyStaticDashboardRuntime()],
+  plugins: [react(), autonomyBridgeStateLoader(), copyStaticDashboardRuntime()],
   server: {
     proxy: {
       '/api': 'http://localhost:5050',

@@ -8,6 +8,33 @@ This is a governance and workflow specification. It does not create an executabl
 
 The gate reduces repeated operator approval prompts only when the exact action is already proven safe. It does not authorize blind autopilot.
 
+This gate is now part of the broader Protected Action Gate. It may confirm that a requested protected action is safe enough to present for execution, but it does not create Human Owner approval by itself.
+
+## Approval Markers
+
+Protected action approval must be current-session, exact-scope, and action-specific.
+
+Required markers:
+
+| Marker | Protected action |
+|---|---|
+| `APPROVE_STAGE_EXACT_FILES` | Stage exact named files only. |
+| `APPROVE_COMMIT` | Create one exact commit with the approved message and cached diff. |
+| `APPROVE_PUSH` | Push one exact branch to one exact remote target. |
+| `APPROVE_PR_CREATE` | Create one exact pull request with the approved base, head, title, and body. |
+| `APPROVE_MERGE` | Merge one exact PR or merge target. |
+| `APPROVE_BRANCH_DELETE` | Delete one exact branch. |
+| `APPROVE_RESET_OR_CLEAN` | Run one exact reset or clean recovery action. |
+| `BLOCK_PROTECTED_ACTION` | Explicitly deny or stop a protected action. |
+
+Approval markers do not transfer between actions. Stage approval does not approve commit. Commit approval does not approve push. Push approval does not approve PR creation. PR creation approval does not approve merge. Merge approval does not approve branch deletion, reset, clean, or local sync.
+
+CI pass, validator PASS, dashboard state, supervisor output, or PR readiness output does not authorize merge. Merge requires `APPROVE_MERGE` and the exact PR or merge target.
+
+Merge approval does not include branch deletion unless `APPROVE_BRANCH_DELETE` is separately present.
+
+Gate output confirms safety classification only. Human Owner approval remains required for every protected action.
+
 ## Gate States
 
 The gate must return exactly one of these states:

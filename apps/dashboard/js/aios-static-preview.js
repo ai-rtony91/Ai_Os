@@ -49,6 +49,13 @@ const workTableAiCards = document.querySelector("[data-work-table-ai-cards]");
 const workTableAiSafeActions = document.querySelector("[data-work-table-ai-safe-actions]");
 const workTableAiBlockedActions = document.querySelector("[data-work-table-ai-blocked-actions]");
 const workTableAiSources = document.querySelector("[data-work-table-ai-sources]");
+const autonomyBridgeStatus = document.querySelector("[data-autonomy-bridge-status]");
+const autonomyBridgeTitle = document.querySelector("[data-autonomy-bridge-title]");
+const autonomyBridgeSummary = document.querySelector("[data-autonomy-bridge-summary]");
+const autonomyBridgeSource = document.querySelector("[data-autonomy-bridge-source]");
+const autonomyBridgeSchema = document.querySelector("[data-autonomy-bridge-schema]");
+const autonomyBridgeCards = document.querySelector("[data-autonomy-bridge-cards]");
+const autonomyBridgeNext = document.querySelector("[data-autonomy-bridge-next]");
 const dashboardThemeSelector = document.querySelector("[data-theme-selector]");
 const youtubeRadioDock = document.querySelector("[data-youtube-radio-dock]");
 const youtubeRadioState = document.querySelector("[data-youtube-radio-state]");
@@ -74,6 +81,8 @@ const dashboardThemeMap = {
   "high-contrast": "theme-high-contrast"
 };
 const toolRegistryFixturePath = "mock-data/tool-registry-status-fixture.example.json";
+const autonomyBridgeLivePath = "/live-data/autonomy_bridge_state.json";
+const autonomyBridgeSamplePath = "mock-data/autonomy_bridge_state.sample.json";
 const toolRegistrySummaryStatuses = ["READY", "INSTALLED", "MISSING", "NEEDS_LOGIN", "NEEDS_CONFIG", "BLOCKED", "UNKNOWN"];
 const workTableAiFixturePath = "mock-data/work-table-ai-fixture.example.json";
 const workTableAiActionsFixturePath = "mock-data/work-table-ai-actions.example.json";
@@ -3390,6 +3399,93 @@ async function loadJsonFixture(path, fallback) {
   }
 }
 
+async function loadAutonomyBridgeState() {
+  const sources = [
+    { path: autonomyBridgeLivePath, sourceLabel: "LIVE" },
+    { path: autonomyBridgeSamplePath, sourceLabel: "sample" }
+  ];
+
+  for (const source of sources) {
+    try {
+      const response = await fetch(source.path, { cache: "no-store" });
+      if (!response.ok) continue;
+      return {
+        data: await response.json(),
+        sourceLabel: source.sourceLabel,
+        sourcePath: source.path
+      };
+    } catch {
+      // Try the next local source.
+    }
+  }
+
+  return {
+    data: {},
+    sourceLabel: "sample",
+    sourcePath: autonomyBridgeSamplePath
+  };
+}
+
+function renderAutonomyBridgeMetric(label, value, state = "unknown") {
+  const metric = document.createElement("div");
+  metric.className = `autonomy-bridge-metric ${state}`;
+  const metricLabel = document.createElement("span");
+  metricLabel.textContent = label;
+  const metricValue = document.createElement("strong");
+  metricValue.textContent = formatMetricValue(value);
+  metric.append(metricLabel, metricValue);
+  return metric;
+}
+
+function renderAutonomyBridgeCard(card, bridgeState) {
+  const item = document.createElement("article");
+  item.className = "autonomy-bridge-card";
+
+  const header = document.createElement("div");
+  header.className = "autonomy-bridge-card-header";
+  const title = document.createElement("strong");
+  title.textContent = card.title || "Night Supervisor Brief";
+  const status = document.createElement("span");
+  status.className = `autonomy-bridge-pill ${normalizeStatusState(card.status)}`;
+  status.textContent = card.status || "UNKNOWN";
+  header.append(title, status);
+
+  const summary = document.createElement("p");
+  summary.textContent = card.summary || bridgeState.plain_summary || "Bridge summary unavailable.";
+
+  const metrics = card.metrics || {};
+  const metricGrid = document.createElement("div");
+  metricGrid.className = "autonomy-bridge-metrics";
+  metricGrid.append(
+    renderAutonomyBridgeMetric("Wins", metrics.wins ?? bridgeState.wins_count, "pass"),
+    renderAutonomyBridgeMetric("Blocked", metrics.blocked ?? bridgeState.blocked_count, "blocked"),
+    renderAutonomyBridgeMetric("Approval needed", metrics.approval_needed ?? bridgeState.approval_needed_count, "warn"),
+    renderAutonomyBridgeMetric("Worker notes", metrics.worker_notes ?? bridgeState.worker_notes_count, "unknown")
+  );
+
+  item.append(header, summary, metricGrid);
+  return item;
+}
+
+async function renderAutonomyBridgeState() {
+  if (!autonomyBridgeStatus) return;
+
+  const payload = await loadAutonomyBridgeState();
+  const bridgeState = payload.data || {};
+  const cards = Array.isArray(bridgeState.dashboard_cards) ? bridgeState.dashboard_cards : [];
+
+  autonomyBridgeStatus.dataset.source = payload.sourceLabel.toLowerCase();
+  autonomyBridgeTitle.textContent = "Night Supervisor State";
+  autonomyBridgeSummary.textContent = bridgeState.plain_summary || "Autonomy bridge state unavailable.";
+  autonomyBridgeSource.textContent = payload.sourceLabel;
+  autonomyBridgeSchema.textContent = `schema: ${bridgeState.schema || "UNKNOWN"}`;
+  autonomyBridgeNext.textContent = bridgeState.next_safe_action || "Next safe action unavailable.";
+  autonomyBridgeCards.replaceChildren(
+    ...(cards.length > 0 ? cards : [{ title: "Night Supervisor Brief" }])
+      .map((card) => renderAutonomyBridgeCard(card, bridgeState))
+  );
+}
+
 function normalizeStatusState(value) {
   const raw = String(value || "UNKNOWN").toUpperCase();
   if (raw.includes("FAIL") || raw.includes("INVALID")) return "fail";
@@ -4886,6 +4982,7 @@ setAssistantMode(activeAssistantMode);
 loadStatusOverview();
 loadToolRegistryStatus();
 loadWorkTableAiInsights();
+renderAutonomyBridgeState();
 
 window.setInterval(() => {
   if (youtubeRadioLastKnownPlaying) {

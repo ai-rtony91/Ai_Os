@@ -3,7 +3,8 @@ param(
     [string]$SourceRepo = "C:\Dev\Ai.Os",
     [string]$BackupRoot = "D:\T9_FOB",
     [switch]$Preview,
-    [switch]$OutputJson
+    [switch]$OutputJson,
+    [switch]$AllowDirty
 )
 
 Set-StrictMode -Version Latest
@@ -54,18 +55,149 @@ function Get-AiOsDirectorySize {
     return $total
 }
 
+function Get-AiOsGitStatus {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $statusLines = @(git -C $Path status --short --branch)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to read git status for source repo: $Path"
+    }
+
+    return [pscustomobject]@{
+        lines = $statusLines
+        is_clean = (@($statusLines | Select-Object -Skip 1).Count -eq 0)
+    }
+}
+
+function Get-AiOsGitInfo {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $branch = (git -C $Path branch --show-current).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to read git branch for source repo: $Path"
+    }
+
+    $commitHash = (git -C $Path rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to read git commit for source repo: $Path"
+    }
+
+    $commitShort = (git -C $Path rev-parse --short HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        throw "Unable to read short git commit for source repo: $Path"
+    }
+
+    return [pscustomobject]@{
+        branch = $branch
+        commit_hash = $commitHash
+        commit_short = $commitShort
+    }
+}
+
+function Get-AiOsProtectedActionLocks {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$BackupReportRoot,
+        [Parameter(Mandatory = $true)][string]$BackupLockPath
+    )
+
+    $lockRoots = @(
+        (Join-Path $RepoRoot "automation\orchestration\locks"),
+        $BackupReportRoot
+    )
+    $protectedPattern = "protected|git|commit|push|merge|stage|staging|reset|clean|branch|\bpr\b|pull request"
+    $locks = @()
+
+    foreach ($root in $lockRoots) {
+        if (-not (Test-Path -LiteralPath $root -PathType Container)) {
+            continue
+        }
+
+        $candidates = @(Get-ChildItem -LiteralPath $root -Recurse -File -Force -ErrorAction SilentlyContinue | Where-Object {
+            $_.Name -like "*.lock" -or $_.Name -like "*.lock.json"
+        })
+
+        foreach ($candidate in $candidates) {
+            if ($candidate.FullName -ieq $BackupLockPath) {
+                continue
+            }
+
+            $nameMatch = $candidate.Name -match $protectedPattern
+            $contentMatch = $false
+            try {
+                $contentMatch = [bool](Select-String -LiteralPath $candidate.FullName -Pattern $protectedPattern -Quiet -ErrorAction Stop)
+            } catch {
+                $contentMatch = $false
+            }
+
+            if ($nameMatch -or $contentMatch) {
+                $locks += [pscustomobject]@{
+                    path = $candidate.FullName
+                    reason = "protected-action-or-git-lock"
+                }
+            }
+        }
+    }
+
+    return @($locks)
+}
+
+function New-AiOsBackupLock {
+    param(
+        [Parameter(Mandatory = $true)][string]$BackupReportRoot,
+        [Parameter(Mandatory = $true)][string]$BackupLockPath,
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)][string]$SnapshotPath
+    )
+
+    if (Test-Path -LiteralPath $BackupLockPath) {
+        throw "BACKUP_LOCK_EXISTS: $BackupLockPath"
+    }
+
+    if (-not (Test-Path -LiteralPath $BackupReportRoot -PathType Container)) {
+        New-Item -ItemType Directory -Path $BackupReportRoot | Out-Null
+    }
+
+    $lock = [ordered]@{
+        schema = "AIOS_BACKUP_LOCK.v1"
+        status = "IN_PROGRESS"
+        created_at = (Get-Date).ToString("o")
+        source_path = $SourcePath
+        snapshot_path = $SnapshotPath
+        process_id = $PID
+    }
+
+    $lock | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $BackupLockPath -Encoding UTF8
+}
+
+function Remove-AiOsBackupLock {
+    param([Parameter(Mandatory = $true)][string]$BackupLockPath)
+
+    if (Test-Path -LiteralPath $BackupLockPath) {
+        Remove-Item -LiteralPath $BackupLockPath -Force
+    }
+}
+
 function Get-AiOsRobocopyCounts {
     # Robocopy still prints its summary table under /NFL /NDL. Parse the
     # "Files :" row for Copied and Skipped counts. Columns are:
     # Total Copied Skipped Mismatch FAILED Extras
-    param([Parameter(Mandatory = $true)][string[]]$Output)
+    param([AllowEmptyCollection()][AllowNull()][string[]]$Output = @())
 
     $counts = [pscustomobject]@{
         files_copied = -1
         files_skipped = -1
     }
 
+    if ($null -eq $Output -or $Output.Count -eq 0) {
+        return $counts
+    }
+
     foreach ($line in $Output) {
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+
         if ($line -match '^\s*Files\s*:\s+(\d+)\s+(\d+)\s+(\d+)') {
             $counts.files_copied = [int]$Matches[2]
             $counts.files_skipped = [int]$Matches[3]
@@ -99,25 +231,14 @@ function New-AiOsBackupResult {
         mutation_scope = if ($Preview) { "NONE" } else { "BACKUP_SNAPSHOT_ONLY" }
         active_repo_mutation = "NO"
         scheduler_behavior = "NO"
-        runtime_mutation = "NO"
+        runtime_mutation = if ($Preview) { "NO" } else { "BACKUP_DESTINATION_ONLY" }
+        allow_dirty = [bool]$AllowDirty
+        backup_lock_path = $backupLockPath
+        robocopy_log_path = $robocopyLogPath
+        manifest_path = $manifestPath
         generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     }
 }
-
-$expectedSource = "C:\Dev\Ai.Os"
-$expectedBackupRoot = "D:\T9_FOB"
-$normalizedSource = ConvertTo-AiOsFullPath -Path $SourceRepo
-$normalizedBackupRoot = ConvertTo-AiOsFullPath -Path $BackupRoot
-$timestamp = Get-Date -Format "yyyy-MM-dd_HHmm"
-$snapshotName = "AIOS_BACKUP_$timestamp"
-$snapshotPath = Join-Path $normalizedBackupRoot $snapshotName
-$excludedDirs = @(
-    "node_modules",
-    "__pycache__",
-    ".pytest_cache",
-    ".codex",
-    (Join-Path $normalizedSource ".git\logs")
-)
 
 function Set-AiOsBackupWindow {
     # Shrink the console to just fit the banner/text, matching the other worker windows.
@@ -139,6 +260,64 @@ function Set-AiOsBackupWindow {
         # Non-interactive hosts may reject sizing; the backup still runs.
     }
 }
+
+function Write-AiOsBackupManifest {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Status,
+        [Parameter(Mandatory = $true)][int]$RobocopyExitCode,
+        [Parameter(Mandatory = $true)][object]$GitInfo,
+        [Parameter(Mandatory = $true)][object]$GitStatus,
+        [AllowEmptyCollection()][AllowNull()][object[]]$ProtectedLocks = @(),
+        [Parameter(Mandatory = $true)][string]$Message
+    )
+
+    $protectedLocksForManifest = if ($null -eq $ProtectedLocks) { @() } else { @($ProtectedLocks) }
+
+    $manifest = [ordered]@{
+        schema = "AIOS_T9_SNAPSHOT_BACKUP_MANIFEST.v1"
+        backup_id = $snapshotName
+        created_at = (Get-Date).ToString("o")
+        source_path = $normalizedSource
+        destination_path = $snapshotPath
+        branch = $GitInfo.branch
+        commit_hash = $GitInfo.commit_hash
+        commit_short = $GitInfo.commit_short
+        git_status = @($GitStatus.lines)
+        git_status_clean = [bool]$GitStatus.is_clean
+        allow_dirty = [bool]$AllowDirty
+        robocopy_exit_code = $RobocopyExitCode
+        status = $Status
+        message = $Message
+        excluded_dirs = @($excludedDirs)
+        robocopy_log_path = $robocopyLogPath
+        backup_lock_path = $backupLockPath
+        protected_action_locks_found = $protectedLocksForManifest
+        operator = "Anthony"
+        script = $PSCommandPath
+    }
+
+    $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $Path -Encoding UTF8
+}
+
+$expectedSource = "C:\Dev\Ai.Os"
+$expectedBackupRoot = "D:\T9_FOB"
+$normalizedSource = ConvertTo-AiOsFullPath -Path $SourceRepo
+$normalizedBackupRoot = ConvertTo-AiOsFullPath -Path $BackupRoot
+$timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
+$snapshotName = "AIOS_BACKUP_$timestamp"
+$snapshotPath = Join-Path $normalizedBackupRoot $snapshotName
+$backupReportRoot = Join-Path $normalizedSource "telemetry\backup_reports"
+$backupLockPath = Join-Path $backupReportRoot "AIOS_BACKUP_IN_PROGRESS.lock"
+$robocopyLogPath = Join-Path $snapshotPath "AIOS_BACKUP_ROBOCOPY.log"
+$manifestPath = Join-Path $snapshotPath "AIOS_BACKUP_MANIFEST.json"
+$excludedDirs = @(
+    "node_modules",
+    "__pycache__",
+    ".pytest_cache",
+    ".codex",
+    (Join-Path $normalizedSource ".git\logs")
+)
 
 try {
     if (-not $OutputJson) {
@@ -174,6 +353,21 @@ try {
         throw "Snapshot destination already exists: $snapshotPath"
     }
 
+    if (Test-Path -LiteralPath $backupLockPath) {
+        throw "BACKUP_LOCK_EXISTS: $backupLockPath"
+    }
+
+    $gitStatus = Get-AiOsGitStatus -Path $normalizedSource
+    $gitInfo = Get-AiOsGitInfo -Path $normalizedSource
+    $protectedLocks = @(Get-AiOsProtectedActionLocks -RepoRoot $normalizedSource -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath)
+    if ($protectedLocks.Count -gt 0) {
+        throw "PROTECTED_ACTION_LOCK_EXISTS: $($protectedLocks.path -join ', ')"
+    }
+
+    if (-not $Preview -and -not $AllowDirty -and -not $gitStatus.is_clean) {
+        throw "DIRTY_REPO: Backup requires clean git status. Re-run with -AllowDirty only after explicit approval. Status: $($gitStatus.lines -join ' | ')"
+    }
+
     $plannedCommand = @(
         "robocopy",
         "`"$normalizedSource`"",
@@ -185,6 +379,8 @@ try {
         "/NFL",
         "/NDL",
         "/NP",
+        "/LOG:`"$robocopyLogPath`"",
+        "/TEE",
         "/XD"
     ) + ($excludedDirs | ForEach-Object { "`"$_`"" })
 
@@ -194,12 +390,14 @@ try {
         $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
         $destBytes = Get-AiOsDirectorySize -Path $normalizedBackupRoot
 
-        $result = New-AiOsBackupResult -Status "PREVIEW" -Message "Preview only. No folder was created and robocopy was not run."
+        $result = New-AiOsBackupResult -Status "PREVIEW" -Message "Preview only. No folder was created, no lock was created, and robocopy was not run."
         $result | Add-Member -NotePropertyName planned_command -NotePropertyValue ($plannedCommand -join " ")
         $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
         $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytes)
         $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
         $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytes)
+        $result | Add-Member -NotePropertyName git_status_clean -NotePropertyValue ([bool]$gitStatus.is_clean)
+        $result | Add-Member -NotePropertyName protected_action_lock_count -NotePropertyValue ([int]$protectedLocks.Count)
         if ($OutputJson) {
             $result | ConvertTo-Json -Depth 6
         }
@@ -208,112 +406,144 @@ try {
             Write-Host "Source: $normalizedSource"
             Write-Host "Backup root: $normalizedBackupRoot"
             Write-Host "Snapshot path: $snapshotPath"
+            Write-Host "Backup lock path: $backupLockPath"
+            Write-Host "Robocopy log path: $robocopyLogPath"
+            Write-Host "Manifest path: $manifestPath"
+            Write-Host "Git status clean: $($gitStatus.is_clean)"
+            Write-Host "Protected-action locks found: $($protectedLocks.Count)"
             Write-Host "Excluded paths:"
             $excludedDirs | ForEach-Object { Write-Host "  - $_" }
             Write-Host ""
             Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
             Write-Host "Current backup size (T9):    $(Format-AiOsBytes -Bytes $destBytes)"
-            Write-Host "Copied this run:             pending (preview — robocopy not run)"
-            Write-Host "Skipped (already current):   pending (preview — robocopy not run)"
-            Write-Host "Produced this backup session: pending (preview — robocopy not run)"
+            Write-Host "Copied this run:             pending (preview - robocopy not run)"
+            Write-Host "Skipped (already current):   pending (preview - robocopy not run)"
+            Write-Host "Produced this backup session: pending (preview - robocopy not run)"
             Write-Host ""
             Write-Host "Planned command:"
             Write-Host ($plannedCommand -join " ")
-            Write-Host "No folder was created. Robocopy was not run."
+            Write-Host "No folder was created. No lock was created. Robocopy was not run."
         }
         exit 0
     }
 
-    # Measured before the snapshot is created so it reflects existing T9 backups.
-    $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
-    $destBytesBefore = Get-AiOsDirectorySize -Path $normalizedBackupRoot
+    $lockCreated = $false
+    try {
+        New-AiOsBackupLock -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath -SourcePath $normalizedSource -SnapshotPath $snapshotPath
+        $lockCreated = $true
 
-    New-Item -ItemType Directory -Path $snapshotPath | Out-Null
+        # Measured before the snapshot is created so it reflects existing T9 backups.
+        $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
+        $destBytesBefore = Get-AiOsDirectorySize -Path $normalizedBackupRoot
 
-    Write-Host ""
-    Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
-    Write-Host "Copying to: $snapshotPath"
-    Write-Host ""
+        New-Item -ItemType Directory -Path $snapshotPath | Out-Null
 
-    $robocopyArgs = @(
-        $normalizedSource,
-        $snapshotPath,
-        "/E",
-        "/XJ",
-        "/R:1",
-        "/W:1",
-        "/NFL",
-        "/NDL",
-        "/NP",
-        "/XD"
-    ) + $excludedDirs
+        Write-Host ""
+        Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
+        Write-Host "Copying to: $snapshotPath"
+        Write-Host ""
 
-    $robocopyOutput = & robocopy @robocopyArgs 2>&1
-    $robocopyExitCode = $LASTEXITCODE
-    $robocopyOutput | ForEach-Object { Write-Host $_ }
+        $robocopyArgs = @(
+            $normalizedSource,
+            $snapshotPath,
+            "/E",
+            "/XJ",
+            "/R:1",
+            "/W:1",
+            "/NFL",
+            "/NDL",
+            "/NP",
+            "/LOG:$robocopyLogPath",
+            "/TEE",
+            "/XD"
+        ) + $excludedDirs
 
-    $counts = Get-AiOsRobocopyCounts -Output @($robocopyOutput | ForEach-Object { "$_" })
-    $copiedBytes = Get-AiOsDirectorySize -Path $snapshotPath
-    $destBytesAfter = $destBytesBefore + $copiedBytes
+        $robocopyOutput = @(& robocopy @robocopyArgs 2>&1)
+        $robocopyExitCode = $LASTEXITCODE
+        $robocopyOutput | ForEach-Object { Write-Host $_ }
 
-    $copiedCountText = if ($counts.files_copied -ge 0) { "{0:N0} files" -f $counts.files_copied } else { "count unavailable" }
-    $skippedCountText = if ($counts.files_skipped -ge 0) { "{0:N0} files" -f $counts.files_skipped } else { "count unavailable" }
+        $robocopyLines = @($robocopyOutput | ForEach-Object {
+            if ($null -eq $_) {
+                ""
+            } else {
+                "$_"
+            }
+        })
+        $counts = Get-AiOsRobocopyCounts -Output $robocopyLines
+        $copiedBytes = Get-AiOsDirectorySize -Path $snapshotPath
+        $destBytesAfter = $destBytesBefore + $copiedBytes
 
-    Write-Host ""
-    Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
-    Write-Host "Current backup size (T9):    $(Format-AiOsBytes -Bytes $destBytesAfter)"
-    Write-Host "Copied this run:             $copiedCountText / $(Format-AiOsBytes -Bytes $copiedBytes)"
-    Write-Host "Skipped (already current):   $skippedCountText"
-    Write-Host "Produced this backup session: $(Format-AiOsBytes -Bytes $copiedBytes)"
-    Write-Host ""
+        $copiedCountText = if ($counts.files_copied -ge 0) { "{0:N0} files" -f $counts.files_copied } else { "count unavailable" }
+        $skippedCountText = if ($counts.files_skipped -ge 0) { "{0:N0} files" -f $counts.files_skipped } else { "count unavailable" }
 
-    $majorPaths = @(
-        ".git",
-        "automation\orchestration",
-        "docs\workflows",
-        "schemas\aios\orchestration",
-        "services\python_supervisor",
-        "telemetry"
-    )
+        Write-Host ""
+        Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
+        Write-Host "Current backup size (T9):    $(Format-AiOsBytes -Bytes $destBytesAfter)"
+        Write-Host "Copied this run:             $copiedCountText / $(Format-AiOsBytes -Bytes $copiedBytes)"
+        Write-Host "Skipped (already current):   $skippedCountText"
+        Write-Host "Produced this backup session: $(Format-AiOsBytes -Bytes $copiedBytes)"
+        Write-Host ""
 
-    $missingPaths = @($majorPaths | Where-Object {
-        -not (Test-Path -LiteralPath (Join-Path $snapshotPath $_))
-    })
+        $majorPaths = @(
+            ".git",
+            "automation\orchestration",
+            "docs\workflows",
+            "schemas\aios\orchestration",
+            "services\python_supervisor",
+            "telemetry"
+        )
 
-    if ($robocopyExitCode -ge 8) {
-        $result = New-AiOsBackupResult -Status "FAILED" -Message "Robocopy reported a failure." -RobocopyExitCode $robocopyExitCode -ExitCode $robocopyExitCode
-        $result | ConvertTo-Json -Depth 6
-        exit $robocopyExitCode
+        $missingPaths = @($majorPaths | Where-Object {
+            -not (Test-Path -LiteralPath (Join-Path $snapshotPath $_))
+        })
+
+        $manifestStatus = "SUCCESS"
+        $manifestMessage = "Backup snapshot created and verified."
+        $exitCode = 0
+        if ($robocopyExitCode -ge 8) {
+            $manifestStatus = "FAILED"
+            $manifestMessage = "Robocopy reported a failure."
+            $exitCode = $robocopyExitCode
+        } elseif ($missingPaths.Count -gt 0) {
+            $manifestStatus = "FAILED"
+            $manifestMessage = "Snapshot verification failed. Missing expected paths: $($missingPaths -join ', ')."
+            $exitCode = 9
+        }
+
+        Write-AiOsBackupManifest -Path $manifestPath -Status $manifestStatus -RobocopyExitCode $robocopyExitCode -GitInfo $gitInfo -GitStatus $gitStatus -ProtectedLocks $protectedLocks -Message $manifestMessage
+
+        $result = New-AiOsBackupResult -Status $manifestStatus -Message $manifestMessage -RobocopyExitCode $robocopyExitCode -ExitCode $exitCode
+        $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
+        $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytesAfter)
+        $result | Add-Member -NotePropertyName copied_bytes -NotePropertyValue ([long]$copiedBytes)
+        $result | Add-Member -NotePropertyName files_copied -NotePropertyValue ([int]$counts.files_copied)
+        $result | Add-Member -NotePropertyName files_skipped -NotePropertyValue ([int]$counts.files_skipped)
+        $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
+        $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytesAfter)
+        $result | Add-Member -NotePropertyName copied_human -NotePropertyValue (Format-AiOsBytes -Bytes $copiedBytes)
+
+        if ($OutputJson) {
+            $result | ConvertTo-Json -Depth 6
+        }
+        else {
+            Write-Host "AI_OS T9 Snapshot Backup"
+            Write-Host "Status: $manifestStatus"
+            Write-Host "Snapshot path: $snapshotPath"
+            Write-Host "Robocopy log path: $robocopyLogPath"
+            Write-Host "Manifest path: $manifestPath"
+            Write-Host "Robocopy exit code: $robocopyExitCode"
+            Write-Host "Active repo mutation: NO"
+            Write-Host "Scheduler behavior: NO"
+            Write-Host "Runtime mutation: BACKUP_DESTINATION_ONLY"
+        }
+
+        exit $exitCode
     }
-
-    if ($missingPaths.Count -gt 0) {
-        $result = New-AiOsBackupResult -Status "FAILED" -Message "Snapshot verification failed. Missing expected paths: $($missingPaths -join ', ')." -RobocopyExitCode $robocopyExitCode -ExitCode 9
-        $result | ConvertTo-Json -Depth 6
-        exit 9
+    finally {
+        if ($lockCreated) {
+            Remove-AiOsBackupLock -BackupLockPath $backupLockPath
+        }
     }
-
-    $result = New-AiOsBackupResult -Status "SUCCESS" -Message "Backup snapshot created and verified." -RobocopyExitCode $robocopyExitCode
-    $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
-    $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytesAfter)
-    $result | Add-Member -NotePropertyName copied_bytes -NotePropertyValue ([long]$copiedBytes)
-    $result | Add-Member -NotePropertyName files_copied -NotePropertyValue ([int]$counts.files_copied)
-    $result | Add-Member -NotePropertyName files_skipped -NotePropertyValue ([int]$counts.files_skipped)
-    $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
-    $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytesAfter)
-    $result | Add-Member -NotePropertyName copied_human -NotePropertyValue (Format-AiOsBytes -Bytes $copiedBytes)
-    if ($OutputJson) {
-        $result | ConvertTo-Json -Depth 6
-    }
-    else {
-        Write-Host "AI_OS T9 Snapshot Backup"
-        Write-Host "Status: SUCCESS"
-        Write-Host "Snapshot path: $snapshotPath"
-        Write-Host "Robocopy exit code: $robocopyExitCode"
-        Write-Host "Active repo mutation: NO"
-        Write-Host "Scheduler behavior: NO"
-        Write-Host "Runtime mutation: NO"
-    }
-    exit 0
 }
 catch {
     $result = New-AiOsBackupResult -Status "FAILED" -Message $_.Exception.Message -ExitCode 1

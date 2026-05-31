@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/approvals/approval_item.schema.json",
+  "title": "AI_OS Canonical Approval Item",
+  "description": "Canonical read-only approval item used by projections that unify Relay approval evidence, Operation Glue approval inbox items, and Python queue approval projections. This schema does not approve, reject, migrate, delete, move, or mutate source approval records.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "source_store",
+    "title",
+    "status",
+    "risk_level",
+    "gate_flags",
+    "origin_ref",
+    "created_at",
+    "decided_at",
+    "decided_by",
+    "source_path",
+    "stable_key",
+    "summary"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable approval identifier from the source store when available, otherwise a deterministic projection identifier."
+    },
+    "source_store": {
+      "type": "string",
+      "enum": ["relay", "glue", "python_queue"],
+      "description": "Original approval store that produced this item."
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable approval title."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["WAITING_APPROVAL", "APPROVED", "REJECTED", "BLOCKED"],
+      "description": "Canonical approval status. Ambiguous or unsafe source states must map toward WAITING_APPROVAL or BLOCKED, never to APPROVED."
+    },
+    "risk_level": {
+      "type": ["string", "null"],
+      "description": "Source risk level or conservative projected risk label."
+    },
+    "gate_flags": {
+      "type": "array",
+      "description": "Approval, protected-action, risk, or safety gates carried forward from the source item.",
+      "items": { "type": "string" }
+    },
+    "origin_ref": {
+      "type": ["string", "null"],
+      "description": "Origin packet, handoff, result, source file, or work item reference associated with the approval."
+    },
+    "created_at": {
+      "type": ["string", "null"],
+      "description": "Source creation timestamp when available."
+    },
+    "decided_at": {
+      "type": ["string", "null"],
+      "description": "Approval decision timestamp when available. Null means no decision has been recorded."
+    },
+    "decided_by": {
+      "type": ["string", "null"],
+      "description": "Human or process that recorded the approval decision when available. Null means no decision owner has been recorded."
+    },
+    "source_path": {
+      "type": "string",
+      "description": "Repository-relative source evidence path."
+    },
+    "stable_key": {
+      "type": "string",
+      "description": "Deduplication key derived from source path, origin reference, and id."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Short source summary for operator review."
+    },
+    "classifier_contract": {
+      "type": "object",
+      "description": "Optional contract for consumers that classify approval evidence. Explicit status, risk_level, and gate_flags must be evaluated before natural-language fallback text; ambiguous or parse-failed inputs must not be classified as PASS.",
+      "additionalProperties": false,
+      "properties": {
+        "accepted_status_values": {
+          "type": "array",
+          "description": "Explicit source statuses that bridge classifiers may map into PASS, WARN, NEEDS_APPROVAL, or BLOCKED without relying on prose.",
+          "items": {
+            "type": "string",
+            "enum": ["PASS", "WARN", "NEEDS_APPROVAL", "BLOCKED", "WAITING_APPROVAL", "APPROVAL_REQUIRED", "UNSAFE_BLOCKED"]
+          }
+        },
+        "safety_rule": {
+          "type": "string",
+          "description": "Classifier safety rule: explicit fields win, substring rules are fallback only, and unknown/ambiguous inputs default to NEEDS_APPROVAL or BLOCKED."
+        }
+      }
+    }
+  }
+}
