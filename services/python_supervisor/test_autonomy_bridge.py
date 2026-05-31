@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from autonomy_bridge import build_bridge_state, classify_item, collect_source_files
 
