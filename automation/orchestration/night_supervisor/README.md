@@ -23,6 +23,29 @@ unattended with built-in safety, validation, and telemetry.
 | 9 | `reporting_and_alerting` | Write nightly summary report; flag CRITICAL alerts for morning review. |
 | 10 | `safety_enforcement` | Confirm no forbidden writes, no active-state mutation, no secrets, no trading. |
 
+## Execution result closeout
+
+Each Night Supervisor report includes one `execution_result` object that closes
+the operator question "what happened overnight?" without redesigning the
+supervisor.
+
+The object connects:
+
+- worker assignment: `worker_id` and `worker_lane` from selected packet evidence.
+- packet selection: `packet_selected`, `packet_id`, `packet_name`, `packet_path`,
+  and `packet_status`.
+- validator result: `validator_status` from the validator automation phase.
+- QA result: `qa_status`, derived from validator state, alerts, forbidden writes,
+  and safety checks.
+- approval requirement: `approval_required`, true when human review is required
+  before mutation or protected action.
+- final classification: `result_classification`, one of `PASS`, `FAIL`,
+  `BLOCKED`, `NEEDS_APPROVAL`, or `NOOP`.
+
+`execution_result.next_safe_action` is the operator-facing stop point. It is
+evidence only and never grants APPLY, commit, push, merge, worker launch,
+scheduler, broker, OANDA, secret, or live-trading authority.
+
 ## Files
 
 - `night_supervisor_harness.py` — executable, stdlib-only DRY_RUN engine. The

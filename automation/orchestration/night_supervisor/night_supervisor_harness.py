@@ -22,7 +22,6 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
-import os
 import re
 import subprocess
 import sys
@@ -48,6 +47,7 @@ BLOCKED_CAPABILITIES = [
     "broker execution",
     "secret handling",
 ]
+RESULT_CLASSIFICATIONS = {"PASS", "FAIL", "BLOCKED", "NEEDS_APPROVAL", "NOOP"}
 
 # Conservative secret-shaped patterns. Night supervision only ever serializes
 # repo metadata (file names, counts, git porcelain), so a hit here means an
@@ -166,6 +166,112 @@ def _safe_load_json(path: Path):
         return json.loads(path.read_text(encoding="utf-8-sig"))
     except Exception:
         return None
+
+
+def _latest_packet(repo_root: Path) -> dict:
+    work_packets = repo_root / "automation" / "orchestration" / "work_packets"
+    active_dir = work_packets / "active"
+    packet_files = sorted(active_dir.glob("*.json")) if active_dir.is_dir() else []
+    if not packet_files and work_packets.is_dir():
+        packet_files = sorted(work_packets.rglob("*.json"))
+    if not packet_files:
+        return {"selected": False, "path": "", "data": {}}
+
+    packet_path = packet_files[0]
+    return {
+        "selected": True,
+        "path": _rel(repo_root, packet_path),
+        "data": _safe_load_json(packet_path) or {},
+    }
+
+
+def _packet_value(packet: dict, names: tuple[str, ...], default: str) -> str:
+    for name in names:
+        value = packet.get(name)
+        if value not in (None, ""):
+            return str(value)
+    return default
+
+
+def _phase_status(phases: list[dict], phase_name: str) -> str:
+    for phase in phases:
+        if phase.get("phase") == phase_name:
+            return str(phase.get("status", "NOT_RUN"))
+    return "NOT_RUN"
+
+
+def _build_execution_result(
+    repo_root: Path,
+    run_id: str,
+    phases: list[dict],
+    alerts: list[dict],
+    changed_files: list[str],
+    untracked_items: list[str],
+    forbidden_write_attempts: int,
+) -> dict:
+    packet_entry = _latest_packet(repo_root)
+    packet = packet_entry["data"]
+    packet_selected = bool(packet_entry["selected"])
+    validator_status = _phase_status(phases, "validator_automation")
+    approval_status = _phase_status(phases, "approval_automation")
+    approval_required = approval_status in {"PLANNED", "WARN", "FAIL", "BLOCKED"}
+    qa_status = "PASS"
+    qa_notes = []
+
+    if forbidden_write_attempts:
+        qa_status = "BLOCKED"
+        qa_notes.append("Forbidden write attempt detected.")
+    if any(alert.get("severity") == "CRITICAL" for alert in alerts):
+        qa_status = "FAIL"
+        qa_notes.append("Critical alert present.")
+    if validator_status == "FAIL":
+        qa_status = "FAIL"
+        qa_notes.append("Validator automation failed.")
+    if not packet_selected:
+        qa_notes.append("No active packet selected; run is a supervisor health pass only.")
+
+    if forbidden_write_attempts:
+        classification = "BLOCKED"
+    elif validator_status == "FAIL" or qa_status == "FAIL":
+        classification = "FAIL"
+    elif approval_required:
+        classification = "NEEDS_APPROVAL"
+    elif not packet_selected and not changed_files and not untracked_items:
+        classification = "NOOP"
+    else:
+        classification = "PASS"
+
+    if classification not in RESULT_CLASSIFICATIONS:
+        classification = "BLOCKED"
+        qa_status = "BLOCKED"
+        qa_notes.append("Unknown classification collapsed to BLOCKED.")
+
+    next_safe_action = {
+        "PASS": "Review report evidence; continue only through the next approved packet.",
+        "FAIL": "Review validator or QA failure before any APPLY, commit, push, merge, or worker launch.",
+        "BLOCKED": "Stop and resolve blocked condition before continuing.",
+        "NEEDS_APPROVAL": "Anthony Meza reviews approval-required items before mutation or protected action.",
+        "NOOP": "No packet was selected and no repo changes were detected; select or create the next approved packet.",
+    }[classification]
+
+    return {
+        "packet_id": _packet_value(packet, ("packet_id", "id", "task_id"), "NO_PACKET_SELECTED"),
+        "packet_name": _packet_value(packet, ("packet_name", "name", "title"), "No packet selected"),
+        "run_id": run_id,
+        "worker_id": _packet_value(packet, ("assigned_worker", "worker_id", "worker_identity"), "UNASSIGNED"),
+        "worker_lane": _packet_value(packet, ("owner_lane", "worker_lane", "lane"), "UNKNOWN"),
+        "packet_selected": packet_selected,
+        "packet_path": packet_entry["path"],
+        "packet_status": _packet_value(packet, ("status", "packet_status", "state"), "NOT_SELECTED"),
+        "validator_status": validator_status,
+        "qa_status": qa_status,
+        "approval_required": approval_required,
+        "result_classification": classification,
+        "files_changed": changed_files,
+        "files_untracked": untracked_items,
+        "next_safe_action": next_safe_action,
+        "notes": qa_notes,
+    }
 
 
 # --------------------------------------------------------------------------
@@ -498,6 +604,15 @@ def run_night_supervision(repo_root: Path | None = None, emit: bool = True) -> d
         ahead_n = int(ahead)
     except ValueError:
         ahead_n = 0
+    execution_result = _build_execution_result(
+        repo_root=repo_root,
+        run_id=run_id,
+        phases=phases,
+        alerts=alerts,
+        changed_files=changed,
+        untracked_items=untracked,
+        forbidden_write_attempts=writer.forbidden_attempts,
+    )
 
     report = {
         "schema": SCHEMA,
@@ -513,6 +628,7 @@ def run_night_supervision(repo_root: Path | None = None, emit: bool = True) -> d
             "changed_files": changed,
             "untracked_items": untracked,
         },
+        "execution_result": execution_result,
         "phases": phases,
         "alerts": alerts,
         "safety_confirmation": {
@@ -568,6 +684,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("AI_OS Night Supervisor (DRY_RUN)")
         print(f"Run: {report['run_id']}  Status: {report['supervisor_status']}")
+        print(f"Execution result: {report['execution_result']['result_classification']}")
         print(f"Branch: {report['repo']['branch']}  Head: {report['repo']['head_sha'][:10]}  Ahead: {report['repo']['ahead_commits']}")
         for ph in report["phases"]:
             print(f"  [{ph['step']:>2}] {ph['status']:<8} {ph['phase']}")
