@@ -66,7 +66,9 @@ $fixture = Read-Json -RelativePath "apps/dashboard/mock-data/aios-worker-auto-ro
 
 $adapterScript = Join-Path $RepoRoot "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1"
 $adapter = $null
-if (Test-Path -LiteralPath $adapterScript -PathType Leaf) {
+if (-not (Test-Path -LiteralPath $adapterScript -PathType Leaf)) {
+  Add-Failure "Missing operator registry adapter: automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1"
+} else {
   try {
     $adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $adapterScript -RepoRoot $RepoRoot -OutputJson | ConvertFrom-Json
   } catch {
@@ -87,13 +89,32 @@ if ($adapter) {
   if (@($adapter.operator_routes).Count -ne @($adapter.runtime_workers).Count) {
     Add-Failure "Operator registry adapter operator_routes must match runtime_workers count."
   }
+  foreach ($route in @($adapter.operator_routes)) {
+    foreach ($field in @("worker_id", "numeric_id", "label", "lane", "allowed_paths", "blocked_paths", "dry_run_task", "report_path", "validation_commands", "stop_condition", "source")) {
+      if (-not ($route.PSObject.Properties.Name -contains $field)) {
+        Add-Failure "Adapter operator route missing field: $field"
+      }
+    }
+    if ($route.source -ne "canonical_runtime_registry") {
+      Add-Failure "Adapter operator route must identify canonical runtime registry source."
+    }
+    if ([string]::IsNullOrWhiteSpace([string]$route.dry_run_task)) {
+      Add-Failure "Adapter operator route $($route.worker_id) dry_run_task is blank."
+    }
+    if (@($route.validation_commands).Count -eq 0) {
+      Add-Failure "Adapter operator route $($route.worker_id) missing validation_commands."
+    }
+    if ($route.stop_condition -notmatch "No APPLY" -or $route.stop_condition -notmatch "no commit" -or $route.stop_condition -notmatch "no push") {
+      Add-Failure "Adapter operator route $($route.worker_id) stop condition must block APPLY, commit, and push."
+    }
+  }
   if ($adapter.safety.writes_files -ne $false -or $adapter.safety.launches_workers -ne $false -or $adapter.safety.changes_json -ne $false) {
     Add-Failure "Operator registry adapter must remain read-only and non-launching."
   }
 }
 
-if (-not $routing -and -not $adapter) {
-  Add-Failure "Routing packet is missing and operator registry adapter is unavailable."
+if (-not $adapter) {
+  Add-Failure "Operator registry adapter is required as the primary worker source."
 }
 
 if ($fixture) {
@@ -142,8 +163,13 @@ if ($routing) {
   }
 }
 
-if ($registry -and @($registry.workers).Count -ne 8) {
-  Add-Failure "Registry must still contain 8 workers."
+if ($registry) {
+  if (@($registry.workers).Count -ne 8) {
+    Add-Failure "Legacy compatibility registry must still contain 8 workers."
+  }
+  if (-not $registry.codex_launch) {
+    Add-Failure "Legacy compatibility registry must still expose codex_launch configuration."
+  }
 }
 
 $orchestratorText = Get-Content -LiteralPath (Join-Path $RepoRoot "automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1") -Raw
