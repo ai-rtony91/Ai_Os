@@ -182,6 +182,13 @@ function Write-AiOsPacketError {
     ) | Set-Content -LiteralPath $errorPath -Encoding UTF8
 }
 
+function Add-AiOsDeferredUntil {
+    param([Parameter(Mandatory = $true)][string]$PacketPath, [Parameter(Mandatory = $true)][string]$DeferredUntilUtc)
+    $packet = Get-Content -Raw -LiteralPath $PacketPath | ConvertFrom-Json
+    if ($packet.PSObject.Properties["deferred_until"]) { $packet.deferred_until = $DeferredUntilUtc } else { $packet | Add-Member -NotePropertyName "deferred_until" -NotePropertyValue $DeferredUntilUtc }
+    $packet | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $PacketPath -Encoding UTF8
+}
+
 function Read-AiOsTaskPacket {
     param([Parameter(Mandatory = $true)][System.IO.FileInfo]$File)
 
@@ -426,7 +433,25 @@ function Complete-AiOsRelayWorkerPacket {
             "mission_chars: $($parsed.mission.Length)"
         )
     } else {
+        $cycleId = if ([string]::IsNullOrWhiteSpace($env:AIOS_CYCLE_ID)) { (Get-Date).ToUniversalTime().ToString("yyyyMMdd") } else { $env:AIOS_CYCLE_ID }
+        $cost = & "$PSScriptRoot\..\cost\Test-AiOsCostCeiling.ps1" -CycleId $cycleId
+        if (-not $cost.ok) {
+            $target = Move-AiOsRelayPacket -SourcePath $runningPath -TargetFolder $RelayPaths.error
+            Write-AiOsPacketError -Id $parsed.id -Reason "COST_CEILING_EXCEEDED" -Detail "$($cost.reason) cycle_spend=$($cost.cycle_spend) day_spend=$($cost.day_spend)"
+            $notify = Join-Path $RepoRoot "automation\orchestration\notifications\Send-AiOsNotification.ps1"
+            if (Test-Path -LiteralPath $notify -PathType Leaf) { & powershell -NoProfile -ExecutionPolicy Bypass -File $notify -Message "COST_CEILING_EXCEEDED packet=$($parsed.id) reason=$($cost.reason)" -Severity "CRITICAL" -Subject "AI_OS BLOCKER" -Apply | Out-Null }
+            Write-AiOsRelayLog "[WORKER] $($parsed.id) running -> error reason=COST_CEILING_EXCEEDED path=$target"
+            return "PROCESSED"
+        }
+        $lock = & "$PSScriptRoot\..\lock\Test-AiOsFileLock.ps1" -AllowedPaths $parsed.allowed_paths -RepoRoot $RepoRoot
+        if ($lock.defer) {
+            Add-AiOsDeferredUntil -PacketPath $runningPath -DeferredUntilUtc $lock.defer_until_utc
+            $target = Move-AiOsRelayPacket -SourcePath $runningPath -TargetFolder $RelayPaths.inbox
+            Write-AiOsRelayLog "[WORKER] $($parsed.id) running -> inbox reason=FILE_LOCK_DEFERRED deferred_until=$($lock.defer_until_utc) path=$target"
+            return "SKIPPED"
+        }
         $result = Invoke-AiOsProviderWorker -Worker $parsed.worker -Provider $parsed.provider -ProviderCommand $parsed.provider_command -ProviderArgs $parsed.provider_args -Tier $parsed.tier -Mission $parsed.mission -AllowedPaths $parsed.allowed_paths
+        [void](& "$PSScriptRoot\..\cost\Add-AiOsCostLedgerEntry.ps1" -CycleId $cycleId -Cost 0 -InputTokens 0 -OutputTokens 0 -PacketId $parsed.id -Worker $parsed.worker -Estimated $false)
         $exitCode = $result.exit_code
         $body = @("command: $($result.command)", "") + @($result.output)
     }

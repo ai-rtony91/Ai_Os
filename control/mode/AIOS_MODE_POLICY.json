@@ -1,0 +1,19 @@
+{
+  "night_hours_local": {
+    "start": "22:00",
+    "end": "07:00"
+  },
+  "idle_threshold_sec": 600,
+  "cadence_sec": {
+    "NIGHT_AUTOPILOT": 300,
+    "DAY_OBSERVER": 1800
+  },
+  "quiet_hours_local": {
+    "start": "22:00",
+    "end": "07:00"
+  },
+  "cost_ceiling_per_cycle_usd": 0.5,
+  "cost_ceiling_per_day_usd": 5.0,
+  "updated_at_utc": "2026-06-01T00:00:00Z",
+  "updated_by": "AIOS-P14-INITIAL"
+}
