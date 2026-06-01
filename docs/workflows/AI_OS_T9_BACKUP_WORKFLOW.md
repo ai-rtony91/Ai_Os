@@ -163,8 +163,34 @@ Initial preview behavior should:
 - refuse to touch known untracked backlog
 - produce console output only
 
-Manual APPLY backup behavior may create one timestamped snapshot only after
-explicit operator approval.
+Manual APPLY backup behavior must choose one explicit backup mode:
+
+```text
+-BackupMode Auto
+-BackupMode Full
+-BackupMode Delta
+-BackupMode ManifestOnly
+-RetentionPreview
+```
+
+`Auto` is the default and avoids duplicate full snapshots:
+
+- no prior successful manifest -> `Full`
+- first successful backup of the local day -> `Full`
+- current commit equals the previous backup commit -> `ManifestOnly`
+- small productive git delta -> `Delta`
+- large or unsafe delta -> `Full`
+
+`Full` preserves the original timestamped snapshot behavior and is intended for
+major checkpoints. `Delta` creates a timestamped delta folder and copies only
+git-tracked changed or new files from the previous successful backup commit to
+the current commit. It uses `git diff --name-status <previous>..<current>` and
+filters copy candidates through `git ls-files`. Deleted files are recorded in
+the manifest only. `ManifestOnly` writes a checkpoint manifest without copying
+files.
+
+`RetentionPreview` reports cleanup candidates only. It must print
+`RETENTION_PREVIEW_ONLY` and must not delete anything.
 
 ## Backup-Session Data-Size Telemetry
 
@@ -197,6 +223,21 @@ Automation mode (`-OutputJson`) must expose these as machine fields without
 dirtying stdout: `source_bytes`, `dest_bytes`, `copied_bytes`, `files_copied`,
 `files_skipped`, plus the `_human` formatted variants.
 
+Mode-aware manifests must also expose:
+
+- `backup_mode`
+- `requested_backup_mode`
+- `selected_backup_mode_reason`
+- `base_backup_id`
+- `base_backup_commit_hash`
+- `changed_files`
+- `deleted_files`
+- `file_count_copied`
+- `delta_source_range`
+- `restore_requires_full_backup`
+- `retention_class`
+- `retention_preview_candidates`
+
 Implemented in `scripts/backup/Start-AiOsT9SnapshotBackup.ps1`. File counts are
 parsed from the robocopy summary `Files :` row; when unavailable the script
 reports `count unavailable` rather than a misleading zero.
@@ -214,6 +255,21 @@ Future robocopy use should avoid destructive mirror behavior until proven safe. 
 - Stop if the T9 drive label does not match `T9_FOB`.
 - Stop if source is not `C:\Dev\Ai.Os`.
 - Stop if destination resolves outside the approved T9 layout.
+- Do not run robocopy for `Delta` or `ManifestOnly`.
+- Never delete files as part of `RetentionPreview`.
+
+## Retention Preview Policy
+
+Initial retention behavior is report-only:
+
+- keep the last 3 full backups.
+- keep the first full backup of each local day.
+- keep all manifests.
+- keep delta backups tied to retained full backups.
+- report older duplicate full snapshots as cleanup candidates.
+
+Deletion, archival movement, or compression requires a separate explicit APPLY
+packet naming the exact candidate paths.
 
 ## Risk Controls
 
