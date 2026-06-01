@@ -1,7 +1,9 @@
 # AI_OS Parallel Codex Workflow
 
 Status: canonical workflow
-Source: `docs/AI_OS/operator/AIOS_PARALLEL_CODEX_WORKFLOW.md`
+Source material: `docs/AI_OS/operator/AIOS_PARALLEL_CODEX_WORKFLOW.md`
+
+`docs/AI_OS/**` is reference/source material only. Current workflow authority lives in `docs/workflows/` unless a specific rule is promoted through governance.
 
 ## Purpose
 

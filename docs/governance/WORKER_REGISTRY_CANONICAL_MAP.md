@@ -21,8 +21,13 @@ Window file: `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json`
 
 This file identifies operator/window-level worker slots for UI and local session coordination. It is not the orchestration execution profile store and should not be used to resolve active packet `assigned_worker` values.
 
+Canonical replacement for orchestration worker authority: `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json`.
+The operator/window registry remains an active legacy-mixed dependency until an operator dependency review reroutes consumers safely.
+
 ## 4. Superseded Stub
 
 Superseded file: `automation/orchestration/workers/WORKER_REGISTRY.json`
 
 This file was never populated and remains empty. Do not add new workers to it. Worker profiles live in `AIOS_WORKER_PROFILES.json`; runtime worker state lives in `AIOS_WORKER_REGISTRY.json`.
+
+Canonical replacement: `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json`.

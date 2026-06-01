@@ -1,7 +1,7 @@
 # AI_OS File Placement Rules
 
 Status: canonical governance rule
-Source: `docs/AI_OS/governance/AIOS_FILE_PLACEMENT_RULES.md`
+Source material: `docs/AI_OS/governance/AIOS_FILE_PLACEMENT_RULES.md`
 
 ## Purpose
 
@@ -10,7 +10,7 @@ This document defines where AI_OS work belongs so planning, automation, reports,
 ## Core Placement Rules
 
 - Canonical governance, workflow, security, concept, architecture, roadmap, and spec summaries belong under `docs/`.
-- Legacy AI_OS planning docs may remain under `docs/AI_OS/` until their live references are retired.
+- Legacy AI_OS planning docs may remain under `docs/AI_OS/` as reference/source material until their live references are retired and selected rules are promoted into canonical docs.
 - Scripts belong in `automation/`.
 - Generated reports belong in `Reports/`.
 - Dashboard code belongs in `apps/dashboard/`.

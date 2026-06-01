@@ -256,8 +256,9 @@ Claude Code is most valuable in bounded, read-only, single-purpose tasks. Prefer
 Claude Code does not plan, coordinate, or chain tasks. ChatGPT plans. Claude Code executes a
 single bounded task and stops.
 
-Every Claude Code invocation requires a delegation packet. See
-`docs/AI_OS/claude/CLAUDE_DELEGATION_STANDARD.md`.
+Every Claude Code invocation requires a delegation packet. Legacy delegation material under
+`docs/AI_OS/claude/` is reference/source material only until promoted into canonical governance
+or workflow docs.
 
 ## Governance Question Set
 
@@ -297,15 +298,17 @@ Workers must use readable, structured terminal output with:
 - One finding per line with PASS/WARN/FAIL labels
 - Explicit stop point in every output
 
-See `docs/AI_OS/interface/AI_OS_WORKER_INTERFACE_SPECIFICATION_DRAFT.md` for the full standard.
+Legacy interface drafts under `docs/AI_OS/interface/` are reference/source material only until
+promoted into canonical governance or workflow docs.
 
 ## Orchestration Model Reference
 
-For the full authority chain, coordination pattern, and role boundaries, see
-`docs/AI_OS/orchestration/AI_OS_ORCHESTRATION_MODEL.md`.
+For the current authority chain, coordination pattern, and role boundaries, use root authority
+docs, `docs/governance/`, `docs/workflows/`, `docs/architecture/`, and
+`automation/orchestration/README.md`.
 
-For the Claude delegation packet standard, see
-`docs/AI_OS/claude/CLAUDE_DELEGATION_STANDARD.md`.
+Legacy orchestration and Claude delegation drafts under `docs/AI_OS/` remain source material,
+not active authority, until file-by-file classification promotes or archives them.
 
 ## Stop Point
 

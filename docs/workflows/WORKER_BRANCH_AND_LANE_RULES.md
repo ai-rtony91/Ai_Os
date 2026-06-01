@@ -1,7 +1,9 @@
 # AI_OS Worker Branch And Lane Rules
 
 Status: canonical workflow
-Source: `docs/AI_OS/operator/AIOS_WORKER_BRANCH_AND_LANE_RULES.md`
+Source material: `docs/AI_OS/operator/AIOS_WORKER_BRANCH_AND_LANE_RULES.md`
+
+`docs/AI_OS/**` is reference/source material only. Current workflow authority lives in `docs/workflows/` unless a specific rule is promoted through governance.
 
 ## Purpose
 

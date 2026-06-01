@@ -41,11 +41,12 @@ APPLY writes:
 - `telemetry/morning_digest/MORNING_DIGEST_STATE.json`
 - `telemetry/morning_digest/MORNING_DIGEST_LATEST.md`
 
-Dashboard fixture:
+Dashboard fixture, not live authority:
 
 - `apps/dashboard/mock-data/autonomy_bridge_state.sample.json`
 
 The telemetry files are runtime evidence. Review before deciding whether any should be committed.
+The dashboard remains fixture-driven for this workflow until a future migration approves `services/orchestrator/` as the read-only runtime API owner.
 
 ## How Night Supervisor Uses It
 
