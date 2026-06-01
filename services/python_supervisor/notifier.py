@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -80,12 +81,37 @@ def render_sos(state: dict[str, Any]) -> str:
 
 
 def write_file_channel(root: Path, state: dict[str, Any]) -> Path:
-    outbox = root / "relay" / "reports" / "SOS_OUTBOX"
-    outbox.mkdir(parents=True, exist_ok=True)
-    filename = f"SOS_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.md"
-    target = outbox / filename
-    target.write_text(render_sos(state), encoding="utf-8")
-    return target
+    dispatcher = root / "automation" / "orchestration" / "notifications" / "Send-AiOsNotification.ps1"
+    message = render_sos(state)
+    completed = subprocess.run(
+        [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(dispatcher),
+            "-Message",
+            message,
+            "-Severity",
+            "CRITICAL",
+            "-Subject",
+            "AI_OS BLOCKER",
+            "-Apply",
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(
+            "SOS dispatcher failed "
+            f"exit={completed.returncode} stdout={completed.stdout.strip()} stderr={completed.stderr.strip()}"
+        )
+    for line in completed.stdout.splitlines():
+        if line.startswith("OUTBOX_FILE="):
+            return Path(line.split("=", 1)[1])
+    raise RuntimeError(f"SOS dispatcher did not report OUTBOX_FILE: {completed.stdout.strip()}")
 
 
 def main() -> int:

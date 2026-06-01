@@ -111,5 +111,11 @@ relay/outbox/
 relay/reports/
 relay/running/
 
+# AI_OS notification bridge local config and runtime state
+automation/orchestration/notifications/notification-config.local.json
+automation/orchestration/notifications/*.local.json
+automation/orchestration/notifications/secrets/
+automation/orchestration/notifications/state/
+
 # AI_OS generated morning digest evidence
 telemetry/morning_digest/
