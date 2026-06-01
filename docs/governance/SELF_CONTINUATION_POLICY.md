@@ -43,25 +43,26 @@ The approval item must include the backlog source, selected goal, risk level, ga
 
 ## Selection Rule
 
-The controller selects at most one candidate per run:
+The controller selects at most `max_auto_goals_per_cycle` candidates per run:
 
 1. backlog is enabled
 2. candidate status is `READY`
-3. candidate risk level is `GREEN`
+3. candidate `risk_level` is `GREEN`
 4. highest numeric priority wins
 5. ties sort by candidate id
+6. `control/self_continuation/STOP` is absent
 
-Non-GREEN candidates are never auto-queued. They remain bounded backlog candidates and require explicit human approval before any execution packet may be created.
+Non-GREEN candidates are never auto-queued as goals. They route to `relay/approvals/` and require explicit human approval before any execution packet may be created.
 
 ## Backlog Pull Discipline
 
-`automation/orchestration/backlog/Pull-AiOsBacklog.ps1` is the only approved helper for pulling backlog work into the relay goal queue. It may pull exactly one item per invocation, and only when all gates match:
+`automation/orchestration/backlog/Pull-AiOsBacklog.ps1` is the only approved helper for pulling backlog work into the relay goal queue. It may pull at most `max_auto_goals_per_cycle` items per invocation, and only when all gates match:
 
 - `status` is `READY`
-- `risk_tier` is `GREEN`
-- `gate` is `APPROVED`
+- `risk_level` is `GREEN`
+- `control/self_continuation/STOP` is absent
 
-Non-GREEN, unapproved, ambiguous, missing, or malformed items must remain untouched in `control/self_continuation/BACKLOG.json`. The helper must write at most one `relay/goals/{id}.goal.txt` file per run and then mark that source backlog item `PULLED` using a separate atomic temp-file replace.
+Non-GREEN, ambiguous, missing, or malformed items must not become goals. READY non-GREEN items route to `relay/approvals/{id}.approval.md`. The helper writes at most `max_auto_goals_per_cycle` `relay/goals/{id}.goal.txt` files per run. Recurring GREEN candidates remain `READY`; non-recurring GREEN candidates are marked `PULLED` using a separate atomic temp-file replace.
 
 ## Kill Switch
 

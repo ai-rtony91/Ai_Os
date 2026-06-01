@@ -4,6 +4,7 @@
   "stop_flag_path": "control/self_continuation/STOP",
   "policy": "docs/governance/SELF_CONTINUATION_POLICY.md",
   "selection_rule": "highest_priority_ready_green_only",
+  "max_auto_goals_per_cycle": 1,
   "candidates": [
     {
       "id": "AIOS-SC-001",
@@ -11,6 +12,7 @@
       "status": "READY",
       "priority": 10,
       "risk_level": "GREEN",
+      "recurring": true,
       "gate_flags": [
         "HUMAN_APPROVAL_REQUIRED",
         "READ_ONLY_REVIEW",
@@ -37,6 +39,7 @@
       "status": "READY",
       "priority": 8,
       "risk_level": "GREEN",
+      "recurring": true,
       "gate_flags": [
         "HUMAN_APPROVAL_REQUIRED",
         "READ_ONLY_REVIEW",
