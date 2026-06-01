@@ -1,5 +1,6 @@
 param(
   [string]$WorkerRegistryPath = "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+  [string]$OperatorRegistryAdapterPath = "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1",
   [string]$WorkQueuePath = "apps/dashboard/mock-data/work-intelligence-queue-v1.example.json",
   [string]$ApprovalInboxPath = "apps/dashboard/mock-data/aios-approval-inbox-v1.example.json",
   [string]$ValidatorChainPath = "apps/dashboard/mock-data/aios-validator-chain-v1.example.json",
@@ -70,6 +71,11 @@ function ConvertTo-WorkerRoutingItem {
 }
 
 $registry = Read-JsonOrNull -RelativePath $WorkerRegistryPath
+$adapter = $null
+$adapterFullPath = Join-Path $RepoRoot $OperatorRegistryAdapterPath
+if (Test-Path -LiteralPath $adapterFullPath -PathType Leaf) {
+  $adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $adapterFullPath -RepoRoot $RepoRoot -OutputJson | ConvertFrom-Json
+}
 $workQueue = Read-JsonOrNull -RelativePath $WorkQueuePath
 $approvalInbox = Read-JsonOrNull -RelativePath $ApprovalInboxPath
 $validatorChain = Read-JsonOrNull -RelativePath $ValidatorChainPath
@@ -145,7 +151,23 @@ if ($applyQueue -and $applyQueue.validation_commands) {
 }
 
 $routingWorkers = @()
-if ($registry) {
+if ($adapter -and $adapter.operator_routes) {
+  foreach ($route in @($adapter.operator_routes)) {
+    $routingWorkers += [ordered]@{
+      worker_id = $route.numeric_id
+      label = $route.label
+      lane = $route.lane
+      allowed_paths = @($route.allowed_paths)
+      blocked_paths = @($route.blocked_paths)
+      mode = $route.mode
+      dry_run_task = $route.dry_run_task
+      report_path = $route.report_path
+      validation_commands = @($route.validation_commands)
+      stop_condition = $route.stop_condition
+      source = "operator_registry_adapter"
+    }
+  }
+} elseif ($registry) {
   foreach ($worker in @($registry.workers)) {
     $routingWorkers += ConvertTo-WorkerRoutingItem -Worker $worker -ValidationCommands $defaultValidationCommands
   }
@@ -157,8 +179,9 @@ $routingPacket = [ordered]@{
   generated_at = (Get-Date -Format s)
   source = "Invoke-AiOsWorkflowOrchestrator.ps1"
   worker_count = @($routingWorkers).Count
-  routing_source = if ($registry) { $WorkerRegistryPath } else { "MISSING" }
-  fallback_if_missing = "Start-AiOsParallelDryRunCrew.ps1 falls back to worker registry when this routing packet is missing."
+  routing_source = if ($adapter -and $adapter.operator_routes) { $OperatorRegistryAdapterPath } elseif ($registry) { $WorkerRegistryPath } else { "MISSING" }
+  fallback_if_missing = "Start-AiOsParallelDryRunCrew.ps1 falls back to the operator registry adapter, then to legacy compatibility registry only when adapter evidence is unavailable."
+  legacy_registry_role = "compatibility_evidence_only"
   workers = @($routingWorkers)
   safety = [ordered]@{
     autonomous_apply = "BLOCKED"
@@ -189,14 +212,14 @@ foreach ($line in $gitStatusLines) {
 }
 
 Add-Section -Lines $lines -Title "Active Worker Lanes"
-if ($registry) {
-  foreach ($worker in @($registry.workers)) {
+if ($routingWorkers.Count -gt 0) {
+  foreach ($worker in @($routingWorkers)) {
     $allowed = Format-ListValue -Values @($worker.allowed_paths)
     $blocked = Format-ListValue -Values @($worker.blocked_paths)
-    $lines.Add("- Worker #$($worker.id) $($worker.label): lane=$($worker.lane); mode=$($worker.mode); allowed=$allowed; blocked=$blocked") | Out-Null
+    $lines.Add("- Worker #$($worker.worker_id) $($worker.label): lane=$($worker.lane); mode=$($worker.mode); allowed=$allowed; blocked=$blocked") | Out-Null
   }
 } else {
-  $lines.Add("- Worker registry missing: $WorkerRegistryPath") | Out-Null
+  $lines.Add("- Worker routing source missing: $OperatorRegistryAdapterPath") | Out-Null
 }
 
 Add-Section -Lines $lines -Title "Worker Routing Packet"

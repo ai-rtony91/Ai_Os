@@ -1,6 +1,7 @@
 param(
   [string]$QueuePath = "automation/operator/AIOS_CONTROLLED_APPLY_QUEUE.example.json",
   [string]$RegistryPath = "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+  [string]$OperatorRegistryAdapterPath = "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1",
   [string]$FinalReportDirectory = "Reports/operator"
 )
 
@@ -8,6 +9,7 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path ".").Path
 $QueueFullPath = Join-Path $RepoRoot $QueuePath
 $RegistryFullPath = Join-Path $RepoRoot $RegistryPath
+$AdapterFullPath = Join-Path $RepoRoot $OperatorRegistryAdapterPath
 $ReportDirFullPath = Join-Path $RepoRoot $FinalReportDirectory
 
 function Ask-OperatorApproval {
@@ -33,11 +35,15 @@ if (-not (Test-Path -LiteralPath $QueueFullPath)) {
 if (-not (Test-Path -LiteralPath $RegistryFullPath)) {
   throw "Worker registry not found: $RegistryFullPath"
 }
+if (-not (Test-Path -LiteralPath $AdapterFullPath -PathType Leaf)) {
+  throw "Operator registry adapter not found: $AdapterFullPath"
+}
 
 New-Item -ItemType Directory -Force -Path $ReportDirFullPath | Out-Null
 
 $queue = Get-Content -LiteralPath $QueueFullPath -Raw | ConvertFrom-Json
 $registry = Get-Content -LiteralPath $RegistryFullPath -Raw | ConvertFrom-Json
+$adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $AdapterFullPath -RepoRoot $RepoRoot -OutputJson | ConvertFrom-Json
 $approvedWorkers = @($queue.approved_workers)
 
 Write-Host "AI_OS Controlled APPLY Lane" -ForegroundColor Cyan
@@ -52,21 +58,25 @@ if ($approvedWorkers.Count -eq 0) {
 
 foreach ($workerItem in $approvedWorkers) {
   $workerId = $workerItem.worker_id
-  $worker = $registry.workers | Where-Object { $_.id -eq $workerId } | Select-Object -First 1
+  $worker = @($adapter.operator_routes | Where-Object { $_.numeric_id -eq $workerId -or $_.worker_id -eq $workerId }) | Select-Object -First 1
+  if (-not $worker) {
+    $worker = $registry.workers | Where-Object { $_.id -eq $workerId } | Select-Object -First 1
+  }
   if (-not $worker) {
     throw "Queue references unknown worker id: $workerId"
   }
 
-  Write-Host "Next APPLY worker: #$($worker.id) $($worker.label) :: $($worker.lane)" -ForegroundColor Yellow
-  if (-not (Ask-OperatorApproval "Approve APPLY for worker #$($worker.id) $($worker.label)?")) {
-    throw "Operator stopped before APPLY for worker #$($worker.id)."
+  $displayId = if ($worker.numeric_id) { $worker.numeric_id } else { $worker.id }
+  Write-Host "Next APPLY worker: #$displayId $($worker.label) :: $($worker.lane)" -ForegroundColor Yellow
+  if (-not (Ask-OperatorApproval "Approve APPLY for worker #$displayId $($worker.label)?")) {
+    throw "Operator stopped before APPLY for worker #$displayId."
   }
 
   Write-Host "APPLY placeholder approved. Execute the approved worker patch manually in the active Codex session."
   Write-Host "Codex command placeholder remains UNKNOWN."
 
-  if (-not (Ask-OperatorApproval "Confirm worker #$($worker.id) APPLY is complete and ready for validation?")) {
-    throw "Operator stopped before validation for worker #$($worker.id)."
+  if (-not (Ask-OperatorApproval "Confirm worker #$displayId APPLY is complete and ready for validation?")) {
+    throw "Operator stopped before validation for worker #$displayId."
   }
 
   Invoke-ValidationCommands -Commands @($queue.validation_commands)

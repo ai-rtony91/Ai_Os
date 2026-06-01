@@ -1,11 +1,13 @@
 param(
   [string]$RegistryPath = "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
+  [string]$OperatorRegistryAdapterPath = "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1",
   [string]$RoutingPacketPath = "Reports/operator/AIOS_WORKER_ROUTING_PACKET.json"
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path ".").Path
 $RegistryFullPath = Join-Path $RepoRoot $RegistryPath
+$AdapterFullPath = Join-Path $RepoRoot $OperatorRegistryAdapterPath
 $RoutingPacketFullPath = Join-Path $RepoRoot $RoutingPacketPath
 
 if (-not (Test-Path -LiteralPath $RegistryFullPath)) {
@@ -13,6 +15,10 @@ if (-not (Test-Path -LiteralPath $RegistryFullPath)) {
 }
 
 $registry = Get-Content -LiteralPath $RegistryFullPath -Raw | ConvertFrom-Json
+$adapter = $null
+if (Test-Path -LiteralPath $AdapterFullPath -PathType Leaf) {
+  $adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $AdapterFullPath -RepoRoot $RepoRoot -OutputJson | ConvertFrom-Json
+}
 $routingPacket = $null
 if (Test-Path -LiteralPath $RoutingPacketFullPath -PathType Leaf) {
   $routingPacket = Get-Content -LiteralPath $RoutingPacketFullPath -Raw | ConvertFrom-Json
@@ -29,13 +35,31 @@ if ($codexLaunchEnabled) {
 }
 if ($routingPacket) {
   Write-Host "Worker routing: using $RoutingPacketPath"
+} elseif ($adapter -and $adapter.operator_routes) {
+  Write-Host "Worker routing: using operator registry adapter."
 } else {
-  Write-Host "Worker routing: routing packet missing; falling back to registry."
+  Write-Host "Worker routing: routing packet missing; falling back to registry compatibility evidence."
 }
 Write-Host ""
 
 if ($routingPacket -and $routingPacket.workers) {
   $workerRoutes = @($routingPacket.workers)
+} elseif ($adapter -and $adapter.operator_routes) {
+  $workerRoutes = @($adapter.operator_routes | ForEach-Object {
+    [ordered]@{
+      worker_id = $_.numeric_id
+      label = $_.label
+      lane = $_.lane
+      allowed_paths = @($_.allowed_paths)
+      blocked_paths = @($_.blocked_paths)
+      mode = $_.mode
+      dry_run_task = $_.dry_run_task
+      report_path = $_.report_path
+      validation_commands = @($_.validation_commands)
+      stop_condition = $_.stop_condition
+      source = "operator_registry_adapter"
+    }
+  })
 } else {
   $workerRoutes = @()
   foreach ($worker in $registry.workers) {

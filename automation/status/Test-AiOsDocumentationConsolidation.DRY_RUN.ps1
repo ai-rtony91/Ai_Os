@@ -20,7 +20,7 @@ if ($gitStatus) {
 }
 Write-Host ""
 
-$expectedFiles = @(
+$legacyDocsAiosExpectedFiles = @(
     "Reports/health/STAGE51_60_DOCUMENTATION_CONSOLIDATION_README.txt",
     "automation/status/Test-AiOsDocumentationConsolidation.DRY_RUN.ps1",
     "docs/AI_OS/index/AIOS_INDEX_CATEGORY_COVERAGE_VALIDATION_DRAFT.md",
@@ -30,7 +30,10 @@ $expectedFiles = @(
     "docs/AI_OS/operator/AIOS_OPERATOR_DOCUMENTATION_NAVIGATION_GUIDE_DRAFT.md",
     "docs/AI_OS/runbooks/AIOS_RUNBOOK_COVERAGE_GAP_REVIEW_DRAFT.md",
     "docs/AI_OS/governance/AIOS_DOCUMENTATION_PROMOTION_CRITERIA_DRAFT.md",
-    "docs/AI_OS/governance/AIOS_INVALID_DATA_AND_MISMATCH_HANDLING_DRAFT.md",
+    "docs/AI_OS/governance/AIOS_INVALID_DATA_AND_MISMATCH_HANDLING_DRAFT.md"
+)
+$expectedFiles = @(
+    $legacyDocsAiosExpectedFiles
     "docs/architecture/aios-system-architecture.md",
     "docs/workflows/aios-operator-workflows.md"
 )
@@ -74,6 +77,7 @@ $requiredPhrases = @(
 $failures = New-Object System.Collections.Generic.List[string]
 
 Write-Host "Checks performed:"
+Write-Host "- Legacy docs/AI_OS source-material references only; canonical summaries remain docs/architecture and docs/workflows"
 Write-Host "- Expected file existence"
 Write-Host "- Approved path prefix validation"
 Write-Host "- Protected root files not staged"

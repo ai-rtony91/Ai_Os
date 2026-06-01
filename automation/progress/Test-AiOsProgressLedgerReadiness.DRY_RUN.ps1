@@ -1,10 +1,13 @@
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$RequiredFiles = @(
+$LegacyDocsAiosReferenceFiles = @(
     "docs\AI_OS\progress\AIOS_PROGRESS_LEDGER_SOURCE_OF_TRUTH.md",
     "docs\AI_OS\progress\AIOS_CODEX_PROGRESS_COUNTDOWN_STANDARD.md",
-    "docs\AI_OS\progress\AIOS_WORKLOAD_PROGRESS_SCHEMA_DRAFT.md",
+    "docs\AI_OS\progress\AIOS_WORKLOAD_PROGRESS_SCHEMA_DRAFT.md"
+)
+$RequiredFiles = @(
+    $LegacyDocsAiosReferenceFiles
     "automation\progress\New-AiOsProgressSnapshot.DRY_RUN.ps1",
     "Reports\progress\AIOS_PROGRESS_LEDGER_TEMPLATE.csv"
 )

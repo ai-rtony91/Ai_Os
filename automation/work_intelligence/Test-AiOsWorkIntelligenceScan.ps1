@@ -208,6 +208,11 @@ if (Test-Path -LiteralPath $scannerPath) {
       Add-Failure "Scanner missing worker report ingestion token: $requiredToken"
     }
   }
+  foreach ($adapterToken in @("Get-OperatorRegistryAdapterResult", "operator_registry_adapter", "legacy_compatibility_fallback", "compatibility_evidence_only", "legacy_registry_primary_source")) {
+    if (-not $scannerText.Contains($adapterToken)) {
+      Add-Failure "Scanner missing adapter-first registry token: $adapterToken"
+    }
+  }
   if (-not $scannerText.Contains("work_queue")) {
     Add-Failure "Scanner missing work_queue field."
   }
@@ -281,6 +286,20 @@ try {
     if (-not ($scan.PSObject.Properties.Name -contains $requiredField)) {
       Add-Failure "Scan output missing worker report ingestion field: $requiredField"
     }
+  }
+  foreach ($requiredField in @("worker_registry_source", "operator_registry_adapter_path", "legacy_worker_registry_path", "legacy_registry_role", "legacy_registry_primary_source")) {
+    if (-not ($scan.PSObject.Properties.Name -contains $requiredField)) {
+      Add-Failure "Scan output missing adapter-first registry field: $requiredField"
+    }
+  }
+  if ($scan.worker_registry_source -ne "operator_registry_adapter") {
+    Add-Failure "Work intelligence scan must prefer operator registry adapter."
+  }
+  if ($scan.legacy_registry_role -ne "compatibility_evidence_only") {
+    Add-Failure "Legacy registry must be compatibility evidence only in work intelligence scan output."
+  }
+  if ($scan.legacy_registry_primary_source -ne $false) {
+    Add-Failure "Legacy registry must not be marked as primary source."
   }
   if ($scan.worker_conflict_count -ne @($scan.worker_conflicts).Count) {
     Add-Failure "worker_conflict_count does not match worker_conflicts length."
