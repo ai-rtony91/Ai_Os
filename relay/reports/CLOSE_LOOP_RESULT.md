@@ -75,3 +75,10 @@ Temporary seeded validation artifacts were removed after validation.
 
 - Approve or reject SOS notifier secret enablement.
 - Approve or reject manual night scheduler registration.
+
+## 2026-06-01 Notification Dispatcher Scaffold
+
+- Dispatcher status: READY_FOR_FILE_CHANNEL_VALIDATION.
+- Bridge status remains BLOCKED until Anthony stores operator-managed credentials and switches local config.
+- Default behavior remains local file output under `relay/reports/SOS_OUTBOX/`.
+- No secrets, tokens, scheduled tasks, broker, OANDA, or live trading actions were enabled.

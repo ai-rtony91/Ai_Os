@@ -1,0 +1,18 @@
+{
+  "channel": "file",
+  "channels": {
+    "file": {
+      "outbox": "relay/reports/SOS_OUTBOX/"
+    },
+    "webhook": {
+      "credential_name": "AIOS_WEBHOOK_URL",
+      "method": "POST"
+    },
+    "telegram": {
+      "credential_name_token": "AIOS_TELEGRAM_BOT_TOKEN",
+      "credential_name_chat": "AIOS_TELEGRAM_CHAT_ID"
+    }
+  },
+  "severity_floor": "WARN",
+  "max_per_hour": 12
+}
