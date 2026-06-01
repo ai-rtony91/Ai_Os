@@ -5,7 +5,7 @@ Writes a compact AI_OS morning brief from local night-cycle evidence.
 
 [CmdletBinding()]
 param(
-    [switch]$Apply = $true,
+    [switch]$Apply,
     [string]$Date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd")
 )
 
@@ -113,6 +113,48 @@ function Get-AiOsTrustGate {
     return [pscustomobject]@{ Status = "READY"; Reason = "cycle marker and morning evidence are current" }
 }
 
+function Get-AiOsEvidenceFreshness {
+    param(
+        [Parameter(Mandatory = $true)][string]$Label,
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][datetime]$Now,
+        [int]$MaxAgeHours = 18
+    )
+
+    $relative = if ($Path.StartsWith($repoRoot)) { $Path.Substring($repoRoot.Length + 1) } else { $Path }
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return [pscustomobject]@{ label = $Label; path = $relative; status = "BLOCKED"; detail = "missing"; age_hours = $null; generated_at = "" }
+    }
+
+    $file = Get-Item -LiteralPath $Path
+    if ($file.Length -le 0) {
+        return [pscustomobject]@{ label = $Label; path = $relative; status = "BLOCKED"; detail = "empty"; age_hours = $null; generated_at = "" }
+    }
+
+    $generatedAt = ""
+    $basisTime = $file.LastWriteTimeUtc
+    $detail = "modified_time"
+    if ($Path.EndsWith(".json", [System.StringComparison]::OrdinalIgnoreCase)) {
+        $json = Get-AiOsTaskJson -Path $Path
+        if ($null -ne $json -and $json.PSObject.Properties.Name -contains "generated_at" -and -not [string]::IsNullOrWhiteSpace([string]$json.generated_at)) {
+            $generatedAt = [string]$json.generated_at
+            $parsed = [datetime]::MinValue
+            if ([datetime]::TryParse($generatedAt, [ref]$parsed)) {
+                $basisTime = $parsed.ToUniversalTime()
+                $detail = "generated_at"
+            } else {
+                return [pscustomobject]@{ label = $Label; path = $relative; status = "WARN"; detail = "generated_at_unreadable"; age_hours = $null; generated_at = $generatedAt }
+            }
+        }
+    }
+
+    $ageHours = [math]::Round(($Now.ToUniversalTime() - $basisTime.ToUniversalTime()).TotalHours, 2)
+    if ($ageHours -gt $MaxAgeHours) {
+        return [pscustomobject]@{ label = $Label; path = $relative; status = "WARN"; detail = "STALE by $detail"; age_hours = $ageHours; generated_at = $generatedAt }
+    }
+    return [pscustomobject]@{ label = $Label; path = $relative; status = "PASS"; detail = "fresh by $detail"; age_hours = $ageHours; generated_at = $generatedAt }
+}
+
 $doneFiles = @(Get-ChildItem -LiteralPath (Join-Path $relayRoot "done") -File -Filter "*.task.json" -ErrorAction SilentlyContinue)
 $errorFiles = @(Get-ChildItem -LiteralPath (Join-Path $relayRoot "error") -File -Filter "*.task.json" -ErrorAction SilentlyContinue)
 $doneTasks = @($doneFiles | ForEach-Object { Get-AiOsTaskJson -Path $_.FullName })
@@ -121,6 +163,26 @@ $errorTasks = @($errorFiles | ForEach-Object { Get-AiOsTaskJson -Path $_.FullNam
 $approvalFiles = @(Get-ChildItem -LiteralPath (Join-Path $relayRoot "approvals") -File -Filter "*" -ErrorAction SilentlyContinue)
 $now = Get-Date
 $trustGate = Get-AiOsTrustGate -Now $now
+$freshness = @(
+    Get-AiOsEvidenceFreshness -Label "morning_digest" -Path $morningDigestPath -Now $now
+    Get-AiOsEvidenceFreshness -Label "morning_digest_state" -Path $morningDigestStatePath -Now $now
+    Get-AiOsEvidenceFreshness -Label "autonomy_bridge_state" -Path $bridgeStatePath -Now $now
+)
+$morningEvidenceStatus = if ($freshness | Where-Object { $_.status -eq "BLOCKED" }) {
+    "BLOCKED"
+} elseif (($freshness | Where-Object { $_.status -eq "WARN" }) -or $trustGate.Status -eq "REVIEW") {
+    "WARN"
+} else {
+    "PASS"
+}
+$digestFreshness = ($freshness | ForEach-Object { "$($_.label)=$($_.status) age_hours=$($_.age_hours) detail=$($_.detail)" }) -join "; "
+$morningNextSafeAction = if ($morningEvidenceStatus -eq "PASS") {
+    "Morning evidence is current; review it before any protected action."
+} elseif ($morningEvidenceStatus -eq "WARN") {
+    "Refresh Morning Digest and Autonomy Bridge evidence before using it as deployment proof."
+} else {
+    "Run the Night Supervisor and Autonomy Bridge evidence chain before deployment proof."
+}
 $approvalLines = @(
     foreach ($file in $approvalFiles | Sort-Object Name) {
         $age = [int]($now.ToUniversalTime() - $file.LastWriteTimeUtc).TotalHours
@@ -173,6 +235,10 @@ $lines = @(
     "STATUS = $($trustGate.Status)"
     "Reason: $($trustGate.Reason)"
     "Canonical digest: $digestReference"
+    "morning_evidence_status = $morningEvidenceStatus"
+    "digest_path = $digestReference"
+    "digest_freshness = $digestFreshness"
+    "next_safe_action = $morningNextSafeAction"
     ""
     "## WHAT THE NIGHT DID"
     "- done_count=$($doneFiles.Count)"
@@ -192,7 +258,8 @@ $lines = @(
     "- $repoState"
     ""
     "## NEXT SAFE ACTION"
-    "- $nextCommand"
+    "- $morningNextSafeAction"
+    "- Rebuild command: $nextCommand"
 )
 
 if ($lines.Count -ge 100) {
@@ -206,5 +273,10 @@ if ($Apply) {
     $lines | Set-Content -LiteralPath $briefPath -Encoding UTF8
     Write-Host "MORNING_BRIEF_WRITTEN path=$briefPath lines=$($lines.Count)"
 } else {
+    Write-Host "MORNING_BRIEF_PREVIEW path=$briefPath lines=$($lines.Count)"
+    Write-Host "morning_evidence_status=$morningEvidenceStatus"
+    Write-Host "digest_path=$digestReference"
+    Write-Host "digest_freshness=$digestFreshness"
+    Write-Host "next_safe_action=$morningNextSafeAction"
     $lines | Write-Output
 }
