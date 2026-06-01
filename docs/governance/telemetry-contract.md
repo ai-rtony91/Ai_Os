@@ -221,7 +221,7 @@ Telemetry must distinguish mock/fixture data from live/read-only data. Dashboard
 
 ## CHECKPOINT ALIGNMENT
 
-Telemetry checkpoints must align with `docs/AI_OS/reporting/AIOS_REPORTING_AND_CHECKPOINT_STANDARD.md`.
+Telemetry checkpoints must align with canonical governance/workflow reporting rules. Legacy reporting material under `docs/AI_OS/reporting/` is reference/source material only until promoted.
 
 Required checkpoint types:
 

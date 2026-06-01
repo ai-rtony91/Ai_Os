@@ -1,7 +1,9 @@
 # AI_OS Safe Session Resume
 
 Status: canonical workflow
-Source: `docs/AI_OS/operator_workflows/AIOS_SAFE_SESSION_RESUME_STANDARD.md`
+Source material: `docs/AI_OS/operator_workflows/AIOS_SAFE_SESSION_RESUME_STANDARD.md`
+
+`docs/AI_OS/**` is reference/source material only. Current workflow authority lives in `docs/workflows/` unless a specific rule is promoted through governance.
 
 ## Purpose
 

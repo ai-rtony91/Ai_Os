@@ -1,7 +1,9 @@
 # AI_OS APPLY Routing Chain
 
 Status: canonical workflow
-Source: `docs/AI_OS/operator_workflows/AIOS_APPLY_ROUTING_CHAIN.md`
+Source material: `docs/AI_OS/operator_workflows/AIOS_APPLY_ROUTING_CHAIN.md`
+
+`docs/AI_OS/**` is reference/source material only. Current workflow authority lives in `docs/workflows/` unless a specific rule is promoted through governance.
 
 ## Purpose
 
