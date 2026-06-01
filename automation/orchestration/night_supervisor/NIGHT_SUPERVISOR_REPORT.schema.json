@@ -11,6 +11,7 @@
     "run_id",
     "generated_at",
     "repo",
+    "execution_result",
     "phases",
     "alerts",
     "safety_confirmation",
@@ -37,6 +38,94 @@
         "ahead_commits": { "type": "integer" },
         "changed_files": { "type": "array", "items": { "type": "string" } },
         "untracked_items": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "execution_result": {
+      "type": "object",
+      "description": "Single close-the-loop result tying worker assignment, packet selection, validator status, QA status, changed files, approval requirement, and final operator classification.",
+      "additionalProperties": false,
+      "required": [
+        "packet_id",
+        "packet_name",
+        "run_id",
+        "worker_id",
+        "worker_lane",
+        "packet_selected",
+        "packet_path",
+        "packet_status",
+        "validator_status",
+        "qa_status",
+        "approval_required",
+        "result_classification",
+        "files_changed",
+        "files_untracked",
+        "next_safe_action",
+        "notes"
+      ],
+      "properties": {
+        "packet_id": {
+          "type": "string",
+          "description": "Selected packet identifier, or NO_PACKET_SELECTED when no packet is available."
+        },
+        "packet_name": {
+          "type": "string",
+          "description": "Selected packet name/title, or a clear no-packet marker."
+        },
+        "run_id": {
+          "type": "string",
+          "description": "Night Supervisor run identifier."
+        },
+        "worker_id": {
+          "type": "string",
+          "description": "Assigned worker identity from packet evidence, or UNASSIGNED."
+        },
+        "worker_lane": {
+          "type": "string",
+          "description": "Worker lane or owner lane from packet evidence, or UNKNOWN."
+        },
+        "packet_selected": {
+          "type": "boolean",
+          "description": "True when an active or fallback packet file was selected for read-only classification."
+        },
+        "packet_path": {
+          "type": "string",
+          "description": "Repo-relative selected packet path, blank when no packet is selected."
+        },
+        "packet_status": {
+          "type": "string",
+          "description": "Packet status/state from packet evidence, or NOT_SELECTED."
+        },
+        "validator_status": {
+          "type": "string",
+          "enum": ["PASS", "PLANNED", "WARN", "FAIL", "BLOCKED", "DEFERRED", "SKIPPED", "NOT_RUN"]
+        },
+        "qa_status": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "BLOCKED", "SKIPPED", "NOT_RUN"]
+        },
+        "approval_required": {
+          "type": "boolean",
+          "description": "True when the current result requires Human Owner review before mutation or protected action."
+        },
+        "result_classification": {
+          "type": "string",
+          "enum": ["PASS", "FAIL", "BLOCKED", "NEEDS_APPROVAL", "NOOP"]
+        },
+        "files_changed": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "files_untracked": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "next_safe_action": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
       }
     },
     "phases": {

@@ -8,9 +8,13 @@ or:  python3 automation/orchestration/night_supervisor/test_night_supervisor.py
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 import night_supervisor_harness as nsh
 
 EXPECTED_PHASE_ORDER = [
@@ -23,6 +27,25 @@ EXPECTED_PHASE_ORDER = [
     "resume_capability_automation",
     "cleanup_and_ledger",
 ]
+REQUIRED_EXECUTION_RESULT_FIELDS = {
+    "packet_id",
+    "packet_name",
+    "run_id",
+    "worker_id",
+    "worker_lane",
+    "packet_selected",
+    "packet_path",
+    "packet_status",
+    "validator_status",
+    "qa_status",
+    "approval_required",
+    "result_classification",
+    "files_changed",
+    "files_untracked",
+    "next_safe_action",
+    "notes",
+}
+RESULT_CLASSIFICATIONS = {"PASS", "FAIL", "BLOCKED", "NEEDS_APPROVAL", "NOOP"}
 
 
 class NightSupervisorChainTest(unittest.TestCase):
@@ -39,6 +62,16 @@ class NightSupervisorChainTest(unittest.TestCase):
             self.assertIn(p["status"], {"PASS", "PLANNED", "WARN", "FAIL", "BLOCKED", "DEFERRED", "SKIPPED"})
             self.assertTrue(p["next_safe_action"])
 
+        execution_result = report["execution_result"]
+        self.assertTrue(REQUIRED_EXECUTION_RESULT_FIELDS.issubset(execution_result))
+        self.assertEqual(execution_result["run_id"], report["run_id"])
+        self.assertIn(execution_result["result_classification"], RESULT_CLASSIFICATIONS)
+        self.assertIn(execution_result["validator_status"], {"PASS", "PLANNED", "WARN", "FAIL", "BLOCKED", "DEFERRED", "SKIPPED", "NOT_RUN"})
+        self.assertIn(execution_result["qa_status"], {"PASS", "FAIL", "BLOCKED", "SKIPPED", "NOT_RUN"})
+        self.assertIsInstance(execution_result["packet_selected"], bool)
+        self.assertIsInstance(execution_result["approval_required"], bool)
+        self.assertTrue(execution_result["next_safe_action"])
+
         sc = report["safety_confirmation"]
         self.assertTrue(sc["no_live_trading"])
         self.assertTrue(sc["no_broker_execution"])
@@ -49,23 +82,43 @@ class NightSupervisorChainTest(unittest.TestCase):
         self.assertEqual(sc["forbidden_write_attempts"], 0)
 
     def test_emit_writes_only_inside_sandbox(self):
-        report = nsh.run_night_supervision(emit=True)
-        repo_root = Path(report["repo"]["repo_root"])
-        sandbox = (repo_root / nsh.RUNTIME_WRITE_ROOT).resolve()
-
-        self.assertGreater(len(report["_sandbox_writes"]), 0)
-        for rel in report["_sandbox_writes"]:
-            resolved = (repo_root / rel).resolve()
-            self.assertTrue(
-                resolved == sandbox or sandbox in resolved.parents,
-                f"write escaped sandbox: {rel}",
+        with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as td:
+            repo_root = Path(td)
+            subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True, text=True)
+            (repo_root / "automation" / "orchestration" / "approval_inbox").mkdir(parents=True)
+            (repo_root / "automation" / "orchestration" / "policy").mkdir(parents=True)
+            (repo_root / "automation" / "orchestration" / "work_packets" / "active").mkdir(parents=True)
+            (repo_root / "automation" / "orchestration" / "work_packets" / "active" / "packet.json").write_text(
+                json.dumps({
+                    "packet_id": "TEST_PACKET",
+                    "packet_name": "Test packet",
+                    "assigned_worker": "test_worker",
+                    "owner_lane": "test_lane",
+                    "status": "active",
+                }) + "\n",
+                encoding="utf-8",
             )
-            self.assertTrue(resolved.is_file(), f"expected file missing: {rel}")
+            report = nsh.run_night_supervision(repo_root=repo_root, emit=True)
 
-        # The summary report must itself parse as valid JSON.
-        report_path = (repo_root / nsh.RUNTIME_WRITE_ROOT / report["_written_report_path"].split(nsh.RUNTIME_WRITE_ROOT + "/")[-1])
-        self.assertTrue(report_path.is_file())
-        json.loads(report_path.read_text(encoding="utf-8"))
+            repo_root = Path(report["repo"]["repo_root"])
+            sandbox = (repo_root / nsh.RUNTIME_WRITE_ROOT).resolve()
+
+            self.assertGreater(len(report["_sandbox_writes"]), 0)
+            self.assertEqual(report["execution_result"]["packet_id"], "TEST_PACKET")
+            self.assertTrue(report["execution_result"]["packet_selected"])
+            self.assertIn(report["execution_result"]["result_classification"], RESULT_CLASSIFICATIONS)
+            for rel in report["_sandbox_writes"]:
+                resolved = (repo_root / rel).resolve()
+                self.assertTrue(
+                    resolved == sandbox or sandbox in resolved.parents,
+                    f"write escaped sandbox: {rel}",
+                )
+                self.assertTrue(resolved.is_file(), f"expected file missing: {rel}")
+
+            # The summary report must itself parse as valid JSON.
+            report_path = (repo_root / nsh.RUNTIME_WRITE_ROOT / report["_written_report_path"].split(nsh.RUNTIME_WRITE_ROOT + "/")[-1])
+            self.assertTrue(report_path.is_file())
+            json.loads(report_path.read_text(encoding="utf-8"))
 
     def test_forbidden_write_is_blocked(self):
         repo_root = nsh.resolve_repo_root()
