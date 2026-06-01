@@ -2,7 +2,26 @@
 
 Date: 2026-05-19
 
-Mode: planning only. No orchestration files moved or deleted by this plan.
+Mode: approved planning only. No orchestration files moved or deleted by this plan.
+
+## Approved Canonical Ownership Defaults
+
+These defaults are approved for planning and future cleanup sequencing only. They do not approve cleanup, file moves, deletes, renames, JSON state mutation, runtime changes, commit, or push.
+
+| Concept | Approved canonical owner | Current safe default |
+| --- | --- | --- |
+| Root launcher | `aios.ps1` | Keep as root launcher; do not rewrite in cleanup |
+| Orchestration | `automation/orchestration/` and `automation/orchestration/README.md` | Keep as canonical orchestration layer |
+| Worker registry | `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json` | Keep other registries until dependency review |
+| Worker inbox | `automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json` | Protect active inbox state |
+| Work packets | `automation/orchestration/work_packets/` | Protect active, blocked, and complete packet state |
+| Command queue | `automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json` | Keep active unless a later packet retires it |
+| Approval authority | `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json` and `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json` | Treat as APPLY checkpoint |
+| Validator chain | `automation/orchestration/validators/` | Validator output is evidence only |
+| Commit package flow | `automation/orchestration/commit_packages/` | No commit/push without explicit approval |
+| Operator status display | `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1` | Keep root display scripts until reroute and reference checks pass |
+| Runtime/generated state | runtime state under orchestration and `telemetry/runtime/` | Protected evidence until retention policy exists |
+| Operator layer | `automation/operator/` | Active launcher/legacy-mixed; do not clean until dependency review |
 
 ## Problem
 
@@ -47,13 +66,13 @@ Reference search also showed newer registry paths under:
 
 Because these references exist, moving files to `archive/orchestration_legacy` tonight would be premature.
 
-## Proposed Canonical Targets
+## Approved Canonical Targets
 
-Choose one canonical file or folder for each control concept before moving anything:
+Use one canonical file or folder for each control concept before moving anything:
 
 | Concept | Candidate Canonical Home |
 | --- | --- |
-| Operator front door | `aios.ps1` plus `automation/operator/` |
+| Operator front door | `aios.ps1`; `automation/operator/` remains active launcher/legacy-mixed until dependency review |
 | Clean-state gate | `automation/orchestration/clean_state/` |
 | Work packets | `automation/orchestration/work_packets/` |
 | Worker registry | `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json` |
@@ -63,17 +82,17 @@ Choose one canonical file or folder for each control concept before moving anyth
 | Validator recommendation | `automation/orchestration/validators/` |
 | Commit package recommendation | `automation/orchestration/commit_packages/` |
 | Locks | `automation/orchestration/locks/` |
-| Operator status display | one approved `show-*` index or `automation/orchestration/control/` |
+| Operator status display | `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1` |
 
 ## Consolidation Sequence
 
 1. Freeze new orchestration sprawl.
-2. Approve canonical source-of-truth paths for registry, queue, approval, validator, commit package, and locks.
-3. Update docs to point to canonical paths.
+2. Record approved canonical source-of-truth paths for registry, queue, approval, validator, commit package, and locks.
+3. Update docs and display references to point to canonical paths.
 4. Convert older root-level examples into fixtures or archive candidates only after references are updated.
 5. Collapse duplicate `show-*` scripts into a single operator status command or documented menu.
 6. Decide whether root `scripts/` are wrappers, legacy scripts, or active low-level utilities.
-7. Move only proven legacy/generated material to `archive/orchestration_legacy`.
+7. Move only proven legacy/generated material to `archive/orchestration_legacy` after reference checks.
 8. Run clean-state and validator checks before any commit.
 
 ## Do Not Move Yet
@@ -120,4 +139,4 @@ Also confirm:
 
 ## Next Safe Action
 
-Approve a source-of-truth map for orchestration before moving files.
+Run a reference update pass before moving files. Cleanup remains blocked until reference checks and validators pass.

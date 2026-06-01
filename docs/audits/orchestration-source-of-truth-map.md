@@ -4,13 +4,23 @@ Date: 2026-05-19
 
 Scope: `automation/orchestration` only.
 
-Mode: inspection and audit report only. No files moved. No files deleted. No app code modified. No push. No merge.
+Mode: approved planning map and audit report only. No files moved. No files deleted. No app code modified. No push. No merge.
 
 ## Summary
 
-`automation/orchestration` has both old root-level display fixtures and newer subfolder implementations. The safer consolidation direction is to keep the subfolder implementation files as canonical where they exist, then update root display scripts and old examples in a later controlled pass.
+`automation/orchestration` has both old root-level display fixtures and newer subfolder implementations. The approved planning direction is to keep the subfolder implementation files as canonical where they exist, then update root display scripts and old examples in a later controlled pass.
 
 Several files look like generated or runtime state, but they are still referenced by scripts inside `automation/orchestration`. Do not archive them until the references listed below are updated.
+
+## Approved planning defaults
+
+- Cleanup is not approved by this map.
+- Old/example/reference files must not be moved until reference checks pass.
+- Runtime/generated state is protected evidence until a retention policy exists.
+- `automation/operator/` remains active launcher/legacy-mixed and must not be cleaned until dependency review.
+- `docs/AI_OS/**` remains reference/source material until file-by-file classification.
+- Trading Lab package ownership remains REVIEW_REQUIRED outside this orchestration map.
+- Dashboard remains fixture-driven until API migration to `services/orchestrator/` is approved.
 
 ## 1. Worker Registry
 
@@ -25,7 +35,7 @@ Several files look like generated or runtime state, but they are still reference
 - `automation/orchestration/claims/WORKER_CLAIM_REGISTRY_001.json`
 - `automation/orchestration/worker_lanes/WORKER_LANE_STATUS.example.json`
 
-### Recommended Canonical File/Folder
+### Approved Canonical File/Folder
 
 - Canonical worker registry: `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json`
 - Canonical worker tools: `automation/orchestration/workers/`
@@ -82,7 +92,7 @@ Archive only after scripts and displays stop reading these paths.
 - `automation/orchestration/work_packets/complete/*.json`
 - `automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json`
 
-### Recommended Canonical File/Folder
+### Approved Canonical File/Folder
 
 - Canonical queue model: `automation/orchestration/work_packets/`
 - Canonical packet creator: `automation/orchestration/work_packets/New-AiOsWorkPacket.ps1`
@@ -146,7 +156,7 @@ Archive only after display scripts and status snapshots use `automation/orchestr
 - `automation/orchestration/approvals/APPROVE_PR_73.json`
 - `automation/orchestration/approvals/APPROVE_PR_TEMPLATE.json`
 
-### Recommended Canonical File/Folder
+### Approved Canonical File/Folder
 
 - Canonical approval inbox: `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json`
 - Canonical approval gate: `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json`
@@ -198,7 +208,7 @@ Keep `automation/orchestration/approvals/APPROVE_PR_TEMPLATE.json` only if PR ap
 - `automation/orchestration/validators/Get-AiOsValidatorRecommendation.DRY_RUN.ps1`
 - `automation/orchestration/validators/Test-*.DRY_RUN.ps1`
 
-### Recommended Canonical File/Folder
+### Approved Canonical File/Folder
 
 - Canonical validator folder: `automation/orchestration/validators/`
 - Canonical validator chain config: `automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json`
@@ -252,7 +262,7 @@ Archive only after root display scripts and status snapshots use `automation/orc
 - `automation/orchestration/show-commit-package.ps1`
 - `automation/orchestration/git/Submit-AiOsWork.ps1`
 
-### Recommended Canonical File/Folder
+### Approved Canonical File/Folder
 
 - Canonical commit package folder: `automation/orchestration/commit_packages/`
 - Canonical recommendation runner: `automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1`
@@ -311,7 +321,7 @@ Archive only after `show-commit-package.ps1` and any old docs point to `automati
 - `automation/orchestration/launch_supervisor.v1.example.json`
 - `automation/orchestration/queue_health_supervisor.v1.example.json`
 
-### Recommended Canonical File/Folder
+### Approved Canonical File/Folder
 
 - Canonical operator control loop: `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1`
 - Canonical supervisor folder: `automation/orchestration/supervisor/`
@@ -372,7 +382,7 @@ Archive or disable `Run-AiOsOperatorLoop.APPLY.ps1` only after MAIN CONTROL appr
 - `automation/orchestration/show-commit-package.ps1`
 - `automation/orchestration/terminal_workstations/Show-AiOsOperatorMenu.ps1`
 
-### Recommended Canonical File/Folder
+### Approved Canonical File/Folder
 
 - Canonical operator status command: `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1`
 - Canonical status summaries: `automation/orchestration/control_summary/` and `automation/orchestration/health_summary/`

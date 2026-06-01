@@ -2,9 +2,30 @@
 
 ## Purpose
 
-This document defines the proposed active source-of-truth map for AI_OS.
+This document defines the approved planning source-of-truth map for AI_OS.
 
 It is a planning/control document only. It does not move, delete, rename, or promote files by itself.
+
+## Approved canonical ownership defaults
+
+These ownership decisions are approved for planning and future cleanup packets. They do not approve cleanup, archive moves, deletes, renames, runtime mutation, Trading Lab consolidation, dashboard API migration, commit, or push.
+
+| Domain | Approved canonical owner | Safe default |
+|---|---|---|
+| Root identity | `README.md`, `AGENTS.md`, and protected root docs | Root authority wins over drafts, archives, generated reports, and CLEAN-era source material |
+| Governance/docs authority | `docs/governance/`, `docs/workflows/`, `docs/security/`, `docs/architecture/`, `docs/audits/` | Update existing canonical docs before creating new authority |
+| Orchestration | `automation/orchestration/` and `automation/orchestration/README.md` with named canonical subfolders | Keep old/example/reference files until references are checked |
+| Worker registry | `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json` | Treat other registries as presentation, legacy, or REVIEW_REQUIRED until validated |
+| Worker inbox | `automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json` | Protect active inbox state from cleanup |
+| Work packets | `automation/orchestration/work_packets/` | Protect active, blocked, and complete packet state |
+| Approval authority | `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json` and `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json` | Approval gate remains the APPLY checkpoint; validator output is evidence only |
+| Validator chain | `automation/orchestration/validators/` | Validator PASS does not approve protected actions |
+| Commit package flow | `automation/orchestration/commit_packages/` | Commit/push remains blocked without explicit approval and gate review |
+| Runtime state readers/control | `scripts/control/`, `services/runtime/`, `services/orchestrator/`, `telemetry/runtime/` | Runtime/generated state is protected evidence until retention policy exists |
+| Trading Lab package ownership | `apps/trading_lab/trading_lab/` likely long-term; `aios/modules/trader/` remains active | REVIEW_REQUIRED; keep both active and do not consolidate yet |
+| Operator layer | `aios.ps1` root launcher plus canonical `automation/orchestration/` | Keep `automation/operator/` active launcher/legacy-mixed until dependency review |
+| Dashboard data source | Current fixture-driven `apps/dashboard/`; future read-only API owner `services/orchestrator/` | Do not wire API or remove fixtures until approved |
+| CLEAN-era source | `docs/AI_OS/**` | Reference/source material only until file-by-file classification |
 
 ## Root authority files
 
@@ -87,7 +108,7 @@ Claude Code West territory remains proposed until approved by Human Owner packet
 | `docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md` | West branch/worktree/lock doctrine | KEEP ACTIVE | Canonical workflow location for West PR-lane branch naming, proposed worktree naming, lock naming, and lane metadata |
 | `docs/AI_OS/operator/` | CLEAN-era operator workflow source | MERGE INTO CANONICAL | Not active authority by default |
 | `docs/AI_OS/operator_workflows/` | CLEAN-era workflow source | MERGE INTO CANONICAL | Not active authority by default |
-| `automation/operator/` | Operator launcher/tooling area | NEEDS USER DECISION | Contains active-looking scripts and legacy/imported content |
+| `automation/operator/` | Operator launcher/tooling area | KEEP ACTIVE / REVIEW_REQUIRED | Active launcher and legacy-mixed area; keep untouched until dependency review against `aios.ps1` and `automation/orchestration/` |
 | `automation/orchestration/` | Orchestration automation layer | KEEP ACTIVE | Active tooling, but individual generated files need classification |
 
 Workflow rule:
@@ -117,14 +138,14 @@ No file in `docs/AI_OS/`, `apps/`, `services/`, `automation/`, or `scripts/` may
 | Path | Role | Classification | Notes |
 |---|---|---|---|
 | `apps/` | User-facing applications | KEEP ACTIVE | Dashboard and Trading Lab app home |
-| `apps/dashboard/` | Dashboard/control-plane app | KEEP ACTIVE | UI authority for dashboard implementation |
-| `apps/trading_lab/` | Paper-only Trading Lab app | KEEP ACTIVE | Active vertical; no live broker execution |
-| `services/` | Backend/runtime services | KEEP ACTIVE | Runtime, dispatcher, policy, telemetry, validation services |
+| `apps/dashboard/` | Dashboard/control-plane app | KEEP ACTIVE | Current dashboard remains fixture-driven until API migration is separately approved |
+| `apps/trading_lab/` | Paper-only Trading Lab app | KEEP ACTIVE | Active vertical; likely long-term Trading Lab package owner; no live broker execution |
+| `services/` | Backend/runtime services | KEEP ACTIVE | Runtime, dispatcher, policy, telemetry, validation services; `services/orchestrator/` is future read-only dashboard API owner |
 | `automation/` | Orchestration automation | KEEP ACTIVE | System automation and operator orchestration |
-| `scripts/` | Developer/operator helper scripts | KEEP ACTIVE | Simple commands and wrappers |
+| `scripts/` | Developer/operator helper scripts | KEEP ACTIVE | Simple commands and wrappers; `scripts/control/` owns runtime reader/control scripts |
 | `schemas/` | Structured contracts | KEEP ACTIVE | JSON/data schemas |
 | `tests/` | Validation tests | KEEP ACTIVE | Test authority |
-| `aios/modules/trader/` | Possible shared Trading Lab module | NEEDS USER DECISION | Overlaps with `apps/trading_lab/trading_lab/` |
+| `aios/modules/trader/` | Active paper trader module | REVIEW_REQUIRED | Keep active because tests import it; overlaps with likely long-term owner `apps/trading_lab/trading_lab/` |
 | `agent/` | Possible agent runtime folder | NEEDS USER DECISION | Target structure prefers `agents/`, but do not rename without dependency review |
 | `packages/` | Shared libraries | NEEDS USER DECISION | Target folder does not currently exist |
 | `tools/` | Repo tooling | NEEDS USER DECISION | Target folder does not currently exist |
@@ -180,13 +201,13 @@ Do not blindly replace CLEAN-era names with current AI_OS authority language. Ev
 | `.pytest_cache/**` | REMOVE/DELETE CANDIDATE AFTER APPROVAL | Test cache |
 | `*_DRAFT.md` under `docs/AI_OS/` | ARCHIVE ONLY | Draft status means not canonical |
 | `*BACKUP*` under `docs/AI_OS/` | ARCHIVE ONLY | Backup copies are not authority |
-| Runtime heartbeat/status/result JSON files | REMOVE/DELETE CANDIDATE AFTER APPROVAL | Generated runtime state unless explicitly designated as ledger/evidence |
+| Runtime heartbeat/status/result JSON files | PROTECTED EVIDENCE / REVIEW_REQUIRED | Runtime/generated state must not move or delete until retention policy exists |
 | Old reports/checkpoints without current owner | ARCHIVE ONLY | Historical evidence, not instructions |
 
 ## Open questions
 
-1. Should `apps/trading_lab/trading_lab/` be the canonical Trading Lab Python package, with `aios/modules/trader/` treated as source material or legacy?
+1. When should `apps/trading_lab/trading_lab/` become the sole canonical Trading Lab Python package, with `aios/modules/trader/` migrated or retired after tests/imports are moved?
 2. Should `agent/` be retained as-is, promoted to `agents/`, or archived after dependency review?
-3. Should `automation/orchestration/` be the only active orchestration layer, with `automation/operator/` reduced to launchers or archive-only experiments?
+3. Which `automation/operator/` scripts remain active launchers, and which become archive candidates after dependency review?
 4. Which `docs/AI_OS/` security and trading boundary docs must be promoted before the rest becomes archive-only?
-5. Should generated runtime state stay in repo for evidence, move to a runtime/evidence folder, or be deleted after approval?
+5. Should generated runtime state stay in repo for evidence, move to a runtime/evidence folder, or be deleted after a retention policy and reference checks are approved?
