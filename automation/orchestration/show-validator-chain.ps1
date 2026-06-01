@@ -3,7 +3,6 @@ $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
 $chainPath = Join-Path $orchestrationRoot "validators\VALIDATOR_CHAIN_CONFIG_001.json"
-$legacyChainPath = Join-Path $orchestrationRoot "validator_chain.example.json"
 
 function Read-JsonFile {
     param(
@@ -41,6 +40,7 @@ function Write-ValidatorSection {
         [string]$Title,
 
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
         [object[]]$Validators
     )
 
@@ -59,9 +59,10 @@ function Write-ValidatorSection {
         $name = Get-JsonValue -Object $validator -Name "validator_name" -Default (Get-JsonValue -Object $validator -Name "name" -Default "UNKNOWN")
         $type = Get-JsonValue -Object $validator -Name "validator_type" -Default $(if ((Get-JsonValue -Object $validator -Name "required" -Default "false") -eq "True") { "required" } else { "optional" })
         $status = Get-JsonValue -Object $validator -Name "status" -Default "configured"
+        $validatorId = Get-JsonValue -Object $validator -Name "validator_id" -Default (Get-JsonValue -Object $validator -Name "name" -Default $name)
 
         Write-Host "  $($validator.order). $name"
-        Write-Host "    ID: $(if ($validator.validator_id) { $validator.validator_id } else { $validator.name })"
+        Write-Host "    ID: $validatorId"
         Write-Host "    Type: $type"
         Write-Host "    Status: $status"
         Write-Host "    Blocked: $(Get-JsonValue -Object $validator -Name 'blocked' -Default 'False')"
@@ -72,12 +73,8 @@ function Write-ValidatorSection {
     }
 }
 
-$usedLegacyChain = $false
 $chain = if (Test-Path -LiteralPath $chainPath -PathType Leaf) {
     Read-JsonFile -Path $chainPath
-} elseif (Test-Path -LiteralPath $legacyChainPath -PathType Leaf) {
-    $usedLegacyChain = $true
-    Read-JsonFile -Path $legacyChainPath
 } else {
     $null
 }
@@ -92,7 +89,7 @@ if ($null -eq $chain) {
     Write-Host ""
     Write-Host "Validator summary:"
     Write-Host "  Canonical source missing: automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json"
-    Write-Host "  Legacy fallback not found; no validator chain source available."
+    Write-Host "  Legacy validator_chain.example.json fallback is disabled for canonical display."
     Write-Host ""
     Write-Host "Next safe action: restore or create the canonical validator chain through an approved workflow."
     exit 0
@@ -108,13 +105,7 @@ Write-Host ""
 Write-Host "Safety: display-only. No validators are run. No files are modified. No workers are launched."
 Write-Host ""
 
-if ($usedLegacyChain) {
-    Write-Host "Validator source: legacy validator_chain.example.json used because canonical source was unavailable."
-} elseif (Test-Path -LiteralPath $legacyChainPath -PathType Leaf) {
-    Write-Host "Legacy fallback: validator_chain.example.json available"
-} else {
-    Write-Host "Legacy fallback not found; canonical source used."
-}
+Write-Host "Legacy validator_chain.example.json fallback: not used; canonical source controls display."
 Write-Host ""
 
 if ($validators.Count -eq 0) {
