@@ -2,7 +2,10 @@
     "system":  "AI_OS",
     "queue":  "dispatcher_queue",
     "purpose":  "Holds work packets waiting for assignment to AI_OS workers.",
-    "status":  "ACTIVE",
+    "status":  "HISTORICAL",
+    "canonical_queue":  "automation/orchestration/work_packets/active/",
+    "canonical_reader":  "services/python_supervisor/queue_scanner.py",
+    "note":  "Items here are historical Phase 16 dispatcher assignments completed 2026-05-15 to 2026-05-16. Active work lives in automation/orchestration/work_packets/active/ read by queue_scanner.py. Do not write new items to this file.",
     "items":  [
                   {
                       "packet_id":  "dispatcher-queue-core",
