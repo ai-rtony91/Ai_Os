@@ -18,7 +18,7 @@ The existing night reports were generated during afternoon manual work on `2026-
 ## Exact Command That Would Be Scheduled
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Ai.Os\automation\orchestration\relay\Invoke-AiOsRelayRunner.ps1" -Apply
+pwsh -NoProfile -ExecutionPolicy Bypass -File "C:\Dev\Ai.Os\automation\orchestration\Invoke-AiOsNightCycle.ps1" -Apply
 ```
 
 Task Scheduler start-in directory:
@@ -29,7 +29,7 @@ C:\Dev\Ai.Os
 
 ## Safety Restatement
 
-The scheduled trigger would only launch the existing relay runner. The runner remains gated:
+The scheduled trigger would only launch the existing full night cycle. The cycle remains gated:
 
 - No git stage, commit, push, merge, reset, clean, or branch operation.
 - No scheduled task creation from inside the runner.
@@ -50,7 +50,7 @@ schtasks /delete /tn "AIOS_Relay_Nightly" /f
 
 ```powershell
 # ===== PROPOSAL ONLY - DO NOT RUN. Anthony registers manually. =====
-# schtasks /create /tn "AIOS_Relay_Nightly" /tr "pwsh -NoProfile -ExecutionPolicy Bypass -File \"C:\Dev\Ai.Os\automation\orchestration\relay\Invoke-AiOsRelayRunner.ps1\" -Apply" /sc DAILY /st 02:00 /ru "%USERNAME%" /rl LIMITED /f
+# schtasks /create /tn "AIOS_Relay_Nightly" /tr "pwsh -NoProfile -ExecutionPolicy Bypass -File \"C:\Dev\Ai.Os\automation\orchestration\Invoke-AiOsNightCycle.ps1\" -Apply" /sc DAILY /st 02:00 /ru "%USERNAME%" /rl LIMITED /f
 # ==================================================================
 ```
 

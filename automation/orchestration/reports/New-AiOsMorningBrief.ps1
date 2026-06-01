@@ -16,6 +16,10 @@ $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..\..")).Pat
 $relayRoot = Join-Path $repoRoot "relay"
 $reportDir = Join-Path $relayRoot "reports"
 $briefPath = Join-Path $reportDir ("MORNING_BRIEF_{0}.md" -f $Date)
+$cycleMarkerPath = Join-Path $repoRoot "control\cycle\last_marker.json"
+$morningDigestPath = Join-Path $repoRoot "telemetry\morning_digest\MORNING_DIGEST_LATEST.md"
+$morningDigestStatePath = Join-Path $repoRoot "telemetry\morning_digest\MORNING_DIGEST_STATE.json"
+$bridgeStatePath = Join-Path $repoRoot "telemetry\night_supervisor\AUTONOMY_BRIDGE_STATE.json"
 
 function Get-AiOsTaskJson {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -64,6 +68,51 @@ function Get-AiOsGitStatus {
     }
 }
 
+function Get-AiOsTrustGate {
+    param([Parameter(Mandatory = $true)][datetime]$Now)
+
+    $reasons = New-Object System.Collections.Generic.List[string]
+    $marker = $null
+    if (-not (Test-Path -LiteralPath $cycleMarkerPath -PathType Leaf)) {
+        $reasons.Add("missing cycle marker: control/cycle/last_marker.json")
+    } else {
+        $marker = Get-AiOsTaskJson -Path $cycleMarkerPath
+        if ($null -eq $marker) {
+            $reasons.Add("cycle marker is unreadable JSON: control/cycle/last_marker.json")
+        } elseif ($marker.PSObject.Properties.Name -notcontains "phase_state") {
+            $reasons.Add("cycle marker missing phase_state: control/cycle/last_marker.json")
+        } elseif ([string]$marker.phase_state -ne "CYCLE_COMPLETE") {
+            $actualPhaseState = [string]$marker.phase_state
+            $reasons.Add("cycle marker phase_state is '$actualPhaseState', expected CYCLE_COMPLETE")
+        }
+    }
+
+    foreach ($evidence in @(
+        [pscustomobject]@{ Label = "morning digest"; Path = $morningDigestPath },
+        [pscustomobject]@{ Label = "morning digest state"; Path = $morningDigestStatePath },
+        [pscustomobject]@{ Label = "autonomy bridge state"; Path = $bridgeStatePath }
+    )) {
+        if (-not (Test-Path -LiteralPath $evidence.Path -PathType Leaf)) {
+            $reasons.Add("missing $($evidence.Label): $($evidence.Path.Substring($repoRoot.Length + 1))")
+            continue
+        }
+
+        $file = Get-Item -LiteralPath $evidence.Path
+        if ($file.Length -le 0) {
+            $reasons.Add("empty $($evidence.Label): $($evidence.Path.Substring($repoRoot.Length + 1))")
+            continue
+        }
+        if (($Now.ToUniversalTime() - $file.LastWriteTimeUtc).TotalHours -gt 18) {
+            $reasons.Add("stale $($evidence.Label): $($evidence.Path.Substring($repoRoot.Length + 1))")
+        }
+    }
+
+    if ($reasons.Count -gt 0) {
+        return [pscustomobject]@{ Status = "REVIEW"; Reason = ($reasons -join "; ") }
+    }
+    return [pscustomobject]@{ Status = "READY"; Reason = "cycle marker and morning evidence are current" }
+}
+
 $doneFiles = @(Get-ChildItem -LiteralPath (Join-Path $relayRoot "done") -File -Filter "*.task.json" -ErrorAction SilentlyContinue)
 $errorFiles = @(Get-ChildItem -LiteralPath (Join-Path $relayRoot "error") -File -Filter "*.task.json" -ErrorAction SilentlyContinue)
 $doneTasks = @($doneFiles | ForEach-Object { Get-AiOsTaskJson -Path $_.FullName })
@@ -71,6 +120,7 @@ $errorTasks = @($errorFiles | ForEach-Object { Get-AiOsTaskJson -Path $_.FullNam
 
 $approvalFiles = @(Get-ChildItem -LiteralPath (Join-Path $relayRoot "approvals") -File -Filter "*" -ErrorAction SilentlyContinue)
 $now = Get-Date
+$trustGate = Get-AiOsTrustGate -Now $now
 $approvalLines = @(
     foreach ($file in $approvalFiles | Sort-Object Name) {
         $age = [int]($now.ToUniversalTime() - $file.LastWriteTimeUtc).TotalHours
@@ -111,9 +161,18 @@ if (Test-Path -LiteralPath $backlogPath -PathType Leaf) {
 $git = Get-AiOsGitStatus
 $repoState = if ($git.clean) { "clean" } else { "dirty count=$($git.count)" }
 $nextCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation\orchestration\Invoke-AiOsNightCycle.ps1"
+$digestReference = if (Test-Path -LiteralPath $morningDigestPath -PathType Leaf) {
+    "telemetry/morning_digest/MORNING_DIGEST_LATEST.md"
+} else {
+    "telemetry/morning_digest/MORNING_DIGEST_LATEST.md (missing)"
+}
 
 $lines = @(
     "# AI_OS Morning Brief - $Date"
+    ""
+    "STATUS = $($trustGate.Status)"
+    "Reason: $($trustGate.Reason)"
+    "Canonical digest: $digestReference"
     ""
     "## WHAT THE NIGHT DID"
     "- done_count=$($doneFiles.Count)"
