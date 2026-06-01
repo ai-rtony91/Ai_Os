@@ -28,12 +28,27 @@ function Read-Json {
   }
 }
 
+function Read-OptionalJson {
+  param([string]$RelativePath)
+  $fullPath = Join-Path $RepoRoot $RelativePath
+  if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
+    return $null
+  }
+  try {
+    return Get-Content -LiteralPath $fullPath -Raw | ConvertFrom-Json
+  } catch {
+    Add-Failure "JSON parse failed: $RelativePath :: $($_.Exception.Message)"
+    return $null
+  }
+}
+
 Write-Host "AI_OS Worker Auto-Routing DRY_RUN Validator" -ForegroundColor Cyan
 Write-Host "Repo: $RepoRoot"
 
 $requiredFiles = @(
   "automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1",
   "automation/operator/Start-AiOsParallelDryRunCrew.ps1",
+  "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1",
   "automation/operator/Test-AiOsWorkerAutoRouting.DRY_RUN.ps1",
   "apps/dashboard/mock-data/aios-worker-auto-routing-v1.example.json",
   "docs/concepts/aios-dispatcher-orchestration-concepts.md"
@@ -46,8 +61,40 @@ foreach ($file in $requiredFiles) {
 }
 
 $registry = Read-Json -RelativePath $RegistryPath
-$routing = Read-Json -RelativePath $RoutingPacketPath
+$routing = Read-OptionalJson -RelativePath $RoutingPacketPath
 $fixture = Read-Json -RelativePath "apps/dashboard/mock-data/aios-worker-auto-routing-v1.example.json"
+
+$adapterScript = Join-Path $RepoRoot "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1"
+$adapter = $null
+if (Test-Path -LiteralPath $adapterScript -PathType Leaf) {
+  try {
+    $adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $adapterScript -RepoRoot $RepoRoot -OutputJson | ConvertFrom-Json
+  } catch {
+    Add-Failure "Operator registry adapter failed: $($_.Exception.Message)"
+  }
+}
+
+if ($adapter) {
+  if ($adapter.schema -ne "AIOS_OPERATOR_REGISTRY_ADAPTER.v1") {
+    Add-Failure "Operator registry adapter schema mismatch."
+  }
+  if ($adapter.mode -ne "READ_ONLY") {
+    Add-Failure "Operator registry adapter must be READ_ONLY."
+  }
+  if (@($adapter.runtime_workers).Count -eq 0) {
+    Add-Failure "Operator registry adapter must expose runtime_workers."
+  }
+  if (@($adapter.operator_routes).Count -ne @($adapter.runtime_workers).Count) {
+    Add-Failure "Operator registry adapter operator_routes must match runtime_workers count."
+  }
+  if ($adapter.safety.writes_files -ne $false -or $adapter.safety.launches_workers -ne $false -or $adapter.safety.changes_json -ne $false) {
+    Add-Failure "Operator registry adapter must remain read-only and non-launching."
+  }
+}
+
+if (-not $routing -and -not $adapter) {
+  Add-Failure "Routing packet is missing and operator registry adapter is unavailable."
+}
 
 if ($fixture) {
   if ($fixture.mode -ne "DRY_RUN_ONLY") {
