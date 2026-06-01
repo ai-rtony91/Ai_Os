@@ -2,9 +2,11 @@
 param(
     [string]$SourceRepo = "C:\Dev\Ai.Os",
     [string]$BackupRoot = "D:\T9_FOB",
+    [ValidateSet("Auto", "Full", "Delta", "ManifestOnly")][string]$BackupMode = "Auto",
     [switch]$Preview,
     [switch]$OutputJson,
-    [switch]$AllowDirty
+    [switch]$AllowDirty,
+    [switch]$RetentionPreview
 )
 
 Set-StrictMode -Version Latest
@@ -245,6 +247,191 @@ function Get-AiOsPreviousBackupManifest {
     return $manifests[0]
 }
 
+function Test-AiOsSuccessfulBackupToday {
+    param([Parameter(Mandatory = $true)][string]$BackupRoot)
+
+    if (-not (Test-Path -LiteralPath $BackupRoot -PathType Container)) {
+        return $false
+    }
+
+    $today = (Get-Date).Date
+    $match = @(Get-ChildItem -LiteralPath $BackupRoot -Directory -Filter "AIOS_BACKUP*" -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $candidate = Join-Path $_.FullName "AIOS_BACKUP_MANIFEST.json"
+            if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { return }
+            try {
+                $manifest = Get-Content -Raw -LiteralPath $candidate | ConvertFrom-Json
+                $status = if ($null -ne $manifest.status) { [string]$manifest.status } else { "" }
+                if ($status -ne "SUCCESS") { return }
+                $createdAt = if ($null -ne $manifest.created_at) { [datetime]$manifest.created_at } else { $_.LastWriteTime }
+                if ($createdAt -ge $today) { $_.FullName }
+            } catch {
+                return
+            }
+        } | Select-Object -First 1)
+
+    return ($match.Count -gt 0)
+}
+
+function Get-AiOsGitDeltaFiles {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$PreviousCommit,
+        [Parameter(Mandatory = $true)][string]$CurrentCommit
+    )
+
+    $empty = [pscustomobject]@{
+        source_range = ""
+        changed_files = @()
+        deleted_files = @()
+        copy_files = @()
+    }
+
+    if ([string]::IsNullOrWhiteSpace($PreviousCommit) -or [string]::IsNullOrWhiteSpace($CurrentCommit) -or $PreviousCommit -eq $CurrentCommit) {
+        return $empty
+    }
+
+    $range = "{0}..{1}" -f $PreviousCommit, $CurrentCommit
+    $nameStatusLines = @(git -C $RepoRoot diff --name-status $range)
+    if ($LASTEXITCODE -ne 0) {
+        return $empty
+    }
+
+    $changed = New-Object System.Collections.Generic.List[string]
+    $deleted = New-Object System.Collections.Generic.List[string]
+    $copy = New-Object System.Collections.Generic.List[string]
+
+    foreach ($line in $nameStatusLines) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $parts = $line -split "`t"
+        $status = [string]$parts[0]
+        $relPath = if ($status.StartsWith("R") -and $parts.Count -ge 3) { [string]$parts[2] } elseif ($parts.Count -ge 2) { [string]$parts[1] } else { "" }
+        if ([string]::IsNullOrWhiteSpace($relPath)) { continue }
+        $relPath = $relPath.Replace("/", "\")
+
+        if ($status -eq "D") {
+            $deleted.Add($relPath)
+            continue
+        }
+
+        $tracked = @(git -C $RepoRoot ls-files -- $relPath)
+        if ($LASTEXITCODE -eq 0 -and $tracked.Count -gt 0) {
+            $changed.Add($relPath)
+            $fullPath = Join-Path $RepoRoot $relPath
+            if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
+                $copy.Add($relPath)
+            }
+        }
+    }
+
+    return [pscustomobject]@{
+        source_range = $range
+        changed_files = @($changed)
+        deleted_files = @($deleted)
+        copy_files = @($copy)
+    }
+}
+
+function Select-AiOsBackupMode {
+    param(
+        [Parameter(Mandatory = $true)][string]$RequestedMode,
+        [AllowNull()]$PreviousManifest,
+        [Parameter(Mandatory = $true)][bool]$HasSuccessfulBackupToday,
+        [Parameter(Mandatory = $true)][object]$GitInfo,
+        [Parameter(Mandatory = $true)][object]$ProductivityDelta
+    )
+
+    if ($RequestedMode -ne "Auto") {
+        return [pscustomobject]@{
+            mode = $RequestedMode
+            reason = "Operator requested $RequestedMode mode."
+        }
+    }
+
+    if ($null -eq $PreviousManifest) {
+        return [pscustomobject]@{ mode = "Full"; reason = "No prior successful backup manifest found." }
+    }
+
+    if (-not $HasSuccessfulBackupToday) {
+        return [pscustomobject]@{ mode = "Full"; reason = "First successful backup of the local day." }
+    }
+
+    if ([string]$ProductivityDelta.previous_backup_commit_hash -eq [string]$GitInfo.commit_hash) {
+        return [pscustomobject]@{ mode = "ManifestOnly"; reason = "Current commit already matches the previous backup commit." }
+    }
+
+    if ([int]$ProductivityDelta.productivity_delta_files -gt 0 -and [int64]$ProductivityDelta.productivity_delta_bytes -le 52428800) {
+        return [pscustomobject]@{ mode = "Delta"; reason = "Productive delta exists and is below the 50 MB delta threshold." }
+    }
+
+    return [pscustomobject]@{ mode = "Full"; reason = "Productive delta is large or cannot be safely represented as a small delta." }
+}
+
+function Get-AiOsRetentionPreviewCandidates {
+    param([Parameter(Mandatory = $true)][string]$BackupRoot)
+
+    if (-not (Test-Path -LiteralPath $BackupRoot -PathType Container)) {
+        return @()
+    }
+
+    $records = @(Get-ChildItem -LiteralPath $BackupRoot -Directory -Filter "AIOS_BACKUP*" -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $manifestPath = Join-Path $_.FullName "AIOS_BACKUP_MANIFEST.json"
+            if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { return }
+            try {
+                $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+                if ([string]$manifest.status -ne "SUCCESS") { return }
+                $mode = if ($manifest.PSObject.Properties.Name -contains "backup_mode") { [string]$manifest.backup_mode } else { "Full" }
+                $createdAt = if ($null -ne $manifest.created_at) { [datetime]$manifest.created_at } else { $_.LastWriteTime }
+                [pscustomobject]@{
+                    backup_id = if ($null -ne $manifest.backup_id) { [string]$manifest.backup_id } else { $_.Name }
+                    path = $_.FullName
+                    manifest_path = $manifestPath
+                    backup_mode = $mode
+                    created_at = $createdAt
+                    local_date = $createdAt.ToString("yyyy-MM-dd")
+                }
+            } catch {
+                return
+            }
+        } | Sort-Object created_at -Descending)
+
+    $fullBackups = @($records | Where-Object { $_.backup_mode -eq "Full" })
+    $keep = New-Object System.Collections.Generic.HashSet[string]
+    @($fullBackups | Select-Object -First 3) | ForEach-Object { [void]$keep.Add($_.backup_id) }
+    $fullBackups | Group-Object local_date | ForEach-Object {
+        $firstOfDay = @($_.Group | Sort-Object created_at | Select-Object -First 1)
+        if ($firstOfDay.Count -gt 0) { [void]$keep.Add($firstOfDay[0].backup_id) }
+    }
+
+    return @($fullBackups | Where-Object { -not $keep.Contains($_.backup_id) } | ForEach-Object {
+        [pscustomobject]@{
+            backup_id = $_.backup_id
+            path = $_.path
+            reason = "Older duplicate full snapshot; retention preview only."
+        }
+    })
+}
+
+function Copy-AiOsDeltaFiles {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$DestinationRoot,
+        [Parameter(Mandatory = $true)][string[]]$RelativePaths
+    )
+
+    foreach ($relPath in $RelativePaths) {
+        $source = Join-Path $RepoRoot $relPath
+        if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { continue }
+        $destination = Join-Path $DestinationRoot $relPath
+        $destinationParent = Split-Path -Parent $destination
+        if (-not (Test-Path -LiteralPath $destinationParent -PathType Container)) {
+            New-Item -ItemType Directory -Path $destinationParent -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $source -Destination $destination -Force
+    }
+}
+
 function Get-AiOsGitDeltaStats {
     param(
         [Parameter(Mandatory = $true)][string]$RepoRoot,
@@ -416,7 +603,11 @@ function Add-AiOsProductivityFields {
 function Write-AiOsBackupProductivityOutput {
     param(
         [Parameter(Mandatory = $true)][object]$ProductivityDelta,
-        [Parameter(Mandatory = $true)][string]$CopiedHuman
+        [Parameter(Mandatory = $true)][string]$CopiedHuman,
+        [int]$ChangedCopied = 0,
+        [int]$DeletedRecorded = 0,
+        [bool]$RestoreRequiresFullBackup = $false,
+        [int]$RetentionCandidateCount = 0
     )
 
     if ([string]$ProductivityDelta.productivity_delta_progress_label -eq "UNKNOWN") {
@@ -426,6 +617,12 @@ function Write-AiOsBackupProductivityOutput {
     }
     Write-Host "Backup total copied: $CopiedHuman"
     Write-Host $ProductivityDelta.productivity_delta_summary
+    Write-Host "Changed files copied: $ChangedCopied"
+    Write-Host "Deleted files recorded: $DeletedRecorded"
+    Write-Host "Restore requires full backup: $(if ($RestoreRequiresFullBackup) { 'YES' } else { 'NO' })"
+    if ($RetentionPreview) {
+        Write-Host "Retention preview candidates: $RetentionCandidateCount"
+    }
     Write-Host "PR merges included: $($ProductivityDelta.productivity_delta_pr_merges)"
     Write-Host "Runtime exclusion status: $($ProductivityDelta.runtime_exclusion_status)"
 }
@@ -447,10 +644,13 @@ function New-AiOsBackupResult {
         backup_root = $normalizedBackupRoot
         snapshot_name = $snapshotName
         snapshot_path = $snapshotPath
+        backup_mode = $selectedBackupMode
+        requested_backup_mode = $BackupMode
+        selected_backup_mode_reason = $selectedBackupModeReason
         excluded_paths = $excludedDirs
         robocopy_exit_code = $RobocopyExitCode
         exit_code = $ExitCode
-        mutation_scope = if ($Preview) { "NONE" } else { "BACKUP_SNAPSHOT_ONLY" }
+        mutation_scope = if ($Preview) { "NONE" } elseif ($selectedBackupMode -eq "ManifestOnly") { "BACKUP_MANIFEST_ONLY" } else { "BACKUP_SNAPSHOT_ONLY" }
         active_repo_mutation = "NO"
         scheduler_behavior = "NO"
         runtime_mutation = if ($Preview) { "NO" } else { "BACKUP_DESTINATION_ONLY" }
@@ -458,6 +658,15 @@ function New-AiOsBackupResult {
         backup_lock_path = $backupLockPath
         robocopy_log_path = $robocopyLogPath
         manifest_path = $manifestPath
+        base_backup_id = $baseBackupId
+        base_backup_commit_hash = $baseBackupCommitHash
+        changed_files = @($changedFiles)
+        deleted_files = @($deletedFiles)
+        file_count_copied = [int]$fileCountCopied
+        delta_source_range = $deltaSourceRange
+        restore_requires_full_backup = [bool]$restoreRequiresFullBackup
+        retention_class = $retentionClass
+        retention_preview_candidates = @($retentionPreviewCandidates)
         generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     }
 }
@@ -494,6 +703,15 @@ function Write-AiOsBackupManifest {
         [Parameter(Mandatory = $true)][object]$ProductivityDelta,
         [int64]$CopiedBytes = 0,
         [string]$CopiedHuman = "0.00 B",
+        [string[]]$ChangedFiles = @(),
+        [string[]]$DeletedFiles = @(),
+        [int]$FileCountCopied = 0,
+        [string]$DeltaSourceRange = "",
+        [string]$BaseBackupId = "",
+        [string]$BaseBackupCommitHash = "",
+        [bool]$RestoreRequiresFullBackup = $false,
+        [string]$RetentionClass = "",
+        [object[]]$RetentionPreviewCandidates = @(),
         [Parameter(Mandatory = $true)][string]$Message
     )
 
@@ -514,6 +732,18 @@ function Write-AiOsBackupManifest {
         robocopy_exit_code = $RobocopyExitCode
         status = $Status
         message = $Message
+        backup_mode = $selectedBackupMode
+        requested_backup_mode = $BackupMode
+        selected_backup_mode_reason = $selectedBackupModeReason
+        base_backup_id = $BaseBackupId
+        base_backup_commit_hash = $BaseBackupCommitHash
+        changed_files = @($ChangedFiles)
+        deleted_files = @($DeletedFiles)
+        file_count_copied = $FileCountCopied
+        delta_source_range = $DeltaSourceRange
+        restore_requires_full_backup = [bool]$RestoreRequiresFullBackup
+        retention_class = $RetentionClass
+        retention_preview_candidates = @($RetentionPreviewCandidates)
         excluded_dirs = @($excludedDirs)
         robocopy_log_path = $robocopyLogPath
         backup_lock_path = $backupLockPath
@@ -548,6 +778,17 @@ $excludedDirs = @(
     ".codex",
     (Join-Path $normalizedSource ".git\logs")
 )
+$selectedBackupMode = $BackupMode
+$selectedBackupModeReason = "Mode has not been selected yet."
+$baseBackupId = ""
+$baseBackupCommitHash = ""
+$changedFiles = @()
+$deletedFiles = @()
+$fileCountCopied = 0
+$deltaSourceRange = ""
+$restoreRequiresFullBackup = $false
+$retentionClass = ""
+$retentionPreviewCandidates = @()
 
 try {
     if (-not $OutputJson) {
@@ -590,6 +831,36 @@ try {
     $gitStatus = Get-AiOsGitStatus -Path $normalizedSource
     $gitInfo = Get-AiOsGitInfo -Path $normalizedSource
     $productivityDelta = Get-AiOsBackupProductivityDelta -RepoRoot $normalizedSource -BackupRoot $normalizedBackupRoot -CurrentSnapshotPath $snapshotPath -GitInfo $gitInfo -ExcludedDirs $excludedDirs
+    $previousManifest = Get-AiOsPreviousBackupManifest -BackupRoot $normalizedBackupRoot -CurrentSnapshotPath $snapshotPath
+    $hasSuccessfulBackupToday = Test-AiOsSuccessfulBackupToday -BackupRoot $normalizedBackupRoot
+    if ($null -ne $previousManifest) {
+        $baseBackupId = if ($null -ne $previousManifest.manifest.backup_id) { [string]$previousManifest.manifest.backup_id } else { "" }
+        $baseBackupCommitHash = if ($null -ne $previousManifest.manifest.commit_hash) { [string]$previousManifest.manifest.commit_hash } else { "" }
+    }
+    $deltaInfo = Get-AiOsGitDeltaFiles -RepoRoot $normalizedSource -PreviousCommit $baseBackupCommitHash -CurrentCommit ([string]$gitInfo.commit_hash)
+    $changedFiles = @($deltaInfo.copy_files)
+    $deletedFiles = @($deltaInfo.deleted_files)
+    $deltaSourceRange = [string]$deltaInfo.source_range
+    $selection = Select-AiOsBackupMode -RequestedMode $BackupMode -PreviousManifest $previousManifest -HasSuccessfulBackupToday $hasSuccessfulBackupToday -GitInfo $gitInfo -ProductivityDelta $productivityDelta
+    $selectedBackupMode = [string]$selection.mode
+    $selectedBackupModeReason = [string]$selection.reason
+    $restoreRequiresFullBackup = ($selectedBackupMode -eq "Delta")
+    $retentionClass = if ($selectedBackupMode -eq "Full") { "FULL_SNAPSHOT" } elseif ($selectedBackupMode -eq "Delta") { "DELTA_SNAPSHOT" } else { "MANIFEST_ONLY" }
+    $retentionPreviewCandidates = if ($RetentionPreview) { @(Get-AiOsRetentionPreviewCandidates -BackupRoot $normalizedBackupRoot) } else { @() }
+
+    if ($selectedBackupMode -eq "Full") {
+        $snapshotName = "AIOS_BACKUP_$timestamp"
+    } else {
+        $snapshotName = "AIOS_BACKUP_{0}_{1}" -f $timestamp, $selectedBackupMode.ToUpperInvariant()
+    }
+    $snapshotPath = Join-Path $normalizedBackupRoot $snapshotName
+    $robocopyLogPath = Join-Path $snapshotPath "AIOS_BACKUP_ROBOCOPY.log"
+    $manifestPath = Join-Path $snapshotPath "AIOS_BACKUP_MANIFEST.json"
+
+    if ($selectedBackupMode -eq "Delta" -and [string]::IsNullOrWhiteSpace($baseBackupCommitHash)) {
+        throw "Delta mode requires a prior successful backup manifest with commit_hash."
+    }
+
     $protectedLocks = @(Get-AiOsProtectedActionLocks -RepoRoot $normalizedSource -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath)
     if ($protectedLocks.Count -gt 0) {
         throw "PROTECTED_ACTION_LOCK_EXISTS: $($protectedLocks.path -join ', ')"
@@ -599,21 +870,27 @@ try {
         throw "DIRTY_REPO: Backup requires clean git status. Re-run with -AllowDirty only after explicit approval. Status: $($gitStatus.lines -join ' | ')"
     }
 
-    $plannedCommand = @(
-        "robocopy",
-        "`"$normalizedSource`"",
-        "`"$snapshotPath`"",
-        "/E",
-        "/XJ",
-        "/R:1",
-        "/W:1",
-        "/NFL",
-        "/NDL",
-        "/NP",
-        "/LOG:`"$robocopyLogPath`"",
-        "/TEE",
-        "/XD"
-    ) + ($excludedDirs | ForEach-Object { "`"$_`"" })
+    $plannedCommand = if ($selectedBackupMode -eq "ManifestOnly") {
+        @("Write manifest only to `"$manifestPath`"")
+    } elseif ($selectedBackupMode -eq "Delta") {
+        @("Copy tracked changed files only to `"$snapshotPath`"", "range=$deltaSourceRange", "files=$($changedFiles.Count)")
+    } else {
+        @(
+            "robocopy",
+            "`"$normalizedSource`"",
+            "`"$snapshotPath`"",
+            "/E",
+            "/XJ",
+            "/R:1",
+            "/W:1",
+            "/NFL",
+            "/NDL",
+            "/NP",
+            "/LOG:`"$robocopyLogPath`"",
+            "/TEE",
+            "/XD"
+        ) + ($excludedDirs | ForEach-Object { "`"$_`"" })
+    }
 
     $excludeNames = @("node_modules", "__pycache__", ".pytest_cache", ".codex")
 
@@ -626,17 +903,21 @@ try {
         $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
         $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytes)
         $result | Add-Member -NotePropertyName copied_bytes -NotePropertyValue 0
-        $result | Add-Member -NotePropertyName copied_human -NotePropertyValue "pending (preview - robocopy not run)"
+        $result | Add-Member -NotePropertyName copied_human -NotePropertyValue "0.00 B"
         $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
         $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytes)
         $result | Add-Member -NotePropertyName git_status_clean -NotePropertyValue ([bool]$gitStatus.is_clean)
         $result | Add-Member -NotePropertyName protected_action_lock_count -NotePropertyValue ([int]$protectedLocks.Count)
+        $result | Add-Member -NotePropertyName retention_preview_status -NotePropertyValue $(if ($RetentionPreview) { "RETENTION_PREVIEW_ONLY" } else { "NOT_REQUESTED" })
         Add-AiOsProductivityFields -Target $result -ProductivityDelta $productivityDelta
         if ($OutputJson) {
             $result | ConvertTo-Json -Depth 6
         }
         else {
             Write-Host "AI_OS T9 Snapshot Backup Preview"
+            Write-Host "Backup mode: $selectedBackupMode"
+            Write-Host "Selected reason: $selectedBackupModeReason"
+            if ($RetentionPreview) { Write-Host "RETENTION_PREVIEW_ONLY" }
             Write-Host "Source: $normalizedSource"
             Write-Host "Backup root: $normalizedBackupRoot"
             Write-Host "Snapshot path: $snapshotPath"
@@ -650,11 +931,11 @@ try {
             Write-Host ""
             Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
             Write-Host "Current backup size (T9):    $(Format-AiOsBytes -Bytes $destBytes)"
-            Write-Host "Copied this run:             pending (preview - robocopy not run)"
+            Write-Host "Copied this run:             0.00 B (preview - no copy run)"
             Write-Host "Skipped (already current):   pending (preview - robocopy not run)"
-            Write-Host "Produced this backup session: pending (preview - robocopy not run)"
+            Write-Host "Produced this backup session: 0.00 B (preview - no copy run)"
             Write-Host ""
-            Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman "pending (preview - robocopy not run)"
+            Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman "0.00 B" -ChangedCopied $changedFiles.Count -DeletedRecorded $deletedFiles.Count -RestoreRequiresFullBackup $restoreRequiresFullBackup -RetentionCandidateCount $retentionPreviewCandidates.Count
             if ($productivityDelta.productivity_delta_today_files -eq "UNKNOWN") {
                 Write-Host "Productivity delta today: UNKNOWN"
             } else {
@@ -666,6 +947,103 @@ try {
             Write-Host "No folder was created. No lock was created. Robocopy was not run."
         }
         exit 0
+    }
+
+    if ($selectedBackupMode -eq "ManifestOnly") {
+        $lockCreated = $false
+        try {
+            New-AiOsBackupLock -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath -SourcePath $normalizedSource -SnapshotPath $snapshotPath
+            $lockCreated = $true
+            New-Item -ItemType Directory -Path $snapshotPath | Out-Null
+            $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
+            $destBytes = Get-AiOsDirectorySize -Path $normalizedBackupRoot
+            $copiedHuman = "0.00 B"
+            $manifestMessage = "Manifest-only checkpoint created. No files were copied."
+
+            Write-AiOsBackupManifest -Path $manifestPath -Status "SUCCESS" -RobocopyExitCode 0 -GitInfo $gitInfo -GitStatus $gitStatus -ProtectedLocks $protectedLocks -ProductivityDelta $productivityDelta -CopiedBytes 0 -CopiedHuman $copiedHuman -ChangedFiles $changedFiles -DeletedFiles $deletedFiles -FileCountCopied 0 -DeltaSourceRange $deltaSourceRange -BaseBackupId $baseBackupId -BaseBackupCommitHash $baseBackupCommitHash -RestoreRequiresFullBackup $false -RetentionClass $retentionClass -RetentionPreviewCandidates $retentionPreviewCandidates -Message $manifestMessage
+
+            $result = New-AiOsBackupResult -Status "SUCCESS" -Message $manifestMessage -RobocopyExitCode 0 -ExitCode 0
+            $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
+            $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytes)
+            $result | Add-Member -NotePropertyName copied_bytes -NotePropertyValue 0
+            $result | Add-Member -NotePropertyName files_copied -NotePropertyValue 0
+            $result | Add-Member -NotePropertyName files_skipped -NotePropertyValue -1
+            $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
+            $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytes)
+            $result | Add-Member -NotePropertyName copied_human -NotePropertyValue $copiedHuman
+            Add-AiOsProductivityFields -Target $result -ProductivityDelta $productivityDelta
+
+            if ($OutputJson) {
+                $result | ConvertTo-Json -Depth 6
+            } else {
+                Write-Host "AI_OS T9 Snapshot Backup"
+                Write-Host "Status: SUCCESS"
+                Write-Host "Backup mode: $selectedBackupMode"
+                Write-Host "Selected reason: $selectedBackupModeReason"
+                Write-Host "Manifest path: $manifestPath"
+                Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman $copiedHuman -ChangedCopied 0 -DeletedRecorded $deletedFiles.Count -RestoreRequiresFullBackup $false -RetentionCandidateCount $retentionPreviewCandidates.Count
+                Write-Host "Active repo mutation: NO"
+                Write-Host "Scheduler behavior: NO"
+                Write-Host "Runtime mutation: BACKUP_DESTINATION_ONLY"
+            }
+            exit 0
+        }
+        finally {
+            if ($lockCreated) {
+                Remove-AiOsBackupLock -BackupLockPath $backupLockPath
+            }
+        }
+    }
+
+    if ($selectedBackupMode -eq "Delta") {
+        $lockCreated = $false
+        try {
+            New-AiOsBackupLock -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath -SourcePath $normalizedSource -SnapshotPath $snapshotPath
+            $lockCreated = $true
+            $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
+            $destBytesBefore = Get-AiOsDirectorySize -Path $normalizedBackupRoot
+            New-Item -ItemType Directory -Path $snapshotPath | Out-Null
+            Copy-AiOsDeltaFiles -RepoRoot $normalizedSource -DestinationRoot $snapshotPath -RelativePaths $changedFiles
+            $copiedBytes = Get-AiOsDirectorySize -Path $snapshotPath
+            $destBytesAfter = $destBytesBefore + $copiedBytes
+            $fileCountCopied = $changedFiles.Count
+            $copiedHuman = Format-AiOsBytes -Bytes $copiedBytes
+            $manifestMessage = "Delta snapshot created from tracked changed files only."
+
+            Write-AiOsBackupManifest -Path $manifestPath -Status "SUCCESS" -RobocopyExitCode 0 -GitInfo $gitInfo -GitStatus $gitStatus -ProtectedLocks $protectedLocks -ProductivityDelta $productivityDelta -CopiedBytes ([long]$copiedBytes) -CopiedHuman $copiedHuman -ChangedFiles $changedFiles -DeletedFiles $deletedFiles -FileCountCopied $fileCountCopied -DeltaSourceRange $deltaSourceRange -BaseBackupId $baseBackupId -BaseBackupCommitHash $baseBackupCommitHash -RestoreRequiresFullBackup $true -RetentionClass $retentionClass -RetentionPreviewCandidates $retentionPreviewCandidates -Message $manifestMessage
+
+            $result = New-AiOsBackupResult -Status "SUCCESS" -Message $manifestMessage -RobocopyExitCode 0 -ExitCode 0
+            $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
+            $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytesAfter)
+            $result | Add-Member -NotePropertyName copied_bytes -NotePropertyValue ([long]$copiedBytes)
+            $result | Add-Member -NotePropertyName files_copied -NotePropertyValue $fileCountCopied
+            $result | Add-Member -NotePropertyName files_skipped -NotePropertyValue -1
+            $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
+            $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytesAfter)
+            $result | Add-Member -NotePropertyName copied_human -NotePropertyValue $copiedHuman
+            Add-AiOsProductivityFields -Target $result -ProductivityDelta $productivityDelta
+
+            if ($OutputJson) {
+                $result | ConvertTo-Json -Depth 6
+            } else {
+                Write-Host "AI_OS T9 Snapshot Backup"
+                Write-Host "Status: SUCCESS"
+                Write-Host "Backup mode: $selectedBackupMode"
+                Write-Host "Selected reason: $selectedBackupModeReason"
+                Write-Host "Snapshot path: $snapshotPath"
+                Write-Host "Manifest path: $manifestPath"
+                Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman $copiedHuman -ChangedCopied $changedFiles.Count -DeletedRecorded $deletedFiles.Count -RestoreRequiresFullBackup $true -RetentionCandidateCount $retentionPreviewCandidates.Count
+                Write-Host "Active repo mutation: NO"
+                Write-Host "Scheduler behavior: NO"
+                Write-Host "Runtime mutation: BACKUP_DESTINATION_ONLY"
+            }
+            exit 0
+        }
+        finally {
+            if ($lockCreated) {
+                Remove-AiOsBackupLock -BackupLockPath $backupLockPath
+            }
+        }
     }
 
     $lockCreated = $false
@@ -716,6 +1094,7 @@ try {
 
         $copiedCountText = if ($counts.files_copied -ge 0) { "{0:N0} files" -f $counts.files_copied } else { "count unavailable" }
         $skippedCountText = if ($counts.files_skipped -ge 0) { "{0:N0} files" -f $counts.files_skipped } else { "count unavailable" }
+        $fileCountCopied = if ($counts.files_copied -ge 0) { [int]$counts.files_copied } else { 0 }
 
         Write-Host ""
         Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
@@ -725,7 +1104,7 @@ try {
         Write-Host "Produced this backup session: $(Format-AiOsBytes -Bytes $copiedBytes)"
         Write-Host ""
         $copiedHuman = Format-AiOsBytes -Bytes $copiedBytes
-        Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman $copiedHuman
+        Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman $copiedHuman -ChangedCopied $fileCountCopied -DeletedRecorded $deletedFiles.Count -RestoreRequiresFullBackup $false -RetentionCandidateCount $retentionPreviewCandidates.Count
         if ($productivityDelta.productivity_delta_today_files -eq "UNKNOWN") {
             Write-Host "Productivity delta today: UNKNOWN"
         } else {
@@ -759,13 +1138,13 @@ try {
             $exitCode = 9
         }
 
-        Write-AiOsBackupManifest -Path $manifestPath -Status $manifestStatus -RobocopyExitCode $robocopyExitCode -GitInfo $gitInfo -GitStatus $gitStatus -ProtectedLocks $protectedLocks -ProductivityDelta $productivityDelta -CopiedBytes ([long]$copiedBytes) -CopiedHuman $copiedHuman -Message $manifestMessage
+        Write-AiOsBackupManifest -Path $manifestPath -Status $manifestStatus -RobocopyExitCode $robocopyExitCode -GitInfo $gitInfo -GitStatus $gitStatus -ProtectedLocks $protectedLocks -ProductivityDelta $productivityDelta -CopiedBytes ([long]$copiedBytes) -CopiedHuman $copiedHuman -ChangedFiles $changedFiles -DeletedFiles $deletedFiles -FileCountCopied $fileCountCopied -DeltaSourceRange $deltaSourceRange -BaseBackupId $baseBackupId -BaseBackupCommitHash $baseBackupCommitHash -RestoreRequiresFullBackup $false -RetentionClass $retentionClass -RetentionPreviewCandidates $retentionPreviewCandidates -Message $manifestMessage
 
         $result = New-AiOsBackupResult -Status $manifestStatus -Message $manifestMessage -RobocopyExitCode $robocopyExitCode -ExitCode $exitCode
         $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
         $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytesAfter)
         $result | Add-Member -NotePropertyName copied_bytes -NotePropertyValue ([long]$copiedBytes)
-        $result | Add-Member -NotePropertyName files_copied -NotePropertyValue ([int]$counts.files_copied)
+        $result | Add-Member -NotePropertyName files_copied -NotePropertyValue $fileCountCopied
         $result | Add-Member -NotePropertyName files_skipped -NotePropertyValue ([int]$counts.files_skipped)
         $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
         $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytesAfter)
@@ -778,6 +1157,8 @@ try {
         else {
             Write-Host "AI_OS T9 Snapshot Backup"
             Write-Host "Status: $manifestStatus"
+            Write-Host "Backup mode: $selectedBackupMode"
+            Write-Host "Selected reason: $selectedBackupModeReason"
             Write-Host "Snapshot path: $snapshotPath"
             Write-Host "Robocopy log path: $robocopyLogPath"
             Write-Host "Manifest path: $manifestPath"
