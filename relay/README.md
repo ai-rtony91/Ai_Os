@@ -34,6 +34,14 @@ If `provider` is omitted, the worker defaults it from `worker`. Current built-in
 
 Unknown providers, missing provider commands, or provider commands containing blocked shell metacharacters fail safely into `relay/error/` before any CLI call.
 
+### Worker Safety Shields
+
+The worker now starts with a local tool preflight for `codex`, `claude`, `gh`, and `git`. Missing tools or version-check failures log `PREFLIGHT_FAILED` and exit code `2` before packet execution.
+
+Provider CLI calls run through `automation/orchestration/timeout/Invoke-AiOsCliWithTimeout.ps1`. A hung command is killed after `timeout_sec` from the packet, or 600 seconds by default, and the packet moves to `relay/error/` with `WORKER_TIMEOUT`.
+
+Successful worker exits are checked by `automation/orchestration/validators/output/Test-AiOsWorkerOutput.DRY_RUN.ps1` before `running/` advances to `done/`. Files written outside `allowed_paths`, or writes to protected paths such as `AGENTS.md`, `RISK_POLICY.md`, `.git/`, or `.codex_backups/`, fail closed into `relay/error/`.
+
 Run one dry-run pass:
 
 ```powershell
