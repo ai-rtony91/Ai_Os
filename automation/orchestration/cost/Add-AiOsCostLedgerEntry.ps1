@@ -6,7 +6,8 @@ param(
     [int]$OutputTokens = 0,
     [string]$PacketId = "",
     [string]$Worker = "",
-    [bool]$Estimated = $false
+    [bool]$Estimated = $false,
+    [string]$EstimateReason = ""
 )
 
 Set-StrictMode -Version Latest
@@ -24,6 +25,7 @@ $entry = [ordered]@{
     input_tokens = $InputTokens
     output_tokens = $OutputTokens
     estimated = [bool]$Estimated
+    estimate_reason = $EstimateReason
 }
 
 $dir = Split-Path -Parent $ledger

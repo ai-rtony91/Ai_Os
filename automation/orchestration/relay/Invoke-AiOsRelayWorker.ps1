@@ -30,6 +30,7 @@ $RelayRoot = Join-Path $RepoRoot "relay"
 $RunnerPath = Join-Path $PSScriptRoot "Invoke-AiOsRelayRunner.ps1"
 $StopFlagPath = Join-Path $RelayRoot "STOP.flag"
 $CanWrite = $true
+$DefaultEstimateUsd = [decimal]0.02
 
 $RelayPaths = [ordered]@{
     approvals = Join-Path $RelayRoot "approvals"
@@ -364,6 +365,80 @@ function Invoke-AiOsProviderWorker {
     }
 }
 
+function Resolve-AiOsWorkerCostRecord {
+    param(
+        [Parameter(Mandatory = $true)][object]$ProviderResult,
+        [Parameter(Mandatory = $true)][decimal]$DefaultEstimateUsd
+    )
+
+    $record = [ordered]@{
+        cost_usd = $DefaultEstimateUsd
+        input_tokens = 0
+        output_tokens = 0
+        estimated = $true
+        estimate_reason = "fallback_nonzero_worker_invocation"
+    }
+
+    try {
+        $lines = @($ProviderResult.output | ForEach-Object { [string]$_ })
+        foreach ($line in $lines) {
+            $trimmed = $line.Trim()
+            if (-not ($trimmed.StartsWith("{") -and $trimmed.EndsWith("}"))) {
+                continue
+            }
+
+            $json = $trimmed | ConvertFrom-Json
+            $jsonCost = $null
+            if ($json.PSObject.Properties["cost_usd"]) { $jsonCost = [decimal]$json.cost_usd }
+            elseif ($json.PSObject.Properties["cost"]) { $jsonCost = [decimal]$json.cost }
+
+            $inputTokens = 0
+            $outputTokens = 0
+            if ($json.PSObject.Properties["usage"] -and $null -ne $json.usage) {
+                if ($json.usage.PSObject.Properties["input_tokens"]) { $inputTokens = [int]$json.usage.input_tokens }
+                elseif ($json.usage.PSObject.Properties["prompt_tokens"]) { $inputTokens = [int]$json.usage.prompt_tokens }
+                if ($json.usage.PSObject.Properties["output_tokens"]) { $outputTokens = [int]$json.usage.output_tokens }
+                elseif ($json.usage.PSObject.Properties["completion_tokens"]) { $outputTokens = [int]$json.usage.completion_tokens }
+            } else {
+                if ($json.PSObject.Properties["input_tokens"]) { $inputTokens = [int]$json.input_tokens }
+                if ($json.PSObject.Properties["output_tokens"]) { $outputTokens = [int]$json.output_tokens }
+            }
+
+            if ($null -ne $jsonCost -and $jsonCost -gt 0) {
+                $record.cost_usd = $jsonCost
+                $record.input_tokens = $inputTokens
+                $record.output_tokens = $outputTokens
+                $record.estimated = $false
+                $record.estimate_reason = "cli_reported_cost"
+                break
+            }
+
+            if (($inputTokens + $outputTokens) -gt 0) {
+                $record.cost_usd = [decimal](($inputTokens * 0.000005) + ($outputTokens * 0.000015))
+                if ($record.cost_usd -le 0) { $record.cost_usd = $DefaultEstimateUsd }
+                $record.input_tokens = $inputTokens
+                $record.output_tokens = $outputTokens
+                $record.estimated = $true
+                $record.estimate_reason = "token_rate_estimate"
+                break
+            }
+        }
+    } catch {
+        $record.cost_usd = $DefaultEstimateUsd
+        $record.input_tokens = 0
+        $record.output_tokens = 0
+        $record.estimated = $true
+        $record.estimate_reason = "fallback_usage_parse_failed"
+    }
+
+    if ($record.cost_usd -le 0) {
+        $record.cost_usd = $DefaultEstimateUsd
+        $record.estimated = $true
+        $record.estimate_reason = "fallback_nonzero_worker_invocation"
+    }
+
+    return [pscustomobject]$record
+}
 function Move-AiOsTier2ToApprovals {
     param(
         [Parameter(Mandatory = $true)][System.IO.FileInfo]$File,
@@ -451,7 +526,9 @@ function Complete-AiOsRelayWorkerPacket {
             return "SKIPPED"
         }
         $result = Invoke-AiOsProviderWorker -Worker $parsed.worker -Provider $parsed.provider -ProviderCommand $parsed.provider_command -ProviderArgs $parsed.provider_args -Tier $parsed.tier -Mission $parsed.mission -AllowedPaths $parsed.allowed_paths
-        [void](& "$PSScriptRoot\..\cost\Add-AiOsCostLedgerEntry.ps1" -CycleId $cycleId -Cost 0 -InputTokens 0 -OutputTokens 0 -PacketId $parsed.id -Worker $parsed.worker -Estimated $false)
+        $costRecord = Resolve-AiOsWorkerCostRecord -ProviderResult $result -DefaultEstimateUsd $DefaultEstimateUsd
+        [void](& "$PSScriptRoot\..\cost\Add-AiOsCostLedgerEntry.ps1" -CycleId $cycleId -Cost $costRecord.cost_usd -InputTokens $costRecord.input_tokens -OutputTokens $costRecord.output_tokens -PacketId $parsed.id -Worker $parsed.worker -Estimated $costRecord.estimated -EstimateReason $costRecord.estimate_reason)
+        Write-AiOsRelayLog "[WORKER] $($parsed.id) cost_ledger cost_usd=$($costRecord.cost_usd) estimated=$($costRecord.estimated) estimate_reason=$($costRecord.estimate_reason) cycle_id=$cycleId"
         $exitCode = $result.exit_code
         $body = @("command: $($result.command)", "") + @($result.output)
     }
