@@ -1,6 +1,7 @@
 param(
   [string]$RegistryPath = "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json",
   [string]$QueuePath = "automation/operator/AIOS_CONTROLLED_APPLY_QUEUE.example.json",
+  [string]$AdapterPath = "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1",
   [string]$WorkerReportDirectory = "Reports/operator/worker-reports"
 )
 
@@ -8,6 +9,7 @@ $ErrorActionPreference = "Stop"
 $RepoRoot = (Resolve-Path ".").Path
 $RegistryFullPath = Join-Path $RepoRoot $RegistryPath
 $QueueFullPath = Join-Path $RepoRoot $QueuePath
+$AdapterFullPath = Join-Path $RepoRoot $AdapterPath
 $ReportDirFullPath = Join-Path $RepoRoot $WorkerReportDirectory
 $failures = New-Object System.Collections.Generic.List[string]
 
@@ -61,6 +63,25 @@ if (-not (Test-Path -LiteralPath $RegistryFullPath)) {
     if (-not $worker.codex_prompt_seed) {
       Add-Failure "Worker #$($worker.id) missing codex_prompt_seed."
     }
+  }
+}
+
+if (-not (Test-Path -LiteralPath $AdapterFullPath -PathType Leaf)) {
+  Add-Failure "Missing operator registry adapter: $AdapterPath"
+} else {
+  try {
+    $adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $AdapterFullPath -RepoRoot $RepoRoot -OutputJson | ConvertFrom-Json
+    if ($adapter.mode -ne "READ_ONLY") {
+      Add-Failure "Operator registry adapter must be READ_ONLY."
+    }
+    if (@($adapter.runtime_workers).Count -eq 0) {
+      Add-Failure "Operator registry adapter must expose runtime_workers."
+    }
+    if (@($adapter.operator_routes).Count -ne @($adapter.runtime_workers).Count) {
+      Add-Failure "Operator registry adapter route count must match runtime worker count."
+    }
+  } catch {
+    Add-Failure "Operator registry adapter failed: $($_.Exception.Message)"
   }
 }
 
