@@ -1,7 +1,10 @@
-﻿{
+{
   "system": "AI_OS",
   "registry": "worker_registry",
   "purpose": "Tracks AI_OS worker windows, worker roles, packet assignment, and safe routing state.",
+  "status": "SUPERSEDED",
+  "superseded_by": "automation/orchestration/workers/AIOS_WORKER_PROFILES.json",
+  "note": "This file was never populated. Worker profiles live in AIOS_WORKER_PROFILES.json. Runtime worker state lives in AIOS_WORKER_REGISTRY.json.",
   "rules": [
     "MAIN CONTROL receives normal ChatGPT commands.",
     "SHELL WORKER runs validators, inspections, and helper scripts only.",
