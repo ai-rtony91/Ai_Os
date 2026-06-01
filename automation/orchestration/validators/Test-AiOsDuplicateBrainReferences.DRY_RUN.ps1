@@ -25,11 +25,34 @@ function Get-ReferenceClassification {
 
   if ($normalized -eq $validatorPath) { return "FIXTURE_REFERENCE" }
   if ($lower.StartsWith("archive/")) { return "ARCHIVE_REFERENCE" }
-  if ($lower -match "(^|/)(mock-data|fixtures|fixture|examples|window_snapshots)(/|$)" -or $lower -match "\.example\." -or $lineLower -match "\.example\.json|fixture|example") {
-    return "FIXTURE_REFERENCE"
-  }
+
+  $retentionOnlyLine = $lineLower -match "reference/source|source/reference|reference-only|reference only|referencefiles|reference files|source material|historical|evidence|compatibility|retention|decision|required before archive|not active|not the active|not primary|not the primary|not canonical|pending file-by-file|fixture ownership review|safe delete candidates|safe delete candidate count|legacydocsaios|expectedfiles|expected files|canonical source missing|fallback is disabled|fallback disabled"
+  $activeAuthorityLine = $lineLower -match "active authority|active queue authority|active approval authority|primary worker authority|primary source|canonical authority|source[- ]of[- ]truth|active source|canonical source"
+
   if ($lower -match "^docs/(audits|governance|workflows)/" -or $lower.EndsWith(".md")) {
     return "DOC_REFERENCE"
+  }
+
+  if (-not $retentionOnlyLine) {
+    if ($Conflict -eq "legacy_operator_registry_primary_source" -and $lineLower -match "primary worker authority|primary source|source.?of.?truth|canonical authority|active worker|worker authority") {
+      return "ACTIVE_DEPENDENCY"
+    }
+    if ($Conflict -eq "root_work_packets_active_queue_authority" -and $lineLower -match "active queue authority|source[- ]of[- ]truth|canonical queue|primary queue|active queue") {
+      return "ACTIVE_DEPENDENCY"
+    }
+    if ($Conflict -eq "root_approvals_active_approval_authority" -and $lineLower -match "active approval authority|source[- ]of[- ]truth|canonical approval|primary approval|active approval") {
+      return "ACTIVE_DEPENDENCY"
+    }
+    if ($Conflict -eq "old_orchestration_example_fallback_active_source" -and ($activeAuthorityLine -or $lineLower -match "fallback|default|read-json|null|test-jsonfile")) {
+      return "ACTIVE_DEPENDENCY"
+    }
+    if ($Conflict -eq "docs_ai_os_active_authority" -and $activeAuthorityLine) {
+      return "ACTIVE_DEPENDENCY"
+    }
+  }
+
+  if ($lower -match "(^|/)(mock-data|fixtures|fixture|examples|window_snapshots)(/|$)" -or $lower -match "\.example\." -or $lineLower -match "\.example\.json|fixture|example") {
+    return "FIXTURE_REFERENCE"
   }
 
   if ($Conflict -eq "legacy_operator_registry_primary_source") {
@@ -69,7 +92,7 @@ function Get-ReferenceClassification {
   }
 
   if ($Conflict -eq "old_orchestration_example_fallback_active_source") {
-    if ($lineLower -match "fallback|default|source|read-json|null|test-jsonfile") {
+    if (-not $retentionOnlyLine -and $lineLower -match "fallback|default|source|read-json|null|test-jsonfile") {
       return "ACTIVE_DEPENDENCY"
     }
     return "FIXTURE_REFERENCE"
@@ -82,7 +105,7 @@ function Get-ReferenceClassification {
     if ($lower -match "automation/operator/worker_queue/" -or $lower -match "automation/orchestration/recommendations/") {
       return "REVIEW_REQUIRED"
     }
-    if ($lineLower -match "allowed_paths|allowed path|authority|canonical|source.?of.?truth|active") {
+    if (-not $retentionOnlyLine -and $lineLower -match "allowed_paths|allowed path|authority|canonical|source.?of.?truth|active") {
       return "ACTIVE_DEPENDENCY"
     }
     return "DOC_REFERENCE"
@@ -174,6 +197,8 @@ $reviewCount = @($findings | Where-Object { $_.classification -eq "REVIEW_REQUIR
 $fixtureCount = @($findings | Where-Object { $_.classification -eq "FIXTURE_REFERENCE" }).Count
 $docCount = @($findings | Where-Object { $_.classification -eq "DOC_REFERENCE" }).Count
 $archiveCount = @($findings | Where-Object { $_.classification -eq "ARCHIVE_REFERENCE" }).Count
+$safeToDeleteNow = @()
+$unsafeToDelete = @("work_packets/**", "approvals/**", "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json", "docs/AI_OS/**")
 
 $result = [pscustomobject]@{
   schema = "AIOS_DUPLICATE_BRAIN_REFERENCE_VALIDATOR.v1"
@@ -187,10 +212,14 @@ $result = [pscustomobject]@{
     doc_reference_count = $docCount
     archive_reference_count = $archiveCount
     total_findings = $findings.Count
+    safe_delete_candidate_count = $safeToDeleteNow.Count
+    protected_unsafe_to_delete_count = $unsafeToDelete.Count
   }
   archive_delete_readiness = [pscustomobject]@{
-    safe_to_delete_now = @()
-    unsafe_to_delete = @("work_packets/**", "approvals/**", "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json", "docs/AI_OS/**")
+    safe_to_delete_now = $safeToDeleteNow
+    safe_delete_candidate_count = $safeToDeleteNow.Count
+    unsafe_to_delete = $unsafeToDelete
+    protected_unsafe_to_delete_count = $unsafeToDelete.Count
     archive_candidates_after_review = @($findings | Where-Object { $_.delete_readiness -eq "ARCHIVE_CANDIDATE_AFTER_REFERENCE_REVIEW" } | Select-Object -ExpandProperty old_brain_path -Unique)
     review_before_archive = @($findings | Where-Object { $_.delete_readiness -eq "REVIEW_BEFORE_ARCHIVE" } | Select-Object -ExpandProperty old_brain_path -Unique)
   }
