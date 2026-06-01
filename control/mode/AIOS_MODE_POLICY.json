@@ -1,13 +1,13 @@
 {
   "night_hours_local": {
-    "start": "22:00",
-    "end": "07:00"
+    "start": "00:00",
+    "end": "06:00"
   },
   "idle_threshold_sec": 600,
   "day_autopilot_enabled": true,
   "day_hours_local": {
-    "start": "07:00",
-    "end": "22:00"
+    "start": "06:00",
+    "end": "00:00"
   },
   "cadence_sec": {
     "night_autopilot": 300,
@@ -15,11 +15,11 @@
     "day_observer": 1800
   },
   "quiet_hours_local": {
-    "start": "22:00",
-    "end": "07:00"
+    "start": "00:00",
+    "end": "06:00"
   },
   "cost_ceiling_per_cycle_usd": 0.5,
   "cost_ceiling_per_day_usd": 5.0,
   "updated_at_utc": "2026-06-01T00:00:00Z",
-  "updated_by": "AIOS-P16-DAY-AUTOPILOT"
+  "updated_by": "AIOS-NIGHT-LOOP-CLOSE-EAST-001"
 }

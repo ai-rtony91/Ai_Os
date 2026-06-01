@@ -40,6 +40,7 @@ $script:AiOsPhaseNames = @(
     "approval-resume",
     "relay-runner-resume-drain",
     "self-continuation",
+    "night-supervisor",
     "autonomy-bridge",
     "morning-brief",
     "sos-file-notifier",
@@ -184,6 +185,7 @@ function Invoke-AiOsNightCycleOnce {
     $morningBriefScript = Join-Path $repoRoot "automation\orchestration\reports\New-AiOsMorningBrief.ps1"
     $staleApprovals = Join-Path $repoRoot "automation\orchestration\maintenance\Clear-AiOsStaleApprovals.ps1"
     $selfContinuation = Join-Path $repoRoot "automation\orchestration\self_continuation\Invoke-AiOsSelfContinuation.DRY_RUN.ps1"
+    $nightSupervisorHarness = Join-Path $repoRoot "automation\orchestration\night_supervisor\night_supervisor_harness.py"
     $bridge = Join-Path $repoRoot "automation\orchestration\night_supervisor\Invoke-AiOsAutonomyBridge.DRY_RUN.ps1"
     $notifier = Join-Path $repoRoot "services\python_supervisor\notifier.py"
     $prWatch = Join-Path $repoRoot "automation\orchestration\pr_watch\Watch-AiOsPullRequests.ps1"
@@ -216,7 +218,7 @@ function Invoke-AiOsNightCycleOnce {
     $notifierArgs = @($notifier, "--channel", "file")
     if ($effectiveApply) { $notifierArgs += "--apply" }
 
-    foreach ($requiredPath in @($modeScript, $runner, $pullBacklog, $morningBriefScript, $staleApprovals, $selfContinuation, $bridge, $notifier)) {
+    foreach ($requiredPath in @($modeScript, $runner, $pullBacklog, $morningBriefScript, $staleApprovals, $selfContinuation, $nightSupervisorHarness, $bridge, $notifier)) {
         if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
             throw "Night cycle dependency missing: $requiredPath"
         }
@@ -234,14 +236,15 @@ function Invoke-AiOsNightCycleOnce {
         Complete-AiOsSkippedPhase -Number 4 -Name "approval-resume" -Reason "DAY_OBSERVER"
         Complete-AiOsSkippedPhase -Number 4 -Name "relay-runner-resume-drain" -Reason "DAY_OBSERVER"
         Complete-AiOsSkippedPhase -Number 5 -Name "self-continuation" -Reason "DAY_OBSERVER"
-        Invoke-AiOsStep -Number 6 -Name "autonomy-bridge" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $bridge, "-AllowNonMain")
+        Invoke-AiOsStep -Number 6 -Name "night-supervisor" -Command "python" -Arguments @($nightSupervisorHarness)
+        Invoke-AiOsStep -Number 7 -Name "autonomy-bridge" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $bridge, "-AllowNonMain")
         if ($MorningBrief) {
-            Invoke-AiOsStep -Number 7 -Name "morning-brief" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $morningBriefScript)
+            Invoke-AiOsStep -Number 8 -Name "morning-brief" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $morningBriefScript)
         } else {
-            Complete-AiOsSkippedPhase -Number 7 -Name "morning-brief" -Reason "disabled"
+            Complete-AiOsSkippedPhase -Number 8 -Name "morning-brief" -Reason "disabled"
         }
-        Invoke-AiOsStep -Number 8 -Name "sos-file-notifier" -Command "python" -Arguments $notifierArgs
-        Invoke-AiOsStep -Number 9 -Name "pr-watch" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $prWatch, "-Apply")
+        Invoke-AiOsStep -Number 9 -Name "sos-file-notifier" -Command "python" -Arguments $notifierArgs
+        Invoke-AiOsStep -Number 10 -Name "pr-watch" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $prWatch, "-Apply")
         Write-AiOsNightCycleLog -Message "CYCLE PASS"
         Write-CycleMarker -State "CYCLE_COMPLETE"
         Update-AiOsDashboardState
@@ -266,14 +269,15 @@ function Invoke-AiOsNightCycleOnce {
     }
 
     Invoke-AiOsStep -Number 5 -Name "self-continuation" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $selfContinuation) + $applyArgs)
-    Invoke-AiOsStep -Number 6 -Name "autonomy-bridge" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $bridge, "-AllowNonMain") + $alertArgs)
+    Invoke-AiOsStep -Number 6 -Name "night-supervisor" -Command "python" -Arguments @($nightSupervisorHarness)
+    Invoke-AiOsStep -Number 7 -Name "autonomy-bridge" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $bridge, "-AllowNonMain") + $alertArgs)
     if ($MorningBrief) {
-        Invoke-AiOsStep -Number 7 -Name "morning-brief" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $morningBriefScript) + $briefArgs)
+        Invoke-AiOsStep -Number 8 -Name "morning-brief" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $morningBriefScript) + $briefArgs)
     } else {
-        Complete-AiOsSkippedPhase -Number 7 -Name "morning-brief" -Reason "disabled"
+        Complete-AiOsSkippedPhase -Number 8 -Name "morning-brief" -Reason "disabled"
     }
-    Invoke-AiOsStep -Number 8 -Name "sos-file-notifier" -Command "python" -Arguments $notifierArgs
-    Invoke-AiOsStep -Number 9 -Name "pr-watch" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $prWatch, "-Apply")
+    Invoke-AiOsStep -Number 9 -Name "sos-file-notifier" -Command "python" -Arguments $notifierArgs
+    Invoke-AiOsStep -Number 10 -Name "pr-watch" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $prWatch, "-Apply")
     Write-AiOsNightCycleLog -Message "CYCLE PASS"
     Write-CycleMarker -State "CYCLE_COMPLETE"
     Update-AiOsDashboardState
