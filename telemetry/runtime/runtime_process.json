@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-06-01T15:50:46Z",
+  "mode": "READ_ONLY",
+  "process_status": "EXPORTER_DRIVEN",
+  "schema": "AIOS_RUNTIME_PROCESS.v1",
+  "started_by": "runtime_state_exporter.py",
+  "status": "EXPORTER_DRIVEN"
+}

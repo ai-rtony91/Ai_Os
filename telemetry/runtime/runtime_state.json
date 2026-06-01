@@ -1,0 +1,263 @@
+{
+  "activePackets": [
+    {
+      "action": "Refresh evidence in a future approved DRY_RUN collection pass.",
+      "lastEventType": "supervisor_packet_flow",
+      "lastUpdatedAt": "2026-06-01T15:50:46Z",
+      "packetId": "goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely",
+      "reason": "Packet evidence is stale.",
+      "risk": "LOW",
+      "status": "STALE"
+    },
+    {
+      "action": "Refresh evidence in a future approved DRY_RUN collection pass.",
+      "lastEventType": "supervisor_packet_flow",
+      "lastUpdatedAt": "2026-06-01T15:50:46Z",
+      "packetId": "phase-17-work-packet-router-state-machine",
+      "reason": "Packet evidence is stale.",
+      "risk": "LOW",
+      "status": "STALE"
+    }
+  ],
+  "alerts": [
+    {
+      "category": "supervisor",
+      "generatedAt": "2026-06-01T15:50:46Z",
+      "message": "Packet evidence is stale.",
+      "severity": "warning"
+    },
+    {
+      "category": "supervisor",
+      "generatedAt": "2026-06-01T15:50:46Z",
+      "message": "Packet evidence is stale.",
+      "severity": "warning"
+    },
+    {
+      "category": "supervisor",
+      "generatedAt": "2026-06-01T15:50:46Z",
+      "message": "Validator state is NOT_RUN.",
+      "severity": "warning"
+    }
+  ],
+  "audit": {
+    "invalidLineCount": 0,
+    "ledgerPath": "telemetry/work_ledger.jsonl",
+    "recentTimeline": [
+      {
+        "eventId": "supervisor_1",
+        "eventType": "supervisor_escalation",
+        "risk": "WARNING",
+        "source": "python_supervisor",
+        "status": "WARNING",
+        "summary": "Packet evidence is stale.",
+        "ts": "2026-06-01T15:50:46Z"
+      },
+      {
+        "eventId": "supervisor_2",
+        "eventType": "supervisor_escalation",
+        "risk": "WARNING",
+        "source": "python_supervisor",
+        "status": "WARNING",
+        "summary": "Packet evidence is stale.",
+        "ts": "2026-06-01T15:50:46Z"
+      },
+      {
+        "eventId": "supervisor_3",
+        "eventType": "supervisor_escalation",
+        "risk": "REVIEW",
+        "source": "python_supervisor",
+        "status": "REVIEW",
+        "summary": "Validator state is NOT_RUN.",
+        "ts": "2026-06-01T15:50:46Z"
+      }
+    ],
+    "sourceEventCount": 3
+  },
+  "backpressure": {
+    "allowedConcurrentPackets": 0,
+    "checkedAt": "2026-06-01T15:50:46Z",
+    "level": "review",
+    "pressureInputs": {
+      "escalationCount": 3,
+      "packetFlowCount": 2
+    },
+    "reason": "Supervisor escalations require review.",
+    "throttled": true
+  },
+  "controls": {
+    "advancePacket": "BLOCKED_BY_EXPORTER_DEFAULT",
+    "assignQueueItem": "BLOCKED_BY_EXPORTER_DEFAULT",
+    "startRuntime": "BLOCKED_BY_EXPORTER_DEFAULT",
+    "stopRuntime": "BLOCKED_BY_EXPORTER_DEFAULT"
+  },
+  "escalation_items": [
+    {
+      "evidence": "Packet evidence is stale.",
+      "next_safe_action": "Refresh evidence in an approved DRY_RUN collection pass.",
+      "severity": "WARNING",
+      "trigger": "packet:goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely"
+    },
+    {
+      "evidence": "Packet evidence is stale.",
+      "next_safe_action": "Refresh evidence in an approved DRY_RUN collection pass.",
+      "severity": "WARNING",
+      "trigger": "packet:phase-17-work-packet-router-state-machine"
+    },
+    {
+      "evidence": "Validator state is NOT_RUN.",
+      "next_safe_action": "Run or review validator evidence before relying on result.",
+      "severity": "REVIEW",
+      "trigger": "validator:orchestration_validator_chain"
+    }
+  ],
+  "executionLedger": {
+    "appliedPacketCount": 0,
+    "approvalCount": 0,
+    "blockedPacketCount": 0,
+    "lastUpdatedAt": "2026-06-01T15:50:46Z",
+    "packetCount": 2
+  },
+  "failedPackets": {
+    "all": [],
+    "poison": [],
+    "retryable": []
+  },
+  "generatedAt": "2026-06-01T15:50:46Z",
+  "generated_at": "2026-06-01T15:50:46Z",
+  "health": {
+    "expiredWorkers": 0,
+    "generatedAt": "2026-06-01T15:50:46Z",
+    "health": "ACTION_NEEDED",
+    "healthy": false,
+    "poisonPackets": 0,
+    "problems": [
+      "Packet evidence is stale.",
+      "Packet evidence is stale.",
+      "Validator state is NOT_RUN."
+    ],
+    "reclaimablePackets": 0,
+    "retryablePackets": 2,
+    "schedulerActions": 2,
+    "staleWorkers": 0
+  },
+  "mode": "READ_ONLY",
+  "nextSafeAction": "Review Night Supervisor DRY_RUN brainstem output before any protected action.",
+  "next_safe_action": "Review Night Supervisor DRY_RUN brainstem output before any protected action.",
+  "packet_flow": [
+    {
+      "approval_required": false,
+      "commit_package_candidate": false,
+      "escalation_reason": "Packet evidence is stale.",
+      "lane": "goal_intake",
+      "next_safe_action": "Refresh evidence in a future approved DRY_RUN collection pass.",
+      "packet_id": "goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely",
+      "packet_state": "STALE",
+      "report_target": "morning_brief_preview",
+      "stop_condition": "DRY_RUN_REPORT_ONLY",
+      "validator_chain": [
+        "DRY_RUN_VALIDATOR_CHAIN_NOT_RUN"
+      ],
+      "worker_identity": "dispatcher"
+    },
+    {
+      "approval_required": false,
+      "commit_package_candidate": false,
+      "escalation_reason": "Packet evidence is stale.",
+      "lane": "route_dispatch",
+      "next_safe_action": "Refresh evidence in a future approved DRY_RUN collection pass.",
+      "packet_id": "phase-17-work-packet-router-state-machine",
+      "packet_state": "STALE",
+      "report_target": "morning_brief_preview",
+      "stop_condition": "DRY_RUN_REPORT_ONLY",
+      "validator_chain": [
+        "DRY_RUN_VALIDATOR_CHAIN_NOT_RUN"
+      ],
+      "worker_identity": "route_dispatch"
+    }
+  ],
+  "provenance": {
+    "fixture": false,
+    "queue": "python_supervisor",
+    "runtime": "python_supervisor",
+    "telemetry": "runtime_state_exporter.py"
+  },
+  "queue": {
+    "countsByStatus": {
+      "STALE": 2
+    },
+    "dispatchable": 0,
+    "itemCount": 2,
+    "manualReview": 3,
+    "poison": 0,
+    "reclaimable": 0,
+    "retryable": 2,
+    "scheduled": 2,
+    "status": "supervisor_projection",
+    "waitingForApproval": 0
+  },
+  "repo_health": {
+    "branch": "codex/p25-telemetry-bridge",
+    "changed_files": [
+      "automation/orchestration/supervisor/Export-AiOsRuntimeState.DRY_RUN.ps1",
+      "docs/governance/TELEMETRY_BRIDGE_CONTRACT.md",
+      "services/python_supervisor/runtime_state_exporter.py"
+    ],
+    "risk_level": "WATCH",
+    "status_summary": "Runtime bundle integrity REVIEW; read-only brainstem pass.",
+    "untracked_items": []
+  },
+  "runtime": {
+    "freshness": "fresh",
+    "lastTickAt": "2026-06-01T15:50:46Z",
+    "queueSource": "python_supervisor",
+    "runtimeId": "python-supervisor-export",
+    "status": "degraded"
+  },
+  "schema": "aios.runtime_visibility_api.v1",
+  "status": "degraded",
+  "supervisor_status": "WARNING",
+  "telemetry": {
+    "eventCount": 3,
+    "invalidLineCount": 0,
+    "lastEventAt": "2026-06-01T15:50:46Z",
+    "ledger": {
+      "exists": true,
+      "path": "telemetry/work_ledger.jsonl"
+    },
+    "recentEvents": [
+      {
+        "eventId": "supervisor_1",
+        "eventType": "supervisor_escalation",
+        "risk": "WARNING",
+        "source": "python_supervisor",
+        "status": "WARNING",
+        "summary": "Packet evidence is stale.",
+        "ts": "2026-06-01T15:50:46Z"
+      },
+      {
+        "eventId": "supervisor_2",
+        "eventType": "supervisor_escalation",
+        "risk": "WARNING",
+        "source": "python_supervisor",
+        "status": "WARNING",
+        "summary": "Packet evidence is stale.",
+        "ts": "2026-06-01T15:50:46Z"
+      },
+      {
+        "eventId": "supervisor_3",
+        "eventType": "supervisor_escalation",
+        "risk": "REVIEW",
+        "source": "python_supervisor",
+        "status": "REVIEW",
+        "summary": "Validator state is NOT_RUN.",
+        "ts": "2026-06-01T15:50:46Z"
+      }
+    ]
+  },
+  "warnings": [
+    "Packet evidence is stale.",
+    "Packet evidence is stale.",
+    "Validator state is NOT_RUN."
+  ],
+  "workers": []
+}
