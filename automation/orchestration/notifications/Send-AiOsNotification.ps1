@@ -147,6 +147,16 @@ function Test-AiOsRateLimit {
     return $true
 }
 
+function Test-AiOsLocalTimeWindow {
+    param([datetime]$Now, [string]$Start, [string]$End)
+    $startParts = $Start.Split(":")
+    $endParts = $End.Split(":")
+    $startTime = $Now.Date.AddHours([int]$startParts[0]).AddMinutes([int]$startParts[1])
+    $endTime = $Now.Date.AddHours([int]$endParts[0]).AddMinutes([int]$endParts[1])
+    if ($endTime -le $startTime) { return ($Now -ge $startTime -or $Now -lt $endTime) }
+    return ($Now -ge $startTime -and $Now -lt $endTime)
+}
+
 if ($Message -match "(?i)\b(trade|order|buy|sell|live|broker)\b") {
     Write-AiOsNotificationLog -Channel "blocked" -Status "PAYLOAD_BLOCKED_TRADING_TERMS" -Detail "length=$($Message.Length)"
     Write-Host "STATUS=PAYLOAD_BLOCKED_TRADING_TERMS"
@@ -157,6 +167,16 @@ $configPath = if (Test-Path -LiteralPath $configLocal -PathType Leaf) { $configL
 $config = Read-AiOsJsonFile -Path $configPath
 $channel = if ([string]::IsNullOrWhiteSpace($ChannelOverride)) { [string]$config.channel } else { $ChannelOverride }
 $channel = $channel.ToLowerInvariant()
+$policyPath = Join-Path $repoRoot "control\mode\AIOS_MODE_POLICY.json"
+if (Test-Path -LiteralPath $policyPath -PathType Leaf) {
+    $policy = Read-AiOsJsonFile -Path $policyPath
+    $localNow = if ([string]::IsNullOrWhiteSpace($env:AIOS_MOCK_LOCAL_TIME)) { Get-Date } else { [datetime]$env:AIOS_MOCK_LOCAL_TIME }
+    $inQuiet = Test-AiOsLocalTimeWindow -Now $localNow -Start ([string]$policy.quiet_hours_local.start) -End ([string]$policy.quiet_hours_local.end)
+    if ($inQuiet -and $Severity.ToUpperInvariant() -ne "CRITICAL") {
+        Write-AiOsNotificationLog -Channel $channel -Status "QUIET_HOURS_REDIRECT" -Detail "severity=$Severity"
+        $channel = "file"
+    }
+}
 
 if (@("file", "webhook", "telegram") -notcontains $channel) {
     Write-AiOsNotificationLog -Channel $channel -Status "UNKNOWN_CHANNEL"
