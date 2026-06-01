@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/PROTECTED_ACTION_RUNNER.schema.json",
+  "title": "AI_OS Protected Action Runner Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "mode",
+    "action",
+    "gate_state",
+    "approval_marker",
+    "lane",
+    "branch",
+    "targets",
+    "approved_files",
+    "changed_files",
+    "cached_diff_files",
+    "validator_status",
+    "checks_status",
+    "mergeability_status",
+    "repo_status",
+    "blockers",
+    "warnings",
+    "reason",
+    "next_safe_action",
+    "no_mutation_confirmed"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_PROTECTED_ACTION_RUNNER_RESULT.v1"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "mode": {
+      "const": "DRY_RUN"
+    },
+    "action": {
+      "type": "string"
+    },
+    "gate_state": {
+      "type": "string",
+      "enum": [
+        "SAFE_TO_STAGE",
+        "SAFE_TO_COMMIT",
+        "SAFE_TO_PUSH",
+        "SAFE_TO_PR_CREATE",
+        "SAFE_TO_CHECK_WATCH",
+        "SAFE_TO_MERGE",
+        "SAFE_TO_SYNC_MAIN",
+        "HUMAN_APPROVAL_REQUIRED",
+        "BLOCKED"
+      ]
+    },
+    "approval_marker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provided",
+        "required",
+        "matched"
+      ],
+      "properties": {
+        "provided": {
+          "type": "string"
+        },
+        "required": {
+          "type": "string"
+        },
+        "matched": {
+          "type": "boolean"
+        }
+      }
+    },
+    "lane": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "remote",
+        "target_branch",
+        "base_branch",
+        "head_branch",
+        "pr_number",
+        "expected_head_sha",
+        "push_target",
+        "commit_message"
+      ],
+      "properties": {
+        "remote": {
+          "type": "string"
+        },
+        "target_branch": {
+          "type": "string"
+        },
+        "base_branch": {
+          "type": "string"
+        },
+        "head_branch": {
+          "type": "string"
+        },
+        "pr_number": {
+          "type": "integer"
+        },
+        "expected_head_sha": {
+          "type": "string"
+        },
+        "push_target": {
+          "type": "string"
+        },
+        "commit_message": {
+          "type": "string"
+        }
+      }
+    },
+    "approved_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cached_diff_files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validator_status": {
+      "type": "string"
+    },
+    "checks_status": {
+      "type": "string"
+    },
+    "mergeability_status": {
+      "type": "string"
+    },
+    "repo_status": {
+      "type": "string"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reason": {
+      "type": "string"
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "stop_condition": {
+      "type": "string"
+    },
+    "no_mutation_confirmed": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "const": 0
+      }
+    }
+  }
+}
