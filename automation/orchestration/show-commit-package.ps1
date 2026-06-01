@@ -3,7 +3,6 @@ $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
 $packagePath = Join-Path $orchestrationRoot "commit_packages\COMMIT_PACKAGE_RECOMMENDATION.example.json"
-$legacyPackagePath = Join-Path $orchestrationRoot "commit_package.example.json"
 
 function Read-JsonFile {
     param(
@@ -41,6 +40,7 @@ function Write-FileList {
         [string]$Title,
 
         [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
         [object[]]$Files
     )
 
@@ -60,12 +60,8 @@ function Write-FileList {
     Write-Host ""
 }
 
-$usedLegacyPackage = $false
 $package = if (Test-Path -LiteralPath $packagePath -PathType Leaf) {
     Read-JsonFile -Path $packagePath
-} elseif (Test-Path -LiteralPath $legacyPackagePath -PathType Leaf) {
-    $usedLegacyPackage = $true
-    Read-JsonFile -Path $legacyPackagePath
 } else {
     $null
 }
@@ -80,7 +76,7 @@ if ($null -eq $package) {
     Write-Host ""
     Write-Host "Commit package summary:"
     Write-Host "  Canonical source missing: automation/orchestration/commit_packages/COMMIT_PACKAGE_RECOMMENDATION.example.json"
-    Write-Host "  Legacy fallback not found; no commit package source available."
+    Write-Host "  Legacy commit_package.example.json fallback is disabled for canonical display."
     Write-Host ""
     Write-Host "Next safe action: create a canonical commit package recommendation through an approved workflow."
     exit 0
@@ -89,6 +85,9 @@ if ($null -eq $package) {
 $approvedFiles = if ($package.PSObject.Properties.Name -contains "approved_files") { @($package.approved_files) } else { @($package.recommended_files) }
 $blockedFiles = if ($package.PSObject.Properties.Name -contains "blocked_files") { @($package.blocked_files) } else { @($package.excluded_files) }
 $packetIds = if ($package.PSObject.Properties.Name -contains "packet_ids") { @($package.packet_ids) } else { @() }
+if ($null -eq $approvedFiles) { $approvedFiles = @() }
+if ($null -eq $blockedFiles) { $blockedFiles = @() }
+if ($null -eq $packetIds) { $packetIds = @() }
 
 Write-Host "AI_OS Commit Package Display"
 Write-Host "Mode: $($package.mode)"
@@ -99,13 +98,7 @@ Write-Host ""
 Write-Host "Safety: display-only. No files are staged. No git add is run. No commit is created. No push is performed."
 Write-Host ""
 
-if ($usedLegacyPackage) {
-    Write-Host "Commit package source: legacy commit_package.example.json used because canonical source was unavailable."
-} elseif (Test-Path -LiteralPath $legacyPackagePath -PathType Leaf) {
-    Write-Host "Legacy fallback: commit_package.example.json available"
-} else {
-    Write-Host "Legacy fallback not found; canonical source used."
-}
+Write-Host "Legacy commit_package.example.json fallback: not used; canonical source controls display."
 Write-Host ""
 
 Write-Host "Commit message:"
@@ -113,7 +106,7 @@ Write-Host "  $(Get-JsonValue -Object $package -Name 'commit_message' -Default (
 Write-Host ""
 
 Write-Host "Packet IDs:"
-if ($packetIds.Count -eq 0) {
+if (@($packetIds).Count -eq 0) {
     Write-Host "  None"
 } else {
     foreach ($packetId in $packetIds) {
@@ -123,8 +116,8 @@ if ($packetIds.Count -eq 0) {
 Write-Host ""
 
 Write-Host "Commit package summary:"
-Write-Host "  Approved files for future commit: $($approvedFiles.Count)"
-Write-Host "  Blocked files: $($blockedFiles.Count)"
+Write-Host "  Approved files for future commit: $(@($approvedFiles).Count)"
+Write-Host "  Blocked files: $(@($blockedFiles).Count)"
 Write-Host ""
 
 Write-FileList -Title "Approved files for future commit:" -Files $approvedFiles

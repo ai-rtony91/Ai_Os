@@ -3,7 +3,6 @@ $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
 $inboxPath = Join-Path $orchestrationRoot "approval_inbox\APPROVAL_INBOX_001.json"
-$legacyInboxPath = Join-Path $orchestrationRoot "approval_inbox.example.json"
 
 function Read-JsonFile {
     param(
@@ -80,12 +79,8 @@ function Write-PacketSection {
     }
 }
 
-$usedLegacyInbox = $false
 $inbox = if (Test-Path -LiteralPath $inboxPath -PathType Leaf) {
     Read-JsonFile -Path $inboxPath
-} elseif (Test-Path -LiteralPath $legacyInboxPath -PathType Leaf) {
-    $usedLegacyInbox = $true
-    Read-JsonFile -Path $legacyInboxPath
 } else {
     $null
 }
@@ -100,7 +95,7 @@ if ($null -eq $inbox) {
     Write-Host ""
     Write-Host "Approval summary:"
     Write-Host "  Canonical source missing: automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
-    Write-Host "  Legacy fallback not found; no approval source available."
+    Write-Host "  Legacy approval_inbox.example.json fallback is disabled for canonical display."
     Write-Host ""
     Write-Host "Next safe action: restore or create the canonical approval inbox through an approved workflow."
     exit 0
@@ -126,23 +121,14 @@ if (-not $isLegacyPacketInbox) {
     Write-Host "  Risk level: $($inbox.risk_level)"
     Write-Host "  Approval status: $($inbox.approval_status)"
     Write-Host "  Approved by human: $($inbox.approved_by_human)"
-    if (Test-Path -LiteralPath $legacyInboxPath -PathType Leaf) {
-        Write-Host "  Legacy packet-list fallback: approval_inbox.example.json available"
-    } else {
-        Write-Host "  Legacy fallback not found; canonical source used."
-    }
+    Write-Host "  Legacy approval_inbox.example.json fallback: not used; canonical source controls display."
     Write-Host ""
     Write-Host "Next safe action: review approval state only; use a separate approved APPLY workflow before changing packet state."
     exit 0
 }
 
-if ($usedLegacyInbox) {
-    Write-Host "Approval source: legacy approval_inbox.example.json used because canonical source was unavailable."
-    Write-Host ""
-}
-
 if ($packets.Count -eq 0) {
-    Write-Host "Approval packets: none found in approval_inbox.example.json"
+    Write-Host "Approval packets: none found in canonical approval inbox."
     exit 0
 }
 

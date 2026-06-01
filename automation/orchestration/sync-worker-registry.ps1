@@ -3,10 +3,8 @@ $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
 $canonicalQueuePath = Join-Path $orchestrationRoot "work_packets"
-$legacyQueuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
 $locksPath = Join-Path $orchestrationRoot "assignment_locks.example.json"
 $registryPath = Join-Path $orchestrationRoot "workers\AIOS_WORKER_REGISTRY.json"
-$legacyRegistryPath = Join-Path $orchestrationRoot "worker_registry.example.json"
 
 function Read-JsonFile {
     param(
@@ -96,7 +94,7 @@ function Get-JsonValue {
 }
 
 $locks = Read-JsonFile -Path $locksPath
-$registry = if (Test-Path -LiteralPath $registryPath -PathType Leaf) { Read-JsonFile -Path $registryPath } else { Read-JsonFile -Path $legacyRegistryPath }
+$registry = if (Test-Path -LiteralPath $registryPath -PathType Leaf) { Read-JsonFile -Path $registryPath } else { $null }
 
 $queue = $null
 $queueSource = "none"
@@ -104,32 +102,22 @@ $packets = @()
 if (Test-Path -LiteralPath $canonicalQueuePath -PathType Container) {
     $packets = @(Get-NormalizedWorkPackets -Path $canonicalQueuePath)
     $queueSource = "automation/orchestration/work_packets/"
-} elseif (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
-    $queue = Read-JsonFile -Path $legacyQueuePath
-    $packets = @($queue.packets)
-    $queueSource = "packet_queue.example.json"
 }
 $lockItems = @($locks.locks)
-$workers = @($registry.workers)
+$workers = if ($null -eq $registry) { @() } else { @($registry.workers) }
 
 Write-Host "AI_OS Worker Registry Sync Display"
 Write-Host "Queue source: $queueSource"
 if (Test-Path -LiteralPath $canonicalQueuePath -PathType Container) {
     Write-Host "Canonical queue folder: automation/orchestration/work_packets/"
-    if (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
-        Write-Host "Queue detail fallback: packet_queue.example.json available"
-    } else {
-        Write-Host "Legacy fallback not found; canonical source used."
-    }
-} elseif ($null -ne $queue) {
-    Write-Host "Fallback queue: $($queue.queue_name)"
+    Write-Host "Legacy packet_queue.example.json fallback: not used; canonical source controls display."
 } else {
     Write-Host "Queue detail: unavailable"
-    Write-Host "Legacy fallback not found; lock and registry checks only."
+    Write-Host "Canonical work_packets folder missing; legacy packet_queue.example.json fallback is disabled."
 }
 Write-Host "Locks: $($locks.lock_name)"
-Write-Host "Registry: $(Get-JsonValue -Object $registry -Name 'registry_name' -Default (Get-JsonValue -Object $registry -Name 'registry_id' -Default 'UNKNOWN'))"
-Write-Host "Mode: $(Get-JsonValue -Object $registry -Name 'mode' -Default 'canonical registry')"
+Write-Host "Registry: $(if ($null -eq $registry) { 'MISSING' } else { Get-JsonValue -Object $registry -Name 'registry_name' -Default (Get-JsonValue -Object $registry -Name 'registry_id' -Default 'UNKNOWN') })"
+Write-Host "Mode: $(if ($null -eq $registry) { 'UNKNOWN' } else { Get-JsonValue -Object $registry -Name 'mode' -Default 'canonical registry' })"
 Write-Host ""
 Write-Host "Safety: display-only. No files are modified. No locks are created. No workers are launched."
 Write-Host ""

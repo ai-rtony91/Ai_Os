@@ -3,7 +3,6 @@ $ErrorActionPreference = "Stop"
 
 $orchestrationRoot = $PSScriptRoot
 $queuePath = Join-Path $orchestrationRoot "work_packets"
-$legacyQueuePath = Join-Path $orchestrationRoot "packet_queue.example.json"
 $locksPath = Join-Path $orchestrationRoot "assignment_locks.example.json"
 $registryPath = Join-Path $orchestrationRoot "workers\AIOS_WORKER_REGISTRY.json"
 
@@ -52,20 +51,11 @@ if (Test-Path -LiteralPath $queuePath -PathType Container) {
     Write-Host "  Active packets: $($activePackets.Count)"
     Write-Host "  Blocked packets: $($blockedPackets.Count)"
     Write-Host "  Complete packets: $($completePackets.Count)"
-    if (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
-        Write-Host "Legacy packet detail fallback: packet_queue.example.json available"
-    } else {
-        Write-Host "Legacy fallback not found; canonical source used."
-    }
-    Write-Host ""
-} elseif (Test-Path -LiteralPath $legacyQueuePath -PathType Leaf) {
-    $queue = Read-JsonFile -Path $legacyQueuePath
-    $packets = @($queue.packets)
-    Write-Host "Fallback packet source: packet_queue.example.json"
+    Write-Host "Legacy packet_queue.example.json fallback: not used; canonical source controls display."
     Write-Host ""
 } else {
     Write-Host "Packet source: unavailable"
-    Write-Host "Legacy fallback not found; worker lock and registry status only."
+    Write-Host "Canonical work_packets folder missing; legacy packet_queue.example.json fallback is disabled."
     Write-Host ""
 }
 
