@@ -62,6 +62,8 @@ trading-lab-readable-list.txt
 automation/intake/AIOS_GOAL_INTAKE.json
 automation/outbox/AIOS_NEXT_ACTION.json
 automation/runtime/state/AIOS_RUNTIME_STATE.json
+apps/dashboard/data/aios_live_state.json
+apps/dashboard/data/aios_live_state.json.tmp
 proof/last_verified.txt
 
 # AIOS work packet runtime instances
