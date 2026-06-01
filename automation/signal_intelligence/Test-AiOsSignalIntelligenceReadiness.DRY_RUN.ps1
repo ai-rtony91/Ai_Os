@@ -1,12 +1,15 @@
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$RequiredFiles = @(
+$LegacyDocsAiosReferenceFiles = @(
     "docs\AI_OS\signal_intelligence\AIOS_SIGNAL_INTELLIGENCE_SOURCE_OF_TRUTH.md",
     "docs\AI_OS\signal_intelligence\AIOS_CONFLUENCE_SCORING_MODEL_DRAFT.md",
     "docs\AI_OS\signal_intelligence\AIOS_MARKET_REGIME_ANALYSIS_DRAFT.md",
     "docs\AI_OS\signal_intelligence\AIOS_SIGNAL_VALIDATION_RULES_DRAFT.md",
     "docs\AI_OS\strategy_registry\AIOS_STRATEGY_REGISTRY_SCHEMA_DRAFT.md"
+)
+$RequiredFiles = @(
+    $LegacyDocsAiosReferenceFiles
 )
 
 $Results = foreach ($RelativePath in $RequiredFiles) {

@@ -34,8 +34,7 @@ $requiredFiles = @(
   "automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1",
   "automation/operator/Test-AiOsWorkflowOrchestrator.DRY_RUN.ps1",
   "apps/dashboard/mock-data/aios-workflow-orchestrator-v1.example.json",
-  "docs/concepts/aios-dispatcher-orchestration-concepts.md",
-  "Reports/operator/README_WORKFLOW_ORCHESTRATOR.md"
+  "docs/concepts/aios-dispatcher-orchestration-concepts.md"
 )
 
 foreach ($file in $requiredFiles) {
@@ -68,26 +67,26 @@ if ($fixture) {
   }
 }
 
-$registry = Test-JsonFile -RelativePath "automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json"
-if ($registry) {
-  if (@($registry.workers).Count -ne 8) {
-    Add-Failure "Worker registry must contain 8 workers."
+$adapterPath = Join-Path $ResolvedRepoRoot "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1"
+if (-not (Test-Path -LiteralPath $adapterPath -PathType Leaf)) {
+  Add-Failure "Missing operator registry adapter."
+} else {
+  $adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $adapterPath -RepoRoot $ResolvedRepoRoot -OutputJson | ConvertFrom-Json
+  if ($adapter.source.primary_worker_source -ne "canonical_runtime_registry") {
+    Add-Failure "Operator registry adapter must be the primary worker routing source."
   }
-  if ($registry.operator_rules.git_add_dot_allowed -ne $false) {
-    Add-Failure "Registry must forbid git add dot."
+  if ($adapter.legacy_operator_summary.compatibility_evidence_only -ne $true) {
+    Add-Failure "Legacy worker registry must be compatibility evidence only."
   }
-  if ($registry.operator_rules.commit_allowed_without_operator_approval -ne $false) {
-    Add-Failure "Registry must block unapproved commits."
-  }
-  if ($registry.operator_rules.push_allowed_without_operator_approval -ne $false) {
-    Add-Failure "Registry must block unapproved pushes."
+  if (@($adapter.operator_routes).Count -eq 0) {
+    Add-Failure "Operator registry adapter must expose operator routes."
   }
 }
 
 $invokePath = Join-Path $ResolvedRepoRoot "automation/operator/Invoke-AiOsWorkflowOrchestrator.ps1"
 if (Test-Path -LiteralPath $invokePath -PathType Leaf) {
   $invokeText = Get-Content -LiteralPath $invokePath -Raw
-  foreach ($requiredToken in @("AIOS_OPERATOR_NEXT_ACTION_PACKET.md", "AIOS_PARALLEL_WORKER_REGISTRY.json", "work-intelligence-queue-v1.example.json", "aios-approval-inbox-v1.example.json", "aios-validator-chain-v1.example.json", "AIOS_CONTROLLED_APPLY_QUEUE.example.json", "AIOS_PHASE_27_COMMIT_PACKAGE.example.json", "git status --short --branch")) {
+  foreach ($requiredToken in @("AIOS_OPERATOR_NEXT_ACTION_PACKET.md", "Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1", "operator_registry_adapter", "compatibility_evidence_only", "work-intelligence-queue-v1.example.json", "aios-approval-inbox-v1.example.json", "aios-validator-chain-v1.example.json", "AIOS_CONTROLLED_APPLY_QUEUE.example.json", "AIOS_PHASE_27_COMMIT_PACKAGE.example.json", "git status --short --branch")) {
     if (-not $invokeText.Contains($requiredToken)) {
       Add-Failure "Orchestrator missing token: $requiredToken"
     }

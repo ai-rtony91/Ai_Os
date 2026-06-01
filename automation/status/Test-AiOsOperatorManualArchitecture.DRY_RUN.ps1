@@ -51,7 +51,7 @@ function Test-RequiredPhrase {
 
 Push-Location $RepoRoot
 try {
-    $stage43Files = @(
+    $legacyDocsAiosDashboardStage43Files = @(
         "docs\AI_OS\dashboard\AIOS_OPERATOR_MANUAL_ARCHITECTURE_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_VOICE_TOUR_GUIDE_SYSTEM_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_TOOLTIP_AND_PANEL_HELP_SYSTEM_DRAFT.md",
@@ -59,12 +59,16 @@ try {
         "docs\AI_OS\dashboard\AIOS_ASSISTANT_PERSONA_AND_BEHAVIOR_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_SCREENSHOT_AND_DEMO_CAPTURE_PLAN_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_CONTEXTUAL_WARNING_AND_EXPLANATION_SYSTEM_DRAFT.md",
-        "docs\AI_OS\dashboard\AIOS_INTERACTIVE_TRAINING_MODE_DRAFT.md",
+        "docs\AI_OS\dashboard\AIOS_INTERACTIVE_TRAINING_MODE_DRAFT.md"
+    )
+    $stage43Files = @(
+        $legacyDocsAiosDashboardStage43Files
         "automation\status\Test-AiOsOperatorManualArchitecture.DRY_RUN.ps1",
         "Reports\health\STAGE43A_43J_OPERATOR_MANUAL_ARCHITECTURE_README.txt"
     )
 
     Write-Host "File checks:"
+    Write-Host "Legacy docs/AI_OS dashboard references are source-material checks only; canonical dashboard contracts live in docs/specs/aios-dashboard-data-contracts.md."
     Test-RequiredFile "operator manual architecture" $stage43Files[0] | Out-Null
     Test-RequiredFile "voice tour guide system" $stage43Files[1] | Out-Null
     Test-RequiredFile "tooltip and panel help system" $stage43Files[2] | Out-Null

@@ -67,19 +67,23 @@ function Test-RequiredPhrase {
 
 Push-Location $RepoRoot
 try {
-    $stageFiles = @(
+    $legacyDocsAiosDashboardStageFiles = @(
         "docs\AI_OS\dashboard\AIOS_STATIC_PROTOTYPE_LAYOUT_FIXTURE_DRAFT.json",
         "docs\AI_OS\dashboard\AIOS_OPERATOR_TOUR_SCRIPT_FIXTURE_DRAFT.json",
         "docs\AI_OS\dashboard\AIOS_TOOLTIP_CONTENT_FIXTURE_DRAFT.json",
         "docs\AI_OS\dashboard\AIOS_STATIC_RENDERED_MOCK_BOUNDARY_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_FIRST_RENDERED_MOCK_FILE_PLAN_DRAFT.md",
         "docs\AI_OS\dashboard\AIOS_SCREENSHOT_DEMO_CAPTURE_READINESS_DRAFT.md",
-        "docs\AI_OS\dashboard\AIOS_DEMO_REDACTION_AND_EVIDENCE_RULES_DRAFT.md",
+        "docs\AI_OS\dashboard\AIOS_DEMO_REDACTION_AND_EVIDENCE_RULES_DRAFT.md"
+    )
+    $stageFiles = @(
+        $legacyDocsAiosDashboardStageFiles
         "automation\status\Test-AiOsDashboardPrototypeMegabatch.DRY_RUN.ps1",
         "Reports\health\STAGE44_46_DASHBOARD_PROTOTYPE_MEGABATCH_README.txt"
     )
 
     Write-Host "File checks:"
+    Write-Host "Legacy docs/AI_OS dashboard references are source-material checks only; canonical dashboard contracts live in docs/specs/aios-dashboard-data-contracts.md."
     Test-RequiredFile "static prototype layout fixture" $stageFiles[0] | Out-Null
     Test-RequiredFile "operator tour script fixture" $stageFiles[1] | Out-Null
     Test-RequiredFile "tooltip content fixture" $stageFiles[2] | Out-Null

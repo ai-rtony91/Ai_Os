@@ -83,6 +83,12 @@ if ($adapter) {
   if ($adapter.mode -ne "READ_ONLY") {
     Add-Failure "Operator registry adapter must be READ_ONLY."
   }
+  if ($adapter.source.primary_worker_source -ne "canonical_runtime_registry") {
+    Add-Failure "Operator registry adapter must declare canonical_runtime_registry as primary worker source."
+  }
+  if ($adapter.source.legacy_operator_registry_role -ne "compatibility_evidence_only") {
+    Add-Failure "Legacy operator registry must be compatibility evidence only."
+  }
   if (@($adapter.runtime_workers).Count -eq 0) {
     Add-Failure "Operator registry adapter must expose runtime_workers."
   }
@@ -110,6 +116,9 @@ if ($adapter) {
   }
   if ($adapter.safety.writes_files -ne $false -or $adapter.safety.launches_workers -ne $false -or $adapter.safety.changes_json -ne $false) {
     Add-Failure "Operator registry adapter must remain read-only and non-launching."
+  }
+  if ($adapter.legacy_operator_summary.active_primary_source -ne $false -or $adapter.legacy_operator_summary.compatibility_evidence_only -ne $true) {
+    Add-Failure "Legacy operator summary must prove the legacy registry is not the primary source."
   }
 }
 

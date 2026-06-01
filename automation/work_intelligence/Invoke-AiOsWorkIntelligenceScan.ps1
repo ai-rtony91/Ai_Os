@@ -921,6 +921,49 @@ function Get-SecurityWarnings {
   }
 }
 
+function Get-OperatorRegistryAdapterResult {
+  param(
+    [string]$AdapterPath = "automation/operator/Get-AiOsOperatorRegistryAdapter.DRY_RUN.ps1",
+    [string]$LegacyRegistryPath
+  )
+
+  $adapterFullPath = Join-Path $RepoRoot $AdapterPath
+  $legacyFullPath = Join-Path $RepoRoot $LegacyRegistryPath
+
+  if (Test-Path -LiteralPath $adapterFullPath -PathType Leaf) {
+    try {
+      $adapter = & powershell -NoProfile -ExecutionPolicy Bypass -File $adapterFullPath -RepoRoot $RepoRoot -OutputJson | ConvertFrom-Json
+      if ($adapter -and $adapter.source.primary_worker_source -eq "canonical_runtime_registry") {
+        return [pscustomobject]@{
+          worker_lane_count = @($adapter.runtime_workers).Count
+          worker_registry_source = "operator_registry_adapter"
+          operator_registry_adapter_path = $AdapterPath
+          legacy_worker_registry_path = $LegacyRegistryPath
+          legacy_registry_role = "compatibility_evidence_only"
+          legacy_registry_primary_source = $false
+        }
+      }
+    } catch {
+      # Fall back to the legacy compatibility registry only when adapter evidence cannot be read.
+    }
+  }
+
+  $legacyCount = 0
+  if (Test-Path -LiteralPath $legacyFullPath -PathType Leaf) {
+    $legacy = Get-Content -LiteralPath $legacyFullPath -Raw | ConvertFrom-Json
+    $legacyCount = @($legacy.workers).Count
+  }
+
+  return [pscustomobject]@{
+    worker_lane_count = $legacyCount
+    worker_registry_source = "legacy_compatibility_fallback"
+    operator_registry_adapter_path = $AdapterPath
+    legacy_worker_registry_path = $LegacyRegistryPath
+    legacy_registry_role = "compatibility_fallback_only"
+    legacy_registry_primary_source = $false
+  }
+}
+
 $gitBranch = Get-CommandText "git branch --show-current"
 $gitStatusShort = Get-CommandText "git status --short"
 $latestCommit = Get-CommandText "git log -1 --oneline"
@@ -945,11 +988,8 @@ $invalidWorkerReportCount = 0
 $workerReportIssueCount = 0
 $workerReportEvidence = @()
 $workerReportIssues = @()
-$registryPath = Join-Path $RepoRoot $config.worker_registry_path
-if (Test-Path -LiteralPath $registryPath) {
-  $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
-  $workerLaneCount = @($registry.workers).Count
-}
+$registryAdapterResult = Get-OperatorRegistryAdapterResult -LegacyRegistryPath $config.worker_registry_path
+$workerLaneCount = $registryAdapterResult.worker_lane_count
 $workerReportDir = Join-Path $RepoRoot $config.worker_report_directory
 $workerReportResult = Get-WorkerReportEvidence -WorkerReportDir $workerReportDir -ProtectedFiles @($config.protected_files)
 $workerReportPresence = $workerReportResult.worker_report_presence
@@ -1019,6 +1059,11 @@ $snapshot = [pscustomobject]@{
   total_json_files = Count-Files "*.json"
   total_markdown_files = Count-Files "*.md"
   worker_lane_count = $workerLaneCount
+  worker_registry_source = $registryAdapterResult.worker_registry_source
+  operator_registry_adapter_path = $registryAdapterResult.operator_registry_adapter_path
+  legacy_worker_registry_path = $registryAdapterResult.legacy_worker_registry_path
+  legacy_registry_role = $registryAdapterResult.legacy_registry_role
+  legacy_registry_primary_source = $registryAdapterResult.legacy_registry_primary_source
   worker_report_count = $workerReportCount
   valid_worker_report_count = $validWorkerReportCount
   invalid_worker_report_count = $invalidWorkerReportCount

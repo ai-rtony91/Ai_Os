@@ -71,15 +71,19 @@ $adapter = [pscustomobject]@{
   source = @{
     canonical_registry_path = $CanonicalRegistryPath
     canonical_registry_found = $null -ne $canonical
+    primary_worker_source = "canonical_runtime_registry"
     legacy_operator_registry_path = $LegacyOperatorRegistryPath
     legacy_operator_registry_found = $null -ne $legacy
+    legacy_operator_registry_role = "compatibility_evidence_only"
   }
   runtime_workers = $runtimeWorkers
   operator_routes = $operatorRoutes
   legacy_operator_summary = @{
     worker_count = if ($legacy -and $legacy.workers) { @($legacy.workers).Count } else { 0 }
     kept_active = $true
-    reason = "Legacy operator/window registry shape is not replaced by canonical runtime registry."
+    active_primary_source = $false
+    compatibility_evidence_only = $true
+    reason = "Legacy operator/window registry is retained only as compatibility evidence; worker routing prefers the canonical runtime registry adapter."
   }
   safety = @{
     writes_files = $false
