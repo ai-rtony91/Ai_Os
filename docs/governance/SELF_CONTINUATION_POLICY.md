@@ -53,6 +53,16 @@ The controller selects at most one candidate per run:
 
 Non-GREEN candidates are never auto-queued. They remain bounded backlog candidates and require explicit human approval before any execution packet may be created.
 
+## Backlog Pull Discipline
+
+`automation/orchestration/backlog/Pull-AiOsBacklog.ps1` is the only approved helper for pulling backlog work into the relay goal queue. It may pull exactly one item per invocation, and only when all gates match:
+
+- `status` is `READY`
+- `risk_tier` is `GREEN`
+- `gate` is `APPROVED`
+
+Non-GREEN, unapproved, ambiguous, missing, or malformed items must remain untouched in `control/self_continuation/BACKLOG.json`. The helper must write at most one `relay/goals/{id}.goal.txt` file per run and then mark that source backlog item `PULLED` using a separate atomic temp-file replace.
+
 ## Kill Switch
 
 Self-continuation halts when either condition is true:
