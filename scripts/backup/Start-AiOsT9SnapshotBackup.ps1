@@ -331,6 +331,11 @@ function Get-AiOsBackupProductivityDelta {
 
     $delta = Get-AiOsGitDeltaStats -RepoRoot $RepoRoot -PreviousCommit $previousCommit -CurrentCommit ([string]$GitInfo.commit_hash)
     $todayDelta = if ([string]::IsNullOrWhiteSpace($todayCommit)) { $null } else { Get-AiOsGitDeltaStats -RepoRoot $RepoRoot -PreviousCommit $todayCommit -CurrentCommit ([string]$GitInfo.commit_hash) }
+    $signal = Get-AiOsBackupProductivitySignal -HasPreviousBackup ($null -ne $previous) `
+        -Commits ([int]$delta.commits) `
+        -Files ([int]$delta.files) `
+        -Bytes ([int64]$delta.bytes) `
+        -PrMerges ([int]$delta.pr_merges)
     $runtimeNames = @("relay\logs", "relay\running", "relay\done", "relay\error", "telemetry", "Reports")
     $runtimeExcluded = @($runtimeNames | Where-Object {
         $runtimeName = $_
@@ -355,7 +360,45 @@ function Get-AiOsBackupProductivityDelta {
         productivity_delta_today_human = if ($null -eq $todayDelta) { "UNKNOWN" } else { Format-AiOsBytes -Bytes ([double]$todayDelta.bytes) }
         runtime_files_excluded = [bool]$runtimeExcluded
         runtime_exclusion_status = if ($runtimeExcluded) { "FULL" } else { "PARTIAL" }
+        productivity_delta_signal_score = $signal.score
+        productivity_delta_progress_bar = $signal.bar
+        productivity_delta_progress_label = $signal.label
         productivity_delta_summary = "Productivity delta: $($delta.files) files / $(Format-AiOsBytes -Bytes ([double]$delta.bytes)) / $($delta.commits) commits since last backup."
+    }
+}
+
+function Get-AiOsBackupProductivitySignal {
+    param(
+        [Parameter(Mandatory = $true)][bool]$HasPreviousBackup,
+        [Parameter(Mandatory = $true)][int]$Commits,
+        [Parameter(Mandatory = $true)][int]$Files,
+        [Parameter(Mandatory = $true)][int64]$Bytes,
+        [Parameter(Mandatory = $true)][int]$PrMerges
+    )
+
+    if (-not $HasPreviousBackup) {
+        return [pscustomobject]@{
+            score = "UNKNOWN"
+            bar = "UNKNOWN"
+            label = "UNKNOWN"
+        }
+    }
+
+    $signals = 0
+    if ($Commits -gt 0) { $signals++ }
+    if ($Files -gt 0) { $signals++ }
+    if ($Bytes -gt 0) { $signals++ }
+    if ($PrMerges -gt 0) { $signals++ }
+
+    $score = [Math]::Min(100, $signals * 25)
+    $filled = [Math]::Min(10, [int]($score / 10))
+    $empty = 10 - $filled
+    $bar = ("█" * $filled) + ("░" * $empty)
+
+    return [pscustomobject]@{
+        score = $score
+        bar = $bar
+        label = "$score%"
     }
 }
 
@@ -368,6 +411,23 @@ function Add-AiOsProductivityFields {
     foreach ($property in $ProductivityDelta.PSObject.Properties) {
         $Target | Add-Member -NotePropertyName $property.Name -NotePropertyValue $property.Value -Force
     }
+}
+
+function Write-AiOsBackupProductivityOutput {
+    param(
+        [Parameter(Mandatory = $true)][object]$ProductivityDelta,
+        [Parameter(Mandatory = $true)][string]$CopiedHuman
+    )
+
+    if ([string]$ProductivityDelta.productivity_delta_progress_label -eq "UNKNOWN") {
+        Write-Host "Backup productivity bar: UNKNOWN"
+    } else {
+        Write-Host "Backup productivity bar: $($ProductivityDelta.productivity_delta_progress_bar) $($ProductivityDelta.productivity_delta_progress_label)"
+    }
+    Write-Host "Backup total copied: $CopiedHuman"
+    Write-Host $ProductivityDelta.productivity_delta_summary
+    Write-Host "PR merges included: $($ProductivityDelta.productivity_delta_pr_merges)"
+    Write-Host "Runtime exclusion status: $($ProductivityDelta.runtime_exclusion_status)"
 }
 
 function New-AiOsBackupResult {
@@ -594,16 +654,12 @@ try {
             Write-Host "Skipped (already current):   pending (preview - robocopy not run)"
             Write-Host "Produced this backup session: pending (preview - robocopy not run)"
             Write-Host ""
-            Write-Host "Backup total copied: pending (preview - robocopy not run)"
-            Write-Host "Productivity delta since previous backup: $($productivityDelta.productivity_delta_files) files / $($productivityDelta.productivity_delta_human) / $($productivityDelta.productivity_delta_commits) commits"
+            Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman "pending (preview - robocopy not run)"
             if ($productivityDelta.productivity_delta_today_files -eq "UNKNOWN") {
                 Write-Host "Productivity delta today: UNKNOWN"
             } else {
                 Write-Host "Productivity delta today: $($productivityDelta.productivity_delta_today_files) files / $($productivityDelta.productivity_delta_today_human)"
             }
-            Write-Host "PR merges included: $($productivityDelta.productivity_delta_pr_merges)"
-            Write-Host "Runtime exclusion status: $($productivityDelta.runtime_exclusion_status)"
-            Write-Host $productivityDelta.productivity_delta_summary
             Write-Host ""
             Write-Host "Planned command:"
             Write-Host ($plannedCommand -join " ")
@@ -669,16 +725,12 @@ try {
         Write-Host "Produced this backup session: $(Format-AiOsBytes -Bytes $copiedBytes)"
         Write-Host ""
         $copiedHuman = Format-AiOsBytes -Bytes $copiedBytes
-        Write-Host "Backup total copied: $copiedHuman"
-        Write-Host "Productivity delta since previous backup: $($productivityDelta.productivity_delta_files) files / $($productivityDelta.productivity_delta_human) / $($productivityDelta.productivity_delta_commits) commits"
+        Write-AiOsBackupProductivityOutput -ProductivityDelta $productivityDelta -CopiedHuman $copiedHuman
         if ($productivityDelta.productivity_delta_today_files -eq "UNKNOWN") {
             Write-Host "Productivity delta today: UNKNOWN"
         } else {
             Write-Host "Productivity delta today: $($productivityDelta.productivity_delta_today_files) files / $($productivityDelta.productivity_delta_today_human)"
         }
-        Write-Host "PR merges included: $($productivityDelta.productivity_delta_pr_merges)"
-        Write-Host "Runtime exclusion status: $($productivityDelta.runtime_exclusion_status)"
-        Write-Host $productivityDelta.productivity_delta_summary
         Write-Host ""
 
         $majorPaths = @(
