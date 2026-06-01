@@ -140,7 +140,7 @@ function Write-AiOsWorkerReport {
         [Parameter(Mandatory = $true)][string]$Tier,
         [Parameter(Mandatory = $true)][datetime]$StartedAt,
         [Parameter(Mandatory = $true)][datetime]$EndedAt,
-        [Parameter(Mandatory = $true)][int]$ExitCode,
+        [Parameter(Mandatory = $true)][object]$ExitCode,
         [Parameter(Mandatory = $true)][string[]]$AllowedPaths,
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
@@ -346,14 +346,9 @@ function Invoke-AiOsProviderWorker {
         ) -join [Environment]::NewLine
     }
 
-    try {
-        $output = @($stdin | & $ProviderCommand @ProviderArgs 2>&1 | ForEach-Object { [string]$_ })
-        $exitCode = if ($null -ne $global:LASTEXITCODE) { [int]$global:LASTEXITCODE } else { 0 }
-    }
-    catch {
-        $output = @("CLI dispatch failed: $($_.Exception.Message)")
-        $exitCode = 127
-    }
+    $result = & "$PSScriptRoot\..\timeout\Invoke-AiOsCliWithTimeout.ps1" -FilePath $ProviderCommand -ArgumentList $ProviderArgs -TimeoutSec $script:CurrentWorkerTimeoutSec -StdIn $stdin -WorkingDirectory $RepoRoot
+    $exitCode = $result.exit_code
+    $output = @("stdout:", $result.stdout, "stderr:", $result.stderr)
 
     return [pscustomobject]@{
         exit_code = $exitCode
@@ -414,6 +409,7 @@ function Complete-AiOsRelayWorkerPacket {
     Write-AiOsRelayLog "[WORKER] $($parsed.id) inbox -> running worker=$($parsed.worker) provider=$($parsed.provider) command=$($parsed.provider_command) tier=$($parsed.tier)"
 
     $started = Get-Date
+    $run_start = $started.ToUniversalTime(); $script:CurrentWorkerTimeoutSec = if ($parsed.packet.PSObject.Properties["timeout_sec"]) { [int]$parsed.packet.timeout_sec } else { 600 }
     $exitCode = 0
     $body = @()
 
@@ -438,7 +434,17 @@ function Complete-AiOsRelayWorkerPacket {
     $ended = Get-Date
     [void](Write-AiOsWorkerReport -Id $parsed.id -Worker $parsed.worker -Provider $parsed.provider -ProviderCommand $parsed.provider_command -Tier $parsed.tier -StartedAt $started -EndedAt $ended -ExitCode $exitCode -AllowedPaths $parsed.allowed_paths -Body $body)
 
-    if ($exitCode -eq 0) {
+    if ([string]$exitCode -eq "TIMEOUT_EXCEEDED") {
+        $target = Move-AiOsRelayPacket -SourcePath $runningPath -TargetFolder $RelayPaths.error
+        Write-AiOsPacketError -Id $parsed.id -Reason "WORKER_TIMEOUT" -Detail "Worker exceeded timeout_sec=$script:CurrentWorkerTimeoutSec. See outbox report."; Write-AiOsRelayLog "[WORKER] $($parsed.id) running -> error reason=WORKER_TIMEOUT path=$target"
+    } elseif ($exitCode -eq 0) {
+        $val = & "$PSScriptRoot\..\validators\output\Test-AiOsWorkerOutput.DRY_RUN.ps1" -PacketId $parsed.id -AllowedPaths $parsed.allowed_paths -RunStartUtc $run_start -RepoRoot $RepoRoot
+        if (-not $val.pass) {
+            $target = Move-AiOsRelayPacket -SourcePath $runningPath -TargetFolder $RelayPaths.error
+            Write-AiOsPacketError -Id $parsed.id -Reason "OUTPUT_OUTSIDE_ALLOWED_PATHS" -Detail "Output validator failed: $($val.violation_reason). See relay/logs/output_validator.log."
+            Write-AiOsRelayLog "[WORKER] $($parsed.id) running -> error reason=OUTPUT_OUTSIDE_ALLOWED_PATHS path=$target"
+            return "PROCESSED"
+        }
         $target = Move-AiOsRelayPacket -SourcePath $runningPath -TargetFolder $RelayPaths.done
         Write-AiOsRelayLog "[WORKER] $($parsed.id) running -> done exit_code=0 path=$target"
     } else {
@@ -509,6 +515,14 @@ function New-AiOsRelayWorkerReport {
 
 Import-AiOsRelayRunnerHelpers
 Initialize-AiOsRelayWorkerFolders
+
+$preflight = & "$PSScriptRoot\..\preflight\Test-AiOsToolPreflight.ps1"
+if (-not $preflight.ok) {
+    Write-AiOsRelayLog "PREFLIGHT_FAILED missing=$($preflight.missing -join ',') unauth=$($preflight.unauth -join ',')"
+    $notify = Join-Path $RepoRoot "automation\orchestration\notifications\Send-AiOsNotification.ps1"
+    if (Test-Path -LiteralPath $notify -PathType Leaf) { & powershell -NoProfile -ExecutionPolicy Bypass -File $notify -Message "PREFLIGHT_FAILED missing=$($preflight.missing -join ',') unauth=$($preflight.unauth -join ',')" -Severity "CRITICAL" -Subject "AI_OS BLOCKER" -Apply | Out-Null }
+    exit 2
+}
 
 $script:ProcessedPackets = 0
 Write-AiOsRelayLog ("[WORKER] start Apply={0} Watch={1} MaxPackets={2} Report={3}" -f [bool]$Apply, [bool]$Watch, $MaxPackets, [bool]$Report)
