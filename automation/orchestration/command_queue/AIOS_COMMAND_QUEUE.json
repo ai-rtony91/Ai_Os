@@ -1,13 +1,15 @@
 ﻿{
     "queue_id":  "AIOS_COMMAND_QUEUE",
     "version":  "1.0",
+    "canonical_queue":  "automation/orchestration/work_packets/active/",
     "items":  [
                   {
                       "id":  "20260516T192852Z",
                       "command":  "powershell -ExecutionPolicy Bypass -File automation/session/Start-AiOsSession.ps1",
                       "reason":  "Session boot check",
-                      "status":  "queued",
-                      "created_utc":  "2026-05-16T19:28:52Z"
+                      "status":  "stale",
+                      "created_utc":  "2026-05-16T19:28:52Z",
+                      "stale_reason":  "Command queue is not the canonical active work queue. P21 verification found automation/session/Start-AiOsSession.ps1 exists, but active work belongs in automation/orchestration/work_packets/active/ and this queued command is stale historical state."
                   }
               ]
 }
