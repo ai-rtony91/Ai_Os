@@ -208,6 +208,168 @@ function Get-AiOsRobocopyCounts {
     return $counts
 }
 
+function Get-AiOsPreviousBackupManifest {
+    param(
+        [Parameter(Mandatory = $true)][string]$BackupRoot,
+        [Parameter(Mandatory = $true)][string]$CurrentSnapshotPath,
+        [Nullable[datetime]]$BeforeLocalTime = $null
+    )
+
+    if (-not (Test-Path -LiteralPath $BackupRoot -PathType Container)) {
+        return $null
+    }
+
+    $manifests = @(Get-ChildItem -LiteralPath $BackupRoot -Directory -Filter "AIOS_BACKUP*" -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -ine $CurrentSnapshotPath } |
+        ForEach-Object {
+            $candidate = Join-Path $_.FullName "AIOS_BACKUP_MANIFEST.json"
+            if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { return }
+            try {
+                $manifest = Get-Content -Raw -LiteralPath $candidate | ConvertFrom-Json
+                $status = if ($null -ne $manifest.status) { [string]$manifest.status } else { "" }
+                if ($status -ne "SUCCESS") { return }
+                $createdAt = if ($null -ne $manifest.created_at) { [datetime]$manifest.created_at } else { $_.LastWriteTime }
+                if ($null -ne $BeforeLocalTime -and $createdAt -ge $BeforeLocalTime.Value) { return }
+                [pscustomobject]@{
+                    path = $candidate
+                    manifest = $manifest
+                    created_at = $createdAt
+                }
+            } catch {
+                return
+            }
+        } |
+        Sort-Object created_at -Descending)
+
+    if ($manifests.Count -eq 0) { return $null }
+    return $manifests[0]
+}
+
+function Get-AiOsGitDeltaStats {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$PreviousCommit,
+        [Parameter(Mandatory = $true)][string]$CurrentCommit
+    )
+
+    $empty = [pscustomobject]@{
+        files = 0
+        new_files = 0
+        changed_files = 0
+        deleted_files = 0
+        bytes = 0L
+        commits = 0
+        pr_merges = 0
+        pr_merge_subjects = @()
+    }
+    if ([string]::IsNullOrWhiteSpace($PreviousCommit) -or [string]::IsNullOrWhiteSpace($CurrentCommit) -or $PreviousCommit -eq $CurrentCommit) {
+        return $empty
+    }
+
+    $range = "{0}..{1}" -f $PreviousCommit, $CurrentCommit
+    $commitCountText = (git -C $RepoRoot rev-list --count $range).Trim()
+    if ($LASTEXITCODE -ne 0) { return $empty }
+
+    $mergeSubjects = @(git -C $RepoRoot log --merges --grep "Merge pull request" --format=%s $range)
+    if ($LASTEXITCODE -ne 0) { $mergeSubjects = @() }
+
+    $nameStatusLines = @(git -C $RepoRoot diff --name-status $range)
+    if ($LASTEXITCODE -ne 0) { return $empty }
+
+    $newFiles = 0
+    $changedFiles = 0
+    $deletedFiles = 0
+    $deltaBytes = [int64]0
+    foreach ($line in $nameStatusLines) {
+        if ([string]::IsNullOrWhiteSpace($line)) { continue }
+        $parts = $line -split "`t"
+        $status = [string]$parts[0]
+        $currentRelPath = if ($status.StartsWith("R") -and $parts.Count -ge 3) { [string]$parts[2] } elseif ($parts.Count -ge 2) { [string]$parts[1] } else { "" }
+
+        if ($status -eq "D") {
+            $deletedFiles++
+            continue
+        } elseif ($status -eq "A") {
+            $newFiles++
+        } else {
+            $changedFiles++
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($currentRelPath)) {
+            $fullPath = Join-Path $RepoRoot $currentRelPath
+            if (Test-Path -LiteralPath $fullPath -PathType Leaf) {
+                $deltaBytes += (Get-Item -LiteralPath $fullPath).Length
+            }
+        }
+    }
+
+    return [pscustomobject]@{
+        files = @($nameStatusLines).Count
+        new_files = $newFiles
+        changed_files = $changedFiles
+        deleted_files = $deletedFiles
+        bytes = $deltaBytes
+        commits = [int]$commitCountText
+        pr_merges = @($mergeSubjects).Count
+        pr_merge_subjects = @($mergeSubjects)
+    }
+}
+
+function Get-AiOsBackupProductivityDelta {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$BackupRoot,
+        [Parameter(Mandatory = $true)][string]$CurrentSnapshotPath,
+        [Parameter(Mandatory = $true)][object]$GitInfo,
+        [Parameter(Mandatory = $true)][string[]]$ExcludedDirs
+    )
+
+    $previous = Get-AiOsPreviousBackupManifest -BackupRoot $BackupRoot -CurrentSnapshotPath $CurrentSnapshotPath
+    $todayBase = Get-AiOsPreviousBackupManifest -BackupRoot $BackupRoot -CurrentSnapshotPath $CurrentSnapshotPath -BeforeLocalTime (Get-Date).Date
+    $previousCommit = if ($null -ne $previous -and $null -ne $previous.manifest.commit_hash) { [string]$previous.manifest.commit_hash } else { "" }
+    $todayCommit = if ($null -ne $todayBase -and $null -ne $todayBase.manifest.commit_hash) { [string]$todayBase.manifest.commit_hash } else { "" }
+
+    $delta = Get-AiOsGitDeltaStats -RepoRoot $RepoRoot -PreviousCommit $previousCommit -CurrentCommit ([string]$GitInfo.commit_hash)
+    $todayDelta = if ([string]::IsNullOrWhiteSpace($todayCommit)) { $null } else { Get-AiOsGitDeltaStats -RepoRoot $RepoRoot -PreviousCommit $todayCommit -CurrentCommit ([string]$GitInfo.commit_hash) }
+    $runtimeNames = @("relay\logs", "relay\running", "relay\done", "relay\error", "telemetry", "Reports")
+    $runtimeExcluded = @($runtimeNames | Where-Object {
+        $runtimeName = $_
+        @($ExcludedDirs | Where-Object { $_ -like "*$runtimeName*" }).Count -gt 0
+    }).Count -eq $runtimeNames.Count
+
+    return [pscustomobject]@{
+        previous_backup_manifest_path = if ($null -ne $previous) { [string]$previous.path } else { "" }
+        previous_backup_id = if ($null -ne $previous -and $null -ne $previous.manifest.backup_id) { [string]$previous.manifest.backup_id } else { "" }
+        previous_backup_commit_hash = $previousCommit
+        productivity_delta_files = [int]$delta.files
+        productivity_delta_new_files = [int]$delta.new_files
+        productivity_delta_changed_files = [int]$delta.changed_files
+        productivity_delta_deleted_files = [int]$delta.deleted_files
+        productivity_delta_bytes = [int64]$delta.bytes
+        productivity_delta_human = Format-AiOsBytes -Bytes ([double]$delta.bytes)
+        productivity_delta_commits = [int]$delta.commits
+        productivity_delta_pr_merges = [int]$delta.pr_merges
+        productivity_delta_pr_merge_subjects = @($delta.pr_merge_subjects)
+        productivity_delta_today_files = if ($null -eq $todayDelta) { "UNKNOWN" } else { [int]$todayDelta.files }
+        productivity_delta_today_bytes = if ($null -eq $todayDelta) { "UNKNOWN" } else { [int64]$todayDelta.bytes }
+        productivity_delta_today_human = if ($null -eq $todayDelta) { "UNKNOWN" } else { Format-AiOsBytes -Bytes ([double]$todayDelta.bytes) }
+        runtime_files_excluded = [bool]$runtimeExcluded
+        runtime_exclusion_status = if ($runtimeExcluded) { "FULL" } else { "PARTIAL" }
+        productivity_delta_summary = "Productivity delta: $($delta.files) files / $(Format-AiOsBytes -Bytes ([double]$delta.bytes)) / $($delta.commits) commits since last backup."
+    }
+}
+
+function Add-AiOsProductivityFields {
+    param(
+        [Parameter(Mandatory = $true)][object]$Target,
+        [Parameter(Mandatory = $true)][object]$ProductivityDelta
+    )
+
+    foreach ($property in $ProductivityDelta.PSObject.Properties) {
+        $Target | Add-Member -NotePropertyName $property.Name -NotePropertyValue $property.Value -Force
+    }
+}
+
 function New-AiOsBackupResult {
     param(
         [Parameter(Mandatory = $true)][string]$Status,
@@ -269,6 +431,9 @@ function Write-AiOsBackupManifest {
         [Parameter(Mandatory = $true)][object]$GitInfo,
         [Parameter(Mandatory = $true)][object]$GitStatus,
         [AllowEmptyCollection()][AllowNull()][object[]]$ProtectedLocks = @(),
+        [Parameter(Mandatory = $true)][object]$ProductivityDelta,
+        [int64]$CopiedBytes = 0,
+        [string]$CopiedHuman = "0.00 B",
         [Parameter(Mandatory = $true)][string]$Message
     )
 
@@ -293,8 +458,13 @@ function Write-AiOsBackupManifest {
         robocopy_log_path = $robocopyLogPath
         backup_lock_path = $backupLockPath
         protected_action_locks_found = $protectedLocksForManifest
+        copied_bytes = $CopiedBytes
+        copied_human = $CopiedHuman
         operator = "Anthony"
         script = $PSCommandPath
+    }
+    foreach ($property in $ProductivityDelta.PSObject.Properties) {
+        $manifest[$property.Name] = $property.Value
     }
 
     $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $Path -Encoding UTF8
@@ -359,6 +529,7 @@ try {
 
     $gitStatus = Get-AiOsGitStatus -Path $normalizedSource
     $gitInfo = Get-AiOsGitInfo -Path $normalizedSource
+    $productivityDelta = Get-AiOsBackupProductivityDelta -RepoRoot $normalizedSource -BackupRoot $normalizedBackupRoot -CurrentSnapshotPath $snapshotPath -GitInfo $gitInfo -ExcludedDirs $excludedDirs
     $protectedLocks = @(Get-AiOsProtectedActionLocks -RepoRoot $normalizedSource -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath)
     if ($protectedLocks.Count -gt 0) {
         throw "PROTECTED_ACTION_LOCK_EXISTS: $($protectedLocks.path -join ', ')"
@@ -394,10 +565,13 @@ try {
         $result | Add-Member -NotePropertyName planned_command -NotePropertyValue ($plannedCommand -join " ")
         $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
         $result | Add-Member -NotePropertyName dest_bytes -NotePropertyValue ([long]$destBytes)
+        $result | Add-Member -NotePropertyName copied_bytes -NotePropertyValue 0
+        $result | Add-Member -NotePropertyName copied_human -NotePropertyValue "pending (preview - robocopy not run)"
         $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
         $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytes)
         $result | Add-Member -NotePropertyName git_status_clean -NotePropertyValue ([bool]$gitStatus.is_clean)
         $result | Add-Member -NotePropertyName protected_action_lock_count -NotePropertyValue ([int]$protectedLocks.Count)
+        Add-AiOsProductivityFields -Target $result -ProductivityDelta $productivityDelta
         if ($OutputJson) {
             $result | ConvertTo-Json -Depth 6
         }
@@ -419,6 +593,17 @@ try {
             Write-Host "Copied this run:             pending (preview - robocopy not run)"
             Write-Host "Skipped (already current):   pending (preview - robocopy not run)"
             Write-Host "Produced this backup session: pending (preview - robocopy not run)"
+            Write-Host ""
+            Write-Host "Backup total copied: pending (preview - robocopy not run)"
+            Write-Host "Productivity delta since previous backup: $($productivityDelta.productivity_delta_files) files / $($productivityDelta.productivity_delta_human) / $($productivityDelta.productivity_delta_commits) commits"
+            if ($productivityDelta.productivity_delta_today_files -eq "UNKNOWN") {
+                Write-Host "Productivity delta today: UNKNOWN"
+            } else {
+                Write-Host "Productivity delta today: $($productivityDelta.productivity_delta_today_files) files / $($productivityDelta.productivity_delta_today_human)"
+            }
+            Write-Host "PR merges included: $($productivityDelta.productivity_delta_pr_merges)"
+            Write-Host "Runtime exclusion status: $($productivityDelta.runtime_exclusion_status)"
+            Write-Host $productivityDelta.productivity_delta_summary
             Write-Host ""
             Write-Host "Planned command:"
             Write-Host ($plannedCommand -join " ")
@@ -483,6 +668,18 @@ try {
         Write-Host "Skipped (already current):   $skippedCountText"
         Write-Host "Produced this backup session: $(Format-AiOsBytes -Bytes $copiedBytes)"
         Write-Host ""
+        $copiedHuman = Format-AiOsBytes -Bytes $copiedBytes
+        Write-Host "Backup total copied: $copiedHuman"
+        Write-Host "Productivity delta since previous backup: $($productivityDelta.productivity_delta_files) files / $($productivityDelta.productivity_delta_human) / $($productivityDelta.productivity_delta_commits) commits"
+        if ($productivityDelta.productivity_delta_today_files -eq "UNKNOWN") {
+            Write-Host "Productivity delta today: UNKNOWN"
+        } else {
+            Write-Host "Productivity delta today: $($productivityDelta.productivity_delta_today_files) files / $($productivityDelta.productivity_delta_today_human)"
+        }
+        Write-Host "PR merges included: $($productivityDelta.productivity_delta_pr_merges)"
+        Write-Host "Runtime exclusion status: $($productivityDelta.runtime_exclusion_status)"
+        Write-Host $productivityDelta.productivity_delta_summary
+        Write-Host ""
 
         $majorPaths = @(
             ".git",
@@ -510,7 +707,7 @@ try {
             $exitCode = 9
         }
 
-        Write-AiOsBackupManifest -Path $manifestPath -Status $manifestStatus -RobocopyExitCode $robocopyExitCode -GitInfo $gitInfo -GitStatus $gitStatus -ProtectedLocks $protectedLocks -Message $manifestMessage
+        Write-AiOsBackupManifest -Path $manifestPath -Status $manifestStatus -RobocopyExitCode $robocopyExitCode -GitInfo $gitInfo -GitStatus $gitStatus -ProtectedLocks $protectedLocks -ProductivityDelta $productivityDelta -CopiedBytes ([long]$copiedBytes) -CopiedHuman $copiedHuman -Message $manifestMessage
 
         $result = New-AiOsBackupResult -Status $manifestStatus -Message $manifestMessage -RobocopyExitCode $robocopyExitCode -ExitCode $exitCode
         $result | Add-Member -NotePropertyName source_bytes -NotePropertyValue ([long]$sourceBytes)
@@ -520,7 +717,8 @@ try {
         $result | Add-Member -NotePropertyName files_skipped -NotePropertyValue ([int]$counts.files_skipped)
         $result | Add-Member -NotePropertyName source_human -NotePropertyValue (Format-AiOsBytes -Bytes $sourceBytes)
         $result | Add-Member -NotePropertyName dest_human -NotePropertyValue (Format-AiOsBytes -Bytes $destBytesAfter)
-        $result | Add-Member -NotePropertyName copied_human -NotePropertyValue (Format-AiOsBytes -Bytes $copiedBytes)
+        $result | Add-Member -NotePropertyName copied_human -NotePropertyValue $copiedHuman
+        Add-AiOsProductivityFields -Target $result -ProductivityDelta $productivityDelta
 
         if ($OutputJson) {
             $result | ConvertTo-Json -Depth 6
