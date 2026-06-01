@@ -8,7 +8,7 @@ This folder is not for live trading, broker connections, OANDA access, API keys,
 
 ## Current Boundary
 
-Treat this folder as an active but unconsolidated orchestration workbench.
+Treat this folder as the approved canonical orchestration layer and an active but still unconsolidated orchestration workbench.
 
 Active areas that should be preserved while consolidation is planned:
 
@@ -34,7 +34,7 @@ See `docs/audits/orchestration-consolidation-plan.md` for the cleanup plan.
 
 ## Canonical Paths
 
-Display and status tools should prefer these active paths first:
+Display and status tools should prefer these approved active paths first:
 
 - worker registry: `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json`
 - worker profiles: `automation/orchestration/workers/AIOS_WORKER_PROFILES.json`
@@ -56,6 +56,16 @@ Legacy root fallback examples were archived after canonical paths became the pre
 - `archive/orchestration_legacy/root_examples/commit_package.example.json`
 
 Status and display scripts may still mention those filenames as optional compatibility labels, but canonical paths above are the active source of truth.
+
+## Current Safe Defaults
+
+- Cleanup is not approved from this README.
+- Old/example/reference files must not be moved until references are checked.
+- Runtime/generated state is protected evidence until a retention policy exists.
+- `automation/operator/` remains active launcher/legacy-mixed until dependency review.
+- Dashboard status remains fixture-driven until API migration to `services/orchestrator/` is approved.
+- Trading Lab package ownership remains REVIEW_REQUIRED; both `apps/trading_lab/trading_lab/` and `aios/modules/trader/` stay active.
+- `docs/AI_OS/**` remains reference/source material until file-by-file classification.
 
 ## Local-First Orchestration Primitives
 
