@@ -34,6 +34,10 @@ If `provider` is omitted, the worker defaults it from `worker`. Current built-in
 
 Unknown providers, missing provider commands, or provider commands containing blocked shell metacharacters fail safely into `relay/error/` before any CLI call.
 
+
+### Worker Cost Ledger
+
+Successful APPLY worker invocations append `control/mode/cost_ledger.jsonl` after the provider command returns. The worker uses `AIOS_CYCLE_ID` when present and falls back to a UTC date cycle id when it is not set. If provider output does not expose parseable cost or token usage, the worker records a conservative nonzero estimate with `estimated=true` and `estimate_reason=fallback_nonzero_worker_invocation` so the existing cost ceiling can still fail closed.
 ### Worker Safety Shields
 
 The worker now starts with a local tool preflight for `codex`, `claude`, `gh`, and `git`. Missing tools or version-check failures log `PREFLIGHT_FAILED` and exit code `2` before packet execution.
