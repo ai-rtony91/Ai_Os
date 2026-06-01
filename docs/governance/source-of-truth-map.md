@@ -190,6 +190,24 @@ Default classification:
 
 Do not blindly replace CLEAN-era names with current AI_OS authority language. Evaluate each file as source material, then merge, archive, or remove only through approved cleanup batches.
 
+## Duplicate-brain reference markings
+
+These markings reflect the current duplicate-brain validator state after active dependency cleanup. They do not approve deletion, archive moves, JSON mutation, or runtime cleanup.
+
+| Path or pattern | Current marking | Rule |
+|---|---|---|
+| `docs/AI_OS/**` | MARK_REFERENCE_ONLY / NEEDS_HUMAN_DECISION | Source/reference material pending file-by-file merge/archive classification. It is not active authority unless a specific rule is promoted into canonical docs. |
+| `work_packets/**` | KEEP_PROTECTED_EVIDENCE / NEEDS_HUMAN_DECISION | Root work packets are not active queue authority. They require a retention or migration decision before archive. |
+| `approvals/**` | KEEP_PROTECTED_EVIDENCE / NEEDS_HUMAN_DECISION | Root approvals are not active approval authority. They require a retention or migration decision before archive. |
+| `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` | KEEP_PROTECTED_EVIDENCE / FUTURE_ARCHIVE_CANDIDATE | Compatibility evidence only until adapter-first registry use is fully proven and retirement is approved. |
+| `automation/orchestration/*.example.json` | FUTURE_ARCHIVE_CANDIDATE | Example files require fixture ownership review before archive. |
+
+Current delete readiness:
+
+- `ACTIVE_DEPENDENCY` count is 0.
+- Safe delete candidate count is 0.
+- No old-brain path is approved for deletion by this map.
+
 ## What files should not be treated as active authority
 
 | Path pattern | Classification | Reason |
