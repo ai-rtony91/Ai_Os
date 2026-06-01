@@ -192,6 +192,38 @@ files.
 `RetentionPreview` reports cleanup candidates only. It must print
 `RETENTION_PREVIEW_ONLY` and must not delete anything.
 
+## Default Post-Packet Savepoint Rule
+
+When a packet or packet batch is fully merged, local `main` is synced, and
+`git status --short --branch` is clean, AI_OS should run a ManifestOnly
+savepoint directly. Do not re-audit the full backup system every time. Do not
+ask about Full backup unless the operator explicitly requests Full backup. Do
+not copy the full repo. ManifestOnly is the default closeout savepoint.
+
+Standard compact command pattern:
+
+```powershell
+scripts/backup/Start-AiOsT9SnapshotBackup.ps1 -BackupMode ManifestOnly -OutputJson
+```
+
+Short operator report format:
+
+```text
+APPLIED?:
+BACKUP_MODE:
+MANIFEST_CREATED?:
+MANIFEST_PATH:
+COPIED_HUMAN:
+FILE_COUNT_COPIED:
+ROBOCOPY_RAN?:
+HEAD_SHA:
+FINAL_GIT_STATUS:
+SAFE_NEXT_ACTION:
+```
+
+Full backup remains separate and requires explicit operator wording: full
+backup.
+
 ## Backup-Session Data-Size Telemetry
 
 Every backup run must report data-size telemetry so the operator can confirm
