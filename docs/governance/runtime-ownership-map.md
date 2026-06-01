@@ -177,6 +177,15 @@ Looks important but requires classification:
 - `approvals/` top-level folder
 - `logs/`, `validation/`, `uploads/`
 
+Duplicate-brain retention markings:
+
+- `docs/AI_OS/**` is source/reference material pending file-by-file merge/archive classification; do not treat it as active authority by default.
+- Root `work_packets/**` is not active queue authority; decide retention or migration before any archive move.
+- Root `approvals/**` is not active approval authority; decide retention or migration before any archive move.
+- `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` is compatibility evidence until adapter-first use is fully proven and retirement is approved.
+- `automation/orchestration/*.example.json` files require fixture ownership review before archive.
+- Current duplicate-brain delete readiness has 0 safe delete candidates.
+
 Historical/reference by default:
 
 - `archive/`

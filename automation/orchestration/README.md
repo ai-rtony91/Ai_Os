@@ -66,6 +66,11 @@ Status and display scripts may still mention those filenames as optional compati
 - Dashboard status remains fixture-driven until API migration to `services/orchestrator/` is approved.
 - Trading Lab package ownership remains REVIEW_REQUIRED; both `apps/trading_lab/trading_lab/` and `aios/modules/trader/` stay active.
 - `docs/AI_OS/**` remains reference/source material until file-by-file classification.
+- Root `work_packets/**` is not active queue authority; it needs a retention or migration decision before archive.
+- Root `approvals/**` is not active approval authority; it needs a retention or migration decision before archive.
+- `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` is compatibility evidence until adapter-first use is proven and retirement is approved.
+- `automation/orchestration/*.example.json` files require fixture ownership review before archive.
+- Current duplicate-brain cleanup evidence identifies 0 safe delete candidates.
 
 ## Local-First Orchestration Primitives
 
