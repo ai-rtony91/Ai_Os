@@ -1,6 +1,8 @@
 {
   "approval_gate_id": "APPLY_APPROVAL_GATE_001",
-  "packet_id": "PENDING_ASSIGNMENT",
+  "packet_id": "phase-17-work-packet-router-state-machine",
+  "bound_by": "AIOS-P23",
+  "bound_at": "2026-06-01T15:12:45Z",
   "requested_mode": "APPLY",
   "approved_mode": "DRY_RUN_ONLY",
   "approval_status": "pending_review",
