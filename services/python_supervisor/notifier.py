@@ -1,13 +1,15 @@
 """AI_OS local SOS notifier.
 
-Default channel is file only. Email and push channels are intentionally disabled
-until Anthony supplies local environment variables and approves that gate.
+Default channel is file only. Email, push, and Telegram live channels are
+intentionally disabled until Anthony supplies local credentials and approves
+that gate.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +17,8 @@ from typing import Any
 
 
 BLOCKING_STATUSES = {"BLOCKED", "NEEDS_APPROVAL"}
+SOS_WAKE_STATUSES = {"BLOCKED"}
+TELEGRAM_ENV_VARS = ("AIOS_TG_BOT_TOKEN", "AIOS_TG_CHAT_ID")
 
 
 def repo_root() -> Path:
@@ -80,6 +84,60 @@ def render_sos(state: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def telegram_env_presence() -> dict[str, bool]:
+    return {name: name in os.environ for name in TELEGRAM_ENV_VARS}
+
+
+def telegram_config_status() -> str:
+    presence = telegram_env_presence()
+    if all(presence.values()):
+        return "configured"
+    return "missing"
+
+
+def render_telegram_sos_preview(state: dict[str, Any]) -> str:
+    status = status_from_state(state)
+    summary = str(state.get("plain_summary") or "No summary available.")
+    next_action = str(state.get("next_safe_action") or "Review bridge state before taking action.")
+    generated = utc_now()
+    return "\n".join(
+        [
+            "#AIOS_SOS AI_OS BLOCKED",
+            "severity=CRITICAL",
+            f"status={status}",
+            f"generated_utc={generated}",
+            f"bridge_generated_at={state.get('generated_at', 'UNKNOWN')}",
+            f"summary={summary}",
+            f"next_safe_action={next_action}",
+            "human_action=Wake and inspect AI_OS dashboard/SOS outbox.",
+        ]
+    )
+
+
+def report_telegram_dry_run(state: dict[str, Any]) -> int:
+    status = status_from_state(state)
+    config_status = telegram_config_status()
+    print("STATUS=DRY_RUN_TELEGRAM_SCAFFOLD")
+    print(f"BRIDGE_STATUS={status}")
+    print(f"TELEGRAM_CONFIG={config_status}")
+    for name, present in telegram_env_presence().items():
+        value_status = "present" if present else "missing"
+        print(f"{name}={value_status}")
+    print("LIVE_SEND=BLOCKED")
+    print("SECRET_VALUES_PRINTED=NO")
+
+    if status not in SOS_WAKE_STATUSES:
+        print("WAKE_CLASS=NO_WAKE")
+        print("REASON=non-SOS status must not wake the Human Owner")
+        return 0
+
+    print("WAKE_CLASS=SOS")
+    print("MESSAGE_PREVIEW_BEGIN")
+    print(render_telegram_sos_preview(state))
+    print("MESSAGE_PREVIEW_END")
+    return 0
+
+
 def write_file_channel(root: Path, state: dict[str, Any]) -> Path:
     dispatcher = root / "automation" / "orchestration" / "notifications" / "Send-AiOsNotification.ps1"
     message = render_sos(state)
@@ -116,7 +174,7 @@ def write_file_channel(root: Path, state: dict[str, Any]) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="AI_OS file-channel SOS notifier")
-    parser.add_argument("--channel", default="file", choices=["file", "email", "push"])
+    parser.add_argument("--channel", default="file", choices=["file", "email", "push", "telegram"])
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--state", default="telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json")
     args = parser.parse_args()
@@ -125,7 +183,7 @@ def main() -> int:
     state_path = root / args.state
     last_path = root / "telemetry" / "night_supervisor" / "last_notified.json"
 
-    if args.channel != "file":
+    if args.channel in {"email", "push"}:
         print("STATUS=BLOCKED")
         print("REASON=non-file channels require Anthony-managed environment secrets and are disabled")
         return 2
@@ -139,6 +197,17 @@ def main() -> int:
     status = status_from_state(state)
     key = notification_key(state)
     previous = read_json(last_path) if last_path.exists() else {}
+
+    if args.channel == "telegram":
+        if args.apply:
+            print("STATUS=BLOCKED")
+            print("BRIDGE_STATUS=" + status)
+            print("CHANNEL=telegram")
+            print("LIVE_SEND=BLOCKED")
+            print("REASON=Telegram live send requires a separate explicit approved live-send flag")
+            print("SECRET_VALUES_PRINTED=NO")
+            return 2
+        return report_telegram_dry_run(state)
 
     if status not in BLOCKING_STATUSES:
         if args.apply:
