@@ -29,6 +29,8 @@ $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
 $relayRoot = Join-Path $repoRoot "relay"
 $logPath = Join-Path $relayRoot "logs\night_cycle.log"
 $cycleMarkerPath = Join-Path $repoRoot "control\cycle\last_marker.json"
+$globalStopPath = Join-Path $repoRoot "control\self_continuation\STOP"
+$globalStopRel = "control/self_continuation/STOP"
 $script:AiOsNextIntervalSeconds = $IntervalSeconds
 $script:AiOsCycleId = [guid]::NewGuid().ToString()
 $script:AiOsResumeActive = [string]::IsNullOrWhiteSpace($ResumeFrom)
@@ -121,6 +123,20 @@ function Update-AiOsDashboardState {
     if (Test-Path -LiteralPath $dashboardState -PathType Leaf) {
         & $dashboardState | Out-Null
     }
+}
+
+function Stop-AiOsNightCycleIfRequested {
+    if (-not (Test-Path -LiteralPath $globalStopPath -PathType Leaf)) {
+        return
+    }
+
+    Write-AiOsNightCycleLog -Message ("STOPPED kill_switch={0}" -f $globalStopRel)
+    $existing = Read-CycleMarker
+    if ($null -ne $existing -and $existing.PSObject.Properties.Name -contains "cycle_in_progress" -and [bool]$existing.cycle_in_progress) {
+        Write-CycleMarker -State "CYCLE_COMPLETE"
+        Update-AiOsDashboardState
+    }
+    exit 0
 }
 
 function Test-AiOsResumeSkip {
@@ -286,8 +302,11 @@ function Invoke-AiOsNightCycleOnce {
 }
 
 do {
+    Stop-AiOsNightCycleIfRequested
     Invoke-AiOsNightCycleOnce
     if ($Watch) {
+        Stop-AiOsNightCycleIfRequested
         Start-Sleep -Seconds $script:AiOsNextIntervalSeconds
+        Stop-AiOsNightCycleIfRequested
     }
 } while ($Watch)
