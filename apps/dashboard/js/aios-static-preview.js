@@ -255,7 +255,7 @@ const _workspaceDetailConfig = {
     summary: "Paper-only workspace for signal intake, latency, regime, risk gate, paper results, scorecard, validator status, and next action.",
     overview: "Review the Trading Lab flow. This workspace uses mock data only and cannot place trades.",
     items: [
-      detailItem("trading-bot", "Trading Lab Workspace", "MOCK ONLY", "A paper-only command workspace for signal review, latency notes, regime tags, risk gate status, paper result, scorecard, validator status, and the next safe action.", "MOCK ONLY. PAPER ONLY. Live Execution: BLOCKED. Broker: BLOCKED.", ["Review mock signal intake.", "Check risk gate stays blocked.", "Use Next Action for the safest follow-up."]),
+      detailItem("trading-bot", "Trading Lab Workspace", "PAPER TRADING SIMULATION", "A paper-only command workspace for signal review, latency notes, regime tags, risk gate status, paper result, scorecard, validator status, and the next safe action.", "PAPER TRADING SIMULATION. PAPER ONLY. Live Execution: BLOCKED. Broker: BLOCKED.", ["Review paper signal intake.", "Check risk gate stays blocked.", "Use Next Action for the safest follow-up."]),
       detailItem("strategy-builder", "Strategy Builder", "STRATEGY", "Draft strategy ideas, assumptions, source evidence, and review notes.", "No live trading logic is enabled.", ["Describe market idea.", "Mark assumptions.", "Require backtest evidence."]),
       detailItem("signal-rules", "Signal Rules", "SIGNALS", "Plan entry, exit, filter, and invalidation rules without execution.", "Signals do not connect to any broker.", ["Entry rules.", "Exit rules.", "Invalidation rules."]),
       detailItem("backtest-files", "Backtest Files", "FILES", "Plan future approved backtest file references and result review.", "No file writer or file sync runs here.", ["Source files later.", "Result summaries.", "Review gaps."]),
@@ -406,7 +406,7 @@ const legacyWorkspaceRailMap = {
 const assistantModes = {
   "tour-guide": {
     label: "Tour Guide",
-    helper: "Explains the dashboard, buttons, rails, and workflows. Mock-only. Backend not connected.",
+    helper: "Explains the dashboard, buttons, rails, and workflows. Preview only. Backend not connected.",
     placeholder: "Ask how to use this AI_OS screen..."
   },
   "work-table-builder": {
@@ -877,7 +877,7 @@ function renderDetailPanel(workspace, item) {
   if (assistantOutput) assistantOutput.textContent = item.body;
   if (detailNote) detailNote.textContent = item.note;
   if (consoleOutput) {
-    consoleOutput.textContent = `Ai_Os> ${workspace.title}\nAi_Os> ${item.title}\nAi_Os> Static mock-only detail panel`;
+    consoleOutput.textContent = `Ai_Os> ${workspace.title}\nAi_Os> ${item.title}\nAi_Os> Static preview detail panel`;
   }
   if (detailList) {
     detailList.replaceChildren(...item.checklist.map((entry) => {
@@ -2015,7 +2015,7 @@ function createExternalHandoffCard(panelData = {}) {
   const title = document.createElement("strong");
   title.textContent = panelData.title || "External Handoff Panel";
   const status = document.createElement("span");
-  status.textContent = panelData.status || "MOCK ONLY";
+  status.textContent = panelData.status || "PAPER TRADING SIMULATION";
   head.append(title, status, createProgressBadge("Validation", panelData, "Pending validation"));
 
   const summary = document.createElement("p");
@@ -2049,7 +2049,7 @@ function renderExternalHandoffPanels(handoffData) {
   const title = document.createElement("strong");
   title.textContent = handoffData.title || "Paper Signal Handoff Path";
   const badge = document.createElement("span");
-  badge.textContent = handoffData.status || handoffData.mode || "MOCK ONLY";
+  badge.textContent = handoffData.status || handoffData.mode || "PAPER TRADING SIMULATION";
   const progress = createProgressBadge("Paper workflow", handoffData, "Pending validation");
   const summary = document.createElement("p");
   summary.textContent = handoffData.summary || "TradingView signal idea -> AI_OS validation -> TradersPost paper route preview.";
@@ -2927,7 +2927,7 @@ async function renderTradingLabNextActionCard() {
   } catch {
     renderTradingLabNextActionData({
       title: "Trading Lab Workspace",
-      badge: "MOCK ONLY",
+      badge: "PAPER TRADING SIMULATION",
       mode: "ACTIVE",
       paper_mode: "ACTIVE",
       live_execution_status: "BLOCKED",
@@ -3829,7 +3829,7 @@ function renderWorkTableAiMeta(data) {
   });
 
   if (workTableAiMode) {
-    workTableAiMode.textContent = data.mode || "LOCAL MOCK ONLY";
+    workTableAiMode.textContent = data.mode || "LOCAL PREVIEW ONLY";
   }
 }
 
