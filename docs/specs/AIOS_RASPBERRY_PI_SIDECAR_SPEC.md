@@ -1,20 +1,22 @@
-# AI_OS Raspberry Pi 5 / PiCar-X Sidecar Spec
+# AI_OS Robot Helper / PiCar-X AI_OS Assistant Spec
 
 Status: spec-only planning
 
-Packet: `AIOS-24H-LOOP-CODEX5-PI5-PICAR-SIDECAR-SPEC-APPLY-001`
+Packet: original CODEX 5 PiCar-X planning APPLY packet
 
 ## Purpose
 
-This document defines the first safe role boundary for a Raspberry Pi 5 / PiCar-X sidecar that supports AI_OS overnight and morning operation without moving AI_OS core execution off the Omen workstation.
+This document defines the first safe role boundary for an AI_OS Robot Helper / PiCar-X AI_OS Assistant that supports AI_OS overnight and morning operation without moving AI_OS core execution off the Omen workstation.
 
-The sidecar is a local wake, watch, alert, and presence surface. It is not a second AI_OS runtime, not a repo worker, not an approval authority, and not a trading system.
+Technical definition: `sidecar` means an auxiliary helper device that watches, wakes, alerts, and presents status while the Omen remains the AI_OS command machine.
+
+The AI_OS Robot Helper is a local wake, watch, alert, and presence surface. It is not a second AI_OS runtime, not a repo worker, not an approval authority, and not a trading system.
 
 ## Operating Principle
 
 The Omen remains the command machine.
 
-The Pi sidecar may help the operator notice, wake, and inspect AI_OS state, but it must not become a parallel source of truth or execution lane. The sidecar should consume approved status/brief evidence and present it through low-friction physical outputs such as voice, display, LED, or PiCar-X movement cues.
+The PiCar-X AI_OS Assistant may help the operator notice, wake, and inspect AI_OS state, but it must not become a parallel source of truth or execution lane. The AI_OS Robot Helper should consume approved status/brief evidence and present it through low-friction physical outputs such as voice, display, LED, or PiCar-X movement cues.
 
 ## Current Authority Boundary
 
@@ -25,7 +27,7 @@ Authoritative AI_OS execution remains on:
 - active local repo: `C:\Dev\Ai.Os`
 - primary machine: Omen workstation
 
-The Pi sidecar must treat the Omen and the repo as upstream authority. If the Omen is offline or unreachable, the sidecar reports that condition instead of trying to replace the Omen.
+The PiCar-X AI_OS Assistant must treat the Omen and the repo as upstream authority. If the Omen is offline or unreachable, the AI_OS Robot Helper reports that condition instead of trying to replace the Omen.
 
 ## Actual Robot Hardware
 
@@ -42,7 +44,7 @@ The planned robot hardware is:
   - Raspberry Pi 3B
   - Raspberry Pi Zero 2W
 
-The kit is treated as a sidecar hardware platform only. It may support future physical alert, camera, sensor, voice, and robot-presence workflows after separate approval. It does not change AI_OS repo, runtime, approval, scheduler, credential, or trading authority.
+The kit is treated as an AI_OS Robot Helper hardware platform only. It may support future physical alert, camera, sensor, voice, and robot-presence workflows after separate approval. It does not change AI_OS repo, runtime, approval, scheduler, credential, or trading authority.
 
 Known kit capabilities and components:
 
@@ -59,9 +61,9 @@ Known kit capabilities and components:
 - Python support.
 - Scratch support.
 
-## Sidecar Responsibilities
+## AI_OS Robot Helper Responsibilities
 
-The Raspberry Pi 5 / PiCar-X sidecar may be designed to perform these responsibilities after separate implementation approval:
+The Raspberry Pi 5 / PiCar-X AI_OS Assistant may be designed to perform these responsibilities after separate implementation approval:
 
 1. Wake-on-LAN assist:
    - send an approved Wake-on-LAN packet to the Omen.
@@ -94,7 +96,7 @@ The Raspberry Pi 5 / PiCar-X sidecar may be designed to perform these responsibi
 
 ## Blocked Responsibilities
 
-The Pi sidecar must not:
+The PiCar-X AI_OS Assistant must not:
 
 - run AI_OS repo commits, merges, pushes, pull requests, branch changes, staging, reset, clean, or GitHub automation.
 - mutate work packets, approvals, queues, locks, validator state, runtime state, telemetry, or governance authority.
@@ -111,14 +113,14 @@ The Pi sidecar must not:
 The proposed WOL flow is:
 
 1. Trigger source:
-   - operator presses a physical or local sidecar control, or
+   - operator presses a physical or local AI_OS Robot Helper control, or
    - an approved future schedule/trigger requests Omen wake, or
    - a future approved Tasker/Telegram notification flow requests wake.
 
 2. Preflight:
    - verify WOL is enabled in the Omen BIOS/UEFI and network adapter settings.
    - verify the Omen MAC address and LAN broadcast target are configured outside the repo or in an approved non-secret local config.
-   - verify the trigger is permitted by the current sidecar mode.
+   - verify the trigger is permitted by the current AI_OS Robot Helper mode.
 
 3. Wake attempt:
    - send one WOL packet.
@@ -143,7 +145,7 @@ Rules:
 
 - Omen awake does not mean AI_OS may run protected actions.
 - Omen awake does not approve runtime loops, commits, pushes, merges, GitHub actions, trading actions, or scheduler work.
-- The sidecar should avoid forcing a bright monitor state during dark-room operation.
+- The AI_OS Robot Helper should avoid forcing a bright monitor state during dark-room operation.
 - Routine successful status should stay quiet.
 - Wake-worthy status should be limited to `BLOCKED`, `NEEDS_APPROVAL`, `OMEN_WAKE_FAILED`, or another separately approved urgent class.
 - The Pi should prefer dim display, LED, or short voice output before escalating to phone/Telegram/Tasker channels.
@@ -153,7 +155,7 @@ Rules:
 The proposed morning notification flow is:
 
 1. Omen produces or exposes approved morning status/brief evidence.
-2. Pi sidecar reads only the approved status/brief surface.
+2. PiCar-X AI_OS Assistant reads only the approved status/brief surface.
 3. Pi renders a compact state:
    - `STATUS`
    - `WHAT CHANGED`
@@ -170,7 +172,7 @@ Morning notification must remain report/display behavior. It must not approve or
 
 ## Tasker And Telegram Compatibility
 
-Tasker and Telegram are governed by the existing API and notification safety boundaries. The sidecar spec does not approve live Telegram, Tasker, bot token, chat ID, webhook, phone automation, or two-way approval execution.
+Tasker and Telegram are governed by the existing API and notification safety boundaries. The AI_OS Robot Helper spec does not approve live Telegram, Tasker, bot token, chat ID, webhook, phone automation, or two-way approval execution.
 
 Compatible future message classes:
 
@@ -189,12 +191,12 @@ Compatibility rules:
 - Telegram starts notification-only unless a separate approval-gated executor design is approved.
 - Phone-side automation must be configured by the operator, not Codex.
 - Secrets must stay outside the repo and outside prompts.
-- Sidecar message payloads must avoid secret values and protected-action commands.
+- AI_OS Robot Helper message payloads must avoid secret values and protected-action commands.
 - Any two-way approval bridge must preserve the existing approval boundary: Human Owner approval is required, validator output is evidence only, and protected actions remain separately gated.
 
 ## Watchdog Model
 
-The sidecar watchdog should answer only these questions:
+The AI_OS Robot Helper watchdog should answer only these questions:
 
 - Is the Omen reachable?
 - Is AI_OS status evidence available?
@@ -215,7 +217,7 @@ If evidence is missing or stale, the watchdog reports `UNKNOWN` or `STALE` and s
 
 ## Stop Conditions
 
-The Pi sidecar lane must stop when:
+The PiCar-X AI_OS Assistant lane must stop when:
 
 - Omen identity, MAC address, or LAN target is unknown.
 - WOL enablement has not been manually verified.
@@ -231,7 +233,7 @@ The Pi sidecar lane must stop when:
 
 Each future phase requires its own packet, allowed paths, validator chain, and Human Owner approval:
 
-1. Sidecar topology spec update:
+1. AI_OS Robot Helper topology spec update:
    - document exact local network assumptions and operator-visible success conditions.
 
 2. Local config design:
@@ -253,7 +255,7 @@ Each future phase requires its own packet, allowed paths, validator chain, and H
    - follow existing notification bridge operator steps and API integration safety workflow.
 
 8. Scheduler or persistence review:
-   - separate high-risk packet only after sidecar behavior is proven manually.
+   - separate high-risk packet only after AI_OS Robot Helper behavior is proven manually.
 
 ## Explicit Non-Goals
 
@@ -269,7 +271,7 @@ Each future phase requires its own packet, allowed paths, validator chain, and H
 
 ## Operator-Visible Success Condition
 
-The sidecar lane is successful when a future approved implementation lets the operator see or hear this kind of compact status without waking the Omen display:
+The PiCar-X AI_OS Assistant lane is successful when a future approved implementation lets the operator see or hear this kind of compact status without waking the Omen display:
 
 ```text
 AI_OS STATUS: NEEDS_APPROVAL
@@ -278,7 +280,7 @@ MORNING BRIEF: READY
 NEXT SAFE ACTION: Review approval inbox from Omen main control.
 ```
 
-The sidecar is not successful merely because a process runs. It is successful only when the operator can safely understand whether the Omen is awake, whether AI_OS needs attention, and what the next safe human action is.
+The AI_OS Robot Helper is not successful merely because a process runs. It is successful only when the operator can safely understand whether the Omen is awake, whether AI_OS needs attention, and what the next safe human action is.
 
 ## References
 
