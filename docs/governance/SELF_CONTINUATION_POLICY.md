@@ -14,16 +14,29 @@ control/self_continuation/BACKLOG.json
 
 It must not invent goals from open-ended reasoning, logs, chat history, telemetry, or model judgment. If a goal is not in the backlog, it is out of scope.
 
+## Gate States
+
+Self-continuation reports one of these gate states:
+
+- `PASS_CLEAN`: latest cycle is clean enough to propose one approval item.
+- `SUPERVISED_BACKLOG`: validators and QA are safe, but human approval or expected supervised review is still pending.
+- `TRUE_BLOCKED`: safety, scheduler, credential, trading, git write, broker, OANDA, secret, API-key, malformed, missing, or ambiguous evidence blocks progress.
+- `FAILED_VALIDATION`: validator, parse, integrity, or QA evidence failed.
+- `NOOP`: no eligible backlog goal exists.
+- `STOPPED`: kill switch, disabled backlog, missing required state, or an explicit stop condition halted the controller.
+
 ## Clean-Cycle Gate
 
-The controller may propose a next goal only when the latest cycle state is clean:
+The controller may propose a next goal only when the latest cycle state is `PASS_CLEAN`:
 
 - supervisor status is `PASS` or `CLEAN`
 - blocked count is zero
 - approval-needed count is zero
 - must-see entries are empty
 
-If the latest state is `BLOCKED`, `NEEDS_APPROVAL`, `WARN`, missing, stale, malformed, or ambiguous, the controller must stop and write nothing.
+`NEEDS_APPROVAL` or approval-needed backlog is `SUPERVISED_BACKLOG` when validator and QA evidence are safe and no true blocker is present. This state is expected in supervised mode. It still prevents self-continuation from writing an approval item, but it is not treated as a safety failure.
+
+If the latest state is `BLOCKED`, `WARN`, missing, stale, malformed, ambiguous, or contains true blocker evidence, the controller must classify it as `TRUE_BLOCKED` or `STOPPED` and write nothing. If validator or QA evidence failed, the controller must classify it as `FAILED_VALIDATION` and write nothing.
 
 ## Proposal Gate
 

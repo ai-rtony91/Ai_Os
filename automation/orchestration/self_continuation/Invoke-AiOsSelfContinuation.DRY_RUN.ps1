@@ -84,23 +84,143 @@ function Get-MustSeeCount {
     return 1
 }
 
-function Test-CycleClean {
+function Test-AnyTruthyValue {
+    param(
+        $Object,
+        [string[]]$Names
+    )
+
+    foreach ($name in $Names) {
+        if ($Object.PSObject.Properties.Name -contains $name) {
+            $value = $Object.$name
+            if ($null -eq $value) { continue }
+            if ($value -is [bool]) { if ($value) { return $true } }
+            elseif ($value -is [string]) {
+                if ($value.Trim().ToLowerInvariant() -in @("true", "yes", "1")) { return $true }
+            }
+        }
+    }
+    return $false
+}
+
+function Get-AnyStatusValue {
+    param(
+        $Object,
+        [string[]]$Names
+    )
+
+    foreach ($name in $Names) {
+        if ($Object.PSObject.Properties.Name -contains $name) {
+            $value = [string]$Object.$name
+            if (-not [string]::IsNullOrWhiteSpace($value)) {
+                return $value.ToUpperInvariant()
+            }
+        }
+    }
+    return "UNKNOWN"
+}
+
+function Test-TrueBlockerEvidence {
+    param($BridgeState)
+
+    $blockedCapabilities = @()
+    if ($BridgeState.PSObject.Properties.Name -contains "authority_boundary" -and $null -ne $BridgeState.authority_boundary) {
+        if ($BridgeState.authority_boundary.PSObject.Properties.Name -contains "blocked_capabilities" -and $null -ne $BridgeState.authority_boundary.blocked_capabilities) {
+            $blockedCapabilities = @($BridgeState.authority_boundary.blocked_capabilities)
+        }
+    }
+
+    $trueBlockerTerms = @(
+        "scheduler",
+        "scheduled",
+        "credential",
+        "trading",
+        "broker",
+        "oanda",
+        "secret",
+        "api_key",
+        "api key",
+        "order",
+        "git",
+        "commit",
+        "push",
+        "merge"
+    )
+
+    foreach ($capability in $blockedCapabilities) {
+        $capabilityText = ([string]$capability).ToLowerInvariant()
+        foreach ($term in $trueBlockerTerms) {
+            if ($capabilityText.Contains($term)) { return $true }
+        }
+    }
+
+    $evidenceSets = @()
+    foreach ($name in @("relay_items_seen", "raw_evidence")) {
+        if ($BridgeState.PSObject.Properties.Name -contains $name -and $null -ne $BridgeState.$name) {
+            $evidenceSets += @($BridgeState.$name)
+        }
+    }
+
+    foreach ($item in $evidenceSets) {
+        $itemStatus = Get-AnyStatusValue -Object $item -Names @("status")
+        $category = ""
+        $sourcePath = ""
+        $summary = ""
+        if ($item.PSObject.Properties.Name -contains "category") { $category = [string]$item.category }
+        if ($item.PSObject.Properties.Name -contains "evidence_type") { $category = [string]$item.evidence_type }
+        if ($item.PSObject.Properties.Name -contains "source_path") { $sourcePath = [string]$item.source_path }
+        if ($item.PSObject.Properties.Name -contains "summary") { $summary = [string]$item.summary }
+
+        if ($itemStatus -eq "BLOCKED" -or $category -eq "blocked_action") {
+            $text = ("$category $sourcePath $summary").ToLowerInvariant()
+            foreach ($term in $trueBlockerTerms) {
+                if ($text.Contains($term)) { return $true }
+            }
+        }
+    }
+
+    return $false
+}
+
+function Test-CycleGate {
     param($BridgeState)
 
     $status = Get-StatusValue -BridgeState $BridgeState
+    $validatorStatus = Get-AnyStatusValue -Object $BridgeState -Names @("validator_status")
+    $qaStatus = Get-AnyStatusValue -Object $BridgeState -Names @("qa_status")
     $approvalCount = Get-CountValue -Object $BridgeState -Names @("approval_needed_count", "approvals_needed", "waiting_approval_count")
     $blockedCount = Get-CountValue -Object $BridgeState -Names @("blocked_count", "blocker_count")
     $mustSeeCount = Get-MustSeeCount -BridgeState $BridgeState
+    $approvalRequired = Test-AnyTruthyValue -Object $BridgeState -Names @("approval_required")
+    $trueBlockerEvidence = Test-TrueBlockerEvidence -BridgeState $BridgeState
 
     $cleanStatuses = @("PASS", "CLEAN")
     $isClean = ($cleanStatuses -contains $status) -and $approvalCount -eq 0 -and $blockedCount -eq 0 -and $mustSeeCount -eq 0
+    $hasApprovalBacklog = $approvalRequired -or $approvalCount -gt 0 -or $status -eq "NEEDS_APPROVAL"
+    $validationFailed = ($validatorStatus -eq "FAIL" -or $qaStatus -eq "FAIL")
+    $gateState = "TRUE_BLOCKED"
+
+    if ($validationFailed) {
+        $gateState = "FAILED_VALIDATION"
+    }
+    elseif ($isClean) {
+        $gateState = "PASS_CLEAN"
+    }
+    elseif ($hasApprovalBacklog -and -not $trueBlockerEvidence -and $blockedCount -eq 0) {
+        $gateState = "SUPERVISED_BACKLOG"
+    }
 
     [pscustomobject]@{
         IsClean = $isClean
+        GateState = $gateState
         Status = $status
+        ValidatorStatus = $validatorStatus
+        QaStatus = $qaStatus
+        ApprovalRequired = $approvalRequired
         ApprovalNeededCount = $approvalCount
         BlockedCount = $blockedCount
         MustSeeCount = $mustSeeCount
+        TrueBlockerEvidence = $trueBlockerEvidence
     }
 }
 
@@ -182,6 +302,7 @@ $approvalDir = Join-Path $repoRoot $approvalDirRel
 $result = [ordered]@{
     mode = if ($Apply) { "APPLY" } else { "DRY_RUN" }
     status = "UNKNOWN"
+    gate_state = "UNKNOWN"
     reason = $null
     cycle = $null
     selected_goal = $null
@@ -192,6 +313,7 @@ $result = [ordered]@{
 try {
     if (Test-Path -LiteralPath $stopPath) {
         $result.status = "STOPPED"
+        $result.gate_state = "STOPPED"
         $result.reason = "kill switch present: $stopRel"
         [pscustomobject]$result | ConvertTo-Json -Depth 8
         exit 0
@@ -199,6 +321,7 @@ try {
 
     if (-not (Test-Path -LiteralPath $backlogPath)) {
         $result.status = "STOPPED"
+        $result.gate_state = "STOPPED"
         $result.reason = "backlog missing: $backlogRel"
         [pscustomobject]$result | ConvertTo-Json -Depth 8
         exit 0
@@ -207,6 +330,7 @@ try {
     $backlog = Read-JsonFile -Path $backlogPath
     if ($backlog.PSObject.Properties.Name -notcontains "enabled" -or -not [bool]$backlog.enabled) {
         $result.status = "STOPPED"
+        $result.gate_state = "STOPPED"
         $result.reason = "backlog disabled"
         [pscustomobject]$result | ConvertTo-Json -Depth 8
         exit 0
@@ -214,17 +338,19 @@ try {
 
     if (-not (Test-Path -LiteralPath $bridgeStatePath -PathType Leaf)) {
         $result.status = "STOPPED"
+        $result.gate_state = "STOPPED"
         $result.reason = "bridge state missing: $bridgeStateRel"
         [pscustomobject]$result | ConvertTo-Json -Depth 8
         exit 0
     }
 
     $bridgeState = Read-JsonFile -Path $bridgeStatePath
-    $cycle = Test-CycleClean -BridgeState $bridgeState
+    $cycle = Test-CycleGate -BridgeState $bridgeState
     $result.cycle = $cycle
+    $result.gate_state = $cycle.GateState
 
     if (-not $cycle.IsClean) {
-        $result.status = "CYCLE_NOT_CLEAN"
+        $result.status = $cycle.GateState
         $result.reason = "latest cycle is $($cycle.Status); approvals=$($cycle.ApprovalNeededCount); blocked=$($cycle.BlockedCount); must_see=$($cycle.MustSeeCount)"
         [pscustomobject]$result | ConvertTo-Json -Depth 8
         exit 0
@@ -233,6 +359,7 @@ try {
     $candidate = Select-BacklogCandidate -Backlog $backlog
     if ($null -eq $candidate) {
         $result.status = "NO_ELIGIBLE_GOAL"
+        $result.gate_state = "NOOP"
         $result.reason = "no READY GREEN backlog candidate exists"
         [pscustomobject]$result | ConvertTo-Json -Depth 8
         exit 0
@@ -245,6 +372,7 @@ try {
     $approvalRel = ConvertTo-RelativePath -Root $repoRoot -Path $approvalFile
 
     $result.status = if ($Apply) { "APPROVAL_WRITTEN" } else { "DRY_RUN_READY" }
+    $result.gate_state = "PASS_CLEAN"
     $result.reason = "next goal is gated as an approval item; it is not written to relay/inbox"
     $result.selected_goal = [pscustomobject]@{
         id = [string]$candidate.id
@@ -266,6 +394,7 @@ try {
 }
 catch {
     $result.status = "FAILED"
+    $result.gate_state = "FAILED_VALIDATION"
     $result.reason = $_.Exception.Message
     [pscustomobject]$result | ConvertTo-Json -Depth 8
     exit 1
