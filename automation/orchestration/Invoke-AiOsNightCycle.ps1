@@ -19,7 +19,9 @@ param(
     [switch]$MorningBrief = $true,
     [string]$ResumeFrom = "",
     [ValidateRange(5, 86400)]
-    [int]$IntervalSeconds = 300
+    [int]$IntervalSeconds = 300,
+    [ValidateRange(1, 1000000)]
+    [int]$MaxCycles = 0
 )
 
 Set-StrictMode -Version Latest
@@ -33,6 +35,7 @@ $globalStopPath = Join-Path $repoRoot "control\self_continuation\STOP"
 $globalStopRel = "control/self_continuation/STOP"
 $script:AiOsNextIntervalSeconds = $IntervalSeconds
 $script:AiOsCycleId = [guid]::NewGuid().ToString()
+$script:AiOsCompletedCycleCount = 0
 $script:AiOsResumeActive = [string]::IsNullOrWhiteSpace($ResumeFrom)
 $script:AiOsPhaseNames = @(
     "hygiene",
@@ -304,6 +307,11 @@ function Invoke-AiOsNightCycleOnce {
 do {
     Stop-AiOsNightCycleIfRequested
     Invoke-AiOsNightCycleOnce
+    $script:AiOsCompletedCycleCount += 1
+    if ($Watch -and $MaxCycles -gt 0 -and $script:AiOsCompletedCycleCount -ge $MaxCycles) {
+        Write-AiOsNightCycleLog -Message ("WATCH COMPLETE cycles={0} max_cycles={1}" -f $script:AiOsCompletedCycleCount, $MaxCycles)
+        break
+    }
     if ($Watch) {
         Stop-AiOsNightCycleIfRequested
         Start-Sleep -Seconds $script:AiOsNextIntervalSeconds
