@@ -7,6 +7,12 @@ const runtimeStatePath = path.join(runtimeDir, "runtime_state.json");
 const runtimeHeartbeatPath = path.join(runtimeDir, "runtime_heartbeat.json");
 const runtimeProcessPath = path.join(runtimeDir, "runtime_process.json");
 const telemetryLedgerPath = path.join(repoRoot, "telemetry", "work_ledger.jsonl");
+const nightSupervisorLedgerPath = path.join(
+  repoRoot,
+  "telemetry",
+  "night_supervisor",
+  "night_ledger.jsonl"
+);
 const dispatcherQueuePath = path.join(
   repoRoot,
   "automation",
@@ -97,6 +103,66 @@ function countBy(items, key) {
 function parseTime(value) {
   const timestamp = Date.parse(value);
   return Number.isNaN(timestamp) ? null : timestamp;
+}
+
+function latestLedgerTimestamp(events) {
+  const timestamps = events
+    .map((event) => event?.ts || event?.timestamp_utc || event?.timestamp || event?.generatedAt)
+    .filter((value) => parseTime(value) !== null)
+    .sort();
+
+  return timestamps.at(-1) || null;
+}
+
+function ledgerStatus(ledger) {
+  if (!ledger.exists) {
+    return "MISSING";
+  }
+
+  if (ledger.invalidLineCount > 0) {
+    return "MIXED_OR_INVALID";
+  }
+
+  if (ledger.events.length === 0) {
+    return "EMPTY_OR_STALE";
+  }
+
+  return "HAS_EVENTS";
+}
+
+function getLedgerAuthority() {
+  const workLedger = readJsonLines(telemetryLedgerPath);
+  const nightLedger = readJsonLines(nightSupervisorLedgerPath);
+  const workLatest = latestLedgerTimestamp(workLedger.events);
+  const nightLatest = latestLedgerTimestamp(nightLedger.events);
+
+  return {
+    schema: "aios.ledger_authority_api.v1",
+    mode: "READ_ONLY",
+    workLedger: {
+      path: workLedger.path,
+      role: "GENERAL_WORK_TELEMETRY",
+      status: ledgerStatus(workLedger),
+      eventCount: workLedger.events.length,
+      invalidLineCount: workLedger.invalidLineCount,
+      latestEventAt: workLatest,
+      evidenceClass: workLatest ? "HISTORICAL_OR_CURRENT_BY_TIMESTAMP" : "STALE_OR_EMPTY"
+    },
+    nightSupervisorLedger: {
+      path: nightLedger.path,
+      role: "ACTIVE_NIGHT_RUNTIME_LEDGER",
+      status: ledgerStatus(nightLedger),
+      eventCount: nightLedger.events.length,
+      invalidLineCount: nightLedger.invalidLineCount,
+      latestEventAt: nightLatest,
+      evidenceClass: nightLatest ? "CURRENT_NIGHT_RUNTIME_EVIDENCE_BY_TIMESTAMP" : "MISSING_OR_STALE"
+    },
+    activeNightRuntimeLedgerPath: relativePath(nightSupervisorLedgerPath),
+    proofBoundary:
+      "Night ledger evidence proves Night Supervisor/Night Cycle activity only; productive autonomy requires a real GREEN task output plus truthful marker, validator, ledger, and report evidence.",
+    warning:
+      "Do not treat stale telemetry/work_ledger.jsonl as proof that no night runtime activity occurred."
+  };
 }
 
 function getProcessRunning(processInfo) {
@@ -216,6 +282,7 @@ function toAuditEntry(event) {
 function getAuditTimeline(options = {}) {
   const recent = Math.max(0, Number(options.recent || 0));
   const ledger = readJsonLines(telemetryLedgerPath);
+  const ledgerAuthority = getLedgerAuthority();
   let timeline = ledger.events
     .map(toAuditEntry)
     .sort((left, right) => String(left.ts || "").localeCompare(String(right.ts || "")));
@@ -230,6 +297,7 @@ function getAuditTimeline(options = {}) {
     ledgerPath: ledger.path,
     sourceEventCount: ledger.events.length,
     invalidLineCount: ledger.invalidLineCount,
+    ledgerAuthority,
     timeline,
     nextSafeAction: "Review blocked, failed, or pending approval events before APPLY, commit, or push."
   };
@@ -296,7 +364,8 @@ function getRuntimeHealth(options = {}) {
     telemetry: {
       ledgerPath: audit.ledgerPath,
       eventCount: audit.sourceEventCount,
-      invalidLineCount: audit.invalidLineCount
+      invalidLineCount: audit.invalidLineCount,
+      ledgerAuthority: audit.ledgerAuthority
     },
     nextSafeAction: problems.length > 0
       ? "Review health problems before runtime control, APPLY, commit, or push."
@@ -321,8 +390,10 @@ function getVisibilitySnapshot() {
       ledgerPath: audit.ledgerPath,
       sourceEventCount: audit.sourceEventCount,
       invalidLineCount: audit.invalidLineCount,
+      ledgerAuthority: audit.ledgerAuthority,
       recentTimeline: audit.timeline
     },
+    ledgerAuthority: audit.ledgerAuthority,
     controls: getControlSummary().controls,
     nextSafeAction: "Use this visibility snapshot for internal read-only consumers. No control action is exposed."
   };
@@ -350,5 +421,6 @@ module.exports = {
   getAuditTimeline,
   getRuntimeHealth,
   getVisibilitySnapshot,
+  getLedgerAuthority,
   getControlSummary
 };

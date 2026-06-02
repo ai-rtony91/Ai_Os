@@ -57,12 +57,50 @@ function normalizeApiAlert(problem, healthStatus) {
   };
 }
 
+function normalizeLedgerAuthority(value) {
+  const authority = asObject(value);
+  const workLedger = asObject(authority.workLedger);
+  const nightSupervisorLedger = asObject(authority.nightSupervisorLedger);
+
+  return {
+    schema: authority.schema ?? UNKNOWN,
+    mode: authority.mode ?? UNKNOWN,
+    workLedger: {
+      path: workLedger.path ?? "telemetry/work_ledger.jsonl",
+      role: workLedger.role ?? "GENERAL_WORK_TELEMETRY",
+      status: workLedger.status ?? UNKNOWN,
+      eventCount: workLedger.eventCount ?? UNKNOWN,
+      invalidLineCount: workLedger.invalidLineCount ?? UNKNOWN,
+      latestEventAt: workLedger.latestEventAt ?? null,
+      evidenceClass: workLedger.evidenceClass ?? UNKNOWN
+    },
+    nightSupervisorLedger: {
+      path: nightSupervisorLedger.path ?? "telemetry/night_supervisor/night_ledger.jsonl",
+      role: nightSupervisorLedger.role ?? "ACTIVE_NIGHT_RUNTIME_LEDGER",
+      status: nightSupervisorLedger.status ?? UNKNOWN,
+      eventCount: nightSupervisorLedger.eventCount ?? UNKNOWN,
+      invalidLineCount: nightSupervisorLedger.invalidLineCount ?? UNKNOWN,
+      latestEventAt: nightSupervisorLedger.latestEventAt ?? null,
+      evidenceClass: nightSupervisorLedger.evidenceClass ?? UNKNOWN
+    },
+    activeNightRuntimeLedgerPath:
+      authority.activeNightRuntimeLedgerPath ?? "telemetry/night_supervisor/night_ledger.jsonl",
+    proofBoundary:
+      authority.proofBoundary ??
+      "Night ledger evidence proves runtime activity only; productive autonomy needs real GREEN task output and validation.",
+    warning:
+      authority.warning ??
+      "Do not treat stale telemetry/work_ledger.jsonl as proof that no night runtime activity occurred."
+  };
+}
+
 function mapRuntimeVisibilityApiDisplayModel(input, sourceLabel) {
   const runtime = asObject(input.runtime);
   const health = asObject(input.health);
   const queue = asObject(input.queue);
   const countsByStatus = asObject(queue.countsByStatus);
   const audit = asObject(input.audit);
+  const ledgerAuthority = normalizeLedgerAuthority(input.ledgerAuthority ?? audit.ledgerAuthority);
   const recentEvents = asArray(audit.recentTimeline).map(normalizeApiTimelineEvent);
   const problems = asArray(health.problems);
   const healthStatus = health.health ?? UNKNOWN;
@@ -118,6 +156,7 @@ function mapRuntimeVisibilityApiDisplayModel(input, sourceLabel) {
       lastEventAt: latestEventTimestamp(recentEvents),
       recentEvents
     },
+    ledgerAuthority,
     executionLedger: {
       packetCount: UNKNOWN,
       approvalCount: UNKNOWN,
@@ -147,6 +186,7 @@ export function mapRuntimeVisibilityDisplayModel(data, options = {}) {
   const telemetry = asObject(input.telemetry);
   const audit = asObject(input.audit);
   const executionLedger = asObject(input.executionLedger);
+  const ledgerAuthority = normalizeLedgerAuthority(input.ledgerAuthority ?? audit.ledgerAuthority);
 
   return {
     schema: input.schema ?? UNKNOWN,
@@ -188,6 +228,7 @@ export function mapRuntimeVisibilityDisplayModel(data, options = {}) {
       lastEventAt: telemetry.lastEventAt ?? null,
       recentEvents: asArray(telemetry.recentEvents ?? audit.recentTimeline).map(copyObject)
     },
+    ledgerAuthority,
     executionLedger: {
       packetCount: executionLedger.packetCount ?? UNKNOWN,
       approvalCount: executionLedger.approvalCount ?? UNKNOWN,
