@@ -27,6 +27,38 @@ Authoritative AI_OS execution remains on:
 
 The Pi sidecar must treat the Omen and the repo as upstream authority. If the Omen is offline or unreachable, the sidecar reports that condition instead of trying to replace the Omen.
 
+## Actual Robot Hardware
+
+The planned robot hardware is:
+
+- product: SunFounder PiCar-X AI Video Robot Car Kit
+- ASIN: `B0CGLPF29H`
+- model: `PiCarX`
+- Raspberry Pi board included: no
+- compatible Raspberry Pi boards:
+  - Raspberry Pi 5
+  - Raspberry Pi 4
+  - Raspberry Pi 3B+
+  - Raspberry Pi 3B
+  - Raspberry Pi Zero 2W
+
+The kit is treated as a sidecar hardware platform only. It may support future physical alert, camera, sensor, voice, and robot-presence workflows after separate approval. It does not change AI_OS repo, runtime, approval, scheduler, credential, or trading authority.
+
+Known kit capabilities and components:
+
+- camera module for AI/video workflows.
+- ultrasonic sensor for obstacle distance sensing.
+- grayscale sensors for line and surface detection.
+- line-following support.
+- obstacle-avoidance support.
+- object-following support.
+- SunFounder Robot HAT.
+- three 9g servos.
+- two motors.
+- rechargeable batteries.
+- Python support.
+- Scratch support.
+
 ## Sidecar Responsibilities
 
 The Raspberry Pi 5 / PiCar-X sidecar may be designed to perform these responsibilities after separate implementation approval:
