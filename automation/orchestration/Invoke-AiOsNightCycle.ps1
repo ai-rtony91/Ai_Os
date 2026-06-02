@@ -85,7 +85,9 @@ function Write-CycleMarker {
 
     $existing = Read-CycleMarker
     $completed = @()
-    if ($null -ne $existing -and $null -ne $existing.completed_phases) {
+    if ($State -eq "STARTED" -and ($null -eq $existing -or [string]$existing.cycle_id -ne $script:AiOsCycleId)) {
+        $completed = @()
+    } elseif ($null -ne $existing -and $null -ne $existing.completed_phases) {
         $completed = @($existing.completed_phases | ForEach-Object { [string]$_ })
     }
     if ($State -eq "COMPLETE" -and -not [string]::IsNullOrWhiteSpace($Phase) -and $completed -notcontains $Phase) {
@@ -189,7 +191,7 @@ function Invoke-AiOsNightCycleOnce {
     $bridge = Join-Path $repoRoot "automation\orchestration\night_supervisor\Invoke-AiOsAutonomyBridge.DRY_RUN.ps1"
     $notifier = Join-Path $repoRoot "services\python_supervisor\notifier.py"
     $prWatch = Join-Path $repoRoot "automation\orchestration\pr_watch\Watch-AiOsPullRequests.ps1"
-    $hygieneArgs = if ($Apply) { @("-Apply") } else { @() }
+    [string[]]$hygieneArgs = if ($Apply) { @("-Apply") } else { @() }
     foreach ($requiredPath in @($rotateLogs, $diskWatch, $prWatch)) {
         if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
             throw "Night cycle hygiene dependency missing: $requiredPath"
@@ -212,10 +214,10 @@ function Invoke-AiOsNightCycleOnce {
     }
 
     $effectiveApply = ($Apply -and -not $observeOnly)
-    $applyArgs = if ($effectiveApply) { @("-Apply") } else { @() }
-    $alertArgs = if ($effectiveApply) { @("-AlertApply", "-StateApply") } else { @() }
-    $briefArgs = if ($effectiveApply) { @("-Apply") } else { @() }
-    $notifierArgs = @($notifier, "--channel", "file")
+    [string[]]$applyArgs = if ($effectiveApply) { @("-Apply") } else { @() }
+    [string[]]$alertArgs = if ($effectiveApply) { @("-AlertApply", "-StateApply") } else { @() }
+    [string[]]$briefArgs = if ($effectiveApply) { @("-Apply") } else { @() }
+    [string[]]$notifierArgs = @($notifier, "--channel", "file")
     if ($effectiveApply) { $notifierArgs += "--apply" }
 
     foreach ($requiredPath in @($modeScript, $runner, $pullBacklog, $morningBriefScript, $staleApprovals, $selfContinuation, $nightSupervisorHarness, $bridge, $notifier)) {
