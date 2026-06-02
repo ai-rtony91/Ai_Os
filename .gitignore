@@ -92,6 +92,9 @@ dist/
 # AIOS night supervisor DRY_RUN runtime outputs (evidence, not source)
 telemetry/night_supervisor/
 
+# Local runtime cycle evidence; not source authority.
+/control/cycle/
+
 # AI_OS generated auto-loop sandbox state
 automation/orchestration/auto_loop/state/**/*.json
 
