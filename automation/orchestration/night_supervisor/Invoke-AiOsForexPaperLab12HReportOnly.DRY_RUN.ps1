@@ -212,13 +212,35 @@ if ($QuietJson) {
 Write-Host "AI_OS Forex Paper Lab 12H Report-Only Plan"
 Write-Host ("Status: {0}" -f $report.wrapper_status)
 Write-Host ("Profile: {0}" -f $report.profile.path)
+Write-Host ("Profile loaded: {0}" -f ($(if ($profile) { "yes" } else { "no" })))
 Write-Host ("Branch: {0}  Head: {1}" -f $branch, $headSha)
 Write-Host ("STOP markers active: {0}" -f $activeStopMarkers.Count)
+Write-Host "STOP marker check:"
+foreach ($marker in $stopMarkerState) {
+    Write-Host ("  {0}: {1}" -f $marker.path, ($(if ($marker.exists) { "ACTIVE" } else { "clear" })))
+}
 Write-Host ""
 foreach ($cycle in $cycles) {
     Write-Host ("  Hour {0,2}: {1} [{2}]" -f $cycle.hour, $cycle.focus, $cycle.status)
 }
 Write-Host ""
+Write-Host "Allowed work:"
+foreach ($item in $profile.allowed_work) {
+    Write-Host ("  - {0}" -f $item)
+}
+Write-Host ""
+Write-Host "Blocked work:"
+foreach ($item in $profile.blocked_work) {
+    Write-Host ("  - {0}" -f $item)
+}
+Write-Host ""
+Write-Host "Safety closeout:"
+Write-Host "NIGHT_SUPERVISOR_NOT_STARTED"
+Write-Host "SCHEDULER_NOT_CHANGED"
+Write-Host "NO_TELEMETRY_RUNTIME_WRITTEN"
+Write-Host "LIVE_TRADING_BLOCKED"
+Write-Host "EDUCATIONAL_USE_ONLY"
+Write-Host "PAPER_TRADING_SIMULATION_ONLY"
 Write-Host "No Night Supervisor run started."
 Write-Host "No scheduler change performed."
 Write-Host "No repo/runtime/telemetry output written."
