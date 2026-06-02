@@ -95,7 +95,7 @@ def test_glue_approval_classification_prefers_safer_status() -> None:
 def test_explicit_blocked_status_beats_pass_text() -> None:
     classification = classify_item(
         {
-            "source_path": "relay/done/example.task.json",
+            "source_path": "relay/inbox/current-blocked.task.json",
             "status": "BLOCKED",
             "summary": "Worker says PASS and complete.",
         }
@@ -139,7 +139,7 @@ def test_ambiguous_input_defaults_safe() -> None:
 def test_prior_cases_same_or_safer() -> None:
     cases = [
         ({"source_path": "relay/error/danger.task.txt", "summary": "Please place a buy order for EURUSD live now."}, "BLOCKED"),
-        ({"source_path": "relay/approvals/example.approval.json", "status": "WAITING"}, "NEEDS_APPROVAL"),
+        ({"source_path": "relay/inbox/current.task.json", "status": "WAITING"}, "NEEDS_APPROVAL"),
         ({"source_path": "relay/done/example.task.json", "status": "PASS"}, "PASS"),
         ({"source_path": "relay/outbox/repo-summary.report.txt", "summary": "review stale unknown"}, "WARN"),
     ]
@@ -147,6 +147,120 @@ def test_prior_cases_same_or_safer() -> None:
     for item, previous_status in cases:
         current = classify_item(item)["status"]
         assert SAFETY_ORDER[current] >= SAFETY_ORDER[previous_status]
+
+
+def test_reference_schema_does_not_become_current_blocker() -> None:
+    classification = classify_item(
+        {
+            "source_path": "automation/orchestration/night_supervisor/NIGHT_SUPERVISOR_REPORT.schema.json",
+            "status": "BLOCKED",
+            "summary": "Safety text mentions broker, OANDA, API key, and real order boundaries.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "reference_evidence"
+
+
+def test_stale_relay_approval_is_historical_warning() -> None:
+    classification = classify_item(
+        {
+            "source_path": "relay/approvals/20260530-165828-dirty-repo.approval.md",
+            "status": "BLOCKED",
+            "summary": "Risk level: blocker. Historical dirty repo approval from 2026-05-30.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "historical_evidence"
+
+
+def test_projection_state_does_not_self_block() -> None:
+    classification = classify_item(
+        {
+            "source_path": "telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json",
+            "supervisor_status": "BLOCKED",
+            "plain_summary": "16 blocked items were seen in a prior bridge projection.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "reference_evidence"
+
+
+def test_current_scheduler_request_stays_blocked() -> None:
+    classification = classify_item(
+        {
+            "source_path": "relay/approvals/register-night-scheduler.approval.md",
+            "status": "WAITING",
+            "summary": "Approval request to create a scheduler task for unattended operation.",
+        }
+    )
+
+    assert classification["status"] == "BLOCKED"
+
+
+def test_relay_readme_is_reference_warning() -> None:
+    classification = classify_item(
+        {
+            "source_path": "relay/README.md",
+            "summary": "Relay documentation mentions approval and protected action flow.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "reference_evidence"
+
+
+def test_relay_example_approval_is_reference_warning() -> None:
+    classification = classify_item(
+        {
+            "source_path": "relay/approvals/example.approval.json",
+            "status": "WAITING",
+            "summary": "Example approval packet proposes git add -A for demonstration only.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "reference_evidence"
+
+
+def test_historical_relay_goal_approval_is_warning() -> None:
+    classification = classify_item(
+        {
+            "source_path": "relay/approvals/g-push-the-validator-to-main.approval.json",
+            "status": "WAITING",
+            "summary": "Historical goal approval requests commit and push review.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "historical_evidence"
+
+
+def test_relay_done_task_is_historical_warning() -> None:
+    classification = classify_item(
+        {
+            "source_path": "relay/done/g-goal-review-waiting-approval-items-plan.task.json",
+            "status": "WAITING_APPROVAL",
+            "summary": "Completed planning task still mentions waiting approval items.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "historical_evidence"
+
+
+def test_relay_log_state_is_historical_warning() -> None:
+    classification = classify_item(
+        {
+            "source_path": "relay/logs/disk_alert_state.json",
+            "summary": "Runtime log state has no active approval request.",
+        }
+    )
+
+    assert classification["status"] == "WARN"
+    assert classification["category"] == "historical_evidence"
 
 
 class AutonomyBridgeGlueTests(unittest.TestCase):
@@ -171,6 +285,33 @@ class AutonomyBridgeGlueTests(unittest.TestCase):
 
     def test_prior_cases_same_or_safer(self) -> None:
         test_prior_cases_same_or_safer()
+
+    def test_reference_schema_does_not_become_current_blocker(self) -> None:
+        test_reference_schema_does_not_become_current_blocker()
+
+    def test_stale_relay_approval_is_historical_warning(self) -> None:
+        test_stale_relay_approval_is_historical_warning()
+
+    def test_projection_state_does_not_self_block(self) -> None:
+        test_projection_state_does_not_self_block()
+
+    def test_current_scheduler_request_stays_blocked(self) -> None:
+        test_current_scheduler_request_stays_blocked()
+
+    def test_relay_readme_is_reference_warning(self) -> None:
+        test_relay_readme_is_reference_warning()
+
+    def test_relay_example_approval_is_reference_warning(self) -> None:
+        test_relay_example_approval_is_reference_warning()
+
+    def test_historical_relay_goal_approval_is_warning(self) -> None:
+        test_historical_relay_goal_approval_is_warning()
+
+    def test_relay_done_task_is_historical_warning(self) -> None:
+        test_relay_done_task_is_historical_warning()
+
+    def test_relay_log_state_is_historical_warning(self) -> None:
+        test_relay_log_state_is_historical_warning()
 
 
 if __name__ == "__main__":
