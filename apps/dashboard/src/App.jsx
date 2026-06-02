@@ -30,6 +30,23 @@ const autonomyBridgeCards = Array.isArray(autonomyBridgeState.dashboard_cards)
   ? autonomyBridgeState.dashboard_cards
   : [];
 const autonomyBridgeSourceIsLive = autonomyBridgeStatePayload.sourceLabel === "LIVE";
+const playlistDockItems = [
+  {
+    title: "Telemetry chat import",
+    status: "placeholder",
+    summary: "Future local intake for telemetry chat references. No private links fetched."
+  },
+  {
+    title: "Parallax web app ideas",
+    status: "placeholder",
+    summary: "Future idea lane for visual app concepts. Planning only."
+  },
+  {
+    title: "Music playlist references",
+    status: "placeholder",
+    summary: "Use the existing Music Companion. No external project import is connected."
+  }
+];
 
 function formatTime(value) {
   if (!value) {
@@ -111,6 +128,60 @@ function Section({ title, action, children }) {
         {action}
       </div>
       {children}
+    </section>
+  );
+}
+
+function MissionCard({ label, value, summary, tone = "neutral" }) {
+  return (
+    <article className={`missionCard ${tone}`}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <p>{summary}</p>
+    </article>
+  );
+}
+
+function WorkerRoomCard({ label, status, summary, meta }) {
+  return (
+    <article className="workerRoomCard">
+      <div className="operatorStatusTop">
+        <h3>{label}</h3>
+        <StatusPill value={status} />
+      </div>
+      <p>{summary}</p>
+      <span>{meta}</span>
+    </article>
+  );
+}
+
+function PlaylistDock() {
+  return (
+    <section className="playlistDock" aria-labelledby="playlist-dock-title">
+      <div className="operatorStatusIntro">
+        <div>
+          <p className="eyebrow">Companion dock</p>
+          <h2 id="playlist-dock-title">Playlist Dock Intake</h2>
+          <p>
+            Placeholder-only intake for future references. This panel does not fetch
+            private ChatGPT projects or connect external APIs.
+          </p>
+        </div>
+        <a className="dockLink" href="/AIOS_MUSIC_COMPANION.html" target="_blank" rel="noreferrer">
+          Open Music Companion
+        </a>
+      </div>
+      <div className="playlistDockGrid">
+        {playlistDockItems.map((item) => (
+          <article className="dockItem" key={item.title}>
+            <div className="operatorStatusTop">
+              <h3>{item.title}</h3>
+              <StatusPill value={item.status} />
+            </div>
+            <p>{item.summary}</p>
+          </article>
+        ))}
+      </div>
     </section>
   );
 }
@@ -201,13 +272,12 @@ function AutonomyBridgeCard({ card }) {
 
 export default function App() {
   const [runtimeVisibility, setRuntimeVisibility] = useState(mockVisibilityDisplay);
-  const [visibilityLoading, setVisibilityLoading] = useState(false);
+  const [visibilityLoading, setVisibilityLoading] = useState(true);
   const [packetFilter, setPacketFilter] = useState("all");
   const [eventQuery, setEventQuery] = useState("");
 
   useEffect(() => {
     const config = getRuntimeVisibilityClientConfig();
-    setVisibilityLoading(true);
     fetchRuntimeVisibilityReadOnly(config)
       .then((result) => {
         setRuntimeVisibility(
@@ -231,7 +301,7 @@ export default function App() {
     return runtimeVisibility.activePackets.filter(
       (packet) => packet.action === packetFilter
     );
-  }, [packetFilter]);
+  }, [packetFilter, runtimeVisibility.activePackets]);
 
   const filteredEvents = useMemo(() => {
     const query = eventQuery.trim().toLowerCase();
@@ -245,19 +315,61 @@ export default function App() {
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(query))
     );
-  }, [eventQuery]);
+  }, [eventQuery, runtimeVisibility.telemetry.recentEvents]);
 
   const healthTone = runtimeVisibility.health.healthy ? "good" : "danger";
   const failedGroups = runtimeVisibility.failedPackets;
+  const bridgeMetrics = autonomyBridgeCards[0]?.metrics ?? {};
+  const winsCount = bridgeMetrics.wins ?? autonomyBridgeState.wins_count ?? "UNKNOWN";
+  const blockedCount = bridgeMetrics.blocked ?? autonomyBridgeState.blocked_count ?? runtimeVisibility.executionLedger.blockedPacketCount;
+  const approvalNeededCount =
+    bridgeMetrics.approval_needed ??
+    autonomyBridgeState.approval_needed_count ??
+    runtimeVisibility.executionLedger.approvalCount;
+  const passedCount = winsCount;
+  const nightSupervisorStatus =
+    autonomyBridgeState.night_supervisor_status ??
+    autonomyBridgeState.supervisor_status ??
+    "UNKNOWN";
+  const nextSafeAction =
+    autonomyBridgeState.next_safe_action ??
+    runtimeVisibility.nextSafeAction ??
+    "Review evidence before protected action.";
+  const workerRooms = [
+    {
+      label: "Codex",
+      status: runtimeVisibility.workers.length > 0 ? "tracked" : "evidence",
+      summary: "Scoped engineering worker activity is shown as evidence only.",
+      meta: `${runtimeVisibility.workers.length} runtime worker lease record(s)`
+    },
+    {
+      label: "Claude",
+      status: "review",
+      summary: "Inspector and review lanes remain outside dashboard execution authority.",
+      meta: `${autonomyBridgeState.worker_notes_count ?? "UNKNOWN"} worker note(s)`
+    },
+    {
+      label: "Relay",
+      status: approvalNeededCount === 0 ? "clear" : "needs_approval",
+      summary: "Relay evidence is summarized for review, not approval automation.",
+      meta: `${approvalNeededCount} approval-needed item(s)`
+    },
+    {
+      label: "Night Supervisor",
+      status: nightSupervisorStatus,
+      summary: autonomyBridgeState.plain_summary ?? "Night Supervisor evidence unavailable.",
+      meta: autonomyBridgeState.morning_digest_path ?? "No digest path available"
+    }
+  ];
 
   return (
     <div className="runtimePage">
       <header className="runtimeHeader">
         <div>
-          <p className="eyebrow">AI_OS runtime visibility</p>
-          <h1>Runtime Operations</h1>
+          <p className="eyebrow">AI_OS 24-hour operations</p>
+          <h1>Operations Display</h1>
           <p className="summary">
-            Local-first, paper-only execution visibility. Generated{" "}
+            Read-only evidence view for worker activity, approvals, savepoints, and next safe action. Generated{" "}
             {formatTime(runtimeVisibility.generatedAt)}.
           </p>
         </div>
@@ -269,6 +381,76 @@ export default function App() {
           {visibilityLoading && <StatusPill value="loading…" />}
         </div>
       </header>
+
+      <section className="operationsHero" aria-labelledby="operations-summary-title">
+        <div className="operatorStatusIntro">
+          <div>
+            <p className="eyebrow">Simple user mode</p>
+            <h2 id="operations-summary-title">24-Hour Mission Summary</h2>
+            <p>{autonomyBridgeState.plain_summary ?? "Runtime evidence is available for review."}</p>
+          </div>
+          <StatusPill value={nightSupervisorStatus} />
+        </div>
+        <div className="missionCardGrid">
+          <MissionCard
+            label="Worker activity"
+            value={winsCount}
+            summary="Completed or useful worker outputs seen in the latest evidence."
+            tone="good"
+          />
+          <MissionCard
+            label="Passed"
+            value={passedCount}
+            summary="Validated or completed evidence items, shown read-only."
+            tone="good"
+          />
+          <MissionCard
+            label="Blocked"
+            value={blockedCount}
+            summary="Items that must remain stopped until reviewed."
+            tone={metricTone(blockedCount, "danger")}
+          />
+          <MissionCard
+            label="Approvals waiting"
+            value={approvalNeededCount}
+            summary="Human-owner review required before protected actions."
+            tone={metricTone(approvalNeededCount, "warn")}
+          />
+          <MissionCard
+            label="Night Supervisor"
+            value={nightSupervisorStatus}
+            summary="Overnight supervision status from current evidence."
+            tone={statusTone(nightSupervisorStatus)}
+          />
+          <MissionCard
+            label="T9 savepoint"
+            value="2026-06-02"
+            summary="Checkpoint and resume evidence exist for the latest night run."
+            tone="good"
+          />
+          <MissionCard
+            label="Next safe action"
+            value="review"
+            summary={nextSafeAction}
+            tone="warn"
+          />
+        </div>
+      </section>
+
+      <section className="workerRooms" aria-labelledby="worker-rooms-title">
+        <div className="operatorStatusIntro">
+          <div>
+            <p className="eyebrow">Worker rooms</p>
+            <h2 id="worker-rooms-title">Room Status</h2>
+            <p>Readable worker state for review only. No launch, pause, approval, or mutation controls.</p>
+          </div>
+        </div>
+        <div className="workerRoomGrid">
+          {workerRooms.map((room) => (
+            <WorkerRoomCard key={room.label} {...room} />
+          ))}
+        </div>
+      </section>
 
       <section className="operatorStatusSlice" aria-labelledby="operator-status-title">
         <div className="operatorStatusIntro">
@@ -330,7 +512,14 @@ export default function App() {
         </div>
       </section>
 
-      <main className="runtimeGrid">
+      <PlaylistDock />
+
+      <details className="advancedTelemetry">
+        <summary>
+          <span>Advanced telemetry drill-down</span>
+          <small>Runtime details, packet tables, worker leases, backpressure, and raw telemetry</small>
+        </summary>
+        <main className="runtimeGrid">
         <Section title="Runtime Status">
           <div className="metricsGrid">
             <Metric label="Runtime ID" value={runtimeVisibility.runtime.runtimeId} />
@@ -570,7 +759,8 @@ export default function App() {
           )}
           <p className="nextAction">{runtimeVisibility.nextSafeAction}</p>
         </Section>
-      </main>
+        </main>
+      </details>
     </div>
   );
 }

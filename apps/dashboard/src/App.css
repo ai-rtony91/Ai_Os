@@ -119,6 +119,8 @@ h3 {
   padding: 18px;
 }
 
+.operationsHero,
+.workerRooms,
 .operatorStatusSlice {
   border-bottom: 1px solid var(--line);
   display: grid;
@@ -142,23 +144,126 @@ h3 {
 }
 
 .operatorStatusIntro p,
-.operatorStatusCard p {
+.operatorStatusCard p,
+.workerRoomCard p,
+.playlistDock p,
+.dockItem p {
   color: var(--muted);
   margin-bottom: 0;
 }
 
+.missionCardGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.missionCard {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--neutral);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.missionCard span {
+  color: var(--muted);
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.missionCard strong {
+  display: block;
+  font-size: 24px;
+  line-height: 1;
+  margin-bottom: 10px;
+  overflow-wrap: anywhere;
+}
+
+.missionCard p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+.workerRoomGrid,
 .operatorStatusGrid {
   display: grid;
   gap: 12px;
+}
+
+.workerRoomGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.operatorStatusGrid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.workerRoomCard,
 .operatorStatusCard {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
   min-width: 0;
   padding: 14px;
+}
+
+.workerRoomCard > span {
+  color: var(--neutral);
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.playlistDock {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
+  padding: 18px 32px;
+}
+
+.playlistDockGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dockItem {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.dockLink {
+  align-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  min-height: 36px;
+  padding: 8px 12px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.dockLink:hover,
+.dockLink:focus {
+  border-color: var(--neutral);
+  color: var(--neutral);
+  outline: none;
 }
 
 .autonomyBridgeGrid {
@@ -486,6 +591,50 @@ h3 {
   margin-bottom: 12px;
 }
 
+.advancedTelemetry {
+  border-bottom: 1px solid var(--line);
+}
+
+.advancedTelemetry > summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  list-style: none;
+  padding: 18px 32px;
+}
+
+.advancedTelemetry > summary::-webkit-details-marker {
+  display: none;
+}
+
+.advancedTelemetry > summary span {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.advancedTelemetry > summary small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.advancedTelemetry > summary::after {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  content: "Open";
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 9px;
+  text-transform: uppercase;
+}
+
+.advancedTelemetry[open] > summary::after {
+  content: "Close";
+}
+
 @media (max-width: 980px) {
   .runtimeHeader,
   .listItem,
@@ -505,7 +654,10 @@ h3 {
   .metricsGrid,
   .queueStrip,
   .workerGrid,
+  .workerRoomGrid,
   .operatorStatusGrid,
+  .missionCardGrid,
+  .playlistDockGrid,
   .pressureGrid,
   .failureSplit {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -517,11 +669,23 @@ h3 {
     padding: 20px 16px;
   }
 
+  .operationsHero,
+  .workerRooms,
   .operatorStatusSlice {
     padding: 16px;
   }
 
   .autonomyBridgeSlice {
+    padding: 16px;
+  }
+
+  .playlistDock {
+    padding: 16px;
+  }
+
+  .advancedTelemetry > summary {
+    align-items: flex-start;
+    flex-direction: column;
     padding: 16px;
   }
 
@@ -537,8 +701,11 @@ h3 {
   .metricsGrid,
   .queueStrip,
   .workerGrid,
+  .workerRoomGrid,
   .operatorStatusGrid,
+  .missionCardGrid,
   .autonomyMetrics,
+  .playlistDockGrid,
   .pressureGrid,
   .failureSplit {
     grid-template-columns: 1fr;
