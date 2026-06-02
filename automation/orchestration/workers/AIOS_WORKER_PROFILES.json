@@ -12,7 +12,10 @@
     "Forex workers are profiles only for now.",
     "No broker/API/live trading code.",
     "No secrets.",
-    "No background services, daemons, or scheduled tasks."
+    "No background services, daemons, or scheduled tasks.",
+    "Main Control and Claude Reviewer do not create file ownership by themselves.",
+    "Window identity markers are presentation-only and do not grant APPLY authority.",
+    "Six Codex worker lanes may run in parallel only when packet allowed_paths do not overlap."
   ],
   "workers": [
     {
@@ -450,39 +453,296 @@
     },
     {
       "worker_id": "codex_worker_1",
-      "display_title": "Codex Worker 1 (Primary East Build Lane)",
+      "display_title": "Codex Worker 1 (Worker Registry Lane)",
       "worker_type": "manual_codex",
       "default_path": "C:\\Dev\\Ai.Os",
       "default_branch": "main",
       "owns_paths": [
-        "automation/orchestration/",
-        "services/python_supervisor/",
-        "schemas/aios/orchestration/"
+        "automation/orchestration/workers/",
+        "docs/governance/WORKER_REGISTRY_CANONICAL_MAP.md"
       ],
       "blocked_paths": [
         ".codex_backups/",
         "apps/dashboard/assets/",
+        "automation/orchestration/work_packets/",
+        "automation/orchestration/approval_inbox/",
+        "telemetry/",
+        "services/",
+        "scripts/",
+        "apps/trading_lab/",
+        "aios/modules/trader/",
         "secrets/",
         ".env",
         "broker/",
         "OANDA/",
-        "live_trading/"
+        "live_trading/",
+        "scheduler/",
+        "runtime/"
       ],
       "can_run_parallel_with": [
+        "codex_worker_2",
+        "codex_worker_3",
+        "codex_worker_4",
+        "codex_worker_5",
+        "codex_worker_6",
         "save_git",
         "check_audit",
         "watch_state"
       ],
       "cannot_overlap_with": [
-        "orchestration_codex"
+        "orchestration_codex",
+        "brainstem_codex",
+        "route_dispatch",
+        "dispatcher"
       ],
       "launch_policy": "manual_shell_only",
       "codex_policy": "manual_only",
       "guard_policy": "ExpectedLaneId codex_worker_1; CommandType codex",
-      "save_policy": "use Submit-AiOsWork.ps1 from save_git",
+      "save_policy": "no stage, commit, push, or PR unless a separate protected-action approval is granted",
       "worker_launch_enabled": false,
       "apply_gate_required": true,
-      "safety_notes": "Primary Codex East execution worker for packet-scoped implementation work. Manually launched per packet. Owns only files declared in each assigned packet allowed_paths."
+      "safety_notes": "Worker registry and ownership governance lane. Owns only files declared in each assigned packet allowed_paths; no packet, approval, runtime, scheduler, trading, broker, OANDA, API-key, secret, commit, push, or merge authority."
+    },
+    {
+      "worker_id": "codex_worker_2",
+      "display_title": "Codex Worker 2 (Workflow Lane)",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Dev\\Ai.Os",
+      "default_branch": "main",
+      "owns_paths": [
+        "docs/workflows/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "automation/orchestration/work_packets/",
+        "automation/orchestration/approval_inbox/",
+        "telemetry/",
+        "services/",
+        "scripts/",
+        "apps/trading_lab/",
+        "aios/modules/trader/",
+        "secrets/",
+        ".env",
+        "broker/",
+        "OANDA/",
+        "live_trading/",
+        "scheduler/",
+        "runtime/"
+      ],
+      "can_run_parallel_with": [
+        "codex_worker_1",
+        "codex_worker_3",
+        "codex_worker_4",
+        "codex_worker_5",
+        "codex_worker_6",
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "rulebook_codex",
+        "brainstem_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId codex_worker_2; CommandType codex",
+      "save_policy": "no stage, commit, push, or PR unless a separate protected-action approval is granted",
+      "worker_launch_enabled": false,
+      "apply_gate_required": true,
+      "safety_notes": "Workflow documentation lane. Shared workflow authority still requires exact packet files and Human Owner approval before APPLY."
+    },
+    {
+      "worker_id": "codex_worker_3",
+      "display_title": "Codex Worker 3 (Governance Lane)",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Dev\\Ai.Os",
+      "default_branch": "main",
+      "owns_paths": [
+        "docs/governance/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "automation/orchestration/work_packets/",
+        "automation/orchestration/approval_inbox/",
+        "telemetry/",
+        "services/",
+        "scripts/",
+        "apps/trading_lab/",
+        "aios/modules/trader/",
+        "secrets/",
+        ".env",
+        "broker/",
+        "OANDA/",
+        "live_trading/",
+        "scheduler/",
+        "runtime/"
+      ],
+      "can_run_parallel_with": [
+        "codex_worker_1",
+        "codex_worker_2",
+        "codex_worker_4",
+        "codex_worker_5",
+        "codex_worker_6",
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "safety_codex",
+        "brainstem_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId codex_worker_3; CommandType codex",
+      "save_policy": "no stage, commit, push, or PR unless a separate protected-action approval is granted",
+      "worker_launch_enabled": false,
+      "apply_gate_required": true,
+      "safety_notes": "Governance documentation lane. Protected root files and shared governance authority require exact packet files and Human Owner approval before APPLY."
+    },
+    {
+      "worker_id": "codex_worker_4",
+      "display_title": "Codex Worker 4 (Validator And Schema Lane)",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Dev\\Ai.Os",
+      "default_branch": "main",
+      "owns_paths": [
+        "automation/orchestration/validators/",
+        "schemas/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "automation/orchestration/work_packets/",
+        "automation/orchestration/approval_inbox/",
+        "telemetry/",
+        "services/",
+        "scripts/",
+        "apps/trading_lab/",
+        "aios/modules/trader/",
+        "secrets/",
+        ".env",
+        "broker/",
+        "OANDA/",
+        "live_trading/",
+        "scheduler/",
+        "runtime/"
+      ],
+      "can_run_parallel_with": [
+        "codex_worker_1",
+        "codex_worker_2",
+        "codex_worker_3",
+        "codex_worker_5",
+        "codex_worker_6",
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [
+        "safety_codex",
+        "brainstem_codex"
+      ],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId codex_worker_4; CommandType codex",
+      "save_policy": "no stage, commit, push, or PR unless a separate protected-action approval is granted",
+      "worker_launch_enabled": false,
+      "apply_gate_required": true,
+      "safety_notes": "Validator and schema lane. Validator PASS remains evidence only and never grants APPLY, commit, push, merge, runtime, scheduler, or trading authority."
+    },
+    {
+      "worker_id": "codex_worker_5",
+      "display_title": "Codex Worker 5 (Dashboard UI Lane)",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Dev\\Ai.Os",
+      "default_branch": "main",
+      "owns_paths": [
+        "apps/dashboard/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "automation/orchestration/work_packets/",
+        "automation/orchestration/approval_inbox/",
+        "telemetry/",
+        "services/",
+        "scripts/",
+        "apps/trading_lab/",
+        "aios/modules/trader/",
+        "secrets/",
+        ".env",
+        "broker/",
+        "OANDA/",
+        "live_trading/",
+        "scheduler/",
+        "runtime/"
+      ],
+      "can_run_parallel_with": [
+        "codex_worker_1",
+        "codex_worker_2",
+        "codex_worker_3",
+        "codex_worker_4",
+        "codex_worker_6",
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId codex_worker_5; CommandType codex",
+      "save_policy": "no stage, commit, push, or PR unless a separate protected-action approval is granted",
+      "worker_launch_enabled": false,
+      "apply_gate_required": true,
+      "safety_notes": "Dashboard UI lane only. No runtime API mutation, telemetry persistence mutation, broker, OANDA, trading execution, API-key, or secret authority."
+    },
+    {
+      "worker_id": "codex_worker_6",
+      "display_title": "Codex Worker 6 (Audit And Reporting Lane)",
+      "worker_type": "manual_codex",
+      "default_path": "C:\\Dev\\Ai.Os",
+      "default_branch": "main",
+      "owns_paths": [
+        "docs/audits/",
+        "Reports/"
+      ],
+      "blocked_paths": [
+        ".codex_backups/",
+        "apps/dashboard/assets/",
+        "automation/orchestration/work_packets/",
+        "automation/orchestration/approval_inbox/",
+        "telemetry/",
+        "services/",
+        "scripts/",
+        "apps/trading_lab/",
+        "aios/modules/trader/",
+        "secrets/",
+        ".env",
+        "broker/",
+        "OANDA/",
+        "live_trading/",
+        "scheduler/",
+        "runtime/"
+      ],
+      "can_run_parallel_with": [
+        "codex_worker_1",
+        "codex_worker_2",
+        "codex_worker_3",
+        "codex_worker_4",
+        "codex_worker_5",
+        "save_git",
+        "check_audit",
+        "watch_state"
+      ],
+      "cannot_overlap_with": [],
+      "launch_policy": "manual_shell_only",
+      "codex_policy": "manual_only",
+      "guard_policy": "ExpectedLaneId codex_worker_6; CommandType codex",
+      "save_policy": "no stage, commit, push, or PR unless a separate protected-action approval is granted",
+      "worker_launch_enabled": false,
+      "apply_gate_required": true,
+      "safety_notes": "Audit and reporting lane. Reports are evidence only and do not grant approval, runtime, scheduler, trading, broker, OANDA, API-key, secret, commit, push, or merge authority."
     }
   ]
 }
