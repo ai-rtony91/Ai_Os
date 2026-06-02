@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -91,6 +92,14 @@ BLOCKER_FALLBACK_TERMS = (
     "secret",
     "credential",
     "webhook",
+    "scheduler",
+    "scheduled task",
+    "schtasks",
+    "protected action",
+    "git add .",
+    "force push",
+    "reset --hard",
+    "git clean",
 )
 APPROVAL_FALLBACK_TERMS = (
     "approval required",
@@ -102,6 +111,44 @@ APPROVAL_FALLBACK_TERMS = (
     "human_review_required",
 )
 WARN_FALLBACK_TERMS = ("warn", "review", "stale", "unknown")
+REFERENCE_PATH_TERMS = (
+    "/archive/",
+    "/examples/",
+    "/templates/",
+    "/example.",
+    "example.",
+    ".example.",
+    ".sample.",
+    ".schema.json",
+)
+STATIC_REFERENCE_PATHS = {
+    "automation/orchestration/night_supervisor/night_supervisor_config.json",
+    "automation/orchestration/night_supervisor/night_supervisor_report.schema.json",
+    "automation/orchestration/night_supervisor/night_supervisor_safety_policy.json",
+    "automation/orchestration/night_supervisor/readme.md",
+    "relay/readme.md",
+    "relay/handoffs/codex_bridge_loop_sequence.md",
+}
+PROJECTION_PATHS = {
+    "relay/reports/alert_latest.md",
+    "telemetry/morning_digest/morning_digest_latest.md",
+    "telemetry/morning_digest/morning_digest_state.json",
+    "telemetry/night_supervisor/autonomy_bridge_state.json",
+}
+HISTORICAL_PATH_TERMS = (
+    "relay/approvals/approved/",
+    "relay/done/",
+    "relay/goals/processed/",
+    "relay/handoffs/processed/",
+    "relay/logs/",
+    "relay/outbox/",
+    "relay/reports/",
+)
+STALE_REVIEW_PATH_TERMS = (
+    "relay/approvals/",
+    "control/operation_glue/worker_packets/",
+)
+EVIDENCE_DATE_PATTERN = re.compile(r"(20\d{2})[-_]?(\d{2})[-_]?(\d{2})")
 
 
 def utc_now() -> str:
@@ -180,6 +227,47 @@ def _status_category(status: str, path: str, text: str) -> str:
     return "unknown"
 
 
+def _extract_evidence_dates(path: str, text: str) -> list[datetime.date]:
+    dates: list[datetime.date] = []
+    for raw_year, raw_month, raw_day in EVIDENCE_DATE_PATTERN.findall(f"{path} {text}"):
+        try:
+            dates.append(datetime(int(raw_year), int(raw_month), int(raw_day), tzinfo=timezone.utc).date())
+        except ValueError:
+            continue
+    return dates
+
+
+def _contains_stale_evidence_date(path: str, text: str) -> bool:
+    today = datetime.now(timezone.utc).date()
+    return any(evidence_date < today for evidence_date in _extract_evidence_dates(path, text))
+
+
+def _is_reference_evidence(path: str) -> bool:
+    return path in STATIC_REFERENCE_PATHS or any(term in path for term in REFERENCE_PATH_TERMS)
+
+
+def _is_projection_evidence(path: str) -> bool:
+    return path in PROJECTION_PATHS
+
+
+def _has_current_unsafe_terms(path: str, text: str) -> bool:
+    return "/error/" in path or any(term in text for term in BLOCKER_FALLBACK_TERMS)
+
+
+def _is_historical_evidence(path: str, text: str) -> bool:
+    if path.startswith("relay/approvals/"):
+        if _contains_stale_evidence_date(path, text):
+            return True
+        if path.startswith("relay/approvals/g-"):
+            return True
+        return not _has_current_unsafe_terms(path, text)
+    if any(term in path for term in HISTORICAL_PATH_TERMS):
+        return True
+    if any(term in path for term in STALE_REVIEW_PATH_TERMS):
+        return _contains_stale_evidence_date(path, text)
+    return False
+
+
 def _max_status(*statuses: str) -> str:
     known = [status for status in statuses if status in STATUS_ORDER]
     if not known:
@@ -217,6 +305,13 @@ def classify_item(item: dict[str, Any]) -> dict[str, str]:
     text = " ".join(str(value) for value in item.values()).lower()
     path = str(item.get("source_path", "")).lower().replace("\\", "/")
     raw_status = str(item.get("status") or item.get("state") or item.get("supervisor_status") or "").upper()
+
+    if _is_projection_evidence(path):
+        return {"status": "WARN", "category": "reference_evidence"}
+    if _is_reference_evidence(path):
+        return {"status": "WARN", "category": "reference_evidence"}
+    if _is_historical_evidence(path, text):
+        return {"status": "WARN", "category": "historical_evidence"}
 
     explicit = _explicit_status(item)
     fallback = _fallback_status(path, text, _normalize_token(raw_status))
