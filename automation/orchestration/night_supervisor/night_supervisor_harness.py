@@ -22,7 +22,9 @@ from __future__ import annotations
 import argparse
 import datetime as _dt
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -48,6 +50,10 @@ BLOCKED_CAPABILITIES = [
     "secret handling",
 ]
 RESULT_CLASSIFICATIONS = {"PASS", "FAIL", "BLOCKED", "NEEDS_APPROVAL", "NOOP"}
+NIGHT_SUPERVISOR_CONFIG_REL = "automation/orchestration/night_supervisor/NIGHT_SUPERVISOR_CONFIG.json"
+DEFAULT_POWERSHELL_CRITICAL_SCRIPTS = (
+    "automation/orchestration/Invoke-AiOsNightCycle.ps1",
+)
 
 # Conservative secret-shaped patterns. Night supervision only ever serializes
 # repo metadata (file names, counts, git porcelain), so a hit here means an
@@ -166,6 +172,101 @@ def _safe_load_json(path: Path):
         return json.loads(path.read_text(encoding="utf-8-sig"))
     except Exception:
         return None
+
+
+def _night_supervisor_config(repo_root: Path) -> dict:
+    config = _safe_load_json(repo_root / NIGHT_SUPERVISOR_CONFIG_REL)
+    return config if isinstance(config, dict) else {}
+
+
+def _powershell_executable() -> Path | None:
+    windows_powershell = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+    if windows_powershell.is_file():
+        return windows_powershell
+
+    for name in ("pwsh", "pwsh.exe"):
+        found = shutil.which(name)
+        if found:
+            return Path(found)
+    return None
+
+
+def _powershell_critical_scripts(repo_root: Path) -> list[str]:
+    config = _night_supervisor_config(repo_root)
+    validation = config.get("validation") if isinstance(config.get("validation"), dict) else {}
+    configured = validation.get("powershell_critical_scripts", DEFAULT_POWERSHELL_CRITICAL_SCRIPTS)
+    if not isinstance(configured, list):
+        configured = list(DEFAULT_POWERSHELL_CRITICAL_SCRIPTS)
+
+    scripts = []
+    for item in configured:
+        rel = str(item).replace("\\", "/").strip()
+        if rel and rel not in scripts:
+            scripts.append(rel)
+    return scripts or list(DEFAULT_POWERSHELL_CRITICAL_SCRIPTS)
+
+
+def _powershell_parse_proof(repo_root: Path) -> dict:
+    scripts = _powershell_critical_scripts(repo_root)
+    executable = _powershell_executable()
+    if executable is None:
+        return {
+            "status": "DEFERRED_UNAVAILABLE",
+            "details": "No Windows PowerShell or pwsh executable was discoverable; parse proof did not run.",
+            "executable": "",
+            "scripts_checked": scripts,
+            "failures": [],
+        }
+
+    failures: list[str] = []
+    checked: list[str] = []
+
+    for rel in scripts:
+        target = repo_root / rel
+        if not target.is_file():
+            failures.append(f"missing:{rel}")
+            continue
+        checked.append(rel)
+        literal_target = str(target).replace("'", "''")
+        command = (
+            "$ErrorActionPreference='Stop'; "
+            "$tokens=$null; $errors=$null; "
+            f"$path='{literal_target}'; "
+            "[System.Management.Automation.Language.Parser]::ParseFile($path, [ref]$tokens, [ref]$errors) | Out-Null; "
+            "if ($errors.Count -gt 0) { "
+            "Write-Output ('PARSE_FAIL ' + $path + ' errors=' + $errors.Count); exit 2 "
+            "} else { Write-Output ('PARSE_PASS ' + $path) }"
+        )
+        try:
+            completed = subprocess.run(
+                [str(executable), "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=20,
+            )
+        except subprocess.TimeoutExpired:
+            failures.append(f"parse_timeout:{rel}")
+            continue
+        if completed.returncode != 0:
+            failures.append(f"parse_error:{rel}: exit={completed.returncode}")
+
+    if failures:
+        return {
+            "status": "FAIL",
+            "details": f"PowerShell parser failed or could not inspect {len(failures)} critical script(s).",
+            "executable": str(executable),
+            "scripts_checked": checked,
+            "failures": failures,
+        }
+
+    return {
+        "status": "PASS",
+        "details": f"PowerShell parser checked {len(checked)} critical script(s).",
+        "executable": str(executable),
+        "scripts_checked": checked,
+        "failures": [],
+    }
 
 
 def _latest_packet(repo_root: Path) -> dict:
@@ -347,6 +448,7 @@ def phase_checkpoint(repo_root: Path, writer: SandboxWriter, date_key: str) -> d
 
 def phase_validator(repo_root: Path) -> dict:
     failures: list[str] = []
+    ps_proof = _powershell_parse_proof(repo_root)
     # JSON parse over a bounded set of orchestration state files.
     orch = repo_root / "automation" / "orchestration"
     checked = 0
@@ -368,6 +470,8 @@ def phase_validator(repo_root: Path) -> dict:
     integrity_ok = _git(repo_root, "rev-parse", "--is-inside-work-tree").stdout.strip() == "true"
     if not integrity_ok:
         failures.append("repo_integrity: not inside a git work tree")
+    if ps_proof["status"] == "FAIL":
+        failures.extend(ps_proof["failures"])
 
     status = "PASS" if not failures else "FAIL"
     return {
@@ -377,12 +481,15 @@ def phase_validator(repo_root: Path) -> dict:
         "summary": (
             f"JSON parse checked {checked} files; git diff --check {'ok' if diff_ok else 'FAILED'}; "
             f"repo integrity {'ok' if integrity_ok else 'FAILED'}; "
-            "PowerShell parse DEFERRED (no pwsh in this environment)."
+            f"PowerShell parse {ps_proof['status']}."
         ),
         "mutations": [],
         "detail": {
             "json_files_checked": checked,
-            "powershell_parse": "DEFERRED_NO_PWSH",
+            "powershell_parse_status": ps_proof["status"],
+            "powershell_parse_details": ps_proof["details"],
+            "powershell_parse_executable": ps_proof["executable"],
+            "powershell_parse_scripts_checked": ps_proof["scripts_checked"],
             "failures": failures,
         },
         "next_safe_action": (

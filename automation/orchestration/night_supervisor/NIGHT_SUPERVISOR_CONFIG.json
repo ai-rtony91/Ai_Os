@@ -35,7 +35,10 @@
     "json_parse_sample_limit": 400,
     "run_git_diff_check": true,
     "run_repo_integrity_check": true,
-    "powershell_parse": "DEFERRED_NO_PWSH_IN_THIS_ENVIRONMENT"
+    "powershell_parse": "CONDITIONAL_IF_AVAILABLE",
+    "powershell_critical_scripts": [
+      "automation/orchestration/Invoke-AiOsNightCycle.ps1"
+    ]
   },
   "lock_expiry": {
     "default_ttl_minutes": 720,

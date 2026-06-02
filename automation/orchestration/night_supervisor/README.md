@@ -14,7 +14,7 @@ unattended with built-in safety, validation, and telemetry.
 |---|-------|-----------|
 | 1 | `supervisor_bootstrap` | Resolve repo identity; recover the most recent validated runtime snapshot. |
 | 2 | `nightly_telemetry_checkpoint` | Capture a read-only runtime snapshot + checkpoint. |
-| 3 | `validator_automation` | JSON parse (BOM-tolerant), `git diff --check`, repo integrity. **Fail-closed** → alert + stop. |
+| 3 | `validator_automation` | JSON parse (BOM-tolerant), `git diff --check`, repo integrity, and conditional PowerShell parser proof for configured critical scripts. **Fail-closed** → alert + stop. |
 | 4 | `lock_enforcement_automation` | Inspect locks; produce an expired-lock release **plan only**. |
 | 5 | `approval_automation` | Classify approval inbox by risk tier. LOW auto-eligible (disabled in DRY_RUN); MEDIUM/HIGH held for human review. |
 | 6 | `runtime_state_automation` | Write a **proposed** runtime-state update to the sandbox; active state untouched. |
@@ -96,11 +96,21 @@ canonical runtime location is deferred to a separate approved packet.
 ## What is automated vs. still manual
 
 **Automated (DRY_RUN, safe):** bootstrap recovery, checkpoint/snapshot capture,
-JSON + diff + integrity validation with fail-closed alerting, lock inspection,
-approval-tier classification, proposed runtime-state, resume records, append-only
-ledger, summary report + alerts, in-code safety enforcement.
+JSON + diff + integrity validation, conditional PowerShell parser proof with
+fail-closed alerting when available, lock inspection, approval-tier
+classification, proposed runtime-state, resume records, append-only ledger,
+summary report + alerts, in-code safety enforcement.
 
 **Still requires a human / separate approved APPLY packet:** releasing expired
 locks, approving LOW-tier packets, mutating active runtime/packet/approval state,
-PowerShell parse validation (no `pwsh` in the Linux container), promoting resume
-records to a canonical path, and any commit/push/merge.
+promoting resume records to a canonical path, and any commit/push/merge.
+
+### PowerShell parser proof
+
+On Windows, the Night Supervisor attempts parser-only validation for the
+configured critical script list, currently
+`automation/orchestration/Invoke-AiOsNightCycle.ps1`. It prefers
+`C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe` when present and
+falls back to `pwsh` only when safely discoverable. If neither executable is
+available, reports mark PowerShell parse as `DEFERRED_UNAVAILABLE` with a
+non-secret reason instead of claiming the parser ran.
