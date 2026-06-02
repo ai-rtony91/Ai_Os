@@ -18,7 +18,7 @@ These ownership decisions are approved for planning and future cleanup packets. 
 | Worker registry | `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json` | Treat other registries as presentation, legacy, or REVIEW_REQUIRED until validated |
 | Worker inbox | `automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json` | Protect active inbox state from cleanup |
 | Work packets | `automation/orchestration/work_packets/` | Protect active, blocked, and complete packet state |
-| Approval authority | `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json` and `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json` | Approval gate remains the APPLY checkpoint; validator output is evidence only |
+| Approval authority | `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json` and `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json` | `automation/orchestration/approval_inbox/` is the single active approval authority; Human Owner remains final approval authority; validator output, Relay, Operation Glue, telemetry, Night Supervisor, Autonomy Bridge, and dashboard outputs are evidence/projection only |
 | Validator chain | `automation/orchestration/validators/` | Validator PASS does not approve protected actions |
 | Commit package flow | `automation/orchestration/commit_packages/` | Commit/push remains blocked without explicit approval and gate review |
 | Runtime state readers/control | `scripts/control/`, `services/runtime/`, `services/orchestrator/`, `telemetry/runtime/` | Runtime/generated state is protected evidence until retention policy exists |
@@ -199,6 +199,9 @@ These markings reflect the current duplicate-brain validator state after active 
 | `docs/AI_OS/**` | MARK_REFERENCE_ONLY / NEEDS_HUMAN_DECISION | Source/reference material pending file-by-file merge/archive classification. It is not active authority unless a specific rule is promoted into canonical docs. |
 | `work_packets/**` | KEEP_PROTECTED_EVIDENCE / NEEDS_HUMAN_DECISION | Root work packets are not active queue authority. They require a retention or migration decision before archive. |
 | `approvals/**` | KEEP_PROTECTED_EVIDENCE / NEEDS_HUMAN_DECISION | Root approvals are not active approval authority. They require a retention or migration decision before archive. |
+| `relay/approvals/**` | KEEP_PROTECTED_EVIDENCE / PROJECTION_INPUT | Relay approvals may feed review and projection views, but they are not active approval authority unless promoted by Human Owner in a separate packet. |
+| `control/operation_glue/APPROVAL_INBOX.json` | LOCAL_RUNTIME_EVIDENCE / PROJECTION_INPUT | Operation Glue approval inbox state is local evidence and must not override `automation/orchestration/approval_inbox/`. |
+| `telemetry/approvals/**` | GENERATED_PROJECTION / EVIDENCE_ONLY | Unified approval projections are dashboard/validator evidence only; they do not approve, reject, migrate, or mutate source approval records. |
 | `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` | KEEP_PROTECTED_EVIDENCE / FUTURE_ARCHIVE_CANDIDATE | Compatibility evidence only until adapter-first registry use is fully proven and retirement is approved. |
 | `automation/orchestration/*.example.json` | FUTURE_ARCHIVE_CANDIDATE | Example files require fixture ownership review before archive. |
 
