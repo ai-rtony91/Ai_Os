@@ -1,0 +1,59 @@
+{
+  "schema": "AIOS_APPROVAL_INBOX.v1",
+  "approval_gate_id": "APPROVAL_INBOX_001",
+  "authority_status": "active_authority",
+  "authority_scope": "automation/orchestration/approval_inbox/",
+  "approval_authority": "Anthony Meza / Human Owner",
+  "packet_id": "AIOS-24H-LOOP-CODEX1-APPROVAL-INBOX-AUTHORITY-APPLY-001",
+  "requested_action": "APPROVAL_INBOX_AUTHORITY_REPAIR",
+  "requested_mode": "APPLY",
+  "approved_mode": "APPLY",
+  "approval_status": "completed",
+  "approved_by_human": true,
+  "approval_timestamp_placeholder": "2026-06-02T00:00:00Z",
+  "risk_level": "governance",
+  "allowed_paths": [
+    "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+    "docs/governance/source-of-truth-map.md",
+    "docs/governance/APPROVAL_FLOW_MAP.md"
+  ],
+  "blocked_paths": [
+    "services/",
+    "relay/",
+    "telemetry/",
+    "control/operation_glue/",
+    "apps/",
+    "scripts/",
+    ".git/",
+    "broker/",
+    "OANDA/",
+    "secrets/",
+    "api_keys/",
+    "live_trading/"
+  ],
+  "active_sources": [
+    "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+    "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+    "automation/orchestration/approval_inbox/APPROVAL_STATUS_RULES_001.md"
+  ],
+  "evidence_projection_sources": [
+    "relay/approvals/",
+    "control/operation_glue/APPROVAL_INBOX.json",
+    "telemetry/",
+    "Night Supervisor output",
+    "Autonomy Bridge output",
+    "dashboard output"
+  ],
+  "validator_chain_required": true,
+  "validator_output_authority": "evidence_only",
+  "commit_package_required": true,
+  "push_blocked_until_final_review": true,
+  "notes": [
+    "This active inbox restores the canonical approval authority file named by source-of-truth governance.",
+    "Human Owner remains final approval authority for APPLY, commit, push, merge, protected actions, runtime mutation, and safety overrides.",
+    "Relay, Operation Glue, telemetry, Night Supervisor, Autonomy Bridge, and dashboard outputs are evidence or projection surfaces only.",
+    "Validator output is evidence only and does not approve APPLY, commit, push, merge, PR creation, runtime mutation, trading, broker, OANDA, API key, secret, or scheduled-task actions.",
+    "This record does not authorize future APPLY work. Future APPLY packets require exact-scope Human Owner approval."
+  ],
+  "next_action": "Use automation/orchestration/approval_inbox/ as the active approval authority and treat other approval surfaces as evidence/projection unless separately promoted by Human Owner."
+}
