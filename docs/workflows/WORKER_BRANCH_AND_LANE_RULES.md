@@ -72,8 +72,33 @@ Allowed worker lanes are:
 - Claude Code West
 - Command Control
 - Validator Lane
+- Codex Worker 1
+- Codex Worker 2
+- Codex Worker 3
+- Codex Worker 4
+- Codex Worker 5
+- Codex Worker 6
 
 Any lane outside this list is `UNKNOWN` until the operator approves and documents it.
+
+## Safe 8-Window Parallel Map
+
+Main Control and Claude Reviewer do not create file ownership by themselves. Main Control owns command, approval, and protected-action decisions. Claude Reviewer is read-only unless a separate APPLY packet assigns exact files.
+
+Six Codex worker windows may run in parallel only when each packet resolves to a unique `worker_id` in `automation/orchestration/workers/AIOS_WORKER_PROFILES.json` and declares non-overlapping allowed paths. Window titles and presentation markers from `automation/window_identity/AIOS_WORKER_REGISTRY.json` are display-only and do not grant file ownership.
+
+Default non-overlap guidance:
+
+| Worker | Default lane | Default boundary |
+|---|---|---|
+| `codex_worker_1` | worker registry / orchestration ownership | `automation/orchestration/workers/` plus assigned worker ownership governance docs |
+| `codex_worker_2` | workflow docs | assigned `docs/workflows/` files |
+| `codex_worker_3` | governance docs | assigned `docs/governance/` files |
+| `codex_worker_4` | validators and schemas | assigned `automation/orchestration/validators/` and `schemas/` files |
+| `codex_worker_5` | dashboard UI | assigned `apps/dashboard/` UI files only |
+| `codex_worker_6` | audits and reports | assigned `docs/audits/` and reporting files only |
+
+Trading Lab, runtime, scheduler, approval mutation, active packet-state mutation, commit, push, merge, reset, clean, delete, broker, OANDA, API-key, secret, and live trading authority are never implied by this map.
 
 ## Worker Identity Names
 

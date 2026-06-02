@@ -54,6 +54,150 @@
       "enabled": true
     },
     {
+      "marker": "CODEX WORKER 1",
+      "title": "CODEX 1 - WORKERS",
+      "color": "Yellow",
+      "identityBanner": "[CODEX-1] WORKER REGISTRY :: ONLINE",
+      "beginMarker": "[CODEX-1] WORKER REGISTRY :: BEGIN",
+      "endMarker": "[CODEX-1] WORKER REGISTRY :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
+      "role": "Presentation marker for Codex Worker 1. Ownership must resolve through automation/orchestration/workers/AIOS_WORKER_PROFILES.json and the active packet.",
+      "allowedActions": [
+        "Use only packet-approved files",
+        "Prefer worker registry and ownership governance tasks",
+        "Run targeted local validators",
+        "Report files changed, validation, git status, commit, and push state"
+      ],
+      "blockedActions": [
+        "No authority from this window marker alone",
+        "No active packet, approval inbox, runtime, scheduler, trading, broker, OANDA, API key, or secret actions",
+        "No staging, commits, pushes, merges, reset, clean, delete, or backup actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "CODEX WORKER 2",
+      "title": "CODEX 2 - WORKFLOWS",
+      "color": "Yellow",
+      "identityBanner": "[CODEX-2] WORKFLOWS :: ONLINE",
+      "beginMarker": "[CODEX-2] WORKFLOWS :: BEGIN",
+      "endMarker": "[CODEX-2] WORKFLOWS :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
+      "role": "Presentation marker for Codex Worker 2. Ownership must resolve through automation/orchestration/workers/AIOS_WORKER_PROFILES.json and the active packet.",
+      "allowedActions": [
+        "Use only packet-approved files",
+        "Prefer assigned docs/workflows files",
+        "Run targeted local validators",
+        "Report files changed, validation, git status, commit, and push state"
+      ],
+      "blockedActions": [
+        "No authority from this window marker alone",
+        "No active packet, approval inbox, runtime, scheduler, trading, broker, OANDA, API key, or secret actions",
+        "No staging, commits, pushes, merges, reset, clean, delete, or backup actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "CODEX WORKER 3",
+      "title": "CODEX 3 - GOVERNANCE",
+      "color": "Yellow",
+      "identityBanner": "[CODEX-3] GOVERNANCE :: ONLINE",
+      "beginMarker": "[CODEX-3] GOVERNANCE :: BEGIN",
+      "endMarker": "[CODEX-3] GOVERNANCE :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
+      "role": "Presentation marker for Codex Worker 3. Ownership must resolve through automation/orchestration/workers/AIOS_WORKER_PROFILES.json and the active packet.",
+      "allowedActions": [
+        "Use only packet-approved files",
+        "Prefer assigned docs/governance files",
+        "Run targeted local validators",
+        "Report files changed, validation, git status, commit, and push state"
+      ],
+      "blockedActions": [
+        "No authority from this window marker alone",
+        "No active packet, approval inbox, runtime, scheduler, trading, broker, OANDA, API key, or secret actions",
+        "No staging, commits, pushes, merges, reset, clean, delete, or backup actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "CODEX WORKER 4",
+      "title": "CODEX 4 - VALIDATORS",
+      "color": "Yellow",
+      "identityBanner": "[CODEX-4] VALIDATORS :: ONLINE",
+      "beginMarker": "[CODEX-4] VALIDATORS :: BEGIN",
+      "endMarker": "[CODEX-4] VALIDATORS :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
+      "role": "Presentation marker for Codex Worker 4. Ownership must resolve through automation/orchestration/workers/AIOS_WORKER_PROFILES.json and the active packet.",
+      "allowedActions": [
+        "Use only packet-approved files",
+        "Prefer assigned validator and schema files",
+        "Run targeted local validators",
+        "Report files changed, validation, git status, commit, and push state"
+      ],
+      "blockedActions": [
+        "No authority from this window marker alone",
+        "No active packet, approval inbox, runtime, scheduler, trading, broker, OANDA, API key, or secret actions",
+        "No staging, commits, pushes, merges, reset, clean, delete, or backup actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "CODEX WORKER 5",
+      "title": "CODEX 5 - DASHBOARD UI",
+      "color": "Yellow",
+      "identityBanner": "[CODEX-5] DASHBOARD UI :: ONLINE",
+      "beginMarker": "[CODEX-5] DASHBOARD UI :: BEGIN",
+      "endMarker": "[CODEX-5] DASHBOARD UI :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
+      "role": "Presentation marker for Codex Worker 5. Ownership must resolve through automation/orchestration/workers/AIOS_WORKER_PROFILES.json and the active packet.",
+      "allowedActions": [
+        "Use only packet-approved files",
+        "Prefer assigned dashboard UI files",
+        "Run targeted local validators",
+        "Report files changed, validation, git status, commit, and push state"
+      ],
+      "blockedActions": [
+        "No authority from this window marker alone",
+        "No runtime API, telemetry persistence, active packet, approval inbox, scheduler, trading, broker, OANDA, API key, or secret actions",
+        "No staging, commits, pushes, merges, reset, clean, delete, or backup actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
+      "marker": "CODEX WORKER 6",
+      "title": "CODEX 6 - AUDITS",
+      "color": "Yellow",
+      "identityBanner": "[CODEX-6] AUDITS :: ONLINE",
+      "beginMarker": "[CODEX-6] AUDITS :: BEGIN",
+      "endMarker": "[CODEX-6] AUDITS :: END OF CHAT ",
+      "endMarkerFill": "=",
+      "endMarkerWidth": 120,
+      "role": "Presentation marker for Codex Worker 6. Ownership must resolve through automation/orchestration/workers/AIOS_WORKER_PROFILES.json and the active packet.",
+      "allowedActions": [
+        "Use only packet-approved files",
+        "Prefer assigned audit and reporting files",
+        "Run targeted local validators",
+        "Report files changed, validation, git status, commit, and push state"
+      ],
+      "blockedActions": [
+        "No authority from this window marker alone",
+        "No active packet, approval inbox, runtime, scheduler, trading, broker, OANDA, API key, or secret actions",
+        "No staging, commits, pushes, merges, reset, clean, delete, or backup actions"
+      ],
+      "nextCommand": "git status --short --branch",
+      "enabled": true
+    },
+    {
       "marker": "CLAUDE REVIEWER",
       "title": "CLAUDE - INSPECTOR",
       "emojiCodePoint": "0x1F9E0",
