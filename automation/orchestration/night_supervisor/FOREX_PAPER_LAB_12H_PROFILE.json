@@ -1,0 +1,100 @@
+{
+  "profile_id": "FOREX_PAPER_LAB_12H_PROFILE",
+  "status": "REPORT_ONLY_PROFILE",
+  "purpose": "Plan a future 12-hour AIOS Lab Forex Paper Trading Simulation Night Supervisor session without starting it.",
+  "source_plan": "docs/AI_OS/trading_laboratory/reference/FOREX_PAPER_LAB_12H_SUPERVISOR_PLAN_DRY_RUN_001.md",
+  "principle": "Base44 gives us the map. AIOS Lab paints the map later.",
+  "mode": "REPORT_ONLY",
+  "max_hours": 12,
+  "interval_minutes": 60,
+  "stop_marker_required": true,
+  "preflight_stop_marker_check": true,
+  "safety_boundary": {
+    "educational_use_only": true,
+    "paper_trading_simulation_only": true,
+    "report_only_by_default": true,
+    "no_live_trading": true,
+    "no_broker_apis": true,
+    "no_oanda": true,
+    "no_webhooks": true,
+    "no_real_market_data": true,
+    "no_real_orders": true,
+    "no_api_keys_or_secrets": true,
+    "no_automatic_commit": true,
+    "no_automatic_push": true,
+    "no_automatic_merge": true,
+    "no_dashboard_theme_css_layout_changes": true,
+    "no_base44_code_or_style_import": true
+  },
+  "allowed_work": [
+    "inspect Trading Lab paper simulation state",
+    "generate hourly gap reports",
+    "generate next-action packets",
+    "generate validator checklist proposals",
+    "update report-only outputs only if later approved"
+  ],
+  "blocked_work": [
+    "live trading",
+    "broker APIs",
+    "OANDA",
+    "webhooks",
+    "real market data",
+    "real orders",
+    "secrets/API keys",
+    "dashboard theme/CSS/layout changes",
+    "Base44 visual/code import",
+    "commits/pushes/merges",
+    "scheduler enable/disable"
+  ],
+  "hourly_plan": [
+    {
+      "hour": 1,
+      "focus": "repo/status/safety baseline"
+    },
+    {
+      "hour": 2,
+      "focus": "forex paper workflow map"
+    },
+    {
+      "hour": 3,
+      "focus": "signal intake gap report"
+    },
+    {
+      "hour": 4,
+      "focus": "risk gate gap report"
+    },
+    {
+      "hour": 5,
+      "focus": "practice ledger gap report"
+    },
+    {
+      "hour": 6,
+      "focus": "latency tracker gap report"
+    },
+    {
+      "hour": 7,
+      "focus": "scorecard/report gap report"
+    },
+    {
+      "hour": 8,
+      "focus": "strategy journal gap report"
+    },
+    {
+      "hour": 9,
+      "focus": "wording/safety-label gap report"
+    },
+    {
+      "hour": 10,
+      "focus": "packet queue generation"
+    },
+    {
+      "hour": 11,
+      "focus": "validator/checklist generation"
+    },
+    {
+      "hour": 12,
+      "focus": "final digest and next-action queue"
+    }
+  ],
+  "activation_rule": "This profile is not a runner. A future approved APPLY packet is required before any Night Supervisor run, scheduler change, runtime output write, commit, push, or merge."
+}
