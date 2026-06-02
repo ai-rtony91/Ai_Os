@@ -21,7 +21,7 @@ These ownership decisions are approved for planning and future cleanup packets. 
 | Approval authority | `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json` and `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json` | `automation/orchestration/approval_inbox/` is the single active approval authority; Human Owner remains final approval authority; validator output, Relay, Operation Glue, telemetry, Night Supervisor, Autonomy Bridge, and dashboard outputs are evidence/projection only |
 | Validator chain | `automation/orchestration/validators/` | Validator PASS does not approve protected actions |
 | Commit package flow | `automation/orchestration/commit_packages/` | Commit/push remains blocked without explicit approval and gate review |
-| Runtime state readers/control | `scripts/control/`, `services/runtime/`, `services/orchestrator/`, `telemetry/runtime/` | Runtime/generated state is protected evidence until retention policy exists |
+| Runtime state readers/control | `scripts/control/`, `services/runtime/`, `services/orchestrator/`, `telemetry/runtime/` | Runtime/generated state is protected evidence until retention policy exists; runtime proof-trail readers must label ledger evidence as current, stale, historical, or reference |
 | Trading Lab package ownership | `apps/trading_lab/trading_lab/` likely long-term; `aios/modules/trader/` remains active | REVIEW_REQUIRED; keep both active and do not consolidate yet |
 | Operator layer | `aios.ps1` root launcher plus canonical `automation/orchestration/` | Keep `automation/operator/` active launcher/legacy-mixed until dependency review |
 | Dashboard data source | Current fixture-driven `apps/dashboard/`; future read-only API owner `services/orchestrator/` | Do not wire API or remove fixtures until approved |
@@ -202,6 +202,8 @@ These markings reflect the current duplicate-brain validator state after active 
 | `relay/approvals/**` | KEEP_PROTECTED_EVIDENCE / PROJECTION_INPUT | Relay approvals may feed review and projection views, but they are not active approval authority unless promoted by Human Owner in a separate packet. |
 | `control/operation_glue/APPROVAL_INBOX.json` | LOCAL_RUNTIME_EVIDENCE / PROJECTION_INPUT | Operation Glue approval inbox state is local evidence and must not override `automation/orchestration/approval_inbox/`. |
 | `telemetry/approvals/**` | GENERATED_PROJECTION / EVIDENCE_ONLY | Unified approval projections are dashboard/validator evidence only; they do not approve, reject, migrate, or mutate source approval records. |
+| `telemetry/work_ledger.jsonl` | KEEP_PROTECTED_EVIDENCE / GENERAL_WORK_TELEMETRY | Historical/general work telemetry ledger. It can look canonical, but it must be treated as stale unless recent writes prove it has been revived. Staleness here does not prove that Night Supervisor activity did not occur. |
+| `telemetry/night_supervisor/night_ledger.jsonl` | KEEP_PROTECTED_EVIDENCE / ACTIVE_NIGHT_RUNTIME_LEDGER | Current Night Supervisor and Night Cycle runtime ledger. It proves runtime-cycle evidence only; it does not prove productive autonomy unless paired with a real GREEN task output, truthful marker evidence, validation, and report. |
 | `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` | KEEP_PROTECTED_EVIDENCE / FUTURE_ARCHIVE_CANDIDATE | Compatibility evidence only until adapter-first registry use is fully proven and retirement is approved. |
 | `automation/orchestration/*.example.json` | FUTURE_ARCHIVE_CANDIDATE | Example files require fixture ownership review before archive. |
 
@@ -210,6 +212,15 @@ Current delete readiness:
 - `ACTIVE_DEPENDENCY` count is 0.
 - Safe delete candidate count is 0.
 - No old-brain path is approved for deletion by this map.
+
+Runtime proof-trail ledger rule:
+
+- `telemetry/work_ledger.jsonl` is the general work telemetry ledger and may be historical/stale unless current writes prove otherwise.
+- `telemetry/night_supervisor/night_ledger.jsonl` is the active Night Supervisor/Night Cycle runtime ledger today.
+- Dashboards, morning reports, runtime exporters, and visibility adapters must label ledger evidence as current, stale, historical, or reference instead of treating every ledger path as the same authority.
+- AI_OS must not treat stale `telemetry/work_ledger.jsonl` as proof that no night runtime activity occurred.
+- AI_OS must not claim productive autonomy from `telemetry/night_supervisor/night_ledger.jsonl` unless a real GREEN task produced a safe work product and the matching marker, validator, ledger, and report evidence exists.
+- Future productive proof must write to the chosen canonical runtime proof trail or an explicit ledger pointer/index approved by Human Owner packet authority.
 
 ## What files should not be treated as active authority
 

@@ -318,6 +318,9 @@ export default function App() {
   }, [eventQuery, runtimeVisibility.telemetry.recentEvents]);
 
   const healthTone = runtimeVisibility.health.healthy ? "good" : "danger";
+  const ledgerAuthority = runtimeVisibility.ledgerAuthority ?? {};
+  const workLedger = ledgerAuthority.workLedger ?? {};
+  const nightSupervisorLedger = ledgerAuthority.nightSupervisorLedger ?? {};
   const failedGroups = runtimeVisibility.failedPackets;
   const bridgeMetrics = autonomyBridgeCards[0]?.metrics ?? {};
   const winsCount = bridgeMetrics.wins ?? autonomyBridgeState.wins_count ?? "UNKNOWN";
@@ -726,7 +729,20 @@ export default function App() {
           <div className="ledgerSummary">
             <Metric label="Events" value={runtimeVisibility.telemetry.eventCount} />
             <Metric label="Invalid lines" value={runtimeVisibility.telemetry.invalidLineCount} />
+            <Metric
+              label="Work ledger"
+              value={workLedger.status ?? "UNKNOWN"}
+              tone={statusTone(workLedger.status ?? "UNKNOWN")}
+            />
+            <Metric label="Work events" value={workLedger.eventCount ?? "UNKNOWN"} />
+            <Metric
+              label="Night ledger"
+              value={nightSupervisorLedger.status ?? "UNKNOWN"}
+              tone={statusTone(nightSupervisorLedger.status ?? "UNKNOWN")}
+            />
+            <Metric label="Night events" value={nightSupervisorLedger.eventCount ?? "UNKNOWN"} />
           </div>
+          <p className="nextAction">{ledgerAuthority.proofBoundary ?? "Ledger evidence is display-only."}</p>
           <div className="eventList">
             {filteredEvents.map((event) => (
               <article className="eventItem" key={event.eventId}>
