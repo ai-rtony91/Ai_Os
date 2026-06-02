@@ -22,19 +22,27 @@ documented here — NOT built by Codex).
 
 ---
 
-## ISSUE 1 — Outbound: notifier has no Telegram channel
-notifier.py (from prior packet) has only a `file` channel.
+## ISSUE 1 — Outbound: notifier has no live Telegram sender
+notifier.py has a Telegram DRY_RUN scaffold. Live Telegram send remains blocked until a
+separate explicit live-send approval.
 
 ### SOLUTION 1 — Add `telegram` channel to notifier.py
 - Extend `services/python_supervisor/notifier.py` with a `telegram` channel:
-  - Reads `AIOS_TG_BOT_TOKEN` and `AIOS_TG_CHAT_ID` from env ONLY (never hardcode/commit).
-  - On BLOCKED / NEEDS_APPROVAL transition, call Telegram `sendMessage`:
+  - Checks whether `AIOS_TG_BOT_TOKEN` and `AIOS_TG_CHAT_ID` are present without printing,
+    storing, or logging secret values.
+  - In DRY_RUN, renders the expected SOS message preview and reports missing/present
+    credential names only.
+  - In APPLY/live mode, stays blocked unless a later packet adds an explicit approved
+    live-send flag.
+  - On true SOS/BLOCKED transition only, call Telegram `sendMessage`:
     - Text = approval id, risk, reason, proposed action (from the approval record).
     - `reply_markup` = inline keyboard with two callback buttons:
       `✅ Approve` -> callback_data `apv:<id>:approve`
       `❌ Reject`  -> callback_data `apv:<id>:reject`
     - Prefix SOS-class messages with a fixed token `#AIOS_SOS` so Tasker can pattern-match
       and fire the wake-up alarm.
+    - Do not prefix routine pass, warning, digest, stale/reference, or normal approval backlog
+      messages with `#AIOS_SOS`.
   - Keep `file` channel as fallback (always also write `relay/reports/SOS_OUTBOX/`).
   - Idempotent via existing `telemetry/night_supervisor/last_notified.json`.
 
@@ -62,7 +70,9 @@ No code captures the button tap / reply and writes an approval decision.
 A blocker at 02:00 must physically wake Anthony.
 
 ### SOLUTION 3 — Escalation contract (Codex documents; Anthony configures phone)
-- AIOS side: SOS-class messages carry the `#AIOS_SOS` token + risk=RED/HIGH marker.
+- AIOS side: true SOS-class messages carry the `#AIOS_SOS` token + risk=RED/HIGH marker.
+- Normal `NEEDS_APPROVAL` backlog is not wake-worthy unless another classifier escalates it
+  into a true blocker.
 - Write `relay/reports/TASKER_SETUP.md` describing the phone-side profile Anthony builds:
   - AutoNotification "Intercept" on the Telegram app, content filter `#AIOS_SOS`.
   - Task: set alarm-stream volume to max + play alarm tone + TTS the reason, bypassing
@@ -81,7 +91,8 @@ A blocker at 02:00 must physically wake Anthony.
 ## GATED ITEM — write approval, DO NOT execute
 `relay/approvals/enable-telegram-bridge.approval.md` (already drafted by Claude) — needs
 `AIOS_TG_BOT_TOKEN` + `AIOS_TG_CHAT_ID`. Anthony creates the bot via @BotFather, gets his
-chat_id, and sets the env vars himself. Codex must not hold or commit the token.
+chat_id, and sets the env vars himself. Codex must not hold, read aloud, print, log, or commit
+the token or chat value.
 
 ## OUT OF SCOPE
 - HMAC message signing (future hardening; chat_id lock is sufficient for v1).
@@ -90,8 +101,9 @@ chat_id, and sets the env vars himself. Codex must not hold or commit the token.
 ---
 
 ## SELF-REVIEW CHECKLIST (must pass before APPLY)
-- [ ] notifier `telegram` channel: with fake token in DRY_RUN, builds correct sendMessage
-      payload + inline keyboard, does NOT make a live call in DRY_RUN.
+- [ ] notifier `telegram` channel: in DRY_RUN, builds correct SOS message preview, reports
+      credential presence by variable name only, and does NOT make a live call.
+- [ ] Non-SOS categories do not include `#AIOS_SOS` and do not wake Tasker.
 - [ ] telegram_relay drops any update whose chat_id != AIOS_TG_CHAT_ID (identity gate proven).
 - [ ] Seeded callback `apv:<id>:approve` writes `relay/approvals/approved/<id>...` with origin
       preserved; resume consumer then re-queues it to `relay/inbox/`. Full O closes.
