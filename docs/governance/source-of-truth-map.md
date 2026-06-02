@@ -222,6 +222,13 @@ Runtime proof-trail ledger rule:
 - AI_OS must not claim productive autonomy from `telemetry/night_supervisor/night_ledger.jsonl` unless a real GREEN task produced a safe work product and the matching marker, validator, ledger, and report evidence exists.
 - Future productive proof must write to the chosen canonical runtime proof trail or an explicit ledger pointer/index approved by Human Owner packet authority.
 
+Runtime proof-trail marker rule:
+
+- `control/cycle/last_marker.json` is protected runtime evidence and must distinguish requested apply intent from effective apply authority.
+- Cycle markers must preserve `requested_apply`, `effective_apply`, `mode`, `observe_only`, `completed_phases`, `skipped_phases`, and per-phase result evidence when available.
+- Skipped observer-mode phases must not be counted or displayed as completed productive work.
+- Dashboard, morning report, and runtime visibility readers that consume cycle markers must label skipped, completed, failed, and not-run phases separately.
+
 ## What files should not be treated as active authority
 
 | Path pattern | Classification | Reason |

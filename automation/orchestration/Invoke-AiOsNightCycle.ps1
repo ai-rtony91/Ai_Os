@@ -37,6 +37,11 @@ $script:AiOsNextIntervalSeconds = $IntervalSeconds
 $script:AiOsCycleId = [guid]::NewGuid().ToString()
 $script:AiOsCompletedCycleCount = 0
 $script:AiOsResumeActive = [string]::IsNullOrWhiteSpace($ResumeFrom)
+$script:AiOsRequestedApply = [bool]$Apply
+$script:AiOsEffectiveApply = $false
+$script:AiOsMode = "UNRESOLVED"
+$script:AiOsModeReason = ""
+$script:AiOsObserveOnly = $null
 $script:AiOsPhaseNames = @(
     "hygiene",
     "clear-stale-approvals",
@@ -81,22 +86,75 @@ function Read-CycleMarker {
     }
 }
 
+function Set-AiOsMarkerModeContext {
+    param(
+        [Parameter(Mandatory = $true)]$Mode,
+        [Parameter(Mandatory = $true)][bool]$ObserveOnly,
+        [Parameter(Mandatory = $true)][bool]$EffectiveApply
+    )
+
+    $modeNames = @($Mode.PSObject.Properties.Name)
+    $script:AiOsMode = if ($modeNames -contains "mode" -and $null -ne $Mode.mode) { [string]$Mode.mode } else { "UNKNOWN" }
+    $script:AiOsModeReason = if ($modeNames -contains "reason" -and $null -ne $Mode.reason) { [string]$Mode.reason } else { "" }
+    $script:AiOsObserveOnly = $ObserveOnly
+    $script:AiOsEffectiveApply = $EffectiveApply
+}
+
 function Write-CycleMarker {
     param(
         [string]$Phase = "",
-        [Parameter(Mandatory = $true)][ValidateSet("STARTED", "COMPLETE", "CYCLE_COMPLETE")]
-        [string]$State
+        [Parameter(Mandatory = $true)][ValidateSet("STARTED", "COMPLETE", "SKIPPED", "CYCLE_COMPLETE")]
+        [string]$State,
+        [string]$Reason = "",
+        [Nullable[int]]$ExitCode = $null
     )
 
     $existing = Read-CycleMarker
     $completed = @()
-    if ($State -eq "STARTED" -and ($null -eq $existing -or [string]$existing.cycle_id -ne $script:AiOsCycleId)) {
+    $skipped = @()
+    $phaseResults = @()
+    $existingNames = if ($null -ne $existing) { @($existing.PSObject.Properties.Name) } else { @() }
+    $sameCycle = ($existingNames -contains "cycle_id" -and [string]$existing.cycle_id -eq $script:AiOsCycleId)
+    if (-not $sameCycle) {
         $completed = @()
-    } elseif ($null -ne $existing -and $null -ne $existing.completed_phases) {
-        $completed = @($existing.completed_phases | ForEach-Object { [string]$_ })
+        $skipped = @()
+        $phaseResults = @()
+    } else {
+        if ($existingNames -contains "completed_phases" -and $null -ne $existing.completed_phases) {
+            $completed = @($existing.completed_phases | ForEach-Object { [string]$_ })
+        }
+        if ($existingNames -contains "skipped_phases" -and $null -ne $existing.skipped_phases) {
+            $skipped = @($existing.skipped_phases | ForEach-Object { [string]$_ })
+        }
+        if ($existingNames -contains "phase_results" -and $null -ne $existing.phase_results) {
+            $phaseResults = @($existing.phase_results | Where-Object {
+                [string]::IsNullOrWhiteSpace($Phase) -or [string]$_.name -ne $Phase
+            })
+        }
     }
     if ($State -eq "COMPLETE" -and -not [string]::IsNullOrWhiteSpace($Phase) -and $completed -notcontains $Phase) {
         $completed += $Phase
+    }
+    if ($State -eq "SKIPPED" -and -not [string]::IsNullOrWhiteSpace($Phase) -and $skipped -notcontains $Phase) {
+        $skipped += $Phase
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($Phase)) {
+        $result = [ordered]@{
+            name = $Phase
+            state = $State
+            result = if ($State -eq "SKIPPED") { "skipped" } elseif ($State -eq "COMPLETE") { "completed" } else { "started" }
+            reason = $Reason
+            requested_apply = $script:AiOsRequestedApply
+            effective_apply = $script:AiOsEffectiveApply
+            mode = $script:AiOsMode
+            observe_only = $script:AiOsObserveOnly
+            updated_at_utc = Get-AiOsUtc
+        }
+        if ($null -ne $ExitCode) {
+            $result["exit_code"] = [int]$ExitCode
+        }
+        $phaseResults += $result
     }
 
     $marker = [ordered]@{
@@ -104,12 +162,19 @@ function Write-CycleMarker {
         cycle_in_progress = ($State -ne "CYCLE_COMPLETE")
         phase_name = $Phase
         phase_state = $State
-        started_at = if ($State -eq "STARTED") { Get-AiOsUtc } elseif ($null -ne $existing -and $null -ne $existing.started_at) { [string]$existing.started_at } else { "" }
+        started_at = if ($State -eq "STARTED") { Get-AiOsUtc } elseif ($sameCycle -and $existingNames -contains "started_at" -and $null -ne $existing.started_at) { [string]$existing.started_at } else { "" }
         updated_at_utc = Get-AiOsUtc
         apply = [bool]$Apply
+        requested_apply = $script:AiOsRequestedApply
+        effective_apply = $script:AiOsEffectiveApply
+        mode = $script:AiOsMode
+        mode_reason = $script:AiOsModeReason
+        observe_only = $script:AiOsObserveOnly
         resume_from = $ResumeFrom
         phases = @($script:AiOsPhaseNames | ForEach-Object { [ordered]@{ name = $_ } })
         completed_phases = @($completed)
+        skipped_phases = @($skipped)
+        phase_results = @($phaseResults)
     }
 
     $markerDir = Split-Path -Parent $cycleMarkerPath
@@ -152,6 +217,7 @@ function Test-AiOsResumeSkip {
         return $false
     }
     Write-AiOsNightCycleLog -Message ("RESUME SKIP phase={0} waiting_for={1}" -f $Name, $ResumeFrom)
+    Write-CycleMarker -Phase $Name -State "SKIPPED" -Reason ("RESUME_WAITING_FOR:{0}" -f $ResumeFrom)
     return $true
 }
 
@@ -166,7 +232,7 @@ function Complete-AiOsSkippedPhase {
     }
     Write-CycleMarker -Phase $Name -State "STARTED"
     Write-AiOsNightCycleLog -Message ("STEP {0} SKIP {1} {2}" -f $Number, $Name, $Reason)
-    Write-CycleMarker -Phase $Name -State "COMPLETE"
+    Write-CycleMarker -Phase $Name -State "SKIPPED" -Reason $Reason
     Update-AiOsDashboardState
 }
 
@@ -191,7 +257,7 @@ function Invoke-AiOsStep {
         throw "Night cycle step failed: $Name exit=$exit"
     }
     Write-AiOsNightCycleLog -Message ("STEP {0} PASS {1}" -f $Number, $Name)
-    Write-CycleMarker -Phase $Name -State "COMPLETE"
+    Write-CycleMarker -Phase $Name -State "COMPLETE" -ExitCode $exit
     Update-AiOsDashboardState
 }
 
@@ -238,6 +304,7 @@ function Invoke-AiOsNightCycleOnce {
     [string[]]$briefArgs = if ($effectiveApply) { @("-Apply") } else { @() }
     [string[]]$notifierArgs = @($notifier, "--channel", "file")
     if ($effectiveApply) { $notifierArgs += "--apply" }
+    Set-AiOsMarkerModeContext -Mode $mode -ObserveOnly $observeOnly -EffectiveApply $effectiveApply
 
     foreach ($requiredPath in @($modeScript, $runner, $pullBacklog, $morningBriefScript, $staleApprovals, $selfContinuation, $nightSupervisorHarness, $bridge, $notifier)) {
         if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
