@@ -1,11 +1,18 @@
 [CmdletBinding()]
 param(
-    [string]$ProfilePath = (Join-Path $PSScriptRoot "AIOS_24H_VACATION_MODE_PROFILE.example.json"),
+    [string]$ProfilePath = "",
     [switch]$QuietJson
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+    throw "Unable to resolve script root. Run this script with -File or pass -ProfilePath."
+}
+if ([string]::IsNullOrWhiteSpace($ProfilePath)) {
+    $ProfilePath = Join-Path $PSScriptRoot "AIOS_24H_VACATION_MODE_PROFILE.example.json"
+}
 
 function Test-PropertyPresent {
     param([object]$InputObject, [string]$Name)
