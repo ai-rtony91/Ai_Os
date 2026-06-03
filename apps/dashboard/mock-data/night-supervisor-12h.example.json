@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "fixture": "night-supervisor-12h",
+    "status": "prototype / reference-only mock data",
+    "source": "Base44 sandbox import (AI_OS-native translation)",
+    "wired": false,
+    "safety": "Sandbox preview only. No live trading, no real notifications, no state mutation. Paper-only.",
+    "schemas": [
+      "schemas/aios/night_supervisor/aios_supervisor_session.schema.json",
+      "schemas/aios/night_supervisor/aios_supervisor_hour.schema.json",
+      "schemas/aios/night_supervisor/aios_alert_event.schema.json"
+    ]
+  },
+  "session": {
+    "session_id": "sess_20260602T1900Z_night12h",
+    "mode": "NIGHT_12H",
+    "status": "COMPLETED",
+    "started_at": "2026-06-02T19:00:00Z",
+    "planned_end_at": "2026-06-03T07:00:00Z",
+    "paper_mode_only": true
+  },
+  "totals": { "hours_planned": 12, "hours_recorded": 12, "alerts_total": 3, "blockers_total": 0, "build_prep_total": 2 },
+  "hour_timeline": [
+    { "hour_index": 0, "window_start": "2026-06-02T19:00:00Z", "status": "RECORDED", "validator_status": "PASS", "alerts": 1 },
+    { "hour_index": 5, "window_start": "2026-06-03T00:00:00Z", "status": "WARN", "validator_status": "WARN", "alerts": 1 },
+    { "hour_index": 8, "window_start": "2026-06-03T03:00:00Z", "status": "RECORDED", "validator_status": "PASS", "alerts": 1 },
+    { "hour_index": 11, "window_start": "2026-06-03T06:00:00Z", "status": "RECORDED", "validator_status": "PASS", "alerts": 0 }
+  ],
+  "alerts": [
+    { "alert_id": "alrt_night12h_00_start", "event_type": "AIOS_SESSION_START", "severity": "INFO", "wake_worthy": false, "delivered": false },
+    { "alert_id": "alrt_night12h_05_approval", "event_type": "AIOS_APPROVAL_NEEDED", "severity": "REVIEW", "wake_worthy": false, "delivered": false },
+    { "alert_id": "alrt_night12h_08_progress", "event_type": "AIOS_BUILD_PROGRESS", "severity": "INFO", "wake_worthy": false, "delivered": false }
+  ],
+  "build_prep": [
+    { "item_id": "prep_night12h_validator_repair", "title": "Repair archived-contract validator paths", "risk_level": "MEDIUM", "current_status": "ready_for_runner_preview", "approval_status": "PENDING" },
+    { "item_id": "prep_night12h_doc_index", "title": "Index new workflow docs in source-of-truth map", "risk_level": "LOW", "current_status": "ready_for_runner_preview", "approval_status": "NOT_REQUIRED" }
+  ],
+  "next_safe_action": "Review morning brief. Nothing was applied; 1 MEDIUM approval item is pending human review."
+}

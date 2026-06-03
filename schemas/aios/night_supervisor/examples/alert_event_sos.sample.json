@@ -1,0 +1,16 @@
+{
+  "schema": "AIOS_ALERT_EVENT.v1",
+  "alert_id": "alrt_vac24h_14_sos",
+  "session_id": "sess_20260602T0800Z_vacation24h",
+  "hour_id": "hr_vac24h_14",
+  "event_type": "AIOS_SOS_CRITICAL",
+  "severity": "SOS",
+  "wake_worthy": true,
+  "source": "validator_automation",
+  "trigger": "Critical validator FAIL during vacation window: repo integrity check could not confirm clean state.",
+  "evidence": "validator_status=FAIL on git diff --check; 0 secrets present; details in nightly report (non-secret).",
+  "channels_planned": ["file", "dashboard", "screen", "led", "voice"],
+  "delivered": false,
+  "created_at": "2026-06-02T22:03:00Z",
+  "next_safe_action": "Operator review required. This is a preview alert only — no notification was sent and no state changed."
+}

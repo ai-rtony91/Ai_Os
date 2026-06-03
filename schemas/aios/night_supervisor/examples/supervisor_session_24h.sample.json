@@ -1,0 +1,39 @@
+{
+  "schema": "AIOS_SUPERVISOR_SESSION.v1",
+  "session_id": "sess_20260602T0800Z_vacation24h",
+  "mode": "VACATION_24H",
+  "execution_mode": "DRY_RUN",
+  "status": "ACTIVE",
+  "started_at": "2026-06-02T08:00:00Z",
+  "planned_end_at": "2026-06-03T08:00:00Z",
+  "ended_at": null,
+  "repo": {
+    "repo_root": "C:/Dev/Ai.Os",
+    "branch": "main",
+    "head_sha": "f32f68b"
+  },
+  "hours": [
+    { "hour_id": "hr_vac24h_00", "hour_index": 0, "status": "RECORDED" },
+    { "hour_id": "hr_vac24h_06", "hour_index": 6, "status": "RECORDED" },
+    { "hour_id": "hr_vac24h_14", "hour_index": 14, "status": "BLOCKED" }
+  ],
+  "totals": {
+    "hours_planned": 24,
+    "hours_recorded": 15,
+    "alerts_total": 6,
+    "blockers_total": 1,
+    "build_prep_total": 4
+  },
+  "paper_mode_only": true,
+  "safety_boundary": {
+    "no_live_trading": true,
+    "no_broker_execution": true,
+    "no_secrets_handled": true,
+    "no_active_state_mutation": true,
+    "no_commit_or_push": true,
+    "no_scheduler_or_background_install": true,
+    "observe_only": true
+  },
+  "approval_authority": "Anthony Meza",
+  "next_safe_action": "1 blocker raised an SOS alert (preview only); review when convenient. No state changed."
+}

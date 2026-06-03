@@ -1,0 +1,53 @@
+{
+  "schema": "AIOS_CODEX_EXPORT_PACKET.v1",
+  "packet_id": "PKT-EAST-NS-IMPORT-001",
+  "exec_token": "<<APPLY:AIOS-EAST-NS-IMPORT-001>>",
+  "title": "Night Supervisor 12H/24H automation scaffold (East zone)",
+  "lane": "EAST",
+  "mode": "DRY_RUN",
+  "zone": "automation/orchestration + telemetry (East-owned)",
+  "worker_identity": "EAST_OCC_01",
+  "supervisor_identity": "Codex East Worksite Supervisor",
+  "allowed_paths": [
+    "automation/orchestration/night_supervisor/",
+    "automation/orchestration/notifications/",
+    "automation/orchestration/pi_robot_helper/",
+    "telemetry/night_supervisor/examples/",
+    "telemetry/pi_robot_helper/examples/"
+  ],
+  "forbidden_paths": [
+    "AGENTS.md",
+    "README.md",
+    "WHITEPAPER.md",
+    ".env",
+    "secrets/",
+    "credentials/",
+    "broker/",
+    "webhooks/"
+  ],
+  "mission": "Create DRY_RUN-only profiles, preview/test scripts, alert registries, and sample telemetry for 12H/24H night supervision. No executor, no hardware, no real senders, no scheduler.",
+  "files_to_create": [
+    "automation/orchestration/night_supervisor/AIOS_12H_MODE_PROFILE.example.json",
+    "automation/orchestration/night_supervisor/AIOS_24H_VACATION_MODE_PROFILE.example.json",
+    "automation/orchestration/night_supervisor/Invoke-AiOs12HModePreview.DRY_RUN.ps1",
+    "automation/orchestration/night_supervisor/Invoke-AiOsVacationModePreview.DRY_RUN.ps1",
+    "automation/orchestration/night_supervisor/Test-AiOs12H24HModeReadiness.DRY_RUN.ps1"
+  ],
+  "validation_commands": [
+    "git diff --check",
+    "powershell -NoProfile -Command \"$null = [System.Management.Automation.Language.Parser]::ParseFile('<file>.ps1',[ref]$null,[ref]$null)\"",
+    "python -c \"import json,sys; json.load(open(sys.argv[1]))\" <file>.json"
+  ],
+  "approval_required": true,
+  "stop_point": "Stop after creating DRY_RUN scaffold; do not wire into Invoke-AiOsNightCycle.ps1 or any scheduler.",
+  "report_requirements": [
+    "files created",
+    "files changed",
+    "validation commands + results",
+    "git status --short --branch",
+    "commit performed: NO",
+    "push performed: NO",
+    "next safe action"
+  ],
+  "safety_note": "No executor/autonomy, no hardware runtime, no real notification senders, no scheduler/service install, no commit/push/merge, no secrets, no live trading. Validator PASS is evidence only."
+}

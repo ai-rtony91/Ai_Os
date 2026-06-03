@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/pi_robot_helper/aios_robot_helper_status.schema.json",
+  "title": "AI_OS Pi Robot Helper Status",
+  "description": "Observe-only status snapshot for the Pi (PiCar-X) robot helper acting as an alert assistant. Translated from docs/specs/AIOS_PICAR_X_ROBOT_HELPER_SPEC.md. This contract describes status/preview only. It NEVER drives GPIO, motors, camera, microphone, speaker runtime, real TTS/STT, repo commits, or any AI_OS state mutation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "status_id",
+    "device_id",
+    "role",
+    "mode",
+    "reachable",
+    "omen_reachable",
+    "brief_available",
+    "display_state",
+    "voice_state",
+    "led_state",
+    "dark_mode",
+    "safety_boundary",
+    "generated_at",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_ROBOT_HELPER_STATUS.v1" },
+    "status_id": { "type": "string" },
+    "device_id": { "type": "string", "description": "e.g. picar-x-01." },
+    "role": { "type": "string", "const": "alert_assistant", "description": "The helper is an alert/announce assistant only." },
+    "mode": { "type": "string", "const": "OBSERVE_ONLY" },
+    "reachable": { "type": "boolean" },
+    "omen_reachable": { "type": ["boolean", "null"], "description": "Whether the Omen workstation appears reachable (watchdog observation), or null if unknown." },
+    "brief_available": { "type": "boolean", "description": "Whether a morning brief artifact appears available to announce." },
+    "last_alert_event_id": { "type": ["string", "null"] },
+    "display_state": { "type": "string", "enum": ["idle", "showing_status", "showing_alert", "dark"] },
+    "voice_state": { "type": "string", "enum": ["silent", "queued_preview", "muted_quiet_hours"], "description": "Voice is preview text only; no real TTS is emitted." },
+    "led_state": { "type": "string", "enum": ["off", "green", "amber", "red", "pulse_red"] },
+    "dark_mode": { "type": "boolean", "description": "Low-brightness dark-room operation active." },
+    "safety_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_gpio_motor_camera_mic_speaker_runtime",
+        "no_real_tts_stt",
+        "no_repo_commit_push_merge",
+        "no_state_mutation",
+        "no_secrets",
+        "llm_output_is_not_command_authority"
+      ],
+      "properties": {
+        "no_gpio_motor_camera_mic_speaker_runtime": { "type": "boolean", "const": true },
+        "no_real_tts_stt": { "type": "boolean", "const": true },
+        "no_repo_commit_push_merge": { "type": "boolean", "const": true },
+        "no_state_mutation": { "type": "boolean", "const": true },
+        "no_secrets": { "type": "boolean", "const": true },
+        "llm_output_is_not_command_authority": { "type": "boolean", "const": true }
+      }
+    },
+    "generated_at": { "type": "string" },
+    "next_safe_action": { "type": "string" }
+  }
+}

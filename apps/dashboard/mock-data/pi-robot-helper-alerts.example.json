@@ -1,0 +1,35 @@
+{
+  "_meta": {
+    "fixture": "pi-robot-helper-alerts",
+    "status": "prototype / reference-only mock data",
+    "source": "Base44 sandbox import (AI_OS-native translation)",
+    "wired": false,
+    "safety": "Sandbox preview only. The Pi robot helper is OBSERVE/ANNOUNCE-preview only: no GPIO/motor/camera/mic/speaker runtime, no real TTS, no commits, no state mutation.",
+    "schemas": [
+      "schemas/aios/pi_robot_helper/aios_robot_helper_status.schema.json",
+      "schemas/aios/pi_robot_helper/aios_voice_audio_rule.schema.json"
+    ]
+  },
+  "robot_status": {
+    "status_id": "rhs_20260603T0001Z",
+    "device_id": "picar-x-01",
+    "role": "alert_assistant",
+    "mode": "OBSERVE_ONLY",
+    "reachable": true,
+    "omen_reachable": true,
+    "brief_available": false,
+    "display_state": "showing_status",
+    "voice_state": "muted_quiet_hours",
+    "led_state": "amber",
+    "dark_mode": true
+  },
+  "alert_feed": [
+    { "alert_id": "alrt_night12h_05_approval", "event_type": "AIOS_APPROVAL_NEEDED", "severity": "REVIEW", "wake_worthy": false, "presented_channel": "display", "spoken": false },
+    { "alert_id": "alrt_vac24h_14_sos", "event_type": "AIOS_SOS_CRITICAL", "severity": "SOS", "wake_worthy": true, "presented_channel": "led", "spoken": false }
+  ],
+  "active_rules": [
+    { "rule_id": "var_sos_wake", "event_type": "AIOS_SOS_CRITICAL", "channel": "voice", "wake_worthy": true, "preview_only": true },
+    { "rule_id": "var_status_quiet", "event_type": "AIOS_STATUS_OK", "channel": "led", "wake_worthy": false, "preview_only": true }
+  ],
+  "next_safe_action": "Preview only. During quiet hours, SOS escalates to LED/voice preview; routine status stays quiet. No hardware actuated."
+}

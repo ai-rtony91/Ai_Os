@@ -1,0 +1,25 @@
+{
+  "_meta": {
+    "fixture": "build-progress-sos-alerts",
+    "status": "prototype / reference-only mock data",
+    "source": "Base44 sandbox import (AI_OS-native translation)",
+    "wired": false,
+    "safety": "Sandbox preview only. Alerts are previews; delivered is always false. No real notifications, no auto-execution, no state mutation.",
+    "schemas": [
+      "schemas/aios/night_supervisor/aios_alert_event.schema.json",
+      "schemas/aios/night_supervisor/aios_build_prep_item.schema.json"
+    ]
+  },
+  "stream": [
+    { "alert_id": "alrt_night12h_08_progress", "event_type": "AIOS_BUILD_PROGRESS", "severity": "INFO", "wake_worthy": false, "created_at": "2026-06-03T03:00:00Z", "summary": "2 build-prep items ready_for_runner_preview", "delivered": false },
+    { "alert_id": "alrt_vac24h_09_prep", "event_type": "AIOS_BUILD_PREP_READY", "severity": "INFO", "wake_worthy": false, "created_at": "2026-06-02T17:00:00Z", "summary": "Vacation prep queue at 4 items", "delivered": false },
+    { "alert_id": "alrt_vac24h_14_sos", "event_type": "AIOS_SOS_CRITICAL", "severity": "SOS", "wake_worthy": true, "created_at": "2026-06-02T22:03:00Z", "summary": "Critical validator FAIL — supervision blocked mutation", "delivered": false }
+  ],
+  "build_prep_queue": [
+    { "item_id": "prep_night12h_validator_repair", "title": "Repair archived-contract validator paths", "risk_level": "MEDIUM", "current_status": "ready_for_runner_preview", "approval_status": "PENDING" },
+    { "item_id": "prep_night12h_doc_index", "title": "Index new workflow docs in source-of-truth map", "risk_level": "LOW", "current_status": "ready_for_runner_preview", "approval_status": "NOT_REQUIRED" },
+    { "item_id": "prep_vac24h_dashboard_fixture", "title": "Add vacation fixture to dashboard mock library", "risk_level": "LOW", "current_status": "ready_for_runner_preview", "approval_status": "NOT_REQUIRED" },
+    { "item_id": "prep_vac24h_latency_probe", "title": "Instrument paper fill latency (currently null)", "risk_level": "MEDIUM", "current_status": "deferred", "approval_status": "PENDING" }
+  ],
+  "next_safe_action": "Review SOS preview and prep queue. Nothing applied; every alert delivered=false. APPLY requires a separate approved packet."
+}

@@ -1,0 +1,40 @@
+{
+  "_meta": {
+    "fixture": "vacation-24h-paper-mode",
+    "status": "prototype / reference-only mock data",
+    "source": "Base44 sandbox import (AI_OS-native translation)",
+    "wired": false,
+    "safety": "Sandbox preview only. Vacation mode is PAPER-ONLY. No live broker, no real orders, no real notifications, no state mutation.",
+    "schemas": [
+      "schemas/aios/night_supervisor/aios_supervisor_session.schema.json",
+      "schemas/aios/night_supervisor/aios_alert_event.schema.json"
+    ]
+  },
+  "session": {
+    "session_id": "sess_20260602T0800Z_vacation24h",
+    "mode": "VACATION_24H",
+    "status": "ACTIVE",
+    "started_at": "2026-06-02T08:00:00Z",
+    "planned_end_at": "2026-06-03T08:00:00Z",
+    "paper_mode_only": true
+  },
+  "totals": { "hours_planned": 24, "hours_recorded": 15, "alerts_total": 6, "blockers_total": 1, "build_prep_total": 4 },
+  "paper_trade_rollup": {
+    "paper_mode_only": true,
+    "trades_observed": 12,
+    "fill_latency_ms": null,
+    "note": "Latency not yet instrumented (fill_latency_ms=null). Paper-only; no live execution."
+  },
+  "alerts": [
+    { "alert_id": "alrt_vac24h_00_start", "event_type": "AIOS_SESSION_START", "severity": "INFO", "wake_worthy": false, "delivered": false },
+    { "alert_id": "alrt_vac24h_06_status", "event_type": "AIOS_STATUS_OK", "severity": "INFO", "wake_worthy": false, "delivered": false },
+    { "alert_id": "alrt_vac24h_14_sos", "event_type": "AIOS_SOS_CRITICAL", "severity": "SOS", "wake_worthy": true, "delivered": false }
+  ],
+  "active_blocker": {
+    "hour_index": 14,
+    "trigger": "Critical validator FAIL during vacation window.",
+    "result_classification": "BLOCKED",
+    "next_safe_action": "Operator review required; supervision halted mutation by design. Preview alert only."
+  },
+  "next_safe_action": "1 SOS preview alert raised at hour 14. No notification sent, no state changed. Review when convenient."
+}
