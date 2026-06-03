@@ -1,0 +1,21 @@
+{
+  "schema": "AIOS_ALERT_EVENT_TYPES.v1",
+  "version": "1.0.0",
+  "description": "Preview-only alert event type registry for AI_OS Night Supervisor and Pi Robot Helper routing. This registry does not send notifications.",
+  "event_types": [
+    { "event_type": "AIOS_BLOCKED", "schema_event_type": "AIOS_BLOCKED", "severity_floor": "CRITICAL" },
+    { "event_type": "APPROVAL_NEEDED", "schema_event_type": "AIOS_APPROVAL_NEEDED", "severity_floor": "REVIEW" },
+    { "event_type": "VALIDATION_FAILED", "schema_event_type": "AIOS_VALIDATOR_FAILED", "severity_floor": "WARNING" },
+    { "event_type": "STOP_MARKER_ACTIVE", "schema_event_type": "AIOS_BLOCKED", "severity_floor": "CRITICAL" },
+    { "event_type": "REPO_DIRTY_UNEXPECTED", "schema_event_type": "AIOS_BLOCKED", "severity_floor": "WARNING" },
+    { "event_type": "SUPERVISOR_STALE", "schema_event_type": "AIOS_STATUS_OK", "severity_floor": "REVIEW" },
+    { "event_type": "OMEN_UNREACHABLE", "schema_event_type": "AIOS_OMEN_WAKE_FAILED", "severity_floor": "CRITICAL" },
+    { "event_type": "PI_HELPER_UNREACHABLE", "schema_event_type": "AIOS_STATUS_OK", "severity_floor": "WARNING" },
+    { "event_type": "ALERT_CHANNEL_FAILED", "schema_event_type": "AIOS_BLOCKED", "severity_floor": "WARNING" },
+    { "event_type": "SECRET_RISK_DETECTED", "schema_event_type": "AIOS_SOS_CRITICAL", "severity_floor": "SOS" },
+    { "event_type": "FORBIDDEN_ACTION_REQUESTED", "schema_event_type": "AIOS_SOS_CRITICAL", "severity_floor": "SOS" },
+    { "event_type": "BUILD_PROGRESS", "schema_event_type": "AIOS_BUILD_PROGRESS", "severity_floor": "INFO" },
+    { "event_type": "HEARTBEAT", "schema_event_type": "AIOS_STATUS_OK", "severity_floor": "INFO" },
+    { "event_type": "COMPLETE", "schema_event_type": "AIOS_SESSION_END", "severity_floor": "INFO" }
+  ]
+}

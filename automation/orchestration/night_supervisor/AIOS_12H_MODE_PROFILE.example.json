@@ -1,0 +1,61 @@
+{
+  "schema": "AIOS_12H_MODE_PROFILE.v1",
+  "version": "1.0.0",
+  "mode": "REPORT_ONLY_BUILD_PREP",
+  "duration_hours": 12,
+  "max_cycles": 12,
+  "stop_marker_required": true,
+  "paper_mode_only": true,
+  "no_executor": true,
+  "no_scheduler": true,
+  "no_hardware": true,
+  "no_real_senders": true,
+  "no_commit_push_merge": true,
+  "allowed_outputs": [
+    "stdout_preview",
+    "operator_report_preview",
+    "build_prep_queue_preview",
+    "alert_route_preview"
+  ],
+  "blocked_actions": [
+    "active_runtime_mutation",
+    "packet_state_mutation",
+    "approval_state_mutation",
+    "lock_release",
+    "worker_launch",
+    "scheduler_registration",
+    "service_registration",
+    "hardware_access",
+    "real_notification_delivery",
+    "commit",
+    "push",
+    "merge",
+    "live_trading",
+    "paper_trading_execution",
+    "backtest_execution",
+    "strategy_optimization"
+  ],
+  "hourly_focus": [
+    { "hour": 1, "focus": "bootstrap and authority check" },
+    { "hour": 2, "focus": "repo state observation" },
+    { "hour": 3, "focus": "validator status observation" },
+    { "hour": 4, "focus": "approval queue preview" },
+    { "hour": 5, "focus": "blocked item classification" },
+    { "hour": 6, "focus": "build-prep candidate grouping" },
+    { "hour": 7, "focus": "paper-mode evidence review" },
+    { "hour": 8, "focus": "alert preview routing" },
+    { "hour": 9, "focus": "resume packet preview" },
+    { "hour": 10, "focus": "morning brief draft preview" },
+    { "hour": 11, "focus": "safety boundary confirmation" },
+    { "hour": 12, "focus": "operator handoff summary" }
+  ],
+  "safety_boundary": {
+    "observe_only": true,
+    "report_only": true,
+    "writes_allowed": false,
+    "live_send_allowed": false,
+    "hardware_allowed": false,
+    "llm_output_is_not_command_authority": true
+  },
+  "next_safe_action": "Run the 12H preview script and review stdout. No state is changed."
+}

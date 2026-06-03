@@ -1,0 +1,20 @@
+{
+  "schema": "AIOS_VOICE_AUDIO_RULE.v1",
+  "rule_id": "var_preview_review_001",
+  "event_type": "APPROVAL_NEEDED",
+  "severity_threshold": "REVIEW",
+  "channel": "voice",
+  "wake_worthy": false,
+  "quiet_hours": {
+    "enabled": true,
+    "start": "22:00",
+    "end": "07:00",
+    "suppress_below_severity": "CRITICAL"
+  },
+  "volume_profile": "muted_preview",
+  "dark_room_brightness": 15,
+  "message_template": "AI OS preview only. Operator review required.",
+  "preview_only": true,
+  "enabled": true,
+  "next_safe_action": "No real audio is produced. Review screen preview text."
+}

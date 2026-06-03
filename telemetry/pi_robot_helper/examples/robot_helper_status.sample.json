@@ -1,0 +1,25 @@
+{
+  "schema": "AIOS_ROBOT_HELPER_STATUS.v1",
+  "status_id": "rhs_preview_east_001",
+  "device_id": "picar-x-preview-01",
+  "role": "alert_assistant",
+  "mode": "OBSERVE_ONLY",
+  "reachable": true,
+  "omen_reachable": true,
+  "brief_available": false,
+  "last_alert_event_id": "alert_preview_001",
+  "display_state": "preview_text_only",
+  "voice_state": "blocked_preview_text_only",
+  "led_state": "amber_label_only",
+  "dark_mode": true,
+  "safety_boundary": {
+    "no_gpio_motor_camera_mic_speaker_runtime": true,
+    "no_real_tts_stt": true,
+    "no_repo_commit_push_merge": true,
+    "no_state_mutation": true,
+    "no_secrets": true,
+    "llm_output_is_not_command_authority": true
+  },
+  "generated_at": "2026-06-03T00:00:00Z",
+  "next_safe_action": "Preview only. Review the matching alert in AI_OS."
+}
