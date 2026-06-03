@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/night_supervisor/aios_codex_export_packet.schema.json",
+  "title": "AI_OS Night Supervisor Codex Export Packet",
+  "description": "Structured form of a tokenized Codex/agent work packet exported from a supervision session (the AI_OS-native translation of Base44 'Codex export packets'). A packet is a PROPOSAL. It is never auto-executed: it must satisfy the AGENTS.md identity/token rules and receive Human Owner approval before any worker applies it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "packet_id",
+    "exec_token",
+    "title",
+    "lane",
+    "mode",
+    "zone",
+    "worker_identity",
+    "supervisor_identity",
+    "allowed_paths",
+    "forbidden_paths",
+    "mission",
+    "files_to_create",
+    "validation_commands",
+    "approval_required",
+    "stop_point",
+    "report_requirements"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_CODEX_EXPORT_PACKET.v1" },
+    "packet_id": { "type": "string", "description": "e.g. PKT-EAST-NS-IMPORT-001." },
+    "exec_token": { "type": "string", "description": "AI_OS execution token marker for routing discipline, e.g. <<APPLY:AIOS-EAST-NS-IMPORT>>. Marks intent only; does not bypass safety." },
+    "title": { "type": "string" },
+    "lane": { "type": "string", "enum": ["EAST", "WEST", "VALIDATOR"] },
+    "mode": { "type": "string", "enum": ["DRY_RUN", "APPLY"] },
+    "zone": { "type": "string", "description": "Owned zone/territory for this packet." },
+    "worker_identity": { "type": "string", "description": "Packet-scoped worker identity, e.g. EAST_OCC_01 / WEST_OCC_01." },
+    "supervisor_identity": { "type": "string" },
+    "allowed_paths": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "forbidden_paths": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "mission": { "type": "string" },
+    "files_to_create": { "type": "array", "items": { "type": "string" } },
+    "files_to_change": { "type": "array", "items": { "type": "string" } },
+    "validation_commands": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "approval_required": {
+      "type": "boolean",
+      "const": true,
+      "description": "Always true. Validator PASS is evidence only and never authorizes APPLY/commit/push/merge."
+    },
+    "stop_point": { "type": "string" },
+    "report_requirements": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "safety_note": {
+      "type": "string",
+      "description": "Restates blocked capabilities: no executor/autonomy, no hardware runtime, no real senders, no scheduler, no commit/push/merge, no secrets, no live trading."
+    }
+  }
+}

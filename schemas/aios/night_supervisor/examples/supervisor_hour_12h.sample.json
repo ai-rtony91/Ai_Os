@@ -1,0 +1,28 @@
+{
+  "schema": "AIOS_SUPERVISOR_HOUR.v1",
+  "hour_id": "hr_night12h_05",
+  "session_id": "sess_20260602T1900Z_night12h",
+  "mode": "NIGHT_12H",
+  "hour_index": 5,
+  "window_start": "2026-06-03T00:00:00Z",
+  "window_end": "2026-06-03T01:00:00Z",
+  "status": "WARN",
+  "observations": [
+    { "kind": "repo_state", "summary": "Working tree clean; no changed files.", "evidence": "git status --porcelain returned 0 entries" },
+    { "kind": "validator", "summary": "JSON parse + git diff --check passed for tracked scaffold.", "evidence": "validator_status=PASS" },
+    { "kind": "paper_trade", "summary": "Paper lab idle outside market window; no fills.", "evidence": "trades_observed=0" },
+    { "kind": "queue", "summary": "1 approval item pending human review (MEDIUM).", "evidence": "approval_inbox.pending=1" }
+  ],
+  "validator_status": "WARN",
+  "alerts": [
+    { "alert_id": "alrt_night12h_05_approval", "event_type": "AIOS_APPROVAL_NEEDED", "severity": "REVIEW" }
+  ],
+  "build_prep_refs": ["prep_night12h_validator_repair"],
+  "paper_trade_summary": {
+    "paper_mode_only": true,
+    "trades_observed": 0,
+    "fill_latency_ms": null
+  },
+  "mutations": [],
+  "next_safe_action": "Human review of the 1 pending MEDIUM approval item; no auto-approval in DRY_RUN."
+}

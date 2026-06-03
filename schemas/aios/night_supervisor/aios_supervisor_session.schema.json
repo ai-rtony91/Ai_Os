@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/night_supervisor/aios_supervisor_session.schema.json",
+  "title": "AI_OS Night Supervisor Session",
+  "description": "A single bounded, observe-only night-supervision session (12H Night mode or 24H Vacation paper mode). Reference/prototype contract translated from the Base44 sandbox. This schema describes evidence only; it never grants APPLY, commit/push/merge, runtime mutation, scheduler, broker, or live-trading authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "session_id",
+    "mode",
+    "status",
+    "started_at",
+    "planned_end_at",
+    "repo",
+    "hours",
+    "totals",
+    "safety_boundary",
+    "approval_authority",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_SUPERVISOR_SESSION.v1" },
+    "session_id": { "type": "string", "description": "Stable session identifier, e.g. sess_20260602T1900Z_night12h." },
+    "mode": {
+      "type": "string",
+      "enum": ["NIGHT_12H", "VACATION_24H"],
+      "description": "NIGHT_12H = single overnight window. VACATION_24H = extended multi-day unattended paper window."
+    },
+    "execution_mode": {
+      "type": "string",
+      "const": "DRY_RUN",
+      "description": "Sessions are observe/report only. Active mutation requires a separate approved APPLY packet."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["PLANNED", "ACTIVE", "REVIEW", "BLOCKED", "COMPLETED", "ABORTED"]
+    },
+    "started_at": { "type": "string", "description": "ISO-8601 session start." },
+    "planned_end_at": { "type": "string", "description": "ISO-8601 planned end of the bounded window." },
+    "ended_at": { "type": ["string", "null"], "description": "ISO-8601 actual end, or null while active." },
+    "repo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo_root", "branch", "head_sha"],
+      "properties": {
+        "repo_root": { "type": "string" },
+        "branch": { "type": "string" },
+        "head_sha": { "type": "string" }
+      }
+    },
+    "hours": {
+      "type": "array",
+      "description": "Ordered references to aios_supervisor_hour records captured during this session.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hour_id", "hour_index", "status"],
+        "properties": {
+          "hour_id": { "type": "string" },
+          "hour_index": { "type": "integer", "minimum": 0 },
+          "status": { "type": "string", "enum": ["PLANNED", "RECORDED", "WARN", "BLOCKED", "SKIPPED"] }
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hours_planned", "hours_recorded", "alerts_total", "blockers_total", "build_prep_total"],
+      "properties": {
+        "hours_planned": { "type": "integer", "minimum": 0 },
+        "hours_recorded": { "type": "integer", "minimum": 0 },
+        "alerts_total": { "type": "integer", "minimum": 0 },
+        "blockers_total": { "type": "integer", "minimum": 0 },
+        "build_prep_total": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "paper_mode_only": {
+      "type": "boolean",
+      "const": true,
+      "description": "Any trading observation in this session is paper-only. Live broker/OANDA/real-order activity is blocked."
+    },
+    "safety_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "no_live_trading",
+        "no_broker_execution",
+        "no_secrets_handled",
+        "no_active_state_mutation",
+        "no_commit_or_push",
+        "no_scheduler_or_background_install",
+        "observe_only"
+      ],
+      "properties": {
+        "no_live_trading": { "type": "boolean", "const": true },
+        "no_broker_execution": { "type": "boolean", "const": true },
+        "no_secrets_handled": { "type": "boolean", "const": true },
+        "no_active_state_mutation": { "type": "boolean", "const": true },
+        "no_commit_or_push": { "type": "boolean", "const": true },
+        "no_scheduler_or_background_install": { "type": "boolean", "const": true },
+        "observe_only": { "type": "boolean", "const": true }
+      }
+    },
+    "approval_authority": { "type": "string", "description": "Human Owner who must approve any promotion to APPLY. Default: Anthony Meza." },
+    "next_safe_action": { "type": "string" }
+  }
+}

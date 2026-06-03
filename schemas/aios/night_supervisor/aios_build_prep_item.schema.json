@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/night_supervisor/aios_build_prep_item.schema.json",
+  "title": "AI_OS Night Supervisor Build-Prep Item",
+  "description": "A build task PREPARED (not executed) during night/vacation supervision for the operator's return. Prep is planning evidence only. It never auto-executes, auto-approves, or mutates active packet/approval/runtime state. Lifecycle uses the canonical states from docs/workflows/WORKER_TASK_LIFECYCLE_STANDARD.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "item_id",
+    "session_id",
+    "title",
+    "description",
+    "category",
+    "risk_level",
+    "current_status",
+    "approval_status",
+    "owning_path",
+    "validator_needed",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_BUILD_PREP_ITEM.v1" },
+    "item_id": { "type": "string" },
+    "session_id": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "category": {
+      "type": "string",
+      "enum": ["docs", "schema", "workflow", "test", "validator", "dashboard", "telemetry", "orchestration", "cleanup", "other"]
+    },
+    "risk_level": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+    "current_status": {
+      "type": "string",
+      "description": "Canonical worker lifecycle state. Build-prep items are capped at ready_for_runner_preview; APPLY-side states require a separate approved packet.",
+      "enum": [
+        "proposed",
+        "queued",
+        "ownership_checked",
+        "blocked_path_checked",
+        "ready_for_runner_preview",
+        "blocked",
+        "deferred"
+      ]
+    },
+    "approval_status": {
+      "type": "string",
+      "enum": ["NOT_REQUIRED", "PENDING", "APPROVED", "DENIED", "EXPIRED"],
+      "description": "Approval state is independent of lifecycle and never grants APPLY by itself."
+    },
+    "owning_path": { "type": "string", "description": "Likely canonical repo path/owner for this work, for duplicate-prevention." },
+    "validator_needed": { "type": "string", "description": "Validator or proof required before this item could ever be applied." },
+    "blocked_reason": { "type": ["string", "null"], "description": "Populated when current_status is blocked." },
+    "next_safe_action": { "type": "string" }
+  }
+}

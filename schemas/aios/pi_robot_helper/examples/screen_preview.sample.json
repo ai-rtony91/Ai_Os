@@ -1,0 +1,20 @@
+{
+  "schema": "AIOS_ROBOT_HELPER_SCREEN_PREVIEW.v1",
+  "preview_id": "scr_20260602T2203Z_sos",
+  "device_id": "picar-x-01",
+  "dark_mode": true,
+  "brightness_percent": 15,
+  "led_color": "pulse_red",
+  "alert_ref": "alrt_vac24h_14_sos",
+  "display_lines": [
+    "AI_OS  •  SOS",
+    "Validator FAIL (vacation)",
+    "22:03Z  H14",
+    "Review when able"
+  ],
+  "voice_line_text": "AI O S critical. Validator fail during vacation window. Operator review required.",
+  "spoken": false,
+  "preview_only": true,
+  "generated_at": "2026-06-02T22:03:05Z",
+  "next_safe_action": "Render preview only. No screen is driven, no audio is spoken, no hardware is actuated."
+}

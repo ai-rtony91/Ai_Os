@@ -1,0 +1,20 @@
+{
+  "schema": "AIOS_VOICE_AUDIO_RULE.v1",
+  "rule_id": "var_sos_wake",
+  "event_type": "AIOS_SOS_CRITICAL",
+  "severity_threshold": "SOS",
+  "channel": "voice",
+  "wake_worthy": true,
+  "quiet_hours": {
+    "enabled": true,
+    "start": "22:00",
+    "end": "07:00",
+    "suppress_below_severity": "CRITICAL"
+  },
+  "volume_profile": "urgent",
+  "dark_room_brightness": 15,
+  "message_template": "AI O S critical. {trigger}. Operator review required.",
+  "preview_only": true,
+  "enabled": true,
+  "next_safe_action": "Preview only. SOS bypasses quiet-hours suppression (>= CRITICAL). No real audio is produced by this rule."
+}

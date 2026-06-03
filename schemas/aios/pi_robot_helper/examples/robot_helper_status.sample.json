@@ -1,0 +1,25 @@
+{
+  "schema": "AIOS_ROBOT_HELPER_STATUS.v1",
+  "status_id": "rhs_20260603T0001Z",
+  "device_id": "picar-x-01",
+  "role": "alert_assistant",
+  "mode": "OBSERVE_ONLY",
+  "reachable": true,
+  "omen_reachable": true,
+  "brief_available": false,
+  "last_alert_event_id": "alrt_night12h_05_approval",
+  "display_state": "showing_status",
+  "voice_state": "muted_quiet_hours",
+  "led_state": "amber",
+  "dark_mode": true,
+  "safety_boundary": {
+    "no_gpio_motor_camera_mic_speaker_runtime": true,
+    "no_real_tts_stt": true,
+    "no_repo_commit_push_merge": true,
+    "no_state_mutation": true,
+    "no_secrets": true,
+    "llm_output_is_not_command_authority": true
+  },
+  "generated_at": "2026-06-03T00:01:00Z",
+  "next_safe_action": "Preview only: amber LED indicates a pending REVIEW alert. No announcement made during quiet hours."
+}

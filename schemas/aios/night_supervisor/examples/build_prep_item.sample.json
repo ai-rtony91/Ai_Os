@@ -1,0 +1,15 @@
+{
+  "schema": "AIOS_BUILD_PREP_ITEM.v1",
+  "item_id": "prep_night12h_validator_repair",
+  "session_id": "sess_20260602T1900Z_night12h",
+  "title": "Repair archived-contract validator paths",
+  "description": "Several validators reference archived contract paths and fail. Prepared as a scoped repair candidate for operator review. Not executed; no files changed.",
+  "category": "validator",
+  "risk_level": "MEDIUM",
+  "current_status": "ready_for_runner_preview",
+  "approval_status": "PENDING",
+  "owning_path": "automation/orchestration/ (validator chain) — exact file TBD by duplicate-intent search",
+  "validator_needed": "PowerShell parse + targeted validator dry-run before any APPLY.",
+  "blocked_reason": null,
+  "next_safe_action": "Operator reviews this prep item; a separate approved APPLY packet would be required to act on it."
+}

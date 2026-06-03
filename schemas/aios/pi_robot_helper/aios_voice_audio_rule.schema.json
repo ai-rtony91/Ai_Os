@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/pi_robot_helper/aios_voice_audio_rule.schema.json",
+  "title": "AI_OS Pi Robot Helper Voice/Audio Rule",
+  "description": "A routing rule mapping an alert event class to a preview presentation (display/voice/led/audio_tone) on the robot helper. preview_only is always true: rules describe what WOULD be presented. No real TTS, audio playback, or hardware actuation occurs from this contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "rule_id",
+    "event_type",
+    "severity_threshold",
+    "channel",
+    "wake_worthy",
+    "message_template",
+    "preview_only",
+    "enabled",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_VOICE_AUDIO_RULE.v1" },
+    "rule_id": { "type": "string" },
+    "event_type": {
+      "type": "string",
+      "description": "Alert class this rule matches. Should be one of the aios_alert_event.event_type values, or '*' for default.",
+      "enum": [
+        "*",
+        "AIOS_SESSION_START",
+        "AIOS_SESSION_END",
+        "AIOS_STATUS_OK",
+        "AIOS_BRIEF_READY",
+        "AIOS_SAFE_TO_IGNORE",
+        "AIOS_APPROVAL_NEEDED",
+        "AIOS_VALIDATOR_FAILED",
+        "AIOS_BLOCKED",
+        "AIOS_BUILD_PROGRESS",
+        "AIOS_BUILD_PREP_READY",
+        "AIOS_PAPER_TRADE_SUMMARY",
+        "AIOS_OMEN_WAKE_FAILED",
+        "AIOS_SOS_CRITICAL"
+      ]
+    },
+    "severity_threshold": {
+      "type": "string",
+      "enum": ["INFO", "REVIEW", "WARNING", "CRITICAL", "SOS"],
+      "description": "Minimum severity that activates this rule."
+    },
+    "channel": { "type": "string", "enum": ["display", "voice", "led", "audio_tone"] },
+    "wake_worthy": { "type": "boolean", "description": "Whether matching alerts may escalate to a wake-worthy presentation." },
+    "quiet_hours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "start": { "type": "string", "description": "Local HH:MM start of quiet hours." },
+        "end": { "type": "string", "description": "Local HH:MM end of quiet hours." },
+        "suppress_below_severity": { "type": "string", "enum": ["INFO", "REVIEW", "WARNING", "CRITICAL", "SOS"] }
+      }
+    },
+    "volume_profile": { "type": "string", "enum": ["mute", "low", "normal", "urgent"], "description": "Preview-only intended loudness; no audio is produced." },
+    "dark_room_brightness": { "type": "integer", "minimum": 0, "maximum": 100, "description": "Intended display brightness percent for dark-room operation." },
+    "message_template": { "type": "string", "description": "Text template for the announcement. Text only; never spoken by real TTS in this model." },
+    "preview_only": { "type": "boolean", "const": true },
+    "enabled": { "type": "boolean" },
+    "next_safe_action": { "type": "string" }
+  }
+}

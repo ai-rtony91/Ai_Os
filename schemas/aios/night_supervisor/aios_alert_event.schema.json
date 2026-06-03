@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/night_supervisor/aios_alert_event.schema.json",
+  "title": "AI_OS Night Supervisor Alert Event",
+  "description": "A single alert produced during night supervision (status, approval-needed, blocked, build-progress, SOS). This is a PREVIEW/evidence contract. delivered is always false in this model: real notification sending requires a separate approved channel and APPLY packet. No secrets, no live execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "alert_id",
+    "session_id",
+    "event_type",
+    "severity",
+    "wake_worthy",
+    "source",
+    "trigger",
+    "evidence",
+    "channels_planned",
+    "delivered",
+    "created_at",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_ALERT_EVENT.v1" },
+    "alert_id": { "type": "string" },
+    "session_id": { "type": "string" },
+    "hour_id": { "type": ["string", "null"], "description": "Originating aios_supervisor_hour, or null for session-level alerts." },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "AIOS_SESSION_START",
+        "AIOS_SESSION_END",
+        "AIOS_STATUS_OK",
+        "AIOS_BRIEF_READY",
+        "AIOS_SAFE_TO_IGNORE",
+        "AIOS_APPROVAL_NEEDED",
+        "AIOS_VALIDATOR_FAILED",
+        "AIOS_BLOCKED",
+        "AIOS_BUILD_PROGRESS",
+        "AIOS_BUILD_PREP_READY",
+        "AIOS_PAPER_TRADE_SUMMARY",
+        "AIOS_OMEN_WAKE_FAILED",
+        "AIOS_SOS_CRITICAL"
+      ],
+      "description": "Canonical alert classes. Aligns with docs/specs/AIOS_PICAR_X_ROBOT_HELPER_SPEC.md alert classes plus build-progress and SOS extensions."
+    },
+    "severity": { "type": "string", "enum": ["INFO", "REVIEW", "WARNING", "CRITICAL", "SOS"] },
+    "wake_worthy": {
+      "type": "boolean",
+      "description": "Whether this alert should escalate to a wake-worthy notification (e.g. SOS, blocked, wake-failed). Routing preview only."
+    },
+    "source": { "type": "string", "description": "Subsystem that produced the alert, e.g. validator_automation, paper_trade_lab, build_prep." },
+    "trigger": { "type": "string", "description": "Condition that fired the alert." },
+    "evidence": { "type": "string", "description": "Non-secret evidence string. Must never contain credentials, tokens, or keys." },
+    "channels_planned": {
+      "type": "array",
+      "description": "Channels a future approved dispatcher WOULD route to (preview only). No channel is contacted in this model.",
+      "items": { "type": "string", "enum": ["file", "dashboard", "screen", "voice", "led", "audio_tone", "telegram", "webhook"] }
+    },
+    "delivered": {
+      "type": "boolean",
+      "const": false,
+      "description": "Always false. This model previews routing only; it never performs real delivery."
+    },
+    "created_at": { "type": "string", "description": "ISO-8601 timestamp." },
+    "next_safe_action": { "type": "string" }
+  }
+}

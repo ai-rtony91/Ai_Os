@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/night_supervisor/aios_supervisor_hour.schema.json",
+  "title": "AI_OS Night Supervisor Hour Slice",
+  "description": "One hour-granularity observation slice inside an aios_supervisor_session. Read-only evidence. All writes (if any) are sandbox-only and never mutate active runtime, packet, approval, or lock state.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "hour_id",
+    "session_id",
+    "mode",
+    "hour_index",
+    "window_start",
+    "window_end",
+    "status",
+    "observations",
+    "validator_status",
+    "alerts",
+    "mutations",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": { "type": "string", "const": "AIOS_SUPERVISOR_HOUR.v1" },
+    "hour_id": { "type": "string" },
+    "session_id": { "type": "string", "description": "Parent aios_supervisor_session.session_id." },
+    "mode": { "type": "string", "enum": ["NIGHT_12H", "VACATION_24H"] },
+    "hour_index": { "type": "integer", "minimum": 0, "description": "0-based position within the session window." },
+    "window_start": { "type": "string", "description": "ISO-8601 start of this hour slice." },
+    "window_end": { "type": "string", "description": "ISO-8601 end of this hour slice." },
+    "status": { "type": "string", "enum": ["PLANNED", "RECORDED", "WARN", "BLOCKED", "SKIPPED"] },
+    "observations": {
+      "type": "array",
+      "description": "Read-only observations captured this hour (git state deltas, validator notes, queue snapshots).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "summary"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["repo_state", "validator", "queue", "lock", "paper_trade", "heartbeat", "note"] },
+          "summary": { "type": "string" },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "validator_status": {
+      "type": "string",
+      "enum": ["PASS", "PLANNED", "WARN", "FAIL", "BLOCKED", "DEFERRED", "SKIPPED", "NOT_RUN"]
+    },
+    "alerts": {
+      "type": "array",
+      "description": "References to aios_alert_event records raised this hour.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["alert_id", "event_type", "severity"],
+        "properties": {
+          "alert_id": { "type": "string" },
+          "event_type": { "type": "string" },
+          "severity": { "type": "string", "enum": ["INFO", "REVIEW", "WARNING", "CRITICAL", "SOS"] }
+        }
+      }
+    },
+    "build_prep_refs": {
+      "type": "array",
+      "description": "References to aios_build_prep_item records prepared this hour.",
+      "items": { "type": "string" }
+    },
+    "paper_trade_summary": {
+      "type": "object",
+      "description": "Paper-only trading observation. Never reflects live broker or real-order activity.",
+      "additionalProperties": false,
+      "required": ["paper_mode_only", "trades_observed", "fill_latency_ms"],
+      "properties": {
+        "paper_mode_only": { "type": "boolean", "const": true },
+        "trades_observed": { "type": "integer", "minimum": 0 },
+        "fill_latency_ms": { "type": ["number", "null"], "description": "Observed paper fill latency; null when not instrumented." }
+      }
+    },
+    "mutations": {
+      "type": "array",
+      "description": "Sandbox-only writes performed this hour. Empty when purely read-only. Never includes active runtime/packet/approval/lock state.",
+      "items": { "type": "string" }
+    },
+    "next_safe_action": { "type": "string" }
+  }
+}
