@@ -1,0 +1,36 @@
+{
+  "schema": "AIOS_ALERT_ROUTING_RULES.v1",
+  "version": "1.0.0",
+  "no_real_senders": true,
+  "file_preview_enabled": true,
+  "screen_preview_enabled": true,
+  "voice_preview_enabled": true,
+  "robot_preview_enabled": true,
+  "telegram_live_send_enabled": false,
+  "webhook_live_send_enabled": false,
+  "tts_enabled": false,
+  "hardware_enabled": false,
+  "quiet_hours": {
+    "enabled": true,
+    "start_local": "22:00",
+    "end_local": "07:00",
+    "suppress_below_severity": "CRITICAL",
+    "sos_can_bypass": true
+  },
+  "routing_table": [
+    { "event_type": "AIOS_BLOCKED", "severity": "CRITICAL", "channels_planned": ["file", "dashboard", "screen", "voice", "led"], "audio_cue": "blocked_review", "delivered": false },
+    { "event_type": "APPROVAL_NEEDED", "severity": "REVIEW", "channels_planned": ["file", "dashboard", "screen"], "audio_cue": "review_chime", "delivered": false },
+    { "event_type": "VALIDATION_FAILED", "severity": "WARNING", "channels_planned": ["file", "dashboard", "screen", "led"], "audio_cue": "warning_chime", "delivered": false },
+    { "event_type": "STOP_MARKER_ACTIVE", "severity": "CRITICAL", "channels_planned": ["file", "dashboard", "screen", "voice", "led"], "audio_cue": "stop_marker", "delivered": false },
+    { "event_type": "REPO_DIRTY_UNEXPECTED", "severity": "WARNING", "channels_planned": ["file", "dashboard", "screen"], "audio_cue": "repo_dirty", "delivered": false },
+    { "event_type": "SUPERVISOR_STALE", "severity": "REVIEW", "channels_planned": ["file", "dashboard", "screen"], "audio_cue": "stale_review", "delivered": false },
+    { "event_type": "OMEN_UNREACHABLE", "severity": "CRITICAL", "channels_planned": ["file", "dashboard", "screen", "voice", "led"], "audio_cue": "omen_unreachable", "delivered": false },
+    { "event_type": "PI_HELPER_UNREACHABLE", "severity": "WARNING", "channels_planned": ["file", "dashboard", "screen"], "audio_cue": "robot_unreachable", "delivered": false },
+    { "event_type": "ALERT_CHANNEL_FAILED", "severity": "WARNING", "channels_planned": ["file", "dashboard", "screen"], "audio_cue": "channel_failed", "delivered": false },
+    { "event_type": "SECRET_RISK_DETECTED", "severity": "SOS", "channels_planned": ["file", "dashboard", "screen", "voice", "led", "audio_tone"], "audio_cue": "sos_security", "delivered": false },
+    { "event_type": "FORBIDDEN_ACTION_REQUESTED", "severity": "SOS", "channels_planned": ["file", "dashboard", "screen", "voice", "led", "audio_tone"], "audio_cue": "sos_forbidden_action", "delivered": false },
+    { "event_type": "BUILD_PROGRESS", "severity": "INFO", "channels_planned": ["file", "dashboard"], "audio_cue": "none", "delivered": false },
+    { "event_type": "HEARTBEAT", "severity": "INFO", "channels_planned": ["file"], "audio_cue": "none", "delivered": false },
+    { "event_type": "COMPLETE", "severity": "INFO", "channels_planned": ["file", "dashboard", "screen"], "audio_cue": "complete_chime", "delivered": false }
+  ]
+}

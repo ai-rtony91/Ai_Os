@@ -1,0 +1,16 @@
+{
+  "schema": "AIOS_SCREEN_PREVIEW.v1",
+  "preview_id": "screen_preview_east_001",
+  "source_event_type": "APPROVAL_NEEDED",
+  "severity": "REVIEW",
+  "display_text": "AI_OS preview: approval needed. No sender or hardware action ran.",
+  "style": {
+    "theme": "dark_room",
+    "accent": "amber",
+    "brightness_percent": 15
+  },
+  "voice_text_preview": "AI OS preview only. Approval needed.",
+  "hardware_action": "BLOCKED",
+  "tts": "BLOCKED",
+  "next_safe_action": "Operator reviews the approval packet manually."
+}

@@ -1,0 +1,57 @@
+{
+  "schema": "AIOS_24H_VACATION_MODE_PROFILE.v1",
+  "version": "1.0.0",
+  "mode": "VACATION_24H_PAPER_MODE_PREVIEW",
+  "duration_hours": 24,
+  "blocks": [
+    {
+      "block_id": "hours_1_12",
+      "hours": "1-12",
+      "focus": "overnight observe-only supervision and build-prep preview"
+    },
+    {
+      "block_id": "hours_13_24",
+      "hours": "13-24",
+      "focus": "conservative daytime check-ins, paper-mode evidence review, and SOS preview escalation"
+    }
+  ],
+  "paper_mode_only": true,
+  "report_only": true,
+  "no_backtesting_execution": true,
+  "no_strategy_optimization_execution": true,
+  "no_broker": true,
+  "no_external_data_fetch": true,
+  "no_executor": true,
+  "no_scheduler": true,
+  "quiet_hours": {
+    "enabled": true,
+    "start_local": "22:00",
+    "end_local": "07:00",
+    "suppress_below_severity": "CRITICAL",
+    "sos_can_bypass": true
+  },
+  "escalation_classes": [
+    "AIOS_BLOCKED",
+    "VALIDATION_FAILED",
+    "APPROVAL_NEEDED",
+    "OMEN_UNREACHABLE",
+    "SECRET_RISK_DETECTED",
+    "FORBIDDEN_ACTION_REQUESTED"
+  ],
+  "human_review_checkpoints": [
+    { "hour": 1, "checkpoint": "start authority and path confirmation" },
+    { "hour": 6, "checkpoint": "first build-prep review" },
+    { "hour": 12, "checkpoint": "midpoint safety review" },
+    { "hour": 18, "checkpoint": "vacation-mode stale-state review" },
+    { "hour": 24, "checkpoint": "operator handoff review" }
+  ],
+  "safety_boundary": {
+    "observe_only": true,
+    "live_trading_blocked": true,
+    "paper_trading_execution_blocked": true,
+    "real_senders_blocked": true,
+    "hardware_blocked": true,
+    "commit_push_merge_blocked": true
+  },
+  "next_safe_action": "Run the 24H preview script and review the two block plan."
+}

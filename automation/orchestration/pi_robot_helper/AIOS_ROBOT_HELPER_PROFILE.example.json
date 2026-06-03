@@ -1,0 +1,39 @@
+{
+  "schema": "AIOS_ROBOT_HELPER_PROFILE.v1",
+  "version": "1.0.0",
+  "device_id": "picar-x-preview-01",
+  "role": "alert_assistant",
+  "mode": "OBSERVE_ONLY",
+  "robot_status": "PREVIEW_READY",
+  "omen_status": "AUTHORITY_REMAINS_WITH_OMEN",
+  "ai_os_evidence_status": "PREVIEW_ONLY",
+  "morning_brief_status": "NOT_AVAILABLE_IN_PREVIEW",
+  "alert_level": "REVIEW",
+  "display_text": "AI_OS preview: review required. No hardware action will run.",
+  "voice_text": "AI OS preview only. Operator review required.",
+  "audio_cue": "review_chime_label_only",
+  "led_cue": "amber_label_only",
+  "movement_cue": "none",
+  "next_safe_action": "Review alert evidence in AI_OS. Do not treat robot output as command authority.",
+  "hardware_enabled": false,
+  "tts_enabled": false,
+  "wol_enabled": false,
+  "gpio_enabled": false,
+  "dark_room": {
+    "enabled": true,
+    "brightness_percent": 15
+  },
+  "quiet_hours": {
+    "enabled": true,
+    "start_local": "22:00",
+    "end_local": "07:00",
+    "suppress_below_severity": "CRITICAL"
+  },
+  "safety_boundary": {
+    "no_gpio_motor_camera_mic_speaker_runtime": true,
+    "no_real_tts_stt": true,
+    "no_wol_packet_sending": true,
+    "no_service_scheduler": true,
+    "no_state_mutation": true
+  }
+}
