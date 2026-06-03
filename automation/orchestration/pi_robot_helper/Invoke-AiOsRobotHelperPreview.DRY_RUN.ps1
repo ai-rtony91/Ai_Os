@@ -1,10 +1,17 @@
 [CmdletBinding()]
 param(
-    [string]$ProfilePath = (Join-Path $PSScriptRoot "AIOS_ROBOT_HELPER_PROFILE.example.json")
+    [string]$ProfilePath = ""
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+    throw "Unable to resolve script root. Run this script with -File or pass -ProfilePath."
+}
+if ([string]::IsNullOrWhiteSpace($ProfilePath)) {
+    $ProfilePath = Join-Path $PSScriptRoot "AIOS_ROBOT_HELPER_PROFILE.example.json"
+}
 
 $profile = Get-Content -Raw -LiteralPath $ProfilePath | ConvertFrom-Json
 $preview = [ordered]@{
