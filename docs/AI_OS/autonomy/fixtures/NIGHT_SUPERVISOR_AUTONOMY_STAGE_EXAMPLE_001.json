@@ -1,0 +1,13 @@
+{
+  "stage_id": "18.13",
+  "stage_status": "PREVIEW_ONLY",
+  "mode": "DRY_RUN",
+  "preview_only": true,
+  "runtime_start_allowed": false,
+  "night_supervisor_runtime_start_allowed": false,
+  "human_approval_required": true,
+  "stop_point": "Stop after Night Supervisor preview classification.",
+  "profitability_priority": "TRUSTED_PROVEN_PROFITABILITY",
+  "fail_closed": true
+}
+

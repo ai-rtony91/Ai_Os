@@ -1,0 +1,17 @@
+{
+  "stage_id": "18.14",
+  "expected_worktree": "C:\\Dev\\aios-paper-sos-runtime-closeout",
+  "actual_worktree": "C:\\Dev\\Ai.Os",
+  "expected_python_cwd": "C:\\Dev\\aios-paper-sos-runtime-closeout",
+  "actual_python_cwd": "C:\\Dev\\Ai.Os",
+  "git_root": "C:\\Dev\\Ai.Os",
+  "userprofile_checked": true,
+  "pwd_checked": true,
+  "locks_clear": true,
+  "dirty_tree_status": "CLEAN_REQUIRED",
+  "forbidden_paths_clean": true,
+  "paper_sos_resume_allowed": false,
+  "human_approval_required": true,
+  "fail_closed": true
+}
+

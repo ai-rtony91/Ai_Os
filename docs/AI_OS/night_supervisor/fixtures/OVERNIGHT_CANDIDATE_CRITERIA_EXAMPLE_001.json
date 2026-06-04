@@ -1,0 +1,14 @@
+{
+  "stage_id": "18.18",
+  "full_overnight_candidate_allowed": false,
+  "human_approval_required": true,
+  "red_team_review_required": true,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "pi_gpio_motor_status": "BLOCKED",
+  "api_key_required": false,
+  "api_key_printed": false,
+  "fail_closed": true
+}
+

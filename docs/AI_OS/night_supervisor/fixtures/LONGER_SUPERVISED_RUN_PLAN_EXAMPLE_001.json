@@ -1,0 +1,10 @@
+{
+  "stage_id": "18.17",
+  "longer_supervised_run_allowed": false,
+  "max_duration_minutes": 120,
+  "human_approval_required": true,
+  "park_command_required": true,
+  "full_overnight_candidate_allowed": false,
+  "fail_closed": true
+}
+

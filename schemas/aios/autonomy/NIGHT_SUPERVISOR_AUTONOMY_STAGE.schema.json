@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Night Supervisor Autonomy Stage",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stage_id", "stage_status", "mode", "preview_only", "runtime_start_allowed", "night_supervisor_runtime_start_allowed", "human_approval_required", "stop_point", "profitability_priority", "fail_closed"],
+  "properties": {
+    "stage_id": { "type": "string" },
+    "stage_status": { "type": "string" },
+    "mode": { "type": "string" },
+    "preview_only": { "type": "boolean" },
+    "runtime_start_allowed": { "type": "boolean" },
+    "night_supervisor_runtime_start_allowed": { "type": "boolean" },
+    "human_approval_required": { "type": "boolean" },
+    "stop_point": { "type": "string" },
+    "profitability_priority": { "type": "string" },
+    "fail_closed": { "type": "boolean" }
+  }
+}
+

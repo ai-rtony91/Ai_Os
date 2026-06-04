@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Longer Supervised Run Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stage_id", "longer_supervised_run_allowed", "max_duration_minutes", "human_approval_required", "park_command_required", "full_overnight_candidate_allowed", "fail_closed"],
+  "properties": {
+    "stage_id": { "type": "string" },
+    "longer_supervised_run_allowed": { "type": "boolean" },
+    "max_duration_minutes": { "type": "integer" },
+    "human_approval_required": { "type": "boolean" },
+    "park_command_required": { "type": "boolean" },
+    "full_overnight_candidate_allowed": { "type": "boolean" },
+    "fail_closed": { "type": "boolean" }
+  }
+}
+

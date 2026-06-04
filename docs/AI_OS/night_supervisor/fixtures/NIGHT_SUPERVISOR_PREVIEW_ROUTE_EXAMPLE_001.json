@@ -1,0 +1,15 @@
+{
+  "stage_id": "18.13",
+  "stage_status": "PREVIEW_ONLY",
+  "mode": "DRY_RUN",
+  "preview_only": true,
+  "runtime_start_allowed": false,
+  "night_supervisor_runtime_start_allowed": false,
+  "telemetry_write_allowed": false,
+  "control_write_allowed": false,
+  "approval_inbox_write_allowed": false,
+  "human_approval_required": true,
+  "stop_point": "Preview only; runtime start blocked.",
+  "fail_closed": true
+}
+

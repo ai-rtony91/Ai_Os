@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Controlled Run Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stage_id", "controlled_run_allowed", "max_duration_minutes", "stop_point", "park_command_required", "openai_live_call_allowed", "telemetry_write_allowed", "control_write_allowed", "commit_allowed", "push_allowed", "merge_allowed", "fail_closed"],
+  "properties": {
+    "stage_id": { "type": "string" },
+    "controlled_run_allowed": { "type": "boolean" },
+    "max_duration_minutes": { "type": "integer" },
+    "stop_point": { "type": "string" },
+    "park_command_required": { "type": "boolean" },
+    "openai_live_call_allowed": { "type": "boolean" },
+    "telemetry_write_allowed": { "type": "boolean" },
+    "control_write_allowed": { "type": "boolean" },
+    "commit_allowed": { "type": "boolean" },
+    "push_allowed": { "type": "boolean" },
+    "merge_allowed": { "type": "boolean" },
+    "fail_closed": { "type": "boolean" }
+  }
+}
+
