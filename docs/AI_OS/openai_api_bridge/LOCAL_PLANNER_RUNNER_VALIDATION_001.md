@@ -29,6 +29,24 @@ Forbidden paths:
 
 PASS.
 
+## No-Write Validation Mode
+
+The runner now supports `--validate-only`.
+
+The PowerShell wrapper now supports `-ValidateOnly`.
+
+When validate-only mode is used, the runner:
+
+- reads the fixture input.
+- validates required safety fields.
+- builds planner output in memory.
+- validates required safety flags.
+- prints `PLANNER_FIXTURE_RUNNER_VALIDATE_ONLY: PASS`.
+- prints `NO_OUTPUT_FILES_WRITTEN`.
+- does not write `PLANNER_RUN_OUTPUT_001.json`.
+- does not write `PLANNER_RUN_REPORT_001.md`.
+- does not modify files.
+
 ## Evidence
 
 - Precheck git status: clean `main` synced with `origin/main`.

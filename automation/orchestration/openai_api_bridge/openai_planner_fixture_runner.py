@@ -165,6 +165,31 @@ def build_output(data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def validate_output_safety(output: dict[str, Any]) -> None:
+    expected = {
+        "mode": "DRY_RUN",
+        "local_fixture_only": True,
+        "live_openai_api_call": False,
+        "api_key_required": False,
+        "package_install_required": False,
+        "network_required": False,
+        "human_approval_required": True,
+        "commit_allowed": False,
+        "push_allowed": False,
+        "live_trading_status": "BLOCKED",
+        "broker_execution_status": "BLOCKED",
+        "oanda_status": "BLOCKED",
+        "night_supervisor_interference_check": "PASS",
+    }
+    failures = [
+        f"{field} expected {expected_value!r}, got {output.get(field)!r}"
+        for field, expected_value in expected.items()
+        if output.get(field) != expected_value
+    ]
+    if failures:
+        raise SafetyFailure("Output safety validation failed: " + "; ".join(failures))
+
+
 def write_outputs(output: dict[str, Any]) -> None:
     assert_allowed_write(OUTPUT_JSON)
     assert_allowed_write(OUTPUT_REPORT)
@@ -203,11 +228,17 @@ def write_outputs(output: dict[str, Any]) -> None:
 
 
 def main() -> int:
+    validate_only = "--validate-only" in sys.argv[1:]
     try:
         data = load_input()
         validate_required_fields(data)
         scan_for_blocked_requests(data)
         output = build_output(data)
+        validate_output_safety(output)
+        if validate_only:
+            print("PLANNER_FIXTURE_RUNNER_VALIDATE_ONLY: PASS")
+            print("NO_OUTPUT_FILES_WRITTEN")
+            return 0
         write_outputs(output)
         print("PLANNER_FIXTURE_RUNNER_RESULT: PASS")
         print(f"OUTPUT_JSON: {OUTPUT_JSON.relative_to(REPO_ROOT).as_posix()}")

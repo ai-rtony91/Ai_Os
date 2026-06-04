@@ -9,7 +9,9 @@ closed when the runner exits nonzero.
 #>
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$ValidateOnly
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -24,6 +26,9 @@ Write-Host "NO_API_KEY_REQUIRED"
 Write-Host "NO_ENV_READ"
 Write-Host "NO_PACKAGE_INSTALL"
 Write-Host "NO_NETWORK_CALL"
+if ($ValidateOnly) {
+    Write-Host "NO_WRITE_VALIDATION_MODE"
+}
 
 if (-not (Test-Path -LiteralPath $runnerPath -PathType Leaf)) {
     throw "Missing runner: $runnerPath"
@@ -39,7 +44,11 @@ if (-not $python) {
 
 Push-Location $repoRoot
 try {
-    & $python.Source $runnerPath
+    if ($ValidateOnly) {
+        & $python.Source $runnerPath --validate-only
+    } else {
+        & $python.Source $runnerPath
+    }
     $exitCode = $LASTEXITCODE
     if ($exitCode -ne 0) {
         throw "Planner fixture runner failed with exit code $exitCode"
