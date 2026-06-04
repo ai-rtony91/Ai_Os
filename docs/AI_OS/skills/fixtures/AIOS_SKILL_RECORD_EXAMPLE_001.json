@@ -1,0 +1,39 @@
+{
+  "skill_id": "repo-precheck",
+  "version": "0.1.0",
+  "status": "PROPOSED",
+  "workflow": "Verify branch, worktree, clean git status, locks, and runtime blockers before a repo task.",
+  "local_first": true,
+  "hosted_allowed": false,
+  "risk_class": "LOW",
+  "allowed_paths": [
+    "docs/AI_OS/skills/",
+    "schemas/aios/skills/"
+  ],
+  "forbidden_paths": [
+    "telemetry/",
+    "control/",
+    "automation/orchestration/locks/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/memory/",
+    "automation/orchestration/night_supervisor/",
+    "broker/",
+    ".env"
+  ],
+  "requires_review": true,
+  "requires_human_approval": true,
+  "bypasses_agents_md": false,
+  "bypasses_approval_gates": false,
+  "secrets_allowed": false,
+  "env_file_creation_allowed": false,
+  "network_allowed": false,
+  "shell_execution_allowed": false,
+  "skill_upload_allowed": false,
+  "skill_execution_allowed": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "pi_gpio_motor_status": "BLOCKED",
+  "night_supervisor_runtime_modification_allowed": false,
+  "stop_point": "Stop after doctrine/schema/fixture validation. Do not execute, upload, commit, or push."
+}
