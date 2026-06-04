@@ -1,0 +1,69 @@
+{
+  "fixture_id": "PLANNER_OUTPUT_EXAMPLE_001",
+  "fixture_type": "openai_planner_output",
+  "mode": "FIXTURE_ONLY",
+  "autonomy_level": "Level 3 - fixture/docs proposal",
+  "classification": {
+    "safety_status": "SAFE_LOCAL_ONLY",
+    "approval_status": "PENDING_FOR_APPLY",
+    "blocked_actions_detected": false,
+    "blocked_reason": ""
+  },
+  "packet_preview": {
+    "identity_marker": "CODEX-ONLY PROMPT",
+    "execution_token_required": true,
+    "packet_id": "AIOS-P16-OPENAI-PLANNER-FIXTURE-PREVIEW-001",
+    "mode": "DRY_RUN_OR_APPROVED_APPLY_ONLY",
+    "zone": "East governed repo execution",
+    "worker_identity": "Codex",
+    "lane": "docs/fixtures only",
+    "branch": "main",
+    "worktree": "C:\\Dev\\Ai.Os",
+    "objective": "Create or validate fixture-only OpenAI planner preview artifacts.",
+    "allowed_paths": [
+      "docs/AI_OS/openai_api_bridge/"
+    ],
+    "forbidden_paths": [
+      "telemetry/night_supervisor/",
+      "control/",
+      "automation/orchestration/locks/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/memory/",
+      "telemetry/",
+      "automation/orchestration/night_supervisor/",
+      "broker files",
+      "OANDA files",
+      "live trading files",
+      "secret files",
+      ".env files",
+      "git config files"
+    ],
+    "approval_authority": "Human Owner",
+    "validator_chain": [
+      "git status --short --branch",
+      "JSON parse validation",
+      "allowed path review",
+      "forbidden path review",
+      "no-secret scan",
+      "no-live-api-call scan",
+      "no-live-trading scan",
+      "final git status"
+    ],
+    "stop_point": "Stop after fixture preview validation. Do not commit or push."
+  },
+  "requires_human_approval": true,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "secret_handling_status": "BLOCKED_NO_SECRETS_ALLOWED",
+  "validator_chain": [
+    "git_clean_state",
+    "allowed_paths",
+    "blocked_paths",
+    "json_integrity",
+    "no_secrets",
+    "no_live_trading_enablement",
+    "final_git_status"
+  ],
+  "stop_point": "Planner output remains inert evidence only.",
+  "recommended_next_action": "Use this fixture to design a future local adapter preview without creating live OpenAI API calls."
+}

@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "OPENAI_PLANNER_INPUT.schema.json",
+  "title": "AI_OS OpenAI Planner Input Fixture Schema",
+  "type": "object",
+  "required": [
+    "fixture_id",
+    "fixture_type",
+    "mode",
+    "autonomy_level",
+    "operator_goal",
+    "allowed_paths",
+    "forbidden_paths",
+    "requires_human_approval",
+    "live_trading_status",
+    "broker_execution_status",
+    "secret_handling_status",
+    "validator_chain",
+    "stop_point",
+    "recommended_next_action"
+  ],
+  "properties": {
+    "fixture_id": {
+      "type": "string"
+    },
+    "fixture_type": {
+      "const": "openai_planner_input"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "FIXTURE_ONLY",
+        "DRY_RUN_ONLY"
+      ]
+    },
+    "autonomy_level": {
+      "type": "string"
+    },
+    "operator_goal": {
+      "type": "string"
+    },
+    "repo": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "task_context": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "forbidden_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "requires_human_approval": {
+      "type": "boolean"
+    },
+    "live_trading_status": {
+      "type": "string",
+      "enum": [
+        "BLOCKED",
+        "PAPER_ONLY"
+      ]
+    },
+    "broker_execution_status": {
+      "type": "string",
+      "enum": [
+        "BLOCKED"
+      ]
+    },
+    "secret_handling_status": {
+      "type": "string",
+      "enum": [
+        "BLOCKED_NO_SECRETS_ALLOWED"
+      ]
+    },
+    "validator_chain": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "stop_point": {
+      "type": "string"
+    },
+    "recommended_next_action": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}
