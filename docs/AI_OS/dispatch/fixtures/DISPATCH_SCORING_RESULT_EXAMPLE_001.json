@@ -1,0 +1,11 @@
+{
+  "decision_id": "DISPATCH-HARDENING-001",
+  "route": "NIGHT_SUPERVISOR_PREVIEW",
+  "route_confidence": 0.86,
+  "risk_score": 0.22,
+  "readiness_score": 0.91,
+  "safety_score": 0.97,
+  "blocker_classes": ["RED_TEAM_REQUIRED"],
+  "fail_closed": true
+}
+

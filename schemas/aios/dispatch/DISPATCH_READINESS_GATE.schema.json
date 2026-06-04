@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Dispatch Readiness Gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["gate_id", "route", "readiness_score", "required_validators_present", "human_approval_required", "ready", "fail_closed", "stop_point"],
+  "properties": {
+    "gate_id": { "type": "string" },
+    "route": { "type": "string" },
+    "readiness_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "required_validators_present": { "type": "boolean" },
+    "human_approval_required": { "type": "boolean" },
+    "ready": { "type": "boolean" },
+    "fail_closed": { "type": "boolean" },
+    "stop_point": { "type": "string" }
+  }
+}
+

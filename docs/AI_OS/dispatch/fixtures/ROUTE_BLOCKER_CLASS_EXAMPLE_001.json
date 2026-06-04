@@ -1,0 +1,9 @@
+{
+  "blocker_class": "LIVE_OPENAI_CALL_RISK",
+  "severity": "critical",
+  "blocks_execution": true,
+  "requires_human_approval": true,
+  "fail_closed": true,
+  "stop_point": "Block until a separate smoke-test packet approves one live API call."
+}
+

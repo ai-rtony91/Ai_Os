@@ -1,0 +1,16 @@
+{
+  "route": "NIGHT_SUPERVISOR_PREVIEW",
+  "validators_required": [
+    "git status check",
+    "branch check",
+    "worktree check",
+    "Night Supervisor lock/cycle check",
+    "no telemetry/control/approval inbox write check",
+    "human approval check",
+    "clean-state verifier"
+  ],
+  "human_approval_required": true,
+  "fail_closed": true,
+  "stop_point": "Preview only. Runtime start remains blocked."
+}
+

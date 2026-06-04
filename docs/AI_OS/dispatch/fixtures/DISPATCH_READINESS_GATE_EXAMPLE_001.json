@@ -1,0 +1,11 @@
+{
+  "gate_id": "DISPATCH-READINESS-GATE-001",
+  "route": "NIGHT_SUPERVISOR_PREVIEW",
+  "readiness_score": 0.91,
+  "required_validators_present": true,
+  "human_approval_required": true,
+  "ready": true,
+  "fail_closed": true,
+  "stop_point": "Ready for preview output only; not ready for runtime start."
+}
+

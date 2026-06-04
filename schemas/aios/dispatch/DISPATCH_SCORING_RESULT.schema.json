@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Dispatch Scoring Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision_id", "route", "route_confidence", "risk_score", "readiness_score", "safety_score", "blocker_classes", "fail_closed"],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "route": { "type": "string" },
+    "route_confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "risk_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "readiness_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "safety_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "blocker_classes": { "type": "array", "items": { "type": "string" } },
+    "fail_closed": { "type": "boolean" }
+  }
+}
+
