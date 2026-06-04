@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Paper SOS Resume Precheck",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stage_id", "expected_worktree", "actual_worktree", "expected_python_cwd", "actual_python_cwd", "git_root", "userprofile_checked", "pwd_checked", "locks_clear", "dirty_tree_status", "forbidden_paths_clean", "paper_sos_resume_allowed", "human_approval_required", "fail_closed"],
+  "properties": {
+    "stage_id": { "type": "string" },
+    "expected_worktree": { "type": "string" },
+    "actual_worktree": { "type": "string" },
+    "expected_python_cwd": { "type": "string" },
+    "actual_python_cwd": { "type": "string" },
+    "git_root": { "type": "string" },
+    "userprofile_checked": { "type": "boolean" },
+    "pwd_checked": { "type": "boolean" },
+    "locks_clear": { "type": "boolean" },
+    "dirty_tree_status": { "type": "string" },
+    "forbidden_paths_clean": { "type": "boolean" },
+    "paper_sos_resume_allowed": { "type": "boolean" },
+    "human_approval_required": { "type": "boolean" },
+    "fail_closed": { "type": "boolean" }
+  }
+}
+

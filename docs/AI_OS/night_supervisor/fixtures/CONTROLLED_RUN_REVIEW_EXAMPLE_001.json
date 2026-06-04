@@ -1,0 +1,15 @@
+{
+  "stage_id": "18.16",
+  "red_team_review_required": true,
+  "locks_clear": true,
+  "dirty_tree_status": "CLEAN_REQUIRED",
+  "forbidden_paths_clean": true,
+  "api_key_printed": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "pi_gpio_motor_status": "BLOCKED",
+  "profitability_priority": "TRUSTED_PROVEN_PROFITABILITY",
+  "fail_closed": true
+}
+

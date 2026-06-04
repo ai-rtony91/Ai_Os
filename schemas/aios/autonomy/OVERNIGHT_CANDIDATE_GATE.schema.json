@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Overnight Candidate Gate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stage_id", "full_overnight_candidate_allowed", "controlled_run_allowed", "longer_supervised_run_allowed", "red_team_review_required", "human_approval_required", "live_trading_status", "broker_execution_status", "oanda_status", "pi_gpio_motor_status", "profitability_priority", "fail_closed"],
+  "properties": {
+    "stage_id": { "type": "string" },
+    "full_overnight_candidate_allowed": { "type": "boolean" },
+    "controlled_run_allowed": { "type": "boolean" },
+    "longer_supervised_run_allowed": { "type": "boolean" },
+    "red_team_review_required": { "type": "boolean" },
+    "human_approval_required": { "type": "boolean" },
+    "live_trading_status": { "type": "string" },
+    "broker_execution_status": { "type": "string" },
+    "oanda_status": { "type": "string" },
+    "pi_gpio_motor_status": { "type": "string" },
+    "profitability_priority": { "type": "string" },
+    "fail_closed": { "type": "boolean" }
+  }
+}
+

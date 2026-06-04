@@ -1,0 +1,15 @@
+{
+  "stage_id": "18.15",
+  "controlled_run_allowed": false,
+  "max_duration_minutes": 10,
+  "stop_point": "Stop after one cycle or 10 minutes.",
+  "park_command_required": true,
+  "openai_live_call_allowed": false,
+  "telemetry_write_allowed": false,
+  "control_write_allowed": false,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "merge_allowed": false,
+  "fail_closed": true
+}
+

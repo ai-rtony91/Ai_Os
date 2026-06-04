@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Controlled Run Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stage_id", "red_team_review_required", "locks_clear", "dirty_tree_status", "forbidden_paths_clean", "api_key_printed", "live_trading_status", "broker_execution_status", "oanda_status", "pi_gpio_motor_status", "profitability_priority", "fail_closed"],
+  "properties": {
+    "stage_id": { "type": "string" },
+    "red_team_review_required": { "type": "boolean" },
+    "locks_clear": { "type": "boolean" },
+    "dirty_tree_status": { "type": "string" },
+    "forbidden_paths_clean": { "type": "boolean" },
+    "api_key_printed": { "type": "boolean" },
+    "live_trading_status": { "type": "string" },
+    "broker_execution_status": { "type": "string" },
+    "oanda_status": { "type": "string" },
+    "pi_gpio_motor_status": { "type": "string" },
+    "profitability_priority": { "type": "string" },
+    "fail_closed": { "type": "boolean" }
+  }
+}
+
