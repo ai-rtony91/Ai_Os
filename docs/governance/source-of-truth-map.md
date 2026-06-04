@@ -176,19 +176,24 @@ Default classification:
 
 | Path | Role | Classification | Notes |
 |---|---|---|---|
-| `docs/AI_OS/context/` | Brain/context source | MERGE INTO CANONICAL | Merge selected current facts into root/governance/workflow docs |
-| `docs/AI_OS/system_wizards/` | Start-here/checkpoint source | MERGE INTO CANONICAL | Merge selected current rules, then archive |
-| `docs/AI_OS/governance/` | Governance source | MERGE INTO CANONICAL | Promote only selected current rules |
-| `docs/AI_OS/operator/` | Operator workflow source | MERGE INTO CANONICAL | Promote only selected workflows |
-| `docs/AI_OS/codex/` | Codex instruction source | MERGE INTO CANONICAL | Root `AGENTS.md` remains active authority |
-| `docs/AI_OS/claude/` | Claude delegation source | NEEDS USER DECISION | Active only if user keeps Claude workflow |
+| `docs/AI_OS/context/AIOS_REPO_SOURCE_OF_TRUTH_MAP.md` | Header-hardened legacy brain/context source | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Do not follow as live instructions. Physical archive/delete requires a separate dependency-confirmation APPLY packet. |
+| `docs/AI_OS/system_wizards/00_START_HERE_AI_OS_CONTEXT_PACK.md` | Header-hardened legacy start-here brain | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Do not follow as live instructions. Physical archive/delete requires a separate dependency-confirmation APPLY packet. |
+| `docs/AI_OS/system_wizards/START_HERE_AI_OS_CONTEXT_PACK.md` | Header-hardened duplicate start-here brain | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Do not follow as live instructions. Physical archive/delete requires a separate dependency-confirmation APPLY packet. |
+| `docs/AI_OS/system_wizards/01_CURRENT_STATE.md` | Header-hardened legacy current-state brain | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Do not follow as live instructions. Physical archive/delete requires a separate dependency-confirmation APPLY packet. |
+| `docs/AI_OS/system_wizards/02_CHECKPOINT.md` | Header-hardened legacy checkpoint brain | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Do not follow as live instructions. Physical archive/delete requires a separate dependency-confirmation APPLY packet. |
+| `docs/AI_OS/governance/` | Header-hardened legacy governance source | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Promote only a specific durable rule that is not already represented in active authority; otherwise archive only after dependency confirmation. |
+| `docs/AI_OS/operator/` | Header-hardened legacy operator workflow source | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Promote only a specific durable rule that is not already represented in active authority; otherwise archive only after dependency confirmation. |
+| `docs/AI_OS/operator_workflows/` | Header-hardened legacy operator workflow source | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Promote only a specific durable rule that is not already represented in active authority; otherwise archive only after dependency confirmation. |
+| `docs/AI_OS/codex/` | Header-hardened legacy Codex instruction source | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Root `AGENTS.md` remains active authority. Do not follow these files as live Codex instructions. |
+| `docs/AI_OS/claude/` | Header-hardened Claude delegation source | MARK_REFERENCE_ONLY_COMPLETE / NEEDS_HUMAN_DECISION | Not active authority unless Human Owner explicitly retains Claude workflow. Human decision required before archive, retirement, or promotion. |
+| `docs/AI_OS/index/` | Header-hardened legacy index/source-map source | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Not active authority. Do not follow as live ownership/source-map instructions. Physical archive/delete requires a separate dependency-confirmation APPLY packet. |
 | `docs/AI_OS/security/` | Security source | MERGE INTO CANONICAL | Promote only selected current boundaries |
 | `docs/AI_OS/audits/` | CLEAN-era audits | ARCHIVE ONLY | Historical records |
 | `docs/AI_OS/**/*_DRAFT.md` | Draft source material | ARCHIVE ONLY | Not active authority unless promoted |
 
 `docs/AI_OS/` rule:
 
-Do not blindly replace CLEAN-era names with current AI_OS authority language. Evaluate each file as source material, then merge, archive, or remove only through approved cleanup batches.
+The 11 known duplicate-brain zones above have been header-hardened as historical/reference-only. They are not active authority, must not be followed as live instructions, and are not approved for physical delete in this packet. Physical archive/delete requires a separate dependency-confirmation APPLY packet.
 
 ## Duplicate-brain reference markings
 
@@ -196,7 +201,17 @@ These markings reflect the current duplicate-brain validator state after active 
 
 | Path or pattern | Current marking | Rule |
 |---|---|---|
-| `docs/AI_OS/**` | MARK_REFERENCE_ONLY / NEEDS_HUMAN_DECISION | Source/reference material pending file-by-file merge/archive classification. It is not active authority unless a specific rule is promoted into canonical docs. |
+| `docs/AI_OS/context/AIOS_REPO_SOURCE_OF_TRUTH_MAP.md` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened historical/reference-only source map. Not active authority; do not follow as live instructions. No physical archive/delete without separate dependency-confirmation APPLY. |
+| `docs/AI_OS/system_wizards/00_START_HERE_AI_OS_CONTEXT_PACK.md` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened historical/reference-only start-here brain. Not active authority; do not follow as live instructions. No physical archive/delete without separate dependency-confirmation APPLY. |
+| `docs/AI_OS/system_wizards/START_HERE_AI_OS_CONTEXT_PACK.md` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened historical/reference-only duplicate start-here brain. Not active authority; do not follow as live instructions. No physical archive/delete without separate dependency-confirmation APPLY. |
+| `docs/AI_OS/system_wizards/01_CURRENT_STATE.md` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened historical/reference-only current-state brain. Not active authority; do not follow as live instructions. No physical archive/delete without separate dependency-confirmation APPLY. |
+| `docs/AI_OS/system_wizards/02_CHECKPOINT.md` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened historical/reference-only checkpoint brain. Not active authority; do not follow as live instructions. No physical archive/delete without separate dependency-confirmation APPLY. |
+| `docs/AI_OS/operator/` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened legacy operator workflow source. Archive after dependency confirmation unless a specific durable rule is not already represented in active authority. |
+| `docs/AI_OS/operator_workflows/` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened legacy operator workflow source. Archive after dependency confirmation unless a specific durable rule is not already represented in active authority. |
+| `docs/AI_OS/codex/` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened legacy Codex instruction source. Root `AGENTS.md` remains active authority; do not follow as live instructions. |
+| `docs/AI_OS/claude/` | MARK_REFERENCE_ONLY_COMPLETE / NEEDS_HUMAN_DECISION | Header-hardened Claude delegation source. Human Owner decision required before retain, retire, promote, or archive. |
+| `docs/AI_OS/governance/` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened legacy governance source. Archive after dependency confirmation unless a specific durable rule is not already represented in active authority. |
+| `docs/AI_OS/index/` | MARK_REFERENCE_ONLY_COMPLETE / ARCHIVE_CANDIDATE_AFTER_DEPENDENCY_CONFIRMATION | Header-hardened legacy index/source-map source. Not active authority; do not follow as live ownership/source-map instructions. |
 | `work_packets/**` | KEEP_PROTECTED_EVIDENCE / NEEDS_HUMAN_DECISION | Root work packets are not active queue authority. They require a retention or migration decision before archive. |
 | `approvals/**` | KEEP_PROTECTED_EVIDENCE / NEEDS_HUMAN_DECISION | Root approvals are not active approval authority. They require a retention or migration decision before archive. |
 | `relay/approvals/**` | KEEP_PROTECTED_EVIDENCE / PROJECTION_INPUT | Relay approvals may feed review and projection views, but they are not active approval authority unless promoted by Human Owner in a separate packet. |
