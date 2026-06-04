@@ -78,6 +78,46 @@ If any required identity field is missing, Codex must stop and request the missi
 
 Canonical identity, lane, packet, validator, lock, and stop-point doctrine lives in `docs/governance/aios-identity-and-lane-governance.md`.
 
+## AI_OS Packet State Alignment Rule
+
+Executable AI_OS packets must be state-aligned before they assign a branch, worktree, mode, or allowed write boundary.
+
+Packet authors must not assume the repo is on `main`, clean, synced, or safe to switch. Before writing or executing a packet that names a target branch, the packet must either:
+
+1. use the current observed branch/worktree state, or
+2. include a read-only preflight step that runs:
+
+```powershell
+pwd
+git status --short --branch
+git branch --show-current
+git remote -v
+```
+
+State alignment rules:
+
+* If the repo is on a non-main branch with dirty files, the packet must not instruct Codex to switch to `main`.
+* If dirty files exist, the packet must first classify the dirty state as current work, unrelated work, stale work, or unsafe/unknown work.
+* If the dirty state may belong to the same mission, the packet must review current changes before generating a new inspection or APPLY packet.
+* If the packet requires `main` but the repo is not on `main`, Codex must stop and report the mismatch unless the packet explicitly includes a safe preservation plan.
+* If the packet author does not know the current repo state, the branch field must be written as `branch: resolve after preflight`, not `branch: main`.
+* A packet must not create a new report, audit, map, or authority document merely because branch state is unknown.
+* Current repo state overrides ideal packet assumptions.
+
+Required failure label:
+
+When a packet fails because assumed branch/worktree state does not match observed state, Codex must label it:
+
+`AIOS-PROMPT-AUTH-STATE-MISMATCH`
+
+and report:
+
+* assumed branch
+* observed branch
+* dirty files
+* whether the dirty files overlap the mission
+* safest next action
+
 ## AI_OS Failure Recovery Response Rule
 
 When Codex stops, refuses, blocks execution, detects missing context, detects missing files, encounters sandbox failure, hits GitHub or Git errors, receives incomplete tokenized work packets, or cannot continue safely, Codex must produce a structured recovery response.
@@ -202,6 +242,7 @@ Live broker execution is blocked.
 - Never commit or push unless the prompt explicitly says to.
 - Never use git add .
 - Always report files created, files updated, validation result, git status, commit status, and push status.
+- Before any packet targets `main`, Codex must verify current branch and dirty state. Dirty non-main work must be reviewed or preserved before switching branches. Never treat `main` as the default execution branch when local state is unknown.
 
 ## East/West Lane Governance Rule
 

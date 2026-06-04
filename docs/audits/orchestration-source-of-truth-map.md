@@ -1,5 +1,7 @@
 # AI_OS Orchestration Source-of-Truth Map
 
+> **REFERENCE_ONLY / HISTORICAL.** Point-in-time orchestration audit snapshot (2026-05-19), not a live authority. The canonical repo source-of-truth is `docs/governance/source-of-truth-map.md`, wired via `automation/orchestration/recommendations/Resolve-AiOsSourceOfTruth.ps1`.
+
 Date: 2026-05-19
 
 Scope: `automation/orchestration` only.

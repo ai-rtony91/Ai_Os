@@ -4549,6 +4549,35 @@
       "validator_consumption": "Validators must treat this as blocked worker queue runner evidence.",
       "review_status": "registry_blocked_rebuild_static_review",
       "next_safe_action": "Keep blocked until explicit operator approval and architecture review."
+    },
+    {
+      "path": "automation/orchestration/validators/Invoke-AiOsAuthorityDuplicationGuard.ps1",
+      "classification": "ACTIVE",
+      "purpose": "Report-only guard enforcing the no-duplicate-authority rule (canonical/source-of-truth/authority naming).",
+      "owner_area": "automation/orchestration/validators",
+      "execution_mode": "report_only_validation",
+      "writes_files": false,
+      "launches_process": false,
+      "runs_git": false,
+      "requires_human_approval": false,
+      "allowed_callers": [
+        "operator",
+        "validator_chain"
+      ],
+      "blocked_actions": [
+        "auto_repair",
+        "runtime_execution",
+        "worker_launch",
+        "startup_launch",
+        "APPLY",
+        "commit",
+        "push"
+      ],
+      "risk_policy_notes": "Report-only guard. Output is evidence only and does not approve script execution or governance edits.",
+      "topology_guard_requirement": "May be run as a validation guard before authority-doc creation or cleanup decisions.",
+      "validator_consumption": "Approved authority duplication guard entry point.",
+      "review_status": "initial_apply_reviewed",
+      "next_safe_action": "Keep report-only and clear STOP findings through a separate approved APPLY task."
     }
   ],
   "counts_by_classification_at_creation": {
