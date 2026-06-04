@@ -42,7 +42,6 @@ Write-Host "Allowed actions:" -ForegroundColor Green
 Write-Host "  git diff --check"
 Write-Host "  git status --short --branch"
 Write-Host "  powershell -NoProfile -ExecutionPolicy Bypass -File <approved-validator.ps1>"
-Write-Host "  powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/show-packet-queue-ledger.ps1"
 Write-Host ""
 Write-Host "Blocked actions:" -ForegroundColor Red
 Write-Host "  no Codex auto-launch" -ForegroundColor Red
