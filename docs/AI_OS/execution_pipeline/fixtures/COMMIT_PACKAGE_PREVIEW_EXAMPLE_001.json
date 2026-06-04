@@ -1,0 +1,22 @@
+{
+  "commit_package_id": "COMMIT_PACKAGE_PREVIEW_EXAMPLE_001",
+  "suggested_commit_message": "feat(aios): add execution pipeline preview",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "autonomy_level": "Level 3 - fixture/docs proposal",
+  "human_approval_required": true,
+  "allowed_paths": ["docs/AI_OS/execution_pipeline/"],
+  "forbidden_paths": ["telemetry/", "control/", "secrets", ".env"],
+  "stop_point": "Stop before commit.",
+  "commit_allowed": false,
+  "push_allowed": false,
+  "merge_allowed": false,
+  "live_openai_api_call": false,
+  "api_key_required": false,
+  "network_required": false,
+  "package_install_required": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "night_supervisor_interference_check": "PASS"
+}

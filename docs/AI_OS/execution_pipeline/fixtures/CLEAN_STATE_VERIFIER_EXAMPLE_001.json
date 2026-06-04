@@ -1,0 +1,22 @@
+{
+  "verifier_id": "CLEAN_STATE_VERIFIER_EXAMPLE_001",
+  "required_git_status": "git status --short --branch",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "autonomy_level": "Level 3 - fixture/docs proposal",
+  "human_approval_required": true,
+  "allowed_paths": ["docs/AI_OS/execution_pipeline/"],
+  "forbidden_paths": ["telemetry/", "control/", "automation/orchestration/night_supervisor/"],
+  "stop_point": "Stop after clean-state preview.",
+  "commit_allowed": false,
+  "push_allowed": false,
+  "merge_allowed": false,
+  "live_openai_api_call": false,
+  "api_key_required": false,
+  "network_required": false,
+  "package_install_required": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "night_supervisor_interference_check": "PASS"
+}
