@@ -1,0 +1,24 @@
+{
+  "record_id": "PROMPTFOO-BOUNDARY-EXAMPLE-001",
+  "phase": "18.7",
+  "promptfoo_status": "future_optional_tooling",
+  "install_allowed": false,
+  "execution_allowed": false,
+  "network_allowed": false,
+  "openai_call_allowed": false,
+  "allowed_targets": [
+    "AI_OS-owned fixtures",
+    "future explicitly approved local endpoints"
+  ],
+  "forbidden_targets": [
+    "third-party systems",
+    "external services",
+    "live broker systems",
+    "OANDA endpoints",
+    "Pi GPIO or motor controls"
+  ],
+  "secrets_policy": "configs_must_not_include_secrets",
+  "human_approval_required": true,
+  "stop_point": "Do not install or run Promptfoo in Phase 18.7."
+}
+

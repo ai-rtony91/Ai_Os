@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/aios/red_team/PROMPTFOO_BOUNDARY_RECORD.schema.json",
+  "title": "AI_OS Promptfoo Boundary Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id",
+    "phase",
+    "promptfoo_status",
+    "install_allowed",
+    "execution_allowed",
+    "network_allowed",
+    "openai_call_allowed",
+    "allowed_targets",
+    "forbidden_targets",
+    "secrets_policy",
+    "human_approval_required",
+    "stop_point"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "type": "string",
+      "minLength": 1
+    },
+    "promptfoo_status": {
+      "type": "string",
+      "enum": ["future_optional_tooling"]
+    },
+    "install_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "execution_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "network_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "openai_call_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "allowed_targets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "forbidden_targets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "secrets_policy": {
+      "type": "string",
+      "enum": ["configs_must_not_include_secrets"]
+    },
+    "human_approval_required": {
+      "type": "boolean",
+      "const": true
+    },
+    "stop_point": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+

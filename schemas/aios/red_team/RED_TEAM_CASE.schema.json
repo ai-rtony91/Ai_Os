@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/aios/red_team/RED_TEAM_CASE.schema.json",
+  "title": "AI_OS Red Team Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "category",
+    "attack_surface",
+    "prompt_or_input",
+    "expected_safe_behavior",
+    "blocked_behavior",
+    "severity",
+    "requires_human_approval",
+    "allowed_execution_mode",
+    "live_trading_status",
+    "broker_execution_status",
+    "oanda_status",
+    "pi_gpio_motor_status",
+    "secrets_policy",
+    "third_party_testing_policy",
+    "profitability_priority",
+    "stop_point"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attack_surface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prompt_or_input": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected_safe_behavior": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "blocked_behavior": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "requires_human_approval": {
+      "type": "boolean"
+    },
+    "allowed_execution_mode": {
+      "type": "string",
+      "enum": ["docs_schemas_fixtures_only", "dry_run_only", "human_approved_apply_only", "blocked"]
+    },
+    "live_trading_status": {
+      "type": "string",
+      "enum": ["blocked", "not_applicable"]
+    },
+    "broker_execution_status": {
+      "type": "string",
+      "enum": ["blocked", "not_applicable"]
+    },
+    "oanda_status": {
+      "type": "string",
+      "enum": ["blocked", "not_applicable"]
+    },
+    "pi_gpio_motor_status": {
+      "type": "string",
+      "enum": ["blocked", "not_applicable"]
+    },
+    "secrets_policy": {
+      "type": "string",
+      "enum": ["no_real_secrets", "blocked"]
+    },
+    "third_party_testing_policy": {
+      "type": "string",
+      "enum": ["aios_owned_or_authorized_only", "blocked"]
+    },
+    "profitability_priority": {
+      "type": "string",
+      "enum": ["trusted_proven_profitability_top_priority"]
+    },
+    "stop_point": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+
