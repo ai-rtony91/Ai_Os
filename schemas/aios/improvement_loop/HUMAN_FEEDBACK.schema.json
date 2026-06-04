@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/improvement_loop/HUMAN_FEEDBACK.schema.json",
+  "title": "AI_OS Human Feedback",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feedback_id", "mode", "local_fixture_only", "feedback_text", "severity", "required_fix", "blocked_behavior"],
+  "properties": {
+    "feedback_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "feedback_text": { "type": "string" },
+    "severity": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+    "required_fix": { "type": "string" },
+    "blocked_behavior": { "type": "string" }
+  }
+}

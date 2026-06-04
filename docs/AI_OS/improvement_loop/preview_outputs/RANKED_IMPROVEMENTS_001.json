@@ -1,0 +1,28 @@
+{
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "live_openai_api_call": false,
+  "api_key_required": false,
+  "network_required": false,
+  "package_install_required": false,
+  "auto_merge": false,
+  "auto_push": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "ranked_improvements": [
+    {
+      "rank": 1,
+      "recommendation_id": "IMPROVEMENT-P18-001",
+      "title": "Add merge-confirmation decision rule and runtime path-verification precheck",
+      "priority_score": 37,
+      "risk_class": "LOW",
+      "evidence": [
+        "HUMAN-FEEDBACK-P18-001",
+        "TRACE-P18-001",
+        "EVAL-P18-MERGE-GUIDANCE-001"
+      ],
+      "next_handoff": "CODEX_HANDOFF_PREVIEW_001.md"
+    }
+  ]
+}

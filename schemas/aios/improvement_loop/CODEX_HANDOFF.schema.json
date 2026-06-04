@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/improvement_loop/CODEX_HANDOFF.schema.json",
+  "title": "AI_OS Codex Handoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["handoff_id", "mode", "local_fixture_only", "title", "lane", "draft_only", "execution_authority", "commit_allowed", "push_allowed", "merge_allowed", "allowed_paths", "forbidden_paths", "stop_point"],
+  "properties": {
+    "handoff_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "title": { "type": "string" },
+    "lane": { "type": "string" },
+    "draft_only": { "type": "boolean", "const": true },
+    "execution_authority": { "type": "string", "const": "NO_EXECUTION_AUTHORITY" },
+    "commit_allowed": { "type": "boolean", "const": false },
+    "push_allowed": { "type": "boolean", "const": false },
+    "merge_allowed": { "type": "boolean", "const": false },
+    "allowed_paths": { "type": "array", "items": { "type": "string" } },
+    "forbidden_paths": { "type": "array", "items": { "type": "string" } },
+    "stop_point": { "type": "string" }
+  }
+}

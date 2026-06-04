@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/improvement_loop/MODEL_FEEDBACK.schema.json",
+  "title": "AI_OS Model Feedback",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["feedback_id", "mode", "local_fixture_only", "review_type", "findings", "recommended_eval"],
+  "properties": {
+    "feedback_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "review_type": { "type": "string" },
+    "findings": { "type": "array", "items": { "type": "string" } },
+    "recommended_eval": { "type": "string" }
+  }
+}

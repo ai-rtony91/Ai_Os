@@ -1,0 +1,26 @@
+{
+  "recommendation_id": "IMPROVEMENT-P18-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "title": "Add merge-confirmation decision rule and runtime path-verification precheck",
+  "evidence": [
+    "HUMAN-FEEDBACK-P18-001",
+    "TRACE-P18-001",
+    "EVAL-P18-MERGE-GUIDANCE-001"
+  ],
+  "scores": {
+    "safety_impact": 5,
+    "copy_paste_reduction": 4,
+    "automation_value": 4,
+    "repo_execution_value": 5,
+    "trading_safety_value": 4,
+    "trusted_proven_profitability_priority": 4,
+    "user_friction_reduction": 5,
+    "frequency": 3,
+    "blocker_severity": 5,
+    "implementation_risk": 2
+  },
+  "priority_score": 37,
+  "risk_class": "LOW",
+  "recommended_next_action": "Draft a future APPLY packet that adds a merge-confirmation decision rule and a runtime worker path-verification precheck."
+}

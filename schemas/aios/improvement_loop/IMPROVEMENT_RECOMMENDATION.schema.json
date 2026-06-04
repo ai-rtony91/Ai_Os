@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/improvement_loop/IMPROVEMENT_RECOMMENDATION.schema.json",
+  "title": "AI_OS Improvement Recommendation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["recommendation_id", "mode", "local_fixture_only", "title", "evidence", "scores", "priority_score", "risk_class", "recommended_next_action"],
+  "properties": {
+    "recommendation_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "title": { "type": "string" },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "scores": {
+      "type": "object",
+      "required": ["safety_impact", "copy_paste_reduction", "automation_value", "repo_execution_value", "trading_safety_value", "trusted_proven_profitability_priority", "user_friction_reduction", "frequency", "blocker_severity", "implementation_risk"],
+      "additionalProperties": false,
+      "properties": {
+        "safety_impact": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "copy_paste_reduction": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "automation_value": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "repo_execution_value": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "trading_safety_value": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "trusted_proven_profitability_priority": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "user_friction_reduction": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "frequency": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "blocker_severity": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "implementation_risk": { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "priority_score": { "type": "integer" },
+    "risk_class": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+    "recommended_next_action": { "type": "string" }
+  }
+}

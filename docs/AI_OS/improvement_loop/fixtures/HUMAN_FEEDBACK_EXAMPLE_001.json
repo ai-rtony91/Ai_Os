@@ -1,0 +1,9 @@
+{
+  "feedback_id": "HUMAN-FEEDBACK-P18-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "feedback_text": "You gave conflicting merge instructions.",
+  "severity": "HIGH",
+  "required_fix": "Never reverse merge confirmation guidance after validation passes. If validation evidence changes, state the new evidence and reason explicitly.",
+  "blocked_behavior": "Do not tell the operator a PR is merge-ready and then reverse guidance without new evidence."
+}

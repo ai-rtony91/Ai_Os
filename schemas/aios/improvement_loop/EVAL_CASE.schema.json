@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/improvement_loop/EVAL_CASE.schema.json",
+  "title": "AI_OS Improvement Loop Eval Case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eval_id", "mode", "local_fixture_only", "failure_pattern", "input_condition", "expected_behavior", "blocked_behavior", "source_of_truth_rule", "pass_fail_criteria"],
+  "properties": {
+    "eval_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "failure_pattern": { "type": "string" },
+    "input_condition": { "type": "string" },
+    "expected_behavior": { "type": "string" },
+    "blocked_behavior": { "type": "string" },
+    "source_of_truth_rule": { "type": "string" },
+    "pass_fail_criteria": { "type": "string" }
+  }
+}
