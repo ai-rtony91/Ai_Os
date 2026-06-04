@@ -1,0 +1,51 @@
+{
+  "fixture_id": "PLANNER_INPUT_EXAMPLE_001",
+  "fixture_type": "openai_planner_input",
+  "mode": "FIXTURE_ONLY",
+  "autonomy_level": "Level 3 - fixture/docs proposal",
+  "operator_goal": "Create a docs-only AI_OS planner packet for a safe local documentation task.",
+  "repo": {
+    "path": "C:\\Dev\\Ai.Os",
+    "branch": "main"
+  },
+  "task_context": {
+    "phase": "Phase 16",
+    "stage": "OpenAI planner adapter fixture scaffold",
+    "lane": "APPLY lane, docs/fixtures only",
+    "worker_identity": "Codex",
+    "visible_success_condition": "A fixture-only planner preview can classify a goal and produce an inert packet draft without live API calls or protected writes."
+  },
+  "allowed_paths": [
+    "docs/AI_OS/openai_api_bridge/"
+  ],
+  "forbidden_paths": [
+    "telemetry/night_supervisor/",
+    "control/",
+    "automation/orchestration/locks/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/memory/",
+    "telemetry/",
+    "automation/orchestration/night_supervisor/",
+    "broker files",
+    "OANDA files",
+    "live trading files",
+    "secret files",
+    ".env files",
+    "git config files"
+  ],
+  "requires_human_approval": true,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "secret_handling_status": "BLOCKED_NO_SECRETS_ALLOWED",
+  "validator_chain": [
+    "git_clean_state",
+    "allowed_paths",
+    "blocked_paths",
+    "json_integrity",
+    "no_secrets",
+    "no_live_trading_enablement",
+    "final_git_status"
+  ],
+  "stop_point": "Stop after producing fixture-only planner preview output. Do not call APIs, install packages, commit, push, or mutate runtime state.",
+  "recommended_next_action": "Review the fixture output and, if accepted, create a separate DRY_RUN packet for a non-executable local preview adapter."
+}
