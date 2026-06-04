@@ -1,0 +1,26 @@
+{
+  "run_id": "AIOS-RUN-P18-3-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "approval_state": "approval_pending",
+  "approval_scope": "Commit approved docs-only run-loop doctrine after validation.",
+  "requested_action": "commit",
+  "validator_evidence": [
+    "git status --short --branch",
+    "JSON parse validation",
+    "forbidden path check"
+  ],
+  "resume_from_state": "validator_chain_complete",
+  "state_strategy": "local_replay_state",
+  "human_approval_required": true,
+  "trusted_proven_profitability_priority": true,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "merge_allowed": false,
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "live_trading_status": "BLOCKED",
+  "secrets_allowed": false,
+  "fail_closed": true
+}
+

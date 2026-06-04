@@ -1,0 +1,30 @@
+{
+  "run_id": "AIOS-RUN-P18-3-FAIL-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "failure_state": "wrong_worktree_blocked",
+  "parked": true,
+  "resumable": true,
+  "state_strategy": "local_replay_state",
+  "last_safe_state": "precheck_started",
+  "next_safe_action": "Verify USERPROFILE, pwd, git root, expected worktree, Python Path.cwd, and profile path before resuming.",
+  "unsafe_actions_blocked": [
+    "file_edit",
+    "commit",
+    "push",
+    "merge",
+    "OpenAI API call",
+    "Night Supervisor runtime start",
+    "broker execution",
+    "Pi motor control"
+  ],
+  "trusted_proven_profitability_priority": true,
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "live_trading_status": "BLOCKED",
+  "pi_gpio_motor_status": "BLOCKED",
+  "secrets_allowed": false,
+  "night_supervisor_runtime_start_allowed": false,
+  "fail_closed": true
+}
+

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/runtime/AIOS_RUNTIME_FAILURE_STATE.schema.json",
+  "title": "AI_OS Runtime Failure State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "mode",
+    "local_fixture_only",
+    "failure_state",
+    "parked",
+    "resumable",
+    "state_strategy",
+    "last_safe_state",
+    "next_safe_action",
+    "unsafe_actions_blocked",
+    "trusted_proven_profitability_priority",
+    "broker_execution_status",
+    "oanda_status",
+    "live_trading_status",
+    "pi_gpio_motor_status",
+    "secrets_allowed",
+    "night_supervisor_runtime_start_allowed",
+    "fail_closed"
+  ],
+  "properties": {
+    "run_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "failure_state": { "type": "string", "enum": ["runtime_error", "validation_error", "guardrail_blocked", "dirty_tree_blocked", "wrong_worktree_blocked", "night_supervisor_lock_blocked", "approval_rejected", "human_parked", "timeout"] },
+    "parked": { "type": "boolean" },
+    "resumable": { "type": "boolean" },
+    "state_strategy": { "type": "string", "enum": ["local_replay_state", "session_state", "previous_response_id", "conversation_id"] },
+    "last_safe_state": { "type": "string" },
+    "next_safe_action": { "type": "string" },
+    "unsafe_actions_blocked": { "type": "array", "items": { "type": "string" } },
+    "trusted_proven_profitability_priority": { "type": "boolean", "const": true },
+    "broker_execution_status": { "type": "string", "const": "BLOCKED" },
+    "oanda_status": { "type": "string", "const": "BLOCKED" },
+    "live_trading_status": { "type": "string", "const": "BLOCKED" },
+    "pi_gpio_motor_status": { "type": "string", "const": "BLOCKED" },
+    "secrets_allowed": { "type": "boolean", "const": false },
+    "night_supervisor_runtime_start_allowed": { "type": "boolean", "const": false },
+    "fail_closed": { "type": "boolean", "const": true }
+  }
+}
+
