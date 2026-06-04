@@ -1,0 +1,43 @@
+{
+  "decision_id": "ORCHESTRATION-P18-1-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "manager_owner": "AI_OS_MANAGER",
+  "specialist": "Guardrail Judge",
+  "default_pattern": "AGENT_AS_TOOL",
+  "handoff_required": false,
+  "handoff_justification": "Guardrail Judge returns bounded evaluation output. AI_OS Manager keeps final answer, validator chain, approval gate, profitability priority, and next action.",
+  "manager_owns_final_answer": true,
+  "manager_owns_validator_chain": true,
+  "manager_owns_approval_gate": true,
+  "allowed_paths": [
+    "docs/AI_OS/runtime/",
+    "docs/AI_OS/orchestration/",
+    "schemas/aios/runtime/",
+    "schemas/aios/orchestration/"
+  ],
+  "forbidden_paths": [
+    "telemetry/",
+    "control/",
+    "automation/orchestration/locks/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/memory/",
+    "automation/orchestration/night_supervisor/",
+    "broker/",
+    "OANDA files",
+    "live trading files",
+    "secret files",
+    ".env files",
+    "dashboard UI files",
+    "Pi GPIO/motor files"
+  ],
+  "commit_allowed": false,
+  "push_allowed": false,
+  "merge_allowed": false,
+  "pi_motor_control_allowed": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "profitability_priority": "TRUSTED_PROVEN_PROFITABILITY_BEFORE_FEATURE_EXPANSION"
+}
+

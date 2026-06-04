@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/runtime/MODEL_RUNTIME_DECISION.schema.json",
+  "title": "AI_OS Model Runtime Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decision_id",
+    "mode",
+    "local_fixture_only",
+    "runtime_path",
+    "model_selection_explicit",
+    "selected_model",
+    "model_strength_class",
+    "selection_rationale",
+    "workflow_default_used",
+    "real_openai_api_call",
+    "api_key_required",
+    "network_required",
+    "package_install_required",
+    "pi_motor_control_allowed",
+    "live_trading_status",
+    "broker_execution_status",
+    "oanda_status",
+    "profitability_priority"
+  ],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "runtime_path": { "type": "string", "enum": ["RESPONSES_API_BOUNDARY", "REALTIME_API_BOUNDARY", "AGENTS_SDK_BOUNDARY", "CHATKIT_BOUNDARY", "AGENT_BUILDER_BOUNDARY"] },
+    "model_selection_explicit": { "type": "boolean", "const": true },
+    "selected_model": { "type": "string" },
+    "model_strength_class": { "type": "string", "enum": ["STRONG_REASONING", "FAST_BOUNDED", "WORKFLOW_DEFAULT"] },
+    "selection_rationale": { "type": "string" },
+    "workflow_default_used": { "type": "boolean" },
+    "real_openai_api_call": { "type": "boolean", "const": false },
+    "api_key_required": { "type": "boolean", "const": false },
+    "network_required": { "type": "boolean", "const": false },
+    "package_install_required": { "type": "boolean", "const": false },
+    "pi_motor_control_allowed": { "type": "boolean", "const": false },
+    "live_trading_status": { "type": "string", "const": "BLOCKED" },
+    "broker_execution_status": { "type": "string", "const": "BLOCKED" },
+    "oanda_status": { "type": "string", "const": "BLOCKED" },
+    "profitability_priority": { "type": "string", "const": "TRUSTED_PROVEN_PROFITABILITY_BEFORE_FEATURE_EXPANSION" }
+  }
+}
+

@@ -1,0 +1,21 @@
+{
+  "decision_id": "MODEL-RUNTIME-P18-1-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "runtime_path": "RESPONSES_API_BOUNDARY",
+  "model_selection_explicit": true,
+  "selected_model": "STRONG_REASONING_MODEL_PLACEHOLDER",
+  "model_strength_class": "STRONG_REASONING",
+  "selection_rationale": "Planner, judge, safety, and high-consequence reasoning require an intentionally selected stronger model. This is a placeholder and does not call OpenAI.",
+  "workflow_default_used": false,
+  "real_openai_api_call": false,
+  "api_key_required": false,
+  "network_required": false,
+  "package_install_required": false,
+  "pi_motor_control_allowed": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "profitability_priority": "TRUSTED_PROVEN_PROFITABILITY_BEFORE_FEATURE_EXPANSION"
+}
+
