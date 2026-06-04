@@ -1,0 +1,21 @@
+{
+  "trace_id": "TRACE-P18-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "event_type": "wrong_working_directory",
+  "packet_id": "PAPER-SOS-RUNTIME-CLOSEOUT-DRYRUN",
+  "branch": "main",
+  "expected_worktree": "C:\\Dev\\aios-paper-sos-runtime-closeout",
+  "actual_worktree": "C:\\Dev\\Ai.Os",
+  "result": "failed before cycle 1",
+  "lesson": "Future runtime workers must verify USERPROFILE, pwd, git rev-parse --show-toplevel, expected worktree, Python Path.cwd, and profile path existence before execution.",
+  "safety_flags": {
+    "live_openai_api_call": false,
+    "api_key_required": false,
+    "network_required": false,
+    "package_install_required": false,
+    "live_trading_status": "BLOCKED",
+    "broker_execution_status": "BLOCKED",
+    "oanda_status": "BLOCKED"
+  }
+}
