@@ -1,0 +1,31 @@
+{
+  "packet_id": "OPENAI-DISPATCH-P18-6-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "live_openai_api_call": false,
+  "api_key_required": false,
+  "network_required": false,
+  "package_install_required": false,
+  "repo_mutation_allowed": false,
+  "dispatcher_route": "NIGHT_SUPERVISOR_PREVIEW",
+  "night_supervisor_dispatch_allowed": true,
+  "night_supervisor_runtime_start_allowed": false,
+  "validator_chain": [
+    "git status --short --branch",
+    "parse dispatch JSON fixtures",
+    "confirm no forbidden paths touched",
+    "confirm no Night Supervisor runtime start",
+    "confirm human approval required"
+  ],
+  "human_approval_required": true,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "merge_allowed": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "pi_gpio_motor_status": "BLOCKED",
+  "profitability_priority": "TRUSTED_PROVEN_PROFITABILITY",
+  "fail_closed": true,
+  "stop_point": "Preview route only. Do not start Night Supervisor runtime."
+}
