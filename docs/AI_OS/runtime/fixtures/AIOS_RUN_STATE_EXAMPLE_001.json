@@ -1,0 +1,38 @@
+{
+  "run_id": "AIOS-RUN-P18-3-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "state_strategy": "local_replay_state",
+  "current_stage": "validator_chain",
+  "lifecycle": [
+    "goal_input",
+    "manager_planner",
+    "route_decision",
+    "specialist_tool_call",
+    "validator_chain",
+    "approval_pause",
+    "resume_from_state",
+    "execution_result",
+    "clean_state_verifier",
+    "trace_grade",
+    "improvement_loop_candidate",
+    "final_report"
+  ],
+  "manager_owner": "AI_OS_MANAGER",
+  "handoff_active": false,
+  "approval_state": "approval_pending",
+  "trusted_proven_profitability_priority": true,
+  "paper_only_trading": true,
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "live_trading_status": "BLOCKED",
+  "secrets_allowed": false,
+  "uncontrolled_autonomy_allowed": false,
+  "pi_gpio_motor_status": "BLOCKED",
+  "night_supervisor_runtime_start_allowed": false,
+  "final_report_required": true,
+  "paste_back_summary_required": true,
+  "clean_state_result_required": true,
+  "fail_closed": true
+}
+
