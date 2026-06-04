@@ -121,3 +121,41 @@ C2 must still avoid:
 - commit or push.
 
 C2 should stop after documentation-only marking and validation. It should not consolidate by moving files.
+
+## C2 DRY_RUN Outcome
+
+C2 deprecation-header planning is documented in:
+
+- `docs/AI_OS/orchestration_consolidation/ORCHESTRATION_C2_DEPRECATION_HEADER_PLAN_001.md`
+- `docs/AI_OS/orchestration_consolidation/ORCHESTRATION_C2_DEPRECATION_HEADER_TEMPLATE.md`
+- `docs/AI_OS/orchestration_consolidation/ORCHESTRATION_C2_VALIDATION_REPORT_001.md`
+
+C2 did not apply deprecation headers outside consolidation docs. It only created the candidate grouping, header template, and validation report.
+
+## Next Packet: C3 Reference Update Planning
+
+C3 should plan reference updates before any deprecation headers are applied outside consolidation docs.
+
+C3 must:
+
+- map readers for every `safe to mark later` candidate.
+- identify exact docs/scripts that reference old root examples or old authority files.
+- name canonical replacement paths.
+- classify each reference update as docs-only, script-help-only, runtime-risk, or manual review.
+- stop before editing legacy files.
+
+C3 must still avoid:
+
+- runtime edits.
+- moves.
+- deletes.
+- renames.
+- deprecation headers outside consolidation docs.
+- approval inbox edits.
+- lock edits.
+- memory edits.
+- Night Supervisor runtime edits.
+- Paper SOS resume.
+- broker/OANDA/live trading.
+- Pi GPIO/motor work.
+- commit or push.
