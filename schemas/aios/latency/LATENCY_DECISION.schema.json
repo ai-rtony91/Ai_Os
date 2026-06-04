@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/latency/LATENCY_DECISION.schema.json",
+  "title": "AI_OS Latency Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "decision_id",
+    "mode",
+    "local_fixture_only",
+    "surface",
+    "principles_applied",
+    "deterministic_first",
+    "llm_required",
+    "model_strength",
+    "parallelization_allowed",
+    "apply_one_at_a_time",
+    "trading_lab_latency_priority",
+    "live_trading_status",
+    "broker_execution_status",
+    "oanda_status",
+    "pi_gpio_motor_status",
+    "night_supervisor_runtime_touched",
+    "secrets_allowed",
+    "network_required",
+    "openai_api_call_required",
+    "priority_processing_allowed",
+    "priority_processing_use_cases",
+    "priority_processing_blocked_for",
+    "priority_processing_must_not_bypass",
+    "user_progress_fields",
+    "profitability_priority",
+    "stop_point"
+  ],
+  "properties": {
+    "decision_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "surface": { "type": "string" },
+    "principles_applied": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Process tokens faster.",
+          "Generate fewer tokens.",
+          "Use fewer input tokens.",
+          "Make fewer requests.",
+          "Parallelize.",
+          "Make your users wait less.",
+          "Don’t default to an LLM."
+        ]
+      },
+      "minItems": 7
+    },
+    "deterministic_first": { "type": "boolean", "const": true },
+    "llm_required": { "type": "boolean" },
+    "model_strength": { "type": "string", "enum": ["NONE", "SMALL_BOUNDED", "STRONG_REASONING"] },
+    "parallelization_allowed": { "type": "boolean" },
+    "apply_one_at_a_time": { "type": "boolean", "const": true },
+    "trading_lab_latency_priority": { "type": "string", "const": "PRIORITY_1" },
+    "live_trading_status": { "type": "string", "const": "BLOCKED" },
+    "broker_execution_status": { "type": "string", "const": "BLOCKED" },
+    "oanda_status": { "type": "string", "const": "BLOCKED" },
+    "pi_gpio_motor_status": { "type": "string", "const": "BLOCKED" },
+    "night_supervisor_runtime_touched": { "type": "boolean", "const": false },
+    "secrets_allowed": { "type": "boolean", "const": false },
+    "network_required": { "type": "boolean", "const": false },
+    "openai_api_call_required": { "type": "boolean", "const": false },
+    "priority_processing_allowed": { "type": "boolean", "const": false },
+    "priority_processing_use_cases": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "priority_processing_blocked_for": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "evals",
+          "batch jobs",
+          "ETL",
+          "nightly reports",
+          "telemetry bulk work",
+          "routine background processing"
+        ]
+      },
+      "minItems": 6,
+      "uniqueItems": true
+    },
+    "priority_processing_must_not_bypass": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 6,
+      "uniqueItems": true
+    },
+    "user_progress_fields": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["current_lane", "blocker", "next_safe_action"] },
+      "minItems": 3
+    },
+    "profitability_priority": { "type": "string", "const": "TRUSTED_PROVEN_PROFITABILITY" },
+    "stop_point": { "type": "string" }
+  }
+}
+

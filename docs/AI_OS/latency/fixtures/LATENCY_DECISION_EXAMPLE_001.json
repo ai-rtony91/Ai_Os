@@ -1,0 +1,58 @@
+{
+  "decision_id": "LATENCY-P18-4-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "surface": "Codex validation and OpenAI packet generation preview",
+  "principles_applied": [
+    "Process tokens faster.",
+    "Generate fewer tokens.",
+    "Use fewer input tokens.",
+    "Make fewer requests.",
+    "Parallelize.",
+    "Make your users wait less.",
+    "Don’t default to an LLM."
+  ],
+  "deterministic_first": true,
+  "llm_required": false,
+  "model_strength": "NONE",
+  "parallelization_allowed": true,
+  "apply_one_at_a_time": true,
+  "trading_lab_latency_priority": "PRIORITY_1",
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "pi_gpio_motor_status": "BLOCKED",
+  "night_supervisor_runtime_touched": false,
+  "secrets_allowed": false,
+  "network_required": false,
+  "openai_api_call_required": false,
+  "priority_processing_allowed": false,
+  "priority_processing_use_cases": [
+    "future high-value user-facing latency-sensitive requests"
+  ],
+  "priority_processing_blocked_for": [
+    "evals",
+    "batch jobs",
+    "ETL",
+    "nightly reports",
+    "telemetry bulk work",
+    "routine background processing"
+  ],
+  "priority_processing_must_not_bypass": [
+    "human approval",
+    "validator gates",
+    "Trading Lab paper-only safety",
+    "broker/OANDA blocks",
+    "live-trading blocks",
+    "Pi GPIO/motor blocks",
+    "clean-state checks"
+  ],
+  "user_progress_fields": [
+    "current_lane",
+    "blocker",
+    "next_safe_action"
+  ],
+  "profitability_priority": "TRUSTED_PROVEN_PROFITABILITY",
+  "stop_point": "Stop after DRY_RUN latency doctrine validation. Do not commit or push."
+}
+
