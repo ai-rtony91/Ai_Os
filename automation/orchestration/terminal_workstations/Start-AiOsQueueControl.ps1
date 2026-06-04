@@ -24,6 +24,5 @@ Write-Host "Safety: display and review only; no packet launch, worker launch, st
 Write-Host "========================================"
 Write-Host ""
 Write-Host "Suggested read-only queue displays:"
-Write-Host "  powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/show-packet-queue-ledger.ps1"
 Write-Host "  powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/show-queue-health-supervisor.ps1"
 Write-Host ""
