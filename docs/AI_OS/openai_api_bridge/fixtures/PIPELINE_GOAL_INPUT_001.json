@@ -1,0 +1,38 @@
+{
+  "goal_id": "PIPELINE_GOAL_INPUT_001",
+  "goal_text": "Create a Codex-safe packet that checks repo status, proposes the next validator, and stops before APPLY.",
+  "requested_phase": "Phase 16.4-16.10",
+  "requested_mode": "DRY_RUN",
+  "autonomy_level": "Level 3 - fixture/docs proposal",
+  "allowed_paths": [
+    "docs/AI_OS/openai_api_bridge/",
+    "automation/orchestration/openai_api_bridge/"
+  ],
+  "forbidden_paths": [
+    "telemetry/",
+    "telemetry/night_supervisor/",
+    "control/",
+    "automation/orchestration/locks/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/memory/",
+    "automation/orchestration/night_supervisor/",
+    "broker files",
+    "OANDA files",
+    "live trading files",
+    "secret files",
+    ".env files",
+    "git config files"
+  ],
+  "human_approval_required": true,
+  "live_openai_api_call_allowed": false,
+  "api_key_allowed": false,
+  "network_allowed": false,
+  "package_install_allowed": false,
+  "commit_allowed": false,
+  "push_allowed": false,
+  "merge_allowed": false,
+  "live_trading_status": "BLOCKED",
+  "broker_execution_status": "BLOCKED",
+  "oanda_status": "BLOCKED",
+  "stop_point": "Stop after lifecycle preview. Do not APPLY, commit, push, merge, call APIs, install packages, or touch runtime state."
+}

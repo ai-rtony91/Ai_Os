@@ -1,0 +1,27 @@
+{
+  "approval_id": "APPROVAL_PREVIEW_P16_PIPELINE_001",
+  "packet_id": "AIOS-P16-PIPELINE-CODEX-PACKET-DRAFT-001",
+  "approval_status": "PREVIEW_ONLY",
+  "human_approval_required": true,
+  "allowed_decisions": [
+    "approve future DRY_RUN",
+    "request changes",
+    "reject"
+  ],
+  "blocked_decisions": [
+    "auto APPLY",
+    "auto commit",
+    "auto push",
+    "auto merge",
+    "runtime approval mutation"
+  ],
+  "required_evidence": [
+    "clean git status",
+    "validated JSON",
+    "forbidden path scan",
+    "no-secret scan",
+    "no-network scan"
+  ],
+  "expiration_policy": "Preview expires when branch, file scope, or validation evidence changes.",
+  "runtime_write_status": "BLOCKED"
+}

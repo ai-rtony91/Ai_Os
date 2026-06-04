@@ -1,0 +1,31 @@
+{
+  "packet_id": "AIOS-P16-PIPELINE-CODEX-PACKET-DRAFT-001",
+  "validator_chain": [
+    "git_clean_state",
+    "allowed_paths",
+    "blocked_paths",
+    "validate_only_runner",
+    "json_integrity",
+    "no_secrets",
+    "no_network",
+    "no_live_trading_enablement",
+    "final_git_status"
+  ],
+  "required_checks": [
+    "git status --short --branch",
+    "PowerShell wrapper -ValidateOnly",
+    "JSON parse validation",
+    "forbidden path scan",
+    "secret scan",
+    "network/OpenAI call scan",
+    "trading safety scan"
+  ],
+  "json_validation_required": true,
+  "validate_only_required": true,
+  "dirty_tree_check_required": true,
+  "forbidden_path_check_required": true,
+  "secret_check_required": true,
+  "network_check_required": true,
+  "trading_safety_check_required": true,
+  "expected_pass_condition": "Validate-only runner passes, JSON parses, tree remains clean, and no forbidden scope is touched."
+}
