@@ -108,6 +108,12 @@ For any human contributor, AI assistant, or Codex worker:
 
 The default posture is: resume from existing authority, do not create a new brain.
 
+For OpenAI CLI, Codex, ChatGPT, and Night Supervisor onboarding, use `docs/workflows/OPENAI_CODEX_NIGHT_SUPERVISOR_ONBOARDING.md` and run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File automation/onboarding/Test-AiOsOpenAiCodexNightSupervisorOnboarding.ps1 -Mode DRY_RUN
+```
+
 ## What AI_OS Is
 
 AI_OS is a human-first automation and orchestration platform. It helps convert goals written in normal language into controlled project work:

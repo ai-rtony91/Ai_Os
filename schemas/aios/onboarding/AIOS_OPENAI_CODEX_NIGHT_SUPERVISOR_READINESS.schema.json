@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/onboarding/AIOS_OPENAI_CODEX_NIGHT_SUPERVISOR_READINESS.schema.json",
+  "title": "AI_OS OpenAI Codex Night Supervisor Readiness",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at",
+    "repo_root",
+    "branch",
+    "git_status",
+    "staged_index_clean",
+    "openai_cli_found",
+    "codex_cli_found",
+    "agents_md_found",
+    "readme_found",
+    "onboarding_doc_found",
+    "night_supervisor_paths",
+    "collision_risk",
+    "status",
+    "blockers",
+    "warnings",
+    "next_actions"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "aios.openai_codex_night_supervisor_readiness.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repo_root": {
+      "type": "string",
+      "minLength": 1
+    },
+    "current_path": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "git_status": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "staged_index_clean": {
+      "type": "boolean"
+    },
+    "openai_cli_found": {
+      "type": "boolean"
+    },
+    "codex_cli_found": {
+      "type": "boolean"
+    },
+    "agents_md_found": {
+      "type": "boolean"
+    },
+    "readme_found": {
+      "type": "boolean"
+    },
+    "onboarding_doc_found": {
+      "type": "boolean"
+    },
+    "night_supervisor_paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "directory_found",
+        "supervisor_script_found",
+        "approval_queue_script_found",
+        "telemetry_night_supervisor_found"
+      ],
+      "properties": {
+        "directory_found": {
+          "type": "boolean"
+        },
+        "supervisor_script_found": {
+          "type": "boolean"
+        },
+        "approval_queue_script_found": {
+          "type": "boolean"
+        },
+        "telemetry_night_supervisor_found": {
+          "type": "boolean"
+        }
+      }
+    },
+    "collision_risk": {
+      "type": "boolean"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "READY",
+        "REVIEW_REQUIRED",
+        "BLOCKED"
+      ]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

@@ -260,6 +260,8 @@ Workers must treat validator output as evidence only. Validator PASS does not ap
 
 Claude Code West territory is governed by `docs/governance/aios-identity-and-lane-governance.md`. West territory is proposed, packet-driven, DRY_RUN-first, and approval-gated; it does not grant runtime, orchestration, governance, main-branch, or live trading authority.
 
+OpenAI CLI, Codex, ChatGPT, Claude reviewer, and Night Supervisor onboarding must follow `docs/workflows/OPENAI_CODEX_NIGHT_SUPERVISOR_ONBOARDING.md` and the readiness command `automation/onboarding/Test-AiOsOpenAiCodexNightSupervisorOnboarding.ps1`. The readiness result is evidence only; it does not grant APPLY, commit, push, merge, live trading, broker, secret, or background autonomy authority.
+
 ## AI Tool Routing Contract Pointer
 
 The canonical AI Tool Routing Contract lives in `docs/governance/operational-doctrine.md`. Codex, Claude, and AI workers must follow that contract when routing work between ChatGPT Personal, Codex East, Claude Chat, Claude Code West, Relay, Night Supervisor, Autonomy Bridge, and future MCP/API layers.

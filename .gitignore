@@ -83,6 +83,13 @@ Reports/work_intelligence/briefings/OPERATOR_VOICE_BRIEFING_*.md
 # AIOS generated logs
 Reports/trading_lab/*.log
 
+# AIOS local onboarding readiness outputs and local auth/session artifacts
+onboarding-readiness*.json
+telemetry/onboarding/*.json
+.aios/onboarding/*.json
+.aios/auth/
+.aios/sessions/
+
 # Service build artifacts
 services/node_modules/
 services/dist/
