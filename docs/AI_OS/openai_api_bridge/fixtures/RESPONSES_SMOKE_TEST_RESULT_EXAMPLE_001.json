@@ -1,0 +1,23 @@
+{
+  "schema": "aios.responses_smoke_test_result.v1",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "smoke_test_authorized": false,
+  "live_openai_api_call": false,
+  "api_key_required": false,
+  "api_key_value_printed": false,
+  "network_required": false,
+  "package_install_required": false,
+  "repo_mutation_allowed": false,
+  "timeout_required": true,
+  "redaction_required": true,
+  "validate_only_required": true,
+  "no_write_mode_required": true,
+  "admin_api_used": false,
+  "service_account_created": false,
+  "human_approval_required": true,
+  "fail_closed": true,
+  "profitability_priority": "TRUSTED_PROVEN_PROFITABILITY",
+  "stop_point": "Future smoke test requires separate human-approved packet."
+}
+
