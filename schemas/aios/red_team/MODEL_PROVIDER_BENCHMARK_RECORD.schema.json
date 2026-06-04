@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/aios/red_team/MODEL_PROVIDER_BENCHMARK_RECORD.schema.json",
+  "title": "AI_OS Model Provider Benchmark Boundary Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id",
+    "phase",
+    "status",
+    "provider_change_allowed",
+    "azure_setup_allowed",
+    "api_calls_allowed",
+    "benchmark_dimensions",
+    "profitability_priority",
+    "human_approval_required",
+    "stop_point"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["future_only"]
+    },
+    "provider_change_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "azure_setup_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "api_calls_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "benchmark_dimensions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "quality",
+          "latency",
+          "cost",
+          "safety",
+          "guardrail_adherence",
+          "packet_correctness",
+          "repo_truthfulness",
+          "profitability_priority_preservation"
+        ]
+      },
+      "minItems": 8,
+      "uniqueItems": true
+    },
+    "profitability_priority": {
+      "type": "string",
+      "enum": ["trusted_proven_profitability_top_priority"]
+    },
+    "human_approval_required": {
+      "type": "boolean",
+      "const": true
+    },
+    "stop_point": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
+

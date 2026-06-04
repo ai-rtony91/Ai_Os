@@ -1,0 +1,22 @@
+{
+  "record_id": "MODEL-PROVIDER-BENCHMARK-EXAMPLE-001",
+  "phase": "18.7",
+  "status": "future_only",
+  "provider_change_allowed": false,
+  "azure_setup_allowed": false,
+  "api_calls_allowed": false,
+  "benchmark_dimensions": [
+    "quality",
+    "latency",
+    "cost",
+    "safety",
+    "guardrail_adherence",
+    "packet_correctness",
+    "repo_truthfulness",
+    "profitability_priority_preservation"
+  ],
+  "profitability_priority": "trusted_proven_profitability_top_priority",
+  "human_approval_required": true,
+  "stop_point": "Do not change providers, set up Azure, or call APIs in Phase 18.7."
+}
+
