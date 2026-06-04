@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI_OS Route Validator Chain",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["route", "validators_required", "human_approval_required", "fail_closed", "stop_point"],
+  "properties": {
+    "route": { "type": "string" },
+    "validators_required": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "human_approval_required": { "type": "boolean" },
+    "fail_closed": { "type": "boolean" },
+    "stop_point": { "type": "string" }
+  }
+}
+
