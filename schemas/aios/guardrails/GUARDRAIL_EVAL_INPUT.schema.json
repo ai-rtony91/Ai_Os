@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/guardrails/GUARDRAIL_EVAL_INPUT.schema.json",
+  "title": "AI_OS Guardrail Eval Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eval_id",
+    "mode",
+    "local_fixture_only",
+    "source_of_truth_documents",
+    "assistant_output_type",
+    "assistant_output",
+    "current_repo_context",
+    "required_rules",
+    "allowed_paths",
+    "forbidden_paths",
+    "stop_point",
+    "live_openai_api_call",
+    "api_key_required",
+    "network_required",
+    "package_install_required",
+    "live_trading_status",
+    "broker_execution_status",
+    "oanda_status"
+  ],
+  "properties": {
+    "eval_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "source_of_truth_documents": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "assistant_output_type": {
+      "type": "string",
+      "enum": ["CODEX_PACKET", "CODEX_REPORT", "PLANNER_OUTPUT", "VALIDATOR_OUTPUT", "PR_REPORT", "MERGE_REPORT"]
+    },
+    "assistant_output": { "type": "string" },
+    "current_repo_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["worktree", "branch", "git_status", "phase", "lane"],
+      "properties": {
+        "worktree": { "type": "string" },
+        "branch": { "type": "string" },
+        "git_status": { "type": "string" },
+        "phase": { "type": "string" },
+        "lane": { "type": "string" }
+      }
+    },
+    "required_rules": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "forbidden_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "stop_point": { "type": "string" },
+    "live_openai_api_call": { "type": "boolean", "const": false },
+    "api_key_required": { "type": "boolean", "const": false },
+    "network_required": { "type": "boolean", "const": false },
+    "package_install_required": { "type": "boolean", "const": false },
+    "live_trading_status": { "type": "string", "const": "BLOCKED" },
+    "broker_execution_status": { "type": "string", "const": "BLOCKED" },
+    "oanda_status": { "type": "string", "const": "BLOCKED" }
+  }
+}

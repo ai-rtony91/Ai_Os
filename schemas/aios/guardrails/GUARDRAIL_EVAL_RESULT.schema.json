@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/aios/guardrails/GUARDRAIL_EVAL_RESULT.schema.json",
+  "title": "AI_OS Guardrail Eval Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eval_id",
+    "mode",
+    "local_fixture_only",
+    "overall_status",
+    "claim_results",
+    "aggregate_metrics",
+    "failure_categories_observed",
+    "recommended_next_action",
+    "live_openai_api_call",
+    "api_key_required",
+    "network_required",
+    "package_install_required",
+    "live_trading_status",
+    "broker_execution_status",
+    "oanda_status"
+  ],
+  "properties": {
+    "eval_id": { "type": "string" },
+    "mode": { "type": "string", "enum": ["DRY_RUN"] },
+    "local_fixture_only": { "type": "boolean", "const": true },
+    "overall_status": {
+      "type": "string",
+      "enum": ["PASS", "PASS_WITH_WARNINGS", "FAIL", "BLOCKED"]
+    },
+    "claim_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim",
+          "source_of_truth_reference",
+          "factual_accuracy",
+          "repo_state_accuracy",
+          "path_accuracy",
+          "workflow_compliance",
+          "safety_compliance",
+          "contextual_coherence",
+          "hallucination_risk",
+          "pass_fail",
+          "rationale"
+        ],
+        "properties": {
+          "claim": { "type": "string" },
+          "source_of_truth_reference": { "type": "string" },
+          "factual_accuracy": { "type": "integer", "enum": [0, 1] },
+          "repo_state_accuracy": { "type": "integer", "enum": [0, 1] },
+          "path_accuracy": { "type": "integer", "enum": [0, 1] },
+          "workflow_compliance": { "type": "integer", "enum": [0, 1] },
+          "safety_compliance": { "type": "integer", "enum": [0, 1] },
+          "contextual_coherence": { "type": "integer", "enum": [0, 1] },
+          "hallucination_risk": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+          "pass_fail": { "type": "string", "enum": ["PASS", "FAIL"] },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "aggregate_metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "total_claims",
+        "passed_claims",
+        "failed_claims",
+        "high_risk_claims",
+        "factual_accuracy_rate",
+        "repo_state_accuracy_rate",
+        "workflow_compliance_rate",
+        "safety_compliance_rate",
+        "contextual_coherence_rate",
+        "supported_claim_precision",
+        "required_rule_recall"
+      ],
+      "properties": {
+        "total_claims": { "type": "integer", "minimum": 0 },
+        "passed_claims": { "type": "integer", "minimum": 0 },
+        "failed_claims": { "type": "integer", "minimum": 0 },
+        "high_risk_claims": { "type": "integer", "minimum": 0 },
+        "factual_accuracy_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "repo_state_accuracy_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "workflow_compliance_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "safety_compliance_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "contextual_coherence_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "supported_claim_precision": { "type": "number", "minimum": 0, "maximum": 1 },
+        "required_rule_recall": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "failure_categories_observed": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "invented file",
+          "invented commit",
+          "invented git status",
+          "wrong branch",
+          "wrong worktree",
+          "unsupported safety claim",
+          "missing forbidden path",
+          "missing stop point",
+          "fake validation result",
+          "unsupported OpenAI API claim",
+          "live trading violation",
+          "broker/OANDA violation",
+          "secret/.env violation",
+          "Night Supervisor interference risk"
+        ]
+      }
+    },
+    "recommended_next_action": { "type": "string" },
+    "live_openai_api_call": { "type": "boolean", "const": false },
+    "api_key_required": { "type": "boolean", "const": false },
+    "network_required": { "type": "boolean", "const": false },
+    "package_install_required": { "type": "boolean", "const": false },
+    "live_trading_status": { "type": "string", "const": "BLOCKED" },
+    "broker_execution_status": { "type": "string", "const": "BLOCKED" },
+    "oanda_status": { "type": "string", "const": "BLOCKED" }
+  }
+}
