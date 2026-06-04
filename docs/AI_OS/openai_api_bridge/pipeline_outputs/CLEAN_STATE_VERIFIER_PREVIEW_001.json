@@ -1,0 +1,11 @@
+{
+  "verifier_id": "CLEAN_STATE_VERIFIER_PREVIEW_P16_PIPELINE_001",
+  "packet_id": "AIOS-P16-PIPELINE-CODEX-PACKET-DRAFT-001",
+  "required_git_status": "git status --short --branch",
+  "expected_clean_status": "No modified, staged, or untracked files outside the approved packet scope.",
+  "dirty_file_policy": "Block if unexpected dirty files exist.",
+  "untracked_file_policy": "Allow only explicitly approved new files in allowed paths.",
+  "forbidden_path_policy": "Block any touched forbidden path.",
+  "final_sync_policy": "After approved PR merge only, sync local main to origin/main.",
+  "pass_fail_logic": "PASS only when branch, status, path scope, JSON, secret, network, and trading checks pass."
+}

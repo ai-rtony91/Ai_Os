@@ -1,0 +1,28 @@
+{
+  "commit_package_id": "COMMIT_PACKAGE_PREVIEW_P16_PIPELINE_001",
+  "packet_id": "AIOS-P16-PIPELINE-CODEX-PACKET-DRAFT-001",
+  "commit_allowed": false,
+  "suggested_commit_message": "docs(aios): add OpenAI planner pipeline preview",
+  "allowed_files_preview": [
+    "docs/AI_OS/openai_api_bridge/",
+    "automation/orchestration/openai_api_bridge/"
+  ],
+  "forbidden_files_preview": [
+    "telemetry/",
+    "telemetry/night_supervisor/",
+    "control/",
+    "automation/orchestration/locks/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/memory/",
+    "automation/orchestration/night_supervisor/",
+    "broker files",
+    "OANDA files",
+    "live trading files",
+    "secret files",
+    ".env files",
+    "git config files"
+  ],
+  "git_add_dot_allowed": false,
+  "requires_human_commit_approval": true,
+  "push_allowed": false
+}

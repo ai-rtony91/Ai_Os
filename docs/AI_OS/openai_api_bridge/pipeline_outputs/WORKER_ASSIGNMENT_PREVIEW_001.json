@@ -1,0 +1,30 @@
+{
+  "packet_id": "AIOS-P16-PIPELINE-CODEX-PACKET-DRAFT-001",
+  "recommended_worker_lane": "DRY_RUN validation lane",
+  "worker_type": "Codex",
+  "branch_strategy": "Use current clean main for read-only validation; use PR lane only after approved changes.",
+  "worktree_strategy": "Use C:\\Dev\\Ai.Os only; no temporary worktree required for read-only preview.",
+  "allowed_paths": [
+    "docs/AI_OS/openai_api_bridge/",
+    "automation/orchestration/openai_api_bridge/"
+  ],
+  "forbidden_paths": [
+    "telemetry/",
+    "telemetry/night_supervisor/",
+    "control/",
+    "automation/orchestration/locks/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/memory/",
+    "automation/orchestration/night_supervisor/",
+    "broker files",
+    "OANDA files",
+    "live trading files",
+    "secret files",
+    ".env files",
+    "git config files"
+  ],
+  "collision_risk": "LOW",
+  "night_supervisor_interference_check": "PASS",
+  "requires_human_start": true,
+  "requires_human_approval": true
+}
