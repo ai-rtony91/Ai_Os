@@ -31,3 +31,52 @@ AGENTS.md
 
 Runtime evidence, dashboard state, telemetry, validator PASS, queue state, or generated packet state must not override human approval or protected-action gates.
 
+## C1 Canonical Authority Marking - Active Decision
+
+Decision file: `docs/AI_OS/orchestration_consolidation/ORCHESTRATION_CANONICAL_AUTHORITY_DECISION_001.md`
+
+C1 marks the following canonical high-level spine as active documentation authority:
+
+```text
+goal intake
+-> packet draft
+-> dispatcher route scoring
+-> worker assignment
+-> validator chain
+-> approval gate
+-> execution worker
+-> clean-state verifier
+-> commit package
+-> PR lane
+-> human merge
+-> trace/red-team/improvement loop
+```
+
+### Active Authority Decisions
+
+- Goal intake authority: Human Owner and AI_OS Manager Control.
+- Packet draft authority: OpenAI/ChatGPT may draft; drafts remain inert until validated.
+- Packet validation authority: `AGENTS.md`, identity/lane governance, and workflow standards.
+- Dispatcher authority: dispatch route scoring and blocker classification.
+- Worker assignment authority: packet-scoped worker identity and worker registry.
+- Validator chain authority: validator standards and validator-chain evidence.
+- Approval gate authority: Human Owner approval plus exact-scope approval gates.
+- Execution worker authority: Codex or assigned worker within approved lane and paths.
+- Clean-state verifier authority: git/worktree clean-state and forbidden-path checks.
+- Commit package authority: exact-file commit package and protected-action gate.
+- PR lane authority: protected main PR lane.
+- Human merge authority: Human Owner only.
+- Trace/red-team/improvement authority: findings feed future packets and PRs.
+- Night Supervisor preview authority: preview/report-only.
+- Night Supervisor runtime authority: blocked until controlled-run gates pass.
+- OpenAI CLI authority: planner/generator only.
+- Skills authority: reviewed developer-level bundles only.
+- Computer-use authority: future isolated human-in-loop capability only.
+- Pi car voice authority: listen, speak, explain, and propose actions only.
+- Trading Lab authority: paper-only until trust gates pass.
+
+### Non-Canonical Files Remain Untouched
+
+All non-canonical, duplicate, legacy, example, root display, queue, approval, relay, runtime, supervisor, or compatibility files remain untouched until later APPLY packets explicitly approve marking, reference updates, moves, archives, or deletion.
+
+No file is deleted or moved until references are mapped, replacement authority is named, a validator confirms no active runtime dependency, and the Human Owner approves APPLY.
