@@ -1,0 +1,20 @@
+{
+  "precheck_id": "RUNTIME-CONTEXT-P18-6-001",
+  "mode": "DRY_RUN",
+  "local_fixture_only": true,
+  "expected_userprofile_check": true,
+  "pwd_check_required": true,
+  "git_root_check_required": true,
+  "expected_worktree_check_required": true,
+  "python_path_cwd_check_required": true,
+  "canonical_profile_check_required": true,
+  "active_lock_check_required": true,
+  "dirty_tree_check_required": true,
+  "forbidden_path_dirty_check_required": true,
+  "mode_check_required": true,
+  "known_failure": "Paper SOS failed because Python Path.cwd() resolved to C:\\Dev\\Ai.Os instead of C:\\Dev\\aios-paper-sos-runtime-closeout.",
+  "night_supervisor_runtime_start_allowed": false,
+  "human_approval_required": true,
+  "fail_closed": true,
+  "stop_point": "Fail closed if runtime context mismatches expected worktree, mode, profile, lock, or clean-state policy."
+}
