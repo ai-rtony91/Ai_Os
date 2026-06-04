@@ -10,13 +10,14 @@
 
     Rule enforced here (operator rule #9):
       No file may use canonical / source-of-truth / authority language in its NAME unless it is
-      (a) registered in the sanctioned-canonical allowlist below (this list IS the one authority registry),
+      (a) listed in the configured evidence paths below,
       (b) clearly marked REFERENCE_ONLY / HISTORICAL / SUPERSEDED / DEPRECATED in its content,
       (c) a point-in-time artifact by naming convention (_DRAFT, phase-N, -pass-N, STAGE, dated, checkpoint, report), or
       (d) under archive/.
 
-    The canonical owners below are derived from the wired resolver
-    (automation/orchestration/recommendations/Resolve-AiOsSourceOfTruth.ps1) and AGENTS.md.
+    This validator is not authority and does not define canonical ownership. Current authority lives in
+    docs/governance/source-of-truth-map.md, and active-system context lives in docs/audits/active-system-map.md.
+    The expected reference roots below are evidence paths used for report-only validation.
 
     Mode: READ_ONLY. No file is created, moved, deleted, or mutated. No commit/push.
     Exit 0 = PASS (no unsanctioned authority files). Exit 1 = STOP (worklist of files to register, mark, or archive).
@@ -44,15 +45,15 @@ function Resolve-AiOsRepoRoot {
     throw "Unable to resolve AI_OS repo root from $StartPath."
 }
 
-# --- THE authority registry: the only files sanctioned to carry canonical/authority/source-of-truth names. ---
-# Keep this list small. Adding an entry is the deliberate, reviewed act of registering a canonical owner.
-$sanctionedCanonical = @(
-    # Protected root authority
+# --- Expected reference roots for report-only validation evidence. ---
+# This list is not authority. Update canonical ownership in docs/governance/source-of-truth-map.md.
+$expectedReferenceRoots = @(
+    # Protected root references
     "AGENTS.md",
     "README.md",
     "WHITEPAPER.md",
     "RISK_POLICY.md",
-    # Wired governance authority (per Resolve-AiOsSourceOfTruth.ps1 + AGENTS.md)
+    # Wired governance references
     "docs/governance/source-of-truth-map.md",
     "docs/governance/operational-doctrine.md",
     "docs/governance/aios-identity-and-lane-governance.md",
@@ -63,7 +64,7 @@ $sanctionedCanonical = @(
     "automation/orchestration/recommendations/Resolve-AiOsSourceOfTruth.ps1",
     "automation/orchestration/workers/AIOS_WORKER_REGISTRY.json",
     "schemas/aios/orchestration/WORKER_REGISTRY_SCHEMA.json",
-    # Scoped canonicals (each owns one lane only)
+    # Scoped historical/reference paths that carry canonical/source-of-truth naming
     "docs/AI_OS/signal_intelligence/AIOS_SIGNAL_INTELLIGENCE_SOURCE_OF_TRUTH.md",
     "docs/AI_OS/operator/AIOS_OPERATOR_PREFERENCES_AND_WORKFLOW_CANONICAL.md",
     "docs/security/SECURE_ACCESS_DOCS_CANONICAL_LINEAGE.md",
@@ -81,8 +82,8 @@ $historicalName = '(?i)(_DRAFT|-pass-\d|phase-\d|stage-?\d|_DRY_RUN|\d{4}-\d{2}-
 $markerExempt = '(?i)(REFERENCE[_ ]?ONLY|HISTORICAL|SUPERSEDED|ARCHIVED|DEPRECATED|not active|CLEAN-era|no longer (active|canonical)|do not use as authority)'
 
 $repoRoot = Resolve-AiOsRepoRoot -StartPath $PSScriptRoot
-$sanctionedSet = @{}
-foreach ($s in $sanctionedCanonical) { $sanctionedSet[$s.ToLowerInvariant()] = $true }
+$expectedReferenceSet = @{}
+foreach ($s in $expectedReferenceRoots) { $expectedReferenceSet[$s.ToLowerInvariant()] = $true }
 
 $findings = @()
 $claimFileCount = 0
@@ -103,7 +104,7 @@ foreach ($scanRoot in $ScanRoots) {
         $claimFileCount++
 
         # Exemptions
-        if ($sanctionedSet.ContainsKey($relPath.ToLowerInvariant())) { continue }
+        if ($expectedReferenceSet.ContainsKey($relPath.ToLowerInvariant())) { continue }
         if ($file.Name -match $historicalName) { continue }
 
         $content = ""
@@ -113,8 +114,8 @@ foreach ($scanRoot in $ScanRoots) {
         $findings += [pscustomobject]@{
             Path           = $relPath
             CheckId        = "unsanctioned_authority_file"
-            Message        = "File name claims canonical/authority/source-of-truth status but is not registered, marked REFERENCE_ONLY/HISTORICAL/SUPERSEDED, historical by naming, or archived."
-            NextSafeAction = "Register it in the sanctioned-canonical allowlist (if it is a real canonical owner), add a REFERENCE_ONLY/HISTORICAL header, or archive it."
+            Message        = "File name claims canonical/authority/source-of-truth status but is not listed as expected evidence, marked REFERENCE_ONLY/HISTORICAL/SUPERSEDED, historical by naming, or archived."
+            NextSafeAction = "If active ownership is intended, update docs/governance/source-of-truth-map.md through an approved APPLY packet; otherwise add a REFERENCE_ONLY/HISTORICAL header or archive after dependency confirmation."
         }
     }
 }
@@ -126,7 +127,7 @@ if ($QuietJson) {
         status            = $status
         scanned_files     = $scannedFileCount
         authority_claim_files = $claimFileCount
-        sanctioned_owners = $sanctionedCanonical.Count
+        expected_reference_paths = $expectedReferenceRoots.Count
         findings          = $findings
     } | ConvertTo-Json -Depth 6
     if ($status -eq "PASS") { exit 0 } else { exit 1 }
@@ -138,7 +139,7 @@ Write-Host "Repo root: $repoRoot"
 Write-Host "Scan roots: $($ScanRoots -join ', ')"
 Write-Host "Files scanned: $scannedFileCount"
 Write-Host "Authority-claim files (by name): $claimFileCount"
-Write-Host "Sanctioned canonical owners: $($sanctionedCanonical.Count)"
+Write-Host "Expected reference paths: $($expectedReferenceRoots.Count)"
 Write-Host "Unsanctioned findings: $($findings.Count)"
 
 if ($findings.Count -gt 0) {
@@ -148,7 +149,7 @@ if ($findings.Count -gt 0) {
         Write-Host ("  [STOP] {0}" -f $f.Path)
     }
     Write-Host ""
-    Write-Host "Fix each by ONE of: register in the allowlist (real owner), add REFERENCE_ONLY/HISTORICAL header, or archive."
+    Write-Host "Fix each by ONE of: update the canonical source-of-truth map through an approved APPLY packet, add REFERENCE_ONLY/HISTORICAL header, or archive after dependency confirmation."
 }
 
 Write-Host ""
