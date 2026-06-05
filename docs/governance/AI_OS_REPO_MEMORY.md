@@ -8,8 +8,8 @@ This memory is a starting context, not command authority. If the branch changes,
 
 ## Last Updated
 
-- Timestamp: 2026-05-23
-- Updated by: Codex worker, lane `Repo Memory Governance`
+- Timestamp: 2026-06-05
+- Updated by: Codex worker, lane `MEMORY_LOOP_APPLY`
 
 ## Last Known Push State
 
@@ -51,3 +51,60 @@ Workers should re-check git state only when one of these applies:
 - The worker needs current file-level evidence before editing.
 - The recorded memory conflicts with visible repo evidence.
 - The operator explicitly requests a fresh status check.
+
+## Assessment Memory Loop
+
+Purpose:
+
+Future AI_OS assessments and reassessments must check this memory before producing conclusions. This section is a recurrence-prevention control, not new approval authority. It records prior fixes, accepted risks, expected outcomes, regression checks, and reopen conditions so future workers do not repeat known mistakes or create duplicate governance.
+
+Assessment loop:
+
+1. Run the current-state assessment from repo evidence.
+2. Review the latest relevant memory entry below.
+3. Compare the current issue against prior problems, root causes, fixes, and accepted risks.
+4. Decide whether the issue is new, an old regression, or a duplicate-authority risk.
+5. Reopen a prior decision only when current evidence matches a listed reopen condition.
+
+Future-assessment checklist:
+
+- What did the last assessment conclude?
+- What changed since?
+- Did the expected improvement happen?
+- Did the old issue return?
+- Did the fix create a new bottleneck?
+- Is this a new issue or an old regression?
+- Are we creating duplicate authority?
+- Should this decision be reopened?
+
+### Tracked Reassessment Themes - 2026-06-05
+
+#### Blast Radius Governance
+
+- Problem discovered: Governance burden was being applied too broadly, causing low-risk inspection and planning work to inherit packet burdens meant for higher-risk mutation or production work.
+- Root cause: Governance rules did not clearly scale required process to actual blast radius before packet validation began.
+- Fix applied: Added a tiered blast-radius model in `AGENTS.md` through commit `8de08e3 docs(governance): align governance burden with blast radius`.
+- Expected outcome: Low-risk read-only and planning work can proceed with lighter governance, while local apply, authority changes, production, secrets, trading, broker/API, and protected actions remain strict.
+- Accepted risk: Tier classification can be misread if future packets omit scope or hide mutation behind analysis wording.
+- Regression checks: Confirm future packets classify READ_ONLY, DRY_RUN PLAN, SANDBOX_OUTPUT, LOCAL_APPLY, PROMOTION, or PRODUCTION_OR_LIVE before validation; confirm protected actions still require explicit approval.
+- Reopen conditions: Reopen if low-risk work is blocked by excessive packet burden again, or if the tier model is used to weaken commit, push, merge, secrets, live trading, broker/API, or authority gates.
+
+#### Morning Brief v2
+
+- Problem discovered: Morning decision surfaces mixed active approval decisions with examples, completed records, and stale digest state.
+- Root cause: Presentation logic counted raw pending-human-review items without enough filtering for example records, completed approvals, and stale projection mismatches.
+- Fix applied: Added repeatable Morning Brief v2 output in commit `3489f61 feat(night-supervisor): add repeatable morning brief v2 output`, then refined consumption during Bridge Intelligence v1 work.
+- Expected outcome: Morning Brief v2 presents current active decision cards separately from noise and stale-state warnings.
+- Accepted risk: Digest state and markdown can still be stale if only the bridge state is refreshed or if old generated outputs are read as current.
+- Regression checks: Confirm `MORNING_BRIEF_V2_LATEST.json` exposes active decision cards, noise cards, stale-state warnings, `recommendation_only`, and current status fields; confirm examples and completed records are not counted as active approvals.
+- Reopen conditions: Reopen if Morning Brief v2 again shows completed records, examples, or stale relay/digest artifacts as active approval work.
+
+#### Bridge Intelligence v1
+
+- Problem discovered: Autonomy Bridge reported `BLOCKED` while the latest Night Supervisor report was `READY`.
+- Root cause: Bridge status scanned broad historical/source artifacts and allowed any classified blocked item to dominate top-level status.
+- Fix applied: Committed Bridge Intelligence v1 in `5ef27a8 feat(night-supervisor): anchor bridge status to active evidence`.
+- Expected outcome: Latest Night Supervisor report anchors bridge status; active blockers drive `BLOCKED`; active approvals drive `NEEDS_APPROVAL`; historical relay artifacts remain detail-only evidence.
+- Accepted risk: Broad raw evidence still contains blocked-looking text and old artifacts, so future consumers must honor `status_impact` and active/current buckets instead of raw item status alone.
+- Regression checks: Confirm `AUTONOMY_BRIDGE_STATE.json` includes `bridge_status`, `active_current`, `active_decision_cards`, `current_blockers`, `raw_evidence`, and `status_impact`; confirm old relay errors, examples, samples, completed records, and stale projections do not force `BLOCKED`.
+- Reopen conditions: Reopen if bridge top-level status is again driven by historical relay artifacts, examples, completed records, stale projections, or old test blockers instead of current active operational evidence.
