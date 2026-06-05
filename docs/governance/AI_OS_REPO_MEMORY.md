@@ -108,3 +108,14 @@ Future-assessment checklist:
 - Accepted risk: Broad raw evidence still contains blocked-looking text and old artifacts, so future consumers must honor `status_impact` and active/current buckets instead of raw item status alone.
 - Regression checks: Confirm `AUTONOMY_BRIDGE_STATE.json` includes `bridge_status`, `active_current`, `active_decision_cards`, `current_blockers`, `raw_evidence`, and `status_impact`; confirm old relay errors, examples, samples, completed records, and stale projections do not force `BLOCKED`.
 - Reopen conditions: Reopen if bridge top-level status is again driven by historical relay artifacts, examples, completed records, stale projections, or old test blockers instead of current active operational evidence.
+
+#### Operator Guidance Layer
+
+- Source: ChatGPT export full-shard aggregate tally. No raw transcript was imported, no private content was stored, and no attachment content was inspected.
+- Problem discovered: Repeated human-AI productivity friction concentrated in Git/GitHub/PR/branch handling, repo/path selection, terminal/CLI and PowerShell use, Codex approval prompts, manual repair burden, stale-state confusion, and unclear next actions.
+- Root cause: AI guidance often assumed operational vocabulary, current UI shape, repo state, or approval-risk context that the operator needed translated into immediate action.
+- Process fix: Added an Operator Guidance Layer rule in `AGENTS.md` requiring action-first, beginner-readable, scope-aware guidance for Git, repo paths, terminal commands, validation, UI/web steps, and Codex approval prompts.
+- Expected outcome: Fewer manual repair loops, clearer next actions, safer approval choices, and less repeated confusion around repo path, PR flow, branch state, command purpose, success condition, and stop condition.
+- Accepted risk: Over-explaining can become new noise if assistants turn the guidance layer into long tutorials instead of short action-first translation.
+- Regression checks: Confirm future prompts explain the immediate action clearly; confirm Codex approval prompts get plain-language risk translation; confirm Git/GitHub/branch/path instructions include success condition and stop condition; confirm UI guidance avoids stale button assumptions and uses current official documentation or visible-state fallback when exact UI matters.
+- Reopen conditions: Reopen if repeated frustration from unclear commands, repo paths, PR flow, approval prompts, missing vocabulary, or stale UI assumptions returns.
