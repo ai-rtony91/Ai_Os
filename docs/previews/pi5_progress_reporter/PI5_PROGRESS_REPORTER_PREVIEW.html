@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI_OS Pi5 Progress Reporter Preview</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0f17;
+      --panel: #141b26;
+      --panel-strong: #1b2533;
+      --text: #f3f7fb;
+      --muted: #a8b3c2;
+      --line: #2f3b4d;
+      --green: #25d07d;
+      --yellow: #f2c94c;
+      --red: #ff5d5d;
+      --blue: #5aa7ff;
+      --purple: #a58cff;
+      --gray: #8d97a6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .screen {
+      width: min(100%, 1180px);
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(30px, 5vw, 54px);
+      line-height: 1;
+    }
+
+    h2 {
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.08;
+    }
+
+    h3 {
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .subline {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: var(--panel);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge.yellow { color: #1e1600; background: var(--yellow); border-color: var(--yellow); }
+    .badge.green { color: #001b0d; background: var(--green); border-color: var(--green); }
+    .badge.red { color: #260000; background: var(--red); border-color: var(--red); }
+    .badge.gray { color: #091019; background: var(--gray); border-color: var(--gray); }
+    .badge.blue { color: #00172e; background: var(--blue); border-color: var(--blue); }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 18px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .overall-number {
+      font-size: clamp(64px, 13vw, 138px);
+      font-weight: 800;
+      line-height: 0.9;
+      color: var(--blue);
+    }
+
+    .phase {
+      margin-top: 14px;
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 750;
+    }
+
+    .next-action {
+      margin-top: 12px;
+      color: var(--text);
+      font-size: clamp(20px, 3vw, 30px);
+      line-height: 1.16;
+    }
+
+    .human-needed {
+      background: #3a2a00;
+      border-color: #8f6d12;
+    }
+
+    .human-needed.urgent {
+      background: #3b2500;
+      border-color: var(--yellow);
+    }
+
+    .human-needed.clear {
+      background: #06301b;
+      border-color: var(--green);
+    }
+
+    .human-needed strong {
+      display: block;
+      font-size: clamp(34px, 5vw, 58px);
+      color: var(--yellow);
+      line-height: 1;
+      margin: 8px 0 12px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric {
+      min-height: 132px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 18px;
+      font-weight: 650;
+    }
+
+    .metric .value {
+      margin-top: 6px;
+      font-size: clamp(30px, 5vw, 50px);
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .bar-track {
+      margin-top: 12px;
+      height: 16px;
+      border-radius: 999px;
+      background: #263142;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: var(--blue);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .card {
+      min-height: 172px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .card .summary {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.25;
+    }
+
+    .count-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .count-box {
+      border: 1px solid var(--line);
+      background: var(--panel-strong);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 112px;
+    }
+
+    .count-box .num {
+      display: block;
+      font-size: 54px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .count-box .caption {
+      color: var(--muted);
+      font-size: 18px;
+      margin-top: 8px;
+    }
+
+    .section {
+      margin-top: 18px;
+    }
+
+    .warning-list {
+      margin: 12px 0 0;
+      padding-left: 22px;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.32;
+    }
+
+    .safety-strip {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .safety-item {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px;
+      color: var(--text);
+      background: #111824;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    @media (max-width: 800px) {
+      header, .hero, .grid, .metric-grid, .safety-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .badges {
+        justify-content: flex-start;
+      }
+
+      .screen {
+        padding: 12px;
+      }
+
+      nav a {
+        font-size: 16px;
+        padding: 9px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="screen">
+    <header>
+      <div>
+        <h1>AI_OS Pi5 Progress</h1>
+        <p class="subline">Raspberry Pi 5 display preview. Static, local, display-only.</p>
+      </div>
+      <div class="badges">
+        <span class="badge gray">DISPLAY ONLY</span>
+        <span class="badge gray">NOT APPROVAL AUTHORITY</span>
+        <span class="badge gray">NO MOTOR / GPIO / TRADING CONTROL</span>
+      </div>
+    </header>
+
+    <nav aria-label="Preview sections">
+      <a href="#main-status">Main Status</a>
+      <a href="#forex">Forex Bot Build</a>
+      <a href="#workers">Worker Readiness</a>
+      <a href="#approval">Approval Decision</a>
+      <a href="#brief">Morning Brief</a>
+      <a href="#alert">Alert / Stop</a>
+    </nav>
+
+    <section id="main-status" class="hero">
+      <article class="panel">
+        <p class="subline">Overall AI_OS progress</p>
+        <div id="overall-number" class="overall-number">--%</div>
+        <div class="bar-track" aria-hidden="true"><div id="overall-bar" class="bar-fill"></div></div>
+        <p id="phase" class="phase">Loading progress contract...</p>
+        <p id="next-action" class="next-action">Waiting for local preview data.</p>
+      </article>
+
+      <article id="human-panel" class="panel human-needed">
+        <p class="subline">Human interaction required</p>
+        <strong id="human-needed">UNKNOWN</strong>
+        <div class="count-row">
+          <div class="count-box">
+            <span id="blockers-count" class="num">--</span>
+            <span class="caption">Blockers</span>
+          </div>
+          <div class="count-box">
+            <span id="approvals-count" class="num">--</span>
+            <span class="caption">Active approvals</span>
+          </div>
+        </div>
+        <p id="last-updated" class="subline">Last updated: unknown</p>
+      </article>
+    </section>
+
+    <section class="metric-grid" aria-label="Progress metrics">
+      <article class="panel metric">
+        <p class="label">Night Supervisor</p>
+        <p id="night-value" class="value">--%</p>
+        <div class="bar-track"><div id="night-bar" class="bar-fill"></div></div>
+      </article>
+      <article class="panel metric">
+        <p class="label">Validation</p>
+        <p id="validation-value" class="value">--%</p>
+        <div class="bar-track"><div id="validation-bar" class="bar-fill"></div></div>
+      </article>
+      <article class="panel metric">
+        <p class="label">Worker Readiness</p>
+        <p id="worker-value" class="value">--%</p>
+        <div class="bar-track"><div id="worker-bar" class="bar-fill"></div></div>
+      </article>
+      <article class="panel metric">
+        <p class="label">Approval Clearance</p>
+        <p id="approval-value" class="value">--%</p>
+        <div class="bar-track"><div id="approval-bar" class="bar-fill"></div></div>
+      </article>
+      <article id="forex" class="panel metric">
+        <p class="label">Forex Bot Build</p>
+        <p id="forex-value" class="value">--%</p>
+        <div class="bar-track"><div id="forex-bar" class="bar-fill"></div></div>
+      </article>
+      <article class="panel metric">
+        <p class="label">Data Source</p>
+        <p id="source-mode" class="value">--</p>
+        <p class="subline">JSON fetch or fallback sample</p>
+      </article>
+    </section>
+
+    <section class="section">
+      <h2>Display Cards</h2>
+      <div id="display-cards" class="grid"></div>
+    </section>
+
+    <section id="workers" class="section panel">
+      <h2>Worker Readiness</h2>
+      <p id="worker-summary" class="next-action">Worker evidence is display-only. This preview cannot launch workers.</p>
+    </section>
+
+    <section id="approval" class="section panel">
+      <h2>Approval Decision</h2>
+      <p id="approval-summary" class="next-action">Approval evidence is recommendation-only. This preview cannot approve, reject, defer, or mutate approvals.</p>
+    </section>
+
+    <section id="brief" class="section panel">
+      <h2>Morning Brief / Stale Warnings</h2>
+      <ul id="stale-warnings" class="warning-list"></ul>
+    </section>
+
+    <section id="alert" class="section panel">
+      <h2>Alert / Stop Boundary</h2>
+      <p id="alert-summary" class="next-action">No active blocker loaded yet.</p>
+      <div class="safety-strip">
+        <div class="safety-item">No approval authority</div>
+        <div class="safety-item">No repo mutation authority</div>
+        <div class="safety-item">No Pi service or scheduler</div>
+        <div class="safety-item">No motor or GPIO control</div>
+        <div class="safety-item">No broker/API</div>
+        <div class="safety-item">No live trading or real orders</div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      This preview reads or simulates telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json.
+      It does not call external services, run shell commands, mutate files, approve work, deploy to the Pi, or control hardware.
+    </p>
+  </main>
+
+  <script>
+    const fallbackReport = {
+      schema: "AIOS_PI5_PROGRESS_REPORT.v1",
+      mode: "DRY_RUN_SANDBOX_OUTPUT",
+      authority_boundary: {
+        evidence_only: true,
+        approval_authority: false,
+        trading_authority: false,
+        repo_mutation_authority: false,
+        pi_service_authority: false,
+        scheduler_authority: false,
+        gpio_or_motor_authority: false
+      },
+      overall_aios_progress_percent: 80,
+      forex_bot_build_percent: 15,
+      night_supervisor_health_percent: 95,
+      worker_readiness_percent: 75,
+      approval_clearance_percent: 60,
+      validation_health_percent: 100,
+      human_interaction_required: true,
+      current_phase: "approval decision required",
+      next_safe_action: "Review Approval Intelligence v2 decision card; defer broad APPLY until exact scope and validator evidence are available.",
+      blockers_count: 0,
+      active_approval_count: 1,
+      last_updated: "2026-06-05T19:10:16Z",
+      forex_display_rule: "REPORT_ONLY_PROFILE / paper simulation planning only. Do not imply live bot, broker connection, real market data, or real orders.",
+      stale_state_warnings: [
+        "Morning digest state date does not match latest Night Supervisor report date.",
+        "Morning digest markdown is stale and still dated 2026-06-02.",
+        "Approval counts differ after noise filtering: active=1 bridge=1 digest=45."
+      ],
+      display_cards: [
+        { title: "Main Status", status: "NEEDS_APPROVAL", percent: 80, summary: "AI_OS is NEEDS_APPROVAL with 0 blocker(s) and 1 active approval(s)." },
+        { title: "Night Supervisor", status: "READY", percent: 95, summary: "Latest Night Supervisor report is READY; validator=PASS; qa=PASS." },
+        { title: "Approval Intelligence", status: "NEEDS_APPROVAL", percent: 60, summary: "1 active recommendation-only approval card(s)." },
+        { title: "Forex Paper Lab", status: "REPORT_ONLY_PROFILE", percent: 15, summary: "REPORT_ONLY_PROFILE / paper simulation planning only. No broker, OANDA, real market data, live bot, or real orders." },
+        { title: "Worker Readiness", status: "WAITING_APPROVAL", percent: 75, summary: "Worker evidence is display-only; worker_launch remains disabled unless a separate approved packet allows it." },
+        { title: "Validation Health", status: "PASS", percent: 100, summary: "Validator=PASS; QA=PASS; forbidden_write_attempts=0." },
+        { title: "Human Needed", status: "YES", percent: 100, summary: "Anthony action is needed for current approval/blocker review." },
+        { title: "Next Safe Action", status: "DISPLAY_ONLY", percent: 0, summary: "Review Approval Intelligence v2 decision card; defer broad APPLY until exact scope and validator evidence are available." }
+      ],
+      validation: {
+        no_pi_deployment: true,
+        no_service_created: true,
+        no_scheduler_created: true,
+        no_gpio_or_motor_controls: true,
+        no_approval_mutation: true,
+        no_secrets: true,
+        no_broker_api: true,
+        no_live_trading: true,
+        no_real_orders: true,
+        no_real_webhooks: true,
+        no_commit_or_push: true
+      }
+    };
+
+    const jsonPath = "../../../telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json";
+
+    function statusClass(status) {
+      const value = String(status || "").toUpperCase();
+      if (value.includes("BLOCK") || value.includes("STOP")) return "red";
+      if (value.includes("NEEDS") || value.includes("WAITING") || value.includes("REVIEW")) return "yellow";
+      if (value.includes("READY") || value.includes("PASS") || value.includes("CLEAR")) return "green";
+      if (value.includes("DISPLAY") || value.includes("REPORT")) return "blue";
+      return "gray";
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function setBar(id, percent, colorName) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
+      el.style.width = safePercent + "%";
+      el.style.background = `var(--${colorName || "blue"})`;
+    }
+
+    function percentText(value) {
+      return `${Number(value) || 0}%`;
+    }
+
+    function renderReport(report, sourceMode) {
+      const overall = report.overall_aios_progress_percent;
+      const humanNeeded = Boolean(report.human_interaction_required);
+      const blockers = Number(report.blockers_count) || 0;
+      const approvals = Number(report.active_approval_count) || 0;
+
+      setText("overall-number", percentText(overall));
+      setText("phase", report.current_phase || "unknown phase");
+      setText("next-action", report.next_safe_action || "Review latest Pi5 progress report.");
+      setText("human-needed", humanNeeded ? "YES" : "NO");
+      setText("blockers-count", blockers);
+      setText("approvals-count", approvals);
+      setText("last-updated", `Last updated: ${report.last_updated || "unknown"}`);
+      setText("source-mode", sourceMode);
+
+      const humanPanel = document.getElementById("human-panel");
+      humanPanel.classList.toggle("urgent", humanNeeded);
+      humanPanel.classList.toggle("clear", !humanNeeded);
+
+      setBar("overall-bar", overall, "blue");
+      setText("night-value", percentText(report.night_supervisor_health_percent));
+      setBar("night-bar", report.night_supervisor_health_percent, "green");
+      setText("validation-value", percentText(report.validation_health_percent));
+      setBar("validation-bar", report.validation_health_percent, "green");
+      setText("worker-value", percentText(report.worker_readiness_percent));
+      setBar("worker-bar", report.worker_readiness_percent, approvals > 0 ? "yellow" : "green");
+      setText("approval-value", percentText(report.approval_clearance_percent));
+      setBar("approval-bar", report.approval_clearance_percent, approvals > 0 ? "yellow" : "green");
+      setText("forex-value", percentText(report.forex_bot_build_percent));
+      setBar("forex-bar", report.forex_bot_build_percent, "purple");
+
+      const cardsRoot = document.getElementById("display-cards");
+      cardsRoot.innerHTML = "";
+      (report.display_cards || []).forEach((card) => {
+        const article = document.createElement("article");
+        article.className = "panel card";
+        article.innerHTML = `
+          <div class="card-head">
+            <h3>${card.title || "Display Card"}</h3>
+            <span class="badge ${statusClass(card.status)}">${card.status || "UNKNOWN"}</span>
+          </div>
+          <p class="value">${percentText(card.percent)}</p>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0, Math.min(100, Number(card.percent) || 0))}%; background:var(--${statusClass(card.status)});"></div></div>
+          <p class="summary">${card.summary || "No summary available."}</p>
+        `;
+        cardsRoot.appendChild(article);
+      });
+
+      const worker = (report.display_cards || []).find((card) => String(card.title || "").toLowerCase().includes("worker"));
+      const approval = (report.display_cards || []).find((card) => String(card.title || "").toLowerCase().includes("approval"));
+      const forex = (report.display_cards || []).find((card) => String(card.title || "").toLowerCase().includes("forex"));
+      setText("worker-summary", worker ? worker.summary : "Worker evidence is display-only. This preview cannot launch workers.");
+      setText("approval-summary", approval ? `${approval.summary} This preview cannot approve, reject, defer, or mutate approvals.` : "Approval evidence is recommendation-only.");
+
+      const warningRoot = document.getElementById("stale-warnings");
+      warningRoot.innerHTML = "";
+      const warnings = report.stale_state_warnings || [];
+      if (warnings.length === 0) {
+        const li = document.createElement("li");
+        li.textContent = "No stale-data warning reported.";
+        warningRoot.appendChild(li);
+      } else {
+        warnings.forEach((warning) => {
+          const li = document.createElement("li");
+          li.textContent = warning;
+          warningRoot.appendChild(li);
+        });
+      }
+
+      const alertSummary = blockers > 0
+        ? `${blockers} current blocker(s). Stop and review before continuation.`
+        : `No active blockers. Human-needed state is ${humanNeeded ? "YES" : "NO"}. ${forex ? forex.summary : ""}`;
+      setText("alert-summary", alertSummary);
+    }
+
+    async function loadReport() {
+      try {
+        const response = await fetch(jsonPath, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const report = await response.json();
+        renderReport(report, "JSON");
+      } catch (error) {
+        renderReport(fallbackReport, "FALLBACK");
+      }
+    }
+
+    loadReport();
+  </script>
+</body>
+</html>
