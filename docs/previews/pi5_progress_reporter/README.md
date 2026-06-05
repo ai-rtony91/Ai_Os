@@ -1,10 +1,19 @@
 # Pi5 Progress Reporter Preview
 
-This folder contains a static local preview for the AI_OS Pi5 Progress Reporter display.
+This folder contains a static local screen-mode preview for the AI_OS Pi5 Progress Reporter display.
 
 ## How to open
 
 Open `PI5_PROGRESS_REPORTER_PREVIEW.html` in a browser from the repo checkout.
+
+The preview uses large touch-friendly tabs:
+
+- Status
+- Approval
+- Forex
+- Workers
+- Brief
+- Safety
 
 The page tries to read:
 
@@ -16,7 +25,7 @@ Some browsers block local `file://` JSON fetches. When that happens, the preview
 
 ## Boundary
 
-This preview is display-only.
+This preview is display-only. Tabs switch visible sections only; they are not action controls.
 
 It does not:
 
@@ -24,6 +33,7 @@ It does not:
 - create a service
 - create a scheduler or background task
 - touch GPIO or motor controls
+- expose motor, GPIO, broker, trading, worker-launch, or approval buttons
 - launch workers
 - mutate approvals
 - stage, commit, push, or merge
@@ -38,6 +48,8 @@ AIOS_PI5_PROGRESS_REPORT.v1
 ```
 
 Visible fields include AI_OS progress, Forex paper-build progress, Night Supervisor health, validation health, worker readiness, approval clearance, human-needed state, current phase, next safe action, blocker count, active approval count, last updated time, stale warnings, and display cards.
+
+The actual Pi screen size or resolution is not required yet. This preview can be tuned later for the final Raspberry Pi display dimensions without changing authority or adding controls.
 
 ## Safety labels
 

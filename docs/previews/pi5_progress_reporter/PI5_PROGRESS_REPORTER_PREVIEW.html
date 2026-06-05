@@ -7,14 +7,14 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0b0f17;
-      --panel: #141b26;
-      --panel-strong: #1b2533;
-      --text: #f3f7fb;
-      --muted: #a8b3c2;
-      --line: #2f3b4d;
-      --green: #25d07d;
-      --yellow: #f2c94c;
+      --bg: #080c13;
+      --panel: #121a25;
+      --panel-strong: #1a2431;
+      --text: #f4f8fc;
+      --muted: #aab6c6;
+      --line: #314052;
+      --green: #28d17c;
+      --yellow: #f4c84b;
       --red: #ff5d5d;
       --blue: #5aa7ff;
       --purple: #a58cff;
@@ -34,23 +34,26 @@
       letter-spacing: 0;
     }
 
-    .screen {
-      width: min(100%, 1180px);
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    .shell {
+      width: min(100%, 1120px);
+      min-height: 100vh;
       margin: 0 auto;
-      padding: 18px;
+      padding: 14px;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 12px;
     }
 
     header {
       display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: start;
-      padding-bottom: 14px;
+      grid-template-columns: 1fr;
+      gap: 10px;
       border-bottom: 1px solid var(--line);
-    }
-
-    h1, h2, h3, p {
-      margin: 0;
+      padding-bottom: 12px;
     }
 
     h1 {
@@ -58,274 +61,293 @@
       line-height: 1;
     }
 
-    h2 {
-      font-size: clamp(22px, 3vw, 34px);
-      line-height: 1.08;
-    }
-
-    h3 {
-      font-size: 22px;
-      line-height: 1.15;
-    }
-
     .subline {
-      margin-top: 8px;
+      margin-top: 6px;
       color: var(--muted);
-      font-size: 18px;
+      font-size: clamp(16px, 2.4vw, 20px);
     }
 
     .badges {
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
       gap: 8px;
     }
 
     .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 38px;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 8px 10px;
+      border-radius: 7px;
+      padding: 8px 11px;
       background: var(--panel);
       color: var(--text);
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       white-space: nowrap;
     }
 
-    .badge.yellow { color: #1e1600; background: var(--yellow); border-color: var(--yellow); }
-    .badge.green { color: #001b0d; background: var(--green); border-color: var(--green); }
-    .badge.red { color: #260000; background: var(--red); border-color: var(--red); }
-    .badge.gray { color: #091019; background: var(--gray); border-color: var(--gray); }
-    .badge.blue { color: #00172e; background: var(--blue); border-color: var(--blue); }
+    .badge.green { background: var(--green); border-color: var(--green); color: #001b0d; }
+    .badge.yellow { background: var(--yellow); border-color: var(--yellow); color: #1f1700; }
+    .badge.red { background: var(--red); border-color: var(--red); color: #260000; }
+    .badge.blue { background: var(--blue); border-color: var(--blue); color: #00172e; }
+    .badge.gray { background: var(--gray); border-color: var(--gray); color: #091019; }
 
-    nav {
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .tab {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 8px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      font-size: clamp(17px, 2.3vw, 24px);
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .tab[aria-selected="true"] {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #00172e;
+    }
+
+    .screen {
+      display: none;
+      min-height: 520px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 16px;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .screen-title {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin: 16px 0;
-    }
-
-    nav a {
-      color: var(--text);
-      text-decoration: none;
-      border: 1px solid var(--line);
-      background: var(--panel);
-      padding: 10px 12px;
-      border-radius: 6px;
-      font-size: 18px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 14px;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 14px;
+    }
+
+    h2 {
+      font-size: clamp(28px, 4.4vw, 46px);
+      line-height: 1;
+    }
+
+    h3 {
+      font-size: clamp(22px, 3vw, 32px);
+      line-height: 1.05;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 0.8fr;
+      gap: 14px;
     }
 
     .panel {
       border: 1px solid var(--line);
-      background: var(--panel);
       border-radius: 8px;
+      background: var(--panel-strong);
       padding: 16px;
     }
 
-    .overall-number {
-      font-size: clamp(64px, 13vw, 138px);
-      font-weight: 800;
-      line-height: 0.9;
+    .overall {
+      font-size: clamp(74px, 16vw, 156px);
+      font-weight: 900;
+      line-height: 0.88;
       color: var(--blue);
     }
 
     .phase {
-      margin-top: 14px;
-      font-size: clamp(24px, 4vw, 40px);
-      font-weight: 750;
+      margin-top: 12px;
+      font-size: clamp(26px, 4vw, 44px);
+      font-weight: 850;
+      line-height: 1.06;
     }
 
     .next-action {
       margin-top: 12px;
-      color: var(--text);
-      font-size: clamp(20px, 3vw, 30px);
+      font-size: clamp(21px, 3vw, 32px);
       line-height: 1.16;
     }
 
-    .human-needed {
-      background: #3a2a00;
-      border-color: #8f6d12;
-    }
-
-    .human-needed.urgent {
-      background: #3b2500;
+    .human-banner {
+      background: #3b2b00;
       border-color: var(--yellow);
     }
 
-    .human-needed.clear {
+    .human-banner.clear {
       background: #06301b;
       border-color: var(--green);
     }
 
-    .human-needed strong {
+    .human-banner strong {
       display: block;
-      font-size: clamp(34px, 5vw, 58px);
+      margin: 6px 0 14px;
       color: var(--yellow);
-      line-height: 1;
-      margin: 8px 0 12px;
+      font-size: clamp(38px, 6vw, 70px);
+      line-height: 0.95;
     }
 
-    .metric-grid {
+    .count-grid, .metric-grid, .safety-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
+      margin-top: 12px;
+    }
+
+    .metric-grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .metric {
-      min-height: 132px;
+      min-height: 130px;
     }
 
-    .metric .label {
+    .label {
       color: var(--muted);
-      font-size: 18px;
-      font-weight: 650;
+      font-size: clamp(16px, 2.2vw, 20px);
+      font-weight: 750;
     }
 
-    .metric .value {
-      margin-top: 6px;
-      font-size: clamp(30px, 5vw, 50px);
-      font-weight: 800;
-      line-height: 1;
+    .value {
+      display: block;
+      margin-top: 8px;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 900;
+      line-height: 0.95;
     }
 
     .bar-track {
-      margin-top: 12px;
-      height: 16px;
+      margin-top: 14px;
+      height: 24px;
       border-radius: 999px;
       background: #263142;
       overflow: hidden;
     }
 
     .bar-fill {
-      height: 100%;
       width: 0%;
+      height: 100%;
       border-radius: inherit;
       background: var(--blue);
     }
 
-    .grid {
+    .card-list {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: 12px;
-      margin-top: 14px;
     }
 
-    .card {
-      min-height: 172px;
-    }
-
-    .card-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .card .summary {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 20px;
-      line-height: 1.25;
-    }
-
-    .count-row {
+    .display-card {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    .count-box {
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: start;
       border: 1px solid var(--line);
-      background: var(--panel-strong);
       border-radius: 8px;
+      background: var(--panel-strong);
       padding: 14px;
-      min-height: 112px;
     }
 
-    .count-box .num {
-      display: block;
-      font-size: 54px;
-      font-weight: 800;
-      line-height: 1;
+    .display-card .value {
+      min-width: 96px;
+      text-align: right;
     }
 
-    .count-box .caption {
+    .summary {
       color: var(--muted);
-      font-size: 18px;
+      font-size: clamp(18px, 2.5vw, 24px);
+      line-height: 1.22;
       margin-top: 8px;
     }
 
-    .section {
-      margin-top: 18px;
+    .stale-strip {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid #7b6520;
+      border-radius: 8px;
+      background: #302712;
+      padding: 12px;
+      color: var(--yellow);
+      font-size: clamp(18px, 2.6vw, 24px);
+      font-weight: 750;
+      line-height: 1.2;
     }
 
-    .warning-list {
-      margin: 12px 0 0;
-      padding-left: 22px;
-      color: var(--muted);
-      font-size: 20px;
-      line-height: 1.32;
-    }
-
-    .safety-strip {
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+    .stale-strip.visible {
+      display: block;
     }
 
     .safety-item {
+      min-height: 92px;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 12px;
-      color: var(--text);
+      border-radius: 8px;
       background: #111824;
-      font-size: 18px;
-      font-weight: 700;
+      padding: 14px;
+      font-size: clamp(20px, 3vw, 30px);
+      font-weight: 850;
+      line-height: 1.1;
     }
 
     .footer-note {
-      margin-top: 18px;
       color: var(--muted);
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.3;
     }
 
-    @media (max-width: 800px) {
-      header, .hero, .grid, .metric-grid, .safety-strip {
+    @media (max-width: 820px) {
+      .shell {
+        padding: 10px;
+      }
+
+      .tabs {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .hero-grid, .metric-grid.three, .metric-grid, .count-grid, .safety-grid {
         grid-template-columns: 1fr;
       }
 
-      .badges {
-        justify-content: flex-start;
-      }
-
       .screen {
+        min-height: 540px;
         padding: 12px;
       }
 
-      nav a {
-        font-size: 16px;
-        padding: 9px 10px;
+      .display-card {
+        grid-template-columns: 1fr;
+      }
+
+      .display-card .value {
+        text-align: left;
       }
     }
   </style>
 </head>
 <body>
-  <main class="screen">
+  <main class="shell">
     <header>
       <div>
         <h1>AI_OS Pi5 Progress</h1>
-        <p class="subline">Raspberry Pi 5 display preview. Static, local, display-only.</p>
+        <p class="subline">Touch-friendly static preview. Reads or simulates the Pi5 progress report contract.</p>
       </div>
       <div class="badges">
         <span class="badge gray">DISPLAY ONLY</span>
@@ -334,98 +356,133 @@
       </div>
     </header>
 
-    <nav aria-label="Preview sections">
-      <a href="#main-status">Main Status</a>
-      <a href="#forex">Forex Bot Build</a>
-      <a href="#workers">Worker Readiness</a>
-      <a href="#approval">Approval Decision</a>
-      <a href="#brief">Morning Brief</a>
-      <a href="#alert">Alert / Stop</a>
+    <nav class="tabs" aria-label="Screen modes">
+      <a class="tab" href="#status" data-screen="status" aria-selected="true">Status</a>
+      <a class="tab" href="#approval" data-screen="approval" aria-selected="false">Approval</a>
+      <a class="tab" href="#forex" data-screen="forex" aria-selected="false">Forex</a>
+      <a class="tab" href="#workers" data-screen="workers" aria-selected="false">Workers</a>
+      <a class="tab" href="#brief" data-screen="brief" aria-selected="false">Brief</a>
+      <a class="tab" href="#safety" data-screen="safety" aria-selected="false">Safety</a>
     </nav>
 
-    <section id="main-status" class="hero">
+    <section id="screen-status" class="screen active" aria-labelledby="status-heading">
+      <div class="screen-title">
+        <h2 id="status-heading">Status</h2>
+        <span id="status-pill" class="badge yellow">LOADING</span>
+      </div>
+      <div class="hero-grid">
+        <article class="panel">
+          <p class="label">Overall AI_OS progress</p>
+          <span id="overall-number" class="overall">--%</span>
+          <div class="bar-track"><div id="overall-bar" class="bar-fill"></div></div>
+          <p id="phase" class="phase">Loading progress contract...</p>
+          <p id="next-action" class="next-action">Waiting for local preview data.</p>
+        </article>
+        <article id="human-panel" class="panel human-banner">
+          <p class="label">Human interaction required</p>
+          <strong id="human-needed">HUMAN NEEDED: UNKNOWN</strong>
+          <div class="count-grid">
+            <div class="panel metric">
+              <span id="blockers-count" class="value">--</span>
+              <p class="label">Blockers</p>
+            </div>
+            <div class="panel metric">
+              <span id="approvals-count" class="value">--</span>
+              <p class="label">Active approvals</p>
+            </div>
+          </div>
+          <p id="last-updated" class="summary">Last updated: unknown</p>
+        </article>
+      </div>
+      <div id="stale-strip" class="stale-strip"></div>
+    </section>
+
+    <section id="screen-approval" class="screen" aria-labelledby="approval-heading">
+      <div class="screen-title">
+        <h2 id="approval-heading">Approval</h2>
+        <span class="badge yellow">RECOMMENDATION ONLY</span>
+      </div>
+      <div class="metric-grid">
+        <article class="panel metric">
+          <p class="label">Active approvals</p>
+          <span id="approval-count-large" class="value">--</span>
+        </article>
+        <article class="panel metric">
+          <p class="label">Approval clearance</p>
+          <span id="approval-clearance" class="value">--%</span>
+          <div class="bar-track"><div id="approval-bar" class="bar-fill"></div></div>
+        </article>
+      </div>
+      <div id="approval-card" class="display-card" style="margin-top: 12px;"></div>
+    </section>
+
+    <section id="screen-forex" class="screen" aria-labelledby="forex-heading">
+      <div class="screen-title">
+        <h2 id="forex-heading">Forex</h2>
+        <span class="badge blue">REPORT_ONLY_PROFILE</span>
+      </div>
       <article class="panel">
-        <p class="subline">Overall AI_OS progress</p>
-        <div id="overall-number" class="overall-number">--%</div>
-        <div class="bar-track" aria-hidden="true"><div id="overall-bar" class="bar-fill"></div></div>
-        <p id="phase" class="phase">Loading progress contract...</p>
-        <p id="next-action" class="next-action">Waiting for local preview data.</p>
-      </article>
-
-      <article id="human-panel" class="panel human-needed">
-        <p class="subline">Human interaction required</p>
-        <strong id="human-needed">UNKNOWN</strong>
-        <div class="count-row">
-          <div class="count-box">
-            <span id="blockers-count" class="num">--</span>
-            <span class="caption">Blockers</span>
-          </div>
-          <div class="count-box">
-            <span id="approvals-count" class="num">--</span>
-            <span class="caption">Active approvals</span>
-          </div>
-        </div>
-        <p id="last-updated" class="subline">Last updated: unknown</p>
-      </article>
-    </section>
-
-    <section class="metric-grid" aria-label="Progress metrics">
-      <article class="panel metric">
-        <p class="label">Night Supervisor</p>
-        <p id="night-value" class="value">--%</p>
-        <div class="bar-track"><div id="night-bar" class="bar-fill"></div></div>
-      </article>
-      <article class="panel metric">
-        <p class="label">Validation</p>
-        <p id="validation-value" class="value">--%</p>
-        <div class="bar-track"><div id="validation-bar" class="bar-fill"></div></div>
-      </article>
-      <article class="panel metric">
-        <p class="label">Worker Readiness</p>
-        <p id="worker-value" class="value">--%</p>
-        <div class="bar-track"><div id="worker-bar" class="bar-fill"></div></div>
-      </article>
-      <article class="panel metric">
-        <p class="label">Approval Clearance</p>
-        <p id="approval-value" class="value">--%</p>
-        <div class="bar-track"><div id="approval-bar" class="bar-fill"></div></div>
-      </article>
-      <article id="forex" class="panel metric">
-        <p class="label">Forex Bot Build</p>
-        <p id="forex-value" class="value">--%</p>
+        <p class="label">Forex bot build progress</p>
+        <span id="forex-percent" class="overall">--%</span>
         <div class="bar-track"><div id="forex-bar" class="bar-fill"></div></div>
+        <p id="forex-summary" class="next-action">Paper simulation planning only. No broker, no OANDA, no live bot, no real orders.</p>
       </article>
-      <article class="panel metric">
-        <p class="label">Data Source</p>
-        <p id="source-mode" class="value">--</p>
-        <p class="subline">JSON fetch or fallback sample</p>
+      <div class="safety-grid">
+        <div class="safety-item">No broker</div>
+        <div class="safety-item">No OANDA</div>
+        <div class="safety-item">No live bot</div>
+        <div class="safety-item">No real orders</div>
+      </div>
+    </section>
+
+    <section id="screen-workers" class="screen" aria-labelledby="workers-heading">
+      <div class="screen-title">
+        <h2 id="workers-heading">Workers</h2>
+        <span class="badge gray">NO WORKER LAUNCH</span>
+      </div>
+      <div class="metric-grid three">
+        <article class="panel metric">
+          <p class="label">Worker readiness</p>
+          <span id="worker-readiness" class="value">--%</span>
+          <div class="bar-track"><div id="worker-bar" class="bar-fill"></div></div>
+        </article>
+        <article class="panel metric">
+          <p class="label">Night Supervisor</p>
+          <span id="night-health" class="value">--%</span>
+          <div class="bar-track"><div id="night-bar" class="bar-fill"></div></div>
+        </article>
+        <article class="panel metric">
+          <p class="label">Validation health</p>
+          <span id="validation-health" class="value">--%</span>
+          <div class="bar-track"><div id="validation-bar" class="bar-fill"></div></div>
+        </article>
+      </div>
+      <p id="worker-summary" class="next-action">Worker launch disabled unless a separate approved packet allows it.</p>
+    </section>
+
+    <section id="screen-brief" class="screen" aria-labelledby="brief-heading">
+      <div class="screen-title">
+        <h2 id="brief-heading">Brief</h2>
+        <span id="brief-pill" class="badge gray">STALE CHECK</span>
+      </div>
+      <article class="panel">
+        <p class="label">Morning Brief summary</p>
+        <p id="brief-summary" class="next-action">Current phase and next safe action will appear here.</p>
+      </article>
+      <article class="panel" style="margin-top: 12px;">
+        <p class="label">Stale warnings</p>
+        <span id="stale-count" class="value">--</span>
+        <p id="first-warning" class="summary">No stale-data warning loaded.</p>
+        <p class="summary">Full details remain in source evidence. This preview does not show raw JSON.</p>
       </article>
     </section>
 
-    <section class="section">
-      <h2>Display Cards</h2>
-      <div id="display-cards" class="grid"></div>
-    </section>
-
-    <section id="workers" class="section panel">
-      <h2>Worker Readiness</h2>
-      <p id="worker-summary" class="next-action">Worker evidence is display-only. This preview cannot launch workers.</p>
-    </section>
-
-    <section id="approval" class="section panel">
-      <h2>Approval Decision</h2>
-      <p id="approval-summary" class="next-action">Approval evidence is recommendation-only. This preview cannot approve, reject, defer, or mutate approvals.</p>
-    </section>
-
-    <section id="brief" class="section panel">
-      <h2>Morning Brief / Stale Warnings</h2>
-      <ul id="stale-warnings" class="warning-list"></ul>
-    </section>
-
-    <section id="alert" class="section panel">
-      <h2>Alert / Stop Boundary</h2>
-      <p id="alert-summary" class="next-action">No active blocker loaded yet.</p>
-      <div class="safety-strip">
+    <section id="screen-safety" class="screen" aria-labelledby="safety-heading">
+      <div class="screen-title">
+        <h2 id="safety-heading">Safety</h2>
+        <span class="badge gray">DISPLAY ONLY</span>
+      </div>
+      <div class="safety-grid">
         <div class="safety-item">No approval authority</div>
         <div class="safety-item">No repo mutation authority</div>
         <div class="safety-item">No Pi service or scheduler</div>
@@ -436,8 +493,7 @@
     </section>
 
     <p class="footer-note">
-      This preview reads or simulates telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json.
-      It does not call external services, run shell commands, mutate files, approve work, deploy to the Pi, or control hardware.
+      Static local preview only. Tabs switch visible sections only. No action buttons, shell commands, worker launch, approval mutation, service, scheduler, GPIO, motor, broker/API, live trading, or production behavior.
     </p>
   </main>
 
@@ -474,36 +530,28 @@
       ],
       display_cards: [
         { title: "Main Status", status: "NEEDS_APPROVAL", percent: 80, summary: "AI_OS is NEEDS_APPROVAL with 0 blocker(s) and 1 active approval(s)." },
-        { title: "Night Supervisor", status: "READY", percent: 95, summary: "Latest Night Supervisor report is READY; validator=PASS; qa=PASS." },
-        { title: "Approval Intelligence", status: "NEEDS_APPROVAL", percent: 60, summary: "1 active recommendation-only approval card(s)." },
-        { title: "Forex Paper Lab", status: "REPORT_ONLY_PROFILE", percent: 15, summary: "REPORT_ONLY_PROFILE / paper simulation planning only. No broker, OANDA, real market data, live bot, or real orders." },
-        { title: "Worker Readiness", status: "WAITING_APPROVAL", percent: 75, summary: "Worker evidence is display-only; worker_launch remains disabled unless a separate approved packet allows it." },
-        { title: "Validation Health", status: "PASS", percent: 100, summary: "Validator=PASS; QA=PASS; forbidden_write_attempts=0." },
         { title: "Human Needed", status: "YES", percent: 100, summary: "Anthony action is needed for current approval/blocker review." },
+        { title: "Night Supervisor", status: "READY", percent: 95, summary: "Latest Night Supervisor report is READY; validator=PASS; qa=PASS." },
+        { title: "Validation Health", status: "PASS", percent: 100, summary: "Validator=PASS; QA=PASS; forbidden_write_attempts=0." },
+        { title: "Approval Intelligence", status: "NEEDS_APPROVAL", percent: 60, summary: "1 active recommendation-only approval card(s). Recommended disposition: defer." },
+        { title: "Worker Readiness", status: "WAITING_APPROVAL", percent: 75, summary: "Worker evidence is display-only; worker_launch remains disabled unless a separate approved packet allows it." },
+        { title: "Forex Paper Lab", status: "REPORT_ONLY_PROFILE", percent: 15, summary: "REPORT_ONLY_PROFILE / paper simulation planning only. No broker, OANDA, real market data, live bot, or real orders." },
         { title: "Next Safe Action", status: "DISPLAY_ONLY", percent: 0, summary: "Review Approval Intelligence v2 decision card; defer broad APPLY until exact scope and validator evidence are available." }
-      ],
-      validation: {
-        no_pi_deployment: true,
-        no_service_created: true,
-        no_scheduler_created: true,
-        no_gpio_or_motor_controls: true,
-        no_approval_mutation: true,
-        no_secrets: true,
-        no_broker_api: true,
-        no_live_trading: true,
-        no_real_orders: true,
-        no_real_webhooks: true,
-        no_commit_or_push: true
-      }
+      ]
     };
 
     const jsonPath = "../../../telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json";
+    const screenOrder = ["status", "approval", "forex", "workers", "brief", "safety"];
+
+    function percentText(value) {
+      return `${Number(value) || 0}%`;
+    }
 
     function statusClass(status) {
       const value = String(status || "").toUpperCase();
       if (value.includes("BLOCK") || value.includes("STOP")) return "red";
-      if (value.includes("NEEDS") || value.includes("WAITING") || value.includes("REVIEW")) return "yellow";
-      if (value.includes("READY") || value.includes("PASS") || value.includes("CLEAR")) return "green";
+      if (value.includes("NEEDS") || value.includes("WAITING") || value.includes("REVIEW") || value === "YES") return "yellow";
+      if (value.includes("READY") || value.includes("PASS") || value.includes("CLEAR") || value === "NO") return "green";
       if (value.includes("DISPLAY") || value.includes("REPORT")) return "blue";
       return "gray";
     }
@@ -513,99 +561,106 @@
       if (el) el.textContent = value;
     }
 
-    function setBar(id, percent, colorName) {
+    function setBar(id, value, colorName) {
       const el = document.getElementById(id);
       if (!el) return;
-      const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
-      el.style.width = safePercent + "%";
+      const safe = Math.max(0, Math.min(100, Number(value) || 0));
+      el.style.width = `${safe}%`;
       el.style.background = `var(--${colorName || "blue"})`;
     }
 
-    function percentText(value) {
-      return `${Number(value) || 0}%`;
+    function cardByTitle(report, titlePart) {
+      return (report.display_cards || []).find((card) => String(card.title || "").toLowerCase().includes(titlePart));
+    }
+
+    function renderApprovalCard(report) {
+      const card = cardByTitle(report, "approval") || {};
+      const root = document.getElementById("approval-card");
+      root.innerHTML = `
+        <span class="value">${percentText(card.percent || report.approval_clearance_percent)}</span>
+        <div>
+          <h3>${card.title || "Approval Intelligence"}</h3>
+          <span class="badge ${statusClass(card.status)}">${card.status || "NEEDS_APPROVAL"}</span>
+          <p class="summary">${card.summary || "Recommendation-only approval card. Recommended disposition: defer until exact scope and validator evidence are available."}</p>
+          <p class="summary">No approve, reject, or defer controls are present in this preview.</p>
+        </div>
+      `;
     }
 
     function renderReport(report, sourceMode) {
-      const overall = report.overall_aios_progress_percent;
       const humanNeeded = Boolean(report.human_interaction_required);
       const blockers = Number(report.blockers_count) || 0;
       const approvals = Number(report.active_approval_count) || 0;
+      const warnings = report.stale_state_warnings || [];
+      const statusCard = cardByTitle(report, "main") || {};
+      const workerCard = cardByTitle(report, "worker") || {};
+      const forexCard = cardByTitle(report, "forex") || {};
 
-      setText("overall-number", percentText(overall));
+      setText("overall-number", percentText(report.overall_aios_progress_percent));
       setText("phase", report.current_phase || "unknown phase");
       setText("next-action", report.next_safe_action || "Review latest Pi5 progress report.");
-      setText("human-needed", humanNeeded ? "YES" : "NO");
+      setText("human-needed", humanNeeded ? "HUMAN NEEDED: YES" : "HUMAN NEEDED: NO");
       setText("blockers-count", blockers);
       setText("approvals-count", approvals);
-      setText("last-updated", `Last updated: ${report.last_updated || "unknown"}`);
-      setText("source-mode", sourceMode);
+      setText("last-updated", `Last updated: ${report.last_updated || "unknown"} | Source: ${sourceMode}`);
+      setText("approval-count-large", approvals);
+      setText("approval-clearance", percentText(report.approval_clearance_percent));
+      setText("forex-percent", percentText(report.forex_bot_build_percent));
+      setText("forex-summary", forexCard.summary || "REPORT_ONLY_PROFILE / paper simulation planning only. No broker, no OANDA, no live bot, no real orders.");
+      setText("worker-readiness", percentText(report.worker_readiness_percent));
+      setText("night-health", percentText(report.night_supervisor_health_percent));
+      setText("validation-health", percentText(report.validation_health_percent));
+      setText("worker-summary", workerCard.summary || "Worker launch disabled unless a separate approved packet allows it.");
+      setText("brief-summary", `${report.current_phase || "Status review"}: ${report.next_safe_action || "Review latest Pi5 progress report."}`);
+      setText("stale-count", warnings.length);
+      setText("first-warning", warnings[0] || "No stale-data warning reported.");
+
+      const statusPill = document.getElementById("status-pill");
+      statusPill.textContent = statusCard.status || (humanNeeded ? "NEEDS_APPROVAL" : "READY");
+      statusPill.className = `badge ${statusClass(statusPill.textContent)}`;
+
+      const briefPill = document.getElementById("brief-pill");
+      briefPill.textContent = warnings.length ? `STALE DATA WARNING: ${warnings.length}` : "NO STALE WARNING";
+      briefPill.className = `badge ${warnings.length ? "yellow" : "green"}`;
 
       const humanPanel = document.getElementById("human-panel");
-      humanPanel.classList.toggle("urgent", humanNeeded);
       humanPanel.classList.toggle("clear", !humanNeeded);
 
-      setBar("overall-bar", overall, "blue");
-      setText("night-value", percentText(report.night_supervisor_health_percent));
-      setBar("night-bar", report.night_supervisor_health_percent, "green");
-      setText("validation-value", percentText(report.validation_health_percent));
-      setBar("validation-bar", report.validation_health_percent, "green");
-      setText("worker-value", percentText(report.worker_readiness_percent));
-      setBar("worker-bar", report.worker_readiness_percent, approvals > 0 ? "yellow" : "green");
-      setText("approval-value", percentText(report.approval_clearance_percent));
+      const staleStrip = document.getElementById("stale-strip");
+      staleStrip.textContent = warnings.length ? `STALE DATA WARNING: ${warnings.length} warning(s). ${warnings[0]}` : "";
+      staleStrip.classList.toggle("visible", warnings.length > 0);
+
+      setBar("overall-bar", report.overall_aios_progress_percent, "blue");
       setBar("approval-bar", report.approval_clearance_percent, approvals > 0 ? "yellow" : "green");
-      setText("forex-value", percentText(report.forex_bot_build_percent));
       setBar("forex-bar", report.forex_bot_build_percent, "purple");
+      setBar("worker-bar", report.worker_readiness_percent, approvals > 0 ? "yellow" : "green");
+      setBar("night-bar", report.night_supervisor_health_percent, "green");
+      setBar("validation-bar", report.validation_health_percent, "green");
 
-      const cardsRoot = document.getElementById("display-cards");
-      cardsRoot.innerHTML = "";
-      (report.display_cards || []).forEach((card) => {
-        const article = document.createElement("article");
-        article.className = "panel card";
-        article.innerHTML = `
-          <div class="card-head">
-            <h3>${card.title || "Display Card"}</h3>
-            <span class="badge ${statusClass(card.status)}">${card.status || "UNKNOWN"}</span>
-          </div>
-          <p class="value">${percentText(card.percent)}</p>
-          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0, Math.min(100, Number(card.percent) || 0))}%; background:var(--${statusClass(card.status)});"></div></div>
-          <p class="summary">${card.summary || "No summary available."}</p>
-        `;
-        cardsRoot.appendChild(article);
-      });
-
-      const worker = (report.display_cards || []).find((card) => String(card.title || "").toLowerCase().includes("worker"));
-      const approval = (report.display_cards || []).find((card) => String(card.title || "").toLowerCase().includes("approval"));
-      const forex = (report.display_cards || []).find((card) => String(card.title || "").toLowerCase().includes("forex"));
-      setText("worker-summary", worker ? worker.summary : "Worker evidence is display-only. This preview cannot launch workers.");
-      setText("approval-summary", approval ? `${approval.summary} This preview cannot approve, reject, defer, or mutate approvals.` : "Approval evidence is recommendation-only.");
-
-      const warningRoot = document.getElementById("stale-warnings");
-      warningRoot.innerHTML = "";
-      const warnings = report.stale_state_warnings || [];
-      if (warnings.length === 0) {
-        const li = document.createElement("li");
-        li.textContent = "No stale-data warning reported.";
-        warningRoot.appendChild(li);
-      } else {
-        warnings.forEach((warning) => {
-          const li = document.createElement("li");
-          li.textContent = warning;
-          warningRoot.appendChild(li);
-        });
-      }
-
-      const alertSummary = blockers > 0
-        ? `${blockers} current blocker(s). Stop and review before continuation.`
-        : `No active blockers. Human-needed state is ${humanNeeded ? "YES" : "NO"}. ${forex ? forex.summary : ""}`;
-      setText("alert-summary", alertSummary);
+      renderApprovalCard(report);
     }
+
+    function showScreen(name) {
+      screenOrder.forEach((screen) => {
+        document.getElementById(`screen-${screen}`).classList.toggle("active", screen === name);
+      });
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.setAttribute("aria-selected", String(tab.dataset.screen === name));
+      });
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", (event) => {
+        event.preventDefault();
+        showScreen(tab.dataset.screen);
+      });
+    });
 
     async function loadReport() {
       try {
         const response = await fetch(jsonPath, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const report = await response.json();
-        renderReport(report, "JSON");
+        renderReport(await response.json(), "JSON");
       } catch (error) {
         renderReport(fallbackReport, "FALLBACK");
       }
