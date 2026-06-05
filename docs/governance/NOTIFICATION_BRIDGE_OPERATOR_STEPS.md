@@ -8,6 +8,38 @@ AI_OS may wake the Human Owner only for true SOS/blocker conditions. Routine pas
 normal approval backlog, warnings, stale/reference evidence, and morning digest updates must
 not trigger the phone alarm.
 
+AI_OS should handle normal evidence and recommendation workflow without interrupting Anthony.
+Notify Anthony only for SOS-level events where safe continuation is blocked or a protected
+action needs explicit approval or intervention.
+
+SOS includes:
+
+- attempted protected actions without explicit approval.
+- forbidden write attempts.
+- secrets, `.env`, or API-key access attempts.
+- broker, OANDA, or live trading attempts.
+- real order or real webhook attempts.
+- production promotion attempts.
+- scheduler or worker launch attempts without approval.
+- GPIO or motor control attempts.
+- Night Supervisor crash or missing required report.
+- validation failure that blocks safe continuation.
+
+SOS does not include:
+
+- `NEEDS_APPROVAL` alone.
+- one active approval card.
+- stale warnings.
+- historical relay noise.
+- recommendation-only defer.
+- Pi5 human-needed display.
+- Bridge `NEEDS_APPROVAL` with zero blockers.
+- Protected Action Readiness `NEEDS_EXPLICIT_APPROVAL` when no execution was attempted
+  and production flow is not blocked.
+
+Display surfaces must separate `display_alert` from `sos_wake_required`. Pi5 may show
+human-needed status without waking Anthony unless `sos_wake_required` is true.
+
 Wake-worthy Telegram messages must include the exact tag:
 
 ```text
