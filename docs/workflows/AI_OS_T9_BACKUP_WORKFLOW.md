@@ -84,6 +84,59 @@ Snapshot destination:
 D:\04_REPOS\AI_OS\Ai_Os\snapshots
 ```
 
+## Snapshot / Mirror Authority Boundary
+
+GitHub `origin/main` is the canonical current repo truth. The local
+`C:\Dev\Ai.Os` worktree is current working state only after `git status`
+classification. T9 material is backup and recovery evidence; it does not become
+active authority just because it exists on the drive.
+
+Backup source classifications:
+
+- `CURRENT_MAIN`: the current GitHub `origin/main` state, or local `main` after
+  it is verified as synced to `origin/main`.
+- `LOCAL_WORKTREE`: the current local checkout plus classified dirty or
+  untracked state.
+- `T9_MIRROR_CURRENT`: a T9 mirror that is explicitly labeled as current and
+  matched to the current `HEAD` or approved manifest.
+- `T9_SNAPSHOT_ARCHIVE`: a timestamped historical backup snapshot.
+- `ARCHIVE_ONLY`: reference or recovery history that must not drive active repo
+  state.
+- `RESTORE_CANDIDATE`: a specific T9 file or folder that may be reviewed for
+  restore after provenance, diff, duplicate-authority, and safety checks.
+- `DO_NOT_ADOPT`: secret-bearing, obsolete, runtime-unsafe,
+  authority-conflicting, duplicate-governance, superseded, or intentionally
+  deleted material.
+
+Authority rules:
+
+- Never scan T9 snapshots as active repo source.
+- Never copy from T9 into `C:\Dev\Ai.Os` without exact human-approved restore
+  scope.
+- Deleted files remain deleted unless a restore packet proves why they should
+  return.
+- Compare T9 files to current `main` and Git history before restore.
+- Restore must be file-by-file or tightly scoped.
+- T9 archive/reference files cannot override `AGENTS.md`, `docs/governance/`,
+  or `docs/workflows/`.
+- If a file exists on T9 but not in current `main`, classify it as
+  `ARCHIVE_ONLY` or `RESTORE_CANDIDATE`, never active.
+- Secret-bearing, obsolete, runtime-unsafe, authority-conflicting, or duplicate
+  governance files must be `DO_NOT_ADOPT`.
+
+Restore Candidate Review checklist:
+
+- exact current target path
+- exact T9 source path
+- snapshot or mirror label
+- reason for restore
+- current `main` comparison
+- Git history or deletion check if available
+- duplicate-authority search
+- forbidden path and secret scan
+- diff review
+- Anthony approval before restore or import
+
 ## Log Path
 
 Recommended backup log directory:
