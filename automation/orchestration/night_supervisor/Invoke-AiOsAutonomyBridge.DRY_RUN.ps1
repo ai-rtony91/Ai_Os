@@ -958,6 +958,194 @@ function New-AiosPi5ProgressReport {
     }
 }
 
+function New-AiosOpenAiSanitizedSummary {
+    param(
+        [object]$BridgeState,
+        [object]$MorningBriefV2,
+        [object]$ApprovalIntelligenceV2,
+        [object]$Pi5ProgressReport,
+        [object]$NightReportRef
+    )
+
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $nightReport = $NightReportRef.report
+    $execution = $nightReport.execution_result
+    $briefJson = $MorningBriefV2.json
+    $approvalJson = $ApprovalIntelligenceV2.json
+    $pi5Json = $Pi5ProgressReport.json
+
+    $approvalCards = @()
+    foreach ($card in @($approvalJson.active_approval_cards)) {
+        $approvalCards += [pscustomobject]@{
+            title = [string]$card.title
+            status = [string]$card.status
+            classification = [string]$card.current_stale_noise_classification
+            requested_action = [string]$card.requested_action
+            risk = [string]$card.risk
+            recommended_disposition = [string]$card.recommended_disposition
+            reason = [string]$card.reason
+            safest_next_action = [string]$card.safest_next_action
+            recommendation_only = $true
+        }
+    }
+
+    $currentBlockersCount = @($BridgeState.current_blockers).Count
+    $activeApprovalCount = $approvalCards.Count
+    $noiseCount = if ($approvalJson.noise_cards_seen -ne $null) {
+        [int]$approvalJson.noise_cards_seen
+    } elseif ($briefJson.noise_cards) {
+        @($briefJson.noise_cards).Count
+    } else {
+        0
+    }
+    $staleWarnings = @($briefJson.stale_state_warnings) | Select-Object -First 5
+
+    $nextSafeActionCandidates = @()
+    if ($approvalCards.Count -gt 0) {
+        foreach ($card in $approvalCards) {
+            if (-not [string]::IsNullOrWhiteSpace([string]$card.safest_next_action)) {
+                $nextSafeActionCandidates += [string]$card.safest_next_action
+            }
+        }
+    }
+    if ($pi5Json.next_safe_action) { $nextSafeActionCandidates += [string]$pi5Json.next_safe_action }
+    if ($briefJson.aios_recommendation) { $nextSafeActionCandidates += [string]$briefJson.aios_recommendation }
+    $nextSafeActionCandidates = @($nextSafeActionCandidates | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Select-Object -Unique -First 5)
+
+    $json = [pscustomobject]@{
+        schema = "AIOS_OPENAI_SANITIZED_SUMMARY.v1"
+        mode = "DRY_RUN_SANDBOX_OUTPUT"
+        generated_at = $generatedAt
+        recommendation_only = $true
+        no_approval_authority = $true
+        no_execution_authority = $true
+        source_contracts_used = @(
+            "AIOS_MORNING_BRIEF_V2.v1",
+            "AIOS_APPROVAL_INTELLIGENCE_V2.v1",
+            "AIOS_PI5_PROGRESS_REPORT.v1",
+            "AIOS_AUTONOMY_BRIDGE_STATE.v1",
+            "AIOS_NIGHT_SUPERVISOR_REPORT.v1"
+        )
+        current_status = [string]$briefJson.status
+        night_supervisor_status = [string]$nightReport.supervisor_status
+        bridge_status = [string]$BridgeState.bridge_status
+        validator_status = [string]$execution.validator_status
+        qa_status = [string]$execution.qa_status
+        current_blockers_count = $currentBlockersCount
+        active_approval_count = $activeApprovalCount
+        active_approval_decision_cards = $approvalCards
+        stale_warnings_summary = [pscustomobject]@{
+            count = $staleWarnings.Count
+            first_items = $staleWarnings
+        }
+        noise_summary = [pscustomobject]@{
+            noise_count = $noiseCount
+            detail = "Noise, examples, completed records, and raw evidence remain excluded from this summary."
+        }
+        next_safe_action_candidates = $nextSafeActionCandidates
+        explicit_forbidden_boundaries = [pscustomobject]@{
+            no_raw_file_contents = $true
+            no_raw_conversations = $true
+            no_credentials = $true
+            no_external_calls = $true
+            no_approval_mutation = $true
+            no_protected_repo_action = $true
+            no_runtime_promotion = $true
+            no_market_execution = $true
+        }
+        excluded_content = @(
+            "raw file contents",
+            "raw conversations",
+            "credentials",
+            "private telemetry",
+            "raw evidence dumps",
+            "approval mutation authority",
+            "execution authority"
+        )
+        validation = [pscustomobject]@{
+            recommendation_only = $true
+            no_approval_authority = $true
+            no_execution_authority = $true
+            no_external_calls = $true
+            no_raw_output = $true
+            no_approval_mutation = $true
+        }
+    }
+
+    $lines = @(
+        "# OpenAI Sanitized Summary",
+        "",
+        "Status: recommendation-only sanitized input package.",
+        "",
+        "## Current Status",
+        "",
+        "- Current status: $($json.current_status)",
+        "- Night Supervisor status: $($json.night_supervisor_status)",
+        "- Bridge status: $($json.bridge_status)",
+        "- Validator status: $($json.validator_status)",
+        "- QA status: $($json.qa_status)",
+        "- Current blockers count: $($json.current_blockers_count)",
+        "- Active approval count: $($json.active_approval_count)",
+        "",
+        "## Active Approval Decision Cards",
+        ""
+    )
+
+    if ($approvalCards.Count -eq 0) {
+        $lines += "- None."
+    } else {
+        foreach ($card in $approvalCards) {
+            $lines += "- $($card.title): $($card.recommended_disposition) - $($card.reason)"
+        }
+    }
+
+    $lines += @(
+        "",
+        "## Stale Warnings",
+        "",
+        "- Count: $($json.stale_warnings_summary.count)"
+    )
+    foreach ($warning in @($json.stale_warnings_summary.first_items)) {
+        $lines += "- $warning"
+    }
+
+    $lines += @(
+        "",
+        "## Noise Summary",
+        "",
+        "- Noise count: $($json.noise_summary.noise_count)",
+        "- Detail: $($json.noise_summary.detail)",
+        "",
+        "## Next Safe Action Candidates",
+        ""
+    )
+    foreach ($action in @($json.next_safe_action_candidates)) {
+        $lines += "- $action"
+    }
+
+    $lines += @(
+        "",
+        "## Boundaries",
+        "",
+        "- recommendation_only: true",
+        "- no_approval_authority: true",
+        "- no_execution_authority: true",
+        "- no raw file contents",
+        "- no raw conversations",
+        "- no credentials",
+        "- no external calls",
+        "- no approval mutation",
+        "- no protected repo action",
+        "- no runtime promotion",
+        "- no market execution"
+    )
+
+    return [pscustomobject]@{
+        markdown = ($lines -join "`n") + "`n"
+        json = $json
+    }
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $forbiddenOutputTerms = @(".env", "secrets", "credentials", "broker", "OANDA", "live webhook", "real order")
 $pythonModule = Join-Path $repoRoot "services\python_supervisor\autonomy_bridge.py"
@@ -996,6 +1184,8 @@ $plannedOutputs = @(
     "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.json",
     "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.md",
     "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json",
+    "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.md",
+    "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json",
     $alertOutput
 )
 
@@ -1052,6 +1242,10 @@ $pi5ProgressMarkdownOutput = "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATES
 $pi5ProgressJsonOutput = "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json"
 $pi5ProgressMarkdownPath = Join-Path $repoRoot $pi5ProgressMarkdownOutput
 $pi5ProgressJsonPath = Join-Path $repoRoot $pi5ProgressJsonOutput
+$openAiSanitizedSummaryMarkdownOutput = "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.md"
+$openAiSanitizedSummaryJsonOutput = "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json"
+$openAiSanitizedSummaryMarkdownPath = Join-Path $repoRoot $openAiSanitizedSummaryMarkdownOutput
+$openAiSanitizedSummaryJsonPath = Join-Path $repoRoot $openAiSanitizedSummaryJsonOutput
 
 if (($StateApply -or $MorningBriefV2Apply) -and -not $Apply) {
     $stateDir = Split-Path -Parent $bridgeStatePath
@@ -1125,6 +1319,17 @@ if ($MorningBriefV2Apply) {
     Set-Content -LiteralPath $pi5ProgressMarkdownPath -Value $pi5ProgressReport.markdown -Encoding UTF8
     $pi5ProgressReport.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $pi5ProgressJsonPath -Encoding UTF8
     Write-AiosLine "PASS" "pi5_progress_report_written=$pi5ProgressMarkdownOutput,$pi5ProgressJsonOutput"
+
+    $openAiSanitizedSummary = New-AiosOpenAiSanitizedSummary `
+        -BridgeState $receipt.bridge_state `
+        -MorningBriefV2 $briefV2 `
+        -ApprovalIntelligenceV2 $approvalIntelligenceV2 `
+        -Pi5ProgressReport $pi5ProgressReport `
+        -NightReportRef $latestReport
+
+    Set-Content -LiteralPath $openAiSanitizedSummaryMarkdownPath -Value $openAiSanitizedSummary.markdown -Encoding UTF8
+    $openAiSanitizedSummary.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $openAiSanitizedSummaryJsonPath -Encoding UTF8
+    Write-AiosLine "PASS" "openai_sanitized_summary_written=$openAiSanitizedSummaryMarkdownOutput,$openAiSanitizedSummaryJsonOutput"
 }
 
 Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"

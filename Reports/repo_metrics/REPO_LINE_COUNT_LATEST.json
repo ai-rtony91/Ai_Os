@@ -1,0 +1,17 @@
+{
+  "schema": "AIOS_REPO_LINE_COUNT_METRIC.v1",
+  "timestamp": "2026-06-05T20:12:53Z",
+  "branch": "main",
+  "repo_path": "C:\\Dev\\Ai.Os",
+  "files_counted": 3484,
+  "total_lines": 228946,
+  "exclusion_rule": "Tracked files excluding telemetry, .git, node_modules, dist, and build path roots.",
+  "includes": "code, docs, scripts, schemas, configs, and data files",
+  "not_pure_source_code_only": true,
+  "command_used": "git ls-files | Where-Object { $_ -notmatch '(^|/)(telemetry|\\.git|node_modules|dist|build)/' } | ForEach-Object { if (Test-Path $_) { Get-Content $_ -ErrorAction SilentlyContinue | Measure-Object -Line } } | Measure-Object -Property Lines -Sum",
+  "expected_observation": {
+    "files_counted": 3484,
+    "total_lines": 228944
+  },
+  "measurement_note": "Current measured value from this run was 3484 files and 228946 lines."
+}
