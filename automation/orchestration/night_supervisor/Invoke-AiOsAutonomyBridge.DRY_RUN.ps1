@@ -1283,6 +1283,136 @@ function New-AiosOpenAiCliInputReadyContract {
     }
 }
 
+function New-AiosOpenAiNoCallRecommendation {
+    param(
+        [object]$OpenAiSanitizedSummary,
+        [object]$OpenAiCliInputReady,
+        [string]$SourceInputPath
+    )
+
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $inputReady = (
+        $OpenAiCliInputReady -and
+        $OpenAiCliInputReady.json -and
+        $OpenAiCliInputReady.json.input_ready -eq $true -and
+        $OpenAiCliInputReady.json.api_call_permitted -eq $false -and
+        $OpenAiCliInputReady.json.recommendation_only -eq $true -and
+        $OpenAiCliInputReady.json.approval_authority -eq $false -and
+        $OpenAiCliInputReady.json.execution_authority -eq $false -and
+        $OpenAiCliInputReady.json.blocked_until_explicit_api_approval -eq $true
+    )
+
+    $nextSafeActions = @()
+    if ($OpenAiSanitizedSummary -and $OpenAiSanitizedSummary.json -and $OpenAiSanitizedSummary.json.next_safe_action_candidates) {
+        $nextSafeActions += @($OpenAiSanitizedSummary.json.next_safe_action_candidates)
+    }
+    $nextSafeActions += "Request explicit API approval if Anthony wants the first live recommendation call."
+
+    $json = [pscustomobject]@{
+        schema = "AIOS_OPENAI_RECOMMENDATION.v1"
+        generated_at = $generatedAt
+        source_input_path = $SourceInputPath
+        adapter_mode = "NO_CALL_FIXTURE"
+        input_contract_valid = [bool]$inputReady
+        recommendation_only = $true
+        approval_authority = $false
+        execution_authority = $false
+        api_call_made = $false
+        human_review_required = $true
+        summary = "No-call fixture recommendation generated from sanitized AI_OS evidence. OpenAI API call is still blocked until explicit approval."
+        recommended_next_actions = @($nextSafeActions)
+        risks = @(
+            "Treating recommendation text as authority would violate AI_OS protected-action rules.",
+            "A live API call still needs exact approval, model or CLI boundary, cost boundary, and output validation.",
+            "Broad APPLY approval remains deferred until exact scope and validator evidence exist."
+        )
+        missing_evidence = @(
+            "Explicit API approval packet.",
+            "Approved model or CLI command boundary.",
+            "Approved cost or usage boundary.",
+            "Post-call output schema validator."
+        )
+        approval_decision_explanation = "Current active approval evidence recommends deferring APPLY because the old approval record is broad and missing exact file list, mutation details, validator evidence, and stop point."
+        protected_action_notes = "OpenAI output is recommendation evidence only. It cannot approve, execute, stage, commit, push, merge, mutate approvals, launch workers, create schedulers, call external services, or touch production."
+        do_not_execute = @(
+            "Do not call OpenAI from this adapter mode.",
+            "Do not treat this output as approval.",
+            "Do not execute commands from this output.",
+            "Do not mutate approvals.",
+            "Do not stage, commit, push, merge, or launch workers.",
+            "Do not use broker, OANDA, live trading, real order, webhook, GPIO, motor, or production paths."
+        )
+        safe_next_packet_candidate = [pscustomobject]@{
+            mode = "DRY_RUN"
+            lane = "OPENAI_CLI_API_APPROVAL_REVIEW"
+            mission = "Review whether Anthony wants to approve the first live OpenAI recommendation call."
+            allowed_input = $SourceInputPath
+            output_target = "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.json"
+            stop_point = "approval decision only; no API call unless explicitly approved"
+        }
+        validation = [pscustomobject]@{
+            input_ready = [bool]$OpenAiCliInputReady.json.input_ready
+            api_call_permitted_is_false = ($OpenAiCliInputReady.json.api_call_permitted -eq $false)
+            recommendation_only = $true
+            approval_authority = $false
+            execution_authority = $false
+            no_api_call = $true
+            no_approval_mutation = $true
+        }
+    }
+
+    $lines = @(
+        "# OpenAI Recommendation Fixture",
+        "",
+        "Generated: $generatedAt",
+        "",
+        "## Adapter",
+        "",
+        "- schema: AIOS_OPENAI_RECOMMENDATION.v1",
+        "- adapter_mode: NO_CALL_FIXTURE",
+        "- source_input_path: $SourceInputPath",
+        "- api_call_made: false",
+        "- recommendation_only: true",
+        "- approval_authority: false",
+        "- execution_authority: false",
+        "- human_review_required: true",
+        "",
+        "## Summary",
+        "",
+        $json.summary,
+        "",
+        "## Recommended Next Actions",
+        ""
+    )
+
+    foreach ($action in @($json.recommended_next_actions)) {
+        $lines += "- $action"
+    }
+
+    $lines += @(
+        "",
+        "## Do Not Execute",
+        ""
+    )
+
+    foreach ($item in @($json.do_not_execute)) {
+        $lines += "- $item"
+    }
+
+    $lines += @(
+        "",
+        "## Boundary",
+        "",
+        "- No command from this output is authority.",
+        "- A live API call remains blocked until exact human approval exists."
+    )
+
+    return [pscustomobject]@{
+        markdown = ($lines -join "`n") + "`n"
+        json = $json
+    }
+}
+
 function New-AiosProtectedActionReadiness {
     param(
         [object]$BridgeState,
@@ -1624,6 +1754,8 @@ $plannedOutputs = @(
     "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json",
     "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.md",
     "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.json",
+    "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.md",
+    "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.json",
     "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md",
     "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json",
     $alertOutput
@@ -1690,6 +1822,10 @@ $openAiCliInputReadyMarkdownOutput = "telemetry/morning_digest/OPENAI_CLI_INPUT_
 $openAiCliInputReadyJsonOutput = "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.json"
 $openAiCliInputReadyMarkdownPath = Join-Path $repoRoot $openAiCliInputReadyMarkdownOutput
 $openAiCliInputReadyJsonPath = Join-Path $repoRoot $openAiCliInputReadyJsonOutput
+$openAiRecommendationMarkdownOutput = "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.md"
+$openAiRecommendationJsonOutput = "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.json"
+$openAiRecommendationMarkdownPath = Join-Path $repoRoot $openAiRecommendationMarkdownOutput
+$openAiRecommendationJsonPath = Join-Path $repoRoot $openAiRecommendationJsonOutput
 $protectedActionReadinessMarkdownOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md"
 $protectedActionReadinessJsonOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json"
 $protectedActionReadinessMarkdownPath = Join-Path $repoRoot $protectedActionReadinessMarkdownOutput
@@ -1800,6 +1936,15 @@ if ($MorningBriefV2Apply) {
     Set-Content -LiteralPath $openAiCliInputReadyMarkdownPath -Value $openAiCliInputReady.markdown -Encoding UTF8
     $openAiCliInputReady.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $openAiCliInputReadyJsonPath -Encoding UTF8
     Write-AiosLine "PASS" "openai_cli_input_ready_written=$openAiCliInputReadyMarkdownOutput,$openAiCliInputReadyJsonOutput"
+
+    $openAiRecommendation = New-AiosOpenAiNoCallRecommendation `
+        -OpenAiSanitizedSummary $openAiSanitizedSummary `
+        -OpenAiCliInputReady $openAiCliInputReady `
+        -SourceInputPath $openAiSanitizedSummaryJsonOutput
+
+    Set-Content -LiteralPath $openAiRecommendationMarkdownPath -Value $openAiRecommendation.markdown -Encoding UTF8
+    $openAiRecommendation.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $openAiRecommendationJsonPath -Encoding UTF8
+    Write-AiosLine "PASS" "openai_recommendation_fixture_written=$openAiRecommendationMarkdownOutput,$openAiRecommendationJsonOutput"
 }
 
 Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"
