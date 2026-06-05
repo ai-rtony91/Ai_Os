@@ -223,7 +223,8 @@ function New-AiosMorningBriefV2 {
     }
 
     $reportStatus = [string]$nightReport.supervisor_status
-    $bridgeStatus = [string]$BridgeState.night_supervisor_status
+    $bridgeStatus = [string]$BridgeState.bridge_status
+    if ([string]::IsNullOrWhiteSpace($bridgeStatus)) { $bridgeStatus = [string]$BridgeState.night_supervisor_status }
     if ([string]::IsNullOrWhiteSpace($bridgeStatus)) { $bridgeStatus = [string]$BridgeState.supervisor_status }
     $digestStatus = if ($digestState) { [string]$digestState.night_supervisor_status } else { "MISSING" }
     if ([string]::IsNullOrWhiteSpace($digestStatus) -and $digestState) { $digestStatus = [string]$digestState.supervisor_status }
@@ -236,7 +237,8 @@ function New-AiosMorningBriefV2 {
     $digestApprovalCount = if ($digestState -and $digestState.approval_needed_count -ne $null) { [int]$digestState.approval_needed_count } else { 0 }
 
     $staleWarnings = @()
-    if ($reportStatus -and $bridgeStatus -and $reportStatus -ne $bridgeStatus) {
+    $bridgeRefinesReadyToApproval = ($reportStatus -eq "READY" -and $bridgeStatus -eq "NEEDS_APPROVAL" -and $decisionCards.Count -gt 0)
+    if ($reportStatus -and $bridgeStatus -and $reportStatus -ne $bridgeStatus -and -not $bridgeRefinesReadyToApproval) {
         $staleWarnings += "Report status is $reportStatus while bridge status is $bridgeStatus."
     }
     if ($digestState -and ([string]$digestState.generated_at).Substring(0, [Math]::Min(10, ([string]$digestState.generated_at).Length)) -ne ([string]$nightReport.generated_at).Substring(0, 10)) {
@@ -245,8 +247,8 @@ function New-AiosMorningBriefV2 {
     if ($digestMarkdown -match "Morning Digest - 2026-06-02") {
         $staleWarnings += "Morning digest markdown is stale and still dated 2026-06-02."
     }
-    if ($reportApprovalCount -ne $bridgeApprovalCount -or $reportApprovalCount -ne $digestApprovalCount) {
-        $staleWarnings += "Approval counts differ: report=$reportApprovalCount bridge=$bridgeApprovalCount digest=$digestApprovalCount."
+    if ($decisionCards.Count -ne $bridgeApprovalCount -or $decisionCards.Count -ne $digestApprovalCount) {
+        $staleWarnings += "Approval counts differ after noise filtering: active=$($decisionCards.Count) bridge=$bridgeApprovalCount digest=$digestApprovalCount."
     }
     if ($staleWarnings.Count -eq 0) {
         $staleWarnings += "No stale-state mismatch detected across report, bridge, and digest evidence."
@@ -312,10 +314,14 @@ STATUS: APPROVAL INTELLIGENCE CLASSIFICATION FIX COMPLETE, NO COMMIT, NO PUSH
     $brief = [ordered]@{
         schema = "AIOS_MORNING_BRIEF_V2.v1"
         mode = "DRY_RUN_SANDBOX_OUTPUT"
+        status = $bridgeStatus
+        supervisor_status = $reportStatus
+        execution_result = [string]$nightReport.execution_result.result_classification
+        recommendation_only = $true
         generated_at = $generatedAt
         source_report = $NightReportRef.repo_relative
         authority = "recommendation_only_not_approval_authority"
-        executive_summary = "AI_OS is safe for continued DRY_RUN and sandbox work. The latest Night Supervisor report is $reportStatus with validators passing and approval still required. The main value gap is approval classification and stale digest filtering."
+        executive_summary = "AI_OS is safe for continued DRY_RUN and sandbox work. The latest Night Supervisor report is $reportStatus, bridge status is $bridgeStatus, validators pass, and active approvals are filtered to current decision cards."
         overnight_changes = [ordered]@{
             report_generated_at = [string]$nightReport.generated_at
             supervisor_status = $reportStatus
@@ -334,6 +340,8 @@ STATUS: APPROVAL INTELLIGENCE CLASSIFICATION FIX COMPLETE, NO COMMIT, NO PUSH
             safety = $nightReport.safety_confirmation
         }
         approval_required = @($decisionCards)
+        active_decision_cards = @($BridgeState.active_decision_cards)
+        current_blockers = @($BridgeState.current_blockers)
         stale_state_warnings = @($staleWarnings)
         risks = @(
             "Approval queue noise can hide the one real decision Anthony needs to make.",
@@ -356,7 +364,7 @@ STATUS: APPROVAL INTELLIGENCE CLASSIFICATION FIX COMPLETE, NO COMMIT, NO PUSH
         codex_recommendation = "Implement approval-summary classification next so completed records and examples do not inflate pending review."
         aios_recommendation = "Keep Night Supervisor as evidence producer and Morning Brief v2 as the decision filter."
         highest_roi_next_packet = $highestRoiPacket
-        noise_cards = @($noiseCards)
+        noise_cards = @($noiseCards + @($BridgeState.noise_cards))
         validation = [ordered]@{
             recommendation_only = $true
             approval_authority = $false
@@ -568,7 +576,7 @@ $morningBriefV2JsonOutput = "telemetry/morning_digest/MORNING_BRIEF_V2_LATEST.js
 $morningBriefV2MarkdownPath = Join-Path $repoRoot $morningBriefV2MarkdownOutput
 $morningBriefV2JsonPath = Join-Path $repoRoot $morningBriefV2JsonOutput
 
-if ($StateApply -and -not $Apply) {
+if (($StateApply -or $MorningBriefV2Apply) -and -not $Apply) {
     $stateDir = Split-Path -Parent $bridgeStatePath
     if (-not (Test-Path $stateDir)) {
         New-Item -ItemType Directory -Path $stateDir -Force | Out-Null

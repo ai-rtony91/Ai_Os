@@ -149,6 +149,28 @@ STALE_REVIEW_PATH_TERMS = (
     "control/operation_glue/worker_packets/",
 )
 EVIDENCE_DATE_PATTERN = re.compile(r"(20\d{2})[-_]?(\d{2})[-_]?(\d{2})")
+ACTIVE_CLASSIFICATIONS = {
+    "ACTIVE_CURRENT",
+    "ACTIVE_APPROVAL_REQUIRED",
+    "ACTIVE_BLOCKER",
+}
+SAMPLE_OR_EXAMPLE_TERMS = (
+    "sample",
+    "example",
+    ".example.",
+    "_example",
+    "sample_resume_proof",
+)
+COMPLETED_TERMS = (
+    "/done/",
+    "/processed/",
+    "/approved/",
+    "status: approved",
+    "status\": \"approved",
+    "status\": \"completed",
+    "approval_status\": \"completed",
+    "approved_sample_only",
+)
 
 
 def utc_now() -> str:
@@ -175,6 +197,17 @@ def load_json_safely(path: Path) -> dict[str, Any]:
         payload.setdefault("source_path", str(path))
         return payload
     return {"source_path": str(path), "status": "BLOCKED", "error": "JSON root is not an object."}
+
+
+def load_latest_night_report(repo_root: str | Path) -> tuple[dict[str, Any] | None, str | None]:
+    report_dir = Path(repo_root).resolve() / "telemetry/night_supervisor/reports"
+    if not report_dir.exists():
+        return None, None
+    reports = sorted(report_dir.glob("night_summary_*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
+    if not reports:
+        return None, None
+    latest = reports[0]
+    return load_json_safely(latest), repo_relative(latest, Path(repo_root).resolve())
 
 
 def read_text_preview(path: Path, limit: int = 900) -> str:
@@ -215,16 +248,16 @@ def _iter_explicit_values(item: dict[str, Any]) -> list[str]:
 
 def _status_category(status: str, path: str, text: str) -> str:
     if status == "BLOCKED":
-        return "blocked_action"
+        return "NOISE"
     if status == "NEEDS_APPROVAL":
-        return "approval_request"
+        return "NOISE"
     if status == "WARN":
-        return "validator_output" if "validator" in text or "validator" in path else "worker_output"
+        return "NOISE"
     if status == "PASS":
-        return "worker_output"
+        return "COMPLETED_RECORD"
     if path.startswith("relay/"):
-        return "relay_input"
-    return "unknown"
+        return "HISTORICAL_EVIDENCE"
+    return "NOISE"
 
 
 def _extract_evidence_dates(path: str, text: str) -> list[datetime.date]:
@@ -248,6 +281,16 @@ def _is_reference_evidence(path: str) -> bool:
 
 def _is_projection_evidence(path: str) -> bool:
     return path in PROJECTION_PATHS
+
+
+def _is_sample_or_example(path: str, text: str) -> bool:
+    haystack = f"{path} {text}"
+    return any(term in haystack for term in SAMPLE_OR_EXAMPLE_TERMS)
+
+
+def _is_completed_record(path: str, text: str) -> bool:
+    haystack = f"{path} {text}"
+    return any(term in haystack for term in COMPLETED_TERMS)
 
 
 def _has_current_unsafe_terms(path: str, text: str) -> bool:
@@ -306,26 +349,26 @@ def classify_item(item: dict[str, Any]) -> dict[str, str]:
     path = str(item.get("source_path", "")).lower().replace("\\", "/")
     raw_status = str(item.get("status") or item.get("state") or item.get("supervisor_status") or "").upper()
 
+    if _is_sample_or_example(path, text):
+        return {"status": "WARN", "category": "SAMPLE_OR_EXAMPLE"}
+    if _is_completed_record(path, text):
+        return {"status": "PASS", "category": "COMPLETED_RECORD"}
     if _is_projection_evidence(path):
-        return {"status": "WARN", "category": "reference_evidence"}
+        return {"status": "WARN", "category": "NOISE"}
     if _is_reference_evidence(path):
-        return {"status": "WARN", "category": "reference_evidence"}
+        return {"status": "WARN", "category": "NOISE"}
     if _is_historical_evidence(path, text):
-        return {"status": "WARN", "category": "historical_evidence"}
+        return {"status": "WARN", "category": "HISTORICAL_EVIDENCE"}
 
     explicit = _explicit_status(item)
     fallback = _fallback_status(path, text, _normalize_token(raw_status))
     status = _max_status(explicit or "PASS", fallback)
     category = _status_category(status, path, text)
 
-    if "dashboard" in path:
-        category = "dashboard_note"
     if "morning" in path:
-        category = "morning_digest"
+        category = "NOISE"
     if "validator" in path:
-        category = "validator_output"
-    if "relay/" in path and category == "unknown":
-        category = "relay_input"
+        category = "NOISE"
 
     return {"status": status, "category": category}
 
@@ -343,6 +386,7 @@ def _item_from_path(path: Path, repo_root: Path) -> dict[str, Any]:
         "title": str(title)[:90],
         "status": classification["status"],
         "category": classification["category"],
+        "status_impact": classification["category"] in ACTIVE_CLASSIFICATIONS,
         "summary": str(summary)[:220],
         "source_path": rel,
         "next_safe_action": str(payload.get("next_safe_action") or "Review this evidence before protected action."),
@@ -394,6 +438,133 @@ def build_repo_state(branch: str = "UNKNOWN", git_status: str = "") -> dict[str,
     }
 
 
+def _legacy_dashboard_status(status: str) -> str:
+    return {
+        "READY": "PASS",
+        "NEEDS_APPROVAL": "WARN",
+        "BLOCKED": "BLOCKED",
+    }.get(status, "UNKNOWN")
+
+
+def _report_phase(report: dict[str, Any], phase_name: str) -> dict[str, Any] | None:
+    for phase in report.get("phases") or []:
+        if isinstance(phase, dict) and phase.get("phase") == phase_name:
+            return phase
+    return None
+
+
+def _canonical_approval_cards(repo_root: Path, report: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    phase = _report_phase(report, "approval_automation") or {}
+    pending = ((phase.get("detail") or {}).get("pending_human_review") or [])
+    active_cards: list[dict[str, Any]] = []
+    noise_cards: list[dict[str, Any]] = []
+
+    for raw in pending:
+        if not isinstance(raw, dict):
+            continue
+        file_path = str(raw.get("file") or "")
+        tier = str(raw.get("tier") or "UNKNOWN")
+        name = Path(file_path).name
+        record = load_json_safely(repo_root / "automation/orchestration/approval_inbox" / name)
+        status = str(record.get("approval_status") or record.get("status") or "pending_or_unknown")
+        card = {
+            "title": name or "Approval Decision",
+            "file": file_path,
+            "packet_id": str(record.get("packet_id") or report.get("execution_result", {}).get("packet_id") or "UNKNOWN"),
+            "requested_action": str(record.get("requested_action") or record.get("requested_mode") or "review approval evidence"),
+            "status": status,
+            "risk": str(record.get("risk_level") or tier),
+            "classification": "ACTIVE_APPROVAL_REQUIRED",
+            "why_it_matters": "Human review is required before mutation or protected action.",
+            "recommended_action": "Approve, reject, or defer from the canonical approval inbox.",
+            "source_path": file_path,
+        }
+        lowered = f"{name} {tier} {status}".lower()
+        if "example" in lowered:
+            card["classification"] = "SAMPLE_OR_EXAMPLE"
+            card["why_it_matters"] = "Example approval records are not active decision work."
+            card["recommended_action"] = "Keep visible as noise/detail only."
+            noise_cards.append(card)
+        elif status.lower() == "completed":
+            card["classification"] = "COMPLETED_RECORD"
+            card["why_it_matters"] = "Completed approval records are historical evidence."
+            card["recommended_action"] = "Keep visible as completed evidence only."
+            noise_cards.append(card)
+        else:
+            active_cards.append(card)
+
+    return active_cards, noise_cards
+
+
+def _active_current_from_report(report: dict[str, Any], report_path: str | None) -> dict[str, Any]:
+    execution = report.get("execution_result") or {}
+    safety = report.get("safety_confirmation") or {}
+    return {
+        "title": "Latest Night Supervisor Report",
+        "status": str(report.get("supervisor_status") or "UNKNOWN"),
+        "category": "ACTIVE_CURRENT",
+        "status_impact": True,
+        "summary": str(report.get("next_safe_action") or execution.get("next_safe_action") or "Review latest Night Supervisor report."),
+        "source_path": report_path or str(report.get("source_path") or "telemetry/night_supervisor/reports"),
+        "validator_status": str(execution.get("validator_status") or "UNKNOWN"),
+        "qa_status": str(execution.get("qa_status") or "UNKNOWN"),
+        "execution_result": str(execution.get("result_classification") or "UNKNOWN"),
+        "forbidden_write_attempts": int(safety.get("forbidden_write_attempts") or 0),
+    }
+
+
+def _current_blockers_from_report(report: dict[str, Any], report_path: str | None) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
+    execution = report.get("execution_result") or {}
+    safety = report.get("safety_confirmation") or {}
+    report_status = _normalize_token(report.get("supervisor_status"))
+    validator_status = _normalize_token(execution.get("validator_status"))
+    qa_status = _normalize_token(execution.get("qa_status"))
+
+    def add_blocker(title: str, summary: str) -> None:
+        blockers.append(
+            {
+                "title": title,
+                "status": "BLOCKED",
+                "category": "ACTIVE_BLOCKER",
+                "status_impact": True,
+                "summary": summary,
+                "source_path": report_path or "latest_night_report",
+                "next_safe_action": "Stop and resolve this current blocker before continuation.",
+            }
+        )
+
+    if report_status in {"BLOCKED", "FAILED", "FAIL", "ERROR", "UNSAFE_BLOCKED"}:
+        add_blocker("Night Supervisor current status blocker", f"Latest Night Supervisor status is {report_status}.")
+    if validator_status not in {"PASS", "READY", "COMPLETE", "DONE"}:
+        add_blocker("Validator current blocker", f"Latest validator status is {validator_status or 'UNKNOWN'}.")
+    if qa_status not in {"PASS", "READY", "COMPLETE", "DONE"}:
+        add_blocker("QA current blocker", f"Latest QA status is {qa_status or 'UNKNOWN'}.")
+    if int(safety.get("forbidden_write_attempts") or 0) > 0:
+        add_blocker("Forbidden write current blocker", "Latest report recorded forbidden write attempts.")
+    return blockers
+
+
+def _stale_state_warnings(
+    latest_report: dict[str, Any] | None,
+    latest_report_path: str | None,
+    previous_bridge_status: str | None,
+    previous_bridge_generated_at: str | None,
+) -> list[str]:
+    warnings: list[str] = []
+    if latest_report:
+        report_status = str(latest_report.get("supervisor_status") or "UNKNOWN")
+        if previous_bridge_status and previous_bridge_status != report_status:
+            warnings.append(f"Prior bridge status was {previous_bridge_status} while latest report is {report_status}.")
+        if previous_bridge_generated_at and str(previous_bridge_generated_at)[:10] != str(latest_report.get("generated_at") or "")[:10]:
+            warnings.append("Prior bridge state date does not match the latest Night Supervisor report date.")
+    else:
+        warnings.append("No latest Night Supervisor report found; bridge status cannot be fully anchored.")
+    if latest_report_path:
+        warnings.append(f"Status anchored to {latest_report_path}.")
+    return warnings
+
+
 def build_dashboard_cards(bridge_state: dict[str, Any]) -> list[dict[str, Any]]:
     metrics = {
         "wins": bridge_state["wins_count"],
@@ -419,54 +590,87 @@ def build_bridge_state(repo_root: str | Path, branch: str = "UNKNOWN", git_statu
     cycle_id = f"autonomy-bridge-{generated_at[:10]}"
     source_files = collect_source_files(root)
     items = [_item_from_path(path, root) for path in source_files]
+    previous_bridge = load_json_safely(root / OUTPUTS["bridge_state"])
+    latest_report, latest_report_path = load_latest_night_report(root)
 
-    completed = [item for item in items if item["status"] == "PASS"]
-    blocked = [item for item in items if item["status"] == "BLOCKED"]
-    approvals = [item for item in items if item["status"] == "NEEDS_APPROVAL"]
+    completed = [item for item in items if item["category"] == "COMPLETED_RECORD" or item["status"] == "PASS"]
+    historical = [item for item in items if item["category"] == "HISTORICAL_EVIDENCE"]
+    samples = [item for item in items if item["category"] == "SAMPLE_OR_EXAMPLE"]
+    noise = [item for item in items if item["category"] == "NOISE"]
     worker_notes = [item for item in items if item["category"] in {"worker_output", "validator_output", "relay_input"}]
     repo_state = build_repo_state(branch, git_status)
+    active_current = [_active_current_from_report(latest_report, latest_report_path)] if latest_report else []
+    active_decision_cards, approval_noise = _canonical_approval_cards(root, latest_report or {})
+    current_blockers = _current_blockers_from_report(latest_report or {}, latest_report_path) if latest_report else []
+    noise_cards = [*approval_noise, *samples[:8], *noise[:8]]
+    detail_only_blocked = [item for item in items if item["status"] == "BLOCKED" and item["category"] not in ACTIVE_CLASSIFICATIONS]
 
-    if blocked:
+    if current_blockers:
         status = "BLOCKED"
-    elif approvals or repo_state["repo_dirty"]:
-        status = "WARN"
-    elif completed:
-        status = "PASS"
+    elif active_decision_cards:
+        status = "NEEDS_APPROVAL"
+    elif latest_report and _normalize_token(latest_report.get("supervisor_status")) == "READY":
+        status = "READY"
     else:
         status = "UNKNOWN"
+    legacy_status = _legacy_dashboard_status(status)
 
     source_count = len(items)
     plain_summary = (
-        f"{len(completed)} items completed, {len(blocked)} blocked, "
-        f"{len(approvals)} need approval, {source_count} evidence items seen."
+        f"Bridge status {status}: {len(current_blockers)} active blockers, "
+        f"{len(active_decision_cards)} active approval decisions, {source_count} detail evidence items seen."
     )
     must_see: list[str] = []
-    must_see.extend(item["summary"] for item in blocked[:3])
-    must_see.extend(item["summary"] for item in approvals[:3])
-    if repo_state["repo_dirty"]:
-        must_see.append(repo_state["status_summary"])
+    must_see.extend(item["summary"] for item in current_blockers[:3])
+    must_see.extend(card["recommended_action"] for card in active_decision_cards[:3])
     if not must_see:
-        must_see.append("No blockers found in available bridge evidence; review raw evidence before APPLY.")
+        must_see.append("No current blockers found; review active decisions before APPLY.")
+
+    stale_warnings = _stale_state_warnings(
+        latest_report,
+        latest_report_path,
+        str(previous_bridge.get("night_supervisor_status") or previous_bridge.get("supervisor_status") or ""),
+        str(previous_bridge.get("generated_at") or ""),
+    )
 
     bridge_state: dict[str, Any] = {
         "schema": SCHEMA,
         "generated_at": generated_at,
         "cycle_id": cycle_id,
         "source_paths": [repo_relative(path, root) for path in source_files],
+        "bridge_status": status,
+        "legacy_dashboard_status": legacy_status,
         "supervisor_status": status,
         "night_supervisor_status": status,
         "plain_summary": plain_summary,
         "must_see": must_see,
         "relay_items_seen": [item for item in items if item["source_path"].startswith("relay/")],
         "items_completed": completed,
-        "items_blocked": blocked,
-        "items_needing_approval": approvals,
+        "items_blocked": current_blockers,
+        "items_needing_approval": active_decision_cards,
+        "active_current": active_current,
+        "active_decision_cards": active_decision_cards,
+        "current_blockers": current_blockers,
+        "historical_evidence": historical,
+        "sample_or_example": samples,
+        "completed_records": completed,
+        "noise_cards": noise_cards,
+        "stale_state_warnings": stale_warnings,
+        "detail_only_blocked": detail_only_blocked,
         "repo_state": repo_state,
         "wins_count": len(completed),
-        "blocked_count": len(blocked),
-        "approval_needed_count": len(approvals),
+        "blocked_count": len(current_blockers),
+        "approval_needed_count": len(active_decision_cards),
         "worker_notes_count": len(worker_notes),
-        "next_safe_action": "Review blocked and approval-needed items before any APPLY, commit, push, merge, or worker launch.",
+        "next_safe_action": (
+            "Resolve current blockers before continuation."
+            if current_blockers
+            else (
+                "Anthony reviews active approval decision cards before any APPLY or protected action."
+                if active_decision_cards
+                else "Continue DRY_RUN or sandbox work; protected actions still require approval."
+            )
+        ),
         "dashboard_cards": [],
         "morning_digest_path": OUTPUTS["morning_digest"].as_posix(),
         "raw_evidence": [
@@ -474,6 +678,7 @@ def build_bridge_state(repo_root: str | Path, branch: str = "UNKNOWN", git_statu
                 "source_path": item["source_path"],
                 "evidence_type": item["category"],
                 "status": item["status"],
+                "status_impact": bool(item.get("status_impact")),
             }
             for item in items
         ],
