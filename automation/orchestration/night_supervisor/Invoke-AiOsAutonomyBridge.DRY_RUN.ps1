@@ -493,6 +493,205 @@ STATUS: APPROVAL INTELLIGENCE CLASSIFICATION FIX COMPLETE, NO COMMIT, NO PUSH
     }
 }
 
+function New-AiosApprovalIntelligenceV2 {
+    param(
+        [object]$BridgeState,
+        [object]$MorningBriefV2
+    )
+
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $sourceCards = @()
+    if ($BridgeState -and $BridgeState.active_decision_cards) {
+        $sourceCards += @($BridgeState.active_decision_cards)
+    }
+    if ($sourceCards.Count -eq 0 -and $MorningBriefV2 -and $MorningBriefV2.json -and $MorningBriefV2.json.active_decision_cards) {
+        $sourceCards += @($MorningBriefV2.json.active_decision_cards)
+    }
+
+    $decisionCards = @()
+    foreach ($card in $sourceCards) {
+        $title = if ($card.title) { [string]$card.title } else { Split-Path -Leaf ([string]$card.file) }
+        if ([string]::IsNullOrWhiteSpace($title)) { $title = "Approval decision" }
+        $packetId = [string]$card.packet_id
+        $requestedAction = [string]$card.requested_action
+        $status = [string]$card.status
+        $risk = [string]$card.risk
+        $classification = [string]$card.classification
+        if ([string]::IsNullOrWhiteSpace($classification)) { $classification = "ACTIVE_APPROVAL_REQUIRED" }
+
+        $recommendedDisposition = "defer"
+        $reason = "Defer until exact scope, intended mutation, validator evidence, affected file list, and stop point are visible."
+        $missingEvidence = @(
+            "Exact intended mutation.",
+            "Exact files to change.",
+            "Validator chain proof.",
+            "Commit package or explicit no-commit boundary.",
+            "Stop point.",
+            "Evidence that this approval is not stale or superseded by newer governance changes."
+        )
+        $allowedPaths = @("unknown_from_active_bridge_evidence")
+        $blockedPaths = @(
+            "approval mutation",
+            "automation/orchestration/approval_inbox/",
+            "secrets",
+            ".env",
+            "broker/API keys",
+            "live trading",
+            "real orders",
+            "real webhooks",
+            "production promotion",
+            "commit",
+            "push"
+        )
+
+        if ($title -eq "APPLY_APPROVAL_GATE_001.json" -or ([string]$card.file) -like "*APPLY_APPROVAL_GATE_001.json") {
+            $recommendedDisposition = "defer"
+            $reason = "Approval record is current, but the underlying packet is old, broad, and missing exact file list, mutation details, validator evidence, and stop point."
+            $allowedPaths = @(
+                "automation/orchestration/",
+                "docs/concepts/",
+                "docs/workflows/",
+                "docs/architecture/",
+                "docs/audits/"
+            )
+            $blockedPaths = @(
+                "automation/operator/",
+                "Reports/security/",
+                "apps/dashboard/",
+                "automation/telemetry/",
+                "Reports/telemetry/",
+                "README.md",
+                "RISK_POLICY.md",
+                "SOURCE_LOG.md",
+                "ERROR_LOG.md",
+                "HALLUCINATION_LOG.md",
+                "AAR.md",
+                "DAILY_REPORT.md",
+                "ARCHITECTURE.md",
+                "DEPLOYMENT.md",
+                "WHITEPAPER.md",
+                "broker/",
+                "OANDA/",
+                "api_keys/",
+                "live_trading/"
+            )
+        }
+
+        $decisionCards += [ordered]@{
+            title = $title
+            source_path = [string]$card.source_path
+            status = $status
+            current_stale_noise_classification = $classification
+            requested_action = $requestedAction
+            current_allowed_state = "DRY_RUN_ONLY until Human Owner approval is explicit."
+            risk = $risk
+            blast_radius = "medium: scoped repo mutation request requiring Human Owner review before APPLY."
+            affected_allowed_paths = $allowedPaths
+            blocked_protected_paths = $blockedPaths
+            required_missing_evidence = $missingEvidence
+            recommended_disposition = $recommendedDisposition
+            reason = $reason
+            safest_next_action = "Defer APPLY; run a fresh DRY_RUN review or generate a narrower APPLY packet with exact scope and validation."
+            recommendation_only = $true
+            approval_mutation = $false
+        }
+    }
+
+    $json = [ordered]@{
+        schema = "AIOS_APPROVAL_INTELLIGENCE_V2.v1"
+        mode = "DRY_RUN_SANDBOX_OUTPUT"
+        generated_at = $generatedAt
+        recommendation_only = $true
+        approval_authority = $false
+        approval_mutation = $false
+        source = "Bridge/Morning Brief active approval evidence."
+        active_approval_cards = $decisionCards
+        noise_cards_seen = if ($MorningBriefV2 -and $MorningBriefV2.json -and $MorningBriefV2.json.noise_cards) { @($MorningBriefV2.json.noise_cards).Count } else { 0 }
+        stale_state_warnings = if ($MorningBriefV2 -and $MorningBriefV2.json -and $MorningBriefV2.json.stale_state_warnings) { @($MorningBriefV2.json.stale_state_warnings) } else { @() }
+        validation = [ordered]@{
+            no_approval_mutation = $true
+            no_external_api_call = $true
+            no_secrets = $true
+            no_broker_api = $true
+            no_live_trading = $true
+            no_production_promotion = $true
+            no_commit_or_push = $true
+        }
+    }
+
+    $lines = @(
+        "# Approval Intelligence v2 - LATEST",
+        "",
+        "Status: DRY_RUN sandbox output only",
+        "Authority: recommendation-only evidence; not approval authority",
+        "Generated: $generatedAt",
+        "",
+        "## Summary",
+        "",
+        "Approval Intelligence v2 converts active approval evidence into human decision cards. It does not approve, reject, defer, or mutate approval state.",
+        "",
+        "## Active Approval Cards",
+        ""
+    )
+
+    if ($decisionCards.Count -eq 0) {
+        $lines += "- No active approval cards found in current Bridge/Morning Brief evidence."
+    } else {
+        $index = 1
+        foreach ($decision in $decisionCards) {
+            $lines += @(
+                "### $index. $($decision.title)",
+                "",
+                "- Status: $($decision.status)",
+                "- Classification: $($decision.current_stale_noise_classification)",
+                "- Requested action: $($decision.requested_action)",
+                "- Current allowed state: $($decision.current_allowed_state)",
+                "- Risk: $($decision.risk)",
+                "- Blast radius: $($decision.blast_radius)",
+                "- Recommended disposition: $($decision.recommended_disposition)",
+                "- Reason: $($decision.reason)",
+                "- Safest next action: $($decision.safest_next_action)",
+                "- Recommendation only: true",
+                "- No approval mutation: true",
+                "",
+                "Affected allowed paths:",
+                ""
+            )
+            foreach ($path in @($decision.affected_allowed_paths)) {
+                $lines += "- $path"
+            }
+            $lines += @(
+                "",
+                "Missing evidence:",
+                ""
+            )
+            foreach ($item in @($decision.required_missing_evidence)) {
+                $lines += "- $item"
+            }
+            $lines += ""
+            $index += 1
+        }
+    }
+
+    $lines += @(
+        "## Validation Notes",
+        "",
+        "- recommendation_only: true",
+        "- no approval mutation",
+        "- no external API call",
+        "- no secrets",
+        "- no broker/API",
+        "- no live trading",
+        "- no production promotion",
+        "- no commit or push"
+    )
+
+    return [pscustomobject]@{
+        markdown = ($lines -join "`n") + "`n"
+        json = $json
+    }
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $forbiddenOutputTerms = @(".env", "secrets", "credentials", "broker", "OANDA", "live webhook", "real order")
 $pythonModule = Join-Path $repoRoot "services\python_supervisor\autonomy_bridge.py"
@@ -527,6 +726,8 @@ $plannedOutputs = @(
     "telemetry/morning_digest/MORNING_DIGEST_LATEST.md",
     "telemetry/morning_digest/MORNING_BRIEF_V2_LATEST.md",
     "telemetry/morning_digest/MORNING_BRIEF_V2_LATEST.json",
+    "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.md",
+    "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.json",
     $alertOutput
 )
 
@@ -575,6 +776,10 @@ $morningBriefV2MarkdownOutput = "telemetry/morning_digest/MORNING_BRIEF_V2_LATES
 $morningBriefV2JsonOutput = "telemetry/morning_digest/MORNING_BRIEF_V2_LATEST.json"
 $morningBriefV2MarkdownPath = Join-Path $repoRoot $morningBriefV2MarkdownOutput
 $morningBriefV2JsonPath = Join-Path $repoRoot $morningBriefV2JsonOutput
+$approvalIntelligenceV2MarkdownOutput = "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.md"
+$approvalIntelligenceV2JsonOutput = "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.json"
+$approvalIntelligenceV2MarkdownPath = Join-Path $repoRoot $approvalIntelligenceV2MarkdownOutput
+$approvalIntelligenceV2JsonPath = Join-Path $repoRoot $approvalIntelligenceV2JsonOutput
 
 if (($StateApply -or $MorningBriefV2Apply) -and -not $Apply) {
     $stateDir = Split-Path -Parent $bridgeStatePath
@@ -617,6 +822,14 @@ if ($MorningBriefV2Apply) {
     Set-Content -LiteralPath $morningBriefV2MarkdownPath -Value $briefV2.markdown -Encoding UTF8
     $briefV2.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $morningBriefV2JsonPath -Encoding UTF8
     Write-AiosLine "PASS" "morning_brief_v2_written=$morningBriefV2MarkdownOutput,$morningBriefV2JsonOutput"
+
+    $approvalIntelligenceV2 = New-AiosApprovalIntelligenceV2 `
+        -BridgeState $receipt.bridge_state `
+        -MorningBriefV2 $briefV2
+
+    Set-Content -LiteralPath $approvalIntelligenceV2MarkdownPath -Value $approvalIntelligenceV2.markdown -Encoding UTF8
+    $approvalIntelligenceV2.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $approvalIntelligenceV2JsonPath -Encoding UTF8
+    Write-AiosLine "PASS" "approval_intelligence_v2_written=$approvalIntelligenceV2MarkdownOutput,$approvalIntelligenceV2JsonOutput"
 }
 
 Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"
