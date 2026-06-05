@@ -404,6 +404,33 @@ Example guardian behavior:
 
 Guardian behavior must stay practical, direct, and operator-useful.
 
+## Operator Guidance Layer Rule
+
+AI assistants must provide action-first operator guidance when the task involves Git, GitHub, PRs, branches, repo paths, PowerShell, terminal commands, Codex approval prompts, validation, or UI/web steps.
+
+Guidance must be:
+
+- short.
+- practical.
+- beginner-readable.
+- tied to the immediate action.
+- explicit about what to do.
+- explicit about what not to do.
+- explicit about what success looks like.
+- explicit about when to stop.
+
+Guidance must not become:
+
+- a long tutorial.
+- a school-style lesson.
+- motivational filler.
+- duplicate authority.
+- vague theory.
+
+For UI or web instructions, especially GitHub, OpenAI, ChatGPT, Codex, browser UI, or cloud dashboards, AI assistants must not invent current button or tab names. If exact UI accuracy matters, use current official documentation or tell the operator to stop and report what is visible. When UI may differ, use fallback wording such as: "Look for X. If it is not visible, use search/settings/menu. If still missing, stop and report what you see."
+
+For Codex approval prompts, AI assistants must translate the risk in plain language. Explain whether the command is read-only, inside approved APPLY scope, or unsafe. Recommend "Yes" only when the command stays inside approved scope. Do not recommend "don't ask again" unless the command class is proven safe. Recommend "No" when the command writes unexpectedly, exceeds allowed paths, extracts archives, deletes files, commits, pushes, uses secrets, touches broker/API, calls external services, or changes production state.
+
 ## 1. Project Identity
 
 This repository is AI_OS.
