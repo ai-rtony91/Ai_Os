@@ -139,3 +139,13 @@ Future-assessment checklist:
 - Accepted risk: Workers can under-explain if they mistake a human-facing handoff for internal processing.
 - Regression checks: Confirm future workers do not interrupt Anthony for safe internal processing, but explain clearly when Anthony action is required; confirm Morning Briefs, approval cards, and operator-facing reports remain human-readable.
 - Reopen conditions: Reopen if the guidance layer becomes too verbose during autonomous execution, or if human approval prompts, terminal commands, PR/merge/push actions, or UI handoffs become unclear again.
+
+#### T9 Snapshot / Mirror Authority Boundary
+
+- Problem discovered: T9 snapshots can preserve deleted, stale, obsolete, or superseded files that should not re-enter active repo truth.
+- Root cause: Backup preservation and active authority can be confused when historical snapshots look like current source files.
+- Process fix: Updated `docs/workflows/AI_OS_T9_BACKUP_WORKFLOW.md` so GitHub `origin/main` remains current truth, T9 snapshots are recovery-only evidence, T9 mirrors require explicit current-HEAD labeling, and restore/import requires exact human approval.
+- Expected outcome: Future workers compare T9 material to current `main` and Git history before any restore review instead of treating T9-only files as active.
+- Accepted risk: T9 can still contain useful recovery material, so overly broad `DO_NOT_ADOPT` classification could hide a valid restore candidate unless the restore checklist is used.
+- Regression checks: Confirm future workers do not classify T9-only files as active guidance, governance, scripts, or runtime artifacts without restore review; confirm deleted files remain deleted unless a restore packet proves why they should return.
+- Reopen conditions: Reopen if stale or deleted T9 files reappear as active guidance, governance, scripts, runtime artifacts, or source-of-truth evidence.
