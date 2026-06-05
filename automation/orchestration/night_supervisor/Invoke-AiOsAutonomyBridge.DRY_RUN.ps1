@@ -692,6 +692,272 @@ function New-AiosApprovalIntelligenceV2 {
     }
 }
 
+function New-AiosPi5ProgressReport {
+    param(
+        [object]$BridgeState,
+        [object]$MorningBriefV2,
+        [object]$ApprovalIntelligenceV2,
+        [object]$NightReportRef,
+        [object]$ForexProfile,
+        [string]$ForexReadme,
+        [string]$Branch,
+        [string]$GitStatus
+    )
+
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $nightReport = $NightReportRef.report
+    $execution = $nightReport.execution_result
+    $safety = $nightReport.safety_confirmation
+    $supervisorStatus = [string]$nightReport.supervisor_status
+    $bridgeStatus = [string]$BridgeState.bridge_status
+    if ([string]::IsNullOrWhiteSpace($bridgeStatus)) { $bridgeStatus = [string]$BridgeState.night_supervisor_status }
+    if ([string]::IsNullOrWhiteSpace($bridgeStatus)) { $bridgeStatus = [string]$MorningBriefV2.json.status }
+
+    $currentBlockers = @($BridgeState.current_blockers)
+    $approvalCards = @()
+    if ($ApprovalIntelligenceV2 -and $ApprovalIntelligenceV2.json -and $ApprovalIntelligenceV2.json.active_approval_cards) {
+        $approvalCards += @($ApprovalIntelligenceV2.json.active_approval_cards)
+    } elseif ($MorningBriefV2 -and $MorningBriefV2.json -and $MorningBriefV2.json.active_decision_cards) {
+        $approvalCards += @($MorningBriefV2.json.active_decision_cards)
+    } elseif ($BridgeState -and $BridgeState.active_decision_cards) {
+        $approvalCards += @($BridgeState.active_decision_cards)
+    }
+
+    $blockersCount = $currentBlockers.Count
+    $activeApprovalCount = $approvalCards.Count
+    $validatorPass = ([string]$execution.validator_status) -eq "PASS"
+    $qaPass = ([string]$execution.qa_status) -eq "PASS"
+    $forbiddenWriteAttempts = if ($safety -and $safety.forbidden_write_attempts -ne $null) { [int]$safety.forbidden_write_attempts } else { 0 }
+    $alertsCount = @($nightReport.alerts).Count
+
+    $nightSupervisorHealthPercent = if ($supervisorStatus -eq "READY" -and $alertsCount -eq 0 -and $forbiddenWriteAttempts -eq 0) { 95 } elseif ($supervisorStatus -eq "NEEDS_APPROVAL") { 80 } elseif ($supervisorStatus -eq "BLOCKED") { 20 } else { 50 }
+    $validationHealthPercent = if ($validatorPass -and $qaPass -and $forbiddenWriteAttempts -eq 0) { 100 } elseif ($validatorPass -or $qaPass) { 65 } else { 25 }
+    $approvalClearancePercent = if ($activeApprovalCount -eq 0) { 100 } else { [Math]::Max(0, 100 - ($activeApprovalCount * 40)) }
+    $workerReadinessPercent = if ($blockersCount -gt 0) { 25 } elseif ($activeApprovalCount -gt 0) { 75 } elseif ($execution.packet_selected -eq $true -and $validatorPass -and $qaPass) { 90 } else { 50 }
+
+    $forexStatus = if ($ForexProfile -and $ForexProfile.status) { [string]$ForexProfile.status } else { "UNKNOWN" }
+    $forexMode = if ($ForexProfile -and $ForexProfile.mode) { [string]$ForexProfile.mode } else { "UNKNOWN" }
+    $forexHourlyPlanCount = if ($ForexProfile -and $ForexProfile.hourly_plan) { @($ForexProfile.hourly_plan).Count } else { 0 }
+    $forexBotBuildPercent = if ($forexStatus -eq "REPORT_ONLY_PROFILE" -and $forexHourlyPlanCount -gt 0) { 15 } elseif ($forexStatus -eq "REPORT_ONLY_PROFILE") { 10 } else { 0 }
+    $safetyHealthPercent = if (
+        $safety -and
+        $safety.no_live_trading -eq $true -and
+        $safety.no_broker_execution -eq $true -and
+        $safety.no_secrets_exposed -eq $true -and
+        $forbiddenWriteAttempts -eq 0
+    ) { 100 } else { 25 }
+    $overallAiosProgressPercent = [int][Math]::Round(
+        ($nightSupervisorHealthPercent * 0.25) +
+        ($validationHealthPercent * 0.20) +
+        ($approvalClearancePercent * 0.15) +
+        ($workerReadinessPercent * 0.15) +
+        ($forexBotBuildPercent * 0.10) +
+        ($safetyHealthPercent * 0.15),
+        0
+    )
+
+    $humanInteractionRequired = ($blockersCount -gt 0 -or $activeApprovalCount -gt 0)
+    $currentPhase = if ($blockersCount -gt 0) {
+        "current blocker review"
+    } elseif ($activeApprovalCount -gt 0) {
+        "approval decision required"
+    } elseif ($supervisorStatus -eq "READY") {
+        "ready for DRY_RUN or sandbox work"
+    } else {
+        "status review"
+    }
+    $nextSafeAction = if ($MorningBriefV2 -and $MorningBriefV2.json -and $MorningBriefV2.json.active_decision_cards -and $activeApprovalCount -gt 0) {
+        "Review Approval Intelligence v2 decision card; defer broad APPLY until exact scope and validator evidence are available."
+    } elseif ($BridgeState -and $BridgeState.next_safe_action) {
+        [string]$BridgeState.next_safe_action
+    } else {
+        "Review latest Morning Brief v2 before taking action."
+    }
+
+    $displayCards = @(
+        [ordered]@{
+            title = "Main Status"
+            status = $bridgeStatus
+            percent = $overallAiosProgressPercent
+            summary = "AI_OS is $bridgeStatus with $blockersCount blocker(s) and $activeApprovalCount active approval(s)."
+            next_safe_action = $nextSafeAction
+        },
+        [ordered]@{
+            title = "Night Supervisor"
+            status = $supervisorStatus
+            percent = $nightSupervisorHealthPercent
+            summary = "Latest Night Supervisor report is $supervisorStatus; validator=$($execution.validator_status); qa=$($execution.qa_status)."
+            source = $NightReportRef.repo_relative
+        },
+        [ordered]@{
+            title = "Approval Intelligence"
+            status = if ($activeApprovalCount -gt 0) { "NEEDS_APPROVAL" } else { "CLEAR" }
+            percent = $approvalClearancePercent
+            summary = "$activeApprovalCount active recommendation-only approval card(s)."
+            next_safe_action = "Approve, reject, or defer only through the canonical approval process; Pi5 display has no approval authority."
+        },
+        [ordered]@{
+            title = "Forex Paper Lab"
+            status = $forexStatus
+            percent = $forexBotBuildPercent
+            summary = "REPORT_ONLY_PROFILE / paper simulation planning only. No broker, OANDA, real market data, live bot, or real orders."
+            mode = $forexMode
+        },
+        [ordered]@{
+            title = "Worker Readiness"
+            status = if ($blockersCount -gt 0) { "BLOCKED" } elseif ($activeApprovalCount -gt 0) { "WAITING_APPROVAL" } else { "READY" }
+            percent = $workerReadinessPercent
+            summary = "Worker evidence is display-only; worker_launch remains disabled unless a separate approved packet allows it."
+        },
+        [ordered]@{
+            title = "Validation Health"
+            status = if ($validatorPass -and $qaPass) { "PASS" } else { "REVIEW" }
+            percent = $validationHealthPercent
+            summary = "Validator=$($execution.validator_status); QA=$($execution.qa_status); forbidden_write_attempts=$forbiddenWriteAttempts."
+        },
+        [ordered]@{
+            title = "Human Needed"
+            status = if ($humanInteractionRequired) { "YES" } else { "NO" }
+            percent = if ($humanInteractionRequired) { 100 } else { 0 }
+            summary = if ($humanInteractionRequired) { "Anthony action is needed for current approval/blocker review." } else { "No current human action required for read-only display state." }
+        },
+        [ordered]@{
+            title = "Next Safe Action"
+            status = "DISPLAY_ONLY"
+            percent = 0
+            summary = $nextSafeAction
+        }
+    )
+
+    $json = [ordered]@{
+        schema = "AIOS_PI5_PROGRESS_REPORT.v1"
+        mode = "DRY_RUN_SANDBOX_OUTPUT"
+        authority_boundary = [ordered]@{
+            evidence_only = $true
+            approval_authority = $false
+            trading_authority = $false
+            repo_mutation_authority = $false
+            pi_service_authority = $false
+            scheduler_authority = $false
+            gpio_or_motor_authority = $false
+        }
+        overall_aios_progress_percent = $overallAiosProgressPercent
+        forex_bot_build_percent = $forexBotBuildPercent
+        night_supervisor_health_percent = $nightSupervisorHealthPercent
+        worker_readiness_percent = $workerReadinessPercent
+        approval_clearance_percent = $approvalClearancePercent
+        validation_health_percent = $validationHealthPercent
+        human_interaction_required = $humanInteractionRequired
+        current_phase = $currentPhase
+        next_safe_action = $nextSafeAction
+        blockers_count = $blockersCount
+        active_approval_count = $activeApprovalCount
+        last_updated = $generatedAt
+        source_evidence = [ordered]@{
+            morning_brief_v2 = "telemetry/morning_digest/MORNING_BRIEF_V2_LATEST.json"
+            approval_intelligence_v2 = "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.json"
+            bridge_state = "telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json"
+            night_supervisor_report = $NightReportRef.repo_relative
+            forex_profile = "automation/orchestration/night_supervisor/FOREX_PAPER_LAB_12H_PROFILE.json"
+        }
+        repo_state = [ordered]@{
+            branch = $Branch
+            status_summary = $GitStatus
+        }
+        forex_display_rule = "REPORT_ONLY_PROFILE / paper simulation planning only. Do not imply live bot, broker connection, real market data, or real orders."
+        stale_state_warnings = if ($MorningBriefV2 -and $MorningBriefV2.json -and $MorningBriefV2.json.stale_state_warnings) { @($MorningBriefV2.json.stale_state_warnings) } else { @() }
+        display_cards = $displayCards
+        validation = [ordered]@{
+            no_pi_deployment = $true
+            no_service_created = $true
+            no_scheduler_created = $true
+            no_gpio_or_motor_controls = $true
+            no_approval_mutation = $true
+            no_secrets = $true
+            no_broker_api = $true
+            no_live_trading = $true
+            no_real_orders = $true
+            no_real_webhooks = $true
+            no_commit_or_push = $true
+        }
+    }
+
+    $lines = @(
+        "# Pi5 Progress Report - LATEST",
+        "",
+        "Status: display-only sandbox output",
+        "Authority: evidence only; no approval, trading, repo mutation, Pi service, scheduler, GPIO, or motor authority",
+        "Generated: $generatedAt",
+        "",
+        "## Progress",
+        "",
+        "- Overall AI_OS progress: $overallAiosProgressPercent%",
+        "- Forex bot build progress: $forexBotBuildPercent%",
+        "- Night Supervisor health: $nightSupervisorHealthPercent%",
+        "- Worker readiness: $workerReadinessPercent%",
+        "- Approval clearance: $approvalClearancePercent%",
+        "- Validation health: $validationHealthPercent%",
+        "- Human interaction required: $humanInteractionRequired",
+        "- Current phase: $currentPhase",
+        "- Blockers: $blockersCount",
+        "- Active approvals: $activeApprovalCount",
+        "",
+        "## Next Safe Action",
+        "",
+        $nextSafeAction,
+        "",
+        "## Display Cards",
+        ""
+    )
+
+    foreach ($card in $displayCards) {
+        $lines += @(
+            "### $($card.title)",
+            "",
+            "- Status: $($card.status)",
+            "- Percent: $($card.percent)%",
+            "- Summary: $($card.summary)",
+            ""
+        )
+    }
+
+    $lines += @(
+        "## Forex Bot Display Rule",
+        "",
+        "- Show Forex as: REPORT_ONLY_PROFILE / paper simulation planning only.",
+        "- Do not imply the bot is live.",
+        "- Do not imply broker/OANDA is connected.",
+        "- Do not imply real market data is active.",
+        "- Do not imply real orders are possible.",
+        "",
+        "## Source Evidence",
+        "",
+        "- Morning Brief v2: telemetry/morning_digest/MORNING_BRIEF_V2_LATEST.json",
+        "- Approval Intelligence v2: telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.json",
+        "- Bridge state: telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json",
+        "- Night Supervisor report: $($NightReportRef.repo_relative)",
+        "- Forex profile: automation/orchestration/night_supervisor/FOREX_PAPER_LAB_12H_PROFILE.json",
+        "",
+        "## Validation Notes",
+        "",
+        "- evidence_only: true",
+        "- no approval mutation",
+        "- no Pi deployment",
+        "- no service or scheduler",
+        "- no GPIO or motor controls",
+        "- no secrets",
+        "- no broker/API",
+        "- no live trading",
+        "- no real orders or webhooks",
+        "- no commit or push"
+    )
+
+    return [pscustomobject]@{
+        markdown = ($lines -join "`n") + "`n"
+        json = $json
+    }
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $forbiddenOutputTerms = @(".env", "secrets", "credentials", "broker", "OANDA", "live webhook", "real order")
 $pythonModule = Join-Path $repoRoot "services\python_supervisor\autonomy_bridge.py"
@@ -728,6 +994,8 @@ $plannedOutputs = @(
     "telemetry/morning_digest/MORNING_BRIEF_V2_LATEST.json",
     "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.md",
     "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.json",
+    "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.md",
+    "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json",
     $alertOutput
 )
 
@@ -780,6 +1048,10 @@ $approvalIntelligenceV2MarkdownOutput = "telemetry/morning_digest/APPROVAL_INTEL
 $approvalIntelligenceV2JsonOutput = "telemetry/morning_digest/APPROVAL_INTELLIGENCE_V2_LATEST.json"
 $approvalIntelligenceV2MarkdownPath = Join-Path $repoRoot $approvalIntelligenceV2MarkdownOutput
 $approvalIntelligenceV2JsonPath = Join-Path $repoRoot $approvalIntelligenceV2JsonOutput
+$pi5ProgressMarkdownOutput = "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.md"
+$pi5ProgressJsonOutput = "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json"
+$pi5ProgressMarkdownPath = Join-Path $repoRoot $pi5ProgressMarkdownOutput
+$pi5ProgressJsonPath = Join-Path $repoRoot $pi5ProgressJsonOutput
 
 if (($StateApply -or $MorningBriefV2Apply) -and -not $Apply) {
     $stateDir = Split-Path -Parent $bridgeStatePath
@@ -830,6 +1102,29 @@ if ($MorningBriefV2Apply) {
     Set-Content -LiteralPath $approvalIntelligenceV2MarkdownPath -Value $approvalIntelligenceV2.markdown -Encoding UTF8
     $approvalIntelligenceV2.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $approvalIntelligenceV2JsonPath -Encoding UTF8
     Write-AiosLine "PASS" "approval_intelligence_v2_written=$approvalIntelligenceV2MarkdownOutput,$approvalIntelligenceV2JsonOutput"
+
+    $forexProfilePath = Join-Path $repoRoot "automation\orchestration\night_supervisor\FOREX_PAPER_LAB_12H_PROFILE.json"
+    $forexReadmePath = Join-Path $repoRoot "automation\orchestration\night_supervisor\FOREX_PAPER_LAB_12H_PROFILE_README.md"
+    $forexProfile = Read-AiosJsonObject -Path $forexProfilePath
+    $forexReadme = if (Test-Path -LiteralPath $forexReadmePath -PathType Leaf) {
+        Get-Content -LiteralPath $forexReadmePath -Raw
+    } else {
+        ""
+    }
+
+    $pi5ProgressReport = New-AiosPi5ProgressReport `
+        -BridgeState $receipt.bridge_state `
+        -MorningBriefV2 $briefV2 `
+        -ApprovalIntelligenceV2 $approvalIntelligenceV2 `
+        -NightReportRef $latestReport `
+        -ForexProfile $forexProfile `
+        -ForexReadme $forexReadme `
+        -Branch $branch `
+        -GitStatus $gitStatus
+
+    Set-Content -LiteralPath $pi5ProgressMarkdownPath -Value $pi5ProgressReport.markdown -Encoding UTF8
+    $pi5ProgressReport.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $pi5ProgressJsonPath -Encoding UTF8
+    Write-AiosLine "PASS" "pi5_progress_report_written=$pi5ProgressMarkdownOutput,$pi5ProgressJsonOutput"
 }
 
 Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"
