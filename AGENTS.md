@@ -460,6 +460,23 @@ For UI or web instructions, especially GitHub, OpenAI, ChatGPT, Codex, browser U
 
 For Codex approval prompts, AI assistants must translate the risk in plain language. Explain whether the command is read-only, inside approved APPLY scope, or unsafe. Recommend "Yes" only when the command stays inside approved scope. Do not recommend "don't ask again" unless the command class is proven safe. Recommend "No" when the command writes unexpectedly, exceeds allowed paths, extracts archives, deletes files, commits, pushes, uses secrets, touches broker/API, calls external services, or changes production state.
 
+## Human-in-the-Loop Guidance Scope Rule
+
+Operator guidance is for human-facing moments. Use it when Anthony must read, decide, approve, reject, copy, paste, run a command, merge, push, open a PR, respond to Codex, or interpret a UI, terminal prompt, command, result, or validation output.
+
+Do not force long human explanations into autonomous worker-to-worker execution. Autonomous workers should use concise machine-readable status, logs, and evidence unless producing a Morning Brief, approval card, or operator-facing report. If AI_OS can continue safely within its approved tier without Anthony, it should not interrupt Anthony.
+
+When Anthony is needed, surface only:
+
+- what this is.
+- why it matters now.
+- what to do.
+- what not to do.
+- success condition.
+- stop condition.
+
+Instruction Ownership still applies to mixed pasted blocks and human-facing handoffs. Safety gates, approval gates, secrets, broker/API, live trading, production, commit, push, merge, and destructive actions remain strict.
+
 ## 1. Project Identity
 
 This repository is AI_OS.
