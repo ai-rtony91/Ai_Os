@@ -4,19 +4,164 @@
 
 Any prompt intended to be pasted into Codex must begin with:
 
-🧩 CODEX-ONLY PROMPT
+CODEX-ONLY PROMPT
 
 This marker is for operator visualization and routing discipline.
 
 Rules:
-- Only use `🧩 CODEX-ONLY PROMPT` on instructions meant to be pasted directly into Codex.
+- Only use `CODEX-ONLY PROMPT` on instructions meant to be pasted directly into Codex.
 - Do not use this marker for Claude/overwatch analysis.
 - Do not use this marker for ChatGPT planning notes.
 - Do not use this marker for human-only explanations.
-- If a prompt does not begin with `🧩 CODEX-ONLY PROMPT`, Codex should treat it as not authorized for execution unless the operator explicitly says otherwise.
+- If a prompt does not begin with `CODEX-ONLY PROMPT`, Codex should treat it as not authorized for execution unless the operator explicitly says otherwise.
 - After reading `AGENTS.md`, `README.md`, or any governance file, Codex must preserve this routing rule.
 
 Detailed communication-lane doctrine lives in `docs/AI_OS/governance/AIOS_AGENT_COMMUNICATION_RULES.md`. AI_OS agents must keep executable prompts, chat explanation, and operator copy/paste message boxes visibly separated when more than one lane appears in a response.
+
+## AI_OS Authority Hierarchy Rule
+
+`AGENTS.md` is the highest local repo authority for AI assistant conduct and Codex packet governance.
+
+Templates, workflows, examples, reports, telemetry, and generated outputs are subordinate usage artifacts unless `AGENTS.md` explicitly delegates authority to a specific file or section.
+
+If a template, workflow, report, telemetry item, generated output, or example conflicts with `AGENTS.md`, `AGENTS.md` wins.
+
+Changes to packet law, authority hierarchy, validation requirements, prompt routing, execution token requirements, identity requirements, or AI assistant conduct belong in `AGENTS.md` or an explicitly delegated authority file. Templates must not create new governance law.
+
+## ChatGPT Generated Packet Validation Gate
+
+Authority status: this section is authoritative. If any future governance document conflicts with this section, this section wins.
+
+ChatGPT is an upstream packet generator. All ChatGPT-generated Codex packets are classified as UNTRUSTED INPUT. ChatGPT-generated packets are not executable authority and are not trusted to become executable Codex packets unless validation succeeds against `AGENTS.md` requirements.
+
+Any ChatGPT response intended for Codex must be a complete AI_OS executable packet before Anthony sees it. Validation must occur before operator presentation. ChatGPT must not output partial Codex prompts, rely on Anthony to repair packet format, or rely on Codex to reject and explain missing fields. A packet that requires manual repair is considered a packet-generation failure. A packet-generation failure is a governance failure. Governance failures must be blocked before execution.
+
+A ChatGPT-generated packet automatically fails validation if any of the following are missing:
+
+- `CODEX-ONLY PROMPT` as first line exactly
+- `AI_OS EXECUTION TOKEN`
+- `AI_OS BOOTSTRAP REQUIRED`
+- identity marker
+- supervisor identity
+- packet ID
+- mode
+- zone
+- worker identity
+- lane
+- worktree
+- branch
+- allowed paths
+- forbidden paths
+- approval authority
+- validator chain
+- stop point
+- mission
+- preflight
+- final report format
+
+Fail validation immediately if:
+
+- `C:\Users\mylab\OneDrive\GitHub\ai-rtony91_Ai_Os_CLEAN`
+- unresolved `@filename`
+- unresolved placeholders
+- `TODO`
+- `TBD`
+- missing stop point
+- missing approval authority
+- missing allowed paths
+- missing forbidden paths
+- duplicate authority is created
+- conflicting authority is created
+- instructions to create duplicate governance files
+- branch state is invented
+- repository path is invented
+
+Default repository:
+
+```text
+C:\Dev\Ai.Os
+```
+
+Legacy repository path is prohibited in newly generated packets unless explicitly provided by the operator.
+
+Governance defects must not be fixed by creating additional governance authority. When authority already exists: update authority, do not duplicate authority, do not parallel authority, and do not fork authority. Creation of duplicate governance heads is itself a governance violation.
+
+When packet validation fails, do not generate an executable packet and do not generate a partial packet. Use the failure report format and generate only:
+
+```text
+WHAT FAILED:
+WHY IT FAILED:
+WHAT IS MISSING:
+SAFE NEXT ACTION:
+STATUS: BLOCKED
+```
+
+A ChatGPT-generated Codex packet must either pass validation completely or be blocked before the operator ever sees it. The operator must never be required to manually repair packet structure.
+
+Anthony must not be used as the validator for ChatGPT packet defects.
+
+This gate is a prompt-generation and validation requirement. It does not bypass DRY_RUN/APPLY mode, allowed paths, validator chains, protected-action approval, commit gates, push gates, no-live-trading rules, or human approval.
+
+## Blast-Radius Routing Rule
+
+Governance burden must equal actual blast radius before packet validation begins.
+
+These governance tiers primarily constrain AI assistants, automation, Codex, Night Supervisor, generated packets, and AI-authored outputs. Anthony remains approval authority and strategic operator. Rules must reduce Anthony's manual repair burden, not increase it. Anthony must not be used as the packet validator for malformed AI output.
+
+Low risk gets low governance burden. Medium risk gets moderate governance burden. High risk gets strict governance burden. Critical risk gets maximum governance burden.
+
+Tier 0 - READ_ONLY:
+
+- Examples: search, inspect, summarize, audit, explain, status check, governance review.
+- Governance: lightweight.
+- Required: scope, read-only intent, no mutation, final report.
+- No full executable packet burden unless Anthony explicitly requests a Codex-executable packet.
+
+Tier 1 - DRY_RUN PLAN:
+
+- Examples: planning, mock output, recommendation, no file writes.
+- Governance: moderate.
+- Required: mode, scope, no-write boundary, final report.
+- No commit, push, promotion, production mutation, secrets, broker/API, or live trading.
+
+Tier 2 - SANDBOX_OUTPUT:
+
+- Examples: generated dry-run report, Night Supervisor evidence, telemetry preview, morning brief output.
+- Governance: bounded.
+- Required: sandbox path, no overwrite unless explicit, no authority creation, no promotion, no secrets.
+- Allowed only in approved generated-output or sandbox-output roots.
+
+Tier 3 - LOCAL_APPLY:
+
+- Examples: scoped doc edit, template edit, script edit, local repo file change.
+- Governance: strict.
+- Required: executable packet, allowed paths, forbidden paths, approval authority, validator chain, stop point, diff/readback.
+- No commit or push unless separately approved.
+
+Tier 4 - PROMOTION / REPO AUTHORITY:
+
+- Examples: promote sandbox evidence, edit `AGENTS.md`, edit governance authority, update canonical docs.
+- Governance: very strict.
+- Required: exact scope, approval, validators, diff, rollback or stop condition.
+- No automatic promotion.
+
+Tier 5 - PRODUCTION_OR_LIVE:
+
+- Examples: broker/API, live trading, real orders, external webhooks, secrets, deploys.
+- Governance: maximum.
+- Default: blocked unless separately and explicitly approved.
+
+The tier model does not weaken commit, push, merge, trading, broker/API, secret, production, destructive cleanup, protected-action, validator, or approval gates.
+
+Placeholder requests must not produce Codex packets. If a request contains placeholders such as `@filename`, `path/to/file`, `[REAL-FILENAME]`, `{feature}`, `TBD`, `TODO`, or example paths, ChatGPT, Codex, and AI_OS workers must stop before packet generation and ask for the real field in one sentence.
+
+Exact required response for placeholder file requests:
+
+```text
+I need the real file path before I can create a Codex packet.
+```
+
+This rule must not weaken commit, push, merge, trading, secrets, validator, protected-action, or approval gates.
 
 ## AI_OS Execution Token Rule
 
@@ -122,6 +267,8 @@ and report:
 
 When Codex stops, refuses, blocks execution, detects missing context, detects missing files, encounters sandbox failure, hits GitHub or Git errors, receives incomplete tokenized work packets, or cannot continue safely, Codex must produce a structured recovery response.
 
+Use failure headings only for actual failure, block, refusal, recovery, or unsafe-to-continue states. Do not use `WHAT FAILED` or `WHY IT FAILED` headings for successful APPLY completion, successful cleanup, successful audit, or completed DRY_RUN investigation.
+
 Required failure response format:
 
 ```text
@@ -139,6 +286,8 @@ Point to the relevant AI_OS authority file, workflow file, or rule.
 
 SAFE NEXT COMMAND OR PROMPT:
 Provide either the next safe command or the corrected tokenized prompt. If no command is safe, say "No command recommended."
+
+STATUS: BLOCKED or FAILED
 ```
 
 Recovery rules:
@@ -154,6 +303,66 @@ Recovery rules:
 - If the issue is commit or push related, reference `docs/workflows/AI_OS_COMMIT_PUSH_GATE.md`.
 - If the issue is stale state or known backlog, reference `docs/governance/AI_OS_REPO_MEMORY.md`.
 - If the issue is prompt routing or execution authorization, reference `AGENTS.md`.
+
+## AI_OS Completion Report Format Rule
+
+Successful Codex tasks must use completion headings, not failure headings.
+
+Use the failure report format only when:
+
+- packet is invalid.
+- execution is blocked.
+- required fields are missing.
+- a safety rule stops the task.
+- Codex cannot continue safely.
+- a command fails.
+- validation fails.
+
+Failure format:
+
+```text
+WHAT FAILED:
+WHY IT FAILED:
+WHAT NEEDS TO HAPPEN NEXT:
+WHERE TO REFERENCE:
+SAFE NEXT COMMAND OR PROMPT:
+STATUS: BLOCKED or FAILED
+```
+
+Use the success report format when:
+
+- the task completed as requested.
+- files were edited successfully.
+- audit completed successfully.
+- cleanup completed successfully.
+- no safety block occurred.
+
+Success format:
+
+```text
+SUMMARY:
+WHAT CHANGED:
+FILES CHANGED:
+VALIDATION:
+REMAINING DIRTY FILES:
+SAFE NEXT COMMAND:
+STATUS: COMPLETE, NO COMMIT, NO PUSH
+```
+
+Use the DRY_RUN report format when:
+
+- investigation, audit, or report completed with no file changes.
+
+DRY_RUN format:
+
+```text
+SUMMARY:
+WHAT WAS TESTED:
+FINDINGS:
+RECOMMENDATION:
+SAFE NEXT COMMAND:
+STATUS: DRY_RUN COMPLETE, NO FILES CHANGED
+```
 
 ## AI_OS Operator Guardian Doctrine
 
