@@ -119,3 +119,13 @@ Future-assessment checklist:
 - Accepted risk: Over-explaining can become new noise if assistants turn the guidance layer into long tutorials instead of short action-first translation.
 - Regression checks: Confirm future prompts explain the immediate action clearly; confirm Codex approval prompts get plain-language risk translation; confirm Git/GitHub/branch/path instructions include success condition and stop condition; confirm UI guidance avoids stale button assumptions and uses current official documentation or visible-state fallback when exact UI matters.
 - Reopen conditions: Reopen if repeated frustration from unclear commands, repo paths, PR flow, approval prompts, missing vocabulary, or stale UI assumptions returns.
+
+#### Instruction Ownership Layer
+
+- Problem discovered: Mixed copied prompts caused actor confusion and manual repair when human instructions, Codex packets, ChatGPT notes, GitHub context, PowerShell commands, placeholders, and repo rules appeared in one pasted block.
+- Root cause: Instructions lacked explicit ownership classification before assistants interpreted or acted on the block.
+- Process fix: Added an Instruction Ownership Layer rule in `AGENTS.md` requiring assistants to identify artifact type, intended actor, executability, Anthony action, urgent approve/reject/stop instructions, placeholders, and the correct response mode before acting.
+- Expected outcome: Future assistants identify who each instruction is for, whether the block is executable, whether Anthony must act, and whether placeholders block execution before generating, repairing, summarizing, translating, or refusing.
+- Accepted risk: Ownership classification can add a small amount of up-front response overhead if agents overuse it for simple single-lane prompts.
+- Regression checks: Confirm wrong-agent execution, malformed packet handling, hidden human actions, and placeholder execution do not recur; confirm mixed pasted context without an execution token is treated as reference-only by Codex.
+- Reopen conditions: Reopen if actor confusion, ChatGPT obeying Codex-only text, Codex acting on context-only blocks, hidden urgent human actions, or placeholder-as-real-target handling returns.
