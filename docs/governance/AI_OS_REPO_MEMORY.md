@@ -149,3 +149,13 @@ Future-assessment checklist:
 - Accepted risk: T9 can still contain useful recovery material, so overly broad `DO_NOT_ADOPT` classification could hide a valid restore candidate unless the restore checklist is used.
 - Regression checks: Confirm future workers do not classify T9-only files as active guidance, governance, scripts, or runtime artifacts without restore review; confirm deleted files remain deleted unless a restore packet proves why they should return.
 - Reopen conditions: Reopen if stale or deleted T9 files reappear as active guidance, governance, scripts, runtime artifacts, or source-of-truth evidence.
+
+#### SOS-Only Operating Rule
+
+- Problem discovered: Anthony was still being pulled into routine PR, GitHub, CLI, and approval flow when the desired operating model is AI does the work and Anthony approves only SOS or protected-action decisions.
+- Root cause: Normal human-needed status, stale warnings, routine approvals, and recommendation-only defers were not clearly separated from SOS wake or interruption conditions.
+- Process fix: Use SOS-only alerting. AI_OS continues normal evidence and recommendation work, and interrupts Anthony only when safe continuation is blocked or a protected action needs explicit approval or intervention.
+- Expected outcome: Less operator burden; AI_OS handles normal workflow; Anthony only sees true SOS and protected-action decisions.
+- Accepted risk: A display alert can still look urgent if a consumer does not distinguish `display_alert` from `sos_wake_required`.
+- Regression checks: Confirm future Morning Brief, Pi5, Night Supervisor, and notification logic distinguish `display_alert` from `sos_wake_required`; confirm `NEEDS_APPROVAL`, stale warnings, historical noise, and recommendation-only defers do not wake Anthony.
+- Reopen conditions: Reopen if Anthony is interrupted for routine warnings or noise, or if protected-action attempts fail to alert.
