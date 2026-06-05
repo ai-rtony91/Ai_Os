@@ -1146,6 +1146,143 @@ function New-AiosOpenAiSanitizedSummary {
     }
 }
 
+function New-AiosOpenAiCliInputReadyContract {
+    param(
+        [object]$OpenAiSanitizedSummary,
+        [object]$ProtectedActionReadiness,
+        [string]$InputPath,
+        [string]$OutputTargetPath
+    )
+
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $inputReady = (
+        $OpenAiSanitizedSummary -and
+        $OpenAiSanitizedSummary.json -and
+        $OpenAiSanitizedSummary.json.recommendation_only -eq $true -and
+        $OpenAiSanitizedSummary.json.no_approval_authority -eq $true -and
+        $OpenAiSanitizedSummary.json.no_execution_authority -eq $true -and
+        $OpenAiSanitizedSummary.json.validation.no_raw_output -eq $true -and
+        $OpenAiSanitizedSummary.json.validation.no_external_calls -eq $true
+    )
+
+    $json = [pscustomobject]@{
+        schema = "AIOS_OPENAI_CLI_INPUT_READY.v1"
+        mode = "DRY_RUN_SANDBOX_OUTPUT"
+        generated_at = $generatedAt
+        input_ready = [bool]$inputReady
+        input_path = $InputPath
+        output_target_path = $OutputTargetPath
+        api_call_permitted = $false
+        recommendation_only = $true
+        approval_authority = $false
+        execution_authority = $false
+        blocked_until_explicit_api_approval = $true
+        required_approval_fields_before_live_api_call = @(
+            "exact input file",
+            "exact output file",
+            "model or CLI command boundary",
+            "cost or usage boundary",
+            "credential-exclusion and no-raw-output validation",
+            "recommendation-only output contract",
+            "stop point",
+            "human approval for the API call"
+        )
+        allowed_input = [pscustomobject]@{
+            sanitized_summary_only = $true
+            source_path = $InputPath
+            raw_repo_dump = $false
+            raw_chats = $false
+            credential_material = $false
+            approval_authority = $false
+            execution_authority = $false
+        }
+        forbidden_input = @(
+            "raw repo dumps",
+            "raw conversations",
+            "credentials",
+            "private telemetry",
+            "approval mutation state",
+            "execution authority",
+            "broker/OANDA/live trading data",
+            "real orders or webhooks",
+            "GPIO or motor control",
+            "production state"
+        )
+        allowed_output = @(
+            "recommendation-only reasoning",
+            "ranked next safe actions",
+            "risk summary",
+            "stale/noise notes",
+            "approval decision explanation",
+            "candidate Codex packet draft for human review"
+        )
+        forbidden_output = @(
+            "approval decisions",
+            "execution commands treated as authority",
+            "approval mutation",
+            "worker launch",
+            "scheduler creation",
+            "external API calls",
+            "protected repo actions",
+            "credential handling",
+            "market execution",
+            "production promotion"
+        )
+        protected_action_readiness = [pscustomobject]@{
+            recommendation_only = [bool]$ProtectedActionReadiness.json.recommendation_only
+            approval_authority = [bool]$ProtectedActionReadiness.json.approval_authority
+            execution_authority = [bool]$ProtectedActionReadiness.json.execution_authority
+        }
+    }
+
+    $lines = @(
+        "# OpenAI CLI Input Ready Contract",
+        "",
+        "Generated: $generatedAt",
+        "",
+        "## Contract",
+        "",
+        "- input_ready: $($json.input_ready)",
+        "- input_path: $InputPath",
+        "- output_target_path: $OutputTargetPath",
+        "- api_call_permitted: false",
+        "- recommendation_only: true",
+        "- approval_authority: false",
+        "- execution_authority: false",
+        "- blocked_until_explicit_api_approval: true",
+        "",
+        "## Allowed Input",
+        "",
+        "- OPENAI_SANITIZED_SUMMARY_LATEST.json only.",
+        "- No raw repo dump.",
+        "- No raw chats.",
+        "- No credentials.",
+        "- No approval or execution authority.",
+        "",
+        "## Required Approval Before Live API Call",
+        ""
+    )
+
+    foreach ($field in @($json.required_approval_fields_before_live_api_call)) {
+        $lines += "- $field"
+    }
+
+    $lines += @(
+        "",
+        "## Boundary",
+        "",
+        "- This output prepares a future CLI/API lane only.",
+        "- It does not call OpenAI.",
+        "- It does not read credential material.",
+        "- It does not approve or execute work."
+    )
+
+    return [pscustomobject]@{
+        markdown = ($lines -join "`n") + "`n"
+        json = $json
+    }
+}
+
 function New-AiosProtectedActionReadiness {
     param(
         [object]$BridgeState,
@@ -1485,6 +1622,8 @@ $plannedOutputs = @(
     "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json",
     "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.md",
     "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json",
+    "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.md",
+    "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.json",
     "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md",
     "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json",
     $alertOutput
@@ -1547,6 +1686,10 @@ $openAiSanitizedSummaryMarkdownOutput = "telemetry/morning_digest/OPENAI_SANITIZ
 $openAiSanitizedSummaryJsonOutput = "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json"
 $openAiSanitizedSummaryMarkdownPath = Join-Path $repoRoot $openAiSanitizedSummaryMarkdownOutput
 $openAiSanitizedSummaryJsonPath = Join-Path $repoRoot $openAiSanitizedSummaryJsonOutput
+$openAiCliInputReadyMarkdownOutput = "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.md"
+$openAiCliInputReadyJsonOutput = "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.json"
+$openAiCliInputReadyMarkdownPath = Join-Path $repoRoot $openAiCliInputReadyMarkdownOutput
+$openAiCliInputReadyJsonPath = Join-Path $repoRoot $openAiCliInputReadyJsonOutput
 $protectedActionReadinessMarkdownOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md"
 $protectedActionReadinessJsonOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json"
 $protectedActionReadinessMarkdownPath = Join-Path $repoRoot $protectedActionReadinessMarkdownOutput
@@ -1647,6 +1790,16 @@ if ($MorningBriefV2Apply) {
     Set-Content -LiteralPath $protectedActionReadinessMarkdownPath -Value $protectedActionReadiness.markdown -Encoding UTF8
     $protectedActionReadiness.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $protectedActionReadinessJsonPath -Encoding UTF8
     Write-AiosLine "PASS" "protected_action_readiness_written=$protectedActionReadinessMarkdownOutput,$protectedActionReadinessJsonOutput"
+
+    $openAiCliInputReady = New-AiosOpenAiCliInputReadyContract `
+        -OpenAiSanitizedSummary $openAiSanitizedSummary `
+        -ProtectedActionReadiness $protectedActionReadiness `
+        -InputPath $openAiSanitizedSummaryJsonOutput `
+        -OutputTargetPath "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.json"
+
+    Set-Content -LiteralPath $openAiCliInputReadyMarkdownPath -Value $openAiCliInputReady.markdown -Encoding UTF8
+    $openAiCliInputReady.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $openAiCliInputReadyJsonPath -Encoding UTF8
+    Write-AiosLine "PASS" "openai_cli_input_ready_written=$openAiCliInputReadyMarkdownOutput,$openAiCliInputReadyJsonOutput"
 }
 
 Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"
