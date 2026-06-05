@@ -1413,6 +1413,159 @@ function New-AiosOpenAiNoCallRecommendation {
     }
 }
 
+function New-AiosOpenAiApiApprovalBoundary {
+    param(
+        [object]$OpenAiCliInputReady,
+        [object]$OpenAiSanitizedSummary,
+        [object]$OpenAiRecommendation,
+        [object]$ProtectedActionReadiness
+    )
+
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $inputPath = "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json"
+    if ($OpenAiCliInputReady -and $OpenAiCliInputReady.json -and $OpenAiCliInputReady.json.input_path) {
+        $inputPath = [string]$OpenAiCliInputReady.json.input_path
+    }
+
+    $outputPath = "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.json"
+    if ($OpenAiCliInputReady -and $OpenAiCliInputReady.json -and $OpenAiCliInputReady.json.output_target_path) {
+        $outputPath = [string]$OpenAiCliInputReady.json.output_target_path
+    }
+
+    $json = [pscustomobject]@{
+        schema = "AIOS_OPENAI_API_APPROVAL_BOUNDARY.v1"
+        generated_at = $generatedAt
+        api_call_permitted = $false
+        blocked_until_explicit_api_approval = $true
+        recommendation_only = $true
+        approval_authority = $false
+        execution_authority = $false
+        exact_input_file = $inputPath
+        exact_output_file = $outputPath
+        approved_model = "[REQUIRES_EXPLICIT_HUMAN_APPROVAL]"
+        approved_command_or_adapter_path = "[REQUIRES_EXPLICIT_HUMAN_APPROVAL]"
+        maximum_input_size = "[REQUIRES_EXPLICIT_HUMAN_APPROVAL]"
+        maximum_output_size = "[REQUIRES_EXPLICIT_HUMAN_APPROVAL]"
+        maximum_cost_per_run = "[REQUIRES_EXPLICIT_HUMAN_APPROVAL]"
+        maximum_runs_per_cycle = 1
+        duplicate_run_suppression_rule = "Hash exact input file plus approved adapter version; skip a live call when the same hash already produced a valid recommendation in the same cycle."
+        pre_call_credential_raw_exclusion_scan = [pscustomobject]@{
+            required = $true
+            target = $inputPath
+            scan_scope = "credential markers and raw conversation identifiers"
+            must_return_no_matches = $true
+        }
+        post_call_schema_raw_exclusion_scan = [pscustomobject]@{
+            required = $true
+            target = $outputPath
+            required_schema = "AIOS_OPENAI_RECOMMENDATION.v1"
+            scan_scope = "credential markers and raw conversation identifiers"
+            must_return_no_matches = $true
+        }
+        stop_point = "Write recommendation-only output, validate schema and scans, then stop before any protected action."
+        explicit_human_approval_statement = "[REQUIRED] Anthony explicitly approves exactly one OpenAI recommendation-only API call with the input, output, model, command, cost, run limit, validators, and stop point named in this boundary."
+        required_approval_fields = @(
+            "exact input file",
+            "exact output file",
+            "approved model",
+            "approved command/adapter path",
+            "maximum input size",
+            "maximum output size",
+            "maximum cost per run",
+            "maximum runs per cycle",
+            "duplicate-run suppression rule",
+            "pre-call credential/raw exclusion scan",
+            "post-call schema/raw exclusion scan",
+            "stop point",
+            "explicit human approval statement"
+        )
+        integration_boundary = [pscustomobject]@{
+            may_feed_morning_brief = "recommendation evidence only"
+            may_feed_pi5 = "display-only recommendation status"
+            may_feed_approval_intelligence = "supporting evidence only"
+            never_authority = $true
+        }
+        current_contract_state = [pscustomobject]@{
+            input_ready = [bool]$OpenAiCliInputReady.json.input_ready
+            cli_api_call_permitted = [bool]$OpenAiCliInputReady.json.api_call_permitted
+            sanitized_summary_schema = [string]$OpenAiSanitizedSummary.json.schema
+            no_call_recommendation_schema = [string]$OpenAiRecommendation.json.schema
+            no_call_adapter_mode = [string]$OpenAiRecommendation.json.adapter_mode
+            protected_action_recommendation_only = [bool]$ProtectedActionReadiness.json.recommendation_only
+            protected_action_approval_authority = [bool]$ProtectedActionReadiness.json.approval_authority
+            protected_action_execution_authority = [bool]$ProtectedActionReadiness.json.execution_authority
+        }
+        validation = [pscustomobject]@{
+            no_api_call = $true
+            no_external_call = $true
+            no_approval_mutation = $true
+            api_call_remains_blocked = $true
+            recommendation_only = $true
+            approval_authority = $false
+            execution_authority = $false
+        }
+    }
+
+    $lines = @(
+        "# OpenAI API Approval Boundary",
+        "",
+        "Generated: $generatedAt",
+        "",
+        "## Boundary Flags",
+        "",
+        "- schema: AIOS_OPENAI_API_APPROVAL_BOUNDARY.v1",
+        "- api_call_permitted: false",
+        "- blocked_until_explicit_api_approval: true",
+        "- recommendation_only: true",
+        "- approval_authority: false",
+        "- execution_authority: false",
+        "",
+        "## Required Approval Fields",
+        ""
+    )
+
+    foreach ($field in @($json.required_approval_fields)) {
+        $lines += "- $field"
+    }
+
+    $lines += @(
+        "",
+        "## Exact Paths",
+        "",
+        "- exact_input_file: $inputPath",
+        "- exact_output_file: $outputPath",
+        "",
+        "## Limits",
+        "",
+        "- approved_model: [REQUIRES_EXPLICIT_HUMAN_APPROVAL]",
+        "- approved_command_or_adapter_path: [REQUIRES_EXPLICIT_HUMAN_APPROVAL]",
+        "- maximum_input_size: [REQUIRES_EXPLICIT_HUMAN_APPROVAL]",
+        "- maximum_output_size: [REQUIRES_EXPLICIT_HUMAN_APPROVAL]",
+        "- maximum_cost_per_run: [REQUIRES_EXPLICIT_HUMAN_APPROVAL]",
+        "- maximum_runs_per_cycle: 1",
+        "",
+        "## Duplicate Run Suppression",
+        "",
+        $json.duplicate_run_suppression_rule,
+        "",
+        "## Integration Boundary",
+        "",
+        "- Morning Brief: recommendation evidence only.",
+        "- Pi5: display-only recommendation status.",
+        "- Approval Intelligence: supporting evidence only.",
+        "- Never approval or execution authority.",
+        "",
+        "## Explicit Human Approval Statement",
+        "",
+        $json.explicit_human_approval_statement
+    )
+
+    return [pscustomobject]@{
+        markdown = ($lines -join "`n") + "`n"
+        json = $json
+    }
+}
+
 function New-AiosProtectedActionReadiness {
     param(
         [object]$BridgeState,
@@ -1756,6 +1909,8 @@ $plannedOutputs = @(
     "telemetry/morning_digest/OPENAI_CLI_INPUT_READY_LATEST.json",
     "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.md",
     "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.json",
+    "telemetry/morning_digest/OPENAI_API_APPROVAL_BOUNDARY_LATEST.md",
+    "telemetry/morning_digest/OPENAI_API_APPROVAL_BOUNDARY_LATEST.json",
     "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md",
     "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json",
     $alertOutput
@@ -1826,6 +1981,10 @@ $openAiRecommendationMarkdownOutput = "telemetry/morning_digest/OPENAI_RECOMMEND
 $openAiRecommendationJsonOutput = "telemetry/morning_digest/OPENAI_RECOMMENDATION_LATEST.json"
 $openAiRecommendationMarkdownPath = Join-Path $repoRoot $openAiRecommendationMarkdownOutput
 $openAiRecommendationJsonPath = Join-Path $repoRoot $openAiRecommendationJsonOutput
+$openAiApiApprovalBoundaryMarkdownOutput = "telemetry/morning_digest/OPENAI_API_APPROVAL_BOUNDARY_LATEST.md"
+$openAiApiApprovalBoundaryJsonOutput = "telemetry/morning_digest/OPENAI_API_APPROVAL_BOUNDARY_LATEST.json"
+$openAiApiApprovalBoundaryMarkdownPath = Join-Path $repoRoot $openAiApiApprovalBoundaryMarkdownOutput
+$openAiApiApprovalBoundaryJsonPath = Join-Path $repoRoot $openAiApiApprovalBoundaryJsonOutput
 $protectedActionReadinessMarkdownOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md"
 $protectedActionReadinessJsonOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json"
 $protectedActionReadinessMarkdownPath = Join-Path $repoRoot $protectedActionReadinessMarkdownOutput
@@ -1945,6 +2104,16 @@ if ($MorningBriefV2Apply) {
     Set-Content -LiteralPath $openAiRecommendationMarkdownPath -Value $openAiRecommendation.markdown -Encoding UTF8
     $openAiRecommendation.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $openAiRecommendationJsonPath -Encoding UTF8
     Write-AiosLine "PASS" "openai_recommendation_fixture_written=$openAiRecommendationMarkdownOutput,$openAiRecommendationJsonOutput"
+
+    $openAiApiApprovalBoundary = New-AiosOpenAiApiApprovalBoundary `
+        -OpenAiCliInputReady $openAiCliInputReady `
+        -OpenAiSanitizedSummary $openAiSanitizedSummary `
+        -OpenAiRecommendation $openAiRecommendation `
+        -ProtectedActionReadiness $protectedActionReadiness
+
+    Set-Content -LiteralPath $openAiApiApprovalBoundaryMarkdownPath -Value $openAiApiApprovalBoundary.markdown -Encoding UTF8
+    $openAiApiApprovalBoundary.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $openAiApiApprovalBoundaryJsonPath -Encoding UTF8
+    Write-AiosLine "PASS" "openai_api_approval_boundary_written=$openAiApiApprovalBoundaryMarkdownOutput,$openAiApiApprovalBoundaryJsonOutput"
 }
 
 Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"
