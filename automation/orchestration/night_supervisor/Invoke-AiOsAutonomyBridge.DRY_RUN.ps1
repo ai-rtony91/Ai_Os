@@ -1146,6 +1146,305 @@ function New-AiosOpenAiSanitizedSummary {
     }
 }
 
+function New-AiosProtectedActionReadiness {
+    param(
+        [object]$BridgeState,
+        [object]$MorningBriefV2,
+        [object]$ApprovalIntelligenceV2,
+        [object]$Pi5ProgressReport,
+        [object]$OpenAiSanitizedSummary,
+        [object]$NightReportRef
+    )
+
+    $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+
+    $samples = @(
+        [pscustomobject]@{
+            action = "read latest Night Supervisor report"
+            action_type = "read"
+            classification = "ALLOWED_READ_ONLY"
+            status = "PASS"
+            reason = "Reads existing report evidence only."
+            safest_next_action = "Read and summarize the latest report without writing files."
+            required_human_approval = $false
+            allowed_path_check = "PASS"
+            forbidden_path_check = "PASS"
+            confidence = "HIGH"
+            audit_log_hint = "Record report path and generated_at if surfaced in a brief."
+        },
+        [pscustomobject]@{
+            action = "generate sanitized summary"
+            action_type = "prepare"
+            classification = "PREPARE_ONLY"
+            status = "PASS"
+            reason = "Creates recommendation-only sandbox evidence for later reasoning."
+            safest_next_action = "Generate sanitized output only; do not call external services."
+            required_human_approval = $false
+            allowed_path_check = "PASS"
+            forbidden_path_check = "PASS"
+            confidence = "HIGH"
+            audit_log_hint = "Record source contracts and excluded-content boundary."
+        },
+        [pscustomobject]@{
+            action = "draft Codex packet"
+            action_type = "prepare"
+            classification = "PREPARE_ONLY"
+            status = "PASS"
+            reason = "Drafting a packet is preparation, not execution."
+            safest_next_action = "Draft complete packet fields and wait for Anthony before execution."
+            required_human_approval = $false
+            allowed_path_check = "PASS"
+            forbidden_path_check = "PASS"
+            confidence = "HIGH"
+            audit_log_hint = "Record packet ID, lane, allowed paths, forbidden paths, and stop point."
+        },
+        [pscustomobject]@{
+            action = "stage files"
+            action_type = "stage"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "Staging is a protected repo action and requires exact-file approval."
+            safest_next_action = "Request exact current approval with named files and cached-diff review."
+            required_human_approval = $true
+            allowed_path_check = "UNKNOWN"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Use the Protected Action Gate and Commit/Push Gate before staging."
+        },
+        [pscustomobject]@{
+            action = "commit changes"
+            action_type = "commit"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "Commit requires explicit approval, reviewed diff, exact files, and message."
+            safest_next_action = "Run cached diff review and request explicit commit approval."
+            required_human_approval = $true
+            allowed_path_check = "UNKNOWN"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Record exact files, validation, cached diff, and commit message."
+        },
+        [pscustomobject]@{
+            action = "push branch"
+            action_type = "push"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "Push is a protected repo action and must name branch and remote target."
+            safest_next_action = "Request explicit push approval for one branch and one remote target."
+            required_human_approval = $true
+            allowed_path_check = "PASS"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Record branch, remote, commits intended for push, and ruleset warnings."
+        },
+        [pscustomobject]@{
+            action = "merge PR"
+            action_type = "merge"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "Merge requires separate explicit approval after checks and mergeability are known."
+            safest_next_action = "Prepare merge readiness evidence and wait for explicit merge approval."
+            required_human_approval = $true
+            allowed_path_check = "UNKNOWN"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Record PR number, checks, mergeability, and review state."
+        },
+        [pscustomobject]@{
+            action = "mutate approval inbox"
+            action_type = "approval_state_change"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "Approval state changes are protected and Anthony-owned."
+            safest_next_action = "Produce a recommendation card; do not change approval state."
+            required_human_approval = $true
+            allowed_path_check = "UNKNOWN"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Record target approval record and requested state transition."
+        },
+        [pscustomobject]@{
+            action = "create scheduler"
+            action_type = "scheduler"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "Scheduler creation starts background behavior and requires explicit approval."
+            safest_next_action = "Prepare a schedule design and stop before registration."
+            required_human_approval = $true
+            allowed_path_check = "UNKNOWN"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Record schedule name, trigger, stop control, and rollback plan."
+        },
+        [pscustomobject]@{
+            action = "launch worker"
+            action_type = "worker_launch"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "Worker launch changes runtime behavior and requires explicit approval."
+            safest_next_action = "Prepare worker packet and readiness evidence; do not launch."
+            required_human_approval = $true
+            allowed_path_check = "UNKNOWN"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Record worker identity, lane, worktree, and stop point."
+        },
+        [pscustomobject]@{
+            action = "call OpenAI API"
+            action_type = "api_call"
+            classification = "NEEDS_EXPLICIT_APPROVAL"
+            status = "REVIEW_REQUIRED"
+            reason = "External AI calls require explicit approval and credential boundary review."
+            safest_next_action = "Use sanitized summary output only until an API lane is approved."
+            required_human_approval = $true
+            allowed_path_check = "UNKNOWN"
+            forbidden_path_check = "UNKNOWN"
+            confidence = "HIGH"
+            audit_log_hint = "Record model intent, input contract, cost boundary, and no-credential-output check."
+        },
+        [pscustomobject]@{
+            action = "access .env / credential material"
+            action_type = "credential_access"
+            classification = "BLOCKED_FOR_SAFETY"
+            status = "BLOCKED"
+            reason = "Credential material is outside evidence-only readiness scope."
+            safest_next_action = "Stop and request a separate credential-boundary review if ever needed."
+            required_human_approval = $true
+            allowed_path_check = "FAIL"
+            forbidden_path_check = "FAIL"
+            confidence = "HIGH"
+            audit_log_hint = "Do not print, copy, store, or summarize credential values."
+        },
+        [pscustomobject]@{
+            action = "market-provider / O-connector / live-trading boundary"
+            action_type = "market_execution"
+            classification = "BLOCKED_FOR_SAFETY"
+            status = "BLOCKED"
+            reason = "Market execution paths remain blocked outside a separately approved safety lane."
+            safest_next_action = "Keep Forex work report-only and paper-simulation planning only."
+            required_human_approval = $true
+            allowed_path_check = "FAIL"
+            forbidden_path_check = "FAIL"
+            confidence = "HIGH"
+            audit_log_hint = "Record that no market provider, live execution, or order routing was used."
+        },
+        [pscustomobject]@{
+            action = "GPIO / motor control"
+            action_type = "hardware_control"
+            classification = "BLOCKED_FOR_SAFETY"
+            status = "BLOCKED"
+            reason = "Physical control is outside this repo-readiness lane."
+            safest_next_action = "Stop until a future isolated hardware lane defines safety controls."
+            required_human_approval = $true
+            allowed_path_check = "FAIL"
+            forbidden_path_check = "FAIL"
+            confidence = "HIGH"
+            audit_log_hint = "Record that no hardware control path was touched."
+        }
+    )
+
+    $counts = [ordered]@{}
+    foreach ($sample in $samples) {
+        $classification = [string]$sample.classification
+        if (-not $counts.Contains($classification)) {
+            $counts[$classification] = 0
+        }
+        $counts[$classification] = [int]$counts[$classification] + 1
+    }
+
+    $json = [pscustomobject]@{
+        schema = "AIOS_PROTECTED_ACTION_READINESS_OUTPUT.v1"
+        mode = "DRY_RUN_SANDBOX_OUTPUT"
+        generated_at = $generatedAt
+        recommendation_only = $true
+        approval_authority = $false
+        execution_authority = $false
+        source_contracts_used = @(
+            "AIOS_MORNING_BRIEF_V2.v1",
+            "AIOS_APPROVAL_INTELLIGENCE_V2.v1",
+            "AIOS_PI5_PROGRESS_REPORT.v1",
+            "AIOS_OPENAI_SANITIZED_SUMMARY.v1",
+            "AIOS_AUTONOMY_BRIDGE_STATE.v1"
+        )
+        current_bridge_status = [string]$BridgeState.bridge_status
+        current_blockers_count = @($BridgeState.current_blockers).Count
+        active_approval_count = @($BridgeState.active_decision_cards).Count
+        classification_counts = [pscustomobject]$counts
+        sample_classifications = $samples
+        integration = [pscustomobject]@{
+            morning_brief = "Show aggregate readiness counts and human-needed items only."
+            approval_intelligence = "Attach readiness class to approval cards without changing approval state."
+            pi5_progress = "Display blocked/readiness counts without action controls."
+            openai_sanitized_summary = "Provide sanitized aggregate context only."
+        }
+        boundary = [pscustomobject]@{
+            recommendation_only = $true
+            approval_authority = $false
+            execution_authority = $false
+            no_approval_mutation = $true
+            no_worker_launch = $true
+            no_scheduler = $true
+            no_external_calls = $true
+            no_protected_action_execution = $true
+        }
+    }
+
+    $lines = @(
+        "# Protected Action Readiness Gate v1",
+        "",
+        "Status: recommendation-only sandbox evidence.",
+        "",
+        "## Authority Boundary",
+        "",
+        "- recommendation_only: true",
+        "- approval_authority: false",
+        "- execution_authority: false",
+        "- no approval mutation",
+        "- no worker launch",
+        "- no scheduler",
+        "- no external calls",
+        "- no protected action execution",
+        "",
+        "## Current Evidence",
+        "",
+        "- Bridge status: $($json.current_bridge_status)",
+        "- Current blockers count: $($json.current_blockers_count)",
+        "- Active approval count: $($json.active_approval_count)",
+        "",
+        "## Classification Counts",
+        ""
+    )
+
+    foreach ($key in $counts.Keys) {
+        $lines += "- ${key}: $($counts[$key])"
+    }
+
+    $lines += @(
+        "",
+        "## Sample Classifications",
+        ""
+    )
+
+    foreach ($sample in $samples) {
+        $lines += "- $($sample.action): $($sample.classification) / $($sample.status) - $($sample.reason) Next: $($sample.safest_next_action)"
+    }
+
+    $lines += @(
+        "",
+        "## Integration",
+        "",
+        "- Morning Brief: aggregate counts and human-needed items only.",
+        "- Approval Intelligence: readiness class on cards, no approval mutation.",
+        "- Pi5 Progress: display-only readiness counts, no action controls.",
+        "- OpenAI sanitized summary: sanitized aggregate context only."
+    )
+
+    return [pscustomobject]@{
+        markdown = ($lines -join "`n") + "`n"
+        json = $json
+    }
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $forbiddenOutputTerms = @(".env", "secrets", "credentials", "broker", "OANDA", "live webhook", "real order")
 $pythonModule = Join-Path $repoRoot "services\python_supervisor\autonomy_bridge.py"
@@ -1186,6 +1485,8 @@ $plannedOutputs = @(
     "telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json",
     "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.md",
     "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json",
+    "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md",
+    "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json",
     $alertOutput
 )
 
@@ -1246,6 +1547,10 @@ $openAiSanitizedSummaryMarkdownOutput = "telemetry/morning_digest/OPENAI_SANITIZ
 $openAiSanitizedSummaryJsonOutput = "telemetry/morning_digest/OPENAI_SANITIZED_SUMMARY_LATEST.json"
 $openAiSanitizedSummaryMarkdownPath = Join-Path $repoRoot $openAiSanitizedSummaryMarkdownOutput
 $openAiSanitizedSummaryJsonPath = Join-Path $repoRoot $openAiSanitizedSummaryJsonOutput
+$protectedActionReadinessMarkdownOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.md"
+$protectedActionReadinessJsonOutput = "telemetry/morning_digest/PROTECTED_ACTION_READINESS_LATEST.json"
+$protectedActionReadinessMarkdownPath = Join-Path $repoRoot $protectedActionReadinessMarkdownOutput
+$protectedActionReadinessJsonPath = Join-Path $repoRoot $protectedActionReadinessJsonOutput
 
 if (($StateApply -or $MorningBriefV2Apply) -and -not $Apply) {
     $stateDir = Split-Path -Parent $bridgeStatePath
@@ -1330,6 +1635,18 @@ if ($MorningBriefV2Apply) {
     Set-Content -LiteralPath $openAiSanitizedSummaryMarkdownPath -Value $openAiSanitizedSummary.markdown -Encoding UTF8
     $openAiSanitizedSummary.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $openAiSanitizedSummaryJsonPath -Encoding UTF8
     Write-AiosLine "PASS" "openai_sanitized_summary_written=$openAiSanitizedSummaryMarkdownOutput,$openAiSanitizedSummaryJsonOutput"
+
+    $protectedActionReadiness = New-AiosProtectedActionReadiness `
+        -BridgeState $receipt.bridge_state `
+        -MorningBriefV2 $briefV2 `
+        -ApprovalIntelligenceV2 $approvalIntelligenceV2 `
+        -Pi5ProgressReport $pi5ProgressReport `
+        -OpenAiSanitizedSummary $openAiSanitizedSummary `
+        -NightReportRef $latestReport
+
+    Set-Content -LiteralPath $protectedActionReadinessMarkdownPath -Value $protectedActionReadiness.markdown -Encoding UTF8
+    $protectedActionReadiness.json | ConvertTo-Json -Depth 14 | Set-Content -LiteralPath $protectedActionReadinessJsonPath -Encoding UTF8
+    Write-AiosLine "PASS" "protected_action_readiness_written=$protectedActionReadinessMarkdownOutput,$protectedActionReadinessJsonOutput"
 }
 
 Write-AiosLine "PASS" "autonomy_bridge_status=$($receipt.status)"
