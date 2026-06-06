@@ -131,3 +131,6 @@ automation/orchestration/notifications/state/
 
 # AI_OS generated morning digest evidence
 telemetry/morning_digest/
+
+# AI_OS local-only sensitive friction telemetry
+telemetry/human_ai_friction/
