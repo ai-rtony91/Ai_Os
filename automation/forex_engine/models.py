@@ -1,0 +1,114 @@
+"""Data models for the AI_OS Forex Engine v1 paper-only scaffold."""
+
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+
+
+def utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
+
+class EngineMode:
+    PAPER_ONLY = "PAPER_ONLY"
+
+
+class Direction:
+    BUY = "BUY"
+    SELL = "SELL"
+
+
+class TradeStatus:
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"
+    BLOCKED = "BLOCKED"
+
+
+class TradeOutcome:
+    WIN = "WIN"
+    LOSS = "LOSS"
+    BREAKEVEN = "BREAKEVEN"
+    OPEN = "OPEN"
+
+
+@dataclass
+class ForexSignal:
+    symbol: str
+    timeframe: str
+    direction: str
+    entry_price: float
+    stop_loss: float
+    take_profit: float
+    timestamp: str
+    strategy_name: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ConfidenceAssessment:
+    score: int
+    reasons: List[str] = field(default_factory=list)
+    allowed: bool = False
+    blocked_reason: Optional[str] = None
+
+
+@dataclass
+class RiskDecision:
+    allowed: bool
+    risk_amount_usd: float
+    max_daily_loss_usd: float
+    open_trade_count: int
+    max_open_trades: int
+    consecutive_losses: int
+    blocked_reason: Optional[str] = None
+
+
+@dataclass
+class PaperTrade:
+    trade_id: str
+    mode: str
+    symbol: str
+    timeframe: str
+    direction: str
+    entry_price: float
+    stop_loss: float
+    take_profit: float
+    position_size_units: float
+    risk_amount_usd: float
+    confidence_score: int
+    status: str = TradeStatus.OPEN
+    opened_at: str = field(default_factory=utc_now_iso)
+    closed_at: Optional[str] = None
+    exit_price: Optional[float] = None
+    outcome: str = TradeOutcome.OPEN
+    pnl_usd: float = 0.0
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class JournalEvent:
+    event_type: str
+    timestamp: str
+    mode: str
+    payload: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PerformanceSummary:
+    starting_balance_usd: float
+    current_balance_usd: float
+    total_trades: int
+    open_trades: int
+    closed_trades: int
+    wins: int
+    losses: int
+    breakeven: int
+    win_rate_pct: float
+    gross_profit_usd: float
+    gross_loss_usd: float
+    net_pnl_usd: float
+    profit_factor: Optional[float]
+    max_drawdown_usd: float
+    max_drawdown_pct: float
+    consecutive_losses: int
+    consistency_note: str
