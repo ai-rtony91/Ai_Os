@@ -169,3 +169,21 @@ Future-assessment checklist:
 - Accepted risk: Live local evidence folders still require privacy review and must not be imported into repo telemetry without explicit approval.
 - Regression checks: Future evidence metrics must count canonical `normalized_body_sha256` groups, not raw files; short 2-5 word overlap must remain `WEAK_SIMILARITY_IGNORE`; strong sentence overlap with different body hashes must remain `PARTIAL_OVERLAP_STRONG_SENTENCE`.
 - Reopen conditions: Reopen if duplicate captures inflate telemetry, same-second captures overwrite, raw evidence is imported into the repo without approval, or weak phrase overlap is treated as duplicate content.
+
+#### Human-AI Friction Local Telemetry Boundary
+
+- Problem discovered: `telemetry/human_ai_friction/` can contain sensitive local friction evidence and was appearing as untracked status noise.
+- Root cause: The local-only folder was not protected by a narrow repo ignore rule.
+- Fix applied: Classified `telemetry/human_ai_friction/` as `LOCAL_ONLY`, `SANITIZE_LATER`, and `DO_NOT_COMMIT`; added a narrow `.gitignore` rule so raw local friction evidence remains out of repo status.
+- Expected outcome: Future workers do not read, import, summarize, stage, or commit raw friction evidence without explicit approval.
+- Regression checks: Confirm `git status --short --branch` does not show `telemetry/human_ai_friction/`; confirm only sanitized summaries are proposed for repo inclusion after approval.
+- Reopen conditions: Reopen if raw friction evidence appears in git status, is imported into repo telemetry, or is proposed for commit.
+
+#### Overnight Priority Lane
+
+- Problem discovered: Anthony needs to delegate overnight priority without manually managing every step.
+- Root cause: Overnight work needed a queue-tray model that ranks and classifies tasks before any worker, API, scheduler, or protected-action path is touched.
+- Fix applied: Added `docs/workflows/AI_OS_OVERNIGHT_PRIORITY_LANE.md` to define the queue tray, task classes, schemas, roles, protected boundaries, SOS rule, and display-only summary targets.
+- Expected outcome: AI_OS can rank work, draft exact packets, and stop before protected actions while Anthony handles only SOS or protected-action decisions.
+- Regression checks: Future overnight work must classify task classes before execution and preserve allowed paths, forbidden paths, validator chain, and stop point.
+- Reopen conditions: Reopen if workers self-select work, execute without exact packets, or Anthony is pulled into routine non-SOS decisions.
