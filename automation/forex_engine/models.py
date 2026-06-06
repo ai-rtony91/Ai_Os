@@ -189,6 +189,63 @@ class StrategyComparisonResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class WalkForwardStatus:
+    PASSED = "PASSED"
+    DEGRADED = "DEGRADED"
+    FAILED = "FAILED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+
+
+@dataclass
+class WalkForwardSplit:
+    mode: str
+    symbol: str
+    timeframe: str
+    train_ratio: float
+    test_ratio: float
+    train_count: int
+    test_count: int
+    train_start: str
+    train_end: str
+    test_start: str
+    test_end: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class WalkForwardWindowResult:
+    mode: str
+    symbol: str
+    timeframe: str
+    window_name: str
+    candles_processed: int
+    trades: int
+    net_pnl_usd: float
+    win_rate_pct: float
+    profit_factor: Optional[float]
+    max_drawdown_usd: float
+    max_drawdown_pct: float
+    status: str
+    summary_note: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class WalkForwardResult:
+    mode: str
+    symbol: str
+    timeframe: str
+    strategy_name: str
+    split: WalkForwardSplit
+    train_result: WalkForwardWindowResult
+    test_result: WalkForwardWindowResult
+    degradation_pct: Optional[float]
+    status: str
+    recommendations: List[str] = field(default_factory=list)
+    summary_note: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
