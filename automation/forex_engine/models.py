@@ -494,6 +494,63 @@ class KillSwitchReport:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class OptimizationStatus:
+    BEST_CANDIDATE = "BEST_CANDIDATE"
+    WATCHLIST = "WATCHLIST"
+    REJECTED = "REJECTED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+    OVERFIT_RISK = "OVERFIT_RISK"
+
+
+class OverfittingRisk:
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    UNKNOWN = "UNKNOWN"
+
+
+@dataclass
+class ParameterSet:
+    name: str
+    strategy_name: str
+    confidence_threshold: int
+    reward_risk_min: float
+    volatility_filter: bool
+    regime_filter: bool
+    max_open_trades: int
+    risk_per_trade_pct: float
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ParameterOptimizationScore:
+    mode: str
+    parameter_set_name: str
+    score: float
+    status: str
+    overfitting_risk: str
+    sample_size: int
+    net_pnl_usd: float
+    win_rate_pct: float
+    profit_factor: Optional[float]
+    max_drawdown_pct: float
+    components: List[StrategyScoreComponent] = field(default_factory=list)
+    recommendations: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class ParameterOptimizationResult:
+    mode: str
+    tested_count: int
+    scores: List[ParameterOptimizationScore] = field(default_factory=list)
+    best_parameter_set: Optional[str] = None
+    overfitting_risk: str = OverfittingRisk.UNKNOWN
+    status: str = OptimizationStatus.INSUFFICIENT_DATA
+    summary_note: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
