@@ -45,6 +45,59 @@ class Candle:
 
 
 @dataclass
+class BacktestConfig:
+    symbol: str
+    timeframe: str
+    starting_balance_usd: float
+    max_candles: Optional[int] = None
+    strategy_name: str = "sprint_3_demo_strategy"
+    mode: str = EngineMode.PAPER_ONLY
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class BacktestTradeResult:
+    trade_id: str
+    symbol: str
+    timeframe: str
+    direction: str
+    entry_price: float
+    stop_loss: float
+    take_profit: float
+    exit_price: float
+    opened_at: str
+    closed_at: str
+    outcome: str
+    pnl_usd: float
+    confidence_score: int
+    close_reason: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class BacktestResult:
+    mode: str
+    symbol: str
+    timeframe: str
+    strategy_name: str
+    candles_processed: int
+    signals_generated: int
+    signals_accepted: int
+    signals_blocked: int
+    trades_opened: int
+    trades_closed: int
+    starting_balance_usd: float
+    ending_balance_usd: float
+    net_pnl_usd: float
+    win_rate_pct: float
+    profit_factor: Optional[float]
+    max_drawdown_usd: float
+    max_drawdown_pct: float
+    results: List[BacktestTradeResult] = field(default_factory=list)
+    summary_note: str = ""
+
+
+@dataclass
 class ForexSignal:
     symbol: str
     timeframe: str
