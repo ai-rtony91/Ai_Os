@@ -619,6 +619,71 @@ class PortfolioOptimizationResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class HistoricalDataReadinessStatus:
+    READY_FOR_LOCAL_IMPORT = "READY_FOR_LOCAL_IMPORT"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+    INVALID_DATASET = "INVALID_DATASET"
+    NEEDS_CLEANING = "NEEDS_CLEANING"
+
+
+class DatasetIssueSeverity:
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+
+
+@dataclass
+class DatasetIssue:
+    code: str
+    severity: str
+    message: str
+    row_number: Optional[int] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class DatasetQualityScore:
+    mode: str
+    score: int
+    status: str
+    issues: List[DatasetIssue] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)
+    recommendations: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class DatasetManifest:
+    mode: str
+    dataset_name: str
+    source_type: str
+    path: str
+    row_count: int
+    symbols: List[str] = field(default_factory=list)
+    timeframes: List[str] = field(default_factory=list)
+    first_timestamp: Optional[str] = None
+    last_timestamp: Optional[str] = None
+    schema_fields: List[str] = field(default_factory=list)
+    created_at: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class HistoricalDatasetSummary:
+    mode: str
+    manifest: DatasetManifest
+    quality_score: DatasetQualityScore
+    readiness_status: str
+    valid_row_count: int
+    invalid_row_count: int
+    duplicate_count: int
+    missing_field_count: int
+    symbol_count: int
+    timeframe_count: int
+    recommendations: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
