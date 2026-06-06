@@ -1,121 +1,259 @@
-# EXEC WORK ORDER — Telegram ↔ Tasker Two-Way SOS Bridge
+# Telegram Tasker Control Surface Roadmap
 
-```
-EXEC-TOKEN: AIOS-TG-TASKER-BRIDGE-20260531
-WORKER: codex
-LANE: one worktree, one branch  ->  codex/telegram-tasker-bridge
-MODE: DRY_RUN first, then APPLY after self-review checklist passes
-AUTHORITY: Codex never commits/pushes/merges. Anthony commits. No secret written.
-DEPENDS ON: CODEX_CLOSE_AUTONOMY_LOOP (notifier.py + approval-resume consumer + night cycle)
-SOURCE AUDIT: relay/reports/AUDIT_AUTONOMY_GAPS_20260531.md + inbound audit (this session)
-```
+Status: future packet design, docs-only
 
-## GOAL
-Give the night supervisor a TWO-WAY channel: it sends a report/SOS to Telegram; Anthony's
-phone (Tasker) escalates a real blocker into a wake-up alarm; Anthony taps Approve/Reject;
-the reply flows back into `relay/approvals/approved|rejected/` and the loop resumes.
+This document preserves the Telegram and Tasker vision for AI_OS, but it is not
+an execution packet. It must not be used to enable Telegram live send, Telegram
+polling, approval mutation, scheduler registration, worker launch, broker/OANDA
+access, live trading, real orders, real webhooks, GPIO, motor control, secrets,
+or production promotion.
 
-Channel = Telegram bot. Polling only (`getUpdates` long-poll) — pure OUTBOUND, NO inbound
-server, so the no-internet-facing-server doctrine holds. Mobile wake-up = Tasker
-(https://tasker.joaoapps.com/) + AutoNotification on Anthony's phone (configured by Anthony,
-documented here — NOT built by Codex).
+Telegram and Tasker are interface surfaces only. AI_OS remains the router and
+gatekeeper. Anthony remains approval authority. Codex and other workers execute
+only exact approved packets and must stop at protected gates.
 
----
+## Core Security Model
 
-## ISSUE 1 — Outbound: notifier has no live Telegram sender
-notifier.py has a Telegram DRY_RUN scaffold. Live Telegram send remains blocked until a
-separate explicit live-send approval.
+- Telegram and Tasker are not authority.
+- AI_OS remains the gatekeeper for every command.
+- Anthony remains approval authority.
+- An identity gate is required before any inbound Telegram command is accepted.
+- Command allowlist only.
+- Unknown commands return help text only.
+- Every command maps to one classification:
+  - `READ_ONLY`
+  - `PREPARE_ONLY`
+  - `NEEDS_EXPLICIT_APPROVAL`
+  - `BLOCKED_FOR_SAFETY`
+- No bot token, chat ID, credential, `.env` value, or secret may be printed,
+  logged, committed, pasted, or summarized.
+- Replay protection is required for Telegram update offsets before inbound
+  control is enabled.
+- Approval decisions must be idempotent.
+- Audit logs may record command metadata only. They must not record secrets.
+- `#AIOS_SOS` is reserved only for wake-worthy SOS events.
 
-### SOLUTION 1 — Add `telegram` channel to notifier.py
-- Extend `services/python_supervisor/notifier.py` with a `telegram` channel:
-  - Checks whether `AIOS_TG_BOT_TOKEN` and `AIOS_TG_CHAT_ID` are present without printing,
-    storing, or logging secret values.
-  - In DRY_RUN, renders the expected SOS message preview and reports missing/present
-    credential names only.
-  - In APPLY/live mode, stays blocked unless a later packet adds an explicit approved
-    live-send flag.
-  - On true SOS/BLOCKED transition only, call Telegram `sendMessage`:
-    - Text = approval id, risk, reason, proposed action (from the approval record).
-    - `reply_markup` = inline keyboard with two callback buttons:
-      `✅ Approve` -> callback_data `apv:<id>:approve`
-      `❌ Reject`  -> callback_data `apv:<id>:reject`
-    - Prefix SOS-class messages with a fixed token `#AIOS_SOS` so Tasker can pattern-match
-      and fire the wake-up alarm.
-    - Do not prefix routine pass, warning, digest, stale/reference, or normal approval backlog
-      messages with `#AIOS_SOS`.
-  - Keep `file` channel as fallback (always also write `relay/reports/SOS_OUTBOX/`).
-  - Idempotent via existing `telemetry/night_supervisor/last_notified.json`.
+## Phase 1 - SOS Wake Only
 
-## ISSUE 2 — Inbound: no consumer for Anthony's reply
-No code captures the button tap / reply and writes an approval decision.
+Purpose: wake Anthony only for true SOS conditions.
 
-### SOLUTION 2 — Telegram poller -> approval write-back
-- New file `services/python_supervisor/telegram_relay.py`:
-  - Long-poll `getUpdates` (offset-tracked in `telemetry/night_supervisor/tg_offset.json`;
-    stdlib `urllib` only, no new deps if avoidable).
-  - IDENTITY GATE (hard): accept updates ONLY when `from.id` / `chat.id` == `AIOS_TG_CHAT_ID`.
-    Drop everything else silently and log it. This is the auth that replaces the hardcoded name.
-  - Parse decision from either a callback_query (`apv:<id>:approve|reject`) or a text reply
-    matching `^(approve|reject)\s+<id>`.
-  - Resolve `<id>` to the waiting approval file in `relay/approvals/`. If found:
-    - approve -> move/write to `relay/approvals/approved/<id>.approval.md` with
-      `status: APPROVED`, `decided_by: Anthony`, `decided_via: telegram`, `decided_utc: <ISO>`.
-    - reject  -> same into `relay/approvals/rejected/`.
-    - Preserve the `origin_id`/`origin` field so the existing resume consumer can re-queue it.
-  - Answer the callback (`answerCallbackQuery`) so the button shows "recorded".
-  - Idempotent: never act on an update offset already processed; never double-write a decision.
-  - Log every action to `relay/logs/telegram_relay.log` (UTC).
+Allowed:
 
-## ISSUE 3 — Wake-up escalation
-A blocker at 02:00 must physically wake Anthony.
+- Telegram sends `#AIOS_SOS` only for true SOS.
+- Tasker watches Telegram notifications for `#AIOS_SOS`.
+- Tasker wakes Anthony by alarm, vibration, TTS, or opening Telegram.
+- Non-SOS messages do not wake Anthony.
 
-### SOLUTION 3 — Escalation contract (Codex documents; Anthony configures phone)
-- AIOS side: true SOS-class messages carry the `#AIOS_SOS` token + risk=RED/HIGH marker.
-- Normal `NEEDS_APPROVAL` backlog is not wake-worthy unless another classifier escalates it
-  into a true blocker.
-- Write `relay/reports/TASKER_SETUP.md` describing the phone-side profile Anthony builds:
-  - AutoNotification "Intercept" on the Telegram app, content filter `#AIOS_SOS`.
-  - Task: set alarm-stream volume to max + play alarm tone + TTS the reason, bypassing
-    silent/DND (Tasker "Alarm" category). Optional: repeat until acknowledged.
-  - Non-SOS (routine nightly report) -> normal notification, no alarm.
-- Codex does NOT touch the phone; it only emits the contract + the `#AIOS_SOS` token.
+Blocked:
 
-## ISSUE 4 — Wire into the night cycle
-### SOLUTION 4
-- Add `telegram_relay.py` poll as a step in `Invoke-AiOsNightCycle.ps1` (after approval-resume,
-  before bridge refresh), `-Apply`-gated, logged. One short poll per cycle is enough; the
-  resume consumer picks up whatever the poll wrote.
+- No inbound Telegram control.
+- No approval mutation.
+- No Telegram polling live run.
+- No Tasker repo control.
+- No scheduler, worker, trading, GPIO, or production action.
 
----
+## Phase 2 - Read-Only Status
 
-## GATED ITEM — write approval, DO NOT execute
-`relay/approvals/enable-telegram-bridge.approval.md` (already drafted by Claude) — needs
-`AIOS_TG_BOT_TOKEN` + `AIOS_TG_CHAT_ID`. Anthony creates the bot via @BotFather, gets his
-chat_id, and sets the env vars himself. Codex must not hold, read aloud, print, log, or commit
-the token or chat value.
+Purpose: let Anthony request sanitized status summaries.
 
-## OUT OF SCOPE
-- HMAC message signing (future hardening; chat_id lock is sufficient for v1).
-- Approval store unification. ChatGPT Custom-GPT path (rejected: needs internet-facing server).
+Allowed commands:
 
----
+- `/status`
+- `/brief`
+- `/pi5`
+- `/openai`
+- `/protected`
+- `/forex`
+- `/t9`
+- `/queue`
 
-## SELF-REVIEW CHECKLIST (must pass before APPLY)
-- [ ] notifier `telegram` channel: in DRY_RUN, builds correct SOS message preview, reports
-      credential presence by variable name only, and does NOT make a live call.
-- [ ] Non-SOS categories do not include `#AIOS_SOS` and do not wake Tasker.
-- [ ] telegram_relay drops any update whose chat_id != AIOS_TG_CHAT_ID (identity gate proven).
-- [ ] Seeded callback `apv:<id>:approve` writes `relay/approvals/approved/<id>...` with origin
-      preserved; resume consumer then re-queues it to `relay/inbox/`. Full O closes.
-- [ ] Reject path writes to rejected/ and does NOT re-queue.
-- [ ] Idempotent: replaying the same update offset writes nothing new.
-- [ ] No token/secret value in the diff. No git/schtasks. urllib/stdlib only (or justify a dep).
-- [ ] Writes confined to relay\, services/python_supervisor\, automation/orchestration\,
-      telemetry/night_supervisor\. No protected root file touched.
-- [ ] `relay/reports/TASKER_SETUP.md` and `enable-telegram-bridge.approval.md` present.
+Classification: `READ_ONLY`
 
-## DELIVERABLE
-Branch `codex/telegram-tasker-bridge`, staged-not-committed, plus
-`relay/reports/TELEGRAM_BRIDGE_RESULT.md` summarizing wiring + the pending bot-token approval.
-Anthony reviews and commits.
-```
+Rules:
+
+- Return sanitized summaries only.
+- Do not expose secrets, token values, chat IDs, private raw evidence, or
+  credential state beyond presence/missing by approved variable name.
+- Do not mutate files, approvals, telemetry, workers, scheduler, trading, or
+  production state.
+
+## Phase 3 - Exact Approval-Card Decisions
+
+Purpose: allow Anthony to decide exact existing approval cards without freeform
+approval.
+
+Allowed commands:
+
+- `approve <approval_id>`
+- `reject <approval_id>`
+- `defer <approval_id>`
+
+Classification: `NEEDS_EXPLICIT_APPROVAL`
+
+Rules:
+
+- `<approval_id>` must match an exact current approval artifact.
+- Approval scope must match the current active approval card.
+- No freeform approval is allowed.
+- Duplicate approval replay must be idempotent.
+- Unknown, stale, historical, sample, or completed approval IDs must not mutate
+  approval state.
+- Approval mutation requires a separately approved APPLY implementation and
+  validator coverage before live use.
+
+## Phase 4 - Packet Preparation Requests
+
+Purpose: let Anthony request packet drafting without execution.
+
+Allowed commands:
+
+- `prepare packet <goal_id>`
+- `prepare forex-paper packet`
+- `prepare t9-check packet`
+- `prepare pi5-health packet`
+
+Classification: `PREPARE_ONLY`
+
+Rules:
+
+- Prepare candidate packets only.
+- Do not execute packets.
+- Do not create or edit files unless a separate APPLY packet authorizes the
+  exact write boundary.
+- Candidate packets must preserve allowed paths, forbidden paths, validator
+  chain, approval authority, and stop point.
+
+## Phase 5 - Protected Action Requests
+
+Purpose: convert protected-action requests into readiness cards, not execution.
+
+Allowed commands:
+
+- `request commit <packet_id>`
+- `request push <branch>`
+- `request merge <pr>`
+- `request worker-launch <packet_id>`
+- `request scheduler <lane>`
+
+Classification: `NEEDS_EXPLICIT_APPROVAL`
+
+Rules:
+
+- Never execute directly from Telegram.
+- Generate or surface Protected Action Readiness classification only.
+- Commit, push, merge, worker launch, scheduler registration, approval mutation,
+  and production-adjacent actions require separate explicit Anthony approval.
+- Validator PASS is evidence only. It is not approval.
+
+## Phase 6 - Forex And Trading
+
+Purpose: expose paper-only Forex status and reports without enabling execution.
+
+Allowed commands:
+
+- `/forex status`
+- `/forex paper-report`
+- `/forex paper-ledger`
+- `/forex risk-summary`
+- `request forex-paper build packet`
+
+Classification:
+
+- Status and reports: `READ_ONLY`
+- Build packet request: `PREPARE_ONLY`
+
+Blocked:
+
+- broker/OANDA
+- live market API
+- API keys
+- real orders
+- real webhooks
+- Telegram-triggered execution
+- live market execution
+
+Rules:
+
+- Telegram must never trigger live orders.
+- Telegram must never access broker, OANDA, API-key, or credential material.
+- Future live-trading architecture, if ever approved, must be separate from this
+  interface roadmap and must preserve protected gates.
+
+## Phase 7 - Emergency Hold
+
+Purpose: provide a controlled way to request a hold without inventing a process
+killer.
+
+Allowed commands:
+
+- `/hold`
+- `/stop-aios`
+- `/pause-workers`
+
+Classification: `NEEDS_EXPLICIT_APPROVAL`
+
+Rules:
+
+- Initially create a hold recommendation or protected-action card only.
+- Show what would stop, why, current risk, and how to resume.
+- Do not kill processes unless a separately approved stop controller exists.
+- Do not stop scheduler, workers, trading, GPIO, or production paths directly
+  from Telegram or Tasker.
+
+## Tasker Role
+
+Tasker is a phone-side wake and attention tool.
+
+Allowed:
+
+- Watch Telegram notifications for `#AIOS_SOS`.
+- Wake Anthony through alarm, vibration, TTS, or opening Telegram.
+- Future Tasker buttons may send allowlisted Telegram commands into the AI_OS
+  gate.
+
+Blocked:
+
+- No direct repo control.
+- No direct approval mutation.
+- No direct worker launch or scheduler control.
+- No direct trading, broker, GPIO, motor, or production control.
+
+## Telegram Role
+
+Telegram is a command and notification interface.
+
+Allowed:
+
+- Carry sanitized outbound status and SOS messages.
+- Accept allowlisted inbound command text after identity-gate validation.
+
+Blocked:
+
+- No freeform execution.
+- No authority transfer.
+- No direct protected action.
+- No secret output.
+- No live send or polling until a separate approval packet authorizes the exact
+  behavior and validation chain.
+
+## Future Implementation Gates
+
+Before any APPLY work expands beyond Phase 1, a complete packet must define:
+
+- exact allowed paths and forbidden paths.
+- identity gate implementation.
+- command allowlist.
+- command classification table.
+- replay protection.
+- idempotent approval handling.
+- audit log metadata schema.
+- secret-output prevention.
+- Protected Action Readiness integration.
+- validator chain.
+- rollback or stop condition.
+
+Any packet that attempts Telegram live send, Telegram polling, approval mutation,
+scheduler activation, worker launch, OpenAI API calls, external API calls,
+broker/OANDA access, live trading, real orders, real webhooks, GPIO, motor
+control, production promotion, commit, push, or merge must stop for explicit
+Anthony approval.
