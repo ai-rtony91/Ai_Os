@@ -85,6 +85,46 @@ class SignalRuleResult:
     summary_note: str = ""
 
 
+class SetupGrade:
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    F = "F"
+
+
+class ConfidenceBand:
+    HIGH_QUALITY = "HIGH_QUALITY"
+    TRADE_CANDIDATE = "TRADE_CANDIDATE"
+    WATCHLIST = "WATCHLIST"
+    BLOCKED = "BLOCKED"
+
+
+@dataclass
+class ConfidenceComponent:
+    name: str
+    score_delta: int
+    reason: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SetupQualityAssessment:
+    mode: str
+    symbol: str
+    timeframe: str
+    direction: str
+    score: int
+    grade: str
+    band: str
+    allowed: bool
+    reduced_risk: bool
+    blocked_reason: Optional[str]
+    components: List[ConfidenceComponent] = field(default_factory=list)
+    recommendations: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
