@@ -426,6 +426,74 @@ class BrokerReadinessCheck:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class RiskAction:
+    CONTINUE = "CONTINUE"
+    REDUCE_RISK = "REDUCE_RISK"
+    BLOCK_ORDER = "BLOCK_ORDER"
+    PAUSE_TRADING = "PAUSE_TRADING"
+    KILL_SWITCH = "KILL_SWITCH"
+
+
+class KillSwitchState:
+    INACTIVE = "INACTIVE"
+    ACTIVE = "ACTIVE"
+    TRIGGERED = "TRIGGERED"
+    RESET_REQUIRED = "RESET_REQUIRED"
+
+
+class RiskBreachType:
+    NONE = "NONE"
+    DAILY_DRAWDOWN = "DAILY_DRAWDOWN"
+    WEEKLY_DRAWDOWN = "WEEKLY_DRAWDOWN"
+    LOSS_STREAK = "LOSS_STREAK"
+    MAX_OPEN_TRADES = "MAX_OPEN_TRADES"
+    ORDER_RISK_TOO_HIGH = "ORDER_RISK_TOO_HIGH"
+    EXPOSURE_TOO_HIGH = "EXPOSURE_TOO_HIGH"
+    VALIDATION_FAILED = "VALIDATION_FAILED"
+    NON_PAPER_MODE = "NON_PAPER_MODE"
+
+
+@dataclass
+class RiskManagementScenario:
+    name: str
+    mode: str
+    starting_balance_usd: float
+    current_balance_usd: float
+    current_daily_pnl_usd: float
+    weekly_drawdown_pct: float
+    consecutive_losses: int
+    open_trade_count: int
+    proposed_order_risk_usd: float
+    validation_passed: bool
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class RiskDecisionReport:
+    mode: str
+    scenario_name: str
+    risk_action: str
+    kill_switch_state: str
+    breaches: List[str] = field(default_factory=list)
+    allowed: bool = False
+    risk_posture: str = ""
+    recommended_position_risk_pct: float = 0.0
+    recommended_action: str = ""
+    reasons: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class KillSwitchReport:
+    mode: str
+    state: str
+    triggered_by: List[str] = field(default_factory=list)
+    reset_required: bool = False
+    reason: str = ""
+    next_safe_action: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
