@@ -92,6 +92,8 @@ telemetry/operator_relief/evidence.jsonl
 
 The ledger is designed to remove manual log transfer. Anthony should not need to copy branch state, dirty status, validator result, or next-action context into another tool just to ask what happened.
 
+Runtime evidence under `approval/operator_relief/pending/*.json` and `telemetry/operator_relief/*.jsonl` is ignored by Git. The `.gitkeep` files remain trackable so the runtime folders exist without committing generated evidence.
+
 ## Packet Drafts
 
 Packet drafts include Codex prompt structure, resolved branch, allowed paths, forbidden paths, validator chain, stop point, and final report format.
