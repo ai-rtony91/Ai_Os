@@ -323,6 +323,109 @@ class SupervisorSummary:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class BrokerSandboxMode:
+    SANDBOX_MODEL_ONLY = "SANDBOX_MODEL_ONLY"
+    PAPER_ONLY_COMPATIBLE = "PAPER_ONLY_COMPATIBLE"
+    LIVE_BLOCKED = "LIVE_BLOCKED"
+
+
+class SandboxOrderSide:
+    BUY = "BUY"
+    SELL = "SELL"
+
+
+class SandboxOrderType:
+    MARKET = "MARKET"
+    LIMIT = "LIMIT"
+    STOP = "STOP"
+
+
+class SandboxOrderStatus:
+    PENDING = "PENDING"
+    ACCEPTED = "ACCEPTED"
+    REJECTED = "REJECTED"
+    FILLED = "FILLED"
+    CANCELLED = "CANCELLED"
+    LIVE_BLOCKED = "LIVE_BLOCKED"
+
+
+class SandboxRejectReason:
+    NONE = "NONE"
+    INVALID_SYMBOL = "INVALID_SYMBOL"
+    INVALID_SIDE = "INVALID_SIDE"
+    INVALID_ORDER_TYPE = "INVALID_ORDER_TYPE"
+    INVALID_UNITS = "INVALID_UNITS"
+    INVALID_PRICE = "INVALID_PRICE"
+    INVALID_MODE = "INVALID_MODE"
+    LIVE_TRADING_BLOCKED = "LIVE_TRADING_BLOCKED"
+    CREDENTIALS_NOT_ALLOWED = "CREDENTIALS_NOT_ALLOWED"
+    NETWORK_NOT_ALLOWED = "NETWORK_NOT_ALLOWED"
+    RISK_BLOCKED = "RISK_BLOCKED"
+
+
+class BrokerReadinessStatus:
+    MODEL_READY = "MODEL_READY"
+    NOT_LIVE_READY = "NOT_LIVE_READY"
+    BLOCKED_FOR_LIVE = "BLOCKED_FOR_LIVE"
+    REQUIRES_SEPARATE_AUTHORIZATION = "REQUIRES_SEPARATE_AUTHORIZATION"
+
+
+@dataclass
+class SandboxOrderRequest:
+    mode: str
+    symbol: str
+    side: str
+    order_type: str
+    units: float
+    requested_price: Optional[float] = None
+    stop_loss: Optional[float] = None
+    take_profit: Optional[float] = None
+    client_order_id: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SandboxOrderResponse:
+    mode: str
+    client_order_id: str
+    sandbox_order_id: str
+    symbol: str
+    side: str
+    order_type: str
+    requested_units: float
+    filled_units: float
+    requested_price: Optional[float]
+    fill_price: Optional[float]
+    status: str
+    reject_reason: str
+    message: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SandboxAccountState:
+    mode: str
+    starting_balance_usd: float
+    current_balance_usd: float
+    open_order_count: int = 0
+    filled_order_count: int = 0
+    rejected_order_count: int = 0
+    live_trading_enabled: bool = False
+    credentials_loaded: bool = False
+    network_enabled: bool = False
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class BrokerReadinessCheck:
+    mode: str
+    status: str
+    checks: List[str] = field(default_factory=list)
+    blocked_reasons: List[str] = field(default_factory=list)
+    next_safe_action: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
