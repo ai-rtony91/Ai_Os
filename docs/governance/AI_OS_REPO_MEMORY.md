@@ -196,3 +196,19 @@ Future-assessment checklist:
 - Expected outcome: Pi5, Morning Brief, file notifications, and Telegram dry-run classification can show human-needed review without waking Anthony unless safe continuation is blocked.
 - Regression checks: Confirm future notifier and bridge outputs do not label `NEEDS_APPROVAL` as SOS and do not include `#AIOS_SOS` for non-SOS review states.
 - Reopen conditions: Reopen if routine approvals, stale warnings, or display alerts wake Anthony, or if true `BLOCKED` states fail to surface as SOS.
+
+#### Pi5 Device Health Baseline
+
+- Problem discovered: Pi5/NVMe health needed a retrievable baseline after suspected corruption.
+- Evidence: Pi5 is online at `192.168.1.167`, NVMe is mounted, disk usage is low, and read-only scans found no obvious active ext4/NVMe corruption.
+- Process fix: Keep a sanitized device-health note at `docs/devices/PI5_DEVICE_HEALTH.md`; future checks compare against this baseline.
+- Regression checks: Do not run repair commands or GPIO/motor actions from repo guidance.
+- Reopen conditions: Reopen if I/O errors, ext4 errors, read-only remounts, boot failures, SMART failures, or unexplained data loss appear.
+
+#### Forex Paper Bot Contract
+
+- Problem discovered: Forex Paper Lab had report-only planning fragments but no canonical paper bot build contract.
+- Fix applied: Added `docs/AI_OS/trading_laboratory/AI_OS_FOREX_PAPER_BOT_CONTRACT.md` as a docs-only contract before runner/runtime work.
+- Expected outcome: Future Forex work starts from fixture price input, paper signal intake, validation, risk gate, paper ledger, report output, Pi5 display, and validator boundaries.
+- Regression checks: Future Forex work must remain paper-only unless separately approved.
+- Reopen conditions: Reopen if broker/OANDA/live market/real order/webhook paths appear in a paper lane.
