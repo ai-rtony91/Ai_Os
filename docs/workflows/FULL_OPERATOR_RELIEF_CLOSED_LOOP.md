@@ -148,6 +148,52 @@ The CLI hook prints a DRY_RUN mode banner, shows the exact Python module, verifi
 
 If `-TaskJson` is missing or the file does not exist, the hook prints usage and exits blocked. It does not write telemetry, write approval queue files, commit, push, merge, call OpenAI, call Codex recursively, or start a daemon.
 
+## Operator Relief Autonomy Spine v1
+
+Autonomy Spine v1 is the first bounded in-memory autonomy path for Operator Relief. It is local, DRY_RUN-first, non-live, and non-executable by default.
+
+Autonomy ladder:
+
+1. Discover bounded local task JSON.
+2. Reject malformed, placeholder, unsupported, forbidden-path, secret, broker/API, live-trading, or unsafe tasks.
+3. Generate a complete non-executable AI_OS packet draft.
+4. Build an approved v1 validator plan.
+5. Classify approval as `AUTO_ALLOWED`, `APPROVAL_REQUIRED`, or `BLOCKED`.
+6. Run approved internal validators only when policy and approval state allow it.
+7. Evaluate commit/push recommendation without executing Git.
+8. Plan next-run metadata without starting a daemon, service, watcher, cron job, or Task Scheduler job.
+9. Process up to a bounded `max_steps` count and stop on the first safety or approval condition.
+
+What is automated now:
+
+- `automation.operator_relief.autonomy_task_discovery` reads explicit task files or the local task input folder.
+- `automation.operator_relief.autonomy_packet_generator` builds non-executable packet drafts with required AI_OS fields.
+- `automation.operator_relief.autonomy_validator_orchestrator` plans and runs only approved v1 validators from the existing validator router.
+- `automation.operator_relief.autonomy_approval_processor` classifies autonomous safety state.
+- `automation.operator_relief.autonomy_controller` composes discovery-ready tasks, policy, handoff, packet draft, validators, schedule metadata, and commit/push recommendation into one JSON-safe report.
+- `automation.operator_relief.autonomy_loop` processes an in-memory task list with a default `max_steps=3`.
+- `automation.operator_relief.autonomy_scheduler` returns schedule metadata only.
+- `automation.operator_relief.autonomy_commit_push_gate` returns commit/push recommendation status only.
+
+What remains blocked:
+
+- Live trading, broker/API/order execution, and secrets.
+- OpenAI API calls and recursive Codex calls.
+- Daemons, background watchers, services, cron, and Task Scheduler registration.
+- Shell passthrough and arbitrary command execution.
+- Merge, rebase, force-push, commit execution, and push execution.
+- Telemetry writes and approval queue writes from the autonomy spine.
+- Protected-path autonomy without explicit human approval.
+
+Safe commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/autonomy_task_discovery.py automation/operator_relief/autonomy_packet_generator.py automation/operator_relief/autonomy_validator_orchestrator.py automation/operator_relief/autonomy_approval_processor.py automation/operator_relief/autonomy_commit_push_gate.py automation/operator_relief/autonomy_scheduler.py automation/operator_relief/autonomy_controller.py automation/operator_relief/autonomy_loop.py
+git diff --check
+git status --short --branch
+```
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
