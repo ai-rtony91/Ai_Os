@@ -116,6 +116,26 @@ Non-executing handoff scaffolding belongs in `automation/operator_relief/full_au
 
 The handoff scaffold must not call Codex recursively, start a daemon, commit, push, merge, or bypass `AGENTS.md`.
 
+## Full-Auto Runner DRY_RUN v1
+
+The Full-Auto Runner DRY_RUN v1 is the non-mutating bridge between the policy layer and any future execution lane:
+
+```powershell
+python -m automation.operator_relief.run_full_auto_dry_run
+```
+
+The runner consumes a real `FullAutoTask` JSON payload from stdin, or from `--task-json` when a concrete task file path is provided. It collects current read-only repo state, calls `evaluate_full_auto_policy()`, and prints one machine-readable JSON final report.
+
+Runner behavior:
+
+- Builds a handoff summary only when policy returns `FULL_AUTO_ALLOWED` or `FULL_AUTO_REQUIRES_APPROVAL`.
+- Produces no handoff when policy returns `FULL_AUTO_BLOCKED`.
+- Reports `approval_needed=true` when human approval is required.
+- Writes no repo files, telemetry files, or approval queue files.
+- Invokes no Codex worker, recursive worker, OpenAI API, daemon, commit, push, or merge path.
+
+The report includes policy status, repo state, handoff summary when present, approval/block status, and explicit safety booleans proving the run stayed DRY_RUN-only.
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
