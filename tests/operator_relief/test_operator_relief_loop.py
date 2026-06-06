@@ -6,7 +6,12 @@ from pathlib import Path
 
 from automation.operator_relief.approval_queue import build_approval_item, write_approval_item
 from automation.operator_relief.evidence_ledger import append_evidence
-from automation.operator_relief.notification_gate import emit_notification, should_notify
+from automation.operator_relief.notification_gate import (
+    DEFAULT_ADB_SOS_SCRIPT,
+    emit_notification,
+    send_adb_sos,
+    should_notify,
+)
 from automation.operator_relief.packet_builder import build_packet_draft
 from automation.operator_relief.repo_state import RepoState
 from automation.operator_relief.task_classifier import classify_state
@@ -66,6 +71,118 @@ def test_notification_gate_emits_approval_needed(tmp_path: Path) -> None:
     assert "approval_needed" in path.read_text(encoding="utf-8")
 
 
+def test_clean_success_does_not_call_adb_sos(tmp_path: Path) -> None:
+    calls: list[str] = []
+
+    def fake_runner() -> dict[str, object]:
+        calls.append("called")
+        return {"enabled": True, "attempted": True, "success": True}
+
+    event = {"classification": "routine_success", "approval_needed": False, "safe_next_action": "none"}
+
+    assert emit_notification(
+        event,
+        tmp_path / "notifications.jsonl",
+        print_to_console=False,
+        send_adb_sos_enabled=True,
+        adb_sos_runner=fake_runner,
+    ) is None
+    assert calls == []
+
+
+def test_approval_needed_can_call_adb_sos_when_enabled(tmp_path: Path) -> None:
+    calls: list[str] = []
+
+    def fake_runner() -> dict[str, object]:
+        calls.append("called")
+        return {"enabled": True, "attempted": True, "success": True, "exit_code": 0}
+
+    event = {"classification": "approval_needed", "approval_needed": True, "safe_next_action": "review"}
+    path = emit_notification(
+        event,
+        tmp_path / "notifications.jsonl",
+        print_to_console=False,
+        send_adb_sos_enabled=True,
+        adb_sos_runner=fake_runner,
+    )
+
+    assert path is not None
+    assert calls == ["called"]
+    record = json.loads(path.read_text(encoding="utf-8").splitlines()[0])
+    assert record["adb_sos"]["success"] is True
+
+
+def test_approval_needed_does_not_call_adb_sos_when_disabled(tmp_path: Path) -> None:
+    calls: list[str] = []
+
+    def fake_runner() -> dict[str, object]:
+        calls.append("called")
+        return {"enabled": True, "attempted": True, "success": True}
+
+    event = {"classification": "approval_needed", "approval_needed": True, "safe_next_action": "review"}
+    path = emit_notification(
+        event,
+        tmp_path / "notifications.jsonl",
+        print_to_console=False,
+        send_adb_sos_enabled=False,
+        adb_sos_runner=fake_runner,
+    )
+
+    assert path is not None
+    assert calls == []
+    record = json.loads(path.read_text(encoding="utf-8").splitlines()[0])
+    assert record["adb_sos"]["attempted"] is False
+
+
+def test_adb_sos_command_path_points_to_android_script(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeCompletedProcess:
+        returncode = 0
+        stdout = "ok"
+        stderr = ""
+
+    def fake_run(command, capture_output, text, shell, check):
+        captured["command"] = command
+        captured["shell"] = shell
+        return FakeCompletedProcess()
+
+    import automation.operator_relief.notification_gate as notification_gate
+
+    monkeypatch.setattr(notification_gate.subprocess, "run", fake_run)
+    result = send_adb_sos()
+
+    assert result["success"] is True
+    assert DEFAULT_ADB_SOS_SCRIPT.as_posix() in captured["command"]
+    assert captured["shell"] is False
+
+
+def test_adb_sos_failure_is_captured_as_notification_evidence(monkeypatch, tmp_path: Path) -> None:
+    class FakeCompletedProcess:
+        returncode = 30
+        stdout = "posted"
+        stderr = "not visible"
+
+    def fake_run(command, capture_output, text, shell, check):
+        return FakeCompletedProcess()
+
+    import automation.operator_relief.notification_gate as notification_gate
+
+    monkeypatch.setattr(notification_gate.subprocess, "run", fake_run)
+    event = {"classification": "approval_needed", "approval_needed": True, "safe_next_action": "review"}
+    path = emit_notification(
+        event,
+        tmp_path / "notifications.jsonl",
+        print_to_console=False,
+        send_adb_sos_enabled=True,
+    )
+
+    record = json.loads(path.read_text(encoding="utf-8").splitlines()[0])
+    assert record["adb_sos"]["success"] is False
+    assert record["adb_sos"]["exit_code"] == 30
+    assert "not visible" in record["adb_sos"]["stderr_tail"]
+
+
 def test_packet_builder_uses_resolved_branch_not_hardcoded_main() -> None:
     draft = build_packet_draft(FakeRepoState())
 
@@ -117,3 +234,10 @@ def test_no_live_trading_broker_secret_strings_are_implemented() -> None:
 
     for term in blocked_runtime_terms:
         assert term not in combined
+
+
+def test_telegram_is_not_referenced_or_required() -> None:
+    root = Path("automation/operator_relief")
+    combined = "\n".join(path.read_text(encoding="utf-8").lower() for path in root.glob("*.py"))
+
+    assert "telegram" not in combined

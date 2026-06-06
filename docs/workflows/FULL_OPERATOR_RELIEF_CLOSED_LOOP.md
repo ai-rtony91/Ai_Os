@@ -44,6 +44,34 @@ The notification gate emits only for:
 
 Clean routine success is recorded as evidence but does not notify.
 
+## Android ADB SOS Notification Rail
+
+Operator Relief can optionally use the existing Android SOS wake rail:
+
+```text
+tools/android/Send-AiosAdbSosWake.ps1
+```
+
+The existing script posts the message:
+
+```text
+#AIOS_SOS WAKE
+```
+
+This is not Telegram. It uses the existing Android ADB notification path.
+
+Enable it with:
+
+```powershell
+python -m automation.operator_relief.run_operator_relief_loop --send-adb-sos
+```
+
+The loop sends SOS only when Anthony is needed: approval needed, validator failed, packet invalid, branch mismatch, dirty worktree, protected path touched, forbidden action requested, or loop failure.
+
+Clean routine success does not send SOS.
+
+This requires the existing ADB setup and Android target availability. If ADB or the Android target is unavailable, the loop records the failure in `telemetry/operator_relief/notifications.jsonl`, prints a local warning, and continues safely.
+
 ## Approval Queue
 
 Approval items are written to:

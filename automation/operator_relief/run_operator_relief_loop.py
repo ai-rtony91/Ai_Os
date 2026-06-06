@@ -7,6 +7,7 @@ for human-needed events, prints a next safe action, and exits.
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from .repo_state import collect_repo_state
 from .task_classifier import classify_state
 
 
-def run_once(repo_root: Path | None = None) -> dict[str, object]:
+def run_once(repo_root: Path | None = None, send_adb_sos: bool = False) -> dict[str, object]:
     repo_state = collect_repo_state(repo_root)
     classification = classify_state(repo_state)
     packet_draft = build_packet_draft(repo_state)
@@ -47,7 +48,7 @@ def run_once(repo_root: Path | None = None) -> dict[str, object]:
 
     notification_path = None
     if should_notify(classification):
-        notification_path = emit_notification(classification)
+        notification_path = emit_notification(classification, send_adb_sos_enabled=send_adb_sos)
 
     return {
         "repo_state": repo_state.to_dict(),
@@ -55,17 +56,26 @@ def run_once(repo_root: Path | None = None) -> dict[str, object]:
         "evidence_path": str(evidence_path),
         "approval_path": str(approval_path) if approval_path else None,
         "notification_path": str(notification_path) if notification_path else None,
+        "adb_sos_enabled": send_adb_sos,
         "packet_draft_executable": packet_draft["executable"],
         "executable": False,
     }
 
 
 def main() -> int:
-    result = run_once()
+    parser = argparse.ArgumentParser(description="Run the one-shot AI_OS operator-relief loop.")
+    parser.add_argument(
+        "--send-adb-sos",
+        action="store_true",
+        help="Send the existing Android ADB SOS wake notification only when human attention is required.",
+    )
+    args = parser.parse_args()
+    result = run_once(send_adb_sos=args.send_adb_sos)
     print("AI_OS Operator Relief Closed Loop v1")
     print("Mode: LOCAL_REPO_WORKFLOW_ONLY")
     print("Codex call: disabled")
     print("OpenAI API call: disabled")
+    print(f"ADB SOS wake: {'enabled' if args.send_adb_sos else 'disabled'}")
     print("Auto-commit: disabled")
     print("Auto-push: disabled")
     print("Next safe action: " + result["classification"]["safe_next_action"])
