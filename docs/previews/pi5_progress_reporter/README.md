@@ -4,7 +4,19 @@ This folder contains a static local screen-mode preview for the AI_OS Pi5 Progre
 
 ## How to open
 
-Open `PI5_PROGRESS_REPORTER_PREVIEW.html` in a browser from the repo checkout.
+Best local preview path:
+
+```powershell
+python -m http.server 8765
+```
+
+Then open:
+
+```text
+http://localhost:8765/docs/previews/pi5_progress_reporter/PI5_PROGRESS_REPORTER_PREVIEW.html
+```
+
+Opening `PI5_PROGRESS_REPORTER_PREVIEW.html` directly from the repo checkout can still work as a static fallback preview.
 
 The preview uses large touch-friendly tabs:
 
@@ -22,6 +34,8 @@ The page tries to read:
 ```
 
 Some browsers block local `file://` JSON fetches. When that happens, the preview uses a clearly marked fallback sample copied from the current `AIOS_PI5_PROGRESS_REPORT.v1` shape.
+
+The preview refreshes from the JSON report every 8 seconds when loaded through a local server. It shows the last refresh time, the data source (`JSON`, `FALLBACK`, or `ERROR`), and a stale-data warning when the report timestamp is missing, invalid, older than 15 minutes, or the JSON fetch fails.
 
 ## Boundary
 

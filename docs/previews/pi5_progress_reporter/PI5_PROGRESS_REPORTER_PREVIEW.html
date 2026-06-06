@@ -297,6 +297,13 @@
       display: block;
     }
 
+    .refresh-status {
+      color: var(--muted);
+      font-size: clamp(15px, 2.1vw, 19px);
+      font-weight: 750;
+      line-height: 1.25;
+    }
+
     .safety-item {
       min-height: 92px;
       border: 1px solid var(--line);
@@ -353,6 +360,7 @@
         <span class="badge gray">DISPLAY ONLY</span>
         <span class="badge gray">NOT APPROVAL AUTHORITY</span>
         <span class="badge gray">NO MOTOR / GPIO / TRADING CONTROL</span>
+        <span id="refresh-source" class="badge gray">SOURCE: LOADING</span>
       </div>
     </header>
 
@@ -392,6 +400,7 @@
             </div>
           </div>
           <p id="last-updated" class="summary">Last updated: unknown</p>
+          <p id="refresh-status" class="refresh-status">Last refresh: not yet refreshed | Data source: LOADING</p>
         </article>
       </div>
       <div id="stale-strip" class="stale-strip"></div>
@@ -541,6 +550,8 @@
     };
 
     const jsonPath = "../../../telemetry/morning_digest/PI5_PROGRESS_REPORT_LATEST.json";
+    const refreshIntervalMs = 8000;
+    const staleThresholdMs = 15 * 60 * 1000;
     const screenOrder = ["status", "approval", "forex", "workers", "brief", "safety"];
 
     function percentText(value) {
@@ -587,11 +598,37 @@
       `;
     }
 
-    function renderReport(report, sourceMode) {
+    function staleInfo(report, sourceMode, loadError) {
+      if (sourceMode === "ERROR") {
+        return { stale: true, reason: `JSON fetch failed; rendering fallback data. ${loadError || ""}`.trim() };
+      }
+
+      const raw = report.last_updated;
+      if (!raw) {
+        return { stale: true, reason: "last_updated is missing." };
+      }
+
+      const parsed = new Date(raw);
+      if (Number.isNaN(parsed.getTime())) {
+        return { stale: true, reason: `last_updated is invalid: ${raw}` };
+      }
+
+      const ageMs = Date.now() - parsed.getTime();
+      if (ageMs > staleThresholdMs) {
+        const ageMinutes = Math.round(ageMs / 60000);
+        return { stale: true, reason: `last_updated is ${ageMinutes} minutes old.` };
+      }
+
+      return { stale: false, reason: "Data refreshed within stale threshold." };
+    }
+
+    function renderReport(report, sourceMode, loadError = "") {
       const humanNeeded = Boolean(report.human_interaction_required);
       const blockers = Number(report.blockers_count) || 0;
       const approvals = Number(report.active_approval_count) || 0;
-      const warnings = report.stale_state_warnings || [];
+      const stale = staleInfo(report, sourceMode, loadError);
+      const warnings = [...(report.stale_state_warnings || [])];
+      if (stale.stale) warnings.unshift(stale.reason);
       const statusCard = cardByTitle(report, "main") || {};
       const workerCard = cardByTitle(report, "worker") || {};
       const forexCard = cardByTitle(report, "forex") || {};
@@ -603,6 +640,7 @@
       setText("blockers-count", blockers);
       setText("approvals-count", approvals);
       setText("last-updated", `Last updated: ${report.last_updated || "unknown"} | Source: ${sourceMode}`);
+      setText("refresh-status", `Last refresh: ${new Date().toLocaleTimeString()} | Data source: ${sourceMode} | Refresh interval: 8 seconds`);
       setText("approval-count-large", approvals);
       setText("approval-clearance", percentText(report.approval_clearance_percent));
       setText("forex-percent", percentText(report.forex_bot_build_percent));
@@ -622,6 +660,10 @@
       const briefPill = document.getElementById("brief-pill");
       briefPill.textContent = warnings.length ? `STALE DATA WARNING: ${warnings.length}` : "NO STALE WARNING";
       briefPill.className = `badge ${warnings.length ? "yellow" : "green"}`;
+
+      const refreshSource = document.getElementById("refresh-source");
+      refreshSource.textContent = `SOURCE: ${sourceMode}`;
+      refreshSource.className = `badge ${sourceMode === "JSON" ? "green" : sourceMode === "FALLBACK" ? "yellow" : "red"}`;
 
       const humanPanel = document.getElementById("human-panel");
       humanPanel.classList.toggle("clear", !humanNeeded);
@@ -662,11 +704,12 @@
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         renderReport(await response.json(), "JSON");
       } catch (error) {
-        renderReport(fallbackReport, "FALLBACK");
+        renderReport(fallbackReport, "ERROR", error.message);
       }
     }
 
     loadReport();
+    setInterval(loadReport, refreshIntervalMs);
   </script>
 </body>
 </html>
