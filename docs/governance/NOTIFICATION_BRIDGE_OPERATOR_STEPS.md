@@ -40,6 +40,13 @@ SOS does not include:
 Display surfaces must separate `display_alert` from `sos_wake_required`. Pi5 may show
 human-needed status without waking Anthony unless `sos_wake_required` is true.
 
+`NEEDS_APPROVAL` is a review/display condition. It may set `display_alert: true`,
+but it must set `sos_wake_required: false` and `wake_class: REVIEW_ONLY` unless a
+protected action was attempted or safe continuation is blocked.
+
+`BLOCKED` is SOS/wake-worthy when safe continuation is blocked. It must set
+`display_alert: true`, `sos_wake_required: true`, and `wake_class: SOS`.
+
 Wake-worthy Telegram messages must include the exact tag:
 
 ```text

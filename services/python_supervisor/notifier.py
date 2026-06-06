@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Any
 
 
-BLOCKING_STATUSES = {"BLOCKED", "NEEDS_APPROVAL"}
+DISPLAY_ALERT_STATUSES = {"BLOCKED", "NEEDS_APPROVAL"}
+FILE_NOTIFY_STATUSES = {"BLOCKED"}
 SOS_WAKE_STATUSES = {"BLOCKED"}
 TELEGRAM_ENV_VARS = ("AIOS_TG_BOT_TOKEN", "AIOS_TG_CHAT_ID")
 
@@ -48,6 +49,22 @@ def status_from_state(state: dict[str, Any]) -> str:
     return str(raw).upper()
 
 
+def display_alert_required(status: str) -> bool:
+    return status in DISPLAY_ALERT_STATUSES
+
+
+def sos_wake_required(status: str) -> bool:
+    return status in SOS_WAKE_STATUSES
+
+
+def wake_class(status: str) -> str:
+    if sos_wake_required(status):
+        return "SOS"
+    if display_alert_required(status):
+        return "REVIEW_ONLY"
+    return "NO_WAKE"
+
+
 def notification_key(state: dict[str, Any]) -> str:
     status = status_from_state(state)
     generated = str(state.get("generated_at") or "")
@@ -69,6 +86,9 @@ def render_sos(state: dict[str, Any]) -> str:
         "",
         f"- Generated: {utc_now()}",
         f"- Bridge generated_at: {state.get('generated_at', 'UNKNOWN')}",
+        "- display_alert: true",
+        "- sos_wake_required: true",
+        "- wake_class: SOS",
         f"- Plain summary: {summary}",
         f"- Waiting approvals: {approval_count}",
         "- Must see:",
@@ -125,8 +145,10 @@ def report_telegram_dry_run(state: dict[str, Any]) -> int:
         print(f"{name}={value_status}")
     print("LIVE_SEND=BLOCKED")
     print("SECRET_VALUES_PRINTED=NO")
+    print(f"display_alert={str(display_alert_required(status)).lower()}")
+    print(f"sos_wake_required={str(sos_wake_required(status)).lower()}")
 
-    if status not in SOS_WAKE_STATUSES:
+    if not sos_wake_required(status):
         print("WAKE_CLASS=NO_WAKE")
         print("REASON=non-SOS status must not wake the Human Owner")
         return 0
@@ -209,11 +231,14 @@ def main() -> int:
             return 2
         return report_telegram_dry_run(state)
 
-    if status not in BLOCKING_STATUSES:
+    if status not in FILE_NOTIFY_STATUSES:
         if args.apply:
             write_json(last_path, {"last_status": status, "last_key": key, "updated_at": utc_now()})
-        print("STATUS=NO_BLOCKER")
+        print("STATUS=DISPLAY_ALERT_ONLY" if display_alert_required(status) else "STATUS=NO_BLOCKER")
         print(f"BRIDGE_STATUS={status}")
+        print(f"display_alert={str(display_alert_required(status)).lower()}")
+        print(f"sos_wake_required={str(sos_wake_required(status)).lower()}")
+        print(f"WAKE_CLASS={wake_class(status)}")
         return 0
 
     if previous.get("last_key") == key:
@@ -226,6 +251,9 @@ def main() -> int:
         print("STATUS=DRY_RUN_WOULD_NOTIFY")
         print(f"BRIDGE_STATUS={status}")
         print("CHANNEL=file")
+        print("display_alert=true")
+        print("sos_wake_required=true")
+        print("WAKE_CLASS=SOS")
         return 0
 
     target = write_file_channel(root, state)
