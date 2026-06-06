@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud","operator-relief")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -10,6 +10,7 @@
     [switch]$ApplyMission,
     [string]$MissionPath = "",
     [string]$TaskId = "",
+    [string]$TaskJson = "",
     [int]$Pr = 0,
     [switch]$ShowPrompt,
 
@@ -89,6 +90,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode control # show operator control loop cockpit"
         Write-Host ".\aios.ps1 -Mode finish-pr -Pr 273 # preview PR finish steps"
         Write-Host ".\aios.ps1 -Mode hud -Worker CLAUDE # preview worker HUD"
+        Write-Host ".\aios.ps1 -Mode operator-relief -TaskJson .\local_task.json # run Full-Auto DRY_RUN only"
     }
 
     "daily" {
@@ -133,6 +135,40 @@ switch ($Mode) {
 
     "hud" {
         powershell -NoProfile -ExecutionPolicy Bypass -File automation/window_identity/Show-AiOsWorkerHud.DRY_RUN.ps1 -Worker $Worker
+    }
+
+    "operator-relief" {
+        $moduleName = "automation.operator_relief.run_full_auto_dry_run"
+
+        Write-Host ""
+        Write-Host "== AI_OS Operator Relief Full-Auto DRY_RUN ==" -ForegroundColor Cyan
+        Write-Host "Mode: DRY_RUN"
+        Write-Host "Python module: $moduleName"
+        Write-Host "Safety: no commit, no push, no merge, no OpenAI API, no recursive Codex, no telemetry write, no approval queue write, no daemon."
+
+        if ([string]::IsNullOrWhiteSpace($TaskJson)) {
+            Write-Host ""
+            Write-Host "Usage:" -ForegroundColor Yellow
+            Write-Host ".\aios.ps1 -Mode operator-relief -TaskJson .\local_full_auto_task.json"
+            Write-Host ""
+            Write-Host "BLOCKED: -TaskJson must point to a real FullAutoTask JSON file." -ForegroundColor Red
+            exit 1
+        }
+
+        if (-not (Test-Path -LiteralPath $TaskJson -PathType Leaf)) {
+            Write-Host ""
+            Write-Host "Usage:" -ForegroundColor Yellow
+            Write-Host ".\aios.ps1 -Mode operator-relief -TaskJson .\local_full_auto_task.json"
+            Write-Host ""
+            Write-Host "BLOCKED: task JSON file not found: $TaskJson" -ForegroundColor Red
+            exit 1
+        }
+
+        $resolvedTaskJson = (Resolve-Path -LiteralPath $TaskJson).Path
+        Write-Host "Task JSON: $resolvedTaskJson"
+        Write-Host "Running: python -m $moduleName --task-json $resolvedTaskJson"
+        python -m $moduleName --task-json $resolvedTaskJson
+        exit $LASTEXITCODE
     }
 
     "runtime" {

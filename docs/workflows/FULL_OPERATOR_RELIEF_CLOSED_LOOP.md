@@ -136,6 +136,18 @@ Runner behavior:
 
 The report includes policy status, repo state, handoff summary when present, approval/block status, and explicit safety booleans proving the run stayed DRY_RUN-only.
 
+## Operator CLI Hook v1
+
+The main AI_OS control surface exposes the same Full-Auto DRY_RUN runner:
+
+```powershell
+.\aios.ps1 -Mode operator-relief -TaskJson .\local_full_auto_task.json
+```
+
+The CLI hook prints a DRY_RUN mode banner, shows the exact Python module, verifies that `-TaskJson` points to a real file, then runs only `python -m automation.operator_relief.run_full_auto_dry_run --task-json` with the resolved concrete task file path.
+
+If `-TaskJson` is missing or the file does not exist, the hook prints usage and exits blocked. It does not write telemetry, write approval queue files, commit, push, merge, call OpenAI, call Codex recursively, or start a daemon.
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
