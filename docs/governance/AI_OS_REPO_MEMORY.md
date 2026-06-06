@@ -159,3 +159,13 @@ Future-assessment checklist:
 - Accepted risk: A display alert can still look urgent if a consumer does not distinguish `display_alert` from `sos_wake_required`.
 - Regression checks: Confirm future Morning Brief, Pi5, Night Supervisor, and notification logic distinguish `display_alert` from `sos_wake_required`; confirm `NEEDS_APPROVAL`, stale warnings, historical noise, and recommendation-only defers do not wake Anthony.
 - Reopen conditions: Reopen if Anthony is interrupted for routine warnings or noise, or if protected-action attempts fail to alert.
+
+#### Clipboard Evidence Intake Dedup
+
+- Problem discovered: Clipboard evidence captures can be over-counted or overwritten.
+- Root cause: Timestamp-only filenames can collide on same-second saves, and file-level counting misses content-level duplicates when generated capture headers differ.
+- Fix applied: Added a repo-tracked local-install template at `tools/evidence/Save-Clipboard-To-AIOS-Evidence.template.ps1` and workflow documentation at `docs/workflows/AI_OS_EVIDENCE_INTAKE_DEDUP.md`. The template uses collision-safe filenames, `CreateNew` writes, metadata sidecars, `raw_file_sha256`, `normalized_body_sha256`, and strong-sentence duplicate classification.
+- Expected outcome: AI_OS can reproduce the corrected clipboard evidence behavior without committing private Desktop evidence captures or metadata sidecars.
+- Accepted risk: Live local evidence folders still require privacy review and must not be imported into repo telemetry without explicit approval.
+- Regression checks: Future evidence metrics must count canonical `normalized_body_sha256` groups, not raw files; short 2-5 word overlap must remain `WEAK_SIMILARITY_IGNORE`; strong sentence overlap with different body hashes must remain `PARTIAL_OVERLAP_STRONG_SENTENCE`.
+- Reopen conditions: Reopen if duplicate captures inflate telemetry, same-second captures overwrite, raw evidence is imported into the repo without approval, or weak phrase overlap is treated as duplicate content.
