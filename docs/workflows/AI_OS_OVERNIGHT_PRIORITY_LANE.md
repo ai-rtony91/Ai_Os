@@ -67,7 +67,12 @@ Output requirements:
 - `ranked_tasks` must be ordered by priority, readiness, safety, and dependency order.
 - Every task must have exactly one `task_class`.
 - Candidate Codex packets must preserve allowed paths, forbidden paths, validator chain, and stop point.
+- Candidate Codex packets must include completeness status, missing evidence, and any unresolved approval point.
 - Morning Brief and Pi5 display summaries are display-only and must not imply execution authority.
+
+## Quality Clause
+
+The Overnight Priority Lane must rank and packetize work by professional-grade standards. `DO_NOW` work must be clear, small, validated, and non-protected unless a separate approval explicitly authorizes the protected step. Low-quality, vague, broad, stale, duplicate-authority, or missing-validator packets should be classified `WAIT` or `BLOCKED`, not executed.
 
 ## Task Classes
 

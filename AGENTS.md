@@ -182,6 +182,28 @@ Tier 5 - PRODUCTION_OR_LIVE:
 
 The tier model does not weaken commit, push, merge, trading, broker/API, secret, production, destructive cleanup, protected-action, validator, or approval gates.
 
+## Industrial-Standard / Professional-Grade Quality Bar
+
+AI_OS treats industrial-standard, professional-grade work as an internal operating target, not as a legal, compliance, or external certification claim.
+
+Every AI_OS packet and worker output should be scoped, traceable, validated, safety-bounded, and reversible where practical. Work should stay to one topic, one lane, one branch or worktree, and one PR unless the Human Owner explicitly approves a broader scope. Workers must avoid duplicate authority, raw/private data leakage, feature creep, hidden authority expansion, and casual placeholder docs unless the artifact is clearly labeled as draft.
+
+Minimum quality expectations for executable packets and APPLY work:
+
+- exact allowed paths.
+- exact forbidden paths.
+- explicit stop point.
+- validator chain.
+- final report format.
+- clear safe next action.
+- evidence or source readback before mutation.
+- no duplicate authority or parallel governance head.
+- no vague "maybe" output when exact repo evidence is available.
+- no "works on my machine" claim without validation evidence.
+- no protected action without explicit approval.
+
+Low-quality packets with vague goals, missing validators, mixed scopes, invented state, placeholder paths, unbounded protected actions, or unclear ownership must be classified `WAIT`, `BLOCKED`, or `REQUIRES_APPROVAL` instead of executed.
+
 Placeholder requests must not produce Codex packets. If a request contains placeholders such as `@filename`, `path/to/file`, `[REAL-FILENAME]`, `{feature}`, `TBD`, `TODO`, or example paths, ChatGPT, Codex, and AI_OS workers must stop before packet generation and ask for the real field in one sentence.
 
 Exact required response for placeholder file requests:
