@@ -14,6 +14,7 @@ from automation.forex_engine.models import (
 )
 from automation.forex_engine.paper_execution import PaperExecutionEngine
 from automation.forex_engine.risk import RiskEngine
+from automation.forex_engine.signal_rules import SPRINT_4_STRATEGY_NAME, generate_signals_from_candles
 
 
 STOP_LOSS = "STOP_LOSS"
@@ -29,7 +30,7 @@ class BacktestEngine:
         self.journal_writer = journal_writer
         self.paper_execution_engine = PaperExecutionEngine(config, risk_engine, journal_writer)
 
-    def run_backtest(self, candles, backtest_config=None):
+    def run_backtest(self, candles, backtest_config=None, signal_provider=None):
         if not candles:
             raise ValueError("Backtest candles must not be empty.")
         validate_candle_sequence(candles)
@@ -54,23 +55,27 @@ class BacktestEngine:
         signals_blocked = 0
         previous_candle = None
 
-        for candle in limited_candles:
+        for index, candle in enumerate(limited_candles):
             evaluate_open_trades_against_candle(paper_engine, candle)
-            signal = generate_demo_signal_from_candle(candle, previous_candle, self.config)
+            signals = self._signals_for_candle(
+                limited_candles[: index + 1],
+                candle,
+                previous_candle,
+                base_config,
+                signal_provider,
+            )
             previous_candle = candle
-            if signal is None:
-                continue
-
-            signals_generated += 1
-            assessment = self.confidence_engine.score_signal(signal)
-            if not assessment.allowed:
-                signals_blocked += 1
-                continue
-            try:
-                paper_engine.submit_signal(signal, assessment)
-                signals_accepted += 1
-            except ValueError:
-                signals_blocked += 1
+            for signal in signals:
+                signals_generated += 1
+                assessment = self.confidence_engine.score_signal(signal)
+                if not assessment.allowed:
+                    signals_blocked += 1
+                    continue
+                try:
+                    paper_engine.submit_signal(signal, assessment)
+                    signals_accepted += 1
+                except ValueError:
+                    signals_blocked += 1
 
         close_remaining_trades_at_end(paper_engine, limited_candles[-1])
         return build_backtest_result(
@@ -81,6 +86,15 @@ class BacktestEngine:
             signals_blocked=signals_blocked,
             paper_execution_engine=paper_engine,
         )
+
+    def _signals_for_candle(self, candles_so_far, candle, previous_candle, backtest_config, signal_provider):
+        if signal_provider:
+            return signal_provider(candles_so_far, self.config)
+        if backtest_config.strategy_name == "sprint_4_intraday_rules_v1":
+            signals, _result = generate_signals_from_candles(candles_so_far, self.config)
+            return signals
+        signal = generate_demo_signal_from_candle(candle, previous_candle, self.config)
+        return [signal] if signal is not None else []
 
 
 def run_backtest(candles, backtest_config=None):

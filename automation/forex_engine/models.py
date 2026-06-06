@@ -45,6 +45,47 @@ class Candle:
 
 
 @dataclass
+class RegimeAssessment:
+    symbol: str
+    timeframe: str
+    trend_state: str
+    volatility_state: str
+    candle_count: int
+    lookback: int
+    reason: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SignalCandidate:
+    symbol: str
+    timeframe: str
+    direction: Optional[str]
+    entry_price: float
+    stop_loss: float
+    take_profit: float
+    strategy_name: str
+    regime_trend: str
+    regime_volatility: str
+    confidence_hint: int
+    reasons: List[str] = field(default_factory=list)
+    blocked_reason: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SignalRuleResult:
+    symbol: str
+    timeframe: str
+    mode: str
+    regime: RegimeAssessment
+    candidates: List[SignalCandidate] = field(default_factory=list)
+    accepted_count: int = 0
+    blocked_count: int = 0
+    summary_note: str = ""
+
+
+@dataclass
 class BacktestConfig:
     symbol: str
     timeframe: str
