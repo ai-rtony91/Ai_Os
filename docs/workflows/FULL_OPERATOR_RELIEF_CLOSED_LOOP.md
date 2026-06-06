@@ -100,6 +100,22 @@ Packet drafts include Codex prompt structure, resolved branch, allowed paths, fo
 
 Drafts are non-executable until Anthony approves them and replaces the placeholder execution token.
 
+## Full-Auto Policy and Handoff
+
+Operator Relief may add Codex Full-Auto as a future execution engine, but AI_OS remains the routing, approval, evidence, notification, and safety-control layer.
+
+Full-Auto eligibility belongs in `automation/operator_relief/full_auto_policy.py`. The policy returns:
+
+- `FULL_AUTO_ALLOWED`
+- `FULL_AUTO_REQUIRES_APPROVAL`
+- `FULL_AUTO_BLOCKED`
+
+The policy must consider risk tier, allowed paths, forbidden paths, validator availability, dirty state, branch state, protected path status, live-trading flags, credential flags, broker/API flags, commit permission, and push permission.
+
+Non-executing handoff scaffolding belongs in `automation/operator_relief/full_auto_handoff.py`. A handoff draft must include allowed paths, forbidden paths, validator chain, stop condition, evidence output path, notification trigger rules, and an explicit no-push/no-merge boundary unless separately approved.
+
+The handoff scaffold must not call Codex recursively, start a daemon, commit, push, merge, or bypass `AGENTS.md`.
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
