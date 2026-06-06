@@ -212,3 +212,18 @@ Future-assessment checklist:
 - Expected outcome: Future Forex work starts from fixture price input, paper signal intake, validation, risk gate, paper ledger, report output, Pi5 display, and validator boundaries.
 - Regression checks: Future Forex work must remain paper-only unless separately approved.
 - Reopen conditions: Reopen if broker/OANDA/live market/real order/webhook paths appear in a paper lane.
+
+#### Industrial-Standard / Professional-Grade Quality Bar
+
+- Problem discovered: AI_OS work can drift into rushed, vague, duplicated, or low-quality changes when multiple lanes are moving quickly.
+- Root cause: Quality expectations were implied but not strongly stated as an industrial-standard / professional-grade operating bar.
+- Process fix: Patch root/workflow guidance so every AI_OS packet must be scoped, validated, reversible where practical, non-duplicative, and safety-bounded before being considered ready.
+- Regression checks: Future packets must reject vague goals, missing validators, duplicate authority, mixed scopes, or unbounded protected actions.
+- Reopen conditions: Reopen if a future lane produces broad, low-quality, unvalidated, duplicate, or unsafe work under the excuse of speed.
+
+#### Telegram Tasker Control Surface
+
+- Problem discovered: The Telegram/Tasker bridge plan was too execution-forward for current AI_OS maturity.
+- Fix applied: Converted the plan to a staged control-surface roadmap with interface-only authority, command allowlist, identity gate, replay/idempotency requirements, and protected-action classification.
+- Regression checks: Telegram/Tasker must never directly execute repo, scheduler, worker, trading, GPIO, production, approval, commit, push, merge, or secret-handling actions.
+- Reopen conditions: Reopen if future Telegram/Tasker work bypasses Protected Action Readiness or treats chat commands as authority.

@@ -4,6 +4,8 @@ AI_OS is a governed AI-assisted operating environment for building, managing, an
 
 It is not an autonomous replacement for human judgment. It is a structured project operating system: humans set direction, AI workers perform bounded work, governance defines safe behavior, and validation proves what changed.
 
+AI_OS aims for industrial-standard, professional-grade repo hygiene and automation discipline: scoped changes, traceable evidence, validation before claims, and clear safety boundaries by default.
+
 Trading Lab is the first production vertical. It is paper-only. Live broker execution, real orders, broker credentials, and uncontrolled automation are blocked.
 
 ## Current Status

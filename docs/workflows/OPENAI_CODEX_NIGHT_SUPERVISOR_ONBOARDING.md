@@ -39,6 +39,10 @@ Default behavior:
 
 Night Supervisor is observe/report/queue by default. It may not APPLY, stage, commit, push, merge, launch workers, start loops, mutate queues, or write authority unless a later packet grants exact APPLY authority.
 
+## Quality Boundary
+
+OpenAI, Codex, and Night Supervisor must optimize for precise, high-quality work instead of speed alone. OpenAI recommends only from sanitized summaries, Codex executes exact packets only, and Night Supervisor observes/classifies only. None of these roles may lower industrial-standard or professional-grade quality expectations to move faster.
+
 ## Startup Order
 
 1. Open the active repo at `C:\Dev\Ai.Os`.

@@ -2,6 +2,13 @@
 
 These steps are operator-only. Codex must not create accounts, store credentials, or switch the live channel.
 
+Current Telegram/Tasker scope is Phase 1 SOS wake only. Telegram and Tasker are
+interface surfaces, not authority. Future read-only status, exact approval-card
+decisions, packet preparation, protected-action requests, Forex paper reports,
+or emergency hold requests must pass through the AI_OS gatekeeper, identity
+gate, command allowlist, replay/idempotency controls, and Protected Action
+Readiness before any live behavior is enabled.
+
 ## SOS-only wake policy
 
 AI_OS may wake the Human Owner only for true SOS/blocker conditions. Routine pass reports,
