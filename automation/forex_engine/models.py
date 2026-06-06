@@ -246,6 +246,83 @@ class WalkForwardResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class PaperOperatorStatus:
+    READY_FOR_PAPER_RESEARCH = "READY_FOR_PAPER_RESEARCH"
+    PAUSED_FOR_INSUFFICIENT_DATA = "PAUSED_FOR_INSUFFICIENT_DATA"
+    PAUSED_FOR_RISK_LIMIT = "PAUSED_FOR_RISK_LIMIT"
+    PAUSED_FOR_LOSS_STREAK = "PAUSED_FOR_LOSS_STREAK"
+    WATCHLIST = "WATCHLIST"
+    BLOCKED = "BLOCKED"
+
+
+class RiskPosture:
+    CONSERVATIVE = "CONSERVATIVE"
+    NORMAL = "NORMAL"
+    AGGRESSIVE_RESEARCH_ONLY = "AGGRESSIVE_RESEARCH_ONLY"
+    PAUSED = "PAUSED"
+
+
+class AlertState:
+    PAPER_ONLY_BOUNDARY_OK = "PAPER_ONLY_BOUNDARY_OK"
+    INSUFFICIENT_DATA_ALERT = "INSUFFICIENT_DATA_ALERT"
+    PROFIT_MILESTONE_ALERT = "PROFIT_MILESTONE_ALERT"
+    LOSS_STREAK_ALERT = "LOSS_STREAK_ALERT"
+    DAILY_DRAWDOWN_ALERT = "DAILY_DRAWDOWN_ALERT"
+    WEEKLY_DRAWDOWN_ALERT = "WEEKLY_DRAWDOWN_ALERT"
+    VALIDATION_HEALTH_ALERT = "VALIDATION_HEALTH_ALERT"
+    NO_ALERTS = "NO_ALERTS"
+
+
+class PauseReason:
+    NONE = "NONE"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+    DAILY_DRAWDOWN_LIMIT = "DAILY_DRAWDOWN_LIMIT"
+    WEEKLY_DRAWDOWN_LIMIT = "WEEKLY_DRAWDOWN_LIMIT"
+    LOSS_STREAK = "LOSS_STREAK"
+    VALIDATION_FAILURE = "VALIDATION_FAILURE"
+    MANUAL_REVIEW_REQUIRED = "MANUAL_REVIEW_REQUIRED"
+
+
+@dataclass
+class OperatorAlert:
+    name: str
+    active: bool
+    severity: str
+    reason: str
+    recommended_action: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class DailyOperatorReport:
+    mode: str
+    report_date: str
+    starting_balance_usd: float
+    current_balance_usd: float
+    net_pnl_usd: float
+    risk_posture: str
+    operator_status: str
+    pause_reason: str
+    alerts: List[OperatorAlert] = field(default_factory=list)
+    summary: str = ""
+    next_safe_action: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class SupervisorSummary:
+    mode: str
+    status: str
+    risk_posture: str
+    active_alert_count: int
+    paper_only_boundary_ok: bool
+    research_ready: bool
+    promotion_ready: bool
+    summary: str
+    next_safe_action: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
