@@ -551,6 +551,74 @@ class ParameterOptimizationResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class PortfolioMode:
+    PORTFOLIO_MODEL_ONLY = "PORTFOLIO_MODEL_ONLY"
+    PAPER_ONLY_COMPATIBLE = "PAPER_ONLY_COMPATIBLE"
+    LIVE_BLOCKED = "LIVE_BLOCKED"
+
+
+class AllocationMethod:
+    EQUAL_WEIGHT = "EQUAL_WEIGHT"
+    RISK_CAPPED = "RISK_CAPPED"
+    CONFIDENCE_WEIGHTED_PLACEHOLDER = "CONFIDENCE_WEIGHTED_PLACEHOLDER"
+
+
+class ConcentrationStatus:
+    OK = "OK"
+    CAUTION = "CAUTION"
+    TOO_CONCENTRATED = "TOO_CONCENTRATED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+
+
+class PortfolioOptimizationStatus:
+    MODEL_READY = "MODEL_READY"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+    WATCHLIST = "WATCHLIST"
+    REJECTED = "REJECTED"
+
+
+@dataclass
+class PortfolioAllocation:
+    symbol: str
+    allocation_usd: float
+    allocation_pct: float
+    risk_cap_usd: float
+    confidence_score: Optional[float]
+    status: str
+    warnings: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PortfolioRiskSummary:
+    mode: str
+    symbol_count: int
+    max_symbol_allocation_pct: float
+    max_symbol_allocation_usd: float
+    xauusd_allocation_pct: float
+    total_allocated_pct: float
+    concentration_status: str
+    warnings: List[str] = field(default_factory=list)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class PortfolioOptimizationResult:
+    mode: str
+    allocation_method: str
+    starting_capital_usd: float
+    allocated_capital_usd: float
+    unallocated_capital_usd: float
+    allocations: List[PortfolioAllocation] = field(default_factory=list)
+    concentration_status: str = ConcentrationStatus.INSUFFICIENT_DATA
+    optimization_status: str = PortfolioOptimizationStatus.INSUFFICIENT_DATA
+    risk_posture: str = RiskPosture.CONSERVATIVE
+    warnings: List[str] = field(default_factory=list)
+    recommendations: List[str] = field(default_factory=list)
+    summary_note: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
