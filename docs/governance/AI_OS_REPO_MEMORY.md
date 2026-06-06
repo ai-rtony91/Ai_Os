@@ -187,3 +187,12 @@ Future-assessment checklist:
 - Expected outcome: AI_OS can rank work, draft exact packets, and stop before protected actions while Anthony handles only SOS or protected-action decisions.
 - Regression checks: Future overnight work must classify task classes before execution and preserve allowed paths, forbidden paths, validator chain, and stop point.
 - Reopen conditions: Reopen if workers self-select work, execute without exact packets, or Anthony is pulled into routine non-SOS decisions.
+
+#### SOS Display vs Wake Boundary
+
+- Problem discovered: `NEEDS_APPROVAL` could be rendered with SOS-like wording even though it should be review/display-only when no execution was attempted.
+- Root cause: Display alerts and wake-worthy SOS alerts were not exposed as separate machine fields everywhere.
+- Fix applied: `NEEDS_APPROVAL` now maps to `display_alert: true`, `sos_wake_required: false`, and `wake_class: REVIEW_ONLY`; `BLOCKED` remains `display_alert: true`, `sos_wake_required: true`, and `wake_class: SOS`.
+- Expected outcome: Pi5, Morning Brief, file notifications, and Telegram dry-run classification can show human-needed review without waking Anthony unless safe continuation is blocked.
+- Regression checks: Confirm future notifier and bridge outputs do not label `NEEDS_APPROVAL` as SOS and do not include `#AIOS_SOS` for non-SOS review states.
+- Reopen conditions: Reopen if routine approvals, stale warnings, or display alerts wake Anthony, or if true `BLOCKED` states fail to surface as SOS.

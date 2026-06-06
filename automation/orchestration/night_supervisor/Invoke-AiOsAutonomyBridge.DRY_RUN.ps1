@@ -36,11 +36,18 @@ function ConvertTo-AiosAlertMarkdown {
     }
     $mustSeeItems = @($BridgeState.must_see)
     $statusUpper = $status.ToUpperInvariant()
+    $displayAlert = $statusUpper -in @("BLOCKED", "NEEDS_APPROVAL")
+    $sosWakeRequired = $statusUpper -eq "BLOCKED"
+    $wakeClass = if ($sosWakeRequired) { "SOS" } elseif ($displayAlert) { "REVIEW_ONLY" } else { "NO_WAKE" }
 
-    if ($statusUpper -in @("BLOCKED", "NEEDS_APPROVAL")) {
+    if ($displayAlert) {
+        $heading = if ($sosWakeRequired) { "# AI_OS SOS - $statusUpper" } else { "# AI_OS REVIEW - $statusUpper" }
         $lines = @(
-            "# AI_OS ALERT - $statusUpper",
+            $heading,
             "",
+            "- display_alert: true",
+            "- sos_wake_required: $($sosWakeRequired.ToString().ToLowerInvariant())",
+            "- wake_class: $wakeClass",
             "- Plain summary: $summary",
             "- Waiting approvals: $approvalCount",
             "- Must see:"
@@ -104,8 +111,9 @@ function Test-AiosAlertRenderer {
 
     foreach ($sample in $samples) {
         $alert = ConvertTo-AiosAlertMarkdown -BridgeState $sample.state
-        $fires = $alert.StartsWith("# AI_OS ALERT")
-        Write-AiosLine "SELFTEST" "$($sample.name): fires=$fires first_line=$($alert.Split("`n")[0].Trim())"
+        $display = $alert -match "display_alert: true"
+        $sosWake = $alert -match "sos_wake_required: true"
+        Write-AiosLine "SELFTEST" "$($sample.name): display=$display sos_wake=$sosWake first_line=$($alert.Split("`n")[0].Trim())"
     }
 }
 
@@ -757,6 +765,9 @@ function New-AiosPi5ProgressReport {
     )
 
     $humanInteractionRequired = ($blockersCount -gt 0 -or $activeApprovalCount -gt 0)
+    $displayAlert = $humanInteractionRequired
+    $sosWakeRequired = $blockersCount -gt 0
+    $wakeClass = if ($sosWakeRequired) { "SOS" } elseif ($displayAlert) { "REVIEW_ONLY" } else { "NO_WAKE" }
     $currentPhase = if ($blockersCount -gt 0) {
         "current blocker review"
     } elseif ($activeApprovalCount -gt 0) {
@@ -842,6 +853,9 @@ function New-AiosPi5ProgressReport {
             gpio_or_motor_authority = $false
         }
         overall_aios_progress_percent = $overallAiosProgressPercent
+        display_alert = $displayAlert
+        sos_wake_required = $sosWakeRequired
+        wake_class = $wakeClass
         forex_bot_build_percent = $forexBotBuildPercent
         night_supervisor_health_percent = $nightSupervisorHealthPercent
         worker_readiness_percent = $workerReadinessPercent
@@ -879,6 +893,7 @@ function New-AiosPi5ProgressReport {
             no_real_orders = $true
             no_real_webhooks = $true
             no_commit_or_push = $true
+            display_alert_not_wake_authority = $true
         }
     }
 
@@ -1578,189 +1593,56 @@ function New-AiosProtectedActionReadiness {
 
     $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 
-    $samples = @(
+    function New-ProtectedActionSample {
+        param(
+            [string]$Action,
+            [string]$ActionType,
+            [string]$Classification,
+            [string]$Status,
+            [string]$Reason,
+            [string]$SafestNextAction,
+            [bool]$RequiredHumanApproval,
+            [string]$AllowedPathCheck,
+            [string]$ForbiddenPathCheck,
+            [string]$Confidence,
+            [string]$AuditLogHint
+        )
+
+        $displayAlert = $Status -in @("REVIEW_REQUIRED", "BLOCKED")
+        $sosWakeRequired = $Status -eq "BLOCKED"
         [pscustomobject]@{
-            action = "read latest Night Supervisor report"
-            action_type = "read"
-            classification = "ALLOWED_READ_ONLY"
-            status = "PASS"
-            reason = "Reads existing report evidence only."
-            safest_next_action = "Read and summarize the latest report without writing files."
-            required_human_approval = $false
-            allowed_path_check = "PASS"
-            forbidden_path_check = "PASS"
-            confidence = "HIGH"
-            audit_log_hint = "Record report path and generated_at if surfaced in a brief."
-        },
-        [pscustomobject]@{
-            action = "generate sanitized summary"
-            action_type = "prepare"
-            classification = "PREPARE_ONLY"
-            status = "PASS"
-            reason = "Creates recommendation-only sandbox evidence for later reasoning."
-            safest_next_action = "Generate sanitized output only; do not call external services."
-            required_human_approval = $false
-            allowed_path_check = "PASS"
-            forbidden_path_check = "PASS"
-            confidence = "HIGH"
-            audit_log_hint = "Record source contracts and excluded-content boundary."
-        },
-        [pscustomobject]@{
-            action = "draft Codex packet"
-            action_type = "prepare"
-            classification = "PREPARE_ONLY"
-            status = "PASS"
-            reason = "Drafting a packet is preparation, not execution."
-            safest_next_action = "Draft complete packet fields and wait for Anthony before execution."
-            required_human_approval = $false
-            allowed_path_check = "PASS"
-            forbidden_path_check = "PASS"
-            confidence = "HIGH"
-            audit_log_hint = "Record packet ID, lane, allowed paths, forbidden paths, and stop point."
-        },
-        [pscustomobject]@{
-            action = "stage files"
-            action_type = "stage"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "Staging is a protected repo action and requires exact-file approval."
-            safest_next_action = "Request exact current approval with named files and cached-diff review."
-            required_human_approval = $true
-            allowed_path_check = "UNKNOWN"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Use the Protected Action Gate and Commit/Push Gate before staging."
-        },
-        [pscustomobject]@{
-            action = "commit changes"
-            action_type = "commit"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "Commit requires explicit approval, reviewed diff, exact files, and message."
-            safest_next_action = "Run cached diff review and request explicit commit approval."
-            required_human_approval = $true
-            allowed_path_check = "UNKNOWN"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Record exact files, validation, cached diff, and commit message."
-        },
-        [pscustomobject]@{
-            action = "push branch"
-            action_type = "push"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "Push is a protected repo action and must name branch and remote target."
-            safest_next_action = "Request explicit push approval for one branch and one remote target."
-            required_human_approval = $true
-            allowed_path_check = "PASS"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Record branch, remote, commits intended for push, and ruleset warnings."
-        },
-        [pscustomobject]@{
-            action = "merge PR"
-            action_type = "merge"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "Merge requires separate explicit approval after checks and mergeability are known."
-            safest_next_action = "Prepare merge readiness evidence and wait for explicit merge approval."
-            required_human_approval = $true
-            allowed_path_check = "UNKNOWN"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Record PR number, checks, mergeability, and review state."
-        },
-        [pscustomobject]@{
-            action = "mutate approval inbox"
-            action_type = "approval_state_change"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "Approval state changes are protected and Anthony-owned."
-            safest_next_action = "Produce a recommendation card; do not change approval state."
-            required_human_approval = $true
-            allowed_path_check = "UNKNOWN"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Record target approval record and requested state transition."
-        },
-        [pscustomobject]@{
-            action = "create scheduler"
-            action_type = "scheduler"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "Scheduler creation starts background behavior and requires explicit approval."
-            safest_next_action = "Prepare a schedule design and stop before registration."
-            required_human_approval = $true
-            allowed_path_check = "UNKNOWN"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Record schedule name, trigger, stop control, and rollback plan."
-        },
-        [pscustomobject]@{
-            action = "launch worker"
-            action_type = "worker_launch"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "Worker launch changes runtime behavior and requires explicit approval."
-            safest_next_action = "Prepare worker packet and readiness evidence; do not launch."
-            required_human_approval = $true
-            allowed_path_check = "UNKNOWN"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Record worker identity, lane, worktree, and stop point."
-        },
-        [pscustomobject]@{
-            action = "call OpenAI API"
-            action_type = "api_call"
-            classification = "NEEDS_EXPLICIT_APPROVAL"
-            status = "REVIEW_REQUIRED"
-            reason = "External AI calls require explicit approval and credential boundary review."
-            safest_next_action = "Use sanitized summary output only until an API lane is approved."
-            required_human_approval = $true
-            allowed_path_check = "UNKNOWN"
-            forbidden_path_check = "UNKNOWN"
-            confidence = "HIGH"
-            audit_log_hint = "Record model intent, input contract, cost boundary, and no-credential-output check."
-        },
-        [pscustomobject]@{
-            action = "access .env / credential material"
-            action_type = "credential_access"
-            classification = "BLOCKED_FOR_SAFETY"
-            status = "BLOCKED"
-            reason = "Credential material is outside evidence-only readiness scope."
-            safest_next_action = "Stop and request a separate credential-boundary review if ever needed."
-            required_human_approval = $true
-            allowed_path_check = "FAIL"
-            forbidden_path_check = "FAIL"
-            confidence = "HIGH"
-            audit_log_hint = "Do not print, copy, store, or summarize credential values."
-        },
-        [pscustomobject]@{
-            action = "market-provider / O-connector / live-trading boundary"
-            action_type = "market_execution"
-            classification = "BLOCKED_FOR_SAFETY"
-            status = "BLOCKED"
-            reason = "Market execution paths remain blocked outside a separately approved safety lane."
-            safest_next_action = "Keep Forex work report-only and paper-simulation planning only."
-            required_human_approval = $true
-            allowed_path_check = "FAIL"
-            forbidden_path_check = "FAIL"
-            confidence = "HIGH"
-            audit_log_hint = "Record that no market provider, live execution, or order routing was used."
-        },
-        [pscustomobject]@{
-            action = "GPIO / motor control"
-            action_type = "hardware_control"
-            classification = "BLOCKED_FOR_SAFETY"
-            status = "BLOCKED"
-            reason = "Physical control is outside this repo-readiness lane."
-            safest_next_action = "Stop until a future isolated hardware lane defines safety controls."
-            required_human_approval = $true
-            allowed_path_check = "FAIL"
-            forbidden_path_check = "FAIL"
-            confidence = "HIGH"
-            audit_log_hint = "Record that no hardware control path was touched."
+            action = $Action
+            action_type = $ActionType
+            classification = $Classification
+            status = $Status
+            reason = $Reason
+            safest_next_action = $SafestNextAction
+            required_human_approval = $RequiredHumanApproval
+            allowed_path_check = $AllowedPathCheck
+            forbidden_path_check = $ForbiddenPathCheck
+            confidence = $Confidence
+            audit_log_hint = $AuditLogHint
+            display_alert = $displayAlert
+            sos_wake_required = $sosWakeRequired
+            wake_class = if ($sosWakeRequired) { "SOS" } elseif ($displayAlert) { "REVIEW_ONLY" } else { "NO_WAKE" }
         }
+    }
+
+    $samples = @(
+        (New-ProtectedActionSample "read latest Night Supervisor report" "read" "ALLOWED_READ_ONLY" "PASS" "Reads existing report evidence only." "Read and summarize the latest report without writing files." $false "PASS" "PASS" "HIGH" "Record report path and generated_at if surfaced in a brief."),
+        (New-ProtectedActionSample "generate sanitized summary" "prepare" "PREPARE_ONLY" "PASS" "Creates recommendation-only sandbox evidence for later reasoning." "Generate sanitized output only; do not call external services." $false "PASS" "PASS" "HIGH" "Record source contracts and excluded-content boundary."),
+        (New-ProtectedActionSample "draft Codex packet" "prepare" "PREPARE_ONLY" "PASS" "Drafting a packet is preparation, not execution." "Draft complete packet fields and wait for Anthony before execution." $false "PASS" "PASS" "HIGH" "Record packet ID, lane, allowed paths, forbidden paths, and stop point."),
+        (New-ProtectedActionSample "stage files" "stage" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "Staging is a protected repo action and requires exact-file approval." "Request exact current approval with named files and cached-diff review." $true "UNKNOWN" "UNKNOWN" "HIGH" "Use the Protected Action Gate and Commit/Push Gate before staging."),
+        (New-ProtectedActionSample "commit changes" "commit" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "Commit requires explicit approval, reviewed diff, exact files, and message." "Run cached diff review and request explicit commit approval." $true "UNKNOWN" "UNKNOWN" "HIGH" "Record exact files, validation, cached diff, and commit message."),
+        (New-ProtectedActionSample "push branch" "push" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "Push is a protected repo action and must name branch and remote target." "Request explicit push approval for one branch and one remote target." $true "PASS" "UNKNOWN" "HIGH" "Record branch, remote, commits intended for push, and ruleset warnings."),
+        (New-ProtectedActionSample "merge PR" "merge" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "Merge requires separate explicit approval after checks and mergeability are known." "Prepare merge readiness evidence and wait for explicit merge approval." $true "UNKNOWN" "UNKNOWN" "HIGH" "Record PR number, checks, mergeability, and review state."),
+        (New-ProtectedActionSample "mutate approval inbox" "approval_state_change" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "Approval state changes are protected and Anthony-owned." "Produce a recommendation card; do not change approval state." $true "UNKNOWN" "UNKNOWN" "HIGH" "Record target approval record and requested state transition."),
+        (New-ProtectedActionSample "create scheduler" "scheduler" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "Scheduler creation starts background behavior and requires explicit approval." "Prepare a schedule design and stop before registration." $true "UNKNOWN" "UNKNOWN" "HIGH" "Record schedule name, trigger, stop control, and rollback plan."),
+        (New-ProtectedActionSample "launch worker" "worker_launch" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "Worker launch changes runtime behavior and requires explicit approval." "Prepare worker packet and readiness evidence; do not launch." $true "UNKNOWN" "UNKNOWN" "HIGH" "Record worker identity, lane, worktree, and stop point."),
+        (New-ProtectedActionSample "call OpenAI API" "api_call" "NEEDS_EXPLICIT_APPROVAL" "REVIEW_REQUIRED" "External AI calls require explicit approval and credential boundary review." "Use sanitized summary output only until an API lane is approved." $true "UNKNOWN" "UNKNOWN" "HIGH" "Record model intent, input contract, cost boundary, and no-credential-output check."),
+        (New-ProtectedActionSample "access .env / credential material" "credential_access" "BLOCKED_FOR_SAFETY" "BLOCKED" "Credential material is outside evidence-only readiness scope." "Stop and request a separate credential-boundary review if ever needed." $true "FAIL" "FAIL" "HIGH" "Do not print, copy, store, or summarize credential values."),
+        (New-ProtectedActionSample "market-provider / O-connector / live-trading boundary" "market_execution" "BLOCKED_FOR_SAFETY" "BLOCKED" "Market execution paths remain blocked outside a separately approved safety lane." "Keep Forex work report-only and paper-simulation planning only." $true "FAIL" "FAIL" "HIGH" "Record that no market provider, live execution, or order routing was used."),
+        (New-ProtectedActionSample "GPIO / motor control" "hardware_control" "BLOCKED_FOR_SAFETY" "BLOCKED" "Physical control is outside this repo-readiness lane." "Stop until a future isolated hardware lane defines safety controls." $true "FAIL" "FAIL" "HIGH" "Record that no hardware control path was touched.")
     )
 
     $counts = [ordered]@{}
