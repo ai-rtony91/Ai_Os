@@ -125,6 +125,70 @@ class SetupQualityAssessment:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
+class StrategyStatus:
+    RESEARCH_CANDIDATE = "RESEARCH_CANDIDATE"
+    WATCHLIST = "WATCHLIST"
+    REJECTED = "REJECTED"
+    INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
+
+
+@dataclass
+class OptimizationCandidate:
+    name: str
+    reason: str
+    priority: str
+    suggested_direction: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class StrategyScoreComponent:
+    name: str
+    score_delta: int
+    reason: str
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class StrategyScorecard:
+    mode: str
+    strategy_name: str
+    symbol: str
+    timeframe: str
+    score: float
+    status: str
+    rank: int
+    trades: int
+    wins: int
+    losses: int
+    win_rate_pct: float
+    profit_factor: Optional[float]
+    net_pnl_usd: float
+    max_drawdown_usd: float
+    max_drawdown_pct: float
+    starting_balance_usd: float
+    ending_balance_usd: float
+    components: List[StrategyScoreComponent] = field(default_factory=list)
+    optimization_candidates: List[OptimizationCandidate] = field(default_factory=list)
+    summary_note: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class StrategyComparisonResult:
+    mode: str
+    compared_at: str
+    strategy_count: int
+    scorecards: List[StrategyScorecard] = field(default_factory=list)
+    top_strategy: Optional[str] = None
+    rejected_count: int = 0
+    watchlist_count: int = 0
+    research_candidate_count: int = 0
+    insufficient_data_count: int = 0
+    summary_note: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
 @dataclass
 class BacktestConfig:
     symbol: str
