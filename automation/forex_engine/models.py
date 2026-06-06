@@ -32,6 +32,19 @@ class TradeOutcome:
 
 
 @dataclass
+class Candle:
+    symbol: str
+    timeframe: str
+    timestamp: str
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float
+    source: str
+
+
+@dataclass
 class ForexSignal:
     symbol: str
     timeframe: str

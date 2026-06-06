@@ -21,6 +21,7 @@ class ForexEngineConfig:
     timeframes: Tuple[str, ...] = ("1m", "5m", "15m", "1h")
     journal_dir: str = "automation/forex_engine/runtime/journal"
     demo_output_dir: str = "automation/forex_engine/runtime/demo"
+    fixture_data_dir: str = "automation/forex_engine/fixtures"
 
 
 def validate_config(config: ForexEngineConfig) -> None:
