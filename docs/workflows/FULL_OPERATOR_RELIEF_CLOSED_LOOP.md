@@ -586,6 +586,27 @@ git diff --check
 git status --short --branch
 ```
 
+## Operator Relief Runtime Output Ignore v1
+
+Operator Relief runtime reports are generated local artifacts, not source authority. The following roots are ignored by Git:
+
+```text
+reports/operator_relief/
+Reports/operator_relief/
+```
+
+Runtime state under these roots should not be committed:
+
+- inbox task files.
+- outbox result reports.
+- archive/processed task files.
+- generated dry-run evidence reports.
+
+Tracked source and tests remain outside these ignore rules:
+
+- `automation/operator_relief/`
+- `tests/operator_relief/`
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:

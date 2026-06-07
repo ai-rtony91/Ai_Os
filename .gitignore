@@ -140,3 +140,5 @@ approval/operator_relief/pending/*.json
 !approval/operator_relief/pending/.gitkeep
 telemetry/operator_relief/*.jsonl
 !telemetry/operator_relief/.gitkeep
+reports/operator_relief/
+Reports/operator_relief/
