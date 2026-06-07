@@ -42,6 +42,8 @@ class HRQ002ApplyDraftPatchResult:
     json_output_path: str
     markdown_output_path: str
     patch_diff: str
+    rollback_plan: list[str]
+    validation_commands: list[str]
     apply_ready_paths: list[str]
     safety: dict[str, Any]
     recommended_next_action: str
@@ -155,6 +157,19 @@ def build_patch(repo_root: Path) -> HRQ002ApplyDraftPatchResult:
         json_output_path=_normalize_path(JSON_OUTPUT_PATH),
         markdown_output_path=_normalize_path(MARKDOWN_OUTPUT_PATH),
         patch_diff=patch_diff,
+        rollback_plan=[
+            "Do not apply this draft patch directly; it is review evidence only.",
+            "If the draft is rejected, regenerate Reports/operator_relief/hrq002_apply_draft_patch/ from the current canonical and duplicate source files.",
+            "A future APPLY packet must record pre-change evidence and stop before staging if the target expands beyond HRQ-002.",
+        ],
+        validation_commands=[
+            "python -m py_compile automation/operator_relief/hrq002_apply_draft_patch.py",
+            "python -m pytest tests/operator_relief/test_hrq002_apply_draft_patch.py",
+            "python -m automation.operator_relief.hrq002_apply_draft_patch --write-report",
+            "python -m automation.operator_relief.hrq002_patch_safety_validator --write-report",
+            "git diff --check",
+            "git status --short --branch",
+        ],
         apply_ready_paths=[],
         safety={
             "executable": False,

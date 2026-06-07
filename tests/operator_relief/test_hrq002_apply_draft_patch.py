@@ -160,6 +160,15 @@ def test_output_contract_is_not_executable_or_apply_ready(tmp_path: Path) -> Non
     assert safety["hrq003_touched"] is False
 
 
+def test_output_includes_rollback_plan_and_validation_commands(tmp_path: Path) -> None:
+    _write_inputs(tmp_path)
+    result = patch.build_patch(tmp_path).to_dict()
+
+    assert result["rollback_plan"]
+    assert result["validation_commands"]
+    assert "python -m automation.operator_relief.hrq002_patch_safety_validator --write-report" in result["validation_commands"]
+
+
 def test_write_reports_writes_diff_json_and_markdown_under_output_root(tmp_path: Path) -> None:
     _write_inputs(tmp_path)
     result = patch.build_patch(tmp_path)
@@ -175,6 +184,8 @@ def test_write_reports_writes_diff_json_and_markdown_under_output_root(tmp_path:
     payload = json.loads(written[1].read_text(encoding="utf-8"))
     assert payload["executable"] is False
     assert payload["apply_ready_paths"] == []
+    assert payload["rollback_plan"]
+    assert payload["validation_commands"]
 
 
 def test_markdown_contains_diff_fence(tmp_path: Path) -> None:
