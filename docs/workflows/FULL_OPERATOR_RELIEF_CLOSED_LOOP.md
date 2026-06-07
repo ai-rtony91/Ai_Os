@@ -275,7 +275,8 @@ Still blocked:
 Safe command:
 
 ```powershell
-python -m automation.operator_relief.inbox_outbox_bridge --inbox-task reports/operator_relief/inbox/task.json
+python -m automation.operator_relief.inbox_outbox_bridge --task-json reports/operator_relief/inbox/task.json
+.\aios.ps1 -Mode bridge -TaskJson .\reports\operator_relief\inbox\task.json
 ```
 
 Safe validation commands:

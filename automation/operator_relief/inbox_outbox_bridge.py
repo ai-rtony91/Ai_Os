@@ -171,7 +171,13 @@ def run_inbox_outbox_bridge(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run one Operator Relief inbox/outbox bridge task.")
-    parser.add_argument("--inbox-task", required=True, help="Task JSON path under reports/operator_relief/inbox/.")
+    parser.add_argument(
+        "--task-json",
+        "--inbox-task",
+        dest="task_json",
+        required=True,
+        help="Task JSON path under reports/operator_relief/inbox/.",
+    )
     parser.add_argument("--outbox", default=None, help="Optional result JSON path under reports/operator_relief/outbox/.")
     parser.add_argument("--overwrite", action="store_true", help="Allow overwriting an existing outbox result JSON.")
     parser.add_argument(
@@ -182,7 +188,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     report = run_inbox_outbox_bridge(
         Path.cwd(),
-        args.inbox_task,
+        args.task_json,
         outbox_path=args.outbox,
         overwrite=args.overwrite,
         allow_failure_report=args.allow_failure_report,

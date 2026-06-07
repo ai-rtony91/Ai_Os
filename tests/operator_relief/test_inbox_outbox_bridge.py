@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from automation.operator_relief.full_auto_policy import FullAutoTask
-from automation.operator_relief.inbox_outbox_bridge import run_inbox_outbox_bridge
+from automation.operator_relief.inbox_outbox_bridge import main, run_inbox_outbox_bridge
 
 
 @dataclass(frozen=True)
@@ -169,3 +169,15 @@ def test_bridge_source_has_no_forbidden_execution_paths() -> None:
     ]
     for marker in forbidden_markers:
         assert marker not in source
+
+
+def test_bridge_cli_accepts_task_json_alias(tmp_path: Path, monkeypatch) -> None:
+    repo = _repo(tmp_path)
+    inbox = _write_inbox(repo, "task.json", _task())
+    monkeypatch.chdir(repo)
+    import automation.operator_relief.inbox_outbox_bridge as bridge
+
+    monkeypatch.setattr(bridge, "collect_repo_state", lambda _root: FakeRepoState(repo_root=str(repo)))
+
+    assert main(["--task-json", str(inbox)]) == 0
+    assert (repo / "reports/operator_relief/outbox/task.result.json").is_file()

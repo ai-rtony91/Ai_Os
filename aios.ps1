@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud","operator-relief")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud","operator-relief","bridge")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -91,6 +91,7 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode finish-pr -Pr 273 # preview PR finish steps"
         Write-Host ".\aios.ps1 -Mode hud -Worker CLAUDE # preview worker HUD"
         Write-Host ".\aios.ps1 -Mode operator-relief -TaskJson .\local_task.json # run Full-Auto DRY_RUN only"
+        Write-Host ".\aios.ps1 -Mode bridge -TaskJson .\reports\operator_relief\inbox\task.json # run inbox/outbox bridge"
     }
 
     "daily" {
@@ -159,6 +160,40 @@ switch ($Mode) {
             Write-Host ""
             Write-Host "Usage:" -ForegroundColor Yellow
             Write-Host ".\aios.ps1 -Mode operator-relief -TaskJson .\local_full_auto_task.json"
+            Write-Host ""
+            Write-Host "BLOCKED: task JSON file not found: $TaskJson" -ForegroundColor Red
+            exit 1
+        }
+
+        $resolvedTaskJson = (Resolve-Path -LiteralPath $TaskJson).Path
+        Write-Host "Task JSON: $resolvedTaskJson"
+        Write-Host "Running: python -m $moduleName --task-json $resolvedTaskJson"
+        python -m $moduleName --task-json $resolvedTaskJson
+        exit $LASTEXITCODE
+    }
+
+    "bridge" {
+        $moduleName = "automation.operator_relief.inbox_outbox_bridge"
+
+        Write-Host ""
+        Write-Host "== AI_OS Operator Relief Inbox/Outbox Bridge ==" -ForegroundColor Cyan
+        Write-Host "Mode: DRY_RUN"
+        Write-Host "Python module: $moduleName"
+        Write-Host "Safety: no commit, no push, no merge, no OpenAI API, no recursive Codex, no daemon, no watcher, no service, no shell passthrough, no source mutation."
+
+        if ([string]::IsNullOrWhiteSpace($TaskJson)) {
+            Write-Host ""
+            Write-Host "Usage:" -ForegroundColor Yellow
+            Write-Host ".\aios.ps1 -Mode bridge -TaskJson .\reports\operator_relief\inbox\task.json"
+            Write-Host ""
+            Write-Host "BLOCKED: -TaskJson must point to a real inbox FullAutoTask JSON file." -ForegroundColor Red
+            exit 1
+        }
+
+        if (-not (Test-Path -LiteralPath $TaskJson -PathType Leaf)) {
+            Write-Host ""
+            Write-Host "Usage:" -ForegroundColor Yellow
+            Write-Host ".\aios.ps1 -Mode bridge -TaskJson .\reports\operator_relief\inbox\task.json"
             Write-Host ""
             Write-Host "BLOCKED: task JSON file not found: $TaskJson" -ForegroundColor Red
             exit 1
