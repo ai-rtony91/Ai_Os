@@ -252,6 +252,41 @@ git diff --check
 git status --short --branch
 ```
 
+## Operator Relief Inbox/Outbox CLI Bridge v1
+
+Inbox/Outbox CLI Bridge v1 reduces manual copy/paste routing by reading one `FullAutoTask` JSON from `reports/operator_relief/inbox/`, running the write-enabled safe executor, and writing one machine-readable result JSON to `reports/operator_relief/outbox/`.
+
+Allowed bridge behavior:
+
+- inbox task path must resolve inside `reports/operator_relief/inbox/`.
+- inbox task must be a valid `.json` `FullAutoTask`.
+- outbox result path must resolve inside `reports/operator_relief/outbox/`.
+- overwrite is blocked unless an explicit overwrite flag is true.
+- blocked or approval-required task results are written only when report-only failure evidence is explicitly allowed.
+- all bridge and executor reports include `executable=false`.
+
+Still blocked:
+
+- traversal outside inbox or outbox.
+- malformed JSON, non-json files, unresolved placeholders, secrets, broker/API/order-execution paths, and live-trading paths.
+- source-file edits, telemetry `.jsonl` writes, approval queue writes, and protected-path writes.
+- commit, push, merge, rebase, force-push, OpenAI API, recursive Codex, shell passthrough, daemon, watcher, or service start.
+
+Safe command:
+
+```powershell
+python -m automation.operator_relief.inbox_outbox_bridge --inbox-task reports/operator_relief/inbox/task.json
+```
+
+Safe validation commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/inbox_outbox_bridge.py
+git diff --check
+git status --short --branch
+```
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
