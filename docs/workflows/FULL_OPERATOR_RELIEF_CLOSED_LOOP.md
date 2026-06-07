@@ -222,6 +222,36 @@ git diff --check
 git status --short --branch
 ```
 
+## Operator Relief Write-Enabled Safe Executor v1
+
+Write-Enabled Safe Executor v1 adds the first controlled write capability. It runs the bounded executor and may write exactly one JSON DRY_RUN evidence report under `reports/operator_relief/`.
+
+Allowed write behavior:
+
+- output path must resolve inside `reports/operator_relief/`.
+- output file must end in `.json`.
+- overwrite is blocked unless an explicit overwrite flag is true.
+- blocked or approval-required task reports are not written unless report-only failure evidence is explicitly allowed.
+- all reports include `executable=false`.
+
+Still blocked:
+
+- source-file edits.
+- telemetry `.jsonl` writes.
+- approval queue writes.
+- protected-path writes.
+- commit, push, merge, rebase, or force-push.
+- OpenAI API, recursive Codex, shell passthrough, daemon, watcher, or service start.
+
+Safe validation commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/write_enabled_safe_executor.py
+git diff --check
+git status --short --branch
+```
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
