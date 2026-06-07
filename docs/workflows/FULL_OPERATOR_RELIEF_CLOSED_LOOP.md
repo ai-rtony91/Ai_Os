@@ -194,6 +194,34 @@ git diff --check
 git status --short --branch
 ```
 
+## Operator Relief Bounded Executor v1
+
+Bounded Executor v1 is the first executor facade above the Autonomy Spine. It still does not edit repo files. It can only perform these internal actions after policy, approval, and validator gates pass:
+
+- run approved validator plans.
+- build a non-executable handoff summary.
+- build a non-executable packet draft.
+- build a commit/push recommendation.
+- return a final JSON-safe report with `executable=false`.
+
+Default mode is `DRY_RUN`. The only alternate v1 mode is `APPLY_SIMULATION`, which simulates eligibility without mutating files.
+
+Blocked executor capabilities:
+
+- file mutation, telemetry writes, approval queue writes, protected-path mutation.
+- OpenAI API, recursive Codex, shell passthrough, daemon, watcher, or service start.
+- commit, push, merge, rebase, or force-push execution.
+- live trading, broker/API/order execution, secrets, or credentials.
+
+Safe validation commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/bounded_executor.py
+git diff --check
+git status --short --branch
+```
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
