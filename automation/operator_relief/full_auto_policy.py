@@ -117,7 +117,8 @@ def evaluate_full_auto_policy(task: FullAutoTask, repo_state: Any) -> FullAutoPo
     if task.broker_api:
         reasons.append("Broker/API/order execution is blocked.")
         blocked = True
-    if _touches_blocked_keyword(task.changed_paths + task.allowed_paths + task.forbidden_paths):
+    touched_scope = task.allowed_paths + task.changed_paths + task.validator_targets + task.requested_actions
+    if _touches_blocked_keyword(touched_scope):
         reasons.append("Path scope includes blocked runtime, secret, broker, API, or live-trading keyword.")
         blocked = True
     if not _validators_available(task.validator_targets):

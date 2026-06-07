@@ -633,6 +633,8 @@ The router does not invent validators or run global test suites.
 - No OpenAI API call.
 - No background daemon.
 
+Forbidden path declarations are safety boundaries. A task may list dangerous paths such as `api/**`, `broker/**`, `secrets/**`, `credentials/**`, `live-trading/**`, `live_trading/**`, or `order_execution/**` in `forbidden_paths` without being blocked by that declaration alone. The blocked-keyword policy applies to touched or executable scope: `allowed_paths`, `changed_paths`, `validator_targets`, requested actions, and explicit live-trading/secret/broker flags.
+
 ## Future Notification Integration
 
 Future work may add Telegram, desktop notifications, or dashboard notification cards only after a separate approval packet defines boundaries, dependencies, credentials policy, opt-out behavior, and validation.

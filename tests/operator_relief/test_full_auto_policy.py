@@ -84,6 +84,56 @@ def test_missing_validator_blocks() -> None:
     assert "One or more validator targets have no v1 validator." in decision.reasons
 
 
+def test_forbidden_paths_with_blocked_keyword_do_not_block_safe_task() -> None:
+    decision = evaluate_full_auto_policy(
+        _task(forbidden_paths=["AGENTS.md", "README.md", "api/**", "broker/**", "secrets/**"]),
+        FakeRepoState(),
+    )
+
+    assert decision.status == FULL_AUTO_ALLOWED
+    assert decision.blocked is False
+
+
+def test_allowed_paths_with_blocked_keyword_blocks() -> None:
+    decision = evaluate_full_auto_policy(
+        _task(
+            allowed_paths=["api/safe.md"],
+            changed_paths=["docs/workflows/FULL_OPERATOR_RELIEF_CLOSED_LOOP.md"],
+            validator_targets=["docs/workflows/FULL_OPERATOR_RELIEF_CLOSED_LOOP.md"],
+        ),
+        FakeRepoState(),
+    )
+
+    assert decision.status == FULL_AUTO_BLOCKED
+    assert "Path scope includes blocked runtime, secret, broker, API, or live-trading keyword." in decision.reasons
+
+
+def test_changed_paths_with_blocked_keyword_blocks() -> None:
+    decision = evaluate_full_auto_policy(
+        _task(
+            allowed_paths=["docs/workflows/FULL_OPERATOR_RELIEF_CLOSED_LOOP.md"],
+            changed_paths=["api/safe.md"],
+            validator_targets=["docs/workflows/FULL_OPERATOR_RELIEF_CLOSED_LOOP.md"],
+        ),
+        FakeRepoState(),
+    )
+
+    assert decision.status == FULL_AUTO_BLOCKED
+
+
+def test_validator_targets_with_blocked_keyword_blocks() -> None:
+    decision = evaluate_full_auto_policy(
+        _task(
+            allowed_paths=["docs/workflows/FULL_OPERATOR_RELIEF_CLOSED_LOOP.md"],
+            changed_paths=["docs/workflows/FULL_OPERATOR_RELIEF_CLOSED_LOOP.md"],
+            validator_targets=["api/safe.md"],
+        ),
+        FakeRepoState(),
+    )
+
+    assert decision.status == FULL_AUTO_BLOCKED
+
+
 def test_push_request_requires_approval() -> None:
     decision = evaluate_full_auto_policy(_task(requested_actions=["push"], push_allowed=True), FakeRepoState())
 
