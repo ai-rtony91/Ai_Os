@@ -139,6 +139,8 @@ telemetry/human_ai_friction/
 approval/operator_relief/pending/*.json
 !approval/operator_relief/pending/.gitkeep
 telemetry/operator_relief/*.jsonl
+telemetry/operator_relief/**/*.json
 !telemetry/operator_relief/.gitkeep
+!telemetry/operator_relief/**/.gitkeep
 reports/operator_relief/
 Reports/operator_relief/

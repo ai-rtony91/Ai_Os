@@ -607,6 +607,191 @@ Tracked source and tests remain outside these ignore rules:
 - `automation/operator_relief/`
 - `tests/operator_relief/`
 
+## CLI Everything Closed Loop Spine v1
+
+CLI Everything Closed Loop Spine v1 connects the local planning, packet queue,
+CLI handoff, approval resume, supervisor, and Engine Room telemetry pieces into
+one bounded one-shot control path.
+
+Safe command:
+
+```powershell
+python -m automation.operator_relief.supervisor_loop
+```
+
+The spine runs once and exits. It does not start a daemon, watcher, service,
+scheduled task, worker, Codex process, OpenAI API call, notification send,
+commit, push, merge, or PR.
+
+## CLI Everything Bridge
+
+The CLI bridge lives at:
+
+```text
+automation/operator_relief/cli_bridge.py
+```
+
+It discovers whether local CLI commands such as Codex or OpenAI CLI are
+available and builds non-executable handoff records. A handoff record is
+evidence only. It contains the command shape that a future approved runner could
+use, but v1 does not execute it.
+
+CLI bridge statuses:
+
+- `CLI_AVAILABLE`
+- `CLI_MISSING`
+- `CLI_HANDOFF_READY`
+- `CLI_HANDOFF_BLOCKED`
+
+Blocked in v1:
+
+- calling Codex.
+- recursive Codex execution.
+- calling OpenAI APIs.
+- emitting a live `AI_OS EXECUTION TOKEN`.
+- treating a packet candidate as executable authority.
+
+## Supervisor Loop
+
+The supervisor loop lives at:
+
+```text
+automation/operator_relief/supervisor_loop.py
+```
+
+It performs one decision cycle:
+
+1. read current repo state.
+2. inspect approval decisions.
+3. attempt bounded approval resume when a valid approval decision exists.
+4. generate the next packet queue.
+5. build a non-executable CLI handoff candidate.
+6. write Engine Room telemetry.
+7. exit.
+
+The supervisor selects a next safe action. It does not perform protected actions
+or launch workers. Routine success does not send notifications.
+
+## Packet Queue Engine
+
+The packet queue engine lives at:
+
+```text
+automation/operator_relief/packet_queue.py
+automation/operator_relief/next_mission_engine.py
+```
+
+It generates 5-10 next mission candidates when appropriate. Candidate output is
+written under:
+
+```text
+telemetry/operator_relief/packet_queue/current_queue.json
+```
+
+Every candidate has:
+
+- `executable=false`
+- `human_review_required=true`
+- approval placeholder `[ANTHONY_APPROVAL_REQUIRED]`
+- no live `AI_OS EXECUTION TOKEN`
+- allowed paths.
+- forbidden paths.
+- validators.
+- stop point.
+- the copy/paste burden it removes.
+
+## Engine Room Telemetry
+
+Engine Room telemetry lives at:
+
+```text
+automation/operator_relief/engine_room_telemetry.py
+telemetry/operator_relief/engine_room/current_status.json
+```
+
+The current status JSON is the backend for future read-only worker visibility:
+
+```text
+Home
+-> Work Queue
+-> Mission
+-> Worker Lane
+-> Active Task
+-> Live Execution Window
+-> code being generated / files changing / validators running
+```
+
+Required fields include repo state, branch, dirty state, active mission, worker
+lane, current task, current action, files in focus, validator status, approval
+status, resume status, notification status, packet queue status, CLI bridge
+status, next safe action, and `executable=false`.
+
+Engine Room telemetry is display evidence only. It is not approval authority.
+
+## Approval Resume Production Integration
+
+Approval resume is integrated through the supervisor loop. When a valid approval
+decision exists under the bounded local approval input path, the supervisor asks
+the approval resume loop to validate it against archived task and outbox
+evidence.
+
+Resume behavior:
+
+- consumes only valid approval or continue decisions.
+- blocks missing, malformed, stale, expired, consumed, replayed, or mismatched
+  approvals.
+- preserves validator output as evidence only.
+- resumes only bounded non-protected continuation.
+- writes resume status to Engine Room telemetry.
+- does not send notifications for routine resume success.
+
+Validator PASS is not approval. Approval remains Anthony's decision.
+
+## Why This Reduces Copy/Paste
+
+Before this spine, Anthony had to copy a Codex report into ChatGPT, ask for the
+next packet, copy the packet back into Codex, manually track validator status,
+and restart the flow after approval-required stops.
+
+The v1 spine reduces that by:
+
+- generating the next packet queue locally.
+- creating non-executable CLI handoff records locally.
+- preserving resume state after approval.
+- writing one current Engine Room status file.
+- keeping notification status explicit.
+- keeping the next safe action machine-readable and human-readable.
+
+## What Still Requires Anthony
+
+Anthony still approves:
+
+- APPLY packets.
+- protected-path changes.
+- commits.
+- pushes.
+- PR creation.
+- merges.
+- scheduler registration.
+- notification activation.
+- governance changes.
+- any broker, credential, API, live-trading, or production action.
+
+## What Remains Blocked
+
+Blocked in CLI Everything Closed Loop Spine v1:
+
+- live trading, broker/API/order execution, and secrets.
+- OpenAI API calls.
+- recursive Codex calls.
+- auto-execution of packet candidates.
+- treating validator PASS as approval.
+- daemons, watchers, services, and scheduled task registration.
+- real notifications in routine supervisor success.
+- commit, push, merge, rebase, force-push, PR creation, or protected actions.
+- dashboard/app changes.
+- governance rewrites.
+
 ## Operator Relief Repo Audit Engine v1
 
 Repo Audit Engine v1 adds an audit-only analytical layer for finding duplicate, stale, conflicting, orphaned, and drifting repository documentation. It scans supported documentation and structured text files under:
