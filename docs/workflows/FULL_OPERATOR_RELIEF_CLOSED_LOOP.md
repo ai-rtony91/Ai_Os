@@ -607,6 +607,61 @@ Tracked source and tests remain outside these ignore rules:
 - `automation/operator_relief/`
 - `tests/operator_relief/`
 
+## Operator Relief Repo Audit Engine v1
+
+Repo Audit Engine v1 adds an audit-only analytical layer for finding duplicate, stale, conflicting, orphaned, and drifting repository documentation. It scans supported documentation and structured text files under:
+
+- `docs/`
+- `automation/operator_relief/`
+- `Reports/`
+- `control/`
+
+Supported file types:
+
+- `.md`
+- `.markdown`
+- `.json`
+- `.yaml`
+- `.yml`
+- `.txt`
+
+Audit categories:
+
+- duplicate headings and near-duplicate headings.
+- duplicate sections, procedures, approval chains, and execution chains.
+- source-of-truth and authority conflicts.
+- orphan documents with weak workflow graph relationships.
+- broken references to missing local files.
+- duplicate workflow, startup, onboarding, approval, execution, and operator chains.
+- document drift where the same topic is described differently.
+
+The engine ignores protected paths such as `docs/governance/`, `docs/security/`, `services/`, `apps/`, secrets, credentials, broker/API paths, live-trading paths, and order execution paths. Forbidden path declarations remain safety boundaries; they are not cleanup targets.
+
+Safe commands:
+
+```powershell
+python -m automation.operator_relief.repo_audit_engine
+python -m automation.operator_relief.repo_audit_engine --write-report
+```
+
+Report behavior:
+
+- default mode prints JSON to stdout only.
+- `--write-report` writes one JSON report under `Reports/operator_relief/audits/`.
+- report payloads include `executable=false`.
+- no markdown report files are produced.
+- no source files are modified.
+
+Blocked capabilities:
+
+- no cleanup.
+- no rewrite.
+- no deletion.
+- no file movement or rename.
+- no commit, push, merge, rebase, or force-push.
+- no OpenAI API call or recursive Codex call.
+- no daemon, watcher, service, server, or open port.
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
