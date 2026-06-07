@@ -1,3 +1,10 @@
+> Deprecated duplicate / reference-only HRQ-001 document.
+>
+> Current canonical workflow authority lives in `docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md`.
+> This file `docs/AI_OS/operator/AIOS_WORKER_BRANCH_AND_LANE_RULES.md` is retained only as historical/source evidence until references are reviewed.
+> Do not treat this file as active workflow authority.
+> Do not delete or archive this file without a separate approved retirement APPLY packet.
+
 > Historical/reference-only legacy AI_OS document.
 >
 > This file is not active AI_OS authority. Current operating authority is `AGENTS.md`; current front-door authority is `README.md`; current source-of-truth mapping lives in `docs/governance/source-of-truth-map.md`; current active-system mapping lives in `docs/audits/active-system-map.md`.
