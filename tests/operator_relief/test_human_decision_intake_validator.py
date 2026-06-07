@@ -33,6 +33,12 @@ def _write_decision(repo_root: Path, payload: object, filename: str = "decision.
     (decision_root / filename).write_text(json.dumps(payload), encoding="utf-8")
 
 
+def _write_filled_decision(repo_root: Path, payload: object, filename: str = "decision.json") -> None:
+    decision_root = repo_root / validator.FILLED_DECISION_ROOT
+    decision_root.mkdir(parents=True, exist_ok=True)
+    (decision_root / filename).write_text(json.dumps(payload), encoding="utf-8")
+
+
 def _build_with_decision(tmp_path: Path, payload: object) -> dict:
     _write_packet(tmp_path)
     _write_decision(tmp_path, payload)
@@ -47,6 +53,30 @@ def test_accepts_valid_decision_for_known_packet_id(tmp_path: Path) -> None:
     assert result["accepted_decisions"][0]["item_id"] == KNOWN_ITEM_ID
     assert result["accepted_decisions"][0]["accepted_for_validation_only"] is True
     assert result["approved_cleanup_candidate_count"] == 0
+
+
+def test_accepts_valid_filled_decision_for_known_packet_id(tmp_path: Path) -> None:
+    _write_packet(tmp_path)
+    _write_filled_decision(tmp_path, VALID_DECISION, "filled_decision.json")
+    result = validator.build_validation(tmp_path).to_dict()
+
+    assert result["accepted_decision_count"] == 1
+    assert result["rejected_decision_count"] == 0
+    assert result["accepted_decisions"][0]["item_id"] == KNOWN_ITEM_ID
+    assert (
+        "Reports/operator_relief/human_review_decisions/filled/filled_decision.json"
+        in result["decision_files_scanned"]
+    )
+
+
+def test_scans_top_level_and_filled_decisions(tmp_path: Path) -> None:
+    _write_packet(tmp_path)
+    _write_decision(tmp_path, VALID_DECISION, "top_level_decision.json")
+    _write_filled_decision(tmp_path, VALID_DECISION, "filled_decision.json")
+    result = validator.build_validation(tmp_path).to_dict()
+
+    assert result["accepted_decision_count"] == 2
+    assert len(result["decision_files_scanned"]) == 2
 
 
 def test_rejects_unknown_decision_value(tmp_path: Path) -> None:

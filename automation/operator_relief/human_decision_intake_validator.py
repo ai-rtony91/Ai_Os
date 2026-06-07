@@ -16,6 +16,7 @@ REPORT_TYPE = "operator_relief_human_decision_intake_validation_v1"
 SCHEMA_PATH = Path("Reports/operator_relief/human_review_decisions/human_review_decision_schema.json")
 PACKET_ROOT = Path("Reports/operator_relief/human_review_packets")
 DECISION_ROOT = Path("Reports/operator_relief/human_review_decisions")
+FILLED_DECISION_ROOT = DECISION_ROOT / "filled"
 OUTPUT_PATH = DECISION_ROOT / "human_decision_intake_validation.json"
 IGNORED_DECISION_FILES = {
     "human_review_decision_schema.json",
@@ -66,11 +67,16 @@ def _decision_files(repo_root: Path) -> list[Path]:
     decision_root = repo_root / DECISION_ROOT
     if not decision_root.exists():
         return []
-    return sorted(
+    top_level_files = [
         path
         for path in decision_root.glob("*.json")
         if path.is_file() and path.name not in IGNORED_DECISION_FILES
-    )
+    ]
+    filled_root = repo_root / FILLED_DECISION_ROOT
+    filled_files = []
+    if filled_root.exists():
+        filled_files = [path for path in filled_root.glob("*.json") if path.is_file()]
+    return sorted(top_level_files + filled_files, key=lambda path: path.as_posix())
 
 
 def _records_from_payload(payload: Any) -> list[dict[str, Any]]:
