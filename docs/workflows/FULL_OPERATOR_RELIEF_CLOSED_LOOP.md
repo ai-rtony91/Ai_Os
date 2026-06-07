@@ -396,6 +396,72 @@ git diff --check
 git status --short --branch
 ```
 
+## Operator Relief Night Mission Control v1
+
+Night Mission Control v1 turns the remaining night-autonomy red items into bounded local scaffolds. It composes the existing runtime bridge, approval handling, ADB wake rail, and one-shot mission loop without creating unsafe unattended autonomy.
+
+Green in v1:
+
+- mission scheduler scaffold returns next-run metadata.
+- phone/Pi approval station scaffold reads bounded local approval decision JSON.
+- ADB emergency alert target is planned through the existing Android wake script.
+- unattended mission runner processes bounded cycles and stops on safety states.
+
+Mission scheduler behavior:
+
+- plans a next local run time and max cycle count.
+- does not register Task Scheduler.
+- does not start a background process.
+- returns `executable=false`.
+
+Phone/Pi approval station target:
+
+- bounded local input path: `automation/operator_relief/approval_input/`.
+- supported decisions: `APPROVE`, `REJECT`, `CONTINUE_MISSION`, `HOLD`.
+- traversal, malformed JSON, and unknown decisions are blocked.
+- no network listener, open port, or credential storage is created.
+
+ADB emergency alert target:
+
+- existing script path: `tools/android/Send-AiosAdbSosWake.ps1`.
+- triggers: approval required, blocked task, validator failure, bridge failure, dirty repo state.
+- default mode plans the exact PowerShell command only.
+- `APPLY_ADB_ALERT` is required before the ADB alert command may run.
+- no Telegram dependency and no credential material required.
+
+Unattended mission runner behavior:
+
+- one-shot only; not a resident runner.
+- default `max_cycles=3`.
+- calls Runtime Bridge for one task per cycle.
+- stops on approval required, blocked task, validator failure, bridge failure, dirty repo, no inbox task, safety violation, or max cycles.
+- builds an ADB escalation plan when human attention is required.
+- does not commit, push, or merge by default.
+
+Still gated:
+
+- actual recurring registration.
+- phone/Pi hosted approval UI or network service.
+- ADB alert execution unless explicit `APPLY_ADB_ALERT` is passed.
+- commit/push unless the existing Auto Commit Push Executor hard gates pass in its explicit apply mode.
+- merge, rebase, force-push, live trading, broker/API/order execution, secrets, OpenAI API calls, recursive Codex calls, daemons, watchers, and services.
+
+Safe commands:
+
+```powershell
+python -m automation.operator_relief.unattended_mission_runner
+python -m automation.operator_relief.unattended_mission_runner --max-cycles 3
+```
+
+Safe validation commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/mission_scheduler.py automation/operator_relief/approval_station.py automation/operator_relief/adb_escalation.py automation/operator_relief/unattended_mission_runner.py
+git diff --check
+git status --short --branch
+```
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
