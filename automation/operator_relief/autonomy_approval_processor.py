@@ -35,6 +35,18 @@ def _touches_protected_path(paths: list[str]) -> bool:
     return any(_path_matches(path, prefix) for path in paths for prefix in PROTECTED_PATH_PREFIXES)
 
 
+def _has_valid_resume_approval(task: FullAutoTask) -> bool:
+    metadata = task.metadata if isinstance(task.metadata, dict) else {}
+    resume = metadata.get("approval_resume")
+    if not isinstance(resume, dict):
+        return False
+    if resume.get("task_id") != task.task_id:
+        return False
+    if resume.get("decision") not in {"APPROVE", "CONTINUE_MISSION"}:
+        return False
+    return resume.get("human_approved") is True
+
+
 def classify_approval(task: FullAutoTask, repo_state: Any) -> ApprovalDecision:
     policy = evaluate_full_auto_policy(task, repo_state)
     reasons = list(policy.reasons)
@@ -51,15 +63,22 @@ def classify_approval(task: FullAutoTask, repo_state: Any) -> ApprovalDecision:
     if policy.blocked:
         return ApprovalDecision(BLOCKED, reasons, True)
 
+    resume_approved = _has_valid_resume_approval(task)
+    protected_requested = (
+        task.commit_allowed
+        or task.push_allowed
+        or any(action in {"commit", "push"} for action in task.requested_actions)
+    )
+
     if (
         policy.requires_approval
         or getattr(repo_state, "dirty_state", "") == "DIRTY"
         or (task.expected_branch and getattr(repo_state, "branch", "") != task.expected_branch)
-        or task.commit_allowed
-        or task.push_allowed
-        or "commit" in task.requested_actions
-        or "push" in task.requested_actions
+        or protected_requested
     ):
+        if resume_approved and not protected_requested:
+            reasons.append("Human approval resume evidence accepted for non-protected continuation.")
+            return ApprovalDecision(AUTO_ALLOWED, reasons, False)
         if not reasons:
             reasons.append("Human approval is required by autonomous v1 safety policy.")
         return ApprovalDecision(APPROVAL_REQUIRED, reasons, True)
