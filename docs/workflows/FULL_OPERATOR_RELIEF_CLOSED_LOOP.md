@@ -288,6 +288,114 @@ git diff --check
 git status --short --branch
 ```
 
+## Operator Relief Runtime Bridge v1
+
+Runtime Bridge v1 is the single one-shot pipeline for the existing Operator Relief autonomy components. It reads the oldest `*.json` task from `reports/operator_relief/inbox/`, processes exactly one task, writes one result JSON to `reports/operator_relief/outbox/`, archives the processed inbox item under `reports/operator_relief/archive/processed/`, and exits.
+
+Runtime pipeline:
+
+1. Task Discovery
+2. Policy Evaluation
+3. Approval Processing
+4. Validator Planning
+5. Bounded Executor
+6. Write Enabled Safe Executor
+7. Outbox Result
+
+Allowed runtime behavior:
+
+- process one inbox task per run.
+- select the oldest inbox JSON first.
+- block duplicate outbox results instead of overwriting.
+- write report-only blocked or approval-required evidence to outbox.
+- archive only tasks that were processed into an outbox report.
+- return `executable=false` in runtime, bridge, executor, and bounded reports.
+
+Still blocked:
+
+- source-file edits.
+- telemetry `.jsonl` writes.
+- approval queue writes.
+- traversal outside inbox, outbox, or archive roots.
+- malformed JSON, unresolved placeholders, secrets, broker/API/order-execution paths, and live-trading paths.
+- commit, push, merge, rebase, force-push, OpenAI API, recursive Codex, shell passthrough, daemon, watcher, or service start.
+
+Safe command:
+
+```powershell
+python -m automation.operator_relief.runtime_bridge
+```
+
+Optional explicit inbox task command:
+
+```powershell
+python -m automation.operator_relief.runtime_bridge --task-json reports/operator_relief/inbox/task.json
+```
+
+Safe validation commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/runtime_bridge.py
+git diff --check
+git status --short --branch
+```
+
+## Operator Relief Auto Commit Push Executor v1
+
+Auto Commit Push Executor v1 is the first bounded closeout executor for high-friction Git steps. It can evaluate whether the current feature-branch work is eligible for exact-file staging, generated-message commit, and push to the current feature branch.
+
+Modes:
+
+- `DRY_RUN`: returns the exact Git commands that would run and executes nothing.
+- `APPLY_COMMIT_PUSH`: may run only exact approved `git add -- <files>`, `git commit -m <generated message>`, and `git push origin feature/full-operator-relief-closed-loop-v1` after all hard gates pass.
+
+Hard gates:
+
+- validators must have passed.
+- branch must be `feature/full-operator-relief-closed-loop-v1`.
+- upstream must be `origin/feature/full-operator-relief-closed-loop-v1`.
+- dirty files must exactly match the approved task `changed_paths`.
+- every changed file must stay inside task `allowed_paths`.
+- forbidden, protected, secret, broker/API, and live-trading paths are blocked.
+- merge, rebase, force-push, main-branch push, tag push, broad staging, and unknown dirty files are blocked.
+
+Generated outputs:
+
+- machine-readable JSON report.
+- explicit files staged or proposed.
+- generated commit message.
+- push target.
+- captured command stdout/stderr in apply mode.
+- `executable=true` only after successful `APPLY_COMMIT_PUSH`.
+
+Still blocked:
+
+- merge, rebase, force-push, main-branch push, tag push, and broad staging.
+- protected paths, secrets, broker/API/order execution, and live trading.
+- OpenAI API calls, recursive Codex calls, daemons, watchers, and services.
+
+Safe DRY_RUN command:
+
+```powershell
+python -m automation.operator_relief.auto_commit_push_executor --task-json reports/operator_relief/inbox/task.json --validators-passed
+```
+
+Apply mode is intentionally explicit and must not be used unless the operator has approved that exact closeout action:
+
+```powershell
+python -m automation.operator_relief.auto_commit_push_executor --task-json reports/operator_relief/inbox/task.json --validators-passed --mode APPLY_COMMIT_PUSH
+```
+
+Safe validation commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/auto_commit_push_executor.py
+git diff --check
+git status --short --branch
+```
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
