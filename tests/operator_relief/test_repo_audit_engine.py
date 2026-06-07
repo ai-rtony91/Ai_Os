@@ -74,6 +74,13 @@ This forbidden governance file must not be scanned.
         """,
     )
     _write(
+        tmp_path / "Reports/operator_relief/audits/generated.md",
+        """
+# Startup Procedure
+Generated runtime report output must not be scanned.
+        """,
+    )
+    _write(
         tmp_path / "automation/operator_relief/audit_target.json",
         '{"name": "operator workflow", "reference": "docs/workflows/startup-a.md"}',
     )
@@ -91,6 +98,42 @@ def test_duplicate_heading_detection(tmp_path: Path) -> None:
         item["heading_text"] == "Startup Procedure" and item["occurrence_count"] >= 3
         for item in report["duplicate_headings"]
     )
+
+
+def test_near_duplicate_heading_detection_for_small_candidate_groups(tmp_path: Path) -> None:
+    repo = _sample_repo(tmp_path)
+    _write(
+        repo / "docs/workflows/near-heading.md",
+        """
+# Startup Procedures
+This is close enough to the startup procedure heading to be reviewed.
+        """,
+    )
+
+    report = run_repo_audit(repo).to_dict()
+
+    assert any(
+        item.get("near_heading_text") == "Startup Procedures"
+        or item["heading_text"] == "Startup Procedures"
+        for item in report["duplicate_headings"]
+    )
+
+
+def test_large_heading_set_uses_capped_comparisons(tmp_path: Path) -> None:
+    repo = _sample_repo(tmp_path)
+    large_headings = "\n".join(
+        f"# Topic {index:04d}\nLarge heading body {index}."
+        for index in range(300)
+    )
+    _write(repo / "docs/workflows/large-heading-set.md", large_headings)
+
+    report = run_repo_audit(repo).to_dict()
+    summary = report["audit_summary"]
+
+    assert summary["headings_scanned"] >= 300
+    assert summary["heading_comparisons_performed"] <= summary["heading_comparison_cap"]
+    assert summary["heading_comparisons_performed"] < 300 * 299 / 2
+    assert summary["near_heading_bucket_truncation_hit"] is True
 
 
 def test_duplicate_section_detection(tmp_path: Path) -> None:
@@ -172,6 +215,12 @@ def test_forbidden_paths_ignored(tmp_path: Path) -> None:
     report = _report(tmp_path)
 
     assert "docs/governance/forbidden.md" not in report["scanned_files"]
+
+
+def test_generated_reports_operator_relief_output_is_skipped(tmp_path: Path) -> None:
+    report = _report(tmp_path)
+
+    assert "Reports/operator_relief/audits/generated.md" not in report["scanned_files"]
 
 
 def test_executable_false(tmp_path: Path) -> None:

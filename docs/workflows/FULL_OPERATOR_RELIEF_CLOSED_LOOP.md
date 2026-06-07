@@ -649,6 +649,10 @@ Report behavior:
 - default mode prints JSON to stdout only.
 - `--write-report` writes one JSON report under `Reports/operator_relief/audits/`.
 - report payloads include `executable=false`.
+- generated runtime output under `Reports/operator_relief/` is skipped during scanning.
+- common generated dependency/build folders such as `.git`, `__pycache__`, `node_modules`, `venv`, `.venv`, `build`, and `dist` are skipped.
+- duplicate heading analysis uses exact heading grouping first and capped near-duplicate comparisons to avoid unbounded all-pairs scans.
+- audit metadata includes `files_scanned`, `headings_scanned`, `heading_comparisons_performed`, and `comparison_cap_hit`.
 - no markdown report files are produced.
 - no source files are modified.
 

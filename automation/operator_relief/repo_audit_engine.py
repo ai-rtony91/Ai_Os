@@ -16,6 +16,16 @@ from typing import Any
 SCAN_ROOTS = (Path("docs"), Path("automation/operator_relief"), Path("Reports"), Path("control"))
 REPORT_ROOT = Path("Reports/operator_relief/audits")
 SUPPORTED_SUFFIXES = {".md", ".markdown", ".json", ".yaml", ".yml", ".txt"}
+EXCLUDED_DIR_NAMES = {".git", "__pycache__", "node_modules", "venv", ".venv", "build", "dist"}
+EXCLUDED_PREFIXES = ("Reports/operator_relief/",)
+MAX_FILES_SCANNED = 5000
+MAX_HEADINGS_SCANNED = 12000
+MAX_SECTIONS_SCANNED = 12000
+MAX_NEAR_HEADING_BUCKET_SIZE = 80
+MAX_NEAR_SECTION_BUCKET_SIZE = 60
+MAX_HEADING_COMPARISONS = 25000
+MAX_SECTION_COMPARISONS = 20000
+MAX_DRIFT_COMPARISONS = 20000
 FORBIDDEN_PREFIXES = (
     "AGENTS.md",
     "docs/governance/",
@@ -92,6 +102,15 @@ def _is_forbidden(relative_path: str) -> bool:
     return any(
         normalized == prefix.rstrip("/") or normalized.startswith(prefix)
         for prefix in FORBIDDEN_PREFIXES
+    )
+
+
+def _is_excluded(relative_path: str) -> bool:
+    normalized = _normalize_path(relative_path)
+    parts = set(Path(normalized).parts)
+    return any(part in EXCLUDED_DIR_NAMES for part in parts) or any(
+        normalized == prefix.rstrip("/") or normalized.startswith(prefix)
+        for prefix in EXCLUDED_PREFIXES
     )
 
 
@@ -182,10 +201,10 @@ def _collect_files(repo_root: Path) -> list[Path]:
             if not path.is_file() or not _is_supported(path):
                 continue
             relative = _normalize_path(path.relative_to(root))
-            if _is_forbidden(relative):
+            if _is_forbidden(relative) or _is_excluded(relative):
                 continue
             files.append(path)
-    return sorted(files, key=lambda item: _normalize_path(item.relative_to(root)))
+    return sorted(files, key=lambda item: _normalize_path(item.relative_to(root)))[:MAX_FILES_SCANNED]
 
 
 def _analyze_files(repo_root: Path) -> list[AuditFile]:
@@ -207,11 +226,33 @@ def _analyze_files(repo_root: Path) -> list[AuditFile]:
     return analyzed
 
 
-def _duplicate_headings(files: list[AuditFile]) -> list[dict[str, Any]]:
+def _heading_bucket_key(normalized: str) -> str:
+    tokens = normalized.split()
+    if not tokens:
+        return ""
+    return f"{tokens[0]}:{len(tokens)}"
+
+
+def _section_bucket_key(title: str) -> str:
+    tokens = _slug(title).split()
+    if not tokens:
+        return ""
+    return f"{tokens[0]}:{len(tokens)}"
+
+
+def _duplicate_headings(files: list[AuditFile]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
+    headings_scanned = 0
+    heading_limit_hit = False
     for file in files:
         for heading in file.headings:
+            if headings_scanned >= MAX_HEADINGS_SCANNED:
+                heading_limit_hit = True
+                break
             grouped.setdefault(heading["normalized"], []).append(heading)
+            headings_scanned += 1
+        if heading_limit_hit:
+            break
 
     duplicates = [
         {
@@ -225,14 +266,36 @@ def _duplicate_headings(files: list[AuditFile]) -> list[dict[str, Any]]:
         if len({item["file"] for item in occurrences}) > 1 or len(occurrences) > 2
     ]
 
-    headings = [heading for file in files for heading in file.headings]
+    headings = sorted(
+        [occurrences[0] for occurrences in grouped.values()],
+        key=lambda item: (item["normalized"], item["file"], item["line"]),
+    )
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    for heading in headings:
+        buckets.setdefault(_heading_bucket_key(heading["normalized"]), []).append(heading)
+
     near: list[dict[str, Any]] = []
-    for index, left in enumerate(headings):
-        for right in headings[index + 1 :]:
-            if left["normalized"] == right["normalized"]:
-                continue
-            score = _token_similarity(left["text"], right["text"])
-            if score >= 0.86:
+    comparisons = 0
+    comparison_cap_hit = False
+    bucket_truncation_hit = False
+    for bucket_key in sorted(buckets):
+        bucket = buckets[bucket_key]
+        if len(bucket) > MAX_NEAR_HEADING_BUCKET_SIZE:
+            bucket = bucket[:MAX_NEAR_HEADING_BUCKET_SIZE]
+            bucket_truncation_hit = True
+        for index, left in enumerate(bucket):
+            if comparison_cap_hit:
+                break
+            for right in bucket[index + 1 :]:
+                if comparisons >= MAX_HEADING_COMPARISONS:
+                    comparison_cap_hit = True
+                    break
+                comparisons += 1
+                if left["normalized"] == right["normalized"]:
+                    continue
+                score = _token_similarity(left["text"], right["text"])
+                if score < 0.86:
+                    continue
                 near.append(
                     {
                         "heading_text": left["text"],
@@ -246,11 +309,28 @@ def _duplicate_headings(files: list[AuditFile]) -> list[dict[str, Any]]:
                         "executable": False,
                     }
                 )
-    return sorted(duplicates + near, key=lambda item: (-item["confidence_score"], item["heading_text"]))[:100]
+        if comparison_cap_hit:
+            break
+
+    metadata = {
+        "headings_scanned": headings_scanned,
+        "unique_heading_slugs_scanned": len(grouped),
+        "heading_comparisons_performed": comparisons,
+        "heading_comparison_cap": MAX_HEADING_COMPARISONS,
+        "comparison_cap_hit": comparison_cap_hit,
+        "heading_limit_hit": heading_limit_hit,
+        "near_heading_bucket_truncation_hit": bucket_truncation_hit,
+        "executable": False,
+    }
+    return (
+        sorted(duplicates + near, key=lambda item: (-item["confidence_score"], item["heading_text"]))[:100],
+        metadata,
+    )
 
 
-def _duplicate_sections(files: list[AuditFile]) -> list[dict[str, Any]]:
-    sections = [section for file in files for section in file.sections]
+def _duplicate_sections(files: list[AuditFile]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    all_sections = [section for file in files for section in file.sections]
+    sections = all_sections[:MAX_SECTIONS_SCANNED]
     grouped: dict[str, list[dict[str, Any]]] = {}
     for section in sections:
         grouped.setdefault(section["hash"], []).append(section)
@@ -267,23 +347,53 @@ def _duplicate_sections(files: list[AuditFile]) -> list[dict[str, Any]]:
         if len({item["file"] for item in occurrences}) > 1
     ]
 
-    for index, left in enumerate(sections):
-        for right in sections[index + 1 :]:
-            if left["file"] == right["file"] or left["hash"] == right["hash"]:
-                continue
-            score = _token_similarity(left["content"], right["content"])
-            if score >= 0.84:
-                duplicates.append(
-                    {
-                        "section_title": left["title"],
-                        "near_section_title": right["title"],
-                        "source_files": sorted({left["file"], right["file"]}),
-                        "similarity_score": round(score, 3),
-                        "confidence": round(score, 3),
-                        "executable": False,
-                    }
-                )
-    return sorted(duplicates, key=lambda item: (-item["confidence"], item["section_title"]))[:100]
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    for section in sections:
+        buckets.setdefault(_section_bucket_key(section["title"]), []).append(section)
+
+    comparisons = 0
+    comparison_cap_hit = False
+    bucket_truncation_hit = False
+    for bucket_key in sorted(buckets):
+        bucket = sorted(buckets[bucket_key], key=lambda item: (item["title"], item["file"], item["line"]))
+        if len(bucket) > MAX_NEAR_SECTION_BUCKET_SIZE:
+            bucket = bucket[:MAX_NEAR_SECTION_BUCKET_SIZE]
+            bucket_truncation_hit = True
+        for index, left in enumerate(bucket):
+            if comparison_cap_hit:
+                break
+            for right in bucket[index + 1 :]:
+                if comparisons >= MAX_SECTION_COMPARISONS:
+                    comparison_cap_hit = True
+                    break
+                comparisons += 1
+                if left["file"] == right["file"] or left["hash"] == right["hash"]:
+                    continue
+                score = _token_similarity(left["content"], right["content"])
+                if score >= 0.84:
+                    duplicates.append(
+                        {
+                            "section_title": left["title"],
+                            "near_section_title": right["title"],
+                            "source_files": sorted({left["file"], right["file"]}),
+                            "similarity_score": round(score, 3),
+                            "confidence": round(score, 3),
+                            "executable": False,
+                        }
+                    )
+        if comparison_cap_hit:
+            break
+
+    metadata = {
+        "sections_scanned": len(sections),
+        "section_comparisons_performed": comparisons,
+        "section_comparison_cap": MAX_SECTION_COMPARISONS,
+        "section_comparison_cap_hit": comparison_cap_hit,
+        "section_limit_hit": len(all_sections) > len(sections),
+        "near_section_bucket_truncation_hit": bucket_truncation_hit,
+        "executable": False,
+    }
+    return sorted(duplicates, key=lambda item: (-item["confidence"], item["section_title"]))[:100], metadata
 
 
 def _source_of_truth_conflicts(files: list[AuditFile]) -> list[dict[str, Any]]:
@@ -381,25 +491,53 @@ def _workflow_duplicates(files: list[AuditFile]) -> list[dict[str, Any]]:
     ]
 
 
-def _document_drift(files: list[AuditFile]) -> list[dict[str, Any]]:
-    sections = [section for file in files for section in file.sections]
+def _document_drift(files: list[AuditFile]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    sections = [section for file in files for section in file.sections][:MAX_SECTIONS_SCANNED]
+    buckets: dict[str, list[dict[str, Any]]] = {}
+    for section in sections:
+        buckets.setdefault(_section_bucket_key(section["title"]), []).append(section)
+
     drift: list[dict[str, Any]] = []
-    for index, left in enumerate(sections):
-        for right in sections[index + 1 :]:
-            if left["file"] == right["file"]:
-                continue
-            title_score = _token_similarity(left["title"], right["title"])
-            content_score = _token_similarity(left["content"], right["content"])
-            if title_score >= 0.86 and 0.35 <= content_score <= 0.78:
-                drift.append(
-                    {
-                        "drift_group": left["title"],
-                        "files_involved": sorted({left["file"], right["file"]}),
-                        "confidence": round((title_score + (1 - content_score)) / 2, 3),
-                        "executable": False,
-                    }
-                )
-    return sorted(drift, key=lambda item: (-item["confidence"], item["drift_group"]))[:100]
+    comparisons = 0
+    comparison_cap_hit = False
+    bucket_truncation_hit = False
+    for bucket_key in sorted(buckets):
+        bucket = sorted(buckets[bucket_key], key=lambda item: (item["title"], item["file"], item["line"]))
+        if len(bucket) > MAX_NEAR_SECTION_BUCKET_SIZE:
+            bucket = bucket[:MAX_NEAR_SECTION_BUCKET_SIZE]
+            bucket_truncation_hit = True
+        for index, left in enumerate(bucket):
+            if comparison_cap_hit:
+                break
+            for right in bucket[index + 1 :]:
+                if comparisons >= MAX_DRIFT_COMPARISONS:
+                    comparison_cap_hit = True
+                    break
+                comparisons += 1
+                if left["file"] == right["file"]:
+                    continue
+                title_score = _token_similarity(left["title"], right["title"])
+                content_score = _token_similarity(left["content"], right["content"])
+                if title_score >= 0.86 and 0.35 <= content_score <= 0.78:
+                    drift.append(
+                        {
+                            "drift_group": left["title"],
+                            "files_involved": sorted({left["file"], right["file"]}),
+                            "confidence": round((title_score + (1 - content_score)) / 2, 3),
+                            "executable": False,
+                        }
+                    )
+        if comparison_cap_hit:
+            break
+
+    metadata = {
+        "drift_comparisons_performed": comparisons,
+        "drift_comparison_cap": MAX_DRIFT_COMPARISONS,
+        "drift_comparison_cap_hit": comparison_cap_hit,
+        "drift_bucket_truncation_hit": bucket_truncation_hit,
+        "executable": False,
+    }
+    return sorted(drift, key=lambda item: (-item["confidence"], item["drift_group"]))[:100], metadata
 
 
 def _top_candidates(*groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -433,13 +571,13 @@ def _safety() -> dict[str, bool]:
 def run_repo_audit(repo_root: Path) -> RepoAuditReport:
     root = repo_root.resolve()
     files = _analyze_files(root)
-    duplicate_headings = _duplicate_headings(files)
-    duplicate_sections = _duplicate_sections(files)
+    duplicate_headings, heading_metadata = _duplicate_headings(files)
+    duplicate_sections, section_metadata = _duplicate_sections(files)
     source_conflicts = _source_of_truth_conflicts(files)
     orphan_documents = _dead_documents(files)
     broken_references = _broken_references(root, files)
     workflow_duplicates = _workflow_duplicates(files)
-    document_drift = _document_drift(files)
+    document_drift, drift_metadata = _document_drift(files)
     cleanup_candidates = _top_candidates(orphan_documents, duplicate_sections, broken_references)
     review_candidates = _top_candidates(source_conflicts, document_drift, workflow_duplicates, duplicate_headings)
 
@@ -449,6 +587,12 @@ def run_repo_audit(repo_root: Path) -> RepoAuditReport:
             "mode": "AUDIT_ONLY",
             "scan_roots": [root.as_posix() for root in SCAN_ROOTS],
             "forbidden_paths_ignored": list(FORBIDDEN_PREFIXES),
+            "excluded_paths_ignored": list(EXCLUDED_PREFIXES),
+            "excluded_directories_ignored": sorted(EXCLUDED_DIR_NAMES),
+            "files_scanned": len(files),
+            **heading_metadata,
+            **section_metadata,
+            **drift_metadata,
             "report_type": "operator_relief_repo_audit_engine_v1",
             "executable": False,
         },
