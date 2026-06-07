@@ -698,6 +698,23 @@ Forbidden path declarations are safety boundaries. A task may list dangerous pat
 
 Future work may add Telegram, desktop notifications, or dashboard notification cards only after a separate approval packet defines boundaries, dependencies, credentials policy, opt-out behavior, and validation.
 
+Telegram notification credentials for the PowerShell bridge use Windows Credential Manager target names:
+
+```text
+AIOS_TELEGRAM_BOT_TOKEN
+AIOS_TELEGRAM_CHAT_ID
+```
+
+Tasker setup guidance for phone-side `#AIOS_SOS` wake filtering lives at:
+
+```text
+relay/reports/TASKER_SETUP.md
+```
+
+Telegram and Tasker remain notification surfaces only. Credential presence,
+validator PASS, or Tasker setup is not approval to send a live notification or
+perform a protected action.
+
 ## Current Stop Point
 
 v1 runs once and exits. It does not watch the repo, start a service, or run as a daemon.

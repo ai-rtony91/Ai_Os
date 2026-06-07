@@ -233,7 +233,15 @@ if ($channel -eq "telegram") {
     $tokenSecret = Get-AiOsCredentialSecret -Credential $tokenCredential
     $chatSecret = Get-AiOsCredentialSecret -Credential $chatCredential
     if ([string]::IsNullOrWhiteSpace($tokenSecret) -or [string]::IsNullOrWhiteSpace($chatSecret)) {
-        Write-AiOsNotificationLog -Channel "telegram" -Status "MISSING_CREDENTIAL_$tokenName"
+        $missing = @()
+        if ([string]::IsNullOrWhiteSpace($tokenSecret)) { $missing += $tokenName }
+        if ([string]::IsNullOrWhiteSpace($chatSecret)) { $missing += $chatName }
+        Write-AiOsNotificationLog -Channel "telegram" -Status "MISSING_TELEGRAM_CREDENTIALS" -Detail ("missing=" + ($missing -join ","))
+        Write-Host "STATUS=MISSING_TELEGRAM_CREDENTIALS"
+        Write-Host "CHANNEL=telegram"
+        Write-Host "FALLBACK_CHANNEL=file"
+        Write-Host ("MISSING_CREDENTIAL_NAMES=" + ($missing -join ","))
+        Write-Host "REDACTED=true"
         Write-AiOsFileNotification -Config $config
         exit 0
     }
