@@ -462,6 +462,130 @@ git diff --check
 git status --short --branch
 ```
 
+## Operator Relief Overnight Autonomy Integration v1
+
+Overnight Autonomy Integration v1 connects the night mission CLI hook, commit/push smoke harness, ADB alert smoke harness, local phone/Pi approval station scaffold, overnight scheduler plan, and merge approval gate into one bounded overnight model.
+
+Integrated capabilities:
+
+- `.\aios.ps1 -Mode night-mission -MaxCycles 3` runs the one-shot unattended mission runner.
+- Commit/push smoke harness proves exact-file staging and feature-branch push command shape against a generated smoke task or injected runner.
+- ADB alert smoke harness plans the existing Android wake script by default and gates actual alert execution behind `APPLY_ADB_ALERT`.
+- Phone/Pi approval model remains local file-based JSON under `automation/operator_relief/approval_input/`.
+- Scheduler model prints or returns a Windows launch command plan for the night mission CLI.
+- Merge approval gate returns machine-readable readiness only; it executes no merge.
+
+Phone/Pi approval model:
+
+- supported decisions: `APPROVE`, `REJECT`, `HOLD`, and existing `CONTINUE_MISSION`.
+- the phone or Pi can later write a bounded local JSON decision file.
+- no web server, open port, credential storage, or network dependency exists in v1.
+
+ADB escalation model:
+
+- default command plan targets `tools/android/Send-AiosAdbSosWake.ps1`.
+- default mode is `DRY_RUN`.
+- `APPLY_ADB_ALERT` may call only the existing wake script path.
+- the smoke harness reports JSON success or failure.
+
+Scheduler model:
+
+- default mode is `DRY_RUN`.
+- planned launch command:
+
+```powershell
+.\aios.ps1 -Mode night-mission -MaxCycles 3
+```
+
+- `APPLY_SCHEDULE_PLAN` is explicit and gated.
+- no daemon, watcher, service, or recurring registration is started by default.
+
+Commit/push smoke model:
+
+- default mode is `DRY_RUN`.
+- generated smoke path: `automation/operator_relief/generated_smoke/auto_commit_push_smoke.txt`.
+- apply smoke mode requires `APPLY_COMMIT_PUSH_SMOKE` and an explicit command runner in v1 test harnesses.
+- it proves exact-file staging and push to `origin/feature/full-operator-relief-closed-loop-v1`.
+- merge, rebase, force-push, main push, tag push, and broad staging remain blocked.
+
+Merge gate model:
+
+- statuses: `MERGE_BLOCKED`, `MERGE_REQUIRES_APPROVAL`, `MERGE_READY_FOR_HUMAN`.
+- validators and PR readiness are required before human merge readiness.
+- no merge, rebase, force-push, or main mutation executes in v1.
+
+Exact safe commands:
+
+```powershell
+.\aios.ps1 -Mode night-mission -MaxCycles 3
+python -m automation.operator_relief.commit_push_smoke_harness
+python -m automation.operator_relief.adb_alert_smoke_harness
+python -m automation.operator_relief.overnight_scheduler --max-cycles 3
+```
+
+Safe validation commands:
+
+```powershell
+python -m pytest tests/operator_relief
+python -m py_compile automation/operator_relief/commit_push_smoke_harness.py automation/operator_relief/adb_alert_smoke_harness.py automation/operator_relief/overnight_scheduler.py automation/operator_relief/merge_approval_gate.py
+git diff --check
+git status --short --branch
+```
+
+## Operator Relief Safe CLI Modes v1
+
+Safe CLI Modes v1 exposes the bounded Operator Relief commands through `aios.ps1` so the operator can run the autonomy bridge without remembering Python module names.
+
+Safe modes:
+
+```powershell
+.\aios.ps1 -Mode bridge -TaskJson .\reports\operator_relief\inbox\task.json
+.\aios.ps1 -Mode runtime-bridge
+.\aios.ps1 -Mode night-mission -MaxCycles 3
+.\aios.ps1 -Mode commit-push-dry-run -TaskJson .\reports\operator_relief\inbox\task.json
+```
+
+Mode routing:
+
+- `bridge` runs only `python -m automation.operator_relief.inbox_outbox_bridge --task-json <resolved path>`.
+- `runtime-bridge` runs only `python -m automation.operator_relief.runtime_bridge`.
+- `night-mission` runs only `python -m automation.operator_relief.unattended_mission_runner --max-cycles <N>`.
+- `commit-push-dry-run` runs only `python -m automation.operator_relief.auto_commit_push_executor --task-json <resolved path> --validators-passed`.
+
+Required parameter behavior:
+
+- `bridge` blocks when `-TaskJson` is missing or not a real file.
+- `commit-push-dry-run` blocks when `-TaskJson` is missing or not a real file.
+- `night-mission` defaults `-MaxCycles` to `3` and blocks non-positive values.
+- `runtime-bridge` requires no task argument and processes the oldest inbox JSON through the runtime bridge.
+
+Blocked capabilities from `aios.ps1` safe modes:
+
+- no commit execution.
+- no push execution.
+- no merge, rebase, or force-push.
+- no OpenAI API call.
+- no recursive Codex call.
+- no daemon, watcher, or service.
+- no shell passthrough.
+- no live trading, broker/API/order execution, secrets, or credentials.
+
+Next planned APPLY gates:
+
+- commit/push remains outside `aios.ps1` safe modes until a separate protected-action approval lane authorizes an exact apply closeout.
+- ADB alert apply remains gated behind explicit alert mode and is not exposed through these safe modes.
+- scheduler registration remains a command plan only unless a separate schedule-apply lane is approved.
+- merge remains human-only through the merge approval gate and executes no merge in v1.
+
+Safe validation commands:
+
+```powershell
+powershell -NoProfile -Command '$tokens=$null; $errors=$null; $null=[System.Management.Automation.Language.Parser]::ParseFile("aios.ps1",[ref]$tokens,[ref]$errors); if ($errors.Count -gt 0) { $errors | ForEach-Object { $_.Message }; exit 1 } else { "AIOS_PS1_PARSE_OK" }'
+python -m pytest tests/operator_relief
+git diff --check
+git status --short --branch
+```
+
 ## Validator Routing
 
 v1 validators are intentionally narrow:
