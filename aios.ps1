@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud","operator-relief","bridge")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud","operator-relief","bridge","runtime-bridge","night-mission","commit-push-dry-run")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -11,6 +11,7 @@
     [string]$MissionPath = "",
     [string]$TaskId = "",
     [string]$TaskJson = "",
+    [int]$MaxCycles = 3,
     [int]$Pr = 0,
     [switch]$ShowPrompt,
 
@@ -92,6 +93,9 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode hud -Worker CLAUDE # preview worker HUD"
         Write-Host ".\aios.ps1 -Mode operator-relief -TaskJson .\local_task.json # run Full-Auto DRY_RUN only"
         Write-Host ".\aios.ps1 -Mode bridge -TaskJson .\reports\operator_relief\inbox\task.json # run inbox/outbox bridge"
+        Write-Host ".\aios.ps1 -Mode runtime-bridge # run one Operator Relief inbox task through runtime bridge"
+        Write-Host ".\aios.ps1 -Mode night-mission -MaxCycles 3 # run one-shot overnight mission"
+        Write-Host ".\aios.ps1 -Mode commit-push-dry-run -TaskJson .\local_task.json # preview safe commit/push closeout only"
     }
 
     "daily" {
@@ -203,6 +207,78 @@ switch ($Mode) {
         Write-Host "Task JSON: $resolvedTaskJson"
         Write-Host "Running: python -m $moduleName --task-json $resolvedTaskJson"
         python -m $moduleName --task-json $resolvedTaskJson
+        exit $LASTEXITCODE
+    }
+
+    "runtime-bridge" {
+        $moduleName = "automation.operator_relief.runtime_bridge"
+
+        Write-Host ""
+        Write-Host "== AI_OS Operator Relief Runtime Bridge ==" -ForegroundColor Cyan
+        Write-Host "Mode: DRY_RUN"
+        Write-Host "Python module: $moduleName"
+        Write-Host "Safety: no commit, no push, no merge, no rebase, no force-push, no OpenAI API, no recursive Codex, no daemon, no watcher, no service, no shell passthrough."
+
+        Write-Host "Running: python -m $moduleName"
+        python -m $moduleName
+        exit $LASTEXITCODE
+    }
+
+    "night-mission" {
+        $moduleName = "automation.operator_relief.unattended_mission_runner"
+
+        Write-Host ""
+        Write-Host "== AI_OS Operator Relief Night Mission ==" -ForegroundColor Cyan
+        Write-Host "Mode: DRY_RUN"
+        Write-Host "Python module: $moduleName"
+        Write-Host "Safety: one-shot only; no daemon, no watcher, no service, no commit, no push, no merge, no OpenAI API, no recursive Codex."
+
+        if ($MaxCycles -le 0) {
+            Write-Host ""
+            Write-Host "Usage:" -ForegroundColor Yellow
+            Write-Host ".\aios.ps1 -Mode night-mission -MaxCycles 3"
+            Write-Host ""
+            Write-Host "BLOCKED: -MaxCycles must be greater than zero." -ForegroundColor Red
+            exit 1
+        }
+
+        Write-Host "Max cycles: $MaxCycles"
+        Write-Host "Running: python -m $moduleName --max-cycles $MaxCycles"
+        python -m $moduleName --max-cycles $MaxCycles
+        exit $LASTEXITCODE
+    }
+
+    "commit-push-dry-run" {
+        $moduleName = "automation.operator_relief.auto_commit_push_executor"
+
+        Write-Host ""
+        Write-Host "== AI_OS Operator Relief Commit/Push DRY_RUN ==" -ForegroundColor Cyan
+        Write-Host "Mode: DRY_RUN"
+        Write-Host "Python module: $moduleName"
+        Write-Host "Safety: dry-run only; no commit, no push, no merge, no rebase, no force-push, no OpenAI API, no recursive Codex, no daemon, no watcher, no service, no shell passthrough."
+
+        if ([string]::IsNullOrWhiteSpace($TaskJson)) {
+            Write-Host ""
+            Write-Host "Usage:" -ForegroundColor Yellow
+            Write-Host ".\aios.ps1 -Mode commit-push-dry-run -TaskJson .\local_task.json"
+            Write-Host ""
+            Write-Host "BLOCKED: -TaskJson must point to a real FullAutoTask JSON file." -ForegroundColor Red
+            exit 1
+        }
+
+        if (-not (Test-Path -LiteralPath $TaskJson -PathType Leaf)) {
+            Write-Host ""
+            Write-Host "Usage:" -ForegroundColor Yellow
+            Write-Host ".\aios.ps1 -Mode commit-push-dry-run -TaskJson .\local_task.json"
+            Write-Host ""
+            Write-Host "BLOCKED: task JSON file not found: $TaskJson" -ForegroundColor Red
+            exit 1
+        }
+
+        $resolvedTaskJson = (Resolve-Path -LiteralPath $TaskJson).Path
+        Write-Host "Task JSON: $resolvedTaskJson"
+        Write-Host "Running: python -m $moduleName --task-json $resolvedTaskJson --validators-passed"
+        python -m $moduleName --task-json $resolvedTaskJson --validators-passed
         exit $LASTEXITCODE
     }
 
