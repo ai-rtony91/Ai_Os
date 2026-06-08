@@ -1,0 +1,21 @@
+SUMMARY:
+Created the mapping report.
+
+WHAT CHANGED:
+Added report-only evidence.
+
+FILES CHANGED:
+Reports/bridge_audit/CODEX_RESULT_TO_EVIDENCE_ADAPTER_MAPPING.md
+
+VALIDATION:
+git diff --check passed.
+python -m pytest tests/orchestration/adapters/test_codex_result_to_evidence.py passed.
+
+REMAINING DIRTY FILES:
+classified untracked report evidence only
+
+SAFE NEXT COMMAND:
+git diff --stat
+
+STATUS:
+COMPLETE, NO COMMIT, NO PUSH

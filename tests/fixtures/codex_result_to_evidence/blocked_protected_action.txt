@@ -1,0 +1,17 @@
+WHAT FAILED:
+Commit approval is required before running git commit.
+
+WHY IT FAILED:
+Protected actions require current-session Anthony approval.
+
+WHAT NEEDS TO HAPPEN NEXT:
+Request exact commit approval.
+
+WHERE TO REFERENCE:
+AGENTS.md
+
+SAFE NEXT COMMAND OR PROMPT:
+No command recommended.
+
+STATUS:
+NEEDS_APPROVAL

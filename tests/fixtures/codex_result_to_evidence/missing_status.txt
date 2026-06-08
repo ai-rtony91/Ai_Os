@@ -1,0 +1,5 @@
+SUMMARY:
+The report did not include a status heading.
+
+VALIDATION:
+git diff --check passed.
