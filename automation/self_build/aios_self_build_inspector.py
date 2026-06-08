@@ -13,16 +13,16 @@ from automation.bridge.aios_self_build_model import build_recommendations
 from automation.bridge.aios_status_model import capture_repo_snapshot, read_json_if_exists, utc_now, write_json, write_markdown
 
 
-REPORT_ROOT = Path("Reports/phase_0_to_4_bridge")
+DEFAULT_REPORT_ROOT = Path("Reports/generated/phase_0_to_4_bridge")
 
 
-def inspect_self_build(repo_root: Path) -> dict[str, object]:
+def inspect_self_build(repo_root: Path, output_root: Path = DEFAULT_REPORT_ROOT) -> dict[str, object]:
     now = utc_now()
     snapshot = capture_repo_snapshot(repo_root)
-    phase0 = read_json_if_exists(repo_root / REPORT_ROOT / "phase0_infrastructure_inventory.json") or {}
-    phase1 = read_json_if_exists(repo_root / REPORT_ROOT / "phase1_wiring_map.json") or {}
-    phase2 = read_json_if_exists(repo_root / REPORT_ROOT / "phase2_approval_compressor_result.json") or {}
-    phase3 = read_json_if_exists(repo_root / REPORT_ROOT / "phase3_governance_enforcement.json") or {}
+    phase0 = read_json_if_exists(repo_root / output_root / "phase0_infrastructure_inventory.json") or {}
+    phase1 = read_json_if_exists(repo_root / output_root / "phase1_wiring_map.json") or {}
+    phase2 = read_json_if_exists(repo_root / output_root / "phase2_approval_compressor_result.json") or {}
+    phase3 = read_json_if_exists(repo_root / output_root / "phase3_governance_enforcement.json") or {}
     recommendations = build_recommendations(now, phase0 if isinstance(phase0, dict) else {})
     payload = {
         "timestamp_utc": now,
@@ -38,9 +38,9 @@ def inspect_self_build(repo_root: Path) -> dict[str, object]:
         "status": "COMPLETE",
         "safe_next_action": "Review recommendations; do not execute automatically.",
     }
-    write_json(repo_root / REPORT_ROOT / "phase4_self_build_inspection.json", payload)
+    write_json(repo_root / output_root / "phase4_self_build_inspection.json", payload)
     write_markdown(
-        repo_root / REPORT_ROOT / "PHASE4_SELF_BUILD_INSPECTION.md",
+        repo_root / output_root / "PHASE4_SELF_BUILD_INSPECTION.md",
         "Phase 4 Self-Build Inspection",
         {
             "SUMMARY": "Self-build inspection generated bounded recommendations only.",
@@ -56,8 +56,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Run read-only AI_OS self-build inspection.")
     parser.add_argument("--mode", choices=["DRY_RUN"], default="DRY_RUN")
     parser.add_argument("--repo-root", default=".")
+    parser.add_argument("--output-root", default=str(DEFAULT_REPORT_ROOT))
     args = parser.parse_args()
-    payload = inspect_self_build(Path(args.repo_root).resolve())
+    payload = inspect_self_build(Path(args.repo_root).resolve(), Path(args.output_root))
     print(json.dumps({"status": payload["status"], "recommendation_count": len(payload["recommendations"])}, indent=2))
     return 0
 

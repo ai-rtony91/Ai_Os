@@ -11,6 +11,8 @@ Reports/daily/*_DRY_RUN_REPORT*.txt
 Reports/daily/MORNING_BRIEF_*.md
 Reports/security/
 Reports/dry_runs/
+Reports/generated/
+Reports/runtime/
 archive/reports_legacy/daily/MORNING_BRIEF_*.md
 archive/reports_legacy/dry_runs/
 archive/reports_legacy/security/
@@ -106,6 +108,8 @@ telemetry/night_supervisor/
 automation/orchestration/auto_loop/state/**/*.json
 
 # AI_OS generated telemetry evidence
+telemetry/generated/
+telemetry/runtime/
 telemetry/auto_loop/reports/*.json
 telemetry/backup_reports/*.json
 telemetry/night_supervisor/*.json
