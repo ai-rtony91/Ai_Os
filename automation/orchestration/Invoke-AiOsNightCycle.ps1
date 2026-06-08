@@ -371,6 +371,55 @@ function Invoke-AiOsNightCycleOnce {
     Update-AiOsDashboardState
 }
 
+function Resolve-AiOsCrashRecovery {
+    # Tier 1 crash-safe restart: if a prior cycle was interrupted (process killed
+    # mid-cycle) and no explicit -ResumeFrom was supplied, resume from the first
+    # incomplete phase instead of re-running already-completed phases (which would
+    # double-execute APPLY work). Reuses the existing -ResumeFrom skip mechanism.
+    if (-not [string]::IsNullOrWhiteSpace($ResumeFrom)) {
+        return
+    }
+
+    $recoverMarker = Read-CycleMarker
+    if ($null -eq $recoverMarker) {
+        return
+    }
+
+    $recoverNames = @($recoverMarker.PSObject.Properties.Name)
+    $inProgress = ($recoverNames -contains "cycle_in_progress" -and [bool]$recoverMarker.cycle_in_progress)
+    if (-not $inProgress) {
+        return
+    }
+
+    $priorCompleted = @()
+    if ($recoverNames -contains "completed_phases" -and $null -ne $recoverMarker.completed_phases) {
+        $priorCompleted = @($recoverMarker.completed_phases | ForEach-Object { [string]$_ })
+    }
+    if ($priorCompleted.Count -eq 0) {
+        return
+    }
+
+    $firstIncomplete = $null
+    foreach ($phaseName in $script:AiOsPhaseNames) {
+        if ($priorCompleted -notcontains $phaseName) {
+            $firstIncomplete = $phaseName
+            break
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($firstIncomplete)) {
+        return
+    }
+
+    $script:ResumeFrom = $firstIncomplete
+    $script:AiOsResumeActive = $false
+    if ($recoverNames -contains "cycle_id" -and -not [string]::IsNullOrWhiteSpace([string]$recoverMarker.cycle_id)) {
+        $script:AiOsCycleId = [string]$recoverMarker.cycle_id
+    }
+    Write-AiOsNightCycleLog -Message ("CRASH_RECOVERY resume_from={0} cycle_id={1} completed_phases={2}" -f $script:ResumeFrom, $script:AiOsCycleId, ($priorCompleted -join ','))
+}
+
+Resolve-AiOsCrashRecovery
+
 do {
     Stop-AiOsNightCycleIfRequested
     Invoke-AiOsNightCycleOnce

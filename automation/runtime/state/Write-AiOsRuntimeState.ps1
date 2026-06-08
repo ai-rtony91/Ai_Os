@@ -23,7 +23,11 @@ $state = [ordered]@{
     safety = "repo_scoped_only_no_live_trading_no_secrets_no_broker"
 }
 
-$state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $statePath -Encoding UTF8
+# Atomic write (temp + rename): a crash mid-write must not leave a truncated
+# state file that crashes the next reader. Mirrors the cycle-marker pattern.
+$tmpStatePath = $statePath + ".tmp"
+$state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $tmpStatePath -Encoding UTF8
+Move-Item -LiteralPath $tmpStatePath -Destination $statePath -Force
 
 if ($QuietJson) {
     $state | ConvertTo-Json -Depth 8
