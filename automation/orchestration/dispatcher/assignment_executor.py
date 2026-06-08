@@ -57,6 +57,15 @@ PR_CLASSIFICATIONS = {
     "PR_REVIEW_REQUIRED",
     "PR_UNKNOWN",
 }
+PACKET_DRAFT_STATUSES = {
+    "DRAFT_READY_FOR_OPERATOR_REVIEW",
+    "DRAFT_BLOCKED_WAITING_APPROVAL",
+    "DRAFT_BLOCKED_BY_LOCK",
+    "DRAFT_BLOCKED_BY_PR_DEPENDENCY",
+    "DRAFT_BLOCKED_BY_PROTECTED_PATH",
+    "DRAFT_REVIEW_REQUIRED",
+    "DRAFT_NOT_CREATED",
+}
 COMPLETE_STATES = {"complete", "completed", "done", "superseded", "archived_reference", "closed"}
 WAITING_APPROVAL_STATES = {"awaiting_approval", "waiting_approval", "waiting_for_approval", "pending_review"}
 ACTIVE_STATES = {"active", "ready", "queued", "assigned", "running", "dry_run_running", "ready_for_dry_run"}
@@ -111,6 +120,45 @@ class WalkieEvent:
     zero_worker_launch_confirmation: bool
 
 
+@dataclass
+class PacketDraft:
+    packet_id: str
+    title: str
+    status: str
+    mode: str
+    lane: str
+    worker_identity: str
+    supervisor_identity: str
+    approval_authority: str
+    baseline: list[str]
+    mission: str
+    allowed_paths: list[str]
+    forbidden_paths: list[str]
+    read_first: list[str]
+    objectives: list[str]
+    validation: list[str]
+    stop_point: str
+    safety_limits: list[str]
+    expected_untracked_backlog: list[str]
+    final_report_format: list[str]
+    zero_launch_confirmation: dict[str, bool]
+    not_approval_notice: str
+    not_executable_until_operator_approval: bool
+    source_dispatch_decision_id: str
+    source_candidate_id: str
+    source_walkie_event_ids: list[str]
+    source_pr_dependency_status: str
+    source_lock_status: str
+    source_approval_status: str
+    source_collision_status: str
+    apply_approved: bool
+    merge_approved: bool
+    push_approved: bool
+    direct_anthony_wake_approved: bool
+    worker_launch_approved: bool
+    draft_text: str
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -138,6 +186,29 @@ def blocked_event_actions() -> list[str]:
         "notification_send",
         "broker_cloud_live_trading",
         "secret_handling",
+    ]
+
+
+def draft_forbidden_actions() -> list[str]:
+    return [
+        "APPLY execution",
+        "commit",
+        "push",
+        "merge",
+        "worker launch",
+        "scheduler start",
+        "Night Supervisor start",
+        "SOS send or arm",
+        "ADB call",
+        "notification send",
+        "broker execution",
+        "cloud deployment",
+        "live trading",
+        "secret handling",
+        "cleanup command",
+        "stash mutation",
+        "force push",
+        "main push",
     ]
 
 
@@ -609,6 +680,12 @@ def classify_candidates(candidates: list[Candidate], state_summary: dict[str, An
         elif any(finding["candidate_id"] == candidate.task_id and finding["dependency_classification"] != "PR_MERGED_BASELINE" for finding in pr_dependency_findings):
             decision = "BLOCKED_BY_PR_DEPENDENCY"
             reasons.append("pr_changed_paths_overlap_candidate_paths")
+        elif status in ACTIVE_STATES and state_summary["approval_state"]["future_apply_approved"] is False:
+            decision = "DRY_RUN_ONLY"
+            reasons.append("no_future_apply_approval")
+        elif status in ACTIVE_STATES:
+            decision = "READY"
+            reasons.append("candidate_status_ready")
         elif state_summary["approval_state"]["future_apply_approved"] is False:
             decision = "DRY_RUN_ONLY"
             reasons.append("no_future_apply_approval")
@@ -644,6 +721,223 @@ def build_dispatch_packet_preview(decision: Decision) -> dict[str, Any]:
         "stop_point": "Stop after dispatch preview. Do not launch workers.",
         "next_safe_action": decision.next_safe_action,
     }
+
+
+def _draft_status_for_decision(decision: Decision, related_walkie_events: list[WalkieEvent]) -> str:
+    if decision.decision in {"READY", "DRY_RUN_ONLY"}:
+        if any(event.severity in {"SAFETY_BLOCK", "SOS_CANDIDATE"} for event in related_walkie_events):
+            return "DRAFT_REVIEW_REQUIRED"
+        return "DRAFT_READY_FOR_OPERATOR_REVIEW"
+    if decision.decision == "WAITING_APPROVAL":
+        return "DRAFT_BLOCKED_WAITING_APPROVAL"
+    if decision.decision == "BLOCKED_BY_LOCK":
+        return "DRAFT_BLOCKED_BY_LOCK"
+    if decision.decision == "BLOCKED_BY_PR_DEPENDENCY":
+        return "DRAFT_BLOCKED_BY_PR_DEPENDENCY"
+    if decision.decision == "BLOCKED_BY_PROTECTED_PATH":
+        return "DRAFT_BLOCKED_BY_PROTECTED_PATH"
+    if decision.decision in {"REVIEW_REQUIRED", "BLOCKED_BY_COLLISION"}:
+        return "DRAFT_REVIEW_REQUIRED"
+    return "DRAFT_NOT_CREATED"
+
+
+def _packet_draft_mode(decision: Decision) -> str:
+    return "DRY_RUN"
+
+
+def _source_pr_dependency_status(candidate_id: str, pr_dependency_findings: list[dict[str, Any]]) -> str:
+    statuses = [
+        str(finding.get("dependency_classification"))
+        for finding in pr_dependency_findings
+        if finding.get("candidate_id") == candidate_id
+    ]
+    return ",".join(statuses) if statuses else "PR_UNKNOWN"
+
+
+def _source_collision_status(candidate_id: str, collisions: list[dict[str, Any]]) -> str:
+    for collision in collisions:
+        if candidate_id in {collision.get("left"), collision.get("right")}:
+            return "COLLISION_PRESENT"
+    return "NO_COLLISION_DETECTED"
+
+
+def _render_packet_draft_text(draft: PacketDraft) -> str:
+    lines = [
+        "CODEX-ONLY PROMPT",
+        "",
+        "AI_OS EXECUTION TOKEN: DRAFT_ONLY_NOT_OPERATOR_APPROVAL",
+        "",
+        "AI_OS BOOTSTRAP REQUIRED",
+        "",
+        "IDENTITY MARKER:",
+        f"Worker identity: {draft.worker_identity}. This is a draft packet only.",
+        "",
+        "PACKET ID:",
+        draft.packet_id,
+        "",
+        "MODE:",
+        draft.mode,
+        "",
+        "WORKTREE:",
+        "C:\\Dev\\Ai.Os",
+        "",
+        "BRANCH RULE:",
+        "Resolve branch after operator approval and read-only preflight.",
+        "",
+        "MISSION:",
+        draft.mission,
+        "",
+        "READ FIRST:",
+        *[f"- {item}" for item in draft.read_first],
+        "",
+        "ALLOWED PATHS:",
+        *[f"- {item}" for item in draft.allowed_paths],
+        "",
+        "FORBIDDEN PATHS AND ACTIONS:",
+        *[f"- {item}" for item in draft.forbidden_paths],
+        *[f"- {item}" for item in draft.safety_limits],
+        "",
+        "VALIDATION:",
+        *[f"- {item}" for item in draft.validation],
+        "",
+        "STOP POINT:",
+        draft.stop_point,
+        "",
+        "FINAL REPORT FORMAT:",
+        *[f"- {item}" for item in draft.final_report_format],
+        "",
+        "DRAFT SAFETY NOTICE:",
+        draft.not_approval_notice,
+        "This draft is not executable until Anthony approves it.",
+        "This draft does not approve APPLY, commit, push, merge, worker launch, scheduler, Night Supervisor, SOS, ADB, broker, cloud, live trading, secrets, cleanup, or stash mutation.",
+    ]
+    return "\n".join(lines)
+
+
+def build_packet_draft_for_decision(
+    decision: Decision,
+    *,
+    walkie_events: list[WalkieEvent],
+    pr_dependency_findings: list[dict[str, Any]],
+    lock_state: dict[str, Any],
+    approval_state: dict[str, Any],
+    collisions: list[dict[str, Any]],
+) -> PacketDraft:
+    related_walkie_events = [
+        event for event in walkie_events if event.candidate_id in {decision.task_id, None}
+    ]
+    status = _draft_status_for_decision(decision, related_walkie_events)
+    draft = PacketDraft(
+        packet_id=f"DRAFT-{decision.task_id}",
+        title=f"Dispatcher Next Packet Draft for {decision.task_id}",
+        status=status,
+        mode=_packet_draft_mode(decision),
+        lane=decision.lane,
+        worker_identity=decision.assigned_worker or "Codex CLI local executor",
+        supervisor_identity="ChatGPT supervisor/planner",
+        approval_authority="Anthony",
+        baseline=[
+            "PR #450 merged Dispatcher Control Plane V1",
+            "PR #452 merged Assignment Executor DRY_RUN V1",
+            "PR #453 merged active-state contracts V1",
+            "PR #454 merged PR backlog fixture ingestion V1",
+        ],
+        mission=decision.next_safe_action or "Run the dispatcher-selected DRY_RUN lane after operator approval.",
+        allowed_paths=["Resolve from source dispatcher candidate before execution."],
+        forbidden_paths=[
+            "broker/",
+            "live_trading/",
+            "oanda/",
+            "webhooks/",
+            "secrets/",
+            "api_keys/",
+            ".env",
+            ".env.*",
+        ],
+        read_first=[
+            "AGENTS.md",
+            "README.md",
+            "docs/AI_OS/worker_dispatcher/worker_dispatcher_assignment_executor_v1.md",
+            "docs/AI_OS/worker_dispatcher/worker_dispatcher_active_state_contracts_v1.md",
+            "docs/AI_OS/worker_dispatcher/worker_dispatcher_pr_backlog_fixture_ingestion_v1.md",
+        ],
+        objectives=[
+            "Run read-only preflight.",
+            "Confirm current branch and dirty state.",
+            "Execute only after Anthony approval.",
+            "Stop at report unless a later packet explicitly approves APPLY.",
+        ],
+        validation=[
+            "Run focused tests for changed components.",
+            "Run relevant validator sample-checks.",
+            "Run git diff --check.",
+            "Confirm no live activation behavior was introduced.",
+        ],
+        stop_point="Stop after DRY_RUN report. Do not APPLY, commit, push, merge, or launch workers.",
+        safety_limits=draft_forbidden_actions(),
+        expected_untracked_backlog=[
+            "Reports/phase_0_to_4_bridge/AIOS_REMOTE_ACCESS_MODEL_NOTE_20260608.md",
+            "Reports/phase_0_to_4_bridge/app_service_bridge_v0_remote_overlap_review_20260608.md",
+            "automation/orchestration/work_packets/proposed/AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md",
+        ],
+        final_report_format=[
+            "SUMMARY:",
+            "VALIDATION:",
+            "SAFETY GATES:",
+            "STATUS:",
+        ],
+        zero_launch_confirmation=zero_launch_confirmation(),
+        not_approval_notice="Dispatcher draft output is evidence only and does not grant approval.",
+        not_executable_until_operator_approval=True,
+        source_dispatch_decision_id=f"DECISION-{decision.task_id}",
+        source_candidate_id=decision.task_id,
+        source_walkie_event_ids=[event.walkie_event_id for event in related_walkie_events],
+        source_pr_dependency_status=_source_pr_dependency_status(decision.task_id, pr_dependency_findings),
+        source_lock_status=str(lock_state.get("classification") or lock_state.get("contract_status") or "UNKNOWN"),
+        source_approval_status=str(approval_state.get("approval_contract") or approval_state.get("inbox_status") or "UNKNOWN"),
+        source_collision_status=_source_collision_status(decision.task_id, collisions),
+        apply_approved=False,
+        merge_approved=False,
+        push_approved=False,
+        direct_anthony_wake_approved=False,
+        worker_launch_approved=False,
+        draft_text="",
+    )
+    draft.draft_text = _render_packet_draft_text(draft)
+    return draft
+
+
+def build_packet_drafts(
+    decisions: list[Decision],
+    *,
+    walkie_events: list[WalkieEvent],
+    pr_dependency_findings: list[dict[str, Any]],
+    lock_state: dict[str, Any],
+    approval_state: dict[str, Any],
+    collisions: list[dict[str, Any]],
+) -> list[PacketDraft]:
+    draftable_statuses = {
+        "READY",
+        "DRY_RUN_ONLY",
+        "WAITING_APPROVAL",
+        "BLOCKED_BY_LOCK",
+        "BLOCKED_BY_PR_DEPENDENCY",
+        "BLOCKED_BY_PROTECTED_PATH",
+        "REVIEW_REQUIRED",
+        "BLOCKED_BY_COLLISION",
+    }
+    return [
+        build_packet_draft_for_decision(
+            decision,
+            walkie_events=walkie_events,
+            pr_dependency_findings=pr_dependency_findings,
+            lock_state=lock_state,
+            approval_state=approval_state,
+            collisions=collisions,
+        )
+        for decision in decisions
+        if decision.decision in draftable_statuses
+    ]
 
 
 def _walkie_route_for(severity: str) -> list[str]:
@@ -856,6 +1150,14 @@ def build_report(repo_root: Path, *, allow_github: bool = False, pr_backlog_fixt
         recommended = [decision for decision in decisions if decision.decision == "DRY_RUN_ONLY"][:3]
     previews = [build_dispatch_packet_preview(decision) for decision in recommended]
     walkie_events = build_walkie_events(decisions, summary, recommended) + build_pr_walkie_events(pr_dependency_findings, pr_backlog_report)
+    packet_drafts = build_packet_drafts(
+        decisions,
+        walkie_events=walkie_events,
+        pr_dependency_findings=pr_dependency_findings,
+        lock_state=summary["lock_state"],
+        approval_state=summary["approval_state"],
+        collisions=collisions,
+    )
     blockers = [asdict(decision) for decision in decisions if decision.decision.startswith("BLOCKED") or decision.decision in {"WAITING_APPROVAL", "REVIEW_REQUIRED"}]
     return {
         "report_id": "AIOS_WORKER_DISPATCHER_ASSIGNMENT_EXECUTOR_DRY_RUN_V1",
@@ -899,6 +1201,7 @@ def build_report(repo_root: Path, *, allow_github: bool = False, pr_backlog_fixt
         "recommended_lanes": [asdict(decision) for decision in recommended],
         "dispatch_packet_previews": previews,
         "internal_walkie_events": [asdict(event) for event in walkie_events],
+        "packet_drafts": [asdict(draft) for draft in packet_drafts],
         "blockers": blockers,
         "zero_launch_confirmation": zero_launch_confirmation(),
         "validator_pass_is_evidence_only": True,
@@ -940,6 +1243,14 @@ def sample_report() -> dict[str, Any]:
     pr_dependency_findings = build_pr_dependency_findings(candidates, pr_backlog_report)
     recommended = [decision for decision in decisions if decision.decision == "DRY_RUN_ONLY"][:3]
     walkie_events = build_walkie_events(decisions, summary, recommended) + build_pr_walkie_events(pr_dependency_findings, pr_backlog_report)
+    packet_drafts = build_packet_drafts(
+        decisions,
+        walkie_events=walkie_events,
+        pr_dependency_findings=pr_dependency_findings,
+        lock_state=summary["lock_state"],
+        approval_state=summary["approval_state"],
+        collisions=collisions,
+    )
     return {
         "report_id": "AIOS_WORKER_DISPATCHER_ASSIGNMENT_EXECUTOR_DRY_RUN_V1_SAMPLE",
         "worker_state": summary["worker_state"],
@@ -974,6 +1285,7 @@ def sample_report() -> dict[str, Any]:
         "recommended_lanes": [asdict(decision) for decision in recommended],
         "dispatch_packet_previews": [build_dispatch_packet_preview(decision) for decision in recommended],
         "internal_walkie_events": [asdict(event) for event in walkie_events],
+        "packet_drafts": [asdict(draft) for draft in packet_drafts],
         "zero_launch_confirmation": zero_launch_confirmation(),
     }
 

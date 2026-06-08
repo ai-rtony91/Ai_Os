@@ -19,6 +19,7 @@ def sample_check() -> dict[str, object]:
     if not isinstance(zero_launch, dict) or zero_launch.get("zero_workers_launched") is not True:
         failures.append("sample report does not confirm zero worker launch")
     previews = report.get("dispatch_packet_previews", [])
+    packet_drafts = report.get("packet_drafts", [])
     walkie_events = report.get("internal_walkie_events", [])
     active_state_contracts = report.get("active_state_contracts", {})
     pr_backlog_state = report.get("pr_backlog_state", {})
@@ -59,6 +60,8 @@ def sample_check() -> dict[str, object]:
         failures.append("PR backlog state inferred worker launch approval")
     if not previews:
         failures.append("sample report did not produce a dispatch packet preview")
+    if not packet_drafts:
+        failures.append("sample report did not produce packet drafts")
     for preview in previews:
         if preview.get("contains_execution_token") is not False:
             failures.append("dispatch preview contains execution token")
@@ -66,6 +69,32 @@ def sample_check() -> dict[str, object]:
             failures.append("dispatch preview implies APPLY approval")
         if preview.get("worker_launch_approved") is not False:
             failures.append("dispatch preview implies worker launch approval")
+    for draft in packet_drafts:
+        if not draft.get("status"):
+            failures.append("packet draft missing status")
+        if draft.get("not_executable_until_operator_approval") is not True:
+            failures.append("packet draft is executable without operator approval")
+        if draft.get("zero_launch_confirmation", {}).get("zero_workers_launched") is not True:
+            failures.append("packet draft does not confirm zero worker launch")
+        if draft.get("apply_approved") is not False:
+            failures.append("packet draft approves APPLY")
+        if draft.get("merge_approved") is not False:
+            failures.append("packet draft approves merge")
+        if draft.get("push_approved") is not False:
+            failures.append("packet draft approves push")
+        if draft.get("direct_anthony_wake_approved") is not False:
+            failures.append("packet draft directly wakes Anthony")
+        if draft.get("worker_launch_approved") is not False:
+            failures.append("packet draft approves worker launch")
+        if not draft.get("source_dispatch_decision_id") or not draft.get("source_candidate_id"):
+            failures.append("packet draft does not reference source decision/candidate")
+        draft_text = str(draft.get("draft_text") or "")
+        if "CODEX-ONLY PROMPT" not in draft_text:
+            failures.append("packet draft text missing CODEX marker")
+        if "DRAFT_ONLY_NOT_OPERATOR_APPROVAL" not in draft_text:
+            failures.append("packet draft text missing draft-only token")
+        if "This draft is not executable until Anthony approves it." not in draft_text:
+            failures.append("packet draft text missing operator approval notice")
     if not walkie_events:
         failures.append("sample report did not produce internal walkie events")
     for event in walkie_events:
