@@ -21,6 +21,19 @@ STATUSES = {
     "COMPLETE_OR_SUPERSEDED",
     "REVIEW_REQUIRED",
 }
+SURFACE_CONTRACT_STATUSES = {
+    "ACTIVE_CONTRACT",
+    "HISTORICAL_REFERENCE",
+    "EVIDENCE_ONLY",
+    "COMPLETED_RECORD",
+    "EMPTY_ACTIVE_REGISTRY",
+    "PROPOSED_BACKLOG",
+    "GENERATED_OUTPUT",
+    "UNKNOWN",
+    "MISSING",
+    "MALFORMED",
+    "REVIEW_REQUIRED",
+}
 WALKIE_EVENT_TYPES = {
     "DISPATCH_READY",
     "DRY_RUN_ONLY",
@@ -38,6 +51,7 @@ WALKIE_SEVERITIES = {"INFO", "NOTICE", "ACTION_REQUIRED", "SAFETY_BLOCK", "SOS_C
 COMPLETE_STATES = {"complete", "completed", "done", "superseded", "archived_reference", "closed"}
 WAITING_APPROVAL_STATES = {"awaiting_approval", "waiting_approval", "waiting_for_approval", "pending_review"}
 ACTIVE_STATES = {"active", "ready", "queued", "assigned", "running", "dry_run_running", "ready_for_dry_run"}
+APPLY_MODES = {"apply", "local_apply", "apply_running", "ready_for_apply"}
 PROTECTED_TERMS = ("broker", "live_trading", "oanda", "webhooks", "secrets", ".env", "scheduler", "live_sos", "cloud")
 DEFAULT_REPORT_PATH = "Reports/generated/dispatcher/assignment_executor_preview.json"
 
@@ -50,6 +64,7 @@ class Candidate:
     lane: str
     assigned_worker: str | None
     status: str
+    mode: str
     protected_paths: list[str]
     required_approval: str | None
     validator_chain: list[str]
@@ -126,6 +141,10 @@ def read_json_file(path: Path) -> tuple[str, Any | None, str | None]:
         return "MALFORMED", None, f"{exc.__class__.__name__}: {exc}"
 
 
+def _contract_status(value: str) -> str:
+    return value if value in SURFACE_CONTRACT_STATUSES else "REVIEW_REQUIRED"
+
+
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
@@ -159,6 +178,15 @@ def _extract_paths(packet: dict[str, Any]) -> list[str]:
         if isinstance(values, list) and values:
             return [str(item) for item in values]
     return []
+
+
+def _extract_lock_paths(lock: dict[str, Any]) -> list[str]:
+    paths: list[str] = []
+    for key in ("protected_paths", "paths", "allowed_paths", "locked_paths"):
+        values = lock.get(key)
+        if isinstance(values, list):
+            paths.extend(str(item) for item in values)
+    return paths
 
 
 def load_pr_backlog(repo_root: Path, *, allow_github: bool) -> dict[str, Any]:
@@ -220,6 +248,13 @@ def load_state(repo_root: Path, *, allow_github: bool = False) -> dict[str, Any]
         "packets": packets,
         "errors": packet_errors,
     }
+    proposed_dir = repo_root / "automation/orchestration/work_packets/proposed"
+    state["proposed_backlog"] = {
+        "path": proposed_dir.as_posix(),
+        "status": "PRESENT" if proposed_dir.exists() else "MISSING",
+        "contract_status": "PROPOSED_BACKLOG" if proposed_dir.exists() else "MISSING",
+        "note": "Proposed backlog is not active queue input without explicit approval.",
+    }
     state["pr_backlog"] = load_pr_backlog(repo_root, allow_github=allow_github)
     return state
 
@@ -232,27 +267,57 @@ def summarize_state(state: dict[str, Any]) -> dict[str, Any]:
     approval_payload = state["approval_inbox"].get("payload") or {}
     apply_payload = state["apply_gate"].get("payload") or {}
     locks = _as_list(locks_payload.get("locks") if isinstance(locks_payload, dict) else [])
+    lock_paths = [
+        path
+        for lock in locks
+        if isinstance(lock, dict)
+        for path in _extract_lock_paths(lock)
+    ]
+    global_blocked_paths = _as_list(locks_payload.get("global_blocked_paths") if isinstance(locks_payload, dict) else [])
     queue_status = _norm(queue_payload.get("status") if isinstance(queue_payload, dict) else "")
     approval_status = _norm(approval_payload.get("approval_status") if isinstance(approval_payload, dict) else "")
     apply_status = _norm(apply_payload.get("approval_status") if isinstance(apply_payload, dict) else "")
+    historical_contract = "HISTORICAL_REFERENCE" if queue_status.upper() == "HISTORICAL" else "REVIEW_REQUIRED"
+    active_packets_status = state["active_work_packets"]["status"]
+    active_packet_contract = "ACTIVE_CONTRACT" if active_packets_status == "PRESENT" else active_packets_status
+    lock_surface_status = state["lock_registry"]["status"]
+    if lock_surface_status == "PRESENT" and not locks:
+        lock_contract = "EMPTY_ACTIVE_REGISTRY"
+    elif lock_surface_status == "PRESENT":
+        lock_contract = "ACTIVE_CONTRACT"
+    elif lock_surface_status in {"MISSING", "MALFORMED"}:
+        lock_contract = lock_surface_status
+    else:
+        lock_contract = "REVIEW_REQUIRED"
+    approval_contract = "EVIDENCE_ONLY" if state["approval_inbox"]["status"] == "PRESENT" else state["approval_inbox"]["status"]
+    worker_inbox_status = state["worker_inbox"]["status"]
     return {
         "worker_state": {
             "surface_status": state["worker_registry"]["status"],
             "worker_count": len(_as_list(workers_payload.get("workers") if isinstance(workers_payload, dict) else [])),
+            "worker_registry_contract": _contract_status("ACTIVE_CONTRACT" if state["worker_registry"]["status"] == "PRESENT" else state["worker_registry"]["status"]),
+            "worker_inbox_contract": _contract_status("ACTIVE_CONTRACT" if worker_inbox_status == "PRESENT" else worker_inbox_status),
         },
         "queue_state": {
             "historical_queue_status": queue_status or state["historical_queue"]["status"],
-            "historical_queue_treatment": "HISTORICAL_REFERENCE" if queue_status.upper() == "HISTORICAL" else "REVIEW_REQUIRED",
+            "historical_queue_treatment": historical_contract,
+            "active_work_packet_contract": _contract_status(active_packet_contract),
             "active_work_packet_count": len(state["active_work_packets"]["packets"]),
+            "proposed_backlog_contract": state["proposed_backlog"]["contract_status"],
         },
         "lock_state": {
             "surface_status": state["lock_registry"]["status"],
             "active_lock_count": len([lock for lock in locks if isinstance(lock, dict)]),
-            "classification": "NO_ACTIVE_LOCKS" if state["lock_registry"]["status"] == "PRESENT" and not locks else "ACTIVE_LOCKS_PRESENT",
+            "classification": "NO_ACTIVE_LOCKS" if lock_contract == "EMPTY_ACTIVE_REGISTRY" else lock_contract,
+            "contract_status": _contract_status(lock_contract),
+            "global_blocked_paths": [str(path) for path in global_blocked_paths],
+            "active_lock_paths": lock_paths,
         },
         "approval_state": {
             "inbox_status": approval_status or state["approval_inbox"]["status"],
             "apply_gate_status": apply_status or state["apply_gate"]["status"],
+            "approval_contract": _contract_status(approval_contract),
+            "apply_gate_contract": "EVIDENCE_ONLY" if state["apply_gate"]["status"] == "PRESENT" else state["apply_gate"]["status"],
             "future_apply_approved": bool(
                 isinstance(apply_payload, dict)
                 and apply_payload.get("approval_status") == "approved_for_apply"
@@ -277,6 +342,7 @@ def normalize_candidates(state: dict[str, Any]) -> list[Candidate]:
                 lane=_norm(packet.get("owner_lane") or packet.get("lane") or "UNKNOWN"),
                 assigned_worker=_norm(packet.get("assigned_worker")) or None,
                 status=status,
+                mode=_lower(packet.get("mode") or packet.get("approved_mode") or "dry_run"),
                 protected_paths=_extract_paths(packet),
                 required_approval=_norm(packet.get("required_approval") or packet.get("approval_id")) or None,
                 validator_chain=[_norm(packet.get("validator"))] if packet.get("validator") else [],
@@ -295,6 +361,7 @@ def normalize_candidates(state: dict[str, Any]) -> list[Candidate]:
                 lane=_norm(item.get("worker_type") or item.get("lane") or "worker_inbox"),
                 assigned_worker=_norm(item.get("worker_id")) or None,
                 status=_lower(item.get("current_status") or item.get("status")),
+                mode=_lower(item.get("mode") or "dry_run"),
                 protected_paths=[],
                 required_approval=_norm(item.get("approval_id")) or None,
                 validator_chain=[],
@@ -313,6 +380,7 @@ def normalize_candidates(state: dict[str, Any]) -> list[Candidate]:
                     lane=_norm(item.get("lane") or "historical"),
                     assigned_worker=_norm(item.get("assigned_worker")) or None,
                     status="historical",
+                    mode="historical",
                     protected_paths=[],
                     required_approval=None,
                     validator_chain=[],
@@ -346,6 +414,15 @@ def classify_candidates(candidates: list[Candidate], state_summary: dict[str, An
         elif status in WAITING_APPROVAL_STATES:
             decision = "WAITING_APPROVAL"
             reasons.append("approval_required_or_pending")
+        elif candidate.protected_paths and _path_overlaps(candidate.protected_paths, state_summary.get("lock_state", {}).get("active_lock_paths", [])):
+            decision = "BLOCKED_BY_LOCK"
+            reasons.append("active_lock_path_overlap")
+        elif candidate.required_approval and state_summary["approval_state"]["future_apply_approved"] is False:
+            decision = "WAITING_APPROVAL"
+            reasons.append("required_approval_without_exact_future_apply_approval")
+        elif candidate.mode in APPLY_MODES and state_summary["approval_state"]["future_apply_approved"] is False:
+            decision = "WAITING_APPROVAL"
+            reasons.append("apply_mode_without_exact_future_apply_approval")
         elif candidate.blockers:
             decision = "REVIEW_REQUIRED"
             reasons.extend([f"blocked_by:{item}" for item in candidate.blockers])
@@ -579,6 +656,25 @@ def build_report(repo_root: Path, *, allow_github: bool = False) -> dict[str, An
         "work_packet_state": {
             "active_count": summary["queue_state"]["active_work_packet_count"],
             "candidate_count": len(candidates),
+            "active_contract": summary["queue_state"]["active_work_packet_contract"],
+            "proposed_backlog_contract": summary["queue_state"]["proposed_backlog_contract"],
+        },
+        "active_state_contracts": {
+            "queue": summary["queue_state"],
+            "locks": summary["lock_state"],
+            "approval": summary["approval_state"],
+            "worker_inbox": {
+                "contract_status": summary["worker_state"]["worker_inbox_contract"],
+                "completed_items_are_active": False,
+            },
+            "work_packets": {
+                "contract_status": summary["queue_state"]["active_work_packet_contract"],
+                "proposed_backlog_contract": summary["queue_state"]["proposed_backlog_contract"],
+                "dispatch_previews_are_executable": False,
+            },
+            "validator_pass_is_approval": False,
+            "github_check_pass_is_approval": False,
+            "dispatcher_preview_is_approval": False,
         },
         "pr_backlog_state": summary["pr_backlog_state"],
         "collision_findings": collisions,
@@ -617,6 +713,7 @@ def sample_report() -> dict[str, Any]:
             ],
             "errors": [],
         },
+        "proposed_backlog": {"status": "PRESENT", "contract_status": "PROPOSED_BACKLOG"},
         "pr_backlog": {"status": "UNKNOWN", "open_prs": []},
     }
     summary = summarize_state(state)
@@ -630,6 +727,23 @@ def sample_report() -> dict[str, Any]:
         "queue_state": summary["queue_state"],
         "lock_state": summary["lock_state"],
         "approval_state": summary["approval_state"],
+        "active_state_contracts": {
+            "queue": summary["queue_state"],
+            "locks": summary["lock_state"],
+            "approval": summary["approval_state"],
+            "worker_inbox": {
+                "contract_status": summary["worker_state"]["worker_inbox_contract"],
+                "completed_items_are_active": False,
+            },
+            "work_packets": {
+                "contract_status": summary["queue_state"]["active_work_packet_contract"],
+                "proposed_backlog_contract": summary["queue_state"]["proposed_backlog_contract"],
+                "dispatch_previews_are_executable": False,
+            },
+            "validator_pass_is_approval": False,
+            "github_check_pass_is_approval": False,
+            "dispatcher_preview_is_approval": False,
+        },
         "candidate_decisions": [asdict(decision) for decision in decisions],
         "collision_findings": collisions,
         "recommended_lanes": [asdict(decision) for decision in recommended],

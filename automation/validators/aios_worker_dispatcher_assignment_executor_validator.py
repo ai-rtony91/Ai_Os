@@ -20,6 +20,30 @@ def sample_check() -> dict[str, object]:
         failures.append("sample report does not confirm zero worker launch")
     previews = report.get("dispatch_packet_previews", [])
     walkie_events = report.get("internal_walkie_events", [])
+    active_state_contracts = report.get("active_state_contracts", {})
+    queue_contract = active_state_contracts.get("queue", {})
+    lock_contract = active_state_contracts.get("locks", {})
+    approval_contract = active_state_contracts.get("approval", {})
+    worker_inbox_contract = active_state_contracts.get("worker_inbox", {})
+    work_packet_contract = active_state_contracts.get("work_packets", {})
+    if not active_state_contracts:
+        failures.append("sample report did not include active-state contract fields")
+    if queue_contract.get("historical_queue_treatment") != "HISTORICAL_REFERENCE":
+        failures.append("historical queue contract was not HISTORICAL_REFERENCE")
+    if work_packet_contract.get("proposed_backlog_contract") != "PROPOSED_BACKLOG":
+        failures.append("proposed backlog contract was not PROPOSED_BACKLOG")
+    if lock_contract.get("contract_status") != "EMPTY_ACTIVE_REGISTRY":
+        failures.append("empty lock registry was not EMPTY_ACTIVE_REGISTRY")
+    if approval_contract.get("approval_contract") != "EVIDENCE_ONLY":
+        failures.append("approval inbox contract was not EVIDENCE_ONLY")
+    if worker_inbox_contract.get("completed_items_are_active") is not False:
+        failures.append("completed worker inbox items were treated as active")
+    if active_state_contracts.get("validator_pass_is_approval") is not False:
+        failures.append("validator PASS was treated as approval")
+    if active_state_contracts.get("github_check_pass_is_approval") is not False:
+        failures.append("GitHub check PASS was treated as approval")
+    if active_state_contracts.get("dispatcher_preview_is_approval") is not False:
+        failures.append("dispatcher preview was treated as approval")
     if not previews:
         failures.append("sample report did not produce a dispatch packet preview")
     for preview in previews:
