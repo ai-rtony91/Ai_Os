@@ -18,7 +18,11 @@ jobs:
         run: |
           python -m py_compile automation/bridge/aios_phase_bridge.py
           python -m py_compile automation/validators/aios_governance_validator.py
+          python -m py_compile automation/orchestration/dispatcher/assignment_executor.py
+          python -m py_compile automation/validators/aios_worker_dispatcher_assignment_executor_validator.py
           python -m py_compile automation/self_build/aios_self_build_inspector.py
       - name: Run governance validator sample
         run: python automation/validators/aios_governance_validator.py --sample-check
+      - name: Run worker dispatcher assignment executor validator sample
+        run: python automation/validators/aios_worker_dispatcher_assignment_executor_validator.py --sample-check
 
