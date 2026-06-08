@@ -226,7 +226,44 @@ Any failure blocks overnight readiness. Secret, broker/live-trading, protected-a
 | Proof defined | 69% | 61% | 51% | 39% |
 | Proof executed and passed later | 75% | 68% | 58% | 49% |
 
-This report defines the proof. It does not execute it.
+## Watchdog ADB SOS-Only Proof Execution
+
+Packet ID: VACATION_MODE_ADB_SOS_ONLY_PROOF_APPLY_001
+Proof file: `tests/operator_relief/test_vacation_watchdog_adb_sos_only.py`
+Wake rail: ADB SOS only.
+Telegram/Tasker status: staged/docs-only; not authority for this proof.
+
+The watchdog ADB SOS-only proof exercises `build_vacation_heartbeat` and `plan_adb_escalation` in `DRY_RUN` mode only.
+
+True SOS cases are expected to become ADB-wake-worthy intent without sending or executing:
+
+- secret/key/token leak
+- live broker/trading execution risk
+- protected gate bypass
+- main branch risk
+- validation failure that invalidates merge readiness
+- SOS pending while ADB SOS is unavailable
+
+Non-SOS cases are expected to stay silent with no ADB wake intent:
+
+- docs polish
+- naming/style
+- optional refactor
+- future Telegram/Tasker work
+- merge timing preference
+- stale but non-blocking report
+
+The executed proof preserves these no-send invariants:
+
+```text
+executable=false
+notification_sent=false
+notification_provider_called=false
+adb_executed=false
+command_result=None
+```
+
+This proof executes only classifier and dry-run planner code. It does not call `adb`, `adb.exe`, Telegram, Tasker, webhook providers, broker APIs, live trading paths, queue writers, approval writers, telemetry writers, or runtime notification senders.
 
 ## Exact Next APPLY Packet
 
