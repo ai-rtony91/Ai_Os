@@ -18,7 +18,12 @@ jobs:
         run: |
           python -m py_compile automation/bridge/aios_phase_bridge.py
           python -m py_compile automation/validators/aios_governance_validator.py
+          python -m py_compile automation/validators/aios_weekend_readiness_validator.py
+          python -m py_compile automation/orchestration/runtime/atomic_state.py
+          python -m py_compile automation/orchestration/restart_safety/restart_guard.py
           python -m py_compile automation/self_build/aios_self_build_inspector.py
       - name: Run governance validator sample
         run: python automation/validators/aios_governance_validator.py --sample-check
+      - name: Run weekend readiness validator sample
+        run: python automation/validators/aios_weekend_readiness_validator.py --sample-check
 
