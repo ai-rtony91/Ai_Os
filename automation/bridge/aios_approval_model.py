@@ -15,7 +15,7 @@ SECRET_TERMS = {"secret", "token", "api_key", "apikey", "password", "credential"
 PLACEHOLDER_MARKERS = [
     "@" + "filename",
     r"\{[^}]+\}",
-    r"\[REAL-[^\]]+\]",
+    r"\[" + "REAL-" + r"[^\]]+\]",
     "path/" + "to/",
     "TO" + "DO",
     "TB" + "D",

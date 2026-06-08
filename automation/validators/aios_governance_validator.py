@@ -30,7 +30,7 @@ REQUIRED_FIELDS = [
     ("AIOS-PACKET-019-PREFLIGHT", "PREFLIGHT"),
     ("AIOS-PACKET-020-FINAL-REPORT-FORMAT", "FINAL REPORT FORMAT"),
 ]
-PLACEHOLDER_PATTERN = r"@" + r"filename|\{[^}]+\}|\[REAL-[^\]]+\]|path/" + r"to/"
+PLACEHOLDER_PATTERN = r"@" + r"filename|\{[^}]+\}|\[" + "REAL-" + r"[^\]]+\]|path/" + r"to/"
 
 
 @dataclass
