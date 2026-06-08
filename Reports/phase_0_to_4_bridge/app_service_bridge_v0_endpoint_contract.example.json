@@ -1,0 +1,70 @@
+{
+  "schema": "aios.app_service_bridge.endpoint_contract.v0",
+  "mode": "LOCAL_DRY_RUN_PREVIEW_ONLY",
+  "service_framework": "services/orchestrator Node Express",
+  "state_store": {
+    "current": "none",
+    "future_proposed_root": "telemetry/app_service_bridge/",
+    "writes_enabled": false,
+    "gitignore_review_required_before_recurring_outputs": true
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/health",
+      "behavior": "Return local bridge health and disabled capability flags.",
+      "mutates_state": false
+    },
+    {
+      "method": "POST",
+      "path": "/packets",
+      "behavior": "Validate packet draft shape and return route preview only.",
+      "mutates_state": false
+    },
+    {
+      "method": "GET",
+      "path": "/queue",
+      "behavior": "Read command queue and worker inbox status only.",
+      "mutates_state": false
+    },
+    {
+      "method": "POST",
+      "path": "/approvals",
+      "behavior": "Return approval request preview and required human action only.",
+      "mutates_state": false
+    },
+    {
+      "method": "GET",
+      "path": "/workers",
+      "behavior": "Read worker registry, worker inbox, profiles, and lock status only.",
+      "mutates_state": false
+    },
+    {
+      "method": "GET",
+      "path": "/reports/latest",
+      "behavior": "Return latest bridge report evidence only.",
+      "mutates_state": false
+    },
+    {
+      "method": "POST",
+      "path": "/sos",
+      "behavior": "Return SOS notification preview only; do not send.",
+      "mutates_state": false
+    }
+  ],
+  "blocked_capabilities": [
+    "provider_api_calls",
+    "cloud_deployment",
+    "tunnel_creation",
+    "secret_storage",
+    "approval_inbox_mutation",
+    "worker_queue_mutation",
+    "worker_lock_mutation",
+    "night_supervisor_runtime_mutation",
+    "codex_launch",
+    "queued_command_execution",
+    "hook_installation",
+    "live_trading",
+    "broker_runtime_work"
+  ]
+}

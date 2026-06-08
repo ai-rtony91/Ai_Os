@@ -9,6 +9,15 @@ const {
   getRuntimeStatus,
   getVisibilitySnapshot
 } = require("./runtimeApiService");
+const {
+  getBridgeHealth,
+  getLatestReports,
+  getQueuePreview,
+  getWorkersPreview,
+  previewApproval,
+  previewSos,
+  validatePacketDraft
+} = require("./appServiceBridge");
 
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -19,6 +28,34 @@ app.use(express.json());
 // Quick check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, service: "orchestrator", ts: Date.now() });
+});
+
+app.get("/health", (req, res) => {
+  res.json(getBridgeHealth());
+});
+
+app.post("/packets", (req, res) => {
+  res.json(validatePacketDraft(req.body));
+});
+
+app.get("/queue", (req, res) => {
+  res.json(getQueuePreview());
+});
+
+app.post("/approvals", (req, res) => {
+  res.json(previewApproval(req.body));
+});
+
+app.get("/workers", (req, res) => {
+  res.json(getWorkersPreview());
+});
+
+app.get("/reports/latest", (req, res) => {
+  res.json(getLatestReports());
+});
+
+app.post("/sos", (req, res) => {
+  res.json(previewSos(req.body));
 });
 
 app.get("/api/runtime/status", (req, res) => {
