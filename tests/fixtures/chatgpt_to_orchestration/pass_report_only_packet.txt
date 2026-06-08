@@ -1,0 +1,84 @@
+CODEX-ONLY PROMPT
+
+AI_OS EXECUTION TOKEN
+
+AI_OS BOOTSTRAP REQUIRED
+
+IDENTITY MARKER:
+AI_OS_EXECUTABLE_PACKET
+
+SUPERVISOR IDENTITY:
+Anthony / AI_OS Owner
+
+PACKET ID:
+PASS_REPORT_ONLY_PACKET_001
+
+LANE:
+CHATGPT_ADAPTER_SCAFFOLD
+
+ZONE:
+AI_OS Adapter Implementation
+
+WORKER IDENTITY:
+Codex CLI Worker
+
+MODE:
+APPLY
+
+BRANCH:
+feature/full-operator-relief-closed-loop-v1
+
+WORKTREE:
+C:\Dev\Ai.Os
+
+APPROVAL AUTHORITY:
+Anthony / AI_OS Owner
+
+READ-FIRST AUTHORITY FILES:
+AGENTS.md
+README.md
+WHITEPAPER.md
+
+ALLOWED PATHS:
+Reports/bridge_audit/
+
+PROTECTED PATHS:
+AGENTS.md
+README.md
+WHITEPAPER.md
+automation/orchestration/work_packets/
+automation/orchestration/approval_inbox/
+tools/
+scripts/
+src/
+config/
+control/
+Relay/
+.github/
+schemas/
+telemetry/
+
+VALIDATOR CHAIN:
+1. Read AGENTS.md.
+2. Read README.md.
+3. Confirm branch/worktree state.
+4. Run git diff --check.
+5. Run git status --short --branch.
+
+MISSION:
+Create one report-only preview.
+
+TASK:
+Create a report preview only.
+
+STOP POINT:
+Stop after report preview.
+
+FINAL RESPONSE FORMAT:
+SUMMARY:
+WHAT CHANGED:
+FILES CHANGED:
+VALIDATION:
+REMAINING DIRTY FILES:
+SAFE NEXT COMMAND:
+STATUS:
