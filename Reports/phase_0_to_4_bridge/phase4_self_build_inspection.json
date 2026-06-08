@@ -1,0 +1,107 @@
+{
+  "branch": "main",
+  "inputs_loaded": {
+    "phase0": true,
+    "phase1": true,
+    "phase2": true,
+    "phase3": true
+  },
+  "recommendations": [
+    {
+      "approval_required": true,
+      "created_utc": "2026-06-08T05:38:38Z",
+      "evidence": [
+        "automation/orchestration/approval_inbox/",
+        "telemetry/approval_inbox/"
+      ],
+      "problem": "Approval evidence exists in multiple places and needs a local schema validator before promotion.",
+      "protected_actions": [],
+      "recommendation_id": "AIOS-SB-001",
+      "risk_tier": "LOCAL_APPLY",
+      "safe_next_prompt": "Packet draft required: validate approval inbox schema without mutating approvals.",
+      "status": "READY_FOR_PACKET",
+      "suggested_allowed_paths": [
+        "automation/validators/",
+        "tests/governance/",
+        "Reports/"
+      ],
+      "suggested_forbidden_paths": [
+        "AGENTS.md",
+        "README.md",
+        "docs/architecture/AI_OS_WHITEPAPER.md"
+      ],
+      "suggested_lane": "APPROVAL_INBOX_SCHEMA_VALIDATOR_ONLY",
+      "suggested_mode": "DRY_RUN",
+      "suggested_validator_chain": [
+        "python -m pytest tests/governance",
+        "git diff --check"
+      ],
+      "title": "Add approval inbox schema validator"
+    },
+    {
+      "approval_required": true,
+      "created_utc": "2026-06-08T05:38:38Z",
+      "evidence": [
+        "automation/validators/",
+        "automation/orchestration/validators/"
+      ],
+      "problem": "Validators are discoverable but not yet enforced by a single local command.",
+      "protected_actions": [],
+      "recommendation_id": "AIOS-SB-002",
+      "risk_tier": "LOCAL_APPLY",
+      "safe_next_prompt": "Packet draft required: connect validator registry evidence to bridge status only.",
+      "status": "READY_FOR_PACKET",
+      "suggested_allowed_paths": [
+        "automation/bridge/",
+        "telemetry/validator_results/",
+        "tests/operator_relief/"
+      ],
+      "suggested_forbidden_paths": [
+        "AGENTS.md",
+        "README.md",
+        ".github/workflows/"
+      ],
+      "suggested_lane": "VALIDATOR_REGISTRY_BRIDGE_ONLY",
+      "suggested_mode": "DRY_RUN",
+      "suggested_validator_chain": [
+        "python automation/bridge/aios_phase_bridge.py --mode DRY_RUN --repo-root ."
+      ],
+      "title": "Wire validator registry into bridge status"
+    },
+    {
+      "approval_required": true,
+      "created_utc": "2026-06-08T05:38:38Z",
+      "evidence": [
+        "AGENTS.md Trading Safety Rules",
+        "README.md Trading Lab Boundary"
+      ],
+      "problem": "Any live broker execution path remains production/live and is blocked.",
+      "protected_actions": [
+        "broker_execution",
+        "live_trading"
+      ],
+      "recommendation_id": "AIOS-SB-003",
+      "risk_tier": "PRODUCTION_OR_LIVE_BLOCKED",
+      "safe_next_prompt": "No execution packet recommended for live broker work.",
+      "status": "BLOCKED",
+      "suggested_allowed_paths": [
+        "Reports/"
+      ],
+      "suggested_forbidden_paths": [
+        "apps/trading_lab/trading_lab/execution/",
+        "aios/modules/trader/",
+        ".env"
+      ],
+      "suggested_lane": "TRADING_BOUNDARY_REVIEW_ONLY",
+      "suggested_mode": "DRY_RUN",
+      "suggested_validator_chain": [
+        "safe risk-term scan only"
+      ],
+      "title": "Keep live broker execution blocked"
+    }
+  ],
+  "repo_root": "C:/Dev/Ai.Os",
+  "safe_next_action": "Review recommendations; do not execute automatically.",
+  "status": "COMPLETE",
+  "timestamp_utc": "2026-06-08T05:38:38Z"
+}

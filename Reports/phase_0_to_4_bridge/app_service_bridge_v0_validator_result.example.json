@@ -1,0 +1,28 @@
+{
+  "schema": "aios.app_service_bridge.validator_result.example.v0",
+  "mode": "DRY_RUN_VALIDATION_EXAMPLE",
+  "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+  "expected_status": "PASS_AFTER_LOCAL_VALIDATION",
+  "expected_checks": [
+    "node --check services/orchestrator/index.js",
+    "node --check services/orchestrator/runtimeApiService.js",
+    "npm --prefix services run typecheck",
+    "npm --prefix services run test:services",
+    "python automation/validators/aios_governance_validator.py --sample-check",
+    "python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md",
+    "git diff --check",
+    "secret-pattern scan across changed files"
+  ],
+  "blocked_capabilities_expected": {
+    "provider_api_calls": true,
+    "cloud_deployment": true,
+    "tunnel_creation": true,
+    "secret_storage": true,
+    "approval_mutation": true,
+    "worker_mutation": true,
+    "codex_launch": true,
+    "queued_command_execution": true,
+    "live_trading": true,
+    "broker_runtime_work": true
+  }
+}

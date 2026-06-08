@@ -1,0 +1,14 @@
+{
+  "ci_workflow": ".github/workflows/aios-governance.yml",
+  "governance_validator": "automation/validators/aios_governance_validator.py",
+  "hook_installer": "scripts/hooks/Install-AiOsGitHooks.ps1",
+  "hook_template": ".githooks/pre-commit",
+  "protected_actions_not_performed": [
+    "hook auto-install",
+    "commit",
+    "push",
+    "merge"
+  ],
+  "safe_next_action": "Run governance validator sample check.",
+  "workflow_doc": "docs/workflows/AI_OS_LOCAL_HOOKS.md"
+}
