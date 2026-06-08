@@ -398,7 +398,7 @@ def collect_source_files(repo_root: str | Path) -> list[Path]:
     candidates: list[Path] = []
     patterns = [
         ("relay", "**/*"),
-        ("telemetry/night_supervisor", "*.json"),
+        ("telemetry/night_supervisor", "**/*.json"),
         ("telemetry/supervisor_briefs", "*.json"),
         ("telemetry/morning_digest", "*.json"),
         ("control/operation_glue", "**/*.json"),

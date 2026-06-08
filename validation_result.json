@@ -1,9 +1,5 @@
 {
-    "status":  "PASS",
-    "checks":  [
-                   "path check passed",
-                   "runtime health passed",
-                   "packet status valid"
-               ],
-    "success_required_before_next_step":  true
+    "status": "UNKNOWN",
+    "note": "Reset by Phase 0 cleanup. Run validators for current state.",
+    "last_reset": "2026-06-08"
 }

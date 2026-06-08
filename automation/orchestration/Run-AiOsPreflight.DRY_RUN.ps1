@@ -8,7 +8,7 @@ Write-Host "Mode: DRY_RUN"
 Write-Host ""
 
 Write-Host "Step 1: Commit package preview"
-powershell -ExecutionPolicy Bypass -File "automation\orchestration\validators\New-CommitPackagePreview.DRY_RUN.ps1"
+powershell -ExecutionPolicy Bypass -File "automation\orchestration\commit_packages\New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
 
 Write-Host ""
 Write-Host "Step 2: Validator chain"

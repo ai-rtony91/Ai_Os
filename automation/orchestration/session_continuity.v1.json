@@ -1,0 +1,27 @@
+{
+  "system": "AI_OS",
+  "continuity_name": "session_continuity_v1",
+  "mode": "DRY_RUN",
+  "purpose": "Active session continuity state for tracking sessions, packet continuity, worker continuity, queue continuity, branch continuity, and recovery-safe startup visibility.",
+  "sessions": [],
+  "recovery_safe_startup": {
+    "startup_state": "clean",
+    "blocked_startup_state": false,
+    "startup_restore_visibility": "no_sessions_to_restore",
+    "continuity_checkpoints": [],
+    "next_safe_action": "No sessions to restore. Ready for new session registration."
+  },
+  "blocked_actions": [
+    "restore sessions",
+    "restart workers",
+    "reassign packets",
+    "restore queue state",
+    "switch branches",
+    "create startup tasks",
+    "create scheduled tasks",
+    "touch broker, OANDA, API keys, webhooks, real orders, or live trading",
+    "commit",
+    "push"
+  ],
+  "note": "Initial clean state created by Phase 0 infrastructure repair."
+}

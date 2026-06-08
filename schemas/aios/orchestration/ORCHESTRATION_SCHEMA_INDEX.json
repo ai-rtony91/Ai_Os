@@ -262,6 +262,118 @@
       "kind": "json_schema",
       "purpose": "Dashboard and runtime API visibility read model.",
       "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_ORCHESTRATION_PACKET.v1",
+      "path": "schemas/aios/orchestration/packet.schema.json",
+      "kind": "json_schema",
+      "purpose": "Foundation schema stub for the one canonical AI_OS packet contract. Defines the stable work request a worker, validator, dashboard, and approval gate can all understand.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PACKET_APPROVAL.v1",
+      "path": "schemas/aios/orchestration/packet-approval.schema.json",
+      "kind": "json_schema",
+      "purpose": "Foundation schema stub for approval metadata attached to a packet or approval inbox item.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PACKET_RUNTIME_STATE.v1",
+      "path": "schemas/aios/orchestration/packet-runtime-state.schema.json",
+      "kind": "json_schema",
+      "purpose": "Foundation schema stub for volatile packet state. Runtime state changes over time and should not replace the durable packet contract.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PACKET_LOCK.v1",
+      "path": "schemas/aios/orchestration/packet-lock.schema.json",
+      "kind": "json_schema",
+      "purpose": "Foundation schema stub for packet and worker path ownership locks.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PACKET_VALIDATOR.v1",
+      "path": "schemas/aios/orchestration/packet-validator.schema.json",
+      "kind": "json_schema",
+      "purpose": "Foundation schema stub for one validator entry attached to a canonical packet.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PACKET_ADAPTER_REPORT.v1",
+      "path": "schemas/aios/orchestration/packet-adapter-report.schema.json",
+      "kind": "json_schema",
+      "purpose": "Foundation schema stub for read-only reports that explain how legacy packet shapes map into the canonical packet contract.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PACKET_READ_MODEL.v1",
+      "path": "schemas/aios/orchestration/packet-read-model.schema.json",
+      "kind": "json_schema",
+      "purpose": "Foundation schema stub for display-safe packet summaries used by dashboards and operator views.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_STRATEGIC_CAMPAIGN_REGISTRY.v1",
+      "path": "schemas/aios/orchestration/aios-strategic-campaign-registry.schema.json",
+      "kind": "json_schema",
+      "purpose": "Strategic campaign registry schema for AI_OS campaign planning authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "overnight_supervisor",
+      "path": "schemas/aios/orchestration/overnight_supervisor.schema.json",
+      "kind": "json_schema",
+      "purpose": "Overnight supervisor report schema for repo health, packet flow, validator, and approval evidence.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_SUPERVISOR_QUEUE.v1",
+      "path": "schemas/aios/orchestration/supervisor_queue.schema.json",
+      "kind": "json_schema",
+      "purpose": "Preview contract for supervised AI_OS queue routing. Queue records are routing evidence only and do not authorize execution.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_RUNTIME_STATE_BUNDLE.v1",
+      "path": "schemas/aios/orchestration/runtime_state_bundle.schema.json",
+      "kind": "json_schema",
+      "purpose": "Read-only runtime aggregation contract for AI_OS orchestration evidence. Describes generated evidence only and does not grant mutation authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_PLANNER_PROMPT_PREVIEW.v1",
+      "path": "schemas/aios/orchestration/planner_prompt_schema.json",
+      "kind": "json_schema",
+      "purpose": "Preview-only planner prompt schema for AI_OS Stage 2. Describes inert planner recommendations only with no runtime or execution authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_VALIDATOR_CONFIDENCE.v1",
+      "path": "schemas/aios/orchestration/validator_confidence.schema.json",
+      "kind": "json_schema",
+      "purpose": "Read-only validator confidence evidence for AI_OS runtime and auto-git decisions.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_AUTO_GIT_POLICY_DECISION.v1",
+      "path": "schemas/aios/orchestration/auto_git_policy.schema.json",
+      "kind": "json_schema",
+      "purpose": "Read-only decision contract for future safe auto commit, push, and merge eligibility. Does not authorize execution.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_AUTONOMY_BRIDGE_STATE.v1",
+      "path": "schemas/aios/orchestration/autonomy_bridge_state.schema.json",
+      "kind": "json_schema",
+      "purpose": "Dashboard-safe bridge state for Relay input, Night Supervisor review, Morning Digest output, and next safe action visibility. Evidence only.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_NIGHT_SUPERVISOR_APPROVAL_QUEUE.v1",
+      "path": "schemas/aios/orchestration/night_supervisor_approval_queue.schema.json",
+      "kind": "json_schema",
+      "purpose": "Read-only Night Supervisor projection over local Relay approval evidence.",
+      "reconciliation_version": "0.1.1"
     }
   ],
   "safety": {
