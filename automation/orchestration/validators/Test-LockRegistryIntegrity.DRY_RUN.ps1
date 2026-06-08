@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$LockRegistryPath = "automation/orchestration/locks/FILE_LOCK_REGISTRY_001.json"
+    [string]$LockRegistryPath = "automation/orchestration/locks/FILE_LOCK_REGISTRY.json"
 )
 
 $ErrorActionPreference = "Stop"
@@ -34,10 +34,72 @@ else {
 $warnings = New-Object System.Collections.Generic.List[string]
 $lockIds = New-Object System.Collections.Generic.HashSet[string]
 
+function Get-LockPaths {
+    param($Lock)
+
+    if ($Lock.PSObject.Properties.Name -contains "claimed_paths") {
+        return @($Lock.claimed_paths)
+    }
+    if ($Lock.PSObject.Properties.Name -contains "locked_paths") {
+        return @($Lock.locked_paths)
+    }
+    if ($Lock.PSObject.Properties.Name -contains "paths") {
+        return @($Lock.paths)
+    }
+    return @()
+}
+
+function ConvertTo-PathKey {
+    param([AllowNull()][string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
+
+    $key = $Path.Replace("\", "/").Trim()
+    while ($key.StartsWith("./")) {
+        $key = $key.Substring(2)
+    }
+    return $key.TrimEnd("/")
+}
+
+function Test-PathOverlap {
+    param(
+        [string]$LeftPath,
+        [string]$RightPath
+    )
+
+    $left = ConvertTo-PathKey -Path $LeftPath
+    $right = ConvertTo-PathKey -Path $RightPath
+
+    if ([string]::IsNullOrWhiteSpace($left) -or [string]::IsNullOrWhiteSpace($right)) {
+        return $false
+    }
+
+    return ($left -eq $right -or $left.StartsWith("$right/") -or $right.StartsWith("$left/"))
+}
+
+$requiredActiveFields = @(
+    "schema",
+    "schema_version",
+    "lock_id",
+    "worker_id",
+    "packet_id",
+    "lane",
+    "status",
+    "claimed_paths",
+    "created_at_utc",
+    "updated_at_utc",
+    "expires_at_utc",
+    "release_condition",
+    "approval_packet_id",
+    "notes"
+)
+
 foreach ($lock in $locks) {
     $lockId = [string]$lock.lock_id
     $workerId = [string]$lock.worker_id
-    $lockedPaths = @($lock.locked_paths)
+    $lockedPaths = @(Get-LockPaths -Lock $lock)
 
     if ([string]::IsNullOrWhiteSpace($lockId) -or $lockId -like "*PLACEHOLDER*") {
         $warnings.Add("Lock has malformed lock_id: $lockId") | Out-Null
@@ -50,8 +112,35 @@ foreach ($lock in $locks) {
         $warnings.Add("Lock has missing worker_id.") | Out-Null
     }
 
-    if ($lockedPaths.Count -eq 0) {
-        $warnings.Add("Lock has empty locked_paths array: $lockId") | Out-Null
+    if ($lock.status -eq "ACTIVE") {
+        foreach ($field in $requiredActiveFields) {
+            if (-not ($lock.PSObject.Properties.Name -contains $field)) {
+                $warnings.Add("ACTIVE lock missing required field ${field}: $lockId") | Out-Null
+            }
+        }
+    }
+
+    if ($lock.status -eq "ACTIVE" -and $lockedPaths.Count -eq 0) {
+        $warnings.Add("ACTIVE lock has empty claimed_paths array: $lockId") | Out-Null
+    }
+
+    foreach ($lockedPath in $lockedPaths) {
+        if ([string]::IsNullOrWhiteSpace((ConvertTo-PathKey -Path $lockedPath))) {
+            $warnings.Add("Lock has empty claimed path: $lockId") | Out-Null
+        }
+    }
+}
+
+$activeLocks = @($locks | Where-Object { $_.status -eq "ACTIVE" })
+for ($i = 0; $i -lt $activeLocks.Count; $i++) {
+    for ($j = $i + 1; $j -lt $activeLocks.Count; $j++) {
+        foreach ($leftPath in @(Get-LockPaths -Lock $activeLocks[$i])) {
+            foreach ($rightPath in @(Get-LockPaths -Lock $activeLocks[$j])) {
+                if (Test-PathOverlap -LeftPath $leftPath -RightPath $rightPath) {
+                    $warnings.Add("ACTIVE lock path overlap detected: $($activeLocks[$i].lock_id) and $($activeLocks[$j].lock_id)") | Out-Null
+                }
+            }
+        }
     }
 }
 
