@@ -134,3 +134,13 @@ telemetry/morning_digest/
 
 # AI_OS local-only sensitive friction telemetry
 telemetry/human_ai_friction/
+
+# AI_OS operator relief runtime evidence
+approval/operator_relief/pending/*.json
+!approval/operator_relief/pending/.gitkeep
+telemetry/operator_relief/*.jsonl
+telemetry/operator_relief/**/*.json
+!telemetry/operator_relief/.gitkeep
+!telemetry/operator_relief/**/.gitkeep
+reports/operator_relief/
+Reports/operator_relief/

@@ -17,6 +17,14 @@ Recommended branch pattern:
 worker/<lane>/<phase>-<short-task>
 ```
 
+Legacy worker branch examples for human review:
+
+```text
+worker/work-intelligence/phase-21-branch-rules
+worker/operator-orchestration/phase-22-file-ownership
+worker/dashboard-ui/phase-15-centerpiece-review
+```
+
 Branch names must be lowercase, short, descriptive, and free of secrets, tokens, account identifiers, or private data.
 
 West branch naming must remain PR-lane compliant and packet-scoped. Recommended West branch pattern:
@@ -134,6 +142,8 @@ Workers must stay inside declared allowed paths and must not edit:
 - broker, OANDA, webhook, live execution, or real order paths.
 
 ## Collision Handling
+
+Worker reports should include planned files and validation commands. The integration lane checks those reports before any merge or APPLY review.
 
 If two workers declare the same planned file, the conflict is blocked until the operator assigns ownership. Stale worker state must be reviewed before resuming.
 

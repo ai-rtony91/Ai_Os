@@ -1,0 +1,53 @@
+CODEX-ONLY PROMPT
+
+AI_OS EXECUTION TOKEN
+
+AI_OS BOOTSTRAP REQUIRED
+
+IDENTITY MARKER:
+AI_OS_EXECUTABLE_PACKET
+
+SUPERVISOR IDENTITY:
+Anthony / AI_OS Owner
+
+PACKET ID:
+FAIL_PLACEHOLDER_PACKET_001
+
+LANE:
+CHATGPT_ADAPTER_SCAFFOLD
+
+ZONE:
+AI_OS Adapter Implementation
+
+WORKER IDENTITY:
+Codex CLI Worker
+
+MODE:
+APPLY
+
+BRANCH:
+feature/full-operator-relief-closed-loop-v1
+
+WORKTREE:
+C:\Dev\Ai.Os
+
+APPROVAL AUTHORITY:
+Anthony / AI_OS Owner
+
+ALLOWED PATHS:
+@filename
+
+PROTECTED PATHS:
+AGENTS.md
+
+VALIDATOR CHAIN:
+Confirm branch/worktree state.
+
+MISSION:
+Implement {feature}.
+
+STOP POINT:
+Stop after preview.
+
+FINAL RESPONSE FORMAT:
+SUMMARY:

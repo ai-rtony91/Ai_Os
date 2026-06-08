@@ -1,5 +1,5 @@
 {
-  "channel": "file",
+  "channel": "telegram",
   "channels": {
     "file": {
       "outbox": "relay/reports/SOS_OUTBOX/"
