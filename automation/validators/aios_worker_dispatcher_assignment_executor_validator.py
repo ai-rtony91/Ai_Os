@@ -21,6 +21,7 @@ def sample_check() -> dict[str, object]:
     previews = report.get("dispatch_packet_previews", [])
     walkie_events = report.get("internal_walkie_events", [])
     active_state_contracts = report.get("active_state_contracts", {})
+    pr_backlog_state = report.get("pr_backlog_state", {})
     queue_contract = active_state_contracts.get("queue", {})
     lock_contract = active_state_contracts.get("locks", {})
     approval_contract = active_state_contracts.get("approval", {})
@@ -44,6 +45,18 @@ def sample_check() -> dict[str, object]:
         failures.append("GitHub check PASS was treated as approval")
     if active_state_contracts.get("dispatcher_preview_is_approval") is not False:
         failures.append("dispatcher preview was treated as approval")
+    if not pr_backlog_state:
+        failures.append("sample report did not include PR backlog section")
+    if pr_backlog_state.get("status") != "UNKNOWN":
+        failures.append("missing sample PR backlog should be PR_UNKNOWN/UNKNOWN")
+    if pr_backlog_state.get("fixture_mode_deterministic") is not True:
+        failures.append("PR backlog fixture mode was not deterministic")
+    if pr_backlog_state.get("merge_approved") is not False:
+        failures.append("PR backlog state inferred merge approval")
+    if pr_backlog_state.get("apply_approved") is not False:
+        failures.append("PR backlog state inferred APPLY approval")
+    if pr_backlog_state.get("worker_launch_approved") is not False:
+        failures.append("PR backlog state inferred worker launch approval")
     if not previews:
         failures.append("sample report did not produce a dispatch packet preview")
     for preview in previews:
@@ -66,6 +79,8 @@ def sample_check() -> dict[str, object]:
             failures.append("SOS candidate event must route only to Watchdog/Pi5 review")
         if event.get("candidate_id") == "dry-run-next" and event.get("event_type") != "DRY_RUN_ONLY":
             failures.append("DRY_RUN_ONLY candidate did not emit DRY_RUN_ONLY walkie event")
+        if event.get("event_type") == "PR_DEPENDENCY_CHANGED" and event.get("zero_external_wake_confirmation") is not True:
+            failures.append("PR dependency walkie event was not preview-only")
     approval_state = report.get("approval_state", {})
     if approval_state.get("future_apply_approved") is not False:
         failures.append("completed/pending approval state was treated as future APPLY approval")
