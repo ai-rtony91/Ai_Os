@@ -38,6 +38,8 @@ class ValidatorResult:
     name: str
     exit_code: int
     output: str = ""
+    stdout: str = ""
+    stderr: str = ""
     wrapper_error: str = ""
 
     @property
@@ -48,6 +50,37 @@ class ValidatorResult:
         payload = asdict(self)
         payload["passed"] = self.passed
         return payload
+
+
+def classify_validator_result(
+    *,
+    name: str,
+    exit_code: int | None,
+    stdout: str | None = "",
+    stderr: str | None = "",
+    wrapper_error: str | None = "",
+) -> ValidatorResult:
+    """Convert raw process evidence into a validator result.
+
+    Empty stdout is valid for clean commands such as ``git diff --check``.
+    Process exit status and wrapper exceptions are the authority.
+    """
+
+    normalized_exit_code = 1 if exit_code is None else exit_code
+    normalized_stdout = stdout or ""
+    normalized_stderr = stderr or ""
+    normalized_wrapper_error = wrapper_error or ""
+    combined_output = "\n".join(
+        part for part in (normalized_stdout, normalized_stderr) if part
+    )
+    return ValidatorResult(
+        name=name,
+        exit_code=normalized_exit_code,
+        output=combined_output,
+        stdout=normalized_stdout,
+        stderr=normalized_stderr,
+        wrapper_error=normalized_wrapper_error,
+    )
 
 
 def _normalize_path(path: str) -> str:

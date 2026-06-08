@@ -5,6 +5,7 @@ from automation.operator_relief.vacation_12_hour_trial import (
     CLASSIFICATION_OK,
     CLASSIFICATION_SOS,
     ValidatorResult,
+    classify_validator_result,
     classify_dirty_scope,
     classify_trial_start,
     is_approved_trial_output,
@@ -44,6 +45,65 @@ def test_trial_start_with_approved_evidence_and_clean_diff_does_not_sos() -> Non
     assert heartbeat["approved_evidence_only"] is True
     assert heartbeat["validator_status"] == "PASS"
     assert heartbeat["do_not_wake_reason"]
+
+
+def test_git_diff_check_exit_zero_with_empty_output_is_pass() -> None:
+    result = classify_validator_result(
+        name="git diff --check",
+        exit_code=0,
+        stdout="",
+        stderr="",
+    )
+
+    assert result.passed is True
+    assert result.output == ""
+
+
+def test_git_diff_check_exit_zero_with_harmless_stdout_is_pass() -> None:
+    result = classify_validator_result(
+        name="git diff --check",
+        exit_code=0,
+        stdout="no whitespace errors",
+        stderr="",
+    )
+
+    assert result.passed is True
+    assert result.output == "no whitespace errors"
+
+
+def test_git_diff_check_nonzero_exit_is_fail() -> None:
+    result = classify_validator_result(
+        name="git diff --check",
+        exit_code=1,
+        stdout="file.py:1: trailing whitespace.",
+        stderr="",
+    )
+
+    assert result.passed is False
+
+
+def test_validator_stderr_does_not_override_zero_exit() -> None:
+    result = classify_validator_result(
+        name="git diff --check",
+        exit_code=0,
+        stdout="",
+        stderr="warning: harmless diagnostic",
+    )
+
+    assert result.passed is True
+    assert result.stderr == "warning: harmless diagnostic"
+
+
+def test_validator_wrapper_exception_is_fail() -> None:
+    result = classify_validator_result(
+        name="git diff --check",
+        exit_code=0,
+        stdout="",
+        stderr="",
+        wrapper_error="runner exception",
+    )
+
+    assert result.passed is False
 
 
 def test_clean_trial_start_is_ok() -> None:
@@ -94,6 +154,24 @@ def test_real_git_diff_check_failure_is_not_suppressed() -> None:
     assert heartbeat["classification"] == CLASSIFICATION_SOS
     assert heartbeat["validator_status"] == "FAIL"
     assert "git diff --check failed" in heartbeat["sos_findings"]
+
+
+def test_real_git_diff_check_failure_from_classified_result_is_not_suppressed() -> None:
+    diff_check = classify_validator_result(
+        name="git diff --check",
+        exit_code=1,
+        stdout="file.py:1: trailing whitespace.",
+        stderr="",
+    )
+
+    heartbeat = classify_trial_start(
+        status_lines=["?? Reports/vacation_candidate/12_hour_trial/"],
+        diff_check=diff_check,
+        branch="feature/full-operator-relief-closed-loop-v1",
+    )
+
+    assert heartbeat["classification"] == CLASSIFICATION_SOS
+    assert heartbeat["validator_status"] == "FAIL"
 
 
 def test_validator_wrapper_error_is_not_suppressed() -> None:
