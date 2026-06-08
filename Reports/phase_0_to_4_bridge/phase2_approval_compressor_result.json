@@ -1,0 +1,26 @@
+{
+  "approval_compressor": "automation/bridge/aios_approval_model.py",
+  "blocked_sample": {
+    "blockers": [
+      "live_trading_or_broker_request_blocked"
+    ],
+    "safe_next_command": "Do not apply. Repair approval packet.",
+    "status": "BLOCKED",
+    "warnings": []
+  },
+  "safe_next_action": "Use approval compressor as a validator, not as authority.",
+  "status_values": [
+    "WAIT",
+    "BLOCKED",
+    "REQUIRES_APPROVAL",
+    "APPLY_READY",
+    "APPLY_EXECUTED",
+    "COMPLETE"
+  ],
+  "valid_sample": {
+    "blockers": [],
+    "safe_next_command": "Run scoped APPLY command, then stop before commit or push.",
+    "status": "APPLY_READY",
+    "warnings": []
+  }
+}

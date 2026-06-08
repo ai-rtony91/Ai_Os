@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+"""AI_OS local pre-commit hook template.
+
+Install only through scripts/hooks/Install-AiOsGitHooks.ps1 after reviewing policy.
+"""
+
+import subprocess
+import sys
+
+
+def run(command):
+    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    if result.stdout:
+        print(result.stdout)
+    if result.stderr:
+        print(result.stderr, file=sys.stderr)
+    return result.returncode
+
+
+checks = [
+    [sys.executable, "automation/validators/aios_governance_validator.py", "--sample-check"],
+]
+
+for check in checks:
+    code = run(check)
+    if code != 0:
+        print("AI_OS local hook blocked commit. Review governance validator output.")
+        sys.exit(code)
+
+sys.exit(0)
+
