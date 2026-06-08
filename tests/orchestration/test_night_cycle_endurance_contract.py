@@ -8,6 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 NIGHT_CYCLE = REPO_ROOT / "automation" / "orchestration" / "Invoke-AiOsNightCycle.ps1"
 WATCHDOG = REPO_ROOT / "automation" / "orchestration" / "watchdog" / "aios_deadman_watchdog.py"
 RUNTIME_STATE = REPO_ROOT / "automation" / "runtime" / "state" / "Write-AiOsRuntimeState.ps1"
+HEARTBEAT_PROOF = REPO_ROOT / "automation" / "orchestration" / "Test-AiOsRuntimeHeartbeat.DRY_RUN.ps1"
 
 
 def night_cycle_text() -> str:
@@ -59,6 +60,22 @@ def test_runtime_state_writer_uses_collision_safe_temp_path() -> None:
     assert '[guid]::NewGuid().ToString("N")' in text
     assert "$tmpStatePath = Join-Path $stateDir" in text
     assert '$statePath + ".tmp"' not in text
+
+
+def test_heartbeat_only_proof_harness_is_dry_run_and_isolated() -> None:
+    text = HEARTBEAT_PROOF.read_text(encoding="utf-8")
+
+    assert "runtime_heartbeat.proof.json" in text
+    assert "DRY_RUN_PROOF" in text
+    assert "full_night_cycle_invoked = $false" in text
+    assert "scheduler_registered = $false" in text
+    assert "restart_supervisor_armed = $false" in text
+    assert "live_send_attempted = $false" in text
+    assert "Write-AiOsProofJsonAtomic" in text
+    assert '[guid]::NewGuid().ToString("N")' in text
+    assert "Move-Item -LiteralPath $tmpPath -Destination $Path -Force" in text
+    assert "& $PSScriptRoot" not in text
+    assert "automation/orchestration/Invoke-AiOsNightCycle.ps1" not in text
 
 
 def test_restart_marker_corruption_approval_wait_and_stale_state_block() -> None:
