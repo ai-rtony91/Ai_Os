@@ -9,6 +9,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from automation.orchestration.dispatcher.assignment_executor import (
     build_dispatch_packet_preview,
+    build_packet_drafts,
     build_pr_dependency_findings,
     build_pr_walkie_events,
     build_walkie_events,
@@ -386,3 +387,138 @@ def test_build_report_reads_local_pr_fixture_without_github(tmp_path: Path) -> N
     assert report["pr_backlog_state"]["fixture_mode_deterministic"] is True
     assert report["pr_backlog_state"]["pr_records_read"] == 1
     assert report["pr_backlog_state"]["pr_dependency_findings"]
+
+
+def _drafts_for_state(state: dict[str, object], summary: dict[str, object], pr_backlog: dict[str, object] | None = None):
+    candidates = normalize_candidates(state)
+    decisions, collisions = classify_candidates(candidates, summary, pr_backlog or {"status": "UNKNOWN", "open_prs": []})
+    pr_report = classify_pr_backlog(pr_backlog or {"status": "UNKNOWN", "open_prs": []})
+    findings = build_pr_dependency_findings(candidates, pr_report)
+    recommended = [decision for decision in decisions if decision.decision in {"READY", "DRY_RUN_ONLY"}]
+    walkie_events = build_walkie_events(decisions, summary, recommended) + build_pr_walkie_events(findings, pr_report)
+    return build_packet_drafts(
+        decisions,
+        walkie_events=walkie_events,
+        pr_dependency_findings=findings,
+        lock_state=summary.get("lock_state", {}),
+        approval_state=summary.get("approval_state", {}),
+        collisions=collisions,
+    )
+
+
+def test_ready_candidate_creates_ready_for_operator_review_draft() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "ready", "status": "ready", "owner_lane": "x"}]},
+    }
+    summary = {"approval_state": {"future_apply_approved": True}, "lock_state": {"active_lock_paths": []}, "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"}}
+
+    drafts = _drafts_for_state(state, summary)
+
+    assert drafts[0].status == "DRAFT_READY_FOR_OPERATOR_REVIEW"
+    assert drafts[0].not_executable_until_operator_approval is True
+
+
+def test_dry_run_only_candidate_creates_safe_dry_run_draft() -> None:
+    report = sample_report()
+    draft = next(item for item in report["packet_drafts"] if item["source_candidate_id"] == "dry-run-next")
+
+    assert draft["status"] == "DRAFT_READY_FOR_OPERATOR_REVIEW"
+    assert draft["mode"] == "DRY_RUN"
+    assert draft["apply_approved"] is False
+
+
+def test_apply_candidate_without_exact_approval_creates_waiting_approval_draft() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "apply", "status": "active", "mode": "APPLY", "owner_lane": "x"}]},
+    }
+    summary = {"approval_state": {"future_apply_approved": False}, "lock_state": {"active_lock_paths": []}, "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"}}
+
+    drafts = _drafts_for_state(state, summary)
+
+    assert drafts[0].status == "DRAFT_BLOCKED_WAITING_APPROVAL"
+
+
+def test_lock_collision_creates_lock_blocked_draft() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "locked", "status": "active", "owner_lane": "x", "allowed_paths": ["docs/AI_OS/worker_dispatcher/file.md"]}]},
+    }
+    summary = {"approval_state": {"future_apply_approved": False}, "lock_state": {"active_lock_paths": ["docs/AI_OS/worker_dispatcher/"]}, "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"}}
+
+    drafts = _drafts_for_state(state, summary)
+
+    assert drafts[0].status == "DRAFT_BLOCKED_BY_LOCK"
+
+
+def test_pr_dependency_creates_pr_blocked_draft() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "docs", "status": "active", "owner_lane": "x", "allowed_paths": ["docs/AI_OS/worker_dispatcher/file.md"]}]},
+    }
+    summary = {"approval_state": {"future_apply_approved": False}, "lock_state": {"active_lock_paths": []}, "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"}}
+    pr_backlog = {"status": "PRESENT", "source": "fixture", "pr_records": [{"pr_number": 1, "state": "open", "draft": False, "merged": False, "merge_state": "clean", "changed_paths": ["docs/AI_OS/worker_dispatcher/"]}]}
+
+    drafts = _drafts_for_state(state, summary, pr_backlog)
+
+    assert drafts[0].status == "DRAFT_BLOCKED_BY_PR_DEPENDENCY"
+    assert drafts[0].source_pr_dependency_status == "PR_OPEN_DEPENDENCY"
+
+
+def test_protected_path_creates_protected_path_blocked_draft() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "protected", "status": "active", "owner_lane": "x", "allowed_paths": ["broker/"]}]},
+    }
+    summary = {"approval_state": {"future_apply_approved": False}, "lock_state": {"active_lock_paths": []}, "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"}}
+
+    drafts = _drafts_for_state(state, summary)
+
+    assert drafts[0].status == "DRAFT_BLOCKED_BY_PROTECTED_PATH"
+
+
+def test_review_required_candidate_creates_review_required_draft() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "unknown", "status": "mystery", "owner_lane": "x"}]},
+    }
+    summary = {"approval_state": {"future_apply_approved": True}, "lock_state": {"active_lock_paths": []}, "queue_state": {"historical_queue_treatment": "REVIEW_REQUIRED"}}
+
+    drafts = _drafts_for_state(state, summary)
+
+    assert drafts[0].status == "DRAFT_REVIEW_REQUIRED"
+
+
+def test_safety_block_walkie_event_prevents_ready_draft() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "one", "status": "active", "owner_lane": "a", "allowed_paths": ["docs/AI_OS/worker_dispatcher/"]}, {"packet_id": "two", "status": "active", "owner_lane": "b", "allowed_paths": ["docs/AI_OS/worker_dispatcher/file.md"]}]},
+    }
+    summary = {"approval_state": {"future_apply_approved": True}, "lock_state": {"active_lock_paths": []}, "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"}}
+
+    drafts = _drafts_for_state(state, summary)
+
+    assert {draft.status for draft in drafts} == {"DRAFT_REVIEW_REQUIRED"}
+
+
+def test_packet_draft_text_is_codex_shaped_but_not_approval() -> None:
+    report = sample_report()
+    draft = report["packet_drafts"][0]
+    text = draft["draft_text"]
+
+    assert "CODEX-ONLY PROMPT" in text
+    assert "AI_OS EXECUTION TOKEN: DRAFT_ONLY_NOT_OPERATOR_APPROVAL" in text
+    assert "This draft is not executable until Anthony approves it." in text
+    assert "This draft does not approve APPLY" in text
+    assert draft["apply_approved"] is False
+    assert draft["merge_approved"] is False
+    assert draft["push_approved"] is False
+    assert draft["worker_launch_approved"] is False
