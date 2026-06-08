@@ -19,6 +19,7 @@ def sample_check() -> dict[str, object]:
     if not isinstance(zero_launch, dict) or zero_launch.get("zero_workers_launched") is not True:
         failures.append("sample report does not confirm zero worker launch")
     previews = report.get("dispatch_packet_previews", [])
+    walkie_events = report.get("internal_walkie_events", [])
     if not previews:
         failures.append("sample report did not produce a dispatch packet preview")
     for preview in previews:
@@ -28,6 +29,19 @@ def sample_check() -> dict[str, object]:
             failures.append("dispatch preview implies APPLY approval")
         if preview.get("worker_launch_approved") is not False:
             failures.append("dispatch preview implies worker launch approval")
+    if not walkie_events:
+        failures.append("sample report did not produce internal walkie events")
+    for event in walkie_events:
+        if event.get("zero_external_wake_confirmation") is not True:
+            failures.append("walkie event does not confirm zero external wake")
+        if event.get("zero_worker_launch_confirmation") is not True:
+            failures.append("walkie event does not confirm zero worker launch")
+        if "direct_anthony_wake" not in event.get("blocked_actions", []):
+            failures.append("walkie event does not block direct Anthony wake")
+        if event.get("severity") == "SOS_CANDIDATE" and event.get("route_to") != ["watchdog_pi5_review"]:
+            failures.append("SOS candidate event must route only to Watchdog/Pi5 review")
+        if event.get("candidate_id") == "dry-run-next" and event.get("event_type") != "DRY_RUN_ONLY":
+            failures.append("DRY_RUN_ONLY candidate did not emit DRY_RUN_ONLY walkie event")
     approval_state = report.get("approval_state", {})
     if approval_state.get("future_apply_approved") is not False:
         failures.append("completed/pending approval state was treated as future APPLY approval")

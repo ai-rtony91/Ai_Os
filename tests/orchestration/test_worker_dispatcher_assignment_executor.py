@@ -9,6 +9,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from automation.orchestration.dispatcher.assignment_executor import (
     build_dispatch_packet_preview,
+    build_walkie_events,
     classify_candidates,
     normalize_candidates,
     sample_report,
@@ -42,6 +43,58 @@ def test_dispatch_preview_is_non_executable_and_zero_launch() -> None:
     preview = report["dispatch_packet_previews"][0]
     assert preview["contains_execution_token"] is False
     assert preview["worker_launch_approved"] is False
+
+
+def test_walkie_events_are_internal_preview_only() -> None:
+    report = sample_report()
+    events = report["internal_walkie_events"]
+
+    assert any(event["event_type"] == "DRY_RUN_ONLY" for event in events)
+    for event in events:
+        assert event["zero_external_wake_confirmation"] is True
+        assert event["zero_worker_launch_confirmation"] is True
+        assert "direct_anthony_wake" in event["blocked_actions"]
+        assert "notification_send" in event["blocked_actions"]
+
+
+def test_waiting_approval_routes_to_night_supervisor_and_approval_evidence() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "approval", "status": "awaiting_approval", "owner_lane": "x"}]},
+    }
+    candidates = normalize_candidates(state)
+    summary = {
+        "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"},
+        "approval_state": {"inbox_status": "completed", "apply_gate_status": "pending_review", "future_apply_approved": False},
+    }
+    decisions, _ = classify_candidates(candidates, summary, {"status": "UNKNOWN", "open_prs": []})
+    events = build_walkie_events(decisions, summary, [])
+
+    event = next(item for item in events if item.event_type == "WAITING_APPROVAL")
+    assert event.severity == "ACTION_REQUIRED"
+    assert event.route_to == ["night_supervisor_review", "approval_inbox_evidence"]
+    assert event.requires_anthony is True
+
+
+def test_sos_candidate_routes_to_watchdog_without_external_wake() -> None:
+    state = {
+        "worker_inbox": {"status": "PRESENT", "payload": {"items": []}},
+        "historical_queue": {"status": "PRESENT", "payload": {"status": "HISTORICAL", "items": []}},
+        "active_work_packets": {"packets": [{"packet_id": "live", "status": "active", "owner_lane": "x", "allowed_paths": ["broker/"]}]},
+    }
+    candidates = normalize_candidates(state)
+    summary = {
+        "queue_state": {"historical_queue_treatment": "HISTORICAL_REFERENCE"},
+        "approval_state": {"inbox_status": "completed", "apply_gate_status": "pending_review", "future_apply_approved": False},
+    }
+    decisions, _ = classify_candidates(candidates, summary, {"status": "UNKNOWN", "open_prs": []})
+    events = build_walkie_events(decisions, summary, [])
+
+    event = next(item for item in events if item.event_type == "SOS_CANDIDATE")
+    assert event.route_to == ["watchdog_pi5_review"]
+    assert event.requires_anthony is True
+    assert event.zero_external_wake_confirmation is True
 
 
 def test_active_packet_without_apply_approval_is_dry_run_only() -> None:

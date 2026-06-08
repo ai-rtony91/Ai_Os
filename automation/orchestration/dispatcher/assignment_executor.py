@@ -21,6 +21,20 @@ STATUSES = {
     "COMPLETE_OR_SUPERSEDED",
     "REVIEW_REQUIRED",
 }
+WALKIE_EVENT_TYPES = {
+    "DISPATCH_READY",
+    "DRY_RUN_ONLY",
+    "WAITING_APPROVAL",
+    "LOCK_COLLISION",
+    "PR_DEPENDENCY_CHANGED",
+    "PROTECTED_PATH_BLOCKED",
+    "QUEUE_STATE_UNKNOWN",
+    "APPROVAL_STATE_UNKNOWN",
+    "NO_SAFE_LANE_FOUND",
+    "SOS_CANDIDATE",
+    "REVIEW_REQUIRED",
+}
+WALKIE_SEVERITIES = {"INFO", "NOTICE", "ACTION_REQUIRED", "SAFETY_BLOCK", "SOS_CANDIDATE"}
 COMPLETE_STATES = {"complete", "completed", "done", "superseded", "archived_reference", "closed"}
 WAITING_APPROVAL_STATES = {"awaiting_approval", "waiting_approval", "waiting_for_approval", "pending_review"}
 ACTIVE_STATES = {"active", "ready", "queued", "assigned", "running", "dry_run_running", "ready_for_dry_run"}
@@ -55,6 +69,24 @@ class Decision:
     next_safe_action: str
 
 
+@dataclass
+class WalkieEvent:
+    walkie_event_id: str
+    event_type: str
+    severity: str
+    route_to: list[str]
+    source: str
+    reason: str
+    candidate_id: str | None
+    lane: str | None
+    requires_anthony: bool
+    safe_next_action: str
+    blocked_actions: list[str]
+    evidence: dict[str, Any]
+    zero_external_wake_confirmation: bool
+    zero_worker_launch_confirmation: bool
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -69,6 +101,20 @@ def zero_launch_confirmation() -> dict[str, bool]:
         "zero_notifications_sent": True,
         "zero_broker_cloud_live_trading": True,
     }
+
+
+def blocked_event_actions() -> list[str]:
+    return [
+        "direct_anthony_wake",
+        "worker_launch",
+        "scheduler_start",
+        "night_supervisor_start",
+        "live_sos_arm_or_send",
+        "adb_call",
+        "notification_send",
+        "broker_cloud_live_trading",
+        "secret_handling",
+    ]
 
 
 def read_json_file(path: Path) -> tuple[str, Any | None, str | None]:
@@ -349,6 +395,164 @@ def build_dispatch_packet_preview(decision: Decision) -> dict[str, Any]:
     }
 
 
+def _walkie_route_for(severity: str) -> list[str]:
+    if severity == "INFO":
+        return ["dispatcher_report"]
+    if severity == "NOTICE":
+        return ["night_supervisor_review"]
+    if severity == "ACTION_REQUIRED":
+        return ["night_supervisor_review", "approval_inbox_evidence"]
+    if severity == "SAFETY_BLOCK":
+        return ["night_supervisor_review", "watchdog_review"]
+    if severity == "SOS_CANDIDATE":
+        return ["watchdog_pi5_review"]
+    return ["night_supervisor_review"]
+
+
+def _event_type_for_decision(decision: Decision) -> tuple[str, str, bool]:
+    if decision.decision == "READY":
+        return "DISPATCH_READY", "NOTICE", False
+    if decision.decision == "DRY_RUN_ONLY":
+        return "DRY_RUN_ONLY", "INFO", False
+    if decision.decision == "WAITING_APPROVAL":
+        return "WAITING_APPROVAL", "ACTION_REQUIRED", True
+    if decision.decision == "BLOCKED_BY_LOCK":
+        return "LOCK_COLLISION", "SAFETY_BLOCK", False
+    if decision.decision == "BLOCKED_BY_PR_DEPENDENCY":
+        return "PR_DEPENDENCY_CHANGED", "ACTION_REQUIRED", True
+    if decision.decision == "BLOCKED_BY_PROTECTED_PATH":
+        return "PROTECTED_PATH_BLOCKED", "SAFETY_BLOCK", True
+    if decision.decision == "BLOCKED_BY_COLLISION":
+        return "LOCK_COLLISION", "SAFETY_BLOCK", False
+    if decision.decision == "REVIEW_REQUIRED":
+        return "REVIEW_REQUIRED", "ACTION_REQUIRED", True
+    return "REVIEW_REQUIRED", "NOTICE", False
+
+
+def build_walkie_event(
+    *,
+    event_type: str,
+    severity: str,
+    source: str,
+    reason: str,
+    candidate_id: str | None,
+    lane: str | None,
+    requires_anthony: bool,
+    safe_next_action: str,
+    evidence: dict[str, Any],
+) -> WalkieEvent:
+    if event_type not in WALKIE_EVENT_TYPES:
+        event_type = "REVIEW_REQUIRED"
+    if severity not in WALKIE_SEVERITIES:
+        severity = "ACTION_REQUIRED"
+    clean_candidate = candidate_id or "state"
+    return WalkieEvent(
+        walkie_event_id=f"WALKIE-{event_type}-{clean_candidate}",
+        event_type=event_type,
+        severity=severity,
+        route_to=_walkie_route_for(severity),
+        source=source,
+        reason=reason,
+        candidate_id=candidate_id,
+        lane=lane,
+        requires_anthony=requires_anthony,
+        safe_next_action=safe_next_action,
+        blocked_actions=blocked_event_actions(),
+        evidence=evidence,
+        zero_external_wake_confirmation=True,
+        zero_worker_launch_confirmation=True,
+    )
+
+
+def build_walkie_events(
+    decisions: list[Decision],
+    state_summary: dict[str, Any],
+    recommended: list[Decision],
+) -> list[WalkieEvent]:
+    events: list[WalkieEvent] = []
+    for decision in decisions:
+        event_type, severity, requires_anthony = _event_type_for_decision(decision)
+        if decision.decision in {"COMPLETE_OR_SUPERSEDED", "HISTORICAL_REFERENCE"}:
+            continue
+        events.append(
+            build_walkie_event(
+                event_type=event_type,
+                severity=severity,
+                source="dispatcher_assignment_executor",
+                reason=";".join(decision.reasons) or decision.decision,
+                candidate_id=decision.task_id,
+                lane=decision.lane,
+                requires_anthony=requires_anthony,
+                safe_next_action=decision.next_safe_action,
+                evidence={
+                    "decision": decision.decision,
+                    "candidate_source": decision.source,
+                    "assigned_worker": decision.assigned_worker,
+                },
+            )
+        )
+
+    queue_treatment = state_summary["queue_state"].get("historical_queue_treatment")
+    if queue_treatment == "REVIEW_REQUIRED":
+        events.append(
+            build_walkie_event(
+                event_type="QUEUE_STATE_UNKNOWN",
+                severity="ACTION_REQUIRED",
+                source="dispatcher_assignment_executor",
+                reason="queue surface is missing, malformed, or not marked historical/canonical",
+                candidate_id=None,
+                lane="queue",
+                requires_anthony=False,
+                safe_next_action="Night Supervisor review should classify queue source before dispatch.",
+                evidence=state_summary["queue_state"],
+            )
+        )
+    approval_state = state_summary["approval_state"]
+    if approval_state.get("inbox_status") in {"MISSING", "MALFORMED"} or approval_state.get("apply_gate_status") == "MALFORMED":
+        events.append(
+            build_walkie_event(
+                event_type="APPROVAL_STATE_UNKNOWN",
+                severity="ACTION_REQUIRED",
+                source="dispatcher_assignment_executor",
+                reason="approval surface is missing or malformed",
+                candidate_id=None,
+                lane="approval",
+                requires_anthony=False,
+                safe_next_action="Night Supervisor review should gather approval evidence before APPLY.",
+                evidence=approval_state,
+            )
+        )
+    if not recommended:
+        events.append(
+            build_walkie_event(
+                event_type="NO_SAFE_LANE_FOUND",
+                severity="ACTION_REQUIRED",
+                source="dispatcher_assignment_executor",
+                reason="no READY or DRY_RUN_ONLY candidate was available",
+                candidate_id=None,
+                lane=None,
+                requires_anthony=False,
+                safe_next_action="Review blockers and approval state before dispatch.",
+                evidence={"decision_count": len(decisions)},
+            )
+        )
+    if any(decision.decision.startswith("BLOCKED") for decision in decisions):
+        events.append(
+            build_walkie_event(
+                event_type="SOS_CANDIDATE",
+                severity="SOS_CANDIDATE",
+                source="dispatcher_assignment_executor",
+                reason="blocked work may require Watchdog/Pi5 review if it becomes operationally urgent",
+                candidate_id=None,
+                lane="watchdog_review",
+                requires_anthony=True,
+                safe_next_action="Route to Watchdog/Pi5 review only; Dispatcher must not wake Anthony directly.",
+                evidence={"blocked_decisions": [asdict(decision) for decision in decisions if decision.decision.startswith("BLOCKED")]},
+            )
+        )
+    return events
+
+
 def build_report(repo_root: Path, *, allow_github: bool = False) -> dict[str, Any]:
     state = load_state(repo_root, allow_github=allow_github)
     summary = summarize_state(state)
@@ -362,6 +566,7 @@ def build_report(repo_root: Path, *, allow_github: bool = False) -> dict[str, An
     if not recommended:
         recommended = [decision for decision in decisions if decision.decision == "DRY_RUN_ONLY"][:3]
     previews = [build_dispatch_packet_preview(decision) for decision in recommended]
+    walkie_events = build_walkie_events(decisions, summary, recommended)
     blockers = [asdict(decision) for decision in decisions if decision.decision.startswith("BLOCKED") or decision.decision in {"WAITING_APPROVAL", "REVIEW_REQUIRED"}]
     return {
         "report_id": "AIOS_WORKER_DISPATCHER_ASSIGNMENT_EXECUTOR_DRY_RUN_V1",
@@ -380,6 +585,7 @@ def build_report(repo_root: Path, *, allow_github: bool = False) -> dict[str, An
         "candidate_decisions": [asdict(decision) for decision in decisions],
         "recommended_lanes": [asdict(decision) for decision in recommended],
         "dispatch_packet_previews": previews,
+        "internal_walkie_events": [asdict(event) for event in walkie_events],
         "blockers": blockers,
         "zero_launch_confirmation": zero_launch_confirmation(),
         "validator_pass_is_evidence_only": True,
@@ -417,6 +623,7 @@ def sample_report() -> dict[str, Any]:
     candidates = normalize_candidates(state)
     decisions, collisions = classify_candidates(candidates, summary, state["pr_backlog"])
     recommended = [decision for decision in decisions if decision.decision == "DRY_RUN_ONLY"][:3]
+    walkie_events = build_walkie_events(decisions, summary, recommended)
     return {
         "report_id": "AIOS_WORKER_DISPATCHER_ASSIGNMENT_EXECUTOR_DRY_RUN_V1_SAMPLE",
         "worker_state": summary["worker_state"],
@@ -427,6 +634,7 @@ def sample_report() -> dict[str, Any]:
         "collision_findings": collisions,
         "recommended_lanes": [asdict(decision) for decision in recommended],
         "dispatch_packet_previews": [build_dispatch_packet_preview(decision) for decision in recommended],
+        "internal_walkie_events": [asdict(event) for event in walkie_events],
         "zero_launch_confirmation": zero_launch_confirmation(),
     }
 

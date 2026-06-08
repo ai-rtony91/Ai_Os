@@ -40,10 +40,14 @@ The executor returns a structured DRY_RUN report with:
 - `collision_findings`
 - `recommended_lanes`
 - `dispatch_packet_previews`
+- `internal_walkie_events`
 - `blockers`
 - `zero_launch_confirmation`
 
 Dispatch previews are draft-only and do not contain an execution token.
+Internal walkie events are also preview-only. They route routine dispatcher
+state toward Night Supervisor or Watchdog/Pi5 review by contract, but the
+Dispatcher never wakes Anthony directly and never launches workers.
 
 ## Next Step
 
