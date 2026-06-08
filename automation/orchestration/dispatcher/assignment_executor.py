@@ -48,6 +48,15 @@ WALKIE_EVENT_TYPES = {
     "REVIEW_REQUIRED",
 }
 WALKIE_SEVERITIES = {"INFO", "NOTICE", "ACTION_REQUIRED", "SAFETY_BLOCK", "SOS_CANDIDATE"}
+PR_CLASSIFICATIONS = {
+    "PR_READY_FOR_REVIEW",
+    "PR_MERGED_BASELINE",
+    "PR_OPEN_DEPENDENCY",
+    "PR_DRAFT_OR_SUPERSEDED",
+    "PR_BLOCKED_BY_CONFLICT",
+    "PR_REVIEW_REQUIRED",
+    "PR_UNKNOWN",
+}
 COMPLETE_STATES = {"complete", "completed", "done", "superseded", "archived_reference", "closed"}
 WAITING_APPROVAL_STATES = {"awaiting_approval", "waiting_approval", "waiting_for_approval", "pending_review"}
 ACTIVE_STATES = {"active", "ready", "queued", "assigned", "running", "dry_run_running", "ready_for_dry_run"}
@@ -189,9 +198,102 @@ def _extract_lock_paths(lock: dict[str, Any]) -> list[str]:
     return paths
 
 
-def load_pr_backlog(repo_root: Path, *, allow_github: bool) -> dict[str, Any]:
+def _extract_pr_changed_paths(record: dict[str, Any]) -> list[str]:
+    values = record.get("changed_paths") or record.get("files") or record.get("changedFiles")
+    if isinstance(values, list):
+        return [str(item) for item in values]
+    return []
+
+
+def _normalize_pr_record(record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "pr_number": record.get("pr_number") or record.get("number"),
+        "title": _norm(record.get("title")),
+        "state": _lower(record.get("state") or ("open" if record.get("number") else "")),
+        "draft": bool(record.get("draft") if "draft" in record else record.get("isDraft", False)),
+        "merged": bool(record.get("merged", False)),
+        "merge_state": _lower(record.get("merge_state") or record.get("mergeStateStatus")),
+        "base_branch": _norm(record.get("base_branch") or record.get("baseRefName")),
+        "head_branch": _norm(record.get("head_branch") or record.get("headRefName")),
+        "head_sha": _norm(record.get("head_sha") or record.get("headRefOid")),
+        "changed_paths": _extract_pr_changed_paths(record),
+        "labels": [str(label).lower() for label in _as_list(record.get("labels"))],
+        "updated_at": _norm(record.get("updated_at") or record.get("updatedAt")),
+        "dependency_notes": _norm(record.get("dependency_notes")),
+    }
+
+
+def classify_pr_record(record: dict[str, Any]) -> str:
+    state = _lower(record.get("state"))
+    merge_state = _lower(record.get("merge_state"))
+    labels = {str(label).lower() for label in _as_list(record.get("labels"))}
+    title = _lower(record.get("title"))
+    if record.get("merged") is True:
+        return "PR_MERGED_BASELINE"
+    if record.get("draft") is True or "superseded" in labels or "draft" in title or "superseded" in title:
+        return "PR_DRAFT_OR_SUPERSEDED"
+    if state in {"closed", "closed_unmerged"}:
+        return "PR_DRAFT_OR_SUPERSEDED"
+    if merge_state in {"dirty", "blocked", "conflicting", "has_hooks", "unstable"}:
+        return "PR_BLOCKED_BY_CONFLICT"
+    if state in {"", "unknown"} and merge_state in {"", "unknown"}:
+        return "PR_UNKNOWN"
+    if state in {"open", "opened"} and merge_state in {"clean", "has_hooks", "unstable", ""}:
+        return "PR_READY_FOR_REVIEW" if merge_state == "clean" else "PR_REVIEW_REQUIRED"
+    if merge_state in {"unknown", "behind"}:
+        return "PR_REVIEW_REQUIRED"
+    return "PR_REVIEW_REQUIRED"
+
+
+def _load_pr_fixture(path: Path) -> dict[str, Any]:
+    status, payload, error = read_json_file(path)
+    if status == "MISSING":
+        return {
+            "status": "UNKNOWN",
+            "source": "fixture",
+            "reason": f"PR backlog fixture missing: {path.as_posix()}",
+            "open_prs": [],
+            "pr_records": [],
+        }
+    if status == "MALFORMED":
+        return {
+            "status": "MALFORMED",
+            "source": "fixture",
+            "reason": error or "PR backlog fixture malformed",
+            "open_prs": [],
+            "pr_records": [],
+        }
+    records = payload.get("prs") if isinstance(payload, dict) else payload
+    if not isinstance(records, list):
+        return {
+            "status": "MALFORMED",
+            "source": "fixture",
+            "reason": "PR backlog fixture must be a list or object with prs list",
+            "open_prs": [],
+            "pr_records": [],
+        }
+    normalized = [_normalize_pr_record(record) for record in records if isinstance(record, dict)]
+    return {
+        "status": "PRESENT",
+        "source": "fixture",
+        "reason": "local PR backlog fixture loaded",
+        "open_pr_count": len([record for record in normalized if record["state"] in {"open", "opened"}]),
+        "open_prs": normalized,
+        "pr_records": normalized,
+    }
+
+
+def load_pr_backlog(repo_root: Path, *, allow_github: bool, pr_backlog_fixture: Path | None = None) -> dict[str, Any]:
+    if pr_backlog_fixture is not None:
+        return _load_pr_fixture(pr_backlog_fixture)
     if not allow_github:
-        return {"status": "UNKNOWN", "reason": "GitHub PR inspection disabled for this run.", "open_prs": []}
+        return {
+            "status": "UNKNOWN",
+            "source": "none",
+            "reason": "PR backlog fixture not provided and live GitHub inspection disabled.",
+            "open_prs": [],
+            "pr_records": [],
+        }
     result = subprocess.run(
         [
             "gh",
@@ -215,10 +317,11 @@ def load_pr_backlog(repo_root: Path, *, allow_github: bool) -> dict[str, Any]:
         prs = json.loads(result.stdout)
     except json.JSONDecodeError as exc:
         return {"status": "UNKNOWN", "reason": f"GitHub PR JSON malformed: {exc}", "open_prs": []}
-    return {"status": "PRESENT", "open_pr_count": len(prs), "open_prs": prs}
+    normalized = [_normalize_pr_record(record) for record in prs if isinstance(record, dict)]
+    return {"status": "PRESENT", "source": "github_cli", "open_pr_count": len(normalized), "open_prs": normalized, "pr_records": normalized}
 
 
-def load_state(repo_root: Path, *, allow_github: bool = False) -> dict[str, Any]:
+def load_state(repo_root: Path, *, allow_github: bool = False, pr_backlog_fixture: Path | None = None) -> dict[str, Any]:
     paths = {
         "worker_registry": repo_root / "automation/orchestration/workers/AIOS_WORKER_REGISTRY.json",
         "worker_inbox": repo_root / "automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json",
@@ -255,7 +358,7 @@ def load_state(repo_root: Path, *, allow_github: bool = False) -> dict[str, Any]
         "contract_status": "PROPOSED_BACKLOG" if proposed_dir.exists() else "MISSING",
         "note": "Proposed backlog is not active queue input without explicit approval.",
     }
-    state["pr_backlog"] = load_pr_backlog(repo_root, allow_github=allow_github)
+    state["pr_backlog"] = load_pr_backlog(repo_root, allow_github=allow_github, pr_backlog_fixture=pr_backlog_fixture)
     return state
 
 
@@ -329,6 +432,35 @@ def summarize_state(state: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def classify_pr_backlog(pr_backlog: dict[str, Any]) -> dict[str, Any]:
+    records = [_normalize_pr_record(record) for record in _as_list(pr_backlog.get("pr_records") or pr_backlog.get("open_prs")) if isinstance(record, dict)]
+    classifications = [
+        {
+            "pr_number": record.get("pr_number"),
+            "title": record.get("title"),
+            "head_branch": record.get("head_branch"),
+            "changed_paths": record.get("changed_paths", []),
+            "classification": classify_pr_record(record),
+            "merge_approved": False,
+            "apply_approved": False,
+            "worker_launch_approved": False,
+        }
+        for record in records
+    ]
+    status = pr_backlog.get("status", "UNKNOWN")
+    return {
+        "status": status,
+        "source": pr_backlog.get("source", "unknown"),
+        "pr_records_read": len(records),
+        "pr_classifications": classifications,
+        "pr_backlog_unknown_reason": pr_backlog.get("reason") if status in {"UNKNOWN", "MALFORMED"} else None,
+        "fixture_mode_deterministic": pr_backlog.get("source") == "fixture" or status == "UNKNOWN",
+        "merge_approved": False,
+        "apply_approved": False,
+        "worker_launch_approved": False,
+    }
+
+
 def normalize_candidates(state: dict[str, Any]) -> list[Candidate]:
     candidates: list[Candidate] = []
     for packet in state["active_work_packets"]["packets"]:
@@ -390,6 +522,47 @@ def normalize_candidates(state: dict[str, Any]) -> list[Candidate]:
     return candidates
 
 
+def build_pr_dependency_findings(candidates: list[Candidate], pr_backlog_report: dict[str, Any]) -> list[dict[str, Any]]:
+    findings: list[dict[str, Any]] = []
+    active_candidates = [
+        candidate
+        for candidate in candidates
+        if candidate.status in ACTIVE_STATES or candidate.status in WAITING_APPROVAL_STATES
+    ]
+    for candidate in active_candidates:
+        candidate_paths = candidate.protected_paths
+        if not candidate_paths:
+            continue
+        for pr_record in pr_backlog_report.get("pr_classifications", []):
+            pr_paths = [str(path) for path in _as_list(pr_record.get("changed_paths"))]
+            if not pr_paths or not _path_overlaps(candidate_paths, pr_paths):
+                continue
+            classification = pr_record.get("classification")
+            if classification == "PR_MERGED_BASELINE":
+                finding = "PR_MERGED_BASELINE"
+            elif classification in {"PR_READY_FOR_REVIEW", "PR_OPEN_DEPENDENCY"}:
+                finding = "PR_OPEN_DEPENDENCY"
+            elif classification == "PR_BLOCKED_BY_CONFLICT":
+                finding = "PR_BLOCKED_BY_CONFLICT"
+            else:
+                finding = "PR_REVIEW_REQUIRED"
+            findings.append(
+                {
+                    "candidate_id": candidate.task_id,
+                    "candidate_paths": candidate_paths,
+                    "pr_number": pr_record.get("pr_number"),
+                    "pr_title": pr_record.get("title"),
+                    "pr_changed_paths": pr_paths,
+                    "pr_classification": classification,
+                    "dependency_classification": finding,
+                    "merge_approved": False,
+                    "apply_approved": False,
+                    "worker_launch_approved": False,
+                }
+            )
+    return findings
+
+
 def classify_candidates(candidates: list[Candidate], state_summary: dict[str, Any], pr_backlog: dict[str, Any]) -> tuple[list[Decision], list[dict[str, Any]]]:
     decisions: list[Decision] = []
     collisions: list[dict[str, Any]] = []
@@ -400,7 +573,8 @@ def classify_candidates(candidates: list[Candidate], state_summary: dict[str, An
             if left.protected_paths and right.protected_paths and _path_overlaps(left.protected_paths, right.protected_paths):
                 collisions.append({"left": left.task_id, "right": right.task_id, "reason": "protected_path_overlap"})
 
-    open_titles = " ".join(str(pr.get("title", "")) for pr in _as_list(pr_backlog.get("open_prs")))
+    pr_backlog_report = classify_pr_backlog(pr_backlog)
+    pr_dependency_findings = build_pr_dependency_findings(candidates, pr_backlog_report)
     for candidate in candidates:
         reasons: list[str] = []
         decision = "REVIEW_REQUIRED"
@@ -432,9 +606,9 @@ def classify_candidates(candidates: list[Candidate], state_summary: dict[str, An
         elif any(candidate.task_id in f"{collision['left']} {collision['right']}" for collision in collisions):
             decision = "BLOCKED_BY_COLLISION"
             reasons.append("candidate_collides_with_active_candidate")
-        elif pr_backlog.get("status") == "PRESENT" and candidate.task_id and candidate.task_id in open_titles:
+        elif any(finding["candidate_id"] == candidate.task_id and finding["dependency_classification"] != "PR_MERGED_BASELINE" for finding in pr_dependency_findings):
             decision = "BLOCKED_BY_PR_DEPENDENCY"
-            reasons.append("matching_open_pr_title")
+            reasons.append("pr_changed_paths_overlap_candidate_paths")
         elif state_summary["approval_state"]["future_apply_approved"] is False:
             decision = "DRY_RUN_ONLY"
             reasons.append("no_future_apply_approval")
@@ -630,11 +804,49 @@ def build_walkie_events(
     return events
 
 
-def build_report(repo_root: Path, *, allow_github: bool = False) -> dict[str, Any]:
-    state = load_state(repo_root, allow_github=allow_github)
+def build_pr_walkie_events(pr_dependency_findings: list[dict[str, Any]], pr_backlog_report: dict[str, Any]) -> list[WalkieEvent]:
+    events: list[WalkieEvent] = []
+    if pr_backlog_report.get("status") in {"UNKNOWN", "MALFORMED"}:
+        events.append(
+            build_walkie_event(
+                event_type="REVIEW_REQUIRED",
+                severity="ACTION_REQUIRED",
+                source="dispatcher_pr_backlog_fixture",
+                reason=pr_backlog_report.get("pr_backlog_unknown_reason") or "PR backlog state unknown",
+                candidate_id=None,
+                lane="pr_backlog",
+                requires_anthony=False,
+                safe_next_action="Provide a local PR backlog fixture or continue with PR_UNKNOWN.",
+                evidence={"pr_backlog_status": pr_backlog_report.get("status")},
+            )
+        )
+    for finding in pr_dependency_findings:
+        if finding["dependency_classification"] == "PR_MERGED_BASELINE":
+            continue
+        severity = "SAFETY_BLOCK" if finding["dependency_classification"] == "PR_BLOCKED_BY_CONFLICT" else "ACTION_REQUIRED"
+        events.append(
+            build_walkie_event(
+                event_type="PR_DEPENDENCY_CHANGED",
+                severity=severity,
+                source="dispatcher_pr_backlog_fixture",
+                reason=finding["dependency_classification"],
+                candidate_id=finding["candidate_id"],
+                lane="pr_backlog",
+                requires_anthony=True,
+                safe_next_action="Review PR dependency evidence before dispatch. Do not merge or APPLY from this signal.",
+                evidence=finding,
+            )
+        )
+    return events
+
+
+def build_report(repo_root: Path, *, allow_github: bool = False, pr_backlog_fixture: Path | None = None) -> dict[str, Any]:
+    state = load_state(repo_root, allow_github=allow_github, pr_backlog_fixture=pr_backlog_fixture)
     summary = summarize_state(state)
     candidates = normalize_candidates(state)
     decisions, collisions = classify_candidates(candidates, summary, state["pr_backlog"])
+    pr_backlog_report = classify_pr_backlog(state["pr_backlog"])
+    pr_dependency_findings = build_pr_dependency_findings(candidates, pr_backlog_report)
     recommended = [
         decision
         for decision in decisions
@@ -643,7 +855,7 @@ def build_report(repo_root: Path, *, allow_github: bool = False) -> dict[str, An
     if not recommended:
         recommended = [decision for decision in decisions if decision.decision == "DRY_RUN_ONLY"][:3]
     previews = [build_dispatch_packet_preview(decision) for decision in recommended]
-    walkie_events = build_walkie_events(decisions, summary, recommended)
+    walkie_events = build_walkie_events(decisions, summary, recommended) + build_pr_walkie_events(pr_dependency_findings, pr_backlog_report)
     blockers = [asdict(decision) for decision in decisions if decision.decision.startswith("BLOCKED") or decision.decision in {"WAITING_APPROVAL", "REVIEW_REQUIRED"}]
     return {
         "report_id": "AIOS_WORKER_DISPATCHER_ASSIGNMENT_EXECUTOR_DRY_RUN_V1",
@@ -676,7 +888,12 @@ def build_report(repo_root: Path, *, allow_github: bool = False) -> dict[str, An
             "github_check_pass_is_approval": False,
             "dispatcher_preview_is_approval": False,
         },
-        "pr_backlog_state": summary["pr_backlog_state"],
+        "pr_backlog_state": {
+            **summary["pr_backlog_state"],
+            **pr_backlog_report,
+            "pr_dependency_findings": pr_dependency_findings,
+            "walkie_events_from_pr_backlog": [asdict(event) for event in build_pr_walkie_events(pr_dependency_findings, pr_backlog_report)],
+        },
         "collision_findings": collisions,
         "candidate_decisions": [asdict(decision) for decision in decisions],
         "recommended_lanes": [asdict(decision) for decision in recommended],
@@ -719,8 +936,10 @@ def sample_report() -> dict[str, Any]:
     summary = summarize_state(state)
     candidates = normalize_candidates(state)
     decisions, collisions = classify_candidates(candidates, summary, state["pr_backlog"])
+    pr_backlog_report = classify_pr_backlog(state["pr_backlog"])
+    pr_dependency_findings = build_pr_dependency_findings(candidates, pr_backlog_report)
     recommended = [decision for decision in decisions if decision.decision == "DRY_RUN_ONLY"][:3]
-    walkie_events = build_walkie_events(decisions, summary, recommended)
+    walkie_events = build_walkie_events(decisions, summary, recommended) + build_pr_walkie_events(pr_dependency_findings, pr_backlog_report)
     return {
         "report_id": "AIOS_WORKER_DISPATCHER_ASSIGNMENT_EXECUTOR_DRY_RUN_V1_SAMPLE",
         "worker_state": summary["worker_state"],
@@ -746,6 +965,12 @@ def sample_report() -> dict[str, Any]:
         },
         "candidate_decisions": [asdict(decision) for decision in decisions],
         "collision_findings": collisions,
+        "pr_backlog_state": {
+            **state["pr_backlog"],
+            **pr_backlog_report,
+            "pr_dependency_findings": pr_dependency_findings,
+            "walkie_events_from_pr_backlog": [asdict(event) for event in build_pr_walkie_events(pr_dependency_findings, pr_backlog_report)],
+        },
         "recommended_lanes": [asdict(decision) for decision in recommended],
         "dispatch_packet_previews": [build_dispatch_packet_preview(decision) for decision in recommended],
         "internal_walkie_events": [asdict(event) for event in walkie_events],
@@ -757,10 +982,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="AI_OS Worker Dispatcher Assignment Executor DRY_RUN V1.")
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--include-github-prs", action="store_true")
+    parser.add_argument("--pr-backlog-fixture")
     parser.add_argument("--sample-check", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    payload = sample_report() if args.sample_check else build_report(Path(args.repo_root).resolve(), allow_github=args.include_github_prs)
+    payload = sample_report() if args.sample_check else build_report(
+        Path(args.repo_root).resolve(),
+        allow_github=args.include_github_prs,
+        pr_backlog_fixture=Path(args.pr_backlog_fixture) if args.pr_backlog_fixture else None,
+    )
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:

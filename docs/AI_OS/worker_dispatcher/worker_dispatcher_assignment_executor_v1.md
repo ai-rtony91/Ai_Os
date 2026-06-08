@@ -49,6 +49,8 @@ Dispatch previews are draft-only and do not contain an execution token.
 Internal walkie events are also preview-only. They route routine dispatcher
 state toward Night Supervisor or Watchdog/Pi5 review by contract, but the
 Dispatcher never wakes Anthony directly and never launches workers.
+PR backlog state may be read from a local fixture; fixture ingestion is
+deterministic and never approves merge, APPLY, or worker launch.
 
 ## Next Step
 
