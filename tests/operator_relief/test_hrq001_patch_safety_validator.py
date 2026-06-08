@@ -23,9 +23,9 @@ SAFE_DIFF = """--- docs/workflows/WORKER_BRANCH_AND_LANE_RULES.md
 +
 @@ -135,6 +144,8 @@
  ## Collision Handling
- 
+
 +Worker reports should include planned files and validation commands. The integration lane checks those reports before any merge or APPLY review.
-+ 
++
 """
 
 
