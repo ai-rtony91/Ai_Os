@@ -187,11 +187,18 @@ function main() {
   }
 
   const interval = setInterval(() => {
-    state = tick(state);
+    try {
+      state = tick(state);
 
-    if (config.maxTicks > 0 && state.tickCount >= config.maxTicks) {
-      clearInterval(interval);
-      shutdown(state, "bounded_run_complete");
+      if (config.maxTicks > 0 && state.tickCount >= config.maxTicks) {
+        clearInterval(interval);
+        shutdown(state, "bounded_run_complete");
+      }
+    } catch (error) {
+      // Endurance hardening: a transient tick failure must not kill the
+      // interval or exit the process. Log, keep the previous state, and
+      // continue so the next interval can recover.
+      console.error("[AI_OS] TICK_ERROR", error);
     }
   }, config.tickMs);
 }

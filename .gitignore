@@ -110,6 +110,8 @@ automation/orchestration/auto_loop/state/**/*.json
 # AI_OS generated telemetry evidence
 telemetry/generated/
 telemetry/runtime/
+telemetry/watchdog/*.json
+!telemetry/watchdog/.gitkeep
 telemetry/auto_loop/reports/*.json
 telemetry/backup_reports/*.json
 telemetry/night_supervisor/*.json

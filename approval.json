@@ -1,4 +1,6 @@
 {
-    "approved":  false,
-    "reason":  "reset: no live approval recorded"
+    "approved": false,
+    "reason": "reset",
+    "note": "Reset by Phase 0 cleanup.",
+    "last_reset": "2026-06-08"
 }

@@ -1,4 +1,5 @@
 {
-    "summary":  "reset: no live completion report recorded",
-    "complete":  false
+    "complete": false,
+    "note": "Reset by Phase 0 cleanup.",
+    "last_reset": "2026-06-08"
 }

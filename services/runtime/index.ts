@@ -7,8 +7,21 @@ const loop = new RuntimeLoop(
     maxConcurrentPackets: Number(process.env.AIOS_MAX_PACKETS ?? 4)
   },
   {
-    deadLetterQueue: { entries: [] },
-    workerLeases: { leases: [] }
+    // Safe empty defaults matching DeadLetterQueueState / WorkerLeaseResult so
+    // the first tick cannot throw an undefined.length TypeError.
+    deadLetterQueue: {
+      packets: [],
+      checkedAt: new Date().toISOString()
+    },
+    workerLeases: {
+      activeWorkers: [],
+      staleWorkers: [],
+      expiredWorkers: [],
+      reclaimablePackets: [],
+      duplicateWorkers: [],
+      applyBlockedWorkers: [],
+      checkedAt: new Date().toISOString()
+    }
   }
 );
 

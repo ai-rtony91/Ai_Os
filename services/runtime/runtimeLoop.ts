@@ -46,14 +46,22 @@ export class RuntimeLoop {
     });
 
     this.interval = setInterval(() => {
-      this.context = runRuntimeTick({
-        context: this.context,
-        deadLetterQueue: this.dependencies.deadLetterQueue,
-        workerLeases: this.dependencies.workerLeases,
-        maxConcurrentPackets: this.config.maxConcurrentPackets
-      });
+      try {
+        this.context = runRuntimeTick({
+          context: this.context,
+          deadLetterQueue: this.dependencies.deadLetterQueue,
+          workerLeases: this.dependencies.workerLeases,
+          maxConcurrentPackets: this.config.maxConcurrentPackets
+        });
 
-      processAutomationQueue(this.config.maxConcurrentPackets);
+        processAutomationQueue(this.config.maxConcurrentPackets);
+      } catch (error) {
+        // Endurance hardening: a transient tick failure must not kill the
+        // interval (and therefore the process). Log and continue; the
+        // previous context is preserved so the next tick can recover.
+        console.error("[aios-runtime] TICK_ERROR", error);
+        return;
+      }
     }, this.config.tickIntervalMs);
   }
 

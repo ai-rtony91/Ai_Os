@@ -45,8 +45,7 @@ Map dependencies first, then promote one canonical path per job. Do not remove d
 | `automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1` | Next action recommender | Runtime loop and status chain | medium | KEEP ACTIVE | Keep active |
 | `automation/orchestration/work_packets/` | Work packet lifecycle root | Route/create/move/get packet scripts, active/blocked/complete/template folders | high | KEEP ACTIVE | Keep; classify packet JSON as runtime state versus examples |
 | `automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json` | Command queue state | Command queue add/get scripts | medium | KEEP ACTIVE | Keep active if command queue remains canonical |
-| `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json` | Approval inbox state | Approval display and apply gate flow | high | KEEP ACTIVE | Keep active; protect from blind removal |
-| `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json` | Approval gate state | Apply approval checks | high | KEEP ACTIVE | Keep active |
+| `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json` | Approval gate state (canonical) | Approval display, apply gate flow, and apply approval checks | high | KEEP ACTIVE | Keep active; `APPROVAL_INBOX_001.json` was archived to `approval_inbox/archive/` |
 | `automation/orchestration/validators/` | Validator chain | Commit/package/apply safety checks | high | KEEP ACTIVE | Keep active |
 | `automation/orchestration/commit_packages/` | Commit package planning | Commit package previews and recommendations | medium | KEEP ACTIVE | Keep active; no commit automation without approval |
 
