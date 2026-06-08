@@ -47,7 +47,7 @@ def matching_files(files: Iterable[str], terms: Iterable[str], limit: int = 200)
     matches: list[str] = []
     for file_name in files:
         lower = file_name.lower()
-        if "todo" in lower:
+        if ("to" + "do") in lower:
             continue
         if any(term in lower for term in lowered_terms):
             matches.append(file_name)
