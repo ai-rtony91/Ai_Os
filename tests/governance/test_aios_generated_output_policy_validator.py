@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO_ROOT))
 
 from automation.validators.aios_generated_output_policy_validator import validate
 
 
 def repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    return REPO_ROOT
 
 
 def test_generated_output_policy_validator_passes() -> None:
