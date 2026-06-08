@@ -37,6 +37,7 @@ The executor returns a structured DRY_RUN report with:
 - `approval_state`
 - `work_packet_state`
 - `pr_backlog_state`
+- `active_state_contracts`
 - `collision_findings`
 - `recommended_lanes`
 - `dispatch_packet_previews`
