@@ -1,0 +1,24 @@
+name: AIOS Governance
+
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Compile governance bridge
+        run: |
+          python -m py_compile automation/bridge/aios_phase_bridge.py
+          python -m py_compile automation/validators/aios_governance_validator.py
+          python -m py_compile automation/self_build/aios_self_build_inspector.py
+      - name: Run governance validator sample
+        run: python automation/validators/aios_governance_validator.py --sample-check
+
