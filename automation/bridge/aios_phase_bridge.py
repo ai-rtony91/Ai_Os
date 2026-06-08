@@ -24,7 +24,9 @@ from automation.bridge.aios_status_model import (
 from automation.bridge.aios_validator_model import discover_validators
 
 
-REPORT_ROOT = Path("Reports/phase_0_to_4_bridge")
+DEFAULT_REPORT_ROOT = Path("Reports/generated/phase_0_to_4_bridge")
+DEFAULT_TELEMETRY_OUTPUT_ROOT = Path("telemetry/generated/validator_results")
+DEFAULT_APPROVAL_OUTPUT_ROOT = Path("telemetry/generated/approval_inbox")
 AUTHORITY_FILES = [
     "AGENTS.md",
     "README.md",
@@ -45,7 +47,7 @@ def _rel(path: Path, repo_root: Path) -> str:
         return path.as_posix()
 
 
-def phase0(repo_root: Path, status_before: str) -> dict[str, object]:
+def phase0(repo_root: Path, status_before: str, report_root: Path) -> dict[str, object]:
     snapshot = capture_repo_snapshot(repo_root)
     tracked = list_git_files(repo_root)
     missing_expected = [path for path in AUTHORITY_FILES if not (repo_root / path).exists()]
@@ -87,9 +89,9 @@ def phase0(repo_root: Path, status_before: str) -> dict[str, object]:
         "blocked_conditions": [],
         "safe_to_continue_boolean": True,
     }
-    write_json(repo_root / REPORT_ROOT / "phase0_infrastructure_inventory.json", payload)
+    write_json(repo_root / report_root / "phase0_infrastructure_inventory.json", payload)
     write_markdown(
-        repo_root / REPORT_ROOT / "PHASE0_INFRASTRUCTURE_INVENTORY.md",
+        repo_root / report_root / "PHASE0_INFRASTRUCTURE_INVENTORY.md",
         "Phase 0 Infrastructure Inventory",
         {
             "SUMMARY": "Inventory generated from tracked files and current Git state. This report is evidence only.",
@@ -110,7 +112,7 @@ def phase0(repo_root: Path, status_before: str) -> dict[str, object]:
     return payload
 
 
-def phase1(repo_root: Path, tracked: list[str]) -> dict[str, object]:
+def phase1(repo_root: Path, tracked: list[str], report_root: Path, telemetry_output_root: Path) -> dict[str, object]:
     queue_inventory = inventory_queue_systems(repo_root, tracked)
     validator_inventory = discover_validators(repo_root, tracked)
     known_state = load_known_state(repo_root)
@@ -136,10 +138,10 @@ def phase1(repo_root: Path, tracked: list[str]) -> dict[str, object]:
         "known_state_loaded": known_state,
         "safe_next_action": "Run python automation/bridge/aios_phase_bridge.py --mode DRY_RUN --repo-root .",
     }
-    write_json(repo_root / REPORT_ROOT / "phase1_wiring_map.json", payload)
-    write_json(repo_root / "telemetry/validator_results/AIOS_VALIDATOR_REGISTRY.current.json", validator_inventory.to_dict())
+    write_json(repo_root / report_root / "phase1_wiring_map.json", payload)
+    write_json(repo_root / telemetry_output_root / "AIOS_VALIDATOR_REGISTRY.current.json", validator_inventory.to_dict())
     write_markdown(
-        repo_root / REPORT_ROOT / "PHASE1_WIRING_MAP.md",
+        repo_root / report_root / "PHASE1_WIRING_MAP.md",
         "Phase 1 Wiring Map",
         {
             "SUMMARY": "Bridge adapters read existing queue, approval, lock, and validator surfaces without replacing them.",
@@ -167,7 +169,7 @@ def _sample_approval(now: str) -> ApprovalRecord:
             "forbidden_paths": ["AGENTS.md", "README.md"],
             "protected_actions_detected": [],
             "approval_text": "Anthony explicitly approves APPLY for bounded local bridge evidence only.",
-            "evidence_files": ["Reports/phase_0_to_4_bridge/phase0_infrastructure_inventory.json"],
+            "evidence_files": ["Reports/generated/phase_0_to_4_bridge/phase0_infrastructure_inventory.json"],
             "validator_chain": ["git diff --check", "python -m py_compile automation/bridge/aios_phase_bridge.py"],
             "expires_utc": "",
             "status": "pending",
@@ -175,7 +177,7 @@ def _sample_approval(now: str) -> ApprovalRecord:
     )
 
 
-def phase2(repo_root: Path, now: str) -> dict[str, object]:
+def phase2(repo_root: Path, now: str, report_root: Path, approval_output_root: Path) -> dict[str, object]:
     valid_decision = compress_approval(_sample_approval(now))
     blocked_decision = compress_approval(
         ApprovalRecord.from_dict(
@@ -206,10 +208,10 @@ def phase2(repo_root: Path, now: str) -> dict[str, object]:
         "status_values": ["WAIT", "BLOCKED", "REQUIRES_APPROVAL", "APPLY_READY", "APPLY_EXECUTED", "COMPLETE"],
         "safe_next_action": "Use approval compressor as a validator, not as authority.",
     }
-    write_json(repo_root / REPORT_ROOT / "phase2_approval_compressor_result.json", payload)
-    write_json(repo_root / "telemetry/approval_inbox/AIOS_APPROVAL_INBOX.current.json", {"sample_decisions": payload})
+    write_json(repo_root / report_root / "phase2_approval_compressor_result.json", payload)
+    write_json(repo_root / approval_output_root / "AIOS_APPROVAL_INBOX.current.json", {"sample_decisions": payload})
     write_markdown(
-        repo_root / REPORT_ROOT / "PHASE2_APPROVAL_COMPRESSOR.md",
+        repo_root / report_root / "PHASE2_APPROVAL_COMPRESSOR.md",
         "Phase 2 Approval Compressor",
         {
             "SUMMARY": "Approval compressor distinguishes ready, waiting, approval-required, and blocked states.",
@@ -221,7 +223,7 @@ def phase2(repo_root: Path, now: str) -> dict[str, object]:
     return payload
 
 
-def phase3(repo_root: Path) -> dict[str, object]:
+def phase3(repo_root: Path, report_root: Path) -> dict[str, object]:
     payload = {
         "governance_validator": "automation/validators/aios_governance_validator.py",
         "hook_template": ".githooks/pre-commit",
@@ -231,9 +233,9 @@ def phase3(repo_root: Path) -> dict[str, object]:
         "protected_actions_not_performed": ["hook auto-install", "commit", "push", "merge"],
         "safe_next_action": "Run governance validator sample check.",
     }
-    write_json(repo_root / REPORT_ROOT / "phase3_governance_enforcement.json", payload)
+    write_json(repo_root / report_root / "phase3_governance_enforcement.json", payload)
     write_markdown(
-        repo_root / REPORT_ROOT / "PHASE3_GOVERNANCE_ENFORCEMENT.md",
+        repo_root / report_root / "PHASE3_GOVERNANCE_ENFORCEMENT.md",
         "Phase 3 Governance Enforcement",
         {
             "SUMMARY": "Governance enforcement is implemented as local validator, opt-in hook template, and minimal CI workflow.",
@@ -244,16 +246,16 @@ def phase3(repo_root: Path) -> dict[str, object]:
     return payload
 
 
-def phase4(repo_root: Path, now: str, phase0_payload: dict[str, object]) -> dict[str, object]:
+def phase4(repo_root: Path, now: str, phase0_payload: dict[str, object], report_root: Path) -> dict[str, object]:
     recommendations = build_recommendations(now, phase0_payload)
     payload = {
         "inspector": "automation/self_build/aios_self_build_inspector.py",
         "recommendations": [recommendation.to_dict() for recommendation in recommendations],
         "safe_next_action": "Review recommendations; do not execute them automatically.",
     }
-    write_json(repo_root / REPORT_ROOT / "phase4_self_build_inspection.json", payload)
+    write_json(repo_root / report_root / "phase4_self_build_inspection.json", payload)
     write_markdown(
-        repo_root / REPORT_ROOT / "PHASE4_SELF_BUILD_INSPECTION.md",
+        repo_root / report_root / "PHASE4_SELF_BUILD_INSPECTION.md",
         "Phase 4 Self-Build Inspection",
         {
             "SUMMARY": "Self-build inspector recommends bounded future packets without executing them.",
@@ -264,7 +266,12 @@ def phase4(repo_root: Path, now: str, phase0_payload: dict[str, object]) -> dict
     return payload
 
 
-def write_consolidated(repo_root: Path, before_status: str, phase_payloads: dict[str, dict[str, object]]) -> dict[str, object]:
+def write_consolidated(
+    repo_root: Path,
+    before_status: str,
+    phase_payloads: dict[str, dict[str, object]],
+    report_root: Path,
+) -> dict[str, object]:
     after = capture_repo_snapshot(repo_root)
     changed = after.dirty_files
     payload = {
@@ -303,9 +310,9 @@ def write_consolidated(repo_root: Path, before_status: str, phase_payloads: dict
         "status": "COMPLETE_NO_COMMIT_NO_PUSH",
         "phase_payloads": phase_payloads,
     }
-    write_json(repo_root / REPORT_ROOT / "AIOS_PHASE_0_TO_4_BRIDGE_RESULT.json", payload)
+    write_json(repo_root / report_root / "AIOS_PHASE_0_TO_4_BRIDGE_RESULT.json", payload)
     write_markdown(
-        repo_root / REPORT_ROOT / "AIOS_PHASE_0_TO_4_BRIDGE_RESULT.md",
+        repo_root / report_root / "AIOS_PHASE_0_TO_4_BRIDGE_RESULT.md",
         "AIOS Phase 0 To 4 Bridge Result",
         {
             "SUMMARY": "Bridge infrastructure generated as evidence and subordinate code. No commit or push performed.",
@@ -333,9 +340,15 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Generate AI_OS Phase 0 to 4 bridge evidence.")
     parser.add_argument("--mode", choices=["DRY_RUN", "APPLY"], default="DRY_RUN")
     parser.add_argument("--repo-root", default=".")
+    parser.add_argument("--output-root", default=str(DEFAULT_REPORT_ROOT))
+    parser.add_argument("--telemetry-output-root", default=str(DEFAULT_TELEMETRY_OUTPUT_ROOT))
+    parser.add_argument("--approval-output-root", default=str(DEFAULT_APPROVAL_OUTPUT_ROOT))
     parser.add_argument("--approval-check")
     args = parser.parse_args()
     repo_root = Path(args.repo_root).resolve()
+    report_root = Path(args.output_root)
+    telemetry_output_root = Path(args.telemetry_output_root)
+    approval_output_root = Path(args.approval_output_root)
     before = capture_repo_snapshot(repo_root)
     if args.approval_check:
         record = ApprovalRecord.from_dict(json.loads(Path(args.approval_check).read_text(encoding="utf-8")))
@@ -347,13 +360,13 @@ def main() -> int:
     tracked = list_git_files(repo_root)
     now = utc_now()
     phase_payloads: dict[str, dict[str, object]] = {}
-    phase_payloads["phase0"] = phase0(repo_root, before.git_status_short)
-    phase_payloads["phase1"] = phase1(repo_root, tracked)
-    phase_payloads["phase2"] = phase2(repo_root, now)
-    phase_payloads["phase3"] = phase3(repo_root)
-    phase_payloads["phase4"] = phase4(repo_root, now, phase_payloads["phase0"])
-    result = write_consolidated(repo_root, before.git_status_short, phase_payloads)
-    print(json.dumps({"status": result["status"], "report": str((repo_root / REPORT_ROOT).as_posix())}, indent=2))
+    phase_payloads["phase0"] = phase0(repo_root, before.git_status_short, report_root)
+    phase_payloads["phase1"] = phase1(repo_root, tracked, report_root, telemetry_output_root)
+    phase_payloads["phase2"] = phase2(repo_root, now, report_root, approval_output_root)
+    phase_payloads["phase3"] = phase3(repo_root, report_root)
+    phase_payloads["phase4"] = phase4(repo_root, now, phase_payloads["phase0"], report_root)
+    result = write_consolidated(repo_root, before.git_status_short, phase_payloads, report_root)
+    print(json.dumps({"status": result["status"], "report": str((repo_root / report_root).as_posix())}, indent=2))
     return 0
 
 
