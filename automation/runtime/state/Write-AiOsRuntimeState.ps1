@@ -23,7 +23,13 @@ $state = [ordered]@{
     safety = "repo_scoped_only_no_live_trading_no_secrets_no_broker"
 }
 
-$state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $statePath -Encoding UTF8
+$stateDir = Split-Path -Parent $statePath
+if (-not [string]::IsNullOrWhiteSpace($stateDir) -and -not (Test-Path -LiteralPath $stateDir -PathType Container)) {
+    New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+}
+$tmpStatePath = "{0}.{1}.tmp" -f $statePath, ([guid]::NewGuid().ToString("N"))
+$state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $tmpStatePath -Encoding UTF8
+Move-Item -LiteralPath $tmpStatePath -Destination $statePath -Force
 
 if ($QuietJson) {
     $state | ConvertTo-Json -Depth 8

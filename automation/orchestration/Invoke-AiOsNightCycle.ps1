@@ -36,12 +36,14 @@ $globalStopRel = "control/self_continuation/STOP"
 $script:AiOsNextIntervalSeconds = $IntervalSeconds
 $script:AiOsCycleId = [guid]::NewGuid().ToString()
 $script:AiOsCompletedCycleCount = 0
-$script:AiOsResumeActive = [string]::IsNullOrWhiteSpace($ResumeFrom)
+$script:AiOsResumeFrom = $ResumeFrom
+$script:AiOsResumeActive = [string]::IsNullOrWhiteSpace($script:AiOsResumeFrom)
 $script:AiOsRequestedApply = [bool]$Apply
 $script:AiOsEffectiveApply = $false
 $script:AiOsMode = "UNRESOLVED"
 $script:AiOsModeReason = ""
 $script:AiOsObserveOnly = $null
+$script:AiOsRestartMarkerStaleAfterSeconds = 86400
 $script:AiOsPhaseNames = @(
     "hygiene",
     "clear-stale-approvals",
@@ -81,6 +83,32 @@ function Read-CycleMarker {
     }
     try {
         return Get-Content -Raw -LiteralPath $cycleMarkerPath | ConvertFrom-Json
+    } catch {
+        throw "BLOCKED_RESTART_MARKER_CORRUPT path=$cycleMarkerPath error=$($_.Exception.Message)"
+    }
+}
+
+function Get-AiOsRestartMarkerAgeSeconds {
+    param(
+        [Parameter(Mandatory = $true)]
+        [object]$Marker
+    )
+
+    $names = @($Marker.PSObject.Properties.Name)
+    $stampText = $null
+    foreach ($name in @("updated_at_utc", "started_at_utc", "started_at")) {
+        if ($names -contains $name -and -not [string]::IsNullOrWhiteSpace([string]$Marker.$name)) {
+            $stampText = [string]$Marker.$name
+            break
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($stampText)) {
+        return $null
+    }
+
+    try {
+        $stamp = [datetime]::Parse($stampText).ToUniversalTime()
+        return [int]([datetime]::UtcNow - $stamp).TotalSeconds
     } catch {
         return $null
     }
@@ -170,7 +198,7 @@ function Write-CycleMarker {
         mode = $script:AiOsMode
         mode_reason = $script:AiOsModeReason
         observe_only = $script:AiOsObserveOnly
-        resume_from = $ResumeFrom
+        resume_from = $script:AiOsResumeFrom
         phases = @($script:AiOsPhaseNames | ForEach-Object { [ordered]@{ name = $_ } })
         completed_phases = @($completed)
         skipped_phases = @($skipped)
@@ -212,12 +240,12 @@ function Test-AiOsResumeSkip {
     if ($script:AiOsResumeActive) {
         return $false
     }
-    if ($Name -eq $ResumeFrom) {
+    if ($Name -eq $script:AiOsResumeFrom) {
         $script:AiOsResumeActive = $true
         return $false
     }
-    Write-AiOsNightCycleLog -Message ("RESUME SKIP phase={0} waiting_for={1}" -f $Name, $ResumeFrom)
-    Write-CycleMarker -Phase $Name -State "SKIPPED" -Reason ("RESUME_WAITING_FOR:{0}" -f $ResumeFrom)
+    Write-AiOsNightCycleLog -Message ("RESUME SKIP phase={0} waiting_for={1}" -f $Name, $script:AiOsResumeFrom)
+    Write-CycleMarker -Phase $Name -State "SKIPPED" -Reason ("RESUME_WAITING_FOR:{0}" -f $script:AiOsResumeFrom)
     return $true
 }
 
@@ -370,6 +398,63 @@ function Invoke-AiOsNightCycleOnce {
     Write-CycleMarker -State "CYCLE_COMPLETE"
     Update-AiOsDashboardState
 }
+
+function Resolve-AiOsCrashRecovery {
+    if (-not [string]::IsNullOrWhiteSpace($script:AiOsResumeFrom)) {
+        return
+    }
+
+    $recoverMarker = Read-CycleMarker
+    if ($null -eq $recoverMarker) {
+        return
+    }
+
+    $recoverNames = @($recoverMarker.PSObject.Properties.Name)
+    $inProgress = ($recoverNames -contains "cycle_in_progress" -and [bool]$recoverMarker.cycle_in_progress)
+    if (-not $inProgress) {
+        return
+    }
+    if ($recoverNames -contains "phase_state" -and [string]$recoverMarker.phase_state -eq "WAITING_FOR_APPROVAL") {
+        throw "BLOCKED_RESTART_WAITING_FOR_APPROVAL cycle_id=$($recoverMarker.cycle_id)"
+    }
+
+    $markerAgeSeconds = Get-AiOsRestartMarkerAgeSeconds -Marker $recoverMarker
+    if ($null -ne $markerAgeSeconds -and $markerAgeSeconds -gt $script:AiOsRestartMarkerStaleAfterSeconds) {
+        throw "BLOCKED_RESTART_MARKER_STALE cycle_id=$($recoverMarker.cycle_id) age_seconds=$markerAgeSeconds"
+    }
+
+    $priorCompleted = @()
+    if ($recoverNames -contains "completed_phases" -and $null -ne $recoverMarker.completed_phases) {
+        $priorCompleted = @($recoverMarker.completed_phases | ForEach-Object { [string]$_ })
+    }
+    if ($priorCompleted.Count -eq 0) {
+        if ($recoverNames -contains "cycle_id" -and -not [string]::IsNullOrWhiteSpace([string]$recoverMarker.cycle_id)) {
+            $script:AiOsCycleId = [string]$recoverMarker.cycle_id
+        }
+        Write-AiOsNightCycleLog -Message ("CRASH_RECOVERY running_marker_no_completed_phases cycle_id={0}" -f $script:AiOsCycleId)
+        return
+    }
+
+    $firstIncomplete = $null
+    foreach ($phaseName in $script:AiOsPhaseNames) {
+        if ($priorCompleted -notcontains $phaseName) {
+            $firstIncomplete = $phaseName
+            break
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($firstIncomplete)) {
+        throw "IN_PROGRESS_MARKER_ALL_PHASES_COMPLETE cycle_id=$($recoverMarker.cycle_id)"
+    }
+
+    $script:AiOsResumeFrom = $firstIncomplete
+    $script:AiOsResumeActive = $false
+    if ($recoverNames -contains "cycle_id" -and -not [string]::IsNullOrWhiteSpace([string]$recoverMarker.cycle_id)) {
+        $script:AiOsCycleId = [string]$recoverMarker.cycle_id
+    }
+    Write-AiOsNightCycleLog -Message ("CRASH_RECOVERY resume_from={0} cycle_id={1} completed_phases={2}" -f $script:AiOsResumeFrom, $script:AiOsCycleId, ($priorCompleted -join ','))
+}
+
+Resolve-AiOsCrashRecovery
 
 do {
     Stop-AiOsNightCycleIfRequested

@@ -18,7 +18,12 @@ jobs:
         run: |
           python -m py_compile automation/bridge/aios_phase_bridge.py
           python -m py_compile automation/validators/aios_governance_validator.py
+          python -m py_compile automation/validators/aios_generated_output_policy_validator.py
+          python -m py_compile automation/validators/aios_restart_safety_validator.py
           python -m py_compile automation/self_build/aios_self_build_inspector.py
       - name: Run governance validator sample
         run: python automation/validators/aios_governance_validator.py --sample-check
-
+      - name: Run generated-output policy validator sample
+        run: python automation/validators/aios_generated_output_policy_validator.py --sample-check --repo-root .
+      - name: Run restart safety validator sample
+        run: python automation/validators/aios_restart_safety_validator.py --sample-check --repo-root .
