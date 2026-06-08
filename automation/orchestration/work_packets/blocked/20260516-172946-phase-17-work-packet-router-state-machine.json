@@ -6,14 +6,14 @@
     "assigned_worker":  "codex_worker_1",
     "repo":  "Ai.Os",
     "branch":  "phase-17-work-packet-router-state-machine",
-    "status":  "awaiting_approval",
+    "status":  "blocked",
     "priority":  "normal",
     "created_utc":  "2026-05-16T17:29:46Z",
-    "updated_utc":  "2026-05-16T18:02:07Z",
+    "updated_utc":  "2026-06-08T20:40:55Z",
     "validator":  "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1",
     "next_action":  "Build Move-AiOsPacketState.ps1 lifecycle engine.",
     "blocked_by":  [
-
+                       "APPLY approval gate pending_review; approved_mode DRY_RUN_ONLY; approved_by_human false"
                    ],
     "related_files":  [
 
@@ -24,6 +24,7 @@
     "notes":  [
 
               ],
+    "state_note":  "Blocked from active queue cleanup because APPLY is not currently approved and router-state-machine work already exists.",
     "history":  [
                     {
                         "from_state":  "active",
@@ -45,6 +46,12 @@
                         "utc":  "2026-05-16T18:02:07Z",
                         "worker":  "supervisor_loop",
                         "apply":  true
+                    },
+                    {
+                        "from_state":  "active/awaiting_approval",
+                        "to_state":  "blocked",
+                        "reason":  "Queue cleanup reclassification after dispatcher cockpit merge and approval-gate review.",
+                        "timestamp_utc":  "2026-06-08T20:40:55Z"
                     }
                 ]
 }

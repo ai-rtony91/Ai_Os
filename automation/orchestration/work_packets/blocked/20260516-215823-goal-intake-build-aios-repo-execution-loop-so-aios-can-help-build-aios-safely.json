@@ -6,14 +6,14 @@
     "assigned_worker":  "dispatcher",
     "repo":  "Ai.Os",
     "branch":  "phase-67-aios-goal-intake-runner",
-    "status":  "active",
+    "status":  "blocked",
     "priority":  "normal",
     "created_utc":  "2026-05-16T21:58:23Z",
-    "updated_utc":  "2026-05-16T21:58:23Z",
+    "updated_utc":  "2026-06-08T20:40:55Z",
     "validator":  "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1",
     "next_action":  "Plan and execute next repo-scoped step for: Build AIOS repo execution loop so AIOS can help build AIOS safely",
     "blocked_by":  [
-
+                       "Stale broad May 16 active packet; review required before any worker launch"
                    ],
     "related_files":  [
 
@@ -23,5 +23,15 @@
                         ],
     "notes":  [
 
-              ]
+              ],
+    "state_note":  "Likely superseded by merged dispatcher PRs #450, #452, #453, #454, and #455.",
+    "superseded_by":  "dispatcher PRs #450, #452, #453, #454, #455",
+    "history":  [
+                    {
+                        "from_state":  "active",
+                        "to_state":  "blocked",
+                        "reason":  "Queue cleanup reclassification because packet is stale, broad, and unsafe as a launch source.",
+                        "timestamp_utc":  "2026-06-08T20:40:55Z"
+                    }
+                ]
 }
