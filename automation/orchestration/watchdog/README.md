@@ -6,8 +6,9 @@ nothing fires and the operator is never woken.**
 
 ## What it does
 
-- Reads the runtime heartbeat (`telemetry/runtime/runtime_heartbeat.json`) and
-  parses its timestamp (`heartbeatAt` / `last_beat` / etc.).
+- Reads the runtime heartbeat (`telemetry/runtime/runtime_heartbeat.json`) emitted
+  by `automation/orchestration/Invoke-AiOsNightCycle.ps1` and parses its
+  timestamp (`heartbeatAt` / `last_beat` / etc.).
 - Computes staleness against a threshold (default **600s / 10 min**).
 - If the heartbeat is **missing, unreadable, or older than the threshold**, it
   classifies the situation as `BLOCKED` — the loop is presumed **dead** — and
@@ -39,6 +40,35 @@ The `--apply` flag is **reserved for future live delivery**. In this version,
 even with `--apply`, it still only writes the alert file and prints
 `LIVE_DELIVERY_NOT_ARMED: wire an SOS channel first`. **It does not send.**
 Wiring an actual SOS channel + scheduler registration is a deliberate later tier.
+
+## Runtime heartbeat contract
+
+The night-cycle loop writes `telemetry/runtime/runtime_heartbeat.json` with:
+
+- `heartbeatAt`
+- `last_beat`
+- `cycle_id`
+- `phase_name`
+- `pid`
+- `mode`
+- `effective_apply`
+- `observe_only`
+- `updated_at_utc`
+
+The heartbeat is local runtime evidence only. It is written with temp-file then
+rename behavior using a collision-safe GUID suffix. It is not approval evidence
+and does not authorize APPLY, restart, commit, push, merge, live sends, scheduler
+registration, broker access, or live trading.
+
+## Restart boundary
+
+The watchdog remains detect-only. It does not restart the night cycle. Any future
+restart supervisor must be manually launched, default to DRY_RUN, require an
+explicit arming flag for actual restart, honor `control/self_continuation/STOP`,
+and preserve the existing approval gates inside the night cycle.
+
+No scheduler, service, startup task, cron, systemd unit, Task Scheduler entry, or
+live notification channel is registered by this watchdog.
 
 ## How to run (DRY_RUN)
 

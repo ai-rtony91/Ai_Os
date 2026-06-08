@@ -24,8 +24,14 @@ $state = [ordered]@{
 }
 
 # Atomic write (temp + rename): a crash mid-write must not leave a truncated
-# state file that crashes the next reader. Mirrors the cycle-marker pattern.
-$tmpStatePath = $statePath + ".tmp"
+# state file that crashes the next reader. The GUID suffix avoids collisions
+# when two local readers/writers happen to overlap.
+$stateDir = Split-Path -Parent $statePath
+if (-not [string]::IsNullOrWhiteSpace($stateDir) -and -not (Test-Path -LiteralPath $stateDir -PathType Container)) {
+    New-Item -ItemType Directory -Path $stateDir -Force | Out-Null
+}
+$stateLeaf = Split-Path -Leaf $statePath
+$tmpStatePath = Join-Path $stateDir (".{0}.{1}.tmp" -f $stateLeaf, [guid]::NewGuid().ToString("N"))
 $state | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $tmpStatePath -Encoding UTF8
 Move-Item -LiteralPath $tmpStatePath -Destination $statePath -Force
 

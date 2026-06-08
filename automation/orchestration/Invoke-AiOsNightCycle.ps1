@@ -21,7 +21,9 @@ param(
     [ValidateRange(5, 86400)]
     [int]$IntervalSeconds = 300,
     [ValidateRange(1, 1000000)]
-    [int]$MaxCycles = 0
+    [int]$MaxCycles = 0,
+    [ValidateRange(60, 604800)]
+    [int]$RestartMarkerMaxAgeSeconds = 172800
 )
 
 Set-StrictMode -Version Latest
@@ -31,6 +33,7 @@ $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..\..")).Path
 $relayRoot = Join-Path $repoRoot "relay"
 $logPath = Join-Path $relayRoot "logs\night_cycle.log"
 $cycleMarkerPath = Join-Path $repoRoot "control\cycle\last_marker.json"
+$runtimeHeartbeatPath = Join-Path $repoRoot "telemetry\runtime\runtime_heartbeat.json"
 $globalStopPath = Join-Path $repoRoot "control\self_continuation\STOP"
 $globalStopRel = "control/self_continuation/STOP"
 $script:AiOsNextIntervalSeconds = $IntervalSeconds
@@ -76,14 +79,65 @@ function Write-AiOsNightCycleLog {
 }
 
 function Read-CycleMarker {
+    param([switch]$FailClosed)
+
     if (-not (Test-Path -LiteralPath $cycleMarkerPath -PathType Leaf)) {
         return $null
     }
     try {
         return Get-Content -Raw -LiteralPath $cycleMarkerPath | ConvertFrom-Json
     } catch {
+        if ($FailClosed) {
+            throw "AIOS_RESTART_MARKER_BLOCKED reason=cycle_marker_unreadable_or_malformed path=$cycleMarkerPath"
+        }
         return $null
     }
+}
+
+function Write-AiOsJsonAtomic {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)]$Data,
+        [int]$Depth = 10
+    )
+
+    $targetDir = Split-Path -Parent $Path
+    if (-not (Test-Path -LiteralPath $targetDir -PathType Container)) {
+        New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+    }
+    $leaf = Split-Path -Leaf $Path
+    $tmpPath = Join-Path $targetDir (".{0}.{1}.tmp" -f $leaf, [guid]::NewGuid().ToString("N"))
+    try {
+        Set-Content -LiteralPath $tmpPath -Value (($Data | ConvertTo-Json -Depth $Depth) + "`n") -Encoding UTF8
+        Move-Item -LiteralPath $tmpPath -Destination $Path -Force
+    } catch {
+        if (Test-Path -LiteralPath $tmpPath -PathType Leaf) {
+            Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue
+        }
+        throw
+    }
+}
+
+function Write-AiOsRuntimeHeartbeat {
+    param(
+        [string]$Phase = "",
+        [string]$State = ""
+    )
+
+    $now = Get-AiOsUtc
+    $heartbeat = [ordered]@{
+        heartbeatAt = $now
+        last_beat = $now
+        cycle_id = $script:AiOsCycleId
+        phase_name = $Phase
+        phase_state = $State
+        pid = $PID
+        mode = $script:AiOsMode
+        effective_apply = $script:AiOsEffectiveApply
+        observe_only = $script:AiOsObserveOnly
+        updated_at_utc = $now
+    }
+    Write-AiOsJsonAtomic -Path $runtimeHeartbeatPath -Data $heartbeat -Depth 8
 }
 
 function Set-AiOsMarkerModeContext {
@@ -177,13 +231,9 @@ function Write-CycleMarker {
         phase_results = @($phaseResults)
     }
 
-    $markerDir = Split-Path -Parent $cycleMarkerPath
-    if (-not (Test-Path -LiteralPath $markerDir -PathType Container)) {
-        New-Item -ItemType Directory -Path $markerDir -Force | Out-Null
-    }
-    $tmpPath = $cycleMarkerPath + ".tmp"
-    Set-Content -LiteralPath $tmpPath -Value (($marker | ConvertTo-Json -Depth 10) + "`n") -Encoding UTF8
-    Move-Item -LiteralPath $tmpPath -Destination $cycleMarkerPath -Force
+    Write-AiOsJsonAtomic -Path $cycleMarkerPath -Data $marker -Depth 10
+    $heartbeatPhase = if ([string]::IsNullOrWhiteSpace($Phase) -and $State -eq "CYCLE_COMPLETE") { "cycle" } else { $Phase }
+    Write-AiOsRuntimeHeartbeat -Phase $heartbeatPhase -State $State
 }
 
 function Update-AiOsDashboardState {
@@ -316,6 +366,7 @@ function Invoke-AiOsNightCycleOnce {
         throw "Approval resume APPLY script missing: $resume"
     }
 
+    Write-AiOsRuntimeHeartbeat -Phase "cycle" -State "STARTED"
     Write-AiOsNightCycleLog -Message ("CYCLE START mode={0} apply={1} observe_only={2}" -f $mode.mode, [bool]$effectiveApply, [bool]$observeOnly)
     if ($observeOnly) {
         Complete-AiOsSkippedPhase -Number 1 -Name "clear-stale-approvals" -Reason "DAY_OBSERVER"
@@ -380,7 +431,7 @@ function Resolve-AiOsCrashRecovery {
         return
     }
 
-    $recoverMarker = Read-CycleMarker
+    $recoverMarker = Read-CycleMarker -FailClosed
     if ($null -eq $recoverMarker) {
         return
     }
@@ -389,6 +440,31 @@ function Resolve-AiOsCrashRecovery {
     $inProgress = ($recoverNames -contains "cycle_in_progress" -and [bool]$recoverMarker.cycle_in_progress)
     if (-not $inProgress) {
         return
+    }
+
+    $markerJson = $recoverMarker | ConvertTo-Json -Depth 20 -Compress
+    if ($markerJson -match "(?i)WAITING_FOR_APPROVAL|WAITING_APPROVAL|awaiting_approval|pending_approval") {
+        throw "AIOS_RESTART_MARKER_BLOCKED reason=approval_wait_state_detected path=$cycleMarkerPath"
+    }
+
+    $markerTimestamp = $null
+    foreach ($field in @("updated_at_utc", "started_at")) {
+        if ($recoverNames -contains $field -and -not [string]::IsNullOrWhiteSpace([string]$recoverMarker.$field)) {
+            try {
+                $candidate = [datetime]::Parse([string]$recoverMarker.$field).ToUniversalTime()
+                $markerTimestamp = $candidate
+                break
+            } catch {
+                throw "AIOS_RESTART_MARKER_BLOCKED reason=cycle_marker_timestamp_unparseable field=$field path=$cycleMarkerPath"
+            }
+        }
+    }
+    if ($null -eq $markerTimestamp) {
+        throw "AIOS_RESTART_MARKER_BLOCKED reason=cycle_marker_timestamp_missing threshold_seconds=$RestartMarkerMaxAgeSeconds path=$cycleMarkerPath"
+    }
+    $markerAgeSeconds = ((Get-Date).ToUniversalTime() - $markerTimestamp).TotalSeconds
+    if ($markerAgeSeconds -gt $RestartMarkerMaxAgeSeconds) {
+        throw "AIOS_RESTART_MARKER_BLOCKED reason=cycle_marker_stale age_seconds=$([math]::Round($markerAgeSeconds, 3)) threshold_seconds=$RestartMarkerMaxAgeSeconds path=$cycleMarkerPath"
     }
 
     $priorCompleted = @()
@@ -408,6 +484,9 @@ function Resolve-AiOsCrashRecovery {
     }
     if ([string]::IsNullOrWhiteSpace($firstIncomplete)) {
         return
+    }
+    if ($firstIncomplete -in @("approval-resume", "relay-runner-resume-drain")) {
+        throw "AIOS_RESTART_MARKER_BLOCKED reason=approval_sensitive_resume_phase phase=$firstIncomplete path=$cycleMarkerPath"
     }
 
     $script:ResumeFrom = $firstIncomplete
