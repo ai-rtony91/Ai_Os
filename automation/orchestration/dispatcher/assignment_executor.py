@@ -3,10 +3,16 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from automation.validators.aios_approval_authority_integrity_validator import validate_approval_gate
 
 
 STATUSES = {
@@ -465,6 +471,11 @@ def summarize_state(state: dict[str, Any]) -> dict[str, Any]:
         lock_contract = "REVIEW_REQUIRED"
     approval_contract = "EVIDENCE_ONLY" if state["approval_inbox"]["status"] == "PRESENT" else state["approval_inbox"]["status"]
     worker_inbox_status = state["worker_inbox"]["status"]
+    approval_gate_integrity = (
+        validate_approval_gate(apply_payload).to_dict()
+        if isinstance(apply_payload, dict)
+        else {"status": state["apply_gate"]["status"], "hardened_approval_verified": False}
+    )
     return {
         "worker_state": {
             "surface_status": state["worker_registry"]["status"],
@@ -492,11 +503,8 @@ def summarize_state(state: dict[str, Any]) -> dict[str, Any]:
             "apply_gate_status": apply_status or state["apply_gate"]["status"],
             "approval_contract": _contract_status(approval_contract),
             "apply_gate_contract": "EVIDENCE_ONLY" if state["apply_gate"]["status"] == "PRESENT" else state["apply_gate"]["status"],
-            "future_apply_approved": bool(
-                isinstance(apply_payload, dict)
-                and apply_payload.get("approval_status") == "approved_for_apply"
-                and apply_payload.get("approved_by_human") is True
-            ),
+            "future_apply_approved": bool(approval_gate_integrity.get("hardened_approval_verified") is True),
+            "approval_gate_integrity": approval_gate_integrity,
             "authority_note": "Completed authority-repair records are evidence only, not future APPLY approval.",
         },
         "pr_backlog_state": state["pr_backlog"],

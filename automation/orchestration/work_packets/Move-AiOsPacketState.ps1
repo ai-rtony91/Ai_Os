@@ -41,6 +41,17 @@ function Test-AiOsTruthy {
     return ($Value -eq $true -or [string]$Value -match "^(?i:true|yes|approved|approved_for_apply|apply_approved)$")
 }
 
+function Test-AiOsMidnightPlaceholder {
+    param([string]$Value)
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return $false
+    }
+    if ($Value -eq "2026-06-08T00:00:00Z" -or $Value -eq "2026-06-02T00:00:00Z") {
+        return $true
+    }
+    return ($Value -match "T00:00:00Z$")
+}
+
 function Get-AiOsPacketField {
     param(
         [object]$Packet,
@@ -95,11 +106,26 @@ function Assert-AiOsApplyGate {
     $approvalRequired = Get-AiOsPacketField -Packet $Packet -Names @("approval_required", "requiresApproval")
     $approvedByHuman = Get-AiOsPacketField -Packet $Packet -Names @("approved_by_human", "human_approved")
     $approvalStatus = [string](Get-AiOsPacketField -Packet $Packet -Names @("approval_status", "approval_state", "approval"))
+    $approvalEvidenceStatus = [string](Get-AiOsPacketField -Packet $Packet -Names @("approval_evidence_status", "hardened_approval_status"))
+    $approvalEvidenceType = [string](Get-AiOsPacketField -Packet $Packet -Names @("approval_evidence_type", "hardened_approval_type"))
+    $approvalHmac = [string](Get-AiOsPacketField -Packet $Packet -Names @("approval_hmac_sha256", "hardened_approval_hmac_sha256"))
+    $approvalTimestamp = [string](Get-AiOsPacketField -Packet $Packet -Names @("approval_timestamp_utc", "approval_timestamp", "bound_at"))
+    $hasHardenedEvidence = (
+        $approvalEvidenceStatus -eq "VERIFIED" -and
+        $approvalEvidenceType -eq "HMAC_SHA256" -and
+        -not [string]::IsNullOrWhiteSpace($approvalHmac) -and
+        -not [string]::IsNullOrWhiteSpace($approvalTimestamp) -and
+        -not (Test-AiOsMidnightPlaceholder -Value $approvalTimestamp)
+    )
 
     if (($approvalRequired -eq $true -or $TargetState -in @("applying", "validated", "complete")) -and
         -not (Test-AiOsTruthy -Value $approvedByHuman) -and
         $approvalStatus -notin $approvedStatuses) {
         throw "APPLY blocked: packet lacks human approval for protected transition $CurrentState -> $TargetState."
+    }
+
+    if ($TargetState -in @("applying", "validated", "complete") -and -not $hasHardenedEvidence) {
+        throw "APPLY blocked: protected transition $CurrentState -> $TargetState requires hardened Human Owner approval evidence; raw approved_by_human is not sufficient."
     }
 
     if ($TargetState -in @("validated", "complete")) {

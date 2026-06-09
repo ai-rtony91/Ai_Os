@@ -1,13 +1,21 @@
 {
   "approval_gate_id": "APPLY_APPROVAL_GATE_001",
   "packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
-  "bound_by": "Anthony explicit approval gate update",
-  "bound_at": "2026-06-08T00:00:00Z",
+  "bound_by": "REMEDIATED_BY_PACKET1_APPROVAL_AUTHORITY_HARDENING",
+  "bound_at": "",
   "requested_mode": "APPLY",
-  "approved_mode": "APPLY",
-  "approval_status": "approved_for_apply",
-  "approved_by_human": true,
-  "approval_timestamp_placeholder": "2026-06-08T00:00:00Z",
+  "approved_mode": "DRY_RUN_ONLY",
+  "approval_status": "pending_review",
+  "approved_by_human": false,
+  "approval_timestamp_placeholder": "",
+  "approval_timestamp_utc": "",
+  "approval_evidence": {
+    "type": "MISSING",
+    "status": "REQUIRED_FOR_APPLY",
+    "canonical_payload": "packet_id + allowed_paths + blocked_paths + approval_timestamp_utc + validator_chain + approval_nonce",
+    "approval_hmac_sha256": "",
+    "approval_nonce": ""
+  },
   "risk_level": "medium",
   "allowed_paths": [
     "tests/orchestration/",
@@ -60,6 +68,9 @@
   "commit_package_required": true,
   "push_blocked_until_final_review": true,
   "notes": [
+    "Packet 1 remediation: previous #460 approval gate state is no longer live APPLY authority.",
+    "Future APPLY approval requires hardened out-of-band Human Owner evidence; raw approved_by_human=true is not sufficient.",
+    "HMAC key material must come from the Human Owner environment only and must never be tracked or printed.",
     "Gate authorizes only the exact heartbeat-only DRY_RUN proof harness protected PR lane.",
     "This gate does not authorize scheduler activation, armed supervisor behavior, worker launch, live sends, broker/OANDA/live trading/webhook/credential behavior, broad APPLY, or GitHub workflow edits.",
     "This gate does not implement the heartbeat harness.",
