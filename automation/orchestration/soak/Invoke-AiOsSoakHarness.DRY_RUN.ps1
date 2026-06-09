@@ -74,6 +74,45 @@ function Assert-WritableRoot {
     }
 }
 
+function New-StatusSummary {
+    return [ordered]@{
+        PASS = 0
+        STOPPED = 0
+        FAILED = 0
+        BLOCKED = 0
+    }
+}
+
+function Increment-StatusSummary {
+    param(
+        [Parameter(Mandatory = $true)] $Summary,
+        [Parameter(Mandatory = $true)][string]$Status
+    )
+
+    if (-not $Summary.Contains($Status)) {
+        $Summary[$Status] = 0
+    }
+    $Summary[$Status] = [int]$Summary[$Status] + 1
+}
+
+function Get-SampleStatus {
+    param(
+        [Parameter(Mandatory = $true)] $Sample,
+        [Parameter(Mandatory = $true)][string]$RunStatus
+    )
+
+    if ($RunStatus -eq "STOPPED") {
+        return "STOPPED"
+    }
+    if ($Sample.stop_marker_detected) {
+        return "STOPPED"
+    }
+    if ($RunStatus -in @("FAILED", "BLOCKED")) {
+        return $RunStatus
+    }
+    return "PASS"
+}
+
 function Write-AiOsJsonAtomic {
     param(
         [Parameter(Mandatory = $true)] $Data,
@@ -150,6 +189,7 @@ function Invoke-AiOsSoakHarnessFinalize {
         max_cycles = $Evidence.max_cycles
         interval_seconds = $Evidence.interval_seconds
         run_timeout_seconds = $Evidence.run_timeout_seconds
+        status_summary = $Evidence.status_summary
         samples = @($Evidence.samples)
         sample_count = $Evidence.sample_count
         forbidden_actions_confirmed = $Evidence.forbidden_actions_confirmed
@@ -179,6 +219,7 @@ $results = [ordered]@{
     run_timeout_seconds = $RunTimeoutSeconds
     samples = @()
     sample_count = 0
+    status_summary = New-StatusSummary
     forbidden_actions_confirmed = [ordered]@{
         scheduler_registration = $true
         worker_launch = $true
@@ -277,6 +318,14 @@ try {
     if ($results.samples.Count -eq 0 -and $results.reasons.Count -eq 0) {
         $results.status = "FAILED"
         $results.reasons += "No evidence samples were produced."
+    }
+
+    $results.sample_count = $results.samples.Count
+    $results.status_summary = New-StatusSummary
+    foreach ($sample in $results.samples) {
+        $sampleStatus = Get-SampleStatus -Sample $sample -RunStatus $results.status
+        Increment-StatusSummary -Summary $results.status_summary -Status $sampleStatus
+        $sample | Add-Member -NotePropertyName "sample_status" -NotePropertyValue $sampleStatus -Force
     }
 } catch {
     $results.status = "BLOCKED"

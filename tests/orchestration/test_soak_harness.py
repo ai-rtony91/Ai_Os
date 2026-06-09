@@ -74,6 +74,16 @@ def test_harness_does_not_mutate_marker_or_runtime_files() -> None:
     assert "telemetry/runtime/runtime_heartbeat.json" not in text
 
 
+def test_harness_emits_status_summary_field() -> None:
+    text = _read(INVOKE_SCRIPT)
+    assert "status_summary" in text
+
+
+def test_harness_records_sample_status_field() -> None:
+    text = _read(INVOKE_SCRIPT)
+    assert "sample_status" in text
+
+
 def test_harness_writes_only_to_soak_report_roots() -> None:
     text = _read(INVOKE_SCRIPT)
     assert "telemetry/soak" in text
