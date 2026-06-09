@@ -1,0 +1,800 @@
+{
+    "schema":  "AIOS_PACKET_FACTORY_VIEW.v1",
+    "system":  "AI_OS",
+    "mode":  "DRY_RUN",
+    "generated_at":  "2026-06-09T22:40:28Z",
+    "repo_root":  "C:\\Dev\\Ai.Os",
+    "source_readers":  [
+                           {
+                               "source":  "templates",
+                               "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\templates",
+                               "exists":  true,
+                               "records_seen":  2
+                           },
+                           {
+                               "source":  "proposed",
+                               "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed",
+                               "exists":  true,
+                               "records_seen":  8
+                           },
+                           {
+                               "source":  "active",
+                               "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\active",
+                               "exists":  true,
+                               "records_seen":  0
+                           },
+                           {
+                               "source":  "UNIFIED_QUEUE_INDEX.json",
+                               "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
+                               "exists":  true,
+                               "records_seen":  5,
+                               "data":  {
+                                            "schema":  "AIOS_UNIFIED_QUEUE_INDEX.v1",
+                                            "system":  "AI_OS",
+                                            "mode":  "DRY_RUN",
+                                            "generated_at_utc":  "2026-06-09T18:42:23.7582616Z",
+                                            "repo_root":  "C:\\Dev\\Ai.Os",
+                                            "packet_root":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets",
+                                            "scanned_folders":  [
+                                                                    "active",
+                                                                    "blocked",
+                                                                    "complete"
+                                                                ],
+                                            "packet_count":  5,
+                                            "normalized_state_order":  [
+                                                                           "QUEUED",
+                                                                           "RUNNING",
+                                                                           "BLOCKED",
+                                                                           "WAITING_APPROVAL",
+                                                                           "COMPLETE",
+                                                                           "FAILED",
+                                                                           "ARCHIVED"
+                                                                       ],
+                                            "normalized_state_counts":  {
+                                                                            "QUEUED":  1,
+                                                                            "RUNNING":  0,
+                                                                            "BLOCKED":  3,
+                                                                            "WAITING_APPROVAL":  0,
+                                                                            "COMPLETE":  1,
+                                                                            "FAILED":  0,
+                                                                            "ARCHIVED":  0
+                                                                        },
+                                            "source_state_counts":  {
+                                                                        "BLOCKED":  3,
+                                                                        "ACTIVE":  1,
+                                                                        "COMPLETE":  1
+                                                                    },
+                                            "mapping_table":  {
+                                                                  "ACTIVE":  "QUEUED",
+                                                                  "ASSIGNED":  "RUNNING",
+                                                                  "AWAITING_APPROVAL":  "WAITING_APPROVAL",
+                                                                  "APPROVAL_NEEDED":  "WAITING_APPROVAL",
+                                                                  "ARCHIVED":  "ARCHIVED",
+                                                                  "BLOCKED":  "BLOCKED",
+                                                                  "COMPLETE":  "COMPLETE",
+                                                                  "COMPLETED":  "COMPLETE",
+                                                                  "DONE":  "COMPLETE",
+                                                                  "ERROR":  "FAILED",
+                                                                  "EXPIRED":  "ARCHIVED",
+                                                                  "FAILED":  "FAILED",
+                                                                  "FAIL":  "FAILED",
+                                                                  "PENDING":  "QUEUED",
+                                                                  "PENDING_APPROVAL":  "WAITING_APPROVAL",
+                                                                  "PROPOSED":  "QUEUED",
+                                                                  "QUEUED":  "QUEUED",
+                                                                  "RUNNING":  "RUNNING",
+                                                                  "STALE":  "BLOCKED",
+                                                                  "VALIDATING":  "RUNNING",
+                                                                  "WAITING_APPROVAL":  "WAITING_APPROVAL",
+                                                                  "WAITING_REVIEW":  "WAITING_APPROVAL",
+                                                                  "NEEDS_APPROVAL":  "WAITING_APPROVAL"
+                                                              },
+                                            "unmapped_states":  [
+
+                                                                ],
+                                            "records":  [
+                                                            {
+                                                                "packet_id":  "control-git-status",
+                                                                "title":  "CONTROL Git Status Visibility",
+                                                                "owner_lane":  "main_control",
+                                                                "assigned_worker":  "",
+                                                                "folder_state":  "blocked",
+                                                                "packet_status":  "blocked",
+                                                                "source_state":  "blocked",
+                                                                "source_state_token":  "BLOCKED",
+                                                                "normalized_state":  "BLOCKED",
+                                                                "source_reason":  "",
+                                                                "source_state_origin":  "packet.status",
+                                                                "source_file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-064501-control-git-status.json"
+                                                            },
+                                                            {
+                                                                "packet_id":  "phase-17-work-packet-router-state-machine",
+                                                                "title":  "phase 17 work packet router state machine",
+                                                                "owner_lane":  "route_dispatch",
+                                                                "assigned_worker":  "codex_worker_1",
+                                                                "folder_state":  "blocked",
+                                                                "packet_status":  "blocked",
+                                                                "source_state":  "blocked",
+                                                                "source_state_token":  "BLOCKED",
+                                                                "normalized_state":  "BLOCKED",
+                                                                "source_reason":  "",
+                                                                "source_state_origin":  "packet.status",
+                                                                "source_file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-172946-phase-17-work-packet-router-state-machine.json"
+                                                            },
+                                                            {
+                                                                "packet_id":  "goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely",
+                                                                "title":  "Goal Intake - build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely",
+                                                                "owner_lane":  "goal_intake",
+                                                                "assigned_worker":  "dispatcher",
+                                                                "folder_state":  "blocked",
+                                                                "packet_status":  "blocked",
+                                                                "source_state":  "blocked",
+                                                                "source_state_token":  "BLOCKED",
+                                                                "normalized_state":  "BLOCKED",
+                                                                "source_reason":  "",
+                                                                "source_state_origin":  "packet.status",
+                                                                "source_file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-215823-goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely.json"
+                                                            },
+                                                            {
+                                                                "packet_id":  "brainstem-daily-start",
+                                                                "title":  "Brainstem Daily Start Route",
+                                                                "owner_lane":  "rulebook_codex",
+                                                                "assigned_worker":  "codex_worker_1",
+                                                                "folder_state":  "complete",
+                                                                "packet_status":  "active",
+                                                                "source_state":  "active",
+                                                                "source_state_token":  "ACTIVE",
+                                                                "normalized_state":  "QUEUED",
+                                                                "source_reason":  "",
+                                                                "source_state_origin":  "packet.status",
+                                                                "source_file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\complete\\20260516-064500-brainstem-daily-start.json"
+                                                            },
+                                                            {
+                                                                "packet_id":  "rulebook-foundation",
+                                                                "title":  "Rulebook Foundation",
+                                                                "owner_lane":  "rulebook_codex",
+                                                                "assigned_worker":  "codex_worker_1",
+                                                                "folder_state":  "complete",
+                                                                "packet_status":  "complete",
+                                                                "source_state":  "complete",
+                                                                "source_state_token":  "COMPLETE",
+                                                                "normalized_state":  "COMPLETE",
+                                                                "source_reason":  "",
+                                                                "source_state_origin":  "packet.status",
+                                                                "source_file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\complete\\20260516-064502-rulebook-foundation.json"
+                                                            }
+                                                        ]
+                                        }
+                           },
+                           {
+                               "source":  "UNIFIED_LOCK_STATUS.json",
+                               "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
+                               "exists":  true,
+                               "records_seen":  0,
+                               "data":  {
+                                            "generated_at":  "2026-06-09T19:02:03.6394794Z",
+                                            "repo_root":  "C:\\Dev\\Ai.Os",
+                                            "source_readers":  [
+                                                                   {
+                                                                       "source":  "FILE_LOCK_REGISTRY.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\locks\\FILE_LOCK_REGISTRY.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  0
+                                                                   },
+                                                                   {
+                                                                       "source":  "WORKER_CLAIM_REGISTRY_001.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\claims\\WORKER_CLAIM_REGISTRY_001.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  1
+                                                                   },
+                                                                   {
+                                                                       "source":  "supervisor.lock",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\control\\cycle\\supervisor.lock",
+                                                                       "exists":  false,
+                                                                       "records_seen":  0
+                                                                   }
+                                                               ],
+                                            "lock_sources_seen":  [
+                                                                      "FILE_LOCK_REGISTRY.json",
+                                                                      "WORKER_CLAIM_REGISTRY_001.json",
+                                                                      "supervisor.lock"
+                                                                  ],
+                                            "held_locks_count":  0,
+                                            "stale_locks_count":  0,
+                                            "collision_count":  0,
+                                            "worker_claim_count":  1,
+                                            "packet_lock_count":  1,
+                                            "instance_lock_count":  0,
+                                            "unknown_lock_records":  [
+                                                                         {
+                                                                             "source":  "claims",
+                                                                             "reason":  "placeholder_claim_registry",
+                                                                             "raw_state":  "claimed",
+                                                                             "record":  {
+                                                                                            "schema":  "AIOS_WORKER_CLAIM_REGISTRY.v1",
+                                                                                            "worker_id":  "WORKER_ID_PLACEHOLDER",
+                                                                                            "worker_name":  "WORKER_NAME_PLACEHOLDER",
+                                                                                            "packet_id":  "PACKET_ID_PLACEHOLDER",
+                                                                                            "assigned_paths":  [
+
+                                                                                                               ],
+                                                                                            "claim_timestamp":  "TIMESTAMP_PLACEHOLDER",
+                                                                                            "expiration_placeholder":  "TIMESTAMP_PLACEHOLDER",
+                                                                                            "claim_status":  "claimed",
+                                                                                            "approval_required":  true,
+                                                                                            "validator_required":  true,
+                                                                                            "commit_blocked_until_review":  true,
+                                                                                            "next_action":  "Validate claim ownership before APPLY work."
+                                                                                        }
+                                                                         }
+                                                                     ],
+                                            "safety_status":  "REVIEW_REQUIRED",
+                                            "write_behavior":  "telemetry_only"
+                                        }
+                           },
+                           {
+                               "source":  "RECOVERY_BOOTSTRAP_VIEW.json",
+                               "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\RECOVERY_BOOTSTRAP_VIEW.json",
+                               "exists":  true,
+                               "records_seen":  1,
+                               "data":  {
+                                            "schema":  "AIOS_RECOVERY_BOOTSTRAP_VIEW.v1",
+                                            "system":  "AI_OS",
+                                            "mode":  "DRY_RUN",
+                                            "generated_at":  "2026-06-09T19:19:01.1668302Z",
+                                            "repo_root":  "C:\\Dev\\Ai.Os",
+                                            "source_readers":  [
+                                                                   {
+                                                                       "source":  "last_marker.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  1
+                                                                   },
+                                                                   {
+                                                                       "source":  "UNIFIED_QUEUE_INDEX.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  5
+                                                                   },
+                                                                   {
+                                                                       "source":  "UNIFIED_LOCK_STATUS.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  0
+                                                                   },
+                                                                   {
+                                                                       "source":  "runtime_heartbeat.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\telemetry\\runtime\\runtime_heartbeat.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  1
+                                                                   }
+                                                               ],
+                                            "marker_present":  true,
+                                            "marker_path":  "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
+                                            "marker_freshness_status":  "STALE",
+                                            "marker_age_seconds":  614003,
+                                            "queue_index_present":  true,
+                                            "queue_counts":  {
+                                                                 "QUEUED":  1,
+                                                                 "RUNNING":  0,
+                                                                 "BLOCKED":  3,
+                                                                 "WAITING_APPROVAL":  0,
+                                                                 "COMPLETE":  1,
+                                                                 "FAILED":  0,
+                                                                 "ARCHIVED":  0
+                                                             },
+                                            "lock_status_present":  true,
+                                            "held_locks_count":  0,
+                                            "stale_locks_count":  0,
+                                            "collision_count":  0,
+                                            "active_packet_count":  0,
+                                            "blocked_packet_count":  3,
+                                            "heartbeat_status":  "DEGRADED",
+                                            "recovery_readiness":  "BLOCKED",
+                                            "blockers":  [
+                                                             "marker_stale"
+                                                         ],
+                                            "warnings":  [
+                                                             "heartbeat_degraded"
+                                                         ],
+                                            "write_behavior":  "telemetry_only"
+                                        }
+                           },
+                           {
+                               "source":  "LEAD_DISPATCH_VIEW.json",
+                               "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\LEAD_DISPATCH_VIEW.json",
+                               "exists":  true,
+                               "records_seen":  1,
+                               "data":  {
+                                            "schema":  "AIOS_LEAD_DISPATCH_VIEW.v1",
+                                            "system":  "AI_OS",
+                                            "mode":  "DRY_RUN",
+                                            "generated_at":  "2026-06-09T19:55:00Z",
+                                            "repo_root":  "C:\\Dev\\Ai.Os",
+                                            "source_readers":  [
+                                                                   {
+                                                                       "source":  "assignment_executor.py",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\dispatcher\\assignment_executor.py",
+                                                                       "exists":  true,
+                                                                       "records_seen":  1
+                                                                   },
+                                                                   {
+                                                                       "source":  "UNIFIED_QUEUE_INDEX.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  5
+                                                                   },
+                                                                   {
+                                                                       "source":  "UNIFIED_LOCK_STATUS.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  1
+                                                                   },
+                                                                   {
+                                                                       "source":  "RECOVERY_BOOTSTRAP_VIEW.json",
+                                                                       "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\RECOVERY_BOOTSTRAP_VIEW.json",
+                                                                       "exists":  true,
+                                                                       "records_seen":  1
+                                                                   }
+                                                               ],
+                                            "queue_status_summary":  {
+                                                                         "present":  true,
+                                                                         "packet_count":  5,
+                                                                         "open_candidate_count":  1,
+                                                                         "blocked_count":  3,
+                                                                         "waiting_approval_count":  0,
+                                                                         "complete_count":  1,
+                                                                         "normalized_state_counts":  {
+                                                                                                         "QUEUED":  1,
+                                                                                                         "RUNNING":  0,
+                                                                                                         "BLOCKED":  3,
+                                                                                                         "WAITING_APPROVAL":  0,
+                                                                                                         "COMPLETE":  1,
+                                                                                                         "FAILED":  0,
+                                                                                                         "ARCHIVED":  0
+                                                                                                     },
+                                                                         "source_state_counts":  {
+                                                                                                     "ACTIVE":  1,
+                                                                                                     "BLOCKED":  3,
+                                                                                                     "COMPLETE":  1
+                                                                                                 }
+                                                                     },
+                                            "lock_status_summary":  {
+                                                                        "present":  true,
+                                                                        "held_locks_count":  0,
+                                                                        "stale_locks_count":  0,
+                                                                        "collision_count":  0,
+                                                                        "safety_status":  "REVIEW_REQUIRED",
+                                                                        "write_behavior":  "telemetry_only"
+                                                                    },
+                                            "recovery_status_summary":  {
+                                                                            "present":  true,
+                                                                            "recovery_readiness":  "BLOCKED",
+                                                                            "blockers":  [
+                                                                                             "marker_stale"
+                                                                                         ],
+                                                                            "warnings":  [
+                                                                                             "heartbeat_degraded"
+                                                                                         ],
+                                                                            "heartbeat_status":  "DEGRADED",
+                                                                            "write_behavior":  "telemetry_only"
+                                                                        },
+                                            "dispatcher_candidate":  {
+                                                                         "source":  "assignment_executor.py",
+                                                                         "source_task_id":  null,
+                                                                         "source_lane":  null,
+                                                                         "source_decision":  "NO_WORK",
+                                                                         "evaluated_decision":  "BLOCKED",
+                                                                         "source_next_safe_action":  "Resolve blockers before dispatch."
+                                                                     },
+                                            "dispatcher_safety_verdict":  "BLOCKED",
+                                            "blocked_reason":  "queue_blocked, lock_review_required_or_collision, recovery_blocked",
+                                            "depends_on_t2b":  true,
+                                            "t2b_dependency_note":  "T2B assignment-plus-lock integration remains a prerequisite for any future write-path dispatch.",
+                                            "write_path_enabled":  false,
+                                            "write_behavior":  "telemetry_only",
+                                            "next_safe_action":  "Resolve the active blocker in queue, lock, or recovery telemetry before any assignment mutation."
+                                        }
+                           }
+                       ],
+    "packet_sources_scanned":  [
+                                   {
+                                       "source":  "templates",
+                                       "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\templates",
+                                       "file_count":  2,
+                                       "packet_count":  0
+                                   },
+                                   {
+                                       "source":  "proposed",
+                                       "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed",
+                                       "file_count":  8,
+                                       "packet_count":  8
+                                   },
+                                   {
+                                       "source":  "active",
+                                       "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\active",
+                                       "file_count":  0,
+                                       "packet_count":  0
+                                   }
+                               ],
+    "proposed_packet_count":  8,
+    "active_packet_count":  0,
+    "packet_template_count":  2,
+    "packet_records":  [
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+                               "title":  "AI_OS_PACKET_DRAFT_FROM_BRIDGE_HARDENING_ADDENDUM",
+                               "mode":  "DRY_RUN-FIRST",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ],
+                               "approval_required":  true,
+                               "duplicate_notes":  [
+
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\n\r\nIDENTITY MARKER: AI_OS_PACKET_DRAFT_FROM_BRIDGE_HARDENING_ADDENDUM\r\n\r\nSUPERVISOR IDENTITY: Codex East\r\n\r\nPACKET ID: AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST\r\n\r\nMODE: DRY_RUN-FIRST\r\n\r\nZONE: East local service bridge\r\n\r\nWORKER IDENTITY: EAST_OCC_02\r\n\r\nLANE: AI_OS_APP_SERVICE_BRIDGE_V0\r\n\r\nWORKTREE: C:\\Dev\\Ai.Os\r\n\r\nBRANCH: main, verified before APPLY by preflight\r\n\r\nSOURCE RECOMMENDATION:\r\nDerived from the bridge-hardening addendum after inspection of `services/orchestrator`, `services/dispatcher`, `services/python_supervisor`, `automation/orchestration/openai_api_bridge`, `docs/AI_OS/dispatch/AIOS_OPENAI_PACKET_DISPATCH_FLOW.md`, and `docs/roadmap/AIOS_FULL_AUTONOMY_BRIDGE_MAP.md`.\r\n\r\nMISSION:\r\nPrepare and implement, only after explicit APPLY approval, a local-first AI_OS App Service Bridge v0 that coordinates inert packet intake, local planner-call previews, Codex execution queue previews, approval inbox status, worker queue status, worker lock status, latest Reports status, telemetry receipts, and SOS-only notification preview events.\r\n\r\nALLOWED PATHS:\r\n- `services/orchestrator/`\r\n- `services/package.json`\r\n- `tests/services/`\r\n- `automation/validators/`\r\n- `Reports/phase_0_to_4_bridge/`\r\n- `docs/workflows/`\r\n\r\nFORBIDDEN PATHS:\r\n- `AGENTS.md`\r\n- `README.md`\r\n- `WHITEPAPER.md`\r\n- `ARCHITECTURE.md`\r\n- `.github/workflows/`\r\n- `.githooks/`\r\n- `.git/`\r\n- `automation/orchestration/approval_inbox/`\r\n- `automation/orchestration/workers/`\r\n- `automation/orchestration/work_packets/active/`\r\n- `automation/orchestration/work_packets/blocked/`\r\n- `automation/orchestration/work_packets/complete/`\r\n- `automation/orchestration/night_supervisor/`\r\n- `telemetry/night_supervisor/`\r\n- `apps/trading_lab/trading_lab/execution/`\r\n- `aios/modules/trader/`\r\n- `.env`\r\n- `.env.*`\r\n- `secrets/`\r\n- `credentials/`\r\n- `broker/`\r\n- `OANDA/`\r\n- `live_trading/`\r\n\r\nAPPROVAL AUTHORITY:\r\nAnthony Meza / Human Owner must approve before APPLY. Validator PASS is evidence only and does not approve APPLY, commit, push, merge, hook install, approval mutation, worker queue mutation, Night Supervisor mutation, live trading, broker runtime work, provider API calls, cloud deployment, tunnel creation, or secret handling.\r\n\r\nPREFLIGHT:\r\nRun these read-only checks before any APPLY work:\r\n- `pwd`\r\n- `git status --short --branch`\r\n- `git branch --show-current`\r\n- `git remote -v`\r\n- Read `AGENTS.md`\r\n- Read `README.md`\r\n- Read `services/orchestrator/index.js`\r\n- Read `services/orchestrator/runtimeApiService.js`\r\n- Read `services/package.json`\r\n- Read `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json`\r\n- Read `automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json`\r\n- Read `automation/orchestration/locks/FILE_LOCK_REGISTRY_001.json`\r\n- Read `docs/workflows/AI_OS_API_INTEGRATION_SAFETY_WORKFLOW.md`\r\n\r\nTARGET SERVICE FRAMEWORK:\r\nUse the existing repo-native Node/Express `services/orchestrator` layer unless preflight proves it is unusable. Do not add FastAPI or install new dependencies in this packet.\r\n\r\nMINIMAL ENDPOINTS:\r\n- `GET /health`\r\n- `POST /packets`\r\n- `GET /queue`\r\n- `POST /approvals`\r\n- `GET /workers`\r\n- `GET /reports/latest`\r\n- `POST /sos`\r\n\r\nV0 BEHAVIOR:\r\n- `GET /health` returns local service status and safety boundary.\r\n- `POST /packets` accepts a packet draft and returns validation/route preview only.\r\n- `GET /queue` reads canonical queue and worker inbox status only.\r\n- `POST /approvals` accepts an approval request preview and returns required Human Owner action only.\r\n- `GET /workers` reads worker registry, worker inbox, and lock status only.\r\n- `GET /reports/latest` reads latest bridge/report evidence only.\r\n- `POST /sos` records or previews SOS-only notification events only after local DRY_RUN validation.\r\n- Local planner-call handling must use fixtures or preview records only. No live provider call is allowed in v0.\r\n- Codex execution queue handling must create preview records only. It must not launch Codex or run queued commands.\r\n\r\nSTATE STORE:\r\nUse local JSONL receipts for v0 unless a later design review approves SQLite. Proposed generated-output root: `telemetry/app_service_bridge/`, with `.gitignore` handling proposed in DRY_RUN before any APPLY write.\r\n\r\nEXPECTED OUTPUT FILES:\r\n- `Reports/phase_0_to_4_bridge/app_service_bridge_v0_design_dry_run.md`\r\n- `Reports/phase_0_to_4_bridge/app_service_bridge_v0_endpoint_contract.example.json`\r\n- `Reports/phase_0_to_4_bridge/app_service_bridge_v0_validator_result.example.json`\r\n\r\nVALIDATOR CHAIN:\r\n- `node --check services/orchestrator/index.js`\r\n- `node --check services/orchestrator/runtimeApiService.js`\r\n- `npm --prefix services run typecheck`\r\n- `python automation/validators/aios_governance_validator.py --sample-check`\r\n- `python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md`\r\n- `git diff --check`\r\n\r\nFORBIDDEN ACTIONS:\r\n- Do not implement cloud hosting.\r\n- Do not deploy Azure App Service.\r\n- Do not create tunnels.\r\n- Do not make live model-provider calls.\r\n- Do not store secrets.\r\n- Do not create `.env` files.\r\n- Do not mutate approval inbox state.\r\n- Do not mutate worker queue state.\r\n- Do not mutate worker locks.\r\n- Do not start Night Supervisor runtime.\r\n- Do not launch Codex.\r\n- Do not run queued commands.\r\n- Do not auto-run APPLY.\r\n- Do not install hooks.\r\n- Do not commit.\r\n- Do not push.\r\n- Do not merge.\r\n- Do not run live trading.\r\n- Do not enable broker runtime work.\r\n\r\nNIGHT SUPERVISOR INTEGRATION PROPOSAL:\r\nExpose read-only bridge health, pending approval counts, worker queue counts, lock status, latest report path, and SOS preview status for Night Supervisor reports. Night Supervisor must remain sandboxed and must not mutate service state without a later approved packet.\r\n\r\nCODEX WORKER QUEUE INTEGRATION PROPOSAL:\r\nExpose Codex-ready packet previews and queue status only. Any actual Codex execution must remain a separate explicit operator action or separately approved packet.\r\n\r\nSTOP POINT:\r\nStop after producing the local service bridge design, endpoint contract, DRY_RUN validator, and validation result. Stop immediately if preflight branch/worktree state does not match this packet, if dirty files overlap the mission in an unsafe way, if dependency installation is required, if any required authority file is missing, if validation fails, if a secret-like value appears, if live trading or broker runtime work appears in scope, if cloud/tunnel/deployment behavior appears, or if APPLY approval is not explicit.\r\n\r\nHUMAN APPROVAL REQUIREMENT BEFORE APPLY:\r\nThis packet is a draft. APPLY requires a separate explicit Human Owner approval naming this packet ID, exact allowed paths, endpoint behavior, local state store boundary, and validation chain. This packet does not state that Anthony explicitly approves commit, push, or merge.\r\n\r\nFINAL REPORT FORMAT:\r\nUse this exact completion format:\r\n\r\nSUMMARY:\r\nWHAT CHANGED:\r\nFILES CHANGED:\r\nVALIDATION:\r\nREMAINING DIRTY FILES:\r\nAPP SERVICE BRIDGE DECISION:\r\nSAFE NEXT COMMAND:\r\nSTATUS: COMPLETE, NO COMMIT, NO PUSH"
+                           },
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-COORDINATION-SPINE-V1.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-COORDINATION-SPINE-V1",
+                               "title":  "AI_OS_PACKET_DRAFT_COORDINATION_SPINE_V1",
+                               "mode":  "DRY_RUN-FIRST",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED",
+                                                               "ALLOWED PATHS",
+                                                               "FORBIDDEN PATHS"
+                                                           ],
+                               "approval_required":  true,
+                               "duplicate_notes":  [
+                                                       "packet_factory_unifier_phrase"
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\nBefore processing this task, read and follow:\r\n1. AGENTS.md\r\n2. docs/governance/AI_OS_REPO_MEMORY.md\r\n3. assigned lane instructions\r\n4. operator instruction\r\nIf unavailable, stop and report missing AI_OS context.\r\n\r\nIDENTITY MARKER: AI_OS_PACKET_DRAFT_COORDINATION_SPINE_V1\r\n\r\nSUPERVISOR IDENTITY: Codex West\r\n\r\nPACKET ID: AIOS-COORDINATION-SPINE-V1\r\n\r\nMODE: DRY_RUN-FIRST\r\n\r\nZONE: West coordination spine lane\r\n\r\nWORKER IDENTITY: WEST_OCC_01\r\n\r\nLANE: AI_OS_COORDINATION_SPINE\r\n\r\nWORKTREE: C:\\Dev\\Ai.Os (verified by preflight)\r\n\r\nBRANCH: branch FROM main, verified before APPLY by preflight\r\n\r\nSOURCE RECOMMENDATION:\r\nHuman Owner directive to close the loops between systems that already exist, by\r\nbuilding one additive coordination spine that composes the existing queue,\r\nlock, dispatcher, recovery, and packet-factory systems into one coordinated view.\r\nThis is Big Pack Mode per AGENTS.md section 3: one large controlled workload per\r\nobjective. The build is additive-only and must not delete, change, duplicate, or\r\nedit any current authority file.\r\n\r\nDUPLICATE-INTENT RECON EVIDENCE (read-only, completed before this packet):\r\nThree read-only recon lanes mapped the canonical owners on main. Key results:\r\n- An existing closed-loop spine already exists:\r\n  automation/orchestration/auto_loop/scripts/Invoke-AiOsRepoLoopSpine.DRY_RUN.ps1\r\n  composes worker assignment, ownership lock, validator plan, approval plan,\r\n  commit-package preview, and resume pointer, output-restricted to\r\n  telemetry/auto_loop/reports. This packet EXTENDS that model and must not create\r\n  a second spine.\r\n- The dispatcher plus lock write-path integration is already specified as an\r\n  un-applied proposed packet:\r\n  automation/orchestration/work_packets/proposed/AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md\r\n  This packet must NOT re-specify that integration. Modules 2 and 3 below are\r\n  read and report composers only and defer the assignment-plus-lock write path to\r\n  that existing T2B packet.\r\n- All readers the spine needs already exist (queue scanner, lock status, work\r\n  packet state, cycle marker, runtime heartbeat, dispatcher decision, glue and\r\n  auto-loop factories, approval inbox helpers). The only missing pieces are thin\r\n  composer, mapping, and reporting seams.\r\nConclusion: duplicate-intent search is clean for the NEW composer seams below, and\r\nflags two pre-existing owners to reuse, not rebuild (the repo loop spine and the\r\nT2B integration packet).\r\n\r\nCANONICAL OWNER MAP (reuse by reading or invoking, never edit here):\r\n- Unified queue projection: services/python_supervisor/queue_scanner.py scan_queue\r\n  over automation/orchestration/work_packets/active. State store folders active,\r\n  blocked, complete. Read helper automation/orchestration/work_packets/Get-AiOsWorkPacketState.ps1.\r\n- Worker lock: automation/orchestration/locks with Claim-AiOsFileLock.DRY_RUN.ps1,\r\n  Release-AiOsFileLock.DRY_RUN.ps1, Get-AiOsWorkerLockStatus.DRY_RUN.ps1, and\r\n  FILE_LOCK_REGISTRY.json. Adjacent lanes: packet lock under scripts, worker claim\r\n  under automation/orchestration/claims, instance lock under automation/orchestration/lock.\r\n- Lead dispatcher: brain automation/orchestration/dispatcher/assignment_executor.py\r\n  read-only json decision, hand automation/dispatcher/runtime/packets/Assign-AIOSPacket.ps1.\r\n  Canonical lane decision docs/architecture/AIOS_CANONICAL_LOOP_DECISION.md.\r\n- Recovery: in-process resume Resolve-AiOsCrashRecovery inside\r\n  automation/orchestration/Invoke-AiOsNightCycle.ps1, marker control/cycle/last_marker.json,\r\n  heartbeat reader automation/orchestration/Test-AiOsRuntimeHeartbeat.DRY_RUN.ps1.\r\n- Packet factory: Operation Glue automation/orchestration/glue and Auto-Loop\r\n  automation/orchestration/auto_loop. Approval terminus\r\n  automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json with helper\r\n  New-AiOsPacketApprovalRequest.DRY_RUN.ps1.\r\n- Existing spine to extend: automation/orchestration/auto_loop/scripts/Invoke-AiOsRepoLoopSpine.DRY_RUN.ps1.\r\n- Daily snapshot reporting: the canonical daily data snapshot added under\r\n  automation/reporting is reused for the spine report rollup.\r\n\r\nOBJECTIVE (definition of done):\r\nA DRY_RUN-first coordination spine exists as thin additive composer seams that\r\nread and aggregate the existing systems into one coordinated spine report, with no\r\nedit to any existing authority file, no scheduler, no live behavior, and a separate\r\nAPPLY gate per module. Phase 1 produces design plus preview diff plan plus a\r\nDRY_RUN spine report, then STOPS for Human Owner approval.\r\n\r\nMISSION:\r\nImplement, DRY_RUN-first and only after explicit per-module APPLY approval, five\r\nthin coordination modules plus one spine orchestrator that extends the existing\r\nrepo loop spine model. Each module composes existing readers and tools as child\r\ninvocations and emits a new report or index file in the new spine namespace only.\r\nReuse before adding. Run a duplicate-intent search before creating any file. If a\r\nrequired owner update to an existing file is discovered, do not edit it; record the\r\nrequired owner update and STOP for Human Owner approval.\r\n\r\nFIVE MODULES (each DRY_RUN-first, each with its own APPLY gate):\r\nMODULE 1 UNIFIED QUEUE INDEX. Read the existing queue projection (queue_scanner\r\nscan_queue, or Get-AiOsWorkPacketState read-only) and emit a NEW unified index file\r\nin the spine namespace that maps existing states to the target set QUEUED, RUNNING,\r\nBLOCKED, WAITING_APPROVAL, COMPLETE, FAILED, ARCHIVED. The mapping layer lives only\r\nin the new file. Do not edit queue_scanner, packet JSONs, or state folders.\r\nMODULE 2 WORKER LOCK STATUS COMPOSER. Read and aggregate the four existing lock\r\nsublanes (file lock, packet lock, worker claim, instance lock) via their existing\r\nread-only status scripts and emit a unified lock view. Mutation stays inside the\r\nexisting Claim and Release scripts. The assignment-plus-lock write integration is\r\nowned by the existing proposed packet AIOS-T2B and is out of scope here.\r\nMODULE 3 LEAD DISPATCHER COMPOSER. Invoke the existing dispatcher brain\r\nassignment_executor.py json mode read-only to capture the next-work decision plus\r\nsafety verdict, and present it in the spine report. The assign then lock then track\r\nwrite path is owned by the existing proposed packet AIOS-T2B, named here as the\r\nprerequisite. This module does not mutate assignment or lock state.\r\nMODULE 4 RECOVERY BOOTSTRAP COMPOSER. Aggregate the existing readers for marker,\r\nqueue, locks, active packet, and heartbeat into one recovery-bootstrap view, using\r\nthe proven compose-by-child-invocation pattern of Invoke-AiOsReadOnlyStatus.DRY_RUN.ps1.\r\nDo not edit the night cycle or the recovery scripts. The restart trigger arming is\r\nout of scope because it would require a scheduler.\r\nMODULE 5 PACKET FACTORY UNIFIER. Read detection evidence (self heal report, queue\r\nBLOCKED and STALE items, autonomy bridge state), generate a goal intake record in\r\nthe spine namespace, invoke the existing Operation Glue or Auto-Loop generator, and\r\nemit one unified factory ledger plus a candidate approval recommendation through the\r\nexisting approval inbox helper. Do not write the canonical approval inbox file. Add\r\nno third generator.\r\nSPINE ORCHESTRATOR. Extend the existing repo loop spine model by composition: a new\r\norchestrator that runs modules 1 through 5 in sequence and emits one spine report.\r\nDo not edit Invoke-AiOsRepoLoopSpine.DRY_RUN.ps1 unless a required owner update is\r\nproven and approved separately.\r\n\r\nALLOWED PATHS (write boundary):\r\n- `automation/orchestration/coordination_spine/`\r\n- `tests/orchestration/`\r\n- `Reports/coordination_spine/`\r\n- `telemetry/coordination_spine/`\r\n- `docs/architecture/` for one new additive spine decision record only, no edits to existing files there\r\n\r\nFORBIDDEN PATHS (no create, edit, or delete here; read-only invocation of existing scripts is allowed and required):\r\n- `AGENTS.md`\r\n- `RISK_POLICY.md`\r\n- `README.md`\r\n- `WHITEPAPER.md`\r\n- `ARCHITECTURE.md`\r\n- `.github/`\r\n- `.githooks/`\r\n- `.git/`\r\n- `automation/orchestration/Invoke-AiOsNightCycle.ps1`\r\n- `control/cycle/`\r\n- `automation/orchestration/work_packets/`\r\n- `services/python_supervisor/queue_scanner.py`\r\n- `automation/orchestration/queue/`\r\n- `automation/orchestration/command_queue/`\r\n- `automation/orchestration/dispatcher/`\r\n- `automation/dispatcher/`\r\n- `services/dispatcher/`\r\n- `services/runtime/`\r\n- `automation/orchestration/locks/`\r\n- `automation/orchestration/lock/`\r\n- `automation/orchestration/claims/`\r\n- `automation/locks/`\r\n- `automation/orchestration/recovery/`\r\n- `automation/recovery/`\r\n- `automation/orchestration/self_heal/`\r\n- `automation/orchestration/approval_inbox/`\r\n- `control/operation_glue/`\r\n- `automation/orchestration/glue/`\r\n- `automation/orchestration/auto_loop/scripts/Invoke-AiOsRepoLoopSpine.DRY_RUN.ps1`\r\n- `apps/dashboard/`\r\n- `tools/android/`\r\n- `automation/orchestration/scheduler/`\r\n- `secrets/`\r\n- `credentials/`\r\n- `.env`\r\n- `.env.*`\r\n- `broker/`\r\n- `OANDA/`\r\n- `live_trading/`\r\n- `webhooks/`\r\n\r\nHARD LIMITS (a violation fails this packet):\r\n- Additive-only. Create files only in the allowed write boundary. Read or invoke\r\n  existing scripts as child processes; never edit, delete, rename, or move them.\r\n- No edits to existing runtime, queue, lock, dispatcher, recovery, or approval\r\n  authority files. If a required owner update is discovered, record it and STOP for\r\n  Human Owner approval instead of editing.\r\n- DRY_RUN report first. Phase 1 produces design and a DRY_RUN report with no\r\n  mutation. Each module gets its own separate APPLY approval later.\r\n- No scheduler, service, cron, or systemd registration of any kind.\r\n- No ADB or SOS activation. No dashboard changes. No broker, no live order path, no\r\n  webhook behavior. No secrets.\r\n- Do not run an unbounded or unattended run.\r\n- No commit, no push, no merge by the worker.\r\n- Honor the STOP kill-switch control/self_continuation/STOP.\r\n- All new index and report writes must be atomic, temp then rename.\r\n- Run a duplicate-intent search before creating any file; if an existing owner is\r\n  found, STOP and report instead of creating a parallel spine or a duplicate file.\r\n\r\nAPPROVAL AUTHORITY:\r\nAnthony Meza the Human Owner must approve before APPLY, separately for each module.\r\nA validator PASS is evidence only and does not approve APPLY, commit, push, merge,\r\nhook install, approval-inbox mutation, scheduler registration, live notification,\r\nlive trading, or secret handling. This packet does not state that the Human Owner explicitly approves commit, push, or merge here. Each of commit, push, and merge requires a separate explicit Human Owner approval naming this packet ID and the exact module.\r\n\r\nPREFLIGHT (read-only, before any APPLY work):\r\n- `pwd`\r\n- `git status --short --branch`\r\n- `git branch --show-current`\r\n- `git remote -v`\r\n- Read `AGENTS.md`\r\n- Read `RISK_POLICY.md`\r\n- Read `README.md`\r\n- Read `automation/orchestration/auto_loop/scripts/Invoke-AiOsRepoLoopSpine.DRY_RUN.ps1`\r\n- Read `automation/orchestration/Invoke-AiOsReadOnlyStatus.DRY_RUN.ps1`\r\n- Read `services/python_supervisor/queue_scanner.py`\r\n- Read `automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1`\r\n- Read `automation/orchestration/dispatcher/assignment_executor.py`\r\n- Read `automation/orchestration/work_packets/proposed/AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md`\r\n\r\nPHASE 1 (this packet, no APPLY): produce the DRY_RUN design, a preview diff plan per\r\nmodule, a duplicate-intent search evidence list, and one DRY_RUN spine report that\r\nreads the existing systems and shows the composed view. Then STOP for Human Owner\r\napproval.\r\n\r\nPHASE 2 (only after a separate explicit APPLY approval naming this packet ID and the\r\nspecific module): implement that one module as additive new files, run the validator\r\nchain and tests, and stop before commit, push, or merge unless that same approval\r\nexplicitly authorizes them.\r\n\r\nVALIDATOR CHAIN:\r\n- `python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-COORDINATION-SPINE-V1.md`\r\n- duplicate-intent search evidence using `rg` over the proposed names, folders, and lanes before any file creation\r\n- PowerShell parser check on every new .ps1 file in Phase 2\r\n- `python -m py_compile` on every new .py file in Phase 2\r\n- JSON parse validation on every new index, ledger, or schema file\r\n- read-only invocation of the existing validator router for evidence\r\n- `git diff --check`\r\n\r\nEXPECTED OUTPUT FILES (Phase 1):\r\n- `Reports/coordination_spine/coordination_spine_v1_design_dry_run.md`\r\n- `Reports/coordination_spine/coordination_spine_v1_dry_run_report.example.json`\r\n- `Reports/coordination_spine/coordination_spine_v1_duplicate_intent_evidence.md`\r\n\r\nFORBIDDEN ACTIONS:\r\n- Do not create a second or parallel spine.\r\n- Do not edit any existing queue, lock, dispatcher, recovery, approval, runtime, or\r\n  spine file.\r\n- Do not re-specify the dispatcher plus lock write integration owned by AIOS-T2B.\r\n- Do not register any scheduler, service, cron, or systemd unit.\r\n- Do not activate ADB or SOS, do not change the dashboard.\r\n- Do not enable broker work, live order paths, or webhook behavior, and do not store\r\n  secrets.\r\n- Do not commit, push, or merge.\r\n\r\nSTOP POINT:\r\nStop after producing the Phase 1 design, per-module preview diff plan, duplicate\r\nintent evidence, and the DRY_RUN spine report. Stop immediately if preflight branch\r\nor worktree state does not match this packet, if a duplicate owner is found for a\r\nproposed file, if a required edit to a forbidden path is discovered, if any\r\nscheduler, ADB, SOS, dashboard, broker, or secret scope appears, if validation\r\nfails, or if APPLY approval is not explicit and module-specific.\r\n\r\nHUMAN APPROVAL REQUIREMENT BEFORE APPLY:\r\nThis packet is a draft. APPLY requires a separate explicit Human Owner approval\r\nnaming this packet ID and the specific module, the exact allowed paths, and the\r\nvalidator chain. Approval of one module does not approve another module.\r\n\r\nFINAL REPORT FORMAT:\r\nSUMMARY:\r\nWHAT CHANGED:\r\nFILES CHANGED:\r\nDUPLICATE-INTENT EVIDENCE:\r\nCANONICAL OWNERS REUSED:\r\nPER-MODULE STATUS:\r\nHARD-LIMIT COMPLIANCE CHECKLIST:\r\nVALIDATION:\r\nREMAINING DIRTY FILES:\r\nSAFE NEXT ACTION:\r\nSTATUS: COMPLETE, NO COMMIT, NO PUSH"
+                           },
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+                               "title":  "AI_OS_PACKET_DRAFT_SOAK_HARNESS_FIRST_RUN_PROOF",
+                               "mode":  "DRY_RUN-FIRST",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ],
+                               "approval_required":  true,
+                               "duplicate_notes":  [
+
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\n\r\nIDENTITY MARKER: AI_OS_PACKET_DRAFT_SOAK_HARNESS_FIRST_RUN_PROOF\r\n\r\nSUPERVISOR IDENTITY: Codex West\r\n\r\nPACKET ID: AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST\r\n\r\nMODE: DRY_RUN-FIRST\r\n\r\nZONE: West endurance proof lane\r\n\r\nWORKER IDENTITY: WEST_OCC_01\r\n\r\nLANE: AI_OS_ENDURANCE_SOAK_PROOF\r\n\r\nWORKTREE: C:\\Dev\\Ai.Os (verified by preflight)\r\n\r\nBRANCH: branch FROM main, verified before APPLY by preflight\r\n\r\nSOURCE RECOMMENDATION:\r\nPulled forward from the vacation hygiene work because the system has no empirical\r\nproof of even one continuous run. The cycle marker control/cycle/last_marker.json\r\nhas never been produced by a real run, and no soak harness exists. No endurance\r\nmilestone (12 hours, 24 hours, multi-day) can be proven until the loop actually\r\nruns and produces evidence. This packet builds the evidence-generation capability\r\nand establishes the proof ladder, so every later milestone can be certified by\r\nartifacts rather than asserted.\r\n\r\nOBJECTIVE (definition of done):\r\nA manually-launched, observe-only soak harness exists that runs the night-cycle\r\nloop in a bounded, supervised, DRY_RUN mode and records evidence of liveness and\r\nresource behavior, and a first supervised run has produced the first real cycle\r\nmarker plus a soak evidence report. No APPLY of real work, no scheduler, no live\r\nsends. The human is present for the first run.\r\n\r\nGROUNDED FINDINGS (already verified on main; do NOT re-derive):\r\n- The night-cycle loop, heartbeat emission, atomic cycle marker, and crash-resume\r\n  are live on main, so a real run can produce real evidence today.\r\n- control/cycle/last_marker.json does not yet exist, so no real cycle has ever run.\r\n- No soak harness and no soak evidence report format exist anywhere in the repo.\r\n- A 12-hour paper-lab profile exists at\r\n  automation/orchestration/night_supervisor/FOREX_PAPER_LAB_12H_PROFILE.json and\r\n  can serve as scaffolding for the 12-hour rung, report-only.\r\n\r\nMISSION:\r\nImplement, DRY_RUN-first and only after explicit APPLY approval, an observe-only\r\nsoak harness, a soak evidence report format, a documented soak ladder runbook, and\r\nthe execution of one short bounded first supervised run that produces the first\r\nreal marker and evidence report. Reuse the existing loop, watchdog, and dashboard\r\nstate; do not add a parallel runtime. Phase 1 produces design plus preview diff\r\nplan plus validator and test plan, then STOPS for Human Owner APPLY approval.\r\n\r\nWORK ITEMS:\r\nA. SOAK HARNESS. Add a manually-launched harness that runs the night-cycle loop in\r\n   a bounded, observe-only manner (DRY_RUN, time-bounded or cycle-count-bounded),\r\n   and on an interval samples and records: heartbeat freshness measured as the age\r\n   of telemetry/runtime/runtime_heartbeat.json, cycle marker progression read from\r\n   control/cycle/last_marker.json, process resident memory, filesystem free space,\r\n   and per-cycle pass or fail. It honors the STOP kill-switch\r\n   control/self_continuation/STOP, registers no scheduler, sends nothing, and\r\n   writes its evidence atomically.\r\nB. EVIDENCE REPORT FORMAT. Define a soak evidence report artifact capturing the\r\n   sampled series for heartbeat freshness, resident memory, disk free, marker\r\n   progression, per-cycle result, start and end time, and a pass or fail verdict\r\n   against rung criteria. Store under Reports/endurance_soak and the gitignored\r\n   runtime telemetry path.\r\nC. SOAK LADDER RUNBOOK. Document the gated ladder with explicit pass criteria for\r\n   each rung: one supervised cycle, twelve hours, twenty-four hours with at least\r\n   one induced crash, seventy-two hours, and seven days zero-touch. Each rung is\r\n   gated on the prior.\r\nD. FIRST SUPERVISED RUN. Execute one short bounded run, human present, in DRY_RUN\r\n   observe-only mode, to produce the first real cycle marker and the first soak\r\n   evidence report. This is proof rung one only. Do not attempt longer rungs in\r\n   this packet.\r\nE. TESTS. Prove the harness samples correctly, the report schema validates, and a\r\n   bounded run terminates and produces a marker and a report.\r\n\r\nALLOWED PATHS:\r\n- `automation/orchestration/soak/`\r\n- `automation/orchestration/watchdog/`\r\n- `automation/orchestration/Invoke-AiOsNightCycle.ps1`\r\n- `Reports/endurance_soak/`\r\n- `telemetry/soak/`\r\n- `docs/runbooks/`\r\n- `tests/`\r\n\r\nFORBIDDEN PATHS:\r\n- `.github/`\r\n- `.github/workflows/`\r\n- `.githooks/`\r\n- `.git/`\r\n- `AGENTS.md`\r\n- `RISK_POLICY.md`\r\n- `README.md`\r\n- `WHITEPAPER.md`\r\n- `ARCHITECTURE.md`\r\n- `secrets/`\r\n- `credentials/`\r\n- `.env`\r\n- `.env.*`\r\n- `broker/`\r\n- `OANDA/`\r\n- `live_trading/`\r\n- `automation/orchestration/approval_inbox/`\r\n- `automation/orchestration/locks/`\r\n- `automation/orchestration/night_supervisor/`\r\n\r\nHARD LIMITS (a violation fails this packet):\r\n- The first supervised run is DRY_RUN and observe-only. No APPLY of real packet\r\n  work, no commit or push by the loop, no live notifications, no broker, no live\r\n  trading.\r\n- The run is bounded in duration or cycle count and requires the human to be\r\n  present. It is not a scheduled or unattended run.\r\n- Never run or register schtasks, Register-ScheduledTask, New-Service, sc.exe,\r\n  cron, or systemd. The harness is manually launched only.\r\n- Honor the STOP kill-switch control/self_continuation/STOP everywhere.\r\n- All evidence-file writes MUST be atomic, temp then rename.\r\n- Reuse the existing loop, watchdog, and dashboard state; no parallel runtime.\r\n- No secrets. Do not store any credential or token value.\r\n- Do not merge, close, draft, rebase, push, or comment on other PRs.\r\n\r\nAPPROVAL AUTHORITY:\r\nAnthony Meza the Human Owner must approve before APPLY. A validator PASS is\r\nevidence only and does not approve APPLY, commit, push, merge, hook install,\r\napproval-inbox mutation, scheduler registration, live notification, live trading,\r\nor secret handling. This packet does not state that the Human Owner explicitly approves commit, push, or merge here. Each of commit, push, and merge requires a separate explicit Human Owner approval naming this packet ID.\r\n\r\nPREFLIGHT (read-only, before any APPLY work):\r\n- `pwd`\r\n- `git status --short --branch`\r\n- `git branch --show-current`\r\n- `git remote -v`\r\n- Read `AGENTS.md`\r\n- Read `RISK_POLICY.md`\r\n- Read `README.md`\r\n- Read `automation/orchestration/Invoke-AiOsNightCycle.ps1`\r\n- Read `automation/orchestration/watchdog/aios_deadman_watchdog.py`\r\n- Read `automation/orchestration/dashboard/Update-AiOsDashboardState.ps1`\r\n- Read `automation/orchestration/night_supervisor/FOREX_PAPER_LAB_12H_PROFILE.json`\r\n\r\nPHASE 1 (this packet, no APPLY): produce the DRY_RUN design, the preview diff plan,\r\nand the validator and test plan, including the first-run procedure and its evidence\r\nschema. Then STOP for Human Owner APPLY approval.\r\n\r\nPHASE 2 (only after explicit APPLY approval naming this packet ID): build the\r\nharness, the report format, and the runbook, execute the one bounded first\r\nsupervised run, and stop before commit, push, or merge unless that same approval\r\nexplicitly authorizes them.\r\n\r\nVALIDATOR CHAIN:\r\n- `python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST.md`\r\n- PowerShell parse check on every changed .ps1 file in Phase 2\r\n- Repo-native tests for the harness sampler and report schema in Phase 2\r\n- `git diff --check`\r\n\r\nEXPECTED OUTPUT FILES (Phase 1):\r\n- `Reports/endurance_soak/soak_harness_design_dry_run.md`\r\n- `Reports/endurance_soak/soak_evidence_report.example.json`\r\n\r\nFORBIDDEN ACTIONS:\r\n- Do not register any scheduler, service, cron, or systemd unit.\r\n- Do not run an unattended or unbounded run.\r\n- Do not enable live notifications or auto-approve anything.\r\n- Do not APPLY real packet work during the supervised run.\r\n- Do not commit, push, or merge without separate explicit approval.\r\n- Do not run live trading or broker work, and do not store secrets.\r\n\r\nSTOP POINT:\r\nStop after producing the Phase 1 design, preview diff plan, and validator result.\r\nStop immediately if preflight branch or worktree state does not match this packet,\r\nif dirty files overlap the mission unsafely, if a required authority file is\r\nmissing, if validation fails, if a secret-like value appears, if any scheduler or\r\nlive notification appears in scope, if an unbounded or unattended run appears in\r\nscope, if live trading or broker work appears, or if APPLY approval is not explicit.\r\n\r\nHUMAN APPROVAL REQUIREMENT BEFORE APPLY:\r\nThis packet is a draft. APPLY requires a separate explicit Human Owner approval\r\nnaming this packet ID, the exact allowed paths, the bounded run duration or cycle\r\ncount, and the validator chain.\r\n\r\nFINAL REPORT FORMAT:\r\nSUMMARY:\r\nWHAT CHANGED:\r\nFILES CHANGED:\r\nREUSED VS ADDED:\r\nFIRST RUN EVIDENCE SUMMARY:\r\nHARD-LIMIT COMPLIANCE CHECKLIST:\r\nVALIDATION:\r\nREMAINING DIRTY FILES:\r\nSAFE NEXT ACTION:\r\nSTATUS: COMPLETE, NO COMMIT, NO PUSH"
+                           },
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+                               "title":  "AI_OS_PACKET_DRAFT_ENDURANCE_TIER1_WEEKEND",
+                               "mode":  "DRY_RUN-FIRST",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ],
+                               "approval_required":  true,
+                               "duplicate_notes":  [
+
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\n\r\nIDENTITY MARKER: AI_OS_PACKET_DRAFT_ENDURANCE_TIER1_WEEKEND\r\n\r\nSUPERVISOR IDENTITY: Codex West\r\n\r\nPACKET ID: AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST\r\n\r\nMODE: DRY_RUN-FIRST\r\n\r\nZONE: West endurance hardening lane\r\n\r\nWORKER IDENTITY: WEST_OCC_01\r\n\r\nLANE: AI_OS_ENDURANCE_TIER1_WEEKEND\r\n\r\nWORKTREE: C:\\Dev\\Ai.Os (verified by preflight)\r\n\r\nBRANCH: claude/tier1-resume-atomic-writes (branch FROM this branch, not main, verified before APPLY by preflight)\r\n\r\nSOURCE RECOMMENDATION:\r\nDerived from the AI_OS endurance audit after inspection of\r\n`automation/orchestration/Invoke-AiOsNightCycle.ps1`,\r\n`automation/orchestration/watchdog/aios_deadman_watchdog.py`,\r\n`automation/orchestration/watchdog/README.md`,\r\n`automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1`,\r\n`automation/recovery/Resume-AiOsCycle.ps1`,\r\n`automation/recovery/README.md`, and\r\n`automation/dispatcher/runtime/workers/Update-AIOSWorkerHeartbeat.ps1`.\r\n\r\nOBJECTIVE (definition of done):\r\nThe unattended night-cycle loop must survive a single crash over a 2-day weekend\r\nwith no human present: if the loop process dies or hangs, it is detected and\r\nrestarted, and on restart it RESUMES from the cycle marker instead of re-running\r\nalready-completed APPLY phases. No OS scheduler, no live sends, no new APPLY\r\nbehavior. Every new action is opt-in behind an explicit flag.\r\n\r\nGROUNDED FINDINGS (already verified by the operator review lane; do NOT re-derive,\r\ndo NOT duplicate these components):\r\n- PR 447 already added crash-safe RESUME plus an atomic runtime-state write to\r\n  `Invoke-AiOsNightCycle.ps1` via `Resolve-AiOsCrashRecovery`. Build ON it. This\r\n  is why the packet branches from `claude/tier1-resume-atomic-writes`.\r\n- `aios_deadman_watchdog.py` already DETECTS loop death by heartbeat staleness\r\n  (exit code 2 equals BLOCKED). It is detect-only, disabled by default, and does\r\n  not loop or restart anything. Reuse it; do not rewrite detection.\r\n- `Start-AiOsPersistentRuntimeSupervisor.ps1` and the self-heal scripts already\r\n  exist. Reuse their loop and audit-log patterns; do not fork a new supervisor.\r\n- CRITICAL GAP confirmed: `Invoke-AiOsNightCycle.ps1` writes NO heartbeat, yet the\r\n  watchdog reads `telemetry/runtime/runtime_heartbeat.json`. The detect-to-restart\r\n  chain is dead at the source. Closing this is WORK ITEM A and is the keystone.\r\n\r\nMISSION:\r\nImplement, DRY_RUN-first and only after explicit APPLY approval, three wired\r\ncapabilities that compose the existing components into a crash-surviving weekend\r\nloop, plus tests and docs: (A) night-cycle heartbeat emission, (B) an armed but\r\nmanually-launched restart supervisor, (C) bounded timeouts on git and network\r\ncalls in the hot path, (D) tests and operator docs. Reuse before adding. If an\r\nitem is already satisfied by existing code, report that and skip it.\r\n\r\nWORK ITEMS:\r\nA. HEARTBEAT EMISSION (keystone). Make the `-Watch` loop in\r\n   `Invoke-AiOsNightCycle.ps1` write `telemetry/runtime/runtime_heartbeat.json`\r\n   atomically (temp plus Move-Item -Force, mirroring Write-CycleMarker) at cycle\r\n   start and cycle end, ideally after each phase. Field set must match what\r\n   `aios_deadman_watchdog.py` parses: an ISO UTC timestamp under heartbeatAt or\r\n   last_beat, plus cycle_id, phase_name, and pid. Confirm the schema by reading\r\n   the watchdog parser first. Reuse `Update-AIOSWorkerHeartbeat.ps1` only if its\r\n   path and schema fit; otherwise add a small Write-AiOsRuntimeHeartbeat helper.\r\nB. ARMED RESTART SUPERVISOR. Add a manually-launched supervisor loop that, on an\r\n   interval, runs `aios_deadman_watchdog.py`; on BLOCKED it restarts the\r\n   night-cycle driver, which then auto-resumes via `Resolve-AiOsCrashRecovery`.\r\n   It MUST: honor the STOP kill-switch and exit immediately if STOP exists; use\r\n   exponential backoff between restarts; enforce a maximum restart count per\r\n   window, then stop and write a local alert; default to DRY_RUN that only logs\r\n   WOULD_RESTART and takes no action; require an explicit -Apply or -ArmRestart\r\n   flag to actually restart. It must NOT register any scheduler.\r\nC. TIMEOUTS. Add one reusable bounded-timeout helper and apply it to the\r\n   git and network calls reached by the night-cycle children (pull-backlog,\r\n   relay-runner, pr-watch, autonomy-bridge). A hung call must time out, be killed,\r\n   and return a logged non-zero result rather than wedging the loop.\r\nD. TESTS AND DOCS. Add or extend tests in the repo-native style proving:\r\n   heartbeat is emitted and atomic; watchdog flips BLOCKED on stale or missing\r\n   heartbeat; supervisor in DRY_RUN logs WOULD_RESTART and does nothing; the\r\n   timeout helper returns non-zero on a hung command. Update the watchdog and\r\n   recovery README files with the MANUAL launch command and an explicit\r\n   not-auto-registered, opt-in note.\r\n\r\nALLOWED PATHS:\r\n- `automation/orchestration/Invoke-AiOsNightCycle.ps1`\r\n- `automation/orchestration/watchdog/`\r\n- `automation/orchestration/runtime/`\r\n- `automation/runtime/state/`\r\n- `automation/shared/`\r\n- `telemetry/runtime/`\r\n- `telemetry/watchdog/`\r\n- `Reports/endurance_tier1/`\r\n\r\nFORBIDDEN PATHS:\r\n- `AGENTS.md`\r\n- `README.md`\r\n- `RISK_POLICY.md`\r\n- `WHITEPAPER.md`\r\n- `ARCHITECTURE.md`\r\n- `.github/workflows/`\r\n- `.githooks/`\r\n- `.git/`\r\n- `automation/orchestration/approval_inbox/`\r\n- `automation/orchestration/workers/`\r\n- `automation/orchestration/work_packets/active/`\r\n- `automation/orchestration/work_packets/blocked/`\r\n- `automation/orchestration/work_packets/complete/`\r\n- `automation/orchestration/night_supervisor/`\r\n- `automation/orchestration/locks/`\r\n- `telemetry/night_supervisor/`\r\n- `.env`\r\n- `.env.*`\r\n- `secrets/`\r\n- `credentials/`\r\n- `broker/`\r\n- `OANDA/`\r\n- `live_trading/`\r\n\r\nHARD LIMITS (a violation fails this packet):\r\n- Never run or register schtasks, Register-ScheduledTask, New-Service, sc.exe,\r\n  cron, or systemd. The restart supervisor is a manually-launched loop only.\r\n- DRY_RUN is the default for every new or changed script. The restart action is\r\n  opt-in behind an explicit flag; default is detect-and-log only.\r\n- Honor the STOP kill-switch `control/self_continuation/STOP` everywhere; never\r\n  restart past STOP.\r\n- All state-file writes MUST be atomic (temp plus Move-Item -Force). No in-place\r\n  Set-Content on state files.\r\n- Do not auto-release locks, reassign packets, stage, or resume APPLY yourself.\r\n  The supervisor only RESTARTS the night-cycle process; the night cycle\r\n  re-resolves its own mode and approval gates. Delegate every APPLY decision to it.\r\n- No live notifications. Alerts are written to local telemetry only.\r\n- No live trading, no broker work, no secret handling.\r\n\r\nAPPROVAL AUTHORITY:\r\nAnthony Meza, the Human Owner, must approve before APPLY. A validator PASS is\r\nevidence only and does not approve APPLY, commit, push, merge, hook install,\r\napproval-inbox mutation, worker-queue mutation, Night Supervisor mutation,\r\nscheduler registration, live notification, live trading, or secret handling.\r\nThis packet does not state that the Human Owner explicitly approves commit, push,\r\nor merge; those require a separate explicit approval naming this packet ID.\r\n\r\nPREFLIGHT (read-only, before any APPLY work):\r\n- `pwd`\r\n- `git status --short --branch`\r\n- `git branch --show-current`\r\n- `git remote -v`\r\n- Read `AGENTS.md`\r\n- Read `RISK_POLICY.md`\r\n- Read `README.md`\r\n- Read `automation/orchestration/Invoke-AiOsNightCycle.ps1`\r\n- Read `automation/orchestration/watchdog/aios_deadman_watchdog.py`\r\n- Read `automation/orchestration/watchdog/README.md`\r\n- Read `automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1`\r\n- Read `automation/recovery/Resume-AiOsCycle.ps1`\r\n- Read `automation/recovery/README.md`\r\n- Read `automation/dispatcher/runtime/workers/Update-AIOSWorkerHeartbeat.ps1`\r\n\r\nPHASE 1 (this packet, no APPLY): produce the DRY_RUN design, the proposed diffs as\r\npreview text, and the validator proof. Then STOP for Human Owner APPLY approval.\r\n\r\nPHASE 2 (only after explicit APPLY approval naming this packet ID): apply the\r\ndiffs, run the validator chain and tests, and stop before commit, push, or merge\r\nunless that same approval explicitly authorizes them.\r\n\r\nVALIDATOR CHAIN:\r\n- `python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST.md`\r\n- `python automation/orchestration/watchdog/aios_deadman_watchdog.py --threshold-seconds 600`\r\n- PowerShell parse check on every changed .ps1 file (the same syntax gate the CI validate job runs)\r\n- `python -m pytest automation/orchestration/watchdog` if Python tests are added\r\n- `git diff --check`\r\n\r\nEXPECTED OUTPUT FILES (Phase 1):\r\n- `Reports/endurance_tier1/weekend_crash_survival_design_dry_run.md`\r\n- `Reports/endurance_tier1/weekend_crash_survival_validator_result.example.json`\r\n\r\nFORBIDDEN ACTIONS:\r\n- Do not register any scheduler, service, cron, or systemd unit.\r\n- Do not enable live notifications or auto-approve anything.\r\n- Do not change packet, approval, lock, or worker-queue flow.\r\n- Do not resume APPLY outside the governed night cycle.\r\n- Do not refactor or rename unrelated scripts.\r\n- Do not commit, push, or merge without separate explicit approval.\r\n- Do not run live trading or broker work, and do not store secrets.\r\n\r\nSTOP POINT:\r\nStop after producing the Phase 1 design, preview diffs, and validator result. Stop\r\nimmediately if preflight branch or worktree state does not match this packet, if\r\ndirty files overlap the mission unsafely, if a required authority file is missing,\r\nif validation fails, if a secret-like value appears, if any scheduler or live\r\nnotification appears in scope, if live trading or broker work appears, or if APPLY\r\napproval is not explicit.\r\n\r\nHUMAN APPROVAL REQUIREMENT BEFORE APPLY:\r\nThis packet is a draft. APPLY requires a separate explicit Human Owner approval\r\nnaming this packet ID, the exact allowed paths, the heartbeat schema, the restart\r\narming flag, and the validator chain.\r\n\r\nFINAL REPORT FORMAT:\r\nSUMMARY:\r\nWHAT CHANGED:\r\nFILES CHANGED:\r\nREUSED VS ADDED:\r\nHARD-LIMIT COMPLIANCE CHECKLIST:\r\nVALIDATION:\r\nREMAINING DIRTY FILES:\r\nWEEKEND SOAK INSTRUCTIONS:\r\nSAFE NEXT ACTION:\r\nSTATUS: COMPLETE, NO COMMIT, NO PUSH"
+                           },
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+                               "title":  "AI_OS_PACKET_DRAFT_GOV_APPROVAL_AUTHORITY",
+                               "mode":  "DRY_RUN-FIRST",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ],
+                               "approval_required":  true,
+                               "duplicate_notes":  [
+
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\n\r\nIDENTITY MARKER: AI_OS_PACKET_DRAFT_GOV_APPROVAL_AUTHORITY\r\n\r\nSUPERVISOR IDENTITY: Codex West\r\n\r\nPACKET ID: AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST\r\n\r\nMODE: DRY_RUN-FIRST\r\n\r\nZONE: West governance hardening lane\r\n\r\nWORKER IDENTITY: WEST_OCC_01\r\n\r\nLANE: AI_OS_GOVERNANCE_APPROVAL_HARDENING\r\n\r\nWORKTREE: C:\\Dev\\Ai.Os (verified by preflight)\r\n\r\nBRANCH: branch FROM main, verified before APPLY by preflight\r\n\r\nSOURCE FINDING:\r\nMerged PR 460 exposed a self-approval forgery vector. A worker edited\r\nautomation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json to set\r\napproved_by_human to true with a placeholder midnight timestamp and a free-text\r\nbound_by value, and it passed the entire approval chain. The root cause is that\r\nthe worker and the Human Owner share one git identity and no validator\r\ndistinguishes the two actors. This is the highest priority security packet in\r\nthe West governance hardening lane.\r\n\r\nOBJECTIVE (definition of done):\r\nClose the self-approval forgery vector so that a worker can no longer forge a\r\nhuman-approved gate. Approval of APPLY must depend on an out-of-band signal that\r\na worker identity cannot produce, and every gate and executor that trusts the\r\nraw approved_by_human boolean must instead require that verified signal. DRY_RUN\r\nfirst, with a STOP before APPLY. Reuse existing validators and gates. Do not\r\nweaken any existing gate.\r\n\r\nGROUNDED FINDINGS (already verified; do NOT re-derive):\r\n- The live gate record on main is in a forged-then-reverted history state. The\r\n  current task is to design a governed restore of the gate to a safe pending\r\n  state and to remove the trust path that let the forgery pass.\r\n- The two approval validators\r\n  automation/orchestration/validators/Test-ApplyApprovalGate.DRY_RUN.ps1 and\r\n  automation/orchestration/validators/Test-ApprovalInboxIntegrity.DRY_RUN.ps1\r\n  already exist and are the reuse target. Harden them; do not replace them.\r\n- automation/orchestration/dispatcher/assignment_executor.py and\r\n  automation/orchestration/work_packets/Move-AiOsPacketState.ps1 both read the\r\n  raw approval boolean and are the two executor trust points to fix.\r\n- A branch-protection plus CODEOWNERS control on the approval_inbox path is the\r\n  correct durable defense, but .github is forbidden to workers, so it is a\r\n  Human-Owner manual step recorded in the report, not a worker edit.\r\n\r\nMISSION:\r\nProduce, DRY_RUN first and only after explicit APPLY approval, the design and\r\nproof that closes the self-approval forgery vector. Define an out-of-band\r\nhuman-approval signal that a worker identity cannot generate, harden the two\r\nexisting approval validators to reject forged gates, make the two executors\r\nrequire the verified signal instead of the raw boolean, add an\r\napproval-integrity validator plus tests that prove a worker-forged gate is\r\nrejected, and record the CODEOWNERS plus branch-protection control as a\r\nHuman-Owner manual step. Reuse before adding.\r\n\r\nDESIGN SCOPE (Phase 1 design targets):\r\n1. Remediate the live gate record. Design a governed change that restores\r\n   automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json to a safe\r\n   pending state, with approved_by_human set to false and approval_status set to\r\n   pending_review, since a forged approved state reached main. The restore is a\r\n   governed change with a preview diff, not a silent edit.\r\n2. Out-of-band human-approval signal. Design a signal a worker cannot produce.\r\n   The preferred design is an HMAC computed over the packet id plus the allowed\r\n   paths plus the approval timestamp using a key held only by the Human Owner, or\r\n   alternatively a required signed commit or an Approved-by trailer verified in\r\n   continuous integration. Validators MUST FAIL when approved_by_human is true\r\n   and no valid out-of-band signal is present. The key itself is never written\r\n   into the repo, never echoed, and never stored in any tracked file.\r\n3. Harden the two approval validators. Update\r\n   automation/orchestration/validators/Test-ApplyApprovalGate.DRY_RUN.ps1 and\r\n   automation/orchestration/validators/Test-ApprovalInboxIntegrity.DRY_RUN.ps1 to\r\n   reject placeholder or midnight timestamps, reject a free-text bound_by value\r\n   that is not on an explicit actor allowlist, and reject approved_by_human true\r\n   without the verified signal from item 2.\r\n4. Stop executors trusting the raw boolean. In\r\n   automation/orchestration/dispatcher/assignment_executor.py the\r\n   future_apply_approved path, and in\r\n   automation/orchestration/work_packets/Move-AiOsPacketState.ps1 the apply-gate\r\n   assertion, must require the verified out-of-band signal rather than the raw\r\n   approved_by_human boolean.\r\n5. CODEOWNERS plus branch-protection recommendation. Recommend, do NOT edit, a\r\n   CODEOWNERS entry plus a branch-protection rule scoped to the approval_inbox\r\n   path. Because .github is forbidden to workers, this is documented in the final\r\n   report as a Human-Owner manual step only.\r\n6. Approval-integrity validator plus tests. Add an approval-integrity validator\r\n   plus tests that prove a worker-forged gate is rejected. The proof must include\r\n   a forged-gate fixture that the validator rejects.\r\n\r\nALLOWED PATHS:\r\n- automation/orchestration/validators/\r\n- automation/validators/\r\n- automation/orchestration/approval_inbox/\r\n- automation/orchestration/dispatcher/\r\n- automation/orchestration/work_packets/\r\n- tests/\r\n- Reports/governance_hardening/\r\n\r\nFORBIDDEN PATHS:\r\n- .github/\r\n- .github/workflows/\r\n- .githooks/\r\n- .git/\r\n- AGENTS.md\r\n- RISK_POLICY.md\r\n- README.md\r\n- WHITEPAPER.md\r\n- ARCHITECTURE.md\r\n- secrets/\r\n- credentials/\r\n- .env\r\n- .env.*\r\n- broker/\r\n- OANDA/\r\n- live_trading/\r\n- automation/orchestration/workers/\r\n- automation/orchestration/locks/\r\n- automation/orchestration/night_supervisor/\r\n\r\nHARD LIMITS (a violation fails this packet):\r\n- DRY_RUN is the default. Phase 1 produces design plus a preview diff plan plus a\r\n  validator and test plan only. No file mutation in Phase 1.\r\n- STOP before APPLY. APPLY requires a separate explicit Human Owner approval\r\n  naming this packet ID.\r\n- Do not edit .github or CODEOWNERS or any continuous integration workflow.\r\n  Recommend those controls as Human-Owner manual steps only.\r\n- Do not weaken any existing gate, validator, approval, lock, or stop point. Only\r\n  strengthen them.\r\n- Honor the STOP kill-switch control/self_continuation/STOP.\r\n- All writes in Phase 2 MUST be atomic (temp then rename).\r\n- No scheduler registration. No live notifications. No broker work. No secrets.\r\n  No live trading.\r\n- Do not merge, close, convert to draft, rebase, push, or comment on PR 449,\r\n  PR 451, or PR 460.\r\n\r\nAPPROVAL AUTHORITY:\r\nAnthony Meza, the Human Owner, must approve before APPLY. A validator PASS is\r\nevidence only and does not approve APPLY, commit, push, merge, hook install,\r\napproval-inbox mutation, worker-queue mutation, Night Supervisor mutation,\r\nscheduler registration, live notification, live trading, or secret handling. This\r\npacket does not state that the Human Owner explicitly approves commit, push, or\r\nmerge; those require a separate explicit approval naming this packet ID.\r\n\r\nPREFLIGHT (read-only, before any APPLY work):\r\n- pwd\r\n- git status --short --branch\r\n- git branch --show-current\r\n- git remote -v\r\n- Read AGENTS.md\r\n- Read RISK_POLICY.md\r\n- Read README.md\r\n- Read automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json\r\n- Read automation/orchestration/validators/Test-ApplyApprovalGate.DRY_RUN.ps1\r\n- Read automation/orchestration/validators/Test-ApprovalInboxIntegrity.DRY_RUN.ps1\r\n- Read automation/orchestration/dispatcher/assignment_executor.py\r\n- Read automation/orchestration/work_packets/Move-AiOsPacketState.ps1\r\n\r\nPHASE 1 (this packet, no APPLY): produce the DRY_RUN design, a preview diff plan\r\nfor the six design targets, and a validator and test plan. Then STOP for Human\r\nOwner APPLY approval.\r\n\r\nPHASE 2 (only after explicit APPLY approval naming this packet ID): apply the\r\nedits to the two existing approval validators, the two executors, the gate\r\nrecord restore, and the new approval-integrity validator plus tests, run the\r\nvalidator chain and tests, and stop before commit, push, or merge unless that\r\nsame approval explicitly authorizes them.\r\n\r\nVALIDATOR CHAIN:\r\n- python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST.md\r\n- PowerShell parse check on every changed .ps1 file (the same syntax gate the\r\n  continuous integration validate job runs) in Phase 2\r\n- Python tests for the approval-integrity validator in Phase 2, including the\r\n  worker-forged-gate rejection test\r\n- git diff --check\r\n\r\nEXPECTED OUTPUT FILES (Phase 1):\r\n- Reports/governance_hardening/approval_authority_hardening_design_dry_run.md\r\n- Reports/governance_hardening/approval_authority_hardening_validator_result.example.json\r\n\r\nFORBIDDEN ACTIONS:\r\n- Do not edit any continuous integration workflow or anything under .github.\r\n- Do not edit CODEOWNERS; recommend it as a Human-Owner manual step only.\r\n- Do not weaken or remove any existing gate, validator, approval, lock, or stop\r\n  point.\r\n- Do not write any key, secret, or token into a tracked file, and do not echo any\r\n  secret value.\r\n- Do not register any scheduler, service, cron, or systemd unit.\r\n- Do not enable live notifications or auto-approve anything.\r\n- Do not merge, close, draft, rebase, push, or comment on PR 449, PR 451, or\r\n  PR 460.\r\n- Do not commit, push, or merge without separate explicit approval.\r\n- Do not run live trading or broker work, and do not store secrets.\r\n\r\nSTOP POINT:\r\nStop after producing the Phase 1 design, preview diff plan, and validator result.\r\nStop immediately if preflight branch or worktree state does not match this packet,\r\nif dirty files overlap the mission unsafely, if a required authority file is\r\nmissing, if validation fails, if a secret-like value appears, if any scheduler or\r\nlive notification appears in scope, if a continuous integration workflow edit\r\nappears in scope, if live trading or broker work appears, or if APPLY approval is\r\nnot explicit.\r\n\r\nHUMAN APPROVAL REQUIREMENT BEFORE APPLY:\r\nThis packet is a draft. APPLY requires a separate explicit Human Owner approval\r\nnaming this packet ID, the exact allowed paths, the out-of-band signal design\r\nchosen, and the validator chain.\r\n\r\nFINAL REPORT FORMAT:\r\nSUMMARY:\r\nWHAT CHANGED:\r\nFILES CHANGED:\r\nREUSED VS ADDED:\r\nHARD-LIMIT COMPLIANCE CHECKLIST:\r\nVALIDATION:\r\nREMAINING DIRTY FILES:\r\nSAFE NEXT ACTION:\r\nSTATUS: COMPLETE, NO COMMIT, NO PUSH"
+                           },
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+                               "title":  "AI_OS_PACKET_DRAFT_FROM_BRIDGE_RECOMMENDATION",
+                               "mode":  "DRY_RUN-FIRST",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ],
+                               "approval_required":  true,
+                               "duplicate_notes":  [
+
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\n\r\nIDENTITY MARKER: AI_OS_PACKET_DRAFT_FROM_BRIDGE_RECOMMENDATION\r\n\r\nSUPERVISOR IDENTITY: Codex East\r\n\r\nPACKET ID: AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST\r\n\r\nMODE: DRY_RUN-FIRST\r\n\r\nZONE: East orchestration validation\r\n\r\nWORKER IDENTITY: EAST_OCC_01\r\n\r\nLANE: APPROVAL_INBOX_SCHEMA_VALIDATOR_ONLY\r\n\r\nWORKTREE: C:\\Dev\\Ai.Os\r\n\r\nBRANCH: main, verified before APPLY by preflight\r\n\r\nSOURCE RECOMMENDATION:\r\nDerived from bridge recommendation `AIOS-SB-001` in `Reports/phase_0_to_4_bridge/phase4_self_build_inspection.json`.\r\n\r\nMISSION:\r\nCreate an APPLY-ready local validator lane for canonical approval inbox schema checks. The lane must read approval inbox files, validate required fields and safety status, emit local evidence, and avoid mutating approvals, worker queue state, Night Supervisor state, hooks, trading systems, secrets, commits, or pushes.\r\n\r\nALLOWED PATHS:\r\n- `automation/validators/`\r\n- `tests/governance/`\r\n- `Reports/phase_0_to_4_bridge/`\r\n\r\nFORBIDDEN PATHS:\r\n- `AGENTS.md`\r\n- `README.md`\r\n- `WHITEPAPER.md`\r\n- `ARCHITECTURE.md`\r\n- `docs/architecture/AI_OS_WHITEPAPER.md`\r\n- `automation/orchestration/approval_inbox/`\r\n- `automation/orchestration/workers/`\r\n- `automation/orchestration/work_packets/active/`\r\n- `automation/orchestration/work_packets/blocked/`\r\n- `automation/orchestration/work_packets/complete/`\r\n- `automation/orchestration/night_supervisor/`\r\n- `.githooks/`\r\n- `.git/`\r\n- `.github/workflows/`\r\n- `telemetry/night_supervisor/`\r\n- `services/`\r\n- `apps/trading_lab/trading_lab/execution/`\r\n- `aios/modules/trader/`\r\n- `.env`\r\n- `secrets/`\r\n- `broker/`\r\n- `OANDA/`\r\n- `live_trading/`\r\n\r\nAPPROVAL AUTHORITY:\r\nAnthony Meza / Human Owner must approve before APPLY. Validator PASS is evidence only and does not approve APPLY, commit, push, merge, hook install, approval mutation, worker queue mutation, Night Supervisor mutation, live trading, broker runtime work, or secret handling.\r\n\r\nPREFLIGHT:\r\nRun these read-only checks before any APPLY work:\r\n- `pwd`\r\n- `git status --short --branch`\r\n- `git branch --show-current`\r\n- `git remote -v`\r\n- Read `AGENTS.md`\r\n- Read `README.md`\r\n- Read `Reports/phase_0_to_4_bridge/phase4_self_build_inspection.json`\r\n- Read `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json`\r\n- Read `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json`\r\n\r\nAFFECTED FILES:\r\n- `automation/validators/aios_approval_inbox_schema_validator.py`\r\n- `tests/governance/test_approval_inbox_schema_validator.py`\r\n- `Reports/phase_0_to_4_bridge/approval_inbox_schema_validator_dry_run.example.json`\r\n\r\nEXPECTED OUTPUT FILES:\r\n- `Reports/phase_0_to_4_bridge/approval_inbox_schema_validator_dry_run.example.json`\r\n\r\nVALIDATOR CHAIN:\r\n- `python -m py_compile automation/validators/aios_approval_inbox_schema_validator.py`\r\n- `python -m pytest tests/governance`\r\n- `python automation/bridge/aios_phase_bridge.py --mode DRY_RUN --repo-root .`\r\n- `git diff --check`\r\n- Existing secret-scan or governance validator if present and safe: `python automation/validators/aios_governance_validator.py --sample-check`\r\n\r\nFORBIDDEN ACTIONS:\r\n- Do not mutate approval inbox state.\r\n- Do not mutate worker inbox or worker registry state.\r\n- Do not start Night Supervisor runtime.\r\n- Do not install hooks.\r\n- Do not commit.\r\n- Do not push.\r\n- Do not merge.\r\n- Do not create branches unless separately approved.\r\n- Do not run live trading.\r\n- Do not enable broker runtime work.\r\n- Do not read, print, create, or move secrets.\r\n- Do not call external services.\r\n- Do not create network tunnels.\r\n\r\nSTOP POINT:\r\nStop after producing the validator, tests, example evidence, and validation results. Stop immediately if preflight branch/worktree state does not match this packet, if dirty files overlap the mission in an unsafe way, if any required authority file is missing, if validation fails, if a secret-like value appears, if live trading or broker runtime work appears in scope, or if APPLY approval is not explicit.\r\n\r\nHUMAN APPROVAL REQUIREMENT BEFORE APPLY:\r\nThis packet is a draft. APPLY requires a separate explicit Human Owner approval naming this packet ID, the exact allowed paths, and the exact validation chain. Commit and push require separate later approvals.\r\nThis packet does not state that Anthony explicitly approves commit, push, or merge.\r\n\r\nFINAL REPORT FORMAT:\r\nUse this exact completion format:\r\n\r\nSUMMARY:\r\nWHAT CHANGED:\r\nFILES CHANGED:\r\nVALIDATION:\r\nREMAINING DIRTY FILES:\r\nSAFE NEXT COMMAND:\r\nSTATUS: COMPLETE, NO COMMIT, NO PUSH"
+                           },
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
+                               "title":  "AI_OS Packet 3A dispatch lane and worker-state proposal",
+                               "mode":  "DRY_RUN",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED",
+                                                               "FORBIDDEN PATHS"
+                                                           ],
+                               "approval_required":  false,
+                               "duplicate_notes":  [
+
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\n\r\nidentity marker: AI_OS Packet 3A dispatch lane and worker-state proposal\r\nsupervisor identity: Anthony approval authority\r\npacket ID: AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST\r\nmode: DRY_RUN\r\nzone: orchestration / dispatch lane decision / worker-state atomic design\r\nworker identity: Codex CLI local executor\r\nlane: packet3a-dispatch-lane-workerstate-dry-run\r\nworktree: C:\\Dev\\Ai.Os\r\nbranch: resolve after preflight\r\n\r\napproval authority: Anthony\r\napproval status: DRY_RUN review only. Packet 3A APPLY is not approved. Packet 3B, Packet 3C, Packet 3D, Packet 3E, Packet 2, and Packet 4 are not approved. No worker launch, scheduler, Night Supervisor, SOS, ADB, broker/cloud/live trading, secrets, commit, push, or merge is approved.\r\n\r\ntitle:\r\nAIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST\r\n\r\npurpose:\r\nNarrow DRY_RUN-first packet to decide the canonical dispatch lane and design worker-state atomic read/write hardening.\r\n\r\nknown state:\r\nPacket 1 approval-authority hardening has landed on main.\r\nApproval chain reports PENDING_HUMAN_REVIEW.\r\nRaw approved_by_human=true is no longer enough for APPLY.\r\nThe original Packet 3 was reviewed and classified PACKET3_SPLIT_REQUIRED.\r\nPacket 3A is the first smaller increment split from the original Packet 3.\r\nExisting atomic file-lock persistence must be reused. Do not redo the lock system.\r\nControlled worker launch remains blocked.\r\n\r\nsource packet:\r\nOriginal parked Packet 3 source:\r\norigin/claude/autonomy-closure-packets\r\nautomation/orchestration/work_packets/proposed/AIOS-T2-DISPATCH-CLOSURE-WORKERSTATE-CITESTS-DRY-RUN-FIRST.md\r\n\r\nmission:\r\nRun a DRY_RUN-only inspection and design pass for Packet 3A. Inventory current dispatch lanes, recommend the canonical dispatch lane, decide whether the TypeScript dispatcher/runtime lane should be repaired, shelved, or left out of T2A, inventory worker-state files and scripts, design atomic worker-state write/read hardening, design fail-safe worker-state read behavior, produce exact future APPLY scope, produce exact tests and validators for later, and stop before APPLY.\r\n\r\npreflight:\r\nRun:\r\npwd\r\ngit status --short --branch\r\ngit branch --show-current\r\ngit remote -v\r\ngit fetch origin\r\ngit status --short --branch\r\ngit log -1 --oneline\r\n\r\nConfirm:\r\n- current branch is main or safely state-aligned after preflight\r\n- main is aligned with origin/main before any later APPLY design is finalized\r\n- no tracked dirty files exist\r\n- only known unrelated untracked backlog exists\r\n- approval chain is pending/review-required, not raw approved\r\n- Packet 1 approval hardening is present\r\n- original Packet 3 remains parked\r\n- Packet 3B, Packet 3C, Packet 3D, Packet 2, and Packet 4 remain parked\r\n\r\nknown unrelated untracked backlog:\r\nReports/phase_0_to_4_bridge/AIOS_REMOTE_ACCESS_MODEL_NOTE_20260608.md\r\nReports/phase_0_to_4_bridge/app_service_bridge_v0_remote_overlap_review_20260608.md\r\nautomation/orchestration/work_packets/proposed/AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md\r\n\r\nread first:\r\nAGENTS.md\r\nREADME.md\r\nautomation/orchestration/README.md\r\ndocs/governance/source-of-truth-map.md\r\ndocs/audits/active-system-map.md\r\ndocs/architecture/AIOS_CANONICAL_LOOP_DECISION.md\r\nautomation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json\r\nautomation/orchestration/approval_inbox/Invoke-AiOsApprovalChain.DRY_RUN.ps1\r\n\r\ninspect dispatch lane surfaces:\r\nautomation/orchestration/dispatcher/\r\nautomation/dispatcher/runtime/\r\nautomation/dispatcher/runtime/packets/Assign-AIOSPacket.ps1\r\nautomation/dispatcher/runtime/workers/Update-AIOSWorkerHeartbeat.ps1\r\nservices/dispatcher/\r\nservices/runtime/\r\nautomation/orchestration/workers/\r\nautomation/window_identity/ if present\r\ntests/orchestration/\r\ntests/governance/\r\n\r\nDRY_RUN requirements:\r\n1. Inventory current dispatch lanes.\r\n2. Identify the canonical dispatch lane recommendation.\r\n3. Decide whether the TypeScript dispatcher/runtime lane should be repaired, shelved, or left out of T2A.\r\n4. Inventory worker-state files and scripts.\r\n5. Design atomic worker-state write/read hardening.\r\n6. Design fail-safe worker-state read behavior for missing, malformed, or partially written state.\r\n7. Identify exact future APPLY scope and exact files to edit, based on repo evidence.\r\n8. Identify exact tests and validators for later APPLY.\r\n9. Confirm no worker launch, scheduler, Night Supervisor, SOS, ADB, broker/live trading, webhook, secret, or production action is introduced.\r\n10. Stop before APPLY.\r\n\r\nlater APPLY candidate scope:\r\nThe later APPLY packet must be generated only after this DRY_RUN confirms exact files. Likely files may include:\r\n- docs/architecture/AIOS_CANONICAL_LOOP_DECISION.md\r\n- automation/dispatcher/runtime/workers/Update-AIOSWorkerHeartbeat.ps1\r\n- worker-state read/write helper paths discovered during DRY_RUN\r\n- focused tests under tests/orchestration/ and/or tests/governance/\r\n\r\nexplicit exclusions:\r\n- assignment lock integration\r\n- relay idempotency\r\n- stranded-task recovery\r\n- CI workflow edits\r\n- .github edits\r\n- CODEOWNERS edits\r\n- Reports seeding except read-only evidence only\r\n- worker launch\r\n- scheduler\r\n- Night Supervisor\r\n- SOS or ADB\r\n- broker, OANDA, cloud, live trading, webhooks\r\n- secrets, credentials, .env\r\n- Packet 3B, Packet 3C, Packet 3D, Packet 3E, Packet 2, or Packet 4 release\r\n\r\nallowed paths:\r\nREAD ONLY:\r\nAGENTS.md\r\nREADME.md\r\ndocs/governance/\r\ndocs/audits/\r\ndocs/architecture/\r\nautomation/orchestration/\r\nautomation/dispatcher/runtime/\r\nautomation/validators/\r\nservices/dispatcher/\r\nservices/runtime/\r\ntests/orchestration/\r\ntests/governance/\r\n.github/workflows/ only for read-only CI context if needed\r\n\r\nFOR FUTURE APPLY DESIGN ONLY:\r\ndocs/architecture/AIOS_CANONICAL_LOOP_DECISION.md\r\nautomation/dispatcher/runtime/workers/\r\nworker-state read/write helper paths discovered during DRY_RUN\r\ntests/orchestration/\r\ntests/governance/\r\n\r\nforbidden paths and actions:\r\nDo not edit files in this DRY_RUN.\r\nDo not apply Packet 3A.\r\nDo not activate or move this packet.\r\nDo not edit approval_inbox/.\r\nDo not edit locks/.\r\nDo not edit relay scripts.\r\nDo not edit assignment lock integration.\r\nDo not edit .github/.\r\nDo not edit CODEOWNERS.\r\nDo not edit Reports/.\r\nDo not release Packet 3B.\r\nDo not release Packet 3C.\r\nDo not release Packet 3D.\r\nDo not release Packet 3E.\r\nDo not release Packet 2.\r\nDo not release Packet 4.\r\nDo not launch workers.\r\nDo not start scheduler.\r\nDo not start Night Supervisor.\r\nDo not run full night cycle.\r\nDo not arm/send SOS.\r\nDo not call ADB.\r\nDo not send notifications.\r\nDo not touch broker, cloud, live trading, OANDA, webhooks, secrets, credentials, or .env.\r\nDo not stage files.\r\nDo not commit.\r\nDo not push.\r\nDo not merge.\r\nDo not stash.\r\nDo not clean.\r\n\r\nSTOP-before-APPLY:\r\nThis packet is DRY_RUN-first. Stop after producing the Packet 3A design report. APPLY requires a separate explicit Anthony approval naming this packet ID, exact allowed paths, exact files, validator chain, and stop point.\r\n\r\nreuse requirements:\r\nReuse Packet 1 approval hardening.\r\nReuse existing atomic file-lock persistence.\r\nDo not create duplicate approval authority.\r\nDo not create a fourth dispatch lane.\r\nDo not redo the lock system.\r\n\r\nvalidator chain:\r\nRun safe read-only validation:\r\npowershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/approval_inbox/Invoke-AiOsApprovalChain.DRY_RUN.ps1\r\npython automation/orchestration/dispatcher/assignment_executor.py --sample-check --json\r\npython automation/validators/aios_worker_dispatcher_assignment_executor_validator.py --sample-check --json\r\npython -m pytest tests/orchestration/test_worker_dispatcher_assignment_executor.py tests/orchestration/test_worker_dispatcher_control_plane.py tests/governance/test_aios_worker_dispatcher_validator.py\r\ngit diff --check\r\ngit status --short --branch\r\n\r\nIf a governance validator exists for proposed work packets, run it against this file:\r\npython automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST.md\r\n\r\nfinal report format:\r\nSUMMARY:\r\nCURRENT REPO STATE:\r\nDISPATCH LANE INVENTORY:\r\nCANONICAL LANE RECOMMENDATION:\r\nTYPESCRIPT LANE DECISION:\r\nWORKER-STATE INVENTORY:\r\nATOMIC WORKER-STATE DESIGN:\r\nFAIL-SAFE READ DESIGN:\r\nFUTURE APPLY SCOPE:\r\nTESTS / VALIDATORS:\r\nEXCLUSIONS CONFIRMED:\r\nRUNTIME SAFETY REVIEW:\r\nDRY_RUN DECISION:\r\nSAFE NEXT ACTION:\r\nSTATUS: DRY_RUN COMPLETE, NO FILES CHANGED\r\n\r\nstop point:\r\nStop after Packet 3A DRY_RUN design report. Do not APPLY, edit, stage, commit, push, merge, activate packets, or launch anything."
+                           },
+                           {
+                               "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md",
+                               "source_kind":  "proposed",
+                               "packet_id":  "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+                               "title":  "AI_OS_PACKET_DRAFT_T2B_ASSIGNMENT_LOCK_INTEGRATION",
+                               "mode":  "DRY_RUN-FIRST",
+                               "status":  "REVIEW_REQUIRED",
+                               "missing_required_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED",
+                                                               "FORBIDDEN PATHS",
+                                                               "VALIDATOR CHAIN"
+                                                           ],
+                               "approval_required":  true,
+                               "duplicate_notes":  [
+
+                                                   ],
+                               "source_text":  "CODEX-ONLY PROMPT\r\n\r\nAI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY\r\n\r\nAI_OS BOOTSTRAP REQUIRED\r\n\r\nIDENTITY MARKER: AI_OS_PACKET_DRAFT_T2B_ASSIGNMENT_LOCK_INTEGRATION\r\n\r\nSUPERVISOR IDENTITY: Anthony approval authority\r\n\r\nPACKET ID: AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST\r\n\r\nMODE: DRY_RUN-FIRST\r\n\r\nZONE: orchestration / Packet 3B assignment lock integration\r\n\r\nWORKER IDENTITY: Codex CLI local executor\r\n\r\nLANE: packet3b-assignment-lock-integration\r\n\r\nWORKTREE: C:\\Dev\\Ai.Os\r\n\r\nBRANCH: main, verified by read-only preflight before any future APPLY\r\n\r\nAPPROVAL AUTHORITY:\r\nAnthony is the Human Owner and approval authority. This proposed packet is not\r\nAPPLY approval. Validator PASS is evidence only. Commit, push, merge, packet\r\nactivation, worker launch, scheduler start, Night Supervisor start, SOS, ADB,\r\nnotification send, broker work, live trading, cloud deployment, and secret\r\nhandling each remain blocked unless separately and explicitly approved.\r\n\r\nPURPOSE:\r\nNarrow DRY_RUN-first packet to design assignment lock integration using existing\r\natomic lock persistence. Packet 3B must reuse the current approval hardening from\r\nPacket 1, reuse the Packet 3A canonical lane decision and worker-state hardening,\r\nand reuse the existing lock persistence under automation/orchestration/locks/.\r\nIt must not redo the lock system.\r\n\r\nMISSION:\r\nPerform a DRY_RUN design for integrating file-lock claims into packet assignment.\r\nThe design must inspect the current assignment mutation path, inspect existing\r\nlock persistence helpers, define the later APPLY scope, define exact tests and\r\nvalidators, and stop before APPLY. No assignment mutation, lock mutation, worker\r\nlaunch, scheduler, Night Supervisor, SOS, ADB, notification, broker/live trading,\r\nsecret handling, or packet activation is approved by this proposal.\r\n\r\nREAD-ONLY PREFLIGHT:\r\n- pwd\r\n- git status --short --branch\r\n- git branch --show-current\r\n- git remote -v\r\n- git fetch origin\r\n- git status --short --branch\r\n- git log -1 --oneline\r\n- Confirm current branch is main and aligned with origin/main.\r\n- Confirm no tracked dirty files exist.\r\n- Confirm only known unrelated untracked backlog remains, or stop and report.\r\n- Confirm approval chain remains PENDING_HUMAN_REVIEW or equivalent safe non-APPLY state.\r\n- Confirm Packet 1 approval-authority hardening has landed.\r\n- Confirm Packet 3A worker-state lane hardening has landed.\r\n- Confirm no active APPLY approval exists.\r\n\r\nDRY_RUN INSPECTION SCOPE:\r\n- AGENTS.md\r\n- automation/dispatcher/runtime/packets/Assign-AIOSPacket.ps1\r\n- automation/orchestration/locks/Claim-AiOsFileLock.DRY_RUN.ps1\r\n- automation/orchestration/locks/Release-AiOsFileLock.DRY_RUN.ps1\r\n- automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1\r\n- automation/orchestration/locks/FILE_LOCK_REGISTRY.json\r\n- automation/orchestration/dispatcher/\r\n- automation/orchestration/work_packets/\r\n- tests/orchestration/test_file_lock_persistence.py\r\n- tests/orchestration/test_packet3a_worker_state_atomicity.py\r\n- tests/governance/test_packet3a_dispatch_lane_decision.py\r\n- docs/architecture/AIOS_CANONICAL_LOOP_DECISION.md\r\n\r\nALLOWED PATHS:\r\n- automation/dispatcher/runtime/packets/Assign-AIOSPacket.ps1\r\n- tests/orchestration/test_packet3b_assignment_lock_integration.py\r\n- tests/orchestration/test_file_lock_persistence.py\r\n- tests/orchestration/test_packet3a_worker_state_atomicity.py\r\n- tests/governance/test_packet3a_dispatch_lane_decision.py\r\n- docs/architecture/AIOS_CANONICAL_LOOP_DECISION.md only if the DRY_RUN proves an existing canonical note needs a small update.\r\n\r\nDRY_RUN DESIGN REQUIREMENTS:\r\n1. Inspect the current assignment mutation path in automation/dispatcher/runtime/packets/Assign-AIOSPacket.ps1.\r\n2. Inspect existing lock persistence scripts:\r\n   - automation/orchestration/locks/Claim-AiOsFileLock.DRY_RUN.ps1\r\n   - automation/orchestration/locks/Release-AiOsFileLock.DRY_RUN.ps1\r\n   - automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1\r\n3. Design lock claim before assignment mutation.\r\n4. Design fail-closed behavior when lock claim is BLOCKED or REVIEW_REQUIRED.\r\n5. Design exact lock ID recording behavior only after successful lock claim.\r\n6. Design double-assignment prevention using assigned-worker checks plus active lock overlap.\r\n7. Design release requirement using exact worker_id plus lock_id.\r\n8. Design stale-lock handling as REVIEW_REQUIRED only, never auto-clear.\r\n9. Produce exact later APPLY scope.\r\n10. Produce exact tests and validators.\r\n11. Stop before APPLY.\r\n\r\nEXPECTED DESIGN ANSWERS:\r\n- Exact current assignment mutation path.\r\n- Exact existing lock persistence functions and scripts to reuse.\r\n- Exact future APPLY files.\r\n- Exact future tests and validators.\r\n- Whether future APPLY needs splitting.\r\n- How double-assignment is prevented.\r\n- How lock collision fails closed.\r\n- How lock release is handled.\r\n- How stale locks are reported without auto-clearing.\r\n- How Packet 3B avoids worker launch.\r\n\r\nLIKELY FUTURE APPLY FILES:\r\n- automation/dispatcher/runtime/packets/Assign-AIOSPacket.ps1\r\n- tests/orchestration/test_packet3b_assignment_lock_integration.py\r\n- Possible small docs update only if an existing canonical doc needs a note.\r\n\r\nFUTURE APPLY BOUNDARY:\r\nFuture APPLY must be separately approved after DRY_RUN confirms exact files. The\r\nlater APPLY scope should be limited to integrating lock claim preview/claim into\r\nassignment, recording successful lock IDs in assignment evidence, and adding\r\nfocused tests. Do not expand into queue movement, runtime launch, stale-lock\r\ncleanup, relay recovery, scheduler behavior, notification behavior, or governance\r\nauthority changes.\r\n\r\nREUSE REQUIREMENTS:\r\n- Reuse Packet 1 approval-authority hardening.\r\n- Reuse Packet 3A canonical lane decision and worker-state hardening.\r\n- Reuse automation/orchestration/locks/ atomic lock persistence.\r\n- Reuse Claim-AiOsFileLock.DRY_RUN.ps1 collision and policy-block behavior.\r\n- Reuse Release-AiOsFileLock.DRY_RUN.ps1 exact worker_id plus lock_id release behavior.\r\n- Reuse Get-AiOsWorkerLockStatus.DRY_RUN.ps1 stale/collision reporting.\r\n- Do not redo lock persistence.\r\n- Do not create a parallel lock registry.\r\n- Do not create any new governance authority source.\r\n\r\nHARD EXCLUSIONS:\r\n- No worker launch.\r\n- No scheduler.\r\n- No Night Supervisor.\r\n- No SOS or ADB.\r\n- No notifications.\r\n- No Telegram.\r\n- No broker or live trading.\r\n- No secrets, credentials, .env, webhooks, or cloud deployment.\r\n- No .github edit.\r\n- No CODEOWNERS edit.\r\n- No Reports seeding.\r\n- No relay idempotency work.\r\n- No stranded-task recovery work.\r\n- No stale-lock cleanup.\r\n- No stale-lock auto-clear.\r\n- No packet auto-reassignment.\r\n- No TypeScript runtime repair.\r\n- No Packet 2 work.\r\n- No Packet B+C work.\r\n- No Packet 4 work.\r\n- No packet activation or state movement.\r\n\r\nFORBIDDEN PATHS FOR FUTURE APPLY:\r\n- .github/\r\n- .github/workflows/\r\n- .githooks/\r\n- .git/\r\n- CODEOWNERS\r\n- AGENTS.md\r\n- README.md\r\n- RISK_POLICY.md\r\n- Reports/\r\n- automation/orchestration/approval_inbox/\r\n- automation/orchestration/relay/\r\n- automation/orchestration/workers/\r\n- automation/orchestration/night_supervisor/\r\n- automation/orchestration/notifications/\r\n- automation/orchestration/recovery/\r\n- services/python_supervisor/\r\n- secrets/\r\n- credentials/\r\n- .env\r\n- .env.*\r\n- broker/\r\n- OANDA/\r\n- live_trading/\r\n- webhooks/\r\n\r\nVALIDATOR CHAIN FOR THIS DRY_RUN PACKET:\r\n- powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/approval_inbox/Invoke-AiOsApprovalChain.DRY_RUN.ps1\r\n- python automation/orchestration/dispatcher/assignment_executor.py --sample-check --json\r\n- python automation/validators/aios_worker_dispatcher_assignment_executor_validator.py --sample-check --json\r\n- python -m pytest tests/orchestration/test_packet3a_worker_state_atomicity.py tests/governance/test_packet3a_dispatch_lane_decision.py\r\n- git diff --check\r\n- git status --short --branch\r\n- If a proposed-work-packet governance validator exists, run it against this file.\r\n\r\nVALIDATOR CHAIN FOR FUTURE APPLY:\r\n- PowerShell parser check for every changed .ps1 file.\r\n- Focused pytest coverage for Packet 3B assignment lock integration.\r\n- Existing lock persistence tests.\r\n- Existing Packet 3A worker-state and dispatch-lane tests.\r\n- Assignment executor sample-check.\r\n- Assignment executor validator sample-check.\r\n- Approval chain DRY_RUN.\r\n- git diff --check.\r\n- git status --short --branch.\r\n\r\nSTOP POINT:\r\nStop after DRY_RUN design and validator report. Do not APPLY, activate, move\r\npacket state, stage, commit, push, merge, launch workers, start scheduler, start\r\nNight Supervisor, arm/send SOS, call ADB, send notifications, touch secrets, or\r\ncontinue automatically.\r\n\r\nFINAL REPORT FORMAT:\r\nSUMMARY:\r\nPACKET3B_DESIGN:\r\nPACKET3B_FILES_LIKELY_TO_CHANGE:\r\nPACKET3B_TESTS_NEEDED:\r\nPACKET3B_SPLIT_DECISION:\r\nRUNTIME SAFETY REVIEW:\r\nVALIDATION:\r\nSAFE NEXT ACTION:\r\nSTATUS: DRY_RUN COMPLETE, NO APPLY, NO COMMIT, NO PUSH"
+                           }
+                       ],
+    "duplicate_intent_findings":  [
+                                      {
+                                          "query":  "Get-AiOsPacketFactoryView",
+                                          "severity":  "BLOCKED",
+                                          "match_count":  2,
+                                          "matched_paths":  [
+                                                                "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Get-AiOsPacketFactoryView.DRY_RUN.ps1",
+                                                                "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_packet_factory_view.py"
+                                                            ],
+                                          "status":  "BLOCKED"
+                                      },
+                                      {
+                                          "query":  "PACKET_FACTORY_VIEW",
+                                          "severity":  "BLOCKED",
+                                          "match_count":  4,
+                                          "matched_paths":  [
+                                                                "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Get-AiOsPacketFactoryView.DRY_RUN.ps1",
+                                                                "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Invoke-AiOsCoordinationSpine.DRY_RUN.ps1",
+                                                                "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_coordination_spine_orchestrator_scaffold.py",
+                                                                "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_packet_factory_view.py"
+                                                            ],
+                                          "status":  "BLOCKED"
+                                      },
+                                      {
+                                          "query":  "module5_packet_factory",
+                                          "severity":  "BLOCKED",
+                                          "match_count":  1,
+                                          "matched_paths":  [
+                                                                "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Get-AiOsPacketFactoryView.DRY_RUN.ps1"
+                                                            ],
+                                          "status":  "BLOCKED"
+                                      },
+                                      {
+                                          "query":  "Packet Factory Unifier",
+                                          "severity":  "REVIEW_REQUIRED",
+                                          "match_count":  2,
+                                          "matched_paths":  [
+                                                                "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Get-AiOsPacketFactoryView.DRY_RUN.ps1",
+                                                                "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_packet_factory_view.py"
+                                                            ],
+                                          "status":  "REVIEW_REQUIRED"
+                                      },
+                                      {
+                                          "query":  "coordination_spine packet factory",
+                                          "severity":  "REVIEW_REQUIRED",
+                                          "match_count":  2,
+                                          "matched_paths":  [
+                                                                "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Get-AiOsPacketFactoryView.DRY_RUN.ps1",
+                                                                "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_packet_factory_view.py"
+                                                            ],
+                                          "status":  "REVIEW_REQUIRED"
+                                      }
+                                  ],
+    "missing_required_fields":  [
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ]
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-COORDINATION-SPINE-V1.md",
+                                        "packet_id":  "AIOS-COORDINATION-SPINE-V1",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED",
+                                                               "ALLOWED PATHS",
+                                                               "FORBIDDEN PATHS"
+                                                           ]
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ]
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ]
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ]
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED"
+                                                           ]
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED",
+                                                               "FORBIDDEN PATHS"
+                                                           ]
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "missing_fields":  [
+                                                               "CODEX-ONLY PROMPT",
+                                                               "AI_OS BOOTSTRAP REQUIRED",
+                                                               "FORBIDDEN PATHS",
+                                                               "VALIDATOR CHAIN"
+                                                           ]
+                                    }
+                                ],
+    "approval_required_items":  [
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "reason":  "proposed_packet_requires_human_apply_approval"
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-COORDINATION-SPINE-V1.md",
+                                        "packet_id":  "AIOS-COORDINATION-SPINE-V1",
+                                        "source_kind":  "proposed",
+                                        "reason":  "proposed_packet_requires_human_apply_approval"
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "reason":  "proposed_packet_requires_human_apply_approval"
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "reason":  "proposed_packet_requires_human_apply_approval"
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "reason":  "proposed_packet_requires_human_apply_approval"
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "reason":  "proposed_packet_requires_human_apply_approval"
+                                    },
+                                    {
+                                        "file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\proposed\\AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md",
+                                        "packet_id":  "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+                                        "source_kind":  "proposed",
+                                        "reason":  "proposed_packet_requires_human_apply_approval"
+                                    }
+                                ],
+    "queue_context_summary":  {
+                                  "present":  true,
+                                  "packet_count":  5,
+                                  "normalized_state_counts":  {
+                                                                  "QUEUED":  1,
+                                                                  "RUNNING":  0,
+                                                                  "BLOCKED":  3,
+                                                                  "WAITING_APPROVAL":  0,
+                                                                  "COMPLETE":  1,
+                                                                  "FAILED":  0,
+                                                                  "ARCHIVED":  0
+                                                              },
+                                  "source_state_counts":  {
+                                                              "BLOCKED":  3,
+                                                              "ACTIVE":  1,
+                                                              "COMPLETE":  1
+                                                          }
+                              },
+    "lock_context_summary":  {
+                                 "present":  true,
+                                 "held_locks_count":  0,
+                                 "stale_locks_count":  0,
+                                 "collision_count":  0,
+                                 "safety_status":  "REVIEW_REQUIRED",
+                                 "write_behavior":  "telemetry_only"
+                             },
+    "recovery_context_summary":  {
+                                     "present":  true,
+                                     "recovery_readiness":  "BLOCKED",
+                                     "blockers":  [
+                                                      "marker_stale"
+                                                  ],
+                                     "warnings":  [
+                                                      "heartbeat_degraded"
+                                                  ],
+                                     "heartbeat_status":  "DEGRADED",
+                                     "write_behavior":  "telemetry_only"
+                                 },
+    "lead_dispatch_context_summary":  {
+                                          "present":  true,
+                                          "dispatcher_safety_verdict":  "BLOCKED",
+                                          "blocked_reason":  "queue_blocked, lock_review_required_or_collision, recovery_blocked",
+                                          "depends_on_t2b":  true,
+                                          "next_safe_action":  "Resolve the active blocker in queue, lock, or recovery telemetry before any assignment mutation."
+                                      },
+    "packet_factory_safety_verdict":  "BLOCKED",
+    "write_path_enabled":  false,
+    "write_behavior":  "telemetry_only",
+    "recommended_next_packet_action":  "Resolve queue, lock, recovery, or duplicate-intent blockers before proposing the next packet.",
+    "blockers":  [
+                     "lead_dispatch_blocked",
+                     "lock_review_required_or_collision",
+                     "queue_blocked",
+                     "recovery_blocked"
+                 ],
+    "warnings":  [
+                     "near_packet_factory_duplicate:AIOS-COORDINATION-SPINE-V1"
+                 ]
+}
