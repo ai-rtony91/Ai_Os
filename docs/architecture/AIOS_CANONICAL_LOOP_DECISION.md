@@ -55,6 +55,18 @@ Evidence that it is non-runnable today:
 - Tier 0 through Tier 3 hardening work targets the PowerShell lane and the Python supervisor it invokes, not a parallel TS rewrite.
 - The TS lane can be developed and tested off the production path without endangering an unattended run.
 
+## Packet 3A T2A dispatch lane decision
+
+Packet 3A records a narrower dispatch-lane decision for the T2A execution bridge. The canonical T2A dispatch lane is the PowerShell/Python orchestration lane. `automation/orchestration/dispatcher/assignment_executor.py` and `automation/orchestration/dispatcher/control_plane.py` are the orchestration cockpit for DRY_RUN evidence, dispatch previews, approval-state checks, lock-state checks, queue-state checks, and zero-launch confirmation.
+
+`automation/dispatcher/runtime/workers/Update-AIOSWorkerHeartbeat.ps1` is a worker heartbeat/state writer only. It updates the worker heartbeat/state tables and session ledger, but it does not assign packets, does not claim locks, does not release locks, does not approve APPLY, and does not launch workers.
+
+`automation/dispatcher/runtime/packets/Assign-AIOSPacket.ps1` is excluded from T2A. Packet assignment and lock/assignment integration belong to a future Packet 3B lane, where assignment state, lock ownership, and worker lease behavior can be reviewed together.
+
+`services/runtime/` and `services/dispatcher/` TypeScript lanes remain shelved/excluded from T2A. Any TypeScript repair-or-unshelve work belongs in a separate future lane, not in Packet 3A.
+
+No worker launch is authorized by Packet 3A. No scheduler, Night Supervisor, SOS, ADB, broker/live trading, webhook, secrets, or .github/CI behavior is authorized. Packet 3B, Packet 3C, Packet 3D, and Packet 3E remain separate; Packet 2 and Packet 4 also remain parked unless separately approved.
+
 ### Negative / accepted
 
 - The TS runtime's design intent (event bus, dispatcher, worker leases, dead-letter queue) is parked. Any capability there must, for now, be reached through the PowerShell cycle and the Python supervisor.

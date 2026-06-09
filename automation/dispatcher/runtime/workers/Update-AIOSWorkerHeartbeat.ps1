@@ -26,7 +26,8 @@ param(
     [string]$AssignedPacketId,
     [string]$LaunchSessionId,
     [string]$TerminalWindowName,
-    [string]$NextSafeAction = "Worker heartbeat registered. Continue DRY_RUN only until packet assignment and approval are confirmed."
+    [string]$NextSafeAction = "Worker heartbeat registered. Continue DRY_RUN only until packet assignment and approval are confirmed.",
+    [string]$WorkerStateRoot
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,10 +44,15 @@ function Read-AIOSJson {
     param([string]$Path)
 
     if (-not (Test-Path -LiteralPath $Path)) {
-        throw "Missing required runtime file: $Path"
+        throw "REVIEW_REQUIRED: Missing required worker-state file: $Path"
     }
 
-    return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    try {
+        return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    }
+    catch {
+        throw "REVIEW_REQUIRED: Malformed worker-state JSON: $Path. $($_.Exception.Message)"
+    }
 }
 
 function Write-AIOSJson {
@@ -55,8 +61,27 @@ function Write-AIOSJson {
         [object]$Data
     )
 
+    $targetDir = Split-Path -Parent $Path
+    if ([string]::IsNullOrWhiteSpace($targetDir)) {
+        throw "REVIEW_REQUIRED: Worker-state target directory could not be resolved for $Path"
+    }
+    if (-not (Test-Path -LiteralPath $targetDir)) {
+        throw "REVIEW_REQUIRED: Worker-state target directory is missing: $targetDir"
+    }
+
+    $tmpPath = Join-Path $targetDir ("{0}.{1}.tmp" -f ([IO.Path]::GetFileName($Path)), ([guid]::NewGuid().ToString("N")))
     $json = $Data | ConvertTo-Json -Depth 30
-    Set-Content -LiteralPath $Path -Value $json -Encoding UTF8
+    try {
+        Set-Content -LiteralPath $tmpPath -Value $json -Encoding UTF8
+        $null = Get-Content -LiteralPath $tmpPath -Raw | ConvertFrom-Json
+        Move-Item -LiteralPath $tmpPath -Destination $Path -Force
+    }
+    catch {
+        if (Test-Path -LiteralPath $tmpPath) {
+            Remove-Item -LiteralPath $tmpPath -Force
+        }
+        throw "REVIEW_REQUIRED: Atomic worker-state write failed for $Path. $($_.Exception.Message)"
+    }
 }
 
 function Get-AIOSSingleRecord {
@@ -88,7 +113,12 @@ function Set-AIOSPropertyIfValue {
 $repoRoot = Get-AIOSRepoRoot
 Set-Location -LiteralPath $repoRoot
 
-$workerDir = Join-Path $repoRoot "Reports/dispatcher/runtime/workers"
+if ([string]::IsNullOrWhiteSpace($WorkerStateRoot)) {
+    $workerDir = Join-Path $repoRoot "Reports/dispatcher/runtime/workers"
+}
+else {
+    $workerDir = $WorkerStateRoot
+}
 $activePath = Join-Path $workerDir "active_worker_table.json"
 $heartbeatPath = Join-Path $workerDir "worker_heartbeat_table.json"
 $ledgerPath = Join-Path $workerDir "worker_session_ledger.json"
