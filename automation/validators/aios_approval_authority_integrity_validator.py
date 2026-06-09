@@ -15,6 +15,22 @@ PLACEHOLDER_TIMESTAMPS = {
     "2026-06-08T00:00:00Z",
     "2026-06-02T00:00:00Z",
 }
+DEFAULT_APPROVAL_INBOX_PATH = Path("automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json")
+REQUIRED_APPROVAL_INBOX_FIELDS = (
+    "approval_gate_id",
+    "authority_status",
+    "packet_id",
+    "requested_action",
+    "requested_mode",
+    "approval_status",
+    "approved_by_human",
+    "risk_level",
+    "allowed_paths",
+    "blocked_paths",
+    "validator_chain_required",
+    "commit_package_required",
+    "push_blocked_until_final_review",
+)
 
 
 @dataclass(frozen=True)
@@ -141,6 +157,88 @@ def validate_approval_gate(gate: dict[str, Any], *, hmac_key: str | None = None)
     )
 
 
+def validate_approval_inbox(authority: dict[str, Any]) -> list[str]:
+    failed: list[str] = []
+
+    for field in REQUIRED_APPROVAL_INBOX_FIELDS:
+        if field not in authority:
+            failed.append(f"inbox_missing_required_field:{field}")
+
+    if str(authority.get("authority_status") or "").strip() != "active_authority":
+        failed.append("inbox_authority_not_active")
+
+    if str(authority.get("approval_status") or "").strip().lower() != "completed":
+        failed.append("inbox_authority_not_completed")
+
+    if authority.get("approved_by_human") is not True:
+        failed.append("inbox_not_human_approved")
+
+    if not _as_list(authority.get("allowed_paths")):
+        failed.append("inbox_allowed_paths_missing")
+
+    if not _as_list(authority.get("blocked_paths")):
+        failed.append("inbox_blocked_paths_missing")
+
+    if authority.get("validator_chain_required") is not True:
+        failed.append("inbox_validator_chain_required_false")
+
+    if authority.get("commit_package_required") is not True:
+        failed.append("inbox_commit_package_required_false")
+
+    if authority.get("push_blocked_until_final_review") is not True:
+        failed.append("inbox_push_blocked_requirement_not_set")
+
+    return failed
+
+
+def validate_inbox_gate_alignment(gate: dict[str, Any], authority: dict[str, Any]) -> list[str]:
+    failed: list[str] = []
+
+    if str(gate.get("approval_status") or "").strip() == "approved_for_apply":
+        if str(authority.get("approval_status") or "").strip().lower() != "completed":
+            failed.append("inbox_and_gate_status_inconsistent_for_apply")
+
+        if str(authority.get("authority_status") or "").strip() != "active_authority":
+            failed.append("inbox_not_active_authority_for_apply")
+
+    return failed
+
+
+def validate_authority_bundle(
+    gate: dict[str, Any],
+    authority: dict[str, Any],
+    *,
+    hmac_key: str | None = None,
+) -> ApprovalAuthorityResult:
+    gate_result = validate_approval_gate(gate, hmac_key=hmac_key)
+    failed_checks = list(gate_result.failed_checks)
+    failed_checks.extend(validate_approval_inbox(authority))
+    failed_checks.extend(validate_inbox_gate_alignment(gate, authority))
+
+    status = gate_result.status
+    next_safe_action = gate_result.next_safe_action
+    evidence_type = gate_result.evidence_type
+
+    if status == "PASS":
+        if failed_checks:
+            status = "BLOCKED"
+            next_safe_action = "Do not APPLY; fix inbox authority and APPLY gate together."
+    elif status == "PENDING_REVIEW":
+        if failed_checks:
+            status = "BLOCKED"
+            next_safe_action = "Do not APPLY; resolve inbox authority validity and APPLY gate evidence first."
+        else:
+            next_safe_action = "Human Owner approval is pending; do not APPLY."
+
+    return ApprovalAuthorityResult(
+        status=status,
+        hardened_approval_verified=status == "PASS",
+        failed_checks=failed_checks,
+        evidence_type=evidence_type,
+        next_safe_action=next_safe_action,
+    )
+
+
 def load_gate(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -148,11 +246,17 @@ def load_gate(path: Path) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--gate", default="automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json")
+    parser.add_argument("--inbox", default=str(DEFAULT_APPROVAL_INBOX_PATH))
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
     gate = load_gate(Path(args.gate))
-    result = validate_approval_gate(gate, hmac_key=os.environ.get("AIOS_HUMAN_APPROVAL_HMAC_KEY"))
+    inbox = load_gate(Path(args.inbox))
+    result = validate_authority_bundle(
+        gate,
+        inbox,
+        hmac_key=os.environ.get("AIOS_HUMAN_APPROVAL_HMAC_KEY"),
+    )
     if args.json:
         print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
     else:
