@@ -1,0 +1,90 @@
+{
+  "schema": "AIOS_LEAD_DISPATCH_VIEW.v1",
+  "system": "AI_OS",
+  "mode": "DRY_RUN",
+  "generated_at": "2026-06-09T19:55:00Z",
+  "repo_root": "C:\\Dev\\Ai.Os",
+  "source_readers": [
+    {
+      "source": "assignment_executor.py",
+      "path": "C:\\Dev\\Ai.Os\\automation\\orchestration\\dispatcher\\assignment_executor.py",
+      "exists": true,
+      "records_seen": 1
+    },
+    {
+      "source": "UNIFIED_QUEUE_INDEX.json",
+      "path": "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
+      "exists": true,
+      "records_seen": 5
+    },
+    {
+      "source": "UNIFIED_LOCK_STATUS.json",
+      "path": "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
+      "exists": true,
+      "records_seen": 1
+    },
+    {
+      "source": "RECOVERY_BOOTSTRAP_VIEW.json",
+      "path": "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\RECOVERY_BOOTSTRAP_VIEW.json",
+      "exists": true,
+      "records_seen": 1
+    }
+  ],
+  "queue_status_summary": {
+    "present": true,
+    "packet_count": 5,
+    "open_candidate_count": 1,
+    "blocked_count": 3,
+    "waiting_approval_count": 0,
+    "complete_count": 1,
+    "normalized_state_counts": {
+      "QUEUED": 1,
+      "RUNNING": 0,
+      "BLOCKED": 3,
+      "WAITING_APPROVAL": 0,
+      "COMPLETE": 1,
+      "FAILED": 0,
+      "ARCHIVED": 0
+    },
+    "source_state_counts": {
+      "ACTIVE": 1,
+      "BLOCKED": 3,
+      "COMPLETE": 1
+    }
+  },
+  "lock_status_summary": {
+    "present": true,
+    "held_locks_count": 0,
+    "stale_locks_count": 0,
+    "collision_count": 0,
+    "safety_status": "REVIEW_REQUIRED",
+    "write_behavior": "telemetry_only"
+  },
+  "recovery_status_summary": {
+    "present": true,
+    "recovery_readiness": "BLOCKED",
+    "blockers": [
+      "marker_stale"
+    ],
+    "warnings": [
+      "heartbeat_degraded"
+    ],
+    "heartbeat_status": "DEGRADED",
+    "write_behavior": "telemetry_only"
+  },
+  "dispatcher_candidate": {
+    "source": "assignment_executor.py",
+    "source_task_id": null,
+    "source_lane": null,
+    "source_decision": "NO_WORK",
+    "evaluated_decision": "BLOCKED",
+    "source_next_safe_action": "Resolve blockers before dispatch."
+  },
+  "dispatcher_safety_verdict": "BLOCKED",
+  "blocked_reason": "queue_blocked, lock_review_required_or_collision, recovery_blocked",
+  "depends_on_t2b": true,
+  "t2b_dependency_note": "T2B assignment-plus-lock integration remains a prerequisite for any future write-path dispatch.",
+  "write_path_enabled": false,
+  "write_behavior": "telemetry_only",
+  "next_safe_action": "Resolve the active blocker in queue, lock, or recovery telemetry before any assignment mutation."
+}
