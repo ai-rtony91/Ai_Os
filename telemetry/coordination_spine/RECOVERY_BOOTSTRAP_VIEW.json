@@ -2,7 +2,7 @@
   "schema": "AIOS_RECOVERY_BOOTSTRAP_VIEW.v1",
   "system": "AI_OS",
   "mode": "DRY_RUN",
-  "generated_at": "2026-06-09T23:18:57.1516772Z",
+  "generated_at": "2026-06-09T23:41:34.8216859Z",
   "repo_root": "C:\\Dev\\Ai.Os",
   "source_readers": [
     {
@@ -33,7 +33,7 @@
   "marker_present": true,
   "marker_path": "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
   "marker_freshness_status": "FRESH",
-  "marker_age_seconds": -14386,
+  "marker_age_seconds": -13029,
   "queue_index_present": true,
   "queue_counts": {
     "QUEUED": 1,
