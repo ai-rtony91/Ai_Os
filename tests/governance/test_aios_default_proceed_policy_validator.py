@@ -54,3 +54,77 @@ def test_default_proceed_policy_validator_passes_for_sample_checks() -> None:
     assert payload["checks"]["push_requires_approval_option_1"] is True
     assert payload["checks"]["live_trading_blocked_with_hard_stop"] is True
     assert payload["checks"]["secret_or_env_behavior_not_weakened"] is True
+
+
+def _recommended_option(command: str, lane: str, scope: str) -> str:
+    result = subprocess.run(
+        [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(REPO_ROOT / "automation\\operator\\Get-AiOsCommandApprovalRecommendation.DRY_RUN.ps1"),
+            "-CommandText",
+            command,
+            "-LaneType",
+            lane,
+            "-ScopeHint",
+            scope,
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    marker = "Recommended option:"
+    for line in result.stdout.splitlines():
+        if line.strip().startswith(marker):
+            return line.split(":", 1)[1].strip()
+
+    raise AssertionError(f"No recommendation option found for command: {command!r}")
+
+
+def test_tier0_and_tier1_safe_commands_keep_option_2_default() -> None:
+    assert _recommended_option("git status --short --branch", "READ_ONLY", "repo") == "Option 2"
+    assert _recommended_option("git switch -c feature/default-tier-proceed", "BRANCH", "repo") == "Option 2"
+
+
+def test_tier2_and_protected_actions_do_not_use_option_2_default() -> None:
+    assert _recommended_option("git reset --hard HEAD", "READ_ONLY", "repo") == "Option 3 / HARD STOP"
+    assert (
+        _recommended_option("git branch -D feature/temp-safe-default", "BRANCH", "repo")
+        == "Option 3 / HARD STOP"
+    )
+    assert (
+        _recommended_option(
+            "gh pr merge 204 --merge --delete-branch=false", "MERGE_ONLY", "PR 204"
+        )
+        == "Option 1"
+    )
+    assert (
+        _recommended_option(
+            'git commit -m "docs: test safe default proceed policy"', "COMMIT_ONLY", "AGENTS.md"
+        )
+        == "Option 1"
+    )
+    assert (
+        _recommended_option(
+            "git push -u origin feature/default-proceed-policy-v1", "PUSH_ONLY", "repo"
+        )
+        == "Option 1"
+    )
+    assert (
+        _recommended_option(
+            "python automation/forex_engine/run_live_broker_demo.py --mode=live",
+            "READ_ONLY",
+            "repo",
+        )
+        == "Option 3 / HARD STOP"
+    )
+    assert (
+        _recommended_option("pwsh -File temp-do-not-run.APPLY.ps1", "READ_ONLY", "repo")
+        == "Option 3 / HARD STOP"
+    )
