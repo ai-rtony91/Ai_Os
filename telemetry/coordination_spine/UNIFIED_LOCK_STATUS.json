@@ -1,0 +1,60 @@
+{
+    "generated_at":  "2026-06-09T19:02:03.6394794Z",
+    "repo_root":  "C:\\Dev\\Ai.Os",
+    "source_readers":  [
+                           {
+                               "source":  "FILE_LOCK_REGISTRY.json",
+                               "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\locks\\FILE_LOCK_REGISTRY.json",
+                               "exists":  true,
+                               "records_seen":  0
+                           },
+                           {
+                               "source":  "WORKER_CLAIM_REGISTRY_001.json",
+                               "path":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\claims\\WORKER_CLAIM_REGISTRY_001.json",
+                               "exists":  true,
+                               "records_seen":  1
+                           },
+                           {
+                               "source":  "supervisor.lock",
+                               "path":  "C:\\Dev\\Ai.Os\\control\\cycle\\supervisor.lock",
+                               "exists":  false,
+                               "records_seen":  0
+                           }
+                       ],
+    "lock_sources_seen":  [
+                              "FILE_LOCK_REGISTRY.json",
+                              "WORKER_CLAIM_REGISTRY_001.json",
+                              "supervisor.lock"
+                          ],
+    "held_locks_count":  0,
+    "stale_locks_count":  0,
+    "collision_count":  0,
+    "worker_claim_count":  1,
+    "packet_lock_count":  1,
+    "instance_lock_count":  0,
+    "unknown_lock_records":  [
+                                 {
+                                     "source":  "claims",
+                                     "reason":  "placeholder_claim_registry",
+                                     "raw_state":  "claimed",
+                                     "record":  {
+                                                    "schema":  "AIOS_WORKER_CLAIM_REGISTRY.v1",
+                                                    "worker_id":  "WORKER_ID_PLACEHOLDER",
+                                                    "worker_name":  "WORKER_NAME_PLACEHOLDER",
+                                                    "packet_id":  "PACKET_ID_PLACEHOLDER",
+                                                    "assigned_paths":  [
+
+                                                                       ],
+                                                    "claim_timestamp":  "TIMESTAMP_PLACEHOLDER",
+                                                    "expiration_placeholder":  "TIMESTAMP_PLACEHOLDER",
+                                                    "claim_status":  "claimed",
+                                                    "approval_required":  true,
+                                                    "validator_required":  true,
+                                                    "commit_blocked_until_review":  true,
+                                                    "next_action":  "Validate claim ownership before APPLY work."
+                                                }
+                                 }
+                             ],
+    "safety_status":  "REVIEW_REQUIRED",
+    "write_behavior":  "telemetry_only"
+}
