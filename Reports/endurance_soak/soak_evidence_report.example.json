@@ -1,0 +1,60 @@
+{
+  "packet_id": "AIOS-SOAK-HARNESS-OBSERVE-ONLY-LOCAL-APPLY-V1",
+  "run_id": "soak_example_20260609T120000Z",
+  "run_mode": "SOAK_DRY_RUN",
+  "status": "PASS",
+  "started_utc": "2026-06-09T12:00:00Z",
+  "completed_utc": "2026-06-09T12:00:10Z",
+  "max_cycles": 1,
+  "interval_seconds": 30,
+  "run_timeout_seconds": 120,
+  "sample_count": 1,
+  "status_summary": {
+    "PASS": 1,
+    "STOPPED": 0,
+    "FAILED": 0,
+    "BLOCKED": 0
+  },
+  "samples": [
+    {
+      "sample_utc": "2026-06-09T12:00:00Z",
+      "marker_exists": true,
+      "marker_snapshot": {
+        "cycle_id": "example-cycle-2026-06-09",
+        "phase_name": "example_phase",
+        "state": "RUN_OK",
+        "source": "example-only"
+      },
+      "heartbeat_exists": true,
+      "heartbeat_timestamp": "2026-06-09T11:59:50Z",
+      "heartbeat_staleness_seconds": 10,
+      "heartbeat_freshness_status": "FRESH",
+      "process_rss_mb": 128.4,
+      "disk_samples": [
+        {
+          "drive": "C",
+          "status": "OK",
+          "free_gb": 183.21
+        }
+      ],
+      "stop_marker_detected": false,
+      "reasons": [
+        "Example evidence payload only."
+      ]
+    }
+  ],
+  "forbidden_actions_confirmed": {
+    "scheduler_registration": true,
+    "worker_launch": true,
+    "outbound_notification": true,
+    "control_marker_mutation": true,
+    "runtime_heartbeat_mutation": true
+  },
+  "writable_roots": [
+    "telemetry/soak",
+    "Reports/endurance_soak"
+  ],
+  "reasons": [
+    "Example evidence uses synthetic DRY_RUN-only data."
+  ]
+}
