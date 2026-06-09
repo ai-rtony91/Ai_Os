@@ -64,6 +64,27 @@ function Read-AiOsBackupState {
     }
 }
 
+function Get-AiOsDailyAutomationSnapshot {
+    param([string]$RepoRoot)
+
+    $snapshotScript = Join-Path $RepoRoot 'automation\orchestration\daily_snapshot\New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1'
+    if (-not (Test-Path -LiteralPath $snapshotScript -PathType Leaf)) {
+        throw "Daily snapshot script not found: $snapshotScript"
+    }
+
+    $snapshotOutput = @(& powershell -ExecutionPolicy Bypass -File $snapshotScript -Json 2>$null)
+    if ($LASTEXITCODE -ne 0 -and $snapshotOutput.Count -eq 0) {
+        throw "Daily snapshot script failed: $snapshotScript"
+    }
+
+    $snapshotJson = ($snapshotOutput -join [Environment]::NewLine).Trim()
+    if ([string]::IsNullOrWhiteSpace($snapshotJson)) {
+        throw "Daily snapshot script produced no JSON: $snapshotScript"
+    }
+
+    return $snapshotJson | ConvertFrom-Json
+}
+
 function New-AiOsPostMainBackupPlan {
     param(
         [Parameter(Mandatory = $true)][string]$Status,
@@ -98,6 +119,8 @@ function New-AiOsPostMainBackupPlan {
             "git_mutation",
             "delete_or_mirror_behavior"
         )
+        daily_data_snapshot_label = "DAILY DATA SNAPSHOT"
+        daily_data_snapshot = $dailySnapshot
         next_safe_action = $NextSafeAction
         generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     }
@@ -140,6 +163,7 @@ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace([string]$currentCommit)
 $currentCommit = [string]$currentCommit
 $shortCommit = if ($currentCommit.Length -ge 7) { $currentCommit.Substring(0, 7) } else { $currentCommit }
 $state = Read-AiOsBackupState -Path $resolvedStateFilePath
+$dailySnapshot = Get-AiOsDailyAutomationSnapshot -RepoRoot $normalizedSource
 $stateReadStatus = if ($null -eq $state) { "MISSING" } elseif ($state.PSObject.Properties.Name -contains "parse_error") { "PARSE_ERROR" } else { "READ" }
 $lastBackedUpCommit = if ($null -ne $state -and $state.PSObject.Properties.Name -contains "last_backed_up_commit") {
     [string]$state.last_backed_up_commit

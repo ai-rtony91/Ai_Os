@@ -41,6 +41,26 @@ Dashboard, runtime, replay, and summary views may display checkpoint evidence on
 - INCIDENT_REPORT
 - AAR
 
+## DAILY DATA SNAPSHOT REQUIREMENT
+
+Every future AI_OS auto-update, checkpoint, backup, and daily status/report should include a `DAILY DATA SNAPSHOT` section sourced from `automation/orchestration/daily_snapshot/New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1`.
+
+Required fields:
+
+- date/time
+- repo path
+- current HEAD
+- files changed/generated today
+- artifact count
+- folder count
+- total bytes/KB/MB collected today
+- backup size if backup ran
+- skipped secrets count
+- validation/governance status
+- success/failure
+
+The snapshot is evidence only. It does not approve APPLY, commit, push, merge, or runtime behavior. Consumers should reuse the shared snapshot script rather than creating a second reporting system.
+
 ## CHECKPOINT TYPES
 
 AI_OS checkpoint records should use controlled checkpoint types:

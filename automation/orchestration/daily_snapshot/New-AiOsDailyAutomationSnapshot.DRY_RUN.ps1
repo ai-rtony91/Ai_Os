@@ -68,10 +68,87 @@ function Convert-AiOsStatusLineToPath {
     return ($path -replace "\\", "/")
 }
 
+function Test-AiOsSecretLikePath {
+    param([string]$Path)
+
+    return $Path -match '(?i)(^|[\\/])\.env(\..*)?$|(?i)(secret|secrets|credential|password|token|private[_-]?key)'
+}
+
+function Get-AiOsRepoInventory {
+    param([string]$RepoRoot)
+
+    $allFiles = @(
+        Get-ChildItem -LiteralPath $RepoRoot -Force -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object {
+                $relativePath = $_.FullName.Substring($RepoRoot.Length).TrimStart('\', '/')
+                $normalized = $relativePath -replace '/', '\'
+                -not ($normalized -match '(^|\\)\.git(\\|$)' -or $normalized -match '(^|\\)node_modules(\\|$)' -or (Test-AiOsSecretLikePath -Path $_.FullName))
+            }
+    )
+
+    $allFolders = @(
+        Get-ChildItem -LiteralPath $RepoRoot -Force -Recurse -Directory -ErrorAction SilentlyContinue |
+            Where-Object {
+                $relativePath = $_.FullName.Substring($RepoRoot.Length).TrimStart('\', '/')
+                $normalized = $relativePath -replace '/', '\'
+                -not ($normalized -match '(^|\\)\.git(\\|$)' -or $normalized -match '(^|\\)node_modules(\\|$)')
+            }
+    )
+
+    $totalBytes = [int64](($allFiles | Measure-Object -Property Length -Sum).Sum)
+
+    return [pscustomobject]@{
+        Files = @($allFiles)
+        Folders = @($allFolders)
+        TotalBytes = $totalBytes
+        TotalKb = [math]::Round($totalBytes / 1KB, 2)
+        TotalMb = [math]::Round($totalBytes / 1MB, 2)
+    }
+}
+
+function Get-AiOsDailySnapshotText {
+    param([object]$Snapshot)
+
+    $changedFiles = @($Snapshot.files_changed_generated_today)
+    $changedFilesText = if ($changedFiles.Count -eq 0) {
+        'None'
+    }
+    elseif ($changedFiles.Count -le 20) {
+        $changedFiles -join ', '
+    }
+    else {
+        ($changedFiles | Select-Object -First 20) -join ', ' + ', ...'
+    }
+
+    $backupSizeText = if ($null -eq $Snapshot.backup_size_bytes -or $Snapshot.backup_ran -ne $true) {
+        'N/A'
+    }
+    else {
+        '{0} bytes ({1:N2} KB / {2:N2} MB)' -f $Snapshot.backup_size_bytes, $Snapshot.backup_size_kb, $Snapshot.backup_size_mb
+    }
+
+    return @"
+## Daily Data Snapshot
+- Date/time: $($Snapshot.date_time_local)
+- Repo path: $($Snapshot.repo_path)
+- Current HEAD: $($Snapshot.current_head)
+- Files changed/generated today: $changedFilesText
+- Artifact count: $($Snapshot.artifact_count)
+- Folder count: $($Snapshot.folder_count)
+- Total bytes collected today: $($Snapshot.total_bytes_collected_today) bytes ($($Snapshot.total_kb_collected_today) KB / $($Snapshot.total_mb_collected_today) MB)
+- Backup size if backup ran: $backupSizeText
+- Skipped secrets count: $($Snapshot.skipped_secrets_count)
+- Validation/governance status: $($Snapshot.validation_governance_status)
+- Success/failure: $($Snapshot.success_failure)
+"@
+}
+
 $repoRoot = Get-AiOsRepoRoot
 Set-Location -LiteralPath $repoRoot
 
 $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+$generatedAtLocal = Get-Date -Format "yyyy-MM-dd HH:mm:ss K"
+$dayStart = (Get-Date).Date
 $branchResult = Invoke-AiOsGit -Arguments @("branch", "--show-current")
 $currentBranch = if ($branchResult.Lines.Count -gt 0) { [string]$branchResult.Lines[0] } else { "UNKNOWN" }
 
@@ -84,8 +161,41 @@ $changedFiles = @(
         Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
 )
 
+$currentHeadResult = Invoke-AiOsGit -Arguments @("rev-parse", "HEAD")
+$currentHead = if ($currentHeadResult.Lines.Count -gt 0) { [string]$currentHeadResult.Lines[0] } else { "UNKNOWN" }
+
 $latestCommitResult = Invoke-AiOsGit -Arguments @("log", "-1", "--format=%H|%ci|%s")
 $latestCommit = if ($latestCommitResult.Lines.Count -gt 0) { [string]$latestCommitResult.Lines[0] } else { "UNKNOWN" }
+
+$inventory = Get-AiOsRepoInventory -RepoRoot $repoRoot
+$todayFiles = @(
+    $inventory.Files |
+        Where-Object { $_.LastWriteTime -ge $dayStart } |
+        Sort-Object FullName
+)
+$todayFolders = @(
+    $todayFiles |
+        ForEach-Object { Split-Path -Parent $_.FullName } |
+        Sort-Object -Unique
+)
+$dailyChangedGeneratedFiles = @(
+    $todayFiles |
+        ForEach-Object { $_.FullName.Substring($repoRoot.Length).TrimStart('\', '/') -replace '\\', '/' }
+)
+$skippedSecrets = @(
+    Get-ChildItem -LiteralPath $repoRoot -Force -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object { Test-AiOsSecretLikePath -Path $_.FullName }
+)
+$dailyBytesCollected = [int64](($todayFiles | Measure-Object -Property Length -Sum).Sum)
+$dailyKbCollected = [math]::Round($dailyBytesCollected / 1KB, 2)
+$dailyMbCollected = [math]::Round($dailyBytesCollected / 1MB, 2)
+$artifactCount = $dailyChangedGeneratedFiles.Count
+$folderCount = $todayFolders.Count
+$backupRan = $false
+$backupSizeBytes = $null
+$backupSizeKb = $null
+$backupSizeMb = $null
+$validationStatus = if ($statusResult.ExitCode -eq 0 -and $currentHead -ne "UNKNOWN") { "PASS" } else { "WARN" }
 
 $automationItems = @(
     New-AiOsAutomationItem -Id "worker_lane_status_tool" -Label "Worker lane status tool" -CandidatePaths @(
@@ -124,6 +234,8 @@ $automationItems = @(
 
 $completedAutomation = @($automationItems | Where-Object { $_.status -eq "PRESENT" })
 $missingAutomation = @($automationItems | Where-Object { $_.status -eq "MISSING" })
+$governanceStatus = if (@($missingAutomation | Where-Object { $_.automation_id -in @("validator_chain_runner", "approval_runner", "clean_state_verifier") }).Count -gt 0) { "WARN" } else { "PASS" }
+$validationGovernanceStatus = "$validationStatus/$governanceStatus"
 
 $blockedReasons = New-Object System.Collections.Generic.List[string]
 $reviewReasons = New-Object System.Collections.Generic.List[string]
@@ -158,6 +270,8 @@ else {
     "CLEAN"
 }
 
+$successFailure = if ($todayStatus -eq "BLOCKED") { "FAILURE" } else { "SUCCESS" }
+
 $nextSafeAction = switch ($todayStatus) {
     "CLEAN" { "Record this snapshot, then choose the next approved AI_OS work packet." }
     "REVIEW" { "Review changed files and missing automation before approving APPLY, commit, or push." }
@@ -168,12 +282,33 @@ $snapshot = [pscustomobject]@{
     schema = "AIOS_DAILY_AUTOMATION_SNAPSHOT.v1"
     mode = "DRY_RUN"
     generated_at = $generatedAt
+    date_time_local = $generatedAtLocal
+    repo_path = $repoRoot
+    current_head = $currentHead
+    current_branch = $currentBranch
     today_status = $todayStatus
     repo_root = $repoRoot
-    current_branch = $currentBranch
     git_status_lines = @($gitStatusLines)
     changed_files = @($changedFiles)
     latest_commit = $latestCommit
+    files_changed_generated_today = @($dailyChangedGeneratedFiles)
+    artifact_count = $artifactCount
+    folder_count = $folderCount
+    total_bytes_collected_today = $dailyBytesCollected
+    total_kb_collected_today = $dailyKbCollected
+    total_mb_collected_today = $dailyMbCollected
+    repo_total_bytes = $inventory.TotalBytes
+    repo_total_kb = $inventory.TotalKb
+    repo_total_mb = $inventory.TotalMb
+    backup_ran = $backupRan
+    backup_size_bytes = $backupSizeBytes
+    backup_size_kb = $backupSizeKb
+    backup_size_mb = $backupSizeMb
+    skipped_secrets_count = @($skippedSecrets).Count
+    validation_status = $validationStatus
+    governance_status = $governanceStatus
+    validation_governance_status = $validationGovernanceStatus
+    success_failure = $successFailure
     worked_minutes = $null
     worked_minutes_note = "Placeholder only. Fill manually in a future approved report workflow."
     completed_automation = @($completedAutomation)
@@ -189,8 +324,19 @@ $snapshot = [pscustomobject]@{
 if (-not $Json) {
     Write-Host "AI_OS Daily Automation Snapshot"
     Write-Host "Mode: DRY_RUN"
+    Write-Host "Date/time: $generatedAtLocal"
+    Write-Host "Repo path: $repoRoot"
+    Write-Host "Current HEAD: $currentHead"
     Write-Host "TODAY STATUS: $todayStatus"
     Write-Host "Branch: $currentBranch"
+    Write-Host "Files changed/generated today: $($dailyChangedGeneratedFiles.Count)"
+    Write-Host "Artifact count: $artifactCount"
+    Write-Host "Folder count: $folderCount"
+    Write-Host "Total bytes collected today: $dailyBytesCollected"
+    Write-Host "Backup size if backup ran: N/A"
+    Write-Host "Skipped secrets count: $(@($skippedSecrets).Count)"
+    Write-Host "Validation/governance status: $validationGovernanceStatus"
+    Write-Host "Success/failure: $successFailure"
     Write-Host "Changed files: $($changedFiles.Count)"
     Write-Host "Latest commit: $latestCommit"
     Write-Host ""

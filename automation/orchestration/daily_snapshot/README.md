@@ -4,6 +4,8 @@ This folder contains a DRY_RUN scaffold for producing one daily automation summa
 
 The snapshot is read-only. It does not edit dispatcher runtime, dashboard files, health summary folders, staged files, commits, pushes, pulls, rebases, or merges.
 
+This script is the canonical source for the `DAILY DATA SNAPSHOT` section used by AI_OS reports, telemetry snapshots, and backup summaries.
+
 Checks included:
 
 - current branch
@@ -23,6 +25,18 @@ The snapshot reports:
 - `TODAY STATUS: CLEAN`
 - `TODAY STATUS: REVIEW`
 - `TODAY STATUS: BLOCKED`
+- `DAILY DATA SNAPSHOT`
+- `date/time`
+- `repo path`
+- `current HEAD`
+- `files changed/generated today`
+- `artifact count`
+- `folder count`
+- `total bytes/KB/MB collected today`
+- `backup size if backup ran`
+- `skipped secrets count`
+- `validation/governance status`
+- `success/failure`
 
 Example beginner command:
 
