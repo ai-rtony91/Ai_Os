@@ -119,6 +119,7 @@ function New-AiOsPostMainBackupPlan {
             "git_mutation",
             "delete_or_mirror_behavior"
         )
+        daily_data_snapshot_label = "DAILY DATA SNAPSHOT"
         daily_data_snapshot = $dailySnapshot
         next_safe_action = $NextSafeAction
         generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")

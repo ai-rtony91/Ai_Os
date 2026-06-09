@@ -67,6 +67,9 @@ $telemetryText = Get-Content -LiteralPath (Join-Path $script:ResolvedRepoRoot 'a
 $backupText = Get-Content -LiteralPath (Join-Path $script:ResolvedRepoRoot 'automation\orchestration\backups\Start-AiOsPostMainUpdateBackup.DRY_RUN.ps1') -Raw
 $readmeText = Get-Content -LiteralPath (Join-Path $script:ResolvedRepoRoot 'automation\orchestration\daily_snapshot\README.md') -Raw
 $reportingStandardText = Get-Content -LiteralPath (Join-Path $script:ResolvedRepoRoot 'docs\AI_OS\reporting\AIOS_REPORTING_AND_CHECKPOINT_STANDARD.md') -Raw
+$writerCount = @(
+    Get-ChildItem -LiteralPath (Join-Path $script:ResolvedRepoRoot 'automation') -Recurse -File -Filter 'New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1' -ErrorAction SilentlyContinue
+).Count
 
 Write-Host ''
 Write-Host 'Snapshot field checks:'
@@ -95,8 +98,16 @@ Write-Host 'Consumer linkage checks:'
 Test-Text -Label 'daily report consumes snapshot script' -Text $reportText -Expected 'New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1'
 Test-Text -Label 'telemetry consumes snapshot script' -Text $telemetryText -Expected 'New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1'
 Test-Text -Label 'backup consumes snapshot script' -Text $backupText -Expected 'New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1'
+Test-Text -Label 'backup mentions daily data snapshot' -Text $backupText -Expected 'DAILY DATA SNAPSHOT'
 Test-Text -Label 'daily snapshot readme mentions canonical source' -Text $readmeText -Expected 'canonical source for the `DAILY DATA SNAPSHOT` section'
 Test-Text -Label 'reporting standard mentions daily data snapshot' -Text $reportingStandardText -Expected 'DAILY DATA SNAPSHOT REQUIREMENT'
+if ($writerCount -eq 1) {
+    Write-Host '[PASS] no duplicate snapshot writer created'
+}
+else {
+    Write-Host "[FAIL] no duplicate snapshot writer created: $writerCount writers found"
+    $failures.Add("Expected exactly one daily snapshot writer, found $writerCount") | Out-Null
+}
 
 Write-Host ''
 if ($failures.Count -gt 0) {
