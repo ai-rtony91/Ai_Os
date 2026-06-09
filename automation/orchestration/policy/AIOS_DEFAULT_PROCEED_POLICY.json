@@ -1,0 +1,10 @@
+{
+  "schema": "AIOS_DEFAULT_PROCEED_POLICY.v1",
+  "schema_version": "1.0.0",
+  "policy_id": "AIOS_DEFAULT_PROCEED_POLICY",
+  "generated_at": "2026-06-09",
+  "DEFAULT_PROCEED_OPTION": 2,
+  "DEFAULT_PROCEED_MEANING": "continue next safe governed DRY_RUN/non-destructive step",
+  "ASK_USER_ONLY_ON_PROTECTED_GATE": true,
+  "description": "Repo-level default decision policy for AI_OS option-based progression prompts."
+}

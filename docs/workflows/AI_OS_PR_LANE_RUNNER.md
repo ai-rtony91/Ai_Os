@@ -12,6 +12,8 @@ Reduce operator burden by replacing manual direct pushes and browser PR creation
 
 The runner is intended to reduce repeated command approvals, manual branch thinking, manual push decisions, manual PR creation steps, manual check watching, and manual merge/sync steps while preserving operator authority and protected-main safety.
 
+For this PR lane, confirmed-safe DRY_RUN/report commands can continue by default with `Option 2` (the next safe governed step). Protected actions (`merge`, `commit`, `push`, worker launch, scheduler, Night Supervisor, SOS/ADB, notifications, broker/OANDA/webhook, or live trading) remain explicit approval gates.
+
 ## Scope
 
 This workflow applies globally across AI_OS lanes, branches, worktrees, Codex sessions, and future Claude review lanes when they are operating inside AI_OS governance.

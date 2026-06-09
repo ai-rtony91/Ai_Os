@@ -8,6 +8,63 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+$script:DEFAULT_PROCEED_POLICY_PATH = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\orchestration\policy\AIOS_DEFAULT_PROCEED_POLICY.json"
+$script:DEFAULT_PROCEED_OPTION = 2
+$script:DEFAULT_PROCEED_MEANING = "continue next safe governed DRY_RUN/non-destructive step"
+$script:ASK_USER_ONLY_ON_PROTECTED_GATE = $true
+
+function Load-AiOsDefaultProceedPolicy {
+    if (-not (Test-Path -LiteralPath $script:DEFAULT_PROCEED_POLICY_PATH -PathType Leaf)) {
+        return [pscustomobject]@{
+            DEFAULT_PROCEED_OPTION          = $script:DEFAULT_PROCEED_OPTION
+            DEFAULT_PROCEED_MEANING         = $script:DEFAULT_PROCEED_MEANING
+            ASK_USER_ONLY_ON_PROTECTED_GATE = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
+        }
+    }
+
+    try {
+        $policyText = Get-Content -LiteralPath $script:DEFAULT_PROCEED_POLICY_PATH -Raw
+        return ($policyText | ConvertFrom-Json)
+    } catch {
+        return [pscustomobject]@{
+            DEFAULT_PROCEED_OPTION          = $script:DEFAULT_PROCEED_OPTION
+            DEFAULT_PROCEED_MEANING         = $script:DEFAULT_PROCEED_MEANING
+            ASK_USER_ONLY_ON_PROTECTED_GATE = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
+        }
+    }
+}
+
+$script:DEFAULT_PROCEED_POLICY = Load-AiOsDefaultProceedPolicy
+
+$script:DEFAULT_PROCEED_OPTION = [int]$script:DEFAULT_PROCEED_POLICY.DEFAULT_PROCEED_OPTION
+$script:DEFAULT_PROCEED_MEANING = [string]$script:DEFAULT_PROCEED_POLICY.DEFAULT_PROCEED_MEANING
+$script:ASK_USER_ONLY_ON_PROTECTED_GATE = [bool]$script:DEFAULT_PROCEED_POLICY.ASK_USER_ONLY_ON_PROTECTED_GATE
+
+if ($script:DEFAULT_PROCEED_OPTION -lt 1) {
+    $script:DEFAULT_PROCEED_OPTION = 1
+}
+if ($script:DEFAULT_PROCEED_OPTION -gt 3) {
+    $script:DEFAULT_PROCEED_OPTION = 3
+}
+if ([string]::IsNullOrWhiteSpace($script:DEFAULT_PROCEED_MEANING)) {
+    $script:DEFAULT_PROCEED_MEANING = "continue next safe governed DRY_RUN/non-destructive step"
+}
+
+function Get-OptionLabel {
+    param([int]$Option)
+
+    if ($Option -eq 1) {
+        return "Option 1"
+    }
+    if ($Option -eq 2) {
+        return "Option 2"
+    }
+    if ($Option -eq 3) {
+        return "Option 3 / HARD STOP"
+    }
+    return "Option $Option"
+}
+
 function Normalize-CommandText {
     param([string]$Text)
 
@@ -45,6 +102,9 @@ function New-Recommendation {
         ScopeMatch = $ScopeMatch
         StateChangingCommand = $StateChanging
         StopRequired = $StopRequired
+        DefaultProceedOption = "Option $($script:DEFAULT_PROCEED_OPTION)"
+        DefaultProceedMeaning = $script:DEFAULT_PROCEED_MEANING
+        AskUserOnlyOnProtectedGate = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
     }
 }
 
@@ -69,6 +129,11 @@ function Test-IsHardStopCommand {
         "^(?i)git\s+push\b.*\s--delete\b",
         "^(?i)gh\s+pr\s+merge\b.*--delete-branch(?!=false)\b",
         "(?i)\bsecret\b|\bcredential\b|\.env\b|id_rsa|token",
+        "(?i)broker",
+        "(?i)\boanda\b",
+        "(?i)\bwebhook\b",
+        "(?i)\blive[-_ ]?trading\b",
+        "(?i)\breal[-_ ]?order\b",
         "(?i)\bT9\b|^[A-Z]:\\T9\\|\\T9\\",
         "^(?i)(powershell|pwsh)\b.*\s-File\s+.*\.ps1(\s|$)",
         "^(?i)&\s+.*\.ps1(\s|$)",
@@ -201,7 +266,7 @@ function Get-AiOsCommandApprovalRecommendation {
 
     if (Test-IsSafeReadOnlyCommand -Command $normalized -Hint $Hint) {
         return New-Recommendation `
-            -Option "Option 2" `
+            -Option (Get-OptionLabel -Option $script:DEFAULT_PROCEED_OPTION) `
             -CommandClass "SAFE_READ_ONLY" `
             -Reason "Command is read-only, scoped, and narrow enough to reuse approval for this command pattern." `
             -RiskLevel "LOW" `
@@ -245,16 +310,22 @@ function Write-Recommendation {
     Write-Host "Scope match: $($Recommendation.ScopeMatch)"
     Write-Host "State-changing command: $($Recommendation.StateChangingCommand)"
     Write-Host "Stop required: $($Recommendation.StopRequired)"
+    Write-Host "Default proceed option: $($Recommendation.DefaultProceedOption)"
+    Write-Host "Default proceed meaning: $($Recommendation.DefaultProceedMeaning)"
+    Write-Host "Ask user only on protected gate: $($Recommendation.AskUserOnlyOnProtectedGate)"
 }
 
 if ($ShowExamples) {
+    $defaultSafeOption = Get-OptionLabel -Option $script:DEFAULT_PROCEED_OPTION
     $examples = @(
-        [pscustomobject]@{ Command = "git status --short --branch"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 2" },
-        [pscustomobject]@{ Command = "gh pr view 204 --json number,url,state"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 2" },
+        [pscustomobject]@{ Command = "git status --short --branch"; Lane = "READ_ONLY"; Scope = "repo"; Expected = $defaultSafeOption },
+        [pscustomobject]@{ Command = "gh pr view 204 --json number,url,state"; Lane = "READ_ONLY"; Scope = "repo"; Expected = $defaultSafeOption },
         [pscustomobject]@{ Command = "git add AGENTS.md"; Lane = "COMMIT_ONLY"; Scope = "AGENTS.md"; Expected = "Option 1" },
         [pscustomobject]@{ Command = "git commit -m `"docs/agents: add approval friction reduction standard`""; Lane = "COMMIT_ONLY"; Scope = "AGENTS.md"; Expected = "Option 1" },
         [pscustomobject]@{ Command = "gh pr merge 204 --merge --delete-branch=false"; Lane = "MERGE_ONLY"; Scope = "PR 204"; Expected = "Option 1" },
+        [pscustomobject]@{ Command = "git push -u origin feature/default-proceed-policy-v1"; Lane = "PUSH_ONLY"; Scope = "repo"; Expected = "Option 1" },
         [pscustomobject]@{ Command = "git clean -fd"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 3 / HARD STOP" },
+        [pscustomobject]@{ Command = "python automation/forex_engine/run_live_broker_demo.py --mode=live"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 3 / HARD STOP" },
         [pscustomobject]@{ Command = "robocopy C:\Dev\Ai.Os D:\backup /MIR"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 3 / HARD STOP" }
     )
 
