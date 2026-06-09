@@ -86,6 +86,47 @@ def test_known_states_map_to_expected_buckets(tmp_path: Path) -> None:
     assert records["unknown-packet"]["normalized_state"] is None
 
 
+def test_stale_maps_to_blocked_and_preserves_reason(tmp_path: Path) -> None:
+    packet_root = tmp_path / "work_packets"
+    write_packet(packet_root, "blocked", "stale.json", packet_id="stale-packet", status="STALE")
+
+    payload = run_index(packet_root)
+
+    assert payload["normalized_state_counts"] == {
+        "QUEUED": 0,
+        "RUNNING": 0,
+        "BLOCKED": 1,
+        "WAITING_APPROVAL": 0,
+        "COMPLETE": 0,
+        "FAILED": 0,
+        "ARCHIVED": 0,
+    }
+
+    record = payload["records"][0]
+    assert record["normalized_state"] == "BLOCKED"
+    assert record["source_reason"] == "STALE"
+
+
+def test_empty_queue_outputs_zero_counts_and_no_unmapped_states(tmp_path: Path) -> None:
+    packet_root = tmp_path / "empty_work_packets"
+    packet_root.mkdir(parents=True, exist_ok=True)
+
+    payload = run_index(packet_root)
+
+    assert payload["packet_count"] == 0
+    assert payload["normalized_state_counts"] == {
+        "QUEUED": 0,
+        "RUNNING": 0,
+        "BLOCKED": 0,
+        "WAITING_APPROVAL": 0,
+        "COMPLETE": 0,
+        "FAILED": 0,
+        "ARCHIVED": 0,
+    }
+    assert payload["unmapped_states"] == []
+    assert payload["records"] == []
+
+
 def test_script_uses_atomic_write_helpers() -> None:
     text = SCRIPT.read_text(encoding="utf-8")
     assert "WriteAllText" in text

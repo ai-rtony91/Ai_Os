@@ -2,7 +2,7 @@
   "schema": "AIOS_UNIFIED_QUEUE_INDEX.v1",
   "system": "AI_OS",
   "mode": "DRY_RUN",
-  "generated_at_utc": "2026-06-09T18:12:16.0160634Z",
+  "generated_at_utc": "2026-06-09T18:42:23.7582616Z",
   "repo_root": "C:\\Dev\\Ai.Os",
   "packet_root": "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets",
   "scanned_folders": [
@@ -53,7 +53,7 @@
     "PROPOSED": "QUEUED",
     "QUEUED": "QUEUED",
     "RUNNING": "RUNNING",
-    "STALE": "ARCHIVED",
+    "STALE": "BLOCKED",
     "VALIDATING": "RUNNING",
     "WAITING_APPROVAL": "WAITING_APPROVAL",
     "WAITING_REVIEW": "WAITING_APPROVAL",
@@ -71,6 +71,7 @@
       "source_state": "blocked",
       "source_state_token": "BLOCKED",
       "normalized_state": "BLOCKED",
+      "source_reason": "",
       "source_state_origin": "packet.status",
       "source_file": "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-064501-control-git-status.json"
     },
@@ -84,6 +85,7 @@
       "source_state": "blocked",
       "source_state_token": "BLOCKED",
       "normalized_state": "BLOCKED",
+      "source_reason": "",
       "source_state_origin": "packet.status",
       "source_file": "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-172946-phase-17-work-packet-router-state-machine.json"
     },
@@ -97,6 +99,7 @@
       "source_state": "blocked",
       "source_state_token": "BLOCKED",
       "normalized_state": "BLOCKED",
+      "source_reason": "",
       "source_state_origin": "packet.status",
       "source_file": "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-215823-goal-intake-build-aios-repo-execution-loop-so-aios-can-help-build-aios-safely.json"
     },
@@ -110,6 +113,7 @@
       "source_state": "active",
       "source_state_token": "ACTIVE",
       "normalized_state": "QUEUED",
+      "source_reason": "",
       "source_state_origin": "packet.status",
       "source_file": "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\complete\\20260516-064500-brainstem-daily-start.json"
     },
@@ -123,6 +127,7 @@
       "source_state": "complete",
       "source_state_token": "COMPLETE",
       "normalized_state": "COMPLETE",
+      "source_reason": "",
       "source_state_origin": "packet.status",
       "source_file": "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\complete\\20260516-064502-rulebook-foundation.json"
     }

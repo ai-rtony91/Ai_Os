@@ -37,7 +37,7 @@ $stateMap = @{
     "PROPOSED" = "QUEUED"
     "QUEUED" = "QUEUED"
     "RUNNING" = "RUNNING"
-    "STALE" = "ARCHIVED"
+    "STALE" = "BLOCKED"
     "VALIDATING" = "RUNNING"
     "WAITING_APPROVAL" = "WAITING_APPROVAL"
     "WAITING_REVIEW" = "WAITING_APPROVAL"
@@ -117,6 +117,7 @@ function Read-AiOsPacketRecord {
     $title = if ($packet.PSObject.Properties.Name -contains "title") { [string] $packet.title } else { "" }
     $ownerLane = if ($packet.PSObject.Properties.Name -contains "owner_lane") { [string] $packet.owner_lane } else { "" }
     $assignedWorker = if ($packet.PSObject.Properties.Name -contains "assigned_worker") { [string] $packet.assigned_worker } else { "" }
+    $sourceReason = if ($resolved.source_state_token -eq "STALE") { "STALE" } else { "" }
 
     return [pscustomobject]@{
         packet_id = $packetId
@@ -128,6 +129,7 @@ function Read-AiOsPacketRecord {
         source_state = $sourceState
         source_state_token = $resolved.source_state_token
         normalized_state = $resolved.normalized_state
+        source_reason = $sourceReason
         source_state_origin = if (-not [string]::IsNullOrWhiteSpace($packetStatus)) { "packet.status" } else { "folder_state" }
         source_file = $File.FullName
     }
@@ -210,7 +212,7 @@ function New-AiOsUnifiedQueueIndexPayload {
             PROPOSED = "QUEUED"
             QUEUED = "QUEUED"
             RUNNING = "RUNNING"
-            STALE = "ARCHIVED"
+            STALE = "BLOCKED"
             VALIDATING = "RUNNING"
             WAITING_APPROVAL = "WAITING_APPROVAL"
             WAITING_REVIEW = "WAITING_APPROVAL"

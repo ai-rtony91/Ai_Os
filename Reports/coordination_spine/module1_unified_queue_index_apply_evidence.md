@@ -37,11 +37,18 @@
 - `ASSIGNED` -> `RUNNING`
 - `VALIDATING` -> `RUNNING`
 - `BLOCKED` -> `BLOCKED`
+- `STALE` -> `BLOCKED`
 - `WAITING_APPROVAL` -> `WAITING_APPROVAL`
 - `COMPLETE` -> `COMPLETE`
 - `FAILED` -> `FAILED`
 - `ARCHIVED` -> `ARCHIVED`
 - Unknown state is preserved in `unmapped_states`
+
+## Revision Notes
+
+- `STALE` now maps to `BLOCKED` instead of `ARCHIVED`.
+- Stale records preserve `source_reason = STALE`.
+- Added explicit tests for stale mapping and for empty-queue zero-output behavior.
 
 ## Validation
 
