@@ -524,7 +524,6 @@ $statusMarkdown
 - Total folders: `$($folders.Count)`
 - Total size: `$totalKb KB / $totalMb MB`
 
-## Daily Data Snapshot
 $dailyDataSnapshotSection
 
 ## Session Tracking
