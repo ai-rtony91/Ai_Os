@@ -259,7 +259,7 @@ Executable mutation automation for this gate must not be created until a separat
 
 ## Operator Prompt Reduction Rule
 
-Codex may treat safe read-only and other non-destructive DRY_RUN commands as `Option 2` by default:
+Codex may treat `TIER_0_AUTO` and safe `TIER_1_LOW_RISK` commands as `Option 2` by default:
 
 - `Option 2` means: continue the next safe governed DRY_RUN/non-destructive step.
 - For protected gates (`merge`, `APPLY`, `commit`, `push`, worker launch, Night Supervisor, SOS/ADB, notifications, broker/OANDA/webhook, live trading, secrets, credentials, `.env`), Codex must keep asking Anthony and never auto-proceed.

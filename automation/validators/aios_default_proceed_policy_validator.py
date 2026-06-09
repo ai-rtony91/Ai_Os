@@ -5,12 +5,22 @@ import json
 import re
 import subprocess
 from pathlib import Path
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 RECOMMENDATION_SCRIPT = REPO_ROOT / "automation" / "operator" / "Get-AiOsCommandApprovalRecommendation.DRY_RUN.ps1"
+APPROVAL_TIER_POLICY = (
+    REPO_ROOT / "automation" / "orchestration" / "policy" / "AIOS_APPROVAL_TIER_POLICY.json"
+)
+
 REQUIRED_FIELDS = [
+    "approval_recommendation_defaults",
+]
+
+REQUIRED_DEFAULT_FIELDS = [
     "DEFAULT_PROCEED_OPTION",
     "DEFAULT_PROCEED_MEANING",
     "ASK_USER_ONLY_ON_PROTECTED_GATE",
+    "DEFAULT_FOR_TIERS",
 ]
 
 
@@ -54,15 +64,33 @@ def validate(repo_root: Path) -> tuple[dict[str, object], list[str]]:
     failures: list[str] = []
     check_results: dict[str, bool] = {}
 
-    policy_path = repo_root / "automation" / "orchestration" / "policy" / "AIOS_DEFAULT_PROCEED_POLICY.json"
-    policy = json.loads(policy_path.read_text(encoding="utf-8"))
-    check_results["policy_required_fields_present"] = all(field in policy for field in REQUIRED_FIELDS)
-    if not check_results["policy_required_fields_present"]:
-        failures.append(f"Missing required fields in {POLICY_PATH.relative_to(REPO_ROOT)}")
+    policy = json.loads(APPROVAL_TIER_POLICY.read_text(encoding="utf-8"))
+    defaults = policy.get("approval_recommendation_defaults", {})
 
-    check_results["default_proceed_option_is_2"] = policy.get("DEFAULT_PROCEED_OPTION") == 2
-    check_results["default_proceed_meaning_is_expected"] = policy.get("DEFAULT_PROCEED_MEANING") == "continue next safe governed DRY_RUN/non-destructive step"
-    check_results["ask_user_only_on_protected_gate"] = bool(policy.get("ASK_USER_ONLY_ON_PROTECTED_GATE"))
+    check_results["policy_required_fields_present"] = all(
+        field in policy for field in REQUIRED_FIELDS
+    )
+    check_results["policy_defaults_required_fields_present"] = all(
+        field in defaults for field in REQUIRED_DEFAULT_FIELDS
+    )
+    if not check_results["policy_required_fields_present"]:
+        failures.append(f"Missing required fields in {APPROVAL_TIER_POLICY.relative_to(REPO_ROOT)}")
+    if not check_results["policy_defaults_required_fields_present"]:
+        failures.append(
+            f"Missing required default recommendation fields in {APPROVAL_TIER_POLICY.relative_to(REPO_ROOT)}"
+        )
+
+    check_results["default_proceed_option_is_2"] = defaults.get("DEFAULT_PROCEED_OPTION") == 2
+    check_results["default_proceed_meaning_is_expected"] = (
+        defaults.get("DEFAULT_PROCEED_MEANING")
+        == "continue next safe governed DRY_RUN/non-destructive step"
+    )
+    check_results["ask_user_only_on_protected_gate"] = bool(
+        defaults.get("ASK_USER_ONLY_ON_PROTECTED_GATE")
+    )
+    check_results["default_for_tiers_includes_tier0_and_tier1"] = set(
+        defaults.get("DEFAULT_FOR_TIERS", [])
+    ) >= {"TIER_0_AUTO", "TIER_1_LOW_RISK"}
 
     if not check_results["default_proceed_option_is_2"]:
         failures.append("DEFAULT_PROCEED_OPTION must be 2")
@@ -70,11 +98,20 @@ def validate(repo_root: Path) -> tuple[dict[str, object], list[str]]:
         failures.append("DEFAULT_PROCEED_MEANING must match the repo policy requirement")
     if not check_results["ask_user_only_on_protected_gate"]:
         failures.append("ASK_USER_ONLY_ON_PROTECTED_GATE must be true")
+    if not check_results["default_for_tiers_includes_tier0_and_tier1"]:
+        failures.append("DEFAULT_FOR_TIERS must include TIER_0_AUTO and TIER_1_LOW_RISK")
 
     safe_return_code, safe_option = _run_recommendation("git status --short --branch", "READ_ONLY", "repo")
     check_results["safe_readonly_default_option_2"] = safe_return_code == 0 and safe_option == "Option 2"
     if not check_results["safe_readonly_default_option_2"]:
         failures.append("Safe read-only commands must recommend Option 2")
+
+    safe_tier1_return_code, safe_tier1_option = _run_recommendation(
+        "git switch -c feature/default-tier-proceed", "BRANCH", "repo"
+    )
+    check_results["safe_tier1_default_option_2"] = safe_tier1_return_code == 0 and safe_tier1_option == "Option 2"
+    if not check_results["safe_tier1_default_option_2"]:
+        failures.append("Safe TIER_1_LOW_RISK commands must recommend Option 2")
 
     commit_return_code, commit_option = _run_recommendation('git commit -m "docs: test"', "COMMIT_ONLY", "AGENTS.md")
     merge_return_code, merge_option = _run_recommendation("gh pr merge 204 --merge --delete-branch=false", "MERGE_ONLY", "PR 204")
