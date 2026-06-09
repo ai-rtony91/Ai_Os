@@ -116,6 +116,8 @@ telemetry/auto_loop/reports/*.json
 telemetry/backup_reports/*.json
 telemetry/night_supervisor/*.json
 telemetry/night_supervisor/*.md
+telemetry/soak/soak_run_*.json
+Reports/endurance_soak/soak_run_*.md
 
 # AI_OS Relay runtime evidence
 relay/approvals/
