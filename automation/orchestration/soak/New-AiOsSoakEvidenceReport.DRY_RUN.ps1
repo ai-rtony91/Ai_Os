@@ -102,11 +102,16 @@ Assert-WritableRoot -Path $ReportRoot
 $evidence = Read-Evidence -Path $InputEvidencePath
 $samples = @($evidence.samples)
 $runId = if ($evidence.run_id) { [string]$evidence.run_id } else { "soak_unknown" }
+$statusSummary = if ($evidence.status_summary) { $evidence.status_summary } else { @{} }
 
 $reportDir = Join-Path $RepoRoot $ReportRoot
 $reportPath = Join-Path $reportDir ("soak_run_{0}.md" -f ($runId.Replace(":", "").Replace("/", "_")))
 
 $sampleCount = $samples.Count
+$sampleCountMismatch = $false
+if ($evidence.sample_count -ne $sampleCount) {
+    $sampleCountMismatch = $true
+}
 $latest = if ($sampleCount -gt 0) { $samples[-1] } else { $null }
 $markerSummary = if ($latest -and $latest.PSObject.Properties.Name -contains "marker_exists") {
     if ($latest.marker_exists) { "Marker present." } else { "Marker not present." }
@@ -147,10 +152,22 @@ $reportLines += "## Run Overview"
 $reportLines += "- Run ID: $($evidence.run_id)"
 $reportLines += "- Mode: $($evidence.run_mode)"
 $reportLines += "- Status: $($evidence.status)"
+$reportLines += "- Status Summary:"
+if ($statusSummary.PSObject.Properties.Count -gt 0) {
+    foreach ($status in "PASS", "STOPPED", "FAILED", "BLOCKED") {
+        $value = if ($statusSummary.PSObject.Properties.Name -contains $status) { $statusSummary.$status } else { 0 }
+        $reportLines += "  - {0}: {1}" -f $status, $value
+    }
+} else {
+    $reportLines += "  - No status summary present in evidence."
+}
 $reportLines += "- Packet ID: $($evidence.packet_id)"
 $reportLines += "- Started: $($evidence.started_utc)"
 $reportLines += "- Completed: $($evidence.completed_utc)"
 $reportLines += "- Sample Count: $sampleCount"
+if ($sampleCountMismatch) {
+    $reportLines += "- Sample Count Mismatch: JSON reported $($evidence.sample_count), observed $sampleCount"
+}
 $reportLines += ""
 $reportLines += "## Marker Summary"
 $reportLines += "- $markerSummary"
