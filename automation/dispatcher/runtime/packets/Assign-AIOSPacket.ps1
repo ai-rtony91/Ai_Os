@@ -6,7 +6,17 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$WorkerId,
 
-    [string]$AssignedBy = "AIOS Operator"
+    [string]$AssignedBy = "AIOS Operator",
+
+    [string]$PacketRuntimeRoot = "",
+
+    [string]$WorkerRuntimeRoot = "",
+
+    [string]$ClaimScriptPath = "",
+
+    [string]$LockRegistryPath = "",
+
+    [int]$LockTtlMinutes = 240
 )
 
 $ErrorActionPreference = "Stop"
@@ -44,6 +54,20 @@ function Write-AIOSJson {
     Set-Content -LiteralPath $Path -Value $json -Encoding UTF8
 }
 
+function ConvertTo-AIOSPathKey {
+    param([AllowNull()][string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
+
+    $key = $Path.Replace("\", "/").Trim()
+    while ($key.StartsWith("./")) {
+        $key = $key.Substring(2)
+    }
+    return $key.TrimEnd("/")
+}
+
 function Test-AIOSBlank {
     param([object]$Value)
     return ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value))
@@ -78,15 +102,176 @@ function Assert-AIOSFlag {
     }
 }
 
+function Ensure-AIOSNoteProperty {
+    param(
+        [object]$Object,
+        [string]$Name,
+        [object]$Value = $null
+    )
+
+    if (-not ($Object.PSObject.Properties.Name.Contains($Name))) {
+        $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
+    }
+}
+
+function Get-AIOSObjectPropertyValue {
+    param(
+        [object]$Object,
+        [string[]]$Names
+    )
+
+    foreach ($name in $Names) {
+        if ($Object.PSObject.Properties.Name -contains $name) {
+            return $Object.$name
+        }
+    }
+    return $null
+}
+
+function Get-AIOSAllowedPaths {
+    param(
+        [object]$QueuePacket,
+        [object]$RuntimePacket
+    )
+
+    $propertyNames = @("allowed_paths", "allowedPaths")
+    $queueValue = Get-AIOSObjectPropertyValue -Object $QueuePacket -Names $propertyNames
+    $runtimeValue = Get-AIOSObjectPropertyValue -Object $RuntimePacket -Names $propertyNames
+    $pathSources = @()
+
+    if ($null -ne $queueValue) {
+        $pathSources += [pscustomobject]@{ label = "queue"; paths = @($queueValue) }
+    }
+    if ($null -ne $runtimeValue) {
+        $pathSources += [pscustomobject]@{ label = "runtime"; paths = @($runtimeValue) }
+    }
+
+    if ($pathSources.Count -eq 0) {
+        throw "Assignment lock claim failed closed: packet allowed_paths are missing."
+    }
+
+    $normalizedSourceSets = @()
+    foreach ($source in $pathSources) {
+        $normalized = @($source.paths | ForEach-Object { ConvertTo-AIOSPathKey -Path ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Sort-Object -Unique)
+        if ($normalized.Count -eq 0) {
+            throw "Assignment lock claim failed closed: packet allowed_paths are empty or malformed."
+        }
+        $normalizedSourceSets += [pscustomobject]@{ label = $source.label; paths = $normalized }
+    }
+
+    if ($normalizedSourceSets.Count -gt 1) {
+        $left = ($normalizedSourceSets[0].paths -join "`n")
+        $right = ($normalizedSourceSets[1].paths -join "`n")
+        if ($left -ne $right) {
+            throw "Assignment lock claim failed closed: queue/runtime allowed_paths disagree."
+        }
+    }
+
+    return @($normalizedSourceSets[0].paths)
+}
+
+function Get-AIOSPacketLane {
+    param([object]$Packet)
+
+    $lane = Get-AIOSObjectPropertyValue -Object $Packet -Names @("lane", "lane_id", "lane_name")
+    if ([string]::IsNullOrWhiteSpace([string]$lane)) {
+        return "packet-assignment"
+    }
+    return [string]$lane
+}
+
+function Invoke-AIOSAssignmentLockClaim {
+    param(
+        [string]$ScriptPath,
+        [string]$RegistryPath,
+        [string]$PacketId,
+        [string]$WorkerId,
+        [string]$Lane,
+        [string[]]$AllowedPaths,
+        [int]$TtlMinutes
+    )
+
+    if (-not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
+        throw "Assignment lock claim failed closed: claim script not found: $ScriptPath"
+    }
+    if (-not (Test-Path -LiteralPath $RegistryPath -PathType Leaf)) {
+        throw "Assignment lock claim failed closed: lock registry not found: $RegistryPath"
+    }
+
+    $arguments = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        $ScriptPath,
+        "-WorkerId",
+        $WorkerId,
+        "-PacketId",
+        $PacketId,
+        "-Lane",
+        $Lane,
+        "-RegistryPath",
+        $RegistryPath,
+        "-ApprovalPacketId",
+        $PacketId,
+        "-ReleaseCondition",
+        "Release with Release-AiOsFileLock.DRY_RUN.ps1 using exact worker_id and lock_id after packet stop point or operator approval.",
+        "-TtlMinutes",
+        ([string]$TtlMinutes),
+        "-Paths"
+    ) + $AllowedPaths + @("-Apply", "-OutputJson")
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    $output = @(& powershell @arguments 2>&1)
+    $exitCode = $LASTEXITCODE
+    $ErrorActionPreference = $previousErrorActionPreference
+    if ($exitCode -ne 0) {
+        throw "Assignment lock claim failed closed: claim script exited $exitCode. $($output -join ' ')"
+    }
+
+    try {
+        $claim = ($output -join "`n") | ConvertFrom-Json
+    }
+    catch {
+        throw "Assignment lock claim failed closed: claim script returned malformed JSON."
+    }
+
+    if ([string]$claim.claim_status -ne "READY_TO_CLAIM") {
+        throw "Assignment lock claim failed closed: claim_status=$($claim.claim_status)."
+    }
+    if ([int]$claim.writes_performed -ne 1) {
+        throw "Assignment lock claim failed closed: writes_performed must be exactly 1."
+    }
+    if ($null -eq $claim.lock -or [string]::IsNullOrWhiteSpace([string]$claim.lock.lock_id)) {
+        throw "Assignment lock claim failed closed: lock_id is missing."
+    }
+
+    return $claim
+}
+
 $repoRoot = Get-AIOSRepoRoot
 Set-Location -LiteralPath $repoRoot
 
-$packetQueuePath = Join-Path $repoRoot "Reports/dispatcher/runtime/packets/packet_queue.json"
-$packetRuntimePath = Join-Path $repoRoot "Reports/dispatcher/runtime/packets/packet_runtime_table.json"
-$assignmentLedgerPath = Join-Path $repoRoot "Reports/dispatcher/runtime/packets/packet_assignment_ledger.json"
-$statusHistoryPath = Join-Path $repoRoot "Reports/dispatcher/runtime/packets/packet_status_history.json"
-$activeWorkerPath = Join-Path $repoRoot "Reports/dispatcher/runtime/workers/active_worker_table.json"
-$heartbeatPath = Join-Path $repoRoot "Reports/dispatcher/runtime/workers/worker_heartbeat_table.json"
+if ([string]::IsNullOrWhiteSpace($PacketRuntimeRoot)) {
+    $PacketRuntimeRoot = Join-Path $repoRoot "Reports/dispatcher/runtime/packets"
+}
+if ([string]::IsNullOrWhiteSpace($WorkerRuntimeRoot)) {
+    $WorkerRuntimeRoot = Join-Path $repoRoot "Reports/dispatcher/runtime/workers"
+}
+if ([string]::IsNullOrWhiteSpace($ClaimScriptPath)) {
+    $ClaimScriptPath = Join-Path $repoRoot "automation/orchestration/locks/Claim-AiOsFileLock.DRY_RUN.ps1"
+}
+if ([string]::IsNullOrWhiteSpace($LockRegistryPath)) {
+    $LockRegistryPath = Join-Path $repoRoot "automation/orchestration/locks/FILE_LOCK_REGISTRY.json"
+}
+
+$packetQueuePath = Join-Path $PacketRuntimeRoot "packet_queue.json"
+$packetRuntimePath = Join-Path $PacketRuntimeRoot "packet_runtime_table.json"
+$assignmentLedgerPath = Join-Path $PacketRuntimeRoot "packet_assignment_ledger.json"
+$statusHistoryPath = Join-Path $PacketRuntimeRoot "packet_status_history.json"
+$activeWorkerPath = Join-Path $WorkerRuntimeRoot "active_worker_table.json"
+$heartbeatPath = Join-Path $WorkerRuntimeRoot "worker_heartbeat_table.json"
 
 $packetQueue = Read-AIOSJson -Path $packetQueuePath
 $packetRuntime = Read-AIOSJson -Path $packetRuntimePath
@@ -124,19 +309,24 @@ $staleAfterSeconds = [int]$heartbeat.stale_after_seconds
 if ($staleAfterSeconds -le 0) {
     throw "Worker stale_after_seconds must be greater than zero."
 }
-$computedAgeSeconds = [int][Math]::Floor(($now - $heartbeatTime).TotalSeconds)
+$computedAgeSeconds = [int64][Math]::Floor(($now - $heartbeatTime).TotalSeconds)
 if ($computedAgeSeconds -gt $staleAfterSeconds) {
     throw "Worker heartbeat is stale. Age seconds: $computedAgeSeconds. Limit seconds: $staleAfterSeconds."
 }
 
-if (-not $queuePacket.PSObject.Properties.Name.Contains("assignment_id")) {
-    $queuePacket | Add-Member -NotePropertyName "assignment_id" -NotePropertyValue $null
-}
-if (-not $queuePacket.PSObject.Properties.Name.Contains("assigned_at")) {
-    $queuePacket | Add-Member -NotePropertyName "assigned_at" -NotePropertyValue $null
-}
-if (-not $queuePacket.PSObject.Properties.Name.Contains("last_status_change_at")) {
-    $queuePacket | Add-Member -NotePropertyName "last_status_change_at" -NotePropertyValue $null
+$allowedPaths = Get-AIOSAllowedPaths -QueuePacket $queuePacket -RuntimePacket $runtimePacket
+$packetLane = Get-AIOSPacketLane -Packet $queuePacket
+$lockClaim = Invoke-AIOSAssignmentLockClaim -ScriptPath $ClaimScriptPath -RegistryPath $LockRegistryPath -PacketId $PacketId -WorkerId $WorkerId -Lane $packetLane -AllowedPaths $allowedPaths -TtlMinutes $LockTtlMinutes
+$lockId = [string]$lockClaim.lock.lock_id
+
+foreach ($packet in @($queuePacket, $runtimePacket)) {
+    Ensure-AIOSNoteProperty -Object $packet -Name "worker_id" -Value $null
+    Ensure-AIOSNoteProperty -Object $packet -Name "assigned_worker_id" -Value $null
+    Ensure-AIOSNoteProperty -Object $packet -Name "assignment_id" -Value $null
+    Ensure-AIOSNoteProperty -Object $packet -Name "assigned_at" -Value $null
+    Ensure-AIOSNoteProperty -Object $packet -Name "updated_at" -Value $null
+    Ensure-AIOSNoteProperty -Object $packet -Name "last_status_change_at" -Value $null
+    Ensure-AIOSNoteProperty -Object $packet -Name "next_safe_action" -Value $null
 }
 
 $timestamp = $now.ToString("yyyy-MM-ddTHH:mm:ssZ")
@@ -169,7 +359,7 @@ $assignmentEntry = [pscustomobject]@{
     mode = "DRY_RUN"
     approval_required = $true
     apply_allowed = $false
-    lock_ids = @()
+    lock_ids = @($lockId)
     reason = "Manual-safe packet assignment after worker heartbeat validation."
     next_safe_action = $nextSafeAction
 }
@@ -180,7 +370,7 @@ $statusEvent = [pscustomobject]@{
     from_status = "QUEUED"
     to_status = "ASSIGNED"
     worker_id = $WorkerId
-    lock_ids = @()
+    lock_ids = @($lockId)
     changed_at = $timestamp
     changed_by = $AssignedBy
     reason = "Packet assigned to validated idle worker with current heartbeat."
@@ -190,15 +380,19 @@ $statusEvent = [pscustomobject]@{
 }
 
 $assignmentLedger.assignments = @($assignmentLedger.assignments) + @($assignmentEntry)
+Ensure-AIOSNoteProperty -Object $assignmentLedger -Name "next_safe_action" -Value $null
 $assignmentLedger.generated_at = $timestamp
 $assignmentLedger.next_safe_action = "Worker $WorkerId may run DRY_RUN only for packet $PacketId."
 
 $statusHistory.status_events = @($statusHistory.status_events) + @($statusEvent)
+Ensure-AIOSNoteProperty -Object $statusHistory -Name "next_safe_action" -Value $null
 $statusHistory.generated_at = $timestamp
 $statusHistory.next_safe_action = "Append the next status event only after DRY_RUN starts or packet state changes."
 
+Ensure-AIOSNoteProperty -Object $packetQueue -Name "next_safe_action" -Value $null
 $packetQueue.generated_at = $timestamp
 $packetQueue.next_safe_action = "Worker $WorkerId may start DRY_RUN for packet $PacketId. No APPLY is approved."
+Ensure-AIOSNoteProperty -Object $packetRuntime -Name "next_safe_action" -Value $null
 $packetRuntime.generated_at = $timestamp
 $packetRuntime.next_safe_action = "Worker $WorkerId may start DRY_RUN for packet $PacketId. No APPLY is approved."
 
@@ -212,6 +406,7 @@ Write-Host ("Result: ASSIGNED")
 Write-Host ("PacketId: {0}" -f $PacketId)
 Write-Host ("WorkerId: {0}" -f $WorkerId)
 Write-Host ("AssignmentId: {0}" -f $assignmentId)
+Write-Host ("LockId: {0}" -f $lockId)
 Write-Host ("Mode: DRY_RUN")
 Write-Host ("ApprovalRequired: true")
 Write-Host ("ApplyAllowed: false")
