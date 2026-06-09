@@ -1,0 +1,25 @@
+{
+  "validator": "aios_approval_inbox_schema_validator",
+  "status": "REVIEW_REQUIRED",
+  "generated_utc": "2026-06-09T00:00:00Z",
+  "files": [
+    {
+      "path": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+      "status": "PASS",
+      "issues": [],
+      "malformed": false
+    },
+    {
+      "path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+      "status": "REVIEW_REQUIRED",
+      "issues": [
+        "gate_approval_status_not_known"
+      ],
+      "malformed": false
+    }
+  ],
+  "issues": [
+    "gate_approval_status_not_known"
+  ],
+  "next_safe_action": "Review approval JSON fields and keep execution request to DRY_RUN."
+}
