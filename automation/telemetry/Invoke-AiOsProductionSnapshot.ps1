@@ -42,6 +42,27 @@ function Count-ExistingFiles {
     ).Count
 }
 
+function Get-AiOsDailyAutomationSnapshot {
+    param([string]$RepoRoot)
+
+    $snapshotScript = Join-Path $RepoRoot 'automation\orchestration\daily_snapshot\New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1'
+    if (-not (Test-Path -LiteralPath $snapshotScript -PathType Leaf)) {
+        throw "Daily snapshot script not found: $snapshotScript"
+    }
+
+    $snapshotOutput = @(& powershell -ExecutionPolicy Bypass -File $snapshotScript -Json 2>$null)
+    if ($LASTEXITCODE -ne 0 -and $snapshotOutput.Count -eq 0) {
+        throw "Daily snapshot script failed: $snapshotScript"
+    }
+
+    $snapshotJson = ($snapshotOutput -join [Environment]::NewLine).Trim()
+    if ([string]::IsNullOrWhiteSpace($snapshotJson)) {
+        throw "Daily snapshot script produced no JSON: $snapshotScript"
+    }
+
+    return $snapshotJson | ConvertFrom-Json
+}
+
 $repoRoot = Get-RepoRoot
 Set-Location -LiteralPath $repoRoot
 
@@ -49,7 +70,7 @@ $telemetryDir = Join-Path $repoRoot "Reports\telemetry"
 New-Item -ItemType Directory -Force -Path $telemetryDir | Out-Null
 
 $ledgerPath = Join-Path $telemetryDir "AIOS_PRODUCTION_DAILY_LEDGER.csv"
-$ledgerHeader = "date,timestamp,repo_root,branch,git_status_clean,tracked_files,modified_files,staged_files,untracked_files,commits_today,validator_script_count,telemetry_file_count,checkpoint_file_count,daily_report_file_count,worker_queue_file_count,snapshot_mode"
+$ledgerHeader = "date,timestamp,repo_root,current_head,branch,git_status_clean,tracked_files,modified_files,staged_files,untracked_files,commits_today,validator_script_count,telemetry_file_count,checkpoint_file_count,daily_report_file_count,worker_queue_file_count,daily_artifact_count,daily_folder_count,daily_total_bytes,daily_total_kb,daily_total_mb,skipped_secrets_count,validation_status,governance_status,success_failure,backup_size_bytes,backup_size_kb,backup_size_mb,snapshot_mode"
 
 if (-not (Test-Path -LiteralPath $ledgerPath)) {
     Set-Content -LiteralPath $ledgerPath -Value $ledgerHeader -Encoding utf8
@@ -65,6 +86,8 @@ if ($branch.Count -eq 0 -or [string]::IsNullOrWhiteSpace([string]$branch[0])) {
 } else {
     $branch = ([string]$branch[0]).Trim()
 }
+
+$dailySnapshot = Get-AiOsDailyAutomationSnapshot -RepoRoot $repoRoot
 
 $porcelain = Invoke-GitLines -Arguments @("status", "--porcelain")
 $gitStatusClean = ($porcelain.Count -eq 0).ToString().ToUpperInvariant()
@@ -99,6 +122,7 @@ $row = [pscustomobject]@{
     date                    = $date
     timestamp               = $timestamp
     repo_root               = $repoRoot
+    current_head            = $dailySnapshot.current_head
     branch                  = $branch
     git_status_clean        = $gitStatusClean
     tracked_files           = $trackedFiles
@@ -111,6 +135,18 @@ $row = [pscustomobject]@{
     checkpoint_file_count   = $checkpointFileCount
     daily_report_file_count = $dailyReportFileCount
     worker_queue_file_count = $workerQueueFileCount
+    daily_artifact_count    = $dailySnapshot.artifact_count
+    daily_folder_count      = $dailySnapshot.folder_count
+    daily_total_bytes       = $dailySnapshot.total_bytes_collected_today
+    daily_total_kb          = $dailySnapshot.total_kb_collected_today
+    daily_total_mb          = $dailySnapshot.total_mb_collected_today
+    skipped_secrets_count   = $dailySnapshot.skipped_secrets_count
+    validation_status       = $dailySnapshot.validation_status
+    governance_status       = $dailySnapshot.governance_status
+    success_failure         = $dailySnapshot.success_failure
+    backup_size_bytes       = $dailySnapshot.backup_size_bytes
+    backup_size_kb          = $dailySnapshot.backup_size_kb
+    backup_size_mb          = $dailySnapshot.backup_size_mb
     snapshot_mode           = "APPLY"
 }
 

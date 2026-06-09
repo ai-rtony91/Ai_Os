@@ -236,6 +236,64 @@ function Write-TextFile {
     Set-Content -LiteralPath $Path -Value $Content -Encoding UTF8
 }
 
+function Get-AiOsDailyAutomationSnapshot {
+    param([string]$RepoRoot)
+
+    $snapshotScript = Join-Path $RepoRoot 'automation\orchestration\daily_snapshot\New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1'
+    if (-not (Test-Path -LiteralPath $snapshotScript -PathType Leaf)) {
+        throw "Daily snapshot script not found: $snapshotScript"
+    }
+
+    $snapshotOutput = @(& powershell -ExecutionPolicy Bypass -File $snapshotScript -Json 2>$null)
+    if ($LASTEXITCODE -ne 0 -and $snapshotOutput.Count -eq 0) {
+        throw "Daily snapshot script failed: $snapshotScript"
+    }
+
+    $snapshotJson = ($snapshotOutput -join [Environment]::NewLine).Trim()
+    if ([string]::IsNullOrWhiteSpace($snapshotJson)) {
+        throw "Daily snapshot script produced no JSON: $snapshotScript"
+    }
+
+    return $snapshotJson | ConvertFrom-Json
+}
+
+function New-AiOsDailyDataSnapshotSection {
+    param([object]$Snapshot)
+
+    $changedFiles = @($Snapshot.files_changed_generated_today)
+    $changedFilesText = if ($changedFiles.Count -eq 0) {
+        'None'
+    }
+    elseif ($changedFiles.Count -le 20) {
+        $changedFiles -join ', '
+    }
+    else {
+        (($changedFiles | Select-Object -First 20) -join ', ') + ', ...'
+    }
+
+    $backupSizeText = if ($Snapshot.backup_ran -eq $true -and $null -ne $Snapshot.backup_size_bytes) {
+        '{0} bytes ({1:N2} KB / {2:N2} MB)' -f $Snapshot.backup_size_bytes, $Snapshot.backup_size_kb, $Snapshot.backup_size_mb
+    }
+    else {
+        'N/A'
+    }
+
+    return @"
+## Daily Data Snapshot
+- Date/time: $($Snapshot.date_time_local)
+- Repo path: $($Snapshot.repo_path)
+- Current HEAD: $($Snapshot.current_head)
+- Files changed/generated today: $changedFilesText
+- Artifact count: $($Snapshot.artifact_count)
+- Folder count: $($Snapshot.folder_count)
+- Total bytes collected today: $($Snapshot.total_bytes_collected_today) bytes ($($Snapshot.total_kb_collected_today) KB / $($Snapshot.total_mb_collected_today) MB)
+- Backup size if backup ran: $backupSizeText
+- Skipped secrets count: $($Snapshot.skipped_secrets_count)
+- Validation/governance status: $($Snapshot.validation_governance_status)
+- Success/failure: $($Snapshot.success_failure)
+"@
+}
+
 function Update-DailyStatusSnapshot {
     param(
         [string]$Mode,
@@ -350,6 +408,8 @@ try {
     $dateStamp = $timestampDate.ToString('yyyy-MM-dd')
     $timestampStamp = $timestampDate.ToString('yyyy-MM-dd HH:mm:ss')
     $fileStamp = $timestampDate.ToString('yyyy-MM-dd_HHmmss')
+    $dailyDataSnapshot = Get-AiOsDailyAutomationSnapshot -RepoRoot $resolvedRepoRoot
+    $dailyDataSnapshotSection = New-AiOsDailyDataSnapshotSection -Snapshot $dailyDataSnapshot
 
     $reportsRoot = Join-Path $resolvedRepoRoot 'Reports'
     $checkpointDir = Join-Path $reportsRoot 'checkpoints'
@@ -463,6 +523,9 @@ $statusMarkdown
 - Total files: `$($files.Count)`
 - Total folders: `$($folders.Count)`
 - Total size: `$totalKb KB / $totalMb MB`
+
+## Daily Data Snapshot
+$dailyDataSnapshotSection
 
 ## Session Tracking
 - Session start: `$($sessionStartDate.ToString('yyyy-MM-dd HH:mm:ss'))`
