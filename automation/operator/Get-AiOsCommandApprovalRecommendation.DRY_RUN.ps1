@@ -8,6 +8,114 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+$script:APPROVAL_TIER_POLICY_PATH = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "..\orchestration\policy\AIOS_APPROVAL_TIER_POLICY.json"
+
+$script:DEFAULT_PROCEED_OPTION = 2
+$script:DEFAULT_PROCEED_MEANING = "continue next safe governed DRY_RUN/non-destructive step"
+$script:ASK_USER_ONLY_ON_PROTECTED_GATE = $true
+$script:DEFAULT_APPROVE_TIERS = @("TIER_0_AUTO", "TIER_1_LOW_RISK")
+
+function Load-AiOsApprovalTierPolicy {
+    if (-not (Test-Path -LiteralPath $script:APPROVAL_TIER_POLICY_PATH -PathType Leaf)) {
+        return [pscustomobject]@{
+            approval_recommendation_defaults = [pscustomobject]@{
+                DEFAULT_PROCEED_OPTION = $script:DEFAULT_PROCEED_OPTION
+                DEFAULT_PROCEED_MEANING = $script:DEFAULT_PROCEED_MEANING
+                ASK_USER_ONLY_ON_PROTECTED_GATE = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
+                DEFAULT_FOR_TIERS = $script:DEFAULT_APPROVE_TIERS
+            }
+        }
+    }
+
+    try {
+        $policyText = Get-Content -LiteralPath $script:APPROVAL_TIER_POLICY_PATH -Raw
+        return ($policyText | ConvertFrom-Json)
+    } catch {
+        return [pscustomobject]@{
+            approval_recommendation_defaults = [pscustomobject]@{
+                DEFAULT_PROCEED_OPTION = $script:DEFAULT_PROCEED_OPTION
+                DEFAULT_PROCEED_MEANING = $script:DEFAULT_PROCEED_MEANING
+                ASK_USER_ONLY_ON_PROTECTED_GATE = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
+                DEFAULT_FOR_TIERS = $script:DEFAULT_APPROVE_TIERS
+            }
+        }
+    }
+}
+
+function Resolve-AiOsApprovalPolicyDefaults {
+    param([pscustomobject]$Policy)
+
+    $defaults = $Policy.approval_recommendation_defaults
+    if (-not $defaults) {
+        return [pscustomobject]@{
+            DEFAULT_PROCEED_OPTION          = $script:DEFAULT_PROCEED_OPTION
+            DEFAULT_PROCEED_MEANING         = $script:DEFAULT_PROCEED_MEANING
+            ASK_USER_ONLY_ON_PROTECTED_GATE = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
+            DEFAULT_FOR_TIERS               = $script:DEFAULT_APPROVE_TIERS
+        }
+    }
+
+    $option = $defaults.DEFAULT_PROCEED_OPTION
+    if (-not $option) {
+        $option = $script:DEFAULT_PROCEED_OPTION
+    }
+
+    $meaning = [string]$defaults.DEFAULT_PROCEED_MEANING
+    if ([string]::IsNullOrWhiteSpace($meaning)) {
+        $meaning = $script:DEFAULT_PROCEED_MEANING
+    }
+
+    $ask = $defaults.ASK_USER_ONLY_ON_PROTECTED_GATE
+    if ($null -eq $ask) {
+        $ask = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
+    }
+
+    $tiers = $defaults.DEFAULT_FOR_TIERS
+    if (-not $tiers -or @($tiers).Count -eq 0) {
+        $tiers = $script:DEFAULT_APPROVE_TIERS
+    }
+
+    return [pscustomobject]@{
+        DEFAULT_PROCEED_OPTION          = [int]$option
+        DEFAULT_PROCEED_MEANING         = [string]$meaning
+        ASK_USER_ONLY_ON_PROTECTED_GATE = [bool]$ask
+        DEFAULT_FOR_TIERS               = [string[]]$tiers
+    }
+}
+
+$script:APPROVAL_TIER_POLICY = Load-AiOsApprovalTierPolicy
+$script:DEFAULT_PROCEED_VALUES = Resolve-AiOsApprovalPolicyDefaults -Policy $script:APPROVAL_TIER_POLICY
+
+$script:DEFAULT_PROCEED_OPTION = [int]$script:DEFAULT_PROCEED_VALUES.DEFAULT_PROCEED_OPTION
+$script:DEFAULT_PROCEED_MEANING = [string]$script:DEFAULT_PROCEED_VALUES.DEFAULT_PROCEED_MEANING
+$script:ASK_USER_ONLY_ON_PROTECTED_GATE = [bool]$script:DEFAULT_PROCEED_VALUES.ASK_USER_ONLY_ON_PROTECTED_GATE
+$script:DEFAULT_APPROVE_TIERS = @($script:DEFAULT_PROCEED_VALUES.DEFAULT_FOR_TIERS)
+
+if ($script:DEFAULT_PROCEED_OPTION -lt 1) {
+    $script:DEFAULT_PROCEED_OPTION = 1
+}
+if ($script:DEFAULT_PROCEED_OPTION -gt 3) {
+    $script:DEFAULT_PROCEED_OPTION = 3
+}
+if ([string]::IsNullOrWhiteSpace($script:DEFAULT_PROCEED_MEANING)) {
+    $script:DEFAULT_PROCEED_MEANING = "continue next safe governed DRY_RUN/non-destructive step"
+}
+
+function Get-OptionLabel {
+    param([int]$Option)
+
+    if ($Option -eq 1) {
+        return "Option 1"
+    }
+    if ($Option -eq 2) {
+        return "Option 2"
+    }
+    if ($Option -eq 3) {
+        return "Option 3 / HARD STOP"
+    }
+    return "Option $Option"
+}
+
 function Normalize-CommandText {
     param([string]$Text)
 
@@ -34,7 +142,8 @@ function New-Recommendation {
         [string]$RiskLevel,
         [string]$ScopeMatch,
         [string]$StateChanging,
-        [string]$StopRequired
+        [string]$StopRequired,
+        [string]$AppliedTier
     )
 
     [pscustomobject]@{
@@ -45,7 +154,60 @@ function New-Recommendation {
         ScopeMatch = $ScopeMatch
         StateChangingCommand = $StateChanging
         StopRequired = $StopRequired
+        AppliedTier = $AppliedTier
+        DefaultProceedOption = "Option $($script:DEFAULT_PROCEED_OPTION)"
+        DefaultProceedMeaning = $script:DEFAULT_PROCEED_MEANING
+        AskUserOnlyOnProtectedGate = $script:ASK_USER_ONLY_ON_PROTECTED_GATE
     }
+}
+
+function Test-IsProtectedHumanRequiredCommand {
+    param([string]$Command)
+
+    $protectedHumanPatterns = @(
+        "^(?i)git\s+commit(\s+|$)",
+        "^(?i)git\s+push(\s+|$)",
+        "^(?i)gh\s+pr\s+merge\b"
+    )
+
+    foreach ($pattern in $protectedHumanPatterns) {
+        if ($Command -match $pattern) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-IsDefaultTier {
+    param([string]$Tier)
+    return $script:DEFAULT_APPROVE_TIERS -contains $Tier
+}
+
+function Get-DefaultTierOption {
+    param([string]$Tier)
+    if (Test-IsDefaultTier -Tier $Tier) {
+        return Get-OptionLabel -Option $script:DEFAULT_PROCEED_OPTION
+    }
+    return "Option 1"
+}
+
+function Get-CommandApprovalTier {
+    param(
+        [string]$Command,
+        [string]$Type,
+        [string]$Hint
+    )
+
+    if (Test-IsSafeReadOnlyCommand -Command $Command -Hint $Hint) {
+        return "TIER_0_AUTO"
+    }
+
+    if (Test-IsScopedApprovedMutation -Command $Command -Type $Type -Hint $Hint) {
+        return "TIER_1_LOW_RISK"
+    }
+
+    return "TIER_2_HUMAN_REQUIRED"
 }
 
 function Test-IsHardStopCommand {
@@ -69,6 +231,11 @@ function Test-IsHardStopCommand {
         "^(?i)git\s+push\b.*\s--delete\b",
         "^(?i)gh\s+pr\s+merge\b.*--delete-branch(?!=false)\b",
         "(?i)\bsecret\b|\bcredential\b|\.env\b|id_rsa|token",
+        "(?i)broker",
+        "(?i)\boanda\b",
+        "(?i)\bwebhook\b",
+        "(?i)\blive[-_ ]?trading\b",
+        "(?i)\breal[-_ ]?order\b",
         "(?i)\bT9\b|^[A-Z]:\\T9\\|\\T9\\",
         "^(?i)(powershell|pwsh)\b.*\s-File\s+.*\.ps1(\s|$)",
         "^(?i)&\s+.*\.ps1(\s|$)",
@@ -196,29 +363,45 @@ function Get-AiOsCommandApprovalRecommendation {
             -RiskLevel "HIGH" `
             -ScopeMatch "NO" `
             -StateChanging "YES" `
-            -StopRequired "YES"
+            -StopRequired "YES" `
+            -AppliedTier "TIER_2_HUMAN_REQUIRED"
     }
 
-    if (Test-IsSafeReadOnlyCommand -Command $normalized -Hint $Hint) {
+    if (Test-IsProtectedHumanRequiredCommand -Command $normalized) {
         return New-Recommendation `
-            -Option "Option 2" `
+            -Option "Option 1" `
+            -CommandClass "PROTECTED_HUMAN_REQUIRED" `
+            -Reason "Command is protected by tier policy and requires explicit Human Owner decision." `
+            -RiskLevel "MEDIUM" `
+            -ScopeMatch "NO" `
+            -StateChanging "YES" `
+            -StopRequired "YES" `
+            -AppliedTier "TIER_2_HUMAN_REQUIRED"
+    }
+
+    $tier = Get-CommandApprovalTier -Command $normalized -Type $Type -Hint $Hint
+    if ($tier -eq "TIER_0_AUTO") {
+        return New-Recommendation `
+            -Option (Get-DefaultTierOption -Tier $tier) `
             -CommandClass "SAFE_READ_ONLY" `
             -Reason "Command is read-only, scoped, and narrow enough to reuse approval for this command pattern." `
             -RiskLevel "LOW" `
             -ScopeMatch "YES" `
             -StateChanging "NO" `
-            -StopRequired "NO"
+            -StopRequired "NO" `
+            -AppliedTier $tier
     }
 
-    if (Test-IsScopedApprovedMutation -Command $normalized -Type $Type -Hint $Hint) {
+    if ($tier -eq "TIER_1_LOW_RISK") {
         return New-Recommendation `
-            -Option "Option 1" `
+            -Option (Get-DefaultTierOption -Tier $tier) `
             -CommandClass "SCOPED_APPROVED_MUTATION" `
-            -Reason "Command is an exact scoped mutation and should receive one-time approval only." `
+            -Reason "Command is a scoped low-risk mutation that can follow safe default continuation." `
             -RiskLevel "MEDIUM" `
             -ScopeMatch "YES" `
             -StateChanging "YES" `
-            -StopRequired "NO"
+            -StopRequired "NO" `
+            -AppliedTier $tier
     }
 
     return New-Recommendation `
@@ -228,7 +411,8 @@ function Get-AiOsCommandApprovalRecommendation {
         -RiskLevel "REVIEW" `
         -ScopeMatch "NO" `
         -StateChanging "UNKNOWN" `
-        -StopRequired "YES"
+        -StopRequired "YES" `
+        -AppliedTier "TIER_2_HUMAN_REQUIRED"
 }
 
 function Write-Recommendation {
@@ -245,16 +429,24 @@ function Write-Recommendation {
     Write-Host "Scope match: $($Recommendation.ScopeMatch)"
     Write-Host "State-changing command: $($Recommendation.StateChangingCommand)"
     Write-Host "Stop required: $($Recommendation.StopRequired)"
+    Write-Host "Applied tier: $($Recommendation.AppliedTier)"
+    Write-Host "Default proceed option: $($Recommendation.DefaultProceedOption)"
+    Write-Host "Default proceed meaning: $($Recommendation.DefaultProceedMeaning)"
+    Write-Host "Ask user only on protected gate: $($Recommendation.AskUserOnlyOnProtectedGate)"
 }
 
 if ($ShowExamples) {
+    $defaultSafeOption = Get-OptionLabel -Option $script:DEFAULT_PROCEED_OPTION
     $examples = @(
-        [pscustomobject]@{ Command = "git status --short --branch"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 2" },
-        [pscustomobject]@{ Command = "gh pr view 204 --json number,url,state"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 2" },
-        [pscustomobject]@{ Command = "git add AGENTS.md"; Lane = "COMMIT_ONLY"; Scope = "AGENTS.md"; Expected = "Option 1" },
+        [pscustomobject]@{ Command = "git status --short --branch"; Lane = "READ_ONLY"; Scope = "repo"; Expected = $defaultSafeOption },
+        [pscustomobject]@{ Command = "gh pr view 204 --json number,url,state"; Lane = "READ_ONLY"; Scope = "repo"; Expected = $defaultSafeOption },
         [pscustomobject]@{ Command = "git commit -m `"docs/agents: add approval friction reduction standard`""; Lane = "COMMIT_ONLY"; Scope = "AGENTS.md"; Expected = "Option 1" },
         [pscustomobject]@{ Command = "gh pr merge 204 --merge --delete-branch=false"; Lane = "MERGE_ONLY"; Scope = "PR 204"; Expected = "Option 1" },
+        [pscustomobject]@{ Command = "git push -u origin feature/default-proceed-policy-v1"; Lane = "PUSH_ONLY"; Scope = "repo"; Expected = "Option 1" },
+        [pscustomobject]@{ Command = "git add automation/orchestration/policy/AIOS_APPROVAL_TIER_POLICY.json"; Lane = "COMMIT_ONLY"; Scope = "repo"; Expected = "Option 2" },
+        [pscustomobject]@{ Command = "git switch -c feature/policy-default-proceed"; Lane = "BRANCH"; Scope = "repo"; Expected = "Option 2" },
         [pscustomobject]@{ Command = "git clean -fd"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 3 / HARD STOP" },
+        [pscustomobject]@{ Command = "python automation/forex_engine/run_live_broker_demo.py --mode=live"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 3 / HARD STOP" },
         [pscustomobject]@{ Command = "robocopy C:\Dev\Ai.Os D:\backup /MIR"; Lane = "READ_ONLY"; Scope = "repo"; Expected = "Option 3 / HARD STOP" }
     )
 

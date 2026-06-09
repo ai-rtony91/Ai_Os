@@ -259,6 +259,11 @@ Executable mutation automation for this gate must not be created until a separat
 
 ## Operator Prompt Reduction Rule
 
-Codex may stop asking the operator for repeated 1/2/3 choices only after this gate returns a `SAFE_TO_*` state for the exact protected action and the packet already contains the matching current-session Human Owner approval marker.
+Codex may treat `TIER_0_AUTO` and safe `TIER_1_LOW_RISK` commands as `Option 2` by default:
+
+- `Option 2` means: continue the next safe governed DRY_RUN/non-destructive step.
+- For protected gates (`merge`, `APPLY`, `commit`, `push`, worker launch, Night Supervisor, SOS/ADB, notifications, broker/OANDA/webhook, live trading, secrets, credentials, `.env`), Codex must keep asking Anthony and never auto-proceed.
+
+Codex may stop asking the operator for repeated 1/2/3 choices for the same protected action only after this gate returns a `SAFE_TO_*` state for the exact protected action and the packet already contains the matching current-session Human Owner approval marker.
 
 Codex must still stop for `HUMAN_APPROVAL_REQUIRED` or `BLOCKED`.

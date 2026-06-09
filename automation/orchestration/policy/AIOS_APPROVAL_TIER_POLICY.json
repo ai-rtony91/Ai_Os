@@ -6,6 +6,15 @@
   "packet_id": "PKT-WEST-APPLY-004",
   "owner": "Claude Code West — West Worksite Supervisor",
   "purpose": "Define the canonical three-tier command approval model for AI_OS workers. Reduces repetitive low-risk read-only approval friction while preserving all protected-mutation and governance gates. This file is the machine-readable authority bridging AGENTS.md behavioral rules and settings.local.json enforcement.",
+  "approval_recommendation_defaults": {
+    "DEFAULT_PROCEED_OPTION": 2,
+    "DEFAULT_PROCEED_MEANING": "continue next safe governed DRY_RUN/non-destructive step",
+    "ASK_USER_ONLY_ON_PROTECTED_GATE": true,
+    "DEFAULT_FOR_TIERS": [
+      "TIER_0_AUTO",
+      "TIER_1_LOW_RISK"
+    ]
+  },
   "authority_references": [
     "AGENTS.md — AI_OS Approval Friction Reduction Standard",
     "automation/orchestration/policy/AIOS_WORKER_SAFETY_POLICY.json",
