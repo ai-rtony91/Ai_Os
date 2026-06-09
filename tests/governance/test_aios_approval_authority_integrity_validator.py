@@ -12,7 +12,9 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from automation.validators.aios_approval_authority_integrity_validator import (
     _canonical_payload,
+    validate_authority_bundle,
     validate_approval_gate,
+    validate_approval_inbox,
 )
 
 
@@ -37,6 +39,44 @@ def _approved_gate() -> dict[str, object]:
     }
 
 
+def _approval_inbox_record() -> dict[str, object]:
+    return {
+        "schema": "AIOS_APPROVAL_INBOX.v1",
+        "approval_gate_id": "APPROVAL_INBOX_001",
+        "authority_status": "active_authority",
+        "packet_id": "AIOS-24H-LOOP-CODEX1-APPROVAL-INBOX-AUTHORITY-APPLY-001",
+        "requested_action": "APPROVAL_INBOX_AUTHORITY_REPAIR",
+        "requested_mode": "APPLY",
+        "approved_mode": "APPLY",
+        "approval_status": "completed",
+        "approved_by_human": True,
+        "approval_timestamp_placeholder": "2026-06-02T00:00:00Z",
+        "risk_level": "governance",
+        "allowed_paths": [
+            "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+            "docs/governance/source-of-truth-map.md",
+            "docs/governance/APPROVAL_FLOW_MAP.md",
+        ],
+        "blocked_paths": [
+            "services/",
+            "relay/",
+            "telemetry/",
+            "control/operation_glue/",
+            "apps/",
+            "scripts/",
+            ".git/",
+            "broker/",
+            "OANDA/",
+            "secrets/",
+            "api_keys/",
+            "live_trading/",
+        ],
+        "validator_chain_required": True,
+        "commit_package_required": True,
+        "push_blocked_until_final_review": True,
+    }
+
+
 def _with_hmac(gate: dict[str, object], key: str) -> dict[str, object]:
     evidence = dict(gate["approval_evidence"])  # type: ignore[index]
     evidence["approval_hmac_sha256"] = hmac.new(
@@ -45,6 +85,53 @@ def _with_hmac(gate: dict[str, object], key: str) -> dict[str, object]:
         sha256,
     ).hexdigest()
     return {**gate, "approval_evidence": evidence}
+
+
+def test_approval_inbox_authority_record_is_valid_for_apply_gate_bundle() -> None:
+    gate = _with_hmac(_approved_gate(), "test-key")
+    inbox = _approval_inbox_record()
+
+    result = validate_authority_bundle(gate, inbox, hmac_key="test-key")
+
+    assert result.status == "PASS"
+    assert result.hardened_approval_verified is True
+
+
+def test_malformed_approval_inbox_record_fails_validation() -> None:
+    gate = _with_hmac(_approved_gate(), "test-key")
+    inbox: dict[str, object] = {}
+
+    result = validate_authority_bundle(gate, inbox, hmac_key="test-key")
+
+    assert result.status == "BLOCKED"
+    assert "inbox_missing_required_field:approval_gate_id" in result.failed_checks
+
+
+def test_inactive_approval_authority_blocks_apply_transition() -> None:
+    gate = _with_hmac(_approved_gate(), "test-key")
+    inbox = _approval_inbox_record()
+    inbox["authority_status"] = "proposed_authority"
+
+    result = validate_authority_bundle(gate, inbox, hmac_key="test-key")
+
+    assert result.status == "BLOCKED"
+    assert "inbox_not_active_authority_for_apply" in result.failed_checks
+
+
+def test_apply_gate_requires_completed_authority_record() -> None:
+    gate = _with_hmac(_approved_gate(), "test-key")
+    inbox = _approval_inbox_record()
+    inbox["approval_status"] = "pending_review"
+
+    result = validate_authority_bundle(gate, inbox, hmac_key="test-key")
+
+    assert result.status == "BLOCKED"
+    assert "inbox_authority_not_completed" in result.failed_checks
+    assert "inbox_and_gate_status_inconsistent_for_apply" in result.failed_checks
+
+
+def test_validate_approval_inbox_minimal_required_fields_only() -> None:
+    assert validate_approval_inbox(_approval_inbox_record()) == []
 
 
 def test_forged_460_style_gate_is_rejected() -> None:
