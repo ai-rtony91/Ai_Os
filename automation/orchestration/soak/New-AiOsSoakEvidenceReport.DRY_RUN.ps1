@@ -156,7 +156,7 @@ $reportLines += "- Status Summary:"
 if ($statusSummary.PSObject.Properties.Count -gt 0) {
     foreach ($status in "PASS", "STOPPED", "FAILED", "BLOCKED") {
         $value = if ($statusSummary.PSObject.Properties.Name -contains $status) { $statusSummary.$status } else { 0 }
-        $reportLines += "  - $status: $value"
+        $reportLines += "  - {0}: {1}" -f $status, $value
     }
 } else {
     $reportLines += "  - No status summary present in evidence."
