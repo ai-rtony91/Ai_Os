@@ -27,7 +27,7 @@ jobs:
         run: python automation/validators/aios_worker_dispatcher_assignment_executor_validator.py --sample-check
 
   execution-bridge-gates:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
