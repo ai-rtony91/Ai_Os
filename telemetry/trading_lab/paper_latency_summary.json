@@ -1,0 +1,17 @@
+{
+  "lane": "AIOS_PAPER_TRADING_COMPLETION_SWEEP",
+  "paper_only": true,
+  "runs": 1,
+  "latency_count": 1,
+  "median_fill_latency_ms": 40,
+  "items": [
+    {
+      "signal_id": "AIOS_PAPER_SIGNAL_2026_06_09_001",
+      "age_seconds": 0,
+      "started_at": "2026-06-09T00:00:00Z",
+      "completed_at": "2026-06-09T00:00:00Z",
+      "status": "PASS",
+      "paper_replay": true
+    }
+  ]
+}

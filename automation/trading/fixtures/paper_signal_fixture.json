@@ -1,0 +1,17 @@
+{
+  "signal_id": "AIOS_PAPER_SIGNAL_2026_06_09_001",
+  "symbol": "EURUSD",
+  "timeframe": "1h",
+  "source": "TradingViewMock",
+  "permission": "bullish",
+  "signal": "BUY",
+  "confidence": 0.88,
+  "generated_at": "2026-06-09T10:00:00Z",
+  "received_at": "2026-06-09T10:00:00Z",
+  "regime": "trend_up",
+  "trend_score": 0.82,
+  "metadata": {
+    "fill_price": 1.0950
+  },
+  "notes": "paper-only dry-run fixture"
+}
