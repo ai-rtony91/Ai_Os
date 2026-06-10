@@ -17,12 +17,12 @@ def run_status_report(
     control_path: Path,
     router_path: Path,
     channels_path: Path,
+    self_build_path: Path | None = None,
     report_root: Path,
 ) -> subprocess.CompletedProcess[str]:
     out_md = report_root / "status_report.md"
     out_json = report_root / "status_report.json"
-    return subprocess.run(
-        [
+    command = [
             "powershell",
             "-NoProfile",
             "-ExecutionPolicy",
@@ -41,7 +41,11 @@ def run_status_report(
             str(out_md),
             "-OutputJsonPath",
             str(out_json),
-        ],
+        ]
+    if self_build_path is not None:
+        command.extend(["-SelfBuildEvidencePath", str(self_build_path)])
+    return subprocess.run(
+        command,
         cwd=REPO_ROOT,
         text=True,
         capture_output=True,
@@ -107,12 +111,34 @@ def test_autonomy_status_report_ready_state(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    self_build = tmp_path / "self_build.evidence.json"
+    self_build.write_text(
+        json.dumps(
+            {
+                "schema": "AIOS_SELF_BUILD_CYCLE.v1",
+                "cycle_id": "sbc-status-test",
+                "generated_at": "2026-06-10T00:00:00Z",
+                "mode": "DRY_RUN",
+                "executed": False,
+                "safety_status": "SAFE",
+                "requires_human": False,
+                "decision": {"action": "REPORT", "reason": "ready for report"},
+                "evidence_bundle": {
+                    "runtime": {"runtime_gate": "READY_TO_REPORT"},
+                    "completion": {"verdict": "COMPLETION_VERIFIED"},
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
 
     result = run_status_report(
         discovery_path=discovery,
         control_path=control,
         router_path=router,
         channels_path=channels,
+        self_build_path=self_build,
         report_root=report_root,
     )
     assert result.returncode == 0
@@ -122,6 +148,20 @@ def test_autonomy_status_report_ready_state(tmp_path: Path) -> None:
     assert payload["next_action"] == "RUN_CODEX_WITH_PACKET"
     assert payload["can_autonomously_do_next"]
     assert payload["forex_builder_readiness"]["status"] in {"READY", "PARTIAL"}
+    assert payload["self_build_decision"]["normalized_status"] == "REPORT_READY"
+    assert payload["self_build_decision"]["operator_route"] == "REPORT_ONLY"
+    assert payload["self_build_decision"]["approval_required"] is False
+    assert "no action is approved" in payload["self_build_decision"]["safe_next_action"]
+    assert payload["self_build_decision_available"] is True
+    assert payload["self_build_decision_status"] == "REPORT_READY"
+    assert payload["self_build_operator_route"] == "REPORT_ONLY"
+    assert payload["self_build_approval_required"] is False
+    assert payload["self_build_report_only"] is True
+    assert payload["self_build_source_cycle_id"] == "sbc-status-test"
+    assert payload["approvals_performed"] == "NO"
+    assert payload["approval_inbox_mutated"] == "NO"
+    assert payload["apply_gate_mutated"] == "NO"
+    assert payload["protected_action_allowed"] == "NO"
 
     md_path = report_root / "status_report.md"
     json_path = report_root / "status_report.json"
@@ -130,7 +170,53 @@ def test_autonomy_status_report_ready_state(tmp_path: Path) -> None:
 
     md = md_path.read_text(encoding="utf-8")
     assert "AIOS Autonomy Status Report" in md
+    assert "Self-build decision consumer" in md
+    assert "Status: REPORT_READY" in md
+    assert "Approval safety visibility" in md
     assert "forex-build" in md
+
+
+def test_autonomy_status_report_surfaces_missing_self_build_evidence(tmp_path: Path) -> None:
+    report_root = tmp_path / "reports3"
+    report_root.mkdir(parents=True, exist_ok=True)
+    discovery = tmp_path / "discovery.json"
+    discovery.write_text(
+        json.dumps(
+            {
+                "schema": "AIOS_AUTONOMY_INVENTORY_V1",
+                "components": {
+                    "trading": {"automation_exists": True},
+                    "packet_runner": {"exists": True},
+                    "autonomy_loop": {"exists": True},
+                    "coordination_spine": {"exists": True},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    control = tmp_path / "control.json"
+    control.write_text(json.dumps({"status": "READY_FOR_CODEX"}), encoding="utf-8")
+    router = tmp_path / "router.json"
+    router.write_text(json.dumps({"next_action": "RUN_CODEX_WITH_PACKET"}), encoding="utf-8")
+    channels = tmp_path / "channels.json"
+    channels.write_text(json.dumps({"channels": [{"name": "Codex CLI local"}]}), encoding="utf-8")
+
+    result = run_status_report(
+        discovery_path=discovery,
+        control_path=control,
+        router_path=router,
+        channels_path=channels,
+        self_build_path=tmp_path / "missing_self_build.evidence.json",
+        report_root=report_root,
+    )
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout.strip())
+    assert payload["self_build_decision_status"] == "WAIT_FOR_EVIDENCE"
+    assert payload["self_build_operator_route"] == "REPORT_ONLY"
+    assert payload["self_build_approval_required"] is False
+    assert payload["self_build_report_only"] is True
+    assert payload["protected_action_allowed"] == "NO"
 
 
 def test_autonomy_status_report_reports_blockers(tmp_path: Path) -> None:
