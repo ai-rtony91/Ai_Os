@@ -2,7 +2,7 @@
     "schema":  "AIOS_COORDINATION_SPINE_VIEW.v1",
     "system":  "AI_OS",
     "mode":  "DRY_RUN",
-    "generated_at":  "2026-06-10T02:15:10.2333523Z",
+    "generated_at":  "2026-06-10T02:47:49.8663904Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "source_readers":  [
                            {
@@ -27,10 +27,10 @@
                                "source":  "RECOVERY_BOOTSTRAP_VIEW.json",
                                "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\RECOVERY_BOOTSTRAP_VIEW.json",
                                "kind":  "telemetry",
-                               "present":  false,
-                               "freshness_status":  "UNREADABLE",
+                               "present":  true,
+                               "freshness_status":  "FRESH",
                                "records_seen":  1,
-                               "status":  "REVIEW_REQUIRED"
+                               "status":  "SAFE_NO_WORK"
                            },
                            {
                                "source":  "LEAD_DISPATCH_VIEW.json",
@@ -92,7 +92,7 @@
                           "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
                           "present":  true,
                           "freshness_status":  "FRESH",
-                          "freshness_age_hours":  0.11,
+                          "freshness_age_hours":  0,
                           "packet_count":  2,
                           "normalized_state_counts":  {
                                                           "QUEUED":  1,
@@ -121,7 +121,7 @@
                          "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
                          "present":  true,
                          "freshness_status":  "FRESH",
-                         "freshness_age_hours":  1.57,
+                         "freshness_age_hours":  2.11,
                          "held_locks_count":  0,
                          "stale_locks_count":  0,
                          "collision_count":  0,
@@ -137,26 +137,26 @@
     "recovery_summary":  {
                              "source":  "RECOVERY_BOOTSTRAP_VIEW.json",
                              "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\RECOVERY_BOOTSTRAP_VIEW.json",
-                             "present":  false,
-                             "freshness_status":  "UNREADABLE",
-                             "freshness_age_hours":  null,
-                             "recovery_readiness":  "REVIEW_REQUIRED",
+                             "present":  true,
+                             "freshness_status":  "FRESH",
+                             "freshness_age_hours":  0,
+                             "recovery_readiness":  "READY_KNOWN",
                              "blockers":  [
-                                              "recovery_source_unreadable"
+
                                           ],
                              "warnings":  [
 
                                           ],
-                             "heartbeat_status":  "UNKNOWN",
+                             "heartbeat_status":  "OK",
                              "write_behavior":  "telemetry_only",
-                             "safety_status":  "REVIEW_REQUIRED"
+                             "safety_status":  "SAFE_NO_WORK"
                          },
     "lead_dispatch_summary":  {
                                   "source":  "LEAD_DISPATCH_VIEW.json",
                                   "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\LEAD_DISPATCH_VIEW.json",
                                   "present":  true,
                                   "freshness_status":  "FRESH",
-                                  "freshness_age_hours":  0.11,
+                                  "freshness_age_hours":  0,
                                   "dispatcher_safety_verdict":  "REVIEW_REQUIRED",
                                   "blocked_reason":  "dispatcher_source_missing_recommendation",
                                   "depends_on_t2b":  true,
@@ -175,7 +175,7 @@
                                    "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\PACKET_FACTORY_VIEW.json",
                                    "present":  true,
                                    "freshness_status":  "FRESH",
-                                   "freshness_age_hours":  0.04,
+                                   "freshness_age_hours":  0,
                                    "packet_factory_safety_verdict":  "REVIEW_REQUIRED",
                                    "write_behavior":  "telemetry_only",
                                    "write_path_enabled":  false,
@@ -192,8 +192,7 @@
     "live_dispatch_status":  "BLOCKED",
     "approval_gate_status":  "BLOCKED",
     "blockers":  [
-                     "packet_factory_approval_required",
-                     "recovery_source_unreadable"
+                     "packet_factory_approval_required"
                  ],
     "warnings":  [
                      "live_dispatch_blocked_by_design",

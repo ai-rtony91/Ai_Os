@@ -2,7 +2,7 @@
     "schema":  "AIOS_UNIFIED_QUEUE_INDEX.v1",
     "system":  "AI_OS",
     "mode":  "DRY_RUN",
-    "generated_at_utc":  "2026-06-10T02:08:26.0425332Z",
+    "generated_at_utc":  "2026-06-10T02:47:32.0225321Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "packet_root":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets",
     "scanned_folders":  [

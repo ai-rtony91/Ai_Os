@@ -2,7 +2,7 @@
     "schema":  "AIOS_PACKET_FACTORY_VIEW.v1",
     "system":  "AI_OS",
     "mode":  "DRY_RUN",
-    "generated_at":  "2026-06-10T02:12:56Z",
+    "generated_at":  "2026-06-10T02:47:45Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "source_readers":  [
                            {
@@ -32,7 +32,7 @@
                                             "schema":  "AIOS_UNIFIED_QUEUE_INDEX.v1",
                                             "system":  "AI_OS",
                                             "mode":  "DRY_RUN",
-                                            "generated_at_utc":  "2026-06-10T02:08:26.0425332Z",
+                                            "generated_at_utc":  "2026-06-10T02:47:32.0225321Z",
                                             "repo_root":  "C:\\Dev\\Ai.Os",
                                             "packet_root":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets",
                                             "scanned_folders":  [
@@ -201,7 +201,7 @@
                                             "schema":  "AIOS_RECOVERY_BOOTSTRAP_VIEW.v1",
                                             "system":  "AI_OS",
                                             "mode":  "DRY_RUN",
-                                            "generated_at":  "2026-06-10T02:11:07.0339400Z",
+                                            "generated_at":  "2026-06-10T02:47:36.0796227Z",
                                             "repo_root":  "C:\\Dev\\Ai.Os",
                                             "source_readers":  [
                                                                    {
@@ -232,7 +232,7 @@
                                             "marker_present":  true,
                                             "marker_path":  "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
                                             "marker_freshness_status":  "FRESH",
-                                            "marker_age_seconds":  10343,
+                                            "marker_age_seconds":  12533,
                                             "queue_index_present":  true,
                                             "queue_counts":  {
                                                                  "QUEUED":  1,
@@ -269,7 +269,7 @@
                                             "schema":  "AIOS_LEAD_DISPATCH_VIEW.v1",
                                             "system":  "AI_OS",
                                             "mode":  "DRY_RUN",
-                                            "generated_at":  "2026-06-10T02:08:35.4711974Z",
+                                            "generated_at":  "2026-06-10T02:47:41.3171263Z",
                                             "repo_root":  "C:\\Dev\\Ai.Os",
                                             "source_readers":  [
                                                                    {
@@ -523,11 +523,12 @@
                                       {
                                           "query":  "PACKET_FACTORY_VIEW",
                                           "severity":  "BLOCKED",
-                                          "match_count":  4,
+                                          "match_count":  5,
                                           "matched_paths":  [
                                                                 "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Get-AiOsPacketFactoryView.DRY_RUN.ps1",
                                                                 "C:\\Dev\\Ai.Os\\automation\\orchestration\\coordination_spine\\Invoke-AiOsCoordinationSpine.DRY_RUN.ps1",
                                                                 "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_coordination_spine_orchestrator_scaffold.py",
+                                                                "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_coordination_spine_recovery_source_read.py",
                                                                 "C:\\Dev\\Ai.Os\\tests\\orchestration\\test_packet_factory_view.py"
                                                             ],
                                           "status":  "BLOCKED"
