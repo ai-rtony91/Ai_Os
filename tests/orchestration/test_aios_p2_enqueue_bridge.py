@@ -15,15 +15,32 @@ MODULE_PATH = (
     / "runtime_closure"
     / "aios_p2_enqueue_bridge.py"
 )
+QUEUE_GATE_PATH = (
+    REPO_ROOT
+    / "automation"
+    / "orchestration"
+    / "work_packets"
+    / "aios_queue_mutation_gate.py"
+)
 HUMAN_GATE_REPORT = REPO_ROOT / "Reports" / "human_gate" / "human_gate_packet_dogfood_report.json"
 AUTONOMY_GAP_REPORT = REPO_ROOT / "Reports" / "autonomy_gap" / "autonomy_gap_reassessment_report.json"
 COMMAND_QUEUE = REPO_ROOT / "automation" / "orchestration" / "command_queue" / "AIOS_COMMAND_QUEUE.json"
 WORKER_INBOX = REPO_ROOT / "automation" / "orchestration" / "workers" / "inbox" / "AIOS_WORKER_INBOX.json"
 ACTIVE_PACKETS = REPO_ROOT / "automation" / "orchestration" / "work_packets" / "active"
+RUNTIME_TELEMETRY = REPO_ROOT / "telemetry" / "runtime"
 
 
 def _load():
     spec = importlib.util.spec_from_file_location("aios_p2_enqueue_bridge_for_tests", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_queue_gate():
+    spec = importlib.util.spec_from_file_location("aios_queue_mutation_gate_for_p2_tests", QUEUE_GATE_PATH)
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
     sys.modules[spec.name] = module
@@ -128,6 +145,8 @@ def test_current_repo_evidence_builds_blocked_preview(tmp_path):
     assert preview["worker_inbox_write_allowed"] is False
     assert preview["active_packet_write_allowed"] is False
     assert preview["runtime_execution_allowed"] is False
+    assert preview["allowed_paths"] == ["automation/orchestration/work_packets/"]
+    assert "automation/orchestration/work_packets/active/" in preview["forbidden_paths"]
 
 
 def test_bridge_writes_only_preview_json_and_markdown(tmp_path):
@@ -168,6 +187,41 @@ def test_ready_evidence_still_produces_preview_only_item(tmp_path):
     assert preview["enqueue_allowed"] is False
     assert preview["dispatch_allowed"] is False
     assert preview["runtime_execution_allowed"] is False
+    assert preview["allowed_paths"] == ["automation/orchestration/work_packets/"]
+    assert "automation/orchestration/workers/inbox/" in preview["forbidden_paths"]
+
+
+def test_enriched_preview_passes_queue_gate_contract_without_mutation(tmp_path):
+    mod = _load()
+    queue_gate = _load_queue_gate()
+    protected_paths = [COMMAND_QUEUE, WORKER_INBOX, ACTIVE_PACKETS, RUNTIME_TELEMETRY]
+    before = {str(path): _fingerprint(path) for path in protected_paths}
+    report = mod.build_p2_enqueue_bridge_report(
+        repo_root=REPO_ROOT,
+        output_dir=tmp_path / "Reports" / "p2_enqueue_bridge",
+        now="2026-01-02T03:04:05Z",
+        evidence=_ready_evidence(),
+    )
+    json_path = tmp_path / "Reports" / "p2_enqueue_bridge" / mod.REPORT_JSON_NAME
+    mod.write_p2_enqueue_bridge_reports(report, output_dir=json_path.parent)
+
+    gate_report = queue_gate.run_queue_mutation_gate(
+        repo_root=REPO_ROOT,
+        proposed_item_path=json_path,
+        output_dir=tmp_path / "Reports" / "queue_mutation_gate",
+        now="2026-01-02T03:04:05Z",
+    )
+
+    after = {str(path): _fingerprint(path) for path in protected_paths}
+    assert before == after
+    assert gate_report["gate_status"] == queue_gate.BLOCKED
+    assert gate_report["validation"]["invalid_reasons"] == []
+    assert gate_report["proposed_queue_item"]["allowed_paths"] == ["automation/orchestration/work_packets/"]
+    assert "automation/orchestration/work_packets/active/" in gate_report["proposed_queue_item"]["forbidden_paths"]
+    assert gate_report["queue_write_allowed"] is False
+    assert gate_report["canonical_queue_mutated"] is False
+    assert gate_report["worker_inbox_mutation_allowed"] is False
+    assert gate_report["runtime_execution_allowed"] is False
 
 
 def test_missing_evidence_is_invalid_not_ready(tmp_path):
@@ -214,7 +268,7 @@ def test_ready_status_with_blockers_is_blocked_by_validator(tmp_path):
 
 def test_bridge_does_not_mutate_canonical_queue_or_worker_inbox(tmp_path):
     mod = _load()
-    protected_paths = [COMMAND_QUEUE, WORKER_INBOX, ACTIVE_PACKETS]
+    protected_paths = [COMMAND_QUEUE, WORKER_INBOX, ACTIVE_PACKETS, RUNTIME_TELEMETRY]
     before = {str(path): _fingerprint(path) for path in protected_paths}
     report = mod.run_p2_enqueue_bridge(
         repo_root=REPO_ROOT,

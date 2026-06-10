@@ -30,6 +30,23 @@ DEFAULT_HUMAN_GATE_SUMMARY = Path("Reports") / "human_gate" / "human_gate_packet
 DEFAULT_AUTONOMY_GAP_REPORT = Path("Reports") / "autonomy_gap" / "autonomy_gap_reassessment_report.json"
 DEFAULT_AUTONOMY_GAP_SUMMARY = Path("Reports") / "autonomy_gap" / "autonomy_gap_reassessment_summary.md"
 
+PROPOSED_QUEUE_ITEM_ALLOWED_PATHS = [
+    "automation/orchestration/work_packets/",
+]
+PROPOSED_QUEUE_ITEM_FORBIDDEN_PATHS = [
+    "automation/orchestration/work_packets/active/",
+    "automation/orchestration/work_packets/blocked/",
+    "automation/orchestration/work_packets/complete/",
+    "automation/orchestration/workers/inbox/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/command_queue/",
+    "telemetry/",
+    "services/",
+    "apps/",
+    "aios/modules/trader/",
+    "aios.ps1",
+]
+
 ALLOWED_BRIDGE_STATUSES = {"READY_FOR_DRY_RUN_PREVIEW", "BLOCKED", "INVALID"}
 UNSAFE_BOOL_FIELDS = [
     "approval_granted",
@@ -239,6 +256,8 @@ def _build_proposed_queue_item_preview(
             str(DEFAULT_HUMAN_GATE_REPORT),
             str(DEFAULT_AUTONOMY_GAP_REPORT),
         ],
+        "allowed_paths": list(PROPOSED_QUEUE_ITEM_ALLOWED_PATHS),
+        "forbidden_paths": list(PROPOSED_QUEUE_ITEM_FORBIDDEN_PATHS),
         "evidence_status": {
             "dogfood_status": human_gate_report.get("dogfood_status"),
             "reassessment_status": autonomy_gap_report.get("reassessment_status"),
@@ -515,6 +534,14 @@ def validate_p2_enqueue_bridge_report(report: dict[str, Any]) -> dict[str, Any]:
     if preview.get("mode") != "DRY_RUN_PREVIEW_ONLY":
         blockers.append("proposed_queue_item_preview.mode must be DRY_RUN_PREVIEW_ONLY")
         unsafe_flags.append("preview_mode_invalid")
+    allowed_paths = preview.get("allowed_paths")
+    if not isinstance(allowed_paths, list) or not allowed_paths:
+        blockers.append("proposed_queue_item_preview.allowed_paths must be a non-empty list")
+        unsafe_flags.append("preview_allowed_paths_missing")
+    forbidden_paths = preview.get("forbidden_paths")
+    if not isinstance(forbidden_paths, list) or not forbidden_paths:
+        blockers.append("proposed_queue_item_preview.forbidden_paths must be a non-empty list")
+        unsafe_flags.append("preview_forbidden_paths_missing")
 
     bridge_blockers = report.get("bridge_blockers")
     if not isinstance(bridge_blockers, list):
