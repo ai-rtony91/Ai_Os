@@ -155,6 +155,25 @@ function New-UnknownRecord {
     }
 }
 
+function Test-IsPlaceholderClaimRecord {
+    param(
+        [object]$Record
+    )
+
+    if ($null -eq $Record) {
+        return $false
+    }
+
+    foreach ($fieldName in @('worker_id', 'worker_name', 'packet_id', 'claim_timestamp', 'expiration_placeholder')) {
+        $fieldValue = Get-PropertyText -InputObject $Record -Names @($fieldName)
+        if (-not [string]::IsNullOrWhiteSpace($fieldValue) -and $fieldValue.ToUpperInvariant().Contains('PLACEHOLDER')) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Get-ClaimRecordArray {
     param(
         [object]$ClaimDocument
@@ -199,10 +218,12 @@ $sourceReaders = @(
 )
 
 $unknownRecords = [System.Collections.Generic.List[object]]::new()
+$claimBoundaryWarnings = [System.Collections.Generic.List[object]]::new()
 $heldRecords = [System.Collections.Generic.List[object]]::new()
 $staleRecords = [System.Collections.Generic.List[object]]::new()
 $collisionCount = 0
 $packetLockCount = 0
+$workerClaimCount = 0
 
 $pathOwners = @{}
 
@@ -237,6 +258,12 @@ foreach ($record in $lockRecords) {
 }
 
 foreach ($record in $claimRecords) {
+    if (Test-IsPlaceholderClaimRecord -Record $record) {
+        $claimBoundaryWarnings.Add((New-UnknownRecord -Source 'claims' -Record $record -Reason 'placeholder_claim_template_excluded')) | Out-Null
+        continue
+    }
+
+    $workerClaimCount++
     $claimState = Get-PropertyText -InputObject $record -Names @('claim_status', 'status', 'state')
     $packetKey = Get-PropertyText -InputObject $record -Names @('packet_id', 'packet', 'packet_reference')
 
@@ -283,7 +310,6 @@ foreach ($pathKey in $pathOwners.Keys) {
 
 $heldCount = $heldRecords.Count
 $staleCount = $staleRecords.Count
-$workerClaimCount = @($claimRecords).Count
 
 $safetyStatus = if ($collisionCount -gt 0 -or $staleCount -gt 0 -or $unknownRecords.Count -gt 0) { 'REVIEW_REQUIRED' } else { 'PASS' }
 
@@ -303,6 +329,7 @@ $result = [ordered]@{
     packet_lock_count = $packetLockCount
     instance_lock_count = $instanceLockCount
     unknown_lock_records = @($unknownRecords)
+    claim_registry_boundary_warnings = @($claimBoundaryWarnings)
     safety_status = $safetyStatus
     write_behavior = 'telemetry_only'
 }

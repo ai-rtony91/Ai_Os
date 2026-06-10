@@ -1,5 +1,5 @@
 {
-    "generated_at":  "2026-06-09T19:02:03.6394794Z",
+    "generated_at":  "2026-06-10T00:40:58.6058989Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "source_readers":  [
                            {
@@ -29,32 +29,35 @@
     "held_locks_count":  0,
     "stale_locks_count":  0,
     "collision_count":  0,
-    "worker_claim_count":  1,
-    "packet_lock_count":  1,
+    "worker_claim_count":  0,
+    "packet_lock_count":  0,
     "instance_lock_count":  0,
     "unknown_lock_records":  [
-                                 {
-                                     "source":  "claims",
-                                     "reason":  "placeholder_claim_registry",
-                                     "raw_state":  "claimed",
-                                     "record":  {
-                                                    "schema":  "AIOS_WORKER_CLAIM_REGISTRY.v1",
-                                                    "worker_id":  "WORKER_ID_PLACEHOLDER",
-                                                    "worker_name":  "WORKER_NAME_PLACEHOLDER",
-                                                    "packet_id":  "PACKET_ID_PLACEHOLDER",
-                                                    "assigned_paths":  [
 
-                                                                       ],
-                                                    "claim_timestamp":  "TIMESTAMP_PLACEHOLDER",
-                                                    "expiration_placeholder":  "TIMESTAMP_PLACEHOLDER",
-                                                    "claim_status":  "claimed",
-                                                    "approval_required":  true,
-                                                    "validator_required":  true,
-                                                    "commit_blocked_until_review":  true,
-                                                    "next_action":  "Validate claim ownership before APPLY work."
-                                                }
-                                 }
                              ],
-    "safety_status":  "REVIEW_REQUIRED",
+    "claim_registry_boundary_warnings":  [
+                                             {
+                                                 "source":  "claims",
+                                                 "reason":  "placeholder_claim_template_excluded",
+                                                 "raw_state":  "claimed",
+                                                 "record":  {
+                                                                "schema":  "AIOS_WORKER_CLAIM_REGISTRY.v1",
+                                                                "worker_id":  "WORKER_ID_PLACEHOLDER",
+                                                                "worker_name":  "WORKER_NAME_PLACEHOLDER",
+                                                                "packet_id":  "PACKET_ID_PLACEHOLDER",
+                                                                "assigned_paths":  [
+
+                                                                                   ],
+                                                                "claim_timestamp":  "TIMESTAMP_PLACEHOLDER",
+                                                                "expiration_placeholder":  "TIMESTAMP_PLACEHOLDER",
+                                                                "claim_status":  "claimed",
+                                                                "approval_required":  true,
+                                                                "validator_required":  true,
+                                                                "commit_blocked_until_review":  true,
+                                                                "next_action":  "Validate claim ownership before APPLY work."
+                                                            }
+                                             }
+                                         ],
+    "safety_status":  "PASS",
     "write_behavior":  "telemetry_only"
 }
