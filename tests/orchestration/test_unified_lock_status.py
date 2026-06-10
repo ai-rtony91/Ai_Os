@@ -54,6 +54,7 @@ def test_empty_state_produces_zero_counts_and_no_unmapped_states(tmp_path: Path)
     assert result["packet_lock_count"] == 0
     assert result["instance_lock_count"] == 0
     assert result["unknown_lock_records"] == []
+    assert result["claim_registry_boundary_warnings"] == []
     assert result["safety_status"] == "PASS"
     assert result["write_behavior"] == "telemetry_only"
     assert output_path.exists()
@@ -61,6 +62,46 @@ def test_empty_state_produces_zero_counts_and_no_unmapped_states(tmp_path: Path)
     persisted = json.loads(output_path.read_text(encoding="utf-8"))
     assert persisted["held_locks_count"] == 0
     assert persisted["unknown_lock_records"] == []
+
+
+def test_placeholder_template_claim_registry_is_excluded_from_active_state(tmp_path: Path) -> None:
+    lock_registry = tmp_path / "FILE_LOCK_REGISTRY.json"
+    claim_registry = tmp_path / "WORKER_CLAIM_REGISTRY_001.json"
+    output_path = tmp_path / "UNIFIED_LOCK_STATUS.json"
+
+    write_json(lock_registry, {"locks": []})
+    write_json(
+        claim_registry,
+        {
+            "schema": "AIOS_WORKER_CLAIM_REGISTRY.v1",
+            "worker_id": "WORKER_ID_PLACEHOLDER",
+            "worker_name": "WORKER_NAME_PLACEHOLDER",
+            "packet_id": "PACKET_ID_PLACEHOLDER",
+            "assigned_paths": [],
+            "claim_timestamp": "TIMESTAMP_PLACEHOLDER",
+            "expiration_placeholder": "TIMESTAMP_PLACEHOLDER",
+            "claim_status": "claimed",
+        },
+    )
+
+    result = run_script(
+        "-LockRegistryPath",
+        str(lock_registry),
+        "-ClaimRegistryPath",
+        str(claim_registry),
+        "-InstanceLockPath",
+        str(tmp_path / "supervisor.lock"),
+        "-OutputPath",
+        str(output_path),
+        "-Apply",
+    )
+
+    assert result["worker_claim_count"] == 0
+    assert result["packet_lock_count"] == 0
+    assert result["unknown_lock_records"] == []
+    assert result["safety_status"] == "PASS"
+    assert result["claim_registry_boundary_warnings"]
+    assert result["claim_registry_boundary_warnings"][0]["reason"] == "placeholder_claim_template_excluded"
 
 
 def test_held_stale_collision_and_unknown_are_reported_without_mutation(tmp_path: Path) -> None:
