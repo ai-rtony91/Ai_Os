@@ -4,6 +4,8 @@ param(
     [string]$RouterEvidencePath = "",
     [string]$WorkerChannelMapPath = "",
     [string]$SelfBuildEvidencePath = "Reports/self_build_cycle/latest_self_build_cycle.evidence.json",
+    [string]$ApprovalSummaryScriptPath = "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
+    [string]$ApprovalInboxPath = "automation/orchestration/approval_inbox",
     [string]$OutputMarkdownPath = "Reports/autonomy_control_plane/autonomy_status_report.md",
     [string]$OutputJsonPath = "Reports/autonomy_control_plane/autonomy_status_report.json"
 )
@@ -132,6 +134,55 @@ function Invoke-SelfBuildDecisionConsumerReadOnly {
     }
 }
 
+function Invoke-ApprovalSummaryReadOnly {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptPath,
+        [Parameter(Mandatory = $true)][string]$InboxPath
+    )
+
+    if ([string]::IsNullOrWhiteSpace($ScriptPath) -or -not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
+        return [ordered]@{
+            available = $false
+            pending_count = 0
+            blocked_count = 0
+            completed_count = 0
+            safe_state = "UNAVAILABLE"
+            next_review_action = "Approval summary is unavailable; run the approval inbox summary directly if approval state is needed."
+        }
+    }
+
+    try {
+        $rawOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $ScriptPath -InboxPath $InboxPath -QuietJson 2>$null
+        $jsonText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($jsonText)) {
+            throw "approval summary produced no JSON output"
+        }
+        $summary = $jsonText | ConvertFrom-Json
+        $pendingCount = @($summary.pending_approvals).Count
+        $blockedCount = @($summary.blocked_actions).Count
+        $completedCount = @($summary.approved_actions).Count
+        $safeState = if ($blockedCount -gt 0) { "BLOCKED" } elseif (($pendingCount + $completedCount) -gt 0) { "REVIEW" } else { "PASS" }
+        return [ordered]@{
+            available = $true
+            pending_count = $pendingCount
+            blocked_count = $blockedCount
+            completed_count = $completedCount
+            safe_state = $safeState
+            next_review_action = [string]$summary.next_safe_command
+        }
+    } catch {
+        return [ordered]@{
+            available = $false
+            pending_count = 0
+            blocked_count = 0
+            completed_count = 0
+            safe_state = "REVIEW_REQUIRED"
+            next_review_action = "Review approval summary failure before relying on approval state visibility."
+            reason = $_.Exception.Message
+        }
+    }
+}
+
 try {
     $repoRoot = Get-AiOsRepoRoot
     Set-Location -Path $repoRoot
@@ -142,12 +193,15 @@ try {
     $routerPath = Resolve-AiOsPath -PathHint $RouterEvidencePath -RepoRoot $repoRoot
     $channelPath = Resolve-AiOsPath -PathHint $WorkerChannelMapPath -RepoRoot $repoRoot
     $selfBuildEvidencePath = Resolve-AiOsPath -PathHint $SelfBuildEvidencePath -RepoRoot $repoRoot
+    $approvalSummaryScriptPath = Resolve-AiOsPath -PathHint $ApprovalSummaryScriptPath -RepoRoot $repoRoot
+    $approvalInboxPath = Resolve-AiOsPath -PathHint $ApprovalInboxPath -RepoRoot $repoRoot
 
     $discovery = Read-JsonOrNull -Path $discoveryPath
     $control = Read-JsonOrNull -Path $controlPath
     $router = Read-JsonOrNull -Path $routerPath
     $channels = Read-JsonOrNull -Path $channelPath
     $selfBuildDecision = Invoke-SelfBuildDecisionConsumerReadOnly -RepoRoot $repoRoot -EvidencePath $selfBuildEvidencePath
+    $approvalSummary = Invoke-ApprovalSummaryReadOnly -ScriptPath $approvalSummaryScriptPath -InboxPath $approvalInboxPath
 
     $controlStatus = if ($control -and $control.status) { [string]$control.status } else { "UNKNOWN" }
     $routerAction = if ($router -and $router.next_action) { [string]$router.next_action } else { "UNKNOWN" }
@@ -229,6 +283,12 @@ try {
         self_build_safe_next_action = [string]$selfBuildDecision.safe_next_action
         self_build_source_evidence_path = [string]$selfBuildDecision.source_evidence_path
         self_build_source_cycle_id = $selfBuildDecision.source_cycle_id
+        approval_summary_available = [bool]$approvalSummary.available
+        approval_pending_count = [int]$approvalSummary.pending_count
+        approval_blocked_count = [int]$approvalSummary.blocked_count
+        approval_completed_count = [int]$approvalSummary.completed_count
+        approval_safe_state = [string]$approvalSummary.safe_state
+        approval_next_review_action = [string]$approvalSummary.next_review_action
         approvals_performed = "NO"
         approval_inbox_mutated = "NO"
         apply_gate_mutated = "NO"
@@ -272,6 +332,15 @@ try {
 - Report only: $(ConvertTo-BoolText -Value $summary.self_build_report_only)
 - Source cycle ID: $($summary.self_build_source_cycle_id)
 - Safe next action: $($summary.self_build_safe_next_action)
+
+## Approval state summary
+
+- Available: $(ConvertTo-BoolText -Value $summary.approval_summary_available)
+- Pending: $($summary.approval_pending_count)
+- Blocked: $($summary.approval_blocked_count)
+- Completed: $($summary.approval_completed_count)
+- Safe state: $($summary.approval_safe_state)
+- Next review action: $($summary.approval_next_review_action)
 
 ## Approval safety visibility
 
