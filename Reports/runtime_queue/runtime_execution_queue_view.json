@@ -1,0 +1,48 @@
+{
+  "canonical_states": [
+    "BLOCKED",
+    "DEFERRED",
+    "DONE",
+    "ERROR",
+    "QUEUED",
+    "RUNNING"
+  ],
+  "generated_at": "2026-06-10T18:01:02Z",
+  "id_collisions": [],
+  "item_count": 1,
+  "items": [
+    {
+      "allowed_paths": [],
+      "created_utc": "2026-05-16T19:28:52Z",
+      "id": "20260516T192852Z",
+      "kind": "unknown",
+      "protected_action": false,
+      "raw_state": "stale",
+      "source": "command_queue",
+      "state": "DEFERRED",
+      "synthetic_id": false
+    }
+  ],
+  "observe_only": true,
+  "protected_item_count": 0,
+  "safe_next_action": "Read-only normalized view. Run the integrity validator before any later drain/wiring packet consumes it. This view enqueues, dispatches, and executes nothing.",
+  "schema": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
+  "source_map": {
+    "command_queue": 1,
+    "worker_task_queue": 0
+  },
+  "sources_index_only": [
+    "unified_queue_index"
+  ],
+  "sources_malformed": [],
+  "sources_missing": [
+    "relay_inbox"
+  ],
+  "sources_read": [
+    "command_queue",
+    "worker_task_queue"
+  ],
+  "state_counts": {
+    "DEFERRED": 1
+  }
+}
