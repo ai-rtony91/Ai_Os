@@ -1,0 +1,2908 @@
+{
+  "all_gaps": [
+    {
+      "approval_required": false,
+      "blocked_until": "Queue validation passes, the human gate packet becomes READY_FOR_HUMAN_REVIEW, the runtime proof gate becomes READY_FOR_HUMAN_GATE, and scheduler/SOS/live paths remain blocked until reviewed.",
+      "burden_category": "decide",
+      "domain": "live_execution_gap",
+      "evidence": {
+        "canonical_queue_item_count": 2,
+        "dogfood_status": "BLOCKED",
+        "packet_status": "BLOCKED",
+        "queue_validation_status": "BLOCK",
+        "queue_view_item_count": 1,
+        "runtime_proof_gate_verdict": "BLOCKED"
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not infer live readiness from report generation or from partial proof coverage.",
+      "id": "live_execution_gap",
+      "impact_score": 100,
+      "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+      "reduces_operator_burden": true,
+      "severity": "CRITICAL",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json and Reports/runtime_queue/runtime_execution_queue_view.json",
+      "title": "Live execution remains unavailable",
+      "why_it_matters": "AI_OS cannot move past observe-only proof into live execution while the queue, proof gate, and human gate are still blocked."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "Queue validation is PASS and the protected item is explained or resolved without mutating the source queue.",
+      "burden_category": "route",
+      "domain": "queue_integrity_gap",
+      "evidence": {
+        "canonical_queue_fail_soft_errors": [
+          "unified_queue_index"
+        ],
+        "duplicate_id_count": 0,
+        "protected_item_count": 1,
+        "queue_validation_blockers": [
+          "RQV-003-NO-PROTECTED-ITEM"
+        ],
+        "queue_validation_status": "BLOCK",
+        "unknown_state_count": 0
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not remove or mutate queue evidence to make the validator pass.",
+      "id": "queue_integrity_gap",
+      "impact_score": 95,
+      "next_safe_lane": "PROTECTED_QUEUE_ITEM_REVIEW_V1",
+      "reduces_operator_burden": true,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#queue_validation_summary",
+      "title": "Canonical queue integrity still fails the validator",
+      "why_it_matters": "A protected queue item and validator BLOCK mean the canonical queue still needs human review before anything downstream can treat it as trustworthy."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "Runtime proof gate reaches READY_FOR_HUMAN_GATE with no unsafe claims or forbidden statuses.",
+      "burden_category": "recover",
+      "domain": "proof_gate_gap",
+      "evidence": {
+        "attention_count": 2,
+        "blocker_count": 8,
+        "final_verdict": "BLOCKED",
+        "safe_next_action": "Fix the blockers before the proof chain can reach human gate review."
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not promote a blocked proof gate into a readiness claim.",
+      "id": "proof_gate_gap",
+      "impact_score": 90,
+      "next_safe_lane": "RUNTIME_PROOF_GATE_BLOCKER_TRIAGE_V1",
+      "reduces_operator_burden": true,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#runtime_proof_gate_summary",
+      "title": "Runtime proof gate remains blocked",
+      "why_it_matters": "The proof spine cannot yet support a human gate readiness claim while the runtime proof gate is blocked."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "The packet becomes READY_FOR_HUMAN_REVIEW or at least ATTENTION without blockers.",
+      "burden_category": "decide",
+      "domain": "human_gate_gap",
+      "evidence": {
+        "human_review_question_count": 9,
+        "human_stop_condition_count": 8,
+        "packet_status": "BLOCKED",
+        "queue_validation_status": "BLOCK",
+        "runtime_proof_gate_verdict": "BLOCKED"
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not approve or execute from a blocked packet.",
+      "id": "human_gate_gap",
+      "impact_score": 90,
+      "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "reduces_operator_burden": true,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#human_gate_packet_summary",
+      "title": "Human gate packet remains blocked",
+      "why_it_matters": "Tony still has to review blockers rather than a readiness packet, so the human gate is not yet at the review-only threshold."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "Remaining human burdens are reduced further and the next dependency target is unambiguous.",
+      "burden_category": "remember",
+      "domain": "operator_dependency_gap",
+      "evidence": {
+        "autonomy_shift": "PARTIAL",
+        "next_reduction_target": {
+          "component_id": "relay_dry_run_proof_review",
+          "component_name": "Relay dry-run proof review",
+          "dependency_category": "recover",
+          "reason": "The relay proof review is still the closest operator dependency bottleneck.",
+          "safe_next_action": "Resolve missing relay predecessor proofs and keep SOS/scheduler blocked in repo-held state.",
+          "target_status": "REVIEWABLE"
+        },
+        "remaining_human_burdens": [
+          {
+            "burden": "Remember the current queue still has proof blockers and human-only gates.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Notice the blocker list before asking for the next lane.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Decide whether to release the next lane after reviewing the queue.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Route the work to the next strict serial lane.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Recover from stale or missing proof state if the queue becomes inconsistent.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Remember relay is DRY_RUN-only and vacation_mode_complete must stay false.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Notice missing predecessor proofs and blocked human-only gates.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Decide whether the relay proof can be accepted for review.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Route the relay output toward proof review or hold it for repair.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Recover upstream proof gaps before advancing.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Remember the relay review is report-only and never means COMPLETE.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Notice invalid flags and missing proofs before accepting the proof.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Decide whether the proof is reviewable or still blocked.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Route reviewable proof toward the next planning step or hold for repair.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Recover from invalid proof/readout before any downstream planning.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          }
+        ]
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not treat partial autonomy shift as full autonomy.",
+      "id": "operator_dependency_gap",
+      "impact_score": 75,
+      "next_safe_lane": "OPERATOR_DEPENDENCY_LEDGER_REVIEW_V1",
+      "reduces_operator_burden": true,
+      "severity": "MEDIUM",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#operator_dependency_summary",
+      "title": "Operator dependency is still partially manual",
+      "why_it_matters": "AI_OS has reduced some queue and proof burden, but Tony still has to remember and recover from upstream relay proof bottlenecks."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "The selector converges on the right proof-to-review target and the upstream blockers are described cleanly.",
+      "burden_category": "route",
+      "domain": "reduction_target_gap",
+      "evidence": {
+        "safe_next_action_from_selector": "Use restart_timeouts_proof_planning as the next dependency-reduction target; do not execute it automatically and keep all runtime and human-gate paths blocked.",
+        "selected_category": "recover",
+        "selected_reason": "The relay proof review is BLOCKED, so the next reduction target is the restart/timeouts proof planning lane. This keeps Tony from having to remember the next blocker while leaving scheduler, SOS, and live paths out of scope.",
+        "selected_target": "restart_timeouts_proof_planning"
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not claim the next lane is execution or live control.",
+      "id": "reduction_target_gap",
+      "impact_score": 70,
+      "next_safe_lane": "REDUCTION_TARGET_SELECTOR_REVIEW_V1",
+      "reduces_operator_burden": true,
+      "severity": "MEDIUM",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#reduction_target_summary",
+      "title": "Reduction target selector still points to a planning lane",
+      "why_it_matters": "The selector is still pointing at planning rather than the relay acceptance packet, so Tony must still decide which reduction lane to use next."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "The evidence views are aligned and the next reduction target is clearly explained.",
+      "burden_category": "notice",
+      "domain": "documentation_gap",
+      "evidence": {
+        "canonical_queue_item_count": 2,
+        "operator_dependency_next_target": "relay_dry_run_proof_review",
+        "reduction_selector_target": "restart_timeouts_proof_planning",
+        "runtime_queue_view_item_count": 1
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not paper over evidence mismatches by editing the reports to agree.",
+      "id": "documentation_gap",
+      "impact_score": 35,
+      "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "reduces_operator_burden": true,
+      "severity": "LOW",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json and Reports/runtime_queue/runtime_execution_queue_view.json",
+      "title": "Evidence views still need alignment",
+      "why_it_matters": "The evidence story is split across views and the next dependency target is not yet perfectly aligned between the ledger and selector."
+    }
+  ],
+  "apply_allowed": false,
+  "approval_granted": false,
+  "blocker_rankings": [
+    {
+      "domain": "live_execution_gap",
+      "id": "live_execution_gap",
+      "impact_score": 100,
+      "rank": 1,
+      "severity": "CRITICAL",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json and Reports/runtime_queue/runtime_execution_queue_view.json",
+      "title": "Live execution remains unavailable"
+    },
+    {
+      "domain": "queue_integrity_gap",
+      "id": "queue_integrity_gap",
+      "impact_score": 95,
+      "rank": 2,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#queue_validation_summary",
+      "title": "Canonical queue integrity still fails the validator"
+    },
+    {
+      "domain": "human_gate_gap",
+      "id": "human_gate_gap",
+      "impact_score": 90,
+      "rank": 3,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#human_gate_packet_summary",
+      "title": "Human gate packet remains blocked"
+    },
+    {
+      "domain": "proof_gate_gap",
+      "id": "proof_gate_gap",
+      "impact_score": 90,
+      "rank": 4,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#runtime_proof_gate_summary",
+      "title": "Runtime proof gate remains blocked"
+    },
+    {
+      "domain": "operator_dependency_gap",
+      "id": "operator_dependency_gap",
+      "impact_score": 75,
+      "rank": 5,
+      "severity": "MEDIUM",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#operator_dependency_summary",
+      "title": "Operator dependency is still partially manual"
+    },
+    {
+      "domain": "reduction_target_gap",
+      "id": "reduction_target_gap",
+      "impact_score": 70,
+      "rank": 6,
+      "severity": "MEDIUM",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#reduction_target_summary",
+      "title": "Reduction target selector still points to a planning lane"
+    },
+    {
+      "domain": "documentation_gap",
+      "id": "documentation_gap",
+      "impact_score": 35,
+      "rank": 7,
+      "severity": "LOW",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json and Reports/runtime_queue/runtime_execution_queue_view.json",
+      "title": "Evidence views still need alignment"
+    }
+  ],
+  "canonical_queue_summary": {
+    "canonical_queue_collisions": [],
+    "canonical_queue_duplicate_id_count": 0,
+    "canonical_queue_duplicate_ids": [],
+    "canonical_queue_fail_soft_errors": [
+      "unified_queue_index"
+    ],
+    "canonical_queue_item_count": 2,
+    "canonical_queue_mutated": false,
+    "canonical_queue_present": true,
+    "canonical_queue_protected_item_count": 1,
+    "canonical_queue_protected_items": [
+      {
+        "allowed_paths": [],
+        "created_utc": "2026-06-02T07:29:30Z",
+        "id": "resume-AIOS_SAMPLE_RESUME_PROOF",
+        "kind": "sample_resume_proof_worker",
+        "protected_action": true,
+        "raw_state": "QUEUED",
+        "source": "relay_inbox",
+        "state": "QUEUED",
+        "synthetic_id": false
+      }
+    ],
+    "canonical_queue_report_path": null,
+    "canonical_queue_schema": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
+    "canonical_queue_source_counts": {
+      "command_queue": 1,
+      "relay_inbox": 1,
+      "worker_task_queue": 0
+    },
+    "canonical_queue_state_counts": {
+      "DEFERRED": 1,
+      "QUEUED": 1
+    },
+    "canonical_queue_unknown_state_count": 0,
+    "canonical_queue_unknown_states": []
+  },
+  "credentials_accessed": false,
+  "dispatch_allowed": false,
+  "dogfood_report_status": "BLOCKED",
+  "evidence_loaded": {
+    "canonical_queue_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "dogfood_report": {
+      "loaded": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_report.json"
+    },
+    "dogfood_report_md": {
+      "loaded": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_summary.md"
+    },
+    "human_gate_packet_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "operator_dependency_ledger": {
+      "loaded": true,
+      "source": "builder"
+    },
+    "operator_dependency_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "packet_validation_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "queue_validation_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "reduction_target_selector": {
+      "loaded": true,
+      "source": "builder"
+    },
+    "reduction_target_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "relay_processor_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "relay_review_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "restart_timeouts_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "retention_rotation_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "runtime_proof_gate_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "runtime_queue_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "runtime_queue_view": {
+      "loaded": true,
+      "path": "Reports\\runtime_queue\\runtime_execution_queue_view.json"
+    },
+    "runtime_queue_view_md": {
+      "loaded": true,
+      "path": "Reports\\runtime_queue\\runtime_execution_queue_view.md"
+    },
+    "soak_summary": {
+      "loaded": true,
+      "source": "dogfood_report"
+    },
+    "validation": {
+      "loaded": true,
+      "source": "dogfood_report"
+    }
+  },
+  "evidence_missing": [],
+  "execution_allowed": false,
+  "forbidden_claims_detected": [],
+  "generated_at_utc": "2026-01-02T03:04:05Z",
+  "human_gate_packet_summary": {
+    "apply_allowed": false,
+    "approval_granted": false,
+    "attention_count": 3,
+    "blocker_count": 3,
+    "canonical_queue_item_count": 2,
+    "collision_count": 0,
+    "dispatch_allowed": false,
+    "duplicate_id_count": 0,
+    "execution_allowed": false,
+    "forbidden_claim_count": 0,
+    "human_review_question_count": 9,
+    "human_review_required": true,
+    "human_stop_condition_count": 8,
+    "invalid_reason_count": 0,
+    "live_trading_allowed": false,
+    "packet_status": "BLOCKED",
+    "protected_item_count": 1,
+    "queue_mutation_allowed": false,
+    "queue_validation_status": "BLOCK",
+    "runtime_launch_allowed": false,
+    "runtime_proof_gate_verdict": "BLOCKED",
+    "safe_next_action": "Clear blockers and regenerate the packet; do not approve or execute.",
+    "scheduler_creation_allowed": false,
+    "sos_allowed": false,
+    "stop_condition": "Stop until blockers are cleared; do not execute or approve.",
+    "unknown_state_count": 0,
+    "unsafe_flag_count": 0,
+    "vacation_mode_complete": false
+  },
+  "live_execution_readiness": {
+    "evidence": {
+      "packet_status": "BLOCKED",
+      "queue_validation_status": "BLOCKED",
+      "runtime_proof_gate_verdict": "BLOCKED"
+    },
+    "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "reason": "Live execution remains blocked because queue validation, proof gate, and human gate are not ready.",
+    "status": "BLOCKED"
+  },
+  "live_trading_allowed": false,
+  "mode": "REASSESSMENT_REPORT",
+  "not_ready_lanes": [
+    {
+      "blocked_by": [
+        "BLOCK",
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "forbidden_scope": "No real enqueue, dequeue, dispatch, or queue mutation.",
+      "lane_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+      "reason": "Queue validation is BLOCK and the human gate packet is BLOCKED, so there is no safe enqueue bridge yet.",
+      "status": "BLOCKED"
+    },
+    {
+      "blocked_by": [
+        "BLOCK",
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "forbidden_scope": "No live control, no runtime toggle, no approval automation.",
+      "lane_id": "OPERATOR_CONTROL_MODE_SWITCH_V1",
+      "reason": "A report-only or observe-only switch may be worth designing later, but live control is not ready.",
+      "status": "ATTENTION"
+    },
+    {
+      "blocked_by": [
+        "BLOCK",
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "forbidden_scope": "No scheduler creation or registration.",
+      "lane_id": "SCHEDULER_REGISTRATION_V1",
+      "reason": "Scheduler readiness remains blocked while the proof chain and queue validation are blocked.",
+      "status": "BLOCKED"
+    },
+    {
+      "blocked_by": [
+        "BLOCK",
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "forbidden_scope": "No SOS arming or SOS delivery claims.",
+      "lane_id": "SOS_ARMING_V1",
+      "reason": "SOS arming remains blocked while the human gate packet is blocked.",
+      "status": "BLOCKED"
+    },
+    {
+      "blocked_by": [
+        "BLOCK",
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "forbidden_scope": "No live broker, trading, or runtime execution.",
+      "lane_id": "LIVE_EXECUTION_V1",
+      "reason": "Live execution remains blocked because queue validation, proof gate, and human gate are not ready.",
+      "status": "BLOCKED"
+    },
+    {
+      "blocked_by": [
+        "BLOCK",
+        "BLOCKED",
+        "BLOCKED"
+      ],
+      "forbidden_scope": "No vacation mode completion claim.",
+      "lane_id": "VACATION_MODE_COMPLETE_V1",
+      "reason": "Vacation mode complete must remain false until the entire proof chain is clean.",
+      "status": "BLOCKED"
+    }
+  ],
+  "operator_burden_summary": {
+    "decide_burden": {
+      "already_reduced": [
+        "The packet and dogfood runner now tell Tony whether the chain is ready, attention-only, or blocked.",
+        "The report ranks the blocker impact so Tony does not have to do that mentally."
+      ],
+      "burden_category": "decide",
+      "current_level": "HIGH",
+      "evidence": [
+        "runtime_proof_gate_verdict=BLOCKED",
+        "packet_status=BLOCKED"
+      ],
+      "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "remains_manual": [
+        "Tony still has to decide which report-only lane to open next.",
+        "Tony still has to decide that live execution remains blocked."
+      ]
+    },
+    "notice_burden": {
+      "already_reduced": [
+        "Canonical queue and dogfood reports now surface the protected item and fail-soft warning.",
+        "A single reassessment report now collates the queue, proof, and packet state."
+      ],
+      "burden_category": "notice",
+      "current_level": "MEDIUM",
+      "evidence": [
+        "canonical_queue_protected_item_count=1",
+        "queue_validation_blockers=['RQV-003-NO-PROTECTED-ITEM']"
+      ],
+      "next_safe_lane": "PROTECTED_QUEUE_ITEM_REVIEW_V1",
+      "remains_manual": [
+        "Tony still has to notice the protected queue item and the queue validation blocker.",
+        "Tony still has to notice whether the evidence views are aligned."
+      ]
+    },
+    "recover_burden": {
+      "already_reduced": [
+        "The operator dependency ledger already identifies the remaining manual burden categories.",
+        "The reassessment report collapses multiple evidence files into one ranked action map."
+      ],
+      "burden_category": "recover",
+      "current_level": "HIGH",
+      "evidence": [
+        "operator_dependency_autonomy_shift=PARTIAL",
+        "next_dependency_target=Relay dry-run proof review"
+      ],
+      "next_safe_lane": "RUNTIME_PROOF_GATE_BLOCKER_TRIAGE_V1",
+      "remains_manual": [
+        "Tony still has to recover from the relay proof bottleneck before any readiness claim improves.",
+        "Tony still has to recover from blocked queue validation before a P2 bridge can be discussed."
+      ]
+    },
+    "remember_burden": {
+      "already_reduced": [
+        "The dogfood runner now writes a ranked evidence bundle.",
+        "The human gate packet and proof gate are both machine-readable."
+      ],
+      "burden_category": "remember",
+      "current_level": "HIGH",
+      "evidence": [
+        "dogfood_status=BLOCKED",
+        "packet_status=BLOCKED",
+        "queue_validation_status=BLOCK"
+      ],
+      "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+      "remains_manual": [
+        "Tony still has to remember that the queue is blocked until the protected item is reviewed.",
+        "Tony still has to remember the next blocker from the proof chain summary."
+      ]
+    },
+    "route_burden": {
+      "already_reduced": [
+        "The reduction selector already proposes a next safe lane.",
+        "The reassessment report now maps blockers to next lanes."
+      ],
+      "burden_category": "route",
+      "current_level": "MEDIUM",
+      "evidence": [
+        "selected_target=restart_timeouts_proof_planning",
+        "next_reduction_target=Relay dry-run proof review"
+      ],
+      "next_safe_lane": "REDUCTION_TARGET_SELECTOR_REVIEW_V1",
+      "remains_manual": [
+        "Tony still has to route the work to the next report-only lane.",
+        "Tony still has to keep P2, scheduler, SOS, and live paths out of scope."
+      ]
+    }
+  },
+  "operator_control_switch_readiness": {
+    "evidence": {
+      "blocked_by": [
+        "queue_validation_block",
+        "human_gate_packet_blocked",
+        "runtime_proof_gate_blocked"
+      ],
+      "recommended_scope": "REPORT_ONLY / OBSERVE_ONLY"
+    },
+    "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+    "reason": "A report-only operator control switch is worth designing later, but live control is not ready.",
+    "status": "ATTENTION"
+  },
+  "operator_dependency_summary": {
+    "autonomy_shift": "PARTIAL",
+    "dependency_categories": [
+      "remember",
+      "notice",
+      "decide",
+      "route",
+      "recover"
+    ],
+    "next_reduction_target": {
+      "component_id": "relay_dry_run_proof_review",
+      "component_name": "Relay dry-run proof review",
+      "dependency_category": "recover",
+      "reason": "The relay proof review is still the closest operator dependency bottleneck.",
+      "safe_next_action": "Resolve missing relay predecessor proofs and keep SOS/scheduler blocked in repo-held state.",
+      "target_status": "REVIEWABLE"
+    },
+    "operator_dependency_present": true,
+    "operator_dependency_unsafe_autonomy_claim": false,
+    "operator_dependency_vacation_mode_complete": false,
+    "reduced_burdens": [
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "next_strict_serial_order"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "proof_chain"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "remaining_blockers"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "human_only_gates"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "validation_status"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "remaining_blockers"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "hard_gate_summary"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "safe_next_action"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "validation_status"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "next_lane"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "queue_consumer"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "next_strict_serial_order"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "assert_no_hard_gate_bypass"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "remaining_blockers"
+      },
+      {
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue",
+        "reduction": "validation_status"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "mode"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "observe_only"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "vacation_mode_complete"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "missing_proofs"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "blocked_human_gates"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "proof_status"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "ready_for_relay"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "safe_next_action"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "next_lane"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "queue_consumer"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "source_queue_validation"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "proof_chain"
+      },
+      {
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor",
+        "reduction": "validation_status"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "review_status"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "proof_reviewable"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "vacation_mode_complete"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "safety_flags"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "missing_proofs"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "blocked_human_gates"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "review_status"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "proof_reviewable"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "safe_next_action"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "next_lane"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "safe_next_action"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "source_relay_validation"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "validation_status"
+      },
+      {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "reduction": "invalid_reasons"
+      }
+    ],
+    "remaining_human_burdens": [
+      {
+        "burden": "Remember the current queue still has proof blockers and human-only gates.",
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue"
+      },
+      {
+        "burden": "Notice the blocker list before asking for the next lane.",
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue"
+      },
+      {
+        "burden": "Decide whether to release the next lane after reviewing the queue.",
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue"
+      },
+      {
+        "burden": "Route the work to the next strict serial lane.",
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue"
+      },
+      {
+        "burden": "Recover from stale or missing proof state if the queue becomes inconsistent.",
+        "component_id": "runtime_execution_queue",
+        "component_name": "Runtime execution queue"
+      },
+      {
+        "burden": "Remember relay is DRY_RUN-only and vacation_mode_complete must stay false.",
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor"
+      },
+      {
+        "burden": "Notice missing predecessor proofs and blocked human-only gates.",
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor"
+      },
+      {
+        "burden": "Decide whether the relay proof can be accepted for review.",
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor"
+      },
+      {
+        "burden": "Route the relay output toward proof review or hold it for repair.",
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor"
+      },
+      {
+        "burden": "Recover upstream proof gaps before advancing.",
+        "component_id": "relay_runtime_processor",
+        "component_name": "Relay runtime processor"
+      },
+      {
+        "burden": "Remember the relay review is report-only and never means COMPLETE.",
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review"
+      },
+      {
+        "burden": "Notice invalid flags and missing proofs before accepting the proof.",
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review"
+      },
+      {
+        "burden": "Decide whether the proof is reviewable or still blocked.",
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review"
+      },
+      {
+        "burden": "Route reviewable proof toward the next planning step or hold for repair.",
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review"
+      },
+      {
+        "burden": "Recover from invalid proof/readout before any downstream planning.",
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review"
+      }
+    ],
+    "tony_manual_approval_items": [
+      "Decide whether to release the next lane after reviewing the queue.",
+      "Route the work to the next strict serial lane.",
+      "Decide whether the relay proof can be accepted for review.",
+      "Route the relay output toward proof review or hold it for repair.",
+      "Decide whether the proof is reviewable or still blocked.",
+      "Route reviewable proof toward the next planning step or hold for repair."
+    ],
+    "tony_manual_recovery_items": [
+      "Recover from stale or missing proof state if the queue becomes inconsistent.",
+      "Recover upstream proof gaps before advancing.",
+      "Recover from invalid proof/readout before any downstream planning."
+    ],
+    "tony_manual_review_items": [
+      "Remember the current queue still has proof blockers and human-only gates.",
+      "Notice the blocker list before asking for the next lane.",
+      "Remember relay is DRY_RUN-only and vacation_mode_complete must stay false.",
+      "Notice missing predecessor proofs and blocked human-only gates.",
+      "Remember the relay review is report-only and never means COMPLETE.",
+      "Notice invalid flags and missing proofs before accepting the proof."
+    ]
+  },
+  "p2_enqueue_bridge_readiness": {
+    "evidence": {
+      "human_gate_packet_status": "BLOCKED",
+      "queue_validation_status": "BLOCKED",
+      "runtime_proof_gate_verdict": "BLOCKED"
+    },
+    "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "reason": "P2 review-to-queue enqueue bridge is blocked until queue validation and human gate readiness clear.",
+    "status": "BLOCKED"
+  },
+  "queue_mutation_allowed": false,
+  "queue_validation_summary": {
+    "collision_count": 0,
+    "duplicate_id_count": 0,
+    "protected_item_count": 1,
+    "queue_validation_blockers": [
+      "RQV-003-NO-PROTECTED-ITEM"
+    ],
+    "queue_validation_checked_fields": [],
+    "queue_validation_status": "BLOCK",
+    "unknown_state_count": 0
+  },
+  "readiness_scorecard": {
+    "all_gaps": [
+      {
+        "approval_required": false,
+        "blocked_until": "Queue validation passes, the human gate packet becomes READY_FOR_HUMAN_REVIEW, the runtime proof gate becomes READY_FOR_HUMAN_GATE, and scheduler/SOS/live paths remain blocked until reviewed.",
+        "burden_category": "decide",
+        "domain": "live_execution_gap",
+        "evidence": {
+          "canonical_queue_item_count": 2,
+          "dogfood_status": "BLOCKED",
+          "packet_status": "BLOCKED",
+          "queue_validation_status": "BLOCK",
+          "queue_view_item_count": 1,
+          "runtime_proof_gate_verdict": "BLOCKED"
+        },
+        "execution_allowed": false,
+        "forbidden_shortcut": "Do not infer live readiness from report generation or from partial proof coverage.",
+        "id": "live_execution_gap",
+        "impact_score": 100,
+        "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+        "reduces_operator_burden": true,
+        "severity": "CRITICAL",
+        "source": "Reports/human_gate/human_gate_packet_dogfood_report.json and Reports/runtime_queue/runtime_execution_queue_view.json",
+        "title": "Live execution remains unavailable",
+        "why_it_matters": "AI_OS cannot move past observe-only proof into live execution while the queue, proof gate, and human gate are still blocked."
+      },
+      {
+        "approval_required": false,
+        "blocked_until": "Queue validation is PASS and the protected item is explained or resolved without mutating the source queue.",
+        "burden_category": "route",
+        "domain": "queue_integrity_gap",
+        "evidence": {
+          "canonical_queue_fail_soft_errors": [
+            "unified_queue_index"
+          ],
+          "duplicate_id_count": 0,
+          "protected_item_count": 1,
+          "queue_validation_blockers": [
+            "RQV-003-NO-PROTECTED-ITEM"
+          ],
+          "queue_validation_status": "BLOCK",
+          "unknown_state_count": 0
+        },
+        "execution_allowed": false,
+        "forbidden_shortcut": "Do not remove or mutate queue evidence to make the validator pass.",
+        "id": "queue_integrity_gap",
+        "impact_score": 95,
+        "next_safe_lane": "PROTECTED_QUEUE_ITEM_REVIEW_V1",
+        "reduces_operator_burden": true,
+        "severity": "HIGH",
+        "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#queue_validation_summary",
+        "title": "Canonical queue integrity still fails the validator",
+        "why_it_matters": "A protected queue item and validator BLOCK mean the canonical queue still needs human review before anything downstream can treat it as trustworthy."
+      },
+      {
+        "approval_required": false,
+        "blocked_until": "Runtime proof gate reaches READY_FOR_HUMAN_GATE with no unsafe claims or forbidden statuses.",
+        "burden_category": "recover",
+        "domain": "proof_gate_gap",
+        "evidence": {
+          "attention_count": 2,
+          "blocker_count": 8,
+          "final_verdict": "BLOCKED",
+          "safe_next_action": "Fix the blockers before the proof chain can reach human gate review."
+        },
+        "execution_allowed": false,
+        "forbidden_shortcut": "Do not promote a blocked proof gate into a readiness claim.",
+        "id": "proof_gate_gap",
+        "impact_score": 90,
+        "next_safe_lane": "RUNTIME_PROOF_GATE_BLOCKER_TRIAGE_V1",
+        "reduces_operator_burden": true,
+        "severity": "HIGH",
+        "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#runtime_proof_gate_summary",
+        "title": "Runtime proof gate remains blocked",
+        "why_it_matters": "The proof spine cannot yet support a human gate readiness claim while the runtime proof gate is blocked."
+      },
+      {
+        "approval_required": false,
+        "blocked_until": "The packet becomes READY_FOR_HUMAN_REVIEW or at least ATTENTION without blockers.",
+        "burden_category": "decide",
+        "domain": "human_gate_gap",
+        "evidence": {
+          "human_review_question_count": 9,
+          "human_stop_condition_count": 8,
+          "packet_status": "BLOCKED",
+          "queue_validation_status": "BLOCK",
+          "runtime_proof_gate_verdict": "BLOCKED"
+        },
+        "execution_allowed": false,
+        "forbidden_shortcut": "Do not approve or execute from a blocked packet.",
+        "id": "human_gate_gap",
+        "impact_score": 90,
+        "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+        "reduces_operator_burden": true,
+        "severity": "HIGH",
+        "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#human_gate_packet_summary",
+        "title": "Human gate packet remains blocked",
+        "why_it_matters": "Tony still has to review blockers rather than a readiness packet, so the human gate is not yet at the review-only threshold."
+      },
+      {
+        "approval_required": false,
+        "blocked_until": "Remaining human burdens are reduced further and the next dependency target is unambiguous.",
+        "burden_category": "remember",
+        "domain": "operator_dependency_gap",
+        "evidence": {
+          "autonomy_shift": "PARTIAL",
+          "next_reduction_target": {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "dependency_category": "recover",
+            "reason": "The relay proof review is still the closest operator dependency bottleneck.",
+            "safe_next_action": "Resolve missing relay predecessor proofs and keep SOS/scheduler blocked in repo-held state.",
+            "target_status": "REVIEWABLE"
+          },
+          "remaining_human_burdens": [
+            {
+              "burden": "Remember the current queue still has proof blockers and human-only gates.",
+              "component_id": "runtime_execution_queue",
+              "component_name": "Runtime execution queue"
+            },
+            {
+              "burden": "Notice the blocker list before asking for the next lane.",
+              "component_id": "runtime_execution_queue",
+              "component_name": "Runtime execution queue"
+            },
+            {
+              "burden": "Decide whether to release the next lane after reviewing the queue.",
+              "component_id": "runtime_execution_queue",
+              "component_name": "Runtime execution queue"
+            },
+            {
+              "burden": "Route the work to the next strict serial lane.",
+              "component_id": "runtime_execution_queue",
+              "component_name": "Runtime execution queue"
+            },
+            {
+              "burden": "Recover from stale or missing proof state if the queue becomes inconsistent.",
+              "component_id": "runtime_execution_queue",
+              "component_name": "Runtime execution queue"
+            },
+            {
+              "burden": "Remember relay is DRY_RUN-only and vacation_mode_complete must stay false.",
+              "component_id": "relay_runtime_processor",
+              "component_name": "Relay runtime processor"
+            },
+            {
+              "burden": "Notice missing predecessor proofs and blocked human-only gates.",
+              "component_id": "relay_runtime_processor",
+              "component_name": "Relay runtime processor"
+            },
+            {
+              "burden": "Decide whether the relay proof can be accepted for review.",
+              "component_id": "relay_runtime_processor",
+              "component_name": "Relay runtime processor"
+            },
+            {
+              "burden": "Route the relay output toward proof review or hold it for repair.",
+              "component_id": "relay_runtime_processor",
+              "component_name": "Relay runtime processor"
+            },
+            {
+              "burden": "Recover upstream proof gaps before advancing.",
+              "component_id": "relay_runtime_processor",
+              "component_name": "Relay runtime processor"
+            },
+            {
+              "burden": "Remember the relay review is report-only and never means COMPLETE.",
+              "component_id": "relay_dry_run_proof_review",
+              "component_name": "Relay dry-run proof review"
+            },
+            {
+              "burden": "Notice invalid flags and missing proofs before accepting the proof.",
+              "component_id": "relay_dry_run_proof_review",
+              "component_name": "Relay dry-run proof review"
+            },
+            {
+              "burden": "Decide whether the proof is reviewable or still blocked.",
+              "component_id": "relay_dry_run_proof_review",
+              "component_name": "Relay dry-run proof review"
+            },
+            {
+              "burden": "Route reviewable proof toward the next planning step or hold for repair.",
+              "component_id": "relay_dry_run_proof_review",
+              "component_name": "Relay dry-run proof review"
+            },
+            {
+              "burden": "Recover from invalid proof/readout before any downstream planning.",
+              "component_id": "relay_dry_run_proof_review",
+              "component_name": "Relay dry-run proof review"
+            }
+          ]
+        },
+        "execution_allowed": false,
+        "forbidden_shortcut": "Do not treat partial autonomy shift as full autonomy.",
+        "id": "operator_dependency_gap",
+        "impact_score": 75,
+        "next_safe_lane": "OPERATOR_DEPENDENCY_LEDGER_REVIEW_V1",
+        "reduces_operator_burden": true,
+        "severity": "MEDIUM",
+        "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#operator_dependency_summary",
+        "title": "Operator dependency is still partially manual",
+        "why_it_matters": "AI_OS has reduced some queue and proof burden, but Tony still has to remember and recover from upstream relay proof bottlenecks."
+      },
+      {
+        "approval_required": false,
+        "blocked_until": "The selector converges on the right proof-to-review target and the upstream blockers are described cleanly.",
+        "burden_category": "route",
+        "domain": "reduction_target_gap",
+        "evidence": {
+          "safe_next_action_from_selector": "Use restart_timeouts_proof_planning as the next dependency-reduction target; do not execute it automatically and keep all runtime and human-gate paths blocked.",
+          "selected_category": "recover",
+          "selected_reason": "The relay proof review is BLOCKED, so the next reduction target is the restart/timeouts proof planning lane. This keeps Tony from having to remember the next blocker while leaving scheduler, SOS, and live paths out of scope.",
+          "selected_target": "restart_timeouts_proof_planning"
+        },
+        "execution_allowed": false,
+        "forbidden_shortcut": "Do not claim the next lane is execution or live control.",
+        "id": "reduction_target_gap",
+        "impact_score": 70,
+        "next_safe_lane": "REDUCTION_TARGET_SELECTOR_REVIEW_V1",
+        "reduces_operator_burden": true,
+        "severity": "MEDIUM",
+        "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#reduction_target_summary",
+        "title": "Reduction target selector still points to a planning lane",
+        "why_it_matters": "The selector is still pointing at planning rather than the relay acceptance packet, so Tony must still decide which reduction lane to use next."
+      },
+      {
+        "approval_required": false,
+        "blocked_until": "The evidence views are aligned and the next reduction target is clearly explained.",
+        "burden_category": "notice",
+        "domain": "documentation_gap",
+        "evidence": {
+          "canonical_queue_item_count": 2,
+          "operator_dependency_next_target": "relay_dry_run_proof_review",
+          "reduction_selector_target": "restart_timeouts_proof_planning",
+          "runtime_queue_view_item_count": 1
+        },
+        "execution_allowed": false,
+        "forbidden_shortcut": "Do not paper over evidence mismatches by editing the reports to agree.",
+        "id": "documentation_gap",
+        "impact_score": 35,
+        "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+        "reduces_operator_burden": true,
+        "severity": "LOW",
+        "source": "Reports/human_gate/human_gate_packet_dogfood_report.json and Reports/runtime_queue/runtime_execution_queue_view.json",
+        "title": "Evidence views still need alignment",
+        "why_it_matters": "The evidence story is split across views and the next dependency target is not yet perfectly aligned between the ledger and selector."
+      }
+    ],
+    "canonical_queue_ready": {
+      "evidence": {
+        "canonical_queue_item_count": 2,
+        "duplicate_id_count": 0,
+        "protected_item_count": 1,
+        "queue_view_mismatch": true,
+        "unknown_state_count": 0
+      },
+      "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+      "reason": "Canonical queue exists, but the queue view and dogfood summary are not fully aligned and the protected item keeps the queue in review mode.",
+      "status": "ATTENTION"
+    },
+    "dogfood_runner_ready": {
+      "evidence": {
+        "dogfood_status": "BLOCKED",
+        "mutated_source_count": null,
+        "mutation_check_status": "PASS"
+      },
+      "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "reason": "Dogfood runner is safe, but the evidence it produced is blocked.",
+      "status": "ATTENTION"
+    },
+    "human_gate_packet_ready": {
+      "evidence": {
+        "apply_allowed": false,
+        "approval_granted": false,
+        "attention_count": 3,
+        "blocker_count": 3,
+        "canonical_queue_item_count": 2,
+        "collision_count": 0,
+        "dispatch_allowed": false,
+        "duplicate_id_count": 0,
+        "execution_allowed": false,
+        "forbidden_claim_count": 0,
+        "human_review_question_count": 9,
+        "human_review_required": true,
+        "human_stop_condition_count": 8,
+        "invalid_reason_count": 0,
+        "live_trading_allowed": false,
+        "packet_status": "BLOCKED",
+        "protected_item_count": 1,
+        "queue_mutation_allowed": false,
+        "queue_validation_status": "BLOCK",
+        "runtime_launch_allowed": false,
+        "runtime_proof_gate_verdict": "BLOCKED",
+        "safe_next_action": "Clear blockers and regenerate the packet; do not approve or execute.",
+        "scheduler_creation_allowed": false,
+        "sos_allowed": false,
+        "stop_condition": "Stop until blockers are cleared; do not execute or approve.",
+        "unknown_state_count": 0,
+        "unsafe_flag_count": 0,
+        "vacation_mode_complete": false
+      },
+      "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "reason": "Human gate packet is BLOCKED because the proof gate and queue validation are blocked.",
+      "status": "BLOCKED"
+    },
+    "live_execution_ready": {
+      "evidence": {
+        "packet_status": "BLOCKED",
+        "queue_validation_status": "BLOCKED",
+        "runtime_proof_gate_verdict": "BLOCKED"
+      },
+      "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+      "reason": "Live execution remains blocked because queue validation, proof gate, and human gate are not ready.",
+      "status": "BLOCKED"
+    },
+    "operator_control_switch_ready": {
+      "evidence": {
+        "blocked_by": [
+          "queue_validation_block",
+          "human_gate_packet_blocked",
+          "runtime_proof_gate_blocked"
+        ],
+        "recommended_scope": "REPORT_ONLY / OBSERVE_ONLY"
+      },
+      "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "reason": "A report-only operator control switch is worth designing later, but live control is not ready.",
+      "status": "ATTENTION"
+    },
+    "operator_dependency_reduced": {
+      "evidence": {
+        "autonomy_shift": "PARTIAL",
+        "reduced_burdens": [
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "next_strict_serial_order"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "proof_chain"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "remaining_blockers"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "human_only_gates"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "validation_status"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "remaining_blockers"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "hard_gate_summary"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "safe_next_action"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "validation_status"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "next_lane"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "queue_consumer"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "next_strict_serial_order"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "assert_no_hard_gate_bypass"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "remaining_blockers"
+          },
+          {
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue",
+            "reduction": "validation_status"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "mode"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "observe_only"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "vacation_mode_complete"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "missing_proofs"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "blocked_human_gates"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "proof_status"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "ready_for_relay"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "safe_next_action"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "next_lane"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "queue_consumer"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "source_queue_validation"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "proof_chain"
+          },
+          {
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor",
+            "reduction": "validation_status"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "review_status"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "proof_reviewable"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "vacation_mode_complete"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "safety_flags"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "missing_proofs"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "blocked_human_gates"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "review_status"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "proof_reviewable"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "safe_next_action"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "next_lane"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "safe_next_action"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "source_relay_validation"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "validation_status"
+          },
+          {
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review",
+            "reduction": "invalid_reasons"
+          }
+        ],
+        "remaining_human_burdens": [
+          {
+            "burden": "Remember the current queue still has proof blockers and human-only gates.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Notice the blocker list before asking for the next lane.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Decide whether to release the next lane after reviewing the queue.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Route the work to the next strict serial lane.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Recover from stale or missing proof state if the queue becomes inconsistent.",
+            "component_id": "runtime_execution_queue",
+            "component_name": "Runtime execution queue"
+          },
+          {
+            "burden": "Remember relay is DRY_RUN-only and vacation_mode_complete must stay false.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Notice missing predecessor proofs and blocked human-only gates.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Decide whether the relay proof can be accepted for review.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Route the relay output toward proof review or hold it for repair.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Recover upstream proof gaps before advancing.",
+            "component_id": "relay_runtime_processor",
+            "component_name": "Relay runtime processor"
+          },
+          {
+            "burden": "Remember the relay review is report-only and never means COMPLETE.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Notice invalid flags and missing proofs before accepting the proof.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Decide whether the proof is reviewable or still blocked.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Route reviewable proof toward the next planning step or hold for repair.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          },
+          {
+            "burden": "Recover from invalid proof/readout before any downstream planning.",
+            "component_id": "relay_dry_run_proof_review",
+            "component_name": "Relay dry-run proof review"
+          }
+        ]
+      },
+      "next_safe_lane": "OPERATOR_DEPENDENCY_LEDGER_REVIEW_V1",
+      "reason": "Operator dependency tracking shows a partial autonomy shift, but manual burdens remain.",
+      "status": "ATTENTION"
+    },
+    "p2_enqueue_bridge_ready": {
+      "evidence": {
+        "human_gate_packet_status": "BLOCKED",
+        "queue_validation_status": "BLOCKED",
+        "runtime_proof_gate_verdict": "BLOCKED"
+      },
+      "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+      "reason": "P2 review-to-queue enqueue bridge is blocked until queue validation and human gate readiness clear.",
+      "status": "BLOCKED"
+    },
+    "queue_validation_ready": {
+      "evidence": {
+        "collision_count": 0,
+        "duplicate_id_count": 0,
+        "protected_item_count": 1,
+        "queue_validation_blockers": [
+          "RQV-003-NO-PROTECTED-ITEM"
+        ],
+        "queue_validation_checked_fields": [],
+        "queue_validation_status": "BLOCK",
+        "unknown_state_count": 0
+      },
+      "next_safe_lane": "PROTECTED_QUEUE_ITEM_REVIEW_V1",
+      "reason": "Queue validation is BLOCK, so the canonical queue still carries a protected item and cannot be treated as ready.",
+      "status": "BLOCKED"
+    },
+    "runtime_proof_gate_ready": {
+      "evidence": {
+        "apply_allowed": false,
+        "approval_granted": false,
+        "attention_count": 2,
+        "blocker_count": 8,
+        "cross_proof_consistency": {
+          "attention_reasons": [
+            "restart/timeouts proof is ATTENTION",
+            "reduction target selector still points to a proof-planning target"
+          ],
+          "blockers": [
+            "restart/timeouts attention not allowed by policy",
+            "relay review is BLOCKED",
+            "operator dependency ledger validation is BLOCKED",
+            "runtime queue still lists remaining blockers"
+          ],
+          "contradictions": [],
+          "invalid_reasons": [],
+          "operator_dependency_status": "BLOCKED",
+          "reduction_target_status": "UNKNOWN",
+          "relay_review_status": "BLOCKED",
+          "restart_timeouts_status": "ATTENTION",
+          "retention_rotation_status": "BLOCKED",
+          "runtime_queue_status": "UNKNOWN",
+          "soak_status": "BLOCKED"
+        },
+        "dispatch_allowed": false,
+        "execution_allowed": false,
+        "final_verdict": "BLOCKED",
+        "forbidden_claim_count": 0,
+        "human_gate_ready": false,
+        "human_gate_required": true,
+        "invalid_reason_count": 0,
+        "live_trading_allowed": false,
+        "prerequisite_missing_count": 0,
+        "relay_review_status": null,
+        "restart_timeouts_status": "ATTENTION",
+        "retention_rotation_status": "BLOCKED",
+        "runtime_launch_allowed": false,
+        "runtime_queue_status": null,
+        "safe_next_action": "Fix the blockers before the proof chain can reach human gate review.",
+        "scheduler_creation_allowed": false,
+        "soak_pass": false,
+        "soak_status": "BLOCKED",
+        "sos_allowed": false,
+        "stop_condition": "Stop until blockers are cleared; no execution.",
+        "unsafe_flag_count": 0,
+        "vacation_mode_complete": false
+      },
+      "next_safe_lane": "RUNTIME_PROOF_GATE_BLOCKER_TRIAGE_V1",
+      "reason": "Runtime proof gate is BLOCKED, so the proof spine is not yet ready for human gate review.",
+      "status": "BLOCKED"
+    },
+    "scheduler_ready": {
+      "evidence": {
+        "scheduler_creation_allowed": false
+      },
+      "next_safe_lane": "REPORT_ONLY",
+      "reason": "Scheduler creation stays blocked until the proof chain clears.",
+      "status": "BLOCKED"
+    },
+    "sos_ready": {
+      "evidence": {
+        "sos_allowed": false
+      },
+      "next_safe_lane": "REPORT_ONLY",
+      "reason": "SOS arming stays blocked until the human gate packet is reviewable.",
+      "status": "BLOCKED"
+    },
+    "vacation_mode_ready": {
+      "evidence": {
+        "vacation_mode_complete": false
+      },
+      "next_safe_lane": "REPORT_ONLY",
+      "reason": "Vacation mode remains false and must stay blocked until the evidence chain is clean.",
+      "status": "BLOCKED"
+    }
+  },
+  "reassessment_status": "BLOCKED",
+  "reassessment_status_reason": "Queue validation is BLOCK, the runtime proof gate is BLOCKED, and the human gate packet is BLOCKED.",
+  "reassessment_type": "autonomy_gap",
+  "recommended_next_lanes": [
+    {
+      "allowed_scope": "Report-only / observe-only",
+      "blocked_by": "queue_integrity_gap",
+      "expected_output": "A clearer blocker map and a smaller Tony review burden.",
+      "forbidden_scope": "No approval, no runtime launch, no dispatch, no queue mutation, no scheduler/SOS/live operations.",
+      "lane_id": "QUEUE_BLOCKER_TRIAGE_V1",
+      "purpose": "Resolve the queue integrity blocker without mutating the source queue.",
+      "readiness_to_start": "READY",
+      "recommended_mode": "REPORT_ONLY",
+      "reduces_operator_burden_category": "remember",
+      "title": "Triaging the queue validator blocker and protected item",
+      "why_now": "This lane reduces the largest current blocker without touching execution paths."
+    },
+    {
+      "allowed_scope": "Report-only / observe-only",
+      "blocked_by": "queue_integrity_gap",
+      "expected_output": "A clearer blocker map and a smaller Tony review burden.",
+      "forbidden_scope": "No approval, no runtime launch, no dispatch, no queue mutation, no scheduler/SOS/live operations.",
+      "lane_id": "PROTECTED_QUEUE_ITEM_REVIEW_V1",
+      "purpose": "Explain why the protected item is present and whether it needs human review.",
+      "readiness_to_start": "READY",
+      "recommended_mode": "OBSERVE_ONLY",
+      "reduces_operator_burden_category": "remember",
+      "title": "Reviewing the protected queue item",
+      "why_now": "This lane reduces the largest current blocker without touching execution paths."
+    },
+    {
+      "allowed_scope": "Report-only / observe-only",
+      "blocked_by": "human_gate_gap",
+      "expected_output": "A clearer blocker map and a smaller Tony review burden.",
+      "forbidden_scope": "No approval, no runtime launch, no dispatch, no queue mutation, no scheduler/SOS/live operations.",
+      "lane_id": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "purpose": "Collapse the blocked proof and packet state into one human-readable explanation.",
+      "readiness_to_start": "READY",
+      "recommended_mode": "REPORT_ONLY",
+      "reduces_operator_burden_category": "remember",
+      "title": "Explaining the human gate blockers",
+      "why_now": "This lane reduces the largest current blocker without touching execution paths."
+    },
+    {
+      "allowed_scope": "Report-only / observe-only",
+      "blocked_by": "proof_gate_gap",
+      "expected_output": "A clearer blocker map and a smaller Tony review burden.",
+      "forbidden_scope": "No approval, no runtime launch, no dispatch, no queue mutation, no scheduler/SOS/live operations.",
+      "lane_id": "RUNTIME_PROOF_GATE_BLOCKER_TRIAGE_V1",
+      "purpose": "Summarize what keeps the proof gate blocked and what is still missing.",
+      "readiness_to_start": "ATTENTION",
+      "recommended_mode": "DRY_RUN_ONLY",
+      "reduces_operator_burden_category": "remember",
+      "title": "Triage the runtime proof gate blocker",
+      "why_now": "This lane reduces the largest current blocker without touching execution paths."
+    },
+    {
+      "allowed_scope": "Report-only / observe-only",
+      "blocked_by": "reduction_target_gap",
+      "expected_output": "A clearer blocker map and a smaller Tony review burden.",
+      "forbidden_scope": "No approval, no runtime launch, no dispatch, no queue mutation, no scheduler/SOS/live operations.",
+      "lane_id": "REDUCTION_TARGET_SELECTOR_REVIEW_V1",
+      "purpose": "Align the next reduction target with the current proof chain state.",
+      "readiness_to_start": "ATTENTION",
+      "recommended_mode": "REPORT_ONLY",
+      "reduces_operator_burden_category": "remember",
+      "title": "Review the reduction target selector",
+      "why_now": "This lane reduces the largest current blocker without touching execution paths."
+    },
+    {
+      "allowed_scope": "Report-only / observe-only",
+      "blocked_by": "operator_dependency_gap",
+      "expected_output": "A clearer blocker map and a smaller Tony review burden.",
+      "forbidden_scope": "No approval, no runtime launch, no dispatch, no queue mutation, no scheduler/SOS/live operations.",
+      "lane_id": "OPERATOR_DEPENDENCY_LEDGER_REVIEW_V1",
+      "purpose": "Reduce the remember/notice/decide/route/recover burden in one place.",
+      "readiness_to_start": "ATTENTION",
+      "recommended_mode": "REPORT_ONLY",
+      "reduces_operator_burden_category": "remember",
+      "title": "Review operator dependency burden",
+      "why_now": "This lane reduces the largest current blocker without touching execution paths."
+    }
+  ],
+  "reduction_target_summary": {
+    "candidate_targets": [
+      {
+        "category": "recover",
+        "live_required": false,
+        "reason": "Relay proof review is still blocked, so the next dependency reduction is to plan the next proof gate instead of pretending acceptance is ready.",
+        "requires_human": true,
+        "scheduler_required": false,
+        "sos_required": false,
+        "supported_by": [
+          "review_status",
+          "proof_status",
+          "blockers",
+          "human_gates",
+          "safe_next_action"
+        ],
+        "target_id": "restart_timeouts_proof_planning"
+      },
+      {
+        "category": "notice",
+        "live_required": false,
+        "reason": "If planning is not yet useful, keep the dependency report current so Tony does not have to rediscover the blocker manually.",
+        "requires_human": true,
+        "scheduler_required": false,
+        "sos_required": false,
+        "supported_by": [
+          "remaining_human_burdens",
+          "reduced_burdens",
+          "safe_next_action"
+        ],
+        "target_id": "operator_dependency_next_report"
+      },
+      {
+        "category": "route",
+        "live_required": false,
+        "reason": "Rejected because the relay proof is not reviewable yet.",
+        "requires_human": true,
+        "scheduler_required": false,
+        "sos_required": false,
+        "supported_by": [
+          "review_status",
+          "missing_proofs"
+        ],
+        "target_id": "relay_proof_acceptance_packet"
+      }
+    ],
+    "dependency_reduction_basis": {
+      "selection_rule": "REVIEWABLE -> relay_proof_acceptance_packet; BLOCKED -> restart_timeouts_proof_planning; NONE -> operator_dependency_next_report; otherwise conservative proof-planning fallback.",
+      "source_autonomy_shift": "PARTIAL",
+      "source_blockers": [
+        "relay runtime proof missing",
+        "restart/timeouts proof missing",
+        "retention proof missing",
+        "soak proof missing",
+        "STOP drill proof missing",
+        "SOS delivered:true missing",
+        "scheduler manual registration missing"
+      ],
+      "source_human_gates": [
+        "human_sos_arming",
+        "human_scheduler_registration"
+      ],
+      "source_next_reduction_target": {
+        "component_id": "relay_dry_run_proof_review",
+        "component_name": "Relay dry-run proof review",
+        "dependency_category": "recover",
+        "reason": "The relay proof review is still the closest operator dependency bottleneck.",
+        "safe_next_action": "Resolve missing relay predecessor proofs and keep SOS/scheduler blocked in repo-held state.",
+        "target_status": "REVIEWABLE"
+      },
+      "source_proof_status": "BLOCKED",
+      "source_review_status": "BLOCKED",
+      "source_safe_next_action": "Measure the next reduction target and keep vacation_mode_complete false; do not treat report-only dependency reduction as runtime autonomy."
+    },
+    "reduction_selector_present": true,
+    "safe_next_action_from_selector": "Use restart_timeouts_proof_planning as the next dependency-reduction target; do not execute it automatically and keep all runtime and human-gate paths blocked.",
+    "selected_category": "recover",
+    "selected_reason": "The relay proof review is BLOCKED, so the next reduction target is the restart/timeouts proof planning lane. This keeps Tony from having to remember the next blocker while leaving scheduler, SOS, and live paths out of scope.",
+    "selected_target": "restart_timeouts_proof_planning",
+    "selector_blocks_execution": true,
+    "source_autonomy_shift": "PARTIAL"
+  },
+  "repo_root": ".",
+  "report_paths": [
+    "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json",
+    "Reports\\autonomy_gap\\autonomy_gap_reassessment_summary.md"
+  ],
+  "runtime_launch_allowed": false,
+  "runtime_proof_gate_summary": {
+    "apply_allowed": false,
+    "approval_granted": false,
+    "attention_count": 2,
+    "blocker_count": 8,
+    "cross_proof_consistency": {
+      "attention_reasons": [
+        "restart/timeouts proof is ATTENTION",
+        "reduction target selector still points to a proof-planning target"
+      ],
+      "blockers": [
+        "restart/timeouts attention not allowed by policy",
+        "relay review is BLOCKED",
+        "operator dependency ledger validation is BLOCKED",
+        "runtime queue still lists remaining blockers"
+      ],
+      "contradictions": [],
+      "invalid_reasons": [],
+      "operator_dependency_status": "BLOCKED",
+      "reduction_target_status": "UNKNOWN",
+      "relay_review_status": "BLOCKED",
+      "restart_timeouts_status": "ATTENTION",
+      "retention_rotation_status": "BLOCKED",
+      "runtime_queue_status": "UNKNOWN",
+      "soak_status": "BLOCKED"
+    },
+    "dispatch_allowed": false,
+    "execution_allowed": false,
+    "final_verdict": "BLOCKED",
+    "forbidden_claim_count": 0,
+    "human_gate_ready": false,
+    "human_gate_required": true,
+    "invalid_reason_count": 0,
+    "live_trading_allowed": false,
+    "prerequisite_missing_count": 0,
+    "relay_review_status": null,
+    "restart_timeouts_status": "ATTENTION",
+    "retention_rotation_status": "BLOCKED",
+    "runtime_launch_allowed": false,
+    "runtime_queue_status": null,
+    "safe_next_action": "Fix the blockers before the proof chain can reach human gate review.",
+    "scheduler_creation_allowed": false,
+    "soak_pass": false,
+    "soak_status": "BLOCKED",
+    "sos_allowed": false,
+    "stop_condition": "Stop until blockers are cleared; no execution.",
+    "unsafe_flag_count": 0,
+    "vacation_mode_complete": false
+  },
+  "runtime_queue_summary": {
+    "cloud_buildable_lane_complete": true,
+    "generated_at_utc": "2026-06-10T19:20:11Z",
+    "hard_gate_summary": {
+      "global": [
+        "No live trading, broker, or OANDA execution.",
+        "No webhook execution.",
+        "No APPLY, dispatch, merge, or push automation.",
+        "No approval inbox mutation or active packet mutation.",
+        "No scheduler, service, or SOS automation outside human checklist lanes."
+      ],
+      "human_only_lanes": [
+        "human_sos_arming",
+        "human_scheduler_registration"
+      ],
+      "no_auto_mutation": [
+        "auto_apply false",
+        "auto_merge false",
+        "auto_scheduler false",
+        "active_packet_mutation_allowed false"
+      ]
+    },
+    "lanes": [
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "restart_supervisor_timeouts"
+        ],
+        "consumer": "restart_supervisor_timeouts",
+        "consumes_from": [
+          "approval_review_card",
+          "packet_completeness_verdict",
+          "path_guard_verdict",
+          "apply_counterpart_inventory_target"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_APPROVAL_CHAIN",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "move relay state",
+          "write active packet state"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Relay lane remains DRY_RUN-only until Anthony approves the exact packet.",
+          "APPLY and dispatch remain blocked."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "relay_runtime_processor",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-RELAY-RUNTIME-PROCESSOR-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "approval-card-and-validator-pipeline",
+        "produces": [
+          "relay_runtime_dry_run_report",
+          "relay_runtime_preview"
+        ],
+        "proof_required": [
+          "approval_card_present",
+          "completeness_ready",
+          "path_guard_pass",
+          "apply_inventory_target_selected",
+          "runtime_dry_run_pass"
+        ],
+        "required_inputs": [
+          "approval_card_present",
+          "completeness_ready",
+          "path_guard_pass",
+          "apply_inventory_target_selected"
+        ],
+        "safe_next_command": "Prepare the DRY_RUN relay preview packet; Anthony approval remains required for any runtime work.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop before any relay mutation, APPLY, dispatch, or active packet write.",
+        "title": "Relay / runtime processor preview lane",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "aios_approval_review_compressor",
+          "aios_packet_completeness_review",
+          "aios_path_guard_validator",
+          "aios_apply_counterpart_inventory"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "jsonl_rotation_retention"
+        ],
+        "consumer": "jsonl_rotation_retention",
+        "consumes_from": [
+          "relay_runtime_dry_run_report"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_RELAY_PROOF",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "create service",
+          "register scheduler",
+          "start background process",
+          "infinite restart storm"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "No service creation.",
+          "No scheduler registration.",
+          "No hidden background process."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "restart_supervisor_timeouts",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-RESTART-SUPERVISOR-AND-TIMEOUTS-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "relay_runtime_dry_run_report",
+        "produces": [
+          "restart_timeout_proof_report",
+          "restart_dry_run_plan"
+        ],
+        "proof_required": [
+          "relay_runtime_dry_run_pass",
+          "restart_timeout_proof_pass"
+        ],
+        "required_inputs": [
+          "relay_runtime_dry_run_pass"
+        ],
+        "safe_next_command": "Draft only the bounded-timeout plan and DRY_RUN restart proof outline.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop if the watchdog restarts silently, loops, or attempts service/scheduler installation.",
+        "title": "Restart supervisor and bounded timeouts",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "soak_endurance_proof"
+        ],
+        "consumer": "soak_endurance_proof",
+        "consumes_from": [
+          "restart_timeout_proof_report"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_RESTART_PROOF",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "delete telemetry",
+          "compress telemetry in place",
+          "mutate retention evidence"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Compression-before-delete only.",
+          "No delete in DRY_RUN."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "jsonl_rotation_retention",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-JSONL-ROTATION-RETENTION-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "restart_timeout_proof_report",
+        "produces": [
+          "retention_dry_run_report",
+          "retention_policy_summary"
+        ],
+        "proof_required": [
+          "restart_timeout_proof_pass",
+          "retention_dry_run_pass"
+        ],
+        "required_inputs": [
+          "restart_timeout_proof_pass"
+        ],
+        "safe_next_command": "Produce the retention DRY_RUN candidate report only.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop before any retention mutation or evidence loss path.",
+        "title": "JSONL rotation and retention",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "stop_drill_recovery_proof"
+        ],
+        "consumer": "stop_drill_recovery_proof",
+        "consumes_from": [
+          "retention_dry_run_report"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_RETENTION_PROOF",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "start long soak",
+          "live broker run",
+          "paper trading bypass"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Stages only: 1h smoke, 4h proof, 8h proof, 24h proof.",
+          "No long soak execution in this prompt."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "soak_endurance_proof",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-SOAK-ENDURANCE-PROOF-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "retention_dry_run_report",
+        "produces": [
+          "soak_proof_plan",
+          "soak_evidence_outline"
+        ],
+        "proof_required": [
+          "retention_dry_run_pass",
+          "soak_pass"
+        ],
+        "required_inputs": [
+          "retention_dry_run_pass"
+        ],
+        "safe_next_command": "Draft the staged soak proof packet and keep execution dry-run only.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop if the soak would become live, unattended, broker-connected, or longer than the approved stage.",
+        "title": "Soak proof",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "aios_soak_evidence_validator",
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "human_sos_arming"
+        ],
+        "consumer": "human_sos_arming",
+        "consumes_from": [
+          "soak_evidence_outline"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_SOAK_PROOF",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "start hidden recovery loop",
+          "mutate runtime state"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "STOP drill evidence required before SOS or scheduler handoff."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "stop_drill_recovery_proof",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-STOP-DRILL-RECOVERY-PROOF-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "soak_evidence_outline",
+        "produces": [
+          "stop_drill_recovery_report",
+          "stop_drill_evidence_outline"
+        ],
+        "proof_required": [
+          "soak_pass",
+          "stop_drill_pass"
+        ],
+        "required_inputs": [
+          "soak_pass"
+        ],
+        "safe_next_command": "Write the STOP drill recovery proof as a DRY_RUN packet only.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop if recovery proof is missing or the drill attempts to become a runtime restart loop.",
+        "title": "STOP drill and recovery proof",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": false,
+        "consumed_by": [
+          "human_scheduler_registration"
+        ],
+        "consumer": "human_scheduler_registration",
+        "consumes_from": [
+          "stop_drill_recovery_report"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_STOP_DRILL",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "store secret in repo",
+          "send real alert from automation",
+          "arm live notification channel"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Human-only checklist.",
+          "Secret lives outside the repo.",
+          "Exactly one alert test only."
+        ],
+        "human_only": true,
+        "human_required": true,
+        "lane_id": "human_sos_arming",
+        "live_broker_trading_enabled": false,
+        "mode": "HUMAN_CHECKLIST_ONLY",
+        "next_packet_name": "AIOS-HUMAN-SOS-ARMING-CHECKLIST",
+        "owner": "Anthony Meza",
+        "owner_type": "anthony_human",
+        "producer": "stop_drill_recovery_report",
+        "produces": [
+          "sos_checklist_confirmation",
+          "sos_delivery_record"
+        ],
+        "proof_required": [
+          "stop_drill_pass",
+          "sos_delivered_true"
+        ],
+        "required_inputs": [
+          "stop_drill_pass",
+          "secret_outside_repo",
+          "exactly_one_alert_test",
+          "stale_heartbeat_test",
+          "healthy_silence_test"
+        ],
+        "safe_next_command": "Anthony completes the SOS checklist manually after the stop drill passes.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop unless Anthony is performing the checklist by hand and no secret value enters the repo.",
+        "title": "Real SOS arming checklist",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "human_checklist"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": false,
+        "consumed_by": [
+          "operator_final_readout"
+        ],
+        "consumer": "operator_final_readout",
+        "consumes_from": [
+          "sos_delivery_record"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_SOS",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "Register-ScheduledTask",
+          "schtasks execution",
+          "create service",
+          "automation scheduler registration"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Human-only scheduler registration.",
+          "Soak PASS required.",
+          "SOS delivered:true required.",
+          "STOP drill PASS required."
+        ],
+        "human_only": true,
+        "human_required": true,
+        "lane_id": "human_scheduler_registration",
+        "live_broker_trading_enabled": false,
+        "mode": "HUMAN_CHECKLIST_ONLY",
+        "next_packet_name": "AIOS-HUMAN-SCHEDULER-REGISTRATION-CHECKLIST",
+        "owner": "Anthony Meza",
+        "owner_type": "anthony_human",
+        "producer": "sos_delivery_record",
+        "produces": [
+          "scheduler_registration_confirmation",
+          "operator_final_readout"
+        ],
+        "proof_required": [
+          "soak_pass",
+          "stop_drill_pass",
+          "sos_delivered_true",
+          "scheduler_registered_by_anthony"
+        ],
+        "required_inputs": [
+          "soak_pass",
+          "stop_drill_pass",
+          "sos_delivered_true",
+          "scheduler_registered_by_anthony"
+        ],
+        "safe_next_command": "Anthony completes scheduler registration by hand after all proof gates pass.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop unless Anthony manually registers the scheduler after the soak and SOS gates pass.",
+        "title": "Human scheduler registration checklist",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "human_checklist"
+        ]
+      }
+    ],
+    "next_strict_serial_order": [
+      "relay_runtime_processor",
+      "restart_supervisor_timeouts",
+      "jsonl_rotation_retention",
+      "soak_endurance_proof",
+      "stop_drill_recovery_proof",
+      "human_sos_arming",
+      "human_scheduler_registration"
+    ],
+    "proof_chain": [
+      "approval_card_present",
+      "completeness_ready",
+      "path_guard_pass",
+      "apply_inventory_target_selected",
+      "runtime_dry_run_pass",
+      "restart_timeout_proof_pass",
+      "retention_dry_run_pass",
+      "soak_pass",
+      "stop_drill_pass",
+      "sos_delivered_true",
+      "scheduler_registered_by_anthony"
+    ],
+    "queue_consumer": "operator_final_readout",
+    "remaining_blockers": [
+      "relay runtime proof missing",
+      "restart/timeouts proof missing",
+      "retention proof missing",
+      "soak proof missing",
+      "STOP drill proof missing",
+      "SOS delivered:true missing",
+      "scheduler manual registration missing"
+    ],
+    "safety_posture": "OBSERVE_ONLY / DRY_RUN_FIRST / HUMAN_GATED / NO_UNSAFE_AUTONOMY",
+    "schema_version": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
+    "state_snapshot": {
+      "apply_inventory_target_selected": false,
+      "approval_card_present": false,
+      "completeness_ready": false,
+      "ledger_on_main": true,
+      "path_guard_pass": false,
+      "restart_timeout_proof_pass": false,
+      "retention_dry_run_pass": false,
+      "runtime_dry_run_pass": false,
+      "scheduler_registered_by_anthony": false,
+      "soak_pass": false,
+      "sos_delivered_true": false,
+      "stop_drill_pass": false,
+      "vacation_mode_complete": false
+    },
+    "vacation_mode_complete": false
+  },
+  "safe_next_action": "Anthony reviews the ranked autonomy gap report and chooses the next report-only lane.",
+  "scheduler_creation_allowed": false,
+  "schema": "AIOS_AUTONOMY_GAP_REASSESSMENT.v1",
+  "service_creation_allowed": false,
+  "sos_allowed": false,
+  "stop_condition": "Stop before approval or execution; keep scheduler, SOS, and live paths blocked until blockers are resolved.",
+  "summary": {
+    "approval_granted": false,
+    "decide_burden": {
+      "already_reduced": [
+        "The packet and dogfood runner now tell Tony whether the chain is ready, attention-only, or blocked.",
+        "The report ranks the blocker impact so Tony does not have to do that mentally."
+      ],
+      "burden_category": "decide",
+      "current_level": "HIGH",
+      "evidence": [
+        "runtime_proof_gate_verdict=BLOCKED",
+        "packet_status=BLOCKED"
+      ],
+      "next_safe_lane": "HUMAN_GATE_BLOCKER_EXPLAINER_V1",
+      "remains_manual": [
+        "Tony still has to decide which report-only lane to open next.",
+        "Tony still has to decide that live execution remains blocked."
+      ]
+    },
+    "dispatch_allowed": false,
+    "dogfood_runner_ready": "ATTENTION",
+    "execution_allowed": false,
+    "human_gate_packet_ready": "BLOCKED",
+    "live_execution_ready": "BLOCKED",
+    "notice_burden": {
+      "already_reduced": [
+        "Canonical queue and dogfood reports now surface the protected item and fail-soft warning.",
+        "A single reassessment report now collates the queue, proof, and packet state."
+      ],
+      "burden_category": "notice",
+      "current_level": "MEDIUM",
+      "evidence": [
+        "canonical_queue_protected_item_count=1",
+        "queue_validation_blockers=['RQV-003-NO-PROTECTED-ITEM']"
+      ],
+      "next_safe_lane": "PROTECTED_QUEUE_ITEM_REVIEW_V1",
+      "remains_manual": [
+        "Tony still has to notice the protected queue item and the queue validation blocker.",
+        "Tony still has to notice whether the evidence views are aligned."
+      ]
+    },
+    "operator_control_switch_ready": "ATTENTION",
+    "p2_enqueue_bridge_ready": "BLOCKED",
+    "queue_mutation_allowed": false,
+    "queue_validation_ready": "BLOCKED",
+    "reassessment_status": "BLOCKED",
+    "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "recover_burden": {
+      "already_reduced": [
+        "The operator dependency ledger already identifies the remaining manual burden categories.",
+        "The reassessment report collapses multiple evidence files into one ranked action map."
+      ],
+      "burden_category": "recover",
+      "current_level": "HIGH",
+      "evidence": [
+        "operator_dependency_autonomy_shift=PARTIAL",
+        "next_dependency_target=Relay dry-run proof review"
+      ],
+      "next_safe_lane": "RUNTIME_PROOF_GATE_BLOCKER_TRIAGE_V1",
+      "remains_manual": [
+        "Tony still has to recover from the relay proof bottleneck before any readiness claim improves.",
+        "Tony still has to recover from blocked queue validation before a P2 bridge can be discussed."
+      ]
+    },
+    "remember_burden": {
+      "already_reduced": [
+        "The dogfood runner now writes a ranked evidence bundle.",
+        "The human gate packet and proof gate are both machine-readable."
+      ],
+      "burden_category": "remember",
+      "current_level": "HIGH",
+      "evidence": [
+        "dogfood_status=BLOCKED",
+        "packet_status=BLOCKED",
+        "queue_validation_status=BLOCK"
+      ],
+      "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+      "remains_manual": [
+        "Tony still has to remember that the queue is blocked until the protected item is reviewed.",
+        "Tony still has to remember the next blocker from the proof chain summary."
+      ]
+    },
+    "report_paths": [
+      "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json",
+      "Reports\\autonomy_gap\\autonomy_gap_reassessment_summary.md"
+    ],
+    "route_burden": {
+      "already_reduced": [
+        "The reduction selector already proposes a next safe lane.",
+        "The reassessment report now maps blockers to next lanes."
+      ],
+      "burden_category": "route",
+      "current_level": "MEDIUM",
+      "evidence": [
+        "selected_target=restart_timeouts_proof_planning",
+        "next_reduction_target=Relay dry-run proof review"
+      ],
+      "next_safe_lane": "REDUCTION_TARGET_SELECTOR_REVIEW_V1",
+      "remains_manual": [
+        "Tony still has to route the work to the next report-only lane.",
+        "Tony still has to keep P2, scheduler, SOS, and live paths out of scope."
+      ]
+    },
+    "runtime_proof_gate_ready": "BLOCKED",
+    "safe_next_action": "Anthony reviews the ranked autonomy gap report and chooses the next report-only lane.",
+    "scheduler_ready": "BLOCKED",
+    "sos_ready": "BLOCKED",
+    "stop_condition": "Stop before approval or execution; keep scheduler, SOS, and live paths blocked until blockers are resolved.",
+    "top_blocker": "Live execution remains unavailable",
+    "top_blocker_domain": "live_execution_gap",
+    "top_blocker_impact_score": 100,
+    "vacation_mode_ready": "BLOCKED"
+  },
+  "telemetry_mutation_allowed": false,
+  "top_blockers": [
+    {
+      "approval_required": false,
+      "blocked_until": "Queue validation passes, the human gate packet becomes READY_FOR_HUMAN_REVIEW, the runtime proof gate becomes READY_FOR_HUMAN_GATE, and scheduler/SOS/live paths remain blocked until reviewed.",
+      "burden_category": "decide",
+      "domain": "live_execution_gap",
+      "evidence": {
+        "canonical_queue_item_count": 2,
+        "dogfood_status": "BLOCKED",
+        "packet_status": "BLOCKED",
+        "queue_validation_status": "BLOCK",
+        "queue_view_item_count": 1,
+        "runtime_proof_gate_verdict": "BLOCKED"
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not infer live readiness from report generation or from partial proof coverage.",
+      "id": "live_execution_gap",
+      "impact_score": 100,
+      "next_safe_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+      "reduces_operator_burden": true,
+      "severity": "CRITICAL",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json and Reports/runtime_queue/runtime_execution_queue_view.json",
+      "title": "Live execution remains unavailable",
+      "why_it_matters": "AI_OS cannot move past observe-only proof into live execution while the queue, proof gate, and human gate are still blocked."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "Queue validation is PASS and the protected item is explained or resolved without mutating the source queue.",
+      "burden_category": "route",
+      "domain": "queue_integrity_gap",
+      "evidence": {
+        "canonical_queue_fail_soft_errors": [
+          "unified_queue_index"
+        ],
+        "duplicate_id_count": 0,
+        "protected_item_count": 1,
+        "queue_validation_blockers": [
+          "RQV-003-NO-PROTECTED-ITEM"
+        ],
+        "queue_validation_status": "BLOCK",
+        "unknown_state_count": 0
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not remove or mutate queue evidence to make the validator pass.",
+      "id": "queue_integrity_gap",
+      "impact_score": 95,
+      "next_safe_lane": "PROTECTED_QUEUE_ITEM_REVIEW_V1",
+      "reduces_operator_burden": true,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#queue_validation_summary",
+      "title": "Canonical queue integrity still fails the validator",
+      "why_it_matters": "A protected queue item and validator BLOCK mean the canonical queue still needs human review before anything downstream can treat it as trustworthy."
+    },
+    {
+      "approval_required": false,
+      "blocked_until": "Runtime proof gate reaches READY_FOR_HUMAN_GATE with no unsafe claims or forbidden statuses.",
+      "burden_category": "recover",
+      "domain": "proof_gate_gap",
+      "evidence": {
+        "attention_count": 2,
+        "blocker_count": 8,
+        "final_verdict": "BLOCKED",
+        "safe_next_action": "Fix the blockers before the proof chain can reach human gate review."
+      },
+      "execution_allowed": false,
+      "forbidden_shortcut": "Do not promote a blocked proof gate into a readiness claim.",
+      "id": "proof_gate_gap",
+      "impact_score": 90,
+      "next_safe_lane": "RUNTIME_PROOF_GATE_BLOCKER_TRIAGE_V1",
+      "reduces_operator_burden": true,
+      "severity": "HIGH",
+      "source": "Reports/human_gate/human_gate_packet_dogfood_report.json#runtime_proof_gate_summary",
+      "title": "Runtime proof gate remains blocked",
+      "why_it_matters": "The proof spine cannot yet support a human gate readiness claim while the runtime proof gate is blocked."
+    }
+  ],
+  "unsafe_autonomy_claim": false,
+  "unsafe_flags_detected": [],
+  "vacation_mode_complete": false,
+  "validation": {
+    "blockers": [],
+    "checked_fields": [
+      "schema",
+      "generated_at_utc",
+      "mode",
+      "reassessment_type",
+      "reassessment_status",
+      "reassessment_status_reason",
+      "repo_root",
+      "evidence_loaded",
+      "evidence_missing",
+      "top_blockers",
+      "all_gaps",
+      "blocker_rankings",
+      "readiness_scorecard",
+      "operator_burden_summary",
+      "recommended_next_lanes",
+      "not_ready_lanes",
+      "operator_control_switch_readiness",
+      "p2_enqueue_bridge_readiness",
+      "live_execution_readiness",
+      "unsafe_flags_detected",
+      "forbidden_claims_detected",
+      "approval_granted",
+      "execution_allowed",
+      "dispatch_allowed",
+      "apply_allowed",
+      "runtime_launch_allowed",
+      "queue_mutation_allowed",
+      "telemetry_mutation_allowed",
+      "scheduler_creation_allowed",
+      "service_creation_allowed",
+      "sos_allowed",
+      "live_trading_allowed",
+      "credentials_accessed",
+      "unsafe_autonomy_claim",
+      "vacation_mode_complete",
+      "safe_next_action",
+      "stop_condition",
+      "report_paths"
+    ],
+    "forbidden_claims": [
+      {
+        "path": "$.readiness_scorecard.operator_dependency_reduced.evidence.reduced_burdens[17].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.readiness_scorecard.operator_dependency_reduced.evidence.reduced_burdens[17].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.readiness_scorecard.operator_dependency_reduced.evidence.reduced_burdens[30].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.readiness_scorecard.operator_dependency_reduced.evidence.reduced_burdens[30].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.operator_dependency_summary.reduced_burdens[17].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.operator_dependency_summary.reduced_burdens[17].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.operator_dependency_summary.reduced_burdens[30].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.operator_dependency_summary.reduced_burdens[30].reduction",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.checked_fields[34]",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[0].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[0].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[1].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[1].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[2].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[2].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[3].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[3].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[4].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[4].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[5].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[5].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[6].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[6].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[7].value",
+        "value": "vacation_mode_complete"
+      },
+      {
+        "path": "$.validation.forbidden_claims[7].value",
+        "value": "vacation_mode_complete"
+      }
+    ],
+    "reassessment_status": "BLOCKED",
+    "status": "PASS",
+    "unsafe_flags": []
+  }
+}
