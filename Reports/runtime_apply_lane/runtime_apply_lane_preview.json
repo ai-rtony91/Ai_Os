@@ -1,0 +1,408 @@
+{
+  "apply_status": "INVALID",
+  "apply_status_reason": "Runtime APPLY lane preview is invalid due missing required evidence.",
+  "approval_inbox_mutation": false,
+  "approval_inbox_mutation_allowed": false,
+  "blockers": [
+    "P2 bridge is not READY_FOR_DRY_RUN_PREVIEW",
+    "queue mutation preview allowed_paths is missing",
+    "queue mutation preview forbidden_paths is missing",
+    "queue mutation approval is not explicit",
+    "queue gate validation: approval evidence is not explicit",
+    "queue gate evidence still carries invalid reasons",
+    "runtime proof final_verdict is missing"
+  ],
+  "command_queue_mutation": false,
+  "command_queue_mutation_allowed": false,
+  "credentials_accessed": false,
+  "evidence_loaded": {
+    "p2_preview": {
+      "loaded": true,
+      "path": "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_preview.json"
+    },
+    "queue_mutation_gate_preview": {
+      "loaded": true,
+      "path": "Reports\\queue_mutation_gate\\queue_mutation_gate_preview.json"
+    },
+    "runtime_proof_gate": {
+      "loaded": false,
+      "path": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json"
+    }
+  },
+  "evidence_missing": [
+    "runtime_proof_gate"
+  ],
+  "execution_projection": {
+    "approval_inbox_mutation": false,
+    "command_queue_mutation": false,
+    "queue_mutation": false,
+    "runtime_execution": false,
+    "runtime_launch": false,
+    "scheduler_registration": false,
+    "sos_notification": false,
+    "trading_execution": false,
+    "worker_inbox_mutation": false,
+    "would_apply": false,
+    "would_execute": false,
+    "would_route": false
+  },
+  "generated_at_utc": "2026-06-10T22:43:49Z",
+  "invalid_reasons": [
+    "missing required evidence: runtime_proof_gate"
+  ],
+  "live_trading_allowed": false,
+  "mode": "DRY_RUN_PREVIEW_ONLY",
+  "p2_preview": {
+    "allowed_paths": [
+      "automation/orchestration/work_packets/"
+    ],
+    "bridge_status": "BLOCKED",
+    "bridge_validation_status": "PASS",
+    "forbidden_paths": [
+      "automation/orchestration/work_packets/active/",
+      "automation/orchestration/work_packets/blocked/",
+      "automation/orchestration/work_packets/complete/",
+      "automation/orchestration/workers/inbox/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/command_queue/",
+      "telemetry/",
+      "services/",
+      "apps/",
+      "aios/modules/trader/",
+      "aios.ps1"
+    ],
+    "lane_id": "p2_review_to_queue_enqueue_bridge",
+    "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1"
+  },
+  "queue_mutation": false,
+  "queue_mutation_allowed": false,
+  "queue_mutation_gate_preview": {
+    "allowed_paths": [],
+    "approval_evidence_present": true,
+    "explicit_approval": false,
+    "forbidden_paths": [],
+    "gate_status": "INVALID",
+    "lane": "p2_review_to_queue_enqueue_bridge",
+    "mode": "DRY_RUN_PREVIEW_ONLY",
+    "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "target_paths": [],
+    "validation_status": "PASS"
+  },
+  "repo_root": "C:/Dev/Ai.Os",
+  "report_paths": [
+    "C:\\Dev\\Ai.Os\\Reports\\runtime_apply_lane\\runtime_apply_lane_preview.json",
+    "C:\\Dev\\Ai.Os\\Reports\\runtime_apply_lane\\runtime_apply_lane_summary.md"
+  ],
+  "route_targets": {
+    "protected": [
+      "automation/orchestration/work_packets/active/",
+      "automation/orchestration/work_packets/blocked/",
+      "automation/orchestration/work_packets/complete/",
+      "automation/orchestration/workers/inbox/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/command_queue/",
+      "telemetry/",
+      "services/",
+      "apps/",
+      "aios/modules/trader/",
+      "aios.ps1"
+    ],
+    "source": [
+      "automation/orchestration/work_packets/"
+    ]
+  },
+  "runtime_execution": false,
+  "runtime_execution_allowed": false,
+  "runtime_launch": false,
+  "runtime_launch_allowed": false,
+  "runtime_mutation_allowed": false,
+  "runtime_proof_gate": {
+    "approval_granted": null,
+    "execution_allowed": null,
+    "final_verdict": "",
+    "human_gate_ready": false,
+    "live_trading_allowed": null,
+    "runtime_launch_allowed": null,
+    "runtime_mutation_allowed": null,
+    "scheduler_creation_allowed": null,
+    "sos_allowed": null,
+    "vacation_mode_complete": null
+  },
+  "safe_next_action": "Repair evidence and rerun preview.",
+  "scheduler_creation_allowed": false,
+  "scheduler_registration": false,
+  "schema": "AIOS_RUNTIME_APPLY_LANE_PREVIEW.v1",
+  "sos_allowed": false,
+  "sos_notification": false,
+  "source_fingerprints": [
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "C:/Dev/Ai.Os/Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
+      "sha256": "6fab8056b09e8c795e64949a7a0a6fe93286f3aa710596604afa2eac2f30669d",
+      "size": 8330
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "C:/Dev/Ai.Os/Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+      "sha256": "aa867c3bf9d210cef06fd600c485004b696f564e706f0e3ee141540cd58fb7e8",
+      "size": 4358
+    },
+    {
+      "exists": false,
+      "is_file": false,
+      "path": "C:/Dev/Ai.Os/Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
+      "sha256": null,
+      "size": null
+    },
+    {
+      "exists": true,
+      "files": [
+        {
+          "path": ".gitkeep",
+          "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+          "size": 2
+        }
+      ],
+      "is_dir": true,
+      "path": "C:/Dev/Ai.Os/automation/orchestration/work_packets/active"
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "C:/Dev/Ai.Os/automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json",
+      "sha256": "2beff4de814cf2ceddc0c01065341672bfdb854dafb7002439719989b3ca8442",
+      "size": 1589
+    },
+    {
+      "exists": true,
+      "files": [
+        {
+          "path": "AIOS_APPROVAL_QUEUE.example.json",
+          "sha256": "d553e811dd0689580fb1ee6cfa9b1d4cdaec7fa5c4534fe8b1bab3e2074274e0",
+          "size": 1576
+        },
+        {
+          "path": "APPLY_APPROVAL_GATE_001.json",
+          "sha256": "3053151fa37c66cb0f02dfaec81664022eb6081309f00536821938b8750670d8",
+          "size": 3240
+        },
+        {
+          "path": "APPROVAL_INBOX_001.json",
+          "sha256": "b9e0d9dae3759084de1a2da81591b89487916db2636606b7b698d28f5cc9fe11",
+          "size": 2606
+        },
+        {
+          "path": "APPROVAL_STATUS_RULES_001.md",
+          "sha256": "2508aedcbfc00b569d3f3b7be4a4fa4d6a5176421642787eb80975f18437f67e",
+          "size": 1511
+        },
+        {
+          "path": "archive/.gitkeep",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "size": 0
+        },
+        {
+          "path": "archive/APPLY_APPROVAL_GATE_001.json",
+          "sha256": "b2f0a10f8fbb4780e6fc41d91d4e2b1737425b8d6d1055d0f7a4b60d3c966612",
+          "size": 1622
+        },
+        {
+          "path": "archive/APPROVAL_INBOX_001.json",
+          "sha256": "113571947363ee65c1595ae2ac75c07373f26730d807b8082c1e485f1067043c",
+          "size": 1641
+        },
+        {
+          "path": "Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
+          "sha256": "e67c0a0cee29a5b30c567df97fc39de8aa3c9872fe06b9aaaf053826f0ec5573",
+          "size": 5445
+        },
+        {
+          "path": "Invoke-AiOsApprovalChain.DRY_RUN.ps1",
+          "sha256": "78ee2e21c4aefecca49956229683dfbd9452c0812cc0a557e015b953fe6fe565",
+          "size": 5928
+        },
+        {
+          "path": "New-AiOsPacketApprovalRequest.DRY_RUN.ps1",
+          "sha256": "6a43e7cda13ec335fb7b29cace5be2b9e48cfd72824c20709bacad128614f501",
+          "size": 2397
+        }
+      ],
+      "is_dir": true,
+      "path": "C:/Dev/Ai.Os/automation/orchestration/approval_inbox"
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "C:/Dev/Ai.Os/automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json",
+      "sha256": "9ca915cc75bd95a69f29ef1c4606beacb6f786d881938ee673dbe7292c912563",
+      "size": 847
+    },
+    {
+      "exists": true,
+      "files": [
+        {
+          "path": "autonomousRemediation.ts",
+          "sha256": "41a5a672bce5ab152357ddb03a70904ddeacc79df2cd07a7367f30c7f43bea16",
+          "size": 2203
+        },
+        {
+          "path": "eventBus.ts",
+          "sha256": "f839ae1c617ccf7af74a0fd90fe4b5ae85aefa3e435bfdd89bdf18e7c23a5ef3",
+          "size": 1649
+        },
+        {
+          "path": "index.ts",
+          "sha256": "92c3f977adacf589d3b4f5a259bdaa94eecd23865cee5d264e1506eb71039b3e",
+          "size": 963
+        },
+        {
+          "path": "runtimeAutomationDispatcher.ts",
+          "sha256": "a12641eaaed5f5df23e86262ff3125564fc9603c007cf31836bf8f912eac00aa",
+          "size": 8481
+        },
+        {
+          "path": "runtimeAutomationExecutor.ts",
+          "sha256": "a3d157876d93b3c248b887bf533b6b9298b27b954bc3c5c2a2bbb73c1ffa97ab",
+          "size": 7356
+        },
+        {
+          "path": "runtimeAutomationHandlers.ts",
+          "sha256": "b0092bc80dd9226edf4a0d5091a164b0e7848dc995fbe3fc6b670abb4a6ba660",
+          "size": 2460
+        },
+        {
+          "path": "runtimeBackpressure.ts",
+          "sha256": "a4b1eb9bbea7422dfc9f4037f5af4adb181ca6cc0135b240111ebf3f9a799104",
+          "size": 2101
+        },
+        {
+          "path": "runtimeBootstrap.js",
+          "sha256": "299aab9ed7218ea346ceabc82bdd10bc649a1f2e16c9705f03df9be5f6983468",
+          "size": 6364
+        },
+        {
+          "path": "runtimeContext.ts",
+          "sha256": "438dffe4067c62204a8d94e47831bcd339cb68371170f043a7264078b59dcd61",
+          "size": 1525
+        },
+        {
+          "path": "runtimeLoop.ts",
+          "sha256": "6686928005ac0d7519c02ab1604268b0e2d96df4bae99973b5befe617a0e4549",
+          "size": 2564
+        },
+        {
+          "path": "runtimeStateStore.js",
+          "sha256": "032bc311fcdeae45a447b2649a2f4a3e2c29979ca62e502761c858a9f1cc673e",
+          "size": 1888
+        },
+        {
+          "path": "runtimeTick.ts",
+          "sha256": "b5a0c9372be8af3bcfc79374d9389c4c30277ed12cd7808c2bb5712a07ddda20",
+          "size": 3342
+        }
+      ],
+      "is_dir": true,
+      "path": "C:/Dev/Ai.Os/services/runtime"
+    },
+    {
+      "exists": true,
+      "files": [
+        {
+          "path": "runtime_heartbeat.json",
+          "sha256": "6b99553354b5b1350855833c5ec8210beda771497bd75d46e15a315f8446079c",
+          "size": 282
+        },
+        {
+          "path": "runtime_process.json",
+          "sha256": "dfc642a055a13f78c339db4cba920ebd57d9b29c0bdf7ff2673f3d789be3b3e4",
+          "size": 230
+        },
+        {
+          "path": "runtime_state.json",
+          "sha256": "519aa74a2666afdbddc14fa5c0daa5ceb709691701793155ac91a5d955345b54",
+          "size": 8358
+        }
+      ],
+      "is_dir": true,
+      "path": "C:/Dev/Ai.Os/telemetry/runtime"
+    },
+    {
+      "exists": true,
+      "files": [
+        {
+          "path": ".gitkeep",
+          "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+          "size": 2
+        }
+      ],
+      "is_dir": true,
+      "path": "C:/Dev/Ai.Os/automation/orchestration/work_packets/active"
+    }
+  ],
+  "stop_condition": "Stop before writing to active queue, worker inbox, approval inbox, command queue, telemetry, scheduler, SOS, services, or runtime.",
+  "summary": {
+    "apply_status": "INVALID",
+    "blocked_count": 7,
+    "invalid_reason_count": 1,
+    "p2_bridge_status": "BLOCKED",
+    "queue_gate_status": "INVALID",
+    "runtime_execution": false,
+    "runtime_launch": false,
+    "runtime_proof_verdict": "",
+    "safe_next_action": "Repair evidence and rerun preview.",
+    "would_apply": false,
+    "would_execute": false,
+    "would_route": false
+  },
+  "telemetry_mutation_allowed": false,
+  "trading_execution": false,
+  "validation": {
+    "apply_status": "INVALID",
+    "blockers": [],
+    "checked_fields": [
+      "schema",
+      "mode",
+      "generated_at_utc",
+      "repo_root",
+      "apply_status",
+      "evidence_missing",
+      "p2_preview",
+      "queue_mutation_gate_preview",
+      "runtime_proof_gate",
+      "worker_availability_preview",
+      "route_targets",
+      "blockers",
+      "invalid_reasons",
+      "would_apply",
+      "would_route",
+      "would_execute",
+      "runtime_launch",
+      "runtime_execution",
+      "queue_mutation",
+      "worker_inbox_mutation",
+      "approval_inbox_mutation",
+      "command_queue_mutation",
+      "scheduler_registration",
+      "sos_notification",
+      "trading_execution",
+      "safe_next_action",
+      "stop_condition",
+      "report_paths"
+    ],
+    "status": "PASS",
+    "unsafe_flags": []
+  },
+  "worker_availability_preview": {
+    "path_targets": [],
+    "previewed": true,
+    "protected_targets": []
+  },
+  "worker_inbox_mutation": false,
+  "worker_inbox_mutation_allowed": false,
+  "would_apply": false,
+  "would_execute": false,
+  "would_route": false
+}
