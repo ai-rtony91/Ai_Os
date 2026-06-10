@@ -1,14 +1,19 @@
-"""Observe-only AI_OS self-build decision cycle.
+"""Compatibility wrapper for the canonical self-build cycle modules.
 
-This module connects the existing self-build recommendation model to a single
-bounded decision cycle. It never executes commands, dispatches workers, mutates
-protected loop state, or approves protected actions.
+Canonical ownership lives in:
+- automation/orchestration/autonomy_control_plane/aios_self_build_cycle_composer.py
+- automation/orchestration/autonomy_reports/aios_self_build_evidence_persister.py
+
+This file exists only so the PowerShell control plane and older callers can keep
+invoking automation/self_build/aios_self_build_cycle.py. It composes no separate
+self-build decision logic and persists no evidence with a local persister.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -17,164 +22,128 @@ REPO_IMPORT_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_IMPORT_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_IMPORT_ROOT))
 
-from automation.bridge.aios_self_build_model import build_recommendations
-from automation.bridge.aios_status_model import capture_repo_snapshot, read_json_if_exists, utc_now, write_json, write_markdown
-
-
-DEFAULT_INPUT_ROOT = Path("Reports/generated/phase_0_to_4_bridge")
-DEFAULT_OUTPUT_ROOT = Path("Reports/self_build_cycle")
-REQUIRED_INPUTS = {
-    "phase0": "phase0_infrastructure_inventory.json",
-    "phase1": "phase1_wiring_map.json",
-    "phase2": "phase2_approval_compressor_result.json",
-    "phase3": "phase3_governance_enforcement.json",
-}
-BLOCKED_TERMS = (
-    "merge",
-    "apply",
-    "broker",
-    "live",
-    "secret",
-    "order execution",
-    "real order",
-    "powershell",
-    "cmd.exe",
-    "bash",
+from automation.orchestration.autonomy_control_plane.aios_self_build_cycle_composer import (
+    decide_self_build_cycle as canonical_decide_self_build_cycle,
+)
+from automation.orchestration.autonomy_reports.aios_self_build_evidence_persister import (
+    persist_cycle_evidence as canonical_persist_cycle_evidence,
 )
 
 
-def _safe_action_text(text: str) -> bool:
-    lowered = text.lower()
-    return not any(term in lowered for term in BLOCKED_TERMS)
+DEFAULT_OUTPUT_ROOT = Path("Reports/self_build_cycle")
+BLOCKED_CAPABILITIES = [
+    "command_execution",
+    "worker_dispatch",
+    "protected_loop_mutation",
+    "production_trading",
+    "external_connector_enablement",
+    "secret_printing",
+    "protected_repository_promotion",
+]
 
 
-def _read_inputs(repo_root: Path, input_root: Path) -> tuple[dict[str, Any], list[str]]:
-    loaded: dict[str, Any] = {}
-    missing: list[str] = []
-    for key, file_name in REQUIRED_INPUTS.items():
-        path = repo_root / input_root / file_name
-        payload = read_json_if_exists(path)
-        if payload is None:
-            missing.append(str(input_root / file_name).replace("\\", "/"))
-            loaded[key] = None
-        else:
-            loaded[key] = payload
-    return loaded, missing
-
-
-def _decision_label(missing_inputs: list[str], recommendations: list[dict[str, Any]]) -> str:
-    if missing_inputs:
-        return "BLOCKED_MISSING_INPUTS"
-    if any(item.get("status") == "BLOCKED" for item in recommendations):
+def _legacy_decision_label(cycle: dict[str, Any]) -> str:
+    action = str((cycle.get("decision") or {}).get("action") or "")
+    if action in {"HOLD_BLOCKED", "FIX_TRUST_FAILURE", "BLOCKED_MALFORMED_INPUT"}:
+        return "HUMAN_REQUIRED"
+    if bool(cycle.get("requires_human", True)):
         return "PROTECTED_ACTION_REQUIRED"
-    if recommendations:
-        return "READY_FOR_HUMAN_REVIEW"
-    return "NO_ACTION_RECOMMENDED"
+    if action == "NO_ACTION":
+        return "NO_ACTION_RECOMMENDED"
+    return action or "HUMAN_REQUIRED"
 
 
-def _render_markdown(payload: dict[str, Any]) -> dict[str, object]:
-    return {
-        "SUMMARY": "Observe-only self-build cycle completed without executing decision output.",
-        "DECISION LABEL": payload["decision_label"],
-        "MODE": payload["mode"],
-        "REQUIRES HUMAN": payload["requires_human"],
-        "SAFETY STATUS": payload["safety_status"],
-        "MISSING INPUTS": payload["missing_inputs"],
-        "RECOMMENDATION COUNT": payload["recommendation_count"],
-        "EVIDENCE PATH": payload["evidence_path"],
-        "SAFE NEXT ACTION": payload["safe_next_action"],
-    }
+def _legacy_safety_status(cycle: dict[str, Any]) -> str:
+    if cycle.get("mode") == "DRY_RUN" and cycle.get("executed") is False:
+        return "SAFE_OBSERVE_ONLY"
+    return "BLOCKED_UNSAFE_CYCLE"
 
 
-def persist_evidence_bundle(repo_root: Path, output_root: Path, payload: dict[str, Any]) -> Path:
-    """Persist the self-build cycle evidence bundle and markdown companion."""
-    evidence_path = repo_root / output_root / "latest_self_build_cycle.evidence.json"
-    report_path = repo_root / output_root / "latest_self_build_cycle.report.md"
-    payload["evidence_path"] = str(evidence_path)
-    payload["report_path"] = str(report_path)
-    write_json(evidence_path, payload)
-    write_markdown(report_path, "AI_OS Self-Build Observe-Only Cycle", _render_markdown(payload))
-    return evidence_path
+def _copy_if_written(src: str | None, dst: Path) -> str | None:
+    if not src:
+        return None
+    source = Path(src)
+    if not source.exists():
+        return str(source)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, dst)
+    return str(dst)
 
 
 def decide_self_build_cycle(
     repo_root: Path,
     mode: str = "DRY_RUN",
-    input_root: Path = DEFAULT_INPUT_ROOT,
+    input_root: Path | None = None,
     output_root: Path = DEFAULT_OUTPUT_ROOT,
 ) -> dict[str, Any]:
+    """Run the canonical observe-only cycle and adapt it for legacy callers."""
     if mode != "DRY_RUN":
         raise ValueError("Only DRY_RUN mode is supported for self-build cycle decisions.")
 
-    now = utc_now()
-    snapshot = capture_repo_snapshot(repo_root)
-    inputs, missing_inputs = _read_inputs(repo_root, input_root)
-    phase0 = inputs.get("phase0") if isinstance(inputs.get("phase0"), dict) else {}
-    recommendations = [item.to_dict() for item in build_recommendations(now, phase0)]
-    unsafe_emitted_actions = [str(item) for item in [] if not _safe_action_text(str(item))]
-    decision_label = _decision_label(missing_inputs, recommendations)
-    requires_human = bool(missing_inputs or recommendations)
-    safety_status = "SAFE_OBSERVE_ONLY" if not unsafe_emitted_actions else "BLOCKED_UNSAFE_ACTION_TEXT"
-    can_advance = not missing_inputs and not unsafe_emitted_actions and decision_label == "READY_FOR_HUMAN_REVIEW"
+    inventory: dict[str, Any] = {}
+    if input_root is not None:
+        inventory["input_root"] = str(input_root)
 
-    payload: dict[str, Any] = {
-        "schema_version": "AIOS-SELF-BUILD-CYCLE-EVIDENCE-V1",
-        "created_at_utc": now,
-        "mode": mode,
-        "decision_label": decision_label,
-        "requires_human": requires_human,
-        "safety_status": safety_status,
-        "can_advance": can_advance,
-        "repo": {
-            "root": snapshot.repo_root,
-            "branch": snapshot.branch,
-            "dirty_files": snapshot.dirty_files,
+    cycle = canonical_decide_self_build_cycle(
+        inventory=inventory,
+        control_plane_report={},
+        router_report={},
+        completion_inputs={},
+        repo_root=repo_root,
+    )
+    persisted = canonical_persist_cycle_evidence(
+        cycle,
+        output_dir=repo_root / output_root,
+        write_markdown=True,
+        overwrite=True,
+    )
+
+    evidence_path = _copy_if_written(
+        persisted.get("json_path"),
+        repo_root / output_root / "latest_self_build_cycle.evidence.json",
+    )
+    report_path = _copy_if_written(
+        persisted.get("md_path"),
+        repo_root / output_root / "latest_self_build_cycle.report.md",
+    )
+
+    decision = cycle.get("decision") or {}
+    emitted_actions: list[object] = []
+    return {
+        "schema_version": "AIOS-SELF-BUILD-CYCLE-WRAPPER-V1",
+        "cycle_id": cycle.get("cycle_id"),
+        "created_at_utc": cycle.get("generated_at"),
+        "mode": cycle.get("mode", "DRY_RUN"),
+        "decision": decision,
+        "decision_label": _legacy_decision_label(cycle),
+        "requires_human": True,
+        "safety_status": _legacy_safety_status(cycle),
+        "can_advance": False,
+        "emitted_actions": emitted_actions,
+        "blocked_capabilities": BLOCKED_CAPABILITIES,
+        "canonical_modules": {
+            "composer": "automation/orchestration/autonomy_control_plane/aios_self_build_cycle_composer.py",
+            "persister": "automation/orchestration/autonomy_reports/aios_self_build_evidence_persister.py",
         },
-        "inputs": {
-            key: {
-                "path": str(input_root / REQUIRED_INPUTS[key]).replace("\\", "/"),
-                "loaded": value is not None,
-            }
-            for key, value in inputs.items()
-        },
-        "missing_inputs": missing_inputs,
-        "recommendation_count": len(recommendations),
-        "recommendations": recommendations,
-        "unsafe_emitted_actions": unsafe_emitted_actions,
-        "emitted_actions": [],
-        "blocked_capabilities": [
-            "command_execution",
-            "worker_dispatch",
-            "protected_loop_mutation",
-            "production_trading",
-            "external_connector_enablement",
-            "secret_printing",
-            "protected_repository_promotion",
-        ],
-        "safe_next_action": (
-            "Review missing self-build inputs before advancing."
-            if missing_inputs
-            else "Human review required before any protected decision advances."
-        ),
-        "evidence_path": None,
-        "report_path": None,
+        "canonical_persist_result": persisted,
+        "evidence_path": evidence_path,
+        "report_path": report_path,
+        "safe_next_action": "Human review required before any protected decision advances.",
     }
-    persist_evidence_bundle(repo_root, output_root, payload)
-    return payload
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run one observe-only AI_OS self-build decision cycle.")
+    parser = argparse.ArgumentParser(description="Run the canonical observe-only AI_OS self-build decision cycle.")
     parser.add_argument("--mode", choices=["DRY_RUN"], default="DRY_RUN")
     parser.add_argument("--repo-root", default=".")
-    parser.add_argument("--input-root", default=str(DEFAULT_INPUT_ROOT))
+    parser.add_argument("--input-root", default=None)
     parser.add_argument("--output-root", default=str(DEFAULT_OUTPUT_ROOT))
     args = parser.parse_args()
 
     payload = decide_self_build_cycle(
         Path(args.repo_root).resolve(),
         mode=args.mode,
-        input_root=Path(args.input_root),
+        input_root=Path(args.input_root) if args.input_root else None,
         output_root=Path(args.output_root),
     )
     print(json.dumps(payload, indent=2, sort_keys=True))
