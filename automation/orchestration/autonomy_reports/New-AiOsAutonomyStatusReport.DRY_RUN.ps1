@@ -3,6 +3,7 @@ param(
     [string]$ControlPlaneEvidencePath = "",
     [string]$RouterEvidencePath = "",
     [string]$WorkerChannelMapPath = "",
+    [string]$SelfBuildEvidencePath = "Reports/self_build_cycle/latest_self_build_cycle.evidence.json",
     [string]$OutputMarkdownPath = "Reports/autonomy_control_plane/autonomy_status_report.md",
     [string]$OutputJsonPath = "Reports/autonomy_control_plane/autonomy_status_report.json"
 )
@@ -20,7 +21,7 @@ function Get-AiOsRepoRoot {
 
 function Resolve-AiOsPath {
     param(
-        [Parameter(Mandatory = $true)][string]$PathHint,
+        [string]$PathHint,
         [Parameter(Mandatory = $true)][string]$RepoRoot
     )
 
@@ -36,7 +37,7 @@ function Resolve-AiOsPath {
 }
 
 function Read-JsonOrNull {
-    param([Parameter(Mandatory = $true)][string]$Path)
+    param([string]$Path)
     if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         return $null
     }
@@ -76,6 +77,61 @@ function ConvertTo-BoolText {
     return "NO"
 }
 
+function Invoke-SelfBuildDecisionConsumerReadOnly {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRoot,
+        [Parameter(Mandatory = $true)][string]$EvidencePath
+    )
+
+    $consumerPath = Join-Path $RepoRoot "automation/orchestration/autonomy_control_plane/aios_self_build_decision_consumer.py"
+    if (-not (Test-Path -LiteralPath $consumerPath -PathType Leaf)) {
+        return [ordered]@{
+            available = $false
+            normalized_status = "UNAVAILABLE"
+            operator_route = "REPORT_ONLY"
+            approval_required = $false
+            report_only = $true
+            safe_next_action = "Self-build decision consumer is unavailable; continue with existing autonomy status only."
+            source_evidence_path = $EvidencePath
+            source_cycle_id = $null
+        }
+    }
+
+    try {
+        $rawOutput = & python $consumerPath --evidence $EvidencePath 2>$null
+        $exitCode = $LASTEXITCODE
+        $jsonText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($jsonText)) {
+            throw "consumer produced no JSON output; exit_code=$exitCode"
+        }
+        $readout = $jsonText | ConvertFrom-Json
+        return [ordered]@{
+            available = $true
+            normalized_status = [string]$readout.normalized_status
+            operator_route = [string]$readout.operator_route
+            approval_required = [bool]$readout.approval_required
+            report_only = [bool]$readout.report_only
+            safe_next_action = [string]$readout.safe_next_action
+            source_evidence_path = [string]$readout.source_evidence_path
+            source_cycle_id = $readout.source_cycle_id
+            source_runtime_gate = $readout.source_runtime_gate
+            source_completion_verdict = $readout.source_completion_verdict
+        }
+    } catch {
+        return [ordered]@{
+            available = $false
+            normalized_status = "REVIEW_REQUIRED"
+            operator_route = "APPROVAL_REVIEW_REQUIRED"
+            approval_required = $true
+            report_only = $true
+            safe_next_action = "Review self-build decision consumer failure before relying on autonomy status."
+            source_evidence_path = $EvidencePath
+            source_cycle_id = $null
+            reason = $_.Exception.Message
+        }
+    }
+}
+
 try {
     $repoRoot = Get-AiOsRepoRoot
     Set-Location -Path $repoRoot
@@ -85,11 +141,13 @@ try {
     $controlPath = Resolve-AiOsPath -PathHint $ControlPlaneEvidencePath -RepoRoot $repoRoot
     $routerPath = Resolve-AiOsPath -PathHint $RouterEvidencePath -RepoRoot $repoRoot
     $channelPath = Resolve-AiOsPath -PathHint $WorkerChannelMapPath -RepoRoot $repoRoot
+    $selfBuildEvidencePath = Resolve-AiOsPath -PathHint $SelfBuildEvidencePath -RepoRoot $repoRoot
 
     $discovery = Read-JsonOrNull -Path $discoveryPath
     $control = Read-JsonOrNull -Path $controlPath
     $router = Read-JsonOrNull -Path $routerPath
     $channels = Read-JsonOrNull -Path $channelPath
+    $selfBuildDecision = Invoke-SelfBuildDecisionConsumerReadOnly -RepoRoot $repoRoot -EvidencePath $selfBuildEvidencePath
 
     $controlStatus = if ($control -and $control.status) { [string]$control.status } else { "UNKNOWN" }
     $routerAction = if ($router -and $router.next_action) { [string]$router.next_action } else { "UNKNOWN" }
@@ -115,7 +173,6 @@ try {
     if ($controlStatus -eq "BLOCKED") {
         $blockers.Add([ordered]@{ item = "control_plane"; reason = "control plane reported BLOCKED"; source = $controlPath })
     }
-
     $controlsReady = @("READY_FOR_CODEX", "PROTECTED_ACTION_REQUIRED", "SOS_REQUIRED")
     $canAct = [System.Collections.Generic.List[object]]::new()
     $requireApproval = [System.Collections.Generic.List[object]]::new()
@@ -159,9 +216,23 @@ try {
             control_plane_evidence = if ($controlPath) { $controlPath } else { $null }
             router_evidence = if ($routerPath) { $routerPath } else { $null }
             worker_channel_map = if ($channelPath) { $channelPath } else { $null }
+            self_build_evidence = if ($selfBuildEvidencePath) { $selfBuildEvidencePath } else { $null }
         }
         control_status = $controlStatus
         next_action = $routerAction
+        self_build_decision = $selfBuildDecision
+        self_build_decision_available = [bool]$selfBuildDecision.available
+        self_build_decision_status = [string]$selfBuildDecision.normalized_status
+        self_build_operator_route = [string]$selfBuildDecision.operator_route
+        self_build_approval_required = [bool]$selfBuildDecision.approval_required
+        self_build_report_only = [bool]$selfBuildDecision.report_only
+        self_build_safe_next_action = [string]$selfBuildDecision.safe_next_action
+        self_build_source_evidence_path = [string]$selfBuildDecision.source_evidence_path
+        self_build_source_cycle_id = $selfBuildDecision.source_cycle_id
+        approvals_performed = "NO"
+        approval_inbox_mutated = "NO"
+        apply_gate_mutated = "NO"
+        protected_action_allowed = "NO"
         can_autonomously_do_next = @($canAct)
         requires_anthony_approval = @($requireApproval)
         forex_builder_readiness = [ordered]@{
@@ -191,6 +262,23 @@ try {
 - Control status: $($summary.control_status)
 - Router next action: $($summary.next_action)
 - Forex builder readiness: $($summary.forex_builder_readiness.status) (score: $($summary.forex_builder_readiness.readiness_score))
+
+## Self-build decision consumer
+
+- Available: $(ConvertTo-BoolText -Value $summary.self_build_decision_available)
+- Status: $($summary.self_build_decision_status)
+- Operator route: $($summary.self_build_operator_route)
+- Approval required: $(ConvertTo-BoolText -Value $summary.self_build_approval_required)
+- Report only: $(ConvertTo-BoolText -Value $summary.self_build_report_only)
+- Source cycle ID: $($summary.self_build_source_cycle_id)
+- Safe next action: $($summary.self_build_safe_next_action)
+
+## Approval safety visibility
+
+- approvals_performed: $($summary.approvals_performed)
+- approval_inbox_mutated: $($summary.approval_inbox_mutated)
+- apply_gate_mutated: $($summary.apply_gate_mutated)
+- protected_action_allowed: $($summary.protected_action_allowed)
 
 ## What AI_OS can do automatically next
 @" + (

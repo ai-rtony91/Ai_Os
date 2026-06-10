@@ -22,6 +22,43 @@ function Read-JsonFile {
     }
 }
 
+function Get-SelfBuildDecisionReadout {
+    $consumerPath = "automation/orchestration/autonomy_control_plane/aios_self_build_decision_consumer.py"
+    $evidencePath = "Reports/self_build_cycle/latest_self_build_cycle.evidence.json"
+    if (-not (Test-Path -LiteralPath $consumerPath -PathType Leaf)) {
+        return [ordered]@{
+            status = "UNAVAILABLE"
+            operator_route = "REPORT_ONLY"
+            approval_required = $false
+            report_only = $true
+            safe_next_action = "Self-build decision consumer is unavailable; run the autonomy status report."
+        }
+    }
+    try {
+        $rawOutput = & python $consumerPath --evidence $evidencePath 2>$null
+        $jsonText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($jsonText)) {
+            throw "consumer produced no JSON output"
+        }
+        $readout = $jsonText | ConvertFrom-Json
+        return [ordered]@{
+            status = [string]$readout.normalized_status
+            operator_route = [string]$readout.operator_route
+            approval_required = [bool]$readout.approval_required
+            report_only = [bool]$readout.report_only
+            safe_next_action = [string]$readout.safe_next_action
+        }
+    } catch {
+        return [ordered]@{
+            status = "REVIEW_REQUIRED"
+            operator_route = "APPROVAL_REVIEW_REQUIRED"
+            approval_required = $true
+            report_only = $true
+            safe_next_action = "Review self-build decision consumer failure before choosing the next command."
+        }
+    }
+}
+
 $runtimeStatePath = "automation/runtime/state/AIOS_RUNTIME_STATE.json"
 $activePacketRoot = "automation/orchestration/work_packets/active"
 $validatorRoots = @(
@@ -31,6 +68,7 @@ $validatorRoots = @(
 )
 
 $runtimeState = Read-JsonFile -Path $runtimeStatePath
+$selfBuildDecision = Get-SelfBuildDecisionReadout
 $gitStatus = @(git status --short)
 $activePackets = @()
 if (Test-Path -LiteralPath $activePacketRoot -PathType Container) {
@@ -115,6 +153,15 @@ $result = [ordered]@{
     runtime_health = $runtimeHealth
     active_packet_count = $activePackets.Count
     repo_clean = ($gitStatus.Count -eq 0)
+    self_build_decision_status = $selfBuildDecision.status
+    self_build_operator_route = $selfBuildDecision.operator_route
+    self_build_approval_required = $selfBuildDecision.approval_required
+    self_build_report_only = $selfBuildDecision.report_only
+    self_build_safe_next_action = $selfBuildDecision.safe_next_action
+    approvals_performed = "NO"
+    approval_inbox_mutated = "NO"
+    apply_gate_mutated = "NO"
+    protected_action_allowed = "NO"
     commit_performed = "NO"
     push_performed = "NO"
 }
@@ -134,5 +181,17 @@ Write-Host "SAFE TO RUN:"
 Write-Host $result.safe_to_run
 Write-Host "APPROVAL REQUIRED:"
 Write-Host $result.approval_required
+Write-Host "SELF-BUILD DECISION:"
+Write-Host $result.self_build_decision_status
+Write-Host "SELF-BUILD ROUTE:"
+Write-Host $result.self_build_operator_route
+Write-Host "SELF-BUILD APPROVAL REQUIRED:"
+Write-Host $result.self_build_approval_required
+Write-Host "SELF-BUILD SAFE NEXT ACTION:"
+Write-Host $result.self_build_safe_next_action
+Write-Host "Approvals performed: NO"
+Write-Host "Approval inbox mutated: NO"
+Write-Host "Apply gate mutated: NO"
+Write-Host "Protected action allowed: NO"
 Write-Host "Commit performed: NO"
 Write-Host "Push performed: NO"
