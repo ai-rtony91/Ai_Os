@@ -1,0 +1,212 @@
+{
+  "apply_allowed": false,
+  "approval_granted": false,
+  "autonomy_gap_evidence_summary": {
+    "live_execution_ready": "BLOCKED",
+    "p2_enqueue_bridge_readiness": "BLOCKED",
+    "reassessment_status": "BLOCKED",
+    "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1"
+  },
+  "bridge_blockers": [
+    "human gate dogfood status is BLOCKED",
+    "autonomy gap reassessment status is BLOCKED",
+    "queue validation is BLOCK",
+    "runtime proof gate is BLOCKED",
+    "human gate packet is BLOCKED",
+    "autonomy gap marks P2 enqueue bridge as BLOCKED"
+  ],
+  "bridge_status": "BLOCKED",
+  "bridge_status_reason": "P2 enqueue bridge remains blocked by current evidence.",
+  "bridge_type": "p2_enqueue_bridge",
+  "credentials_accessed": false,
+  "dispatch_allowed": false,
+  "evidence_loaded": {
+    "autonomy_gap_report": {
+      "loaded": true,
+      "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json"
+    },
+    "autonomy_gap_summary": {
+      "loaded": true,
+      "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_summary.md"
+    },
+    "human_gate_report": {
+      "loaded": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_report.json"
+    },
+    "human_gate_summary": {
+      "loaded": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_summary.md"
+    }
+  },
+  "evidence_missing": [],
+  "execution_allowed": false,
+  "generated_at_utc": "2026-06-10T21:12:42Z",
+  "human_gate_evidence_summary": {
+    "dogfood_status": "BLOCKED",
+    "human_gate_packet_status": "BLOCKED",
+    "mutated_source_count": 0,
+    "mutation_check_status": "PASS",
+    "queue_validation_status": "BLOCK",
+    "runtime_proof_gate_status": "BLOCKED"
+  },
+  "invalid_reasons": [],
+  "live_trading_allowed": false,
+  "mode": "DRY_RUN",
+  "proposed_queue_item_preview": {
+    "active_packet_write_allowed": false,
+    "apply_allowed": false,
+    "bridge_blockers": [
+      "human gate dogfood status is BLOCKED",
+      "autonomy gap reassessment status is BLOCKED",
+      "queue validation is BLOCK",
+      "runtime proof gate is BLOCKED",
+      "human gate packet is BLOCKED",
+      "autonomy gap marks P2 enqueue bridge as BLOCKED"
+    ],
+    "canonical_queue_write_allowed": false,
+    "consumer": "canonical_runtime_execution_queue_preview_only",
+    "dispatch_allowed": false,
+    "enqueue_allowed": false,
+    "evidence_status": {
+      "dogfood_status": "BLOCKED",
+      "human_gate_packet_status": "BLOCKED",
+      "p2_enqueue_bridge_readiness": "BLOCKED",
+      "queue_validation_status": "BLOCK",
+      "reassessment_status": "BLOCKED",
+      "runtime_proof_gate_status": "BLOCKED"
+    },
+    "generated_at_utc": "2026-06-10T21:12:42Z",
+    "invalid_reasons": [],
+    "lane_id": "p2_review_to_queue_enqueue_bridge",
+    "live_trading_allowed": false,
+    "mode": "DRY_RUN_PREVIEW_ONLY",
+    "preview_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "preview_state": "PREVIEW_BLOCKED",
+    "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "runtime_execution_allowed": false,
+    "safe_next_action": "Review this preview; a separate approved packet is required before any real enqueue.",
+    "scheduler_creation_allowed": false,
+    "schema_version": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
+    "sos_allowed": false,
+    "source_reports": [
+      "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
+      "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json"
+    ],
+    "stop_condition": "Stop before writing to queue, worker inbox, active packets, runtime, scheduler, SOS, or approval state.",
+    "title": "P2 review-to-queue enqueue bridge preview",
+    "worker_inbox_write_allowed": false
+  },
+  "queue_mutation_allowed": false,
+  "repo_root": ".",
+  "report_paths": [
+    "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_preview.json",
+    "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_summary.md"
+  ],
+  "runtime_launch_allowed": false,
+  "runtime_mutation_allowed": false,
+  "safe_next_action": "Review the P2 enqueue preview; real enqueue requires a separate approved APPLY packet.",
+  "scheduler_creation_allowed": false,
+  "schema": "AIOS_P2_ENQUEUE_BRIDGE_PREVIEW.v1",
+  "service_creation_allowed": false,
+  "sos_allowed": false,
+  "source_fingerprints": [
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
+      "sha256": "22cdd8003aaf1a9ff90382fac57951bd3a5124e70e8972adedfd282b59f0a772",
+      "size": 82769
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_summary.md",
+      "sha256": "0fe77c99fba457d71363f62525faccee2d4cc5ccb4d4a02f016e4cc852b78319",
+      "size": 1084
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json",
+      "sha256": "697e2b7e2e8142179c15e4c279b14b5dd895016b346515d137083cf7efd670ab",
+      "size": 118239
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_summary.md",
+      "sha256": "e660ff791bee18ceece120aa2458829b2f95867080400dd0d065c5d16a4ac8d1",
+      "size": 4674
+    }
+  ],
+  "stop_condition": "Stop after writing preview evidence; do not mutate queues, inboxes, runtime, scheduler, SOS, or approval state.",
+  "summary": {
+    "active_packet_write_allowed": false,
+    "blocker_count": 6,
+    "bridge_status": "BLOCKED",
+    "canonical_queue_write_allowed": false,
+    "enqueue_allowed": false,
+    "human_gate_packet_status": "BLOCKED",
+    "invalid_reason_count": 0,
+    "live_trading_allowed": false,
+    "p2_enqueue_bridge_readiness": "BLOCKED",
+    "queue_mutation_allowed": false,
+    "queue_validation_status": "BLOCK",
+    "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "report_paths": [
+      "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_preview.json",
+      "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_summary.md"
+    ],
+    "runtime_execution_allowed": false,
+    "safe_next_action": "Review the P2 enqueue preview; real enqueue requires a separate approved APPLY packet.",
+    "scheduler_creation_allowed": false,
+    "sos_allowed": false,
+    "stop_condition": "Stop after writing preview evidence; do not mutate queues, inboxes, runtime, scheduler, SOS, or approval state.",
+    "validation_status": "PASS",
+    "worker_inbox_write_allowed": false
+  },
+  "telemetry_mutation_allowed": false,
+  "unsafe_autonomy_claim": false,
+  "vacation_mode_complete": false,
+  "validation": {
+    "blockers": [],
+    "bridge_status": "BLOCKED",
+    "checked_fields": [
+      "schema",
+      "generated_at_utc",
+      "mode",
+      "bridge_type",
+      "bridge_status",
+      "bridge_status_reason",
+      "repo_root",
+      "report_paths",
+      "evidence_loaded",
+      "evidence_missing",
+      "source_fingerprints",
+      "bridge_blockers",
+      "invalid_reasons",
+      "proposed_queue_item_preview",
+      "human_gate_evidence_summary",
+      "autonomy_gap_evidence_summary",
+      "approval_granted",
+      "execution_allowed",
+      "dispatch_allowed",
+      "apply_allowed",
+      "runtime_launch_allowed",
+      "runtime_mutation_allowed",
+      "queue_mutation_allowed",
+      "telemetry_mutation_allowed",
+      "scheduler_creation_allowed",
+      "service_creation_allowed",
+      "sos_allowed",
+      "live_trading_allowed",
+      "credentials_accessed",
+      "unsafe_autonomy_claim",
+      "vacation_mode_complete",
+      "safe_next_action",
+      "stop_condition"
+    ],
+    "status": "PASS",
+    "unsafe_flags": []
+  }
+}
