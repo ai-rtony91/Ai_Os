@@ -1,8 +1,10 @@
 CODEX-ONLY PROMPT
 
+CODEX-ONLY PROMPT:
+
 AI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
 
-AI_OS BOOTSTRAP REQUIRED
+AI_OS BOOTSTRAP REQUIRED: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
 
 IDENTITY MARKER: AI_OS_PACKET_DRAFT_T2B_ASSIGNMENT_LOCK_INTEGRATION
 
@@ -22,12 +24,48 @@ WORKTREE: C:\Dev\Ai.Os
 
 BRANCH: main, verified by read-only preflight before any future APPLY
 
+ALLOWED PATHS:
+- automation/orchestration/coordination_spine/
+- automation/orchestration/locks/
+- automation/orchestration/work_packets/proposed/
+- automation/orchestration/work_packets/active/
+- automation/orchestration/work_packets/deferred/
+- tests/orchestration/
+- tests/guardrails/
+
+FORBIDDEN PATHS:
+- AGENTS.md
+- README.md
+- docs/
+- automation/orchestration/approval_inbox/
+- automation/orchestration/workers/
+- automation/orchestration/night_supervisor/
+- services/
+- broker/
+- webhooks/
+- secrets/
+- .env
+- .env.*
+
 APPROVAL AUTHORITY:
 Anthony is the Human Owner and approval authority. This proposed packet is not
 APPLY approval. Validator PASS is evidence only. Commit, push, merge, packet
 activation, worker launch, scheduler start, Night Supervisor start, SOS, ADB,
 notification send, broker work, live trading, cloud deployment, and secret
 handling each remain blocked unless separately and explicitly approved.
+
+VALIDATOR CHAIN:
+- python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md
+
+STOP POINT:
+- Do not modify packet mission/scope, do not touch runtime heartbeat, lock semantics, queue policy, worker launch, live dispatch, T2B execution, Operation Glue, Auto-Loop, secrets, broker, webhook, or authority.
+
+FINAL REPORT FORMAT:
+SUMMARY
+WHAT CHANGED
+FILES CHANGED
+VALIDATION
+SAFE NEXT COMMAND
 
 PURPOSE:
 Narrow DRY_RUN-first packet to design assignment lock integration using existing

@@ -1,8 +1,23 @@
 CODEX-ONLY PROMPT
 
+CODEX-ONLY PROMPT:
+
 AI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
 
-AI_OS BOOTSTRAP REQUIRED
+AI_OS BOOTSTRAP REQUIRED: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
+
+FORBIDDEN PATHS:
+- AGENTS.md
+- README.md
+- automation/orchestration/approval_inbox/
+- automation/orchestration/workers/
+- automation/orchestration/night_supervisor/
+- services/
+- secrets/
+- credentials/
+- broker/
+- OANDA/
+- live_trading/
 
 identity marker: AI_OS Packet 3A dispatch lane and worker-state proposal
 supervisor identity: Anthony approval authority

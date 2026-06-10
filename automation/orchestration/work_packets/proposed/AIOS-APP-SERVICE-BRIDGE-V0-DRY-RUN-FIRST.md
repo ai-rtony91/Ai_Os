@@ -1,8 +1,10 @@
 CODEX-ONLY PROMPT
 
+CODEX-ONLY PROMPT:
+
 AI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
 
-AI_OS BOOTSTRAP REQUIRED
+AI_OS BOOTSTRAP REQUIRED: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
 
 IDENTITY MARKER: AI_OS_PACKET_DRAFT_FROM_BRIDGE_HARDENING_ADDENDUM
 
@@ -63,6 +65,19 @@ FORBIDDEN PATHS:
 
 APPROVAL AUTHORITY:
 Anthony Meza / Human Owner must approve before APPLY. Validator PASS is evidence only and does not approve APPLY, commit, push, merge, hook install, approval mutation, worker queue mutation, Night Supervisor mutation, live trading, broker runtime work, provider API calls, cloud deployment, tunnel creation, or secret handling.
+
+VALIDATOR CHAIN:
+- python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md
+
+STOP POINT:
+- No mutation of live dispatch, workers, Module 5B, T2B, Operation Glue, Auto-Loop, broker/webhook/scheduler/authority/secrets, or dashboard for this packet.
+
+FINAL REPORT FORMAT:
+SUMMARY
+WHAT CHANGED
+FILES CHANGED
+VALIDATION
+SAFE NEXT COMMAND
 
 PREFLIGHT:
 Run these read-only checks before any APPLY work:

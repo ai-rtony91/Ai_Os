@@ -1,8 +1,9 @@
 {
-  "heartbeatAt": "2026-06-01T15:50:46Z",
-  "last_beat": "2026-06-01T15:50:46Z",
-  "mode": "READ_ONLY",
-  "schema": "AIOS_RUNTIME_HEARTBEAT.v1",
-  "status": "degraded",
-  "supervisor_status": "WARNING"
+    "heartbeatAt":  "2026-06-10T02:05:27Z",
+    "last_beat":  "2026-06-01T15:50:46Z",
+    "mode":  "READ_ONLY",
+    "schema":  "AIOS_RUNTIME_HEARTBEAT.v1",
+    "status":  "OK",
+    "supervisor_status":  "OK",
+    "source":  "coordination_spine_bounded_heartbeat_refresh"
 }
