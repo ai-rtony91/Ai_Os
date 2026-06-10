@@ -1,8 +1,29 @@
 CODEX-ONLY PROMPT
 
+CODEX-ONLY PROMPT:
+
 AI_OS EXECUTION TOKEN: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
 
-AI_OS BOOTSTRAP REQUIRED
+AI_OS BOOTSTRAP REQUIRED: OPERATOR_REVIEW_REQUIRED_BEFORE_APPLY
+ALLOWED PATHS:
+- automation/orchestration/coordination_spine/
+- automation/orchestration/work_packets
+- telemetry/coordination_spine/
+- telemetry/runtime/
+- automation/orchestration/locks/
+- tests/orchestration/
+FORBIDDEN PATHS:
+- AGENTS.md
+- automation/orchestration/work_packets
+- automation/orchestration/approval_inbox/
+- broker/
+- live_trading/
+VALIDATOR CHAIN:
+- python automation/validators/aios_governance_validator.py --input automation/orchestration/work_packets/proposed/AIOS-COORDINATION-SPINE-V1.md
+STOP POINT:
+- No queue lock or approval mutation in this bounded repair phase.
+FINAL REPORT FORMAT:
+SUMMARY/WHAT CHANGED/FILES CHANGED/VALIDATION/SAFE NEXT COMMAND
 Before processing this task, read and follow:
 1. AGENTS.md
 2. docs/governance/AI_OS_REPO_MEMORY.md

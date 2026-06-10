@@ -1,60 +1,62 @@
 {
-  "schema": "AIOS_RECOVERY_BOOTSTRAP_VIEW.v1",
-  "system": "AI_OS",
-  "mode": "DRY_RUN",
-  "generated_at": "2026-06-09T23:41:34.8216859Z",
-  "repo_root": "C:\\Dev\\Ai.Os",
-  "source_readers": [
-    {
-      "source": "last_marker.json",
-      "path": "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
-      "exists": true,
-      "records_seen": 1
-    },
-    {
-      "source": "UNIFIED_QUEUE_INDEX.json",
-      "path": "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
-      "exists": true,
-      "records_seen": 5
-    },
-    {
-      "source": "UNIFIED_LOCK_STATUS.json",
-      "path": "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
-      "exists": true,
-      "records_seen": 0
-    },
-    {
-      "source": "runtime_heartbeat.json",
-      "path": "C:\\Dev\\Ai.Os\\telemetry\\runtime\\runtime_heartbeat.json",
-      "exists": true,
-      "records_seen": 1
-    }
-  ],
-  "marker_present": true,
-  "marker_path": "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
-  "marker_freshness_status": "FRESH",
-  "marker_age_seconds": -13029,
-  "queue_index_present": true,
-  "queue_counts": {
-    "QUEUED": 1,
-    "RUNNING": 0,
-    "BLOCKED": 3,
-    "WAITING_APPROVAL": 0,
-    "COMPLETE": 1,
-    "FAILED": 0,
-    "ARCHIVED": 0
-  },
-  "lock_status_present": true,
-  "held_locks_count": 0,
-  "stale_locks_count": 0,
-  "collision_count": 0,
-  "active_packet_count": 0,
-  "blocked_packet_count": 3,
-  "heartbeat_status": "DEGRADED",
-  "recovery_readiness": "REVIEW_REQUIRED",
-  "blockers": [],
-  "warnings": [
-    "heartbeat_degraded"
-  ],
-  "write_behavior": "telemetry_only"
+    "schema":  "AIOS_RECOVERY_BOOTSTRAP_VIEW.v1",
+    "system":  "AI_OS",
+    "mode":  "DRY_RUN",
+    "generated_at":  "2026-06-10T02:47:36.0796227Z",
+    "repo_root":  "C:\\Dev\\Ai.Os",
+    "source_readers":  [
+                           {
+                               "source":  "last_marker.json",
+                               "path":  "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
+                               "exists":  true,
+                               "records_seen":  1
+                           },
+                           {
+                               "source":  "UNIFIED_QUEUE_INDEX.json",
+                               "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
+                               "exists":  true,
+                               "records_seen":  2
+                           },
+                           {
+                               "source":  "UNIFIED_LOCK_STATUS.json",
+                               "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
+                               "exists":  true,
+                               "records_seen":  0
+                           },
+                           {
+                               "source":  "runtime_heartbeat.json",
+                               "path":  "C:\\Dev\\Ai.Os\\telemetry\\runtime\\runtime_heartbeat.json",
+                               "exists":  true,
+                               "records_seen":  1
+                           }
+                       ],
+    "marker_present":  true,
+    "marker_path":  "C:\\Dev\\Ai.Os\\control\\cycle\\last_marker.json",
+    "marker_freshness_status":  "FRESH",
+    "marker_age_seconds":  12533,
+    "queue_index_present":  true,
+    "queue_counts":  {
+                         "QUEUED":  1,
+                         "RUNNING":  0,
+                         "BLOCKED":  0,
+                         "WAITING_APPROVAL":  0,
+                         "COMPLETE":  1,
+                         "FAILED":  0,
+                         "ARCHIVED":  0
+                     },
+    "lock_status_present":  true,
+    "held_locks_count":  0,
+    "stale_locks_count":  0,
+    "collision_count":  0,
+    "active_packet_count":  0,
+    "blocked_packet_count":  0,
+    "heartbeat_status":  "OK",
+    "recovery_readiness":  "READY_KNOWN",
+    "blockers":  [
+
+                 ],
+    "warnings":  [
+
+                 ],
+    "write_behavior":  "telemetry_only"
 }

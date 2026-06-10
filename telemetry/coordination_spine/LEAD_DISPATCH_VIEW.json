@@ -2,7 +2,7 @@
     "schema":  "AIOS_LEAD_DISPATCH_VIEW.v1",
     "system":  "AI_OS",
     "mode":  "DRY_RUN",
-    "generated_at":  "2026-06-10T01:13:19.5275592Z",
+    "generated_at":  "2026-06-10T02:47:41.3171263Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "source_readers":  [
                            {
@@ -15,7 +15,7 @@
                                "source":  "UNIFIED_QUEUE_INDEX.json",
                                "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
                                "exists":  true,
-                               "records_seen":  4
+                               "records_seen":  2
                            },
                            {
                                "source":  "UNIFIED_LOCK_STATUS.json",
@@ -32,22 +32,21 @@
                        ],
     "queue_status_summary":  {
                                  "present":  true,
-                                 "packet_count":  4,
+                                 "packet_count":  2,
                                  "open_candidate_count":  1,
-                                 "blocked_count":  2,
+                                 "blocked_count":  0,
                                  "waiting_approval_count":  0,
                                  "complete_count":  1,
                                  "normalized_state_counts":  {
                                                                  "QUEUED":  1,
                                                                  "RUNNING":  0,
-                                                                 "BLOCKED":  2,
+                                                                 "BLOCKED":  0,
                                                                  "WAITING_APPROVAL":  0,
                                                                  "COMPLETE":  1,
                                                                  "FAILED":  0,
                                                                  "ARCHIVED":  0
                                                              },
                                  "source_state_counts":  {
-                                                             "BLOCKED":  2,
                                                              "ACTIVE":  1,
                                                              "COMPLETE":  1
                                                          }
@@ -62,29 +61,29 @@
                             },
     "recovery_status_summary":  {
                                     "present":  true,
-                                    "recovery_readiness":  "REVIEW_REQUIRED",
+                                    "recovery_readiness":  "READY_KNOWN",
                                     "blockers":  [
 
                                                  ],
                                     "warnings":  [
-                                                     "heartbeat_degraded"
+
                                                  ],
-                                    "heartbeat_status":  "DEGRADED",
+                                    "heartbeat_status":  "OK",
                                     "write_behavior":  "telemetry_only"
                                 },
     "dispatcher_candidate":  {
                                  "source_lane":  null,
                                  "source_task_id":  null,
                                  "source":  "assignment_executor.py",
-                                 "evaluated_decision":  "BLOCKED",
+                                 "evaluated_decision":  "REVIEW_REQUIRED",
                                  "source_decision":  "UNKNOWN",
-                                 "source_next_safe_action":  "Resolve blockers before dispatch."
+                                 "source_next_safe_action":  "Inspect dispatcher source output."
                              },
-    "dispatcher_safety_verdict":  "BLOCKED",
-    "blocked_reason":  "queue_blocked",
+    "dispatcher_safety_verdict":  "REVIEW_REQUIRED",
+    "blocked_reason":  "dispatcher_source_missing_recommendation",
     "depends_on_t2b":  true,
     "t2b_dependency_note":  "T2B assignment-plus-lock integration remains a prerequisite for any future write-path dispatch.",
     "write_path_enabled":  false,
     "write_behavior":  "telemetry_only",
-    "next_safe_action":  "Resolve the active blocker in queue, lock, or recovery telemetry before any assignment mutation."
+    "next_safe_action":  "Inspect dispatcher source output before any future dispatch or write-path work."
 }

@@ -2,7 +2,7 @@
     "schema":  "AIOS_COORDINATION_SPINE_VIEW.v1",
     "system":  "AI_OS",
     "mode":  "DRY_RUN",
-    "generated_at":  "2026-06-10T01:13:27.8306849Z",
+    "generated_at":  "2026-06-10T02:47:49.8663904Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "source_readers":  [
                            {
@@ -11,8 +11,8 @@
                                "kind":  "telemetry",
                                "present":  true,
                                "freshness_status":  "FRESH",
-                               "records_seen":  4,
-                               "status":  "BLOCKED"
+                               "records_seen":  2,
+                               "status":  "READY_TO_DRAFT"
                            },
                            {
                                "source":  "UNIFIED_LOCK_STATUS.json",
@@ -30,7 +30,7 @@
                                "present":  true,
                                "freshness_status":  "FRESH",
                                "records_seen":  1,
-                               "status":  "REVIEW_REQUIRED"
+                               "status":  "SAFE_NO_WORK"
                            },
                            {
                                "source":  "LEAD_DISPATCH_VIEW.json",
@@ -39,7 +39,7 @@
                                "present":  true,
                                "freshness_status":  "FRESH",
                                "records_seen":  1,
-                               "status":  "BLOCKED"
+                               "status":  "REVIEW_REQUIRED"
                            },
                            {
                                "source":  "PACKET_FACTORY_VIEW.json",
@@ -93,24 +93,23 @@
                           "present":  true,
                           "freshness_status":  "FRESH",
                           "freshness_age_hours":  0,
-                          "packet_count":  4,
+                          "packet_count":  2,
                           "normalized_state_counts":  {
                                                           "QUEUED":  1,
                                                           "RUNNING":  0,
-                                                          "BLOCKED":  2,
+                                                          "BLOCKED":  0,
                                                           "WAITING_APPROVAL":  0,
                                                           "COMPLETE":  1,
                                                           "FAILED":  0,
                                                           "ARCHIVED":  0
                                                       },
                           "source_state_counts":  {
-                                                      "BLOCKED":  2,
                                                       "ACTIVE":  1,
                                                       "COMPLETE":  1
                                                   },
-                          "safety_status":  "BLOCKED",
+                          "safety_status":  "READY_TO_DRAFT",
                           "blockers":  [
-                                           "queue_blocked"
+
                                        ],
                           "warnings":  [
 
@@ -122,7 +121,7 @@
                          "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
                          "present":  true,
                          "freshness_status":  "FRESH",
-                         "freshness_age_hours":  0.54,
+                         "freshness_age_hours":  2.11,
                          "held_locks_count":  0,
                          "stale_locks_count":  0,
                          "collision_count":  0,
@@ -140,17 +139,17 @@
                              "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\RECOVERY_BOOTSTRAP_VIEW.json",
                              "present":  true,
                              "freshness_status":  "FRESH",
-                             "freshness_age_hours":  1.53,
-                             "recovery_readiness":  "REVIEW_REQUIRED",
+                             "freshness_age_hours":  0,
+                             "recovery_readiness":  "READY_KNOWN",
                              "blockers":  [
 
                                           ],
                              "warnings":  [
-                                              "heartbeat_degraded"
+
                                           ],
-                             "heartbeat_status":  "DEGRADED",
+                             "heartbeat_status":  "OK",
                              "write_behavior":  "telemetry_only",
-                             "safety_status":  "REVIEW_REQUIRED"
+                             "safety_status":  "SAFE_NO_WORK"
                          },
     "lead_dispatch_summary":  {
                                   "source":  "LEAD_DISPATCH_VIEW.json",
@@ -158,14 +157,14 @@
                                   "present":  true,
                                   "freshness_status":  "FRESH",
                                   "freshness_age_hours":  0,
-                                  "dispatcher_safety_verdict":  "BLOCKED",
-                                  "blocked_reason":  "queue_blocked",
+                                  "dispatcher_safety_verdict":  "REVIEW_REQUIRED",
+                                  "blocked_reason":  "dispatcher_source_missing_recommendation",
                                   "depends_on_t2b":  true,
-                                  "next_safe_action":  "Resolve the active blocker in queue, lock, or recovery telemetry before any assignment mutation.",
+                                  "next_safe_action":  "Inspect dispatcher source output before any future dispatch or write-path work.",
                                   "write_behavior":  "telemetry_only",
-                                  "safety_status":  "BLOCKED",
+                                  "safety_status":  "REVIEW_REQUIRED",
                                   "blockers":  [
-                                                   "queue_blocked"
+
                                                ],
                                   "warnings":  [
 
@@ -176,16 +175,15 @@
                                    "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\PACKET_FACTORY_VIEW.json",
                                    "present":  true,
                                    "freshness_status":  "FRESH",
-                                   "freshness_age_hours":  0.01,
-                                   "packet_factory_safety_verdict":  "BLOCKED",
+                                   "freshness_age_hours":  0,
+                                   "packet_factory_safety_verdict":  "REVIEW_REQUIRED",
                                    "write_behavior":  "telemetry_only",
                                    "write_path_enabled":  false,
                                    "blockers":  [
-                                                    "packet_factory_blocked",
                                                     "packet_factory_approval_required"
                                                 ],
                                    "warnings":  [
-                                                    "packet_factory_missing_required_fields"
+                                                    "packet_factory_review_required"
                                                 ],
                                    "safety_status":  "BLOCKED"
                                },
@@ -194,15 +192,12 @@
     "live_dispatch_status":  "BLOCKED",
     "approval_gate_status":  "BLOCKED",
     "blockers":  [
-                     "packet_factory_approval_required",
-                     "packet_factory_blocked",
-                     "queue_blocked"
+                     "packet_factory_approval_required"
                  ],
     "warnings":  [
-                     "heartbeat_degraded",
                      "live_dispatch_blocked_by_design",
                      "module5b_design_only",
-                     "packet_factory_missing_required_fields",
+                     "packet_factory_review_required",
                      "t2b_prerequisite_only"
                  ],
     "recommended_next_action":  "Resolve the active queue, lock, recovery, or packet-factory blockers before any live action.",

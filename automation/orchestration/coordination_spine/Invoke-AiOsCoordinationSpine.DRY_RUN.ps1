@@ -301,16 +301,15 @@ function Read-AiOsRecoverySummary {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     $fullPath = Resolve-AiOsPath -Path $Path
-    $freshness = Get-AiOsFileFreshness -Path $fullPath
-    if ($freshness.status -in @("MISSING", "UNREADABLE", "STALE")) {
+    if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
         return [pscustomobject]@{
             source = "RECOVERY_BOOTSTRAP_VIEW.json"
             path = $fullPath
             present = $false
-            freshness_status = $freshness.status
-            freshness_age_hours = $freshness.age_hours
+            freshness_status = "MISSING"
+            freshness_age_hours = $null
             recovery_readiness = "REVIEW_REQUIRED"
-            blockers = @("recovery_source_$($freshness.status.ToLowerInvariant())")
+            blockers = @("recovery_source_missing")
             warnings = @()
             heartbeat_status = "UNKNOWN"
             write_behavior = "telemetry_only"
@@ -319,11 +318,99 @@ function Read-AiOsRecoverySummary {
     }
 
     try {
-        $doc = Read-AiOsJsonDocument -Path $fullPath
-        $readiness = if ($doc.PSObject.Properties.Name -contains "recovery_readiness") { [string]$doc.recovery_readiness } else { "UNKNOWN" }
-        $blockers = if ($doc.PSObject.Properties.Name -contains "blockers") { @($doc.blockers) } else { @() }
-        $warnings = if ($doc.PSObject.Properties.Name -contains "warnings") { @($doc.warnings) } else { @() }
-        $heartbeat = if ($doc.PSObject.Properties.Name -contains "heartbeat_status") { [string]$doc.heartbeat_status } else { "UNKNOWN" }
+        $raw = Get-Content -LiteralPath $fullPath -Raw
+        if ([string]::IsNullOrWhiteSpace($raw)) {
+            return [pscustomobject]@{
+                source = "RECOVERY_BOOTSTRAP_VIEW.json"
+                path = $fullPath
+                present = $false
+                freshness_status = "UNREADABLE"
+                freshness_age_hours = $null
+                recovery_readiness = "REVIEW_REQUIRED"
+                blockers = @("recovery_source_unreadable")
+                warnings = @()
+                heartbeat_status = "UNKNOWN"
+                write_behavior = "telemetry_only"
+                safety_status = "REVIEW_REQUIRED"
+            }
+        }
+
+        $ageHours = [Math]::Round(((Get-Date).ToUniversalTime() - [System.IO.File]::GetLastWriteTimeUtc($fullPath)).TotalHours, 2)
+        $freshnessStatus = if ($ageHours -gt 48) { "STALE" } else { "FRESH" }
+        if ($freshnessStatus -eq "STALE") {
+            return [pscustomobject]@{
+                source = "RECOVERY_BOOTSTRAP_VIEW.json"
+                path = $fullPath
+                present = $false
+                freshness_status = $freshnessStatus
+                freshness_age_hours = $ageHours
+                recovery_readiness = "REVIEW_REQUIRED"
+                blockers = @("recovery_source_stale")
+                warnings = @()
+                heartbeat_status = "UNKNOWN"
+                write_behavior = "telemetry_only"
+                safety_status = "REVIEW_REQUIRED"
+            }
+        }
+
+        $doc = $raw | ConvertFrom-Json
+        if ($null -eq $doc) {
+            return [pscustomobject]@{
+                source = "RECOVERY_BOOTSTRAP_VIEW.json"
+                path = $fullPath
+                present = $false
+                freshness_status = "UNREADABLE"
+                freshness_age_hours = $ageHours
+                recovery_readiness = "REVIEW_REQUIRED"
+                blockers = @("recovery_source_unreadable")
+                warnings = @()
+                heartbeat_status = "UNKNOWN"
+                write_behavior = "telemetry_only"
+                safety_status = "REVIEW_REQUIRED"
+            }
+        }
+
+        if (-not ($doc.PSObject.Properties.Name -contains "recovery_readiness") -or -not ($doc.PSObject.Properties.Name -contains "heartbeat_status")) {
+            return [pscustomobject]@{
+                source = "RECOVERY_BOOTSTRAP_VIEW.json"
+                path = $fullPath
+                present = $false
+                freshness_status = $freshnessStatus
+                freshness_age_hours = $ageHours
+                recovery_readiness = "REVIEW_REQUIRED"
+                blockers = @("recovery_source_unreadable")
+                warnings = @()
+                heartbeat_status = if ($doc.PSObject.Properties.Name -contains "heartbeat_status") { [string]$doc.heartbeat_status } else { "UNKNOWN" }
+                write_behavior = "telemetry_only"
+                safety_status = "REVIEW_REQUIRED"
+            }
+        }
+
+        $readiness = [string]$doc.recovery_readiness
+        if ($doc.PSObject.Properties.Name -contains "blockers") {
+            if ($null -eq $doc.blockers) {
+                $blockers = @()
+            }
+            else {
+                $blockers = @($doc.blockers)
+            }
+        }
+        else {
+            $blockers = @()
+        }
+
+        if ($doc.PSObject.Properties.Name -contains "warnings") {
+            if ($null -eq $doc.warnings) {
+                $warnings = @()
+            }
+            else {
+                $warnings = @($doc.warnings)
+            }
+        }
+        else {
+            $warnings = @()
+        }
+        $heartbeat = [string]$doc.heartbeat_status
 
         $status = switch ($readiness) {
             "BLOCKED" { "BLOCKED" }
@@ -336,8 +423,8 @@ function Read-AiOsRecoverySummary {
             source = "RECOVERY_BOOTSTRAP_VIEW.json"
             path = $fullPath
             present = $true
-            freshness_status = $freshness.status
-            freshness_age_hours = $freshness.age_hours
+            freshness_status = $freshnessStatus
+            freshness_age_hours = $ageHours
             recovery_readiness = $readiness
             blockers = @($blockers)
             warnings = @($warnings)

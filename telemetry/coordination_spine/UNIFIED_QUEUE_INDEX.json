@@ -2,7 +2,7 @@
     "schema":  "AIOS_UNIFIED_QUEUE_INDEX.v1",
     "system":  "AI_OS",
     "mode":  "DRY_RUN",
-    "generated_at_utc":  "2026-06-10T01:13:14.7379143Z",
+    "generated_at_utc":  "2026-06-10T02:47:32.0225321Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "packet_root":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets",
     "scanned_folders":  [
@@ -10,7 +10,7 @@
                             "blocked",
                             "complete"
                         ],
-    "packet_count":  4,
+    "packet_count":  2,
     "normalized_state_order":  [
                                    "QUEUED",
                                    "RUNNING",
@@ -23,14 +23,13 @@
     "normalized_state_counts":  {
                                     "QUEUED":  1,
                                     "RUNNING":  0,
-                                    "BLOCKED":  2,
+                                    "BLOCKED":  0,
                                     "WAITING_APPROVAL":  0,
                                     "COMPLETE":  1,
                                     "FAILED":  0,
                                     "ARCHIVED":  0
                                 },
     "source_state_counts":  {
-                                "BLOCKED":  2,
                                 "ACTIVE":  1,
                                 "COMPLETE":  1
                             },
@@ -63,34 +62,6 @@
 
                         ],
     "records":  [
-                    {
-                        "packet_id":  "control-git-status",
-                        "title":  "CONTROL Git Status Visibility",
-                        "owner_lane":  "main_control",
-                        "assigned_worker":  "",
-                        "folder_state":  "blocked",
-                        "packet_status":  "blocked",
-                        "source_state":  "blocked",
-                        "source_state_token":  "BLOCKED",
-                        "normalized_state":  "BLOCKED",
-                        "source_reason":  "",
-                        "source_state_origin":  "packet.status",
-                        "source_file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-064501-control-git-status.json"
-                    },
-                    {
-                        "packet_id":  "phase-17-work-packet-router-state-machine",
-                        "title":  "phase 17 work packet router state machine",
-                        "owner_lane":  "route_dispatch",
-                        "assigned_worker":  "codex_worker_1",
-                        "folder_state":  "blocked",
-                        "packet_status":  "blocked",
-                        "source_state":  "blocked",
-                        "source_state_token":  "BLOCKED",
-                        "normalized_state":  "BLOCKED",
-                        "source_reason":  "",
-                        "source_state_origin":  "packet.status",
-                        "source_file":  "C:\\Dev\\Ai.Os\\automation\\orchestration\\work_packets\\blocked\\20260516-172946-phase-17-work-packet-router-state-machine.json"
-                    },
                     {
                         "packet_id":  "brainstem-daily-start",
                         "title":  "Brainstem Daily Start Route",
