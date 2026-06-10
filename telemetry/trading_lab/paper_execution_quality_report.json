@@ -1,0 +1,21 @@
+{
+  "run_id": "AIOS-PAPER-TRADING-COMPLETION-SWEEP-001",
+  "paper_only": true,
+  "generated_at": "2026-06-09T00:00:00Z",
+  "mode": "paper_only",
+  "execution_quality_score": 99.0,
+  "average_paper_slippage": 0.0,
+  "rejected_order_count": 0,
+  "risk_block_count": 0,
+  "entries": [
+    {
+      "signal_id": "AIOS_PAPER_SIGNAL_2026_06_09_001",
+      "paper_only": true,
+      "expected_fill_price": 0.0,
+      "actual_paper_fill_price": 0.0,
+      "paper_slippage": 0.0,
+      "spread_estimate": 0.0,
+      "fill_latency_ms": 40
+    }
+  ]
+}

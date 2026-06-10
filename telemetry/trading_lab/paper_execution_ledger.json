@@ -1,0 +1,30 @@
+{
+  "entries": [
+    {
+      "signal_id": "AIOS_PAPER_SIGNAL_2026_06_09_001",
+      "symbol": "EURUSD",
+      "timeframe": "1h",
+      "permission": "bullish",
+      "signal": "BUY",
+      "paper_decision": "PAPER_SIMULATE",
+      "blocked_reason": "",
+      "route_action": "PAPER_BUY_PREVIEW",
+      "route_status": "PAPER_PREVIEW_ONLY",
+      "paper_only": true,
+      "live_execution_status": "BLOCKED",
+      "execution_allowed": false,
+      "safety_blocked_tokens": [
+        "api_key",
+        "broker",
+        "live_order",
+        "password",
+        "real_order",
+        "secret_key",
+        "token",
+        "webhook_url"
+      ],
+      "updated_utc": "2026-06-09T00:00:00Z"
+    }
+  ],
+  "run_id": "AIOS-PAPER-TRADING-COMPLETION-SWEEP-001"
+}
