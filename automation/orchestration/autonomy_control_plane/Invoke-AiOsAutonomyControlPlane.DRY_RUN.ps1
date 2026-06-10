@@ -1,6 +1,9 @@
 param(
     [string]$GoalText,
     [string]$PacketPath,
+    [switch]$SelfBuildObserveOnly,
+    [string]$SelfBuildCycleScriptPath = "automation/self_build/aios_self_build_cycle.py",
+    [string]$SelfBuildCycleOutputRoot = "Reports/self_build_cycle",
     [string]$AutonomyLoopScriptPath = "automation/orchestration/autonomy_loop/Invoke-AiOsAutonomyLoop.DRY_RUN.ps1",
     [string]$PacketRunnerScriptPath = "automation/orchestration/packet_runner/Invoke-AiOsPacketAutoRunner.DRY_RUN.ps1",
     [string]$ValidatorScriptPath = "automation/validators/aios_governance_validator.py",
@@ -85,6 +88,56 @@ try {
     $createdAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     $evidencePath = Resolve-AiOsPath -PathHint $OutputEvidencePath -RepoRoot $repoRoot
     $reportPath = Resolve-AiOsPath -PathHint $OutputReportPath -RepoRoot $repoRoot
+
+    if ($SelfBuildObserveOnly) {
+        $resolvedSelfBuildScript = Resolve-AiOsPath -PathHint $SelfBuildCycleScriptPath -RepoRoot $repoRoot
+        $resolvedSelfBuildOutputRoot = Resolve-AiOsPath -PathHint $SelfBuildCycleOutputRoot -RepoRoot $repoRoot
+        if (-not (Test-Path -LiteralPath $resolvedSelfBuildScript -PathType Leaf)) {
+            throw "BLOCKED: self-build cycle script not found: $resolvedSelfBuildScript"
+        }
+
+        $cycleOut = & python $resolvedSelfBuildScript --mode DRY_RUN --repo-root $repoRoot --output-root $resolvedSelfBuildOutputRoot 2>&1
+        $cycleExitCode = $LASTEXITCODE
+        $cycleText = if ($cycleOut -is [array]) { $cycleOut -join "`n" } else { [string]$cycleOut }
+        $cyclePayload = Parse-JsonQuiet -Text $cycleText
+        if ($null -eq $cyclePayload) {
+            throw "BLOCKED: self-build cycle output was not readable JSON."
+        }
+
+        $status = if ($cyclePayload.safety_status -eq "SAFE_OBSERVE_ONLY") { "PROTECTED_ACTION_REQUIRED" } else { "BLOCKED" }
+        $evidence = [ordered]@{
+            schema_version = "AIOS-AUTONOMY-CONTROL-PLANE-SELF-BUILD-OBSERVE-V1"
+            created_at_utc = $createdAt
+            workflow = "self_build_observe_only"
+            status = $status
+            latest_decision_label = $cyclePayload.decision_label
+            mode = $cyclePayload.mode
+            requires_human = $cyclePayload.requires_human
+            safety_status = $cyclePayload.safety_status
+            self_build_evidence_path = $cyclePayload.evidence_path
+            self_build_report_path = $cyclePayload.report_path
+            emitted_actions = @($cyclePayload.emitted_actions)
+            blocked_capabilities = @($cyclePayload.blocked_capabilities)
+            cycle_exit_code = $cycleExitCode
+            evidence_path = $evidencePath
+            report_path = $reportPath
+            safe_next_action = $cyclePayload.safe_next_action
+        }
+        Write-JsonAtomic -Path $evidencePath -Object $evidence
+        Write-TextAtomic -Path $reportPath -Text (New-MarkdownReport -Payload @{
+            created_at_utc = $createdAt
+            workflow = "self_build_observe_only"
+            status = $status
+            packet_path = ""
+            packet_runner = @{ status = "SKIPPED" }
+            validator = @{ status = $cyclePayload.safety_status }
+            evidence_path = $evidencePath
+            report_path = $reportPath
+        })
+        Write-Output ($evidence | ConvertTo-Json -Depth 20)
+        if ($status -eq "PROTECTED_ACTION_REQUIRED") { exit 0 }
+        exit 1
+    }
 
     if ([string]::IsNullOrWhiteSpace($GoalText) -and [string]::IsNullOrWhiteSpace($PacketPath)) {
         throw "BLOCKED: either -GoalText or -PacketPath is required."
