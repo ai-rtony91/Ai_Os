@@ -84,6 +84,25 @@ def test_autonomy_loop_goal_to_packet_and_report(tmp_path: Path) -> None:
     packet_text = packet_path.read_text(encoding="utf-8")
     assert "CODEX-ONLY PROMPT" in packet_text
     assert "Build a minimal paper-only planning lane for DRY_RUN completion" in packet_text
+    assert "SAFE NEXT ACTION:" in packet_text
+    assert "broker execution" not in packet_text.lower()
+    assert "merge" not in packet_text.lower()
+
+    validator = subprocess.run(
+        [
+            "python",
+            "automation/validators/aios_governance_validator.py",
+            "--input",
+            str(packet_path),
+        ],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert validator.returncode == 0, validator.stdout + validator.stderr
+    validation_payload = json.loads(validator.stdout)
+    assert validation_payload["status"] == "PASS"
 
     packet_path.unlink()
 
