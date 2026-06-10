@@ -1,0 +1,130 @@
+{
+  "approval_check": {
+    "active_approval_gate_present": true,
+    "active_approval_inbox_present": true,
+    "approval_evidence_present": true,
+    "approved_statuses": [
+      "approved",
+      "approved_for_apply"
+    ],
+    "explicit_approval": false
+  },
+  "approval_inbox_mutation_allowed": false,
+  "canonical_queue_mutated": false,
+  "canonical_queue_owner": "automation/orchestration/work_packets/active/",
+  "command_queue_mutation_allowed": false,
+  "credentials_accessed": false,
+  "dequeue_allowed": false,
+  "dispatch_allowed": false,
+  "duplicate_check": {
+    "active_queue_path": "automation/orchestration/work_packets/active",
+    "duplicate_packet_id": false,
+    "matching_active_packet_paths": []
+  },
+  "enqueue_allowed": false,
+  "future_write_target": "automation/orchestration/work_packets/active/",
+  "gate_status": "INVALID",
+  "gate_status_reason": "allowed_paths is required; forbidden_paths is required",
+  "generated_at_utc": "2026-06-10T22:18:46Z",
+  "live_trading_allowed": false,
+  "mode": "DRY_RUN_PREVIEW_ONLY",
+  "proposed_item_source": {
+    "loaded": true,
+    "path": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json"
+  },
+  "proposed_queue_item": {
+    "allowed_paths": [],
+    "forbidden_paths": [],
+    "lane": "p2_review_to_queue_enqueue_bridge",
+    "mode": "DRY_RUN_PREVIEW_ONLY",
+    "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "target_paths": []
+  },
+  "protected_path_check": {
+    "protected_path_targeted": false,
+    "targeted_protected_paths": []
+  },
+  "queue_write_allowed": false,
+  "repo_root": ".",
+  "report_paths": [
+    "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+    "Reports/queue_mutation_gate/queue_mutation_gate_summary.md"
+  ],
+  "runtime_execution_allowed": false,
+  "runtime_launch_allowed": false,
+  "safe_next_action": "Repair the proposed queue item shape before review.",
+  "scheduler_creation_allowed": false,
+  "schema": "AIOS_QUEUE_MUTATION_GATE_PREVIEW.v1",
+  "sos_allowed": false,
+  "source_fingerprints": {
+    "active_queue": {
+      "exists": true,
+      "files": [
+        {
+          "path": ".gitkeep",
+          "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+          "size": 2
+        }
+      ],
+      "is_dir": true,
+      "path": "automation/orchestration/work_packets/active"
+    },
+    "approval_gate": {
+      "exists": true,
+      "is_dir": false,
+      "path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+      "sha256": "3053151fa37c66cb0f02dfaec81664022eb6081309f00536821938b8750670d8",
+      "size": 3240
+    },
+    "approval_inbox": {
+      "exists": true,
+      "is_dir": false,
+      "path": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+      "sha256": "b9e0d9dae3759084de1a2da81591b89487916db2636606b7b698d28f5cc9fe11",
+      "size": 2606
+    },
+    "command_queue": {
+      "exists": true,
+      "is_dir": false,
+      "path": "automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json",
+      "sha256": "9ca915cc75bd95a69f29ef1c4606beacb6f786d881938ee673dbe7292c912563",
+      "size": 847
+    },
+    "worker_inbox": {
+      "exists": true,
+      "is_dir": false,
+      "path": "automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json",
+      "sha256": "2beff4de814cf2ceddc0c01065341672bfdb854dafb7002439719989b3ca8442",
+      "size": 1589
+    }
+  },
+  "stop_condition": "Stop before writing to the real active queue, worker inbox, approval inbox, command queue, telemetry, runtime, scheduler, SOS, services, apps, or trading paths.",
+  "telemetry_mutation_allowed": false,
+  "unsafe_action_check": {
+    "matched_terms": [],
+    "unsafe_action_requested": false
+  },
+  "validation": {
+    "blockers": [
+      "approval evidence is not explicit"
+    ],
+    "checked_fields": [
+      "packet_id",
+      "mode",
+      "lane",
+      "allowed_paths",
+      "forbidden_paths",
+      "approval_evidence",
+      "explicit_approval",
+      "duplicate_active_packet_id",
+      "protected_paths",
+      "unsafe_actions"
+    ],
+    "invalid_reasons": [
+      "allowed_paths is required",
+      "forbidden_paths is required"
+    ],
+    "status": "PASS"
+  },
+  "worker_inbox_mutation_allowed": false
+}
