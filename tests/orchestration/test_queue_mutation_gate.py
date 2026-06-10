@@ -204,7 +204,10 @@ def test_default_p2_evidence_loads_as_preview_without_real_queue_mutation(tmp_pa
         now="2026-06-10T15:20:28Z",
     )
 
-    assert report["gate_status"] in {gate.BLOCKED, gate.INVALID}
+    assert report["gate_status"] == gate.BLOCKED
+    assert report["validation"]["invalid_reasons"] == []
+    assert report["proposed_queue_item"]["allowed_paths"] == ["automation/orchestration/work_packets/"]
+    assert "automation/orchestration/work_packets/active/" in report["proposed_queue_item"]["forbidden_paths"]
     assert report["queue_write_allowed"] is False
     assert report["canonical_queue_mutated"] is False
     assert _fingerprint(REAL_ACTIVE_QUEUE) == before
