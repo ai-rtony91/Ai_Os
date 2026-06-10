@@ -1,0 +1,190 @@
+{
+  "action_allowed": true,
+  "action_mutates_state": false,
+  "active_packet_mutation_allowed": false,
+  "apply_allowed": false,
+  "approval_granted": false,
+  "autonomy_gap_evidence_summary": {
+    "execution_allowed": false,
+    "live_execution_readiness": "BLOCKED",
+    "p2_enqueue_bridge_readiness": "BLOCKED",
+    "queue_mutation_allowed": false,
+    "reassessment_status": "BLOCKED",
+    "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "safe_next_action": "Anthony reviews the ranked autonomy gap report and chooses the next report-only lane."
+  },
+  "command_queue_mutation_allowed": false,
+  "control_status": "BLOCKED",
+  "control_status_reason": "Operator review is blocked by unresolved evidence.",
+  "control_surface": "operator_control_switch",
+  "credentials_accessed": false,
+  "dispatch_allowed": false,
+  "evidence_loaded": {
+    "autonomy_gap_report": {
+      "loaded": true,
+      "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json"
+    },
+    "human_gate_report": {
+      "loaded": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_report.json"
+    },
+    "p2_bridge_report": {
+      "loaded": true,
+      "path": "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_preview.json"
+    }
+  },
+  "evidence_missing": [],
+  "execution_allowed": false,
+  "generated_at_utc": "2026-06-10T21:25:12Z",
+  "human_gate_evidence_summary": {
+    "dogfood_status": "BLOCKED",
+    "execution_allowed": false,
+    "human_gate_packet_status": "BLOCKED",
+    "mutation_check_status": "PASS",
+    "queue_mutation_allowed": false,
+    "queue_validation_status": "BLOCK",
+    "runtime_proof_gate_status": "BLOCKED",
+    "safe_next_action": "Anthony reviews the dogfood report and decides whether the human gate packet should be reviewed.",
+    "stop_condition": "Stop after reviewing the dogfood evidence; do not approve or execute."
+  },
+  "invalid_reasons": [],
+  "live_trading_allowed": false,
+  "mode": "DRY_RUN",
+  "next_blocked_lane": "P2_ENQUEUE_BRIDGE",
+  "operator_blockers": [
+    "human gate dogfood status is BLOCKED",
+    "runtime queue validation status is BLOCK",
+    "runtime proof gate status is BLOCKED",
+    "human gate packet status is BLOCKED",
+    "autonomy gap reassessment status is BLOCKED",
+    "autonomy gap P2 enqueue bridge readiness is BLOCKED",
+    "P2 enqueue bridge status is BLOCKED"
+  ],
+  "p2_bridge_evidence_summary": {
+    "active_packet_write_allowed": false,
+    "bridge_status": "BLOCKED",
+    "canonical_queue_write_allowed": false,
+    "enqueue_allowed": false,
+    "queue_mutation_allowed": false,
+    "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "runtime_execution_allowed": false,
+    "safe_next_action": "Review the P2 enqueue preview; real enqueue requires a separate approved APPLY packet.",
+    "stop_condition": "Stop after writing preview evidence; do not mutate queues, inboxes, runtime, scheduler, SOS, or approval state.",
+    "validation_status": "PASS",
+    "worker_inbox_write_allowed": false
+  },
+  "protected_boundaries": {
+    "active_packet_write_allowed": false,
+    "approval_inbox_write_allowed": false,
+    "canonical_queue_write_allowed": false,
+    "command_queue_write_allowed": false,
+    "live_trading_allowed": false,
+    "protected_paths": [
+      "automation/orchestration/work_packets/active/",
+      "automation/orchestration/workers/inbox/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/command_queue/",
+      "telemetry/",
+      "services/",
+      "apps/",
+      "aios/modules/trader/"
+    ],
+    "runtime_launch_allowed": false,
+    "scheduler_creation_allowed": false,
+    "sos_allowed": false,
+    "telemetry_write_allowed": false,
+    "worker_inbox_write_allowed": false
+  },
+  "queue_mutation_allowed": false,
+  "rejected_unsafe_actions": [
+    "enqueue",
+    "dequeue",
+    "dispatch",
+    "execute",
+    "approve",
+    "mutate",
+    "schedule",
+    "sos",
+    "live"
+  ],
+  "repo_root": ".",
+  "report_paths": [
+    "Reports\\operator_control\\operator_control_switch_report.json",
+    "Reports\\operator_control\\operator_control_switch_summary.md"
+  ],
+  "requested_action": "status",
+  "runtime_launch_allowed": false,
+  "runtime_mutation_allowed": false,
+  "safe_actions": [
+    "status",
+    "inspect",
+    "report",
+    "preview"
+  ],
+  "safe_next_action": "Review P2_ENQUEUE_BRIDGE and keep queue, runtime, scheduler, SOS, and trading mutation blocked.",
+  "scheduler_creation_allowed": false,
+  "schema": "AIOS_OPERATOR_CONTROL_SWITCH_REPORT.v1",
+  "service_creation_allowed": false,
+  "sos_allowed": false,
+  "source_fingerprints": [
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
+      "sha256": "22cdd8003aaf1a9ff90382fac57951bd3a5124e70e8972adedfd282b59f0a772",
+      "size": 82769
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json",
+      "sha256": "697e2b7e2e8142179c15e4c279b14b5dd895016b346515d137083cf7efd670ab",
+      "size": 118239
+    },
+    {
+      "exists": true,
+      "is_file": true,
+      "path": "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_preview.json",
+      "sha256": "b20ba02bc8be5a18087104a7308b191bdffce88d75a818b386a9daf3ff1d6efa",
+      "size": 7788
+    }
+  ],
+  "stop_condition": "Stop after writing operator control evidence; do not mutate queues, packets, inboxes, runtime, scheduler, SOS, trading, telemetry, or approvals.",
+  "summary": {
+    "action_allowed": true,
+    "active_packet_write_allowed": false,
+    "autonomy_gap_status": "BLOCKED",
+    "autonomy_recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
+    "canonical_queue_write_allowed": false,
+    "control_status": "BLOCKED",
+    "human_gate_dogfood_status": "BLOCKED",
+    "live_trading_allowed": false,
+    "next_blocked_lane": "P2_ENQUEUE_BRIDGE",
+    "p2_enqueue_allowed": false,
+    "p2_enqueue_bridge_status": "BLOCKED",
+    "queue_mutation_allowed": false,
+    "report_paths": [
+      "Reports\\operator_control\\operator_control_switch_report.json",
+      "Reports\\operator_control\\operator_control_switch_summary.md"
+    ],
+    "requested_action": "status",
+    "runtime_launch_allowed": false,
+    "runtime_proof_gate_status": "BLOCKED",
+    "safe_next_action": "Review P2_ENQUEUE_BRIDGE and keep queue, runtime, scheduler, SOS, and trading mutation blocked.",
+    "scheduler_creation_allowed": false,
+    "sos_allowed": false,
+    "stop_condition": "Stop after writing operator control evidence; do not mutate queues, packets, inboxes, runtime, scheduler, SOS, trading, telemetry, or approvals.",
+    "unsafe_action_rejected": false,
+    "validation_status": "PASS",
+    "worker_inbox_write_allowed": false
+  },
+  "telemetry_mutation_allowed": false,
+  "unsafe_action_rejected": false,
+  "validation": {
+    "blockers": [],
+    "control_status": "BLOCKED",
+    "status": "PASS",
+    "unsafe_flags": []
+  },
+  "worker_inbox_mutation_allowed": false
+}
