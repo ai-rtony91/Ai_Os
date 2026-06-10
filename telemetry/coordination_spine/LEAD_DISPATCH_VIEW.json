@@ -2,14 +2,14 @@
   "schema": "AIOS_LEAD_DISPATCH_VIEW.v1",
   "system": "AI_OS",
   "mode": "DRY_RUN",
-  "generated_at": "2026-06-09T19:55:00Z",
+  "generated_at": "2026-06-09T23:55:38.1957910Z",
   "repo_root": "C:\\Dev\\Ai.Os",
   "source_readers": [
     {
       "source": "assignment_executor.py",
       "path": "C:\\Dev\\Ai.Os\\automation\\orchestration\\dispatcher\\assignment_executor.py",
       "exists": true,
-      "records_seen": 1
+      "records_seen": 0
     },
     {
       "source": "UNIFIED_QUEUE_INDEX.json",
@@ -21,7 +21,7 @@
       "source": "UNIFIED_LOCK_STATUS.json",
       "path": "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_LOCK_STATUS.json",
       "exists": true,
-      "records_seen": 1
+      "records_seen": 0
     },
     {
       "source": "RECOVERY_BOOTSTRAP_VIEW.json",
@@ -47,8 +47,8 @@
       "ARCHIVED": 0
     },
     "source_state_counts": {
-      "ACTIVE": 1,
       "BLOCKED": 3,
+      "ACTIVE": 1,
       "COMPLETE": 1
     }
   },
@@ -62,10 +62,8 @@
   },
   "recovery_status_summary": {
     "present": true,
-    "recovery_readiness": "BLOCKED",
-    "blockers": [
-      "marker_stale"
-    ],
+    "recovery_readiness": "REVIEW_REQUIRED",
+    "blockers": [],
     "warnings": [
       "heartbeat_degraded"
     ],
@@ -73,15 +71,15 @@
     "write_behavior": "telemetry_only"
   },
   "dispatcher_candidate": {
+    "source_lane": null,
+    "source_next_safe_action": "Resolve blockers before dispatch.",
     "source": "assignment_executor.py",
     "source_task_id": null,
-    "source_lane": null,
-    "source_decision": "NO_WORK",
-    "evaluated_decision": "BLOCKED",
-    "source_next_safe_action": "Resolve blockers before dispatch."
+    "source_decision": "UNKNOWN",
+    "evaluated_decision": "BLOCKED"
   },
   "dispatcher_safety_verdict": "BLOCKED",
-  "blocked_reason": "queue_blocked, lock_review_required_or_collision, recovery_blocked",
+  "blocked_reason": "queue_blocked, lock_review_required_or_collision",
   "depends_on_t2b": true,
   "t2b_dependency_note": "T2B assignment-plus-lock integration remains a prerequisite for any future write-path dispatch.",
   "write_path_enabled": false,
