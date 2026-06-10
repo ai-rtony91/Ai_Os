@@ -1,6 +1,6 @@
 # AI_OS SOS Arming Preview
 
-- sos_status: `INVALID`
+- sos_status: `BLOCKED`
 - would_send_notification: `False`
 - notification_allowed: `False`
 - would_route: `False`
@@ -16,7 +16,7 @@
 - would_dispatch: `False`
 - would_route: `False`
 - would_execute: `False`
-- blocked_reason: `explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: INVALID; runtime apply lane preview evidence is required for SOS arming preview; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED`
+- blocked_reason: `explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED`
 
 ## Protected Boundaries
 - notification_allowed: `False`

@@ -23,9 +23,9 @@
   },
   "enqueue_allowed": false,
   "future_write_target": "automation/orchestration/work_packets/active/",
-  "gate_status": "INVALID",
-  "gate_status_reason": "allowed_paths is required; forbidden_paths is required",
-  "generated_at_utc": "2026-06-10T22:18:46Z",
+  "gate_status": "BLOCKED",
+  "gate_status_reason": "approval evidence is not explicit",
+  "generated_at_utc": "2026-06-10T23:23:15Z",
   "live_trading_allowed": false,
   "mode": "DRY_RUN_PREVIEW_ONLY",
   "proposed_item_source": {
@@ -33,8 +33,22 @@
     "path": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json"
   },
   "proposed_queue_item": {
-    "allowed_paths": [],
-    "forbidden_paths": [],
+    "allowed_paths": [
+      "automation/orchestration/work_packets/"
+    ],
+    "forbidden_paths": [
+      "automation/orchestration/work_packets/active/",
+      "automation/orchestration/work_packets/blocked/",
+      "automation/orchestration/work_packets/complete/",
+      "automation/orchestration/workers/inbox/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/command_queue/",
+      "telemetry/",
+      "services/",
+      "apps/",
+      "aios/modules/trader/",
+      "aios.ps1"
+    ],
     "lane": "p2_review_to_queue_enqueue_bridge",
     "mode": "DRY_RUN_PREVIEW_ONLY",
     "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
@@ -52,7 +66,7 @@
   ],
   "runtime_execution_allowed": false,
   "runtime_launch_allowed": false,
-  "safe_next_action": "Repair the proposed queue item shape before review.",
+  "safe_next_action": "Resolve queue mutation blockers before requesting a real queue write.",
   "scheduler_creation_allowed": false,
   "schema": "AIOS_QUEUE_MUTATION_GATE_PREVIEW.v1",
   "sos_allowed": false,
@@ -120,10 +134,7 @@
       "protected_paths",
       "unsafe_actions"
     ],
-    "invalid_reasons": [
-      "allowed_paths is required",
-      "forbidden_paths is required"
-    ],
+    "invalid_reasons": [],
     "status": "PASS"
   },
   "worker_inbox_mutation_allowed": false

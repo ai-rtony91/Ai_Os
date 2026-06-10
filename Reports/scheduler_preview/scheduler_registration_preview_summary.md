@@ -35,12 +35,10 @@
 - Anthony explicit scheduler registration action
 
 ## Remaining Blockers
-- queue mutation gate is not ready: INVALID
+- queue mutation gate is not ready: BLOCKED
 - explicit queue mutation approval is not present
 - runtime apply preview is not ready: INVALID
 - human gate evidence is not pass: BLOCKED
 - autonomy reassessment is not pass: BLOCKED
-- queue gate invalid reason: allowed_paths is required
-- queue gate invalid reason: forbidden_paths is required
 
 - This preview does not register scheduler tasks, create services, launch runtime, send notifications, or mutate queue/worker state.

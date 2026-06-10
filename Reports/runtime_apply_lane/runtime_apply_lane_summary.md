@@ -2,7 +2,7 @@
 
 - apply_status: `INVALID`
 - p2_bridge_status: `BLOCKED`
-- queue_gate_status: `INVALID`
+- queue_gate_status: `BLOCKED`
 - runtime_proof_verdict: ``
 - would_apply: `False`
 - would_route: `False`
@@ -16,16 +16,13 @@
 - sos_notification: `False`
 - trading_execution: `False`
 - safe_next_action: Repair evidence and rerun preview.
-- blocked_count: 7
+- blocked_count: 4
 
 ## Safety
 - This preview does not execute runtime, mutate worker inbox, mutate queue, launch services, arm SOS, or perform trading.
 
 ## Blockers
 - P2 bridge is not READY_FOR_DRY_RUN_PREVIEW
-- queue mutation preview allowed_paths is missing
-- queue mutation preview forbidden_paths is missing
 - queue mutation approval is not explicit
 - queue gate validation: approval evidence is not explicit
-- queue gate evidence still carries invalid reasons
 - runtime proof final_verdict is missing
