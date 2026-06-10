@@ -40,7 +40,7 @@
   },
   "evidence_missing": [],
   "execution_allowed": false,
-  "generated_at_utc": "2026-06-10T21:12:42Z",
+  "generated_at_utc": "2026-06-10T22:25:16Z",
   "human_gate_evidence_summary": {
     "dogfood_status": "BLOCKED",
     "human_gate_packet_status": "BLOCKED",
@@ -54,6 +54,9 @@
   "mode": "DRY_RUN",
   "proposed_queue_item_preview": {
     "active_packet_write_allowed": false,
+    "allowed_paths": [
+      "automation/orchestration/work_packets/"
+    ],
     "apply_allowed": false,
     "bridge_blockers": [
       "human gate dogfood status is BLOCKED",
@@ -75,7 +78,20 @@
       "reassessment_status": "BLOCKED",
       "runtime_proof_gate_status": "BLOCKED"
     },
-    "generated_at_utc": "2026-06-10T21:12:42Z",
+    "forbidden_paths": [
+      "automation/orchestration/work_packets/active/",
+      "automation/orchestration/work_packets/blocked/",
+      "automation/orchestration/work_packets/complete/",
+      "automation/orchestration/workers/inbox/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/command_queue/",
+      "telemetry/",
+      "services/",
+      "apps/",
+      "aios/modules/trader/",
+      "aios.ps1"
+    ],
+    "generated_at_utc": "2026-06-10T22:25:16Z",
     "invalid_reasons": [],
     "lane_id": "p2_review_to_queue_enqueue_bridge",
     "live_trading_allowed": false,
