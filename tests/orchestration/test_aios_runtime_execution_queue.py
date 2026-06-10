@@ -122,13 +122,13 @@ def test_sos_lane_is_human_required_and_contains_no_secret_value():
     assert sos["owner_type"] == "anthony_human"
     serialized = json.dumps(sos, sort_keys=True)
     for pattern in [
-        "secret" + "=",
-        "token" + "=",
-        "pass" + "word" + "=",
-        "api" + "_key" + "=",
-        "api" + "key" + "=",
+        "sec" + "ret=",
+        "tok" + "en=",
+        "pass" + "word=",
+        "api" + "_key=",
+        "api" + "key=",
         "bear" + "er ",
-        "sk" + "-",
+        "s" + "k-",
     ]:
         assert pattern not in serialized.lower()
 

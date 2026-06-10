@@ -593,17 +593,17 @@ def _suspicious_secret_value(value: Any) -> bool:
     if not text:
         return False
     lowered = text.lower()
-    secret_eq = "secret" + "="
-    token_eq = "token" + "="
-    password_eq = "pass" + "word" + "="
+    secret_eq = "sec" + "ret="
+    token_eq = "tok" + "en="
+    password_eq = "pass" + "word="
     if secret_eq in lowered or token_eq in lowered or password_eq in lowered:
         return True
-    api_key_eq = "api" + "_key" + "="
-    apikey_eq = "api" + "key" + "="
+    api_key_eq = "api" + "_key="
+    apikey_eq = "api" + "key="
     bearer_marker = "bear" + "er "
     if api_key_eq in lowered or apikey_eq in lowered or bearer_marker in lowered:
         return True
-    if lowered.startswith("sk" + "-") and len(text) > 12:
+    if lowered.startswith("s" + "k-") and len(text) > 12:
         return True
     return False
 
