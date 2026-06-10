@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud","autonomy-status","autonomy-next","approval-status","self-build-status")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -67,6 +67,38 @@ function Show-AiOsCrewRecommendation {
     }
 }
 
+function Invoke-AiOsReadOnlyPowerShellScript {
+    param(
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [string[]]$Arguments = @()
+    )
+
+    $scriptPath = Join-Path $PSScriptRoot $RelativePath
+    if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
+        Write-Host "Read-only command unavailable: $RelativePath" -ForegroundColor Yellow
+        Write-Host "No state was changed."
+        return
+    }
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath @Arguments
+}
+
+function Invoke-AiOsReadOnlyPythonScript {
+    param(
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [string[]]$Arguments = @()
+    )
+
+    $scriptPath = Join-Path $PSScriptRoot $RelativePath
+    if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
+        Write-Host "Read-only command unavailable: $RelativePath" -ForegroundColor Yellow
+        Write-Host "No state was changed."
+        return
+    }
+
+    & python $scriptPath @Arguments
+}
+
 switch ($Mode) {
     "help" {
         Write-Host ""
@@ -89,6 +121,10 @@ switch ($Mode) {
         Write-Host ".\aios.ps1 -Mode control # show operator control loop cockpit"
         Write-Host ".\aios.ps1 -Mode finish-pr -Pr 273 # preview PR finish steps"
         Write-Host ".\aios.ps1 -Mode hud -Worker CLAUDE # preview worker HUD"
+        Write-Host ".\aios.ps1 -Mode autonomy-status # autonomy/control-plane status report"
+        Write-Host ".\aios.ps1 -Mode autonomy-next # next safe operator command only"
+        Write-Host ".\aios.ps1 -Mode approval-status # approval inbox/readiness summary"
+        Write-Host ".\aios.ps1 -Mode self-build-status # latest self-build decision readout"
     }
 
     "daily" {
@@ -133,6 +169,25 @@ switch ($Mode) {
 
     "hud" {
         powershell -NoProfile -ExecutionPolicy Bypass -File automation/window_identity/Show-AiOsWorkerHud.DRY_RUN.ps1 -Worker $Worker
+    }
+
+    "autonomy-status" {
+        Invoke-AiOsReadOnlyPowerShellScript -RelativePath "automation/orchestration/autonomy_reports/New-AiOsAutonomyStatusReport.DRY_RUN.ps1"
+    }
+
+    "autonomy-next" {
+        Invoke-AiOsReadOnlyPowerShellScript -RelativePath "automation/runtime/recommendation/Get-AiOsNextCommand.ps1"
+    }
+
+    "approval-status" {
+        Invoke-AiOsReadOnlyPowerShellScript -RelativePath "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1"
+    }
+
+    "self-build-status" {
+        Invoke-AiOsReadOnlyPythonScript -RelativePath "automation/orchestration/autonomy_control_plane/aios_self_build_decision_consumer.py" -Arguments @(
+            "--evidence",
+            (Join-Path $PSScriptRoot "Reports/self_build_cycle/latest_self_build_cycle.evidence.json")
+        )
     }
 
     "runtime" {
