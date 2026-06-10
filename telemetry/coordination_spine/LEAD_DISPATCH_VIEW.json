@@ -2,7 +2,7 @@
     "schema":  "AIOS_LEAD_DISPATCH_VIEW.v1",
     "system":  "AI_OS",
     "mode":  "DRY_RUN",
-    "generated_at":  "2026-06-10T00:43:38.5921578Z",
+    "generated_at":  "2026-06-10T01:13:19.5275592Z",
     "repo_root":  "C:\\Dev\\Ai.Os",
     "source_readers":  [
                            {
@@ -15,7 +15,7 @@
                                "source":  "UNIFIED_QUEUE_INDEX.json",
                                "path":  "C:\\Dev\\Ai.Os\\telemetry\\coordination_spine\\UNIFIED_QUEUE_INDEX.json",
                                "exists":  true,
-                               "records_seen":  5
+                               "records_seen":  4
                            },
                            {
                                "source":  "UNIFIED_LOCK_STATUS.json",
@@ -32,22 +32,22 @@
                        ],
     "queue_status_summary":  {
                                  "present":  true,
-                                 "packet_count":  5,
+                                 "packet_count":  4,
                                  "open_candidate_count":  1,
-                                 "blocked_count":  3,
+                                 "blocked_count":  2,
                                  "waiting_approval_count":  0,
                                  "complete_count":  1,
                                  "normalized_state_counts":  {
                                                                  "QUEUED":  1,
                                                                  "RUNNING":  0,
-                                                                 "BLOCKED":  3,
+                                                                 "BLOCKED":  2,
                                                                  "WAITING_APPROVAL":  0,
                                                                  "COMPLETE":  1,
                                                                  "FAILED":  0,
                                                                  "ARCHIVED":  0
                                                              },
                                  "source_state_counts":  {
-                                                             "BLOCKED":  3,
+                                                             "BLOCKED":  2,
                                                              "ACTIVE":  1,
                                                              "COMPLETE":  1
                                                          }
