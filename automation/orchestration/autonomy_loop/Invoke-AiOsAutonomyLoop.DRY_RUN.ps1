@@ -159,16 +159,16 @@ FORBIDDEN PATHS:
 - live_trading/
 - OANDA/
 - .env
-- any live broker/webhook credential path
+- any protected external connector credential path
 
 APPROVAL AUTHORITY:
 Anthony is approval authority.
 Codex may edit allowed paths only.
-No live trading.
-No broker execution.
+No production trading enablement.
+No external connector enablement.
 No secrets.
 No real orders.
-No merge to main.
+No protected repository promotion.
 
 MISSION:
 Goal intake for: $($GoalText.Trim())
@@ -178,7 +178,7 @@ Goal intake for: $($GoalText.Trim())
 3. Run governance validation on the generated packet.
 4. Run packet auto-runner in DRY_RUN mode.
 5. Emit a JSON report.
-6. Stop before any APPLY, merge, or live-risk gate.
+6. Stop before any APPLY, protected repository promotion, or production-risk gate.
 
 PREFLIGHT:
 - pwd
@@ -192,6 +192,9 @@ VALIDATOR CHAIN:
 
 STOP POINT:
 Stop if governance validator fails.
+
+SAFE NEXT ACTION:
+Run the generated packet through the packet auto-runner in DRY_RUN mode only.
 
 FINAL REPORT FORMAT:
 SUMMARY:
@@ -289,10 +292,10 @@ STATUS:
         auto_runner_status = "PASS"
         auto_runner = $autoRunnerStatus
         blocked_actions = @(
-            "merge",
+            "protected_repository_promotion",
             "apply",
             "live_trading",
-            "broker_execution",
+            "external_connector_enablement",
             "secret_reads",
             "commit"
         )
