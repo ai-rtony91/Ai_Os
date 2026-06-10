@@ -1,0 +1,44 @@
+{
+  "blocked_layers": [],
+  "closure_layer_statuses": {
+    "p2_bridge": "INVALID",
+    "queue_mutation_gate": "BLOCKED",
+    "runtime_apply_lane": "INVALID",
+    "scheduler_registration": "BLOCKED",
+    "sos_arming": "INVALID"
+  },
+  "code_blockers": [
+    "runtime_apply_lane"
+  ],
+  "generated_at_utc": "2026-06-10T23:49:39Z",
+  "governance_blockers": [
+    "queue_mutation_gate",
+    "runtime_apply_lane",
+    "sos_arming",
+    "scheduler_registration"
+  ],
+  "mode": "DRY_RUN_PREVIEW_ONLY",
+  "observe_loop_status": "OBSERVE_LOOP_INVALID",
+  "ready_layers": [],
+  "real_blockers": [
+    "p2_bridge",
+    "queue_mutation_gate",
+    "runtime_apply_lane",
+    "sos_arming",
+    "scheduler_registration"
+  ],
+  "safe_next_action": "Resolve stale/invalid evidence and rerun observe-spine runner.",
+  "schema": "AIOS_AUTONOMY_CLOSURE_REPORT.v1",
+  "stale_layers": [],
+  "validate_mutation_boundaries": {
+    "approval_inbox_mutation": false,
+    "command_queue_mutation": false,
+    "queue_mutation": false,
+    "runtime_execution": false,
+    "runtime_launch": false,
+    "scheduler_registration": false,
+    "sos_notification": false,
+    "trading_execution": false,
+    "worker_inbox_mutation": false
+  }
+}
