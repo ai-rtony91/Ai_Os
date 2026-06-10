@@ -59,6 +59,50 @@ function Get-SelfBuildDecisionReadout {
     }
 }
 
+function Get-ApprovalSummaryReadout {
+    $summaryPath = "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1"
+    $inboxPath = "automation/orchestration/approval_inbox"
+    if (-not (Test-Path -LiteralPath $summaryPath -PathType Leaf)) {
+        return [ordered]@{
+            available = $false
+            pending_count = 0
+            blocked_count = 0
+            completed_count = 0
+            safe_state = "UNAVAILABLE"
+            next_review_action = "Approval summary is unavailable; run the approval inbox summary directly if approval state is needed."
+        }
+    }
+    try {
+        $rawOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $summaryPath -InboxPath $inboxPath -QuietJson 2>$null
+        $jsonText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($jsonText)) {
+            throw "approval summary produced no JSON output"
+        }
+        $summary = $jsonText | ConvertFrom-Json
+        $pendingCount = @($summary.pending_approvals).Count
+        $blockedCount = @($summary.blocked_actions).Count
+        $completedCount = @($summary.approved_actions).Count
+        $safeState = if ($blockedCount -gt 0) { "BLOCKED" } elseif (($pendingCount + $completedCount) -gt 0) { "REVIEW" } else { "PASS" }
+        return [ordered]@{
+            available = $true
+            pending_count = $pendingCount
+            blocked_count = $blockedCount
+            completed_count = $completedCount
+            safe_state = $safeState
+            next_review_action = [string]$summary.next_safe_command
+        }
+    } catch {
+        return [ordered]@{
+            available = $false
+            pending_count = 0
+            blocked_count = 0
+            completed_count = 0
+            safe_state = "REVIEW_REQUIRED"
+            next_review_action = "Review approval summary failure before choosing the next command."
+        }
+    }
+}
+
 $runtimeStatePath = "automation/runtime/state/AIOS_RUNTIME_STATE.json"
 $activePacketRoot = "automation/orchestration/work_packets/active"
 $validatorRoots = @(
@@ -69,6 +113,7 @@ $validatorRoots = @(
 
 $runtimeState = Read-JsonFile -Path $runtimeStatePath
 $selfBuildDecision = Get-SelfBuildDecisionReadout
+$approvalSummary = Get-ApprovalSummaryReadout
 $gitStatus = @(git status --short)
 $activePackets = @()
 if (Test-Path -LiteralPath $activePacketRoot -PathType Container) {
@@ -158,6 +203,12 @@ $result = [ordered]@{
     self_build_approval_required = $selfBuildDecision.approval_required
     self_build_report_only = $selfBuildDecision.report_only
     self_build_safe_next_action = $selfBuildDecision.safe_next_action
+    approval_summary_available = $approvalSummary.available
+    approval_pending_count = $approvalSummary.pending_count
+    approval_blocked_count = $approvalSummary.blocked_count
+    approval_completed_count = $approvalSummary.completed_count
+    approval_safe_state = $approvalSummary.safe_state
+    approval_next_review_action = $approvalSummary.next_review_action
     approvals_performed = "NO"
     approval_inbox_mutated = "NO"
     apply_gate_mutated = "NO"
@@ -189,6 +240,10 @@ Write-Host "SELF-BUILD APPROVAL REQUIRED:"
 Write-Host $result.self_build_approval_required
 Write-Host "SELF-BUILD SAFE NEXT ACTION:"
 Write-Host $result.self_build_safe_next_action
+Write-Host "APPROVAL STATE SUMMARY:"
+Write-Host "available=$($result.approval_summary_available); pending=$($result.approval_pending_count); blocked=$($result.approval_blocked_count); completed=$($result.approval_completed_count); safe_state=$($result.approval_safe_state)"
+Write-Host "APPROVAL NEXT REVIEW ACTION:"
+Write-Host $result.approval_next_review_action
 Write-Host "Approvals performed: NO"
 Write-Host "Approval inbox mutated: NO"
 Write-Host "Apply gate mutated: NO"
