@@ -167,6 +167,16 @@ Future backup helpers should exclude:
 
 The future helper should report excluded categories plainly so the operator knows what was intentionally skipped.
 
+## Recursion Guard
+
+AI_OS backup helpers must never copy their own destination back into future backups. The backup source must not contain the backup root, the backup root must not contain the source repo, and the timestamped snapshot path must never resolve inside `C:\Dev\Ai.Os`.
+
+The T9 backup helper must block the run when recursion is detected. This includes nested backup folders, old snapshot folders, `current_mirror`, `snapshots`, `AIOS_BACKUP*`, `T9_FOB`, or other T9 backup output appearing as candidate copy sources.
+
+Backups must never include old snapshots unless Anthony explicitly approves a separate restore or archival lane. T9 output must never be copied back into `C:\Dev\Ai.Os` without exact human-approved restore scope.
+
+Retention deletion remains separate. Recursion detection can block a run, but it does not approve cleanup, deletion, compression, restore, scheduled tasks, or T9-to-repo copy.
+
 ## Recommended Schedule
 
 Schedule creation is not approved by this document.
