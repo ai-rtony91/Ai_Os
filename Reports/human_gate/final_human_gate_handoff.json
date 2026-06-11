@@ -19,7 +19,7 @@
   },
   "credentials_accessed": false,
   "current_status": "HUMAN_GATE_REQUIRED",
-  "generated_at_utc": "2026-06-11T05:31:31Z",
+  "generated_at_utc": "2026-06-11T06:08:52Z",
   "live_trading_allowed": false,
   "mode": "PREVIEW_ONLY_HUMAN_GATE_HANDOFF",
   "next_strict_human_order": [

@@ -193,3 +193,21 @@ def test_runtime_proof_gate_consumes_normalized_stack_without_stale_alias_blocke
     assert all(str(item).startswith("human gate required:") for item in gate["blockers"])
     assert gate["runtime_execution_allowed"] is False
     assert gate["runtime_launch_allowed"] is False
+
+def test_stop_drill_human_confirmation_reduces_only_stop_drill_blocker():
+    import json
+    from pathlib import Path
+
+    report = json.loads(Path("Reports/runtime_queue_blocker_stack/runtime_queue_blocker_stack.json").read_text(encoding="utf-8"))
+    proofs = report.get("proofs", {})
+
+    assert proofs.get("stop_drill_proof", {}).get("status") == "PASS"
+    assert proofs.get("sos_delivery_proof", {}).get("status") == "HUMAN_GATE_REQUIRED"
+    assert proofs.get("scheduler_manual_registration_proof", {}).get("status") == "HUMAN_GATE_REQUIRED"
+
+    assert report.get("runtime_execution_allowed") is False
+    assert report.get("runtime_launch_allowed") is False
+    assert report.get("scheduler_registration_allowed") is False
+    assert report.get("sos_allowed") is False
+    assert report.get("live_trading_allowed") is False
+    assert report.get("vacation_mode_complete") is False

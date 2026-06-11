@@ -52,7 +52,7 @@
     },
     "credentials_accessed": false,
     "current_status": "HUMAN_GATE_REQUIRED",
-    "generated_at_utc": "2026-06-11T05:31:31Z",
+    "generated_at_utc": "2026-06-11T06:08:52Z",
     "live_trading_allowed": false,
     "mode": "PREVIEW_ONLY_HUMAN_GATE_HANDOFF",
     "next_strict_human_order": [
@@ -85,7 +85,7 @@
     "stop_drill_pass": false,
     "vacation_mode_complete": false
   },
-  "generated_at_utc": "2026-06-11T05:31:31Z",
+  "generated_at_utc": "2026-06-11T06:08:52Z",
   "human_gate_blockers": [
     "stop_drill_human_confirmation",
     "sos_delivery_human_confirmation",
@@ -112,7 +112,7 @@
   "mode": "DRY_RUN_PROOF",
   "normalized_runtime_queue_readout": {
     "cloud_buildable_lane_complete": true,
-    "generated_at_utc": "2026-06-11T05:31:31Z",
+    "generated_at_utc": "2026-06-11T06:08:52Z",
     "hard_gate_summary": {
       "global": [
         "No live trading, broker, or OANDA execution.",

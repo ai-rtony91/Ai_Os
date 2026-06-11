@@ -69,7 +69,7 @@
       },
       "evidence_missing": [],
       "execution_allowed": false,
-      "generated_at_utc": "2026-06-11T05:31:32Z",
+      "generated_at_utc": "2026-06-11T06:08:53Z",
       "human_gate_evidence_summary": {
         "dogfood_status": "BLOCKED",
         "human_gate_packet_status": "BLOCKED",
@@ -165,7 +165,7 @@
           "aios/modules/trader/",
           "aios.ps1"
         ],
-        "generated_at_utc": "2026-06-11T05:31:32Z",
+        "generated_at_utc": "2026-06-11T06:08:53Z",
         "invalid_reasons": [],
         "lane_id": "p2_review_to_queue_enqueue_bridge",
         "live_trading_allowed": false,
@@ -331,12 +331,12 @@
       "future_write_target": "automation/orchestration/work_packets/active/",
       "gate_status": "READY_FOR_HUMAN_REVIEW",
       "gate_status_reason": "proposal is ready for human review",
-      "generated_at_utc": "2026-06-11T05:31:32Z",
+      "generated_at_utc": "2026-06-11T06:08:53Z",
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
       "proposed_item_source": {
         "loaded": true,
-        "path": "C:/Users/mylab/AppData/Local/Temp/tmp5yjlyes4.json"
+        "path": "C:/Users/mylab/AppData/Local/Temp/tmpcuqgpo17.json"
       },
       "proposed_queue_item": {
         "allowed_paths": [
@@ -480,7 +480,7 @@
         "would_execute": false,
         "would_route": false
       },
-      "generated_at_utc": "2026-06-11T05:31:32Z",
+      "generated_at_utc": "2026-06-11T06:08:53Z",
       "invalid_reasons": [],
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
@@ -604,7 +604,7 @@
           "exists": true,
           "is_file": true,
           "path": "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
-          "sha256": "9f08293f534b36b3f3423f860e9668cfedb1bb80b1d88849b306a37b7bca6e70",
+          "sha256": "e25013a694c742f3ce3273bbcdf04c17cc74acefba754f6779e853e3a6afb680",
           "size": 15394
         },
         {
@@ -917,7 +917,7 @@
         "runtime_apply_preview": "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
         "sos_preview": "Reports/sos_preview/sos_arming_preview.json"
       },
-      "generated_at_utc": "2026-06-11T05:31:32Z",
+      "generated_at_utc": "2026-06-11T06:08:53Z",
       "human_gate_projection": {
         "dogfood_status": null,
         "human_gate_packet_status": ""
@@ -1500,7 +1500,7 @@
         "queue_mutation_report": false,
         "runtime_apply_preview": false
       },
-      "generated_at_utc": "2026-06-11T05:31:32Z",
+      "generated_at_utc": "2026-06-11T06:08:53Z",
       "human_gate_report_summary": {
         "dogfood_status": null,
         "packet_status": null
@@ -2103,7 +2103,7 @@
       "would_route": false
     }
   },
-  "generated_at_utc": "2026-06-11T05:31:32Z",
+  "generated_at_utc": "2026-06-11T06:08:53Z",
   "governance_blockers": [
     "sos_arming",
     "scheduler_registration"

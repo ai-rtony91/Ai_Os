@@ -39,7 +39,7 @@
     "would_execute": false,
     "would_route": false
   },
-  "generated_at_utc": "2026-06-11T05:31:31Z",
+  "generated_at_utc": "2026-06-11T06:08:53Z",
   "invalid_reasons": [],
   "live_trading_allowed": false,
   "mode": "DRY_RUN_PREVIEW_ONLY",
@@ -163,7 +163,7 @@
       "exists": true,
       "is_file": true,
       "path": "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
-      "sha256": "9f08293f534b36b3f3423f860e9668cfedb1bb80b1d88849b306a37b7bca6e70",
+      "sha256": "e25013a694c742f3ce3273bbcdf04c17cc74acefba754f6779e853e3a6afb680",
       "size": 15394
     },
     {

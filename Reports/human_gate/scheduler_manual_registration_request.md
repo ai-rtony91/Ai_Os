@@ -1,7 +1,7 @@
 # AI_OS Scheduler Manual Registration Human Gate Request
 
 - status: `HUMAN_GATE_REQUIRED`
-- generated_at_utc: `2026-06-11T05:31:31Z`
+- generated_at_utc: `2026-06-11T06:08:52Z`
 - safe_next_action: Anthony must register the scheduler manually outside Codex automation after STOP and SOS proof, then provide the exact human confirmation phrase in a separately approved human-gated packet.
 - stop_condition: Stop before creating Windows Scheduled Tasks, services, or claiming manual registration.
 - exact_human_confirmation_phrase: `ANTHONY_CONFIRMS_SCHEDULER_MANUALLY_REGISTERED_AFTER_STOP_AND_SOS_PROOF`

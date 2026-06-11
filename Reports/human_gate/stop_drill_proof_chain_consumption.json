@@ -1,0 +1,41 @@
+{
+  "schema": "AIOS_STOP_DRILL_PROOF_CHAIN_CONSUMPTION.v1",
+  "status": "PASS_FOR_DRY_RUN_RECOVERY_PROOF_ONLY",
+  "source_evidence": "Reports/human_gate/stop_drill_human_confirmation_record.json",
+  "consumes_stop_drill_human_confirmation": true,
+  "stop_drill_proof_status": "PASS",
+  "stop_drill_pass": true,
+  "stop_drill_scope": "DRY_RUN_RECOVERY_PROOF_ONLY",
+  "remaining_human_gates": [
+    "sos_delivery_human_confirmation",
+    "scheduler_manual_registration_human_confirmation"
+  ],
+  "non_authorizations": [
+    "runtime execution",
+    "runtime launch",
+    "queue write",
+    "worker inbox mutation",
+    "command queue mutation",
+    "scheduler registration",
+    "SOS send",
+    "broker action",
+    "live trading",
+    "secret storage",
+    "vacation mode completion"
+  ],
+  "safety_flags": {
+    "runtime_execution_allowed": false,
+    "runtime_launch_allowed": false,
+    "queue_write_allowed": false,
+    "worker_inbox_mutation_allowed": false,
+    "command_queue_mutation_allowed": false,
+    "scheduler_registration_allowed": false,
+    "sos_notification_allowed": false,
+    "live_trading_allowed": false,
+    "broker_action_allowed": false,
+    "secret_write_allowed": false,
+    "vacation_mode_complete": false
+  },
+  "safe_next_action": "Refresh the runtime proof chain so STOP drill is no longer a blocker while SOS delivery and scheduler manual registration remain blocked.",
+  "stop_condition": "Stop before runtime execution, runtime launch, queue write, scheduler registration, SOS send, broker action, live trading, secret storage, or vacation_mode_complete."
+}
