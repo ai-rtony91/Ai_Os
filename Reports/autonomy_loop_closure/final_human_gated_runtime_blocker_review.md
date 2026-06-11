@@ -1,7 +1,7 @@
 # Final Human-Gated Runtime Blocker Review
 
-Packet: `AIOS-FINAL-HUMAN-GATED-RUNTIME-BLOCKER-REVIEW-RUN-V1`  
-Mode: APPLY, report-only  
+Packet: `AIOS-FINAL-HUMAN-GATED-RUNTIME-BLOCKER-REVIEW-RUN-V1`
+Mode: APPLY, report-only
 Current main HEAD: `d252af38716490b745ac526973cdf96fdeb5fa02`
 
 ## Scope

@@ -1,6 +1,6 @@
 # Proposed Review Packet: SOS Delivery Human Confirmation Review
 
-Status: PROPOSED / REVIEW-ONLY  
+Status: PROPOSED / REVIEW-ONLY
 This file is not an executable Codex packet and does not authorize APPLY, runtime launch, runtime execution, queue mutation, scheduler registration, SOS send by Codex, approval mutation, worker inbox mutation, command queue mutation, broker action, live trading, credential access, deletion, commit to main, push to main, PR merge, or PR closure.
 
 ## Purpose
