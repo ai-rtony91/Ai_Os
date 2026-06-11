@@ -22,6 +22,13 @@ QUEUE_GATE_PATH = (
     / "work_packets"
     / "aios_queue_mutation_gate.py"
 )
+ADAPTER_MODULE_PATH = (
+    REPO_ROOT
+    / "automation"
+    / "orchestration"
+    / "approval_inbox"
+    / "aios_approval_evidence_adapter.py"
+)
 HUMAN_GATE_REPORT = REPO_ROOT / "Reports" / "human_gate" / "human_gate_packet_dogfood_report.json"
 AUTONOMY_GAP_REPORT = REPO_ROOT / "Reports" / "autonomy_gap" / "autonomy_gap_reassessment_report.json"
 COMMAND_QUEUE = REPO_ROOT / "automation" / "orchestration" / "command_queue" / "AIOS_COMMAND_QUEUE.json"
@@ -41,6 +48,15 @@ def _load():
 
 def _load_queue_gate():
     spec = importlib.util.spec_from_file_location("aios_queue_mutation_gate_for_p2_tests", QUEUE_GATE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_adapter():
+    spec = importlib.util.spec_from_file_location("aios_approval_evidence_adapter_for_tests", ADAPTER_MODULE_PATH)
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
     sys.modules[spec.name] = module
@@ -116,6 +132,53 @@ def _ready_evidence() -> dict:
             "vacation_mode_complete": False,
         },
     }
+
+
+def _write_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def _build_repo_with_reports(repo_root: Path, *, apply_gate_status: str = "pending_review") -> None:
+    _write_json(
+        repo_root / "Reports" / "human_gate" / "human_gate_packet_dogfood_report.json",
+        _ready_evidence()["human_gate_report"],
+    )
+    _write_json(
+        repo_root / "Reports" / "autonomy_gap" / "autonomy_gap_reassessment_report.json",
+        _ready_evidence()["autonomy_gap_report"],
+    )
+    _write_json(
+        repo_root / "automation" / "orchestration" / "approval_inbox" / "APPLY_APPROVAL_GATE_001.json",
+        {
+            "approval_gate_id": "APPLY_APPROVAL_GATE_001",
+            "approval_status": apply_gate_status,
+            "approved_by_human": False,
+            "approval_authority": "Anthony / Human Owner",
+            "approved_by": "system-reviewer",
+            "packet_id": "AIOS-ENRICHMENT-TEST-001",
+            "allowed_paths": ["automation/orchestration/work_packets/"],
+            "blocked_paths": ["automation/orchestration/work_packets/active/"],
+            "validator_chain_required": True,
+            "commit_package_required": True,
+        },
+    )
+    _write_json(
+        repo_root / "automation" / "orchestration" / "approval_inbox" / "APPROVAL_INBOX_001.json",
+        {
+            "schema": "AIOS_APPROVAL_INBOX.v1",
+            "approval_gate_id": "APPROVAL_INBOX_001",
+            "authority_status": "active_authority",
+            "approval_status": "completed",
+            "approved_by_human": True,
+            "approval_authority": "Anthony / Human Owner",
+            "approved_by": "Anthony",
+            "allowed_paths": ["tests/orchestration/"],
+            "blocked_paths": ["services/"],
+            "validator_chain_required": True,
+            "commit_package_required": True,
+        },
+    )
 
 
 def test_module_imports_cleanly():
@@ -224,6 +287,144 @@ def test_enriched_preview_passes_queue_gate_contract_without_mutation(tmp_path):
     assert gate_report["runtime_execution_allowed"] is False
 
 
+def test_approval_adapter_marks_pending_apply_gate_as_non_authorizing(tmp_path):
+    adapter = _load_adapter()
+    repo_root = tmp_path / "repo"
+    approval_gate = (
+        repo_root / "automation" / "orchestration" / "approval_inbox" / "APPLY_APPROVAL_GATE_001.json"
+    )
+    approval_inbox = (
+        repo_root / "automation" / "orchestration" / "approval_inbox" / "APPROVAL_INBOX_001.json"
+    )
+    _write_json(
+        approval_gate,
+        {
+            "approval_gate_id": "APPLY_APPROVAL_GATE_001",
+            "approval_status": "pending_review",
+            "approved_by_human": False,
+            "bound_by": "APPLY_PENDING_SCOPE",
+            "packet_id": "AIOS-PENDING-APPROVAL",
+            "validator_chain_required": True,
+            "commit_package_required": True,
+            "allowed_paths": ["automation/orchestration/work_packets/"],
+            "blocked_paths": ["automation/orchestration/work_packets/active/"],
+        },
+    )
+    _write_json(
+        approval_inbox,
+        {
+            "schema": "AIOS_APPROVAL_INBOX.v1",
+            "approval_gate_id": "APPROVAL_INBOX_001",
+            "authority_status": "active_authority",
+            "approval_status": "completed",
+            "approved_by_human": True,
+            "approval_authority": "Anthony / Human Owner",
+            "validator_chain_required": False,
+            "commit_package_required": False,
+        },
+    )
+
+    evidence = adapter.build_queue_mutation_approval_evidence(
+        repo_root=repo_root,
+        approval_gate_path=approval_gate,
+        approval_inbox_path=approval_inbox,
+    )
+
+    assert evidence
+    assert isinstance(evidence, dict)
+    assert evidence["approval_status"] == "pending_review"
+    assert evidence["approved_by_human"] is False
+    assert evidence["approval_granted"] is False
+    assert evidence["explicit_approval"] is False
+    assert evidence["apply_gate_pending"] is True
+    assert evidence["non_authorizing_placeholder"] is True
+
+
+def test_approval_inbox_authority_is_not_queue_authorization_by_itself(tmp_path):
+    adapter = _load_adapter()
+    repo_root = tmp_path / "repo"
+    approval_gate = (
+        repo_root / "automation" / "orchestration" / "approval_inbox" / "APPLY_APPROVAL_GATE_001.json"
+    )
+    approval_inbox = (
+        repo_root / "automation" / "orchestration" / "approval_inbox" / "APPROVAL_INBOX_001.json"
+    )
+    _write_json(
+        approval_inbox,
+        {
+            "schema": "AIOS_APPROVAL_INBOX.v1",
+            "approval_gate_id": "APPROVAL_INBOX_001",
+            "authority_status": "active_authority",
+            "approval_status": "completed",
+            "approved_by_human": True,
+            "approval_authority": "Anthony / Human Owner",
+            "approved_by": "Anthony / Human Owner",
+            "allowed_paths": ["tests/orchestration/"],
+            "blocked_paths": ["services/"],
+            "validator_chain_required": True,
+            "commit_package_required": True,
+        },
+    )
+
+    evidence = adapter.build_queue_mutation_approval_evidence(
+        repo_root=repo_root,
+        approval_gate_path=approval_gate,
+        approval_inbox_path=approval_inbox,
+    )
+
+    assert evidence["approval_status"] == "missing_approval_status"
+    assert evidence["explicit_approval"] is False
+    assert evidence["apply_gate_pending"] is False
+    assert evidence["file_exists"] is False
+    assert evidence["authority_active"] is True
+
+
+def test_p2_bridge_embeds_pending_approval_evidence_and_queue_gate_consumes_it(tmp_path):
+    mod = _load()
+    queue_gate = _load_queue_gate()
+    repo_root = tmp_path / "repo"
+    _build_repo_with_reports(repo_root)
+
+    output_dir = repo_root / "Reports" / "p2_enqueue_bridge"
+    report = mod.build_p2_enqueue_bridge_report(
+        repo_root=repo_root,
+        output_dir=output_dir,
+        now="2026-01-02T03:04:05Z",
+        evidence=_ready_evidence(),
+    )
+    preview = report["proposed_queue_item_preview"]
+    approval_evidence = preview["approval_evidence"]
+    assert approval_evidence["approval_status"] == "pending_review"
+    assert approval_evidence["source_files"]
+    assert "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json" in " ".join(approval_evidence["source_files"])
+    assert approval_evidence["explicit_approval"] is False
+    assert approval_evidence["explicit_apply_approved"] is False
+    assert approval_evidence["non_authorizing_reason"] == "apply approval gate is pending_review"
+
+    output_path = output_dir / mod.REPORT_JSON_NAME
+    mod.write_p2_enqueue_bridge_reports(report, output_dir=output_dir)
+
+    protected_paths = [
+        repo_root / "automation" / "orchestration" / "work_packets" / "active",
+        repo_root / "automation" / "orchestration" / "workers" / "inbox" / "AIOS_WORKER_INBOX.json",
+    ]
+    before = {str(path): _fingerprint(path) for path in protected_paths}
+    gate_report = queue_gate.run_queue_mutation_gate(
+        repo_root=repo_root,
+        proposed_item_path=output_path,
+        output_dir=tmp_path / "Reports" / "queue_mutation_gate",
+        now="2026-01-02T03:04:05Z",
+    )
+    after = {str(path): _fingerprint(path) for path in protected_paths}
+
+    assert before == after
+    assert gate_report["gate_status"] == queue_gate.BLOCKED
+    assert gate_report["approval_check"]["approval_evidence_present"] is True
+    assert gate_report["approval_check"]["explicit_approval"] is False
+    assert "approval evidence is not explicit" in gate_report["validation"]["blockers"]
+    assert gate_report["queue_write_allowed"] is False
+
+
 def test_missing_evidence_is_invalid_not_ready(tmp_path):
     mod = _load()
     report = mod.build_p2_enqueue_bridge_report(
@@ -305,6 +506,10 @@ def test_cli_defaults_to_dry_run_and_writes_preview(tmp_path, monkeypatch, capsy
     assert parsed["bridge_status"] == "BLOCKED"
     assert (outdir / mod.REPORT_JSON_NAME).exists()
     assert (outdir / mod.REPORT_MD_NAME).exists()
+    cli_report = json.loads((outdir / mod.REPORT_JSON_NAME).read_text(encoding="utf-8"))
+    assert cli_report["proposed_queue_item_preview"]["approval_evidence"]
+    assert cli_report["proposed_queue_item_preview"]["approval_evidence"]["approval_status"] == "pending_review"
+    assert cli_report["proposed_queue_item_preview"]["approval_evidence"]["explicit_approval"] is False
     assert parsed["enqueue_allowed"] is False
 
 

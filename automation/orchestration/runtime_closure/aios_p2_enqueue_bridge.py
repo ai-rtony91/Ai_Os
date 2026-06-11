@@ -14,9 +14,12 @@ import argparse
 import copy
 import hashlib
 import json
+import importlib.util
 from datetime import datetime, timezone
+from importlib import import_module
+import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 SCHEMA = "AIOS_P2_ENQUEUE_BRIDGE_PREVIEW.v1"
@@ -46,6 +49,9 @@ PROPOSED_QUEUE_ITEM_FORBIDDEN_PATHS = [
     "aios/modules/trader/",
     "aios.ps1",
 ]
+
+ADAPTER_MODULE_NAME = "automation.orchestration.approval_inbox.aios_approval_evidence_adapter"
+ADAPTER_MODULE_PATH = Path("automation") / "orchestration" / "approval_inbox" / "aios_approval_evidence_adapter.py"
 
 ALLOWED_BRIDGE_STATUSES = {"READY_FOR_DRY_RUN_PREVIEW", "BLOCKED", "INVALID"}
 UNSAFE_BOOL_FIELDS = [
@@ -108,6 +114,99 @@ def _ensure_dict(value: Any) -> dict[str, Any]:
 
 def _status(value: Any) -> str:
     return str(value or "").upper()
+
+
+def _load_approval_adapter_module(repo_root: Path) -> tuple[Callable[[Any], Any] | None, list[str]]:
+    errors: list[str] = []
+    module = None
+    try:
+        module = import_module(ADAPTER_MODULE_NAME)
+        build_fn = getattr(module, "build_queue_mutation_approval_evidence", None)
+        if callable(build_fn):
+            return build_fn, []
+        errors.append("import_module resolved to module without build_queue_mutation_approval_evidence")
+    except Exception as exc:
+        errors.append(f"import_module failed: {type(exc).__name__}: {exc}")
+
+    adapter_path = repo_root / ADAPTER_MODULE_PATH
+    if adapter_path.exists():
+        try:
+            spec = importlib.util.spec_from_file_location("aios_approval_evidence_adapter_for_p2_bridge", adapter_path)
+            if spec is None or spec.loader is None:
+                errors.append("spec_from_file_location returned no executable module spec")
+            else:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                build_fn = getattr(module, "build_queue_mutation_approval_evidence", None)
+                if callable(build_fn):
+                    return build_fn, errors
+                errors.append("file-loaded adapter missing build_queue_mutation_approval_evidence")
+        except Exception as exc:
+            errors.append(f"file load failed: {type(exc).__name__}: {exc}")
+
+    try:
+        previous_paths = list(sys.path)
+        repo_root_str = str(repo_root)
+        if repo_root_str not in sys.path:
+            sys.path.insert(0, repo_root_str)
+        module = import_module(ADAPTER_MODULE_NAME)
+        build_fn = getattr(module, "build_queue_mutation_approval_evidence", None)
+        if callable(build_fn):
+            return build_fn, errors
+        errors.append("sys.path prepended import succeeded without callable build function")
+    except Exception as exc:
+        if repo_root_str in sys.path:
+            errors.append(f"repo-root import failed: {type(exc).__name__}: {exc}")
+        else:
+            errors.append(f"repo-root import setup failed: {type(exc).__name__}: {exc}")
+    finally:
+        sys.path[:] = previous_paths
+
+    return None, errors
+
+
+def _approval_evidence(repo_root: Path):
+    adapter_builder, errors = _load_approval_adapter_module(repo_root)
+    if adapter_builder is not None:
+        try:
+            evidence = adapter_builder(repo_root=repo_root)
+            if isinstance(evidence, dict):
+                if not evidence:
+                    return {"approval_status": "missing_evidence_payload", "non_authorizing_reason": "approval adapter returned an empty payload", "approval_granted": False, "explicit_approval": False, "non_authorizing_placeholder": True, "apply_gate_pending": True, "authority_active": False, "approval_completed": False, "missing_authority_fields": False, "source_files": [], "approved_by_human": False, "approval_evidence_loader_errors": errors}
+                if errors:
+                    evidence = dict(evidence)
+                    evidence["approval_evidence_loader_errors"] = errors
+                return evidence
+        except Exception as exc:
+            errors.append(f"build fn failed: {type(exc).__name__}: {exc}")
+    else:
+        if not errors:
+            errors.append("approval adapter not available")
+
+    apply_gate_path = repo_root / "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json"
+    approval_inbox_path = repo_root / "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+    return {
+        "source_files": [str(apply_gate_path), str(approval_inbox_path)],
+        "approval_status": "missing_authorized_adapter",
+        "approved_by_human": False,
+        "approval_granted": False,
+        "approval_authority": None,
+        "approved_by": None,
+        "packet_id": None,
+        "allowed_paths": [],
+        "blocked_paths": [],
+        "validator_chain_required": None,
+        "commit_package_required": None,
+        "explicit_approval": False,
+        "apply_gate_pending": True,
+        "authority_active": False,
+        "approval_completed": False,
+        "missing_authority_fields": False,
+        "non_authorizing_placeholder": True,
+        "non_authorizing_reason": "; ".join(errors) or "approval adapter unavailable",
+        "approval_evidence_loader_errors": errors,
+        "explicit_apply_approved": False,
+    }
 
 
 def _path_hash(path: Path) -> str | None:
@@ -241,6 +340,7 @@ def _build_proposed_queue_item_preview(
     invalid_reasons: list[str],
     human_gate_report: dict[str, Any],
     autonomy_gap_report: dict[str, Any],
+    approval_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     recommended_lanes = autonomy_gap_report.get("recommended_next_lanes") if isinstance(autonomy_gap_report.get("recommended_next_lanes"), list) else []
     next_lane = recommended_lanes[0] if recommended_lanes and isinstance(recommended_lanes[0], dict) else {}
@@ -256,6 +356,7 @@ def _build_proposed_queue_item_preview(
             str(DEFAULT_HUMAN_GATE_REPORT),
             str(DEFAULT_AUTONOMY_GAP_REPORT),
         ],
+        "approval_evidence": approval_evidence or {},
         "allowed_paths": list(PROPOSED_QUEUE_ITEM_ALLOWED_PATHS),
         "forbidden_paths": list(PROPOSED_QUEUE_ITEM_FORBIDDEN_PATHS),
         "evidence_status": {
@@ -312,6 +413,7 @@ def build_p2_enqueue_bridge_report(
         human_gate_report=human_gate_report,
         autonomy_gap_report=autonomy_gap_report,
     )
+    approval_evidence = _approval_evidence(repo_root_path)
     bridge_blockers = _collect_bridge_blockers(
         evidence_missing=evidence_missing,
         human_gate_report=human_gate_report,
@@ -332,6 +434,7 @@ def build_p2_enqueue_bridge_report(
         invalid_reasons=invalid_reasons,
         human_gate_report=human_gate_report,
         autonomy_gap_report=autonomy_gap_report,
+        approval_evidence=approval_evidence,
     )
     report_paths = [
         str(output_dir_path / REPORT_JSON_NAME),
