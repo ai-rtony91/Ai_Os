@@ -1,28 +1,25 @@
 {
   "blocked_layers": [],
   "closure_layer_statuses": {
-    "p2_bridge": "BLOCKED",
+    "p2_bridge": "READY_FOR_DRY_RUN_PREVIEW",
     "queue_mutation_gate": "READY_FOR_HUMAN_REVIEW",
     "runtime_apply_lane": "BLOCKED",
-    "scheduler_registration": "BLOCKED",
-    "sos_arming": "BLOCKED"
+    "scheduler_registration": "READY_FOR_SCHEDULER_PREVIEW",
+    "sos_arming": "READY_FOR_SOS_PREVIEW"
   },
   "code_blockers": [],
-  "generated_at_utc": "2026-06-11T02:28:58Z",
-  "governance_blockers": [
-    "sos_arming",
-    "scheduler_registration"
-  ],
+  "generated_at_utc": "2026-06-11T02:55:58Z",
+  "governance_blockers": [],
   "mode": "DRY_RUN_PREVIEW_ONLY",
   "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
   "ready_layers": [
-    "queue_mutation_gate"
-  ],
-  "real_blockers": [
     "p2_bridge",
-    "runtime_apply_lane",
+    "queue_mutation_gate",
     "sos_arming",
     "scheduler_registration"
+  ],
+  "real_blockers": [
+    "runtime_apply_lane"
   ],
   "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
   "schema": "AIOS_AUTONOMY_CLOSURE_REPORT.v1",

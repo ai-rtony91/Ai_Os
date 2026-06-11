@@ -6,8 +6,8 @@ review. It does not execute runtime behavior, does not dispatch workers, does
 not create scheduler or service actions, does not arm SOS, and does not claim
 vacation mode completion.
 
-Pure standard library. JSON-only CLI. No subprocess, no network, no file
-writes.
+Pure standard library. JSON CLI that can persist preview evidence. No
+subprocess, no network, no runtime execution.
 """
 
 from __future__ import annotations
@@ -16,6 +16,7 @@ import argparse
 import copy
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Iterable
 
 from automation.orchestration.autonomy_reports.aios_operator_dependency_ledger import (
@@ -241,6 +242,10 @@ DEFAULT_SOAK_INPUT = {
         "2026-01-01T01:00:00Z",
     ],
 }
+
+REPORT_DIR = Path("Reports") / "runtime_proof_gate"
+REPORT_JSON_NAME = "runtime_proof_gate_preview.json"
+REPORT_MD_NAME = "runtime_proof_gate_summary.md"
 
 
 def _now(now: str | None = None) -> str:
@@ -1273,8 +1278,94 @@ def summarize_runtime_proof_gate(gate: dict[str, Any]) -> dict[str, object]:
     }
 
 
+def build_runtime_proof_gate_markdown_summary(gate: dict[str, Any]) -> str:
+    summary = summarize_runtime_proof_gate(gate)
+    blockers = list(gate.get("blockers") or [])
+    attention = list(gate.get("attention_reasons") or [])
+    invalid = list(gate.get("invalid_reasons") or [])
+    lines = [
+        "# AI_OS Runtime Proof Gate",
+        "",
+        f"- final_verdict: `{summary.get('final_verdict')}`",
+        f"- human_gate_ready: `{summary.get('human_gate_ready')}`",
+        f"- human_gate_required: `{summary.get('human_gate_required')}`",
+        f"- execution_allowed: `{summary.get('execution_allowed')}`",
+        f"- dispatch_allowed: `{summary.get('dispatch_allowed')}`",
+        f"- apply_allowed: `{summary.get('apply_allowed')}`",
+        f"- runtime_launch_allowed: `{summary.get('runtime_launch_allowed')}`",
+        f"- scheduler_creation_allowed: `{summary.get('scheduler_creation_allowed')}`",
+        f"- sos_allowed: `{summary.get('sos_allowed')}`",
+        f"- live_trading_allowed: `{summary.get('live_trading_allowed')}`",
+        f"- blocker_count: `{summary.get('blocker_count')}`",
+        f"- attention_count: `{summary.get('attention_count')}`",
+        f"- invalid_reason_count: `{summary.get('invalid_reason_count')}`",
+        f"- unsafe_flag_count: `{summary.get('unsafe_flag_count')}`",
+        f"- safe_next_action: {summary.get('safe_next_action')}",
+        f"- stop_condition: {summary.get('stop_condition')}",
+        "",
+        "## Blockers",
+    ]
+    if blockers:
+        lines.extend(f"- {item}" for item in blockers)
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Attention"])
+    if attention:
+        lines.extend(f"- {item}" for item in attention)
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Invalid Reasons"])
+    if invalid:
+        lines.extend(f"- {item}" for item in invalid)
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Safety", "- This gate never launches runtime, mutates protected paths, or enables trading."])
+    if gate.get("report_paths"):
+        lines.extend(["", "## Report Paths"])
+        lines.extend(f"- {item}" for item in gate.get("report_paths", []))
+    return "\n".join(lines) + "\n"
+
+
+def write_runtime_proof_gate_reports(
+    gate: dict[str, Any],
+    *,
+    repo_root: str | Path = ".",
+    output_dir: str | Path | None = None,
+) -> dict[str, Any]:
+    root = Path(repo_root)
+    out_dir = Path(output_dir) if output_dir is not None else root / REPORT_DIR
+    if not out_dir.is_absolute():
+        out_dir = root / out_dir
+    out_dir.mkdir(parents=True, exist_ok=True)
+    json_path = out_dir / REPORT_JSON_NAME
+    md_path = out_dir / REPORT_MD_NAME
+    report = _deepcopy(gate)
+    report["report_paths"] = [json_path.as_posix(), md_path.as_posix()]
+    report.update(summarize_runtime_proof_gate(report))
+    report["runtime_execution_allowed"] = report.get("execution_allowed")
+    json_path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+    md_path.write_text(build_runtime_proof_gate_markdown_summary(report), encoding="utf-8")
+    return report
+
+
+def run_runtime_proof_gate(
+    *,
+    repo_root: str | Path = ".",
+    output_dir: str | Path | None = None,
+    write_report: bool = True,
+    **kwargs: Any,
+) -> dict[str, Any]:
+    gate = build_runtime_proof_gate(**kwargs)
+    if write_report:
+        gate = write_runtime_proof_gate_reports(gate, repo_root=repo_root, output_dir=output_dir)
+    return gate
+
+
 def _cli_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="AI_OS runtime proof gate")
+    parser.add_argument("--repo-root", default=".", help="repository root for output resolution")
+    parser.add_argument("--output-dir", default=None, help="optional report output directory")
+    parser.add_argument("--no-write", action="store_true", help="build the gate without writing report files")
     parser.add_argument("--runtime-queue-json")
     parser.add_argument("--relay-processor-json")
     parser.add_argument("--relay-proof-review-json")
@@ -1299,7 +1390,11 @@ def _load_json_arg(raw: str | None) -> dict[str, Any] | None:
 
 def main() -> int:
     args = _cli_args()
-    gate = build_runtime_proof_gate(
+    root = Path(args.repo_root)
+    gate = run_runtime_proof_gate(
+        repo_root=root,
+        output_dir=args.output_dir,
+        write_report=not args.no_write,
         runtime_queue_readout=_load_json_arg(args.runtime_queue_json),
         relay_processor_readout=_load_json_arg(args.relay_processor_json),
         relay_proof_review=_load_json_arg(args.relay_proof_review_json),

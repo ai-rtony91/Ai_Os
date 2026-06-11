@@ -14,6 +14,7 @@ MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "runtime_closure" / "
 P2_BRIDGE_REPORT = REPO_ROOT / "Reports" / "p2_enqueue_bridge" / "p2_enqueue_bridge_preview.json"
 QUEUE_GATE_REPORT = REPO_ROOT / "Reports" / "queue_mutation_gate" / "queue_mutation_gate_preview.json"
 RUNTIME_PROOF_REPORT = REPO_ROOT / "Reports" / "runtime_proof_gate" / "runtime_proof_gate_preview.json"
+RUNTIME_PROOF_HELPERS_PATH = REPO_ROOT / "tests" / "orchestration" / "test_runtime_proof_gate.py"
 
 REAL_ACTIVE_QUEUE = REPO_ROOT / "automation" / "orchestration" / "work_packets" / "active"
 REAL_WORKER_INBOX = REPO_ROOT / "automation" / "orchestration" / "workers" / "inbox" / "AIOS_WORKER_INBOX.json"
@@ -25,6 +26,15 @@ REAL_RUNTIME_TELEMETRY = REPO_ROOT / "telemetry" / "runtime"
 
 def _load():
     spec = importlib.util.spec_from_file_location("aios_runtime_apply_lane_preview", MODULE_PATH)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_runtime_proof_helpers():
+    spec = importlib.util.spec_from_file_location("runtime_proof_gate_test_helpers", RUNTIME_PROOF_HELPERS_PATH)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -238,6 +248,59 @@ def test_preview_files_are_written_and_loaded(tmp_path):
     loaded = json.loads(json_path.read_text(encoding="utf-8"))
     assert loaded["summary"]["apply_status"] == report["apply_status"]
     assert "This preview does not execute runtime, mutate worker inbox, mutate queue" in md_path.read_text(encoding="utf-8")
+
+
+def test_runtime_apply_consumes_runtime_proof_report_from_file(tmp_path):
+    mod = _load()
+    helpers = _load_runtime_proof_helpers()
+    proof_mod = helpers._load(helpers.GATE_PATH, "aios_runtime_proof_gate_for_apply_file_tests")
+    queue, processor, _, restart, retention, soak, ledger, selector = helpers._ready_inputs()
+    blocked_proof = proof_mod.build_runtime_proof_gate(
+        runtime_queue_readout=queue,
+        relay_processor_readout=processor,
+        restart_timeouts_proof=restart,
+        retention_rotation_proof=retention,
+        soak_proof=soak,
+        operator_dependency_ledger=ledger,
+        reduction_target_selector=selector,
+        now="2026-06-10T15:20:28Z",
+    )
+    assert blocked_proof["final_verdict"] == "BLOCKED"
+
+    proof_outdir = tmp_path / "Reports" / "runtime_proof_gate"
+    proof_mod.write_runtime_proof_gate_reports(blocked_proof, repo_root=tmp_path, output_dir=proof_outdir)
+
+    report = mod.build_runtime_apply_lane_report(
+        repo_root=tmp_path,
+        now="2026-06-10T15:20:28Z",
+        p2_preview=_ready_p2_preview(),
+        queue_mutation_gate_preview=_queue_gate_with_approval(True),
+    )
+
+    assert report["evidence_loaded"]["runtime_proof_gate"]["loaded"] is True
+    assert report["runtime_proof_gate"]["final_verdict"] == "BLOCKED"
+    assert report["apply_status"] == mod.STATUS_BLOCKED
+    assert report["would_apply"] is False
+    assert report["would_execute"] is False
+    assert report["runtime_launch"] is False
+    assert report["runtime_execution"] is False
+    assert report["validation"]["status"] == "PASS"
+
+
+def test_missing_runtime_proof_report_does_not_yield_ready(tmp_path):
+    mod = _load()
+    report = mod.build_runtime_apply_lane_report(
+        repo_root=tmp_path,
+        now="2026-06-10T15:20:28Z",
+        p2_preview=_ready_p2_preview(),
+        queue_mutation_gate_preview=_queue_gate_with_approval(True),
+    )
+
+    assert report["evidence_loaded"]["runtime_proof_gate"]["loaded"] is False
+    assert report["apply_status"] != mod.STATUS_READY
+    assert "missing required evidence: runtime_proof_gate" in report["invalid_reasons"]
+    assert report["runtime_launch"] is False
+    assert report["runtime_execution"] is False
 
 
 def test_protected_real_paths_are_not_mutated(tmp_path):
