@@ -1,0 +1,61 @@
+{
+  "schema": "AIOS_SCHEDULER_REGISTRATION_DISABLED_APPLY_EVIDENCE.v1",
+  "packet_id": "AIOS-SCHEDULER-DISABLED-REGISTRATION-SAFE-V2",
+  "mode": "APPLY",
+  "lane": "scheduler-registration-disabled-safe-v2",
+  "status": "TASK_REGISTERED_DISABLED_NO_RUN",
+  "recorded_at_local": "2026-06-11T14:32:43-04:00",
+  "task_registration": {
+    "task_name": "AIOS_Relay_Nightly",
+    "registration_status": "REGISTERED",
+    "enabled": false,
+    "state_code": 1,
+    "state_label": "Disabled",
+    "disabled_status": "CONFIRMED_DISABLED",
+    "trigger": {
+      "schedule": "daily",
+      "time_local": "02:00",
+      "start_boundary_observed": "2026-06-12T02:00:00",
+      "days_interval": 1
+    },
+    "action_summary": "Task Scheduler uses pwsh to launch the AI_OS night-cycle script with the approved apply flag from the disabled task definition.",
+    "action_execute": "pwsh",
+    "action_arguments_match_expected": true,
+    "working_directory": "C:\\Dev\\Ai.Os",
+    "last_run_time": "11/30/1999 00:00:00",
+    "last_task_result": 267011,
+    "last_task_result_meaning": "SCHED_S_TASK_HAS_NOT_RUN",
+    "query_output_summary": "Task Scheduler COM query returned Enabled=false, State=Disabled, executable=pwsh, expected arguments matched, working directory matched C:\\Dev\\Ai.Os, and last result indicated the task has not run."
+  },
+  "source_evidence": [
+    "Reports/autonomy_loop_closure/scheduler_manual_registration_review_after_ntfy_sos.json",
+    "automation/orchestration/work_packets/proposed/AIOS-SCHEDULER-MANUAL-REGISTRATION-APPLY-REQUEST-AFTER-NTFY-SOS.md",
+    "Reports/human_gate/ntfy_remote_sos_delivery_proof_record.json",
+    "Reports/autonomy_loop_closure/ntfy_remote_sos_delivery_consumption.json"
+  ],
+  "safety_confirmations": {
+    "task_was_not_run": true,
+    "task_was_not_enabled": true,
+    "runtime_was_not_launched": true,
+    "runtime_was_not_executed": true,
+    "queue_was_not_mutated": true,
+    "approval_inbox_was_not_mutated": true,
+    "worker_inbox_was_not_mutated": true,
+    "command_queue_was_not_mutated": true,
+    "sos_was_not_sent_by_codex": true,
+    "broker_live_trading_remained_blocked": true,
+    "credential_access_or_storage_performed": false,
+    "ntfy_topic_or_private_url_stored": false,
+    "telemetry_runtime_mutated": false,
+    "dashboard_mutated": false,
+    "destructive_cleanup_performed": false
+  },
+  "rollback": {
+    "disable_command": "schtasks /change /tn \"AIOS_Relay_Nightly\" /disable",
+    "delete_command": "schtasks /delete /tn \"AIOS_Relay_Nightly\" /f",
+    "rollback_disable_path": "Windows Task Scheduler task AIOS_Relay_Nightly -> disable",
+    "rollback_delete_path": "Windows Task Scheduler task AIOS_Relay_Nightly -> delete"
+  },
+  "next_safe_action": "Review the disabled registration evidence in a PR. Enabling AIOS_Relay_Nightly requires a separate Anthony-approved APPLY packet.",
+  "no_protected_runtime_statement": "No task run, task enablement, runtime launch, runtime execution, queue mutation, SOS send, broker action, live trading, credential access, telemetry/runtime write, dashboard write, destructive cleanup, push to main, or merge was performed."
+}
