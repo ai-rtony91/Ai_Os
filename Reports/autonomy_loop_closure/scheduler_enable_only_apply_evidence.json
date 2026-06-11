@@ -1,0 +1,67 @@
+{
+  "schema": "AIOS_SCHEDULER_ENABLE_ONLY_APPLY_EVIDENCE.v1",
+  "packet_id": "AIOS-SCHEDULER-ENABLE-ONLY-APPLY-V1",
+  "mode": "APPLY",
+  "lane": "scheduler-enable-only",
+  "status": "TASK_ENABLED_NO_RUN",
+  "recorded_at_local": "2026-06-11T14:42:39-04:00",
+  "task": {
+    "task_name": "AIOS_Relay_Nightly",
+    "prior_state": {
+      "enabled": false,
+      "state_label": "Disabled",
+      "last_run_time": "11/30/1999 00:00:00",
+      "last_task_result": 267011,
+      "last_task_result_meaning": "SCHED_S_TASK_HAS_NOT_RUN"
+    },
+    "final_state": {
+      "enabled": true,
+      "state_label": "Ready",
+      "last_run_time": "11/30/1999 00:00:00",
+      "last_task_result": 267011,
+      "last_task_result_meaning": "SCHED_S_TASK_HAS_NOT_RUN"
+    },
+    "trigger_summary": {
+      "schedule": "daily",
+      "time_local": "02:00",
+      "start_boundary_observed": "2026-06-12T02:00:00",
+      "days_interval": 1,
+      "next_scheduled_fire_time_local": "2026-06-12T02:00:00"
+    },
+    "working_directory": "C:\\Dev\\Ai.Os",
+    "action_summary": "Existing task action matched the approved disabled-registration evidence. The action was not printed as a standalone runnable command.",
+    "enabled_during_packet": true,
+    "query_output_summary": "Before enable, the task was disabled and had never run. After enable, the task reported Enabled=true, State=Ready, next scheduled fire at 2026-06-12 02:00 local, and the task still had never run."
+  },
+  "source_evidence": [
+    "Reports/autonomy_loop_closure/scheduler_registration_disabled_apply_evidence.json",
+    "Reports/autonomy_loop_closure/scheduler_registration_disabled_apply_evidence.md",
+    "automation/orchestration/work_packets/proposed/AIOS-SCHEDULER-ENABLE-REQUEST-AFTER-DISABLED-REGISTRATION.md"
+  ],
+  "safety_confirmations": {
+    "task_was_enabled": true,
+    "task_was_not_run": true,
+    "manual_task_run_was_not_requested": true,
+    "night_cycle_script_was_not_invoked_directly": true,
+    "runtime_was_not_launched": true,
+    "runtime_was_not_executed": true,
+    "queue_was_not_mutated": true,
+    "approval_inbox_was_not_mutated": true,
+    "worker_inbox_was_not_mutated": true,
+    "command_queue_was_not_mutated": true,
+    "sos_was_not_sent_by_codex": true,
+    "broker_live_trading_remained_blocked": true,
+    "credential_access_or_storage_performed": false,
+    "ntfy_topic_token_private_url_or_secret_stored": false,
+    "telemetry_runtime_mutated": false,
+    "telemetry_night_supervisor_mutated": false,
+    "dashboard_mutated": false,
+    "destructive_cleanup_performed": false
+  },
+  "rollback": {
+    "disable_command": "schtasks /change /tn \"AIOS_Relay_Nightly\" /disable",
+    "delete_command": "schtasks /delete /tn \"AIOS_Relay_Nightly\" /f"
+  },
+  "next_safe_action": "Review this enable-only evidence in a PR. First scheduled-fire proof requires separate Anthony approval and must not use a manual task run.",
+  "no_forbidden_action_statement": "No task run, direct night-cycle invocation, runtime launch, runtime execution, queue mutation, approval mutation, worker inbox mutation, command queue mutation, SOS send, broker action, live trading, credential access, telemetry/runtime write, telemetry/night_supervisor write, dashboard write, destructive cleanup, direct push to main, merge, or PR closure was performed."
+}
