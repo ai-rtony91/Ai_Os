@@ -10,9 +10,11 @@
   ],
   "apply_allowed": false,
   "approval_granted": false,
+  "attention_count": 1,
   "attention_reasons": [
     "reduction target selector still points to a proof-planning target"
   ],
+  "blocker_count": 12,
   "blockers": [
     "relay review is BLOCKED",
     "operator dependency ledger validation is BLOCKED",
@@ -51,6 +53,7 @@
   "execution_allowed": false,
   "final_verdict": "BLOCKED",
   "final_verdict_reason": "The connected dry-run proofs are not yet safe enough for human gate review.",
+  "forbidden_claim_count": 0,
   "forbidden_claims_detected": [],
   "gate_policy": {
     "allow_autonomy_claim": false,
@@ -76,9 +79,10 @@
   },
   "gate_type": "runtime_proof_gate",
   "gate_version": "v1",
-  "generated_at_utc": "2026-06-11T01:42:46Z",
+  "generated_at_utc": "2026-06-11T02:55:33Z",
   "human_gate_ready": false,
   "human_gate_required": true,
+  "invalid_reason_count": 0,
   "invalid_reasons": [],
   "live_trading_allowed": false,
   "mode": "DRY_RUN_GATE",
@@ -144,6 +148,7 @@
     "operator_dependency_ledger",
     "reduction_target_selector"
   ],
+  "prerequisite_missing_count": 8,
   "prerequisite_statuses": {
     "operator_dependency_ledger": "PASS",
     "reduction_target_selector": "PASS",
@@ -303,6 +308,7 @@
     "validation_status": null
   },
   "rejected_prerequisites": [],
+  "relay_review_status": null,
   "relay_summary": {
     "blocked_human_gates": [
       "human_sos_arming",
@@ -325,6 +331,11 @@
     "vacation_mode_complete": false,
     "validation_status": null
   },
+  "report_paths": [
+    "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
+    "Reports/runtime_proof_gate/runtime_proof_gate_summary.md"
+  ],
+  "restart_timeouts_status": "PASS",
   "restart_timeouts_summary": {
     "component": "restart_timeouts",
     "proof_status": "PASS",
@@ -339,6 +350,7 @@
     "vacation_mode_complete": false,
     "validation_status": null
   },
+  "retention_rotation_status": "PASS",
   "retention_rotation_summary": {
     "archive_executed": false,
     "archive_required": false,
@@ -357,8 +369,10 @@
     "vacation_mode_complete": false,
     "validation_status": null
   },
+  "runtime_execution_allowed": false,
   "runtime_launch_allowed": false,
   "runtime_mutation_allowed": false,
+  "runtime_queue_status": null,
   "runtime_queue_summary": {
     "blockers": [
       "relay runtime proof missing",
@@ -401,6 +415,8 @@
   "scheduler_creation_allowed": false,
   "schema": "AIOS_RUNTIME_PROOF_GATE.v1",
   "service_creation_allowed": false,
+  "soak_pass": true,
+  "soak_status": "PASS",
   "soak_summary": {
     "checkpoint_continuity_ok": true,
     "component": "soak",
@@ -424,6 +440,7 @@
   "stop_condition": "Stop until blockers are cleared; no execution.",
   "telemetry_mutation_allowed": false,
   "unsafe_autonomy_claim": false,
+  "unsafe_flag_count": 0,
   "unsafe_flags_detected": [],
   "vacation_mode_complete": false
 }

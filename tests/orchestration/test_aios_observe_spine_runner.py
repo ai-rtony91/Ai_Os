@@ -20,10 +20,28 @@ APPROVAL_INBOX = REPO_ROOT / "automation" / "orchestration" / "approval_inbox"
 COMMAND_QUEUE = REPO_ROOT / "automation" / "orchestration" / "command_queue" / "AIOS_COMMAND_QUEUE.json"
 SERVICES = REPO_ROOT / "services"
 TELEMETRY = REPO_ROOT / "telemetry"
+RUNTIME_APPLY_MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "runtime_closure" / "aios_runtime_apply_lane_preview.py"
+RUNTIME_PROOF_HELPERS_PATH = REPO_ROOT / "tests" / "orchestration" / "test_runtime_proof_gate.py"
 
 
 def _load():
     spec = importlib.util.spec_from_file_location("aios_observe_spine_runner_test_module", MODULE_PATH)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_runtime_proof_helpers():
+    spec = importlib.util.spec_from_file_location("runtime_proof_gate_test_helpers_for_observe", RUNTIME_PROOF_HELPERS_PATH)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_runtime_apply_module():
+    spec = importlib.util.spec_from_file_location("runtime_apply_lane_preview_test_module", RUNTIME_APPLY_MODULE_PATH)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -194,3 +212,92 @@ def test_real_paths_do_not_mutate_when_running_runner(tmp_path):
 
     after = {str(path): _fingerprint(path) for path in protected}
     assert before == after
+
+
+def test_blocked_runtime_proof_file_keeps_observe_loop_blocked_not_invalid(tmp_path):
+    mod = _load()
+    helpers = _load_runtime_proof_helpers()
+    proof_mod = helpers._load(helpers.GATE_PATH, "aios_runtime_proof_gate_for_observe_tests")
+    queue, processor, _, restart, retention, soak, ledger, selector = helpers._ready_inputs()
+    blocked_proof = proof_mod.build_runtime_proof_gate(
+        runtime_queue_readout=queue,
+        relay_processor_readout=processor,
+        restart_timeouts_proof=restart,
+        retention_rotation_proof=retention,
+        soak_proof=soak,
+        operator_dependency_ledger=ledger,
+        reduction_target_selector=selector,
+        now="2026-06-10T15:20:28Z",
+    )
+    assert blocked_proof["final_verdict"] == "BLOCKED"
+
+    proof_outdir = tmp_path / "Reports" / "runtime_proof_gate"
+    proof_mod.write_runtime_proof_gate_reports(blocked_proof, repo_root=tmp_path, output_dir=proof_outdir)
+    runtime_apply_mod = _load_runtime_apply_module()
+    p2_preview = {
+        "bridge_status": "READY_FOR_DRY_RUN_PREVIEW",
+        "validation": {"status": "PASS"},
+        "summary": {"recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1"},
+        "proposed_queue_item_preview": {
+            "preview_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+            "lane_id": "p2_review_to_queue_enqueue_bridge",
+            "mode": "DRY_RUN_PREVIEW_ONLY",
+            "allowed_paths": ["automation/orchestration/work_packets/"],
+            "forbidden_paths": [
+                "automation/orchestration/work_packets/active/",
+                "automation/orchestration/work_packets/blocked/",
+                "automation/orchestration/work_packets/complete/",
+            ],
+            "runtime_execution_allowed": False,
+            "scheduler_creation_allowed": False,
+            "sos_allowed": False,
+            "live_trading_allowed": False,
+            "queue_mutation_allowed": False,
+            "runtime_launch_allowed": False,
+            "worker_inbox_write_allowed": False,
+        },
+    }
+    queue_gate = {
+        "gate_status": "READY_FOR_HUMAN_REVIEW",
+        "validation": {"status": "PASS", "blockers": []},
+        "proposed_queue_item": {
+            "packet_id": "AIOS-RUNTIME-APPLY-PREVIEW-001",
+            "lane": "feature/runtime-apply-lane-preview-v1",
+            "mode": "DRY_RUN_PREVIEW_ONLY",
+            "allowed_paths": ["automation/orchestration/work_packets/"],
+            "forbidden_paths": ["automation/orchestration/work_packets/active/"],
+            "target_paths": ["automation/orchestration/work_packets/"],
+        },
+        "approval_check": {"approval_evidence_present": True, "explicit_approval": True},
+        "runtime_execution_allowed": False,
+        "runtime_launch_allowed": False,
+        "scheduler_creation_allowed": False,
+        "sos_allowed": False,
+        "live_trading_allowed": False,
+        "queue_mutation_allowed": False,
+        "worker_inbox_mutation_allowed": False,
+        "approval_inbox_mutation_allowed": False,
+        "command_queue_mutation_allowed": False,
+    }
+    runtime_apply = runtime_apply_mod.build_runtime_apply_lane_report(
+        repo_root=tmp_path,
+        now="2026-06-10T15:20:28Z",
+        p2_preview=p2_preview,
+        queue_mutation_gate_preview=queue_gate,
+    )
+
+    evidence = _ready_evidence()
+    evidence["runtime_apply"] = runtime_apply
+
+    report = mod.build_observe_spine_report(
+        repo_root=REPO_ROOT,
+        output_dir=tmp_path / "control_loop",
+        now="2026-06-10T15:20:28Z",
+        evidence=evidence,
+    )
+
+    assert report["layers"]["runtime_apply_lane"]["status"] == mod.LAYER_BLOCKED
+    assert report["layers"]["runtime_apply_lane"]["stale"] is False
+    assert report["layers"]["runtime_apply_lane"]["real_blocker"] is True
+    assert report["observe_loop_status"] == mod.BLOCKED
+    assert report["observe_loop_status"] != mod.INVALID
