@@ -21,6 +21,14 @@ REPORT_DIR = Path("Reports") / "stop_drill_preview"
 REPORT_JSON_NAME = "stop_drill_preview.json"
 REPORT_MD_NAME = "stop_drill_preview.md"
 ALLOWED_STATUSES = {"REVIEWABLE", "HUMAN_GATE_REQUIRED"}
+STOP_CONFIRMATION_PHRASE = "ANTHONY_CONFIRMS_STOP_DRILL_PASSED_FOR_DRY_RUN_RECOVERY_PROOF_ONLY"
+STOP_SAFE_NEXT_ACTION = (
+    "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance."
+)
+STOP_SAFETY_NOTE = (
+    "The confirmation phrase does not authorize runtime execution, scheduler registration, SOS send, live trading, "
+    "broker action, or queue mutation."
+)
 
 
 def _now(now: str | None = None) -> str:
@@ -40,9 +48,7 @@ def build_stop_drill_preview(
         and explicit_human_confirmation.get("stop_drill_confirmed") is True
     )
     status = "REVIEWABLE" if confirmed else "HUMAN_GATE_REQUIRED"
-    manual_step = (
-        "Human must perform/confirm STOP drill in a separately approved STOP drill packet; this preview does not stop or kill anything."
-    )
+    manual_step = STOP_SAFE_NEXT_ACTION
     report = {
         "schema": SCHEMA,
         "mode": MODE,
@@ -50,7 +56,12 @@ def build_stop_drill_preview(
         "status": status,
         "proof_status": status,
         "review_status": status,
+        "stop_drill_pass": confirmed,
         "stop_drill_reviewable": confirmed,
+        "stop_drill_human_confirmation": confirmed,
+        "stop_drill_human_confirmation_required": not confirmed,
+        "exact_human_confirmation_phrase": STOP_CONFIRMATION_PHRASE,
+        "safety_note": STOP_SAFETY_NOTE,
         "explicit_human_provided_evidence": confirmed,
         "manual_step_required": None if confirmed else manual_step,
         "human_gate": None if confirmed else "stop_drill_human_confirmation",
@@ -66,6 +77,7 @@ def build_stop_drill_preview(
         "scheduler_creation_allowed": False,
         "scheduler_registration_allowed": False,
         "notification_send_allowed": False,
+        "sos_notification_allowed": False,
         "sos_allowed": False,
         "live_trading_allowed": False,
         "credentials_accessed": False,
@@ -104,6 +116,7 @@ def validate_stop_drill_preview(report: dict[str, Any]) -> dict[str, Any]:
         "scheduler_creation_allowed",
         "scheduler_registration_allowed",
         "notification_send_allowed",
+        "sos_notification_allowed",
         "sos_allowed",
         "live_trading_allowed",
         "credentials_accessed",
@@ -114,6 +127,18 @@ def validate_stop_drill_preview(report: dict[str, Any]) -> dict[str, Any]:
             unsafe_flags.append(f"{field}_true")
     if report.get("status") == "HUMAN_GATE_REQUIRED" and not report.get("manual_step_required"):
         blockers.append("manual_step_required must be present when human gate is required")
+    if report.get("status") == "HUMAN_GATE_REQUIRED":
+        if report.get("stop_drill_pass") is not False:
+            blockers.append("stop_drill_pass must remain false without explicit human evidence")
+            unsafe_flags.append("stop_drill_pass_true_without_evidence")
+        if report.get("stop_drill_human_confirmation_required") is not True:
+            blockers.append("stop_drill_human_confirmation_required must be true")
+            unsafe_flags.append("stop_drill_human_confirmation_required_false")
+        if report.get("safe_next_action") != STOP_SAFE_NEXT_ACTION:
+            blockers.append("safe_next_action must match the human-gated STOP drill handoff")
+    if report.get("stop_drill_pass") is True and report.get("explicit_human_provided_evidence") is not True:
+        blockers.append("stop_drill_pass true requires explicit_human_provided_evidence true")
+        unsafe_flags.append("stop_drill_pass_true_without_evidence")
     return {
         "status": "PASS" if not blockers else "BLOCK",
         "blockers": blockers,
@@ -133,14 +158,21 @@ def build_markdown(report: dict[str, Any]) -> str:
         "# AI_OS STOP Drill Preview",
         "",
         f"- status: `{report.get('status')}`",
+        f"- stop_drill_pass: `{report.get('stop_drill_pass')}`",
+        f"- stop_drill_human_confirmation_required: `{report.get('stop_drill_human_confirmation_required')}`",
         f"- stop_executed: `{report.get('stop_executed')}`",
         f"- runtime_execution_allowed: `{report.get('runtime_execution_allowed')}`",
+        f"- runtime_launch_allowed: `{report.get('runtime_launch_allowed')}`",
         f"- scheduler_creation_allowed: `{report.get('scheduler_creation_allowed')}`",
         f"- notification_send_allowed: `{report.get('notification_send_allowed')}`",
         f"- safe_next_action: {report.get('safe_next_action')}",
+        f"- exact_human_confirmation_phrase: `{report.get('exact_human_confirmation_phrase')}`",
         "",
         "## Manual Step",
         f"- {report.get('manual_step_required') or 'Human confirmation evidence is present for review.'}",
+        "",
+        "## Safety Note",
+        f"- {report.get('safety_note')}",
     ]
     return "\n".join(lines) + "\n"
 

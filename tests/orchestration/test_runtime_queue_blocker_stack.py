@@ -88,18 +88,59 @@ def test_human_gate_requests_do_not_claim_delivery_or_scheduler_registration(tmp
     mod = _load(MODULE_PATH, "aios_runtime_queue_blocker_stack_request_test")
     report = mod.run_runtime_queue_blocker_stack(repo_root=tmp_path, now="2026-06-11T12:00:00Z")
 
+    stop_path = tmp_path / "Reports" / "human_gate" / "stop_drill_confirmation_request.json"
     sos_path = tmp_path / "Reports" / "human_gate" / "sos_delivery_request.json"
     scheduler_path = tmp_path / "Reports" / "human_gate" / "scheduler_manual_registration_request.json"
+    handoff_path = tmp_path / "Reports" / "human_gate" / "final_human_gate_handoff.json"
+    stop = json.loads(stop_path.read_text(encoding="utf-8"))
     sos = json.loads(sos_path.read_text(encoding="utf-8"))
     scheduler = json.loads(scheduler_path.read_text(encoding="utf-8"))
+    handoff = json.loads(handoff_path.read_text(encoding="utf-8"))
 
+    assert report["source_loaded"]["stop_drill_confirmation_request"] is True
+    assert report["source_loaded"]["final_human_gate_handoff"] is True
     assert report["proofs"]["sos_delivery_proof"]["status"] == "HUMAN_GATE_REQUIRED"
+    assert stop["schema"] == "AIOS_STOP_DRILL_CONFIRMATION_REQUEST.v1"
+    assert stop["stop_drill_pass"] is False
+    assert stop["stop_drill_human_confirmation"] is False
+    assert stop["runtime_execution_allowed"] is False
+    assert stop["runtime_launch_allowed"] is False
+    assert stop["scheduler_registration_allowed"] is False
+    assert stop["sos_notification_allowed"] is False
+    assert (
+        stop["exact_human_confirmation_phrase"]
+        == "ANTHONY_CONFIRMS_STOP_DRILL_PASSED_FOR_DRY_RUN_RECOVERY_PROOF_ONLY"
+    )
+    assert sos["schema"] == "AIOS_SOS_DELIVERY_CONFIRMATION_REQUEST.v1"
     assert sos["real_channel_armed"] is False
     assert sos["notification_send_allowed"] is False
     assert sos["delivered_true"] is False
+    assert sos["sos_delivery_human_confirmation"] is False
+    assert sos["scheduler_registration_allowed"] is False
+    assert (
+        sos["exact_human_confirmation_phrase"]
+        == "ANTHONY_CONFIRMS_SOS_DELIVERED_TRUE_FOR_SINGLE_TEST_ONLY_NO_SECRET_IN_REPO"
+    )
+    assert scheduler["schema"] == "AIOS_SCHEDULER_MANUAL_REGISTRATION_CONFIRMATION_REQUEST.v1"
+    assert scheduler["scheduler_registered_by_anthony"] is False
     assert scheduler["real_scheduler_registered"] is False
     assert scheduler["scheduler_creation_allowed"] is False
     assert scheduler["manual_registration_confirmed"] is False
+    assert scheduler["sos_notification_allowed"] is False
+    assert (
+        scheduler["exact_human_confirmation_phrase"]
+        == "ANTHONY_CONFIRMS_SCHEDULER_MANUALLY_REGISTERED_AFTER_STOP_AND_SOS_PROOF"
+    )
+    assert handoff["status"] == "HUMAN_GATE_REQUIRED"
+    assert handoff["stop_drill_pass"] is False
+    assert handoff["sos_delivered_true"] is False
+    assert handoff["scheduler_registered_by_anthony"] is False
+    assert handoff["vacation_mode_complete"] is False
+    assert handoff["runtime_execution_allowed"] is False
+    assert handoff["queue_write_allowed"] is False
+    assert handoff["scheduler_creation_allowed"] is False
+    assert handoff["sos_allowed"] is False
+    assert len(handoff["next_strict_human_order"]) == 7
 
 
 def test_runtime_proof_gate_consumes_normalized_stack_without_stale_alias_blockers(tmp_path):

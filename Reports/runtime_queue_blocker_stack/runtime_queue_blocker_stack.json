@@ -31,12 +31,80 @@
   },
   "command_queue_mutation_allowed": false,
   "credentials_accessed": false,
-  "generated_at_utc": "2026-06-11T04:40:41Z",
+  "final_human_gate_handoff": {
+    "broker_action_allowed": false,
+    "confirmation_requests": {
+      "scheduler_manual_registration_request": {
+        "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_SCHEDULER_MANUALLY_REGISTERED_AFTER_STOP_AND_SOS_PROOF",
+        "path": "Reports\\human_gate\\scheduler_manual_registration_request.json",
+        "status": "HUMAN_GATE_REQUIRED"
+      },
+      "sos_delivery_request": {
+        "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_SOS_DELIVERED_TRUE_FOR_SINGLE_TEST_ONLY_NO_SECRET_IN_REPO",
+        "path": "Reports\\human_gate\\sos_delivery_request.json",
+        "status": "HUMAN_GATE_REQUIRED"
+      },
+      "stop_drill_confirmation_request": {
+        "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_STOP_DRILL_PASSED_FOR_DRY_RUN_RECOVERY_PROOF_ONLY",
+        "path": "Reports\\human_gate\\stop_drill_confirmation_request.json",
+        "status": "HUMAN_GATE_REQUIRED"
+      }
+    },
+    "credentials_accessed": false,
+    "current_status": "HUMAN_GATE_REQUIRED",
+    "generated_at_utc": "2026-06-11T05:31:31Z",
+    "live_trading_allowed": false,
+    "mode": "PREVIEW_ONLY_HUMAN_GATE_HANDOFF",
+    "next_strict_human_order": [
+      "Review STOP drill confirmation request.",
+      "If safe, run/confirm STOP drill manually.",
+      "Review SOS delivery request.",
+      "If safe, perform exactly one SOS delivery test manually without secrets in repo.",
+      "Review scheduler manual registration request.",
+      "If safe, register scheduler manually outside Codex automation.",
+      "Rerun final proof chain after human confirmations."
+    ],
+    "protected_mutation_detected": false,
+    "queue_write_allowed": false,
+    "report_paths": [
+      "Reports/human_gate/final_human_gate_handoff.json",
+      "Reports/human_gate/final_human_gate_handoff.md"
+    ],
+    "runtime_execution_allowed": false,
+    "runtime_launch_allowed": false,
+    "safe_next_action": "Anthony reviews and completes the strict human order manually; rerun final proof chain after confirmations.",
+    "scheduler_creation_allowed": false,
+    "scheduler_registered_by_anthony": false,
+    "scheduler_registration_allowed": false,
+    "schema": "AIOS_FINAL_HUMAN_GATE_HANDOFF.v1",
+    "sos_allowed": false,
+    "sos_delivered_true": false,
+    "sos_notification_allowed": false,
+    "status": "HUMAN_GATE_REQUIRED",
+    "stop_condition": "Stop before runtime execution, runtime launch, queue write, scheduler creation, SOS send, broker action, credential access, live trading, or vacation-mode completion.",
+    "stop_drill_pass": false,
+    "vacation_mode_complete": false
+  },
+  "generated_at_utc": "2026-06-11T05:31:31Z",
   "human_gate_blockers": [
     "stop_drill_human_confirmation",
     "sos_delivery_human_confirmation",
     "scheduler_manual_registration_human_confirmation"
   ],
+  "human_gate_confirmation_requests": {
+    "scheduler_manual_registration_request": {
+      "path": "Reports\\human_gate\\scheduler_manual_registration_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "sos_delivery_request": {
+      "path": "Reports\\human_gate\\sos_delivery_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "stop_drill_confirmation_request": {
+      "path": "Reports\\human_gate\\stop_drill_confirmation_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    }
+  },
   "human_gate_only_blockers": true,
   "invalid_proofs": [],
   "live_trading_allowed": false,
@@ -44,7 +112,7 @@
   "mode": "DRY_RUN_PROOF",
   "normalized_runtime_queue_readout": {
     "cloud_buildable_lane_complete": true,
-    "generated_at_utc": "2026-06-11T04:40:41Z",
+    "generated_at_utc": "2026-06-11T05:31:31Z",
     "hard_gate_summary": {
       "global": [
         "No live trading, broker, or OANDA execution.",
@@ -663,7 +731,7 @@
         ],
         "human_gate": "scheduler_manual_registration_human_confirmation",
         "reason": "Scheduler manual registration cannot be claimed without explicit human-provided evidence.",
-        "safe_next_action": "Human must perform/confirm scheduler registration in a separately approved real scheduler packet.",
+        "safe_next_action": "Anthony must register the scheduler manually outside Codex automation after STOP and SOS proof, then provide the exact human confirmation phrase in a separately approved human-gated packet.",
         "source": "Reports\\human_gate\\scheduler_manual_registration_request.json",
         "status": "HUMAN_GATE_REQUIRED"
       },
@@ -684,7 +752,7 @@
         ],
         "human_gate": "sos_delivery_human_confirmation",
         "reason": "SOS delivered:true cannot be claimed without explicit human-provided evidence.",
-        "safe_next_action": "Human must perform/confirm SOS delivery in a separately approved real channel packet.",
+        "safe_next_action": "Anthony must perform exactly one SOS delivery test manually without secrets in repo, then provide the exact human confirmation phrase in a separately approved human-gated packet.",
         "source": "Reports\\human_gate\\sos_delivery_request.json",
         "status": "HUMAN_GATE_REQUIRED"
       },
@@ -694,8 +762,8 @@
         ],
         "human_gate": "stop_drill_human_confirmation",
         "reason": "STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
-        "safe_next_action": "Human must approve/confirm the STOP drill in a separate real STOP drill packet before runtime readiness.",
-        "source": "Reports\\relay_proof_review\\relay_proof_review.json",
+        "safe_next_action": "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance.",
+        "source": "Reports\\stop_drill_preview\\stop_drill_preview.json",
         "status": "HUMAN_GATE_REQUIRED"
       }
     },
@@ -775,7 +843,7 @@
       ],
       "human_gate": "scheduler_manual_registration_human_confirmation",
       "reason": "Scheduler manual registration cannot be claimed without explicit human-provided evidence.",
-      "safe_next_action": "Human must perform/confirm scheduler registration in a separately approved real scheduler packet.",
+      "safe_next_action": "Anthony must register the scheduler manually outside Codex automation after STOP and SOS proof, then provide the exact human confirmation phrase in a separately approved human-gated packet.",
       "source": "Reports\\human_gate\\scheduler_manual_registration_request.json",
       "status": "HUMAN_GATE_REQUIRED"
     },
@@ -796,7 +864,7 @@
       ],
       "human_gate": "sos_delivery_human_confirmation",
       "reason": "SOS delivered:true cannot be claimed without explicit human-provided evidence.",
-      "safe_next_action": "Human must perform/confirm SOS delivery in a separately approved real channel packet.",
+      "safe_next_action": "Anthony must perform exactly one SOS delivery test manually without secrets in repo, then provide the exact human confirmation phrase in a separately approved human-gated packet.",
       "source": "Reports\\human_gate\\sos_delivery_request.json",
       "status": "HUMAN_GATE_REQUIRED"
     },
@@ -806,8 +874,8 @@
       ],
       "human_gate": "stop_drill_human_confirmation",
       "reason": "STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
-      "safe_next_action": "Human must approve/confirm the STOP drill in a separate real STOP drill packet before runtime readiness.",
-      "source": "Reports\\relay_proof_review\\relay_proof_review.json",
+      "safe_next_action": "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance.",
+      "source": "Reports\\stop_drill_preview\\stop_drill_preview.json",
       "status": "HUMAN_GATE_REQUIRED"
     }
   },
@@ -826,14 +894,17 @@
   "schema": "AIOS_RUNTIME_QUEUE_BLOCKER_STACK.v1",
   "sos_allowed": false,
   "source_loaded": {
+    "final_human_gate_handoff": true,
     "relay_predecessor_proof": true,
     "relay_proof_review": true,
     "runtime_proof_gate": true,
     "scheduler_manual_registration_request": true,
     "sos_delivery_request": true,
-    "stop_drill_preview": false
+    "stop_drill_confirmation_request": true,
+    "stop_drill_preview": true
   },
   "source_reports": {
+    "final_human_gate_handoff": "Reports\\human_gate\\final_human_gate_handoff.json",
     "relay_predecessor_proof": "Reports\\relay_predecessor_proof\\relay_predecessor_proof.json",
     "relay_proof_review": "Reports\\relay_proof_review\\relay_proof_review.json",
     "runtime_proof_gate": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
@@ -841,6 +912,7 @@
     "scheduler_preview": "Reports\\scheduler_preview\\scheduler_registration_preview.json",
     "sos_delivery_request": "Reports\\human_gate\\sos_delivery_request.json",
     "sos_preview": "Reports\\sos_preview\\sos_arming_preview.json",
+    "stop_drill_confirmation_request": "Reports\\human_gate\\stop_drill_confirmation_request.json",
     "stop_drill_preview": "Reports\\stop_drill_preview\\stop_drill_preview.json"
   },
   "stale_blockers_resolved": [

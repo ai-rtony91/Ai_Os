@@ -1,7 +1,7 @@
 {
   "credentials_accessed": false,
-  "explicit_human_provided_evidence": false,
-  "generated_at_utc": "2026-06-11T04:40:41Z",
+  "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_SCHEDULER_MANUALLY_REGISTERED_AFTER_STOP_AND_SOS_PROOF",
+  "generated_at_utc": "2026-06-11T05:31:31Z",
   "live_trading_allowed": false,
   "manual_registration_confirmed": false,
   "mode": "PREVIEW_ONLY_HUMAN_GATE_REQUEST",
@@ -9,11 +9,14 @@
   "real_scheduler_registered": false,
   "runtime_execution_allowed": false,
   "runtime_launch_allowed": false,
-  "safe_next_action": "Human must perform/confirm scheduler registration in a separately approved real scheduler packet.",
+  "safe_next_action": "Anthony must register the scheduler manually outside Codex automation after STOP and SOS proof, then provide the exact human confirmation phrase in a separately approved human-gated packet.",
+  "safety_note": "This phrase does not authorize Codex or AI_OS to create Windows scheduled tasks automatically.",
   "scheduler_creation_allowed": false,
+  "scheduler_registered_by_anthony": false,
   "scheduler_registration_allowed": false,
-  "schema": "AIOS_HUMAN_GATE_SCHEDULER_MANUAL_REGISTRATION_REQUEST.v1",
+  "schema": "AIOS_SCHEDULER_MANUAL_REGISTRATION_CONFIRMATION_REQUEST.v1",
   "sos_allowed": false,
+  "sos_notification_allowed": false,
   "status": "HUMAN_GATE_REQUIRED",
   "stop_condition": "Stop before creating Windows Scheduled Tasks, services, or claiming manual registration."
 }

@@ -31,10 +31,49 @@ REPORT_JSON_NAME = "runtime_queue_blocker_stack.json"
 REPORT_MD_NAME = "runtime_queue_blocker_stack.md"
 
 HUMAN_GATE_DIR = Path("Reports") / "human_gate"
+STOP_REQUEST_JSON = "stop_drill_confirmation_request.json"
+STOP_REQUEST_MD = "stop_drill_confirmation_request.md"
 SOS_REQUEST_JSON = "sos_delivery_request.json"
 SOS_REQUEST_MD = "sos_delivery_request.md"
 SCHEDULER_REQUEST_JSON = "scheduler_manual_registration_request.json"
 SCHEDULER_REQUEST_MD = "scheduler_manual_registration_request.md"
+FINAL_HANDOFF_JSON = "final_human_gate_handoff.json"
+FINAL_HANDOFF_MD = "final_human_gate_handoff.md"
+
+STOP_CONFIRMATION_PHRASE = "ANTHONY_CONFIRMS_STOP_DRILL_PASSED_FOR_DRY_RUN_RECOVERY_PROOF_ONLY"
+SOS_CONFIRMATION_PHRASE = "ANTHONY_CONFIRMS_SOS_DELIVERED_TRUE_FOR_SINGLE_TEST_ONLY_NO_SECRET_IN_REPO"
+SCHEDULER_CONFIRMATION_PHRASE = "ANTHONY_CONFIRMS_SCHEDULER_MANUALLY_REGISTERED_AFTER_STOP_AND_SOS_PROOF"
+STOP_CONFIRMATION_SAFETY_NOTE = (
+    "This phrase does not authorize runtime execution, scheduler registration, SOS send, live trading, broker action, "
+    "or queue mutation."
+)
+SOS_CONFIRMATION_SAFETY_NOTE = (
+    "This phrase does not authorize ongoing SOS automation, scheduler registration, runtime execution, broker action, "
+    "live trading, or secret storage in repo."
+)
+SCHEDULER_CONFIRMATION_SAFETY_NOTE = (
+    "This phrase does not authorize Codex or AI_OS to create Windows scheduled tasks automatically."
+)
+STOP_SAFE_NEXT_ACTION = (
+    "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance."
+)
+SOS_SAFE_NEXT_ACTION = (
+    "Anthony must perform exactly one SOS delivery test manually without secrets in repo, then provide the exact "
+    "human confirmation phrase in a separately approved human-gated packet."
+)
+SCHEDULER_SAFE_NEXT_ACTION = (
+    "Anthony must register the scheduler manually outside Codex automation after STOP and SOS proof, then provide "
+    "the exact human confirmation phrase in a separately approved human-gated packet."
+)
+FINAL_HUMAN_ORDER = [
+    "Review STOP drill confirmation request.",
+    "If safe, run/confirm STOP drill manually.",
+    "Review SOS delivery request.",
+    "If safe, perform exactly one SOS delivery test manually without secrets in repo.",
+    "Review scheduler manual registration request.",
+    "If safe, register scheduler manually outside Codex automation.",
+    "Rerun final proof chain after human confirmations.",
+]
 
 DEFAULT_RUNTIME_PROOF = Path("Reports") / "runtime_proof_gate" / "runtime_proof_gate_preview.json"
 DEFAULT_RELAY_REVIEW = Path("Reports") / "relay_proof_review" / "relay_proof_review.json"
@@ -202,55 +241,87 @@ def _explicit_scheduler_evidence(root: Path) -> dict[str, Any] | None:
     return None
 
 
-def build_sos_delivery_request(*, now: str | None = None) -> dict[str, Any]:
+def build_stop_drill_confirmation_request(*, now: str | None = None) -> dict[str, Any]:
     return {
-        "schema": "AIOS_HUMAN_GATE_SOS_DELIVERY_REQUEST.v1",
+        "schema": "AIOS_STOP_DRILL_CONFIRMATION_REQUEST.v1",
         "generated_at_utc": _now(now),
         "mode": "PREVIEW_ONLY_HUMAN_GATE_REQUEST",
         "status": "HUMAN_GATE_REQUIRED",
+        "stop_drill_pass": False,
+        "stop_drill_human_confirmation": False,
+        "runtime_execution_allowed": False,
+        "runtime_launch_allowed": False,
+        "scheduler_registration_allowed": False,
+        "sos_notification_allowed": False,
+        "live_trading_allowed": False,
+        "exact_human_confirmation_phrase": STOP_CONFIRMATION_PHRASE,
+        "safety_note": STOP_CONFIRMATION_SAFETY_NOTE,
+        "safe_next_action": STOP_SAFE_NEXT_ACTION,
+        "stop_condition": "Stop before claiming STOP drill pass, launching runtime, sending SOS, registering scheduler, or mutating queues.",
+    }
+
+
+def build_sos_delivery_request(*, now: str | None = None) -> dict[str, Any]:
+    return {
+        "schema": "AIOS_SOS_DELIVERY_CONFIRMATION_REQUEST.v1",
+        "generated_at_utc": _now(now),
+        "mode": "PREVIEW_ONLY_HUMAN_GATE_REQUEST",
+        "status": "HUMAN_GATE_REQUIRED",
+        "delivered_true": False,
+        "sos_delivery_human_confirmation": False,
         "real_channel_armed": False,
         "notification_send_allowed": False,
         "notification_sent": False,
-        "delivered_true": False,
-        "explicit_human_provided_evidence": False,
+        "sos_allowed": False,
         "runtime_execution_allowed": False,
         "runtime_launch_allowed": False,
         "scheduler_creation_allowed": False,
-        "sos_allowed": False,
+        "scheduler_registration_allowed": False,
         "live_trading_allowed": False,
         "credentials_accessed": False,
-        "safe_next_action": (
-            "Human must perform/confirm SOS delivery in a separately approved real channel packet."
-        ),
+        "exact_human_confirmation_phrase": SOS_CONFIRMATION_PHRASE,
+        "safety_note": SOS_CONFIRMATION_SAFETY_NOTE,
+        "safe_next_action": SOS_SAFE_NEXT_ACTION,
         "stop_condition": "Stop before sending SOS, arming a real channel, storing credentials, or claiming delivered:true.",
     }
 
 
 def build_scheduler_manual_registration_request(*, now: str | None = None) -> dict[str, Any]:
     return {
-        "schema": "AIOS_HUMAN_GATE_SCHEDULER_MANUAL_REGISTRATION_REQUEST.v1",
+        "schema": "AIOS_SCHEDULER_MANUAL_REGISTRATION_CONFIRMATION_REQUEST.v1",
         "generated_at_utc": _now(now),
         "mode": "PREVIEW_ONLY_HUMAN_GATE_REQUEST",
         "status": "HUMAN_GATE_REQUIRED",
+        "scheduler_registered_by_anthony": False,
+        "manual_registration_confirmed": False,
         "real_scheduler_registered": False,
         "scheduler_creation_allowed": False,
         "scheduler_registration_allowed": False,
-        "manual_registration_confirmed": False,
-        "explicit_human_provided_evidence": False,
         "runtime_execution_allowed": False,
         "runtime_launch_allowed": False,
         "notification_send_allowed": False,
+        "sos_notification_allowed": False,
         "sos_allowed": False,
         "live_trading_allowed": False,
         "credentials_accessed": False,
-        "safe_next_action": (
-            "Human must perform/confirm scheduler registration in a separately approved real scheduler packet."
-        ),
+        "exact_human_confirmation_phrase": SCHEDULER_CONFIRMATION_PHRASE,
+        "safety_note": SCHEDULER_CONFIRMATION_SAFETY_NOTE,
+        "safe_next_action": SCHEDULER_SAFE_NEXT_ACTION,
         "stop_condition": "Stop before creating Windows Scheduled Tasks, services, or claiming manual registration.",
     }
 
 
 def _request_markdown(title: str, request: dict[str, Any]) -> str:
+    flag_fields = {
+        "delivered_true",
+        "manual_registration_confirmed",
+        "real_channel_armed",
+        "real_scheduler_registered",
+        "scheduler_registered_by_anthony",
+        "sos_delivery_human_confirmation",
+        "stop_drill_human_confirmation",
+        "stop_drill_pass",
+    }
     lines = [
         f"# {title}",
         "",
@@ -258,11 +329,13 @@ def _request_markdown(title: str, request: dict[str, Any]) -> str:
         f"- generated_at_utc: `{request.get('generated_at_utc')}`",
         f"- safe_next_action: {request.get('safe_next_action')}",
         f"- stop_condition: {request.get('stop_condition')}",
+        f"- exact_human_confirmation_phrase: `{request.get('exact_human_confirmation_phrase')}`",
         "",
         "## Safety Flags",
     ]
-    for key in sorted(k for k in request if k.endswith("_allowed") or k in {"delivered_true", "manual_registration_confirmed", "real_channel_armed", "real_scheduler_registered"}):
+    for key in sorted(k for k in request if k.endswith("_allowed") or k in flag_fields):
         lines.append(f"- {key}: `{request.get(key)}`")
+    lines.extend(["", "## Safety Note", f"- {request.get('safety_note')}"])
     return "\n".join(lines) + "\n"
 
 
@@ -273,15 +346,21 @@ def write_human_gate_requests(
     write_reports: bool = True,
 ) -> dict[str, dict[str, Any]]:
     root = Path(repo_root)
-    sos_evidence = _explicit_sos_evidence(root)
-    scheduler_evidence = _explicit_scheduler_evidence(root)
-
-    sos_request = _deepcopy(sos_evidence) if sos_evidence else build_sos_delivery_request(now=now)
-    scheduler_request = _deepcopy(scheduler_evidence) if scheduler_evidence else build_scheduler_manual_registration_request(now=now)
+    stop_request = build_stop_drill_confirmation_request(now=now)
+    sos_request = build_sos_delivery_request(now=now)
+    scheduler_request = build_scheduler_manual_registration_request(now=now)
 
     if write_reports:
         out_dir = root / HUMAN_GATE_DIR
         out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / STOP_REQUEST_JSON).write_text(
+            json.dumps(stop_request, indent=2, sort_keys=True),
+            encoding="utf-8",
+        )
+        (out_dir / STOP_REQUEST_MD).write_text(
+            _request_markdown("AI_OS STOP Drill Human Confirmation Request", stop_request),
+            encoding="utf-8",
+        )
         (out_dir / SOS_REQUEST_JSON).write_text(json.dumps(sos_request, indent=2, sort_keys=True), encoding="utf-8")
         (out_dir / SOS_REQUEST_MD).write_text(
             _request_markdown("AI_OS SOS Delivery Human Gate Request", sos_request),
@@ -297,9 +376,112 @@ def write_human_gate_requests(
         )
 
     return {
+        "stop_drill_confirmation_request": stop_request,
         "sos_delivery_request": sos_request,
         "scheduler_manual_registration_request": scheduler_request,
     }
+
+
+def build_final_human_gate_handoff(
+    *,
+    proofs: dict[str, dict[str, Any]],
+    stop_request: dict[str, Any],
+    sos_request: dict[str, Any],
+    scheduler_request: dict[str, Any],
+    now: str | None = None,
+) -> dict[str, Any]:
+    stop_drill_pass = proofs.get("stop_drill_proof", {}).get("status") == "PASS"
+    sos_delivered_true = proofs.get("sos_delivery_proof", {}).get("status") == "PASS"
+    scheduler_registered_by_anthony = (
+        proofs.get("scheduler_manual_registration_proof", {}).get("status") == "PASS"
+    )
+    return {
+        "schema": "AIOS_FINAL_HUMAN_GATE_HANDOFF.v1",
+        "generated_at_utc": _now(now),
+        "mode": "PREVIEW_ONLY_HUMAN_GATE_HANDOFF",
+        "status": "HUMAN_GATE_REQUIRED",
+        "current_status": "HUMAN_GATE_REQUIRED",
+        "stop_drill_pass": stop_drill_pass,
+        "sos_delivered_true": sos_delivered_true,
+        "scheduler_registered_by_anthony": scheduler_registered_by_anthony,
+        "vacation_mode_complete": False,
+        "runtime_execution_allowed": False,
+        "runtime_launch_allowed": False,
+        "queue_write_allowed": False,
+        "scheduler_creation_allowed": False,
+        "scheduler_registration_allowed": False,
+        "sos_allowed": False,
+        "sos_notification_allowed": False,
+        "live_trading_allowed": False,
+        "broker_action_allowed": False,
+        "credentials_accessed": False,
+        "protected_mutation_detected": False,
+        "next_strict_human_order": list(FINAL_HUMAN_ORDER),
+        "confirmation_requests": {
+            "stop_drill_confirmation_request": {
+                "path": str(HUMAN_GATE_DIR / STOP_REQUEST_JSON),
+                "status": stop_request.get("status"),
+                "exact_human_confirmation_phrase": stop_request.get("exact_human_confirmation_phrase"),
+            },
+            "sos_delivery_request": {
+                "path": str(HUMAN_GATE_DIR / SOS_REQUEST_JSON),
+                "status": sos_request.get("status"),
+                "exact_human_confirmation_phrase": sos_request.get("exact_human_confirmation_phrase"),
+            },
+            "scheduler_manual_registration_request": {
+                "path": str(HUMAN_GATE_DIR / SCHEDULER_REQUEST_JSON),
+                "status": scheduler_request.get("status"),
+                "exact_human_confirmation_phrase": scheduler_request.get("exact_human_confirmation_phrase"),
+            },
+        },
+        "safe_next_action": "Anthony reviews and completes the strict human order manually; rerun final proof chain after confirmations.",
+        "stop_condition": (
+            "Stop before runtime execution, runtime launch, queue write, scheduler creation, SOS send, broker action, "
+            "credential access, live trading, or vacation-mode completion."
+        ),
+    }
+
+
+def _final_handoff_markdown(handoff: dict[str, Any]) -> str:
+    lines = [
+        "# AI_OS Final Human Gate Handoff",
+        "",
+        f"- status: `{handoff.get('status')}`",
+        f"- stop_drill_pass: `{handoff.get('stop_drill_pass')}`",
+        f"- sos_delivered_true: `{handoff.get('sos_delivered_true')}`",
+        f"- scheduler_registered_by_anthony: `{handoff.get('scheduler_registered_by_anthony')}`",
+        f"- vacation_mode_complete: `{handoff.get('vacation_mode_complete')}`",
+        f"- runtime_execution_allowed: `{handoff.get('runtime_execution_allowed')}`",
+        f"- runtime_launch_allowed: `{handoff.get('runtime_launch_allowed')}`",
+        f"- queue_write_allowed: `{handoff.get('queue_write_allowed')}`",
+        f"- scheduler_creation_allowed: `{handoff.get('scheduler_creation_allowed')}`",
+        f"- sos_allowed: `{handoff.get('sos_allowed')}`",
+        f"- live_trading_allowed: `{handoff.get('live_trading_allowed')}`",
+        f"- safe_next_action: {handoff.get('safe_next_action')}",
+        "",
+        "## Next Strict Human Order",
+    ]
+    for index, item in enumerate(list(handoff.get("next_strict_human_order") or []), start=1):
+        lines.append(f"{index}. {item}")
+    lines.extend(["", "## Stop Condition", f"- {handoff.get('stop_condition')}"])
+    return "\n".join(lines) + "\n"
+
+
+def write_final_human_gate_handoff(
+    handoff: dict[str, Any],
+    *,
+    repo_root: str | Path = ".",
+) -> dict[str, Any]:
+    root = Path(repo_root)
+    out_dir = root / HUMAN_GATE_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+    json_path = out_dir / FINAL_HANDOFF_JSON
+    md_path = out_dir / FINAL_HANDOFF_MD
+    written = _deepcopy(handoff)
+    written["report_paths"] = [json_path.as_posix(), md_path.as_posix()]
+    json_path.write_text(json.dumps(written, indent=2, sort_keys=True), encoding="utf-8")
+    md_path.write_text(_final_handoff_markdown(written), encoding="utf-8")
+    return written
 
 
 def _proofs_from_evidence(
@@ -361,7 +543,7 @@ def _proofs_from_evidence(
             reason="STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
             human_gate="stop_drill_human_confirmation",
             aliases=["STOP drill proof missing"],
-            safe_next_action="Human must approve/confirm the STOP drill in a separate real STOP drill packet before runtime readiness.",
+            safe_next_action=STOP_SAFE_NEXT_ACTION,
         ),
         "sos_delivery_proof": _proof(
             status=sos_status,
@@ -440,6 +622,7 @@ def build_runtime_queue_blocker_stack(
     stop_preview = stop_preview if isinstance(stop_preview, dict) else _read_json(root / DEFAULT_STOP_DRILL_PREVIEW)
 
     requests = write_human_gate_requests(repo_root=root, now=generated_at, write_reports=write_human_requests)
+    stop_request = requests["stop_drill_confirmation_request"]
     sos_request = sos_request if isinstance(sos_request, dict) else requests["sos_delivery_request"]
     scheduler_request = (
         scheduler_request
@@ -455,6 +638,15 @@ def build_runtime_queue_blocker_stack(
         sos_request=sos_request,
         scheduler_request=scheduler_request,
     )
+    final_handoff = build_final_human_gate_handoff(
+        proofs=proofs,
+        stop_request=stop_request,
+        sos_request=sos_request,
+        scheduler_request=scheduler_request,
+        now=generated_at,
+    )
+    if write_human_requests:
+        final_handoff = write_final_human_gate_handoff(final_handoff, repo_root=root)
 
     statuses = {key: proof["status"] for key, proof in proofs.items()}
     stale_layers = [
@@ -505,14 +697,31 @@ def build_runtime_queue_blocker_stack(
         "real_blockers": real_blocked,
         "human_gate_blockers": human_gate_blockers,
         "human_gate_only_blockers": bool(human_gate_blockers) and not missing and not invalid and not real_blocked,
+        "human_gate_confirmation_requests": {
+            "stop_drill_confirmation_request": {
+                "path": str(HUMAN_GATE_DIR / STOP_REQUEST_JSON),
+                "status": stop_request.get("status"),
+            },
+            "sos_delivery_request": {
+                "path": str(HUMAN_GATE_DIR / SOS_REQUEST_JSON),
+                "status": sos_request.get("status"),
+            },
+            "scheduler_manual_registration_request": {
+                "path": str(HUMAN_GATE_DIR / SCHEDULER_REQUEST_JSON),
+                "status": scheduler_request.get("status"),
+            },
+        },
+        "final_human_gate_handoff": final_handoff,
         "normalized_runtime_queue_readout": normalized_queue,
         "source_reports": {
             "runtime_proof_gate": str(DEFAULT_RUNTIME_PROOF),
             "relay_proof_review": str(DEFAULT_RELAY_REVIEW),
             "relay_predecessor_proof": str(DEFAULT_RELAY_PREDECESSOR),
             "stop_drill_preview": str(DEFAULT_STOP_DRILL_PREVIEW),
+            "stop_drill_confirmation_request": str(HUMAN_GATE_DIR / STOP_REQUEST_JSON),
             "sos_delivery_request": str(HUMAN_GATE_DIR / SOS_REQUEST_JSON),
             "scheduler_manual_registration_request": str(HUMAN_GATE_DIR / SCHEDULER_REQUEST_JSON),
+            "final_human_gate_handoff": str(HUMAN_GATE_DIR / FINAL_HANDOFF_JSON),
             "sos_preview": str(DEFAULT_SOS_PREVIEW),
             "scheduler_preview": str(DEFAULT_SCHEDULER_PREVIEW),
         },
@@ -521,8 +730,10 @@ def build_runtime_queue_blocker_stack(
             "relay_proof_review": isinstance(relay_review, dict),
             "relay_predecessor_proof": isinstance(relay_predecessor, dict),
             "stop_drill_preview": isinstance(stop_preview, dict),
+            "stop_drill_confirmation_request": isinstance(stop_request, dict),
             "sos_delivery_request": isinstance(sos_request, dict),
             "scheduler_manual_registration_request": isinstance(scheduler_request, dict),
+            "final_human_gate_handoff": isinstance(final_handoff, dict),
         },
         "protected_mutation_detected": False,
         **PROTECTED_FALSE_FIELDS,

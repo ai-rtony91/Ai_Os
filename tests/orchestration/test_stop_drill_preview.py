@@ -25,15 +25,23 @@ def test_stop_drill_preview_is_human_gated_without_execution():
 
     assert report["status"] == "HUMAN_GATE_REQUIRED"
     assert report["proof_status"] == "HUMAN_GATE_REQUIRED"
+    assert report["stop_drill_pass"] is False
+    assert report["stop_drill_human_confirmation_required"] is True
     assert report["manual_step_required"]
     assert report["stop_executed"] is False
     assert report["kill_processes_allowed"] is False
     assert report["runtime_mutation_allowed"] is False
     assert report["runtime_execution_allowed"] is False
+    assert report["runtime_launch_allowed"] is False
     assert report["scheduler_creation_allowed"] is False
     assert report["notification_send_allowed"] is False
+    assert report["sos_notification_allowed"] is False
     assert report["sos_allowed"] is False
     assert report["protected_mutation_detected"] is False
+    assert (
+        report["safe_next_action"]
+        == "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance."
+    )
     assert mod.validate_stop_drill_preview(report)["status"] == "PASS"
 
 
@@ -48,7 +56,9 @@ def test_stop_drill_preview_can_be_reviewable_with_explicit_human_confirmation()
     )
 
     assert report["status"] == "REVIEWABLE"
+    assert report["stop_drill_pass"] is True
     assert report["stop_drill_reviewable"] is True
+    assert report["stop_drill_human_confirmation_required"] is False
     assert report["stop_executed"] is False
     assert report["runtime_execution_allowed"] is False
     assert mod.validate_stop_drill_preview(report)["status"] == "PASS"

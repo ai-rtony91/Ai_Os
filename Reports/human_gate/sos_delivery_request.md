@@ -1,9 +1,10 @@
 # AI_OS SOS Delivery Human Gate Request
 
 - status: `HUMAN_GATE_REQUIRED`
-- generated_at_utc: `2026-06-11T04:40:41Z`
-- safe_next_action: Human must perform/confirm SOS delivery in a separately approved real channel packet.
+- generated_at_utc: `2026-06-11T05:31:31Z`
+- safe_next_action: Anthony must perform exactly one SOS delivery test manually without secrets in repo, then provide the exact human confirmation phrase in a separately approved human-gated packet.
 - stop_condition: Stop before sending SOS, arming a real channel, storing credentials, or claiming delivered:true.
+- exact_human_confirmation_phrase: `ANTHONY_CONFIRMS_SOS_DELIVERED_TRUE_FOR_SINGLE_TEST_ONLY_NO_SECRET_IN_REPO`
 
 ## Safety Flags
 - delivered_true: `False`
@@ -13,4 +14,9 @@
 - runtime_execution_allowed: `False`
 - runtime_launch_allowed: `False`
 - scheduler_creation_allowed: `False`
+- scheduler_registration_allowed: `False`
 - sos_allowed: `False`
+- sos_delivery_human_confirmation: `False`
+
+## Safety Note
+- This phrase does not authorize ongoing SOS automation, scheduler registration, runtime execution, broker action, live trading, or secret storage in repo.

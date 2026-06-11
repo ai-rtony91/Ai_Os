@@ -1,0 +1,17 @@
+{
+  "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_STOP_DRILL_PASSED_FOR_DRY_RUN_RECOVERY_PROOF_ONLY",
+  "generated_at_utc": "2026-06-11T05:31:31Z",
+  "live_trading_allowed": false,
+  "mode": "PREVIEW_ONLY_HUMAN_GATE_REQUEST",
+  "runtime_execution_allowed": false,
+  "runtime_launch_allowed": false,
+  "safe_next_action": "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance.",
+  "safety_note": "This phrase does not authorize runtime execution, scheduler registration, SOS send, live trading, broker action, or queue mutation.",
+  "scheduler_registration_allowed": false,
+  "schema": "AIOS_STOP_DRILL_CONFIRMATION_REQUEST.v1",
+  "sos_notification_allowed": false,
+  "status": "HUMAN_GATE_REQUIRED",
+  "stop_condition": "Stop before claiming STOP drill pass, launching runtime, sending SOS, registering scheduler, or mutating queues.",
+  "stop_drill_human_confirmation": false,
+  "stop_drill_pass": false
+}
