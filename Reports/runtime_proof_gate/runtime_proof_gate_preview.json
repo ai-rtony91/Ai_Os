@@ -13,19 +13,16 @@
   "approval_granted": false,
   "attention_count": 0,
   "attention_reasons": [],
-  "blocker_count": 4,
+  "blocker_count": 3,
   "blockers": [
-    "runtime queue still lists remaining blockers",
-    "restart_timeouts_proof",
-    "retention_rotation_proof",
-    "soak_proof"
+    "human gate required: stop_drill_human_confirmation",
+    "human gate required: sos_delivery_human_confirmation",
+    "human gate required: scheduler_manual_registration_human_confirmation"
   ],
   "credentials_accessed": false,
   "cross_proof_consistency": {
     "attention_reasons": [],
-    "blockers": [
-      "runtime queue still lists remaining blockers"
-    ],
+    "blockers": [],
     "contradictions": [],
     "invalid_reasons": [],
     "operator_dependency_status": "READY_FOR_DRY_RUN",
@@ -33,7 +30,7 @@
     "relay_review_status": "REVIEWABLE",
     "restart_timeouts_status": "PASS",
     "retention_rotation_status": "PASS",
-    "runtime_queue_status": "UNKNOWN",
+    "runtime_queue_status": "HUMAN_GATE_REQUIRED",
     "soak_status": "PASS"
   },
   "dispatch_allowed": false,
@@ -66,7 +63,13 @@
   },
   "gate_type": "runtime_proof_gate",
   "gate_version": "v1",
-  "generated_at_utc": "2026-06-11T03:59:35Z",
+  "generated_at_utc": "2026-06-11T04:41:11Z",
+  "human_gate_blockers": [
+    "stop_drill_human_confirmation",
+    "sos_delivery_human_confirmation",
+    "scheduler_manual_registration_human_confirmation"
+  ],
+  "human_gate_only_blockers": true,
   "human_gate_ready": false,
   "human_gate_required": true,
   "invalid_reason_count": 0,
@@ -115,11 +118,7 @@
       "runtime_execution_queue": "PASS"
     }
   },
-  "prerequisite_inputs_missing": [
-    "restart_timeouts_proof",
-    "retention_rotation_proof",
-    "soak_proof"
-  ],
+  "prerequisite_inputs_missing": [],
   "prerequisite_inputs_present": [
     "runtime_queue_readout",
     "relay_processor_readout",
@@ -128,9 +127,13 @@
     "retention_rotation_proof",
     "soak_proof",
     "operator_dependency_ledger",
-    "reduction_target_selector"
+    "reduction_target_selector",
+    "runtime_queue_blocker_stack",
+    "stop_drill_preview",
+    "sos_delivery_request",
+    "scheduler_manual_registration_request"
   ],
-  "prerequisite_missing_count": 3,
+  "prerequisite_missing_count": 0,
   "prerequisite_statuses": {
     "operator_dependency_ledger": "PASS",
     "reduction_target_selector": "PASS",
@@ -209,10 +212,6 @@
     },
     "runtime_queue": {
       "blockers": [
-        "relay runtime proof missing",
-        "restart/timeouts proof missing",
-        "retention proof missing",
-        "soak proof missing",
         "STOP drill proof missing",
         "SOS delivered:true missing",
         "scheduler manual registration missing"
@@ -230,10 +229,6 @@
       },
       "proof_status": null,
       "remaining_blockers": [
-        "relay runtime proof missing",
-        "restart/timeouts proof missing",
-        "retention proof missing",
-        "soak proof missing",
         "STOP drill proof missing",
         "SOS delivered:true missing",
         "scheduler manual registration missing"
@@ -243,7 +238,7 @@
       "source_schema": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
       "unsafe_autonomy_claim": null,
       "vacation_mode_complete": false,
-      "validation_status": null
+      "validation_status": "HUMAN_GATE_REQUIRED"
     },
     "soak": {
       "checkpoint_continuity_ok": true,
@@ -340,13 +335,10 @@
   "runtime_execution_allowed": false,
   "runtime_launch_allowed": false,
   "runtime_mutation_allowed": false,
-  "runtime_queue_status": null,
+  "runtime_queue_blocker_stack_status": "HUMAN_GATE_REQUIRED",
+  "runtime_queue_status": "HUMAN_GATE_REQUIRED",
   "runtime_queue_summary": {
     "blockers": [
-      "relay runtime proof missing",
-      "restart/timeouts proof missing",
-      "retention proof missing",
-      "soak proof missing",
       "STOP drill proof missing",
       "SOS delivered:true missing",
       "scheduler manual registration missing"
@@ -364,10 +356,6 @@
     },
     "proof_status": null,
     "remaining_blockers": [
-      "relay runtime proof missing",
-      "restart/timeouts proof missing",
-      "retention proof missing",
-      "soak proof missing",
       "STOP drill proof missing",
       "SOS delivered:true missing",
       "scheduler manual registration missing"
@@ -377,10 +365,11 @@
     "source_schema": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
     "unsafe_autonomy_claim": null,
     "vacation_mode_complete": false,
-    "validation_status": null
+    "validation_status": "HUMAN_GATE_REQUIRED"
   },
   "safe_next_action": "Fix the blockers before the proof chain can reach human gate review.",
   "scheduler_creation_allowed": false,
+  "scheduler_manual_registration_request_status": "HUMAN_GATE_REQUIRED",
   "schema": "AIOS_RUNTIME_PROOF_GATE.v1",
   "service_creation_allowed": false,
   "soak_pass": true,
@@ -404,8 +393,10 @@
     "validation_status": null
   },
   "sos_allowed": false,
+  "sos_delivery_request_status": "HUMAN_GATE_REQUIRED",
   "source_metadata": {},
   "stop_condition": "Stop until blockers are cleared; no execution.",
+  "stop_drill_status": "HUMAN_GATE_REQUIRED",
   "telemetry_mutation_allowed": false,
   "unsafe_autonomy_claim": false,
   "unsafe_flag_count": 0,

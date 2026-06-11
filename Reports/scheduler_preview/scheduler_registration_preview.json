@@ -31,7 +31,7 @@
     "runtime_apply_preview": "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
     "sos_preview": "Reports/sos_preview/sos_arming_preview.json"
   },
-  "generated_at_utc": "2026-06-11T04:00:17Z",
+  "generated_at_utc": "2026-06-11T04:41:31Z",
   "human_gate_projection": {
     "dogfood_status": "BLOCKED",
     "human_gate_packet_status": "BLOCKED"

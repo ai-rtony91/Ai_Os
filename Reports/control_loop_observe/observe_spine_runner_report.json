@@ -69,7 +69,7 @@
       },
       "evidence_missing": [],
       "execution_allowed": false,
-      "generated_at_utc": "2026-06-11T04:00:29Z",
+      "generated_at_utc": "2026-06-11T04:41:38Z",
       "human_gate_evidence_summary": {
         "dogfood_status": "BLOCKED",
         "human_gate_packet_status": "BLOCKED",
@@ -165,7 +165,7 @@
           "aios/modules/trader/",
           "aios.ps1"
         ],
-        "generated_at_utc": "2026-06-11T04:00:29Z",
+        "generated_at_utc": "2026-06-11T04:41:38Z",
         "invalid_reasons": [],
         "lane_id": "p2_review_to_queue_enqueue_bridge",
         "live_trading_allowed": false,
@@ -331,12 +331,12 @@
       "future_write_target": "automation/orchestration/work_packets/active/",
       "gate_status": "READY_FOR_HUMAN_REVIEW",
       "gate_status_reason": "proposal is ready for human review",
-      "generated_at_utc": "2026-06-11T04:00:29Z",
+      "generated_at_utc": "2026-06-11T04:41:38Z",
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
       "proposed_item_source": {
         "loaded": true,
-        "path": "C:/Users/mylab/AppData/Local/Temp/tmpisl61kst.json"
+        "path": "C:/Users/mylab/AppData/Local/Temp/tmp39uccr03.json"
       },
       "proposed_queue_item": {
         "allowed_paths": [
@@ -480,7 +480,7 @@
         "would_execute": false,
         "would_route": false
       },
-      "generated_at_utc": "2026-06-11T04:00:29Z",
+      "generated_at_utc": "2026-06-11T04:41:38Z",
       "invalid_reasons": [],
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
@@ -590,22 +590,22 @@
           "exists": true,
           "is_file": true,
           "path": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
-          "sha256": "e21c5dbd196ccf4d6b9c41abf5e088f53b283d45822921503fb713e45a122f50",
+          "sha256": "c3ac206b1319dfac114f22d4f452855b397df5abca0dc572db6644c582c5c941",
           "size": 10493
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
-          "sha256": "58ae05e8654209512df1c7b6b5d34570188f8dfa5e5e9870f6a7565115a9bc50",
+          "sha256": "c775b4e5c19bf289850e4df68ef25657cae09022e28ef7a90864a374eb038ca9",
           "size": 4948
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
-          "sha256": "4b27d5847397daa50ae8f4d3a724dfafb6185a101f660d3c5b97dda39a6db2f5",
-          "size": 15414
+          "sha256": "73ddb5ca87b37d266e001ddb05b01edc0361940a38733ec57ca7102991bf99f2",
+          "size": 15394
         },
         {
           "exists": true,
@@ -917,7 +917,7 @@
         "runtime_apply_preview": "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
         "sos_preview": "Reports/sos_preview/sos_arming_preview.json"
       },
-      "generated_at_utc": "2026-06-11T04:00:29Z",
+      "generated_at_utc": "2026-06-11T04:41:38Z",
       "human_gate_projection": {
         "dogfood_status": null,
         "human_gate_packet_status": ""
@@ -1500,7 +1500,7 @@
         "queue_mutation_report": false,
         "runtime_apply_preview": false
       },
-      "generated_at_utc": "2026-06-11T04:00:29Z",
+      "generated_at_utc": "2026-06-11T04:41:38Z",
       "human_gate_report_summary": {
         "dogfood_status": null,
         "packet_status": null
@@ -2103,7 +2103,7 @@
       "would_route": false
     }
   },
-  "generated_at_utc": "2026-06-11T04:00:29Z",
+  "generated_at_utc": "2026-06-11T04:41:38Z",
   "governance_blockers": [
     "sos_arming",
     "scheduler_registration"

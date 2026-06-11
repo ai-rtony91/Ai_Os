@@ -29,7 +29,7 @@
     "queue_mutation_report": false,
     "runtime_apply_preview": false
   },
-  "generated_at_utc": "2026-06-11T04:00:11Z",
+  "generated_at_utc": "2026-06-11T04:41:25Z",
   "human_gate_report_summary": {
     "dogfood_status": "BLOCKED",
     "packet_status": "BLOCKED"
