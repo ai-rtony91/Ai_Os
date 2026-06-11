@@ -137,7 +137,17 @@ function Write-AiOsRuntimeHeartbeat {
         observe_only = $script:AiOsObserveOnly
         updated_at_utc = $now
     }
-    Write-AiOsJsonAtomic -Path $runtimeHeartbeatPath -Data $heartbeat -Depth 8
+    $targetHeartbeatPath = Get-AiOsRuntimeHeartbeatPath
+    Write-AiOsJsonAtomic -Path $targetHeartbeatPath -Data $heartbeat -Depth 8
+}
+
+function Get-AiOsRuntimeHeartbeatPath {
+    if (($script:AiOsObserveOnly -eq $true) -or (-not $script:AiOsEffectiveApply)) {
+        $observeOnlyDir = Join-Path ([System.IO.Path]::GetTempPath()) "AIOS_NIGHT_CYCLE"
+        return Join-Path $observeOnlyDir ("runtime_heartbeat.{0}.observe_only.json" -f $script:AiOsCycleId)
+    }
+
+    return $runtimeHeartbeatPath
 }
 
 function Set-AiOsMarkerModeContext {

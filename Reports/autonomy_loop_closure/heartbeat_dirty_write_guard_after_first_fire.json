@@ -1,0 +1,78 @@
+{
+  "schema": "AIOS_HEARTBEAT_DIRTY_WRITE_GUARD_AFTER_FIRST_FIRE.v1",
+  "packet_id": "AIOS-HEARTBEAT-DIRTY-WRITE-GUARD-APPLY-V1",
+  "mode": "APPLY",
+  "lane": "heartbeat-dirty-write-guard",
+  "recorded_at_local": "2026-06-11",
+  "source_evidence": [
+    "Reports/autonomy_loop_closure/first_scheduled_fire_proof_after_scheduler_enable.json",
+    "Reports/autonomy_loop_closure/first_scheduled_fire_proof_after_scheduler_enable.md",
+    "telemetry/night_supervisor/reports/night_summary_2026-06-11.json",
+    "automation/orchestration/work_packets/proposed/AIOS-HEARTBEAT-DIRTY-WRITE-GUARD-AFTER-FIRST-SCHEDULED-FIRE.md"
+  ],
+  "root_cause": {
+    "owner": "automation/orchestration/Invoke-AiOsNightCycle.ps1",
+    "function": "Write-AiOsRuntimeHeartbeat",
+    "tracked_dirty_file": "telemetry/runtime/runtime_heartbeat.json",
+    "classification": "observe_only_dry_run_active_heartbeat_mutation",
+    "summary": "The night-cycle heartbeat writer always wrote telemetry/runtime/runtime_heartbeat.json, including observe-only DRY_RUN scheduled runs where effective_apply was false. Because runtime_heartbeat.json is tracked, timestamp refreshes left main dirty and caused scheduled-fire validation to fail git diff --check."
+  },
+  "fix_applied": {
+    "strategy": "B",
+    "strategy_label": "skip active tracked heartbeat mutation when effective_apply is false or observe_only is true",
+    "code_file": "automation/orchestration/Invoke-AiOsNightCycle.ps1",
+    "details": [
+      "Write-AiOsRuntimeHeartbeat now resolves a target heartbeat path before writing.",
+      "Observe-only or ineffective APPLY runs write heartbeat evidence to a temp path outside the repo under AIOS_NIGHT_CYCLE.",
+      "Effective APPLY runs preserve the active telemetry/runtime/runtime_heartbeat.json heartbeat behavior."
+    ],
+    "active_heartbeat_preserved_for_effective_apply": true,
+    "observe_only_heartbeat_evidence_available": true,
+    "observe_only_heartbeat_evidence_path_pattern": "%TEMP%/AIOS_NIGHT_CYCLE/runtime_heartbeat.<cycle_id>.observe_only.json",
+    "telemetry_runtime_written_by_this_packet": false,
+    "telemetry_night_supervisor_written_by_this_packet": false
+  },
+  "tests": {
+    "test_file": "tests/orchestration/test_night_cycle_endurance_contract.py",
+    "coverage": [
+      "night cycle still defines the runtime heartbeat schema",
+      "observe-only heartbeat writes use the temp evidence path",
+      "direct active heartbeat writes are no longer used for observe-only/effective_apply false paths",
+      "no scheduler or night-cycle execution is required"
+    ]
+  },
+  "safety_confirmations": {
+    "no_scheduler_query_by_codex": true,
+    "no_scheduler_mutation_by_codex": true,
+    "no_aios_relay_nightly_run": true,
+    "no_night_cycle_direct_invocation": true,
+    "no_runtime_manual_launch": true,
+    "no_runtime_manual_execution": true,
+    "no_queue_mutation": true,
+    "no_approval_inbox_mutation": true,
+    "no_worker_inbox_mutation": true,
+    "no_command_queue_mutation": true,
+    "no_sos_send": true,
+    "no_broker_or_live_trading": true,
+    "no_credential_access_or_storage": true,
+    "no_secret_storage": true,
+    "no_ntfy_topic_token_private_url_or_secret_stored": true,
+    "no_telemetry_runtime_mutation_by_codex": true,
+    "no_telemetry_night_supervisor_mutation_by_codex": true,
+    "no_dashboard_mutation": true,
+    "no_destructive_cleanup": true,
+    "no_direct_push_to_main": true,
+    "no_merge": true,
+    "no_pr_closure": true
+  },
+  "validation_plan": [
+    "focused pytest for tests/orchestration/test_night_cycle_endurance_contract.py",
+    "PowerShell parser validation for automation/orchestration/Invoke-AiOsNightCycle.ps1",
+    "git diff --check",
+    "python -m json.tool Reports/autonomy_loop_closure/heartbeat_dirty_write_guard_after_first_fire.json",
+    "git status --short --branch",
+    "forbidden path check"
+  ],
+  "next_safe_packet": "automation/orchestration/work_packets/proposed/AIOS-SCHEDULED-FIRE-RETRY-AFTER-HEARTBEAT-GUARD.md",
+  "status": "HEARTBEAT_DIRTY_WRITE_GUARD_READY_FOR_REVIEW"
+}
