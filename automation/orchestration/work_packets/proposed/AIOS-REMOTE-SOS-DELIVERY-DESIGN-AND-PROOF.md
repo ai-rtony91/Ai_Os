@@ -1,6 +1,6 @@
 # Proposed Review Packet: Remote SOS Delivery Design And Proof
 
-Status: PROPOSED / REVIEW-ONLY  
+Status: PROPOSED / REVIEW-ONLY
 This file is not an executable Codex packet and does not authorize APPLY, SOS send by Codex, runtime launch, runtime execution, queue mutation, scheduler registration, approval mutation, worker inbox mutation, command queue mutation, broker action, live trading, credential access, deletion, push to main, merge, or PR closure.
 
 ## Purpose
