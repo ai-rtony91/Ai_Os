@@ -35,8 +35,6 @@
 - Anthony explicit scheduler registration action
 
 ## Remaining Blockers
-- queue mutation gate is not ready: BLOCKED
-- explicit queue mutation approval is not present
 - runtime apply preview is not ready: BLOCKED
 - human gate evidence is not pass: BLOCKED
 - autonomy reassessment is not pass: BLOCKED

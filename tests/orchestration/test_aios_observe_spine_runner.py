@@ -99,6 +99,12 @@ def test_runner_builds_all_layer_reports_and_keeps_mutations_false(tmp_path):
     )
 
     assert report["observe_loop_status"] == mod.READY
+    assert report["runtime_apply_status"] == "READY_FOR_RUNTIME_PREVIEW"
+    assert report["queue_gate_status"] == "READY_FOR_HUMAN_REVIEW"
+    assert report["p2_bridge_status"] == "READY_FOR_DRY_RUN_PREVIEW"
+    assert report["scheduler_status"] == "READY_FOR_SCHEDULER_PREVIEW"
+    assert report["sos_status"] == "READY_FOR_SOS_PREVIEW"
+    assert report["stale_layers"] == []
     assert set(report["layers"].keys()) == {
         "p2_bridge",
         "queue_mutation_gate",
@@ -189,6 +195,10 @@ def test_default_evidence_loading_uses_repo_reports_and_keeps_mutations_false(tm
     assert report["layers"]["p2_bridge"]["status"] == "BLOCKED"
     assert report["layers"]["runtime_apply_lane"]["status"] == "BLOCKED"
     assert report["observe_loop_status"] == mod.BLOCKED
+    assert report["runtime_apply_status"] == "BLOCKED"
+    assert report["queue_gate_status"] == "READY_FOR_HUMAN_REVIEW"
+    assert report["p2_bridge_status"] == "BLOCKED"
+    assert report["stale_layers"] == []
     assert all(value is False for value in report["mutation_projection"].values())
     assert all(value is False for value in report["validate_mutation_boundaries"].values())
 

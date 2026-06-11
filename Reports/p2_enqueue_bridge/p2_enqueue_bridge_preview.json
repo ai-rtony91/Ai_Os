@@ -40,7 +40,7 @@
   },
   "evidence_missing": [],
   "execution_allowed": false,
-  "generated_at_utc": "2026-06-11T02:55:19Z",
+  "generated_at_utc": "2026-06-11T03:16:22Z",
   "human_gate_evidence_summary": {
     "dogfood_status": "BLOCKED",
     "human_gate_packet_status": "BLOCKED",
@@ -65,6 +65,9 @@
       "apply_gate_pending": false,
       "approval_authority": "Anthony / Human Owner",
       "approval_completed": true,
+      "approval_evidence_loader_errors": [
+        "import_module failed: ModuleNotFoundError: No module named 'automation'"
+      ],
       "approval_gate_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
       "approval_gate_packet_mismatch": false,
       "approval_gate_path_used": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
@@ -136,7 +139,7 @@
       "aios/modules/trader/",
       "aios.ps1"
     ],
-    "generated_at_utc": "2026-06-11T02:55:19Z",
+    "generated_at_utc": "2026-06-11T03:16:22Z",
     "invalid_reasons": [],
     "lane_id": "p2_review_to_queue_enqueue_bridge",
     "live_trading_allowed": false,

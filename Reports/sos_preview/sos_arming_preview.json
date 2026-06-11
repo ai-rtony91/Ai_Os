@@ -4,7 +4,7 @@
     "sos_ready": "BLOCKED"
   },
   "blocked_event": {
-    "blocked_reason": "explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED",
+    "blocked_reason": "P2 bridge is not ready for SOS preview: BLOCKED; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED",
     "event": "AIOS_RUNTIME_SOS",
     "event_status": "BLOCKED",
     "would_apply": false,
@@ -29,13 +29,14 @@
     "queue_mutation_report": false,
     "runtime_apply_preview": false
   },
-  "generated_at_utc": "2026-06-11T01:51:15Z",
+  "generated_at_utc": "2026-06-11T03:17:22Z",
   "human_gate_report_summary": {
     "dogfood_status": "BLOCKED",
     "packet_status": "BLOCKED"
   },
   "mode": "DRY_RUN",
   "notification_allowed": false,
+  "notification_send_allowed": false,
   "notification_sent": false,
   "p2_bridge_summary": {
     "bridge_blocker_count": 6,
@@ -62,11 +63,12 @@
   },
   "queue_mutation": false,
   "queue_mutation_gate_summary": {
-    "explicit_approval": false,
-    "gate_status": "BLOCKED",
-    "gate_status_reason": "approval evidence is not explicit; approval evidence packet_id does not match proposed queue packet_id",
+    "explicit_approval": true,
+    "gate_status": "READY_FOR_HUMAN_REVIEW",
+    "gate_status_reason": "proposal is ready for human review",
     "proposed_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
   },
+  "real_channel_armed": false,
   "repo_root": ".",
   "report_paths": [
     "Reports/sos_preview/sos_arming_preview.json"
@@ -81,8 +83,10 @@
   "scheduler_registration": false,
   "scheduler_required": false,
   "schema": "AIOS_SOS_ARMING_PREVIEW.v1",
+  "sos_allowed": false,
+  "sos_preview_status": "BLOCKED",
   "sos_status": "BLOCKED",
-  "sos_status_reason": "explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED",
+  "sos_status_reason": "P2 bridge is not ready for SOS preview: BLOCKED; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED",
   "source_fingerprints": [
     {
       "entries": [
@@ -103,6 +107,7 @@
       "entries": [
         "AIOS_APPROVAL_QUEUE.example.json",
         "APPLY_APPROVAL_GATE_001.json",
+        "APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
         "APPROVAL_INBOX_001.json",
         "APPROVAL_STATUS_RULES_001.md",
         "Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
@@ -118,7 +123,7 @@
         "archive/APPLY_APPROVAL_GATE_001.json",
         "archive/APPROVAL_INBOX_001.json"
       ],
-      "file_count": 16,
+      "file_count": 17,
       "kind": "dir",
       "path": "C:/Dev/Ai.Os/automation/orchestration/approval_inbox",
       "sha256": null
@@ -605,9 +610,7 @@
   "trading_execution": false,
   "validation": {
     "blockers": [
-      "explicit approval for queue mutation is not present in evidence",
       "P2 bridge is not ready for SOS preview: BLOCKED",
-      "queue mutation gate is not ready: BLOCKED",
       "human gate evidence requires review: BLOCKED",
       "autonomy reassessment evidence is blocked: BLOCKED"
     ],

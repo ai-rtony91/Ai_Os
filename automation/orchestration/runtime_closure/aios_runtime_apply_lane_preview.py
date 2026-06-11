@@ -407,9 +407,13 @@ def build_runtime_apply_lane_report(
             if apply_status == STATUS_BLOCKED
             else "Runtime APPLY lane preview is invalid due missing required evidence."
         ),
+        "runtime_apply_status": apply_status,
+        "runtime_proof_verdict": runtime_meta["final_verdict"],
         "evidence_missing": [item for item in ["p2_preview", "queue_mutation_gate_preview", "runtime_proof_gate"] if not evidence[item]],
         "evidence_loaded": evidence.get("evidence_loaded", {}),
         "source_fingerprints": evidence.get("source_fingerprints", []),
+        "p2_bridge_status": p2_meta["bridge_status"],
+        "queue_gate_status": queue_meta["gate_status"],
         "p2_preview": {
             "bridge_status": p2_meta["bridge_status"],
             "bridge_validation_status": p2_meta["bridge_validation_status"],
@@ -670,6 +674,7 @@ def summarize_runtime_apply_lane_preview(report: dict[str, Any]) -> dict[str, An
     if not isinstance(report, dict):
         return {
             "apply_status": None,
+            "runtime_apply_status": None,
             "p2_bridge_status": None,
             "queue_gate_status": None,
             "runtime_proof_verdict": None,
@@ -684,6 +689,7 @@ def summarize_runtime_apply_lane_preview(report: dict[str, Any]) -> dict[str, An
         }
     return {
         "apply_status": report.get("apply_status"),
+        "runtime_apply_status": report.get("runtime_apply_status"),
         "p2_bridge_status": _ensure_dict(report.get("p2_preview")).get("bridge_status"),
         "queue_gate_status": _ensure_dict(report.get("queue_mutation_gate_preview")).get("gate_status"),
         "runtime_proof_verdict": _ensure_dict(report.get("runtime_proof_gate")).get("final_verdict"),
@@ -704,6 +710,7 @@ def build_runtime_apply_lane_markdown_summary(report: dict[str, Any]) -> str:
         "# AI_OS Runtime APPLY Lane Preview",
         "",
         f"- apply_status: `{summary.get('apply_status')}`",
+        f"- runtime_apply_status: `{summary.get('runtime_apply_status')}`",
         f"- p2_bridge_status: `{summary.get('p2_bridge_status')}`",
         f"- queue_gate_status: `{summary.get('queue_gate_status')}`",
         f"- runtime_proof_verdict: `{summary.get('runtime_proof_verdict')}`",

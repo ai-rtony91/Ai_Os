@@ -140,11 +140,14 @@ def test_current_repo_evidence_is_blocked_or_ready(tmp_path):
         now="2026-06-10T15:20:28Z",
     )
     assert report["scheduler_status"] in {"BLOCKED", "INVALID"}
+    assert report["scheduler_preview_status"] in {"BLOCKED", "INVALID"}
     assert report["validation"]["status"] == "PASS"
     assert report["would_register_task"] is False
     assert report["would_start_service"] is False
     assert report["scheduler_created"] is False
     assert report["service_created"] is False
+    assert report["scheduler_creation_allowed"] is False
+    assert report["real_scheduler_registered"] is False
     assert report["runtime_launch_allowed"] is False
     assert report["runtime_execution_allowed"] is False
     assert report["notification_send_allowed"] is False
@@ -158,11 +161,14 @@ def test_ready_evidence_produces_ready_preview():
         evidence=_ready_evidence(),
     )
     assert report["scheduler_status"] == mod.READY
+    assert report["scheduler_preview_status"] == mod.READY
     assert report["would_schedule"] is True
     assert report["would_register_task"] is False
     assert report["would_start_service"] is False
     assert report["scheduler_registration_allowed"] is False
+    assert report["scheduler_creation_allowed"] is False
     assert report["service_created"] is False
+    assert report["real_scheduler_registered"] is False
     assert report["runtime_launch"] is False
     assert report["runtime_execution"] is False
     assert report["queue_mutation"] is False
@@ -187,6 +193,7 @@ def test_scheduler_registration_preview_files_written(tmp_path):
     assert md_path.exists()
     loaded = json.loads(json_path.read_text(encoding="utf-8"))
     assert loaded["summary"]["scheduler_status"] == report["scheduler_status"]
+    assert loaded["scheduler_preview_status"] == report["scheduler_preview_status"]
     assert "This preview does not register scheduler tasks" in md_path.read_text(encoding="utf-8")
 
 

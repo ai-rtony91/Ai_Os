@@ -25,6 +25,7 @@
     "sos_status": "BLOCKED",
     "stale_layers": []
   },
+  "code_blockers": [],
   "evidence": {
     "p2_bridge": {
       "apply_allowed": false,
@@ -68,7 +69,7 @@
       },
       "evidence_missing": [],
       "execution_allowed": false,
-      "generated_at_utc": "2026-06-11T02:55:47Z",
+      "generated_at_utc": "2026-06-11T03:17:33Z",
       "human_gate_evidence_summary": {
         "dogfood_status": "BLOCKED",
         "human_gate_packet_status": "BLOCKED",
@@ -164,7 +165,7 @@
           "aios/modules/trader/",
           "aios.ps1"
         ],
-        "generated_at_utc": "2026-06-11T02:55:47Z",
+        "generated_at_utc": "2026-06-11T03:17:33Z",
         "invalid_reasons": [],
         "lane_id": "p2_review_to_queue_enqueue_bridge",
         "live_trading_allowed": false,
@@ -330,12 +331,12 @@
       "future_write_target": "automation/orchestration/work_packets/active/",
       "gate_status": "READY_FOR_HUMAN_REVIEW",
       "gate_status_reason": "proposal is ready for human review",
-      "generated_at_utc": "2026-06-11T02:55:47Z",
+      "generated_at_utc": "2026-06-11T03:17:33Z",
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
       "proposed_item_source": {
         "loaded": true,
-        "path": "C:/Users/mylab/AppData/Local/Temp/tmpgo982hzr.json"
+        "path": "C:/Users/mylab/AppData/Local/Temp/tmpk6bra0ek.json"
       },
       "proposed_queue_item": {
         "allowed_paths": [
@@ -479,10 +480,11 @@
         "would_execute": false,
         "would_route": false
       },
-      "generated_at_utc": "2026-06-11T02:55:47Z",
+      "generated_at_utc": "2026-06-11T03:17:33Z",
       "invalid_reasons": [],
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
+      "p2_bridge_status": "BLOCKED",
       "p2_preview": {
         "allowed_paths": [
           "automation/orchestration/work_packets/"
@@ -506,6 +508,7 @@
         "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
         "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1"
       },
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
       "queue_mutation": false,
       "queue_mutation_allowed": false,
       "queue_mutation_gate_preview": {
@@ -557,6 +560,7 @@
           "automation/orchestration/work_packets/"
         ]
       },
+      "runtime_apply_status": "BLOCKED",
       "runtime_execution": false,
       "runtime_execution_allowed": false,
       "runtime_launch": false,
@@ -574,6 +578,7 @@
         "sos_allowed": false,
         "vacation_mode_complete": false
       },
+      "runtime_proof_verdict": "BLOCKED",
       "safe_next_action": "Resolve blockers and explicit approvals before any runtime apply lane mutation.",
       "scheduler_creation_allowed": false,
       "scheduler_registration": false,
@@ -585,21 +590,21 @@
           "exists": true,
           "is_file": true,
           "path": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
-          "sha256": "c793a4ac4c0c7f8e162468590a084c0c62ca5dedd4787992da288e83b0c54709",
-          "size": 10356
+          "sha256": "e1d3e4c820d8e5db7ed3c15d68f4dac40800d5e72b238daf4f648f813a31cd61",
+          "size": 10493
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
-          "sha256": "e4fefca38be762bc226b84627ac15139e64eaa7ce1fbcb87622e65892d36f898",
+          "sha256": "a03a864a9bcf0b942023538122c0997ee787b68ef9881f2338fbb96e963f14b6",
           "size": 4948
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
-          "sha256": "7c8499b2297a81e9c4bb1c8a6ee1bc39dc85994e8d1b1a5751b3c1160a9fde24",
+          "sha256": "a110d5c780ec577b4d45feff2925b1343c69af81a83df57d746d5216433e56d4",
           "size": 16499
         },
         {
@@ -819,6 +824,7 @@
         "invalid_reason_count": 0,
         "p2_bridge_status": "BLOCKED",
         "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+        "runtime_apply_status": "BLOCKED",
         "runtime_execution": false,
         "runtime_launch": false,
         "runtime_proof_verdict": "BLOCKED",
@@ -911,7 +917,7 @@
         "runtime_apply_preview": "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
         "sos_preview": "Reports/sos_preview/sos_arming_preview.json"
       },
-      "generated_at_utc": "2026-06-11T02:55:47Z",
+      "generated_at_utc": "2026-06-11T03:17:33Z",
       "human_gate_projection": {
         "dogfood_status": null,
         "human_gate_packet_status": ""
@@ -946,6 +952,7 @@
         "gate_status": "READY_FOR_HUMAN_REVIEW",
         "gate_validation_status": "PASS"
       },
+      "real_scheduler_registered": false,
       "remaining_blockers": [
         "runtime apply preview is not ready: BLOCKED",
         "human gate evidence is not pass: MISSING",
@@ -972,6 +979,8 @@
       "runtime_launch_allowed": false,
       "safe_next_action": "Resolve evidence blockers and explicit approvals before scheduling registration.",
       "scheduler_created": false,
+      "scheduler_creation_allowed": false,
+      "scheduler_preview_status": "BLOCKED",
       "scheduler_registration_allowed": false,
       "scheduler_status": "BLOCKED",
       "scheduler_status_reason": "Scheduler registration is blocked by evidence blockers.",
@@ -1412,6 +1421,7 @@
       "stop_condition": "Stop before scheduler creation, service creation, runtime launch/execution, notification send, queue mutation, or worker mutation.",
       "summary": {
         "notification_send_allowed": false,
+        "real_scheduler_registered": false,
         "remaining_blockers": [
           "runtime apply preview is not ready: BLOCKED",
           "human gate evidence is not pass: MISSING",
@@ -1421,6 +1431,8 @@
         "runtime_execution_allowed": false,
         "runtime_launch_allowed": false,
         "safe_next_action": "Resolve evidence blockers and explicit approvals before scheduling registration.",
+        "scheduler_creation_allowed": false,
+        "scheduler_preview_status": "BLOCKED",
         "scheduler_registration_allowed": false,
         "scheduler_status": "BLOCKED",
         "service_created": false,
@@ -1488,13 +1500,14 @@
         "queue_mutation_report": false,
         "runtime_apply_preview": false
       },
-      "generated_at_utc": "2026-06-11T02:55:47Z",
+      "generated_at_utc": "2026-06-11T03:17:33Z",
       "human_gate_report_summary": {
         "dogfood_status": null,
         "packet_status": null
       },
       "mode": "DRY_RUN",
       "notification_allowed": false,
+      "notification_send_allowed": false,
       "notification_sent": false,
       "p2_bridge_summary": {
         "bridge_blocker_count": 6,
@@ -1526,6 +1539,7 @@
         "gate_status_reason": "proposal is ready for human review",
         "proposed_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
       },
+      "real_channel_armed": false,
       "repo_root": ".",
       "report_paths": [
         "Reports/sos_preview/sos_arming_preview.json"
@@ -1540,6 +1554,8 @@
       "scheduler_registration": false,
       "scheduler_required": false,
       "schema": "AIOS_SOS_ARMING_PREVIEW.v1",
+      "sos_allowed": false,
+      "sos_preview_status": "BLOCKED",
       "sos_status": "BLOCKED",
       "sos_status_reason": "P2 bridge is not ready for SOS preview: BLOCKED; human gate evidence requires review: MISSING; autonomy reassessment evidence is blocked: MISSING",
       "source_fingerprints": [
@@ -2087,7 +2103,11 @@
       "would_route": false
     }
   },
-  "generated_at_utc": "2026-06-11T02:55:47Z",
+  "generated_at_utc": "2026-06-11T03:17:33Z",
+  "governance_blockers": [
+    "sos_arming",
+    "scheduler_registration"
+  ],
   "layers": {
     "p2_bridge": {
       "blockers": [
@@ -2171,6 +2191,7 @@
     "worker_inbox_mutation": false
   },
   "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+  "p2_bridge_status": "BLOCKED",
   "path_fingerprints": {
     "snapshot": [
       {
@@ -2632,9 +2653,20 @@
       }
     ]
   },
+  "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+  "real_blockers": [
+    "p2_bridge",
+    "runtime_apply_lane",
+    "sos_arming",
+    "scheduler_registration"
+  ],
   "repo_root": ".",
+  "runtime_apply_status": "BLOCKED",
   "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+  "scheduler_status": "BLOCKED",
   "schema": "AIOS_OBSERVE_SPINE_RUNNER.v1",
+  "sos_status": "BLOCKED",
+  "stale_layers": [],
   "summary": {
     "code_blockers": [],
     "governance_blockers": [

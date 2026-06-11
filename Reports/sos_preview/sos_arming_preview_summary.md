@@ -16,7 +16,7 @@
 - would_dispatch: `False`
 - would_route: `False`
 - would_execute: `False`
-- blocked_reason: `explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED`
+- blocked_reason: `P2 bridge is not ready for SOS preview: BLOCKED; human gate evidence requires review: BLOCKED; autonomy reassessment evidence is blocked: BLOCKED`
 
 ## Protected Boundaries
 - notification_allowed: `False`

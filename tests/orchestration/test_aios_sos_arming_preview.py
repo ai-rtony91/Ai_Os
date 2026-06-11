@@ -90,11 +90,15 @@ def test_current_repo_evidence_builds_blocked_preview(tmp_path):
         now="2026-01-02T03:04:05Z",
     )
     assert report["sos_status"] in {"BLOCKED", "INVALID"}
+    assert report["sos_preview_status"] in {"BLOCKED", "INVALID"}
     assert report["validation"]["status"] == "PASS"
     assert report["notification_allowed"] is False
+    assert report["notification_send_allowed"] is False
     assert report["notification_sent"] is False
     assert report["credential_required"] is True
     assert report["scheduler_required"] is False
+    assert report["real_channel_armed"] is False
+    assert report["sos_allowed"] is False
     assert report["would_apply"] is False
     assert report["would_route"] is False
     assert report["would_execute"] is False
@@ -104,10 +108,8 @@ def test_current_repo_evidence_builds_blocked_preview(tmp_path):
     assert report["worker_inbox_mutation"] is False
     assert report["scheduler_registration"] is False
     assert report["trading_execution"] is False
-    assert (
-        report["sos_status"] == "BLOCKED"
-        and "explicit approval" in report["sos_status_reason"].lower()
-    ) or report["sos_status"] == "INVALID"
+    assert report["sos_status"] == "BLOCKED"
+    assert "p2 bridge is not ready for sos preview" in report["sos_status_reason"].lower()
     assert report["protected_boundaries"]["notification_allowed"] is False
 
 
@@ -146,6 +148,8 @@ def test_preview_only_artifacts_are_written(tmp_path):
     ]
     loaded = json.loads(json_path.read_text(encoding="utf-8"))
     assert loaded["sos_status"] == report["sos_status"]
+    assert loaded["sos_preview_status"] == report["sos_preview_status"]
+    assert loaded["real_channel_armed"] is False
     assert "This preview does not send notifications, mutate state, or arm SOS." in md_path.read_text(encoding="utf-8")
 
 

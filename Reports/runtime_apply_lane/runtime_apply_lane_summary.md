@@ -1,6 +1,7 @@
 # AI_OS Runtime APPLY Lane Preview
 
 - apply_status: `BLOCKED`
+- runtime_apply_status: `BLOCKED`
 - p2_bridge_status: `BLOCKED`
 - queue_gate_status: `READY_FOR_HUMAN_REVIEW`
 - runtime_proof_verdict: `BLOCKED`

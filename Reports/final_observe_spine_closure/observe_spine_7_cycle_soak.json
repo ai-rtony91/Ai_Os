@@ -1,0 +1,367 @@
+{
+  "blocked_cycles": 7,
+  "code_blockers": [],
+  "cycle_count": 7,
+  "cycle_statuses": [
+    "OBSERVE_LOOP_BLOCKED",
+    "OBSERVE_LOOP_BLOCKED",
+    "OBSERVE_LOOP_BLOCKED",
+    "OBSERVE_LOOP_BLOCKED",
+    "OBSERVE_LOOP_BLOCKED",
+    "OBSERVE_LOOP_BLOCKED",
+    "OBSERVE_LOOP_BLOCKED"
+  ],
+  "cycles": [
+    {
+      "code_blockers": [],
+      "cycle_index": 1,
+      "generated_at_utc": "2026-06-11T03:17:57Z",
+      "governance_blockers": [
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "mutation_projection": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      },
+      "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+      "p2_bridge_status": "BLOCKED",
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+      "real_blockers": [
+        "p2_bridge",
+        "runtime_apply_lane",
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "runtime_apply_status": "BLOCKED",
+      "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+      "scheduler_status": "BLOCKED",
+      "sos_status": "BLOCKED",
+      "stale_layers": [],
+      "validate_mutation_boundaries": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      }
+    },
+    {
+      "code_blockers": [],
+      "cycle_index": 2,
+      "generated_at_utc": "2026-06-11T03:17:57Z",
+      "governance_blockers": [
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "mutation_projection": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      },
+      "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+      "p2_bridge_status": "BLOCKED",
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+      "real_blockers": [
+        "p2_bridge",
+        "runtime_apply_lane",
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "runtime_apply_status": "BLOCKED",
+      "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+      "scheduler_status": "BLOCKED",
+      "sos_status": "BLOCKED",
+      "stale_layers": [],
+      "validate_mutation_boundaries": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      }
+    },
+    {
+      "code_blockers": [],
+      "cycle_index": 3,
+      "generated_at_utc": "2026-06-11T03:17:57Z",
+      "governance_blockers": [
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "mutation_projection": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      },
+      "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+      "p2_bridge_status": "BLOCKED",
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+      "real_blockers": [
+        "p2_bridge",
+        "runtime_apply_lane",
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "runtime_apply_status": "BLOCKED",
+      "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+      "scheduler_status": "BLOCKED",
+      "sos_status": "BLOCKED",
+      "stale_layers": [],
+      "validate_mutation_boundaries": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      }
+    },
+    {
+      "code_blockers": [],
+      "cycle_index": 4,
+      "generated_at_utc": "2026-06-11T03:17:57Z",
+      "governance_blockers": [
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "mutation_projection": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      },
+      "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+      "p2_bridge_status": "BLOCKED",
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+      "real_blockers": [
+        "p2_bridge",
+        "runtime_apply_lane",
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "runtime_apply_status": "BLOCKED",
+      "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+      "scheduler_status": "BLOCKED",
+      "sos_status": "BLOCKED",
+      "stale_layers": [],
+      "validate_mutation_boundaries": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      }
+    },
+    {
+      "code_blockers": [],
+      "cycle_index": 5,
+      "generated_at_utc": "2026-06-11T03:17:57Z",
+      "governance_blockers": [
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "mutation_projection": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      },
+      "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+      "p2_bridge_status": "BLOCKED",
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+      "real_blockers": [
+        "p2_bridge",
+        "runtime_apply_lane",
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "runtime_apply_status": "BLOCKED",
+      "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+      "scheduler_status": "BLOCKED",
+      "sos_status": "BLOCKED",
+      "stale_layers": [],
+      "validate_mutation_boundaries": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      }
+    },
+    {
+      "code_blockers": [],
+      "cycle_index": 6,
+      "generated_at_utc": "2026-06-11T03:17:57Z",
+      "governance_blockers": [
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "mutation_projection": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      },
+      "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+      "p2_bridge_status": "BLOCKED",
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+      "real_blockers": [
+        "p2_bridge",
+        "runtime_apply_lane",
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "runtime_apply_status": "BLOCKED",
+      "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+      "scheduler_status": "BLOCKED",
+      "sos_status": "BLOCKED",
+      "stale_layers": [],
+      "validate_mutation_boundaries": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      }
+    },
+    {
+      "code_blockers": [],
+      "cycle_index": 7,
+      "generated_at_utc": "2026-06-11T03:17:57Z",
+      "governance_blockers": [
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "mutation_projection": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      },
+      "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+      "p2_bridge_status": "BLOCKED",
+      "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+      "real_blockers": [
+        "p2_bridge",
+        "runtime_apply_lane",
+        "sos_arming",
+        "scheduler_registration"
+      ],
+      "runtime_apply_status": "BLOCKED",
+      "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+      "scheduler_status": "BLOCKED",
+      "sos_status": "BLOCKED",
+      "stale_layers": [],
+      "validate_mutation_boundaries": {
+        "approval_inbox_mutation": false,
+        "command_queue_mutation": false,
+        "queue_mutation": false,
+        "runtime_execution": false,
+        "runtime_launch": false,
+        "scheduler_registration": false,
+        "sos_notification": false,
+        "trading_execution": false,
+        "worker_inbox_mutation": false
+      }
+    }
+  ],
+  "final_closeout_report_paths": [
+    "Reports/final_observe_spine_closure/final_closeout_status.json",
+    "Reports/final_observe_spine_closure/final_closeout_status.md"
+  ],
+  "final_status": "BLOCKED_WITH_REAL_REASON",
+  "generated_at_utc": "2026-06-11T03:17:57Z",
+  "governance_blockers": [
+    "sos_arming",
+    "scheduler_registration"
+  ],
+  "mode": "DRY_RUN_CLOSEOUT",
+  "mutation_flags_false_across_all_cycles": true,
+  "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+  "p2_bridge_status": "BLOCKED",
+  "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
+  "real_blockers": [
+    "p2_bridge",
+    "runtime_apply_lane",
+    "sos_arming",
+    "scheduler_registration"
+  ],
+  "repo_root": ".",
+  "report_paths": [
+    "Reports/final_observe_spine_closure/observe_spine_7_cycle_soak.json",
+    "Reports/final_observe_spine_closure/observe_spine_7_cycle_soak.md"
+  ],
+  "required_human_decision": "Resolve: p2_bridge, runtime_apply_lane, sos_arming, scheduler_registration.",
+  "runtime_apply_status": "BLOCKED",
+  "safe_next_action": "Resolve the named real blockers before any real action.",
+  "scheduler_status": "BLOCKED",
+  "schema": "AIOS_OBSERVE_SPINE_SOAK.v1",
+  "sos_status": "BLOCKED",
+  "stable_status": true,
+  "stale_layers": [],
+  "status": "BLOCKED_WITH_REAL_REASON",
+  "status_reason": "Observe spine remains blocked by named real blockers."
+}
