@@ -29,6 +29,7 @@ def test_night_cycle_emits_runtime_heartbeat_schema() -> None:
 
     assert "telemetry\\runtime\\runtime_heartbeat.json" in text
     assert "function Write-AiOsRuntimeHeartbeat" in text
+    assert "function Get-AiOsRuntimeHeartbeatPath" in text
     assert 'Write-AiOsRuntimeHeartbeat -Phase "cycle" -State "STARTED"' in text
     assert '$heartbeatPhase = if ([string]::IsNullOrWhiteSpace($Phase) -and $State -eq "CYCLE_COMPLETE") { "cycle" } else { $Phase }' in text
     for field in (
@@ -43,6 +44,17 @@ def test_night_cycle_emits_runtime_heartbeat_schema() -> None:
         "updated_at_utc",
     ):
         assert field in text
+
+
+def test_observe_only_heartbeat_writes_use_temp_evidence_path() -> None:
+    text = night_cycle_text()
+
+    assert '($script:AiOsObserveOnly -eq $true) -or (-not $script:AiOsEffectiveApply)' in text
+    assert '[System.IO.Path]::GetTempPath()' in text
+    assert '"AIOS_NIGHT_CYCLE"' in text
+    assert '"runtime_heartbeat.{0}.observe_only.json"' in text
+    assert "Write-AiOsJsonAtomic -Path $targetHeartbeatPath -Data $heartbeat -Depth 8" in text
+    assert "Write-AiOsJsonAtomic -Path $runtimeHeartbeatPath -Data $heartbeat -Depth 8" not in text
 
 
 def test_night_cycle_uses_collision_safe_atomic_temp_writes() -> None:
