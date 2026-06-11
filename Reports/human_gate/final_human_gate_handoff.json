@@ -1,0 +1,54 @@
+{
+  "broker_action_allowed": false,
+  "confirmation_requests": {
+    "scheduler_manual_registration_request": {
+      "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_SCHEDULER_MANUALLY_REGISTERED_AFTER_STOP_AND_SOS_PROOF",
+      "path": "Reports\\human_gate\\scheduler_manual_registration_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "sos_delivery_request": {
+      "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_SOS_DELIVERED_TRUE_FOR_SINGLE_TEST_ONLY_NO_SECRET_IN_REPO",
+      "path": "Reports\\human_gate\\sos_delivery_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "stop_drill_confirmation_request": {
+      "exact_human_confirmation_phrase": "ANTHONY_CONFIRMS_STOP_DRILL_PASSED_FOR_DRY_RUN_RECOVERY_PROOF_ONLY",
+      "path": "Reports\\human_gate\\stop_drill_confirmation_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    }
+  },
+  "credentials_accessed": false,
+  "current_status": "HUMAN_GATE_REQUIRED",
+  "generated_at_utc": "2026-06-11T05:31:31Z",
+  "live_trading_allowed": false,
+  "mode": "PREVIEW_ONLY_HUMAN_GATE_HANDOFF",
+  "next_strict_human_order": [
+    "Review STOP drill confirmation request.",
+    "If safe, run/confirm STOP drill manually.",
+    "Review SOS delivery request.",
+    "If safe, perform exactly one SOS delivery test manually without secrets in repo.",
+    "Review scheduler manual registration request.",
+    "If safe, register scheduler manually outside Codex automation.",
+    "Rerun final proof chain after human confirmations."
+  ],
+  "protected_mutation_detected": false,
+  "queue_write_allowed": false,
+  "report_paths": [
+    "Reports/human_gate/final_human_gate_handoff.json",
+    "Reports/human_gate/final_human_gate_handoff.md"
+  ],
+  "runtime_execution_allowed": false,
+  "runtime_launch_allowed": false,
+  "safe_next_action": "Anthony reviews and completes the strict human order manually; rerun final proof chain after confirmations.",
+  "scheduler_creation_allowed": false,
+  "scheduler_registered_by_anthony": false,
+  "scheduler_registration_allowed": false,
+  "schema": "AIOS_FINAL_HUMAN_GATE_HANDOFF.v1",
+  "sos_allowed": false,
+  "sos_delivered_true": false,
+  "sos_notification_allowed": false,
+  "status": "HUMAN_GATE_REQUIRED",
+  "stop_condition": "Stop before runtime execution, runtime launch, queue write, scheduler creation, SOS send, broker action, credential access, live trading, or vacation-mode completion.",
+  "stop_drill_pass": false,
+  "vacation_mode_complete": false
+}
