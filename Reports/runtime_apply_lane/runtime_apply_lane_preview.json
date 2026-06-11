@@ -1,16 +1,14 @@
 {
-  "apply_status": "INVALID",
-  "apply_status_reason": "Runtime APPLY lane preview is invalid due missing required evidence.",
+  "apply_status": "BLOCKED",
+  "apply_status_reason": "Runtime APPLY lane is blocked by evidence blockers.",
   "approval_inbox_mutation": false,
   "approval_inbox_mutation_allowed": false,
   "blockers": [
     "P2 bridge is not READY_FOR_DRY_RUN_PREVIEW",
-    "queue mutation preview allowed_paths is missing",
-    "queue mutation preview forbidden_paths is missing",
     "queue mutation approval is not explicit",
     "queue gate validation: approval evidence is not explicit",
-    "queue gate evidence still carries invalid reasons",
-    "runtime proof final_verdict is missing"
+    "queue gate validation: approval evidence packet_id does not match proposed queue packet_id",
+    "runtime proof final_verdict is not READY_FOR_HUMAN_GATE"
   ],
   "command_queue_mutation": false,
   "command_queue_mutation_allowed": false,
@@ -25,13 +23,11 @@
       "path": "Reports\\queue_mutation_gate\\queue_mutation_gate_preview.json"
     },
     "runtime_proof_gate": {
-      "loaded": false,
+      "loaded": true,
       "path": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json"
     }
   },
-  "evidence_missing": [
-    "runtime_proof_gate"
-  ],
+  "evidence_missing": [],
   "execution_projection": {
     "approval_inbox_mutation": false,
     "command_queue_mutation": false,
@@ -46,10 +42,8 @@
     "would_execute": false,
     "would_route": false
   },
-  "generated_at_utc": "2026-06-10T22:43:49Z",
-  "invalid_reasons": [
-    "missing required evidence: runtime_proof_gate"
-  ],
+  "generated_at_utc": "2026-06-11T01:51:10Z",
+  "invalid_reasons": [],
   "live_trading_allowed": false,
   "mode": "DRY_RUN_PREVIEW_ONLY",
   "p2_preview": {
@@ -78,18 +72,32 @@
   "queue_mutation": false,
   "queue_mutation_allowed": false,
   "queue_mutation_gate_preview": {
-    "allowed_paths": [],
+    "allowed_paths": [
+      "automation/orchestration/work_packets/"
+    ],
     "approval_evidence_present": true,
     "explicit_approval": false,
-    "forbidden_paths": [],
-    "gate_status": "INVALID",
+    "forbidden_paths": [
+      "automation/orchestration/work_packets/active/",
+      "automation/orchestration/work_packets/blocked/",
+      "automation/orchestration/work_packets/complete/",
+      "automation/orchestration/workers/inbox/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/command_queue/",
+      "telemetry/",
+      "services/",
+      "apps/",
+      "aios/modules/trader/",
+      "aios.ps1"
+    ],
+    "gate_status": "BLOCKED",
     "lane": "p2_review_to_queue_enqueue_bridge",
     "mode": "DRY_RUN_PREVIEW_ONLY",
     "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
     "target_paths": [],
     "validation_status": "PASS"
   },
-  "repo_root": "C:/Dev/Ai.Os",
+  "repo_root": ".",
   "report_paths": [
     "C:\\Dev\\Ai.Os\\Reports\\runtime_apply_lane\\runtime_apply_lane_preview.json",
     "C:\\Dev\\Ai.Os\\Reports\\runtime_apply_lane\\runtime_apply_lane_summary.md"
@@ -118,18 +126,18 @@
   "runtime_launch_allowed": false,
   "runtime_mutation_allowed": false,
   "runtime_proof_gate": {
-    "approval_granted": null,
-    "execution_allowed": null,
-    "final_verdict": "",
+    "approval_granted": false,
+    "execution_allowed": false,
+    "final_verdict": "BLOCKED",
     "human_gate_ready": false,
-    "live_trading_allowed": null,
-    "runtime_launch_allowed": null,
-    "runtime_mutation_allowed": null,
-    "scheduler_creation_allowed": null,
-    "sos_allowed": null,
-    "vacation_mode_complete": null
+    "live_trading_allowed": false,
+    "runtime_launch_allowed": false,
+    "runtime_mutation_allowed": false,
+    "scheduler_creation_allowed": false,
+    "sos_allowed": false,
+    "vacation_mode_complete": false
   },
-  "safe_next_action": "Repair evidence and rerun preview.",
+  "safe_next_action": "Resolve blockers and explicit approvals before any runtime apply lane mutation.",
   "scheduler_creation_allowed": false,
   "scheduler_registration": false,
   "schema": "AIOS_RUNTIME_APPLY_LANE_PREVIEW.v1",
@@ -139,23 +147,23 @@
     {
       "exists": true,
       "is_file": true,
-      "path": "C:/Dev/Ai.Os/Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
-      "sha256": "6fab8056b09e8c795e64949a7a0a6fe93286f3aa710596604afa2eac2f30669d",
-      "size": 8330
+      "path": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
+      "sha256": "48c9e6fa19a7a1c6312c52c5531a31a0292ddfe429d342166b30b948d8963043",
+      "size": 10748
     },
     {
       "exists": true,
       "is_file": true,
-      "path": "C:/Dev/Ai.Os/Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
-      "sha256": "aa867c3bf9d210cef06fd600c485004b696f564e706f0e3ee141540cd58fb7e8",
-      "size": 4358
+      "path": "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+      "sha256": "8822311c9ddad9de6e24a9c9d200009b14eb8bc90d9387b29495e69800d861d4",
+      "size": 5098
     },
     {
-      "exists": false,
-      "is_file": false,
-      "path": "C:/Dev/Ai.Os/Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
-      "sha256": null,
-      "size": null
+      "exists": true,
+      "is_file": true,
+      "path": "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
+      "sha256": "bcde3677b10ec0eca48606ff32e894abd33b42bd3c7e2beee5369862b7a0ce3d",
+      "size": 15938
     },
     {
       "exists": true,
@@ -167,12 +175,12 @@
         }
       ],
       "is_dir": true,
-      "path": "C:/Dev/Ai.Os/automation/orchestration/work_packets/active"
+      "path": "automation/orchestration/work_packets/active"
     },
     {
       "exists": true,
       "is_file": true,
-      "path": "C:/Dev/Ai.Os/automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json",
+      "path": "automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json",
       "sha256": "2beff4de814cf2ceddc0c01065341672bfdb854dafb7002439719989b3ca8442",
       "size": 1589
     },
@@ -180,9 +188,29 @@
       "exists": true,
       "files": [
         {
+          "path": "__pycache__/aios_approval_evidence_adapter.cpython-311.pyc",
+          "sha256": "a19742cea7435ee00918b0dfd4b1e06b9feef347775d09a5afabaf17e77783d8",
+          "size": 12330
+        },
+        {
+          "path": "__pycache__/aios_queue_specific_approval_request.cpython-311.pyc",
+          "sha256": "7410a7a5b4c614be984057979b86dc1def7d41d624d12486bf01fbcd10764ca7",
+          "size": 35039
+        },
+        {
+          "path": "aios_approval_evidence_adapter.py",
+          "sha256": "6b5ef34392e163b610dc9601a29518cf2e74362831c7c21716aeee32d861329b",
+          "size": 10744
+        },
+        {
           "path": "AIOS_APPROVAL_QUEUE.example.json",
           "sha256": "d553e811dd0689580fb1ee6cfa9b1d4cdaec7fa5c4534fe8b1bab3e2074274e0",
           "size": 1576
+        },
+        {
+          "path": "aios_queue_specific_approval_request.py",
+          "sha256": "6b631fec991568d73f76af22bf883fd9ae03a69358e98e4adf23d53a985d37d2",
+          "size": 28340
         },
         {
           "path": "APPLY_APPROVAL_GATE_001.json",
@@ -231,12 +259,12 @@
         }
       ],
       "is_dir": true,
-      "path": "C:/Dev/Ai.Os/automation/orchestration/approval_inbox"
+      "path": "automation/orchestration/approval_inbox"
     },
     {
       "exists": true,
       "is_file": true,
-      "path": "C:/Dev/Ai.Os/automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json",
+      "path": "automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json",
       "sha256": "9ca915cc75bd95a69f29ef1c4606beacb6f786d881938ee673dbe7292c912563",
       "size": 847
     },
@@ -305,7 +333,7 @@
         }
       ],
       "is_dir": true,
-      "path": "C:/Dev/Ai.Os/services/runtime"
+      "path": "services/runtime"
     },
     {
       "exists": true,
@@ -327,7 +355,7 @@
         }
       ],
       "is_dir": true,
-      "path": "C:/Dev/Ai.Os/telemetry/runtime"
+      "path": "telemetry/runtime"
     },
     {
       "exists": true,
@@ -339,20 +367,20 @@
         }
       ],
       "is_dir": true,
-      "path": "C:/Dev/Ai.Os/automation/orchestration/work_packets/active"
+      "path": "automation/orchestration/work_packets/active"
     }
   ],
   "stop_condition": "Stop before writing to active queue, worker inbox, approval inbox, command queue, telemetry, scheduler, SOS, services, or runtime.",
   "summary": {
-    "apply_status": "INVALID",
-    "blocked_count": 7,
-    "invalid_reason_count": 1,
+    "apply_status": "BLOCKED",
+    "blocked_count": 5,
+    "invalid_reason_count": 0,
     "p2_bridge_status": "BLOCKED",
-    "queue_gate_status": "INVALID",
+    "queue_gate_status": "BLOCKED",
     "runtime_execution": false,
     "runtime_launch": false,
-    "runtime_proof_verdict": "",
-    "safe_next_action": "Repair evidence and rerun preview.",
+    "runtime_proof_verdict": "BLOCKED",
+    "safe_next_action": "Resolve blockers and explicit approvals before any runtime apply lane mutation.",
     "would_apply": false,
     "would_execute": false,
     "would_route": false
@@ -360,7 +388,7 @@
   "telemetry_mutation_allowed": false,
   "trading_execution": false,
   "validation": {
-    "apply_status": "INVALID",
+    "apply_status": "BLOCKED",
     "blockers": [],
     "checked_fields": [
       "schema",
@@ -396,7 +424,9 @@
     "unsafe_flags": []
   },
   "worker_availability_preview": {
-    "path_targets": [],
+    "path_targets": [
+      "automation/orchestration/work_packets/"
+    ],
     "previewed": true,
     "protected_targets": []
   },

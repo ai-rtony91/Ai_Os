@@ -1,0 +1,312 @@
+[
+  {
+    "number": 554,
+    "title": "chore(reports): refresh autonomy spine evidence",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/autonomy-evidence-refresh-v1",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-10T23:38:03Z"
+  },
+  {
+    "number": 550,
+    "title": "feat(runtime): enrich P2 queue contract",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/p2-contract-enrichment-v1",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-06-10T22:28:44Z"
+  },
+  {
+    "number": 533,
+    "title": "feat(autonomy): add self-build evidence ledger",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/self-build-evidence-ledger-v1",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-10T14:55:48Z"
+  },
+  {
+    "number": 528,
+    "title": "feat(autonomy): add canonical decision packet drafter",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/canonical-decision-packet-drafter-v1",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-10T13:30:01Z"
+  },
+  {
+    "number": 521,
+    "title": "feat(autonomy): loop-closure Lane A — evidence ledger + drafter, promotion review, approval card, APPLY inventory, path-guard",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "claude/repo-overview-D1GBF",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-10T17:53:31Z"
+  },
+  {
+    "number": 511,
+    "title": "Autonomy completion Big-Pack: CONNECT/TRUST/ACT/ARM/PROVE (DRY_RUN-first)",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "claude/autonomy-completion-packet",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-10T04:46:43Z"
+  },
+  {
+    "number": 504,
+    "title": "jsonl rotation + retention (DRY_RUN-first, preserves proof history)",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "claude/jsonl-rotation-retention",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-10T02:17:43Z"
+  },
+  {
+    "number": 502,
+    "title": "SOS Telegram arming v2 (DRY_RUN-first, supersedes stale #468)",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "claude/sos-telegram-arming-v2",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-10T02:14:12Z"
+  },
+  {
+    "number": 469,
+    "title": "Packet B+C: restart supervisor + git timeouts (#456 completion, DRY_RUN-first)",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "claude/packetBC-restart-timeouts",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-09T01:04:46Z"
+  },
+  {
+    "number": 468,
+    "title": "Packet 2: SOS last-mile arming (DRY_RUN-first, serialized)",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "claude/packet2-sos-arming",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-09T01:04:41Z"
+  },
+  {
+    "number": 466,
+    "title": "Packet 3: dispatch closure + atomic worker-state + CI tests (DRY_RUN-first, serialized)",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "claude/packet3-dispatch-closure",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-09T00:42:45Z"
+  },
+  {
+    "number": 462,
+    "title": "ci(governance): add execution bridge gates",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/ci-execution-bridge-gates-v1",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-09T00:07:58Z"
+  },
+  {
+    "number": 451,
+    "title": "feat(governance): close weekend readiness control gaps v1",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/weekend-ready-gap-closure-one-packet-v1",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-06-08T17:48:16Z"
+  },
+  {
+    "number": 449,
+    "title": "fix(governance): add Tier 1 restart safety gate",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/tier1-crash-safe-restart-v1",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-06-08T15:36:46Z"
+  },
+  {
+    "number": 445,
+    "title": "build(deps): bump actions/setup-python from 5 to 6",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "dependabot/github_actions/actions/setup-python-6",
+    "mergeStateStatus": "UNKNOWN",
+    "mergeable": "UNKNOWN",
+    "updatedAt": "2026-06-08T12:09:47Z"
+  },
+  {
+    "number": 444,
+    "title": "build(deps): bump actions/checkout from 4 to 6",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "dependabot/github_actions/actions/checkout-6",
+    "mergeStateStatus": "UNKNOWN",
+    "mergeable": "UNKNOWN",
+    "updatedAt": "2026-06-08T12:09:43Z"
+  },
+  {
+    "number": 437,
+    "title": "feat: add operator relief closed loop",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/full-operator-relief-closed-loop-v1",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-06-08T14:51:16Z"
+  },
+  {
+    "number": 436,
+    "title": "feat: add forex engine large dataset backtest adapter",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "feature/forex-engine-v1-sprint-14-large-dataset-backtest-adapter",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-06-06T22:36:35Z"
+  },
+  {
+    "number": 359,
+    "title": "build(deps): bump react and @types/react in /apps/dashboard",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "dependabot/npm_and_yarn/apps/dashboard/multi-c336f0d9c2",
+    "mergeStateStatus": "UNKNOWN",
+    "mergeable": "UNKNOWN",
+    "updatedAt": "2026-06-02T11:33:16Z"
+  },
+  {
+    "number": 358,
+    "title": "build(deps-dev): bump eslint from 9.39.4 to 10.4.1 in /apps/dashboard",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "dependabot/npm_and_yarn/apps/dashboard/eslint-10.4.1",
+    "mergeStateStatus": "UNKNOWN",
+    "mergeable": "UNKNOWN",
+    "updatedAt": "2026-06-02T11:33:04Z"
+  },
+  {
+    "number": 357,
+    "title": "build(deps): bump react-dom from 19.2.6 to 19.2.7 in /apps/dashboard",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "dependabot/npm_and_yarn/apps/dashboard/react-dom-19.2.7",
+    "mergeStateStatus": "UNKNOWN",
+    "mergeable": "UNKNOWN",
+    "updatedAt": "2026-06-02T11:32:53Z"
+  },
+  {
+    "number": 301,
+    "title": "Night Supervisor effector layer on Codex V2 spine",
+    "state": "OPEN",
+    "baseRefName": "phase-night-supervisor-layer2-memory",
+    "headRefName": "phase-night-supervisor-effector-layer",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-05-29T01:01:09Z"
+  },
+  {
+    "number": 300,
+    "title": "Add Layer 2 Night Supervisor memory and evidence systems",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "phase-night-supervisor-layer2-memory",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-05-29T14:53:37Z"
+  },
+  {
+    "number": 295,
+    "title": "ci(dashboard): add static web apps workflow",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "codex/azure-static-web-apps-dashboard",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-05-28T01:32:41Z"
+  },
+  {
+    "number": 294,
+    "title": "chore(dashboard): add Azure request logging",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "fix/azure-dashboard-request-logs",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-05-28T00:54:11Z"
+  },
+  {
+    "number": 274,
+    "title": "Normalize JSON helper output for preview chain",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "json-helper-fixes",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-05-27T08:02:17Z"
+  },
+  {
+    "number": 267,
+    "title": "automation: worker control layer -- morning brief, Claude hooks, validator chain runner (PKT-WEST-APPLY-005)",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "west/PKT-WEST-APPLY-005-worker-control-layer",
+    "mergeStateStatus": "CLEAN",
+    "mergeable": "MERGEABLE",
+    "updatedAt": "2026-05-26T16:00:50Z"
+  },
+  {
+    "number": 251,
+    "title": "build(deps-dev): bump @eslint/js from 9.39.4 to 10.0.1 in /apps/dashboard",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "dependabot/npm_and_yarn/apps/dashboard/eslint/js-10.0.1",
+    "mergeStateStatus": "UNKNOWN",
+    "mergeable": "UNKNOWN",
+    "updatedAt": "2026-05-25T18:06:39Z"
+  },
+  {
+    "number": 249,
+    "title": "build(deps-dev): bump eslint-plugin-react-hooks from 7.0.1 to 7.1.1 in /apps/dashboard",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "dependabot/npm_and_yarn/apps/dashboard/eslint-plugin-react-hooks-7.1.1",
+    "mergeStateStatus": "UNKNOWN",
+    "mergeable": "UNKNOWN",
+    "updatedAt": "2026-05-25T18:06:23Z"
+  },
+  {
+    "number": 243,
+    "title": "Add PR creation state to lane runner",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "pr-lane-runner-pr-creation-state",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-05-24T20:03:21Z"
+  },
+  {
+    "number": 236,
+    "title": "Fix task generator work packet repo identity",
+    "state": "OPEN",
+    "baseRefName": "main",
+    "headRefName": "fix/task-generator-repo-name",
+    "mergeStateStatus": "DIRTY",
+    "mergeable": "CONFLICTING",
+    "updatedAt": "2026-05-24T13:25:38Z"
+  }
+]

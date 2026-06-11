@@ -157,6 +157,27 @@ def test_governance_and_code_blocker_classification(tmp_path):
     assert report["layers"]["sos_arming"]["stale"] is False
 
 
+def test_default_evidence_loading_uses_repo_reports_and_keeps_mutations_false(tmp_path):
+    mod = _load()
+    protected = [ACTIVE_QUEUE, WORKER_INBOX, APPROVAL_INBOX, COMMAND_QUEUE, SERVICES, TELEMETRY]
+    before = {str(path): _fingerprint(path) for path in protected}
+
+    report = mod.build_observe_spine_report(
+        repo_root=REPO_ROOT,
+        output_dir=tmp_path / "ignore",
+        now="2026-06-10T15:20:28Z",
+    )
+
+    assert report["layers"]["p2_bridge"]["status"] == "BLOCKED"
+    assert report["layers"]["runtime_apply_lane"]["status"] == "BLOCKED"
+    assert report["observe_loop_status"] == mod.BLOCKED
+    assert all(value is False for value in report["mutation_projection"].values())
+    assert all(value is False for value in report["validate_mutation_boundaries"].values())
+
+    after = {str(path): _fingerprint(path) for path in protected}
+    assert before == after
+
+
 def test_real_paths_do_not_mutate_when_running_runner(tmp_path):
     mod = _load()
     protected = [ACTIVE_QUEUE, WORKER_INBOX, APPROVAL_INBOX, COMMAND_QUEUE, SERVICES, TELEMETRY]

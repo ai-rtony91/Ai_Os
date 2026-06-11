@@ -40,7 +40,7 @@
   },
   "evidence_missing": [],
   "execution_allowed": false,
-  "generated_at_utc": "2026-06-10T22:25:16Z",
+  "generated_at_utc": "2026-06-11T01:50:59Z",
   "human_gate_evidence_summary": {
     "dogfood_status": "BLOCKED",
     "human_gate_packet_status": "BLOCKED",
@@ -58,6 +58,64 @@
       "automation/orchestration/work_packets/"
     ],
     "apply_allowed": false,
+    "approval_evidence": {
+      "allowed_paths": [
+        "tests/orchestration/",
+        "automation/orchestration/Test-AiOsRuntimeHeartbeat.DRY_RUN.ps1",
+        "Reports/endurance_tier1/",
+        "automation/orchestration/watchdog/README.md",
+        "automation/recovery/README.md"
+      ],
+      "apply_gate_pending": true,
+      "approval_authority": "REMEDIATED_BY_PACKET1_APPROVAL_AUTHORITY_HARDENING",
+      "approval_completed": false,
+      "approval_evidence_loader_errors": [
+        "import_module failed: ModuleNotFoundError: No module named 'automation'"
+      ],
+      "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+      "approval_gate_packet_mismatch": true,
+      "approval_gate_path_used": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+      "approval_gate_selected_from_queue_specific": false,
+      "approval_granted": false,
+      "approval_status": "pending_review",
+      "approved_by": null,
+      "approved_by_human": false,
+      "authority_active": true,
+      "blocked_paths": [
+        ".github/",
+        ".github/workflows/",
+        "AGENTS.md",
+        "README.md",
+        "RISK_POLICY.md",
+        "broker/",
+        "OANDA/",
+        "api_keys/",
+        "secrets/",
+        ".env",
+        "live_trading/",
+        "webhooks/",
+        "worker launch paths",
+        "scheduler registration paths",
+        "night supervisor arming paths",
+        "#449/#451 branches or PRs",
+        "parked salvage branch"
+      ],
+      "commit_package_required": true,
+      "explicit_apply_approved": false,
+      "explicit_approval": false,
+      "file_exists": true,
+      "missing_authority_fields": false,
+      "non_authorizing_placeholder": true,
+      "non_authorizing_reason": "approval gate packet_id AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1 does not match target_packet_id P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+      "packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+      "schema_present": true,
+      "source_files": [
+        "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+        "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+      ],
+      "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+      "validator_chain_required": true
+    },
     "bridge_blockers": [
       "human gate dogfood status is BLOCKED",
       "autonomy gap reassessment status is BLOCKED",
@@ -91,11 +149,12 @@
       "aios/modules/trader/",
       "aios.ps1"
     ],
-    "generated_at_utc": "2026-06-10T22:25:16Z",
+    "generated_at_utc": "2026-06-11T01:50:59Z",
     "invalid_reasons": [],
     "lane_id": "p2_review_to_queue_enqueue_bridge",
     "live_trading_allowed": false,
     "mode": "DRY_RUN_PREVIEW_ONLY",
+    "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
     "preview_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
     "preview_state": "PREVIEW_BLOCKED",
     "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
@@ -130,28 +189,28 @@
       "exists": true,
       "is_file": true,
       "path": "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
-      "sha256": "22cdd8003aaf1a9ff90382fac57951bd3a5124e70e8972adedfd282b59f0a772",
-      "size": 82769
+      "sha256": "77f5725ba9749d24f96de63f2053d113ebad26b850c10b2092f4c104f31a2dfb",
+      "size": 83123
     },
     {
       "exists": true,
       "is_file": true,
       "path": "Reports\\human_gate\\human_gate_packet_dogfood_summary.md",
-      "sha256": "0fe77c99fba457d71363f62525faccee2d4cc5ccb4d4a02f016e4cc852b78319",
+      "sha256": "5889a70913bad39deed7859161ebbf9ce8d59322261ecbe60c8ce9285bb80f35",
       "size": 1084
     },
     {
       "exists": true,
       "is_file": true,
       "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json",
-      "sha256": "697e2b7e2e8142179c15e4c279b14b5dd895016b346515d137083cf7efd670ab",
-      "size": 118239
+      "sha256": "f239820d81a20d6812a4e936fc4de5dfd44587a7fb130b23791e1390f1e71c7b",
+      "size": 118672
     },
     {
       "exists": true,
       "is_file": true,
       "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_summary.md",
-      "sha256": "e660ff791bee18ceece120aa2458829b2f95867080400dd0d065c5d16a4ac8d1",
+      "sha256": "178ab37ab50569f8fec5c68759eddbbf9ea4c278faf9e60f975c36f99a83ac1d",
       "size": 4674
     }
   ],

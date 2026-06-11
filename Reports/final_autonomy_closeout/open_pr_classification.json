@@ -1,0 +1,314 @@
+{
+  "classifications": [
+    {
+      "number": 554,
+      "title": "chore(reports): refresh autonomy spine evidence",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "report_only_refresh",
+      "reason": "Evidence refresh packet aligns with final closeout evidence maintenance.",
+      "required_by_packet": true
+    },
+    {
+      "number": 550,
+      "title": "feat(runtime): enrich P2 queue contract",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "should_not_merge_without_rebase",
+      "reason": "Dirty/conflicting state (mergeable=CONFLICTING) with overlapping scope; requires conflict resolution before merge consideration.",
+      "required_by_packet": true
+    },
+    {
+      "number": 533,
+      "title": "feat(autonomy): add self-build evidence ledger",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "report_only_refresh",
+      "reason": "Autonomy evidence ledger useful but not required to resolve current approval mismatch blocker.",
+      "required_by_packet": true
+    },
+    {
+      "number": 528,
+      "title": "feat(autonomy): add canonical decision packet drafter",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "report_only_refresh",
+      "reason": "Decision packet drafting is adjacent utility, not direct approval/queue-chain blocker for this closeout.",
+      "required_by_packet": true
+    },
+    {
+      "number": 521,
+      "title": "feat(autonomy): loop-closure Lane A \u2014 evidence ledger + drafter, promotion review, approval card, APPLY inventory, path-guard",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "stale_conflict_risk",
+      "reason": "Large legacy lane packet with proposal overlap and likely superseded by later focused packets.",
+      "required_by_packet": true
+    },
+    {
+      "number": 511,
+      "title": "Autonomy completion Big-Pack: CONNECT/TRUST/ACT/ARM/PROVE (DRY_RUN-first)",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "stale_conflict_risk",
+      "reason": "High-level big-pack planning packet; now partially obsolete as pieces were split into merged focus packets.",
+      "required_by_packet": true
+    },
+    {
+      "number": 504,
+      "title": "jsonl rotation + retention (DRY_RUN-first, preserves proof history)",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "report_only_refresh",
+      "reason": "Retention proof useful for longer-run stability but not yet connected to queue-approval mismatch.",
+      "required_by_packet": true
+    },
+    {
+      "number": 502,
+      "title": "SOS Telegram arming v2 (DRY_RUN-first, supersedes stale #468)",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "relevant_to_final_autonomy_closeout_now",
+      "reason": "Directly targets SOS wake path, one of the remaining end-state objectives.",
+      "required_by_packet": true
+    },
+    {
+      "number": 469,
+      "title": "Packet B+C: restart supervisor + git timeouts (#456 completion, DRY_RUN-first)",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "report_only_refresh",
+      "reason": "Restart/timeouts packet is relevant for 24h stability, not immediate queue-approval mismatch.",
+      "required_by_packet": true
+    },
+    {
+      "number": 468,
+      "title": "Packet 2: SOS last-mile arming (DRY_RUN-first, serialized)",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "stale_conflict_risk",
+      "reason": "Explicitly superseded by #502 by PR author notes; stale candidate.",
+      "required_by_packet": true
+    },
+    {
+      "number": 466,
+      "title": "Packet 3: dispatch closure + atomic worker-state + CI tests (DRY_RUN-first, serialized)",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "report_only_refresh",
+      "reason": "Dispatch closure required for full runtime lane; not direct queue-specific approval blocker.",
+      "required_by_packet": true
+    },
+    {
+      "number": 462,
+      "title": "ci(governance): add execution bridge gates",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "report_only_refresh",
+      "reason": "Execution bridge gates strengthen proof safety but are not currently required to proceed with approval target mismatch fix.",
+      "required_by_packet": true
+    },
+    {
+      "number": 451,
+      "title": "feat(governance): close weekend readiness control gaps v1",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "should_not_merge_without_rebase",
+      "reason": "CONFLICTING state and wide scope indicate merge risk without cleanup/rebase.",
+      "required_by_packet": true
+    },
+    {
+      "number": 449,
+      "title": "fix(governance): add Tier 1 restart safety gate",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "should_not_merge_without_rebase",
+      "reason": "CONFLICTING state overlaps restart gate lineage; requires controlled rebasing/review.",
+      "required_by_packet": true
+    },
+    {
+      "number": 445,
+      "title": "build(deps): bump actions/setup-python from 5 to 6",
+      "state": "OPEN",
+      "mergeStateStatus": "UNKNOWN",
+      "mergeable": "UNKNOWN",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 444,
+      "title": "build(deps): bump actions/checkout from 4 to 6",
+      "state": "OPEN",
+      "mergeStateStatus": "UNKNOWN",
+      "mergeable": "UNKNOWN",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 437,
+      "title": "feat: add operator relief closed loop",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "stale_conflict_risk",
+      "reason": "Large operator-relief lane likely stale against the current approved workflow model.",
+      "required_by_packet": true
+    },
+    {
+      "number": 436,
+      "title": "feat: add forex engine large dataset backtest adapter",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 359,
+      "title": "build(deps): bump react and @types/react in /apps/dashboard",
+      "state": "OPEN",
+      "mergeStateStatus": "UNKNOWN",
+      "mergeable": "UNKNOWN",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 358,
+      "title": "build(deps-dev): bump eslint from 9.39.4 to 10.4.1 in /apps/dashboard",
+      "state": "OPEN",
+      "mergeStateStatus": "UNKNOWN",
+      "mergeable": "UNKNOWN",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 357,
+      "title": "build(deps): bump react-dom from 19.2.6 to 19.2.7 in /apps/dashboard",
+      "state": "OPEN",
+      "mergeStateStatus": "UNKNOWN",
+      "mergeable": "UNKNOWN",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 301,
+      "title": "Night Supervisor effector layer on Codex V2 spine",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 300,
+      "title": "Add Layer 2 Night Supervisor memory and evidence systems",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 295,
+      "title": "ci(dashboard): add static web apps workflow",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 294,
+      "title": "chore(dashboard): add Azure request logging",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 274,
+      "title": "Normalize JSON helper output for preview chain",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 267,
+      "title": "automation: worker control layer -- morning brief, Claude hooks, validator chain runner (PKT-WEST-APPLY-005)",
+      "state": "OPEN",
+      "mergeStateStatus": "CLEAN",
+      "mergeable": "MERGEABLE",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 251,
+      "title": "build(deps-dev): bump @eslint/js from 9.39.4 to 10.0.1 in /apps/dashboard",
+      "state": "OPEN",
+      "mergeStateStatus": "UNKNOWN",
+      "mergeable": "UNKNOWN",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 249,
+      "title": "build(deps-dev): bump eslint-plugin-react-hooks from 7.0.1 to 7.1.1 in /apps/dashboard",
+      "state": "OPEN",
+      "mergeStateStatus": "UNKNOWN",
+      "mergeable": "UNKNOWN",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 243,
+      "title": "Add PR creation state to lane runner",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    },
+    {
+      "number": 236,
+      "title": "Fix task generator work packet repo identity",
+      "state": "OPEN",
+      "mergeStateStatus": "DIRTY",
+      "mergeable": "CONFLICTING",
+      "category": "unrelated_trading_or_old_lane",
+      "reason": "Not in minimum required closeout targets for this packet.",
+      "required_by_packet": false
+    }
+  ]
+}

@@ -5,13 +5,11 @@
     "scheduler_readiness": null
   },
   "blockers": [
-    "queue mutation gate is not ready: INVALID",
+    "queue mutation gate is not ready: BLOCKED",
     "explicit queue mutation approval is not present",
-    "runtime apply preview is not ready: INVALID",
+    "runtime apply preview is not ready: BLOCKED",
     "human gate evidence is not pass: BLOCKED",
-    "autonomy reassessment is not pass: BLOCKED",
-    "queue gate invalid reason: allowed_paths is required",
-    "queue gate invalid reason: forbidden_paths is required"
+    "autonomy reassessment is not pass: BLOCKED"
   ],
   "command_queue_mutation": false,
   "evidence_loaded": {
@@ -29,13 +27,13 @@
     "sos_preview": false
   },
   "evidence_paths": {
-    "autonomy_gap_report": "C:/Dev/Ai.Os/Reports/autonomy_gap/autonomy_gap_reassessment_report.json",
-    "human_gate_report": "C:/Dev/Ai.Os/Reports/human_gate/human_gate_packet_dogfood_report.json",
-    "queue_mutation_gate_preview": "C:/Dev/Ai.Os/Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
-    "runtime_apply_preview": "C:/Dev/Ai.Os/Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
-    "sos_preview": "C:/Dev/Ai.Os/Reports/sos_preview/sos_arming_preview.json"
+    "autonomy_gap_report": "Reports/autonomy_gap/autonomy_gap_reassessment_report.json",
+    "human_gate_report": "Reports/human_gate/human_gate_packet_dogfood_report.json",
+    "queue_mutation_gate_preview": "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+    "runtime_apply_preview": "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
+    "sos_preview": "Reports/sos_preview/sos_arming_preview.json"
   },
-  "generated_at_utc": "2026-06-10T23:12:06Z",
+  "generated_at_utc": "2026-06-11T01:51:15Z",
   "human_gate_projection": {
     "dogfood_status": "BLOCKED",
     "human_gate_packet_status": "BLOCKED"
@@ -67,19 +65,17 @@
   "queue_mutation_allowed": false,
   "queue_mutation_gate_projection": {
     "explicit_approval": false,
-    "gate_status": "INVALID",
+    "gate_status": "BLOCKED",
     "gate_validation_status": "PASS"
   },
   "remaining_blockers": [
-    "queue mutation gate is not ready: INVALID",
+    "queue mutation gate is not ready: BLOCKED",
     "explicit queue mutation approval is not present",
-    "runtime apply preview is not ready: INVALID",
+    "runtime apply preview is not ready: BLOCKED",
     "human gate evidence is not pass: BLOCKED",
-    "autonomy reassessment is not pass: BLOCKED",
-    "queue gate invalid reason: allowed_paths is required",
-    "queue gate invalid reason: forbidden_paths is required"
+    "autonomy reassessment is not pass: BLOCKED"
   ],
-  "repo_root": "C:/Dev/Ai.Os",
+  "repo_root": ".",
   "required_dependencies": [
     "Queue mutation gate approval evidence",
     "Runtime APPLY lane READY_FOR_RUNTIME_PREVIEW",
@@ -89,7 +85,7 @@
     "Anthony explicit scheduler registration action"
   ],
   "runtime_apply_projection": {
-    "runtime_apply_status": "INVALID",
+    "runtime_apply_status": "BLOCKED",
     "would_apply": false,
     "would_execute": false,
     "would_route": false
@@ -109,7 +105,7 @@
   "sos_projection": {
     "notification_send_allowed": false,
     "notification_sent": false,
-    "sos_status": "INVALID"
+    "sos_status": "BLOCKED"
   },
   "source_fingerprints": [
     {
@@ -118,17 +114,21 @@
       ],
       "file_count": 1,
       "kind": "dir",
-      "path": "C:/Dev/Ai.Os/automation/orchestration/work_packets/active"
+      "path": "automation/orchestration/work_packets/active"
     },
     {
       "kind": "file",
-      "path": "C:/Dev/Ai.Os/automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json",
+      "path": "automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json",
       "sha256": "2beff4de814cf2ceddc0c01065341672bfdb854dafb7002439719989b3ca8442",
       "size": 1589
     },
     {
       "entries": [
+        "__pycache__/aios_approval_evidence_adapter.cpython-311.pyc",
+        "__pycache__/aios_queue_specific_approval_request.cpython-311.pyc",
+        "aios_approval_evidence_adapter.py",
         "AIOS_APPROVAL_QUEUE.example.json",
+        "aios_queue_specific_approval_request.py",
         "APPLY_APPROVAL_GATE_001.json",
         "APPROVAL_INBOX_001.json",
         "APPROVAL_STATUS_RULES_001.md",
@@ -139,9 +139,9 @@
         "Invoke-AiOsApprovalChain.DRY_RUN.ps1",
         "New-AiOsPacketApprovalRequest.DRY_RUN.ps1"
       ],
-      "file_count": 10,
+      "file_count": 14,
       "kind": "dir",
-      "path": "C:/Dev/Ai.Os/automation/orchestration/approval_inbox"
+      "path": "automation/orchestration/approval_inbox"
     },
     {
       "entries": [
@@ -151,7 +151,7 @@
       ],
       "file_count": 3,
       "kind": "dir",
-      "path": "C:/Dev/Ai.Os/automation/orchestration/command_queue"
+      "path": "automation/orchestration/command_queue"
     },
     {
       "entries": [
@@ -421,7 +421,7 @@
       ],
       "file_count": 263,
       "kind": "dir",
-      "path": "C:/Dev/Ai.Os/services"
+      "path": "services"
     },
     {
       "entries": [
@@ -529,20 +529,18 @@
       ],
       "file_count": 101,
       "kind": "dir",
-      "path": "C:/Dev/Ai.Os/telemetry"
+      "path": "telemetry"
     }
   ],
   "stop_condition": "Stop before scheduler creation, service creation, runtime launch/execution, notification send, queue mutation, or worker mutation.",
   "summary": {
     "notification_send_allowed": false,
     "remaining_blockers": [
-      "queue mutation gate is not ready: INVALID",
+      "queue mutation gate is not ready: BLOCKED",
       "explicit queue mutation approval is not present",
-      "runtime apply preview is not ready: INVALID",
+      "runtime apply preview is not ready: BLOCKED",
       "human gate evidence is not pass: BLOCKED",
-      "autonomy reassessment is not pass: BLOCKED",
-      "queue gate invalid reason: allowed_paths is required",
-      "queue gate invalid reason: forbidden_paths is required"
+      "autonomy reassessment is not pass: BLOCKED"
     ],
     "report_paths": null,
     "runtime_execution_allowed": false,

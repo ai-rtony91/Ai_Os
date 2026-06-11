@@ -1,0 +1,508 @@
+{
+  "approval_status": {
+    "explicit_approval": false,
+    "human_approval_phrase_present": false,
+    "mismatch_result": true,
+    "old_heartbeat_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+    "queue_specific_gate_path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
+    "queue_target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "safe_scope": "DRY_RUN queue review only",
+    "status": "drafted_only"
+  },
+  "completion_estimate": {
+    "governed_preview_spine_completeness_percent": 90,
+    "overall_closeout_readiness_percent": 84,
+    "queue_approval_correctness_completeness_percent": 88,
+    "runtime_apply_readiness_completeness_percent": 86,
+    "scheduler_observe_loop_readiness_completeness_percent": 83,
+    "seven_day_unattended_observe_readiness_completeness_percent": 78,
+    "sos_only_wake_readiness_completeness_percent": 84
+  },
+  "files_changed": [
+    "Reports/autonomy_closure/autonomy_closure_report.json",
+    "Reports/autonomy_closure/autonomy_closure_summary.md",
+    "Reports/autonomy_gap/autonomy_gap_reassessment_report.json",
+    "Reports/autonomy_gap/autonomy_gap_reassessment_summary.md",
+    "Reports/control_loop_observe/observe_spine_runner_report.json",
+    "Reports/control_loop_observe/observe_spine_runner_summary.md",
+    "Reports/human_gate/human_gate_packet_dogfood_report.json",
+    "Reports/human_gate/human_gate_packet_dogfood_summary.md",
+    "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
+    "Reports/p2_enqueue_bridge/p2_enqueue_bridge_summary.md",
+    "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+    "Reports/queue_mutation_gate/queue_mutation_gate_summary.md",
+    "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
+    "Reports/runtime_apply_lane/runtime_apply_lane_summary.md",
+    "Reports/scheduler_preview/scheduler_registration_preview.json",
+    "Reports/scheduler_preview/scheduler_registration_preview_summary.md",
+    "Reports/sos_preview/sos_arming_preview.json",
+    "Reports/sos_preview/sos_arming_preview_summary.md",
+    "automation/orchestration/approval_inbox/aios_approval_evidence_adapter.py",
+    "automation/orchestration/control_loop/aios_observe_spine_runner.py",
+    "automation/orchestration/runtime_closure/aios_p2_enqueue_bridge.py",
+    "automation/orchestration/work_packets/aios_queue_mutation_gate.py",
+    "tests/orchestration/test_aios_observe_spine_runner.py",
+    "tests/orchestration/test_aios_p2_enqueue_bridge.py",
+    "tests/orchestration/test_queue_mutation_gate.py",
+    "Reports/approval_state_transition/p2_queue_approval_request.json",
+    "Reports/approval_state_transition/p2_queue_approval_request.md",
+    "Reports/final_autonomy_closeout/approval_target_audit.json",
+    "Reports/final_autonomy_closeout/approval_target_audit.md",
+    "Reports/final_autonomy_closeout/open_pr_classification.json",
+    "Reports/final_autonomy_closeout/open_pr_classification.md",
+    "Reports/final_autonomy_closeout/open_pr_raw.json",
+    "Reports/final_autonomy_closeout/open_prs_open_list.json",
+    "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
+    "Reports/runtime_proof_gate/runtime_proof_gate_summary.md"
+  ],
+  "files_created": [
+    "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
+    "Reports/runtime_proof_gate/runtime_proof_gate_summary.md",
+    "Reports/approval_state_transition/p2_queue_approval_request.json",
+    "Reports/approval_state_transition/p2_queue_approval_request.md",
+    "automation/orchestration/approval_inbox/aios_queue_specific_approval_request.py",
+    "tests/orchestration/test_queue_specific_approval_request.py",
+    "Reports/final_autonomy_closeout/final_blocker_matrix.json",
+    "Reports/final_autonomy_closeout/final_blocker_matrix.md",
+    "Reports/final_autonomy_closeout/FINAL_AUTONOMY_CLOSEOUT_REPORT.md",
+    "Reports/final_autonomy_closeout/final_autonomy_closeout_report.json"
+  ],
+  "next_action": "Anthony must review Reports/approval_state_transition/p2_queue_approval_request.md and, if correct, provide the exact approval phrase: ANTHONY_EXPLICITLY_APPROVES_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1_FOR_DRY_RUN_QUEUE_REVIEW_ONLY",
+  "observe_loop_status": {
+    "code_blockers": [],
+    "governance_blockers": [
+      "queue_mutation_gate",
+      "runtime_apply_lane",
+      "sos_arming",
+      "scheduler_registration"
+    ],
+    "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+    "real_blockers": [
+      "p2_bridge",
+      "queue_mutation_gate",
+      "runtime_apply_lane",
+      "sos_arming",
+      "scheduler_registration"
+    ],
+    "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
+    "stale_layers": []
+  },
+  "open_pr_triage": {
+    "classification_file": "Reports/final_autonomy_closeout/open_pr_classification.json",
+    "classifications": [
+      {
+        "category": "report_only_refresh",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 554,
+        "reason": "Evidence refresh packet aligns with final closeout evidence maintenance.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "chore(reports): refresh autonomy spine evidence"
+      },
+      {
+        "category": "should_not_merge_without_rebase",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 550,
+        "reason": "Dirty/conflicting state (mergeable=CONFLICTING) with overlapping scope; requires conflict resolution before merge consideration.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "feat(runtime): enrich P2 queue contract"
+      },
+      {
+        "category": "report_only_refresh",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 533,
+        "reason": "Autonomy evidence ledger useful but not required to resolve current approval mismatch blocker.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "feat(autonomy): add self-build evidence ledger"
+      },
+      {
+        "category": "report_only_refresh",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 528,
+        "reason": "Decision packet drafting is adjacent utility, not direct approval/queue-chain blocker for this closeout.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "feat(autonomy): add canonical decision packet drafter"
+      },
+      {
+        "category": "stale_conflict_risk",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 521,
+        "reason": "Large legacy lane packet with proposal overlap and likely superseded by later focused packets.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "feat(autonomy): loop-closure Lane A \u2014 evidence ledger + drafter, promotion review, approval card, APPLY inventory, path-guard"
+      },
+      {
+        "category": "stale_conflict_risk",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 511,
+        "reason": "High-level big-pack planning packet; now partially obsolete as pieces were split into merged focus packets.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "Autonomy completion Big-Pack: CONNECT/TRUST/ACT/ARM/PROVE (DRY_RUN-first)"
+      },
+      {
+        "category": "report_only_refresh",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 504,
+        "reason": "Retention proof useful for longer-run stability but not yet connected to queue-approval mismatch.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "jsonl rotation + retention (DRY_RUN-first, preserves proof history)"
+      },
+      {
+        "category": "relevant_to_final_autonomy_closeout_now",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 502,
+        "reason": "Directly targets SOS wake path, one of the remaining end-state objectives.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "SOS Telegram arming v2 (DRY_RUN-first, supersedes stale #468)"
+      },
+      {
+        "category": "report_only_refresh",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 469,
+        "reason": "Restart/timeouts packet is relevant for 24h stability, not immediate queue-approval mismatch.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "Packet B+C: restart supervisor + git timeouts (#456 completion, DRY_RUN-first)"
+      },
+      {
+        "category": "stale_conflict_risk",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 468,
+        "reason": "Explicitly superseded by #502 by PR author notes; stale candidate.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "Packet 2: SOS last-mile arming (DRY_RUN-first, serialized)"
+      },
+      {
+        "category": "report_only_refresh",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 466,
+        "reason": "Dispatch closure required for full runtime lane; not direct queue-specific approval blocker.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "Packet 3: dispatch closure + atomic worker-state + CI tests (DRY_RUN-first, serialized)"
+      },
+      {
+        "category": "report_only_refresh",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 462,
+        "reason": "Execution bridge gates strengthen proof safety but are not currently required to proceed with approval target mismatch fix.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "ci(governance): add execution bridge gates"
+      },
+      {
+        "category": "should_not_merge_without_rebase",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 451,
+        "reason": "CONFLICTING state and wide scope indicate merge risk without cleanup/rebase.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "feat(governance): close weekend readiness control gaps v1"
+      },
+      {
+        "category": "should_not_merge_without_rebase",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 449,
+        "reason": "CONFLICTING state overlaps restart gate lineage; requires controlled rebasing/review.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "fix(governance): add Tier 1 restart safety gate"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "UNKNOWN",
+        "mergeable": "UNKNOWN",
+        "number": 445,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "build(deps): bump actions/setup-python from 5 to 6"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "UNKNOWN",
+        "mergeable": "UNKNOWN",
+        "number": 444,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "build(deps): bump actions/checkout from 4 to 6"
+      },
+      {
+        "category": "stale_conflict_risk",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 437,
+        "reason": "Large operator-relief lane likely stale against the current approved workflow model.",
+        "required_by_packet": true,
+        "state": "OPEN",
+        "title": "feat: add operator relief closed loop"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 436,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "feat: add forex engine large dataset backtest adapter"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "UNKNOWN",
+        "mergeable": "UNKNOWN",
+        "number": 359,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "build(deps): bump react and @types/react in /apps/dashboard"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "UNKNOWN",
+        "mergeable": "UNKNOWN",
+        "number": 358,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "build(deps-dev): bump eslint from 9.39.4 to 10.4.1 in /apps/dashboard"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "UNKNOWN",
+        "mergeable": "UNKNOWN",
+        "number": 357,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "build(deps): bump react-dom from 19.2.6 to 19.2.7 in /apps/dashboard"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 301,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "Night Supervisor effector layer on Codex V2 spine"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 300,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "Add Layer 2 Night Supervisor memory and evidence systems"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 295,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "ci(dashboard): add static web apps workflow"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 294,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "chore(dashboard): add Azure request logging"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 274,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "Normalize JSON helper output for preview chain"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "CLEAN",
+        "mergeable": "MERGEABLE",
+        "number": 267,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "automation: worker control layer -- morning brief, Claude hooks, validator chain runner (PKT-WEST-APPLY-005)"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "UNKNOWN",
+        "mergeable": "UNKNOWN",
+        "number": 251,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "build(deps-dev): bump @eslint/js from 9.39.4 to 10.0.1 in /apps/dashboard"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "UNKNOWN",
+        "mergeable": "UNKNOWN",
+        "number": 249,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "build(deps-dev): bump eslint-plugin-react-hooks from 7.0.1 to 7.1.1 in /apps/dashboard"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 243,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "Add PR creation state to lane runner"
+      },
+      {
+        "category": "unrelated_trading_or_old_lane",
+        "mergeStateStatus": "DIRTY",
+        "mergeable": "CONFLICTING",
+        "number": 236,
+        "reason": "Not in minimum required closeout targets for this packet.",
+        "required_by_packet": false,
+        "state": "OPEN",
+        "title": "Fix task generator work packet repo identity"
+      }
+    ]
+  },
+  "packet_count_recalibration": {
+    "blocker_basis": [
+      "Exact queue-specific approval phrase not yet provided.",
+      "Runtime proof gate is BLOCKED but valid.",
+      "Observe spine is BLOCKED, not INVALID, after the runner fix."
+    ],
+    "confidence_level": 0.86,
+    "evidence_basis": [
+      "Reports/final_autonomy_closeout/approval_target_audit.json",
+      "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+      "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
+      "Reports/control_loop_observe/observe_spine_runner_report.json"
+    ],
+    "minimum_remaining_packets": 1,
+    "realistic_remaining_packets": 2,
+    "risk_upper_remaining_packets": 4,
+    "what_would_increase_count": [
+      "If the queue-specific approval adapter or approval request generator needs another fix.",
+      "If a later refresh exposes a new stale or missing evidence gap."
+    ],
+    "what_would_reduce_count": [
+      "Anthony supplies the exact approval phrase and the queue-specific approval gate can be written.",
+      "Downstream previews can then be refreshed without changing any protected state."
+    ]
+  },
+  "protected_paths": {
+    "after_fingerprint": "No protected path mutated; the refreshed reports still show identical fingerprints.",
+    "before_fingerprint": "No protected path mutated; fingerprints remained unchanged in the refreshed reports.",
+    "mutation_result": "NO_PROTECTED_MUTATION"
+  },
+  "queue_gate_status": {
+    "approval_evidence_present": true,
+    "blockers": [
+      "approval evidence is not explicit",
+      "approval evidence packet_id does not match proposed queue packet_id"
+    ],
+    "canonical_queue_mutated": false,
+    "explicit_approval": false,
+    "gate_status": "BLOCKED",
+    "invalid_reasons": [],
+    "queue_write_allowed": false
+  },
+  "runtime_proof_gate_status": {
+    "attention_count": 1,
+    "blocker_count": 12,
+    "final_verdict": "BLOCKED",
+    "human_gate_ready": false,
+    "safe_next_action": "Fix the blockers before the proof chain can reach human gate review.",
+    "stop_condition": "Stop until blockers are cleared; no execution."
+  },
+  "runtime_status": {
+    "runtime_apply_status": "BLOCKED",
+    "runtime_execution": false,
+    "runtime_launch": false,
+    "runtime_proof_verdict": "BLOCKED",
+    "would_apply": false,
+    "would_execute": false,
+    "would_route": false
+  },
+  "scheduler_status": {
+    "real_scheduler_registered": false,
+    "reason": "Resolve evidence blockers and explicit approvals before scheduling registration.",
+    "scheduler_preview_status": "BLOCKED",
+    "would_schedule": false
+  },
+  "sos_status": {
+    "notification_send_allowed": false,
+    "real_channel_armed": false,
+    "reason": "Resolve explicit approval blockers and evidence blockers before arming SOS.",
+    "sos_preview_status": "BLOCKED"
+  },
+  "status": "HUMAN_APPROVAL_REQUIRED",
+  "summary": {
+    "approval_gate_drafted_or_written": "drafted_only",
+    "current_branch": "feature/final-autonomy-closeout-superpacket-v1",
+    "current_commit": "60332c327e01fbda13f18a0de52992d585fb511b",
+    "current_status": "HUMAN_APPROVAL_REQUIRED",
+    "files_changed_count": 35,
+    "files_created_count": 10,
+    "observe_loop_state": "OBSERVE_LOOP_BLOCKED",
+    "queue_gate_state": "BLOCKED",
+    "runtime_apply_state": "BLOCKED",
+    "scheduler_state": "BLOCKED",
+    "sos_state": "BLOCKED",
+    "what_changed": [
+      "Added a queue-specific approval request generator and tests.",
+      "Taught the approval evidence adapter to recognize a queue-specific approval target.",
+      "Taught the P2 bridge and queue gate to carry and enforce approval evidence for the queue target.",
+      "Fixed the observe-spine runner so default reports are no longer suppressed by empty evidence overrides.",
+      "Materialized the missing runtime proof gate preview file from the existing runtime proof builder.",
+      "Refreshed the entire evidence chain: P2, queue gate, runtime apply, SOS, scheduler, observe spine, human gate, autonomy gap, and autonomy closure."
+    ],
+    "what_did_not_change": [
+      "The active queue was not mutated.",
+      "The worker inbox was not mutated.",
+      "The approval inbox files were not mutated.",
+      "Runtime execution was not launched.",
+      "SOS was not armed.",
+      "Scheduler registration was not performed.",
+      "Live trading remained blocked.",
+      "The old heartbeat approval gate file was not repurposed."
+    ]
+  }
+}

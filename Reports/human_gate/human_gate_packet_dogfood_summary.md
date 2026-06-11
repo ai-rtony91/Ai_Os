@@ -1,6 +1,6 @@
 # AI_OS Human Gate Packet Dogfood Report
 
-- generated_at_utc: `2026-01-02T03:04:05Z`
+- generated_at_utc: `2026-06-11T01:47:38Z`
 - dogfood_status: `BLOCKED`
 - packet_status: `BLOCKED`
 - runtime_proof_gate_verdict: `None`
