@@ -1,0 +1,119 @@
+{
+  "schema": "AIOS_FIRST_SCHEDULED_FIRE_PROOF_AFTER_SCHEDULER_ENABLE.v1",
+  "packet_id": "AIOS-FIRST-SCHEDULED-FIRE-PROOF-CONSUME-V2-OPERATOR-EVIDENCE",
+  "mode": "APPLY",
+  "lane": "first-scheduled-fire-proof",
+  "recorded_at_local": "2026-06-11",
+  "task_name": "AIOS_Relay_Nightly",
+  "evidence_boundary": {
+    "task_scheduler_evidence_source": "operator_supplied",
+    "codex_task_scheduler_query_performed": false,
+    "codex_manual_task_run_performed": false,
+    "codex_runtime_manual_launch_performed": false,
+    "repo_local_report_source": "telemetry/night_supervisor/reports/night_summary_2026-06-11.json"
+  },
+  "operator_supplied_task_evidence": {
+    "task_name": "AIOS_Relay_Nightly",
+    "scheduled_fire_time_local": "2026-06-11T17:00:00-04:00",
+    "task_last_run_time": "6/11/2026 5:00:00 PM",
+    "task_last_result": 1,
+    "task_next_run_time": "6/12/2026 5:00:00 PM",
+    "scheduled_task_state_after_run": "Enabled",
+    "status_after_run": "Ready",
+    "task_to_run_pwsh_path": "C:\\Program Files\\WindowsApps\\Microsoft.PowerShell_7.6.2.0_x64__8wekyb3d8bbwe\\pwsh.exe",
+    "start_in": "C:\\Dev\\Ai.Os",
+    "task_disabled_after_proof_by_operator": true,
+    "post_proof_scheduled_task_state": "Disabled",
+    "post_proof_next_run_time": "N/A",
+    "post_proof_last_run_time": "6/11/2026 5:00:00 PM",
+    "post_proof_last_result": 1
+  },
+  "night_supervisor_report_evidence": {
+    "path": "telemetry/night_supervisor/reports/night_summary_2026-06-11.json",
+    "schema": "AIOS_NIGHT_SUPERVISOR_REPORT.v1",
+    "run_id": "night_20260611T210002Z",
+    "generated_at": "2026-06-11T21:00:04Z",
+    "mode": "DRY_RUN",
+    "supervisor_status": "BLOCKED",
+    "repo_branch_reported_by_run": "main",
+    "repo_head_sha": "c1a659802136778f13be4777a7eb83f7652c8d91",
+    "changed_files": [
+      "telemetry/runtime/runtime_heartbeat.json"
+    ],
+    "execution_result": {
+      "result_classification": "FAIL",
+      "validator_status": "FAIL",
+      "qa_status": "FAIL",
+      "files_changed": [
+        "telemetry/runtime/runtime_heartbeat.json"
+      ],
+      "next_safe_action": "Review validator or QA failure before any APPLY, commit, push, merge, or worker launch."
+    },
+    "validator_failure_summary": "JSON parse checked 131 files; git diff --check FAILED; repo integrity ok; PowerShell parse PASS.",
+    "safety_confirmation": {
+      "no_live_trading": true,
+      "no_broker_execution": true,
+      "no_secrets_exposed": true,
+      "no_active_state_mutation": true,
+      "no_commit_or_push": true,
+      "writes_within_allowed_paths_only": true,
+      "forbidden_write_attempts": 0
+    }
+  },
+  "status_classification": {
+    "scheduler_fire_status": "PASS",
+    "task_action_resolution_status": "PASS",
+    "working_directory_status": "PASS",
+    "aios_reached_status": "PASS",
+    "night_report_updated_status": "PASS",
+    "supervisor_status": "BLOCKED",
+    "execution_result": "FAIL",
+    "validator_status": "FAIL",
+    "failure_classification": "CONTROLLED_VALIDATOR_BLOCK",
+    "dirty_file_identified": "telemetry/runtime/runtime_heartbeat.json",
+    "dirty_file_restored_by_operator_before_this_packet": true,
+    "repo_clean_before_packet": true,
+    "safety_gates_held": true
+  },
+  "safety_confirmations": {
+    "no_manual_task_run_by_codex": true,
+    "no_scheduler_query_by_codex_in_this_packet": true,
+    "no_scheduler_mutation_by_codex": true,
+    "no_runtime_manual_launch": true,
+    "no_runtime_manual_execution": true,
+    "no_queue_mutation": true,
+    "no_approval_inbox_mutation": true,
+    "no_worker_inbox_mutation": true,
+    "no_command_queue_mutation": true,
+    "no_sos_send": true,
+    "no_broker_or_live_trading": true,
+    "no_credential_access_or_storage": true,
+    "no_secret_storage": true,
+    "no_ntfy_topic_token_private_url_or_secret_stored": true,
+    "no_telemetry_runtime_mutation_by_codex": true,
+    "no_telemetry_night_supervisor_mutation_by_codex": true,
+    "no_dashboard_mutation": true,
+    "no_destructive_cleanup": true,
+    "no_direct_push_to_main": true,
+    "no_merge": true,
+    "no_pr_closure": true
+  },
+  "evidence_mismatches": [
+    {
+      "classification": "MISMATCH_RECORDED",
+      "field": "scheduled_fire_time_local",
+      "prior_enable_evidence": "Reports/autonomy_loop_closure/scheduler_enable_only_apply_evidence.json recorded next_scheduled_fire_time_local as 2026-06-12T02:00:00.",
+      "operator_and_night_report_evidence": "Operator-supplied Task Scheduler output reports Last Run Time 6/11/2026 5:00:00 PM and the night report generated_at 2026-06-11T21:00:04Z.",
+      "handling": "This proof records the operator-supplied post-run Task Scheduler output as controlling task evidence for the first-fire result. ERROR_LOG.md was not edited because it is outside this packet's allowed write paths."
+    }
+  ],
+  "source_evidence": [
+    "operator_supplied_task_evidence_in_packet_AIOS-FIRST-SCHEDULED-FIRE-PROOF-CONSUME-V2-OPERATOR-EVIDENCE",
+    "telemetry/night_supervisor/reports/night_summary_2026-06-11.json",
+    "Reports/autonomy_loop_closure/scheduler_enable_only_apply_evidence.json",
+    "automation/orchestration/work_packets/proposed/AIOS-FIRST-SCHEDULED-FIRE-PROOF-AFTER-SCHEDULER-ENABLE.md"
+  ],
+  "exact_next_safe_action": "Review and execute a separate heartbeat dirty-write guard APPLY lane that fixes or normalizes telemetry/runtime/runtime_heartbeat.json writing so scheduled-fire validation can leave main clean.",
+  "next_safe_packet": "automation/orchestration/work_packets/proposed/AIOS-HEARTBEAT-DIRTY-WRITE-GUARD-AFTER-FIRST-SCHEDULED-FIRE.md",
+  "status": "FIRST_SCHEDULED_FIRE_PROOF_RECORDED_CONTROLLED_VALIDATOR_BLOCK_IDENTIFIED"
+}
