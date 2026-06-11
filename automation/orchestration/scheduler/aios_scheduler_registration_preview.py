@@ -321,6 +321,7 @@ def build_scheduler_registration_preview(
         "generated_at_utc": _now(now),
         "repo_root": root.as_posix(),
         "scheduler_status": status,
+        "scheduler_preview_status": status,
         "scheduler_status_reason": (
             "Scheduler registration can proceed as a dry-run preview."
             if status == READY
@@ -363,6 +364,7 @@ def build_scheduler_registration_preview(
         "would_register_task": False,
         "would_start_service": False,
         "scheduler_registration_allowed": False,
+        "scheduler_creation_allowed": False,
         "scheduler_created": False,
         "service_created": False,
         "runtime_launch_allowed": False,
@@ -417,14 +419,15 @@ def build_scheduler_registration_preview(
         {
             "runtime_launch": False,
             "runtime_execution": False,
-            "queue_mutation": False,
-            "worker_inbox_mutation": False,
-            "approval_inbox_mutation": False,
-            "command_queue_mutation": False,
-            "service_creation": False,
-            "notification_sent": False,
-            "unsafe_path_hits": [],
-        }
+        "queue_mutation": False,
+        "worker_inbox_mutation": False,
+        "approval_inbox_mutation": False,
+        "command_queue_mutation": False,
+        "service_creation": False,
+        "notification_sent": False,
+        "unsafe_path_hits": [],
+        "real_scheduler_registered": False,
+    }
     )
 
     blocked_paths = []
@@ -567,8 +570,11 @@ def build_scheduler_registration_preview_markdown(report: dict[str, Any]) -> str
 def summarize_scheduler_registration_preview(report: dict[str, Any]) -> dict[str, Any]:
     return {
         "scheduler_status": report.get("scheduler_status"),
+        "scheduler_preview_status": report.get("scheduler_preview_status"),
         "scheduler_registration_allowed": report.get("scheduler_registration_allowed"),
+        "scheduler_creation_allowed": report.get("scheduler_creation_allowed"),
         "service_created": report.get("service_created"),
+        "real_scheduler_registered": report.get("real_scheduler_registered"),
         "runtime_launch_allowed": report.get("runtime_launch_allowed"),
         "runtime_execution_allowed": report.get("runtime_execution_allowed"),
         "notification_send_allowed": report.get("notification_send_allowed"),

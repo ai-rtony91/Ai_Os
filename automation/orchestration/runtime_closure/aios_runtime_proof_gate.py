@@ -15,9 +15,13 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable
+
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from automation.orchestration.autonomy_reports.aios_operator_dependency_ledger import (
     build_operator_dependency_ledger,

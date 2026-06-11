@@ -79,7 +79,7 @@
   },
   "gate_type": "runtime_proof_gate",
   "gate_version": "v1",
-  "generated_at_utc": "2026-06-11T02:55:33Z",
+  "generated_at_utc": "2026-06-11T03:17:09Z",
   "human_gate_ready": false,
   "human_gate_required": true,
   "invalid_reason_count": 0,

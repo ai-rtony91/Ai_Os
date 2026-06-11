@@ -284,6 +284,7 @@ def build_sos_arming_preview(
         "generated_at_utc": _now(now),
         "repo_root": root.as_posix(),
         "sos_status": status,
+        "sos_preview_status": status,
         "sos_status_reason": _status_reason(invalid_reasons or blockers),
         "evidence_loaded": {
             "p2_bridge_report": p2_path,
@@ -333,9 +334,12 @@ def build_sos_arming_preview(
         "scheduler_registration": False,
         "trading_execution": False,
         "notification_allowed": False,
+        "notification_send_allowed": False,
         "notification_sent": False,
         "credential_required": True,
         "scheduler_required": False,
+        "real_channel_armed": False,
+        "sos_allowed": False,
         "protected_boundaries": protected_boundaries,
         "validation": validation,
         "safe_next_action": (
@@ -471,12 +475,16 @@ def write_sos_arming_preview(
 def summarize_sos_arming_preview(report: dict[str, Any]) -> dict[str, Any]:
     return {
         "sos_status": report.get("sos_status"),
+        "sos_preview_status": report.get("sos_preview_status"),
         "runtime_launch": report.get("runtime_launch"),
         "runtime_execution": report.get("runtime_execution"),
         "queue_mutation": report.get("queue_mutation"),
         "worker_inbox_mutation": report.get("worker_inbox_mutation"),
         "notification_allowed": report.get("notification_allowed"),
+        "notification_send_allowed": report.get("notification_send_allowed"),
         "notification_sent": report.get("notification_sent"),
+        "real_channel_armed": report.get("real_channel_armed"),
+        "sos_allowed": report.get("sos_allowed"),
         "validation_status": report.get("validation", {}).get("status"),
         "safe_next_action": report.get("safe_next_action"),
         "report_paths": report.get("report_paths"),

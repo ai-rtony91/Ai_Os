@@ -5,8 +5,6 @@
     "scheduler_readiness": null
   },
   "blockers": [
-    "queue mutation gate is not ready: BLOCKED",
-    "explicit queue mutation approval is not present",
     "runtime apply preview is not ready: BLOCKED",
     "human gate evidence is not pass: BLOCKED",
     "autonomy reassessment is not pass: BLOCKED"
@@ -33,7 +31,7 @@
     "runtime_apply_preview": "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
     "sos_preview": "Reports/sos_preview/sos_arming_preview.json"
   },
-  "generated_at_utc": "2026-06-11T01:51:15Z",
+  "generated_at_utc": "2026-06-11T03:17:27Z",
   "human_gate_projection": {
     "dogfood_status": "BLOCKED",
     "human_gate_packet_status": "BLOCKED"
@@ -64,13 +62,12 @@
   "queue_mutation": false,
   "queue_mutation_allowed": false,
   "queue_mutation_gate_projection": {
-    "explicit_approval": false,
-    "gate_status": "BLOCKED",
+    "explicit_approval": true,
+    "gate_status": "READY_FOR_HUMAN_REVIEW",
     "gate_validation_status": "PASS"
   },
+  "real_scheduler_registered": false,
   "remaining_blockers": [
-    "queue mutation gate is not ready: BLOCKED",
-    "explicit queue mutation approval is not present",
     "runtime apply preview is not ready: BLOCKED",
     "human gate evidence is not pass: BLOCKED",
     "autonomy reassessment is not pass: BLOCKED"
@@ -96,6 +93,8 @@
   "runtime_launch_allowed": false,
   "safe_next_action": "Resolve evidence blockers and explicit approvals before scheduling registration.",
   "scheduler_created": false,
+  "scheduler_creation_allowed": false,
+  "scheduler_preview_status": "BLOCKED",
   "scheduler_registration_allowed": false,
   "scheduler_status": "BLOCKED",
   "scheduler_status_reason": "Scheduler registration is blocked by evidence blockers.",
@@ -130,6 +129,7 @@
         "AIOS_APPROVAL_QUEUE.example.json",
         "aios_queue_specific_approval_request.py",
         "APPLY_APPROVAL_GATE_001.json",
+        "APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
         "APPROVAL_INBOX_001.json",
         "APPROVAL_STATUS_RULES_001.md",
         "archive/.gitkeep",
@@ -139,7 +139,7 @@
         "Invoke-AiOsApprovalChain.DRY_RUN.ps1",
         "New-AiOsPacketApprovalRequest.DRY_RUN.ps1"
       ],
-      "file_count": 14,
+      "file_count": 15,
       "kind": "dir",
       "path": "automation/orchestration/approval_inbox"
     },
@@ -535,9 +535,8 @@
   "stop_condition": "Stop before scheduler creation, service creation, runtime launch/execution, notification send, queue mutation, or worker mutation.",
   "summary": {
     "notification_send_allowed": false,
+    "real_scheduler_registered": false,
     "remaining_blockers": [
-      "queue mutation gate is not ready: BLOCKED",
-      "explicit queue mutation approval is not present",
       "runtime apply preview is not ready: BLOCKED",
       "human gate evidence is not pass: BLOCKED",
       "autonomy reassessment is not pass: BLOCKED"
@@ -546,6 +545,8 @@
     "runtime_execution_allowed": false,
     "runtime_launch_allowed": false,
     "safe_next_action": "Resolve evidence blockers and explicit approvals before scheduling registration.",
+    "scheduler_creation_allowed": false,
+    "scheduler_preview_status": "BLOCKED",
     "scheduler_registration_allowed": false,
     "scheduler_status": "BLOCKED",
     "service_created": false,

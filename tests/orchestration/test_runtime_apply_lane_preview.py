@@ -219,6 +219,8 @@ def test_ready_with_explicit_approval_produces_ready_preview_status(tmp_path):
         runtime_proof_gate=_runtime_proof_gate_ready(),
     )
     assert report["apply_status"] == mod.STATUS_READY
+    assert report["runtime_apply_status"] == mod.STATUS_READY
+    assert report["runtime_proof_verdict"] == "READY_FOR_HUMAN_GATE"
     assert report["validation"]["status"] == "PASS"
     assert report["execution_projection"]["would_apply"] is False
     assert report["execution_projection"]["would_route"] is False
@@ -280,6 +282,8 @@ def test_runtime_apply_consumes_runtime_proof_report_from_file(tmp_path):
     assert report["evidence_loaded"]["runtime_proof_gate"]["loaded"] is True
     assert report["runtime_proof_gate"]["final_verdict"] == "BLOCKED"
     assert report["apply_status"] == mod.STATUS_BLOCKED
+    assert report["runtime_apply_status"] == mod.STATUS_BLOCKED
+    assert report["runtime_proof_verdict"] == "BLOCKED"
     assert report["would_apply"] is False
     assert report["would_execute"] is False
     assert report["runtime_launch"] is False
