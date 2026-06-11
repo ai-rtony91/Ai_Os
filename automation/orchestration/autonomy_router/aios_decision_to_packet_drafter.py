@@ -48,6 +48,39 @@ FORBIDDEN_PATHS = [
     "broker/", "OANDA/", "live_trading/", "webhooks/",
 ]
 
+STRICT_PACKET_FIELDS = [
+    "packet_id",
+    "objective",
+    "allowed_paths",
+    "forbidden_paths",
+    "approval_authority",
+    "validator_chain",
+    "stop_point",
+    "mission",
+    "preflight",
+    "final_report_format",
+]
+
+PROTECTED_OUTPUT_MARKERS = [
+    "automation/orchestration/work_packets/",
+    "automation/orchestration/workers/inbox/",
+    "automation/orchestration/workers/aios_worker_inbox.json",
+    "automation/orchestration/command_queue/",
+    "automation/orchestration/approval_inbox/",
+    "telemetry/runtime/",
+    "services/runtime/",
+    "services/dispatcher/",
+    "services/orchestrator/",
+    "services/policy/",
+    "apps/trading_lab/",
+    "aios/modules/trader/",
+    "broker/",
+    "live_trading/",
+    "secrets/",
+    "credentials/",
+    ".env",
+]
+
 
 def _now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -72,6 +105,53 @@ def _is_valid_candidate(goal: Any) -> bool:
         isinstance(goal, dict)
         and isinstance(goal.get("objective"), str)
         and bool(goal.get("objective"))
+    )
+
+
+def _missing_strict_packet_fields(request: dict) -> list[str]:
+    missing: list[str] = []
+    for field in STRICT_PACKET_FIELDS:
+        value = request.get(field)
+        if value is None or value == "" or value == []:
+            missing.append(field)
+    return missing
+
+
+def draft_codex_packet_from_request(request: Any, *, now: Optional[str] = None) -> dict[str, object]:
+    """Strict packet-draft entry point that fails closed on missing governance fields."""
+    if not isinstance(request, dict):
+        return {
+            "schema": SCHEMA,
+            "status": "BLOCKED_MALFORMED_REQUEST",
+            "missing": list(STRICT_PACKET_FIELDS),
+            "draft_text": "",
+            "observe_only": True,
+        }
+
+    missing = _missing_strict_packet_fields(request)
+    if missing:
+        return {
+            "schema": SCHEMA,
+            "status": "BLOCKED_MISSING_REQUIRED_INPUTS",
+            "missing": missing,
+            "draft_text": "",
+            "observe_only": True,
+        }
+
+    goal = {
+        "objective": request["objective"],
+        "target_area": request.get("target_area") or "Reports/self_build_drafts",
+        "allowed_paths": request["allowed_paths"],
+        "worker_preference": request.get("worker_identity") or "Codex East",
+        "protected_action_expected": bool(request.get("protected_action_expected", False)),
+        "source_gap": request.get("mission") or request["objective"],
+    }
+    return build_packet_draft(
+        goal,
+        allowed_paths=list(request["allowed_paths"]),
+        supervisor=str(request.get("supervisor_identity") or "ChatGPT Personal"),
+        worker_identity=str(request.get("worker_identity") or "Codex East"),
+        now=now,
     )
 
 
@@ -270,8 +350,10 @@ def write_draft(
         base = Path(repo_root) if repo_root else Path.cwd()
         target_dir = base / DEFAULT_SUBDIR
 
-    # Hard guard: refuse to write into the protected packet lane.
-    if "work_packets" in str(target_dir).replace("\\", "/"):
+    normalized_target = (str(target_dir).replace("\\", "/").rstrip("/") + "/").lower()
+
+    # Hard guard: refuse to write into protected state, runtime, credential, broker, or trading lanes.
+    if any(marker in normalized_target for marker in PROTECTED_OUTPUT_MARKERS):
         return {"written": False, "status": "BLOCKED_FORBIDDEN_DIR", "md_path": None}
 
     md_path = target_dir / f"{result['packet_id']}.md"

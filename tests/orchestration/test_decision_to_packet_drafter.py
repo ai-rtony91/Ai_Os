@@ -6,6 +6,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DRAFTER = (
     REPO_ROOT / "automation" / "orchestration" / "autonomy_router"
@@ -41,6 +43,25 @@ def _goal(**over):
     return base
 
 
+def _strict_request(**over):
+    base = {
+        "packet_id": "AIOS-STRICT-PACKET-DRAFT-TEST",
+        "objective": "Draft a governed Codex packet for the next safe autonomy step",
+        "allowed_paths": ["Reports/self_build_drafts/"],
+        "forbidden_paths": ["automation/orchestration/work_packets/active/", "broker/", "live_trading/"],
+        "approval_authority": "Anthony remains Human Owner.",
+        "validator_chain": ["git diff --check"],
+        "stop_point": "Stop after draft generation.",
+        "mission": "Produce a review-only Codex packet draft.",
+        "preflight": ["pwd", "git status --short --branch"],
+        "final_report_format": ["SUMMARY:", "STATUS:"],
+        "supervisor_identity": "ChatGPT Personal",
+        "worker_identity": "Codex East",
+    }
+    base.update(over)
+    return base
+
+
 def test_scoped_draft_is_ready_and_governance_clean():
     m = _drafter()
     gov = _load("aios_governance_validator", VALIDATOR)
@@ -68,8 +89,27 @@ def test_draft_first_line_and_required_markers():
     res = m.build_packet_draft(_goal(), allowed_paths=["Reports/self_build_drafts/"])
     text = res["draft_text"]
     assert text.splitlines()[0] == "CODEX-ONLY PROMPT"
-    for marker in ["PACKET ID", "ALLOWED PATHS", "FORBIDDEN PATHS", "APPROVAL AUTHORITY",
-                   "VALIDATOR CHAIN", "STOP POINT", "MISSION", "PREFLIGHT", "FINAL REPORT FORMAT"]:
+    for marker in [
+        "AI_OS EXECUTION TOKEN",
+        "AI_OS BOOTSTRAP REQUIRED",
+        "IDENTITY MARKER",
+        "SUPERVISOR IDENTITY",
+        "PACKET ID",
+        "MODE",
+        "ZONE",
+        "WORKER IDENTITY",
+        "LANE",
+        "WORKTREE",
+        "BRANCH",
+        "ALLOWED PATHS",
+        "FORBIDDEN PATHS",
+        "APPROVAL AUTHORITY",
+        "VALIDATOR CHAIN",
+        "STOP POINT",
+        "MISSION",
+        "PREFLIGHT",
+        "FINAL REPORT FORMAT",
+    ]:
         assert marker in text
 
 
@@ -91,9 +131,46 @@ def test_protected_gap_flagged():
 
 def test_malformed_candidate_raises():
     m = _drafter()
-    import pytest
     with pytest.raises(ValueError):
         m.build_packet_draft({"no_objective": True})
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "packet_id",
+        "allowed_paths",
+        "forbidden_paths",
+        "approval_authority",
+        "validator_chain",
+        "stop_point",
+        "mission",
+        "preflight",
+        "final_report_format",
+    ],
+)
+def test_strict_request_missing_required_fields_fail_closed(field):
+    m = _drafter()
+    req = _strict_request()
+    req[field] = [] if isinstance(req[field], list) else ""
+    res = m.draft_codex_packet_from_request(req)
+    assert res["status"] == "BLOCKED_MISSING_REQUIRED_INPUTS"
+    assert field in res["missing"]
+    assert res["draft_text"] == ""
+    assert res["observe_only"] is True
+
+
+def test_strict_request_generates_codex_bound_packet():
+    m = _drafter()
+    res = m.draft_codex_packet_from_request(_strict_request(), now="2026-01-01T00:00:00Z")
+    text = res["draft_text"]
+    assert res["status"] == "DRAFT_READY_FOR_COMPLETENESS_REVIEW"
+    assert text.startswith("CODEX-ONLY PROMPT\n")
+    assert "AI_OS EXECUTION TOKEN" in text
+    assert "AI_OS BOOTSTRAP REQUIRED" in text
+    assert "APPROVAL AUTHORITY" in text
+    assert "VALIDATOR CHAIN" in text
+    assert "STOP POINT" in text
 
 
 def test_write_draft_atomic_no_overwrite(tmp_path):
@@ -114,6 +191,31 @@ def test_write_draft_refuses_work_packets_dir(tmp_path):
     forbidden_dir = tmp_path / "automation" / "orchestration" / "work_packets"
     r = m.write_draft(res, output_dir=forbidden_dir)
     assert r["written"] is False and r["status"] == "BLOCKED_FORBIDDEN_DIR"
+    assert not forbidden_dir.exists()
+
+
+@pytest.mark.parametrize(
+    "parts",
+    [
+        ("automation", "orchestration", "work_packets", "active"),
+        ("automation", "orchestration", "command_queue"),
+        ("automation", "orchestration", "approval_inbox"),
+        ("automation", "orchestration", "workers", "inbox"),
+        ("telemetry", "runtime"),
+        ("services", "runtime"),
+        ("broker",),
+        ("live_trading",),
+        ("secrets",),
+        ("credentials",),
+    ],
+)
+def test_write_draft_refuses_protected_mutation_paths(tmp_path, parts):
+    m = _drafter()
+    res = m.build_packet_draft(_goal(), allowed_paths=["Reports/"])
+    forbidden_dir = tmp_path.joinpath(*parts)
+    r = m.write_draft(res, output_dir=forbidden_dir)
+    assert r["written"] is False
+    assert r["status"] == "BLOCKED_FORBIDDEN_DIR"
     assert not forbidden_dir.exists()
 
 
