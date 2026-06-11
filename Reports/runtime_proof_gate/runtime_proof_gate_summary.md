@@ -24,14 +24,14 @@
 - stop_condition: Stop until blockers are cleared; no execution.
 
 ## Blockers
-- human gate required: stop_drill_human_confirmation
 - human gate required: sos_delivery_human_confirmation
 - human gate required: scheduler_manual_registration_human_confirmation
+- human gate required: stop_drill_human_confirmation
 
 ## Human Gate Blockers
-- stop_drill_human_confirmation
 - sos_delivery_human_confirmation
 - scheduler_manual_registration_human_confirmation
+- stop_drill_human_confirmation
 
 ## Attention
 - none

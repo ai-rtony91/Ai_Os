@@ -212,6 +212,28 @@ def _proof_status(runtime_proof: dict[str, Any] | None, top_level: str, cross_le
     )
 
 
+def _explicit_stop_drill_evidence(root: Path) -> dict[str, Any] | None:
+    for relative in [
+        Path("Reports") / "human_gate" / "stop_drill_human_confirmation_record.json",
+        Path("Reports") / "human_gate" / "stop_drill_proof_chain_consumption.json",
+    ]:
+        payload = _read_json(root / relative)
+        if not isinstance(payload, dict):
+            continue
+
+        status = _norm(payload.get("status"))
+        if (
+            payload.get("stop_drill_pass") is True
+            and status == "PASS_FOR_DRY_RUN_RECOVERY_PROOF_ONLY"
+            and (
+                payload.get("confirmation_phrase_used") is True
+                or payload.get("consumes_stop_drill_human_confirmation") is True
+            )
+        ):
+            return payload
+    return None
+
+
 def _explicit_sos_evidence(root: Path) -> dict[str, Any] | None:
     for relative in [
         Path("Reports") / "human_gate" / "sos_delivery_evidence.json",
@@ -498,11 +520,29 @@ def _proofs_from_evidence(
     retention_status = _proof_status(runtime_proof, "retention_rotation_status", "retention_rotation_status", "retention_rotation_summary")
     soak_status = _proof_status(runtime_proof, "soak_status", "soak_status", "soak_summary")
 
-    stop_status = _first_status(stop_preview.get("status") if isinstance(stop_preview, dict) else None)
-    if stop_status == "MISSING":
-        stop_status = "HUMAN_GATE_REQUIRED"
-    if stop_status not in {"REVIEWABLE", "HUMAN_GATE_REQUIRED"}:
-        stop_status = "BLOCKED_WITH_REAL_REASON" if stop_status == "BLOCKED" else stop_status
+    stop_evidence = _explicit_stop_drill_evidence(root)
+    if stop_evidence is not None:
+        stop_status = "PASS"
+        stop_source = str(Path("Reports") / "human_gate" / "stop_drill_human_confirmation_record.json")
+        stop_reason = (
+            "STOP drill human confirmation record exists and is PASS_FOR_DRY_RUN_RECOVERY_PROOF_ONLY; "
+            "this reduces only the STOP drill dry-run recovery blocker and does not authorize runtime, "
+            "scheduler, SOS, broker, live trading, secrets, or vacation mode."
+        )
+        stop_human_gate = None
+        stop_safe_next_action = (
+            "Proceed only to the remaining human gates: SOS delivery confirmation and scheduler manual registration."
+        )
+    else:
+        stop_status = _first_status(stop_preview.get("status") if isinstance(stop_preview, dict) else None)
+        if stop_status == "MISSING":
+            stop_status = "HUMAN_GATE_REQUIRED"
+        if stop_status not in {"REVIEWABLE", "HUMAN_GATE_REQUIRED"}:
+            stop_status = "BLOCKED_WITH_REAL_REASON" if stop_status == "BLOCKED" else stop_status
+        stop_source = str(DEFAULT_STOP_DRILL_PREVIEW if (root / DEFAULT_STOP_DRILL_PREVIEW).exists() else DEFAULT_RELAY_REVIEW)
+        stop_reason = "STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists."
+        stop_human_gate = "stop_drill_human_confirmation"
+        stop_safe_next_action = STOP_SAFE_NEXT_ACTION
 
     sos_status = "PASS" if sos_request.get("delivered_true") is True else "HUMAN_GATE_REQUIRED"
     scheduler_status = (
@@ -539,11 +579,11 @@ def _proofs_from_evidence(
         ),
         "stop_drill_proof": _proof(
             status=stop_status,
-            source=str(DEFAULT_STOP_DRILL_PREVIEW if (root / DEFAULT_STOP_DRILL_PREVIEW).exists() else DEFAULT_RELAY_REVIEW),
-            reason="STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
-            human_gate="stop_drill_human_confirmation",
+            source=stop_source,
+            reason=stop_reason,
+            human_gate=stop_human_gate,
             aliases=["STOP drill proof missing"],
-            safe_next_action=STOP_SAFE_NEXT_ACTION,
+            safe_next_action=stop_safe_next_action,
         ),
         "sos_delivery_proof": _proof(
             status=sos_status,
