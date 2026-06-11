@@ -6,44 +6,31 @@
     "retention_rotation_proof",
     "soak_proof",
     "operator_dependency_ledger",
-    "reduction_target_selector"
+    "reduction_target_selector",
+    "relay_proof_review"
   ],
   "apply_allowed": false,
   "approval_granted": false,
-  "attention_count": 1,
-  "attention_reasons": [
-    "reduction target selector still points to a proof-planning target"
-  ],
-  "blocker_count": 12,
+  "attention_count": 0,
+  "attention_reasons": [],
+  "blocker_count": 4,
   "blockers": [
-    "relay review is BLOCKED",
-    "operator dependency ledger validation is BLOCKED",
     "runtime queue still lists remaining blockers",
-    "runtime_queue_readout",
-    "relay_processor_readout",
-    "relay_proof_review",
     "restart_timeouts_proof",
     "retention_rotation_proof",
-    "soak_proof",
-    "operator_dependency_ledger",
-    "reduction_target_selector",
-    "relay proof review must be REVIEWABLE"
+    "soak_proof"
   ],
   "credentials_accessed": false,
   "cross_proof_consistency": {
-    "attention_reasons": [
-      "reduction target selector still points to a proof-planning target"
-    ],
+    "attention_reasons": [],
     "blockers": [
-      "relay review is BLOCKED",
-      "operator dependency ledger validation is BLOCKED",
       "runtime queue still lists remaining blockers"
     ],
     "contradictions": [],
     "invalid_reasons": [],
-    "operator_dependency_status": "BLOCKED",
+    "operator_dependency_status": "READY_FOR_DRY_RUN",
     "reduction_target_status": "UNKNOWN",
-    "relay_review_status": "BLOCKED",
+    "relay_review_status": "REVIEWABLE",
     "restart_timeouts_status": "PASS",
     "retention_rotation_status": "PASS",
     "runtime_queue_status": "UNKNOWN",
@@ -79,7 +66,7 @@
   },
   "gate_type": "runtime_proof_gate",
   "gate_version": "v1",
-  "generated_at_utc": "2026-06-11T03:17:09Z",
+  "generated_at_utc": "2026-06-11T03:59:35Z",
   "human_gate_ready": false,
   "human_gate_required": true,
   "invalid_reason_count": 0,
@@ -90,12 +77,12 @@
     "autonomy_shift": "PARTIAL",
     "component": "operator_dependency_ledger",
     "next_reduction_target": {
-      "component_id": "relay_dry_run_proof_review",
-      "component_name": "Relay dry-run proof review",
-      "dependency_category": "recover",
-      "reason": "The relay proof review is still the closest operator dependency bottleneck.",
-      "safe_next_action": "Resolve missing relay predecessor proofs and keep SOS/scheduler blocked in repo-held state.",
-      "target_status": "REVIEWABLE"
+      "component_id": "relay_runtime_processor",
+      "component_name": "Relay runtime processor",
+      "dependency_category": "decide",
+      "reason": "The relay processor still needs a proven dry-run readout before downstream planning can shrink operator burden.",
+      "safe_next_action": "Supply the missing relay predecessor proofs and preserve human-only gates.",
+      "target_status": "DRY_RUN_PROVEN"
     },
     "operator_dependency_categories": [
       "remember",
@@ -114,10 +101,10 @@
       "route",
       "recover"
     ],
-    "proof_status": "BLOCKED",
+    "proof_status": "READY_FOR_DRY_RUN",
     "reduced_burdens_count": 42,
     "remaining_human_burdens_count": 15,
-    "review_status": "BLOCKED",
+    "review_status": "REVIEWABLE",
     "safe_next_action": "Measure the next reduction target and keep vacation_mode_complete false; do not treat report-only dependency reduction as runtime autonomy.",
     "source_schema": "AIOS_OPERATOR_DEPENDENCY_LEDGER.v1",
     "unsafe_autonomy_claim": false,
@@ -129,14 +116,9 @@
     }
   },
   "prerequisite_inputs_missing": [
-    "runtime_queue_readout",
-    "relay_processor_readout",
-    "relay_proof_review",
     "restart_timeouts_proof",
     "retention_rotation_proof",
-    "soak_proof",
-    "operator_dependency_ledger",
-    "reduction_target_selector"
+    "soak_proof"
   ],
   "prerequisite_inputs_present": [
     "runtime_queue_readout",
@@ -148,7 +130,7 @@
     "operator_dependency_ledger",
     "reduction_target_selector"
   ],
-  "prerequisite_missing_count": 8,
+  "prerequisite_missing_count": 3,
   "prerequisite_statuses": {
     "operator_dependency_ledger": "PASS",
     "reduction_target_selector": "PASS",
@@ -166,17 +148,12 @@
         "human_scheduler_registration"
       ],
       "component": "relay_processor",
-      "lane_status": "BLOCKED_WAITING_FOR_APPROVAL_CHAIN",
-      "missing_proofs": [
-        "approval_card_present",
-        "completeness_ready",
-        "path_guard_pass",
-        "apply_inventory_target_selected"
-      ],
+      "lane_status": "READY_FOR_DRY_RUN",
+      "missing_proofs": [],
       "observe_only": true,
-      "proof_status": "BLOCKED",
+      "proof_status": "READY_FOR_DRY_RUN",
       "review_status": null,
-      "safe_next_action": "Collect the missing predecessor proofs before any relay runtime review; do not dispatch, apply, or mutate runtime state.",
+      "safe_next_action": "Prepare the relay dry-run proof review; keep the queue observe-only and hold all human-gated lanes.",
       "source_schema": "AIOS_RELAY_RUNTIME_PROCESSOR.v1",
       "unsafe_autonomy_claim": null,
       "vacation_mode_complete": false,
@@ -188,16 +165,11 @@
         "human_scheduler_registration"
       ],
       "component": "relay_review",
-      "missing_proofs": [
-        "approval_card_present",
-        "completeness_ready",
-        "path_guard_pass",
-        "apply_inventory_target_selected"
-      ],
-      "proof_reviewable": false,
-      "proof_status": "BLOCKED",
-      "review_status": "BLOCKED",
-      "safe_next_action": "Collect the missing predecessor proofs before human acceptance; the relay proof is not reviewable yet.",
+      "missing_proofs": [],
+      "proof_reviewable": true,
+      "proof_status": "READY_FOR_DRY_RUN",
+      "review_status": "REVIEWABLE",
+      "safe_next_action": "Surface the relay dry-run proof for human acceptance. After acceptance, the next safe planning step is restart/timeouts proof planning.",
       "source_schema": "AIOS_RELAY_DRY_RUN_PROOF_REVIEW.v1",
       "unsafe_autonomy_claim": null,
       "vacation_mode_complete": false,
@@ -297,10 +269,10 @@
     "proof_status": null,
     "remaining_human_burdens_count": 15,
     "review_status": null,
-    "safe_next_action": "Use restart_timeouts_proof_planning as the next dependency-reduction target; do not execute it automatically and keep all runtime and human-gate paths blocked.",
-    "selected_category": "recover",
-    "selected_reason": "The relay proof review is BLOCKED, so the next reduction target is the restart/timeouts proof planning lane. This keeps Tony from having to remember the next blocker while leaving scheduler, SOS, and live paths out of scope.",
-    "selected_target": "restart_timeouts_proof_planning",
+    "safe_next_action": "Use relay_proof_acceptance_packet as the next dependency-reduction target; do not execute it automatically and keep all runtime and human-gate paths blocked.",
+    "selected_category": "route",
+    "selected_reason": "The relay proof review is REVIEWABLE, so the next safe reduction target is the human acceptance packet. This still requires a human decision and does not auto-accept anything.",
+    "selected_target": "relay_proof_acceptance_packet",
     "source_autonomy_shift": "PARTIAL",
     "source_schema": "AIOS_REDUCTION_TARGET_SELECTOR.v1",
     "unsafe_autonomy_claim": false,
@@ -308,24 +280,20 @@
     "validation_status": null
   },
   "rejected_prerequisites": [],
-  "relay_review_status": null,
+  "relay_review_status": "REVIEWABLE",
+  "relay_reviewable": true,
   "relay_summary": {
     "blocked_human_gates": [
       "human_sos_arming",
       "human_scheduler_registration"
     ],
     "component": "relay_processor",
-    "lane_status": "BLOCKED_WAITING_FOR_APPROVAL_CHAIN",
-    "missing_proofs": [
-      "approval_card_present",
-      "completeness_ready",
-      "path_guard_pass",
-      "apply_inventory_target_selected"
-    ],
+    "lane_status": "READY_FOR_DRY_RUN",
+    "missing_proofs": [],
     "observe_only": true,
-    "proof_status": "BLOCKED",
+    "proof_status": "READY_FOR_DRY_RUN",
     "review_status": null,
-    "safe_next_action": "Collect the missing predecessor proofs before any relay runtime review; do not dispatch, apply, or mutate runtime state.",
+    "safe_next_action": "Prepare the relay dry-run proof review; keep the queue observe-only and hold all human-gated lanes.",
     "source_schema": "AIOS_RELAY_RUNTIME_PROCESSOR.v1",
     "unsafe_autonomy_claim": null,
     "vacation_mode_complete": false,

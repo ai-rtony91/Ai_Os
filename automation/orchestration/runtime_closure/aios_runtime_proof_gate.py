@@ -250,6 +250,8 @@ DEFAULT_SOAK_INPUT = {
 REPORT_DIR = Path("Reports") / "runtime_proof_gate"
 REPORT_JSON_NAME = "runtime_proof_gate_preview.json"
 REPORT_MD_NAME = "runtime_proof_gate_summary.md"
+DEFAULT_RELAY_PROOF_REVIEW_REPORT = Path("Reports") / "relay_proof_review" / "relay_proof_review.json"
+DEFAULT_RELAY_PREDECESSOR_PROOF_REPORT = Path("Reports") / "relay_predecessor_proof" / "relay_predecessor_proof.json"
 
 
 def _now(now: str | None = None) -> str:
@@ -827,7 +829,8 @@ def build_runtime_proof_gate(
     if isinstance(soak, dict) and soak.get("proof_status") == "PASS" and (soak.get("soak_executed") is True or soak.get("runtime_launched") is True):
         invalid_reasons.append("soak proof claims PASS while soak or runtime launch executed")
 
-    relay_reviewable = isinstance(review, dict) and review.get("review_status") == "REVIEWABLE"
+    relay_review_status = _status_of(review, keys=["review_status", "proof_status"])
+    relay_reviewable = relay_review_status == "REVIEWABLE"
     restart_pass = isinstance(restart, dict) and restart.get("proof_status") == "PASS"
     retention_pass = isinstance(retention, dict) and retention.get("proof_status") == "PASS"
     soak_pass = isinstance(soak, dict) and soak.get("proof_status") == "PASS" and soak.get("soak_pass") is True
@@ -930,6 +933,8 @@ def build_runtime_proof_gate(
         "prerequisite_inputs_present": [name for name, value in prerequisite_inputs.items() if isinstance(value, dict)],
         "prerequisite_inputs_missing": list(missing_inputs),
         "prerequisite_statuses": prerequisite_statuses,
+        "relay_review_status": relay_review_status,
+        "relay_reviewable": relay_reviewable,
         "accepted_prerequisites": [
             name for name, status in prerequisite_statuses.items() if name != "runtime_queue" and status == "PASS"
         ]
@@ -1251,6 +1256,7 @@ def summarize_runtime_proof_gate(gate: dict[str, Any]) -> dict[str, object]:
     restart_summary = gate.get("restart_timeouts_summary") if isinstance(gate.get("restart_timeouts_summary"), dict) else {}
     retention_summary = gate.get("retention_rotation_summary") if isinstance(gate.get("retention_rotation_summary"), dict) else {}
     queue_summary = gate.get("runtime_queue_summary") if isinstance(gate.get("runtime_queue_summary"), dict) else {}
+    relay_review_status = gate.get("relay_review_status") or relay_summary.get("review_status") or (gate.get("prerequisite_statuses") or {}).get("relay_proof_review")
     return {
         "final_verdict": gate.get("final_verdict"),
         "human_gate_ready": gate.get("human_gate_ready"),
@@ -1274,7 +1280,7 @@ def summarize_runtime_proof_gate(gate: dict[str, Any]) -> dict[str, object]:
         "retention_rotation_status": retention_summary.get("proof_status"),
         "soak_status": soak_summary.get("proof_status"),
         "soak_pass": soak_summary.get("soak_pass"),
-        "relay_review_status": relay_summary.get("review_status"),
+        "relay_review_status": relay_review_status,
         "runtime_queue_status": queue_summary.get("validation_status"),
         "safe_next_action": gate.get("safe_next_action"),
         "stop_condition": gate.get("stop_condition"),
@@ -1352,6 +1358,41 @@ def write_runtime_proof_gate_reports(
     return report
 
 
+def _read_json(path: Path) -> dict[str, Any] | None:
+    try:
+        if not path.exists():
+            return None
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return loaded if isinstance(loaded, dict) else None
+
+
+def _default_relay_evidence(repo_root: Path) -> dict[str, Any]:
+    review_report = _read_json(repo_root / DEFAULT_RELAY_PROOF_REVIEW_REPORT)
+    if not isinstance(review_report, dict):
+        predecessor_report = _read_json(repo_root / DEFAULT_RELAY_PREDECESSOR_PROOF_REPORT)
+        if isinstance(predecessor_report, dict):
+            nested = predecessor_report.get("relay_proof_review")
+            review_report = nested if isinstance(nested, dict) else None
+
+    if not isinstance(review_report, dict):
+        return {}
+
+    review_source = review_report.get("relay_proof_review")
+    if not isinstance(review_source, dict):
+        review_source = review_report
+
+    evidence = {
+        "runtime_queue_readout": review_report.get("runtime_queue_readout"),
+        "relay_processor_readout": review_report.get("relay_processor_readout"),
+        "relay_proof_review": review_source,
+        "operator_dependency_ledger": review_report.get("operator_dependency_ledger"),
+        "reduction_target_selector": review_report.get("reduction_target_selector"),
+    }
+    return {key: value for key, value in evidence.items() if isinstance(value, dict)}
+
+
 def run_runtime_proof_gate(
     *,
     repo_root: str | Path = ".",
@@ -1359,7 +1400,13 @@ def run_runtime_proof_gate(
     write_report: bool = True,
     **kwargs: Any,
 ) -> dict[str, Any]:
-    gate = build_runtime_proof_gate(**kwargs)
+    root = Path(repo_root)
+    evidence = _default_relay_evidence(root)
+    resolved_kwargs = dict(kwargs)
+    for key, value in evidence.items():
+        if resolved_kwargs.get(key) is None:
+            resolved_kwargs[key] = value
+    gate = build_runtime_proof_gate(**resolved_kwargs)
     if write_report:
         gate = write_runtime_proof_gate_reports(gate, repo_root=repo_root, output_dir=output_dir)
     return gate

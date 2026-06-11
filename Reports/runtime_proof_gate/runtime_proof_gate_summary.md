@@ -10,29 +10,21 @@
 - scheduler_creation_allowed: `False`
 - sos_allowed: `False`
 - live_trading_allowed: `False`
-- blocker_count: `12`
-- attention_count: `1`
+- blocker_count: `4`
+- attention_count: `0`
 - invalid_reason_count: `0`
 - unsafe_flag_count: `0`
 - safe_next_action: Fix the blockers before the proof chain can reach human gate review.
 - stop_condition: Stop until blockers are cleared; no execution.
 
 ## Blockers
-- relay review is BLOCKED
-- operator dependency ledger validation is BLOCKED
 - runtime queue still lists remaining blockers
-- runtime_queue_readout
-- relay_processor_readout
-- relay_proof_review
 - restart_timeouts_proof
 - retention_rotation_proof
 - soak_proof
-- operator_dependency_ledger
-- reduction_target_selector
-- relay proof review must be REVIEWABLE
 
 ## Attention
-- reduction target selector still points to a proof-planning target
+- none
 
 ## Invalid Reasons
 - none

@@ -16,6 +16,8 @@ RETENTION_PATH = REPO_ROOT / "automation" / "orchestration" / "runtime_closure" 
 SOAK_PATH = REPO_ROOT / "automation" / "orchestration" / "runtime_closure" / "aios_soak_dry_run_proof.py"
 LEDGER_PATH = REPO_ROOT / "automation" / "orchestration" / "autonomy_reports" / "aios_operator_dependency_ledger.py"
 SELECTOR_PATH = REPO_ROOT / "automation" / "orchestration" / "autonomy_reports" / "aios_reduction_target_selector.py"
+RELAY_PREDECESSOR_PATH = REPO_ROOT / "automation" / "orchestration" / "relay_proof" / "aios_relay_predecessor_proof.py"
+RELAY_REVIEW_PATH = REPO_ROOT / "automation" / "orchestration" / "relay_proof" / "aios_relay_proof_review.py"
 GATE_PATH = REPO_ROOT / "automation" / "orchestration" / "runtime_closure" / "aios_runtime_proof_gate.py"
 
 
@@ -226,6 +228,35 @@ def test_gate_builds_from_all_safe_pass_reviewable_inputs():
     assert gate["human_gate_ready"] is True
     assert gate["execution_allowed"] is False
     assert gate["approval_granted"] is False
+
+
+def test_runtime_proof_gate_consumes_relay_review_report_from_file(tmp_path):
+    gate_mod = _load(GATE_PATH, "aios_runtime_proof_gate_file_loader_test")
+    predecessor_mod = _load(RELAY_PREDECESSOR_PATH, "aios_relay_predecessor_proof_for_gate_file_loader_test")
+    review_mod = _load(RELAY_REVIEW_PATH, "aios_relay_proof_review_for_gate_file_loader_test")
+    bundle = predecessor_mod.build_relay_predecessor_proof_bundle(repo_root=REPO_ROOT, now="2026-06-10T03:04:05Z")
+    review = review_mod.build_relay_proof_review_report(
+        repo_root=REPO_ROOT,
+        predecessor_bundle=bundle,
+        now="2026-06-10T03:04:05Z",
+    )
+
+    review_outdir = tmp_path / "Reports" / "relay_proof_review"
+    review_mod.write_relay_proof_review_reports(review, repo_root=tmp_path, output_dir=review_outdir)
+
+    gate = gate_mod.run_runtime_proof_gate(
+        repo_root=tmp_path,
+        output_dir=tmp_path / "Reports" / "runtime_proof_gate",
+        now="2026-06-10T03:04:05Z",
+    )
+
+    assert gate["relay_review_status"] == "REVIEWABLE"
+    assert gate["prerequisite_statuses"]["relay_proof_review"] == "PASS"
+    assert gate["runtime_execution_allowed"] is False
+    assert gate["execution_allowed"] is False
+    assert gate["dispatch_allowed"] is False
+    assert gate["apply_allowed"] is False
+    assert gate["relay_review_status"] == "REVIEWABLE"
 
 
 def test_ready_for_human_gate_keeps_execution_and_approval_blocked():
