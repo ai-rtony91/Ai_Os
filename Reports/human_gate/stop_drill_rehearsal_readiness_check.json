@@ -1,0 +1,81 @@
+{
+  "schema": "AIOS_STOP_DRILL_REHEARSAL_READINESS_CHECK.v1",
+  "status": "REVIEW_ONLY",
+  "check_type": "STOP_DRILL_REHEARSAL_READINESS",
+  "performed_by": "Anthony / Human Owner",
+  "stop_drill_pass": false,
+  "stop_drill_claimed_passed": false,
+  "confirmation_phrase_used": false,
+  "required_exact_phrase": "ANTHONY_CONFIRMS_STOP_DRILL_PASSED_FOR_DRY_RUN_RECOVERY_PROOF_ONLY",
+  "purpose": "Prepare Anthony to decide whether a manual STOP drill can be performed safely before any STOP drill pass claim exists.",
+  "this_does_not_execute_stop": true,
+  "this_does_not_claim_pass": true,
+  "preconditions": [
+    "main is clean and synced to origin/main",
+    "no broker or live trading connection is active",
+    "no secrets are written to the repo",
+    "no scheduler action is authorized",
+    "no SOS action is authorized",
+    "Codex does not execute STOP, kill processes, launch runtime, mutate queues, send SOS, or register scheduler tasks"
+  ],
+  "what_to_observe_if_anthony_runs_manual_stop_drill": [
+    "what condition was intentionally stopped",
+    "whether the system stayed blocked instead of continuing",
+    "whether recovery behavior was visible and understandable",
+    "whether evidence remained available after the stop",
+    "whether no active queue, worker inbox, command queue, scheduler, SOS, broker, secret, or live-trading path changed"
+  ],
+  "pass_criteria": [
+    "Anthony personally performed or reviewed the manual STOP drill",
+    "observed stop condition is documented",
+    "recovery behavior is documented",
+    "no runtime execution by Codex occurred",
+    "no queue mutation occurred",
+    "no worker inbox mutation occurred",
+    "no command queue mutation occurred",
+    "no scheduler registration occurred",
+    "no SOS send occurred",
+    "no live trading occurred",
+    "no secret was written",
+    "Anthony decides the STOP drill evidence is sufficient for dry-run recovery proof only"
+  ],
+  "fail_or_stop_criteria": [
+    "any automation attempts to execute STOP for Anthony",
+    "Codex kills a process",
+    "runtime launches or executes",
+    "active queue, worker inbox, or command queue changes",
+    "scheduler registration occurs",
+    "SOS is sent",
+    "broker, OANDA, webhook, live-trading, .env, or secret paths are touched",
+    "vacation_mode_complete becomes true",
+    "any report claims stop_drill_pass true before Anthony confirms it"
+  ],
+  "non_authorizations": [
+    "runtime execution",
+    "runtime launch",
+    "queue write",
+    "worker inbox mutation",
+    "command queue mutation",
+    "scheduler registration",
+    "SOS send",
+    "broker action",
+    "live trading",
+    "secret storage",
+    "vacation mode completion"
+  ],
+  "safety_flags": {
+    "runtime_execution_allowed": false,
+    "runtime_launch_allowed": false,
+    "queue_write_allowed": false,
+    "worker_inbox_mutation_allowed": false,
+    "command_queue_mutation_allowed": false,
+    "scheduler_registration_allowed": false,
+    "sos_notification_allowed": false,
+    "live_trading_allowed": false,
+    "broker_action_allowed": false,
+    "secret_write_allowed": false,
+    "vacation_mode_complete": false
+  },
+  "safe_next_action": "Anthony reviews this readiness check. If he is not ready, remain blocked. If he performs the manual STOP drill and records evidence, then prepare a separate confirmation packet using the exact phrase.",
+  "stop_condition": "Stop before claiming STOP drill pass, executing STOP through Codex, killing processes, launching runtime, executing runtime, mutating queues, sending SOS, registering scheduler, touching credentials, writing secrets, enabling live trading, or setting vacation_mode_complete true."
+}
