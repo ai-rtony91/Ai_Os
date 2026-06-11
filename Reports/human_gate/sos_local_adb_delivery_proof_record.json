@@ -1,0 +1,52 @@
+{
+  "schema": "AIOS_SOS_LOCAL_ADB_DELIVERY_PROOF_RECORD.v1",
+  "packet_id": "AIOS-SOS-LOCAL-ADB-DELIVERY-PROOF-REMOTE-GAP-V1",
+  "status": "LOCAL_USB_ADB_DELIVERY_CONFIRMED",
+  "confirmation_type": "SOS_LOCAL_USB_ADB_DELIVERY_CONFIRMED_BY_ANTHONY",
+  "confirmed_at_local": "2026-06-11 13:15",
+  "channel_tested": "ADB CLI terminal connection to phone over USB",
+  "adb_device_visible": true,
+  "adb_device_id_seen": "RFCXA1LCKJX",
+  "message_sent": "#AIOS_SOS TEST - Anthony manual ADB delivery test",
+  "adb_notification_post_returned": true,
+  "dumpsys_found": "AIOS_SOS_WAKE",
+  "human_visual_confirmation": "AIOS SOS notification appeared on phone at 13:15",
+  "local_delivery_status": "PROVEN_BY_MANUAL_HUMAN_TEST",
+  "remote_delivery_status": "NOT_PROVEN",
+  "operational_requirement": "Anthony does not want permanent SOS control through USB direct-line connection to the Omen desktop. Anthony wants remote SOS delivery.",
+  "safety_flags": {
+    "no_secrets_stored_in_repo": true,
+    "no_codex_automation_sent_sos": true,
+    "no_runtime_launched": true,
+    "no_runtime_executed": true,
+    "no_scheduler_registered": true,
+    "no_queue_mutated": true,
+    "no_approval_mutated": true,
+    "no_worker_inbox_mutated": true,
+    "no_command_queue_mutated": true,
+    "no_broker_or_live_trading_action": true,
+    "broker_action_allowed": false,
+    "live_trading_allowed": false
+  },
+  "non_authorizations": [
+    "remote SOS delivery",
+    "unattended SOS arming",
+    "scheduler registration",
+    "runtime launch",
+    "runtime execution",
+    "queue mutation",
+    "approval mutation",
+    "worker inbox mutation",
+    "command queue mutation",
+    "broker action",
+    "live trading",
+    "credential storage"
+  ],
+  "known_follow_up": {
+    "script": "tools/android/Send-AiosAdbSosWake.ps1",
+    "issue": "USB fallback Count bug exists in the helper script.",
+    "status": "SCRIPT_REPAIR_SEPARATE_PACKET",
+    "note": "Direct manual ADB delivery succeeded. This packet does not edit tools/android/Send-AiosAdbSosWake.ps1."
+  },
+  "safe_next_action": "Design and prove a remote SOS delivery path. Do not proceed to scheduler registration until remote SOS delivery is proven and human-confirmed."
+}
