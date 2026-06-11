@@ -1,0 +1,94 @@
+{
+  "schema": "AIOS_SCHEDULER_MANUAL_REGISTRATION_REVIEW_AFTER_NTFY_SOS.v1",
+  "packet_id": "AIOS-SCHEDULER-MANUAL-REGISTRATION-REVIEW-AFTER-NTFY-SOS-RUN-V1",
+  "status": "REVIEW_READY_ONLY",
+  "current_main_head": "8b481d28622e2bced4626445eadadc90a4fd651c",
+  "evidence_files_inspected": [
+    "AGENTS.md",
+    "README.md",
+    "automation/orchestration/work_packets/proposed/AIOS-SCHEDULER-MANUAL-REGISTRATION-REVIEW-AFTER-NTFY-SOS.md",
+    "Reports/human_gate/ntfy_remote_sos_delivery_proof_record.json",
+    "Reports/autonomy_loop_closure/ntfy_remote_sos_delivery_consumption.json",
+    "Reports/autonomy_loop_closure/final_human_gated_runtime_blocker_review.md",
+    "Reports/autonomy_loop_closure/final_blocker_matrix_after_533.md",
+    "Reports/scheduler_preview/scheduler_registration_preview.json",
+    "Reports/scheduler_preview/scheduler_registration_preview_summary.md",
+    "automation/orchestration/scheduler/SCHEDULED_TRIGGER_PROPOSAL.md",
+    "automation/orchestration/scheduler/Invoke-AiOsSchedulerPreview.DRY_RUN.ps1",
+    "automation/orchestration/Invoke-AiOsNightCycle.ps1",
+    "automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1",
+    "automation/orchestration/night_supervisor/README.md",
+    "aios.ps1"
+  ],
+  "ntfy_sos_proof_status": {
+    "status": "REMOTE_SOS_DELIVERY_CONFIRMED_FOR_REVIEW",
+    "source_record": "Reports/human_gate/ntfy_remote_sos_delivery_proof_record.json",
+    "topic_name_stored": false,
+    "topic_url_stored": false,
+    "token_stored": false,
+    "credential_stored": false,
+    "notification_only": true,
+    "phone_to_ai_os_command_execution_authorized": false,
+    "adb_path_status": "disabled and not final SOS path",
+    "telegram_tasker_used": false
+  },
+  "scheduler_readiness_classification": "REVIEW_READY_ONLY",
+  "scheduler_readiness_reason": "A candidate scheduled task, trigger, action, working directory, and rollback command are observable in the existing scheduler proposal, but Anthony has not approved scheduler registration and runtime launch/execution plus queue mutation remain blocked.",
+  "candidate_scheduler_target": {
+    "task_name": "AIOS_Relay_Nightly",
+    "purpose": "Start one gated AI_OS relay/night cycle without manual launch.",
+    "trigger": "Daily at 02:00 local time",
+    "run_as": "current Windows user",
+    "working_directory": "C:\\Dev\\Ai.Os",
+    "action": "pwsh -NoProfile -ExecutionPolicy Bypass -File \"C:\\Dev\\Ai.Os\\automation\\orchestration\\Invoke-AiOsNightCycle.ps1\" -Apply",
+    "source": "automation/orchestration/scheduler/SCHEDULED_TRIGGER_PROPOSAL.md",
+    "target_exists": true,
+    "log_path": "C:\\Dev\\Ai.Os\\relay\\logs\\night_cycle.log"
+  },
+  "proposed_manual_registration_step_not_authorized_yet": {
+    "command": "schtasks /create /tn \"AIOS_Relay_Nightly\" /tr \"pwsh -NoProfile -ExecutionPolicy Bypass -File \\\"C:\\Dev\\Ai.Os\\automation\\orchestration\\Invoke-AiOsNightCycle.ps1\\\" -Apply\" /sc DAILY /st 02:00 /ru \"%USERNAME%\" /rl LIMITED /f",
+    "ui_fallback": "Use Windows Task Scheduler to create a daily 02:00 task named AIOS_Relay_Nightly that runs the same pwsh action from C:\\Dev\\Ai.Os only after Anthony separately approves the exact registration.",
+    "authorization_status": "NOT_AUTHORIZED_YET"
+  },
+  "rollback_or_disable_step_not_authorized_yet": {
+    "disable_command": "schtasks /change /tn \"AIOS_Relay_Nightly\" /disable",
+    "delete_command": "schtasks /delete /tn \"AIOS_Relay_Nightly\" /f",
+    "authorization_status": "NOT_AUTHORIZED_YET"
+  },
+  "pre_registration_validation_commands": [
+    "git status --short --branch",
+    "Test-Path C:\\Dev\\Ai.Os\\automation\\orchestration\\Invoke-AiOsNightCycle.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/scheduler/Invoke-AiOsSchedulerPreview.DRY_RUN.ps1 -OutputJson",
+    "python -m json.tool Reports/human_gate/ntfy_remote_sos_delivery_proof_record.json",
+    "python -m json.tool Reports/autonomy_loop_closure/ntfy_remote_sos_delivery_consumption.json",
+    "powershell -NoProfile -ExecutionPolicy Bypass -Command \"$errors = $null; [System.Management.Automation.PSParser]::Tokenize((Get-Content -Raw automation/orchestration/Invoke-AiOsNightCycle.ps1), [ref]$errors) | Out-Null; if ($errors) { $errors; exit 1 } else { 'PARSE_OK' }\""
+  ],
+  "post_registration_validation_commands": [
+    "schtasks /query /tn \"AIOS_Relay_Nightly\" /fo LIST /v",
+    "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Get-ScheduledTask -TaskName 'AIOS_Relay_Nightly' | Select-Object TaskName,State,TaskPath\"",
+    "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Get-ScheduledTaskInfo -TaskName 'AIOS_Relay_Nightly' | Select-Object LastRunTime,LastTaskResult,NextRunTime\"",
+    "git status --short --branch"
+  ],
+  "blocked_actions_preserved": {
+    "scheduler_registration": "NOT_AUTHORIZED_IN_THIS_PACKET",
+    "windows_task_scheduler_mutation": "BLOCKED",
+    "runtime_launch": "BLOCKED",
+    "runtime_execution": "BLOCKED",
+    "queue_mutation": "BLOCKED",
+    "approval_mutation": "BLOCKED",
+    "worker_inbox_mutation": "BLOCKED",
+    "command_queue_mutation": "BLOCKED",
+    "codex_sos_send": "BLOCKED",
+    "broker_action": "BLOCKED",
+    "live_trading": "BLOCKED",
+    "credential_access_or_storage": "BLOCKED",
+    "ntfy_topic_or_secret_storage": "BLOCKED"
+  },
+  "risk_notes": [
+    "The candidate action includes -Apply and would start a future gated night cycle when the schedule fires; this is why scheduler registration needs separate explicit approval and must not be inferred from this review.",
+    "The ntfy proof is notification-only and does not create a command channel.",
+    "The prior scheduler preview remains blocked for actual registration until human approval and validation evidence are present."
+  ],
+  "next_safe_action": "Review the proposed apply-request packet and, only if Anthony approves, run a separate scheduler registration APPLY lane that names the exact task, trigger, action, working directory, log path, rollback command, and validation chain.",
+  "no_protected_action_statement": "No scheduler registration, Task Scheduler mutation, runtime launch, runtime execution, queue mutation, SOS send, broker action, live trading, credential access, deletion, push to main, merge, or PR closure was performed."
+}
