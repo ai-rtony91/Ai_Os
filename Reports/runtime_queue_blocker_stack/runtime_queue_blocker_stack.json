@@ -1,0 +1,874 @@
+{
+  "alias_normalization": {
+    "SOS delivered:true missing": {
+      "proof": "sos_delivery_proof",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "STOP drill proof missing": {
+      "proof": "stop_drill_proof",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "relay runtime proof missing": {
+      "proof": "relay_runtime_proof",
+      "status": "REVIEWABLE"
+    },
+    "restart/timeouts proof missing": {
+      "proof": "restart_timeouts_proof",
+      "status": "PASS"
+    },
+    "retention proof missing": {
+      "proof": "retention_rotation_proof",
+      "status": "PASS"
+    },
+    "scheduler manual registration missing": {
+      "proof": "scheduler_manual_registration_proof",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "soak proof missing": {
+      "proof": "soak_proof",
+      "status": "PASS"
+    }
+  },
+  "command_queue_mutation_allowed": false,
+  "credentials_accessed": false,
+  "generated_at_utc": "2026-06-11T04:40:41Z",
+  "human_gate_blockers": [
+    "stop_drill_human_confirmation",
+    "sos_delivery_human_confirmation",
+    "scheduler_manual_registration_human_confirmation"
+  ],
+  "human_gate_only_blockers": true,
+  "invalid_proofs": [],
+  "live_trading_allowed": false,
+  "missing_proofs": [],
+  "mode": "DRY_RUN_PROOF",
+  "normalized_runtime_queue_readout": {
+    "cloud_buildable_lane_complete": true,
+    "generated_at_utc": "2026-06-11T04:40:41Z",
+    "hard_gate_summary": {
+      "global": [
+        "No live trading, broker, or OANDA execution.",
+        "No webhook execution.",
+        "No APPLY, dispatch, merge, or push automation.",
+        "No approval inbox mutation or active packet mutation.",
+        "No scheduler, service, or SOS automation outside human checklist lanes."
+      ],
+      "human_only_lanes": [
+        "human_sos_arming",
+        "human_scheduler_registration"
+      ],
+      "no_auto_mutation": [
+        "auto_apply false",
+        "auto_merge false",
+        "auto_scheduler false",
+        "active_packet_mutation_allowed false"
+      ]
+    },
+    "human_gate_blockers": [
+      "stop_drill_human_confirmation",
+      "sos_delivery_human_confirmation",
+      "scheduler_manual_registration_human_confirmation"
+    ],
+    "human_gate_only_blockers": true,
+    "lanes": [
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "restart_supervisor_timeouts"
+        ],
+        "consumer": "restart_supervisor_timeouts",
+        "consumes_from": [
+          "approval_review_card",
+          "packet_completeness_verdict",
+          "path_guard_verdict",
+          "apply_counterpart_inventory_target"
+        ],
+        "current_status": "DRY_RUN_PROVEN",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "move relay state",
+          "write active packet state"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Relay lane remains DRY_RUN-only until Anthony approves the exact packet.",
+          "APPLY and dispatch remain blocked."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "relay_runtime_processor",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-RELAY-RUNTIME-PROCESSOR-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "approval-card-and-validator-pipeline",
+        "produces": [
+          "relay_runtime_dry_run_report",
+          "relay_runtime_preview"
+        ],
+        "proof_required": [
+          "approval_card_present",
+          "completeness_ready",
+          "path_guard_pass",
+          "apply_inventory_target_selected",
+          "runtime_dry_run_pass"
+        ],
+        "required_inputs": [
+          "approval_card_present",
+          "completeness_ready",
+          "path_guard_pass",
+          "apply_inventory_target_selected"
+        ],
+        "safe_next_command": "Prepare the DRY_RUN relay preview packet; Anthony approval remains required for any runtime work.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop before any relay mutation, APPLY, dispatch, or active packet write.",
+        "title": "Relay / runtime processor preview lane",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "aios_approval_review_compressor",
+          "aios_packet_completeness_review",
+          "aios_path_guard_validator",
+          "aios_apply_counterpart_inventory"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "jsonl_rotation_retention"
+        ],
+        "consumer": "jsonl_rotation_retention",
+        "consumes_from": [
+          "relay_runtime_dry_run_report"
+        ],
+        "current_status": "DRY_RUN_PROVEN",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "create service",
+          "register scheduler",
+          "start background process",
+          "infinite restart storm"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "No service creation.",
+          "No scheduler registration.",
+          "No hidden background process."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "restart_supervisor_timeouts",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-RESTART-SUPERVISOR-AND-TIMEOUTS-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "relay_runtime_dry_run_report",
+        "produces": [
+          "restart_timeout_proof_report",
+          "restart_dry_run_plan"
+        ],
+        "proof_required": [
+          "relay_runtime_dry_run_pass",
+          "restart_timeout_proof_pass"
+        ],
+        "required_inputs": [
+          "relay_runtime_dry_run_pass"
+        ],
+        "safe_next_command": "Draft only the bounded-timeout plan and DRY_RUN restart proof outline.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop if the watchdog restarts silently, loops, or attempts service/scheduler installation.",
+        "title": "Restart supervisor and bounded timeouts",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "soak_endurance_proof"
+        ],
+        "consumer": "soak_endurance_proof",
+        "consumes_from": [
+          "restart_timeout_proof_report"
+        ],
+        "current_status": "DRY_RUN_PROVEN",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "delete telemetry",
+          "compress telemetry in place",
+          "mutate retention evidence"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Compression-before-delete only.",
+          "No delete in DRY_RUN."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "jsonl_rotation_retention",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-JSONL-ROTATION-RETENTION-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "restart_timeout_proof_report",
+        "produces": [
+          "retention_dry_run_report",
+          "retention_policy_summary"
+        ],
+        "proof_required": [
+          "restart_timeout_proof_pass",
+          "retention_dry_run_pass"
+        ],
+        "required_inputs": [
+          "restart_timeout_proof_pass"
+        ],
+        "safe_next_command": "Produce the retention DRY_RUN candidate report only.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop before any retention mutation or evidence loss path.",
+        "title": "JSONL rotation and retention",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "stop_drill_recovery_proof"
+        ],
+        "consumer": "stop_drill_recovery_proof",
+        "consumes_from": [
+          "retention_dry_run_report"
+        ],
+        "current_status": "SOAK_PROVEN",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "start long soak",
+          "live broker run",
+          "paper trading bypass"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Stages only: 1h smoke, 4h proof, 8h proof, 24h proof.",
+          "No long soak execution in this prompt."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "soak_endurance_proof",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-SOAK-ENDURANCE-PROOF-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "retention_dry_run_report",
+        "produces": [
+          "soak_proof_plan",
+          "soak_evidence_outline"
+        ],
+        "proof_required": [
+          "retention_dry_run_pass",
+          "soak_pass"
+        ],
+        "required_inputs": [
+          "retention_dry_run_pass"
+        ],
+        "safe_next_command": "Draft the staged soak proof packet and keep execution dry-run only.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop if the soak would become live, unattended, broker-connected, or longer than the approved stage.",
+        "title": "Soak proof",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "aios_soak_evidence_validator",
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": true,
+        "consumed_by": [
+          "human_sos_arming"
+        ],
+        "consumer": "human_sos_arming",
+        "consumes_from": [
+          "soak_evidence_outline"
+        ],
+        "current_status": "READY_FOR_RECOVERY_PROOF",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "start hidden recovery loop",
+          "mutate runtime state"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "STOP drill evidence required before SOS or scheduler handoff."
+        ],
+        "human_only": false,
+        "human_required": true,
+        "lane_id": "stop_drill_recovery_proof",
+        "live_broker_trading_enabled": false,
+        "mode": "DRY_RUN_FIRST",
+        "next_packet_name": "AIOS-STOP-DRILL-RECOVERY-PROOF-DRY-RUN-FIRST",
+        "owner": "Codex East",
+        "owner_type": "mixed_human_gate",
+        "producer": "soak_evidence_outline",
+        "produces": [
+          "stop_drill_recovery_report",
+          "stop_drill_evidence_outline"
+        ],
+        "proof_required": [
+          "soak_pass",
+          "stop_drill_pass"
+        ],
+        "required_inputs": [
+          "soak_pass"
+        ],
+        "safe_next_command": "Write the STOP drill recovery proof as a DRY_RUN packet only.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop if recovery proof is missing or the drill attempts to become a runtime restart loop.",
+        "title": "STOP drill and recovery proof",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "runtime_closure_manifest"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": false,
+        "consumed_by": [
+          "human_scheduler_registration"
+        ],
+        "consumer": "human_scheduler_registration",
+        "consumes_from": [
+          "stop_drill_recovery_report"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_STOP_DRILL",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "store secret in repo",
+          "send real alert from automation",
+          "arm live notification channel"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Human-only checklist.",
+          "Secret lives outside the repo.",
+          "Exactly one alert test only."
+        ],
+        "human_only": true,
+        "human_required": true,
+        "lane_id": "human_sos_arming",
+        "live_broker_trading_enabled": false,
+        "mode": "HUMAN_CHECKLIST_ONLY",
+        "next_packet_name": "AIOS-HUMAN-SOS-ARMING-CHECKLIST",
+        "owner": "Anthony Meza",
+        "owner_type": "anthony_human",
+        "producer": "stop_drill_recovery_report",
+        "produces": [
+          "sos_checklist_confirmation",
+          "sos_delivery_record"
+        ],
+        "proof_required": [
+          "stop_drill_pass",
+          "sos_delivered_true"
+        ],
+        "required_inputs": [
+          "stop_drill_pass",
+          "secret_outside_repo",
+          "exactly_one_alert_test",
+          "stale_heartbeat_test",
+          "healthy_silence_test"
+        ],
+        "safe_next_command": "Anthony completes the SOS checklist manually after the stop drill passes.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop unless Anthony is performing the checklist by hand and no secret value enters the repo.",
+        "title": "Real SOS arming checklist",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "human_checklist"
+        ]
+      },
+      {
+        "active_packet_mutation_allowed": false,
+        "auto_apply": false,
+        "auto_merge": false,
+        "auto_scheduler": false,
+        "automation_allowed": false,
+        "consumed_by": [
+          "operator_final_readout"
+        ],
+        "consumer": "operator_final_readout",
+        "consumes_from": [
+          "sos_delivery_record"
+        ],
+        "current_status": "BLOCKED_WAITING_FOR_SOS",
+        "forbidden_actions": [
+          "mutate work_packets/active",
+          "mutate approval_inbox",
+          "dispatch real work",
+          "execute APPLY",
+          "start background jobs",
+          "create services",
+          "register scheduler tasks",
+          "arm real SOS",
+          "enable live trading",
+          "touch broker or OANDA runtime",
+          "auto_apply",
+          "auto_merge",
+          "auto_scheduler",
+          "Register-ScheduledTask",
+          "schtasks execution",
+          "create service",
+          "automation scheduler registration"
+        ],
+        "hard_gates": [
+          "No live trading, broker, or OANDA execution.",
+          "No webhook execution.",
+          "No APPLY, dispatch, merge, or push automation.",
+          "No approval inbox mutation or active packet mutation.",
+          "No scheduler, service, or SOS automation outside human checklist lanes.",
+          "Human-only scheduler registration.",
+          "Soak PASS required.",
+          "SOS delivered:true required.",
+          "STOP drill PASS required."
+        ],
+        "human_only": true,
+        "human_required": true,
+        "lane_id": "human_scheduler_registration",
+        "live_broker_trading_enabled": false,
+        "mode": "HUMAN_CHECKLIST_ONLY",
+        "next_packet_name": "AIOS-HUMAN-SCHEDULER-REGISTRATION-CHECKLIST",
+        "owner": "Anthony Meza",
+        "owner_type": "anthony_human",
+        "producer": "sos_delivery_record",
+        "produces": [
+          "scheduler_registration_confirmation",
+          "operator_final_readout"
+        ],
+        "proof_required": [
+          "soak_pass",
+          "stop_drill_pass",
+          "sos_delivered_true",
+          "scheduler_registered_by_anthony"
+        ],
+        "required_inputs": [
+          "soak_pass",
+          "stop_drill_pass",
+          "sos_delivered_true",
+          "scheduler_registered_by_anthony"
+        ],
+        "safe_next_command": "Anthony completes scheduler registration by hand after all proof gates pass.",
+        "scheduler_execution_allowed": false,
+        "service_execution_allowed": false,
+        "sos_execution_allowed": false,
+        "stop_condition": "Stop unless Anthony manually registers the scheduler after the soak and SOS gates pass.",
+        "title": "Human scheduler registration checklist",
+        "vacation_mode_blocker": true,
+        "validator_required": [
+          "human_checklist"
+        ]
+      }
+    ],
+    "next_strict_serial_order": [
+      "relay_runtime_processor",
+      "restart_supervisor_timeouts",
+      "jsonl_rotation_retention",
+      "soak_endurance_proof",
+      "stop_drill_recovery_proof",
+      "human_sos_arming",
+      "human_scheduler_registration"
+    ],
+    "normalized_status": "HUMAN_GATE_REQUIRED",
+    "proof_chain": [
+      "approval_card_present",
+      "completeness_ready",
+      "path_guard_pass",
+      "apply_inventory_target_selected",
+      "runtime_dry_run_pass",
+      "restart_timeout_proof_pass",
+      "retention_dry_run_pass",
+      "soak_pass",
+      "stop_drill_pass",
+      "sos_delivered_true",
+      "scheduler_registered_by_anthony"
+    ],
+    "proofs": {
+      "relay_runtime_proof": {
+        "aliases": [
+          "relay runtime proof missing"
+        ],
+        "human_gate": null,
+        "reason": "Relay proof review REVIEWABLE maps to relay_runtime_proof REVIEWABLE; it does not approve runtime execution.",
+        "safe_next_action": "Human reviews relay proof acceptance separately; runtime execution remains blocked.",
+        "source": "Reports\\relay_proof_review\\relay_proof_review.json",
+        "status": "REVIEWABLE"
+      },
+      "restart_timeouts_proof": {
+        "aliases": [
+          "restart/timeouts proof missing",
+          "restart_timeouts_proof"
+        ],
+        "human_gate": null,
+        "reason": "restart/timeouts proof alias normalized from runtime proof gate evidence.",
+        "safe_next_action": null,
+        "source": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
+        "status": "PASS"
+      },
+      "retention_rotation_proof": {
+        "aliases": [
+          "retention proof missing",
+          "retention_rotation_proof"
+        ],
+        "human_gate": null,
+        "reason": "retention proof alias normalized to retention_rotation_proof.",
+        "safe_next_action": null,
+        "source": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
+        "status": "PASS"
+      },
+      "scheduler_manual_registration_proof": {
+        "aliases": [
+          "scheduler manual registration missing"
+        ],
+        "human_gate": "scheduler_manual_registration_human_confirmation",
+        "reason": "Scheduler manual registration cannot be claimed without explicit human-provided evidence.",
+        "safe_next_action": "Human must perform/confirm scheduler registration in a separately approved real scheduler packet.",
+        "source": "Reports\\human_gate\\scheduler_manual_registration_request.json",
+        "status": "HUMAN_GATE_REQUIRED"
+      },
+      "soak_proof": {
+        "aliases": [
+          "soak proof missing",
+          "soak_proof"
+        ],
+        "human_gate": null,
+        "reason": "soak proof alias normalized from runtime proof gate evidence.",
+        "safe_next_action": null,
+        "source": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
+        "status": "PASS"
+      },
+      "sos_delivery_proof": {
+        "aliases": [
+          "SOS delivered:true missing"
+        ],
+        "human_gate": "sos_delivery_human_confirmation",
+        "reason": "SOS delivered:true cannot be claimed without explicit human-provided evidence.",
+        "safe_next_action": "Human must perform/confirm SOS delivery in a separately approved real channel packet.",
+        "source": "Reports\\human_gate\\sos_delivery_request.json",
+        "status": "HUMAN_GATE_REQUIRED"
+      },
+      "stop_drill_proof": {
+        "aliases": [
+          "STOP drill proof missing"
+        ],
+        "human_gate": "stop_drill_human_confirmation",
+        "reason": "STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
+        "safe_next_action": "Human must approve/confirm the STOP drill in a separate real STOP drill packet before runtime readiness.",
+        "source": "Reports\\relay_proof_review\\relay_proof_review.json",
+        "status": "HUMAN_GATE_REQUIRED"
+      }
+    },
+    "queue_consumer": "operator_final_readout",
+    "remaining_blockers": [
+      "STOP drill proof missing",
+      "SOS delivered:true missing",
+      "scheduler manual registration missing"
+    ],
+    "safety_posture": "OBSERVE_ONLY / DRY_RUN_FIRST / HUMAN_GATED / NO_UNSAFE_AUTONOMY",
+    "schema_version": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
+    "state_snapshot": {
+      "apply_inventory_target_selected": true,
+      "approval_card_present": true,
+      "completeness_ready": true,
+      "ledger_on_main": true,
+      "path_guard_pass": true,
+      "restart_timeout_proof_pass": true,
+      "retention_dry_run_pass": true,
+      "runtime_dry_run_pass": true,
+      "scheduler_registered_by_anthony": false,
+      "soak_pass": true,
+      "sos_delivered_true": false,
+      "stop_drill_pass": false,
+      "vacation_mode_complete": false
+    },
+    "status": "HUMAN_GATE_REQUIRED",
+    "vacation_mode_complete": false,
+    "validation_status": "HUMAN_GATE_REQUIRED"
+  },
+  "notification_send_allowed": false,
+  "proof_statuses": {
+    "relay_runtime_proof": "REVIEWABLE",
+    "restart_timeouts_proof": "PASS",
+    "retention_rotation_proof": "PASS",
+    "scheduler_manual_registration_proof": "HUMAN_GATE_REQUIRED",
+    "soak_proof": "PASS",
+    "sos_delivery_proof": "HUMAN_GATE_REQUIRED",
+    "stop_drill_proof": "HUMAN_GATE_REQUIRED"
+  },
+  "proofs": {
+    "relay_runtime_proof": {
+      "aliases": [
+        "relay runtime proof missing"
+      ],
+      "human_gate": null,
+      "reason": "Relay proof review REVIEWABLE maps to relay_runtime_proof REVIEWABLE; it does not approve runtime execution.",
+      "safe_next_action": "Human reviews relay proof acceptance separately; runtime execution remains blocked.",
+      "source": "Reports\\relay_proof_review\\relay_proof_review.json",
+      "status": "REVIEWABLE"
+    },
+    "restart_timeouts_proof": {
+      "aliases": [
+        "restart/timeouts proof missing",
+        "restart_timeouts_proof"
+      ],
+      "human_gate": null,
+      "reason": "restart/timeouts proof alias normalized from runtime proof gate evidence.",
+      "safe_next_action": null,
+      "source": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
+      "status": "PASS"
+    },
+    "retention_rotation_proof": {
+      "aliases": [
+        "retention proof missing",
+        "retention_rotation_proof"
+      ],
+      "human_gate": null,
+      "reason": "retention proof alias normalized to retention_rotation_proof.",
+      "safe_next_action": null,
+      "source": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
+      "status": "PASS"
+    },
+    "scheduler_manual_registration_proof": {
+      "aliases": [
+        "scheduler manual registration missing"
+      ],
+      "human_gate": "scheduler_manual_registration_human_confirmation",
+      "reason": "Scheduler manual registration cannot be claimed without explicit human-provided evidence.",
+      "safe_next_action": "Human must perform/confirm scheduler registration in a separately approved real scheduler packet.",
+      "source": "Reports\\human_gate\\scheduler_manual_registration_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "soak_proof": {
+      "aliases": [
+        "soak proof missing",
+        "soak_proof"
+      ],
+      "human_gate": null,
+      "reason": "soak proof alias normalized from runtime proof gate evidence.",
+      "safe_next_action": null,
+      "source": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
+      "status": "PASS"
+    },
+    "sos_delivery_proof": {
+      "aliases": [
+        "SOS delivered:true missing"
+      ],
+      "human_gate": "sos_delivery_human_confirmation",
+      "reason": "SOS delivered:true cannot be claimed without explicit human-provided evidence.",
+      "safe_next_action": "Human must perform/confirm SOS delivery in a separately approved real channel packet.",
+      "source": "Reports\\human_gate\\sos_delivery_request.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    },
+    "stop_drill_proof": {
+      "aliases": [
+        "STOP drill proof missing"
+      ],
+      "human_gate": "stop_drill_human_confirmation",
+      "reason": "STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
+      "safe_next_action": "Human must approve/confirm the STOP drill in a separate real STOP drill packet before runtime readiness.",
+      "source": "Reports\\relay_proof_review\\relay_proof_review.json",
+      "status": "HUMAN_GATE_REQUIRED"
+    }
+  },
+  "protected_mutation_detected": false,
+  "queue_mutation_allowed": false,
+  "real_blockers": [],
+  "report_paths": [
+    "Reports/runtime_queue_blocker_stack/runtime_queue_blocker_stack.json",
+    "Reports/runtime_queue_blocker_stack/runtime_queue_blocker_stack.md"
+  ],
+  "runtime_execution_allowed": false,
+  "runtime_launch_allowed": false,
+  "safe_next_action": "Human must resolve the listed human-gated confirmations in separately approved packets.",
+  "scheduler_creation_allowed": false,
+  "scheduler_registration_allowed": false,
+  "schema": "AIOS_RUNTIME_QUEUE_BLOCKER_STACK.v1",
+  "sos_allowed": false,
+  "source_loaded": {
+    "relay_predecessor_proof": true,
+    "relay_proof_review": true,
+    "runtime_proof_gate": true,
+    "scheduler_manual_registration_request": true,
+    "sos_delivery_request": true,
+    "stop_drill_preview": false
+  },
+  "source_reports": {
+    "relay_predecessor_proof": "Reports\\relay_predecessor_proof\\relay_predecessor_proof.json",
+    "relay_proof_review": "Reports\\relay_proof_review\\relay_proof_review.json",
+    "runtime_proof_gate": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json",
+    "scheduler_manual_registration_request": "Reports\\human_gate\\scheduler_manual_registration_request.json",
+    "scheduler_preview": "Reports\\scheduler_preview\\scheduler_registration_preview.json",
+    "sos_delivery_request": "Reports\\human_gate\\sos_delivery_request.json",
+    "sos_preview": "Reports\\sos_preview\\sos_arming_preview.json",
+    "stop_drill_preview": "Reports\\stop_drill_preview\\stop_drill_preview.json"
+  },
+  "stale_blockers_resolved": [
+    "relay runtime proof missing",
+    "restart/timeouts proof missing",
+    "retention proof missing",
+    "soak proof missing",
+    "STOP drill proof missing",
+    "SOS delivered:true missing",
+    "scheduler manual registration missing"
+  ],
+  "stale_layers": [],
+  "status": "HUMAN_GATE_REQUIRED",
+  "stop_condition": "Stop before active queue mutation, worker inbox mutation, command queue mutation, runtime launch, scheduler registration, SOS send, credential access, or live trading.",
+  "vacation_mode_complete": false,
+  "validation": {
+    "blockers": [],
+    "checked_proofs": [
+      "relay_runtime_proof",
+      "restart_timeouts_proof",
+      "retention_rotation_proof",
+      "soak_proof",
+      "stop_drill_proof",
+      "sos_delivery_proof",
+      "scheduler_manual_registration_proof"
+    ],
+    "status": "PASS",
+    "unsafe_flags": []
+  },
+  "worker_inbox_mutation_allowed": false
+}

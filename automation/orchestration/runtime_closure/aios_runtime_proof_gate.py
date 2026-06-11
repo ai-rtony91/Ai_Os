@@ -252,6 +252,14 @@ REPORT_JSON_NAME = "runtime_proof_gate_preview.json"
 REPORT_MD_NAME = "runtime_proof_gate_summary.md"
 DEFAULT_RELAY_PROOF_REVIEW_REPORT = Path("Reports") / "relay_proof_review" / "relay_proof_review.json"
 DEFAULT_RELAY_PREDECESSOR_PROOF_REPORT = Path("Reports") / "relay_predecessor_proof" / "relay_predecessor_proof.json"
+DEFAULT_RUNTIME_QUEUE_BLOCKER_STACK_REPORT = (
+    Path("Reports") / "runtime_queue_blocker_stack" / "runtime_queue_blocker_stack.json"
+)
+DEFAULT_STOP_DRILL_PREVIEW_REPORT = Path("Reports") / "stop_drill_preview" / "stop_drill_preview.json"
+DEFAULT_SOS_DELIVERY_REQUEST_REPORT = Path("Reports") / "human_gate" / "sos_delivery_request.json"
+DEFAULT_SCHEDULER_MANUAL_REGISTRATION_REQUEST_REPORT = (
+    Path("Reports") / "human_gate" / "scheduler_manual_registration_request.json"
+)
 
 
 def _now(now: str | None = None) -> str:
@@ -486,7 +494,7 @@ def _proof_consistency(
     retention_status = _status_of(retention, keys=["proof_status"])
     soak_status = _status_of(soak, keys=["proof_status"])
     relay_review_status = _status_of(relay_review, keys=["review_status", "proof_status"])
-    queue_status = _status_of(queue, keys=["validation_status", "proof_status"])
+    queue_status = _status_of(queue, keys=["normalized_status", "status", "validation_status", "proof_status"])
     ledger_status = _status_of(ledger, keys=["validation_status", "proof_status", "review_status"])
     selector_status = _status_of(selector, keys=["validation_status"])
 
@@ -552,7 +560,14 @@ def _proof_consistency(
     if selector_status == "BLOCKED":
         blockers.append("reduction target selector validation is BLOCKED")
 
-    if isinstance(queue, dict) and list(queue.get("remaining_blockers") or []):
+    queue_has_normalized_human_gates = (
+        isinstance(queue, dict)
+        and (
+            queue.get("human_gate_only_blockers") is True
+            or queue_status in {"HUMAN_GATE_REQUIRED", "REVIEWABLE"}
+        )
+    )
+    if isinstance(queue, dict) and list(queue.get("remaining_blockers") or []) and not queue_has_normalized_human_gates:
         blockers.append("runtime queue still lists remaining blockers")
     if isinstance(selector, dict):
         selected_target = str(selector.get("selected_target") or "")
@@ -599,6 +614,44 @@ def _component_input(
     return _deepcopy(provided)
 
 
+def _optional_component(provided: Any, *, name: str, invalid: list[str]) -> dict[str, Any] | None:
+    if provided is None:
+        return None
+    if not isinstance(provided, dict):
+        invalid.append(f"{name} must be an object")
+        return None
+    return _deepcopy(provided)
+
+
+def _human_gate_blockers_from_stack(
+    stack: dict[str, Any] | None,
+    *,
+    stop_drill_preview: dict[str, Any] | None = None,
+    sos_delivery_request: dict[str, Any] | None = None,
+    scheduler_manual_registration_request: dict[str, Any] | None = None,
+) -> list[str]:
+    blockers: list[str] = []
+    if isinstance(stack, dict):
+        blockers.extend(str(item) for item in list(stack.get("human_gate_blockers") or []) if str(item).strip())
+        proofs = stack.get("proofs")
+        if isinstance(proofs, dict):
+            for proof in proofs.values():
+                if not isinstance(proof, dict):
+                    continue
+                if proof.get("status") == "HUMAN_GATE_REQUIRED" and proof.get("human_gate"):
+                    blockers.append(str(proof["human_gate"]))
+
+    optional_pairs = [
+        (stop_drill_preview, "stop_drill_human_confirmation"),
+        (sos_delivery_request, "sos_delivery_human_confirmation"),
+        (scheduler_manual_registration_request, "scheduler_manual_registration_human_confirmation"),
+    ]
+    for payload, gate_name in optional_pairs:
+        if isinstance(payload, dict) and payload.get("status") == "HUMAN_GATE_REQUIRED":
+            blockers.append(gate_name)
+    return list(dict.fromkeys(blockers))
+
+
 def build_runtime_proof_gate(
     *,
     runtime_queue_readout: dict[str, Any] | None = None,
@@ -609,6 +662,10 @@ def build_runtime_proof_gate(
     soak_proof: dict[str, Any] | None = None,
     operator_dependency_ledger: dict[str, Any] | None = None,
     reduction_target_selector: dict[str, Any] | None = None,
+    runtime_queue_blocker_stack: dict[str, Any] | None = None,
+    stop_drill_preview: dict[str, Any] | None = None,
+    sos_delivery_request: dict[str, Any] | None = None,
+    scheduler_manual_registration_request: dict[str, Any] | None = None,
     gate_policy: dict[str, Any] | None = None,
     now: str | None = None,
     source_metadata: dict[str, Any] | None = None,
@@ -620,8 +677,27 @@ def build_runtime_proof_gate(
     missing_inputs: list[str] = []
     invalid_inputs: list[str] = []
 
+    blocker_stack = _optional_component(
+        runtime_queue_blocker_stack,
+        name="runtime_queue_blocker_stack",
+        invalid=invalid_inputs,
+    )
+    stop_preview = _optional_component(stop_drill_preview, name="stop_drill_preview", invalid=invalid_inputs)
+    sos_request = _optional_component(sos_delivery_request, name="sos_delivery_request", invalid=invalid_inputs)
+    scheduler_request = _optional_component(
+        scheduler_manual_registration_request,
+        name="scheduler_manual_registration_request",
+        invalid=invalid_inputs,
+    )
+    stack_queue = (
+        blocker_stack.get("normalized_runtime_queue_readout")
+        if isinstance(blocker_stack, dict)
+        and isinstance(blocker_stack.get("normalized_runtime_queue_readout"), dict)
+        else None
+    )
+
     queue = _component_input(
-        runtime_queue_readout,
+        runtime_queue_readout if runtime_queue_readout is not None else stack_queue,
         build_runtime_execution_queue(),
         required=bool(policy.get("require_runtime_queue", True)),
         name="runtime_queue_readout",
@@ -709,6 +785,14 @@ def build_runtime_proof_gate(
         "operator_dependency_ledger": ledger,
         "reduction_target_selector": selector,
     }
+    for optional_name, optional_value in {
+        "runtime_queue_blocker_stack": blocker_stack,
+        "stop_drill_preview": stop_preview,
+        "sos_delivery_request": sos_request,
+        "scheduler_manual_registration_request": scheduler_request,
+    }.items():
+        if isinstance(optional_value, dict):
+            prerequisite_inputs[optional_name] = optional_value
     prerequisite_statuses = {
         "runtime_queue": queue_validation.get("status"),
         "relay_processor": relay_validation.get("status"),
@@ -719,6 +803,14 @@ def build_runtime_proof_gate(
         "operator_dependency_ledger": ledger_validation.get("status"),
         "reduction_target_selector": selector_validation.get("status"),
     }
+
+    for resolved_default in [
+        "restart_timeouts_proof",
+        "retention_rotation_proof",
+        "soak_proof",
+    ]:
+        if resolved_default in missing_inputs and prerequisite_statuses.get(resolved_default) == "PASS":
+            missing_inputs.remove(resolved_default)
 
     unsafe_flags_detected: list[dict[str, Any]] = []
     forbidden_claims_detected: list[dict[str, Any]] = []
@@ -787,6 +879,14 @@ def build_runtime_proof_gate(
     invalid_reasons: list[str] = list(dict.fromkeys(cross["invalid_reasons"]))
     attention_reasons: list[str] = list(dict.fromkeys(cross["attention_reasons"]))
     blocker_reasons.extend(cross["blockers"])
+    human_gate_blockers = _human_gate_blockers_from_stack(
+        blocker_stack,
+        stop_drill_preview=stop_preview,
+        sos_delivery_request=sos_request,
+        scheduler_manual_registration_request=scheduler_request,
+    )
+    if human_gate_blockers:
+        blocker_reasons.extend(f"human gate required: {item}" for item in human_gate_blockers)
 
     if invalid_inputs:
         invalid_reasons.extend(invalid_inputs)
@@ -834,6 +934,11 @@ def build_runtime_proof_gate(
     restart_pass = isinstance(restart, dict) and restart.get("proof_status") == "PASS"
     retention_pass = isinstance(retention, dict) and retention.get("proof_status") == "PASS"
     soak_pass = isinstance(soak, dict) and soak.get("proof_status") == "PASS" and soak.get("soak_pass") is True
+    runtime_queue_status = (
+        _status_of(blocker_stack, keys=["status"])
+        if isinstance(blocker_stack, dict)
+        else cross.get("runtime_queue_status")
+    )
 
     if policy.get("require_soak_pass", True) and not soak_pass:
         blocker_reasons.append("soak proof must pass for human gate readiness")
@@ -933,6 +1038,16 @@ def build_runtime_proof_gate(
         "prerequisite_inputs_present": [name for name, value in prerequisite_inputs.items() if isinstance(value, dict)],
         "prerequisite_inputs_missing": list(missing_inputs),
         "prerequisite_statuses": prerequisite_statuses,
+        "runtime_queue_status": runtime_queue_status,
+        "runtime_queue_blocker_stack_status": blocker_stack.get("status") if isinstance(blocker_stack, dict) else None,
+        "stop_drill_status": stop_preview.get("status") if isinstance(stop_preview, dict) else None,
+        "sos_delivery_request_status": sos_request.get("status") if isinstance(sos_request, dict) else None,
+        "scheduler_manual_registration_request_status": (
+            scheduler_request.get("status") if isinstance(scheduler_request, dict) else None
+        ),
+        "human_gate_blockers": human_gate_blockers,
+        "human_gate_only_blockers": bool(human_gate_blockers)
+        and not [item for item in blocker_reasons if not str(item).startswith("human gate required:")],
         "relay_review_status": relay_review_status,
         "relay_reviewable": relay_reviewable,
         "accepted_prerequisites": [
@@ -1257,6 +1372,11 @@ def summarize_runtime_proof_gate(gate: dict[str, Any]) -> dict[str, object]:
     retention_summary = gate.get("retention_rotation_summary") if isinstance(gate.get("retention_rotation_summary"), dict) else {}
     queue_summary = gate.get("runtime_queue_summary") if isinstance(gate.get("runtime_queue_summary"), dict) else {}
     relay_review_status = gate.get("relay_review_status") or relay_summary.get("review_status") or (gate.get("prerequisite_statuses") or {}).get("relay_proof_review")
+    runtime_queue_status = (
+        gate.get("runtime_queue_status")
+        or queue_summary.get("validation_status")
+        or queue_summary.get("proof_status")
+    )
     return {
         "final_verdict": gate.get("final_verdict"),
         "human_gate_ready": gate.get("human_gate_ready"),
@@ -1281,7 +1401,13 @@ def summarize_runtime_proof_gate(gate: dict[str, Any]) -> dict[str, object]:
         "soak_status": soak_summary.get("proof_status"),
         "soak_pass": soak_summary.get("soak_pass"),
         "relay_review_status": relay_review_status,
-        "runtime_queue_status": queue_summary.get("validation_status"),
+        "runtime_queue_status": runtime_queue_status,
+        "runtime_queue_blocker_stack_status": gate.get("runtime_queue_blocker_stack_status"),
+        "stop_drill_status": gate.get("stop_drill_status"),
+        "sos_delivery_request_status": gate.get("sos_delivery_request_status"),
+        "scheduler_manual_registration_request_status": gate.get("scheduler_manual_registration_request_status"),
+        "human_gate_only_blockers": gate.get("human_gate_only_blockers"),
+        "human_gate_blockers": list(gate.get("human_gate_blockers") or []),
         "safe_next_action": gate.get("safe_next_action"),
         "stop_condition": gate.get("stop_condition"),
         "cross_proof_consistency": cross,
@@ -1297,6 +1423,12 @@ def build_runtime_proof_gate_markdown_summary(gate: dict[str, Any]) -> str:
         "# AI_OS Runtime Proof Gate",
         "",
         f"- final_verdict: `{summary.get('final_verdict')}`",
+        f"- runtime_queue_status: `{summary.get('runtime_queue_status')}`",
+        f"- runtime_queue_blocker_stack_status: `{summary.get('runtime_queue_blocker_stack_status')}`",
+        f"- stop_drill_status: `{summary.get('stop_drill_status')}`",
+        f"- sos_delivery_request_status: `{summary.get('sos_delivery_request_status')}`",
+        f"- scheduler_manual_registration_request_status: `{summary.get('scheduler_manual_registration_request_status')}`",
+        f"- human_gate_only_blockers: `{summary.get('human_gate_only_blockers')}`",
         f"- human_gate_ready: `{summary.get('human_gate_ready')}`",
         f"- human_gate_required: `{summary.get('human_gate_required')}`",
         f"- execution_allowed: `{summary.get('execution_allowed')}`",
@@ -1317,6 +1449,12 @@ def build_runtime_proof_gate_markdown_summary(gate: dict[str, Any]) -> str:
     ]
     if blockers:
         lines.extend(f"- {item}" for item in blockers)
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Human Gate Blockers"])
+    human_gate_blockers = list(summary.get("human_gate_blockers") or [])
+    if human_gate_blockers:
+        lines.extend(f"- {item}" for item in human_gate_blockers)
     else:
         lines.append("- none")
     lines.extend(["", "## Attention"])
@@ -1370,25 +1508,42 @@ def _read_json(path: Path) -> dict[str, Any] | None:
 
 def _default_relay_evidence(repo_root: Path) -> dict[str, Any]:
     review_report = _read_json(repo_root / DEFAULT_RELAY_PROOF_REVIEW_REPORT)
+    blocker_stack = _read_json(repo_root / DEFAULT_RUNTIME_QUEUE_BLOCKER_STACK_REPORT)
+    stop_drill_preview = _read_json(repo_root / DEFAULT_STOP_DRILL_PREVIEW_REPORT)
+    sos_delivery_request = _read_json(repo_root / DEFAULT_SOS_DELIVERY_REQUEST_REPORT)
+    scheduler_manual_registration_request = _read_json(
+        repo_root / DEFAULT_SCHEDULER_MANUAL_REGISTRATION_REQUEST_REPORT
+    )
     if not isinstance(review_report, dict):
         predecessor_report = _read_json(repo_root / DEFAULT_RELAY_PREDECESSOR_PROOF_REPORT)
         if isinstance(predecessor_report, dict):
             nested = predecessor_report.get("relay_proof_review")
             review_report = nested if isinstance(nested, dict) else None
 
-    if not isinstance(review_report, dict):
+    if not isinstance(review_report, dict) and not isinstance(blocker_stack, dict):
         return {}
 
-    review_source = review_report.get("relay_proof_review")
+    review_source = review_report.get("relay_proof_review") if isinstance(review_report, dict) else None
     if not isinstance(review_source, dict):
         review_source = review_report
 
+    normalized_queue = (
+        blocker_stack.get("normalized_runtime_queue_readout")
+        if isinstance(blocker_stack, dict)
+        and isinstance(blocker_stack.get("normalized_runtime_queue_readout"), dict)
+        else None
+    )
     evidence = {
-        "runtime_queue_readout": review_report.get("runtime_queue_readout"),
-        "relay_processor_readout": review_report.get("relay_processor_readout"),
+        "runtime_queue_readout": normalized_queue
+        or (review_report.get("runtime_queue_readout") if isinstance(review_report, dict) else None),
+        "relay_processor_readout": review_report.get("relay_processor_readout") if isinstance(review_report, dict) else None,
         "relay_proof_review": review_source,
-        "operator_dependency_ledger": review_report.get("operator_dependency_ledger"),
-        "reduction_target_selector": review_report.get("reduction_target_selector"),
+        "operator_dependency_ledger": review_report.get("operator_dependency_ledger") if isinstance(review_report, dict) else None,
+        "reduction_target_selector": review_report.get("reduction_target_selector") if isinstance(review_report, dict) else None,
+        "runtime_queue_blocker_stack": blocker_stack,
+        "stop_drill_preview": stop_drill_preview,
+        "sos_delivery_request": sos_delivery_request,
+        "scheduler_manual_registration_request": scheduler_manual_registration_request,
     }
     return {key: value for key, value in evidence.items() if isinstance(value, dict)}
 

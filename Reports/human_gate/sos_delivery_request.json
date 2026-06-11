@@ -1,0 +1,19 @@
+{
+  "credentials_accessed": false,
+  "delivered_true": false,
+  "explicit_human_provided_evidence": false,
+  "generated_at_utc": "2026-06-11T04:40:41Z",
+  "live_trading_allowed": false,
+  "mode": "PREVIEW_ONLY_HUMAN_GATE_REQUEST",
+  "notification_send_allowed": false,
+  "notification_sent": false,
+  "real_channel_armed": false,
+  "runtime_execution_allowed": false,
+  "runtime_launch_allowed": false,
+  "safe_next_action": "Human must perform/confirm SOS delivery in a separately approved real channel packet.",
+  "scheduler_creation_allowed": false,
+  "schema": "AIOS_HUMAN_GATE_SOS_DELIVERY_REQUEST.v1",
+  "sos_allowed": false,
+  "status": "HUMAN_GATE_REQUIRED",
+  "stop_condition": "Stop before sending SOS, arming a real channel, storing credentials, or claiming delivered:true."
+}
