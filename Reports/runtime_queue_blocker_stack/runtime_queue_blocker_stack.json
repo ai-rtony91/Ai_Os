@@ -6,7 +6,7 @@
     },
     "STOP drill proof missing": {
       "proof": "stop_drill_proof",
-      "status": "HUMAN_GATE_REQUIRED"
+      "status": "PASS"
     },
     "relay runtime proof missing": {
       "proof": "relay_runtime_proof",
@@ -52,7 +52,7 @@
     },
     "credentials_accessed": false,
     "current_status": "HUMAN_GATE_REQUIRED",
-    "generated_at_utc": "2026-06-11T05:31:31Z",
+    "generated_at_utc": "2026-06-11T06:14:19Z",
     "live_trading_allowed": false,
     "mode": "PREVIEW_ONLY_HUMAN_GATE_HANDOFF",
     "next_strict_human_order": [
@@ -82,12 +82,11 @@
     "sos_notification_allowed": false,
     "status": "HUMAN_GATE_REQUIRED",
     "stop_condition": "Stop before runtime execution, runtime launch, queue write, scheduler creation, SOS send, broker action, credential access, live trading, or vacation-mode completion.",
-    "stop_drill_pass": false,
+    "stop_drill_pass": true,
     "vacation_mode_complete": false
   },
-  "generated_at_utc": "2026-06-11T05:31:31Z",
+  "generated_at_utc": "2026-06-11T06:14:19Z",
   "human_gate_blockers": [
-    "stop_drill_human_confirmation",
     "sos_delivery_human_confirmation",
     "scheduler_manual_registration_human_confirmation"
   ],
@@ -112,7 +111,7 @@
   "mode": "DRY_RUN_PROOF",
   "normalized_runtime_queue_readout": {
     "cloud_buildable_lane_complete": true,
-    "generated_at_utc": "2026-06-11T05:31:31Z",
+    "generated_at_utc": "2026-06-11T06:14:19Z",
     "hard_gate_summary": {
       "global": [
         "No live trading, broker, or OANDA execution.",
@@ -133,7 +132,6 @@
       ]
     },
     "human_gate_blockers": [
-      "stop_drill_human_confirmation",
       "sos_delivery_human_confirmation",
       "scheduler_manual_registration_human_confirmation"
     ],
@@ -454,7 +452,7 @@
         "consumes_from": [
           "soak_evidence_outline"
         ],
-        "current_status": "READY_FOR_RECOVERY_PROOF",
+        "current_status": "RECOVERY_PROVEN",
         "forbidden_actions": [
           "mutate work_packets/active",
           "mutate approval_inbox",
@@ -524,7 +522,7 @@
         "consumes_from": [
           "stop_drill_recovery_report"
         ],
-        "current_status": "BLOCKED_WAITING_FOR_STOP_DRILL",
+        "current_status": "HUMAN_CHECKLIST_READY",
         "forbidden_actions": [
           "mutate work_packets/active",
           "mutate approval_inbox",
@@ -760,16 +758,15 @@
         "aliases": [
           "STOP drill proof missing"
         ],
-        "human_gate": "stop_drill_human_confirmation",
-        "reason": "STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
-        "safe_next_action": "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance.",
-        "source": "Reports\\stop_drill_preview\\stop_drill_preview.json",
-        "status": "HUMAN_GATE_REQUIRED"
+        "human_gate": null,
+        "reason": "STOP drill human confirmation record exists and is PASS_FOR_DRY_RUN_RECOVERY_PROOF_ONLY; this reduces only the STOP drill dry-run recovery blocker and does not authorize runtime, scheduler, SOS, broker, live trading, secrets, or vacation mode.",
+        "safe_next_action": "Proceed only to the remaining human gates: SOS delivery confirmation and scheduler manual registration.",
+        "source": "Reports\\human_gate\\stop_drill_human_confirmation_record.json",
+        "status": "PASS"
       }
     },
     "queue_consumer": "operator_final_readout",
     "remaining_blockers": [
-      "STOP drill proof missing",
       "SOS delivered:true missing",
       "scheduler manual registration missing"
     ],
@@ -787,7 +784,7 @@
       "scheduler_registered_by_anthony": false,
       "soak_pass": true,
       "sos_delivered_true": false,
-      "stop_drill_pass": false,
+      "stop_drill_pass": true,
       "vacation_mode_complete": false
     },
     "status": "HUMAN_GATE_REQUIRED",
@@ -802,7 +799,7 @@
     "scheduler_manual_registration_proof": "HUMAN_GATE_REQUIRED",
     "soak_proof": "PASS",
     "sos_delivery_proof": "HUMAN_GATE_REQUIRED",
-    "stop_drill_proof": "HUMAN_GATE_REQUIRED"
+    "stop_drill_proof": "PASS"
   },
   "proofs": {
     "relay_runtime_proof": {
@@ -872,11 +869,11 @@
       "aliases": [
         "STOP drill proof missing"
       ],
-      "human_gate": "stop_drill_human_confirmation",
-      "reason": "STOP drill remains preview-only and requires human confirmation unless a reviewable proof exists.",
-      "safe_next_action": "Anthony must confirm STOP drill in a separately approved human-gated packet before runtime readiness can advance.",
-      "source": "Reports\\stop_drill_preview\\stop_drill_preview.json",
-      "status": "HUMAN_GATE_REQUIRED"
+      "human_gate": null,
+      "reason": "STOP drill human confirmation record exists and is PASS_FOR_DRY_RUN_RECOVERY_PROOF_ONLY; this reduces only the STOP drill dry-run recovery blocker and does not authorize runtime, scheduler, SOS, broker, live trading, secrets, or vacation mode.",
+      "safe_next_action": "Proceed only to the remaining human gates: SOS delivery confirmation and scheduler manual registration.",
+      "source": "Reports\\human_gate\\stop_drill_human_confirmation_record.json",
+      "status": "PASS"
     }
   },
   "protected_mutation_detected": false,

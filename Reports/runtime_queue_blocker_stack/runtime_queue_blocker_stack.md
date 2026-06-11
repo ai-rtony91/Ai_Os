@@ -10,12 +10,11 @@
 - restart_timeouts_proof: `PASS`
 - retention_rotation_proof: `PASS`
 - soak_proof: `PASS`
-- stop_drill_proof: `HUMAN_GATE_REQUIRED`
+- stop_drill_proof: `PASS`
 - sos_delivery_proof: `HUMAN_GATE_REQUIRED`
 - scheduler_manual_registration_proof: `HUMAN_GATE_REQUIRED`
 
 ## Human Gates
-- stop_drill_human_confirmation
 - sos_delivery_human_confirmation
 - scheduler_manual_registration_human_confirmation
 
