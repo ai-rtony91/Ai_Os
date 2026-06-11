@@ -1,6 +1,6 @@
 # Proposed Review Packet: High-Risk PR Decomposition After Autonomy Closeout
 
-Status: PROPOSED / REVIEW-ONLY  
+Status: PROPOSED / REVIEW-ONLY
 This file is not an executable Codex packet and does not authorize APPLY, commit, push, merge, PR closure, runtime launch, runtime execution, queue mutation, scheduler registration, SOS send, broker action, live trading, or credential access.
 
 ## Purpose

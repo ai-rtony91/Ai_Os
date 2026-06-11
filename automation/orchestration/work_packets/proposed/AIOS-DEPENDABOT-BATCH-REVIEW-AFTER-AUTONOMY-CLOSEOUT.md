@@ -1,6 +1,6 @@
 # Proposed Review Packet: Dependabot Batch Review After Autonomy Closeout
 
-Status: PROPOSED / REVIEW-ONLY  
+Status: PROPOSED / REVIEW-ONLY
 This file is not an executable Codex packet and does not authorize APPLY, auto-merge, commit, push, merge, dependency installation, runtime mutation, dashboard deployment, broker action, live trading, or credential access.
 
 ## Purpose

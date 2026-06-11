@@ -2,8 +2,8 @@
 
 Status: REPORT_ONLY
 
-Live PR state capture: FAILED  
-Confidence: LOW  
+Live PR state capture: FAILED
+Confidence: LOW
 Fallback evidence: `Reports/pr_backlog_reconciliation/open_pr_backlog_after_570_reconciliation.json`
 
 The packet attempted to capture live open PR state with `gh pr list`, but the Windows sandbox returned `CreateProcessAsUserW failed: 1312`. No close action was performed because the optional safe-close phase requires working `gh` CLI and live confirmation that each PR is still open.

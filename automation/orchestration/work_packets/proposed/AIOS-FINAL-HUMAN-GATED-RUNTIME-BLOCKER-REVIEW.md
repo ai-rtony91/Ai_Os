@@ -1,6 +1,6 @@
 # Proposed Review Packet: Final Human-Gated Runtime Blocker Review
 
-Status: PROPOSED / REVIEW-ONLY  
+Status: PROPOSED / REVIEW-ONLY
 This file is not an executable Codex packet and does not authorize APPLY, commit, push, merge, runtime launch, runtime execution, queue mutation, scheduler registration, SOS send, broker action, live trading, or credential access.
 
 ## Purpose
