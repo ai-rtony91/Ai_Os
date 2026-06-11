@@ -237,10 +237,17 @@ def test_default_p2_evidence_loads_as_preview_without_real_queue_mutation(tmp_pa
         now="2026-06-10T15:20:28Z",
     )
 
-    assert report["gate_status"] == gate.BLOCKED
+    assert report["gate_status"] == gate.READY
+    assert report["approval_check"]["approval_evidence_present"] is True
+    assert report["approval_check"]["explicit_approval"] is True
+    assert report["approval_check"]["approval_gate_packet_mismatch"] is False
     assert report["validation"]["invalid_reasons"] == []
+    assert report["validation"]["blockers"] == []
     assert report["proposed_queue_item"]["allowed_paths"] == ["automation/orchestration/work_packets/"]
     assert "automation/orchestration/work_packets/active/" in report["proposed_queue_item"]["forbidden_paths"]
     assert report["queue_write_allowed"] is False
     assert report["canonical_queue_mutated"] is False
+    assert report["worker_inbox_mutation_allowed"] is False
+    assert report["approval_inbox_mutation_allowed"] is False
+    assert report["command_queue_mutation_allowed"] is False
     assert _fingerprint(REAL_ACTIVE_QUEUE) == before

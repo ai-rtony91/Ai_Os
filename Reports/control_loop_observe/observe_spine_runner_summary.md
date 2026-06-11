@@ -2,15 +2,15 @@
 
 - observe_loop_status: `OBSERVE_LOOP_BLOCKED`
 - p2_bridge_status: `BLOCKED`
-- queue_gate_status: `BLOCKED`
+- queue_gate_status: `READY_FOR_HUMAN_REVIEW`
 - runtime_apply_status: `BLOCKED`
 - sos_status: `BLOCKED`
 - scheduler_status: `BLOCKED`
 
 ## Layer status
 - p2_bridge: status=BLOCKED stale=False real=True governance=False code=False
-- queue_mutation_gate: status=BLOCKED stale=False real=True governance=True code=False
-- runtime_apply_lane: status=BLOCKED stale=False real=True governance=True code=False
+- queue_mutation_gate: status=READY_FOR_HUMAN_REVIEW stale=False real=False governance=False code=False
+- runtime_apply_lane: status=BLOCKED stale=False real=True governance=False code=False
 - sos_arming: status=BLOCKED stale=False real=True governance=True code=False
 - scheduler_registration: status=BLOCKED stale=False real=True governance=True code=False
 

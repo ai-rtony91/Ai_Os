@@ -1,0 +1,44 @@
+{
+  "allowed_paths": [
+    "automation/orchestration/work_packets/"
+  ],
+  "approval_authority": "Anthony / Human Owner",
+  "approval_evidence": {
+    "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+    "approval_gate_packet_mismatch": true,
+    "phrase_hash_or_label": "ANTHONY_EXPLICIT_P2_QUEUE_REVIEW_APPROVAL",
+    "scope": "P2 queue mutation gate review only",
+    "status": "APPROVED_FOR_DRY_RUN_QUEUE_REVIEW_ONLY",
+    "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "type": "EXPLICIT_HUMAN_APPROVAL_PHRASE"
+  },
+  "approval_gate_id": "APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+  "approval_status": "approved_for_apply",
+  "approved_by": "Anthony / Human Owner",
+  "approved_by_human": true,
+  "blocked_paths": [
+    "automation/orchestration/work_packets/active/",
+    "automation/orchestration/work_packets/blocked/",
+    "automation/orchestration/work_packets/complete/",
+    "automation/orchestration/workers/inbox/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/command_queue/",
+    "telemetry/",
+    "services/",
+    "apps/",
+    "aios/modules/trader/",
+    "aios.ps1"
+  ],
+  "canonical_queue_mutation_allowed": false,
+  "commit_package_required": true,
+  "live_trading_allowed": false,
+  "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+  "queue_write_allowed": false,
+  "runtime_execution_allowed": false,
+  "safe_next_action": "Rerun P2 bridge and queue mutation gate; do not mutate active queue.",
+  "scheduler_registration_allowed": false,
+  "schema": "AIOS_APPLY_APPROVAL_GATE.v1",
+  "sos_notification_allowed": false,
+  "validator_chain_required": true,
+  "worker_inbox_mutation_allowed": false
+}

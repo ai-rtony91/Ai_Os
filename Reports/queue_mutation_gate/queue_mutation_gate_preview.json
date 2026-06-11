@@ -3,13 +3,13 @@
     "active_approval_gate_present": true,
     "active_approval_inbox_present": true,
     "approval_evidence_present": true,
-    "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
-    "approval_gate_packet_mismatch": true,
+    "approval_gate_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "approval_gate_packet_mismatch": false,
     "approved_statuses": [
       "approved",
       "approved_for_apply"
     ],
-    "explicit_approval": false,
+    "explicit_approval": true,
     "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
   },
   "approval_inbox_mutation_allowed": false,
@@ -26,9 +26,9 @@
   },
   "enqueue_allowed": false,
   "future_write_target": "automation/orchestration/work_packets/active/",
-  "gate_status": "BLOCKED",
-  "gate_status_reason": "approval evidence is not explicit; approval evidence packet_id does not match proposed queue packet_id",
-  "generated_at_utc": "2026-06-11T01:51:05Z",
+  "gate_status": "READY_FOR_HUMAN_REVIEW",
+  "gate_status_reason": "proposal is ready for human review",
+  "generated_at_utc": "2026-06-11T02:24:48Z",
   "live_trading_allowed": false,
   "mode": "DRY_RUN_PREVIEW_ONLY",
   "proposed_item_source": {
@@ -69,7 +69,7 @@
   ],
   "runtime_execution_allowed": false,
   "runtime_launch_allowed": false,
-  "safe_next_action": "Resolve queue mutation blockers before requesting a real queue write.",
+  "safe_next_action": "Human reviews this preview; a separate approved APPLY gate is still required before any real queue write.",
   "scheduler_creation_allowed": false,
   "schema": "AIOS_QUEUE_MUTATION_GATE_PREVIEW.v1",
   "sos_allowed": false,
@@ -122,10 +122,7 @@
     "unsafe_action_requested": false
   },
   "validation": {
-    "blockers": [
-      "approval evidence is not explicit",
-      "approval evidence packet_id does not match proposed queue packet_id"
-    ],
+    "blockers": [],
     "checked_fields": [
       "packet_id",
       "mode",

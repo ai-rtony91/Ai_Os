@@ -5,9 +5,6 @@
   "approval_inbox_mutation_allowed": false,
   "blockers": [
     "P2 bridge is not READY_FOR_DRY_RUN_PREVIEW",
-    "queue mutation approval is not explicit",
-    "queue gate validation: approval evidence is not explicit",
-    "queue gate validation: approval evidence packet_id does not match proposed queue packet_id",
     "runtime proof final_verdict is not READY_FOR_HUMAN_GATE"
   ],
   "command_queue_mutation": false,
@@ -42,7 +39,7 @@
     "would_execute": false,
     "would_route": false
   },
-  "generated_at_utc": "2026-06-11T01:51:10Z",
+  "generated_at_utc": "2026-06-11T02:24:55Z",
   "invalid_reasons": [],
   "live_trading_allowed": false,
   "mode": "DRY_RUN_PREVIEW_ONLY",
@@ -76,7 +73,7 @@
       "automation/orchestration/work_packets/"
     ],
     "approval_evidence_present": true,
-    "explicit_approval": false,
+    "explicit_approval": true,
     "forbidden_paths": [
       "automation/orchestration/work_packets/active/",
       "automation/orchestration/work_packets/blocked/",
@@ -90,7 +87,7 @@
       "aios/modules/trader/",
       "aios.ps1"
     ],
-    "gate_status": "BLOCKED",
+    "gate_status": "READY_FOR_HUMAN_REVIEW",
     "lane": "p2_review_to_queue_enqueue_bridge",
     "mode": "DRY_RUN_PREVIEW_ONLY",
     "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
@@ -148,15 +145,15 @@
       "exists": true,
       "is_file": true,
       "path": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
-      "sha256": "48c9e6fa19a7a1c6312c52c5531a31a0292ddfe429d342166b30b948d8963043",
-      "size": 10748
+      "sha256": "0ef5f886bbbde19dc46402efdd926f04618c0e38c7dc4126091c7745e742b1a8",
+      "size": 10493
     },
     {
       "exists": true,
       "is_file": true,
       "path": "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
-      "sha256": "8822311c9ddad9de6e24a9c9d200009b14eb8bc90d9387b29495e69800d861d4",
-      "size": 5098
+      "sha256": "427899429a9f5f2efe048eab20a2a8ca775d95d6c0fb05f62620fb68967b45ef",
+      "size": 4948
     },
     {
       "exists": true,
@@ -189,7 +186,7 @@
       "files": [
         {
           "path": "__pycache__/aios_approval_evidence_adapter.cpython-311.pyc",
-          "sha256": "a19742cea7435ee00918b0dfd4b1e06b9feef347775d09a5afabaf17e77783d8",
+          "sha256": "6ca59c5f426a9ba44648abc98b40b0e683029d379e272329ff8e7f20fea2917f",
           "size": 12330
         },
         {
@@ -199,8 +196,8 @@
         },
         {
           "path": "aios_approval_evidence_adapter.py",
-          "sha256": "6b5ef34392e163b610dc9601a29518cf2e74362831c7c21716aeee32d861329b",
-          "size": 10744
+          "sha256": "1d3b38819a99a618b4a6314fe80ed70a238843117402c854165652f363f35e65",
+          "size": 10923
         },
         {
           "path": "AIOS_APPROVAL_QUEUE.example.json",
@@ -209,13 +206,18 @@
         },
         {
           "path": "aios_queue_specific_approval_request.py",
-          "sha256": "6b631fec991568d73f76af22bf883fd9ae03a69358e98e4adf23d53a985d37d2",
-          "size": 28340
+          "sha256": "9f96b2a4377d421d4ebd535e335b23656ca491f8ba8da476d7b4a11f6ab505ef",
+          "size": 28951
         },
         {
           "path": "APPLY_APPROVAL_GATE_001.json",
           "sha256": "3053151fa37c66cb0f02dfaec81664022eb6081309f00536821938b8750670d8",
           "size": 3240
+        },
+        {
+          "path": "APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
+          "sha256": "13cb29db1eb3175df8bb2a4ab42a1c6d8c368c0180543ded425b55df4128b821",
+          "size": 1756
         },
         {
           "path": "APPROVAL_INBOX_001.json",
@@ -373,10 +375,10 @@
   "stop_condition": "Stop before writing to active queue, worker inbox, approval inbox, command queue, telemetry, scheduler, SOS, services, or runtime.",
   "summary": {
     "apply_status": "BLOCKED",
-    "blocked_count": 5,
+    "blocked_count": 2,
     "invalid_reason_count": 0,
     "p2_bridge_status": "BLOCKED",
-    "queue_gate_status": "BLOCKED",
+    "queue_gate_status": "READY_FOR_HUMAN_REVIEW",
     "runtime_execution": false,
     "runtime_launch": false,
     "runtime_proof_verdict": "BLOCKED",
