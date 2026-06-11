@@ -1,0 +1,205 @@
+{
+  "schema": "AIOS_LOCKOUT_SAFE_LOGIN_STACK_DESIGN.v1",
+  "generated_at": "2026-06-11",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-DESIGN-DRY-RUN-V1",
+  "lane": "login-security-stack-design",
+  "stack_layers": [
+    {
+      "layer": "local_omen_windows_login",
+      "role": "Local workstation access and fallback control",
+      "configuration_status": "unchanged",
+      "notes": "Must remain independent from cloud login/provider changes."
+    },
+    {
+      "layer": "cloudflare_access",
+      "role": "Front-door identity gate for exposed AI_OS surfaces",
+      "configuration_status": "not_configured_by_this_packet",
+      "notes": "Dashboard exposure remains blocked until Access policy is proven."
+    },
+    {
+      "layer": "microsoft_entra",
+      "role": "Primary admin login provider candidate",
+      "configuration_status": "not_configured_by_this_packet",
+      "notes": "Requires identity inventory, recovery review, and break-glass design before setup."
+    },
+    {
+      "layer": "github",
+      "role": "Backup operator login provider candidate and repo identity",
+      "configuration_status": "not_configured_by_this_packet",
+      "notes": "Must not bypass AI_OS app roles or protected-action approval gates."
+    },
+    {
+      "layer": "google",
+      "role": "Optional fallback login provider",
+      "configuration_status": "decision_deferred",
+      "notes": "Use only if it improves lockout resilience without unmanaged account sprawl."
+    },
+    {
+      "layer": "cloudflare_otp",
+      "role": "Constrained emergency fallback",
+      "configuration_status": "not_configured_by_this_packet",
+      "notes": "Should not depend on the same reset loop as primary Microsoft login."
+    },
+    {
+      "layer": "turnstile",
+      "role": "Bot/human check on AI_OS login or sensitive forms",
+      "configuration_status": "not_configured_by_this_packet",
+      "notes": "Token must be server-verified in future implementation."
+    },
+    {
+      "layer": "aios_backend_roles",
+      "role": "Application authorization after authentication",
+      "configuration_status": "design_only",
+      "notes": "External login identity does not equal app role or action authority."
+    },
+    {
+      "layer": "aios_approval_gates",
+      "role": "Protected-action authorization",
+      "configuration_status": "unchanged",
+      "notes": "Validator PASS and authenticated login do not approve protected actions."
+    }
+  ],
+  "identity_accounts": {
+    "windows_omen_login": {
+      "owner": "Anthony",
+      "purpose": "Local desktop and repo fallback",
+      "must_not_be_used_for": [
+        "end_user_login",
+        "provider_admin_substitute",
+        "shared_app_access"
+      ],
+      "status": "unchanged"
+    },
+    "azure_portal_browser_identity": {
+      "owner": "Anthony / production cloud admin",
+      "purpose": "Azure Portal administration after separate approval",
+      "known_status": "requires_manual_inventory",
+      "secret_handling": "store_no_secrets"
+    },
+    "azure_cli_identity": {
+      "production_account": "ai.tradeplatform@Algotradez.onmicrosoft.com",
+      "tenant_id": "feb18abf-17ea-4d88-a4ac-05ffcd6ecb8b",
+      "subscription_name": "Subscription 1",
+      "subscription_state": "Enabled",
+      "default_subscription": true,
+      "previous_identity": "my.laboratory@outlook.com",
+      "warning": "Previous identity should not be used for production AI_OS cloud resources unless separately approved."
+    },
+    "github_identity": {
+      "github_cli_identity": "ai-rtony91",
+      "git_author_identity": "270783377+ai-rtony91@users.noreply.github.com",
+      "purpose": "Repo/operator identity and backup Access login candidate"
+    },
+    "cloudflare_admin_identity": {
+      "owner": "Anthony / future Cloudflare admin",
+      "purpose": "Cloudflare Access, DNS, tunnel, and Turnstile administration after approval",
+      "known_status": "requires_manual_inventory"
+    },
+    "aios_admin_identity": {
+      "purpose": "AI_OS app administration after backend role checks",
+      "rule": "Separate from cloud provider, repo, and local machine authority."
+    },
+    "aios_end_user_identity": {
+      "purpose": "End-user authentication with user-owned provider account",
+      "rule": "End users do not touch Azure admin, Omen login, GitHub repo, scheduler, runtime, broker, or secrets."
+    },
+    "recovery_email": {
+      "purpose": "Independent account recovery",
+      "requirement": "Must be separate from the primary Microsoft reset loop."
+    },
+    "break_glass_account": {
+      "purpose": "Emergency administrative recovery",
+      "requirement": "Must be independently recoverable and not used for daily work or end users."
+    }
+  },
+  "lockout_controls": {
+    "minimum_independent_admin_paths": 2,
+    "required_paths": [
+      "microsoft_entra_primary",
+      "github_backup_or_break_glass"
+    ],
+    "optional_paths": [
+      "google_fallback",
+      "cloudflare_otp"
+    ],
+    "local_fallback": "Omen/Windows login remains unchanged.",
+    "recovery_email_rule": "Recovery email must be separate from the primary Microsoft account.",
+    "break_glass_rule": "Break-glass account must not depend on the same Microsoft reset loop.",
+    "dashboard_exposure_rule": "Dashboard remains blocked until Cloudflare Access is proven.",
+    "scenario_recovery": [
+      {
+        "scenario": "microsoft_entra_unavailable",
+        "path": "Use GitHub backup login or break-glass; keep local Omen fallback."
+      },
+      {
+        "scenario": "azure_cli_wrong_identity",
+        "path": "Stop Azure mutation and run identity inventory only."
+      },
+      {
+        "scenario": "cloudflare_admin_unavailable",
+        "path": "Use break-glass or alternate Cloudflare admin path; keep dashboard unexposed."
+      },
+      {
+        "scenario": "access_policy_misconfigured",
+        "path": "Use local Omen fallback and independent Cloudflare admin path; repair only through approved provider-change packet."
+      }
+    ]
+  },
+  "end_user_model": {
+    "authentication": "End users authenticate with their own provider account.",
+    "authorization": "AI_OS backend maps verified sessions to explicit app roles.",
+    "forbidden_for_end_users": [
+      "Anthony Azure admin identity",
+      "Omen/Windows login",
+      "GitHub repo/admin identity",
+      "Cloudflare admin identity",
+      "scheduler",
+      "runtime",
+      "broker",
+      "secrets",
+      "approval gates"
+    ],
+    "rule": "Login identity does not equal action authority."
+  },
+  "frontend_compromise_model": {
+    "frontend_trust": "untrusted",
+    "browser_secrets": "forbidden",
+    "session_verification": "backend_verifies_session",
+    "role_verification": "backend_verifies_role",
+    "turnstile_verification": "server_side_required_in_future_implementation",
+    "protected_actions": "still_require_aios_approval_gates"
+  },
+  "forbidden_actions": [
+    "configure_cloudflare",
+    "configure_azure",
+    "configure_entra",
+    "configure_github_oauth",
+    "configure_google_oauth",
+    "create_or_change_dns",
+    "create_or_change_tunnels",
+    "expose_dashboard",
+    "access_request_write_or_store_secrets",
+    "edit_env",
+    "mutate_runtime",
+    "mutate_scheduler",
+    "mutate_queues",
+    "mutate_approval_inbox",
+    "mutate_worker_inbox",
+    "mutate_command_queue",
+    "touch_broker_or_live_trading_paths",
+    "delete_files",
+    "push_to_main",
+    "merge",
+    "close_prs"
+  ],
+  "next_packet": {
+    "path": "automation/orchestration/work_packets/proposed/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN.md",
+    "mode": "DRY_RUN",
+    "purpose": "Inventory identity and recovery facts before provider configuration.",
+    "provider_changes": false,
+    "store_secrets": false
+  },
+  "status": "LOCKOUT_SAFE_LOGIN_STACK_DESIGN_READY_FOR_REVIEW"
+}
+
