@@ -1,0 +1,150 @@
+{
+  "allowed_paths": [
+    "automation/orchestration/work_packets/"
+  ],
+  "approval_attempt_rejected": false,
+  "approval_authority": "Anthony Meza / Human Owner",
+  "approval_evidence": {
+    "allowed_paths": [
+      "automation/orchestration/work_packets/"
+    ],
+    "apply_gate_pending": true,
+    "approval_authority": "Anthony Meza / Human Owner",
+    "approval_completed": true,
+    "approval_gate_output_path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
+    "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+    "approval_gate_packet_mismatch": true,
+    "approval_gate_write_allowed": false,
+    "approval_granted": false,
+    "approval_status": "pending_review",
+    "approved_by": null,
+    "approved_by_human": false,
+    "authority_active": true,
+    "blocked_paths": [
+      "automation/orchestration/work_packets/active/",
+      "automation/orchestration/work_packets/blocked/",
+      "automation/orchestration/work_packets/complete/",
+      "automation/orchestration/workers/inbox/",
+      "automation/orchestration/approval_inbox/",
+      "automation/orchestration/command_queue/",
+      "telemetry/",
+      "services/",
+      "apps/",
+      "aios/modules/trader/",
+      "aios.ps1"
+    ],
+    "commit_package_required": true,
+    "explicit_approval": false,
+    "missing_authority_fields": true,
+    "non_authorizing_placeholder": true,
+    "non_authorizing_reason": "queue-specific approval required; existing apply gate targets AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+    "packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+    "source_files": [
+      "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
+      "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+      "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+      "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+    ],
+    "status": "PENDING_HUMAN_APPROVAL",
+    "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "type": "HUMAN_REVIEW_REQUIRED",
+    "validator_chain_required": true
+  },
+  "approval_gate_output_path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
+  "approval_gate_write_allowed": false,
+  "approval_status": "pending_review",
+  "approved_by": null,
+  "approved_by_human": false,
+  "blocked_paths": [
+    "automation/orchestration/work_packets/active/",
+    "automation/orchestration/work_packets/blocked/",
+    "automation/orchestration/work_packets/complete/",
+    "automation/orchestration/workers/inbox/",
+    "automation/orchestration/approval_inbox/",
+    "automation/orchestration/command_queue/",
+    "telemetry/",
+    "services/",
+    "apps/",
+    "aios/modules/trader/",
+    "aios.ps1"
+  ],
+  "canonical_queue_mutation_allowed": false,
+  "commit_package_required": true,
+  "generated_at_utc": "2026-06-11T01:37:33Z",
+  "live_trading_allowed": false,
+  "mode": "DRY_RUN_FIRST",
+  "queue_gate_blockers": [
+    "approval evidence is not explicit"
+  ],
+  "queue_gate_invalid_reasons": [
+    "allowed_paths is required",
+    "forbidden_paths is required"
+  ],
+  "queue_gate_status": "INVALID",
+  "queue_write_allowed": false,
+  "report_paths": [
+    "Reports/approval_state_transition/p2_queue_approval_request.json",
+    "Reports/approval_state_transition/p2_queue_approval_request.md"
+  ],
+  "runtime_execution_allowed": false,
+  "safe_next_action": "Anthony must review the draft request and confirm the exact human approval phrase before any queue-specific gate write.",
+  "scheduler_registration_allowed": false,
+  "schema": "AIOS_QUEUE_SPECIFIC_APPROVAL_REQUEST.v1",
+  "sos_notification_allowed": false,
+  "source_approval_gate": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+  "source_approval_inbox": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+  "source_p2_report": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
+  "source_queue_gate_report": "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
+  "stop_condition": "Stop before mutating approval inbox, active queue, worker inbox, runtime, scheduler, SOS, live trading, commit, or push.",
+  "summary": {
+    "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+    "approval_gate_packet_mismatch": true,
+    "approval_granted": false,
+    "approval_status": "pending_review",
+    "blocker_count": 0,
+    "explicit_approval": false,
+    "queue_gate_status": "INVALID",
+    "queue_write_allowed": false,
+    "report_paths": [
+      "Reports/approval_state_transition/p2_queue_approval_request.json",
+      "Reports/approval_state_transition/p2_queue_approval_request.md"
+    ],
+    "safe_next_action": "Anthony must review the draft request and confirm the exact human approval phrase before any queue-specific gate write.",
+    "schema": "AIOS_QUEUE_SPECIFIC_APPROVAL_REQUEST.v1",
+    "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+    "validation_status": "PASS"
+  },
+  "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+  "validation": {
+    "blockers": [],
+    "checked_fields": [
+      "schema",
+      "mode",
+      "target_packet_id",
+      "approval_status",
+      "approved_by_human",
+      "approval_authority",
+      "approved_by",
+      "queue_write_allowed",
+      "canonical_queue_mutation_allowed",
+      "worker_inbox_mutation_allowed",
+      "runtime_execution_allowed",
+      "scheduler_registration_allowed",
+      "sos_notification_allowed",
+      "live_trading_allowed",
+      "validator_chain_required",
+      "commit_package_required",
+      "allowed_paths",
+      "blocked_paths",
+      "source_p2_report",
+      "source_queue_gate_report",
+      "approval_evidence",
+      "safe_next_action",
+      "stop_condition"
+    ],
+    "safe_next_action": "P2 queue approval request is ready for human review.",
+    "status": "PASS"
+  },
+  "validator_chain_required": true,
+  "worker_inbox_mutation_allowed": false
+}

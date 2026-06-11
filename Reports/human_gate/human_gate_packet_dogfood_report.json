@@ -75,7 +75,7 @@
   ],
   "execution_allowed": false,
   "forbidden_claims_detected": [],
-  "generated_at_utc": "2026-01-02T03:04:05Z",
+  "generated_at_utc": "2026-06-11T01:47:38Z",
   "human_gate_packet_summary": {
     "apply_allowed": false,
     "approval_granted": false,
@@ -657,7 +657,7 @@
       "human_scheduler_registration"
     ],
     "dispatch_allowed": false,
-    "generated_at_utc": "2026-01-02T03:04:05Z",
+    "generated_at_utc": "2026-06-11T01:47:38Z",
     "human_only_gates": [
       "human_sos_arming",
       "human_scheduler_registration"
@@ -804,7 +804,7 @@
       "human_scheduler_registration"
     ],
     "dispatch_allowed": false,
-    "generated_at_utc": "2026-01-02T03:04:05Z",
+    "generated_at_utc": "2026-06-11T01:47:38Z",
     "human_only_gates": [
       "human_sos_arming",
       "human_scheduler_registration"
@@ -957,7 +957,7 @@
     "evaluated_conditions": [
       {
         "condition": "current_time_utc_valid",
-        "evidence": "2026-01-02T03:04:05Z",
+        "evidence": "2026-06-11T01:47:38Z",
         "passed": true
       },
       {
@@ -982,12 +982,12 @@
       },
       {
         "condition": "heartbeat_age_seconds",
-        "evidence": 97175,
+        "evidence": 13916588,
         "passed": false
       },
       {
         "condition": "checkpoint_age_seconds",
-        "evidence": 97385,
+        "evidence": 13916798,
         "passed": false
       }
     ],
@@ -1027,7 +1027,7 @@
     ],
     "simulated_inputs": {
       "checkpoint_expected": true,
-      "current_time_utc": "2026-01-02T03:04:05Z",
+      "current_time_utc": "2026-06-11T01:47:38Z",
       "last_checkpoint_utc": "2026-01-01T00:01:00Z",
       "last_heartbeat_utc": "2026-01-01T00:04:30Z",
       "runtime_expected": true,
@@ -1054,17 +1054,17 @@
     "archive_required": false,
     "credentials_accessed": false,
     "delete_executed": false,
-    "delete_required": false,
+    "delete_required": true,
     "dispatch_allowed": false,
     "evaluated_files": [
       {
-        "age_days": null,
+        "age_days": 132.075,
         "archive_required": false,
         "classification": "review",
         "contains_jsonl": true,
-        "delete_required": false,
+        "delete_required": true,
         "issues": [
-          "future timestamp"
+          "age exceeds max_age_days"
         ],
         "kind": "jsonl",
         "line_count": 25,
@@ -1075,17 +1075,15 @@
         "truncate_required": false
       }
     ],
-    "expired_files": [],
-    "file_mutation_allowed": false,
-    "future_timestamp_files": [
+    "expired_files": [
       {
-        "age_days": null,
+        "age_days": 132.075,
         "archive_required": false,
         "classification": "review",
         "contains_jsonl": true,
-        "delete_required": false,
+        "delete_required": true,
         "issues": [
-          "future timestamp"
+          "age exceeds max_age_days"
         ],
         "kind": "jsonl",
         "line_count": 25,
@@ -1096,7 +1094,9 @@
         "truncate_required": false
       }
     ],
-    "generated_at_utc": "2026-01-02T03:04:05Z",
+    "file_mutation_allowed": false,
+    "future_timestamp_files": [],
+    "generated_at_utc": "2026-06-11T01:47:38Z",
     "keep_candidates": [],
     "live_trading_allowed": false,
     "malformed_inputs": [],
@@ -1113,7 +1113,7 @@
       "scheduler and SOS remain blocked",
       "live operations remain blocked"
     ],
-    "proof_status": "BLOCKED",
+    "proof_status": "ATTENTION",
     "proof_type": "retention_rotation",
     "retention_policy": {
       "archive_after_days": 14,
@@ -1126,19 +1126,19 @@
       "truncate_execution_allowed": false
     },
     "retention_recommendation": {
-      "operator_action": "Fix the simulated metadata before rerunning the proof.",
-      "reason": "At least one simulated file could not be evaluated safely.",
-      "summary": "Dry-run retention proof could not complete because simulated file metadata was invalid, missing, or future-dated."
+      "operator_action": "Review the simulated file set and keep file mutation blocked.",
+      "reason": "The proof identified retention pressure, but the module only reports it.",
+      "summary": "Dry-run retention proof found files that would need rotate, archive, or review handling; no file mutation occurred."
     },
     "review_candidates": [
       {
-        "age_days": null,
+        "age_days": 132.075,
         "archive_required": false,
         "classification": "review",
         "contains_jsonl": true,
-        "delete_required": false,
+        "delete_required": true,
         "issues": [
-          "future timestamp"
+          "age exceeds max_age_days"
         ],
         "kind": "jsonl",
         "line_count": 25,
@@ -1153,12 +1153,12 @@
     "rotation_executed": false,
     "rotation_required": false,
     "runtime_mutation_allowed": false,
-    "safe_next_action": "Fix the simulated file metadata and rerun the dry-run proof; no file action was taken.",
+    "safe_next_action": "Dry-run proof only: report the retention, rotation, archive, and review results and keep file mutation, telemetry mutation, scheduler, SOS, and live execution blocked.",
     "scheduler_creation_allowed": false,
     "schema": "AIOS_RETENTION_ROTATION_DRY_RUN_PROOF.v1",
     "service_creation_allowed": false,
     "simulated_inputs": {
-      "current_time_utc": "2026-01-02T03:04:05Z",
+      "current_time_utc": "2026-06-11T01:47:38Z",
       "file_count": 1
     },
     "sos_allowed": false,
@@ -1172,15 +1172,19 @@
   "runtime_proof_gate_summary": {
     "apply_allowed": false,
     "approval_granted": false,
-    "attention_count": 2,
-    "blocker_count": 8,
+    "attention_count": 4,
+    "blocker_count": 10,
     "cross_proof_consistency": {
       "attention_reasons": [
         "restart/timeouts proof is ATTENTION",
+        "retention/rotation proof is ATTENTION",
+        "soak proof is ATTENTION",
         "reduction target selector still points to a proof-planning target"
       ],
       "blockers": [
         "restart/timeouts attention not allowed by policy",
+        "retention/rotation attention not allowed by policy",
+        "soak attention not allowed by policy",
         "relay review is BLOCKED",
         "operator dependency ledger validation is BLOCKED",
         "runtime queue still lists remaining blockers"
@@ -1191,9 +1195,9 @@
       "reduction_target_status": "UNKNOWN",
       "relay_review_status": "BLOCKED",
       "restart_timeouts_status": "ATTENTION",
-      "retention_rotation_status": "BLOCKED",
+      "retention_rotation_status": "ATTENTION",
       "runtime_queue_status": "UNKNOWN",
-      "soak_status": "BLOCKED"
+      "soak_status": "ATTENTION"
     },
     "dispatch_allowed": false,
     "execution_allowed": false,
@@ -1206,13 +1210,13 @@
     "prerequisite_missing_count": 0,
     "relay_review_status": null,
     "restart_timeouts_status": "ATTENTION",
-    "retention_rotation_status": "BLOCKED",
+    "retention_rotation_status": "ATTENTION",
     "runtime_launch_allowed": false,
     "runtime_queue_status": null,
     "safe_next_action": "Fix the blockers before the proof chain can reach human gate review.",
     "scheduler_creation_allowed": false,
     "soak_pass": false,
-    "soak_status": "BLOCKED",
+    "soak_status": "ATTENTION",
     "sos_allowed": false,
     "stop_condition": "Stop until blockers are cleared; no execution.",
     "unsafe_flag_count": 0,
@@ -1220,7 +1224,7 @@
   },
   "runtime_queue_summary": {
     "cloud_buildable_lane_complete": true,
-    "generated_at_utc": "2026-06-10T19:20:11Z",
+    "generated_at_utc": "2026-06-11T01:47:38Z",
     "hard_gate_summary": {
       "global": [
         "No live trading, broker, or OANDA execution.",
@@ -1829,11 +1833,10 @@
   "soak_summary": {
     "apply_allowed": false,
     "attention_reasons": [
-      "restart/timeouts proof attention"
+      "restart/timeouts proof attention",
+      "retention/rotation proof attention"
     ],
-    "blockers": [
-      "prerequisite proof blocked"
-    ],
+    "blockers": [],
     "checkpoint_continuity_ok": true,
     "checkpoint_gaps_detected": false,
     "credentials_accessed": false,
@@ -1970,7 +1973,7 @@
       }
     ],
     "future_timestamps": [],
-    "generated_at_utc": "2026-01-02T03:04:05Z",
+    "generated_at_utc": "2026-06-11T01:47:38Z",
     "heartbeat_continuity_ok": true,
     "invalid_timestamps": [],
     "live_trading_allowed": false,
@@ -1990,14 +1993,14 @@
       "no file or telemetry mutation",
       "live operations remain blocked"
     ],
-    "proof_status": "BLOCKED",
+    "proof_status": "ATTENTION",
     "proof_type": "soak",
     "required_duration_seconds": 3600,
     "restart_timeouts_proof_status": "ATTENTION",
-    "retention_rotation_proof_status": "BLOCKED",
+    "retention_rotation_proof_status": "ATTENTION",
     "runtime_launched": false,
     "runtime_mutation_allowed": false,
-    "safe_next_action": "Fix the simulated soak inputs or prerequisite proof readouts and rerun the dry-run proof; no runtime action was taken.",
+    "safe_next_action": "Dry-run soak proof only: report the simulated endurance results and keep runtime launch, scheduler, SOS, and live execution blocked.",
     "scheduler_creation_allowed": false,
     "schema": "AIOS_SOAK_DRY_RUN_PROOF.v1",
     "service_creation_allowed": false,
@@ -2009,7 +2012,7 @@
         "2026-01-01T00:45:00Z",
         "2026-01-01T01:00:00Z"
       ],
-      "current_time_utc": "2026-01-02T03:04:05Z",
+      "current_time_utc": "2026-06-11T01:47:38Z",
       "heartbeat_samples_utc": [
         "2026-01-01T00:00:00Z",
         "2026-01-01T00:05:00Z",
@@ -2041,9 +2044,9 @@
       "soak_execution_allowed": false
     },
     "soak_recommendation": {
-      "operator_action": "Fix the simulated inputs and prerequisite proofs before rerunning the proof.",
-      "reason": "At least one required input or prerequisite proof was not safe to evaluate.",
-      "summary": "Dry-run soak proof could not complete because the simulated input or prerequisite proofs were invalid or blocked."
+      "operator_action": "Review the simulated soak conditions and keep runtime mutation blocked.",
+      "reason": "The proof indicates endurance risk or proof-chain attention, but the module only reports it.",
+      "summary": "Dry-run soak proof detected continuity or retention pressure; no runtime was launched."
     },
     "sos_allowed": false,
     "stale_heartbeats_detected": false,
@@ -2109,10 +2112,10 @@
       "existed_before": true,
       "mutated": false,
       "path": "automation\\orchestration\\runtime_closure\\aios_human_gate_packet_dogfood_runner.py",
-      "sha256_after": "09d2e9b9a7747d75e1bfd05ddcdab741638afa93b7807169283f4bd1b414c2cb",
-      "sha256_before": "09d2e9b9a7747d75e1bfd05ddcdab741638afa93b7807169283f4bd1b414c2cb",
-      "size_after": 43663,
-      "size_before": 43663
+      "sha256_after": "1737a9f76aff06c9a5d7600d99960c717f565eb6d47051fd060d83c04ac13bcc",
+      "sha256_before": "1737a9f76aff06c9a5d7600d99960c717f565eb6d47051fd060d83c04ac13bcc",
+      "size_after": 44675,
+      "size_before": 44675
     },
     {
       "existed_after": true,

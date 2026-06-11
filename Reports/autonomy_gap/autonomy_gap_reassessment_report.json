@@ -58,8 +58,8 @@
       "burden_category": "recover",
       "domain": "proof_gate_gap",
       "evidence": {
-        "attention_count": 2,
-        "blocker_count": 8,
+        "attention_count": 4,
+        "blocker_count": 10,
         "final_verdict": "BLOCKED",
         "safe_next_action": "Fix the blockers before the proof chain can reach human gate review."
       },
@@ -439,7 +439,7 @@
   "evidence_missing": [],
   "execution_allowed": false,
   "forbidden_claims_detected": [],
-  "generated_at_utc": "2026-01-02T03:04:05Z",
+  "generated_at_utc": "2026-06-11T01:47:44Z",
   "human_gate_packet_summary": {
     "apply_allowed": false,
     "approval_granted": false,
@@ -1064,8 +1064,8 @@
         "burden_category": "recover",
         "domain": "proof_gate_gap",
         "evidence": {
-          "attention_count": 2,
-          "blocker_count": 8,
+          "attention_count": 4,
+          "blocker_count": 10,
           "final_verdict": "BLOCKED",
           "safe_next_action": "Fix the blockers before the proof chain can reach human gate review."
         },
@@ -1659,15 +1659,19 @@
       "evidence": {
         "apply_allowed": false,
         "approval_granted": false,
-        "attention_count": 2,
-        "blocker_count": 8,
+        "attention_count": 4,
+        "blocker_count": 10,
         "cross_proof_consistency": {
           "attention_reasons": [
             "restart/timeouts proof is ATTENTION",
+            "retention/rotation proof is ATTENTION",
+            "soak proof is ATTENTION",
             "reduction target selector still points to a proof-planning target"
           ],
           "blockers": [
             "restart/timeouts attention not allowed by policy",
+            "retention/rotation attention not allowed by policy",
+            "soak attention not allowed by policy",
             "relay review is BLOCKED",
             "operator dependency ledger validation is BLOCKED",
             "runtime queue still lists remaining blockers"
@@ -1678,9 +1682,9 @@
           "reduction_target_status": "UNKNOWN",
           "relay_review_status": "BLOCKED",
           "restart_timeouts_status": "ATTENTION",
-          "retention_rotation_status": "BLOCKED",
+          "retention_rotation_status": "ATTENTION",
           "runtime_queue_status": "UNKNOWN",
-          "soak_status": "BLOCKED"
+          "soak_status": "ATTENTION"
         },
         "dispatch_allowed": false,
         "execution_allowed": false,
@@ -1693,13 +1697,13 @@
         "prerequisite_missing_count": 0,
         "relay_review_status": null,
         "restart_timeouts_status": "ATTENTION",
-        "retention_rotation_status": "BLOCKED",
+        "retention_rotation_status": "ATTENTION",
         "runtime_launch_allowed": false,
         "runtime_queue_status": null,
         "safe_next_action": "Fix the blockers before the proof chain can reach human gate review.",
         "scheduler_creation_allowed": false,
         "soak_pass": false,
-        "soak_status": "BLOCKED",
+        "soak_status": "ATTENTION",
         "sos_allowed": false,
         "stop_condition": "Stop until blockers are cleared; no execution.",
         "unsafe_flag_count": 0,
@@ -1908,15 +1912,19 @@
   "runtime_proof_gate_summary": {
     "apply_allowed": false,
     "approval_granted": false,
-    "attention_count": 2,
-    "blocker_count": 8,
+    "attention_count": 4,
+    "blocker_count": 10,
     "cross_proof_consistency": {
       "attention_reasons": [
         "restart/timeouts proof is ATTENTION",
+        "retention/rotation proof is ATTENTION",
+        "soak proof is ATTENTION",
         "reduction target selector still points to a proof-planning target"
       ],
       "blockers": [
         "restart/timeouts attention not allowed by policy",
+        "retention/rotation attention not allowed by policy",
+        "soak attention not allowed by policy",
         "relay review is BLOCKED",
         "operator dependency ledger validation is BLOCKED",
         "runtime queue still lists remaining blockers"
@@ -1927,9 +1935,9 @@
       "reduction_target_status": "UNKNOWN",
       "relay_review_status": "BLOCKED",
       "restart_timeouts_status": "ATTENTION",
-      "retention_rotation_status": "BLOCKED",
+      "retention_rotation_status": "ATTENTION",
       "runtime_queue_status": "UNKNOWN",
-      "soak_status": "BLOCKED"
+      "soak_status": "ATTENTION"
     },
     "dispatch_allowed": false,
     "execution_allowed": false,
@@ -1942,13 +1950,13 @@
     "prerequisite_missing_count": 0,
     "relay_review_status": null,
     "restart_timeouts_status": "ATTENTION",
-    "retention_rotation_status": "BLOCKED",
+    "retention_rotation_status": "ATTENTION",
     "runtime_launch_allowed": false,
     "runtime_queue_status": null,
     "safe_next_action": "Fix the blockers before the proof chain can reach human gate review.",
     "scheduler_creation_allowed": false,
     "soak_pass": false,
-    "soak_status": "BLOCKED",
+    "soak_status": "ATTENTION",
     "sos_allowed": false,
     "stop_condition": "Stop until blockers are cleared; no execution.",
     "unsafe_flag_count": 0,
@@ -1956,7 +1964,7 @@
   },
   "runtime_queue_summary": {
     "cloud_buildable_lane_complete": true,
-    "generated_at_utc": "2026-06-10T19:20:11Z",
+    "generated_at_utc": "2026-06-11T01:47:38Z",
     "hard_gate_summary": {
       "global": [
         "No live trading, broker, or OANDA execution.",
@@ -2737,8 +2745,8 @@
       "burden_category": "recover",
       "domain": "proof_gate_gap",
       "evidence": {
-        "attention_count": 2,
-        "blocker_count": 8,
+        "attention_count": 4,
+        "blocker_count": 10,
         "final_verdict": "BLOCKED",
         "safe_next_action": "Fix the blockers before the proof chain can reach human gate review."
       },

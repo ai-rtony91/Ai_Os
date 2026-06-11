@@ -1,16 +1,14 @@
 {
   "blocked_layers": [],
   "closure_layer_statuses": {
-    "p2_bridge": "INVALID",
+    "p2_bridge": "BLOCKED",
     "queue_mutation_gate": "BLOCKED",
-    "runtime_apply_lane": "INVALID",
+    "runtime_apply_lane": "BLOCKED",
     "scheduler_registration": "BLOCKED",
-    "sos_arming": "INVALID"
+    "sos_arming": "BLOCKED"
   },
-  "code_blockers": [
-    "runtime_apply_lane"
-  ],
-  "generated_at_utc": "2026-06-10T23:49:39Z",
+  "code_blockers": [],
+  "generated_at_utc": "2026-06-11T01:52:25Z",
   "governance_blockers": [
     "queue_mutation_gate",
     "runtime_apply_lane",
@@ -18,7 +16,7 @@
     "scheduler_registration"
   ],
   "mode": "DRY_RUN_PREVIEW_ONLY",
-  "observe_loop_status": "OBSERVE_LOOP_INVALID",
+  "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
   "ready_layers": [],
   "real_blockers": [
     "p2_bridge",
@@ -27,7 +25,7 @@
     "sos_arming",
     "scheduler_registration"
   ],
-  "safe_next_action": "Resolve stale/invalid evidence and rerun observe-spine runner.",
+  "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
   "schema": "AIOS_AUTONOMY_CLOSURE_REPORT.v1",
   "stale_layers": [],
   "validate_mutation_boundaries": {

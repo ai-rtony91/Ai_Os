@@ -1,9 +1,9 @@
 # AI_OS Runtime APPLY Lane Preview
 
-- apply_status: `INVALID`
+- apply_status: `BLOCKED`
 - p2_bridge_status: `BLOCKED`
-- queue_gate_status: `INVALID`
-- runtime_proof_verdict: ``
+- queue_gate_status: `BLOCKED`
+- runtime_proof_verdict: `BLOCKED`
 - would_apply: `False`
 - would_route: `False`
 - would_execute: `False`
@@ -15,17 +15,15 @@
 - scheduler_registration: `False`
 - sos_notification: `False`
 - trading_execution: `False`
-- safe_next_action: Repair evidence and rerun preview.
-- blocked_count: 7
+- safe_next_action: Resolve blockers and explicit approvals before any runtime apply lane mutation.
+- blocked_count: 5
 
 ## Safety
 - This preview does not execute runtime, mutate worker inbox, mutate queue, launch services, arm SOS, or perform trading.
 
 ## Blockers
 - P2 bridge is not READY_FOR_DRY_RUN_PREVIEW
-- queue mutation preview allowed_paths is missing
-- queue mutation preview forbidden_paths is missing
 - queue mutation approval is not explicit
 - queue gate validation: approval evidence is not explicit
-- queue gate evidence still carries invalid reasons
-- runtime proof final_verdict is missing
+- queue gate validation: approval evidence packet_id does not match proposed queue packet_id
+- runtime proof final_verdict is not READY_FOR_HUMAN_GATE

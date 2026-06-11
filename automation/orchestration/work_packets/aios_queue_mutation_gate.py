@@ -238,13 +238,33 @@ def _normalize_proposed_item(item: dict[str, Any], context: dict[str, Any]) -> d
     }
 
 
-def _approval_is_explicit(evidence: dict[str, Any]) -> bool:
+def _approval_packet_id(evidence: dict[str, Any]) -> str:
+    packet_id = _first_non_empty(evidence, ("packet_id", "approval_gate_packet_id", "target_packet_id"))
+    return str(packet_id).strip() if packet_id is not None else ""
+
+
+def _approval_is_explicit(evidence: dict[str, Any], target_packet_id: str) -> bool:
     if not evidence:
         return False
     status = str(evidence.get("approval_status") or evidence.get("status") or "").strip().lower()
     human = evidence.get("approved_by_human") is True or evidence.get("approval_granted") is True
     authority = str(evidence.get("approval_authority") or evidence.get("approved_by") or "").strip()
-    return status in APPROVED_STATUSES and human and bool(authority)
+    packet_id = _approval_packet_id(evidence)
+    packet_match = bool(packet_id) and bool(str(target_packet_id).strip()) and packet_id == str(target_packet_id).strip()
+    allowed_paths = _list_from_value(evidence.get("allowed_paths"))
+    blocked_paths = _list_from_value(evidence.get("blocked_paths"))
+    validator_chain_required = evidence.get("validator_chain_required") is True
+    commit_package_required = evidence.get("commit_package_required") is True
+    return (
+        status in APPROVED_STATUSES
+        and human
+        and bool(authority)
+        and packet_match
+        and bool(allowed_paths)
+        and bool(blocked_paths)
+        and validator_chain_required
+        and commit_package_required
+    )
 
 
 def _active_packet_matches(active_dir: Path, packet_id: str) -> list[str]:
@@ -325,7 +345,13 @@ def build_queue_mutation_gate_preview(
     approval_gate_path = root / DEFAULT_APPROVAL_GATE
     approval_inbox_path = root / DEFAULT_APPROVAL_INBOX
     approval_evidence = normalized["approval_evidence"]
-    explicit_approval = _approval_is_explicit(approval_evidence)
+    approval_gate_packet_id = _approval_packet_id(approval_evidence)
+    approval_gate_packet_mismatch = bool(
+        approval_gate_packet_id
+        and normalized["packet_id"]
+        and approval_gate_packet_id != normalized["packet_id"]
+    )
+    explicit_approval = _approval_is_explicit(approval_evidence, normalized["packet_id"])
     duplicate_paths = _active_packet_matches(active_dir, normalized["packet_id"])
     protected_paths = _targeted_protected_paths(normalized)
     unsafe_terms = _unsafe_action_terms(item)
@@ -338,6 +364,8 @@ def build_queue_mutation_gate_preview(
         blockers.append("approval evidence is missing")
     elif not explicit_approval:
         blockers.append("approval evidence is not explicit")
+        if approval_gate_packet_mismatch:
+            blockers.append("approval evidence packet_id does not match proposed queue packet_id")
     if duplicate_paths:
         blockers.append("duplicate active packet ID would be created")
     if protected_paths:
@@ -392,6 +420,9 @@ def build_queue_mutation_gate_preview(
         "approval_check": {
             "approval_evidence_present": bool(approval_evidence),
             "explicit_approval": explicit_approval,
+            "target_packet_id": normalized["packet_id"],
+            "approval_gate_packet_id": approval_gate_packet_id or None,
+            "approval_gate_packet_mismatch": approval_gate_packet_mismatch,
             "approved_statuses": sorted(APPROVED_STATUSES),
             "active_approval_gate_present": approval_gate_path.exists(),
             "active_approval_inbox_present": approval_inbox_path.exists(),

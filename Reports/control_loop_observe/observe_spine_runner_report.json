@@ -1,8 +1,6 @@
 {
   "closure": {
-    "code_blockers": [
-      "runtime_apply_lane"
-    ],
+    "code_blockers": [],
     "governance_blockers": [
       "queue_mutation_gate",
       "runtime_apply_lane",
@@ -10,13 +8,13 @@
       "scheduler_registration"
     ],
     "layer_statuses": {
-      "p2_bridge": "INVALID",
+      "p2_bridge": "BLOCKED",
       "queue_mutation_gate": "BLOCKED",
-      "runtime_apply_lane": "INVALID",
+      "runtime_apply_lane": "BLOCKED",
       "scheduler_registration": "BLOCKED",
-      "sos_arming": "INVALID"
+      "sos_arming": "BLOCKED"
     },
-    "p2_bridge_status": "INVALID",
+    "p2_bridge_status": "BLOCKED",
     "queue_mutation_gate_status": "BLOCKED",
     "real_blockers": [
       "p2_bridge",
@@ -25,9 +23,9 @@
       "sos_arming",
       "scheduler_registration"
     ],
-    "runtime_apply_status": "INVALID",
+    "runtime_apply_status": "BLOCKED",
     "scheduler_status": "BLOCKED",
-    "sos_status": "INVALID",
+    "sos_status": "BLOCKED",
     "stale_layers": []
   },
   "evidence": {
@@ -35,17 +33,21 @@
       "apply_allowed": false,
       "approval_granted": false,
       "autonomy_gap_evidence_summary": {
-        "live_execution_ready": "",
-        "p2_enqueue_bridge_readiness": "",
-        "reassessment_status": null,
-        "recommended_next_lane": null
+        "live_execution_ready": "BLOCKED",
+        "p2_enqueue_bridge_readiness": "BLOCKED",
+        "reassessment_status": "BLOCKED",
+        "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1"
       },
       "bridge_blockers": [
-        "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
-        "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json"
+        "human gate dogfood status is BLOCKED",
+        "autonomy gap reassessment status is BLOCKED",
+        "queue validation is BLOCK",
+        "runtime proof gate is BLOCKED",
+        "human gate packet is BLOCKED",
+        "autonomy gap marks P2 enqueue bridge as BLOCKED"
       ],
-      "bridge_status": "INVALID",
-      "bridge_status_reason": "P2 enqueue bridge evidence is missing or invalid.",
+      "bridge_status": "BLOCKED",
+      "bridge_status_reason": "P2 enqueue bridge remains blocked by current evidence.",
       "bridge_type": "p2_enqueue_bridge",
       "credentials_accessed": false,
       "dispatch_allowed": false,
@@ -67,19 +69,16 @@
           "path": "Reports\\human_gate\\human_gate_packet_dogfood_summary.md"
         }
       },
-      "evidence_missing": [
-        "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
-        "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json"
-      ],
+      "evidence_missing": [],
       "execution_allowed": false,
-      "generated_at_utc": "2026-06-10T23:49:39Z",
+      "generated_at_utc": "2026-06-11T01:51:15Z",
       "human_gate_evidence_summary": {
-        "dogfood_status": null,
-        "human_gate_packet_status": "",
+        "dogfood_status": "BLOCKED",
+        "human_gate_packet_status": "BLOCKED",
         "mutated_source_count": 0,
-        "mutation_check_status": null,
-        "queue_validation_status": "",
-        "runtime_proof_gate_status": ""
+        "mutation_check_status": "PASS",
+        "queue_validation_status": "BLOCK",
+        "runtime_proof_gate_status": "BLOCKED"
       },
       "invalid_reasons": [],
       "live_trading_allowed": false,
@@ -90,21 +89,80 @@
           "automation/orchestration/work_packets/"
         ],
         "apply_allowed": false,
+        "approval_evidence": {
+          "allowed_paths": [
+            "tests/orchestration/",
+            "automation/orchestration/Test-AiOsRuntimeHeartbeat.DRY_RUN.ps1",
+            "Reports/endurance_tier1/",
+            "automation/orchestration/watchdog/README.md",
+            "automation/recovery/README.md"
+          ],
+          "apply_gate_pending": true,
+          "approval_authority": "REMEDIATED_BY_PACKET1_APPROVAL_AUTHORITY_HARDENING",
+          "approval_completed": false,
+          "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+          "approval_gate_packet_mismatch": true,
+          "approval_gate_path_used": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+          "approval_gate_selected_from_queue_specific": false,
+          "approval_granted": false,
+          "approval_status": "pending_review",
+          "approved_by": null,
+          "approved_by_human": false,
+          "authority_active": true,
+          "blocked_paths": [
+            ".github/",
+            ".github/workflows/",
+            "AGENTS.md",
+            "README.md",
+            "RISK_POLICY.md",
+            "broker/",
+            "OANDA/",
+            "api_keys/",
+            "secrets/",
+            ".env",
+            "live_trading/",
+            "webhooks/",
+            "worker launch paths",
+            "scheduler registration paths",
+            "night supervisor arming paths",
+            "#449/#451 branches or PRs",
+            "parked salvage branch"
+          ],
+          "commit_package_required": true,
+          "explicit_apply_approved": false,
+          "explicit_approval": false,
+          "file_exists": true,
+          "missing_authority_fields": false,
+          "non_authorizing_placeholder": true,
+          "non_authorizing_reason": "approval gate packet_id AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1 does not match target_packet_id P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+          "packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+          "schema_present": true,
+          "source_files": [
+            "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+            "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
+          ],
+          "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+          "validator_chain_required": true
+        },
         "bridge_blockers": [
-          "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
-          "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json"
+          "human gate dogfood status is BLOCKED",
+          "autonomy gap reassessment status is BLOCKED",
+          "queue validation is BLOCK",
+          "runtime proof gate is BLOCKED",
+          "human gate packet is BLOCKED",
+          "autonomy gap marks P2 enqueue bridge as BLOCKED"
         ],
         "canonical_queue_write_allowed": false,
         "consumer": "canonical_runtime_execution_queue_preview_only",
         "dispatch_allowed": false,
         "enqueue_allowed": false,
         "evidence_status": {
-          "dogfood_status": null,
-          "human_gate_packet_status": "",
-          "p2_enqueue_bridge_readiness": "",
-          "queue_validation_status": "",
-          "reassessment_status": null,
-          "runtime_proof_gate_status": ""
+          "dogfood_status": "BLOCKED",
+          "human_gate_packet_status": "BLOCKED",
+          "p2_enqueue_bridge_readiness": "BLOCKED",
+          "queue_validation_status": "BLOCK",
+          "reassessment_status": "BLOCKED",
+          "runtime_proof_gate_status": "BLOCKED"
         },
         "forbidden_paths": [
           "automation/orchestration/work_packets/active/",
@@ -119,14 +177,15 @@
           "aios/modules/trader/",
           "aios.ps1"
         ],
-        "generated_at_utc": "2026-06-10T23:49:39Z",
+        "generated_at_utc": "2026-06-11T01:51:15Z",
         "invalid_reasons": [],
         "lane_id": "p2_review_to_queue_enqueue_bridge",
         "live_trading_allowed": false,
         "mode": "DRY_RUN_PREVIEW_ONLY",
+        "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
         "preview_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
         "preview_state": "PREVIEW_BLOCKED",
-        "recommended_next_lane": null,
+        "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
         "runtime_execution_allowed": false,
         "safe_next_action": "Review this preview; a separate approved packet is required before any real enqueue.",
         "scheduler_creation_allowed": false,
@@ -158,45 +217,45 @@
           "exists": true,
           "is_file": true,
           "path": "Reports\\human_gate\\human_gate_packet_dogfood_report.json",
-          "sha256": "22cdd8003aaf1a9ff90382fac57951bd3a5124e70e8972adedfd282b59f0a772",
-          "size": 82769
+          "sha256": "77f5725ba9749d24f96de63f2053d113ebad26b850c10b2092f4c104f31a2dfb",
+          "size": 83123
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports\\human_gate\\human_gate_packet_dogfood_summary.md",
-          "sha256": "0fe77c99fba457d71363f62525faccee2d4cc5ccb4d4a02f016e4cc852b78319",
+          "sha256": "5889a70913bad39deed7859161ebbf9ce8d59322261ecbe60c8ce9285bb80f35",
           "size": 1084
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_report.json",
-          "sha256": "697e2b7e2e8142179c15e4c279b14b5dd895016b346515d137083cf7efd670ab",
-          "size": 118239
+          "sha256": "f239820d81a20d6812a4e936fc4de5dfd44587a7fb130b23791e1390f1e71c7b",
+          "size": 118672
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports\\autonomy_gap\\autonomy_gap_reassessment_summary.md",
-          "sha256": "e660ff791bee18ceece120aa2458829b2f95867080400dd0d065c5d16a4ac8d1",
+          "sha256": "178ab37ab50569f8fec5c68759eddbbf9ea4c278faf9e60f975c36f99a83ac1d",
           "size": 4674
         }
       ],
       "stop_condition": "Stop after writing preview evidence; do not mutate queues, inboxes, runtime, scheduler, SOS, or approval state.",
       "summary": {
         "active_packet_write_allowed": false,
-        "blocker_count": 2,
-        "bridge_status": "INVALID",
+        "blocker_count": 6,
+        "bridge_status": "BLOCKED",
         "canonical_queue_write_allowed": false,
         "enqueue_allowed": false,
-        "human_gate_packet_status": "",
+        "human_gate_packet_status": "BLOCKED",
         "invalid_reason_count": 0,
         "live_trading_allowed": false,
-        "p2_enqueue_bridge_readiness": "",
+        "p2_enqueue_bridge_readiness": "BLOCKED",
         "queue_mutation_allowed": false,
-        "queue_validation_status": "",
-        "recommended_next_lane": null,
+        "queue_validation_status": "BLOCK",
+        "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1",
         "report_paths": [
           "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_preview.json",
           "Reports\\p2_enqueue_bridge\\p2_enqueue_bridge_summary.md"
@@ -214,7 +273,7 @@
       "vacation_mode_complete": false,
       "validation": {
         "blockers": [],
-        "bridge_status": "INVALID",
+        "bridge_status": "BLOCKED",
         "checked_fields": [
           "schema",
           "generated_at_utc",
@@ -259,11 +318,14 @@
         "active_approval_gate_present": true,
         "active_approval_inbox_present": true,
         "approval_evidence_present": true,
+        "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+        "approval_gate_packet_mismatch": true,
         "approved_statuses": [
           "approved",
           "approved_for_apply"
         ],
-        "explicit_approval": false
+        "explicit_approval": false,
+        "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
       },
       "approval_inbox_mutation_allowed": false,
       "canonical_queue_mutated": false,
@@ -280,13 +342,13 @@
       "enqueue_allowed": false,
       "future_write_target": "automation/orchestration/work_packets/active/",
       "gate_status": "BLOCKED",
-      "gate_status_reason": "approval evidence is not explicit",
-      "generated_at_utc": "2026-06-10T23:49:39Z",
+      "gate_status_reason": "approval evidence is not explicit; approval evidence packet_id does not match proposed queue packet_id",
+      "generated_at_utc": "2026-06-11T01:51:15Z",
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
       "proposed_item_source": {
         "loaded": true,
-        "path": "C:/Users/mylab/AppData/Local/Temp/tmp5_d8girz.json"
+        "path": "C:/Users/mylab/AppData/Local/Temp/tmpzsfwx1vm.json"
       },
       "proposed_queue_item": {
         "allowed_paths": [
@@ -372,7 +434,8 @@
       },
       "validation": {
         "blockers": [
-          "approval evidence is not explicit"
+          "approval evidence is not explicit",
+          "approval evidence packet_id does not match proposed queue packet_id"
         ],
         "checked_fields": [
           "packet_id",
@@ -392,15 +455,16 @@
       "worker_inbox_mutation_allowed": false
     },
     "runtime_apply": {
-      "apply_status": "INVALID",
-      "apply_status_reason": "Runtime APPLY lane preview is invalid due missing required evidence.",
+      "apply_status": "BLOCKED",
+      "apply_status_reason": "Runtime APPLY lane is blocked by evidence blockers.",
       "approval_inbox_mutation": false,
       "approval_inbox_mutation_allowed": false,
       "blockers": [
         "P2 bridge is not READY_FOR_DRY_RUN_PREVIEW",
         "queue mutation approval is not explicit",
         "queue gate validation: approval evidence is not explicit",
-        "runtime proof final_verdict is missing"
+        "queue gate validation: approval evidence packet_id does not match proposed queue packet_id",
+        "runtime proof final_verdict is not READY_FOR_HUMAN_GATE"
       ],
       "command_queue_mutation": false,
       "command_queue_mutation_allowed": false,
@@ -415,13 +479,11 @@
           "path": "Reports\\queue_mutation_gate\\queue_mutation_gate_preview.json"
         },
         "runtime_proof_gate": {
-          "loaded": false,
+          "loaded": true,
           "path": "Reports\\runtime_proof_gate\\runtime_proof_gate_preview.json"
         }
       },
-      "evidence_missing": [
-        "runtime_proof_gate"
-      ],
+      "evidence_missing": [],
       "execution_projection": {
         "approval_inbox_mutation": false,
         "command_queue_mutation": false,
@@ -436,17 +498,15 @@
         "would_execute": false,
         "would_route": false
       },
-      "generated_at_utc": "2026-06-10T23:49:39Z",
-      "invalid_reasons": [
-        "missing required evidence: runtime_proof_gate"
-      ],
+      "generated_at_utc": "2026-06-11T01:51:15Z",
+      "invalid_reasons": [],
       "live_trading_allowed": false,
       "mode": "DRY_RUN_PREVIEW_ONLY",
       "p2_preview": {
         "allowed_paths": [
           "automation/orchestration/work_packets/"
         ],
-        "bridge_status": "INVALID",
+        "bridge_status": "BLOCKED",
         "bridge_validation_status": "PASS",
         "forbidden_paths": [
           "automation/orchestration/work_packets/active/",
@@ -463,7 +523,7 @@
         ],
         "lane_id": "p2_review_to_queue_enqueue_bridge",
         "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
-        "recommended_next_lane": null
+        "recommended_next_lane": "QUEUE_BLOCKER_TRIAGE_V1"
       },
       "queue_mutation": false,
       "queue_mutation_allowed": false,
@@ -522,18 +582,18 @@
       "runtime_launch_allowed": false,
       "runtime_mutation_allowed": false,
       "runtime_proof_gate": {
-        "approval_granted": null,
-        "execution_allowed": null,
-        "final_verdict": "",
+        "approval_granted": false,
+        "execution_allowed": false,
+        "final_verdict": "BLOCKED",
         "human_gate_ready": false,
-        "live_trading_allowed": null,
-        "runtime_launch_allowed": null,
-        "runtime_mutation_allowed": null,
-        "scheduler_creation_allowed": null,
-        "sos_allowed": null,
-        "vacation_mode_complete": null
+        "live_trading_allowed": false,
+        "runtime_launch_allowed": false,
+        "runtime_mutation_allowed": false,
+        "scheduler_creation_allowed": false,
+        "sos_allowed": false,
+        "vacation_mode_complete": false
       },
-      "safe_next_action": "Repair evidence and rerun preview.",
+      "safe_next_action": "Resolve blockers and explicit approvals before any runtime apply lane mutation.",
       "scheduler_creation_allowed": false,
       "scheduler_registration": false,
       "schema": "AIOS_RUNTIME_APPLY_LANE_PREVIEW.v1",
@@ -544,22 +604,22 @@
           "exists": true,
           "is_file": true,
           "path": "Reports/p2_enqueue_bridge/p2_enqueue_bridge_preview.json",
-          "sha256": "6fab8056b09e8c795e64949a7a0a6fe93286f3aa710596604afa2eac2f30669d",
-          "size": 8330
+          "sha256": "48c9e6fa19a7a1c6312c52c5531a31a0292ddfe429d342166b30b948d8963043",
+          "size": 10748
         },
         {
           "exists": true,
           "is_file": true,
           "path": "Reports/queue_mutation_gate/queue_mutation_gate_preview.json",
-          "sha256": "aa867c3bf9d210cef06fd600c485004b696f564e706f0e3ee141540cd58fb7e8",
-          "size": 4358
+          "sha256": "8822311c9ddad9de6e24a9c9d200009b14eb8bc90d9387b29495e69800d861d4",
+          "size": 5098
         },
         {
-          "exists": false,
-          "is_file": false,
+          "exists": true,
+          "is_file": true,
           "path": "Reports/runtime_proof_gate/runtime_proof_gate_preview.json",
-          "sha256": null,
-          "size": null
+          "sha256": "bcde3677b10ec0eca48606ff32e894abd33b42bd3c7e2beee5369862b7a0ce3d",
+          "size": 15938
         },
         {
           "exists": true,
@@ -584,9 +644,29 @@
           "exists": true,
           "files": [
             {
+              "path": "__pycache__/aios_approval_evidence_adapter.cpython-311.pyc",
+              "sha256": "a19742cea7435ee00918b0dfd4b1e06b9feef347775d09a5afabaf17e77783d8",
+              "size": 12330
+            },
+            {
+              "path": "__pycache__/aios_queue_specific_approval_request.cpython-311.pyc",
+              "sha256": "7410a7a5b4c614be984057979b86dc1def7d41d624d12486bf01fbcd10764ca7",
+              "size": 35039
+            },
+            {
+              "path": "aios_approval_evidence_adapter.py",
+              "sha256": "6b5ef34392e163b610dc9601a29518cf2e74362831c7c21716aeee32d861329b",
+              "size": 10744
+            },
+            {
               "path": "AIOS_APPROVAL_QUEUE.example.json",
               "sha256": "d553e811dd0689580fb1ee6cfa9b1d4cdaec7fa5c4534fe8b1bab3e2074274e0",
               "size": 1576
+            },
+            {
+              "path": "aios_queue_specific_approval_request.py",
+              "sha256": "6b631fec991568d73f76af22bf883fd9ae03a69358e98e4adf23d53a985d37d2",
+              "size": 28340
             },
             {
               "path": "APPLY_APPROVAL_GATE_001.json",
@@ -748,15 +828,15 @@
       ],
       "stop_condition": "Stop before writing to active queue, worker inbox, approval inbox, command queue, telemetry, scheduler, SOS, services, or runtime.",
       "summary": {
-        "apply_status": "INVALID",
-        "blocked_count": 4,
-        "invalid_reason_count": 1,
-        "p2_bridge_status": "INVALID",
+        "apply_status": "BLOCKED",
+        "blocked_count": 5,
+        "invalid_reason_count": 0,
+        "p2_bridge_status": "BLOCKED",
         "queue_gate_status": "BLOCKED",
         "runtime_execution": false,
         "runtime_launch": false,
-        "runtime_proof_verdict": "",
-        "safe_next_action": "Repair evidence and rerun preview.",
+        "runtime_proof_verdict": "BLOCKED",
+        "safe_next_action": "Resolve blockers and explicit approvals before any runtime apply lane mutation.",
         "would_apply": false,
         "would_execute": false,
         "would_route": false
@@ -764,7 +844,7 @@
       "telemetry_mutation_allowed": false,
       "trading_execution": false,
       "validation": {
-        "apply_status": "INVALID",
+        "apply_status": "BLOCKED",
         "blockers": [],
         "checked_fields": [
           "schema",
@@ -821,7 +901,7 @@
       "blockers": [
         "queue mutation gate is not ready: BLOCKED",
         "explicit queue mutation approval is not present",
-        "runtime apply preview is not ready: INVALID",
+        "runtime apply preview is not ready: BLOCKED",
         "human gate evidence is not pass: MISSING",
         "autonomy reassessment is not pass: MISSING"
       ],
@@ -847,7 +927,7 @@
         "runtime_apply_preview": "Reports/runtime_apply_lane/runtime_apply_lane_preview.json",
         "sos_preview": "Reports/sos_preview/sos_arming_preview.json"
       },
-      "generated_at_utc": "2026-06-10T23:49:39Z",
+      "generated_at_utc": "2026-06-11T01:51:15Z",
       "human_gate_projection": {
         "dogfood_status": null,
         "human_gate_packet_status": ""
@@ -885,7 +965,7 @@
       "remaining_blockers": [
         "queue mutation gate is not ready: BLOCKED",
         "explicit queue mutation approval is not present",
-        "runtime apply preview is not ready: INVALID",
+        "runtime apply preview is not ready: BLOCKED",
         "human gate evidence is not pass: MISSING",
         "autonomy reassessment is not pass: MISSING"
       ],
@@ -899,7 +979,7 @@
         "Anthony explicit scheduler registration action"
       ],
       "runtime_apply_projection": {
-        "runtime_apply_status": "INVALID",
+        "runtime_apply_status": "BLOCKED",
         "would_apply": false,
         "would_execute": false,
         "would_route": false
@@ -919,7 +999,7 @@
       "sos_projection": {
         "notification_send_allowed": false,
         "notification_sent": false,
-        "sos_status": "INVALID"
+        "sos_status": "BLOCKED"
       },
       "source_fingerprints": [
         {
@@ -938,7 +1018,11 @@
         },
         {
           "entries": [
+            "__pycache__/aios_approval_evidence_adapter.cpython-311.pyc",
+            "__pycache__/aios_queue_specific_approval_request.cpython-311.pyc",
+            "aios_approval_evidence_adapter.py",
             "AIOS_APPROVAL_QUEUE.example.json",
+            "aios_queue_specific_approval_request.py",
             "APPLY_APPROVAL_GATE_001.json",
             "APPROVAL_INBOX_001.json",
             "APPROVAL_STATUS_RULES_001.md",
@@ -949,7 +1033,7 @@
             "Invoke-AiOsApprovalChain.DRY_RUN.ps1",
             "New-AiOsPacketApprovalRequest.DRY_RUN.ps1"
           ],
-          "file_count": 10,
+          "file_count": 14,
           "kind": "dir",
           "path": "automation/orchestration/approval_inbox"
         },
@@ -1348,7 +1432,7 @@
         "remaining_blockers": [
           "queue mutation gate is not ready: BLOCKED",
           "explicit queue mutation approval is not present",
-          "runtime apply preview is not ready: INVALID",
+          "runtime apply preview is not ready: BLOCKED",
           "human gate evidence is not pass: MISSING",
           "autonomy reassessment is not pass: MISSING"
         ],
@@ -1398,7 +1482,7 @@
         "sos_ready": null
       },
       "blocked_event": {
-        "blocked_reason": "explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: INVALID; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: MISSING; autonomy reassessment evidence is blocked: MISSING",
+        "blocked_reason": "explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: MISSING; autonomy reassessment evidence is blocked: MISSING",
         "event": "AIOS_RUNTIME_SOS",
         "event_status": "BLOCKED",
         "would_apply": false,
@@ -1423,7 +1507,7 @@
         "queue_mutation_report": false,
         "runtime_apply_preview": false
       },
-      "generated_at_utc": "2026-06-10T23:49:39Z",
+      "generated_at_utc": "2026-06-11T01:51:15Z",
       "human_gate_report_summary": {
         "dogfood_status": null,
         "packet_status": null
@@ -1432,8 +1516,8 @@
       "notification_allowed": false,
       "notification_sent": false,
       "p2_bridge_summary": {
-        "bridge_blocker_count": 2,
-        "bridge_status": "INVALID"
+        "bridge_blocker_count": 6,
+        "bridge_status": "BLOCKED"
       },
       "protected_boundaries": {
         "active_packet_mutation_allowed": false,
@@ -1458,7 +1542,7 @@
       "queue_mutation_gate_summary": {
         "explicit_approval": false,
         "gate_status": "BLOCKED",
-        "gate_status_reason": "approval evidence is not explicit",
+        "gate_status_reason": "approval evidence is not explicit; approval evidence packet_id does not match proposed queue packet_id",
         "proposed_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
       },
       "repo_root": ".",
@@ -1475,8 +1559,8 @@
       "scheduler_registration": false,
       "scheduler_required": false,
       "schema": "AIOS_SOS_ARMING_PREVIEW.v1",
-      "sos_status": "INVALID",
-      "sos_status_reason": "P2 bridge report is invalid",
+      "sos_status": "BLOCKED",
+      "sos_status_reason": "explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: MISSING; autonomy reassessment evidence is blocked: MISSING",
       "source_fingerprints": [
         {
           "entries": [
@@ -1502,12 +1586,17 @@
             "Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
             "Invoke-AiOsApprovalChain.DRY_RUN.ps1",
             "New-AiOsPacketApprovalRequest.DRY_RUN.ps1",
+            "__pycache__",
+            "__pycache__/aios_approval_evidence_adapter.cpython-311.pyc",
+            "__pycache__/aios_queue_specific_approval_request.cpython-311.pyc",
+            "aios_approval_evidence_adapter.py",
+            "aios_queue_specific_approval_request.py",
             "archive",
             "archive/.gitkeep",
             "archive/APPLY_APPROVAL_GATE_001.json",
             "archive/APPROVAL_INBOX_001.json"
           ],
-          "file_count": 11,
+          "file_count": 16,
           "kind": "dir",
           "path": "C:/Dev/Ai.Os/automation/orchestration/approval_inbox",
           "sha256": null
@@ -1995,7 +2084,7 @@
       "validation": {
         "blockers": [
           "explicit approval for queue mutation is not present in evidence",
-          "P2 bridge is not ready for SOS preview: INVALID",
+          "P2 bridge is not ready for SOS preview: BLOCKED",
           "queue mutation gate is not ready: BLOCKED",
           "human gate evidence requires review: MISSING",
           "autonomy reassessment evidence is blocked: MISSING"
@@ -2009,9 +2098,7 @@
           "approval_explicit",
           "protected_boundaries"
         ],
-        "invalid_reasons": [
-          "P2 bridge report is invalid"
-        ],
+        "invalid_reasons": [],
         "status": "PASS"
       },
       "worker_inbox_mutation": false,
@@ -2020,11 +2107,11 @@
       "would_route": false
     }
   },
-  "generated_at_utc": "2026-06-10T23:49:39Z",
+  "generated_at_utc": "2026-06-11T01:51:15Z",
   "layers": {
     "p2_bridge": {
       "blockers": [
-        "P2 enqueue bridge evidence is missing or invalid."
+        "P2 enqueue bridge remains blocked by current evidence."
       ],
       "code_blocker": false,
       "governance_blocker": false,
@@ -2032,12 +2119,13 @@
       "name": "p2_bridge",
       "real_blocker": true,
       "stale": false,
-      "status": "INVALID"
+      "status": "BLOCKED"
     },
     "queue_mutation_gate": {
       "blockers": [
         "approval evidence is not explicit",
-        "approval evidence is not explicit"
+        "approval evidence packet_id does not match proposed queue packet_id",
+        "approval evidence is not explicit; approval evidence packet_id does not match proposed queue packet_id"
       ],
       "code_blocker": false,
       "governance_blocker": true,
@@ -2052,24 +2140,23 @@
         "P2 bridge is not READY_FOR_DRY_RUN_PREVIEW",
         "queue mutation approval is not explicit",
         "queue gate validation: approval evidence is not explicit",
-        "runtime proof final_verdict is missing",
-        "Runtime APPLY lane preview is invalid due missing required evidence."
+        "queue gate validation: approval evidence packet_id does not match proposed queue packet_id",
+        "runtime proof final_verdict is not READY_FOR_HUMAN_GATE",
+        "Runtime APPLY lane is blocked by evidence blockers."
       ],
-      "code_blocker": true,
+      "code_blocker": false,
       "governance_blocker": true,
-      "invalid_reasons": [
-        "missing required evidence: runtime_proof_gate"
-      ],
+      "invalid_reasons": [],
       "name": "runtime_apply_lane",
       "real_blocker": true,
       "stale": false,
-      "status": "INVALID"
+      "status": "BLOCKED"
     },
     "scheduler_registration": {
       "blockers": [
         "queue mutation gate is not ready: BLOCKED",
         "explicit queue mutation approval is not present",
-        "runtime apply preview is not ready: INVALID",
+        "runtime apply preview is not ready: BLOCKED",
         "human gate evidence is not pass: MISSING",
         "autonomy reassessment is not pass: MISSING",
         "Scheduler registration is blocked by evidence blockers."
@@ -2085,21 +2172,19 @@
     "sos_arming": {
       "blockers": [
         "explicit approval for queue mutation is not present in evidence",
-        "P2 bridge is not ready for SOS preview: INVALID",
+        "P2 bridge is not ready for SOS preview: BLOCKED",
         "queue mutation gate is not ready: BLOCKED",
         "human gate evidence requires review: MISSING",
         "autonomy reassessment evidence is blocked: MISSING",
-        "P2 bridge report is invalid"
+        "explicit approval for queue mutation is not present in evidence; P2 bridge is not ready for SOS preview: BLOCKED; queue mutation gate is not ready: BLOCKED; human gate evidence requires review: MISSING; autonomy reassessment evidence is blocked: MISSING"
       ],
       "code_blocker": false,
       "governance_blocker": true,
-      "invalid_reasons": [
-        "P2 bridge report is invalid"
-      ],
+      "invalid_reasons": [],
       "name": "sos_arming",
       "real_blocker": true,
       "stale": false,
-      "status": "INVALID"
+      "status": "BLOCKED"
     }
   },
   "mode": "DRY_RUN_PREVIEW_ONLY",
@@ -2114,7 +2199,7 @@
     "trading_execution": false,
     "worker_inbox_mutation": false
   },
-  "observe_loop_status": "OBSERVE_LOOP_INVALID",
+  "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
   "path_fingerprints": {
     "snapshot": [
       {
@@ -2142,6 +2227,10 @@
           "Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
           "Invoke-AiOsApprovalChain.DRY_RUN.ps1",
           "New-AiOsPacketApprovalRequest.DRY_RUN.ps1",
+          "__pycache__/aios_approval_evidence_adapter.cpython-311.pyc",
+          "__pycache__/aios_queue_specific_approval_request.cpython-311.pyc",
+          "aios_approval_evidence_adapter.py",
+          "aios_queue_specific_approval_request.py",
           "archive/.gitkeep",
           "archive/APPLY_APPROVAL_GATE_001.json",
           "archive/APPROVAL_INBOX_001.json"
@@ -2572,20 +2661,18 @@
     ]
   },
   "repo_root": ".",
-  "safe_next_action": "Resolve stale/invalid evidence and rerun observe-spine runner.",
+  "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
   "schema": "AIOS_OBSERVE_SPINE_RUNNER.v1",
   "summary": {
-    "code_blockers": [
-      "runtime_apply_lane"
-    ],
+    "code_blockers": [],
     "governance_blockers": [
       "queue_mutation_gate",
       "runtime_apply_lane",
       "sos_arming",
       "scheduler_registration"
     ],
-    "observe_loop_status": "OBSERVE_LOOP_INVALID",
-    "p2_bridge_status": "INVALID",
+    "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
+    "p2_bridge_status": "BLOCKED",
     "queue_gate_status": "BLOCKED",
     "real_blockers": [
       "p2_bridge",
@@ -2594,10 +2681,10 @@
       "sos_arming",
       "scheduler_registration"
     ],
-    "runtime_apply_status": "INVALID",
-    "safe_next_action": "Resolve stale/invalid evidence and rerun observe-spine runner.",
+    "runtime_apply_status": "BLOCKED",
+    "safe_next_action": "Resolve real/gateway blockers and rerun observe-spine runner.",
     "scheduler_status": "BLOCKED",
-    "sos_status": "INVALID",
+    "sos_status": "BLOCKED",
     "stale_layers": []
   },
   "validate_mutation_boundaries": {

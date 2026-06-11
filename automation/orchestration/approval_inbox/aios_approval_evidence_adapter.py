@@ -13,7 +13,11 @@ from typing import Any
 
 
 DEFAULT_APPROVAL_GATE_PATH = Path("automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json")
+DEFAULT_QUEUE_SPECIFIC_APPROVAL_GATE_PATH = Path(
+    "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json"
+)
 DEFAULT_APPROVAL_INBOX_PATH = Path("automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json")
+DEFAULT_QUEUE_TARGET_PACKET_ID = "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
 APPROVED_STATUSES = {"approved_for_apply", "approved"}
 NON_AUTHORIZED_STATUSES = {
     "pending_review",
@@ -55,6 +59,24 @@ def _first_non_empty(record: dict[str, Any], keys: tuple[str, ...]) -> Any:
     return None
 
 
+def _select_approval_gate_path(root: Path) -> tuple[Path, bool]:
+    queue_specific_path = root / DEFAULT_QUEUE_SPECIFIC_APPROVAL_GATE_PATH
+    if queue_specific_path.exists():
+        return queue_specific_path, True
+    return root / DEFAULT_APPROVAL_GATE_PATH, False
+
+
+def _approval_gate_packet_id(approval_gate: dict[str, Any]) -> str:
+    packet_id = _first_non_empty(approval_gate, ("packet_id", "approval_gate_id"))
+    return str(packet_id).strip() if packet_id is not None else ""
+
+
+def _approval_gate_matches_target(approval_gate_packet_id: str, target_packet_id: str) -> bool:
+    if not approval_gate_packet_id or not target_packet_id:
+        return False
+    return approval_gate_packet_id == target_packet_id
+
+
 def _to_status(value: Any) -> str:
     return str(value or "").strip().lower()
 
@@ -67,9 +89,17 @@ def _build_non_authorizing_reason(
     has_approver: bool,
     apply_gate_present: bool,
     apply_gate_pending: bool,
+    target_packet_id: str,
+    approval_gate_packet_id: str,
+    approval_gate_packet_mismatch: bool,
 ) -> str:
     if not apply_gate_present:
         return "apply approval gate file is missing"
+    if approval_gate_packet_mismatch:
+        return (
+            "approval gate packet_id "
+            f"{approval_gate_packet_id or 'missing'} does not match target_packet_id {target_packet_id or 'missing'}"
+        )
     if apply_gate_pending:
         return "apply approval gate is pending_review"
     if approval_status and approval_status not in APPROVED_STATUSES:
@@ -99,6 +129,7 @@ def build_queue_mutation_approval_evidence(
     repo_root: str | Path = ".",
     approval_gate_path: str | Path = DEFAULT_APPROVAL_GATE_PATH,
     approval_inbox_path: str | Path = DEFAULT_APPROVAL_INBOX_PATH,
+    target_packet_id: str = DEFAULT_QUEUE_TARGET_PACKET_ID,
 ) -> dict[str, Any]:
     root = Path(repo_root)
     approval_gate_path = Path(approval_gate_path)
@@ -107,6 +138,12 @@ def build_queue_mutation_approval_evidence(
         approval_gate_path = root / approval_gate_path
     if not approval_inbox_path.is_absolute():
         approval_inbox_path = root / approval_inbox_path
+
+    selected_gate_path, selected_from_queue_specific = _select_approval_gate_path(root)
+    if selected_from_queue_specific:
+        approval_gate_path = selected_gate_path
+    elif not approval_gate_path.exists() and selected_gate_path.exists():
+        approval_gate_path = selected_gate_path
 
     approval_gate = _read_json(approval_gate_path) or {}
     approval_inbox = _read_json(approval_inbox_path) or {}
@@ -122,15 +159,42 @@ def build_queue_mutation_approval_evidence(
         approval_status = "missing_approval_status"
 
     approved_by_human = _bool(approval_gate.get("approved_by_human"))
+    approval_gate_packet_id = _approval_gate_packet_id(approval_gate)
+    approval_gate_packet_mismatch = bool(
+        approval_gate_packet_id
+        and str(target_packet_id).strip()
+        and not _approval_gate_matches_target(approval_gate_packet_id, str(target_packet_id).strip())
+    )
     approval_granted = False
     approval_authority = _first_non_empty(approval_gate, ("approval_authority", "bound_by"))
+    if approval_authority is None:
+        approval_authority = _first_non_empty(approval_inbox, ("approval_authority",))
     approved_by = _first_non_empty(approval_gate, ("approved_by",))
+    if approved_by is None:
+        approved_by = _first_non_empty(approval_inbox, ("approved_by",))
     has_authority, has_approver = _projection_has_authority_fields(approval_gate)
+    if not has_authority:
+        has_authority = bool(str(approval_authority).strip())
+    if not has_approver:
+        has_approver = bool(str(approved_by).strip())
+    allowed_paths = _list_from(
+        _first_non_empty(approval_gate, ("allowed_paths",))
+        or _first_non_empty(approval_inbox, ("allowed_paths",))
+    )
+    blocked_paths = _list_from(
+        _first_non_empty(approval_gate, ("blocked_paths", "blocked_path"))
+        or _first_non_empty(approval_inbox, ("blocked_paths", "blocked_path"))
+    )
     explicit_apply_approved = (
         approval_status in APPROVED_STATUSES
         and approved_by_human is True
+        and approval_gate_packet_mismatch is False
         and has_authority is True
         and has_approver is True
+        and bool(allowed_paths)
+        and bool(blocked_paths)
+        and _bool(_first_non_empty(approval_gate, ("validator_chain_required",)))
+        and _bool(_first_non_empty(approval_gate, ("commit_package_required",)))
     )
     if explicit_apply_approved:
         approval_granted = True
@@ -152,25 +216,24 @@ def build_queue_mutation_approval_evidence(
         has_approver=has_approver,
         apply_gate_present=apply_gate_present,
         apply_gate_pending=apply_gate_pending,
-    )
-
-    allowed_paths = _list_from(
-        _first_non_empty(approval_gate, ("allowed_paths",))
-        or _first_non_empty(approval_inbox, ("allowed_paths",))
-    )
-    blocked_paths = _list_from(
-        _first_non_empty(approval_gate, ("blocked_paths", "blocked_path"))
-        or _first_non_empty(approval_inbox, ("blocked_paths", "blocked_path"))
+        target_packet_id=str(target_packet_id).strip(),
+        approval_gate_packet_id=approval_gate_packet_id,
+        approval_gate_packet_mismatch=approval_gate_packet_mismatch,
     )
 
     return {
         "source_files": source_files,
+        "target_packet_id": str(target_packet_id).strip(),
         "approval_status": approval_status,
         "approved_by_human": approved_by_human,
         "approval_granted": approval_granted,
         "approval_authority": str(approval_authority) if approval_authority is not None else None,
         "approved_by": str(approved_by) if approved_by is not None else None,
-        "packet_id": _first_non_empty(approval_gate, ("packet_id", "approval_gate_id")),
+        "packet_id": approval_gate_packet_id,
+        "approval_gate_packet_id": approval_gate_packet_id,
+        "approval_gate_path_used": approval_gate_path.as_posix(),
+        "approval_gate_selected_from_queue_specific": selected_from_queue_specific,
+        "approval_gate_packet_mismatch": approval_gate_packet_mismatch,
         "allowed_paths": allowed_paths,
         "blocked_paths": blocked_paths,
         "validator_chain_required": _first_non_empty(

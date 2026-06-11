@@ -1,6 +1,6 @@
 # AI_OS P2 Enqueue Bridge Preview
 
-- generated_at_utc: `2026-06-10T22:25:16Z`
+- generated_at_utc: `2026-06-11T01:50:59Z`
 - bridge_status: `BLOCKED`
 - queue_validation_status: `BLOCK`
 - human_gate_packet_status: `BLOCKED`

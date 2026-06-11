@@ -1,6 +1,6 @@
 # AI_OS Autonomy Gap Reassessment
 
-- generated_at_utc: `2026-01-02T03:04:05Z`
+- generated_at_utc: `2026-06-11T01:47:44Z`
 - reassessment_status: `BLOCKED`
 - top_blocker: `Live execution remains unavailable`
 - top_blocker_domain: `live_execution_gap`

@@ -65,9 +65,20 @@ def _approved_item(packet_id: str = "AIOS-QUEUE-GATE-TEST-001") -> dict:
         "allowed_paths": ["automation/orchestration/work_packets/"],
         "forbidden_paths": ["automation/orchestration/work_packets/active/"],
         "approval_evidence": {
+            "packet_id": packet_id,
+            "target_packet_id": packet_id,
+            "approval_gate_packet_id": packet_id,
+            "approval_gate_packet_mismatch": False,
             "approval_status": "approved_for_apply",
             "approved_by_human": True,
             "approval_authority": "Anthony / Human Owner",
+            "approved_by": "Anthony / Human Owner",
+            "allowed_paths": ["automation/orchestration/work_packets/"],
+            "blocked_paths": ["automation/orchestration/work_packets/active/"],
+            "validator_chain_required": True,
+            "commit_package_required": True,
+            "explicit_approval": True,
+            "approval_granted": True,
         },
     }
 
@@ -112,6 +123,28 @@ def test_missing_approval_blocks_preview(tmp_path):
     assert report["gate_status"] == gate.BLOCKED
     assert "approval evidence is missing" in report["validation"]["blockers"]
     assert report["queue_write_allowed"] is False
+
+
+def test_packet_mismatch_blocks_even_if_approval_evidence_is_approved(tmp_path):
+    repo_root = _make_repo(tmp_path)
+    proposal = tmp_path / "proposal.json"
+    item = _approved_item("P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1")
+    item["approval_evidence"]["packet_id"] = "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1"
+    item["approval_evidence"]["approval_gate_packet_id"] = "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1"
+    item["approval_evidence"]["approval_gate_packet_mismatch"] = True
+    item["approval_evidence"]["target_packet_id"] = "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
+    _write_json(proposal, item)
+
+    report = gate.run_queue_mutation_gate(
+        repo_root=repo_root,
+        proposed_item_path=proposal,
+        output_dir=tmp_path / "reports",
+        now="2026-06-10T15:20:28Z",
+    )
+
+    assert report["gate_status"] == gate.BLOCKED
+    assert report["approval_check"]["approval_gate_packet_mismatch"] is True
+    assert "approval evidence packet_id does not match proposed queue packet_id" in report["validation"]["blockers"]
 
 
 def test_duplicate_active_packet_id_is_rejected(tmp_path):

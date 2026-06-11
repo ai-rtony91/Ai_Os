@@ -25,6 +25,7 @@ from typing import Any, Callable
 SCHEMA = "AIOS_P2_ENQUEUE_BRIDGE_PREVIEW.v1"
 MODE = "DRY_RUN"
 BRIDGE_TYPE = "p2_enqueue_bridge"
+QUEUE_TARGET_PACKET_ID = "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
 REPORT_JSON_NAME = "p2_enqueue_bridge_preview.json"
 REPORT_MD_NAME = "p2_enqueue_bridge_summary.md"
 DEFAULT_REPORT_SUBDIR = Path("Reports") / "p2_enqueue_bridge"
@@ -169,10 +170,28 @@ def _approval_evidence(repo_root: Path):
     adapter_builder, errors = _load_approval_adapter_module(repo_root)
     if adapter_builder is not None:
         try:
-            evidence = adapter_builder(repo_root=repo_root)
+            evidence = adapter_builder(
+                repo_root=repo_root,
+                target_packet_id=QUEUE_TARGET_PACKET_ID,
+            )
             if isinstance(evidence, dict):
                 if not evidence:
-                    return {"approval_status": "missing_evidence_payload", "non_authorizing_reason": "approval adapter returned an empty payload", "approval_granted": False, "explicit_approval": False, "non_authorizing_placeholder": True, "apply_gate_pending": True, "authority_active": False, "approval_completed": False, "missing_authority_fields": False, "source_files": [], "approved_by_human": False, "approval_evidence_loader_errors": errors}
+                    return {
+                        "target_packet_id": QUEUE_TARGET_PACKET_ID,
+                        "approval_status": "missing_evidence_payload",
+                        "non_authorizing_reason": "approval adapter returned an empty payload",
+                        "approval_granted": False,
+                        "explicit_approval": False,
+                        "non_authorizing_placeholder": True,
+                        "apply_gate_pending": True,
+                        "authority_active": False,
+                        "approval_completed": False,
+                        "missing_authority_fields": False,
+                        "source_files": [],
+                        "approved_by_human": False,
+                        "approval_gate_packet_mismatch": True,
+                        "approval_evidence_loader_errors": errors,
+                    }
                 if errors:
                     evidence = dict(evidence)
                     evidence["approval_evidence_loader_errors"] = errors
@@ -187,12 +206,15 @@ def _approval_evidence(repo_root: Path):
     approval_inbox_path = repo_root / "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
     return {
         "source_files": [str(apply_gate_path), str(approval_inbox_path)],
+        "target_packet_id": QUEUE_TARGET_PACKET_ID,
         "approval_status": "missing_authorized_adapter",
         "approved_by_human": False,
         "approval_granted": False,
         "approval_authority": None,
         "approved_by": None,
         "packet_id": None,
+        "approval_gate_packet_id": None,
+        "approval_gate_packet_mismatch": True,
         "allowed_paths": [],
         "blocked_paths": [],
         "validator_chain_required": None,
@@ -346,6 +368,7 @@ def _build_proposed_queue_item_preview(
     next_lane = recommended_lanes[0] if recommended_lanes and isinstance(recommended_lanes[0], dict) else {}
     return {
         "preview_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+        "packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
         "schema_version": "AIOS_RUNTIME_EXECUTION_QUEUE.v1",
         "generated_at_utc": generated_at,
         "mode": "DRY_RUN_PREVIEW_ONLY",

@@ -94,6 +94,16 @@ def _ensure_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _maybe_dict(value: Any) -> dict[str, Any] | None:
+    if isinstance(value, dict) and value:
+        return value
+    return None
+
+
+def _compact_dict(**items: Any) -> dict[str, Any]:
+    return {key: value for key, value in items.items() if value is not None}
+
+
 def _ensure_list(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
@@ -291,18 +301,18 @@ def _build_observe_spine_report(
     sos_mod = _load_module("aios_sos_arming_preview", root / SOS_PREVIEW_PATH)
     scheduler_mod = _load_module("aios_scheduler_registration_preview", root / SCHEDULER_PREVIEW_PATH)
 
-    p2_report = _ensure_dict(supplied.get("p2_bridge") or supplied.get("p2_bridge_report"))
+    p2_report = _maybe_dict(supplied.get("p2_bridge") or supplied.get("p2_bridge_report"))
     if not p2_report:
         p2_report = p2_mod.build_p2_enqueue_bridge_report(
             repo_root=root,
             now=now_value,
-            evidence={
-                "human_gate_report": _ensure_dict(supplied.get("human_gate") or supplied.get("human_gate_report")),
-                "autonomy_gap_report": _ensure_dict(supplied.get("autonomy_gap") or supplied.get("autonomy_gap_report")),
-            },
+            evidence=_compact_dict(
+                human_gate_report=_maybe_dict(supplied.get("human_gate") or supplied.get("human_gate_report")),
+                autonomy_gap_report=_maybe_dict(supplied.get("autonomy_gap") or supplied.get("autonomy_gap_report")),
+            ),
         )
 
-    queue_report = _ensure_dict(supplied.get("queue_mutation_gate") or supplied.get("queue_mutation_gate_report"))
+    queue_report = _maybe_dict(supplied.get("queue_mutation_gate") or supplied.get("queue_mutation_gate_report"))
     if not queue_report:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as handle:
             handle.write(json.dumps(p2_report, indent=2, sort_keys=True))
@@ -317,42 +327,42 @@ def _build_observe_spine_report(
             if temp_p2_path.exists():
                 temp_p2_path.unlink()
 
-    runtime_report = _ensure_dict(supplied.get("runtime_apply") or supplied.get("runtime_apply_report"))
+    runtime_report = _maybe_dict(supplied.get("runtime_apply") or supplied.get("runtime_apply_report"))
     if not runtime_report:
         runtime_report = runtime_mod.build_runtime_apply_lane_report(
             repo_root=root,
             p2_preview=p2_report,
             queue_mutation_gate_preview=queue_report,
-            runtime_proof_gate=_ensure_dict(supplied.get("runtime_proof_gate")),
+            runtime_proof_gate=_maybe_dict(supplied.get("runtime_proof_gate") or supplied.get("runtime_proof_gate_report")),
             now=now_value,
         )
 
-    sos_report = _ensure_dict(supplied.get("sos_arming") or supplied.get("sos_preview") or supplied.get("sos_arming_report"))
+    sos_report = _maybe_dict(supplied.get("sos_arming") or supplied.get("sos_preview") or supplied.get("sos_arming_report"))
     if not sos_report:
         sos_report = sos_mod.build_sos_arming_preview(
             repo_root=root,
             now=now_value,
-            evidence={
-                "p2_bridge_report": p2_report,
-                "queue_mutation_report": queue_report,
-                "human_gate_report": _ensure_dict(supplied.get("human_gate") or supplied.get("human_gate_report")),
-                "autonomy_gap_report": _ensure_dict(supplied.get("autonomy_gap") or supplied.get("autonomy_gap_report")),
-                "runtime_apply_report": runtime_report,
-            },
+            evidence=_compact_dict(
+                p2_bridge_report=p2_report,
+                queue_mutation_report=queue_report,
+                human_gate_report=_maybe_dict(supplied.get("human_gate") or supplied.get("human_gate_report")),
+                autonomy_gap_report=_maybe_dict(supplied.get("autonomy_gap") or supplied.get("autonomy_gap_report")),
+                runtime_apply_report=runtime_report,
+            ),
         )
 
-    scheduler_report = _ensure_dict(supplied.get("scheduler_registration") or supplied.get("scheduler_registration_report"))
+    scheduler_report = _maybe_dict(supplied.get("scheduler_registration") or supplied.get("scheduler_registration_report"))
     if not scheduler_report:
         scheduler_report = scheduler_mod.build_scheduler_registration_preview(
             repo_root=root,
             now=now_value,
-            evidence={
-                "queue_mutation_gate": queue_report,
-                "runtime_apply": runtime_report,
-                "sos_preview": sos_report,
-                "human_gate": _ensure_dict(supplied.get("human_gate") or supplied.get("human_gate_report")),
-                "autonomy_gap": _ensure_dict(supplied.get("autonomy_gap") or supplied.get("autonomy_gap_report")),
-            },
+            evidence=_compact_dict(
+                queue_mutation_gate=queue_report,
+                runtime_apply=runtime_report,
+                sos_preview=sos_report,
+                human_gate=_maybe_dict(supplied.get("human_gate") or supplied.get("human_gate_report")),
+                autonomy_gap=_maybe_dict(supplied.get("autonomy_gap") or supplied.get("autonomy_gap_report")),
+            ),
         )
 
     p2_status = _normalize_status(p2_report.get("bridge_status"))

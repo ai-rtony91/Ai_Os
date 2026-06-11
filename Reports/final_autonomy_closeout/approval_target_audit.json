@@ -1,0 +1,120 @@
+{
+  "approval_target_audit": {
+    "approval_gate_001": {
+      "exists": true,
+      "path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+      "schema": null,
+      "current_status": "pending_review",
+      "approved_by_human": false,
+      "approval_authority": null,
+      "approved_by": null,
+      "allowed_paths": [
+        "tests/orchestration/",
+        "automation/orchestration/Test-AiOsRuntimeHeartbeat.DRY_RUN.ps1",
+        "Reports/endurance_tier1/",
+        "automation/orchestration/watchdog/README.md",
+        "automation/recovery/README.md"
+      ],
+      "blocked_paths": [
+        ".github/",
+        ".github/workflows/",
+        "AGENTS.md",
+        "README.md",
+        "RISK_POLICY.md",
+        "broker/",
+        "OANDA/",
+        "api_keys/",
+        "secrets/",
+        ".env",
+        "live_trading/",
+        "webhooks/",
+        "worker launch paths",
+        "scheduler registration paths",
+        "night supervisor arming paths",
+        "#449/#451 branches or PRs",
+        "parked salvage branch"
+      ],
+      "validator_chain_required": true,
+      "commit_package_required": true,
+      "approval_evidence": {
+        "packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+        "approval_status": "pending_review",
+        "approved_by_human": false,
+        "approval_authority": null,
+        "approved_by": null,
+        "allowed_paths_count": 5,
+        "blocked_paths_count": 17,
+        "validator_chain_required": true,
+        "commit_package_required": true,
+        "approval_gate_present": true,
+        "approval_inbox_present": true,
+        "example_present": true
+      }
+    },
+    "approval_inbox_001": {
+      "exists": true,
+      "path": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+      "schema": "AIOS_APPROVAL_INBOX.v1",
+      "status": "active_authority",
+      "approval_status": "completed",
+      "approved_by_human": true,
+      "approval_authority": "Anthony Meza / Human Owner",
+      "approved_by": null,
+      "allowed_paths": [
+        "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+        "docs/governance/source-of-truth-map.md",
+        "docs/governance/APPROVAL_FLOW_MAP.md"
+      ],
+      "blocked_paths": [
+        "services/",
+        "relay/",
+        "telemetry/",
+        "control/operation_glue/",
+        "apps/",
+        "scripts/",
+        ".git/",
+        "broker/",
+        "OANDA/",
+        "secrets/",
+        "api_keys/",
+        "live_trading/"
+      ],
+      "validator_chain_required": true,
+      "commit_package_required": true
+    },
+    "example_file": {
+      "exists": true,
+      "path": "automation/orchestration/approval_inbox/AIOS_APPROVAL_QUEUE.example.json",
+      "schema": "aios_approval_queue.v1",
+      "status": "blocked",
+      "approval_authority": null,
+      "approved_by_human": false,
+      "allowed_paths": [
+        "automation/orchestration/approval_inbox/AIOS_APPROVAL_QUEUE.example.json"
+      ],
+      "blocked_paths": [
+        "broker/",
+        "OANDA/",
+        "api_keys/",
+        "live_trading/"
+      ],
+      "validator_chain_required": true,
+      "commit_package_required": true
+    },
+    "queue_target": {
+      "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
+      "current_apply_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
+      "matches": false
+    },
+    "authorization_summary": {
+      "exact_match_required": true,
+      "can_authorize_current_queue_target": false,
+      "is_mismatch": true,
+      "blocking_reason": "packet mismatch"
+    }
+  },
+  "current_apply_gate_file": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
+  "current_approval_inbox_file": "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json",
+  "current_example_file": "automation/orchestration/approval_inbox/AIOS_APPROVAL_QUEUE.example.json",
+  "expected_queue_target_packet": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1"
+}
