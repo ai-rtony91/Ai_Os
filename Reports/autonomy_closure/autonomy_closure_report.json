@@ -2,25 +2,24 @@
   "blocked_layers": [],
   "closure_layer_statuses": {
     "p2_bridge": "BLOCKED",
-    "queue_mutation_gate": "BLOCKED",
+    "queue_mutation_gate": "READY_FOR_HUMAN_REVIEW",
     "runtime_apply_lane": "BLOCKED",
     "scheduler_registration": "BLOCKED",
     "sos_arming": "BLOCKED"
   },
   "code_blockers": [],
-  "generated_at_utc": "2026-06-11T01:52:25Z",
+  "generated_at_utc": "2026-06-11T02:28:58Z",
   "governance_blockers": [
-    "queue_mutation_gate",
-    "runtime_apply_lane",
     "sos_arming",
     "scheduler_registration"
   ],
   "mode": "DRY_RUN_PREVIEW_ONLY",
   "observe_loop_status": "OBSERVE_LOOP_BLOCKED",
-  "ready_layers": [],
+  "ready_layers": [
+    "queue_mutation_gate"
+  ],
   "real_blockers": [
     "p2_bridge",
-    "queue_mutation_gate",
     "runtime_apply_lane",
     "sos_arming",
     "scheduler_registration"

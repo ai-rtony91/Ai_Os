@@ -2,7 +2,7 @@
 
 - apply_status: `BLOCKED`
 - p2_bridge_status: `BLOCKED`
-- queue_gate_status: `BLOCKED`
+- queue_gate_status: `READY_FOR_HUMAN_REVIEW`
 - runtime_proof_verdict: `BLOCKED`
 - would_apply: `False`
 - would_route: `False`
@@ -16,14 +16,11 @@
 - sos_notification: `False`
 - trading_execution: `False`
 - safe_next_action: Resolve blockers and explicit approvals before any runtime apply lane mutation.
-- blocked_count: 5
+- blocked_count: 2
 
 ## Safety
 - This preview does not execute runtime, mutate worker inbox, mutate queue, launch services, arm SOS, or perform trading.
 
 ## Blockers
 - P2 bridge is not READY_FOR_DRY_RUN_PREVIEW
-- queue mutation approval is not explicit
-- queue gate validation: approval evidence is not explicit
-- queue gate validation: approval evidence packet_id does not match proposed queue packet_id
 - runtime proof final_verdict is not READY_FOR_HUMAN_GATE

@@ -17,6 +17,13 @@ MODULE_PATH = (
 )
 
 APPROVAL_GATE_PATH = REPO_ROOT / "automation" / "orchestration" / "approval_inbox" / "APPLY_APPROVAL_GATE_001.json"
+QUEUE_SPECIFIC_APPROVAL_GATE_PATH = (
+    REPO_ROOT
+    / "automation"
+    / "orchestration"
+    / "approval_inbox"
+    / "APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json"
+)
 APPROVAL_INBOX_PATH = REPO_ROOT / "automation" / "orchestration" / "approval_inbox" / "APPROVAL_INBOX_001.json"
 P2_REPORT_PATH = REPO_ROOT / "Reports" / "p2_enqueue_bridge" / "p2_enqueue_bridge_preview.json"
 QUEUE_GATE_REPORT_PATH = REPO_ROOT / "Reports" / "queue_mutation_gate" / "queue_mutation_gate_preview.json"
@@ -131,6 +138,7 @@ def test_approved_flag_without_exact_phrase_is_rejected():
 
 def test_exact_phrase_builds_approved_in_memory_request_but_does_not_write_approval_inbox(tmp_path):
     mod = _load()
+    before = _fingerprint(QUEUE_SPECIFIC_APPROVAL_GATE_PATH)
     report = mod.build_queue_specific_approval_request(
         repo_root=REPO_ROOT,
         approved=True,
@@ -141,12 +149,13 @@ def test_exact_phrase_builds_approved_in_memory_request_but_does_not_write_appro
     )
     outdir = tmp_path / "Reports" / "approval_state_transition"
     mod.write_queue_specific_approval_request(report, outdir)
+    after = _fingerprint(QUEUE_SPECIFIC_APPROVAL_GATE_PATH)
 
     assert report["approval_status"] == "approved_for_apply"
     assert report["approved_by_human"] is True
     assert report["approval_evidence"]["explicit_approval"] is True
     assert report["approval_gate_write_allowed"] is False
-    assert not (REPO_ROOT / report["approval_gate_output_path"]).exists()
+    assert before == after
 
 
 def test_packet_mismatch_validation_blocks_tampered_request():

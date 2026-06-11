@@ -3,22 +3,22 @@
     "automation/orchestration/work_packets/"
   ],
   "approval_attempt_rejected": false,
-  "approval_authority": "Anthony Meza / Human Owner",
+  "approval_authority": "Anthony / Human Owner",
   "approval_evidence": {
     "allowed_paths": [
       "automation/orchestration/work_packets/"
     ],
-    "apply_gate_pending": true,
-    "approval_authority": "Anthony Meza / Human Owner",
+    "apply_gate_pending": false,
+    "approval_authority": "Anthony / Human Owner",
     "approval_completed": true,
     "approval_gate_output_path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
     "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
     "approval_gate_packet_mismatch": true,
-    "approval_gate_write_allowed": false,
-    "approval_granted": false,
-    "approval_status": "pending_review",
-    "approved_by": null,
-    "approved_by_human": false,
+    "approval_gate_write_allowed": true,
+    "approval_granted": true,
+    "approval_status": "approved_for_apply",
+    "approved_by": "Anthony / Human Owner",
+    "approved_by_human": true,
     "authority_active": true,
     "blocked_paths": [
       "automation/orchestration/work_packets/active/",
@@ -34,9 +34,9 @@
       "aios.ps1"
     ],
     "commit_package_required": true,
-    "explicit_approval": false,
-    "missing_authority_fields": true,
-    "non_authorizing_placeholder": true,
+    "explicit_approval": true,
+    "missing_authority_fields": false,
+    "non_authorizing_placeholder": false,
     "non_authorizing_reason": "queue-specific approval required; existing apply gate targets AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
     "packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
     "source_files": [
@@ -45,16 +45,16 @@
       "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json",
       "automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json"
     ],
-    "status": "PENDING_HUMAN_APPROVAL",
+    "status": "APPROVED_FOR_DRY_RUN_QUEUE_REVIEW_ONLY",
     "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
-    "type": "HUMAN_REVIEW_REQUIRED",
+    "type": "EXPLICIT_HUMAN_APPROVAL_PHRASE",
     "validator_chain_required": true
   },
   "approval_gate_output_path": "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1.json",
-  "approval_gate_write_allowed": false,
-  "approval_status": "pending_review",
-  "approved_by": null,
-  "approved_by_human": false,
+  "approval_gate_write_allowed": true,
+  "approval_status": "approved_for_apply",
+  "approved_by": "Anthony / Human Owner",
+  "approved_by_human": true,
   "blocked_paths": [
     "automation/orchestration/work_packets/active/",
     "automation/orchestration/work_packets/blocked/",
@@ -70,24 +70,22 @@
   ],
   "canonical_queue_mutation_allowed": false,
   "commit_package_required": true,
-  "generated_at_utc": "2026-06-11T01:37:33Z",
+  "generated_at_utc": "2026-06-11T02:24:07Z",
   "live_trading_allowed": false,
   "mode": "DRY_RUN_FIRST",
   "queue_gate_blockers": [
-    "approval evidence is not explicit"
+    "approval evidence is not explicit",
+    "approval evidence packet_id does not match proposed queue packet_id"
   ],
-  "queue_gate_invalid_reasons": [
-    "allowed_paths is required",
-    "forbidden_paths is required"
-  ],
-  "queue_gate_status": "INVALID",
+  "queue_gate_invalid_reasons": [],
+  "queue_gate_status": "BLOCKED",
   "queue_write_allowed": false,
   "report_paths": [
     "Reports/approval_state_transition/p2_queue_approval_request.json",
     "Reports/approval_state_transition/p2_queue_approval_request.md"
   ],
   "runtime_execution_allowed": false,
-  "safe_next_action": "Anthony must review the draft request and confirm the exact human approval phrase before any queue-specific gate write.",
+  "safe_next_action": "Queue-specific approval is explicit in memory only; do not mutate the canonical active queue.",
   "scheduler_registration_allowed": false,
   "schema": "AIOS_QUEUE_SPECIFIC_APPROVAL_REQUEST.v1",
   "sos_notification_allowed": false,
@@ -99,17 +97,17 @@
   "summary": {
     "approval_gate_packet_id": "AIOS-HEARTBEAT-ONLY-PROOF-HARNESS-APPLY-V1",
     "approval_gate_packet_mismatch": true,
-    "approval_granted": false,
-    "approval_status": "pending_review",
+    "approval_granted": true,
+    "approval_status": "approved_for_apply",
     "blocker_count": 0,
-    "explicit_approval": false,
-    "queue_gate_status": "INVALID",
+    "explicit_approval": true,
+    "queue_gate_status": "BLOCKED",
     "queue_write_allowed": false,
     "report_paths": [
       "Reports/approval_state_transition/p2_queue_approval_request.json",
       "Reports/approval_state_transition/p2_queue_approval_request.md"
     ],
-    "safe_next_action": "Anthony must review the draft request and confirm the exact human approval phrase before any queue-specific gate write.",
+    "safe_next_action": "Queue-specific approval is explicit in memory only; do not mutate the canonical active queue.",
     "schema": "AIOS_QUEUE_SPECIFIC_APPROVAL_REQUEST.v1",
     "target_packet_id": "P2_REVIEW_TO_QUEUE_ENQUEUE_BRIDGE_V1",
     "validation_status": "PASS"
