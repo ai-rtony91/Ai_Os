@@ -18,6 +18,149 @@ function ConvertTo-AiOsFullPath {
     return [System.IO.Path]::GetFullPath($Path).TrimEnd("\")
 }
 
+function Add-AiOsTrailingSeparator {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $separator = [System.IO.Path]::DirectorySeparatorChar
+    if ($Path.EndsWith([string]$separator)) {
+        return $Path
+    }
+
+    return "$Path$separator"
+}
+
+function Test-AiOsPathEqual {
+    param(
+        [Parameter(Mandatory = $true)][string]$Left,
+        [Parameter(Mandatory = $true)][string]$Right
+    )
+
+    return [System.StringComparer]::OrdinalIgnoreCase.Equals($Left, $Right)
+}
+
+function Test-AiOsPathInside {
+    param(
+        [Parameter(Mandatory = $true)][string]$ChildPath,
+        [Parameter(Mandatory = $true)][string]$ParentPath
+    )
+
+    if (Test-AiOsPathEqual -Left $ChildPath -Right $ParentPath) {
+        return $false
+    }
+
+    $childWithSeparator = Add-AiOsTrailingSeparator -Path $ChildPath
+    $parentWithSeparator = Add-AiOsTrailingSeparator -Path $ParentPath
+    return $childWithSeparator.StartsWith($parentWithSeparator, [System.StringComparison]::OrdinalIgnoreCase)
+}
+
+function Test-AiOsPathContainsBackupPattern {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $segments = @($Path -split '[\\/]' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    foreach ($segment in $segments) {
+        if ($segment -like "AIOS_BACKUP*" -or
+            $segment -ieq "current_mirror" -or
+            $segment -ieq "snapshots" -or
+            $segment -ieq "T9_FOB" -or
+            $segment -ieq "AI_OS backup mirror") {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-AiOsBackupRecursionGuard {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceFullPath,
+        [Parameter(Mandatory = $true)][string]$BackupRootFullPath,
+        [Parameter(Mandatory = $true)][string]$SnapshotPathFullPath,
+        [Parameter(Mandatory = $true)][string]$ApprovedBackupRootFullPath,
+        [AllowEmptyCollection()][string[]]$CandidateCopySourcePaths = @(),
+        [AllowEmptyCollection()][string[]]$ExcludedFolderNames = @()
+    )
+
+    $sourceEqualsBackupRoot = Test-AiOsPathEqual -Left $SourceFullPath -Right $BackupRootFullPath
+    $sourceEqualsSnapshotPath = Test-AiOsPathEqual -Left $SourceFullPath -Right $SnapshotPathFullPath
+    $backupRootInsideSource = Test-AiOsPathInside -ChildPath $BackupRootFullPath -ParentPath $SourceFullPath
+    $sourceInsideBackupRoot = Test-AiOsPathInside -ChildPath $SourceFullPath -ParentPath $BackupRootFullPath
+    $snapshotInsideSource = Test-AiOsPathInside -ChildPath $SnapshotPathFullPath -ParentPath $SourceFullPath
+    $backupRootApproved = Test-AiOsPathEqual -Left $BackupRootFullPath -Right $ApprovedBackupRootFullPath
+    $candidateCopySourceContainsBackupRoot = $false
+    $candidateCopySourceContainsBackupPattern = $false
+
+    foreach ($candidate in $CandidateCopySourcePaths) {
+        if ([string]::IsNullOrWhiteSpace($candidate)) {
+            continue
+        }
+
+        $candidateFullPath = ConvertTo-AiOsFullPath -Path $candidate
+        if ((Test-AiOsPathEqual -Left $candidateFullPath -Right $BackupRootFullPath) -or
+            (Test-AiOsPathInside -ChildPath $candidateFullPath -ParentPath $BackupRootFullPath) -or
+            (Test-AiOsPathInside -ChildPath $BackupRootFullPath -ParentPath $candidateFullPath)) {
+            $candidateCopySourceContainsBackupRoot = $true
+        }
+
+        if (Test-AiOsPathContainsBackupPattern -Path $candidateFullPath) {
+            $candidateCopySourceContainsBackupPattern = $true
+        }
+    }
+
+    $reasons = New-Object System.Collections.Generic.List[string]
+    if ($sourceEqualsBackupRoot) { $reasons.Add("SourceRepo path equals BackupRoot.") }
+    if ($sourceEqualsSnapshotPath) { $reasons.Add("SourceRepo path equals SnapshotPath.") }
+    if ($backupRootInsideSource) { $reasons.Add("BackupRoot is inside SourceRepo.") }
+    if ($sourceInsideBackupRoot) { $reasons.Add("SourceRepo is inside BackupRoot.") }
+    if ($snapshotInsideSource) { $reasons.Add("SnapshotPath is inside SourceRepo.") }
+    if (-not $backupRootApproved) { $reasons.Add("BackupRoot resolves outside the approved T9 backup layout.") }
+    if ($candidateCopySourceContainsBackupRoot) { $reasons.Add("A candidate copy source path contains the backup root.") }
+    if ($candidateCopySourceContainsBackupPattern) { $reasons.Add("A candidate copy source path contains a known backup folder pattern.") }
+
+    $recursiveBackupDetected = ($reasons.Count -gt 0)
+    return [pscustomobject]@{
+        recursion_guard_enabled = $true
+        source_full_path = $SourceFullPath
+        backup_root_full_path = $BackupRootFullPath
+        snapshot_path_full_path = $SnapshotPathFullPath
+        excluded_folder_names = @($ExcludedFolderNames)
+        backup_root_inside_source = [bool]$backupRootInsideSource
+        source_inside_backup_root = [bool]$sourceInsideBackupRoot
+        snapshot_inside_source = [bool]$snapshotInsideSource
+        recursive_backup_detected = [bool]$recursiveBackupDetected
+        recursive_backup_reason = if ($recursiveBackupDetected) { ($reasons -join " ") } else { "NONE" }
+        safe_to_copy = (-not $recursiveBackupDetected)
+        source_equals_backup_root = [bool]$sourceEqualsBackupRoot
+        source_equals_snapshot_path = [bool]$sourceEqualsSnapshotPath
+        backup_root_approved = [bool]$backupRootApproved
+        candidate_copy_source_contains_backup_root = [bool]$candidateCopySourceContainsBackupRoot
+        candidate_copy_source_contains_backup_pattern = [bool]$candidateCopySourceContainsBackupPattern
+    }
+}
+
+function Test-AiOsRelativePathExcluded {
+    param(
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [string[]]$ExcludedFolderNames = @(),
+        [string[]]$ExcludedFilePatterns = @()
+    )
+
+    $segments = @($RelativePath -split '[\\/]' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    foreach ($name in $ExcludedFolderNames) {
+        if (@($segments | Where-Object { $_ -like $name }).Count -gt 0) {
+            return $true
+        }
+    }
+
+    $leafName = if ($segments.Count -gt 0) { $segments[-1] } else { $RelativePath }
+    foreach ($pattern in $ExcludedFilePatterns) {
+        if ($leafName -like $pattern) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Format-AiOsBytes {
     param([Parameter(Mandatory = $true)][double]$Bytes)
 
@@ -35,16 +178,24 @@ function Format-AiOsBytes {
 function Get-AiOsDirectorySize {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
-        [string[]]$ExcludeNames = @()
+        [string[]]$ExcludeNames = @(),
+        [string[]]$ExcludeFilePatterns = @()
     )
 
     $total = [double]0
     $files = Get-ChildItem -LiteralPath $Path -Recurse -File -Force -ErrorAction SilentlyContinue
     foreach ($file in $files) {
         $segments = $file.FullName.Split([System.IO.Path]::DirectorySeparatorChar)
+        $leafName = Split-Path -Leaf $file.FullName
         $skip = $false
         foreach ($name in $ExcludeNames) {
-            if ($segments -contains $name) {
+            if (@($segments | Where-Object { $_ -like $name }).Count -gt 0) {
+                $skip = $true
+                break
+            }
+        }
+        foreach ($pattern in $ExcludeFilePatterns) {
+            if ($leafName -like $pattern) {
                 $skip = $true
                 break
             }
@@ -644,10 +795,22 @@ function New-AiOsBackupResult {
         backup_root = $normalizedBackupRoot
         snapshot_name = $snapshotName
         snapshot_path = $snapshotPath
+        recursion_guard_enabled = [bool]$recursionGuard.recursion_guard_enabled
+        source_full_path = $recursionGuard.source_full_path
+        backup_root_full_path = $recursionGuard.backup_root_full_path
+        snapshot_path_full_path = $recursionGuard.snapshot_path_full_path
+        excluded_folder_names = @($recursionGuard.excluded_folder_names)
+        backup_root_inside_source = [bool]$recursionGuard.backup_root_inside_source
+        source_inside_backup_root = [bool]$recursionGuard.source_inside_backup_root
+        snapshot_inside_source = [bool]$recursionGuard.snapshot_inside_source
+        recursive_backup_detected = [bool]$recursionGuard.recursive_backup_detected
+        recursive_backup_reason = $recursionGuard.recursive_backup_reason
+        safe_to_copy = [bool]$recursionGuard.safe_to_copy
         backup_mode = $selectedBackupMode
         requested_backup_mode = $BackupMode
         selected_backup_mode_reason = $selectedBackupModeReason
         excluded_paths = $excludedDirs
+        excluded_file_patterns = $excludedFilePatterns
         robocopy_exit_code = $RobocopyExitCode
         exit_code = $ExitCode
         mutation_scope = if ($Preview) { "NONE" } elseif ($selectedBackupMode -eq "ManifestOnly") { "BACKUP_MANIFEST_ONLY" } else { "BACKUP_SNAPSHOT_ONLY" }
@@ -745,6 +908,8 @@ function Write-AiOsBackupManifest {
         retention_class = $RetentionClass
         retention_preview_candidates = @($RetentionPreviewCandidates)
         excluded_dirs = @($excludedDirs)
+        excluded_file_patterns = @($excludedFilePatterns)
+        recursion_guard = $recursionGuard
         robocopy_log_path = $robocopyLogPath
         backup_lock_path = $backupLockPath
         protected_action_locks_found = $protectedLocksForManifest
@@ -764,20 +929,82 @@ $expectedSource = "C:\Dev\Ai.Os"
 $expectedBackupRoot = "D:\T9_FOB"
 $normalizedSource = ConvertTo-AiOsFullPath -Path $SourceRepo
 $normalizedBackupRoot = ConvertTo-AiOsFullPath -Path $BackupRoot
+$sourceFullPath = $normalizedSource
+$backupRootFullPath = $normalizedBackupRoot
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
 $snapshotName = "AIOS_BACKUP_$timestamp"
-$snapshotPath = Join-Path $normalizedBackupRoot $snapshotName
+$snapshotPath = ConvertTo-AiOsFullPath -Path (Join-Path $normalizedBackupRoot $snapshotName)
+$snapshotPathFullPath = $snapshotPath
 $backupReportRoot = Join-Path $normalizedSource "telemetry\backup_reports"
 $backupLockPath = Join-Path $backupReportRoot "AIOS_BACKUP_IN_PROGRESS.lock"
 $robocopyLogPath = Join-Path $snapshotPath "AIOS_BACKUP_ROBOCOPY.log"
 $manifestPath = Join-Path $snapshotPath "AIOS_BACKUP_MANIFEST.json"
-$excludedDirs = @(
+$excludedFolderNames = @(
+    ".git",
     "node_modules",
+    ".venv",
+    "venv",
     "__pycache__",
     ".pytest_cache",
-    ".codex",
-    (Join-Path $normalizedSource ".git\logs")
+    "dist",
+    "build",
+    ".codex_backups",
+    "current_mirror",
+    "snapshots",
+    "AIOS_BACKUP*",
+    "T9_FOB",
+    "AI_OS backup mirror",
+    "secrets",
+    "credentials"
 )
+$excludedFilePatterns = @(
+    ".env",
+    ".env.*",
+    "*secret*",
+    "*secrets*",
+    "*credential*",
+    "*credentials*",
+    "*.key",
+    "*.pem"
+)
+$excludedDirs = @(
+    ".git",
+    "node_modules",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".pytest_cache",
+    "dist",
+    "build",
+    ".codex_backups",
+    "current_mirror",
+    "snapshots",
+    "AIOS_BACKUP*",
+    "secrets",
+    "credentials",
+    $normalizedBackupRoot,
+    (Join-Path $normalizedBackupRoot "current_mirror"),
+    (Join-Path $normalizedBackupRoot "snapshots"),
+    (Join-Path $normalizedBackupRoot "AIOS_BACKUP*")
+)
+$recursionGuard = [pscustomobject]@{
+    recursion_guard_enabled = $true
+    source_full_path = $sourceFullPath
+    backup_root_full_path = $backupRootFullPath
+    snapshot_path_full_path = $snapshotPathFullPath
+    excluded_folder_names = @($excludedFolderNames)
+    backup_root_inside_source = $false
+    source_inside_backup_root = $false
+    snapshot_inside_source = $false
+    recursive_backup_detected = $false
+    recursive_backup_reason = "NOT_EVALUATED"
+    safe_to_copy = $false
+    source_equals_backup_root = $false
+    source_equals_snapshot_path = $false
+    backup_root_approved = $false
+    candidate_copy_source_contains_backup_root = $false
+    candidate_copy_source_contains_backup_pattern = $false
+}
 $selectedBackupMode = $BackupMode
 $selectedBackupModeReason = "Mode has not been selected yet."
 $baseBackupId = ""
@@ -797,6 +1024,16 @@ try {
         if (Test-Path -LiteralPath $identityScript) {
             & $identityScript -Marker "T9 BACKUP"
         }
+    }
+
+    $recursionGuard = Test-AiOsBackupRecursionGuard -SourceFullPath $sourceFullPath `
+        -BackupRootFullPath $backupRootFullPath `
+        -SnapshotPathFullPath $snapshotPathFullPath `
+        -ApprovedBackupRootFullPath $expectedBackupRoot `
+        -CandidateCopySourcePaths @($sourceFullPath) `
+        -ExcludedFolderNames $excludedFolderNames
+    if (-not $recursionGuard.safe_to_copy) {
+        throw "RECURSIVE_BACKUP_BLOCKED: $($recursionGuard.recursive_backup_reason)"
     }
 
     if ($normalizedSource -ne $expectedSource) {
@@ -838,7 +1075,9 @@ try {
         $baseBackupCommitHash = if ($null -ne $previousManifest.manifest.commit_hash) { [string]$previousManifest.manifest.commit_hash } else { "" }
     }
     $deltaInfo = Get-AiOsGitDeltaFiles -RepoRoot $normalizedSource -PreviousCommit $baseBackupCommitHash -CurrentCommit ([string]$gitInfo.commit_hash)
-    $changedFiles = @($deltaInfo.copy_files)
+    $changedFiles = @($deltaInfo.copy_files | Where-Object {
+        -not (Test-AiOsRelativePathExcluded -RelativePath $_ -ExcludedFolderNames $excludedFolderNames -ExcludedFilePatterns $excludedFilePatterns)
+    })
     $deletedFiles = @($deltaInfo.deleted_files)
     $deltaSourceRange = [string]$deltaInfo.source_range
     $selection = Select-AiOsBackupMode -RequestedMode $BackupMode -PreviousManifest $previousManifest -HasSuccessfulBackupToday $hasSuccessfulBackupToday -GitInfo $gitInfo -ProductivityDelta $productivityDelta
@@ -853,9 +1092,27 @@ try {
     } else {
         $snapshotName = "AIOS_BACKUP_{0}_{1}" -f $timestamp, $selectedBackupMode.ToUpperInvariant()
     }
-    $snapshotPath = Join-Path $normalizedBackupRoot $snapshotName
+    $snapshotPath = ConvertTo-AiOsFullPath -Path (Join-Path $normalizedBackupRoot $snapshotName)
+    $snapshotPathFullPath = $snapshotPath
     $robocopyLogPath = Join-Path $snapshotPath "AIOS_BACKUP_ROBOCOPY.log"
     $manifestPath = Join-Path $snapshotPath "AIOS_BACKUP_MANIFEST.json"
+
+    $candidateCopySourcePaths = New-Object System.Collections.Generic.List[string]
+    $candidateCopySourcePaths.Add($normalizedSource)
+    foreach ($relPath in $changedFiles) {
+        if (-not [string]::IsNullOrWhiteSpace($relPath)) {
+            $candidateCopySourcePaths.Add((Join-Path $normalizedSource $relPath))
+        }
+    }
+    $recursionGuard = Test-AiOsBackupRecursionGuard -SourceFullPath $sourceFullPath `
+        -BackupRootFullPath $backupRootFullPath `
+        -SnapshotPathFullPath $snapshotPathFullPath `
+        -ApprovedBackupRootFullPath $expectedBackupRoot `
+        -CandidateCopySourcePaths @($candidateCopySourcePaths) `
+        -ExcludedFolderNames $excludedFolderNames
+    if (-not $recursionGuard.safe_to_copy) {
+        throw "RECURSIVE_BACKUP_BLOCKED: $($recursionGuard.recursive_backup_reason)"
+    }
 
     if ($selectedBackupMode -eq "Delta" -and [string]::IsNullOrWhiteSpace($baseBackupCommitHash)) {
         throw "Delta mode requires a prior successful backup manifest with commit_hash."
@@ -889,13 +1146,13 @@ try {
             "/LOG:`"$robocopyLogPath`"",
             "/TEE",
             "/XD"
-        ) + ($excludedDirs | ForEach-Object { "`"$_`"" })
+        ) + ($excludedDirs | ForEach-Object { "`"$_`"" }) + @("/XF") + ($excludedFilePatterns | ForEach-Object { "`"$_`"" })
     }
 
-    $excludeNames = @("node_modules", "__pycache__", ".pytest_cache", ".codex")
+    $excludeNames = @($excludedFolderNames)
 
     if ($Preview) {
-        $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
+        $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames -ExcludeFilePatterns $excludedFilePatterns
         $destBytes = Get-AiOsDirectorySize -Path $normalizedBackupRoot
 
         $result = New-AiOsBackupResult -Status "PREVIEW" -Message "Preview only. No folder was created, no lock was created, and robocopy was not run."
@@ -926,8 +1183,16 @@ try {
             Write-Host "Manifest path: $manifestPath"
             Write-Host "Git status clean: $($gitStatus.is_clean)"
             Write-Host "Protected-action locks found: $($protectedLocks.Count)"
+            Write-Host "Recursion guard enabled: $($recursionGuard.recursion_guard_enabled)"
+            Write-Host "Recursion guard passed: $($recursionGuard.safe_to_copy)"
+            Write-Host "Recursive backup detected: $($recursionGuard.recursive_backup_detected)"
+            Write-Host "Recursive backup reason: $($recursionGuard.recursive_backup_reason)"
+            Write-Host "Excluded folder names:"
+            $excludedFolderNames | ForEach-Object { Write-Host "  - $_" }
             Write-Host "Excluded paths:"
             $excludedDirs | ForEach-Object { Write-Host "  - $_" }
+            Write-Host "Excluded file patterns:"
+            $excludedFilePatterns | ForEach-Object { Write-Host "  - $_" }
             Write-Host ""
             Write-Host "Source data measured:        $(Format-AiOsBytes -Bytes $sourceBytes)"
             Write-Host "Current backup size (T9):    $(Format-AiOsBytes -Bytes $destBytes)"
@@ -955,7 +1220,7 @@ try {
             New-AiOsBackupLock -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath -SourcePath $normalizedSource -SnapshotPath $snapshotPath
             $lockCreated = $true
             New-Item -ItemType Directory -Path $snapshotPath | Out-Null
-            $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
+            $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames -ExcludeFilePatterns $excludedFilePatterns
             $destBytes = Get-AiOsDirectorySize -Path $normalizedBackupRoot
             $copiedHuman = "0.00 B"
             $manifestMessage = "Manifest-only checkpoint created. No files were copied."
@@ -1000,7 +1265,7 @@ try {
         try {
             New-AiOsBackupLock -BackupReportRoot $backupReportRoot -BackupLockPath $backupLockPath -SourcePath $normalizedSource -SnapshotPath $snapshotPath
             $lockCreated = $true
-            $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
+            $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames -ExcludeFilePatterns $excludedFilePatterns
             $destBytesBefore = Get-AiOsDirectorySize -Path $normalizedBackupRoot
             New-Item -ItemType Directory -Path $snapshotPath | Out-Null
             Copy-AiOsDeltaFiles -RepoRoot $normalizedSource -DestinationRoot $snapshotPath -RelativePaths $changedFiles
@@ -1052,7 +1317,7 @@ try {
         $lockCreated = $true
 
         # Measured before the snapshot is created so it reflects existing T9 backups.
-        $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames
+        $sourceBytes = Get-AiOsDirectorySize -Path $normalizedSource -ExcludeNames $excludeNames -ExcludeFilePatterns $excludedFilePatterns
         $destBytesBefore = Get-AiOsDirectorySize -Path $normalizedBackupRoot
 
         New-Item -ItemType Directory -Path $snapshotPath | Out-Null
@@ -1075,7 +1340,7 @@ try {
             "/LOG:$robocopyLogPath",
             "/TEE",
             "/XD"
-        ) + $excludedDirs
+        ) + $excludedDirs + @("/XF") + $excludedFilePatterns
 
         $robocopyOutput = @(& robocopy @robocopyArgs 2>&1)
         $robocopyExitCode = $LASTEXITCODE
@@ -1113,7 +1378,6 @@ try {
         Write-Host ""
 
         $majorPaths = @(
-            ".git",
             "automation\orchestration",
             "docs\workflows",
             "schemas\aios\orchestration",
