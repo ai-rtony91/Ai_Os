@@ -341,6 +341,55 @@ if ($escalationItems.Count -eq 0) {
     $todayFocus = "Repo looks clear for the next approved planning or validation step."
 }
 
+$level6ReadinessStatus = if ($riskLevel -eq "BLOCKED") {
+    "BLOCKED"
+} elseif ($escalationItems.Count -gt 0) {
+    "REPORT_ONLY_REVIEW"
+} else {
+    "REPORT_ONLY_READY"
+}
+
+$level6ReportOnlyReadiness = [pscustomobject]@{
+    level = "Level 6"
+    capability = "Overnight supervision with morning brief and escalation routing."
+    readiness_status = $level6ReadinessStatus
+    report_only = $true
+    execution_allowed = $false
+    scheduler_allowed = $false
+    daemon_allowed = $false
+    worker_launch_allowed = $false
+    runtime_mutation_allowed = $false
+    background_execution_allowed = $false
+    protected_git_actions_allowed = $false
+    blocked_capabilities = @(
+        "scheduler/startup task",
+        "daemon/background loop",
+        "worker launch",
+        "runtime mutation",
+        "packet movement",
+        "approval mutation",
+        "lock mutation",
+        "git add",
+        "commit",
+        "push",
+        "PR",
+        "merge"
+    )
+    evidence = @(
+        "Overnight Supervisor reads repo status, packet evidence, validator configuration, approval evidence, worker registry, and commit package candidates.",
+        "Morning brief output is generated as report-only evidence.",
+        "Protected actions require separate Human Owner approval and an exact packet."
+    )
+    blocked_reason = if ($level6ReadinessStatus -eq "REPORT_ONLY_READY") {
+        "none for report-only readiness; execution remains blocked."
+    } elseif ($level6ReadinessStatus -eq "REPORT_ONLY_REVIEW") {
+        "Review escalation items before claiming a clear overnight report window."
+    } else {
+        "Blocked escalation items prevent Level 6 readiness."
+    }
+    next_safe_action = "Use this helper for report-only overnight readiness review. Do not schedule, launch, mutate runtime, or perform protected git actions."
+}
+
 $packetDrafts = @(
     [pscustomobject]@{
         title = "Review Overnight Supervisor Escalation Items"
@@ -367,6 +416,7 @@ $report = [pscustomobject]@{
     validator_results = $validatorResults
     approval_required = $approvalRequired
     commit_package_candidates = $commitPackageCandidates
+    level6_report_only_readiness = $level6ReportOnlyReadiness
     escalation_items = $escalationItems
     next_safe_actions = $nextSafeActions
     packet_drafts = $packetDrafts
@@ -383,6 +433,7 @@ $report = [pscustomobject]@{
             "validator_results=$($validatorResults.Count)",
             "approval_required=$($approvalRequired.Count)",
             "commit_package_candidates=$($commitPackageCandidates.Count)",
+            "level6_report_only_readiness=$($level6ReportOnlyReadiness.readiness_status)",
             "approval_items=$approvalCount",
             "workers=$workerCount"
         )
@@ -429,6 +480,15 @@ Write-Host "Classified packets: $($report.packet_flow.Count)"
 Write-Host "Approval-required items: $($report.approval_required.Count)"
 Write-Host "Commit package candidates: $($report.commit_package_candidates.Count)"
 Write-Host "Escalation items: $($report.escalation_items.Count)"
+Write-Host ""
+Write-Host "Level 6 report-only readiness:"
+Write-Host "  Status: $($report.level6_report_only_readiness.readiness_status)"
+Write-Host "  Execution allowed: $($report.level6_report_only_readiness.execution_allowed)"
+Write-Host "  Scheduler allowed: $($report.level6_report_only_readiness.scheduler_allowed)"
+Write-Host "  Daemon allowed: $($report.level6_report_only_readiness.daemon_allowed)"
+Write-Host "  Worker launch allowed: $($report.level6_report_only_readiness.worker_launch_allowed)"
+Write-Host "  Runtime mutation allowed: $($report.level6_report_only_readiness.runtime_mutation_allowed)"
+Write-Host "  Protected git actions allowed: $($report.level6_report_only_readiness.protected_git_actions_allowed)"
 Write-Host ""
 Write-Host "Next safe actions:"
 foreach ($item in $report.next_safe_actions) {

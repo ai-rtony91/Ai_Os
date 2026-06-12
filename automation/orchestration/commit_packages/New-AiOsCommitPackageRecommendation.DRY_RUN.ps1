@@ -240,6 +240,25 @@ if ($recommendedTopScopes.Count -gt 1) {
 
 $commitMessage = Get-CommitMessageSuggestion -RecommendedFiles $recommendedFiles
 $gitStatus = if ($statusLines.Count -eq 0) { "clean" } else { "dirty" }
+$exactChangedFiles = @($changedFiles + $newFiles | Sort-Object -Unique)
+$suggestedValidators = @(
+    "git diff --check",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1"
+)
+$riskFlags = @($risks | ForEach-Object { "$($_.path): $($_.risk)" })
+$stopBeforeStaging = "STOP: preview only. Do not run git add, git commit, git push, PR, or merge without separate explicit approval."
+$protectedActionBoundary = [pscustomobject]@{
+    git_add_allowed = $false
+    commit_allowed = $false
+    push_allowed = $false
+    pr_allowed = $false
+    merge_allowed = $false
+    separate_human_approval_required = $true
+    statement = "No git add, commit, push, PR, or merge is authorized by this DRY_RUN recommendation."
+}
 
 $result = [pscustomobject]@{
     task = "Recommend AI_OS selective commit package"
@@ -261,11 +280,16 @@ $result = [pscustomobject]@{
     }
     changed_files = $changedFiles
     new_files = $newFiles
+    exact_changed_files = $exactChangedFiles
     generated_or_example_files = @($generatedOrExampleFiles | Sort-Object -Unique)
     recommended_files = $recommendedFiles
     recommended_git_add_commands = @($recommendedFiles | ForEach-Object { $_.git_add_command })
     excluded_files = $excludedFiles
     risks = $risks
+    risk_flags = $riskFlags
+    suggested_validators = $suggestedValidators
+    stop_before_staging = $stopBeforeStaging
+    protected_action_boundary = $protectedActionBoundary
     git_warnings = $gitWarnings
     commit_message_suggestion = $commitMessage
     safety = [pscustomobject]@{
@@ -277,8 +301,23 @@ $result = [pscustomobject]@{
         runtime_integration = "NO"
         dashboard_edits = "NO"
     }
+    level5_dirty_tree_preview = [pscustomobject]@{
+        available = ($gitStatus -eq "dirty")
+        status = if ($gitStatus -eq "dirty") { "REVIEW" } else { "NOT_NEEDED" }
+        exact_changed_files = $exactChangedFiles
+        recommended_files = @($recommendedFiles | ForEach-Object { $_.path })
+        suggested_validators = $suggestedValidators
+        risk_flags = $riskFlags
+        stop_before_staging = $stopBeforeStaging
+        protected_action_boundary = $protectedActionBoundary
+        next_safe_action = if ($gitStatus -eq "dirty") {
+            "Review exact changed files, risk flags, and validators. Stop before staging until separate explicit approval is granted."
+        } else {
+            "No commit package preview is needed while the repo is clean."
+        }
+    }
     validator_friendly = $true
-    next_safe_action = "Review recommended git add commands. Stage only selected files after explicit approval; never use git add ."
+    next_safe_action = "Review exact-file package and validators. Stop before staging; git add, commit, push, PR, or merge require separate explicit approval."
 }
 
 $result | Add-Member -NotePropertyName orchestration_result_contract -NotePropertyValue ([pscustomobject]@{
@@ -293,10 +332,13 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
     commit_candidate = ($recommendedFiles.Count -gt 0)
     next_safe_action = $result.next_safe_action
     stop_condition = "REPORT_ONLY_NO_STAGING_NO_COMMIT_NO_PUSH"
+    suggested_validators = $suggestedValidators
+    stop_before_staging = $stopBeforeStaging
+    protected_action_boundary = $protectedActionBoundary
     runtime_notes = @(
         "DRY_RUN",
         "No files were staged.",
-        "No commit or push was performed."
+        "No git add, commit, push, PR, or merge was performed."
     )
     evidence = [pscustomobject]@{
         recommended_file_count = $recommendedFiles.Count
@@ -382,5 +424,16 @@ if ($gitWarnings.Count -eq 0) {
 }
 Write-Host ""
 
-Write-Host "Validator note: no files were staged. No git add, commit, or push was run."
+Write-Host "Suggested validators:"
+foreach ($validator in $suggestedValidators) {
+    Write-Host "  - $validator"
+}
+Write-Host ""
+
+Write-Host "Safety stop:"
+Write-Host "  $stopBeforeStaging"
+Write-Host "  $($protectedActionBoundary.statement)"
+Write-Host ""
+
+Write-Host "Validator note: no files were staged. No git add, commit, push, PR, or merge was run."
 Write-Host "Next safe action: $($result.next_safe_action)"
