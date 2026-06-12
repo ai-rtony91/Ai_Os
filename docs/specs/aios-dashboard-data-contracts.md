@@ -19,6 +19,7 @@ This spec defines read-only dashboard and operator-panel contracts for:
 - command center / operator panels,
 - telemetry panels,
 - AI assistant panel concepts,
+- multi-client state access boundaries,
 - static preview behavior,
 - responsive/mobile behavior,
 - safety boundaries.
@@ -59,6 +60,26 @@ State values should be explicit and conservative:
 - `REVIEW REQUIRED`
 
 Missing data is `UNKNOWN`, not PASS. Conflicting evidence is `MISMATCH` or `INVALID DATA`.
+
+## Multi-Client State Access Contract
+
+AI_OS may support two future operator clients:
+
+1. Web dashboard: browser-first access, protected by Cloudflare Access, with a future target of Next.js plus React Three Fiber where browser-native 3D is useful.
+2. UE5 client: premium 3D/4D command-center, immersive desktop app, kiosk operator mode, and possible future launcher.
+
+The UE5 client does not replace the web dashboard by default. Any future APPLY packet must decide whether UE5 is Phase 2 or Phase 3 after the web dashboard redesign.
+
+State access rules:
+
+- Live AI_OS state must be read through approved backend APIs only.
+- The current candidate backend owner is `services/orchestrator/` or a later approved read-only state API.
+- Clients must not read repo files, telemetry ledgers, approval inboxes, worker queues, scheduler state, local environment files, or generated runtime files directly.
+- API responses should include source path or source name, timestamp, freshness, stale/invalid markers, mode, approval requirement, and next safe action where applicable.
+- API responses must redact credentials, secrets, tokens, private paths, and broker/account identifiers before they reach any client.
+- UE5 must not store secrets, broker keys, Azure tokens, Cloudflare tokens, repo credentials, Git credentials, API keys, private keys, recovery keys, or persistent privileged sessions.
+- UE5 controls for runtime, scheduler, queues, broker, and live-trading surfaces must remain display-only or approval-request previews unless a separate approved workflow and approval gate authorizes a specific action.
+- Live broker execution and live trading remain blocked.
 
 ## Fixture / Mock-Data Contract
 
