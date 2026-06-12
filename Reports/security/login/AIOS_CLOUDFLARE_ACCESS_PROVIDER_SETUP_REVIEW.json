@@ -1,0 +1,261 @@
+{
+  "schema": "AIOS_CLOUDFLARE_ACCESS_PROVIDER_SETUP_REVIEW.v1",
+  "generated_at": "2026-06-11",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN-V1",
+  "lane": "cloudflare-access-provider-setup-review",
+  "current_identity_baseline": {
+    "azure_cli_production_account": "ai.tradeplatform@Algotradez.onmicrosoft.com",
+    "azure_tenant_id": "feb18abf-17ea-4d88-a4ac-05ffcd6ecb8b",
+    "azure_tenant_id_secret": false,
+    "azure_subscription_name": "Subscription 1",
+    "azure_subscription_state": "Enabled",
+    "github_cli_identity": "ai-rtony91",
+    "git_author": "ai-rtony91",
+    "git_email": "270783377+ai-rtony91@users.noreply.github.com",
+    "omen_windows_login": "UNCHANGED",
+    "prior_azure_cli_account": {
+      "value": "my.laboratory@outlook.com",
+      "rule": "Do not use for production AI_OS cloud resources unless separately approved."
+    }
+  },
+  "unresolved_inputs": [
+    {
+      "input": "cloudflare_account_identity",
+      "status": "UNRESOLVED",
+      "safe_collection": "manual confirmation or sanitized screenshot only",
+      "forbidden_collection": [
+        "api_tokens",
+        "session_cookies",
+        "passwords",
+        "recovery_codes"
+      ]
+    },
+    {
+      "input": "cloudflare_second_admin_path",
+      "status": "UNRESOLVED",
+      "safe_collection": "manual confirmation of independent admin or recovery path"
+    },
+    {
+      "input": "azure_portal_browser_identity",
+      "status": "UNRESOLVED",
+      "safe_collection": "manual confirmation in dedicated AI TRADEZ browser profile"
+    },
+    {
+      "input": "recovery_email_class",
+      "status": "UNRESOLVED",
+      "safe_collection": "manual classification only",
+      "rule": "Must be separate from the primary Microsoft reset loop."
+    },
+    {
+      "input": "break_glass_account_details",
+      "status": "UNRESOLVED",
+      "safe_collection": "manual confirmation of owner, account class, MFA, and recovery independence"
+    },
+    {
+      "input": "optional_google_fallback_identity",
+      "status": "UNRESOLVED",
+      "safe_collection": "manual decision and account-class confirmation"
+    },
+    {
+      "input": "otp_emergency_mailbox_class",
+      "status": "UNRESOLVED",
+      "safe_collection": "manual confirmation only"
+    }
+  ],
+  "provider_setup_checklist": {
+    "cloudflare_access": [
+      {
+        "step": "Open Cloudflare dashboard in intended admin account",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Confirm account name, admin class, and recovery path",
+        "authorization": "NOT_AUTHORIZED_YET",
+        "evidence": "sanitized screenshot or manual statement only"
+      },
+      {
+        "step": "Confirm at least two independent Cloudflare admin paths",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Locate Zero Trust / Access application setup area",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Draft Access app name and protected hostname",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Draft deny-by-default policy",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Draft admin and end-user policies separately",
+        "authorization": "NOT_AUTHORIZED_YET"
+      }
+    ],
+    "microsoft_entra": [
+      {
+        "step": "Confirm Azure Portal uses AI TRADEZ dedicated browser profile",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Confirm tenant feb18abf-17ea-4d88-a4ac-05ffcd6ecb8b is selected",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Confirm recovery email class is independent from primary Microsoft reset loop",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Draft Microsoft/Entra provider settings for Cloudflare Access",
+        "authorization": "NOT_AUTHORIZED_YET"
+      }
+    ],
+    "github": [
+      {
+        "step": "Confirm ai-rtony91 account health and recovery path",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Confirm GitHub login is independent from Microsoft recovery",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Draft GitHub backup provider settings for Cloudflare Access",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Confirm GitHub does not bypass AI_OS protected-action gates",
+        "authorization": "NOT_AUTHORIZED_YET"
+      }
+    ],
+    "google_optional": [
+      {
+        "step": "Decide whether Google adds independent recovery value",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Confirm Google account class and owner if used",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Reject Google if it creates account sprawl or weak recovery",
+        "authorization": "NOT_AUTHORIZED_YET"
+      }
+    ],
+    "otp_emergency": [
+      {
+        "step": "Identify emergency email class",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Confirm OTP mailbox is not trapped in Microsoft reset loop",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Constrain OTP to emergency use only",
+        "authorization": "NOT_AUTHORIZED_YET"
+      }
+    ],
+    "turnstile_later_phase": [
+      {
+        "step": "Plan public site key placement",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Plan secret storage outside repo",
+        "authorization": "NOT_AUTHORIZED_YET"
+      },
+      {
+        "step": "Plan backend server-side token verification",
+        "authorization": "NOT_AUTHORIZED_YET"
+      }
+    ]
+  },
+  "lockout_controls": {
+    "minimum_independent_admin_paths": 2,
+    "required": [
+      "Cloudflare admin recovery is not single-path",
+      "break-glass account is independent from Microsoft reset loop",
+      "recovery email class is separate from primary Microsoft account",
+      "local Omen fallback is retained",
+      "GitHub backup is available or deferred with documented risk",
+      "rollback path exists for exact provider action",
+      "DNS, tunnel, and dashboard exposure are excluded until Access policy is proven"
+    ],
+    "app_role_and_approval_gate_separation": true,
+    "end_users_use_anthony_admin_identities": false
+  },
+  "proof_requirements": [
+    "Cloudflare Access test user can log in",
+    "Microsoft primary admin can log in",
+    "GitHub backup can log in",
+    "break-glass path is tested without daily admin",
+    "optional Google fallback decision is recorded",
+    "OTP emergency fallback is constrained or explicitly deferred",
+    "Turnstile token validation is proven in backend only",
+    "dashboard is inaccessible without Cloudflare Access",
+    "local Omen fallback still works",
+    "no secrets committed",
+    "git status clean after each step",
+    "T9 savepoint after each major merge",
+    "AI_OS approval gates still control protected actions"
+  ],
+  "rollback_requirements": {
+    "before_each_provider_action": [
+      "confirm clean repo",
+      "record T9 savepoint",
+      "capture sanitized current provider UI state",
+      "confirm primary and backup admin paths",
+      "define exact rollback action",
+      "stop if any recovery path is unclear"
+    ],
+    "after_each_provider_action": [
+      "test changed login path",
+      "test independent backup login path",
+      "test local Omen fallback",
+      "confirm dashboard remains unexposed unless explicitly approved later",
+      "confirm no secrets entered repo",
+      "confirm git status is clean",
+      "stop and revert only the last provider change if login proof fails"
+    ]
+  },
+  "forbidden_actions": [
+    "configure_cloudflare",
+    "configure_azure",
+    "configure_entra",
+    "configure_github_oauth",
+    "configure_google_oauth",
+    "create_or_change_dns",
+    "create_or_change_tunnels",
+    "configure_turnstile",
+    "configure_otp",
+    "expose_dashboard",
+    "access_request_write_or_store_secrets",
+    "edit_env",
+    "mutate_runtime",
+    "mutate_scheduler",
+    "mutate_queues",
+    "mutate_approval_inbox",
+    "mutate_worker_inbox",
+    "mutate_command_queue",
+    "touch_broker_or_live_trading_paths",
+    "delete_files",
+    "push_to_main",
+    "merge",
+    "close_prs"
+  ],
+  "next_packet": {
+    "path": "automation/orchestration/work_packets/proposed/AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-APPLY-REQUEST.md",
+    "type": "APPLY_REQUEST_ONLY_NOT_EXECUTABLE",
+    "requires_separate_anthony_approval_before_cloudflare_dashboard_action": true,
+    "secrets_in_repo_allowed": false,
+    "evidence_mode": "sanitized_screenshots_or_manual_confirmation_only",
+    "dns_tunnel_dashboard_exposure_allowed": false,
+    "runtime_scheduler_queue_broker_live_trading_changes_allowed": false
+  },
+  "status": "DRY_RUN_PROVIDER_SETUP_REVIEW_READY_NO_PROVIDER_CHANGES_NO_SECRETS_STORED"
+}
+
