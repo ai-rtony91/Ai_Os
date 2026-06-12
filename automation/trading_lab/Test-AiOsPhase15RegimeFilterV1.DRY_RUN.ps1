@@ -1,10 +1,13 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 Write-Host "AI_OS Phase 15 Regime Filter v1 DRY_RUN"
 Write-Host "Mode: read-only validation"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$contractPath = Join-Path $repoRoot "docs/AI_OS/trading_laboratory/phase_15_regime_filter/PHASE_15_REGIME_FILTER_V1_CONTRACT.json"
+$contractPath = Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/phase_15_regime_filter/PHASE_15_REGIME_FILTER_V1_CONTRACT.json"
 $fixturePath = Join-Path $repoRoot "apps/dashboard/mock-data/phase-15-regime-filter-v1.example.json"
 
 foreach ($path in @($contractPath, $fixturePath)) {

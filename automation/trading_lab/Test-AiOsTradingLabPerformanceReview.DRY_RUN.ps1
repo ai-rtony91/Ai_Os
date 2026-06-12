@@ -1,10 +1,12 @@
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# Dashboard mock data remains fixture-only and this validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $files = @(
-    "docs/AI_OS/trading_laboratory/profitability/PAPER_REVIEW_LEDGER_001.json",
-    "docs/AI_OS/trading_laboratory/profitability/STRATEGY_PERFORMANCE_SUMMARY_001.json",
-    "docs/AI_OS/trading_laboratory/latency/REPLAY_FAILURE_SUMMARY_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/profitability/PAPER_REVIEW_LEDGER_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/profitability/STRATEGY_PERFORMANCE_SUMMARY_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/latency/REPLAY_FAILURE_SUMMARY_001.json",
     "apps/dashboard/mock-data/trading-lab-performance-review.example.json"
 )
 
@@ -16,9 +18,9 @@ foreach ($file in $files) {
     Get-Content -Raw $path | ConvertFrom-Json | Out-Null
 }
 
-$ledger = Get-Content -Raw (Join-Path $repoRoot "docs/AI_OS/trading_laboratory/profitability/PAPER_REVIEW_LEDGER_001.json") | ConvertFrom-Json
-$summary = Get-Content -Raw (Join-Path $repoRoot "docs/AI_OS/trading_laboratory/profitability/STRATEGY_PERFORMANCE_SUMMARY_001.json") | ConvertFrom-Json
-$failure = Get-Content -Raw (Join-Path $repoRoot "docs/AI_OS/trading_laboratory/latency/REPLAY_FAILURE_SUMMARY_001.json") | ConvertFrom-Json
+$ledger = Get-Content -Raw (Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/profitability/PAPER_REVIEW_LEDGER_001.json") | ConvertFrom-Json
+$summary = Get-Content -Raw (Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/profitability/STRATEGY_PERFORMANCE_SUMMARY_001.json") | ConvertFrom-Json
+$failure = Get-Content -Raw (Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/latency/REPLAY_FAILURE_SUMMARY_001.json") | ConvertFrom-Json
 
 if ($ledger.mode -ne "paper_only" -or $summary.mode -ne "paper_only" -or $failure.mode -ne "paper_only") {
     throw "All performance review files must be paper_only."

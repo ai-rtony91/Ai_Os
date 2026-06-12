@@ -4,6 +4,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $failures = New-Object System.Collections.Generic.List[string]
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# Dashboard mock data remains fixture-only and this validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 
 function Add-Failure {
   param([string]$Message)
@@ -12,7 +14,7 @@ function Add-Failure {
 
 Push-Location $RepoRoot
 try {
-  $runtimeRoot = "docs/AI_OS/trading_laboratory/paper_bot_core/runtime_simulation"
+  $runtimeRoot = "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/runtime_simulation"
   $requiredFiles = @(
     "$runtimeRoot/README.md",
     "$runtimeRoot/PAPER_RUNTIME_SIMULATION_SPEC.md",

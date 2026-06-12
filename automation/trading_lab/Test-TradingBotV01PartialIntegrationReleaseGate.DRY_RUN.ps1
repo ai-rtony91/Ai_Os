@@ -8,26 +8,28 @@ Write-Host "Mode: DRY_RUN"
 Write-Host "No commit. No push."
 Write-Host ""
 
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# This release gate does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $failures = New-Object System.Collections.Generic.List[string]
 
 $lane1Files = @(
-    "docs/AI_OS/trading_laboratory/phase_14_4/PHASE_14_4_SUPERTREND_MVP_SIGNAL_PREVIEW.md",
-    "docs/AI_OS/trading_laboratory/phase_14_4/PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_4/PHASE_14_4_SUPERTREND_MVP_SIGNAL_PREVIEW.md",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_4/PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001.json",
     "automation/trading_lab/Test-AiOsTradingLabPhase144SuperTrendPreview.DRY_RUN.ps1"
 )
 
 $lane2Files = @(
-    "docs/AI_OS/trading_laboratory/phase_14_5/PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_MOCK.md",
-    "docs/AI_OS/trading_laboratory/phase_14_5/PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_001.json",
-    "docs/AI_OS/trading_laboratory/phase_14_6/PHASE_14_6_TRADERSPOST_ROUTE_PREVIEW_MOCK.md",
-    "docs/AI_OS/trading_laboratory/phase_14_6/PHASE_14_6_TRADERSPOST_ROUTE_PREVIEW_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_5/PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_MOCK.md",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_5/PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_6/PHASE_14_6_TRADERSPOST_ROUTE_PREVIEW_MOCK.md",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_6/PHASE_14_6_TRADERSPOST_ROUTE_PREVIEW_001.json",
     "automation/trading_lab/Test-AiOsTradingLabPhase145TradingViewPayloadMock.DRY_RUN.ps1",
     "automation/trading_lab/Test-AiOsTradingLabPhase146TradersPostRoutePreview.DRY_RUN.ps1"
 )
 
 $lane3Files = @(
-    "docs/AI_OS/trading_laboratory/phase_14_7/PHASE_14_7_PAPER_TRADE_OUTCOME_LOOP.md",
-    "docs/AI_OS/trading_laboratory/phase_14_7/PHASE_14_7_PAPER_TRADE_OUTCOME_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_7/PHASE_14_7_PAPER_TRADE_OUTCOME_LOOP.md",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_7/PHASE_14_7_PAPER_TRADE_OUTCOME_001.json",
     "automation/trading_lab/Test-AiOsTradingLabPhase147PaperTradeOutcomeLoop.DRY_RUN.ps1"
 )
 

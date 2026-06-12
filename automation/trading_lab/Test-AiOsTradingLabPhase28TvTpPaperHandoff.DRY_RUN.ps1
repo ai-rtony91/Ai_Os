@@ -1,12 +1,15 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 
 $files = @(
     "apps/dashboard/mock-data/tradingview-paper-alert.example.json",
     "apps/dashboard/mock-data/traderspost-paper-route-preview.example.json",
     "apps/dashboard/mock-data/phase-28-tv-tp-paper-handoff.example.json",
-    "docs/AI_OS/trading_laboratory/phase_28/TV_TP_PAPER_HANDOFF_CONTRACT.json"
+    "archive/docs_aios_trading_laboratory_legacy/phase_28/TV_TP_PAPER_HANDOFF_CONTRACT.json"
 )
 
 foreach ($file in $files) {
@@ -20,7 +23,7 @@ foreach ($file in $files) {
 $alert = Get-Content -LiteralPath (Join-Path $repoRoot "apps/dashboard/mock-data/tradingview-paper-alert.example.json") -Raw | ConvertFrom-Json
 $route = Get-Content -LiteralPath (Join-Path $repoRoot "apps/dashboard/mock-data/traderspost-paper-route-preview.example.json") -Raw | ConvertFrom-Json
 $handoff = Get-Content -LiteralPath (Join-Path $repoRoot "apps/dashboard/mock-data/phase-28-tv-tp-paper-handoff.example.json") -Raw | ConvertFrom-Json
-$contract = Get-Content -LiteralPath (Join-Path $repoRoot "docs/AI_OS/trading_laboratory/phase_28/TV_TP_PAPER_HANDOFF_CONTRACT.json") -Raw | ConvertFrom-Json
+$contract = Get-Content -LiteralPath (Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/phase_28/TV_TP_PAPER_HANDOFF_CONTRACT.json") -Raw | ConvertFrom-Json
 
 foreach ($field in $contract.required_fields) {
     if (-not ($handoff.PSObject.Properties.Name -contains $field)) {

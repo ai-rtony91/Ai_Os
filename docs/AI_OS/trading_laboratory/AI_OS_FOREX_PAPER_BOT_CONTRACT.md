@@ -1,3 +1,11 @@
+# AI_OS Classification Header
+
+Classification: PAPER_ONLY_CONTRACT_REFERENCE.
+
+This `docs/AI_OS` file is a subordinate paper-only Trading Lab reference. Root `AGENTS.md`, `README.md`, `RISK_POLICY.md`, `docs/governance/**`, `docs/workflows/**`, `docs/specs/**`, `docs/security/**`, `docs/architecture/**`, and `docs/audits/**` remain canonical above `docs/AI_OS` unless explicitly delegated.
+
+This file does not authorize live trading, broker execution, real orders, real webhooks, credentials, secrets, runtime mutation, APPLY, commit, push, merge, deployment, or archive promotion.
+
 # AI_OS Forex Paper Bot Contract
 
 Status: docs-only contract.

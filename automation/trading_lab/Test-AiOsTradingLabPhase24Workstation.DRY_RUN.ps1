@@ -1,9 +1,12 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $fixturePath = Join-Path $repoRoot "apps\dashboard\mock-data\trading-lab-workstation.example.json"
-$contractPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_24\TRADING_LAB_WORKSTATION_CONTRACT.json"
-$docPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_24\PHASE_24_TRADING_LAB_WORKSTATION_LAYOUT_SYSTEM.md"
+$contractPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_24\TRADING_LAB_WORKSTATION_CONTRACT.json"
+$docPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_24\PHASE_24_TRADING_LAB_WORKSTATION_LAYOUT_SYSTEM.md"
 $failures = New-Object System.Collections.Generic.List[string]
 
 function Add-Failure {

@@ -4,6 +4,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $failures = New-Object System.Collections.Generic.List[string]
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# Dashboard mock data remains fixture-only and this validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 
 function Add-Failure {
   param([string]$Message)
@@ -13,7 +15,7 @@ function Add-Failure {
 Push-Location $RepoRoot
 try {
   $fixturePath = "apps/dashboard/mock-data/trading-lab-window-system.example.json"
-  $docPath = "docs/AI_OS/trading_laboratory/paper_bot_core/TRADING_LAB_MODULAR_WINDOW_SYSTEM.md"
+  $docPath = "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/TRADING_LAB_MODULAR_WINDOW_SYSTEM.md"
 
   foreach ($file in @($fixturePath, $docPath)) {
     if (-not (Test-Path -LiteralPath $file)) {

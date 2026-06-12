@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { cpSync, existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 
 const autonomyBridgeStateModuleId = 'virtual:aios-autonomy-bridge-state'
 const resolvedAutonomyBridgeStateModuleId = `\0${autonomyBridgeStateModuleId}`

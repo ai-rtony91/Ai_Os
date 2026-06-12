@@ -1,8 +1,11 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $files = @(
-    "docs/AI_OS/trading_laboratory/phase_15_9/STRATEGY_RANKING_CONTRACT.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_15_9/STRATEGY_RANKING_CONTRACT.json",
     "apps/trading_lab/trading_lab/results/paper_runner/PAPER_STRATEGY_RANKING_001.json",
     "apps/dashboard/mock-data/trading-lab-strategy-ranking.example.json"
 )

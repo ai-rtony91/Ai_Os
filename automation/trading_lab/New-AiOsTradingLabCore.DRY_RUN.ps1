@@ -2,6 +2,9 @@ param()
 
 $ErrorActionPreference = "Stop"
 
+# Legacy scaffold preview only. The docs/AI_OS/trading_laboratory paths below are historical planning targets, not current authority.
+# This DRY_RUN script must not be treated as approval for APPLY, live trading, broker execution, real webhooks, real orders, credentials, commit, push, merge, or deployment.
+
 $ExpectedRootName = "Ai.Os"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $RepoName = Split-Path -Leaf $RepoRoot

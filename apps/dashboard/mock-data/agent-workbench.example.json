@@ -3,6 +3,15 @@
   "title": "Agent Workbench",
   "summary": "Controlled local mock view of AI_OS agents. Agents are visible workers, not autonomous executors.",
   "mode": "local_mock",
+  "fixture_only": true,
+  "authority_status": "non_authoritative_display_fixture",
+  "source_path_policy": {
+    "detail_source_paths": "fixture_only_historical_source_references",
+    "allowed_paths": "mock_display_scope_only",
+    "docs_ai_os_trading_laboratory_paths": "stale_or_historical_reference_only",
+    "runtime_truth_status": "not_runtime_truth",
+    "execution_authority_status": "not_execution_authority"
+  },
   "autonomy_status": "blocked",
   "root_access_status": "blocked",
   "admin_access_status": "blocked",

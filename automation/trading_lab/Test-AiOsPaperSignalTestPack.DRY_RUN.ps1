@@ -1,5 +1,8 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $env:PYTHONPATH = Join-Path $repoRoot "apps\trading_lab"
 
@@ -20,8 +23,8 @@ $requiredFiles = @(
     "$resultRoot/PAPER_SIGNAL_TEST_PACK_LEDGER_001.json",
     "$resultRoot/PAPER_SIGNAL_TEST_PACK_SCORECARD_001.json",
     "$resultRoot/PAPER_SIGNAL_TEST_PACK_VALIDATION_REPORT_001.json",
-    "docs/AI_OS/trading_laboratory/phase_22/PHASE_22_PAPER_SIGNAL_TEST_PACK.md",
-    "docs/AI_OS/trading_laboratory/phase_22/PAPER_SIGNAL_TEST_PACK_CONTRACT.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_22/PHASE_22_PAPER_SIGNAL_TEST_PACK.md",
+    "archive/docs_aios_trading_laboratory_legacy/phase_22/PAPER_SIGNAL_TEST_PACK_CONTRACT.json",
     "apps/dashboard/mock-data/paper-signal-test-pack.example.json"
 )
 
@@ -37,7 +40,7 @@ Get-ChildItem -LiteralPath (Join-Path $repoRoot $fixtureRoot) -Filter "*.json" -
 Get-ChildItem -LiteralPath (Join-Path $repoRoot $resultRoot) -Filter "*.json" -File | ForEach-Object {
     Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json | Out-Null
 }
-Get-Content -LiteralPath (Join-Path $repoRoot "docs/AI_OS/trading_laboratory/phase_22/PAPER_SIGNAL_TEST_PACK_CONTRACT.json") -Raw | ConvertFrom-Json | Out-Null
+Get-Content -LiteralPath (Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/phase_22/PAPER_SIGNAL_TEST_PACK_CONTRACT.json") -Raw | ConvertFrom-Json | Out-Null
 Get-Content -LiteralPath (Join-Path $repoRoot "apps/dashboard/mock-data/paper-signal-test-pack.example.json") -Raw | ConvertFrom-Json | Out-Null
 
 python -m trading_lab.ingest.paper_signal_test_pack_runner --json | Out-Null

@@ -8,11 +8,403 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Ai_Os">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Ai_Os Work Table Preview</title>
+  <title>AI_OS Planetary Command Preview</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/aios-icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/aios-icon.svg">
   <link rel="stylesheet" href="css/aios-static-preview.css">
+  <style>
+    .planetary-static-preview {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      gap: 18px;
+      margin: 16px 0 18px;
+      padding: clamp(18px, 3vw, 32px);
+      border: 1px solid rgba(95, 190, 255, 0.35);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(36, 170, 255, 0.24), transparent 22%),
+        radial-gradient(circle at 78% 8%, rgba(133, 89, 255, 0.24), transparent 24%),
+        radial-gradient(circle at 70% 76%, rgba(190, 82, 45, 0.18), transparent 30%),
+        linear-gradient(135deg, rgba(3, 8, 17, 0.98), rgba(8, 12, 26, 0.98) 52%, rgba(15, 8, 26, 0.98));
+      box-shadow:
+        inset 0 0 90px rgba(42, 168, 255, 0.08),
+        0 28px 80px rgba(0, 0, 0, 0.34);
+      color: #eef7ff;
+      isolation: isolate;
+    }
+
+    .planetary-static-preview::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      background-image:
+        radial-gradient(circle, rgba(255, 255, 255, 0.78) 0 1px, transparent 1.5px),
+        radial-gradient(circle, rgba(112, 194, 255, 0.48) 0 1px, transparent 1.6px);
+      background-position: 0 0, 44px 70px;
+      background-size: 118px 132px, 174px 196px;
+      opacity: 0.2;
+    }
+
+    .planetary-static-preview::after {
+      content: "";
+      position: absolute;
+      inset: 10%;
+      z-index: -1;
+      border: 1px solid rgba(105, 190, 255, 0.18);
+      border-radius: 50%;
+      transform: rotate(-16deg);
+    }
+
+    .planetary-command-head,
+    .planetary-command-status,
+    .planetary-safety-strip,
+    .planetary-layout,
+    .planetary-zone-map,
+    .planetary-side-stack,
+    .planetary-card-grid,
+    .planetary-advanced-grid,
+    .planetary-control-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .planetary-command-head {
+      align-items: start;
+      grid-template-columns: minmax(0, 1fr) auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .planetary-brand h1 {
+      margin: 0;
+      color: #f4fbff;
+      font-size: clamp(44px, 8vw, 98px);
+      line-height: 0.86;
+      letter-spacing: 0;
+      text-shadow:
+        0 0 30px rgba(45, 181, 255, 0.5),
+        0 0 74px rgba(127, 91, 255, 0.28);
+    }
+
+    .planetary-brand p {
+      max-width: 760px;
+      color: #b9cbe2;
+      line-height: 1.55;
+    }
+
+    .planetary-required-rule {
+      margin-top: 10px;
+      color: #e7f4ff;
+      font-weight: 700;
+    }
+
+    .planetary-command-status {
+      justify-items: end;
+    }
+
+    .planetary-pill {
+      display: inline-flex;
+      min-height: 28px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(142, 204, 255, 0.38);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(7, 14, 28, 0.72);
+      color: #eaf7ff;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .planetary-pill.warn {
+      border-color: rgba(244, 198, 82, 0.72);
+      background: rgba(244, 198, 82, 0.14);
+    }
+
+    .planetary-pill.danger {
+      border-color: rgba(255, 102, 102, 0.74);
+      background: rgba(255, 102, 102, 0.14);
+    }
+
+    .planetary-pill.good {
+      border-color: rgba(84, 224, 158, 0.72);
+      background: rgba(84, 224, 158, 0.14);
+    }
+
+    .planetary-safety-strip {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      position: relative;
+      z-index: 1;
+    }
+
+    .planetary-safety-item,
+    .planetary-panel,
+    .planetary-zone-card {
+      border: 1px solid rgba(142, 204, 255, 0.24);
+      border-radius: 14px;
+      background: rgba(5, 11, 23, 0.74);
+      box-shadow: 0 16px 42px rgba(0, 0, 0, 0.22);
+    }
+
+    .planetary-safety-item {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+    }
+
+    .planetary-safety-item span:first-child,
+    .planetary-panel-label {
+      color: #8ecaff;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .planetary-layout {
+      grid-template-columns: minmax(420px, 1.55fr) minmax(280px, 0.85fr);
+      position: relative;
+      z-index: 1;
+    }
+
+    .planetary-zone-map {
+      min-height: 630px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(95, 190, 255, 0.28);
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 48% 48%, rgba(48, 169, 255, 0.16), transparent 30%),
+        radial-gradient(circle at 54% 60%, rgba(255, 255, 255, 0.06), transparent 50%),
+        rgba(2, 7, 15, 0.78);
+      box-shadow: inset 0 0 88px rgba(80, 160, 255, 0.08);
+    }
+
+    .planetary-zone-map::before,
+    .planetary-zone-map::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 1px solid rgba(118, 196, 255, 0.16);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      pointer-events: none;
+    }
+
+    .planetary-zone-map::before {
+      width: 90%;
+      height: 74%;
+    }
+
+    .planetary-zone-map::after {
+      width: 68%;
+      height: 48%;
+      transform: translate(-50%, -50%) rotate(24deg);
+    }
+
+    .planetary-zone-card {
+      position: absolute;
+      display: grid;
+      grid-template-columns: 78px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      width: min(44%, 360px);
+      min-height: 118px;
+      padding: 12px;
+      text-align: left;
+    }
+
+    .planetary-zone-card.mars { left: 7%; bottom: 6%; width: min(52%, 430px); }
+    .planetary-zone-card.moon { left: 8%; top: 10%; }
+    .planetary-zone-card.earth { right: 7%; top: 8%; }
+    .planetary-zone-card.galaxy { right: 8%; bottom: 16%; }
+    .planetary-zone-card.vault { left: 34%; top: 42%; width: min(38%, 330px); }
+
+    .planetary-body {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      box-shadow: inset -18px -20px 30px rgba(0, 0, 0, 0.48);
+    }
+
+    .planetary-body::before {
+      content: "";
+      position: absolute;
+      inset: -11px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 50%;
+    }
+
+    .mars .planetary-body {
+      background:
+        radial-gradient(circle at 32% 24%, rgba(255, 214, 166, 0.42), transparent 17%),
+        radial-gradient(circle at 70% 70%, rgba(82, 38, 27, 0.54), transparent 25%),
+        linear-gradient(145deg, #d98655, #9a392d 54%, #4f211c);
+      box-shadow: inset -18px -20px 30px rgba(0, 0, 0, 0.45), 0 0 44px rgba(202, 97, 60, 0.36);
+    }
+
+    .moon .planetary-body {
+      background:
+        radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.65), transparent 16%),
+        radial-gradient(circle at 62% 58%, rgba(94, 100, 110, 0.5), transparent 14%),
+        linear-gradient(145deg, #edf1f5, #8d96a4 60%, #394050);
+      box-shadow: inset -18px -20px 30px rgba(0, 0, 0, 0.44), 0 0 38px rgba(214, 219, 226, 0.28);
+    }
+
+    .earth .planetary-body {
+      background:
+        radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.55), transparent 14%),
+        radial-gradient(circle at 44% 52%, rgba(88, 194, 126, 0.72), transparent 19%),
+        radial-gradient(circle at 68% 42%, rgba(52, 114, 196, 0.76), transparent 24%),
+        linear-gradient(145deg, #65d6c0, #1e74c5 54%, #0a2449);
+      box-shadow: inset -18px -20px 30px rgba(0, 0, 0, 0.42), 0 0 42px rgba(80, 198, 164, 0.35);
+    }
+
+    .galaxy .planetary-body {
+      background:
+        radial-gradient(circle at 46% 50%, rgba(255, 229, 172, 0.96), transparent 9%),
+        radial-gradient(ellipse at 50% 50%, rgba(122, 79, 255, 0.7), transparent 34%),
+        radial-gradient(ellipse at 50% 50%, rgba(47, 184, 255, 0.42), transparent 58%),
+        #080818;
+      box-shadow: inset -12px -18px 28px rgba(0, 0, 0, 0.48), 0 0 52px rgba(161, 120, 255, 0.42);
+    }
+
+    .vault .planetary-body {
+      background:
+        radial-gradient(circle, #020308 0 24%, transparent 25%),
+        conic-gradient(from 20deg, rgba(229, 197, 108, 0.9), rgba(90, 18, 28, 0.2), rgba(122, 79, 255, 0.72), rgba(229, 197, 108, 0.9));
+      box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.9), 0 0 56px rgba(229, 197, 108, 0.36);
+    }
+
+    .planetary-zone-copy {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .planetary-zone-copy strong {
+      color: #f2f8ff;
+      font-size: 16px;
+    }
+
+    .planetary-zone-copy small {
+      color: #adc1d6;
+      line-height: 1.35;
+    }
+
+    .planetary-side-stack {
+      align-content: start;
+    }
+
+    .planetary-panel {
+      padding: 14px;
+    }
+
+    .planetary-panel h2,
+    .planetary-panel h3 {
+      margin: 4px 0 8px;
+      color: #f2f8ff;
+    }
+
+    .planetary-panel p,
+    .planetary-panel li {
+      color: #adc1d6;
+    }
+
+    .planetary-edgemark-score {
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      margin: 8px 0;
+    }
+
+    .planetary-edgemark-score strong {
+      color: #f2f8ff;
+      font-size: clamp(46px, 7vw, 72px);
+      line-height: 0.9;
+    }
+
+    .planetary-card-grid,
+    .planetary-advanced-grid,
+    .planetary-control-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .planetary-card-grid span,
+    .planetary-advanced-grid span,
+    .planetary-control-grid span {
+      border: 1px solid rgba(95, 190, 255, 0.22);
+      border-radius: 10px;
+      background: rgba(47, 184, 255, 0.08);
+      color: #dcecff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 8px 10px;
+      text-transform: uppercase;
+    }
+
+    .planetary-paper-note,
+    .planetary-astronaut-note {
+      margin-top: 10px;
+      border: 1px solid rgba(244, 198, 82, 0.32);
+      border-radius: 12px;
+      background: rgba(244, 198, 82, 0.1);
+      padding: 10px;
+      color: #f5ddb0;
+    }
+
+    @media (max-width: 1100px) {
+      .planetary-layout,
+      .planetary-command-head {
+        grid-template-columns: 1fr;
+      }
+
+      .planetary-command-status {
+        justify-items: start;
+      }
+
+      .planetary-zone-map {
+        min-height: auto;
+        padding: 12px;
+      }
+
+      .planetary-zone-card,
+      .planetary-zone-card.mars,
+      .planetary-zone-card.moon,
+      .planetary-zone-card.earth,
+      .planetary-zone-card.galaxy,
+      .planetary-zone-card.vault {
+        position: relative;
+        inset: auto;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .planetary-safety-strip,
+      .planetary-card-grid,
+      .planetary-advanced-grid,
+      .planetary-control-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .planetary-zone-card {
+        grid-template-columns: 64px minmax(0, 1fr);
+      }
+
+      .planetary-body {
+        width: 60px;
+        height: 60px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="background-layer layer-base"></div>
@@ -171,6 +563,181 @@
           </button>
         </div>
       </header>
+
+      <section class="planetary-static-preview" aria-label="AI_OS planetary command static preview">
+        <div class="planetary-command-head">
+          <div class="planetary-brand">
+            <span class="eyebrow">AI_OS PLANETARY COMMAND</span>
+            <h1>AIOS</h1>
+            <p>Intelligent. Adaptive. Yours. Static preview for a realistic cinematic command system with premium fintech and aerospace direction.</p>
+            <p class="planetary-required-rule">The goal is not to change the AI_OS visual identity; the goal is to enhance it into a realistic, cinematic, game-navigable command system.</p>
+          </div>
+          <div class="planetary-command-status" aria-label="Preview status">
+            <span class="planetary-pill warn">GLOBAL STATUS: PREVIEW</span>
+            <span class="planetary-pill">AIOS EDGEMARK: MODEL PREVIEW</span>
+            <span class="planetary-pill good">MODE: PAPER-SAFE</span>
+            <span class="planetary-pill">LIVE DATA: UNKNOWN</span>
+          </div>
+        </div>
+
+        <div class="planetary-safety-strip" aria-label="Static preview safety state">
+          <div class="planetary-safety-item">
+            <span>Live trading</span>
+            <span class="planetary-pill danger">BLOCKED</span>
+          </div>
+          <div class="planetary-safety-item">
+            <span>Broker</span>
+            <span class="planetary-pill danger">BLOCKED</span>
+          </div>
+          <div class="planetary-safety-item">
+            <span>Secrets</span>
+            <span class="planetary-pill good">SAFE</span>
+          </div>
+          <div class="planetary-safety-item">
+            <span>Runtime source</span>
+            <span class="planetary-pill">PREVIEW / UNKNOWN</span>
+          </div>
+        </div>
+
+        <div class="planetary-layout">
+          <section class="planetary-zone-map" aria-label="Planetary zone map">
+            <article class="planetary-zone-card mars">
+              <span class="planetary-body" aria-hidden="true"></span>
+              <span class="planetary-zone-copy">
+                <span class="planetary-panel-label">Mars Lab</span>
+                <strong>Developer and build world</strong>
+                <small>Codex lanes, PRs, workers, tests, packets, and build status. Geologic, dusty, harsh, physical.</small>
+                <span class="planetary-pill warn">REVIEW</span>
+              </span>
+            </article>
+
+            <article class="planetary-zone-card moon">
+              <span class="planetary-body" aria-hidden="true"></span>
+              <span class="planetary-zone-copy">
+                <span class="planetary-panel-label">Moon Control</span>
+                <strong>Mission-control health</strong>
+                <small>AI_OS health, approvals, scheduler state, EdgeMark, and alerts. Cold, cratered, reflective.</small>
+                <span class="planetary-pill warn">NEEDS_APPROVAL</span>
+              </span>
+            </article>
+
+            <article class="planetary-zone-card earth">
+              <span class="planetary-body" aria-hidden="true"></span>
+              <span class="planetary-zone-copy">
+                <span class="planetary-panel-label">Earth Hub</span>
+                <strong>Personal workspace</strong>
+                <small>Apps, contacts, notes, school/work/Microsoft, and user workspace. Atmospheric and global.</small>
+                <span class="planetary-pill good">PAPER_SAFE</span>
+              </span>
+            </article>
+
+            <article class="planetary-zone-card galaxy">
+              <span class="planetary-body" aria-hidden="true"></span>
+              <span class="planetary-zone-copy">
+                <span class="planetary-panel-label">Galaxy Intelligence</span>
+                <strong>Agents, memory, research</strong>
+                <small>Automation map, roadmap, strategy, believable star fields, red dwarf depth, and source confidence.</small>
+                <span class="planetary-pill">UNKNOWN</span>
+              </span>
+            </article>
+
+            <article class="planetary-zone-card vault">
+              <span class="planetary-body" aria-hidden="true"></span>
+              <span class="planetary-zone-copy">
+                <span class="planetary-panel-label">Black Hole Vault</span>
+                <strong>Restricted security zone</strong>
+                <small>Secrets boundary, broker/live block, emergency warnings, gravitational and restricted.</small>
+                <span class="planetary-pill danger">BLOCKED</span>
+              </span>
+            </article>
+          </section>
+
+          <aside class="planetary-side-stack" aria-label="Planetary command details">
+            <section class="planetary-panel">
+              <span class="planetary-panel-label">AIOS EdgeMark</span>
+              <h2>Conservative model preview</h2>
+              <div class="planetary-edgemark-score">
+                <strong>PREVIEW</strong>
+                <span class="planetary-pill warn">UNKNOWN UNTIL WIRED</span>
+              </div>
+              <div class="planetary-card-grid">
+                <span>validation cleanliness</span>
+                <span>safety gates</span>
+                <span>paper/live boundary</span>
+                <span>automation health</span>
+                <span>repo reliability</span>
+                <span>stale penalties</span>
+              </div>
+            </section>
+
+            <section class="planetary-panel">
+              <span class="planetary-panel-label">Current objective</span>
+              <h2>Transform AI_OS into a readable planetary command shell</h2>
+              <p>Next allowed action: review this static preview, then validate locally before any protected action. No PASS is inferred from missing live data.</p>
+            </section>
+
+            <section class="planetary-panel">
+              <span class="planetary-panel-label">Critical alerts</span>
+              <h2>Preview-only evidence</h2>
+              <ul>
+                <li>Live trading remains BLOCKED.</li>
+                <li>Broker controls remain BLOCKED.</li>
+                <li>Runtime state is PREVIEW / UNKNOWN on this static route.</li>
+              </ul>
+            </section>
+
+            <section class="planetary-panel">
+              <span class="planetary-panel-label">Advanced drawer preview</span>
+              <h2>Operator-only raw detail categories</h2>
+              <div class="planetary-advanced-grid">
+                <span>raw telemetry</span>
+                <span>queues</span>
+                <span>approvals</span>
+                <span>scheduler</span>
+                <span>runtime</span>
+                <span>GitHub checks</span>
+                <span>workers</span>
+                <span>debug JSON</span>
+                <span>logs</span>
+                <span>security state</span>
+                <span>freshness</span>
+              </div>
+            </section>
+
+            <section class="planetary-panel">
+              <span class="planetary-panel-label">Paper League</span>
+              <h2>Simulated only</h2>
+              <div class="planetary-card-grid">
+                <span>risk-adjusted return</span>
+                <span>lowest drawdown</span>
+                <span>consistency streak</span>
+                <span>execution quality</span>
+                <span>EdgeMark progression</span>
+              </div>
+              <p class="planetary-paper-note">Paper League is not real-money competition. No live backend, broker action, live orders, or multiplayer leaderboard is active.</p>
+            </section>
+
+            <section class="planetary-panel">
+              <span class="planetary-panel-label">Input guidance</span>
+              <h2>Keyboard, mouse, Xbox planned</h2>
+              <div class="planetary-control-grid">
+                <span>Tab / Shift+Tab</span>
+                <span>Enter / Space</span>
+                <span>Escape / Back</span>
+                <span>Mouse hover/click</span>
+                <span>Xbox A select</span>
+                <span>Xbox B back</span>
+              </div>
+            </section>
+
+            <section class="planetary-panel">
+              <span class="planetary-panel-label">Astronaut Mode</span>
+              <h2>Future immersive mode locked</h2>
+              <p class="planetary-astronaut-note">No first-person movement, no UE5 project, no game engine dependencies, and no uploaded image assets are included in this static preview.</p>
+            </section>
+          </aside>
+        </div>
+      </section>
 
       <section class="guided-workspace-status" aria-label="Guided AI_OS workspace status">
         <div>

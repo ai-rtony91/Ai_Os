@@ -2,6 +2,9 @@ param()
 
 $ErrorActionPreference = "Stop"
 
+# LEGACY APPLY SAFETY GUARD:
+# This scaffold targets legacy docs/AI_OS/trading_laboratory paths and must not be run as current execution.
+# It does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $ExpectedRootName = "Ai.Os"
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $RepoName = Split-Path -Leaf $RepoRoot

@@ -1,14 +1,23 @@
 :root {
-  --bg: #101316;
-  --surface: #171c20;
-  --surface-2: #20262b;
-  --line: #34404a;
-  --text: #eff4f2;
-  --muted: #9ca9a5;
-  --good: #4fb477;
-  --warn: #e3b341;
-  --danger: #e05d5d;
-  --neutral: #86a6c8;
+  --bg: #05070b;
+  --bg-2: #090d17;
+  --surface: rgba(9, 14, 26, 0.84);
+  --surface-2: rgba(17, 24, 39, 0.86);
+  --surface-3: rgba(5, 10, 20, 0.92);
+  --line: rgba(138, 167, 191, 0.28);
+  --line-strong: rgba(99, 186, 255, 0.46);
+  --text: #edf7ff;
+  --muted: #9fb1c5;
+  --good: #4fd49d;
+  --warn: #f2c35b;
+  --danger: #ff6b6b;
+  --neutral: #8cc8ff;
+  --violet: #a178ff;
+  --blue: #2fb8ff;
+  --mars: #c8613f;
+  --earth: #4fc6a4;
+  --moon: #d4d8df;
+  --gold: #e5c56c;
 }
 
 * {
@@ -29,43 +38,75 @@ input {
   font: inherit;
 }
 
+button {
+  color: inherit;
+}
+
 .runtimePage {
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-.runtimeHeader {
-  align-items: center;
-  border-bottom: 1px solid var(--line);
+.commandShell {
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 24px;
+  position: relative;
+}
+
+.commandShell::before {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(47, 184, 255, 0.26), transparent 19%),
+    radial-gradient(circle at 82% 10%, rgba(161, 120, 255, 0.2), transparent 22%),
+    radial-gradient(circle at 72% 72%, rgba(200, 97, 63, 0.14), transparent 30%),
+    linear-gradient(135deg, #03050b 0%, #07101f 42%, #100b1c 70%, #03050b 100%);
+  content: "";
+  inset: 0;
+  position: absolute;
+  z-index: -3;
+}
+
+.commandShell::after {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.74) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgba(126, 194, 255, 0.5) 0 1px, transparent 1.5px);
+  background-position:
+    0 0,
+    38px 56px;
+  background-size:
+    110px 120px,
+    150px 170px;
+  content: "";
+  inset: 0;
+  opacity: 0.24;
+  pointer-events: none;
+  position: absolute;
+  z-index: -2;
+}
+
+.commandHeader,
+.safetyStrip,
+.planetaryLayout {
+  margin-inline: auto;
+  max-width: 1480px;
+}
+
+.commandHeader {
+  align-items: flex-start;
   display: flex;
-  gap: 24px;
+  gap: 18px;
   justify-content: space-between;
-  padding: 24px 32px;
+  margin-bottom: 14px;
 }
 
-.mockWarning,
-.warningStrip {
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 10px 32px;
-}
-
-.mockWarning {
-  background: rgba(224, 93, 93, 0.16);
-  color: var(--text);
-}
-
-.warningStrip {
-  background: rgba(227, 179, 65, 0.12);
-  color: var(--muted);
-  font-size: 13px;
+.brandBlock {
+  max-width: 620px;
 }
 
 .eyebrow {
   color: var(--neutral);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0;
   margin: 0 0 6px;
@@ -74,18 +115,25 @@ input {
 
 h1,
 h2,
+h3,
 p {
   margin-top: 0;
 }
 
 h1 {
-  font-size: clamp(30px, 5vw, 54px);
-  line-height: 1;
-  margin-bottom: 10px;
+  color: var(--text);
+  font-size: clamp(42px, 7vw, 86px);
+  letter-spacing: 0;
+  line-height: 0.86;
+  margin: 0 0 10px;
+  text-shadow:
+    0 0 26px rgba(47, 184, 255, 0.4),
+    0 0 58px rgba(161, 120, 255, 0.24);
 }
 
 h2 {
-  font-size: 16px;
+  font-size: clamp(18px, 2.2vw, 28px);
+  line-height: 1.08;
   margin-bottom: 0;
 }
 
@@ -94,259 +142,622 @@ h3 {
   margin: 0;
 }
 
-.summary {
+p {
   color: var(--muted);
+  line-height: 1.55;
   margin-bottom: 0;
 }
 
+.brandBlock p:last-child {
+  color: #d7ecff;
+  font-size: 16px;
+}
+
+.commandHeaderStatus,
 .headerStatus,
 .sectionHeader,
-.sectionTitle,
 .workerTop,
 .itemMeta,
 .alerts,
-.ledgerSummary {
+.ledgerSummary,
+.bridgeSourceRow {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.runtimeGrid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(12, 1fr);
-  padding: 18px;
+.commandHeaderStatus {
+  justify-content: flex-end;
+  max-width: 620px;
 }
 
-.operationsHero,
-.workerRooms,
-.operatorStatusSlice {
-  border-bottom: 1px solid var(--line);
-  display: grid;
-  gap: 14px;
-  padding: 18px 32px;
+.headerButton,
+.iconButton,
+.segmented button {
+  cursor: pointer;
 }
 
-.autonomyBridgeSlice {
-  border-bottom: 1px solid var(--line);
-  display: grid;
-  gap: 14px;
-  padding: 18px 32px;
-}
-
-.operatorStatusIntro,
-.operatorStatusTop {
-  align-items: flex-start;
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-}
-
-.operatorStatusIntro p,
-.operatorStatusCard p,
-.workerRoomCard p,
-.playlistDock p,
-.dockItem p {
-  color: var(--muted);
-  margin-bottom: 0;
-}
-
-.missionCardGrid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
-
-.missionCard {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--neutral);
-  border-radius: 8px;
-  min-width: 0;
-  padding: 14px;
-}
-
-.missionCard span {
-  color: var(--muted);
-  display: block;
-  font-size: 11px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-
-.missionCard strong {
-  display: block;
-  font-size: 24px;
-  line-height: 1;
-  margin-bottom: 10px;
-  overflow-wrap: anywhere;
-}
-
-.missionCard p {
-  color: var(--muted);
-  font-size: 13px;
-  margin: 0;
-}
-
-.workerRoomGrid,
-.operatorStatusGrid {
-  display: grid;
-  gap: 12px;
-}
-
-.workerRoomGrid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.operatorStatusGrid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-
-.workerRoomCard,
-.operatorStatusCard {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  min-width: 0;
-  padding: 14px;
-}
-
-.workerRoomCard > span {
-  color: var(--neutral);
-  display: block;
-  font-size: 12px;
-  font-weight: 800;
-  margin-top: 12px;
-  overflow-wrap: anywhere;
-  text-transform: uppercase;
-}
-
-.playlistDock {
-  border-bottom: 1px solid var(--line);
-  display: grid;
-  gap: 14px;
-  padding: 18px 32px;
-}
-
-.playlistDockGrid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.dockItem {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  min-width: 0;
-  padding: 14px;
-}
-
-.dockLink {
-  align-items: center;
-  background: var(--surface-2);
+.headerButton,
+.iconButton {
+  background: rgba(9, 14, 26, 0.72);
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--text);
-  display: inline-flex;
   font-size: 12px;
   font-weight: 800;
   min-height: 36px;
   padding: 8px 12px;
-  text-decoration: none;
   text-transform: uppercase;
 }
 
-.dockLink:hover,
-.dockLink:focus {
+.headerButton.primary {
+  background: linear-gradient(135deg, rgba(47, 184, 255, 0.28), rgba(161, 120, 255, 0.26));
+  border-color: var(--line-strong);
+}
+
+.headerButton:hover,
+.headerButton:focus-visible,
+.iconButton:hover,
+.iconButton:focus-visible,
+.segmented button:hover,
+.segmented button:focus-visible {
   border-color: var(--neutral);
-  color: var(--neutral);
-  outline: none;
+  outline: 2px solid rgba(47, 184, 255, 0.2);
+  outline-offset: 2px;
 }
 
-.autonomyBridgeGrid {
+.safetyStrip {
+  align-items: stretch;
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-bottom: 18px;
 }
 
-.autonomyBridgeCard {
-  background: var(--surface);
+.safetyItem {
+  background: rgba(5, 10, 20, 0.72);
   border: 1px solid var(--line);
   border-radius: 8px;
-  min-width: 0;
-  padding: 14px;
-}
-
-.autonomyBridgeCard p {
-  color: var(--muted);
-  margin-bottom: 0;
-}
-
-.autonomyMetrics {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-top: 14px;
-}
-
-.bridgeWarning {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-
-.operatorStatusMeta {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin: 14px 0 0;
+  min-width: 0;
+  padding: 12px;
 }
 
-.operatorStatusMeta div {
-  border-top: 1px solid var(--line);
-  display: grid;
-  gap: 4px;
-  padding-top: 8px;
-}
-
-.operatorStatusMeta dt {
+.safetyItem span:first-child {
   color: var(--muted);
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
-.operatorStatusMeta dd {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.blockedList {
-  color: var(--muted);
+.planetaryLayout {
   display: grid;
-  gap: 6px;
-  margin: 14px 0 0;
-  padding-left: 18px;
+  gap: 14px;
+  grid-template-columns: minmax(260px, 0.85fr) minmax(460px, 1.8fr) minmax(280px, 0.95fr);
+  grid-template-areas:
+    "intro scene edge"
+    "objective scene alerts"
+    "zone scene paper"
+    "astronaut scene paper";
 }
 
-.operatorWarnings {
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-
+.commandIntro,
+.edgeMarkPanel,
+.criticalAlerts,
+.missionObjectivePanel,
+.zoneDetailPanel,
+.paperLeaguePanel,
+.astronautTile,
+.operatorStatusCard,
+.autonomyBridgeCard,
 .section {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 8px;
-  grid-column: span 6;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.24);
   min-width: 0;
+}
+
+.commandIntro {
+  grid-area: intro;
+  padding: 18px;
+}
+
+.edgeMarkPanel {
+  display: grid;
+  gap: 12px;
+  grid-area: edge;
+  padding: 18px;
+}
+
+.edgeScore {
+  align-items: end;
+  display: flex;
+  gap: 12px;
+}
+
+.edgeScore strong {
+  color: var(--text);
+  font-size: clamp(42px, 6vw, 78px);
+  line-height: 0.9;
+}
+
+.edgeScore span {
+  color: var(--neutral);
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.edgeConfidence {
+  color: var(--warn);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.edgeMarkPanel ul,
+.blockedList {
+  color: var(--muted);
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.criticalAlerts {
+  grid-area: alerts;
+  padding: 18px;
+}
+
+.panelTitleRow {
+  margin-bottom: 12px;
+}
+
+.alertStack,
+.stackList,
+.eventList {
+  display: grid;
+  gap: 10px;
+}
+
+.alertCard {
+  align-items: flex-start;
+  background: rgba(5, 10, 20, 0.52);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+}
+
+.alertCard strong {
+  display: block;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.missionObjectivePanel {
+  display: grid;
+  gap: 14px;
+  grid-area: objective;
+  padding: 18px;
+}
+
+.nextActionBox {
+  background: rgba(47, 184, 255, 0.1);
+  border: 1px solid rgba(47, 184, 255, 0.28);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.nextActionBox span {
+  color: var(--muted);
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.nextActionBox strong {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.planetaryScene {
+  background:
+    radial-gradient(circle at 50% 54%, rgba(47, 184, 255, 0.16), transparent 28%),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.06), transparent 58%),
+    rgba(2, 6, 13, 0.74);
+  border: 1px solid rgba(99, 186, 255, 0.32);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 90px rgba(47, 184, 255, 0.08),
+    0 24px 80px rgba(0, 0, 0, 0.38);
+  grid-area: scene;
+  min-height: 690px;
+  overflow: hidden;
+  position: relative;
+}
+
+.starfield {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 1.6px),
+    radial-gradient(circle, rgba(141, 204, 255, 0.55) 0 1px, transparent 1.8px);
+  background-position:
+    10px 20px,
+    58px 90px;
+  background-size:
+    130px 140px,
+    190px 210px;
+  inset: 0;
+  opacity: 0.26;
+  position: absolute;
+}
+
+.orbitalPath {
+  border: 1px solid rgba(108, 187, 255, 0.18);
+  border-radius: 50%;
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-16deg);
+}
+
+.pathOne {
+  height: 78%;
+  width: 92%;
+}
+
+.pathTwo {
+  height: 56%;
+  transform: translate(-50%, -50%) rotate(20deg);
+  width: 76%;
+}
+
+.pathThree {
+  height: 36%;
+  transform: translate(-50%, -50%) rotate(46deg);
+  width: 58%;
+}
+
+.zoneMap {
+  inset: 0;
+  position: absolute;
+}
+
+.planetNode {
+  align-items: center;
+  background: rgba(4, 9, 18, 0.5);
+  border: 1px solid rgba(151, 188, 222, 0.26);
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  min-height: 116px;
+  padding: 12px;
+  position: absolute;
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+  width: min(44%, 340px);
+}
+
+.planetNode:hover,
+.planetNode:focus-visible,
+.planetNode.active {
+  background: rgba(8, 17, 32, 0.78);
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(47, 184, 255, 0.12), 0 18px 44px rgba(0, 0, 0, 0.3);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.planetNode.selected {
+  border-color: rgba(229, 197, 108, 0.76);
+}
+
+.planetNode.mars {
+  bottom: 5%;
+  left: 7%;
+  width: min(52%, 410px);
+}
+
+.planetNode.moon {
+  left: 10%;
+  top: 12%;
+}
+
+.planetNode.earth {
+  right: 7%;
+  top: 8%;
+}
+
+.planetNode.galaxy {
+  bottom: 18%;
+  right: 8%;
+}
+
+.planetNode.vault {
+  left: 34%;
+  top: 42%;
+  width: min(38%, 320px);
+}
+
+.planetVisual {
+  border-radius: 50%;
+  display: grid;
+  flex: 0 0 88px;
+  height: 88px;
+  place-items: center;
+  position: relative;
+  width: 88px;
+}
+
+.planetVisual::before {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  content: "";
+  inset: -12px;
+  position: absolute;
+}
+
+.planetCore {
+  border-radius: 50%;
+  box-shadow: inset -18px -20px 30px rgba(0, 0, 0, 0.45);
+  height: 74px;
+  position: relative;
+  width: 74px;
+}
+
+.mars .planetCore {
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 210, 154, 0.38), transparent 18%),
+    radial-gradient(circle at 70% 70%, rgba(84, 36, 28, 0.46), transparent 25%),
+    linear-gradient(145deg, #db8656, #9e392d 52%, #4d241d);
+  box-shadow:
+    inset -18px -20px 30px rgba(0, 0, 0, 0.42),
+    0 0 42px rgba(200, 97, 63, 0.38);
+}
+
+.moon .planetCore {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.62), transparent 18%),
+    radial-gradient(circle at 60% 58%, rgba(99, 103, 112, 0.46), transparent 14%),
+    linear-gradient(145deg, #eef2f6, #8f97a5 60%, #394050);
+  box-shadow:
+    inset -18px -20px 30px rgba(0, 0, 0, 0.44),
+    0 0 38px rgba(212, 216, 223, 0.28);
+}
+
+.earth .planetCore {
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.54), transparent 14%),
+    radial-gradient(circle at 44% 52%, rgba(90, 194, 126, 0.72), transparent 19%),
+    radial-gradient(circle at 68% 42%, rgba(52, 114, 196, 0.76), transparent 24%),
+    linear-gradient(145deg, #64d7c0, #1e74c5 54%, #0b244a);
+  box-shadow:
+    inset -18px -20px 30px rgba(0, 0, 0, 0.42),
+    0 0 42px rgba(79, 198, 164, 0.35);
+}
+
+.galaxy .planetCore {
+  background:
+    radial-gradient(circle at 46% 50%, rgba(255, 229, 172, 0.95), transparent 9%),
+    radial-gradient(ellipse at 50% 50%, rgba(122, 79, 255, 0.7), transparent 34%),
+    radial-gradient(ellipse at 50% 50%, rgba(47, 184, 255, 0.42), transparent 58%),
+    #080818;
+  box-shadow:
+    inset -12px -18px 28px rgba(0, 0, 0, 0.48),
+    0 0 52px rgba(161, 120, 255, 0.42);
+}
+
+.vault .planetCore {
+  background:
+    radial-gradient(circle, #020308 0 24%, transparent 25%),
+    conic-gradient(from 20deg, rgba(229, 197, 108, 0.9), rgba(90, 18, 28, 0.2), rgba(122, 79, 255, 0.72), rgba(229, 197, 108, 0.9));
+  box-shadow:
+    inset 0 0 24px rgba(0, 0, 0, 0.88),
+    0 0 56px rgba(229, 197, 108, 0.36);
+}
+
+.zoneCopy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.zoneCopy strong {
+  color: var(--text);
+  font-size: 17px;
+}
+
+.zoneCopy small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.zoneStatus {
+  margin-top: 4px;
+}
+
+.zoneDetailPanel {
+  grid-area: zone;
+  padding: 18px;
+}
+
+.signalGrid,
+.leagueCategories,
+.advancedCategoryGrid,
+.controlGrid {
+  display: grid;
+  gap: 8px;
+}
+
+.signalGrid,
+.leagueCategories,
+.advancedCategoryGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.signalGrid span,
+.leagueCategories span,
+.advancedCategoryGrid span {
+  background: rgba(47, 184, 255, 0.08);
+  border: 1px solid rgba(47, 184, 255, 0.22);
+  border-radius: 8px;
+  color: #dcecff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 10px;
+  text-transform: uppercase;
+}
+
+.paperLeaguePanel {
+  grid-area: paper;
+  padding: 18px;
+}
+
+.astronautTile {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  grid-area: astronaut;
+  padding: 18px;
+}
+
+.helmetPreview {
+  border: 1px solid rgba(212, 216, 223, 0.32);
+  border-radius: 50%;
+  flex: 0 0 54px;
+  height: 54px;
+  position: relative;
+  width: 54px;
+}
+
+.helmetPreview::before {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.46), transparent 18%),
+    linear-gradient(145deg, rgba(47, 184, 255, 0.28), rgba(6, 9, 18, 0.88));
+  border-radius: 50%;
+  content: "";
+  inset: 8px;
+  position: absolute;
+}
+
+.loadingStatus {
+  align-items: center;
+  background: rgba(5, 10, 20, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  gap: 10px;
+  left: 24px;
+  padding: 10px 12px;
+  position: fixed;
+  top: 24px;
+  z-index: 30;
+}
+
+.drawerBackdrop,
+.overlayBackdrop {
+  background: rgba(0, 0, 0, 0.58);
+  inset: 0;
+  position: fixed;
+  z-index: 40;
+}
+
+.advancedDrawer {
+  background: rgba(5, 8, 15, 0.96);
+  border-left: 1px solid var(--line-strong);
+  bottom: 0;
+  box-shadow: -28px 0 80px rgba(0, 0, 0, 0.46);
+  max-width: min(1180px, 96vw);
+  overflow: auto;
+  padding: 22px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 84vw;
+}
+
+.drawerTitle {
+  align-items: center;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.inputHelpOverlay {
+  background: rgba(5, 8, 15, 0.98);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.44);
+  left: 50%;
+  max-width: min(760px, 92vw);
+  padding: 22px;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 760px;
+}
+
+.controlGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.controlGrid div,
+.controllerState {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.controlGrid strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.controllerState {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.controllerState span {
+  color: var(--muted);
+}
+
+.runtimeGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.section {
+  grid-column: span 6;
   padding: 16px;
 }
 
 .section:nth-child(3),
 .section:nth-child(4),
-.section:nth-child(8) {
+.section:nth-child(8),
+.section:nth-child(10),
+.section:nth-child(11) {
   grid-column: span 12;
 }
 
@@ -355,15 +766,14 @@ h3 {
   margin-bottom: 14px;
 }
 
-.sectionTitle {
-  gap: 8px;
-}
-
 .metricsGrid,
 .queueStrip,
 .workerGrid,
 .pressureGrid,
-.failureSplit {
+.failureSplit,
+.workerRoomGrid,
+.operatorStatusGrid,
+.autonomyBridgeGrid {
   display: grid;
   gap: 10px;
 }
@@ -384,6 +794,14 @@ h3 {
 .failureSplit {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-bottom: 12px;
+}
+
+.operatorStatusGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.autonomyBridgeGrid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .metric {
@@ -429,8 +847,8 @@ h3 {
   border-radius: 999px;
   color: var(--text);
   display: inline-flex;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 11px;
+  font-weight: 900;
   justify-content: center;
   min-height: 26px;
   padding: 5px 9px;
@@ -439,34 +857,22 @@ h3 {
 }
 
 .pill.good {
-  background: rgba(79, 180, 119, 0.16);
+  background: rgba(79, 212, 157, 0.16);
   border-color: var(--good);
 }
 
 .pill.warn {
-  background: rgba(227, 179, 65, 0.16);
+  background: rgba(242, 195, 91, 0.16);
   border-color: var(--warn);
 }
 
 .pill.danger {
-  background: rgba(224, 93, 93, 0.16);
+  background: rgba(255, 107, 107, 0.16);
   border-color: var(--danger);
 }
 
-.sourceLabel {
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
-  padding: 3px 7px;
-  text-transform: uppercase;
-}
-
-.sourceLabel.fixture,
-.sourceLabel.danger {
-  border-color: var(--danger);
-  color: var(--danger);
+.pill.neutral {
+  background: rgba(140, 200, 255, 0.1);
 }
 
 .segmented {
@@ -484,7 +890,6 @@ h3 {
   border: 0;
   border-radius: 6px;
   color: var(--muted);
-  cursor: pointer;
   min-height: 32px;
   padding: 6px 10px;
 }
@@ -517,16 +922,12 @@ h3 {
   text-transform: uppercase;
 }
 
-.stackList,
-.eventList {
-  display: grid;
-  gap: 10px;
-}
-
 .listItem,
 .eventItem,
 .workerCard,
-.backpressure {
+.backpressure,
+.operatorStatusCard,
+.autonomyBridgeCard {
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -546,7 +947,9 @@ h3 {
 .eventItem p,
 .workerCard p,
 .backpressure p,
-.nextAction {
+.nextAction,
+.operatorStatusCard p,
+.autonomyBridgeCard p {
   color: var(--muted);
   margin: 7px 0 0;
 }
@@ -587,137 +990,191 @@ h3 {
   padding: 8px 10px;
 }
 
+.search:focus-visible {
+  border-color: var(--neutral);
+  outline: 2px solid rgba(47, 184, 255, 0.2);
+}
+
 .ledgerSummary {
   margin-bottom: 12px;
 }
 
-.advancedTelemetry {
-  border-bottom: 1px solid var(--line);
-}
-
-.advancedTelemetry > summary {
-  align-items: center;
-  cursor: pointer;
+.operatorStatusTop {
+  align-items: flex-start;
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 16px;
   justify-content: space-between;
-  list-style: none;
-  padding: 18px 32px;
 }
 
-.advancedTelemetry > summary::-webkit-details-marker {
-  display: none;
+.operatorStatusMeta {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
 }
 
-.advancedTelemetry > summary span {
-  font-size: 16px;
-  font-weight: 800;
+.operatorStatusMeta div {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+  padding-top: 8px;
 }
 
-.advancedTelemetry > summary small {
+.operatorStatusMeta dt {
   color: var(--muted);
-  font-size: 12px;
-}
-
-.advancedTelemetry > summary::after {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--muted);
-  content: "Open";
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  padding: 5px 9px;
   text-transform: uppercase;
 }
 
-.advancedTelemetry[open] > summary::after {
-  content: "Close";
+.operatorStatusMeta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
-@media (max-width: 980px) {
-  .runtimeHeader,
-  .listItem,
-  .eventItem,
-  .backpressure {
-    align-items: flex-start;
+.autonomyMetrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.warningStrip {
+  align-items: center;
+  background: rgba(242, 195, 91, 0.12);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.bridgeWarning {
+  margin: 12px 0;
+}
+
+@media (max-width: 1180px) {
+  .planetaryLayout {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "intro edge"
+      "objective alerts"
+      "scene scene"
+      "zone paper"
+      "astronaut paper";
+  }
+
+  .planetaryScene {
+    min-height: 620px;
+  }
+}
+
+@media (max-width: 860px) {
+  .commandShell {
+    padding: 16px;
+  }
+
+  .commandHeader {
     flex-direction: column;
+  }
+
+  .commandHeaderStatus {
+    justify-content: flex-start;
+  }
+
+  .safetyStrip,
+  .planetaryLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .planetaryLayout {
+    grid-template-areas:
+      "intro"
+      "edge"
+      "objective"
+      "alerts"
+      "scene"
+      "zone"
+      "paper"
+      "astronaut";
+  }
+
+  .planetaryScene {
+    min-height: auto;
+    padding: 12px;
+  }
+
+  .zoneMap {
+    display: grid;
+    gap: 12px;
+    position: relative;
+  }
+
+  .orbitalPath {
+    display: none;
+  }
+
+  .planetNode,
+  .planetNode.mars,
+  .planetNode.moon,
+  .planetNode.earth,
+  .planetNode.galaxy,
+  .planetNode.vault {
+    inset: auto;
+    position: relative;
+    width: 100%;
+  }
+
+  .advancedDrawer {
+    width: 100vw;
+  }
+
+  .controlGrid,
+  .metricsGrid,
+  .queueStrip,
+  .workerGrid,
+  .operatorStatusGrid,
+  .autonomyMetrics,
+  .pressureGrid,
+  .failureSplit,
+  .signalGrid,
+  .leagueCategories,
+  .advancedCategoryGrid {
+    grid-template-columns: 1fr;
   }
 
   .section,
   .section:nth-child(3),
   .section:nth-child(4),
-  .section:nth-child(8) {
+  .section:nth-child(8),
+  .section:nth-child(10),
+  .section:nth-child(11) {
     grid-column: span 12;
   }
 
-  .metricsGrid,
-  .queueStrip,
-  .workerGrid,
-  .workerRoomGrid,
-  .operatorStatusGrid,
-  .missionCardGrid,
-  .playlistDockGrid,
-  .pressureGrid,
-  .failureSplit {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .listItem,
+  .eventItem,
+  .backpressure,
+  .astronautTile,
+  .controllerState {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
-@media (max-width: 640px) {
-  .runtimeHeader {
-    padding: 20px 16px;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 
-  .operationsHero,
-  .workerRooms,
-  .operatorStatusSlice {
-    padding: 16px;
-  }
-
-  .autonomyBridgeSlice {
-    padding: 16px;
-  }
-
-  .playlistDock {
-    padding: 16px;
-  }
-
-  .advancedTelemetry > summary {
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 16px;
-  }
-
-  .operatorStatusIntro,
-  .operatorStatusTop {
-    flex-direction: column;
-  }
-
-  .runtimeGrid {
-    padding: 12px;
-  }
-
-  .metricsGrid,
-  .queueStrip,
-  .workerGrid,
-  .workerRoomGrid,
-  .operatorStatusGrid,
-  .missionCardGrid,
-  .autonomyMetrics,
-  .playlistDockGrid,
-  .pressureGrid,
-  .failureSplit {
-    grid-template-columns: 1fr;
-  }
-
-  .sectionHeader {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .segmented,
-  .search {
-    width: 100%;
+  .planetNode:hover,
+  .planetNode:focus-visible,
+  .planetNode.active {
+    transform: none;
   }
 }

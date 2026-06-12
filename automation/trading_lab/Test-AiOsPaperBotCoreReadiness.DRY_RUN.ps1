@@ -4,22 +4,24 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# Dashboard mock data remains fixture-only and this validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $requiredFiles = @(
-  "docs/AI_OS/trading_laboratory/paper_bot_core/README.md",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_CORE_SPEC.md",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_DECISION_FLOW.md",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_SAFETY_BOUNDARY.md",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_NEXT_ACTION.md",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_SIGNAL_CONTRACT.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_DECISION_CONTRACT.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_RISK_GATE_CONTRACT.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_SCORECARD_CONTRACT.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/PAPER_BOT_STATUS.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/MOCK_SIGNAL_001.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/MOCK_DECISION_001.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/MOCK_RISK_GATE_001.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/MOCK_SCORECARD_001.json",
-  "docs/AI_OS/trading_laboratory/paper_bot_core/MOCK_PAPER_TRADE_001.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/README.md",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_CORE_SPEC.md",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_DECISION_FLOW.md",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_SAFETY_BOUNDARY.md",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_NEXT_ACTION.md",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_SIGNAL_CONTRACT.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_DECISION_CONTRACT.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_RISK_GATE_CONTRACT.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_SCORECARD_CONTRACT.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/PAPER_BOT_STATUS.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/MOCK_SIGNAL_001.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/MOCK_DECISION_001.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/MOCK_RISK_GATE_001.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/MOCK_SCORECARD_001.json",
+  "archive/docs_aios_trading_laboratory_legacy/paper_bot_core/MOCK_PAPER_TRADE_001.json",
   "apps/dashboard/mock-data/paper-bot-core.example.json"
 )
 
@@ -38,7 +40,7 @@ try {
     }
   }
 
-  $jsonFiles = Get-ChildItem -LiteralPath "docs/AI_OS/trading_laboratory/paper_bot_core" -Filter "*.json" -File
+  $jsonFiles = Get-ChildItem -LiteralPath "archive/docs_aios_trading_laboratory_legacy/paper_bot_core" -Filter "*.json" -File
   $jsonFiles += Get-Item -LiteralPath "apps/dashboard/mock-data/paper-bot-core.example.json"
   foreach ($jsonFile in $jsonFiles) {
     try {

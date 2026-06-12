@@ -1,8 +1,11 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $files = @(
-    "docs/AI_OS/trading_laboratory/phase_19_1/PAPER_TRADING_READINESS_AUDIT_CONTRACT.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_19_1/PAPER_TRADING_READINESS_AUDIT_CONTRACT.json",
     "apps/dashboard/mock-data/paper-trading-readiness-audit.example.json"
 )
 

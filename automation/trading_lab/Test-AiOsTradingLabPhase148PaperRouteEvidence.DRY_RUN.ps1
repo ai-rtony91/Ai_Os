@@ -8,11 +8,13 @@ function Fail {
 
 $repoRoot = (Get-Location).Path
 
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# This validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $requiredFiles = @(
-    "docs/AI_OS/trading_laboratory/phase_14_8/PHASE_14_8_PAPER_ROUTE_EVIDENCE_CONSOLIDATION.md",
-    "docs/AI_OS/trading_laboratory/phase_14_8/PAPER_ROUTE_EVIDENCE_001.json",
-    "docs/AI_OS/trading_laboratory/phase_14_8/PAPER_ROUTE_SAMPLE_RUN_001.json",
-    "docs/AI_OS/trading_laboratory/phase_14_8/PAPER_ROUTE_EVIDENCE_README.md"
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_8/PHASE_14_8_PAPER_ROUTE_EVIDENCE_CONSOLIDATION.md",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_8/PAPER_ROUTE_EVIDENCE_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_8/PAPER_ROUTE_SAMPLE_RUN_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_8/PAPER_ROUTE_EVIDENCE_README.md"
 )
 
 foreach ($relativePath in $requiredFiles) {
@@ -22,7 +24,7 @@ foreach ($relativePath in $requiredFiles) {
     }
 }
 
-$markdownPath = Join-Path $repoRoot "docs/AI_OS/trading_laboratory/phase_14_8/PHASE_14_8_PAPER_ROUTE_EVIDENCE_CONSOLIDATION.md"
+$markdownPath = Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/phase_14_8/PHASE_14_8_PAPER_ROUTE_EVIDENCE_CONSOLIDATION.md"
 $markdownText = Get-Content -LiteralPath $markdownPath -Raw
 $requiredMarkdownTerms = @(
     "paper-only",
@@ -39,8 +41,8 @@ foreach ($term in $requiredMarkdownTerms) {
 }
 
 $jsonFiles = @(
-    "docs/AI_OS/trading_laboratory/phase_14_8/PAPER_ROUTE_EVIDENCE_001.json",
-    "docs/AI_OS/trading_laboratory/phase_14_8/PAPER_ROUTE_SAMPLE_RUN_001.json"
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_8/PAPER_ROUTE_EVIDENCE_001.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_8/PAPER_ROUTE_SAMPLE_RUN_001.json"
 )
 
 foreach ($relativePath in $jsonFiles) {

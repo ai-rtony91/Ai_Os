@@ -3,6 +3,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $failures = New-Object System.Collections.Generic.List[string]
 
 function Add-Failure {
@@ -29,8 +32,8 @@ try {
     "$resultRoot/PAPER_REGIME_RESULT_001.json",
     "$resultRoot/PAPER_VALIDATION_REPORT_001.json",
     "$resultRoot/PAPER_NEXT_ACTION.md",
-    "docs/AI_OS/trading_laboratory/phase_15_4/PHASE_15_4_TRADING_LAB_PAPER_BOT_RUNNER.md",
-    "docs/AI_OS/trading_laboratory/phase_15_4/PAPER_RUNNER_CONTRACT.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_15_4/PHASE_15_4_TRADING_LAB_PAPER_BOT_RUNNER.md",
+    "archive/docs_aios_trading_laboratory_legacy/phase_15_4/PAPER_RUNNER_CONTRACT.json",
     "apps/dashboard/mock-data/trading-lab-paper-runner.example.json"
   )
 
@@ -49,7 +52,7 @@ try {
   }
 
   $jsonFiles = @()
-  foreach ($root in @($fixtureRoot, $resultRoot, "docs/AI_OS/trading_laboratory/phase_15_4")) {
+  foreach ($root in @($fixtureRoot, $resultRoot, "archive/docs_aios_trading_laboratory_legacy/phase_15_4")) {
     if (Test-Path -LiteralPath $root) {
       $jsonFiles += Get-ChildItem -LiteralPath $root -Filter "*.json" -File
     }

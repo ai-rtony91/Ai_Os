@@ -3,12 +3,14 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 Set-Location $repoRoot
 
+# Archive Trading Lab docs referenced below are historical/reference-only evidence.
+# This validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $requiredFiles = @(
-    "docs\AI_OS\trading_laboratory\tradingview_traderspost_bridge\STAGE_14_6_TV_TP_PAPER_BRIDGE.md",
-    "docs\AI_OS\trading_laboratory\tradingview_traderspost_bridge\TV_ALERT_TEMPLATE_GUIDE.md",
-    "docs\AI_OS\trading_laboratory\tradingview_traderspost_bridge\TRADERSPOST_HANDOFF_TEMPLATE_GUIDE.md",
-    "docs\AI_OS\trading_laboratory\tradingview_traderspost_bridge\TV_TP_SAFETY_RULES.md",
-    "docs\AI_OS\trading_laboratory\tradingview_traderspost_bridge\TV_TP_FILE_INDEX.md",
+    "archive\docs_aios_trading_laboratory_legacy\tradingview_traderspost_bridge\STAGE_14_6_TV_TP_PAPER_BRIDGE.md",
+    "archive\docs_aios_trading_laboratory_legacy\tradingview_traderspost_bridge\TV_ALERT_TEMPLATE_GUIDE.md",
+    "archive\docs_aios_trading_laboratory_legacy\tradingview_traderspost_bridge\TRADERSPOST_HANDOFF_TEMPLATE_GUIDE.md",
+    "archive\docs_aios_trading_laboratory_legacy\tradingview_traderspost_bridge\TV_TP_SAFETY_RULES.md",
+    "archive\docs_aios_trading_laboratory_legacy\tradingview_traderspost_bridge\TV_TP_FILE_INDEX.md",
     "apps\trading_lab\trading_lab\tv_tp_bridge\__init__.py",
     "apps\trading_lab\trading_lab\tv_tp_bridge\tv_alert_payload.py",
     "apps\trading_lab\trading_lab\tv_tp_bridge\aios_signal_intake.py",
