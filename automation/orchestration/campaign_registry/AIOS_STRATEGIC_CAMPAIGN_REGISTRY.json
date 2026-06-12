@@ -56,13 +56,13 @@
       "campaign_id": "CAMPAIGN-AIOS-GOVERNANCE",
       "title": "AI_OS Governance Authority",
       "objective": "Keep AI_OS identity, authority, safety, and source-of-truth rules clear before expanding automation.",
-      "status": "IN_PROGRESS",
+      "status": "COMPLETE",
       "priority": "critical",
       "phases": [
         {
           "phase_id": "PHASE-GOV-FOUNDATION",
           "title": "Authority Foundation",
-          "status": "IN_PROGRESS"
+          "status": "COMPLETE"
         }
       ],
       "stages": [
@@ -80,13 +80,15 @@
           "stage_id": "STAGE-GOV-SOURCE-OF-TRUTH-REVIEW",
           "phase_id": "PHASE-GOV-FOUNDATION",
           "title": "Review source-of-truth map against current orchestration state",
-          "status": "READY",
+          "status": "COMPLETE",
           "priority": "high",
           "depends_on": [
             "STAGE-GOV-NAMING-AUTHORITY"
           ],
           "blocked_by": [],
-          "next_packet_candidate": "PKT-GOV-SOURCE-OF-TRUTH-REVIEW-DRYRUN"
+          "next_packet_candidate": null,
+          "completed_by_pr": "https://github.com/ai-rtony91/Ai_Os/pull/608",
+          "completed_by_commit": "b3c772cc"
         }
       ],
       "depends_on": [],
@@ -122,15 +124,17 @@
         "AGENTS.md",
         "README.md",
         "RISK_POLICY.md",
-        "docs/governance/source-of-truth-map.md"
+        "docs/governance/source-of-truth-map.md",
+        "PR #607",
+        "PR #608"
       ],
-      "completion_percent": 70,
-      "progress_basis": "Core identity authority is normalized; source-of-truth review remains open.",
+      "completion_percent": 100,
+      "progress_basis": "Governance source-of-truth review is closed: PR #607 aligned source-of-truth references and PR #608 improved structural clarity for future display-only interfaces. Post-#608 scorecard found no remaining structural blocker.",
       "timeline_estimate": "1-2 work sessions",
-      "next_packet_candidate": "PKT-GOV-SOURCE-OF-TRUTH-REVIEW-DRYRUN",
+      "next_packet_candidate": null,
       "crew_lane": "governance-authority-review",
       "recommended_worker": "EAST_OCC_01",
-      "stop_condition": "Stop after DRY_RUN report unless Human Owner approves APPLY."
+      "stop_condition": "Governance source-of-truth review closed; no further APPLY is authorized by this registry entry."
     },
     {
       "campaign_id": "CAMPAIGN-AIOS-ORCHESTRATION",
