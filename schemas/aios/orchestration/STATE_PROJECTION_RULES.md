@@ -33,6 +33,39 @@ The v0.1.1 schema reconciliation recognizes current AI_OS file shapes and aliase
 
 Schema reconciliation does not change runtime authority. These aliases only let read-only validators and future adapters understand current evidence without mutating runtime state.
 
+## Frontend-Safe Display Contract
+
+Future dashboard, GUI, UE5, VR, AR, and other visual state readers must consume projected state through a display-only envelope before rendering it as an action, card, node, world object, alert, lane, or command.
+
+Every frontend-safe projection should expose these fields:
+
+| Field | Meaning | Safe default |
+|---|---|---|
+| `display_state` | Human-readable state to render, such as `READY`, `REVIEW`, `BLOCKED`, `UNKNOWN`, or `DISPLAY_ONLY` | `UNKNOWN` |
+| `authority_state` | Whether the object is authority or evidence, such as `CANONICAL_AUTHORITY`, `EVIDENCE_ONLY`, `DISPLAY_ONLY`, `LEGACY_REFERENCE`, or `NON_CANONICAL` | `DISPLAY_ONLY` |
+| `source_path` | Primary local source path or API route used for the projection | Exact path or `UNKNOWN` |
+| `source_type` | Source class, such as `canonical`, `generated_projection`, `fixture`, `example`, `archive`, `legacy`, `api_read_model`, or `git_status` | `generated_projection` |
+| `freshness` | Timestamp/TTL/staleness evidence when available | `is_stale=true` when unknown |
+| `blocked_actions` | Actions the frontend must not expose as direct controls | Include protected git, APPLY, approval mutation, lock mutation, worker launch, runtime mutation |
+| `next_safe_action` | Operator-readable next review step | Review evidence before protected action |
+| `approval_required` | Whether mutation/execution of this object would require explicit Human Owner approval | `true` for any protected action |
+| `execution_allowed` | Whether this projection allows execution | `false` |
+| `mutation_allowed` | Whether this projection allows state mutation | `false` |
+| `stale_or_legacy` | Whether the source is stale, legacy, example, archived, or unverified | `true` when uncertain |
+| `safe_for_frontend_display` | Whether the object can be shown to a frontend as display-only data | `true` only when execution and mutation are false |
+
+Frontend readers must treat missing envelope fields as `NEEDS_REVIEW`, not as implicit permission. Visual affordances should default to review, inspect, or copy-only behavior. Buttons that stage files, commit, push, merge, mutate approvals, move packets, claim locks, launch workers, start runtimes, schedule tasks, touch broker/live trading, or access secrets are outside this display contract.
+
+## Source Type Defaults
+
+- `automation/orchestration/work_packets/active`, `blocked`, and `complete` are canonical packet lifecycle evidence; only `active` should be rendered as live work without an explicit state filter.
+- `automation/orchestration/work_packets/proposed`, `deferred`, `rejected`, `templates`, and `examples` are non-live display/reference material.
+- root `work_packets/**` is protected historical evidence, not active queue authority.
+- `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json` and `APPLY_APPROVAL_GATE_001.json` are canonical approval authority evidence, but they still do not authorize a frontend to mutate approval state.
+- root `approvals/**`, `relay/approvals/**`, `telemetry/approvals/**`, and archived approval inbox files are evidence/projection/reference only unless separately promoted by Human Owner.
+- `automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json` and dispatcher queue read models are compatibility or runtime queue evidence; active work routing should prefer work packets plus the campaign registry unless a specific queue mutation packet says otherwise.
+- dashboard mock data and API projections are display sources only; they must never override source-of-truth authority.
+
 ## Worker State Projection
 
 Worker state should be projected from:
@@ -57,7 +90,7 @@ If packet state conflicts across sources, projection must return `NEEDS_REVIEW` 
 
 Command queue state should be projected from `automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json` and related approval or packet evidence.
 
-Queued commands are requests or previews unless an explicit governed approval authorizes the next step. A queue item must not execute itself.
+Queued commands are requests, compatibility records, or previews unless an explicit governed approval authorizes the next step. A queue item must not execute itself, and future frontends must not render queue rows as executable controls.
 
 ## Approval State Projection
 

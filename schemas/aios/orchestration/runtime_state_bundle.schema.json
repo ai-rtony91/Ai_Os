@@ -11,6 +11,7 @@
     "generated_at",
     "mode",
     "authority_boundary",
+    "frontend_contract",
     "packet_state",
     "worker_state",
     "lock_state",
@@ -76,6 +77,9 @@
           }
         }
       }
+    },
+    "frontend_contract": {
+      "$ref": "#/$defs/frontend_contract"
     },
     "packet_state": {
       "$ref": "#/$defs/runtime_section"
@@ -328,6 +332,7 @@
       "additionalProperties": false,
       "required": [
         "status",
+        "frontend_contract",
         "source_paths",
         "summary",
         "items",
@@ -344,6 +349,9 @@
             "BLOCKED",
             "UNKNOWN"
           ]
+        },
+        "frontend_contract": {
+          "$ref": "#/$defs/frontend_contract"
         },
         "source_paths": {
           "type": "array",
@@ -389,6 +397,75 @@
           "minimum": 0
         },
         "is_stale": {
+          "type": "boolean"
+        }
+      }
+    },
+    "frontend_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "display_state",
+        "authority_state",
+        "source_path",
+        "source_type",
+        "freshness",
+        "blocked_actions",
+        "next_safe_action",
+        "approval_required",
+        "execution_allowed",
+        "mutation_allowed",
+        "stale_or_legacy",
+        "safe_for_frontend_display"
+      ],
+      "properties": {
+        "display_state": {
+          "type": "string"
+        },
+        "authority_state": {
+          "type": "string",
+          "enum": [
+            "CANONICAL_AUTHORITY",
+            "EVIDENCE_ONLY",
+            "DISPLAY_ONLY",
+            "LEGACY_REFERENCE",
+            "NON_CANONICAL",
+            "UNKNOWN"
+          ]
+        },
+        "source_path": {
+          "type": "string"
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "freshness": {
+          "$ref": "#/$defs/freshness"
+        },
+        "blocked_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next_safe_action": {
+          "type": "string"
+        },
+        "approval_required": {
+          "type": "boolean"
+        },
+        "execution_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutation_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "stale_or_legacy": {
+          "type": "boolean"
+        },
+        "safe_for_frontend_display": {
           "type": "boolean"
         }
       }

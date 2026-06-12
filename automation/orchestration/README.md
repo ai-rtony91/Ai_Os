@@ -48,6 +48,8 @@ Display and status tools should prefer these approved active paths first:
 - commit packages: `automation/orchestration/commit_packages/`
 - orchestration runtime bundle: `automation/orchestration/runtime/Get-AiOsRuntimeStateBundle.DRY_RUN.ps1`
 - runtime next-command recommendation: `automation/runtime/recommendation/Get-AiOsNextCommand.ps1`
+- frontend-safe state projection contract: `schemas/aios/orchestration/STATE_PROJECTION_RULES.md`
+- runtime visibility read-model schema: `schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.json`
 - operator status: `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1`
 
 Legacy root fallback examples were archived after canonical paths became the preferred source and fallback reads were made optional:
@@ -72,6 +74,7 @@ Status and display scripts may still mention those filenames as optional compati
 - Root `work_packets/**` is not active queue authority; it needs a retention or migration decision before archive.
 - Root `approvals/**` is not active approval authority; it needs a retention or migration decision before archive.
 - Active work routing should prefer `automation/orchestration/work_packets/` plus the campaign registry over command queue compatibility files.
+- `automation/orchestration/work_packets/proposed/`, `deferred/`, `rejected/`, `templates/`, and `examples/` are not active executable work queues.
 - `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` is compatibility evidence until adapter-first use is proven and retirement is approved.
 - `automation/orchestration/*.example.json` files require fixture ownership review before archive.
 - Current duplicate-brain cleanup evidence identifies 0 safe delete candidates.
@@ -86,7 +89,9 @@ Validator-chain output is evidence and validation guidance only; validators do n
 
 Worker registry, worker profiles, lock registry, lane status, and path-conflict policy remain worker-boundary enforcement mechanisms.
 
-Canonical orchestration event schema and state projection authority are still unresolved consolidation work and must not be invented ad hoc.
+State projection and frontend display boundaries are defined in `schemas/aios/orchestration/STATE_PROJECTION_RULES.md`, `schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.json`, and `schemas/aios/orchestration/runtime_state_bundle.schema.json`.
+
+Future dashboard, GUI, UE5, VR, or AR layers may read display-safe projections only. They must preserve `execution_allowed=false`, `mutation_allowed=false`, `safe_for_frontend_display=true`, blocked actions, source paths, source type, freshness, and next safe action. Visual layers must not expose direct controls for APPLY, approval mutation, packet movement, worker launch, lock mutation, runtime mutation, protected git actions, broker/live trading, webhooks, orders, or secrets.
 
 ## Safe Use
 

@@ -27,6 +27,15 @@
     "mode": {
       "type": "string"
     },
+    "frontend_contract": {
+      "$ref": "#/$defs/frontend_contract"
+    },
+    "projection_items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/frontend_contract"
+      }
+    },
     "source_paths": {
       "type": "array",
       "items": {
@@ -124,11 +133,19 @@
       "additionalProperties": true
     },
     "executionLedger": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": true
-      }
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      ]
     },
     "overall_status": {
       "type": "string"
@@ -147,6 +164,96 @@
     },
     "next_safe_action": {
       "type": "string"
+    }
+  },
+  "$defs": {
+    "freshness": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "checked_at": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "is_stale": {
+          "type": "boolean"
+        }
+      }
+    },
+    "frontend_contract": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "display_state",
+        "authority_state",
+        "source_path",
+        "source_type",
+        "freshness",
+        "blocked_actions",
+        "next_safe_action",
+        "approval_required",
+        "execution_allowed",
+        "mutation_allowed",
+        "stale_or_legacy",
+        "safe_for_frontend_display"
+      ],
+      "properties": {
+        "display_state": {
+          "type": "string"
+        },
+        "authority_state": {
+          "type": "string",
+          "enum": [
+            "CANONICAL_AUTHORITY",
+            "EVIDENCE_ONLY",
+            "DISPLAY_ONLY",
+            "LEGACY_REFERENCE",
+            "NON_CANONICAL",
+            "UNKNOWN"
+          ]
+        },
+        "source_path": {
+          "type": "string"
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "freshness": {
+          "$ref": "#/$defs/freshness"
+        },
+        "blocked_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next_safe_action": {
+          "type": "string"
+        },
+        "approval_required": {
+          "type": "boolean"
+        },
+        "execution_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutation_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "stale_or_legacy": {
+          "type": "boolean"
+        },
+        "safe_for_frontend_display": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }
