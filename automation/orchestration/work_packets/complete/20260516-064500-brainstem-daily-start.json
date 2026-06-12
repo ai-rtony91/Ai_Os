@@ -6,7 +6,7 @@
   "assigned_worker": "codex_worker_1",
   "repo": "aios-worker-brainstem",
   "branch": "phase-brainstem-daily-start",
-  "status": "active",
+  "status": "complete",
   "priority": "normal",
   "created_utc": "2026-05-16T06:45:00Z",
   "updated_utc": "2026-05-16T06:45:00Z",
@@ -19,6 +19,6 @@
   ],
   "related_packets": [],
   "notes": [
-    "Example active packet."
+    "Historical complete packet; folder state is authoritative."
   ]
 }

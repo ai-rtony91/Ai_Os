@@ -1,5 +1,6 @@
 param(
-    [switch]$QuietJson
+    [switch]$QuietJson,
+    [switch]$OutputJson
 )
 
 Set-StrictMode -Off
@@ -19,6 +20,29 @@ function Read-JsonFile {
             parse_error = $_.Exception.Message
             path = $Path
         }
+    }
+}
+
+function Invoke-AiOsQuietJsonCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [string[]]$Arguments = @()
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $rawOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $Path @Arguments 2>$null
+        $jsonText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($jsonText)) {
+            return $null
+        }
+        return $jsonText | ConvertFrom-Json
+    }
+    catch {
+        return $null
     }
 }
 
@@ -105,6 +129,8 @@ function Get-ApprovalSummaryReadout {
 
 $runtimeStatePath = "automation/runtime/state/AIOS_RUNTIME_STATE.json"
 $activePacketRoot = "automation/orchestration/work_packets/active"
+$runtimeHealthScript = "automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
+$campaignNextTaskScript = "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
 $validatorRoots = @(
     "automation/validators",
     "automation/orchestration/validators",
@@ -112,6 +138,8 @@ $validatorRoots = @(
 )
 
 $runtimeState = Read-JsonFile -Path $runtimeStatePath
+$runtimeHealthReadout = Invoke-AiOsQuietJsonCommand -Path $runtimeHealthScript -Arguments @("-QuietJson")
+$campaignReadout = Invoke-AiOsQuietJsonCommand -Path $campaignNextTaskScript -Arguments @("-OutputJson")
 $selfBuildDecision = Get-SelfBuildDecisionReadout
 $approvalSummary = Get-ApprovalSummaryReadout
 $gitStatus = @(git status --short)
@@ -134,7 +162,7 @@ if ($activePackets.Count -gt 0) {
 }
 
 $packetStatus = $(if ($packet -and $packet.status) { [string]$packet.status } else { "UNKNOWN" })
-$runtimeHealth = $(if ($runtimeState -and $runtimeState.health) { [string]$runtimeState.health } else { "UNKNOWN" })
+$runtimeHealth = $(if ($runtimeHealthReadout -and $runtimeHealthReadout.health) { [string]$runtimeHealthReadout.health } elseif ($runtimeState -and $runtimeState.health) { [string]$runtimeState.health } else { "UNKNOWN" })
 $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/runtime/reports/Write-AiOsRepoStatusReport.ps1"
 $why = "Start with an operator-readable repo status report."
 $manualWorkRemoved = "Reduces manual checking of git status, packet folders, runtime state, and validator folders."
@@ -156,10 +184,15 @@ elseif ($runtimeHealth -ne "HEALTHY") {
     $why = "Runtime health is $runtimeHealth."
     $manualWorkRemoved = "Points directly to the health check instead of requiring manual folder inspection."
 }
+elseif ($activePackets.Count -eq 0 -and $campaignReadout -and [string]$campaignReadout.overall_readiness -eq "READY_FOR_PACKET_PREVIEW") {
+    $recommendedCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1 -OutputJson"
+    $why = "No active packet is available; campaign registry has a READY packet candidate."
+    $manualWorkRemoved = "Uses the canonical campaign registry instead of searching packet folders manually."
+}
 elseif ($activePackets.Count -eq 0) {
-    $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/runtime/reports/Write-AiOsRepoStatusReport.ps1"
-    $why = "No active packet is available; report current repo position before creating the next packet."
-    $manualWorkRemoved = "Avoids manual search across packet folders."
+    $recommendedCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1 -OutputJson"
+    $why = "No active packet is available and no READY campaign stage was selected."
+    $manualWorkRemoved = "Shows the canonical reason routing cannot select a next packet."
 }
 elseif ($packetStatus -eq "awaiting_approval") {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_detection/Find-AiOsApprovalMatch.DRY_RUN.ps1"
@@ -197,6 +230,8 @@ $result = [ordered]@{
     approval_required = $approvalRequired
     runtime_health = $runtimeHealth
     active_packet_count = $activePackets.Count
+    campaign_readiness = if ($campaignReadout -and $campaignReadout.overall_readiness) { [string]$campaignReadout.overall_readiness } else { "UNKNOWN" }
+    campaign_next_packet_candidate = if ($campaignReadout -and $campaignReadout.next_packet_candidate) { [string]$campaignReadout.next_packet_candidate } else { "" }
     repo_clean = ($gitStatus.Count -eq 0)
     self_build_decision_status = $selfBuildDecision.status
     self_build_operator_route = $selfBuildDecision.operator_route
@@ -217,7 +252,7 @@ $result = [ordered]@{
     push_performed = "NO"
 }
 
-if ($QuietJson) {
+if ($QuietJson -or $OutputJson) {
     $result | ConvertTo-Json -Depth 8
     exit 0
 }
@@ -232,6 +267,10 @@ Write-Host "SAFE TO RUN:"
 Write-Host $result.safe_to_run
 Write-Host "APPROVAL REQUIRED:"
 Write-Host $result.approval_required
+Write-Host "CAMPAIGN READINESS:"
+Write-Host $result.campaign_readiness
+Write-Host "CAMPAIGN NEXT PACKET:"
+Write-Host $result.campaign_next_packet_candidate
 Write-Host "SELF-BUILD DECISION:"
 Write-Host $result.self_build_decision_status
 Write-Host "SELF-BUILD ROUTE:"

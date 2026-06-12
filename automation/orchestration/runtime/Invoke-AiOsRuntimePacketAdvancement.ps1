@@ -6,6 +6,7 @@ $ErrorActionPreference = 'Stop'
 
 $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..\..')).Path
 $activePacketDir = Join-Path $repoRoot 'automation\orchestration\work_packets\active'
+$packetStateMover = Join-Path $repoRoot 'automation\orchestration\work_packets\Move-AiOsPacketState.ps1'
 
 $statusMoves = @{
     'active' = 'routed'
@@ -53,6 +54,11 @@ if (-not $Apply) {
     exit 0
 }
 
+if (-not (Test-Path -LiteralPath $packetStateMover -PathType Leaf)) {
+    Write-Host ''
+    Write-Host "BLOCKED: packet state mover not found: $packetStateMover" -ForegroundColor Red
+    exit 1
+}
 
 powershell -ExecutionPolicy Bypass -File checkpoints/verify_success.ps1
 
@@ -62,24 +68,15 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+& powershell -NoProfile -ExecutionPolicy Bypass -File $packetStateMover -PacketPath $packetFile.FullName -TargetState $nextStatus -Worker "runtime_packet_advancement" -Apply
 
-$packet.status = $nextStatus
-$packet.updated_utc = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-
-$note = 'Advanced by runtime packet advancement.'
-if ($null -eq $packet.notes) {
-    $packet.notes = @($note)
-} elseif ($packet.notes -is [System.Array]) {
-    $packet.notes = @($packet.notes) + $note
-} else {
-    $packet.notes = @([string]$packet.notes, $note)
+if ($LASTEXITCODE -ne 0) {
+    Write-Host ''
+    Write-Host 'BLOCKED: packet state mover rejected the transition' -ForegroundColor Red
+    exit 1
 }
 
-$packet |
-    ConvertTo-Json -Depth 20 |
-    Set-Content -LiteralPath $packetFile.FullName -Encoding UTF8
-
 Write-Host 'Mode: APPLY'
-Write-Host 'Packet updated: YES'
+Write-Host 'Packet update delegated: YES'
 Write-Host 'Commit performed: NO'
 Write-Host 'Push performed: NO'

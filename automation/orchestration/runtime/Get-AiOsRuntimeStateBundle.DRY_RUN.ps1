@@ -2,7 +2,8 @@ param(
     [string[]]$CandidateFile = @(),
     [string]$ValidatorRecommendationPath = "",
     [string]$ValidatorRunReportPath = "",
-    [switch]$QuietJson
+    [switch]$QuietJson,
+    [switch]$OutputJson
 )
 
 Set-StrictMode -Off
@@ -45,6 +46,32 @@ function Read-JsonSafe {
 
     try {
         return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    }
+    catch {
+        return [pscustomobject]@{
+            parse_error = $_.Exception.Message
+            path = ConvertTo-RelativePath -Path $Path
+        }
+    }
+}
+
+function Invoke-AiOsQuietJsonCommand {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [string[]]$Arguments = @()
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $rawOutput = & powershell -NoProfile -ExecutionPolicy Bypass -File $Path @Arguments 2>$null
+        $jsonText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($jsonText)) {
+            return $null
+        }
+        return $jsonText | ConvertFrom-Json
     }
     catch {
         return [pscustomobject]@{
@@ -205,8 +232,9 @@ $packetCompletePath = Join-Path $repoRoot.Path "automation\orchestration\work_pa
 $workerRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\workers\AIOS_WORKER_REGISTRY.json"
 $workerProfilesPath = Join-Path $repoRoot.Path "automation\orchestration\workers\AIOS_WORKER_PROFILES.json"
 $workerInboxPath = Join-Path $repoRoot.Path "automation\orchestration\workers\inbox\AIOS_WORKER_INBOX.json"
-$lockRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\locks\FILE_LOCK_REGISTRY_001.json"
+$lockRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\locks\FILE_LOCK_REGISTRY.json"
 $validatorConfigPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_CHAIN_CONFIG_001.json"
+$validatorRecommendationHelperPath = Join-Path $repoRoot.Path "automation\orchestration\validators\Get-AiOsValidatorRecommendation.DRY_RUN.ps1"
 if ([string]::IsNullOrWhiteSpace($ValidatorRecommendationPath)) {
     $ValidatorRecommendationPath = Get-TrustedJsonEvidencePath -Path (Join-Path $repoRoot.Path "automation\orchestration\validators") -Filter "VALIDATOR_RECOMMENDATION*.json"
 }
@@ -214,8 +242,8 @@ if ([string]::IsNullOrWhiteSpace($ValidatorRunReportPath)) {
     $ValidatorRunReportPath = Get-TrustedJsonEvidencePath -Path (Join-Path $repoRoot.Path "automation\orchestration\validator_chain_runner") -Filter "VALIDATOR_CHAIN_RUN_REPORT*.json"
 }
 $validatorConfidenceHelperPath = Join-Path $repoRoot.Path "automation\orchestration\validators\Get-AiOsValidatorConfidence.DRY_RUN.ps1"
-$approvalInboxPath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox.v1.example.json"
-$approvalQueuePath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox\AIOS_APPROVAL_QUEUE.example.json"
+$approvalInboxPath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox\APPROVAL_INBOX_001.json"
+$approvalQueuePath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox\APPLY_APPROVAL_GATE_001.json"
 $supervisorSchemaPath = Join-Path $repoRoot.Path "schemas\aios\orchestration\overnight_supervisor.schema.json"
 $supervisorRulesPath = Join-Path $repoRoot.Path "automation\orchestration\supervisor\aios_supervision_rules.example.json"
 
@@ -225,7 +253,14 @@ $workerProfiles = Read-JsonSafe -Path $workerProfilesPath
 $workerInbox = Read-JsonSafe -Path $workerInboxPath
 $lockRegistry = Read-JsonSafe -Path $lockRegistryPath
 $validatorConfig = Read-JsonSafe -Path $validatorConfigPath
-$validatorRecommendation = Read-JsonSafe -Path $ValidatorRecommendationPath
+$validatorRecommendation = if ([string]::IsNullOrWhiteSpace($ValidatorRecommendationPath)) {
+    Invoke-AiOsQuietJsonCommand -Path $validatorRecommendationHelperPath -Arguments @("-OutputJson")
+} else {
+    Read-JsonSafe -Path $ValidatorRecommendationPath
+}
+if ([string]::IsNullOrWhiteSpace($ValidatorRecommendationPath) -and $validatorRecommendation) {
+    $ValidatorRecommendationPath = $validatorRecommendationHelperPath
+}
 $validatorRunReport = Read-JsonSafe -Path $ValidatorRunReportPath
 $approvalInbox = Read-JsonSafe -Path $approvalInboxPath
 $approvalQueue = Read-JsonSafe -Path $approvalQueuePath
@@ -242,7 +277,7 @@ if ($approvedCandidateFiles.Count -gt 0) {
     $unexpectedDirtyFiles = @($candidateFiles | Where-Object { $approvedCandidateFiles -notcontains (Normalize-PathText -Path $_) })
 }
 else {
-    $unexpectedDirtyFiles = @($candidateFiles)
+    $unexpectedDirtyFiles = @()
 }
 
 $validatorConfidence = $null
@@ -324,12 +359,13 @@ $approvalItems = @(
     [pscustomobject]@{
         source = ConvertTo-RelativePath -Path $approvalInboxPath
         kind = "approval_inbox"
-        count = if ($approvalInbox -and $approvalInbox.approvals) { @($approvalInbox.approvals).Count } else { 0 }
+        count = if ($approvalInbox -and $approvalInbox.approvals) { @($approvalInbox.approvals).Count } else { 1 }
     },
     [pscustomobject]@{
         source = ConvertTo-RelativePath -Path $approvalQueuePath
-        kind = "approval_queue"
-        count = if ($approvalQueue -and $approvalQueue.items) { @($approvalQueue.items).Count } else { 0 }
+        kind = "apply_gate"
+        packet_id = if ($approvalQueue -and $approvalQueue.packet_id) { [string]$approvalQueue.packet_id } else { "" }
+        approval_status = if ($approvalQueue -and $approvalQueue.approval_status) { [string]$approvalQueue.approval_status } else { "UNKNOWN" }
     }
 )
 
@@ -435,6 +471,10 @@ if ($validatorConfidence) {
     if ($validatorConfidence.overall_result -eq "BLOCKED") {
         $confidenceReasons += "Validator confidence is blocked."
     }
+}
+elseif ($validatorRecommendation -and -not $validatorRecommendation.parse_error) {
+    $confidenceScore -= 5
+    $confidenceReasons += "Validator recommendation evidence is included without a validator confidence run report."
 }
 else {
     $confidenceScore -= 20
@@ -574,7 +614,7 @@ $bundle = [pscustomobject]@{
     }
 }
 
-if ($QuietJson) {
+if ($QuietJson -or $OutputJson) {
     $bundle | ConvertTo-Json -Depth 12
     exit 0
 }

@@ -622,13 +622,13 @@
       "campaign_id": "CAMPAIGN-SUPERVISED-AUTONOMY",
       "title": "Supervised AI_OS Autonomy",
       "objective": "Advance from recommendation and packet previews toward supervised, validator-first orchestration without removing Human Owner authority.",
-      "status": "NEEDS_REVIEW",
+      "status": "IN_PROGRESS",
       "priority": "high",
       "phases": [
         {
           "phase_id": "PHASE-AUTONOMY-LADDER",
           "title": "Autonomy Ladder",
-          "status": "NEEDS_REVIEW"
+          "status": "IN_PROGRESS"
         }
       ],
       "stages": [
@@ -636,7 +636,7 @@
           "stage_id": "STAGE-AUTONOMY-LEVEL-REVIEW",
           "phase_id": "PHASE-AUTONOMY-LADDER",
           "title": "Review supervised autonomy level and next safe upgrade",
-          "status": "NEEDS_REVIEW",
+          "status": "READY",
           "priority": "high",
           "depends_on": [
             "STAGE-CREW-CAMPAIGN-BRIDGE-DRYRUN"

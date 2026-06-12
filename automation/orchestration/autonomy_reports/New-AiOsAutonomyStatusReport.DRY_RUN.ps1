@@ -6,8 +6,9 @@ param(
     [string]$SelfBuildEvidencePath = "Reports/self_build_cycle/latest_self_build_cycle.evidence.json",
     [string]$ApprovalSummaryScriptPath = "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
     [string]$ApprovalInboxPath = "automation/orchestration/approval_inbox",
-    [string]$OutputMarkdownPath = "Reports/autonomy_control_plane/autonomy_status_report.md",
-    [string]$OutputJsonPath = "Reports/autonomy_control_plane/autonomy_status_report.json"
+    [string]$OutputMarkdownPath = "",
+    [string]$OutputJsonPath = "",
+    [switch]$WriteOutput
 )
 
 $ErrorActionPreference = "Stop"
@@ -186,6 +187,18 @@ function Invoke-ApprovalSummaryReadOnly {
 try {
     $repoRoot = Get-AiOsRepoRoot
     Set-Location -Path $repoRoot
+    $shouldWriteOutput = (
+        $WriteOutput -or
+        -not [string]::IsNullOrWhiteSpace($OutputMarkdownPath) -or
+        -not [string]::IsNullOrWhiteSpace($OutputJsonPath)
+    )
+    if ($shouldWriteOutput -and [string]::IsNullOrWhiteSpace($OutputMarkdownPath)) {
+        $OutputMarkdownPath = "Reports/autonomy_control_plane/autonomy_status_report.md"
+    }
+    if ($shouldWriteOutput -and [string]::IsNullOrWhiteSpace($OutputJsonPath)) {
+        $OutputJsonPath = "Reports/autonomy_control_plane/autonomy_status_report.json"
+    }
+
     $outputMarkdownPath = Resolve-AiOsPath -PathHint $OutputMarkdownPath -RepoRoot $repoRoot
     $outputJsonPath = Resolve-AiOsPath -PathHint $OutputJsonPath -RepoRoot $repoRoot
     $discoveryPath = Resolve-AiOsPath -PathHint $DiscoveryReportPath -RepoRoot $repoRoot
@@ -303,8 +316,9 @@ try {
         blocker_summary = @(
             Emit-BlockedSummary -Items $blockers
         )
-        created_markdown_path = $outputMarkdownPath
-        created_json_path = $outputJsonPath
+        output_write_performed = if ($shouldWriteOutput) { "YES" } else { "NO" }
+        created_markdown_path = if ($shouldWriteOutput) { $outputMarkdownPath } else { $null }
+        created_json_path = if ($shouldWriteOutput) { $outputJsonPath } else { $null }
     }
 
     if ($summary.blocker_summary.Count -eq 1 -and $summary.blocker_summary[0] -eq "No blockers detected.") {
@@ -388,8 +402,10 @@ try {
 - This report is DRY-RUN only and does not execute merges, applies, broker actions, live trading, or secret commands.
 "@
 
-    Write-TextAtomic -Path $outputJsonPath -Text ($summary | ConvertTo-Json -Depth 20)
-    Write-TextAtomic -Path $outputMarkdownPath -Text $markdown
+    if ($shouldWriteOutput) {
+        Write-TextAtomic -Path $outputJsonPath -Text ($summary | ConvertTo-Json -Depth 20)
+        Write-TextAtomic -Path $outputMarkdownPath -Text $markdown
+    }
 
     Write-Output ($summary | ConvertTo-Json -Depth 20)
 
