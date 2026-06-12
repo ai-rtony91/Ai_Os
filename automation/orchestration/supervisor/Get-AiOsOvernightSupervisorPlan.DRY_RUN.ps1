@@ -42,17 +42,17 @@ $branchLine = @($statusLines | Where-Object { $_ -like "## *" } | Select-Object 
 $changedFiles = @($statusLines | Where-Object { $_ -match "^\s*M\s+" } | ForEach-Object { ($_ -replace "^\s*M\s+", "").Trim() })
 $untrackedItems = @($statusLines | Where-Object { $_ -match "^\?\?\s+" } | ForEach-Object { ($_ -replace "^\?\?\s+", "").Trim() })
 
-$queueHealthPath = Join-Path $repoRoot.Path "automation\orchestration\queue_health_supervisor.v1.example.json"
 $validatorConfigPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_CHAIN_CONFIG_001.json"
-$approvalInboxPath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox.v1.example.json"
+$approvalInboxPath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox\APPROVAL_INBOX_001.json"
+$approvalGatePath = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox\APPLY_APPROVAL_GATE_001.json"
 $approvalInboxFolder = Join-Path $repoRoot.Path "automation\orchestration\approval_inbox"
 $workPacketFolder = Join-Path $repoRoot.Path "automation\orchestration\work_packets"
 $commitPackageFolder = Join-Path $repoRoot.Path "automation\orchestration\commit_packages"
 $workerRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\workers\AIOS_WORKER_REGISTRY.json"
 
-$queueHealth = Read-JsonFile -Path $queueHealthPath
 $validatorConfig = Read-JsonFile -Path $validatorConfigPath
 $approvalInbox = Read-JsonFile -Path $approvalInboxPath
+$approvalGate = Read-JsonFile -Path $approvalGatePath
 $workerRegistry = Read-JsonFile -Path $workerRegistryPath
 
 function Get-JsonLeafFiles {
@@ -175,12 +175,12 @@ if ($packetFlow.Count -eq 0) {
 }
 
 $stalePackets = @()
-if ($queueHealth -and $queueHealth.stale_packet_visibility) {
-    $stalePackets = @($queueHealth.stale_packet_visibility | ForEach-Object {
+if ($packetFlow.Count -gt 0) {
+    $stalePackets = @($packetFlow | Where-Object { $_.packet_state -eq "STALE" } | ForEach-Object {
         [pscustomobject]@{
             packet_id = [string]$_.packet_id
-            state = [string]$_.visibility_state
-            reason = [string]$_.notes
+            state = [string]$_.packet_state
+            reason = [string]$_.escalation_reason
             next_safe_action = "Review stale packet evidence; do not move packet state without separate APPLY approval."
         }
     })
@@ -236,21 +236,25 @@ if ($untrackedItems.Count -gt 0) {
         next_safe_action = "Classify untracked items before staging, cleanup, or commit."
     }
 }
-if (-not $queueHealth) {
+if (-not (Test-Path -LiteralPath $workPacketFolder -PathType Container)) {
     $escalationItems += [pscustomobject]@{
         severity = "WARNING"
-        trigger = "queue_health_unavailable"
-        evidence = (Get-RelativePathSafe -Path $queueHealthPath)
-        next_safe_action = "Restore or review queue health read model before trusting stale packet summaries."
+        trigger = "work_packet_folder_unavailable"
+        evidence = (Get-RelativePathSafe -Path $workPacketFolder)
+        next_safe_action = "Restore or review canonical work packet evidence before trusting packet summaries."
     }
 }
 
+$approvalJsonFiles = Get-JsonLeafFiles -Path $approvalInboxFolder
 $approvalCount = 0
 if ($approvalInbox -and $approvalInbox.items) {
     $approvalCount = @($approvalInbox.items).Count
+} elseif ($approvalJsonFiles.Count -gt 0) {
+    $approvalCount = $approvalJsonFiles.Count
+} elseif ($approvalGate) {
+    $approvalCount = 1
 }
 
-$approvalJsonFiles = Get-JsonLeafFiles -Path $approvalInboxFolder
 $approvalRequired = @($packetFlow | Where-Object { $_.approval_required } | ForEach-Object {
     [pscustomobject]@{
         packet_id = [string]$_.packet_id
@@ -421,7 +425,7 @@ $report = [pscustomobject]@{
     next_safe_actions = $nextSafeActions
     packet_drafts = $packetDrafts
     morning_brief = [pscustomobject]@{
-        summary = "Overnight Supervisor DRY_RUN inspected repo status, queue health evidence, validator configuration, approval count, and worker count."
+        summary = "Overnight Supervisor DRY_RUN inspected repo status, canonical work packet evidence, validator configuration, approval inbox evidence, and worker count."
         blockers = @($escalationItems | Where-Object { $_.severity -eq "BLOCKED" } | ForEach-Object { $_.trigger })
         approval_needed = $approvalNeeded
         review_items = @(
