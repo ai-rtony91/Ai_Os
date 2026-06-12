@@ -1,0 +1,276 @@
+{
+  "schema": "AIOS_LOCKOUT_SAFE_LOGIN_IMPLEMENTATION_PLAN.v1",
+  "generated_at": "2026-06-11",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1",
+  "lane": "login-security-implementation-plan",
+  "current_identity_baseline": {
+    "windows_omen_login": {
+      "status": "CONFIRMED_UNCHANGED",
+      "rule": "Local fallback only; not an end-user or provider-admin substitute."
+    },
+    "azure_cli": {
+      "production_account": "ai.tradeplatform@Algotradez.onmicrosoft.com",
+      "tenant_id": "feb18abf-17ea-4d88-a4ac-05ffcd6ecb8b",
+      "subscription_name": "Subscription 1",
+      "subscription_state": "Enabled",
+      "prior_account": "my.laboratory@outlook.com",
+      "prior_account_rule": "Do not use for production AI_OS cloud resources unless separately approved.",
+      "tenant_id_secret": false
+    },
+    "azure_portal_browser": {
+      "recommended_identity": "AI TRADEZ dedicated browser profile",
+      "status": "UNRESOLVED_MANUAL_CONFIRMATION_REQUIRED"
+    },
+    "github": {
+      "cli_identity": "ai-rtony91",
+      "git_author": "ai-rtony91",
+      "git_email": "270783377+ai-rtony91@users.noreply.github.com"
+    },
+    "cloudflare_admin_identity": {
+      "status": "UNRESOLVED_MANUAL_CONFIRMATION_REQUIRED",
+      "required_class": "business_admin"
+    },
+    "recovery_email_class": {
+      "status": "UNRESOLVED_MANUAL_CONFIRMATION_REQUIRED",
+      "rule": "Separate from primary Microsoft reset loop."
+    },
+    "break_glass_account": {
+      "status": "UNRESOLVED_MANUAL_CONFIRMATION_REQUIRED",
+      "rule": "Independent from same Microsoft reset loop."
+    }
+  },
+  "implementation_phases": [
+    {
+      "phase": 0,
+      "name": "Repo, T9, and identity baseline",
+      "future_action": "Confirm clean repo, T9 savepoint, and identity inventory.",
+      "gate": "Clean Git status, current origin/main, and T9 savepoint approval.",
+      "stop_point": "Stop before provider dashboards."
+    },
+    {
+      "phase": 1,
+      "name": "Cloudflare account/admin identity confirmation",
+      "future_action": "Confirm Cloudflare admin account class, owner, recovery paths, and second admin path.",
+      "gate": "Anthony manual confirmation; no API tokens.",
+      "stop_point": "Stop before changing Cloudflare."
+    },
+    {
+      "phase": 2,
+      "name": "Cloudflare Access application design",
+      "future_action": "Define Access application, policies, groups, session settings, and deny-by-default behavior.",
+      "gate": "Review-only policy design approval.",
+      "stop_point": "Stop before creating Access app."
+    },
+    {
+      "phase": 3,
+      "name": "Microsoft/Entra primary provider setup plan",
+      "future_action": "Plan Microsoft/Entra as primary admin login provider.",
+      "gate": "Confirm AI TRADEZ portal profile and recovery separation.",
+      "stop_point": "Stop before Entra or Cloudflare provider setup."
+    },
+    {
+      "phase": 4,
+      "name": "GitHub backup provider setup plan",
+      "future_action": "Plan GitHub backup login provider.",
+      "gate": "Confirm GitHub account health and recovery path.",
+      "stop_point": "Stop before GitHub OAuth or provider setup."
+    },
+    {
+      "phase": 5,
+      "name": "Google optional fallback decision",
+      "future_action": "Decide whether Google improves recovery or creates account sprawl.",
+      "gate": "Anthony decision with independent recovery evidence.",
+      "stop_point": "Stop before Google OAuth or provider setup."
+    },
+    {
+      "phase": 6,
+      "name": "Cloudflare OTP emergency fallback constraints",
+      "future_action": "Define allowed OTP addresses and emergency-only use.",
+      "gate": "Confirm OTP mailbox is independently recoverable.",
+      "stop_point": "Stop before enabling OTP."
+    },
+    {
+      "phase": 7,
+      "name": "Break-glass account and recovery procedure",
+      "future_action": "Define owner, account class, MFA/recovery separation, and drill cadence.",
+      "gate": "Anthony manual confirmation.",
+      "stop_point": "Stop before relying on break-glass for exposure."
+    },
+    {
+      "phase": 8,
+      "name": "Turnstile site and secret handling plan",
+      "future_action": "Define site key use, secret storage outside repo, and backend verification.",
+      "gate": "Secret handling plan approved.",
+      "stop_point": "Stop before Turnstile creation or secret handling."
+    },
+    {
+      "phase": 9,
+      "name": "Local dashboard exposure boundary",
+      "future_action": "Define remote exposure prerequisites.",
+      "gate": "Cloudflare Access proof plan approved.",
+      "stop_point": "Stop before DNS, tunnel, or dashboard exposure."
+    },
+    {
+      "phase": 10,
+      "name": "Dry proof before remote exposure",
+      "future_action": "Prove Access login paths, denial behavior, no-secret status, and local fallback.",
+      "gate": "Proof checklist complete.",
+      "stop_point": "Stop before remote exposure."
+    },
+    {
+      "phase": 11,
+      "name": "Staged implementation packet",
+      "future_action": "Generate exact APPLY packets for one provider change at a time.",
+      "gate": "Separate Anthony approval for each provider action.",
+      "stop_point": "Stop after each packet and validation."
+    },
+    {
+      "phase": 12,
+      "name": "Rollback and lockout drill",
+      "future_action": "Run safe lockout drill, verify rollback path, and record proof.",
+      "gate": "Anthony approval and no-secrets evidence.",
+      "stop_point": "Stop after clean Git status and T9 savepoint."
+    }
+  ],
+  "provider_plan": {
+    "cloudflare_access": {
+      "role": "Front-door identity gate.",
+      "setup_order": [
+        "confirm_admin_identity_and_recovery",
+        "define_access_application",
+        "define_deny_by_default_policy",
+        "add_microsoft_primary_after_recovery_checks",
+        "add_github_backup_after_account_health_check",
+        "decide_google_and_otp",
+        "prove_access_blocks_unauthenticated_access"
+      ],
+      "does_not_replace": [
+        "backend_role_checks",
+        "aios_approval_gates"
+      ]
+    },
+    "microsoft_entra": {
+      "role": "Primary admin login provider.",
+      "preconditions": [
+        "Azure Portal uses AI TRADEZ dedicated browser profile",
+        "recovery email class is separate from Microsoft reset loop",
+        "break-glass account is defined",
+        "Cloudflare admin has two recovery paths",
+        "no secrets copied into repo"
+      ]
+    },
+    "github": {
+      "role": "Backup operator login provider.",
+      "identity": "ai-rtony91",
+      "rules": [
+        "confirm account recovery and MFA",
+        "prove login independent from Microsoft",
+        "do not bypass repo or AI_OS protected-action gates"
+      ]
+    },
+    "google": {
+      "role": "Optional fallback.",
+      "decision": "Use only if it provides independent recovery without account sprawl."
+    },
+    "cloudflare_otp": {
+      "role": "Emergency fallback.",
+      "constraints": [
+        "emergency use only",
+        "approved emergency email class only",
+        "not trapped in primary Microsoft reset loop",
+        "periodic review required"
+      ]
+    },
+    "turnstile": {
+      "role": "Bot/human check, not identity authority.",
+      "rules": [
+        "public site key may be in browser",
+        "secret key must stay outside repo",
+        "backend verifies token server-side",
+        "passing Turnstile grants no app role or action authority"
+      ]
+    }
+  },
+  "lockout_controls": {
+    "minimum_independent_admin_paths": 2,
+    "required_controls": [
+      "break-glass account independent from same Microsoft reset loop",
+      "recovery email separated from primary Microsoft account",
+      "local Omen fallback retained",
+      "emergency access checklist",
+      "pre-change rollback path",
+      "post-change login proof",
+      "periodic access review"
+    ],
+    "local_fallback": "Omen/Windows login remains unchanged.",
+    "dashboard_exposure_rule": "Dashboard remains blocked until Access policy is proven."
+  },
+  "rollback_plan": {
+    "before_each_provider_apply": [
+      "confirm clean repo",
+      "record T9 savepoint",
+      "record current provider state with screenshots/manual confirmation only",
+      "confirm at least two admin access paths",
+      "define backout path for exact provider change",
+      "stop if primary and backup logins are not both available"
+    ],
+    "after_each_provider_apply": [
+      "test changed login path",
+      "test independent backup login path",
+      "verify local Omen fallback",
+      "verify no secrets committed",
+      "verify git status clean after merge",
+      "create T9 savepoint after major merge"
+    ],
+    "lockout_response": "Stop and revert only the last provider change using the last known admin path; do not make additional provider changes while locked out or partially locked out."
+  },
+  "proof_requirements": [
+    "Cloudflare Access test user can log in",
+    "Microsoft primary admin can log in",
+    "GitHub backup can log in",
+    "break-glass path is tested without using daily admin",
+    "Turnstile token validation is proven in backend only",
+    "dashboard is inaccessible without Cloudflare Access",
+    "local Omen fallback still works",
+    "no secrets committed",
+    "git status clean after each step",
+    "T9 savepoint after each major merge",
+    "AI_OS approval gates still control protected actions"
+  ],
+  "forbidden_actions": [
+    "configure_cloudflare",
+    "configure_azure",
+    "configure_entra",
+    "configure_github_oauth",
+    "configure_google_oauth",
+    "create_or_change_dns",
+    "create_or_change_tunnels",
+    "configure_turnstile",
+    "configure_otp",
+    "expose_dashboard",
+    "access_request_write_or_store_secrets",
+    "edit_env",
+    "mutate_runtime",
+    "mutate_scheduler",
+    "mutate_queues",
+    "mutate_approval_inbox",
+    "mutate_worker_inbox",
+    "mutate_command_queue",
+    "touch_broker_or_live_trading_paths",
+    "delete_files",
+    "push_to_main",
+    "merge",
+    "close_prs"
+  ],
+  "next_packet": {
+    "path": "automation/orchestration/work_packets/proposed/AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN.md",
+    "mode": "DRY_RUN",
+    "purpose": "Prepare Cloudflare provider setup checklist before any provider dashboard change.",
+    "provider_changes_allowed": false,
+    "secrets_allowed": false,
+    "dns_tunnel_dashboard_exposure_allowed": false
+  },
+  "status": "DRY_RUN_IMPLEMENTATION_PLAN_READY_FOR_REVIEW_NO_PROVIDER_CHANGES_NO_SECRETS_STORED"
+}
+
