@@ -131,6 +131,7 @@ $runtimeStatePath = "automation/runtime/state/AIOS_RUNTIME_STATE.json"
 $activePacketRoot = "automation/orchestration/work_packets/active"
 $runtimeHealthScript = "automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
 $campaignNextTaskScript = "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
+$commitPackageRecommendationScript = "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
 $validatorRoots = @(
     "automation/validators",
     "automation/orchestration/validators",
@@ -143,6 +144,11 @@ $campaignReadout = Invoke-AiOsQuietJsonCommand -Path $campaignNextTaskScript -Ar
 $selfBuildDecision = Get-SelfBuildDecisionReadout
 $approvalSummary = Get-ApprovalSummaryReadout
 $gitStatus = @(git status --short)
+$commitPackageReadout = if ($gitStatus.Count -gt 0) {
+    Invoke-AiOsQuietJsonCommand -Path $commitPackageRecommendationScript -Arguments @("-OutputJson")
+} else {
+    $null
+}
 $activePackets = @()
 if (Test-Path -LiteralPath $activePacketRoot -PathType Container) {
     $activePackets = @(Get-ChildItem -LiteralPath $activePacketRoot -File -Filter "*.json" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending)
@@ -168,6 +174,13 @@ $why = "Start with an operator-readable repo status report."
 $manualWorkRemoved = "Reduces manual checking of git status, packet folders, runtime state, and validator folders."
 $safeToRun = "YES - read-only inspection only."
 $approvalRequired = "NO"
+$level5Validators = @(
+    "git diff --check",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1"
+)
 
 if (-not $runtimeState) {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/runtime/state/Write-AiOsRuntimeState.ps1"
@@ -178,6 +191,12 @@ elseif ($runtimeState.parse_error) {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/runtime/state/Write-AiOsRuntimeState.ps1"
     $why = "Runtime state JSON could not be parsed."
     $manualWorkRemoved = "Rebuilds the operator summary from runtime health checks."
+}
+elseif ($gitStatus.Count -gt 0 -and $commitPackageReadout) {
+    $recommendedCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1 -OutputJson"
+    $why = "Working tree has changes; Level 5 preparation should produce an exact-file commit package preview and stop before staging."
+    $manualWorkRemoved = "Replaces manual changed-file triage with a DRY_RUN commit package preview, validator list, and risk flags."
+    $approvalRequired = "YES - required before staging or commit"
 }
 elseif ($runtimeHealth -ne "HEALTHY") {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
@@ -209,15 +228,28 @@ elseif (-not $validatorPresent) {
     $why = "No validator folder was found."
     $manualWorkRemoved = "Surfaces validator absence before execution work starts."
 }
-elseif ($gitStatus.Count -gt 0) {
-    $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/runtime/reports/Write-AiOsRepoStatusReport.ps1"
-    $why = "Working tree has changes and should be summarized before selective commit decisions."
-    $manualWorkRemoved = "Collects changed files and packet context in one operator report."
-}
 else {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/advancement/Invoke-AiOsPacketAdvancement.DRY_RUN.ps1"
     $why = "Runtime is healthy, validators are present, and an active packet can continue in DRY_RUN."
     $manualWorkRemoved = "Turns packet state into the next safe command."
+}
+
+$commitPackageChangedFiles = @()
+$commitPackageRecommendedFiles = @()
+$commitPackageRiskFlags = @()
+if ($commitPackageReadout) {
+    $commitPackageChangedFiles = @(
+        @($commitPackageReadout.changed_files)
+        @($commitPackageReadout.new_files)
+    ) | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Sort-Object -Unique
+    $commitPackageRecommendedFiles = @($commitPackageReadout.recommended_files | ForEach-Object { [string]$_.path } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique)
+    $commitPackageRiskFlags = @($commitPackageReadout.risks | ForEach-Object {
+        if ($_.path -and $_.risk) {
+            "$($_.path): $($_.risk)"
+        } else {
+            [string]$_
+        }
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 }
 
 $result = [ordered]@{
@@ -233,6 +265,17 @@ $result = [ordered]@{
     campaign_readiness = if ($campaignReadout -and $campaignReadout.overall_readiness) { [string]$campaignReadout.overall_readiness } else { "UNKNOWN" }
     campaign_next_packet_candidate = if ($campaignReadout -and $campaignReadout.next_packet_candidate) { [string]$campaignReadout.next_packet_candidate } else { "" }
     repo_clean = ($gitStatus.Count -eq 0)
+    level5_commit_package_preview = [ordered]@{
+        available = [bool]($null -ne $commitPackageReadout)
+        status = if ($commitPackageReadout -and $commitPackageReadout.orchestration_result_contract.status) { [string]$commitPackageReadout.orchestration_result_contract.status } elseif ($gitStatus.Count -gt 0) { "REVIEW" } else { "NOT_NEEDED" }
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1 -OutputJson"
+        exact_changed_files = @($commitPackageChangedFiles)
+        recommended_files = @($commitPackageRecommendedFiles)
+        suggested_validators = @($level5Validators)
+        risk_flags = @($commitPackageRiskFlags)
+        stop_before_staging = "STOP: preview only. Do not run git add, git commit, git push, PR, or merge without separate explicit approval."
+        next_safe_action = if ($commitPackageReadout -and $commitPackageReadout.next_safe_action) { [string]$commitPackageReadout.next_safe_action } elseif ($gitStatus.Count -gt 0) { "Run the commit package preview and review exact files before staging." } else { "No commit package preview is needed while the repo is clean." }
+    }
     self_build_decision_status = $selfBuildDecision.status
     self_build_operator_route = $selfBuildDecision.operator_route
     self_build_approval_required = $selfBuildDecision.approval_required
@@ -271,6 +314,10 @@ Write-Host "CAMPAIGN READINESS:"
 Write-Host $result.campaign_readiness
 Write-Host "CAMPAIGN NEXT PACKET:"
 Write-Host $result.campaign_next_packet_candidate
+Write-Host "LEVEL 5 COMMIT PACKAGE PREVIEW:"
+Write-Host "available=$($result.level5_commit_package_preview.available); status=$($result.level5_commit_package_preview.status)"
+Write-Host "LEVEL 5 STOP:"
+Write-Host $result.level5_commit_package_preview.stop_before_staging
 Write-Host "SELF-BUILD DECISION:"
 Write-Host $result.self_build_decision_status
 Write-Host "SELF-BUILD ROUTE:"
