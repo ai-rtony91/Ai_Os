@@ -4,7 +4,9 @@ Write-Host "AI_OS TradingView Paper Signal Handoff v1 DRY_RUN"
 Write-Host "Mode: read-only validation"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$contractPath = Join-Path $repoRoot "docs/AI_OS/trading_laboratory/external_handoff/TRADINGVIEW_PAPER_SIGNAL_HANDOFF_V1_CONTRACT.json"
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# Dashboard mock data remains fixture-only and this validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+$contractPath = Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/external_handoff/TRADINGVIEW_PAPER_SIGNAL_HANDOFF_V1_CONTRACT.json"
 $fixturePath = Join-Path $repoRoot "apps/dashboard/mock-data/tradingview-paper-signal-handoff-v1.example.json"
 
 foreach ($path in @($contractPath, $fixturePath)) {

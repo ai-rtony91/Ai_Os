@@ -2,7 +2,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$payloadPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_14_5\PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_001.json"
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# This validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+$payloadPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_14_5\PHASE_14_5_TRADINGVIEW_ALERT_PAYLOAD_001.json"
 
 function Read-JsonFile {
     param([Parameter(Mandatory = $true)][string] $Path)

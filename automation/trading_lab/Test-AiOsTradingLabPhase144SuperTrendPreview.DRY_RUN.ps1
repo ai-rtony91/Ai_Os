@@ -2,8 +2,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$docPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_14_4\PHASE_14_4_SUPERTREND_MVP_SIGNAL_PREVIEW.md"
-$previewPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_14_4\PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001.json"
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# This validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+$docPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_14_4\PHASE_14_4_SUPERTREND_MVP_SIGNAL_PREVIEW.md"
+$previewPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_14_4\PHASE_14_4_SUPERTREND_SIGNAL_PREVIEW_001.json"
 
 function Read-JsonFile {
     param(

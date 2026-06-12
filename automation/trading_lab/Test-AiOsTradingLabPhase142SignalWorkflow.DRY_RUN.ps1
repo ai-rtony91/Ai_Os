@@ -2,8 +2,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$tracePath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_14_2\PHASE_14_2_SIGNAL_TO_SCORECARD_TRACE_001.json"
-$latencyPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\latency\TRADING_LATENCY_LEDGER_001.json"
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# This validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+$tracePath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_14_2\PHASE_14_2_SIGNAL_TO_SCORECARD_TRACE_001.json"
+$latencyPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\latency\TRADING_LATENCY_LEDGER_001.json"
 
 function Read-JsonFile {
     param(

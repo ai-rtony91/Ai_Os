@@ -9,6 +9,8 @@ Write-Host "Paper Only: YES"
 Write-Host "Live Trading: BLOCKED"
 Write-Host ""
 
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# This control tower does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $failures = New-Object System.Collections.Generic.List[string]
 
 Write-Host "Git status:"
@@ -16,7 +18,7 @@ git status --short --branch
 Write-Host ""
 
 Write-Host "Trading Lab phase folders:"
-Get-ChildItem -LiteralPath "docs\AI_OS\trading_laboratory" -Directory -ErrorAction SilentlyContinue |
+Get-ChildItem -LiteralPath "archive\docs_aios_trading_laboratory_legacy" -Directory -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -like "phase_*" } |
     Sort-Object Name |
     ForEach-Object { Write-Host "- $($_.Name)" }
@@ -35,7 +37,7 @@ $validators = $allDryRunScripts |
     Where-Object { $_.Name -like "Test-*.DRY_RUN.ps1" } |
     Sort-Object Name
 
-$phase143Folder = "docs\AI_OS\trading_laboratory\phase_14_3"
+$phase143Folder = "archive\docs_aios_trading_laboratory_legacy\phase_14_3"
 $phase143Doc = Join-Path $phase143Folder "PHASE_14_3_PAPER_SIGNAL_DECISION_ENGINE.md"
 $phase143Json = Join-Path $phase143Folder "PHASE_14_3_DECISION_RESULT_001.json"
 $phase143Validator = "automation\trading_lab\Test-AiOsTradingLabPhase143DecisionEngine.DRY_RUN.ps1"
@@ -64,10 +66,10 @@ Write-Host "- status: $phase143Status"
 Write-Host ""
 
 $jsonRoots = @(
-    "docs\AI_OS\trading_laboratory\phase_14_3",
-    "docs\AI_OS\trading_laboratory\phase_14_4",
-    "docs\AI_OS\trading_laboratory\profitability",
-    "docs\AI_OS\trading_laboratory\latency"
+    "archive\docs_aios_trading_laboratory_legacy\phase_14_3",
+    "archive\docs_aios_trading_laboratory_legacy\phase_14_4",
+    "archive\docs_aios_trading_laboratory_legacy\profitability",
+    "archive\docs_aios_trading_laboratory_legacy\latency"
 )
 
 $jsonFiles = @()

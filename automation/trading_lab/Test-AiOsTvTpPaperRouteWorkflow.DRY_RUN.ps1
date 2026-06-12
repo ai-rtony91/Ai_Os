@@ -1,10 +1,12 @@
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+# Archive Trading Lab docs referenced below are historical/reference-only evidence, not current authority.
+# Dashboard mock data remains fixture-only and this validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
 $files = @(
-    "docs/AI_OS/trading_laboratory/external_handoff/TV_TP_PAPER_ROUTE_CONTRACT.json",
-    "docs/AI_OS/trading_laboratory/external_handoff/TV_ALERT_REFERENCE_SCHEMA.json",
-    "docs/AI_OS/trading_laboratory/external_handoff/TP_PAPER_ROUTE_PREVIEW_SCHEMA.json",
+    "archive/docs_aios_trading_laboratory_legacy/external_handoff/TV_TP_PAPER_ROUTE_CONTRACT.json",
+    "archive/docs_aios_trading_laboratory_legacy/external_handoff/TV_ALERT_REFERENCE_SCHEMA.json",
+    "archive/docs_aios_trading_laboratory_legacy/external_handoff/TP_PAPER_ROUTE_PREVIEW_SCHEMA.json",
     "apps/dashboard/mock-data/tv-tp-paper-route-workflow.example.json"
 )
 
@@ -16,7 +18,7 @@ foreach ($file in $files) {
     Get-Content -LiteralPath $path -Raw | ConvertFrom-Json | Out-Null
 }
 
-$contract = Get-Content -LiteralPath (Join-Path $repoRoot "docs/AI_OS/trading_laboratory/external_handoff/TV_TP_PAPER_ROUTE_CONTRACT.json") -Raw | ConvertFrom-Json
+$contract = Get-Content -LiteralPath (Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/external_handoff/TV_TP_PAPER_ROUTE_CONTRACT.json") -Raw | ConvertFrom-Json
 $fixture = Get-Content -LiteralPath (Join-Path $repoRoot "apps/dashboard/mock-data/tv-tp-paper-route-workflow.example.json") -Raw | ConvertFrom-Json
 
 if ($contract.source_status -ne "EXTERNAL_REFERENCE_ONLY") {
