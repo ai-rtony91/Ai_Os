@@ -5,7 +5,7 @@ Write-Host "Mode: read-only"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $resultDir = Join-Path $repoRoot "apps\trading_lab\trading_lab\results\paper_runner"
-$latencyDir = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\latency"
+$specPath = Join-Path $repoRoot "docs\specs\trading-lab-latency-contract.md"
 $dashboardFixture = Join-Path $repoRoot "apps\dashboard\mock-data\trading-lab-latency-replay.example.json"
 
 $requiredFiles = @(
@@ -17,8 +17,7 @@ $requiredFiles = @(
   "apps\trading_lab\trading_lab\results\paper_runner\PAPER_REPLAY_LEDGER_001.json",
   "apps\trading_lab\trading_lab\results\paper_runner\PAPER_REPLAY_RESULT_001.json",
   "apps\trading_lab\trading_lab\results\paper_runner\PAPER_REPLAY_REVIEW_SUMMARY.md",
-  "docs\AI_OS\trading_laboratory\latency\PHASE_15_8_LATENCY_REPLAY_LOOP.md",
-  "docs\AI_OS\trading_laboratory\latency\LATENCY_REPLAY_CONTRACT.json",
+  "docs\specs\trading-lab-latency-contract.md",
   "apps\dashboard\mock-data\trading-lab-latency-replay.example.json"
 )
 
@@ -39,7 +38,6 @@ $jsonFiles = @(
   "apps\trading_lab\trading_lab\results\paper_runner\PAPER_SCORECARD_001.json",
   "apps\trading_lab\trading_lab\results\paper_runner\PAPER_REPLAY_LEDGER_001.json",
   "apps\trading_lab\trading_lab\results\paper_runner\PAPER_REPLAY_RESULT_001.json",
-  "docs\AI_OS\trading_laboratory\latency\LATENCY_REPLAY_CONTRACT.json",
   "apps\dashboard\mock-data\trading-lab-latency-replay.example.json"
 )
 
@@ -51,6 +49,21 @@ foreach ($relativePath in $jsonFiles) {
     } catch {
       $failures.Add("JSON parse failed: $relativePath")
     }
+  }
+}
+
+$specText = Get-Content -LiteralPath $specPath -Raw
+$requiredSpecMarkers = @(
+  "does not authorize live trading",
+  "Generated Trading Lab latency results are evidence only",
+  "Dashboard mock latency files are fixture-only",
+  "Archive files are historical reference only",
+  "Future timestamps, negative delays, and clock skew must not be treated as PASS"
+)
+
+foreach ($marker in $requiredSpecMarkers) {
+  if ($specText -notmatch [regex]::Escape($marker)) {
+    $failures.Add("Canonical latency spec missing required boundary marker: $marker")
   }
 }
 
@@ -97,7 +110,7 @@ if (Test-Path -LiteralPath $dashboardFixture) {
 
 $scanFiles = @()
 if (Test-Path -LiteralPath $resultDir) { $scanFiles += Get-ChildItem -LiteralPath $resultDir -File }
-if (Test-Path -LiteralPath $latencyDir) { $scanFiles += Get-ChildItem -LiteralPath $latencyDir -File }
+if (Test-Path -LiteralPath $specPath) { $scanFiles += Get-Item -LiteralPath $specPath }
 if (Test-Path -LiteralPath $dashboardFixture) { $scanFiles += Get-Item -LiteralPath $dashboardFixture }
 
 $combinedText = ""
