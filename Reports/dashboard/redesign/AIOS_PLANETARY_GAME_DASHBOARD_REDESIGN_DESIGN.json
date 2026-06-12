@@ -1,0 +1,682 @@
+{
+  "schema": "aios.dashboard.redesign.planetary_game_design.v1",
+  "generated_at": "2026-06-12T00:00:00-04:00",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-DESIGN-DRY-RUN-V1",
+  "worker_identity": "Codex East",
+  "branch": "feature/planetary-game-dashboard-redesign-design-v1",
+  "current_dashboard_summary": {
+    "active_bridge": "Current Vite/React dashboard remains the active bridge until a separate APPLY packet approves source changes.",
+    "react_entry": "apps/dashboard/src/App.jsx",
+    "static_preview": "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+    "first_screen_observed_elements": [
+      "runtime status header",
+      "24-hour mission summary",
+      "worker rooms",
+      "operator status fixture",
+      "autonomy bridge state",
+      "playlist dock",
+      "advanced telemetry drill-down",
+      "static preview start screen",
+      "side rails",
+      "Work Table",
+      "Apps Hub",
+      "status strips",
+      "assistant details"
+    ],
+    "noise_assessment": [
+      "operator-only telemetry appears too close to the first screen",
+      "worker, approval, runtime, and safety state are repeated across panels",
+      "raw queue and packet concepts should move to Advanced",
+      "media/player controls should not compete with safety state on the command map"
+    ],
+    "state_dependencies_to_preserve": [
+      "mock-data/aios-runtime-visibility-v1.example.json import",
+      "mock-data/aios-operator-status-v1.example.json import",
+      "virtual autonomy bridge state module",
+      "optional /api/runtime/visibility read-only API",
+      "schema aios.runtime_visibility_api.v1",
+      "mode READ_ONLY",
+      "fixture fallback behavior"
+    ],
+    "current_input_assumptions": {
+      "mouse": "primary click and hover style interaction",
+      "touch": "mobile rail and button interaction exists",
+      "keyboard": "Enter/Space activation on some controls, Escape for mobile rail close, arrow keys mostly tied to media controls",
+      "gamepad": "not currently implemented",
+      "unified_navigation_layer": "not currently implemented"
+    }
+  },
+  "existing_concept_spec_alignment": {
+    "web_first": true,
+    "ue5_future_only": true,
+    "keyboard_mouse_xbox_first_class": true,
+    "backend_api_only_for_future_clients": true,
+    "no_secrets_frontend": true,
+    "no_broker_or_live_trading": true,
+    "unknown_is_not_success": true,
+    "validator_output_is_evidence_only": true
+  },
+  "visual_identity_anchor": {
+    "source": "uploaded AI_OS visual identity image used as brand/theme reference only",
+    "asset_policy": "Do not commit, copy, recreate, or depend on the uploaded image asset in this documentation packet.",
+    "required_wording": "The goal is not to change the AI_OS visual identity; the goal is to enhance it into a realistic, cinematic, game-navigable command system.",
+    "preserve": [
+      "dark cinematic space background",
+      "blue/purple energy language",
+      "lightning/energy symbol",
+      "signal tower / communications tower",
+      "Earth / global intelligence theme",
+      "currency / trading / finance symbol",
+      "AIOS lettering",
+      "tagline direction: intelligent, adaptive, yours",
+      "reflective premium command-center mood",
+      "high-contrast futuristic fintech plus aerospace identity"
+    ],
+    "enhance_only": [
+      "increase realism",
+      "improve physical lighting",
+      "improve material detail",
+      "improve planetary realism",
+      "improve reflections and depth",
+      "improve premium fintech polish",
+      "improve readability of AIOS and tagline",
+      "improve consistency with Mars/Moon/Earth/Galaxy/Black Hole planetary dashboard",
+      "make it feel NASA-grade, cinematic, serious, realistic, and operational"
+    ]
+  },
+  "realism_first_art_direction": {
+    "priority": "realistic cinematic space art is the top visual requirement",
+    "inspiration": [
+      "NASA / aerospace / mission-control",
+      "realistic sci-fi, not fantasy sci-fi",
+      "premium fintech/trading terminal merged with space exploration",
+      "cinematic command-center operation"
+    ],
+    "planetary_requirements": [
+      "Mars should feel geologic, dusty, harsh, and physical",
+      "Earth should look atmospheric, alive, and recognizable, not icon-like",
+      "Moon should feel cold, cratered, reflective, and mission-control adjacent",
+      "Galaxy/deep space should use believable star fields, nebula depth, red dwarf inspiration, black-hole lensing inspiration, and orbital distance cues",
+      "Black Hole/Vault should feel dangerous, gravitational, distorted, restricted, and visually serious"
+    ],
+    "lighting_requirements": [
+      "sun direction",
+      "rim light",
+      "shadow",
+      "glow",
+      "atmospheric scattering",
+      "carefully controlled bloom"
+    ],
+    "material_requirements": [
+      "dust",
+      "rock",
+      "metal",
+      "glass",
+      "worn panels",
+      "astronaut suit fabric",
+      "visor reflections",
+      "cockpit surfaces"
+    ],
+    "ui_requirement": "UI overlays should feel like a serious command system layered over a realistic world.",
+    "readability_rule": "Realism must not hurt readability, accessibility, safety states, or operator clarity."
+  },
+  "preserve_and_enhance_rules": [
+    "preserve the current AI_OS visual identity",
+    "enhance, do not replace",
+    "preserve the core symbols",
+    "keep dashboard controls usable, readable, safe, and governance-bound",
+    "use the visual anchor to guide written art direction only"
+  ],
+  "prohibited_visual_directions": [
+    "cartoon",
+    "toy-like",
+    "flat",
+    "low-poly",
+    "childish",
+    "arcade-only",
+    "mobile-game style",
+    "unrelated sci-fi",
+    "neon overload that hurts readability",
+    "decorative poster instead of usable command system"
+  ],
+  "implementation_note_no_image_asset_committed": "The uploaded AI_OS visual identity image is not committed, copied, or added as an asset by this documentation-only packet.",
+  "proposed_theme": {
+    "name": "cinematic realistic planetary command system",
+    "style": [
+      "NASA inspired",
+      "aerospace mission control",
+      "physically grounded sci-fi",
+      "high-end fintech trading terminal",
+      "premium command center"
+    ],
+    "realism_requirements": [
+      "realistic planetary scale cues",
+      "geologic dusty Mars terrain",
+      "atmospheric recognizable Earth",
+      "cold cratered Moon",
+      "believable star fields and nebula depth",
+      "black-hole lensing inspiration",
+      "physically motivated lighting",
+      "real materials such as dust, rock, metal, glass, suit fabric, and visor reflections"
+    ],
+    "avoid": [
+      "cartoon planets",
+      "toy-like low-poly planets",
+      "flat emoji-style planets",
+      "arcade-only composition",
+      "childish colors",
+      "fake neon overload",
+      "effects that reduce readability"
+    ]
+  },
+  "planet_zones": [
+    {
+      "id": "mars_lab",
+      "label": "Mars Lab",
+      "purpose": "development and build world",
+      "first_screen_role": "large foreground lower-screen development planet",
+      "content": [
+        "Codex lanes",
+        "GitHub PRs",
+        "workers",
+        "tests",
+        "packets",
+        "build status",
+        "local dev tools",
+        "dashboard redesign/dev tools"
+      ],
+      "safety": [
+        "no one-click commit",
+        "no one-click push",
+        "no one-click merge",
+        "protected actions require AI_OS approval gates"
+      ]
+    },
+    {
+      "id": "moon_control",
+      "label": "Moon Control",
+      "purpose": "mission control and operational health",
+      "content": [
+        "AI_OS health",
+        "AIOS EdgeMark",
+        "scheduler state",
+        "approvals",
+        "current objective",
+        "safety gates",
+        "critical alerts"
+      ],
+      "safety": [
+        "scheduler and runtime controls remain display-only or approval-request previews",
+        "approval state is evidence, not permission"
+      ]
+    },
+    {
+      "id": "earth_hub",
+      "label": "Earth Hub",
+      "purpose": "personal apps and end-user workspace",
+      "content": [
+        "personal apps",
+        "created apps",
+        "contacts",
+        "notes",
+        "school/work/Microsoft entry",
+        "user profile",
+        "future end-user workspace"
+      ],
+      "safety": [
+        "no OAuth/provider setup in this design",
+        "no credentials or private tokens in frontend"
+      ]
+    },
+    {
+      "id": "galaxy_intelligence",
+      "label": "Galaxy Intelligence",
+      "purpose": "AI agents, memory, research, automation, and strategy",
+      "content": [
+        "AI agents",
+        "memory",
+        "research",
+        "automation map",
+        "strategy",
+        "roadmap",
+        "long-term intelligence layer"
+      ],
+      "safety": [
+        "AI assistant surfaces remain display-only until separately approved",
+        "no live AI API calls by default"
+      ]
+    },
+    {
+      "id": "black_hole_vault",
+      "label": "Black Hole Vault",
+      "purpose": "restricted security and blocked-action zone",
+      "content": [
+        "secrets boundary",
+        "broker/live-trading block",
+        "emergency stop references",
+        "break-glass references",
+        "access warnings"
+      ],
+      "safety": [
+        "never show secrets",
+        "never expose broker/account credentials",
+        "no live broker or live-trading controls"
+      ]
+    }
+  ],
+  "first_screen": {
+    "show_only": [
+      "AI_OS global status",
+      "AIOS EdgeMark score",
+      "mode",
+      "safety state",
+      "current objective",
+      "next allowed action",
+      "critical alerts",
+      "planetary entry points"
+    ],
+    "status_values": [
+      "READY",
+      "BLOCKED",
+      "NEEDS_APPROVAL",
+      "UNKNOWN",
+      "STALE",
+      "PASS",
+      "FAIL"
+    ],
+    "mode_values": [
+      "observe-only",
+      "paper-safe",
+      "blocked"
+    ],
+    "remove_from_first_screen": [
+      "worker lease tables",
+      "queue counters",
+      "raw packet tables",
+      "raw telemetry event log",
+      "debug JSON",
+      "fixture source traces",
+      "music/player dock",
+      "multiple repeated status panels"
+    ]
+  },
+  "advanced_drawer": {
+    "contains": [
+      "raw telemetry",
+      "queues",
+      "approvals",
+      "scheduler",
+      "runtime",
+      "GitHub PR/checks",
+      "workers",
+      "debug JSON",
+      "logs",
+      "security state",
+      "Cloudflare/login status",
+      "state freshness",
+      "raw source trace"
+    ],
+    "default_state": "collapsed"
+  },
+  "first_person_astronaut_mode": {
+    "status": "future immersive mode, not Phase 1 dependency",
+    "capabilities": [
+      "move as astronaut or cockpit explorer",
+      "orbit and inspect zones",
+      "enter zones safely",
+      "keyboard/mouse/controller support"
+    ],
+    "safety": [
+      "movement never triggers destructive actions",
+      "protected actions require confirmation",
+      "approval gates remain authoritative",
+      "non-3D dashboard remains usable"
+    ],
+    "phases": [
+      {
+        "phase": 1,
+        "scope": "2D/2.5D planetary command map and unified navigation"
+      },
+      {
+        "phase": 2,
+        "scope": "web 3D prototype with React Three Fiber, orbit camera, selectable planets, gamepad support, and fallback"
+      },
+      {
+        "phase": 3,
+        "scope": "UE5 premium first-person astronaut/cockpit evaluation"
+      }
+    ]
+  },
+  "gamified_paper_league": {
+    "mode": "simulated paper trading only",
+    "features": [
+      "season mode",
+      "leagues/divisions",
+      "badges",
+      "missions",
+      "streaks",
+      "learning unlocks",
+      "AIOS EdgeMark progression",
+      "safe onboarding"
+    ],
+    "blocked": [
+      "real-money competition",
+      "gambling framing",
+      "live broker action",
+      "broker credentials",
+      "live order execution",
+      "multiplayer/live leaderboard implementation until later backend/API approval"
+    ]
+  },
+  "leaderboard_safety_model": {
+    "categories": [
+      "biggest paper P&L",
+      "best risk-adjusted return",
+      "lowest drawdown",
+      "best consistency streak",
+      "best execution quality",
+      "best AIOS EdgeMark",
+      "best learning progression",
+      "best latency readiness later",
+      "best rule discipline"
+    ],
+    "primary_score_priority": [
+      "discipline",
+      "consistency",
+      "risk control",
+      "evidence-backed execution",
+      "clean validation"
+    ],
+    "anti_reckless_rule": "Reckless max-risk paper behavior can rank in raw P&L but must score poorly on risk, drawdown, and discipline."
+  },
+  "aios_edgemark_model": {
+    "definition": "benchmark-style score for trading edge and AI_OS system readiness",
+    "inputs": [
+      "validation cleanliness",
+      "safety gate status",
+      "paper/live boundary",
+      "signal quality later",
+      "latency readiness later",
+      "execution quality later",
+      "scheduler/automation health",
+      "repo clean-state reliability",
+      "stale/unknown evidence penalty",
+      "rule discipline"
+    ],
+    "bands": [
+      {
+        "range": "90-100",
+        "status": "READY"
+      },
+      {
+        "range": "70-89",
+        "status": "REVIEW"
+      },
+      {
+        "range": "40-69",
+        "status": "NEEDS_APPROVAL_OR_NEEDS_WORK"
+      },
+      {
+        "range": "0-39",
+        "status": "BLOCKED"
+      }
+    ],
+    "rules": [
+      "missing data lowers confidence",
+      "stale data lowers confidence",
+      "UNKNOWN is not success",
+      "live trading remains BLOCKED until separately approved",
+      "score explanation must be visible",
+      "no fake confidence"
+    ]
+  },
+  "input_model": {
+    "mouse": [
+      "click planet/body",
+      "hover highlight",
+      "drag/pan/rotate where appropriate",
+      "wheel zoom only if not disorienting",
+      "right-click/context action only for safe menus",
+      "no destructive action on accidental click"
+    ],
+    "keyboard": [
+      "Tab and Shift+Tab move between planet zones",
+      "Enter or Space activates focused zone",
+      "Escape returns to galaxy/home view",
+      "Arrow keys or WASD move focus/selection",
+      "/ or Ctrl+K opens command palette",
+      "visible focus rings",
+      "no keyboard trap"
+    ],
+    "gamepad": [
+      "Left stick or D-pad moves focus",
+      "Right stick controls camera/orbit",
+      "A selects/enters zone",
+      "B backs out",
+      "X opens Advanced/actions",
+      "Y opens search/command palette",
+      "LB/RB switches zones",
+      "LT/RT controls zoom/speed",
+      "Start/Menu opens system menu",
+      "Back/View opens help/controls overlay"
+    ],
+    "abstraction": {
+      "commands": [
+        "focusZone",
+        "selectZone",
+        "enterZone",
+        "back",
+        "openCommandPalette",
+        "openAdvancedDrawer",
+        "moveFocus",
+        "setCameraIntent"
+      ],
+      "state": [
+        "focusedZone",
+        "selectedZone",
+        "activeView",
+        "activeInput",
+        "reducedMotion",
+        "advancedOpen",
+        "commandPaletteOpen",
+        "safetyState"
+      ]
+    }
+  },
+  "accessibility_model": {
+    "requirements": [
+      "non-3D fallback",
+      "reduced-motion mode",
+      "high-contrast mode",
+      "visible focus rings",
+      "screen-reader labels",
+      "stable status text outside 3D canvas",
+      "no color-only status",
+      "no keyboard trap",
+      "motion never blocks reading"
+    ],
+    "reduced_motion": [
+      "static realistic planet stills",
+      "no orbit animation",
+      "no camera drift",
+      "no bloom-heavy transitions"
+    ]
+  },
+  "technology_stack": {
+    "current": [
+      "Vite",
+      "React",
+      "fixture-backed dashboard",
+      "optional read-only runtime visibility API"
+    ],
+    "web_first_future": [
+      "Next.js + React + TypeScript evaluation later",
+      "React Three Fiber",
+      "Three.js",
+      "Drei",
+      "Tailwind",
+      "shadcn/ui",
+      "Zustand or equivalent",
+      "TanStack Query or equivalent",
+      "Browser Gamepad API",
+      "reduced-motion fallback",
+      "non-3D fallback"
+    ],
+    "blocked_in_this_packet": [
+      "dashboard overwrite",
+      "runtime behavior changes",
+      "scheduler behavior changes",
+      "Cloudflare/Azure/DNS/tunnel/provider configuration",
+      "secrets",
+      "broker/live trading",
+      "game engine dependencies"
+    ]
+  },
+  "ue5_premium_client": {
+    "status": "future evaluation lane only",
+    "possible_fit": [
+      "premium command center",
+      "immersive desktop app",
+      "kiosk operator mode",
+      "possible launcher",
+      "first-person astronaut/cockpit mode"
+    ],
+    "realism_target": [
+      "Lumen/Nanite-style direction",
+      "realistic planet materials",
+      "atmospheric effects",
+      "astronaut presence",
+      "visor/cockpit reflections",
+      "controller-native exploration"
+    ],
+    "boundaries": [
+      "approved backend APIs only",
+      "no direct repo file reads",
+      "no direct telemetry ledger reads",
+      "no approval inbox reads",
+      "no worker queue reads",
+      "no scheduler reads",
+      "no local environment file reads",
+      "no secrets",
+      "no broker keys",
+      "live trading blocked"
+    ]
+  },
+  "backend_state_boundary": {
+    "allowed_direction": "approved backend APIs only",
+    "required_response_features": [
+      "schema",
+      "mode",
+      "source label",
+      "timestamp",
+      "freshness",
+      "stale/invalid markers",
+      "approval requirement",
+      "next safe action",
+      "redacted source trace"
+    ],
+    "must_not_read_directly": [
+      "repo files",
+      "telemetry ledgers",
+      "approval inboxes",
+      "worker queues",
+      "scheduler state",
+      "local environment files",
+      "generated runtime files"
+    ]
+  },
+  "role_model": {
+    "end_user": [
+      "simplified planetary UI",
+      "paper league",
+      "safe progress",
+      "approved actions only"
+    ],
+    "trader_student": [
+      "Paper League",
+      "learning missions",
+      "score explanations",
+      "paper performance"
+    ],
+    "operator": [
+      "Advanced drawer",
+      "state freshness",
+      "worker/PR status",
+      "approval state"
+    ],
+    "admin": [
+      "control review surfaces",
+      "access state",
+      "break-glass references"
+    ],
+    "protected_action_authority": "AI_OS approval gates, not UI identity alone"
+  },
+  "apply_plan": [
+    {
+      "phase": 1,
+      "name": "2D/2.5D planetary shell",
+      "requires": [
+        "separate Anthony approval",
+        "exact files to change",
+        "local preview",
+        "manual screenshot review",
+        "no backend mutation"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "browser 3D prototype",
+      "requires": [
+        "separate dependency approval",
+        "React Three Fiber/Three.js approval",
+        "reduced-motion fallback",
+        "gamepad test"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "UE5 evaluation",
+      "requires": [
+        "dedicated UE5 packet",
+        "approved backend API contract",
+        "no direct repo/runtime reads",
+        "no secrets"
+      ]
+    }
+  ],
+  "rollback_plan": [
+    "use isolated branch",
+    "change only approved files",
+    "preserve current fixtures and read-only API behavior",
+    "capture before/after screenshots",
+    "run local preview before merge",
+    "restore exact changed files from prior commit if validation fails",
+    "do not delete existing dashboard files in first redesign implementation"
+  ],
+  "forbidden_actions": [
+    "overwrite dashboard files in this packet",
+    "delete dashboard files",
+    "edit apps/dashboard in this packet",
+    "create UE5 project",
+    "add UE5 assets",
+    "add game engine dependencies",
+    "expose dashboard remotely",
+    "configure Cloudflare/Azure/DNS/tunnels/providers",
+    "mutate runtime",
+    "mutate scheduler",
+    "mutate queues",
+    "mutate approval inbox",
+    "touch broker/live trading paths",
+    "access or store secrets",
+    "push to main",
+    "merge",
+    "close PRs"
+  ],
+  "next_packet": {
+    "path": "automation/orchestration/work_packets/proposed/AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST.md",
+    "status": "proposed review-only",
+    "execution_token": "intentionally omitted until separate Anthony approval"
+  },
+  "status": "VISUAL_IDENTITY_ANCHOR_APPLIED_READY_FOR_REVIEW"
+}
