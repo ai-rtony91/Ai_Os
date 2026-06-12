@@ -1,0 +1,146 @@
+{
+  "schema": "AIOS_TURNSTILE_POST_ACCESS_LOGIN_AND_SERVICE_HANDOFF_POLICY.v1",
+  "generated_at": "2026-06-12",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-TURNSTILE-POST-ACCESS-LOGIN-AND-SERVICE-HANDOFF-POLICY-V1",
+  "lane": "turnstile-post-access-login-service-handoff-policy",
+  "login_flow": [
+    {
+      "order": 1,
+      "step": "AI_OS_URL",
+      "description": "User opens the AI_OS URL."
+    },
+    {
+      "order": 2,
+      "step": "CLOUDFLARE_ACCESS_IDENTITY_LOGIN",
+      "description": "Cloudflare Access authenticates identity first."
+    },
+    {
+      "order": 3,
+      "step": "AI_OS_POST_LOGIN_TURNSTILE_CHECK",
+      "description": "AI_OS requires Turnstile only after successful Cloudflare Access identity login and before app session creation."
+    },
+    {
+      "order": 4,
+      "step": "AI_OS_DASHBOARD_SESSION",
+      "description": "AI_OS creates the app session after backend validation and role mapping."
+    },
+    {
+      "order": 5,
+      "step": "EXTRA_TURNSTILE_BEFORE_THIRD_PARTY_SERVICE_HANDOFF",
+      "description": "AI_OS requires an additional Turnstile check only before third-party service login or handoff screens."
+    }
+  ],
+  "turnstile_policy": "POST_ACCESS_LOGIN_AND_SERVICE_HANDOFF_ONLY",
+  "cloudflare_access_policy": "FRONT_DOOR_IDENTITY_GATE",
+  "mandatory_turnstile_contexts": [
+    {
+      "context": "post_cloudflare_access_login",
+      "timing": "after_successful_cloudflare_access_identity_login",
+      "before": "aios_app_session_creation",
+      "required": true
+    },
+    {
+      "context": "third_party_service_handoff",
+      "examples": [
+        "TradingView",
+        "similar_connected_services"
+      ],
+      "timing": "before_in_app_service_login_or_handoff_screen",
+      "required": true
+    }
+  ],
+  "non_mandatory_turnstile_contexts": [
+    {
+      "context": "before_cloudflare_access_identity_login",
+      "required": false,
+      "rule": "Turnstile must not run before Cloudflare Access authenticates identity."
+    },
+    {
+      "context": "every_dashboard_page_load",
+      "required": false
+    },
+    {
+      "context": "every_admin_click",
+      "required": false
+    },
+    {
+      "context": "normal_authenticated_navigation",
+      "required": false
+    },
+    {
+      "context": "local_omen_only_access",
+      "required": false,
+      "rule": "Turnstile is not required for local-only Omen access unless that local flow is later approved for remote exposure."
+    }
+  ],
+  "third_party_service_handoff_policy": {
+    "turnstile_required_before_handoff": true,
+    "credentials_in_frontend_or_repo_allowed": false,
+    "does_not_grant": [
+      "broker_authority",
+      "trading_authority",
+      "runtime_authority",
+      "scheduler_authority",
+      "queue_authority",
+      "repo_authority",
+      "secret_access",
+      "provider_admin_authority"
+    ],
+    "approval_gates_required_for_protected_actions": true,
+    "notes": "External service handoffs must not grant broker or trading authority without AI_OS approval gates."
+  },
+  "preserved_stack": {
+    "microsoft_entra_primary_login": "preserved",
+    "github_backup_login": "preserved",
+    "google_optional_fallback": "preserved",
+    "cloudflare_otp_emergency_fallback": "preserved",
+    "break_glass_path": "preserved",
+    "local_omen_fallback": "unchanged",
+    "no_lockout_design": "preserved",
+    "aios_backend_roles": "required",
+    "aios_approval_gates": "required_for_protected_actions"
+  },
+  "frontend_compromise_model": {
+    "frontend_trust": "untrusted",
+    "secrets_in_browser_allowed": false,
+    "third_party_credentials_in_frontend_allowed": false,
+    "turnstile_secret_key_committed_allowed": false,
+    "turnstile_token_verification": "server_side_backend_required_in_future_implementation",
+    "turnstile_replaces_identity_or_authorization": false
+  },
+  "forbidden_actions": [
+    "configure_cloudflare",
+    "configure_turnstile",
+    "configure_azure",
+    "configure_entra",
+    "configure_github_oauth",
+    "configure_google_oauth",
+    "create_or_change_dns",
+    "create_or_change_tunnels",
+    "expose_dashboard",
+    "access_request_write_or_store_secrets",
+    "edit_env",
+    "mutate_runtime",
+    "mutate_scheduler",
+    "mutate_queues",
+    "mutate_approval_inbox",
+    "mutate_worker_inbox",
+    "mutate_command_queue",
+    "touch_broker_or_live_trading_paths",
+    "delete_files",
+    "push_to_main",
+    "merge",
+    "close_prs"
+  ],
+  "next_packet": {
+    "path": "automation/orchestration/work_packets/proposed/AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-APPLY-REQUEST-TURNSTILE-POST-ACCESS-REVISION.md",
+    "type": "APPLY_REQUEST_ONLY_NOT_EXECUTABLE",
+    "purpose": "Revise the future provider setup request so Turnstile is post-Access and service-handoff only.",
+    "provider_changes_allowed": false,
+    "turnstile_configuration_allowed": false,
+    "secrets_allowed": false,
+    "dns_tunnel_dashboard_exposure_allowed": false
+  },
+  "status": "DRY_RUN_POST_ACCESS_TURNSTILE_POLICY_READY_FOR_REVIEW_NO_PROVIDER_CHANGES_NO_SECRETS_STORED"
+}
