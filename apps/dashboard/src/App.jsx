@@ -1175,6 +1175,12 @@ export default function App() {
   const handlersRef = useRef({
     closeTopLayer: () => false
   });
+  const stableInputHandlers = useMemo(
+    () => ({
+      closeTopLayer: () => handlersRef.current.closeTopLayer()
+    }),
+    []
+  );
   const gamepadConnected = useGamepadPresence();
 
   useEffect(() => {
@@ -1191,32 +1197,34 @@ export default function App() {
       .finally(() => setVisibilityLoading(false));
   }, []);
 
-  handlersRef.current = {
-    closeTopLayer: () => {
-      if (inputHelpOpen) {
-        setInputHelpOpen(false);
-        return true;
-      }
+  useEffect(() => {
+    handlersRef.current = {
+      closeTopLayer: () => {
+        if (inputHelpOpen) {
+          setInputHelpOpen(false);
+          return true;
+        }
 
-      if (advancedOpen) {
-        setAdvancedOpen(false);
-        return true;
-      }
+        if (advancedOpen) {
+          setAdvancedOpen(false);
+          return true;
+        }
 
-      if (selectedZoneId !== activeZoneId) {
-        setSelectedZoneId(activeZoneId);
-        return true;
-      }
+        if (selectedZoneId !== activeZoneId) {
+          setSelectedZoneId(activeZoneId);
+          return true;
+        }
 
-      return false;
-    }
-  };
+        return false;
+      }
+    };
+  }, [activeZoneId, advancedOpen, inputHelpOpen, selectedZoneId]);
 
   useAiosInputNavigation(
     zoneDefinitions.map((zone) => zone.id),
     activeZoneId,
     setActiveZoneId,
-    handlersRef.current
+    stableInputHandlers
   );
 
   const isLocalApiReadOnly =
