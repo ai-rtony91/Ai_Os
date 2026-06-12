@@ -80,7 +80,7 @@
           "stage_id": "STAGE-GOV-SOURCE-OF-TRUTH-REVIEW",
           "phase_id": "PHASE-GOV-FOUNDATION",
           "title": "Review source-of-truth map against current orchestration state",
-          "status": "NEEDS_REVIEW",
+          "status": "READY",
           "priority": "high",
           "depends_on": [
             "STAGE-GOV-NAMING-AUTHORITY"
