@@ -94,6 +94,41 @@ function New-Freshness {
     }
 }
 
+function New-FrontendContract {
+    param(
+        [string]$DisplayState,
+        [string[]]$SourcePaths,
+        [string]$SourceType,
+        [object]$Freshness,
+        [string[]]$BlockedActions,
+        [string]$NextSafeAction,
+        [bool]$ApprovalRequired = $true,
+        [bool]$StaleOrLegacy = $false
+    )
+
+    $relativeSources = @($SourcePaths | ForEach-Object { ConvertTo-RelativePath -Path $_ })
+    $sourcePath = if ($relativeSources.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace([string]$relativeSources[0])) {
+        [string]$relativeSources[0]
+    } else {
+        "runtime_state_bundle"
+    }
+
+    [pscustomobject]@{
+        display_state = $DisplayState
+        authority_state = "EVIDENCE_ONLY"
+        source_path = $sourcePath
+        source_type = $SourceType
+        freshness = $Freshness
+        blocked_actions = @($BlockedActions)
+        next_safe_action = $NextSafeAction
+        approval_required = $ApprovalRequired
+        execution_allowed = $false
+        mutation_allowed = $false
+        stale_or_legacy = $StaleOrLegacy
+        safe_for_frontend_display = $true
+    }
+}
+
 function New-Section {
     param(
         [string]$Status,
@@ -101,15 +136,29 @@ function New-Section {
         [string]$Summary,
         [object[]]$Items = @(),
         [bool]$IsStale = $false,
-        [string[]]$BlockedActions = @()
+        [string[]]$BlockedActions = @(),
+        [string]$SourceType = "generated_projection",
+        [string]$NextSafeAction = "Review this display-only evidence before any protected action.",
+        [bool]$ApprovalRequired = $true
     )
+
+    $freshness = New-Freshness -IsStale $IsStale
 
     [pscustomobject]@{
         status = $Status
+        frontend_contract = New-FrontendContract `
+            -DisplayState $Status `
+            -SourcePaths $SourcePaths `
+            -SourceType $SourceType `
+            -Freshness $freshness `
+            -BlockedActions $BlockedActions `
+            -NextSafeAction $NextSafeAction `
+            -ApprovalRequired $ApprovalRequired `
+            -StaleOrLegacy $IsStale
         source_paths = @($SourcePaths | ForEach-Object { ConvertTo-RelativePath -Path $_ })
         summary = $Summary
         items = @($Items)
-        freshness = New-Freshness -IsStale $IsStale
+        freshness = $freshness
         blocked_actions = @($BlockedActions)
     }
 }
@@ -592,15 +641,24 @@ $bundle = [pscustomobject]@{
         generated_evidence_only = $true
         blocked_capabilities = $blockedRuntimeActions
     }
-    packet_state = New-Section -Status "REVIEW" -SourcePaths @($packetActivePath, $packetBlockedPath, $packetCompletePath) -Summary "Packet folders inspected as read-only runtime evidence." -Items $packetItems -BlockedActions @("packet_state_change", "packet_assignment")
-    worker_state = New-Section -Status "REVIEW" -SourcePaths @($workerRegistryPath, $workerProfilesPath, $workerInboxPath) -Summary "Worker registry, profiles, and inbox inspected without heartbeat writes." -Items $workerItems -BlockedActions @("worker_launch", "heartbeat_write", "worker_state_change")
-    lock_state = New-Section -Status "REVIEW" -SourcePaths @($lockRegistryPath) -Summary "Lock registry evidence inspected without lock release." -Items @($lockRegistry) -BlockedActions @("lock_claim", "lock_release", "force_unlock")
-    validator_state = New-Section -Status "REVIEW" -SourcePaths @($validatorConfigPath, $ValidatorRecommendationPath, $ValidatorRunReportPath) -Summary "Validator config and report evidence inspected without running mutation paths." -Items $validatorItems -BlockedActions @("apply_repair", "approval_grant")
-    approval_state = New-Section -Status "REVIEW" -SourcePaths @($approvalInboxPath, $approvalQueuePath) -Summary "Approval evidence inspected without creating or resolving approvals." -Items $approvalItems -BlockedActions @("approval_create", "approval_resolve")
-    commit_package_state = New-Section -Status $(if ($candidateFiles.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @($commitPackageRecommendationHelperPath) -Summary "Level 5 commit-package preview evidence inspected without staging, committing, pushing, PR, or merge actions." -Items $commitPackageItems -BlockedActions @("stage_files", "commit_changes", "push_changes", "create_pr", "merge_pr")
-    escalation_state = New-Section -Status $(if ($staleConditions.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @() -Summary "Escalation persistence is not enabled; review conditions are included in stale_conditions." -Items @($staleConditions) -BlockedActions @("escalation_append", "escalation_resolve")
-    git_state = New-Section -Status $(if ($unexpectedDirtyFiles.Count -gt 0) { "BLOCKED" } elseif ($changedLines.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @("git status --short --branch") -Summary "Git status inspected read-only." -Items @([pscustomobject]@{ branch = [string]$branchLine; changed_lines = $changedLines; candidate_files = $candidateFiles; approved_candidate_files = $approvedCandidateFiles; unexpected_dirty_files = $unexpectedDirtyFiles }) -BlockedActions @("stage_files", "commit_changes", "push_changes")
-    supervisor_state = New-Section -Status "READY" -SourcePaths @($supervisorSchemaPath, $supervisorRulesPath) -Summary "Supervisor schema and rules inspected as read-only authority evidence." -Items @($supervisorRules) -BlockedActions @("start_loop", "start_daemon", "launch_worker")
+    frontend_contract = New-FrontendContract `
+        -DisplayState "DISPLAY_ONLY" `
+        -SourcePaths @("automation/orchestration/runtime/Get-AiOsRuntimeStateBundle.DRY_RUN.ps1") `
+        -SourceType "runtime_state_bundle" `
+        -Freshness (New-Freshness -IsStale $false) `
+        -BlockedActions $blockedRuntimeActions `
+        -NextSafeAction "Use this bundle as frontend display evidence only. Do not expose execution or mutation controls from it." `
+        -ApprovalRequired $false `
+        -StaleOrLegacy $false
+    packet_state = New-Section -Status "REVIEW" -SourcePaths @($packetActivePath, $packetBlockedPath, $packetCompletePath) -SourceType "canonical_work_packet_evidence" -Summary "Packet folders inspected as read-only runtime evidence." -Items $packetItems -BlockedActions @("packet_state_change", "packet_assignment") -NextSafeAction "Display packet state only; move or assign packets only through a separately approved packet workflow."
+    worker_state = New-Section -Status "REVIEW" -SourcePaths @($workerRegistryPath, $workerProfilesPath, $workerInboxPath) -SourceType "canonical_worker_evidence" -Summary "Worker registry, profiles, and inbox inspected without heartbeat writes." -Items $workerItems -BlockedActions @("worker_launch", "heartbeat_write", "worker_state_change") -NextSafeAction "Display worker state only; launch or mutate workers only through a separately approved worker workflow."
+    lock_state = New-Section -Status "REVIEW" -SourcePaths @($lockRegistryPath) -SourceType "canonical_lock_evidence" -Summary "Lock registry evidence inspected without lock release." -Items @($lockRegistry) -BlockedActions @("lock_claim", "lock_release", "force_unlock") -NextSafeAction "Display lock state only; claim or release locks only through a separately approved lock workflow."
+    validator_state = New-Section -Status "REVIEW" -SourcePaths @($validatorConfigPath, $ValidatorRecommendationPath, $ValidatorRunReportPath) -SourceType "validator_evidence" -Summary "Validator config and report evidence inspected without running mutation paths." -Items $validatorItems -BlockedActions @("apply_repair", "approval_grant") -NextSafeAction "Display validator evidence only; validator PASS does not approve APPLY or protected actions."
+    approval_state = New-Section -Status "REVIEW" -SourcePaths @($approvalInboxPath, $approvalQueuePath) -SourceType "canonical_approval_evidence" -Summary "Approval evidence inspected without creating or resolving approvals." -Items $approvalItems -BlockedActions @("approval_create", "approval_resolve") -NextSafeAction "Display approval state only; Human Owner approval remains required before protected actions."
+    commit_package_state = New-Section -Status $(if ($candidateFiles.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @($commitPackageRecommendationHelperPath) -SourceType "commit_package_preview" -Summary "Level 5 commit-package preview evidence inspected without staging, committing, pushing, PR, or merge actions." -Items $commitPackageItems -BlockedActions @("stage_files", "commit_changes", "push_changes", "create_pr", "merge_pr") -NextSafeAction "Display exact-file preview only; do not stage, commit, push, create PRs, or merge from a frontend."
+    escalation_state = New-Section -Status $(if ($staleConditions.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @() -SourceType "generated_projection" -Summary "Escalation persistence is not enabled; review conditions are included in stale_conditions." -Items @($staleConditions) -BlockedActions @("escalation_append", "escalation_resolve") -NextSafeAction "Display escalation conditions only; do not persist or resolve escalations from this bundle."
+    git_state = New-Section -Status $(if ($unexpectedDirtyFiles.Count -gt 0) { "BLOCKED" } elseif ($changedLines.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @("git status --short --branch") -SourceType "git_status_projection" -Summary "Git status inspected read-only." -Items @([pscustomobject]@{ branch = [string]$branchLine; changed_lines = $changedLines; candidate_files = $candidateFiles; approved_candidate_files = $approvedCandidateFiles; unexpected_dirty_files = $unexpectedDirtyFiles }) -BlockedActions @("stage_files", "commit_changes", "push_changes") -NextSafeAction "Display git status only; protected git actions require separate approval and exact-file scope."
+    supervisor_state = New-Section -Status "READY" -SourcePaths @($supervisorSchemaPath, $supervisorRulesPath) -SourceType "supervisor_schema_evidence" -Summary "Supervisor schema and rules inspected as read-only authority evidence." -Items @($supervisorRules) -BlockedActions @("start_loop", "start_daemon", "launch_worker") -NextSafeAction "Display supervisor readiness only; do not schedule, launch, or daemonize from this bundle."
     next_safe_actions = @(
         [pscustomobject]@{
             rank = 1

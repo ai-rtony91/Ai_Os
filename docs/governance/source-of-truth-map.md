@@ -27,8 +27,29 @@ These ownership decisions are approved for planning and future cleanup packets. 
 | Runtime state readers/control | `automation/runtime/state/AIOS_RUNTIME_STATE.json`, `automation/orchestration/runtime/`, `scripts/control/`, `services/runtime/`, `services/orchestrator/`, `telemetry/runtime/` | Runtime/generated state is protected evidence until retention policy exists; runtime proof-trail readers must label ledger evidence as current, stale, historical, or reference |
 | Trading Lab package ownership | `apps/trading_lab/trading_lab/` likely long-term; `aios/modules/trader/` remains active | REVIEW_REQUIRED; keep both active and do not consolidate yet |
 | Operator layer | `aios.ps1` root launcher plus canonical `automation/orchestration/` | Keep `automation/operator/` active launcher/legacy-mixed until dependency review |
-| Dashboard data source | Current fixture-driven `apps/dashboard/`; future read-only API owner `services/orchestrator/` | Do not wire API or remove fixtures until approved |
+| Dashboard/frontend state source | Current fixture-driven `apps/dashboard/`; future read-only API owner `services/orchestrator/`; frontend display contract in `schemas/aios/orchestration/STATE_PROJECTION_RULES.md` and `RUNTIME_VISIBILITY_SCHEMA.json` | Frontends may display read-only projections only; do not wire API mutation, remove fixtures, expose execution controls, or treat display state as authority until approved |
 | CLEAN-era source | `docs/AI_OS/**` | Reference/source material only until file-by-file classification |
+
+## Frontend and Immersive UI State Boundary
+
+Future dashboard, GUI, UE5, VR, AR, or other visual command-center surfaces must use display-only state projections. A visual layer may read and render canonical evidence, but it does not gain authority to approve work, mutate approvals, move packets, claim locks, launch workers, run APPLY paths, stage files, commit, push, merge, schedule tasks, start daemons, touch broker/live trading paths, or read secrets.
+
+Safe frontend projections must preserve:
+
+- `display_state`
+- `authority_state`
+- `source_path`
+- `source_type`
+- `freshness`
+- `blocked_actions`
+- `next_safe_action`
+- `approval_required`
+- `execution_allowed=false`
+- `mutation_allowed=false`
+- `stale_or_legacy`
+- `safe_for_frontend_display`
+
+If a source lacks those fields, future frontends should render it as `NEEDS_REVIEW` or hide it behind an evidence drilldown instead of presenting it as live command authority.
 
 ## Root authority files
 
@@ -83,7 +104,7 @@ Claude Code West territory remains proposed until approved by Human Owner packet
 | `docs/workflows/` | Shared / approval-required path | Canonical workflow authority |
 | `docs/security/` | Shared / approval-required path | Security and approval boundary authority |
 | `schemas/aios/orchestration/` | Shared / approval-required path | Packet, validator, lock, and approval contracts |
-| `apps/dashboard/mock-data/` | Shared / unclear path | Needs classification before APPLY |
+| `apps/dashboard/mock-data/` | Shared fixture path | Fixture-only frontend evidence; not runtime truth, not command authority |
 | `automation/orchestration/` | Forbidden West path | East/runtime orchestration machinery |
 | `automation/operator/` | Forbidden West path | Operator tooling and unresolved legacy risk |
 | `services/` | Forbidden West path | Backend/runtime services |
@@ -224,6 +245,11 @@ These markings reflect the current duplicate-brain validator state after active 
 | `telemetry/night_supervisor/night_ledger.jsonl` | KEEP_PROTECTED_EVIDENCE / ACTIVE_NIGHT_RUNTIME_LEDGER | Current Night Supervisor and Night Cycle runtime ledger. It proves runtime-cycle evidence only; it does not prove productive autonomy unless paired with a real GREEN task output, truthful marker evidence, validation, and report. |
 | `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` | KEEP_PROTECTED_EVIDENCE / FUTURE_ARCHIVE_CANDIDATE | Compatibility evidence only until adapter-first registry use is fully proven and retirement is approved. |
 | `automation/orchestration/*.example.json` | FUTURE_ARCHIVE_CANDIDATE | Example files require fixture ownership review before archive. |
+| `automation/orchestration/work_packets/proposed/**` | NON_LIVE_PACKET_EVIDENCE | Proposed packet material only; future interfaces must not render these as active executable work. |
+| `automation/orchestration/work_packets/deferred/**` | NON_LIVE_PACKET_EVIDENCE | Deferred packet material only; future interfaces must not render these as active executable work. |
+| `automation/orchestration/work_packets/rejected/**` | NON_LIVE_PACKET_EVIDENCE | Rejected packet material only; future interfaces must not render these as active executable work. |
+| `automation/orchestration/work_packets/templates/**` | TEMPLATE_ONLY | Packet templates are not work. |
+| `automation/orchestration/work_packets/examples/**` | EXAMPLE_ONLY | Packet examples are not active work. |
 
 Current delete readiness:
 
