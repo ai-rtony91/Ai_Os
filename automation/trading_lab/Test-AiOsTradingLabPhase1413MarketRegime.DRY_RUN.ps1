@@ -2,8 +2,14 @@ $ErrorActionPreference = "Stop"
 
 $RepoRoot = (Get-Location).Path
 $JsonPath = Join-Path $RepoRoot "apps\trading_lab\mock-data\market_regime_engine.example.json"
-$DocPath = Join-Path $RepoRoot "docs\AI_OS\trading_laboratory\phase_14_13\PHASE_14_13_MARKET_REGIME_ENGINE.md"
-$CheckpointPath = Join-Path $RepoRoot "Reports\checkpoints\CHECKPOINT_PHASE_14_13_MARKET_REGIME.md"
+# Historical/reference-only evidence. These archive files are not current authority
+# and are not active Reports/checkpoints output.
+$DocPath = Join-Path $RepoRoot "archive\docs_aios_trading_laboratory_legacy\phase_14_13\PHASE_14_13_MARKET_REGIME_ENGINE.md"
+$CheckpointPath = Join-Path $RepoRoot "archive\reports_legacy\checkpoints\CHECKPOINT_PHASE_14_13_MARKET_REGIME.md"
+
+# This validator provides evidence only. It does not approve live trading, broker
+# execution, real webhooks, real orders, credentials, APPLY, commit, push, merge,
+# or deployment.
 
 $RequiredFiles = @(
   $JsonPath,

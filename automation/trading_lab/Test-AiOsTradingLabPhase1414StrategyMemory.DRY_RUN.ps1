@@ -1,9 +1,15 @@
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-$docPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_14_14\PHASE_14_14_STRATEGY_MEMORY_ENGINE.md"
+# Historical/reference-only evidence. These archive files are not current authority
+# and are not active Reports/checkpoints output.
+$docPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_14_14\PHASE_14_14_STRATEGY_MEMORY_ENGINE.md"
 $jsonPath = Join-Path $repoRoot "apps\trading_lab\mock-data\strategy_memory_engine.example.json"
-$checkpointPath = Join-Path $repoRoot "Reports\checkpoints\CHECKPOINT_PHASE_14_14_STRATEGY_MEMORY.md"
+$checkpointPath = Join-Path $repoRoot "archive\reports_legacy\checkpoints\CHECKPOINT_PHASE_14_14_STRATEGY_MEMORY.md"
+
+# This validator provides evidence only. It does not approve live trading, broker
+# execution, real webhooks, real orders, credentials, APPLY, commit, push, merge,
+# or deployment.
 
 $requiredFiles = @($docPath, $jsonPath, $checkpointPath)
 

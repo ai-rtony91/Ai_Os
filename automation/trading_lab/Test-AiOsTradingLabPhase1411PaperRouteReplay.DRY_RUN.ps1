@@ -7,9 +7,17 @@ $RequiredFiles = @(
     "apps/trading_lab/trading_lab/tv_tp_bridge/paper_route_replay.py",
     "apps/trading_lab/mock-data/tv_tp_bridge/paper_route_replay_result.example.json",
     "automation/trading_lab/Test-AiOsTradingLabPhase1411PaperRouteReplay.DRY_RUN.ps1",
-    "docs/AI_OS/trading_laboratory/phase_14_11/PHASE_14_11_PAPER_ROUTE_REPLAY_CONNECTOR.md",
-    "Reports/checkpoints/CHECKPOINT_PHASE_14_11_PAPER_ROUTE_REPLAY.md"
+    "archive/docs_aios_trading_laboratory_legacy/phase_14_11/PHASE_14_11_PAPER_ROUTE_REPLAY_CONNECTOR.md",
+    "archive/reports_legacy/checkpoints/CHECKPOINT_PHASE_14_11_PAPER_ROUTE_REPLAY.md"
 )
+
+# Historical/reference-only evidence. Archive docs are not current authority,
+# archive checkpoints are not active Reports/checkpoints output, and dashboard or
+# app mock data is fixture evidence only, not runtime truth.
+#
+# This DRY_RUN validator must not write repo files. It provides evidence only and
+# does not approve live trading, broker execution, real webhooks, real orders,
+# credentials, APPLY, commit, push, merge, or deployment.
 
 foreach ($File in $RequiredFiles) {
     if (-not (Test-Path $File)) {
@@ -29,13 +37,11 @@ sys.path.insert(0, str(Path.cwd()))
 
 from apps.trading_lab.trading_lab.tv_tp_bridge.paper_route_replay import (
     build_paper_route_replay_result,
-    write_example_result,
 )
 
 result = build_paper_route_replay_result()
-written = write_example_result()
-
-assert result == written
+fixture_path = Path("apps/trading_lab/mock-data/tv_tp_bridge/paper_route_replay_result.example.json")
+fixture = json.loads(fixture_path.read_text(encoding="utf-8"))
 
 required = {
     "replay_id",
@@ -60,6 +66,8 @@ required = {
 }
 missing = required.difference(result)
 assert not missing, f"Missing replay fields: {sorted(missing)}"
+fixture_missing = required.difference(fixture)
+assert not fixture_missing, f"Missing replay fixture fields: {sorted(fixture_missing)}"
 assert isinstance(result["scorecard_ready"], bool)
 assert isinstance(result["execution_quality_score"], (int, float))
 assert result["mode"] == "paper_only"
@@ -71,19 +79,15 @@ assert "slippage_estimate" in result
 assert isinstance(result["spread_estimate"], (int, float))
 assert isinstance(result["slippage_estimate"], (int, float))
 
+for key in required:
+    assert result[key] == fixture[key], f"Replay fixture mismatch for {key}"
+
 print(json.dumps(result, indent=2))
 '@
 
-$TempScript = New-TemporaryFile
-try {
-    Set-Content -Path $TempScript -Value $PythonScript -Encoding UTF8
-    $Output = python $TempScript
-    if ($LASTEXITCODE -ne 0) {
-        throw "Phase 14.11 connector execution failed."
-    }
-}
-finally {
-    Remove-Item -Path $TempScript -Force
+$Output = $PythonScript | python -
+if ($LASTEXITCODE -ne 0) {
+    throw "Phase 14.11 connector execution failed."
 }
 
 $ReplayJson = Get-Content -Raw $ReplayJsonPath | ConvertFrom-Json
