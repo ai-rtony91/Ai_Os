@@ -1,14 +1,4 @@
 {
   "schema": "AIOS_WORKER_CLAIM_REGISTRY.v1",
-  "worker_id": "WORKER_ID_PLACEHOLDER",
-  "worker_name": "WORKER_NAME_PLACEHOLDER",
-  "packet_id": "PACKET_ID_PLACEHOLDER",
-  "assigned_paths": [],
-  "claim_timestamp": "TIMESTAMP_PLACEHOLDER",
-  "expiration_placeholder": "TIMESTAMP_PLACEHOLDER",
-  "claim_status": "claimed",
-  "approval_required": true,
-  "validator_required": true,
-  "commit_blocked_until_review": true,
-  "next_action": "Validate claim ownership before APPLY work."
+  "claims": []
 }
