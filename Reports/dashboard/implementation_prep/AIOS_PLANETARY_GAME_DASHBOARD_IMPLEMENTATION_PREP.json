@@ -1,0 +1,428 @@
+{
+  "schema": "aios.dashboard.implementation_prep.planetary_game.v1",
+  "generated_at": "2026-06-12T00:00:00-04:00",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-PREP-DRY-RUN-V1",
+  "worker_identity": "Codex East",
+  "branch": "feature/planetary-game-dashboard-implementation-prep-v1",
+  "current_dashboard_map": {
+    "framework_runtime": {
+      "framework": "Vite + React",
+      "react_version": "^19.2.4",
+      "entry_points": [
+        "apps/dashboard/src/main.jsx",
+        "apps/dashboard/src/App.jsx",
+        "apps/dashboard/src/App.css",
+        "apps/dashboard/src/index.css"
+      ],
+      "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "lint": "eslint .",
+        "preview": "vite preview",
+        "start": "node server.js"
+      }
+    },
+    "visible_dashboard_control_files": [
+      "apps/dashboard/src/App.jsx",
+      "apps/dashboard/src/App.css",
+      "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+      "apps/dashboard/js/aios-static-preview.js",
+      "apps/dashboard/css/aios-static-preview.css",
+      "apps/dashboard/index.html"
+    ],
+    "active_react_app": {
+      "main": "apps/dashboard/src/main.jsx",
+      "app": "apps/dashboard/src/App.jsx",
+      "style": "apps/dashboard/src/App.css",
+      "imports": [
+        "apps/dashboard/mock-data/aios-runtime-visibility-v1.example.json",
+        "apps/dashboard/mock-data/aios-operator-status-v1.example.json",
+        "virtual:aios-autonomy-bridge-state"
+      ],
+      "current_first_screen": [
+        "operations header",
+        "24-hour mission summary",
+        "worker rooms",
+        "operator status fixture",
+        "autonomy bridge state",
+        "playlist dock",
+        "advanced telemetry drill-down"
+      ]
+    },
+    "state_boundary": {
+      "adapter": "apps/dashboard/src/runtimeVisibilityAdapter.js",
+      "client": "apps/dashboard/src/runtimeVisibilityClient.js",
+      "api_url": "/api/runtime/visibility",
+      "required_api_schema": "aios.runtime_visibility_api.v1",
+      "required_mode": "READ_ONLY",
+      "vite_proxy": "/api -> http://localhost:5050",
+      "virtual_module": "virtual:aios-autonomy-bridge-state",
+      "fallback_fixture": "apps/dashboard/mock-data/autonomy_bridge_state.sample.json"
+    },
+    "static_preview": {
+      "entry": "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+      "css": "apps/dashboard/css/aios-static-preview.css",
+      "js": "apps/dashboard/js/aios-static-preview.js",
+      "behavior": [
+        "rails",
+        "Work Table",
+        "Apps Hub",
+        "status panels",
+        "fixture fetches",
+        "music dock",
+        "session/local storage for local UI state"
+      ]
+    },
+    "pwa_static_server": {
+      "index": "apps/dashboard/index.html",
+      "manifest": "apps/dashboard/manifest.webmanifest",
+      "service_worker": "apps/dashboard/service-worker.js",
+      "server": "apps/dashboard/server.js",
+      "note": "Service worker is placeholder-only and not registered."
+    },
+    "assets": [
+      "apps/dashboard/assets/ai_osgalaxy.theme.jpg",
+      "apps/dashboard/src/assets/hero.png",
+      "apps/dashboard/assets/aios-icon.svg",
+      "apps/dashboard/icons/aios-icon.svg",
+      "apps/dashboard/assets/brand/"
+    ],
+    "orchestration_dashboard_writer": {
+      "path": "automation/orchestration/dashboard/Update-AiOsDashboardState.ps1",
+      "writes": "apps/dashboard/data/aios_live_state.json",
+      "phase_1_action": "do not invoke or modify"
+    },
+    "safe_later_apply_files": [
+      "apps/dashboard/src/App.jsx",
+      "apps/dashboard/src/App.css",
+      "apps/dashboard/mock-data/aios-planetary-dashboard-state-v1.example.json",
+      "apps/dashboard/skeleton/dashboard-structure.md",
+      "apps/dashboard/skeleton/safety-rules.md"
+    ],
+    "avoid_first_files": [
+      "apps/dashboard/package.json",
+      "apps/dashboard/package-lock.json",
+      "apps/dashboard/vite.config.js",
+      "apps/dashboard/server.js",
+      "apps/dashboard/service-worker.js",
+      "apps/dashboard/manifest.webmanifest",
+      "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+      "apps/dashboard/js/aios-static-preview.js",
+      "apps/dashboard/css/aios-static-preview.css",
+      "existing runtime/operator/autonomy fixtures"
+    ]
+  },
+  "redesign_alignment": {
+    "preserve_visual_identity": true,
+    "required_identity_sentence": "The goal is not to change the AI_OS visual identity; the goal is to enhance it into a realistic, cinematic, game-navigable command system.",
+    "realism_first": true,
+    "web_first": true,
+    "ue5_future_only": true,
+    "paper_only_trading_lab": true,
+    "broker_live_trading_blocked": true,
+    "zones": [
+      "Mars Lab",
+      "Moon Control",
+      "Earth Hub",
+      "Galaxy Intelligence",
+      "Black Hole Vault"
+    ],
+    "first_screen_must_show": [
+      "global status",
+      "AIOS EdgeMark",
+      "mode",
+      "safety state",
+      "current objective",
+      "next allowed action",
+      "critical alerts",
+      "zone entries"
+    ],
+    "advanced_drawer_contains": [
+      "raw telemetry",
+      "queues",
+      "scheduler",
+      "runtime",
+      "GitHub checks",
+      "workers",
+      "debug JSON",
+      "logs",
+      "security details",
+      "freshness",
+      "source trace"
+    ]
+  },
+  "phase_1_scope": [
+    "Create a realistic 2D/2.5D planetary landing shell in the existing React app.",
+    "Preserve current Vite/React bridge and read-only runtime visibility behavior.",
+    "Show Mars/Moon/Earth/Galaxy/Black Hole zones.",
+    "Show global status, AIOS EdgeMark placeholder/model, safety state, current objective, next safe action, and critical alerts.",
+    "Keep Advanced drawer for raw telemetry/debug/operator details.",
+    "Add lightweight keyboard/mouse navigation with a future Gamepad API path.",
+    "Use no new dependencies in the first APPLY.",
+    "Avoid backend/API mutation and live data expansion."
+  ],
+  "phase_1_non_goals": [
+    "UE5 project",
+    "first-person astronaut implementation",
+    "multiplayer",
+    "live leaderboard backend",
+    "dependency installation",
+    "Three.js or React Three Fiber without separate approval",
+    "Cloudflare/Azure/DNS/tunnel/provider configuration",
+    "secret handling",
+    "runtime mutation",
+    "scheduler mutation",
+    "queue mutation",
+    "approval inbox mutation",
+    "worker inbox mutation",
+    "command queue mutation",
+    "broker/live trading mutation",
+    "public/remote exposure"
+  ],
+  "proposed_file_cut_list": {
+    "primary_apply_files": [
+      {
+        "path": "apps/dashboard/src/App.jsx",
+        "purpose": "Planetary shell, status derivation, zone rendering, Advanced drawer, Paper League boundary, input navigation hook."
+      },
+      {
+        "path": "apps/dashboard/src/App.css",
+        "purpose": "Cinematic planetary shell styling, responsive layout, focus states, reduced-motion rules, safety label treatment."
+      },
+      {
+        "path": "apps/dashboard/mock-data/aios-planetary-dashboard-state-v1.example.json",
+        "purpose": "Deterministic local fixture for zones, AIOS EdgeMark display model, paper-only league summary, and blocked capability labels."
+      },
+      {
+        "path": "apps/dashboard/skeleton/dashboard-structure.md",
+        "purpose": "Reference structure update for planetary shell plus Advanced drawer."
+      },
+      {
+        "path": "apps/dashboard/skeleton/safety-rules.md",
+        "purpose": "Reference safety rules for planetary navigation, input controls, Paper League, and blocked protected actions."
+      }
+    ],
+    "optional_only_if_needed": [
+      "apps/dashboard/src/runtimeVisibilityAdapter.js",
+      "apps/dashboard/src/index.css"
+    ],
+    "do_not_change_first_apply": [
+      "apps/dashboard/package.json",
+      "apps/dashboard/package-lock.json",
+      "apps/dashboard/vite.config.js",
+      "apps/dashboard/server.js",
+      "apps/dashboard/service-worker.js",
+      "apps/dashboard/manifest.webmanifest",
+      "apps/dashboard/AIOS_STATIC_PREVIEW.html",
+      "apps/dashboard/js/aios-static-preview.js",
+      "apps/dashboard/css/aios-static-preview.css"
+    ]
+  },
+  "proposed_component_cut_list": {
+    "local_components_first": [
+      "PlanetaryCommandShell",
+      "PlanetaryScene",
+      "PlanetZoneNode",
+      "AiosEdgeMarkPanel",
+      "SafetyStatusStrip",
+      "MissionObjectivePanel",
+      "CriticalAlertsPanel",
+      "PaperLeaguePanel",
+      "AdvancedDrawer",
+      "InputHelpOverlay",
+      "StatusPill",
+      "Metric"
+    ],
+    "local_helpers_first": [
+      "useAiosInputNavigation",
+      "buildPlanetaryDashboardModel",
+      "deriveAiosEdgeMark"
+    ],
+    "future_split_files_after_shape_proves": [
+      "apps/dashboard/src/components/PlanetaryCommandShell.jsx",
+      "apps/dashboard/src/components/PlanetaryScene.jsx",
+      "apps/dashboard/src/components/PlanetZoneNode.jsx",
+      "apps/dashboard/src/components/AdvancedDrawer.jsx",
+      "apps/dashboard/src/hooks/useAiosInputNavigation.js",
+      "apps/dashboard/src/data/planetaryDashboardModel.js"
+    ]
+  },
+  "visual_strategy": {
+    "phase_1_stack": "React + CSS only, no new dependency",
+    "techniques": [
+      "CSS radial gradients",
+      "CSS conic gradients",
+      "layered backgrounds",
+      "pseudo-elements",
+      "controlled box shadows",
+      "existing committed brand assets only if explicitly referenced by later APPLY"
+    ],
+    "dependency_policy": "Do not install dependencies in first APPLY. Three.js/R3F/Drei require separate approval.",
+    "uploaded_visual_policy": "Uploaded visual identity image remains reference-only; do not commit, copy, or add as asset.",
+    "realism_rules": [
+      "NASA / aerospace / mission-control inspiration",
+      "realistic sci-fi, not fantasy sci-fi",
+      "premium fintech/trading terminal merged with space exploration",
+      "physically motivated lighting",
+      "real materials and readable overlays",
+      "reduced-motion fallback"
+    ],
+    "prohibited_visuals": [
+      "cartoon",
+      "toy-like",
+      "flat",
+      "low-poly",
+      "childish",
+      "arcade-only",
+      "mobile-game style",
+      "neon overload"
+    ]
+  },
+  "input_strategy": {
+    "commands": [
+      "focusZone",
+      "selectZone",
+      "enterZone",
+      "back",
+      "openAdvancedDrawer",
+      "closeAdvancedDrawer",
+      "moveFocus",
+      "openInputHelp"
+    ],
+    "keyboard": [
+      "Tab/Shift+Tab native focus order",
+      "Arrow keys or WASD move zone focus",
+      "Enter/Space selects focused zone",
+      "Escape closes overlays or returns home",
+      "visible focus rings",
+      "no keyboard trap"
+    ],
+    "mouse_touch": [
+      "click/tap focuses or enters zones",
+      "hover may show concise status",
+      "hover cannot hide safety labels",
+      "drag/orbit skipped unless harmless"
+    ],
+    "xbox_controller_future": [
+      "D-pad/left stick move focus",
+      "A select",
+      "B back",
+      "X Advanced",
+      "Y command/search",
+      "LB/RB switch zones",
+      "Start/Menu help/system menu"
+    ],
+    "safety": [
+      "no destructive one-button actions",
+      "protected actions remain approval-gated",
+      "controller disconnect falls back to keyboard/mouse"
+    ]
+  },
+  "safety_boundaries": [
+    "dashboard remains read-only/display-only by default",
+    "no backend/API mutation",
+    "no runtime mutation",
+    "no scheduler mutation",
+    "no queue mutation",
+    "no approval inbox mutation",
+    "no broker/live trading controls",
+    "no secrets",
+    "no uploaded image asset commit",
+    "no UE5 project",
+    "no dependency installation",
+    "no public/remote exposure",
+    "fixture data must not appear authoritative",
+    "UNKNOWN is not success"
+  ],
+  "test_preview_plan": {
+    "commands": [
+      "git diff --check",
+      "cd apps/dashboard",
+      "npm run build",
+      "npm run lint",
+      "npm run preview",
+      "git status --short --branch"
+    ],
+    "manual_review": [
+      "desktop screenshot review",
+      "mobile viewport screenshot review",
+      "keyboard-only walkthrough",
+      "reduced-motion walkthrough",
+      "Advanced drawer open/close review",
+      "critical status readability over visuals",
+      "confirm no secrets/broker/runtime/scheduler/queue/approval/live-trading controls"
+    ]
+  },
+  "rollback_plan": [
+    "Use isolated feature branch.",
+    "Edit only exact approved files.",
+    "Do not delete existing dashboard files during Phase 1.",
+    "Run build/lint before PR.",
+    "Capture before/after screenshots.",
+    "If validation or manual review fails, restore only exact changed files from pre-implementation commit.",
+    "Preserve fixtures, Vite virtual module, static preview, server, service worker, manifest, and read-only runtime visibility API contract."
+  ],
+  "risk_register": [
+    {
+      "risk": "browser performance",
+      "mitigation": "Use no-new-dependency CSS first, controlled animation, and reduced-motion fallback."
+    },
+    {
+      "risk": "realism vs readability",
+      "mitigation": "Keep status labels in stable overlays outside heavy visual effects."
+    },
+    {
+      "risk": "dependency bloat",
+      "mitigation": "Defer Three.js/R3F/Drei until separate approval."
+    },
+    {
+      "risk": "dashboard state safety",
+      "mitigation": "Do not expand live sources or direct repo/runtime reads."
+    },
+    {
+      "risk": "public/remote exposure",
+      "mitigation": "No Cloudflare/Azure/DNS/tunnel/publishing workflow in Phase 1."
+    },
+    {
+      "risk": "game mechanics imply real-money competition",
+      "mitigation": "Keep Paper League simulated, paper-only, and discipline-focused."
+    },
+    {
+      "risk": "controller browser differences",
+      "mitigation": "Plan Gamepad API hooks after keyboard semantics are stable."
+    },
+    {
+      "risk": "visual identity drift",
+      "mitigation": "Preserve AIOS lettering, blue/purple energy, signal/global/trading motifs, and premium command-center mood."
+    }
+  ],
+  "forbidden_actions": [
+    "edit apps/dashboard in this DRY_RUN packet",
+    "overwrite dashboard files",
+    "delete dashboard files",
+    "install dependencies",
+    "run npm install",
+    "create UE5 project files",
+    "add assets",
+    "copy or commit uploaded image assets",
+    "expose dashboard remotely",
+    "configure Cloudflare/Azure/DNS/tunnels/providers",
+    "mutate runtime",
+    "mutate scheduler",
+    "mutate queues",
+    "mutate approval inbox",
+    "touch broker/live trading paths",
+    "access or store secrets",
+    "push to main",
+    "merge",
+    "close PRs"
+  ],
+  "next_packet": {
+    "path": "automation/orchestration/work_packets/proposed/AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST.md",
+    "status": "review-only APPLY request",
+    "execution_token": "intentionally omitted until separate Anthony approval"
+  },
+  "status": "DRY_RUN_COMPLETE_IMPLEMENTATION_PREP_READY_FOR_REVIEW"
+}
+
