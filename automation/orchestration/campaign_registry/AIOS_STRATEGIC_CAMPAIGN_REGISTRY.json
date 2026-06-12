@@ -636,13 +636,15 @@
           "stage_id": "STAGE-AUTONOMY-LEVEL-REVIEW",
           "phase_id": "PHASE-AUTONOMY-LADDER",
           "title": "Review supervised autonomy level and next safe upgrade",
-          "status": "READY",
+          "status": "COMPLETE",
           "priority": "high",
           "depends_on": [
             "STAGE-CREW-CAMPAIGN-BRIDGE-DRYRUN"
           ],
           "blocked_by": [],
-          "next_packet_candidate": "PKT-AUTONOMY-LEVEL-REVIEW-DRYRUN"
+          "next_packet_candidate": null,
+          "completed_by_pr": "https://github.com/ai-rtony91/Ai_Os/pull/604",
+          "completed_by_commit": "91cceda0"
         }
       ],
       "depends_on": [
@@ -678,15 +680,19 @@
       ],
       "evidence_paths": [
         "docs/architecture/AI_OS_SEMI_AUTONOMY_MODEL.md",
-        "docs/governance/AI_OS_AUTONOMY_LEVELS.md"
+        "docs/governance/AI_OS_AUTONOMY_LEVELS.md",
+        "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+        "automation/orchestration/supervisor/Get-AiOsOvernightSupervisorPlan.DRY_RUN.ps1",
+        "PR #603",
+        "PR #604"
       ],
-      "completion_percent": 25,
-      "progress_basis": "Semi-autonomy model exists; operational integration needs evidence.",
+      "completion_percent": 45,
+      "progress_basis": "Autonomy level review is complete: PR #603 installed Level 5 commit-package preview behavior, PR #604 proved dirty-tree preview behavior and added Level 6 report-only overnight supervisor readiness. Execution, scheduler, daemon, worker launch, runtime mutation, and protected git actions remain blocked.",
       "timeline_estimate": "multi-checkpoint",
-      "next_packet_candidate": "PKT-AUTONOMY-LEVEL-REVIEW-DRYRUN",
+      "next_packet_candidate": null,
       "crew_lane": "supervised-autonomy-review",
       "recommended_worker": "EAST_OCC_01",
-      "stop_condition": "Stop after autonomy-level review."
+      "stop_condition": "Autonomy level review closed; no execution or protected action is authorized by this registry."
     }
   ]
 }
