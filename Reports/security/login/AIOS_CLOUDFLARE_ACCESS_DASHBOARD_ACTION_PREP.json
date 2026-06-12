@@ -1,0 +1,272 @@
+{
+  "schema": "AIOS_CLOUDFLARE_ACCESS_DASHBOARD_ACTION_PREP.v1",
+  "generated_at": "2026-06-12",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-CLOUDFLARE-ACCESS-DASHBOARD-ACTION-PREP-DRY-RUN-V1",
+  "lane": "cloudflare-access-dashboard-action-prep",
+  "dashboard_action_checklist": [
+    {
+      "step": "confirm_cloudflare_dashboard_account_identity",
+      "future_action": "Open Cloudflare dashboard in the intended business/admin account and confirm account display or class.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "evidence": "manual_confirmation_or_sanitized_screenshot_only",
+      "provider_change": false
+    },
+    {
+      "step": "confirm_cloudflare_admin_recovery_paths",
+      "future_action": "Confirm at least two independent Cloudflare admin or recovery paths.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "provider_change": false
+    },
+    {
+      "step": "navigate_to_zero_trust_access_applications",
+      "future_action": "Use Cloudflare One or Zero Trust, then Access controls and Applications if the visible UI matches; otherwise stop and record visible labels.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "provider_change": false
+    },
+    {
+      "step": "draft_self_hosted_application_object",
+      "future_action": "Prepare a self-hosted Access application object for AI_OS without saving or publishing it.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "provider_change": false
+    },
+    {
+      "step": "confirm_application_name",
+      "future_action": "Confirm Access app name such as AI_OS Access - Production or an Anthony-approved variant.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "provider_change": false
+    },
+    {
+      "step": "confirm_domain_subdomain_target",
+      "future_action": "Confirm target zone/domain and AI_OS subdomain without creating DNS or tunnel records.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "provider_change": false
+    },
+    {
+      "step": "draft_identity_provider_order",
+      "future_action": "Plan Microsoft/Entra primary, GitHub backup, Google optional, and OTP emergency fallback ordering.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "provider_change": false
+    },
+    {
+      "step": "confirm_turnstile_post_access_placement",
+      "future_action": "Confirm Turnstile runs after Cloudflare Access login before AI_OS session creation, and before third-party handoff screens.",
+      "authorization": "NOT_AUTHORIZED_YET",
+      "provider_change": false
+    },
+    {
+      "step": "stop_before_exposure",
+      "future_action": "Stop before DNS changes, tunnel changes, dashboard exposure, provider save/publish, or secret handling.",
+      "authorization": "MANDATORY_STOP",
+      "provider_change": false
+    }
+  ],
+  "unresolved_inputs": [
+    {
+      "input": "cloudflare_account_identity",
+      "status": "UNRESOLVED",
+      "required_confirmation": "Cloudflare account display or admin class",
+      "safe_collection": "manual confirmation or sanitized screenshot only"
+    },
+    {
+      "input": "cloudflare_admin_recovery_paths",
+      "status": "UNRESOLVED",
+      "required_confirmation": "At least two independent admin or recovery paths"
+    },
+    {
+      "input": "domain_or_zone_target",
+      "status": "UNRESOLVED",
+      "required_confirmation": "Cloudflare zone/domain to be considered for AI_OS",
+      "dns_change_allowed": false
+    },
+    {
+      "input": "aios_subdomain_target",
+      "status": "UNRESOLVED",
+      "required_confirmation": "Candidate AI_OS hostname",
+      "dns_change_allowed": false
+    },
+    {
+      "input": "access_app_name",
+      "status": "UNRESOLVED",
+      "recommended_value": "AI_OS Access - Production"
+    },
+    {
+      "input": "primary_microsoft_entra_account",
+      "status": "PARTIALLY_CONFIRMED",
+      "known_value": "ai.tradeplatform@Algotradez.onmicrosoft.com",
+      "required_confirmation": "Portal/admin account and recovery separation before provider setup"
+    },
+    {
+      "input": "github_backup_account",
+      "status": "CONFIRMED_FOR_REPO_CONTEXT",
+      "known_value": "ai-rtony91",
+      "required_confirmation": "Account health and independent recovery before provider setup"
+    },
+    {
+      "input": "google_fallback_decision",
+      "status": "UNRESOLVED",
+      "rule": "Enable only if it improves independent recovery without account sprawl"
+    },
+    {
+      "input": "otp_emergency_boundary",
+      "status": "UNRESOLVED",
+      "rule": "Emergency-only, constrained mailbox class, not same Microsoft reset loop"
+    },
+    {
+      "input": "break_glass_recovery_path",
+      "status": "UNRESOLVED",
+      "rule": "Must be independently recoverable before dashboard exposure"
+    }
+  ],
+  "identity_provider_order": [
+    {
+      "order": 1,
+      "provider": "microsoft_entra",
+      "role": "primary_admin_login",
+      "status": "PLANNED_NOT_CONFIGURED"
+    },
+    {
+      "order": 2,
+      "provider": "github",
+      "role": "backup_operator_login",
+      "status": "PLANNED_NOT_CONFIGURED"
+    },
+    {
+      "order": 3,
+      "provider": "google",
+      "role": "optional_fallback",
+      "status": "DECISION_DEFERRED"
+    },
+    {
+      "order": 4,
+      "provider": "cloudflare_otp",
+      "role": "emergency_fallback_only",
+      "status": "PLANNED_NOT_CONFIGURED"
+    }
+  ],
+  "turnstile_policy": {
+    "policy": "POST_ACCESS_LOGIN_AND_SERVICE_HANDOFF_ONLY",
+    "cloudflare_access_first": true,
+    "mandatory_contexts": [
+      "after_successful_cloudflare_access_identity_login_before_aios_app_session_creation",
+      "before_in_app_third_party_service_handoff_or_login_screens"
+    ],
+    "non_mandatory_contexts": [
+      "before_cloudflare_access_identity_login",
+      "every_dashboard_page_load",
+      "every_admin_click",
+      "normal_authenticated_navigation",
+      "local_omen_only_access_unless_later_exposed_remotely"
+    ],
+    "identity_authority": false,
+    "replaces_backend_roles_or_aios_approval_gates": false,
+    "server_side_verification_required": true,
+    "turnstile_secret_key_in_repo_allowed": false
+  },
+  "no_lockout_controls": [
+    "Confirm at least two independent admin login paths before provider action.",
+    "Confirm break-glass account is independent from the primary Microsoft reset loop.",
+    "Confirm recovery email class is separate from the primary Microsoft account.",
+    "Confirm local Omen fallback still works.",
+    "Confirm Cloudflare admin recovery is not single-path.",
+    "Confirm GitHub backup is available or deferred with documented risk.",
+    "Confirm no DNS, tunnel, or dashboard exposure is included.",
+    "Confirm exact rollback path for the one dashboard action."
+  ],
+  "screenshot_confirmation_requirements": [
+    {
+      "requirement": "cloudflare_account_identity",
+      "evidence_mode": "sanitized_screenshot_or_manual_confirmation_only",
+      "secrets_allowed": false
+    },
+    {
+      "requirement": "cloudflare_admin_recovery_independence",
+      "evidence_mode": "manual_confirmation_only",
+      "secrets_allowed": false
+    },
+    {
+      "requirement": "domain_subdomain_target",
+      "evidence_mode": "manual_confirmation_only",
+      "dns_change_allowed": false
+    },
+    {
+      "requirement": "provider_order",
+      "evidence_mode": "manual_confirmation_only",
+      "provider_configuration_allowed": false
+    },
+    {
+      "requirement": "turnstile_post_access_policy",
+      "evidence_mode": "manual_confirmation_only",
+      "turnstile_configuration_allowed": false
+    }
+  ],
+  "rollback_requirements": {
+    "before_future_dashboard_action": [
+      "confirm clean repo",
+      "record T9 savepoint if required by future lane",
+      "capture sanitized current provider UI state only after approval",
+      "confirm primary and backup admin paths",
+      "define exact rollback action",
+      "stop if any recovery path is unclear"
+    ],
+    "after_future_dashboard_action": [
+      "test changed login path",
+      "test independent backup login path",
+      "confirm local Omen fallback still works",
+      "confirm dashboard remains unexposed unless separately approved",
+      "confirm no secrets entered repo",
+      "confirm git status is clean",
+      "rollback only the last change if login proof fails"
+    ]
+  },
+  "forbidden_actions": [
+    "configure_cloudflare",
+    "configure_turnstile",
+    "configure_azure",
+    "configure_entra",
+    "configure_github_oauth",
+    "configure_google_oauth",
+    "configure_otp",
+    "create_or_change_dns",
+    "create_or_change_tunnels",
+    "expose_dashboard",
+    "access_request_write_or_store_secrets",
+    "edit_env",
+    "mutate_runtime",
+    "mutate_scheduler",
+    "mutate_queues",
+    "mutate_approval_inbox",
+    "mutate_worker_inbox",
+    "mutate_command_queue",
+    "touch_broker_or_live_trading_paths",
+    "delete_files",
+    "push_to_main",
+    "merge",
+    "close_prs"
+  ],
+  "reference_docs": [
+    "https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/",
+    "https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/",
+    "https://developers.cloudflare.com/turnstile/get-started/server-side-validation/"
+  ],
+  "next_packet": {
+    "path": "automation/orchestration/work_packets/proposed/AIOS-CLOUDFLARE-ACCESS-DASHBOARD-ACTION-APPLY-REQUEST.md",
+    "type": "APPLY_REQUEST_ONLY_NOT_EXECUTABLE",
+    "requires_anthony_confirmation": [
+      "cloudflare_account_identity",
+      "domain_subdomain_target",
+      "access_app_name",
+      "primary_microsoft_entra_account",
+      "github_backup_account",
+      "google_fallback_decision",
+      "otp_emergency_boundary",
+      "break_glass_recovery_path",
+      "no_secrets_in_repo",
+      "no_dns_tunnel_dashboard_exposure_until_access_policy_proven"
+    ],
+    "provider_changes_allowed": false,
+    "secrets_allowed": false,
+    "dns_tunnel_dashboard_exposure_allowed": false
+  },
+  "status": "DRY_RUN_CLOUDFLARE_DASHBOARD_ACTION_PREP_READY_FOR_REVIEW_NO_PROVIDER_CHANGES_NO_SECRETS_STORED"
+}
