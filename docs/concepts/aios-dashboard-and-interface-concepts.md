@@ -38,6 +38,7 @@ Concept-only until separately approved:
 - AI assistant panel connected to live AI,
 - floating/docking panels,
 - production telemetry dashboard,
+- premium Unreal Engine 5 planetary command-map client,
 - execution monitor,
 - external account, API, or broker visibility.
 
@@ -86,6 +87,33 @@ Implementation guardrails:
 - keep critical FAIL, BLOCKED, WARN, REVIEW REQUIRED, and next-action states visible without hunting,
 - keep dashboard visuals separate from live broker/trading activation,
 - do not archive or down-rank branding, theme, layout, mockup, or visual-direction docs unless the design intent is preserved here or in a future canonical visual identity doc.
+
+## Dual-Client Architecture Direction
+
+AI_OS should evaluate Unreal Engine 5 as a premium 3D/4D planetary command-map client, not as an immediate replacement for the web dashboard.
+
+Recommended client split:
+
+1. Web dashboard: fast, accessible, browser-first, Cloudflare Access protected, and usable by end users and admins. The future web target is Next.js plus React Three Fiber for browser-native 3D where useful. The current `apps/dashboard` implementation remains the active dashboard surface until a separate redesign or migration is approved.
+2. UE5 client: premium command center, immersive desktop app, kiosk operator mode, and possible future launcher. It should be evaluated as a high-fidelity command-map experience for operator situational awareness, not as default runtime authority.
+
+UE5 visual and interaction requirements:
+
+- cinematic Mars, Moon, Earth, Galaxy, and Black Hole navigation metaphors,
+- high-fidelity lighting and material direction inspired by Nanite/Lumen-class Unreal workflows,
+- planetary, orbital, galactic, and timeline overlays that preserve operator readability,
+- controller-first navigation with gamepad-native movement, focus, select, back/cancel, zoom, orbit, pan, and snap-to-status controls,
+- keyboard, mouse, and Xbox controller as first-class input models,
+- desktop operator mode and kiosk/command-center mode,
+- high-contrast safety, approval, blocked, stale, and `UNKNOWN` states visible over 3D scenery,
+- reduced-motion and non-3D fallback through the web dashboard.
+
+UE5 phase boundary:
+
+- UE5 is a future evaluation lane.
+- UE5 must not be assumed to replace the web dashboard immediately.
+- A future APPLY packet must decide whether UE5 belongs in Phase 2 or Phase 3 after the web dashboard redesign.
+- No UE5 project, launcher, packaging workflow, asset pipeline, or runtime integration is approved by this concept note alone.
 
 ## Panel Taxonomy
 
@@ -160,6 +188,14 @@ Blocked direction:
 
 If a desired panel requires a blocked or missing source, it should display `UNKNOWN` and explain the limitation.
 
+UE5 state access boundary:
+
+- UE5 must read AI_OS state through approved backend APIs only.
+- UE5 must not read repo files, telemetry ledgers, approval inboxes, worker queues, scheduler state, local environment files, or generated runtime files directly from disk.
+- UE5 must not store secrets, broker keys, Azure tokens, Cloudflare tokens, repo credentials, Git credentials, API keys, private keys, recovery keys, or persistent privileged sessions.
+- UE5 must treat runtime, scheduler, queue, broker, and live-trading controls as display-only or approval-request previews unless a separate approved workflow and approval gate authorizes a specific action.
+- Live broker execution and live trading remain blocked.
+
 ## Terminal Dashboard Readability Direction
 
 Terminal/operator displays should stay:
@@ -203,4 +239,7 @@ Preserved mobile/accessibility ideas:
 - Confirm app docs in `apps/dashboard` remain separate from legacy planning docs.
 - Decide whether to create a compact dashboard data-contract spec before archiving `docs/AI_OS/dashboard`.
 - Decide whether AI assistant and command-center action concepts remain mock-only or become future approved workflows.
+- Decide whether the web dashboard redesign targets Next.js plus React Three Fiber while the current Vite/React dashboard remains the active bridge.
+- Decide whether UE5 evaluation belongs in Phase 2 or Phase 3 after the web dashboard redesign.
+- Decide the exact approved backend API contract before any UE5 client reads AI_OS state.
 - Review legacy dashboard docs for archive after this extraction.
