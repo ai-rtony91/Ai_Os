@@ -1,0 +1,263 @@
+{
+  "schema": "AIOS_LOCKOUT_SAFE_LOGIN_IDENTITY_INVENTORY.v1",
+  "generated_at": "2026-06-11",
+  "mode": "DRY_RUN",
+  "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN-V1",
+  "lane": "login-security-stack-inventory",
+  "evidence_classification": {
+    "git_preflight": {
+      "status": "OBSERVED",
+      "summary": "main was clean and synced before branch creation; inventory branch created from current main"
+    },
+    "prior_design_merge": {
+      "status": "OBSERVED",
+      "commit": "35efd0e5",
+      "summary": "docs(security): design lockout-safe AIOS login stack (#583)"
+    },
+    "github_auth_status": {
+      "status": "OBSERVED_SANITIZED",
+      "host": "github.com",
+      "account": "ai-rtony91",
+      "active_account": true,
+      "git_protocol": "https",
+      "token_value_stored": false
+    },
+    "local_git_config": {
+      "status": "OBSERVED_LOCAL_CONFIG",
+      "user_name": "ai-rtony91",
+      "user_email": "270783377+ai-rtony91@users.noreply.github.com"
+    },
+    "azure_cli_readback": {
+      "status": "BLOCKED_BY_SANDBOX",
+      "command_class": "read_only",
+      "error": "CreateProcessAsUserW failed: 1312"
+    },
+    "github_api_user_readback": {
+      "status": "BLOCKED_BY_SANDBOX",
+      "command_class": "read_only",
+      "error": "CreateProcessAsUserW failed: 1312"
+    },
+    "azure_portal_browser_identity": {
+      "status": "MANUAL_INPUT_REQUIRED",
+      "browser_scraped": false
+    },
+    "cloudflare_account_identity": {
+      "status": "MANUAL_INPUT_REQUIRED",
+      "cloudflare_api_queried": false
+    }
+  },
+  "azure_cli_identity": {
+    "current_account_user": {
+      "value": "ai.tradeplatform@Algotradez.onmicrosoft.com",
+      "evidence": "OPERATOR_CONFIRMED"
+    },
+    "tenant_id": {
+      "value": "feb18abf-17ea-4d88-a4ac-05ffcd6ecb8b",
+      "evidence": "OPERATOR_CONFIRMED_NON_SECRET_METADATA"
+    },
+    "subscription_name": {
+      "value": "Subscription 1",
+      "evidence": "OPERATOR_CONFIRMED"
+    },
+    "subscription_id": {
+      "value": null,
+      "evidence": "CLI_READBACK_BLOCKED"
+    },
+    "subscription_state": {
+      "value": "Enabled",
+      "evidence": "OPERATOR_CONFIRMED"
+    },
+    "default_subscription": {
+      "value": true,
+      "evidence": "OPERATOR_CONFIRMED"
+    },
+    "cloud_name": {
+      "value": null,
+      "evidence": "CLI_READBACK_BLOCKED"
+    },
+    "prior_account_user": {
+      "value": "my.laboratory@outlook.com",
+      "evidence": "OPERATOR_CONFIRMED"
+    },
+    "production_warning": "Prior Azure CLI user should not be used for production AI_OS cloud resources unless separately approved."
+  },
+  "azure_portal_browser_identity": {
+    "status": "MANUAL_INPUT_REQUIRED",
+    "safe_fields_needed": [
+      "signed_in_account_display_or_email_class",
+      "tenant_shown_in_portal",
+      "whether_portal_account_matches_intended_production_admin",
+      "whether_recovery_is_independent_from_primary_microsoft_reset_loop"
+    ],
+    "forbidden_fields": [
+      "passwords",
+      "tokens",
+      "cookies",
+      "mfa_codes",
+      "client_secrets",
+      "refresh_tokens"
+    ]
+  },
+  "github_identity": {
+    "github_cli_identity": {
+      "value": "ai-rtony91",
+      "evidence": "OBSERVED_SANITIZED_AND_OPERATOR_CONFIRMED"
+    },
+    "github_api_user_id": {
+      "value": null,
+      "evidence": "API_READBACK_BLOCKED"
+    },
+    "github_api_user_type": {
+      "value": null,
+      "evidence": "API_READBACK_BLOCKED"
+    },
+    "git_author_name": {
+      "value": "ai-rtony91",
+      "evidence": "OBSERVED_LOCAL_CONFIG_AND_OPERATOR_CONFIRMED"
+    },
+    "git_author_email": {
+      "value": "270783377+ai-rtony91@users.noreply.github.com",
+      "evidence": "OBSERVED_LOCAL_CONFIG_AND_OPERATOR_CONFIRMED"
+    },
+    "token_value_stored": false
+  },
+  "cloudflare_account_identity": {
+    "status": "MANUAL_INPUT_REQUIRED",
+    "safe_fields_needed": [
+      "account_owner_or_admin_display_or_email_class",
+      "whether_two_independent_admin_paths_exist",
+      "whether_recovery_depends_on_microsoft_github_google_or_separate_mailbox",
+      "whether_access_and_turnstile_share_the_same_cloudflare_account"
+    ],
+    "forbidden_fields": [
+      "cloudflare_api_tokens",
+      "turnstile_secret_keys",
+      "session_cookies",
+      "passwords",
+      "recovery_codes"
+    ]
+  },
+  "desired_production_accounts": {
+    "microsoft_entra_primary_admin_account": {
+      "value": "ai.tradeplatform@Algotradez.onmicrosoft.com",
+      "evidence": "OPERATOR_CONFIRMED"
+    },
+    "azure_tenant_id": {
+      "value": "feb18abf-17ea-4d88-a4ac-05ffcd6ecb8b",
+      "evidence": "OPERATOR_CONFIRMED_NON_SECRET_METADATA"
+    },
+    "github_backup_operator_identity": {
+      "value": "ai-rtony91",
+      "evidence": "OBSERVED_SANITIZED_AND_OPERATOR_CONFIRMED"
+    },
+    "cloudflare_admin_account": {
+      "value": null,
+      "evidence": "MANUAL_INPUT_REQUIRED"
+    },
+    "optional_google_fallback_identity": {
+      "value": null,
+      "evidence": "MANUAL_INPUT_REQUIRED"
+    },
+    "aios_app_admin_role": "admin",
+    "aios_app_operator_role": "operator",
+    "aios_app_viewer_role": "viewer",
+    "aios_end_user_roles": [
+      "viewer",
+      "future_scoped_domain_roles"
+    ]
+  },
+  "recovery_and_break_glass": {
+    "recovery_email_class": {
+      "value": null,
+      "status": "MANUAL_INPUT_REQUIRED"
+    },
+    "break_glass_account_owner": {
+      "value": "Anthony",
+      "status": "DESIGN_REQUIRED_OPERATOR_CONTEXT"
+    },
+    "independent_recovery_path": {
+      "value": null,
+      "status": "MANUAL_INPUT_REQUIRED"
+    },
+    "mfa_recovery_separation": {
+      "value": null,
+      "status": "MANUAL_INPUT_REQUIRED"
+    },
+    "emergency_contact_process_note": {
+      "value": null,
+      "status": "MANUAL_INPUT_REQUIRED"
+    },
+    "same_microsoft_reset_loop_avoidance": "REQUIRED",
+    "local_omen_fallback": "UNCHANGED_OPERATOR_CONFIRMED"
+  },
+  "end_user_boundary": {
+    "end_users_use_own_provider_identity": true,
+    "end_users_forbidden_identities": [
+      "Anthony Azure admin identity",
+      "Omen/Windows login",
+      "GitHub admin or repo identity",
+      "Cloudflare admin identity",
+      "scheduler",
+      "runtime",
+      "broker",
+      "secrets",
+      "repo credentials"
+    ],
+    "login_identity_equals_action_authority": false,
+    "protected_actions_require_aios_approval_gates": true
+  },
+  "lockout_risks": [
+    {
+      "risk": "Azure CLI command readback unavailable",
+      "status": "PRESENT",
+      "control": "Rerun read-only CLI inventory before Azure APPLY."
+    },
+    {
+      "risk": "Azure Portal browser identity unknown",
+      "status": "PRESENT",
+      "control": "Require manual non-secret portal identity input."
+    },
+    {
+      "risk": "Cloudflare admin identity unknown",
+      "status": "PRESENT",
+      "control": "Require manual non-secret Cloudflare account input before Access or Turnstile setup."
+    },
+    {
+      "risk": "Recovery email class unknown",
+      "status": "PRESENT",
+      "control": "Require recovery email class independent from primary Microsoft reset loop."
+    },
+    {
+      "risk": "Break-glass account details unknown",
+      "status": "PRESENT",
+      "control": "Define independent break-glass account before dashboard exposure."
+    },
+    {
+      "risk": "Frontend compromise",
+      "status": "ALWAYS_PRESENT",
+      "control": "Treat frontend as untrusted; verify session, role, and future Turnstile server-side."
+    }
+  ],
+  "no_secrets_policy": {
+    "passwords_stored": false,
+    "personal_access_tokens_stored": false,
+    "oauth_client_secrets_stored": false,
+    "refresh_tokens_stored": false,
+    "session_cookies_stored": false,
+    "mfa_codes_stored": false,
+    "recovery_codes_stored": false,
+    "cloudflare_api_tokens_stored": false,
+    "turnstile_secret_keys_stored": false,
+    "broker_credentials_stored": false,
+    "env_values_stored": false
+  },
+  "recommendation": {
+    "next_packet": "automation/orchestration/work_packets/proposed/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN.md",
+    "next_mode": "DRY_RUN",
+    "provider_changes_allowed": false,
+    "dashboard_exposure_allowed": false,
+    "secrets_allowed": false
+  },
+  "status": "DRY_RUN_INVENTORY_READY_FOR_REVIEW_NO_PROVIDER_CHANGES_NO_SECRETS_STORED"
+}
+
