@@ -235,6 +235,7 @@ $workerInboxPath = Join-Path $repoRoot.Path "automation\orchestration\workers\in
 $lockRegistryPath = Join-Path $repoRoot.Path "automation\orchestration\locks\FILE_LOCK_REGISTRY.json"
 $validatorConfigPath = Join-Path $repoRoot.Path "automation\orchestration\validators\VALIDATOR_CHAIN_CONFIG_001.json"
 $validatorRecommendationHelperPath = Join-Path $repoRoot.Path "automation\orchestration\validators\Get-AiOsValidatorRecommendation.DRY_RUN.ps1"
+$commitPackageRecommendationHelperPath = Join-Path $repoRoot.Path "automation\orchestration\commit_packages\New-AiOsCommitPackageRecommendation.DRY_RUN.ps1"
 if ([string]::IsNullOrWhiteSpace($ValidatorRecommendationPath)) {
     $ValidatorRecommendationPath = Get-TrustedJsonEvidencePath -Path (Join-Path $repoRoot.Path "automation\orchestration\validators") -Filter "VALIDATOR_RECOMMENDATION*.json"
 }
@@ -272,6 +273,11 @@ $changedLines = @($gitLines | Where-Object { $_ -notlike "## *" })
 $candidateFiles = @($changedLines | ForEach-Object { Convert-StatusLineToPath -Line $_ } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and $_ -ne ".codex_worktrees/" })
 $approvedCandidateFiles = @($CandidateFile | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { Normalize-PathText -Path $_ } | Select-Object -Unique)
 $validatorCandidateFiles = if ($approvedCandidateFiles.Count -gt 0) { @($approvedCandidateFiles) } else { @() }
+$commitPackageRecommendation = if ($candidateFiles.Count -gt 0) {
+    Invoke-AiOsQuietJsonCommand -Path $commitPackageRecommendationHelperPath -Arguments @("-OutputJson")
+} else {
+    $null
+}
 $unexpectedDirtyFiles = @()
 if ($approvedCandidateFiles.Count -gt 0) {
     $unexpectedDirtyFiles = @($candidateFiles | Where-Object { $approvedCandidateFiles -notcontains (Normalize-PathText -Path $_) })
@@ -366,6 +372,45 @@ $approvalItems = @(
         kind = "apply_gate"
         packet_id = if ($approvalQueue -and $approvalQueue.packet_id) { [string]$approvalQueue.packet_id } else { "" }
         approval_status = if ($approvalQueue -and $approvalQueue.approval_status) { [string]$approvalQueue.approval_status } else { "UNKNOWN" }
+    }
+)
+
+$level5SuggestedValidators = @(
+    "git diff --check",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1"
+)
+$commitPackageExactChangedFiles = @()
+$commitPackageRecommendedFiles = @()
+$commitPackageRiskFlags = @()
+if ($commitPackageRecommendation) {
+    $commitPackageExactChangedFiles = @(
+        @($commitPackageRecommendation.changed_files)
+        @($commitPackageRecommendation.new_files)
+    ) | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) } | Sort-Object -Unique
+    $commitPackageRecommendedFiles = @($commitPackageRecommendation.recommended_files | ForEach-Object { [string]$_.path } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique)
+    $commitPackageRiskFlags = @($commitPackageRecommendation.risks | ForEach-Object {
+        if ($_.path -and $_.risk) {
+            "$($_.path): $($_.risk)"
+        } else {
+            [string]$_
+        }
+    } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
+$commitPackageItems = @(
+    [pscustomobject]@{
+        source = ConvertTo-RelativePath -Path $commitPackageRecommendationHelperPath
+        kind = "level5_commit_package_preview"
+        available = [bool]($null -ne $commitPackageRecommendation)
+        status = if ($commitPackageRecommendation -and $commitPackageRecommendation.orchestration_result_contract.status) { [string]$commitPackageRecommendation.orchestration_result_contract.status } elseif ($candidateFiles.Count -gt 0) { "REVIEW" } else { "NOT_NEEDED" }
+        exact_changed_files = @($commitPackageExactChangedFiles)
+        recommended_files = @($commitPackageRecommendedFiles)
+        suggested_validators = @($level5SuggestedValidators)
+        risk_flags = @($commitPackageRiskFlags)
+        stop_before_staging = "STOP: preview only. Do not run git add, git commit, git push, PR, or merge without separate explicit approval."
+        next_safe_action = if ($commitPackageRecommendation -and $commitPackageRecommendation.next_safe_action) { [string]$commitPackageRecommendation.next_safe_action } elseif ($candidateFiles.Count -gt 0) { "Run the commit package preview and review exact files before staging." } else { "No commit package preview is needed while the repo is clean." }
     }
 )
 
@@ -552,6 +597,7 @@ $bundle = [pscustomobject]@{
     lock_state = New-Section -Status "REVIEW" -SourcePaths @($lockRegistryPath) -Summary "Lock registry evidence inspected without lock release." -Items @($lockRegistry) -BlockedActions @("lock_claim", "lock_release", "force_unlock")
     validator_state = New-Section -Status "REVIEW" -SourcePaths @($validatorConfigPath, $ValidatorRecommendationPath, $ValidatorRunReportPath) -Summary "Validator config and report evidence inspected without running mutation paths." -Items $validatorItems -BlockedActions @("apply_repair", "approval_grant")
     approval_state = New-Section -Status "REVIEW" -SourcePaths @($approvalInboxPath, $approvalQueuePath) -Summary "Approval evidence inspected without creating or resolving approvals." -Items $approvalItems -BlockedActions @("approval_create", "approval_resolve")
+    commit_package_state = New-Section -Status $(if ($candidateFiles.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @($commitPackageRecommendationHelperPath) -Summary "Level 5 commit-package preview evidence inspected without staging, committing, pushing, PR, or merge actions." -Items $commitPackageItems -BlockedActions @("stage_files", "commit_changes", "push_changes", "create_pr", "merge_pr")
     escalation_state = New-Section -Status $(if ($staleConditions.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @() -Summary "Escalation persistence is not enabled; review conditions are included in stale_conditions." -Items @($staleConditions) -BlockedActions @("escalation_append", "escalation_resolve")
     git_state = New-Section -Status $(if ($unexpectedDirtyFiles.Count -gt 0) { "BLOCKED" } elseif ($changedLines.Count -gt 0) { "REVIEW" } else { "READY" }) -SourcePaths @("git status --short --branch") -Summary "Git status inspected read-only." -Items @([pscustomobject]@{ branch = [string]$branchLine; changed_lines = $changedLines; candidate_files = $candidateFiles; approved_candidate_files = $approvedCandidateFiles; unexpected_dirty_files = $unexpectedDirtyFiles }) -BlockedActions @("stage_files", "commit_changes", "push_changes")
     supervisor_state = New-Section -Status "READY" -SourcePaths @($supervisorSchemaPath, $supervisorRulesPath) -Summary "Supervisor schema and rules inspected as read-only authority evidence." -Items @($supervisorRules) -BlockedActions @("start_loop", "start_daemon", "launch_worker")
@@ -589,6 +635,16 @@ $bundle = [pscustomobject]@{
         eligible_actions = if ($safeAutoAllowed) { @("commit") } else { @() }
         blocked_actions = @("push", "merge", "direct_push_to_main", "protected_path_change", "validator_bypass")
         stop_conditions = $autoGitStopConditions
+    }
+    level5_commit_package_preview = [pscustomobject]@{
+        available = [bool]($null -ne $commitPackageRecommendation)
+        status = if ($commitPackageRecommendation -and $commitPackageRecommendation.orchestration_result_contract.status) { [string]$commitPackageRecommendation.orchestration_result_contract.status } elseif ($candidateFiles.Count -gt 0) { "REVIEW" } else { "NOT_NEEDED" }
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1 -OutputJson"
+        exact_changed_files = @($commitPackageExactChangedFiles)
+        recommended_files = @($commitPackageRecommendedFiles)
+        suggested_validators = @($level5SuggestedValidators)
+        risk_flags = @($commitPackageRiskFlags)
+        stop_before_staging = "STOP: preview only. Do not run git add, git commit, git push, PR, or merge without separate explicit approval."
     }
     blocking_signals = @($blockingSignals | Select-Object -Unique)
     human_required_signals = @($humanRequiredSignals | Select-Object -Unique)
@@ -629,6 +685,7 @@ Write-Host "Git: $branchLine"
 Write-Host "Packets: $($packetItems.Count)"
 Write-Host "Workers sources: $($workerItems.Count)"
 Write-Host "Approval sources: $($approvalItems.Count)"
+Write-Host "Commit package preview: $($bundle.level5_commit_package_preview.status)"
 Write-Host "Stale/review conditions: $($staleConditions.Count)"
 Write-Host ""
 Write-Host "[VALIDATOR RESULT]"
