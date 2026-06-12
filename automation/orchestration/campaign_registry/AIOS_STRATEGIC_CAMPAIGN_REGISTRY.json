@@ -211,24 +211,24 @@
         "merge commit 0035e02e9ba0ee6d00618822716d3aefbf38adad"
       ],
       "completion_percent": 80,
-      "progress_basis": "Runtime wiring exists and the strategic campaign registry foundation is live on main through PR #284.",
+      "progress_basis": "Runtime wiring exists, the strategic campaign registry foundation is live on main through PR #284, and Crew Core bridge DRY_RUN evidence has been reviewed.",
       "timeline_estimate": "1-2 work sessions",
-      "next_packet_candidate": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+      "next_packet_candidate": null,
       "crew_lane": "crew-core-campaign-bridge",
       "recommended_worker": "EAST_OCC_01",
-      "stop_condition": "Stop after Crew Core campaign bridge DRY_RUN report."
+      "stop_condition": "Crew Core bridge DRY_RUN reviewed; review remaining orchestration work separately."
     },
     {
       "campaign_id": "CAMPAIGN-CREW-CORE",
       "title": "Crew Core Supervised Routing",
       "objective": "Let Crew Core consume approved recommendation sources and produce preview-only task intake records.",
-      "status": "READY",
+      "status": "COMPLETE",
       "priority": "high",
       "phases": [
         {
           "phase_id": "PHASE-CREW-READINESS",
           "title": "Crew Readiness",
-          "status": "READY"
+          "status": "COMPLETE"
         }
       ],
       "stages": [
@@ -236,13 +236,13 @@
           "stage_id": "STAGE-CREW-CAMPAIGN-BRIDGE-DRYRUN",
           "phase_id": "PHASE-CREW-READINESS",
           "title": "Design Crew Core campaign registry bridge",
-          "status": "READY",
+          "status": "COMPLETE",
           "priority": "high",
           "depends_on": [
             "STAGE-ORCH-CAMPAIGN-REGISTRY"
           ],
           "blocked_by": [],
-          "next_packet_candidate": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN"
+          "next_packet_candidate": null
         }
       ],
       "depends_on": [
@@ -275,13 +275,13 @@
         "automation/orchestration/crew/",
         "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
       ],
-      "completion_percent": 35,
-      "progress_basis": "Crew preview helpers exist; campaign bridge is not wired yet.",
+      "completion_percent": 100,
+      "progress_basis": "Crew bridge DRY_RUN packet exists on main and crew integration preview returns campaign, task, assignment, validator, dry-run result, approval, and commit-package evidence without writes.",
       "timeline_estimate": "1-2 work sessions",
-      "next_packet_candidate": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+      "next_packet_candidate": null,
       "crew_lane": "crew-core-campaign-bridge",
       "recommended_worker": "EAST_OCC_01",
-      "stop_condition": "Stop after DRY_RUN bridge plan."
+      "stop_condition": "Crew Core bridge DRY_RUN reviewed; no APPLY bridge script required."
     },
     {
       "campaign_id": "CAMPAIGN-TELEMETRY-REPORTING",
