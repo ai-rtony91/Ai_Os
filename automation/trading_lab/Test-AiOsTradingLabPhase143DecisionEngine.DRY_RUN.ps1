@@ -1,8 +1,11 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$decisionPath = Join-Path $repoRoot "docs\AI_OS\trading_laboratory\phase_14_3\PHASE_14_3_DECISION_RESULT_001.json"
+$decisionPath = Join-Path $repoRoot "archive\docs_aios_trading_laboratory_legacy\phase_14_3\PHASE_14_3_DECISION_RESULT_001.json"
 
 function Read-JsonFile {
     param(

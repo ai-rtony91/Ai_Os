@@ -1,10 +1,13 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 Write-Host "AI_OS Phase 15 Signal Score Contract v1 DRY_RUN"
 Write-Host "Mode: read-only validation"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
-$contractPath = Join-Path $repoRoot "docs/AI_OS/trading_laboratory/signal_logs/PHASE_15_SIGNAL_SCORE_CONTRACT_V1.json"
+$contractPath = Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/signal_logs/PHASE_15_SIGNAL_SCORE_CONTRACT_V1.json"
 $fixturePath = Join-Path $repoRoot "apps/dashboard/mock-data/phase-15-signal-score-v1.example.json"
 
 foreach ($path in @($contractPath, $fixturePath)) {

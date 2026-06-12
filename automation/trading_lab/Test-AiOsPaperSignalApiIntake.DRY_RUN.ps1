@@ -1,5 +1,8 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $env:PYTHONPATH = Join-Path $repoRoot "apps\trading_lab"
 
@@ -11,7 +14,7 @@ $files = @(
     "apps/trading_lab/trading_lab/results/paper_signal_api/PAPER_SIGNAL_INTAKE_LEDGER_001.json",
     "apps/trading_lab/trading_lab/results/paper_signal_api/PAPER_SIGNAL_VALIDATION_RESULT_001.json",
     "apps/trading_lab/trading_lab/results/paper_signal_api/PAPER_ROUTE_PREVIEW_001.json",
-    "docs/AI_OS/trading_laboratory/phase_21/PAPER_SIGNAL_API_CONTRACT.json",
+    "archive/docs_aios_trading_laboratory_legacy/phase_21/PAPER_SIGNAL_API_CONTRACT.json",
     "apps/dashboard/mock-data/paper-signal-api-intake.example.json"
 )
 

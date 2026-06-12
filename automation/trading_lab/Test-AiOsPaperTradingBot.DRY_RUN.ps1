@@ -1,5 +1,8 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $env:PYTHONPATH = Join-Path $repoRoot "apps\trading_lab"
 
@@ -41,7 +44,7 @@ $createdFiles = @(
     "apps/trading_lab/trading_lab/results/bot/PAPER_TRADING_BOT_STATUS_001.json",
     "apps/trading_lab/trading_lab/results/bot/PAPER_TRADING_BOT_LEDGER_001.json",
     "apps/dashboard/mock-data/paper-trading-bot-status.example.json",
-    "docs/AI_OS/trading_laboratory/phase_24/PHASE_24_PAPER_TRADING_BOT_PROTOTYPE.md"
+    "archive/docs_aios_trading_laboratory_legacy/phase_24/PHASE_24_PAPER_TRADING_BOT_PROTOTYPE.md"
 )
 
 foreach ($file in $createdFiles) {

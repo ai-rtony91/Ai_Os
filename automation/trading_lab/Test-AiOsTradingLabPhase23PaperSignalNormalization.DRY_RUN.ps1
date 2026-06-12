@@ -1,8 +1,11 @@
 $ErrorActionPreference = "Stop"
 
+# Archive docs referenced below are historical/reference-only evidence, not current authority.
+# This DRY_RUN validator does not approve live trading, broker execution, real webhooks, real orders, credentials, APPLY, commit, push, merge, or deployment.
+
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $fixturePath = Join-Path $repoRoot "apps/dashboard/mock-data/phase-23-paper-signal-normalization.example.json"
-$contractPath = Join-Path $repoRoot "docs/AI_OS/trading_laboratory/phase_23/PAPER_SIGNAL_NORMALIZATION_CONTRACT.json"
+$contractPath = Join-Path $repoRoot "archive/docs_aios_trading_laboratory_legacy/phase_23/PAPER_SIGNAL_NORMALIZATION_CONTRACT.json"
 
 foreach ($path in @($fixturePath, $contractPath)) {
     if (-not (Test-Path -LiteralPath $path)) {
