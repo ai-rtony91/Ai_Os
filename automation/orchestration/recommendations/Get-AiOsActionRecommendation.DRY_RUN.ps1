@@ -1,5 +1,6 @@
 ﻿param(
-    [switch]$QuietJson
+    [switch]$QuietJson,
+    [switch]$OutputJson
 )
 
 Set-StrictMode -Off
@@ -29,6 +30,14 @@ elseif ($next.status -eq "blocked" -or $next.status -eq "failed") {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/blockers/Resolve-AiOsRuntimeBlocker.DRY_RUN.ps1"
     $reason = "Packet needs blocker/failure review."
 }
+elseif ($next.status -eq "campaign_ready") {
+    $recommendedCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1 -OutputJson"
+    $reason = "No active packet is present; campaign registry has a READY packet candidate."
+}
+elseif ($next.status -eq "no_active_packet") {
+    $recommendedCommand = "No command recommended. Review campaign registry statuses and approve one next packet candidate."
+    $reason = "No active packet and no READY campaign stage are available for automatic advancement."
+}
 else {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/advancement/Invoke-AiOsPacketAdvancement.DRY_RUN.ps1"
     $reason = "Packet can continue normal advancement."
@@ -46,7 +55,7 @@ $result = [pscustomobject]@{
 }
 
 $approvalRequired = ($approval.matches_found -gt 0 -or $next.status -eq "awaiting_approval")
-$blockedReason = if ($health.health -ne "HEALTHY") { "Runtime health is not clean." } elseif ($next.status -eq "blocked" -or $next.status -eq "failed") { "Packet is blocked or failed." } else { "none" }
+$blockedReason = if ($health.health -ne "HEALTHY") { "Runtime health is not clean." } elseif ($next.status -eq "blocked" -or $next.status -eq "failed") { "Packet is blocked or failed." } elseif ($next.status -eq "no_active_packet") { "No active packet or READY campaign stage is available." } else { "none" }
 $status = if ($blockedReason -ne "none") { "BLOCKED" } elseif ($approvalRequired) { "REVIEW" } else { "READY" }
 $result | Add-Member -NotePropertyName orchestration_result_contract -NotePropertyValue ([pscustomobject]@{
     status = $status
@@ -75,7 +84,7 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
     generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 })
 
-if ($QuietJson) {
+if ($QuietJson -or $OutputJson) {
     $result | ConvertTo-Json -Depth 8
     exit 0
 }
