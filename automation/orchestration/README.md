@@ -23,7 +23,7 @@ Active areas that should be preserved while consolidation is planned:
 Areas that require consolidation before further scaling:
 
 - duplicate worker registries
-- duplicate packet and command queue concepts
+- command queue compatibility labels versus canonical work packet authority
 - duplicate approval inbox examples and processors
 - duplicate supervisor/runtime/control-loop concepts
 - root-level `show-*` scripts that overlap with subfolder tools
@@ -39,12 +39,15 @@ Display and status tools should prefer these approved active paths first:
 - worker registry: `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json`
 - worker profiles: `automation/orchestration/workers/AIOS_WORKER_PROFILES.json`
 - worker inbox: `automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json`
+- campaign registry: `automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json`
 - queue/work packets: `automation/orchestration/work_packets/`
-- command queue: `automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json`
+- command queue compatibility/evidence: `automation/orchestration/command_queue/AIOS_COMMAND_QUEUE.json` (not active work authority when the file marks itself stale or non-canonical)
 - approval inbox: `automation/orchestration/approval_inbox/APPROVAL_INBOX_001.json`
 - approval gate: `automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json`
 - validator chain: `automation/orchestration/validators/`
 - commit packages: `automation/orchestration/commit_packages/`
+- orchestration runtime bundle: `automation/orchestration/runtime/Get-AiOsRuntimeStateBundle.DRY_RUN.ps1`
+- runtime next-command recommendation: `automation/runtime/recommendation/Get-AiOsNextCommand.ps1`
 - operator status: `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1`
 
 Legacy root fallback examples were archived after canonical paths became the preferred source and fallback reads were made optional:
@@ -68,6 +71,7 @@ Status and display scripts may still mention those filenames as optional compati
 - `docs/AI_OS/**` remains reference/source material until file-by-file classification.
 - Root `work_packets/**` is not active queue authority; it needs a retention or migration decision before archive.
 - Root `approvals/**` is not active approval authority; it needs a retention or migration decision before archive.
+- Active work routing should prefer `automation/orchestration/work_packets/` plus the campaign registry over command queue compatibility files.
 - `automation/operator/AIOS_PARALLEL_WORKER_REGISTRY.json` is compatibility evidence until adapter-first use is proven and retirement is approved.
 - `automation/orchestration/*.example.json` files require fixture ownership review before archive.
 - Current duplicate-brain cleanup evidence identifies 0 safe delete candidates.

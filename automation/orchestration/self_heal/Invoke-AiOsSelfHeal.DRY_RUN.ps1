@@ -28,7 +28,7 @@ $requiredFolders = @(
     "automation/orchestration/work_packets/active",
     "automation/orchestration/work_packets/blocked",
     "automation/orchestration/work_packets/complete",
-    "automation/orchestration/approvals",
+    "automation/orchestration/approval_inbox",
     "automation/orchestration/memory"
 )
 

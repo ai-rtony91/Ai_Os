@@ -15,8 +15,10 @@ reports, or bypass GitHub branch protection.
 GitHub pull request number to inspect or merge.
 
 .PARAMETER ApprovalPath
-Path to an approval JSON file. Defaults to
-automation/orchestration/approvals/APPROVE_PR_<PrNumber>.json.
+Path to an approval JSON file. Defaults to the canonical approval inbox gate:
+automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json.
+Legacy automation/orchestration/approvals/APPROVE_PR_<PrNumber>.json files are
+non-canonical evidence only and are rejected as merge authority.
 
 .PARAMETER Json
 Emit JSON instead of the default Markdown report.
@@ -47,6 +49,7 @@ $mode = "DRY_RUN"
 $expectedRepoPath = "C:\Dev\Ai.Os"
 $expectedRemoteUrl = "https://github.com/ai-rtony91/Ai_Os.git"
 $baseBranch = "main"
+$canonicalApprovalGatePath = "automation/orchestration/approval_inbox/APPLY_APPROVAL_GATE_001.json"
 
 function Write-FailureRecovery {
     param(
@@ -220,11 +223,24 @@ function Get-CheckSummary {
 function Read-ApprovalFile {
     param([Parameter(Mandatory = $true)][string] $Path)
 
+    $normalizedPath = $Path.Replace("\", "/")
+    if ($normalizedPath -match "(^|/)automation/orchestration/approvals/") {
+        return [pscustomobject] @{
+            exists = (Test-Path -LiteralPath $Path -PathType Leaf)
+            valid = $false
+            approved = $false
+            approval_status = "LEGACY_NON_CANONICAL"
+            pr_number = $null
+            reason = "Legacy approvals path is non-canonical for merge authority. Use automation/orchestration/approval_inbox/ with current PR-specific Human Owner evidence."
+        }
+    }
+
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         return [pscustomobject] @{
             exists = $false
             valid = $false
             approved = $false
+            approval_status = "MISSING"
             pr_number = $null
             reason = "Approval file missing: $Path"
         }
@@ -238,9 +254,17 @@ function Read-ApprovalFile {
             exists = $true
             valid = $false
             approved = $false
+            approval_status = "INVALID_JSON"
             pr_number = $null
             reason = "Approval file JSON parse failed: $($_.Exception.Message)"
         }
+    }
+
+    $approvedStatuses = @("approved", "approved_for_apply", "apply_approved", "completed", "merge_approved")
+    $statusValue = ""
+    $statusProperty = $approval.PSObject.Properties["approval_status"]
+    if ($null -ne $statusProperty -and $null -ne $statusProperty.Value) {
+        $statusValue = [string] $statusProperty.Value
     }
 
     $approvedValue = $false
@@ -248,17 +272,29 @@ function Read-ApprovalFile {
     if ($null -ne $approvedProperty) {
         $approvedValue = [bool] $approvedProperty.Value
     }
+    $approvedByHumanProperty = $approval.PSObject.Properties["approved_by_human"]
+    if ($null -ne $approvedByHumanProperty -and [bool] $approvedByHumanProperty.Value) {
+        $approvedValue = $true
+    }
+    if (-not [string]::IsNullOrWhiteSpace($statusValue) -and $statusValue -notin $approvedStatuses) {
+        $approvedValue = $false
+    }
 
     $approvalPrNumber = $null
     $prProperty = $approval.PSObject.Properties["pr_number"]
     if ($null -ne $prProperty -and $null -ne $prProperty.Value) {
         $approvalPrNumber = [int] $prProperty.Value
     }
+    $pullRequestProperty = $approval.PSObject.Properties["pull_request_number"]
+    if ($null -eq $approvalPrNumber -and $null -ne $pullRequestProperty -and $null -ne $pullRequestProperty.Value) {
+        $approvalPrNumber = [int] $pullRequestProperty.Value
+    }
 
     return [pscustomobject] @{
         exists = $true
         valid = $true
         approved = $approvedValue
+        approval_status = $statusValue
         pr_number = $approvalPrNumber
         reason = "Approval file parsed."
     }
@@ -301,6 +337,7 @@ function Format-MarkdownReport {
 ## Approval
 - Path: $($Packet.approval.path)
 - Exists: $($Packet.approval.exists)
+- Status: $($Packet.approval.approval_status)
 - Approved: $($Packet.approval.approved)
 - PR number: $($Packet.approval.pr_number)
 
@@ -336,7 +373,7 @@ try {
     Assert-CommandAvailable -CommandName "gh"
 
     if ([string]::IsNullOrWhiteSpace($ApprovalPath)) {
-        $ApprovalPath = "automation/orchestration/approvals/APPROVE_PR_$PrNumber.json"
+        $ApprovalPath = $canonicalApprovalGatePath
     }
 
     $generatedAt = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
@@ -391,10 +428,10 @@ try {
         $blockers += $approval.reason
     }
     elseif (-not $approval.approved) {
-        $blockers += "Approval file does not say approved=true."
+        $blockers += "Canonical approval evidence does not contain current Human Owner merge approval."
     }
-    elseif ($approval.pr_number -ne $PrNumber) {
-        $blockers += "Approval file PR number mismatch: expected $PrNumber, got $($approval.pr_number)"
+    elseif ($null -eq $approval.pr_number -or $approval.pr_number -ne $PrNumber) {
+        $blockers += "Approval evidence PR number missing or mismatched: expected $PrNumber, got $($approval.pr_number)"
     }
 
     $prViewResult = Invoke-NativeCommand `
@@ -491,6 +528,7 @@ try {
             exists = $approval.exists
             valid = $approval.valid
             approved = $approval.approved
+            approval_status = $approval.approval_status
             pr_number = $approval.pr_number
             reason = $approval.reason
         }
