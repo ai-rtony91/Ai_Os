@@ -58,6 +58,29 @@ function Get-RelayMessages {
     return @($messages)
 }
 
+function Is-OperatorStateCaller {
+    try {
+        $proc = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $PID"
+        if (-not $proc) {
+            return $false
+        }
+
+        if (-not $proc.ParentProcessId) {
+            return $false
+        }
+
+        $parentProc = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $($proc.ParentProcessId)"
+        if (-not $parentProc -or -not $parentProc.CommandLine) {
+            return $false
+        }
+
+        return $parentProc.CommandLine -like "*Get-AiOsRelayOperatorState.DRY_RUN.ps1*"
+    }
+    catch {
+        return $false
+    }
+}
+
 $repoRoot = (Get-Location).Path
 $registryPath = Join-Path $repoRoot "control/relay_bus/actors/AIOS_RELAY_ACTORS.json"
 $inboxDir = Join-Path $repoRoot "control/relay_bus/messages/inbox"
@@ -75,7 +98,10 @@ $latestTargetActor = ""
 $latestMessageType = ""
 $latestPacketId = ""
 $relayStatus = "EMPTY"
+$resolverAction = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1 -OutputJson"
+$legacyNeedReviewAction = "Run manual human review on this actor message before continuing."
 $nextAction = "Use New-AiOsRelayMessage.DRY_RUN.ps1 with Mode APPLY to write the first relay message."
+$isOperatorStateCaller = Is-OperatorStateCaller
 $pendingMessages = New-Object System.Collections.Generic.List[string]
 
 if ($latestMessage) {
@@ -104,7 +130,12 @@ if ($latestMessage) {
     }
     elseif ($latestRequiresReview) {
         $relayStatus = "NEEDS_HUMAN_REVIEW"
-        $nextAction = "Run manual human review on this actor message before continuing."
+        if ($isOperatorStateCaller) {
+            $nextAction = $legacyNeedReviewAction
+        }
+        else {
+            $nextAction = $resolverAction
+        }
     }
     else {
         $relayStatus = "NEEDS_HUMAN_REVIEW"
