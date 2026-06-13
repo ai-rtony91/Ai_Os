@@ -66,7 +66,7 @@ $actorRelayBusStatus = if ($actorRelayState) { [string]$actorRelayState.relay_st
 $actorRelayLatestMessagePath = if ($actorRelayState) { [string]$actorRelayState.latest_message_path } else { "" }
 $actorRelayLatestActor = if ($actorRelayState) { [string]$actorRelayState.latest_actor } else { "" }
 $actorRelayLatestTargetActor = if ($actorRelayState) { [string]$actorRelayState.latest_target_actor } else { "" }
-$actorRelayNextAction = if ($actorRelayState) { [string]$actorRelayState.exact_next_action } else { "" }
+$actorRelayNextAction = if ($actorRelayState) { [string]$actorRelayState.exact_next_action } else { "Use New-AiOsRelayMessage.DRY_RUN.ps1 with Mode APPLY to write the first relay message." }
 
 $latestReportFile = Get-RelayLatestFile -Directory $state.codex_reports_dir
 $latestPromptFile = Get-RelayLatestFile -Directory $state.chatgpt_prompts_dir -Pattern "*.txt"
@@ -103,7 +103,7 @@ if ($hasPasteback) {
 }
 
 $relayStatus = "EMPTY"
-$nextAction = ""
+$legacyNextAction = ""
 $needsReport = $true
 $needsPrompt = $false
 $needsReview = $false
@@ -116,26 +116,32 @@ if ($hasReport) {
         $needsPrompt = $true
         $needsReview = $false
         $needsPasteback = $true
-        $nextAction = "Generate a ChatGPT prompt with Invoke-AiOsCodexChatGptRelay.DRY_RUN.ps1 -Latest -OutputJson and share it manually."
+        $legacyNextAction = "Generate a ChatGPT prompt with Invoke-AiOsCodexChatGptRelay.DRY_RUN.ps1 -Latest -OutputJson and share it manually."
     }
     elseif (-not $hasPasteback) {
         $relayStatus = "NEEDS_CHATGPT_REVIEW"
         $needsReview = $true
         $needsPasteback = $true
-        $nextAction = "Paste the prompt to ChatGPT and save reviewed output using New-AiOsChatGptPastebackItem.DRY_RUN.ps1 -Mode APPLY."
+        $legacyNextAction = "Paste the prompt to ChatGPT and save reviewed output using New-AiOsChatGptPastebackItem.DRY_RUN.ps1 -Mode APPLY."
     }
     elseif ($pastebackSafe) {
         $relayStatus = "PASTEBACK_READY"
         $needsPasteback = $false
-        $nextAction = "Run the reviewed PowerShell command manually in this session."
+        $legacyNextAction = "Run the reviewed PowerShell command manually in this session."
     }
     else {
         $relayStatus = "PASTEBACK_REVIEW_REQUIRED"
         $needsPasteback = $false
-        $nextAction = "Fix safety issues in the pasteback artifact, then re-run New-AiOsChatGptPastebackItem.DRY_RUN.ps1."
+        $legacyNextAction = "Fix safety issues in the pasteback artifact, then re-run New-AiOsChatGptPastebackItem.DRY_RUN.ps1."
     }
 } else {
-    $nextAction = "Store a Codex report using New-AiOsCodexReportRelayItem.DRY_RUN.ps1 -Mode APPLY."
+    $legacyNextAction = "Store a Codex report using New-AiOsCodexReportRelayItem.DRY_RUN.ps1 -Mode APPLY."
+}
+
+$exactNextAction = $legacyNextAction
+$actorRelayBusReadyOrEmpty = @("EMPTY", "READY") -contains $actorRelayBusStatus
+if ($actorRelayBusReadyOrEmpty -and (-not [string]::IsNullOrWhiteSpace($actorRelayNextAction))) {
+    $exactNextAction = $actorRelayNextAction
 }
 
 $output = [ordered]@{
@@ -156,7 +162,7 @@ $output = [ordered]@{
     needs_pasteback = $needsPasteback
     pasteback_ready = $pastebackSafe
     pasteback_safety_status = $pastebackStatus
-    exact_next_action = $nextAction
+    exact_next_action = $exactNextAction
     related_existing_notes = @(
         "docs/AI_OS/autonomy/AIOS_CODEX_CHATGPT_POWERSHELL_RELAY_V1.md",
         "docs/AI_OS/autonomy/AIOS_CHATGPT_REVIEWED_PR_LIFECYCLE_BRIDGE_V1.md",
