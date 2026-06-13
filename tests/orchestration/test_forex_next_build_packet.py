@@ -38,31 +38,29 @@ def test_forex_continuation_recommender_reports_known_sprints_and_recommendation
     assert res["human_approval_required"] is True
     assert res["forex_readiness_gate_present"] is True
     assert res["forex_signal_intake_ledger_present"] is True
-    assert res["latest_forex_sprint_detected"] == "SPRINT_17"
-    assert res["recommended_next_packet_id"] == "AIOS-FOREX-PAPER-STUDY-JOURNAL-APPLY-V1"
-    assert res["recommended_next_packet_title"] == "feat(forex): add paper study journal"
-    assert res["recommended_lane"] == "PAPER_STUDY_JOURNAL"
+    assert res["forex_risk_decision_router_present"] is True
+    assert res["forex_continuity_review_present"] is True
+    assert res["forex_study_journal_present"] is True
+    assert res["latest_forex_sprint_detected"] == "SPRINT_18"
+    assert res["recommended_next_packet_id"] == "AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1"
+    assert res["recommended_next_packet_title"] == "feat(forex): add paper learning action router"
+    assert res["recommended_lane"] == "PAPER_LEARNING_ACTION_ROUTER"
 
 
 def test_forex_continuation_recommendation_contains_files_and_validators_and_blocked_actions():
     res = _load_recommendation()
 
     expected_files = [
-        "automation/forex_engine/paper_study_journal.py",
-        "automation/forex_engine/run_paper_study_journal_demo.py",
-        "tests/forex_engine/test_paper_study_journal.py",
-        "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md",
+        "automation/forex_engine/paper_learning_action_router.py",
+        "automation/forex_engine/run_paper_learning_action_router_demo.py",
+        "tests/forex_engine/test_paper_learning_action_router.py",
+        "docs/AI_OS/trading/FOREX_ENGINE_V1_PAPER_LEARNING_ACTION_ROUTER.md",
     ]
     assert res["recommended_files"] == expected_files
 
     expected_validators = [
         "git diff --check",
         "python -m pytest tests/forex_engine -q -p no:cacheprovider",
-        "python automation/forex_engine/run_readiness_demo.py",
-        "python automation/forex_engine/run_paper_signal_intake_demo.py",
-        "python automation/forex_engine/run_paper_risk_decision_demo.py",
-        "python automation/forex_engine/run_paper_continuity_review_demo.py",
-        "python automation/forex_engine/run_paper_study_journal_demo.py",
         ".\\aios.ps1 -Mode status",
         "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",

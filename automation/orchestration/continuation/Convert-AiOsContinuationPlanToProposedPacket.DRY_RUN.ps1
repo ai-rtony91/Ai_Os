@@ -44,7 +44,6 @@ function Read-JsonSafe {
     }
 
     $candidate = [string]$Text
-    $trimmed = $candidate.Trim()
     try {
         return $candidate | ConvertFrom-Json -ErrorAction Stop
     }
@@ -168,12 +167,20 @@ if ($dirtyOrUntrackedCount -gt 0) {
     $invariantFailures += "Repository has dirty or untracked state ($dirtyOrUntrackedCount)."
 }
 
-$proposedPacketStatus = if ($invariantFailures.Count -eq 0) { "READY_FOR_APPROVAL" } else { "BLOCKED" }
 $proposedPacketId = $recommendedPacketId
-$proposedPacketPath = "automation/orchestration/work_packets/proposed/AIOS-FOREX-PAPER-STUDY-JOURNAL-APPLY-V1.md"
+if (-not [string]::IsNullOrWhiteSpace($proposedPacketId)) {
+    $sanitizedPacketId = [regex]::Replace($proposedPacketId, "[^A-Za-z0-9._-]", "_")
+}
+else {
+    $sanitizedPacketId = "UNRECOMMENDED_PACKET"
+}
+
+$proposedPacketPath = "automation/orchestration/work_packets/proposed/$sanitizedPacketId.md"
+$proposedPacketStatus = if ($invariantFailures.Count -eq 0) { "READY_FOR_APPROVAL" } else { "BLOCKED" }
 $exactNextSafeAction = if ($invariantFailures.Count -eq 0) {
     "Anthony review and approval for execution of packet '$proposedPacketId'."
-} else {
+}
+else {
     "Resolve invariant and repository-state blockers before generating a safe proposal."
 }
 
@@ -211,7 +218,11 @@ if ($proposedPacketStatus -eq "READY_FOR_APPROVAL") {
         mode = "APPLY"
         lane = $recommendedLane
         owner_lane = $recommendedLane
-        mission = "build Sprint 18 paper study journal from Sprint 17 continuity review output"
+        mission = if ([string]::IsNullOrWhiteSpace($recommendedPacketTitle)) {
+            "build the next AI_OS packet from the continuation recommendation"
+        } else {
+            "build $recommendedPacketTitle"
+        }
         recommended_files = @($recommendedFiles)
         required_validators = @($requiredValidators)
         blocked_actions = @($blockExecutionText)
@@ -236,16 +247,17 @@ if ($proposedPacketStatus -eq "READY_FOR_APPROVAL") {
         title = $recommendedPacketTitle
         exact_next_safe_action = $exactNextSafeAction
     }
-
     $packetValidationStatus = "PASS"
 }
 
 $reason = if ($proposedPacketStatus -eq "READY_FOR_APPROVAL") {
     "Continuation plan is ready for approval and all required safety invariants passed."
-} else {
+}
+else {
     if ($invariantFailures.Count -gt 0) {
         "Blocked until all invariants and safety gates pass. " + ($invariantFailures -join " ")
-    } else {
+    }
+    else {
         "Blocked due to unresolved continuity/validation blockers."
     }
 }

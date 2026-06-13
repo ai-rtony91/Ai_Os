@@ -30,20 +30,20 @@ This recommender adds a narrow, deterministic handoff that maps current Forex bu
 - No worker launch, no packet mutation, no runtime mutation, no commit/push.
 - Always ends with a human approval requirement for the next protected `APPLY` packet.
 
-## Recommended Packet After Sprint 17
+## Recommended Packet After Sprint 18
 
-When Sprint 14, 15, 16, and 17 are present:
+When Sprint 14, 15, 16, 17, and 18 are present:
 
-- Packet ID: `AIOS-FOREX-PAPER-STUDY-JOURNAL-APPLY-V1`
-- Packet title: `feat(forex): add paper study journal`
-- Lane: `PAPER_STUDY_JOURNAL`
+- Packet ID: `AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1`
+- Packet title: `feat(forex): add paper learning action router`
+- Lane: `PAPER_LEARNING_ACTION_ROUTER`
 
 Recommended files:
 
-- `automation/forex_engine/paper_study_journal.py`
-- `automation/forex_engine/run_paper_study_journal_demo.py`
-- `tests/forex_engine/test_paper_study_journal.py`
-- `docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md`
+- `automation/forex_engine/paper_learning_action_router.py`
+- `automation/forex_engine/run_paper_learning_action_router_demo.py`
+- `tests/forex_engine/test_paper_learning_action_router.py`
+- `docs/AI_OS/trading/FOREX_ENGINE_V1_PAPER_LEARNING_ACTION_ROUTER.md`
 
 ## Blocked Actions
 

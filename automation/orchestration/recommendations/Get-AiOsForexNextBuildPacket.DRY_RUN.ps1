@@ -22,47 +22,80 @@ $sprint14Path = Join-Path $repoRoot "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_1
 $sprint15Path = Join-Path $repoRoot "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_15_PAPER_SIGNAL_INTAKE_LEDGER.md"
 $sprint16Path = Join-Path $repoRoot "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_16_PAPER_RISK_DECISION_ROUTER.md"
 $sprint17Path = Join-Path $repoRoot "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_17_PAPER_CONTINUITY_REVIEW.md"
+$sprint18Path = Join-Path $repoRoot "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md"
 
 $forexReadinessGatePresent = Test-Path -LiteralPath $sprint14Path -PathType Leaf
 $forexSignalIntakeLedgerPresent = Test-Path -LiteralPath $sprint15Path -PathType Leaf
 $forexRiskDecisionRouterPresent = Test-Path -LiteralPath $sprint16Path -PathType Leaf
 $forexContinuityReviewPresent = Test-Path -LiteralPath $sprint17Path -PathType Leaf
+$forexStudyJournalPresent = Test-Path -LiteralPath $sprint18Path -PathType Leaf
 
-if ($forexReadinessGatePresent -and $forexSignalIntakeLedgerPresent -and $forexRiskDecisionRouterPresent -and $forexContinuityReviewPresent) {
+if ($forexReadinessGatePresent -and $forexSignalIntakeLedgerPresent -and $forexRiskDecisionRouterPresent -and $forexContinuityReviewPresent -and $forexStudyJournalPresent) {
+    $latestSprint = "SPRINT_18"
+    $recommendedPacketId = "AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1"
+    $recommendedPacketTitle = "feat(forex): add paper learning action router"
+    $recommendedLane = "PAPER_LEARNING_ACTION_ROUTER"
+    $recommendedFiles = @(
+        "automation/forex_engine/paper_learning_action_router.py",
+        "automation/forex_engine/run_paper_learning_action_router_demo.py",
+        "tests/forex_engine/test_paper_learning_action_router.py",
+        "docs/AI_OS/trading/FOREX_ENGINE_V1_PAPER_LEARNING_ACTION_ROUTER.md"
+    )
+} elseif ($forexReadinessGatePresent -and $forexSignalIntakeLedgerPresent -and $forexRiskDecisionRouterPresent -and $forexContinuityReviewPresent) {
     $latestSprint = "SPRINT_17"
     $recommendedPacketId = "AIOS-FOREX-PAPER-STUDY-JOURNAL-APPLY-V1"
     $recommendedPacketTitle = "feat(forex): add paper study journal"
     $recommendedLane = "PAPER_STUDY_JOURNAL"
+    $recommendedFiles = @(
+        "automation/forex_engine/paper_study_journal.py",
+        "automation/forex_engine/run_paper_study_journal_demo.py",
+        "tests/forex_engine/test_paper_study_journal.py",
+        "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md"
+    )
 } elseif ($forexReadinessGatePresent -and $forexSignalIntakeLedgerPresent -and $forexRiskDecisionRouterPresent) {
     $latestSprint = "SPRINT_16"
     $recommendedPacketId = "AIOS-FOREX-PAPER-CONTINUITY-REVIEW-APPLY-V1"
     $recommendedPacketTitle = "feat(forex): add paper continuity review"
     $recommendedLane = "PAPER_CONTINUITY_REVIEW"
+    $recommendedFiles = @(
+        "automation/forex_engine/paper_continuity_review.py",
+        "automation/forex_engine/run_paper_continuity_review_demo.py",
+        "tests/forex_engine/test_paper_continuity_review.py",
+        "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_17_PAPER_CONTINUITY_REVIEW.md"
+    )
 } elseif ($forexReadinessGatePresent -and $forexSignalIntakeLedgerPresent) {
     $latestSprint = "SPRINT_15"
     $recommendedPacketId = "AIOS-FOREX-PAPER-RISK-DECISION-ROUTER-APPLY-V1"
     $recommendedPacketTitle = "feat(forex): add paper risk decision router"
     $recommendedLane = "PAPER_RISK_DECISION_ROUTER"
+    $recommendedFiles = @(
+        "automation/forex_engine/paper_risk_decision_router.py",
+        "automation/forex_engine/run_paper_risk_decision_demo.py",
+        "tests/forex_engine/test_paper_risk_decision_router.py",
+        "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_16_PAPER_RISK_DECISION_ROUTER.md"
+    )
 } elseif ($forexReadinessGatePresent) {
     $latestSprint = "SPRINT_14"
     $recommendedPacketId = "AIOS-FOREX-PAPER-SIGNAL-INTAKE-LEDGER-APPLY-V1"
     $recommendedPacketTitle = "feat(forex): add paper signal intake ledger"
     $recommendedLane = "PAPER_SIGNAL_INTAKE"
+    $recommendedFiles = @(
+        "automation/forex_engine/paper_signal_intake.py",
+        "automation/forex_engine/run_paper_signal_intake_demo.py",
+        "tests/forex_engine/test_paper_signal_intake.py",
+        "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_15_PAPER_SIGNAL_INTAKE_LEDGER.md"
+    )
 } else {
     $latestSprint = "UNKNOWN"
     $recommendedPacketId = ""
     $recommendedPacketTitle = "No recommendation yet"
     $recommendedLane = "PAPER_BOUNDARY_REVIEW"
+    $recommendedFiles = @()
 }
 
 $requiredValidators = @(
     "git diff --check",
     "python -m pytest tests/forex_engine -q -p no:cacheprovider",
-    "python automation/forex_engine/run_readiness_demo.py",
-    "python automation/forex_engine/run_paper_signal_intake_demo.py",
-    "python automation/forex_engine/run_paper_risk_decision_demo.py",
-    "python automation/forex_engine/run_paper_continuity_review_demo.py",
-    "python automation/forex_engine/run_paper_study_journal_demo.py",
     ".\aios.ps1 -Mode status",
     "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
     "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",
@@ -88,13 +121,6 @@ $blockedActions = @(
     "push/PR/merge automation"
 )
 
-$recommendedFiles = @(
-    "automation/forex_engine/paper_study_journal.py",
-    "automation/forex_engine/run_paper_study_journal_demo.py",
-    "tests/forex_engine/test_paper_study_journal.py",
-    "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md"
-)
-
 $result = [ordered]@{
     schema = "AIOS_FOREX_CONTINUATION_RECOMMENDATION.v1"
     generated_utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
@@ -103,6 +129,9 @@ $result = [ordered]@{
     dirty_or_untracked_count = $dirtyCount
     forex_readiness_gate_present = [bool]$forexReadinessGatePresent
     forex_signal_intake_ledger_present = [bool]$forexSignalIntakeLedgerPresent
+    forex_risk_decision_router_present = [bool]$forexRiskDecisionRouterPresent
+    forex_continuity_review_present = [bool]$forexContinuityReviewPresent
+    forex_study_journal_present = [bool]$forexStudyJournalPresent
     latest_forex_sprint_detected = $latestSprint
     recommended_next_packet_id = $recommendedPacketId
     recommended_next_packet_title = $recommendedPacketTitle
@@ -113,7 +142,11 @@ $result = [ordered]@{
     human_approval_required = $true
     execution_allowed = $false
     reason = if ($recommendedPacketId) {
-        "Sprint 14, 15, 16, and 17 evidence is present; the next safe step is paper study journal."
+        if ($latestSprint -eq "SPRINT_18") {
+            "Sprint 14 through Sprint 18 evidence is present; the next safe step is paper learning action router."
+        } else {
+            "Paper build evidence is present; the next safe step is the next lane packet."
+        }
     } else {
         "Sprint 14 and/or Sprint 15 evidence is not fully present; no safe next packet can be recommended."
     }

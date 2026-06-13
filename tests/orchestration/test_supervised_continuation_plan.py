@@ -38,7 +38,13 @@ def _load_plan(extra_args=None, repo_root=None, campaign_script=None, forex_scri
     return json.loads(raw.strip())
 
 
-def _write_fake_recommender(path: Path, packet_id: str = "AIOS-FOREX-PAPER-STUDY-JOURNAL-APPLY-V1", lane: str = "PAPER_STUDY_JOURNAL", title: str = "feat(forex): add paper study journal") -> Path:
+def _write_fake_recommender(
+    path: Path,
+    packet_id: str = "AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1",
+    lane: str = "PAPER_LEARNING_ACTION_ROUTER",
+    title: str = "feat(forex): add paper learning action router",
+    latest_sprint: str = "SPRINT_18",
+) -> Path:
     script = path / "Get-AiOsForexNextBuildPacket.DRY_RUN.ps1"
     fake_payload = json.dumps(
         {
@@ -46,24 +52,19 @@ def _write_fake_recommender(path: Path, packet_id: str = "AIOS-FOREX-PAPER-STUDY
             "schema": "AIOS_FOREX_CONTINUATION_RECOMMENDATION.v1",
             "execution_allowed": False,
             "human_approval_required": True,
-            "latest_forex_sprint_detected": "SPRINT_17",
+            "latest_forex_sprint_detected": latest_sprint,
             "recommended_next_packet_id": packet_id,
             "recommended_next_packet_title": title,
             "recommended_lane": lane,
             "recommended_files": [
-                "automation/forex_engine/paper_study_journal.py",
-                "automation/forex_engine/run_paper_study_journal_demo.py",
-                "tests/forex_engine/test_paper_study_journal.py",
-                "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md",
+                "automation/forex_engine/paper_learning_action_router.py",
+                "automation/forex_engine/run_paper_learning_action_router_demo.py",
+                "tests/forex_engine/test_paper_learning_action_router.py",
+                "docs/AI_OS/trading/FOREX_ENGINE_V1_PAPER_LEARNING_ACTION_ROUTER.md",
             ],
             "required_validators": [
                 "git diff --check",
                 "python -m pytest tests/forex_engine -q -p no:cacheprovider",
-                "python automation/forex_engine/run_readiness_demo.py",
-                "python automation/forex_engine/run_paper_signal_intake_demo.py",
-                "python automation/forex_engine/run_paper_risk_decision_demo.py",
-                "python automation/forex_engine/run_paper_continuity_review_demo.py",
-                "python automation/forex_engine/run_paper_study_journal_demo.py",
                 ".\\aios.ps1 -Mode status",
                 "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
                 "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",
@@ -110,7 +111,7 @@ def test_clean_repo_yields_ready_for_approval_with_recommendation(tmp_path):
 
     recommender_dir = Path(tmp_path) / "helpers"
     recommender_dir.mkdir()
-    recommender_script = _write_fake_recommender(recommender_dir)
+    recommender_script = _write_fake_recommender(recommender_dir, latest_sprint="SPRINT_18")
     res = _load_plan(
         repo_root=fake_repo,
         forex_script=recommender_script,
@@ -123,14 +124,14 @@ def test_clean_repo_yields_ready_for_approval_with_recommendation(tmp_path):
     assert res["human_approval_required"] is True
     assert res["can_continue_without_anthony"] is False
     assert res["continuation_status"] == "READY_FOR_APPROVAL"
-    assert res["recommended_next_packet_id"] == "AIOS-FOREX-PAPER-STUDY-JOURNAL-APPLY-V1"
-    assert res["recommended_next_packet_title"] == "feat(forex): add paper study journal"
-    assert res["recommended_lane"] == "PAPER_STUDY_JOURNAL"
+    assert res["recommended_next_packet_id"] == "AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1"
+    assert res["recommended_next_packet_title"] == "feat(forex): add paper learning action router"
+    assert res["recommended_lane"] == "PAPER_LEARNING_ACTION_ROUTER"
     assert res["recommended_files"] == [
-        "automation/forex_engine/paper_study_journal.py",
-        "automation/forex_engine/run_paper_study_journal_demo.py",
-        "tests/forex_engine/test_paper_study_journal.py",
-        "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md",
+        "automation/forex_engine/paper_learning_action_router.py",
+        "automation/forex_engine/run_paper_learning_action_router_demo.py",
+        "tests/forex_engine/test_paper_learning_action_router.py",
+        "docs/AI_OS/trading/FOREX_ENGINE_V1_PAPER_LEARNING_ACTION_ROUTER.md",
     ]
     assert any("git diff --check" == item for item in res["required_validators"])
     assert "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1" in res["required_validators"]
