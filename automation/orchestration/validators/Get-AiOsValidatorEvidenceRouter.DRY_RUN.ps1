@@ -106,7 +106,7 @@ function Get-NoWriteState {
     try {
         $oldErrorActionPreference = $ErrorActionPreference
         $ErrorActionPreference = "Continue"
-        $statusLines = @(& git status --short --branch 2>$null)
+        $statusLines = @(& git status --short --branch --untracked-files=all 2>$null)
         $statusExitCode = $LASTEXITCODE
         $diffNames = @(& git diff --name-only 2>$null)
         $diffExitCode = $LASTEXITCODE
@@ -187,7 +187,12 @@ function Test-ValidatorEvidenceRouterDirtyState {
         "tests/orchestration/test_aios_day_night_readiness.py",
         "tests/orchestration/test_aios_day_night_readiness_runner.py",
         "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
-        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1"
+        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1",
+        "automation/orchestration/self_development/Invoke-AiOsGovernedSelfDevelopmentLoop.DRY_RUN.ps1",
+        "automation/orchestration/self_development/aios_governed_self_development_loop.py",
+        "schemas/aios/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1.schema.json",
+        "tests/orchestration/test_aios_governed_self_development_loop.py",
+        "tests/orchestration/test_aios_governed_self_development_loop_runner.py"
     )
     $changedPaths = @($State.changed_entries | ForEach-Object { Get-ChangedPathFromStatusLine -Line ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     if ($changedPaths.Count -eq 0) {
