@@ -150,7 +150,14 @@ $continuationStatus = "BLOCKED"
 $reason = "No valid recommender evidence was available to produce a safe continuation recommendation."
 $exactNextAction = "Resolve recommender dependency and rerun this continuation plan."
 
-if ($forexPlan -and (Has-MemberValue -Object $forexPlan -Name "_aios_parse_error") -and -not $forexPlan._aios_parse_error -and $forexPlan.recommended_next_packet_id) {
+if (Has-MemberValue -Object $forexPlan -Name "_aios_parse_error") {
+    $forexHasParseError = [bool]$forexPlan._aios_parse_error
+}
+else {
+    $forexHasParseError = $false
+}
+
+if ($forexPlan -and -not $forexHasParseError -and $forexPlan.recommended_next_packet_id) {
     $safeToApprove = $true
     $recommendedNextPacketId = [string]$forexPlan.recommended_next_packet_id
     $recommendedNextPacketTitle = [string]$forexPlan.recommended_next_packet_title
@@ -161,7 +168,7 @@ if ($forexPlan -and (Has-MemberValue -Object $forexPlan -Name "_aios_parse_error
     $exactNextAction = "Anthony review the proposed packet $recommendedNextPacketId, then approve Codex APPLY packet generation."
     $continuationStatus = "READY_FOR_APPROVAL"
 }
-elseif ($forexPlan -and (Has-MemberValue -Object $forexPlan -Name "_aios_parse_error") -and $forexPlan._aios_parse_error) {
+elseif ($forexPlan -and $forexHasParseError) {
     $reason = "Forex recommender output was not valid JSON in this environment."
     $continuationStatus = "BLOCKED"
 }
