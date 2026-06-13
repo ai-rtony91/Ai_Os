@@ -55,7 +55,9 @@ def evaluate_decision_for_continuity_review(
 
     source = dict(decision_record)
 
-    source_decision_id = str(source.get("source_decision_id", "")).strip()
+    source_decision_id = str(
+        source.get("source_decision_id") or source.get("decision_id") or ""
+    ).strip()
     source_ledger_record_id = str(
         source.get("source_ledger_record_id", "").strip() or source.get("ledger_record_id", "").strip()
     )

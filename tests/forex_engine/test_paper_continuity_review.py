@@ -22,7 +22,6 @@ def _safe_decision() -> dict:
         generated_at_utc="2026-06-12T00:00:00Z",
         decision_id="continuity_decision_001",
     )
-    decision["source_decision_id"] = "continuity_decision_001"
     return decision
 
 
@@ -54,6 +53,7 @@ def test_rejected_paper_risk_decision_produces_review_blocked():
 def test_missing_source_ids_produce_review_blocked():
     decision = _safe_decision()
     decision["source_decision_id"] = ""
+    decision["decision_id"] = ""
     decision["source_ledger_record_id"] = ""
     decision["signal_id"] = ""
 
