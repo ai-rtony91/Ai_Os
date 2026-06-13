@@ -357,6 +357,9 @@ def test_relay_state_with_single_message_returns_latest() -> None:
         assert state["latest_target_actor"] == "powershell_operator"
         assert state["latest_packet_id"] == "AIOS-RELAY-BUS-SINGLE-01"
         assert state["relay_status"] == "NEEDS_HUMAN_REVIEW"
+        assert state["exact_next_action"] == (
+            "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1 -OutputJson"
+        )
         assert state["pending_human_review_count"] == 1
         assert state["execution_allowed"] is False
         assert state["can_continue_without_anthony"] is False

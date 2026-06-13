@@ -118,6 +118,8 @@ State rules:
 
 - `EMPTY` when no messages exist.
 - `NEEDS_HUMAN_REVIEW` when latest message needs human handling.
+- `NEEDS_HUMAN_REVIEW` resolution command:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1 -OutputJson`
 - `READY_FOR_POWERSHELL_PASTEBACK` for `reviewed_powershell`.
 - `BLOCKED_NEEDS_OWNER` when latest status is `blocked_needs_owner`.
 - `REVIEW_READY` when latest evidence message needs review.
