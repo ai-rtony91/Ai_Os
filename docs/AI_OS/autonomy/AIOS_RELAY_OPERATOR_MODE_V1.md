@@ -32,7 +32,7 @@ current Codex → ChatGPT → PowerShell relay status and the exact next action.
 `Get-AiOsRelayOperatorState.DRY_RUN.ps1` now gives actor relay bus suggestions
 precedence when actor bus state is explicitly at handoff points.
 
-- When `actor_relay_bus_status` is `EMPTY` or `READY` and `actor_relay_next_action`
+- When `actor_relay_bus_status` is `EMPTY`, `READY`, or `NEEDS_HUMAN_REVIEW` and `actor_relay_next_action`
   is populated, `exact_next_action` uses the actor bus action.
 - Existing `needs_*` bridge fields remain in output for backward compatibility.
 

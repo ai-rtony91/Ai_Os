@@ -139,7 +139,7 @@ if ($hasReport) {
 }
 
 $exactNextAction = $legacyNextAction
-$actorRelayBusReadyOrEmpty = @("EMPTY", "READY") -contains $actorRelayBusStatus
+$actorRelayBusReadyOrEmpty = @("EMPTY", "READY", "NEEDS_HUMAN_REVIEW") -contains $actorRelayBusStatus
 if ($actorRelayBusReadyOrEmpty -and (-not [string]::IsNullOrWhiteSpace($actorRelayNextAction))) {
     $exactNextAction = $actorRelayNextAction
 }
