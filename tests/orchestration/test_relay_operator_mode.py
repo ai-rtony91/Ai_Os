@@ -136,7 +136,9 @@ def test_relay_state_prefers_actor_relay_when_needs_human_review() -> None:
         out = _run_script_json(operator_script, [], root)
 
         assert out["actor_relay_bus_status"] == "NEEDS_HUMAN_REVIEW"
-        assert out["actor_relay_next_action"] == "Run manual human review on this actor message before continuing."
+        assert out["actor_relay_next_action"] == (
+            "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1 -OutputJson"
+        )
         assert out["exact_next_action"] == out["actor_relay_next_action"]
 
 
