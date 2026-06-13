@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_DAY_NIGHT_READINESS_RESULT.v1.schema.json",
+  "title": "AIOS Day Night Readiness Result v1",
+  "description": "Console-only read-only day/night readiness router result. This schema grants no APPLY, packet generation, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "autonomy_chain_state",
+    "readiness",
+    "allowed_operator_modes",
+    "blocked_operator_modes",
+    "evidence_sources",
+    "validator_status",
+    "approval_state",
+    "runtime_worker_state",
+    "backup_interference_state",
+    "recommended_next_packet",
+    "required_before_supervised_mode",
+    "required_before_runtime_or_worker",
+    "safety",
+    "no_write_proof",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_DAY_NIGHT_READINESS_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "repo_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "autonomy_chain_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "classification",
+        "recommendation_allowed",
+        "execution_allowed"
+      ],
+      "properties": {
+        "classification": {
+          "type": "string",
+          "enum": [
+            "OFF",
+            "OBSERVE_ALLOWED",
+            "SUPERVISED_RECOMMENDATION_ALLOWED",
+            "PAUSE_REQUIRED",
+            "SOS_HARD_STOP",
+            "BLOCKED_BY_DIRTY_REPO",
+            "BLOCKED_BY_UNSAFE_SURFACE",
+            "BLOCKED_BY_APPROVAL_STATE",
+            "BLOCKED_BY_RUNTIME_RISK",
+            "BLOCKED_BY_VALIDATOR_RISK",
+            "BLOCKED_BY_BACKUP_INTERFERENCE"
+          ]
+        },
+        "recommendation_allowed": {
+          "type": "boolean"
+        },
+        "execution_allowed": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "allowed_operator_modes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_operator_modes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "validator_status": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "approval_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "runtime_worker_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "backup_interference_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "recommended_next_packet": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "AIOS-GOVERNED-SELF-DEVELOPMENT-LOOP-APPLY-V1"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "required_before_supervised_mode": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_before_runtime_or_worker": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "console_only",
+        "writes_files",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_packet_drafts",
+        "outputs_packet_body",
+        "mutates_registry",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approvals",
+        "writes_relay",
+        "starts_runtime",
+        "launches_workers",
+        "scheduler_or_daemon",
+        "protected_action_recommended",
+        "commands_sanitized",
+        "secrets_or_env_access",
+        "broker_or_live_trading"
+      ],
+      "properties": {
+        "console_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "writes_files": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_packet_drafts": {
+          "type": "boolean",
+          "const": false
+        },
+        "outputs_packet_body": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approvals": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_relay": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "scheduler_or_daemon": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_action_recommended": {
+          "type": "boolean",
+          "const": false
+        },
+        "commands_sanitized": {
+          "type": "boolean",
+          "const": true
+        },
+        "secrets_or_env_access": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "no_write_proof": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}

@@ -229,6 +229,27 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "AIOS_VALIDATOR_EVIDENCE_ROUTER_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_VALIDATOR_EVIDENCE_ROUTER_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Console-only validator/evidence router result contract. Evidence only; grants no APPLY, packet generation, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_DAY_NIGHT_READINESS_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_DAY_NIGHT_READINESS_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Console-only day/night readiness result contract. Evidence only; grants no APPLY, packet generation, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Console-only governed self-development loop result contract. Evidence only; grants no APPLY, packet generation, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "APPROVAL_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
       "kind": "json_schema",
