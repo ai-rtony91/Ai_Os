@@ -76,6 +76,14 @@ def _run_generator_command(script: Path, args: list[tuple[str, object]]) -> str:
     return _run_ps_command(command)
 
 
+def _get_field(packet_text: str, field_name: str) -> str:
+    lines = packet_text.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() == f"{field_name}:" and index + 1 < len(lines):
+            return lines[index + 1].strip()
+    raise AssertionError(f"Missing field '{field_name}' in generated packet.")
+
+
 def _apply_kwarg_overrides(args: list[tuple[str, object]], kwargs: dict[str, object]) -> list[tuple[str, object]]:
     args_map = {key: index for index, (key, _) in enumerate(args)}
     for key, value in kwargs.items():
@@ -168,6 +176,43 @@ def test_generator_emits_mandatory_headers():
 
     assert "automation/orchestration/packet_generator/New-AiOsCodexPacket.DRY_RUN.ps1" in packet
     assert "broker/OANDA/webhook/order/secrets paths" in packet
+
+
+def test_array_binding_uses_scalar_identity_fields():
+    result = _run_generator(
+        Lane="RELAY_OPERATOR_ACTION_ROUTER",
+        Mode="APPLY",
+        AllowedMutationFiles=[
+            "automation/orchestration/packet_generator/New-AiOsCodexPacket.DRY_RUN.ps1",
+            "automation/orchestration/packet_generator/Test-AiOsCodexPacket.DRY_RUN.ps1",
+            "tests/orchestration/test_relay_operator_mode.py",
+            "docs/AI_OS/autonomy/AIOS_RELAY_OPERATOR_MODE_V1.md",
+        ],
+        ForbiddenPaths=[
+            "broker/OANDA/webhook/order/secrets paths",
+            "runtime state",
+            "scheduler",
+        ],
+        Validators=[
+            "git diff --check",
+            "python -m pytest tests/orchestration/test_codex_packet_generator.py -q -p no:cacheprovider",
+            "python -m pytest tests/orchestration/test_capability_packet_draft.py -q -p no:cacheprovider",
+        ],
+    )
+
+    assert result["packet_valid"] is True
+    packet = result["generated_packet_text"]
+
+    assert _get_field(packet, "SUPERVISOR IDENTITY") == "ChatGPT Planning Supervisor under Anthony Human Owner"
+    assert _get_field(packet, "WORKER IDENTITY") == "Codex CLI local executor inside C:\\Dev\\Ai.Os"
+    assert _get_field(packet, "WORKTREE") == str(REPO_ROOT)
+    assert _get_field(packet, "START_BRANCH") == "main"
+    assert _get_field(packet, "MODE") == "APPLY"
+    assert _get_field(packet, "ZONE") == "ORCHESTRATION"
+    assert _get_field(packet, "LANE") == "RELAY_OPERATOR_ACTION_ROUTER"
+
+    validated = _run_validator(packet)
+    assert validated["packet_valid"] is True
 
 
 def test_validator_accepts_complete_packet():

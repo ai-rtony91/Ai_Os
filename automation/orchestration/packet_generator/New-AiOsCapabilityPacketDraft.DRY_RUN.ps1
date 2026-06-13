@@ -561,24 +561,27 @@ $exactNextAction = if ($safetyTier -eq "REQUIRES_SECRET_REVIEW" -or $safetyTier 
     "Run a RESEARCH review of the generated packet through AGENTS-compliant relay flow and review output first."
 }
 
-$generatedRaw = & powershell -NoProfile -ExecutionPolicy Bypass -File $GeneratorScript `
-    -PacketId $generatedPacketId `
-    -Mode "DRY_RUN" `
-    -Zone $zone `
-    -Lane $lane `
-    -Mission $safeMission `
-    -Worktree $RepoRoot `
-    -StartBranch "main" `
-    -Branch "feature/$branchSuffix" `
-    -ApprovalAuthority $safeApprovalAuthority `
-    -SupervisorIdentity $safeSupervisorIdentity `
-    -WorkerIdentity $safeWorkerIdentity `
-    -AllowedMutationFiles $safeAllowedMutationFiles `
-    -ForbiddenPaths $safeForbidden `
-    -ReadFirst $safeReadFirst `
-    -Validators $validators `
-    -StopPoint $stopPoint `
-    -OutputJson
+$generatorArgs = @{
+    PacketId           = $generatedPacketId
+    Mode               = "DRY_RUN"
+    Zone               = $zone
+    Lane               = $lane
+    Mission            = $safeMission
+    Worktree           = $RepoRoot
+    StartBranch        = "main"
+    Branch             = "feature/$branchSuffix"
+    ApprovalAuthority  = $safeApprovalAuthority
+    SupervisorIdentity = $safeSupervisorIdentity
+    WorkerIdentity     = $safeWorkerIdentity
+    AllowedMutationFiles = $safeAllowedMutationFiles
+    ForbiddenPaths      = $safeForbidden
+    ReadFirst           = $safeReadFirst
+    Validators          = $validators
+    StopPoint           = $stopPoint
+    OutputJson          = $true
+}
+
+$generatedRaw = & $GeneratorScript @generatorArgs
 
 if ([string]::IsNullOrWhiteSpace($generatedRaw)) {
     throw "Generator did not return any output."

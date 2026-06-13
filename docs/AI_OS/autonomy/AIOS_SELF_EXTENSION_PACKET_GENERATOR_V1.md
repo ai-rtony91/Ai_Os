@@ -77,6 +77,9 @@ system.
 ## Relay and AGENTS alignment
 
 - Uses `New-AiOsCodexPacket.DRY_RUN.ps1` to produce relay-ready packet text.
+- Passes argument arrays to `New-AiOsCodexPacket.DRY_RUN.ps1` through
+  splatted parameters, preserving scalar values in identity/worktree/zone/lane
+  fields while allowing safe list-based reads and mutation rules.
 - Keeps packet validation and review in human/ChatGPT review flow.
 - Preserves `execution_allowed: false` and `can_continue_without_anthony: false`.
 
