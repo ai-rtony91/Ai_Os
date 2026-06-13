@@ -183,11 +183,16 @@ function Test-RouterValidationDirtyState {
         "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1",
         "automation/orchestration/validators/aios_validator_evidence_router.py",
         "schemas/aios/orchestration/AIOS_VALIDATOR_EVIDENCE_ROUTER_RESULT.v1.schema.json",
+        "automation/orchestration/supervisor/Get-AiOsDayNightReadiness.DRY_RUN.ps1",
+        "automation/orchestration/supervisor/aios_day_night_readiness.py",
+        "schemas/aios/orchestration/AIOS_DAY_NIGHT_READINESS_RESULT.v1.schema.json",
         "schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.json",
         "tests/orchestration/test_aios_self_development_packet_router.py",
         "tests/orchestration/test_aios_self_development_packet_router_runner.py",
         "tests/orchestration/test_aios_validator_evidence_router.py",
-        "tests/orchestration/test_aios_validator_evidence_router_runner.py"
+        "tests/orchestration/test_aios_validator_evidence_router_runner.py",
+        "tests/orchestration/test_aios_day_night_readiness.py",
+        "tests/orchestration/test_aios_day_night_readiness_runner.py"
     )
     $changedPaths = @($State.changed_entries | ForEach-Object { Get-ChangedPathFromStatusLine -Line ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     if ($changedPaths.Count -eq 0) {
