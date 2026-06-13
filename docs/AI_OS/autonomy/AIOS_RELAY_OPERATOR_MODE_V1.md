@@ -82,6 +82,19 @@ No commands are executed.
 
 For details and implementation scope, see [`AIOS_ACTOR_RELAY_BUS_V1.md`](AIOS_ACTOR_RELAY_BUS_V1.md).
 
+## SOS escalation policy surface in relay operator mode
+
+When `actor_relay_bus_status` is `NEEDS_HUMAN_REVIEW`, the operator state now reads the
+`Get-AiOsSosEscalationPolicy.DRY_RUN.ps1` output and surfaces:
+
+- `sos_escalation_status`
+- `sos_anthony_required`
+- `sos_routine_review_allowed`
+- `sos_safe_next_action`
+- `sos_matched_categories`
+
+This keeps the relay handoff read-only while making classification visible to `aios.ps1 -Mode relay`.
+
 ## Future upgrade
 
 - Add checksum linking between report/prompt/pasteback packet IDs.
