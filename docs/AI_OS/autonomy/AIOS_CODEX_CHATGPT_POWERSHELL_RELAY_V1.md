@@ -52,6 +52,11 @@ It standardizes the handoff while keeping **all execution manual** and in Anthon
 - Merge approval gates in reviewed PR lifecycle scripts
 - Final workflow execution in PowerShell
 
+## Operator surface
+
+- `.\aios.ps1 -Mode relay` now surfaces this relay state as a single read-only
+  operator command and prints the exact next action.
+
 ## Future safe additions
 
 - Stronger schema validation for relay artifacts

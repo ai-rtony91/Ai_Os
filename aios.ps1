@@ -1,5 +1,5 @@
 ﻿param(
-    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","packet","layout","control","finish-pr","hud","autonomy-status","autonomy-next","approval-status","self-build-status")]
+    [ValidateSet("help","daily","morning","swarm","status","resume","workers","runtime","supervisor","mission","runner","queue","telemetry","relay","packet","layout","control","finish-pr","hud","autonomy-status","autonomy-next","approval-status","self-build-status")]
     [Parameter(Position=0)]
     [string]$Mode = "help",
     [string]$Goal = "Build next AIOS runtime loop step",
@@ -684,6 +684,19 @@ switch ($Mode) {
         Write-Host "  Open each worker manually in a new Windows Terminal tab." -ForegroundColor Yellow
         Write-Host ""
     }
+
+   "relay" {
+    $relayArgs = @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "automation/orchestration/review_bridge/Get-AiOsRelayOperatorState.DRY_RUN.ps1",
+        "-OutputJson"
+    )
+    & powershell @relayArgs
+    break
+}
 
    "packet" {
     # Validate worker
