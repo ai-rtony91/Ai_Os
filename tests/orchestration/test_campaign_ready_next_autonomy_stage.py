@@ -1,6 +1,7 @@
 """Tests for campaign registry readiness wiring for routine relay review continuation."""
 
 from pathlib import Path
+from contextlib import contextmanager
 import json
 import subprocess
 
@@ -35,56 +36,69 @@ def _file_set(root: Path) -> set[str]:
     }
 
 
-def _clear_relay_inbox() -> None:
+@contextmanager
+def _isolated_relay_inbox():
+    RELAY_INBOX.mkdir(parents=True, exist_ok=True)
+    saved_messages = {path.name: path.read_bytes() for path in RELAY_INBOX.glob("*.json")}
     for message_file in RELAY_INBOX.glob("*.json"):
         if message_file.name != ".gitkeep":
             message_file.unlink()
 
+    try:
+        yield
+    finally:
+        for message_file in RELAY_INBOX.glob("*.json"):
+            if message_file.name != ".gitkeep":
+                message_file.unlink()
+        for name, content in saved_messages.items():
+            (RELAY_INBOX / name).write_bytes(content)
 
-def _ready_candidates_for_packet_id(registry: dict, packet_id: str) -> list[dict]:
-    ready_stages: list[dict] = []
+
+def _stage_by_id(registry: dict, stage_id: str) -> dict:
     for campaign in registry.get("campaigns", []):
         for stage in campaign.get("stages", []):
-            if str(stage.get("status", "")).upper() == "READY" and str(
-                stage.get("next_packet_candidate", "")
-            ) == packet_id:
-                ready_stages.append(stage)
-    return ready_stages
+            if stage.get("stage_id") == stage_id:
+                return stage
+    raise AssertionError(f"stage not found: {stage_id}")
 
 
-def test_campaign_registry_has_single_ready_candidate_for_relay_routine_continuation_stage() -> None:
+def test_campaign_registry_marks_relay_routine_continuation_stage_complete() -> None:
     with CAMPAIGN_REGISTRY.open("r", encoding="utf-8") as fh:
         registry = json.load(fh)
 
-    ready_candidates = _ready_candidates_for_packet_id(
-        registry, "AIOS-ROUTINE-REVIEW-CONTINUATION-GATE-APPLY-V1"
+    stage = _stage_by_id(
+        registry,
+        "STAGE-AUTONOMY-ROUTINE-REVIEW-CONTINUATION",
     )
-    assert len(ready_candidates) == 1
-    assert ready_candidates[0]["status"] == "READY"
-    assert ready_candidates[0]["next_packet_candidate"] == "AIOS-ROUTINE-REVIEW-CONTINUATION-GATE-APPLY-V1"
-    assert ready_candidates[0].get("next_packet_candidate") == "AIOS-ROUTINE-REVIEW-CONTINUATION-GATE-APPLY-V1"
+    assert stage["status"] == "COMPLETE"
+    assert stage["next_packet_candidate"] is None
+    assert stage["completed_by_pr"] == "https://github.com/ai-rtony91/Ai_Os/pull/642"
+    assert stage["completed_by_commit"] == "bc99ae4e"
 
 
-def test_campaign_next_task_surfaces_routine_review_continuation_candidate() -> None:
+def test_campaign_next_task_truthfully_reports_no_ready_stage_after_routine_gate_completion() -> None:
     pre = _file_set(REPO_ROOT)
     out = _run_script_json(CAMPAIGN_NEXT_TASK_SCRIPT, [])
     post = _file_set(REPO_ROOT)
 
     assert out["schema"] == "AIOS_CAMPAIGN_NEXT_TASK_RECOMMENDATION.v1"
-    assert out["overall_readiness"] == "READY_FOR_PACKET_PREVIEW"
-    assert out["recommended_lane"] == "RELAY_ROUTINE_REVIEW_CONTINUATION"
-    assert out["next_packet_candidate"] == "AIOS-ROUTINE-REVIEW-CONTINUATION-GATE-APPLY-V1"
-    assert out["reason"].startswith("Selected highest-priority READY stage")
+    assert out["overall_readiness"] == "NO_READY_STAGE"
+    assert out["recommended_campaign"] is None
+    assert out["recommended_phase"] is None
+    assert out["recommended_stage"] is None
+    assert out["recommended_lane"] is None
+    assert out["next_packet_candidate"] is None
+    assert out["reason"] == "No READY stage with complete dependencies and no blockers was found."
+    assert out["blockers"] == ["No selectable campaign stage."]
     assert pre == post
 
 
-def test_action_recommendation_no_longer_reports_no_active_packet_when_ready_candidate_exists() -> None:
-    _clear_relay_inbox()
-    pre = _file_set(REPO_ROOT)
-    out = _run_script_json(ACTION_RECOMMENDATION_SCRIPT, [])
-    post = _file_set(REPO_ROOT)
+def test_action_recommendation_truthfully_reports_no_active_packet_when_no_ready_stage_exists() -> None:
+    with _isolated_relay_inbox():
+        pre = _file_set(REPO_ROOT)
+        out = _run_script_json(ACTION_RECOMMENDATION_SCRIPT, [])
+        post = _file_set(REPO_ROOT)
 
-    assert out["packet_status"] != "no_active_packet"
-    assert "No command recommended" not in out["recommended_command"]
+    assert out["packet_status"] == "no_active_packet"
     assert out["mode"] == "READ_ONLY"
     assert pre == post
