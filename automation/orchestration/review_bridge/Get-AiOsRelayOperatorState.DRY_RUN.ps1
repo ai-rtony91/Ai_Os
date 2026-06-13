@@ -48,6 +48,28 @@ function Get-ActorRelayBusState {
         return $rawText | ConvertFrom-Json -ErrorAction Stop
     }
     catch {
+    return $null
+  }
+}
+
+function Get-SosEscalationState {
+    param([string]$RepoRoot)
+
+    $sosScript = Join-Path $PSScriptRoot "..\\relay_bus\\Get-AiOsSosEscalationPolicy.DRY_RUN.ps1"
+    if (-not (Test-Path -LiteralPath $sosScript -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $rawOutput = & $sosScript -OutputJson 2>$null
+        $rawText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($rawText)) {
+            return $null
+        }
+
+        return $rawText | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
         return $null
     }
 }
@@ -67,6 +89,41 @@ $actorRelayLatestMessagePath = if ($actorRelayState) { [string]$actorRelayState.
 $actorRelayLatestActor = if ($actorRelayState) { [string]$actorRelayState.latest_actor } else { "" }
 $actorRelayLatestTargetActor = if ($actorRelayState) { [string]$actorRelayState.latest_target_actor } else { "" }
 $actorRelayNextAction = if ($actorRelayState) { [string]$actorRelayState.exact_next_action } else { "Use New-AiOsRelayMessage.DRY_RUN.ps1 with Mode APPLY to write the first relay message." }
+
+$sosEscalationStatus = "NOT_APPLICABLE"
+$sosAnthonyRequired = $false
+$sosRoutineReviewAllowed = $false
+$sosSafeNextAction = ""
+$sosMatchedCategories = New-Object System.Collections.Generic.List[string]
+
+if ($actorRelayBusStatus -eq "NEEDS_HUMAN_REVIEW") {
+    $sosState = Get-SosEscalationState -RepoRoot $repoRoot
+    if ($sosState -ne $null) {
+        $sosEscalationStatus = [string]$sosState.escalation_status
+        $sosAnthonyRequired = if ($sosState.PSObject.Properties.Name -contains "anthony_required") {
+            [bool]$sosState.anthony_required
+        }
+        else {
+            $false
+        }
+        $sosRoutineReviewAllowed = if ($sosState.PSObject.Properties.Name -contains "routine_review_allowed") {
+            [bool]$sosState.routine_review_allowed
+        }
+        else {
+            $false
+        }
+        if ($sosState.PSObject.Properties.Name -contains "safe_next_action") {
+            $sosSafeNextAction = [string]$sosState.safe_next_action
+        }
+        if ($sosState.PSObject.Properties.Name -contains "matched_sos_categories") {
+            foreach ($category in @($sosState.matched_sos_categories)) {
+                if ($null -ne $category) {
+                    [void]$sosMatchedCategories.Add([string]$category)
+                }
+            }
+        }
+    }
+}
 
 $latestReportFile = Get-RelayLatestFile -Directory $state.codex_reports_dir
 $latestPromptFile = Get-RelayLatestFile -Directory $state.chatgpt_prompts_dir -Pattern "*.txt"
@@ -153,6 +210,11 @@ $output = [ordered]@{
     actor_relay_latest_actor = $actorRelayLatestActor
     actor_relay_latest_target_actor = $actorRelayLatestTargetActor
     actor_relay_next_action = $actorRelayNextAction
+    sos_escalation_status = $sosEscalationStatus
+    sos_anthony_required = $sosAnthonyRequired
+    sos_routine_review_allowed = $sosRoutineReviewAllowed
+    sos_safe_next_action = $sosSafeNextAction
+    sos_matched_categories = @($sosMatchedCategories)
     latest_codex_report_path = if ($latestReportFile) { $latestReportFile.FullName } else { "" }
     latest_chatgpt_prompt_path = if ($latestPromptFile) { $latestPromptFile.FullName } else { "" }
     latest_pasteback_path = if ($latestPastebackFile) { $latestPastebackFile.FullName } else { "" }

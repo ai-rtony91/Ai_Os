@@ -19,6 +19,8 @@ This router sits after the actor relay resolver in the relay flow:
 2. `Resolve-AiOsRelayHumanReview.DRY_RUN.ps1` produces the latest human-review context.
 3. `Get-AiOsSosEscalationPolicy.DRY_RUN.ps1` classifies the review context.
 4. `Get-AiOsRelayOperatorState.DRY_RUN.ps1` and operator commands can surface the safe recommendation.
+5. In relay operator mode, these fields are surfaced as `sos_*` fields so Anthony can see
+   whether to treat a review as routine or SOS escalation.
 
 The policy is advisory for next-action precedence and does not mutate upstream state.
 
