@@ -28,6 +28,28 @@ function Get-RelayOperatorState {
     }
 }
 
+function Get-CampaignNextTaskState {
+    param([string]$RepoRoot)
+
+    $campaignNextTaskScript = Join-Path $RepoRoot "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
+    if (-not (Test-Path -LiteralPath $campaignNextTaskScript -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $rawOutput = powershell -NoProfile -ExecutionPolicy Bypass -File $campaignNextTaskScript -OutputJson 2>$null
+        $rawText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($rawText)) {
+            return $null
+        }
+
+        return $rawText | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
+        return $null
+    }
+}
+
 $health = powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $next = powershell -ExecutionPolicy Bypass -File automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $blocker = powershell -ExecutionPolicy Bypass -File automation/orchestration/blockers/Resolve-AiOsRuntimeBlocker.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
@@ -35,6 +57,14 @@ $approval = powershell -ExecutionPolicy Bypass -File automation/orchestration/ap
 $gitStatus = @(git status --short)
 $repoRoot = (Get-Location).Path
 $relayOperatorState = Get-RelayOperatorState -RepoRoot $repoRoot
+$campaignNextTaskState = Get-CampaignNextTaskState -RepoRoot $repoRoot
+$campaignOverallReadiness = if ($campaignNextTaskState -and $campaignNextTaskState.PSObject.Properties.Name -contains "overall_readiness") {
+    [string]$campaignNextTaskState.overall_readiness
+}
+else {
+    ""
+}
+$noReadyStageDiscoveryCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1 -OutputJson"
 $relaySosEscalationStatus = "NOT_APPLICABLE"
 $relaySosAnthonyRequired = $false
 $relaySosRoutineReviewAllowed = $false
@@ -106,11 +136,11 @@ elseif ($next.status -eq "awaiting_approval") {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_detection/Find-AiOsApprovalMatch.DRY_RUN.ps1"
     $reason = "Packet is waiting for approval."
 }
-elseif ($gitStatus.Count -gt 0 -and $commitPackagePreview) {
+elseif ($gitStatus.Count -gt 0 -and $commitPackagePreview -and $campaignOverallReadiness -ne "NO_READY_STAGE") {
     $recommendedCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1 -OutputJson"
     $reason = "Working tree has changes; prepare an exact-file Level 5 commit package preview and stop before staging."
 }
-elseif ($health.health -ne "HEALTHY") {
+elseif ($health.health -ne "HEALTHY" -and $campaignOverallReadiness -ne "NO_READY_STAGE") {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
     $reason = "Health is not clean."
 }
@@ -123,8 +153,14 @@ elseif ($next.status -eq "campaign_ready") {
     $reason = "No active packet is present; campaign registry has a READY packet candidate."
 }
 elseif ($next.status -eq "no_active_packet") {
-    $recommendedCommand = "No command recommended. Review campaign registry statuses and approve one next packet candidate."
-    $reason = "No active packet and no READY campaign stage are available for automatic advancement."
+    if ($campaignOverallReadiness -eq "NO_READY_STAGE") {
+        $recommendedCommand = $noReadyStageDiscoveryCommand
+        $reason = "No active packet and campaign registry reports NO_READY_STAGE; run read-only discovery to identify planning gaps."
+    }
+    else {
+        $recommendedCommand = "No command recommended. Review campaign registry statuses and approve one next packet candidate."
+        $reason = "No active packet and no READY campaign stage are available for automatic advancement."
+    }
 }
 else {
     $recommendedCommand = "powershell -ExecutionPolicy Bypass -File automation/orchestration/advancement/Invoke-AiOsPacketAdvancement.DRY_RUN.ps1"
@@ -168,6 +204,8 @@ $result = [pscustomobject]@{
     routine_review_continuation_allowed = $routineReviewContinuationAllowed
     routine_review_continuation_reason = $routineReviewContinuationReason
     routine_review_next_action = $routineReviewNextAction
+    campaign_overall_readiness = $campaignOverallReadiness
+    no_ready_stage_discovery_command = $noReadyStageDiscoveryCommand
     reason = $reason
     health = $health.health
     packet_id = $next.packet_id
@@ -193,6 +231,9 @@ if ($relaySosApplies -and ($relaySosEscalationStatus -eq "SOS_ESCALATION" -or $r
 $blockedReason = if ($gitStatus.Count -gt 0 -and $commitPackagePreview) { "none" } elseif ($health.health -ne "HEALTHY") { "Runtime health is not clean." } elseif ($next.status -eq "blocked" -or $next.status -eq "failed") { "Packet is blocked or failed." } elseif ($next.status -eq "no_active_packet") { "No active packet or READY campaign stage is available." } else { "none" }
 $status = if ($blockedReason -ne "none") { "BLOCKED" } elseif ($approvalRequired) { "REVIEW" } else { "READY" }
 $nextSafeAction = $recommendedCommand
+if ($next.status -eq "no_active_packet" -and $campaignOverallReadiness -eq "NO_READY_STAGE" -and (-not $relaySosApplies)) {
+    $nextSafeAction = $noReadyStageDiscoveryCommand
+}
 if ($relaySosApplies -and $routineReviewContinuationAllowed) {
     $routineReviewCommandForAction = if ($routineReviewNextAction) { $routineReviewNextAction } else { $routineReviewResolverCommand }
     $nextSafeAction = "Routine relay review may continue through resolver and SOS-governed review flow: $routineReviewCommandForAction"
@@ -227,6 +268,8 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
         routine_review_continuation_allowed = $routineReviewContinuationAllowed
         routine_review_continuation_reason = $routineReviewContinuationReason
         routine_review_next_action = $routineReviewNextAction
+        campaign_overall_readiness = $campaignOverallReadiness
+        no_ready_stage_discovery_command = $noReadyStageDiscoveryCommand
     }
     generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 })

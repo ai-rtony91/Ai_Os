@@ -11,6 +11,10 @@ CAMPAIGN_REGISTRY = REPO_ROOT / "automation/orchestration/campaign_registry/AIOS
 CAMPAIGN_NEXT_TASK_SCRIPT = REPO_ROOT / "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
 ACTION_RECOMMENDATION_SCRIPT = REPO_ROOT / "automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1"
 RELAY_INBOX = REPO_ROOT / "control/relay_bus/messages/inbox"
+NO_READY_DISCOVERY_COMMAND = (
+    "powershell -NoProfile -ExecutionPolicy Bypass -File "
+    "automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1 -OutputJson"
+)
 
 
 def _run_script_json(script: Path, args: list[str]) -> dict:
@@ -100,5 +104,7 @@ def test_action_recommendation_truthfully_reports_no_active_packet_when_no_ready
         post = _file_set(REPO_ROOT)
 
     assert out["packet_status"] == "no_active_packet"
+    assert out["campaign_overall_readiness"] == "NO_READY_STAGE"
+    assert out["recommended_command"] == NO_READY_DISCOVERY_COMMAND
     assert out["mode"] == "READ_ONLY"
     assert pre == post
