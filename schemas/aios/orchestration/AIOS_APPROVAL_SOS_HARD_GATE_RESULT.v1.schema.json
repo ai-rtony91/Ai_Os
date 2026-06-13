@@ -1,0 +1,297 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_APPROVAL_SOS_HARD_GATE_RESULT.v1.schema.json",
+  "title": "AIOS Approval SOS Hard Gate Result v1",
+  "description": "Console-only read-only approval/SOS hard-gate result. This schema grants no APPLY, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "approval_state",
+    "sos_state",
+    "protected_action_catalog",
+    "blocked_actions",
+    "allowed_read_only_actions",
+    "human_owner_required_for",
+    "safety",
+    "no_write_proof",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_APPROVAL_SOS_HARD_GATE_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "repo_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "approval_state": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "explicit_human_owner_approval_present",
+        "approval_mutation_allowed",
+        "approval_source",
+        "status"
+      ],
+      "properties": {
+        "explicit_human_owner_approval_present": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_mutation_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_source": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "sos_state": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "sos_hard_stop_active",
+        "wake_required"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "sos_hard_stop_active": {
+          "type": "boolean"
+        },
+        "wake_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "protected_action_catalog": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/protected_action"
+      }
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "action_id",
+          "status",
+          "reason"
+        ],
+        "properties": {
+          "action_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "const": "BLOCKED_WITHOUT_EXPLICIT_HUMAN_OWNER_APPROVAL"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "allowed_read_only_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "human_owner_required_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "console_only",
+        "writes_files",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_packet_drafts",
+        "writes_proposed_packets",
+        "outputs_packet_body",
+        "creates_ready_stage",
+        "mutates_registry",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approvals",
+        "writes_relay",
+        "starts_runtime",
+        "launches_workers",
+        "scheduler_or_daemon",
+        "protected_action_recommended",
+        "protected_actions_blocked",
+        "read_only_inspection_allowed",
+        "human_owner_required_before_protected_action",
+        "secrets_or_env_access",
+        "broker_or_live_trading"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "BLOCKED",
+            "BLOCKED_BY_WRITE_SURFACE_RISK"
+          ]
+        },
+        "console_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "writes_files": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_packet_drafts": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_proposed_packets": {
+          "type": "boolean",
+          "const": false
+        },
+        "outputs_packet_body": {
+          "type": "boolean",
+          "const": false
+        },
+        "creates_ready_stage": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approvals": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_relay": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "scheduler_or_daemon": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_action_recommended": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_actions_blocked": {
+          "type": "boolean",
+          "const": true
+        },
+        "read_only_inspection_allowed": {
+          "type": "boolean",
+          "const": true
+        },
+        "human_owner_required_before_protected_action": {
+          "type": "boolean",
+          "const": true
+        },
+        "secrets_or_env_access": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "no_write_proof": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "protected_action": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "action_id",
+        "label",
+        "human_owner_required",
+        "blocked_without_explicit_human_owner_approval"
+      ],
+      "properties": {
+        "action_id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "human_owner_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "blocked_without_explicit_human_owner_approval": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    }
+  }
+}

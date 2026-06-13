@@ -3,9 +3,15 @@ param(
     [string]$RepoRoot = "",
     [string]$ExpectedBranch = "main",
     [switch]$OutputJson,
+    [ValidateRange(1, 1000)]
+    [int]$Cycles = 3,
+    [ValidateRange(1, 100)]
+    [int]$MaxCycles = 10,
+    [string]$GovernedLoopJson = "",
+    [string]$ApprovalSosHardGateJson = "",
     [bool]$FailOnDirtyWorktree = $true,
     [ValidateRange(1, 300)]
-    [int]$TimeoutSeconds = 30
+    [int]$TimeoutSeconds = 120
 )
 
 Set-StrictMode -Version Latest
@@ -77,29 +83,6 @@ function Get-PathFingerprint {
     }
 }
 
-function Get-EnvFingerprint {
-    param([string]$Root)
-    $files = @(Get-ChildItem -LiteralPath $Root -File -Force -Recurse -Filter ".env*" -ErrorAction SilentlyContinue)
-    $items = @($files | ForEach-Object {
-        [ordered]@{
-            relative_path = ConvertTo-RelativePath -Root $Root -Path $_.FullName
-            length = [int64]$_.Length
-            last_write_utc_ticks = [int64]$_.LastWriteTimeUtc.Ticks
-        }
-    })
-    $totalBytes = 0
-    foreach ($file in $files) {
-        $totalBytes += [int64]$file.Length
-    }
-    return [ordered]@{
-        path = ".env*"
-        exists = ($files.Count -gt 0)
-        file_count = $files.Count
-        total_bytes = [int64]$totalBytes
-        metadata_hash = New-MetadataHash -Items $items
-    }
-}
-
 function Get-NoWriteState {
     param([string]$Root)
     Push-Location -LiteralPath $Root
@@ -130,21 +113,25 @@ function Get-NoWriteState {
         "Reports",
         "telemetry",
         "automation/orchestration/work_packets",
-        "control/relay_bus/messages",
-        "control/review_bridge/codex_reports",
+        "automation/orchestration/packet_generator",
         "automation/orchestration/queue",
         "automation/orchestration/command_queue",
         "automation/orchestration/locks",
         "automation/orchestration/approval_inbox",
         "automation/orchestration/runtime",
         "automation/orchestration/workers/inbox",
-        "control"
+        "automation/orchestration/relay_bus",
+        "control/relay_bus/messages",
+        "control/review_bridge/codex_reports",
+        "control",
+        "secrets",
+        ".env",
+        "AIOS_BACKUP_IN_PROGRESS.lock"
     )
     $fingerprints = [ordered]@{}
     foreach ($relative in $forbiddenRoots) {
         $fingerprints[$relative] = Get-PathFingerprint -Root $Root -RelativePath $relative
     }
-    $fingerprints[".env*"] = Get-EnvFingerprint -Root $Root
 
     return [ordered]@{
         branch = $branch
@@ -172,36 +159,21 @@ function Get-ChangedPathFromStatusLine {
     return $path.Replace("\", "/")
 }
 
-function Test-DayNightReadinessDirtyState {
+function Test-SoakValidationDirtyState {
     param([object]$State)
     $allowedExact = @(
-        "automation/orchestration/supervisor/Get-AiOsDayNightReadiness.DRY_RUN.ps1",
-        "automation/orchestration/supervisor/aios_day_night_readiness.py",
-        "schemas/aios/orchestration/AIOS_DAY_NIGHT_READINESS_RESULT.v1.schema.json",
-        "schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.json",
-        "tests/orchestration/test_aios_day_night_readiness.py",
-        "tests/orchestration/test_aios_day_night_readiness_runner.py",
-        "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
-        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1",
-        "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1",
-        "automation/orchestration/self_development/Invoke-AiOsGovernedSelfDevelopmentLoop.DRY_RUN.ps1",
-        "automation/orchestration/self_development/aios_governed_self_development_loop.py",
-        "schemas/aios/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1.schema.json",
-        "tests/orchestration/test_aios_governed_self_development_loop.py",
-        "tests/orchestration/test_aios_governed_self_development_loop_runner.py",
-        "tests/orchestration/test_aios_self_audit_runner.py",
-        "tests/orchestration/test_aios_self_development_packet_router_runner.py",
-        "tests/orchestration/test_aios_validator_evidence_router_runner.py",
-        "automation/orchestration/operator_control/Test-AiOsApprovalSosHardGate.DRY_RUN.ps1",
-        "automation/orchestration/operator_control/aios_approval_sos_hard_gate.py",
-        "schemas/aios/orchestration/AIOS_APPROVAL_SOS_HARD_GATE_RESULT.v1.schema.json",
-        "tests/orchestration/test_aios_approval_sos_hard_gate.py",
-        "tests/orchestration/test_aios_approval_sos_hard_gate_runner.py",
         "automation/orchestration/self_development/Test-AiOsGovernedSelfDevelopmentSoak.DRY_RUN.ps1",
         "automation/orchestration/self_development/aios_governed_self_development_soak.py",
         "schemas/aios/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_SOAK_RESULT.v1.schema.json",
+        "schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.json",
         "tests/orchestration/test_aios_governed_self_development_soak.py",
-        "tests/orchestration/test_aios_governed_self_development_soak_runner.py"
+        "tests/orchestration/test_aios_governed_self_development_soak_runner.py",
+        "automation/orchestration/operator_control/Test-AiOsApprovalSosHardGate.DRY_RUN.ps1",
+        "automation/orchestration/self_development/Invoke-AiOsGovernedSelfDevelopmentLoop.DRY_RUN.ps1",
+        "automation/orchestration/supervisor/Get-AiOsDayNightReadiness.DRY_RUN.ps1",
+        "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1",
+        "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
+        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1"
     )
     $changedPaths = @($State.changed_entries | ForEach-Object { Get-ChangedPathFromStatusLine -Line ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     if ($changedPaths.Count -eq 0) {
@@ -235,6 +207,33 @@ function Compare-NoWriteState {
         after_changed_entries = @($After.changed_entries)
         before_untracked_files = @($Before.untracked_files)
         after_untracked_files = @($After.untracked_files)
+    }
+}
+
+function ConvertFrom-JsonEvidenceParameter {
+    param([string]$Name, [string]$JsonText)
+    if ([string]::IsNullOrWhiteSpace($JsonText)) {
+        return [ordered]@{
+            supplied = $false
+            data = $null
+        }
+    }
+    $trimmed = $JsonText.Trim()
+    if (-not $trimmed.StartsWith("{")) {
+        throw "$Name must be a JSON object string, not a file path or command."
+    }
+    try {
+        $data = $trimmed | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
+        throw "$Name must be valid JSON evidence."
+    }
+    if ($null -eq $data -or $data -is [System.Array]) {
+        throw "$Name must decode to one JSON object."
+    }
+    return [ordered]@{
+        supplied = $true
+        data = $data
     }
 }
 
@@ -273,8 +272,42 @@ function Read-AuthorityContext {
     }
 }
 
+function New-FailedSurfaceResult {
+    param([string]$Schema, [string]$ErrorText)
+    return [ordered]@{
+        schema = $Schema
+        safety = [ordered]@{
+            status = "BLOCKED"
+            writes_files = $false
+            writes_reports = $false
+            writes_telemetry = $false
+            writes_packet_drafts = $false
+            writes_proposed_packets = $false
+            outputs_packet_body = $false
+            creates_ready_stage = $false
+            mutates_registry = $false
+            mutates_queue = $false
+            mutates_locks = $false
+            mutates_approvals = $false
+            writes_relay = $false
+            starts_runtime = $false
+            launches_workers = $false
+            scheduler_or_daemon = $false
+            protected_action_recommended = $false
+            secrets_or_env_access = $false
+            broker_or_live_trading = $false
+        }
+        stop_conditions = @($ErrorText)
+    }
+}
+
 function Invoke-JsonSurface {
-    param([string]$Root, [string]$RelativeScript, [int]$TimeoutSeconds, [string]$ExpectedBranchValue = $ExpectedBranch)
+    param(
+        [string]$Root,
+        [string]$RelativeScript,
+        [string]$ExpectedBranchValue,
+        [int]$TimeoutSecondsValue
+    )
     $scriptPath = Join-Path $Root $RelativeScript
     if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
         return [ordered]@{
@@ -284,31 +317,32 @@ function Invoke-JsonSurface {
             data = $null
         }
     }
-    $psi = [System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName = "powershell"
     $safePath = $scriptPath -replace '"', '\"'
     $safeRoot = $Root -replace '"', '\"'
     $safeExpectedBranch = $ExpectedBranchValue -replace '"', '\"'
-    $branchAwareScripts = @(
-        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1",
-        "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
-        "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1"
-    )
-    $normalizedRelativeScript = $RelativeScript -replace "\\", "/"
-    if ($branchAwareScripts -contains $normalizedRelativeScript) {
-        $psi.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -RepoRoot "{1}" -ExpectedBranch "{2}" -OutputJson -TimeoutSeconds {3}' -f $safePath, $safeRoot, $safeExpectedBranch, $TimeoutSeconds
-    } else {
-        $psi.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -OutputJson' -f $safePath
-    }
+    $arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -RepoRoot "{1}" -ExpectedBranch "{2}" -OutputJson -TimeoutSeconds {3}' -f $safePath, $safeRoot, $safeExpectedBranch, $TimeoutSecondsValue
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = "powershell"
+    $psi.Arguments = $arguments
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError = $true
     $psi.UseShellExecute = $false
     $process = [System.Diagnostics.Process]::new()
     $process.StartInfo = $psi
-    [void]$process.Start()
+    try {
+        [void]$process.Start()
+    }
+    catch {
+        return [ordered]@{
+            available = $true
+            ok = $false
+            error = "surface_start_failed"
+            data = $null
+        }
+    }
     $stdoutTask = $process.StandardOutput.ReadToEndAsync()
     $stderrTask = $process.StandardError.ReadToEndAsync()
-    if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+    if (-not $process.WaitForExit($TimeoutSecondsValue * 1000)) {
         $process.Kill()
         return [ordered]@{
             available = $true
@@ -319,6 +353,7 @@ function Invoke-JsonSurface {
     }
     $rawText = $stdoutTask.Result.Trim()
     if ($process.ExitCode -ne 0) {
+        $null = $stderrTask.Result
         return [ordered]@{
             available = $true
             ok = $false
@@ -345,12 +380,12 @@ function Invoke-JsonSurface {
     }
 }
 
-function Invoke-PythonReadinessLogic {
-    param([string]$LogicPath, [object]$Payload, [int]$TimeoutSeconds)
+function Invoke-PythonSoakLogic {
+    param([string]$LogicPath, [object]$Payload, [int]$TimeoutSecondsValue)
     if (-not (Test-Path -LiteralPath $LogicPath -PathType Leaf)) {
-        throw "Python day/night readiness logic module missing: $LogicPath"
+        throw "Python governed self-development soak logic module missing: $LogicPath"
     }
-    $payloadJson = $Payload | ConvertTo-Json -Depth 70
+    $payloadJson = $Payload | ConvertTo-Json -Depth 90
     $psi = [System.Diagnostics.ProcessStartInfo]::new()
     $psi.FileName = "python"
     $psi.Arguments = ('"{0}"' -f ($LogicPath -replace '"', '\"'))
@@ -365,57 +400,50 @@ function Invoke-PythonReadinessLogic {
     $stderrTask = $process.StandardError.ReadToEndAsync()
     $process.StandardInput.Write($payloadJson)
     $process.StandardInput.Close()
-    if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+    if (-not $process.WaitForExit($TimeoutSecondsValue * 1000)) {
         $process.Kill()
-        throw "Python day/night readiness logic timed out."
+        throw "Python governed self-development soak logic timed out."
     }
     $rawText = $stdoutTask.Result.Trim()
     $errorText = $stderrTask.Result.Trim()
     if ([string]::IsNullOrWhiteSpace($rawText)) {
-        throw "Python day/night readiness logic returned no JSON. $errorText"
+        throw "Python governed self-development soak logic returned no JSON. $errorText"
     }
     return $rawText | ConvertFrom-Json -ErrorAction Stop
 }
 
 function Write-ConsoleReport {
     param([object]$Result)
-    Write-Host "AIOS Day Night Readiness"
+    Write-Host "AIOS Governed Self-Development Soak"
     Write-Host "Mode: $($Result.mode)"
     Write-Host "Schema: $($Result.schema)"
     Write-Host ""
     Write-Host "CURRENT STATE"
-    Write-Host "branch: $($Result.repo_state.branch)"
-    Write-Host "dirty: $($Result.repo_state.dirty)"
-    Write-Host "expected_branch: $($Result.repo_state.expected_branch)"
-    Write-Host "branch_matches_expected: $($Result.repo_state.branch_matches_expected)"
+    Write-Host "cycles_requested: $($Result.cycles_requested)"
+    Write-Host "cycles_completed: $($Result.cycles_completed)"
     Write-Host ""
-    Write-Host "READINESS"
-    Write-Host "classification: $($Result.readiness.classification)"
-    Write-Host "recommendation_allowed: $($Result.readiness.recommendation_allowed)"
-    Write-Host "execution_allowed: $($Result.readiness.execution_allowed)"
+    Write-Host "SOAK SIMULATION"
+    Write-Host "aggregate_status: $($Result.aggregate_status)"
+    Write-Host "governed_loop_pass: $($Result.safety.governed_loop_pass)"
+    Write-Host "approval_sos_hard_gate_pass: $($Result.safety.approval_sos_hard_gate_pass)"
     Write-Host ""
-    Write-Host "OPERATOR MODES"
-    Write-Host "allowed: $(@($Result.allowed_operator_modes) -join ', ')"
-    Write-Host "blocked: $(@($Result.blocked_operator_modes) -join ', ')"
-    Write-Host ""
-    Write-Host "EVIDENCE SOURCES"
-    foreach ($source in @($Result.evidence_sources)) {
-        Write-Host "- $($source.name): $($source.status)"
+    Write-Host "CYCLE RESULTS"
+    foreach ($cycle in @($Result.cycle_results)) {
+        Write-Host "- cycle $($cycle.cycle_index): $($cycle.status); governed_loop=$($cycle.governed_loop_status); hard_gate=$($cycle.approval_sos_hard_gate_status)"
     }
     Write-Host ""
-    Write-Host "VALIDATOR STATUS"
-    Write-Host "status: $($Result.validator_status.status)"
-    Write-Host "unsafe_flags: $(@($Result.validator_status.unsafe_flags) -join ', ')"
+    Write-Host "FORBIDDEN SURFACE DELTAS"
+    if (@($Result.forbidden_surface_deltas).Count -eq 0) {
+        Write-Host "- none"
+    }
+    else {
+        foreach ($delta in @($Result.forbidden_surface_deltas)) {
+            Write-Host "- cycle $($delta.cycle_index): $($delta.surface) $($delta.delta)"
+        }
+    }
     Write-Host ""
-    Write-Host "APPROVAL STATE"
-    Write-Host "status: $($Result.approval_state.status)"
-    Write-Host "approval_required: $($Result.approval_state.approval_required)"
-    Write-Host ""
-    Write-Host "RUNTIME WORKER STATE"
-    Write-Host "status: $($Result.runtime_worker_state.status)"
-    Write-Host ""
-    Write-Host "BACKUP INTERFERENCE"
-    Write-Host "status: $($Result.backup_interference_state.status)"
+    Write-Host "APPROVAL REQUIRED"
+    Write-Host "human_owner_required: $($Result.approval_required.human_owner_required)"
     Write-Host ""
     Write-Host "NO-WRITE PROOF"
     Write-Host "changed: $($Result.no_write_proof.changed)"
@@ -435,45 +463,43 @@ function Write-ConsoleReport {
     Write-Host "NEXT SAFE ACTION"
     Write-Host $Result.next_safe_action
     Write-Host ""
-    Write-Host "STATUS: $($Result.safety.status)"
+    Write-Host "STATUS: $($Result.aggregate_status)"
 }
 
 $resolvedRepoRoot = Get-RepoRoot -PathHint $RepoRoot
-$logicPath = Join-Path $PSScriptRoot "aios_day_night_readiness.py"
+$logicPath = Join-Path $PSScriptRoot "aios_governed_self_development_soak.py"
 $generatedUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 $authorityContext = Read-AuthorityContext -Root $resolvedRepoRoot
 $beforeState = Get-NoWriteState -Root $resolvedRepoRoot
-$dirtyAllowedForValidation = Test-DayNightReadinessDirtyState -State $beforeState
-$skipSurfaceCalls = (-not $authorityContext.all_required_loaded) -or ([bool]$beforeState.dirty -and $FailOnDirtyWorktree -and (-not $dirtyAllowedForValidation))
+$dirtyAllowedForValidation = Test-SoakValidationDirtyState -State $beforeState
+$skipCycles = (-not $authorityContext.all_required_loaded) -or ([bool]$beforeState.dirty -and $FailOnDirtyWorktree -and (-not $dirtyAllowedForValidation)) -or ($Cycles -gt $MaxCycles)
+$governedLoopEvidence = ConvertFrom-JsonEvidenceParameter -Name "GovernedLoopJson" -JsonText $GovernedLoopJson
+$hardGateEvidence = ConvertFrom-JsonEvidenceParameter -Name "ApprovalSosHardGateJson" -JsonText $ApprovalSosHardGateJson
+$cycleResults = @()
 
-$surfaceResults = [ordered]@{
-    self_audit_result = $null
-    packet_router_result = $null
-    validator_evidence_router_result = $null
-    campaign_no_ready = $null
-    campaign_next_task = $null
-    action_recommendation = $null
-    approval_inbox_summary = $null
-    lock_status = $null
-    worker_inbox = $null
-}
-
-if (-not $skipSurfaceCalls) {
-    $surfaces = [ordered]@{
-        self_audit_result = "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1"
-        packet_router_result = "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1"
-        validator_evidence_router_result = "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1"
-        campaign_no_ready = "automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1"
-        campaign_next_task = "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
-        action_recommendation = "automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1"
-        approval_inbox_summary = "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1"
-        lock_status = "automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1"
-        worker_inbox = "automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1"
-    }
-    foreach ($entry in $surfaces.GetEnumerator()) {
-        $surfaceResult = Invoke-JsonSurface -Root $resolvedRepoRoot -RelativeScript $entry.Value -TimeoutSeconds $TimeoutSeconds
-        if ($surfaceResult.ok) {
-            $surfaceResults[$entry.Key] = $surfaceResult.data
+if (-not $skipCycles) {
+    for ($i = 1; $i -le $Cycles; $i++) {
+        $cycleBeforeState = Get-NoWriteState -Root $resolvedRepoRoot
+        if ([bool]$governedLoopEvidence.supplied) {
+            $governedLoopData = $governedLoopEvidence.data
+        }
+        else {
+            $surface = Invoke-JsonSurface -Root $resolvedRepoRoot -RelativeScript "automation/orchestration/self_development/Invoke-AiOsGovernedSelfDevelopmentLoop.DRY_RUN.ps1" -ExpectedBranchValue $ExpectedBranch -TimeoutSecondsValue $TimeoutSeconds
+            $governedLoopData = if ($surface.ok) { $surface.data } else { New-FailedSurfaceResult -Schema "AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1" -ErrorText $surface.error }
+        }
+        if ([bool]$hardGateEvidence.supplied) {
+            $hardGateData = $hardGateEvidence.data
+        }
+        else {
+            $surface = Invoke-JsonSurface -Root $resolvedRepoRoot -RelativeScript "automation/orchestration/operator_control/Test-AiOsApprovalSosHardGate.DRY_RUN.ps1" -ExpectedBranchValue $ExpectedBranch -TimeoutSecondsValue $TimeoutSeconds
+            $hardGateData = if ($surface.ok) { $surface.data } else { New-FailedSurfaceResult -Schema "AIOS_APPROVAL_SOS_HARD_GATE_RESULT.v1" -ErrorText $surface.error }
+        }
+        $cycleAfterState = Get-NoWriteState -Root $resolvedRepoRoot
+        $cycleResults += [ordered]@{
+            cycle_index = $i
+            governed_loop_result = $governedLoopData
+            approval_sos_hard_gate_result = $hardGateData
+            no_write_proof = Compare-NoWriteState -Before $cycleBeforeState -After $cycleAfterState
         }
     }
 }
@@ -487,7 +513,7 @@ $repoState = [ordered]@{
     expected_branch = $ExpectedBranch
     branch_matches_expected = ([string]$beforeState.branch -eq [string]$ExpectedBranch)
     dirty = [bool]$beforeState.dirty
-    dirty_allowed_for_day_night_readiness_validation = [bool]$dirtyAllowedForValidation
+    dirty_allowed_for_soak_validation = [bool]$dirtyAllowedForValidation
     fail_on_dirty_worktree = [bool]$FailOnDirtyWorktree
     status_lines = @($beforeState.status_lines)
     diff_name_only = @($beforeState.diff_name_only)
@@ -496,42 +522,24 @@ $repoState = [ordered]@{
 
 $payload = [ordered]@{
     generated_utc = $generatedUtc
+    cycles_requested = $Cycles
+    max_cycles = $MaxCycles
     repo_state = $repoState
     authority_context = $authorityContext
-    self_audit_result = $surfaceResults.self_audit_result
-    packet_router_result = $surfaceResults.packet_router_result
-    validator_evidence_router_result = $surfaceResults.validator_evidence_router_result
-    campaign_no_ready = $surfaceResults.campaign_no_ready
-    campaign_next_task = $surfaceResults.campaign_next_task
-    action_recommendation = $surfaceResults.action_recommendation
-    approval_inbox_summary = $surfaceResults.approval_inbox_summary
-    lock_status = $surfaceResults.lock_status
-    worker_inbox = $surfaceResults.worker_inbox
-    runtime_worker_state = [ordered]@{
-        runtime_risk_detected = $false
-        worker_launch_detected = $false
-        scheduler_or_daemon_detected = $false
-        runtime_state_source = "read_only_evidence"
-    }
-    backup_interference_state = [ordered]@{
-        interference_detected = $false
-        repo_local_backup_lock_present = $false
-        backup_in_progress = $false
-        snapshot_restore_candidate_present = $false
-    }
+    cycle_results = $cycleResults
     no_write_proof = $noWriteProof
 }
 
-$result = Invoke-PythonReadinessLogic -LogicPath $logicPath -Payload $payload -TimeoutSeconds $TimeoutSeconds
+$result = Invoke-PythonSoakLogic -LogicPath $logicPath -Payload $payload -TimeoutSecondsValue $TimeoutSeconds
 
 if ($OutputJson) {
-    $result | ConvertTo-Json -Depth 70
+    $result | ConvertTo-Json -Depth 90
 }
 else {
     Write-ConsoleReport -Result $result
 }
 
-if ([string]$result.safety.status -eq "PASS") {
+if ([string]$result.aggregate_status -eq "PASS") {
     exit 0
 }
 exit 1

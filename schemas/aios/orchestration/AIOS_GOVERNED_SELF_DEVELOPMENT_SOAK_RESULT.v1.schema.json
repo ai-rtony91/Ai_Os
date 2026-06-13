@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_SOAK_RESULT.v1.schema.json",
+  "title": "AIOS Governed Self Development Soak Result v1",
+  "description": "Console-only read-only governed autonomy soak simulation result. This schema grants no APPLY, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "cycles_requested",
+    "cycles_completed",
+    "cycle_results",
+    "aggregate_status",
+    "forbidden_surface_deltas",
+    "recommended_next_packet",
+    "approval_required",
+    "safety",
+    "no_write_proof",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_GOVERNED_SELF_DEVELOPMENT_SOAK_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "cycles_requested": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "cycles_completed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cycle_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "aggregate_status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "BLOCKED",
+        "BLOCKED_BY_WRITE_SURFACE_RISK"
+      ]
+    },
+    "forbidden_surface_deltas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "recommended_next_packet": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "approval_required": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "console_only",
+        "writes_files",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_packet_drafts",
+        "writes_proposed_packets",
+        "outputs_packet_body",
+        "creates_ready_stage",
+        "mutates_registry",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approvals",
+        "writes_relay",
+        "starts_runtime",
+        "launches_workers",
+        "scheduler_or_daemon",
+        "backup_repo_local_lock",
+        "protected_action_recommended",
+        "secrets_or_env_access",
+        "broker_or_live_trading",
+        "governed_loop_pass",
+        "approval_sos_hard_gate_pass"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "console_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "writes_files": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_packet_drafts": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_proposed_packets": {
+          "type": "boolean",
+          "const": false
+        },
+        "outputs_packet_body": {
+          "type": "boolean",
+          "const": false
+        },
+        "creates_ready_stage": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approvals": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_relay": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "scheduler_or_daemon": {
+          "type": "boolean",
+          "const": false
+        },
+        "backup_repo_local_lock": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_action_recommended": {
+          "type": "boolean",
+          "const": false
+        },
+        "secrets_or_env_access": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        },
+        "governed_loop_pass": {
+          "type": "boolean"
+        },
+        "approval_sos_hard_gate_pass": {
+          "type": "boolean"
+        }
+      }
+    },
+    "no_write_proof": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}
