@@ -31,6 +31,27 @@ function Parse-RelayJson {
     }
 }
 
+function Get-ActorRelayBusState {
+    param([string]$RepoRoot)
+
+    $relayBusStateScript = Join-Path $RepoRoot "automation/orchestration/relay_bus/Get-AiOsRelayBusState.DRY_RUN.ps1"
+    if (-not (Test-Path -LiteralPath $relayBusStateScript -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $rawOutput = powershell -NoProfile -ExecutionPolicy Bypass -File $relayBusStateScript -OutputJson 2>$null
+        $rawText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($rawText)) {
+            return $null
+        }
+        return $rawText | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
+        return $null
+    }
+}
+
 $repoRoot = (Get-Location).Path
 $state = [ordered]@{
     relay_root = Join-Path $repoRoot "control/review_bridge"
@@ -39,6 +60,13 @@ $state = [ordered]@{
     pasteback_dir = Join-Path $repoRoot "control/review_bridge/pasteback"
     archive_dir = Join-Path $repoRoot "control/review_bridge/archive"
 }
+
+$actorRelayState = Get-ActorRelayBusState -RepoRoot $repoRoot
+$actorRelayBusStatus = if ($actorRelayState) { [string]$actorRelayState.relay_status } else { "EMPTY" }
+$actorRelayLatestMessagePath = if ($actorRelayState) { [string]$actorRelayState.latest_message_path } else { "" }
+$actorRelayLatestActor = if ($actorRelayState) { [string]$actorRelayState.latest_actor } else { "" }
+$actorRelayLatestTargetActor = if ($actorRelayState) { [string]$actorRelayState.latest_target_actor } else { "" }
+$actorRelayNextAction = if ($actorRelayState) { [string]$actorRelayState.exact_next_action } else { "" }
 
 $latestReportFile = Get-RelayLatestFile -Directory $state.codex_reports_dir
 $latestPromptFile = Get-RelayLatestFile -Directory $state.chatgpt_prompts_dir -Pattern "*.txt"
@@ -114,6 +142,11 @@ $output = [ordered]@{
     schema = "AIOS_RELAY_OPERATOR_STATE.v1"
     mode = "DRY_RUN_READ_ONLY"
     relay_status = $relayStatus
+    actor_relay_bus_status = $actorRelayBusStatus
+    actor_relay_latest_message_path = $actorRelayLatestMessagePath
+    actor_relay_latest_actor = $actorRelayLatestActor
+    actor_relay_latest_target_actor = $actorRelayLatestTargetActor
+    actor_relay_next_action = $actorRelayNextAction
     latest_codex_report_path = if ($latestReportFile) { $latestReportFile.FullName } else { "" }
     latest_chatgpt_prompt_path = if ($latestPromptFile) { $latestPromptFile.FullName } else { "" }
     latest_pasteback_path = if ($latestPastebackFile) { $latestPastebackFile.FullName } else { "" }
@@ -127,6 +160,7 @@ $output = [ordered]@{
     related_existing_notes = @(
         "docs/AI_OS/autonomy/AIOS_CODEX_CHATGPT_POWERSHELL_RELAY_V1.md",
         "docs/AI_OS/autonomy/AIOS_CHATGPT_REVIEWED_PR_LIFECYCLE_BRIDGE_V1.md",
+        "docs/AI_OS/autonomy/AIOS_ACTOR_RELAY_BUS_V1.md",
         "docs/AI_OS/autonomy/AIOS_RELAY_OPERATOR_MODE_V1.md"
     )
     related_existing_scripts = @(
