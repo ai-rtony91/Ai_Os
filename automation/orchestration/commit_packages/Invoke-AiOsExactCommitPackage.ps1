@@ -1,6 +1,8 @@
-[CmdletBinding()]
+[CmdletBinding(PositionalBinding = $false)]
 param(
     [string[]]$Files = @(),
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$AdditionalFiles = @(),
     [string]$Message = "",
     [switch]$AllowOtherDirtyFiles,
     [switch]$Help
@@ -13,7 +15,14 @@ function Show-Help {
     Write-Output "AI_OS exact-file commit helper"
     Write-Output ""
     Write-Output "Usage:"
-    Write-Output '  powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/Invoke-AiOsExactCommitPackage.ps1 -Files @("path/to/file1","path/to/file2") -Message "commit message"'
+    Write-Output '  $files = @('
+    Write-Output '    "path/to/file1",'
+    Write-Output '    "path/to/file2"'
+    Write-Output '  )'
+    Write-Output '  powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/Invoke-AiOsExactCommitPackage.ps1 -Files $files -Message "commit message"'
+    Write-Output ""
+    Write-Output "Direct multi-file form:"
+    Write-Output '  powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/commit_packages/Invoke-AiOsExactCommitPackage.ps1 -Files "path/to/file1" "path/to/file2" -Message "commit message"'
     Write-Output ""
     Write-Output "Safety:"
     Write-Output "  - stages only exact paths passed with -Files"
@@ -66,6 +75,10 @@ function Test-UnsafePathSpec {
         return "broad staging path"
     }
 
+    if ($trimmed.StartsWith("-")) {
+        return "unexpected parameter-like token"
+    }
+
     if ($trimmed -match "[\*\?\[\]]") {
         return "wildcard pathspec"
     }
@@ -113,7 +126,9 @@ if ($Help) {
     exit 0
 }
 
-if ($Files.Count -eq 0) {
+$effectiveFiles = @($Files) + @($AdditionalFiles)
+
+if ($effectiveFiles.Count -eq 0) {
     throw "No files were provided. Pass exact paths with -Files."
 }
 
@@ -125,7 +140,7 @@ $repoRoot = (Invoke-Git -Arguments @("rev-parse", "--show-toplevel")).Lines[0].T
 Set-Location -LiteralPath $repoRoot
 
 $normalizedFiles = @()
-foreach ($file in $Files) {
+foreach ($file in $effectiveFiles) {
     $unsafeReason = Test-UnsafePathSpec -Path $file
     if (-not [string]::IsNullOrWhiteSpace($unsafeReason)) {
         throw "Refusing unsafe file path '$file': $unsafeReason."
