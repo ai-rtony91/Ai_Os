@@ -95,6 +95,10 @@ $sosAnthonyRequired = $false
 $sosRoutineReviewAllowed = $false
 $sosSafeNextAction = ""
 $sosMatchedCategories = New-Object System.Collections.Generic.List[string]
+$routineReviewContinuationAllowed = $false
+$routineReviewContinuationReason = "No routine relay review continuation context is active."
+$routineReviewNextAction = ""
+$routineReviewResolverCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1 -OutputJson"
 
 if ($actorRelayBusStatus -eq "NEEDS_HUMAN_REVIEW") {
     $sosState = Get-SosEscalationState -RepoRoot $repoRoot
@@ -122,6 +126,22 @@ if ($actorRelayBusStatus -eq "NEEDS_HUMAN_REVIEW") {
                 }
             }
         }
+    }
+
+    if ($sosEscalationStatus -eq "SOS_ESCALATION" -or $sosAnthonyRequired) {
+        $routineReviewContinuationAllowed = $false
+        $routineReviewContinuationReason = "Relay review is SOS escalation or Anthony-required; continuation without Anthony is blocked."
+        $routineReviewNextAction = "STOP: Anthony review required before continuation. No continuation command is recommended."
+    }
+    elseif ($sosEscalationStatus -eq "ROUTINE_REVIEW" -and (-not $sosAnthonyRequired) -and $sosRoutineReviewAllowed) {
+        $routineReviewContinuationAllowed = $true
+        $routineReviewContinuationReason = "Relay review is ROUTINE_REVIEW, Anthony is not required, and SOS policy allows governed review continuation."
+        $routineReviewNextAction = $routineReviewResolverCommand
+    }
+    else {
+        $routineReviewContinuationAllowed = $false
+        $routineReviewContinuationReason = "Relay review does not meet the routine continuation gate."
+        $routineReviewNextAction = "Review SOS classification before continuation."
     }
 }
 
@@ -200,6 +220,13 @@ $actorRelayBusReadyOrEmpty = @("EMPTY", "READY", "NEEDS_HUMAN_REVIEW") -contains
 if ($actorRelayBusReadyOrEmpty -and (-not [string]::IsNullOrWhiteSpace($actorRelayNextAction))) {
     $exactNextAction = $actorRelayNextAction
 }
+if (
+    $actorRelayBusStatus -eq "NEEDS_HUMAN_REVIEW" -and
+    (-not [string]::IsNullOrWhiteSpace($routineReviewNextAction)) -and
+    ($routineReviewContinuationAllowed -or $sosEscalationStatus -eq "SOS_ESCALATION" -or $sosAnthonyRequired)
+) {
+    $exactNextAction = $routineReviewNextAction
+}
 
 $output = [ordered]@{
     schema = "AIOS_RELAY_OPERATOR_STATE.v1"
@@ -215,6 +242,9 @@ $output = [ordered]@{
     sos_routine_review_allowed = $sosRoutineReviewAllowed
     sos_safe_next_action = $sosSafeNextAction
     sos_matched_categories = @($sosMatchedCategories)
+    routine_review_continuation_allowed = $routineReviewContinuationAllowed
+    routine_review_continuation_reason = $routineReviewContinuationReason
+    routine_review_next_action = $routineReviewNextAction
     latest_codex_report_path = if ($latestReportFile) { $latestReportFile.FullName } else { "" }
     latest_chatgpt_prompt_path = if ($latestPromptFile) { $latestPromptFile.FullName } else { "" }
     latest_pasteback_path = if ($latestPastebackFile) { $latestPastebackFile.FullName } else { "" }
@@ -225,6 +255,7 @@ $output = [ordered]@{
     pasteback_ready = $pastebackSafe
     pasteback_safety_status = $pastebackStatus
     exact_next_action = $exactNextAction
+    next_safe_action = $exactNextAction
     related_existing_notes = @(
         "docs/AI_OS/autonomy/AIOS_CODEX_CHATGPT_POWERSHELL_RELAY_V1.md",
         "docs/AI_OS/autonomy/AIOS_CHATGPT_REVIEWED_PR_LIFECYCLE_BRIDGE_V1.md",
