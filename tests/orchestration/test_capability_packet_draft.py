@@ -65,6 +65,14 @@ def _run_validator(packet_text: str) -> dict:
     return json.loads(raw.strip())
 
 
+def _get_field(packet_text: str, field_name: str) -> str:
+    lines = packet_text.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() == f"{field_name}:" and index + 1 < len(lines):
+            return lines[index + 1].strip()
+    raise AssertionError(f"Missing field '{field_name}' in generated packet.")
+
+
 def _packet_headers(packet: str) -> None:
     for required in (
         "CODEX-ONLY PROMPT",
@@ -136,6 +144,27 @@ def test_broker_api_is_blocked_high_risk_intent() -> None:
     assert result["execution_allowed"] is False
     assert "No live integration" in result["stop_point"]
     assert "live_integration" in result["exact_next_action"].lower() or "risk review" in result["exact_next_action"].lower()
+
+
+def test_capability_draft_preserves_scalar_fields_with_arrays() -> None:
+    result = _run_capability_draft(
+        CapabilityName="Relay Operator Action Router",
+        CapabilityIntent="draft packet routing study for local code review",
+        SuggestedZone="ORCHESTRATION",
+        SuggestedLane="RELAY_OPERATOR_ACTION_ROUTER",
+    )
+
+    packet = result["generated_packet_text"]
+    assert _get_field(packet, "SUPERVISOR IDENTITY") == "ChatGPT Planning Supervisor under Anthony Human Owner"
+    assert _get_field(packet, "WORKER IDENTITY") == "Codex CLI local executor inside C:\\Dev\\Ai.Os"
+    assert _get_field(packet, "WORKTREE") == str(REPO_ROOT)
+    assert _get_field(packet, "START_BRANCH") == "main"
+    assert _get_field(packet, "MODE") == "DRY_RUN"
+    assert _get_field(packet, "ZONE") == "ORCHESTRATION"
+    assert _get_field(packet, "LANE") == "RELAY_OPERATOR_ACTION_ROUTER"
+
+    validated = _run_validator(packet)
+    assert validated["packet_valid"] is True
 
 
 def test_unknown_intent_uses_dry_run_scaffold() -> None:

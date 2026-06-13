@@ -42,6 +42,79 @@ function Format-List {
     return ($items -join "`r`n")
 }
 
+function Ensure-TextValue {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Label,
+        [object]$Value,
+        [string]$Default = ""
+    )
+
+    if ($null -eq $Value) {
+        return $Default
+    }
+
+    if ($Value -is [System.Array]) {
+        return $Default
+    }
+    if ($Value -is [System.Collections.IEnumerable]) {
+        if (-not ($Value -is [string])) {
+            return $Default
+        }
+    }
+
+    $text = [string]$Value
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        return $Default
+    }
+
+    return $text
+}
+
+function Ensure-TextList {
+    param(
+        [object]$Values,
+        [string[]]$Fallback = @()
+    )
+
+    $items = @()
+    if ($null -eq $Values) {
+        return @($Fallback)
+    }
+
+    if ($Values -is [string]) {
+        if (-not [string]::IsNullOrWhiteSpace($Values)) {
+            return @([string]$Values)
+        }
+        return @($Fallback)
+    }
+
+    if ($Values -is [System.Collections.IEnumerable]) {
+        foreach ($value in @($Values)) {
+            if ($null -eq $value) {
+                continue
+            }
+            if ($value -is [System.Array]) {
+                continue
+            }
+            if ($value -is [System.Collections.IEnumerable]) {
+                if (-not ($value -is [string])) {
+                    continue
+                }
+            }
+            $normalized = [string]$value
+            if (-not [string]::IsNullOrWhiteSpace($normalized)) {
+                $items += $normalized
+            }
+        }
+        if ($items.Count -gt 0) {
+            return @($items)
+        }
+    }
+
+    return @($Fallback)
+}
+
 function Invoke-ContinuationPlan {
     param([string]$ScriptPath)
     if ([string]::IsNullOrWhiteSpace($ScriptPath) -or -not (Test-Path -LiteralPath $ScriptPath -PathType Leaf)) {
@@ -112,24 +185,69 @@ if ($FromContinuationPlan) {
     $continuation = Invoke-ContinuationPlan -ScriptPath $planScript
 }
 
-$resolvedPacketId = if ([string]::IsNullOrWhiteSpace($PacketId) -and $continuation -and ($continuation.recommended_next_packet_id)) { [string]$continuation.recommended_next_packet_id } else { $PacketId }
-$resolvedZone = if ([string]::IsNullOrWhiteSpace($Zone) -and $continuation -and ($continuation.domain)) { [string]$continuation.domain } else { $Zone }
-$resolvedLane = if ([string]::IsNullOrWhiteSpace($Lane) -and $continuation -and ($continuation.recommended_lane)) { [string]$continuation.recommended_lane } else { $Lane }
-$resolvedMission = if ([string]::IsNullOrWhiteSpace($Mission) -and $continuation -and ($continuation.recommended_next_packet_title)) { "build $($continuation.recommended_next_packet_title)" } else { $Mission }
-$resolvedApprovalAuthority = if ([string]::IsNullOrWhiteSpace($ApprovalAuthority)) { "Anthony approves this scoped packet. No protected action approval beyond this scope is granted." } else { $ApprovalAuthority }
-$resolvedReadFirst = if ($ReadFirst.Count -gt 0) { $ReadFirst } else { $fallbackAllowed }
-$resolvedValidators = if ($Validators.Count -gt 0) { $Validators } else { if ($continuation -and $continuation.required_validators) { @($continuation.required_validators) } else { $fallbackValidators } }
-$resolvedAllowed = if ($AllowedMutationFiles.Count -gt 0) { $AllowedMutationFiles } else { if ($continuation -and $continuation.recommended_files) { @($continuation.recommended_files) } else { @() } }
-$resolvedForbidden = if ($ForbiddenPaths.Count -gt 0) { $ForbiddenPaths } else { $fallbackForbidden }
-$resolvedStopPoint = if ([string]::IsNullOrWhiteSpace($StopPoint) -and $continuation -and ($continuation.exact_next_safe_action)) { $continuation.exact_next_safe_action } else { $StopPoint }
-$resolvedMode = $Mode
+$resolvedPacketId = Ensure-TextValue -Label "PACKET ID" -Value $PacketId -Default ""
+if ([string]::IsNullOrWhiteSpace($resolvedPacketId) -and $continuation -and ($continuation.recommended_next_packet_id)) {
+    $resolvedPacketId = [string]$continuation.recommended_next_packet_id
+}
+
+$resolvedZone = Ensure-TextValue -Label "ZONE" -Value $Zone -Default ""
+if ([string]::IsNullOrWhiteSpace($resolvedZone) -and $continuation -and ($continuation.domain)) {
+    $resolvedZone = [string]$continuation.domain
+}
+
+$resolvedLane = Ensure-TextValue -Label "LANE" -Value $Lane -Default ""
+if ([string]::IsNullOrWhiteSpace($resolvedLane) -and $continuation -and ($continuation.recommended_lane)) {
+    $resolvedLane = [string]$continuation.recommended_lane
+}
+
+$resolvedMission = Ensure-TextValue -Label "MISSION" -Value $Mission -Default ""
+if ([string]::IsNullOrWhiteSpace($resolvedMission) -and $continuation -and ($continuation.recommended_next_packet_title)) {
+    $resolvedMission = "build $($continuation.recommended_next_packet_title)"
+}
+
+$resolvedWorktree = Ensure-TextValue -Label "WORKTREE" -Value $Worktree -Default "C:\Dev\Ai.Os"
+$resolvedStartBranch = Ensure-TextValue -Label "START_BRANCH" -Value $StartBranch -Default "main"
+$resolvedApprovalAuthority = Ensure-TextValue -Label "APPROVAL AUTHORITY" -Value $ApprovalAuthority -Default "Anthony approves this scoped packet. No protected action approval beyond this scope is granted."
+$resolvedSupervisorIdentity = Ensure-TextValue -Label "SUPERVISOR IDENTITY" -Value $SupervisorIdentity -Default "ChatGPT Planning Supervisor under Anthony Human Owner"
+$resolvedWorkerIdentity = Ensure-TextValue -Label "WORKER IDENTITY" -Value $WorkerIdentity -Default "Codex CLI local executor inside C:\Dev\Ai.Os"
+$resolvedMode = Ensure-TextValue -Label "MODE" -Value $Mode -Default "DRY_RUN"
+$resolvedStopPoint = Ensure-TextValue -Label "STOP POINT" -Value $StopPoint -Default ""
+$resolvedBranch = Ensure-TextValue -Label "BRANCH" -Value $Branch -Default ""
+
+$resolvedReadFirst = Ensure-TextList -Values $ReadFirst -Fallback @()
+if (@($resolvedReadFirst).Count -eq 0) {
+    $resolvedReadFirst = @($fallbackAllowed)
+}
+
+$resolvedValidators = Ensure-TextList -Values $Validators -Fallback @()
+if (@($resolvedValidators).Count -eq 0) {
+    $resolvedValidators = if ($continuation -and $continuation.required_validators) {
+        @($continuation.required_validators)
+    }
+    else {
+        @($fallbackValidators)
+    }
+}
+
+$resolvedAllowed = Ensure-TextList -Values $AllowedMutationFiles -Fallback @()
+if (@($resolvedAllowed).Count -eq 0) {
+    $resolvedAllowed = if ($continuation -and $continuation.recommended_files) {
+        @($continuation.recommended_files)
+    }
+    else {
+        @()
+    }
+}
+
+$resolvedForbidden = Ensure-TextList -Values $ForbiddenPaths -Fallback $fallbackForbidden
+$resolvedStopPoint = if ([string]::IsNullOrWhiteSpace($resolvedStopPoint) -and $continuation -and ($continuation.exact_next_safe_action)) { [string]$continuation.exact_next_safe_action } else { $resolvedStopPoint }
 
 $missing = @()
 if ([string]::IsNullOrWhiteSpace($resolvedPacketId)) { $missing += "PACKET ID" }
 if ([string]::IsNullOrWhiteSpace($resolvedZone)) { $missing += "ZONE" }
 if ([string]::IsNullOrWhiteSpace($resolvedLane)) { $missing += "LANE" }
 if ([string]::IsNullOrWhiteSpace($resolvedMission)) { $missing += "MISSION" }
-if ([string]::IsNullOrWhiteSpace($Branch)) { $missing += "BRANCH" }
+if ([string]::IsNullOrWhiteSpace($resolvedBranch)) { $missing += "BRANCH" }
 
 $packetValid = $missing.Count -eq 0
 
@@ -148,10 +266,10 @@ IDENTITY MARKER:
 $schemaText
 
 SUPERVISOR IDENTITY:
-$SupervisorIdentity
+$resolvedSupervisorIdentity
 
 WORKER IDENTITY:
-$WorkerIdentity
+$resolvedWorkerIdentity
 
 PACKET ID:
 $resolvedPacketId
@@ -166,13 +284,13 @@ LANE:
 $resolvedLane
 
 WORKTREE:
-$Worktree
+$resolvedWorktree
 
 START_BRANCH:
-$StartBranch
+$resolvedStartBranch
 
 BRANCH:
-$Branch
+$resolvedBranch
 
 APPROVAL AUTHORITY:
 $resolvedApprovalAuthority
@@ -186,14 +304,14 @@ PREFLIGHT
 3. No runtime/state mutation or secrets usage.
 
 REQUIRED PREFLIGHT STATE:
-- path must be $Worktree
-- branch must be $StartBranch before branch creation
+- path must be $resolvedWorktree
+- branch must be $resolvedStartBranch before branch creation
 - repository must be clean
 
 BRANCH PLAN:
-1. Start on $StartBranch.
+1. Start on $resolvedStartBranch.
 2. Verify branch safety and state.
-3. Create/switch to branch $Branch.
+3. Create/switch to branch $resolvedBranch.
 4. Apply only the allowed mutation files.
 5. Validate using VALIDATOR CHAIN.
 6. Commit exact files only.

@@ -74,6 +74,17 @@ The generator does not execute the target packet. It does not:
 All safety controls are explicit in output text, and the validator script checks
 mandatory packet fields before review.
 
+### Array binding stability
+
+Scalar packet fields (`SUPERVISOR IDENTITY`, `WORKER IDENTITY`, `WORKTREE`,
+`START_BRANCH`, `MODE`, `ZONE`, `LANE`, and `APPROVAL AUTHORITY`) are resolved with
+scalar-only handling so list-valued inputs can never be reused as scalar packet
+values.
+
+This prevents list inputs such as `AllowedMutationFiles`, `ForbiddenPaths`,
+`ReadFirst`, and `Validators` from bleeding into scalar packet fields during
+argument binding.
+
 ## Validator behavior
 
 `Test-AiOsCodexPacket.DRY_RUN.ps1` validates the generated text for required
