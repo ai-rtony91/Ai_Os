@@ -53,11 +53,25 @@ No commands are executed.
 - Directory existence/state inference between report, prompt, and pasteback.
 - Exact next action selection across the relay steps.
 - Manually checking whether a saved pasteback passed scan.
+- Actor-bus handoff summary in the relay operator state.
 
 ## What remains blocked
 
 - No automatic execution in `relay` mode.
 - No branch mutation, queue mutation, lock mutation, approval mutation, runtime launch.
+- No direct actor-relay runtime or future actor dispatch from `relay` output; execution remains a human-gated action.
+
+## Actor relay bus fields in operator state
+
+`AIOS_RELAY_OPERATOR_STATE.v1` now includes:
+
+- `actor_relay_bus_status`
+- `actor_relay_latest_message_path`
+- `actor_relay_latest_actor`
+- `actor_relay_latest_target_actor`
+- `actor_relay_next_action`
+
+For details and implementation scope, see [`AIOS_ACTOR_RELAY_BUS_V1.md`](AIOS_ACTOR_RELAY_BUS_V1.md).
 
 ## Future upgrade
 

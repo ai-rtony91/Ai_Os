@@ -1,0 +1,124 @@
+{
+  "actors": [
+    {
+      "actor_id": "chatgpt_supervisor",
+      "display_name": "ChatGPT Supervisor",
+      "actor_type": "chatgpt",
+      "enabled": true,
+      "allowed_message_types": [
+        "chatgpt_review_prompt",
+        "codex_final_report",
+        "reviewed_powershell",
+        "evidence_note",
+        "blocked_needs_owner",
+        "general_handoff"
+      ],
+      "notes": "Active handoff target for human-readable policy and message review orchestration."
+    },
+    {
+      "actor_id": "openai_cli",
+      "display_name": "OpenAI CLI",
+      "actor_type": "tool",
+      "enabled": false,
+      "allowed_message_types": [
+        "openai_cli_report",
+        "evidence_note",
+        "general_handoff"
+      ],
+      "notes": "Future actor placeholder for OpenAI CLI reports. Not connected in V1."
+    },
+    {
+      "actor_id": "codex_cli",
+      "display_name": "Codex CLI",
+      "actor_type": "tool",
+      "enabled": true,
+      "allowed_message_types": [
+        "codex_final_report",
+        "evidence_note",
+        "general_handoff",
+        "blocked_needs_owner"
+      ],
+      "notes": "Active executor actor for generated change packets and relay handoff summaries."
+    },
+    {
+      "actor_id": "powershell_operator",
+      "display_name": "PowerShell Operator",
+      "actor_type": "human-gated-runtime",
+      "enabled": true,
+      "allowed_message_types": [
+        "reviewed_powershell",
+        "powershell_run_result",
+        "evidence_note",
+        "blocked_needs_owner",
+        "general_handoff"
+      ],
+      "notes": "Receives reviewed PowerShell instructions and executes only after Anthony pasteback."
+    },
+    {
+      "actor_id": "aios_relay",
+      "display_name": "AI_OS Relay",
+      "actor_type": "orchestration",
+      "enabled": true,
+      "allowed_message_types": [
+        "evidence_note",
+        "general_handoff",
+        "blocked_needs_owner",
+        "openai_cli_report",
+        "chatgpt_review_prompt",
+        "codex_final_report",
+        "reviewed_powershell",
+        "powershell_run_result"
+      ],
+      "notes": "Internal bus relay coordinator for actor handoff state and message routing."
+    },
+    {
+      "actor_id": "claude_code",
+      "display_name": "Claude Code",
+      "actor_type": "tool",
+      "enabled": false,
+      "allowed_message_types": [
+        "general_handoff",
+        "evidence_note",
+        "blocked_needs_owner"
+      ],
+      "notes": "Future actor placeholder (not integrated)."
+    },
+    {
+      "actor_id": "unreal_engine_5",
+      "display_name": "Unreal Engine 5",
+      "actor_type": "integration",
+      "enabled": false,
+      "allowed_message_types": [
+        "general_handoff",
+        "evidence_note",
+        "blocked_needs_owner"
+      ],
+      "notes": "Future actor placeholder (not integrated)."
+    },
+    {
+      "actor_id": "vscode",
+      "display_name": "VS Code",
+      "actor_type": "tool",
+      "enabled": false,
+      "allowed_message_types": [
+        "general_handoff",
+        "evidence_note",
+        "blocked_needs_owner"
+      ],
+      "notes": "Future actor placeholder (not integrated)."
+    },
+    {
+      "actor_id": "github_actions",
+      "display_name": "GitHub Actions",
+      "actor_type": "ci",
+      "enabled": false,
+      "allowed_message_types": [
+        "general_handoff",
+        "evidence_note",
+        "blocked_needs_owner",
+        "powershell_run_result"
+      ],
+      "notes": "Future actor placeholder (not integrated)."
+    }
+  ]
+}
