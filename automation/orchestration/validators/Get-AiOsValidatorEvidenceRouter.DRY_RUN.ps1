@@ -1,12 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$RepoRoot = "",
-    [string]$ExpectedBranch = "main",
+    [string]$ExpectedBranch = "feature/governed-self-development-closure-v1",
     [switch]$OutputJson,
-    [ValidateSet("Core", "ExtendedReadOnly")]
-    [string]$SurfaceProfile = "Core",
-    [ValidateRange(1, 20)]
-    [int]$MaxCandidatePackets = 5,
     [bool]$FailOnDirtyWorktree = $true,
     [ValidateRange(1, 300)]
     [int]$TimeoutSeconds = 30
@@ -141,6 +137,7 @@ function Get-NoWriteState {
         "automation/orchestration/locks",
         "automation/orchestration/approval_inbox",
         "automation/orchestration/runtime",
+        "automation/orchestration/workers/inbox",
         "control"
     )
     $fingerprints = [ordered]@{}
@@ -175,33 +172,24 @@ function Get-ChangedPathFromStatusLine {
     return $path.Replace("\", "/")
 }
 
-function Test-SelfAuditValidationDirtyState {
+function Test-ValidatorEvidenceRouterDirtyState {
     param([object]$State)
     $allowedExact = @(
-        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1",
-        "automation/orchestration/self_audit/aios_self_audit_loop.py",
-        "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
-        "automation/orchestration/self_audit/aios_self_development_packet_router.py",
-        "schemas/aios/orchestration/AIOS_SELF_AUDIT_LOOP_RESULT.v1.schema.json",
-        "schemas/aios/orchestration/AIOS_SELF_DEVELOPMENT_PACKET_ROUTER_RESULT.v1.schema.json",
         "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1",
         "automation/orchestration/validators/aios_validator_evidence_router.py",
         "schemas/aios/orchestration/AIOS_VALIDATOR_EVIDENCE_ROUTER_RESULT.v1.schema.json",
         "schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.json",
-        "tests/orchestration/test_aios_self_audit_loop.py",
-        "tests/orchestration/test_aios_self_audit_runner.py",
-        "tests/orchestration/test_aios_self_development_packet_router.py",
-        "tests/orchestration/test_aios_self_development_packet_router_runner.py",
         "tests/orchestration/test_aios_validator_evidence_router.py",
-        "tests/orchestration/test_aios_validator_evidence_router_runner.py"
+        "tests/orchestration/test_aios_validator_evidence_router_runner.py",
+        "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
+        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1"
     )
     $changedPaths = @($State.changed_entries | ForEach-Object { Get-ChangedPathFromStatusLine -Line ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     if ($changedPaths.Count -eq 0) {
         return $false
     }
     foreach ($path in $changedPaths) {
-        $isAllowed = $allowedExact -contains $path
-        if (-not $isAllowed) {
+        if (-not ($allowedExact -contains $path)) {
             return $false
         }
     }
@@ -237,7 +225,9 @@ function Read-AuthorityContext {
         "AGENTS.md",
         "README.md",
         "RISK_POLICY.md",
-        "docs/AI_OS/autonomy/AIOS_SELF_AUDIT_LOOP_CONTRACT_V1.md"
+        "docs/AI_OS/autonomy/AIOS_SELF_AUDIT_LOOP_CONTRACT_V1.md",
+        "docs/governance/aios-identity-and-lane-governance.md",
+        "docs/governance/AI_OS_REPO_MEMORY.md"
     )
     $items = @()
     foreach ($relative in $files) {
@@ -265,7 +255,7 @@ function Read-AuthorityContext {
 }
 
 function Invoke-JsonSurface {
-    param([string]$Root, [string]$RelativeScript)
+    param([string]$Root, [string]$RelativeScript, [int]$TimeoutSeconds)
     $scriptPath = Join-Path $Root $RelativeScript
     if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
         return [ordered]@{
@@ -275,14 +265,32 @@ function Invoke-JsonSurface {
             data = $null
         }
     }
-    $raw = & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath -OutputJson 2>&1
-    $exitCode = $LASTEXITCODE
-    $rawText = ($raw | Out-String).Trim()
-    if ($exitCode -ne 0) {
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = "powershell"
+    $psi.Arguments = ('-NoProfile -ExecutionPolicy Bypass -File "{0}" -OutputJson' -f ($scriptPath -replace '"', '\"'))
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.UseShellExecute = $false
+    $process = [System.Diagnostics.Process]::new()
+    $process.StartInfo = $psi
+    [void]$process.Start()
+    $stdoutTask = $process.StandardOutput.ReadToEndAsync()
+    $stderrTask = $process.StandardError.ReadToEndAsync()
+    if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+        $process.Kill()
         return [ordered]@{
             available = $true
             ok = $false
-            error = "surface_exit_$exitCode"
+            error = "surface_timeout"
+            data = $null
+        }
+    }
+    $rawText = $stdoutTask.Result.Trim()
+    if ($process.ExitCode -ne 0) {
+        return [ordered]@{
+            available = $true
+            ok = $false
+            error = "surface_exit_$($process.ExitCode)"
             data = $null
         }
     }
@@ -295,6 +303,7 @@ function Invoke-JsonSurface {
         }
     }
     catch {
+        $null = $stderrTask.Result
         return [ordered]@{
             available = $true
             ok = $false
@@ -304,12 +313,68 @@ function Invoke-JsonSurface {
     }
 }
 
-function Invoke-PythonSelfAuditLogic {
+function Get-SurfaceInventory {
+    param([string]$Root)
+    $paths = @(
+        "automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1",
+        "automation/orchestration/validators/Test-ApplyApprovalGate.DRY_RUN.ps1",
+        "automation/orchestration/validators/Test-ApprovalInboxIntegrity.DRY_RUN.ps1",
+        "automation/orchestration/validators/Test-LockRegistryIntegrity.DRY_RUN.ps1",
+        "automation/orchestration/validators/Test-WorkerClaimCollision.DRY_RUN.ps1",
+        "automation/orchestration/validators/Test-AiOsIdentitySpine.DRY_RUN.ps1",
+        "automation/orchestration/validators/Test-AiOsOrchestrationSchemaContracts.DRY_RUN.ps1",
+        "automation/orchestration/validators/Test-CommitPackageManifest.DRY_RUN.ps1",
+        "automation/orchestration/validators/Invoke-AiOsAuthorityDuplicationGuard.ps1",
+        "automation/orchestration/validators/New-CommitPackagePreview.DRY_RUN.ps1",
+        "automation/orchestration/commit_packages/New-AiOsCommitPackageRecommendation.DRY_RUN.ps1",
+        "automation/orchestration/commit_packages/Test-AiOsCommitPushGate.DRY_RUN.ps1",
+        "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
+        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1",
+        "automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1",
+        "automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1",
+        "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1",
+        "automation/orchestration/approval_inbox/Get-AiOsApprovalInboxSummary.DRY_RUN.ps1",
+        "automation/orchestration/locks/Get-AiOsWorkerLockStatus.DRY_RUN.ps1",
+        "automation/orchestration/workers/Get-AiOsWorkerRegistry.DRY_RUN.ps1",
+        "automation/orchestration/workers/inbox/Get-AiOsWorkerInbox.DRY_RUN.ps1",
+        "automation/orchestration/relay_bus/Get-AiOsRelayBusState.DRY_RUN.ps1",
+        "automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1",
+        "automation/orchestration/runtime/Get-AiOsRuntimeStateBundle.DRY_RUN.ps1",
+        "automation/orchestration/commit_packages/Invoke-AiOsExactCommitPackage.ps1",
+        "automation/orchestration/approval_inbox/New-AiOsPacketApprovalRequest.DRY_RUN.ps1",
+        "automation/orchestration/approval_inbox/Invoke-AiOsApprovalChain.DRY_RUN.ps1",
+        "automation/orchestration/approval_processor/Invoke-AiOsApprovalProcessor.DRY_RUN.ps1",
+        "automation/orchestration/approval_runner/Invoke-AiOsApprovedActionResume.ps1",
+        "automation/orchestration/locks/Claim-AiOsFileLock.DRY_RUN.ps1",
+        "automation/orchestration/locks/Release-AiOsFileLock.DRY_RUN.ps1",
+        "automation/orchestration/relay_bus/New-AiOsRelayMessage.DRY_RUN.ps1",
+        "automation/orchestration/workers/inbox/New-AiOsWorkerReadyPacket.DRY_RUN.ps1",
+        "automation/orchestration/workers/inbox/Add-AiOsWorkerInboxItem.DRY_RUN.ps1",
+        "automation/orchestration/workers/state/Set-AiOsWorkerTaskState.DRY_RUN.ps1",
+        "automation/orchestration/workers/launcher/Open-AiOsWorkerWindow.DRY_RUN.ps1",
+        "automation/orchestration/workers/daemon/Start-AiOsWorkerDaemon.DRY_RUN.ps1",
+        "automation/orchestration/workers/loop/Start-AiOsWorkerLoop.DRY_RUN.ps1",
+        "automation/orchestration/workers/cycle/Start-AiOsAutonomousWorkerCycle.DRY_RUN.ps1",
+        "automation/orchestration/workers/execution/Invoke-AiOsWorkerSafeExecute.DRY_RUN.ps1",
+        "automation/orchestration/runtime/Start-AiOsRuntimeCycle.DRY_RUN.ps1",
+        "automation/orchestration/runtime/Start-AiOsPersistentRuntimeSupervisor.ps1",
+        "automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1",
+        "automation/orchestration/runtime/Invoke-AiOsRuntimePacketAdvancement.ps1"
+    )
+    return @($paths | ForEach-Object {
+        [ordered]@{
+            path = $_
+            exists = [bool](Test-Path -LiteralPath (Join-Path $Root $_) -PathType Leaf)
+        }
+    })
+}
+
+function Invoke-PythonRouterLogic {
     param([string]$LogicPath, [object]$Payload, [int]$TimeoutSeconds)
     if (-not (Test-Path -LiteralPath $LogicPath -PathType Leaf)) {
-        throw "Python logic module missing: $LogicPath"
+        throw "Python router logic module missing: $LogicPath"
     }
-    $payloadJson = $Payload | ConvertTo-Json -Depth 40
+    $payloadJson = $Payload | ConvertTo-Json -Depth 60
     $psi = [System.Diagnostics.ProcessStartInfo]::new()
     $psi.FileName = "python"
     $psi.Arguments = ('"{0}"' -f ($LogicPath -replace '"', '\"'))
@@ -326,19 +391,19 @@ function Invoke-PythonSelfAuditLogic {
     $process.StandardInput.Close()
     if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
         $process.Kill()
-        throw "Python self-audit logic timed out."
+        throw "Python validator evidence router logic timed out."
     }
     $rawText = $stdoutTask.Result.Trim()
     $errorText = $stderrTask.Result.Trim()
     if ([string]::IsNullOrWhiteSpace($rawText)) {
-        throw "Python self-audit logic returned no JSON. $errorText"
+        throw "Python validator evidence router logic returned no JSON. $errorText"
     }
     return $rawText | ConvertFrom-Json -ErrorAction Stop
 }
 
 function Write-ConsoleReport {
     param([object]$Result)
-    Write-Host "AIOS Self-Audit Loop"
+    Write-Host "AIOS Validator Evidence Router"
     Write-Host "Mode: $($Result.mode)"
     Write-Host "Schema: $($Result.schema)"
     Write-Host ""
@@ -348,41 +413,30 @@ function Write-ConsoleReport {
     Write-Host "expected_branch: $($Result.repo_state.expected_branch)"
     Write-Host "branch_matches_expected: $($Result.repo_state.branch_matches_expected)"
     Write-Host ""
-    Write-Host "AUTHORITY CONTEXT"
-    Write-Host "all_required_loaded: $($Result.authority_context.all_required_loaded)"
-    Write-Host ""
-    Write-Host "COMPLETE IDLE STATE"
-    Write-Host "overall_readiness: $($Result.complete_idle_state.overall_readiness)"
-    Write-Host "classification: $($Result.complete_idle_state.classification)"
-    Write-Host "idle_allowed: $($Result.complete_idle_state.idle_allowed)"
-    Write-Host ""
-    Write-Host "SAFE SURFACES USED"
-    foreach ($surface in @($Result.safe_surfaces_used)) {
-        Write-Host "- $surface"
+    Write-Host "SAFE VALIDATORS"
+    foreach ($surface in @($Result.validator_catalog | Where-Object { $_.classification -eq "SAFE_READ_ONLY_VALIDATOR" })) {
+        Write-Host "- $($surface.surface_id): $($surface.path)"
     }
     Write-Host ""
-    Write-Host "GAP CLASSIFICATIONS"
-    foreach ($gap in @($Result.gap_classifications)) {
-        Write-Host "- $($gap.classification): $($gap.severity)"
+    Write-Host "SAFE EVIDENCE"
+    foreach ($surface in @($Result.evidence_sources | Where-Object { $_.classification -in @("SAFE_READ_ONLY_EVIDENCE", "SAFE_WITH_SANITIZATION") })) {
+        Write-Host "- $($surface.surface_id): $($surface.classification)"
     }
     Write-Host ""
-    Write-Host "CANDIDATE PACKETS"
-    foreach ($candidate in @($Result.candidate_packets)) {
-        Write-Host "- #$($candidate.rank) $($candidate.packet_id) [$($candidate.mode)] blocked=$($candidate.blocked)"
+    Write-Host "BLOCKED SURFACES"
+    foreach ($surface in @($Result.excluded_surfaces)) {
+        Write-Host "- $($surface.surface_id): $($surface.classification)"
     }
     Write-Host ""
-    Write-Host "RECOMMENDED NEXT PACKET"
-    if ($null -ne $Result.recommended_next_packet) {
-        Write-Host "$($Result.recommended_next_packet.packet_id)"
-    }
-    else {
-        Write-Host "none"
+    Write-Host "RECOMMENDED CHAINS"
+    foreach ($chain in @($Result.recommended_chains)) {
+        Write-Host "- $($chain.name): $($chain.chain_id)"
     }
     Write-Host ""
     Write-Host "NO-WRITE PROOF"
-    Write-Host "changed: $($Result.safety.no_write_proof.changed)"
-    Write-Host "git_state_changed: $($Result.safety.no_write_proof.git_state_changed)"
-    Write-Host "forbidden_surface_changed: $($Result.safety.no_write_proof.forbidden_surface_changed)"
+    Write-Host "changed: $($Result.no_write_proof.changed)"
+    Write-Host "git_state_changed: $($Result.no_write_proof.git_state_changed)"
+    Write-Host "forbidden_surface_changed: $($Result.no_write_proof.forbidden_surface_changed)"
     Write-Host ""
     Write-Host "STOP CONDITIONS"
     if (@($Result.stop_conditions).Count -eq 0) {
@@ -401,70 +455,18 @@ function Write-ConsoleReport {
 }
 
 $resolvedRepoRoot = Get-RepoRoot -PathHint $RepoRoot
-$logicPath = Join-Path $PSScriptRoot "aios_self_audit_loop.py"
+$logicPath = Join-Path $PSScriptRoot "aios_validator_evidence_router.py"
 $generatedUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 $authorityContext = Read-AuthorityContext -Root $resolvedRepoRoot
 $beforeState = Get-NoWriteState -Root $resolvedRepoRoot
-$dirtyAllowedForSelfValidation = Test-SelfAuditValidationDirtyState -State $beforeState
+$dirtyAllowedForValidation = Test-ValidatorEvidenceRouterDirtyState -State $beforeState
+$skipSurfaceCalls = (-not $authorityContext.all_required_loaded) -or ([bool]$beforeState.dirty -and $FailOnDirtyWorktree -and (-not $dirtyAllowedForValidation))
 
-$safeSurfaces = [ordered]@{
-    no_ready_stage_discovery = "automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1"
-    campaign_next_task = "automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1"
-    action_recommendation = "automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1"
-}
-
-if ($SurfaceProfile -eq "ExtendedReadOnly") {
-    $safeSurfaces.relay_bus_state = "automation/orchestration/relay_bus/Get-AiOsRelayBusState.DRY_RUN.ps1"
-    $safeSurfaces.relay_operator_state = "automation/orchestration/review_bridge/Get-AiOsRelayOperatorState.DRY_RUN.ps1"
-    $safeSurfaces.relay_human_review = "automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1"
-}
-
-$blockedSurfaces = @(
-    "automation/self_build/aios_self_build_cycle.py",
-    "automation/self_build/aios_self_build_inspector.py",
-    "automation/orchestration/autonomy_reports/*",
-    "automation/orchestration/autonomy_control_plane/Invoke-AiOsAutonomyControlPlane.DRY_RUN.ps1",
-    "automation/orchestration/autonomy_router/Get-AiOsAutonomyNextAction.DRY_RUN.ps1",
-    "automation/orchestration/autonomy_loop/Invoke-AiOsAutonomyLoop.DRY_RUN.ps1",
-    "automation/orchestration/autonomy_discovery/Get-AiOsAutonomyInventory.DRY_RUN.ps1",
-    "automation/orchestration/review_bridge/New-AiOsCodexReportRelayItem.DRY_RUN.ps1",
-    "automation/orchestration/reports/New-AiOsMorningBrief.ps1",
-    "automation/telemetry/Update-AiOsProductionReadout.ps1",
-    "automation/reporting/New-AiOsReport.ps1",
-    "automation/orchestration/commit_packages/Invoke-AiOsExactCommitPackage.ps1",
-    "automation/orchestration/relay_bus/New-AiOsRelayMessage.DRY_RUN.ps1"
-)
-
-$evidence = [ordered]@{}
-$safeSurfacesUsed = @()
-$surfaceDetails = @()
-$skipSurfaceCalls = (-not $authorityContext.all_required_loaded) -or ([bool]$beforeState.dirty -and $FailOnDirtyWorktree -and (-not $dirtyAllowedForSelfValidation))
-
+$sourcePacketRouterResult = $null
 if (-not $skipSurfaceCalls) {
-    foreach ($entry in $safeSurfaces.GetEnumerator()) {
-        $surfaceResult = Invoke-JsonSurface -Root $resolvedRepoRoot -RelativeScript $entry.Value
-        $surfaceDetails += [ordered]@{
-            name = $entry.Key
-            path = $entry.Value
-            available = [bool]$surfaceResult.available
-            ok = [bool]$surfaceResult.ok
-            error = [string]$surfaceResult.error
-        }
-        if ($surfaceResult.ok) {
-            $evidence[$entry.Key] = $surfaceResult.data
-            $safeSurfacesUsed += $entry.Value
-        }
-    }
-}
-else {
-    foreach ($entry in $safeSurfaces.GetEnumerator()) {
-        $surfaceDetails += [ordered]@{
-            name = $entry.Key
-            path = $entry.Value
-            available = [bool](Test-Path -LiteralPath (Join-Path $resolvedRepoRoot $entry.Value) -PathType Leaf)
-            ok = $false
-            error = "skipped_due_to_stop_condition"
-        }
+    $surfaceResult = Invoke-JsonSurface -Root $resolvedRepoRoot -RelativeScript "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1" -TimeoutSeconds $TimeoutSeconds
+    if ($surfaceResult.ok) {
+        $sourcePacketRouterResult = $surfaceResult.data
     }
 }
 
@@ -477,7 +479,7 @@ $repoState = [ordered]@{
     expected_branch = $ExpectedBranch
     branch_matches_expected = ([string]$beforeState.branch -eq [string]$ExpectedBranch)
     dirty = [bool]$beforeState.dirty
-    dirty_allowed_for_self_validation = [bool]$dirtyAllowedForSelfValidation
+    dirty_allowed_for_validator_evidence_router_validation = [bool]$dirtyAllowedForValidation
     fail_on_dirty_worktree = [bool]$FailOnDirtyWorktree
     status_lines = @($beforeState.status_lines)
     diff_name_only = @($beforeState.diff_name_only)
@@ -488,31 +490,19 @@ $payload = [ordered]@{
     generated_utc = $generatedUtc
     repo_state = $repoState
     authority_context = $authorityContext
-    evidence = $evidence
-    surface_inventory = [ordered]@{
-        profile = $SurfaceProfile
-        timeout_seconds = $TimeoutSeconds
-        safe_surface_count = $safeSurfaces.Count
-        blocked_surface_count = $blockedSurfaces.Count
-        surfaces = $surfaceDetails
+    source_packet_router_result = $sourcePacketRouterResult
+    source_packet_router_schema = "AIOS_SELF_DEVELOPMENT_PACKET_ROUTER_RESULT.v1"
+    surface_inventory = Get-SurfaceInventory -Root $resolvedRepoRoot
+    action_recommendation = [ordered]@{
+        recommended_command = ""
     }
-    blocked_surfaces = $blockedSurfaces
-    safe_surfaces_used = $safeSurfacesUsed
     no_write_proof = $noWriteProof
-    max_candidate_packets = $MaxCandidatePackets
-    candidate_packet_ids = @(
-        "AIOS-SELF-DEVELOPMENT-PACKET-ROUTER-DRYRUN-V1",
-        "AIOS-VALIDATOR-EVIDENCE-ROUTER-DRYRUN-V1",
-        "AIOS-DAY-NIGHT-SUPERVISOR-READINESS-DRYRUN-V1",
-        "AIOS-DASHBOARD-DATA-CONTRACT-REVIEW-DRYRUN-V1",
-        "AIOS-DASHBOARD-LAYER-TAXONOMY-DOCS-APPLY-V1"
-    )
 }
 
-$result = Invoke-PythonSelfAuditLogic -LogicPath $logicPath -Payload $payload -TimeoutSeconds $TimeoutSeconds
+$result = Invoke-PythonRouterLogic -LogicPath $logicPath -Payload $payload -TimeoutSeconds $TimeoutSeconds
 
 if ($OutputJson) {
-    $result | ConvertTo-Json -Depth 40
+    $result | ConvertTo-Json -Depth 60
 }
 else {
     Write-ConsoleReport -Result $result

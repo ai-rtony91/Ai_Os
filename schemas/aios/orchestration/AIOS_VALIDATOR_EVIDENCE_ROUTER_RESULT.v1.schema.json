@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_VALIDATOR_EVIDENCE_ROUTER_RESULT.v1.schema.json",
+  "title": "AIOS Validator Evidence Router Result v1",
+  "description": "Console-only read-only validator/evidence router result. This schema grants no APPLY, packet generation, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "source_packet_router_schema",
+    "validator_catalog",
+    "evidence_sources",
+    "excluded_surfaces",
+    "recommended_chains",
+    "required_before_next_packet",
+    "required_before_apply",
+    "required_before_commit",
+    "required_after_commit",
+    "safety",
+    "no_write_proof",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_VALIDATOR_EVIDENCE_ROUTER_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "repo_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source_packet_router_schema": {
+      "type": "string",
+      "const": "AIOS_SELF_DEVELOPMENT_PACKET_ROUTER_RESULT.v1"
+    },
+    "validator_catalog": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "evidence_sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "excluded_surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "recommended_chains": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "chain_id",
+          "name",
+          "surfaces",
+          "protected_action_recommended",
+          "stop_condition"
+        ],
+        "properties": {
+          "chain_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "surfaces": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "protected_action_recommended": {
+            "type": "boolean",
+            "const": false
+          },
+          "stop_condition": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required_before_next_packet": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_before_apply": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_before_commit": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_after_commit": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "console_only",
+        "writes_files",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_packet_drafts",
+        "outputs_packet_body",
+        "mutates_registry",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approvals",
+        "writes_relay",
+        "starts_runtime",
+        "launches_workers",
+        "protected_action_recommended",
+        "commands_sanitized",
+        "secrets_or_env_access",
+        "broker_or_live_trading"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "BLOCKED",
+            "BLOCKED_BY_WRITE_SURFACE_RISK"
+          ]
+        },
+        "console_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "writes_files": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_packet_drafts": {
+          "type": "boolean",
+          "const": false
+        },
+        "outputs_packet_body": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approvals": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_relay": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_action_recommended": {
+          "type": "boolean",
+          "const": false
+        },
+        "commands_sanitized": {
+          "type": "boolean",
+          "const": true
+        },
+        "secrets_or_env_access": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "no_write_proof": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "surface": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "surface_id",
+        "path",
+        "family",
+        "classification",
+        "blocked",
+        "safe_to_execute_by_router",
+        "safe_to_use_as_evidence",
+        "command",
+        "reason"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "SAFE_READ_ONLY_VALIDATOR",
+            "SAFE_READ_ONLY_EVIDENCE",
+            "SAFE_WITH_SANITIZATION",
+            "PROTECTED_ACTION_PREVIEW_ONLY",
+            "WRITE_OR_MUTATION_SURFACE_BLOCKED",
+            "SECRET_OR_ENV_BLOCKED",
+            "RUNTIME_OR_WORKER_BLOCKED",
+            "BROKER_OR_LIVE_TRADING_BLOCKED",
+            "UNKNOWN_NEEDS_REVIEW"
+          ]
+        },
+        "blocked": {
+          "type": "boolean"
+        },
+        "safe_to_execute_by_router": {
+          "type": "boolean",
+          "const": false
+        },
+        "safe_to_use_as_evidence": {
+          "type": "boolean"
+        },
+        "command": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "safe_to_surface",
+            "display_text"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
