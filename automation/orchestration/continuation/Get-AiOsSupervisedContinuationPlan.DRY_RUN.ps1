@@ -39,7 +39,19 @@ function Read-JsonSafe {
         return $null
     }
     try {
-        $obj = $Text | ConvertFrom-Json
+        $textValue = [string]$Text
+        $startIndex = $textValue.IndexOf("{")
+        if ($startIndex -lt 0) {
+            throw "No JSON object found in text."
+        }
+
+        $endIndex = $textValue.LastIndexOf("}")
+        if ($endIndex -lt $startIndex) {
+            throw "JSON object boundaries are incomplete."
+        }
+
+        $jsonPayload = $textValue.Substring($startIndex, $endIndex - $startIndex + 1)
+        $obj = $jsonPayload | ConvertFrom-Json
         $obj | Add-Member -NotePropertyName _aios_source -NotePropertyValue $Source -Force
         return $obj
     }
