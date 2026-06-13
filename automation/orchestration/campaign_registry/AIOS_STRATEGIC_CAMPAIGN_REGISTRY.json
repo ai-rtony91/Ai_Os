@@ -305,11 +305,13 @@
           "stage_id": "STAGE-TELEMETRY-CONTRACT-REVIEW",
           "phase_id": "PHASE-TELEMETRY-CONTRACTS",
           "title": "Review telemetry contract before new writers",
-          "status": "NEEDS_REVIEW",
+          "status": "COMPLETE",
           "priority": "high",
           "depends_on": [],
           "blocked_by": [],
-          "next_packet_candidate": "PKT-TELEMETRY-CONTRACT-REVIEW-DRYRUN"
+          "next_packet_candidate": null,
+          "completed_by_pr": "https://github.com/ai-rtony91/Ai_Os/pull/646",
+          "completed_by_commit": "9d8b6c01"
         }
       ],
       "depends_on": [
