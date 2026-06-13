@@ -490,13 +490,13 @@
       "campaign_id": "CAMPAIGN-FOREX-BOUNDARY",
       "title": "Forex Boundary Documentation",
       "objective": "Represent future Forex/OANDA interest as documentation-boundary planning only.",
-      "status": "DEFERRED",
+      "status": "COMPLETE",
       "priority": "low",
       "phases": [
         {
           "phase_id": "PHASE-FOREX-DOCS-ONLY",
           "title": "Forex Docs Boundary",
-          "status": "DEFERRED"
+          "status": "COMPLETE"
         }
       ],
       "stages": [
@@ -504,23 +504,21 @@
           "stage_id": "STAGE-FOREX-DOCS-BOUNDARY",
           "phase_id": "PHASE-FOREX-DOCS-ONLY",
           "title": "Draft Forex/OANDA documentation boundary only",
-          "status": "DEFERRED",
+          "status": "COMPLETE",
           "priority": "low",
           "depends_on": [
             "STAGE-TRADING-PAPER-BOUNDARY-REVIEW"
           ],
-          "blocked_by": [
-            "Trading Lab paper boundary not reviewed"
-          ],
-          "next_packet_candidate": "PKT-FOREX-DOCS-BOUNDARY-DRYRUN"
+          "blocked_by": [],
+          "next_packet_candidate": null,
+          "completed_by_pr": "https://github.com/ai-rtony91/Ai_Os/pull/649",
+          "completed_by_commit": "fcf98cc0"
         }
       ],
       "depends_on": [
         "CAMPAIGN-TRADING-LAB-PAPER"
       ],
-      "blocked_by": [
-        "Trading Lab paper boundary not reviewed"
-      ],
+      "blocked_by": [],
       "unlock_conditions": [
         "Human Owner separately approves documentation-boundary review.",
         "No implementation scope is included."
@@ -547,13 +545,13 @@
         "RISK_POLICY.md",
         "docs/roadmap/aios-product-roadmap.md"
       ],
-      "completion_percent": 5,
-      "progress_basis": "Boundary interest is known but intentionally deferred.",
-      "timeline_estimate": "blocked until decision",
-      "next_packet_candidate": "PKT-FOREX-DOCS-BOUNDARY-DRYRUN",
+      "completion_percent": 100,
+      "progress_basis": "Forex/OANDA documentation boundary clarified by PR #649; OANDA/live broker execution remains blocked.",
+      "timeline_estimate": "complete",
+      "next_packet_candidate": null,
       "crew_lane": "forex-boundary-docs",
       "recommended_worker": "EAST_OCC_01",
-      "stop_condition": "Stop after docs-only boundary review."
+      "stop_condition": "Forex/OANDA docs boundary review closed; OANDA/live broker execution remains blocked."
     },
     {
       "campaign_id": "CAMPAIGN-PRODUCTION-HARDENING",
