@@ -33,16 +33,18 @@ function Get-RelayMessages {
         return @()
     }
 
-    $items = Get-ChildItem -LiteralPath $MessagesDir -Filter "*.json" -File |
-        Sort-Object -Property LastWriteTime -Descending
-    $messages = New-Object System.Collections.Generic.List[object]
+    $items = @(
+        Get-ChildItem -LiteralPath $MessagesDir -Filter "*.json" -File |
+            Sort-Object -Property LastWriteTime -Descending
+    )
+    $messages = @()
 
-    foreach ($item in $items) {
+    foreach ($item in @($items)) {
         try {
             $raw = Get-Content -LiteralPath $item.FullName -Raw
             $obj = $raw | ConvertFrom-Json -ErrorAction Stop
             $obj | Add-Member -NotePropertyName "message_path" -NotePropertyValue $item.FullName -Force
-            $messages.Add($obj)
+            $messages += $obj
         }
         catch {
             continue
@@ -52,7 +54,8 @@ function Get-RelayMessages {
     if ($messages.Count -eq 0) {
         return @()
     }
-    return ,($messages.ToArray())
+
+    return @($messages)
 }
 
 $repoRoot = (Get-Location).Path
@@ -63,7 +66,7 @@ $actors = Get-RelayActors -RegistryPath $registryPath
 $enabledActors = if ($actors) { @($actors | Where-Object { $_.enabled -eq $true } | ForEach-Object { [string]$_.actor_id }) } else { @() }
 $actorCount = if ($actors) { $actors.Count } else { 0 }
 
-$messages = Get-RelayMessages -MessagesDir $inboxDir
+$messages = @((Get-RelayMessages -MessagesDir $inboxDir))
 $latestMessage = if ($messages.Count -gt 0) { $messages[0] } else { $null }
 
 $latestPath = ""
