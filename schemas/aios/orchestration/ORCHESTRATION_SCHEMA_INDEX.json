@@ -250,6 +250,13 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "AIOS_APPROVAL_SOS_HARD_GATE_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_APPROVAL_SOS_HARD_GATE_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Console-only approval/SOS hard-gate result contract. Evidence only; grants no APPLY, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "APPROVAL_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
       "kind": "json_schema",
