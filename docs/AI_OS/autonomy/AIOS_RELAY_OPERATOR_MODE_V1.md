@@ -27,6 +27,15 @@ current Codex → ChatGPT → PowerShell relay status and the exact next action.
 - `PASTEBACK_REVIEW_REQUIRED`
   - Pasteback exists but safety scan is missing or failed.
 
+## Actor relay bus handoff precedence
+
+`Get-AiOsRelayOperatorState.DRY_RUN.ps1` now gives actor relay bus suggestions
+precedence when actor bus state is explicitly at handoff points.
+
+- When `actor_relay_bus_status` is `EMPTY` or `READY` and `actor_relay_next_action`
+  is populated, `exact_next_action` uses the actor bus action.
+- Existing `needs_*` bridge fields remain in output for backward compatibility.
+
 ## `.\aios.ps1 -Mode relay`
 
 The mode calls:

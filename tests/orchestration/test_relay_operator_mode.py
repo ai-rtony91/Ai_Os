@@ -46,13 +46,39 @@ def test_relay_state_reports_empty() -> None:
 
         out = _run_script_json(RELAY_STATE_SCRIPT, [], tmp_root)
 
+        assert out["mode"] == "DRY_RUN_READ_ONLY"
+        assert out["actor_relay_bus_status"] == "EMPTY"
+        assert out["actor_relay_next_action"] == "Use New-AiOsRelayMessage.DRY_RUN.ps1 with Mode APPLY to write the first relay message."
+        assert out["exact_next_action"] == out["actor_relay_next_action"]
         assert out["relay_status"] == "EMPTY"
         assert out["needs_codex_report"] is True
         assert out["needs_chatgpt_prompt"] is False
         assert out["needs_chatgpt_review"] is False
         assert out["needs_pasteback"] is False
-        assert out["exact_next_action"].startswith("Store a Codex report")
+        for legacy_field in (
+            "related_existing_notes",
+            "related_existing_scripts",
+            "needs_codex_report",
+            "needs_chatgpt_prompt",
+            "needs_chatgpt_review",
+            "needs_pasteback",
+        ):
+            assert legacy_field in out
         assert "AIOS_CODEX_CHATGPT_POWERSHELL_RELAY_V1.md" in out["related_existing_notes"][0]
+
+
+def test_relay_state_does_not_write_files() -> None:
+    with TemporaryDirectory() as tmp:
+        tmp_root = Path(tmp)
+        _init_relay_dirs(tmp_root)
+
+        before_files = {path.relative_to(tmp_root).as_posix() for path in tmp_root.rglob("*") if path.is_file()}
+        out = _run_script_json(RELAY_STATE_SCRIPT, [], tmp_root)
+        after_files = {path.relative_to(tmp_root).as_posix() for path in tmp_root.rglob("*") if path.is_file()}
+
+        assert out["mode"] == "DRY_RUN_READ_ONLY"
+        assert before_files == after_files
+        assert out["exact_next_action"] == out["actor_relay_next_action"]
 
 
 def test_relay_state_needs_chatgpt_prompt_after_report() -> None:
