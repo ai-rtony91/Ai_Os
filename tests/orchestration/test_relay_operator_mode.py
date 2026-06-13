@@ -4,11 +4,15 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import json
 import subprocess
+import shutil
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AIOS = REPO_ROOT / "aios.ps1"
 RELAY_STATE_SCRIPT = REPO_ROOT / "automation/orchestration/review_bridge/Get-AiOsRelayOperatorState.DRY_RUN.ps1"
+NEW_RELAY_MESSAGE_SCRIPT = REPO_ROOT / "automation/orchestration/relay_bus/New-AiOsRelayMessage.DRY_RUN.ps1"
+RELAY_ACTORS_SOURCE = REPO_ROOT / "control/relay_bus/actors/AIOS_RELAY_ACTORS.json"
+RELAY_BUS_STATE_SCRIPT = REPO_ROOT / "automation/orchestration/relay_bus/Get-AiOsRelayBusState.DRY_RUN.ps1"
 
 
 def _run_script_json(script: Path, args: list[str], cwd: Path) -> dict:
@@ -39,6 +43,25 @@ def _init_relay_dirs(root: Path) -> Path:
     return base
 
 
+def _init_relay_bus_root(root: Path) -> None:
+    control_root = root / "control" / "relay_bus"
+    (control_root / "actors").mkdir(parents=True, exist_ok=True)
+    (control_root / "messages" / "inbox").mkdir(parents=True, exist_ok=True)
+    (control_root / "messages" / "outbox").mkdir(parents=True, exist_ok=True)
+    (control_root / "messages" / "archive").mkdir(parents=True, exist_ok=True)
+    (control_root / "pasteback").mkdir(parents=True, exist_ok=True)
+    (control_root / "evidence").mkdir(parents=True, exist_ok=True)
+    for marker in (
+        control_root / "messages" / "inbox" / ".gitkeep",
+        control_root / "messages" / "outbox" / ".gitkeep",
+        control_root / "messages" / "archive" / ".gitkeep",
+        control_root / "evidence" / ".gitkeep",
+        control_root / "pasteback" / ".gitkeep",
+    ):
+        marker.write_text("", encoding="utf-8")
+    shutil.copy2(RELAY_ACTORS_SOURCE, control_root / "actors" / "AIOS_RELAY_ACTORS.json")
+
+
 def test_relay_state_reports_empty() -> None:
     with TemporaryDirectory() as tmp:
         tmp_root = Path(tmp)
@@ -65,6 +88,56 @@ def test_relay_state_reports_empty() -> None:
         ):
             assert legacy_field in out
         assert "AIOS_CODEX_CHATGPT_POWERSHELL_RELAY_V1.md" in out["related_existing_notes"][0]
+
+
+def test_relay_state_prefers_actor_relay_when_needs_human_review() -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _init_relay_dirs(root)
+        _init_relay_bus_root(root)
+
+        subprocess.check_output([
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(NEW_RELAY_MESSAGE_SCRIPT),
+            "-Actor",
+            "codex_cli",
+            "-TargetActor",
+            "powershell_operator",
+            "-PacketId",
+            "AIOS-RELAY-STATE-NEEDS-HUMAN",
+            "-Branch",
+            "feature/relay-test",
+            "-MessageType",
+            "codex_final_report",
+            "-Intent",
+            "handoff summary",
+            "-Status",
+            "pending",
+            "-PayloadText",
+            json.dumps({"message_id": "AIOS-RELAY-STATE-NEEDS-HUMAN"}),
+            "-Mode",
+            "APPLY",
+        ], cwd=str(root))
+
+        relay_bus_state = _run_script_json(RELAY_BUS_STATE_SCRIPT, [], root)
+        assert relay_bus_state["relay_status"] == "NEEDS_HUMAN_REVIEW"
+
+        operator_script = root / "automation" / "orchestration" / "review_bridge" / "Get-AiOsRelayOperatorState.DRY_RUN.ps1"
+        relay_bus_script = root / "automation" / "orchestration" / "relay_bus" / "Get-AiOsRelayBusState.DRY_RUN.ps1"
+        operator_script.parent.mkdir(parents=True, exist_ok=True)
+        relay_bus_script.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(RELAY_STATE_SCRIPT, operator_script)
+        shutil.copy2(RELAY_BUS_STATE_SCRIPT, relay_bus_script)
+
+        out = _run_script_json(operator_script, [], root)
+
+        assert out["actor_relay_bus_status"] == "NEEDS_HUMAN_REVIEW"
+        assert out["actor_relay_next_action"] == "Run manual human review on this actor message before continuing."
+        assert out["exact_next_action"] == out["actor_relay_next_action"]
 
 
 def test_relay_state_does_not_write_files() -> None:
