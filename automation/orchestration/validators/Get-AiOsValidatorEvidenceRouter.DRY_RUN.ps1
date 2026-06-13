@@ -199,7 +199,12 @@ function Test-ValidatorEvidenceRouterDirtyState {
         "automation/orchestration/operator_control/aios_approval_sos_hard_gate.py",
         "schemas/aios/orchestration/AIOS_APPROVAL_SOS_HARD_GATE_RESULT.v1.schema.json",
         "tests/orchestration/test_aios_approval_sos_hard_gate.py",
-        "tests/orchestration/test_aios_approval_sos_hard_gate_runner.py"
+        "tests/orchestration/test_aios_approval_sos_hard_gate_runner.py",
+        "automation/orchestration/self_development/Test-AiOsGovernedSelfDevelopmentSoak.DRY_RUN.ps1",
+        "automation/orchestration/self_development/aios_governed_self_development_soak.py",
+        "schemas/aios/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_SOAK_RESULT.v1.schema.json",
+        "tests/orchestration/test_aios_governed_self_development_soak.py",
+        "tests/orchestration/test_aios_governed_self_development_soak_runner.py"
     )
     $changedPaths = @($State.changed_entries | ForEach-Object { Get-ChangedPathFromStatusLine -Line ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     if ($changedPaths.Count -eq 0) {
