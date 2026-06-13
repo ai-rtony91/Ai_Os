@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_SELF_AUDIT_LOOP_RESULT.v1.schema.json",
+  "title": "AIOS Self-Audit Loop Result v1",
+  "description": "Console-only read-only AIOS self-audit loop result. This schema grants no APPLY, packet generation, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "authority_context",
+    "complete_idle_state",
+    "surface_inventory",
+    "blocked_surfaces",
+    "safe_surfaces_used",
+    "findings",
+    "gap_classifications",
+    "candidate_packets",
+    "recommended_next_packet",
+    "stop_conditions",
+    "safety",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_SELF_AUDIT_LOOP_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "repo_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "authority_context": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "complete_idle_state": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "overall_readiness",
+        "classification",
+        "idle_allowed",
+        "registry_inconsistency_detected"
+      ],
+      "properties": {
+        "overall_readiness": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "idle_allowed": {
+          "type": "boolean"
+        },
+        "registry_inconsistency_detected": {
+          "type": "boolean"
+        }
+      }
+    },
+    "surface_inventory": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "blocked_surfaces": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safe_surfaces_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "severity",
+          "classification",
+          "summary"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gap_classifications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "candidate_packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "packet_id",
+          "mode",
+          "blocked",
+          "rank_score"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "rank_score": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "recommended_next_packet": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "console_only",
+        "writes_files",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_packets",
+        "mutates_registry",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approvals",
+        "starts_runtime",
+        "launches_workers",
+        "protected_git_action",
+        "broker_or_live_trading",
+        "no_write_proof"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "BLOCKED",
+            "BLOCKED_BY_WRITE_SURFACE_RISK"
+          ]
+        },
+        "console_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "writes_files": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_packets": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approvals": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_git_action": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        },
+        "no_write_proof": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}
