@@ -25,13 +25,13 @@ function Read-JsonFile {
 function Invoke-Resolver {
     param([string]$RepoRoot)
 
-    $resolverScript = Join-Path $RepoRoot "Resolve-AiOsRelayHumanReview.DRY_RUN.ps1"
+    $resolverScript = Join-Path $PSScriptRoot "Resolve-AiOsRelayHumanReview.DRY_RUN.ps1"
     if (-not (Test-Path -LiteralPath $resolverScript -PathType Leaf)) {
         return $null
     }
 
     try {
-        $raw = & powershell -NoProfile -ExecutionPolicy Bypass -File $resolverScript -OutputJson 2>$null
+        $raw = & $resolverScript -OutputJson 2>$null
         $rawText = ($raw | Out-String).Trim()
         if ([string]::IsNullOrWhiteSpace($rawText)) {
             return $null
@@ -73,10 +73,20 @@ $resolverOutput = $null
 $status = ""
 $resolverHasOutput = $false
 $escalationReasons = New-Object System.Collections.Generic.List[string]
+$limitations = New-Object System.Collections.Generic.List[string]
+$matchedSosCategories = New-Object System.Collections.Generic.List[string]
+$matchedRoutineCategories = New-Object System.Collections.Generic.List[string]
 $scanText = New-Object System.Collections.Generic.List[string]
+$requiresHumanReview = $false
+$inspectedActor = ""
+$inspectedTargetActor = ""
+$inspectedPacketId = ""
+$inspectedMessageType = ""
+$inspectedStatus = ""
 $safeNextAction = ""
 $anthonyRequired = $false
 $routineReviewAllowed = $false
+$confidence = "LOW"
 
 if (-not [string]::IsNullOrWhiteSpace($RelayReviewJsonPath)) {
     $resolverOutput = Read-JsonFile -Path $RelayReviewJsonPath
@@ -90,6 +100,7 @@ elseif ([string]::IsNullOrWhiteSpace($PayloadText)) {
     $resolverHasOutput = $resolverOutput -ne $null
     if ($null -eq $resolverOutput) {
         $escalationReasons.Add("Resolver output unavailable; treating as routine-only path with no escalation.")
+        $limitations.Add("Resolver invocation did not return usable JSON.")
     }
 }
 else {
@@ -109,19 +120,40 @@ else {
 
 if ($resolverOutput -ne $null) {
     $status = To-SafeText $resolverOutput.status
+    if ($resolverOutput.PSObject.Properties.Name -contains "requires_human_review") {
+        try {
+            $requiresHumanReview = [bool]$resolverOutput.requires_human_review
+        }
+        catch {
+            $requiresHumanReview = $true
+        }
+    }
+    else {
+        $requiresHumanReview = -not ([string]::IsNullOrWhiteSpace($status) -and $status -ne "NEEDS_HUMAN_REVIEW" -and $status -ne "blocked_needs_owner") -and $status -ne "READY"
+    }
+    if ($status -eq "EMPTY" -or $status -eq "") {
+        $requiresHumanReview = $false
+    }
+    $inspectedActor = To-SafeText $resolverOutput.actor
+    $inspectedTargetActor = To-SafeText $resolverOutput.target_actor
+    $inspectedPacketId = To-SafeText $resolverOutput.packet_id
+    $inspectedMessageType = To-SafeText $resolverOutput.message_type
+    $inspectedStatus = To-SafeText $resolverOutput.status_detail
     $scanText.Add((To-SafeText $resolverOutput.status))
     $scanText.Add((To-SafeText $resolverOutput.why_human_review_needed))
     $scanText.Add((To-SafeText $resolverOutput.status_detail))
     $scanText.Add((To-SafeText $resolverOutput.intent))
     $scanText.Add((To-SafeText $resolverOutput.message_type))
-    $scanText.Add((To-SafeText $resolverOutput.latest_message_path))
+    if ($resolverOutput.PSObject.Properties.Name -contains "latest_message_path") {
+        $scanText.Add((To-SafeText $resolverOutput.latest_message_path))
+    }
     if ($resolverOutput.PSObject.Properties.Name -contains "payload_contains_forbidden_secret_pattern") {
         if ([bool]$resolverOutput.payload_contains_forbidden_secret_pattern -eq $true) {
             $hasEscalation = $true
             $escalationReasons.Add("Resolver output indicates the payload contains a secret-like pattern.")
         }
     }
-    if (-not [string]::IsNullOrWhiteSpace($resolverOutput.latest_message_path)) {
+    if ($resolverOutput.PSObject.Properties.Name -contains "latest_message_path" -and -not [string]::IsNullOrWhiteSpace($resolverOutput.latest_message_path)) {
         $latestMessage = Read-JsonFile -Path $resolverOutput.latest_message_path
         if ($null -ne $latestMessage) {
             $scanText.Add((To-SafeText $latestMessage.payload_text))
@@ -144,6 +176,8 @@ $hasEscalation = $false
 
 if (Has-Pattern -Text $scanBlob -Patterns @(
         "AIOS_TG_BOT_TOKEN",
+        "token",
+        "\btoken\b",
         "token=",
         "api_key",
         "secret",
@@ -151,6 +185,9 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "bearer"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("SECRETS_AND_CREDENTIALS")) {
+        $matchedSosCategories.Add("SECRETS_AND_CREDENTIALS")
+    }
     $escalationReasons.Add("Secret, token, API key, credential, or bearer-string material was detected.")
 }
 
@@ -165,6 +202,9 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "\breal money\b"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("MONEY_TRADING_BROKER")) {
+        $matchedSosCategories.Add("MONEY_TRADING_BROKER")
+    }
     $escalationReasons.Add("Broker/OANDA/webhook/order/live-trading/money movement language detected.")
 }
 
@@ -178,6 +218,9 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "\btruncate\b"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("DESTRUCTIVE_REPO_ACTION")) {
+        $matchedSosCategories.Add("DESTRUCTIVE_REPO_ACTION")
+    }
     $escalationReasons.Add("Destructive change intent (delete/overwrite/reset/force-push) detected.")
 }
 
@@ -189,6 +232,9 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "\blaunch\b"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("RUNTIME_CONTROL")) {
+        $matchedSosCategories.Add("RUNTIME_CONTROL")
+    }
     $escalationReasons.Add("Runtime/worker/scheduler/daemon launch intent detected.")
 }
 
@@ -199,6 +245,9 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "\block\b.*\bmutation\b"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("GOVERNANCE_AUTHORITY")) {
+        $matchedSosCategories.Add("GOVERNANCE_AUTHORITY")
+    }
     $escalationReasons.Add("Approval inbox/queue/lock mutation without bounded packet scope detected.")
 }
 
@@ -208,6 +257,9 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "\bambiguous authority\b"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("GOVERNANCE_AUTHORITY")) {
+        $matchedSosCategories.Add("GOVERNANCE_AUTHORITY")
+    }
     $escalationReasons.Add("Failed recovery or ambiguous authority condition detected.")
 }
 
@@ -216,6 +268,9 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "\bsecurity incident\b"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("SECURITY_LEGAL_BUSINESS")) {
+        $matchedSosCategories.Add("SECURITY_LEGAL_BUSINESS")
+    }
     $escalationReasons.Add("Security alert language detected.")
 }
 
@@ -225,7 +280,49 @@ if (Has-Pattern -Text $scanBlob -Patterns @(
         "\bcontract\b.*\brequired\b"
     )) {
     $hasEscalation = $true
+    if (-not $matchedSosCategories.Contains("SECURITY_LEGAL_BUSINESS")) {
+        $matchedSosCategories.Add("SECURITY_LEGAL_BUSINESS")
+    }
     $escalationReasons.Add("Legal or business decision requiring Anthony detected.")
+}
+
+if ($requiresHumanReview) {
+    if ($inspectedMessageType -eq "generated_packet_review") {
+        if (-not $matchedRoutineCategories.Contains("PACKET_REVIEW")) {
+            $matchedRoutineCategories.Add("PACKET_REVIEW")
+        }
+    }
+    elseif ($inspectedMessageType -eq "codex_final_report") {
+        if (-not $matchedRoutineCategories.Contains("CODEX_REPORT_REVIEW")) {
+            $matchedRoutineCategories.Add("CODEX_REPORT_REVIEW")
+        }
+    }
+
+    if (Has-Pattern -Text $scanBlob -Patterns @(
+            "\bpr\b",
+            "\bmerge\b",
+            "\bsync\b",
+            "\bcheck(s|ing)?\b",
+            "\breview\b",
+            "\bstatus report\b",
+            "\bdocs?\b",
+            "\btests?\b",
+            "\bbranch cleanup\b"
+        )) {
+        if (-not $matchedRoutineCategories.Contains("WORKFLOW_REVIEW")) {
+            $matchedRoutineCategories.Add("WORKFLOW_REVIEW")
+        }
+    }
+}
+
+if ($hasEscalation) {
+    $confidence = "MEDIUM"
+    if ($matchedSosCategories.Contains("SECRETS_AND_CREDENTIALS")) {
+        $confidence = "HIGH"
+    }
+}
+elseif ($matchedRoutineCategories.Count -gt 0 -and ($status -ne "READY")) {
+    $confidence = "MEDIUM"
 }
 
 if ((-not $hasEscalation) -and ($escalationReasons.Count -eq 0)) {
@@ -277,6 +374,16 @@ $result = [ordered]@{
     safe_next_action = $safeNextAction
     anthony_required = $anthonyRequired
     routine_review_allowed = $routineReviewAllowed
+    requires_human_review = $requiresHumanReview
+    inspected_actor = $inspectedActor
+    inspected_target_actor = $inspectedTargetActor
+    inspected_packet_id = $inspectedPacketId
+    inspected_message_type = $inspectedMessageType
+    inspected_status = $inspectedStatus
+    matched_sos_categories = @($matchedSosCategories)
+    matched_routine_categories = @($matchedRoutineCategories)
+    confidence = $confidence
+    limitations = @($limitations)
 }
 
 if ($OutputJson) {
