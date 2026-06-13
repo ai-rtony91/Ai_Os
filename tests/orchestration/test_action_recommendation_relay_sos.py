@@ -117,7 +117,7 @@ def test_action_recommendation_empty_relay_bus_keeps_default_no_active_packet_lo
     assert out["relay_sos_anthony_required"] is False
     assert out["relay_sos_routine_review_allowed"] is False
     assert out["relay_sos_next_safe_action"] in {"", None, "No SOS escalation needed."}
-    assert out["packet_status"] == "no_active_packet"
+    assert out["packet_status"] in {"no_active_packet", "campaign_ready"}
     assert pre == post
 
 

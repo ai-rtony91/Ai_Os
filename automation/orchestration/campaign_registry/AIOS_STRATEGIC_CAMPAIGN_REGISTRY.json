@@ -649,6 +649,18 @@
           "next_packet_candidate": null,
           "completed_by_pr": "https://github.com/ai-rtony91/Ai_Os/pull/604",
           "completed_by_commit": "91cceda0"
+        },
+        {
+          "stage_id": "STAGE-AUTONOMY-ROUTINE-REVIEW-CONTINUATION",
+          "phase_id": "PHASE-AUTONOMY-LADDER",
+          "title": "Routine relay review continuation gate",
+          "status": "READY",
+          "priority": "high",
+          "depends_on": [
+            "STAGE-AUTONOMY-LEVEL-REVIEW"
+          ],
+          "blocked_by": [],
+          "next_packet_candidate": "AIOS-ROUTINE-REVIEW-CONTINUATION-GATE-APPLY-V1"
         }
       ],
       "depends_on": [
@@ -694,7 +706,7 @@
       "progress_basis": "Autonomy level review is complete: PR #603 installed Level 5 commit-package preview behavior, PR #604 proved dirty-tree preview behavior and added Level 6 report-only overnight supervisor readiness. Execution, scheduler, daemon, worker launch, runtime mutation, and protected git actions remain blocked.",
       "timeline_estimate": "multi-checkpoint",
       "next_packet_candidate": null,
-      "crew_lane": "supervised-autonomy-review",
+      "crew_lane": "RELAY_ROUTINE_REVIEW_CONTINUATION",
       "recommended_worker": "EAST_OCC_01",
       "stop_condition": "Autonomy level review closed; no execution or protected action is authorized by this registry."
     }
