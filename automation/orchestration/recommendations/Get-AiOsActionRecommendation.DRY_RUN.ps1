@@ -50,6 +50,28 @@ function Get-CampaignNextTaskState {
     }
 }
 
+function Get-CampaignNoReadyStageDiscoveryState {
+    param([string]$RepoRoot)
+
+    $discoveryScript = Join-Path $RepoRoot "automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1"
+    if (-not (Test-Path -LiteralPath $discoveryScript -PathType Leaf)) {
+        return $null
+    }
+
+    try {
+        $rawOutput = powershell -NoProfile -ExecutionPolicy Bypass -File $discoveryScript -OutputJson 2>$null
+        $rawText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($rawText)) {
+            return $null
+        }
+
+        return $rawText | ConvertFrom-Json -ErrorAction Stop
+    }
+    catch {
+        return $null
+    }
+}
+
 $health = powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $next = powershell -ExecutionPolicy Bypass -File automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $blocker = powershell -ExecutionPolicy Bypass -File automation/orchestration/blockers/Resolve-AiOsRuntimeBlocker.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
@@ -65,6 +87,36 @@ else {
     ""
 }
 $noReadyStageDiscoveryCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1 -OutputJson"
+$campaignNoReadyStageDiscoveryState = if ($campaignOverallReadiness -eq "NO_READY_STAGE") {
+    Get-CampaignNoReadyStageDiscoveryState -RepoRoot $repoRoot
+}
+else {
+    $null
+}
+$noReadyStageClassification = if ($campaignNoReadyStageDiscoveryState -and $campaignNoReadyStageDiscoveryState.PSObject.Properties.Name -contains "no_ready_stage_classification") {
+    [string]$campaignNoReadyStageDiscoveryState.no_ready_stage_classification
+}
+else {
+    ""
+}
+$noReadyStageIdleAllowed = if ($campaignNoReadyStageDiscoveryState -and $campaignNoReadyStageDiscoveryState.PSObject.Properties.Name -contains "idle_allowed") {
+    [bool]$campaignNoReadyStageDiscoveryState.idle_allowed
+}
+else {
+    $false
+}
+$noReadyStagePlanningRequired = if ($campaignNoReadyStageDiscoveryState -and $campaignNoReadyStageDiscoveryState.PSObject.Properties.Name -contains "next_stage_planning_required") {
+    [bool]$campaignNoReadyStageDiscoveryState.next_stage_planning_required
+}
+else {
+    $false
+}
+$noReadyStageRegistryInconsistencyDetected = if ($campaignNoReadyStageDiscoveryState -and $campaignNoReadyStageDiscoveryState.PSObject.Properties.Name -contains "registry_inconsistency_detected") {
+    [bool]$campaignNoReadyStageDiscoveryState.registry_inconsistency_detected
+}
+else {
+    $false
+}
 $relaySosEscalationStatus = "NOT_APPLICABLE"
 $relaySosAnthonyRequired = $false
 $relaySosRoutineReviewAllowed = $false
@@ -155,7 +207,15 @@ elseif ($next.status -eq "campaign_ready") {
 elseif ($next.status -eq "no_active_packet") {
     if ($campaignOverallReadiness -eq "NO_READY_STAGE") {
         $recommendedCommand = $noReadyStageDiscoveryCommand
-        $reason = "No active packet and campaign registry reports NO_READY_STAGE; run read-only discovery to identify planning gaps."
+        if ($noReadyStageClassification -eq "COMPLETE_IDLE") {
+            $reason = "Campaign registry reports COMPLETE_IDLE; no selectable work is pending and AIOS may idle cleanly. Discovery remains available for read-only review."
+        }
+        elseif ($noReadyStageClassification -eq "BLOCKED_BY_REGISTRY_INCONSISTENCY") {
+            $reason = "Campaign registry reports BLOCKED_BY_REGISTRY_INCONSISTENCY; review and repair registry bookkeeping before requesting a packet."
+        }
+        else {
+            $reason = "Campaign registry reports NO_READY_STAGE; run read-only discovery to identify next-stage planning gaps."
+        }
     }
     else {
         $recommendedCommand = "No command recommended. Review campaign registry statuses and approve one next packet candidate."
@@ -206,6 +266,10 @@ $result = [pscustomobject]@{
     routine_review_next_action = $routineReviewNextAction
     campaign_overall_readiness = $campaignOverallReadiness
     no_ready_stage_discovery_command = $noReadyStageDiscoveryCommand
+    no_ready_stage_classification = $noReadyStageClassification
+    no_ready_stage_idle_allowed = $noReadyStageIdleAllowed
+    no_ready_stage_planning_required = $noReadyStagePlanningRequired
+    no_ready_stage_registry_inconsistency_detected = $noReadyStageRegistryInconsistencyDetected
     reason = $reason
     health = $health.health
     packet_id = $next.packet_id
@@ -232,7 +296,15 @@ $blockedReason = if ($gitStatus.Count -gt 0 -and $commitPackagePreview) { "none"
 $status = if ($blockedReason -ne "none") { "BLOCKED" } elseif ($approvalRequired) { "REVIEW" } else { "READY" }
 $nextSafeAction = $recommendedCommand
 if ($next.status -eq "no_active_packet" -and $campaignOverallReadiness -eq "NO_READY_STAGE" -and (-not $relaySosApplies)) {
-    $nextSafeAction = $noReadyStageDiscoveryCommand
+    if ($noReadyStageClassification -eq "COMPLETE_IDLE") {
+        $nextSafeAction = "No READY stage is available and no blocker is detected. Idle cleanly or run read-only no-ready-stage discovery for review: $noReadyStageDiscoveryCommand"
+    }
+    elseif ($noReadyStageClassification -eq "BLOCKED_BY_REGISTRY_INCONSISTENCY") {
+        $nextSafeAction = "Review and repair campaign registry inconsistencies before requesting a packet. Read-only evidence: $noReadyStageDiscoveryCommand"
+    }
+    else {
+        $nextSafeAction = $noReadyStageDiscoveryCommand
+    }
 }
 if ($relaySosApplies -and $routineReviewContinuationAllowed) {
     $routineReviewCommandForAction = if ($routineReviewNextAction) { $routineReviewNextAction } else { $routineReviewResolverCommand }
@@ -270,6 +342,10 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
         routine_review_next_action = $routineReviewNextAction
         campaign_overall_readiness = $campaignOverallReadiness
         no_ready_stage_discovery_command = $noReadyStageDiscoveryCommand
+        no_ready_stage_classification = $noReadyStageClassification
+        no_ready_stage_idle_allowed = $noReadyStageIdleAllowed
+        no_ready_stage_planning_required = $noReadyStagePlanningRequired
+        no_ready_stage_registry_inconsistency_detected = $noReadyStageRegistryInconsistencyDetected
     }
     generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 })

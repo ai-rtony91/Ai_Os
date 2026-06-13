@@ -177,6 +177,15 @@ $blockedStages = New-Object System.Collections.Generic.List[object]
 $candidateNextStageOptions = New-Object System.Collections.Generic.List[object]
 $supervisedAutonomySelectableStages = New-Object System.Collections.Generic.List[object]
 $supervisedAutonomyStages = New-Object System.Collections.Generic.List[object]
+$dependencyInconsistencies = New-Object System.Collections.Generic.List[object]
+$readyStagesWithBlockers = New-Object System.Collections.Generic.List[object]
+$completeStagesWithPacketCandidates = New-Object System.Collections.Generic.List[object]
+$activeNextPacketCandidates = New-Object System.Collections.Generic.List[object]
+$duplicateActiveNextPacketCandidates = New-Object System.Collections.Generic.List[object]
+$activeHighPriorityBlockedStages = New-Object System.Collections.Generic.List[object]
+$highPriorityInProgressMissingNextPacketCandidate = New-Object System.Collections.Generic.List[object]
+$plannedOrInProgressCandidateOptions = New-Object System.Collections.Generic.List[object]
+$stageIdCounts = @{}
 
 $totalPhases = 0
 foreach ($campaign in @($registry.campaigns)) {
@@ -184,6 +193,10 @@ foreach ($campaign in @($registry.campaigns)) {
 
     foreach ($stage in @($campaign.stages)) {
         $bucket = Get-StageStatusBucket -Status ([string]$stage.status)
+        $stageId = [string]$stage.stage_id
+        $stagePriority = ([string]$stage.priority).ToLowerInvariant()
+        $campaignPriority = ([string]$campaign.priority).ToLowerInvariant()
+        $campaignStatus = [string]$campaign.status
         if ($statusCounts.Contains($bucket)) {
             $statusCounts[$bucket] = [int]$statusCounts[$bucket] + 1
         }
@@ -193,6 +206,63 @@ foreach ($campaign in @($registry.campaigns)) {
 
         $summary = Convert-StageSummary -Campaign $campaign -Stage $stage -StageMap $stageMap
         [void]$allStageSummaries.Add($summary)
+
+        if (-not [string]::IsNullOrWhiteSpace($stageId)) {
+            if (-not $stageIdCounts.ContainsKey($stageId)) {
+                $stageIdCounts[$stageId] = 0
+            }
+            $stageIdCounts[$stageId] = [int]$stageIdCounts[$stageId] + 1
+        }
+
+        foreach ($dependency in @($stage.depends_on)) {
+            $dependencyId = [string]$dependency
+            if ([string]::IsNullOrWhiteSpace($dependencyId)) {
+                continue
+            }
+
+            if (-not $stageMap.ContainsKey($dependencyId)) {
+                [void]$dependencyInconsistencies.Add([pscustomobject]@{
+                    campaign_id = [string]$campaign.campaign_id
+                    stage_id = $stageId
+                    missing_dependency_id = $dependencyId
+                    issue = "Stage depends on missing stage id."
+                })
+            }
+        }
+
+        if ([string]$stage.status -eq "READY" -and @($summary.blocked_by).Count -gt 0) {
+            [void]$readyStagesWithBlockers.Add($summary)
+        }
+
+        if ([string]$stage.status -eq "COMPLETE" -and -not [string]::IsNullOrWhiteSpace([string]$summary.next_packet_candidate)) {
+            [void]$completeStagesWithPacketCandidates.Add($summary)
+        }
+
+        if (
+            -not [string]::IsNullOrWhiteSpace([string]$summary.next_packet_candidate) -and
+            @("COMPLETE", "DEFERRED") -notcontains $bucket
+        ) {
+            [void]$activeNextPacketCandidates.Add([pscustomobject]@{
+                next_packet_candidate = [string]$summary.next_packet_candidate
+                campaign_id = [string]$campaign.campaign_id
+                stage_id = $stageId
+                status = [string]$stage.status
+            })
+        }
+
+        $isHighPriorityPath = @("critical", "high") -contains $campaignPriority -or @("critical", "high") -contains $stagePriority
+        $isActiveCampaignPath = $campaignStatus -eq "IN_PROGRESS"
+        if (($bucket -eq "BLOCKED" -or @($summary.blocked_by).Count -gt 0) -and ($isHighPriorityPath -or $isActiveCampaignPath)) {
+            [void]$activeHighPriorityBlockedStages.Add($summary)
+        }
+
+        if (
+            $bucket -eq "IN_PROGRESS" -and
+            ($isHighPriorityPath -or $isActiveCampaignPath) -and
+            [string]::IsNullOrWhiteSpace([string]$summary.next_packet_candidate)
+        ) {
+            [void]$highPriorityInProgressMissingNextPacketCandidate.Add($summary)
+        }
 
         if ([string]$campaign.campaign_id -eq "CAMPAIGN-SUPERVISED-AUTONOMY") {
             [void]$supervisedAutonomyStages.Add($summary)
@@ -227,7 +297,30 @@ foreach ($campaign in @($registry.campaigns)) {
             }
 
             [void]$candidateNextStageOptions.Add((Convert-StageSummary -Campaign $campaign -Stage $stage -StageMap $stageMap -Gap $gap))
+            if ($campaignStatus -eq "IN_PROGRESS" -and @("IN_PROGRESS", "PLANNED") -contains $bucket) {
+                [void]$plannedOrInProgressCandidateOptions.Add($summary)
+            }
         }
+    }
+}
+
+foreach ($candidateGroup in @($activeNextPacketCandidates | Group-Object -Property next_packet_candidate | Where-Object { $_.Count -gt 1 })) {
+    [void]$duplicateActiveNextPacketCandidates.Add([pscustomobject]@{
+        next_packet_candidate = [string]$candidateGroup.Name
+        count = [int]$candidateGroup.Count
+        stages = @($candidateGroup.Group)
+        issue = "Duplicate active next_packet_candidate values exist."
+    })
+}
+
+$duplicateStageIds = New-Object System.Collections.Generic.List[object]
+foreach ($stageIdKey in @($stageIdCounts.Keys)) {
+    if ([int]$stageIdCounts[$stageIdKey] -gt 1) {
+        [void]$duplicateStageIds.Add([pscustomobject]@{
+            stage_id = [string]$stageIdKey
+            count = [int]$stageIdCounts[$stageIdKey]
+            issue = "Duplicate stage_id values exist."
+        })
     }
 }
 
@@ -250,6 +343,65 @@ if ($candidateNextStageOptions.Count -gt 0) {
 }
 else {
     [void]$candidateGapNotes.Add("No IN_PROGRESS, PLANNED, or NEEDS_REVIEW stage is immediately available as a candidate option.")
+}
+
+$registryInconsistencyDetected = (
+    $dependencyInconsistencies.Count -gt 0 -or
+    $readyStagesWithBlockers.Count -gt 0 -or
+    $completeStagesWithPacketCandidates.Count -gt 0 -or
+    $duplicateActiveNextPacketCandidates.Count -gt 0 -or
+    $duplicateStageIds.Count -gt 0
+)
+$lastCompletedHighPriorityStageExists = $null -ne $lastCompletedHighPriorityStage
+$activeHighPriorityBlockedCount = $activeHighPriorityBlockedStages.Count
+$inProgressHighPriorityMissingNextPacketCandidateCount = $highPriorityInProgressMissingNextPacketCandidate.Count
+$plannedOrInProgressCandidateCount = $plannedOrInProgressCandidateOptions.Count
+$workloadCompletionState = "UNKNOWN"
+$noReadyStageClassification = "NEEDS_NEXT_STAGE_PLANNING"
+$noReadyStageClassificationReason = "No READY stage is available; planning review is required before defining new work."
+$idleAllowed = $false
+$nextStagePlanningRequired = $true
+
+if ($noReadyStageDetected -and $registryInconsistencyDetected) {
+    $noReadyStageClassification = "BLOCKED_BY_REGISTRY_INCONSISTENCY"
+    $noReadyStageClassificationReason = "No READY stage is available and registry bookkeeping inconsistencies were detected."
+    $workloadCompletionState = "BLOCKED_BY_REGISTRY_INCONSISTENCY"
+    $idleAllowed = $false
+    $nextStagePlanningRequired = $false
+}
+elseif (
+    $noReadyStageDetected -and
+    [int]$statusCounts["READY"] -eq 0 -and
+    $activeHighPriorityBlockedCount -eq 0 -and
+    $inProgressHighPriorityMissingNextPacketCandidateCount -eq 0 -and
+    (-not $registryInconsistencyDetected) -and
+    $lastCompletedHighPriorityStageExists -and
+    $plannedOrInProgressCandidateCount -eq 0
+) {
+    $noReadyStageClassification = "COMPLETE_IDLE"
+    $noReadyStageClassificationReason = "No READY stage is available, no active/high-priority blocker is detected, no in-progress high-priority stage is missing a packet candidate, and a high-priority stage was completed."
+    $workloadCompletionState = "COMPLETE_IDLE"
+    $idleAllowed = $true
+    $nextStagePlanningRequired = $false
+}
+elseif (
+    $noReadyStageDetected -and
+    [int]$statusCounts["READY"] -eq 0 -and
+    $plannedOrInProgressCandidateCount -gt 0 -and
+    (-not $registryInconsistencyDetected)
+) {
+    $noReadyStageClassification = "NEEDS_NEXT_STAGE_PLANNING"
+    $noReadyStageClassificationReason = "No READY stage is available and active planned or in-progress campaign work needs supervised planning before it can become selectable."
+    $workloadCompletionState = "NEEDS_NEXT_STAGE_PLANNING"
+    $idleAllowed = $false
+    $nextStagePlanningRequired = $true
+}
+elseif ($noReadyStageDetected) {
+    $noReadyStageClassification = "NEEDS_NEXT_STAGE_PLANNING"
+    $noReadyStageClassificationReason = "No READY stage is available; a supervised planning review is required before defining any new selectable work."
+    $workloadCompletionState = "NEEDS_NEXT_STAGE_PLANNING"
+    $idleAllowed = $false
+    $nextStagePlanningRequired = $true
 }
 
 $actionRecommendationPath = Join-Path $repoRoot "automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1"
@@ -280,11 +432,17 @@ $relatedSurfaces = @(
     }
 )
 
-$recommendedNextAction = if ($noReadyStageDetected) {
-    "Review campaign registry gaps and create a supervised DRY_RUN packet candidate for the next autonomy stage."
-}
-else {
-    "Use the campaign next-task selector output before running no-ready-stage discovery."
+$recommendedNextAction = switch ($noReadyStageClassification) {
+    "COMPLETE_IDLE" { "No READY stage is available and no blocker is detected. Idle cleanly or request a supervised planning review before defining new work." }
+    "BLOCKED_BY_REGISTRY_INCONSISTENCY" { "Review and repair campaign registry inconsistencies before requesting a packet." }
+    default {
+        if ($noReadyStageDetected) {
+            "Review campaign registry gaps and create a supervised DRY_RUN packet candidate for the next autonomy stage."
+        }
+        else {
+            "Use the campaign next-task selector output before running no-ready-stage discovery."
+        }
+    }
 }
 $lastCompletedStageValue = if ($null -ne $lastCompletedHighPriorityStage) { $lastCompletedHighPriorityStage } else { $null }
 $statusCountsObject = [pscustomobject]@{
@@ -325,6 +483,26 @@ $safetyObject = [pscustomobject]@{
     pushes = $false
     broker_or_live_trading = $false
 }
+$classifierEvidenceObject = [pscustomobject]@{
+    ready_count = [int]$statusCounts["READY"]
+    blocked_count = [int]$statusCounts["BLOCKED"]
+    active_high_priority_blocked_count = $activeHighPriorityBlockedCount
+    planned_or_in_progress_candidate_count = $plannedOrInProgressCandidateCount
+    in_progress_high_priority_missing_next_packet_candidate_count = $inProgressHighPriorityMissingNextPacketCandidateCount
+    last_completed_high_priority_stage_exists = $lastCompletedHighPriorityStageExists
+    dependency_inconsistency_count = $dependencyInconsistencies.Count
+    ready_stage_with_blocker_count = $readyStagesWithBlockers.Count
+    complete_stage_with_next_packet_candidate_count = $completeStagesWithPacketCandidates.Count
+    duplicate_active_next_packet_candidate_count = $duplicateActiveNextPacketCandidates.Count
+    duplicate_stage_id_count = $duplicateStageIds.Count
+    dependency_inconsistencies = @($dependencyInconsistencies.ToArray())
+    ready_stages_with_blockers = @($readyStagesWithBlockers.ToArray())
+    complete_stages_with_packet_candidates = @($completeStagesWithPacketCandidates.ToArray())
+    duplicate_active_next_packet_candidates = @($duplicateActiveNextPacketCandidates.ToArray())
+    duplicate_stage_ids = @($duplicateStageIds.ToArray())
+    active_high_priority_blocked_stages = @($activeHighPriorityBlockedStages.ToArray())
+    high_priority_in_progress_missing_next_packet_candidate = @($highPriorityInProgressMissingNextPacketCandidate.ToArray())
+}
 $candidateNextStageOptionArray = @($candidateNextStageOptions.ToArray())
 $blockedStageArray = @($blockedStages.ToArray())
 $relatedSurfaceArray = @($relatedSurfaces)
@@ -334,6 +512,13 @@ $result = [ordered]@{
     mode = "DRY_RUN_READ_ONLY"
     overall_readiness = $overallReadiness
     no_ready_stage_detected = $noReadyStageDetected
+    no_ready_stage_classification = $noReadyStageClassification
+    no_ready_stage_classification_reason = $noReadyStageClassificationReason
+    workload_completion_state = $workloadCompletionState
+    idle_allowed = $idleAllowed
+    next_stage_planning_required = $nextStagePlanningRequired
+    registry_inconsistency_detected = $registryInconsistencyDetected
+    classifier_evidence = $classifierEvidenceObject
     reason = $reason
     inventory = $inventoryObject
     last_completed_stage = $lastCompletedStageValue

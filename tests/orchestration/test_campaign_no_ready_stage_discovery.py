@@ -13,6 +13,11 @@ DISCOVERY_COMMAND = (
     "powershell -NoProfile -ExecutionPolicy Bypass -File "
     "automation/orchestration/campaign_registry/Get-AiOsCampaignNoReadyStageDiscovery.DRY_RUN.ps1 -OutputJson"
 )
+ALLOWED_CLASSIFICATIONS = {
+    "COMPLETE_IDLE",
+    "NEEDS_NEXT_STAGE_PLANNING",
+    "BLOCKED_BY_REGISTRY_INCONSISTENCY",
+}
 
 
 def _run_script_json(script: Path, args: list[str] | None = None) -> dict:
@@ -43,6 +48,7 @@ def test_discovery_script_emits_contract_schema() -> None:
 
     assert out["schema"] == "AIOS_CAMPAIGN_NO_READY_STAGE_DISCOVERY.v1"
     assert out["mode"] == "DRY_RUN_READ_ONLY"
+    assert out["no_ready_stage_classification"] in ALLOWED_CLASSIFICATIONS
 
 
 def test_discovery_script_is_dry_run_read_only() -> None:
@@ -64,6 +70,39 @@ def test_current_registry_reports_no_ready_stage_detected() -> None:
     assert out["candidate_gap_summary"]["supervised_autonomy_no_next_selectable_stage"] is True
 
 
+def test_current_registry_classifier_state_is_allowed_and_internally_consistent() -> None:
+    out = _run_script_json(DISCOVERY_SCRIPT)
+
+    assert out["no_ready_stage_classification"] in ALLOWED_CLASSIFICATIONS
+    if out["no_ready_stage_classification"] == "COMPLETE_IDLE":
+        assert out["idle_allowed"] is True
+        assert out["next_stage_planning_required"] is False
+        assert out["registry_inconsistency_detected"] is False
+    elif out["no_ready_stage_classification"] == "NEEDS_NEXT_STAGE_PLANNING":
+        assert out["idle_allowed"] is False
+        assert out["next_stage_planning_required"] is True
+        assert out["registry_inconsistency_detected"] is False
+    elif out["no_ready_stage_classification"] == "BLOCKED_BY_REGISTRY_INCONSISTENCY":
+        assert out["idle_allowed"] is False
+        assert out["next_stage_planning_required"] is False
+        assert out["registry_inconsistency_detected"] is True
+
+
+def test_discovery_output_includes_classifier_evidence() -> None:
+    out = _run_script_json(DISCOVERY_SCRIPT)
+
+    assert "classifier_evidence" in out
+    evidence = out["classifier_evidence"]
+    for key in (
+        "ready_count",
+        "blocked_count",
+        "active_high_priority_blocked_count",
+        "planned_or_in_progress_candidate_count",
+        "last_completed_high_priority_stage_exists",
+    ):
+        assert key in evidence
+
+
 def test_discovery_output_includes_campaign_stage_status_counts() -> None:
     out = _run_script_json(DISCOVERY_SCRIPT)
     counts = out["inventory"]["status_counts"]
@@ -78,8 +117,8 @@ def test_discovery_output_includes_campaign_stage_status_counts() -> None:
 def test_discovery_output_includes_safe_planning_recommended_next_action() -> None:
     out = _run_script_json(DISCOVERY_SCRIPT)
 
-    assert "review campaign registry gaps" in out["recommended_next_action"].lower()
-    assert "DRY_RUN" in out["recommended_next_action"]
+    recommended = out["recommended_next_action"].lower()
+    assert "idle cleanly" in recommended or "review campaign registry gaps" in recommended or "review and repair campaign registry" in recommended
 
 
 def test_discovery_recommended_next_action_omits_forbidden_action_language() -> None:
@@ -121,5 +160,6 @@ def test_action_recommendation_surfaces_discovery_router_for_no_ready_stage() ->
     assert out["mode"] == "READ_ONLY"
     assert out["packet_status"] == "no_active_packet"
     assert out["campaign_overall_readiness"] == "NO_READY_STAGE"
+    assert out["no_ready_stage_classification"] in ALLOWED_CLASSIFICATIONS
     assert out["recommended_command"] == DISCOVERY_COMMAND
-    assert out["orchestration_result_contract"]["next_safe_action"] == DISCOVERY_COMMAND
+    assert "no command recommended" not in out["orchestration_result_contract"]["next_safe_action"].lower()
