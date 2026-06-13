@@ -40,6 +40,10 @@ $relaySosAnthonyRequired = $false
 $relaySosRoutineReviewAllowed = $false
 $relaySosSafeNextAction = ""
 $relaySosApplies = $false
+$routineReviewContinuationAllowed = $false
+$routineReviewContinuationReason = ""
+$routineReviewNextAction = ""
+$routineReviewResolverCommand = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Resolve-AiOsRelayHumanReview.DRY_RUN.ps1 -OutputJson"
 
 if ($relayOperatorState -and [string]$relayOperatorState.actor_relay_bus_status -eq "NEEDS_HUMAN_REVIEW") {
     $relaySosApplies = $true
@@ -54,6 +58,24 @@ if ($relayOperatorState -and [string]$relayOperatorState.actor_relay_bus_status 
     }
     if ($relayOperatorState.PSObject.Properties.Name -contains "sos_safe_next_action") {
         $relaySosSafeNextAction = [string]$relayOperatorState.sos_safe_next_action
+    }
+    if ($relayOperatorState.PSObject.Properties.Name -contains "routine_review_continuation_allowed") {
+        $routineReviewContinuationAllowed = [bool]$relayOperatorState.routine_review_continuation_allowed
+    }
+    else {
+        $routineReviewContinuationAllowed = ($relaySosEscalationStatus -eq "ROUTINE_REVIEW" -and (-not $relaySosAnthonyRequired) -and $relaySosRoutineReviewAllowed)
+    }
+    if ($relayOperatorState.PSObject.Properties.Name -contains "routine_review_continuation_reason") {
+        $routineReviewContinuationReason = [string]$relayOperatorState.routine_review_continuation_reason
+    }
+    if ($relayOperatorState.PSObject.Properties.Name -contains "routine_review_next_action") {
+        $routineReviewNextAction = [string]$relayOperatorState.routine_review_next_action
+    }
+    if ($routineReviewContinuationAllowed -and [string]::IsNullOrWhiteSpace($routineReviewNextAction)) {
+        $routineReviewNextAction = $routineReviewResolverCommand
+    }
+    if ($routineReviewContinuationAllowed -and [string]::IsNullOrWhiteSpace($routineReviewContinuationReason)) {
+        $routineReviewContinuationReason = "Routine relay review may continue through resolver and SOS-governed review flow."
     }
 }
 $commitPackagePreview = $null
@@ -109,10 +131,11 @@ else {
     $reason = "Packet can continue normal advancement."
 }
 
-if ($relaySosApplies -and $relaySosEscalationStatus -eq "ROUTINE_REVIEW") {
-    $reason = "Routine relay review may continue through resolver and SOS-governed path."
+if ($relaySosApplies -and $routineReviewContinuationAllowed) {
+    $recommendedCommand = if ($routineReviewNextAction) { $routineReviewNextAction } else { $routineReviewResolverCommand }
+    $reason = if ($routineReviewContinuationReason) { $routineReviewContinuationReason } else { "Routine relay review may continue through resolver and SOS-governed review flow." }
 }
-elseif ($relaySosApplies -and $relaySosEscalationStatus -eq "SOS_ESCALATION") {
+elseif ($relaySosApplies -and ($relaySosEscalationStatus -eq "SOS_ESCALATION" -or $relaySosAnthonyRequired)) {
     $recommendedCommand = "No command recommended. STOP and request Anthony review before any continuation."
     $reason = "Relay SOS escalation requires Anthony; do not continue automatically."
 }
@@ -142,6 +165,9 @@ $result = [pscustomobject]@{
     relay_sos_anthony_required = $relaySosAnthonyRequired
     relay_sos_routine_review_allowed = $relaySosRoutineReviewAllowed
     relay_sos_next_safe_action = if ($relaySosSafeNextAction) { $relaySosSafeNextAction } else { "" }
+    routine_review_continuation_allowed = $routineReviewContinuationAllowed
+    routine_review_continuation_reason = $routineReviewContinuationReason
+    routine_review_next_action = $routineReviewNextAction
     reason = $reason
     health = $health.health
     packet_id = $next.packet_id
@@ -160,17 +186,18 @@ $result = [pscustomobject]@{
     }
 }
 
-$approvalRequired = ($approval.matches_found -gt 0 -or $next.status -eq "awaiting_approval" -or $commitPackagePreview)
-if ($relaySosApplies -and $relaySosEscalationStatus -eq "SOS_ESCALATION") {
+$approvalRequired = ($approval.matches_found -gt 0 -or $next.status -eq "awaiting_approval" -or ($commitPackagePreview -and (-not $routineReviewContinuationAllowed)))
+if ($relaySosApplies -and ($relaySosEscalationStatus -eq "SOS_ESCALATION" -or $relaySosAnthonyRequired)) {
     $approvalRequired = $true
 }
 $blockedReason = if ($gitStatus.Count -gt 0 -and $commitPackagePreview) { "none" } elseif ($health.health -ne "HEALTHY") { "Runtime health is not clean." } elseif ($next.status -eq "blocked" -or $next.status -eq "failed") { "Packet is blocked or failed." } elseif ($next.status -eq "no_active_packet") { "No active packet or READY campaign stage is available." } else { "none" }
 $status = if ($blockedReason -ne "none") { "BLOCKED" } elseif ($approvalRequired) { "REVIEW" } else { "READY" }
 $nextSafeAction = $recommendedCommand
-if ($relaySosApplies -and $relaySosEscalationStatus -eq "ROUTINE_REVIEW") {
-    $nextSafeAction = if ($relaySosSafeNextAction) { $relaySosSafeNextAction } else { "Continue through resolver and SOS-governed routine review flow." }
+if ($relaySosApplies -and $routineReviewContinuationAllowed) {
+    $routineReviewCommandForAction = if ($routineReviewNextAction) { $routineReviewNextAction } else { $routineReviewResolverCommand }
+    $nextSafeAction = "Routine relay review may continue through resolver and SOS-governed review flow: $routineReviewCommandForAction"
 }
-elseif ($relaySosApplies -and $relaySosEscalationStatus -eq "SOS_ESCALATION") {
+elseif ($relaySosApplies -and ($relaySosEscalationStatus -eq "SOS_ESCALATION" -or $relaySosAnthonyRequired)) {
     $nextSafeAction = "STOP and request Anthony review before continuation."
 }
 $result | Add-Member -NotePropertyName orchestration_result_contract -NotePropertyValue ([pscustomobject]@{
@@ -197,6 +224,9 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
         blocker = $blocker.blocker
         reason = $reason
         level5_commit_package_preview = $result.level5_commit_package_preview
+        routine_review_continuation_allowed = $routineReviewContinuationAllowed
+        routine_review_continuation_reason = $routineReviewContinuationReason
+        routine_review_next_action = $routineReviewNextAction
     }
     generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 })
@@ -213,6 +243,7 @@ Write-Host "packet_id: $($result.packet_id)"
 Write-Host "packet_status: $($result.packet_status)"
 Write-Host "approval_matches: $($result.approval_matches)"
 Write-Host "reason: $($result.reason)"
+Write-Host "routine_review_continuation_allowed: $($result.routine_review_continuation_allowed)"
 Write-Host "level5_commit_package_preview: available=$($result.level5_commit_package_preview.available); status=$($result.level5_commit_package_preview.status)"
 Write-Host "level5_stop: $($result.level5_commit_package_preview.stop_before_staging)"
 Write-Host ""
