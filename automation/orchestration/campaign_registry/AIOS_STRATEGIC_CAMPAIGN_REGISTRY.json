@@ -422,13 +422,13 @@
       "campaign_id": "CAMPAIGN-TRADING-LAB-PAPER",
       "title": "Trading Lab Paper System",
       "objective": "Advance Trading Lab as a paper-only proving ground with evidence, risk controls, and no live path.",
-      "status": "BLOCKED",
+      "status": "COMPLETE",
       "priority": "normal",
       "phases": [
         {
           "phase_id": "PHASE-TRADING-PAPER-READINESS",
           "title": "Paper Readiness",
-          "status": "BLOCKED"
+          "status": "COMPLETE"
         }
       ],
       "stages": [
@@ -436,23 +436,21 @@
           "stage_id": "STAGE-TRADING-PAPER-BOUNDARY-REVIEW",
           "phase_id": "PHASE-TRADING-PAPER-READINESS",
           "title": "Review paper-only Trading Lab boundary",
-          "status": "BLOCKED",
+          "status": "COMPLETE",
           "priority": "normal",
           "depends_on": [
             "STAGE-TELEMETRY-CONTRACT-REVIEW"
           ],
-          "blocked_by": [
-            "Telemetry/reporting evidence boundary not reviewed"
-          ],
-          "next_packet_candidate": "PKT-TRADING-PAPER-BOUNDARY-REVIEW-DRYRUN"
+          "blocked_by": [],
+          "next_packet_candidate": null,
+          "completed_by_pr": "https://github.com/ai-rtony91/Ai_Os/pull/647",
+          "completed_by_commit": "e69c6898"
         }
       ],
       "depends_on": [
         "CAMPAIGN-TELEMETRY-REPORTING"
       ],
-      "blocked_by": [
-        "Telemetry/reporting evidence boundary not reviewed"
-      ],
+      "blocked_by": [],
       "unlock_conditions": [
         "Telemetry/reporting contract reviewed.",
         "Paper-only boundary confirmed."
@@ -480,13 +478,13 @@
         "apps/trading_lab/README.md",
         "RISK_POLICY.md"
       ],
-      "completion_percent": 20,
-      "progress_basis": "Paper-only direction exists; dependency gates remain.",
+      "completion_percent": 100,
+      "progress_basis": "Trading Lab paper-only boundary review is closed after telemetry dependency completion in PR #647; live trading, broker, OANDA, webhook, order, secret, runtime, worker, scheduler, queue, approval inbox, and dashboard authority remain blocked.",
       "timeline_estimate": "multi-checkpoint",
-      "next_packet_candidate": "PKT-TRADING-PAPER-BOUNDARY-REVIEW-DRYRUN",
+      "next_packet_candidate": null,
       "crew_lane": "trading-lab-paper-review",
       "recommended_worker": "EAST_OCC_01",
-      "stop_condition": "Stop after paper-boundary review."
+      "stop_condition": "Trading Lab paper boundary review closed; Forex/OANDA documentation boundary requires a separate DRY_RUN packet."
     },
     {
       "campaign_id": "CAMPAIGN-FOREX-BOUNDARY",
