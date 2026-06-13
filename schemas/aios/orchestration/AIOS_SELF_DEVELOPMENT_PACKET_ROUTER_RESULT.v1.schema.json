@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_SELF_DEVELOPMENT_PACKET_ROUTER_RESULT.v1.schema.json",
+  "title": "AIOS Self-Development Packet Router Result v1",
+  "description": "Console-only read-only AIOS self-development packet router result. This schema grants no APPLY, packet generation, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "source_self_audit_schema",
+    "repo_state",
+    "input_summary",
+    "candidate_packets",
+    "blocked_candidates",
+    "ranking_basis",
+    "recommended_packet",
+    "confidence",
+    "approval_required_before_apply",
+    "safety",
+    "stop_conditions",
+    "no_write_proof",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_SELF_DEVELOPMENT_PACKET_ROUTER_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "source_self_audit_schema": {
+      "type": "string"
+    },
+    "repo_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "input_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "candidate_packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "packet_id",
+          "classification",
+          "mode",
+          "blocked",
+          "rank_score",
+          "intent"
+        ],
+        "properties": {
+          "packet_id": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "SAFE_DRY_RUN_REVIEW",
+              "SAFE_DESIGN_REVIEW",
+              "APPLY_REQUIRES_HUMAN_APPROVAL",
+              "BLOCKED_WRITES_PACKET",
+              "BLOCKED_READY_STAGE_MUTATION",
+              "BLOCKED_REGISTRY_MUTATION",
+              "BLOCKED_PROTECTED_ACTION",
+              "BLOCKED_RUNTIME_OR_WORKER",
+              "BLOCKED_LIVE_TRADING_OR_BROKER",
+              "BLOCKED_SECRET_OR_ENV",
+              "UNKNOWN_NEEDS_REVIEW"
+            ]
+          },
+          "mode": {
+            "type": "string"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "rank_score": {
+            "type": "integer"
+          },
+          "intent": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "blocked_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "ranking_basis": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "recommended_packet": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "approval_required_before_apply": {
+      "type": "boolean",
+      "const": true
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "console_only",
+        "writes_files",
+        "writes_packet_drafts",
+        "writes_proposed_packets",
+        "creates_ready_stage",
+        "mutates_registry",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approvals",
+        "starts_runtime",
+        "launches_workers",
+        "protected_action_recommended",
+        "broker_or_live_trading",
+        "secrets_or_env_access"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "BLOCKED",
+            "BLOCKED_BY_WRITE_SURFACE_RISK"
+          ]
+        },
+        "console_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "writes_files": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_packet_drafts": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_proposed_packets": {
+          "type": "boolean",
+          "const": false
+        },
+        "creates_ready_stage": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approvals": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_action_recommended": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        },
+        "secrets_or_env_access": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "no_write_proof": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}
