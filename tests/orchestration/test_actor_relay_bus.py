@@ -55,6 +55,10 @@ def _build_payload(message_id: str) -> str:
     return json.dumps({"message_id": message_id, "content": "relay test"})
 
 
+def _run_script_filelist(root: Path) -> set[str]:
+    return {str(item.relative_to(root)) for item in root.rglob("*") if item.is_file()}
+
+
 def test_actor_registry_exists_and_starter_actors_are_present() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -290,6 +294,70 @@ def test_relay_state_reads_latest_and_tracks_next_action() -> None:
         assert state["relay_status"] == "READY_FOR_POWERSHELL_PASTEBACK"
         assert "latest actor relay message" not in state["exact_next_action"]
         assert state["actor_count"] == 9
+        assert state["execution_allowed"] is False
+        assert state["can_continue_without_anthony"] is False
+
+
+def test_relay_state_empty_inbox_returns_empty_no_crash() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _init_relay_bus_root(root)
+
+        pre_files = _run_script_filelist(root)
+        state = _run_script_json(RELAY_BUS_STATE_SCRIPT, [], root)
+        post_files = _run_script_filelist(root)
+
+        assert state["relay_status"] == "EMPTY"
+        assert state["latest_message_path"] == ""
+        assert state["latest_actor"] == ""
+        assert state["latest_target_actor"] == ""
+        assert state["latest_message_type"] == ""
+        assert state["latest_packet_id"] == ""
+        assert state["actor_count"] == 9
+        assert state["pending_human_review_count"] == 0
+        assert state["pending_messages"] == []
+        assert state["execution_allowed"] is False
+        assert state["can_continue_without_anthony"] is False
+        assert pre_files == post_files
+
+
+def test_relay_state_with_single_message_returns_latest() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _init_relay_bus_root(root)
+
+        _run_script_json(
+            NEW_MESSAGE_SCRIPT,
+            [
+                "-Actor",
+                "codex_cli",
+                "-TargetActor",
+                "powershell_operator",
+                "-PacketId",
+                "AIOS-RELAY-BUS-SINGLE-01",
+                "-Branch",
+                "feature/actor-relay-bus-v1",
+                "-MessageType",
+                "codex_final_report",
+                "-Intent",
+                "handoff summary",
+                "-Status",
+                "pending",
+                "-PayloadText",
+                _build_payload("AIOS-RELAY-BUS-SINGLE-01"),
+                "-Mode",
+                "APPLY",
+            ],
+            root,
+        )
+
+        state = _run_script_json(RELAY_BUS_STATE_SCRIPT, [], root)
+        assert state["latest_message_type"] == "codex_final_report"
+        assert state["latest_actor"] == "codex_cli"
+        assert state["latest_target_actor"] == "powershell_operator"
+        assert state["latest_packet_id"] == "AIOS-RELAY-BUS-SINGLE-01"
+        assert state["relay_status"] == "NEEDS_HUMAN_REVIEW"
+        assert state["pending_human_review_count"] == 1
         assert state["execution_allowed"] is False
         assert state["can_continue_without_anthony"] is False
 
