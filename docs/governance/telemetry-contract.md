@@ -8,9 +8,9 @@ Telemetry is an accountable evidence layer. It exists to make orchestration acti
 
 Human authorization is the default. Automation is the exception.
 
-## CURRENT STATUS: PARTIAL / Evidence-Only
+## CURRENT STATUS: PARTIAL / Evidence-Only / Review-Required
 
-Status label: `PARTIAL / Evidence-Only`
+Status label: `PARTIAL / Evidence-Only / Review-Required`
 
 Current repo evidence shows that telemetry scaffolding exists, including:
 
@@ -23,6 +23,17 @@ Current repo evidence shows that telemetry scaffolding exists, including:
 
 This status is not production-ready telemetry. Schema alignment is incomplete. Validator coverage is incomplete. Dashboard and runtime projections must be treated as derived evidence views, not authority. Any live dashboard wiring, worker automation, or runtime decision-making based on telemetry requires implementation review and a stable validator first.
 
+Current contract authority is intentionally narrow:
+
+- Read-only telemetry/reporting review is allowed.
+- Existing replay and validation checks are allowed when they do not write files.
+- New telemetry writers are not approved by this contract.
+- Reports writes are not approved unless a separate packet explicitly authorizes them.
+- Dashboard implementation changes are not approved by this contract.
+- Registry promotion is not approved by this contract.
+
+This document clarifies the boundary only. It does not complete telemetry implementation, approve new writers, approve Reports output, approve dashboard wiring, unlock Trading Lab, or approve Forex/OANDA work.
+
 ## CANONICAL TELEMETRY PATH
 
 The canonical durable telemetry ledger for Phase 1 is:
@@ -32,6 +43,30 @@ telemetry/work_ledger.jsonl
 ```
 
 Telemetry events must be append-only JSON Lines records. Runtime projections, dashboards, summaries, and replay views may read from telemetry, but they must not become authority over approval, APPLY, commit, push, merge, runtime execution, worker launch, dashboard launch, trading, broker access, or live automation.
+
+## CURRENT WRITE BOUNDARY
+
+Telemetry/reporting work is split into read-only review, explicitly approved evidence writes, and blocked writes.
+
+Allowed without additional APPLY authority:
+
+- read `docs/governance/telemetry-contract.md`;
+- read dashboard, reporting, roadmap, and Trading Lab contract docs;
+- run existing read-only validators or replay checks;
+- inspect existing telemetry scripts and services;
+- report gaps and next safe actions.
+
+Blocked until a separate approved packet:
+
+- adding a new telemetry writer;
+- modifying existing telemetry writer behavior;
+- writing to `telemetry/`;
+- creating or writing `Reports/` output;
+- wiring telemetry into dashboard implementation;
+- using telemetry to start runtime, workers, schedulers, queues, approvals, or protected actions;
+- promoting campaign registry stages.
+
+Reports writes remain blocked until a Reports policy exists or a future packet explicitly authorizes a bounded Reports write path. A DRY_RUN or APPLY packet must name the exact Reports path, write behavior, validation command, and stop point before any Reports output is created.
 
 ## AUTHORITY
 
@@ -102,6 +137,20 @@ The governance/canonical target uses snake_case fields and explicit authority fi
 This mismatch is intentional to document, not resolve, in this governance lane. Telemetry remains `PARTIAL / Evidence-Only` until a separate implementation PR reconciles the implemented event schema with the canonical governance schema and adds validation coverage.
 
 No document, dashboard, script, or runtime component should claim production-ready telemetry until schema reconciliation and validator coverage are implemented.
+
+## SCHEMA OWNERSHIP AND MIXED IMPLEMENTATION STATE
+
+The canonical telemetry field style going forward is snake_case, using the target canonical fields in this contract.
+
+Current implementation evidence is mixed:
+
+- `scripts/telemetry/Write-AIOSTelemetryEvent.ps1` emits canonical snake_case telemetry records.
+- `services/telemetry/telemetryEvent.ts` and `services/telemetry/telemetryWriter.ts` still use legacy camelCase telemetry records.
+- `services/telemetry/telemetrySchemaValidator.ts` and `scripts/telemetry/Test-AIOSTelemetryLedger.ps1` recognize legacy, canonical, mixed, and unknown shapes.
+
+This mixed state is acceptable only as evidence during review. It is not production readiness.
+
+Schema reconciliation must happen in a future implementation packet. That packet must decide whether TypeScript writers should emit canonical snake_case directly, use an explicit compatibility layer, or remain legacy-mapped for a limited transition period. This docs packet does not edit TypeScript, PowerShell, writer behavior, ledger history, or validator behavior.
 
 ## LEGACY FIELD MAPPING
 
@@ -202,6 +251,27 @@ Future telemetry must support:
 - detection of invalid, incomplete, or schema-mismatched lines;
 - corrective events that reference prior event IDs without overwriting history.
 
+## DASHBOARD RELATIONSHIP
+
+Dashboard telemetry surfaces are display/evidence consumers only.
+
+The dashboard may later show telemetry-backed status when an approved read path exists, but it must not become telemetry authority. Dashboard output must not approve APPLY, mutate queues, change approvals, launch workers, start runtime, trigger scheduler behavior, stage or commit files, write telemetry, write Reports, fire webhooks, connect to brokers, place orders, or route live trading.
+
+Dashboard telemetry views must:
+
+- identify source evidence;
+- show stale, missing, invalid, or conflicting data explicitly;
+- redact secrets, credentials, tokens, private paths, broker identifiers, and account data;
+- remain display-only unless a separate approved workflow grants a specific bounded control surface.
+
+## TRADING LAB RELATIONSHIP
+
+Trading Lab remains paper-only.
+
+The Trading Lab paper boundary stays blocked until the telemetry/reporting evidence boundary is reviewed. Telemetry may later support paper evidence, latency evidence, validator evidence, and replayable audit trails, but it must not route live trading, broker, webhook, OANDA, real order, account, credential, or live execution data.
+
+No telemetry event, dashboard view, report, replay output, or validator result may unlock live broker execution. Any future Trading Lab telemetry work must preserve the paper-only boundary and must keep live broker, OANDA, webhook, real order, credential, and secret paths blocked.
+
 ## RISK CONTROLS
 
 Telemetry must not trigger automation by itself.
@@ -218,6 +288,19 @@ Telemetry must not:
 - authorize runtime launchers, daemons, worker loops, startup tasks, or scheduled tasks.
 
 Telemetry must distinguish mock/fixture data from live/read-only data. Dashboard wiring must wait until schema reconciliation and telemetry validators are stable.
+
+## VALIDATION EXPECTATIONS
+
+Current read-only validation surfaces:
+
+- `scripts/telemetry/Test-AIOSTelemetryLedger.ps1` validates the current ledger shape and classifies canonical, legacy, mixed, and invalid records.
+- `automation/status/Test-AiOsTelemetryPreviewContract.DRY_RUN.ps1` validates the telemetry preview contract and no-write preview boundary.
+
+Known validation gap:
+
+- dedicated schema-validator test coverage for `services/telemetry/telemetrySchemaValidator.ts` is incomplete or unclear.
+
+Future implementation packets must validate schema compatibility before changing writer behavior. A writer-change packet should include tests that prove canonical records validate, legacy records remain safely classified as evidence-only when needed, invalid records fail closed, and no secret, broker, OANDA, webhook, order, or live-trading payload can be treated as approved telemetry.
 
 ## CHECKPOINT ALIGNMENT
 
@@ -291,6 +374,18 @@ The next safe implementation PR should be limited to telemetry schema reconcilia
 - no dashboard live wiring until the validator exists and passes.
 
 This implementation requires review of `services/telemetry/`, `scripts/telemetry/`, dashboard readers, runtime visibility readers, and any current ledger examples before mutation.
+
+## NEXT ALLOWED REVIEW PACKET
+
+If this documentation clarification is accepted and validators pass, the future safe registry/review packet may be:
+
+```text
+AIOS-TELEMETRY-CONTRACT-REVIEW-REGISTRY-ADVANCE-APPLY-V1
+```
+
+That future packet may only update registry or review bookkeeping if validation passes and the packet explicitly limits itself to registry/review state. It must not add telemetry writers, write telemetry, create Reports output, modify services, modify dashboard implementation, unlock Trading Lab implementation, or touch Forex/OANDA work.
+
+This document does not perform that registry advancement.
 
 ## NON-GOALS
 
