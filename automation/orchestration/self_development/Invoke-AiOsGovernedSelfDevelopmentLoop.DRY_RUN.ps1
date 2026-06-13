@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$RepoRoot = "",
-    [string]$ExpectedBranch = "feature/governed-self-development-closure-v1",
+    [string]$ExpectedBranch = "main",
     [switch]$OutputJson,
     [string]$DayNightReadinessJson = "",
     [string]$CampaignNoReadyJson = "",
@@ -185,6 +185,10 @@ function Test-GovernedLoopValidationDirtyState {
         "schemas/aios/orchestration/ORCHESTRATION_SCHEMA_INDEX.json",
         "tests/orchestration/test_aios_governed_self_development_loop.py",
         "tests/orchestration/test_aios_governed_self_development_loop_runner.py",
+        "tests/orchestration/test_aios_self_audit_runner.py",
+        "tests/orchestration/test_aios_self_development_packet_router_runner.py",
+        "tests/orchestration/test_aios_validator_evidence_router_runner.py",
+        "tests/orchestration/test_aios_day_night_readiness_runner.py",
         "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
         "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1",
         "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1",

@@ -12,6 +12,24 @@ PACKET_ROUTER_RUNNER = REPO_ROOT / "automation/orchestration/self_audit/Get-AiOs
 SELF_AUDIT_RUNNER = REPO_ROOT / "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1"
 
 
+def _current_branch() -> str:
+    result = subprocess.run(
+        ["git", "branch", "--show-current"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return result.stdout.strip()
+
+
+def _expected_branch_args() -> tuple[str, ...]:
+    branch = _current_branch()
+    if branch == "main":
+        return ()
+    return ("-ExpectedBranch", branch)
+
+
 def _run_runner(*args: str, cwd: Path = REPO_ROOT, check: bool = True) -> subprocess.CompletedProcess[str]:
     result = subprocess.run(
         [
@@ -54,8 +72,15 @@ def test_runner_has_no_forbidden_parameters() -> None:
         assert forbidden not in param_block
 
 
+def test_runner_defaults_expected_branch_to_main() -> None:
+    text = RUNNER.read_text(encoding="utf-8")
+
+    assert '[string]$ExpectedBranch = "main"' in text
+    assert "feature/governed-self-development-closure-v1" not in text
+
+
 def test_runner_emits_json_only_with_output_json() -> None:
-    result = _run_runner("-OutputJson")
+    result = _run_runner("-OutputJson", *_expected_branch_args())
     raw = result.stdout.strip()
     parsed = json.loads(raw)
 
@@ -65,8 +90,24 @@ def test_runner_emits_json_only_with_output_json() -> None:
     assert parsed["safety"]["console_only"] is True
 
 
+def test_runner_accepts_explicit_current_expected_branch() -> None:
+    branch = _current_branch()
+    result = _run_runner("-OutputJson", "-ExpectedBranch", branch)
+    parsed = json.loads(result.stdout)
+
+    assert parsed["repo_state"]["expected_branch"] == branch
+    assert parsed["repo_state"]["branch_matches_expected"] is True
+
+
+def test_runner_passes_expected_branch_to_packet_router() -> None:
+    text = RUNNER.read_text(encoding="utf-8")
+
+    assert "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1" in text
+    assert '-ExpectedBranch "{2}"' in text
+
+
 def test_runner_console_mode_includes_expected_sections() -> None:
-    result = _run_runner()
+    result = _run_runner(*_expected_branch_args())
     out = result.stdout
 
     for section in (
@@ -121,7 +162,7 @@ def test_runner_no_write_proof_does_not_create_forbidden_files() -> None:
         "automation/orchestration/workers/inbox",
     ]
     before = {root: _file_set(REPO_ROOT, root) for root in protected_roots}
-    result = _run_runner("-OutputJson")
+    result = _run_runner("-OutputJson", *_expected_branch_args())
     after = {root: _file_set(REPO_ROOT, root) for root in protected_roots}
     parsed = json.loads(result.stdout)
 

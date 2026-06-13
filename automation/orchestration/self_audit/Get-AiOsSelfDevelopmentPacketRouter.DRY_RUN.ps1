@@ -197,7 +197,8 @@ function Test-RouterValidationDirtyState {
         "automation/orchestration/self_development/aios_governed_self_development_loop.py",
         "schemas/aios/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1.schema.json",
         "tests/orchestration/test_aios_governed_self_development_loop.py",
-        "tests/orchestration/test_aios_governed_self_development_loop_runner.py"
+        "tests/orchestration/test_aios_governed_self_development_loop_runner.py",
+        "tests/orchestration/test_aios_self_audit_runner.py"
     )
     $changedPaths = @($State.changed_entries | ForEach-Object { Get-ChangedPathFromStatusLine -Line ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     if ($changedPaths.Count -eq 0) {
@@ -268,7 +269,7 @@ function Read-AuthorityContext {
 }
 
 function Invoke-JsonSurface {
-    param([string]$Root, [string]$RelativeScript)
+    param([string]$Root, [string]$RelativeScript, [int]$SurfaceTimeoutSeconds = $TimeoutSeconds, [string]$ExpectedBranchValue = $ExpectedBranch)
     $scriptPath = Join-Path $Root $RelativeScript
     if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
         return [ordered]@{
@@ -278,7 +279,15 @@ function Invoke-JsonSurface {
             data = $null
         }
     }
-    $raw = & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath -OutputJson 2>&1
+    $branchAwareScripts = @(
+        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1"
+    )
+    $normalizedRelativeScript = $RelativeScript -replace "\\", "/"
+    if ($branchAwareScripts -contains $normalizedRelativeScript) {
+        $raw = & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath -RepoRoot $Root -ExpectedBranch $ExpectedBranchValue -OutputJson -TimeoutSeconds $SurfaceTimeoutSeconds 2>&1
+    } else {
+        $raw = & powershell -NoProfile -ExecutionPolicy Bypass -File $scriptPath -OutputJson 2>&1
+    }
     $exitCode = $LASTEXITCODE
     $rawText = ($raw | Out-String).Trim()
     if ($exitCode -ne 0) {

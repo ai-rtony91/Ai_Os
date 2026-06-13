@@ -16,6 +16,24 @@ _RUNNER_JSON: subprocess.CompletedProcess[str] | None = None
 _RUNNER_CONSOLE: subprocess.CompletedProcess[str] | None = None
 
 
+def _current_branch() -> str:
+    result = subprocess.run(
+        ["git", "branch", "--show-current"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return result.stdout.strip()
+
+
+def _expected_branch_args() -> tuple[str, ...]:
+    branch = _current_branch()
+    if branch == "main":
+        return ()
+    return ("-ExpectedBranch", branch)
+
+
 def _json_arg(payload: dict) -> str:
     return json.dumps(payload, separators=(",", ":"))
 
@@ -122,14 +140,14 @@ def _run_runner(*args: str, cwd: Path = REPO_ROOT, check: bool = True) -> subpro
 def _runner_json() -> subprocess.CompletedProcess[str]:
     global _RUNNER_JSON
     if _RUNNER_JSON is None:
-        _RUNNER_JSON = _run_runner("-OutputJson", *_runner_evidence_args())
+        _RUNNER_JSON = _run_runner("-OutputJson", *_expected_branch_args(), *_runner_evidence_args())
     return _RUNNER_JSON
 
 
 def _runner_console() -> subprocess.CompletedProcess[str]:
     global _RUNNER_CONSOLE
     if _RUNNER_CONSOLE is None:
-        _RUNNER_CONSOLE = _run_runner(*_runner_evidence_args())
+        _RUNNER_CONSOLE = _run_runner(*_expected_branch_args(), *_runner_evidence_args())
     return _RUNNER_CONSOLE
 
 
@@ -166,6 +184,13 @@ def test_runner_has_no_forbidden_parameters() -> None:
         assert forbidden not in param_block
 
 
+def test_runner_defaults_expected_branch_to_main() -> None:
+    text = RUNNER.read_text(encoding="utf-8")
+
+    assert '[string]$ExpectedBranch = "main"' in text
+    assert "feature/governed-self-development-closure-v1" not in text
+
+
 def test_runner_emits_json_only_with_output_json() -> None:
     result = _runner_json()
     raw = result.stdout.strip()
@@ -175,6 +200,16 @@ def test_runner_emits_json_only_with_output_json() -> None:
     assert "AIOS Governed Self-Development Loop" not in raw
     assert parsed["schema"] == "AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1"
     assert parsed["recommended_next_packet"]["packet_id"] == "AIOS-OPERATOR-CONTROL-SURFACE-CONTRACT-DRYRUN-V1"
+
+
+def test_runner_accepts_explicit_current_expected_branch() -> None:
+    branch = _current_branch()
+    result = _run_runner("-OutputJson", "-ExpectedBranch", branch, *_runner_evidence_args())
+    parsed = json.loads(result.stdout)
+
+    assert parsed["repo_state"]["expected_branch"] == branch
+    assert parsed["repo_state"]["branch_matches_expected"] is True
+    assert parsed["safety"]["status"] == "PASS"
 
 
 def test_runner_console_mode_includes_expected_sections() -> None:

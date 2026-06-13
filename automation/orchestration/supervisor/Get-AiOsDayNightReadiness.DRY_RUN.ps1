@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$RepoRoot = "",
-    [string]$ExpectedBranch = "feature/governed-self-development-closure-v1",
+    [string]$ExpectedBranch = "main",
     [switch]$OutputJson,
     [bool]$FailOnDirtyWorktree = $true,
     [ValidateRange(1, 300)]
@@ -188,7 +188,10 @@ function Test-DayNightReadinessDirtyState {
         "automation/orchestration/self_development/aios_governed_self_development_loop.py",
         "schemas/aios/orchestration/AIOS_GOVERNED_SELF_DEVELOPMENT_LOOP_RESULT.v1.schema.json",
         "tests/orchestration/test_aios_governed_self_development_loop.py",
-        "tests/orchestration/test_aios_governed_self_development_loop_runner.py"
+        "tests/orchestration/test_aios_governed_self_development_loop_runner.py",
+        "tests/orchestration/test_aios_self_audit_runner.py",
+        "tests/orchestration/test_aios_self_development_packet_router_runner.py",
+        "tests/orchestration/test_aios_validator_evidence_router_runner.py"
     )
     $changedPaths = @($State.changed_entries | ForEach-Object { Get-ChangedPathFromStatusLine -Line ([string]$_) } | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
     if ($changedPaths.Count -eq 0) {
@@ -261,7 +264,7 @@ function Read-AuthorityContext {
 }
 
 function Invoke-JsonSurface {
-    param([string]$Root, [string]$RelativeScript, [int]$TimeoutSeconds)
+    param([string]$Root, [string]$RelativeScript, [int]$TimeoutSeconds, [string]$ExpectedBranchValue = $ExpectedBranch)
     $scriptPath = Join-Path $Root $RelativeScript
     if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
         return [ordered]@{
@@ -273,7 +276,20 @@ function Invoke-JsonSurface {
     }
     $psi = [System.Diagnostics.ProcessStartInfo]::new()
     $psi.FileName = "powershell"
-    $psi.Arguments = ('-NoProfile -ExecutionPolicy Bypass -File "{0}" -OutputJson' -f ($scriptPath -replace '"', '\"'))
+    $safePath = $scriptPath -replace '"', '\"'
+    $safeRoot = $Root -replace '"', '\"'
+    $safeExpectedBranch = $ExpectedBranchValue -replace '"', '\"'
+    $branchAwareScripts = @(
+        "automation/orchestration/self_audit/Invoke-AiOsSelfAuditLoop.DRY_RUN.ps1",
+        "automation/orchestration/self_audit/Get-AiOsSelfDevelopmentPacketRouter.DRY_RUN.ps1",
+        "automation/orchestration/validators/Get-AiOsValidatorEvidenceRouter.DRY_RUN.ps1"
+    )
+    $normalizedRelativeScript = $RelativeScript -replace "\\", "/"
+    if ($branchAwareScripts -contains $normalizedRelativeScript) {
+        $psi.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -RepoRoot "{1}" -ExpectedBranch "{2}" -OutputJson -TimeoutSeconds {3}' -f $safePath, $safeRoot, $safeExpectedBranch, $TimeoutSeconds
+    } else {
+        $psi.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" -OutputJson' -f $safePath
+    }
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError = $true
     $psi.UseShellExecute = $false
