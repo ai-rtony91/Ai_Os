@@ -56,6 +56,7 @@ function Has-ForbiddenSecretPattern {
 $repoRoot = (Get-Location).Path
 $inboxDir = Join-Path $repoRoot "control/relay_bus/messages/inbox"
 $defaultAction = "Use New-AiOsRelayMessage.DRY_RUN.ps1 with Mode APPLY to write the first relay message."
+$sosPolicyNextAction = "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Get-AiOsSosEscalationPolicy.DRY_RUN.ps1 -OutputJson"
 
 $latestMessagePath = ""
 $latestActor = ""
@@ -120,7 +121,7 @@ if ($null -ne $latestMessage) {
 
     if ($isReviewNeeded) {
         $resolutionStatus = "NEEDS_HUMAN_REVIEW"
-        $safeNextAction = "Do not execute; open the actor relay message, resolve concerns, then continue only with explicit Anthony approval."
+        $safeNextAction = "Do not execute; open the actor relay message, resolve concerns, run SOS escalation policy classification with: $sosPolicyNextAction, then continue only with explicit Anthony approval."
     }
     else {
         $resolutionStatus = "READY"
@@ -138,6 +139,7 @@ $result = [ordered]@{
     execution_allowed = $false
     can_continue_without_anthony = $false
     requires_human_review = $true
+    sos_policy_next_action = if ($resolutionStatus -eq "NEEDS_HUMAN_REVIEW") { $sosPolicyNextAction } else { "" }
     latest_message_path = $latestMessagePath
     actor = $latestActor
     target_actor = $latestTargetActor

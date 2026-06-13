@@ -124,7 +124,11 @@ def test_resolver_pending_human_review_message_returns_summary() -> None:
         assert out["intent"] == "handoff summary"
         assert out["status_detail"] == "pending"
         assert out["safe_next_action"] == (
-            "Do not execute; open the actor relay message, resolve concerns, then continue only with explicit Anthony approval."
+            "Do not execute; open the actor relay message, resolve concerns, run SOS escalation policy classification with: powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Get-AiOsSosEscalationPolicy.DRY_RUN.ps1 -OutputJson, then continue only with explicit Anthony approval."
+        )
+        assert (
+            out["sos_policy_next_action"]
+            == "powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Get-AiOsSosEscalationPolicy.DRY_RUN.ps1 -OutputJson"
         )
         assert out["requires_human_review"] is True
         assert out["execution_allowed"] is False

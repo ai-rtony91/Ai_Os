@@ -16,6 +16,7 @@ the latest actor relay bus message and emits a fixed human-review summary.
 2. Parse the message envelope safely.
 3. Return review resolution status and rationale.
 4. Never set writable behavior.
+5. Surface the SOS policy handoff when review is required.
 
 When a message is present, the resolver emits this summary:
 
@@ -42,6 +43,8 @@ The script always returns JSON fields with these defaults:
 - `can_continue_without_anthony`: `false`
 - `requires_human_review`: `true`
 - `status`: one of `EMPTY`, `READY`, `NEEDS_HUMAN_REVIEW`
+- `sos_policy_next_action`: set when `status` is `NEEDS_HUMAN_REVIEW` to:
+  `powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Get-AiOsSosEscalationPolicy.DRY_RUN.ps1 -OutputJson`
 
 ## Status rules
 
@@ -64,6 +67,16 @@ The script always returns JSON fields with these defaults:
   - `xoxb-`
 
 If detected, `payload_contains_forbidden_secret_pattern` is `true` and review remains required.
+
+## SOS handoff
+
+When `status` is `NEEDS_HUMAN_REVIEW`, the resolver emits `sos_policy_next_action` and updates `safe_next_action` to route operators to:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/relay_bus/Get-AiOsSosEscalationPolicy.DRY_RUN.ps1 -OutputJson
+```
+
+This keeps the resolver read-only and delegates policy classification to the SOS router.
 
 ## Example command
 
