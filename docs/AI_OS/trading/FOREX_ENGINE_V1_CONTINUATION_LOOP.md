@@ -8,7 +8,7 @@ This is a read-only supervision helper that helps AI_OS continue the Forex Engin
 
 ## What It Does
 
-- Detects whether Sprint 14 (paper readiness) and Sprint 15 (paper signal intake ledger) are present.
+- Detects whether Sprint 14 (paper readiness), Sprint 15 (paper signal intake ledger), Sprint 16 (paper risk decision router), and Sprint 17 (paper continuity review) are present.
 - Reports repo state used for recommendation:
   - `repo_root`
   - `branch`
@@ -30,20 +30,20 @@ This recommender adds a narrow, deterministic handoff that maps current Forex bu
 - No worker launch, no packet mutation, no runtime mutation, no commit/push.
 - Always ends with a human approval requirement for the next protected `APPLY` packet.
 
-## Recommended Packet After Sprint 15
+## Recommended Packet After Sprint 17
 
-When Sprint 14 and Sprint 15 are both present:
+When Sprint 14, 15, 16, and 17 are present:
 
-- Packet ID: `AIOS-FOREX-PAPER-RISK-DECISION-ROUTER-APPLY-V1`
-- Packet title: `feat(forex): add paper risk decision router`
-- Lane: `PAPER_RISK_DECISION_ROUTER`
+- Packet ID: `AIOS-FOREX-PAPER-STUDY-JOURNAL-APPLY-V1`
+- Packet title: `feat(forex): add paper study journal`
+- Lane: `PAPER_STUDY_JOURNAL`
 
 Recommended files:
 
-- `automation/forex_engine/paper_risk_decision.py`
-- `automation/forex_engine/run_paper_risk_decision_demo.py`
-- `tests/forex_engine/test_paper_risk_decision.py`
-- `docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_16_PAPER_RISK_DECISION_ROUTER.md`
+- `automation/forex_engine/paper_study_journal.py`
+- `automation/forex_engine/run_paper_study_journal_demo.py`
+- `tests/forex_engine/test_paper_study_journal.py`
+- `docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_18_PAPER_STUDY_JOURNAL.md`
 
 ## Blocked Actions
 
