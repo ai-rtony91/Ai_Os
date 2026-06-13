@@ -37,29 +37,89 @@ def _run_ps(script: Path, args: list[str]) -> str:
     return subprocess.check_output(cmd, text=True, cwd=str(REPO_ROOT))
 
 
+def _ps_quote(value: str) -> str:
+    return "'" + value.replace("'", "''") + "'"
+
+
+def _ps_array(values: list[str]) -> str:
+    if not values:
+        return "@()"
+    return "@(" + ", ".join(_ps_quote(str(item)) for item in values) + ")"
+
+
+def _run_ps_command(command: str) -> str:
+    cmd = [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        command,
+    ]
+    return subprocess.check_output(cmd, text=True, cwd=str(REPO_ROOT))
+
+
+def _run_generator_command(script: Path, args: list[tuple[str, object]]) -> str:
+    command_parts = [f"& {_ps_quote(str(script))}"]
+    for switch, value in args:
+        if isinstance(value, bool):
+            if value:
+                command_parts.append(switch)
+        elif isinstance(value, list):
+            command_parts.append(switch)
+            command_parts.append(_ps_array(value))
+        else:
+            command_parts.append(switch)
+            command_parts.append(_ps_quote(str(value)))
+
+    command = " ".join(command_parts)
+    return _run_ps_command(command)
+
+
+def _apply_kwarg_overrides(args: list[tuple[str, object]], kwargs: dict[str, object]) -> list[tuple[str, object]]:
+    args_map = {key: index for index, (key, _) in enumerate(args)}
+    for key, value in kwargs.items():
+        switch = f"-{key}"
+        if switch in args_map:
+            args[args_map[switch]] = (switch, value)
+        else:
+            args.append((switch, value))
+    return args
+
+
 def _run_generator(output_json: bool = True, **kwargs: object) -> dict:
-    args = ["-Zone", "ORCHESTRATION", "-Lane", "PACKET_GENERATOR", "-Mission", "build packet generator v1", "-Branch", "feature/codex-packet-generator-v1", "-ApprovalAuthority", "Anthony approves this scoped packet."]
-    args.extend(["-PacketId", "AIOS-CODEX-PACKET-GENERATOR-APPLY-V1"])
-    args.extend(["-Worktree", str(REPO_ROOT)])
-    args.extend(["-StartBranch", "main"])
-    args.extend(["-AllowedMutationFiles", "automation/orchestration/packet_generator/New-AiOsCodexPacket.DRY_RUN.ps1", "automation/orchestration/packet_generator/Test-AiOsCodexPacket.DRY_RUN.ps1", "tests/orchestration/test_codex_packet_generator.py", "docs/AI_OS/autonomy/AIOS_CODEX_PACKET_GENERATOR_V1.md"])
-    args.extend(["-ForbiddenPaths", "broker/OANDA/webhook/order/secrets paths", "runtime state", "scheduler", "daemon"])
-    args.extend(["-ReadFirst", "AGENTS.md", "README.md", "RISK_POLICY.md"])
-    args.extend(["-Validators", "git diff --check", "python -m pytest tests/forex_engine -q -p no:cacheprovider"])
+    args: list[tuple[str, object]] = [
+        ("-Zone", "ORCHESTRATION"),
+        ("-Lane", "PACKET_GENERATOR"),
+        ("-Mission", "build packet generator v1"),
+        ("-Branch", "feature/codex-packet-generator-v1"),
+        ("-ApprovalAuthority", "Anthony approves this scoped packet."),
+        ("-PacketId", "AIOS-CODEX-PACKET-GENERATOR-APPLY-V1"),
+        ("-Worktree", str(REPO_ROOT)),
+        ("-StartBranch", "main"),
+        ("-AllowedMutationFiles", [
+            "automation/orchestration/packet_generator/New-AiOsCodexPacket.DRY_RUN.ps1",
+            "automation/orchestration/packet_generator/Test-AiOsCodexPacket.DRY_RUN.ps1",
+            "tests/orchestration/test_codex_packet_generator.py",
+            "docs/AI_OS/autonomy/AIOS_CODEX_PACKET_GENERATOR_V1.md",
+        ]),
+        ("-ForbiddenPaths", [
+            "broker/OANDA/webhook/order/secrets paths",
+            "runtime state",
+            "scheduler",
+            "daemon",
+        ]),
+        ("-ReadFirst", ["AGENTS.md", "README.md", "RISK_POLICY.md"]),
+        ("-Validators", [
+            "git diff --check",
+            "python -m pytest tests/forex_engine -q -p no:cacheprovider",
+        ]),
+    ]
     if output_json:
-        args.append("-OutputJson")
+        args.append(("-OutputJson", True))
     if kwargs:
-        for key, value in kwargs.items():
-            switch = f"-{key}"
-            if isinstance(value, bool):
-                if value:
-                    args.append(switch)
-            elif isinstance(value, list):
-                for item in value:
-                    args.extend([switch, str(item)])
-            else:
-                args.extend([switch, str(value)])
-    raw = _run_ps(GENERATOR, args)
+        args = _apply_kwarg_overrides(args, kwargs)
+    raw = _run_generator_command(GENERATOR, args)
     return json.loads(raw.strip())
 
 
@@ -128,7 +188,7 @@ def test_validator_detects_missing_bootstrap():
 
 def test_validator_detects_missing_identity():
     result = _run_generator()
-    malformed = result["generated_packet_text"].replace("IDENTITY MARKER:\r\n", "IDENTITY:\r\n")
+    malformed = result["generated_packet_text"].replace("IDENTITY MARKER:", "IDENTITY:")
     validated = _run_validator(malformed)
     assert validated["packet_valid"] is False
     assert "IDENTITY MARKER" in validated["missing_required_fields"]
@@ -167,4 +227,3 @@ def test_dry_run_does_not_write_files():
         ["git", "status", "--short", "--untracked-files=all"], text=True, cwd=str(REPO_ROOT)
     )
     assert pre == post
-

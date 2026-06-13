@@ -23,7 +23,24 @@ function Read-Text {
 
 function Missing-Field {
     param([string]$Text, [string]$Label)
-    return -not ($Text.Contains($Label))
+
+    $normalized = $Text -replace "`r`n", "`n"
+    $normalized = $normalized -replace "`r", "`n"
+    $lines = @($normalized -split "`n")
+
+    foreach ($line in $lines) {
+        $trimmed = $line.Trim()
+
+        if ($trimmed -eq $Label) {
+            return $false
+        }
+
+        if ($trimmed.StartsWith($Label + ":")) {
+            return $false
+        }
+    }
+
+    return $true
 }
 
 function Find-MissingFields {
@@ -55,6 +72,7 @@ function Find-MissingFields {
 
 $rawPacketText = Read-Text -Text $PacketText -Path $PacketPath
 $missing = Find-MissingFields -Text $rawPacketText
+$missing = @($missing)
 $packetValid = $missing.Count -eq 0
 
 $result = [ordered]@{
