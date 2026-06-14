@@ -17,6 +17,9 @@ FOREX_BOT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PAPER_BOT.md")
 FOREX_BACKTEST_PATH = Path("apps/trading_lab/trading_lab/forex_backtest.py")
 FOREX_BACKTEST_TEST_PATH = Path("tests/trading_lab/test_forex_backtest.py")
 FOREX_BACKTEST_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_BACKTEST.md")
+FOREX_LEDGER_PATH = Path("apps/trading_lab/trading_lab/forex_paper_ledger.py")
+FOREX_LEDGER_TEST_PATH = Path("tests/trading_lab/test_forex_paper_ledger.py")
+FOREX_LEDGER_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PAPER_LEDGER.md")
 FOREX_SCAFFOLD_PATHS = (
     FOREX_BOT_PATH,
     FOREX_BOT_TEST_PATH,
@@ -26,6 +29,11 @@ FOREX_BACKTEST_PATHS = (
     FOREX_BACKTEST_PATH,
     FOREX_BACKTEST_TEST_PATH,
     FOREX_BACKTEST_DOC_PATH,
+)
+FOREX_LEDGER_PATHS = (
+    FOREX_LEDGER_PATH,
+    FOREX_LEDGER_TEST_PATH,
+    FOREX_LEDGER_DOC_PATH,
 )
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -535,11 +543,291 @@ live trading paths.
 """
 
 
+def build_forex_ledger_source() -> str:
+    return '''from __future__ import annotations
+
+from typing import Any
+
+
+SUPPORTED_PAIRS = {"EURUSD", "GBPUSD", "USDJPY"}
+SUPPORTED_DIRECTIONS = {"buy", "sell"}
+
+PAPER_LEDGER_SAFETY = {
+    "paper_only": True,
+    "execution_allowed": False,
+    "broker_execution": False,
+    "credential_use": False,
+    "live_trading": False,
+    "real_orders": False,
+    "real_webhooks": False,
+}
+
+BLOCKED_SCOPE_FIELDS = {
+    "api_key",
+    "broker_order",
+    "credentials",
+    "live_execution",
+    "real_order",
+    "webhook_url",
+}
+
+
+def blocked_record(reason: str) -> dict[str, Any]:
+    return {
+        "allowed": False,
+        "record_type": "blocked",
+        "blocked_reason": reason,
+        **PAPER_LEDGER_SAFETY,
+    }
+
+
+def _pip_size(pair: str) -> float:
+    return 0.01 if pair.endswith("JPY") else 0.0001
+
+
+def _blocked_scope_reason(payload: dict[str, Any]) -> str | None:
+    for field in sorted(BLOCKED_SCOPE_FIELDS):
+        if payload.get(field):
+            return f"{field}_blocked"
+    return None
+
+
+def _result_pips(pair: str, direction: str, entry: float, target: float) -> float:
+    pip_size = _pip_size(pair)
+    if direction == "buy":
+        return round((target - entry) / pip_size, 1)
+    return round((entry - target) / pip_size, 1)
+
+
+def record_paper_trade(
+    *,
+    pair: str,
+    direction: str,
+    entry: float,
+    stop: float,
+    target: float,
+    position_size: float,
+    timestamp: str,
+    live_execution: bool = False,
+    broker_order: bool = False,
+    credentials: Any = None,
+    api_key: Any = None,
+    real_order: bool = False,
+    webhook_url: str | None = None,
+) -> dict[str, Any]:
+    payload = {
+        "live_execution": live_execution,
+        "broker_order": broker_order,
+        "credentials": credentials,
+        "api_key": api_key,
+        "real_order": real_order,
+        "webhook_url": webhook_url,
+    }
+    blocked_reason = _blocked_scope_reason(payload)
+    if blocked_reason:
+        return blocked_record(blocked_reason)
+
+    normalized_pair = str(pair).upper()
+    normalized_direction = str(direction).lower()
+    if normalized_pair not in SUPPORTED_PAIRS:
+        return blocked_record("unsupported_pair")
+    if normalized_direction not in SUPPORTED_DIRECTIONS:
+        return blocked_record("unsupported_direction")
+    if position_size <= 0:
+        return blocked_record("position_size_must_be_positive")
+
+    entry_value = float(entry)
+    stop_value = float(stop)
+    target_value = float(target)
+    size_value = float(position_size)
+    result_pips = _result_pips(normalized_pair, normalized_direction, entry_value, target_value)
+    if normalized_direction == "buy":
+        pnl = (target_value - entry_value) * size_value
+    else:
+        pnl = (entry_value - target_value) * size_value
+
+    return {
+        "allowed": True,
+        "record_type": "paper_trade",
+        "pair": normalized_pair,
+        "direction": normalized_direction,
+        "entry": entry_value,
+        "stop": stop_value,
+        "target": target_value,
+        "position_size": size_value,
+        "result_pips": result_pips,
+        "pnl": round(pnl, 2),
+        "timestamp": timestamp,
+        **PAPER_LEDGER_SAFETY,
+    }
+
+
+def summarize_paper_ledger(trades: list[dict[str, Any]]) -> dict[str, Any]:
+    records = [record_paper_trade(**trade) for trade in trades]
+    allowed_records = [record for record in records if record.get("allowed")]
+    winning_trades = [record for record in allowed_records if record["pnl"] > 0]
+    losing_trades = [record for record in allowed_records if record["pnl"] < 0]
+    total_pnl = round(sum(record["pnl"] for record in allowed_records), 2)
+    return {
+        "trade_count": len(allowed_records),
+        "winning_trades": len(winning_trades),
+        "losing_trades": len(losing_trades),
+        "blocked_trades": len(records) - len(allowed_records),
+        "total_pnl": total_pnl,
+        "records": records,
+        **PAPER_LEDGER_SAFETY,
+    }
+'''
+
+
+def build_forex_ledger_test_source() -> str:
+    return '''from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = REPO_ROOT / "apps" / "trading_lab" / "trading_lab" / "forex_paper_ledger.py"
+
+
+def load_ledger_module():
+    spec = importlib.util.spec_from_file_location("forex_paper_ledger", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_ledger_imports():
+    ledger = load_ledger_module()
+    assert callable(ledger.record_paper_trade)
+    assert callable(ledger.summarize_paper_ledger)
+
+
+def test_valid_paper_trade_records():
+    ledger = load_ledger_module()
+    record = ledger.record_paper_trade(
+        pair="EURUSD",
+        direction="buy",
+        entry=1.1000,
+        stop=1.0950,
+        target=1.1050,
+        position_size=10000,
+        timestamp="2026-06-14T00:00:00Z",
+    )
+    assert record["allowed"] is True
+    assert record["pair"] == "EURUSD"
+    assert record["direction"] == "buy"
+    assert record["result_pips"] == 50.0
+    assert record["pnl"] == 50.0
+    assert record["paper_only"] is True
+    assert record["execution_allowed"] is False
+
+
+def test_pnl_summary_deterministic():
+    ledger = load_ledger_module()
+    summary = ledger.summarize_paper_ledger(
+        [
+            {
+                "pair": "EURUSD",
+                "direction": "buy",
+                "entry": 1.1000,
+                "stop": 1.0950,
+                "target": 1.1050,
+                "position_size": 10000,
+                "timestamp": "2026-06-14T00:00:00Z",
+            },
+            {
+                "pair": "GBPUSD",
+                "direction": "sell",
+                "entry": 1.2500,
+                "stop": 1.2550,
+                "target": 1.2450,
+                "position_size": 10000,
+                "timestamp": "2026-06-14T00:05:00Z",
+            },
+            {
+                "pair": "USDJPY",
+                "direction": "buy",
+                "entry": 157.00,
+                "stop": 156.50,
+                "target": 156.80,
+                "position_size": 1000,
+                "timestamp": "2026-06-14T00:10:00Z",
+            },
+        ]
+    )
+    assert summary["trade_count"] == 3
+    assert summary["winning_trades"] == 2
+    assert summary["losing_trades"] == 1
+    assert summary["total_pnl"] == -100.0
+    assert summary["paper_only"] is True
+
+
+def test_live_broker_credential_and_real_order_blocked():
+    ledger = load_ledger_module()
+    base = {
+        "pair": "EURUSD",
+        "direction": "buy",
+        "entry": 1.1000,
+        "stop": 1.0950,
+        "target": 1.1050,
+        "position_size": 10000,
+        "timestamp": "2026-06-14T00:00:00Z",
+    }
+    assert ledger.record_paper_trade(**base, live_execution=True)["blocked_reason"] == "live_execution_blocked"
+    assert ledger.record_paper_trade(**base, broker_order=True)["blocked_reason"] == "broker_order_blocked"
+    assert ledger.record_paper_trade(**base, credentials={"token": "x"})["blocked_reason"] == "credentials_blocked"
+    assert ledger.record_paper_trade(**base, api_key="x")["blocked_reason"] == "api_key_blocked"
+    assert ledger.record_paper_trade(**base, real_order=True)["blocked_reason"] == "real_order_blocked"
+
+
+def test_invalid_pair_blocked():
+    ledger = load_ledger_module()
+    record = ledger.record_paper_trade(
+        pair="AUDUSD",
+        direction="buy",
+        entry=0.6500,
+        stop=0.6450,
+        target=0.6550,
+        position_size=10000,
+        timestamp="2026-06-14T00:00:00Z",
+    )
+    assert record["allowed"] is False
+    assert record["blocked_reason"] == "unsupported_pair"
+'''
+
+
+def build_forex_ledger_doc() -> str:
+    return """# AIOS Forex Paper Ledger
+
+This generated component is the third `forex-paper-bot` build step. It records
+paper-only Forex trade outcomes for local review and does not create broker
+orders, credential access, live execution, real orders, or real webhooks.
+
+The ledger records pair, direction, entry, stop, target, position size,
+deterministic result pips, paper PnL, and timestamp. The summary reports
+`trade_count`, `winning_trades`, `losing_trades`, `total_pnl`, and
+`paper_only: true`.
+
+Unsupported pairs and unsafe live/broker/credential/order fields are blocked.
+"""
+
+
 def forex_backtest_files() -> dict[Path, str]:
     return {
         FOREX_BACKTEST_PATH: build_forex_backtest_source(),
         FOREX_BACKTEST_TEST_PATH: build_forex_backtest_test_source(),
         FOREX_BACKTEST_DOC_PATH: build_forex_backtest_doc(),
+    }
+
+
+def forex_ledger_files() -> dict[Path, str]:
+    return {
+        FOREX_LEDGER_PATH: build_forex_ledger_source(),
+        FOREX_LEDGER_TEST_PATH: build_forex_ledger_test_source(),
+        FOREX_LEDGER_DOC_PATH: build_forex_ledger_doc(),
     }
 
 
@@ -563,6 +851,15 @@ def write_forex_scaffold(repo_root: Path) -> list[str]:
 def write_forex_backtest(repo_root: Path) -> list[str]:
     files_written: list[str] = []
     for relative_path, content in forex_backtest_files().items():
+        target = repo_root / relative_path
+        if write_text_if_changed(target, content):
+            files_written.append(relative_path.as_posix())
+    return files_written
+
+
+def write_forex_ledger(repo_root: Path) -> list[str]:
+    files_written: list[str] = []
+    for relative_path, content in forex_ledger_files().items():
         target = repo_root / relative_path
         if write_text_if_changed(target, content):
             files_written.append(relative_path.as_posix())
@@ -621,6 +918,32 @@ def run_forex_backtest_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_forex_ledger_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_LEDGER_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_paper_ledger_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
 def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -642,6 +965,8 @@ def select_forex_continue_action(repo_root: Path) -> str:
         return "build_scaffold"
     if not (repo_root / FOREX_BACKTEST_PATH).exists():
         return "build_backtest"
+    if not (repo_root / FOREX_LEDGER_PATH).exists():
+        return "build_ledger"
     return "done"
 
 
@@ -650,6 +975,8 @@ def _apply_writer_for_action(repo_root: Path, action: str) -> tuple[list[str], V
         return write_forex_scaffold(repo_root), run_forex_bot_validator
     if action == "build_backtest":
         return write_forex_backtest(repo_root), run_forex_backtest_validator
+    if action == "build_ledger":
+        return write_forex_ledger(repo_root), run_forex_ledger_validator
     return [], None
 
 
@@ -658,6 +985,8 @@ def _repair_for_action(repo_root: Path, action: str) -> list[str]:
         return write_forex_scaffold(repo_root)
     if action == "build_backtest":
         return write_forex_backtest(repo_root)
+    if action == "build_ledger":
+        return write_forex_ledger(repo_root)
     return []
 
 
@@ -697,7 +1026,7 @@ def execute_goal(
     action = report["continue_action"]
     if action == "done":
         report["result"] = "DONE"
-        report["next_safe_action"] = "Forex paper bot scaffold and backtest already exist. Review validators before the next build step."
+        report["next_safe_action"] = "Forex paper bot scaffold, backtest, and ledger already exist. Review validators before the next build step."
         return report
 
     files_written, default_runner = _apply_writer_for_action(repo_root, action)
@@ -751,7 +1080,7 @@ def main(argv: list[str] | None = None) -> int:
         max_repairs=args.max_repairs,
     )
     print(json.dumps(report, indent=2, sort_keys=False))
-    return 0 if report["result"] in {"passed", "preview_only", "blocked"} else 1
+    return 0 if report["result"] in {"passed", "preview_only", "blocked", "DONE"} else 1
 
 
 if __name__ == "__main__":
