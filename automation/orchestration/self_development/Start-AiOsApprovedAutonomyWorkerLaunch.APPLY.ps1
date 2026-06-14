@@ -95,6 +95,13 @@ function Invoke-PythonJsonLogic {
     $psi.RedirectStandardError = $true
     $psi.UseShellExecute = $false
     $psi.WorkingDirectory = $resolvedRepoRoot
+    $existingPythonPath = $psi.EnvironmentVariables["PYTHONPATH"]
+    if ([string]::IsNullOrWhiteSpace($existingPythonPath)) {
+        $psi.EnvironmentVariables["PYTHONPATH"] = $resolvedRepoRoot
+    }
+    else {
+        $psi.EnvironmentVariables["PYTHONPATH"] = "$resolvedRepoRoot$([System.IO.Path]::PathSeparator)$existingPythonPath"
+    }
     $process = [System.Diagnostics.Process]::new()
     $process.StartInfo = $psi
     [void]$process.Start()
