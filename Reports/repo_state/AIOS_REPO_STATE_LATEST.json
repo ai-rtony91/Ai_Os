@@ -1,0 +1,49 @@
+{
+  "ahead_behind": {
+    "ahead": null,
+    "behind": null,
+    "raw": "## main...origin/main"
+  },
+  "blocked_reason": "dirty_working_tree",
+  "branch": "main",
+  "component": "repo_state_evidence",
+  "evidence_quality": "strong",
+  "generated_at_utc": "2026-06-14T17:04:16Z",
+  "git_available": true,
+  "inside_worktree": true,
+  "is_clean": false,
+  "repo_root": "C:\\Dev\\Ai.Os",
+  "safe_for_apply": false,
+  "schema_version": "1.0",
+  "staged_files": [],
+  "status_short": [
+    "## main...origin/main",
+    " M automation/orchestration/Invoke-AiOsNightCycle.ps1",
+    " M tests/orchestration/test_night_cycle_endurance_contract.py",
+    "?? Reports/autonomy_decision_governor/AIOS_AUTONOMY_DECISION_GOVERNOR_LATEST.json",
+    "?? automation/orchestration/aios_autonomy_decision_governor.py",
+    "?? automation/orchestration/aios_repo_state_evidence.py",
+    "?? automation/orchestration/relay/Get-AiOsRelayWorkerEvidenceDrain.DRY_RUN.ps1",
+    "?? docs/orchestration/AIOS_AUTONOMY_DECISION_GOVERNOR.md",
+    "?? schemas/orchestration/aios_autonomy_decision_governor.schema.json",
+    "?? tests/orchestration/test_aios_autonomy_decision_governor.py",
+    "?? tests/orchestration/test_aios_repo_state_evidence.py",
+    "?? tests/orchestration/test_relay_worker_evidence_drain_contract.py"
+  ],
+  "system": "AI_OS",
+  "tracked_dirty_files": [
+    "automation/orchestration/Invoke-AiOsNightCycle.ps1",
+    "tests/orchestration/test_night_cycle_endurance_contract.py"
+  ],
+  "untracked_files": [
+    "Reports/autonomy_decision_governor/AIOS_AUTONOMY_DECISION_GOVERNOR_LATEST.json",
+    "automation/orchestration/aios_autonomy_decision_governor.py",
+    "automation/orchestration/aios_repo_state_evidence.py",
+    "automation/orchestration/relay/Get-AiOsRelayWorkerEvidenceDrain.DRY_RUN.ps1",
+    "docs/orchestration/AIOS_AUTONOMY_DECISION_GOVERNOR.md",
+    "schemas/orchestration/aios_autonomy_decision_governor.schema.json",
+    "tests/orchestration/test_aios_autonomy_decision_governor.py",
+    "tests/orchestration/test_aios_repo_state_evidence.py",
+    "tests/orchestration/test_relay_worker_evidence_drain_contract.py"
+  ]
+}
