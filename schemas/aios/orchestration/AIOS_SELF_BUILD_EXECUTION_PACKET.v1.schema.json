@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/AIOS_SELF_BUILD_EXECUTION_PACKET.v1.schema.json",
+  "title": "AIOS Self-Build Execution Packet",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "packet_id",
+    "identity_marker",
+    "supervisor_identity",
+    "worker_identity",
+    "zone",
+    "approval_authority",
+    "mode",
+    "worktree",
+    "branch",
+    "objective",
+    "allowed_files",
+    "blocked_files",
+    "forbidden_surfaces",
+    "validator_chain",
+    "repair_policy",
+    "timebox_minutes",
+    "max_repair_attempts",
+    "stop_conditions",
+    "commit_policy",
+    "push_pr_merge_policy",
+    "human_wake_policy",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_SELF_BUILD_EXECUTION_PACKET.v1"
+    }
+  }
+}

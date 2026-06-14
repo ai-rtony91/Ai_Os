@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/AIOS_AUTONOMOUS_SELF_BUILD_EXECUTOR_RESULT.v1.schema.json",
+  "title": "AIOS Autonomous Self-Build Executor Result",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "supervisor_mode",
+    "approval_state",
+    "selected_candidate",
+    "execution_packet",
+    "validation_repair_result",
+    "run_ledger",
+    "cycles_requested",
+    "cycles_completed",
+    "executed_autonomously",
+    "human_wake_policy",
+    "safety",
+    "stop_reason",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_AUTONOMOUS_SELF_BUILD_EXECUTOR_RESULT.v1"
+    }
+  }
+}

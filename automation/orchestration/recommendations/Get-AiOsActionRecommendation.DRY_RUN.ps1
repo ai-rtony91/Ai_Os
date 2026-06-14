@@ -163,6 +163,42 @@ function Get-FullAutonomyWorkerLaunchAvailabilityState {
     }
 }
 
+function Get-AutonomousSelfBuildAvailabilityState {
+    param([string]$RepoRoot)
+
+    $executorScript = Join-Path $RepoRoot "automation/orchestration/self_development/Start-AiOsAutonomousSelfBuildExecutor.APPLY.ps1"
+    $executorLogic = Join-Path $RepoRoot "automation/orchestration/self_development/aios_autonomous_self_build_executor.py"
+    $candidateSelector = Join-Path $RepoRoot "automation/orchestration/self_development/aios_self_build_candidate_selector.py"
+    $executionPacket = Join-Path $RepoRoot "automation/orchestration/self_development/aios_self_build_execution_packet.py"
+    $repairEngine = Join-Path $RepoRoot "automation/orchestration/self_development/aios_self_build_validator_repair_engine.py"
+    $ledgerHelper = Join-Path $RepoRoot "automation/orchestration/self_development/aios_self_build_execution_ledger.py"
+
+    $executorAvailable = (Test-Path -LiteralPath $executorScript -PathType Leaf) -and (Test-Path -LiteralPath $executorLogic -PathType Leaf)
+    $selectorAvailable = Test-Path -LiteralPath $candidateSelector -PathType Leaf
+    $packetAvailable = Test-Path -LiteralPath $executionPacket -PathType Leaf
+    $repairAvailable = Test-Path -LiteralPath $repairEngine -PathType Leaf
+    $ledgerAvailable = Test-Path -LiteralPath $ledgerHelper -PathType Leaf
+
+    return [pscustomobject]@{
+        executor = if ($executorAvailable) { "available" } else { "missing" }
+        can_select_next_candidate = [bool]$selectorAvailable
+        can_build_execution_packet = [bool]$packetAvailable
+        can_validate_and_repair_stub = [bool]$repairAvailable
+        can_apply_local_self_build = "requires Human Owner approval"
+        can_commit = "requires separate Human Owner commit approval"
+        push_pr_merge_allowed = $false
+        starts_apply = $false
+        writes_ledger = $false
+        launches_workers = $false
+        commits = $false
+        pushes = $false
+        creates_pr = $false
+        merges = $false
+        ledger_helper = if ($ledgerAvailable) { "available" } else { "missing" }
+        next_safe_action = "Run autonomous self-build executor in DRY_RUN or approved local APPLY mode."
+    }
+}
+
 $health = powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $next = powershell -ExecutionPolicy Bypass -File automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $blocker = powershell -ExecutionPolicy Bypass -File automation/orchestration/blockers/Resolve-AiOsRuntimeBlocker.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
@@ -171,6 +207,7 @@ $gitStatus = @(git status --short)
 $repoRoot = (Get-Location).Path
 $fullAutonomyState = Get-FullAutonomyWorkerPostureBridgeState -RepoRoot $repoRoot
 $fullAutonomyWorkerLaunch = Get-FullAutonomyWorkerLaunchAvailabilityState -RepoRoot $repoRoot
+$autonomousSelfBuild = Get-AutonomousSelfBuildAvailabilityState -RepoRoot $repoRoot
 $relayOperatorState = Get-RelayOperatorState -RepoRoot $repoRoot
 $campaignNextTaskState = Get-CampaignNextTaskState -RepoRoot $repoRoot
 $campaignOverallReadiness = if ($campaignNextTaskState -and $campaignNextTaskState.PSObject.Properties.Name -contains "overall_readiness") {
@@ -371,6 +408,7 @@ $result = [pscustomobject]@{
     blocker = $blocker.blocker
     full_autonomy_state = $fullAutonomyState
     full_autonomy_worker_launch = $fullAutonomyWorkerLaunch
+    autonomous_self_build = $autonomousSelfBuild
     level5_commit_package_preview = [pscustomobject]@{
         available = [bool]($null -ne $commitPackagePreview)
         status = if ($commitPackagePreview -and $commitPackagePreview.orchestration_result_contract.status) { [string]$commitPackagePreview.orchestration_result_contract.status } elseif ($gitStatus.Count -gt 0) { "REVIEW" } else { "NOT_NEEDED" }
@@ -443,6 +481,7 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
         no_ready_stage_registry_inconsistency_detected = $noReadyStageRegistryInconsistencyDetected
         full_autonomy_state = $fullAutonomyState
         full_autonomy_worker_launch = $fullAutonomyWorkerLaunch
+        autonomous_self_build = $autonomousSelfBuild
     }
     generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 })
@@ -479,6 +518,16 @@ Write-Host "approved_launch_controller: $($result.full_autonomy_worker_launch.ap
 Write-Host "forex_research_pipeline: $($result.full_autonomy_worker_launch.forex_research_pipeline)"
 Write-Host "worker_launch_allowed_now: $($result.full_autonomy_worker_launch.worker_launch_allowed_now)"
 Write-Host "next_safe_action: $($result.full_autonomy_worker_launch.next_safe_action)"
+Write-Host ""
+Write-Host "AUTONOMOUS SELF-BUILD"
+Write-Host "executor: $($result.autonomous_self_build.executor)"
+Write-Host "can_select_next_candidate: $($result.autonomous_self_build.can_select_next_candidate)"
+Write-Host "can_build_execution_packet: $($result.autonomous_self_build.can_build_execution_packet)"
+Write-Host "can_validate_and_repair_stub: $($result.autonomous_self_build.can_validate_and_repair_stub)"
+Write-Host "can_apply_local_self_build: $($result.autonomous_self_build.can_apply_local_self_build)"
+Write-Host "can_commit: $($result.autonomous_self_build.can_commit)"
+Write-Host "push_pr_merge_allowed: $($result.autonomous_self_build.push_pr_merge_allowed)"
+Write-Host "next_safe_action: $($result.autonomous_self_build.next_safe_action)"
 Write-Host ""
 Write-Host "RECOMMENDED COMMAND:"
 Write-Host $result.recommended_command

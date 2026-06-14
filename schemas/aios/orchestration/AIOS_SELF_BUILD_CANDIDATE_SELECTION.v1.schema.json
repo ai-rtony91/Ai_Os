@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/AIOS_SELF_BUILD_CANDIDATE_SELECTION.v1.schema.json",
+  "title": "AIOS Self-Build Candidate Selection",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "generated_utc",
+    "candidate_id",
+    "candidate_title",
+    "candidate_lane",
+    "priority",
+    "objective",
+    "allowed_files",
+    "blocked_surfaces",
+    "required_validators",
+    "approval_required",
+    "reason",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_SELF_BUILD_CANDIDATE_SELECTION.v1"
+    }
+  }
+}

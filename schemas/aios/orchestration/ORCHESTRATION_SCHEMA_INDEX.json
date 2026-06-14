@@ -334,6 +334,41 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "AIOS_SELF_BUILD_CANDIDATE_SELECTION.v1",
+      "path": "schemas/aios/orchestration/AIOS_SELF_BUILD_CANDIDATE_SELECTION.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Deterministic autonomous self-build candidate selection contract. Evidence only; grants no registry, READY stage, queue, lock, approval, broker, trading, scheduler, daemon, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_SELF_BUILD_EXECUTION_PACKET.v1",
+      "path": "schemas/aios/orchestration/AIOS_SELF_BUILD_EXECUTION_PACKET.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Inert self-build execution packet object contract. Data only; grants no packet file write, READY stage creation, registry mutation, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_SELF_BUILD_VALIDATOR_REPAIR_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_SELF_BUILD_VALIDATOR_REPAIR_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Bounded self-build validator repair decision contract. Returns deterministic repair guidance only and grants no arbitrary code edit, queue, lock, approval, registry, broker, trading, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_SELF_BUILD_EXECUTION_LEDGER_RECORD.v1",
+      "path": "schemas/aios/orchestration/AIOS_SELF_BUILD_EXECUTION_LEDGER_RECORD.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Local self-build execution ledger record contract for approved bounded burn-in runs. Grants no queue, lock, approval, registry, broker, live trading, runtime, scheduler, daemon, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_AUTONOMOUS_SELF_BUILD_EXECUTOR_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_AUTONOMOUS_SELF_BUILD_EXECUTOR_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Autonomous self-build executor burn-in result contract. Allows only bounded local self-build ledger writes with approval and grants no arbitrary source edit, worker launch, runtime, scheduler, daemon, broker, trading, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "APPROVAL_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
       "kind": "json_schema",
