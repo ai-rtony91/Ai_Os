@@ -86,7 +86,11 @@ for ($i = 1; $i -le $Cycles; $i++) {
         continue
     }
 
-    powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1 -Apply
+    if ($Apply) {
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1 -Apply
+    } else {
+        powershell -ExecutionPolicy Bypass -File automation/orchestration/runtime/Invoke-AiOsRuntimeSelfRoute.ps1
+    }
     $selfRouteResult = Convert-AiOsExitCodeToAuditResult -ExitCode $LASTEXITCODE
     if ($LASTEXITCODE -ne 0) {
         $cycleResult = "FAIL"
