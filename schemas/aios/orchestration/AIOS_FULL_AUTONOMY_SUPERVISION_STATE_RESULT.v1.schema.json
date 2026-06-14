@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_FULL_AUTONOMY_SUPERVISION_STATE_RESULT.v1.schema.json",
+  "title": "AIOS Full Autonomy Supervision State Result v1",
+  "description": "Console-only read-only full-autonomy supervision state result. This schema grants no APPLY, approval, queue, lock, relay, runtime, scheduler, worker, broker, trading, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "requested_autonomy_level",
+    "resolved_autonomy_level",
+    "operating_profile",
+    "full_autonomy_state",
+    "full_autonomy_prerequisites",
+    "worker_supervision",
+    "human_wake_policy",
+    "approval_gate",
+    "sos_gate",
+    "protected_actions",
+    "recommended_validators",
+    "recommended_next_action",
+    "safety",
+    "no_write_proof",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_FULL_AUTONOMY_SUPERVISION_STATE_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "repo_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "requested_autonomy_level": {
+      "type": "string",
+      "enum": [
+        "LEVEL_0_MANUAL",
+        "LEVEL_1_ASSISTED",
+        "LEVEL_2_SEMI_AUTONOMOUS",
+        "LEVEL_3_SUPERVISED_AUTONOMY",
+        "LEVEL_4_CONDITIONAL_FULL_AUTONOMY",
+        "LEVEL_5_FULL_AUTONOMY_REQUESTED"
+      ]
+    },
+    "resolved_autonomy_level": {
+      "type": "string"
+    },
+    "operating_profile": {
+      "type": "string",
+      "enum": [
+        "12H_SUPERVISED",
+        "24H_SUPERVISED",
+        "WEEKEND",
+        "VACATION",
+        "OVERNIGHT",
+        "EMERGENCY_REVIEW",
+        "FULL_AUTONOMY_SUPERVISED"
+      ]
+    },
+    "full_autonomy_state": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "full_autonomy_prerequisites": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "worker_supervision": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "worker_supervision_status",
+        "worker_shift_mode",
+        "recommended_worker_count",
+        "max_parallel_workers",
+        "allowed_worker_lanes",
+        "blocked_worker_lanes",
+        "worker_launch_allowed",
+        "worker_launch_reason",
+        "supervisor_review_required",
+        "human_wake_policy",
+        "autonomous_continuation_allowed",
+        "autonomous_continuation_limits"
+      ],
+      "properties": {
+        "worker_launch_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "allowed_worker_lanes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "blocked_worker_lanes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "human_wake_policy": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "approval_gate": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "human_owner_required",
+        "self_approval_allowed",
+        "before_apply",
+        "before_commit",
+        "before_push",
+        "before_pr",
+        "before_merge"
+      ],
+      "properties": {
+        "human_owner_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_approval_allowed": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "sos_gate": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "protected_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "recommended_validators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "recommended_next_action": {
+      "type": "string"
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "writes_files",
+        "mutates_registry",
+        "creates_ready_stage",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approval",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_relay",
+        "starts_runtime",
+        "launches_workers",
+        "enables_scheduler",
+        "starts_daemon",
+        "touches_secrets_or_env",
+        "broker_or_live_trading",
+        "protected_actions_blocked",
+        "human_owner_required_before_protected_action",
+        "self_approval_allowed"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "REVIEW_REQUIRED",
+            "BLOCKED",
+            "BLOCKED_BY_WRITE_SURFACE_RISK"
+          ]
+        },
+        "writes_files": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "creates_ready_stage": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approval": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_relay": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "enables_scheduler": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_daemon": {
+          "type": "boolean",
+          "const": false
+        },
+        "touches_secrets_or_env": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_actions_blocked": {
+          "type": "boolean",
+          "const": true
+        },
+        "human_owner_required_before_protected_action": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_approval_allowed": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "no_write_proof": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "stop_conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}
