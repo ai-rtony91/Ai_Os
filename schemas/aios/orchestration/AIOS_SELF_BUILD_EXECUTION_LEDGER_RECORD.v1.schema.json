@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/AIOS_SELF_BUILD_EXECUTION_LEDGER_RECORD.v1.schema.json",
+  "title": "AIOS Self-Build Execution Ledger Record",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "run_id",
+    "generated_utc",
+    "candidate_id",
+    "packet_id",
+    "mode",
+    "status",
+    "validator_summary",
+    "repair_attempts",
+    "safety",
+    "stop_reason",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_SELF_BUILD_EXECUTION_LEDGER_RECORD.v1"
+    }
+  }
+}
