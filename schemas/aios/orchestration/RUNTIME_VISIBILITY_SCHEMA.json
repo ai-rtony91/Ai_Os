@@ -1,12 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-os.local/schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.v0.1.1",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.v0.1.2",
   "title": "AI_OS Runtime Visibility Read Model Schema",
-  "description": "v0.1.1 JSON Schema for AI_OS runtime API and dashboard visibility read models. Supports current API and mock shapes. Contract scaffold only; visibility projections are evidence and display data, not command authority.",
+  "description": "v0.1.2 JSON Schema for AI_OS runtime API and dashboard visibility read models. Supports current API and mock shapes. Visibility projections are evidence and display data, not command authority.",
   "type": "object",
   "additionalProperties": true,
   "required": [
-    "schema"
+    "schema",
+    "frontend_contract",
+    "source_paths"
   ],
   "properties": {
     "schema": {

@@ -20,6 +20,18 @@ const dispatcherQueuePath = path.join(
   "queue",
   "DISPATCHER_QUEUE.json"
 );
+const FRONTEND_BLOCKED_ACTIONS = Object.freeze([
+  "protected_git",
+  "apply",
+  "approval_mutation",
+  "lock_mutation",
+  "worker_launch",
+  "runtime_mutation",
+  "queue_mutation",
+  "broker_execution",
+  "live_trading",
+  "secret_access"
+]);
 
 function nowIso() {
   return new Date().toISOString();
@@ -27,6 +39,39 @@ function nowIso() {
 
 function relativePath(fullPath) {
   return path.relative(repoRoot, fullPath).replace(/\\/g, "/");
+}
+
+function buildFrontendContract({
+  displayState,
+  sourcePath,
+  sourceType,
+  generatedAt,
+  isStale,
+  nextSafeAction
+}) {
+  return {
+    display_state: displayState || "UNKNOWN",
+    authority_state: "EVIDENCE_ONLY",
+    source_path: sourcePath || "UNKNOWN",
+    source_type: sourceType || "generated_projection",
+    freshness: {
+      generated_at: generatedAt,
+      ttl_seconds: 0,
+      is_stale: Boolean(isStale)
+    },
+    blocked_actions: [...FRONTEND_BLOCKED_ACTIONS],
+    next_safe_action:
+      nextSafeAction || "Review read-only runtime visibility before any protected action.",
+    approval_required: true,
+    execution_allowed: false,
+    mutation_allowed: false,
+    stale_or_legacy: Boolean(isStale),
+    safe_for_frontend_display: true
+  };
+}
+
+function uniquePaths(paths) {
+  return [...new Set(paths.filter(Boolean))];
 }
 
 function readJsonFile(fullPath) {
@@ -378,11 +423,64 @@ function getVisibilitySnapshot() {
   const queue = getQueueStatus();
   const audit = getAuditTimeline({ recent: 20 });
   const health = getRuntimeHealth();
+  const generatedAt = nowIso();
+  const sourcePaths = uniquePaths([
+    status.runtime.statePath,
+    status.runtime.heartbeatPath,
+    status.runtime.processPath,
+    queue.queue.path,
+    audit.ledgerPath,
+    audit.ledgerAuthority?.nightSupervisorLedger?.path
+  ]);
+  const nextSafeAction = "Use this visibility snapshot for internal read-only consumers. No control action is exposed.";
 
   return {
     schema: "aios.runtime_visibility_api.v1",
-    generatedAt: nowIso(),
+    generatedAt,
     mode: "READ_ONLY",
+    source_paths: sourcePaths,
+    frontend_contract: buildFrontendContract({
+      displayState: health.healthy ? "READY" : "REVIEW",
+      sourcePath: "/api/runtime/visibility",
+      sourceType: "api_read_model",
+      generatedAt,
+      isStale: !health.healthy,
+      nextSafeAction
+    }),
+    projection_items: [
+      buildFrontendContract({
+        displayState: status.runtime.status,
+        sourcePath: status.runtime.statePath,
+        sourceType: "runtime_state",
+        generatedAt,
+        isStale: !health.healthy,
+        nextSafeAction: "Review runtime status only. This projection cannot start or stop runtime."
+      }),
+      buildFrontendContract({
+        displayState: queue.queue.status,
+        sourcePath: queue.queue.path,
+        sourceType: "queue_state",
+        generatedAt,
+        isStale: !queue.queue.ok,
+        nextSafeAction: "Review queue state only. This projection cannot mutate queue items."
+      }),
+      buildFrontendContract({
+        displayState: audit.invalidLineCount > 0 ? "REVIEW" : "DISPLAY_ONLY",
+        sourcePath: audit.ledgerPath,
+        sourceType: "telemetry",
+        generatedAt,
+        isStale: audit.sourceEventCount === 0,
+        nextSafeAction: "Review telemetry as evidence only before any protected action."
+      }),
+      buildFrontendContract({
+        displayState: "BLOCKED",
+        sourcePath: "/api/runtime/control",
+        sourceType: "api_read_model",
+        generatedAt,
+        isStale: false,
+        nextSafeAction: "Use PowerShell control scripts only with explicit operator approval."
+      })
+    ],
     runtime: status.runtime,
     health,
     queue: queue.queue,
@@ -395,7 +493,7 @@ function getVisibilitySnapshot() {
     },
     ledgerAuthority: audit.ledgerAuthority,
     controls: getControlSummary().controls,
-    nextSafeAction: "Use this visibility snapshot for internal read-only consumers. No control action is exposed."
+    nextSafeAction
   };
 }
 
