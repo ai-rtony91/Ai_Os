@@ -30,6 +30,7 @@ FOREX_DECISION_POLICY_PATH = Path("apps/trading_lab/trading_lab/forex_decision_p
 FOREX_DECISION_POLICY_TEST_PATH = Path("tests/trading_lab/test_forex_decision_policy.py")
 FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
 NEXT_BUILD_PLAN_ROUTER_PATH = Path("automation/orchestration/aios_next_build_plan.py")
+BOUNDED_EXECUTOR_HANDOFF_PATH = Path("automation/orchestration/aios_bounded_executor_handoff.py")
 
 CommandRunner = Callable[[list[str], Path], dict[str, Any]]
 
@@ -231,6 +232,32 @@ def build_next_build_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
     return module.build_next_build_plan(goal_decision)
 
 
+def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
+    handoff_path = Path(__file__).with_name("aios_bounded_executor_handoff.py")
+    spec = importlib.util.spec_from_file_location("aios_bounded_executor_handoff", handoff_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1",
+            "goal": next_build_plan.get("goal", "forex-paper-bot"),
+            "input_route": next_build_plan.get("route", "unknown"),
+            "next_component": next_build_plan.get("next_component", "unknown"),
+            "next_packet_id": next_build_plan.get("next_packet_id", "NONE"),
+            "handoff_status": "blocked",
+            "reason_code": "bounded_executor_handoff_unavailable",
+            "executor_mode": "none",
+            "allowed_action": "none",
+            "allowed_paths": [],
+            "validators": [],
+            "command_preview": [],
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+            "next_safe_action": "Stop and repair the missing bounded executor handoff builder.",
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_bounded_executor_handoff(next_build_plan)
+
+
 def default_state_path() -> Path:
     return Path(tempfile.gettempdir()) / "AIOS_WAKE_CONTINUE_STATE.json"
 
@@ -245,6 +272,7 @@ def base_report(goal: str) -> dict[str, Any]:
         "repair_attempts": 0,
         "goal_decision": None,
         "next_build_plan": None,
+        "bounded_executor_handoff": None,
         "result": "blocked",
         "next_safe_action": "Inspect the blocked reason before continuing.",
         "approval_required": approval_required(),
@@ -321,11 +349,17 @@ def run_wake_continue(
                 return report
             next_build_plan = build_next_build_plan(goal_decision)
             report["next_build_plan"] = next_build_plan
-            report["next_safe_action"] = next_build_plan["next_safe_action"]
-            if next_build_plan.get("route") == "stop":
+            bounded_executor_handoff = build_bounded_executor_handoff(next_build_plan)
+            report["bounded_executor_handoff"] = bounded_executor_handoff
+            report["next_safe_action"] = bounded_executor_handoff["next_safe_action"]
+            handoff_status = bounded_executor_handoff.get("handoff_status")
+            if handoff_status == "ready":
+                report["result"] = "DONE_FOR_CURRENT_GOAL"
+            elif handoff_status == "stopped":
                 report["result"] = "REVIEW_REQUIRED"
             else:
-                report["result"] = "DONE_FOR_CURRENT_GOAL"
+                report["result"] = "BLOCKED"
+                report["blocked_reason"] = bounded_executor_handoff.get("reason_code", "bounded_executor_handoff_blocked")
             write_state(state_path, report)
             return report
 
@@ -379,7 +413,7 @@ def main(argv: list[str] | None = None) -> int:
         state_path=state_path,
     )
     print(json.dumps(report, indent=2, sort_keys=False))
-    return 0 if report["result"] in {"DONE_FOR_CURRENT_GOAL", "REVIEW_REQUIRED", "passed", "preview_only", "blocked", "max_cycles_reached"} else 1
+    return 0 if report["result"] in {"DONE_FOR_CURRENT_GOAL", "REVIEW_REQUIRED", "passed", "preview_only", "blocked", "BLOCKED", "max_cycles_reached"} else 1
 
 
 if __name__ == "__main__":
