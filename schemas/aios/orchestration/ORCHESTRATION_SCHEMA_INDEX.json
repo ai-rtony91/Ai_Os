@@ -306,6 +306,34 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "AIOS_APPROVED_AUTONOMY_WORKER_LAUNCH_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_APPROVED_AUTONOMY_WORKER_LAUNCH_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Approved local simulation/research worker launch controller result. Allows only bounded local tasks and approved run ledger writes; grants no live trading, broker, secrets, scheduler, daemon, queue, lock, approval, registry, Reports, telemetry, relay, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_AUTONOMY_RUN_LEDGER_RECORD.v1",
+      "path": "schemas/aios/orchestration/AIOS_AUTONOMY_RUN_LEDGER_RECORD.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Local autonomy run ledger record contract for approved bounded simulation/research runs. Does not grant queue, lock, approval, registry, broker, live trading, runtime, scheduler, daemon, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_AUTONOMOUS_FOREX_RESEARCH_RUN_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_AUTONOMOUS_FOREX_RESEARCH_RUN_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Simulation-only Forex research, backtest, replay, and soak run result. Synthetic fixtures only; not valid for live trading and grants no broker, OANDA, secrets, webhook, order, live trading, scheduler, daemon, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
+      "name": "AIOS_MINIMAL_SOS_WAKE_POLICY_RESULT.v1",
+      "path": "schemas/aios/orchestration/AIOS_MINIMAL_SOS_WAKE_POLICY_RESULT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Minimal Human Owner wake policy result for autonomous local research. Wakes for SOS and protected boundaries only; grants no execution, approval, broker, trading, scheduler, daemon, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "APPROVAL_INBOX_SCHEMA",
       "path": "schemas/aios/orchestration/APPROVAL_INBOX_SCHEMA.json",
       "kind": "json_schema",

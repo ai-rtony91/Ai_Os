@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_APPROVED_AUTONOMY_WORKER_LAUNCH_RESULT.v1.schema.json",
+  "title": "AIOS Approved Autonomy Worker Launch Result v1",
+  "description": "Approved local simulation/research worker launch controller result. Live trading, broker/OANDA, secrets, scheduler, daemon, queue, lock, approval, registry, Reports, telemetry, and relay mutation remain blocked.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "approval_state",
+    "input_evidence",
+    "launch_decision",
+    "worker_posture",
+    "operating_profile",
+    "worker_count",
+    "max_parallel_workers",
+    "allowed_lanes",
+    "blocked_lanes",
+    "timebox_minutes",
+    "worker_tasks",
+    "run_ledger",
+    "executed_task_count",
+    "failed_task_count",
+    "stop_reason",
+    "human_wake_policy",
+    "safety",
+    "no_write_proof",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_APPROVED_AUTONOMY_WORKER_LAUNCH_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY"
+      ]
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "launch_decision": {
+      "type": "string",
+      "enum": [
+        "LAUNCH_DENIED",
+        "LAUNCH_REVIEW_REQUIRED",
+        "LAUNCH_APPROVAL_MISSING",
+        "LAUNCH_APPLY_READY",
+        "LAUNCH_APPLY_EXECUTED",
+        "LAUNCH_APPLY_PARTIAL_STOPPED",
+        "LAUNCH_BLOCKED_BY_SOS",
+        "LAUNCH_BLOCKED_BY_VALIDATORS",
+        "LAUNCH_BLOCKED_BY_PROTECTED_LANE",
+        "LAUNCH_BLOCKED_BY_WORKER_LIMIT",
+        "LAUNCH_BLOCKED_BY_TIMEBOX",
+        "LAUNCH_BLOCKED_BY_SECRET_OR_LIVE_TRADING_BOUNDARY"
+      ]
+    },
+    "worker_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "max_parallel_workers": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "allowed_lanes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocked_lanes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "worker_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "run_ledger": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "starts_runtime",
+        "launches_workers",
+        "enables_scheduler",
+        "starts_daemon",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approval",
+        "mutates_registry",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_relay",
+        "touches_secrets_or_env",
+        "broker_or_live_trading",
+        "protected_actions_blocked"
+      ],
+      "properties": {
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "enables_scheduler": {
+          "type": "boolean",
+          "const": false
+        },
+        "starts_daemon": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approval": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_relay": {
+          "type": "boolean",
+          "const": false
+        },
+        "touches_secrets_or_env": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_actions_blocked": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    }
+  }
+}
