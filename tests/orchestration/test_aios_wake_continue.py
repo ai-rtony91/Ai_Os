@@ -7,6 +7,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_wake_continue.py"
+POLICY_SOURCE_PATH = REPO_ROOT / "apps" / "trading_lab" / "trading_lab" / "forex_decision_policy.py"
 
 
 def load_module():
@@ -82,7 +83,7 @@ def seed_decision_policy(repo_root: Path) -> None:
     test_path = repo_root / "tests" / "trading_lab" / "test_forex_decision_policy.py"
     policy_path.parent.mkdir(parents=True, exist_ok=True)
     test_path.parent.mkdir(parents=True, exist_ok=True)
-    policy_path.write_text("# decision policy placeholder\n", encoding="utf-8")
+    policy_path.write_text(POLICY_SOURCE_PATH.read_text(encoding="utf-8"), encoding="utf-8")
     test_path.write_text("# decision policy test placeholder\n", encoding="utf-8")
 
 
@@ -274,8 +275,14 @@ def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     state = json.loads(state_path.read_text(encoding="utf-8"))
     assert report["result"] == "DONE_FOR_CURRENT_GOAL"
     assert report["selected_action"] == "validate_all_forex"
+    assert report["goal_decision"]["schema"] == "AIOS_FOREX_GOAL_DECISION.v1"
+    assert report["goal_decision"]["decision_bridge_passed"] is True
+    assert report["goal_decision"]["decision"] == "continue_build"
+    assert report["goal_decision"]["reason_code"] == "acceptable_report"
+    assert report["goal_decision"]["next_build_recommendation"].startswith("Continue")
     assert len(report["validators_run"]) == 1
     assert state["schema"] == "AIOS_WAKE_CONTINUE.v1"
+    assert state["goal_decision"]["decision"] == "continue_build"
 
 
 def test_max_cycles_respected(tmp_path):
