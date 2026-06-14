@@ -14,10 +14,18 @@ SUPPORTED_GOALS = {"forex-paper-bot"}
 FOREX_BOT_PATH = Path("apps/trading_lab/trading_lab/forex_paper_bot.py")
 FOREX_BOT_TEST_PATH = Path("tests/trading_lab/test_forex_paper_bot.py")
 FOREX_BOT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PAPER_BOT.md")
+FOREX_BACKTEST_PATH = Path("apps/trading_lab/trading_lab/forex_backtest.py")
+FOREX_BACKTEST_TEST_PATH = Path("tests/trading_lab/test_forex_backtest.py")
+FOREX_BACKTEST_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_BACKTEST.md")
 FOREX_SCAFFOLD_PATHS = (
     FOREX_BOT_PATH,
     FOREX_BOT_TEST_PATH,
     FOREX_BOT_DOC_PATH,
+)
+FOREX_BACKTEST_PATHS = (
+    FOREX_BACKTEST_PATH,
+    FOREX_BACKTEST_TEST_PATH,
+    FOREX_BACKTEST_DOC_PATH,
 )
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -315,6 +323,226 @@ def forex_scaffold_files() -> dict[Path, str]:
     }
 
 
+def build_forex_backtest_source() -> str:
+    return '''from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+from typing import Any
+
+
+PAPER_BACKTEST_SAFETY = {
+    "paper_only": True,
+    "execution_allowed": False,
+    "broker_execution": False,
+    "credential_use": False,
+    "live_trading": False,
+    "real_orders": False,
+    "real_webhooks": False,
+}
+
+BLOCKED_SCOPE_FIELDS = {
+    "broker",
+    "broker_order",
+    "credentials",
+    "api_key",
+    "token",
+    "live_execution",
+    "real_order",
+    "webhook_url",
+    "real_webhook",
+}
+
+
+def _load_forex_paper_bot():
+    try:
+        from . import forex_paper_bot  # type: ignore
+
+        return forex_paper_bot
+    except ImportError:
+        module_path = Path(__file__).with_name("forex_paper_bot.py")
+        spec = importlib.util.spec_from_file_location("forex_paper_bot", module_path)
+        module = importlib.util.module_from_spec(spec)
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        return module
+
+
+def _blocked_scope_reason(candle: dict[str, Any]) -> str | None:
+    for field in sorted(BLOCKED_SCOPE_FIELDS):
+        if candle.get(field):
+            return f"{field}_blocked"
+    return None
+
+
+def _paper_stop_loss(close: float, direction: str, candle: dict[str, Any]) -> float | None:
+    if candle.get("stop_loss") is not None:
+        return float(candle["stop_loss"])
+    if direction == "buy":
+        return round(close * 0.99, 6)
+    if direction == "sell":
+        return round(close * 1.01, 6)
+    return None
+
+
+def run_backtest(
+    candles: list[dict[str, Any]],
+    *,
+    starting_balance: float = 10000.0,
+    default_pair: str = "EURUSD",
+    default_direction: str = "buy",
+    max_risk_percent: float = 1.0,
+) -> dict[str, Any]:
+    bot = _load_forex_paper_bot()
+    ending_balance = float(starting_balance)
+    decisions: list[dict[str, Any]] = []
+    trades_allowed = 0
+    trades_blocked = 0
+
+    for index, candle in enumerate(candles):
+        blocked_scope = _blocked_scope_reason(candle)
+        pair = str(candle.get("pair", default_pair)).upper()
+        direction = str(candle.get("direction", default_direction)).lower()
+        close = float(candle.get("close", candle.get("entry_price", 0)))
+        stop_loss = _paper_stop_loss(close, direction, candle)
+
+        if blocked_scope:
+            trades_blocked += 1
+            decisions.append(
+                {
+                    "index": index,
+                    "allowed": False,
+                    "blocked_reason": blocked_scope,
+                    **PAPER_BACKTEST_SAFETY,
+                }
+            )
+            continue
+
+        decision = bot.paper_decision(
+            pair=pair,
+            direction=direction,
+            entry_price=close,
+            stop_loss=stop_loss,
+            account_equity=ending_balance,
+            max_risk_percent=max_risk_percent,
+        )
+        decision_record = {"index": index, **decision}
+        if decision.get("allowed"):
+            trades_allowed += 1
+            risk_amount = decision["mock_position_size"]["risk_amount"]
+            paper_result_r = float(candle.get("paper_result_r", 0.0))
+            ending_balance += risk_amount * paper_result_r
+        else:
+            trades_blocked += 1
+        decisions.append(decision_record)
+
+    return {
+        "trades_considered": len(candles),
+        "trades_allowed": trades_allowed,
+        "trades_blocked": trades_blocked,
+        "ending_balance": round(ending_balance, 2),
+        "decisions": decisions,
+        **PAPER_BACKTEST_SAFETY,
+    }
+'''
+
+
+def build_forex_backtest_test_source() -> str:
+    return '''from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = REPO_ROOT / "apps" / "trading_lab" / "trading_lab" / "forex_backtest.py"
+
+
+def load_backtest_module():
+    spec = importlib.util.spec_from_file_location("forex_backtest", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_generated_forex_backtest_imports():
+    backtest = load_backtest_module()
+    assert callable(backtest.run_backtest)
+
+
+def test_backtest_returns_paper_only_true():
+    backtest = load_backtest_module()
+    summary = backtest.run_backtest([])
+    assert summary["paper_only"] is True
+    assert summary["execution_allowed"] is False
+    assert summary["broker_execution"] is False
+    assert summary["real_orders"] is False
+
+
+def test_valid_sample_candles_produce_deterministic_summary():
+    backtest = load_backtest_module()
+    summary = backtest.run_backtest(
+        [
+            {"pair": "EURUSD", "direction": "buy", "close": 1.10, "stop_loss": 1.09, "paper_result_r": 1.0},
+            {"pair": "GBPUSD", "direction": "sell", "close": 1.25, "stop_loss": 1.26, "paper_result_r": -0.5},
+            {"pair": "AUDUSD", "direction": "buy", "close": 0.65, "stop_loss": 0.64, "paper_result_r": 1.0},
+        ],
+        starting_balance=10000.0,
+        max_risk_percent=1.0,
+    )
+    assert summary["trades_considered"] == 3
+    assert summary["trades_allowed"] == 2
+    assert summary["trades_blocked"] == 1
+    assert summary["ending_balance"] == 10049.5
+    assert summary["paper_only"] is True
+
+
+def test_broker_live_and_credential_fields_are_blocked():
+    backtest = load_backtest_module()
+    summary = backtest.run_backtest(
+        [
+            {"pair": "EURUSD", "direction": "buy", "close": 1.10, "stop_loss": 1.09, "broker_order": True},
+            {"pair": "EURUSD", "direction": "buy", "close": 1.10, "stop_loss": 1.09, "live_execution": True},
+            {"pair": "EURUSD", "direction": "buy", "close": 1.10, "stop_loss": 1.09, "credentials": {"token": "x"}},
+            {"pair": "EURUSD", "direction": "buy", "close": 1.10, "stop_loss": 1.09, "webhook_url": "https://example.invalid"},
+        ],
+    )
+    assert summary["trades_considered"] == 4
+    assert summary["trades_allowed"] == 0
+    assert summary["trades_blocked"] == 4
+    assert all(decision["allowed"] is False for decision in summary["decisions"])
+    assert summary["execution_allowed"] is False
+    assert summary["live_trading"] is False
+'''
+
+
+def build_forex_backtest_doc() -> str:
+    return """# AIOS Forex Backtest
+
+This generated component is the second `forex-paper-bot` build step. It is a
+deterministic, paper-only backtest helper that consumes local candle-like
+dictionaries, calls the local Forex paper bot decision function, and returns a
+summary for review.
+
+The backtest summary includes `trades_considered`, `trades_allowed`,
+`trades_blocked`, `ending_balance`, and `paper_only: true`.
+
+The component blocks broker fields, credential fields, live execution flags,
+real order fields, and real webhook fields. It does not mutate queues, approvals,
+workers, runtime, schedulers, daemons, Git state, broker state, credentials, or
+live trading paths.
+"""
+
+
+def forex_backtest_files() -> dict[Path, str]:
+    return {
+        FOREX_BACKTEST_PATH: build_forex_backtest_source(),
+        FOREX_BACKTEST_TEST_PATH: build_forex_backtest_test_source(),
+        FOREX_BACKTEST_DOC_PATH: build_forex_backtest_doc(),
+    }
+
+
 def write_text_if_changed(path: Path, content: str) -> bool:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists() and path.read_text(encoding="utf-8") == content:
@@ -326,6 +554,15 @@ def write_text_if_changed(path: Path, content: str) -> bool:
 def write_forex_scaffold(repo_root: Path) -> list[str]:
     files_written: list[str] = []
     for relative_path, content in forex_scaffold_files().items():
+        target = repo_root / relative_path
+        if write_text_if_changed(target, content):
+            files_written.append(relative_path.as_posix())
+    return files_written
+
+
+def write_forex_backtest(repo_root: Path) -> list[str]:
+    files_written: list[str] = []
+    for relative_path, content in forex_backtest_files().items():
         target = repo_root / relative_path
         if write_text_if_changed(target, content):
             files_written.append(relative_path.as_posix())
@@ -358,6 +595,32 @@ def run_forex_bot_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_forex_backtest_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_BACKTEST_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_backtest_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
 def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -374,11 +637,36 @@ def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     }
 
 
+def select_forex_continue_action(repo_root: Path) -> str:
+    if not (repo_root / FOREX_BOT_PATH).exists():
+        return "build_scaffold"
+    if not (repo_root / FOREX_BACKTEST_PATH).exists():
+        return "build_backtest"
+    return "done"
+
+
+def _apply_writer_for_action(repo_root: Path, action: str) -> tuple[list[str], ValidatorRunner | None]:
+    if action == "build_scaffold":
+        return write_forex_scaffold(repo_root), run_forex_bot_validator
+    if action == "build_backtest":
+        return write_forex_backtest(repo_root), run_forex_backtest_validator
+    return [], None
+
+
+def _repair_for_action(repo_root: Path, action: str) -> list[str]:
+    if action == "build_scaffold":
+        return write_forex_scaffold(repo_root)
+    if action == "build_backtest":
+        return write_forex_backtest(repo_root)
+    return []
+
+
 def execute_goal(
     repo_root: Path,
     goal: str,
     *,
     apply: bool = False,
+    continue_goal: bool = False,
     max_repairs: int = 0,
     validator_runner: ValidatorRunner | None = None,
 ) -> dict[str, Any]:
@@ -396,6 +684,7 @@ def execute_goal(
         "files_written": [],
         "validators_run": [],
         "repair_attempts": 0,
+        "continue_action": select_forex_continue_action(repo_root) if continue_goal else "build_scaffold",
         "result": "preview_only",
         "next_safe_action": "Run with --apply only inside an approved local write boundary.",
         "approval_required": approval_required(),
@@ -405,15 +694,26 @@ def execute_goal(
     if not apply:
         return report
 
-    runner = validator_runner or run_forex_bot_validator
-    report["files_written"] = write_forex_scaffold(repo_root)
+    action = report["continue_action"]
+    if action == "done":
+        report["result"] = "DONE"
+        report["next_safe_action"] = "Forex paper bot scaffold and backtest already exist. Review validators before the next build step."
+        return report
+
+    files_written, default_runner = _apply_writer_for_action(repo_root, action)
+    runner = validator_runner or default_runner
+    report["files_written"] = files_written
+    if runner is None:
+        report["result"] = "blocked"
+        report["blocked_reason"] = "no_validator_for_continue_action"
+        return report
 
     validation = runner(repo_root)
     report["validators_run"].append(validation)
 
     while not validation.get("passed", False) and report["repair_attempts"] < max_repairs:
         report["repair_attempts"] += 1
-        repaired_files = write_forex_scaffold(repo_root)
+        repaired_files = _repair_for_action(repo_root, action)
         for relative_path in repaired_files:
             if relative_path not in report["files_written"]:
                 report["files_written"].append(relative_path)
@@ -433,6 +733,7 @@ def execute_goal(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run one bounded AIOS autonomy execute goal.")
     parser.add_argument("--goal", required=True, help="Goal to execute. Supported: forex-paper-bot.")
+    parser.add_argument("--continue", dest="continue_goal", action="store_true", help="Continue the next missing goal component.")
     parser.add_argument("--apply", action="store_true", help="Write the supported local scaffold and run validators.")
     parser.add_argument("--max-repairs", type=int, default=0, help="Maximum bounded repair attempts.")
     parser.add_argument("--repo-root", default=None, help="Optional repository root for tests or sandbox runs.")
@@ -446,6 +747,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_root=repo_root,
         goal=args.goal,
         apply=args.apply,
+        continue_goal=args.continue_goal,
         max_repairs=args.max_repairs,
     )
     print(json.dumps(report, indent=2, sort_keys=False))

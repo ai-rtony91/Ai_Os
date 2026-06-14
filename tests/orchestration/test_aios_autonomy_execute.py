@@ -25,6 +25,14 @@ def load_generated_bot(path: Path):
     return module
 
 
+def load_generated_backtest(path: Path):
+    spec = importlib.util.spec_from_file_location("forex_backtest", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 def passing_validator(_repo_root: Path) -> dict[str, object]:
     return {
         "name": "fake_validator",
@@ -70,11 +78,68 @@ def test_forex_paper_bot_goal_writes_files_in_temp_workspace(tmp_path):
         assert (tmp_path / relative_path).exists()
 
 
+def test_continue_selects_backtest_when_scaffold_exists(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    report = module.execute_goal(
+        tmp_path,
+        "forex-paper-bot",
+        apply=True,
+        continue_goal=True,
+        max_repairs=1,
+        validator_runner=passing_validator,
+    )
+    assert report["result"] == "passed"
+    assert report["continue_action"] == "build_backtest"
+    assert sorted(report["files_written"]) == sorted(
+        [
+            "apps/trading_lab/trading_lab/forex_backtest.py",
+            "tests/trading_lab/test_forex_backtest.py",
+            "docs/orchestration/AIOS_FOREX_BACKTEST.md",
+        ]
+    )
+
+
+def test_continue_done_when_scaffold_and_backtest_exist(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.write_forex_backtest(tmp_path)
+    report = module.execute_goal(
+        tmp_path,
+        "forex-paper-bot",
+        apply=True,
+        continue_goal=True,
+        max_repairs=1,
+        validator_runner=passing_validator,
+    )
+    assert report["result"] == "DONE"
+    assert report["continue_action"] == "done"
+    assert report["files_written"] == []
+    assert report["validators_run"] == []
+
+
 def test_generated_forex_bot_imports(tmp_path):
     module = load_executor_module()
     module.execute_goal(tmp_path, "forex-paper-bot", apply=True, validator_runner=passing_validator)
     bot = load_generated_bot(tmp_path / "apps/trading_lab/trading_lab/forex_paper_bot.py")
     assert bot.SUPPORTED_PAIRS == {"EURUSD", "GBPUSD", "USDJPY"}
+
+
+def test_generated_forex_backtest_imports(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.execute_goal(tmp_path, "forex-paper-bot", apply=True, continue_goal=True, validator_runner=passing_validator)
+    backtest = load_generated_backtest(tmp_path / "apps/trading_lab/trading_lab/forex_backtest.py")
+    summary = backtest.run_backtest(
+        [
+            {"pair": "EURUSD", "direction": "buy", "close": 1.10, "stop_loss": 1.09, "paper_result_r": 1.0},
+            {"pair": "GBPUSD", "direction": "sell", "close": 1.25, "stop_loss": 1.26, "paper_result_r": -0.5},
+        ]
+    )
+    assert summary["paper_only"] is True
+    assert summary["trades_considered"] == 2
+    assert summary["trades_allowed"] == 2
+    assert summary["trades_blocked"] == 0
 
 
 def test_valid_eurusd_paper_signal_allowed(tmp_path):
@@ -237,4 +302,17 @@ def test_cli_report_is_json_compatible(tmp_path, capsys):
     report = json.loads(captured.out)
     assert report["schema"] == "AIOS_AUTONOMY_EXECUTE.v1"
     assert report["result"] == "preview_only"
+    assert report["files_written"] == []
+
+
+def test_cli_continue_flag_is_supported(tmp_path, capsys):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    exit_code = module.main(["--goal", "forex-paper-bot", "--continue", "--repo-root", str(tmp_path)])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    report = json.loads(captured.out)
+    assert report["schema"] == "AIOS_AUTONOMY_EXECUTE.v1"
+    assert report["result"] == "preview_only"
+    assert report["continue_action"] == "build_backtest"
     assert report["files_written"] == []
