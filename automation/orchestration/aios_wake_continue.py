@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import subprocess
 import sys
@@ -27,6 +28,7 @@ FOREX_REPORT_PATH = Path("apps/trading_lab/trading_lab/forex_report.py")
 FOREX_REPORT_TEST_PATH = Path("tests/trading_lab/test_forex_report.py")
 FOREX_DECISION_POLICY_PATH = Path("apps/trading_lab/trading_lab/forex_decision_policy.py")
 FOREX_DECISION_POLICY_TEST_PATH = Path("tests/trading_lab/test_forex_decision_policy.py")
+FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
 
 CommandRunner = Callable[[list[str], Path], dict[str, Any]]
 
@@ -187,6 +189,25 @@ def default_command_runner(command: list[str], repo_root: Path) -> dict[str, Any
     }
 
 
+def build_goal_decision(repo_root: Path, goal: str) -> dict[str, Any]:
+    bridge_path = Path(__file__).with_name("aios_forex_goal_decision.py")
+    spec = importlib.util.spec_from_file_location("aios_forex_goal_decision", bridge_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_FOREX_GOAL_DECISION.v1",
+            "goal": goal,
+            "decision_bridge_passed": False,
+            "decision": "stop_for_human_review",
+            "reason_code": "goal_decision_bridge_unavailable",
+            "decision_reasons": ["goal_decision_bridge_unavailable"],
+            "next_safe_action": "Stop and repair the missing Forex goal decision bridge.",
+            "safety": safety_flags(),
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_goal_decision(repo_root, goal=goal)
+
+
 def default_state_path() -> Path:
     return Path(tempfile.gettempdir()) / "AIOS_WAKE_CONTINUE_STATE.json"
 
@@ -199,6 +220,7 @@ def base_report(goal: str) -> dict[str, Any]:
         "commands_run": [],
         "validators_run": [],
         "repair_attempts": 0,
+        "goal_decision": None,
         "result": "blocked",
         "next_safe_action": "Inspect the blocked reason before continuing.",
         "approval_required": approval_required(),
@@ -262,8 +284,19 @@ def run_wake_continue(
         if command_result.get("passed", False):
             if selected_action.startswith("build_"):
                 continue
+            goal_decision = build_goal_decision(repo_root, goal)
+            report["goal_decision"] = goal_decision
+            if not goal_decision.get("decision_bridge_passed", False):
+                report["result"] = "blocked"
+                report["blocked_reason"] = goal_decision.get("reason_code", "goal_decision_bridge_failed")
+                report["next_safe_action"] = goal_decision.get(
+                    "next_safe_action",
+                    "Inspect the blocked Forex goal decision bridge output.",
+                )
+                write_state(state_path, report)
+                return report
             report["result"] = "DONE_FOR_CURRENT_GOAL"
-            report["next_safe_action"] = "Forex paper bot, backtest, ledger, strategy rules, data import, report, and decision policy validated. Commit and push still require approval."
+            report["next_safe_action"] = goal_decision["next_safe_action"]
             write_state(state_path, report)
             return report
 
