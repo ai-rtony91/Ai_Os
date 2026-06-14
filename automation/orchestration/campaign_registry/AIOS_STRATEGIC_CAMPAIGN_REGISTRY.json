@@ -373,11 +373,11 @@
           "stage_id": "STAGE-DASHBOARD-DATA-CONTRACT-REVIEW",
           "phase_id": "PHASE-DASHBOARD-VISIBILITY",
           "title": "Review dashboard data contract against current app",
-          "status": "NEEDS_REVIEW",
+          "status": "COMPLETE",
           "priority": "normal",
           "depends_on": [],
           "blocked_by": [],
-          "next_packet_candidate": "PKT-DASHBOARD-DATA-CONTRACT-REVIEW-DRYRUN"
+          "next_packet_candidate": null
         }
       ],
       "depends_on": [
@@ -571,7 +571,7 @@
           "stage_id": "STAGE-PRODUCTION-READINESS-REVIEW",
           "phase_id": "PHASE-PRODUCTION-READINESS",
           "title": "Review production hardening prerequisites",
-          "status": "NOT_STARTED",
+          "status": "READY",
           "priority": "normal",
           "depends_on": [
             "STAGE-DASHBOARD-DATA-CONTRACT-REVIEW"
