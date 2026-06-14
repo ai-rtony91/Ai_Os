@@ -109,6 +109,18 @@ def test_safe_crash_recovery_preserves_cycle_id() -> None:
     assert "CRASH_RECOVERY resume_from={0} cycle_id={1}" in text
 
 
+def test_relay_worker_evidence_drain_hook_is_static_skip_only() -> None:
+    text = night_cycle_text()
+
+    assert '"relay-worker-evidence-drain"' in text
+    assert "Get-AiOsRelayWorkerEvidenceDrain.DRY_RUN.ps1" in text
+    assert '$relayWorkerEvidenceDrain = Join-Path $repoRoot "automation\\orchestration\\relay\\Get-AiOsRelayWorkerEvidenceDrain.DRY_RUN.ps1"' in text
+    assert 'Complete-AiOsSkippedPhase -Number 4 -Name "relay-worker-evidence-drain" -Reason "STATIC_CONTRACT_ONLY"' in text
+    assert 'Invoke-AiOsStep -Number 4 -Name "relay-worker-evidence-drain"' not in text
+    assert '"-File", $relayWorkerEvidenceDrain' not in text
+    assert "Invoke-AiOsRelayWorker.ps1" not in text
+
+
 def test_watchdog_blocks_missing_and_stale_heartbeat(tmp_path: Path) -> None:
     watchdog = load_watchdog_module()
     now = datetime(2026, 6, 8, 12, 0, 0, tzinfo=timezone.utc)

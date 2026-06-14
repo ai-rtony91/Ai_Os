@@ -50,6 +50,7 @@ $script:AiOsPhaseNames = @(
     "clear-stale-approvals",
     "pull-backlog",
     "relay-runner",
+    "relay-worker-evidence-drain",
     "approval-resume",
     "relay-runner-resume-drain",
     "self-continuation",
@@ -327,6 +328,7 @@ function Invoke-AiOsNightCycleOnce {
     $diskWatch = Join-Path $repoRoot "automation\orchestration\hygiene\Watch-AiOsDiskSpace.ps1"
     $modeScript = Join-Path $repoRoot "automation\orchestration\mode\Get-AiOsActiveMode.ps1"
     $runner = Join-Path $repoRoot "automation\orchestration\relay\Invoke-AiOsRelayRunner.ps1"
+    $relayWorkerEvidenceDrain = Join-Path $repoRoot "automation\orchestration\relay\Get-AiOsRelayWorkerEvidenceDrain.DRY_RUN.ps1"
     $resume = Join-Path $repoRoot "automation\orchestration\approval_runner\Invoke-AiOsApprovedActionResume.ps1"
     $pullBacklog = Join-Path $repoRoot "automation\orchestration\backlog\Pull-AiOsBacklog.ps1"
     $morningBriefScript = Join-Path $repoRoot "automation\orchestration\reports\New-AiOsMorningBrief.ps1"
@@ -366,7 +368,7 @@ function Invoke-AiOsNightCycleOnce {
     if ($effectiveApply) { $notifierArgs += "--apply" }
     Set-AiOsMarkerModeContext -Mode $mode -ObserveOnly $observeOnly -EffectiveApply $effectiveApply
 
-    foreach ($requiredPath in @($modeScript, $runner, $pullBacklog, $morningBriefScript, $staleApprovals, $selfContinuation, $nightSupervisorHarness, $bridge, $notifier)) {
+    foreach ($requiredPath in @($modeScript, $runner, $relayWorkerEvidenceDrain, $pullBacklog, $morningBriefScript, $staleApprovals, $selfContinuation, $nightSupervisorHarness, $bridge, $notifier)) {
         if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
             throw "Night cycle dependency missing: $requiredPath"
         }
@@ -382,6 +384,7 @@ function Invoke-AiOsNightCycleOnce {
         Complete-AiOsSkippedPhase -Number 1 -Name "clear-stale-approvals" -Reason "DAY_OBSERVER"
         Complete-AiOsSkippedPhase -Number 2 -Name "pull-backlog" -Reason "DAY_OBSERVER"
         Complete-AiOsSkippedPhase -Number 3 -Name "relay-runner" -Reason "DAY_OBSERVER"
+        Complete-AiOsSkippedPhase -Number 4 -Name "relay-worker-evidence-drain" -Reason "STATIC_CONTRACT_ONLY"
         Complete-AiOsSkippedPhase -Number 4 -Name "approval-resume" -Reason "DAY_OBSERVER"
         Complete-AiOsSkippedPhase -Number 4 -Name "relay-runner-resume-drain" -Reason "DAY_OBSERVER"
         Complete-AiOsSkippedPhase -Number 5 -Name "self-continuation" -Reason "DAY_OBSERVER"
@@ -403,6 +406,7 @@ function Invoke-AiOsNightCycleOnce {
     Invoke-AiOsStep -Number 1 -Name "clear-stale-approvals" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $staleApprovals) + $applyArgs)
     Invoke-AiOsStep -Number 2 -Name "pull-backlog" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $pullBacklog) + $applyArgs)
     Invoke-AiOsStep -Number 3 -Name "relay-runner" -Command $ps -Arguments (@("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $runner) + $applyArgs)
+    Complete-AiOsSkippedPhase -Number 4 -Name "relay-worker-evidence-drain" -Reason "STATIC_CONTRACT_ONLY"
 
     if ($effectiveApply) {
         Invoke-AiOsStep -Number 4 -Name "approval-resume" -Command $ps -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $resume, "-Apply")
