@@ -89,7 +89,7 @@ def test_unsafe_scope_fields_are_blocked_with_safe_placeholders():
     assert policy.decide_next_action(acceptable_report(), broker_order=True)["reason_code"] == "broker_order_blocked"
     assert policy.decide_next_action(acceptable_report(), live_execution=True)["reason_code"] == "live_execution_blocked"
     assert policy.decide_next_action(acceptable_report(), credentials={"sample": "safe-placeholder"})["reason_code"] == "credentials_blocked"
-    assert policy.decide_next_action(acceptable_report(), api_key="safe-placeholder")["reason_code"] == "api_key_blocked"
+    assert policy.decide_next_action(acceptable_report(), api_key="placeholder-safe")["reason_code"] == "api_key_blocked"
     assert policy.decide_next_action(acceptable_report(), real_order=True)["reason_code"] == "real_order_blocked"
     assert policy.decide_next_action(acceptable_report(), webhook_url="https://example.invalid/hook")["reason_code"] == "webhook_url_blocked"
     assert policy.decide_next_action(acceptable_report(), network=True)["reason_code"] == "network_blocked"
