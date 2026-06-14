@@ -1,6 +1,99 @@
 {
   "schema": "aios.runtime_visibility.v1",
   "generatedAt": "2026-05-18T23:45:00Z",
+  "mode": "DISPLAY_ONLY",
+  "source_paths": [
+    "apps/dashboard/mock-data/aios-runtime-visibility-v1.example.json"
+  ],
+  "frontend_contract": {
+    "display_state": "NEEDS_REVIEW",
+    "authority_state": "DISPLAY_ONLY",
+    "source_path": "apps/dashboard/mock-data/aios-runtime-visibility-v1.example.json",
+    "source_type": "fixture",
+    "freshness": {
+      "generated_at": "2026-05-18T23:45:00Z",
+      "ttl_seconds": 0,
+      "is_stale": true
+    },
+    "blocked_actions": [
+      "protected_git",
+      "apply",
+      "approval_mutation",
+      "lock_mutation",
+      "worker_launch",
+      "runtime_mutation",
+      "queue_mutation",
+      "broker_execution",
+      "live_trading",
+      "secret_access"
+    ],
+    "next_safe_action": "Review fixture-backed runtime visibility as display-only evidence before any protected action.",
+    "approval_required": true,
+    "execution_allowed": false,
+    "mutation_allowed": false,
+    "stale_or_legacy": true,
+    "safe_for_frontend_display": true
+  },
+  "projection_items": [
+    {
+      "display_state": "NEEDS_REVIEW",
+      "authority_state": "DISPLAY_ONLY",
+      "source_path": "apps/dashboard/mock-data/aios-runtime-visibility-v1.example.json",
+      "source_type": "fixture",
+      "freshness": {
+        "generated_at": "2026-05-18T23:45:00Z",
+        "ttl_seconds": 0,
+        "is_stale": true
+      },
+      "blocked_actions": [
+        "protected_git",
+        "apply",
+        "approval_mutation",
+        "lock_mutation",
+        "worker_launch",
+        "runtime_mutation",
+        "queue_mutation",
+        "broker_execution",
+        "live_trading",
+        "secret_access"
+      ],
+      "next_safe_action": "Review runtime status from fixture evidence only.",
+      "approval_required": true,
+      "execution_allowed": false,
+      "mutation_allowed": false,
+      "stale_or_legacy": true,
+      "safe_for_frontend_display": true
+    },
+    {
+      "display_state": "DISPLAY_ONLY",
+      "authority_state": "DISPLAY_ONLY",
+      "source_path": "apps/dashboard/mock-data/aios-runtime-visibility-v1.example.json",
+      "source_type": "fixture",
+      "freshness": {
+        "generated_at": "2026-05-18T23:45:00Z",
+        "ttl_seconds": 0,
+        "is_stale": true
+      },
+      "blocked_actions": [
+        "protected_git",
+        "apply",
+        "approval_mutation",
+        "lock_mutation",
+        "worker_launch",
+        "runtime_mutation",
+        "queue_mutation",
+        "broker_execution",
+        "live_trading",
+        "secret_access"
+      ],
+      "next_safe_action": "Review queue counters as display-only fixture evidence.",
+      "approval_required": true,
+      "execution_allowed": false,
+      "mutation_allowed": false,
+      "stale_or_legacy": true,
+      "safe_for_frontend_display": true
+    }
+  ],
   "runtime": {
     "runtimeId": "runtime-local-001",
     "status": "degraded",
