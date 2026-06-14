@@ -77,6 +77,15 @@ def seed_report(repo_root: Path) -> None:
     test_path.write_text("# report test placeholder\n", encoding="utf-8")
 
 
+def seed_decision_policy(repo_root: Path) -> None:
+    policy_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_decision_policy.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_decision_policy.py"
+    policy_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    policy_path.write_text("# decision policy placeholder\n", encoding="utf-8")
+    test_path.write_text("# decision policy test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -220,6 +229,28 @@ def test_detects_data_import_present_selects_report_action(tmp_path):
     assert report["selected_action"] == "build_forex_report"
 
 
+def test_detects_report_present_selects_decision_policy_action(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    state_path = tmp_path / "state.json"
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=False,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=state_path,
+    )
+    assert report["result"] == "preview_only"
+    assert report["selected_action"] == "build_forex_decision_policy"
+
+
 def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     module = load_module()
     seed_executor(tmp_path)
@@ -229,6 +260,7 @@ def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     seed_strategy(tmp_path)
     seed_data_import(tmp_path)
     seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
     state_path = tmp_path / "state.json"
     report = module.run_wake_continue(
         tmp_path,
@@ -313,6 +345,7 @@ def test_cli_main_writes_state_in_temp_path(tmp_path, capsys):
     seed_strategy(tmp_path)
     seed_data_import(tmp_path)
     seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
     state_path = tmp_path / "state.json"
     exit_code = module.main(
         [

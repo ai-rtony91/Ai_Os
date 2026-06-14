@@ -29,6 +29,9 @@ FOREX_DATA_IMPORT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_DATA_IMPORT.md"
 FOREX_REPORT_PATH = Path("apps/trading_lab/trading_lab/forex_report.py")
 FOREX_REPORT_TEST_PATH = Path("tests/trading_lab/test_forex_report.py")
 FOREX_REPORT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_REPORT.md")
+FOREX_DECISION_POLICY_PATH = Path("apps/trading_lab/trading_lab/forex_decision_policy.py")
+FOREX_DECISION_POLICY_TEST_PATH = Path("tests/trading_lab/test_forex_decision_policy.py")
+FOREX_DECISION_POLICY_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_DECISION_POLICY.md")
 FOREX_SCAFFOLD_PATHS = (
     FOREX_BOT_PATH,
     FOREX_BOT_TEST_PATH,
@@ -58,6 +61,11 @@ FOREX_REPORT_PATHS = (
     FOREX_REPORT_PATH,
     FOREX_REPORT_TEST_PATH,
     FOREX_REPORT_DOC_PATH,
+)
+FOREX_DECISION_POLICY_PATHS = (
+    FOREX_DECISION_POLICY_PATH,
+    FOREX_DECISION_POLICY_TEST_PATH,
+    FOREX_DECISION_POLICY_DOC_PATH,
 )
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -1502,6 +1510,313 @@ writes and no network access.
 """
 
 
+def build_forex_decision_policy_source() -> str:
+    return '''from __future__ import annotations
+
+from typing import Any
+
+
+ALLOWED_DECISIONS = {
+    "continue_build",
+    "improve_strategy",
+    "improve_data",
+    "improve_risk_controls",
+    "stop_for_human_review",
+}
+
+PAPER_DECISION_POLICY_SAFETY = {
+    "paper_only": True,
+    "execution_allowed": False,
+    "broker_execution": False,
+    "credential_use": False,
+    "live_trading": False,
+    "real_orders": False,
+    "real_webhooks": False,
+    "network_access": False,
+    "file_writes": False,
+}
+
+BLOCKED_SCOPE_FIELDS = {
+    "api_key",
+    "broker",
+    "broker_order",
+    "credentials",
+    "live_execution",
+    "network",
+    "network_access",
+    "real_order",
+    "webhook",
+    "webhook_url",
+}
+
+
+def blocked_decision(reason: str) -> dict[str, Any]:
+    return {
+        "allowed": False,
+        "decision": "stop_for_human_review",
+        "reason_code": reason,
+        "decision_reasons": [reason],
+        "next_safe_action": "Stop and review the paper report before continuing.",
+        **PAPER_DECISION_POLICY_SAFETY,
+    }
+
+
+def _blocked_scope_reason(*payloads: dict[str, Any]) -> str | None:
+    for payload in payloads:
+        for field in sorted(BLOCKED_SCOPE_FIELDS):
+            if payload.get(field):
+                return f"{field}_blocked"
+    return None
+
+
+def _number(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _allowed_decision(
+    decision: str,
+    reason_code: str,
+    *,
+    trade_count: int,
+    win_rate: float,
+    total_pnl: float,
+    risk_flags: list[Any],
+) -> dict[str, Any]:
+    if decision not in ALLOWED_DECISIONS:
+        return blocked_decision("unsupported_decision")
+    return {
+        "allowed": True,
+        "decision": decision,
+        "reason_code": reason_code,
+        "decision_reasons": [reason_code],
+        "inputs": {
+            "trade_count": trade_count,
+            "win_rate": round(win_rate, 2),
+            "total_pnl": round(total_pnl, 2),
+            "risk_flags": risk_flags,
+        },
+        "next_safe_action": "Use this as a paper-only build recommendation. Do not route it to execution.",
+        **PAPER_DECISION_POLICY_SAFETY,
+    }
+
+
+def decide_next_action(
+    forex_report: dict[str, Any],
+    *,
+    live_execution: bool = False,
+    broker_order: bool = False,
+    credentials: Any = None,
+    api_key: Any = None,
+    real_order: bool = False,
+    webhook_url: str | None = None,
+    network: bool = False,
+    network_access: bool = False,
+) -> dict[str, Any]:
+    if not isinstance(forex_report, dict) or not forex_report:
+        return blocked_decision("invalid_report")
+
+    unsafe_payload = {
+        "live_execution": live_execution,
+        "broker_order": broker_order,
+        "credentials": credentials,
+        "api_key": api_key,
+        "real_order": real_order,
+        "webhook_url": webhook_url,
+        "network": network,
+        "network_access": network_access,
+    }
+    blocked_reason = _blocked_scope_reason(unsafe_payload, forex_report)
+    if blocked_reason:
+        return blocked_decision(blocked_reason)
+
+    if forex_report.get("allowed") is False:
+        return blocked_decision("report_not_allowed")
+    if forex_report.get("paper_only") is not True:
+        return blocked_decision("report_not_paper_only")
+
+    raw_flags = forex_report.get("risk_flags", [])
+    risk_flags = raw_flags if isinstance(raw_flags, list) else [raw_flags]
+    risk_flags = [flag for flag in risk_flags if flag]
+    trade_count = int(_number(forex_report.get("trade_count", 0)))
+    win_rate = _number(forex_report.get("win_rate", 0.0))
+    total_pnl = _number(forex_report.get("total_pnl", 0.0))
+
+    if risk_flags:
+        return _allowed_decision(
+            "stop_for_human_review",
+            "risk_flags_present",
+            trade_count=trade_count,
+            win_rate=win_rate,
+            total_pnl=total_pnl,
+            risk_flags=risk_flags,
+        )
+    if trade_count <= 0:
+        return _allowed_decision(
+            "improve_data",
+            "no_trades",
+            trade_count=trade_count,
+            win_rate=win_rate,
+            total_pnl=total_pnl,
+            risk_flags=risk_flags,
+        )
+    if win_rate < 50.0:
+        return _allowed_decision(
+            "improve_strategy",
+            "low_win_rate",
+            trade_count=trade_count,
+            win_rate=win_rate,
+            total_pnl=total_pnl,
+            risk_flags=risk_flags,
+        )
+    if total_pnl < 0:
+        return _allowed_decision(
+            "improve_risk_controls",
+            "negative_total_pnl",
+            trade_count=trade_count,
+            win_rate=win_rate,
+            total_pnl=total_pnl,
+            risk_flags=risk_flags,
+        )
+    return _allowed_decision(
+        "continue_build",
+        "acceptable_report",
+        trade_count=trade_count,
+        win_rate=win_rate,
+        total_pnl=total_pnl,
+        risk_flags=risk_flags,
+    )
+'''
+
+
+def build_forex_decision_policy_test_source() -> str:
+    return '''from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = REPO_ROOT / "apps" / "trading_lab" / "trading_lab" / "forex_decision_policy.py"
+
+
+def load_policy_module():
+    spec = importlib.util.spec_from_file_location("forex_decision_policy", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def acceptable_report():
+    return {
+        "allowed": True,
+        "paper_only": True,
+        "trade_count": 10,
+        "win_rate": 60.0,
+        "total_pnl": 125.0,
+        "risk_flags": [],
+    }
+
+
+def test_module_imports():
+    policy = load_policy_module()
+    assert callable(policy.decide_next_action)
+
+
+def test_acceptable_report_returns_continue_build():
+    policy = load_policy_module()
+    decision = policy.decide_next_action(acceptable_report())
+    assert decision["allowed"] is True
+    assert decision["decision"] == "continue_build"
+    assert decision["reason_code"] == "acceptable_report"
+    assert decision["execution_allowed"] is False
+    assert decision["broker_execution"] is False
+
+
+def test_risk_flag_returns_stop_for_human_review():
+    policy = load_policy_module()
+    report = acceptable_report()
+    report["risk_flags"] = ["negative_total_pnl"]
+    decision = policy.decide_next_action(report)
+    assert decision["decision"] == "stop_for_human_review"
+    assert decision["reason_code"] == "risk_flags_present"
+
+
+def test_no_trades_returns_improve_data():
+    policy = load_policy_module()
+    report = acceptable_report()
+    report["trade_count"] = 0
+    decision = policy.decide_next_action(report)
+    assert decision["decision"] == "improve_data"
+    assert decision["reason_code"] == "no_trades"
+
+
+def test_low_win_rate_returns_improve_strategy():
+    policy = load_policy_module()
+    report = acceptable_report()
+    report["win_rate"] = 49.0
+    decision = policy.decide_next_action(report)
+    assert decision["decision"] == "improve_strategy"
+    assert decision["reason_code"] == "low_win_rate"
+
+
+def test_negative_pnl_returns_improve_risk_controls():
+    policy = load_policy_module()
+    report = acceptable_report()
+    report["total_pnl"] = -25.0
+    decision = policy.decide_next_action(report)
+    assert decision["decision"] == "improve_risk_controls"
+    assert decision["reason_code"] == "negative_total_pnl"
+
+
+def test_missing_or_invalid_report_blocked():
+    policy = load_policy_module()
+    assert policy.decide_next_action({})["reason_code"] == "invalid_report"
+    assert policy.decide_next_action("not-a-report")["reason_code"] == "invalid_report"
+
+
+def test_unsafe_scope_fields_are_blocked_with_safe_placeholders():
+    policy = load_policy_module()
+    assert policy.decide_next_action(acceptable_report(), broker_order=True)["reason_code"] == "broker_order_blocked"
+    assert policy.decide_next_action(acceptable_report(), live_execution=True)["reason_code"] == "live_execution_blocked"
+    assert policy.decide_next_action(acceptable_report(), credentials={"sample": "safe-placeholder"})["reason_code"] == "credentials_blocked"
+    assert policy.decide_next_action(acceptable_report(), api_key="safe-placeholder")["reason_code"] == "api_key_blocked"
+    assert policy.decide_next_action(acceptable_report(), real_order=True)["reason_code"] == "real_order_blocked"
+    assert policy.decide_next_action(acceptable_report(), webhook_url="https://example.invalid/hook")["reason_code"] == "webhook_url_blocked"
+    assert policy.decide_next_action(acceptable_report(), network=True)["reason_code"] == "network_blocked"
+
+
+def test_no_file_writes_or_network_usage():
+    source = MODULE_PATH.read_text(encoding="utf-8").lower()
+    for forbidden in ["open(", "write_text", "write_bytes", "with open", "pathlib", "requests", "socket"]:
+        assert forbidden not in source
+'''
+
+
+def build_forex_decision_policy_doc() -> str:
+    return """# AIOS Forex Decision Policy
+
+This generated component is the seventh `forex-paper-bot` build step. It turns
+a local paper scorecard from `forex_report` into a deterministic next-action
+decision for AIOS continuation.
+
+Allowed decisions are `continue_build`, `improve_strategy`, `improve_data`,
+`improve_risk_controls`, and `stop_for_human_review`.
+
+The policy stops for human review when risk flags are present, improves data
+when no trades were produced, improves strategy when win rate is low, improves
+risk controls when total paper PnL is negative, and continues building only
+when the report is acceptable.
+
+The component is paper/research-only. It blocks live execution, broker orders,
+credentials, API keys, real orders, webhooks, and network fields. It performs no
+file writes and no network access.
+"""
+
+
 def forex_backtest_files() -> dict[Path, str]:
     return {
         FOREX_BACKTEST_PATH: build_forex_backtest_source(),
@@ -1539,6 +1854,14 @@ def forex_report_files() -> dict[Path, str]:
         FOREX_REPORT_PATH: build_forex_report_source(),
         FOREX_REPORT_TEST_PATH: build_forex_report_test_source(),
         FOREX_REPORT_DOC_PATH: build_forex_report_doc(),
+    }
+
+
+def forex_decision_policy_files() -> dict[Path, str]:
+    return {
+        FOREX_DECISION_POLICY_PATH: build_forex_decision_policy_source(),
+        FOREX_DECISION_POLICY_TEST_PATH: build_forex_decision_policy_test_source(),
+        FOREX_DECISION_POLICY_DOC_PATH: build_forex_decision_policy_doc(),
     }
 
 
@@ -1598,6 +1921,15 @@ def write_forex_data_import(repo_root: Path) -> list[str]:
 def write_forex_report(repo_root: Path) -> list[str]:
     files_written: list[str] = []
     for relative_path, content in forex_report_files().items():
+        target = repo_root / relative_path
+        if write_text_if_changed(target, content):
+            files_written.append(relative_path.as_posix())
+    return files_written
+
+
+def write_forex_decision_policy(repo_root: Path) -> list[str]:
+    files_written: list[str] = []
+    for relative_path, content in forex_decision_policy_files().items():
         target = repo_root / relative_path
         if write_text_if_changed(target, content):
             files_written.append(relative_path.as_posix())
@@ -1760,6 +2092,32 @@ def run_forex_report_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_forex_decision_policy_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_decision_policy_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
 def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -1789,6 +2147,8 @@ def select_forex_continue_action(repo_root: Path) -> str:
         return "build_data_import"
     if not (repo_root / FOREX_REPORT_PATH).exists():
         return "build_report"
+    if not (repo_root / FOREX_DECISION_POLICY_PATH).exists():
+        return "build_decision_policy"
     return "done"
 
 
@@ -1805,6 +2165,8 @@ def _apply_writer_for_action(repo_root: Path, action: str) -> tuple[list[str], V
         return write_forex_data_import(repo_root), run_forex_data_import_validator
     if action == "build_report":
         return write_forex_report(repo_root), run_forex_report_validator
+    if action == "build_decision_policy":
+        return write_forex_decision_policy(repo_root), run_forex_decision_policy_validator
     return [], None
 
 
@@ -1821,6 +2183,8 @@ def _repair_for_action(repo_root: Path, action: str) -> list[str]:
         return write_forex_data_import(repo_root)
     if action == "build_report":
         return write_forex_report(repo_root)
+    if action == "build_decision_policy":
+        return write_forex_decision_policy(repo_root)
     return []
 
 
@@ -1860,7 +2224,7 @@ def execute_goal(
     action = report["continue_action"]
     if action == "done":
         report["result"] = "DONE"
-        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, strategy rules, data import, and report already exist. Review validators before the next build step."
+        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, strategy rules, data import, report, and decision policy already exist. Review validators before the next build step."
         return report
 
     files_written, default_runner = _apply_writer_for_action(repo_root, action)
