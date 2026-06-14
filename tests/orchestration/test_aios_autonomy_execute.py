@@ -57,6 +57,14 @@ def load_generated_data_import(path: Path):
     return module
 
 
+def load_generated_report(path: Path):
+    spec = importlib.util.spec_from_file_location("forex_report", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 def passing_validator(_repo_root: Path) -> dict[str, object]:
     return {
         "name": "fake_validator",
@@ -196,13 +204,40 @@ def test_continue_selects_data_import_when_prior_forex_components_exist(tmp_path
     )
 
 
-def test_continue_done_when_all_data_import_components_exist(tmp_path):
+def test_continue_selects_report_when_prior_forex_components_exist(tmp_path):
     module = load_executor_module()
     module.write_forex_scaffold(tmp_path)
     module.write_forex_backtest(tmp_path)
     module.write_forex_ledger(tmp_path)
     module.write_forex_strategy(tmp_path)
     module.write_forex_data_import(tmp_path)
+    report = module.execute_goal(
+        tmp_path,
+        "forex-paper-bot",
+        apply=True,
+        continue_goal=True,
+        max_repairs=1,
+        validator_runner=passing_validator,
+    )
+    assert report["result"] == "passed"
+    assert report["continue_action"] == "build_report"
+    assert sorted(report["files_written"]) == sorted(
+        [
+            "apps/trading_lab/trading_lab/forex_report.py",
+            "tests/trading_lab/test_forex_report.py",
+            "docs/orchestration/AIOS_FOREX_REPORT.md",
+        ]
+    )
+
+
+def test_continue_done_when_all_report_components_exist(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.write_forex_backtest(tmp_path)
+    module.write_forex_ledger(tmp_path)
+    module.write_forex_strategy(tmp_path)
+    module.write_forex_data_import(tmp_path)
+    module.write_forex_report(tmp_path)
     report = module.execute_goal(
         tmp_path,
         "forex-paper-bot",
@@ -300,6 +335,25 @@ def test_generated_forex_data_import_imports(tmp_path):
     assert summary["paper_only"] is True
     assert summary["network_access"] is False
     assert summary["candles_normalized"] == 1
+
+
+def test_generated_forex_report_imports(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.write_forex_backtest(tmp_path)
+    module.write_forex_ledger(tmp_path)
+    module.write_forex_strategy(tmp_path)
+    module.write_forex_data_import(tmp_path)
+    module.execute_goal(tmp_path, "forex-paper-bot", apply=True, continue_goal=True, validator_runner=passing_validator)
+    report_module = load_generated_report(tmp_path / "apps/trading_lab/trading_lab/forex_report.py")
+    scorecard = report_module.build_report(
+        {"trades_considered": 2, "trades_allowed": 2, "trades_blocked": 0, "ending_balance": 10100.0},
+        {"trade_count": 2, "winning_trades": 1, "losing_trades": 1, "total_pnl": 0.0},
+        {"name": "ma_momentum", "signal": "hold"},
+    )
+    assert scorecard["paper_only"] is True
+    assert scorecard["trade_count"] == 2
+    assert scorecard["win_rate"] == 50.0
 
 
 def test_valid_eurusd_paper_signal_allowed(tmp_path):

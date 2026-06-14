@@ -23,6 +23,8 @@ FOREX_STRATEGY_PATH = Path("apps/trading_lab/trading_lab/forex_strategy_rules.py
 FOREX_STRATEGY_TEST_PATH = Path("tests/trading_lab/test_forex_strategy_rules.py")
 FOREX_DATA_IMPORT_PATH = Path("apps/trading_lab/trading_lab/forex_data_import.py")
 FOREX_DATA_IMPORT_TEST_PATH = Path("tests/trading_lab/test_forex_data_import.py")
+FOREX_REPORT_PATH = Path("apps/trading_lab/trading_lab/forex_report.py")
+FOREX_REPORT_TEST_PATH = Path("tests/trading_lab/test_forex_report.py")
 
 CommandRunner = Callable[[list[str], Path], dict[str, Any]]
 
@@ -76,6 +78,8 @@ def read_repo_state(repo_root: Path) -> dict[str, bool]:
         "forex_strategy_test_exists": (repo_root / FOREX_STRATEGY_TEST_PATH).exists(),
         "forex_data_import_exists": (repo_root / FOREX_DATA_IMPORT_PATH).exists(),
         "forex_data_import_test_exists": (repo_root / FOREX_DATA_IMPORT_TEST_PATH).exists(),
+        "forex_report_exists": (repo_root / FOREX_REPORT_PATH).exists(),
+        "forex_report_test_exists": (repo_root / FOREX_REPORT_TEST_PATH).exists(),
     }
 
 
@@ -104,6 +108,10 @@ def select_next_action(goal: str, repo_state: dict[str, bool]) -> tuple[str, str
         return "build_forex_data_import", None
     if not repo_state["forex_data_import_test_exists"]:
         return "blocked", "forex_data_import_test_missing"
+    if not repo_state["forex_report_exists"]:
+        return "build_forex_report", None
+    if not repo_state["forex_report_test_exists"]:
+        return "blocked", "forex_report_test_missing"
     return "validate_all_forex", None
 
 
@@ -118,7 +126,13 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             "--max-repairs",
             str(max_repairs),
         ]
-    if action in {"build_forex_backtest", "build_forex_ledger", "build_forex_strategy", "build_forex_data_import"}:
+    if action in {
+        "build_forex_backtest",
+        "build_forex_ledger",
+        "build_forex_strategy",
+        "build_forex_data_import",
+        "build_forex_report",
+    }:
         return [
             sys.executable,
             AUTONOMY_EXECUTOR_PATH.as_posix(),
@@ -141,6 +155,7 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             FOREX_LEDGER_TEST_PATH.as_posix(),
             FOREX_STRATEGY_TEST_PATH.as_posix(),
             FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
+            FOREX_REPORT_TEST_PATH.as_posix(),
         ]
     raise ValueError(f"unsupported action: {action}")
 
@@ -238,13 +253,13 @@ def run_wake_continue(
             if selected_action.startswith("build_"):
                 continue
             report["result"] = "DONE_FOR_CURRENT_GOAL"
-            report["next_safe_action"] = "Forex paper bot, backtest, ledger, strategy rules, and data import validated. Commit and push still require approval."
+            report["next_safe_action"] = "Forex paper bot, backtest, ledger, strategy rules, data import, and report validated. Commit and push still require approval."
             write_state(state_path, report)
             return report
 
         while report["repair_attempts"] < max_repairs:
             report["repair_attempts"] += 1
-            repair_command = command_for_action("build_forex_data_import", max_repairs)
+            repair_command = command_for_action("build_forex_report", max_repairs)
             repair_result = runner(repair_command, repo_root)
             report["commands_run"].append(repair_result)
             retry_result = runner(command, repo_root)
