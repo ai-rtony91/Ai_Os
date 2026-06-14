@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/orchestration/aios_closed_loop_packet_drafter.schema.json",
+  "title": "AI_OS Closed Loop Packet Drafter Preview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system",
+    "component",
+    "mode",
+    "generated_at_utc",
+    "input_status",
+    "packet_blueprint",
+    "validation",
+    "dispatch",
+    "preview_text_path",
+    "safety_boundaries"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "system": { "const": "AI_OS" },
+    "component": { "const": "closed_loop_packet_drafter" },
+    "mode": { "const": "APPLY_BUILD_WITH_PREVIEW_OUTPUT" },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "input_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["closed_loop_report", "governor_decision", "recommendation_status"],
+      "properties": {
+        "closed_loop_report": {
+          "type": "string",
+          "enum": ["present", "missing", "generated_in_memory", "blocked"]
+        },
+        "governor_decision": {
+          "type": "string",
+          "enum": ["present", "missing", "unknown"]
+        },
+        "recommendation_status": {
+          "type": "string",
+          "enum": ["ready", "blocked", "partial"]
+        }
+      }
+    },
+    "packet_blueprint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packet_id",
+        "mode",
+        "zone",
+        "lane",
+        "risk_level",
+        "allowed_paths",
+        "forbidden_paths",
+        "validator_chain",
+        "stop_point",
+        "preview_type"
+      ],
+      "properties": {
+        "packet_id": { "type": "string", "minLength": 1 },
+        "mode": { "type": "string", "enum": ["DRY_RUN", "APPLY"] },
+        "zone": { "type": "string", "minLength": 1 },
+        "lane": { "type": "string", "minLength": 1 },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "blocked"] },
+        "allowed_paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "forbidden_paths": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "validator_chain": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "stop_point": { "type": "string", "minLength": 1 },
+        "preview_type": {
+          "type": "string",
+          "enum": [
+            "READ_ONLY_STATUS_RECON",
+            "DRY_RUN_PACKET_PREVIEW",
+            "DRY_RUN_VALIDATOR_REPAIR",
+            "DRY_RUN_QUEUE_CONSOLIDATION",
+            "DRY_RUN_SELF_BUILD_LOOP_WIRING",
+            "DRY_RUN_CLOSED_LOOP_NEXT_STEP",
+            "BLOCKED_NEEDS_CLEANUP",
+            "BLOCKED_NEEDS_APPROVAL",
+            "BLOCKED_SAFETY_SCOPE"
+          ]
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agents_required_fields_present",
+        "missing_fields",
+        "blocked",
+        "blocked_reason"
+      ],
+      "properties": {
+        "agents_required_fields_present": { "type": "boolean" },
+        "missing_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "blocked": { "type": "boolean" },
+        "blocked_reason": {
+          "anyOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        }
+      }
+    },
+    "dispatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatch_authorized",
+        "queue_mutation_authorized",
+        "human_approval_required"
+      ],
+      "properties": {
+        "dispatch_authorized": { "const": false },
+        "queue_mutation_authorized": { "const": false },
+        "human_approval_required": { "type": "boolean" }
+      }
+    },
+    "preview_text_path": {
+      "const": "Reports/sandbox/closed_loop_packet_drafter/AIOS_CLOSED_LOOP_PACKET_DRAFTER_PREVIEW.txt"
+    },
+    "safety_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "worker_dispatch",
+        "queue_mutation",
+        "continuous_loop",
+        "live_trading",
+        "broker_execution",
+        "credential_use",
+        "unapproved_mutation"
+      ],
+      "properties": {
+        "worker_dispatch": { "const": "blocked" },
+        "queue_mutation": { "const": "blocked" },
+        "continuous_loop": { "const": "blocked" },
+        "live_trading": { "const": "blocked" },
+        "broker_execution": { "const": "blocked" },
+        "credential_use": { "const": "blocked" },
+        "unapproved_mutation": { "const": "blocked" }
+      }
+    }
+  }
+}

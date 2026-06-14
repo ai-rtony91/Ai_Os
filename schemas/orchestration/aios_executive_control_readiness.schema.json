@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/orchestration/aios_executive_control_readiness.schema.json",
+  "title": "AI_OS Executive Control Readiness Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system",
+    "component",
+    "mode",
+    "generated_at_utc",
+    "input_status",
+    "governor_ready",
+    "closed_loop_ready",
+    "packet_drafter_ready",
+    "queue_preview_ready",
+    "queue_dispatch_gates_ready",
+    "readiness_checks",
+    "blockers",
+    "readiness_status",
+    "next_step",
+    "safety_boundaries"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "system": { "const": "AI_OS" },
+    "component": { "const": "executive_control_readiness" },
+    "mode": { "const": "APPLY_BUILD_WITH_CONTROL_READINESS_OUTPUT" },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "input_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "governor",
+        "closed_loop",
+        "packet_drafter",
+        "queue_preview",
+        "queue_dispatch_gates"
+      ],
+      "properties": {
+        "governor": { "$ref": "#/$defs/inputRecord" },
+        "closed_loop": { "$ref": "#/$defs/inputRecord" },
+        "packet_drafter": { "$ref": "#/$defs/inputRecord" },
+        "queue_preview": { "$ref": "#/$defs/inputRecord" },
+        "queue_dispatch_gates": { "$ref": "#/$defs/inputRecord" }
+      }
+    },
+    "governor_ready": { "type": "boolean" },
+    "closed_loop_ready": { "type": "boolean" },
+    "packet_drafter_ready": { "type": "boolean" },
+    "queue_preview_ready": { "type": "boolean" },
+    "queue_dispatch_gates_ready": { "type": "boolean" },
+    "readiness_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "governor",
+        "closed_loop",
+        "packet_drafter",
+        "queue_preview",
+        "queue_dispatch_gates"
+      ],
+      "properties": {
+        "governor": { "$ref": "#/$defs/readinessCheck" },
+        "closed_loop": { "$ref": "#/$defs/readinessCheck" },
+        "packet_drafter": { "$ref": "#/$defs/readinessCheck" },
+        "queue_preview": { "$ref": "#/$defs/readinessCheck" },
+        "queue_dispatch_gates": { "$ref": "#/$defs/readinessCheck" }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "readiness_status": {
+      "type": "string",
+      "enum": ["blocked", "partial", "ready_for_control_plane_design"]
+    },
+    "next_step": { "type": "string", "minLength": 1 },
+    "safety_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "real_queue_mutation",
+        "worker_dispatch",
+        "continuous_loop",
+        "start_pause_resume_stop_implementation",
+        "live_trading",
+        "broker_execution",
+        "credential_use",
+        "webhook_execution",
+        "scheduler_creation",
+        "unapproved_mutation"
+      ],
+      "properties": {
+        "real_queue_mutation": { "const": "blocked" },
+        "worker_dispatch": { "const": "blocked" },
+        "continuous_loop": { "const": "blocked" },
+        "start_pause_resume_stop_implementation": { "const": "blocked" },
+        "live_trading": { "const": "blocked" },
+        "broker_execution": { "const": "blocked" },
+        "credential_use": { "const": "blocked" },
+        "webhook_execution": { "const": "blocked" },
+        "scheduler_creation": { "const": "blocked" },
+        "unapproved_mutation": { "const": "blocked" }
+      }
+    }
+  },
+  "$defs": {
+    "inputRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "path", "status", "component", "summary"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["present", "missing", "invalid"] },
+        "component": {
+          "anyOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        },
+        "summary": { "type": "string" }
+      }
+    },
+    "readinessCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ready", "blockers"],
+      "properties": {
+        "ready": { "type": "boolean" },
+        "blockers": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

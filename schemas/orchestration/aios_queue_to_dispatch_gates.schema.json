@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/orchestration/aios_queue_to_dispatch_gates.schema.json",
+  "title": "AI_OS Queue To Dispatch Gates Preview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system",
+    "component",
+    "mode",
+    "generated_at_utc",
+    "input_status",
+    "overall_status",
+    "validated_queue_item",
+    "gates",
+    "validation",
+    "safety_boundaries",
+    "next_step"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "system": { "const": "AI_OS" },
+    "component": { "const": "queue_to_dispatch_gates" },
+    "mode": { "const": "APPLY_BUILD_WITH_CONSOLIDATED_GATE_PREVIEW_OUTPUT" },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "input_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["queue_injection_preview", "proposed_queue_item"],
+      "properties": {
+        "queue_injection_preview": {
+          "type": "string",
+          "enum": ["present", "missing", "blocked"]
+        },
+        "proposed_queue_item": {
+          "type": "string",
+          "enum": ["present", "missing", "invalid"]
+        }
+      }
+    },
+    "overall_status": {
+      "type": "string",
+      "enum": ["preview_only", "blocked", "requires_approval"]
+    },
+    "validated_queue_item": { "type": "object" },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "queue_admission_preview",
+        "worker_dispatch_preview",
+        "human_approval_preview",
+        "real_queue_injection_gate_preview"
+      ],
+      "properties": {
+        "queue_admission_preview": { "$ref": "#/$defs/gateResult" },
+        "worker_dispatch_preview": { "$ref": "#/$defs/gateResult" },
+        "human_approval_preview": { "$ref": "#/$defs/gateResult" },
+        "real_queue_injection_gate_preview": { "$ref": "#/$defs/gateResult" }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_fields_present", "missing_fields", "blocked", "blocked_reason"],
+      "properties": {
+        "required_fields_present": { "type": "boolean" },
+        "missing_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "blocked": { "type": "boolean" },
+        "blocked_reason": {
+          "anyOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        }
+      }
+    },
+    "safety_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "real_queue_mutation",
+        "worker_dispatch",
+        "continuous_loop",
+        "live_trading",
+        "broker_execution",
+        "credential_use",
+        "webhook_execution",
+        "scheduler_creation",
+        "unapproved_mutation"
+      ],
+      "properties": {
+        "real_queue_mutation": { "const": "blocked" },
+        "worker_dispatch": { "const": "blocked" },
+        "continuous_loop": { "const": "blocked" },
+        "live_trading": { "const": "blocked" },
+        "broker_execution": { "const": "blocked" },
+        "credential_use": { "const": "blocked" },
+        "webhook_execution": { "const": "blocked" },
+        "scheduler_creation": { "const": "blocked" },
+        "unapproved_mutation": { "const": "blocked" }
+      }
+    },
+    "next_step": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "gateResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reason",
+        "queue_mutation_authorized",
+        "dispatch_authorized",
+        "human_approval_required"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["preview_only", "blocked", "requires_approval"]
+        },
+        "reason": { "type": "string", "minLength": 1 },
+        "queue_mutation_authorized": { "const": false },
+        "dispatch_authorized": { "const": false },
+        "human_approval_required": { "type": "boolean" }
+      }
+    }
+  }
+}
