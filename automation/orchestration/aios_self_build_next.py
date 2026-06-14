@@ -2,7 +2,8 @@
 
 This command is read-only. It reads the campaign registry, selects the highest
 priority READY stage whose stage dependencies are COMPLETE and whose blockers
-are empty, then prints a JSON packet preview to stdout.
+are empty, then prints a JSON packet preview to stdout. With --write-packet it
+may also write the preview packet text to an explicitly guarded preview path.
 """
 
 from __future__ import annotations
@@ -20,6 +21,24 @@ DEFAULT_REGISTRY_PATH = (
     / "campaign_registry"
     / "AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json"
 )
+DEFAULT_PACKET_OUTPUT_DIR = (
+    Path("automation")
+    / "orchestration"
+    / "work_packets"
+    / "preview"
+)
+FORBIDDEN_OUTPUT_PREFIXES = (
+    Path("Reports"),
+    Path("control") / "review_bridge",
+)
+FORBIDDEN_OUTPUT_PARTS = {
+    "active",
+    "complete",
+    "blocked",
+    "queue",
+    "approval",
+    "workers",
+}
 
 PRIORITY_ORDER = {
     "critical": 0,
@@ -61,6 +80,10 @@ def load_json(path: str | Path) -> Any:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def normalize_path_text(path: Path) -> str:
+    return path.as_posix().strip().lstrip("./")
+
+
 def priority_rank(priority: Any) -> int:
     return PRIORITY_ORDER.get(str(priority or "").strip().lower(), 99)
 
@@ -93,6 +116,94 @@ def nonempty_list(value: Any) -> list[str]:
     if isinstance(value, list):
         return [str(item).strip() for item in value if str(item).strip()]
     return [str(value).strip()]
+
+
+def safe_filename(value: str) -> str:
+    safe = []
+    for char in value:
+        if char.isalnum() or char in {"-", "_", "."}:
+            safe.append(char)
+        else:
+            safe.append("-")
+    return "".join(safe).strip(".-") or "AIOS_PACKET_PREVIEW"
+
+
+def path_is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def resolve_output_dir(repo_root: str | Path, output_dir: str | Path | None = None) -> Path:
+    root = Path(repo_root).resolve()
+    target = Path(output_dir) if output_dir is not None else DEFAULT_PACKET_OUTPUT_DIR
+    if not target.is_absolute():
+        target = root / target
+    target = target.resolve()
+
+    if path_is_relative_to(target, root):
+        scoped_path = target.relative_to(root)
+    else:
+        scoped_path = target
+    scoped_text = normalize_path_text(scoped_path)
+    scoped_parts = {part.lower() for part in scoped_path.parts}
+
+    for prefix in FORBIDDEN_OUTPUT_PREFIXES:
+        prefix_text = normalize_path_text(prefix)
+        if scoped_text == prefix_text or scoped_text.startswith(prefix_text + "/"):
+            raise ValueError(f"output_dir is blocked: {scoped_text}")
+
+    if FORBIDDEN_OUTPUT_PARTS.intersection(scoped_parts):
+        raise ValueError(f"output_dir contains a blocked path segment: {scoped_text}")
+
+    return target
+
+
+def render_packet_text(packet_preview: dict[str, Any]) -> str:
+    allowed_paths = "\n".join(f"- {path}" for path in packet_preview["allowed_paths"])
+    forbidden_paths = "\n".join(f"- {path}" for path in packet_preview["forbidden_paths"])
+    validators = "\n".join(f"- {validator}" for validator in packet_preview["validators"])
+    final_report = "\n".join(packet_preview["final_report_format"])
+
+    return (
+        "CODEX-ONLY PROMPT\n\n"
+        "AI_OS EXECUTION TOKEN\n"
+        "AI_OS BOOTSTRAP REQUIRED\n\n"
+        f"PACKET ID: {packet_preview['packet_id']}\n"
+        f"MODE: {packet_preview['mode']}\n"
+        f"ZONE: {packet_preview['zone']}\n"
+        f"WORKER: {packet_preview['worker']}\n"
+        f"LANE: {packet_preview['lane']}\n"
+        f"BRANCH: {packet_preview['branch']}\n"
+        f"WORKTREE: {packet_preview['worktree']}\n\n"
+        "MISSION:\n"
+        f"{packet_preview['mission']}\n\n"
+        "ALLOWED PATHS:\n"
+        f"{allowed_paths}\n\n"
+        "FORBIDDEN PATHS:\n"
+        f"{forbidden_paths}\n\n"
+        "VALIDATORS:\n"
+        f"{validators}\n\n"
+        "STOP POINT:\n"
+        f"{packet_preview['stop_point']}\n\n"
+        "FINAL REPORT FORMAT:\n"
+        f"{final_report}\n"
+    )
+
+
+def write_packet_preview(
+    packet_preview: dict[str, Any],
+    repo_root: str | Path = ".",
+    output_dir: str | Path | None = None,
+) -> Path:
+    target_dir = resolve_output_dir(repo_root, output_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    filename = f"{safe_filename(str(packet_preview['packet_id']))}.txt"
+    target_path = target_dir / filename
+    target_path.write_text(render_packet_text(packet_preview), encoding="utf-8")
+    return target_path
 
 
 def find_ready_candidates(registry: dict[str, Any]) -> list[dict[str, Any]]:
@@ -165,27 +276,48 @@ def build_packet_preview(selected: dict[str, Any], registry: dict[str, Any]) -> 
     }
 
 
-def build_report(repo_root: str | Path = ".") -> dict[str, Any]:
+def relative_output_path(repo_root: str | Path, path: Path) -> str:
+    root = Path(repo_root).resolve()
+    try:
+        return path.resolve().relative_to(root).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
+def build_report(
+    repo_root: str | Path = ".",
+    *,
+    write_packet: bool = False,
+    output_dir: str | Path | None = None,
+) -> dict[str, Any]:
     root = Path(repo_root)
     registry_path = root / DEFAULT_REGISTRY_PATH
     registry = load_json(registry_path)
     selected = select_next_stage(registry)
 
     if selected is None:
-        return {
+        report = {
             "schema": "AIOS_SELF_BUILD_NEXT.v1",
             "mode": "DRY_RUN_READ_ONLY",
             "generated_at_utc": utc_now(),
             "selected_stage": None,
             "packet_preview": None,
+            "written_packet_path": None,
             "reason": "No READY stage with complete dependencies and no blockers was found.",
             "blockers": ["NO_READY_STAGE"],
             "safety": SAFETY.copy(),
         }
+        return report
 
     campaign = selected["campaign"]
     phase = selected["phase"]
     stage = selected["stage"]
+
+    packet_preview = build_packet_preview(selected, registry)
+    written_packet_path = None
+    if write_packet:
+        written_path = write_packet_preview(packet_preview, root, output_dir)
+        written_packet_path = relative_output_path(root, written_path)
 
     return {
         "schema": "AIOS_SELF_BUILD_NEXT.v1",
@@ -211,7 +343,8 @@ def build_report(repo_root: str | Path = ".") -> dict[str, Any]:
             "next_packet_candidate": stage.get("next_packet_candidate"),
         },
         "reason": "Selected highest-priority READY stage with complete dependencies and no blockers.",
-        "packet_preview": build_packet_preview(selected, registry),
+        "packet_preview": packet_preview,
+        "written_packet_path": written_packet_path,
         "safety": SAFETY.copy(),
     }
 
@@ -219,9 +352,11 @@ def build_report(repo_root: str | Path = ".") -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build the next AI_OS self-build packet preview.")
     parser.add_argument("--repo-root", default=".", help="Repository root. Defaults to current directory.")
+    parser.add_argument("--write-packet", action="store_true", help="Write the selected Codex packet preview to a guarded .txt file.")
+    parser.add_argument("--output-dir", default=None, help="Packet preview output directory. Defaults to automation/orchestration/work_packets/preview.")
     args = parser.parse_args()
 
-    report = build_report(args.repo_root)
+    report = build_report(args.repo_root, write_packet=args.write_packet, output_dir=args.output_dir)
     print(json.dumps(report, indent=2, sort_keys=True))
 
 
