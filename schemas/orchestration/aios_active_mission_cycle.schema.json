@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AIOS Active Mission Cycle Report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "system",
+    "component",
+    "mode",
+    "generated_at_utc",
+    "mission_status",
+    "current_chain_state",
+    "selected_next_action",
+    "blocked_reason",
+    "human_action_required",
+    "approval_required",
+    "queue_mutation_authorized",
+    "dispatch_authorized",
+    "live_trading",
+    "broker_execution",
+    "sos_message_path",
+    "next_step",
+    "safety_boundaries"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "system": {
+      "const": "AI_OS"
+    },
+    "component": {
+      "const": "active_mission_cycle"
+    },
+    "mode": {
+      "const": "ONE_CYCLE_SOS_REPORT_ONLY"
+    },
+    "generated_at_utc": {
+      "type": "string"
+    },
+    "mission_status": {
+      "enum": [
+        "running_preview",
+        "blocked",
+        "requires_cleanup",
+        "requires_approval",
+        "ready_for_next_packet"
+      ]
+    },
+    "current_chain_state": {
+      "type": "object"
+    },
+    "selected_next_action": {
+      "type": "object"
+    },
+    "blocked_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "human_action_required": {
+      "type": "boolean"
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "queue_mutation_authorized": {
+      "const": false
+    },
+    "dispatch_authorized": {
+      "const": false
+    },
+    "live_trading": {
+      "const": "blocked"
+    },
+    "broker_execution": {
+      "const": "blocked"
+    },
+    "sos_message_path": {
+      "type": "string"
+    },
+    "next_step": {
+      "type": "string"
+    },
+    "safety_boundaries": {
+      "type": "object",
+      "required": [
+        "real_queue_mutation",
+        "worker_dispatch",
+        "continuous_loop",
+        "live_trading",
+        "broker_execution",
+        "credential_use",
+        "webhook_execution",
+        "scheduler_creation",
+        "unapproved_mutation"
+      ],
+      "properties": {
+        "real_queue_mutation": {
+          "const": "blocked"
+        },
+        "worker_dispatch": {
+          "const": "blocked"
+        },
+        "continuous_loop": {
+          "const": "blocked"
+        },
+        "live_trading": {
+          "const": "blocked"
+        },
+        "broker_execution": {
+          "const": "blocked"
+        },
+        "credential_use": {
+          "const": "blocked"
+        },
+        "webhook_execution": {
+          "const": "blocked"
+        },
+        "scheduler_creation": {
+          "const": "blocked"
+        },
+        "unapproved_mutation": {
+          "const": "blocked"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "schemas/orchestration/aios_closed_autonomy_loop.schema.json",
+  "title": "AI_OS Closed Autonomy Loop Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system",
+    "component",
+    "mode",
+    "loop_id",
+    "generated_at_utc",
+    "loop_phase_status",
+    "inputs",
+    "governor_decision",
+    "proposed_cycle_action",
+    "gate_result",
+    "dispatch_recommendation",
+    "safety_boundaries",
+    "next_loop_requirement"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "system": { "const": "AI_OS" },
+    "component": { "const": "closed_autonomy_loop" },
+    "mode": { "const": "ONE_CYCLE_RECOMMENDATION_ONLY" },
+    "loop_id": { "type": "string", "minLength": 1 },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "loop_phase_status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observe",
+        "decide",
+        "plan",
+        "validate_gate",
+        "recommend_dispatch",
+        "report",
+        "stop"
+      ],
+      "properties": {
+        "observe": { "$ref": "#/$defs/phaseStatus" },
+        "decide": { "$ref": "#/$defs/phaseStatus" },
+        "plan": { "$ref": "#/$defs/phaseStatus" },
+        "validate_gate": { "$ref": "#/$defs/phaseStatus" },
+        "recommend_dispatch": { "$ref": "#/$defs/phaseStatus" },
+        "report": { "$ref": "#/$defs/phaseStatus" },
+        "stop": { "const": "complete" }
+      }
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "path", "status", "summary"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "path": { "type": "string", "minLength": 1 },
+          "status": {
+            "type": "string",
+            "enum": ["present", "missing", "unknown"]
+          },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "governor_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_candidate_id",
+        "decision_category",
+        "blocked",
+        "blocked_reason",
+        "allowed_lane"
+      ],
+      "properties": {
+        "selected_candidate_id": { "type": "string" },
+        "decision_category": { "type": "string" },
+        "blocked": { "type": "boolean" },
+        "blocked_reason": {
+          "anyOf": [
+            { "type": "null" },
+            { "type": "string" }
+          ]
+        },
+        "allowed_lane": { "type": "string" }
+      }
+    },
+    "proposed_cycle_action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposed_action_id",
+        "proposed_action_title",
+        "proposed_packet_id",
+        "proposed_mode",
+        "proposed_lane",
+        "required_validators",
+        "required_approval",
+        "allowed_paths",
+        "forbidden_paths",
+        "stop_conditions"
+      ],
+      "properties": {
+        "proposed_action_id": { "type": "string" },
+        "proposed_action_title": { "type": "string" },
+        "proposed_packet_id": { "type": "string" },
+        "proposed_mode": {
+          "type": "string",
+          "enum": ["READ_ONLY", "DRY_RUN", "APPLY", "BLOCKED"]
+        },
+        "proposed_lane": { "type": "string" },
+        "required_validators": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "required_approval": {
+          "type": "string",
+          "enum": ["none", "anthony", "blocked"]
+        },
+        "allowed_paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "forbidden_paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "stop_conditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "gate_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "safe_to_dispatch"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ready_for_dry_run",
+            "ready_for_apply",
+            "blocked",
+            "requires_human_approval",
+            "requires_cleanup",
+            "requires_validator_repair"
+          ]
+        },
+        "reason": { "type": "string" },
+        "safe_to_dispatch": { "const": false }
+      }
+    },
+    "dispatch_recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dispatch_authorized",
+        "queue_mutation_authorized",
+        "recommended_next_packet_type",
+        "recommended_next_packet_id",
+        "recommended_worker_lane",
+        "human_action_required",
+        "reason"
+      ],
+      "properties": {
+        "dispatch_authorized": { "const": false },
+        "queue_mutation_authorized": { "const": false },
+        "recommended_next_packet_type": { "type": "string" },
+        "recommended_next_packet_id": { "type": "string" },
+        "recommended_worker_lane": { "type": "string" },
+        "human_action_required": { "type": "boolean" },
+        "reason": { "type": "string" }
+      }
+    },
+    "safety_boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "continuous_loop",
+        "worker_dispatch",
+        "queue_mutation",
+        "live_trading",
+        "broker_execution",
+        "credential_use",
+        "unapproved_mutation"
+      ],
+      "properties": {
+        "continuous_loop": { "const": "blocked" },
+        "worker_dispatch": { "const": "recommendation_only" },
+        "queue_mutation": { "const": "blocked" },
+        "live_trading": { "const": "blocked" },
+        "broker_execution": { "const": "blocked" },
+        "credential_use": { "const": "blocked" },
+        "unapproved_mutation": { "const": "blocked" }
+      }
+    },
+    "next_loop_requirement": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "phaseStatus": {
+      "type": "string",
+      "enum": ["complete", "partial", "blocked"]
+    }
+  }
+}
