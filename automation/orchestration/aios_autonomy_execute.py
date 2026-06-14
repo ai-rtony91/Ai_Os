@@ -23,6 +23,9 @@ FOREX_LEDGER_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PAPER_LEDGER.md")
 FOREX_STRATEGY_PATH = Path("apps/trading_lab/trading_lab/forex_strategy_rules.py")
 FOREX_STRATEGY_TEST_PATH = Path("tests/trading_lab/test_forex_strategy_rules.py")
 FOREX_STRATEGY_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_STRATEGY_RULES.md")
+FOREX_DATA_IMPORT_PATH = Path("apps/trading_lab/trading_lab/forex_data_import.py")
+FOREX_DATA_IMPORT_TEST_PATH = Path("tests/trading_lab/test_forex_data_import.py")
+FOREX_DATA_IMPORT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_DATA_IMPORT.md")
 FOREX_SCAFFOLD_PATHS = (
     FOREX_BOT_PATH,
     FOREX_BOT_TEST_PATH,
@@ -42,6 +45,11 @@ FOREX_STRATEGY_PATHS = (
     FOREX_STRATEGY_PATH,
     FOREX_STRATEGY_TEST_PATH,
     FOREX_STRATEGY_DOC_PATH,
+)
+FOREX_DATA_IMPORT_PATHS = (
+    FOREX_DATA_IMPORT_PATH,
+    FOREX_DATA_IMPORT_TEST_PATH,
+    FOREX_DATA_IMPORT_DOC_PATH,
 )
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -1029,6 +1037,225 @@ broker, call APIs, trade live, or route orders.
 """
 
 
+def build_forex_data_import_source() -> str:
+    return '''from __future__ import annotations
+
+from typing import Any
+
+
+SUPPORTED_PAIRS = {"EURUSD", "GBPUSD", "USDJPY"}
+REQUIRED_FIELDS = ("timestamp", "pair", "open", "high", "low", "close")
+OPTIONAL_NUMERIC_FIELDS = ("volume", "fast_ma", "slow_ma", "momentum")
+NUMERIC_FIELDS = ("open", "high", "low", "close", *OPTIONAL_NUMERIC_FIELDS)
+
+PAPER_DATA_IMPORT_SAFETY = {
+    "paper_only": True,
+    "research_only": True,
+    "network_access": False,
+    "execution_allowed": False,
+    "broker_execution": False,
+    "credential_use": False,
+    "live_trading": False,
+    "real_orders": False,
+    "real_webhooks": False,
+}
+
+BLOCKED_SCOPE_FIELDS = {
+    "api_key",
+    "broker_order",
+    "credentials",
+    "live_execution",
+    "real_order",
+    "webhook_url",
+}
+
+
+def blocked_row(reason: str) -> dict[str, Any]:
+    return {
+        "allowed": False,
+        "status": "blocked",
+        "blocked_reason": reason,
+        **PAPER_DATA_IMPORT_SAFETY,
+    }
+
+
+def _blocked_scope_reason(row: dict[str, Any]) -> str | None:
+    for field in sorted(BLOCKED_SCOPE_FIELDS):
+        if row.get(field):
+            return f"{field}_blocked"
+    return None
+
+
+def _parse_number(value: Any, field: str) -> tuple[float | None, str | None]:
+    try:
+        return float(value), None
+    except (TypeError, ValueError):
+        return None, f"invalid_numeric_{field}"
+
+
+def normalize_csv_row(row: dict[str, Any]) -> dict[str, Any]:
+    blocked_reason = _blocked_scope_reason(row)
+    if blocked_reason:
+        return blocked_row(blocked_reason)
+
+    for field in REQUIRED_FIELDS:
+        if row.get(field) in (None, ""):
+            return blocked_row(f"missing_{field}")
+
+    pair = str(row["pair"]).upper()
+    if pair not in SUPPORTED_PAIRS:
+        return blocked_row("unsupported_pair")
+
+    candle: dict[str, Any] = {
+        "allowed": True,
+        "status": "normalized",
+        "timestamp": str(row["timestamp"]),
+        "pair": pair,
+        **PAPER_DATA_IMPORT_SAFETY,
+    }
+
+    for field in NUMERIC_FIELDS:
+        if field not in row or row.get(field) in (None, ""):
+            continue
+        parsed, reason = _parse_number(row.get(field), field)
+        if reason:
+            return blocked_row(reason)
+        candle[field] = parsed
+
+    if candle["high"] < candle["low"]:
+        return blocked_row("invalid_ohlc_high_below_low")
+    if candle["high"] < max(candle["open"], candle["close"]):
+        return blocked_row("invalid_ohlc_high_below_open_or_close")
+    if candle["low"] > min(candle["open"], candle["close"]):
+        return blocked_row("invalid_ohlc_low_above_open_or_close")
+
+    return candle
+
+
+def normalize_csv_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    records = [normalize_csv_row(row) for row in rows]
+    candles = [record for record in records if record.get("allowed")]
+    blocked = [record for record in records if not record.get("allowed")]
+    return {
+        "rows_received": len(rows),
+        "candles_normalized": len(candles),
+        "rows_blocked": len(blocked),
+        "candles": candles,
+        "blocked_rows": blocked,
+        **PAPER_DATA_IMPORT_SAFETY,
+    }
+'''
+
+
+def build_forex_data_import_test_source() -> str:
+    return '''from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = REPO_ROOT / "apps" / "trading_lab" / "trading_lab" / "forex_data_import.py"
+
+
+def load_data_import_module():
+    spec = importlib.util.spec_from_file_location("forex_data_import", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def valid_row(**overrides):
+    row = {
+        "timestamp": "2026-06-14T00:00:00Z",
+        "pair": "EURUSD",
+        "open": "1.1000",
+        "high": "1.1060",
+        "low": "1.0950",
+        "close": "1.1040",
+    }
+    row.update(overrides)
+    return row
+
+
+def test_module_imports():
+    data_import = load_data_import_module()
+    assert callable(data_import.normalize_csv_row)
+    assert callable(data_import.normalize_csv_rows)
+
+
+def test_valid_rows_normalize():
+    data_import = load_data_import_module()
+    summary = data_import.normalize_csv_rows([valid_row(pair="GBPUSD"), valid_row(pair="USDJPY", open="157.0", high="157.5", low="156.8", close="157.2")])
+    assert summary["paper_only"] is True
+    assert summary["network_access"] is False
+    assert summary["candles_normalized"] == 2
+    assert summary["rows_blocked"] == 0
+
+
+def test_numeric_strings_convert():
+    data_import = load_data_import_module()
+    candle = data_import.normalize_csv_row(valid_row(volume="1000", fast_ma="1.103", slow_ma="1.101", momentum="0.5"))
+    assert candle["allowed"] is True
+    assert candle["open"] == 1.1
+    assert candle["volume"] == 1000.0
+    assert candle["momentum"] == 0.5
+
+
+def test_missing_field_blocked():
+    data_import = load_data_import_module()
+    row = valid_row()
+    del row["close"]
+    result = data_import.normalize_csv_row(row)
+    assert result["allowed"] is False
+    assert result["blocked_reason"] == "missing_close"
+
+
+def test_invalid_pair_blocked():
+    data_import = load_data_import_module()
+    result = data_import.normalize_csv_row(valid_row(pair="AUDUSD"))
+    assert result["allowed"] is False
+    assert result["blocked_reason"] == "unsupported_pair"
+
+
+def test_live_broker_credential_api_key_real_order_and_webhook_blocked():
+    data_import = load_data_import_module()
+    assert data_import.normalize_csv_row(valid_row(live_execution=True))["blocked_reason"] == "live_execution_blocked"
+    assert data_import.normalize_csv_row(valid_row(broker_order=True))["blocked_reason"] == "broker_order_blocked"
+    assert data_import.normalize_csv_row(valid_row(credentials={"token": "x"}))["blocked_reason"] == "credentials_blocked"
+    assert data_import.normalize_csv_row(valid_row(api_key="placeholder"))["blocked_reason"] == "api_key_blocked"
+    assert data_import.normalize_csv_row(valid_row(real_order=True))["blocked_reason"] == "real_order_blocked"
+    assert data_import.normalize_csv_row(valid_row(webhook_url="https://example.invalid"))["blocked_reason"] == "webhook_url_blocked"
+
+
+def test_no_network_usage():
+    source = MODULE_PATH.read_text(encoding="utf-8").lower()
+    for forbidden in ["requests", "urllib", "http.client", "socket", "websocket"]:
+        assert forbidden not in source
+'''
+
+
+def build_forex_data_import_doc() -> str:
+    return """# AIOS Forex Data Import
+
+This generated component is the fifth `forex-paper-bot` build step. It is a
+paper/research-only historical data import and normalization helper for local
+CSV-style rows.
+
+Required row fields are `timestamp`, `pair`, `open`, `high`, `low`, and `close`.
+Optional numeric fields are `volume`, `fast_ma`, `slow_ma`, and `momentum`.
+Supported pairs are EURUSD, GBPUSD, and USDJPY.
+
+The importer validates required fields, supported pairs, numeric OHLC values,
+and basic OHLC consistency. It blocks live execution, broker orders,
+credentials, API keys, real orders, and webhooks.
+
+It performs no network access, broker access, credential access, live trading,
+real order routing, or webhook execution.
+"""
+
+
 def forex_backtest_files() -> dict[Path, str]:
     return {
         FOREX_BACKTEST_PATH: build_forex_backtest_source(),
@@ -1050,6 +1277,14 @@ def forex_strategy_files() -> dict[Path, str]:
         FOREX_STRATEGY_PATH: build_forex_strategy_source(),
         FOREX_STRATEGY_TEST_PATH: build_forex_strategy_test_source(),
         FOREX_STRATEGY_DOC_PATH: build_forex_strategy_doc(),
+    }
+
+
+def forex_data_import_files() -> dict[Path, str]:
+    return {
+        FOREX_DATA_IMPORT_PATH: build_forex_data_import_source(),
+        FOREX_DATA_IMPORT_TEST_PATH: build_forex_data_import_test_source(),
+        FOREX_DATA_IMPORT_DOC_PATH: build_forex_data_import_doc(),
     }
 
 
@@ -1091,6 +1326,15 @@ def write_forex_ledger(repo_root: Path) -> list[str]:
 def write_forex_strategy(repo_root: Path) -> list[str]:
     files_written: list[str] = []
     for relative_path, content in forex_strategy_files().items():
+        target = repo_root / relative_path
+        if write_text_if_changed(target, content):
+            files_written.append(relative_path.as_posix())
+    return files_written
+
+
+def write_forex_data_import(repo_root: Path) -> list[str]:
+    files_written: list[str] = []
+    for relative_path, content in forex_data_import_files().items():
         target = repo_root / relative_path
         if write_text_if_changed(target, content):
             files_written.append(relative_path.as_posix())
@@ -1201,6 +1445,32 @@ def run_forex_strategy_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_forex_data_import_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_data_import_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
 def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -1226,6 +1496,8 @@ def select_forex_continue_action(repo_root: Path) -> str:
         return "build_ledger"
     if not (repo_root / FOREX_STRATEGY_PATH).exists():
         return "build_strategy"
+    if not (repo_root / FOREX_DATA_IMPORT_PATH).exists():
+        return "build_data_import"
     return "done"
 
 
@@ -1238,6 +1510,8 @@ def _apply_writer_for_action(repo_root: Path, action: str) -> tuple[list[str], V
         return write_forex_ledger(repo_root), run_forex_ledger_validator
     if action == "build_strategy":
         return write_forex_strategy(repo_root), run_forex_strategy_validator
+    if action == "build_data_import":
+        return write_forex_data_import(repo_root), run_forex_data_import_validator
     return [], None
 
 
@@ -1250,6 +1524,8 @@ def _repair_for_action(repo_root: Path, action: str) -> list[str]:
         return write_forex_ledger(repo_root)
     if action == "build_strategy":
         return write_forex_strategy(repo_root)
+    if action == "build_data_import":
+        return write_forex_data_import(repo_root)
     return []
 
 
@@ -1289,7 +1565,7 @@ def execute_goal(
     action = report["continue_action"]
     if action == "done":
         report["result"] = "DONE"
-        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, and strategy rules already exist. Review validators before the next build step."
+        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, strategy rules, and data import already exist. Review validators before the next build step."
         return report
 
     files_written, default_runner = _apply_writer_for_action(repo_root, action)
