@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/AIOS_SELF_BUILD_VALIDATOR_REPAIR_RESULT.v1.schema.json",
+  "title": "AIOS Self-Build Validator Repair Result",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "generated_utc",
+    "status",
+    "repair_needed",
+    "current_attempt",
+    "max_repair_attempts",
+    "validator_summary",
+    "protected_boundary_hits",
+    "sos_status",
+    "wake_required",
+    "next_repair_action",
+    "repair_actions",
+    "stop_conditions",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_SELF_BUILD_VALIDATOR_REPAIR_RESULT.v1"
+    }
+  }
+}
