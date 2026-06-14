@@ -280,9 +280,51 @@ def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     assert report["goal_decision"]["decision"] == "continue_build"
     assert report["goal_decision"]["reason_code"] == "acceptable_report"
     assert report["goal_decision"]["next_build_recommendation"].startswith("Continue")
+    assert report["next_build_plan"]["schema"] == "AIOS_NEXT_BUILD_PLAN.v1"
+    assert report["next_build_plan"]["route"] == "build_next_paper_component"
+    assert report["next_build_plan"]["next_component"] == "forex_risk_controls"
+    assert report["next_safe_action"] == report["next_build_plan"]["next_safe_action"]
     assert len(report["validators_run"]) == 1
     assert state["schema"] == "AIOS_WAKE_CONTINUE.v1"
     assert state["goal_decision"]["decision"] == "continue_build"
+    assert state["next_build_plan"]["next_component"] == "forex_risk_controls"
+
+
+def test_validate_all_stop_route_returns_review_required(tmp_path, monkeypatch):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+
+    def stop_decision(_repo_root: Path, goal: str) -> dict[str, object]:
+        return {
+            "schema": "AIOS_FOREX_GOAL_DECISION.v1",
+            "goal": goal,
+            "decision_bridge_passed": True,
+            "decision": "stop_for_human_review",
+            "reason_code": "risk_flags_present",
+            "decision_reasons": ["risk_flags_present"],
+        }
+
+    monkeypatch.setattr(module, "build_goal_decision", stop_decision)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+    )
+    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["next_build_plan"]["route"] == "stop"
+    assert report["next_build_plan"]["next_component"] == "none"
+    assert report["next_safe_action"] == report["next_build_plan"]["next_safe_action"]
 
 
 def test_max_cycles_respected(tmp_path):

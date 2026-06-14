@@ -29,6 +29,7 @@ FOREX_REPORT_TEST_PATH = Path("tests/trading_lab/test_forex_report.py")
 FOREX_DECISION_POLICY_PATH = Path("apps/trading_lab/trading_lab/forex_decision_policy.py")
 FOREX_DECISION_POLICY_TEST_PATH = Path("tests/trading_lab/test_forex_decision_policy.py")
 FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
+NEXT_BUILD_PLAN_ROUTER_PATH = Path("automation/orchestration/aios_next_build_plan.py")
 
 CommandRunner = Callable[[list[str], Path], dict[str, Any]]
 
@@ -208,6 +209,28 @@ def build_goal_decision(repo_root: Path, goal: str) -> dict[str, Any]:
     return module.build_goal_decision(repo_root, goal=goal)
 
 
+def build_next_build_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
+    router_path = Path(__file__).with_name("aios_next_build_plan.py")
+    spec = importlib.util.spec_from_file_location("aios_next_build_plan", router_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_NEXT_BUILD_PLAN.v1",
+            "goal": goal_decision.get("goal", "forex-paper-bot"),
+            "input_decision": goal_decision.get("decision", "invalid_decision"),
+            "route": "stop",
+            "next_component": "none",
+            "next_packet_id": "NONE",
+            "reason_code": "next_build_plan_router_unavailable",
+            "plan_reasons": ["next_build_plan_router_unavailable"],
+            "next_safe_action": "Stop and repair the missing next build plan router.",
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_next_build_plan(goal_decision)
+
+
 def default_state_path() -> Path:
     return Path(tempfile.gettempdir()) / "AIOS_WAKE_CONTINUE_STATE.json"
 
@@ -221,6 +244,7 @@ def base_report(goal: str) -> dict[str, Any]:
         "validators_run": [],
         "repair_attempts": 0,
         "goal_decision": None,
+        "next_build_plan": None,
         "result": "blocked",
         "next_safe_action": "Inspect the blocked reason before continuing.",
         "approval_required": approval_required(),
@@ -295,8 +319,13 @@ def run_wake_continue(
                 )
                 write_state(state_path, report)
                 return report
-            report["result"] = "DONE_FOR_CURRENT_GOAL"
-            report["next_safe_action"] = goal_decision["next_safe_action"]
+            next_build_plan = build_next_build_plan(goal_decision)
+            report["next_build_plan"] = next_build_plan
+            report["next_safe_action"] = next_build_plan["next_safe_action"]
+            if next_build_plan.get("route") == "stop":
+                report["result"] = "REVIEW_REQUIRED"
+            else:
+                report["result"] = "DONE_FOR_CURRENT_GOAL"
             write_state(state_path, report)
             return report
 
@@ -350,7 +379,7 @@ def main(argv: list[str] | None = None) -> int:
         state_path=state_path,
     )
     print(json.dumps(report, indent=2, sort_keys=False))
-    return 0 if report["result"] in {"DONE_FOR_CURRENT_GOAL", "passed", "preview_only", "blocked", "max_cycles_reached"} else 1
+    return 0 if report["result"] in {"DONE_FOR_CURRENT_GOAL", "REVIEW_REQUIRED", "passed", "preview_only", "blocked", "max_cycles_reached"} else 1
 
 
 if __name__ == "__main__":
