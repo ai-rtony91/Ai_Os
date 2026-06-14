@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_AUTONOMOUS_FOREX_RESEARCH_RUN_RESULT.v1.schema.json",
+  "title": "AIOS Autonomous Forex Research Run Result v1",
+  "description": "Simulation-only Forex research/backtest/replay/soak result. Synthetic fixtures only; not valid for live trading.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "generated_utc",
+    "repo_state",
+    "research_mode",
+    "pair",
+    "timeframe",
+    "strategy_profile",
+    "approval_state",
+    "data_source",
+    "synthetic_fixture_notice",
+    "research_plan",
+    "backtest_result",
+    "replay_result",
+    "soak_result",
+    "safety",
+    "run_ledger",
+    "stop_conditions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_AUTONOMOUS_FOREX_RESEARCH_RUN_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN",
+        "APPLY"
+      ]
+    },
+    "research_mode": {
+      "type": "string"
+    },
+    "data_source": {
+      "type": "string",
+      "const": "SYNTHETIC_LOCAL_FIXTURE_ONLY"
+    },
+    "backtest_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "trade_count",
+        "win_rate",
+        "loss_rate",
+        "gross_return_sim",
+        "max_drawdown_sim",
+        "average_r_multiple_sim",
+        "notes",
+        "valid_for_live_trading"
+      ],
+      "properties": {
+        "valid_for_live_trading": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "soak_result": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "cycles_requested",
+        "cycles_completed",
+        "passed_cycles",
+        "failed_cycles",
+        "stability_status",
+        "stop_reason",
+        "valid_for_live_trading"
+      ],
+      "properties": {
+        "valid_for_live_trading": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "uses_live_market_data": {
+          "type": "boolean",
+          "const": false
+        },
+        "uses_network": {
+          "type": "boolean",
+          "const": false
+        },
+        "touches_secrets_or_env": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        },
+        "valid_for_live_trading": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  }
+}

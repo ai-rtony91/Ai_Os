@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_AUTONOMY_RUN_LEDGER_RECORD.v1.schema.json",
+  "title": "AIOS Autonomy Run Ledger Record v1",
+  "description": "One local autonomy run ledger record. This contract records bounded local simulation/research evidence only and grants no queue, lock, approval, registry, broker, live trading, runtime, scheduler, daemon, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "run_id",
+    "mode",
+    "task_type",
+    "status",
+    "generated_utc",
+    "safety",
+    "stop_reason",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_AUTONOMY_RUN_LEDGER_RECORD.v1"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "task_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "mutates_registry",
+        "mutates_queue",
+        "mutates_locks",
+        "mutates_approval",
+        "writes_reports",
+        "writes_telemetry",
+        "writes_relay",
+        "touches_secrets_or_env",
+        "broker_or_live_trading"
+      ],
+      "properties": {
+        "mutates_registry": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_queue": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_locks": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutates_approval": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_reports": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_telemetry": {
+          "type": "boolean",
+          "const": false
+        },
+        "writes_relay": {
+          "type": "boolean",
+          "const": false
+        },
+        "touches_secrets_or_env": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "stop_reason": {
+      "type": "string"
+    },
+    "next_safe_action": {
+      "type": "string"
+    }
+  }
+}

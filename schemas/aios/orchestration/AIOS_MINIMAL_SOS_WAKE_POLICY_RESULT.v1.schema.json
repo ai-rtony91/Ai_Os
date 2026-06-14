@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_MINIMAL_SOS_WAKE_POLICY_RESULT.v1.schema.json",
+  "title": "AIOS Minimal SOS Wake Policy Result v1",
+  "description": "Human Owner wake policy for autonomous local research runs. Routine simulation results do not wake; SOS, protected boundaries, security, repo corruption, critical validators, and timebox breach do wake.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "mode",
+    "wake_required",
+    "wake_class",
+    "wake_reasons",
+    "do_not_wake_for",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_MINIMAL_SOS_WAKE_POLICY_RESULT.v1"
+    },
+    "mode": {
+      "type": "string",
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "wake_required": {
+      "type": "boolean"
+    },
+    "wake_class": {
+      "type": "string"
+    },
+    "wake_reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "do_not_wake_for": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "starts_runtime": {
+          "type": "boolean",
+          "const": false
+        },
+        "launches_workers": {
+          "type": "boolean",
+          "const": false
+        },
+        "touches_secrets_or_env": {
+          "type": "boolean",
+          "const": false
+        },
+        "broker_or_live_trading": {
+          "type": "boolean",
+          "const": false
+        },
+        "protected_actions_blocked": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    }
+  }
+}

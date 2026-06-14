@@ -129,6 +129,40 @@ function Get-FullAutonomyWorkerPostureBridgeState {
     }
 }
 
+function Get-FullAutonomyWorkerLaunchAvailabilityState {
+    param([string]$RepoRoot)
+
+    $preflightScript = Join-Path $RepoRoot "automation/orchestration/self_development/Test-AiOsFullAutonomyWorkerLaunchPreflightGate.DRY_RUN.ps1"
+    $commanderScript = Join-Path $RepoRoot "automation/orchestration/self_development/New-AiOsFullAutonomyWorkerLaunchCommand.DRY_RUN.ps1"
+    $guardScript = Join-Path $RepoRoot "automation/orchestration/self_development/Test-AiOsFullAutonomyWorkerLaunchGuard.DRY_RUN.ps1"
+    $controllerScript = Join-Path $RepoRoot "automation/orchestration/self_development/Start-AiOsApprovedAutonomyWorkerLaunch.APPLY.ps1"
+    $controllerLogic = Join-Path $RepoRoot "automation/orchestration/self_development/aios_approved_autonomy_worker_launch_controller.py"
+    $forexScript = Join-Path $RepoRoot "automation/orchestration/self_development/Start-AiOsAutonomousForexResearchRun.APPLY.ps1"
+    $forexLogic = Join-Path $RepoRoot "automation/orchestration/self_development/aios_autonomous_forex_research_pipeline.py"
+
+    $preflightAvailable = Test-Path -LiteralPath $preflightScript -PathType Leaf
+    $commandGuardAvailable = (Test-Path -LiteralPath $commanderScript -PathType Leaf) -and (Test-Path -LiteralPath $guardScript -PathType Leaf)
+    $controllerAvailable = (Test-Path -LiteralPath $controllerScript -PathType Leaf) -and (Test-Path -LiteralPath $controllerLogic -PathType Leaf)
+    $forexAvailable = (Test-Path -LiteralPath $forexScript -PathType Leaf) -and (Test-Path -LiteralPath $forexLogic -PathType Leaf)
+
+    return [pscustomobject]@{
+        preflight = if ($preflightAvailable) { "available" } else { "missing" }
+        command_guard = if ($commandGuardAvailable) { "available" } else { "missing" }
+        approved_launch_controller = if ($controllerAvailable) { "available" } else { "missing" }
+        forex_research_pipeline = if ($forexAvailable) { "available" } else { "missing" }
+        worker_launch_allowed_now = $false
+        starts_apply = $false
+        writes_ledger = $false
+        launches_workers = $false
+        starts_runtime = $false
+        enables_scheduler = $false
+        starts_daemon = $false
+        broker_or_live_trading = $false
+        touches_secrets_or_env = $false
+        next_safe_action = "Run approved local simulation workers only after Human Owner approval and current validation evidence are supplied."
+    }
+}
+
 $health = powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $next = powershell -ExecutionPolicy Bypass -File automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $blocker = powershell -ExecutionPolicy Bypass -File automation/orchestration/blockers/Resolve-AiOsRuntimeBlocker.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
@@ -136,6 +170,7 @@ $approval = powershell -ExecutionPolicy Bypass -File automation/orchestration/ap
 $gitStatus = @(git status --short)
 $repoRoot = (Get-Location).Path
 $fullAutonomyState = Get-FullAutonomyWorkerPostureBridgeState -RepoRoot $repoRoot
+$fullAutonomyWorkerLaunch = Get-FullAutonomyWorkerLaunchAvailabilityState -RepoRoot $repoRoot
 $relayOperatorState = Get-RelayOperatorState -RepoRoot $repoRoot
 $campaignNextTaskState = Get-CampaignNextTaskState -RepoRoot $repoRoot
 $campaignOverallReadiness = if ($campaignNextTaskState -and $campaignNextTaskState.PSObject.Properties.Name -contains "overall_readiness") {
@@ -335,6 +370,7 @@ $result = [pscustomobject]@{
     approval_matches = $approval.matches_found
     blocker = $blocker.blocker
     full_autonomy_state = $fullAutonomyState
+    full_autonomy_worker_launch = $fullAutonomyWorkerLaunch
     level5_commit_package_preview = [pscustomobject]@{
         available = [bool]($null -ne $commitPackagePreview)
         status = if ($commitPackagePreview -and $commitPackagePreview.orchestration_result_contract.status) { [string]$commitPackagePreview.orchestration_result_contract.status } elseif ($gitStatus.Count -gt 0) { "REVIEW" } else { "NOT_NEEDED" }
@@ -406,6 +442,7 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
         no_ready_stage_planning_required = $noReadyStagePlanningRequired
         no_ready_stage_registry_inconsistency_detected = $noReadyStageRegistryInconsistencyDetected
         full_autonomy_state = $fullAutonomyState
+        full_autonomy_worker_launch = $fullAutonomyWorkerLaunch
     }
     generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 })
@@ -434,6 +471,14 @@ Write-Host "worker_posture: $($result.full_autonomy_state.worker_posture)"
 Write-Host "worker_launch_allowed: $($result.full_autonomy_state.worker_launch_allowed)"
 Write-Host "human_wake_policy: $($result.full_autonomy_state.human_wake_policy)"
 Write-Host "next_safe_action: $($result.full_autonomy_state.next_safe_action)"
+Write-Host ""
+Write-Host "FULL AUTONOMY WORKER LAUNCH"
+Write-Host "preflight: $($result.full_autonomy_worker_launch.preflight)"
+Write-Host "command_guard: $($result.full_autonomy_worker_launch.command_guard)"
+Write-Host "approved_launch_controller: $($result.full_autonomy_worker_launch.approved_launch_controller)"
+Write-Host "forex_research_pipeline: $($result.full_autonomy_worker_launch.forex_research_pipeline)"
+Write-Host "worker_launch_allowed_now: $($result.full_autonomy_worker_launch.worker_launch_allowed_now)"
+Write-Host "next_safe_action: $($result.full_autonomy_worker_launch.next_safe_action)"
 Write-Host ""
 Write-Host "RECOMMENDED COMMAND:"
 Write-Host $result.recommended_command
