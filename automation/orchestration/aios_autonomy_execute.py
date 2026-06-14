@@ -20,6 +20,9 @@ FOREX_BACKTEST_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_BACKTEST.md")
 FOREX_LEDGER_PATH = Path("apps/trading_lab/trading_lab/forex_paper_ledger.py")
 FOREX_LEDGER_TEST_PATH = Path("tests/trading_lab/test_forex_paper_ledger.py")
 FOREX_LEDGER_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PAPER_LEDGER.md")
+FOREX_STRATEGY_PATH = Path("apps/trading_lab/trading_lab/forex_strategy_rules.py")
+FOREX_STRATEGY_TEST_PATH = Path("tests/trading_lab/test_forex_strategy_rules.py")
+FOREX_STRATEGY_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_STRATEGY_RULES.md")
 FOREX_SCAFFOLD_PATHS = (
     FOREX_BOT_PATH,
     FOREX_BOT_TEST_PATH,
@@ -34,6 +37,11 @@ FOREX_LEDGER_PATHS = (
     FOREX_LEDGER_PATH,
     FOREX_LEDGER_TEST_PATH,
     FOREX_LEDGER_DOC_PATH,
+)
+FOREX_STRATEGY_PATHS = (
+    FOREX_STRATEGY_PATH,
+    FOREX_STRATEGY_TEST_PATH,
+    FOREX_STRATEGY_DOC_PATH,
 )
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -815,6 +823,212 @@ Unsupported pairs and unsafe live/broker/credential/order fields are blocked.
 """
 
 
+def build_forex_strategy_source() -> str:
+    return '''from __future__ import annotations
+
+from typing import Any
+
+
+SUPPORTED_PAIRS = {"EURUSD", "GBPUSD", "USDJPY"}
+
+PAPER_STRATEGY_SAFETY = {
+    "paper_only": True,
+    "execution_allowed": False,
+    "broker_execution": False,
+    "credential_use": False,
+    "live_trading": False,
+    "real_orders": False,
+    "real_webhooks": False,
+}
+
+BLOCKED_SCOPE_FIELDS = {
+    "api_key",
+    "broker_order",
+    "credentials",
+    "live_execution",
+    "real_order",
+    "webhook_url",
+}
+
+
+def blocked_signal(reason: str) -> dict[str, Any]:
+    return {
+        "allowed": False,
+        "signal": "hold",
+        "signal_type": "blocked",
+        "blocked_reason": reason,
+        **PAPER_STRATEGY_SAFETY,
+    }
+
+
+def _blocked_scope_reason(payload: dict[str, Any]) -> str | None:
+    for field in sorted(BLOCKED_SCOPE_FIELDS):
+        if payload.get(field):
+            return f"{field}_blocked"
+    return None
+
+
+def _indicator_value(input_data: dict[str, Any], name: str) -> float | None:
+    if name in input_data:
+        return float(input_data[name])
+    indicators = input_data.get("indicators", {})
+    if isinstance(indicators, dict) and name in indicators:
+        return float(indicators[name])
+    return None
+
+
+def evaluate_strategy(
+    pair: str,
+    input_data: dict[str, Any],
+    *,
+    live_execution: bool = False,
+    broker_order: bool = False,
+    credentials: Any = None,
+    api_key: Any = None,
+    real_order: bool = False,
+    webhook_url: str | None = None,
+) -> dict[str, Any]:
+    unsafe_payload = {
+        "live_execution": live_execution,
+        "broker_order": broker_order,
+        "credentials": credentials,
+        "api_key": api_key,
+        "real_order": real_order,
+        "webhook_url": webhook_url,
+    }
+    blocked_reason = _blocked_scope_reason(unsafe_payload)
+    if blocked_reason:
+        return blocked_signal(blocked_reason)
+
+    normalized_pair = str(pair).upper()
+    if normalized_pair not in SUPPORTED_PAIRS:
+        return blocked_signal("unsupported_pair")
+
+    fast_ma = _indicator_value(input_data, "fast_ma")
+    slow_ma = _indicator_value(input_data, "slow_ma")
+    momentum = _indicator_value(input_data, "momentum")
+
+    if fast_ma is None or slow_ma is None or momentum is None:
+        return {
+            "allowed": True,
+            "signal": "hold",
+            "signal_type": "paper_strategy_signal",
+            "reason": "insufficient_data",
+            "pair": normalized_pair,
+            **PAPER_STRATEGY_SAFETY,
+        }
+
+    if fast_ma > slow_ma and momentum > 0:
+        signal = "buy"
+        reason = "fast_ma_above_slow_ma_with_positive_momentum"
+    elif fast_ma < slow_ma and momentum < 0:
+        signal = "sell"
+        reason = "fast_ma_below_slow_ma_with_negative_momentum"
+    else:
+        signal = "hold"
+        reason = "filters_not_aligned"
+
+    return {
+        "allowed": True,
+        "signal": signal,
+        "signal_type": "paper_strategy_signal",
+        "reason": reason,
+        "pair": normalized_pair,
+        "fast_ma": fast_ma,
+        "slow_ma": slow_ma,
+        "momentum": momentum,
+        **PAPER_STRATEGY_SAFETY,
+    }
+'''
+
+
+def build_forex_strategy_test_source() -> str:
+    return '''from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = REPO_ROOT / "apps" / "trading_lab" / "trading_lab" / "forex_strategy_rules.py"
+
+
+def load_strategy_module():
+    spec = importlib.util.spec_from_file_location("forex_strategy_rules", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_strategy_module_imports():
+    strategy = load_strategy_module()
+    assert callable(strategy.evaluate_strategy)
+
+
+def test_buy_signal_deterministic():
+    strategy = load_strategy_module()
+    signal = strategy.evaluate_strategy("EURUSD", {"fast_ma": 1.1050, "slow_ma": 1.1000, "momentum": 0.8})
+    assert signal["allowed"] is True
+    assert signal["signal"] == "buy"
+    assert signal["paper_only"] is True
+    assert signal["execution_allowed"] is False
+
+
+def test_sell_signal_deterministic():
+    strategy = load_strategy_module()
+    signal = strategy.evaluate_strategy("GBPUSD", {"fast_ma": 1.2450, "slow_ma": 1.2500, "momentum": -0.4})
+    assert signal["allowed"] is True
+    assert signal["signal"] == "sell"
+    assert signal["paper_only"] is True
+
+
+def test_hold_on_insufficient_data():
+    strategy = load_strategy_module()
+    signal = strategy.evaluate_strategy("USDJPY", {"fast_ma": 157.2})
+    assert signal["allowed"] is True
+    assert signal["signal"] == "hold"
+    assert signal["reason"] == "insufficient_data"
+
+
+def test_invalid_pair_blocked():
+    strategy = load_strategy_module()
+    signal = strategy.evaluate_strategy("AUDUSD", {"fast_ma": 0.66, "slow_ma": 0.65, "momentum": 0.1})
+    assert signal["allowed"] is False
+    assert signal["blocked_reason"] == "unsupported_pair"
+
+
+def test_live_broker_credential_real_order_and_webhook_blocked():
+    strategy = load_strategy_module()
+    data = {"fast_ma": 1.1050, "slow_ma": 1.1000, "momentum": 0.8}
+    assert strategy.evaluate_strategy("EURUSD", data, live_execution=True)["blocked_reason"] == "live_execution_blocked"
+    assert strategy.evaluate_strategy("EURUSD", data, broker_order=True)["blocked_reason"] == "broker_order_blocked"
+    assert strategy.evaluate_strategy("EURUSD", data, credentials={"token": "x"})["blocked_reason"] == "credentials_blocked"
+    assert strategy.evaluate_strategy("EURUSD", data, real_order=True)["blocked_reason"] == "real_order_blocked"
+    assert strategy.evaluate_strategy("EURUSD", data, webhook_url="https://example.invalid")["blocked_reason"] == "webhook_url_blocked"
+'''
+
+
+def build_forex_strategy_doc() -> str:
+    return """# AIOS Forex Strategy Rules
+
+This generated component is the fourth `forex-paper-bot` build step. It is a
+paper-only deterministic strategy signal evaluator for local review.
+
+The strategy supports EURUSD, GBPUSD, and USDJPY. It accepts a candle or
+indicator dictionary with `fast_ma`, `slow_ma`, and optional indicator nesting.
+It emits `buy`, `sell`, or `hold` paper signals only:
+
+- `buy` when `fast_ma > slow_ma` and momentum is positive
+- `sell` when `fast_ma < slow_ma` and momentum is negative
+- `hold` when data is insufficient or filters are not aligned
+
+The component blocks live execution, broker order fields, credentials, API key
+fields, real order fields, and real webhook fields. It does not connect to a
+broker, call APIs, trade live, or route orders.
+"""
+
+
 def forex_backtest_files() -> dict[Path, str]:
     return {
         FOREX_BACKTEST_PATH: build_forex_backtest_source(),
@@ -828,6 +1042,14 @@ def forex_ledger_files() -> dict[Path, str]:
         FOREX_LEDGER_PATH: build_forex_ledger_source(),
         FOREX_LEDGER_TEST_PATH: build_forex_ledger_test_source(),
         FOREX_LEDGER_DOC_PATH: build_forex_ledger_doc(),
+    }
+
+
+def forex_strategy_files() -> dict[Path, str]:
+    return {
+        FOREX_STRATEGY_PATH: build_forex_strategy_source(),
+        FOREX_STRATEGY_TEST_PATH: build_forex_strategy_test_source(),
+        FOREX_STRATEGY_DOC_PATH: build_forex_strategy_doc(),
     }
 
 
@@ -860,6 +1082,15 @@ def write_forex_backtest(repo_root: Path) -> list[str]:
 def write_forex_ledger(repo_root: Path) -> list[str]:
     files_written: list[str] = []
     for relative_path, content in forex_ledger_files().items():
+        target = repo_root / relative_path
+        if write_text_if_changed(target, content):
+            files_written.append(relative_path.as_posix())
+    return files_written
+
+
+def write_forex_strategy(repo_root: Path) -> list[str]:
+    files_written: list[str] = []
+    for relative_path, content in forex_strategy_files().items():
         target = repo_root / relative_path
         if write_text_if_changed(target, content):
             files_written.append(relative_path.as_posix())
@@ -944,6 +1175,32 @@ def run_forex_ledger_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_forex_strategy_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_STRATEGY_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_strategy_rules_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
 def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -967,6 +1224,8 @@ def select_forex_continue_action(repo_root: Path) -> str:
         return "build_backtest"
     if not (repo_root / FOREX_LEDGER_PATH).exists():
         return "build_ledger"
+    if not (repo_root / FOREX_STRATEGY_PATH).exists():
+        return "build_strategy"
     return "done"
 
 
@@ -977,6 +1236,8 @@ def _apply_writer_for_action(repo_root: Path, action: str) -> tuple[list[str], V
         return write_forex_backtest(repo_root), run_forex_backtest_validator
     if action == "build_ledger":
         return write_forex_ledger(repo_root), run_forex_ledger_validator
+    if action == "build_strategy":
+        return write_forex_strategy(repo_root), run_forex_strategy_validator
     return [], None
 
 
@@ -987,6 +1248,8 @@ def _repair_for_action(repo_root: Path, action: str) -> list[str]:
         return write_forex_backtest(repo_root)
     if action == "build_ledger":
         return write_forex_ledger(repo_root)
+    if action == "build_strategy":
+        return write_forex_strategy(repo_root)
     return []
 
 
@@ -1026,7 +1289,7 @@ def execute_goal(
     action = report["continue_action"]
     if action == "done":
         report["result"] = "DONE"
-        report["next_safe_action"] = "Forex paper bot scaffold, backtest, and ledger already exist. Review validators before the next build step."
+        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, and strategy rules already exist. Review validators before the next build step."
         return report
 
     files_written, default_runner = _apply_writer_for_action(repo_root, action)

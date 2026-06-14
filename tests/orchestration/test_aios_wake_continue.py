@@ -50,6 +50,15 @@ def seed_ledger(repo_root: Path) -> None:
     test_path.write_text("# ledger test placeholder\n", encoding="utf-8")
 
 
+def seed_strategy(repo_root: Path) -> None:
+    strategy_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_strategy_rules.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_strategy_rules.py"
+    strategy_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    strategy_path.write_text("# strategy placeholder\n", encoding="utf-8")
+    test_path.write_text("# strategy test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -133,12 +142,32 @@ def test_detects_scaffold_and_backtest_present_selects_ledger_action(tmp_path):
     assert report["selected_action"] == "build_forex_ledger"
 
 
+def test_detects_scaffold_backtest_and_ledger_present_selects_strategy_action(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    state_path = tmp_path / "state.json"
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=False,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=state_path,
+    )
+    assert report["result"] == "preview_only"
+    assert report["selected_action"] == "build_forex_strategy"
+
+
 def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     module = load_module()
     seed_executor(tmp_path)
     seed_scaffold(tmp_path)
     seed_backtest(tmp_path)
     seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
     state_path = tmp_path / "state.json"
     report = module.run_wake_continue(
         tmp_path,
@@ -220,6 +249,7 @@ def test_cli_main_writes_state_in_temp_path(tmp_path, capsys):
     seed_scaffold(tmp_path)
     seed_backtest(tmp_path)
     seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
     state_path = tmp_path / "state.json"
     exit_code = module.main(
         [

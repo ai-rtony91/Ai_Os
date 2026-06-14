@@ -41,6 +41,14 @@ def load_generated_ledger(path: Path):
     return module
 
 
+def load_generated_strategy(path: Path):
+    spec = importlib.util.spec_from_file_location("forex_strategy_rules", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 def passing_validator(_repo_root: Path) -> dict[str, object]:
     return {
         "name": "fake_validator",
@@ -131,11 +139,36 @@ def test_continue_selects_ledger_when_scaffold_and_backtest_exist(tmp_path):
     )
 
 
-def test_continue_done_when_scaffold_backtest_and_ledger_exist(tmp_path):
+def test_continue_selects_strategy_when_scaffold_backtest_and_ledger_exist(tmp_path):
     module = load_executor_module()
     module.write_forex_scaffold(tmp_path)
     module.write_forex_backtest(tmp_path)
     module.write_forex_ledger(tmp_path)
+    report = module.execute_goal(
+        tmp_path,
+        "forex-paper-bot",
+        apply=True,
+        continue_goal=True,
+        max_repairs=1,
+        validator_runner=passing_validator,
+    )
+    assert report["result"] == "passed"
+    assert report["continue_action"] == "build_strategy"
+    assert sorted(report["files_written"]) == sorted(
+        [
+            "apps/trading_lab/trading_lab/forex_strategy_rules.py",
+            "tests/trading_lab/test_forex_strategy_rules.py",
+            "docs/orchestration/AIOS_FOREX_STRATEGY_RULES.md",
+        ]
+    )
+
+
+def test_continue_done_when_all_strategy_components_exist(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.write_forex_backtest(tmp_path)
+    module.write_forex_ledger(tmp_path)
+    module.write_forex_strategy(tmp_path)
     report = module.execute_goal(
         tmp_path,
         "forex-paper-bot",
@@ -196,6 +229,18 @@ def test_generated_forex_ledger_imports(tmp_path):
     assert summary["paper_only"] is True
     assert summary["trade_count"] == 1
     assert summary["total_pnl"] == 50.0
+
+
+def test_generated_forex_strategy_imports(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.write_forex_backtest(tmp_path)
+    module.write_forex_ledger(tmp_path)
+    module.execute_goal(tmp_path, "forex-paper-bot", apply=True, continue_goal=True, validator_runner=passing_validator)
+    strategy = load_generated_strategy(tmp_path / "apps/trading_lab/trading_lab/forex_strategy_rules.py")
+    signal = strategy.evaluate_strategy("EURUSD", {"fast_ma": 1.105, "slow_ma": 1.100, "momentum": 0.3})
+    assert signal["paper_only"] is True
+    assert signal["signal"] == "buy"
 
 
 def test_valid_eurusd_paper_signal_allowed(tmp_path):
