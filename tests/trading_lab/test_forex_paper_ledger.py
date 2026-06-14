@@ -96,7 +96,7 @@ def test_live_broker_credential_and_real_order_blocked():
     assert ledger.record_paper_trade(**base, live_execution=True)["blocked_reason"] == "live_execution_blocked"
     assert ledger.record_paper_trade(**base, broker_order=True)["blocked_reason"] == "broker_order_blocked"
     assert ledger.record_paper_trade(**base, credentials={"token": "x"})["blocked_reason"] == "credentials_blocked"
-    assert ledger.record_paper_trade(**base, api_key="x")["blocked_reason"] == "api_key_blocked"
+    assert ledger.record_paper_trade(**base, api_key="placeholder")["blocked_reason"] == "api_key_blocked"
     assert ledger.record_paper_trade(**base, real_order=True)["blocked_reason"] == "real_order_blocked"
 
 
