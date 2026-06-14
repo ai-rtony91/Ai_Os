@@ -15,6 +15,10 @@ SUPPORTED_GOALS = {"forex-paper-bot"}
 AUTONOMY_EXECUTOR_PATH = Path("automation/orchestration/aios_autonomy_execute.py")
 FOREX_BOT_PATH = Path("apps/trading_lab/trading_lab/forex_paper_bot.py")
 FOREX_BOT_TEST_PATH = Path("tests/trading_lab/test_forex_paper_bot.py")
+FOREX_BACKTEST_PATH = Path("apps/trading_lab/trading_lab/forex_backtest.py")
+FOREX_BACKTEST_TEST_PATH = Path("tests/trading_lab/test_forex_backtest.py")
+FOREX_LEDGER_PATH = Path("apps/trading_lab/trading_lab/forex_paper_ledger.py")
+FOREX_LEDGER_TEST_PATH = Path("tests/trading_lab/test_forex_paper_ledger.py")
 
 CommandRunner = Callable[[list[str], Path], dict[str, Any]]
 
@@ -60,6 +64,10 @@ def read_repo_state(repo_root: Path) -> dict[str, bool]:
         "autonomy_executor_exists": (repo_root / AUTONOMY_EXECUTOR_PATH).exists(),
         "forex_scaffold_exists": (repo_root / FOREX_BOT_PATH).exists(),
         "forex_scaffold_test_exists": (repo_root / FOREX_BOT_TEST_PATH).exists(),
+        "forex_backtest_exists": (repo_root / FOREX_BACKTEST_PATH).exists(),
+        "forex_backtest_test_exists": (repo_root / FOREX_BACKTEST_TEST_PATH).exists(),
+        "forex_ledger_exists": (repo_root / FOREX_LEDGER_PATH).exists(),
+        "forex_ledger_test_exists": (repo_root / FOREX_LEDGER_TEST_PATH).exists(),
     }
 
 
@@ -72,7 +80,15 @@ def select_next_action(goal: str, repo_state: dict[str, bool]) -> tuple[str, str
         return "build_forex_scaffold", None
     if not repo_state["forex_scaffold_test_exists"]:
         return "blocked", "forex_scaffold_test_missing"
-    return "validate_forex_scaffold", None
+    if not repo_state["forex_backtest_exists"]:
+        return "build_forex_backtest", None
+    if not repo_state["forex_backtest_test_exists"]:
+        return "blocked", "forex_backtest_test_missing"
+    if not repo_state["forex_ledger_exists"]:
+        return "build_forex_ledger", None
+    if not repo_state["forex_ledger_test_exists"]:
+        return "blocked", "forex_ledger_test_missing"
+    return "validate_all_forex", None
 
 
 def command_for_action(action: str, max_repairs: int) -> list[str]:
@@ -86,7 +102,18 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             "--max-repairs",
             str(max_repairs),
         ]
-    if action == "validate_forex_scaffold":
+    if action in {"build_forex_backtest", "build_forex_ledger"}:
+        return [
+            sys.executable,
+            AUTONOMY_EXECUTOR_PATH.as_posix(),
+            "--goal",
+            "forex-paper-bot",
+            "--continue",
+            "--apply",
+            "--max-repairs",
+            str(max_repairs),
+        ]
+    if action == "validate_all_forex":
         return [
             sys.executable,
             "-m",
@@ -94,6 +121,8 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             "-p",
             "no:cacheprovider",
             FOREX_BOT_TEST_PATH.as_posix(),
+            FOREX_BACKTEST_TEST_PATH.as_posix(),
+            FOREX_LEDGER_TEST_PATH.as_posix(),
         ]
     raise ValueError(f"unsupported action: {action}")
 
@@ -188,16 +217,16 @@ def run_wake_continue(
             report["validators_run"].append(command_result)
 
         if command_result.get("passed", False):
-            if selected_action == "build_forex_scaffold":
+            if selected_action.startswith("build_"):
                 continue
-            report["result"] = "passed"
-            report["next_safe_action"] = "Review local changes. Commit and push still require approval."
+            report["result"] = "DONE_FOR_CURRENT_GOAL"
+            report["next_safe_action"] = "Forex paper bot, backtest, and ledger validated. Commit and push still require approval."
             write_state(state_path, report)
             return report
 
         while report["repair_attempts"] < max_repairs:
             report["repair_attempts"] += 1
-            repair_command = command_for_action("build_forex_scaffold", max_repairs)
+            repair_command = command_for_action("build_forex_ledger", max_repairs)
             repair_result = runner(repair_command, repo_root)
             report["commands_run"].append(repair_result)
             retry_result = runner(command, repo_root)
@@ -245,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
         state_path=state_path,
     )
     print(json.dumps(report, indent=2, sort_keys=False))
-    return 0 if report["result"] in {"passed", "preview_only", "blocked", "max_cycles_reached"} else 1
+    return 0 if report["result"] in {"DONE_FOR_CURRENT_GOAL", "passed", "preview_only", "blocked", "max_cycles_reached"} else 1
 
 
 if __name__ == "__main__":

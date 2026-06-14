@@ -32,6 +32,24 @@ def seed_scaffold(repo_root: Path) -> None:
     test_path.write_text("# test placeholder\n", encoding="utf-8")
 
 
+def seed_backtest(repo_root: Path) -> None:
+    backtest_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_backtest.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_backtest.py"
+    backtest_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    backtest_path.write_text("# backtest placeholder\n", encoding="utf-8")
+    test_path.write_text("# backtest test placeholder\n", encoding="utf-8")
+
+
+def seed_ledger(repo_root: Path) -> None:
+    ledger_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_paper_ledger.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_paper_ledger.py"
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text("# ledger placeholder\n", encoding="utf-8")
+    test_path.write_text("# ledger test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -80,7 +98,7 @@ def test_detects_scaffold_missing_selects_build_action(tmp_path):
     assert report["selected_action"] == "build_forex_scaffold"
 
 
-def test_detects_scaffold_present_selects_validate_action(tmp_path):
+def test_detects_scaffold_present_selects_backtest_action(tmp_path):
     module = load_module()
     seed_executor(tmp_path)
     seed_scaffold(tmp_path)
@@ -94,13 +112,33 @@ def test_detects_scaffold_present_selects_validate_action(tmp_path):
         state_path=state_path,
     )
     assert report["result"] == "preview_only"
-    assert report["selected_action"] == "validate_forex_scaffold"
+    assert report["selected_action"] == "build_forex_backtest"
 
 
-def test_apply_validate_action_runs_validator_and_writes_state(tmp_path):
+def test_detects_scaffold_and_backtest_present_selects_ledger_action(tmp_path):
     module = load_module()
     seed_executor(tmp_path)
     seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    state_path = tmp_path / "state.json"
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=False,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=state_path,
+    )
+    assert report["result"] == "preview_only"
+    assert report["selected_action"] == "build_forex_ledger"
+
+
+def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
     state_path = tmp_path / "state.json"
     report = module.run_wake_continue(
         tmp_path,
@@ -112,8 +150,8 @@ def test_apply_validate_action_runs_validator_and_writes_state(tmp_path):
         command_runner=passing_runner,
     )
     state = json.loads(state_path.read_text(encoding="utf-8"))
-    assert report["result"] == "passed"
-    assert report["selected_action"] == "validate_forex_scaffold"
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
+    assert report["selected_action"] == "validate_all_forex"
     assert len(report["validators_run"]) == 1
     assert state["schema"] == "AIOS_WAKE_CONTINUE.v1"
 
@@ -180,6 +218,8 @@ def test_cli_main_writes_state_in_temp_path(tmp_path, capsys):
     module = load_module()
     seed_executor(tmp_path)
     seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
     state_path = tmp_path / "state.json"
     exit_code = module.main(
         [
@@ -195,5 +235,5 @@ def test_cli_main_writes_state_in_temp_path(tmp_path, capsys):
     assert exit_code == 0
     report = json.loads(captured.out)
     assert report["result"] == "preview_only"
-    assert report["selected_action"] == "validate_forex_scaffold"
+    assert report["selected_action"] == "validate_all_forex"
     assert state_path.exists()
