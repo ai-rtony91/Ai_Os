@@ -283,11 +283,15 @@ def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     assert report["next_build_plan"]["schema"] == "AIOS_NEXT_BUILD_PLAN.v1"
     assert report["next_build_plan"]["route"] == "build_next_paper_component"
     assert report["next_build_plan"]["next_component"] == "forex_risk_controls"
-    assert report["next_safe_action"] == report["next_build_plan"]["next_safe_action"]
+    assert report["bounded_executor_handoff"]["schema"] == "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1"
+    assert report["bounded_executor_handoff"]["handoff_status"] == "ready"
+    assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_risk_controls"
+    assert report["next_safe_action"] == report["bounded_executor_handoff"]["next_safe_action"]
     assert len(report["validators_run"]) == 1
     assert state["schema"] == "AIOS_WAKE_CONTINUE.v1"
     assert state["goal_decision"]["decision"] == "continue_build"
     assert state["next_build_plan"]["next_component"] == "forex_risk_controls"
+    assert state["bounded_executor_handoff"]["handoff_status"] == "ready"
 
 
 def test_validate_all_stop_route_returns_review_required(tmp_path, monkeypatch):
@@ -324,7 +328,48 @@ def test_validate_all_stop_route_returns_review_required(tmp_path, monkeypatch):
     assert report["result"] == "REVIEW_REQUIRED"
     assert report["next_build_plan"]["route"] == "stop"
     assert report["next_build_plan"]["next_component"] == "none"
-    assert report["next_safe_action"] == report["next_build_plan"]["next_safe_action"]
+    assert report["bounded_executor_handoff"]["handoff_status"] == "stopped"
+    assert report["next_safe_action"] == report["bounded_executor_handoff"]["next_safe_action"]
+
+
+def test_validate_all_unsupported_handoff_returns_blocked(tmp_path, monkeypatch):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+
+    def unsupported_plan(_goal_decision: dict[str, object]) -> dict[str, object]:
+        return {
+            "schema": "AIOS_NEXT_BUILD_PLAN.v1",
+            "goal": "forex-paper-bot",
+            "input_decision": "continue_build",
+            "route": "build_next_paper_component",
+            "next_component": "unsupported_component",
+            "next_packet_id": "PKT-AIOS-UNSUPPORTED",
+            "reason_code": "acceptable_report",
+            "plan_reasons": ["acceptable_report"],
+            "next_safe_action": "Unsupported preview.",
+        }
+
+    monkeypatch.setattr(module, "build_next_build_plan", unsupported_plan)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+    )
+    assert report["result"] == "BLOCKED"
+    assert report["bounded_executor_handoff"]["handoff_status"] == "blocked"
+    assert report["bounded_executor_handoff"]["reason_code"] == "unsupported_component"
+    assert report["next_safe_action"] == report["bounded_executor_handoff"]["next_safe_action"]
 
 
 def test_max_cycles_respected(tmp_path):
