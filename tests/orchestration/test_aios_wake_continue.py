@@ -68,6 +68,15 @@ def seed_data_import(repo_root: Path) -> None:
     test_path.write_text("# data import test placeholder\n", encoding="utf-8")
 
 
+def seed_report(repo_root: Path) -> None:
+    report_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_report.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_report.py"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text("# report placeholder\n", encoding="utf-8")
+    test_path.write_text("# report test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -190,6 +199,27 @@ def test_detects_prior_forex_components_present_selects_data_import_action(tmp_p
     assert report["selected_action"] == "build_forex_data_import"
 
 
+def test_detects_data_import_present_selects_report_action(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    state_path = tmp_path / "state.json"
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=False,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=state_path,
+    )
+    assert report["result"] == "preview_only"
+    assert report["selected_action"] == "build_forex_report"
+
+
 def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     module = load_module()
     seed_executor(tmp_path)
@@ -198,6 +228,7 @@ def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     seed_ledger(tmp_path)
     seed_strategy(tmp_path)
     seed_data_import(tmp_path)
+    seed_report(tmp_path)
     state_path = tmp_path / "state.json"
     report = module.run_wake_continue(
         tmp_path,
@@ -281,6 +312,7 @@ def test_cli_main_writes_state_in_temp_path(tmp_path, capsys):
     seed_ledger(tmp_path)
     seed_strategy(tmp_path)
     seed_data_import(tmp_path)
+    seed_report(tmp_path)
     state_path = tmp_path / "state.json"
     exit_code = module.main(
         [

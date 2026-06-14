@@ -26,6 +26,9 @@ FOREX_STRATEGY_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_STRATEGY_RULES.md"
 FOREX_DATA_IMPORT_PATH = Path("apps/trading_lab/trading_lab/forex_data_import.py")
 FOREX_DATA_IMPORT_TEST_PATH = Path("tests/trading_lab/test_forex_data_import.py")
 FOREX_DATA_IMPORT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_DATA_IMPORT.md")
+FOREX_REPORT_PATH = Path("apps/trading_lab/trading_lab/forex_report.py")
+FOREX_REPORT_TEST_PATH = Path("tests/trading_lab/test_forex_report.py")
+FOREX_REPORT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_REPORT.md")
 FOREX_SCAFFOLD_PATHS = (
     FOREX_BOT_PATH,
     FOREX_BOT_TEST_PATH,
@@ -50,6 +53,11 @@ FOREX_DATA_IMPORT_PATHS = (
     FOREX_DATA_IMPORT_PATH,
     FOREX_DATA_IMPORT_TEST_PATH,
     FOREX_DATA_IMPORT_DOC_PATH,
+)
+FOREX_REPORT_PATHS = (
+    FOREX_REPORT_PATH,
+    FOREX_REPORT_TEST_PATH,
+    FOREX_REPORT_DOC_PATH,
 )
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -1256,6 +1264,244 @@ real order routing, or webhook execution.
 """
 
 
+def build_forex_report_source() -> str:
+    return '''from __future__ import annotations
+
+from typing import Any
+
+
+PAPER_REPORT_SAFETY = {
+    "paper_only": True,
+    "research_only": True,
+    "network_access": False,
+    "file_writes": False,
+    "execution_allowed": False,
+    "broker_execution": False,
+    "credential_use": False,
+    "live_trading": False,
+    "real_orders": False,
+    "real_webhooks": False,
+}
+
+BLOCKED_SCOPE_FIELDS = {
+    "api_key",
+    "broker_order",
+    "credentials",
+    "file_output",
+    "live_execution",
+    "network",
+    "network_access",
+    "output_path",
+    "real_order",
+    "webhook_url",
+}
+
+
+def blocked_report(reason: str) -> dict[str, Any]:
+    return {
+        "allowed": False,
+        "report_type": "blocked",
+        "blocked_reason": reason,
+        "risk_flags": ["blocked_scope"],
+        **PAPER_REPORT_SAFETY,
+    }
+
+
+def _blocked_scope_reason(*payloads: dict[str, Any]) -> str | None:
+    for payload in payloads:
+        for field in sorted(BLOCKED_SCOPE_FIELDS):
+            if payload.get(field):
+                return f"{field}_blocked"
+    return None
+
+
+def _safe_number(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _risk_flags(trade_count: int, win_rate: float, total_pnl: float, backtest_summary: dict[str, Any]) -> list[str]:
+    flags: list[str] = []
+    if trade_count == 0:
+        flags.append("no_trades")
+    if win_rate < 50.0 and trade_count > 0:
+        flags.append("win_rate_below_50")
+    if total_pnl < 0:
+        flags.append("negative_total_pnl")
+    if int(backtest_summary.get("trades_blocked", 0)) > 0:
+        flags.append("blocked_backtest_trades_present")
+    return flags
+
+
+def build_report(
+    backtest_summary: dict[str, Any],
+    ledger_summary: dict[str, Any],
+    strategy_metadata: dict[str, Any],
+    *,
+    live_execution: bool = False,
+    broker_order: bool = False,
+    credentials: Any = None,
+    api_key: Any = None,
+    real_order: bool = False,
+    webhook_url: str | None = None,
+    network: bool = False,
+    network_access: bool = False,
+    output_path: str | None = None,
+    file_output: bool = False,
+) -> dict[str, Any]:
+    unsafe_payload = {
+        "live_execution": live_execution,
+        "broker_order": broker_order,
+        "credentials": credentials,
+        "api_key": api_key,
+        "real_order": real_order,
+        "webhook_url": webhook_url,
+        "network": network,
+        "network_access": network_access,
+        "output_path": output_path,
+        "file_output": file_output,
+    }
+    blocked_reason = _blocked_scope_reason(unsafe_payload, backtest_summary, ledger_summary, strategy_metadata)
+    if blocked_reason:
+        return blocked_report(blocked_reason)
+
+    trade_count = int(ledger_summary.get("trade_count", backtest_summary.get("trades_allowed", 0)))
+    winning_trades = int(ledger_summary.get("winning_trades", 0))
+    win_rate = round((winning_trades / trade_count) * 100.0, 2) if trade_count else 0.0
+    total_pnl = round(_safe_number(ledger_summary.get("total_pnl", 0.0)), 2)
+    flags = _risk_flags(trade_count, win_rate, total_pnl, backtest_summary)
+
+    return {
+        "allowed": True,
+        "report_type": "paper_scorecard",
+        "trade_count": trade_count,
+        "win_rate": win_rate,
+        "total_pnl": total_pnl,
+        "risk_flags": flags,
+        "strategy": {
+            "name": strategy_metadata.get("name", "forex_strategy_rules"),
+            "version": strategy_metadata.get("version", "paper-v1"),
+            "signal": strategy_metadata.get("signal", "hold"),
+        },
+        "backtest": {
+            "trades_considered": int(backtest_summary.get("trades_considered", 0)),
+            "trades_allowed": int(backtest_summary.get("trades_allowed", 0)),
+            "trades_blocked": int(backtest_summary.get("trades_blocked", 0)),
+            "ending_balance": _safe_number(backtest_summary.get("ending_balance", 0.0)),
+        },
+        **PAPER_REPORT_SAFETY,
+    }
+'''
+
+
+def build_forex_report_test_source() -> str:
+    return '''from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = REPO_ROOT / "apps" / "trading_lab" / "trading_lab" / "forex_report.py"
+
+
+def load_report_module():
+    spec = importlib.util.spec_from_file_location("forex_report", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def sample_backtest():
+    return {
+        "trades_considered": 3,
+        "trades_allowed": 2,
+        "trades_blocked": 1,
+        "ending_balance": 10049.5,
+        "paper_only": True,
+    }
+
+
+def sample_ledger():
+    return {
+        "trade_count": 3,
+        "winning_trades": 2,
+        "losing_trades": 1,
+        "total_pnl": -100.0,
+        "paper_only": True,
+    }
+
+
+def sample_strategy():
+    return {"name": "ma_momentum", "version": "paper-v1", "signal": "buy"}
+
+
+def test_module_imports():
+    report = load_report_module()
+    assert callable(report.build_report)
+
+
+def test_valid_report_generated():
+    report = load_report_module()
+    scorecard = report.build_report(sample_backtest(), sample_ledger(), sample_strategy())
+    assert scorecard["allowed"] is True
+    assert scorecard["report_type"] == "paper_scorecard"
+    assert scorecard["paper_only"] is True
+    assert scorecard["network_access"] is False
+    assert scorecard["file_writes"] is False
+
+
+def test_win_rate_calculated():
+    report = load_report_module()
+    scorecard = report.build_report(sample_backtest(), sample_ledger(), sample_strategy())
+    assert scorecard["trade_count"] == 3
+    assert scorecard["win_rate"] == 66.67
+    assert scorecard["total_pnl"] == -100.0
+
+
+def test_risk_flags_present():
+    report = load_report_module()
+    scorecard = report.build_report(sample_backtest(), sample_ledger(), sample_strategy())
+    assert "negative_total_pnl" in scorecard["risk_flags"]
+    assert "blocked_backtest_trades_present" in scorecard["risk_flags"]
+
+
+def test_broker_live_credential_real_order_webhook_and_network_blocked():
+    report = load_report_module()
+    assert report.build_report(sample_backtest(), sample_ledger(), sample_strategy(), broker_order=True)["blocked_reason"] == "broker_order_blocked"
+    assert report.build_report(sample_backtest(), sample_ledger(), sample_strategy(), live_execution=True)["blocked_reason"] == "live_execution_blocked"
+    assert report.build_report(sample_backtest(), sample_ledger(), sample_strategy(), credentials={"token": "x"})["blocked_reason"] == "credentials_blocked"
+    assert report.build_report(sample_backtest(), sample_ledger(), sample_strategy(), real_order=True)["blocked_reason"] == "real_order_blocked"
+    assert report.build_report(sample_backtest(), sample_ledger(), sample_strategy(), webhook_url="https://example.invalid")["blocked_reason"] == "webhook_url_blocked"
+    assert report.build_report(sample_backtest(), sample_ledger(), sample_strategy(), network=True)["blocked_reason"] == "network_blocked"
+
+
+def test_no_file_writes():
+    source = MODULE_PATH.read_text(encoding="utf-8").lower()
+    for forbidden in ["open(", "write_text", "write_bytes", "with open", "pathlib"]:
+        assert forbidden not in source
+'''
+
+
+def build_forex_report_doc() -> str:
+    return """# AIOS Forex Report
+
+This generated component is the sixth `forex-paper-bot` build step. It creates
+a deterministic paper/research-only scorecard from backtest summary, ledger
+summary, and strategy metadata.
+
+The scorecard includes `trade_count`, `win_rate`, `total_pnl`, `risk_flags`, and
+`paper_only: true`.
+
+The component blocks live execution, broker orders, credentials, API keys, real
+orders, webhooks, network fields, and file-output fields. It performs no file
+writes and no network access.
+"""
+
+
 def forex_backtest_files() -> dict[Path, str]:
     return {
         FOREX_BACKTEST_PATH: build_forex_backtest_source(),
@@ -1285,6 +1531,14 @@ def forex_data_import_files() -> dict[Path, str]:
         FOREX_DATA_IMPORT_PATH: build_forex_data_import_source(),
         FOREX_DATA_IMPORT_TEST_PATH: build_forex_data_import_test_source(),
         FOREX_DATA_IMPORT_DOC_PATH: build_forex_data_import_doc(),
+    }
+
+
+def forex_report_files() -> dict[Path, str]:
+    return {
+        FOREX_REPORT_PATH: build_forex_report_source(),
+        FOREX_REPORT_TEST_PATH: build_forex_report_test_source(),
+        FOREX_REPORT_DOC_PATH: build_forex_report_doc(),
     }
 
 
@@ -1335,6 +1589,15 @@ def write_forex_strategy(repo_root: Path) -> list[str]:
 def write_forex_data_import(repo_root: Path) -> list[str]:
     files_written: list[str] = []
     for relative_path, content in forex_data_import_files().items():
+        target = repo_root / relative_path
+        if write_text_if_changed(target, content):
+            files_written.append(relative_path.as_posix())
+    return files_written
+
+
+def write_forex_report(repo_root: Path) -> list[str]:
+    files_written: list[str] = []
+    for relative_path, content in forex_report_files().items():
         target = repo_root / relative_path
         if write_text_if_changed(target, content):
             files_written.append(relative_path.as_posix())
@@ -1471,6 +1734,32 @@ def run_forex_data_import_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_forex_report_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_REPORT_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_report_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
 def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -1498,6 +1787,8 @@ def select_forex_continue_action(repo_root: Path) -> str:
         return "build_strategy"
     if not (repo_root / FOREX_DATA_IMPORT_PATH).exists():
         return "build_data_import"
+    if not (repo_root / FOREX_REPORT_PATH).exists():
+        return "build_report"
     return "done"
 
 
@@ -1512,6 +1803,8 @@ def _apply_writer_for_action(repo_root: Path, action: str) -> tuple[list[str], V
         return write_forex_strategy(repo_root), run_forex_strategy_validator
     if action == "build_data_import":
         return write_forex_data_import(repo_root), run_forex_data_import_validator
+    if action == "build_report":
+        return write_forex_report(repo_root), run_forex_report_validator
     return [], None
 
 
@@ -1526,6 +1819,8 @@ def _repair_for_action(repo_root: Path, action: str) -> list[str]:
         return write_forex_strategy(repo_root)
     if action == "build_data_import":
         return write_forex_data_import(repo_root)
+    if action == "build_report":
+        return write_forex_report(repo_root)
     return []
 
 
@@ -1565,7 +1860,7 @@ def execute_goal(
     action = report["continue_action"]
     if action == "done":
         report["result"] = "DONE"
-        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, strategy rules, and data import already exist. Review validators before the next build step."
+        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, strategy rules, data import, and report already exist. Review validators before the next build step."
         return report
 
     files_written, default_runner = _apply_writer_for_action(repo_root, action)
