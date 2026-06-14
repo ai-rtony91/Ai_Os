@@ -72,12 +72,70 @@ function Get-CampaignNoReadyStageDiscoveryState {
     }
 }
 
+function Get-FullAutonomyWorkerPostureBridgeState {
+    param([string]$RepoRoot)
+
+    $bridgeScript = Join-Path $RepoRoot "automation/orchestration/self_development/Get-AiOsFullAutonomyWorkerPostureBridge.DRY_RUN.ps1"
+    $fallback = [pscustomobject]@{
+        available = $false
+        mode = "DRY_RUN_READ_ONLY"
+        requested_level = "UNKNOWN"
+        resolved_or_activation_status = "REVIEW_REQUIRED"
+        operating_profile = "24H_SUPERVISED"
+        worker_posture = "BLOCKED_BY_VALIDATION"
+        worker_launch_allowed = $false
+        human_wake_policy = "Review full-autonomy posture bridge availability before relying on worker guidance."
+        next_safe_action = "Review full-autonomy worker posture bridge failure before autonomy posture escalation."
+        starts_runtime = $false
+        launches_workers = $false
+        slow_nested_workers_started = $false
+        source = "automation/orchestration/self_development/Get-AiOsFullAutonomyWorkerPostureBridge.DRY_RUN.ps1"
+    }
+
+    if (-not (Test-Path -LiteralPath $bridgeScript -PathType Leaf)) {
+        return $fallback
+    }
+
+    try {
+        $branch = (& git -C $RepoRoot branch --show-current 2>$null).Trim()
+        if ([string]::IsNullOrWhiteSpace($branch)) {
+            $branch = "main"
+        }
+        $rawOutput = powershell -NoProfile -ExecutionPolicy Bypass -File $bridgeScript -RepoRoot $RepoRoot -ExpectedBranch $branch -OutputJson -RequestedAutonomyLevel "LEVEL_4_CONDITIONAL_FULL_AUTONOMY" -OperatingProfile "24H_SUPERVISED" 2>$null
+        $rawText = ($rawOutput | Out-String).Trim()
+        if ([string]::IsNullOrWhiteSpace($rawText)) {
+            return $fallback
+        }
+
+        $data = $rawText | ConvertFrom-Json -ErrorAction Stop
+        return [pscustomobject]@{
+            available = $true
+            mode = [string]$data.mode
+            requested_level = [string]$data.activation_summary.requested_autonomy_level
+            resolved_or_activation_status = [string]$data.activation_summary.activation_status
+            operating_profile = [string]$data.activation_summary.operating_profile
+            worker_posture = [string]$data.worker_posture
+            worker_launch_allowed = [bool]$data.worker_launch_allowed
+            human_wake_policy = [string]$data.human_wake_policy
+            next_safe_action = [string]$data.next_safe_action
+            starts_runtime = [bool]$data.safety.starts_runtime
+            launches_workers = [bool]$data.safety.launches_workers
+            slow_nested_workers_started = $false
+            source = "automation/orchestration/self_development/Get-AiOsFullAutonomyWorkerPostureBridge.DRY_RUN.ps1"
+        }
+    }
+    catch {
+        return $fallback
+    }
+}
+
 $health = powershell -ExecutionPolicy Bypass -File automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $next = powershell -ExecutionPolicy Bypass -File automation/orchestration/next_step/Resolve-AiOsNextStep.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $blocker = powershell -ExecutionPolicy Bypass -File automation/orchestration/blockers/Resolve-AiOsRuntimeBlocker.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $approval = powershell -ExecutionPolicy Bypass -File automation/orchestration/approval_detection/Find-AiOsApprovalMatch.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
 $gitStatus = @(git status --short)
 $repoRoot = (Get-Location).Path
+$fullAutonomyState = Get-FullAutonomyWorkerPostureBridgeState -RepoRoot $repoRoot
 $relayOperatorState = Get-RelayOperatorState -RepoRoot $repoRoot
 $campaignNextTaskState = Get-CampaignNextTaskState -RepoRoot $repoRoot
 $campaignOverallReadiness = if ($campaignNextTaskState -and $campaignNextTaskState.PSObject.Properties.Name -contains "overall_readiness") {
@@ -276,6 +334,7 @@ $result = [pscustomobject]@{
     packet_status = $next.status
     approval_matches = $approval.matches_found
     blocker = $blocker.blocker
+    full_autonomy_state = $fullAutonomyState
     level5_commit_package_preview = [pscustomobject]@{
         available = [bool]($null -ne $commitPackagePreview)
         status = if ($commitPackagePreview -and $commitPackagePreview.orchestration_result_contract.status) { [string]$commitPackagePreview.orchestration_result_contract.status } elseif ($gitStatus.Count -gt 0) { "REVIEW" } else { "NOT_NEEDED" }
@@ -346,6 +405,7 @@ $result | Add-Member -NotePropertyName orchestration_result_contract -NoteProper
         no_ready_stage_idle_allowed = $noReadyStageIdleAllowed
         no_ready_stage_planning_required = $noReadyStagePlanningRequired
         no_ready_stage_registry_inconsistency_detected = $noReadyStageRegistryInconsistencyDetected
+        full_autonomy_state = $fullAutonomyState
     }
     generated_at = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
 })
@@ -365,6 +425,15 @@ Write-Host "reason: $($result.reason)"
 Write-Host "routine_review_continuation_allowed: $($result.routine_review_continuation_allowed)"
 Write-Host "level5_commit_package_preview: available=$($result.level5_commit_package_preview.available); status=$($result.level5_commit_package_preview.status)"
 Write-Host "level5_stop: $($result.level5_commit_package_preview.stop_before_staging)"
+Write-Host ""
+Write-Host "FULL AUTONOMY STATE"
+Write-Host "requested_level: $($result.full_autonomy_state.requested_level)"
+Write-Host "resolved_or_activation_status: $($result.full_autonomy_state.resolved_or_activation_status)"
+Write-Host "operating_profile: $($result.full_autonomy_state.operating_profile)"
+Write-Host "worker_posture: $($result.full_autonomy_state.worker_posture)"
+Write-Host "worker_launch_allowed: $($result.full_autonomy_state.worker_launch_allowed)"
+Write-Host "human_wake_policy: $($result.full_autonomy_state.human_wake_policy)"
+Write-Host "next_safe_action: $($result.full_autonomy_state.next_safe_action)"
 Write-Host ""
 Write-Host "RECOMMENDED COMMAND:"
 Write-Host $result.recommended_command
