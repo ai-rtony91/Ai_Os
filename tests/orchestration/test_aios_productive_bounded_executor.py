@@ -80,6 +80,17 @@ def passing_portfolio_validator(_repo_root: Path) -> dict[str, object]:
     }
 
 
+def passing_session_validator(_repo_root: Path) -> dict[str, object]:
+    return {
+        "name": "fake_session_validator",
+        "command": "python -m pytest -p no:cacheprovider tests/trading_lab/test_forex_paper_session_controller.py",
+        "returncode": 0,
+        "passed": True,
+        "stdout": "",
+        "stderr": "",
+    }
+
+
 def failing_validator(_repo_root: Path) -> dict[str, object]:
     return {
         "name": "fake_validator",
@@ -165,6 +176,24 @@ def portfolio_handoff() -> dict[str, object]:
             "apps/trading_lab/trading_lab/forex_portfolio_state.py",
             "tests/trading_lab/test_forex_portfolio_state.py",
             "docs/orchestration/AIOS_FOREX_PORTFOLIO_STATE.md",
+            "automation/orchestration/aios_productive_bounded_executor.py",
+            "tests/orchestration/test_aios_productive_bounded_executor.py",
+            "automation/orchestration/aios_wake_continue.py",
+            "tests/orchestration/test_aios_wake_continue.py",
+        ],
+    }
+
+
+def session_controller_handoff() -> dict[str, object]:
+    return {
+        "schema": "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1",
+        "goal": "forex-paper-bot",
+        "handoff_status": "ready",
+        "allowed_action": "build_forex_paper_session_controller",
+        "allowed_paths": [
+            "apps/trading_lab/trading_lab/forex_paper_session_controller.py",
+            "tests/trading_lab/test_forex_paper_session_controller.py",
+            "docs/orchestration/AIOS_FOREX_PAPER_SESSION_CONTROLLER.md",
             "automation/orchestration/aios_productive_bounded_executor.py",
             "tests/orchestration/test_aios_productive_bounded_executor.py",
             "automation/orchestration/aios_wake_continue.py",
@@ -262,6 +291,19 @@ def test_dry_run_for_portfolio_state_writes_no_files(tmp_path):
     assert not (tmp_path / "apps" / "trading_lab" / "trading_lab" / "forex_portfolio_state.py").exists()
 
 
+def test_dry_run_for_session_controller_writes_no_files(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        goal="forex-paper-bot",
+        action="build_forex_paper_session_controller",
+    )
+    assert report["result"] == "preview_only"
+    assert report["mode"] == "DRY_RUN"
+    assert report["files_written"] == []
+    assert not (tmp_path / "apps" / "trading_lab" / "trading_lab" / "forex_paper_session_controller.py").exists()
+
+
 def test_apply_writes_only_allowlisted_risk_control_files(tmp_path):
     module = load_module()
     report = module.execute_productive_bounded_action(
@@ -330,6 +372,23 @@ def test_apply_writes_only_allowlisted_portfolio_state_files(tmp_path):
     assert not (tmp_path / "automation" / "orchestration" / "aios_productive_bounded_executor.py").exists()
 
 
+def test_apply_writes_only_allowlisted_session_controller_files(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        goal="forex-paper-bot",
+        action="build_forex_paper_session_controller",
+        apply=True,
+        max_repairs=1,
+        validator_runner=passing_session_validator,
+    )
+    assert report["result"] == "passed"
+    assert sorted(report["files_written"]) == sorted(module.SESSION_CONTROLLER_WRITE_ALLOWED_PATHS)
+    for relative_path in module.SESSION_CONTROLLER_WRITE_ALLOWED_PATHS:
+        assert (tmp_path / relative_path).exists()
+    assert not (tmp_path / "automation" / "orchestration" / "aios_productive_bounded_executor.py").exists()
+
+
 def test_accepts_bounded_handoff_fixture(tmp_path):
     module = load_module()
     report = module.execute_productive_bounded_action(
@@ -379,6 +438,19 @@ def test_accepts_portfolio_state_bounded_handoff_fixture(tmp_path):
     )
     assert report["result"] == "passed"
     assert report["action"] == "build_forex_portfolio_state"
+    assert "automation/orchestration/aios_productive_bounded_executor.py" in report["allowed_paths"]
+
+
+def test_accepts_session_controller_bounded_handoff_fixture(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        handoff=session_controller_handoff(),
+        apply=True,
+        validator_runner=passing_session_validator,
+    )
+    assert report["result"] == "passed"
+    assert report["action"] == "build_forex_paper_session_controller"
     assert "automation/orchestration/aios_productive_bounded_executor.py" in report["allowed_paths"]
 
 
@@ -460,6 +532,19 @@ def test_reports_portfolio_state_validator_pass(tmp_path):
     )
     assert report["validators_run"][0]["passed"] is True
     assert report["validators_run"][0]["name"] == "fake_portfolio_validator"
+
+
+def test_reports_session_controller_validator_pass(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        goal="forex-paper-bot",
+        action="build_forex_paper_session_controller",
+        apply=True,
+        validator_runner=passing_session_validator,
+    )
+    assert report["validators_run"][0]["passed"] is True
+    assert report["validators_run"][0]["name"] == "fake_session_validator"
 
 
 def test_reports_no_protected_actions_or_runtime_activation(tmp_path):
@@ -581,8 +666,35 @@ def test_wake_continue_recognizes_portfolio_state_after_created(tmp_path):
         command_runner=passing_command_runner,
     )
     assert report["selected_action"] == "validate_all_forex_with_portfolio_state"
-    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
     assert "tests/trading_lab/test_forex_portfolio_state.py" in report["validators_run"][0]["command"]
+    assert report["next_build_plan"]["next_component"] == "forex_paper_session_controller"
+    assert report["bounded_executor_handoff"]["handoff_status"] == "ready"
+    assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_paper_session_controller"
+
+
+def test_wake_continue_recognizes_session_controller_after_created(tmp_path):
+    product = load_module()
+    wake = load_wake_module()
+    seed_executor(tmp_path)
+    seed_existing_forex_components(tmp_path)
+    product.write_risk_controls_files(tmp_path)
+    product.write_execution_simulator_files(tmp_path)
+    product.write_execution_ledger_integration_files(tmp_path)
+    product.write_portfolio_state_files(tmp_path)
+    product.write_session_controller_files(tmp_path)
+    report = wake.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_command_runner,
+    )
+    assert report["selected_action"] == "validate_all_forex_with_session_controller"
+    assert report["result"] == "REVIEW_REQUIRED"
+    assert "tests/trading_lab/test_forex_paper_session_controller.py" in report["validators_run"][0]["command"]
     assert report["bounded_executor_handoff"]["handoff_status"] == "stopped"
 
 
