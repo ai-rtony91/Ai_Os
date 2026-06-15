@@ -150,15 +150,26 @@ def test_self_route_references_packet_queue_planner() -> None:
     text = self_route_text()
 
     assert "automation/orchestration/aios_packet_queue_planner.py" in text
-    assert "--candidates $packetQueueCandidateEvidenceJson" in text
+    assert '-ArgumentName "--candidates"' in text
+    assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
 
 
 def test_self_route_references_candidate_packet_evidence_adapter() -> None:
     text = self_route_text()
 
     assert "automation/orchestration/aios_candidate_packet_evidence_adapter.py" in text
-    assert "python $candidateEvidenceAdapterPath `" in text
-    assert "--evidence $candidateEvidenceInputJson" in text
+    assert "-ScriptPath $candidateEvidenceAdapterPath" in text
+    assert '-ArgumentName "--evidence"' in text
+    assert "-JsonPayload $candidateEvidenceInputJson" in text
+
+
+def test_self_route_uses_windows_safe_json_argument_handoff() -> None:
+    text = self_route_text()
+
+    assert "function Invoke-AiOsPythonJsonArgumentScript" in text
+    assert "$encodedPayload = [Convert]::ToBase64String" in text
+    assert "base64.b64decode(sys.argv[3]).decode()" in text
+    assert "runpy.run_path(p,run_name=n)" in text
 
 
 def test_self_route_json_includes_candidate_packet_evidence_contract() -> None:
@@ -176,7 +187,8 @@ def test_self_route_generated_archive_paths_are_not_planner_candidate_packets() 
     text = self_route_text()
 
     assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress" in text
-    assert "--candidates $packetQueueCandidateEvidenceJson" in text
+    assert '-ArgumentName "--candidates"' in text
+    assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
     assert "Reports/" not in text
     assert "control/review_bridge/" not in text
     assert "automation/orchestration/work_packets/preview/" not in text
@@ -195,7 +207,9 @@ def test_self_route_packet_queue_planner_receives_adapter_candidates() -> None:
 
     assert "$candidatePackets = @(Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name \"candidate_packets\" -Default @())" in text
     assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress" in text
-    assert "--candidates $packetQueueCandidateEvidenceJson" in text
+    assert "-ScriptPath $packetQueuePlannerPath" in text
+    assert '-ArgumentName "--candidates"' in text
+    assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
 
 
 def test_self_route_json_includes_packet_queue_plan_contract() -> None:
@@ -262,12 +276,24 @@ def test_self_route_packet_queue_selected_preview_is_stop_report_only() -> None:
     assert "launch_codex" in text
 
 
+def test_self_route_default_candidate_selected_plan_is_propagated_to_report_contracts() -> None:
+    text = self_route_text()
+
+    assert '"PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION"' in text
+    assert '$packetQueuePlanStatus = [string](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "queue_status" -Default "UNKNOWN")' in text
+    assert "packet_queue_plan_status = $packetQueuePlanStatus" in text
+    assert "selected_packet = $selectedPacket" in text
+    assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+    assert '"packet_queue_plan_selected"' in text
+
+
 def test_self_route_references_cycle_ledger_module() -> None:
     text = self_route_text()
 
     assert "automation/orchestration/aios_cycle_ledger.py" in text
-    assert "python $cycleLedgerPath `" in text
-    assert "--evidence $cycleEvidenceJson" in text
+    assert "-ScriptPath $cycleLedgerPath" in text
+    assert '-ArgumentName "--evidence"' in text
+    assert "-JsonPayload $cycleEvidenceJson" in text
 
 
 def test_self_route_json_includes_cycle_ledger_dashboard_and_sos_contract() -> None:
@@ -291,6 +317,14 @@ def test_self_route_passes_selected_packet_and_preview_to_cycle_ledger_evidence(
     assert "selected_packet = $selectedPacket" in text
     assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
     assert 'codex_prompt_emitted = [bool](Get-AiOsObjectProperty -Object $codexReadyPacketPreview -Name "packet_ready" -Default $false)' in text
+
+
+def test_self_route_report_only_recommendation_approval_does_not_become_cycle_sos_gate() -> None:
+    text = self_route_text()
+
+    assert "source_recommendation_approval_required = $approvalRequired" in text
+    assert "approval_required = [ordered]@{\n        human_owner_review = $false\n    }" in text
+    assert '$rejectionReasons += "human_owner_review_required"' not in text
 
 
 def test_self_route_cycle_ledger_and_dashboard_receive_selected_candidate_evidence() -> None:

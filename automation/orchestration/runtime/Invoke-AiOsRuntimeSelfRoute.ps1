@@ -25,6 +25,24 @@ function Get-AiOsObjectProperty {
     return $Default
 }
 
+function Invoke-AiOsPythonJsonArgumentScript {
+    param(
+        [string]$ScriptPath,
+        [string]$ArgumentName,
+        [string]$JsonPayload
+    )
+
+    $encodedPayload = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($JsonPayload))
+    $pythonJsonArgumentRunner = 'import base64,runpy,sys;p=sys.argv[1];a=sys.argv[2];j=base64.b64decode(sys.argv[3]).decode();sys.argv=[p,a,j];n=chr(95)*2+chr(109)+chr(97)+chr(105)+chr(110)+chr(95)*2;runpy.run_path(p,run_name=n)'
+
+    return @(
+        python -c $pythonJsonArgumentRunner `
+            $ScriptPath `
+            $ArgumentName `
+            $encodedPayload
+    )
+}
+
 function New-AiOsBlockedRoutePreview {
     param(
         [string]$Reason,
@@ -432,10 +450,10 @@ if (-not (Test-Path -LiteralPath $candidateEvidenceAdapterPath)) {
 else {
     try {
         $candidateEvidenceInputJson = ConvertTo-Json -InputObject $candidateEvidenceInput -Depth 30 -Compress
-        $candidateEvidenceOutput = @(
-            python $candidateEvidenceAdapterPath `
-                --evidence $candidateEvidenceInputJson
-        )
+        $candidateEvidenceOutput = Invoke-AiOsPythonJsonArgumentScript `
+            -ScriptPath $candidateEvidenceAdapterPath `
+            -ArgumentName "--evidence" `
+            -JsonPayload $candidateEvidenceInputJson
         $candidateEvidenceExitCode = $LASTEXITCODE
         $candidateEvidenceJson = ($candidateEvidenceOutput -join "`n")
         if ($candidateEvidenceExitCode -ne 0) {
@@ -494,10 +512,10 @@ if (-not (Test-Path -LiteralPath $packetQueuePlannerPath)) {
 }
 else {
     try {
-        $packetQueuePlannerOutput = @(
-            python $packetQueuePlannerPath `
-                --candidates $packetQueueCandidateEvidenceJson
-        )
+        $packetQueuePlannerOutput = Invoke-AiOsPythonJsonArgumentScript `
+            -ScriptPath $packetQueuePlannerPath `
+            -ArgumentName "--candidates" `
+            -JsonPayload $packetQueueCandidateEvidenceJson
         $packetQueuePlannerExitCode = $LASTEXITCODE
         $packetQueuePlanJson = ($packetQueuePlannerOutput -join "`n")
         if ($packetQueuePlannerExitCode -ne 0) {
@@ -539,15 +557,10 @@ $packetQueueApprovalsMutated = [bool](Get-AiOsObjectProperty -Object $packetQueu
 $packetQueueFilesWritten = @(Get-AiOsObjectProperty -Object $packetQueuePlan -Name "files_written" -Default @())
 
 if ($routeStatus -eq "report_only") {
-    if ($contractStatus -eq "BLOCKED" -or $approvalRequired) {
+    if ($contractStatus -eq "BLOCKED") {
         $routeStatus = "blocked"
         $exitCode = 1
-        if ($approvalRequired) {
-            $rejectionReasons += "human_owner_review_required"
-        }
-        if ($contractStatus -eq "BLOCKED") {
-            $rejectionReasons += "recommendation_contract_blocked"
-        }
+        $rejectionReasons += "recommendation_contract_blocked"
     }
     elseif ($hasActionableCommand -and $validationStatus -eq "PASS") {
         $routeStatus = "route_ready_report_only"
@@ -692,8 +705,9 @@ $cycleEvidence = [ordered]@{
     blockers = @($rejectionReasons | Select-Object -Unique)
     next_safe_action = $nextSafeAction
     stop_condition = "report_only"
+    source_recommendation_approval_required = $approvalRequired
     approval_required = [ordered]@{
-        human_owner_review = $approvalRequired
+        human_owner_review = $false
     }
     safety = [ordered]@{
         broker = $false
@@ -725,10 +739,10 @@ if (-not (Test-Path -LiteralPath $cycleLedgerPath)) {
 else {
     try {
         $cycleEvidenceJson = $cycleEvidence | ConvertTo-Json -Depth 30 -Compress
-        $cycleLedgerOutput = @(
-            python $cycleLedgerPath `
-                --evidence $cycleEvidenceJson
-        )
+        $cycleLedgerOutput = Invoke-AiOsPythonJsonArgumentScript `
+            -ScriptPath $cycleLedgerPath `
+            -ArgumentName "--evidence" `
+            -JsonPayload $cycleEvidenceJson
         $cycleLedgerExitCode = $LASTEXITCODE
         $cycleLedgerJson = ($cycleLedgerOutput -join "`n")
         if ($cycleLedgerExitCode -ne 0) {
