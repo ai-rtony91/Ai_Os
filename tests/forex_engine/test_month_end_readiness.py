@@ -7,6 +7,7 @@ from automation.forex_engine import evidence_bundle_runner
 from automation.forex_engine import evidence_aggregator
 from automation.forex_engine import forex_dashboard_contract
 from automation.forex_engine import month_end_readiness
+from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import paper_forward_simulator
 from automation.forex_engine import risk_contract
 from automation.forex_engine import schema_contracts as schemas
@@ -87,6 +88,20 @@ def test_month_end_readiness_accepts_local_evidence_bundle_runner_output() -> No
     assert review["live_trade_ready"] is False
     assert review["protected_gate_required"] is True
     assert "broker integration is not approved" in review["live_trade_blockers"]
+
+
+def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> None:
+    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    review = month_end_readiness.build_month_end_readiness_v2_review(bundle)
+
+    assert review["classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert review["paper_forward_ready"] in {True, False}
+    assert review["v2_evidence_ready"] in {True, False}
+    assert review["live_trade_ready"] is False
+    assert review["protected_gate_required"] is True
+    assert review["evidence_summary"]["fixture_count"] == 9
+    assert "broker integration is not approved" in review["live_trade_blockers"]
+    assert "live readiness requires separate future approval" in review["next_safe_action"]
 
 
 def test_module_has_no_network_broker_env_or_file_write_behavior() -> None:

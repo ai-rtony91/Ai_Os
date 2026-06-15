@@ -338,12 +338,15 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             milestone_value="medium",
             risk_level="low",
             required_files=[
+                "automation/forex_engine/paper_forward_evidence_v2.py",
+                "automation/forex_engine/run_paper_forward_evidence_v2_demo.py",
                 "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE_V2.md",
                 "tests/forex_engine/test_paper_forward_evidence_v2.py",
             ],
             purpose=(
-                "Broaden local paper-forward evidence with more out-of-sample fixtures, longer "
-                "deterministic windows, and stronger blocker reporting before any readiness threshold promotion."
+                "Broaden local paper-forward evidence with more out-of-sample fixtures, multi-fixture "
+                "paper-forward comparison, regime consistency scoring, and stronger blocker reporting "
+                "before any readiness threshold promotion."
             ),
             validators=[
                 "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_evidence_v2.py -q",

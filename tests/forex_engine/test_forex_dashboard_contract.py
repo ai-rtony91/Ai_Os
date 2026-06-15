@@ -4,6 +4,7 @@ from pathlib import Path
 
 from automation.forex_engine import backtest_harness
 from automation.forex_engine import forex_dashboard_contract
+from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import risk_contract
 
 
@@ -49,6 +50,22 @@ def test_dashboard_state_accepts_blockers_and_next_safe_action() -> None:
 
     assert state.current_blocker == "walk_forward_missing"
     assert state.next_safe_action == "Collect local evidence."
+
+
+def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
+    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    summary = paper_forward_evidence_v2.summarize_paper_forward_evidence_v2(bundle)
+    dashboard = forex_dashboard_contract.build_forex_dashboard_v2_summary(summary)
+    lines = forex_dashboard_contract.format_forex_dashboard_v2_lines(dashboard)
+
+    assert dashboard["fixture_count"] == 9
+    assert dashboard["paper_forward_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert dashboard["live_ready"] is False
+    assert dashboard["protected_gate_required"] is True
+    assert len(lines) <= 10
+    assert "Live ready: false" in lines
+    assert "Protected gate required: true" in lines
+    assert lines[-1] == "Safety: no broker/live/secrets/orders/webhooks"
 
 
 def test_module_has_no_network_broker_env_or_file_write_behavior() -> None:

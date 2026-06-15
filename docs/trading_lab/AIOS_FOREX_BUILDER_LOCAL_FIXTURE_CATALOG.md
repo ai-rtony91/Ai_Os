@@ -9,6 +9,12 @@ Current fixtures:
 - `EURUSD_5M_TREND_SAMPLE`
 - `EURUSD_5M_CHOP_SAMPLE`
 - `EURUSD_5M_PULLBACK_SAMPLE`
+- `EURUSD_5M_REVERSAL_SAMPLE`
+- `EURUSD_5M_VOLATILE_SAMPLE`
+- `EURUSD_5M_LOW_VOL_SAMPLE`
+- `EURUSD_15M_TREND_SAMPLE`
+- `GBPUSD_5M_TREND_SAMPLE`
+- `USDJPY_5M_RANGE_SAMPLE`
 
 ## Boundary
 
@@ -24,6 +30,10 @@ This catalog supports local simulation only. It is not broker paper trading and 
 - `get_fixture_by_id(fixture_id)`
 - `list_fixture_ids()`
 - `fixture_catalog_summary()`
+- `validate_fixture_catalog()`
+- `fixture_regime_summary()`
+- `fixture_quality_summary(fixture)`
+- `assert_fixture_is_local_only(fixture)`
 
 ## Evidence Use
 
