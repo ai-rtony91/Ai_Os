@@ -153,9 +153,9 @@ def _count_passed_tests(wake_report: dict[str, Any], readiness: dict[str, Any]) 
     return total
 
 
-def _build_preview_queue() -> dict[str, Any]:
+def _build_preview_queue(repo_root: Path) -> dict[str, Any]:
     work_queue = _load_sibling("aios_self_build_work_queue")
-    return work_queue.build_self_build_core_preview_queue(Path(__file__).resolve().parents[2])
+    return work_queue.build_self_build_core_preview_queue(repo_root)
 
 
 def _not_selected_packet(reason_code: str) -> dict[str, Any]:
@@ -181,10 +181,30 @@ def _not_selected_runner(reason_code: str) -> dict[str, Any]:
     }
 
 
+def _approval_request(
+    selected_queue_item: dict[str, Any] | None,
+    *,
+    approved_by: str | None,
+    approval_token: str | None,
+    approve_action: str | None,
+) -> dict[str, Any]:
+    item = selected_queue_item if isinstance(selected_queue_item, dict) else {}
+    selected_action = str(item.get("action_id", "none"))
+    return {
+        "requested_action": approve_action or selected_action,
+        "requested_write_paths": list(item.get("allowed_paths", [])),
+        "approved_by": approved_by or "",
+        "approval_token_present": bool(approval_token),
+    }
+
+
 def run_self_build_dry_run_driver(
     repo_root: Path,
     *,
     preview_approved_scope: str | None = None,
+    approved_by: str | None = None,
+    approval_token: str | None = None,
+    approve_action: str | None = None,
     wake_runner: WakeRunner | None = None,
 ) -> dict[str, Any]:
     runner = wake_runner or default_wake_runner
@@ -211,7 +231,7 @@ def run_self_build_dry_run_driver(
     queue = {"schema": "AIOS_SELF_BUILD_WORK_QUEUE.v1", "items": []}
     effective_readiness = readiness.copy()
     if preview_approved_scope == APPROVED_PREVIEW_SCOPE:
-        queue = _build_preview_queue()
+        queue = _build_preview_queue(repo_root)
         effective_readiness["readiness_status"] = "ready"
         effective_readiness["sos_required"] = bool(sos.get("sos_required") is True)
     elif preview_approved_scope not in {None, ""}:
@@ -250,6 +270,17 @@ def run_self_build_dry_run_driver(
             "validators_run": wake_report.get("validators_run", []),
             "next_safe_action": selector.get("next_safe_action", "Review self-build DRY_RUN output."),
         }
+    )
+
+    approval_module = _load_sibling("aios_self_build_apply_approval_gate")
+    apply_approval = approval_module.evaluate_apply_approval_gate(
+        selected_queue_item if isinstance(selected_queue_item, dict) else {},
+        _approval_request(
+            selected_queue_item if isinstance(selected_queue_item, dict) else None,
+            approved_by=approved_by,
+            approval_token=approval_token,
+            approve_action=approve_action,
+        ),
     )
 
     readiness_status = str(readiness.get("readiness_status", "not_ready"))
@@ -297,6 +328,7 @@ def run_self_build_dry_run_driver(
         "stop_report": stop_report,
         "sos": sos,
         "core_status": core_status,
+        "apply_approval": apply_approval,
         "morning_summary": (
             f"AIOS self-build DRY_RUN: wake_passed={wake_validation_passed}, "
             f"readiness={readiness_status}, selected_action={selected_next_action}."
@@ -311,6 +343,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run AIOS SelfBuild DRY_RUN driver.")
     parser.add_argument("--driver-mode", default="DRY_RUN")
     parser.add_argument("--preview-approved-scope", default=None)
+    parser.add_argument("--approved-by", default=None)
+    parser.add_argument("--approval-token", default=None)
+    parser.add_argument("--approve-action", default=None)
     parser.add_argument("--repo-root", default=None)
     return parser
 
@@ -318,7 +353,13 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     repo_root = Path(args.repo_root).resolve() if args.repo_root else Path(__file__).resolve().parents[2]
-    report = run_self_build_dry_run_driver(repo_root, preview_approved_scope=args.preview_approved_scope)
+    report = run_self_build_dry_run_driver(
+        repo_root,
+        preview_approved_scope=args.preview_approved_scope,
+        approved_by=args.approved_by,
+        approval_token=args.approval_token,
+        approve_action=args.approve_action,
+    )
     report["driver_mode"] = "DRY_RUN"
     print(json.dumps(report, indent=2, sort_keys=False))
     return 0

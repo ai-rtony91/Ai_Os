@@ -33,8 +33,12 @@ The current self-build-core preview sequence is:
 1. `build_self_build_core_status_reader`
 2. `build_self_build_run_summary_view`
 3. `build_self_build_apply_approval_gate`
+4. `integrate_self_build_apply_approval_gate`
+5. `build_self_build_local_apply_executor_bridge`
 
-The apply approval gate is preview-only until a separate bounded APPLY packet builds it.
+The APPLY approval gate evaluates whether explicit Anthony approval matches a selected queue item. It can report `approved`, but v0 still does not execute local APPLY or allow apply without human control.
+
+The local APPLY executor bridge is preview-only until a separate bounded APPLY packet builds it.
 
 Start command:
 
