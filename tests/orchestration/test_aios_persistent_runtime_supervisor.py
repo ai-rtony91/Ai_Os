@@ -96,6 +96,56 @@ def test_self_route_apply_mode_is_report_only() -> None:
     assert "Do not execute it from self-route." in text
 
 
+def test_self_route_json_includes_bounded_worker_route_preview() -> None:
+    text = self_route_text()
+
+    assert "AIOS_BOUNDED_WORKER_ROUTING_PREVIEW.v1" in text
+    assert "automation/orchestration/aios_bounded_worker_routing_preview.py" in text
+    assert "route_preview_status = $routePreviewStatus" in text
+    assert "route_preview_exit_code = $routePreviewExitCode" in text
+    assert "route_preview = $routePreview" in text
+
+
+def test_self_route_passes_validation_evidence_to_route_preview() -> None:
+    text = self_route_text()
+
+    assert "$validatedCommandEvidence = [ordered]@{" in text
+    assert "validation_status = $validationStatus" in text
+    assert "status = $validationStatus" in text
+    assert "execution_allowed = $false" in text
+    assert "--validated-command $validatedCommandJson" in text
+
+
+def test_self_route_route_preview_is_evidence_only() -> None:
+    text = self_route_text()
+
+    assert "commands_executed = @()" in text
+    assert "queues_mutated = $false" in text
+    assert "approvals_mutated = $false" in text
+    assert "workers_dispatched = $false" in text
+    assert "worker_dispatch = $false" in text
+    assert "queue_mutation = $false" in text
+    assert "approval_mutation = $false" in text
+
+
+def test_self_route_blocked_route_preview_stops_advancement() -> None:
+    text = self_route_text()
+
+    assert 'if ($routePreviewStatus -in @("blocked", "rejected")) {' in text
+    assert "$routeStatus = $routePreviewStatus" in text
+    assert '$rejectionReasons += "route_preview_$routePreviewStatus"' in text
+    assert "route_preview_blocker:$routePreviewBlocker" in text
+    assert "$exitCode = 1" in text
+
+
+def test_self_route_unvalidated_preview_cannot_be_route_ready() -> None:
+    text = self_route_text()
+
+    assert 'elseif ($routePreviewStatus -eq "route_ready" -and $validationStatus -notin @("PASS")) {' in text
+    assert '$routeStatus = "blocked"' in text
+    assert '$rejectionReasons += "route_preview_ready_without_validated_command"' in text
+
+
 def test_supervisor_does_not_advance_packets_after_self_route_failure() -> None:
     text = supervisor_text()
 
