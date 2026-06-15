@@ -72,6 +72,16 @@ LOCAL_APPLY_EXECUTOR_BRIDGE_VALIDATORS = [
     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_local_apply_executor_bridge.py",
 ]
 
+SINGLE_ACTION_EXECUTOR_PATHS = [
+    "automation/orchestration/aios_self_build_single_action_executor.py",
+    "tests/orchestration/test_aios_self_build_single_action_executor.py",
+    "docs/orchestration/AIOS_SELF_BUILD_SINGLE_ACTION_EXECUTOR.md",
+]
+
+SINGLE_ACTION_EXECUTOR_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_single_action_executor.py",
+]
+
 
 def _safety() -> dict[str, bool]:
     return {
@@ -258,6 +268,17 @@ def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> 
                 "action_id": "build_self_build_local_apply_executor_bridge",
                 "allowed_paths": LOCAL_APPLY_EXECUTOR_BRIDGE_PATHS,
                 "validators": LOCAL_APPLY_EXECUTOR_BRIDGE_VALIDATORS,
+                "protected_action_flags": {},
+                "status": "ready",
+                "reason_code": "next_preview_scope_self_build_core",
+            },
+            {
+                "priority": 60,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "build_self_build_single_action_executor",
+                "allowed_paths": SINGLE_ACTION_EXECUTOR_PATHS,
+                "validators": SINGLE_ACTION_EXECUTOR_VALIDATORS,
                 "protected_action_flags": {},
                 "status": "ready",
                 "reason_code": "next_preview_scope_self_build_core",
