@@ -97,6 +97,8 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
     assert review["paper_forward_ready"] in {True, False}
     assert review["v2_evidence_ready"] in {True, False}
+    assert review["stress_oos_ready"] in {True, False}
+    assert review["broker_paper_sandbox_ready"] is False
     assert review["live_trade_ready"] is False
     assert review["protected_gate_required"] is True
     assert review["evidence_summary"]["fixture_count"] == 9
@@ -110,6 +112,13 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["opportunity_quality_score"] >= 0.0
     assert review["evidence_summary"]["risk_governor_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
     assert review["evidence_summary"]["stress_scenario_count"] >= 1
+    assert review["evidence_summary"]["paper_forward_stress_scenario_count"] >= 1
+    assert review["evidence_summary"]["stress_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["evidence_summary"]["oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["evidence_summary"]["combined_stress_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["evidence_summary"]["heldout_consistency_pct"] >= 0.0
+    assert review["evidence_summary"]["degradation_pct"] >= 0.0
+    assert review["evidence_summary"]["broker_paper_sandbox_ready"] is False
     assert "broker integration is not approved" in review["live_trade_blockers"]
     assert "live readiness requires separate future approval" in review["next_safe_action"]
 

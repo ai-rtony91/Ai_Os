@@ -66,6 +66,11 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     opportunity = dict(bundle.get("opportunity_capture") or {})
     risk_governor = dict(bundle.get("risk_governor") or bundle.get("risk_governor_result") or {})
     stress = dict(bundle.get("stress_scenarios") or {})
+    paper_stress = dict(bundle.get("paper_forward_stress") or bundle.get("stress_result") or {})
+    paper_stress_summary = dict(paper_stress.get("stress_summary") or {})
+    oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
+    oos_summary = dict(oos_result.get("oos_summary") or {})
+    combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
     stress_blockers = [
         str(blocker)
         for scenario in list(stress.get("scenario_results") or stress.get("scenarios") or [])
@@ -76,13 +81,19 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *blockers,
             *_text_list(opportunity.get("blockers")),
             *_text_list(risk_governor.get("blockers")),
+            *_text_list(paper_stress.get("blockers")),
+            *_text_list(oos_result.get("blockers")),
+            *_text_list(combined_gate.get("blockers")),
             *stress_blockers,
         ]
     )
     risk_governor_classification = str(risk_governor.get("classification") or classification)
+    combined_stress_oos_classification = str(combined_gate.get("combined_classification") or "not_run")
+    stress_oos_ready = combined_stress_oos_classification == "PAPER_FORWARD_READY"
     paper_forward_ready = (
         classification == "PAPER_FORWARD_READY"
         and risk_governor_classification == "PAPER_FORWARD_READY"
+        and (combined_stress_oos_classification in {"not_run", "PAPER_FORWARD_READY"})
         and not local_blockers
     )
     review = {
@@ -90,6 +101,8 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         "classification": classification,
         "paper_forward_ready": paper_forward_ready,
         "v2_evidence_ready": paper_forward_ready,
+        "stress_oos_ready": stress_oos_ready,
+        "broker_paper_sandbox_ready": False,
         "live_trade_ready": False,
         "protected_gate_required": True,
         "evidence_summary": {
@@ -112,6 +125,33 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             "opportunity_quality_score": float(opportunity.get("opportunity_quality_score", 0.0)),
             "risk_governor_classification": risk_governor_classification,
             "stress_scenario_count": len(list(stress.get("scenario_results") or stress.get("scenarios") or [])),
+            "paper_forward_stress_scenario_count": int(paper_stress_summary.get("scenario_count", 0)),
+            "stress_classification": paper_stress_summary.get(
+                "classification",
+                combined_gate.get("stress_classification", "not_run"),
+            ),
+            "stress_survived_scenarios_pct": float(
+                combined_gate.get(
+                    "survived_scenarios_pct",
+                    paper_stress_summary.get("survived_scenarios_pct", 0.0),
+                )
+            ),
+            "oos_classification": oos_summary.get(
+                "classification",
+                combined_gate.get("oos_classification", "not_run"),
+            ),
+            "combined_stress_oos_classification": combined_stress_oos_classification,
+            "heldout_consistency_pct": float(
+                combined_gate.get(
+                    "heldout_consistency_pct",
+                    oos_summary.get("heldout_consistency_pct", 0.0),
+                )
+            ),
+            "degradation_pct": float(
+                combined_gate.get("degradation_pct", oos_summary.get("degradation_pct", 0.0))
+            ),
+            "stress_oos_ready": stress_oos_ready,
+            "broker_paper_sandbox_ready": False,
             "symbols": list(catalog.get("symbols") or []),
             "timeframes": list(catalog.get("timeframes") or []),
         },
@@ -177,7 +217,7 @@ def _next_safe_action(paper_forward_ready: bool, blockers: list[str]) -> str:
 
 def _next_safe_action_v2(paper_forward_ready: bool, blockers: list[str]) -> str:
     if paper_forward_ready:
-        return "Advance to protected stress and out-of-sample paper-forward validation; live readiness requires separate future approval."
+        return "Prepare broker-paper sandbox readiness contract only; live readiness requires separate future approval."
     if blockers:
-        return "Resolve V2 local evidence blockers before claiming paper-forward readiness."
-    return "Collect stronger multi-regime local evidence and rerun V2 readiness review."
+        return "Resolve V2 local evidence blockers before claiming paper-forward readiness; live readiness requires separate future approval."
+    return "Collect stronger multi-regime local evidence and rerun V2 readiness review; live readiness requires separate future approval."
