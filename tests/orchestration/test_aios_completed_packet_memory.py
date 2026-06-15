@@ -326,11 +326,35 @@ def test_default_memory_includes_paper_forward_evidence_v2_completion() -> None:
         for record in records
         if record["packet_id"] == "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
     ][0]
+    assert v2["landed_pr"] == "#745"
+    assert v2["title"] == "Add paper-forward evidence V2"
     assert v2["lane"] == "paper-forward-evidence-expansion-v2"
+    assert (
+        v2["completion_reason"]
+        == "paper-forward evidence V2 landed with multi-fixture evidence, regime consistency, V2 demo, readiness/dashboard integration, and safe next selector"
+    )
     assert "automation/forex_engine/paper_forward_evidence_v2.py" in v2["completed_files"]
     assert "automation/forex_engine/run_paper_forward_evidence_v2_demo.py" in v2["completed_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE_V2.md" in v2["completed_files"]
     assert "tests/forex_engine/test_paper_forward_evidence_v2.py" in v2["completed_files"]
+
+
+def test_default_memory_includes_risk_governor_completion() -> None:
+    result = build_result(candidate_packets=[])
+
+    assert "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS" in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    risk_governor = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
+    ][0]
+    assert risk_governor["lane"] == "risk-governor-paper-forward-thresholds"
+    assert "automation/forex_engine/risk_governor_thresholds.py" in risk_governor["completed_files"]
+    assert "automation/forex_engine/opportunity_capture.py" in risk_governor["completed_files"]
+    assert "automation/forex_engine/run_risk_governor_demo.py" in risk_governor["completed_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_OPPORTUNITY_CAPTURE.md" in risk_governor["completed_files"]
+    assert "tests/forex_engine/test_opportunity_capture.py" in risk_governor["completed_files"]
 
 
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
@@ -452,7 +476,7 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
@@ -464,7 +488,8 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     assert "PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
+    assert "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:

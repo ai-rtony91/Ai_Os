@@ -100,6 +100,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["live_trade_ready"] is False
     assert review["protected_gate_required"] is True
     assert review["evidence_summary"]["fixture_count"] == 9
+    assert review["evidence_summary"]["starting_balance"] == 500.0
+    assert review["evidence_summary"]["ending_balance"] >= 500.0
+    assert review["evidence_summary"]["return_pct"] >= 0.0
+    assert review["evidence_summary"]["capture_rate_pct"] >= 0.0
+    assert review["evidence_summary"]["missed_signal_count"] >= 0
+    assert review["evidence_summary"]["missed_pnl_estimate"] >= 0.0
+    assert review["evidence_summary"]["risk_adjusted_return"] >= 0.0
+    assert review["evidence_summary"]["opportunity_quality_score"] >= 0.0
+    assert review["evidence_summary"]["risk_governor_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert review["evidence_summary"]["stress_scenario_count"] >= 1
     assert "broker integration is not approved" in review["live_trade_blockers"]
     assert "live readiness requires separate future approval" in review["next_safe_action"]
 

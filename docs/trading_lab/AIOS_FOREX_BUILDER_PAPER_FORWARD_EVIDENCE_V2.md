@@ -61,7 +61,7 @@ Stronger out-of-sample and forward evidence is required.
 
 Live readiness remains a protected downstream gate.
 
-V2 evidence can support `PAPER_FORWARD_READY` only for local simulation. It cannot authorize broker paper trading or live trading. The next protected step is risk-governor threshold hardening and then a separate approval packet for broker-paper sandbox integration, if earned.
+V2 evidence can support `PAPER_FORWARD_READY` only for local simulation. It cannot authorize broker paper trading or live trading. The next protected steps are risk-governor threshold hardening, stress and out-of-sample validation, and then a separate broker-paper sandbox readiness contract only if evidence earns it.
 
 ## Boundaries
 

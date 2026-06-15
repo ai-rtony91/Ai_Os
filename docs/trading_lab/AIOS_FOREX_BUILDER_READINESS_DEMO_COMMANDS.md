@@ -7,6 +7,7 @@ These commands show local paper-forward evidence without writing generated repor
 ## Commands
 
 ```powershell
+python -m automation.forex_engine.run_risk_governor_demo
 python -m automation.forex_engine.run_paper_forward_evidence_v2_demo
 python -m automation.forex_engine.run_paper_forward_demo
 python -m automation.forex_engine.run_evidence_bundle_demo
@@ -30,6 +31,7 @@ Each command prints compact operator-readable proof:
 - simulated ledger or evidence status.
 - paper PnL when applicable.
 - aggregate paper PnL and consistency percentage for the V2 command.
+- starting balance, ending balance, return percent, capture rate, cost drag, drawdown, missed PnL estimate, and opportunity quality score for the risk-governor command.
 - risk or evidence classification.
 - readiness status.
 - blocker count or blocker summary.
