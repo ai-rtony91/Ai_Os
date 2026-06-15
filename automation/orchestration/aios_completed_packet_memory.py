@@ -95,6 +95,75 @@ DEFAULT_COMPLETED_PACKETS = [
         "source": "default_completed_memory",
     },
     {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS",
+        "title": "Add local forex builder data schema contracts",
+        "lane": "forex-builder-data-schemas",
+        "landed_pr": "#742",
+        "completion_reason": "local forex builder data schema contracts landed on main",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_DATA_SCHEMAS.md",
+            "automation/forex_engine/schema_contracts.py",
+            "tests/forex_engine/test_schema_contracts.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_DATA_SCHEMAS.md",
+            "automation/forex_engine/schema_contracts.py",
+            "tests/forex_engine/test_schema_contracts.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-BACKTEST-HARNESS",
+        "title": "Create forex builder deterministic backtest harness scaffold",
+        "lane": "forex-builder-backtest",
+        "completion_reason": "local deterministic backtest harness contract, docs, and tests exist",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BACKTEST_HARNESS.md",
+            "automation/forex_engine/backtest_harness.py",
+            "tests/forex_engine/test_backtest_harness.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BACKTEST_HARNESS.md",
+            "automation/forex_engine/backtest_harness.py",
+            "tests/forex_engine/test_backtest_harness.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-RISK-CONTRACT",
+        "title": "Define forex builder risk gate contract",
+        "lane": "forex-builder-risk-policy",
+        "completion_reason": "local forex risk contract, docs, and tests exist",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_CONTRACT.md",
+            "automation/forex_engine/risk_contract.py",
+            "tests/forex_engine/test_risk_contract.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_CONTRACT.md",
+            "automation/forex_engine/risk_contract.py",
+            "tests/forex_engine/test_risk_contract.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT",
+        "title": "Define forex builder dashboard contract",
+        "lane": "forex-builder-dashboard",
+        "completion_reason": "compact forex dashboard/report contract, docs, and tests exist",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_DASHBOARD_CONTRACT.md",
+            "automation/forex_engine/forex_dashboard_contract.py",
+            "tests/forex_engine/test_forex_dashboard_contract.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_DASHBOARD_CONTRACT.md",
+            "automation/forex_engine/forex_dashboard_contract.py",
+            "tests/forex_engine/test_forex_dashboard_contract.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
         "packet_id": "AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
         "alternate_packet_ids": [
             "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",

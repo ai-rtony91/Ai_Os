@@ -255,6 +255,35 @@ def test_default_memory_includes_landed_forex_canonical_spec() -> None:
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md" in canonical["completed_files"]
 
 
+def test_default_memory_includes_landed_forex_data_schemas_from_pr_742() -> None:
+    result = build_result(candidate_packets=[])
+
+    assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    data_schemas = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
+    ][0]
+    assert data_schemas["landed_pr"] == "#742"
+    assert data_schemas["title"] == "Add local forex builder data schema contracts"
+    assert data_schemas["completion_reason"] == "local forex builder data schema contracts landed on main"
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_DATA_SCHEMAS.md" in data_schemas["completed_files"]
+    assert "automation/forex_engine/schema_contracts.py" in data_schemas["completed_files"]
+    assert "tests/forex_engine/test_schema_contracts.py" in data_schemas["completed_files"]
+
+
+def test_default_memory_includes_completed_backtest_risk_and_dashboard_packets() -> None:
+    result = build_result(candidate_packets=[])
+
+    for packet_id in (
+        "PKT-AIOS-FOREX-BUILDER-BACKTEST-HARNESS",
+        "PKT-AIOS-FOREX-BUILDER-RISK-CONTRACT",
+        "PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT",
+    ):
+        assert packet_id in result["completed_packet_ids"]
+
+
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
     result = build_result(candidate_packets=[])
 
@@ -292,6 +321,28 @@ def test_forex_canonical_spec_candidate_is_suppressed_by_default_memory() -> Non
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
     assert (
         "completed_packet_id:PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+        in result["suppressed_candidates"][0]["suppression_reasons"]
+    )
+
+
+def test_forex_data_schemas_candidate_is_suppressed_by_pr_742_default_memory() -> None:
+    data_schemas = candidate(
+        packet_id="PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS",
+        title="Define forex builder local data schemas",
+        lane="forex-builder-data-schemas",
+        required_files=[
+            "docs/trading_lab/AIOS_FOREX_BUILDER_DATA_SCHEMAS.md",
+            "automation/forex_engine/schema_contracts.py",
+            "tests/forex_engine/test_schema_contracts.py",
+        ],
+    )
+
+    result = build_result(candidate_packets=[data_schemas])
+
+    assert result["active_candidates"] == []
+    assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
+    assert (
+        "completed_packet_id:PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
         in result["suppressed_candidates"][0]["suppression_reasons"]
     )
 
@@ -342,7 +393,7 @@ def test_supertrend_edge_proof_alternate_packet_ids_are_suppressed_by_default_me
         assert f"completed_packet_id:{packet_id}" in result["suppressed_candidates"][0]["suppression_reasons"]
 
 
-def test_forex_roadmap_advances_to_data_schemas_after_canonical_spec_landed() -> None:
+def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() -> None:
     memory = load_module()
     roadmap = load_forex_roadmap_module()
     roadmap_result = roadmap.build_forex_builder_roadmap({})
@@ -352,10 +403,14 @@ def test_forex_roadmap_advances_to_data_schemas_after_canonical_spec_landed() ->
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
+    assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
+    assert "PKT-AIOS-FOREX-BUILDER-BACKTEST-HARNESS" not in active_ids
+    assert "PKT-AIOS-FOREX-BUILDER-RISK-CONTRACT" not in active_ids
+    assert "PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:
