@@ -217,6 +217,24 @@ def _one_action_execution_request(
     }
 
 
+def _one_action_apply_runner_options(
+    selected_queue_item: dict[str, Any] | None,
+    *,
+    approve_action: str | None,
+) -> dict[str, Any]:
+    item = selected_queue_item if isinstance(selected_queue_item, dict) else {}
+    if not item:
+        return {"execute": False}
+    selected_action = str(item.get("action_id", "none"))
+    return {
+        "execute": False,
+        "requested_action": approve_action or selected_action,
+        "selected_queue_action": selected_action,
+        "requested_write_paths": list(item.get("allowed_paths", [])),
+        "preview_only": True,
+    }
+
+
 def _verifier_for_pre_execution_controller(verifier: dict[str, Any]) -> dict[str, Any]:
     normalized = verifier.copy()
     reasons = [str(reason) for reason in normalized.get("rejection_reasons", []) if str(reason)]
@@ -386,6 +404,25 @@ def run_self_build_dry_run_driver(
         one_action_execution_request,
     )
 
+    one_action_apply_runner_options = _one_action_apply_runner_options(
+        selected_queue_item if isinstance(selected_queue_item, dict) else None,
+        approve_action=approve_action,
+    )
+    one_action_apply_runner_module = _load_sibling("aios_self_build_one_action_apply_runner")
+    one_action_apply_runner = one_action_apply_runner_module.build_self_build_one_action_apply_runner(
+        selected_queue_item if isinstance(selected_queue_item, dict) else {},
+        apply_approval,
+        local_apply_executor_bridge,
+        single_action_executor,
+        _verifier_for_pre_execution_controller(apply_result_verifier),
+        one_action_execution_controller,
+        one_action_execution_request,
+        one_action_apply_runner_options,
+    )
+    one_action_apply_runner["commands_executed"] = bool(
+        one_action_apply_runner.get("safety", {}).get("commands_executed", False)
+    )
+
     no_scope_review = preview_approved_scope in {None, ""} and readiness_status == "review_required"
     next_safe_action = (
         "Stop for Anthony self-build readiness review. Re-run with --preview-approved-scope self-build-core to preview only."
@@ -415,6 +452,8 @@ def run_self_build_dry_run_driver(
         "apply_result_verifier": apply_result_verifier,
         "one_action_execution_request": one_action_execution_request,
         "one_action_execution_controller": one_action_execution_controller,
+        "one_action_apply_runner_options": one_action_apply_runner_options,
+        "one_action_apply_runner": one_action_apply_runner,
         "morning_summary": (
             f"AIOS self-build DRY_RUN: wake_passed={wake_validation_passed}, "
             f"readiness={readiness_status}, selected_action={selected_next_action}."

@@ -38,6 +38,12 @@ COMPLETED_BEFORE_APPLY_RUNNER = COMPLETED_BEFORE_INTEGRATION + [
     "docs/orchestration/AIOS_SELF_BUILD_ONE_ACTION_EXECUTION_CONTROLLER.md",
 ]
 
+COMPLETED_BEFORE_EXECUTE_GATE = COMPLETED_BEFORE_APPLY_RUNNER + [
+    "automation/orchestration/aios_self_build_one_action_apply_runner.py",
+    "tests/orchestration/test_aios_self_build_one_action_apply_runner.py",
+    "docs/orchestration/AIOS_SELF_BUILD_ONE_ACTION_APPLY_RUNNER.md",
+]
+
 
 def load_module():
     spec = importlib.util.spec_from_file_location("aios_self_build_dry_run_driver", MODULE_PATH)
@@ -142,6 +148,11 @@ def test_driver_parses_wake_json_and_stops_without_approved_scope():
     assert report["one_action_execution_controller"]["schema"] == "AIOS_SELF_BUILD_ONE_ACTION_EXECUTION_CONTROLLER.v1"
     assert report["one_action_execution_controller"]["controller_status"] == "blocked"
     assert report["one_action_execution_controller"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["schema"] == "AIOS_SELF_BUILD_ONE_ACTION_APPLY_RUNNER.v1"
+    assert report["one_action_apply_runner"]["runner_status"] == "blocked"
+    assert report["one_action_apply_runner"]["runner_mode"] == "DRY_RUN"
+    assert report["one_action_apply_runner"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["commands_executed"] is False
 
 
 def test_driver_previews_one_action_execution_controller_with_approved_scope(tmp_path):
@@ -178,6 +189,10 @@ def test_driver_previews_one_action_execution_controller_with_approved_scope(tmp
     assert report["one_action_execution_controller"]["controller_status"] == "blocked"
     assert report["one_action_execution_controller"]["command_execution_allowed"] is False
     assert report["one_action_execution_controller"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["runner_status"] == "blocked"
+    assert report["one_action_apply_runner"]["runner_mode"] == "DRY_RUN"
+    assert report["one_action_apply_runner"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["commands_executed"] is False
 
 
 def test_driver_never_executes_generated_codex_or_apply_commands(tmp_path):
@@ -200,9 +215,11 @@ def test_driver_never_executes_generated_codex_or_apply_commands(tmp_path):
     assert report["single_action_executor"]["command_executed"] is False
     assert report["one_action_execution_controller"]["command_executed"] is False
     assert report["one_action_execution_controller"]["command_execution_allowed"] is False
+    assert report["one_action_apply_runner"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["commands_executed"] is False
 
 
-def test_valid_anthony_approval_marks_one_action_controller_ready_but_executes_nothing(tmp_path):
+def test_valid_anthony_approval_marks_one_action_apply_runner_preview_ready_but_executes_nothing(tmp_path):
     module = load_module()
     seed_completed_paths(tmp_path, COMPLETED_BEFORE_APPLY_RUNNER)
     report = module.run_self_build_dry_run_driver(
@@ -241,6 +258,16 @@ def test_valid_anthony_approval_marks_one_action_controller_ready_but_executes_n
     assert report["one_action_execution_controller"]["command_execution_allowed"] is True
     assert report["one_action_execution_controller"]["command_executed"] is False
     assert report["one_action_execution_controller"]["selected_action"] == "build_self_build_one_action_apply_runner"
+    assert report["one_action_apply_runner_options"]["execute"] is False
+    assert report["one_action_apply_runner"]["runner_status"] == "preview_ready"
+    assert report["one_action_apply_runner"]["runner_mode"] == "DRY_RUN"
+    assert report["one_action_apply_runner"]["selected_action"] == "build_self_build_one_action_apply_runner"
+    assert report["one_action_apply_runner"]["command_execution_allowed"] is True
+    assert report["one_action_apply_runner"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["commands_executed"] is False
+    assert report["one_action_apply_runner"]["safety"]["commands_executed"] is False
+    assert report["one_action_apply_runner"]["safety"]["files_written"] is False
+    assert report["one_action_apply_runner"]["safety"]["reports_written"] is False
     assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
 
 
@@ -269,6 +296,9 @@ def test_mismatched_approve_action_is_rejected(tmp_path):
     assert report["one_action_execution_controller"]["controller_status"] == "rejected"
     assert report["one_action_execution_controller"]["command_execution_allowed"] is False
     assert report["one_action_execution_controller"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["runner_status"] == "rejected"
+    assert report["one_action_apply_runner"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["commands_executed"] is False
 
 
 def test_completed_one_action_controller_selects_apply_runner_next(tmp_path):
@@ -291,6 +321,29 @@ def test_completed_one_action_controller_selects_apply_runner_next(tmp_path):
     ]
     assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
     assert report["one_action_execution_controller"]["command_executed"] is False
+
+
+def test_completed_one_action_apply_runner_selects_execute_gate_next(tmp_path):
+    module = load_module()
+    seed_completed_paths(tmp_path, COMPLETED_BEFORE_EXECUTE_GATE)
+    report = module.run_self_build_dry_run_driver(
+        tmp_path,
+        preview_approved_scope="self-build-core",
+        wake_runner=fake_wake_runner,
+    )
+
+    assert report["selected_next_action"] == "build_self_build_one_action_execute_gate"
+    assert report["selected_queue_item"]["allowed_paths"] == [
+        "automation/orchestration/aios_self_build_one_action_execute_gate.py",
+        "tests/orchestration/test_aios_self_build_one_action_execute_gate.py",
+        "docs/orchestration/AIOS_SELF_BUILD_ONE_ACTION_EXECUTE_GATE.md",
+    ]
+    assert report["selected_queue_item"]["validators"] == [
+        "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_one_action_execute_gate.py",
+    ]
+    assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
+    assert report["one_action_apply_runner"]["command_executed"] is False
+    assert report["one_action_apply_runner"]["commands_executed"] is False
 
 
 def test_driver_handles_sandbox_1312_as_blocker_not_sos():

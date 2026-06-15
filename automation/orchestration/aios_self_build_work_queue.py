@@ -112,6 +112,16 @@ ONE_ACTION_APPLY_RUNNER_VALIDATORS = [
     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_one_action_apply_runner.py",
 ]
 
+ONE_ACTION_EXECUTE_GATE_PATHS = [
+    "automation/orchestration/aios_self_build_one_action_execute_gate.py",
+    "tests/orchestration/test_aios_self_build_one_action_execute_gate.py",
+    "docs/orchestration/AIOS_SELF_BUILD_ONE_ACTION_EXECUTE_GATE.md",
+]
+
+ONE_ACTION_EXECUTE_GATE_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_one_action_execute_gate.py",
+]
+
 
 def _safety() -> dict[str, bool]:
     return {
@@ -342,6 +352,17 @@ def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> 
                 "action_id": "build_self_build_one_action_apply_runner",
                 "allowed_paths": ONE_ACTION_APPLY_RUNNER_PATHS,
                 "validators": ONE_ACTION_APPLY_RUNNER_VALIDATORS,
+                "protected_action_flags": {},
+                "status": "ready",
+                "reason_code": "next_preview_scope_self_build_core",
+            },
+            {
+                "priority": 100,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "build_self_build_one_action_execute_gate",
+                "allowed_paths": ONE_ACTION_EXECUTE_GATE_PATHS,
+                "validators": ONE_ACTION_EXECUTE_GATE_VALIDATORS,
                 "protected_action_flags": {},
                 "status": "ready",
                 "reason_code": "next_preview_scope_self_build_core",
