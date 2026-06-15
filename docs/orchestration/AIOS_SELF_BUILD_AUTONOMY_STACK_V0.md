@@ -36,12 +36,15 @@ The current self-build-core preview sequence is:
 4. `integrate_self_build_apply_approval_gate`
 5. `build_self_build_local_apply_executor_bridge`
 6. `build_self_build_single_action_executor`
+7. `build_self_build_apply_result_verifier`
 
 The APPLY approval gate evaluates whether explicit Anthony approval matches a selected queue item. It can report `approved`, but v0 still does not execute local APPLY or allow apply without human control.
 
 The local APPLY executor bridge can prepare a `command_to_run` after valid Anthony approval, but it does not execute that command in v1.
 
-The single-action executor is preview-only until a separate bounded APPLY packet builds it.
+The single-action executor can report that one approved bounded command would run, but it does not execute that command in v1.
+
+The apply result verifier is preview-only until a separate bounded APPLY packet builds it.
 
 Start command:
 

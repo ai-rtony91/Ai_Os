@@ -204,6 +204,33 @@ def test_queue_selects_single_action_executor_after_bridge_completed(tmp_path):
     assert all(value is False for value in selected["selected_queue_item"]["protected_action_flags"].values())
 
 
+def test_queue_selects_apply_result_verifier_after_single_action_executor_completed(tmp_path):
+    module = load_module()
+    completed_paths = (
+        module.CORE_STATUS_READER_PATHS
+        + module.RUN_SUMMARY_VIEW_PATHS
+        + module.APPLY_APPROVAL_GATE_PATHS
+        + module.INTEGRATE_APPLY_APPROVAL_GATE_PATHS
+        + module.LOCAL_APPLY_EXECUTOR_BRIDGE_PATHS
+        + module.SINGLE_ACTION_EXECUTOR_PATHS
+    )
+    for relative_path in completed_paths:
+        target = tmp_path / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("present", encoding="utf-8")
+
+    queue = module.build_self_build_core_preview_queue(tmp_path)
+    items_by_action = {item["action_id"]: item for item in queue["items"]}
+    selected = select_next_action({"readiness_status": "ready"}, queue)
+
+    assert items_by_action["build_self_build_single_action_executor"]["status"] == "completed"
+    assert items_by_action["build_self_build_apply_result_verifier"]["status"] == "ready"
+    assert selected["selected_next_action"] == "build_self_build_apply_result_verifier"
+    assert selected["selected_queue_item"]["allowed_paths"] == module.APPLY_RESULT_VERIFIER_PATHS
+    assert selected["selected_queue_item"]["validators"] == module.APPLY_RESULT_VERIFIER_VALIDATORS
+    assert all(value is False for value in selected["selected_queue_item"]["protected_action_flags"].values())
+
+
 def test_no_network_subprocess_or_file_write_usage():
     source = MODULE_PATH.read_text(encoding="utf-8").lower()
     for forbidden in ["subprocess", "requests", "socket", "urllib", ".write_text", "open("]:

@@ -314,6 +314,15 @@ def run_self_build_dry_run_driver(
         stop_report,
     )
 
+    executor_module = _load_sibling("aios_self_build_single_action_executor")
+    single_action_executor = executor_module.build_self_build_single_action_executor(
+        selected_queue_item if isinstance(selected_queue_item, dict) else {},
+        apply_approval,
+        local_apply_executor_bridge,
+        core_status,
+        stop_report,
+    )
+
     no_scope_review = preview_approved_scope in {None, ""} and readiness_status == "review_required"
     next_safe_action = (
         "Stop for Anthony self-build readiness review. Re-run with --preview-approved-scope self-build-core to preview only."
@@ -339,6 +348,7 @@ def run_self_build_dry_run_driver(
         "core_status": core_status,
         "apply_approval": apply_approval,
         "local_apply_executor_bridge": local_apply_executor_bridge,
+        "single_action_executor": single_action_executor,
         "morning_summary": (
             f"AIOS self-build DRY_RUN: wake_passed={wake_validation_passed}, "
             f"readiness={readiness_status}, selected_action={selected_next_action}."
