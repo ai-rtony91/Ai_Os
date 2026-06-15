@@ -3,7 +3,9 @@
 from automation.forex_engine.analytics import ForexAnalytics
 from automation.forex_engine.confidence import ConfidenceEngine
 from automation.forex_engine.config import ForexEngineConfig
+from automation.forex_engine.costs import TradeCostAssumptions, apply_cost_to_pnl, conservative_entry_price
 from automation.forex_engine.market_data import load_fixture_candles, validate_candle_sequence
+from automation.forex_engine.metrics import calculate_edge_metrics
 from automation.forex_engine.models import (
     BacktestConfig,
     BacktestResult,
@@ -15,6 +17,7 @@ from automation.forex_engine.models import (
 from automation.forex_engine.paper_execution import PaperExecutionEngine
 from automation.forex_engine.risk import RiskEngine
 from automation.forex_engine.signal_rules import SPRINT_4_STRATEGY_NAME, generate_signals_from_candles
+from automation.forex_engine.strategies import SUPERTREND_PULLBACK_V1, evaluate_supertrend_pullback
 
 
 STOP_LOSS = "STOP_LOSS"
@@ -239,3 +242,104 @@ def run_backtest_for_fixture(symbol, timeframe, config):
         mode=EngineMode.PAPER_ONLY,
     )
     return engine.run_backtest(candles, backtest_config)
+
+
+def run_supertrend_edge_backtest(
+    candles,
+    starting_balance_usd=500.0,
+    risk_per_trade_usd=5.0,
+    cost_assumptions=TradeCostAssumptions(),
+):
+    """Run local PAPER_ONLY Supertrend edge research with conservative costs."""
+    if not candles:
+        raise ValueError("Supertrend edge backtest candles must not be empty.")
+    validate_candle_sequence(candles)
+    source_candles = list(candles)
+    trades = []
+    no_trade_reasons = []
+    index = 0
+    while index < len(source_candles):
+        window = source_candles[: index + 1]
+        if len(window) < 5:
+            index += 1
+            continue
+        result = evaluate_supertrend_pullback(window)
+        if not result["accepted"]:
+            no_trade_reasons.extend(result["no_trade_reasons"])
+            index += 1
+            continue
+        signal = result["signal"]
+        risk_distance = abs(signal.entry_price - signal.stop_loss)
+        if risk_distance <= 0:
+            no_trade_reasons.append("NO_TRADE: invalid_risk_distance")
+            index += 1
+            continue
+        position_size_units = risk_per_trade_usd / risk_distance
+        entry_price = conservative_entry_price(signal.direction, signal.entry_price, cost_assumptions)
+        exit_index, exit_price, close_reason = _find_supertrend_exit(source_candles, index + 1, signal)
+        if exit_index is None:
+            exit_index = len(source_candles) - 1
+            exit_price = source_candles[-1].close
+            close_reason = END_OF_BACKTEST
+        raw_pnl = _raw_pnl(signal.direction, entry_price, exit_price, position_size_units)
+        pnl = apply_cost_to_pnl(raw_pnl, position_size_units, cost_assumptions)
+        trades.append(
+            {
+                "strategy_name": SUPERTREND_PULLBACK_V1,
+                "symbol": signal.symbol,
+                "timeframe": signal.timeframe,
+                "direction": signal.direction,
+                "entry_price": round(entry_price, 5),
+                "stop_loss": signal.stop_loss,
+                "take_profit": signal.take_profit,
+                "exit_price": round(exit_price, 5),
+                "opened_at": signal.timestamp,
+                "closed_at": source_candles[exit_index].timestamp,
+                "close_reason": close_reason,
+                "position_size_units": position_size_units,
+                "pnl_usd": pnl,
+                "r_multiple": round(pnl / risk_per_trade_usd, 4) if risk_per_trade_usd else 0.0,
+            }
+        )
+        index = max(exit_index + 1, index + 1)
+    metrics = calculate_edge_metrics(trades, starting_balance_usd, no_trade_reasons)
+    return {
+        "mode": EngineMode.PAPER_ONLY,
+        "strategy_name": SUPERTREND_PULLBACK_V1,
+        "symbol": source_candles[0].symbol,
+        "timeframe": source_candles[0].timeframe,
+        "candles_processed": len(source_candles),
+        "trades": trades,
+        "metrics": metrics,
+        "no_trade_reasons": no_trade_reasons,
+        "cost_assumptions": {
+            "spread": cost_assumptions.spread,
+            "slippage": cost_assumptions.slippage,
+            "commission_per_trade_usd": cost_assumptions.commission_per_trade_usd,
+        },
+        "summary_note": "PAPER_ONLY Supertrend edge candidate research; no live readiness or earnings claim.",
+    }
+
+
+def _find_supertrend_exit(candles, start_index, signal):
+    for index in range(start_index, len(candles)):
+        candle = candles[index]
+        if signal.direction == Direction.BUY:
+            if candle.low <= signal.stop_loss:
+                return index, signal.stop_loss, STOP_LOSS
+            if candle.high >= signal.take_profit:
+                return index, signal.take_profit, TAKE_PROFIT
+        if signal.direction == Direction.SELL:
+            if candle.high >= signal.stop_loss:
+                return index, signal.stop_loss, STOP_LOSS
+            if candle.low <= signal.take_profit:
+                return index, signal.take_profit, TAKE_PROFIT
+    return None, None, None
+
+
+def _raw_pnl(direction, entry_price, exit_price, position_size_units):
+    if direction == Direction.BUY:
+        return (exit_price - entry_price) * position_size_units
+    if direction == Direction.SELL:
+        return (entry_price - exit_price) * position_size_units
+    raise ValueError("Direction must be BUY or SELL.")

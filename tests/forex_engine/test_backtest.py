@@ -9,9 +9,12 @@ from automation.forex_engine.backtest import (
     evaluate_open_trades_against_candle,
     generate_demo_signal_from_candle,
     run_backtest,
+    run_supertrend_edge_backtest,
 )
 from automation.forex_engine.confidence import ConfidenceEngine
 from automation.forex_engine.config import ForexEngineConfig
+from automation.forex_engine.costs import TradeCostAssumptions
+from automation.forex_engine.daily_edge_report import deterministic_supertrend_sample
 from automation.forex_engine.market_data import load_fixture_candles
 from automation.forex_engine.models import Candle, Direction, EngineMode
 from automation.forex_engine.paper_execution import PaperExecutionEngine
@@ -153,3 +156,18 @@ def test_backtest_does_not_require_network():
     result = BacktestEngine(ForexEngineConfig(), RiskEngine(ForexEngineConfig()), ConfidenceEngine(ForexEngineConfig()))
     candles = load_fixture_candles("XAUUSD", "5m", ForexEngineConfig())
     assert result.run_backtest(candles).mode == EngineMode.PAPER_ONLY
+
+
+def test_supertrend_edge_backtest_returns_costed_paper_metrics():
+    result = run_supertrend_edge_backtest(deterministic_supertrend_sample(count=48))
+    assert result["mode"] == EngineMode.PAPER_ONLY
+    assert result["strategy_name"] == "supertrend_pullback_v1"
+    assert "cost_assumptions" in result
+    assert result["metrics"]["total_trades"] == len(result["trades"])
+
+
+def test_supertrend_edge_backtest_cost_model_reduces_result():
+    candles = deterministic_supertrend_sample(count=48)
+    zero_cost = run_supertrend_edge_backtest(candles, cost_assumptions=TradeCostAssumptions(0, 0, 0))
+    costed = run_supertrend_edge_backtest(candles)
+    assert costed["metrics"]["net_pnl_usd"] <= zero_cost["metrics"]["net_pnl_usd"]

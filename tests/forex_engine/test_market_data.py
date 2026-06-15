@@ -4,6 +4,7 @@ from automation.forex_engine.config import ForexEngineConfig
 from automation.forex_engine.market_data import (
     load_candles_from_csv,
     load_fixture_candles,
+    load_local_candle_csv,
     summarize_candles,
     validate_candle,
     validate_candle_sequence,
@@ -92,3 +93,44 @@ def test_no_network_api_dependency_required():
     assert candles[0].source.endswith("automation\\forex_engine\\fixtures\\XAUUSD_5m_sample.csv") or candles[
         0
     ].source.endswith("automation/forex_engine/fixtures/XAUUSD_5m_sample.csv")
+
+
+def test_local_csv_import_accepts_required_ohlc_and_optional_volume(tmp_path):
+    path = tmp_path / "manual_export.csv"
+    path.write_text(
+        "timestamp,open,high,low,close,volume\n"
+        "2026-06-06T09:00:00Z,1.0800,1.0810,1.0790,1.0805,100\n"
+        "2026-06-06T09:05:00Z,1.0805,1.0820,1.0800,1.0815,110\n",
+        encoding="utf-8",
+    )
+
+    candles = load_local_candle_csv(path, ForexEngineConfig())
+
+    assert len(candles) == 2
+    assert candles[0].symbol == "EURUSD"
+    assert candles[0].timeframe == "5m"
+
+
+def test_local_csv_import_rejects_duplicate_timestamps(tmp_path):
+    path = tmp_path / "duplicates.csv"
+    path.write_text(
+        "timestamp,open,high,low,close\n"
+        "2026-06-06T09:00:00Z,1.0800,1.0810,1.0790,1.0805\n"
+        "2026-06-06T09:00:00Z,1.0805,1.0820,1.0800,1.0815\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="unique"):
+        load_local_candle_csv(path, ForexEngineConfig())
+
+
+def test_local_csv_import_rejects_high_low_not_containing_open_close(tmp_path):
+    path = tmp_path / "bad_ohlc.csv"
+    path.write_text(
+        "timestamp,open,high,low,close\n"
+        "2026-06-06T09:00:00Z,1.0800,1.0795,1.0790,1.0805\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="high"):
+        load_local_candle_csv(path, ForexEngineConfig())

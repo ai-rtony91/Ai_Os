@@ -7,7 +7,10 @@ from automation.forex_engine.config import ForexEngineConfig
 from automation.forex_engine.models import Candle
 
 
-REQUIRED_COLUMNS = ("timestamp", "symbol", "timeframe", "open", "high", "low", "close", "volume")
+FIXTURE_COLUMNS = ("timestamp", "symbol", "timeframe", "open", "high", "low", "close", "volume")
+LOCAL_IMPORT_REQUIRED_COLUMNS = ("timestamp", "open", "high", "low", "close")
+LOCAL_IMPORT_OPTIONAL_COLUMNS = ("volume", "symbol", "timeframe")
+REQUIRED_COLUMNS = FIXTURE_COLUMNS
 
 
 def load_candles_from_csv(path, config: ForexEngineConfig):
@@ -15,24 +18,59 @@ def load_candles_from_csv(path, config: ForexEngineConfig):
     candles = []
     with csv_path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
-        if reader.fieldnames != list(REQUIRED_COLUMNS):
-            raise ValueError(f"CSV header must be: {','.join(REQUIRED_COLUMNS)}")
+        fieldnames = reader.fieldnames or []
+        if fieldnames == list(FIXTURE_COLUMNS):
+            symbol = None
+            timeframe = None
+        else:
+            _validate_local_import_header(fieldnames)
+            symbol = config.symbols[0]
+            timeframe = config.timeframes[1] if len(config.timeframes) > 1 else config.timeframes[0]
         for row in reader:
+            row_symbol = row.get("symbol") or symbol
+            row_timeframe = row.get("timeframe") or timeframe
+            for column in LOCAL_IMPORT_REQUIRED_COLUMNS:
+                if row.get(column) in (None, ""):
+                    raise ValueError(f"Candle CSV missing required value: {column}")
             candle = Candle(
-                symbol=row["symbol"],
-                timeframe=row["timeframe"],
+                symbol=row_symbol,
+                timeframe=row_timeframe,
                 timestamp=row["timestamp"],
                 open=float(row["open"]),
                 high=float(row["high"]),
                 low=float(row["low"]),
                 close=float(row["close"]),
-                volume=float(row["volume"]),
+                volume=float(row.get("volume") or 0),
                 source=str(csv_path),
             )
             validate_candle(candle, config)
             candles.append(candle)
     validate_candle_sequence(candles)
     return candles
+
+
+def load_local_candle_csv(path, config=None, symbol=None, timeframe=None):
+    """Load a local-only exported candle CSV. No network or broker access is used."""
+    active_config = config or ForexEngineConfig()
+    candles = load_candles_from_csv(path, active_config)
+    if symbol:
+        for candle in candles:
+            candle.symbol = symbol
+    if timeframe:
+        for candle in candles:
+            candle.timeframe = timeframe
+    validate_candle_sequence(candles)
+    return candles
+
+
+def _validate_local_import_header(fieldnames):
+    missing = [column for column in LOCAL_IMPORT_REQUIRED_COLUMNS if column not in fieldnames]
+    if missing:
+        raise ValueError(f"CSV missing required OHLC columns: {', '.join(missing)}")
+    allowed = set(LOCAL_IMPORT_REQUIRED_COLUMNS + LOCAL_IMPORT_OPTIONAL_COLUMNS)
+    unknown = [column for column in fieldnames if column not in allowed]
+    if unknown:
+        raise ValueError(f"CSV contains unsupported columns for local import: {', '.join(unknown)}")
 
 
 def validate_candle(candle: Candle, config: ForexEngineConfig) -> None:
