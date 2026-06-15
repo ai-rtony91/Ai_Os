@@ -82,6 +82,16 @@ SINGLE_ACTION_EXECUTOR_VALIDATORS = [
     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_single_action_executor.py",
 ]
 
+APPLY_RESULT_VERIFIER_PATHS = [
+    "automation/orchestration/aios_self_build_apply_result_verifier.py",
+    "tests/orchestration/test_aios_self_build_apply_result_verifier.py",
+    "docs/orchestration/AIOS_SELF_BUILD_APPLY_RESULT_VERIFIER.md",
+]
+
+APPLY_RESULT_VERIFIER_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_apply_result_verifier.py",
+]
+
 
 def _safety() -> dict[str, bool]:
     return {
@@ -279,6 +289,17 @@ def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> 
                 "action_id": "build_self_build_single_action_executor",
                 "allowed_paths": SINGLE_ACTION_EXECUTOR_PATHS,
                 "validators": SINGLE_ACTION_EXECUTOR_VALIDATORS,
+                "protected_action_flags": {},
+                "status": "ready",
+                "reason_code": "next_preview_scope_self_build_core",
+            },
+            {
+                "priority": 70,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "build_self_build_apply_result_verifier",
+                "allowed_paths": APPLY_RESULT_VERIFIER_PATHS,
+                "validators": APPLY_RESULT_VERIFIER_VALIDATORS,
                 "protected_action_flags": {},
                 "status": "ready",
                 "reason_code": "next_preview_scope_self_build_core",
