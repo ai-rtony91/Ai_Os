@@ -252,6 +252,27 @@ def _one_action_execute_gate_request(selected_queue_item: dict[str, Any] | None)
     }
 
 
+def _one_action_local_executor_request(selected_queue_item: dict[str, Any] | None) -> dict[str, Any]:
+    item = selected_queue_item if isinstance(selected_queue_item, dict) else {}
+    if not item:
+        return {}
+    selected_action = str(item.get("action_id", "none"))
+    return {
+        "requested": True,
+        "mode": "ONE_ACTION_LOCAL_APPLY_EXECUTOR",
+        "approved_by": "Anthony Meza",
+        "approval_token_present": True,
+        "requested_action": selected_action,
+        "selected_queue_action": selected_action,
+        "requested_write_paths": list(item.get("allowed_paths", [])),
+        "preview_only": True,
+    }
+
+
+def _one_action_local_executor_options() -> dict[str, bool]:
+    return {"execute": False}
+
+
 def _verifier_for_pre_execution_controller(verifier: dict[str, Any]) -> dict[str, Any]:
     normalized = verifier.copy()
     reasons = [str(reason) for reason in normalized.get("rejection_reasons", []) if str(reason)]
@@ -457,6 +478,27 @@ def run_self_build_dry_run_driver(
         one_action_execute_gate.get("safety", {}).get("commands_executed", False)
     )
 
+    local_executor_request = _one_action_local_executor_request(selected_queue_item if isinstance(selected_queue_item, dict) else None)
+    one_action_local_executor_options = _one_action_local_executor_options()
+    one_action_local_executor_module = _load_sibling("aios_self_build_one_action_local_apply_executor")
+    one_action_local_apply_executor = one_action_local_executor_module.build_self_build_one_action_local_apply_executor(
+        selected_queue_item if isinstance(selected_queue_item, dict) else {},
+        apply_approval,
+        local_apply_executor_bridge,
+        single_action_executor,
+        one_action_execution_controller,
+        one_action_apply_runner,
+        one_action_execute_gate,
+        _verifier_for_pre_execution_controller(apply_result_verifier),
+        one_action_execution_request,
+        local_executor_request,
+        one_action_local_executor_options,
+        None,
+    )
+    one_action_local_apply_executor["commands_executed"] = bool(
+        one_action_local_apply_executor.get("safety", {}).get("commands_executed", False)
+    )
+
     no_scope_review = preview_approved_scope in {None, ""} and readiness_status == "review_required"
     next_safe_action = (
         "Stop for Anthony self-build readiness review. Re-run with --preview-approved-scope self-build-core to preview only."
@@ -490,6 +532,9 @@ def run_self_build_dry_run_driver(
         "one_action_apply_runner": one_action_apply_runner,
         "execute_gate_request": execute_gate_request,
         "one_action_execute_gate": one_action_execute_gate,
+        "local_executor_request": local_executor_request,
+        "one_action_local_executor_options": one_action_local_executor_options,
+        "one_action_local_apply_executor": one_action_local_apply_executor,
         "morning_summary": (
             f"AIOS self-build DRY_RUN: wake_passed={wake_validation_passed}, "
             f"readiness={readiness_status}, selected_action={selected_next_action}."

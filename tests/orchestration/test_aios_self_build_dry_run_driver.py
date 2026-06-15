@@ -50,6 +50,12 @@ COMPLETED_BEFORE_LOCAL_APPLY_EXECUTOR = COMPLETED_BEFORE_EXECUTE_GATE + [
     "docs/orchestration/AIOS_SELF_BUILD_ONE_ACTION_EXECUTE_GATE.md",
 ]
 
+COMPLETED_BEFORE_RESULT_COLLECTOR = COMPLETED_BEFORE_LOCAL_APPLY_EXECUTOR + [
+    "automation/orchestration/aios_self_build_one_action_local_apply_executor.py",
+    "tests/orchestration/test_aios_self_build_one_action_local_apply_executor.py",
+    "docs/orchestration/AIOS_SELF_BUILD_ONE_ACTION_LOCAL_APPLY_EXECUTOR.md",
+]
+
 
 def load_module():
     spec = importlib.util.spec_from_file_location("aios_self_build_dry_run_driver", MODULE_PATH)
@@ -164,6 +170,13 @@ def test_driver_parses_wake_json_and_stops_without_approved_scope():
     assert report["one_action_execute_gate"]["gate_status"] == "blocked"
     assert report["one_action_execute_gate"]["command_executed"] is False
     assert report["one_action_execute_gate"]["commands_executed"] is False
+    assert report["local_executor_request"] == {}
+    assert report["one_action_local_executor_options"] == {"execute": False}
+    assert report["one_action_local_apply_executor"]["schema"] == "AIOS_SELF_BUILD_ONE_ACTION_LOCAL_APPLY_EXECUTOR.v1"
+    assert report["one_action_local_apply_executor"]["executor_status"] == "blocked"
+    assert report["one_action_local_apply_executor"]["executor_mode"] == "DRY_RUN"
+    assert report["one_action_local_apply_executor"]["command_executed"] is False
+    assert report["one_action_local_apply_executor"]["command_returncode"] is None
 
 
 def test_driver_previews_one_action_execution_controller_with_approved_scope(tmp_path):
@@ -237,6 +250,8 @@ def test_driver_never_executes_generated_codex_or_apply_commands(tmp_path):
     assert report["one_action_apply_runner"]["commands_executed"] is False
     assert report["one_action_execute_gate"]["command_executed"] is False
     assert report["one_action_execute_gate"]["commands_executed"] is False
+    assert report["one_action_local_apply_executor"]["command_executed"] is False
+    assert report["one_action_local_apply_executor"]["command_returncode"] is None
 
 
 def test_valid_anthony_approval_marks_one_action_apply_runner_preview_ready_but_executes_nothing(tmp_path):
@@ -297,6 +312,16 @@ def test_valid_anthony_approval_marks_one_action_apply_runner_preview_ready_but_
     assert report["one_action_execute_gate"]["command_execution_allowed"] is True
     assert report["one_action_execute_gate"]["command_executed"] is False
     assert report["one_action_execute_gate"]["commands_executed"] is False
+    assert report["local_executor_request"]["requested"] is True
+    assert report["local_executor_request"]["mode"] == "ONE_ACTION_LOCAL_APPLY_EXECUTOR"
+    assert report["local_executor_request"]["requested_action"] == "build_self_build_one_action_apply_runner"
+    assert report["local_executor_request"]["selected_queue_action"] == "build_self_build_one_action_apply_runner"
+    assert report["one_action_local_executor_options"] == {"execute": False}
+    assert report["one_action_local_apply_executor"]["executor_status"] == "dry_run_ready"
+    assert report["one_action_local_apply_executor"]["executor_mode"] == "DRY_RUN"
+    assert report["one_action_local_apply_executor"]["command_execution_allowed"] is True
+    assert report["one_action_local_apply_executor"]["command_executed"] is False
+    assert report["one_action_local_apply_executor"]["command_returncode"] is None
     assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
 
 
@@ -331,6 +356,9 @@ def test_mismatched_approve_action_is_rejected(tmp_path):
     assert report["one_action_execute_gate"]["gate_status"] == "rejected"
     assert report["one_action_execute_gate"]["command_executed"] is False
     assert report["one_action_execute_gate"]["commands_executed"] is False
+    assert report["one_action_local_apply_executor"]["executor_status"] == "rejected"
+    assert report["one_action_local_apply_executor"]["command_executed"] is False
+    assert report["one_action_local_apply_executor"]["command_returncode"] is None
 
 
 def test_completed_one_action_controller_selects_apply_runner_next(tmp_path):
@@ -410,11 +438,47 @@ def test_valid_anthony_approval_marks_one_action_execute_gate_armed_but_executes
     assert report["one_action_execute_gate"]["command_execution_allowed"] is True
     assert report["one_action_execute_gate"]["command_executed"] is False
     assert report["one_action_execute_gate"]["commands_executed"] is False
+    assert report["local_executor_request"]["requested"] is True
+    assert report["local_executor_request"]["mode"] == "ONE_ACTION_LOCAL_APPLY_EXECUTOR"
+    assert report["local_executor_request"]["approved_by"] == "Anthony Meza"
+    assert report["local_executor_request"]["approval_token_present"] is True
+    assert report["local_executor_request"]["requested_action"] == "build_self_build_one_action_local_apply_executor"
+    assert report["local_executor_request"]["selected_queue_action"] == "build_self_build_one_action_local_apply_executor"
+    assert report["one_action_local_executor_options"] == {"execute": False}
+    assert report["one_action_local_apply_executor"]["executor_status"] == "dry_run_ready"
+    assert report["one_action_local_apply_executor"]["executor_mode"] == "DRY_RUN"
+    assert report["one_action_local_apply_executor"]["command_execution_allowed"] is True
+    assert report["one_action_local_apply_executor"]["command_executed"] is False
+    assert report["one_action_local_apply_executor"]["command_returncode"] is None
+    assert report["one_action_local_apply_executor"]["post_execution_evidence"]["command_runner_called"] is False
     assert report["safety"]["local_apply_executed"] is False
     assert report["safety"]["generated_commands_executed"] is False
     assert report["safety"]["files_written"] is False
     assert report["safety"]["reports_written"] is False
     assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
+
+
+def test_completed_local_apply_executor_selects_execution_result_collector_next(tmp_path):
+    module = load_module()
+    seed_completed_paths(tmp_path, COMPLETED_BEFORE_RESULT_COLLECTOR)
+    report = module.run_self_build_dry_run_driver(
+        tmp_path,
+        preview_approved_scope="self-build-core",
+        wake_runner=fake_wake_runner,
+    )
+
+    assert report["selected_next_action"] == "build_self_build_one_action_execution_result_collector"
+    assert report["selected_queue_item"]["allowed_paths"] == [
+        "automation/orchestration/aios_self_build_one_action_execution_result_collector.py",
+        "tests/orchestration/test_aios_self_build_one_action_execution_result_collector.py",
+        "docs/orchestration/AIOS_SELF_BUILD_ONE_ACTION_EXECUTION_RESULT_COLLECTOR.md",
+    ]
+    assert report["selected_queue_item"]["validators"] == [
+        "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_one_action_execution_result_collector.py",
+    ]
+    assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
+    assert report["one_action_local_apply_executor"]["command_executed"] is False
+    assert report["one_action_local_apply_executor"]["command_returncode"] is None
 
 
 def test_driver_handles_sandbox_1312_as_blocker_not_sos():
