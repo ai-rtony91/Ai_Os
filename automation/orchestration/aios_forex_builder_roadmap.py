@@ -134,7 +134,8 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             risk_level="low",
             required_files=[
                 "docs/trading_lab/AIOS_FOREX_BUILDER_DATA_SCHEMAS.md",
-                "tests/orchestration/test_aios_forex_builder_data_schemas.py",
+                "automation/forex_engine/schema_contracts.py",
+                "tests/forex_engine/test_schema_contracts.py",
             ],
             purpose=(
                 "Define local fixture schemas for market data, signals, orders-as-intent, "
