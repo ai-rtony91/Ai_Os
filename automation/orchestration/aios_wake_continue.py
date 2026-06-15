@@ -34,6 +34,8 @@ FOREX_PAPER_EXECUTION_SIMULATOR_PATH = Path("apps/trading_lab/trading_lab/forex_
 FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH = Path("tests/trading_lab/test_forex_paper_execution_simulator.py")
 FOREX_EXECUTION_LEDGER_INTEGRATION_PATH = Path("apps/trading_lab/trading_lab/forex_execution_ledger_integration.py")
 FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH = Path("tests/trading_lab/test_forex_execution_ledger_integration.py")
+FOREX_PORTFOLIO_STATE_PATH = Path("apps/trading_lab/trading_lab/forex_portfolio_state.py")
+FOREX_PORTFOLIO_STATE_TEST_PATH = Path("tests/trading_lab/test_forex_portfolio_state.py")
 FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
 NEXT_BUILD_PLAN_ROUTER_PATH = Path("automation/orchestration/aios_next_build_plan.py")
 BOUNDED_EXECUTOR_HANDOFF_PATH = Path("automation/orchestration/aios_bounded_executor_handoff.py")
@@ -119,6 +121,8 @@ def read_repo_state(repo_root: Path) -> dict[str, bool]:
         "forex_execution_ledger_integration_test_exists": (
             repo_root / FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH
         ).exists(),
+        "forex_portfolio_state_exists": (repo_root / FOREX_PORTFOLIO_STATE_PATH).exists(),
+        "forex_portfolio_state_test_exists": (repo_root / FOREX_PORTFOLIO_STATE_TEST_PATH).exists(),
     }
 
 
@@ -161,9 +165,13 @@ def select_next_action(goal: str, repo_state: dict[str, bool]) -> tuple[str, str
         return "blocked", "forex_paper_execution_simulator_incomplete"
     if repo_state["forex_execution_ledger_integration_exists"] != repo_state["forex_execution_ledger_integration_test_exists"]:
         return "blocked", "forex_execution_ledger_integration_incomplete"
+    if repo_state["forex_portfolio_state_exists"] != repo_state["forex_portfolio_state_test_exists"]:
+        return "blocked", "forex_portfolio_state_incomplete"
     if repo_state["forex_risk_controls_exists"]:
         if repo_state["forex_paper_execution_simulator_exists"]:
             if repo_state["forex_execution_ledger_integration_exists"]:
+                if repo_state["forex_portfolio_state_exists"]:
+                    return "validate_all_forex_with_portfolio_state", None
                 return "validate_all_forex_with_execution_ledger_integration", None
             return "validate_all_forex_with_risk_controls_and_execution_simulator", None
         return "validate_all_forex_with_risk_controls", None
@@ -265,6 +273,25 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
             FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH.as_posix(),
         ]
+    if action == "validate_all_forex_with_portfolio_state":
+        return [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-p",
+            "no:cacheprovider",
+            FOREX_BOT_TEST_PATH.as_posix(),
+            FOREX_BACKTEST_TEST_PATH.as_posix(),
+            FOREX_LEDGER_TEST_PATH.as_posix(),
+            FOREX_STRATEGY_TEST_PATH.as_posix(),
+            FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
+            FOREX_REPORT_TEST_PATH.as_posix(),
+            FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
+            FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
+            FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
+            FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH.as_posix(),
+            FOREX_PORTFOLIO_STATE_TEST_PATH.as_posix(),
+        ]
     raise ValueError(f"unsupported action: {action}")
 
 
@@ -321,6 +348,10 @@ def component_inventory_from_repo_state(repo_state: dict[str, bool]) -> dict[str
         "forex_execution_ledger_integration": bool(
             repo_state.get("forex_execution_ledger_integration_exists")
             and repo_state.get("forex_execution_ledger_integration_test_exists")
+        ),
+        "forex_portfolio_state": bool(
+            repo_state.get("forex_portfolio_state_exists")
+            and repo_state.get("forex_portfolio_state_test_exists")
         ),
     }
 
@@ -388,7 +419,72 @@ def build_execution_ledger_integration_plan(goal: str) -> dict[str, Any]:
     }
 
 
+def build_portfolio_state_plan(goal: str) -> dict[str, Any]:
+    return {
+        "schema": "AIOS_NEXT_BUILD_PLAN.v1",
+        "goal": goal,
+        "input_decision": "build_forex_portfolio_state",
+        "route": "build_next_paper_component",
+        "next_component": "forex_portfolio_state",
+        "next_packet_id": "PKT-AIOS-FOREX-PORTFOLIO-STATE-APPLY",
+        "reason_code": "execution_ledger_integration_validated_portfolio_state_missing",
+        "plan_reasons": [
+            "execution_ledger_integration_validated_portfolio_state_missing",
+            "route:build_next_paper_component",
+        ],
+        "next_safe_action": "Prepare bounded portfolio-state packet for Anthony review.",
+        "approval_required": approval_required(),
+        "safety": safety_flags(),
+    }
+
+
+def build_portfolio_state_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
+    validators = [
+        "python -m pytest -p no:cacheprovider tests/trading_lab/test_forex_portfolio_state.py",
+        (
+            "python -m pytest -p no:cacheprovider "
+            "tests/orchestration/test_aios_productive_bounded_executor.py "
+            "tests/orchestration/test_aios_wake_continue.py"
+        ),
+    ]
+    return {
+        "schema": "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1",
+        "goal": next_build_plan.get("goal", "forex-paper-bot"),
+        "input_route": next_build_plan.get("route", "build_next_paper_component"),
+        "next_component": "forex_portfolio_state",
+        "next_packet_id": "PKT-AIOS-FOREX-PORTFOLIO-STATE-APPLY",
+        "handoff_status": "ready",
+        "reason_code": next_build_plan.get(
+            "reason_code",
+            "execution_ledger_integration_validated_portfolio_state_missing",
+        ),
+        "executor_mode": "local_apply_after_human_review",
+        "allowed_action": "build_forex_portfolio_state",
+        "allowed_paths": [
+            "apps/trading_lab/trading_lab/forex_portfolio_state.py",
+            "tests/trading_lab/test_forex_portfolio_state.py",
+            "docs/orchestration/AIOS_FOREX_PORTFOLIO_STATE.md",
+            "automation/orchestration/aios_productive_bounded_executor.py",
+            "tests/orchestration/test_aios_productive_bounded_executor.py",
+            "automation/orchestration/aios_wake_continue.py",
+            "tests/orchestration/test_aios_wake_continue.py",
+        ],
+        "validators": validators,
+        "command_preview": [
+            (
+                "python automation/orchestration/aios_productive_bounded_executor.py "
+                "--goal forex-paper-bot --action build_forex_portfolio_state --apply --max-repairs 1"
+            )
+        ],
+        "approval_required": approval_required(),
+        "safety": safety_flags(),
+        "next_safe_action": "Prepare bounded portfolio-state packet for Anthony review.",
+    }
+
+
 def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
+    if next_build_plan.get("next_component") == "forex_portfolio_state":
+        return build_portfolio_state_handoff(next_build_plan)
     handoff_path = Path(__file__).with_name("aios_bounded_executor_handoff.py")
     spec = importlib.util.spec_from_file_location("aios_bounded_executor_handoff", handoff_path)
     if spec is None or spec.loader is None:
@@ -471,6 +567,35 @@ def build_operator_relay(
 
 
 def build_local_runner_bridge(bounded_executor_handoff: dict[str, Any]) -> dict[str, Any]:
+    if bounded_executor_handoff.get("allowed_action") == "build_forex_portfolio_state":
+        command = (
+            "Set-Location -LiteralPath 'C:\\Dev\\Ai.Os'; "
+            "python .\\automation\\orchestration\\aios_productive_bounded_executor.py "
+            "--goal forex-paper-bot --action build_forex_portfolio_state --apply --max-repairs 1"
+        )
+        return {
+            "schema": "AIOS_LOCAL_RUNNER_BRIDGE.v1",
+            "runner_status": "preview_ready",
+            "command_preview": [command],
+            "working_directory": "C:\\Dev\\Ai.Os",
+            "validation_commands": bounded_executor_handoff.get("validators", []),
+            "forbidden_actions": [
+                "git_add",
+                "git_commit",
+                "git_push",
+                "git_merge",
+                "scheduler",
+                "daemon",
+                "worker_dispatch",
+                "broker",
+                "live_trading",
+                "credentials",
+                "real_orders",
+                "real_webhooks",
+            ],
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+        }
     bridge_path = Path(__file__).with_name("aios_local_runner_bridge.py")
     spec = importlib.util.spec_from_file_location("aios_local_runner_bridge", bridge_path)
     if spec is None or spec.loader is None:
@@ -490,6 +615,21 @@ def build_local_runner_bridge(bounded_executor_handoff: dict[str, Any]) -> dict[
 
 
 def build_bounded_executor_ready(bounded_executor_handoff: dict[str, Any]) -> dict[str, Any]:
+    if bounded_executor_handoff.get("allowed_action") == "build_forex_portfolio_state":
+        return {
+            "schema": "AIOS_BOUNDED_EXECUTOR_READY.v1",
+            "goal": bounded_executor_handoff.get("goal", "forex-paper-bot"),
+            "status": "ready_for_human_review",
+            "reason_code": "portfolio_state_handoff_bounded_ready",
+            "allowed_action": "build_forex_portfolio_state",
+            "allowed_paths_bounded": True,
+            "validators_bounded": True,
+            "command_execution": False,
+            "executed": False,
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+            "next_safe_action": "Prepare or apply the bounded portfolio-state packet after Anthony approval.",
+        }
     ready_path = Path(__file__).with_name("aios_bounded_executor_ready.py")
     spec = importlib.util.spec_from_file_location("aios_bounded_executor_ready", ready_path)
     if spec is None or spec.loader is None:
@@ -528,13 +668,35 @@ def build_control_plane_status(
         }
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.build_control_plane_status(
+    status = module.build_control_plane_status(
         resume_state=resume_state,
         cli_result_ingest=cli_result_ingest,
         operator_relay=operator_relay,
         local_runner_bridge=local_runner_bridge,
         bounded_executor_ready=bounded_executor_ready,
     )
+    if bounded_executor_ready.get("allowed_action") == "build_forex_portfolio_state":
+        blockers = list(status.get("blockers") or [])
+        safety = status.get("safety") or safety_flags()
+        unsafe = any(
+            bool(safety.get(key))
+            for key in [
+                "broker",
+                "live_trading",
+                "real_orders",
+                "scheduler",
+                "daemon",
+                "worker_dispatch",
+                "queue_mutation",
+                "approval_mutation",
+            ]
+        )
+        if not blockers and not unsafe and resume_state.get("resume_ready") is True:
+            status["dashboard_ready"] = True
+            status["loop_status"] = "ready_for_human_review"
+            status["next_component"] = "forex_portfolio_state"
+            status["next_action"] = "Prepare bounded portfolio-state packet for Anthony review."
+    return status
 
 
 def build_mode_capability_registry() -> dict[str, Any]:
@@ -609,7 +771,7 @@ def build_continuation_controller(
         }
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module.build_continuation_controller(
+    controller = module.build_continuation_controller(
         resume_state=resume_state,
         control_plane_status=control_plane_status,
         bounded_executor_handoff=bounded_executor_handoff,
@@ -617,6 +779,27 @@ def build_continuation_controller(
         mode_registry=mode_registry,
         user_goal=user_goal,
     )
+    if (
+        bounded_executor_handoff.get("allowed_action") == "build_forex_portfolio_state"
+        and bounded_executor_ready.get("status") == "ready_for_human_review"
+    ):
+        controller.update(
+            {
+                "continuation_status": "ready_for_human_approved_execution",
+                "next_component": "forex_portfolio_state",
+                "next_action": "build_forex_portfolio_state",
+                "action_type": "execute_existing_tool_after_human_approval",
+                "codex_packet_required": False,
+                "local_runner_available": True,
+                "productive_executor_available": True,
+                "sos_required": False,
+                "reason_code": "productive_executor_support_available",
+                "next_safe_action": (
+                    "After Anthony approval, run the existing productive executor for build_forex_portfolio_state."
+                ),
+            }
+        )
+    return controller
 
 
 def build_sos_escalation(status: dict[str, Any]) -> dict[str, Any]:
@@ -802,6 +985,7 @@ def run_wake_continue(
                 "validate_all_forex_with_risk_controls",
                 "validate_all_forex_with_risk_controls_and_execution_simulator",
                 "validate_all_forex_with_execution_ledger_integration",
+                "validate_all_forex_with_portfolio_state",
             }:
                 component_inventory = component_inventory_from_repo_state(repo_state)
                 post_risk_decision = build_post_risk_decision(component_inventory, goal)
@@ -811,6 +995,11 @@ def run_wake_continue(
                     and not component_inventory["forex_execution_ledger_integration"]
                 ):
                     next_build_plan = build_execution_ledger_integration_plan(goal)
+                elif (
+                    selected_action == "validate_all_forex_with_execution_ledger_integration"
+                    and not component_inventory["forex_portfolio_state"]
+                ):
+                    next_build_plan = build_portfolio_state_plan(goal)
                 else:
                     next_build_plan = build_next_build_plan(post_risk_decision)
             else:
