@@ -373,13 +373,36 @@ def test_default_memory_includes_stress_oos_completion() -> None:
         for record in records
         if record["packet_id"] == "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
     ][0]
+    assert stress_oos["landed_pr"] == "#747"
     assert stress_oos["title"] == "Add paper-forward stress and out-of-sample validation"
     assert stress_oos["lane"] == "paper-forward-stress-and-out-of-sample"
+    assert (
+        stress_oos["completion_reason"]
+        == "stress scenarios, OOS validation, heldout fixtures, leave-one-regime/symbol/timeframe checks, combined stress/OOS gate, readiness/dashboard propagation, docs, and tests landed on main"
+    )
     assert "automation/forex_engine/paper_forward_stress.py" in stress_oos["completed_files"]
     assert "automation/forex_engine/out_of_sample_validator.py" in stress_oos["completed_files"]
     assert "automation/forex_engine/run_stress_and_oos_demo.py" in stress_oos["completed_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_AND_OUT_OF_SAMPLE.md" in stress_oos["completed_files"]
     assert "tests/forex_engine/test_out_of_sample_validator.py" in stress_oos["completed_files"]
+
+
+def test_default_memory_includes_broker_paper_sandbox_readiness_contract_completion() -> None:
+    result = build_result(candidate_packets=[])
+
+    assert "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT" in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    readiness = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT"
+    ][0]
+    assert readiness["title"] == "Add broker-paper sandbox readiness contract"
+    assert readiness["lane"] == "broker-paper-sandbox-readiness-contract"
+    assert "automation/forex_engine/broker_paper_sandbox_readiness.py" in readiness["completed_files"]
+    assert "automation/forex_engine/run_broker_paper_sandbox_readiness_demo.py" in readiness["completed_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_SANDBOX_READINESS_CONTRACT.md" in readiness["completed_files"]
+    assert "tests/forex_engine/test_broker_paper_sandbox_readiness.py" in readiness["completed_files"]
 
 
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
@@ -501,7 +524,7 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V1"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
@@ -515,7 +538,8 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2" not in active_ids
     assert "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT"
+    assert "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V1"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:

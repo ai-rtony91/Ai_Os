@@ -99,8 +99,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["v2_evidence_ready"] in {True, False}
     assert review["stress_oos_ready"] in {True, False}
     assert review["broker_paper_sandbox_ready"] is False
+    assert review["broker_paper_sandbox_readiness_status"] in {
+        "NOT_READY",
+        "WATCHLIST",
+        "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
+    }
+    assert review["broker_paper_sandbox_contract_ready"] in {True, False}
     assert review["live_trade_ready"] is False
     assert review["protected_gate_required"] is True
+    assert review["broker_integration_active"] is False
+    assert review["credentials_required_now"] is False
     assert review["evidence_summary"]["fixture_count"] == 9
     assert review["evidence_summary"]["starting_balance"] == 500.0
     assert review["evidence_summary"]["ending_balance"] >= 500.0
@@ -119,6 +127,14 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["heldout_consistency_pct"] >= 0.0
     assert review["evidence_summary"]["degradation_pct"] >= 0.0
     assert review["evidence_summary"]["broker_paper_sandbox_ready"] is False
+    assert review["evidence_summary"]["broker_paper_sandbox_readiness_status"] in {
+        "NOT_READY",
+        "WATCHLIST",
+        "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
+    }
+    assert review["evidence_summary"]["broker_paper_sandbox_contract_ready"] in {True, False}
+    assert review["evidence_summary"]["broker_integration_active"] is False
+    assert review["evidence_summary"]["credentials_required_now"] is False
     assert "broker integration is not approved" in review["live_trade_blockers"]
     assert "live readiness requires separate future approval" in review["next_safe_action"]
 
