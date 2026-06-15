@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import subprocess
 import sys
@@ -32,6 +33,9 @@ FOREX_REPORT_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_REPORT.md")
 FOREX_DECISION_POLICY_PATH = Path("apps/trading_lab/trading_lab/forex_decision_policy.py")
 FOREX_DECISION_POLICY_TEST_PATH = Path("tests/trading_lab/test_forex_decision_policy.py")
 FOREX_DECISION_POLICY_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_DECISION_POLICY.md")
+FOREX_RISK_CONTROLS_PATH = Path("apps/trading_lab/trading_lab/forex_risk_controls.py")
+FOREX_RISK_CONTROLS_TEST_PATH = Path("tests/trading_lab/test_forex_risk_controls.py")
+FOREX_RISK_CONTROLS_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_RISK_CONTROLS.md")
 FOREX_SCAFFOLD_PATHS = (
     FOREX_BOT_PATH,
     FOREX_BOT_TEST_PATH,
@@ -66,6 +70,11 @@ FOREX_DECISION_POLICY_PATHS = (
     FOREX_DECISION_POLICY_PATH,
     FOREX_DECISION_POLICY_TEST_PATH,
     FOREX_DECISION_POLICY_DOC_PATH,
+)
+FOREX_RISK_CONTROLS_PATHS = (
+    FOREX_RISK_CONTROLS_PATH,
+    FOREX_RISK_CONTROLS_TEST_PATH,
+    FOREX_RISK_CONTROLS_DOC_PATH,
 )
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -1936,6 +1945,21 @@ def write_forex_decision_policy(repo_root: Path) -> list[str]:
     return files_written
 
 
+def _load_productive_bounded_executor():
+    module_path = Path(__file__).with_name("aios_productive_bounded_executor.py")
+    spec = importlib.util.spec_from_file_location("aios_productive_bounded_executor", module_path)
+    if spec is None or spec.loader is None:
+        raise ValueError("productive_bounded_executor_unavailable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def write_forex_risk_controls(repo_root: Path) -> list[str]:
+    module = _load_productive_bounded_executor()
+    return module.write_risk_controls_files(repo_root)
+
+
 def run_forex_bot_validator(repo_root: Path) -> dict[str, Any]:
     command = [
         sys.executable,
@@ -2118,6 +2142,11 @@ def run_forex_decision_policy_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_forex_risk_controls_validator(repo_root: Path) -> dict[str, Any]:
+    module = _load_productive_bounded_executor()
+    return module.run_risk_controls_validator(repo_root)
+
+
 def blocked_report(goal: str, mode: str, reason: str) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
@@ -2149,6 +2178,8 @@ def select_forex_continue_action(repo_root: Path) -> str:
         return "build_report"
     if not (repo_root / FOREX_DECISION_POLICY_PATH).exists():
         return "build_decision_policy"
+    if not all((repo_root / relative_path).exists() for relative_path in FOREX_RISK_CONTROLS_PATHS):
+        return "build_risk_controls"
     return "done"
 
 
@@ -2167,6 +2198,8 @@ def _apply_writer_for_action(repo_root: Path, action: str) -> tuple[list[str], V
         return write_forex_report(repo_root), run_forex_report_validator
     if action == "build_decision_policy":
         return write_forex_decision_policy(repo_root), run_forex_decision_policy_validator
+    if action == "build_risk_controls":
+        return write_forex_risk_controls(repo_root), run_forex_risk_controls_validator
     return [], None
 
 
@@ -2185,6 +2218,8 @@ def _repair_for_action(repo_root: Path, action: str) -> list[str]:
         return write_forex_report(repo_root)
     if action == "build_decision_policy":
         return write_forex_decision_policy(repo_root)
+    if action == "build_risk_controls":
+        return write_forex_risk_controls(repo_root)
     return []
 
 
@@ -2224,7 +2259,7 @@ def execute_goal(
     action = report["continue_action"]
     if action == "done":
         report["result"] = "DONE"
-        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, strategy rules, data import, report, and decision policy already exist. Review validators before the next build step."
+        report["next_safe_action"] = "Forex paper bot scaffold, backtest, ledger, strategy rules, data import, report, decision policy, and risk controls already exist. Review validators before the next build step."
         return report
 
     files_written, default_runner = _apply_writer_for_action(repo_root, action)

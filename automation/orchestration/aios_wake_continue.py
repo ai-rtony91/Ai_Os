@@ -28,6 +28,8 @@ FOREX_REPORT_PATH = Path("apps/trading_lab/trading_lab/forex_report.py")
 FOREX_REPORT_TEST_PATH = Path("tests/trading_lab/test_forex_report.py")
 FOREX_DECISION_POLICY_PATH = Path("apps/trading_lab/trading_lab/forex_decision_policy.py")
 FOREX_DECISION_POLICY_TEST_PATH = Path("tests/trading_lab/test_forex_decision_policy.py")
+FOREX_RISK_CONTROLS_PATH = Path("apps/trading_lab/trading_lab/forex_risk_controls.py")
+FOREX_RISK_CONTROLS_TEST_PATH = Path("tests/trading_lab/test_forex_risk_controls.py")
 FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
 NEXT_BUILD_PLAN_ROUTER_PATH = Path("automation/orchestration/aios_next_build_plan.py")
 BOUNDED_EXECUTOR_HANDOFF_PATH = Path("automation/orchestration/aios_bounded_executor_handoff.py")
@@ -94,6 +96,8 @@ def read_repo_state(repo_root: Path) -> dict[str, bool]:
         "forex_report_test_exists": (repo_root / FOREX_REPORT_TEST_PATH).exists(),
         "forex_decision_policy_exists": (repo_root / FOREX_DECISION_POLICY_PATH).exists(),
         "forex_decision_policy_test_exists": (repo_root / FOREX_DECISION_POLICY_TEST_PATH).exists(),
+        "forex_risk_controls_exists": (repo_root / FOREX_RISK_CONTROLS_PATH).exists(),
+        "forex_risk_controls_test_exists": (repo_root / FOREX_RISK_CONTROLS_TEST_PATH).exists(),
     }
 
 
@@ -130,6 +134,10 @@ def select_next_action(goal: str, repo_state: dict[str, bool]) -> tuple[str, str
         return "build_forex_decision_policy", None
     if not repo_state["forex_decision_policy_test_exists"]:
         return "blocked", "forex_decision_policy_test_missing"
+    if repo_state["forex_risk_controls_exists"] != repo_state["forex_risk_controls_test_exists"]:
+        return "blocked", "forex_risk_controls_incomplete"
+    if repo_state["forex_risk_controls_exists"]:
+        return "validate_all_forex_with_risk_controls", None
     return "validate_all_forex", None
 
 
@@ -176,6 +184,22 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
             FOREX_REPORT_TEST_PATH.as_posix(),
             FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
+        ]
+    if action == "validate_all_forex_with_risk_controls":
+        return [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-p",
+            "no:cacheprovider",
+            FOREX_BOT_TEST_PATH.as_posix(),
+            FOREX_BACKTEST_TEST_PATH.as_posix(),
+            FOREX_LEDGER_TEST_PATH.as_posix(),
+            FOREX_STRATEGY_TEST_PATH.as_posix(),
+            FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
+            FOREX_REPORT_TEST_PATH.as_posix(),
+            FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
+            FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
         ]
     raise ValueError(f"unsupported action: {action}")
 
@@ -236,6 +260,25 @@ def build_next_build_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.build_next_build_plan(goal_decision)
+
+
+def build_post_risk_controls_review_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
+    decision_reasons = goal_decision.get("decision_reasons", [])
+    if not isinstance(decision_reasons, list):
+        decision_reasons = [str(decision_reasons)]
+    return {
+        "schema": "AIOS_NEXT_BUILD_PLAN.v1",
+        "goal": goal_decision.get("goal", "forex-paper-bot"),
+        "input_decision": goal_decision.get("decision", "continue_build"),
+        "route": "stop",
+        "next_component": "none",
+        "next_packet_id": "NONE",
+        "reason_code": "forex_risk_controls_validated",
+        "plan_reasons": [*decision_reasons, "risk_controls_validated", "route:stop"],
+        "next_safe_action": "Review the next paper-only Forex component after risk controls. Do not execute, stage, commit, push, or dispatch workers.",
+        "approval_required": approval_required(),
+        "safety": safety_flags(),
+    }
 
 
 def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
@@ -514,9 +557,14 @@ def run_wake_continue(
                 )
                 write_state(state_path, report)
                 return report
-            next_build_plan = build_next_build_plan(goal_decision)
+            if selected_action == "validate_all_forex_with_risk_controls":
+                next_build_plan = build_post_risk_controls_review_plan(goal_decision)
+            else:
+                next_build_plan = build_next_build_plan(goal_decision)
             report["next_build_plan"] = next_build_plan
             bounded_executor_handoff = build_bounded_executor_handoff(next_build_plan)
+            if selected_action == "validate_all_forex_with_risk_controls":
+                bounded_executor_handoff["next_safe_action"] = next_build_plan["next_safe_action"]
             report["bounded_executor_handoff"] = bounded_executor_handoff
             local_runner_bridge = build_local_runner_bridge(bounded_executor_handoff)
             report["local_runner_bridge"] = local_runner_bridge

@@ -87,6 +87,15 @@ def seed_decision_policy(repo_root: Path) -> None:
     test_path.write_text("# decision policy test placeholder\n", encoding="utf-8")
 
 
+def seed_risk_controls(repo_root: Path) -> None:
+    risk_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_risk_controls.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_risk_controls.py"
+    risk_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    risk_path.write_text("# risk controls placeholder\n", encoding="utf-8")
+    test_path.write_text("# risk controls test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -343,6 +352,33 @@ def test_write_resume_state_persists_after_done_when_requested(tmp_path):
     assert report["control_plane_status_path"] == "Reports/aios_control_plane/AIOS_CONTROL_PLANE_STATUS_latest.json"
     assert (tmp_path / report["control_plane_status_path"]).exists()
     assert report["next_safe_action"] == report["control_plane_status"]["next_action"]
+
+
+def test_validate_all_with_risk_controls_returns_review_required(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+    seed_risk_controls(tmp_path)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+    )
+    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["selected_action"] == "validate_all_forex_with_risk_controls"
+    assert report["next_build_plan"]["next_component"] == "none"
+    assert report["next_build_plan"]["reason_code"] == "forex_risk_controls_validated"
+    assert "after risk controls" in report["next_safe_action"]
 
 
 def test_validate_all_stop_route_returns_review_required(tmp_path, monkeypatch):
