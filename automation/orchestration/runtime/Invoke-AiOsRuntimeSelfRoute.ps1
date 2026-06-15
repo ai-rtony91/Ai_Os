@@ -104,6 +104,62 @@ function New-AiOsBlockedRoutePreview {
     }
 }
 
+function New-AiOsPacketQueueFallbackPlan {
+    param(
+        [string]$QueueStatus,
+        [string]$Reason
+    )
+
+    $nextSafeAction = if ($QueueStatus -eq "empty") {
+        "Add candidate packet evidence before planning queue selection."
+    }
+    else {
+        "Stop; packet queue planner evidence could not be generated."
+    }
+
+    return [pscustomobject]@{
+        schema = "AIOS_PACKET_QUEUE_PLANNER.v1"
+        queue_status = $QueueStatus
+        selected_packet = $null
+        ranked_packets = @()
+        blocked_packets = @()
+        collision_status = [pscustomobject]@{
+            status = "clear"
+            collisions = @()
+        }
+        required_approvals = @()
+        next_safe_action = $nextSafeAction
+        codex_ready_packet_preview = [pscustomobject]@{
+            packet_ready = $false
+            reason_code = $Reason
+            packet_id = $null
+            codex_prompt_text = ""
+            write_scope = @()
+            validator_chain = @()
+        }
+        commands_executed = @()
+        workers_dispatched = $false
+        queues_mutated = $false
+        approvals_mutated = $false
+        files_written = @()
+        safety = [pscustomobject]@{
+            preview_only = $true
+            evidence_only = $true
+            packet_execution = $false
+            codex_launch = $false
+            worker_dispatch = $false
+            queue_mutation = $false
+            approval_mutation = $false
+            reports_written = $false
+            network_access = $false
+            git_commit = $false
+            git_push = $false
+            git_merge = $false
+            branch_deletion = $false
+        }
+    }
+}
+
 if (-not ($QuietJson -or $OutputJson)) {
     Write-Host "AIOS Runtime Self Route"
     Write-Host "Mode: $(if ($Apply) { 'APPLY_REPORT_ONLY' } else { 'DRY_RUN_REPORT_ONLY' })"
@@ -121,6 +177,8 @@ $normalizedCommand = $recommendedCommand.Trim()
 $hasActionableCommand = -not [string]::IsNullOrWhiteSpace($normalizedCommand) -and $normalizedCommand -notmatch "(?i)^No command recommended"
 $commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommendedCommand.ps1"
 $routePreviewPath = "automation/orchestration/aios_bounded_worker_routing_preview.py"
+$packetQueuePlannerPath = "automation/orchestration/aios_packet_queue_planner.py"
+$packetQueueCandidateEvidenceJson = "[]"
 $validationOutput = @()
 $validationExitCode = $null
 $validationStatus = "NOT_RUN"
@@ -130,6 +188,19 @@ $routePreviewExitCode = $null
 $routePreviewStatus = "NOT_RUN"
 $routePreviewBlocker = ""
 $routePreviewNextSafeAction = ""
+$packetQueuePlan = $null
+$packetQueuePlannerOutput = @()
+$packetQueuePlannerExitCode = $null
+$packetQueuePlanStatus = "NOT_RUN"
+$packetQueuePlannerBlocker = ""
+$codexReadyPacketPreview = $null
+$selectedPacket = $null
+$packetQueueNextSafeAction = ""
+$packetQueueCommandsExecuted = @()
+$packetQueueWorkersDispatched = $false
+$packetQueueQueuesMutated = $false
+$packetQueueApprovalsMutated = $false
+$packetQueueFilesWritten = @()
 $routeStatus = "report_only"
 $exitCode = 0
 $rejectionReasons = @()
@@ -166,6 +237,60 @@ $validatedCommandEvidence = [ordered]@{
     output = @($validationOutput)
     execution_allowed = $false
 }
+
+if (-not (Test-Path -LiteralPath $packetQueuePlannerPath)) {
+    $packetQueuePlan = New-AiOsPacketQueueFallbackPlan `
+        -QueueStatus "blocked" `
+        -Reason "packet_queue_planner_missing"
+    $packetQueuePlanStatus = "blocked"
+    $packetQueuePlannerBlocker = "packet_queue_planner_missing"
+    $packetQueuePlannerExitCode = 1
+}
+else {
+    try {
+        $packetQueuePlannerOutput = @(
+            python $packetQueuePlannerPath `
+                --candidates $packetQueueCandidateEvidenceJson
+        )
+        $packetQueuePlannerExitCode = $LASTEXITCODE
+        $packetQueuePlanJson = ($packetQueuePlannerOutput -join "`n")
+        if ($packetQueuePlannerExitCode -ne 0) {
+            $packetQueuePlan = New-AiOsPacketQueueFallbackPlan `
+                -QueueStatus "blocked" `
+                -Reason "packet_queue_planner_nonzero_exit"
+            $packetQueuePlanStatus = "blocked"
+            $packetQueuePlannerBlocker = "packet_queue_planner_nonzero_exit"
+        }
+        elseif ([string]::IsNullOrWhiteSpace($packetQueuePlanJson)) {
+            $packetQueuePlan = New-AiOsPacketQueueFallbackPlan `
+                -QueueStatus "empty" `
+                -Reason "packet_queue_candidate_evidence_missing"
+            $packetQueuePlanStatus = "empty"
+            $packetQueuePlannerBlocker = "packet_queue_candidate_evidence_missing"
+        }
+        else {
+            $packetQueuePlan = $packetQueuePlanJson | ConvertFrom-Json
+            $packetQueuePlanStatus = [string](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "queue_status" -Default "UNKNOWN")
+        }
+    }
+    catch {
+        $packetQueuePlan = New-AiOsPacketQueueFallbackPlan `
+            -QueueStatus "blocked" `
+            -Reason "packet_queue_planner_generation_failed"
+        $packetQueuePlanStatus = "blocked"
+        $packetQueuePlannerBlocker = "packet_queue_planner_generation_failed"
+        $packetQueuePlannerExitCode = 1
+    }
+}
+
+$codexReadyPacketPreview = Get-AiOsObjectProperty -Object $packetQueuePlan -Name "codex_ready_packet_preview" -Default $null
+$selectedPacket = Get-AiOsObjectProperty -Object $packetQueuePlan -Name "selected_packet" -Default $null
+$packetQueueNextSafeAction = [string](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "next_safe_action" -Default "")
+$packetQueueCommandsExecuted = @(Get-AiOsObjectProperty -Object $packetQueuePlan -Name "commands_executed" -Default @())
+$packetQueueWorkersDispatched = [bool](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "workers_dispatched" -Default $false)
+$packetQueueQueuesMutated = [bool](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "queues_mutated" -Default $false)
+$packetQueueApprovalsMutated = [bool](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "approvals_mutated" -Default $false)
+$packetQueueFilesWritten = @(Get-AiOsObjectProperty -Object $packetQueuePlan -Name "files_written" -Default @())
 
 if ($routeStatus -eq "report_only") {
     if ($contractStatus -eq "BLOCKED" -or $approvalRequired) {
@@ -246,6 +371,15 @@ elseif ($routePreviewStatus -eq "route_ready" -and $validationStatus -notin @("P
     $rejectionReasons += "route_preview_ready_without_validated_command"
 }
 
+if ($packetQueuePlanStatus -in @("blocked", "rejected")) {
+    $routeStatus = $packetQueuePlanStatus
+    $exitCode = 1
+    $rejectionReasons += "packet_queue_plan_$packetQueuePlanStatus"
+    if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
+        $rejectionReasons += "packet_queue_blocker:$packetQueuePlannerBlocker"
+    }
+}
+
 $nextSafeAction = if (-not [string]::IsNullOrWhiteSpace($contractNextSafeAction)) {
     $contractNextSafeAction
 }
@@ -273,6 +407,16 @@ $report = [pscustomobject]@{
     route_preview_status = $routePreviewStatus
     route_preview_exit_code = $routePreviewExitCode
     route_preview = $routePreview
+    packet_queue_plan_status = $packetQueuePlanStatus
+    packet_queue_plan = $packetQueuePlan
+    codex_ready_packet_preview = $codexReadyPacketPreview
+    selected_packet = $selectedPacket
+    packet_queue_next_safe_action = $packetQueueNextSafeAction
+    packet_queue_commands_executed = @($packetQueueCommandsExecuted)
+    packet_queue_workers_dispatched = $packetQueueWorkersDispatched
+    packet_queue_queues_mutated = $packetQueueQueuesMutated
+    packet_queue_approvals_mutated = $packetQueueApprovalsMutated
+    packet_queue_files_written = @($packetQueueFilesWritten)
     command_execution_allowed = $false
     command_executed = $false
     rejection_reasons = @($rejectionReasons | Select-Object -Unique)
@@ -315,6 +459,10 @@ Write-Host "Command validation: $validationStatus"
 Write-Host "Route preview: $routePreviewStatus"
 if (-not [string]::IsNullOrWhiteSpace($routePreviewBlocker)) {
     Write-Host "Route preview blocker: $routePreviewBlocker"
+}
+Write-Host "Packet queue plan: $packetQueuePlanStatus"
+if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
+    Write-Host "Packet queue blocker: $packetQueuePlannerBlocker"
 }
 foreach ($line in $validationOutput) {
     Write-Host $line
