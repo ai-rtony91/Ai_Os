@@ -96,6 +96,15 @@ def seed_risk_controls(repo_root: Path) -> None:
     test_path.write_text("# risk controls test placeholder\n", encoding="utf-8")
 
 
+def seed_execution_simulator(repo_root: Path) -> None:
+    simulator_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_paper_execution_simulator.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_paper_execution_simulator.py"
+    simulator_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    simulator_path.write_text("# execution simulator placeholder\n", encoding="utf-8")
+    test_path.write_text("# execution simulator test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -354,7 +363,7 @@ def test_write_resume_state_persists_after_done_when_requested(tmp_path):
     assert report["next_safe_action"] == report["control_plane_status"]["next_action"]
 
 
-def test_validate_all_with_risk_controls_returns_review_required(tmp_path):
+def test_validate_all_with_risk_controls_selects_execution_simulator(tmp_path):
     module = load_module()
     seed_executor(tmp_path)
     seed_scaffold(tmp_path)
@@ -374,11 +383,83 @@ def test_validate_all_with_risk_controls_returns_review_required(tmp_path):
         state_path=tmp_path / "state.json",
         command_runner=passing_runner,
     )
-    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
     assert report["selected_action"] == "validate_all_forex_with_risk_controls"
-    assert report["next_build_plan"]["next_component"] == "none"
-    assert report["next_build_plan"]["reason_code"] == "forex_risk_controls_validated"
-    assert "after risk controls" in report["next_safe_action"]
+    assert report["post_risk_decision"]["schema"] == "AIOS_FOREX_POST_RISK_DECISION.v1"
+    assert report["post_risk_decision"]["selected_next_component"] == "forex_paper_execution_simulator"
+    assert report["post_risk_decision"]["selected_action"] == "build_forex_paper_execution_simulator"
+    assert report["next_build_plan"]["next_component"] == "forex_paper_execution_simulator"
+    assert report["next_build_plan"]["next_packet_id"] == "PKT-AIOS-FOREX-PAPER-EXECUTION-SIMULATOR-CONTINUATION-APPLY"
+    assert report["bounded_executor_handoff"]["handoff_status"] == "ready"
+    assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_paper_execution_simulator"
+    assert report["bounded_executor_ready"]["status"] == "ready_for_human_review"
+    assert report["control_plane_status"]["dashboard_ready"] is True
+    assert "paper execution simulator" in report["next_safe_action"]
+
+
+def test_emit_continuation_controller_includes_packet_preview_for_execution_simulator(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+    seed_risk_controls(tmp_path)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+        emit_continuation_controller=True,
+    )
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
+    assert report["mode_capability_registry"]["schema"] == "AIOS_MODE_CAPABILITY_REGISTRY.v1"
+    assert report["build_intent_route"]["route_status"] == "ready_for_forex_control_plane"
+    assert report["continuation_controller"]["schema"] == "AIOS_CONTINUATION_CONTROLLER.v1"
+    assert report["continuation_controller"]["continuation_status"] == "ready_to_prepare_packet"
+    assert report["continuation_controller"]["next_component"] == "forex_paper_execution_simulator"
+    assert report["continuation_controller"]["codex_packet_required"] is True
+    assert report["codex_packet_preview"]["schema"] == "AIOS_CODEX_PACKET_BUILDER.v1"
+    assert report["codex_packet_preview"]["packet_ready"] is True
+    assert report["codex_packet_preview"]["packet_id"] == "PKT-AIOS-FOREX-PAPER-EXECUTION-SIMULATOR-CONTINUATION-APPLY"
+    assert "CODEX-ONLY PROMPT" in report["codex_packet_preview"]["codex_prompt_text"]
+    assert report["sos_escalation"]["schema"] == "AIOS_SOS_ESCALATION_POLICY.v1"
+    assert report["sos_escalation"]["sos_required"] is False
+    assert report["next_safe_action"] == report["continuation_controller"]["next_safe_action"]
+
+
+def test_validate_all_with_execution_simulator_present_stops_for_review(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+    seed_risk_controls(tmp_path)
+    seed_execution_simulator(tmp_path)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+    )
+    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["post_risk_decision"]["selected_next_component"] == "none"
+    assert report["post_risk_decision"]["reason_code"] == "current_inventory_complete_for_defined_scope"
+    assert report["next_build_plan"]["route"] == "stop"
+    assert report["bounded_executor_handoff"]["handoff_status"] == "stopped"
 
 
 def test_validate_all_stop_route_returns_review_required(tmp_path, monkeypatch):
