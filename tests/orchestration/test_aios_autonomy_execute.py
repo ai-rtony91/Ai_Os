@@ -73,6 +73,14 @@ def load_generated_decision_policy(path: Path):
     return module
 
 
+def load_generated_risk_controls(path: Path):
+    spec = importlib.util.spec_from_file_location("forex_risk_controls", path)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
 def passing_validator(_repo_root: Path) -> dict[str, object]:
     return {
         "name": "fake_validator",
@@ -265,7 +273,7 @@ def test_continue_selects_decision_policy_when_prior_forex_components_exist(tmp_
     )
 
 
-def test_continue_done_when_all_decision_policy_components_exist(tmp_path):
+def test_continue_selects_risk_controls_when_decision_policy_exists(tmp_path):
     module = load_executor_module()
     module.write_forex_scaffold(tmp_path)
     module.write_forex_backtest(tmp_path)
@@ -274,6 +282,35 @@ def test_continue_done_when_all_decision_policy_components_exist(tmp_path):
     module.write_forex_data_import(tmp_path)
     module.write_forex_report(tmp_path)
     module.write_forex_decision_policy(tmp_path)
+    report = module.execute_goal(
+        tmp_path,
+        "forex-paper-bot",
+        apply=True,
+        continue_goal=True,
+        max_repairs=1,
+        validator_runner=passing_validator,
+    )
+    assert report["result"] == "passed"
+    assert report["continue_action"] == "build_risk_controls"
+    assert sorted(report["files_written"]) == sorted(
+        [
+            "apps/trading_lab/trading_lab/forex_risk_controls.py",
+            "tests/trading_lab/test_forex_risk_controls.py",
+            "docs/orchestration/AIOS_FOREX_RISK_CONTROLS.md",
+        ]
+    )
+
+
+def test_continue_done_when_all_risk_control_components_exist(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.write_forex_backtest(tmp_path)
+    module.write_forex_ledger(tmp_path)
+    module.write_forex_strategy(tmp_path)
+    module.write_forex_data_import(tmp_path)
+    module.write_forex_report(tmp_path)
+    module.write_forex_decision_policy(tmp_path)
+    module.write_forex_risk_controls(tmp_path)
     report = module.execute_goal(
         tmp_path,
         "forex-paper-bot",
@@ -415,6 +452,26 @@ def test_generated_forex_decision_policy_imports(tmp_path):
     assert decision["paper_only"] is True
     assert decision["decision"] == "continue_build"
     assert decision["execution_allowed"] is False
+
+
+def test_generated_forex_risk_controls_imports(tmp_path):
+    module = load_executor_module()
+    module.write_forex_scaffold(tmp_path)
+    module.write_forex_backtest(tmp_path)
+    module.write_forex_ledger(tmp_path)
+    module.write_forex_strategy(tmp_path)
+    module.write_forex_data_import(tmp_path)
+    module.write_forex_report(tmp_path)
+    module.write_forex_decision_policy(tmp_path)
+    module.execute_goal(tmp_path, "forex-paper-bot", apply=True, continue_goal=True, validator_runner=passing_validator)
+    risk_controls = load_generated_risk_controls(tmp_path / "apps/trading_lab/trading_lab/forex_risk_controls.py")
+    decision = risk_controls.evaluate_risk_controls(
+        {"pair": "EURUSD", "action": "buy", "position_size_units": 10000, "risk_percent": 1.0},
+        {"daily_pnl": 0.0, "trades_today": 1},
+        {"max_position_size_units": 25000, "max_risk_percent": 2.0, "daily_loss_limit": 500.0, "max_trades_per_day": 5},
+    )
+    assert decision["paper_only"] is True
+    assert decision["allowed"] is True
 
 
 def test_valid_eurusd_paper_signal_allowed(tmp_path):
