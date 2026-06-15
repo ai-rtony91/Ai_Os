@@ -20,6 +20,18 @@ ACTION_ALLOWLIST = {
             "tests/orchestration/test_aios_wake_continue.py",
         },
         "validator_prefix": "python -m pytest -p no:cacheprovider",
+    },
+    "build_forex_paper_execution_simulator": {
+        "paths": {
+            "apps/trading_lab/trading_lab/forex_paper_execution_simulator.py",
+            "tests/trading_lab/test_forex_paper_execution_simulator.py",
+            "docs/orchestration/AIOS_FOREX_PAPER_EXECUTION_SIMULATOR.md",
+            "automation/orchestration/aios_productive_bounded_executor.py",
+            "tests/orchestration/test_aios_productive_bounded_executor.py",
+            "automation/orchestration/aios_wake_continue.py",
+            "tests/orchestration/test_aios_wake_continue.py",
+        },
+        "validator_prefix": "python -m pytest -p no:cacheprovider",
     }
 }
 
@@ -138,6 +150,8 @@ def build_bounded_executor_ready(bounded_executor_handoff: dict[str, Any] | None
         "next_safe_action": (
             "Prepare/apply the bounded risk controls packet only after Anthony approval."
             if status == "ready_for_human_review" and allowed_action == "build_forex_risk_controls"
+            else "Prepare/apply the bounded paper execution simulator packet only after Anthony approval."
+            if status == "ready_for_human_review" and allowed_action == "build_forex_paper_execution_simulator"
             else "Stop and repair bounded executor readiness before execution."
         ),
     }

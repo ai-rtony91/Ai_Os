@@ -16,13 +16,17 @@ def load_module():
     return module
 
 
-def plan(next_component: str, route: str = "build_next_paper_component") -> dict[str, object]:
+def plan(
+    next_component: str,
+    route: str = "build_next_paper_component",
+    next_packet_id: str = "PKT-AIOS-FOREX-RISK-CONTROLS-CONTINUATION-APPLY",
+) -> dict[str, object]:
     return {
         "schema": "AIOS_NEXT_BUILD_PLAN.v1",
         "goal": "forex-paper-bot",
         "route": route,
         "next_component": next_component,
-        "next_packet_id": "PKT-AIOS-FOREX-RISK-CONTROLS-CONTINUATION-APPLY",
+        "next_packet_id": next_packet_id,
     }
 
 
@@ -55,11 +59,44 @@ def test_allowed_paths_are_exactly_bounded_and_deterministic():
     ]
 
 
+def test_execution_simulator_handoff_is_ready_with_exact_paths():
+    module = load_module()
+    handoff = module.build_bounded_executor_handoff(
+        plan(
+            "forex_paper_execution_simulator",
+            next_packet_id="PKT-AIOS-FOREX-PAPER-EXECUTION-SIMULATOR-CONTINUATION-APPLY",
+        )
+    )
+    assert handoff["handoff_status"] == "ready"
+    assert handoff["executor_mode"] == "local_apply_after_human_review"
+    assert handoff["allowed_action"] == "build_forex_paper_execution_simulator"
+    assert handoff["next_component"] == "forex_paper_execution_simulator"
+    assert handoff["next_packet_id"] == "PKT-AIOS-FOREX-PAPER-EXECUTION-SIMULATOR-CONTINUATION-APPLY"
+    assert handoff["allowed_paths"] == [
+        "apps/trading_lab/trading_lab/forex_paper_execution_simulator.py",
+        "tests/trading_lab/test_forex_paper_execution_simulator.py",
+        "docs/orchestration/AIOS_FOREX_PAPER_EXECUTION_SIMULATOR.md",
+        "automation/orchestration/aios_productive_bounded_executor.py",
+        "tests/orchestration/test_aios_productive_bounded_executor.py",
+        "automation/orchestration/aios_wake_continue.py",
+        "tests/orchestration/test_aios_wake_continue.py",
+    ]
+
+
 def test_validators_are_present_and_deterministic():
     module = load_module()
     handoff = module.build_bounded_executor_handoff(plan("forex_risk_controls"))
     assert handoff["validators"] == [
         "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_autonomy_execute.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_risk_controls.py",
+    ]
+    assert handoff["command_preview"][-1] == handoff["validators"][0]
+
+
+def test_execution_simulator_validators_are_pytest_only():
+    module = load_module()
+    handoff = module.build_bounded_executor_handoff(plan("forex_paper_execution_simulator"))
+    assert handoff["validators"] == [
+        "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_productive_bounded_executor.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_paper_execution_simulator.py",
     ]
     assert handoff["command_preview"][-1] == handoff["validators"][0]
 

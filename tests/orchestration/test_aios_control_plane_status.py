@@ -16,7 +16,7 @@ def load_module():
     return module
 
 
-def resume_state(**safety_overrides: bool) -> dict[str, object]:
+def resume_state(next_component: str = "forex_risk_controls", **safety_overrides: bool) -> dict[str, object]:
     safety = {
         "broker": False,
         "live_trading": False,
@@ -31,7 +31,7 @@ def resume_state(**safety_overrides: bool) -> dict[str, object]:
         "schema": "AIOS_RESUME_STATE.v1",
         "goal": "forex-paper-bot",
         "resume_ready": True,
-        "next_build_plan": {"next_component": "forex_risk_controls"},
+        "next_build_plan": {"next_component": next_component},
         "next_safe_action": "Prepare bounded risk controls packet.",
         "approval_required": {"commit": True, "push": True},
         "safety": safety,
@@ -78,6 +78,32 @@ def test_dashboard_ready_true_for_safe_ready_state():
     assert status["next_component"] == "forex_risk_controls"
     assert status["dashboard_ready"] is True
     assert status["loop_status"] == "dashboard_ready"
+
+
+def test_dashboard_ready_true_for_execution_simulator_handoff():
+    module = load_module()
+    status = module.build_control_plane_status(
+        resume_state=resume_state("forex_paper_execution_simulator"),
+        cli_result_ingest={"blockers": []},
+        operator_relay={"next_safe_action": "Prepare simulator packet."},
+        local_runner_bridge=runner_bridge(),
+        bounded_executor_ready=ready_state(),
+    )
+    assert status["next_component"] == "forex_paper_execution_simulator"
+    assert status["dashboard_ready"] is True
+    assert status["loop_status"] == "dashboard_ready"
+
+
+def test_dashboard_ready_false_for_unknown_next_component():
+    module = load_module()
+    status = module.build_control_plane_status(
+        resume_state=resume_state("unknown_component"),
+        cli_result_ingest={"blockers": []},
+        local_runner_bridge=runner_bridge(),
+        bounded_executor_ready=ready_state(),
+    )
+    assert status["dashboard_ready"] is False
+    assert status["loop_status"] == "waiting_for_review"
 
 
 def test_dashboard_ready_false_for_broker_live_scheduler_or_daemon_flags():
