@@ -286,12 +286,63 @@ def test_apply_validate_all_action_returns_done_and_writes_state(tmp_path):
     assert report["bounded_executor_handoff"]["schema"] == "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1"
     assert report["bounded_executor_handoff"]["handoff_status"] == "ready"
     assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_risk_controls"
-    assert report["next_safe_action"] == report["bounded_executor_handoff"]["next_safe_action"]
+    assert report["cli_result_ingest"]["schema"] == "AIOS_CLI_RESULT_INGEST.v1"
+    assert report["local_runner_bridge"]["schema"] == "AIOS_LOCAL_RUNNER_BRIDGE.v1"
+    assert report["local_runner_bridge"]["runner_status"] == "preview_ready"
+    assert report["bounded_executor_ready"]["schema"] == "AIOS_BOUNDED_EXECUTOR_READY.v1"
+    assert report["bounded_executor_ready"]["status"] == "ready_for_human_review"
+    assert report["resume_state"]["schema"] == "AIOS_RESUME_STATE.v1"
+    assert report["resume_state"]["resume_ready"] is True
+    assert report["operator_relay"]["schema"] == "AIOS_OPERATOR_RELAY.v1"
+    assert report["operator_relay"]["codex_prompt_ready"] is True
+    assert report["control_plane_status"]["schema"] == "AIOS_CONTROL_PLANE_STATUS.v1"
+    assert report["control_plane_status"]["dashboard_ready"] is True
+    assert report["next_safe_action"] == report["control_plane_status"]["next_action"]
     assert len(report["validators_run"]) == 1
     assert state["schema"] == "AIOS_WAKE_CONTINUE.v1"
     assert state["goal_decision"]["decision"] == "continue_build"
     assert state["next_build_plan"]["next_component"] == "forex_risk_controls"
     assert state["bounded_executor_handoff"]["handoff_status"] == "ready"
+    assert report["resume_state_paths"] is None
+    assert not (tmp_path / "Reports" / "aios_resume").exists()
+    assert report["control_plane_status_path"] is None
+    assert not (tmp_path / "Reports" / "aios_control_plane").exists()
+
+
+def test_write_resume_state_persists_after_done_when_requested(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+        write_resume_state_requested=True,
+        resume_state_dir=tmp_path / "Reports" / "aios_resume",
+        write_control_plane_status_requested=True,
+        control_plane_dir=tmp_path / "Reports" / "aios_control_plane",
+    )
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
+    assert report["resume_state"]["schema"] == "AIOS_RESUME_STATE.v1"
+    assert report["resume_state"]["resume_ready"] is True
+    assert report["resume_state_paths"]["timestamped"].startswith("Reports/aios_resume/AIOS_RESUME_STATE_")
+    assert report["resume_state_paths"]["latest"] == "Reports/aios_resume/AIOS_RESUME_STATE_latest.json"
+    assert (tmp_path / report["resume_state_paths"]["timestamped"]).exists()
+    assert (tmp_path / report["resume_state_paths"]["latest"]).exists()
+    assert report["control_plane_status"]["dashboard_ready"] is True
+    assert report["control_plane_status_path"] == "Reports/aios_control_plane/AIOS_CONTROL_PLANE_STATUS_latest.json"
+    assert (tmp_path / report["control_plane_status_path"]).exists()
+    assert report["next_safe_action"] == report["control_plane_status"]["next_action"]
 
 
 def test_validate_all_stop_route_returns_review_required(tmp_path, monkeypatch):
