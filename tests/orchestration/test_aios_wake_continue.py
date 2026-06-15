@@ -456,6 +456,8 @@ def test_validate_all_with_execution_simulator_present_stops_for_review(tmp_path
         command_runner=passing_runner,
     )
     assert report["result"] == "REVIEW_REQUIRED"
+    assert report["selected_action"] == "validate_all_forex_with_risk_controls_and_execution_simulator"
+    assert "tests/trading_lab/test_forex_paper_execution_simulator.py" in report["validators_run"][0]["command"]
     assert report["post_risk_decision"]["selected_next_component"] == "none"
     assert report["post_risk_decision"]["reason_code"] == "current_inventory_complete_for_defined_scope"
     assert report["next_build_plan"]["route"] == "stop"
