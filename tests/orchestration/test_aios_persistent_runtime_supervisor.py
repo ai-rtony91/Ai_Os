@@ -153,6 +153,51 @@ def test_self_route_references_packet_queue_planner() -> None:
     assert "--candidates $packetQueueCandidateEvidenceJson" in text
 
 
+def test_self_route_references_candidate_packet_evidence_adapter() -> None:
+    text = self_route_text()
+
+    assert "automation/orchestration/aios_candidate_packet_evidence_adapter.py" in text
+    assert "python $candidateEvidenceAdapterPath `" in text
+    assert "--evidence $candidateEvidenceInputJson" in text
+
+
+def test_self_route_json_includes_candidate_packet_evidence_contract() -> None:
+    text = self_route_text()
+
+    assert "candidate_evidence_status = $candidateEvidenceStatus" in text
+    assert "candidate_evidence = $candidateEvidenceResult" in text
+    assert "candidate_packets = @($candidatePackets)" in text
+    assert "candidate_noise_paths = @($candidateNoisePaths)" in text
+    assert "candidate_archive_paths = @($candidateArchivePaths)" in text
+    assert "candidate_default_used = $candidateDefaultUsed" in text
+
+
+def test_self_route_generated_archive_paths_are_not_planner_candidate_packets() -> None:
+    text = self_route_text()
+
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress" in text
+    assert "--candidates $packetQueueCandidateEvidenceJson" in text
+    assert "Reports/" not in text
+    assert "control/review_bridge/" not in text
+    assert "automation/orchestration/work_packets/preview/" not in text
+
+
+def test_self_route_no_promoted_candidate_uses_default_safe_candidate_evidence() -> None:
+    text = self_route_text()
+
+    assert 'default_candidate_packet_id = "PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION"' in text
+    assert "$candidateDefaultUsed = [bool](Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name \"default_candidate_used\" -Default $false)" in text
+    assert "candidate_default_used = $candidateDefaultUsed" in text
+
+
+def test_self_route_packet_queue_planner_receives_adapter_candidates() -> None:
+    text = self_route_text()
+
+    assert "$candidatePackets = @(Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name \"candidate_packets\" -Default @())" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress" in text
+    assert "--candidates $packetQueueCandidateEvidenceJson" in text
+
+
 def test_self_route_json_includes_packet_queue_plan_contract() -> None:
     text = self_route_text()
 
@@ -211,6 +256,7 @@ def test_self_route_packet_queue_selected_preview_is_stop_report_only() -> None:
 
     assert "selected_packet = $selectedPacket" in text
     assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+    assert 'default_candidate_packet_id = "PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION"' in text
     assert "REPORT_ONLY_NO_RECOMMENDED_COMMAND_EXECUTION" in text
     assert "No staging. No commit. No push." not in text
     assert "launch_codex" in text
@@ -245,6 +291,16 @@ def test_self_route_passes_selected_packet_and_preview_to_cycle_ledger_evidence(
     assert "selected_packet = $selectedPacket" in text
     assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
     assert 'codex_prompt_emitted = [bool](Get-AiOsObjectProperty -Object $codexReadyPacketPreview -Name "packet_ready" -Default $false)' in text
+
+
+def test_self_route_cycle_ledger_and_dashboard_receive_selected_candidate_evidence() -> None:
+    text = self_route_text()
+
+    assert "selected_packet = $selectedPacket" in text
+    assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+    assert "cycle_ledger = $cycleLedger" in text
+    assert "dashboard_contract = $dashboardContract" in text
+    assert "current_packet = [string](Get-AiOsObjectProperty -Object $SelectedPacket -Name \"packet_id\" -Default \"\")" in text
 
 
 def test_self_route_cycle_ledger_evidence_includes_today_goal_alignment() -> None:
@@ -287,6 +343,17 @@ def test_self_route_cycle_ledger_failure_becomes_safe_blocked_evidence() -> None
     assert "cycle_ledger_empty_output" in text
     assert "cycle_ledger_generation_failed" in text
     assert '$rejectionReasons += "cycle_ledger_blocked:$cycleLedgerBlocker"' in text
+
+
+def test_self_route_candidate_adapter_failure_becomes_safe_blocked_evidence() -> None:
+    text = self_route_text()
+
+    assert "New-AiOsCandidateEvidenceFallbackResult" in text
+    assert "candidate_evidence_adapter_missing" in text
+    assert "candidate_evidence_adapter_nonzero_exit" in text
+    assert "candidate_evidence_adapter_empty_output" in text
+    assert "candidate_evidence_adapter_generation_failed" in text
+    assert '$rejectionReasons += "candidate_evidence_blocked:$candidateEvidenceBlocker"' in text
 
 
 def test_self_route_empty_no_candidate_state_remains_safe_and_reportable() -> None:
