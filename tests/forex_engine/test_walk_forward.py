@@ -3,9 +3,14 @@ import importlib
 import pytest
 
 from automation.forex_engine.config import ForexEngineConfig
+from automation.forex_engine.daily_edge_report import deterministic_supertrend_sample
 from automation.forex_engine.market_data import load_fixture_candles
 from automation.forex_engine.models import WalkForwardStatus, WalkForwardWindowResult
-from automation.forex_engine.walk_forward import WalkForwardEngine
+from automation.forex_engine.walk_forward import (
+    WalkForwardEngine,
+    evaluate_supertrend_walk_forward,
+    sequential_window_splits,
+)
 
 
 def fixture_candles():
@@ -105,3 +110,25 @@ def test_existing_strategy_comparison_demo_imports():
 def test_no_live_execution_fields_required():
     result = WalkForwardEngine(ForexEngineConfig()).run_walk_forward(fixture_candles())
     assert "broker" not in result.metadata
+
+
+def test_supertrend_walk_forward_generates_enough_windows():
+    candles = deterministic_supertrend_sample(count=60)
+    windows = sequential_window_splits(candles, train_size=12, test_size=6, step_size=6)
+    assert len(windows) >= 5
+    assert windows[0]["train_end"] < windows[0]["test_start"]
+
+
+def test_weak_inconsistent_supertrend_system_fails():
+    candles = deterministic_supertrend_sample(count=24)
+    result = evaluate_supertrend_walk_forward(candles, train_size=8, test_size=4, step_size=4, minimum_trades=10)
+    assert result["classification"] in {"FAIL", "WATCHLIST"}
+    assert result["live_ready"] is False
+
+
+def test_consistent_paper_candidate_is_not_live_ready():
+    candles = deterministic_supertrend_sample(count=72)
+    result = evaluate_supertrend_walk_forward(candles, train_size=12, test_size=6, step_size=6, minimum_trades=1)
+    assert result["mode"] == "PAPER_ONLY"
+    assert result["classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert result["live_ready"] is False
