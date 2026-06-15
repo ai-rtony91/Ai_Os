@@ -231,6 +231,65 @@ function New-AiOsCandidateEvidenceFallbackResult {
     }
 }
 
+function New-AiOsCompletedPacketMemoryFallbackResult {
+    param(
+        [string]$Status,
+        [string]$Reason
+    )
+
+    return [pscustomobject]@{
+        schema = "AIOS_COMPLETED_PACKET_MEMORY_SUPPRESSION.v1"
+        suppression_status = $Status
+        active_candidates = @()
+        suppressed_candidates = @()
+        completed_packet_ids = @()
+        suppression_reasons = [pscustomobject]@{}
+        next_candidate_available = $false
+        next_candidate = $null
+        memory_source = [pscustomobject]@{
+            source = "runtime_self_route_fallback"
+            reason = $Reason
+        }
+        forex_builder_alignment = [pscustomobject]@{
+            milestone = "AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety"
+            proof_target = "industrial-grade forex bot builder"
+            control_plane_role = "completed packet memory suppression"
+            aligned = $false
+            blocked_boundaries = @($Reason)
+            requires_future_gates_before_execution = $true
+        }
+        commands_executed = @()
+        files_written = @()
+        workers_dispatched = $false
+        queues_mutated = $false
+        approvals_mutated = $false
+        safety = [pscustomobject]@{
+            preview_only = $true
+            evidence_only = $true
+            command_execution = $false
+            filesystem_writes = $false
+            reports_written = $false
+            network_access = $false
+            worker_dispatch = $false
+            queue_mutation = $false
+            approval_mutation = $false
+            scheduler_activation = $false
+            daemon_activation = $false
+            broker = $false
+            live_trading = $false
+            credentials = $false
+            real_orders = $false
+            real_webhooks = $false
+            git_add = $false
+            git_commit = $false
+            git_push = $false
+            git_merge = $false
+        }
+        blocker = $Reason
+        next_safe_action = "Stop; completed packet memory evidence could not be generated."
+    }
+}
+
 function New-AiOsApprovedExecutorFallbackContract {
     param(
         [string]$Status,
@@ -415,6 +474,7 @@ $hasActionableCommand = -not [string]::IsNullOrWhiteSpace($normalizedCommand) -a
 $commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommendedCommand.ps1"
 $routePreviewPath = "automation/orchestration/aios_bounded_worker_routing_preview.py"
 $candidateEvidenceAdapterPath = "automation/orchestration/aios_candidate_packet_evidence_adapter.py"
+$completedPacketMemoryPath = "automation/orchestration/aios_completed_packet_memory.py"
 $packetQueuePlannerPath = "automation/orchestration/aios_packet_queue_planner.py"
 $approvedExecutorContractPath = "automation/orchestration/aios_approved_packet_executor_contract.py"
 $cycleLedgerPath = "automation/orchestration/aios_cycle_ledger.py"
@@ -438,6 +498,17 @@ $candidateArchiveNoise = @()
 $candidateNoisePaths = @()
 $candidateArchivePaths = @()
 $candidateDefaultUsed = $false
+$completedPacketMemory = $null
+$completedPacketMemoryOutput = @()
+$completedPacketMemoryExitCode = $null
+$completedPacketMemoryStatus = "NOT_RUN"
+$completedPacketMemoryBlocker = ""
+$activeCandidatePackets = @()
+$suppressedCandidatePackets = @()
+$suppressedPacketIds = @()
+$nextCandidateAvailable = $false
+$nextCandidate = $null
+$completedMemoryNextSafeAction = ""
 $packetQueuePlan = $null
 $packetQueuePlannerOutput = @()
 $packetQueuePlannerExitCode = $null
@@ -585,12 +656,92 @@ $candidateNoisePaths = @(
 )
 $candidateArchivePaths = @($candidateNoisePaths)
 $candidateDefaultUsed = [bool](Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name "default_candidate_used" -Default $false)
-$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress
 
 if ($candidateEvidenceStatus -eq "blocked") {
     $routeStatus = "blocked"
     $exitCode = 1
     $rejectionReasons += "candidate_evidence_blocked:$candidateEvidenceBlocker"
+}
+
+$completedPacketMemoryEvidence = [ordered]@{
+    schema = "AIOS_RUNTIME_SELF_ROUTE_COMPLETED_PACKET_MEMORY_EVIDENCE.v1"
+    candidate_packets = @($candidatePackets)
+    completed_packet_ids = @()
+    landed_prs = @()
+    commit_history_summary = @()
+    cycle_ledger_history = @()
+    manual_suppression_rules = @()
+    today_goal_context = "AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety"
+}
+
+if (-not (Test-Path -LiteralPath $completedPacketMemoryPath)) {
+    $completedPacketMemory = New-AiOsCompletedPacketMemoryFallbackResult `
+        -Status "blocked" `
+        -Reason "completed_packet_memory_missing"
+    $completedPacketMemoryStatus = "blocked"
+    $completedPacketMemoryBlocker = "completed_packet_memory_missing"
+    $completedPacketMemoryExitCode = 1
+}
+else {
+    try {
+        $completedPacketMemoryEvidenceJson = ConvertTo-Json -InputObject $completedPacketMemoryEvidence -Depth 30 -Compress
+        $completedPacketMemoryOutput = Invoke-AiOsPythonJsonArgumentScript `
+            -ScriptPath $completedPacketMemoryPath `
+            -ArgumentName "--evidence" `
+            -JsonPayload $completedPacketMemoryEvidenceJson
+        $completedPacketMemoryExitCode = $LASTEXITCODE
+        $completedPacketMemoryJson = ($completedPacketMemoryOutput -join "`n")
+        if ($completedPacketMemoryExitCode -ne 0) {
+            $completedPacketMemory = New-AiOsCompletedPacketMemoryFallbackResult `
+                -Status "blocked" `
+                -Reason "completed_packet_memory_nonzero_exit"
+            $completedPacketMemoryStatus = "blocked"
+            $completedPacketMemoryBlocker = "completed_packet_memory_nonzero_exit"
+        }
+        elseif ([string]::IsNullOrWhiteSpace($completedPacketMemoryJson)) {
+            $completedPacketMemory = New-AiOsCompletedPacketMemoryFallbackResult `
+                -Status "blocked" `
+                -Reason "completed_packet_memory_empty_output"
+            $completedPacketMemoryStatus = "blocked"
+            $completedPacketMemoryBlocker = "completed_packet_memory_empty_output"
+            $completedPacketMemoryExitCode = 1
+        }
+        else {
+            $completedPacketMemory = $completedPacketMemoryJson | ConvertFrom-Json
+            $completedPacketMemoryStatus = [string](Get-AiOsObjectProperty -Object $completedPacketMemory -Name "suppression_status" -Default "UNKNOWN")
+        }
+    }
+    catch {
+        $completedPacketMemory = New-AiOsCompletedPacketMemoryFallbackResult `
+            -Status "blocked" `
+            -Reason "completed_packet_memory_generation_failed"
+        $completedPacketMemoryStatus = "blocked"
+        $completedPacketMemoryBlocker = "completed_packet_memory_generation_failed"
+        $completedPacketMemoryExitCode = 1
+    }
+}
+
+$activeCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name "active_candidates" -Default @())
+$suppressedCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name "suppressed_candidates" -Default @())
+$suppressedPacketIds = @(
+    $suppressedCandidatePackets |
+        ForEach-Object { [string](Get-AiOsObjectProperty -Object $_ -Name "packet_id" -Default "") } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+)
+$nextCandidateAvailable = [bool](Get-AiOsObjectProperty -Object $completedPacketMemory -Name "next_candidate_available" -Default $false)
+$nextCandidate = Get-AiOsObjectProperty -Object $completedPacketMemory -Name "next_candidate" -Default $null
+$completedMemoryNextSafeAction = [string](Get-AiOsObjectProperty -Object $completedPacketMemory -Name "next_safe_action" -Default "")
+$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress
+
+if ($completedPacketMemoryStatus -eq "blocked") {
+    $routeStatus = "blocked"
+    $exitCode = 1
+    $rejectionReasons += "completed_packet_memory_blocked:$completedPacketMemoryBlocker"
+}
+elseif ($completedPacketMemoryStatus -eq "rejected") {
+    $routeStatus = "rejected"
+    $exitCode = 1
+    $rejectionReasons += "completed_packet_memory_rejected"
 }
 
 if (-not (Test-Path -LiteralPath $packetQueuePlannerPath)) {
@@ -826,7 +977,10 @@ if ($packetQueuePlanStatus -in @("blocked", "rejected")) {
     }
 }
 
-$nextSafeAction = if (-not [string]::IsNullOrWhiteSpace($contractNextSafeAction)) {
+$nextSafeAction = if ($completedPacketMemoryStatus -eq "ready" -and -not $nextCandidateAvailable -and -not [string]::IsNullOrWhiteSpace($completedMemoryNextSafeAction)) {
+    $completedMemoryNextSafeAction
+}
+elseif (-not [string]::IsNullOrWhiteSpace($contractNextSafeAction)) {
     $contractNextSafeAction
 }
 elseif ($routePreviewStatus -in @("blocked", "rejected") -and -not [string]::IsNullOrWhiteSpace($routePreviewNextSafeAction)) {
@@ -1006,6 +1160,14 @@ $report = [pscustomobject]@{
     candidate_noise_paths = @($candidateNoisePaths)
     candidate_archive_paths = @($candidateArchivePaths)
     candidate_default_used = $candidateDefaultUsed
+    completed_packet_memory_status = $completedPacketMemoryStatus
+    completed_packet_memory = $completedPacketMemory
+    active_candidate_packets = @($activeCandidatePackets)
+    suppressed_candidate_packets = @($suppressedCandidatePackets)
+    suppressed_packet_ids = @($suppressedPacketIds)
+    next_candidate_available = $nextCandidateAvailable
+    next_candidate = $nextCandidate
+    completed_memory_next_safe_action = $completedMemoryNextSafeAction
     packet_queue_plan_status = $packetQueuePlanStatus
     packet_queue_plan = $packetQueuePlan
     codex_ready_packet_preview = $codexReadyPacketPreview
@@ -1083,6 +1245,10 @@ if (-not [string]::IsNullOrWhiteSpace($routePreviewBlocker)) {
 Write-Host "Candidate evidence: $candidateEvidenceStatus"
 if (-not [string]::IsNullOrWhiteSpace($candidateEvidenceBlocker)) {
     Write-Host "Candidate evidence blocker: $candidateEvidenceBlocker"
+}
+Write-Host "Completed packet memory: $completedPacketMemoryStatus"
+if (-not [string]::IsNullOrWhiteSpace($completedPacketMemoryBlocker)) {
+    Write-Host "Completed packet memory blocker: $completedPacketMemoryBlocker"
 }
 Write-Host "Packet queue plan: $packetQueuePlanStatus"
 if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {

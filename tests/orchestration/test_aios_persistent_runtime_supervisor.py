@@ -183,10 +183,57 @@ def test_self_route_json_includes_candidate_packet_evidence_contract() -> None:
     assert "candidate_default_used = $candidateDefaultUsed" in text
 
 
+def test_self_route_references_completed_packet_memory() -> None:
+    text = self_route_text()
+
+    assert "automation/orchestration/aios_completed_packet_memory.py" in text
+    assert "-ScriptPath $completedPacketMemoryPath" in text
+    assert '-ArgumentName "--evidence"' in text
+    assert "-JsonPayload $completedPacketMemoryEvidenceJson" in text
+
+
+def test_self_route_json_includes_completed_packet_memory_contract() -> None:
+    text = self_route_text()
+
+    assert "completed_packet_memory_status = $completedPacketMemoryStatus" in text
+    assert "completed_packet_memory = $completedPacketMemory" in text
+    assert "active_candidate_packets = @($activeCandidatePackets)" in text
+    assert "suppressed_candidate_packets = @($suppressedCandidatePackets)" in text
+    assert "suppressed_packet_ids = @($suppressedPacketIds)" in text
+    assert "next_candidate_available = $nextCandidateAvailable" in text
+    assert "next_candidate = $nextCandidate" in text
+    assert "completed_memory_next_safe_action = $completedMemoryNextSafeAction" in text
+
+
+def test_self_route_completed_memory_failure_becomes_safe_blocked_evidence() -> None:
+    text = self_route_text()
+
+    assert "New-AiOsCompletedPacketMemoryFallbackResult" in text
+    assert "completed_packet_memory_missing" in text
+    assert "completed_packet_memory_nonzero_exit" in text
+    assert "completed_packet_memory_empty_output" in text
+    assert "completed_packet_memory_generation_failed" in text
+    assert '$rejectionReasons += "completed_packet_memory_blocked:$completedPacketMemoryBlocker"' in text
+
+
+def test_self_route_all_suppressed_candidates_remain_no_packet_report_only() -> None:
+    text = self_route_text()
+
+    assert "$activeCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"active_candidates\" -Default @())" in text
+    assert "$nextCandidateAvailable = [bool](Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"next_candidate_available\" -Default $false)" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
+    assert '$nextSafeAction = if ($completedPacketMemoryStatus -eq "ready" -and -not $nextCandidateAvailable' in text
+    assert "$completedMemoryNextSafeAction" in text
+    assert "selected_packet = $selectedPacket" in text
+    assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+
+
 def test_self_route_generated_archive_paths_are_not_planner_candidate_packets() -> None:
     text = self_route_text()
 
-    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress" in text
+    assert "candidate_packets = @($candidatePackets)" in text
+    assert "$activeCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"active_candidates\" -Default @())" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
     assert '-ArgumentName "--candidates"' in text
     assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
     assert "Reports/" not in text
@@ -202,11 +249,13 @@ def test_self_route_no_promoted_candidate_uses_default_safe_candidate_evidence()
     assert "candidate_default_used = $candidateDefaultUsed" in text
 
 
-def test_self_route_packet_queue_planner_receives_adapter_candidates() -> None:
+def test_self_route_packet_queue_planner_receives_completed_memory_active_candidates() -> None:
     text = self_route_text()
 
     assert "$candidatePackets = @(Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name \"candidate_packets\" -Default @())" in text
-    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress" in text
+    assert "candidate_packets = @($candidatePackets)" in text
+    assert "$activeCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"active_candidates\" -Default @())" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
     assert "-ScriptPath $packetQueuePlannerPath" in text
     assert '-ArgumentName "--candidates"' in text
     assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
@@ -276,15 +325,16 @@ def test_self_route_packet_queue_selected_preview_is_stop_report_only() -> None:
     assert "launch_codex" in text
 
 
-def test_self_route_default_candidate_selected_plan_is_propagated_to_report_contracts() -> None:
+def test_self_route_completed_memory_suppresses_default_candidate_before_planning() -> None:
     text = self_route_text()
 
     assert '"PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION"' in text
-    assert '$packetQueuePlanStatus = [string](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "queue_status" -Default "UNKNOWN")' in text
-    assert "packet_queue_plan_status = $packetQueuePlanStatus" in text
-    assert "selected_packet = $selectedPacket" in text
-    assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
-    assert '"packet_queue_plan_selected"' in text
+    assert "$completedPacketMemoryPath = \"automation/orchestration/aios_completed_packet_memory.py\"" in text
+    assert "$completedPacketMemoryOutput = Invoke-AiOsPythonJsonArgumentScript" in text
+    assert "-ScriptPath $completedPacketMemoryPath" in text
+    assert "$suppressedPacketIds = @(" in text
+    assert "suppressed_packet_ids = @($suppressedPacketIds)" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
 
 
 def test_self_route_references_approved_packet_executor_contract() -> None:
