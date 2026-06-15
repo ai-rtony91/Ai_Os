@@ -95,6 +95,16 @@ for ($i = 1; $i -le $Cycles; $i++) {
     if ($LASTEXITCODE -ne 0) {
         $cycleResult = "FAIL"
         $blocker = "self route failed"
+        Write-AiOsSupervisorCycleAuditLog `
+            -Cycle $i `
+            -PathRegistryResult $pathRegistryResult `
+            -SelfRouteResult $selfRouteResult `
+            -PacketAdvancementResult $packetAdvancementResult `
+            -Mode $Mode `
+            -Result $cycleResult `
+            -Blocker $blocker
+        Write-Host "Runtime halted due to self-route blocker."
+        continue
     }
 
     if ($Apply) {
