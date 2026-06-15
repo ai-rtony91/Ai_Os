@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, is_dataclass
 from typing import Any
 
+from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import schema_contracts as schemas
 from automation.forex_engine.evidence_aggregator import ALLOWED_EVIDENCE_CLASSES
 
@@ -71,6 +72,13 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
+    sandbox_readiness = dict(bundle.get("broker_paper_sandbox_readiness") or {})
+    if not sandbox_readiness:
+        sandbox_readiness = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+            bundle,
+            combined_gate,
+            risk_governor,
+        )
     stress_blockers = [
         str(blocker)
         for scenario in list(stress.get("scenario_results") or stress.get("scenarios") or [])
@@ -84,6 +92,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *_text_list(paper_stress.get("blockers")),
             *_text_list(oos_result.get("blockers")),
             *_text_list(combined_gate.get("blockers")),
+            *_text_list(sandbox_readiness.get("blockers")),
             *stress_blockers,
         ]
     )
@@ -103,6 +112,12 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         "v2_evidence_ready": paper_forward_ready,
         "stress_oos_ready": stress_oos_ready,
         "broker_paper_sandbox_ready": False,
+        "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
+        "broker_paper_sandbox_contract_ready": bool(
+            sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
+        ),
+        "broker_integration_active": False,
+        "credentials_required_now": False,
         "live_trade_ready": False,
         "protected_gate_required": True,
         "evidence_summary": {
@@ -152,6 +167,12 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             ),
             "stress_oos_ready": stress_oos_ready,
             "broker_paper_sandbox_ready": False,
+            "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
+            "broker_paper_sandbox_contract_ready": bool(
+                sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
+            ),
+            "broker_integration_active": False,
+            "credentials_required_now": False,
             "symbols": list(catalog.get("symbols") or []),
             "timeframes": list(catalog.get("timeframes") or []),
         },

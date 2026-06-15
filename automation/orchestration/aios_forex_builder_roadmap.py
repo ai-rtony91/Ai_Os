@@ -409,22 +409,71 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
         ),
         _candidate(
             packet_id="PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT",
-            title="Define paper sandbox readiness contract",
-            lane="paper-sandbox-readiness-contract",
+            title="Define broker-paper sandbox readiness contract",
+            lane="broker-paper-sandbox-readiness-contract",
             priority="low",
             milestone_value="medium",
             risk_level="low",
             required_files=[
-                "docs/trading_lab/AIOS_FOREX_BUILDER_SANDBOX_READINESS_CONTRACT.md",
-                "tests/forex_engine/test_sandbox_readiness_contract.py",
+                "automation/forex_engine/broker_paper_sandbox_readiness.py",
+                "automation/forex_engine/run_broker_paper_sandbox_readiness_demo.py",
+                "automation/forex_engine/month_end_readiness.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_SANDBOX_READINESS_CONTRACT.md",
+                "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+                "tests/forex_engine/test_month_end_readiness.py",
+                "tests/forex_engine/test_forex_dashboard_contract.py",
             ],
             purpose=(
-                "Define the protected readiness contract for a future paper sandbox review only. "
-                "This packet must not integrate any external execution venue, read credentials, place paper orders, place live "
-                "orders, use network ingestion, or bypass protected approval."
+                "Define the protected readiness contract for a future broker-paper sandbox review only. "
+                "This packet must not integrate a broker, read credentials, place paper orders, place live "
+                "orders, use network/API ingestion, or bypass protected approval."
             ),
             validators=[
-                "python -m pytest -p no:cacheprovider tests/forex_engine/test_sandbox_readiness_contract.py -q",
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_sandbox_readiness.py tests/forex_engine/test_month_end_readiness.py tests/forex_engine/test_forex_dashboard_contract.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V1",
+            title="Repair paper-forward stress WATCHLIST blockers",
+            lane="paper-forward-stress-repair",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/paper_forward_stress.py",
+                "automation/forex_engine/out_of_sample_validator.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_REPAIR_PLAN.md",
+                "tests/forex_engine/test_paper_forward_stress_repair.py",
+            ],
+            purpose=(
+                "Repair deterministic stress/OOS WATCHLIST blockers before any adapter-stub contract. "
+                "No broker, network, credentials, orders, scheduler, daemon, or live trading path."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_stress.py tests/forex_engine/test_out_of_sample_validator.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT",
+            title="Define sandbox adapter stub contract",
+            lane="sandbox-adapter-stub-contract",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_SANDBOX_ADAPTER_STUB_CONTRACT.md",
+                "tests/forex_engine/test_sandbox_adapter_stub_contract.py",
+            ],
+            purpose=(
+                "Define a protected future adapter-stub contract only. This must not connect to a broker, "
+                "read credentials, use network/API ingestion, place paper orders, place live orders, "
+                "or bypass protected approval."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_sandbox_adapter_stub_contract.py -q",
                 VALIDATOR,
             ],
         ),
