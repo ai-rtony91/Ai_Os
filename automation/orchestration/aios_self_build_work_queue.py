@@ -42,6 +42,16 @@ RUN_SUMMARY_VIEW_VALIDATORS = [
     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_run_summary_view.py",
 ]
 
+APPLY_APPROVAL_GATE_PATHS = [
+    "automation/orchestration/aios_self_build_apply_approval_gate.py",
+    "tests/orchestration/test_aios_self_build_apply_approval_gate.py",
+    "docs/orchestration/AIOS_SELF_BUILD_APPLY_APPROVAL_GATE.md",
+]
+
+APPLY_APPROVAL_GATE_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_apply_approval_gate.py",
+]
+
 
 def _safety() -> dict[str, bool]:
     return {
@@ -126,24 +136,28 @@ def build_self_build_work_queue(
     *,
     goal: str = "forex-paper-bot",
     mode: str = "generic",
+    repo_root: str | Path | None = None,
 ) -> dict[str, Any]:
+    root = _repo_root(repo_root)
     normalized_items = []
     for item in items or []:
         if not isinstance(item, dict):
             continue
-        normalized_items.append(
-            build_queue_item(
-                priority=int(item.get("priority", 100)),
-                mode=str(item.get("mode", mode)),
-                goal=str(item.get("goal", goal)),
-                action_id=str(item.get("action_id", "unknown_action")),
-                allowed_paths=list(item.get("allowed_paths", [])),
-                validators=list(item.get("validators", [])),
-                protected_action_flags=item.get("protected_action_flags", {}),
-                status=str(item.get("status", "ready")),
-                reason_code=str(item.get("reason_code", "bounded_dry_run_item")),
-            )
+        queue_item = build_queue_item(
+            priority=int(item.get("priority", 100)),
+            mode=str(item.get("mode", mode)),
+            goal=str(item.get("goal", goal)),
+            action_id=str(item.get("action_id", "unknown_action")),
+            allowed_paths=list(item.get("allowed_paths", [])),
+            validators=list(item.get("validators", [])),
+            protected_action_flags=item.get("protected_action_flags", {}),
+            status=str(item.get("status", "ready")),
+            reason_code=str(item.get("reason_code", "bounded_dry_run_item")),
         )
+        if _all_repo_paths_exist(root, queue_item["allowed_paths"]):
+            queue_item["status"] = "completed"
+            queue_item["reason_code"] = "completed_allowed_paths_exist"
+        normalized_items.append(queue_item)
     normalized_items.sort(key=lambda queue_item: (queue_item["priority"], queue_item["action_id"]))
     return {
         "schema": QUEUE_SCHEMA,
@@ -162,18 +176,13 @@ def _repo_root(repo_root: str | Path | None) -> Path:
 
 
 def _all_repo_paths_exist(repo_root: Path, paths: list[str]) -> bool:
+    if not paths:
+        return False
     return all((repo_root / path).exists() for path in paths)
 
 
 def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> dict[str, Any]:
     root = _repo_root(repo_root)
-    status_reader_completed = _all_repo_paths_exist(root, CORE_STATUS_READER_PATHS)
-    status_reader_status = "completed" if status_reader_completed else "ready"
-    status_reader_reason = (
-        "completed_existing_files_present"
-        if status_reader_completed
-        else "preview_scope_self_build_core"
-    )
     return build_self_build_work_queue(
         [
             {
@@ -186,8 +195,8 @@ def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> 
                     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_core_status_reader.py",
                 ],
                 "protected_action_flags": {},
-                "status": status_reader_status,
-                "reason_code": status_reader_reason,
+                "status": "ready",
+                "reason_code": "preview_scope_self_build_core",
             },
             {
                 "priority": 20,
@@ -200,9 +209,21 @@ def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> 
                 "status": "ready",
                 "reason_code": "next_preview_scope_self_build_core",
             },
+            {
+                "priority": 30,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "build_self_build_apply_approval_gate",
+                "allowed_paths": APPLY_APPROVAL_GATE_PATHS,
+                "validators": APPLY_APPROVAL_GATE_VALIDATORS,
+                "protected_action_flags": {},
+                "status": "ready",
+                "reason_code": "next_preview_scope_self_build_core",
+            },
         ],
         goal="self-build-core",
         mode="platform",
+        repo_root=root,
     )
 
 

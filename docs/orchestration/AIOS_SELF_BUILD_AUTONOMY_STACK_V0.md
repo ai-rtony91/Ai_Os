@@ -17,6 +17,25 @@ The v0 stack is DRY_RUN / preview-only. It does not execute commands, launch Cod
 
 The current proof target remains `forex-paper-bot`, with the latest validated Forex chain ending at `forex_paper_session_controller`. Forex feature expansion is paused; these tools are generic self-build readiness infrastructure for future AIOS modes.
 
+## Queue Completion Detection
+
+The self-build work queue is an in-memory preview model. It detects completed items generically: if every path in a queue item's `allowed_paths` already exists in the repo, the item is returned with:
+
+```text
+status: completed
+reason_code: completed_allowed_paths_exist
+```
+
+Completed queue items remain visible for auditability, but the next-action selector skips them because only `ready` items are selectable.
+
+The current self-build-core preview sequence is:
+
+1. `build_self_build_core_status_reader`
+2. `build_self_build_run_summary_view`
+3. `build_self_build_apply_approval_gate`
+
+The apply approval gate is preview-only until a separate bounded APPLY packet builds it.
+
 Start command:
 
 ```powershell
