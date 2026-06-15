@@ -83,6 +83,30 @@ def test_execution_simulator_handoff_is_ready_with_exact_paths():
     ]
 
 
+def test_execution_ledger_integration_handoff_is_ready_with_exact_paths():
+    module = load_module()
+    handoff = module.build_bounded_executor_handoff(
+        plan(
+            "forex_execution_ledger_integration",
+            next_packet_id="PKT-AIOS-FOREX-EXECUTION-LEDGER-INTEGRATION-APPLY",
+        )
+    )
+    assert handoff["handoff_status"] == "ready"
+    assert handoff["executor_mode"] == "local_apply_after_human_review"
+    assert handoff["allowed_action"] == "build_forex_execution_ledger_integration"
+    assert handoff["next_component"] == "forex_execution_ledger_integration"
+    assert handoff["next_packet_id"] == "PKT-AIOS-FOREX-EXECUTION-LEDGER-INTEGRATION-APPLY"
+    assert handoff["allowed_paths"] == [
+        "apps/trading_lab/trading_lab/forex_execution_ledger_integration.py",
+        "tests/trading_lab/test_forex_execution_ledger_integration.py",
+        "docs/orchestration/AIOS_FOREX_EXECUTION_LEDGER_INTEGRATION.md",
+        "automation/orchestration/aios_productive_bounded_executor.py",
+        "tests/orchestration/test_aios_productive_bounded_executor.py",
+        "automation/orchestration/aios_wake_continue.py",
+        "tests/orchestration/test_aios_wake_continue.py",
+    ]
+
+
 def test_validators_are_present_and_deterministic():
     module = load_module()
     handoff = module.build_bounded_executor_handoff(plan("forex_risk_controls"))
@@ -97,6 +121,15 @@ def test_execution_simulator_validators_are_pytest_only():
     handoff = module.build_bounded_executor_handoff(plan("forex_paper_execution_simulator"))
     assert handoff["validators"] == [
         "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_productive_bounded_executor.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_paper_execution_simulator.py",
+    ]
+    assert handoff["command_preview"][-1] == handoff["validators"][0]
+
+
+def test_execution_ledger_integration_validators_are_pytest_only():
+    module = load_module()
+    handoff = module.build_bounded_executor_handoff(plan("forex_execution_ledger_integration"))
+    assert handoff["validators"] == [
+        "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_productive_bounded_executor.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_execution_ledger_integration.py",
     ]
     assert handoff["command_preview"][-1] == handoff["validators"][0]
 

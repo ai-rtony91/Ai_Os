@@ -105,6 +105,15 @@ def seed_execution_simulator(repo_root: Path) -> None:
     test_path.write_text("# execution simulator test placeholder\n", encoding="utf-8")
 
 
+def seed_execution_ledger_integration(repo_root: Path) -> None:
+    integration_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_execution_ledger_integration.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_execution_ledger_integration.py"
+    integration_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    integration_path.write_text("# execution ledger integration placeholder\n", encoding="utf-8")
+    test_path.write_text("# execution ledger integration test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -455,11 +464,42 @@ def test_validate_all_with_execution_simulator_present_stops_for_review(tmp_path
         state_path=tmp_path / "state.json",
         command_runner=passing_runner,
     )
-    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
     assert report["selected_action"] == "validate_all_forex_with_risk_controls_and_execution_simulator"
     assert "tests/trading_lab/test_forex_paper_execution_simulator.py" in report["validators_run"][0]["command"]
     assert report["post_risk_decision"]["selected_next_component"] == "none"
     assert report["post_risk_decision"]["reason_code"] == "current_inventory_complete_for_defined_scope"
+    assert report["next_build_plan"]["route"] == "build_next_paper_component"
+    assert report["next_build_plan"]["next_component"] == "forex_execution_ledger_integration"
+    assert report["bounded_executor_handoff"]["handoff_status"] == "ready"
+    assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_execution_ledger_integration"
+
+
+def test_validate_all_with_execution_ledger_integration_present_stops_for_review(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+    seed_risk_controls(tmp_path)
+    seed_execution_simulator(tmp_path)
+    seed_execution_ledger_integration(tmp_path)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+    )
+    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["selected_action"] == "validate_all_forex_with_execution_ledger_integration"
+    assert "tests/trading_lab/test_forex_execution_ledger_integration.py" in report["validators_run"][0]["command"]
     assert report["next_build_plan"]["route"] == "stop"
     assert report["bounded_executor_handoff"]["handoff_status"] == "stopped"
 

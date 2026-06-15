@@ -94,6 +94,20 @@ def test_dashboard_ready_true_for_execution_simulator_handoff():
     assert status["loop_status"] == "dashboard_ready"
 
 
+def test_dashboard_ready_true_for_execution_ledger_integration_handoff():
+    module = load_module()
+    status = module.build_control_plane_status(
+        resume_state=resume_state("forex_execution_ledger_integration"),
+        cli_result_ingest={"blockers": []},
+        operator_relay={"next_safe_action": "Prepare integration packet."},
+        local_runner_bridge=runner_bridge(),
+        bounded_executor_ready=ready_state(),
+    )
+    assert status["next_component"] == "forex_execution_ledger_integration"
+    assert status["dashboard_ready"] is True
+    assert status["loop_status"] == "dashboard_ready"
+
+
 def test_dashboard_ready_false_for_unknown_next_component():
     module = load_module()
     status = module.build_control_plane_status(
