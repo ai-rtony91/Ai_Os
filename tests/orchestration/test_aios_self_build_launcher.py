@@ -15,7 +15,8 @@ def test_launcher_exists_and_calls_controller():
     source = script_text()
     assert SCRIPT_PATH.exists()
     assert "C:\\Dev\\Ai.Os" in source
-    assert "aios_overnight_build_controller.py" in source
+    assert "aios_self_build_dry_run_driver.py" in source
+    assert "aios_overnight_build_controller.py" not in source
     assert "DRY_RUN" in source
     assert "@EffectiveArgs" in source
 
