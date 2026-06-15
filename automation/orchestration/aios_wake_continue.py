@@ -32,6 +32,8 @@ FOREX_RISK_CONTROLS_PATH = Path("apps/trading_lab/trading_lab/forex_risk_control
 FOREX_RISK_CONTROLS_TEST_PATH = Path("tests/trading_lab/test_forex_risk_controls.py")
 FOREX_PAPER_EXECUTION_SIMULATOR_PATH = Path("apps/trading_lab/trading_lab/forex_paper_execution_simulator.py")
 FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH = Path("tests/trading_lab/test_forex_paper_execution_simulator.py")
+FOREX_EXECUTION_LEDGER_INTEGRATION_PATH = Path("apps/trading_lab/trading_lab/forex_execution_ledger_integration.py")
+FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH = Path("tests/trading_lab/test_forex_execution_ledger_integration.py")
 FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
 NEXT_BUILD_PLAN_ROUTER_PATH = Path("automation/orchestration/aios_next_build_plan.py")
 BOUNDED_EXECUTOR_HANDOFF_PATH = Path("automation/orchestration/aios_bounded_executor_handoff.py")
@@ -113,6 +115,10 @@ def read_repo_state(repo_root: Path) -> dict[str, bool]:
         "forex_risk_controls_test_exists": (repo_root / FOREX_RISK_CONTROLS_TEST_PATH).exists(),
         "forex_paper_execution_simulator_exists": (repo_root / FOREX_PAPER_EXECUTION_SIMULATOR_PATH).exists(),
         "forex_paper_execution_simulator_test_exists": (repo_root / FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH).exists(),
+        "forex_execution_ledger_integration_exists": (repo_root / FOREX_EXECUTION_LEDGER_INTEGRATION_PATH).exists(),
+        "forex_execution_ledger_integration_test_exists": (
+            repo_root / FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH
+        ).exists(),
     }
 
 
@@ -153,8 +159,12 @@ def select_next_action(goal: str, repo_state: dict[str, bool]) -> tuple[str, str
         return "blocked", "forex_risk_controls_incomplete"
     if repo_state["forex_paper_execution_simulator_exists"] != repo_state["forex_paper_execution_simulator_test_exists"]:
         return "blocked", "forex_paper_execution_simulator_incomplete"
+    if repo_state["forex_execution_ledger_integration_exists"] != repo_state["forex_execution_ledger_integration_test_exists"]:
+        return "blocked", "forex_execution_ledger_integration_incomplete"
     if repo_state["forex_risk_controls_exists"]:
         if repo_state["forex_paper_execution_simulator_exists"]:
+            if repo_state["forex_execution_ledger_integration_exists"]:
+                return "validate_all_forex_with_execution_ledger_integration", None
             return "validate_all_forex_with_risk_controls_and_execution_simulator", None
         return "validate_all_forex_with_risk_controls", None
     return "validate_all_forex", None
@@ -237,6 +247,24 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
             FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
         ]
+    if action == "validate_all_forex_with_execution_ledger_integration":
+        return [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-p",
+            "no:cacheprovider",
+            FOREX_BOT_TEST_PATH.as_posix(),
+            FOREX_BACKTEST_TEST_PATH.as_posix(),
+            FOREX_LEDGER_TEST_PATH.as_posix(),
+            FOREX_STRATEGY_TEST_PATH.as_posix(),
+            FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
+            FOREX_REPORT_TEST_PATH.as_posix(),
+            FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
+            FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
+            FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
+            FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH.as_posix(),
+        ]
     raise ValueError(f"unsupported action: {action}")
 
 
@@ -290,6 +318,10 @@ def component_inventory_from_repo_state(repo_state: dict[str, bool]) -> dict[str
             repo_state.get("forex_paper_execution_simulator_exists")
             and repo_state.get("forex_paper_execution_simulator_test_exists")
         ),
+        "forex_execution_ledger_integration": bool(
+            repo_state.get("forex_execution_ledger_integration_exists")
+            and repo_state.get("forex_execution_ledger_integration_test_exists")
+        ),
     }
 
 
@@ -335,6 +367,25 @@ def build_next_build_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.build_next_build_plan(goal_decision)
+
+
+def build_execution_ledger_integration_plan(goal: str) -> dict[str, Any]:
+    return {
+        "schema": "AIOS_NEXT_BUILD_PLAN.v1",
+        "goal": goal,
+        "input_decision": "build_forex_execution_ledger_integration",
+        "route": "build_next_paper_component",
+        "next_component": "forex_execution_ledger_integration",
+        "next_packet_id": "PKT-AIOS-FOREX-EXECUTION-LEDGER-INTEGRATION-APPLY",
+        "reason_code": "execution_simulator_validated_ledger_integration_missing",
+        "plan_reasons": [
+            "execution_simulator_validated_ledger_integration_missing",
+            "route:build_next_paper_component",
+        ],
+        "next_safe_action": "Prepare bounded execution-ledger integration packet for Anthony review.",
+        "approval_required": approval_required(),
+        "safety": safety_flags(),
+    }
 
 
 def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
@@ -750,10 +801,18 @@ def run_wake_continue(
             if selected_action in {
                 "validate_all_forex_with_risk_controls",
                 "validate_all_forex_with_risk_controls_and_execution_simulator",
+                "validate_all_forex_with_execution_ledger_integration",
             }:
-                post_risk_decision = build_post_risk_decision(component_inventory_from_repo_state(repo_state), goal)
+                component_inventory = component_inventory_from_repo_state(repo_state)
+                post_risk_decision = build_post_risk_decision(component_inventory, goal)
                 report["post_risk_decision"] = post_risk_decision
-                next_build_plan = build_next_build_plan(post_risk_decision)
+                if (
+                    selected_action == "validate_all_forex_with_risk_controls_and_execution_simulator"
+                    and not component_inventory["forex_execution_ledger_integration"]
+                ):
+                    next_build_plan = build_execution_ledger_integration_plan(goal)
+                else:
+                    next_build_plan = build_next_build_plan(post_risk_decision)
             else:
                 next_build_plan = build_next_build_plan(goal_decision)
             report["next_build_plan"] = next_build_plan

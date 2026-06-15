@@ -58,6 +58,17 @@ def passing_simulator_validator(_repo_root: Path) -> dict[str, object]:
     }
 
 
+def passing_integration_validator(_repo_root: Path) -> dict[str, object]:
+    return {
+        "name": "fake_integration_validator",
+        "command": "python -m pytest -p no:cacheprovider tests/trading_lab/test_forex_execution_ledger_integration.py",
+        "returncode": 0,
+        "passed": True,
+        "stdout": "",
+        "stderr": "",
+    }
+
+
 def failing_validator(_repo_root: Path) -> dict[str, object]:
     return {
         "name": "fake_validator",
@@ -107,6 +118,24 @@ def simulator_handoff() -> dict[str, object]:
             "apps/trading_lab/trading_lab/forex_paper_execution_simulator.py",
             "tests/trading_lab/test_forex_paper_execution_simulator.py",
             "docs/orchestration/AIOS_FOREX_PAPER_EXECUTION_SIMULATOR.md",
+            "automation/orchestration/aios_productive_bounded_executor.py",
+            "tests/orchestration/test_aios_productive_bounded_executor.py",
+            "automation/orchestration/aios_wake_continue.py",
+            "tests/orchestration/test_aios_wake_continue.py",
+        ],
+    }
+
+
+def integration_handoff() -> dict[str, object]:
+    return {
+        "schema": "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1",
+        "goal": "forex-paper-bot",
+        "handoff_status": "ready",
+        "allowed_action": "build_forex_execution_ledger_integration",
+        "allowed_paths": [
+            "apps/trading_lab/trading_lab/forex_execution_ledger_integration.py",
+            "tests/trading_lab/test_forex_execution_ledger_integration.py",
+            "docs/orchestration/AIOS_FOREX_EXECUTION_LEDGER_INTEGRATION.md",
             "automation/orchestration/aios_productive_bounded_executor.py",
             "tests/orchestration/test_aios_productive_bounded_executor.py",
             "automation/orchestration/aios_wake_continue.py",
@@ -178,6 +207,19 @@ def test_dry_run_for_execution_simulator_writes_no_files(tmp_path):
     assert not (tmp_path / "apps" / "trading_lab" / "trading_lab" / "forex_paper_execution_simulator.py").exists()
 
 
+def test_dry_run_for_execution_ledger_integration_writes_no_files(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        goal="forex-paper-bot",
+        action="build_forex_execution_ledger_integration",
+    )
+    assert report["result"] == "preview_only"
+    assert report["mode"] == "DRY_RUN"
+    assert report["files_written"] == []
+    assert not (tmp_path / "apps" / "trading_lab" / "trading_lab" / "forex_execution_ledger_integration.py").exists()
+
+
 def test_apply_writes_only_allowlisted_risk_control_files(tmp_path):
     module = load_module()
     report = module.execute_productive_bounded_action(
@@ -212,6 +254,23 @@ def test_apply_writes_only_allowlisted_execution_simulator_files(tmp_path):
     assert not (tmp_path / "automation" / "orchestration" / "aios_productive_bounded_executor.py").exists()
 
 
+def test_apply_writes_only_allowlisted_execution_ledger_integration_files(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        goal="forex-paper-bot",
+        action="build_forex_execution_ledger_integration",
+        apply=True,
+        max_repairs=1,
+        validator_runner=passing_integration_validator,
+    )
+    assert report["result"] == "passed"
+    assert sorted(report["files_written"]) == sorted(module.INTEGRATION_WRITE_ALLOWED_PATHS)
+    for relative_path in module.INTEGRATION_WRITE_ALLOWED_PATHS:
+        assert (tmp_path / relative_path).exists()
+    assert not (tmp_path / "automation" / "orchestration" / "aios_productive_bounded_executor.py").exists()
+
+
 def test_accepts_bounded_handoff_fixture(tmp_path):
     module = load_module()
     report = module.execute_productive_bounded_action(
@@ -235,6 +294,19 @@ def test_accepts_execution_simulator_bounded_handoff_fixture(tmp_path):
     )
     assert report["result"] == "passed"
     assert report["action"] == "build_forex_paper_execution_simulator"
+    assert "automation/orchestration/aios_productive_bounded_executor.py" in report["allowed_paths"]
+
+
+def test_accepts_execution_ledger_integration_bounded_handoff_fixture(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        handoff=integration_handoff(),
+        apply=True,
+        validator_runner=passing_integration_validator,
+    )
+    assert report["result"] == "passed"
+    assert report["action"] == "build_forex_execution_ledger_integration"
     assert "automation/orchestration/aios_productive_bounded_executor.py" in report["allowed_paths"]
 
 
@@ -290,6 +362,19 @@ def test_reports_execution_simulator_validator_pass(tmp_path):
     )
     assert report["validators_run"][0]["passed"] is True
     assert report["validators_run"][0]["name"] == "fake_simulator_validator"
+
+
+def test_reports_execution_ledger_integration_validator_pass(tmp_path):
+    module = load_module()
+    report = module.execute_productive_bounded_action(
+        tmp_path,
+        goal="forex-paper-bot",
+        action="build_forex_execution_ledger_integration",
+        apply=True,
+        validator_runner=passing_integration_validator,
+    )
+    assert report["validators_run"][0]["passed"] is True
+    assert report["validators_run"][0]["name"] == "fake_integration_validator"
 
 
 def test_reports_no_protected_actions_or_runtime_activation(tmp_path):
@@ -362,8 +447,31 @@ def test_wake_continue_recognizes_execution_simulator_after_created(tmp_path):
         command_runner=passing_command_runner,
     )
     assert report["selected_action"] == "validate_all_forex_with_risk_controls_and_execution_simulator"
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
+    assert report["next_build_plan"]["next_component"] == "forex_execution_ledger_integration"
+    assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_execution_ledger_integration"
+
+
+def test_wake_continue_recognizes_execution_ledger_integration_after_created(tmp_path):
+    product = load_module()
+    wake = load_wake_module()
+    seed_executor(tmp_path)
+    seed_existing_forex_components(tmp_path)
+    product.write_risk_controls_files(tmp_path)
+    product.write_execution_simulator_files(tmp_path)
+    product.write_execution_ledger_integration_files(tmp_path)
+    report = wake.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_command_runner,
+    )
+    assert report["selected_action"] == "validate_all_forex_with_execution_ledger_integration"
     assert report["result"] == "REVIEW_REQUIRED"
-    assert report["post_risk_decision"]["selected_next_component"] == "none"
+    assert "tests/trading_lab/test_forex_execution_ledger_integration.py" in report["validators_run"][0]["command"]
     assert report["bounded_executor_handoff"]["handoff_status"] == "stopped"
 
 

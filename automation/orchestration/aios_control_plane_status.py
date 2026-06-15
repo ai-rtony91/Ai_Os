@@ -24,7 +24,11 @@ HARD_BLOCK_FLAGS = {
     "worker_dispatch",
 }
 
-DASHBOARD_READY_COMPONENTS = {"forex_risk_controls", "forex_paper_execution_simulator"}
+DASHBOARD_READY_COMPONENTS = {
+    "forex_risk_controls",
+    "forex_paper_execution_simulator",
+    "forex_execution_ledger_integration",
+}
 
 
 def base_safety() -> dict[str, bool]:

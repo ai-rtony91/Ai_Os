@@ -28,6 +28,16 @@ FOREX_PAPER_EXECUTION_SIMULATOR_ALLOWED_PATHS = [
     "tests/orchestration/test_aios_wake_continue.py",
 ]
 
+FOREX_EXECUTION_LEDGER_INTEGRATION_ALLOWED_PATHS = [
+    "apps/trading_lab/trading_lab/forex_execution_ledger_integration.py",
+    "tests/trading_lab/test_forex_execution_ledger_integration.py",
+    "docs/orchestration/AIOS_FOREX_EXECUTION_LEDGER_INTEGRATION.md",
+    "automation/orchestration/aios_productive_bounded_executor.py",
+    "tests/orchestration/test_aios_productive_bounded_executor.py",
+    "automation/orchestration/aios_wake_continue.py",
+    "tests/orchestration/test_aios_wake_continue.py",
+]
+
 STRATEGY_REVIEW_ALLOWED_PATHS = [
     "apps/trading_lab/trading_lab/forex_strategy_rules.py",
     "tests/trading_lab/test_forex_strategy_rules.py",
@@ -46,6 +56,10 @@ FOREX_RISK_CONTROLS_VALIDATORS = [
 
 FOREX_PAPER_EXECUTION_SIMULATOR_VALIDATORS = [
     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_productive_bounded_executor.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_paper_execution_simulator.py",
+]
+
+FOREX_EXECUTION_LEDGER_INTEGRATION_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_productive_bounded_executor.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_execution_ledger_integration.py",
 ]
 
 STRATEGY_REVIEW_VALIDATORS = [
@@ -111,6 +125,11 @@ def _ready_handoff(
         "Prepare bounded paper execution simulator packet for Anthony review. "
         "Do not execute, stage, commit, push, or dispatch from this handoff."
         if allowed_action == "build_forex_paper_execution_simulator"
+        else (
+            "Prepare bounded execution-ledger integration packet for Anthony review. "
+            "Do not execute, stage, commit, push, or dispatch from this handoff."
+        )
+        if allowed_action == "build_forex_execution_ledger_integration"
         else (
             f"Prepare the {allowed_action} APPLY packet for Anthony review. "
             "Do not execute, stage, commit, push, or dispatch from this handoff."
@@ -196,6 +215,13 @@ def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str,
             allowed_action="build_forex_paper_execution_simulator",
             allowed_paths=FOREX_PAPER_EXECUTION_SIMULATOR_ALLOWED_PATHS,
             validators=FOREX_PAPER_EXECUTION_SIMULATOR_VALIDATORS,
+        )
+    if next_component == "forex_execution_ledger_integration":
+        return _ready_handoff(
+            next_build_plan,
+            allowed_action="build_forex_execution_ledger_integration",
+            allowed_paths=FOREX_EXECUTION_LEDGER_INTEGRATION_ALLOWED_PATHS,
+            validators=FOREX_EXECUTION_LEDGER_INTEGRATION_VALIDATORS,
         )
     if next_component == "forex_strategy_rules_review":
         return _ready_handoff(
