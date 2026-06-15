@@ -216,6 +216,98 @@ def test_self_route_packet_queue_selected_preview_is_stop_report_only() -> None:
     assert "launch_codex" in text
 
 
+def test_self_route_references_cycle_ledger_module() -> None:
+    text = self_route_text()
+
+    assert "automation/orchestration/aios_cycle_ledger.py" in text
+    assert "python $cycleLedgerPath `" in text
+    assert "--evidence $cycleEvidenceJson" in text
+
+
+def test_self_route_json_includes_cycle_ledger_dashboard_and_sos_contract() -> None:
+    text = self_route_text()
+
+    assert "cycle_ledger_status = $cycleLedgerStatus" in text
+    assert "cycle_ledger = $cycleLedger" in text
+    assert "dashboard_contract = $dashboardContract" in text
+    assert "dashboard_status = $dashboardStatus" in text
+    assert "sos_required = $sosRequired" in text
+    assert "sos_reason = $sosReason" in text
+    assert "forex_builder_alignment = $forexBuilderAlignment" in text
+    assert "cycle_next_safe_action = $cycleNextSafeAction" in text
+
+
+def test_self_route_passes_selected_packet_and_preview_to_cycle_ledger_evidence() -> None:
+    text = self_route_text()
+
+    assert "$cycleEvidence = [ordered]@{" in text
+    assert "packet_queue_plan = $packetQueuePlan" in text
+    assert "selected_packet = $selectedPacket" in text
+    assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+    assert 'codex_prompt_emitted = [bool](Get-AiOsObjectProperty -Object $codexReadyPacketPreview -Name "packet_ready" -Default $false)' in text
+
+
+def test_self_route_cycle_ledger_evidence_includes_today_goal_alignment() -> None:
+    text = self_route_text()
+
+    assert "AIOS self-building machine; first proof target: industrial-grade forex bot builder" in text
+    assert "no broker/live/secrets until gates prove safety" in text
+    assert "forex_builder_alignment = $forexBuilderAlignment" in text
+
+
+def test_self_route_does_not_execute_cycle_ledger_or_dashboard_output() -> None:
+    text = self_route_text()
+
+    assert "Invoke-Expression" not in text
+    assert "Start-Process" not in text
+    assert "command_execution_allowed = $false" in text
+    assert "command_executed = $false" in text
+    assert "codex_prompt_text |" not in text
+
+
+def test_self_route_cycle_ledger_does_not_write_reports_or_mutate_state() -> None:
+    text = self_route_text()
+
+    assert "Reports/" not in text
+    assert "reports_written = $false" in text
+    assert "workers_dispatched = $false" in text
+    assert "queues_mutated = $false" in text
+    assert "approvals_mutated = $false" in text
+    assert "worker_dispatch = $false" in text
+    assert "queue_mutation = $false" in text
+    assert "approval_mutation = $false" in text
+
+
+def test_self_route_cycle_ledger_failure_becomes_safe_blocked_evidence() -> None:
+    text = self_route_text()
+
+    assert "New-AiOsBlockedCycleLedgerResult" in text
+    assert "cycle_ledger_module_missing" in text
+    assert "cycle_ledger_nonzero_exit" in text
+    assert "cycle_ledger_empty_output" in text
+    assert "cycle_ledger_generation_failed" in text
+    assert '$rejectionReasons += "cycle_ledger_blocked:$cycleLedgerBlocker"' in text
+
+
+def test_self_route_empty_no_candidate_state_remains_safe_and_reportable() -> None:
+    text = self_route_text()
+
+    assert '$packetQueueCandidateEvidenceJson = "[]"' in text
+    assert 'elseif ($packetQueuePlanStatus -eq "empty") {' in text
+    assert '"packet_queue_plan_empty"' in text
+    assert "No recommended command validation was needed." in text
+    assert "Stop or idle according to the action recommendation; no command is executable from self-route." in text
+
+
+def test_self_route_sos_blocks_but_remains_report_only() -> None:
+    text = self_route_text()
+
+    assert "if ($sosRequired) {" in text
+    assert '$rejectionReasons += "cycle_ledger_sos_required:$sosReason"' in text
+    assert "$exitCode = 1" in text
+    assert "REPORT_ONLY_NO_RECOMMENDED_COMMAND_EXECUTION" in text
+
+
 def test_supervisor_does_not_advance_packets_after_self_route_failure() -> None:
     text = supervisor_text()
 

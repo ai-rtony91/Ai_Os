@@ -160,6 +160,98 @@ function New-AiOsPacketQueueFallbackPlan {
     }
 }
 
+function New-AiOsBlockedCycleLedgerResult {
+    param(
+        [string]$Reason,
+        [AllowNull()]$SelectedPacket,
+        [AllowNull()]$CodexReadyPacketPreview,
+        [string]$NextSafeAction = "Stop; cycle ledger evidence could not be generated."
+    )
+
+    $timestampUtc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    $safety = [pscustomobject]@{
+        preview_only = $true
+        evidence_only = $true
+        command_execution = $false
+        filesystem_writes = $false
+        reports_written = $false
+        network_access = $false
+        subprocess = $false
+        worker_dispatch = $false
+        queue_mutation = $false
+        approval_mutation = $false
+        scheduler_activation = $false
+        daemon_activation = $false
+        broker = $false
+        live_trading = $false
+        credentials = $false
+        real_orders = $false
+        real_webhooks = $false
+        git_add = $false
+        git_commit = $false
+        git_push = $false
+        git_merge = $false
+    }
+    $forexAlignment = [pscustomobject]@{
+        milestone = "AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety"
+        proof_target = "industrial-grade forex bot builder"
+        control_plane_role = "cycle memory, dashboard progress, blocker/SOS decision, next safe action"
+        aligned = $true
+        blocked_boundaries = @()
+        requires_future_gates_before_execution = $true
+        sos_required = $false
+    }
+    $cycleLedger = [pscustomobject]@{
+        schema = "AIOS_CYCLE_LEDGER_ENTRY.v1"
+        cycle_id = "runtime_self_route_current"
+        timestamp_utc = $timestampUtc
+        repo_branch = "UNKNOWN"
+        repo_head = "UNKNOWN"
+        selected_packet = $SelectedPacket
+        selected_reason = $Reason
+        codex_prompt_emitted = [bool](Get-AiOsObjectProperty -Object $CodexReadyPacketPreview -Name "packet_ready" -Default $false)
+        validation_status = "not_run"
+        validation_summary = "Cycle ledger generation failed: $Reason"
+        pr_number = $null
+        pr_status = "none"
+        checks_status = "not_run"
+        blocker_status = "blocked"
+        sos_required = $false
+        sos_reason = "No SOS required for cycle ledger generation failure; stop/report."
+        next_safe_action = $NextSafeAction
+        forex_builder_alignment = $forexAlignment
+        safety = $safety
+    }
+    $dashboardContract = [pscustomobject]@{
+        schema = "AIOS_CYCLE_DASHBOARD_CONTRACT.v1"
+        current_mission = "AIOS self-building control-plane cycle memory"
+        current_cycle = $cycleLedger.cycle_id
+        current_packet = [string](Get-AiOsObjectProperty -Object $SelectedPacket -Name "packet_id" -Default "")
+        progress_status = "blocked"
+        tests_passed = 0
+        tests_failed = 0
+        pr_status = "none"
+        checks_status = "not_run"
+        blocker_status = "blocked"
+        sos_required = $false
+        sos_reason = $cycleLedger.sos_reason
+        next_safe_action = $NextSafeAction
+        last_updated_utc = $timestampUtc
+    }
+
+    return [pscustomobject]@{
+        schema = "AIOS_CYCLE_LEDGER_DASHBOARD_SOS.v1"
+        cycle_ledger = $cycleLedger
+        dashboard_contract = $dashboardContract
+        commands_executed = @()
+        files_written = @()
+        workers_dispatched = $false
+        queues_mutated = $false
+        approvals_mutated = $false
+        safety = $safety
+    }
+}
+
 if (-not ($QuietJson -or $OutputJson)) {
     Write-Host "AIOS Runtime Self Route"
     Write-Host "Mode: $(if ($Apply) { 'APPLY_REPORT_ONLY' } else { 'DRY_RUN_REPORT_ONLY' })"
@@ -178,6 +270,7 @@ $hasActionableCommand = -not [string]::IsNullOrWhiteSpace($normalizedCommand) -a
 $commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommendedCommand.ps1"
 $routePreviewPath = "automation/orchestration/aios_bounded_worker_routing_preview.py"
 $packetQueuePlannerPath = "automation/orchestration/aios_packet_queue_planner.py"
+$cycleLedgerPath = "automation/orchestration/aios_cycle_ledger.py"
 $packetQueueCandidateEvidenceJson = "[]"
 $validationOutput = @()
 $validationExitCode = $null
@@ -201,6 +294,18 @@ $packetQueueWorkersDispatched = $false
 $packetQueueQueuesMutated = $false
 $packetQueueApprovalsMutated = $false
 $packetQueueFilesWritten = @()
+$cycleLedgerResult = $null
+$cycleLedgerOutput = @()
+$cycleLedgerExitCode = $null
+$cycleLedgerStatus = "NOT_RUN"
+$cycleLedgerBlocker = ""
+$cycleLedger = $null
+$dashboardContract = $null
+$dashboardStatus = "NOT_RUN"
+$sosRequired = $false
+$sosReason = ""
+$forexBuilderAlignment = $null
+$cycleNextSafeAction = ""
 $routeStatus = "report_only"
 $exitCode = 0
 $rejectionReasons = @()
@@ -393,6 +498,152 @@ else {
     "Stop or idle according to the action recommendation; no command is executable from self-route."
 }
 
+$repoBranch = [string](Get-AiOsObjectProperty -Object $recommendation -Name "repo_branch" -Default "")
+if ([string]::IsNullOrWhiteSpace($repoBranch)) {
+    $repoBranch = [string](Get-AiOsObjectProperty -Object $contract -Name "repo_branch" -Default "UNKNOWN")
+}
+$repoHead = [string](Get-AiOsObjectProperty -Object $recommendation -Name "repo_head" -Default "")
+if ([string]::IsNullOrWhiteSpace($repoHead)) {
+    $repoHead = [string](Get-AiOsObjectProperty -Object $contract -Name "repo_head" -Default "UNKNOWN")
+}
+$selectedReason = if ($packetQueuePlanStatus -eq "selected") {
+    "packet_queue_plan_selected"
+}
+elseif ($packetQueuePlanStatus -eq "empty") {
+    "packet_queue_plan_empty"
+}
+else {
+    "packet_queue_plan_$packetQueuePlanStatus"
+}
+$blockerStatus = if ($routeStatus -in @("blocked", "rejected") -or $rejectionReasons.Count -gt 0) {
+    "blocked"
+}
+else {
+    "none"
+}
+$validationSummary = if ($validationOutput.Count -gt 0) {
+    ($validationOutput -join "; ")
+}
+elseif ($validationStatus -eq "NOT_APPLICABLE") {
+    "No recommended command validation was needed."
+}
+else {
+    "Validation status: $validationStatus"
+}
+$cycleEvidence = [ordered]@{
+    cycle_id = "runtime_self_route_current"
+    timestamp_utc = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    repo_branch = $repoBranch
+    repo_head = $repoHead
+    current_mission = "AIOS self-building machine; first proof target: industrial-grade forex bot builder; no broker/live/secrets until gates prove safety."
+    route_status = $routeStatus
+    packet_queue_plan = $packetQueuePlan
+    selected_packet = $selectedPacket
+    selected_reason = $selectedReason
+    codex_ready_packet_preview = $codexReadyPacketPreview
+    codex_prompt_emitted = [bool](Get-AiOsObjectProperty -Object $codexReadyPacketPreview -Name "packet_ready" -Default $false)
+    validation_status = $validationStatus
+    validation_summary = $validationSummary
+    pr_number = $null
+    pr_status = "none"
+    checks_status = "not_run"
+    blocker_status = $blockerStatus
+    blockers = @($rejectionReasons | Select-Object -Unique)
+    next_safe_action = $nextSafeAction
+    stop_condition = "report_only"
+    approval_required = [ordered]@{
+        human_owner_review = $approvalRequired
+    }
+    safety = [ordered]@{
+        broker = $false
+        live_trading = $false
+        credentials = $false
+        secrets = $false
+        real_orders = $false
+        real_webhooks = $false
+        worker_dispatch = $false
+        queue_mutation = $false
+        approval_mutation = $false
+        scheduler_activation = $false
+        daemon_activation = $false
+        reports_written = $false
+        network_access = $false
+    }
+}
+
+if (-not (Test-Path -LiteralPath $cycleLedgerPath)) {
+    $cycleLedgerResult = New-AiOsBlockedCycleLedgerResult `
+        -Reason "cycle_ledger_module_missing" `
+        -SelectedPacket $selectedPacket `
+        -CodexReadyPacketPreview $codexReadyPacketPreview `
+        -NextSafeAction "Stop; cycle ledger module is missing."
+    $cycleLedgerStatus = "blocked"
+    $cycleLedgerBlocker = "cycle_ledger_module_missing"
+    $cycleLedgerExitCode = 1
+}
+else {
+    try {
+        $cycleEvidenceJson = $cycleEvidence | ConvertTo-Json -Depth 30 -Compress
+        $cycleLedgerOutput = @(
+            python $cycleLedgerPath `
+                --evidence $cycleEvidenceJson
+        )
+        $cycleLedgerExitCode = $LASTEXITCODE
+        $cycleLedgerJson = ($cycleLedgerOutput -join "`n")
+        if ($cycleLedgerExitCode -ne 0) {
+            $cycleLedgerResult = New-AiOsBlockedCycleLedgerResult `
+                -Reason "cycle_ledger_nonzero_exit" `
+                -SelectedPacket $selectedPacket `
+                -CodexReadyPacketPreview $codexReadyPacketPreview `
+                -NextSafeAction "Stop; cycle ledger generation returned a nonzero exit."
+            $cycleLedgerStatus = "blocked"
+            $cycleLedgerBlocker = "cycle_ledger_nonzero_exit"
+        }
+        elseif ([string]::IsNullOrWhiteSpace($cycleLedgerJson)) {
+            $cycleLedgerResult = New-AiOsBlockedCycleLedgerResult `
+                -Reason "cycle_ledger_empty_output" `
+                -SelectedPacket $selectedPacket `
+                -CodexReadyPacketPreview $codexReadyPacketPreview `
+                -NextSafeAction "Stop; cycle ledger generation returned empty output."
+            $cycleLedgerStatus = "blocked"
+            $cycleLedgerBlocker = "cycle_ledger_empty_output"
+        }
+        else {
+            $cycleLedgerResult = $cycleLedgerJson | ConvertFrom-Json
+            $cycleLedgerStatus = "ready"
+        }
+    }
+    catch {
+        $cycleLedgerResult = New-AiOsBlockedCycleLedgerResult `
+            -Reason "cycle_ledger_generation_failed" `
+            -SelectedPacket $selectedPacket `
+            -CodexReadyPacketPreview $codexReadyPacketPreview `
+            -NextSafeAction "Stop; cycle ledger evidence could not be generated."
+        $cycleLedgerStatus = "blocked"
+        $cycleLedgerBlocker = "cycle_ledger_generation_failed"
+        $cycleLedgerExitCode = 1
+    }
+}
+
+$cycleLedger = Get-AiOsObjectProperty -Object $cycleLedgerResult -Name "cycle_ledger" -Default $null
+$dashboardContract = Get-AiOsObjectProperty -Object $cycleLedgerResult -Name "dashboard_contract" -Default $null
+$dashboardStatus = if ($null -eq $dashboardContract) { "blocked" } else { "ready" }
+$sosRequired = [bool](Get-AiOsObjectProperty -Object $dashboardContract -Name "sos_required" -Default $false)
+$sosReason = [string](Get-AiOsObjectProperty -Object $dashboardContract -Name "sos_reason" -Default "")
+$forexBuilderAlignment = Get-AiOsObjectProperty -Object $cycleLedger -Name "forex_builder_alignment" -Default $null
+$cycleNextSafeAction = [string](Get-AiOsObjectProperty -Object $dashboardContract -Name "next_safe_action" -Default "")
+
+if ($cycleLedgerStatus -eq "blocked") {
+    $routeStatus = "blocked"
+    $exitCode = 1
+    $rejectionReasons += "cycle_ledger_blocked:$cycleLedgerBlocker"
+}
+if ($sosRequired) {
+    $routeStatus = "blocked"
+    $exitCode = 1
+    $rejectionReasons += "cycle_ledger_sos_required:$sosReason"
+}
+
 $report = [pscustomobject]@{
     schema = "AIOS_RUNTIME_SELF_ROUTE_REPORT.v1"
     mode = if ($Apply) { "APPLY_REPORT_ONLY" } else { "DRY_RUN_REPORT_ONLY" }
@@ -417,6 +668,14 @@ $report = [pscustomobject]@{
     packet_queue_queues_mutated = $packetQueueQueuesMutated
     packet_queue_approvals_mutated = $packetQueueApprovalsMutated
     packet_queue_files_written = @($packetQueueFilesWritten)
+    cycle_ledger_status = $cycleLedgerStatus
+    cycle_ledger = $cycleLedger
+    dashboard_contract = $dashboardContract
+    dashboard_status = $dashboardStatus
+    sos_required = $sosRequired
+    sos_reason = $sosReason
+    forex_builder_alignment = $forexBuilderAlignment
+    cycle_next_safe_action = $cycleNextSafeAction
     command_execution_allowed = $false
     command_executed = $false
     rejection_reasons = @($rejectionReasons | Select-Object -Unique)
@@ -463,6 +722,15 @@ if (-not [string]::IsNullOrWhiteSpace($routePreviewBlocker)) {
 Write-Host "Packet queue plan: $packetQueuePlanStatus"
 if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
     Write-Host "Packet queue blocker: $packetQueuePlannerBlocker"
+}
+Write-Host "Cycle ledger: $cycleLedgerStatus"
+Write-Host "Dashboard: $dashboardStatus"
+Write-Host "SOS required: $sosRequired"
+if (-not [string]::IsNullOrWhiteSpace($sosReason)) {
+    Write-Host "SOS reason: $sosReason"
+}
+if (-not [string]::IsNullOrWhiteSpace($cycleLedgerBlocker)) {
+    Write-Host "Cycle ledger blocker: $cycleLedgerBlocker"
 }
 foreach ($line in $validationOutput) {
     Write-Host $line
