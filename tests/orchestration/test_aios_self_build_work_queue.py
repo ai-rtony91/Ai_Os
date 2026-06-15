@@ -50,6 +50,24 @@ def test_queue_sorts_by_priority():
     assert queue["mutation_performed"] is False
 
 
+def test_queue_generically_marks_items_completed_when_allowed_paths_exist(tmp_path):
+    module = load_module()
+    allowed_paths = ["automation/orchestration/example_reader.py", "tests/orchestration/test_example_reader.py"]
+    for relative_path in allowed_paths:
+        target = tmp_path / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("present", encoding="utf-8")
+
+    queue = module.build_self_build_work_queue(
+        [{"priority": 10, "action_id": "build_example_reader", "allowed_paths": allowed_paths}],
+        repo_root=tmp_path,
+    )
+
+    item = queue["items"][0]
+    assert item["status"] == "completed"
+    assert item["reason_code"] == "completed_allowed_paths_exist"
+
+
 def test_path_traversal_is_rejected_from_allowed_paths():
     module = load_module()
     item = module.build_queue_item(action_id="unsafe", allowed_paths=["../outside.py", "safe/path.py"])
@@ -68,7 +86,7 @@ def test_self_build_core_queue_marks_status_reader_completed_when_files_exist(tm
     items_by_action = {item["action_id"]: item for item in queue["items"]}
 
     assert items_by_action["build_self_build_core_status_reader"]["status"] == "completed"
-    assert items_by_action["build_self_build_core_status_reader"]["reason_code"] == "completed_existing_files_present"
+    assert items_by_action["build_self_build_core_status_reader"]["reason_code"] == "completed_allowed_paths_exist"
     assert items_by_action["build_self_build_run_summary_view"]["status"] == "ready"
     assert items_by_action["build_self_build_run_summary_view"]["allowed_paths"] == module.RUN_SUMMARY_VIEW_PATHS
 
@@ -86,6 +104,27 @@ def test_queue_selects_run_summary_view_after_status_reader_completed(tmp_path):
     assert selected["selector_status"] == "selected"
     assert selected["selected_next_action"] == "build_self_build_run_summary_view"
     assert selected["selected_queue_item"]["action_id"] == "build_self_build_run_summary_view"
+    assert all(value is False for value in selected["selected_queue_item"]["protected_action_flags"].values())
+
+
+def test_queue_skips_completed_status_reader_and_run_summary_view(tmp_path):
+    module = load_module()
+    for relative_path in module.CORE_STATUS_READER_PATHS + module.RUN_SUMMARY_VIEW_PATHS:
+        target = tmp_path / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("present", encoding="utf-8")
+
+    queue = module.build_self_build_core_preview_queue(tmp_path)
+    items_by_action = {item["action_id"]: item for item in queue["items"]}
+    selected = select_next_action({"readiness_status": "ready"}, queue)
+
+    assert items_by_action["build_self_build_core_status_reader"]["status"] == "completed"
+    assert items_by_action["build_self_build_run_summary_view"]["status"] == "completed"
+    assert items_by_action["build_self_build_apply_approval_gate"]["status"] == "ready"
+    assert selected["selector_status"] == "selected"
+    assert selected["selected_next_action"] == "build_self_build_apply_approval_gate"
+    assert selected["selected_queue_item"]["allowed_paths"] == module.APPLY_APPROVAL_GATE_PATHS
+    assert selected["selected_queue_item"]["validators"] == module.APPLY_APPROVAL_GATE_VALIDATORS
     assert all(value is False for value in selected["selected_queue_item"]["protected_action_flags"].values())
 
 
