@@ -77,6 +77,23 @@ DEFAULT_COMPLETED_PACKETS = [
         "lane": "connect-runtime-selfroute-to-approved-executor-contract",
         "source": "default_completed_memory",
     },
+    {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC",
+        "title": "feat(trading-lab): add canonical forex builder spec",
+        "lane": "forex-builder-spec",
+        "landed_pr": "#737",
+        "commit": "cd012419",
+        "completion_reason": "canonical forex builder spec landed on main",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md",
+            "tests/orchestration/test_aios_forex_builder_roadmap.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md",
+            "tests/orchestration/test_aios_forex_builder_roadmap.py",
+        ],
+        "source": "default_completed_memory",
+    },
 ]
 
 COMPLETE_STATUSES = {
@@ -183,6 +200,7 @@ def _record_lane(record: dict[str, Any]) -> str:
 def _required_files(record: dict[str, Any]) -> list[str]:
     return _as_text_list(
         record.get("required_files")
+        or record.get("completed_files")
         or record.get("write_scope")
         or record.get("files")
         or record.get("changed_files")
