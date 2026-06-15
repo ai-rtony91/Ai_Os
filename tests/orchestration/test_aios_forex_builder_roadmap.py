@@ -26,6 +26,7 @@ DAILY_LOOP_PACKET_ID = "PKT-AIOS-DAILY-CONTRIBUTION-LOOP-LITE"
 PAPER_FORWARD_EVIDENCE_V1_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1"
 PAPER_FORWARD_EVIDENCE_V2_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
 RISK_GOVERNOR_PACKET_ID = "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
+STRESS_OUT_OF_SAMPLE_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
 APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID = "PKT-AIOS-APPROVED-EXECUTOR-LOCAL-APPLY-LOOP"
 
 
@@ -105,7 +106,7 @@ def test_today_goal_alignment_is_present_and_aligned() -> None:
 def test_roadmap_candidates_are_emitted() -> None:
     candidates = roadmap_candidates()
 
-    assert len(candidates) == 14
+    assert len(candidates) == 15
 
 
 def test_first_candidate_is_canonical_spec_packet() -> None:
@@ -134,7 +135,7 @@ def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
 def test_monthly_forex_candidates_appear_in_safe_order() -> None:
     packet_ids = [candidate["packet_id"] for candidate in roadmap_candidates()]
 
-    assert packet_ids[:14] == [
+    assert packet_ids[:15] == [
         CANONICAL_SPEC_PACKET_ID,
         DATA_SCHEMAS_PACKET_ID,
         BACKTEST_PACKET_ID,
@@ -148,6 +149,7 @@ def test_monthly_forex_candidates_appear_in_safe_order() -> None:
         PAPER_FORWARD_EVIDENCE_V1_PACKET_ID,
         PAPER_FORWARD_EVIDENCE_V2_PACKET_ID,
         RISK_GOVERNOR_PACKET_ID,
+        STRESS_OUT_OF_SAMPLE_PACKET_ID,
         APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID,
     ]
 
@@ -176,7 +178,14 @@ def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
     assert "automation/forex_engine/run_paper_forward_evidence_v2_demo.py" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE_V2.md" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
     assert "tests/forex_engine/test_paper_forward_evidence_v2.py" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/risk_governor_thresholds.py" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/opportunity_capture.py" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/run_risk_governor_demo.py" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_GOVERNOR_THRESHOLDS.md" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_OPPORTUNITY_CAPTURE.md" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_opportunity_capture.py" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_AND_OUT_OF_SAMPLE.md" in candidates[STRESS_OUT_OF_SAMPLE_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_paper_forward_stress_and_out_of_sample.py" in candidates[STRESS_OUT_OF_SAMPLE_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOCAL_APPLY_LOOP.md" in candidates[APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID]["required_files"]
 
 

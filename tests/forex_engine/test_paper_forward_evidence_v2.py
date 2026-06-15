@@ -44,6 +44,13 @@ def test_evidence_v2_bundle_includes_fixture_summary_and_regime_consistency() ->
     assert bundle["multi_fixture_paper_forward_summary"]["fixture_count"] == 9
     assert bundle["regime_consistency"]["total_regimes"] >= 6
     assert bundle["risk_gate_result"]
+    assert bundle["opportunity_capture"]
+    assert bundle["opportunity_capture_summary"]
+    assert bundle["risk_governor"]
+    assert bundle["stress_scenarios"]
+    assert bundle["starting_balance"] == 500.0
+    assert bundle["ending_balance"] >= 500.0
+    assert bundle["return_pct"] >= 0.0
     assert bundle["month_end_readiness_review"]
     assert bundle["forex_dashboard_v2"]
     assert bundle["classification"] in ALLOWED_CLASSIFICATIONS
@@ -75,6 +82,13 @@ def test_evidence_v2_summary_is_compact_and_never_live_ready() -> None:
     assert summary["simulated_ledger_entries"] == summary["total_intents"]
     assert summary["classification"] in ALLOWED_CLASSIFICATIONS
     assert summary["classification"] != "LIVE_READY"
+    assert summary["starting_balance"] == 500.0
+    assert summary["ending_balance"] >= 500.0
+    assert summary["return_pct"] >= 0.0
+    assert summary["cost_drag_pct"] >= 0.0
+    assert summary["capture_rate_pct"] >= 0.0
+    assert summary["opportunity_quality_score"] >= 0.0
+    assert summary["risk_governor_classification"] in ALLOWED_CLASSIFICATIONS
     assert summary["live_ready"] is False
     assert summary["live_trade_ready"] is False
     assert summary["protected_gate_required"] is True
@@ -90,6 +104,9 @@ def test_month_end_readiness_v2_keeps_live_trade_ready_false() -> None:
     assert review["live_trade_ready"] is False
     assert review["protected_gate_required"] is True
     assert review["evidence_summary"]["fixture_count"] == 9
+    assert review["evidence_summary"]["starting_balance"] == 500.0
+    assert review["evidence_summary"]["capture_rate_pct"] >= 0.0
+    assert review["evidence_summary"]["risk_governor_classification"] in ALLOWED_CLASSIFICATIONS
     assert review["next_safe_action"]
 
 

@@ -6,7 +6,9 @@ from automation.forex_engine import evidence_bundle_runner
 from automation.forex_engine import forex_dashboard_contract
 from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import month_end_readiness
+from automation.forex_engine import opportunity_capture
 from automation.forex_engine import paper_forward_runner
+from automation.forex_engine import risk_governor_thresholds
 from automation.forex_engine import schema_contracts as schemas
 
 
@@ -47,6 +49,28 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
         "reports_written": False,
         "files_written": [],
     }
+    opportunity_report = opportunity_capture.calculate_opportunity_capture(bundle)
+    stress_scenarios = risk_governor_thresholds.run_cost_stress_scenarios(bundle)
+    risk_governor = risk_governor_thresholds.evaluate_risk_governor_thresholds(
+        bundle,
+        opportunity_report,
+    )
+    bundle.update(
+        {
+            "opportunity_capture": opportunity_report,
+            "opportunity_capture_summary": opportunity_capture.opportunity_capture_summary(opportunity_report),
+            "risk_governor": risk_governor,
+            "risk_governor_result": risk_governor,
+            "stress_scenarios": stress_scenarios,
+            "starting_balance": opportunity_report["starting_balance"],
+            "ending_balance": opportunity_report["ending_balance"],
+            "aggregate_paper_pnl": opportunity_report["aggregate_paper_pnl"],
+            "return_pct": opportunity_report["return_pct"],
+            "max_drawdown_pct": opportunity_report["max_drawdown_pct"],
+            "cost_drag_usd": opportunity_report["cost_drag_usd"],
+            "cost_drag_pct": opportunity_report["cost_drag_pct"],
+        }
+    )
     bundle["classification"] = classify_paper_forward_evidence_v2(bundle)
     bundle["blockers"] = _bundle_blockers(bundle)
     bundle["next_safe_action"] = _next_safe_action(bundle["classification"], bundle["blockers"])
@@ -74,6 +98,17 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
         "aggregate_paper_pnl": float(multi_summary.get("aggregate_pnl", 0.0)),
         "consistency_pct": float(multi_summary.get("consistency_pct", 0.0)),
         "regime_consistency_pct": float(regime.get("consistent_regimes_pct", 0.0)),
+        "starting_balance": float(payload.get("starting_balance", 500.0)),
+        "ending_balance": float(payload.get("ending_balance", 500.0)),
+        "return_pct": float(payload.get("return_pct", 0.0)),
+        "max_drawdown_pct": float(payload.get("max_drawdown_pct", 0.0)),
+        "cost_drag_usd": float(payload.get("cost_drag_usd", 0.0)),
+        "cost_drag_pct": float(payload.get("cost_drag_pct", 0.0)),
+        "capture_rate_pct": float(dict(payload.get("opportunity_capture") or {}).get("capture_rate_pct", 0.0)),
+        "opportunity_quality_score": float(
+            dict(payload.get("opportunity_capture") or {}).get("opportunity_quality_score", 0.0)
+        ),
+        "risk_governor_classification": dict(payload.get("risk_governor") or {}).get("classification", classification),
         "classification": classification,
         "readiness_status": readiness.get("classification", classification),
         "paper_forward_ready": bool(readiness.get("paper_forward_ready", classification == "PAPER_FORWARD_READY")),
@@ -99,11 +134,14 @@ def classify_paper_forward_evidence_v2(bundle: dict[str, Any]) -> str:
     multi = dict(payload.get("multi_fixture_paper_forward_summary") or {})
     regime = dict(payload.get("regime_consistency") or {})
     risk = dict(payload.get("risk_gate_result") or {})
+    governor = dict(payload.get("risk_governor") or {})
     classifications = [
         str(multi.get("classification") or "FAIL"),
         str(regime.get("classification") or "FAIL"),
         str(risk.get("classification") or "FAIL"),
     ]
+    if governor:
+        classifications.append(str(governor.get("classification") or "FAIL"))
     if not catalog.get("valid", False):
         return "FAIL"
     if any(item not in ALLOWED_V2_CLASSIFICATIONS for item in classifications):
@@ -197,11 +235,15 @@ def _bundle_blockers(bundle: dict[str, Any]) -> list[str]:
     multi = dict(bundle.get("multi_fixture_paper_forward_summary") or {})
     regime = dict(bundle.get("regime_consistency") or {})
     risk = dict(bundle.get("risk_gate_result") or {})
+    governor = dict(bundle.get("risk_governor") or bundle.get("risk_governor_result") or {})
+    opportunity = dict(bundle.get("opportunity_capture") or {})
     blockers = []
     blockers.extend([str(item) for item in list(catalog.get("blockers") or [])])
     blockers.extend([str(item) for item in list(multi.get("blockers") or [])])
     blockers.extend([str(item) for item in list(regime.get("blockers") or [])])
     blockers.extend([str(item) for item in list(risk.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(governor.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(opportunity.get("blockers") or [])])
     return _unique(blockers)
 
 
@@ -215,7 +257,7 @@ def _unique(items: list[str]) -> list[str]:
 
 def _next_safe_action(classification: str, blockers: list[str]) -> str:
     if classification == "PAPER_FORWARD_READY":
-        return "Advance to protected risk-governor paper-forward threshold hardening; live readiness requires separate future approval."
+        return "Advance to protected stress and out-of-sample paper-forward validation; live readiness requires separate future approval."
     if blockers:
         return "Resolve V2 local evidence blockers before risk-governor threshold work."
     return "Continue protected paper-forward evidence expansion and risk review; live readiness requires separate future approval."

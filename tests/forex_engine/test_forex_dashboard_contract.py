@@ -60,9 +60,16 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
 
     assert dashboard["fixture_count"] == 9
     assert dashboard["paper_forward_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert dashboard["aggregate_paper_pnl"] >= 0.0
+    assert dashboard["return_pct"] >= 0.0
+    assert dashboard["capture_rate_pct"] >= 0.0
+    assert dashboard["risk_governor_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert dashboard["opportunity_quality_score"] >= 0.0
     assert dashboard["live_ready"] is False
     assert dashboard["protected_gate_required"] is True
     assert len(lines) <= 10
+    assert any("PnL:" in line for line in lines)
+    assert any("Capture:" in line for line in lines)
     assert "Live ready: false" in lines
     assert "Protected gate required: true" in lines
     assert lines[-1] == "Safety: no broker/live/secrets/orders/webhooks"

@@ -304,12 +304,10 @@ DEFAULT_COMPLETED_PACKETS = [
     },
     {
         "packet_id": "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2",
-        "title": "Expand paper-forward evidence with broader out-of-sample fixtures",
+        "title": "Add paper-forward evidence V2",
         "lane": "paper-forward-evidence-expansion-v2",
-        "completion_reason": (
-            "V2 deterministic fixtures, multi-fixture paper-forward simulation, regime consistency scoring, "
-            "compact readiness output, docs, and tests validate local paper-forward evidence expansion"
-        ),
+        "landed_pr": "#745",
+        "completion_reason": "paper-forward evidence V2 landed with multi-fixture evidence, regime consistency, V2 demo, readiness/dashboard integration, and safe next selector",
         "completed_files": [
             "automation/forex_engine/local_fixture_catalog.py",
             "automation/forex_engine/paper_forward_runner.py",
@@ -339,6 +337,31 @@ DEFAULT_COMPLETED_PACKETS = [
             "tests/forex_engine/test_paper_forward_runner.py",
             "tests/forex_engine/test_month_end_readiness.py",
             "tests/forex_engine/test_forex_dashboard_contract.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS",
+        "title": "Define paper-forward risk governor thresholds",
+        "lane": "risk-governor-paper-forward-thresholds",
+        "completion_reason": "local opportunity capture, threshold policy, stress scenarios, demo, docs, and tests validate paper-only risk governor evidence",
+        "completed_files": [
+            "automation/forex_engine/risk_governor_thresholds.py",
+            "automation/forex_engine/opportunity_capture.py",
+            "automation/forex_engine/run_risk_governor_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_GOVERNOR_THRESHOLDS.md",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_OPPORTUNITY_CAPTURE.md",
+            "tests/forex_engine/test_risk_governor_thresholds.py",
+            "tests/forex_engine/test_opportunity_capture.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/risk_governor_thresholds.py",
+            "automation/forex_engine/opportunity_capture.py",
+            "automation/forex_engine/run_risk_governor_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_GOVERNOR_THRESHOLDS.md",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_OPPORTUNITY_CAPTURE.md",
+            "tests/forex_engine/test_risk_governor_thresholds.py",
+            "tests/forex_engine/test_opportunity_capture.py",
         ],
         "source": "default_completed_memory",
     },

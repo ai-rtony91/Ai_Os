@@ -1498,22 +1498,74 @@ if (-not (Test-Path -LiteralPath $operatorCheckpointDashboardPath)) {
 }
 else {
     try {
+        $operatorCheckpointSelectedPacket = if ($null -eq $selectedPacket) {
+            $null
+        }
+        else {
+            [ordered]@{
+                packet_id = [string](Get-AiOsObjectProperty -Object $selectedPacket -Name "packet_id" -Default "")
+                title = [string](Get-AiOsObjectProperty -Object $selectedPacket -Name "title" -Default "")
+                lane = [string](Get-AiOsObjectProperty -Object $selectedPacket -Name "lane" -Default "")
+            }
+        }
+        $operatorCheckpointPreview = [ordered]@{
+            packet_ready = [bool](Get-AiOsObjectProperty -Object $codexReadyPacketPreview -Name "packet_ready" -Default $false)
+        }
+        $operatorCheckpointDashboard = [ordered]@{
+            current_packet = [string](Get-AiOsObjectProperty -Object $dashboardContract -Name "current_packet" -Default "")
+            pr_status = [string](Get-AiOsObjectProperty -Object $dashboardContract -Name "pr_status" -Default "none")
+            checks_status = [string](Get-AiOsObjectProperty -Object $dashboardContract -Name "checks_status" -Default "not_run")
+            blocker_status = [string](Get-AiOsObjectProperty -Object $dashboardContract -Name "blocker_status" -Default "none")
+            sos_required = $sosRequired
+        }
+        $operatorCheckpointCycleLedger = [ordered]@{
+            codex_prompt_emitted = [bool](Get-AiOsObjectProperty -Object $cycleLedger -Name "codex_prompt_emitted" -Default $false)
+            validation_status = [string](Get-AiOsObjectProperty -Object $cycleLedger -Name "validation_status" -Default "not_run")
+            pr_status = [string](Get-AiOsObjectProperty -Object $cycleLedger -Name "pr_status" -Default "none")
+            checks_status = [string](Get-AiOsObjectProperty -Object $cycleLedger -Name "checks_status" -Default "not_run")
+            blocker_status = [string](Get-AiOsObjectProperty -Object $cycleLedger -Name "blocker_status" -Default "none")
+        }
+        $operatorCheckpointActiveCandidatePackets = @(
+            $activeCandidatePackets | ForEach-Object {
+                [ordered]@{
+                    packet_id = [string](Get-AiOsObjectProperty -Object $_ -Name "packet_id" -Default "")
+                }
+            }
+        )
+        $operatorCheckpointCandidatePackets = @(
+            $candidatePackets | ForEach-Object {
+                [ordered]@{
+                    packet_id = [string](Get-AiOsObjectProperty -Object $_ -Name "packet_id" -Default "")
+                }
+            }
+        )
+        $operatorCheckpointForexRoadmapCandidates = @(
+            $forexRoadmapCandidates | ForEach-Object {
+                [ordered]@{
+                    packet_id = [string](Get-AiOsObjectProperty -Object $_ -Name "packet_id" -Default "")
+                }
+            }
+        )
+        $operatorCheckpointPacketQueuePlan = [ordered]@{
+            selected_packet = $operatorCheckpointSelectedPacket
+            ranked_packets = @()
+        }
         $operatorCheckpointEvidence = [ordered]@{
-            selected_packet = $selectedPacket
-            codex_ready_packet_preview = $codexReadyPacketPreview
+            selected_packet = $operatorCheckpointSelectedPacket
+            codex_ready_packet_preview = $operatorCheckpointPreview
             approved_executor_status = $approvedExecutorStatus
             approval_status = $executorApprovalStatus
             execution_allowed = $executionAllowed
             command_validation_status = $validationStatus
-            dashboard_contract = $dashboardContract
-            cycle_ledger = $cycleLedger
+            dashboard_contract = $operatorCheckpointDashboard
+            cycle_ledger = $operatorCheckpointCycleLedger
             sos_required = $sosRequired
             rejection_reasons = @($rejectionReasons | Select-Object -Unique)
             next_safe_action = $nextSafeAction
-            active_candidate_packets = @($activeCandidatePackets)
-            candidate_packets = @($candidatePackets)
-            forex_roadmap_candidates = @($forexRoadmapCandidates)
-            packet_queue_plan = $packetQueuePlan
+            active_candidate_packets = @($operatorCheckpointActiveCandidatePackets)
+            candidate_packets = @($operatorCheckpointCandidatePackets)
+            forex_roadmap_candidates = @($operatorCheckpointForexRoadmapCandidates)
+            packet_queue_plan = $operatorCheckpointPacketQueuePlan
         }
         $operatorCheckpointInputJson = $operatorCheckpointEvidence | ConvertTo-Json -Depth 30 -Compress
         $operatorCheckpointOutput = Invoke-AiOsPythonJsonArgumentScript `

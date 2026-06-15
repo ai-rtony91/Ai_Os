@@ -67,6 +67,11 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "fixture_count": int(payload.get("fixture_count", 0)),
         "regime_consistency_pct": float(payload.get("regime_consistency_pct", 0.0)),
         "paper_forward_classification": str(payload.get("classification") or "FAIL"),
+        "aggregate_paper_pnl": float(payload.get("aggregate_paper_pnl", 0.0)),
+        "return_pct": float(payload.get("return_pct", 0.0)),
+        "capture_rate_pct": float(payload.get("capture_rate_pct", 0.0)),
+        "risk_governor_classification": str(payload.get("risk_governor_classification") or payload.get("classification") or "FAIL"),
+        "opportunity_quality_score": float(payload.get("opportunity_quality_score", 0.0)),
         "readiness_status": str(payload.get("readiness_status") or payload.get("classification") or "FAIL"),
         "live_ready": False,
         "live_trade_ready": False,
@@ -83,13 +88,16 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
     payload = dict(summary)
     return [
         "FOREX BUILDER V2 STATUS",
-        f"Fixtures: {payload.get('fixture_count', 0)}",
-        f"Regime consistency: {payload.get('regime_consistency_pct', 0.0)}",
-        f"Paper-forward: {payload.get('paper_forward_classification', 'FAIL')}",
+        f"Fixtures: {payload.get('fixture_count', 0)} | Regime consistency: {payload.get('regime_consistency_pct', 0.0)}",
+        (
+            f"Paper-forward: {payload.get('paper_forward_classification', 'FAIL')} | "
+            f"Risk governor: {payload.get('risk_governor_classification', 'FAIL')}"
+        ),
+        f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",
+        f"Capture: {payload.get('capture_rate_pct', 0.0)} | Quality: {payload.get('opportunity_quality_score', 0.0)}",
         f"Readiness: {payload.get('readiness_status', 'FAIL')}",
         "Live ready: false",
         "Protected gate required: true",
-        f"Blocker: {payload.get('current_blocker', 'none')}",
         f"Next: {payload.get('next_safe_action')}",
         "Safety: no broker/live/secrets/orders/webhooks",
     ]

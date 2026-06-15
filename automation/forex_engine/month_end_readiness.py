@@ -63,7 +63,28 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     multi_summary = dict(bundle.get("multi_fixture_paper_forward_summary") or {})
     regime = dict(bundle.get("regime_consistency") or {})
     catalog = dict(bundle.get("fixture_catalog_summary") or {})
-    paper_forward_ready = classification == "PAPER_FORWARD_READY" and not blockers
+    opportunity = dict(bundle.get("opportunity_capture") or {})
+    risk_governor = dict(bundle.get("risk_governor") or bundle.get("risk_governor_result") or {})
+    stress = dict(bundle.get("stress_scenarios") or {})
+    stress_blockers = [
+        str(blocker)
+        for scenario in list(stress.get("scenario_results") or stress.get("scenarios") or [])
+        for blocker in list(dict(scenario).get("blockers") or [])
+    ]
+    local_blockers = _unique(
+        [
+            *blockers,
+            *_text_list(opportunity.get("blockers")),
+            *_text_list(risk_governor.get("blockers")),
+            *stress_blockers,
+        ]
+    )
+    risk_governor_classification = str(risk_governor.get("classification") or classification)
+    paper_forward_ready = (
+        classification == "PAPER_FORWARD_READY"
+        and risk_governor_classification == "PAPER_FORWARD_READY"
+        and not local_blockers
+    )
     review = {
         "schema": "AIOS_FOREX_BUILDER_MONTH_END_READINESS_REVIEW_V2.v1",
         "classification": classification,
@@ -79,13 +100,25 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             "aggregate_paper_pnl": float(multi_summary.get("aggregate_pnl", 0.0)),
             "consistency_pct": float(multi_summary.get("consistency_pct", 0.0)),
             "regime_consistency_pct": float(regime.get("consistent_regimes_pct", 0.0)),
+            "starting_balance": float(opportunity.get("starting_balance", bundle.get("starting_balance", 500.0))),
+            "ending_balance": float(opportunity.get("ending_balance", bundle.get("ending_balance", 500.0))),
+            "return_pct": float(opportunity.get("return_pct", bundle.get("return_pct", 0.0))),
+            "max_drawdown_pct": float(opportunity.get("max_drawdown_pct", bundle.get("max_drawdown_pct", 0.0))),
+            "cost_drag_pct": float(opportunity.get("cost_drag_pct", bundle.get("cost_drag_pct", 0.0))),
+            "capture_rate_pct": float(opportunity.get("capture_rate_pct", 0.0)),
+            "missed_signal_count": int(opportunity.get("missed_signal_count", 0)),
+            "missed_pnl_estimate": float(opportunity.get("missed_pnl_estimate", 0.0)),
+            "risk_adjusted_return": float(opportunity.get("risk_adjusted_return", 0.0)),
+            "opportunity_quality_score": float(opportunity.get("opportunity_quality_score", 0.0)),
+            "risk_governor_classification": risk_governor_classification,
+            "stress_scenario_count": len(list(stress.get("scenario_results") or stress.get("scenarios") or [])),
             "symbols": list(catalog.get("symbols") or []),
             "timeframes": list(catalog.get("timeframes") or []),
         },
-        "blockers": _unique(blockers),
-        "blocked": _unique([*blockers, *LIVE_TRADE_BLOCKERS]),
+        "blockers": local_blockers,
+        "blocked": _unique([*local_blockers, *LIVE_TRADE_BLOCKERS]),
         "live_trade_blockers": list(LIVE_TRADE_BLOCKERS),
-        "next_safe_action": _next_safe_action_v2(paper_forward_ready, blockers),
+        "next_safe_action": _next_safe_action_v2(paper_forward_ready, local_blockers),
         "live_ready": False,
     }
     schemas.assert_no_live_permissions(review)
@@ -144,7 +177,7 @@ def _next_safe_action(paper_forward_ready: bool, blockers: list[str]) -> str:
 
 def _next_safe_action_v2(paper_forward_ready: bool, blockers: list[str]) -> str:
     if paper_forward_ready:
-        return "Continue protected paper-forward evidence expansion and risk review; live readiness requires separate future approval."
+        return "Advance to protected stress and out-of-sample paper-forward validation; live readiness requires separate future approval."
     if blockers:
         return "Resolve V2 local evidence blockers before claiming paper-forward readiness."
     return "Collect stronger multi-regime local evidence and rerun V2 readiness review."

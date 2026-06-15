@@ -361,15 +361,42 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             milestone_value="medium",
             risk_level="low",
             required_files=[
+                "automation/forex_engine/risk_governor_thresholds.py",
+                "automation/forex_engine/opportunity_capture.py",
+                "automation/forex_engine/run_risk_governor_demo.py",
                 "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_GOVERNOR_THRESHOLDS.md",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_OPPORTUNITY_CAPTURE.md",
                 "tests/forex_engine/test_risk_governor_thresholds.py",
+                "tests/forex_engine/test_opportunity_capture.py",
             ],
             purpose=(
-                "Define stricter paper-forward thresholds for evidence review only. This must not "
-                "create live trading approval or broker execution."
+                "Define stricter paper-forward thresholds, opportunity capture metrics, missed edge "
+                "estimates, cost drag, drawdown checks, and stress scenarios for evidence review only. "
+                "This must not create live trading approval or broker execution."
             ),
             validators=[
-                "python -m pytest -p no:cacheprovider tests/forex_engine/test_risk_governor_thresholds.py -q",
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_risk_governor_thresholds.py tests/forex_engine/test_opportunity_capture.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1",
+            title="Expand paper-forward stress and out-of-sample validation",
+            lane="paper-forward-stress-and-out-of-sample-v1",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_AND_OUT_OF_SAMPLE.md",
+                "tests/forex_engine/test_paper_forward_stress_and_out_of_sample.py",
+            ],
+            purpose=(
+                "Extend local paper-forward evidence with stronger stress, out-of-sample, and "
+                "regime-resilience validation before any broker-paper sandbox readiness contract. "
+                "No broker, network, secrets, orders, scheduler, daemon, or live trading path."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_stress_and_out_of_sample.py -q",
                 VALIDATOR,
             ],
         ),
