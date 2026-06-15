@@ -11,6 +11,10 @@ PLANNER_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_packet_queue_p
 CANONICAL_SPEC_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
 CANONICAL_SPEC_PATH = "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md"
 CANONICAL_SPEC_FILE = REPO_ROOT / "docs" / "trading_lab" / "AIOS_FOREX_BUILDER_SPEC.md"
+DATA_SCHEMAS_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
+DATA_SCHEMAS_DOC_PATH = "docs/trading_lab/AIOS_FOREX_BUILDER_DATA_SCHEMAS.md"
+DATA_SCHEMAS_MODULE_PATH = "automation/forex_engine/schema_contracts.py"
+DATA_SCHEMAS_TEST_PATH = "tests/forex_engine/test_schema_contracts.py"
 
 
 def load_module(name: str, path: Path):
@@ -38,6 +42,16 @@ def canonical_spec_candidate() -> dict[str, object]:
         candidate
         for candidate in roadmap_candidates()
         if candidate["packet_id"] == CANONICAL_SPEC_PACKET_ID
+    ]
+    assert len(matches) == 1
+    return matches[0]
+
+
+def data_schemas_candidate() -> dict[str, object]:
+    matches = [
+        candidate
+        for candidate in roadmap_candidates()
+        if candidate["packet_id"] == DATA_SCHEMAS_PACKET_ID
     ]
     assert len(matches) == 1
     return matches[0]
@@ -94,6 +108,26 @@ def test_canonical_spec_candidate_exists_and_points_to_spec() -> None:
     candidate = canonical_spec_candidate()
 
     assert CANONICAL_SPEC_PATH in candidate["required_files"]
+
+
+def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
+    candidate = data_schemas_candidate()
+
+    assert candidate["lane"] == "forex-builder-data-schemas"
+    assert DATA_SCHEMAS_DOC_PATH in candidate["required_files"]
+    assert DATA_SCHEMAS_MODULE_PATH in candidate["required_files"]
+    assert DATA_SCHEMAS_TEST_PATH in candidate["required_files"]
+
+
+def test_data_schemas_candidate_preserves_non_live_safety_flags() -> None:
+    candidate = data_schemas_candidate()
+
+    assert candidate["non_live_only"] is True
+    assert candidate["broker_allowed"] is False
+    assert candidate["live_trading_allowed"] is False
+    assert candidate["credentials_allowed"] is False
+    assert candidate["orders_allowed"] is False
+    assert candidate["webhooks_allowed"] is False
 
 
 def test_canonical_spec_document_exists_and_preserves_non_live_boundaries() -> None:
