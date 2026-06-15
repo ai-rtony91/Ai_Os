@@ -8,15 +8,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = "C:\Dev\Ai.Os"
-$ControllerScript = ".\automation\orchestration\aios_overnight_build_controller.py"
+$DriverScript = ".\automation\orchestration\aios_self_build_dry_run_driver.py"
 $DefaultArgs = @(
-    "--controller-mode", "DRY_RUN",
-    "--goal", "forex-paper-bot",
-    "--current-mode", "generic",
-    "--cycle-budget", "1",
-    "--time-budget-minutes", "30",
-    "--max-files-changed", "5",
-    "--max-repairs", "1"
+    "--driver-mode", "DRY_RUN"
 )
 
 Set-Location -LiteralPath $RepoRoot
@@ -27,5 +21,5 @@ $EffectiveArgs = if ($SelfBuildArgs.Count -gt 0) {
     $DefaultArgs
 }
 
-& python $ControllerScript @EffectiveArgs
+& python $DriverScript @EffectiveArgs
 exit $LASTEXITCODE
