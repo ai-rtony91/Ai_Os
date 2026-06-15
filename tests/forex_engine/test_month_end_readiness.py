@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from automation.forex_engine import backtest_harness
+from automation.forex_engine import evidence_bundle_runner
 from automation.forex_engine import evidence_aggregator
 from automation.forex_engine import forex_dashboard_contract
 from automation.forex_engine import month_end_readiness
@@ -74,6 +75,18 @@ def test_month_end_readiness_reports_complete_and_blocked_sections() -> None:
     assert review["evidence_exists"]["backtest"] is True
     assert review["evidence_exists"]["risk_gate"] is True
     assert review["blocked"]
+
+
+def test_month_end_readiness_accepts_local_evidence_bundle_runner_output() -> None:
+    bundle = evidence_bundle_runner.build_local_evidence_bundle()
+    review = bundle["month_end_readiness_review"]
+
+    assert review["classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert review["evidence_exists"]["backtest"] is True
+    assert review["evidence_exists"]["paper_forward"] is True
+    assert review["live_trade_ready"] is False
+    assert review["protected_gate_required"] is True
+    assert "broker integration is not approved" in review["live_trade_blockers"]
 
 
 def test_module_has_no_network_broker_env_or_file_write_behavior() -> None:

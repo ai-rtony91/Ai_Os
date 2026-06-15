@@ -23,6 +23,10 @@ EVIDENCE_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-EVIDENCE-AGGREGATOR"
 MONTH_END_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS"
 APPROVED_EXECUTOR_PACKET_ID = "PKT-AIOS-APPROVED-EXECUTOR-LOOP-LITE"
 DAILY_LOOP_PACKET_ID = "PKT-AIOS-DAILY-CONTRIBUTION-LOOP-LITE"
+PAPER_FORWARD_EVIDENCE_V1_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1"
+PAPER_FORWARD_EVIDENCE_V2_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
+RISK_GOVERNOR_PACKET_ID = "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
+APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID = "PKT-AIOS-APPROVED-EXECUTOR-LOCAL-APPLY-LOOP"
 
 
 def load_module(name: str, path: Path):
@@ -101,7 +105,7 @@ def test_today_goal_alignment_is_present_and_aligned() -> None:
 def test_roadmap_candidates_are_emitted() -> None:
     candidates = roadmap_candidates()
 
-    assert len(candidates) == 11
+    assert len(candidates) == 14
 
 
 def test_first_candidate_is_canonical_spec_packet() -> None:
@@ -130,7 +134,7 @@ def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
 def test_monthly_forex_candidates_appear_in_safe_order() -> None:
     packet_ids = [candidate["packet_id"] for candidate in roadmap_candidates()]
 
-    assert packet_ids[:10] == [
+    assert packet_ids[:14] == [
         CANONICAL_SPEC_PACKET_ID,
         DATA_SCHEMAS_PACKET_ID,
         BACKTEST_PACKET_ID,
@@ -141,6 +145,10 @@ def test_monthly_forex_candidates_appear_in_safe_order() -> None:
         MONTH_END_PACKET_ID,
         APPROVED_EXECUTOR_PACKET_ID,
         DAILY_LOOP_PACKET_ID,
+        PAPER_FORWARD_EVIDENCE_V1_PACKET_ID,
+        PAPER_FORWARD_EVIDENCE_V2_PACKET_ID,
+        RISK_GOVERNOR_PACKET_ID,
+        APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID,
     ]
 
 
@@ -163,6 +171,10 @@ def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
     assert "automation/forex_engine/month_end_readiness.py" in candidates[MONTH_END_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOOP_LITE.md" in candidates[APPROVED_EXECUTOR_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_DAILY_CONTRIBUTION_LOOP_LITE.md" in candidates[DAILY_LOOP_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/evidence_bundle_runner.py" in candidates[PAPER_FORWARD_EVIDENCE_V1_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE_V2.md" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_GOVERNOR_THRESHOLDS.md" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
+    assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOCAL_APPLY_LOOP.md" in candidates[APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID]["required_files"]
 
 
 def test_data_schemas_candidate_preserves_non_live_safety_flags() -> None:

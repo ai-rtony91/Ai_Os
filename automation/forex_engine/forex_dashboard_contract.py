@@ -24,7 +24,7 @@ def build_forex_dashboard_state(
     risk_status = _classification(risk_gate, default="not_run")
     paper_state = _paper_state(paper_forward_summary)
     state = schemas.DashboardState(
-        current_phase="paper-forward simulation scaffold",
+        current_phase="paper-forward evidence review",
         selected_strategy=_strategy_name(strategy),
         data_fixture_status="ready" if fixture is not None else "missing",
         backtest_status=_backtest_status(backtest_result),
@@ -36,6 +36,8 @@ def build_forex_dashboard_state(
         sos_required=bool(sos_required),
         next_safe_action=next_safe_action
         or _next_safe_action(risk_status, paper_state, current_blocker),
+        fixture_id=_fixture_id(fixture),
+        readiness_status=_readiness_status(risk_status, paper_state, current_blocker),
     )
     schemas.validate_dashboard_state_schema(state)
     return state
@@ -47,9 +49,9 @@ def format_forex_dashboard_lines(state: schemas.DashboardState | dict[str, Any])
     return [
         "FOREX BUILDER STATUS",
         f"Strategy: {payload['selected_strategy']}",
-        f"Fixture: {payload['data_fixture_status']}",
+        f"Fixture: {payload.get('fixture_id', 'unknown')} ({payload['data_fixture_status']})",
         f"Backtest: {payload['backtest_status']} | Walk-forward: {payload['walk_forward_status']}",
-        f"Risk gate: {payload['risk_gate_status']}",
+        f"Risk gate: {payload['risk_gate_status']} | Readiness: {payload.get('readiness_status', 'WATCHLIST')}",
         f"Paper-forward: {payload['paper_permission_state']}",
         f"Blocker: {payload['current_blocker']}",
         f"SOS: {'yes' if payload['sos_required'] else 'no'}",
@@ -71,6 +73,7 @@ def dashboard_contract_summary() -> dict[str, Any]:
             "walk_forward",
             "risk_gate",
             "paper_forward",
+            "readiness",
             "blockers",
             "sos",
             "next_safe_action",
@@ -119,6 +122,11 @@ def _backtest_status(value: Any | None) -> str:
     return "ready" if total_trades > 0 else "no_trades"
 
 
+def _fixture_id(value: Any | None) -> str:
+    payload = _optional_payload(value)
+    return str(payload.get("fixture_id") or "missing")
+
+
 def _paper_state(summary: dict[str, Any] | None) -> str:
     payload = summary or {}
     if payload.get("total_entries", 0):
@@ -126,6 +134,16 @@ def _paper_state(summary: dict[str, Any] | None) -> str:
     if payload.get("classification"):
         return str(payload["classification"])
     return "not_started"
+
+
+def _readiness_status(risk_status: str, paper_state: str, blocker: str) -> str:
+    if risk_status == "FAIL":
+        return "FAIL"
+    if blocker != "none":
+        return "WATCHLIST"
+    if risk_status == "PAPER_FORWARD_READY" and paper_state == "simulated_local_only":
+        return "PAPER_FORWARD_READY"
+    return "WATCHLIST"
 
 
 def _next_safe_action(risk_status: str, paper_state: str, blocker: str) -> str:
