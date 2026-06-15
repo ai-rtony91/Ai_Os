@@ -4,7 +4,9 @@
 
 The operator checkpoint dashboard exists to make AIOS readable at the stop points that matter. The runtime self-route can still produce full evidence, but the default human output should start with a compact status panel instead of a large raw JSON report or a long diagnostic transcript.
 
-This layer supports the current self-building milestone: AIOS is building toward the forex-builder proof target through safe, staged, non-live repo work.
+This layer supports the current monthly mission: self-building AIOS -> forex-builder proof -> daily earned repo work -> gated trade readiness.
+
+AIOS is the factory. Forex is the first proof product. Daily GitHub work is the compounding output. Live trade readiness is a protected downstream gate, not an automatic background action.
 
 ## Default View
 
@@ -16,7 +18,7 @@ Example:
 
 ```text
 AIOS STATUS
-Mission: self-building AIOS -> forex-builder proof -> daily earned repo work
+Mission: self-building AIOS -> forex-builder proof -> daily earned repo work -> gated trade readiness
 Packet: PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS
 State: WAITING_FOR_APPROVAL
 Progress: selected=yes | prompt=yes | tests=not_run | PR=none | SOS=no
@@ -28,7 +30,7 @@ Details: run with -OutputJson for full report
 
 ## Checkpoints
 
-- Mission Check: confirms `self-building AIOS -> forex-builder proof -> daily earned repo work`.
+- Mission Check: confirms `self-building AIOS -> forex-builder proof -> daily earned repo work -> gated trade readiness`.
 - Packet Check: shows the selected packet ID or `none`.
 - Approval Check: shows whether AIOS is waiting for Anthony, approved locally, blocked, or complete.
 - Workbench Check: shows whether work was written, not written, or preview-only.
@@ -52,7 +54,7 @@ Details: run with -OutputJson for full report
 
 AIOS may use bored queue tasks only when no higher-priority active packet exists and only inside approved safety boundaries.
 
-Bored queue tasks are data only. They are not executed by the checkpoint dashboard. They must be small legitimate repo-improvement tasks such as doc polish, test hardening, dashboard simplification, roadmap acceptance cleanup, validator guard cleanup, or compact report contract improvements.
+Bored queue tasks are data only. They are not executed by the checkpoint dashboard. They must be small legitimate repo-improvement tasks such as doc polish, test hardening, dashboard simplification, roadmap acceptance cleanup, paper-only forex evidence expansion, risk gate docs/tests, daily contribution loop prep, validator guard cleanup, or compact report contract improvements.
 
 Forbidden bored queue behavior:
 

@@ -8,8 +8,8 @@ from typing import Any
 SCHEMA = "AIOS_COMPLETED_PACKET_MEMORY_SUPPRESSION.v1"
 
 FOREX_MILESTONE = (
-    "AIOS self-building machine -> first proof target: industrial-grade forex bot builder "
-    "-> no broker/live/secrets until gates prove safety"
+    "AIOS is the factory -> forex is the first proof product -> daily earned repo work "
+    "-> gated trade readiness, with no broker/live/secrets until protected gates prove safety"
 )
 
 DEFAULT_COMPLETED_PACKETS = [
@@ -91,6 +91,56 @@ DEFAULT_COMPLETED_PACKETS = [
         "required_files": [
             "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md",
             "tests/orchestration/test_aios_forex_builder_roadmap.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
+        "alternate_packet_ids": [
+            "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",
+            "PKT-AIOS-PAPER-ONLY-SUPERTREND-EDGE-PROOF",
+        ],
+        "title": "Add paper-only Supertrend edge proof builder",
+        "lane": "paper-only-supertrend-edge-proof-builder",
+        "landed_pr": "#740",
+        "completion_reason": "paper-only Supertrend edge proof builder landed on main",
+        "completed_files": [
+            "automation/forex_engine/indicators.py",
+            "automation/forex_engine/strategies.py",
+            "automation/forex_engine/costs.py",
+            "automation/forex_engine/metrics.py",
+            "automation/forex_engine/edge_gate_policy.py",
+            "automation/forex_engine/daily_edge_report.py",
+            "automation/forex_engine/run_supertrend_edge_demo.py",
+            "automation/forex_engine/run_supertrend_walk_forward_demo.py",
+            "automation/forex_engine/run_daily_edge_report.py",
+            "docs/AI_OS/trading/AIOS_TRADING_EDGE_PROOF_GATE.md",
+            "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_4_SUPERTREND_EDGE_PROOF.md",
+            "tests/forex_engine/test_indicators.py",
+            "tests/forex_engine/test_strategies.py",
+            "tests/forex_engine/test_costs.py",
+            "tests/forex_engine/test_metrics.py",
+            "tests/forex_engine/test_edge_gate_policy.py",
+            "tests/forex_engine/test_daily_edge_report.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/indicators.py",
+            "automation/forex_engine/strategies.py",
+            "automation/forex_engine/costs.py",
+            "automation/forex_engine/metrics.py",
+            "automation/forex_engine/edge_gate_policy.py",
+            "automation/forex_engine/daily_edge_report.py",
+            "automation/forex_engine/run_supertrend_edge_demo.py",
+            "automation/forex_engine/run_supertrend_walk_forward_demo.py",
+            "automation/forex_engine/run_daily_edge_report.py",
+            "docs/AI_OS/trading/AIOS_TRADING_EDGE_PROOF_GATE.md",
+            "docs/AI_OS/trading/FOREX_ENGINE_V1_SPRINT_4_SUPERTREND_EDGE_PROOF.md",
+            "tests/forex_engine/test_indicators.py",
+            "tests/forex_engine/test_strategies.py",
+            "tests/forex_engine/test_costs.py",
+            "tests/forex_engine/test_metrics.py",
+            "tests/forex_engine/test_edge_gate_policy.py",
+            "tests/forex_engine/test_daily_edge_report.py",
         ],
         "source": "default_completed_memory",
     },
@@ -189,6 +239,14 @@ def _packet_id(record: dict[str, Any]) -> str:
     return _text(record.get("packet_id") or record.get("id"))
 
 
+def _packet_ids(record: dict[str, Any]) -> list[str]:
+    ids: list[str] = []
+    for value in [_packet_id(record), *_as_text_list(record.get("alternate_packet_ids"))]:
+        if value and value not in ids:
+            ids.append(value)
+    return ids
+
+
 def _record_title(record: dict[str, Any]) -> str:
     return _text(record.get("title") or record.get("name") or record.get("pr_title"))
 
@@ -264,9 +322,9 @@ def _manual_rules(payload: dict[str, Any]) -> list[dict[str, Any]]:
 def _completed_packet_ids(records: list[dict[str, Any]], cycle_records: list[dict[str, Any]]) -> list[str]:
     ids: list[str] = []
     for record in [*records, *cycle_records]:
-        packet_id = _packet_id(record)
-        if packet_id and packet_id not in ids:
-            ids.append(packet_id)
+        for packet_id in _packet_ids(record):
+            if packet_id not in ids:
+                ids.append(packet_id)
     return ids
 
 
@@ -364,13 +422,13 @@ def _suppression_reasons(
     for record in memory_records:
         if _files_are_new(candidate, record):
             continue
-        record_id = _packet_id(record)
+        record_ids = _packet_ids(record)
         source = _text(record.get("source"), "memory")
-        if candidate_id and record_id and candidate_id == record_id:
+        if candidate_id and candidate_id in record_ids:
             reasons.append(f"completed_packet_id:{candidate_id}")
         if source == "landed_prs" and _title_or_lane_matches(candidate, record):
             reasons.append(f"landed_pr_match:{_record_title(record) or _record_lane(record)}")
-        if _write_scope_matches(candidate, record) and (_record_lane(candidate) == _record_lane(record) or record_id):
+        if _write_scope_matches(candidate, record) and (_record_lane(candidate) == _record_lane(record) or record_ids):
             reasons.append(f"completed_write_scope_match:{source}")
         if source == "commit_history_summary" and _title_or_lane_matches(candidate, record):
             reasons.append(f"commit_history_match:{_record_title(record) or _record_lane(record)}")
@@ -397,7 +455,12 @@ def _suppression_reasons(
 def _alignment() -> dict[str, Any]:
     return {
         "milestone": FOREX_MILESTONE,
+        "monthly_goal": "Legitimate daily repo progress while building forex toward gated trade readiness.",
+        "factory_status": "AIOS is the factory.",
         "proof_target": "industrial-grade forex bot builder",
+        "proof_product": "forex is the first proof product",
+        "daily_contribution_policy": "Daily GitHub work must be legitimate validated repo work.",
+        "future_gate_warning": "Live trade readiness is a protected downstream gate, not an automatic background action.",
         "control_plane_role": "completed packet memory and candidate suppression",
         "aligned": True,
         "blocked_boundaries": [],

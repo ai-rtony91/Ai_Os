@@ -531,7 +531,7 @@ function New-AiOsOperatorCheckpointFallbackPanel {
     return [pscustomobject]@{
         schema = "AIOS_OPERATOR_CHECKPOINT_PANEL.v1"
         status = "blocked"
-        mission = "self-building AIOS -> forex-builder proof -> daily earned repo work"
+        mission = "self-building AIOS -> forex-builder proof -> daily earned repo work -> gated trade readiness"
         current_packet = "none"
         state = "BLOCKED"
         checkpoint_summary = [pscustomobject]@{
@@ -551,7 +551,7 @@ function New-AiOsOperatorCheckpointFallbackPanel {
         safety_line = "no broker/live/secrets/orders/webhooks"
         lines = @(
             "AIOS STATUS",
-            "Mission: self-building AIOS -> forex-builder proof -> daily earned repo work",
+            "Mission: self-building AIOS -> forex-builder proof -> daily earned repo work -> gated trade readiness",
             "Packet: none",
             "State: BLOCKED",
             "Progress: selected=no | prompt=no | tests=unknown | PR=none | SOS=no",

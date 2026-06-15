@@ -19,7 +19,7 @@ The contract accepts local JSON evidence:
 - `manual_suppression_rules`
 - `today_goal_context`
 
-If no completed memory is supplied, the contract still includes default completed memory for the landed self-building infrastructure packets through PR #731 and the landed forex-builder canonical spec from PR #737.
+If no completed memory is supplied, the contract still includes default completed memory for the landed self-building infrastructure packets through PR #731, the landed forex-builder canonical spec from PR #737, and the paper-only Supertrend edge proof builder from PR #740.
 
 ## Outputs
 
@@ -81,6 +81,7 @@ Default memory includes the landed infrastructure sequence:
 - self-route approved executor connector
 - `PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION`
 - `PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC`
+- `AIOS-EDGE-PROOF-BUILDER-MASTER-V1`
 
 The forex canonical spec completion record includes:
 
@@ -91,6 +92,17 @@ The forex canonical spec completion record includes:
 - completed files:
   - `docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md`
   - `tests/orchestration/test_aios_forex_builder_roadmap.py`
+
+The paper-only Supertrend edge proof completion record includes:
+
+- landed PR: `#740`
+- packet ID: `AIOS-EDGE-PROOF-BUILDER-MASTER-V1`
+- alternate packet IDs:
+  - `PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1`
+  - `PKT-AIOS-PAPER-ONLY-SUPERTREND-EDGE-PROOF`
+- title: `Add paper-only Supertrend edge proof builder`
+- completion reason: paper-only Supertrend edge proof builder landed on main
+- completed files for indicators, strategy, conservative costs, metrics, edge gate policy, daily report, demo runners, Sprint 4 docs, and focused tests
 
 The default memory exists so self-route can stop selecting stale infrastructure packets after those lanes land.
 
@@ -105,7 +117,7 @@ After PR #737, `PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC` is suppressed and the nex
 Every result includes `forex_builder_alignment` for the current milestone:
 
 ```text
-AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety
+AIOS is the factory -> forex is the first proof product -> daily earned repo work -> gated trade readiness, with no broker/live/secrets until protected gates prove safety
 ```
 
 Completed packet memory supports the control plane only. It does not enable broker execution, live trading, credentials, real orders, or webhooks.

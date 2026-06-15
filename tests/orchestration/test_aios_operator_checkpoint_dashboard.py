@@ -6,6 +6,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_operator_checkpoint_dashboard.py"
+MISSION_DOC_PATH = REPO_ROOT / "docs" / "orchestration" / "AIOS_MONTHLY_MISSION_ALIGNMENT.md"
 
 
 def load_module():
@@ -39,6 +40,30 @@ def test_panel_schema_is_operator_checkpoint_v1() -> None:
 
     assert panel["schema"] == "AIOS_OPERATOR_CHECKPOINT_PANEL.v1"
     assert panel["status"] == "ready"
+
+
+def test_monthly_mission_alignment_doc_exists_and_names_core_policy() -> None:
+    assert MISSION_DOC_PATH.exists()
+    text = MISSION_DOC_PATH.read_text(encoding="utf-8")
+
+    assert "AIOS is the factory" in text
+    assert "Forex is the first proof product" in text
+    assert "Daily GitHub work" in text
+    assert "legitimate validated repo work" in text
+    assert "Live trade readiness is a protected downstream gate" in text
+    assert "not an automatic background action" in text
+
+
+def test_panel_mission_aligns_monthly_goal() -> None:
+    module = load_module()
+    panel = module.build_operator_checkpoint_panel(selected_report())
+
+    assert "daily earned repo work" in panel["mission"]
+    assert "gated trade readiness" in panel["mission"]
+    assert panel["factory_status"] == "AIOS is the factory."
+    assert panel["proof_product"] == "Forex is the first proof product."
+    assert "legitimate validated repo work" in panel["daily_contribution_policy"]
+    assert "protected downstream gate" in panel["future_gate_warning"]
 
 
 def test_selected_packet_appears_in_panel() -> None:
@@ -114,6 +139,31 @@ def test_bored_queue_tasks_are_safe_and_explain_earned_green_box_reason() -> Non
         assert "daemon" not in write_scope_text
         for forbidden in ("broker", "live trading", "secrets", "orders", "webhooks", "scheduler", "daemon"):
             assert forbidden in task["forbidden_actions"]
+        for forbidden in ("fake commits", "fake heatmap commits", "meaningless whitespace commits", "generated noise commits"):
+            assert forbidden in task["forbidden_actions"]
+
+
+def test_bored_queue_favors_monthly_alignment_work() -> None:
+    module = load_module()
+    bored_queue = module.build_bored_work_queue({})
+    text = " ".join(
+        [
+            task["packet_id"]
+            + " "
+            + task["title"]
+            + " "
+            + task["lane"]
+            + " "
+            + " ".join(task["write_scope"])
+            for task in bored_queue
+        ]
+    ).lower()
+
+    assert "docs" in text
+    assert "test" in text
+    assert "dashboard" in text or "operator" in text
+    assert "forex" in text
+    assert "daily" in text
 
 
 def test_panel_lines_are_ten_lines_or_fewer_by_default() -> None:

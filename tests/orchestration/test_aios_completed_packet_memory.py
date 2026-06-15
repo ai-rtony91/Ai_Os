@@ -255,6 +255,26 @@ def test_default_memory_includes_landed_forex_canonical_spec() -> None:
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md" in canonical["completed_files"]
 
 
+def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
+    result = build_result(candidate_packets=[])
+
+    assert "AIOS-EDGE-PROOF-BUILDER-MASTER-V1" in result["completed_packet_ids"]
+    assert "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1" in result["completed_packet_ids"]
+    assert "PKT-AIOS-PAPER-ONLY-SUPERTREND-EDGE-PROOF" in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    supertrend = [
+        record
+        for record in records
+        if record["packet_id"] == "AIOS-EDGE-PROOF-BUILDER-MASTER-V1"
+    ][0]
+    assert supertrend["landed_pr"] == "#740"
+    assert supertrend["title"] == "Add paper-only Supertrend edge proof builder"
+    assert supertrend["completion_reason"] == "paper-only Supertrend edge proof builder landed on main"
+    assert "automation/forex_engine/indicators.py" in supertrend["completed_files"]
+    assert "automation/forex_engine/strategies.py" in supertrend["completed_files"]
+    assert "tests/forex_engine/test_edge_gate_policy.py" in supertrend["completed_files"]
+
+
 def test_forex_canonical_spec_candidate_is_suppressed_by_default_memory() -> None:
     canonical = candidate(
         packet_id="PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC",
@@ -274,6 +294,52 @@ def test_forex_canonical_spec_candidate_is_suppressed_by_default_memory() -> Non
         "completed_packet_id:PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
         in result["suppressed_candidates"][0]["suppression_reasons"]
     )
+
+
+def test_supertrend_edge_proof_packet_id_is_suppressed_by_default_memory() -> None:
+    supertrend = candidate(
+        packet_id="AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
+        title="Add paper-only Supertrend edge proof builder",
+        lane="paper-only-supertrend-edge-proof-builder",
+        required_files=[
+            "automation/forex_engine/indicators.py",
+            "automation/forex_engine/strategies.py",
+            "automation/forex_engine/costs.py",
+            "automation/forex_engine/metrics.py",
+            "automation/forex_engine/edge_gate_policy.py",
+            "automation/forex_engine/daily_edge_report.py",
+        ],
+    )
+
+    result = build_result(candidate_packets=[supertrend])
+
+    assert result["active_candidates"] == []
+    assert result["suppressed_candidates"][0]["packet_id"] == "AIOS-EDGE-PROOF-BUILDER-MASTER-V1"
+    assert (
+        "completed_packet_id:AIOS-EDGE-PROOF-BUILDER-MASTER-V1"
+        in result["suppressed_candidates"][0]["suppression_reasons"]
+    )
+
+
+def test_supertrend_edge_proof_alternate_packet_ids_are_suppressed_by_default_memory() -> None:
+    for packet_id in (
+        "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",
+        "PKT-AIOS-PAPER-ONLY-SUPERTREND-EDGE-PROOF",
+    ):
+        result = build_result(
+            candidate_packets=[
+                candidate(
+                    packet_id=packet_id,
+                    title="Add paper-only Supertrend edge proof builder",
+                    lane="paper-only-supertrend-edge-proof-builder",
+                    required_files=["automation/forex_engine/indicators.py"],
+                )
+            ]
+        )
+
+        assert result["active_candidates"] == []
+        assert result["suppressed_candidates"][0]["packet_id"] == packet_id
+        assert f"completed_packet_id:{packet_id}" in result["suppressed_candidates"][0]["suppression_reasons"]
 
 
 def test_forex_roadmap_advances_to_data_schemas_after_canonical_spec_landed() -> None:
@@ -315,6 +381,10 @@ def test_forex_builder_alignment_is_present() -> None:
     alignment = result["forex_builder_alignment"]
 
     assert alignment["proof_target"] == "industrial-grade forex bot builder"
+    assert alignment["factory_status"] == "AIOS is the factory."
+    assert alignment["proof_product"] == "forex is the first proof product"
+    assert "legitimate validated repo work" in alignment["daily_contribution_policy"]
+    assert "protected downstream gate" in alignment["future_gate_warning"]
     assert alignment["aligned"] is True
     assert "no broker/live/secrets" in alignment["milestone"]
     assert alignment["requires_future_gates_before_execution"] is True
