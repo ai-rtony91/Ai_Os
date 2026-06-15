@@ -6,10 +6,18 @@ from typing import Any
 
 
 SCHEMA = "AIOS_OPERATOR_CHECKPOINT_PANEL.v1"
-MISSION = "self-building AIOS -> forex-builder proof -> daily earned repo work"
+MISSION = "self-building AIOS -> forex-builder proof -> daily earned repo work -> gated trade readiness"
+MONTHLY_GOAL = (
+    "AIOS self-building loop produces legitimate daily repo progress and builds the forex system "
+    "toward gated trade readiness."
+)
 DETAIL_HINT = "run with -OutputJson for full report"
 SAFETY_LINE = "no broker/live/secrets/orders/webhooks"
 FORBIDDEN_ACTIONS = [
+    "fake commits",
+    "fake heatmap commits",
+    "meaningless whitespace commits",
+    "generated noise commits",
     "broker",
     "live trading",
     "credentials",
@@ -284,6 +292,22 @@ def build_bored_work_queue(report: dict[str, Any]) -> list[dict[str, Any]]:
             ["tests/orchestration/...", "automation/orchestration/..."],
             ["python -m pytest -p no:cacheprovider tests/orchestration/test_aios_operator_checkpoint_dashboard.py -q"],
         ),
+        _bored_task(
+            "PKT-AIOS-BORED-FOREX-EVIDENCE-POLISH-ONE",
+            "Clarify one paper-only forex evidence acceptance gate",
+            "bored-forex-evidence-polish",
+            "No active packet; paper-only evidence docs/tests can improve the forex proof without trading execution.",
+            ["docs/AI_OS/trading/...", "tests/forex_engine/..."],
+            ["python -m pytest tests/forex_engine -q"],
+        ),
+        _bored_task(
+            "PKT-AIOS-BORED-DAILY-LOOP-PREP-ONE",
+            "Prepare one daily contribution loop contract assertion",
+            "bored-daily-loop-prep",
+            "No active packet; a narrow contract assertion can keep earned daily work legitimate.",
+            ["docs/orchestration/...", "tests/orchestration/..."],
+            ["python -m pytest -p no:cacheprovider tests/orchestration/test_aios_operator_checkpoint_dashboard.py -q"],
+        ),
     ]
 
 
@@ -350,6 +374,11 @@ def build_operator_checkpoint_panel(report: dict[str, Any]) -> dict[str, Any]:
         "current_packet": packet_id,
         "state": state,
         "checkpoint_summary": checkpoint_summary,
+        "monthly_goal": MONTHLY_GOAL,
+        "factory_status": "AIOS is the factory.",
+        "proof_product": "Forex is the first proof product.",
+        "daily_contribution_policy": "Daily GitHub work must be legitimate validated repo work.",
+        "future_gate_warning": "Live trade readiness is a protected downstream gate, not an automatic background action.",
         "progress_line": progress_line,
         "next_action": next_action,
         "bored_queue": bored_queue,

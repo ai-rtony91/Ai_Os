@@ -700,6 +700,7 @@ def test_self_route_default_human_output_is_compact_operator_panel() -> None:
     text = self_route_text()
 
     assert "AIOS STATUS" in text
+    assert "self-building AIOS -> forex-builder proof -> daily earned repo work -> gated trade readiness" in text
     assert "Packet:" in text
     assert "State:" in text
     assert "Next:" in text
