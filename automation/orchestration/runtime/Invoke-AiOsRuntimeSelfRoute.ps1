@@ -1,7 +1,8 @@
 param(
     [switch]$Apply,
     [switch]$QuietJson,
-    [switch]$OutputJson
+    [switch]$OutputJson,
+    [switch]$Detailed
 )
 
 Set-StrictMode -Off
@@ -522,10 +523,44 @@ function New-AiOsBlockedCycleLedgerResult {
     }
 }
 
-if (-not ($QuietJson -or $OutputJson)) {
-    Write-Host "AIOS Runtime Self Route"
-    Write-Host "Mode: $(if ($Apply) { 'APPLY_REPORT_ONLY' } else { 'DRY_RUN_REPORT_ONLY' })"
-    Write-Host ""
+function New-AiOsOperatorCheckpointFallbackPanel {
+    param(
+        [string]$Reason
+    )
+
+    return [pscustomobject]@{
+        schema = "AIOS_OPERATOR_CHECKPOINT_PANEL.v1"
+        status = "blocked"
+        mission = "self-building AIOS -> forex-builder proof -> daily earned repo work"
+        current_packet = "none"
+        state = "BLOCKED"
+        checkpoint_summary = [pscustomobject]@{
+            mission_check = "aligned"
+            packet_check = "none"
+            approval_check = "BLOCKED"
+            workbench_check = "not_written"
+            validation_check = "unknown"
+            pr_check = "none"
+            sos_check = "no"
+            bored_queue_check = "blocked"
+        }
+        progress_line = "selected=no | prompt=no | tests=unknown | PR=none | SOS=no"
+        next_action = "inspect operator checkpoint module blocker"
+        bored_queue = @()
+        detail_hint = "run with -OutputJson for full report"
+        safety_line = "no broker/live/secrets/orders/webhooks"
+        lines = @(
+            "AIOS STATUS",
+            "Mission: self-building AIOS -> forex-builder proof -> daily earned repo work",
+            "Packet: none",
+            "State: BLOCKED",
+            "Progress: selected=no | prompt=no | tests=unknown | PR=none | SOS=no",
+            "Next: inspect operator checkpoint module blocker",
+            "Bored queue: unavailable because checkpoint panel failed: $Reason",
+            "Safety: no broker/live/secrets/orders/webhooks",
+            "Details: run with -OutputJson for full report"
+        )
+    }
 }
 
 $recommendation = powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/recommendations/Get-AiOsActionRecommendation.DRY_RUN.ps1 -QuietJson | ConvertFrom-Json
@@ -545,6 +580,7 @@ $forexBuilderRoadmapPath = "automation/orchestration/aios_forex_builder_roadmap.
 $packetQueuePlannerPath = "automation/orchestration/aios_packet_queue_planner.py"
 $approvedExecutorContractPath = "automation/orchestration/aios_approved_packet_executor_contract.py"
 $cycleLedgerPath = "automation/orchestration/aios_cycle_ledger.py"
+$operatorCheckpointDashboardPath = "automation/orchestration/aios_operator_checkpoint_dashboard.py"
 $packetQueueCandidateEvidenceJson = "[]"
 $validationOutput = @()
 $validationExitCode = $null
@@ -1399,62 +1435,149 @@ $report = [pscustomobject]@{
     }
 }
 
+$operatorCheckpointPanel = $null
+$operatorCheckpointExitCode = $null
+$operatorCheckpointBlocker = ""
+
+if (-not (Test-Path -LiteralPath $operatorCheckpointDashboardPath)) {
+    $operatorCheckpointBlocker = "operator_checkpoint_dashboard_missing"
+    $operatorCheckpointPanel = New-AiOsOperatorCheckpointFallbackPanel -Reason $operatorCheckpointBlocker
+    $operatorCheckpointExitCode = 1
+}
+else {
+    try {
+        $operatorCheckpointEvidence = [ordered]@{
+            selected_packet = $selectedPacket
+            codex_ready_packet_preview = $codexReadyPacketPreview
+            approved_executor_status = $approvedExecutorStatus
+            approval_status = $executorApprovalStatus
+            execution_allowed = $executionAllowed
+            command_validation_status = $validationStatus
+            dashboard_contract = $dashboardContract
+            cycle_ledger = $cycleLedger
+            sos_required = $sosRequired
+            rejection_reasons = @($rejectionReasons | Select-Object -Unique)
+            next_safe_action = $nextSafeAction
+            active_candidate_packets = @($activeCandidatePackets)
+            candidate_packets = @($candidatePackets)
+            forex_roadmap_candidates = @($forexRoadmapCandidates)
+            packet_queue_plan = $packetQueuePlan
+        }
+        $operatorCheckpointInputJson = $operatorCheckpointEvidence | ConvertTo-Json -Depth 30 -Compress
+        $operatorCheckpointOutput = Invoke-AiOsPythonJsonArgumentScript `
+            -ScriptPath $operatorCheckpointDashboardPath `
+            -ArgumentName "--report" `
+            -JsonPayload $operatorCheckpointInputJson
+        $operatorCheckpointExitCode = $LASTEXITCODE
+        $operatorCheckpointJson = ($operatorCheckpointOutput -join "`n")
+        if ($operatorCheckpointExitCode -ne 0) {
+            $operatorCheckpointBlocker = "operator_checkpoint_dashboard_nonzero_exit"
+            $operatorCheckpointPanel = New-AiOsOperatorCheckpointFallbackPanel -Reason $operatorCheckpointBlocker
+        }
+        elseif ([string]::IsNullOrWhiteSpace($operatorCheckpointJson)) {
+            $operatorCheckpointBlocker = "operator_checkpoint_dashboard_empty_output"
+            $operatorCheckpointPanel = New-AiOsOperatorCheckpointFallbackPanel -Reason $operatorCheckpointBlocker
+        }
+        else {
+            $operatorCheckpointPanel = $operatorCheckpointJson | ConvertFrom-Json
+        }
+    }
+    catch {
+        $operatorCheckpointBlocker = "operator_checkpoint_dashboard_generation_failed"
+        $operatorCheckpointPanel = New-AiOsOperatorCheckpointFallbackPanel -Reason $operatorCheckpointBlocker
+        $operatorCheckpointExitCode = 1
+    }
+}
+
+$operatorCheckpointStatus = [string](Get-AiOsObjectProperty -Object $operatorCheckpointPanel -Name "status" -Default "blocked")
+$operatorCheckpointLines = @(Get-AiOsObjectProperty -Object $operatorCheckpointPanel -Name "lines" -Default @("AIOS STATUS", "State: BLOCKED", "Next: inspect operator checkpoint details"))
+$boredQueueCandidates = @(Get-AiOsObjectProperty -Object $operatorCheckpointPanel -Name "bored_queue" -Default @())
+$boredQueueStatus = if ($boredQueueCandidates.Count -gt 0) {
+    "available"
+}
+elseif ($null -eq $selectedPacket) {
+    "empty"
+}
+else {
+    "inactive"
+}
+$compactDashboardStatus = if ($operatorCheckpointStatus -eq "ready" -and $operatorCheckpointLines.Count -gt 0) {
+    "ready"
+}
+else {
+    "blocked"
+}
+
+$report | Add-Member -NotePropertyName operator_checkpoint_status -NotePropertyValue $operatorCheckpointStatus -Force
+$report | Add-Member -NotePropertyName operator_checkpoint_panel -NotePropertyValue $operatorCheckpointPanel -Force
+$report | Add-Member -NotePropertyName operator_checkpoint_lines -NotePropertyValue $operatorCheckpointLines -Force
+$report | Add-Member -NotePropertyName bored_queue_status -NotePropertyValue $boredQueueStatus -Force
+$report | Add-Member -NotePropertyName bored_queue_candidates -NotePropertyValue $boredQueueCandidates -Force
+$report | Add-Member -NotePropertyName compact_dashboard_status -NotePropertyValue $compactDashboardStatus -Force
+
 if ($QuietJson -or $OutputJson) {
     $report | ConvertTo-Json -Depth 20
     exit $exitCode
 }
 
-Write-Host "Recommended command:"
-Write-Host $recommendedCommand
-Write-Host ""
-Write-Host "Route status: $routeStatus"
-Write-Host "Contract status: $contractStatus"
-Write-Host "Approval required: $approvalRequired"
-Write-Host "Command validation: $validationStatus"
-Write-Host "Route preview: $routePreviewStatus"
-if (-not [string]::IsNullOrWhiteSpace($routePreviewBlocker)) {
-    Write-Host "Route preview blocker: $routePreviewBlocker"
-}
-Write-Host "Candidate evidence: $candidateEvidenceStatus"
-if (-not [string]::IsNullOrWhiteSpace($candidateEvidenceBlocker)) {
-    Write-Host "Candidate evidence blocker: $candidateEvidenceBlocker"
-}
-Write-Host "Completed packet memory: $completedPacketMemoryStatus"
-if (-not [string]::IsNullOrWhiteSpace($completedPacketMemoryBlocker)) {
-    Write-Host "Completed packet memory blocker: $completedPacketMemoryBlocker"
-}
-Write-Host "Forex roadmap: $forexRoadmapStatus"
-if (-not [string]::IsNullOrWhiteSpace($forexRoadmapBlocker)) {
-    Write-Host "Forex roadmap blocker: $forexRoadmapBlocker"
-}
-Write-Host "Packet queue plan: $packetQueuePlanStatus"
-if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
-    Write-Host "Packet queue blocker: $packetQueuePlannerBlocker"
-}
-Write-Host "Approved executor: $approvedExecutorStatus"
-Write-Host "Execution allowed: $executionAllowed"
-if (-not [string]::IsNullOrWhiteSpace($approvedExecutorBlocker)) {
-    Write-Host "Approved executor blocker: $approvedExecutorBlocker"
-}
-Write-Host "Cycle ledger: $cycleLedgerStatus"
-Write-Host "Dashboard: $dashboardStatus"
-Write-Host "SOS required: $sosRequired"
-if (-not [string]::IsNullOrWhiteSpace($sosReason)) {
-    Write-Host "SOS reason: $sosReason"
-}
-if (-not [string]::IsNullOrWhiteSpace($cycleLedgerBlocker)) {
-    Write-Host "Cycle ledger blocker: $cycleLedgerBlocker"
-}
-foreach ($line in $validationOutput) {
+foreach ($line in $operatorCheckpointLines) {
     Write-Host $line
 }
-Write-Host ""
-Write-Host "Next safe action:"
-Write-Host $nextSafeAction
-Write-Host ""
-Write-Host "Command executed: NO"
-Write-Host "Commit performed: NO"
-Write-Host "Push performed: NO"
-Write-Host "Stop condition: REPORT_ONLY_NO_RECOMMENDED_COMMAND_EXECUTION"
+
+if ($Detailed) {
+    Write-Host ""
+    Write-Host "Recommended command:"
+    Write-Host $recommendedCommand
+    Write-Host ""
+    Write-Host "Route status: $routeStatus"
+    Write-Host "Contract status: $contractStatus"
+    Write-Host "Approval required: $approvalRequired"
+    Write-Host "Command validation: $validationStatus"
+    Write-Host "Route preview: $routePreviewStatus"
+    if (-not [string]::IsNullOrWhiteSpace($routePreviewBlocker)) {
+        Write-Host "Route preview blocker: $routePreviewBlocker"
+    }
+    Write-Host "Candidate evidence: $candidateEvidenceStatus"
+    if (-not [string]::IsNullOrWhiteSpace($candidateEvidenceBlocker)) {
+        Write-Host "Candidate evidence blocker: $candidateEvidenceBlocker"
+    }
+    Write-Host "Completed packet memory: $completedPacketMemoryStatus"
+    if (-not [string]::IsNullOrWhiteSpace($completedPacketMemoryBlocker)) {
+        Write-Host "Completed packet memory blocker: $completedPacketMemoryBlocker"
+    }
+    Write-Host "Forex roadmap: $forexRoadmapStatus"
+    if (-not [string]::IsNullOrWhiteSpace($forexRoadmapBlocker)) {
+        Write-Host "Forex roadmap blocker: $forexRoadmapBlocker"
+    }
+    Write-Host "Packet queue plan: $packetQueuePlanStatus"
+    if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
+        Write-Host "Packet queue blocker: $packetQueuePlannerBlocker"
+    }
+    Write-Host "Approved executor: $approvedExecutorStatus"
+    Write-Host "Execution allowed: $executionAllowed"
+    if (-not [string]::IsNullOrWhiteSpace($approvedExecutorBlocker)) {
+        Write-Host "Approved executor blocker: $approvedExecutorBlocker"
+    }
+    Write-Host "Cycle ledger: $cycleLedgerStatus"
+    Write-Host "Dashboard: $dashboardStatus"
+    Write-Host "SOS required: $sosRequired"
+    if (-not [string]::IsNullOrWhiteSpace($sosReason)) {
+        Write-Host "SOS reason: $sosReason"
+    }
+    if (-not [string]::IsNullOrWhiteSpace($cycleLedgerBlocker)) {
+        Write-Host "Cycle ledger blocker: $cycleLedgerBlocker"
+    }
+    foreach ($line in $validationOutput) {
+        Write-Host $line
+    }
+    Write-Host ""
+    Write-Host "Next safe action:"
+    Write-Host $nextSafeAction
+    Write-Host ""
+    Write-Host "Command executed: NO"
+    Write-Host "Commit performed: NO"
+    Write-Host "Push performed: NO"
+    Write-Host "Stop condition: REPORT_ONLY_NO_RECOMMENDED_COMMAND_EXECUTION"
+}
 
 exit $exitCode
