@@ -41,6 +41,7 @@ The current self-build-core preview sequence is:
 9. `build_self_build_one_action_apply_runner`
 10. `build_self_build_one_action_execute_gate`
 11. `build_self_build_one_action_local_apply_executor`
+12. `build_self_build_one_action_execution_result_collector`
 
 The APPLY approval gate evaluates whether explicit Anthony approval matches a selected queue item. It can report `approved`, but v0 still does not execute local APPLY or allow apply without human control.
 
@@ -56,7 +57,9 @@ The one-action APPLY runner can report final pre-execution wrapper readiness aft
 
 The one-action execute gate can report final explicit execution-gate readiness after a separate gate request and the full controller/runner readiness chain align. It reports `command_executed: false` and still does not execute commands.
 
-The one-action local APPLY executor is the next preview-only self-build-core queue item after the execute gate. It is queued but not built yet.
+The one-action local APPLY executor can report local executor dry-run readiness after the full gate chain aligns. It defaults to `DRY_RUN`, receives `executor_options.execute: false`, does not receive a real command runner from the driver, and reports `command_executed: false`.
+
+The one-action execution result collector is the next preview-only self-build-core queue item after the local APPLY executor. It is queued but not built yet.
 
 Start command:
 
