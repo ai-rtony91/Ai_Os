@@ -52,6 +52,26 @@ APPLY_APPROVAL_GATE_VALIDATORS = [
     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_apply_approval_gate.py",
 ]
 
+INTEGRATE_APPLY_APPROVAL_GATE_PATHS = [
+    "automation/orchestration/aios_self_build_dry_run_driver.py",
+    "tests/orchestration/test_aios_self_build_dry_run_driver.py",
+    "docs/orchestration/AIOS_SELF_BUILD_DRY_RUN_DRIVER.md",
+]
+
+INTEGRATE_APPLY_APPROVAL_GATE_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_dry_run_driver.py",
+]
+
+LOCAL_APPLY_EXECUTOR_BRIDGE_PATHS = [
+    "automation/orchestration/aios_self_build_local_apply_executor_bridge.py",
+    "tests/orchestration/test_aios_self_build_local_apply_executor_bridge.py",
+    "docs/orchestration/AIOS_SELF_BUILD_LOCAL_APPLY_EXECUTOR_BRIDGE.md",
+]
+
+LOCAL_APPLY_EXECUTOR_BRIDGE_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_local_apply_executor_bridge.py",
+]
+
 
 def _safety() -> dict[str, bool]:
     return {
@@ -216,6 +236,28 @@ def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> 
                 "action_id": "build_self_build_apply_approval_gate",
                 "allowed_paths": APPLY_APPROVAL_GATE_PATHS,
                 "validators": APPLY_APPROVAL_GATE_VALIDATORS,
+                "protected_action_flags": {},
+                "status": "ready",
+                "reason_code": "next_preview_scope_self_build_core",
+            },
+            {
+                "priority": 40,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "integrate_self_build_apply_approval_gate",
+                "allowed_paths": INTEGRATE_APPLY_APPROVAL_GATE_PATHS,
+                "validators": INTEGRATE_APPLY_APPROVAL_GATE_VALIDATORS,
+                "protected_action_flags": {},
+                "status": "ready",
+                "reason_code": "next_preview_scope_self_build_core",
+            },
+            {
+                "priority": 50,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "build_self_build_local_apply_executor_bridge",
+                "allowed_paths": LOCAL_APPLY_EXECUTOR_BRIDGE_PATHS,
+                "validators": LOCAL_APPLY_EXECUTOR_BRIDGE_VALIDATORS,
                 "protected_action_flags": {},
                 "status": "ready",
                 "reason_code": "next_preview_scope_self_build_core",
