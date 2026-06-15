@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 
@@ -25,6 +25,22 @@ PROTECTED_ACTION_FLAGS = {
     "real_webhooks": False,
     "destructive_cleanup": False,
 }
+
+CORE_STATUS_READER_PATHS = [
+    "automation/orchestration/aios_self_build_core_status_reader.py",
+    "tests/orchestration/test_aios_self_build_core_status_reader.py",
+    "docs/orchestration/AIOS_SELF_BUILD_CORE_STATUS_READER.md",
+]
+
+RUN_SUMMARY_VIEW_PATHS = [
+    "automation/orchestration/aios_self_build_run_summary_view.py",
+    "tests/orchestration/test_aios_self_build_run_summary_view.py",
+    "docs/orchestration/AIOS_SELF_BUILD_RUN_SUMMARY_VIEW.md",
+]
+
+RUN_SUMMARY_VIEW_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_run_summary_view.py",
+]
 
 
 def _safety() -> dict[str, bool]:
@@ -139,6 +155,55 @@ def build_self_build_work_queue(
         "mutation_performed": False,
         "safety": _safety(),
     }
+
+
+def _repo_root(repo_root: str | Path | None) -> Path:
+    return Path(repo_root).resolve() if repo_root else Path(__file__).resolve().parents[2]
+
+
+def _all_repo_paths_exist(repo_root: Path, paths: list[str]) -> bool:
+    return all((repo_root / path).exists() for path in paths)
+
+
+def build_self_build_core_preview_queue(repo_root: str | Path | None = None) -> dict[str, Any]:
+    root = _repo_root(repo_root)
+    status_reader_completed = _all_repo_paths_exist(root, CORE_STATUS_READER_PATHS)
+    status_reader_status = "completed" if status_reader_completed else "ready"
+    status_reader_reason = (
+        "completed_existing_files_present"
+        if status_reader_completed
+        else "preview_scope_self_build_core"
+    )
+    return build_self_build_work_queue(
+        [
+            {
+                "priority": 10,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "build_self_build_core_status_reader",
+                "allowed_paths": CORE_STATUS_READER_PATHS,
+                "validators": [
+                    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_core_status_reader.py",
+                ],
+                "protected_action_flags": {},
+                "status": status_reader_status,
+                "reason_code": status_reader_reason,
+            },
+            {
+                "priority": 20,
+                "mode": "platform",
+                "goal": "self-build-core",
+                "action_id": "build_self_build_run_summary_view",
+                "allowed_paths": RUN_SUMMARY_VIEW_PATHS,
+                "validators": RUN_SUMMARY_VIEW_VALIDATORS,
+                "protected_action_flags": {},
+                "status": "ready",
+                "reason_code": "next_preview_scope_self_build_core",
+            },
+        ],
+        goal="self-build-core",
+        mode="platform",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:

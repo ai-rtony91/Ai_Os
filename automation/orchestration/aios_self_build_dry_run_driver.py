@@ -155,24 +155,7 @@ def _count_passed_tests(wake_report: dict[str, Any], readiness: dict[str, Any]) 
 
 def _build_preview_queue() -> dict[str, Any]:
     work_queue = _load_sibling("aios_self_build_work_queue")
-    item = work_queue.build_queue_item(
-        priority=10,
-        mode="platform",
-        goal="self-build-core",
-        action_id="build_self_build_core_status_reader",
-        allowed_paths=[
-            "automation/orchestration/aios_self_build_core_status_reader.py",
-            "tests/orchestration/test_aios_self_build_core_status_reader.py",
-            "docs/orchestration/AIOS_SELF_BUILD_CORE_STATUS_READER.md",
-        ],
-        validators=[
-            "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_self_build_core_status_reader.py",
-        ],
-        protected_action_flags={},
-        status="ready",
-        reason_code="preview_scope_self_build_core",
-    )
-    return work_queue.build_self_build_work_queue([item], goal="self-build-core", mode="platform")
+    return work_queue.build_self_build_core_preview_queue(Path(__file__).resolve().parents[2])
 
 
 def _not_selected_packet(reason_code: str) -> dict[str, Any]:
@@ -270,6 +253,27 @@ def run_self_build_dry_run_driver(
     )
 
     readiness_status = str(readiness.get("readiness_status", "not_ready"))
+    status_reader = _load_sibling("aios_self_build_core_status_reader")
+    core_status = status_reader.read_self_build_core_status(
+        wake_continue=wake_report,
+        self_build_loop_readiness=readiness,
+        self_build_dry_run_driver={
+            "schema": SCHEMA,
+            "driver_mode": "DRY_RUN",
+            "wake_validation_passed": wake_validation_passed,
+            "tests_passed_count": _count_passed_tests(wake_report, readiness),
+            "readiness_status": readiness_status,
+            "selected_queue_item": selected_queue_item,
+            "selected_next_action": selected_next_action,
+        },
+        queue=queue,
+        selector=selector,
+        codex_packet_preview=codex_packet_preview,
+        local_apply_preview=local_apply_preview,
+        stop_report=stop_report,
+        sos=sos,
+    )
+
     no_scope_review = preview_approved_scope in {None, ""} and readiness_status == "review_required"
     next_safe_action = (
         "Stop for Anthony self-build readiness review. Re-run with --preview-approved-scope self-build-core to preview only."
@@ -292,6 +296,7 @@ def run_self_build_dry_run_driver(
         "local_apply_preview": local_apply_preview,
         "stop_report": stop_report,
         "sos": sos,
+        "core_status": core_status,
         "morning_summary": (
             f"AIOS self-build DRY_RUN: wake_passed={wake_validation_passed}, "
             f"readiness={readiness_status}, selected_action={selected_next_action}."
