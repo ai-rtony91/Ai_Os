@@ -231,6 +231,80 @@ function New-AiOsCandidateEvidenceFallbackResult {
     }
 }
 
+function New-AiOsApprovedExecutorFallbackContract {
+    param(
+        [string]$Status,
+        [string]$Reason,
+        [AllowNull()]$SelectedPacket
+    )
+
+    return [pscustomobject]@{
+        schema = "AIOS_APPROVED_PACKET_EXECUTOR_CONTRACT.v1"
+        executor_status = $Status
+        selected_packet = $SelectedPacket
+        approval_required = $true
+        approval_status = "not_evaluated"
+        approval_source = ""
+        execution_allowed = $false
+        command_preview_allowed = $false
+        codex_launch_allowed = $false
+        protected_action_required = $false
+        blocked_reasons = @($Reason)
+        rejected_reasons = @()
+        required_validators = @()
+        allowed_execution_mode = "none"
+        forbidden_actions = @(
+            "execute_without_matching_human_owner_approval",
+            "launch_codex_without_matching_human_owner_approval",
+            "dispatch_worker",
+            "mutate_queue",
+            "mutate_approval_state",
+            "start_scheduler_without_separate_approval",
+            "start_daemon_without_separate_approval",
+            "write_reports",
+            "access_network",
+            "touch_broker_live_trading_credentials_orders_or_webhooks",
+            "git_add",
+            "git_commit_without_separate_approval",
+            "git_push_without_separate_approval",
+            "git_merge_without_separate_approval",
+            "git_reset",
+            "branch_deletion"
+        )
+        commands_executed = @()
+        workers_dispatched = $false
+        queues_mutated = $false
+        approvals_mutated = $false
+        files_written = @()
+        safety = [pscustomobject]@{
+            preview_only = $true
+            evidence_only = $true
+            execution_contract_only = $true
+            command_execution = $false
+            codex_launch = $false
+            worker_dispatch = $false
+            queue_mutation = $false
+            approval_mutation = $false
+            filesystem_writes = $false
+            reports_written = $false
+            network_access = $false
+            scheduler_activation = $false
+            daemon_activation = $false
+            broker = $false
+            live_trading = $false
+            credentials = $false
+            real_orders = $false
+            real_webhooks = $false
+            git_add = $false
+            git_commit = $false
+            git_push = $false
+            git_merge = $false
+            git_reset = $false
+        }
+        next_safe_action = "Stop; approved packet executor contract evidence could not be generated."
+    }
+}
+
 function New-AiOsBlockedCycleLedgerResult {
     param(
         [string]$Reason,
@@ -342,6 +416,7 @@ $commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommende
 $routePreviewPath = "automation/orchestration/aios_bounded_worker_routing_preview.py"
 $candidateEvidenceAdapterPath = "automation/orchestration/aios_candidate_packet_evidence_adapter.py"
 $packetQueuePlannerPath = "automation/orchestration/aios_packet_queue_planner.py"
+$approvedExecutorContractPath = "automation/orchestration/aios_approved_packet_executor_contract.py"
 $cycleLedgerPath = "automation/orchestration/aios_cycle_ledger.py"
 $packetQueueCandidateEvidenceJson = "[]"
 $validationOutput = @()
@@ -376,6 +451,22 @@ $packetQueueWorkersDispatched = $false
 $packetQueueQueuesMutated = $false
 $packetQueueApprovalsMutated = $false
 $packetQueueFilesWritten = @()
+$approvedExecutorContract = $null
+$approvedExecutorOutput = @()
+$approvedExecutorExitCode = $null
+$approvedExecutorStatus = "NOT_RUN"
+$approvedExecutorBlocker = ""
+$executionAllowed = $false
+$commandPreviewAllowed = $false
+$codexLaunchAllowed = $false
+$executorApprovalRequired = $false
+$executorApprovalStatus = "NOT_RUN"
+$executorApprovalSource = ""
+$protectedActionRequired = $false
+$executorBlockedReasons = @()
+$executorRejectedReasons = @()
+$allowedExecutionMode = "none"
+$executorNextSafeAction = ""
 $cycleLedgerResult = $null
 $cycleLedgerOutput = @()
 $cycleLedgerExitCode = $null
@@ -555,6 +646,102 @@ $packetQueueWorkersDispatched = [bool](Get-AiOsObjectProperty -Object $packetQue
 $packetQueueQueuesMutated = [bool](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "queues_mutated" -Default $false)
 $packetQueueApprovalsMutated = [bool](Get-AiOsObjectProperty -Object $packetQueuePlan -Name "approvals_mutated" -Default $false)
 $packetQueueFilesWritten = @(Get-AiOsObjectProperty -Object $packetQueuePlan -Name "files_written" -Default @())
+
+$approvedExecutorEvidence = [ordered]@{
+    schema = "AIOS_RUNTIME_SELF_ROUTE_APPROVED_EXECUTOR_EVIDENCE.v1"
+    selected_packet = $selectedPacket
+    codex_ready_packet_preview = $codexReadyPacketPreview
+    approval_evidence = @()
+    source_recommendation_approval_required = $approvalRequired
+    report_only = $true
+    safety = [ordered]@{
+        command_execution = $false
+        codex_launch = $false
+        worker_dispatch = $false
+        queue_mutation = $false
+        approval_mutation = $false
+        scheduler_activation = $false
+        daemon_activation = $false
+        reports_written = $false
+        network_access = $false
+        broker = $false
+        live_trading = $false
+        credentials = $false
+        real_orders = $false
+        real_webhooks = $false
+    }
+}
+
+if (-not (Test-Path -LiteralPath $approvedExecutorContractPath)) {
+    $approvedExecutorContract = New-AiOsApprovedExecutorFallbackContract `
+        -Status "blocked" `
+        -Reason "approved_executor_contract_missing" `
+        -SelectedPacket $selectedPacket
+    $approvedExecutorStatus = "blocked"
+    $approvedExecutorBlocker = "approved_executor_contract_missing"
+    $approvedExecutorExitCode = 1
+}
+else {
+    try {
+        $approvedExecutorEvidenceJson = $approvedExecutorEvidence | ConvertTo-Json -Depth 30 -Compress
+        $approvedExecutorOutput = Invoke-AiOsPythonJsonArgumentScript `
+            -ScriptPath $approvedExecutorContractPath `
+            -ArgumentName "--evidence" `
+            -JsonPayload $approvedExecutorEvidenceJson
+        $approvedExecutorExitCode = $LASTEXITCODE
+        $approvedExecutorJson = ($approvedExecutorOutput -join "`n")
+        if ($approvedExecutorExitCode -ne 0) {
+            $approvedExecutorContract = New-AiOsApprovedExecutorFallbackContract `
+                -Status "blocked" `
+                -Reason "approved_executor_contract_nonzero_exit" `
+                -SelectedPacket $selectedPacket
+            $approvedExecutorStatus = "blocked"
+            $approvedExecutorBlocker = "approved_executor_contract_nonzero_exit"
+        }
+        elseif ([string]::IsNullOrWhiteSpace($approvedExecutorJson)) {
+            $approvedExecutorContract = New-AiOsApprovedExecutorFallbackContract `
+                -Status "blocked" `
+                -Reason "approved_executor_contract_empty_output" `
+                -SelectedPacket $selectedPacket
+            $approvedExecutorStatus = "blocked"
+            $approvedExecutorBlocker = "approved_executor_contract_empty_output"
+        }
+        else {
+            $approvedExecutorContract = $approvedExecutorJson | ConvertFrom-Json
+            $approvedExecutorStatus = [string](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "executor_status" -Default "UNKNOWN")
+        }
+    }
+    catch {
+        $approvedExecutorContract = New-AiOsApprovedExecutorFallbackContract `
+            -Status "blocked" `
+            -Reason "approved_executor_contract_generation_failed" `
+            -SelectedPacket $selectedPacket
+        $approvedExecutorStatus = "blocked"
+        $approvedExecutorBlocker = "approved_executor_contract_generation_failed"
+        $approvedExecutorExitCode = 1
+    }
+}
+
+$executionAllowed = [bool](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "execution_allowed" -Default $false)
+$commandPreviewAllowed = [bool](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "command_preview_allowed" -Default $false)
+$codexLaunchAllowed = $false
+$executorApprovalRequired = [bool](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "approval_required" -Default $false)
+$executorApprovalStatus = [string](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "approval_status" -Default "")
+$executorApprovalSource = [string](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "approval_source" -Default "")
+$protectedActionRequired = [bool](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "protected_action_required" -Default $false)
+$executorBlockedReasons = @(Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "blocked_reasons" -Default @())
+$executorRejectedReasons = @(Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "rejected_reasons" -Default @())
+$allowedExecutionMode = [string](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "allowed_execution_mode" -Default "none")
+$executorNextSafeAction = [string](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name "next_safe_action" -Default "")
+
+if ($approvedExecutorStatus -eq "rejected") {
+    $routeStatus = "rejected"
+    $exitCode = 1
+    $rejectionReasons += "approved_executor_rejected"
+    foreach ($executorReason in $executorRejectedReasons) {
+        $rejectionReasons += "approved_executor_rejected:$executorReason"
+    }
+}
 
 if ($routeStatus -eq "report_only") {
     if ($contractStatus -eq "BLOCKED") {
@@ -806,7 +993,7 @@ $report = [pscustomobject]@{
     recommended_command = $recommendedCommand
     recommendation_reason = $recommendationReason
     recommendation_contract_status = $contractStatus
-    approval_required = $approvalRequired
+    recommendation_approval_required = $approvalRequired
     command_validation_status = $validationStatus
     command_validation_exit_code = $validationExitCode
     command_validation_output = @($validationOutput)
@@ -829,6 +1016,19 @@ $report = [pscustomobject]@{
     packet_queue_queues_mutated = $packetQueueQueuesMutated
     packet_queue_approvals_mutated = $packetQueueApprovalsMutated
     packet_queue_files_written = @($packetQueueFilesWritten)
+    approved_executor_status = $approvedExecutorStatus
+    approved_executor_contract = $approvedExecutorContract
+    execution_allowed = $executionAllowed
+    command_preview_allowed = $commandPreviewAllowed
+    codex_launch_allowed = $codexLaunchAllowed
+    approval_required = $executorApprovalRequired
+    approval_status = $executorApprovalStatus
+    approval_source = $executorApprovalSource
+    protected_action_required = $protectedActionRequired
+    executor_blocked_reasons = @($executorBlockedReasons)
+    executor_rejected_reasons = @($executorRejectedReasons)
+    allowed_execution_mode = $allowedExecutionMode
+    executor_next_safe_action = $executorNextSafeAction
     cycle_ledger_status = $cycleLedgerStatus
     cycle_ledger = $cycleLedger
     dashboard_contract = $dashboardContract
@@ -887,6 +1087,11 @@ if (-not [string]::IsNullOrWhiteSpace($candidateEvidenceBlocker)) {
 Write-Host "Packet queue plan: $packetQueuePlanStatus"
 if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
     Write-Host "Packet queue blocker: $packetQueuePlannerBlocker"
+}
+Write-Host "Approved executor: $approvedExecutorStatus"
+Write-Host "Execution allowed: $executionAllowed"
+if (-not [string]::IsNullOrWhiteSpace($approvedExecutorBlocker)) {
+    Write-Host "Approved executor blocker: $approvedExecutorBlocker"
 }
 Write-Host "Cycle ledger: $cycleLedgerStatus"
 Write-Host "Dashboard: $dashboardStatus"

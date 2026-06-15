@@ -287,6 +287,101 @@ def test_self_route_default_candidate_selected_plan_is_propagated_to_report_cont
     assert '"packet_queue_plan_selected"' in text
 
 
+def test_self_route_references_approved_packet_executor_contract() -> None:
+    text = self_route_text()
+
+    assert "automation/orchestration/aios_approved_packet_executor_contract.py" in text
+    assert "-ScriptPath $approvedExecutorContractPath" in text
+    assert '-ArgumentName "--evidence"' in text
+    assert "-JsonPayload $approvedExecutorEvidenceJson" in text
+
+
+def test_self_route_json_includes_approved_executor_contract_fields() -> None:
+    text = self_route_text()
+
+    assert "approved_executor_status = $approvedExecutorStatus" in text
+    assert "approved_executor_contract = $approvedExecutorContract" in text
+    assert "execution_allowed = $executionAllowed" in text
+    assert "command_preview_allowed = $commandPreviewAllowed" in text
+    assert "codex_launch_allowed = $codexLaunchAllowed" in text
+    assert "approval_required = $executorApprovalRequired" in text
+    assert "approval_status = $executorApprovalStatus" in text
+    assert "approval_source = $executorApprovalSource" in text
+    assert "protected_action_required = $protectedActionRequired" in text
+    assert "allowed_execution_mode = $allowedExecutionMode" in text
+    assert "executor_next_safe_action = $executorNextSafeAction" in text
+
+
+def test_self_route_passes_selected_packet_to_approved_executor_contract() -> None:
+    text = self_route_text()
+
+    assert "$approvedExecutorEvidence = [ordered]@{" in text
+    assert "selected_packet = $selectedPacket" in text
+    assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+    assert "approval_evidence = @()" in text
+
+
+def test_self_route_missing_executor_approval_blocks_execution_by_default() -> None:
+    text = self_route_text()
+
+    assert "approval_evidence = @()" in text
+    assert "$executorApprovalStatus = [string](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name \"approval_status\" -Default \"\")" in text
+    assert "executor_blocked_reasons = @($executorBlockedReasons)" in text
+
+
+def test_self_route_executor_execution_and_codex_launch_are_false_by_default() -> None:
+    text = self_route_text()
+
+    assert "$executionAllowed = $false" in text
+    assert "$codexLaunchAllowed = $false" in text
+    assert "execution_allowed = $executionAllowed" in text
+    assert "codex_launch_allowed = $codexLaunchAllowed" in text
+
+
+def test_self_route_executor_approval_required_and_blocked_reasons_are_exposed() -> None:
+    text = self_route_text()
+
+    assert "approval_required = $true" in text
+    assert "$executorApprovalRequired = [bool](Get-AiOsObjectProperty -Object $approvedExecutorContract -Name \"approval_required\" -Default $false)" in text
+    assert "$executorBlockedReasons = @(Get-AiOsObjectProperty -Object $approvedExecutorContract -Name \"blocked_reasons\" -Default @())" in text
+    assert "$executorRejectedReasons = @(Get-AiOsObjectProperty -Object $approvedExecutorContract -Name \"rejected_reasons\" -Default @())" in text
+    assert "executor_blocked_reasons = @($executorBlockedReasons)" in text
+    assert "executor_rejected_reasons = @($executorRejectedReasons)" in text
+
+
+def test_self_route_executor_command_preview_remains_report_only() -> None:
+    text = self_route_text()
+
+    assert "command_preview_allowed = $commandPreviewAllowed" in text
+    assert "REPORT_ONLY_NO_RECOMMENDED_COMMAND_EXECUTION" in text
+    assert "Command executed: NO" in text
+
+
+def test_self_route_executor_does_not_launch_codex_or_execute_commands() -> None:
+    text = self_route_text()
+
+    assert "Invoke-Expression" not in text
+    assert "Start-Process" not in text
+    assert "$codexLaunchAllowed = $false" in text
+    assert "command_execution = $false" in text
+    assert "codex_launch = $false" in text
+
+
+def test_self_route_executor_does_not_dispatch_mutate_reports_or_touch_trading_boundaries() -> None:
+    text = self_route_text()
+
+    assert "worker_dispatch = $false" in text
+    assert "queue_mutation = $false" in text
+    assert "approval_mutation = $false" in text
+    assert "reports_written = $false" in text
+    assert "broker = $false" in text
+    assert "live_trading = $false" in text
+    assert "credentials = $false" in text
+    assert "real_orders = $false" in text
+    assert "real_webhooks = $false" in text
+    assert "Reports/" not in text
+
+
 def test_self_route_references_cycle_ledger_module() -> None:
     text = self_route_text()
 
