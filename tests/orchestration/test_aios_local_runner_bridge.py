@@ -28,6 +28,18 @@ def handoff() -> dict[str, object]:
     }
 
 
+def execution_simulator_handoff() -> dict[str, object]:
+    return {
+        "schema": "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1",
+        "handoff_status": "ready",
+        "allowed_action": "build_forex_paper_execution_simulator",
+        "validators": [
+            "python -m pytest -p no:cacheprovider tests/trading_lab/test_forex_paper_execution_simulator.py",
+        ],
+        "next_safe_action": "Prepare the bounded paper execution simulator handoff for review.",
+    }
+
+
 def test_local_runner_bridge_imports():
     module = load_module()
     assert module.SCHEMA == "AIOS_LOCAL_RUNNER_BRIDGE.v1"
@@ -44,6 +56,16 @@ def test_forex_handoff_produces_command_preview_only():
     assert bridge["validation_commands"] == handoff()["validators"]
     assert bridge["safety"]["command_execution"] is False
     assert bridge["approval_required"]["human_review_before_execution"] is True
+
+
+def test_execution_simulator_handoff_produces_command_preview_only():
+    module = load_module()
+    bridge = module.build_local_runner_bridge(execution_simulator_handoff())
+    assert bridge["runner_status"] == "preview_ready"
+    assert bridge["working_directory"] == r"C:\Dev\Ai.Os"
+    assert bridge["command_preview"][0] == "Set-Location -LiteralPath 'C:\\Dev\\Ai.Os'"
+    assert bridge["validation_commands"] == execution_simulator_handoff()["validators"]
+    assert bridge["safety"]["command_execution"] is False
 
 
 def test_unsupported_or_stopped_handoff_does_not_preview_execution():

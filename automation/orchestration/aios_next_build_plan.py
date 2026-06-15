@@ -7,6 +7,7 @@ from typing import Any
 
 SCHEMA = "AIOS_NEXT_BUILD_PLAN.v1"
 INPUT_SCHEMA = "AIOS_FOREX_GOAL_DECISION.v1"
+POST_RISK_INPUT_SCHEMA = "AIOS_FOREX_POST_RISK_DECISION.v1"
 
 ROUTES = {
     "continue_build": {
@@ -38,6 +39,27 @@ ROUTES = {
         "next_component": "none",
         "next_packet_id": "NONE",
         "next_safe_action": "Stop for Anthony review before preparing another build packet.",
+    },
+}
+
+POST_RISK_ROUTES = {
+    "forex_risk_controls": {
+        "route": "build_next_paper_component",
+        "next_component": "forex_risk_controls",
+        "next_packet_id": "PKT-AIOS-FOREX-RISK-CONTROLS-CONTINUATION-APPLY",
+        "next_safe_action": "Prepare a bounded paper-only Forex risk controls build packet.",
+    },
+    "forex_paper_execution_simulator": {
+        "route": "build_next_paper_component",
+        "next_component": "forex_paper_execution_simulator",
+        "next_packet_id": "PKT-AIOS-FOREX-PAPER-EXECUTION-SIMULATOR-CONTINUATION-APPLY",
+        "next_safe_action": "Prepare bounded paper execution simulator packet for Anthony review.",
+    },
+    "none": {
+        "route": "stop",
+        "next_component": "none",
+        "next_packet_id": "NONE",
+        "next_safe_action": "Stop for Anthony review before defining another paper-only Forex component.",
     },
 }
 
@@ -84,9 +106,44 @@ def _input_decision(goal_decision: dict[str, Any]) -> str:
     return decision if isinstance(decision, str) and decision else "invalid_decision"
 
 
+def _build_post_risk_next_build_plan(post_risk_decision: dict[str, Any]) -> dict[str, Any]:
+    goal = post_risk_decision.get("goal", "forex-paper-bot")
+    selected_next_component = post_risk_decision.get("selected_next_component", "none")
+    if not isinstance(selected_next_component, str) or not selected_next_component:
+        selected_next_component = "none"
+    reason_code = post_risk_decision.get("reason_code", "invalid_post_risk_decision")
+    decision_reasons = post_risk_decision.get("decision_reasons", [])
+    if not isinstance(decision_reasons, list):
+        decision_reasons = [str(decision_reasons)]
+
+    route_info = POST_RISK_ROUTES.get(selected_next_component)
+    if route_info is None:
+        route_info = POST_RISK_ROUTES["none"]
+        selected_next_component = "none"
+        reason_code = "invalid_post_risk_decision"
+        decision_reasons = ["invalid_post_risk_decision"]
+
+    route = route_info["route"]
+    return {
+        "schema": SCHEMA,
+        "goal": goal,
+        "input_decision": str(post_risk_decision.get("selected_action", "none")),
+        "route": route,
+        "next_component": route_info["next_component"],
+        "next_packet_id": route_info["next_packet_id"],
+        "reason_code": reason_code,
+        "plan_reasons": [*decision_reasons, f"route:{route}"],
+        "next_safe_action": route_info["next_safe_action"],
+        "approval_required": approval_required(),
+        "safety": safety_flags(),
+    }
+
+
 def build_next_build_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(goal_decision, dict):
         goal_decision = {}
+    if goal_decision.get("schema") == POST_RISK_INPUT_SCHEMA:
+        return _build_post_risk_next_build_plan(goal_decision)
 
     goal = goal_decision.get("goal", "forex-paper-bot")
     input_decision = _input_decision(goal_decision)

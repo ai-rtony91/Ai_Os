@@ -24,6 +24,8 @@ HARD_BLOCK_FLAGS = {
     "worker_dispatch",
 }
 
+DASHBOARD_READY_COMPONENTS = {"forex_risk_controls", "forex_paper_execution_simulator"}
+
 
 def base_safety() -> dict[str, bool]:
     return {
@@ -113,9 +115,12 @@ def build_control_plane_status(
     blockers = _collect_blockers(cli_result, github, safety, ready)
     bounded_ready = runner.get("runner_status") == "preview_ready" and ready.get("status") == "ready_for_human_review"
 
+    next_component = str(plan.get("next_component", "unknown"))
+
     dashboard_ready = bool(
         resume.get("resume_ready") is True
         and bounded_ready
+        and next_component in DASHBOARD_READY_COMPONENTS
         and not blockers
         and not any(safety.get(key) is True for key in HARD_BLOCK_FLAGS)
     )
@@ -132,7 +137,7 @@ def build_control_plane_status(
         "current_goal": resume.get("goal", "forex-paper-bot"),
         "loop_status": loop_status,
         "resume_ready": bool(resume.get("resume_ready") is True),
-        "next_component": plan.get("next_component", "unknown"),
+        "next_component": next_component,
         "next_action": next_action,
         "proof_net": "forex-paper-bot",
         "approvals_required": approvals_required,

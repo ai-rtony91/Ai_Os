@@ -254,9 +254,10 @@ def test_wake_continue_recognizes_risk_controls_after_created(tmp_path):
         command_runner=passing_command_runner,
     )
     assert report["selected_action"] == "validate_all_forex_with_risk_controls"
-    assert report["result"] == "REVIEW_REQUIRED"
-    assert report["next_build_plan"]["next_component"] == "none"
-    assert "after risk controls" in report["next_safe_action"]
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
+    assert report["post_risk_decision"]["selected_next_component"] == "forex_paper_execution_simulator"
+    assert report["next_build_plan"]["next_component"] == "forex_paper_execution_simulator"
+    assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_paper_execution_simulator"
 
 
 def test_autonomy_execute_validation_includes_risk_controls_after_created(tmp_path):

@@ -18,6 +18,16 @@ FOREX_RISK_CONTROLS_ALLOWED_PATHS = [
     "tests/orchestration/test_aios_wake_continue.py",
 ]
 
+FOREX_PAPER_EXECUTION_SIMULATOR_ALLOWED_PATHS = [
+    "apps/trading_lab/trading_lab/forex_paper_execution_simulator.py",
+    "tests/trading_lab/test_forex_paper_execution_simulator.py",
+    "docs/orchestration/AIOS_FOREX_PAPER_EXECUTION_SIMULATOR.md",
+    "automation/orchestration/aios_productive_bounded_executor.py",
+    "tests/orchestration/test_aios_productive_bounded_executor.py",
+    "automation/orchestration/aios_wake_continue.py",
+    "tests/orchestration/test_aios_wake_continue.py",
+]
+
 STRATEGY_REVIEW_ALLOWED_PATHS = [
     "apps/trading_lab/trading_lab/forex_strategy_rules.py",
     "tests/trading_lab/test_forex_strategy_rules.py",
@@ -32,6 +42,10 @@ DATA_QUALITY_REVIEW_ALLOWED_PATHS = [
 
 FOREX_RISK_CONTROLS_VALIDATORS = [
     "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_autonomy_execute.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_risk_controls.py",
+]
+
+FOREX_PAPER_EXECUTION_SIMULATOR_VALIDATORS = [
+    "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_productive_bounded_executor.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_paper_execution_simulator.py",
 ]
 
 STRATEGY_REVIEW_VALIDATORS = [
@@ -93,6 +107,15 @@ def _ready_handoff(
         f"Review bounded APPLY packet for {allowed_action}.",
         *validators,
     ]
+    next_safe_action = (
+        "Prepare bounded paper execution simulator packet for Anthony review. "
+        "Do not execute, stage, commit, push, or dispatch from this handoff."
+        if allowed_action == "build_forex_paper_execution_simulator"
+        else (
+            f"Prepare the {allowed_action} APPLY packet for Anthony review. "
+            "Do not execute, stage, commit, push, or dispatch from this handoff."
+        )
+    )
     return {
         "schema": SCHEMA,
         "goal": next_build_plan.get("goal", "forex-paper-bot"),
@@ -107,10 +130,7 @@ def _ready_handoff(
         "command_preview": command_preview,
         "approval_required": approval_required(),
         "safety": safety_flags(),
-        "next_safe_action": (
-            f"Prepare the {allowed_action} APPLY packet for Anthony review. "
-            "Do not execute, stage, commit, push, or dispatch from this handoff."
-        ),
+        "next_safe_action": next_safe_action,
     }
 
 
@@ -169,6 +189,13 @@ def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str,
             allowed_action="build_forex_risk_controls",
             allowed_paths=FOREX_RISK_CONTROLS_ALLOWED_PATHS,
             validators=FOREX_RISK_CONTROLS_VALIDATORS,
+        )
+    if next_component == "forex_paper_execution_simulator":
+        return _ready_handoff(
+            next_build_plan,
+            allowed_action="build_forex_paper_execution_simulator",
+            allowed_paths=FOREX_PAPER_EXECUTION_SIMULATOR_ALLOWED_PATHS,
+            validators=FOREX_PAPER_EXECUTION_SIMULATOR_VALIDATORS,
         )
     if next_component == "forex_strategy_rules_review":
         return _ready_handoff(

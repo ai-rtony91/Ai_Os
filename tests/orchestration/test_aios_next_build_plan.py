@@ -26,6 +26,18 @@ def goal_decision(decision: str) -> dict[str, object]:
     }
 
 
+def post_risk_decision(next_component: str, action: str, reason_code: str) -> dict[str, object]:
+    return {
+        "schema": "AIOS_FOREX_POST_RISK_DECISION.v1",
+        "goal": "forex-paper-bot",
+        "selected_next_component": next_component,
+        "selected_action": action,
+        "selected_packet_id": "PKT-AIOS-FOREX-PAPER-EXECUTION-SIMULATOR-CONTINUATION-APPLY",
+        "reason_code": reason_code,
+        "decision_reasons": [reason_code],
+    }
+
+
 def test_router_imports():
     module = load_module()
     assert module.SCHEMA == "AIOS_NEXT_BUILD_PLAN.v1"
@@ -38,6 +50,31 @@ def test_continue_build_routes_to_forex_risk_controls():
     assert plan["route"] == "build_next_paper_component"
     assert plan["next_component"] == "forex_risk_controls"
     assert plan["next_packet_id"] == "PKT-AIOS-FOREX-RISK-CONTROLS-CONTINUATION-APPLY"
+
+
+def test_post_risk_decision_routes_to_execution_simulator():
+    module = load_module()
+    plan = module.build_next_build_plan(
+        post_risk_decision(
+            "forex_paper_execution_simulator",
+            "build_forex_paper_execution_simulator",
+            "risk_controls_validated_execution_simulator_missing",
+        )
+    )
+    assert plan["route"] == "build_next_paper_component"
+    assert plan["next_component"] == "forex_paper_execution_simulator"
+    assert plan["next_packet_id"] == "PKT-AIOS-FOREX-PAPER-EXECUTION-SIMULATOR-CONTINUATION-APPLY"
+    assert plan["reason_code"] == "risk_controls_validated_execution_simulator_missing"
+
+
+def test_post_risk_current_scope_complete_routes_to_stop():
+    module = load_module()
+    plan = module.build_next_build_plan(
+        post_risk_decision("none", "none", "current_inventory_complete_for_defined_scope")
+    )
+    assert plan["route"] == "stop"
+    assert plan["next_component"] == "none"
+    assert plan["next_packet_id"] == "NONE"
 
 
 def test_improve_strategy_routes_to_strategy_review():

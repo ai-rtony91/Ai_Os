@@ -7,7 +7,7 @@ from typing import Any
 
 SCHEMA = "AIOS_LOCAL_RUNNER_BRIDGE.v1"
 REPO_ROOT_TEXT = r"C:\Dev\Ai.Os"
-SUPPORTED_ACTIONS = {"build_forex_risk_controls"}
+SUPPORTED_ACTIONS = {"build_forex_risk_controls", "build_forex_paper_execution_simulator"}
 
 
 def safety_flags() -> dict[str, bool]:

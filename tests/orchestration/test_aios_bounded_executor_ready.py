@@ -36,6 +36,26 @@ def handoff() -> dict[str, object]:
     }
 
 
+def execution_simulator_handoff() -> dict[str, object]:
+    return {
+        "schema": "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1",
+        "handoff_status": "ready",
+        "allowed_action": "build_forex_paper_execution_simulator",
+        "allowed_paths": [
+            "apps/trading_lab/trading_lab/forex_paper_execution_simulator.py",
+            "tests/trading_lab/test_forex_paper_execution_simulator.py",
+            "docs/orchestration/AIOS_FOREX_PAPER_EXECUTION_SIMULATOR.md",
+            "automation/orchestration/aios_productive_bounded_executor.py",
+            "tests/orchestration/test_aios_productive_bounded_executor.py",
+            "automation/orchestration/aios_wake_continue.py",
+            "tests/orchestration/test_aios_wake_continue.py",
+        ],
+        "validators": [
+            "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_productive_bounded_executor.py tests/orchestration/test_aios_wake_continue.py tests/trading_lab/test_forex_paper_execution_simulator.py",
+        ],
+    }
+
+
 def test_bounded_executor_ready_imports():
     module = load_module()
     assert module.SCHEMA == "AIOS_BOUNDED_EXECUTOR_READY.v1"
@@ -52,6 +72,18 @@ def test_forex_risk_controls_handoff_ready_for_human_review_only():
     assert ready["validators_bounded"] is True
     assert ready["command_execution"] is False
     assert ready["executed"] is False
+
+
+def test_execution_simulator_handoff_ready_for_human_review_only():
+    module = load_module()
+    ready = module.build_bounded_executor_ready(execution_simulator_handoff())
+    assert ready["status"] == "ready_for_human_review"
+    assert ready["allowed_action"] == "build_forex_paper_execution_simulator"
+    assert ready["allowed_paths_bounded"] is True
+    assert ready["validators_bounded"] is True
+    assert ready["command_execution"] is False
+    assert ready["executed"] is False
+    assert "paper execution simulator" in ready["next_safe_action"]
 
 
 def test_unsupported_action_blocks_readiness():
