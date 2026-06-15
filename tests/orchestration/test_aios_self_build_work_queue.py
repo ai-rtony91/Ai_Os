@@ -3,6 +3,8 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 
+from automation.orchestration.aios_next_action_selector import select_next_action
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_self_build_work_queue.py"
@@ -53,6 +55,38 @@ def test_path_traversal_is_rejected_from_allowed_paths():
     item = module.build_queue_item(action_id="unsafe", allowed_paths=["../outside.py", "safe/path.py"])
     assert item["allowed_paths"] == ["safe/path.py"]
     assert item["reason_code"] == "bounded_dry_run_item"
+
+
+def test_self_build_core_queue_marks_status_reader_completed_when_files_exist(tmp_path):
+    module = load_module()
+    for relative_path in module.CORE_STATUS_READER_PATHS:
+        target = tmp_path / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("present", encoding="utf-8")
+
+    queue = module.build_self_build_core_preview_queue(tmp_path)
+    items_by_action = {item["action_id"]: item for item in queue["items"]}
+
+    assert items_by_action["build_self_build_core_status_reader"]["status"] == "completed"
+    assert items_by_action["build_self_build_core_status_reader"]["reason_code"] == "completed_existing_files_present"
+    assert items_by_action["build_self_build_run_summary_view"]["status"] == "ready"
+    assert items_by_action["build_self_build_run_summary_view"]["allowed_paths"] == module.RUN_SUMMARY_VIEW_PATHS
+
+
+def test_queue_selects_run_summary_view_after_status_reader_completed(tmp_path):
+    module = load_module()
+    for relative_path in module.CORE_STATUS_READER_PATHS:
+        target = tmp_path / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("present", encoding="utf-8")
+
+    queue = module.build_self_build_core_preview_queue(tmp_path)
+    selected = select_next_action({"readiness_status": "ready"}, queue)
+
+    assert selected["selector_status"] == "selected"
+    assert selected["selected_next_action"] == "build_self_build_run_summary_view"
+    assert selected["selected_queue_item"]["action_id"] == "build_self_build_run_summary_view"
+    assert all(value is False for value in selected["selected_queue_item"]["protected_action_flags"].values())
 
 
 def test_no_network_subprocess_or_file_write_usage():

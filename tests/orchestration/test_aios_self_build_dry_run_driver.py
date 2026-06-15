@@ -89,6 +89,9 @@ def test_driver_parses_wake_json_and_stops_without_approved_scope():
     assert report["local_apply_preview"]["commands_executed"] is False
     assert report["stop_report"]["resume_ready"] is False
     assert report["sos"]["sos_required"] is False
+    assert report["core_status"]["schema"] == "AIOS_SELF_BUILD_CORE_STATUS_READER.v1"
+    assert report["core_status"]["can_apply_without_human"] is False
+    assert report["core_status"]["can_continue_preview"] is False
 
 
 def test_driver_previews_self_build_core_only_with_approved_scope():
@@ -101,11 +104,15 @@ def test_driver_previews_self_build_core_only_with_approved_scope():
     assert report["wake_validation_passed"] is True
     assert report["readiness_status"] == "review_required"
     assert report["selected_queue_item"]["goal"] == "self-build-core"
-    assert report["selected_next_action"] == "build_self_build_core_status_reader"
+    assert report["selected_next_action"] == "build_self_build_run_summary_view"
     assert report["codex_packet_preview"]["packet_ready"] is True
     assert "CODEX-ONLY PROMPT" in report["codex_packet_preview"]["codex_prompt_text"]
     assert report["local_apply_preview"]["runner_status"] == "preview_only"
     assert report["local_apply_preview"]["commands_executed"] is False
+    assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
+    assert report["core_status"]["selected_next_action"] == "build_self_build_run_summary_view"
+    assert report["core_status"]["can_continue_preview"] is True
+    assert report["core_status"]["can_apply_without_human"] is False
 
 
 def test_driver_never_executes_generated_codex_or_apply_commands():
@@ -118,6 +125,8 @@ def test_driver_never_executes_generated_codex_or_apply_commands():
     assert report["safety"]["codex_launched"] is False
     assert report["safety"]["local_apply_executed"] is False
     assert report["safety"]["generated_commands_executed"] is False
+    assert report["driver_mode"] == "DRY_RUN"
+    assert report["local_apply_preview"]["runner_mode"] == "DRY_RUN"
     assert report["approval_required"]["commit"] is True
     assert report["approval_required"]["push"] is True
     assert report["approval_required"]["merge"] is True
