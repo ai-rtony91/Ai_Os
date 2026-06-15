@@ -18,6 +18,12 @@ COMPLETED_BEFORE_INTEGRATION = [
     "automation/orchestration/aios_self_build_apply_approval_gate.py",
     "tests/orchestration/test_aios_self_build_apply_approval_gate.py",
     "docs/orchestration/AIOS_SELF_BUILD_APPLY_APPROVAL_GATE.md",
+    "automation/orchestration/aios_self_build_dry_run_driver.py",
+    "tests/orchestration/test_aios_self_build_dry_run_driver.py",
+    "docs/orchestration/AIOS_SELF_BUILD_DRY_RUN_DRIVER.md",
+    "automation/orchestration/aios_self_build_local_apply_executor_bridge.py",
+    "tests/orchestration/test_aios_self_build_local_apply_executor_bridge.py",
+    "docs/orchestration/AIOS_SELF_BUILD_LOCAL_APPLY_EXECUTOR_BRIDGE.md",
 ]
 
 
@@ -113,9 +119,11 @@ def test_driver_parses_wake_json_and_stops_without_approved_scope():
     assert report["core_status"]["can_continue_preview"] is False
     assert report["apply_approval"]["schema"] == "AIOS_SELF_BUILD_APPLY_APPROVAL_GATE.v1"
     assert report["apply_approval"]["can_apply_without_human"] is False
+    assert report["local_apply_executor_bridge"]["schema"] == "AIOS_SELF_BUILD_LOCAL_APPLY_EXECUTOR_BRIDGE.v1"
+    assert report["local_apply_executor_bridge"]["execution_status"] == "prepared_not_executed"
 
 
-def test_driver_previews_apply_approval_gate_integration_with_approved_scope(tmp_path):
+def test_driver_previews_single_action_executor_with_approved_scope(tmp_path):
     module = load_module()
     seed_completed_paths(tmp_path)
     report = module.run_self_build_dry_run_driver(
@@ -126,17 +134,19 @@ def test_driver_previews_apply_approval_gate_integration_with_approved_scope(tmp
     assert report["wake_validation_passed"] is True
     assert report["readiness_status"] == "review_required"
     assert report["selected_queue_item"]["goal"] == "self-build-core"
-    assert report["selected_next_action"] == "integrate_self_build_apply_approval_gate"
+    assert report["selected_next_action"] == "build_self_build_single_action_executor"
     assert report["codex_packet_preview"]["packet_ready"] is True
     assert "CODEX-ONLY PROMPT" in report["codex_packet_preview"]["codex_prompt_text"]
     assert report["local_apply_preview"]["runner_status"] == "preview_only"
     assert report["local_apply_preview"]["commands_executed"] is False
     assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
-    assert report["core_status"]["selected_next_action"] == "integrate_self_build_apply_approval_gate"
+    assert report["core_status"]["selected_next_action"] == "build_self_build_single_action_executor"
     assert report["core_status"]["can_continue_preview"] is True
     assert report["core_status"]["can_apply_without_human"] is False
     assert report["apply_approval"]["approval_status"] == "review_required"
     assert report["apply_approval"]["local_allowlisted_apply_allowed"] is False
+    assert report["local_apply_executor_bridge"]["bridge_status"] == "blocked"
+    assert report["local_apply_executor_bridge"]["execution_status"] == "prepared_not_executed"
 
 
 def test_driver_never_executes_generated_codex_or_apply_commands(tmp_path):
@@ -158,7 +168,7 @@ def test_driver_never_executes_generated_codex_or_apply_commands(tmp_path):
     assert report["apply_approval"]["can_apply_without_human"] is False
 
 
-def test_valid_anthony_approval_is_approved_but_executes_nothing(tmp_path):
+def test_valid_anthony_approval_prepares_bridge_but_executes_nothing(tmp_path):
     module = load_module()
     seed_completed_paths(tmp_path)
     report = module.run_self_build_dry_run_driver(
@@ -166,16 +176,20 @@ def test_valid_anthony_approval_is_approved_but_executes_nothing(tmp_path):
         preview_approved_scope="self-build-core",
         approved_by="Anthony Meza",
         approval_token="ANTHONY_APPROVED_LOCAL_APPLY",
-        approve_action="integrate_self_build_apply_approval_gate",
+        approve_action="build_self_build_single_action_executor",
         wake_runner=fake_wake_runner,
     )
 
-    assert report["selected_next_action"] == "integrate_self_build_apply_approval_gate"
+    assert report["selected_next_action"] == "build_self_build_single_action_executor"
     assert report["apply_approval"]["approval_status"] == "approved"
     assert report["apply_approval"]["local_allowlisted_apply_allowed"] is True
     assert report["apply_approval"]["can_apply_without_human"] is False
+    assert report["local_apply_executor_bridge"]["bridge_status"] == "ready"
+    assert report["local_apply_executor_bridge"]["execution_status"] == "prepared_not_executed"
+    assert report["local_apply_executor_bridge"]["command_to_run"]
     assert report["safety"]["local_apply_executed"] is False
     assert report["safety"]["generated_commands_executed"] is False
+    assert report["safety"]["files_written"] is False
 
 
 def test_mismatched_approve_action_is_rejected(tmp_path):
@@ -190,9 +204,10 @@ def test_mismatched_approve_action_is_rejected(tmp_path):
         wake_runner=fake_wake_runner,
     )
 
-    assert report["selected_next_action"] == "integrate_self_build_apply_approval_gate"
+    assert report["selected_next_action"] == "build_self_build_single_action_executor"
     assert report["apply_approval"]["approval_status"] == "rejected"
     assert "requested_action_mismatch" in report["apply_approval"]["rejection_reasons"]
+    assert report["local_apply_executor_bridge"]["bridge_status"] == "blocked"
     assert report["safety"]["local_apply_executed"] is False
 
 
