@@ -15,6 +15,7 @@ SUPPORTED_ACTIONS = {
     "build_forex_paper_execution_simulator",
     "build_forex_execution_ledger_integration",
     "build_forex_portfolio_state",
+    "build_forex_paper_session_controller",
 }
 
 FOREX_RISK_CONTROLS_PATH = Path("apps/trading_lab/trading_lab/forex_risk_controls.py")
@@ -29,6 +30,9 @@ FOREX_EXECUTION_LEDGER_INTEGRATION_DOC_PATH = Path("docs/orchestration/AIOS_FORE
 FOREX_PORTFOLIO_STATE_PATH = Path("apps/trading_lab/trading_lab/forex_portfolio_state.py")
 FOREX_PORTFOLIO_STATE_TEST_PATH = Path("tests/trading_lab/test_forex_portfolio_state.py")
 FOREX_PORTFOLIO_STATE_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PORTFOLIO_STATE.md")
+FOREX_PAPER_SESSION_CONTROLLER_PATH = Path("apps/trading_lab/trading_lab/forex_paper_session_controller.py")
+FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH = Path("tests/trading_lab/test_forex_paper_session_controller.py")
+FOREX_PAPER_SESSION_CONTROLLER_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PAPER_SESSION_CONTROLLER.md")
 
 RISK_CONTROLS_WRITE_ALLOWED_PATHS = {
     FOREX_RISK_CONTROLS_PATH.as_posix(),
@@ -53,6 +57,12 @@ PORTFOLIO_WRITE_ALLOWED_PATHS = {
     FOREX_PORTFOLIO_STATE_PATH.as_posix(),
     FOREX_PORTFOLIO_STATE_TEST_PATH.as_posix(),
     FOREX_PORTFOLIO_STATE_DOC_PATH.as_posix(),
+}
+
+SESSION_CONTROLLER_WRITE_ALLOWED_PATHS = {
+    FOREX_PAPER_SESSION_CONTROLLER_PATH.as_posix(),
+    FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH.as_posix(),
+    FOREX_PAPER_SESSION_CONTROLLER_DOC_PATH.as_posix(),
 }
 
 RISK_CONTROLS_HANDOFF_ALLOWED_PATHS = {
@@ -88,6 +98,14 @@ PORTFOLIO_HANDOFF_ALLOWED_PATHS = {
     "tests/orchestration/test_aios_wake_continue.py",
 }
 
+SESSION_CONTROLLER_HANDOFF_ALLOWED_PATHS = {
+    *SESSION_CONTROLLER_WRITE_ALLOWED_PATHS,
+    "automation/orchestration/aios_productive_bounded_executor.py",
+    "tests/orchestration/test_aios_productive_bounded_executor.py",
+    "automation/orchestration/aios_wake_continue.py",
+    "tests/orchestration/test_aios_wake_continue.py",
+}
+
 ACTION_CONTRACTS = {
     "build_forex_risk_controls": {
         "write_paths": RISK_CONTROLS_WRITE_ALLOWED_PATHS,
@@ -104,6 +122,10 @@ ACTION_CONTRACTS = {
     "build_forex_portfolio_state": {
         "write_paths": PORTFOLIO_WRITE_ALLOWED_PATHS,
         "handoff_paths": PORTFOLIO_HANDOFF_ALLOWED_PATHS,
+    },
+    "build_forex_paper_session_controller": {
+        "write_paths": SESSION_CONTROLLER_WRITE_ALLOWED_PATHS,
+        "handoff_paths": SESSION_CONTROLLER_HANDOFF_ALLOWED_PATHS,
     },
 }
 
@@ -192,6 +214,14 @@ def portfolio_state_files() -> dict[Path, str]:
     }
 
 
+def session_controller_files() -> dict[Path, str]:
+    return {
+        FOREX_PAPER_SESSION_CONTROLLER_PATH: _template_text(FOREX_PAPER_SESSION_CONTROLLER_PATH),
+        FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH: _template_text(FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH),
+        FOREX_PAPER_SESSION_CONTROLLER_DOC_PATH: _template_text(FOREX_PAPER_SESSION_CONTROLLER_DOC_PATH),
+    }
+
+
 def files_for_action(action: str) -> dict[Path, str]:
     if action == "build_forex_risk_controls":
         return risk_controls_files()
@@ -201,6 +231,8 @@ def files_for_action(action: str) -> dict[Path, str]:
         return execution_ledger_integration_files()
     if action == "build_forex_portfolio_state":
         return portfolio_state_files()
+    if action == "build_forex_paper_session_controller":
+        return session_controller_files()
     raise ValueError("unsupported_action")
 
 
@@ -258,6 +290,10 @@ def write_execution_ledger_integration_files(repo_root: Path) -> list[str]:
 
 def write_portfolio_state_files(repo_root: Path) -> list[str]:
     return write_action_files(repo_root, "build_forex_portfolio_state")
+
+
+def write_session_controller_files(repo_root: Path) -> list[str]:
+    return write_action_files(repo_root, "build_forex_paper_session_controller")
 
 
 def write_action_files(repo_root: Path, action: str) -> list[str]:
@@ -379,6 +415,32 @@ def run_portfolio_state_validator(repo_root: Path) -> dict[str, Any]:
     }
 
 
+def run_session_controller_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_paper_session_controller_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
 def run_action_validator(action: str, repo_root: Path) -> dict[str, Any]:
     if action == "build_forex_risk_controls":
         return run_risk_controls_validator(repo_root)
@@ -388,6 +450,8 @@ def run_action_validator(action: str, repo_root: Path) -> dict[str, Any]:
         return run_execution_ledger_integration_validator(repo_root)
     if action == "build_forex_portfolio_state":
         return run_portfolio_state_validator(repo_root)
+    if action == "build_forex_paper_session_controller":
+        return run_session_controller_validator(repo_root)
     raise ValueError("unsupported_action")
 
 
@@ -479,6 +543,10 @@ def execute_productive_bounded_action(
             report["next_safe_action"] = (
                 "Review the portfolio-state diff. Staging, commit, push, and merge require Anthony approval."
             )
+        elif action == "build_forex_paper_session_controller":
+            report["next_safe_action"] = (
+                "Review the paper-session controller diff. Staging, commit, push, and merge require Anthony approval."
+            )
         else:
             report["next_safe_action"] = (
                 "Review the risk-controls diff. Staging, commit, push, and merge require Anthony approval."
@@ -497,7 +565,8 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help=(
             "Supported action: build_forex_risk_controls, build_forex_paper_execution_simulator, "
-            "build_forex_execution_ledger_integration, or build_forex_portfolio_state."
+            "build_forex_execution_ledger_integration, build_forex_portfolio_state, "
+            "or build_forex_paper_session_controller."
         ),
     )
     parser.add_argument("--apply", action="store_true", help="Write allowlisted component files and run validators.")

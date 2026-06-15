@@ -123,6 +123,15 @@ def seed_portfolio_state(repo_root: Path) -> None:
     test_path.write_text("# portfolio state test placeholder\n", encoding="utf-8")
 
 
+def seed_session_controller(repo_root: Path) -> None:
+    session_path = repo_root / "apps" / "trading_lab" / "trading_lab" / "forex_paper_session_controller.py"
+    test_path = repo_root / "tests" / "trading_lab" / "test_forex_paper_session_controller.py"
+    session_path.parent.mkdir(parents=True, exist_ok=True)
+    test_path.parent.mkdir(parents=True, exist_ok=True)
+    session_path.write_text("# paper session controller placeholder\n", encoding="utf-8")
+    test_path.write_text("# paper session controller test placeholder\n", encoding="utf-8")
+
+
 def passing_runner(command: list[str], _repo_root: Path) -> dict[str, object]:
     return {
         "command": " ".join(command),
@@ -540,9 +549,44 @@ def test_validate_all_with_portfolio_state_present_stops_for_review(tmp_path):
         state_path=tmp_path / "state.json",
         command_runner=passing_runner,
     )
-    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["result"] == "DONE_FOR_CURRENT_GOAL"
     assert report["selected_action"] == "validate_all_forex_with_portfolio_state"
     assert "tests/trading_lab/test_forex_portfolio_state.py" in report["validators_run"][0]["command"]
+    assert report["next_build_plan"]["route"] == "build_next_paper_component"
+    assert report["next_build_plan"]["next_component"] == "forex_paper_session_controller"
+    assert report["bounded_executor_handoff"]["handoff_status"] == "ready"
+    assert report["bounded_executor_handoff"]["allowed_action"] == "build_forex_paper_session_controller"
+    assert report["bounded_executor_ready"]["status"] == "ready_for_human_review"
+    assert report["control_plane_status"]["dashboard_ready"] is True
+
+
+def test_validate_all_with_session_controller_present_stops_for_review(tmp_path):
+    module = load_module()
+    seed_executor(tmp_path)
+    seed_scaffold(tmp_path)
+    seed_backtest(tmp_path)
+    seed_ledger(tmp_path)
+    seed_strategy(tmp_path)
+    seed_data_import(tmp_path)
+    seed_report(tmp_path)
+    seed_decision_policy(tmp_path)
+    seed_risk_controls(tmp_path)
+    seed_execution_simulator(tmp_path)
+    seed_execution_ledger_integration(tmp_path)
+    seed_portfolio_state(tmp_path)
+    seed_session_controller(tmp_path)
+    report = module.run_wake_continue(
+        tmp_path,
+        goal="forex-paper-bot",
+        apply=True,
+        max_cycles=3,
+        max_repairs=1,
+        state_path=tmp_path / "state.json",
+        command_runner=passing_runner,
+    )
+    assert report["result"] == "REVIEW_REQUIRED"
+    assert report["selected_action"] == "validate_all_forex_with_session_controller"
+    assert "tests/trading_lab/test_forex_paper_session_controller.py" in report["validators_run"][0]["command"]
     assert report["next_build_plan"]["route"] == "stop"
     assert report["bounded_executor_handoff"]["handoff_status"] == "stopped"
 

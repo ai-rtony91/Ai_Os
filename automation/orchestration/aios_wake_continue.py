@@ -36,6 +36,8 @@ FOREX_EXECUTION_LEDGER_INTEGRATION_PATH = Path("apps/trading_lab/trading_lab/for
 FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH = Path("tests/trading_lab/test_forex_execution_ledger_integration.py")
 FOREX_PORTFOLIO_STATE_PATH = Path("apps/trading_lab/trading_lab/forex_portfolio_state.py")
 FOREX_PORTFOLIO_STATE_TEST_PATH = Path("tests/trading_lab/test_forex_portfolio_state.py")
+FOREX_PAPER_SESSION_CONTROLLER_PATH = Path("apps/trading_lab/trading_lab/forex_paper_session_controller.py")
+FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH = Path("tests/trading_lab/test_forex_paper_session_controller.py")
 FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
 NEXT_BUILD_PLAN_ROUTER_PATH = Path("automation/orchestration/aios_next_build_plan.py")
 BOUNDED_EXECUTOR_HANDOFF_PATH = Path("automation/orchestration/aios_bounded_executor_handoff.py")
@@ -123,6 +125,10 @@ def read_repo_state(repo_root: Path) -> dict[str, bool]:
         ).exists(),
         "forex_portfolio_state_exists": (repo_root / FOREX_PORTFOLIO_STATE_PATH).exists(),
         "forex_portfolio_state_test_exists": (repo_root / FOREX_PORTFOLIO_STATE_TEST_PATH).exists(),
+        "forex_paper_session_controller_exists": (repo_root / FOREX_PAPER_SESSION_CONTROLLER_PATH).exists(),
+        "forex_paper_session_controller_test_exists": (
+            repo_root / FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH
+        ).exists(),
     }
 
 
@@ -167,10 +173,14 @@ def select_next_action(goal: str, repo_state: dict[str, bool]) -> tuple[str, str
         return "blocked", "forex_execution_ledger_integration_incomplete"
     if repo_state["forex_portfolio_state_exists"] != repo_state["forex_portfolio_state_test_exists"]:
         return "blocked", "forex_portfolio_state_incomplete"
+    if repo_state["forex_paper_session_controller_exists"] != repo_state["forex_paper_session_controller_test_exists"]:
+        return "blocked", "forex_paper_session_controller_incomplete"
     if repo_state["forex_risk_controls_exists"]:
         if repo_state["forex_paper_execution_simulator_exists"]:
             if repo_state["forex_execution_ledger_integration_exists"]:
                 if repo_state["forex_portfolio_state_exists"]:
+                    if repo_state["forex_paper_session_controller_exists"]:
+                        return "validate_all_forex_with_session_controller", None
                     return "validate_all_forex_with_portfolio_state", None
                 return "validate_all_forex_with_execution_ledger_integration", None
             return "validate_all_forex_with_risk_controls_and_execution_simulator", None
@@ -292,6 +302,26 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH.as_posix(),
             FOREX_PORTFOLIO_STATE_TEST_PATH.as_posix(),
         ]
+    if action == "validate_all_forex_with_session_controller":
+        return [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-p",
+            "no:cacheprovider",
+            FOREX_BOT_TEST_PATH.as_posix(),
+            FOREX_BACKTEST_TEST_PATH.as_posix(),
+            FOREX_LEDGER_TEST_PATH.as_posix(),
+            FOREX_STRATEGY_TEST_PATH.as_posix(),
+            FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
+            FOREX_REPORT_TEST_PATH.as_posix(),
+            FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
+            FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
+            FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
+            FOREX_EXECUTION_LEDGER_INTEGRATION_TEST_PATH.as_posix(),
+            FOREX_PORTFOLIO_STATE_TEST_PATH.as_posix(),
+            FOREX_PAPER_SESSION_CONTROLLER_TEST_PATH.as_posix(),
+        ]
     raise ValueError(f"unsupported action: {action}")
 
 
@@ -352,6 +382,10 @@ def component_inventory_from_repo_state(repo_state: dict[str, bool]) -> dict[str
         "forex_portfolio_state": bool(
             repo_state.get("forex_portfolio_state_exists")
             and repo_state.get("forex_portfolio_state_test_exists")
+        ),
+        "forex_paper_session_controller": bool(
+            repo_state.get("forex_paper_session_controller_exists")
+            and repo_state.get("forex_paper_session_controller_test_exists")
         ),
     }
 
@@ -438,6 +472,25 @@ def build_portfolio_state_plan(goal: str) -> dict[str, Any]:
     }
 
 
+def build_session_controller_plan(goal: str) -> dict[str, Any]:
+    return {
+        "schema": "AIOS_NEXT_BUILD_PLAN.v1",
+        "goal": goal,
+        "input_decision": "build_forex_paper_session_controller",
+        "route": "build_next_paper_component",
+        "next_component": "forex_paper_session_controller",
+        "next_packet_id": "PKT-AIOS-FOREX-PAPER-SESSION-CONTROLLER-APPLY",
+        "reason_code": "portfolio_state_validated_session_controller_missing",
+        "plan_reasons": [
+            "portfolio_state_validated_session_controller_missing",
+            "route:build_next_paper_component",
+        ],
+        "next_safe_action": "Prepare bounded paper-session controller packet for Anthony review.",
+        "approval_required": approval_required(),
+        "safety": safety_flags(),
+    }
+
+
 def build_portfolio_state_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
     validators = [
         "python -m pytest -p no:cacheprovider tests/trading_lab/test_forex_portfolio_state.py",
@@ -482,7 +535,53 @@ def build_portfolio_state_handoff(next_build_plan: dict[str, Any]) -> dict[str, 
     }
 
 
+def build_session_controller_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
+    validators = [
+        "python -m pytest -p no:cacheprovider tests/trading_lab/test_forex_paper_session_controller.py",
+        (
+            "python -m pytest -p no:cacheprovider "
+            "tests/orchestration/test_aios_productive_bounded_executor.py "
+            "tests/orchestration/test_aios_wake_continue.py"
+        ),
+    ]
+    return {
+        "schema": "AIOS_BOUNDED_EXECUTOR_HANDOFF.v1",
+        "goal": next_build_plan.get("goal", "forex-paper-bot"),
+        "input_route": next_build_plan.get("route", "build_next_paper_component"),
+        "next_component": "forex_paper_session_controller",
+        "next_packet_id": "PKT-AIOS-FOREX-PAPER-SESSION-CONTROLLER-APPLY",
+        "handoff_status": "ready",
+        "reason_code": next_build_plan.get(
+            "reason_code",
+            "portfolio_state_validated_session_controller_missing",
+        ),
+        "executor_mode": "local_apply_after_human_review",
+        "allowed_action": "build_forex_paper_session_controller",
+        "allowed_paths": [
+            "apps/trading_lab/trading_lab/forex_paper_session_controller.py",
+            "tests/trading_lab/test_forex_paper_session_controller.py",
+            "docs/orchestration/AIOS_FOREX_PAPER_SESSION_CONTROLLER.md",
+            "automation/orchestration/aios_productive_bounded_executor.py",
+            "tests/orchestration/test_aios_productive_bounded_executor.py",
+            "automation/orchestration/aios_wake_continue.py",
+            "tests/orchestration/test_aios_wake_continue.py",
+        ],
+        "validators": validators,
+        "command_preview": [
+            (
+                "python automation/orchestration/aios_productive_bounded_executor.py "
+                "--goal forex-paper-bot --action build_forex_paper_session_controller --apply --max-repairs 1"
+            )
+        ],
+        "approval_required": approval_required(),
+        "safety": safety_flags(),
+        "next_safe_action": "Prepare bounded paper-session controller packet for Anthony review.",
+    }
+
+
 def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
+    if next_build_plan.get("next_component") == "forex_paper_session_controller":
+        return build_session_controller_handoff(next_build_plan)
     if next_build_plan.get("next_component") == "forex_portfolio_state":
         return build_portfolio_state_handoff(next_build_plan)
     handoff_path = Path(__file__).with_name("aios_bounded_executor_handoff.py")
@@ -567,6 +666,35 @@ def build_operator_relay(
 
 
 def build_local_runner_bridge(bounded_executor_handoff: dict[str, Any]) -> dict[str, Any]:
+    if bounded_executor_handoff.get("allowed_action") == "build_forex_paper_session_controller":
+        command = (
+            "Set-Location -LiteralPath 'C:\\Dev\\Ai.Os'; "
+            "python .\\automation\\orchestration\\aios_productive_bounded_executor.py "
+            "--goal forex-paper-bot --action build_forex_paper_session_controller --apply --max-repairs 1"
+        )
+        return {
+            "schema": "AIOS_LOCAL_RUNNER_BRIDGE.v1",
+            "runner_status": "preview_ready",
+            "command_preview": [command],
+            "working_directory": "C:\\Dev\\Ai.Os",
+            "validation_commands": bounded_executor_handoff.get("validators", []),
+            "forbidden_actions": [
+                "git_add",
+                "git_commit",
+                "git_push",
+                "git_merge",
+                "scheduler",
+                "daemon",
+                "worker_dispatch",
+                "broker",
+                "live_trading",
+                "credentials",
+                "real_orders",
+                "real_webhooks",
+            ],
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+        }
     if bounded_executor_handoff.get("allowed_action") == "build_forex_portfolio_state":
         command = (
             "Set-Location -LiteralPath 'C:\\Dev\\Ai.Os'; "
@@ -615,6 +743,21 @@ def build_local_runner_bridge(bounded_executor_handoff: dict[str, Any]) -> dict[
 
 
 def build_bounded_executor_ready(bounded_executor_handoff: dict[str, Any]) -> dict[str, Any]:
+    if bounded_executor_handoff.get("allowed_action") == "build_forex_paper_session_controller":
+        return {
+            "schema": "AIOS_BOUNDED_EXECUTOR_READY.v1",
+            "goal": bounded_executor_handoff.get("goal", "forex-paper-bot"),
+            "status": "ready_for_human_review",
+            "reason_code": "session_controller_handoff_bounded_ready",
+            "allowed_action": "build_forex_paper_session_controller",
+            "allowed_paths_bounded": True,
+            "validators_bounded": True,
+            "command_execution": False,
+            "executed": False,
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+            "next_safe_action": "Prepare or apply the bounded paper-session controller packet after Anthony approval.",
+        }
     if bounded_executor_handoff.get("allowed_action") == "build_forex_portfolio_state":
         return {
             "schema": "AIOS_BOUNDED_EXECUTOR_READY.v1",
@@ -675,7 +818,10 @@ def build_control_plane_status(
         local_runner_bridge=local_runner_bridge,
         bounded_executor_ready=bounded_executor_ready,
     )
-    if bounded_executor_ready.get("allowed_action") == "build_forex_portfolio_state":
+    if bounded_executor_ready.get("allowed_action") in {
+        "build_forex_portfolio_state",
+        "build_forex_paper_session_controller",
+    }:
         blockers = list(status.get("blockers") or [])
         safety = status.get("safety") or safety_flags()
         unsafe = any(
@@ -692,10 +838,15 @@ def build_control_plane_status(
             ]
         )
         if not blockers and not unsafe and resume_state.get("resume_ready") is True:
+            next_component = (
+                "forex_paper_session_controller"
+                if bounded_executor_ready.get("allowed_action") == "build_forex_paper_session_controller"
+                else "forex_portfolio_state"
+            )
             status["dashboard_ready"] = True
             status["loop_status"] = "ready_for_human_review"
-            status["next_component"] = "forex_portfolio_state"
-            status["next_action"] = "Prepare bounded portfolio-state packet for Anthony review."
+            status["next_component"] = next_component
+            status["next_action"] = f"Prepare bounded {next_component.replace('_', '-')} packet for Anthony review."
     return status
 
 
@@ -780,14 +931,17 @@ def build_continuation_controller(
         user_goal=user_goal,
     )
     if (
-        bounded_executor_handoff.get("allowed_action") == "build_forex_portfolio_state"
+        bounded_executor_handoff.get("allowed_action")
+        in {"build_forex_portfolio_state", "build_forex_paper_session_controller"}
         and bounded_executor_ready.get("status") == "ready_for_human_review"
     ):
+        action = str(bounded_executor_handoff.get("allowed_action"))
+        next_component = str(bounded_executor_handoff.get("next_component", "unknown"))
         controller.update(
             {
                 "continuation_status": "ready_for_human_approved_execution",
-                "next_component": "forex_portfolio_state",
-                "next_action": "build_forex_portfolio_state",
+                "next_component": next_component,
+                "next_action": action,
                 "action_type": "execute_existing_tool_after_human_approval",
                 "codex_packet_required": False,
                 "local_runner_available": True,
@@ -795,7 +949,7 @@ def build_continuation_controller(
                 "sos_required": False,
                 "reason_code": "productive_executor_support_available",
                 "next_safe_action": (
-                    "After Anthony approval, run the existing productive executor for build_forex_portfolio_state."
+                    f"After Anthony approval, run the existing productive executor for {action}."
                 ),
             }
         )
@@ -986,6 +1140,7 @@ def run_wake_continue(
                 "validate_all_forex_with_risk_controls_and_execution_simulator",
                 "validate_all_forex_with_execution_ledger_integration",
                 "validate_all_forex_with_portfolio_state",
+                "validate_all_forex_with_session_controller",
             }:
                 component_inventory = component_inventory_from_repo_state(repo_state)
                 post_risk_decision = build_post_risk_decision(component_inventory, goal)
@@ -1000,6 +1155,11 @@ def run_wake_continue(
                     and not component_inventory["forex_portfolio_state"]
                 ):
                     next_build_plan = build_portfolio_state_plan(goal)
+                elif (
+                    selected_action == "validate_all_forex_with_portfolio_state"
+                    and not component_inventory["forex_paper_session_controller"]
+                ):
+                    next_build_plan = build_session_controller_plan(goal)
                 else:
                     next_build_plan = build_next_build_plan(post_risk_decision)
             else:
