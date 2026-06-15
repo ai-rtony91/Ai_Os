@@ -30,15 +30,28 @@ FOREX_DECISION_POLICY_PATH = Path("apps/trading_lab/trading_lab/forex_decision_p
 FOREX_DECISION_POLICY_TEST_PATH = Path("tests/trading_lab/test_forex_decision_policy.py")
 FOREX_RISK_CONTROLS_PATH = Path("apps/trading_lab/trading_lab/forex_risk_controls.py")
 FOREX_RISK_CONTROLS_TEST_PATH = Path("tests/trading_lab/test_forex_risk_controls.py")
+FOREX_PAPER_EXECUTION_SIMULATOR_PATH = Path("apps/trading_lab/trading_lab/forex_paper_execution_simulator.py")
+FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH = Path("tests/trading_lab/test_forex_paper_execution_simulator.py")
 FOREX_GOAL_DECISION_BRIDGE_PATH = Path("automation/orchestration/aios_forex_goal_decision.py")
 NEXT_BUILD_PLAN_ROUTER_PATH = Path("automation/orchestration/aios_next_build_plan.py")
 BOUNDED_EXECUTOR_HANDOFF_PATH = Path("automation/orchestration/aios_bounded_executor_handoff.py")
+POST_RISK_DECISION_PATH = Path("automation/orchestration/aios_forex_post_risk_decision.py")
 RESUME_STATE_PATH = Path("automation/orchestration/aios_resume_state.py")
 CLI_RESULT_INGEST_PATH = Path("automation/orchestration/aios_cli_result_ingest.py")
 OPERATOR_RELAY_PATH = Path("automation/orchestration/aios_operator_relay.py")
 LOCAL_RUNNER_BRIDGE_PATH = Path("automation/orchestration/aios_local_runner_bridge.py")
 BOUNDED_EXECUTOR_READY_PATH = Path("automation/orchestration/aios_bounded_executor_ready.py")
 CONTROL_PLANE_STATUS_PATH = Path("automation/orchestration/aios_control_plane_status.py")
+MODE_CAPABILITY_REGISTRY_PATH = Path("automation/orchestration/aios_mode_capability_registry.py")
+BUILD_INTENT_ROUTER_PATH = Path("automation/orchestration/aios_build_intent_router.py")
+CONTINUATION_CONTROLLER_PATH = Path("automation/orchestration/aios_continuation_controller.py")
+CODEX_PACKET_BUILDER_PATH = Path("automation/orchestration/aios_codex_packet_builder.py")
+SOS_ESCALATION_POLICY_PATH = Path("automation/orchestration/aios_sos_escalation_policy.py")
+CONTINUATION_APPROVAL_AUTHORITY = (
+    "Anthony Meza only approves staging, commit, push, merge, scheduler activation, daemon activation, "
+    "worker dispatch, queue mutation, approval mutation, broker/live trading, credentials, real orders, "
+    "real webhooks, and destructive actions."
+)
 
 CommandRunner = Callable[[list[str], Path], dict[str, Any]]
 
@@ -98,6 +111,8 @@ def read_repo_state(repo_root: Path) -> dict[str, bool]:
         "forex_decision_policy_test_exists": (repo_root / FOREX_DECISION_POLICY_TEST_PATH).exists(),
         "forex_risk_controls_exists": (repo_root / FOREX_RISK_CONTROLS_PATH).exists(),
         "forex_risk_controls_test_exists": (repo_root / FOREX_RISK_CONTROLS_TEST_PATH).exists(),
+        "forex_paper_execution_simulator_exists": (repo_root / FOREX_PAPER_EXECUTION_SIMULATOR_PATH).exists(),
+        "forex_paper_execution_simulator_test_exists": (repo_root / FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH).exists(),
     }
 
 
@@ -240,6 +255,45 @@ def build_goal_decision(repo_root: Path, goal: str) -> dict[str, Any]:
     return module.build_goal_decision(repo_root, goal=goal)
 
 
+def component_inventory_from_repo_state(repo_state: dict[str, bool]) -> dict[str, bool]:
+    return {
+        "forex_paper_bot": bool(repo_state.get("forex_scaffold_exists") and repo_state.get("forex_scaffold_test_exists")),
+        "forex_backtest": bool(repo_state.get("forex_backtest_exists") and repo_state.get("forex_backtest_test_exists")),
+        "forex_paper_ledger": bool(repo_state.get("forex_ledger_exists") and repo_state.get("forex_ledger_test_exists")),
+        "forex_strategy_rules": bool(repo_state.get("forex_strategy_exists") and repo_state.get("forex_strategy_test_exists")),
+        "forex_data_import": bool(repo_state.get("forex_data_import_exists") and repo_state.get("forex_data_import_test_exists")),
+        "forex_report": bool(repo_state.get("forex_report_exists") and repo_state.get("forex_report_test_exists")),
+        "forex_decision_policy": bool(repo_state.get("forex_decision_policy_exists") and repo_state.get("forex_decision_policy_test_exists")),
+        "forex_risk_controls": bool(repo_state.get("forex_risk_controls_exists") and repo_state.get("forex_risk_controls_test_exists")),
+        "forex_paper_execution_simulator": bool(
+            repo_state.get("forex_paper_execution_simulator_exists")
+            and repo_state.get("forex_paper_execution_simulator_test_exists")
+        ),
+    }
+
+
+def build_post_risk_decision(component_inventory: dict[str, bool], goal: str) -> dict[str, Any]:
+    decision_path = Path(__file__).with_name("aios_forex_post_risk_decision.py")
+    spec = importlib.util.spec_from_file_location("aios_forex_post_risk_decision", decision_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_FOREX_POST_RISK_DECISION.v1",
+            "goal": goal,
+            "current_component_state": component_inventory,
+            "selected_next_component": "none",
+            "selected_action": "none",
+            "selected_packet_id": "NONE",
+            "reason_code": "post_risk_decision_unavailable",
+            "decision_reasons": ["post_risk_decision_unavailable"],
+            "next_safe_action": "Stop and repair the missing post-risk decision builder.",
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_post_risk_decision(component_inventory, goal=goal)
+
+
 def build_next_build_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
     router_path = Path(__file__).with_name("aios_next_build_plan.py")
     spec = importlib.util.spec_from_file_location("aios_next_build_plan", router_path)
@@ -260,25 +314,6 @@ def build_next_build_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module.build_next_build_plan(goal_decision)
-
-
-def build_post_risk_controls_review_plan(goal_decision: dict[str, Any]) -> dict[str, Any]:
-    decision_reasons = goal_decision.get("decision_reasons", [])
-    if not isinstance(decision_reasons, list):
-        decision_reasons = [str(decision_reasons)]
-    return {
-        "schema": "AIOS_NEXT_BUILD_PLAN.v1",
-        "goal": goal_decision.get("goal", "forex-paper-bot"),
-        "input_decision": goal_decision.get("decision", "continue_build"),
-        "route": "stop",
-        "next_component": "none",
-        "next_packet_id": "NONE",
-        "reason_code": "forex_risk_controls_validated",
-        "plan_reasons": [*decision_reasons, "risk_controls_validated", "route:stop"],
-        "next_safe_action": "Review the next paper-only Forex component after risk controls. Do not execute, stage, commit, push, or dispatch workers.",
-        "approval_required": approval_required(),
-        "safety": safety_flags(),
-    }
 
 
 def build_bounded_executor_handoff(next_build_plan: dict[str, Any]) -> dict[str, Any]:
@@ -430,6 +465,138 @@ def build_control_plane_status(
     )
 
 
+def build_mode_capability_registry() -> dict[str, Any]:
+    registry_path = Path(__file__).with_name("aios_mode_capability_registry.py")
+    spec = importlib.util.spec_from_file_location("aios_mode_capability_registry", registry_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_MODE_CAPABILITY_REGISTRY.v1",
+            "active_mode": "forex",
+            "active_goal": "forex-paper-bot",
+            "modes": {},
+            "reason_code": "mode_capability_registry_unavailable",
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_mode_capability_registry()
+
+
+def build_intent_route(
+    user_goal: str,
+    resume_state: dict[str, Any],
+    control_plane_status: dict[str, Any],
+    mode_registry: dict[str, Any],
+) -> dict[str, Any]:
+    router_path = Path(__file__).with_name("aios_build_intent_router.py")
+    spec = importlib.util.spec_from_file_location("aios_build_intent_router", router_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_BUILD_INTENT_ROUTER.v1",
+            "detected_mode": "unknown",
+            "detected_goal": "unknown",
+            "proof_target": False,
+            "route_status": "needs_human_clarification",
+            "next_action": "Stop and repair the missing build-intent router.",
+            "reason_code": "build_intent_router_unavailable",
+            "safety": safety_flags(),
+            "approval_required": approval_required(),
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.route_build_intent(user_goal, resume_state, control_plane_status, mode_registry)
+
+
+def build_continuation_controller(
+    resume_state: dict[str, Any],
+    control_plane_status: dict[str, Any],
+    bounded_executor_handoff: dict[str, Any],
+    bounded_executor_ready: dict[str, Any],
+    mode_registry: dict[str, Any],
+    *,
+    user_goal: str,
+) -> dict[str, Any]:
+    controller_path = Path(__file__).with_name("aios_continuation_controller.py")
+    spec = importlib.util.spec_from_file_location("aios_continuation_controller", controller_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_CONTINUATION_CONTROLLER.v1",
+            "continuation_status": "blocked",
+            "current_mode": "unknown",
+            "current_goal": user_goal,
+            "next_component": "unknown",
+            "next_action": "Stop and repair the missing continuation controller.",
+            "action_type": "human_review",
+            "codex_packet_required": False,
+            "local_runner_available": False,
+            "productive_executor_available": False,
+            "sos_required": False,
+            "reason_code": "continuation_controller_unavailable",
+            "next_safe_action": "Stop and repair the missing continuation controller.",
+            "approval_required": approval_required(),
+            "safety": safety_flags(),
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_continuation_controller(
+        resume_state=resume_state,
+        control_plane_status=control_plane_status,
+        bounded_executor_handoff=bounded_executor_handoff,
+        bounded_executor_ready=bounded_executor_ready,
+        mode_registry=mode_registry,
+        user_goal=user_goal,
+    )
+
+
+def build_sos_escalation(status: dict[str, Any]) -> dict[str, Any]:
+    policy_path = Path(__file__).with_name("aios_sos_escalation_policy.py")
+    spec = importlib.util.spec_from_file_location("aios_sos_escalation_policy", policy_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_SOS_ESCALATION_POLICY.v1",
+            "sos_required": True,
+            "severity": "high",
+            "triggers": ["sos_escalation_policy_unavailable"],
+            "wake_anthony": True,
+            "stop_reason": "sos_escalation_policy_unavailable",
+            "next_safe_action": "Stop and repair the missing SOS escalation policy.",
+            "safety": safety_flags(),
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_sos_escalation(status)
+
+
+def build_codex_packet_preview(
+    continuation_controller: dict[str, Any],
+    mode_registry: dict[str, Any],
+    bounded_executor_handoff: dict[str, Any],
+) -> dict[str, Any]:
+    builder_path = Path(__file__).with_name("aios_codex_packet_builder.py")
+    spec = importlib.util.spec_from_file_location("aios_codex_packet_builder", builder_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_CODEX_PACKET_BUILDER.v1",
+            "packet_ready": False,
+            "packet_id": "NONE",
+            "packet_title": "No Codex Packet",
+            "identity_header": {},
+            "validator_chain": [],
+            "write_scope": [],
+            "safety_blocks": [],
+            "codex_prompt_text": "",
+            "reason_code": "codex_packet_builder_unavailable",
+            "next_safe_action": "Stop and repair the missing Codex packet builder.",
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_codex_packet_preview(
+        continuation_controller,
+        mode_registry,
+        bounded_executor_handoff,
+        approval_authority=CONTINUATION_APPROVAL_AUTHORITY,
+    )
+
+
 def write_resume_state(repo_root: Path, resume_state: dict[str, Any], resume_state_dir: Path | None) -> dict[str, Any]:
     resume_path = Path(__file__).with_name("aios_resume_state.py")
     spec = importlib.util.spec_from_file_location("aios_resume_state", resume_path)
@@ -467,6 +634,7 @@ def base_report(goal: str) -> dict[str, Any]:
         "validators_run": [],
         "repair_attempts": 0,
         "goal_decision": None,
+        "post_risk_decision": None,
         "next_build_plan": None,
         "bounded_executor_handoff": None,
         "cli_result_ingest": None,
@@ -502,6 +670,7 @@ def run_wake_continue(
     resume_state_dir: Path | None = None,
     write_control_plane_status_requested: bool = False,
     control_plane_dir: Path | None = None,
+    emit_continuation_controller: bool = False,
 ) -> dict[str, Any]:
     report = base_report(goal)
     state_path = state_path or default_state_path()
@@ -558,13 +727,13 @@ def run_wake_continue(
                 write_state(state_path, report)
                 return report
             if selected_action == "validate_all_forex_with_risk_controls":
-                next_build_plan = build_post_risk_controls_review_plan(goal_decision)
+                post_risk_decision = build_post_risk_decision(component_inventory_from_repo_state(repo_state), goal)
+                report["post_risk_decision"] = post_risk_decision
+                next_build_plan = build_next_build_plan(post_risk_decision)
             else:
                 next_build_plan = build_next_build_plan(goal_decision)
             report["next_build_plan"] = next_build_plan
             bounded_executor_handoff = build_bounded_executor_handoff(next_build_plan)
-            if selected_action == "validate_all_forex_with_risk_controls":
-                bounded_executor_handoff["next_safe_action"] = next_build_plan["next_safe_action"]
             report["bounded_executor_handoff"] = bounded_executor_handoff
             local_runner_bridge = build_local_runner_bridge(bounded_executor_handoff)
             report["local_runner_bridge"] = local_runner_bridge
@@ -621,6 +790,54 @@ def run_wake_continue(
                     "next_action",
                     bounded_executor_handoff["next_safe_action"],
                 )
+            if emit_continuation_controller:
+                mode_capability_registry = build_mode_capability_registry()
+                report["mode_capability_registry"] = mode_capability_registry
+                intent_route = build_intent_route(
+                    goal,
+                    resume_state,
+                    report["control_plane_status"],
+                    mode_capability_registry,
+                )
+                report["build_intent_route"] = intent_route
+                continuation_controller = build_continuation_controller(
+                    resume_state,
+                    report["control_plane_status"],
+                    bounded_executor_handoff,
+                    bounded_executor_ready,
+                    mode_capability_registry,
+                    user_goal=goal,
+                )
+                report["continuation_controller"] = continuation_controller
+                sos_escalation = build_sos_escalation(
+                    {
+                        "wake_result": report["result"],
+                        "blocked_reason": report.get("blocked_reason"),
+                        "build_intent_route": intent_route,
+                        "continuation_controller": continuation_controller,
+                        "control_plane_status": report["control_plane_status"],
+                        "bounded_executor_ready": bounded_executor_ready,
+                    }
+                )
+                report["sos_escalation"] = sos_escalation
+                if sos_escalation.get("sos_required") is True:
+                    report["result"] = "BLOCKED"
+                    report["blocked_reason"] = sos_escalation.get("stop_reason", "sos_required")
+                    report["next_safe_action"] = sos_escalation.get(
+                        "next_safe_action",
+                        continuation_controller.get("next_safe_action", report["next_safe_action"]),
+                    )
+                else:
+                    report["next_safe_action"] = continuation_controller.get(
+                        "next_safe_action",
+                        report["next_safe_action"],
+                    )
+                if continuation_controller.get("codex_packet_required") is True:
+                    report["codex_packet_preview"] = build_codex_packet_preview(
+                        continuation_controller,
+                        mode_capability_registry,
+                        bounded_executor_handoff,
+                    )
             if write_resume_state_requested:
                 try:
                     resume_state = write_resume_state(repo_root, resume_state, resume_state_dir)
@@ -688,6 +905,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--resume-state-dir", default=None, help="Optional resume-state output dir under Reports/aios_resume.")
     parser.add_argument("--write-control-plane-status", action="store_true", help="Write control-plane latest status under Reports/aios_control_plane.")
     parser.add_argument("--control-plane-dir", default=None, help="Optional output dir under Reports/aios_control_plane.")
+    parser.add_argument("--emit-continuation-controller", action="store_true", help="Include generic continuation-controller state in output.")
     return parser
 
 
@@ -708,6 +926,7 @@ def main(argv: list[str] | None = None) -> int:
         resume_state_dir=resume_state_dir,
         write_control_plane_status_requested=args.write_control_plane_status,
         control_plane_dir=control_plane_dir,
+        emit_continuation_controller=args.emit_continuation_controller,
     )
     print(json.dumps(report, indent=2, sort_keys=False))
     return 0 if report["result"] in {"DONE_FOR_CURRENT_GOAL", "REVIEW_REQUIRED", "passed", "preview_only", "blocked", "BLOCKED", "max_cycles_reached"} else 1
