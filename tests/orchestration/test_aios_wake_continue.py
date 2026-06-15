@@ -589,6 +589,19 @@ def test_validate_all_with_session_controller_present_stops_for_review(tmp_path)
     assert "tests/trading_lab/test_forex_paper_session_controller.py" in report["validators_run"][0]["command"]
     assert report["next_build_plan"]["route"] == "stop"
     assert report["bounded_executor_handoff"]["handoff_status"] == "stopped"
+    assert report["self_build_loop_readiness"]["schema"] == "AIOS_SELF_BUILD_LOOP_READINESS.v1"
+    assert report["self_build_loop_readiness"]["readiness_status"] == "review_required"
+    assert report["self_build_loop_readiness"]["latest_validated_chain"] == "forex_paper_session_controller"
+    assert report["self_build_loop_readiness"]["route_status"] == "stopped_for_review"
+    assert (
+        report["self_build_loop_readiness"]["reason_code"]
+        == "forex_session_chain_complete_review_required"
+    )
+    assert (
+        report["self_build_loop_readiness"]["next_allowed_self_build_action"]
+        == "self_build_loop_readiness_review"
+    )
+    assert "self-build loop readiness" in report["next_safe_action"]
 
 
 def test_validate_all_stop_route_returns_review_required(tmp_path, monkeypatch):
