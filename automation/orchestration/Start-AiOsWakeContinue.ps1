@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]$WakeArgs
+    [string[]]$WakeArgs = @()
 )
 
 Set-StrictMode -Version Latest

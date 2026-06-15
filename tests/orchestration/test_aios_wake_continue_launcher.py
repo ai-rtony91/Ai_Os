@@ -15,6 +15,12 @@ def test_launcher_script_exists():
     assert SCRIPT_PATH.exists()
 
 
+def test_launcher_initializes_wake_args_for_no_arg_strict_mode():
+    source = script_source()
+    assert "[string[]]$WakeArgs = @()" in source
+    assert "Set-StrictMode -Version Latest" in source
+
+
 def test_launcher_calls_wake_continue_path():
     source = script_source()
     assert r".\automation\orchestration\aios_wake_continue.py" in source
