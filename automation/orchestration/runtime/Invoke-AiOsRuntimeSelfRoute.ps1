@@ -160,6 +160,59 @@ function New-AiOsPacketQueueFallbackPlan {
     }
 }
 
+function New-AiOsCandidateEvidenceFallbackResult {
+    param(
+        [string]$Status,
+        [string]$Reason
+    )
+
+    return [pscustomobject]@{
+        schema = "AIOS_CANDIDATE_PACKET_EVIDENCE_ADAPTER.v1"
+        candidate_status = $Status
+        candidate_packets = @()
+        candidates = @()
+        archive_noise = @()
+        default_candidate_used = $false
+        today_goal_alignment = [pscustomobject]@{
+            milestone = "AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety"
+            proof_target = "industrial-grade forex bot builder"
+            control_plane_role = "candidate packet evidence normalization"
+            aligned = $false
+            blocked_boundaries = @($Reason)
+            requires_future_gates_before_execution = $true
+        }
+        commands_executed = @()
+        files_written = @()
+        workers_dispatched = $false
+        queues_mutated = $false
+        approvals_mutated = $false
+        safety = [pscustomobject]@{
+            preview_only = $true
+            evidence_only = $true
+            command_execution = $false
+            filesystem_writes = $false
+            reports_written = $false
+            network_access = $false
+            worker_dispatch = $false
+            queue_mutation = $false
+            approval_mutation = $false
+            scheduler_activation = $false
+            daemon_activation = $false
+            broker = $false
+            live_trading = $false
+            credentials = $false
+            real_orders = $false
+            real_webhooks = $false
+            git_add = $false
+            git_commit = $false
+            git_push = $false
+            git_merge = $false
+        }
+        blocker = $Reason
+        next_safe_action = "Stop; candidate packet evidence could not be generated."
+    }
+}
+
 function New-AiOsBlockedCycleLedgerResult {
     param(
         [string]$Reason,
@@ -269,6 +322,7 @@ $normalizedCommand = $recommendedCommand.Trim()
 $hasActionableCommand = -not [string]::IsNullOrWhiteSpace($normalizedCommand) -and $normalizedCommand -notmatch "(?i)^No command recommended"
 $commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommendedCommand.ps1"
 $routePreviewPath = "automation/orchestration/aios_bounded_worker_routing_preview.py"
+$candidateEvidenceAdapterPath = "automation/orchestration/aios_candidate_packet_evidence_adapter.py"
 $packetQueuePlannerPath = "automation/orchestration/aios_packet_queue_planner.py"
 $cycleLedgerPath = "automation/orchestration/aios_cycle_ledger.py"
 $packetQueueCandidateEvidenceJson = "[]"
@@ -281,6 +335,16 @@ $routePreviewExitCode = $null
 $routePreviewStatus = "NOT_RUN"
 $routePreviewBlocker = ""
 $routePreviewNextSafeAction = ""
+$candidateEvidenceResult = $null
+$candidateEvidenceOutput = @()
+$candidateEvidenceExitCode = $null
+$candidateEvidenceStatus = "NOT_RUN"
+$candidateEvidenceBlocker = ""
+$candidatePackets = @()
+$candidateArchiveNoise = @()
+$candidateNoisePaths = @()
+$candidateArchivePaths = @()
+$candidateDefaultUsed = $false
 $packetQueuePlan = $null
 $packetQueuePlannerOutput = @()
 $packetQueuePlannerExitCode = $null
@@ -341,6 +405,83 @@ $validatedCommandEvidence = [ordered]@{
     exit_code = $validationExitCode
     output = @($validationOutput)
     execution_allowed = $false
+}
+
+$candidateEvidenceInput = [ordered]@{
+    schema = "AIOS_RUNTIME_SELF_ROUTE_CANDIDATE_EVIDENCE_INPUT.v1"
+    current_mission = "AIOS self-building machine; first proof target: industrial-grade forex bot builder; no broker/live/secrets until gates prove safety."
+    today_milestone_context = "AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety"
+    default_candidate_packet_id = "PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION"
+    recommendation_contract_status = $contractStatus
+    route_status = $routeStatus
+    proposed_packet_records = @(Get-AiOsObjectProperty -Object $recommendation -Name "proposed_packet_records" -Default @())
+    candidate_packets = @(Get-AiOsObjectProperty -Object $recommendation -Name "candidate_packets" -Default @())
+    manual_candidate_specs = @(Get-AiOsObjectProperty -Object $recommendation -Name "manual_candidate_specs" -Default @())
+    work_packet_preview_paths = @(Get-AiOsObjectProperty -Object $recommendation -Name "work_packet_preview_paths" -Default @())
+    repo_status = Get-AiOsObjectProperty -Object $recommendation -Name "repo_status" -Default ([ordered]@{})
+}
+
+if (-not (Test-Path -LiteralPath $candidateEvidenceAdapterPath)) {
+    $candidateEvidenceResult = New-AiOsCandidateEvidenceFallbackResult `
+        -Status "blocked" `
+        -Reason "candidate_evidence_adapter_missing"
+    $candidateEvidenceStatus = "blocked"
+    $candidateEvidenceBlocker = "candidate_evidence_adapter_missing"
+    $candidateEvidenceExitCode = 1
+}
+else {
+    try {
+        $candidateEvidenceInputJson = ConvertTo-Json -InputObject $candidateEvidenceInput -Depth 30 -Compress
+        $candidateEvidenceOutput = @(
+            python $candidateEvidenceAdapterPath `
+                --evidence $candidateEvidenceInputJson
+        )
+        $candidateEvidenceExitCode = $LASTEXITCODE
+        $candidateEvidenceJson = ($candidateEvidenceOutput -join "`n")
+        if ($candidateEvidenceExitCode -ne 0) {
+            $candidateEvidenceResult = New-AiOsCandidateEvidenceFallbackResult `
+                -Status "blocked" `
+                -Reason "candidate_evidence_adapter_nonzero_exit"
+            $candidateEvidenceStatus = "blocked"
+            $candidateEvidenceBlocker = "candidate_evidence_adapter_nonzero_exit"
+        }
+        elseif ([string]::IsNullOrWhiteSpace($candidateEvidenceJson)) {
+            $candidateEvidenceResult = New-AiOsCandidateEvidenceFallbackResult `
+                -Status "blocked" `
+                -Reason "candidate_evidence_adapter_empty_output"
+            $candidateEvidenceStatus = "blocked"
+            $candidateEvidenceBlocker = "candidate_evidence_adapter_empty_output"
+        }
+        else {
+            $candidateEvidenceResult = $candidateEvidenceJson | ConvertFrom-Json
+            $candidateEvidenceStatus = "ready"
+        }
+    }
+    catch {
+        $candidateEvidenceResult = New-AiOsCandidateEvidenceFallbackResult `
+            -Status "blocked" `
+            -Reason "candidate_evidence_adapter_generation_failed"
+        $candidateEvidenceStatus = "blocked"
+        $candidateEvidenceBlocker = "candidate_evidence_adapter_generation_failed"
+        $candidateEvidenceExitCode = 1
+    }
+}
+
+$candidatePackets = @(Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name "candidate_packets" -Default @())
+$candidateArchiveNoise = @(Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name "archive_noise" -Default @())
+$candidateNoisePaths = @(
+    $candidateArchiveNoise |
+        ForEach-Object { [string](Get-AiOsObjectProperty -Object $_ -Name "path" -Default "") } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+)
+$candidateArchivePaths = @($candidateNoisePaths)
+$candidateDefaultUsed = [bool](Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name "default_candidate_used" -Default $false)
+$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($candidatePackets) -Depth 30 -Compress
+
+if ($candidateEvidenceStatus -eq "blocked") {
+    $routeStatus = "blocked"
+    $exitCode = 1
+    $rejectionReasons += "candidate_evidence_blocked:$candidateEvidenceBlocker"
 }
 
 if (-not (Test-Path -LiteralPath $packetQueuePlannerPath)) {
@@ -658,6 +799,12 @@ $report = [pscustomobject]@{
     route_preview_status = $routePreviewStatus
     route_preview_exit_code = $routePreviewExitCode
     route_preview = $routePreview
+    candidate_evidence_status = $candidateEvidenceStatus
+    candidate_evidence = $candidateEvidenceResult
+    candidate_packets = @($candidatePackets)
+    candidate_noise_paths = @($candidateNoisePaths)
+    candidate_archive_paths = @($candidateArchivePaths)
+    candidate_default_used = $candidateDefaultUsed
     packet_queue_plan_status = $packetQueuePlanStatus
     packet_queue_plan = $packetQueuePlan
     codex_ready_packet_preview = $codexReadyPacketPreview
@@ -718,6 +865,10 @@ Write-Host "Command validation: $validationStatus"
 Write-Host "Route preview: $routePreviewStatus"
 if (-not [string]::IsNullOrWhiteSpace($routePreviewBlocker)) {
     Write-Host "Route preview blocker: $routePreviewBlocker"
+}
+Write-Host "Candidate evidence: $candidateEvidenceStatus"
+if (-not [string]::IsNullOrWhiteSpace($candidateEvidenceBlocker)) {
+    Write-Host "Candidate evidence blocker: $candidateEvidenceBlocker"
 }
 Write-Host "Packet queue plan: $packetQueuePlanStatus"
 if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
