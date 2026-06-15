@@ -300,6 +300,37 @@ def test_default_memory_includes_paper_forward_evidence_v1_completion() -> None:
         "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1",
     ):
         assert packet_id in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    v1 = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1"
+    ][0]
+    assert v1["landed_pr"] == "#744"
+    assert v1["title"] == "Add paper-forward evidence expansion"
+    assert (
+        v1["completion_reason"]
+        == "local fixture catalog, paper-forward runner, evidence bundle runner, readiness demos, and V1 evidence routing landed on main"
+    )
+    assert "automation/forex_engine/run_month_end_readiness_demo.py" in v1["completed_files"]
+    assert "tests/forex_engine/test_evidence_bundle_runner.py" in v1["completed_files"]
+
+
+def test_default_memory_includes_paper_forward_evidence_v2_completion() -> None:
+    result = build_result(candidate_packets=[])
+
+    assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2" in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    v2 = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
+    ][0]
+    assert v2["lane"] == "paper-forward-evidence-expansion-v2"
+    assert "automation/forex_engine/paper_forward_evidence_v2.py" in v2["completed_files"]
+    assert "automation/forex_engine/run_paper_forward_evidence_v2_demo.py" in v2["completed_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE_V2.md" in v2["completed_files"]
+    assert "tests/forex_engine/test_paper_forward_evidence_v2.py" in v2["completed_files"]
 
 
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
@@ -421,7 +452,7 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
@@ -432,7 +463,8 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     assert "PKT-AIOS-FOREX-BUILDER-EVIDENCE-AGGREGATOR" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
+    assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:

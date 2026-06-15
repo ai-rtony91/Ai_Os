@@ -16,6 +16,12 @@ def test_catalog_contains_required_fixtures() -> None:
         "EURUSD_5M_TREND_SAMPLE",
         "EURUSD_5M_CHOP_SAMPLE",
         "EURUSD_5M_PULLBACK_SAMPLE",
+        "EURUSD_5M_REVERSAL_SAMPLE",
+        "EURUSD_5M_VOLATILE_SAMPLE",
+        "EURUSD_5M_LOW_VOL_SAMPLE",
+        "EURUSD_15M_TREND_SAMPLE",
+        "GBPUSD_5M_TREND_SAMPLE",
+        "USDJPY_5M_RANGE_SAMPLE",
     ]
 
 
@@ -26,7 +32,8 @@ def test_catalog_fixtures_validate_through_schema_contracts() -> None:
         assert schemas.validate_market_fixture_schema(fixture) is True
         assert fixture.mode == schemas.LOCAL_ONLY
         assert fixture.network_allowed is False
-        assert fixture.source == "deterministic_python_fixture_catalog"
+        assert fixture.source == "deterministic_local_fixture"
+        local_fixture_catalog.assert_fixture_is_local_only(fixture)
 
 
 def test_fixture_catalog_summary_is_local_only_and_reportless() -> None:
@@ -39,6 +46,38 @@ def test_fixture_catalog_summary_is_local_only_and_reportless() -> None:
     assert summary["broker_allowed"] is False
     assert summary["live_ready"] is False
     assert summary["reports_written"] is False
+    assert summary["fixture_count"] == 9
+    assert "trend" in summary["regimes"]
+    assert "range" in summary["regimes"]
+
+
+def test_fixture_catalog_validation_and_quality_are_local_only() -> None:
+    validation = local_fixture_catalog.validate_fixture_catalog()
+
+    assert validation["valid"] is True
+    assert validation["fixture_count"] == 9
+    assert validation["blockers"] == []
+    for quality in validation["quality"].values():
+        assert quality["valid"] is True
+        assert quality["candle_count"] >= 8
+        assert quality["source"] == "deterministic_local_fixture"
+        assert quality["local_only"] is True
+        assert quality["valid_ohlc_sequence"] is True
+        assert quality["network_allowed"] is False
+        assert quality["broker_source"] is False
+
+
+def test_fixture_regime_summary_covers_multiple_regimes_symbols_and_timeframes() -> None:
+    summary = local_fixture_catalog.fixture_regime_summary()
+
+    assert summary["total_regimes"] >= 6
+    assert "trend" in summary["regimes"]
+    assert "chop" in summary["regimes"]
+    assert "pullback" in summary["regimes"]
+    assert "reversal" in summary["regimes"]
+    assert "volatile" in summary["regimes"]
+    assert "low_vol" in summary["regimes"]
+    assert "range" in summary["regimes"]
 
 
 def test_get_fixture_by_id_returns_valid_fixture() -> None:

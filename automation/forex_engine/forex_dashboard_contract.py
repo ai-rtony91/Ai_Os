@@ -60,6 +60,41 @@ def format_forex_dashboard_lines(state: schemas.DashboardState | dict[str, Any])
     ]
 
 
+def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[str, Any]:
+    payload = dict(evidence_summary)
+    summary = {
+        "schema": "AIOS_FOREX_BUILDER_DASHBOARD_V2_SUMMARY.v1",
+        "fixture_count": int(payload.get("fixture_count", 0)),
+        "regime_consistency_pct": float(payload.get("regime_consistency_pct", 0.0)),
+        "paper_forward_classification": str(payload.get("classification") or "FAIL"),
+        "readiness_status": str(payload.get("readiness_status") or payload.get("classification") or "FAIL"),
+        "live_ready": False,
+        "live_trade_ready": False,
+        "protected_gate_required": True,
+        "current_blocker": _current_blocker(payload.get("blockers")),
+        "next_safe_action": str(payload.get("next_safe_action") or "Continue local evidence review; live remains blocked."),
+        "safety": "no broker/live/secrets/orders/webhooks",
+    }
+    schemas.assert_no_live_permissions(summary)
+    return summary
+
+
+def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
+    payload = dict(summary)
+    return [
+        "FOREX BUILDER V2 STATUS",
+        f"Fixtures: {payload.get('fixture_count', 0)}",
+        f"Regime consistency: {payload.get('regime_consistency_pct', 0.0)}",
+        f"Paper-forward: {payload.get('paper_forward_classification', 'FAIL')}",
+        f"Readiness: {payload.get('readiness_status', 'FAIL')}",
+        "Live ready: false",
+        "Protected gate required: true",
+        f"Blocker: {payload.get('current_blocker', 'none')}",
+        f"Next: {payload.get('next_safe_action')}",
+        "Safety: no broker/live/secrets/orders/webhooks",
+    ]
+
+
 def dashboard_contract_summary() -> dict[str, Any]:
     return {
         "schema": "AIOS_FOREX_BUILDER_DASHBOARD_CONTRACT.v1",
@@ -154,3 +189,11 @@ def _next_safe_action(risk_status: str, paper_state: str, blocker: str) -> str:
     if risk_status == "PAPER_FORWARD_READY":
         return "Run local paper-forward simulator; no broker or live path."
     return "Run risk gate and collect stronger local evidence."
+
+
+def _current_blocker(value: Any) -> str:
+    if isinstance(value, list) and value:
+        return str(value[0])
+    if value in (None, "", {}, []):
+        return "none"
+    return str(value)

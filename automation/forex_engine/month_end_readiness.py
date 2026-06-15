@@ -53,6 +53,45 @@ def build_month_end_readiness_review(
     return review
 
 
+def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict[str, Any]:
+    bundle = dict(evidence_bundle)
+    schemas.assert_no_live_permissions(bundle)
+    classification = str(bundle.get("classification") or "FAIL")
+    if classification not in ALLOWED_EVIDENCE_CLASSES:
+        classification = "FAIL"
+    blockers = _text_list(bundle.get("blockers"))
+    multi_summary = dict(bundle.get("multi_fixture_paper_forward_summary") or {})
+    regime = dict(bundle.get("regime_consistency") or {})
+    catalog = dict(bundle.get("fixture_catalog_summary") or {})
+    paper_forward_ready = classification == "PAPER_FORWARD_READY" and not blockers
+    review = {
+        "schema": "AIOS_FOREX_BUILDER_MONTH_END_READINESS_REVIEW_V2.v1",
+        "classification": classification,
+        "paper_forward_ready": paper_forward_ready,
+        "v2_evidence_ready": paper_forward_ready,
+        "live_trade_ready": False,
+        "protected_gate_required": True,
+        "evidence_summary": {
+            "fixture_count": int(multi_summary.get("fixture_count", 0)),
+            "regime_count": int(regime.get("total_regimes", 0)),
+            "total_intents": int(multi_summary.get("total_intents", 0)),
+            "simulated_ledger_entries": int(multi_summary.get("total_ledger_entries", 0)),
+            "aggregate_paper_pnl": float(multi_summary.get("aggregate_pnl", 0.0)),
+            "consistency_pct": float(multi_summary.get("consistency_pct", 0.0)),
+            "regime_consistency_pct": float(regime.get("consistent_regimes_pct", 0.0)),
+            "symbols": list(catalog.get("symbols") or []),
+            "timeframes": list(catalog.get("timeframes") or []),
+        },
+        "blockers": _unique(blockers),
+        "blocked": _unique([*blockers, *LIVE_TRADE_BLOCKERS]),
+        "live_trade_blockers": list(LIVE_TRADE_BLOCKERS),
+        "next_safe_action": _next_safe_action_v2(paper_forward_ready, blockers),
+        "live_ready": False,
+    }
+    schemas.assert_no_live_permissions(review)
+    return review
+
+
 def _payload(value: Any) -> dict[str, Any]:
     if value is None:
         return {}
@@ -101,3 +140,11 @@ def _next_safe_action(paper_forward_ready: bool, blockers: list[str]) -> str:
     if blockers:
         return "Resolve month-end evidence blockers before paper-forward readiness is claimed."
     return "Collect missing evidence and rerun the local readiness review."
+
+
+def _next_safe_action_v2(paper_forward_ready: bool, blockers: list[str]) -> str:
+    if paper_forward_ready:
+        return "Continue protected paper-forward evidence expansion and risk review; live readiness requires separate future approval."
+    if blockers:
+        return "Resolve V2 local evidence blockers before claiming paper-forward readiness."
+    return "Collect stronger multi-regime local evidence and rerun V2 readiness review."

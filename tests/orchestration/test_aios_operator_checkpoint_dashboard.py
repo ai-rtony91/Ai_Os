@@ -123,6 +123,20 @@ def test_post_paper_forward_evidence_packet_stays_compact_waiting_for_approval()
     assert len(panel["lines"]) <= 10
 
 
+def test_post_v2_risk_governor_packet_stays_compact_waiting_for_approval() -> None:
+    module = load_module()
+    report = selected_report()
+    report["selected_packet"] = {"packet_id": "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"}
+
+    panel = module.build_operator_checkpoint_panel(report)
+
+    assert panel["current_packet"] == "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
+    assert panel["state"] == "WAITING_FOR_APPROVAL"
+    assert panel["progress_line"] == "selected=yes | prompt=yes | tests=not_run | PR=none | SOS=no"
+    assert "Bored queue: inactive because a packet is selected" in panel["lines"]
+    assert len(panel["lines"]) <= 10
+
+
 def test_approval_missing_maps_to_waiting_for_approval() -> None:
     module = load_module()
     panel = module.build_operator_checkpoint_panel(selected_report())

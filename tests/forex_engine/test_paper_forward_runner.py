@@ -47,6 +47,37 @@ def test_run_local_session_has_no_file_writes_by_default() -> None:
     assert bundle["paper_summary"]["files_written"] == []
 
 
+def test_multi_fixture_paper_forward_runs_simulated_only() -> None:
+    results = paper_forward_runner.run_multi_fixture_paper_forward()
+    summary = results["summary"]
+
+    assert results["mode"] == "PAPER_ONLY"
+    assert summary["fixture_count"] == len(local_fixture_catalog.list_fixture_ids())
+    assert summary["total_intents"] > 0
+    assert summary["total_ledger_entries"] == summary["total_intents"]
+    assert summary["classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert summary["live_ready"] is False
+    assert summary["protected_gate_required"] is True
+    for item in results["per_fixture_results"]:
+        assert item["ledger_entry_count"] == item["intent_count"]
+        assert item["broker_order_ids"]
+        assert all(order_id is None for order_id in item["broker_order_ids"])
+        assert all(live_order is False for live_order in item["live_orders"])
+        assert item["safety"]["broker_allowed"] is False
+        assert item["safety"]["live_order"] is False
+
+
+def test_regime_consistency_scoring_is_local_only_and_never_live_ready() -> None:
+    results = paper_forward_runner.run_multi_fixture_paper_forward()
+    consistency = paper_forward_runner.calculate_regime_consistency(results["per_fixture_results"])
+
+    assert consistency["total_regimes"] >= 6
+    assert 0.0 <= consistency["consistent_regimes_pct"] <= 100.0
+    assert consistency["classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+    assert consistency["classification"] != "LIVE_READY"
+    assert consistency["live_ready"] is False
+
+
 def test_demo_command_main_prints_paper_only_safety_note(capsys) -> None:
     assert run_paper_forward_demo.main([]) == 0
     output = capsys.readouterr().out

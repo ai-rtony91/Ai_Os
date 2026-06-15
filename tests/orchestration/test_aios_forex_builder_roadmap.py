@@ -172,7 +172,10 @@ def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
     assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOOP_LITE.md" in candidates[APPROVED_EXECUTOR_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_DAILY_CONTRIBUTION_LOOP_LITE.md" in candidates[DAILY_LOOP_PACKET_ID]["required_files"]
     assert "automation/forex_engine/evidence_bundle_runner.py" in candidates[PAPER_FORWARD_EVIDENCE_V1_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/paper_forward_evidence_v2.py" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/run_paper_forward_evidence_v2_demo.py" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE_V2.md" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_paper_forward_evidence_v2.py" in candidates[PAPER_FORWARD_EVIDENCE_V2_PACKET_ID]["required_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_GOVERNOR_THRESHOLDS.md" in candidates[RISK_GOVERNOR_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOCAL_APPLY_LOOP.md" in candidates[APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID]["required_files"]
 
