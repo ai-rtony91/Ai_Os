@@ -116,7 +116,8 @@ DEFAULT_COMPLETED_PACKETS = [
         "packet_id": "PKT-AIOS-FOREX-BUILDER-BACKTEST-HARNESS",
         "title": "Create forex builder deterministic backtest harness scaffold",
         "lane": "forex-builder-backtest",
-        "completion_reason": "local deterministic backtest harness contract, docs, and tests exist",
+        "landed_pr": "#743",
+        "completion_reason": "monthly forex factory scaffold landed with local deterministic backtest harness contract, docs, and tests",
         "completed_files": [
             "docs/trading_lab/AIOS_FOREX_BUILDER_BACKTEST_HARNESS.md",
             "automation/forex_engine/backtest_harness.py",
@@ -133,7 +134,8 @@ DEFAULT_COMPLETED_PACKETS = [
         "packet_id": "PKT-AIOS-FOREX-BUILDER-RISK-CONTRACT",
         "title": "Define forex builder risk gate contract",
         "lane": "forex-builder-risk-policy",
-        "completion_reason": "local forex risk contract, docs, and tests exist",
+        "landed_pr": "#743",
+        "completion_reason": "monthly forex factory scaffold landed with local forex risk contract, docs, and tests",
         "completed_files": [
             "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_CONTRACT.md",
             "automation/forex_engine/risk_contract.py",
@@ -150,7 +152,8 @@ DEFAULT_COMPLETED_PACKETS = [
         "packet_id": "PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT",
         "title": "Define forex builder dashboard contract",
         "lane": "forex-builder-dashboard",
-        "completion_reason": "compact forex dashboard/report contract, docs, and tests exist",
+        "landed_pr": "#743",
+        "completion_reason": "monthly forex factory scaffold landed with compact forex dashboard/report contract, docs, and tests",
         "completed_files": [
             "docs/trading_lab/AIOS_FOREX_BUILDER_DASHBOARD_CONTRACT.md",
             "automation/forex_engine/forex_dashboard_contract.py",
@@ -160,6 +163,141 @@ DEFAULT_COMPLETED_PACKETS = [
             "docs/trading_lab/AIOS_FOREX_BUILDER_DASHBOARD_CONTRACT.md",
             "automation/forex_engine/forex_dashboard_contract.py",
             "tests/forex_engine/test_forex_dashboard_contract.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR",
+        "title": "Create local paper-forward simulator scaffold",
+        "lane": "forex-builder-paper-forward-simulator",
+        "landed_pr": "#743",
+        "completion_reason": "paper-forward simulator scaffold landed and V1 local runner validates simulated ledger evidence",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_SIMULATOR.md",
+            "automation/forex_engine/paper_forward_simulator.py",
+            "automation/forex_engine/paper_forward_runner.py",
+            "automation/forex_engine/run_paper_forward_demo.py",
+            "tests/forex_engine/test_paper_forward_simulator.py",
+            "tests/forex_engine/test_paper_forward_runner.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_SIMULATOR.md",
+            "automation/forex_engine/paper_forward_simulator.py",
+            "automation/forex_engine/paper_forward_runner.py",
+            "automation/forex_engine/run_paper_forward_demo.py",
+            "tests/forex_engine/test_paper_forward_simulator.py",
+            "tests/forex_engine/test_paper_forward_runner.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-EVIDENCE-AGGREGATOR",
+        "title": "Create forex builder evidence aggregator",
+        "lane": "forex-builder-evidence-aggregator",
+        "landed_pr": "#743",
+        "completion_reason": "evidence aggregator scaffold landed and V1 local evidence bundle runner validates aggregator output",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_EVIDENCE_AGGREGATOR.md",
+            "automation/forex_engine/evidence_aggregator.py",
+            "automation/forex_engine/evidence_bundle_runner.py",
+            "automation/forex_engine/run_evidence_bundle_demo.py",
+            "tests/forex_engine/test_evidence_aggregator.py",
+            "tests/forex_engine/test_evidence_bundle_runner.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_EVIDENCE_AGGREGATOR.md",
+            "automation/forex_engine/evidence_aggregator.py",
+            "automation/forex_engine/evidence_bundle_runner.py",
+            "automation/forex_engine/run_evidence_bundle_demo.py",
+            "tests/forex_engine/test_evidence_aggregator.py",
+            "tests/forex_engine/test_evidence_bundle_runner.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS",
+        "title": "Create forex builder month-end readiness review",
+        "lane": "forex-builder-month-end-readiness",
+        "landed_pr": "#743",
+        "completion_reason": "month-end readiness scaffold landed and V1 local readiness demo validates summary output",
+        "completed_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_MONTH_END_READINESS.md",
+            "automation/forex_engine/month_end_readiness.py",
+            "automation/forex_engine/run_month_end_readiness_demo.py",
+            "tests/forex_engine/test_month_end_readiness.py",
+        ],
+        "required_files": [
+            "docs/trading_lab/AIOS_FOREX_BUILDER_MONTH_END_READINESS.md",
+            "automation/forex_engine/month_end_readiness.py",
+            "automation/forex_engine/run_month_end_readiness_demo.py",
+            "tests/forex_engine/test_month_end_readiness.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-APPROVED-EXECUTOR-LOOP-LITE",
+        "title": "Document approved executor loop lite",
+        "lane": "approved-executor-loop-lite",
+        "landed_pr": "#743",
+        "completion_reason": "approved executor loop-lite doc landed with monthly forex factory scaffolds",
+        "completed_files": [
+            "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOOP_LITE.md",
+            "tests/orchestration/test_aios_operator_checkpoint_dashboard.py",
+        ],
+        "required_files": [
+            "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOOP_LITE.md",
+            "tests/orchestration/test_aios_operator_checkpoint_dashboard.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-DAILY-CONTRIBUTION-LOOP-LITE",
+        "title": "Document daily earned contribution loop lite",
+        "lane": "daily-contribution-loop-lite",
+        "landed_pr": "#743",
+        "completion_reason": "daily contribution loop-lite doc landed with monthly forex factory scaffolds",
+        "completed_files": [
+            "docs/orchestration/AIOS_DAILY_CONTRIBUTION_LOOP_LITE.md",
+            "tests/orchestration/test_aios_operator_checkpoint_dashboard.py",
+        ],
+        "required_files": [
+            "docs/orchestration/AIOS_DAILY_CONTRIBUTION_LOOP_LITE.md",
+            "tests/orchestration/test_aios_operator_checkpoint_dashboard.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1",
+        "title": "Expand local paper-forward forex evidence",
+        "lane": "paper-forward-evidence-expansion",
+        "completion_reason": "local fixture catalog, paper-forward runner, evidence bundle runner, demos, docs, and tests validate V1 paper-forward evidence",
+        "completed_files": [
+            "automation/forex_engine/local_fixture_catalog.py",
+            "automation/forex_engine/paper_forward_runner.py",
+            "automation/forex_engine/evidence_bundle_runner.py",
+            "automation/forex_engine/run_paper_forward_demo.py",
+            "automation/forex_engine/run_evidence_bundle_demo.py",
+            "automation/forex_engine/run_month_end_readiness_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE.md",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_LOCAL_FIXTURE_CATALOG.md",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_READINESS_DEMO_COMMANDS.md",
+            "tests/forex_engine/test_local_fixture_catalog.py",
+            "tests/forex_engine/test_paper_forward_runner.py",
+            "tests/forex_engine/test_evidence_bundle_runner.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/local_fixture_catalog.py",
+            "automation/forex_engine/paper_forward_runner.py",
+            "automation/forex_engine/evidence_bundle_runner.py",
+            "automation/forex_engine/run_paper_forward_demo.py",
+            "automation/forex_engine/run_evidence_bundle_demo.py",
+            "automation/forex_engine/run_month_end_readiness_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE.md",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_LOCAL_FIXTURE_CATALOG.md",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_READINESS_DEMO_COMMANDS.md",
+            "tests/forex_engine/test_local_fixture_catalog.py",
+            "tests/forex_engine/test_paper_forward_runner.py",
+            "tests/forex_engine/test_evidence_bundle_runner.py",
         ],
         "source": "default_completed_memory",
     },
@@ -228,6 +366,9 @@ COMPLETE_STATUSES = {
 
 REOPENED_STATUSES = {"reopened", "reopen", "open_again"}
 REPAIR_STATUSES = {"validation_failed", "failed", "repair", "needs_repair"}
+SUPPRESSIBLE_FOREX_SCAFFOLD_PACKET_IDS = {
+    "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR",
+}
 
 
 def _safety() -> dict[str, bool]:
@@ -444,6 +585,8 @@ def _is_validation_repair(candidate: dict[str, Any]) -> bool:
 
 
 def _is_forex_scaffold(candidate: dict[str, Any]) -> bool:
+    if _packet_id(candidate) in SUPPRESSIBLE_FOREX_SCAFFOLD_PACKET_IDS:
+        return False
     text = " ".join(
         [
             _packet_id(candidate),

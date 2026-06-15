@@ -161,6 +161,8 @@ class DashboardState:
     current_blocker: str
     sos_required: bool
     next_safe_action: str
+    fixture_id: str = "unknown"
+    readiness_status: str = "WATCHLIST"
 
 
 @dataclass(frozen=True)
@@ -382,6 +384,8 @@ def validate_dashboard_state_schema(state: DashboardState | dict[str, Any]) -> b
     )
     if str(payload["live_permission_state"]).upper() in {"APPROVED", "LIVE_READY", "ENABLED"}:
         raise ValueError("DashboardState.live_permission_state must not grant live readiness")
+    if str(payload.get("readiness_status", "")).upper() in {"APPROVED", "LIVE_READY", "ENABLED"}:
+        raise ValueError("DashboardState.readiness_status must not grant live readiness")
     assert_no_live_permissions(payload)
     return True
 

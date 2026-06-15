@@ -300,20 +300,95 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             ),
         ),
         _candidate(
-            packet_id="PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-EVIDENCE-EXPANSION",
-            title="Expand paper-forward forex evidence",
-            lane="forex-builder-paper-forward-evidence-expansion",
+            packet_id="PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1",
+            title="Expand local paper-forward forex evidence",
+            lane="paper-forward-evidence-expansion",
             priority="low",
             milestone_value="medium",
             risk_level="low",
             required_files=[
-                "docs/trading_lab/AIOS_FOREX_BUILDER_EVIDENCE_AGGREGATOR.md",
-                "tests/forex_engine/test_evidence_aggregator.py",
+                "automation/forex_engine/local_fixture_catalog.py",
+                "automation/forex_engine/paper_forward_runner.py",
+                "automation/forex_engine/evidence_bundle_runner.py",
+                "automation/forex_engine/run_paper_forward_demo.py",
+                "automation/forex_engine/run_evidence_bundle_demo.py",
+                "automation/forex_engine/run_month_end_readiness_demo.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE.md",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_LOCAL_FIXTURE_CATALOG.md",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_READINESS_DEMO_COMMANDS.md",
+                "tests/forex_engine/test_local_fixture_catalog.py",
+                "tests/forex_engine/test_paper_forward_runner.py",
+                "tests/forex_engine/test_evidence_bundle_runner.py",
             ],
             purpose=(
-                "Future safe candidate for broadening local paper-forward evidence after the "
-                "simulator, aggregator, and readiness contracts are validated."
+                "Build a usable local evidence layer around deterministic fixtures, simulated "
+                "paper-forward ledgers, evidence bundles, compact demos, dashboard state, and "
+                "month-end readiness review. No broker, network, secrets, orders, webhooks, scheduler, or daemon."
             ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_local_fixture_catalog.py tests/forex_engine/test_paper_forward_runner.py tests/forex_engine/test_evidence_bundle_runner.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2",
+            title="Expand paper-forward evidence with broader out-of-sample fixtures",
+            lane="paper-forward-evidence-expansion-v2",
+            priority="medium",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_EVIDENCE_V2.md",
+                "tests/forex_engine/test_paper_forward_evidence_v2.py",
+            ],
+            purpose=(
+                "Broaden local paper-forward evidence with more out-of-sample fixtures, longer "
+                "deterministic windows, and stronger blocker reporting before any readiness threshold promotion."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_evidence_v2.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS",
+            title="Define paper-forward risk governor thresholds",
+            lane="risk-governor-paper-forward-thresholds",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_GOVERNOR_THRESHOLDS.md",
+                "tests/forex_engine/test_risk_governor_thresholds.py",
+            ],
+            purpose=(
+                "Define stricter paper-forward thresholds for evidence review only. This must not "
+                "create live trading approval or broker execution."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_risk_governor_thresholds.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-APPROVED-EXECUTOR-LOCAL-APPLY-LOOP",
+            title="Design approved executor local apply loop",
+            lane="approved-executor-local-apply-loop",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOCAL_APPLY_LOOP.md",
+                "tests/orchestration/test_aios_approved_executor_local_apply_loop.py",
+            ],
+            purpose=(
+                "Design the next local apply loop after paper-forward evidence exists, with no "
+                "worker dispatch, queue mutation, approval mutation, scheduler, daemon, commit, push, or merge."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_approved_executor_local_apply_loop.py -q",
+                VALIDATOR,
+            ],
         ),
     ]
 

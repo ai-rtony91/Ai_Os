@@ -282,6 +282,24 @@ def test_default_memory_includes_completed_backtest_risk_and_dashboard_packets()
         "PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT",
     ):
         assert packet_id in result["completed_packet_ids"]
+        records = [
+            record
+            for record in load_module().DEFAULT_COMPLETED_PACKETS
+            if record["packet_id"] == packet_id
+        ]
+        assert records[0]["landed_pr"] == "#743"
+
+
+def test_default_memory_includes_paper_forward_evidence_v1_completion() -> None:
+    result = build_result(candidate_packets=[])
+
+    for packet_id in (
+        "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR",
+        "PKT-AIOS-FOREX-BUILDER-EVIDENCE-AGGREGATOR",
+        "PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS",
+        "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1",
+    ):
+        assert packet_id in result["completed_packet_ids"]
 
 
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
@@ -403,14 +421,18 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-BACKTEST-HARNESS" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-RISK-CONTRACT" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR"
+    assert "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR" not in active_ids
+    assert "PKT-AIOS-FOREX-BUILDER-EVIDENCE-AGGREGATOR" not in active_ids
+    assert "PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS" not in active_ids
+    assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:
