@@ -8,6 +8,9 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_forex_builder_roadmap.py"
 ADAPTER_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_candidate_packet_evidence_adapter.py"
 PLANNER_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_packet_queue_planner.py"
+CANONICAL_SPEC_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+CANONICAL_SPEC_PATH = "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md"
+CANONICAL_SPEC_FILE = REPO_ROOT / "docs" / "trading_lab" / "AIOS_FOREX_BUILDER_SPEC.md"
 
 
 def load_module(name: str, path: Path):
@@ -28,6 +31,16 @@ def roadmap_candidates() -> list[dict[str, object]]:
     candidates = result["roadmap_candidates"]
     assert isinstance(candidates, list)
     return candidates
+
+
+def canonical_spec_candidate() -> dict[str, object]:
+    matches = [
+        candidate
+        for candidate in roadmap_candidates()
+        if candidate["packet_id"] == CANONICAL_SPEC_PACKET_ID
+    ]
+    assert len(matches) == 1
+    return matches[0]
 
 
 def assert_preview_only(result: dict[str, object]) -> None:
@@ -72,9 +85,37 @@ def test_roadmap_candidates_are_emitted() -> None:
 def test_first_candidate_is_canonical_spec_packet() -> None:
     candidates = roadmap_candidates()
 
-    assert candidates[0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+    assert candidates[0]["packet_id"] == CANONICAL_SPEC_PACKET_ID
     assert candidates[0]["title"] == "Create canonical forex builder product spec"
     assert candidates[0]["lane"] == "forex-builder-spec"
+
+
+def test_canonical_spec_candidate_exists_and_points_to_spec() -> None:
+    candidate = canonical_spec_candidate()
+
+    assert CANONICAL_SPEC_PATH in candidate["required_files"]
+
+
+def test_canonical_spec_document_exists_and_preserves_non_live_boundaries() -> None:
+    text = CANONICAL_SPEC_FILE.read_text(encoding="utf-8")
+    lower_text = text.lower()
+
+    assert "aios builds an industrial-grade forex bot builder through safe staged development" in lower_text
+    assert "phase 0: canonical spec" in lower_text
+    assert "phase 6: broker integration only after separate future protected approval" in lower_text
+    for required_boundary in (
+        "no broker integration",
+        "no oanda/live exchange integration",
+        "no live orders",
+        "no paper orders unless separately approved later",
+        "no credentials, secrets, or env reads or writes",
+        "no webhooks",
+        "no scheduler or daemon execution",
+        "no real-money trading",
+        "no account mutation",
+        "no network market automation",
+    ):
+        assert required_boundary in lower_text
 
 
 def test_all_candidates_are_non_live() -> None:
@@ -108,10 +149,14 @@ def test_all_candidates_have_required_planner_fields() -> None:
 
 def test_forbidden_lanes_include_protected_boundaries() -> None:
     result = roadmap_result()
-    forbidden_text = " ".join(result["forbidden_lanes"]).lower()
+    forbidden_lanes = result["forbidden_lanes"]
 
-    for term in ("broker", "live", "orders", "secrets", "webhooks", "scheduler", "daemon"):
-        assert term in forbidden_text
+    assert "broker integration" in forbidden_lanes
+    assert "OANDA/live exchange integration" in forbidden_lanes
+    assert "live orders" in forbidden_lanes
+    assert "credentials/secrets/env reads/writes" in forbidden_lanes
+    assert "webhooks" in forbidden_lanes
+    assert "scheduler/daemon execution" in forbidden_lanes
 
 
 def test_next_recommended_candidate_is_canonical_spec_packet() -> None:
@@ -119,7 +164,7 @@ def test_next_recommended_candidate_is_canonical_spec_packet() -> None:
     next_candidate = result["next_recommended_candidate"]
 
     assert isinstance(next_candidate, dict)
-    assert next_candidate["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+    assert next_candidate["packet_id"] == CANONICAL_SPEC_PACKET_ID
 
 
 def test_output_is_compatible_with_candidate_adapter_and_packet_queue_planner() -> None:
@@ -132,9 +177,9 @@ def test_output_is_compatible_with_candidate_adapter_and_packet_queue_planner() 
     )
     plan = planner.build_packet_queue_planner(adapter_result["candidate_packets"])
 
-    assert adapter_result["candidate_packets"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+    assert adapter_result["candidate_packets"][0]["packet_id"] == CANONICAL_SPEC_PACKET_ID
     assert plan["queue_status"] == "selected"
-    assert plan["selected_packet"]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+    assert plan["selected_packet"]["packet_id"] == CANONICAL_SPEC_PACKET_ID
     assert plan["codex_ready_packet_preview"]["packet_ready"] is True
 
 
