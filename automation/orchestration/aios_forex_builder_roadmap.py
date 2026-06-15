@@ -77,6 +77,7 @@ def _candidate(
     risk_level: str,
     required_files: list[str],
     purpose: str,
+    validators: list[str] | None = None,
 ) -> dict[str, Any]:
     return {
         "packet_id": packet_id,
@@ -89,12 +90,10 @@ def _candidate(
         "required_files": required_files,
         "blocked_files": [],
         "required_approvals": [],
-        "validators": [VALIDATOR],
+        "validators": validators or [VALIDATOR],
         "dependencies": [],
         "conflicts": [],
         "safety_flags": [],
-        "forex_builder_alignment": _alignment(),
-        "purpose": purpose,
         "non_live_only": True,
         "network_allowed": False,
         "scheduler_allowed": False,
@@ -144,19 +143,24 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
         ),
         _candidate(
             packet_id="PKT-AIOS-FOREX-BUILDER-BACKTEST-HARNESS",
-            title="Create forex builder deterministic backtest harness scaffold",
+            title="Create forex builder deterministic backtest harness contract",
             lane="forex-builder-backtest",
             priority="medium",
             milestone_value="medium",
             risk_level="low",
             required_files=[
                 "docs/trading_lab/AIOS_FOREX_BUILDER_BACKTEST_HARNESS.md",
-                "tests/orchestration/test_aios_forex_builder_backtest.py",
+                "automation/forex_engine/backtest_harness.py",
+                "tests/forex_engine/test_backtest_harness.py",
             ],
             purpose=(
                 "Create deterministic backtest harness scaffold using local fixtures only. "
                 "Must remain non-live and no broker/secrets."
             ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_backtest_harness.py -q",
+                VALIDATOR,
+            ],
         ),
         _candidate(
             packet_id="PKT-AIOS-FOREX-BUILDER-RISK-CONTRACT",
@@ -167,12 +171,17 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             risk_level="low",
             required_files=[
                 "docs/trading_lab/AIOS_FOREX_BUILDER_RISK_CONTRACT.md",
-                "tests/orchestration/test_aios_forex_builder_risk_contract.py",
+                "automation/forex_engine/risk_contract.py",
+                "tests/forex_engine/test_risk_contract.py",
             ],
             purpose=(
                 "Define risk gate contract before any paper/live execution. "
                 "Must remain non-live and no broker/secrets."
             ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_risk_contract.py -q",
+                VALIDATOR,
+            ],
         ),
         _candidate(
             packet_id="PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT",
@@ -183,11 +192,127 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             risk_level="low",
             required_files=[
                 "docs/trading_lab/AIOS_FOREX_BUILDER_DASHBOARD_CONTRACT.md",
-                "tests/orchestration/test_aios_forex_builder_dashboard.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
+                "tests/forex_engine/test_forex_dashboard_contract.py",
             ],
             purpose=(
                 "Define dashboard fields for strategy status, backtest result, risk gate, "
                 "paper state, and SOS blockers. Must remain non-live and no broker/secrets."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_forex_dashboard_contract.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR",
+            title="Create local paper-forward simulator scaffold",
+            lane="forex-builder-paper-forward-simulator",
+            priority="medium",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_PAPER_FORWARD_SIMULATOR.md",
+                "automation/forex_engine/paper_forward_simulator.py",
+                "tests/forex_engine/test_paper_forward_simulator.py",
+            ],
+            purpose=(
+                "Create local simulated ledger scaffolding from order-intent records. "
+                "This is not broker paper trading and must remain local only."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_simulator.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-FOREX-BUILDER-EVIDENCE-AGGREGATOR",
+            title="Create forex builder evidence aggregator",
+            lane="forex-builder-evidence-aggregator",
+            priority="medium",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_EVIDENCE_AGGREGATOR.md",
+                "automation/forex_engine/evidence_aggregator.py",
+                "tests/forex_engine/test_evidence_aggregator.py",
+            ],
+            purpose=(
+                "Combine backtest, walk-forward, cost, risk, and local paper-forward evidence "
+                "into FAIL/WATCHLIST/PAPER_FORWARD_READY only."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_evidence_aggregator.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS",
+            title="Create forex builder month-end readiness review",
+            lane="forex-builder-month-end-readiness",
+            priority="medium",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_MONTH_END_READINESS.md",
+                "automation/forex_engine/month_end_readiness.py",
+                "tests/forex_engine/test_month_end_readiness.py",
+            ],
+            purpose=(
+                "Summarize complete evidence, blockers, paper-forward readiness, and protected "
+                "live-readiness gates without writing reports by default."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_month_end_readiness.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-APPROVED-EXECUTOR-LOOP-LITE",
+            title="Document approved executor loop lite",
+            lane="approved-executor-loop-lite",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOOP_LITE.md",
+                "tests/orchestration/test_aios_operator_checkpoint_dashboard.py",
+            ],
+            purpose=(
+                "Document that AIOS can run only explicitly approved local packets and must stop "
+                "before protected actions, dispatch, queues, approvals, schedulers, or daemons."
+            ),
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-DAILY-CONTRIBUTION-LOOP-LITE",
+            title="Document daily earned contribution loop lite",
+            lane="daily-contribution-loop-lite",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/orchestration/AIOS_DAILY_CONTRIBUTION_LOOP_LITE.md",
+                "tests/orchestration/test_aios_operator_checkpoint_dashboard.py",
+            ],
+            purpose=(
+                "Document bored-queue-only daily work when no higher-priority packet exists, "
+                "forbidding fake commits and generated noise."
+            ),
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-EVIDENCE-EXPANSION",
+            title="Expand paper-forward forex evidence",
+            lane="forex-builder-paper-forward-evidence-expansion",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_EVIDENCE_AGGREGATOR.md",
+                "tests/forex_engine/test_evidence_aggregator.py",
+            ],
+            purpose=(
+                "Future safe candidate for broadening local paper-forward evidence after the "
+                "simulator, aggregator, and readiness contracts are validated."
             ),
         ),
     ]
@@ -212,7 +337,7 @@ def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
         "queues_mutated": False,
         "approvals_mutated": False,
         "safety": _safety(),
-        "next_safe_action": "Promote the canonical forex builder spec candidate as the next unfinished non-live self-build packet.",
+        "next_safe_action": "Filter roadmap candidates through completed packet memory and promote the first unfinished non-live forex-builder packet.",
     }
 
 

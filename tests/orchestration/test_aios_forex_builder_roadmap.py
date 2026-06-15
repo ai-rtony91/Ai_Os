@@ -15,6 +15,14 @@ DATA_SCHEMAS_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
 DATA_SCHEMAS_DOC_PATH = "docs/trading_lab/AIOS_FOREX_BUILDER_DATA_SCHEMAS.md"
 DATA_SCHEMAS_MODULE_PATH = "automation/forex_engine/schema_contracts.py"
 DATA_SCHEMAS_TEST_PATH = "tests/forex_engine/test_schema_contracts.py"
+BACKTEST_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-BACKTEST-HARNESS"
+RISK_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-RISK-CONTRACT"
+DASHBOARD_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-DASHBOARD-CONTRACT"
+PAPER_FORWARD_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR"
+EVIDENCE_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-EVIDENCE-AGGREGATOR"
+MONTH_END_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-MONTH-END-READINESS"
+APPROVED_EXECUTOR_PACKET_ID = "PKT-AIOS-APPROVED-EXECUTOR-LOOP-LITE"
+DAILY_LOOP_PACKET_ID = "PKT-AIOS-DAILY-CONTRIBUTION-LOOP-LITE"
 
 
 def load_module(name: str, path: Path):
@@ -93,7 +101,7 @@ def test_today_goal_alignment_is_present_and_aligned() -> None:
 def test_roadmap_candidates_are_emitted() -> None:
     candidates = roadmap_candidates()
 
-    assert len(candidates) == 5
+    assert len(candidates) == 11
 
 
 def test_first_candidate_is_canonical_spec_packet() -> None:
@@ -117,6 +125,44 @@ def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
     assert DATA_SCHEMAS_DOC_PATH in candidate["required_files"]
     assert DATA_SCHEMAS_MODULE_PATH in candidate["required_files"]
     assert DATA_SCHEMAS_TEST_PATH in candidate["required_files"]
+
+
+def test_monthly_forex_candidates_appear_in_safe_order() -> None:
+    packet_ids = [candidate["packet_id"] for candidate in roadmap_candidates()]
+
+    assert packet_ids[:10] == [
+        CANONICAL_SPEC_PACKET_ID,
+        DATA_SCHEMAS_PACKET_ID,
+        BACKTEST_PACKET_ID,
+        RISK_PACKET_ID,
+        DASHBOARD_PACKET_ID,
+        PAPER_FORWARD_PACKET_ID,
+        EVIDENCE_PACKET_ID,
+        MONTH_END_PACKET_ID,
+        APPROVED_EXECUTOR_PACKET_ID,
+        DAILY_LOOP_PACKET_ID,
+    ]
+
+
+def test_backtest_risk_dashboard_candidates_point_to_new_contract_files() -> None:
+    candidates = {candidate["packet_id"]: candidate for candidate in roadmap_candidates()}
+
+    assert "automation/forex_engine/backtest_harness.py" in candidates[BACKTEST_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_backtest_harness.py" in candidates[BACKTEST_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/risk_contract.py" in candidates[RISK_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_risk_contract.py" in candidates[RISK_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/forex_dashboard_contract.py" in candidates[DASHBOARD_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_forex_dashboard_contract.py" in candidates[DASHBOARD_PACKET_ID]["required_files"]
+
+
+def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
+    candidates = {candidate["packet_id"]: candidate for candidate in roadmap_candidates()}
+
+    assert "automation/forex_engine/paper_forward_simulator.py" in candidates[PAPER_FORWARD_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/evidence_aggregator.py" in candidates[EVIDENCE_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/month_end_readiness.py" in candidates[MONTH_END_PACKET_ID]["required_files"]
+    assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOOP_LITE.md" in candidates[APPROVED_EXECUTOR_PACKET_ID]["required_files"]
+    assert "docs/orchestration/AIOS_DAILY_CONTRIBUTION_LOOP_LITE.md" in candidates[DAILY_LOOP_PACKET_ID]["required_files"]
 
 
 def test_data_schemas_candidate_preserves_non_live_safety_flags() -> None:

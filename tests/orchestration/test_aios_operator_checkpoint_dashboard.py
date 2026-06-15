@@ -7,6 +7,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_operator_checkpoint_dashboard.py"
 MISSION_DOC_PATH = REPO_ROOT / "docs" / "orchestration" / "AIOS_MONTHLY_MISSION_ALIGNMENT.md"
+APPROVED_EXECUTOR_DOC_PATH = REPO_ROOT / "docs" / "orchestration" / "AIOS_APPROVED_EXECUTOR_LOOP_LITE.md"
+DAILY_LOOP_DOC_PATH = REPO_ROOT / "docs" / "orchestration" / "AIOS_DAILY_CONTRIBUTION_LOOP_LITE.md"
+RUSTDESK_DOC_PATH = REPO_ROOT / "docs" / "orchestration" / "AIOS_RUSTDESK_OPERATOR_RUNBOOK.md"
+MONTHLY_STATUS_DOC_PATH = REPO_ROOT / "docs" / "orchestration" / "AIOS_MONTHLY_FOREX_FACTORY_STATUS.md"
 
 
 def load_module():
@@ -52,6 +56,37 @@ def test_monthly_mission_alignment_doc_exists_and_names_core_policy() -> None:
     assert "legitimate validated repo work" in text
     assert "Live trade readiness is a protected downstream gate" in text
     assert "not an automatic background action" in text
+
+
+def test_loop_lite_and_rustdesk_docs_exist_with_stop_boundaries() -> None:
+    docs = {
+        APPROVED_EXECUTOR_DOC_PATH: [
+            "explicitly approved local packets",
+            "worker dispatch without approval",
+            "scheduler or daemon activation",
+        ],
+        DAILY_LOOP_DOC_PATH: [
+            "Daily Contribution Loop Lite",
+            "fake heatmap commits",
+            "generated Reports commits unless explicitly approved",
+        ],
+        RUSTDESK_DOC_PATH: [
+            "RustDesk is the current primary remote-control lane",
+            "Tailscale private mesh",
+            "Forex-builder and self-build work must not be blocked on VPN setup",
+        ],
+        MONTHLY_STATUS_DOC_PATH: [
+            "AIOS is the factory",
+            "Forex is the first proof product",
+            "PKT-AIOS-FOREX-BUILDER-PAPER-FORWARD-SIMULATOR",
+        ],
+    }
+
+    for path, snippets in docs.items():
+        assert path.exists()
+        text = path.read_text(encoding="utf-8")
+        for snippet in snippets:
+            assert snippet in text
 
 
 def test_panel_mission_aligns_monthly_goal() -> None:
@@ -141,6 +176,8 @@ def test_bored_queue_tasks_are_safe_and_explain_earned_green_box_reason() -> Non
             assert forbidden in task["forbidden_actions"]
         for forbidden in ("fake commits", "fake heatmap commits", "meaningless whitespace commits", "generated noise commits"):
             assert forbidden in task["forbidden_actions"]
+        assert "Reports commits unless approved" in task["forbidden_actions"]
+        assert "control/review_bridge commits unless approved" in task["forbidden_actions"]
 
 
 def test_bored_queue_favors_monthly_alignment_work() -> None:
@@ -164,6 +201,18 @@ def test_bored_queue_favors_monthly_alignment_work() -> None:
     assert "dashboard" in text or "operator" in text
     assert "forex" in text
     assert "daily" in text
+
+
+def test_panel_reports_no_worker_dispatch_queue_approval_mutation_or_reports_writes() -> None:
+    module = load_module()
+    panel = module.build_operator_checkpoint_panel({})
+
+    assert panel["commands_executed"] == []
+    assert panel["files_written"] == []
+    assert panel["workers_dispatched"] is False
+    assert panel["queues_mutated"] is False
+    assert panel["approvals_mutated"] is False
+    assert panel["reports_written"] is False
 
 
 def test_panel_lines_are_ten_lines_or_fewer_by_default() -> None:
