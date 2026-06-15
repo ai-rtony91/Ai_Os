@@ -650,6 +650,77 @@ def test_self_route_sos_blocks_but_remains_report_only() -> None:
     assert "REPORT_ONLY_NO_RECOMMENDED_COMMAND_EXECUTION" in text
 
 
+def test_self_route_references_operator_checkpoint_dashboard() -> None:
+    text = self_route_text()
+
+    assert "automation/orchestration/aios_operator_checkpoint_dashboard.py" in text
+    assert "$operatorCheckpointDashboardPath" in text
+    assert "-ScriptPath $operatorCheckpointDashboardPath" in text
+    assert '-ArgumentName "--report"' in text
+    assert "-JsonPayload $operatorCheckpointInputJson" in text
+
+
+def test_self_route_json_includes_operator_checkpoint_contract() -> None:
+    text = self_route_text()
+
+    assert "operator_checkpoint_status" in text
+    assert "operator_checkpoint_panel" in text
+    assert "operator_checkpoint_lines" in text
+    assert "bored_queue_status" in text
+    assert "bored_queue_candidates" in text
+    assert "compact_dashboard_status" in text
+
+
+def test_self_route_default_human_output_is_compact_operator_panel() -> None:
+    text = self_route_text()
+
+    assert "AIOS STATUS" in text
+    assert "Packet:" in text
+    assert "State:" in text
+    assert "Next:" in text
+    assert "foreach ($line in $operatorCheckpointLines)" in text
+    assert "if ($Detailed) {" in text
+    assert "Recommended command:" in text
+
+
+def test_self_route_default_output_does_not_dump_raw_json() -> None:
+    text = self_route_text()
+
+    assert "if ($QuietJson -or $OutputJson)" in text
+    assert "$report | ConvertTo-Json -Depth 20" in text
+    assert "foreach ($line in $operatorCheckpointLines)" in text
+    assert "Write-Host ($report | ConvertTo-Json" not in text
+    assert "$report | ConvertTo-Json -Depth 20 | Write-Host" not in text
+
+
+def test_self_route_output_json_still_returns_full_json() -> None:
+    text = self_route_text()
+
+    assert "[switch]$OutputJson" in text
+    assert "if ($QuietJson -or $OutputJson) {" in text
+    assert "$report | ConvertTo-Json -Depth 20" in text
+    assert "operator_checkpoint_panel" in text
+    assert "cycle_ledger = $cycleLedger" in text
+    assert "dashboard_contract = $dashboardContract" in text
+
+
+def test_self_route_operator_checkpoint_preserves_safety_fields() -> None:
+    text = self_route_text()
+
+    assert "broker = $false" in text
+    assert "live_trading = $false" in text
+    assert "credentials = $false" in text
+    assert "real_orders = $false" in text
+    assert "real_webhooks = $false" in text
+    assert "workers_dispatched = $false" in text
+    assert "queues_mutated = $false" in text
+    assert "approvals_mutated = $false" in text
+    assert "reports_written = $false" in text
+    assert "git_add = $false" in text
+    assert "git_commit = $false" in text
+    assert "git_push = $false" in text
+
+
 def test_supervisor_does_not_advance_packets_after_self_route_failure() -> None:
     text = supervisor_text()
 
