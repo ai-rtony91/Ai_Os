@@ -38,6 +38,7 @@ The current self-build-core preview sequence is:
 6. `build_self_build_single_action_executor`
 7. `build_self_build_apply_result_verifier`
 8. `build_self_build_one_action_execution_controller`
+9. `build_self_build_one_action_apply_runner`
 
 The APPLY approval gate evaluates whether explicit Anthony approval matches a selected queue item. It can report `approved`, but v0 still does not execute local APPLY or allow apply without human control.
 
@@ -45,9 +46,11 @@ The local APPLY executor bridge can prepare a `command_to_run` after valid Antho
 
 The single-action executor can report that one approved bounded command would run, but it does not execute that command in v1.
 
-The apply result verifier checks post-APPLY evidence after execution. In the current DRY_RUN driver flow, execution remains disabled, so verifier readiness is reported as blocked with `command_not_executed`.
+The apply result verifier checks post-APPLY evidence after execution. In the current DRY_RUN driver flow, execution remains disabled, so verifier readiness is reported as blocked with `command_not_executed` and may include `validators_missing` when no post-APPLY validator evidence exists.
 
-The one-action execution controller is the next preview-only self-build-core queue item. It is not built by the queue or driver.
+The one-action execution controller can report pre-execution readiness for exactly one bounded local APPLY command when explicit Anthony approval, bridge readiness, single-action executor readiness, bounded paths, validators, and protected-action blocks all align. It still does not execute commands.
+
+The one-action APPLY runner is the next preview-only self-build-core queue item after the controller. It is not built by the queue or driver.
 
 Start command:
 
