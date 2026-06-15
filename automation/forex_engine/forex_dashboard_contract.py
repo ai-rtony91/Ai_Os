@@ -72,6 +72,12 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "capture_rate_pct": float(payload.get("capture_rate_pct", 0.0)),
         "risk_governor_classification": str(payload.get("risk_governor_classification") or payload.get("classification") or "FAIL"),
         "opportunity_quality_score": float(payload.get("opportunity_quality_score", 0.0)),
+        "stress_classification": str(payload.get("stress_classification") or "not_run"),
+        "oos_classification": str(payload.get("oos_classification") or "not_run"),
+        "combined_stress_oos_classification": str(payload.get("combined_stress_oos_classification") or "not_run"),
+        "heldout_consistency_pct": float(payload.get("heldout_consistency_pct", 0.0)),
+        "degradation_pct": float(payload.get("degradation_pct", 0.0)),
+        "stress_oos_ready": bool(payload.get("stress_oos_ready", False)),
         "readiness_status": str(payload.get("readiness_status") or payload.get("classification") or "FAIL"),
         "live_ready": False,
         "live_trade_ready": False,
@@ -93,10 +99,14 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
             f"Paper-forward: {payload.get('paper_forward_classification', 'FAIL')} | "
             f"Risk governor: {payload.get('risk_governor_classification', 'FAIL')}"
         ),
+        (
+            f"Stress/OOS: {payload.get('combined_stress_oos_classification', 'not_run')} | "
+            f"Heldout: {payload.get('heldout_consistency_pct', 0.0)} | "
+            f"Degradation: {payload.get('degradation_pct', 0.0)}"
+        ),
         f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",
         f"Capture: {payload.get('capture_rate_pct', 0.0)} | Quality: {payload.get('opportunity_quality_score', 0.0)}",
-        f"Readiness: {payload.get('readiness_status', 'FAIL')}",
-        "Live ready: false",
+        f"Readiness: {payload.get('readiness_status', 'FAIL')} | Live ready: false",
         "Protected gate required: true",
         f"Next: {payload.get('next_safe_action')}",
         "Safety: no broker/live/secrets/orders/webhooks",

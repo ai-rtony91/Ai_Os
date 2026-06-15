@@ -382,13 +382,20 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
         _candidate(
             packet_id="PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1",
             title="Expand paper-forward stress and out-of-sample validation",
-            lane="paper-forward-stress-and-out-of-sample-v1",
+            lane="paper-forward-stress-and-out-of-sample",
             priority="low",
             milestone_value="medium",
             risk_level="low",
             required_files=[
+                "automation/forex_engine/paper_forward_stress.py",
+                "automation/forex_engine/out_of_sample_validator.py",
+                "automation/forex_engine/run_stress_and_oos_demo.py",
+                "automation/forex_engine/month_end_readiness.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
                 "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_AND_OUT_OF_SAMPLE.md",
-                "tests/forex_engine/test_paper_forward_stress_and_out_of_sample.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_SANDBOX_GATE.md",
+                "tests/forex_engine/test_paper_forward_stress.py",
+                "tests/forex_engine/test_out_of_sample_validator.py",
             ],
             purpose=(
                 "Extend local paper-forward evidence with stronger stress, out-of-sample, and "
@@ -396,7 +403,28 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
                 "No broker, network, secrets, orders, scheduler, daemon, or live trading path."
             ),
             validators=[
-                "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_stress_and_out_of_sample.py -q",
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_stress.py tests/forex_engine/test_out_of_sample_validator.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT",
+            title="Define paper sandbox readiness contract",
+            lane="paper-sandbox-readiness-contract",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_SANDBOX_READINESS_CONTRACT.md",
+                "tests/forex_engine/test_sandbox_readiness_contract.py",
+            ],
+            purpose=(
+                "Define the protected readiness contract for a future paper sandbox review only. "
+                "This packet must not integrate any external execution venue, read credentials, place paper orders, place live "
+                "orders, use network ingestion, or bypass protected approval."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_sandbox_readiness_contract.py -q",
                 VALIDATOR,
             ],
         ),

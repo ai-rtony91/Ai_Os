@@ -48,6 +48,9 @@ def test_evidence_v2_bundle_includes_fixture_summary_and_regime_consistency() ->
     assert bundle["opportunity_capture_summary"]
     assert bundle["risk_governor"]
     assert bundle["stress_scenarios"]
+    assert bundle["paper_forward_stress"]
+    assert bundle["out_of_sample_validation"]
+    assert bundle["combined_stress_oos_gate"]
     assert bundle["starting_balance"] == 500.0
     assert bundle["ending_balance"] >= 500.0
     assert bundle["return_pct"] >= 0.0
@@ -89,6 +92,13 @@ def test_evidence_v2_summary_is_compact_and_never_live_ready() -> None:
     assert summary["capture_rate_pct"] >= 0.0
     assert summary["opportunity_quality_score"] >= 0.0
     assert summary["risk_governor_classification"] in ALLOWED_CLASSIFICATIONS
+    assert summary["stress_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert summary["oos_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert summary["combined_stress_oos_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert summary["stress_survived_scenarios_pct"] >= 0.0
+    assert summary["heldout_consistency_pct"] >= 0.0
+    assert summary["degradation_pct"] >= 0.0
+    assert summary["stress_oos_ready"] in {True, False}
     assert summary["live_ready"] is False
     assert summary["live_trade_ready"] is False
     assert summary["protected_gate_required"] is True
@@ -107,6 +117,12 @@ def test_month_end_readiness_v2_keeps_live_trade_ready_false() -> None:
     assert review["evidence_summary"]["starting_balance"] == 500.0
     assert review["evidence_summary"]["capture_rate_pct"] >= 0.0
     assert review["evidence_summary"]["risk_governor_classification"] in ALLOWED_CLASSIFICATIONS
+    assert review["evidence_summary"]["stress_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert review["evidence_summary"]["oos_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert review["evidence_summary"]["combined_stress_oos_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert review["evidence_summary"]["heldout_consistency_pct"] >= 0.0
+    assert review["evidence_summary"]["degradation_pct"] >= 0.0
+    assert review["evidence_summary"]["broker_paper_sandbox_ready"] is False
     assert review["next_safe_action"]
 
 

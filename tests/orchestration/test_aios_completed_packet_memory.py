@@ -349,12 +349,37 @@ def test_default_memory_includes_risk_governor_completion() -> None:
         for record in records
         if record["packet_id"] == "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
     ][0]
+    assert risk_governor["landed_pr"] == "#746"
+    assert risk_governor["title"] == "Add paper-forward risk governor thresholds"
     assert risk_governor["lane"] == "risk-governor-paper-forward-thresholds"
+    assert (
+        risk_governor["completion_reason"]
+        == "risk-to-reward, expectancy, opportunity capture, cost/slippage stress, and threshold governor landed on main"
+    )
     assert "automation/forex_engine/risk_governor_thresholds.py" in risk_governor["completed_files"]
     assert "automation/forex_engine/opportunity_capture.py" in risk_governor["completed_files"]
     assert "automation/forex_engine/run_risk_governor_demo.py" in risk_governor["completed_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_OPPORTUNITY_CAPTURE.md" in risk_governor["completed_files"]
     assert "tests/forex_engine/test_opportunity_capture.py" in risk_governor["completed_files"]
+
+
+def test_default_memory_includes_stress_oos_completion() -> None:
+    result = build_result(candidate_packets=[])
+
+    assert "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1" in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    stress_oos = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
+    ][0]
+    assert stress_oos["title"] == "Add paper-forward stress and out-of-sample validation"
+    assert stress_oos["lane"] == "paper-forward-stress-and-out-of-sample"
+    assert "automation/forex_engine/paper_forward_stress.py" in stress_oos["completed_files"]
+    assert "automation/forex_engine/out_of_sample_validator.py" in stress_oos["completed_files"]
+    assert "automation/forex_engine/run_stress_and_oos_demo.py" in stress_oos["completed_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_AND_OUT_OF_SAMPLE.md" in stress_oos["completed_files"]
+    assert "tests/forex_engine/test_out_of_sample_validator.py" in stress_oos["completed_files"]
 
 
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
@@ -476,7 +501,7 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
@@ -489,7 +514,8 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V1" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-EVIDENCE-EXPANSION-V2" not in active_ids
     assert "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
+    assert "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:

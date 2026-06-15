@@ -7,7 +7,9 @@ from automation.forex_engine import forex_dashboard_contract
 from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import month_end_readiness
 from automation.forex_engine import opportunity_capture
+from automation.forex_engine import out_of_sample_validator
 from automation.forex_engine import paper_forward_runner
+from automation.forex_engine import paper_forward_stress
 from automation.forex_engine import risk_governor_thresholds
 from automation.forex_engine import schema_contracts as schemas
 
@@ -55,6 +57,13 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
         bundle,
         opportunity_report,
     )
+    paper_stress = paper_forward_stress.run_paper_forward_stress(bundle)
+    oos_validation = out_of_sample_validator.run_out_of_sample_validation(active_fixture_ids)
+    combined_gate = paper_forward_stress.build_stress_oos_gate(
+        paper_stress,
+        oos_validation,
+        risk_governor,
+    )
     bundle.update(
         {
             "opportunity_capture": opportunity_report,
@@ -62,6 +71,11 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
             "risk_governor": risk_governor,
             "risk_governor_result": risk_governor,
             "stress_scenarios": stress_scenarios,
+            "paper_forward_stress": paper_stress,
+            "stress_result": paper_stress,
+            "out_of_sample_validation": oos_validation,
+            "oos_result": oos_validation,
+            "combined_stress_oos_gate": combined_gate,
             "starting_balance": opportunity_report["starting_balance"],
             "ending_balance": opportunity_report["ending_balance"],
             "aggregate_paper_pnl": opportunity_report["aggregate_paper_pnl"],
@@ -87,6 +101,11 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
     multi_summary = dict(payload.get("multi_fixture_paper_forward_summary") or {})
     regime = dict(payload.get("regime_consistency") or {})
     readiness = dict(payload.get("month_end_readiness_review") or {})
+    stress_result = dict(payload.get("paper_forward_stress") or payload.get("stress_result") or {})
+    stress_summary = dict(stress_result.get("stress_summary") or {})
+    oos_result = dict(payload.get("out_of_sample_validation") or payload.get("oos_result") or {})
+    oos_summary = dict(oos_result.get("oos_summary") or {})
+    combined_gate = dict(payload.get("combined_stress_oos_gate") or {})
     classification = classify_paper_forward_evidence_v2(payload)
     summary = {
         "schema": "AIOS_FOREX_PAPER_FORWARD_EVIDENCE_V2_SUMMARY.v1",
@@ -109,6 +128,13 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
             dict(payload.get("opportunity_capture") or {}).get("opportunity_quality_score", 0.0)
         ),
         "risk_governor_classification": dict(payload.get("risk_governor") or {}).get("classification", classification),
+        "stress_classification": stress_summary.get("classification", combined_gate.get("stress_classification", "not_run")),
+        "oos_classification": oos_summary.get("classification", combined_gate.get("oos_classification", "not_run")),
+        "combined_stress_oos_classification": combined_gate.get("combined_classification", "not_run"),
+        "stress_survived_scenarios_pct": float(combined_gate.get("survived_scenarios_pct", stress_summary.get("survived_scenarios_pct", 0.0))),
+        "heldout_consistency_pct": float(combined_gate.get("heldout_consistency_pct", oos_summary.get("heldout_consistency_pct", 0.0))),
+        "degradation_pct": float(combined_gate.get("degradation_pct", oos_summary.get("degradation_pct", 0.0))),
+        "stress_oos_ready": combined_gate.get("combined_classification") == "PAPER_FORWARD_READY",
         "classification": classification,
         "readiness_status": readiness.get("classification", classification),
         "paper_forward_ready": bool(readiness.get("paper_forward_ready", classification == "PAPER_FORWARD_READY")),
@@ -135,6 +161,7 @@ def classify_paper_forward_evidence_v2(bundle: dict[str, Any]) -> str:
     regime = dict(payload.get("regime_consistency") or {})
     risk = dict(payload.get("risk_gate_result") or {})
     governor = dict(payload.get("risk_governor") or {})
+    combined_gate = dict(payload.get("combined_stress_oos_gate") or {})
     classifications = [
         str(multi.get("classification") or "FAIL"),
         str(regime.get("classification") or "FAIL"),
@@ -142,6 +169,8 @@ def classify_paper_forward_evidence_v2(bundle: dict[str, Any]) -> str:
     ]
     if governor:
         classifications.append(str(governor.get("classification") or "FAIL"))
+    if combined_gate:
+        classifications.append(str(combined_gate.get("combined_classification") or "FAIL"))
     if not catalog.get("valid", False):
         return "FAIL"
     if any(item not in ALLOWED_V2_CLASSIFICATIONS for item in classifications):
@@ -237,6 +266,9 @@ def _bundle_blockers(bundle: dict[str, Any]) -> list[str]:
     risk = dict(bundle.get("risk_gate_result") or {})
     governor = dict(bundle.get("risk_governor") or bundle.get("risk_governor_result") or {})
     opportunity = dict(bundle.get("opportunity_capture") or {})
+    stress_result = dict(bundle.get("paper_forward_stress") or bundle.get("stress_result") or {})
+    oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
+    combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
     blockers = []
     blockers.extend([str(item) for item in list(catalog.get("blockers") or [])])
     blockers.extend([str(item) for item in list(multi.get("blockers") or [])])
@@ -244,6 +276,9 @@ def _bundle_blockers(bundle: dict[str, Any]) -> list[str]:
     blockers.extend([str(item) for item in list(risk.get("blockers") or [])])
     blockers.extend([str(item) for item in list(governor.get("blockers") or [])])
     blockers.extend([str(item) for item in list(opportunity.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(stress_result.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(oos_result.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(combined_gate.get("blockers") or [])])
     return _unique(blockers)
 
 
@@ -257,7 +292,7 @@ def _unique(items: list[str]) -> list[str]:
 
 def _next_safe_action(classification: str, blockers: list[str]) -> str:
     if classification == "PAPER_FORWARD_READY":
-        return "Advance to protected stress and out-of-sample paper-forward validation; live readiness requires separate future approval."
+        return "Prepare broker-paper sandbox readiness contract only; live readiness requires separate future approval."
     if blockers:
-        return "Resolve V2 local evidence blockers before risk-governor threshold work."
-    return "Continue protected paper-forward evidence expansion and risk review; live readiness requires separate future approval."
+        return "Resolve stress/OOS local evidence blockers before broker-paper sandbox readiness is considered."
+    return "Continue protected stress and out-of-sample evidence expansion; live readiness requires separate future approval."
