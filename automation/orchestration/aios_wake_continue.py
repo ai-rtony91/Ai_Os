@@ -53,6 +53,7 @@ BUILD_INTENT_ROUTER_PATH = Path("automation/orchestration/aios_build_intent_rout
 CONTINUATION_CONTROLLER_PATH = Path("automation/orchestration/aios_continuation_controller.py")
 CODEX_PACKET_BUILDER_PATH = Path("automation/orchestration/aios_codex_packet_builder.py")
 SOS_ESCALATION_POLICY_PATH = Path("automation/orchestration/aios_sos_escalation_policy.py")
+SELF_BUILD_LOOP_READINESS_PATH = Path("automation/orchestration/aios_self_build_loop_readiness.py")
 CONTINUATION_APPROVAL_AUTHORITY = (
     "Anthony Meza only approves staging, commit, push, merge, scheduler activation, daemon activation, "
     "worker dispatch, queue mutation, approval mutation, broker/live trading, credentials, real orders, "
@@ -1006,6 +1007,44 @@ def build_codex_packet_preview(
     )
 
 
+def build_self_build_loop_readiness(wake_report: dict[str, Any]) -> dict[str, Any]:
+    readiness_path = Path(__file__).with_name("aios_self_build_loop_readiness.py")
+    spec = importlib.util.spec_from_file_location("aios_self_build_loop_readiness", readiness_path)
+    if spec is None or spec.loader is None:
+        return {
+            "schema": "AIOS_SELF_BUILD_LOOP_READINESS.v1",
+            "readiness_status": "not_ready",
+            "current_goal": wake_report.get("goal", "unknown"),
+            "latest_validated_chain": wake_report.get("selected_action", "unknown"),
+            "tests_passed_count": 0,
+            "route_status": "blocked",
+            "reason_code": "self_build_loop_readiness_unavailable",
+            "missing_capabilities": ["self_build_loop_readiness_module"],
+            "next_allowed_self_build_action": "repair_self_build_loop_readiness",
+            "codex_packet_required": False,
+            "local_runner_available": False,
+            "productive_executor_available": False,
+            "sos_required": True,
+            "protected_actions_blocked": approval_required(),
+            "safety": safety_flags(),
+            "next_safe_action": "Stop and repair the missing self-build loop readiness gate.",
+        }
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.build_self_build_loop_readiness(wake_report)
+
+
+def attach_self_build_loop_readiness(report: dict[str, Any]) -> dict[str, Any]:
+    readiness = build_self_build_loop_readiness(report)
+    report["self_build_loop_readiness"] = readiness
+    if readiness.get("reason_code") == "forex_session_chain_complete_review_required":
+        report["next_safe_action"] = readiness.get(
+            "next_safe_action",
+            "Stop Forex feature expansion and review AIOS self-build loop readiness with Anthony.",
+        )
+    return report
+
+
 def write_resume_state(repo_root: Path, resume_state: dict[str, Any], resume_state_dir: Path | None) -> dict[str, Any]:
     resume_path = Path(__file__).with_name("aios_resume_state.py")
     spec = importlib.util.spec_from_file_location("aios_resume_state", resume_path)
@@ -1052,6 +1091,7 @@ def base_report(goal: str) -> dict[str, Any]:
         "bounded_executor_ready": None,
         "control_plane_status": None,
         "control_plane_status_path": None,
+        "self_build_loop_readiness": None,
         "resume_state": None,
         "resume_state_paths": None,
         "result": "blocked",
@@ -1270,6 +1310,7 @@ def run_wake_continue(
                         mode_capability_registry,
                         bounded_executor_handoff,
                     )
+            attach_self_build_loop_readiness(report)
             if write_resume_state_requested:
                 try:
                     resume_state = write_resume_state(repo_root, resume_state, resume_state_dir)
