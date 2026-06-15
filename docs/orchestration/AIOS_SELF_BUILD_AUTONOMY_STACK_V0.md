@@ -37,6 +37,7 @@ The current self-build-core preview sequence is:
 5. `build_self_build_local_apply_executor_bridge`
 6. `build_self_build_single_action_executor`
 7. `build_self_build_apply_result_verifier`
+8. `build_self_build_one_action_execution_controller`
 
 The APPLY approval gate evaluates whether explicit Anthony approval matches a selected queue item. It can report `approved`, but v0 still does not execute local APPLY or allow apply without human control.
 
@@ -44,7 +45,9 @@ The local APPLY executor bridge can prepare a `command_to_run` after valid Antho
 
 The single-action executor can report that one approved bounded command would run, but it does not execute that command in v1.
 
-The apply result verifier is preview-only until a separate bounded APPLY packet builds it.
+The apply result verifier checks post-APPLY evidence after execution. In the current DRY_RUN driver flow, execution remains disabled, so verifier readiness is reported as blocked with `command_not_executed`.
+
+The one-action execution controller is the next preview-only self-build-core queue item. It is not built by the queue or driver.
 
 Start command:
 
@@ -52,4 +55,4 @@ Start command:
 .\automation\orchestration\Start-AiOsSelfBuild.DRY_RUN.ps1
 ```
 
-The launcher runs only the overnight build controller in `DRY_RUN` mode and forwards explicit arguments when provided.
+The launcher runs the self-build DRY_RUN driver and forwards explicit arguments when provided.

@@ -323,6 +323,21 @@ def run_self_build_dry_run_driver(
         stop_report,
     )
 
+    verifier_module = _load_sibling("aios_self_build_apply_result_verifier")
+    apply_result_verifier = verifier_module.build_self_build_apply_result_verifier(
+        selected_queue_item if isinstance(selected_queue_item, dict) else {},
+        single_action_executor,
+        before_git_status={"status_text": ""},
+        after_git_status={"status_text": ""},
+        validator_results=[],
+        allowed_paths=(
+            selected_queue_item.get("allowed_paths", [])
+            if isinstance(selected_queue_item, dict)
+            else local_apply_executor_bridge.get("allowed_paths", [])
+        ),
+        max_files_changed=int(local_apply_executor_bridge.get("max_files_changed", 1) or 1),
+    )
+
     no_scope_review = preview_approved_scope in {None, ""} and readiness_status == "review_required"
     next_safe_action = (
         "Stop for Anthony self-build readiness review. Re-run with --preview-approved-scope self-build-core to preview only."
@@ -349,6 +364,7 @@ def run_self_build_dry_run_driver(
         "apply_approval": apply_approval,
         "local_apply_executor_bridge": local_apply_executor_bridge,
         "single_action_executor": single_action_executor,
+        "apply_result_verifier": apply_result_verifier,
         "morning_summary": (
             f"AIOS self-build DRY_RUN: wake_passed={wake_validation_passed}, "
             f"readiness={readiness_status}, selected_action={selected_next_action}."
