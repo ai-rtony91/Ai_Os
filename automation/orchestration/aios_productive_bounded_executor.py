@@ -10,24 +10,54 @@ from typing import Any, Callable
 
 SCHEMA = "AIOS_PRODUCTIVE_BOUNDED_EXECUTOR.v1"
 SUPPORTED_GOALS = {"forex-paper-bot"}
-SUPPORTED_ACTIONS = {"build_forex_risk_controls"}
+SUPPORTED_ACTIONS = {"build_forex_risk_controls", "build_forex_paper_execution_simulator"}
 
 FOREX_RISK_CONTROLS_PATH = Path("apps/trading_lab/trading_lab/forex_risk_controls.py")
 FOREX_RISK_CONTROLS_TEST_PATH = Path("tests/trading_lab/test_forex_risk_controls.py")
 FOREX_RISK_CONTROLS_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_RISK_CONTROLS.md")
+FOREX_PAPER_EXECUTION_SIMULATOR_PATH = Path("apps/trading_lab/trading_lab/forex_paper_execution_simulator.py")
+FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH = Path("tests/trading_lab/test_forex_paper_execution_simulator.py")
+FOREX_PAPER_EXECUTION_SIMULATOR_DOC_PATH = Path("docs/orchestration/AIOS_FOREX_PAPER_EXECUTION_SIMULATOR.md")
 
-WRITE_ALLOWED_PATHS = {
+RISK_CONTROLS_WRITE_ALLOWED_PATHS = {
     FOREX_RISK_CONTROLS_PATH.as_posix(),
     FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
     FOREX_RISK_CONTROLS_DOC_PATH.as_posix(),
 }
+WRITE_ALLOWED_PATHS = RISK_CONTROLS_WRITE_ALLOWED_PATHS
 
-HANDOFF_ALLOWED_PATHS = {
-    *WRITE_ALLOWED_PATHS,
+SIMULATOR_WRITE_ALLOWED_PATHS = {
+    FOREX_PAPER_EXECUTION_SIMULATOR_PATH.as_posix(),
+    FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
+    FOREX_PAPER_EXECUTION_SIMULATOR_DOC_PATH.as_posix(),
+}
+
+RISK_CONTROLS_HANDOFF_ALLOWED_PATHS = {
+    *RISK_CONTROLS_WRITE_ALLOWED_PATHS,
     "automation/orchestration/aios_autonomy_execute.py",
     "tests/orchestration/test_aios_autonomy_execute.py",
     "automation/orchestration/aios_wake_continue.py",
     "tests/orchestration/test_aios_wake_continue.py",
+}
+HANDOFF_ALLOWED_PATHS = RISK_CONTROLS_HANDOFF_ALLOWED_PATHS
+
+SIMULATOR_HANDOFF_ALLOWED_PATHS = {
+    *SIMULATOR_WRITE_ALLOWED_PATHS,
+    "automation/orchestration/aios_productive_bounded_executor.py",
+    "tests/orchestration/test_aios_productive_bounded_executor.py",
+    "automation/orchestration/aios_wake_continue.py",
+    "tests/orchestration/test_aios_wake_continue.py",
+}
+
+ACTION_CONTRACTS = {
+    "build_forex_risk_controls": {
+        "write_paths": RISK_CONTROLS_WRITE_ALLOWED_PATHS,
+        "handoff_paths": RISK_CONTROLS_HANDOFF_ALLOWED_PATHS,
+    },
+    "build_forex_paper_execution_simulator": {
+        "write_paths": SIMULATOR_WRITE_ALLOWED_PATHS,
+        "handoff_paths": SIMULATOR_HANDOFF_ALLOWED_PATHS,
+    },
 }
 
 ValidatorRunner = Callable[[Path], dict[str, Any]]
@@ -91,6 +121,22 @@ def risk_controls_files() -> dict[Path, str]:
     }
 
 
+def execution_simulator_files() -> dict[Path, str]:
+    return {
+        FOREX_PAPER_EXECUTION_SIMULATOR_PATH: _template_text(FOREX_PAPER_EXECUTION_SIMULATOR_PATH),
+        FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH: _template_text(FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH),
+        FOREX_PAPER_EXECUTION_SIMULATOR_DOC_PATH: _template_text(FOREX_PAPER_EXECUTION_SIMULATOR_DOC_PATH),
+    }
+
+
+def files_for_action(action: str) -> dict[Path, str]:
+    if action == "build_forex_risk_controls":
+        return risk_controls_files()
+    if action == "build_forex_paper_execution_simulator":
+        return execution_simulator_files()
+    raise ValueError("unsupported_action")
+
+
 def _is_bounded_relative_path(path_text: str, allowed_paths: set[str]) -> bool:
     if not path_text or "\\" in path_text:
         return False
@@ -101,11 +147,14 @@ def _is_bounded_relative_path(path_text: str, allowed_paths: set[str]) -> bool:
 
 
 def validate_handoff_scope(action: str, handoff: dict[str, Any] | None = None) -> tuple[bool, str, list[str]]:
-    if action not in SUPPORTED_ACTIONS:
+    action_contract = ACTION_CONTRACTS.get(action)
+    if action_contract is None:
         return False, "unsupported_action", []
+    write_paths = action_contract["write_paths"]
+    handoff_paths = action_contract["handoff_paths"]
 
     if handoff is None:
-        return True, "scope_valid", sorted(HANDOFF_ALLOWED_PATHS)
+        return True, "scope_valid", sorted(handoff_paths)
 
     allowed_paths = handoff.get("allowed_paths", [])
     if not isinstance(allowed_paths, list):
@@ -113,9 +162,9 @@ def validate_handoff_scope(action: str, handoff: dict[str, Any] | None = None) -
     allowed_paths_text = [str(path) for path in allowed_paths]
     if not allowed_paths_text:
         return False, "allowed_paths_missing", []
-    if not all(_is_bounded_relative_path(path, HANDOFF_ALLOWED_PATHS) for path in allowed_paths_text):
+    if not all(_is_bounded_relative_path(path, handoff_paths) for path in allowed_paths_text):
         return False, "unbounded_path", allowed_paths_text
-    if not WRITE_ALLOWED_PATHS.issubset(set(allowed_paths_text)):
+    if not write_paths.issubset(set(allowed_paths_text)):
         return False, "write_paths_not_authorized_by_handoff", allowed_paths_text
     return True, "scope_valid", allowed_paths_text
 
@@ -129,9 +178,21 @@ def write_text_if_changed(path: Path, content: str) -> bool:
 
 
 def write_risk_controls_files(repo_root: Path) -> list[str]:
+    return write_action_files(repo_root, "build_forex_risk_controls")
+
+
+def write_execution_simulator_files(repo_root: Path) -> list[str]:
+    return write_action_files(repo_root, "build_forex_paper_execution_simulator")
+
+
+def write_action_files(repo_root: Path, action: str) -> list[str]:
+    action_contract = ACTION_CONTRACTS.get(action)
+    if action_contract is None:
+        raise ValueError("unsupported_action")
+    write_paths = action_contract["write_paths"]
     files_written: list[str] = []
-    for relative_path, content in risk_controls_files().items():
-        if relative_path.as_posix() not in WRITE_ALLOWED_PATHS:
+    for relative_path, content in files_for_action(action).items():
+        if relative_path.as_posix() not in write_paths:
             raise ValueError("write_path_not_allowlisted")
         target = repo_root / relative_path
         if write_text_if_changed(target, content):
@@ -163,6 +224,40 @@ def run_risk_controls_validator(repo_root: Path) -> dict[str, Any]:
         "stdout": completed.stdout[-4000:],
         "stderr": completed.stderr[-4000:],
     }
+
+
+def run_execution_simulator_validator(repo_root: Path) -> dict[str, Any]:
+    command = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "-p",
+        "no:cacheprovider",
+        FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    return {
+        "name": "forex_paper_execution_simulator_tests",
+        "command": " ".join(command),
+        "returncode": completed.returncode,
+        "passed": completed.returncode == 0,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
+def run_action_validator(action: str, repo_root: Path) -> dict[str, Any]:
+    if action == "build_forex_risk_controls":
+        return run_risk_controls_validator(repo_root)
+    if action == "build_forex_paper_execution_simulator":
+        return run_execution_simulator_validator(repo_root)
+    raise ValueError("unsupported_action")
 
 
 def _blocked_report(goal: str, action: str, mode: str, reason: str, allowed_paths: list[str] | None = None) -> dict[str, Any]:
@@ -218,7 +313,7 @@ def execute_productive_bounded_action(
         "validators_run": [],
         "repair_attempts": 0,
         "result": "preview_only",
-        "next_safe_action": "Run with --apply only inside the approved risk-controls write boundary.",
+        "next_safe_action": f"Run with --apply only inside the approved {action} write boundary.",
         "approval_required": approval_required(),
         "safety": safety_flags(),
     }
@@ -226,23 +321,26 @@ def execute_productive_bounded_action(
     if not apply:
         return report
 
-    runner = validator_runner or run_risk_controls_validator
-    report["files_written"] = write_risk_controls_files(repo_root)
-    validation = runner(repo_root)
+    report["files_written"] = write_action_files(repo_root, action)
+    validation = validator_runner(repo_root) if validator_runner else run_action_validator(action, repo_root)
     report["validators_run"].append(validation)
 
     while not validation.get("passed", False) and report["repair_attempts"] < max_repairs:
         report["repair_attempts"] += 1
-        repaired_files = write_risk_controls_files(repo_root)
+        repaired_files = write_action_files(repo_root, action)
         for relative_path in repaired_files:
             if relative_path not in report["files_written"]:
                 report["files_written"].append(relative_path)
-        validation = runner(repo_root)
+        validation = validator_runner(repo_root) if validator_runner else run_action_validator(action, repo_root)
         report["validators_run"].append(validation)
 
     if validation.get("passed", False):
         report["result"] = "passed"
-        report["next_safe_action"] = "Review the risk-controls diff. Staging, commit, push, and merge require Anthony approval."
+        report["next_safe_action"] = (
+            "Review the paper execution simulator diff. Staging, commit, push, and merge require Anthony approval."
+            if action == "build_forex_paper_execution_simulator"
+            else "Review the risk-controls diff. Staging, commit, push, and merge require Anthony approval."
+        )
     else:
         report["result"] = "failed"
         report["next_safe_action"] = "Inspect risk-controls validator output before another bounded repair."
@@ -252,7 +350,11 @@ def execute_productive_bounded_action(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run one productive bounded AIOS executor action.")
     parser.add_argument("--goal", required=True, help="Supported goal: forex-paper-bot.")
-    parser.add_argument("--action", required=True, help="Supported action: build_forex_risk_controls.")
+    parser.add_argument(
+        "--action",
+        required=True,
+        help="Supported action: build_forex_risk_controls or build_forex_paper_execution_simulator.",
+    )
     parser.add_argument("--apply", action="store_true", help="Write allowlisted risk-control files and run validators.")
     parser.add_argument("--max-repairs", type=int, default=0, help="Maximum deterministic repair attempts.")
     parser.add_argument("--repo-root", default=None, help="Optional repository root for tests.")

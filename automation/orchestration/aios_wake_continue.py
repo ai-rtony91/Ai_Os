@@ -151,7 +151,11 @@ def select_next_action(goal: str, repo_state: dict[str, bool]) -> tuple[str, str
         return "blocked", "forex_decision_policy_test_missing"
     if repo_state["forex_risk_controls_exists"] != repo_state["forex_risk_controls_test_exists"]:
         return "blocked", "forex_risk_controls_incomplete"
+    if repo_state["forex_paper_execution_simulator_exists"] != repo_state["forex_paper_execution_simulator_test_exists"]:
+        return "blocked", "forex_paper_execution_simulator_incomplete"
     if repo_state["forex_risk_controls_exists"]:
+        if repo_state["forex_paper_execution_simulator_exists"]:
+            return "validate_all_forex_with_risk_controls_and_execution_simulator", None
         return "validate_all_forex_with_risk_controls", None
     return "validate_all_forex", None
 
@@ -215,6 +219,23 @@ def command_for_action(action: str, max_repairs: int) -> list[str]:
             FOREX_REPORT_TEST_PATH.as_posix(),
             FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
             FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
+        ]
+    if action == "validate_all_forex_with_risk_controls_and_execution_simulator":
+        return [
+            sys.executable,
+            "-m",
+            "pytest",
+            "-p",
+            "no:cacheprovider",
+            FOREX_BOT_TEST_PATH.as_posix(),
+            FOREX_BACKTEST_TEST_PATH.as_posix(),
+            FOREX_LEDGER_TEST_PATH.as_posix(),
+            FOREX_STRATEGY_TEST_PATH.as_posix(),
+            FOREX_DATA_IMPORT_TEST_PATH.as_posix(),
+            FOREX_REPORT_TEST_PATH.as_posix(),
+            FOREX_DECISION_POLICY_TEST_PATH.as_posix(),
+            FOREX_RISK_CONTROLS_TEST_PATH.as_posix(),
+            FOREX_PAPER_EXECUTION_SIMULATOR_TEST_PATH.as_posix(),
         ]
     raise ValueError(f"unsupported action: {action}")
 
@@ -726,7 +747,10 @@ def run_wake_continue(
                 )
                 write_state(state_path, report)
                 return report
-            if selected_action == "validate_all_forex_with_risk_controls":
+            if selected_action in {
+                "validate_all_forex_with_risk_controls",
+                "validate_all_forex_with_risk_controls_and_execution_simulator",
+            }:
                 post_risk_decision = build_post_risk_decision(component_inventory_from_repo_state(repo_state), goal)
                 report["post_risk_decision"] = post_risk_decision
                 next_build_plan = build_next_build_plan(post_risk_decision)
