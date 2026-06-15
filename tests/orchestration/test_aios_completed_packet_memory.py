@@ -6,10 +6,19 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_completed_packet_memory.py"
+FOREX_ROADMAP_PATH = REPO_ROOT / "automation" / "orchestration" / "aios_forex_builder_roadmap.py"
 
 
 def load_module():
     spec = importlib.util.spec_from_file_location("aios_completed_packet_memory", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_forex_roadmap_module():
+    spec = importlib.util.spec_from_file_location("aios_forex_builder_roadmap", FOREX_ROADMAP_PATH)
     module = importlib.util.module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(module)
@@ -228,6 +237,77 @@ def test_default_memory_suppresses_selfroute_candidate_evidence_integration() ->
     assert result["active_candidates"] == []
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION"
     assert "PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION" in result["completed_packet_ids"]
+
+
+def test_default_memory_includes_landed_forex_canonical_spec() -> None:
+    result = build_result(candidate_packets=[])
+
+    assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" in result["completed_packet_ids"]
+    records = load_module().DEFAULT_COMPLETED_PACKETS
+    canonical = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+    ][0]
+    assert canonical["landed_pr"] == "#737"
+    assert canonical["commit"] == "cd012419"
+    assert canonical["completion_reason"] == "canonical forex builder spec landed on main"
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md" in canonical["completed_files"]
+
+
+def test_forex_canonical_spec_candidate_is_suppressed_by_default_memory() -> None:
+    canonical = candidate(
+        packet_id="PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC",
+        title="Create canonical forex builder product spec",
+        lane="forex-builder-spec",
+        required_files=[
+            "docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md",
+            "tests/orchestration/test_aios_forex_builder_roadmap.py",
+        ],
+    )
+
+    result = build_result(candidate_packets=[canonical])
+
+    assert result["active_candidates"] == []
+    assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+    assert (
+        "completed_packet_id:PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+        in result["suppressed_candidates"][0]["suppression_reasons"]
+    )
+
+
+def test_forex_roadmap_advances_to_data_schemas_after_canonical_spec_landed() -> None:
+    memory = load_module()
+    roadmap = load_forex_roadmap_module()
+    roadmap_result = roadmap.build_forex_builder_roadmap({})
+
+    result = memory.build_completed_packet_memory(
+        {"candidate_packets": roadmap_result["roadmap_candidates"]}
+    )
+
+    assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
+    active_ids = [item["packet_id"] for item in result["active_candidates"]]
+    assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS"
+
+
+def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:
+    memory = load_module()
+    roadmap = load_forex_roadmap_module()
+    roadmap_result = roadmap.build_forex_builder_roadmap({})
+
+    result = memory.build_completed_packet_memory(
+        {"candidate_packets": roadmap_result["roadmap_candidates"]}
+    )
+
+    for item in result["active_candidates"]:
+        assert item["non_live_only"] is True
+        assert item["broker_allowed"] is False
+        assert item["live_trading_allowed"] is False
+        assert item["credentials_allowed"] is False
+        assert item["orders_allowed"] is False
+        assert item["webhooks_allowed"] is False
 
 
 def test_forex_builder_alignment_is_present() -> None:

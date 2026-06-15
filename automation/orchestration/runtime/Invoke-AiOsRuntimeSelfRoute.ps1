@@ -618,6 +618,9 @@ $forexRoadmapExitCode = $null
 $forexRoadmapStatus = "NOT_RUN"
 $forexRoadmapBlocker = ""
 $forexRoadmapCandidates = @()
+$forexRoadmapActiveCandidates = @()
+$forexRoadmapSuppressedCandidates = @()
+$forexRoadmapSuppressedPacketIds = @()
 $forexRoadmapNextCandidate = $null
 $forexRoadmapForbiddenLanes = @()
 $forexRoadmapNextSafeAction = ""
@@ -915,8 +918,55 @@ $forexRoadmapCandidates = @(Get-AiOsObjectProperty -Object $forexRoadmap -Name "
 $forexRoadmapNextCandidate = Get-AiOsObjectProperty -Object $forexRoadmap -Name "next_recommended_candidate" -Default $null
 $forexRoadmapForbiddenLanes = @(Get-AiOsObjectProperty -Object $forexRoadmap -Name "forbidden_lanes" -Default @())
 $forexRoadmapNextSafeAction = [string](Get-AiOsObjectProperty -Object $forexRoadmap -Name "next_safe_action" -Default "")
-$forexRoadmapUsed = $forexRoadmapNeeded -and $forexRoadmapStatus -eq "ready" -and @($forexRoadmapCandidates).Count -gt 0
-$plannerCandidatePackets = if ($forexRoadmapUsed) { @($forexRoadmapCandidates) } else { @($activeCandidatePackets) }
+$forexRoadmapActiveCandidates = @($forexRoadmapCandidates)
+
+if ($forexRoadmapNeeded -and $forexRoadmapStatus -eq "ready" -and @($forexRoadmapCandidates).Count -gt 0) {
+    try {
+        $forexRoadmapCompletedMemoryEvidence = [ordered]@{
+            candidate_packets = @($forexRoadmapCandidates)
+            today_goal_context = "AIOS self-building machine; forex-builder roadmap advancement after completed canonical spec #737."
+        }
+        $forexRoadmapCompletedMemoryEvidenceJson = ConvertTo-Json -InputObject $forexRoadmapCompletedMemoryEvidence -Depth 30 -Compress
+        $forexRoadmapCompletedMemoryOutput = Invoke-AiOsPythonJsonArgumentScript `
+            -ScriptPath $completedPacketMemoryPath `
+            -ArgumentName "--evidence" `
+            -JsonPayload $forexRoadmapCompletedMemoryEvidenceJson
+        $forexRoadmapCompletedMemoryJson = ($forexRoadmapCompletedMemoryOutput -join "`n")
+        if ($LASTEXITCODE -ne 0) {
+            $forexRoadmapStatus = "blocked"
+            $forexRoadmapBlocker = "forex_roadmap_completed_memory_nonzero_exit"
+            $forexRoadmapActiveCandidates = @()
+        }
+        elseif ([string]::IsNullOrWhiteSpace($forexRoadmapCompletedMemoryJson)) {
+            $forexRoadmapStatus = "blocked"
+            $forexRoadmapBlocker = "forex_roadmap_completed_memory_empty_output"
+            $forexRoadmapActiveCandidates = @()
+        }
+        else {
+            $forexRoadmapCompletedMemory = $forexRoadmapCompletedMemoryJson | ConvertFrom-Json
+            $forexRoadmapActiveCandidates = @(Get-AiOsObjectProperty -Object $forexRoadmapCompletedMemory -Name "active_candidates" -Default @())
+            $forexRoadmapSuppressedCandidates = @(Get-AiOsObjectProperty -Object $forexRoadmapCompletedMemory -Name "suppressed_candidates" -Default @())
+            $forexRoadmapSuppressedPacketIds = @(
+                $forexRoadmapSuppressedCandidates |
+                    ForEach-Object { [string](Get-AiOsObjectProperty -Object $_ -Name "packet_id" -Default "") } |
+                    Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+            )
+            if ($forexRoadmapActiveCandidates.Count -gt 0) {
+                $forexRoadmapNextCandidate = $forexRoadmapActiveCandidates[0]
+            }
+        }
+    }
+    catch {
+        $forexRoadmapStatus = "blocked"
+        $forexRoadmapBlocker = "forex_roadmap_completed_memory_generation_failed"
+        $forexRoadmapActiveCandidates = @()
+    }
+}
+
+$suppressedCandidatePackets = @($suppressedCandidatePackets + $forexRoadmapSuppressedCandidates)
+$suppressedPacketIds = @($suppressedPacketIds + $forexRoadmapSuppressedPacketIds | Select-Object -Unique)
+$forexRoadmapUsed = $forexRoadmapNeeded -and $forexRoadmapStatus -eq "ready" -and @($forexRoadmapActiveCandidates).Count -gt 0
+$plannerCandidatePackets = if ($forexRoadmapUsed) { @($forexRoadmapNextCandidate) } else { @($activeCandidatePackets) }
 $packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress
 
 if ($completedPacketMemoryStatus -eq "blocked") {
@@ -1374,7 +1424,9 @@ $report = [pscustomobject]@{
     forex_roadmap_status = $forexRoadmapStatus
     forex_roadmap = $forexRoadmap
     forex_roadmap_candidates = @($forexRoadmapCandidates)
+    forex_roadmap_active_candidates = @($forexRoadmapActiveCandidates)
     forex_roadmap_next_candidate = $forexRoadmapNextCandidate
+    forex_roadmap_suppressed_packet_ids = @($forexRoadmapSuppressedPacketIds)
     forex_roadmap_forbidden_lanes = @($forexRoadmapForbiddenLanes)
     forex_roadmap_used = $forexRoadmapUsed
     packet_queue_plan_status = $packetQueuePlanStatus

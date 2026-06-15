@@ -19,7 +19,7 @@ The contract accepts local JSON evidence:
 - `manual_suppression_rules`
 - `today_goal_context`
 
-If no completed memory is supplied, the contract still includes default completed memory for the landed self-building infrastructure packets through PR #731.
+If no completed memory is supplied, the contract still includes default completed memory for the landed self-building infrastructure packets through PR #731 and the landed forex-builder canonical spec from PR #737.
 
 ## Outputs
 
@@ -80,8 +80,25 @@ Default memory includes the landed infrastructure sequence:
 - approved packet executor contract
 - self-route approved executor connector
 - `PKT-AIOS-SELFROUTE-CANDIDATE-EVIDENCE-INTEGRATION`
+- `PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC`
+
+The forex canonical spec completion record includes:
+
+- landed PR: `#737`
+- commit: `cd012419`
+- title: `feat(trading-lab): add canonical forex builder spec`
+- completion reason: canonical forex builder spec landed on main
+- completed files:
+  - `docs/trading_lab/AIOS_FOREX_BUILDER_SPEC.md`
+  - `tests/orchestration/test_aios_forex_builder_roadmap.py`
 
 The default memory exists so self-route can stop selecting stale infrastructure packets after those lanes land.
+
+## Forex Roadmap Advancement
+
+Runtime self-route must filter forex roadmap candidates through completed packet memory before feeding candidates to the packet queue planner. This prevents a completed roadmap packet from re-entering after the normal candidate-memory pass has already produced no active candidates.
+
+After PR #737, `PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC` is suppressed and the next active forex roadmap candidate becomes `PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS`.
 
 ## Forex Builder Alignment
 

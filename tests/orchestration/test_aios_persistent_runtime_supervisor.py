@@ -248,7 +248,9 @@ def test_self_route_json_includes_forex_roadmap_contract() -> None:
     assert "forex_roadmap_status = $forexRoadmapStatus" in text
     assert "forex_roadmap = $forexRoadmap" in text
     assert "forex_roadmap_candidates = @($forexRoadmapCandidates)" in text
+    assert "forex_roadmap_active_candidates = @($forexRoadmapActiveCandidates)" in text
     assert "forex_roadmap_next_candidate = $forexRoadmapNextCandidate" in text
+    assert "forex_roadmap_suppressed_packet_ids = @($forexRoadmapSuppressedPacketIds)" in text
     assert "forex_roadmap_forbidden_lanes = @($forexRoadmapForbiddenLanes)" in text
     assert "forex_roadmap_used = $forexRoadmapUsed" in text
 
@@ -258,18 +260,41 @@ def test_self_route_uses_forex_roadmap_when_active_candidates_are_empty() -> Non
 
     assert "$forexRoadmapNeeded = @($activeCandidatePackets).Count -eq 0" in text
     assert 'if ($forexRoadmapNeeded) {' in text
-    assert '$forexRoadmapUsed = $forexRoadmapNeeded -and $forexRoadmapStatus -eq "ready" -and @($forexRoadmapCandidates).Count -gt 0' in text
-    assert "$plannerCandidatePackets = if ($forexRoadmapUsed) { @($forexRoadmapCandidates) } else { @($activeCandidatePackets) }" in text
+    assert '$forexRoadmapUsed = $forexRoadmapNeeded -and $forexRoadmapStatus -eq "ready" -and @($forexRoadmapActiveCandidates).Count -gt 0' in text
+    assert "$plannerCandidatePackets = if ($forexRoadmapUsed) { @($forexRoadmapNextCandidate) } else { @($activeCandidatePackets) }" in text
 
 
 def test_self_route_packet_planner_receives_forex_roadmap_candidates() -> None:
     text = self_route_text()
 
     assert "$forexRoadmapCandidates = @(Get-AiOsObjectProperty -Object $forexRoadmap -Name \"roadmap_candidates\" -Default @())" in text
+    assert "$forexRoadmapActiveCandidates = @(Get-AiOsObjectProperty -Object $forexRoadmapCompletedMemory -Name \"active_candidates\" -Default @())" in text
     assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress" in text
     assert "-ScriptPath $packetQueuePlannerPath" in text
     assert '-ArgumentName "--candidates"' in text
     assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
+
+
+def test_self_route_filters_forex_roadmap_candidates_through_completed_memory() -> None:
+    text = self_route_text()
+
+    assert "$forexRoadmapCompletedMemoryEvidence = [ordered]@{" in text
+    assert "candidate_packets = @($forexRoadmapCandidates)" in text
+    assert "-ScriptPath $completedPacketMemoryPath" in text
+    assert "-JsonPayload $forexRoadmapCompletedMemoryEvidenceJson" in text
+    assert "$forexRoadmapSuppressedPacketIds = @(" in text
+    assert "$suppressedPacketIds = @($suppressedPacketIds + $forexRoadmapSuppressedPacketIds | Select-Object -Unique)" in text
+    assert "$plannerCandidatePackets = if ($forexRoadmapUsed) { @($forexRoadmapNextCandidate) } else { @($activeCandidatePackets) }" in text
+
+
+def test_self_route_forex_roadmap_can_advance_to_data_schemas_after_canonical_spec() -> None:
+    text = self_route_text()
+    roadmap = forex_roadmap_text()
+
+    assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" in roadmap
+    assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" in roadmap
+    assert "$forexRoadmapNextCandidate = $forexRoadmapActiveCandidates[0]" in text
+    assert "$selectedPacket = Get-AiOsObjectProperty -Object $packetQueuePlan -Name \"selected_packet\" -Default $null" in text
 
 
 def test_self_route_forex_roadmap_failure_becomes_safe_blocked_evidence() -> None:
