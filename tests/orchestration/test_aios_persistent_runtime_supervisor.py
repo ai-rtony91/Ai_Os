@@ -28,6 +28,11 @@ def self_route_text() -> str:
     return self_route.read_text(encoding="utf-8").replace("\r\n", "\n")
 
 
+def forex_roadmap_text() -> str:
+    roadmap = REPO_ROOT / "automation" / "orchestration" / "aios_forex_builder_roadmap.py"
+    return roadmap.read_text(encoding="utf-8").replace("\r\n", "\n")
+
+
 def test_self_route_apply_is_only_inside_apply_branch() -> None:
     text = supervisor_text()
     lines = text.splitlines()
@@ -221,11 +226,102 @@ def test_self_route_all_suppressed_candidates_remain_no_packet_report_only() -> 
 
     assert "$activeCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"active_candidates\" -Default @())" in text
     assert "$nextCandidateAvailable = [bool](Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"next_candidate_available\" -Default $false)" in text
-    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
-    assert '$nextSafeAction = if ($completedPacketMemoryStatus -eq "ready" -and -not $nextCandidateAvailable' in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress" in text
+    assert '$nextSafeAction = if ($forexRoadmapUsed -and -not [string]::IsNullOrWhiteSpace($executorNextSafeAction))' in text
     assert "$completedMemoryNextSafeAction" in text
     assert "selected_packet = $selectedPacket" in text
     assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+
+
+def test_self_route_references_forex_builder_roadmap() -> None:
+    text = self_route_text()
+
+    assert "automation/orchestration/aios_forex_builder_roadmap.py" in text
+    assert "-ScriptPath $forexBuilderRoadmapPath" in text
+    assert '-ArgumentName "--evidence"' in text
+    assert "-JsonPayload $forexRoadmapEvidenceJson" in text
+
+
+def test_self_route_json_includes_forex_roadmap_contract() -> None:
+    text = self_route_text()
+
+    assert "forex_roadmap_status = $forexRoadmapStatus" in text
+    assert "forex_roadmap = $forexRoadmap" in text
+    assert "forex_roadmap_candidates = @($forexRoadmapCandidates)" in text
+    assert "forex_roadmap_next_candidate = $forexRoadmapNextCandidate" in text
+    assert "forex_roadmap_forbidden_lanes = @($forexRoadmapForbiddenLanes)" in text
+    assert "forex_roadmap_used = $forexRoadmapUsed" in text
+
+
+def test_self_route_uses_forex_roadmap_when_active_candidates_are_empty() -> None:
+    text = self_route_text()
+
+    assert "$forexRoadmapNeeded = @($activeCandidatePackets).Count -eq 0" in text
+    assert 'if ($forexRoadmapNeeded) {' in text
+    assert '$forexRoadmapUsed = $forexRoadmapNeeded -and $forexRoadmapStatus -eq "ready" -and @($forexRoadmapCandidates).Count -gt 0' in text
+    assert "$plannerCandidatePackets = if ($forexRoadmapUsed) { @($forexRoadmapCandidates) } else { @($activeCandidatePackets) }" in text
+
+
+def test_self_route_packet_planner_receives_forex_roadmap_candidates() -> None:
+    text = self_route_text()
+
+    assert "$forexRoadmapCandidates = @(Get-AiOsObjectProperty -Object $forexRoadmap -Name \"roadmap_candidates\" -Default @())" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress" in text
+    assert "-ScriptPath $packetQueuePlannerPath" in text
+    assert '-ArgumentName "--candidates"' in text
+    assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
+
+
+def test_self_route_forex_roadmap_failure_becomes_safe_blocked_evidence() -> None:
+    text = self_route_text()
+
+    assert "New-AiOsForexRoadmapFallbackResult" in text
+    assert "forex_builder_roadmap_missing" in text
+    assert "forex_builder_roadmap_nonzero_exit" in text
+    assert "forex_builder_roadmap_empty_output" in text
+    assert "forex_builder_roadmap_generation_failed" in text
+    assert '$rejectionReasons += "forex_builder_roadmap_blocked:$forexRoadmapBlocker"' in text
+
+
+def test_self_route_forex_roadmap_default_candidate_contract_is_canonical_spec() -> None:
+    text = self_route_text()
+    roadmap = forex_roadmap_text()
+
+    assert "$forexRoadmapNextCandidate = Get-AiOsObjectProperty -Object $forexRoadmap -Name \"next_recommended_candidate\" -Default $null" in text
+    assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" in roadmap
+    assert '"forex-builder-spec"' in roadmap
+
+
+def test_self_route_forex_candidate_propagates_to_executor_ledger_and_dashboard() -> None:
+    text = self_route_text()
+
+    assert "selected_packet = $selectedPacket" in text
+    assert "codex_ready_packet_preview = $codexReadyPacketPreview" in text
+    assert "approved_executor_status = $approvedExecutorStatus" in text
+    assert "execution_allowed = $executionAllowed" in text
+    assert "cycle_ledger = $cycleLedger" in text
+    assert "dashboard_contract = $dashboardContract" in text
+    assert "current_packet = [string](Get-AiOsObjectProperty -Object $SelectedPacket -Name \"packet_id\" -Default \"\")" in text
+
+
+def test_self_route_forex_forbidden_lanes_cover_protected_boundaries() -> None:
+    text = self_route_text()
+    roadmap = forex_roadmap_text()
+
+    assert "forex_roadmap_forbidden_lanes = @($forexRoadmapForbiddenLanes)" in text
+    forbidden_text = roadmap.lower()
+    for term in ("broker", "live", "orders", "secrets", "webhooks", "scheduler", "daemon"):
+        assert term in forbidden_text
+
+
+def test_self_route_does_not_select_broker_live_secret_order_or_webhook_forex_candidate() -> None:
+    roadmap = forex_roadmap_text()
+
+    assert "broker_allowed\": False" in roadmap
+    assert "live_trading_allowed\": False" in roadmap
+    assert "credentials_allowed\": False" in roadmap
+    assert "orders_allowed\": False" in roadmap
+    assert "webhooks_allowed\": False" in roadmap
 
 
 def test_self_route_generated_archive_paths_are_not_planner_candidate_packets() -> None:
@@ -233,7 +329,7 @@ def test_self_route_generated_archive_paths_are_not_planner_candidate_packets() 
 
     assert "candidate_packets = @($candidatePackets)" in text
     assert "$activeCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"active_candidates\" -Default @())" in text
-    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress" in text
     assert '-ArgumentName "--candidates"' in text
     assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
     assert "Reports/" not in text
@@ -255,7 +351,7 @@ def test_self_route_packet_queue_planner_receives_completed_memory_active_candid
     assert "$candidatePackets = @(Get-AiOsObjectProperty -Object $candidateEvidenceResult -Name \"candidate_packets\" -Default @())" in text
     assert "candidate_packets = @($candidatePackets)" in text
     assert "$activeCandidatePackets = @(Get-AiOsObjectProperty -Object $completedPacketMemory -Name \"active_candidates\" -Default @())" in text
-    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress" in text
     assert "-ScriptPath $packetQueuePlannerPath" in text
     assert '-ArgumentName "--candidates"' in text
     assert "-JsonPayload $packetQueueCandidateEvidenceJson" in text
@@ -334,7 +430,7 @@ def test_self_route_completed_memory_suppresses_default_candidate_before_plannin
     assert "-ScriptPath $completedPacketMemoryPath" in text
     assert "$suppressedPacketIds = @(" in text
     assert "suppressed_packet_ids = @($suppressedPacketIds)" in text
-    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress" in text
+    assert "$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress" in text
 
 
 def test_self_route_references_approved_packet_executor_contract() -> None:

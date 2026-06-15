@@ -290,6 +290,72 @@ function New-AiOsCompletedPacketMemoryFallbackResult {
     }
 }
 
+function New-AiOsForexRoadmapFallbackResult {
+    param(
+        [string]$Status,
+        [string]$Reason
+    )
+
+    return [pscustomobject]@{
+        schema = "AIOS_FOREX_BUILDER_ROADMAP_CANDIDATE_SOURCE.v1"
+        roadmap_status = $Status
+        today_goal_alignment = [pscustomobject]@{
+            milestone = "AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety"
+            proof_target = "industrial-grade forex bot builder"
+            control_plane_role = "safe forex-builder roadmap candidate source"
+            aligned = $false
+            non_live_only = $true
+            blocked_boundaries = @($Reason)
+            requires_future_gates_before_execution = $true
+        }
+        roadmap_candidates = @()
+        candidate_packets = @()
+        candidates = @()
+        forbidden_lanes = @(
+            "broker integration",
+            "OANDA/live exchange integration",
+            "live orders",
+            "paper orders unless separately approved",
+            "credentials/secrets/env reads/writes",
+            "webhooks",
+            "scheduler/daemon execution",
+            "real-money trading",
+            "account mutation",
+            "network market automation"
+        )
+        next_recommended_candidate = $null
+        commands_executed = @()
+        files_written = @()
+        workers_dispatched = $false
+        queues_mutated = $false
+        approvals_mutated = $false
+        safety = [pscustomobject]@{
+            preview_only = $true
+            evidence_only = $true
+            command_execution = $false
+            filesystem_writes = $false
+            reports_written = $false
+            network_access = $false
+            worker_dispatch = $false
+            queue_mutation = $false
+            approval_mutation = $false
+            scheduler_activation = $false
+            daemon_activation = $false
+            broker = $false
+            live_trading = $false
+            credentials = $false
+            real_orders = $false
+            real_webhooks = $false
+            git_add = $false
+            git_commit = $false
+            git_push = $false
+            git_merge = $false
+        }
+        blocker = $Reason
+        next_safe_action = "Stop; forex-builder roadmap evidence could not be generated."
+    }
+}
+
 function New-AiOsApprovedExecutorFallbackContract {
     param(
         [string]$Status,
@@ -475,6 +541,7 @@ $commandValidatorPath = "automation/orchestration/validators/Test-AiOsRecommende
 $routePreviewPath = "automation/orchestration/aios_bounded_worker_routing_preview.py"
 $candidateEvidenceAdapterPath = "automation/orchestration/aios_candidate_packet_evidence_adapter.py"
 $completedPacketMemoryPath = "automation/orchestration/aios_completed_packet_memory.py"
+$forexBuilderRoadmapPath = "automation/orchestration/aios_forex_builder_roadmap.py"
 $packetQueuePlannerPath = "automation/orchestration/aios_packet_queue_planner.py"
 $approvedExecutorContractPath = "automation/orchestration/aios_approved_packet_executor_contract.py"
 $cycleLedgerPath = "automation/orchestration/aios_cycle_ledger.py"
@@ -509,6 +576,17 @@ $suppressedPacketIds = @()
 $nextCandidateAvailable = $false
 $nextCandidate = $null
 $completedMemoryNextSafeAction = ""
+$forexRoadmap = $null
+$forexRoadmapOutput = @()
+$forexRoadmapExitCode = $null
+$forexRoadmapStatus = "NOT_RUN"
+$forexRoadmapBlocker = ""
+$forexRoadmapCandidates = @()
+$forexRoadmapNextCandidate = $null
+$forexRoadmapForbiddenLanes = @()
+$forexRoadmapNextSafeAction = ""
+$forexRoadmapUsed = $false
+$plannerCandidatePackets = @()
 $packetQueuePlan = $null
 $packetQueuePlannerOutput = @()
 $packetQueuePlannerExitCode = $null
@@ -731,7 +809,79 @@ $suppressedPacketIds = @(
 $nextCandidateAvailable = [bool](Get-AiOsObjectProperty -Object $completedPacketMemory -Name "next_candidate_available" -Default $false)
 $nextCandidate = Get-AiOsObjectProperty -Object $completedPacketMemory -Name "next_candidate" -Default $null
 $completedMemoryNextSafeAction = [string](Get-AiOsObjectProperty -Object $completedPacketMemory -Name "next_safe_action" -Default "")
-$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($activeCandidatePackets) -Depth 30 -Compress
+
+$forexRoadmapNeeded = @($activeCandidatePackets).Count -eq 0
+$forexRoadmapEvidence = [ordered]@{
+    schema = "AIOS_RUNTIME_SELF_ROUTE_FOREX_ROADMAP_EVIDENCE.v1"
+    completed_packet_memory_status = $completedPacketMemoryStatus
+    suppressed_packet_ids = @($suppressedPacketIds)
+    active_candidate_count = @($activeCandidatePackets).Count
+    completed_memory_next_safe_action = $completedMemoryNextSafeAction
+    today_goal_context = "AIOS self-building machine -> first proof target: industrial-grade forex bot builder -> no broker/live/secrets until gates prove safety"
+}
+
+if ($forexRoadmapNeeded) {
+    if (-not (Test-Path -LiteralPath $forexBuilderRoadmapPath)) {
+        $forexRoadmap = New-AiOsForexRoadmapFallbackResult `
+            -Status "blocked" `
+            -Reason "forex_builder_roadmap_missing"
+        $forexRoadmapStatus = "blocked"
+        $forexRoadmapBlocker = "forex_builder_roadmap_missing"
+        $forexRoadmapExitCode = 1
+    }
+    else {
+        try {
+            $forexRoadmapEvidenceJson = ConvertTo-Json -InputObject $forexRoadmapEvidence -Depth 30 -Compress
+            $forexRoadmapOutput = Invoke-AiOsPythonJsonArgumentScript `
+                -ScriptPath $forexBuilderRoadmapPath `
+                -ArgumentName "--evidence" `
+                -JsonPayload $forexRoadmapEvidenceJson
+            $forexRoadmapExitCode = $LASTEXITCODE
+            $forexRoadmapJson = ($forexRoadmapOutput -join "`n")
+            if ($forexRoadmapExitCode -ne 0) {
+                $forexRoadmap = New-AiOsForexRoadmapFallbackResult `
+                    -Status "blocked" `
+                    -Reason "forex_builder_roadmap_nonzero_exit"
+                $forexRoadmapStatus = "blocked"
+                $forexRoadmapBlocker = "forex_builder_roadmap_nonzero_exit"
+            }
+            elseif ([string]::IsNullOrWhiteSpace($forexRoadmapJson)) {
+                $forexRoadmap = New-AiOsForexRoadmapFallbackResult `
+                    -Status "blocked" `
+                    -Reason "forex_builder_roadmap_empty_output"
+                $forexRoadmapStatus = "blocked"
+                $forexRoadmapBlocker = "forex_builder_roadmap_empty_output"
+                $forexRoadmapExitCode = 1
+            }
+            else {
+                $forexRoadmap = $forexRoadmapJson | ConvertFrom-Json
+                $forexRoadmapStatus = [string](Get-AiOsObjectProperty -Object $forexRoadmap -Name "roadmap_status" -Default "UNKNOWN")
+            }
+        }
+        catch {
+            $forexRoadmap = New-AiOsForexRoadmapFallbackResult `
+                -Status "blocked" `
+                -Reason "forex_builder_roadmap_generation_failed"
+            $forexRoadmapStatus = "blocked"
+            $forexRoadmapBlocker = "forex_builder_roadmap_generation_failed"
+            $forexRoadmapExitCode = 1
+        }
+    }
+}
+else {
+    $forexRoadmap = New-AiOsForexRoadmapFallbackResult `
+        -Status "not_needed" `
+        -Reason "active_candidate_packets_available"
+    $forexRoadmapStatus = "not_needed"
+}
+
+$forexRoadmapCandidates = @(Get-AiOsObjectProperty -Object $forexRoadmap -Name "roadmap_candidates" -Default @())
+$forexRoadmapNextCandidate = Get-AiOsObjectProperty -Object $forexRoadmap -Name "next_recommended_candidate" -Default $null
+$forexRoadmapForbiddenLanes = @(Get-AiOsObjectProperty -Object $forexRoadmap -Name "forbidden_lanes" -Default @())
+$forexRoadmapNextSafeAction = [string](Get-AiOsObjectProperty -Object $forexRoadmap -Name "next_safe_action" -Default "")
+$forexRoadmapUsed = $forexRoadmapNeeded -and $forexRoadmapStatus -eq "ready" -and @($forexRoadmapCandidates).Count -gt 0
+$plannerCandidatePackets = if ($forexRoadmapUsed) { @($forexRoadmapCandidates) } else { @($activeCandidatePackets) }
+$packetQueueCandidateEvidenceJson = ConvertTo-Json -InputObject @($plannerCandidatePackets) -Depth 30 -Compress
 
 if ($completedPacketMemoryStatus -eq "blocked") {
     $routeStatus = "blocked"
@@ -742,6 +892,17 @@ elseif ($completedPacketMemoryStatus -eq "rejected") {
     $routeStatus = "rejected"
     $exitCode = 1
     $rejectionReasons += "completed_packet_memory_rejected"
+}
+
+if ($forexRoadmapNeeded -and $forexRoadmapStatus -eq "blocked") {
+    $routeStatus = "blocked"
+    $exitCode = 1
+    $rejectionReasons += "forex_builder_roadmap_blocked:$forexRoadmapBlocker"
+}
+elseif ($forexRoadmapNeeded -and $forexRoadmapStatus -eq "rejected") {
+    $routeStatus = "rejected"
+    $exitCode = 1
+    $rejectionReasons += "forex_builder_roadmap_rejected"
 }
 
 if (-not (Test-Path -LiteralPath $packetQueuePlannerPath)) {
@@ -977,7 +1138,13 @@ if ($packetQueuePlanStatus -in @("blocked", "rejected")) {
     }
 }
 
-$nextSafeAction = if ($completedPacketMemoryStatus -eq "ready" -and -not $nextCandidateAvailable -and -not [string]::IsNullOrWhiteSpace($completedMemoryNextSafeAction)) {
+$nextSafeAction = if ($forexRoadmapUsed -and -not [string]::IsNullOrWhiteSpace($executorNextSafeAction)) {
+    $executorNextSafeAction
+}
+elseif ($forexRoadmapUsed -and -not [string]::IsNullOrWhiteSpace($forexRoadmapNextSafeAction)) {
+    $forexRoadmapNextSafeAction
+}
+elseif ($completedPacketMemoryStatus -eq "ready" -and -not $nextCandidateAvailable -and -not $forexRoadmapUsed -and -not [string]::IsNullOrWhiteSpace($completedMemoryNextSafeAction)) {
     $completedMemoryNextSafeAction
 }
 elseif (-not [string]::IsNullOrWhiteSpace($contractNextSafeAction)) {
@@ -1168,6 +1335,12 @@ $report = [pscustomobject]@{
     next_candidate_available = $nextCandidateAvailable
     next_candidate = $nextCandidate
     completed_memory_next_safe_action = $completedMemoryNextSafeAction
+    forex_roadmap_status = $forexRoadmapStatus
+    forex_roadmap = $forexRoadmap
+    forex_roadmap_candidates = @($forexRoadmapCandidates)
+    forex_roadmap_next_candidate = $forexRoadmapNextCandidate
+    forex_roadmap_forbidden_lanes = @($forexRoadmapForbiddenLanes)
+    forex_roadmap_used = $forexRoadmapUsed
     packet_queue_plan_status = $packetQueuePlanStatus
     packet_queue_plan = $packetQueuePlan
     codex_ready_packet_preview = $codexReadyPacketPreview
@@ -1249,6 +1422,10 @@ if (-not [string]::IsNullOrWhiteSpace($candidateEvidenceBlocker)) {
 Write-Host "Completed packet memory: $completedPacketMemoryStatus"
 if (-not [string]::IsNullOrWhiteSpace($completedPacketMemoryBlocker)) {
     Write-Host "Completed packet memory blocker: $completedPacketMemoryBlocker"
+}
+Write-Host "Forex roadmap: $forexRoadmapStatus"
+if (-not [string]::IsNullOrWhiteSpace($forexRoadmapBlocker)) {
+    Write-Host "Forex roadmap blocker: $forexRoadmapBlocker"
 }
 Write-Host "Packet queue plan: $packetQueuePlanStatus"
 if (-not [string]::IsNullOrWhiteSpace($packetQueuePlannerBlocker)) {
