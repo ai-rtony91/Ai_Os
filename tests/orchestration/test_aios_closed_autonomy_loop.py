@@ -145,11 +145,13 @@ def _inputs(
     validator_router: dict | None = None,
     approval_gate: dict | None = None,
     dirty_tree_classifier: dict | None = None,
+    autonomous_job_continuation: dict | None = None,
 ) -> dict:
     payloads = {
         "governor_decision": decision,
         "repo_state": repo_state or _repo_state(True),
         "dirty_tree_classifier": dirty_tree_classifier,
+        "autonomous_job_continuation": autonomous_job_continuation,
         "validator_router": validator_router,
         "approval_gate": approval_gate,
         "approval_inbox": None,
@@ -171,6 +173,24 @@ def _inputs(
             },
         ],
         "payloads": payloads,
+    }
+
+
+def _autonomous_job(state: str = "CONTINUE", security_state: str = "CLEAR", allowed: bool = True) -> dict:
+    return {
+        "schema": "AIOS_AUTONOMOUS_JOB_CONTINUATION_STATE.v1",
+        "state": state,
+        "safe_to_continue_without_human": allowed,
+        "stop_reason": None if state == "CONTINUE" else state.lower(),
+        "next_safe_action": f"{state} fixture next action.",
+        "security_snapshot": {
+            "overall_state": security_state,
+            "safe_for_dry_run": security_state in {"CLEAR", "WATCH"},
+            "safe_for_apply": False,
+            "sos_required": state == "SOS",
+            "stop_required": state == "STOP",
+            "review_required": state == "REVIEW_REQUIRED",
+        },
     }
 
 
@@ -340,6 +360,45 @@ def test_security_dirty_blocks_closed_loop_gate() -> None:
 
     assert gate["status"] == "blocked"
     assert "SOS" in gate["reason"]
+    assert gate["safe_to_dispatch"] is False
+
+
+def test_autonomous_job_stop_blocks_closed_loop_gate_first() -> None:
+    m = _load()
+    state = m.build_loop_state(
+        _inputs(
+            _governor_decision(),
+            autonomous_job_continuation=_autonomous_job(state="STOP", security_state="STOP", allowed=False),
+        )
+    )
+
+    gate = m.evaluate_loop_gates(state)
+
+    assert gate["status"] == "blocked"
+    assert "Autonomous job continuation reported STOP" in gate["reason"]
+    assert gate["safe_to_dispatch"] is False
+
+
+def test_autonomous_job_watch_context_can_downgrade_generated_dirty_sos() -> None:
+    m = _load()
+    state = m.build_loop_state(
+        _inputs(
+            _governor_decision(),
+            repo_state=_repo_state(False),
+            autonomous_job_continuation=_autonomous_job(state="CONTINUE", security_state="WATCH", allowed=True),
+            dirty_tree_classifier=_dirty_tree(
+                overall="SECURITY_SOS_DIRTY",
+                dirty_count=2,
+                safe_for_dry_run=False,
+                safe_for_apply=False,
+                sos_required=True,
+            ),
+        )
+    )
+
+    gate = m.evaluate_loop_gates(state)
+
+    assert gate["status"] == "ready_for_dry_run"
     assert gate["safe_to_dispatch"] is False
 
 

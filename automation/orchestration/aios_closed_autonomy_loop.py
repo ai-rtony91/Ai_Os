@@ -159,6 +159,21 @@ def _load_dirty_tree_classifier() -> Any | None:
         return None
 
 
+def _load_autonomous_job_continuation() -> Any | None:
+    path = Path(__file__).parent / "continuation" / "aios_autonomous_job_continuation.py"
+    if not path.is_file():
+        return None
+    try:
+        spec = importlib.util.spec_from_file_location("aios_autonomous_job_continuation", path)
+        if spec is None or spec.loader is None:
+            return None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except Exception:
+        return None
+
+
 def _build_governor_decision(repo_root: Path, generated_at_utc: str | None) -> tuple[dict[str, Any] | None, str]:
     governor = _load_governor_module()
     if governor is None:
@@ -188,6 +203,25 @@ def _build_dirty_tree_classification(repo_root: Path) -> tuple[dict[str, Any] | 
         f"dirty_count={result.get('dirty_count')}; "
         f"safe_for_dry_run={str(result.get('safe_for_dry_run') is True).lower()}; "
         f"safe_for_apply={str(result.get('safe_for_apply') is True).lower()}"
+    )
+    return result, summary
+
+
+def _build_autonomous_job_continuation(repo_root: Path, generated_at_utc: str | None) -> tuple[dict[str, Any] | None, str]:
+    engine = _load_autonomous_job_continuation()
+    if engine is None:
+        return None, "Autonomous job continuation engine is missing or could not be imported."
+    try:
+        result = engine.build_continuation_state(repo_root=repo_root, generated_at_utc=generated_at_utc)
+    except Exception:
+        return None, "Autonomous job continuation engine failed; closed loop is fail-closed."
+    if not isinstance(result, dict):
+        return None, "Autonomous job continuation engine returned a non-object result."
+    security = result.get("security_snapshot") if isinstance(result.get("security_snapshot"), dict) else {}
+    summary = (
+        f"state={result.get('state')}; "
+        f"security={security.get('overall_state')}; "
+        f"safe_to_continue={str(result.get('safe_to_continue_without_human') is True).lower()}"
     )
     return result, summary
 
@@ -228,6 +262,17 @@ def collect_loop_inputs(repo_root: str | Path, generated_at_utc: str | None = No
             Path("automation") / "orchestration" / "continuation" / "aios_dirty_tree_classifier.py",
             "present" if dirty_tree is not None else "unknown",
             dirty_tree_summary,
+        )
+    )
+
+    autonomous_job, autonomous_summary = _build_autonomous_job_continuation(root, generated_at_utc)
+    payloads["autonomous_job_continuation"] = autonomous_job
+    records.append(
+        _input_record(
+            "autonomous_job_continuation",
+            Path("automation") / "orchestration" / "continuation" / "aios_autonomous_job_continuation.py",
+            "present" if autonomous_job is not None else "unknown",
+            autonomous_summary,
         )
     )
 
@@ -406,6 +451,21 @@ def _dirty_tree_payload(loop_state: dict[str, Any]) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _autonomous_job_payload(loop_state: dict[str, Any]) -> dict[str, Any]:
+    payload = loop_state["payloads"].get("autonomous_job_continuation")
+    return payload if isinstance(payload, dict) else {}
+
+
+def _autonomous_job_allows_dry_run(loop_state: dict[str, Any]) -> bool:
+    payload = _autonomous_job_payload(loop_state)
+    security = payload.get("security_snapshot") if isinstance(payload.get("security_snapshot"), dict) else {}
+    return (
+        payload.get("state") == "CONTINUE"
+        and payload.get("safe_to_continue_without_human") is True
+        and str(security.get("overall_state") or "").upper() in {"CLEAR", "WATCH"}
+    )
+
+
 def _dirty_tree_is_safe_for_dry_run(loop_state: dict[str, Any]) -> bool:
     payload = _dirty_tree_payload(loop_state)
     return (
@@ -421,6 +481,8 @@ def _repo_dirty(loop_state: dict[str, Any]) -> bool:
     dirty_tree = _dirty_tree_payload(loop_state)
     if dirty_tree:
         if _dirty_tree_is_safe_for_dry_run(loop_state):
+            return False
+        if _autonomous_job_allows_dry_run(loop_state):
             return False
         if int(dirty_tree.get("dirty_count") or 0) > 0:
             return True
@@ -504,8 +566,29 @@ def evaluate_loop_gates(loop_state: dict[str, Any]) -> dict[str, Any]:
             "safe_to_dispatch": False,
         }
 
+    autonomous_job = _autonomous_job_payload(loop_state)
+    autonomous_state = str(autonomous_job.get("state") or "").upper()
+    if autonomous_state == "SOS":
+        return {
+            "status": "blocked",
+            "reason": "Autonomous job continuation reported SOS; continuation must stop without dispatch.",
+            "safe_to_dispatch": False,
+        }
+    if autonomous_state == "STOP":
+        return {
+            "status": "blocked",
+            "reason": "Autonomous job continuation reported STOP; continuation is blocked.",
+            "safe_to_dispatch": False,
+        }
+    if autonomous_state == "REVIEW_REQUIRED":
+        return {
+            "status": "requires_human_approval",
+            "reason": "Autonomous job continuation requires review before another cycle.",
+            "safe_to_dispatch": False,
+        }
+
     dirty_tree = _dirty_tree_payload(loop_state)
-    if dirty_tree.get("sos_required") is True:
+    if dirty_tree.get("sos_required") is True and not _autonomous_job_allows_dry_run(loop_state):
         return {
             "status": "blocked",
             "reason": "Dirty tree classifier found security SOS indicators; continuation must stop without printing secret values.",

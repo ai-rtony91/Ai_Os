@@ -108,6 +108,29 @@ def _next_component(
     return "unknown"
 
 
+def _autonomous_job_summary(autonomous_job_state: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(autonomous_job_state, dict):
+        return {
+            "available": False,
+            "state": "UNAVAILABLE",
+            "security_state": "UNKNOWN",
+            "allowed": False,
+            "stop_reason": "missing",
+            "next_safe_action": "Autonomous job continuation evidence is unavailable.",
+        }
+    security = autonomous_job_state.get("security_snapshot")
+    security = security if isinstance(security, dict) else {}
+    state = str(autonomous_job_state.get("state") or "UNKNOWN").upper()
+    return {
+        "available": True,
+        "state": state,
+        "security_state": str(security.get("overall_state") or "UNKNOWN").upper(),
+        "allowed": autonomous_job_state.get("safe_to_continue_without_human") is True and state == "CONTINUE",
+        "stop_reason": str(autonomous_job_state.get("stop_reason") or ""),
+        "next_safe_action": str(autonomous_job_state.get("next_safe_action") or "Review autonomous job continuation state."),
+    }
+
+
 def build_continuation_controller(
     *,
     resume_state: dict[str, Any] | None = None,
@@ -116,6 +139,7 @@ def build_continuation_controller(
     bounded_executor_ready: dict[str, Any] | None = None,
     mode_registry: dict[str, Any] | None = None,
     user_goal: str | None = None,
+    autonomous_job_state: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     resume = resume_state if isinstance(resume_state, dict) else {}
     control = control_plane_status if isinstance(control_plane_status, dict) else {}
@@ -130,8 +154,33 @@ def build_continuation_controller(
     ready_status = str(ready.get("status", "not_ready"))
     handoff_status = str(handoff.get("handoff_status", "blocked"))
     safety = _collect_safety(resume, control, handoff, ready)
+    autonomous = _autonomous_job_summary(autonomous_job_state)
 
-    if any(safety.get(flag) is True for flag in HARD_SAFETY_FLAGS):
+    if autonomous["state"] == "SOS":
+        action_type = "sos_stop"
+        continuation_status = "blocked"
+        reason_code = "autonomous_job_security_sos"
+        codex_packet_required = False
+        productive_available = False
+        next_action = "Stop for SOS escalation."
+        next_safe_action = autonomous["next_safe_action"]
+    elif autonomous["state"] == "STOP":
+        action_type = "human_review"
+        continuation_status = "blocked"
+        reason_code = "autonomous_job_stop"
+        codex_packet_required = False
+        productive_available = False
+        next_action = "Stop for human review."
+        next_safe_action = autonomous["next_safe_action"]
+    elif autonomous["state"] == "REVIEW_REQUIRED":
+        action_type = "human_review"
+        continuation_status = "human_review_required"
+        reason_code = "autonomous_job_review_required"
+        codex_packet_required = False
+        productive_available = False
+        next_action = "Stop for human review."
+        next_safe_action = autonomous["next_safe_action"]
+    elif any(safety.get(flag) is True for flag in HARD_SAFETY_FLAGS):
         action_type = "sos_stop"
         continuation_status = "blocked"
         reason_code = "safety_blocker_present"
@@ -197,6 +246,12 @@ def build_continuation_controller(
         "sos_required": action_type == "sos_stop",
         "reason_code": reason_code,
         "next_safe_action": next_safe_action,
+        "autonomous_job_continuation_available": autonomous["available"],
+        "autonomous_job_continuation_state": autonomous["state"],
+        "autonomous_job_security_state": autonomous["security_state"],
+        "autonomous_continuation_allowed": autonomous["allowed"],
+        "autonomous_job_stop_reason": autonomous["stop_reason"],
+        "autonomous_job_next_safe_action": autonomous["next_safe_action"],
         "approval_required": approval_required(human_review=True),
         "safety": safety,
     }

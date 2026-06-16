@@ -109,6 +109,24 @@ function Has-MemberValue {
     return ($Object.PSObject.Properties.Name -contains $Name)
 }
 
+function Invoke-AutonomousJobContinuation {
+    param([string]$RepoRootPath)
+
+    $enginePath = Join-Path $PSScriptRoot "Get-AiOsAutonomousJobContinuation.DRY_RUN.ps1"
+    $state = Invoke-JsonCommand -Path $enginePath -Arguments @("-OutputJson", "-RepoRoot", $RepoRootPath)
+    if ($state -and -not (Has-MemberValue -Object $state -Name "_aios_parse_error")) {
+        return $state
+    }
+    return [pscustomobject]@{
+        schema = "AIOS_AUTONOMOUS_JOB_CONTINUATION_STATE.v1"
+        repo_root = $RepoRootPath
+        state = "REVIEW_REQUIRED"
+        safe_to_continue_without_human = $false
+        stop_reason = "autonomous_job_continuation_unavailable"
+        next_safe_action = "Review autonomous job continuation failure before continuation."
+    }
+}
+
 function Get-ActivePacketId {
     param([string]$RepoRootPath)
 
@@ -133,6 +151,17 @@ $repoRoot = Resolve-RepoRoot -CandidateRoot $RepoRoot
 $gitStatusRaw = @(git -C $repoRoot status --short --untracked-files=all 2>$null)
 $dirtyOrUntrackedCount = $gitStatusRaw.Count
 $dirtyTreeClassification = Invoke-DirtyTreeClassification -RepoRootPath $repoRoot
+$autonomousJobContinuation = Invoke-AutonomousJobContinuation -RepoRootPath $repoRoot
+$autonomousContinuationState = if ($autonomousJobContinuation -and $autonomousJobContinuation.state) {
+    [string]$autonomousJobContinuation.state
+} else {
+    "UNKNOWN"
+}
+$autonomousContinuationAllowed = (
+    $autonomousJobContinuation -and
+    $autonomousJobContinuation.safe_to_continue_without_human -eq $true -and
+    $autonomousContinuationState -eq "CONTINUE"
+)
 $safeDirtyContinuationAllowed = (
     $dirtyOrUntrackedCount -gt 0 -and
     $dirtyTreeClassification.safe_for_dry_run -eq $true -and
@@ -227,6 +256,17 @@ elseif ($safeDirtyContinuationAllowed -and $safeToApprove) {
     $reason = "{0} Dirty generated evidence is safe for READ_ONLY/DRY_RUN continuation only; APPLY remains blocked while dirty files exist." -f $reason
 }
 
+if ($autonomousContinuationState -eq "SOS") {
+    $continuationStatus = "BLOCKED"
+    $reason = "Autonomous Job Continuation reported SOS. Stop continuation and review without printing secret values."
+    $safeToApprove = $false
+}
+elseif ($autonomousContinuationState -eq "STOP") {
+    $continuationStatus = "BLOCKED"
+    $reason = "Autonomous Job Continuation reported STOP. Do not bypass current security or protected-action state."
+    $safeToApprove = $false
+}
+
 if (-not (Test-Path -LiteralPath $registryPath -PathType Leaf)) {
     $campaignReadiness = "NO_REGISTRY"
 }
@@ -285,6 +325,9 @@ $result = [pscustomobject]@{
     dirty_or_untracked_count = $dirtyOrUntrackedCount
     dirty_tree_classification = $dirtyTreeClassification
     safe_dirty_continuation_allowed = $safeDirtyContinuationAllowed
+    autonomous_job_continuation = $autonomousJobContinuation
+    autonomous_continuation_state = $autonomousContinuationState
+    autonomous_continuation_allowed = $autonomousContinuationAllowed
     active_packet_id = $activePacketId
     campaign_readiness = $campaignReadiness
     domain = $domain

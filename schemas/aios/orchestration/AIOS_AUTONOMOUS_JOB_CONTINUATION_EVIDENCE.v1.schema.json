@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_AUTONOMOUS_JOB_CONTINUATION_EVIDENCE.v1.schema.json",
+  "title": "AIOS Autonomous Job Continuation Evidence V1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "repo_root",
+    "branch",
+    "dirty_tree",
+    "security_state",
+    "governor_decision",
+    "selected_task",
+    "approval",
+    "validator",
+    "dirty_signature",
+    "security_signature",
+    "task_signature",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_AUTONOMOUS_JOB_CONTINUATION_EVIDENCE.v1"
+    },
+    "generated_at_utc": {
+      "type": "string"
+    },
+    "repo_root": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "dirty_tree": {
+      "type": ["object", "null"]
+    },
+    "security_state": {
+      "type": ["object", "null"]
+    },
+    "governor_decision": {
+      "type": ["object", "null"]
+    },
+    "selected_task": {
+      "type": "object",
+      "required": ["task_id", "title", "mode", "lane", "blocked", "validators", "allowed_paths", "forbidden_paths"]
+    },
+    "approval": {
+      "type": "object",
+      "required": [
+        "approval_required",
+        "explicit_approval_present",
+        "approval_gate_status",
+        "approval_inbox_status",
+        "approval_mutated"
+      ]
+    },
+    "validator": {
+      "type": "object",
+      "required": ["status", "post_repair_status", "failed", "passed", "required_validators"]
+    },
+    "dirty_signature": {
+      "type": "string"
+    },
+    "security_signature": {
+      "type": "string"
+    },
+    "task_signature": {
+      "type": "string"
+    },
+    "safety": {
+      "type": "object",
+      "required": [
+        "read_only",
+        "dry_run_only",
+        "apply_allowed",
+        "git_add_allowed",
+        "git_commit_allowed",
+        "git_push_allowed",
+        "pr_allowed",
+        "merge_allowed",
+        "worker_launch_allowed",
+        "scheduler_allowed",
+        "daemon_allowed",
+        "broker_allowed",
+        "live_trading_allowed",
+        "production_allowed",
+        "dashboard_mutation_allowed"
+      ]
+    }
+  }
+}
