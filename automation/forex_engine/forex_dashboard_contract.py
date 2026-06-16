@@ -127,6 +127,18 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "dryrun_ledger_records": int(payload.get("dryrun_ledger_records", payload.get("records_count", 0))),
         "dryrun_ledger_accepted": int(payload.get("dryrun_ledger_accepted", payload.get("accepted_count", 0))),
         "dryrun_ledger_rejected": int(payload.get("dryrun_ledger_rejected", payload.get("rejected_count", 0))),
+        "broker_paper_dryrun_risk_governor_classification": str(
+            payload.get("broker_paper_dryrun_risk_governor_classification") or "not_run"
+        ),
+        "broker_paper_dryrun_risk_governor_ready": bool(
+            payload.get("broker_paper_dryrun_risk_governor_ready", False)
+        ),
+        "dryrun_risk_records": int(payload.get("dryrun_risk_records", payload.get("risk_records", 0))),
+        "dryrun_risk_accepted": int(payload.get("dryrun_risk_accepted", payload.get("risk_accepted", 0))),
+        "dryrun_risk_rejected": int(payload.get("dryrun_risk_rejected", payload.get("risk_rejected", 0))),
+        "aggregate_max_loss_usd": float(payload.get("aggregate_max_loss_usd", 0.0)),
+        "max_daily_loss_usd": float(payload.get("max_daily_loss_usd", 5.0)),
+        "kill_switch_armed": bool(payload.get("kill_switch_armed", True)),
         "broker_paper_orders_allowed": False,
         "credentials_allowed": False,
         "network_api_allowed": False,
@@ -178,6 +190,8 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
             f"Stub: {payload.get('broker_paper_stub_contract_classification', 'not_run')} | "
             f"Ledger: {payload.get('broker_paper_dryrun_ledger_classification', 'not_run')}/"
             f"{payload.get('dryrun_ledger_records', 0)} | "
+            f"Risk gov: {payload.get('broker_paper_dryrun_risk_governor_classification', 'not_run')}/"
+            f"{payload.get('dryrun_risk_accepted', 0)}-{payload.get('dryrun_risk_rejected', 0)} | "
             f"Repaired worst PnL: {payload.get('repaired_worst_stress_pnl', 0.0)}"
         ),
         f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",

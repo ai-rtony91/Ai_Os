@@ -104,6 +104,27 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         if dryrun_ledger_classification_for_blockers == "DRYRUN_LEDGER_READY"
         else _text_list(dryrun_ledger.get("rejection_reasons"))
     )
+    dryrun_risk_governor = dict(
+        bundle.get("broker_paper_dryrun_risk_governor")
+        or bundle.get("dryrun_risk_governor")
+        or bundle.get("broker_paper_risk_governor")
+        or {}
+    )
+    dryrun_risk_governor_summary = dict(
+        bundle.get("broker_paper_dryrun_risk_governor_summary")
+        or dryrun_risk_governor
+    )
+    dryrun_risk_governor_classification_for_blockers = str(
+        dryrun_risk_governor_summary.get("broker_paper_dryrun_risk_governor_classification")
+        or dryrun_risk_governor_summary.get("classification")
+        or dryrun_risk_governor.get("classification")
+        or ""
+    )
+    dryrun_risk_governor_rejection_blockers = (
+        []
+        if dryrun_risk_governor_classification_for_blockers == "DRYRUN_RISK_GOVERNOR_READY"
+        else _text_list(dryrun_risk_governor.get("rejection_reasons"))
+    )
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
@@ -120,6 +141,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             presecurity_gate=presecurity_gate,
             adapter_stub_contract=adapter_stub,
             dryrun_intent_ledger=dryrun_ledger,
+            dryrun_risk_governor=dryrun_risk_governor,
         )
     stress_blockers = [
         str(blocker)
@@ -141,6 +163,8 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *_text_list(adapter_stub.get("rejection_reasons")),
             *_text_list(dryrun_ledger.get("blockers")),
             *dryrun_ledger_rejection_blockers,
+            *_text_list(dryrun_risk_governor.get("blockers")),
+            *dryrun_risk_governor_rejection_blockers,
             *_text_list(oos_result.get("blockers")),
             *_text_list(combined_gate.get("blockers")),
             *_text_list(sandbox_readiness.get("blockers")),
@@ -178,6 +202,12 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         or dryrun_ledger.get("classification")
         or "not_run"
     )
+    broker_paper_dryrun_risk_governor_classification = str(
+        dryrun_risk_governor_summary.get("broker_paper_dryrun_risk_governor_classification")
+        or sandbox_readiness.get("broker_paper_dryrun_risk_governor_classification")
+        or dryrun_risk_governor.get("classification")
+        or "not_run"
+    )
     stress_oos_ready = combined_stress_oos_classification == "PAPER_FORWARD_READY"
     paper_forward_ready = (
         classification == "PAPER_FORWARD_READY"
@@ -187,6 +217,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         and presecurity_gate_classification in {"not_run", "PRESECURITY_READY"}
         and broker_paper_stub_contract_classification in {"not_run", "STUB_CONTRACT_READY"}
         and broker_paper_dryrun_ledger_classification in {"not_run", "DRYRUN_LEDGER_READY"}
+        and broker_paper_dryrun_risk_governor_classification in {"not_run", "DRYRUN_RISK_GOVERNOR_READY"}
         and not local_blockers
     )
     review = {
@@ -263,6 +294,49 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         ),
         "dryrun_ledger_rejected": int(
             dryrun_ledger_summary.get("rejected_count", sandbox_readiness.get("dryrun_ledger_rejected", 0))
+        ),
+        "broker_paper_dryrun_risk_governor_classification": broker_paper_dryrun_risk_governor_classification,
+        "broker_paper_dryrun_risk_governor_ready": bool(
+            dryrun_risk_governor_summary.get(
+                "broker_paper_dryrun_risk_governor_ready",
+                sandbox_readiness.get("broker_paper_dryrun_risk_governor_ready", False),
+            )
+        ),
+        "dryrun_risk_records": int(
+            dryrun_risk_governor_summary.get(
+                "records_count",
+                sandbox_readiness.get("dryrun_risk_records", 0),
+            )
+        ),
+        "dryrun_risk_accepted": int(
+            dryrun_risk_governor_summary.get(
+                "risk_accepted",
+                sandbox_readiness.get("dryrun_risk_accepted", 0),
+            )
+        ),
+        "dryrun_risk_rejected": int(
+            dryrun_risk_governor_summary.get(
+                "risk_rejected",
+                sandbox_readiness.get("dryrun_risk_rejected", 0),
+            )
+        ),
+        "aggregate_max_loss_usd": float(
+            dryrun_risk_governor_summary.get(
+                "aggregate_max_loss_usd",
+                sandbox_readiness.get("aggregate_max_loss_usd", 0.0),
+            )
+        ),
+        "max_daily_loss_usd": float(
+            dryrun_risk_governor_summary.get(
+                "max_daily_loss_usd",
+                sandbox_readiness.get("max_daily_loss_usd", 5.0),
+            )
+        ),
+        "kill_switch_armed": bool(
+            dryrun_risk_governor_summary.get(
+                "kill_switch_armed",
+                sandbox_readiness.get("kill_switch_armed", True),
+            )
         ),
         "broker_paper_orders_allowed": False,
         "credentials_allowed": False,
@@ -434,6 +508,49 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             "dryrun_ledger_rejected": int(
                 dryrun_ledger_summary.get("rejected_count", sandbox_readiness.get("dryrun_ledger_rejected", 0))
             ),
+            "broker_paper_dryrun_risk_governor_classification": broker_paper_dryrun_risk_governor_classification,
+            "broker_paper_dryrun_risk_governor_ready": bool(
+                dryrun_risk_governor_summary.get(
+                    "broker_paper_dryrun_risk_governor_ready",
+                    sandbox_readiness.get("broker_paper_dryrun_risk_governor_ready", False),
+                )
+            ),
+            "dryrun_risk_records": int(
+                dryrun_risk_governor_summary.get(
+                    "records_count",
+                    sandbox_readiness.get("dryrun_risk_records", 0),
+                )
+            ),
+            "dryrun_risk_accepted": int(
+                dryrun_risk_governor_summary.get(
+                    "risk_accepted",
+                    sandbox_readiness.get("dryrun_risk_accepted", 0),
+                )
+            ),
+            "dryrun_risk_rejected": int(
+                dryrun_risk_governor_summary.get(
+                    "risk_rejected",
+                    sandbox_readiness.get("dryrun_risk_rejected", 0),
+                )
+            ),
+            "aggregate_max_loss_usd": float(
+                dryrun_risk_governor_summary.get(
+                    "aggregate_max_loss_usd",
+                    sandbox_readiness.get("aggregate_max_loss_usd", 0.0),
+                )
+            ),
+            "max_daily_loss_usd": float(
+                dryrun_risk_governor_summary.get(
+                    "max_daily_loss_usd",
+                    sandbox_readiness.get("max_daily_loss_usd", 5.0),
+                )
+            ),
+            "kill_switch_armed": bool(
+                dryrun_risk_governor_summary.get(
+                    "kill_switch_armed",
+                    sandbox_readiness.get("kill_switch_armed", True),
+                )
+            ),
             "broker_paper_orders_allowed": False,
             "credentials_allowed": False,
             "network_api_allowed": False,
@@ -488,6 +605,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             presecurity_gate_classification,
             broker_paper_stub_contract_classification,
             broker_paper_dryrun_ledger_classification,
+            broker_paper_dryrun_risk_governor_classification,
         ),
         "live_ready": False,
     }
@@ -553,7 +671,12 @@ def _next_safe_action_v2(
     presecurity_gate_classification: str = "not_run",
     broker_paper_stub_contract_classification: str = "not_run",
     broker_paper_dryrun_ledger_classification: str = "not_run",
+    broker_paper_dryrun_risk_governor_classification: str = "not_run",
 ) -> str:
+    if broker_paper_dryrun_risk_governor_classification == "DRYRUN_RISK_GOVERNOR_READY":
+        return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1; broker-paper orders remain blocked."
+    if broker_paper_dryrun_risk_governor_classification in {"FAIL", "WATCHLIST"}:
+        return "Repair PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1 before dry-run replay-harness work."
     if broker_paper_dryrun_ledger_classification == "DRYRUN_LEDGER_READY":
         return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1; broker-paper orders remain blocked."
     if broker_paper_dryrun_ledger_classification in {"FAIL", "WATCHLIST"}:
