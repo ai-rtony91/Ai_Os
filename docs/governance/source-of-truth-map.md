@@ -30,6 +30,8 @@ These ownership decisions are approved for planning and future cleanup packets. 
 | Dashboard/frontend state source | Current fixture-driven `apps/dashboard/`; future read-only API owner `services/orchestrator/`; frontend display contract in `schemas/aios/orchestration/STATE_PROJECTION_RULES.md` and `RUNTIME_VISIBILITY_SCHEMA.json` | Frontends may display read-only projections only; do not wire API mutation, remove fixtures, expose execution controls, or treat display state as authority until approved |
 | CLEAN-era source | `docs/AI_OS/**` | Reference/source material only until file-by-file classification |
 
+Dashboard State Contract V1 pointer: `schemas/aios/orchestration/AIOS_DASHBOARD_STATE_CONTRACT.v1.schema.json`.
+
 ## Frontend and Immersive UI State Boundary
 
 Future dashboard, GUI, UE5, VR, AR, or other visual command-center surfaces must use display-only state projections. A visual layer may read and render canonical evidence, but it does not gain authority to approve work, mutate approvals, move packets, claim locks, launch workers, run APPLY paths, stage files, commit, push, merge, schedule tasks, start daemons, touch broker/live trading paths, or read secrets.

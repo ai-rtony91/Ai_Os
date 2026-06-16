@@ -126,6 +126,8 @@ Runtime visibility is generated/evidence state only. It must not become command 
 
 Dashboard visibility should be projected from runtime visibility and documented API/read-model contracts.
 
+The full canonical dashboard state envelope is `schemas/aios/orchestration/AIOS_DASHBOARD_STATE_CONTRACT.v1.schema.json`.
+
 Dashboard state is display evidence only. It must not approve work, move packets, launch workers, mutate approvals, bypass validators, or execute commands.
 
 ## Conflict Handling
