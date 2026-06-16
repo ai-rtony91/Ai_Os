@@ -121,6 +121,18 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert dashboard["aggregate_max_loss_usd"] >= 0.0
     assert dashboard["max_daily_loss_usd"] >= 0.0
     assert dashboard["kill_switch_armed"] in {True, False}
+    assert dashboard["broker_paper_dryrun_replay_harness_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_REPLAY_HARNESS_READY",
+        "not_run",
+    }
+    assert dashboard["broker_paper_dryrun_replay_harness_ready"] in {True, False}
+    assert dashboard["replay_records"] >= 0
+    assert dashboard["replay_stub_accepted"] >= 0
+    assert dashboard["replay_stub_rejected"] >= 0
+    assert dashboard["replay_risk_accepted"] >= 0
+    assert dashboard["replay_risk_rejected"] >= 0
     assert dashboard["broker_paper_orders_allowed"] is False
     assert dashboard["credentials_allowed"] is False
     assert dashboard["network_api_allowed"] is False
@@ -129,6 +141,7 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
         "NOT_READY",
         "WATCHLIST",
         "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
+        "DRYRUN_REPLAY_HARNESS_READY",
         "not_run",
     }
     assert dashboard["broker_paper_sandbox_contract_ready"] in {True, False}
@@ -148,6 +161,7 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert any("Sandbox contract:" in line for line in lines)
     assert any("Ledger:" in line for line in lines)
     assert any("Risk gov:" in line for line in lines)
+    assert any("Replay:" in line for line in lines)
     assert any("Presecurity:" in line for line in lines)
     assert any("Stub:" in line for line in lines)
     assert any("Repaired worst PnL:" in line for line in lines)

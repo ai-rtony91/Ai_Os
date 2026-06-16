@@ -4,6 +4,7 @@ from typing import Any
 
 from automation.forex_engine import broker_paper_adapter_stub_contract
 from automation.forex_engine import broker_paper_dryrun_intent_ledger
+from automation.forex_engine import broker_paper_dryrun_replay_harness
 from automation.forex_engine import broker_paper_dryrun_risk_governor
 from automation.forex_engine import broker_paper_presecurity_gate
 from automation.forex_engine import schema_contracts as schemas
@@ -13,7 +14,8 @@ PAPER_ONLY_CONTRACT = "PAPER_ONLY_CONTRACT"
 NOT_READY = "NOT_READY"
 WATCHLIST = "WATCHLIST"
 CONTRACT_READY = "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET"
-ALLOWED_READINESS_STATUSES = {NOT_READY, WATCHLIST, CONTRACT_READY}
+DRYRUN_REPLAY_HARNESS_READY = "DRYRUN_REPLAY_HARNESS_READY"
+ALLOWED_READINESS_STATUSES = {NOT_READY, WATCHLIST, CONTRACT_READY, DRYRUN_REPLAY_HARNESS_READY}
 FORBIDDEN_READINESS_STATUSES = {"LIVE_READY", "BROKER_READY", "ORDER_READY", "AUTO_TRADE_READY"}
 
 
@@ -51,6 +53,7 @@ def evaluate_broker_paper_sandbox_readiness(
     adapter_stub_contract: dict[str, Any] | None = None,
     dryrun_intent_ledger: dict[str, Any] | None = None,
     dryrun_risk_governor: dict[str, Any] | None = None,
+    dryrun_replay_harness: dict[str, Any] | None = None,
     policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     active_policy = default_broker_paper_sandbox_readiness_policy()
@@ -104,6 +107,18 @@ def evaluate_broker_paper_sandbox_readiness(
         if active_dryrun_risk_governor
         else {}
     )
+    active_dryrun_replay_harness = dict(
+        dryrun_replay_harness
+        or active_evidence.get("broker_paper_dryrun_replay_harness")
+        or active_evidence.get("dryrun_replay_harness")
+        or active_evidence.get("broker_paper_replay_harness")
+        or {}
+    )
+    active_dryrun_replay_harness_summary = (
+        broker_paper_dryrun_replay_harness.summarize_dryrun_replay_harness(active_dryrun_replay_harness)
+        if active_dryrun_replay_harness
+        else {}
+    )
     evidence_gates = _evidence_gates(
         active_evidence,
         active_stress_oos,
@@ -116,6 +131,7 @@ def evaluate_broker_paper_sandbox_readiness(
         active_adapter_stub,
         active_dryrun_ledger_summary or active_dryrun_ledger,
         active_dryrun_risk_governor_summary or active_dryrun_risk_governor,
+        active_dryrun_replay_harness_summary or active_dryrun_replay_harness,
         active_policy,
     )
     passed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is True]
@@ -140,6 +156,7 @@ def evaluate_broker_paper_sandbox_readiness(
             active_adapter_stub,
             active_dryrun_ledger_summary or active_dryrun_ledger,
             active_dryrun_risk_governor_summary or active_dryrun_risk_governor,
+            active_dryrun_replay_harness_summary or active_dryrun_replay_harness,
         ),
         "required_future_protected_approvals": _required_future_protected_approvals(),
         "forbidden_current_actions": _forbidden_current_actions(),
@@ -206,9 +223,38 @@ def evaluate_broker_paper_sandbox_readiness(
         "dryrun_risk_records": int(active_dryrun_risk_governor_summary.get("records_count", 0)),
         "dryrun_risk_accepted": int(active_dryrun_risk_governor_summary.get("risk_accepted", 0)),
         "dryrun_risk_rejected": int(active_dryrun_risk_governor_summary.get("risk_rejected", 0)),
-        "aggregate_max_loss_usd": float(active_dryrun_risk_governor_summary.get("aggregate_max_loss_usd", 0.0)),
-        "max_daily_loss_usd": float(active_dryrun_risk_governor_summary.get("max_daily_loss_usd", 5.0)),
-        "kill_switch_armed": bool(active_dryrun_risk_governor_summary.get("kill_switch_armed", True)),
+        "broker_paper_dryrun_replay_harness_status": active_dryrun_replay_harness_summary.get(
+            "classification",
+            "not_run",
+        ),
+        "broker_paper_dryrun_replay_harness_classification": active_dryrun_replay_harness_summary.get(
+            "classification",
+            "not_run",
+        ),
+        "broker_paper_dryrun_replay_harness_ready": False,
+        "replay_records": int(active_dryrun_replay_harness_summary.get("records_replayed", 0)),
+        "replay_stub_accepted": int(active_dryrun_replay_harness_summary.get("stub_accepted", 0)),
+        "replay_stub_rejected": int(active_dryrun_replay_harness_summary.get("stub_rejected", 0)),
+        "replay_risk_accepted": int(active_dryrun_replay_harness_summary.get("risk_accepted", 0)),
+        "replay_risk_rejected": int(active_dryrun_replay_harness_summary.get("risk_rejected", 0)),
+        "aggregate_max_loss_usd": float(
+            active_dryrun_replay_harness_summary.get(
+                "aggregate_max_loss_usd",
+                active_dryrun_risk_governor_summary.get("aggregate_max_loss_usd", 0.0),
+            )
+        ),
+        "max_daily_loss_usd": float(
+            active_dryrun_replay_harness_summary.get(
+                "max_daily_loss_usd",
+                active_dryrun_risk_governor_summary.get("max_daily_loss_usd", 5.0),
+            )
+        ),
+        "kill_switch_armed": bool(
+            active_dryrun_replay_harness_summary.get(
+                "kill_switch_armed",
+                active_dryrun_risk_governor_summary.get("kill_switch_armed", True),
+            )
+        ),
         "file_writes_allowed": False,
         "reports_writes_allowed": False,
         "would_place_order": False,
@@ -218,6 +264,7 @@ def evaluate_broker_paper_sandbox_readiness(
         "credentials_used": False,
         "credentials_allowed": False,
         "next_safe_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
+        "live_ready": False,
         "live_trade_ready": False,
         "real_order_ready": False,
         "broker_integration_active": False,
@@ -248,10 +295,19 @@ def evaluate_broker_paper_sandbox_readiness(
         active_dryrun_ledger_summary or active_dryrun_ledger,
         active_dryrun_risk_governor_summary or active_dryrun_risk_governor,
     )
+    result["broker_paper_dryrun_replay_harness_ready"] = _dryrun_replay_harness_ready(
+        evidence_gates,
+        active_presecurity_gate,
+        active_adapter_stub,
+        active_dryrun_ledger_summary or active_dryrun_ledger,
+        active_dryrun_risk_governor_summary or active_dryrun_risk_governor,
+        active_dryrun_replay_harness_summary or active_dryrun_replay_harness,
+    )
     result["broker_paper_stub_contract_ready"] = result["adapter_stub_contract_ready"]
-    result["broker_paper_sandbox_contract_ready"] = result["broker_paper_dryrun_risk_governor_ready"]
-    result["broker_paper_contract_ready"] = result["broker_paper_dryrun_risk_governor_ready"]
+    result["broker_paper_sandbox_contract_ready"] = result["broker_paper_dryrun_replay_harness_ready"]
+    result["broker_paper_contract_ready"] = result["broker_paper_dryrun_replay_harness_ready"]
     result["next_safe_packet"] = _next_safe_packet_id(
+        result["broker_paper_dryrun_replay_harness_ready"],
         result["broker_paper_dryrun_risk_governor_ready"],
         result["broker_paper_dryrun_ledger_ready"],
         result["adapter_stub_contract_ready"],
@@ -260,6 +316,7 @@ def evaluate_broker_paper_sandbox_readiness(
     result["next_safe_action"] = _next_safe_action(
         result["readiness_status"],
         result["blockers"],
+        result["broker_paper_dryrun_replay_harness_ready"],
         result["broker_paper_dryrun_risk_governor_ready"],
         result["broker_paper_dryrun_ledger_ready"],
         result["adapter_stub_contract_ready"],
@@ -288,7 +345,7 @@ def classify_broker_paper_sandbox_readiness(result: dict[str, Any]) -> str:
         return WATCHLIST
     if blockers:
         return NOT_READY
-    return CONTRACT_READY
+    return DRYRUN_REPLAY_HARNESS_READY
 
 
 def broker_paper_sandbox_boundary_summary() -> dict[str, Any]:
@@ -333,6 +390,9 @@ def broker_paper_sandbox_boundary_summary() -> dict[str, Any]:
         "next_safe_packet_after_stub_contract": "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1",
         "next_safe_packet_after_dryrun_ledger": "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1",
         "next_safe_packet_after_dryrun_risk_governor": "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1",
+        "next_safe_packet_after_dryrun_replay_harness": (
+            "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
+        ),
     }
 
 
@@ -345,6 +405,8 @@ def assert_no_broker_paper_side_effects(result: dict[str, Any]) -> None:
         raise ValueError("live_trade_ready must remain false")
     if payload.get("real_order_ready") is not False:
         raise ValueError("real_order_ready must remain false")
+    if payload.get("live_ready") is not False:
+        raise ValueError("live_ready must remain false")
     if payload.get("broker_integration_active") is not False:
         raise ValueError("broker_integration_active must remain false")
     if payload.get("credentials_required_now") is not False:
@@ -435,6 +497,7 @@ def _evidence_gates(
     adapter_stub: dict[str, Any],
     dryrun_ledger: dict[str, Any],
     dryrun_risk_governor: dict[str, Any],
+    dryrun_replay_harness: dict[str, Any],
     policy: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     multi = dict(evidence.get("multi_fixture_paper_forward_summary") or {})
@@ -469,6 +532,11 @@ def _evidence_gates(
     dryrun_risk_governor_classification = str(
         dryrun_risk_governor.get("classification")
         or dryrun_risk_governor.get("broker_paper_dryrun_risk_governor_classification")
+        or ""
+    )
+    dryrun_replay_harness_classification = str(
+        dryrun_replay_harness.get("classification")
+        or dryrun_replay_harness.get("broker_paper_dryrun_replay_harness_classification")
         or ""
     )
     gates = {
@@ -610,6 +678,31 @@ def _evidence_gates(
                                         True,
                                     )
                                 )
+                                if (
+                                    dryrun_risk_governor_classification
+                                    == broker_paper_dryrun_risk_governor.DRYRUN_RISK_GOVERNOR_READY
+                                ):
+                                    if dryrun_replay_harness:
+                                        gates["broker_paper_dryrun_replay_harness_classification"] = (
+                                            _dryrun_replay_harness_classification_gate(
+                                                dryrun_replay_harness_classification
+                                            )
+                                        )
+                                        gates["broker_paper_dryrun_replay_harness_forbidden_capabilities_blocked"] = (
+                                            _boolean_gate(
+                                                _dryrun_replay_harness_forbidden_capabilities_blocked(
+                                                    dryrun_replay_harness
+                                                ),
+                                                _dryrun_replay_harness_forbidden_capabilities_blocked(
+                                                    dryrun_replay_harness
+                                                ),
+                                                True,
+                                            )
+                                        )
+                                    else:
+                                        gates["broker_paper_dryrun_replay_harness_present"] = (
+                                            _boolean_watchlist(False, True)
+                                        )
                             else:
                                 gates["broker_paper_dryrun_risk_governor_present"] = _boolean_watchlist(False, True)
                     else:
@@ -752,6 +845,32 @@ def _dryrun_risk_governor_classification_gate(classification: str) -> dict[str, 
         "passed": False,
         "actual": classification or "missing",
         "threshold": broker_paper_dryrun_risk_governor.DRYRUN_RISK_GOVERNOR_READY,
+        "comparator": "==",
+        "classification": "FAIL",
+    }
+
+
+def _dryrun_replay_harness_classification_gate(classification: str) -> dict[str, Any]:
+    if classification == broker_paper_dryrun_replay_harness.DRYRUN_REPLAY_HARNESS_READY:
+        return {
+            "passed": True,
+            "actual": classification,
+            "threshold": broker_paper_dryrun_replay_harness.DRYRUN_REPLAY_HARNESS_READY,
+            "comparator": "==",
+            "classification": "PAPER_FORWARD_READY",
+        }
+    if classification == "WATCHLIST":
+        return {
+            "passed": True,
+            "actual": classification,
+            "threshold": broker_paper_dryrun_replay_harness.DRYRUN_REPLAY_HARNESS_READY,
+            "comparator": "==",
+            "classification": "WATCHLIST",
+        }
+    return {
+        "passed": False,
+        "actual": classification or "missing",
+        "threshold": broker_paper_dryrun_replay_harness.DRYRUN_REPLAY_HARNESS_READY,
         "comparator": "==",
         "classification": "FAIL",
     }
@@ -901,6 +1020,35 @@ def _dryrun_risk_governor_forbidden_capabilities_blocked(dryrun_risk_governor: d
     return True
 
 
+def _dryrun_replay_harness_forbidden_capabilities_blocked(dryrun_replay_harness: dict[str, Any]) -> bool:
+    required_false_fields = (
+        "file_writes_allowed",
+        "reports_writes_allowed",
+        "broker_sdk_allowed",
+        "network_api_allowed",
+        "credentials_allowed",
+        "env_secret_read_allowed",
+        "webhook_allowed",
+        "scheduler_allowed",
+        "daemon_allowed",
+        "broker_paper_orders_allowed",
+        "live_orders_allowed",
+        "would_place_order",
+        "order_placed",
+        "broker_request_sent",
+        "network_used",
+        "credentials_used",
+        "live_ready",
+        "live_trade_ready",
+    )
+    if any(dryrun_replay_harness.get(field) is not False for field in required_false_fields):
+        return False
+    safety_flags = dict(dryrun_replay_harness.get("safety_flags") or {})
+    if any(safety_flags.get(field) is True for field in required_false_fields):
+        return False
+    return True
+
+
 def _adapter_stub_contract_ready(
     evidence_gates: dict[str, dict[str, Any]],
     presecurity_gate: dict[str, Any],
@@ -916,6 +1064,8 @@ def _adapter_stub_contract_ready(
         if name.startswith("broker_paper_dryrun_ledger"):
             continue
         if name.startswith("broker_paper_dryrun_risk_governor"):
+            continue
+        if name.startswith("broker_paper_dryrun_replay_harness"):
             continue
         if gate.get("passed") is not True:
             return False
@@ -938,6 +1088,8 @@ def _dryrun_ledger_ready(
         return False
     for name, gate in evidence_gates.items():
         if name.startswith("broker_paper_dryrun_risk_governor"):
+            continue
+        if name.startswith("broker_paper_dryrun_replay_harness"):
             continue
         if gate.get("passed") is not True:
             return False
@@ -962,6 +1114,40 @@ def _dryrun_risk_governor_ready(
     if (
         dryrun_risk_governor.get("classification")
         != broker_paper_dryrun_risk_governor.DRYRUN_RISK_GOVERNOR_READY
+    ):
+        return False
+    for name, gate in evidence_gates.items():
+        if name.startswith("broker_paper_dryrun_replay_harness"):
+            continue
+        if gate.get("passed") is not True:
+            return False
+        if gate.get("classification") != "PAPER_FORWARD_READY":
+            return False
+    return True
+
+
+def _dryrun_replay_harness_ready(
+    evidence_gates: dict[str, dict[str, Any]],
+    presecurity_gate: dict[str, Any],
+    adapter_stub: dict[str, Any],
+    dryrun_ledger: dict[str, Any],
+    dryrun_risk_governor: dict[str, Any],
+    dryrun_replay_harness: dict[str, Any],
+) -> bool:
+    if presecurity_gate.get("classification") != broker_paper_presecurity_gate.PRESECURITY_READY:
+        return False
+    if adapter_stub.get("classification") != broker_paper_adapter_stub_contract.STUB_CONTRACT_READY:
+        return False
+    if dryrun_ledger.get("classification") != broker_paper_dryrun_intent_ledger.DRYRUN_LEDGER_READY:
+        return False
+    if (
+        dryrun_risk_governor.get("classification")
+        != broker_paper_dryrun_risk_governor.DRYRUN_RISK_GOVERNOR_READY
+    ):
+        return False
+    if (
+        dryrun_replay_harness.get("classification")
+        != broker_paper_dryrun_replay_harness.DRYRUN_REPLAY_HARNESS_READY
     ):
         return False
     for gate in evidence_gates.values():
@@ -990,6 +1176,7 @@ def _blockers(
     adapter_stub: dict[str, Any],
     dryrun_ledger: dict[str, Any],
     dryrun_risk_governor: dict[str, Any],
+    dryrun_replay_harness: dict[str, Any],
 ) -> list[str]:
     blockers = []
     for name, gate in evidence_gates.items():
@@ -1017,6 +1204,13 @@ def _blockers(
         != broker_paper_dryrun_risk_governor.DRYRUN_RISK_GOVERNOR_READY
     ):
         blockers.extend([str(item) for item in list(dryrun_risk_governor.get("rejection_reasons") or [])])
+    blockers.extend([str(item) for item in list(dryrun_replay_harness.get("blockers") or [])])
+    if (
+        dryrun_replay_harness
+        and dryrun_replay_harness.get("classification")
+        != broker_paper_dryrun_replay_harness.DRYRUN_REPLAY_HARNESS_READY
+    ):
+        blockers.extend([str(item) for item in list(dryrun_replay_harness.get("rejection_reasons") or [])])
     return _unique(blockers)
 
 
@@ -1069,10 +1263,16 @@ def _forbidden_current_actions() -> list[str]:
 def _next_safe_action(
     readiness_status: str,
     blockers: list[str],
+    dryrun_replay_harness_ready: bool,
     dryrun_risk_governor_ready: bool,
     dryrun_ledger_ready: bool,
     adapter_stub_contract_ready: bool,
 ) -> str:
+    if dryrun_replay_harness_ready:
+        return (
+            "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1; "
+            "broker-paper orders remain blocked."
+        )
     if dryrun_risk_governor_ready:
         return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1; broker-paper orders remain blocked."
     if dryrun_ledger_ready:
@@ -1082,6 +1282,10 @@ def _next_safe_action(
     if readiness_status == CONTRACT_READY:
         return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1; broker-paper orders remain blocked."
     if readiness_status == WATCHLIST:
+        if any("broker_paper_dryrun_replay_harness_present" in blocker for blocker in blockers):
+            return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1; broker-paper orders remain blocked."
+        if any("broker_paper_dryrun_replay_harness" in blocker for blocker in blockers):
+            return "Repair broker-paper dry-run replay harness evidence before evidence-gate work."
         if any("broker_paper_dryrun_risk_governor_present" in blocker for blocker in blockers):
             return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1; broker-paper orders remain blocked."
         if any("broker_paper_dryrun_risk_governor" in blocker for blocker in blockers):
@@ -1111,11 +1315,14 @@ def _next_safe_action(
 
 
 def _next_safe_packet_id(
+    dryrun_replay_harness_ready: bool,
     dryrun_risk_governor_ready: bool,
     dryrun_ledger_ready: bool,
     adapter_stub_contract_ready: bool,
     presecurity_gate: dict[str, Any],
 ) -> str:
+    if dryrun_replay_harness_ready:
+        return "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
     if dryrun_risk_governor_ready:
         return "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1"
     if dryrun_ledger_ready:
