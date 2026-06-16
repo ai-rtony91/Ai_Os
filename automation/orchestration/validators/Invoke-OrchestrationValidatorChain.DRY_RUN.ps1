@@ -1,6 +1,9 @@
 [CmdletBinding()]
 param(
-    [string]$ConfigPath = "automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json"
+    [string]$ConfigPath = "automation/orchestration/validators/VALIDATOR_CHAIN_CONFIG_001.json",
+    [string[]]$ChangedPath = @(),
+    [string[]]$AllowedPath = @(),
+    [string[]]$ForbiddenPath = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -28,6 +31,65 @@ function Get-RepoRoot {
         throw "Unable to find git repository root."
     }
     return $root.Trim()
+}
+
+function ConvertTo-AiOsRelativePath {
+    param([string]$Path)
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return ""
+    }
+
+    $normalized = $Path.Trim().Trim([char]34).Trim([char]39) -replace "\\", "/"
+    while ($normalized.StartsWith("./")) {
+        $normalized = $normalized.Substring(2)
+    }
+    while ($normalized.StartsWith("/")) {
+        $normalized = $normalized.Substring(1)
+    }
+    return $normalized
+}
+
+function ConvertTo-AiOsPathList {
+    param([string[]]$Paths)
+
+    $normalized = New-Object System.Collections.Generic.List[string]
+    foreach ($path in @($Paths)) {
+        $clean = ConvertTo-AiOsRelativePath -Path $path
+        if (-not [string]::IsNullOrWhiteSpace($clean)) {
+            $normalized.Add($clean.TrimEnd("/")) | Out-Null
+        }
+    }
+    return @($normalized | Sort-Object -Unique)
+}
+
+function Test-AiOsPathUnder {
+    param(
+        [string]$Path,
+        [string]$Scope
+    )
+
+    $normalizedPath = (ConvertTo-AiOsRelativePath -Path $Path).TrimEnd("/")
+    $normalizedScope = (ConvertTo-AiOsRelativePath -Path $Scope).TrimEnd("/")
+    if ([string]::IsNullOrWhiteSpace($normalizedPath) -or [string]::IsNullOrWhiteSpace($normalizedScope)) {
+        return $false
+    }
+
+    return ($normalizedPath -eq $normalizedScope -or $normalizedPath -like "$normalizedScope/*")
+}
+
+function Test-AiOsPathInScope {
+    param(
+        [string]$Path,
+        [string[]]$Scopes
+    )
+
+    foreach ($scope in @($Scopes)) {
+        if (Test-AiOsPathUnder -Path $Path -Scope $scope) {
+            return $true
+        }
+    }
+    return $false
 }
 
 $repoRoot = Get-RepoRoot
@@ -67,16 +129,24 @@ else {
     Add-ValidatorResult -Results $results -ValidatorName "git_clean_state" -Result "FAIL" -Severity "BLOCKER" -Notes "git status failed."
 }
 
-$changedPaths = @(
+$statusChangedPaths = @(
     foreach ($line in $statusLines) {
         if ($line -like "##*" -or $line.Length -lt 4) { continue }
         $path = $line.Substring(3).Trim()
         if ($path -match " -> ") {
             $path = ($path -split " -> ")[-1].Trim()
         }
-        $path -replace "\\", "/"
+        ConvertTo-AiOsRelativePath -Path $path
     }
 )
+$explicitChangedPaths = ConvertTo-AiOsPathList -Paths $ChangedPath
+$changedPaths = if ($explicitChangedPaths.Count -gt 0) { $explicitChangedPaths } else { $statusChangedPaths }
+$packetAllowedPaths = ConvertTo-AiOsPathList -Paths $AllowedPath
+$packetForbiddenPaths = ConvertTo-AiOsPathList -Paths $ForbiddenPath
+$packetScopeProvided = ($packetAllowedPaths.Count -gt 0 -or $packetForbiddenPaths.Count -gt 0)
+$unsafePacketAllowedScopes = @($packetAllowedPaths | Where-Object {
+    $_ -in @("apps", "apps/trading_lab", "apps/trading_lab/trading_lab")
+})
 
 $allowedPrefixes = @(
     "automation/orchestration/",
@@ -108,24 +178,77 @@ $blockedPrefixes = @(
     "DEPLOYMENT.md",
     "WHITEPAPER.md"
 )
+$hardBlockedPrefixes = @(
+    ".git/",
+    ".codex_backups/",
+    "apps/dashboard/",
+    "services/",
+    "core/",
+    "Reports/security/",
+    "automation/operator/",
+    "automation/telemetry/",
+    "Reports/telemetry/",
+    "README.md",
+    "RISK_POLICY.md",
+    "SOURCE_LOG.md",
+    "ERROR_LOG.md",
+    "HALLUCINATION_LOG.md",
+    "AAR.md",
+    "DAILY_REPORT.md",
+    "ARCHITECTURE.md",
+    "DEPLOYMENT.md",
+    "WHITEPAPER.md"
+)
+
+if ($packetScopeProvided) {
+    if ($unsafePacketAllowedScopes.Count -eq 0) {
+        Add-ValidatorResult -Results $results -ValidatorName "packet_scope" -Result "PASS" -Severity "INFO" -Notes "Packet-aware path scope is exact enough for validator review."
+    }
+    else {
+        Add-ValidatorResult -Results $results -ValidatorName "packet_scope" -Result "FAIL" -Severity "BLOCKER" -Notes ("Broad packet allowed paths are blocked: {0}" -f ($unsafePacketAllowedScopes -join ", "))
+    }
+}
 
 $outsideAllowed = @($changedPaths | Where-Object {
     $path = $_
-    -not [bool]@($allowedPrefixes | Where-Object { $path -like "$_*" }).Count
+    -not (Test-AiOsPathInScope -Path $path -Scopes $allowedPrefixes) -and
+        -not (Test-AiOsPathInScope -Path $path -Scopes $packetAllowedPaths)
 })
 if ($outsideAllowed.Count -eq 0) {
-    Add-ValidatorResult -Results $results -ValidatorName "allowed_paths" -Result "PASS" -Severity "INFO" -Notes "Changed files are inside orchestration allowed paths."
+    $allowedNotes = if ($packetAllowedPaths.Count -gt 0) {
+        "Changed files are inside validator defaults or packet-approved exact paths."
+    }
+    else {
+        "Changed files are inside orchestration allowed paths."
+    }
+    Add-ValidatorResult -Results $results -ValidatorName "allowed_paths" -Result "PASS" -Severity "INFO" -Notes $allowedNotes
 }
 else {
-    Add-ValidatorResult -Results $results -ValidatorName "allowed_paths" -Result "WARN" -Severity "REVIEW_REQUIRED" -Notes ("Changed files outside current validator package: {0}" -f ($outsideAllowed -join ", "))
+    $allowedResult = if ($packetScopeProvided) { "FAIL" } else { "WARN" }
+    $allowedSeverity = if ($packetScopeProvided) { "BLOCKER" } else { "REVIEW_REQUIRED" }
+    $allowedMessage = if ($packetScopeProvided) { "Changed files outside packet-approved exact paths" } else { "Changed files outside current validator package" }
+    Add-ValidatorResult -Results $results -ValidatorName "allowed_paths" -Result $allowedResult -Severity $allowedSeverity -Notes ("{0}: {1}" -f $allowedMessage, ($outsideAllowed -join ", "))
 }
 
 $blockedMatches = @($changedPaths | Where-Object {
     $path = $_
-    [bool]@($blockedPrefixes | Where-Object { $path -eq $_ -or $path -like "$_*" }).Count
+    $blockedByPacketForbidden = Test-AiOsPathInScope -Path $path -Scopes $packetForbiddenPaths
+    $blockedByHardPrefix = Test-AiOsPathInScope -Path $path -Scopes $hardBlockedPrefixes
+    $blockedByDefaultPrefix = Test-AiOsPathInScope -Path $path -Scopes $blockedPrefixes
+    $allowedByPacketScope = Test-AiOsPathInScope -Path $path -Scopes $packetAllowedPaths
+
+    $blockedByPacketForbidden -or
+        ($packetScopeProvided -and ($blockedByHardPrefix -or ((-not $allowedByPacketScope) -and $blockedByDefaultPrefix))) -or
+        ((-not $packetScopeProvided) -and $blockedByDefaultPrefix)
 })
 if ($blockedMatches.Count -eq 0) {
-    Add-ValidatorResult -Results $results -ValidatorName "blocked_paths" -Result "PASS" -Severity "INFO" -Notes "No blocked changed paths detected."
+    $blockedNotes = if ($packetScopeProvided) {
+        "No blocked changed paths detected inside packet-aware exact path scope."
+    }
+    else {
+        "No blocked changed paths detected."
+    }
+    Add-ValidatorResult -Results $results -ValidatorName "blocked_paths" -Result "PASS" -Severity "INFO" -Notes $blockedNotes
 }
 else {
     Add-ValidatorResult -Results $results -ValidatorName "blocked_paths" -Result "FAIL" -Severity "BLOCKER" -Notes ("Blocked changed paths detected: {0}" -f ($blockedMatches -join ", "))
