@@ -4,6 +4,7 @@ from pathlib import Path
 
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import local_fixture_catalog
+from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import oos_expansion
 from automation.forex_engine import oos_repair
 from automation.forex_engine import run_oos_expansion_demo
@@ -111,6 +112,27 @@ def test_expanded_oos_accepts_repair_result_and_preserves_watchlist_when_repair_
     assert repaired["broker_paper_contract_ready"] is False
     assert repaired["live_ready"] is False
     assert repaired["protected_gate_required"] is True
+
+
+def test_expanded_oos_accepts_low_vol_redesign_result() -> None:
+    expanded = oos_expansion.run_expanded_oos_validation()
+    repair = oos_repair.apply_oos_repair_policy(expanded)
+    low_vol = low_vol_edge_redesign.apply_low_vol_edge_redesign(repair)
+    redesigned = oos_expansion.run_expanded_oos_validation(
+        oos_repair_result=repair,
+        low_vol_edge_result=low_vol,
+    )
+    summary = oos_expansion.summarize_expanded_oos(redesigned)
+
+    assert redesigned["low_vol_edge_classification"] == low_vol["classification"]
+    assert redesigned["low_vol_policy_action"] == low_vol["low_vol_policy_action"]
+    assert redesigned["redesigned_max_degradation_pct"] == low_vol["redesigned_max_degradation_pct"]
+    assert redesigned["max_degradation_pct"] <= redesigned["repaired_max_degradation_pct"]
+    assert redesigned["low_vol_rejected_intents"] == low_vol["rejected_low_vol_intents"]
+    assert redesigned["broker_paper_contract_ready"] is False
+    assert redesigned["live_ready"] is False
+    assert summary["low_vol_edge_classification"] == low_vol["classification"]
+    assert summary["redesigned_max_degradation_pct"] == low_vol["redesigned_max_degradation_pct"]
 
 
 def test_expanded_oos_can_advance_to_paper_forward_ready_only_when_repair_clears_policy() -> None:

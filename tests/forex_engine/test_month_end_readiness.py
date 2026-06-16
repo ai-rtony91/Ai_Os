@@ -133,6 +133,10 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["expanded_oos_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["oos_repair_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["low_vol_edge_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["low_vol_policy_action"] in {"NO_TRADE_GATE", "REDUCED_SIZE", "EDGE_REDESIGN", "WATCHLIST", "not_run"}
+    assert review["redesigned_max_degradation_pct"] >= 0.0
+    assert review["low_vol_rejected_intents"] >= 0
     assert review["original_max_degradation_pct"] >= review["repaired_max_degradation_pct"]
     assert review["degradation_improvement_pct"] >= 0.0
     assert review["weakest_split"]
@@ -152,6 +156,21 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
         "PAPER_FORWARD_READY",
         "not_run",
     }
+    assert review["evidence_summary"]["low_vol_edge_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "PAPER_FORWARD_READY",
+        "not_run",
+    }
+    assert review["evidence_summary"]["low_vol_policy_action"] in {
+        "NO_TRADE_GATE",
+        "REDUCED_SIZE",
+        "EDGE_REDESIGN",
+        "WATCHLIST",
+        "not_run",
+    }
+    assert review["evidence_summary"]["redesigned_max_degradation_pct"] >= 0.0
+    assert review["evidence_summary"]["low_vol_rejected_intents"] >= 0
     assert (
         review["evidence_summary"]["original_max_degradation_pct"]
         >= review["evidence_summary"]["repaired_max_degradation_pct"]
@@ -176,6 +195,7 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert "broker integration is not approved" in review["live_trade_blockers"]
     assert (
         "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1" in review["next_safe_action"]
+        or "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1" in review["next_safe_action"]
         or "live readiness requires separate future approval" in review["next_safe_action"]
     )
 

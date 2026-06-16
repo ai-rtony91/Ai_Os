@@ -32,6 +32,7 @@ STRESS_REPAIR_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V1"
 OOS_EXPANSION_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1"
 OOS_REPAIR_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1"
 LOW_VOL_EDGE_REDESIGN_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1"
+LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-RESEARCH-V2"
 STRESS_REPAIR_V2_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V2"
 PRESECURITY_GATE_PACKET_ID = "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
 SANDBOX_ADAPTER_STUB_PACKET_ID = "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
@@ -114,7 +115,7 @@ def test_today_goal_alignment_is_present_and_aligned() -> None:
 def test_roadmap_candidates_are_emitted() -> None:
     candidates = roadmap_candidates()
 
-    assert len(candidates) == 23
+    assert len(candidates) == 24
 
 
 def test_first_candidate_is_canonical_spec_packet() -> None:
@@ -143,7 +144,7 @@ def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
 def test_monthly_forex_candidates_appear_in_safe_order() -> None:
     packet_ids = [candidate["packet_id"] for candidate in roadmap_candidates()]
 
-    assert packet_ids[:23] == [
+    assert packet_ids[:24] == [
         CANONICAL_SPEC_PACKET_ID,
         DATA_SCHEMAS_PACKET_ID,
         BACKTEST_PACKET_ID,
@@ -163,6 +164,7 @@ def test_monthly_forex_candidates_appear_in_safe_order() -> None:
         OOS_EXPANSION_PACKET_ID,
         OOS_REPAIR_PACKET_ID,
         LOW_VOL_EDGE_REDESIGN_PACKET_ID,
+        LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID,
         STRESS_REPAIR_V2_PACKET_ID,
         PRESECURITY_GATE_PACKET_ID,
         SANDBOX_ADAPTER_STUB_PACKET_ID,
@@ -226,9 +228,11 @@ def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
     assert "automation/forex_engine/run_oos_repair_demo.py" in candidates[OOS_REPAIR_PACKET_ID]["required_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_REPAIR.md" in candidates[OOS_REPAIR_PACKET_ID]["required_files"]
     assert "tests/forex_engine/test_oos_repair.py" in candidates[OOS_REPAIR_PACKET_ID]["required_files"]
-    assert "automation/forex_engine/oos_repair.py" in candidates[LOW_VOL_EDGE_REDESIGN_PACKET_ID]["required_files"]
-    assert "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_REPAIR.md" in candidates[LOW_VOL_EDGE_REDESIGN_PACKET_ID]["required_files"]
-    assert "tests/forex_engine/test_oos_repair.py" in candidates[LOW_VOL_EDGE_REDESIGN_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/low_vol_edge_redesign.py" in candidates[LOW_VOL_EDGE_REDESIGN_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/run_low_vol_edge_redesign_demo.py" in candidates[LOW_VOL_EDGE_REDESIGN_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_LOW_VOL_EDGE_REDESIGN.md" in candidates[LOW_VOL_EDGE_REDESIGN_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_low_vol_edge_redesign.py" in candidates[LOW_VOL_EDGE_REDESIGN_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/low_vol_edge_redesign.py" in candidates[LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID]["required_files"]
     assert "automation/forex_engine/stress_repair.py" in candidates[STRESS_REPAIR_V2_PACKET_ID]["required_files"]
     assert "tests/forex_engine/test_stress_repair.py" in candidates[STRESS_REPAIR_V2_PACKET_ID]["required_files"]
     assert "docs/security/AIOS_BROKER_PAPER_PRESECURITY_GATE.md" in candidates[PRESECURITY_GATE_PACKET_ID]["required_files"]
@@ -324,9 +328,11 @@ def test_roadmap_routes_after_oos_repair_and_requires_presecurity_gate() -> None
     result = roadmap_result()
     routing = result["post_oos_repair_routing"]
 
-    assert result["current_selected_packet"] == OOS_REPAIR_PACKET_ID
+    assert result["current_selected_packet"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
     assert routing["current_selected_packet_after_pr_750"] == OOS_REPAIR_PACKET_ID
+    assert routing["current_selected_packet_after_pr_751_752"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
     assert routing["conditional_next_packets"]["oos_repair_watchlist"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
+    assert routing["conditional_next_packets"]["low_vol_redesign_watchlist"] == LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
     assert routing["conditional_next_packets"]["oos_pass_stress_watchlist"] == STRESS_REPAIR_V2_PACKET_ID
     assert routing["conditional_next_packets"]["oos_and_stress_pass"] == PRESECURITY_GATE_PACKET_ID
     assert result["security_gate_required_before_broker_paper"] is True
@@ -347,11 +353,26 @@ def test_roadmap_selects_low_vol_redesign_when_oos_repair_remains_watchlist() ->
     assert result["post_oos_repair_next_safe_candidate"]["packet_id"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
 
 
+def test_roadmap_selects_low_vol_research_when_low_vol_redesign_remains_watchlist() -> None:
+    module = load_module("aios_forex_builder_roadmap", MODULE_PATH)
+    result = module.build_forex_builder_roadmap(
+        {
+            "oos_repair": {"repaired_classification": "WATCHLIST"},
+            "low_vol_edge_redesign": {"classification": "WATCHLIST"},
+            "stress_repair": {"repaired_classification": "WATCHLIST"},
+        }
+    )
+
+    assert result["post_low_vol_redesign_next_safe_packet"] == LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
+    assert result["post_low_vol_redesign_next_safe_candidate"]["packet_id"] == LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
+
+
 def test_roadmap_selects_presecurity_gate_when_oos_and_stress_pass() -> None:
     module = load_module("aios_forex_builder_roadmap", MODULE_PATH)
     result = module.build_forex_builder_roadmap(
         {
             "oos_repair": {"repaired_classification": "PAPER_FORWARD_READY"},
+            "low_vol_edge_redesign": {"classification": "PAPER_FORWARD_READY"},
             "stress_repair": {"repaired_classification": "PAPER_FORWARD_READY"},
         }
     )

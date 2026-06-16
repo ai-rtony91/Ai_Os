@@ -31,6 +31,7 @@ def default_broker_paper_sandbox_readiness_policy() -> dict[str, Any]:
         "credentials_required_now_must_be_false": True,
         "protected_gate_required_must_be_true": True,
         "future_broker_paper_packet_requires_approval": True,
+        "presecurity_gate_landed": False,
     }
 
 
@@ -41,6 +42,7 @@ def evaluate_broker_paper_sandbox_readiness(
     stress_repair: dict[str, Any] | None = None,
     expanded_oos: dict[str, Any] | None = None,
     oos_repair: dict[str, Any] | None = None,
+    low_vol_edge_redesign: dict[str, Any] | None = None,
     policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     active_policy = default_broker_paper_sandbox_readiness_policy()
@@ -56,6 +58,7 @@ def evaluate_broker_paper_sandbox_readiness(
     active_stress_repair = dict(stress_repair or active_evidence.get("stress_repair") or {})
     active_expanded_oos = dict(expanded_oos or active_evidence.get("expanded_oos") or {})
     active_oos_repair = dict(oos_repair or active_evidence.get("oos_repair") or {})
+    active_low_vol_edge = dict(low_vol_edge_redesign or active_evidence.get("low_vol_edge_redesign") or {})
     evidence_gates = _evidence_gates(
         active_evidence,
         active_stress_oos,
@@ -63,6 +66,7 @@ def evaluate_broker_paper_sandbox_readiness(
         active_stress_repair,
         active_expanded_oos,
         active_oos_repair,
+        active_low_vol_edge,
         active_policy,
     )
     passed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is True]
@@ -82,6 +86,7 @@ def evaluate_broker_paper_sandbox_readiness(
             active_stress_repair,
             active_expanded_oos,
             active_oos_repair,
+            active_low_vol_edge,
         ),
         "required_future_protected_approvals": _required_future_protected_approvals(),
         "forbidden_current_actions": _forbidden_current_actions(),
@@ -102,6 +107,11 @@ def evaluate_broker_paper_sandbox_readiness(
         "original_max_degradation_pct": float(active_oos_repair.get("original_max_degradation_pct", 0.0)),
         "repaired_max_degradation_pct": float(active_oos_repair.get("repaired_max_degradation_pct", 0.0)),
         "degradation_improvement_pct": float(active_oos_repair.get("degradation_improvement_pct", 0.0)),
+        "low_vol_edge_status": active_low_vol_edge.get("classification", "not_run"),
+        "low_vol_edge_classification": active_low_vol_edge.get("classification", "not_run"),
+        "low_vol_policy_action": active_low_vol_edge.get("low_vol_policy_action", "not_run"),
+        "redesigned_max_degradation_pct": float(active_low_vol_edge.get("redesigned_max_degradation_pct", 0.0)),
+        "low_vol_rejected_intents": int(active_low_vol_edge.get("rejected_low_vol_intents", 0)),
         "live_trade_ready": False,
         "real_order_ready": False,
         "broker_integration_active": False,
@@ -244,6 +254,7 @@ def _evidence_gates(
     stress_repair: dict[str, Any],
     expanded_oos: dict[str, Any],
     oos_repair: dict[str, Any],
+    low_vol_edge: dict[str, Any],
     policy: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     multi = dict(evidence.get("multi_fixture_paper_forward_summary") or {})
@@ -267,6 +278,7 @@ def _evidence_gates(
         or oos_repair.get("classification")
         or ""
     )
+    low_vol_edge_classification = str(low_vol_edge.get("classification") or "")
     gates = {
         "minimum_fixture_count": _minimum(int(multi.get("fixture_count", 0)), policy["minimum_fixture_count"]),
         "minimum_regime_count": _minimum(int(regime.get("total_regimes", 0)), policy["minimum_regime_count"]),
@@ -321,6 +333,23 @@ def _evidence_gates(
             float(oos_repair.get("repaired_max_degradation_pct", 100.0)),
             float(oos_repair.get("repair_plan", {}).get("max_allowed_degradation_pct", 35.0)),
         )
+    if low_vol_edge_classification:
+        gates["low_vol_edge_classification"] = _classification_gate(low_vol_edge_classification)
+        gates["low_vol_edge_degradation_improved"] = _boolean_gate(
+            float(low_vol_edge.get("degradation_improvement_from_repair_pct", 0.0)) > 0.0,
+            float(low_vol_edge.get("degradation_improvement_from_repair_pct", 0.0)) > 0.0,
+            True,
+        )
+        gates["low_vol_edge_degradation_policy"] = _maximum_watchlist(
+            float(low_vol_edge.get("redesigned_max_degradation_pct", 100.0)),
+            float(low_vol_edge.get("policy", {}).get("max_allowed_degradation_pct", 35.0)),
+        )
+        if low_vol_edge_classification == "PAPER_FORWARD_READY":
+            presecurity_landed = bool(policy.get("presecurity_gate_landed", False))
+            gates["presecurity_gate_landed_before_broker_paper"] = _boolean_watchlist(
+                presecurity_landed,
+                True,
+            )
     return gates
 
 
@@ -377,6 +406,17 @@ def _boolean_gate(passed: bool, actual: bool, expected: bool) -> dict[str, Any]:
     }
 
 
+def _boolean_watchlist(actual: bool, expected: bool) -> dict[str, Any]:
+    passed = bool(actual) == bool(expected)
+    return {
+        "passed": True,
+        "actual": bool(actual),
+        "threshold": bool(expected),
+        "comparator": "==",
+        "classification": "PAPER_FORWARD_READY" if passed else "WATCHLIST",
+    }
+
+
 def _contract_flags(evidence: dict[str, Any]) -> dict[str, bool]:
     return {
         "live_trade_ready": bool(evidence.get("live_trade_ready", False)),
@@ -400,6 +440,7 @@ def _blockers(
     stress_repair: dict[str, Any],
     expanded_oos: dict[str, Any],
     oos_repair: dict[str, Any],
+    low_vol_edge: dict[str, Any],
 ) -> list[str]:
     blockers = []
     for name, gate in evidence_gates.items():
@@ -413,6 +454,7 @@ def _blockers(
     blockers.extend([str(item) for item in list(stress_repair.get("blockers") or [])])
     blockers.extend([str(item) for item in list(expanded_oos.get("blockers") or [])])
     blockers.extend([str(item) for item in list(oos_repair.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(low_vol_edge.get("blockers") or [])])
     return _unique(blockers)
 
 
@@ -466,6 +508,10 @@ def _next_safe_action(readiness_status: str, blockers: list[str]) -> str:
     if readiness_status == CONTRACT_READY:
         return "Run the pre-security broker-paper gate before any adapter, credential, network, or order work."
     if readiness_status == WATCHLIST:
+        if any("presecurity" in blocker for blocker in blockers):
+            return "Run PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1 before any broker-paper adapter work."
+        if any("low_vol" in blocker for blocker in blockers):
+            return "Resolve low-vol edge redesign WATCHLIST evidence before broker-paper sandbox readiness."
         if any("oos_repair" in blocker for blocker in blockers):
             return "Repair low-vol OOS degradation before any protected broker-paper sandbox contract."
         if any("expanded_oos" in blocker for blocker in blockers):

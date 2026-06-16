@@ -462,6 +462,33 @@ def test_default_memory_includes_oos_expansion_completion() -> None:
     ]
 
 
+def test_default_memory_includes_oos_repair_and_backup_metrics_completions() -> None:
+    result = build_result(candidate_packets=[])
+    records = load_module()._completed_memory_records({})
+
+    assert "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1" in result["completed_packet_ids"]
+    assert "PKT-AIOS-T9-BACKUP-DAILY-WORK-METRICS-SOS-V1" in result["completed_packet_ids"]
+    repair = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1"
+    ][0]
+    backup = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-T9-BACKUP-DAILY-WORK-METRICS-SOS-V1"
+    ][0]
+
+    assert repair["landed_pr"] == "#751"
+    assert repair["title"] == "Add OOS repair gate"
+    assert "automation/forex_engine/oos_repair.py" in repair["completed_files"]
+    assert "tests/forex_engine/test_oos_repair.py" in repair["completed_files"]
+    assert backup["landed_pr"] == "#752"
+    assert backup["title"] == "Add T9 backup daily work metrics and courtesy SOS"
+    assert "automation/orchestration/backups/Get-AiOsBackupWorkDelta.ps1" in backup["completed_files"]
+    assert "docs/AI_OS/operations/T9_BACKUP_DAILY_WORK_METRICS_POLICY.md" in backup["completed_files"]
+
+
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
     result = build_result(candidate_packets=[])
 
@@ -581,7 +608,7 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
@@ -598,7 +625,8 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     assert "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V1" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1"
+    assert "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:

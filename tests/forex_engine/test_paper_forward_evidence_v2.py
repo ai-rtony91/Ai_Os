@@ -55,6 +55,8 @@ def test_evidence_v2_bundle_includes_fixture_summary_and_regime_consistency() ->
     assert bundle["expanded_oos_summary"]
     assert bundle["oos_repair"]
     assert bundle["oos_repair_summary"]
+    assert bundle["low_vol_edge_redesign"]
+    assert bundle["low_vol_edge_summary"]
     assert bundle["starting_balance"] == 500.0
     assert bundle["ending_balance"] >= 500.0
     assert bundle["return_pct"] >= 0.0
@@ -106,6 +108,10 @@ def test_evidence_v2_summary_is_compact_and_never_live_ready() -> None:
     assert summary["expanded_oos_heldout_consistency_pct"] >= 0.0
     assert summary["expanded_oos_degradation_pct"] >= 0.0
     assert summary["oos_repair_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert summary["low_vol_edge_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert summary["low_vol_policy_action"] in {"NO_TRADE_GATE", "REDUCED_SIZE", "EDGE_REDESIGN", "WATCHLIST", "not_run"}
+    assert summary["redesigned_max_degradation_pct"] >= 0.0
+    assert summary["low_vol_rejected_intents"] >= 0
     assert summary["original_max_degradation_pct"] >= summary["repaired_max_degradation_pct"]
     assert summary["degradation_improvement_pct"] >= 0.0
     assert summary["weakest_oos_split"]
@@ -137,6 +143,16 @@ def test_month_end_readiness_v2_keeps_live_trade_ready_false() -> None:
     assert review["evidence_summary"]["expanded_oos_heldout_consistency_pct"] >= 0.0
     assert review["evidence_summary"]["expanded_oos_degradation_pct"] >= 0.0
     assert review["evidence_summary"]["oos_repair_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert review["evidence_summary"]["low_vol_edge_classification"] in {*ALLOWED_CLASSIFICATIONS, "not_run"}
+    assert review["evidence_summary"]["low_vol_policy_action"] in {
+        "NO_TRADE_GATE",
+        "REDUCED_SIZE",
+        "EDGE_REDESIGN",
+        "WATCHLIST",
+        "not_run",
+    }
+    assert review["evidence_summary"]["redesigned_max_degradation_pct"] >= 0.0
+    assert review["evidence_summary"]["low_vol_rejected_intents"] >= 0
     assert (
         review["evidence_summary"]["original_max_degradation_pct"]
         >= review["evidence_summary"]["repaired_max_degradation_pct"]

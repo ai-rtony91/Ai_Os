@@ -75,6 +75,8 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     expanded_oos_summary = dict(bundle.get("expanded_oos_summary") or expanded_oos.get("expanded_oos_summary") or {})
     oos_repair = dict(bundle.get("oos_repair") or {})
     oos_repair_summary = dict(bundle.get("oos_repair_summary") or {})
+    low_vol_edge = dict(bundle.get("low_vol_edge_redesign") or {})
+    low_vol_edge_summary = dict(bundle.get("low_vol_edge_summary") or low_vol_edge)
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
@@ -87,6 +89,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             stress_repair=stress_repair,
             expanded_oos=expanded_oos,
             oos_repair=oos_repair,
+            low_vol_edge_redesign=low_vol_edge,
         )
     stress_blockers = [
         str(blocker)
@@ -102,6 +105,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *_text_list(stress_repair.get("blockers")),
             *_text_list(expanded_oos.get("blockers")),
             *_text_list(oos_repair.get("blockers")),
+            *_text_list(low_vol_edge.get("blockers")),
             *_text_list(oos_result.get("blockers")),
             *_text_list(combined_gate.get("blockers")),
             *_text_list(sandbox_readiness.get("blockers")),
@@ -116,11 +120,17 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         or oos_repair.get("classification")
         or "not_run"
     )
+    low_vol_edge_classification = str(
+        low_vol_edge_summary.get("low_vol_edge_classification")
+        or low_vol_edge.get("classification")
+        or "not_run"
+    )
     stress_oos_ready = combined_stress_oos_classification == "PAPER_FORWARD_READY"
     paper_forward_ready = (
         classification == "PAPER_FORWARD_READY"
         and risk_governor_classification == "PAPER_FORWARD_READY"
         and (combined_stress_oos_classification in {"not_run", "PAPER_FORWARD_READY"})
+        and (low_vol_edge_classification in {"not_run", "PAPER_FORWARD_READY"})
         and not local_blockers
     )
     review = {
@@ -138,6 +148,24 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             expanded_oos.get("classification", "not_run"),
         ),
         "oos_repair_classification": oos_repair_classification,
+        "low_vol_edge_classification": low_vol_edge_classification,
+        "low_vol_policy_action": str(
+            low_vol_edge_summary.get("low_vol_policy_action")
+            or low_vol_edge.get("low_vol_policy_action")
+            or "not_run"
+        ),
+        "redesigned_max_degradation_pct": float(
+            low_vol_edge_summary.get(
+                "redesigned_max_degradation_pct",
+                low_vol_edge.get("redesigned_max_degradation_pct", 0.0),
+            )
+        ),
+        "low_vol_rejected_intents": int(
+            low_vol_edge_summary.get(
+                "rejected_low_vol_intents",
+                low_vol_edge_summary.get("low_vol_rejected_intents", low_vol_edge.get("rejected_low_vol_intents", 0)),
+            )
+        ),
         "original_max_degradation_pct": float(
             oos_repair_summary.get(
                 "original_max_degradation_pct",
@@ -249,6 +277,24 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
                 expanded_oos_summary.get("degradation_pct", expanded_oos.get("degradation_pct", 0.0))
             ),
             "oos_repair_classification": oos_repair_classification,
+            "low_vol_edge_classification": low_vol_edge_classification,
+            "low_vol_policy_action": str(
+                low_vol_edge_summary.get("low_vol_policy_action")
+                or low_vol_edge.get("low_vol_policy_action")
+                or "not_run"
+            ),
+            "redesigned_max_degradation_pct": float(
+                low_vol_edge_summary.get(
+                    "redesigned_max_degradation_pct",
+                    low_vol_edge.get("redesigned_max_degradation_pct", 0.0),
+                )
+            ),
+            "low_vol_rejected_intents": int(
+                low_vol_edge_summary.get(
+                    "rejected_low_vol_intents",
+                    low_vol_edge_summary.get("low_vol_rejected_intents", low_vol_edge.get("rejected_low_vol_intents", 0)),
+                )
+            ),
             "original_max_degradation_pct": float(
                 oos_repair_summary.get(
                     "original_max_degradation_pct",
@@ -294,7 +340,12 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         "blockers": local_blockers,
         "blocked": _unique([*local_blockers, *LIVE_TRADE_BLOCKERS]),
         "live_trade_blockers": list(LIVE_TRADE_BLOCKERS),
-        "next_safe_action": _next_safe_action_v2(paper_forward_ready, local_blockers, oos_repair_classification),
+        "next_safe_action": _next_safe_action_v2(
+            paper_forward_ready,
+            local_blockers,
+            oos_repair_classification,
+            low_vol_edge_classification,
+        ),
         "live_ready": False,
     }
     schemas.assert_no_live_permissions(review)
@@ -351,9 +402,18 @@ def _next_safe_action(paper_forward_ready: bool, blockers: list[str]) -> str:
     return "Collect missing evidence and rerun the local readiness review."
 
 
-def _next_safe_action_v2(paper_forward_ready: bool, blockers: list[str], oos_repair_classification: str = "not_run") -> str:
+def _next_safe_action_v2(
+    paper_forward_ready: bool,
+    blockers: list[str],
+    oos_repair_classification: str = "not_run",
+    low_vol_edge_classification: str = "not_run",
+) -> str:
     if paper_forward_ready:
         return "Run the broker-paper pre-security gate before any adapter work; live readiness requires separate future approval."
+    if low_vol_edge_classification == "WATCHLIST":
+        return "Continue low-vol edge research before broker-paper readiness; live readiness requires separate future approval."
+    if low_vol_edge_classification == "PAPER_FORWARD_READY" and any("presecurity" in blocker for blocker in blockers):
+        return "Run PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1 before any broker-paper adapter work."
     if oos_repair_classification == "WATCHLIST":
         return "Run PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1 before broker-paper readiness."
     if blockers:
