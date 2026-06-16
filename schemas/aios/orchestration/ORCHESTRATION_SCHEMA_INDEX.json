@@ -418,6 +418,13 @@
       "reconciliation_version": "0.1.1"
     },
     {
+      "name": "AIOS_DASHBOARD_STATE_CONTRACT.v1",
+      "path": "schemas/aios/orchestration/AIOS_DASHBOARD_STATE_CONTRACT.v1.schema.json",
+      "kind": "json_schema",
+      "purpose": "Canonical display-only dashboard state contract over existing evidence. Grants no mutation, control, approval, worker-launch, broker, live-trading, scheduler, daemon, button, commit, push, PR, or merge authority.",
+      "reconciliation_version": "0.1.1"
+    },
+    {
       "name": "AIOS_ORCHESTRATION_PACKET.v1",
       "path": "schemas/aios/orchestration/packet.schema.json",
       "kind": "json_schema",

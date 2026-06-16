@@ -1,0 +1,580 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_DASHBOARD_STATE_CONTRACT.v1.schema.json",
+  "title": "AIOS Dashboard State Contract v1",
+  "description": "Canonical display-only dashboard state contract. Dashboards consume existing evidence and projections only; this schema grants no mutation, control, approval, worker-launch, broker, live-trading, scheduler, daemon, button, commit, push, PR, or merge authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "schema_version",
+    "generated_at_utc",
+    "mode",
+    "authority_boundary",
+    "source_index",
+    "freshness",
+    "system_state",
+    "security_state",
+    "continuation_state",
+    "governor_state",
+    "watchtower_state",
+    "validator_state",
+    "control_plane_state",
+    "active_mission_state",
+    "resume_state",
+    "worker_state",
+    "system_health",
+    "system_readiness",
+    "risk_level",
+    "blocked_actions",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_DASHBOARD_STATE_CONTRACT.v1"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "type": "string",
+      "const": "DISPLAY_ONLY_READ_MODEL"
+    },
+    "authority_boundary": {
+      "$ref": "#/$defs/authority_boundary"
+    },
+    "source_index": {
+      "$ref": "#/$defs/source_index"
+    },
+    "freshness": {
+      "$ref": "#/$defs/freshness"
+    },
+    "system_state": {
+      "$ref": "#/$defs/plain_state_section"
+    },
+    "security_state": {
+      "$ref": "#/$defs/security_state_section"
+    },
+    "continuation_state": {
+      "$ref": "#/$defs/continuation_state_section"
+    },
+    "governor_state": {
+      "$ref": "#/$defs/plain_state_section"
+    },
+    "watchtower_state": {
+      "$ref": "#/$defs/watchtower_state_section"
+    },
+    "validator_state": {
+      "$ref": "#/$defs/plain_state_section"
+    },
+    "control_plane_state": {
+      "$ref": "#/$defs/control_plane_state_section"
+    },
+    "active_mission_state": {
+      "$ref": "#/$defs/plain_state_section"
+    },
+    "resume_state": {
+      "$ref": "#/$defs/plain_state_section"
+    },
+    "worker_state": {
+      "$ref": "#/$defs/plain_state_section"
+    },
+    "system_health": {
+      "type": "string",
+      "enum": ["PASS", "WARN", "FAIL", "BLOCKED", "UNKNOWN"]
+    },
+    "system_readiness": {
+      "type": "string",
+      "enum": ["READY", "REVIEW", "NEEDS_REVIEW", "BLOCKED", "UNKNOWN"]
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "BLOCKED", "UNKNOWN"]
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "authority_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only",
+        "evidence_only",
+        "dashboard_creates_truth",
+        "execution_allowed",
+        "mutation_allowed",
+        "control_authority",
+        "button_authority",
+        "broker_allowed",
+        "live_trading_allowed",
+        "approval_mutation_allowed",
+        "worker_launch_allowed",
+        "scheduler_allowed",
+        "daemon_allowed"
+      ],
+      "properties": {
+        "read_only": { "type": "boolean", "const": true },
+        "evidence_only": { "type": "boolean", "const": true },
+        "dashboard_creates_truth": { "type": "boolean", "const": false },
+        "execution_allowed": { "type": "boolean", "const": false },
+        "mutation_allowed": { "type": "boolean", "const": false },
+        "control_authority": { "type": "boolean", "const": false },
+        "button_authority": { "type": "boolean", "const": false },
+        "broker_allowed": { "type": "boolean", "const": false },
+        "live_trading_allowed": { "type": "boolean", "const": false },
+        "approval_mutation_allowed": { "type": "boolean", "const": false },
+        "worker_launch_allowed": { "type": "boolean", "const": false },
+        "scheduler_allowed": { "type": "boolean", "const": false },
+        "daemon_allowed": { "type": "boolean", "const": false }
+      }
+    },
+    "source_index": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_sources",
+        "backing_schemas"
+      ],
+      "properties": {
+        "primary_sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_ref"
+          }
+        },
+        "backing_schemas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source_ref"
+          }
+        }
+      }
+    },
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_path",
+        "source_schema",
+        "source_type",
+        "authority_state"
+      ],
+      "properties": {
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_type": {
+          "type": "string",
+          "enum": [
+            "canonical_schema",
+            "canonical_doc",
+            "source_code",
+            "generated_projection",
+            "runtime_evidence",
+            "api_read_model",
+            "fixture",
+            "unknown"
+          ]
+        },
+        "authority_state": {
+          "$ref": "#/$defs/authority_state"
+        }
+      }
+    },
+    "authority_state": {
+      "type": "string",
+      "enum": [
+        "CANONICAL_AUTHORITY",
+        "EVIDENCE_ONLY",
+        "DISPLAY_ONLY",
+        "LEGACY_REFERENCE",
+        "NON_CANONICAL",
+        "UNKNOWN"
+      ]
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checked_at",
+        "is_stale",
+        "evidence_state"
+      ],
+      "properties": {
+        "checked_at": {
+          "type": "string",
+          "minLength": 1
+        },
+        "generated_at": {
+          "type": ["string", "null"]
+        },
+        "ttl_seconds": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "is_stale": {
+          "type": "boolean"
+        },
+        "evidence_state": {
+          "$ref": "#/$defs/evidence_state"
+        }
+      }
+    },
+    "evidence_state": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "DISPLAY_ONLY",
+        "MISSING",
+        "STALE",
+        "UNSUPPORTED",
+        "UNKNOWN"
+      ]
+    },
+    "display_state": {
+      "type": "string",
+      "enum": [
+        "READY",
+        "REVIEW",
+        "NEEDS_REVIEW",
+        "BLOCKED",
+        "UNKNOWN",
+        "DISPLAY_ONLY",
+        "PASS",
+        "WARN",
+        "FAIL",
+        "CLEAR",
+        "WATCH",
+        "REVIEW_REQUIRED",
+        "STOP",
+        "SOS",
+        "NO_SETUP",
+        "WATCHING",
+        "CANDIDATE_FOUND",
+        "HIGH_PRIORITY",
+        "INVALIDATED",
+        "CONTINUE"
+      ]
+    },
+    "state_section_core": {
+      "type": "object",
+      "required": [
+        "display_state",
+        "authority_state",
+        "source_path",
+        "source_schema",
+        "freshness",
+        "summary",
+        "items",
+        "blocked_actions",
+        "next_safe_action",
+        "approval_required",
+        "execution_allowed",
+        "mutation_allowed",
+        "safe_for_frontend_display"
+      ],
+      "properties": {
+        "display_state": {
+          "$ref": "#/$defs/display_state"
+        },
+        "authority_state": {
+          "$ref": "#/$defs/authority_state"
+        },
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "freshness": {
+          "$ref": "#/$defs/freshness"
+        },
+        "evidence_state": {
+          "$ref": "#/$defs/evidence_state"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "blocked_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "next_safe_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_required": {
+          "type": "boolean"
+        },
+        "execution_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "mutation_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "safe_for_frontend_display": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "properties": {
+                  "evidence_state": {
+                    "enum": ["MISSING", "STALE", "UNSUPPORTED", "UNKNOWN"]
+                  }
+                },
+                "required": ["evidence_state"]
+              },
+              {
+                "properties": {
+                  "freshness": {
+                    "properties": {
+                      "evidence_state": {
+                        "enum": ["MISSING", "STALE", "UNSUPPORTED", "UNKNOWN"]
+                      }
+                    },
+                    "required": ["evidence_state"]
+                  }
+                },
+                "required": ["freshness"]
+              }
+            ]
+          },
+          "then": {
+            "properties": {
+              "display_state": {
+                "enum": ["NEEDS_REVIEW", "REVIEW", "BLOCKED", "UNKNOWN"]
+              },
+              "approval_required": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "plain_state_section": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/state_section_core"
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "security_state_section": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/state_section_core"
+        },
+        {
+          "type": "object",
+          "required": [
+            "shield_state",
+            "vault_lock_state",
+            "radar_events",
+            "tripwire_events",
+            "boss_alert"
+          ],
+          "properties": {
+            "shield_state": {
+              "type": "string",
+              "enum": ["GREEN", "YELLOW", "RED", "BLACK", "UNKNOWN"]
+            },
+            "vault_lock_state": {
+              "type": "string",
+              "enum": ["LOCKED", "LOCKED_READ_ONLY", "LOCKED_REVIEW", "SEALED", "UNKNOWN"]
+            },
+            "radar_events": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "tripwire_events": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "boss_alert": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": ["active", "level", "reason"],
+              "properties": {
+                "active": { "type": "boolean" },
+                "level": { "type": "string" },
+                "reason": { "type": "string" }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "watchtower_state_section": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/state_section_core"
+        },
+        {
+          "type": "object",
+          "required": [
+            "market_radar",
+            "candidate_targets",
+            "priority_targets",
+            "market_regime",
+            "watchtower_status",
+            "next_best_setup"
+          ],
+          "properties": {
+            "market_radar": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "candidate_targets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "priority_targets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "market_regime": {
+              "type": "string",
+              "enum": ["TREND_UP", "TREND_DOWN", "RANGE", "HIGH_VOL", "LOW_VOL", "UNKNOWN"]
+            },
+            "watchtower_status": {
+              "type": "string",
+              "enum": ["NO_SETUP", "WATCHING", "CANDIDATE_FOUND", "HIGH_PRIORITY", "INVALIDATED", "REVIEW_REQUIRED", "UNKNOWN"]
+            },
+            "next_best_setup": {
+              "type": ["object", "null"],
+              "additionalProperties": true
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "continuation_state_section": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/state_section_core"
+        },
+        {
+          "type": "object",
+          "required": [
+            "current_task",
+            "repair_count",
+            "resume_status",
+            "approval_status"
+          ],
+          "properties": {
+            "current_task": {
+              "type": ["object", "null"],
+              "additionalProperties": true
+            },
+            "repair_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "resume_status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "approval_status": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "control_plane_state_section": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/state_section_core"
+        },
+        {
+          "type": "object",
+          "required": [
+            "control_plane_status",
+            "validator_status",
+            "governor_status",
+            "mission_status"
+          ],
+          "properties": {
+            "control_plane_status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "validator_status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "governor_status": {
+              "type": "string",
+              "minLength": 1
+            },
+            "mission_status": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}
