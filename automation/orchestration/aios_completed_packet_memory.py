@@ -639,6 +639,37 @@ DEFAULT_COMPLETED_PACKETS = [
         "source": "default_completed_memory",
     },
     {
+        "packet_id": "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1",
+        "title": "Add broker-paper dry-run intent ledger",
+        "lane": "broker-paper-dryrun-intent-ledger",
+        "landed_pr": "#756",
+        "completion_reason": (
+            "local-only in-memory broker-paper dry-run intent ledger records fake dry-run intents and stub "
+            "simulation results while keeping broker SDK, credentials, network/API, file/Reports writes, "
+            "broker-paper orders, and live trading blocked"
+        ),
+        "completed_files": [
+            "automation/forex_engine/broker_paper_dryrun_intent_ledger.py",
+            "automation/forex_engine/run_broker_paper_dryrun_intent_ledger_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_INTENT_LEDGER.md",
+            "tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/broker_paper_dryrun_intent_ledger.py",
+            "automation/forex_engine/run_broker_paper_dryrun_intent_ledger_demo.py",
+            "automation/forex_engine/broker_paper_sandbox_readiness.py",
+            "automation/forex_engine/month_end_readiness.py",
+            "automation/forex_engine/forex_dashboard_contract.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_INTENT_LEDGER.md",
+            "tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py",
+            "tests/forex_engine/test_broker_paper_adapter_stub_contract.py",
+            "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+            "tests/forex_engine/test_month_end_readiness.py",
+            "tests/forex_engine/test_forex_dashboard_contract.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
         "packet_id": "AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
         "alternate_packet_ids": [
             "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",
@@ -894,6 +925,18 @@ def _normalize_completed_packet_record(record: dict[str, Any]) -> dict[str, Any]
                 "completion_reason": (
                     "local-only broker-paper adapter stub validates fake dry-run intents and produces simulated/rejected "
                     "audit records while keeping broker SDK, credentials, network/API, broker-paper orders, and live trading blocked"
+                ),
+            }
+        )
+    if _packet_id(normalized) == "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1":
+        normalized.update(
+            {
+                "landed_pr": "#756",
+                "title": "Add broker-paper dry-run intent ledger",
+                "completion_reason": (
+                    "local-only in-memory broker-paper dry-run intent ledger records fake dry-run intents and stub "
+                    "simulation results while keeping broker SDK, credentials, network/API, file/Reports writes, "
+                    "broker-paper orders, and live trading blocked"
                 ),
             }
         )
