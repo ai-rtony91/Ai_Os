@@ -403,6 +403,102 @@ def test_security_dirty_forces_blocked_decision() -> None:
     assert decision["blocked_reason"] == "security_sos_dirty"
 
 
+def test_preemptive_security_sos_stops_first() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            repo_state="dirty",
+            dirty_tree_overall_classification="SECURITY_SOS_DIRTY",
+            dirty_tree_sos_required=True,
+            dirty_tree_safe_for_dry_run=False,
+            preemptive_security_state_present=True,
+            preemptive_security_overall_state="SOS",
+            preemptive_security_safe_for_dry_run=False,
+            preemptive_security_safe_for_apply=False,
+            preemptive_security_sos_required=True,
+            preemptive_security_stop_required=True,
+            preemptive_security_event_count=1,
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+
+    assert decision["selected_candidate_id"] == "preemptive_security_sos_stop"
+    assert decision["decision_category"] == "BLOCKED_STOP_AND_REPORT"
+    assert decision["allowed_lane"] == "BLOCKED"
+    assert decision["blocked_reason"] == "preemptive_security_sos"
+
+
+def test_preemptive_security_stop_blocks_before_apply() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            preemptive_security_state_present=True,
+            preemptive_security_overall_state="STOP",
+            preemptive_security_safe_for_dry_run=False,
+            preemptive_security_safe_for_apply=False,
+            preemptive_security_stop_required=True,
+            preemptive_security_event_count=1,
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+
+    assert decision["selected_candidate_id"] == "preemptive_security_review_stop"
+    assert decision["decision_category"] == "BLOCKED_STOP_AND_REPORT"
+    assert decision["allowed_lane"] == "BLOCKED"
+    assert decision["blocked_reason"] == "preemptive_security_review_required"
+
+
+def test_preemptive_security_watch_blocks_apply_but_allows_dry_run_routing() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            decision_output_present=False,
+            preemptive_security_state_present=True,
+            preemptive_security_overall_state="WATCH",
+            preemptive_security_safe_for_dry_run=True,
+            preemptive_security_safe_for_apply=False,
+            preemptive_security_event_count=1,
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+    apply_candidate = next(
+        candidate for candidate in decision["ranked_candidates"] if candidate["task_id"] == "self_build_decision_output_wiring"
+    )
+
+    assert apply_candidate["blocked"] is True
+    assert apply_candidate["total_score"] == 0
+    assert "READ_ONLY/DRY_RUN" in apply_candidate["reason"]
+    assert decision["allowed_lane"] != "APPLY_CODE_SAFE"
+
+
+def test_preemptive_security_watch_suppresses_dirty_tree_generated_report_false_sos() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            repo_state="safe_dirty",
+            dirty_tree_overall_classification="SECURITY_SOS_DIRTY",
+            dirty_tree_sos_required=True,
+            dirty_tree_safe_for_dry_run=True,
+            dirty_tree_safe_for_apply=False,
+            dirty_tree_dirty_count=1,
+            preemptive_security_state_present=True,
+            preemptive_security_overall_state="WATCH",
+            preemptive_security_safe_for_dry_run=True,
+            preemptive_security_safe_for_apply=False,
+            preemptive_security_sos_required=False,
+            preemptive_security_stop_required=False,
+            preemptive_security_review_required=False,
+            preemptive_security_event_count=1,
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+    candidate_ids = {candidate["task_id"] for candidate in decision["ranked_candidates"]}
+
+    assert "dirty_tree_security_sos" not in candidate_ids
+    assert "safe_dirty_dry_run_continuation" in candidate_ids
+    assert decision["blocked_reason"] != "security_sos_dirty"
+
+
 def test_protected_authority_dirty_forces_blocked_decision() -> None:
     m = _load()
     decision = m.choose_next_decision(

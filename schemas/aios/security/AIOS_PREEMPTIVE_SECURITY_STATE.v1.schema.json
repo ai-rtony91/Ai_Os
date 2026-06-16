@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PREEMPTIVE_SECURITY_STATE.v1.schema.json",
+  "title": "AIOS Preemptive Security State v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_utc",
+    "repo_root",
+    "component",
+    "overall_state",
+    "security_status",
+    "safe_for_dry_run",
+    "safe_for_apply",
+    "sos_required",
+    "stop_required",
+    "review_required",
+    "event_count",
+    "events",
+    "category_counts",
+    "shield_state",
+    "vault_lock_state",
+    "radar_events",
+    "tripwire_events",
+    "boss_alert",
+    "blocked_actions",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_PREEMPTIVE_SECURITY_STATE.v1"
+    },
+    "generated_utc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_root": {
+      "type": "string"
+    },
+    "component": {
+      "const": "preemptive_security_layer"
+    },
+    "overall_state": {
+      "type": "string",
+      "enum": ["CLEAR", "WATCH", "REVIEW_REQUIRED", "STOP", "SOS"]
+    },
+    "security_status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safe_for_dry_run": {
+      "type": "boolean"
+    },
+    "safe_for_apply": {
+      "type": "boolean"
+    },
+    "sos_required": {
+      "type": "boolean"
+    },
+    "stop_required": {
+      "type": "boolean"
+    },
+    "review_required": {
+      "type": "boolean"
+    },
+    "event_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "AIOS_PREEMPTIVE_SECURITY_EVENT.v1.schema.json"
+      }
+    },
+    "category_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "shield_state": {
+      "type": "string",
+      "enum": ["GREEN", "YELLOW", "RED", "BLACK"]
+    },
+    "vault_lock_state": {
+      "type": "string",
+      "enum": ["LOCKED", "LOCKED_READ_ONLY", "LOCKED_REVIEW", "SEALED"]
+    },
+    "radar_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "tripwire_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "boss_alert": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["active", "level", "reason"],
+      "properties": {
+        "active": {
+          "type": "boolean"
+        },
+        "level": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only",
+        "stdout_only_by_default",
+        "secret_values_printed",
+        "writes_reports_by_default",
+        "network_access",
+        "broker_access",
+        "live_trading",
+        "real_order_execution",
+        "production_mutation",
+        "dashboard_mutation",
+        "scheduler_activation",
+        "daemon_activation",
+        "worker_launch"
+      ],
+      "properties": {
+        "read_only": { "type": "boolean", "const": true },
+        "stdout_only_by_default": { "type": "boolean", "const": true },
+        "secret_values_printed": { "type": "boolean", "const": false },
+        "writes_reports_by_default": { "type": "boolean", "const": false },
+        "network_access": { "type": "boolean", "const": false },
+        "broker_access": { "type": "boolean", "const": false },
+        "live_trading": { "type": "boolean", "const": false },
+        "real_order_execution": { "type": "boolean", "const": false },
+        "production_mutation": { "type": "boolean", "const": false },
+        "dashboard_mutation": { "type": "boolean", "const": false },
+        "scheduler_activation": { "type": "boolean", "const": false },
+        "daemon_activation": { "type": "boolean", "const": false },
+        "worker_launch": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}

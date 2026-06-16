@@ -153,6 +153,18 @@ def _load_dirty_tree_classifier() -> Any | None:
     return module
 
 
+def _load_preemptive_security_layer() -> Any | None:
+    security_path = Path(__file__).parents[1] / "security" / "aios_preemptive_security_layer.py"
+    if not security_path.is_file():
+        return None
+    spec = importlib.util.spec_from_file_location("aios_preemptive_security_layer", security_path)
+    if spec is None or spec.loader is None:
+        return None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def _load_repo_state_evidence(repo_root: Path) -> tuple[dict[str, Any] | None, str, str]:
     rel_path = str(DEFAULT_REPO_STATE_OUTPUT).replace("\\", "/")
     payload = load_json_if_exists(repo_root / DEFAULT_REPO_STATE_OUTPUT)
@@ -241,6 +253,49 @@ def _apply_dirty_tree_classifier_signal(signals: dict[str, Any], payload: dict[s
         f"safe_for_dry_run={str(safe_for_dry_run).lower()}; "
         f"safe_for_apply={str(safe_for_apply).lower()}; "
         f"sos_required={str(sos_required).lower()}; protected_stop_required={str(protected_stop_required).lower()}"
+    )
+
+
+def _apply_preemptive_security_signal(signals: dict[str, Any], payload: dict[str, Any] | None) -> str:
+    if not isinstance(payload, dict):
+        signals["preemptive_security_state_present"] = False
+        signals["preemptive_security_overall_state"] = "UNKNOWN_SECURITY_RISK"
+        signals["preemptive_security_safe_for_dry_run"] = False
+        signals["preemptive_security_safe_for_apply"] = False
+        signals["preemptive_security_sos_required"] = False
+        signals["preemptive_security_stop_required"] = True
+        signals["preemptive_security_review_required"] = True
+        signals["preemptive_security_event_count"] = 0
+        signals["preemptive_security_boss_alert_active"] = False
+        return "Preemptive security state is missing or unreadable; fail closed for mutation."
+
+    overall = str(payload.get("overall_state") or "UNKNOWN_SECURITY_RISK")
+    event_count = _to_int(payload.get("event_count"), 0)
+    safe_for_dry_run = payload.get("safe_for_dry_run") is True
+    safe_for_apply = payload.get("safe_for_apply") is True
+    sos_required = payload.get("sos_required") is True
+    stop_required = payload.get("stop_required") is True or overall in {"STOP", "UNKNOWN_SECURITY_RISK"}
+    review_required = payload.get("review_required") is True or overall == "REVIEW_REQUIRED"
+    boss_alert = payload.get("boss_alert") if isinstance(payload.get("boss_alert"), dict) else {}
+    blocked_actions = payload.get("blocked_actions") if isinstance(payload.get("blocked_actions"), list) else []
+
+    signals["preemptive_security_state_present"] = True
+    signals["preemptive_security_overall_state"] = overall
+    signals["preemptive_security_safe_for_dry_run"] = safe_for_dry_run
+    signals["preemptive_security_safe_for_apply"] = safe_for_apply
+    signals["preemptive_security_sos_required"] = sos_required
+    signals["preemptive_security_stop_required"] = stop_required
+    signals["preemptive_security_review_required"] = review_required
+    signals["preemptive_security_event_count"] = event_count
+    signals["preemptive_security_boss_alert_active"] = boss_alert.get("active") is True
+    signals["preemptive_security_blocked_actions"] = [str(action) for action in blocked_actions]
+
+    return (
+        f"overall={overall}; event_count={event_count}; "
+        f"safe_for_dry_run={str(safe_for_dry_run).lower()}; "
+        f"safe_for_apply={str(safe_for_apply).lower()}; "
+        f"sos_required={str(sos_required).lower()}; stop_required={str(stop_required).lower()}; "
+        f"review_required={str(review_required).lower()}"
     )
 
 
@@ -431,6 +486,16 @@ def discover_evidence(repo_root: str | Path) -> dict[str, Any]:
         "dirty_tree_protected_stop_required": False,
         "dirty_tree_review_required": False,
         "dirty_tree_dirty_count": 0,
+        "preemptive_security_state_present": False,
+        "preemptive_security_overall_state": "UNKNOWN",
+        "preemptive_security_safe_for_dry_run": True,
+        "preemptive_security_safe_for_apply": True,
+        "preemptive_security_sos_required": False,
+        "preemptive_security_stop_required": False,
+        "preemptive_security_review_required": False,
+        "preemptive_security_event_count": 0,
+        "preemptive_security_boss_alert_active": False,
+        "preemptive_security_blocked_actions": [],
         "duplicate_intent_detected": False,
         "canonical_owner": "",
     }
@@ -460,6 +525,25 @@ def discover_evidence(repo_root: str | Path) -> dict[str, Any]:
             "automation/orchestration/continuation/aios_dirty_tree_classifier.py",
             dirty_tree_status,
             dirty_tree_summary,
+        )
+    )
+
+    security_layer = _load_preemptive_security_layer()
+    security_status = "missing"
+    security_summary = "Preemptive security layer module is missing."
+    if security_layer is not None:
+        security_status = "present"
+        try:
+            security_payload = security_layer.build_security_state(repo_root=root, dirty_tree=dirty_tree_payload)
+            security_summary = _apply_preemptive_security_signal(signals, security_payload)
+        except Exception:
+            security_status = "unknown"
+            security_summary = _apply_preemptive_security_signal(signals, None)
+    evidence_inputs.append(
+        _evidence(
+            "automation/security/aios_preemptive_security_layer.py",
+            security_status,
+            security_summary,
         )
     )
 
@@ -590,6 +674,16 @@ def classify_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     signals.setdefault("dirty_tree_protected_stop_required", False)
     signals.setdefault("dirty_tree_review_required", False)
     signals.setdefault("dirty_tree_dirty_count", 0)
+    signals.setdefault("preemptive_security_state_present", False)
+    signals.setdefault("preemptive_security_overall_state", "UNKNOWN")
+    signals.setdefault("preemptive_security_safe_for_dry_run", True)
+    signals.setdefault("preemptive_security_safe_for_apply", True)
+    signals.setdefault("preemptive_security_sos_required", False)
+    signals.setdefault("preemptive_security_stop_required", False)
+    signals.setdefault("preemptive_security_review_required", False)
+    signals.setdefault("preemptive_security_event_count", 0)
+    signals.setdefault("preemptive_security_boss_alert_active", False)
+    signals.setdefault("preemptive_security_blocked_actions", [])
     signals.setdefault("duplicate_intent_detected", False)
     signals.setdefault("canonical_owner", "")
     return {"signals": signals, "evidence_inputs": records}
@@ -690,6 +784,7 @@ def _sorted_candidates(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]
 def _apply_candidate_safety_overrides(signals: dict[str, Any], candidates: list[dict[str, Any]]) -> None:
     approval_missing = signals["approval_status"] in {"unknown", "missing", "pending", "pending_review", "review"}
     repo_dirty = signals.get("repo_state") != "clean"
+    security_blocks_apply = signals.get("preemptive_security_safe_for_apply") is False
     for candidate in candidates:
         applies = str(candidate.get("allowed_lane", "")).startswith("APPLY")
         if repo_dirty and applies and candidate.get("category") != "STATUS_RECON":
@@ -702,14 +797,120 @@ def _apply_candidate_safety_overrides(signals: dict[str, Any], candidates: list[
             candidate["blocked_reason"] = candidate.get("blocked_reason") or "apply_approval_missing"
             candidate["total_score"] = 0
             candidate["reason"] = f"{candidate['reason']} Approval evidence is missing, so APPLY is blocked."
+        if security_blocks_apply and applies:
+            candidate["blocked"] = True
+            candidate["blocked_reason"] = candidate.get("blocked_reason") or "preemptive_security_not_apply_safe"
+            candidate["total_score"] = 0
+            candidate["reason"] = f"{candidate['reason']} Preemptive security state allows only READ_ONLY/DRY_RUN routing."
 
 
 def _rank_candidate_records(classified: dict[str, Any]) -> list[dict[str, Any]]:
     signals = classified["signals"]
     candidates: list[dict[str, Any]] = []
     approval_missing = signals["approval_status"] in {"unknown", "missing", "pending", "pending_review", "review"}
+    security_overlay_present = signals.get("preemptive_security_state_present") is True
 
-    if signals.get("dirty_tree_sos_required"):
+    if signals.get("preemptive_security_sos_required"):
+        candidates.append(
+            _candidate(
+                task_id="preemptive_security_sos_stop",
+                title="Stop and escalate preemptive security SOS.",
+                category="BLOCKED_STOP_AND_REPORT",
+                value_score=100,
+                urgency_score=100,
+                risk_score=100,
+                blocker_score=100,
+                validation_score=100,
+                autonomy_leverage_score=100,
+                reason="Preemptive security state found canary, secret, broker, live-trading, or real-order SOS risk.",
+                required_validator="Preemptive security state review",
+                allowed_lane="BLOCKED",
+                stop_condition="Stop AI_OS continuation and do not print secret-like values.",
+                blocked=True,
+                blocked_reason="preemptive_security_sos",
+                risk_level="blocked",
+                confidence=0.99,
+                priority_boost=1500,
+                packet_scope=_packet_scope(
+                    "AIOS-PREEMPTIVE-SECURITY-SOS-STOP",
+                    "DRY_RUN",
+                    "BLOCKED",
+                    ["automation/security/aios_preemptive_security_layer.py", "Reports/"],
+                ),
+            )
+        )
+
+    if signals.get("preemptive_security_stop_required") or signals.get("preemptive_security_review_required"):
+        candidates.append(
+            _candidate(
+                task_id="preemptive_security_review_stop",
+                title="Stop for preemptive security review before mutation.",
+                category="BLOCKED_STOP_AND_REPORT",
+                value_score=99,
+                urgency_score=99,
+                risk_score=99,
+                blocker_score=99,
+                validation_score=98,
+                autonomy_leverage_score=98,
+                reason=(
+                    "Preemptive security state is "
+                    f"{signals.get('preemptive_security_overall_state')}; APPLY and protected actions require review."
+                ),
+                required_validator="Preemptive security state and Dirty Tree Classifier review",
+                allowed_lane="BLOCKED",
+                stop_condition="Stop before APPLY, protected actions, scheduler, daemon, worker launch, broker, live trading, or production.",
+                blocked=True,
+                blocked_reason="preemptive_security_review_required",
+                risk_level="blocked",
+                confidence=0.96,
+                priority_boost=1400,
+                packet_scope=_packet_scope(
+                    "AIOS-PREEMPTIVE-SECURITY-REVIEW-STOP",
+                    "DRY_RUN",
+                    "BLOCKED",
+                    ["automation/security/aios_preemptive_security_layer.py", "automation/orchestration/continuation/"],
+                ),
+            )
+        )
+
+    if (
+        signals.get("preemptive_security_state_present")
+        and signals.get("preemptive_security_overall_state") == "WATCH"
+        and signals.get("preemptive_security_safe_for_dry_run")
+    ):
+        candidates.append(
+            _candidate(
+                task_id="preemptive_security_watch_dry_run",
+                title="Continue only READ_ONLY/DRY_RUN work under preemptive security WATCH.",
+                category="TELEMETRY_REPORTING",
+                value_score=20,
+                urgency_score=20,
+                risk_score=20,
+                blocker_score=20,
+                validation_score=20,
+                autonomy_leverage_score=20,
+                reason="Preemptive security state is WATCH; generated safety evidence may be observed, but APPLY remains blocked.",
+                required_validator="Preemptive security state review",
+                allowed_lane="DRY_RUN",
+                stop_condition="Stop before APPLY, protected actions, worker launch, scheduler, secrets, broker, live trading, or production.",
+                blocked=False,
+                blocked_reason=None,
+                risk_level="low",
+                confidence=0.78,
+                priority_boost=20,
+                packet_scope=_packet_scope(
+                    "AIOS-PREEMPTIVE-SECURITY-WATCH-DRY-RUN",
+                    "DRY_RUN",
+                    "DRY_RUN",
+                    ["automation/security/aios_preemptive_security_layer.py", "Reports/"],
+                ),
+            )
+        )
+
+    dirty_tree_sos_still_required = signals.get("dirty_tree_sos_required") and (
+        not security_overlay_present or signals.get("preemptive_security_sos_required")
+    )
+    if dirty_tree_sos_still_required:
         candidates.append(
             _candidate(
                 task_id="dirty_tree_security_sos",

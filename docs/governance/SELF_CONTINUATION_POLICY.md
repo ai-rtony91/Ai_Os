@@ -44,6 +44,8 @@ Dirty files under approved generated evidence, report, or sandbox preview roots 
 
 Dirty APPLY remains blocked. Unknown dirty files require review, protected authority dirty files stop continuation, and secret, broker, live-order, webhook, production, dashboard mutation, scheduler, daemon, or worker-launch indicators escalate to SOS without printing secret values.
 
+The Preemptive Security Layer may downgrade generated safety-report mentions to `WATCH` when they do not imply enablement, secret exposure, executable authority, or live action. `WATCH` permits READ_ONLY/DRY_RUN continuation only. `STOP`, `REVIEW_REQUIRED`, or `SOS` security state blocks APPLY and requires review or escalation.
+
 ## Proposal Gate
 
 Every self-continuation output is an approval item under:
