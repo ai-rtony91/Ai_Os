@@ -252,6 +252,8 @@ Blocked actions must not be routed into APPLY.
 
 A runner preview is read-only. It must not edit target files, install packages, call the internet, start background work, touch secrets, trade, or connect to brokers.
 
+Dirty generated evidence, reports, and sandbox previews may remain present during READ_ONLY or DRY_RUN preview when the dirty tree classifier marks every dirty file safe for DRY_RUN. That classification never approves APPLY. Unknown dirty files require review, protected authority dirty files stop, and security indicators require SOS escalation.
+
 A runner preview should:
 
 1. Select one task only.

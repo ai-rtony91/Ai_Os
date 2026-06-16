@@ -343,6 +343,85 @@ def test_dirty_repo_ranks_status_cleanup_above_apply_work() -> None:
     assert decision["blocked"] is True
 
 
+def test_safe_generated_dirty_does_not_select_status_recon() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            repo_state="safe_dirty",
+            dirty_tree_overall_classification="SAFE_DIRTY",
+            dirty_tree_safe_for_dry_run=True,
+            dirty_tree_safe_for_apply=False,
+            dirty_tree_dirty_count=3,
+            validator_status="missing",
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+
+    assert decision["selected_candidate_id"] != "repo_status_recon"
+    assert decision["decision_category"] == "VALIDATOR_REPAIR"
+    assert decision["allowed_lane"] == "DRY_RUN"
+    assert decision["blocked"] is False
+
+
+def test_safe_dirty_still_blocks_apply_candidates() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            repo_state="safe_dirty",
+            dirty_tree_overall_classification="SAFE_DIRTY",
+            dirty_tree_safe_for_dry_run=True,
+            dirty_tree_safe_for_apply=False,
+            dirty_tree_dirty_count=2,
+            decision_output_present=False,
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+    apply_candidate = next(
+        candidate for candidate in decision["ranked_candidates"] if candidate["task_id"] == "self_build_decision_output_wiring"
+    )
+
+    assert apply_candidate["blocked"] is True
+    assert decision["allowed_lane"] != "APPLY_CODE_SAFE"
+
+
+def test_security_dirty_forces_blocked_decision() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            repo_state="dirty",
+            dirty_tree_overall_classification="SECURITY_SOS_DIRTY",
+            dirty_tree_sos_required=True,
+            dirty_tree_safe_for_dry_run=False,
+            dirty_tree_dirty_count=1,
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+
+    assert decision["selected_candidate_id"] == "dirty_tree_security_sos"
+    assert decision["decision_category"] == "BLOCKED_STOP_AND_REPORT"
+    assert decision["allowed_lane"] == "BLOCKED"
+    assert decision["blocked_reason"] == "security_sos_dirty"
+
+
+def test_protected_authority_dirty_forces_blocked_decision() -> None:
+    m = _load()
+    decision = m.choose_next_decision(
+        _evidence(
+            repo_state="dirty",
+            dirty_tree_overall_classification="PROTECTED_AUTHORITY_DIRTY",
+            dirty_tree_protected_stop_required=True,
+            dirty_tree_safe_for_dry_run=False,
+            dirty_tree_dirty_count=1,
+        ),
+        generated_at_utc=FIXED_NOW,
+    )
+
+    assert decision["selected_candidate_id"] == "dirty_tree_protected_authority_stop"
+    assert decision["decision_category"] == "BLOCKED_STOP_AND_REPORT"
+    assert decision["allowed_lane"] == "BLOCKED"
+    assert decision["blocked_reason"] == "protected_authority_dirty"
+
+
 def test_approval_missing_blocks_apply_even_when_apply_value_is_high() -> None:
     m = _load()
     decision = m.choose_next_decision(

@@ -141,6 +141,18 @@ def _load_repo_state_collector() -> Any | None:
     return module
 
 
+def _load_dirty_tree_classifier() -> Any | None:
+    classifier_path = Path(__file__).parent / "continuation" / "aios_dirty_tree_classifier.py"
+    if not classifier_path.is_file():
+        return None
+    spec = importlib.util.spec_from_file_location("aios_dirty_tree_classifier", classifier_path)
+    if spec is None or spec.loader is None:
+        return None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def _load_repo_state_evidence(repo_root: Path) -> tuple[dict[str, Any] | None, str, str]:
     rel_path = str(DEFAULT_REPO_STATE_OUTPUT).replace("\\", "/")
     payload = load_json_if_exists(repo_root / DEFAULT_REPO_STATE_OUTPUT)
@@ -183,6 +195,53 @@ def _apply_repo_state_signal(signals: dict[str, Any], payload: dict[str, Any] | 
     safe_text = str(bool(safe_for_apply)).lower()
     reason_text = str(blocked_reason or "none")
     return f"branch={branch or 'unknown'}; is_clean={clean_text}; safe_for_apply={safe_text}; blocked_reason={reason_text}; evidence_quality={quality}"
+
+
+def _apply_dirty_tree_classifier_signal(signals: dict[str, Any], payload: dict[str, Any] | None) -> str:
+    if not isinstance(payload, dict):
+        signals["dirty_tree_overall_classification"] = "UNKNOWN_DIRTY"
+        signals["dirty_tree_safe_for_dry_run"] = False
+        signals["dirty_tree_safe_for_apply"] = False
+        signals["dirty_tree_sos_required"] = False
+        signals["dirty_tree_protected_stop_required"] = False
+        signals["dirty_tree_review_required"] = True
+        signals["dirty_tree_dirty_count"] = 0
+        return "Dirty tree classifier evidence is missing."
+
+    overall = str(payload.get("overall_classification") or "UNKNOWN_DIRTY")
+    dirty_count = _to_int(payload.get("dirty_count"), 0)
+    safe_for_dry_run = payload.get("safe_for_dry_run") is True
+    safe_for_apply = payload.get("safe_for_apply") is True
+    sos_required = payload.get("sos_required") is True
+    protected_stop_required = payload.get("protected_stop_required") is True
+    review_required = payload.get("review_required") is True
+    git_error = payload.get("git_status_error")
+
+    signals["dirty_tree_overall_classification"] = overall
+    signals["dirty_tree_safe_for_dry_run"] = safe_for_dry_run
+    signals["dirty_tree_safe_for_apply"] = safe_for_apply
+    signals["dirty_tree_sos_required"] = sos_required
+    signals["dirty_tree_protected_stop_required"] = protected_stop_required
+    signals["dirty_tree_review_required"] = review_required
+    signals["dirty_tree_dirty_count"] = dirty_count
+
+    if not git_error:
+        if sos_required or protected_stop_required or review_required:
+            signals["repo_state"] = "dirty"
+            signals["repo_state_blocked_reason"] = overall.lower()
+        elif dirty_count > 0 and safe_for_dry_run:
+            signals["repo_state"] = "safe_dirty"
+            signals["repo_state_blocked_reason"] = "safe_dirty_read_only"
+        elif dirty_count == 0 and safe_for_apply:
+            signals["repo_state"] = "clean"
+            signals["repo_state_blocked_reason"] = None
+
+    return (
+        f"overall={overall}; dirty_count={dirty_count}; "
+        f"safe_for_dry_run={str(safe_for_dry_run).lower()}; "
+        f"safe_for_apply={str(safe_for_apply).lower()}; "
+        f"sos_required={str(sos_required).lower()}; protected_stop_required={str(protected_stop_required).lower()}"
+    )
 
 
 def _count_files(path: Path) -> int:
@@ -365,6 +424,13 @@ def discover_evidence(repo_root: str | Path) -> dict[str, Any]:
         "active_blocker_count": 0,
         "trading_lab_paper_only_confirmed": False,
         "unsafe_scope_detected": False,
+        "dirty_tree_overall_classification": "UNKNOWN_DIRTY",
+        "dirty_tree_safe_for_dry_run": False,
+        "dirty_tree_safe_for_apply": False,
+        "dirty_tree_sos_required": False,
+        "dirty_tree_protected_stop_required": False,
+        "dirty_tree_review_required": False,
+        "dirty_tree_dirty_count": 0,
         "duplicate_intent_detected": False,
         "canonical_owner": "",
     }
@@ -376,6 +442,26 @@ def discover_evidence(repo_root: str | Path) -> dict[str, Any]:
     repo_state_payload, repo_state_path, repo_state_status = _load_repo_state_evidence(root)
     repo_state_summary = _apply_repo_state_signal(signals, repo_state_payload)
     evidence_inputs.append(_evidence(repo_state_path, repo_state_status, repo_state_summary))
+
+    dirty_classifier = _load_dirty_tree_classifier()
+    dirty_tree_payload: dict[str, Any] | None = None
+    dirty_tree_status = "missing"
+    dirty_tree_summary = "Dirty tree classifier module is missing."
+    if dirty_classifier is not None:
+        dirty_tree_status = "present"
+        try:
+            dirty_tree_payload = dirty_classifier.build_dirty_tree_classification(repo_root=root)
+            dirty_tree_summary = _apply_dirty_tree_classifier_signal(signals, dirty_tree_payload)
+        except Exception:
+            dirty_tree_status = "unknown"
+            dirty_tree_summary = _apply_dirty_tree_classifier_signal(signals, None)
+    evidence_inputs.append(
+        _evidence(
+            "automation/orchestration/continuation/aios_dirty_tree_classifier.py",
+            dirty_tree_status,
+            dirty_tree_summary,
+        )
+    )
 
     json_sources = {
         "control/cycle/last_marker.json": "status_artifact",
@@ -497,6 +583,13 @@ def classify_evidence(evidence: dict[str, Any]) -> dict[str, Any]:
     signals.setdefault("active_blocker_count", 0)
     signals.setdefault("trading_lab_paper_only_confirmed", False)
     signals.setdefault("unsafe_scope_detected", False)
+    signals.setdefault("dirty_tree_overall_classification", "UNKNOWN_DIRTY")
+    signals.setdefault("dirty_tree_safe_for_dry_run", False)
+    signals.setdefault("dirty_tree_safe_for_apply", False)
+    signals.setdefault("dirty_tree_sos_required", False)
+    signals.setdefault("dirty_tree_protected_stop_required", False)
+    signals.setdefault("dirty_tree_review_required", False)
+    signals.setdefault("dirty_tree_dirty_count", 0)
     signals.setdefault("duplicate_intent_detected", False)
     signals.setdefault("canonical_owner", "")
     return {"signals": signals, "evidence_inputs": records}
@@ -596,14 +689,18 @@ def _sorted_candidates(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]
 
 def _apply_candidate_safety_overrides(signals: dict[str, Any], candidates: list[dict[str, Any]]) -> None:
     approval_missing = signals["approval_status"] in {"unknown", "missing", "pending", "pending_review", "review"}
-    repo_dirty = signals.get("repo_state") == "dirty"
+    repo_dirty = signals.get("repo_state") != "clean"
     for candidate in candidates:
         applies = str(candidate.get("allowed_lane", "")).startswith("APPLY")
         if repo_dirty and applies and candidate.get("category") != "STATUS_RECON":
             candidate["blocked"] = True
+            candidate["blocked_reason"] = candidate.get("blocked_reason") or "dirty_working_tree"
+            candidate["total_score"] = 0
             candidate["reason"] = f"{candidate['reason']} Repo is dirty, so APPLY candidates must wait for status or cleanup."
         if signals.get("approval_required") and approval_missing and applies:
             candidate["blocked"] = True
+            candidate["blocked_reason"] = candidate.get("blocked_reason") or "apply_approval_missing"
+            candidate["total_score"] = 0
             candidate["reason"] = f"{candidate['reason']} Approval evidence is missing, so APPLY is blocked."
 
 
@@ -611,6 +708,56 @@ def _rank_candidate_records(classified: dict[str, Any]) -> list[dict[str, Any]]:
     signals = classified["signals"]
     candidates: list[dict[str, Any]] = []
     approval_missing = signals["approval_status"] in {"unknown", "missing", "pending", "pending_review", "review"}
+
+    if signals.get("dirty_tree_sos_required"):
+        candidates.append(
+            _candidate(
+                task_id="dirty_tree_security_sos",
+                title="Stop and escalate dirty tree security indicators.",
+                category="BLOCKED_STOP_AND_REPORT",
+                value_score=100,
+                urgency_score=100,
+                risk_score=100,
+                blocker_score=100,
+                validation_score=100,
+                autonomy_leverage_score=100,
+                reason="Dirty tree classifier found secret, broker, live-order, webhook, production, dashboard mutation, scheduler, daemon, or worker-launch indicators.",
+                required_validator="Dirty tree classifier security review",
+                allowed_lane="BLOCKED",
+                stop_condition="Stop AI_OS continuation and do not print secret values.",
+                blocked=True,
+                blocked_reason="security_sos_dirty",
+                risk_level="blocked",
+                confidence=0.99,
+                priority_boost=1300,
+                packet_scope=_packet_scope("AIOS-DIRTY-TREE-SECURITY-SOS-STOP", "DRY_RUN", "BLOCKED", ["Reports/", "automation/orchestration/continuation/aios_dirty_tree_classifier.py"]),
+            )
+        )
+
+    if signals.get("dirty_tree_protected_stop_required"):
+        candidates.append(
+            _candidate(
+                task_id="dirty_tree_protected_authority_stop",
+                title="Stop before continuing with dirty protected authority files.",
+                category="BLOCKED_STOP_AND_REPORT",
+                value_score=98,
+                urgency_score=98,
+                risk_score=98,
+                blocker_score=98,
+                validation_score=95,
+                autonomy_leverage_score=95,
+                reason="Dirty tree classifier found protected governance, security, runtime, dispatcher, or repo authority files.",
+                required_validator="Human Owner protected-authority dirty file review",
+                allowed_lane="BLOCKED",
+                stop_condition="Stop until the Human Owner reviews the protected dirty files.",
+                blocked=True,
+                blocked_reason="protected_authority_dirty",
+                risk_level="blocked",
+                confidence=0.96,
+                priority_boost=1200,
+                packet_scope=_packet_scope("AIOS-DIRTY-TREE-PROTECTED-AUTHORITY-STOP", "DRY_RUN", "BLOCKED", ["docs/governance/", "docs/security/", "AGENTS.md", "README.md"]),
+            )
+        )
 
     if signals["unsafe_scope_detected"]:
         candidates.append(
@@ -637,8 +784,9 @@ def _rank_candidate_records(classified: dict[str, Any]) -> list[dict[str, Any]]:
             )
         )
 
-    if signals["repo_state"] != "clean":
+    if signals["repo_state"] != "clean" and not signals.get("dirty_tree_safe_for_dry_run"):
         dirty = signals["repo_state"] == "dirty"
+        dirty_tree_overall = str(signals.get("dirty_tree_overall_classification") or "")
         candidates.append(
             _candidate(
                 task_id="repo_status_recon",
@@ -651,7 +799,7 @@ def _rank_candidate_records(classified: dict[str, Any]) -> list[dict[str, Any]]:
                 validation_score=80,
                 autonomy_leverage_score=85,
                 reason=(
-                    "Repo-state evidence proves the working tree is dirty; dirty files must be classified before new APPLY work."
+                    f"Repo-state evidence proves the working tree is dirty ({dirty_tree_overall or 'unclassified'}); dirty files must be reviewed before new APPLY work."
                     if dirty
                     else "Repo state evidence is unknown or not proven clean; mutation work must wait."
                 ),
@@ -664,6 +812,33 @@ def _rank_candidate_records(classified: dict[str, Any]) -> list[dict[str, Any]]:
                 confidence=0.86,
                 priority_boost=800,
                 packet_scope=_packet_scope("AIOS-REPO-STATUS-RECON-DRY-RUN", "DRY_RUN", "READ_ONLY", ["AGENTS.md", "README.md", "WHITEPAPER.md"]),
+            )
+        )
+
+    if signals["repo_state"] == "safe_dirty" or (
+        signals.get("dirty_tree_safe_for_dry_run") and _to_int(signals.get("dirty_tree_dirty_count"), 0) > 0
+    ):
+        candidates.append(
+            _candidate(
+                task_id="safe_dirty_dry_run_continuation",
+                title="Continue only READ_ONLY/DRY_RUN work with safe generated dirty evidence.",
+                category="TELEMETRY_REPORTING",
+                value_score=12,
+                urgency_score=12,
+                risk_score=14,
+                blocker_score=10,
+                validation_score=12,
+                autonomy_leverage_score=14,
+                reason="Dirty files are classified as generated evidence, reports, or sandbox previews; DRY_RUN continuation is allowed while APPLY remains blocked.",
+                required_validator="Dirty tree classifier result review",
+                allowed_lane="DRY_RUN",
+                stop_condition="Stop before APPLY, protected actions, worker launch, scheduler, secrets, broker, live trading, or production.",
+                blocked=False,
+                blocked_reason=None,
+                risk_level="low",
+                confidence=0.74,
+                priority_boost=0,
+                packet_scope=_packet_scope("AIOS-SAFE-DIRTY-DRY-RUN-CONTINUATION", "DRY_RUN", "DRY_RUN", ["Reports/", "automation/orchestration/work_packets/preview/"]),
             )
         )
 

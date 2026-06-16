@@ -144,6 +144,21 @@ def _load_governor_module() -> Any | None:
         return None
 
 
+def _load_dirty_tree_classifier() -> Any | None:
+    path = Path(__file__).parent / "continuation" / "aios_dirty_tree_classifier.py"
+    if not path.is_file():
+        return None
+    try:
+        spec = importlib.util.spec_from_file_location("aios_dirty_tree_classifier", path)
+        if spec is None or spec.loader is None:
+            return None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except Exception:
+        return None
+
+
 def _build_governor_decision(repo_root: Path, generated_at_utc: str | None) -> tuple[dict[str, Any] | None, str]:
     governor = _load_governor_module()
     if governor is None:
@@ -156,6 +171,25 @@ def _build_governor_decision(repo_root: Path, generated_at_utc: str | None) -> t
     if not isinstance(decision, dict):
         return None, "Autonomy Decision Governor returned a non-object decision."
     return decision, "Governor decision produced in memory; no dispatch or report write was performed."
+
+
+def _build_dirty_tree_classification(repo_root: Path) -> tuple[dict[str, Any] | None, str]:
+    classifier = _load_dirty_tree_classifier()
+    if classifier is None:
+        return None, "Dirty tree classifier module is missing or could not be imported."
+    try:
+        result = classifier.build_dirty_tree_classification(repo_root=repo_root)
+    except Exception:
+        return None, "Dirty tree classifier failed; closed loop is fail-closed."
+    if not isinstance(result, dict):
+        return None, "Dirty tree classifier returned a non-object result."
+    summary = (
+        f"overall={result.get('overall_classification')}; "
+        f"dirty_count={result.get('dirty_count')}; "
+        f"safe_for_dry_run={str(result.get('safe_for_dry_run') is True).lower()}; "
+        f"safe_for_apply={str(result.get('safe_for_apply') is True).lower()}"
+    )
+    return result, summary
 
 
 def collect_loop_inputs(repo_root: str | Path, generated_at_utc: str | None = None) -> dict[str, Any]:
@@ -185,6 +219,17 @@ def collect_loop_inputs(repo_root: str | Path, generated_at_utc: str | None = No
                 summary,
             )
         )
+
+    dirty_tree, dirty_tree_summary = _build_dirty_tree_classification(root)
+    payloads["dirty_tree_classifier"] = dirty_tree
+    records.append(
+        _input_record(
+            "dirty_tree_classifier",
+            Path("automation") / "orchestration" / "continuation" / "aios_dirty_tree_classifier.py",
+            "present" if dirty_tree is not None else "unknown",
+            dirty_tree_summary,
+        )
+    )
 
     return {"repo_root": str(root), "inputs": records, "payloads": payloads}
 
@@ -356,7 +401,29 @@ def _collect_blockers(payload: Any) -> list[str]:
     return sorted(set(blockers))
 
 
+def _dirty_tree_payload(loop_state: dict[str, Any]) -> dict[str, Any]:
+    payload = loop_state["payloads"].get("dirty_tree_classifier")
+    return payload if isinstance(payload, dict) else {}
+
+
+def _dirty_tree_is_safe_for_dry_run(loop_state: dict[str, Any]) -> bool:
+    payload = _dirty_tree_payload(loop_state)
+    return (
+        int(payload.get("dirty_count") or 0) > 0
+        and payload.get("safe_for_dry_run") is True
+        and payload.get("safe_for_apply") is False
+        and payload.get("sos_required") is not True
+        and payload.get("protected_stop_required") is not True
+    )
+
+
 def _repo_dirty(loop_state: dict[str, Any]) -> bool:
+    dirty_tree = _dirty_tree_payload(loop_state)
+    if dirty_tree:
+        if _dirty_tree_is_safe_for_dry_run(loop_state):
+            return False
+        if int(dirty_tree.get("dirty_count") or 0) > 0:
+            return True
     payload = loop_state["payloads"].get("repo_state")
     decision = loop_state["governor_decision"]
     if isinstance(payload, dict):
@@ -434,6 +501,28 @@ def evaluate_loop_gates(loop_state: dict[str, Any]) -> dict[str, Any]:
         return {
             "status": "blocked",
             "reason": "Live trading, broker, credential, webhook, secret, or real-order scope is blocked.",
+            "safe_to_dispatch": False,
+        }
+
+    dirty_tree = _dirty_tree_payload(loop_state)
+    if dirty_tree.get("sos_required") is True:
+        return {
+            "status": "blocked",
+            "reason": "Dirty tree classifier found security SOS indicators; continuation must stop without printing secret values.",
+            "safe_to_dispatch": False,
+        }
+
+    if dirty_tree.get("protected_stop_required") is True:
+        return {
+            "status": "blocked",
+            "reason": "Dirty tree classifier found protected authority dirty files.",
+            "safe_to_dispatch": False,
+        }
+
+    if _dirty_tree_is_safe_for_dry_run(loop_state) and action.get("proposed_mode") == "APPLY":
+        return {
+            "status": "requires_cleanup",
+            "reason": "Dirty generated evidence permits READ_ONLY/DRY_RUN only; APPLY remains blocked until the tree is clean.",
             "safe_to_dispatch": False,
         }
 
