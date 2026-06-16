@@ -120,6 +120,13 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
             payload.get("broker_paper_stub_contract_classification") or "not_run"
         ),
         "broker_paper_stub_contract_ready": bool(payload.get("broker_paper_stub_contract_ready", False)),
+        "broker_paper_dryrun_ledger_classification": str(
+            payload.get("broker_paper_dryrun_ledger_classification") or "not_run"
+        ),
+        "broker_paper_dryrun_ledger_ready": bool(payload.get("broker_paper_dryrun_ledger_ready", False)),
+        "dryrun_ledger_records": int(payload.get("dryrun_ledger_records", payload.get("records_count", 0))),
+        "dryrun_ledger_accepted": int(payload.get("dryrun_ledger_accepted", payload.get("accepted_count", 0))),
+        "dryrun_ledger_rejected": int(payload.get("dryrun_ledger_rejected", payload.get("rejected_count", 0))),
         "broker_paper_orders_allowed": False,
         "credentials_allowed": False,
         "network_api_allowed": False,
@@ -169,6 +176,8 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
             f"Sandbox contract: {payload.get('broker_paper_sandbox_readiness_status', 'not_run')} | "
             f"Presecurity: {payload.get('presecurity_gate_classification', 'not_run')} | "
             f"Stub: {payload.get('broker_paper_stub_contract_classification', 'not_run')} | "
+            f"Ledger: {payload.get('broker_paper_dryrun_ledger_classification', 'not_run')}/"
+            f"{payload.get('dryrun_ledger_records', 0)} | "
             f"Repaired worst PnL: {payload.get('repaired_worst_stress_pnl', 0.0)}"
         ),
         f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",

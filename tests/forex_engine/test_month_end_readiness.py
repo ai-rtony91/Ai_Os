@@ -149,6 +149,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
         "not_run",
     }
     assert review["broker_paper_stub_contract_ready"] in {True, False}
+    assert review["broker_paper_dryrun_ledger_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_LEDGER_READY",
+        "not_run",
+    }
+    assert review["broker_paper_dryrun_ledger_ready"] in {True, False}
+    assert review["dryrun_ledger_records"] >= 0
+    assert review["dryrun_ledger_accepted"] >= 0
+    assert review["dryrun_ledger_rejected"] >= 0
     assert review["broker_paper_orders_allowed"] is False
     assert review["credentials_allowed"] is False
     assert review["network_api_allowed"] is False
@@ -205,6 +215,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
         "not_run",
     }
     assert review["evidence_summary"]["broker_paper_stub_contract_ready"] in {True, False}
+    assert review["evidence_summary"]["broker_paper_dryrun_ledger_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_LEDGER_READY",
+        "not_run",
+    }
+    assert review["evidence_summary"]["broker_paper_dryrun_ledger_ready"] in {True, False}
+    assert review["evidence_summary"]["dryrun_ledger_records"] >= 0
+    assert review["evidence_summary"]["dryrun_ledger_accepted"] >= 0
+    assert review["evidence_summary"]["dryrun_ledger_rejected"] >= 0
     assert review["evidence_summary"]["broker_paper_orders_allowed"] is False
     assert review["evidence_summary"]["credentials_allowed"] is False
     assert review["evidence_summary"]["network_api_allowed"] is False

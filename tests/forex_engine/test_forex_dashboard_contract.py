@@ -98,6 +98,16 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
         "not_run",
     }
     assert dashboard["broker_paper_stub_contract_ready"] in {True, False}
+    assert dashboard["broker_paper_dryrun_ledger_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_LEDGER_READY",
+        "not_run",
+    }
+    assert dashboard["broker_paper_dryrun_ledger_ready"] in {True, False}
+    assert dashboard["dryrun_ledger_records"] >= 0
+    assert dashboard["dryrun_ledger_accepted"] >= 0
+    assert dashboard["dryrun_ledger_rejected"] >= 0
     assert dashboard["broker_paper_orders_allowed"] is False
     assert dashboard["credentials_allowed"] is False
     assert dashboard["network_api_allowed"] is False
@@ -123,6 +133,7 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert any("Repaired degradation:" in line for line in lines)
     assert any("Weakest:" in line for line in lines)
     assert any("Sandbox contract:" in line for line in lines)
+    assert any("Ledger:" in line for line in lines)
     assert any("Presecurity:" in line for line in lines)
     assert any("Stub:" in line for line in lines)
     assert any("Repaired worst PnL:" in line for line in lines)

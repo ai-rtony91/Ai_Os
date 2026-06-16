@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from automation.forex_engine import broker_paper_adapter_stub_contract
+from automation.forex_engine import broker_paper_dryrun_intent_ledger
 from automation.forex_engine import broker_paper_presecurity_gate
 from automation.forex_engine import schema_contracts as schemas
 
@@ -47,6 +48,7 @@ def evaluate_broker_paper_sandbox_readiness(
     low_vol_edge_redesign: dict[str, Any] | None = None,
     presecurity_gate: dict[str, Any] | None = None,
     adapter_stub_contract: dict[str, Any] | None = None,
+    dryrun_intent_ledger: dict[str, Any] | None = None,
     policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     active_policy = default_broker_paper_sandbox_readiness_policy()
@@ -76,6 +78,18 @@ def evaluate_broker_paper_sandbox_readiness(
         or active_evidence.get("adapter_stub_contract")
         or {}
     )
+    active_dryrun_ledger = dict(
+        dryrun_intent_ledger
+        or active_evidence.get("broker_paper_dryrun_intent_ledger")
+        or active_evidence.get("dryrun_intent_ledger")
+        or active_evidence.get("broker_paper_intent_ledger")
+        or {}
+    )
+    active_dryrun_ledger_summary = (
+        broker_paper_dryrun_intent_ledger.summarize_dryrun_intent_ledger(active_dryrun_ledger)
+        if active_dryrun_ledger
+        else {}
+    )
     evidence_gates = _evidence_gates(
         active_evidence,
         active_stress_oos,
@@ -86,6 +100,7 @@ def evaluate_broker_paper_sandbox_readiness(
         active_low_vol_edge,
         active_presecurity_gate,
         active_adapter_stub,
+        active_dryrun_ledger_summary or active_dryrun_ledger,
         active_policy,
     )
     passed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is True]
@@ -108,6 +123,7 @@ def evaluate_broker_paper_sandbox_readiness(
             active_low_vol_edge,
             active_presecurity_gate,
             active_adapter_stub,
+            active_dryrun_ledger_summary or active_dryrun_ledger,
         ),
         "required_future_protected_approvals": _required_future_protected_approvals(),
         "forbidden_current_actions": _forbidden_current_actions(),
@@ -153,6 +169,22 @@ def evaluate_broker_paper_sandbox_readiness(
         "broker_paper_stub_contract_classification": active_adapter_stub.get("classification", "not_run"),
         "broker_paper_stub_contract_ready": False,
         "adapter_stub_contract_ready": False,
+        "broker_paper_dryrun_ledger_status": active_dryrun_ledger_summary.get("classification", "not_run"),
+        "broker_paper_dryrun_ledger_classification": active_dryrun_ledger_summary.get(
+            "classification",
+            "not_run",
+        ),
+        "broker_paper_dryrun_ledger_ready": False,
+        "dryrun_ledger_records": int(active_dryrun_ledger_summary.get("records_count", 0)),
+        "dryrun_ledger_accepted": int(active_dryrun_ledger_summary.get("accepted_count", 0)),
+        "dryrun_ledger_rejected": int(active_dryrun_ledger_summary.get("rejected_count", 0)),
+        "file_writes_allowed": False,
+        "reports_writes_allowed": False,
+        "would_place_order": False,
+        "order_placed": False,
+        "broker_request_sent": False,
+        "network_used": False,
+        "credentials_used": False,
         "credentials_allowed": False,
         "next_safe_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
         "live_trade_ready": False,
@@ -172,11 +204,26 @@ def evaluate_broker_paper_sandbox_readiness(
         active_presecurity_gate,
         active_adapter_stub,
     )
+    result["broker_paper_dryrun_ledger_ready"] = _dryrun_ledger_ready(
+        evidence_gates,
+        active_presecurity_gate,
+        active_adapter_stub,
+        active_dryrun_ledger_summary or active_dryrun_ledger,
+    )
     result["broker_paper_stub_contract_ready"] = result["adapter_stub_contract_ready"]
-    result["broker_paper_sandbox_contract_ready"] = result["adapter_stub_contract_ready"]
-    result["broker_paper_contract_ready"] = result["adapter_stub_contract_ready"]
-    result["next_safe_packet"] = _next_safe_packet_id(result["adapter_stub_contract_ready"], active_presecurity_gate)
-    result["next_safe_action"] = _next_safe_action(result["readiness_status"], result["blockers"])
+    result["broker_paper_sandbox_contract_ready"] = result["broker_paper_dryrun_ledger_ready"]
+    result["broker_paper_contract_ready"] = result["broker_paper_dryrun_ledger_ready"]
+    result["next_safe_packet"] = _next_safe_packet_id(
+        result["broker_paper_dryrun_ledger_ready"],
+        result["adapter_stub_contract_ready"],
+        active_presecurity_gate,
+    )
+    result["next_safe_action"] = _next_safe_action(
+        result["readiness_status"],
+        result["blockers"],
+        result["broker_paper_dryrun_ledger_ready"],
+        result["adapter_stub_contract_ready"],
+    )
     assert_no_broker_paper_side_effects(result)
     return result
 
@@ -244,6 +291,7 @@ def broker_paper_sandbox_boundary_summary() -> dict[str, Any]:
         "security_gate_required_before_broker_paper": True,
         "required_security_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
         "next_safe_packet_after_stub_contract": "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1",
+        "next_safe_packet_after_dryrun_ledger": "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1",
     }
 
 
@@ -272,6 +320,20 @@ def assert_no_broker_paper_side_effects(result: dict[str, Any]) -> None:
         raise ValueError("broker_paper_orders_allowed must remain false")
     if payload.get("live_orders_allowed") is not False:
         raise ValueError("live_orders_allowed must remain false")
+    if payload.get("file_writes_allowed") is not False:
+        raise ValueError("file_writes_allowed must remain false")
+    if payload.get("reports_writes_allowed") is not False:
+        raise ValueError("reports_writes_allowed must remain false")
+    if payload.get("would_place_order") is not False:
+        raise ValueError("would_place_order must remain false")
+    if payload.get("order_placed") is not False:
+        raise ValueError("order_placed must remain false")
+    if payload.get("broker_request_sent") is not False:
+        raise ValueError("broker_request_sent must remain false")
+    if payload.get("network_used") is not False:
+        raise ValueError("network_used must remain false")
+    if payload.get("credentials_used") is not False:
+        raise ValueError("credentials_used must remain false")
     if payload.get("protected_gate_required") is not True:
         raise ValueError("protected_gate_required must remain true")
     if payload.get("future_broker_paper_packet_requires_approval") is not True:
@@ -330,6 +392,7 @@ def _evidence_gates(
     low_vol_edge: dict[str, Any],
     presecurity_gate: dict[str, Any],
     adapter_stub: dict[str, Any],
+    dryrun_ledger: dict[str, Any],
     policy: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     multi = dict(evidence.get("multi_fixture_paper_forward_summary") or {})
@@ -356,6 +419,11 @@ def _evidence_gates(
     low_vol_edge_classification = str(low_vol_edge.get("classification") or "")
     presecurity_classification = str(presecurity_gate.get("classification") or "")
     adapter_stub_classification = str(adapter_stub.get("classification") or "")
+    dryrun_ledger_classification = str(
+        dryrun_ledger.get("classification")
+        or dryrun_ledger.get("broker_paper_dryrun_ledger_classification")
+        or ""
+    )
     gates = {
         "minimum_fixture_count": _minimum(int(multi.get("fixture_count", 0)), policy["minimum_fixture_count"]),
         "minimum_regime_count": _minimum(int(regime.get("total_regimes", 0)), policy["minimum_regime_count"]),
@@ -467,6 +535,18 @@ def _evidence_gates(
                     _stub_forbidden_capabilities_blocked(adapter_stub),
                     True,
                 )
+                if adapter_stub_classification == broker_paper_adapter_stub_contract.STUB_CONTRACT_READY:
+                    if dryrun_ledger:
+                        gates["broker_paper_dryrun_ledger_classification"] = _dryrun_ledger_classification_gate(
+                            dryrun_ledger_classification
+                        )
+                        gates["broker_paper_dryrun_ledger_forbidden_capabilities_blocked"] = _boolean_gate(
+                            _dryrun_ledger_forbidden_capabilities_blocked(dryrun_ledger),
+                            _dryrun_ledger_forbidden_capabilities_blocked(dryrun_ledger),
+                            True,
+                        )
+                    else:
+                        gates["broker_paper_dryrun_ledger_present"] = _boolean_watchlist(False, True)
             else:
                 gates["broker_paper_stub_contract_present"] = _boolean_watchlist(False, True)
     else:
@@ -558,6 +638,32 @@ def _stub_contract_classification_gate(classification: str) -> dict[str, Any]:
     }
 
 
+def _dryrun_ledger_classification_gate(classification: str) -> dict[str, Any]:
+    if classification == broker_paper_dryrun_intent_ledger.DRYRUN_LEDGER_READY:
+        return {
+            "passed": True,
+            "actual": classification,
+            "threshold": broker_paper_dryrun_intent_ledger.DRYRUN_LEDGER_READY,
+            "comparator": "==",
+            "classification": "PAPER_FORWARD_READY",
+        }
+    if classification == "WATCHLIST":
+        return {
+            "passed": True,
+            "actual": classification,
+            "threshold": broker_paper_dryrun_intent_ledger.DRYRUN_LEDGER_READY,
+            "comparator": "==",
+            "classification": "WATCHLIST",
+        }
+    return {
+        "passed": False,
+        "actual": classification or "missing",
+        "threshold": broker_paper_dryrun_intent_ledger.DRYRUN_LEDGER_READY,
+        "comparator": "==",
+        "classification": "FAIL",
+    }
+
+
 def _maximum_watchlist(actual: float, threshold: float) -> dict[str, Any]:
     passed_policy = float(actual) <= float(threshold)
     return {
@@ -639,6 +745,35 @@ def _stub_forbidden_capabilities_blocked(adapter_stub: dict[str, Any]) -> bool:
     )
 
 
+def _dryrun_ledger_forbidden_capabilities_blocked(dryrun_ledger: dict[str, Any]) -> bool:
+    required_false_fields = (
+        "file_writes_allowed",
+        "reports_writes_allowed",
+        "broker_sdk_allowed",
+        "network_api_allowed",
+        "credentials_allowed",
+        "env_secret_read_allowed",
+        "webhook_allowed",
+        "scheduler_allowed",
+        "daemon_allowed",
+        "broker_paper_orders_allowed",
+        "live_orders_allowed",
+        "would_place_order",
+        "order_placed",
+        "broker_request_sent",
+        "network_used",
+        "credentials_used",
+        "live_ready",
+    )
+    if any(dryrun_ledger.get(field) is not False for field in required_false_fields):
+        return False
+    records = [dict(item) for item in list(dryrun_ledger.get("records") or []) if isinstance(item, dict)]
+    for record in records:
+        if any(record.get(field) is True for field in required_false_fields):
+            return False
+    return True
+
+
 def _adapter_stub_contract_ready(
     evidence_gates: dict[str, dict[str, Any]],
     presecurity_gate: dict[str, Any],
@@ -651,6 +786,28 @@ def _adapter_stub_contract_ready(
     for name, gate in evidence_gates.items():
         if name == "broker_paper_stub_contract_present":
             continue
+        if name.startswith("broker_paper_dryrun_ledger"):
+            continue
+        if gate.get("passed") is not True:
+            return False
+        if gate.get("classification") != "PAPER_FORWARD_READY":
+            return False
+    return True
+
+
+def _dryrun_ledger_ready(
+    evidence_gates: dict[str, dict[str, Any]],
+    presecurity_gate: dict[str, Any],
+    adapter_stub: dict[str, Any],
+    dryrun_ledger: dict[str, Any],
+) -> bool:
+    if presecurity_gate.get("classification") != broker_paper_presecurity_gate.PRESECURITY_READY:
+        return False
+    if adapter_stub.get("classification") != broker_paper_adapter_stub_contract.STUB_CONTRACT_READY:
+        return False
+    if dryrun_ledger.get("classification") != broker_paper_dryrun_intent_ledger.DRYRUN_LEDGER_READY:
+        return False
+    for gate in evidence_gates.values():
         if gate.get("passed") is not True:
             return False
         if gate.get("classification") != "PAPER_FORWARD_READY":
@@ -674,6 +831,7 @@ def _blockers(
     low_vol_edge: dict[str, Any],
     presecurity_gate: dict[str, Any],
     adapter_stub: dict[str, Any],
+    dryrun_ledger: dict[str, Any],
 ) -> list[str]:
     blockers = []
     for name, gate in evidence_gates.items():
@@ -691,6 +849,9 @@ def _blockers(
     blockers.extend([str(item) for item in list(presecurity_gate.get("blockers") or [])])
     blockers.extend([str(item) for item in list(adapter_stub.get("blockers") or [])])
     blockers.extend([str(item) for item in list(adapter_stub.get("rejection_reasons") or [])])
+    blockers.extend([str(item) for item in list(dryrun_ledger.get("blockers") or [])])
+    if dryrun_ledger.get("classification") != broker_paper_dryrun_intent_ledger.DRYRUN_LEDGER_READY:
+        blockers.extend([str(item) for item in list(dryrun_ledger.get("rejection_reasons") or [])])
     return _unique(blockers)
 
 
@@ -740,10 +901,23 @@ def _forbidden_current_actions() -> list[str]:
     ]
 
 
-def _next_safe_action(readiness_status: str, blockers: list[str]) -> str:
+def _next_safe_action(
+    readiness_status: str,
+    blockers: list[str],
+    dryrun_ledger_ready: bool,
+    adapter_stub_contract_ready: bool,
+) -> str:
+    if dryrun_ledger_ready:
+        return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1; broker-paper orders remain blocked."
+    if adapter_stub_contract_ready:
+        return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1; broker-paper orders remain blocked."
     if readiness_status == CONTRACT_READY:
         return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1; broker-paper orders remain blocked."
     if readiness_status == WATCHLIST:
+        if any("broker_paper_dryrun_ledger_present" in blocker for blocker in blockers):
+            return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1; broker-paper orders remain blocked."
+        if any("broker_paper_dryrun_ledger" in blocker for blocker in blockers):
+            return "Repair broker-paper dry-run intent ledger evidence before risk-governor work."
         if any("broker_paper_stub_contract_present" in blocker for blocker in blockers):
             return "Proceed only to PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT; broker-paper orders remain blocked."
         if any("broker_paper_stub" in blocker for blocker in blockers):
@@ -764,7 +938,13 @@ def _next_safe_action(readiness_status: str, blockers: list[str]) -> str:
     return "Collect missing local evidence and rerun the broker-paper sandbox readiness contract."
 
 
-def _next_safe_packet_id(adapter_stub_contract_ready: bool, presecurity_gate: dict[str, Any]) -> str:
+def _next_safe_packet_id(
+    dryrun_ledger_ready: bool,
+    adapter_stub_contract_ready: bool,
+    presecurity_gate: dict[str, Any],
+) -> str:
+    if dryrun_ledger_ready:
+        return "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1"
     if adapter_stub_contract_ready:
         return "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
     if presecurity_gate.get("classification") == broker_paper_presecurity_gate.PRESECURITY_READY:

@@ -22,6 +22,8 @@ PRESECURITY_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-REPAIR-V1
 SANDBOX_ADAPTER_STUB_PACKET_ID = "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
 SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT-REPAIR-V1"
 DRYRUN_INTENT_LEDGER_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
+DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-REPAIR-V1"
+DRYRUN_RISK_GOVERNOR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1"
 
 VALIDATOR = "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_forex_builder_roadmap.py -q"
 
@@ -672,15 +674,73 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             milestone_value="medium",
             risk_level="low",
             required_files=[
+                "automation/forex_engine/broker_paper_dryrun_intent_ledger.py",
+                "automation/forex_engine/run_broker_paper_dryrun_intent_ledger_demo.py",
+                "automation/forex_engine/broker_paper_sandbox_readiness.py",
+                "automation/forex_engine/month_end_readiness.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
                 "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_INTENT_LEDGER.md",
                 "tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py",
+                "tests/forex_engine/test_broker_paper_adapter_stub_contract.py",
+                "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+                "tests/forex_engine/test_month_end_readiness.py",
+                "tests/forex_engine/test_forex_dashboard_contract.py",
             ],
             purpose=(
                 "Define a local-only dry-run intent ledger after the stub contract passes. "
                 "No broker SDK, credentials, network, order execution, webhooks, scheduler, daemon, or live trading."
             ),
             validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py tests/forex_engine/test_broker_paper_adapter_stub_contract.py tests/forex_engine/test_broker_paper_sandbox_readiness.py tests/forex_engine/test_month_end_readiness.py tests/forex_engine/test_forex_dashboard_contract.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id=DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID,
+            title="Repair broker-paper dry-run intent ledger",
+            lane="broker-paper-dryrun-intent-ledger-repair",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/broker_paper_dryrun_intent_ledger.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_INTENT_LEDGER.md",
+                "tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py",
+            ],
+            purpose=(
+                "Repair local-only dry-run intent ledger evidence before any dry-run risk-governor work. "
+                "No broker SDK, credentials, network, order execution, scheduler, daemon, webhooks, or live trading."
+            ),
+            validators=[
                 "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id=DRYRUN_RISK_GOVERNOR_PACKET_ID,
+            title="Define broker-paper dry-run risk governor",
+            lane="broker-paper-dryrun-risk-governor",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/broker_paper_dryrun_risk_governor.py",
+                "automation/forex_engine/run_broker_paper_dryrun_risk_governor_demo.py",
+                "automation/forex_engine/broker_paper_sandbox_readiness.py",
+                "automation/forex_engine/month_end_readiness.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_RISK_GOVERNOR.md",
+                "tests/forex_engine/test_broker_paper_dryrun_risk_governor.py",
+                "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+                "tests/forex_engine/test_month_end_readiness.py",
+                "tests/forex_engine/test_forex_dashboard_contract.py",
+            ],
+            purpose=(
+                "Add dry-run-only risk governor controls after the in-memory intent ledger is ready. "
+                "This still must not implement broker SDKs, credentials, network, paper orders, schedulers, daemons, webhooks, or live trading."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_dryrun_risk_governor.py tests/forex_engine/test_broker_paper_sandbox_readiness.py tests/forex_engine/test_month_end_readiness.py tests/forex_engine/test_forex_dashboard_contract.py -q",
                 VALIDATOR,
             ],
         ),
@@ -774,6 +834,11 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         or payload.get("broker_paper_stub_contract")
         or payload.get("adapter_stub_contract")
     )
+    dryrun_ledger = _as_dict(
+        payload.get("broker_paper_dryrun_intent_ledger")
+        or payload.get("dryrun_intent_ledger")
+        or payload.get("broker_paper_intent_ledger")
+    )
     oos_classification = str(
         payload.get("oos_repair_classification")
         or oos_repair.get("repaired_classification")
@@ -802,6 +867,12 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         or adapter_stub.get("classification")
         or "not_run"
     )
+    dryrun_ledger_classification = str(
+        payload.get("broker_paper_dryrun_ledger_classification")
+        or payload.get("dryrun_ledger_classification")
+        or dryrun_ledger.get("classification")
+        or "not_run"
+    )
     if low_vol_classification == "WATCHLIST":
         selected = LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
         reason = "Low-vol redesign remains WATCHLIST, so deeper low-vol edge research is the next safe packet."
@@ -814,6 +885,12 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
     elif adapter_stub_classification in {"FAIL", "WATCHLIST"}:
         selected = SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID
         reason = "Adapter-stub contract is not ready, so repair the local stub contract before dry-run ledger work."
+    elif dryrun_ledger_classification in {"FAIL", "WATCHLIST"}:
+        selected = DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID
+        reason = "Dry-run intent ledger is not ready, so repair the in-memory ledger before risk-governor work."
+    elif dryrun_ledger_classification == "DRYRUN_LEDGER_READY":
+        selected = DRYRUN_RISK_GOVERNOR_PACKET_ID
+        reason = "Dry-run intent ledger passed; only the dry-run risk governor is safe next."
     elif adapter_stub_classification == "STUB_CONTRACT_READY":
         selected = DRYRUN_INTENT_LEDGER_PACKET_ID
         reason = "Adapter-stub contract passed; only the local dry-run intent ledger is safe next."
@@ -834,18 +911,20 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         selected = LOW_VOL_EDGE_REDESIGN_PACKET_ID
         reason = "OOS repair passed or is supplied, but low-vol redesign evidence has not been supplied yet."
     else:
-        selected = SANDBOX_ADAPTER_STUB_PACKET_ID
-        reason = "After PR #754, the current selected packet is broker-paper sandbox adapter stub contract."
+        selected = DRYRUN_INTENT_LEDGER_PACKET_ID
+        reason = "After PR #755, the current selected packet is broker-paper dry-run intent ledger."
     return {
         "current_selected_packet_after_pr_750": OOS_REPAIR_PACKET_ID,
         "current_selected_packet_after_pr_751_752": LOW_VOL_EDGE_REDESIGN_PACKET_ID,
         "current_selected_packet_after_pr_753": PRESECURITY_GATE_PACKET_ID,
         "current_selected_packet_after_pr_754": SANDBOX_ADAPTER_STUB_PACKET_ID,
+        "current_selected_packet_after_pr_755": DRYRUN_INTENT_LEDGER_PACKET_ID,
         "observed_oos_repair_classification": oos_classification,
         "observed_low_vol_edge_classification": low_vol_classification,
         "observed_stress_repair_classification": stress_classification,
         "observed_presecurity_gate_classification": presecurity_classification,
         "observed_broker_paper_stub_contract_classification": adapter_stub_classification,
+        "observed_broker_paper_dryrun_ledger_classification": dryrun_ledger_classification,
         "next_safe_packet": selected,
         "reason": reason,
         "conditional_next_packets": {
@@ -861,6 +940,9 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
             "stub_contract_fail": SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID,
             "stub_contract_watchlist": SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID,
             "stub_contract_pass": DRYRUN_INTENT_LEDGER_PACKET_ID,
+            "dryrun_ledger_fail": DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID,
+            "dryrun_ledger_watchlist": DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID,
+            "dryrun_ledger_pass": DRYRUN_RISK_GOVERNOR_PACKET_ID,
         },
         "forbidden_next_packets": [
             "broker integration",
@@ -890,7 +972,7 @@ def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
         "candidates": candidates,
         "forbidden_lanes": FORBIDDEN_LANES,
         "next_recommended_candidate": next_candidate,
-        "current_selected_packet": SANDBOX_ADAPTER_STUB_PACKET_ID,
+        "current_selected_packet": DRYRUN_INTENT_LEDGER_PACKET_ID,
         "post_oos_repair_routing": repair_routing,
         "post_oos_repair_next_safe_packet": repair_routing["next_safe_packet"],
         "post_oos_repair_next_safe_candidate": _candidate_by_id(candidates, str(repair_routing["next_safe_packet"])),
@@ -903,6 +985,12 @@ def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
         "post_adapter_stub_contract_routing": repair_routing,
         "post_adapter_stub_contract_next_safe_packet": repair_routing["next_safe_packet"],
         "post_adapter_stub_contract_next_safe_candidate": _candidate_by_id(
+            candidates,
+            str(repair_routing["next_safe_packet"]),
+        ),
+        "post_dryrun_intent_ledger_routing": repair_routing,
+        "post_dryrun_intent_ledger_next_safe_packet": repair_routing["next_safe_packet"],
+        "post_dryrun_intent_ledger_next_safe_candidate": _candidate_by_id(
             candidates,
             str(repair_routing["next_safe_packet"]),
         ),
