@@ -28,6 +28,8 @@ DRYRUN_RISK_GOVERNOR_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVER
 DRYRUN_REPLAY_HARNESS_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1"
 DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-REPAIR-V1"
 DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
+DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-REPAIR-V1"
+BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID = "PKT-AIOS-BROKER-PAPER-ADAPTER-PLAN-APPROVAL-GATE-V1"
 
 VALIDATOR = "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_forex_builder_roadmap.py -q"
 
@@ -826,11 +828,13 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             milestone_value="medium",
             risk_level="low",
             required_files=[
-                "automation/forex_engine/broker_paper_dryrun_replay_harness.py",
+                "automation/forex_engine/broker_paper_dryrun_replay_evidence_gate.py",
+                "automation/forex_engine/run_broker_paper_dryrun_replay_evidence_gate_demo.py",
                 "automation/forex_engine/broker_paper_sandbox_readiness.py",
                 "automation/forex_engine/month_end_readiness.py",
                 "automation/forex_engine/forex_dashboard_contract.py",
-                "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_REPLAY_EVIDENCE_GATE.md",
+                "tests/forex_engine/test_broker_paper_dryrun_replay_evidence_gate.py",
                 "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
             ],
             purpose=(
@@ -838,9 +842,47 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
                 "This does not select broker SDKs, credentials, network, paper orders, webhooks, schedulers, daemons, or live trading."
             ),
             validators=[
-                "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_dryrun_replay_harness.py tests/forex_engine/test_broker_paper_sandbox_readiness.py -q",
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_dryrun_replay_evidence_gate.py tests/forex_engine/test_broker_paper_sandbox_readiness.py -q",
                 VALIDATOR,
             ],
+        ),
+        _candidate(
+            packet_id=DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID,
+            title="Repair broker-paper dry-run replay evidence gate",
+            lane="broker-paper-dryrun-replay-evidence-gate-repair",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/broker_paper_dryrun_replay_evidence_gate.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_REPLAY_EVIDENCE_GATE.md",
+                "tests/forex_engine/test_broker_paper_dryrun_replay_evidence_gate.py",
+            ],
+            purpose=(
+                "Repair deterministic replay evidence checks before any adapter plan approval gate. "
+                "No broker SDK, credentials, network, order execution, scheduler, daemon, webhooks, or live trading."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_dryrun_replay_evidence_gate.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id=BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID,
+            title="Plan broker-paper adapter approval gate",
+            lane="broker-paper-adapter-plan-approval-gate",
+            priority="low",
+            milestone_value="medium",
+            risk_level="medium",
+            required_files=[
+                "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE.md",
+                "tests/orchestration/test_aios_forex_builder_roadmap.py",
+            ],
+            purpose=(
+                "Plan the future approval boundary for a broker-paper adapter without enabling SDKs, "
+                "credentials, network/API, broker-paper orders, scheduler, daemon, webhooks, or live trading."
+            ),
+            validators=[VALIDATOR],
         ),
         _candidate(
             packet_id=PRESECURITY_REPAIR_PACKET_ID,
@@ -947,6 +989,11 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         or payload.get("dryrun_replay_harness")
         or payload.get("broker_paper_replay_harness")
     )
+    dryrun_replay_evidence_gate = _as_dict(
+        payload.get("broker_paper_dryrun_replay_evidence_gate")
+        or payload.get("dryrun_replay_evidence_gate")
+        or payload.get("broker_paper_replay_evidence_gate")
+    )
     oos_classification = str(
         payload.get("oos_repair_classification")
         or oos_repair.get("repaired_classification")
@@ -993,6 +1040,12 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         or dryrun_replay_harness.get("classification")
         or "not_run"
     )
+    dryrun_replay_evidence_gate_classification = str(
+        payload.get("broker_paper_dryrun_replay_evidence_gate_classification")
+        or payload.get("dryrun_replay_evidence_gate_classification")
+        or dryrun_replay_evidence_gate.get("classification")
+        or "not_run"
+    )
     if low_vol_classification == "WATCHLIST":
         selected = LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
         reason = "Low-vol redesign remains WATCHLIST, so deeper low-vol edge research is the next safe packet."
@@ -1014,6 +1067,12 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
     elif dryrun_replay_harness_classification in {"FAIL", "WATCHLIST"}:
         selected = DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID
         reason = "Dry-run replay harness is not ready, so repair replay evidence before evidence-gate work."
+    elif dryrun_replay_evidence_gate_classification in {"FAIL", "WATCHLIST"}:
+        selected = DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID
+        reason = "Dry-run replay evidence gate is not ready, so repair evidence before adapter plan approval."
+    elif dryrun_replay_evidence_gate_classification == "DRYRUN_REPLAY_EVIDENCE_READY":
+        selected = BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID
+        reason = "Dry-run replay evidence passed; only the adapter plan approval gate is safe next."
     elif dryrun_replay_harness_classification == "DRYRUN_REPLAY_HARNESS_READY":
         selected = DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID
         reason = "Dry-run replay harness passed; only the local replay evidence gate is safe next."
@@ -1043,8 +1102,8 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         selected = LOW_VOL_EDGE_REDESIGN_PACKET_ID
         reason = "OOS repair passed or is supplied, but low-vol redesign evidence has not been supplied yet."
     else:
-        selected = DRYRUN_REPLAY_HARNESS_PACKET_ID
-        reason = "After PR #757, the current selected packet is broker-paper dry-run replay harness."
+        selected = DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID
+        reason = "After PR #758, the current selected packet is broker-paper dry-run replay evidence gate."
     return {
         "current_selected_packet_after_pr_750": OOS_REPAIR_PACKET_ID,
         "current_selected_packet_after_pr_751_752": LOW_VOL_EDGE_REDESIGN_PACKET_ID,
@@ -1053,6 +1112,7 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         "current_selected_packet_after_pr_755": DRYRUN_INTENT_LEDGER_PACKET_ID,
         "current_selected_packet_after_pr_756": DRYRUN_RISK_GOVERNOR_PACKET_ID,
         "current_selected_packet_after_pr_757": DRYRUN_REPLAY_HARNESS_PACKET_ID,
+        "current_selected_packet_after_pr_758": DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID,
         "observed_oos_repair_classification": oos_classification,
         "observed_low_vol_edge_classification": low_vol_classification,
         "observed_stress_repair_classification": stress_classification,
@@ -1061,6 +1121,9 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         "observed_broker_paper_dryrun_ledger_classification": dryrun_ledger_classification,
         "observed_broker_paper_dryrun_risk_governor_classification": dryrun_risk_governor_classification,
         "observed_broker_paper_dryrun_replay_harness_classification": dryrun_replay_harness_classification,
+        "observed_broker_paper_dryrun_replay_evidence_gate_classification": (
+            dryrun_replay_evidence_gate_classification
+        ),
         "next_safe_packet": selected,
         "reason": reason,
         "conditional_next_packets": {
@@ -1085,6 +1148,9 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
             "dryrun_replay_harness_fail": DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID,
             "dryrun_replay_harness_watchlist": DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID,
             "dryrun_replay_harness_pass": DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID,
+            "dryrun_replay_evidence_gate_fail": DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID,
+            "dryrun_replay_evidence_gate_watchlist": DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID,
+            "dryrun_replay_evidence_gate_pass": BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID,
         },
         "forbidden_next_packets": [
             "broker integration",
@@ -1114,7 +1180,7 @@ def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
         "candidates": candidates,
         "forbidden_lanes": FORBIDDEN_LANES,
         "next_recommended_candidate": next_candidate,
-        "current_selected_packet": DRYRUN_REPLAY_HARNESS_PACKET_ID,
+        "current_selected_packet": DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID,
         "post_oos_repair_routing": repair_routing,
         "post_oos_repair_next_safe_packet": repair_routing["next_safe_packet"],
         "post_oos_repair_next_safe_candidate": _candidate_by_id(candidates, str(repair_routing["next_safe_packet"])),
@@ -1145,6 +1211,12 @@ def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
         "post_dryrun_replay_harness_routing": repair_routing,
         "post_dryrun_replay_harness_next_safe_packet": repair_routing["next_safe_packet"],
         "post_dryrun_replay_harness_next_safe_candidate": _candidate_by_id(
+            candidates,
+            str(repair_routing["next_safe_packet"]),
+        ),
+        "post_dryrun_replay_evidence_gate_routing": repair_routing,
+        "post_dryrun_replay_evidence_gate_next_safe_packet": repair_routing["next_safe_packet"],
+        "post_dryrun_replay_evidence_gate_next_safe_candidate": _candidate_by_id(
             candidates,
             str(repair_routing["next_safe_packet"]),
         ),

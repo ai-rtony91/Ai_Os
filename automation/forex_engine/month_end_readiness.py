@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, is_dataclass
 from typing import Any
 
+from automation.forex_engine import broker_paper_dryrun_replay_evidence_gate
 from automation.forex_engine import broker_paper_dryrun_replay_harness
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import schema_contracts as schemas
@@ -151,6 +152,33 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         if dryrun_replay_harness_classification_for_blockers == "DRYRUN_REPLAY_HARNESS_READY"
         else _text_list(dryrun_replay_harness.get("rejection_reasons"))
     )
+    dryrun_replay_evidence_gate = dict(
+        bundle.get("broker_paper_dryrun_replay_evidence_gate")
+        or bundle.get("dryrun_replay_evidence_gate")
+        or bundle.get("broker_paper_replay_evidence_gate")
+        or {}
+    )
+    dryrun_replay_evidence_gate_summary = dict(
+        bundle.get("broker_paper_dryrun_replay_evidence_gate_summary")
+        or dryrun_replay_evidence_gate
+    )
+    if dryrun_replay_evidence_gate and "classification" in dryrun_replay_evidence_gate:
+        dryrun_replay_evidence_gate_summary = (
+            broker_paper_dryrun_replay_evidence_gate.summarize_replay_evidence_gate(
+                dryrun_replay_evidence_gate
+            )
+        )
+    dryrun_replay_evidence_gate_classification_for_blockers = str(
+        dryrun_replay_evidence_gate_summary.get("broker_paper_dryrun_replay_evidence_gate_classification")
+        or dryrun_replay_evidence_gate_summary.get("classification")
+        or dryrun_replay_evidence_gate.get("classification")
+        or ""
+    )
+    dryrun_replay_evidence_gate_rejection_blockers = (
+        []
+        if dryrun_replay_evidence_gate_classification_for_blockers == "DRYRUN_REPLAY_EVIDENCE_READY"
+        else _text_list(dryrun_replay_evidence_gate.get("rejection_reasons"))
+    )
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
@@ -169,6 +197,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             dryrun_intent_ledger=dryrun_ledger,
             dryrun_risk_governor=dryrun_risk_governor,
             dryrun_replay_harness=dryrun_replay_harness,
+            dryrun_replay_evidence_gate=dryrun_replay_evidence_gate,
         )
     stress_blockers = [
         str(blocker)
@@ -194,6 +223,8 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *dryrun_risk_governor_rejection_blockers,
             *_text_list(dryrun_replay_harness.get("blockers")),
             *dryrun_replay_harness_rejection_blockers,
+            *_text_list(dryrun_replay_evidence_gate.get("blockers")),
+            *dryrun_replay_evidence_gate_rejection_blockers,
             *_text_list(oos_result.get("blockers")),
             *_text_list(combined_gate.get("blockers")),
             *_text_list(sandbox_readiness.get("blockers")),
@@ -243,6 +274,12 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         or dryrun_replay_harness.get("classification")
         or "not_run"
     )
+    broker_paper_dryrun_replay_evidence_gate_classification = str(
+        dryrun_replay_evidence_gate_summary.get("broker_paper_dryrun_replay_evidence_gate_classification")
+        or sandbox_readiness.get("broker_paper_dryrun_replay_evidence_gate_classification")
+        or dryrun_replay_evidence_gate.get("classification")
+        or "not_run"
+    )
     stress_oos_ready = combined_stress_oos_classification == "PAPER_FORWARD_READY"
     paper_forward_ready = (
         classification == "PAPER_FORWARD_READY"
@@ -254,6 +291,10 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         and broker_paper_dryrun_ledger_classification in {"not_run", "DRYRUN_LEDGER_READY"}
         and broker_paper_dryrun_risk_governor_classification in {"not_run", "DRYRUN_RISK_GOVERNOR_READY"}
         and broker_paper_dryrun_replay_harness_classification in {"not_run", "DRYRUN_REPLAY_HARNESS_READY"}
+        and broker_paper_dryrun_replay_evidence_gate_classification in {
+            "not_run",
+            "DRYRUN_REPLAY_EVIDENCE_READY",
+        }
         and not local_blockers
     )
     review = {
@@ -357,21 +398,30 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             )
         ),
         "aggregate_max_loss_usd": float(
-            dryrun_risk_governor_summary.get(
+            dryrun_replay_evidence_gate_summary.get(
                 "aggregate_max_loss_usd",
-                sandbox_readiness.get("aggregate_max_loss_usd", 0.0),
+                dryrun_risk_governor_summary.get(
+                    "aggregate_max_loss_usd",
+                    sandbox_readiness.get("aggregate_max_loss_usd", 0.0),
+                ),
             )
         ),
         "max_daily_loss_usd": float(
-            dryrun_risk_governor_summary.get(
+            dryrun_replay_evidence_gate_summary.get(
                 "max_daily_loss_usd",
-                sandbox_readiness.get("max_daily_loss_usd", 5.0),
+                dryrun_risk_governor_summary.get(
+                    "max_daily_loss_usd",
+                    sandbox_readiness.get("max_daily_loss_usd", 5.0),
+                ),
             )
         ),
         "kill_switch_armed": bool(
-            dryrun_risk_governor_summary.get(
+            dryrun_replay_evidence_gate_summary.get(
                 "kill_switch_armed",
-                sandbox_readiness.get("kill_switch_armed", True),
+                dryrun_risk_governor_summary.get(
+                    "kill_switch_armed",
+                    sandbox_readiness.get("kill_switch_armed", True),
+                ),
             )
         ),
         "broker_paper_dryrun_replay_harness_classification": broker_paper_dryrun_replay_harness_classification,
@@ -409,6 +459,51 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             dryrun_replay_harness_summary.get(
                 "risk_rejected",
                 sandbox_readiness.get("replay_risk_rejected", 0),
+            )
+        ),
+        "broker_paper_dryrun_replay_evidence_gate_classification": (
+            broker_paper_dryrun_replay_evidence_gate_classification
+        ),
+        "broker_paper_dryrun_replay_evidence_gate_ready": bool(
+            dryrun_replay_evidence_gate_summary.get(
+                "broker_paper_dryrun_replay_evidence_gate_ready",
+                sandbox_readiness.get("broker_paper_dryrun_replay_evidence_gate_ready", False),
+            )
+        ),
+        "replay_evidence_records": int(
+            dryrun_replay_evidence_gate_summary.get(
+                "records_replayed",
+                sandbox_readiness.get("replay_evidence_records", 0),
+            )
+        ),
+        "replay_evidence_stub_accepted": int(
+            dryrun_replay_evidence_gate_summary.get(
+                "stub_accepted",
+                sandbox_readiness.get("replay_evidence_stub_accepted", 0),
+            )
+        ),
+        "replay_evidence_stub_rejected": int(
+            dryrun_replay_evidence_gate_summary.get(
+                "stub_rejected",
+                sandbox_readiness.get("replay_evidence_stub_rejected", 0),
+            )
+        ),
+        "replay_evidence_risk_accepted": int(
+            dryrun_replay_evidence_gate_summary.get(
+                "risk_accepted",
+                sandbox_readiness.get("replay_evidence_risk_accepted", 0),
+            )
+        ),
+        "replay_evidence_risk_rejected": int(
+            dryrun_replay_evidence_gate_summary.get(
+                "risk_rejected",
+                sandbox_readiness.get("replay_evidence_risk_rejected", 0),
+            )
+        ),
+        "replay_evidence_eom_milestone_status": str(
+            dryrun_replay_evidence_gate_summary.get(
+                "eom_milestone_status",
+                sandbox_readiness.get("replay_evidence_eom_milestone_status", "not_run"),
             )
         ),
         "broker_paper_orders_allowed": False,
@@ -607,21 +702,30 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
                 )
             ),
             "aggregate_max_loss_usd": float(
-                dryrun_risk_governor_summary.get(
+                dryrun_replay_evidence_gate_summary.get(
                     "aggregate_max_loss_usd",
-                    sandbox_readiness.get("aggregate_max_loss_usd", 0.0),
+                    dryrun_risk_governor_summary.get(
+                        "aggregate_max_loss_usd",
+                        sandbox_readiness.get("aggregate_max_loss_usd", 0.0),
+                    ),
                 )
             ),
             "max_daily_loss_usd": float(
-                dryrun_risk_governor_summary.get(
+                dryrun_replay_evidence_gate_summary.get(
                     "max_daily_loss_usd",
-                    sandbox_readiness.get("max_daily_loss_usd", 5.0),
+                    dryrun_risk_governor_summary.get(
+                        "max_daily_loss_usd",
+                        sandbox_readiness.get("max_daily_loss_usd", 5.0),
+                    ),
                 )
             ),
             "kill_switch_armed": bool(
-                dryrun_risk_governor_summary.get(
+                dryrun_replay_evidence_gate_summary.get(
                     "kill_switch_armed",
-                    sandbox_readiness.get("kill_switch_armed", True),
+                    dryrun_risk_governor_summary.get(
+                        "kill_switch_armed",
+                        sandbox_readiness.get("kill_switch_armed", True),
+                    ),
                 )
             ),
             "broker_paper_dryrun_replay_harness_classification": (
@@ -661,6 +765,51 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
                 dryrun_replay_harness_summary.get(
                     "risk_rejected",
                     sandbox_readiness.get("replay_risk_rejected", 0),
+                )
+            ),
+            "broker_paper_dryrun_replay_evidence_gate_classification": (
+                broker_paper_dryrun_replay_evidence_gate_classification
+            ),
+            "broker_paper_dryrun_replay_evidence_gate_ready": bool(
+                dryrun_replay_evidence_gate_summary.get(
+                    "broker_paper_dryrun_replay_evidence_gate_ready",
+                    sandbox_readiness.get("broker_paper_dryrun_replay_evidence_gate_ready", False),
+                )
+            ),
+            "replay_evidence_records": int(
+                dryrun_replay_evidence_gate_summary.get(
+                    "records_replayed",
+                    sandbox_readiness.get("replay_evidence_records", 0),
+                )
+            ),
+            "replay_evidence_stub_accepted": int(
+                dryrun_replay_evidence_gate_summary.get(
+                    "stub_accepted",
+                    sandbox_readiness.get("replay_evidence_stub_accepted", 0),
+                )
+            ),
+            "replay_evidence_stub_rejected": int(
+                dryrun_replay_evidence_gate_summary.get(
+                    "stub_rejected",
+                    sandbox_readiness.get("replay_evidence_stub_rejected", 0),
+                )
+            ),
+            "replay_evidence_risk_accepted": int(
+                dryrun_replay_evidence_gate_summary.get(
+                    "risk_accepted",
+                    sandbox_readiness.get("replay_evidence_risk_accepted", 0),
+                )
+            ),
+            "replay_evidence_risk_rejected": int(
+                dryrun_replay_evidence_gate_summary.get(
+                    "risk_rejected",
+                    sandbox_readiness.get("replay_evidence_risk_rejected", 0),
+                )
+            ),
+            "replay_evidence_eom_milestone_status": str(
+                dryrun_replay_evidence_gate_summary.get(
+                    "eom_milestone_status",
+                    sandbox_readiness.get("replay_evidence_eom_milestone_status", "not_run"),
                 )
             ),
             "broker_paper_orders_allowed": False,
@@ -719,6 +868,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             broker_paper_dryrun_ledger_classification,
             broker_paper_dryrun_risk_governor_classification,
             broker_paper_dryrun_replay_harness_classification,
+            broker_paper_dryrun_replay_evidence_gate_classification,
         ),
         "live_ready": False,
     }
@@ -786,7 +936,18 @@ def _next_safe_action_v2(
     broker_paper_dryrun_ledger_classification: str = "not_run",
     broker_paper_dryrun_risk_governor_classification: str = "not_run",
     broker_paper_dryrun_replay_harness_classification: str = "not_run",
+    broker_paper_dryrun_replay_evidence_gate_classification: str = "not_run",
 ) -> str:
+    if broker_paper_dryrun_replay_evidence_gate_classification == "DRYRUN_REPLAY_EVIDENCE_READY":
+        return (
+            "Proceed only to PKT-AIOS-BROKER-PAPER-ADAPTER-PLAN-APPROVAL-GATE-V1; "
+            "broker SDKs, credentials, network/API, broker-paper orders, and live trading remain blocked."
+        )
+    if broker_paper_dryrun_replay_evidence_gate_classification in {"FAIL", "WATCHLIST"}:
+        return (
+            "Repair PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-REPAIR-V1 "
+            "before adapter plan approval work."
+        )
     if broker_paper_dryrun_replay_harness_classification == "DRYRUN_REPLAY_HARNESS_READY":
         return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1; broker-paper orders remain blocked."
     if broker_paper_dryrun_replay_harness_classification in {"FAIL", "WATCHLIST"}:

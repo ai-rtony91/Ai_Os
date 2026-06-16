@@ -701,6 +701,36 @@ DEFAULT_COMPLETED_PACKETS = [
         "source": "default_completed_memory",
     },
     {
+        "packet_id": "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1",
+        "title": "Add broker-paper dry-run replay harness",
+        "lane": "broker-paper-dryrun-replay-harness",
+        "landed_pr": "#758",
+        "completion_reason": (
+            "local-only replay harness routes fake dry-run intent batches through the existing "
+            "presecurity, stub, ledger, and risk-governor chain while keeping broker SDK, credentials, "
+            "network/API, file/Reports writes, broker-paper orders, and live trading blocked"
+        ),
+        "completed_files": [
+            "automation/forex_engine/broker_paper_dryrun_replay_harness.py",
+            "automation/forex_engine/run_broker_paper_dryrun_replay_harness_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_REPLAY_HARNESS.md",
+            "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/broker_paper_dryrun_replay_harness.py",
+            "automation/forex_engine/run_broker_paper_dryrun_replay_harness_demo.py",
+            "automation/forex_engine/broker_paper_sandbox_readiness.py",
+            "automation/forex_engine/month_end_readiness.py",
+            "automation/forex_engine/forex_dashboard_contract.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_REPLAY_HARNESS.md",
+            "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py",
+            "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+            "tests/forex_engine/test_month_end_readiness.py",
+            "tests/forex_engine/test_forex_dashboard_contract.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
         "packet_id": "AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
         "alternate_packet_ids": [
             "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",
@@ -987,6 +1017,24 @@ def _normalize_completed_packet_record(record: dict[str, Any]) -> dict[str, Any]
                     "automation/forex_engine/run_broker_paper_dryrun_risk_governor_demo.py",
                     "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_RISK_GOVERNOR.md",
                     "tests/forex_engine/test_broker_paper_dryrun_risk_governor.py",
+                ],
+            }
+        )
+    if _packet_id(normalized) == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1":
+        normalized.update(
+            {
+                "landed_pr": "#758",
+                "title": "Add broker-paper dry-run replay harness",
+                "completion_reason": (
+                    "local-only replay harness routes fake dry-run intent batches through the existing "
+                    "presecurity, stub, ledger, and risk-governor chain while keeping broker SDK, credentials, "
+                    "network/API, file/Reports writes, broker-paper orders, and live trading blocked"
+                ),
+                "completed_files": [
+                    "automation/forex_engine/broker_paper_dryrun_replay_harness.py",
+                    "automation/forex_engine/run_broker_paper_dryrun_replay_harness_demo.py",
+                    "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_REPLAY_HARNESS.md",
+                    "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py",
                 ],
             }
         )

@@ -619,6 +619,32 @@ def test_default_memory_includes_dryrun_risk_governor_completion() -> None:
     ]
 
 
+def test_default_memory_includes_dryrun_replay_harness_completion() -> None:
+    result = build_result(candidate_packets=[])
+    records = load_module()._completed_memory_records({})
+
+    assert "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1" in result["completed_packet_ids"]
+    replay_harness = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1"
+    ][0]
+
+    assert replay_harness["landed_pr"] == "#758"
+    assert replay_harness["title"] == "Add broker-paper dry-run replay harness"
+    assert replay_harness["lane"] == "broker-paper-dryrun-replay-harness"
+    assert (
+        replay_harness["completion_reason"]
+        == "local-only replay harness routes fake dry-run intent batches through the existing presecurity, stub, ledger, and risk-governor chain while keeping broker SDK, credentials, network/API, file/Reports writes, broker-paper orders, and live trading blocked"
+    )
+    assert replay_harness["completed_files"] == [
+        "automation/forex_engine/broker_paper_dryrun_replay_harness.py",
+        "automation/forex_engine/run_broker_paper_dryrun_replay_harness_demo.py",
+        "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_REPLAY_HARNESS.md",
+        "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py",
+    ]
+
+
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
     result = build_result(candidate_packets=[])
 
@@ -738,7 +764,7 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
@@ -761,7 +787,8 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     assert "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT" not in active_ids
     assert "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1" not in active_ids
     assert "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1"
+    assert "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:

@@ -7,6 +7,7 @@ import pytest
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import broker_paper_adapter_stub_contract
 from automation.forex_engine import broker_paper_dryrun_intent_ledger
+from automation.forex_engine import broker_paper_dryrun_replay_evidence_gate
 from automation.forex_engine import broker_paper_dryrun_replay_harness
 from automation.forex_engine import broker_paper_dryrun_risk_governor
 from automation.forex_engine import broker_paper_presecurity_gate
@@ -25,6 +26,7 @@ ALLOWED_STATUSES = {
     "WATCHLIST",
     "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
     "DRYRUN_REPLAY_HARNESS_READY",
+    "DRYRUN_REPLAY_EVIDENCE_READY",
 }
 
 
@@ -153,6 +155,18 @@ def test_default_readiness_result_is_watchlist_and_contract_only() -> None:
     assert result["replay_stub_rejected"] >= 0
     assert result["replay_risk_accepted"] >= 0
     assert result["replay_risk_rejected"] >= 0
+    assert result["broker_paper_dryrun_replay_evidence_gate_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_REPLAY_EVIDENCE_READY",
+        "not_run",
+    }
+    assert result["broker_paper_dryrun_replay_evidence_gate_ready"] is False
+    assert result["replay_evidence_records"] >= 0
+    assert result["replay_evidence_stub_accepted"] >= 0
+    assert result["replay_evidence_stub_rejected"] >= 0
+    assert result["replay_evidence_risk_accepted"] >= 0
+    assert result["replay_evidence_risk_rejected"] >= 0
     assert result["credential_boundary_required"] is True
     assert result["kill_switch_required"] is True
     assert result["max_loss_guard_required"] is True
@@ -450,9 +464,11 @@ def test_dryrun_replay_harness_ready_routes_only_to_replay_evidence_gate() -> No
         dryrun_replay_harness=replay,
     )
 
-    assert result["readiness_status"] == "DRYRUN_REPLAY_HARNESS_READY"
+    assert result["readiness_status"] == "WATCHLIST"
     assert result["broker_paper_dryrun_replay_harness_classification"] == "DRYRUN_REPLAY_HARNESS_READY"
     assert result["broker_paper_dryrun_replay_harness_ready"] is True
+    assert result["broker_paper_dryrun_replay_evidence_gate_classification"] == "not_run"
+    assert result["broker_paper_dryrun_replay_evidence_gate_ready"] is False
     assert result["replay_records"] == 2
     assert result["replay_stub_accepted"] == 1
     assert result["replay_stub_rejected"] == 1
@@ -462,6 +478,68 @@ def test_dryrun_replay_harness_ready_routes_only_to_replay_evidence_gate() -> No
     assert result["max_daily_loss_usd"] == 5.0
     assert result["kill_switch_armed"] is True
     assert result["next_safe_packet"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
+    assert "gate_watchlist:broker_paper_dryrun_replay_evidence_gate_present" in result["blockers"]
+    assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["broker_paper_orders_allowed"] is False
+    assert result["network_api_allowed"] is False
+    assert result["credentials_allowed"] is False
+    assert result["broker_sdk_allowed"] is False
+    assert result["live_ready"] is False
+    assert result["live_orders_allowed"] is False
+    assert result["live_trade_ready"] is False
+
+
+def test_dryrun_replay_evidence_gate_ready_routes_only_to_adapter_plan_approval_gate() -> None:
+    evidence, stress_oos, risk_governor = _strong_contract_inputs()
+    presecurity = broker_paper_presecurity_gate.evaluate_broker_paper_presecurity_gate()
+    stub = broker_paper_adapter_stub_contract.simulate_broker_paper_stub_adapter(
+        {
+            "symbol": "EURUSD_FAKE",
+            "side": "buy",
+            "quantity_units": 500,
+            "order_type": "market_stub",
+            "stop_loss_pips": 8.0,
+            "take_profit_pips": 12.0,
+            "max_loss_usd": 1.0,
+            "dry_run": True,
+            "approved_by_operator": True,
+        }
+    )
+    ledger = broker_paper_dryrun_intent_ledger.replay_dryrun_intent_batch(
+        broker_paper_dryrun_replay_harness.build_default_replay_batch()
+    )
+    dryrun_risk = broker_paper_dryrun_risk_governor.evaluate_dryrun_ledger_risk(ledger)
+    replay = broker_paper_dryrun_replay_harness.replay_dryrun_batch_through_safety_stack()
+    evidence_gate = broker_paper_dryrun_replay_evidence_gate.validate_replay_harness_evidence(replay)
+
+    result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=evidence,
+        stress_oos=stress_oos,
+        risk_governor=risk_governor,
+        stress_repair=evidence["stress_repair"],
+        expanded_oos=evidence["expanded_oos"],
+        oos_repair=evidence["oos_repair"],
+        presecurity_gate=presecurity,
+        adapter_stub_contract=stub,
+        dryrun_intent_ledger=ledger,
+        dryrun_risk_governor=dryrun_risk,
+        dryrun_replay_harness=replay,
+        dryrun_replay_evidence_gate=evidence_gate,
+    )
+
+    assert result["readiness_status"] == "DRYRUN_REPLAY_EVIDENCE_READY"
+    assert result["broker_paper_dryrun_replay_evidence_gate_classification"] == "DRYRUN_REPLAY_EVIDENCE_READY"
+    assert result["broker_paper_dryrun_replay_evidence_gate_ready"] is True
+    assert result["replay_evidence_records"] == 2
+    assert result["replay_evidence_stub_accepted"] == 1
+    assert result["replay_evidence_stub_rejected"] == 1
+    assert result["replay_evidence_risk_accepted"] == 1
+    assert result["replay_evidence_risk_rejected"] == 1
+    assert result["aggregate_max_loss_usd"] == 1.0
+    assert result["max_daily_loss_usd"] == 5.0
+    assert result["kill_switch_armed"] is True
+    assert result["next_safe_packet"] == "PKT-AIOS-BROKER-PAPER-ADAPTER-PLAN-APPROVAL-GATE-V1"
+    assert result["broker_paper_sandbox_contract_ready"] is True
     assert result["broker_paper_orders_allowed"] is False
     assert result["network_api_allowed"] is False
     assert result["credentials_allowed"] is False
@@ -599,6 +677,10 @@ def test_boundary_summary_blocks_broker_paper_live_credentials_network_and_order
     assert (
         summary["next_safe_packet_after_dryrun_replay_harness"]
         == "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
+    )
+    assert (
+        summary["next_safe_packet_after_dryrun_replay_evidence_gate"]
+        == "PKT-AIOS-BROKER-PAPER-ADAPTER-PLAN-APPROVAL-GATE-V1"
     )
 
 
