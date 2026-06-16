@@ -71,6 +71,9 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert dashboard["heldout_consistency_pct"] >= 0.0
     assert dashboard["degradation_pct"] >= 0.0
     assert dashboard["stress_oos_ready"] in {True, False}
+    assert dashboard["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert dashboard["stress_repair_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert "repaired_worst_stress_pnl" in dashboard
     assert dashboard["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",
         "WATCHLIST",
@@ -84,7 +87,9 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert any("PnL:" in line for line in lines)
     assert any("Capture:" in line for line in lines)
     assert any("Stress/OOS:" in line for line in lines)
+    assert any("Repair:" in line for line in lines)
     assert any("Sandbox contract:" in line for line in lines)
+    assert any("Repaired worst PnL:" in line for line in lines)
     assert any("Live ready: false" in line for line in lines)
     assert any("Protected gate required: true" in line for line in lines)
     assert lines[-1] == "Safety: no broker/live/secrets/orders/webhooks"

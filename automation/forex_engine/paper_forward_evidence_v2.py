@@ -13,6 +13,7 @@ from automation.forex_engine import paper_forward_runner
 from automation.forex_engine import paper_forward_stress
 from automation.forex_engine import risk_governor_thresholds
 from automation.forex_engine import schema_contracts as schemas
+from automation.forex_engine import stress_repair
 
 
 ALLOWED_V2_CLASSIFICATIONS = {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
@@ -65,10 +66,12 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
         oos_validation,
         risk_governor,
     )
+    stress_repair_result = stress_repair.apply_local_stress_repair_policy(bundle)
     sandbox_readiness = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
         bundle,
         combined_gate,
         risk_governor,
+        stress_repair_result,
     )
     bundle.update(
         {
@@ -82,6 +85,8 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
             "out_of_sample_validation": oos_validation,
             "oos_result": oos_validation,
             "combined_stress_oos_gate": combined_gate,
+            "stress_repair": stress_repair_result,
+            "stress_repair_summary": stress_repair.summarize_stress_repair(stress_repair_result),
             "broker_paper_sandbox_readiness": sandbox_readiness,
             "starting_balance": opportunity_report["starting_balance"],
             "ending_balance": opportunity_report["ending_balance"],
@@ -113,6 +118,8 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
     oos_result = dict(payload.get("out_of_sample_validation") or payload.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(payload.get("combined_stress_oos_gate") or {})
+    repair = dict(payload.get("stress_repair") or {})
+    repair_summary = dict(payload.get("stress_repair_summary") or stress_repair.summarize_stress_repair(repair) if repair else {})
     sandbox_readiness = dict(payload.get("broker_paper_sandbox_readiness") or {})
     classification = classify_paper_forward_evidence_v2(payload)
     summary = {
@@ -143,6 +150,11 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
         "heldout_consistency_pct": float(combined_gate.get("heldout_consistency_pct", oos_summary.get("heldout_consistency_pct", 0.0))),
         "degradation_pct": float(combined_gate.get("degradation_pct", oos_summary.get("degradation_pct", 0.0))),
         "stress_oos_ready": combined_gate.get("combined_classification") == "PAPER_FORWARD_READY",
+        "stress_repair_status": repair_summary.get("stress_repair_status", "not_run"),
+        "stress_repair_classification": repair_summary.get("repaired_stress_classification", "not_run"),
+        "repaired_stress_classification": repair_summary.get("repaired_stress_classification", "not_run"),
+        "repaired_worst_stress_pnl": float(repair_summary.get("repaired_worst_stress_pnl", 0.0)),
+        "repaired_stress_survived_pct": float(repair_summary.get("repaired_stress_survived_pct", 0.0)),
         "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
         "broker_paper_sandbox_contract_ready": bool(
             sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
@@ -282,6 +294,7 @@ def _bundle_blockers(bundle: dict[str, Any]) -> list[str]:
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
     sandbox_readiness = dict(bundle.get("broker_paper_sandbox_readiness") or {})
+    repair = dict(bundle.get("stress_repair") or {})
     blockers = []
     blockers.extend([str(item) for item in list(catalog.get("blockers") or [])])
     blockers.extend([str(item) for item in list(multi.get("blockers") or [])])
@@ -292,6 +305,7 @@ def _bundle_blockers(bundle: dict[str, Any]) -> list[str]:
     blockers.extend([str(item) for item in list(stress_result.get("blockers") or [])])
     blockers.extend([str(item) for item in list(oos_result.get("blockers") or [])])
     blockers.extend([str(item) for item in list(combined_gate.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(repair.get("blockers") or [])])
     blockers.extend([str(item) for item in list(sandbox_readiness.get("blockers") or [])])
     return _unique(blockers)
 

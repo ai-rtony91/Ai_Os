@@ -69,6 +69,8 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     stress = dict(bundle.get("stress_scenarios") or {})
     paper_stress = dict(bundle.get("paper_forward_stress") or bundle.get("stress_result") or {})
     paper_stress_summary = dict(paper_stress.get("stress_summary") or {})
+    stress_repair = dict(bundle.get("stress_repair") or {})
+    stress_repair_summary = dict(bundle.get("stress_repair_summary") or {})
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
@@ -90,6 +92,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *_text_list(opportunity.get("blockers")),
             *_text_list(risk_governor.get("blockers")),
             *_text_list(paper_stress.get("blockers")),
+            *_text_list(stress_repair.get("blockers")),
             *_text_list(oos_result.get("blockers")),
             *_text_list(combined_gate.get("blockers")),
             *_text_list(sandbox_readiness.get("blockers")),
@@ -112,6 +115,11 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         "v2_evidence_ready": paper_forward_ready,
         "stress_oos_ready": stress_oos_ready,
         "broker_paper_sandbox_ready": False,
+        "stress_repair_status": stress_repair_summary.get("stress_repair_status", "not_run"),
+        "repaired_stress_classification": stress_repair_summary.get("repaired_stress_classification", "not_run"),
+        "broker_paper_contract_ready": bool(
+            sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
+        ),
         "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
         "broker_paper_sandbox_contract_ready": bool(
             sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
@@ -166,7 +174,14 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
                 combined_gate.get("degradation_pct", oos_summary.get("degradation_pct", 0.0))
             ),
             "stress_oos_ready": stress_oos_ready,
+            "stress_repair_status": stress_repair_summary.get("stress_repair_status", "not_run"),
+            "repaired_stress_classification": stress_repair_summary.get("repaired_stress_classification", "not_run"),
+            "repaired_worst_stress_pnl": float(stress_repair_summary.get("repaired_worst_stress_pnl", 0.0)),
+            "repaired_stress_survived_pct": float(stress_repair_summary.get("repaired_stress_survived_pct", 0.0)),
             "broker_paper_sandbox_ready": False,
+            "broker_paper_contract_ready": bool(
+                sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
+            ),
             "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
             "broker_paper_sandbox_contract_ready": bool(
                 sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)

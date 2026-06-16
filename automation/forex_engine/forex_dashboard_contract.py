@@ -78,11 +78,17 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "heldout_consistency_pct": float(payload.get("heldout_consistency_pct", 0.0)),
         "degradation_pct": float(payload.get("degradation_pct", 0.0)),
         "stress_oos_ready": bool(payload.get("stress_oos_ready", False)),
+        "stress_repair_status": str(payload.get("stress_repair_status") or "not_run"),
+        "stress_repair_classification": str(payload.get("stress_repair_classification") or payload.get("repaired_stress_classification") or "not_run"),
+        "repaired_worst_stress_pnl": float(payload.get("repaired_worst_stress_pnl", 0.0)),
         "broker_paper_sandbox_readiness_status": str(
             payload.get("broker_paper_sandbox_readiness_status") or "not_run"
         ),
         "broker_paper_sandbox_contract_ready": bool(
             payload.get("broker_paper_sandbox_contract_ready", False)
+        ),
+        "broker_paper_contract_ready": bool(
+            payload.get("broker_paper_contract_ready", payload.get("broker_paper_sandbox_contract_ready", False))
         ),
         "readiness_status": str(payload.get("readiness_status") or payload.get("classification") or "FAIL"),
         "live_ready": False,
@@ -107,10 +113,14 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
         ),
         (
             f"Stress/OOS: {payload.get('combined_stress_oos_classification', 'not_run')} | "
+            f"Repair: {payload.get('stress_repair_classification', 'not_run')} | "
             f"Heldout: {payload.get('heldout_consistency_pct', 0.0)} | "
             f"Degradation: {payload.get('degradation_pct', 0.0)}"
         ),
-        f"Sandbox contract: {payload.get('broker_paper_sandbox_readiness_status', 'not_run')}",
+        (
+            f"Sandbox contract: {payload.get('broker_paper_sandbox_readiness_status', 'not_run')} | "
+            f"Repaired worst PnL: {payload.get('repaired_worst_stress_pnl', 0.0)}"
+        ),
         f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",
         f"Capture: {payload.get('capture_rate_pct', 0.0)} | Quality: {payload.get('opportunity_quality_score', 0.0)}",
         f"Readiness: {payload.get('readiness_status', 'FAIL')} | Live ready: false | Protected gate required: true",

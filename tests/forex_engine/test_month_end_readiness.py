@@ -99,6 +99,9 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["v2_evidence_ready"] in {True, False}
     assert review["stress_oos_ready"] in {True, False}
     assert review["broker_paper_sandbox_ready"] is False
+    assert review["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["repaired_stress_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["broker_paper_contract_ready"] in {True, False}
     assert review["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",
         "WATCHLIST",
@@ -126,6 +129,10 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["combined_stress_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["evidence_summary"]["heldout_consistency_pct"] >= 0.0
     assert review["evidence_summary"]["degradation_pct"] >= 0.0
+    assert review["evidence_summary"]["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["evidence_summary"]["repaired_stress_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert "repaired_worst_stress_pnl" in review["evidence_summary"]
+    assert review["evidence_summary"]["broker_paper_contract_ready"] in {True, False}
     assert review["evidence_summary"]["broker_paper_sandbox_ready"] is False
     assert review["evidence_summary"]["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",

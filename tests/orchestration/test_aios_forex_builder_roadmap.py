@@ -29,6 +29,7 @@ RISK_GOVERNOR_PACKET_ID = "PKT-AIOS-RISK-GOVERNOR-PAPER-FORWARD-THRESHOLDS"
 STRESS_OUT_OF_SAMPLE_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1"
 BROKER_PAPER_SANDBOX_CONTRACT_PACKET_ID = "PKT-AIOS-BROKER-PAPER-SANDBOX-READINESS-CONTRACT"
 STRESS_REPAIR_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V1"
+OOS_EXPANSION_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1"
 SANDBOX_ADAPTER_STUB_PACKET_ID = "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
 APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID = "PKT-AIOS-APPROVED-EXECUTOR-LOCAL-APPLY-LOOP"
 
@@ -109,7 +110,7 @@ def test_today_goal_alignment_is_present_and_aligned() -> None:
 def test_roadmap_candidates_are_emitted() -> None:
     candidates = roadmap_candidates()
 
-    assert len(candidates) == 18
+    assert len(candidates) == 19
 
 
 def test_first_candidate_is_canonical_spec_packet() -> None:
@@ -138,7 +139,7 @@ def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
 def test_monthly_forex_candidates_appear_in_safe_order() -> None:
     packet_ids = [candidate["packet_id"] for candidate in roadmap_candidates()]
 
-    assert packet_ids[:18] == [
+    assert packet_ids[:19] == [
         CANONICAL_SPEC_PACKET_ID,
         DATA_SCHEMAS_PACKET_ID,
         BACKTEST_PACKET_ID,
@@ -155,6 +156,7 @@ def test_monthly_forex_candidates_appear_in_safe_order() -> None:
         STRESS_OUT_OF_SAMPLE_PACKET_ID,
         BROKER_PAPER_SANDBOX_CONTRACT_PACKET_ID,
         STRESS_REPAIR_PACKET_ID,
+        OOS_EXPANSION_PACKET_ID,
         SANDBOX_ADAPTER_STUB_PACKET_ID,
         APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID,
     ]
@@ -203,8 +205,12 @@ def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
     assert "tests/forex_engine/test_broker_paper_sandbox_readiness.py" in candidates[BROKER_PAPER_SANDBOX_CONTRACT_PACKET_ID]["required_files"]
     assert candidates[BROKER_PAPER_SANDBOX_CONTRACT_PACKET_ID]["broker_allowed"] is False
     assert candidates[BROKER_PAPER_SANDBOX_CONTRACT_PACKET_ID]["orders_allowed"] is False
-    assert "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_REPAIR_PLAN.md" in candidates[STRESS_REPAIR_PACKET_ID]["required_files"]
-    assert "tests/forex_engine/test_paper_forward_stress_repair.py" in candidates[STRESS_REPAIR_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/stress_repair.py" in candidates[STRESS_REPAIR_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/run_stress_repair_demo.py" in candidates[STRESS_REPAIR_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_REPAIR.md" in candidates[STRESS_REPAIR_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_stress_repair.py" in candidates[STRESS_REPAIR_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md" in candidates[OOS_EXPANSION_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_out_of_sample_validator.py" in candidates[OOS_EXPANSION_PACKET_ID]["required_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_SANDBOX_ADAPTER_STUB_CONTRACT.md" in candidates[SANDBOX_ADAPTER_STUB_PACKET_ID]["required_files"]
     assert "tests/forex_engine/test_sandbox_adapter_stub_contract.py" in candidates[SANDBOX_ADAPTER_STUB_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOCAL_APPLY_LOOP.md" in candidates[APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID]["required_files"]

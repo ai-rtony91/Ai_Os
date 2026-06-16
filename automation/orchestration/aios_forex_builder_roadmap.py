@@ -442,17 +442,44 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             milestone_value="medium",
             risk_level="low",
             required_files=[
+                "automation/forex_engine/stress_repair.py",
+                "automation/forex_engine/run_stress_repair_demo.py",
+                "automation/forex_engine/broker_paper_sandbox_readiness.py",
+                "automation/forex_engine/month_end_readiness.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_REPAIR.md",
+                "tests/forex_engine/test_stress_repair.py",
                 "automation/forex_engine/paper_forward_stress.py",
                 "automation/forex_engine/out_of_sample_validator.py",
-                "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_REPAIR_PLAN.md",
-                "tests/forex_engine/test_paper_forward_stress_repair.py",
             ],
             purpose=(
                 "Repair deterministic stress/OOS WATCHLIST blockers before any adapter-stub contract. "
                 "No broker, network, credentials, orders, scheduler, daemon, or live trading path."
             ),
             validators=[
-                "python -m pytest -p no:cacheprovider tests/forex_engine/test_paper_forward_stress.py tests/forex_engine/test_out_of_sample_validator.py -q",
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_stress_repair.py tests/forex_engine/test_broker_paper_sandbox_readiness.py tests/forex_engine/test_month_end_readiness.py tests/forex_engine/test_forex_dashboard_contract.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1",
+            title="Expand deterministic paper-forward OOS evidence",
+            lane="paper-forward-oos-expansion",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/out_of_sample_validator.py",
+                "automation/forex_engine/local_fixture_catalog.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md",
+                "tests/forex_engine/test_out_of_sample_validator.py",
+            ],
+            purpose=(
+                "Expand deterministic local heldout and degradation evidence after stress repair remains WATCHLIST. "
+                "This is not broker integration, credentials work, paper order execution, or live trading."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_out_of_sample_validator.py tests/forex_engine/test_stress_repair.py -q",
                 VALIDATOR,
             ],
         ),

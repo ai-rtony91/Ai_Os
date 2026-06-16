@@ -38,6 +38,7 @@ def evaluate_broker_paper_sandbox_readiness(
     evidence: dict[str, Any] | None = None,
     stress_oos: dict[str, Any] | None = None,
     risk_governor: dict[str, Any] | None = None,
+    stress_repair: dict[str, Any] | None = None,
     policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     active_policy = default_broker_paper_sandbox_readiness_policy()
@@ -50,7 +51,14 @@ def evaluate_broker_paper_sandbox_readiness(
         or active_evidence.get("risk_governor_result")
         or {}
     )
-    evidence_gates = _evidence_gates(active_evidence, active_stress_oos, active_risk_governor, active_policy)
+    active_stress_repair = dict(stress_repair or active_evidence.get("stress_repair") or {})
+    evidence_gates = _evidence_gates(
+        active_evidence,
+        active_stress_oos,
+        active_risk_governor,
+        active_stress_repair,
+        active_policy,
+    )
     passed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is True]
     failed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is not True]
     result = {
@@ -60,10 +68,18 @@ def evaluate_broker_paper_sandbox_readiness(
         "evidence_gates": evidence_gates,
         "passed_gates": passed_gates,
         "failed_gates": failed_gates,
-        "blockers": _blockers(evidence_gates, active_evidence, active_stress_oos, active_risk_governor),
+        "blockers": _blockers(
+            evidence_gates,
+            active_evidence,
+            active_stress_oos,
+            active_risk_governor,
+            active_stress_repair,
+        ),
         "required_future_protected_approvals": _required_future_protected_approvals(),
         "forbidden_current_actions": _forbidden_current_actions(),
         "broker_paper_sandbox_contract_ready": False,
+        "stress_repair_status": active_stress_repair.get("stress_repair_status", "not_run"),
+        "stress_repair_classification": active_stress_repair.get("repaired_classification", "not_run"),
         "live_trade_ready": False,
         "real_order_ready": False,
         "broker_integration_active": False,
@@ -197,6 +213,7 @@ def _evidence_gates(
     evidence: dict[str, Any],
     stress_oos: dict[str, Any],
     risk_governor: dict[str, Any],
+    stress_repair: dict[str, Any],
     policy: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     multi = dict(evidence.get("multi_fixture_paper_forward_summary") or {})
@@ -205,7 +222,16 @@ def _evidence_gates(
     stress_classification = str(stress_oos.get("stress_classification") or _stress_summary(evidence).get("classification") or "FAIL")
     combined_classification = str(stress_oos.get("combined_classification") or "FAIL")
     risk_governor_classification = str(risk_governor.get("classification") or "FAIL")
-    return {
+    repair_classification = str(
+        stress_repair.get("repaired_classification")
+        or stress_repair.get("classification")
+        or ""
+    )
+    if repair_classification == "PAPER_FORWARD_READY" and stress_classification == "WATCHLIST":
+        stress_classification = "PAPER_FORWARD_READY"
+    if repair_classification == "PAPER_FORWARD_READY" and combined_classification == "WATCHLIST":
+        combined_classification = "PAPER_FORWARD_READY"
+    gates = {
         "minimum_fixture_count": _minimum(int(multi.get("fixture_count", 0)), policy["minimum_fixture_count"]),
         "minimum_regime_count": _minimum(int(regime.get("total_regimes", 0)), policy["minimum_regime_count"]),
         "minimum_total_intents": _minimum(int(multi.get("total_intents", 0)), policy["minimum_total_intents"]),
@@ -240,6 +266,9 @@ def _evidence_gates(
         ),
         "future_broker_paper_packet_requires_approval": _boolean_gate(True, True, True),
     }
+    if repair_classification:
+        gates["stress_repair_classification"] = _classification_gate(repair_classification)
+    return gates
 
 
 def _minimum(actual: float, threshold: float) -> dict[str, Any]:
@@ -304,6 +333,7 @@ def _blockers(
     evidence: dict[str, Any],
     stress_oos: dict[str, Any],
     risk_governor: dict[str, Any],
+    stress_repair: dict[str, Any],
 ) -> list[str]:
     blockers = []
     for name, gate in evidence_gates.items():
@@ -314,6 +344,7 @@ def _blockers(
     blockers.extend([str(item) for item in list(evidence.get("blockers") or [])])
     blockers.extend([str(item) for item in list(stress_oos.get("blockers") or [])])
     blockers.extend([str(item) for item in list(risk_governor.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(stress_repair.get("blockers") or [])])
     return _unique(blockers)
 
 
