@@ -81,6 +81,14 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "stress_repair_status": str(payload.get("stress_repair_status") or "not_run"),
         "stress_repair_classification": str(payload.get("stress_repair_classification") or payload.get("repaired_stress_classification") or "not_run"),
         "repaired_worst_stress_pnl": float(payload.get("repaired_worst_stress_pnl", 0.0)),
+        "expanded_oos_status": str(payload.get("expanded_oos_status") or payload.get("expanded_oos_classification") or "not_run"),
+        "expanded_oos_classification": str(payload.get("expanded_oos_classification") or payload.get("expanded_oos_status") or "not_run"),
+        "expanded_oos_heldout_consistency_pct": float(
+            payload.get("expanded_oos_heldout_consistency_pct", payload.get("heldout_consistency_pct", 0.0))
+        ),
+        "expanded_oos_degradation_pct": float(
+            payload.get("expanded_oos_degradation_pct", payload.get("degradation_pct", 0.0))
+        ),
         "broker_paper_sandbox_readiness_status": str(
             payload.get("broker_paper_sandbox_readiness_status") or "not_run"
         ),
@@ -114,8 +122,9 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
         (
             f"Stress/OOS: {payload.get('combined_stress_oos_classification', 'not_run')} | "
             f"Repair: {payload.get('stress_repair_classification', 'not_run')} | "
-            f"Heldout: {payload.get('heldout_consistency_pct', 0.0)} | "
-            f"Degradation: {payload.get('degradation_pct', 0.0)}"
+            f"OOS+: {payload.get('expanded_oos_classification', 'not_run')} | "
+            f"Heldout: {payload.get('expanded_oos_heldout_consistency_pct', payload.get('heldout_consistency_pct', 0.0))} | "
+            f"Degradation: {payload.get('expanded_oos_degradation_pct', payload.get('degradation_pct', 0.0))}"
         ),
         (
             f"Sandbox contract: {payload.get('broker_paper_sandbox_readiness_status', 'not_run')} | "

@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from automation.forex_engine import broker_paper_sandbox_readiness
+from automation.forex_engine import oos_expansion
 from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import stress_repair
 
@@ -27,6 +28,13 @@ def _strong_contract_inputs() -> tuple[dict[str, object], dict[str, object], dic
     evidence["stress_repair"] = {
         "repaired_classification": "PAPER_FORWARD_READY",
         "stress_repair_status": "PAPER_FORWARD_READY",
+        "blockers": [],
+        "live_ready": False,
+        "protected_gate_required": True,
+    }
+    evidence["expanded_oos"] = {
+        "classification": "PAPER_FORWARD_READY",
+        "heldout_consistency_pct": 100.0,
         "blockers": [],
         "live_ready": False,
         "protected_gate_required": True,
@@ -75,6 +83,8 @@ def test_default_readiness_result_is_watchlist_and_contract_only() -> None:
     assert result["broker_paper_sandbox_contract_ready"] is False
     assert result["stress_repair_status"] in {"WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert result["stress_repair_classification"] in {"WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert result["expanded_oos_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert result["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert result["live_trade_ready"] is False
     assert result["real_order_ready"] is False
     assert result["broker_integration_active"] is False
@@ -92,6 +102,7 @@ def test_fail_evidence_returns_not_ready() -> None:
         evidence=evidence,
         stress_oos=stress_oos,
         risk_governor=risk_governor,
+        expanded_oos=evidence["expanded_oos"],
     )
 
     assert result["readiness_status"] == "NOT_READY"
@@ -106,6 +117,7 @@ def test_strong_evidence_can_return_contract_ready() -> None:
         evidence=evidence,
         stress_oos=stress_oos,
         risk_governor=risk_governor,
+        expanded_oos=evidence["expanded_oos"],
     )
 
     assert result["readiness_status"] == "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET"
@@ -132,6 +144,27 @@ def test_readiness_accepts_stress_repair_result_and_stays_watchlist_when_repair_
     assert result["broker_paper_sandbox_contract_ready"] is False
     assert result["stress_repair_status"] == repair["stress_repair_status"]
     assert "gate_watchlist:stress_repair_classification" in result["blockers"]
+    assert result["live_trade_ready"] is False
+
+
+def test_readiness_accepts_expanded_oos_and_blocks_contract_when_oos_is_watchlist() -> None:
+    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    expanded = oos_expansion.run_expanded_oos_validation()
+    expanded["classification"] = "WATCHLIST"
+    expanded["blockers"] = ["expanded_oos_degradation_exceeds_policy"]
+
+    result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=bundle,
+        stress_oos=bundle["combined_stress_oos_gate"],
+        risk_governor=bundle["risk_governor"],
+        stress_repair=bundle["stress_repair"],
+        expanded_oos=expanded,
+    )
+
+    assert result["readiness_status"] == "WATCHLIST"
+    assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["expanded_oos_classification"] == "WATCHLIST"
+    assert "gate_watchlist:expanded_oos_classification" in result["blockers"]
     assert result["live_trade_ready"] is False
 
 

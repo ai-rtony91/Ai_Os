@@ -6,6 +6,7 @@ from automation.forex_engine import backtest_harness
 from automation.forex_engine import evidence_bundle_runner
 from automation.forex_engine import evidence_aggregator
 from automation.forex_engine import forex_dashboard_contract
+from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import month_end_readiness
 from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import paper_forward_simulator
@@ -112,7 +113,7 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["protected_gate_required"] is True
     assert review["broker_integration_active"] is False
     assert review["credentials_required_now"] is False
-    assert review["evidence_summary"]["fixture_count"] == 9
+    assert review["evidence_summary"]["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
     assert review["evidence_summary"]["starting_balance"] == 500.0
     assert review["evidence_summary"]["ending_balance"] >= 500.0
     assert review["evidence_summary"]["return_pct"] >= 0.0
@@ -129,6 +130,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["combined_stress_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["evidence_summary"]["heldout_consistency_pct"] >= 0.0
     assert review["evidence_summary"]["degradation_pct"] >= 0.0
+    assert review["expanded_oos_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["evidence_summary"]["expanded_oos_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "PAPER_FORWARD_READY",
+        "not_run",
+    }
+    assert review["evidence_summary"]["expanded_oos_heldout_consistency_pct"] >= 0.0
+    assert review["evidence_summary"]["expanded_oos_degradation_pct"] >= 0.0
     assert review["evidence_summary"]["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["evidence_summary"]["repaired_stress_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert "repaired_worst_stress_pnl" in review["evidence_summary"]

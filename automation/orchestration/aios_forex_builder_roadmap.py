@@ -469,17 +469,79 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             milestone_value="medium",
             risk_level="low",
             required_files=[
+                "automation/forex_engine/oos_expansion.py",
+                "automation/forex_engine/run_oos_expansion_demo.py",
                 "automation/forex_engine/out_of_sample_validator.py",
                 "automation/forex_engine/local_fixture_catalog.py",
+                "automation/forex_engine/broker_paper_sandbox_readiness.py",
+                "automation/forex_engine/month_end_readiness.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
                 "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md",
+                "tests/forex_engine/test_oos_expansion.py",
                 "tests/forex_engine/test_out_of_sample_validator.py",
+                "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+                "tests/forex_engine/test_month_end_readiness.py",
+                "tests/forex_engine/test_forex_dashboard_contract.py",
             ],
             purpose=(
                 "Expand deterministic local heldout and degradation evidence after stress repair remains WATCHLIST. "
                 "This is not broker integration, credentials work, paper order execution, or live trading."
             ),
             validators=[
-                "python -m pytest -p no:cacheprovider tests/forex_engine/test_out_of_sample_validator.py tests/forex_engine/test_stress_repair.py -q",
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_oos_expansion.py tests/forex_engine/test_out_of_sample_validator.py tests/forex_engine/test_broker_paper_sandbox_readiness.py tests/forex_engine/test_month_end_readiness.py tests/forex_engine/test_forex_dashboard_contract.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1",
+            title="Repair expanded paper-forward OOS WATCHLIST blockers",
+            lane="paper-forward-oos-repair",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/oos_repair.py",
+                "automation/forex_engine/run_oos_repair_demo.py",
+                "automation/forex_engine/oos_expansion.py",
+                "automation/forex_engine/out_of_sample_validator.py",
+                "automation/forex_engine/local_fixture_catalog.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_REPAIR.md",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md",
+                "tests/forex_engine/test_oos_repair.py",
+                "tests/forex_engine/test_oos_expansion.py",
+                "tests/forex_engine/test_out_of_sample_validator.py",
+            ],
+            purpose=(
+                "Repair expanded deterministic OOS WATCHLIST blockers through clearer diagnostics, "
+                "more local heldout coverage, and degradation review only. No broker, network, credentials, "
+                "orders, scheduler, daemon, or live trading path."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_oos_expansion.py tests/forex_engine/test_out_of_sample_validator.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V2",
+            title="Repair remaining stress survival WATCHLIST blockers",
+            lane="paper-forward-stress-repair-v2",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/stress_repair.py",
+                "automation/forex_engine/paper_forward_stress.py",
+                "automation/forex_engine/oos_expansion.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_STRESS_REPAIR.md",
+                "tests/forex_engine/test_stress_repair.py",
+                "tests/forex_engine/test_paper_forward_stress.py",
+            ],
+            purpose=(
+                "Continue protected stress repair if expanded OOS survives but stress repair remains WATCHLIST. "
+                "No broker integration, credentials, order execution, scheduler, daemon, or live trading."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_stress_repair.py tests/forex_engine/test_paper_forward_stress.py tests/forex_engine/test_oos_expansion.py -q",
                 VALIDATOR,
             ],
         ),
