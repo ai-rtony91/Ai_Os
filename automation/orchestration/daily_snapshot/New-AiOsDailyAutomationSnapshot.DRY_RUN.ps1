@@ -5,6 +5,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$backupWorkDeltaScript = Join-Path (Split-Path -Parent $PSScriptRoot) "backups\Get-AiOsBackupWorkDelta.ps1"
+. $backupWorkDeltaScript
+
 function Get-AiOsRepoRoot {
     $root = & git rev-parse --show-toplevel 2>$null
     if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($root)) {
@@ -71,7 +74,7 @@ function Convert-AiOsStatusLineToPath {
 function Test-AiOsSecretLikePath {
     param([string]$Path)
 
-    return $Path -match '(?i)(^|[\\/])\.env(\..*)?$|(?i)(secret|secrets|credential|password|token|private[_-]?key)'
+    return $Path -match '(?i)(^|[\\/])\.env(\..*)?$|(?i)(^|[\\/])id_rsa$|(?i)(^|[\\/])id_ed25519$|(?i)\.(pem|key|pfx|p12)$|(?i)(secret|secrets|credential|password|token|private[_-]?key)'
 }
 
 function Get-AiOsRepoInventory {
@@ -163,6 +166,15 @@ $changedFiles = @(
 
 $currentHeadResult = Invoke-AiOsGit -Arguments @("rev-parse", "HEAD")
 $currentHead = if ($currentHeadResult.Lines.Count -gt 0) { [string]$currentHeadResult.Lines[0] } else { "UNKNOWN" }
+$backupWorkDelta = Get-AiOsBackupWorkDeltaReport -RepoRoot $repoRoot -BaseCommit "" -CurrentCommit $currentHead -TimeslotLabel "daily_snapshot"
+$backupCopiedMetrics = New-AiOsBackupCopiedMetrics -BackupMode "DAILY_SNAPSHOT_NO_BACKUP" `
+    -BackupRoot "" `
+    -Destination "" `
+    -CopiedFilesCount 0 `
+    -CopiedBytes 0 `
+    -ExcludedPaths @(".git", "node_modules") `
+    -ExcludedSecretPatterns @(".env", "*.env", ".env.*", "*.pem", "*.key", "id_rsa", "id_ed25519", "*.pfx", "*.p12", "*secret*", "*secrets*") `
+    -FullSnapshotOrIncremental "NO_BACKUP_RAN"
 
 $latestCommitResult = Invoke-AiOsGit -Arguments @("log", "-1", "--format=%H|%ci|%s")
 $latestCommit = if ($latestCommitResult.Lines.Count -gt 0) { [string]$latestCommitResult.Lines[0] } else { "UNKNOWN" }
@@ -286,6 +298,14 @@ $snapshot = [pscustomobject]@{
     repo_path = $repoRoot
     current_head = $currentHead
     current_branch = $currentBranch
+    backup_timeslot_label = $backupWorkDelta.backup_timeslot_label
+    backup_timeslot_local = $backupWorkDelta.backup_timeslot_local
+    backup_window_start = $backupWorkDelta.backup_window_start
+    backup_window_end = $backupWorkDelta.backup_window_end
+    backup_copied_metrics = $backupCopiedMetrics
+    dev_work_delta_metrics = $backupWorkDelta.dev_work_delta_metrics
+    daily_work_metrics = $backupWorkDelta.daily_work_metrics
+    timeslot_work_metrics = $backupWorkDelta.timeslot_work_metrics
     today_status = $todayStatus
     repo_root = $repoRoot
     git_status_lines = @($gitStatusLines)

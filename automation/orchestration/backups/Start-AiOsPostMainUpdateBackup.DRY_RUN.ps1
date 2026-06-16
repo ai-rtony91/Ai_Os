@@ -18,11 +18,19 @@ param(
     [string]$SourceRepo = "C:\Dev\Ai.Os",
     [string]$BackupRoot = "D:\T9_FOB",
     [string]$StateFilePath = "telemetry\backup_reports\AIOS_POST_MAIN_UPDATE_BACKUP_STATE.json",
+    [string]$BackupTimeslotLabel = "manual",
+    [string]$BackupWindowStart = "",
+    [string]$BackupWindowEnd = "",
     [switch]$OutputJson
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+$workDeltaScript = Join-Path $PSScriptRoot "Get-AiOsBackupWorkDelta.ps1"
+$courtesySosScript = Join-Path $PSScriptRoot "New-AiOsBackupCourtesySos.ps1"
+. $workDeltaScript
+. $courtesySosScript
 
 function ConvertTo-AiOsFullPath {
     param([Parameter(Mandatory = $true)][string]$Path)
@@ -64,6 +72,41 @@ function Read-AiOsBackupState {
     }
 }
 
+function Get-AiOsObjectPropertyValue {
+    param(
+        [AllowNull()][object]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [AllowNull()][object]$Default = $null
+    )
+
+    if ($null -eq $Object) {
+        return $Default
+    }
+
+    if ($Object.PSObject.Properties.Name -contains $Name) {
+        return $Object.$Name
+    }
+
+    return $Default
+}
+
+function Get-AiOsNamedBaseline {
+    param(
+        [AllowNull()][object]$Baselines,
+        [Parameter(Mandatory = $true)][string]$Name
+    )
+
+    if ($null -eq $Baselines) {
+        return $null
+    }
+
+    if ($Baselines.PSObject.Properties.Name -contains $Name) {
+        return $Baselines.$Name
+    }
+
+    return $null
+}
+
 function Get-AiOsDailyAutomationSnapshot {
     param([string]$RepoRoot)
 
@@ -101,15 +144,27 @@ function New-AiOsPostMainBackupPlan {
         schema = "AIOS_POST_MAIN_UPDATE_BACKUP_PLAN.v1"
         mode = "DRY_RUN"
         status = $Status
+        backup_timeslot_label = $backupWorkDelta.backup_timeslot_label
+        backup_timeslot_local = $backupWorkDelta.backup_timeslot_local
+        backup_window_start = $backupWorkDelta.backup_window_start
+        backup_window_end = $backupWorkDelta.backup_window_end
         current_commit = $CurrentCommit
         last_backed_up_commit = $LastBackedUpCommit
+        last_successful_backup_commit = $backupWorkDelta.last_successful_backup_commit
         backup_required = $BackupRequired
         recommended_backup_path = $RecommendedBackupPath
         robocopy_preview = $RobocopyPreview
         writes_performed = 0
         state_file_path = ConvertTo-AiOsRelativePath -Root $normalizedSource -Path $resolvedStateFilePath
         state_read_status = $StateReadStatus
-        excluded_paths = @(".git", ".codex_backups", "node_modules", "__pycache__", ".venv", "dist", "build")
+        excluded_paths = @($excludedDirs)
+        excluded_secret_patterns = @($excludedSecretPatterns)
+        backup_copied_metrics = $backupCopiedMetrics
+        dev_work_delta_metrics = $backupWorkDelta.dev_work_delta_metrics
+        daily_work_metrics = $backupWorkDelta.daily_work_metrics
+        timeslot_work_metrics = $backupWorkDelta.timeslot_work_metrics
+        courtesy_sos = $courtesySos
+        state_update_preview = $stateUpdatePreview
         blocked_capabilities = @(
             "robocopy_execution",
             "backup_snapshot_creation",
@@ -155,8 +210,8 @@ if (-not $resolvedStateFilePath.StartsWith($stateRoot, [System.StringComparison]
     throw "State file path must stay under telemetry\backup_reports."
 }
 
-$currentCommit = (& git -C $normalizedSource rev-parse HEAD 2>&1 | Select-Object -First 1)
-if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace([string]$currentCommit)) {
+$currentCommit = Get-AiOsBackupGitHead -RepoRoot $normalizedSource
+if ([string]::IsNullOrWhiteSpace([string]$currentCommit)) {
     throw "Unable to read current main commit with git rev-parse HEAD."
 }
 
@@ -165,17 +220,28 @@ $shortCommit = if ($currentCommit.Length -ge 7) { $currentCommit.Substring(0, 7)
 $state = Read-AiOsBackupState -Path $resolvedStateFilePath
 $dailySnapshot = Get-AiOsDailyAutomationSnapshot -RepoRoot $normalizedSource
 $stateReadStatus = if ($null -eq $state) { "MISSING" } elseif ($state.PSObject.Properties.Name -contains "parse_error") { "PARSE_ERROR" } else { "READ" }
-$lastBackedUpCommit = if ($null -ne $state -and $state.PSObject.Properties.Name -contains "last_backed_up_commit") {
-    [string]$state.last_backed_up_commit
+$lastSuccessfulBackupCommit = Get-AiOsObjectPropertyValue -Object $state -Name "last_successful_backup_commit" -Default $null
+if ([string]::IsNullOrWhiteSpace([string]$lastSuccessfulBackupCommit)) {
+    $lastSuccessfulBackupCommit = Get-AiOsObjectPropertyValue -Object $state -Name "last_backed_up_commit" -Default $null
 }
-else {
-    $null
+$lastBackedUpCommit = if ([string]::IsNullOrWhiteSpace([string]$lastSuccessfulBackupCommit)) { $null } else { [string]$lastSuccessfulBackupCommit }
+
+$timeslotBaselines = Get-AiOsObjectPropertyValue -Object $state -Name "timeslot_baselines" -Default $null
+$dailyBaselines = Get-AiOsObjectPropertyValue -Object $state -Name "daily_baselines" -Default $null
+$timeslotBaseline = Get-AiOsNamedBaseline -Baselines $timeslotBaselines -Name $BackupTimeslotLabel
+$todayKey = (Get-Date).Date.ToString("yyyy-MM-dd")
+$dailyBaseline = Get-AiOsNamedBaseline -Baselines $dailyBaselines -Name $todayKey
+$timeslotBaseCommit = Get-AiOsObjectPropertyValue -Object $timeslotBaseline -Name "last_successful_backup_commit" -Default $null
+if ([string]::IsNullOrWhiteSpace([string]$timeslotBaseCommit)) {
+    $timeslotBaseCommit = Get-AiOsObjectPropertyValue -Object $timeslotBaseline -Name "commit" -Default $lastBackedUpCommit
 }
+$dayStartCommit = Get-AiOsObjectPropertyValue -Object $dailyBaseline -Name "day_start_commit" -Default $null
 
 $timestamp = Get-Date -Format "yyyy-MM-dd_HHmm"
 $destinationName = "AIOS_BACKUP_POST_MAIN_${timestamp}_$shortCommit"
 $recommendedBackupPath = Join-Path $normalizedBackupRoot $destinationName
 $excludedDirs = @(".git", ".codex_backups", "node_modules", "__pycache__", ".venv", "dist", "build")
+$excludedSecretPatterns = @(".env", "*.env", ".env.*", "*.pem", "*.key", "id_rsa", "id_ed25519", "*.pfx", "*.p12", "*secret*", "*secrets*")
 $robocopyPreview = @(
     "robocopy",
     "`"$normalizedSource`"",
@@ -183,6 +249,8 @@ $robocopyPreview = @(
     "/E",
     "/XD"
 ) + ($excludedDirs | ForEach-Object { "`"$_`"" }) + @(
+    "/XF"
+) + ($excludedSecretPatterns | ForEach-Object { "`"$_`"" }) + @(
     "/R:2",
     "/W:2",
     "/COPY:DAT",
@@ -191,14 +259,67 @@ $robocopyPreview = @(
     "/TEE"
 )
 
+$backupWorkDelta = Get-AiOsBackupWorkDeltaReport -RepoRoot $normalizedSource `
+    -BaseCommit $lastBackedUpCommit `
+    -CurrentCommit $currentCommit `
+    -TimeslotLabel $BackupTimeslotLabel `
+    -WindowStartLocal $BackupWindowStart `
+    -WindowEndLocal $BackupWindowEnd `
+    -DayStartCommit $dayStartCommit `
+    -TimeslotBaseCommit $timeslotBaseCommit `
+    -LastSuccessfulBackupCommit $lastBackedUpCommit
+$backupCopiedMetrics = New-AiOsBackupCopiedMetrics -BackupMode "DRY_RUN_POST_MAIN_PREVIEW" `
+    -BackupRoot $normalizedBackupRoot `
+    -Destination $recommendedBackupPath `
+    -CopiedFilesCount 0 `
+    -CopiedBytes 0 `
+    -ExcludedPaths $excludedDirs `
+    -ExcludedSecretPatterns $excludedSecretPatterns `
+    -FullSnapshotOrIncremental "FULL_SNAPSHOT_PREVIEW"
+$timeslotBaselinePreview = [ordered]@{}
+$timeslotBaselinePreview[$BackupTimeslotLabel] = [ordered]@{
+    last_successful_backup_commit = $currentCommit
+    last_successful_backup_timestamp = (Get-Date).ToString("o")
+    last_successful_backup_path = $recommendedBackupPath
+}
+$dailyBaselinePreview = [ordered]@{}
+$dailyBaselinePreview[$todayKey] = [ordered]@{
+    day_start_commit = $backupWorkDelta.daily_work_metrics.day_start_commit
+    current_commit = $currentCommit
+    last_successful_backup_timestamp = (Get-Date).ToString("o")
+}
+$stateUpdatePreview = [pscustomobject][ordered]@{
+    schema = "AIOS_POST_MAIN_UPDATE_BACKUP_STATE_PREVIEW.v1"
+    dry_run_only = $true
+    writes_performed = 0
+    last_successful_backup_commit = $currentCommit
+    last_successful_backup_timestamp = (Get-Date).ToString("o")
+    last_successful_backup_path = $recommendedBackupPath
+    timeslot_baselines = $timeslotBaselinePreview
+    daily_baselines = $dailyBaselinePreview
+}
+
+$baselineMissing = -not $backupWorkDelta.dev_work_delta_metrics.available
 $backupRequired = -not ($lastBackedUpCommit -and $lastBackedUpCommit -eq $currentCommit)
-$status = if ($backupRequired) { "BACKUP_RECOMMENDED" } else { "SKIP_BACKUP" }
-$nextSafeAction = if ($backupRequired) {
+$status = if ($baselineMissing) { "BASELINE_UNKNOWN" } elseif ($backupRequired) { "BACKUP_RECOMMENDED" } else { "SKIP_BACKUP" }
+$nextSafeAction = if ($baselineMissing) {
+    "Establish the first successful backup baseline commit, then compare future reports against that commit."
+}
+elseif ($backupRequired) {
     "Approve the exact destination path before running any backup command."
 }
 else {
     "No backup needed for this commit unless the Human Owner requests a fresh snapshot."
 }
+$courtesySos = New-AiOsBackupCourtesySos -Status $status `
+    -TimeslotLabel $backupWorkDelta.backup_timeslot_label `
+    -CopiedMetrics $backupCopiedMetrics `
+    -DevWorkDeltaMetrics $backupWorkDelta.dev_work_delta_metrics `
+    -DailyWorkMetrics $backupWorkDelta.daily_work_metrics `
+    -BaseCommit $backupWorkDelta.dev_work_delta_metrics.base_commit `
+    -CurrentCommit $currentCommit `
+    -Destination $recommendedBackupPath `
+    -LogPath ""
 
 $plan = New-AiOsPostMainBackupPlan -Status $status `
     -CurrentCommit $currentCommit `
