@@ -150,6 +150,30 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "replay_stub_rejected": int(payload.get("replay_stub_rejected", payload.get("stub_rejected", 0))),
         "replay_risk_accepted": int(payload.get("replay_risk_accepted", payload.get("risk_accepted", 0))),
         "replay_risk_rejected": int(payload.get("replay_risk_rejected", payload.get("risk_rejected", 0))),
+        "broker_paper_dryrun_replay_evidence_gate_classification": str(
+            payload.get("broker_paper_dryrun_replay_evidence_gate_classification") or "not_run"
+        ),
+        "broker_paper_dryrun_replay_evidence_gate_ready": bool(
+            payload.get("broker_paper_dryrun_replay_evidence_gate_ready", False)
+        ),
+        "replay_evidence_records": int(
+            payload.get("replay_evidence_records", payload.get("records_replayed", 0))
+        ),
+        "replay_evidence_stub_accepted": int(
+            payload.get("replay_evidence_stub_accepted", payload.get("stub_accepted", 0))
+        ),
+        "replay_evidence_stub_rejected": int(
+            payload.get("replay_evidence_stub_rejected", payload.get("stub_rejected", 0))
+        ),
+        "replay_evidence_risk_accepted": int(
+            payload.get("replay_evidence_risk_accepted", payload.get("risk_accepted", 0))
+        ),
+        "replay_evidence_risk_rejected": int(
+            payload.get("replay_evidence_risk_rejected", payload.get("risk_rejected", 0))
+        ),
+        "replay_evidence_eom_milestone_status": str(
+            payload.get("replay_evidence_eom_milestone_status") or "not_run"
+        ),
         "broker_paper_orders_allowed": False,
         "credentials_allowed": False,
         "network_api_allowed": False,
@@ -206,6 +230,8 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
             f"Replay: {payload.get('broker_paper_dryrun_replay_harness_classification', 'not_run')}/"
             f"{payload.get('replay_stub_accepted', 0)}-{payload.get('replay_stub_rejected', 0)}/"
             f"{payload.get('replay_risk_accepted', 0)}-{payload.get('replay_risk_rejected', 0)} | "
+            f"Evidence: {payload.get('broker_paper_dryrun_replay_evidence_gate_classification', 'not_run')}/"
+            f"{payload.get('replay_evidence_records', 0)} | "
             f"Repaired worst PnL: {payload.get('repaired_worst_stress_pnl', 0.0)}"
         ),
         f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",
@@ -229,6 +255,7 @@ def dashboard_contract_summary() -> dict[str, Any]:
             "walk_forward",
             "risk_gate",
             "paper_forward",
+            "broker_paper_dryrun_replay_evidence_gate",
             "readiness",
             "blockers",
             "sos",

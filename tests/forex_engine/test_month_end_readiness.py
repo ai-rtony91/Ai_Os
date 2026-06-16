@@ -108,6 +108,7 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
         "WATCHLIST",
         "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
         "DRYRUN_REPLAY_HARNESS_READY",
+        "DRYRUN_REPLAY_EVIDENCE_READY",
     }
     assert review["broker_paper_sandbox_contract_ready"] is False
     assert review["live_trade_ready"] is False
@@ -185,6 +186,19 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["replay_stub_rejected"] >= 0
     assert review["replay_risk_accepted"] >= 0
     assert review["replay_risk_rejected"] >= 0
+    assert review["broker_paper_dryrun_replay_evidence_gate_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_REPLAY_EVIDENCE_READY",
+        "not_run",
+    }
+    assert review["broker_paper_dryrun_replay_evidence_gate_ready"] in {True, False}
+    assert review["replay_evidence_records"] >= 0
+    assert review["replay_evidence_stub_accepted"] >= 0
+    assert review["replay_evidence_stub_rejected"] >= 0
+    assert review["replay_evidence_risk_accepted"] >= 0
+    assert review["replay_evidence_risk_rejected"] >= 0
+    assert review["replay_evidence_eom_milestone_status"]
     assert review["broker_paper_orders_allowed"] is False
     assert review["credentials_allowed"] is False
     assert review["network_api_allowed"] is False
@@ -276,6 +290,19 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["replay_stub_rejected"] >= 0
     assert review["evidence_summary"]["replay_risk_accepted"] >= 0
     assert review["evidence_summary"]["replay_risk_rejected"] >= 0
+    assert review["evidence_summary"]["broker_paper_dryrun_replay_evidence_gate_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_REPLAY_EVIDENCE_READY",
+        "not_run",
+    }
+    assert review["evidence_summary"]["broker_paper_dryrun_replay_evidence_gate_ready"] in {True, False}
+    assert review["evidence_summary"]["replay_evidence_records"] >= 0
+    assert review["evidence_summary"]["replay_evidence_stub_accepted"] >= 0
+    assert review["evidence_summary"]["replay_evidence_stub_rejected"] >= 0
+    assert review["evidence_summary"]["replay_evidence_risk_accepted"] >= 0
+    assert review["evidence_summary"]["replay_evidence_risk_rejected"] >= 0
+    assert review["evidence_summary"]["replay_evidence_eom_milestone_status"]
     assert review["evidence_summary"]["broker_paper_orders_allowed"] is False
     assert review["evidence_summary"]["credentials_allowed"] is False
     assert review["evidence_summary"]["network_api_allowed"] is False
@@ -295,6 +322,7 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
         "WATCHLIST",
         "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
         "DRYRUN_REPLAY_HARNESS_READY",
+        "DRYRUN_REPLAY_EVIDENCE_READY",
     }
     assert review["evidence_summary"]["broker_paper_sandbox_contract_ready"] is False
     assert review["evidence_summary"]["broker_integration_active"] is False
@@ -307,6 +335,7 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
         or "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1" in review["next_safe_action"]
         or "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1" in review["next_safe_action"]
         or "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1" in review["next_safe_action"]
+        or "PKT-AIOS-BROKER-PAPER-ADAPTER-PLAN-APPROVAL-GATE-V1" in review["next_safe_action"]
         or "live readiness requires separate future approval" in review["next_safe_action"]
     )
 

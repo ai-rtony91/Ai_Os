@@ -45,6 +45,8 @@ DRYRUN_RISK_GOVERNOR_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVER
 DRYRUN_REPLAY_HARNESS_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-V1"
 DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-HARNESS-REPAIR-V1"
 DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-V1"
+DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-REPLAY-EVIDENCE-GATE-REPAIR-V1"
+BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID = "PKT-AIOS-BROKER-PAPER-ADAPTER-PLAN-APPROVAL-GATE-V1"
 APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID = "PKT-AIOS-APPROVED-EXECUTOR-LOCAL-APPLY-LOOP"
 
 
@@ -124,7 +126,7 @@ def test_today_goal_alignment_is_present_and_aligned() -> None:
 def test_roadmap_candidates_are_emitted() -> None:
     candidates = roadmap_candidates()
 
-    assert len(candidates) == 33
+    assert len(candidates) == 35
 
 
 def test_first_candidate_is_canonical_spec_packet() -> None:
@@ -153,7 +155,7 @@ def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
 def test_monthly_forex_candidates_appear_in_safe_order() -> None:
     packet_ids = [candidate["packet_id"] for candidate in roadmap_candidates()]
 
-    assert packet_ids[:33] == [
+    assert packet_ids[:35] == [
         CANONICAL_SPEC_PACKET_ID,
         DATA_SCHEMAS_PACKET_ID,
         BACKTEST_PACKET_ID,
@@ -184,6 +186,8 @@ def test_monthly_forex_candidates_appear_in_safe_order() -> None:
         DRYRUN_REPLAY_HARNESS_PACKET_ID,
         DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID,
         DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID,
+        DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID,
+        BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID,
         PRESECURITY_REPAIR_PACKET_ID,
         STRESS_REPAIR_V2_PACKET_ID,
         APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID,
@@ -285,8 +289,11 @@ def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
     assert "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py" in candidates[DRYRUN_REPLAY_HARNESS_PACKET_ID]["required_files"]
     assert "automation/forex_engine/broker_paper_dryrun_replay_harness.py" in candidates[DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID]["required_files"]
     assert "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py" in candidates[DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID]["required_files"]
-    assert "automation/forex_engine/broker_paper_dryrun_replay_harness.py" in candidates[DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID]["required_files"]
-    assert "tests/forex_engine/test_broker_paper_dryrun_replay_harness.py" in candidates[DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/broker_paper_dryrun_replay_evidence_gate.py" in candidates[DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_broker_paper_dryrun_replay_evidence_gate.py" in candidates[DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/broker_paper_dryrun_replay_evidence_gate.py" in candidates[DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_broker_paper_dryrun_replay_evidence_gate.py" in candidates[DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID]["required_files"]
+    assert "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE.md" in candidates[BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOCAL_APPLY_LOOP.md" in candidates[APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID]["required_files"]
 
 
@@ -376,7 +383,7 @@ def test_roadmap_routes_after_oos_repair_and_requires_presecurity_gate() -> None
     result = roadmap_result()
     routing = result["post_oos_repair_routing"]
 
-    assert result["current_selected_packet"] == DRYRUN_REPLAY_HARNESS_PACKET_ID
+    assert result["current_selected_packet"] == DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID
     assert routing["current_selected_packet_after_pr_750"] == OOS_REPAIR_PACKET_ID
     assert routing["current_selected_packet_after_pr_751_752"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
     assert routing["current_selected_packet_after_pr_753"] == PRESECURITY_GATE_PACKET_ID
@@ -384,6 +391,7 @@ def test_roadmap_routes_after_oos_repair_and_requires_presecurity_gate() -> None
     assert routing["current_selected_packet_after_pr_755"] == DRYRUN_INTENT_LEDGER_PACKET_ID
     assert routing["current_selected_packet_after_pr_756"] == DRYRUN_RISK_GOVERNOR_PACKET_ID
     assert routing["current_selected_packet_after_pr_757"] == DRYRUN_REPLAY_HARNESS_PACKET_ID
+    assert routing["current_selected_packet_after_pr_758"] == DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID
     assert routing["conditional_next_packets"]["oos_repair_watchlist"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
     assert routing["conditional_next_packets"]["low_vol_redesign_watchlist"] == LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
     assert routing["conditional_next_packets"]["oos_pass_stress_watchlist"] == STRESS_REPAIR_V2_PACKET_ID
@@ -403,6 +411,18 @@ def test_roadmap_routes_after_oos_repair_and_requires_presecurity_gate() -> None
     assert routing["conditional_next_packets"]["dryrun_replay_harness_fail"] == DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID
     assert routing["conditional_next_packets"]["dryrun_replay_harness_watchlist"] == DRYRUN_REPLAY_HARNESS_REPAIR_PACKET_ID
     assert routing["conditional_next_packets"]["dryrun_replay_harness_pass"] == DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID
+    assert (
+        routing["conditional_next_packets"]["dryrun_replay_evidence_gate_fail"]
+        == DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID
+    )
+    assert (
+        routing["conditional_next_packets"]["dryrun_replay_evidence_gate_watchlist"]
+        == DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID
+    )
+    assert (
+        routing["conditional_next_packets"]["dryrun_replay_evidence_gate_pass"]
+        == BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID
+    )
     assert result["security_gate_required_before_broker_paper"] is True
     assert result["required_security_packet"] == PRESECURITY_GATE_PACKET_ID
     assert "broker-paper requires secrets/network/broker boundaries" in result["security_gate_reason"]
@@ -612,6 +632,47 @@ def test_roadmap_selects_replay_evidence_gate_when_replay_harness_passes() -> No
     assert (
         result["post_dryrun_replay_harness_next_safe_candidate"]["packet_id"]
         == DRYRUN_REPLAY_EVIDENCE_GATE_PACKET_ID
+    )
+
+
+def test_roadmap_selects_replay_evidence_repair_when_evidence_gate_fails_or_watchlists() -> None:
+    module = load_module("aios_forex_builder_roadmap", MODULE_PATH)
+    for classification in ("FAIL", "WATCHLIST"):
+        result = module.build_forex_builder_roadmap(
+            {
+                "presecurity_gate": {"classification": "PRESECURITY_READY"},
+                "broker_paper_adapter_stub_contract": {"classification": "STUB_CONTRACT_READY"},
+                "broker_paper_dryrun_intent_ledger": {"classification": "DRYRUN_LEDGER_READY"},
+                "broker_paper_dryrun_risk_governor": {"classification": "DRYRUN_RISK_GOVERNOR_READY"},
+                "broker_paper_dryrun_replay_harness": {"classification": "DRYRUN_REPLAY_HARNESS_READY"},
+                "broker_paper_dryrun_replay_evidence_gate": {"classification": classification},
+            }
+        )
+
+        assert result["post_dryrun_replay_evidence_gate_next_safe_packet"] == DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID
+        assert (
+            result["post_dryrun_replay_evidence_gate_next_safe_candidate"]["packet_id"]
+            == DRYRUN_REPLAY_EVIDENCE_GATE_REPAIR_PACKET_ID
+        )
+
+
+def test_roadmap_selects_adapter_plan_approval_gate_when_replay_evidence_passes() -> None:
+    module = load_module("aios_forex_builder_roadmap", MODULE_PATH)
+    result = module.build_forex_builder_roadmap(
+        {
+            "presecurity_gate": {"classification": "PRESECURITY_READY"},
+            "broker_paper_adapter_stub_contract": {"classification": "STUB_CONTRACT_READY"},
+            "broker_paper_dryrun_intent_ledger": {"classification": "DRYRUN_LEDGER_READY"},
+            "broker_paper_dryrun_risk_governor": {"classification": "DRYRUN_RISK_GOVERNOR_READY"},
+            "broker_paper_dryrun_replay_harness": {"classification": "DRYRUN_REPLAY_HARNESS_READY"},
+            "broker_paper_dryrun_replay_evidence_gate": {"classification": "DRYRUN_REPLAY_EVIDENCE_READY"},
+        }
+    )
+
+    assert result["post_dryrun_replay_evidence_gate_next_safe_packet"] == BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID
+    assert (
+        result["post_dryrun_replay_evidence_gate_next_safe_candidate"]["packet_id"]
+        == BROKER_PAPER_ADAPTER_PLAN_APPROVAL_GATE_PACKET_ID
     )
 
 
