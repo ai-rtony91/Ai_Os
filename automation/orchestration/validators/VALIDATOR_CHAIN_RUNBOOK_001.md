@@ -38,6 +38,25 @@ It reduces manual checking by putting the required checks in a fixed order. A wo
 | `commit_package_review` | Confirms exact-file commit packaging and blocks blind staging. |
 | `final_git_status` | Gives the operator the final changed-file view before any next step. |
 
+## Packet-Aware Path Scope
+
+`Invoke-OrchestrationValidatorChain.DRY_RUN.ps1` supports exact packet scope
+flags for validating a specific packet change set:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File automation/orchestration/validators/Invoke-OrchestrationValidatorChain.DRY_RUN.ps1 `
+  -ChangedPath "apps/trading_lab/trading_lab/watchtower.py" `
+  -AllowedPath "apps/trading_lab/trading_lab/watchtower.py" `
+  -ForbiddenPath "apps/dashboard/","secrets/",".env"
+```
+
+Use `-ChangedPath` for exact packet files when unrelated dirty backlog exists.
+Use `-AllowedPath` with one or more PowerShell array values for exact
+packet-approved files only. Use `-ForbiddenPath` with one or more PowerShell
+array values for packet and security blockers.
+Forbidden paths always win over allowed paths. Broad `apps/` packet allowance is
+blocked; do not use it to approve Trading Lab changes.
+
 ## When To Stop
 
 Stop immediately when a validator reports `FAIL` for:
