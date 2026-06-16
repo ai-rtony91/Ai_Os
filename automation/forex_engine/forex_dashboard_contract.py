@@ -116,6 +116,13 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "kill_switch_required": bool(payload.get("kill_switch_required", True)),
         "max_loss_guard_required": bool(payload.get("max_loss_guard_required", True)),
         "audit_log_required": bool(payload.get("audit_log_required", True)),
+        "broker_paper_stub_contract_classification": str(
+            payload.get("broker_paper_stub_contract_classification") or "not_run"
+        ),
+        "broker_paper_stub_contract_ready": bool(payload.get("broker_paper_stub_contract_ready", False)),
+        "broker_paper_orders_allowed": False,
+        "credentials_allowed": False,
+        "network_api_allowed": False,
         "weakest_oos_split": str(payload.get("weakest_oos_split") or payload.get("weakest_split") or "none"),
         "broker_paper_sandbox_readiness_status": str(
             payload.get("broker_paper_sandbox_readiness_status") or "not_run"
@@ -161,6 +168,7 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
         (
             f"Sandbox contract: {payload.get('broker_paper_sandbox_readiness_status', 'not_run')} | "
             f"Presecurity: {payload.get('presecurity_gate_classification', 'not_run')} | "
+            f"Stub: {payload.get('broker_paper_stub_contract_classification', 'not_run')} | "
             f"Repaired worst PnL: {payload.get('repaired_worst_stress_pnl', 0.0)}"
         ),
         f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",

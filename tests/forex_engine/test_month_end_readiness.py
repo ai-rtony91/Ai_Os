@@ -142,6 +142,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["kill_switch_required"] is True
     assert review["max_loss_guard_required"] is True
     assert review["audit_log_required"] is True
+    assert review["broker_paper_stub_contract_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "STUB_CONTRACT_READY",
+        "not_run",
+    }
+    assert review["broker_paper_stub_contract_ready"] in {True, False}
+    assert review["broker_paper_orders_allowed"] is False
+    assert review["credentials_allowed"] is False
+    assert review["network_api_allowed"] is False
     assert review["original_max_degradation_pct"] >= review["repaired_max_degradation_pct"]
     assert review["degradation_improvement_pct"] >= 0.0
     assert review["weakest_split"]
@@ -188,6 +198,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["kill_switch_required"] is True
     assert review["evidence_summary"]["max_loss_guard_required"] is True
     assert review["evidence_summary"]["audit_log_required"] is True
+    assert review["evidence_summary"]["broker_paper_stub_contract_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "STUB_CONTRACT_READY",
+        "not_run",
+    }
+    assert review["evidence_summary"]["broker_paper_stub_contract_ready"] in {True, False}
+    assert review["evidence_summary"]["broker_paper_orders_allowed"] is False
+    assert review["evidence_summary"]["credentials_allowed"] is False
+    assert review["evidence_summary"]["network_api_allowed"] is False
     assert (
         review["evidence_summary"]["original_max_degradation_pct"]
         >= review["evidence_summary"]["repaired_max_degradation_pct"]

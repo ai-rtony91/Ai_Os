@@ -581,6 +581,35 @@ DEFAULT_COMPLETED_PACKETS = [
         "source": "default_completed_memory",
     },
     {
+        "packet_id": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
+        "title": "Add broker-paper presecurity gate",
+        "lane": "broker-paper-presecurity-gate",
+        "landed_pr": "#754",
+        "completion_reason": (
+            "presecurity contract blocks credentials, env reads, broker SDKs, network/API, webhooks, "
+            "schedulers, daemons, broker-paper orders, and live orders before adapter work"
+        ),
+        "completed_files": [
+            "automation/forex_engine/broker_paper_presecurity_gate.py",
+            "automation/forex_engine/run_broker_paper_presecurity_gate_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_PRESECURITY_GATE.md",
+            "tests/forex_engine/test_broker_paper_presecurity_gate.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/broker_paper_presecurity_gate.py",
+            "automation/forex_engine/run_broker_paper_presecurity_gate_demo.py",
+            "automation/forex_engine/broker_paper_sandbox_readiness.py",
+            "automation/forex_engine/month_end_readiness.py",
+            "automation/forex_engine/forex_dashboard_contract.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_PRESECURITY_GATE.md",
+            "tests/forex_engine/test_broker_paper_presecurity_gate.py",
+            "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+            "tests/forex_engine/test_month_end_readiness.py",
+            "tests/forex_engine/test_forex_dashboard_contract.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
         "packet_id": "AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
         "alternate_packet_ids": [
             "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",
@@ -814,6 +843,17 @@ def _normalize_completed_packet_record(record: dict[str, Any]) -> dict[str, Any]
                 "completion_reason": (
                     "low-vol edge redesign landed with paper-only low-vol no-trade/reduced-size policy, "
                     "audit fields, and broker/live blocked"
+                ),
+            }
+        )
+    if _packet_id(normalized) == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1":
+        normalized.update(
+            {
+                "landed_pr": "#754",
+                "title": "Add broker-paper presecurity gate",
+                "completion_reason": (
+                    "presecurity contract blocks credentials, env reads, broker SDKs, network/API, webhooks, "
+                    "schedulers, daemons, broker-paper orders, and live orders before adapter work"
                 ),
             }
         )

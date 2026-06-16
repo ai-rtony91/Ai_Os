@@ -79,6 +79,13 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     low_vol_edge_summary = dict(bundle.get("low_vol_edge_summary") or low_vol_edge)
     presecurity_gate = dict(bundle.get("presecurity_gate") or bundle.get("broker_paper_presecurity_gate") or {})
     presecurity_gate_summary = dict(bundle.get("presecurity_gate_summary") or presecurity_gate)
+    adapter_stub = dict(
+        bundle.get("broker_paper_adapter_stub_contract")
+        or bundle.get("broker_paper_stub_contract")
+        or bundle.get("adapter_stub_contract")
+        or {}
+    )
+    adapter_stub_summary = dict(bundle.get("broker_paper_stub_contract_summary") or adapter_stub)
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
@@ -93,6 +100,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             oos_repair=oos_repair,
             low_vol_edge_redesign=low_vol_edge,
             presecurity_gate=presecurity_gate,
+            adapter_stub_contract=adapter_stub,
         )
     stress_blockers = [
         str(blocker)
@@ -110,6 +118,8 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *_text_list(oos_repair.get("blockers")),
             *_text_list(low_vol_edge.get("blockers")),
             *_text_list(presecurity_gate.get("blockers")),
+            *_text_list(adapter_stub.get("blockers")),
+            *_text_list(adapter_stub.get("rejection_reasons")),
             *_text_list(oos_result.get("blockers")),
             *_text_list(combined_gate.get("blockers")),
             *_text_list(sandbox_readiness.get("blockers")),
@@ -135,6 +145,12 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         or presecurity_gate.get("classification")
         or "not_run"
     )
+    broker_paper_stub_contract_classification = str(
+        adapter_stub_summary.get("broker_paper_stub_contract_classification")
+        or sandbox_readiness.get("broker_paper_stub_contract_classification")
+        or adapter_stub.get("classification")
+        or "not_run"
+    )
     stress_oos_ready = combined_stress_oos_classification == "PAPER_FORWARD_READY"
     paper_forward_ready = (
         classification == "PAPER_FORWARD_READY"
@@ -142,6 +158,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         and (combined_stress_oos_classification in {"not_run", "PAPER_FORWARD_READY"})
         and (low_vol_edge_classification in {"not_run", "PAPER_FORWARD_READY"})
         and presecurity_gate_classification in {"not_run", "PRESECURITY_READY"}
+        and broker_paper_stub_contract_classification in {"not_run", "STUB_CONTRACT_READY"}
         and not local_blockers
     )
     review = {
@@ -196,6 +213,16 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         "audit_log_required": bool(
             presecurity_gate_summary.get("audit_log_required", sandbox_readiness.get("audit_log_required", True))
         ),
+        "broker_paper_stub_contract_classification": broker_paper_stub_contract_classification,
+        "broker_paper_stub_contract_ready": bool(
+            adapter_stub_summary.get(
+                "broker_paper_stub_contract_ready",
+                sandbox_readiness.get("broker_paper_stub_contract_ready", False),
+            )
+        ),
+        "broker_paper_orders_allowed": False,
+        "credentials_allowed": False,
+        "network_api_allowed": False,
         "original_max_degradation_pct": float(
             oos_repair_summary.get(
                 "original_max_degradation_pct",
@@ -225,7 +252,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         ),
         "broker_paper_contract_ready": False,
         "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
-        "broker_paper_sandbox_contract_ready": False,
+        "broker_paper_sandbox_contract_ready": bool(sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)),
         "broker_integration_active": False,
         "credentials_required_now": False,
         "live_trade_ready": False,
@@ -340,6 +367,16 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             "audit_log_required": bool(
                 presecurity_gate_summary.get("audit_log_required", sandbox_readiness.get("audit_log_required", True))
             ),
+            "broker_paper_stub_contract_classification": broker_paper_stub_contract_classification,
+            "broker_paper_stub_contract_ready": bool(
+                adapter_stub_summary.get(
+                    "broker_paper_stub_contract_ready",
+                    sandbox_readiness.get("broker_paper_stub_contract_ready", False),
+                )
+            ),
+            "broker_paper_orders_allowed": False,
+            "credentials_allowed": False,
+            "network_api_allowed": False,
             "original_max_degradation_pct": float(
                 oos_repair_summary.get(
                     "original_max_degradation_pct",
@@ -370,7 +407,9 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             "broker_paper_sandbox_ready": False,
             "broker_paper_contract_ready": False,
             "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
-            "broker_paper_sandbox_contract_ready": False,
+            "broker_paper_sandbox_contract_ready": bool(
+                sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
+            ),
             "broker_integration_active": False,
             "credentials_required_now": False,
             "security_gate_required_before_broker_paper": True,
@@ -387,6 +426,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             oos_repair_classification,
             low_vol_edge_classification,
             presecurity_gate_classification,
+            broker_paper_stub_contract_classification,
         ),
         "live_ready": False,
     }
@@ -450,7 +490,12 @@ def _next_safe_action_v2(
     oos_repair_classification: str = "not_run",
     low_vol_edge_classification: str = "not_run",
     presecurity_gate_classification: str = "not_run",
+    broker_paper_stub_contract_classification: str = "not_run",
 ) -> str:
+    if broker_paper_stub_contract_classification == "STUB_CONTRACT_READY":
+        return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1; broker-paper orders remain blocked."
+    if broker_paper_stub_contract_classification in {"FAIL", "WATCHLIST"}:
+        return "Repair PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT before dry-run intent ledger work."
     if paper_forward_ready:
         return "Run the broker-paper pre-security gate before any adapter work; live readiness requires separate future approval."
     if presecurity_gate_classification == "PRESECURITY_READY":

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from automation.forex_engine import broker_paper_adapter_stub_contract
 from automation.forex_engine import broker_paper_presecurity_gate
 from automation.forex_engine import schema_contracts as schemas
 
@@ -45,6 +46,7 @@ def evaluate_broker_paper_sandbox_readiness(
     oos_repair: dict[str, Any] | None = None,
     low_vol_edge_redesign: dict[str, Any] | None = None,
     presecurity_gate: dict[str, Any] | None = None,
+    adapter_stub_contract: dict[str, Any] | None = None,
     policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     active_policy = default_broker_paper_sandbox_readiness_policy()
@@ -67,6 +69,13 @@ def evaluate_broker_paper_sandbox_readiness(
         or active_evidence.get("broker_paper_presecurity_gate")
         or {}
     )
+    active_adapter_stub = dict(
+        adapter_stub_contract
+        or active_evidence.get("broker_paper_adapter_stub_contract")
+        or active_evidence.get("broker_paper_stub_contract")
+        or active_evidence.get("adapter_stub_contract")
+        or {}
+    )
     evidence_gates = _evidence_gates(
         active_evidence,
         active_stress_oos,
@@ -76,6 +85,7 @@ def evaluate_broker_paper_sandbox_readiness(
         active_oos_repair,
         active_low_vol_edge,
         active_presecurity_gate,
+        active_adapter_stub,
         active_policy,
     )
     passed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is True]
@@ -97,6 +107,7 @@ def evaluate_broker_paper_sandbox_readiness(
             active_oos_repair,
             active_low_vol_edge,
             active_presecurity_gate,
+            active_adapter_stub,
         ),
         "required_future_protected_approvals": _required_future_protected_approvals(),
         "forbidden_current_actions": _forbidden_current_actions(),
@@ -138,7 +149,11 @@ def evaluate_broker_paper_sandbox_readiness(
         "daily_stop_required": bool(active_presecurity_gate.get("daily_stop_required", True)),
         "audit_log_required": bool(active_presecurity_gate.get("audit_log_required", True)),
         "manual_approval_required": bool(active_presecurity_gate.get("manual_approval_required", True)),
+        "broker_paper_stub_contract_status": active_adapter_stub.get("classification", "not_run"),
+        "broker_paper_stub_contract_classification": active_adapter_stub.get("classification", "not_run"),
+        "broker_paper_stub_contract_ready": False,
         "adapter_stub_contract_ready": False,
+        "credentials_allowed": False,
         "next_safe_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
         "live_trade_ready": False,
         "real_order_ready": False,
@@ -152,14 +167,15 @@ def evaluate_broker_paper_sandbox_readiness(
         "safety": broker_paper_sandbox_boundary_summary(),
     }
     result["readiness_status"] = classify_broker_paper_sandbox_readiness(result)
-    result["adapter_stub_contract_ready"] = _adapter_stub_contract_ready(evidence_gates, active_presecurity_gate)
-    result["broker_paper_sandbox_contract_ready"] = False
-    result["broker_paper_contract_ready"] = False
-    result["next_safe_packet"] = (
-        "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
-        if result["adapter_stub_contract_ready"]
-        else "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
+    result["adapter_stub_contract_ready"] = _adapter_stub_contract_ready(
+        evidence_gates,
+        active_presecurity_gate,
+        active_adapter_stub,
     )
+    result["broker_paper_stub_contract_ready"] = result["adapter_stub_contract_ready"]
+    result["broker_paper_sandbox_contract_ready"] = result["adapter_stub_contract_ready"]
+    result["broker_paper_contract_ready"] = result["adapter_stub_contract_ready"]
+    result["next_safe_packet"] = _next_safe_packet_id(result["adapter_stub_contract_ready"], active_presecurity_gate)
     result["next_safe_action"] = _next_safe_action(result["readiness_status"], result["blockers"])
     assert_no_broker_paper_side_effects(result)
     return result
@@ -227,6 +243,7 @@ def broker_paper_sandbox_boundary_summary() -> dict[str, Any]:
         "files_written": [],
         "security_gate_required_before_broker_paper": True,
         "required_security_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
+        "next_safe_packet_after_stub_contract": "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1",
     }
 
 
@@ -243,6 +260,8 @@ def assert_no_broker_paper_side_effects(result: dict[str, Any]) -> None:
         raise ValueError("broker_integration_active must remain false")
     if payload.get("credentials_required_now") is not False:
         raise ValueError("credentials_required_now must remain false")
+    if payload.get("credentials_allowed") is not False:
+        raise ValueError("credentials_allowed must remain false")
     if payload.get("broker_sdk_allowed") is not False:
         raise ValueError("broker_sdk_allowed must remain false")
     if payload.get("network_api_allowed") is not False:
@@ -310,6 +329,7 @@ def _evidence_gates(
     oos_repair: dict[str, Any],
     low_vol_edge: dict[str, Any],
     presecurity_gate: dict[str, Any],
+    adapter_stub: dict[str, Any],
     policy: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     multi = dict(evidence.get("multi_fixture_paper_forward_summary") or {})
@@ -335,6 +355,7 @@ def _evidence_gates(
     )
     low_vol_edge_classification = str(low_vol_edge.get("classification") or "")
     presecurity_classification = str(presecurity_gate.get("classification") or "")
+    adapter_stub_classification = str(adapter_stub.get("classification") or "")
     gates = {
         "minimum_fixture_count": _minimum(int(multi.get("fixture_count", 0)), policy["minimum_fixture_count"]),
         "minimum_regime_count": _minimum(int(regime.get("total_regimes", 0)), policy["minimum_regime_count"]),
@@ -437,7 +458,17 @@ def _evidence_gates(
             True,
         )
         if presecurity_classification == broker_paper_presecurity_gate.PRESECURITY_READY:
-            gates["presecurity_adapter_stub_contract_only"] = _boolean_watchlist(False, True)
+            if adapter_stub:
+                gates["broker_paper_stub_contract_classification"] = _stub_contract_classification_gate(
+                    adapter_stub_classification
+                )
+                gates["broker_paper_stub_forbidden_capabilities_blocked"] = _boolean_gate(
+                    _stub_forbidden_capabilities_blocked(adapter_stub),
+                    _stub_forbidden_capabilities_blocked(adapter_stub),
+                    True,
+                )
+            else:
+                gates["broker_paper_stub_contract_present"] = _boolean_watchlist(False, True)
     else:
         gates["presecurity_gate_present"] = _boolean_watchlist(False, True)
     return gates
@@ -501,6 +532,32 @@ def _presecurity_classification_gate(classification: str) -> dict[str, Any]:
     }
 
 
+def _stub_contract_classification_gate(classification: str) -> dict[str, Any]:
+    if classification == broker_paper_adapter_stub_contract.STUB_CONTRACT_READY:
+        return {
+            "passed": True,
+            "actual": classification,
+            "threshold": broker_paper_adapter_stub_contract.STUB_CONTRACT_READY,
+            "comparator": "==",
+            "classification": "PAPER_FORWARD_READY",
+        }
+    if classification == "WATCHLIST":
+        return {
+            "passed": True,
+            "actual": classification,
+            "threshold": broker_paper_adapter_stub_contract.STUB_CONTRACT_READY,
+            "comparator": "==",
+            "classification": "WATCHLIST",
+        }
+    return {
+        "passed": False,
+        "actual": classification or "missing",
+        "threshold": broker_paper_adapter_stub_contract.STUB_CONTRACT_READY,
+        "comparator": "==",
+        "classification": "FAIL",
+    }
+
+
 def _maximum_watchlist(actual: float, threshold: float) -> dict[str, Any]:
     passed_policy = float(actual) <= float(threshold)
     return {
@@ -559,14 +616,40 @@ def _presecurity_forbidden_capabilities_blocked(presecurity_gate: dict[str, Any]
     )
 
 
+def _stub_forbidden_capabilities_blocked(adapter_stub: dict[str, Any]) -> bool:
+    return all(
+        adapter_stub.get(field) is False
+        for field in (
+            "broker_sdk_allowed",
+            "network_api_allowed",
+            "credentials_allowed",
+            "env_secret_read_allowed",
+            "webhook_allowed",
+            "scheduler_allowed",
+            "daemon_allowed",
+            "broker_paper_orders_allowed",
+            "live_orders_allowed",
+            "would_place_order",
+            "order_placed",
+            "broker_request_sent",
+            "network_used",
+            "credentials_used",
+            "live_ready",
+        )
+    )
+
+
 def _adapter_stub_contract_ready(
     evidence_gates: dict[str, dict[str, Any]],
     presecurity_gate: dict[str, Any],
+    adapter_stub: dict[str, Any],
 ) -> bool:
     if presecurity_gate.get("classification") != broker_paper_presecurity_gate.PRESECURITY_READY:
         return False
+    if adapter_stub.get("classification") != broker_paper_adapter_stub_contract.STUB_CONTRACT_READY:
+        return False
     for name, gate in evidence_gates.items():
-        if name == "presecurity_adapter_stub_contract_only":
+        if name == "broker_paper_stub_contract_present":
             continue
         if gate.get("passed") is not True:
             return False
@@ -590,6 +673,7 @@ def _blockers(
     oos_repair: dict[str, Any],
     low_vol_edge: dict[str, Any],
     presecurity_gate: dict[str, Any],
+    adapter_stub: dict[str, Any],
 ) -> list[str]:
     blockers = []
     for name, gate in evidence_gates.items():
@@ -605,6 +689,8 @@ def _blockers(
     blockers.extend([str(item) for item in list(oos_repair.get("blockers") or [])])
     blockers.extend([str(item) for item in list(low_vol_edge.get("blockers") or [])])
     blockers.extend([str(item) for item in list(presecurity_gate.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(adapter_stub.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(adapter_stub.get("rejection_reasons") or [])])
     return _unique(blockers)
 
 
@@ -656,10 +742,12 @@ def _forbidden_current_actions() -> list[str]:
 
 def _next_safe_action(readiness_status: str, blockers: list[str]) -> str:
     if readiness_status == CONTRACT_READY:
-        return "Run the pre-security broker-paper gate before any adapter, credential, network, or order work."
+        return "Proceed only to PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1; broker-paper orders remain blocked."
     if readiness_status == WATCHLIST:
-        if any("presecurity_adapter_stub_contract_only" in blocker for blocker in blockers):
+        if any("broker_paper_stub_contract_present" in blocker for blocker in blockers):
             return "Proceed only to PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT; broker-paper orders remain blocked."
+        if any("broker_paper_stub" in blocker for blocker in blockers):
+            return "Repair broker-paper adapter stub contract evidence before dry-run intent ledger work."
         if any("presecurity_gate_present" in blocker for blocker in blockers):
             return "Run PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1 before any broker-paper adapter work."
         if any("presecurity" in blocker for blocker in blockers):
@@ -674,6 +762,14 @@ def _next_safe_action(readiness_status: str, blockers: list[str]) -> str:
     if blockers:
         return f"Resolve readiness blocker: {blockers[0]}; broker-paper and live execution remain blocked."
     return "Collect missing local evidence and rerun the broker-paper sandbox readiness contract."
+
+
+def _next_safe_packet_id(adapter_stub_contract_ready: bool, presecurity_gate: dict[str, Any]) -> str:
+    if adapter_stub_contract_ready:
+        return "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
+    if presecurity_gate.get("classification") == broker_paper_presecurity_gate.PRESECURITY_READY:
+        return "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
+    return "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
 
 
 def _unique(items: list[str]) -> list[str]:
