@@ -86,6 +86,11 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert dashboard["degradation_improvement_pct"] >= 0.0
     assert dashboard["redesigned_max_degradation_pct"] >= 0.0
     assert dashboard["low_vol_rejected_intents"] >= 0
+    assert dashboard["presecurity_gate_classification"] in {"FAIL", "WATCHLIST", "PRESECURITY_READY", "not_run"}
+    assert dashboard["credential_boundary_required"] is True
+    assert dashboard["kill_switch_required"] is True
+    assert dashboard["max_loss_guard_required"] is True
+    assert dashboard["audit_log_required"] is True
     assert dashboard["weakest_oos_split"]
     assert dashboard["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",
@@ -108,6 +113,7 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert any("Repaired degradation:" in line for line in lines)
     assert any("Weakest:" in line for line in lines)
     assert any("Sandbox contract:" in line for line in lines)
+    assert any("Presecurity:" in line for line in lines)
     assert any("Repaired worst PnL:" in line for line in lines)
     assert any("Live ready: false" in line for line in lines)
     assert any("Protected gate required: true" in line for line in lines)

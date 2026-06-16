@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from automation.forex_engine import broker_paper_sandbox_readiness
+from automation.forex_engine import broker_paper_presecurity_gate
 from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import oos_expansion
 from automation.forex_engine import oos_repair
@@ -88,6 +89,7 @@ def test_default_policy_exists_and_preserves_contract_boundaries() -> None:
     assert policy["broker_integration_active_must_be_false"] is True
     assert policy["credentials_required_now_must_be_false"] is True
     assert policy["protected_gate_required_must_be_true"] is True
+    assert policy["presecurity_gate_landed"] is False
 
 
 def test_default_readiness_result_is_watchlist_and_contract_only() -> None:
@@ -103,6 +105,11 @@ def test_default_readiness_result_is_watchlist_and_contract_only() -> None:
     assert result["expanded_oos_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert result["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert result["oos_repair_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert result["presecurity_gate_classification"] in {"FAIL", "WATCHLIST", "PRESECURITY_READY", "not_run"}
+    assert result["credential_boundary_required"] is True
+    assert result["kill_switch_required"] is True
+    assert result["max_loss_guard_required"] is True
+    assert result["audit_log_required"] is True
     assert result["live_trade_ready"] is False
     assert result["real_order_ready"] is False
     assert result["broker_integration_active"] is False
@@ -131,7 +138,7 @@ def test_fail_evidence_returns_not_ready() -> None:
     assert "gate_failed:combined_stress_oos_classification" in result["blockers"]
 
 
-def test_strong_evidence_can_return_contract_ready() -> None:
+def test_strong_evidence_stays_blocked_when_presecurity_gate_is_missing() -> None:
     evidence, stress_oos, risk_governor = _strong_contract_inputs()
 
     result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
@@ -142,14 +149,42 @@ def test_strong_evidence_can_return_contract_ready() -> None:
         oos_repair=evidence["oos_repair"],
     )
 
-    assert result["readiness_status"] == "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET"
-    assert result["broker_paper_sandbox_contract_ready"] is True
+    assert result["readiness_status"] == "WATCHLIST"
+    assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["broker_paper_contract_ready"] is False
+    assert result["presecurity_gate_classification"] == "not_run"
+    assert "gate_watchlist:presecurity_gate_present" in result["blockers"]
     assert result["live_trade_ready"] is False
     assert result["real_order_ready"] is False
     assert result["broker_integration_active"] is False
     assert result["credentials_required_now"] is False
     assert result["protected_gate_required"] is True
     assert result["security_gate_required_before_broker_paper"] is True
+
+
+def test_presecurity_ready_routes_only_to_adapter_stub_contract() -> None:
+    evidence, stress_oos, risk_governor = _strong_contract_inputs()
+    presecurity = broker_paper_presecurity_gate.evaluate_broker_paper_presecurity_gate()
+
+    result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=evidence,
+        stress_oos=stress_oos,
+        risk_governor=risk_governor,
+        stress_repair=evidence["stress_repair"],
+        expanded_oos=evidence["expanded_oos"],
+        oos_repair=evidence["oos_repair"],
+        presecurity_gate=presecurity,
+    )
+
+    assert result["readiness_status"] == "WATCHLIST"
+    assert result["presecurity_gate_classification"] == "PRESECURITY_READY"
+    assert result["adapter_stub_contract_ready"] is True
+    assert result["next_safe_packet"] == "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
+    assert "gate_watchlist:presecurity_adapter_stub_contract_only" in result["blockers"]
+    assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["broker_paper_orders_allowed"] is False
+    assert result["live_orders_allowed"] is False
+    assert result["live_trade_ready"] is False
 
 
 def test_readiness_accepts_stress_repair_result_and_stays_watchlist_when_repair_is_watchlist() -> None:
@@ -264,6 +299,8 @@ def test_boundary_summary_blocks_broker_paper_live_credentials_network_and_order
     assert summary["real_order_ready"] is False
     assert summary["credentials_required_now"] is False
     assert summary["network_allowed"] is False
+    assert summary["broker_sdk_allowed"] is False
+    assert summary["broker_paper_orders_allowed"] is False
     assert summary["protected_gate_required"] is True
     assert summary["security_gate_required_before_broker_paper"] is True
     assert summary["required_security_packet"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"

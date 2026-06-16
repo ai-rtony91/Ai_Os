@@ -111,6 +111,11 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "low_vol_rejected_intents": int(
             payload.get("low_vol_rejected_intents", payload.get("rejected_low_vol_intents", 0))
         ),
+        "presecurity_gate_classification": str(payload.get("presecurity_gate_classification") or "not_run"),
+        "credential_boundary_required": bool(payload.get("credential_boundary_required", True)),
+        "kill_switch_required": bool(payload.get("kill_switch_required", True)),
+        "max_loss_guard_required": bool(payload.get("max_loss_guard_required", True)),
+        "audit_log_required": bool(payload.get("audit_log_required", True)),
         "weakest_oos_split": str(payload.get("weakest_oos_split") or payload.get("weakest_split") or "none"),
         "broker_paper_sandbox_readiness_status": str(
             payload.get("broker_paper_sandbox_readiness_status") or "not_run"
@@ -155,6 +160,7 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
         ),
         (
             f"Sandbox contract: {payload.get('broker_paper_sandbox_readiness_status', 'not_run')} | "
+            f"Presecurity: {payload.get('presecurity_gate_classification', 'not_run')} | "
             f"Repaired worst PnL: {payload.get('repaired_worst_stress_pnl', 0.0)}"
         ),
         f"PnL: {payload.get('aggregate_paper_pnl', 0.0)} | Return pct: {payload.get('return_pct', 0.0)}",
