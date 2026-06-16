@@ -515,6 +515,32 @@ def test_default_memory_includes_low_vol_edge_redesign_completion() -> None:
     ]
 
 
+def test_default_memory_includes_presecurity_gate_completion() -> None:
+    result = build_result(candidate_packets=[])
+    records = load_module()._completed_memory_records({})
+
+    assert "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1" in result["completed_packet_ids"]
+    presecurity = [
+        record
+        for record in records
+        if record["packet_id"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
+    ][0]
+
+    assert presecurity["landed_pr"] == "#754"
+    assert presecurity["title"] == "Add broker-paper presecurity gate"
+    assert presecurity["lane"] == "broker-paper-presecurity-gate"
+    assert (
+        presecurity["completion_reason"]
+        == "presecurity contract blocks credentials, env reads, broker SDKs, network/API, webhooks, schedulers, daemons, broker-paper orders, and live orders before adapter work"
+    )
+    assert presecurity["completed_files"] == [
+        "automation/forex_engine/broker_paper_presecurity_gate.py",
+        "automation/forex_engine/run_broker_paper_presecurity_gate_demo.py",
+        "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_PRESECURITY_GATE.md",
+        "tests/forex_engine/test_broker_paper_presecurity_gate.py",
+    ]
+
+
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:
     result = build_result(candidate_packets=[])
 
@@ -634,7 +660,7 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     )
 
     assert result["suppressed_candidates"][0]["packet_id"] == "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
-    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
+    assert result["next_candidate"]["packet_id"] == "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
     active_ids = [item["packet_id"] for item in result["active_candidates"]]
     assert "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC" not in active_ids
     assert "PKT-AIOS-FOREX-BUILDER-DATA-SCHEMAS" not in active_ids
@@ -653,7 +679,8 @@ def test_forex_roadmap_advances_beyond_data_schemas_after_pr_742_and_handoffs() 
     assert "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1" not in active_ids
     assert "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1" not in active_ids
-    assert active_ids[0] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
+    assert "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1" not in active_ids
+    assert active_ids[0] == "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
 
 
 def test_forex_roadmap_memory_preserves_non_live_safety_flags() -> None:

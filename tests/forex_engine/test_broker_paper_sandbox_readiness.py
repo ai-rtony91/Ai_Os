@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from automation.forex_engine import broker_paper_sandbox_readiness
+from automation.forex_engine import broker_paper_adapter_stub_contract
 from automation.forex_engine import broker_paper_presecurity_gate
 from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import oos_expansion
@@ -106,6 +107,13 @@ def test_default_readiness_result_is_watchlist_and_contract_only() -> None:
     assert result["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert result["oos_repair_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert result["presecurity_gate_classification"] in {"FAIL", "WATCHLIST", "PRESECURITY_READY", "not_run"}
+    assert result["broker_paper_stub_contract_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "STUB_CONTRACT_READY",
+        "not_run",
+    }
+    assert result["broker_paper_stub_contract_ready"] is False
     assert result["credential_boundary_required"] is True
     assert result["kill_switch_required"] is True
     assert result["max_loss_guard_required"] is True
@@ -178,11 +186,53 @@ def test_presecurity_ready_routes_only_to_adapter_stub_contract() -> None:
 
     assert result["readiness_status"] == "WATCHLIST"
     assert result["presecurity_gate_classification"] == "PRESECURITY_READY"
-    assert result["adapter_stub_contract_ready"] is True
+    assert result["adapter_stub_contract_ready"] is False
+    assert result["broker_paper_stub_contract_ready"] is False
     assert result["next_safe_packet"] == "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
-    assert "gate_watchlist:presecurity_adapter_stub_contract_only" in result["blockers"]
+    assert "gate_watchlist:broker_paper_stub_contract_present" in result["blockers"]
     assert result["broker_paper_sandbox_contract_ready"] is False
     assert result["broker_paper_orders_allowed"] is False
+    assert result["live_orders_allowed"] is False
+    assert result["live_trade_ready"] is False
+
+
+def test_stub_contract_ready_routes_only_to_dryrun_intent_ledger() -> None:
+    evidence, stress_oos, risk_governor = _strong_contract_inputs()
+    presecurity = broker_paper_presecurity_gate.evaluate_broker_paper_presecurity_gate()
+    stub = broker_paper_adapter_stub_contract.simulate_broker_paper_stub_adapter(
+        {
+            "symbol": "EURUSD_FAKE",
+            "side": "buy",
+            "quantity_units": 1000,
+            "order_type": "market_stub",
+            "stop_loss_pips": 8.0,
+            "take_profit_pips": 12.0,
+            "max_loss_usd": 10.0,
+            "dry_run": True,
+            "approved_by_operator": True,
+        }
+    )
+
+    result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=evidence,
+        stress_oos=stress_oos,
+        risk_governor=risk_governor,
+        stress_repair=evidence["stress_repair"],
+        expanded_oos=evidence["expanded_oos"],
+        oos_repair=evidence["oos_repair"],
+        presecurity_gate=presecurity,
+        adapter_stub_contract=stub,
+    )
+
+    assert result["readiness_status"] == "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET"
+    assert result["presecurity_gate_classification"] == "PRESECURITY_READY"
+    assert result["broker_paper_stub_contract_classification"] == "STUB_CONTRACT_READY"
+    assert result["adapter_stub_contract_ready"] is True
+    assert result["broker_paper_stub_contract_ready"] is True
+    assert result["next_safe_packet"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
+    assert result["broker_paper_orders_allowed"] is False
+    assert result["network_api_allowed"] is False
+    assert result["credentials_allowed"] is False
     assert result["live_orders_allowed"] is False
     assert result["live_trade_ready"] is False
 
@@ -299,11 +349,14 @@ def test_boundary_summary_blocks_broker_paper_live_credentials_network_and_order
     assert summary["real_order_ready"] is False
     assert summary["credentials_required_now"] is False
     assert summary["network_allowed"] is False
+    assert summary["network_api_allowed"] is False
     assert summary["broker_sdk_allowed"] is False
     assert summary["broker_paper_orders_allowed"] is False
+    assert summary["credentials_allowed"] is False
     assert summary["protected_gate_required"] is True
     assert summary["security_gate_required_before_broker_paper"] is True
     assert summary["required_security_packet"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
+    assert summary["next_safe_packet_after_stub_contract"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
 
 
 def test_demo_function_exists_and_prints_safety_note(capsys) -> None:
