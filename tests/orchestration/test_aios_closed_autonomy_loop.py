@@ -116,10 +116,40 @@ def _repo_state(clean: bool = True) -> dict:
     }
 
 
-def _inputs(decision: dict, *, repo_state: dict | None = None, validator_router: dict | None = None, approval_gate: dict | None = None) -> dict:
+def _dirty_tree(
+    *,
+    overall: str = "CLEAN",
+    dirty_count: int = 0,
+    safe_for_dry_run: bool = True,
+    safe_for_apply: bool = True,
+    sos_required: bool = False,
+    protected_stop_required: bool = False,
+) -> dict:
+    return {
+        "schema": "AIOS_DIRTY_TREE_CLASSIFIER_RESULT.v1",
+        "overall_classification": overall,
+        "dirty_count": dirty_count,
+        "safe_for_dry_run": safe_for_dry_run,
+        "safe_for_apply": safe_for_apply,
+        "sos_required": sos_required,
+        "protected_stop_required": protected_stop_required,
+        "review_required": dirty_count > 0 and not safe_for_dry_run and not sos_required and not protected_stop_required,
+        "dirty_files": [],
+    }
+
+
+def _inputs(
+    decision: dict,
+    *,
+    repo_state: dict | None = None,
+    validator_router: dict | None = None,
+    approval_gate: dict | None = None,
+    dirty_tree_classifier: dict | None = None,
+) -> dict:
     payloads = {
         "governor_decision": decision,
         "repo_state": repo_state or _repo_state(True),
+        "dirty_tree_classifier": dirty_tree_classifier,
         "validator_router": validator_router,
         "approval_gate": approval_gate,
         "approval_inbox": None,
@@ -237,6 +267,102 @@ def test_dirty_repo_governor_decision_produces_cleanup_or_blocked_gate() -> None
     gate = m.evaluate_loop_gates(state)
 
     assert gate["status"] in {"requires_cleanup", "blocked"}
+    assert gate["safe_to_dispatch"] is False
+
+
+def test_safe_generated_dirty_allows_dry_run_gate() -> None:
+    m = _load()
+    state = m.build_loop_state(
+        _inputs(
+            _governor_decision(),
+            repo_state=_repo_state(False),
+            dirty_tree_classifier=_dirty_tree(
+                overall="SAFE_DIRTY",
+                dirty_count=2,
+                safe_for_dry_run=True,
+                safe_for_apply=False,
+            ),
+        )
+    )
+
+    gate = m.evaluate_loop_gates(state)
+
+    assert gate["status"] == "ready_for_dry_run"
+    assert gate["safe_to_dispatch"] is False
+
+
+def test_safe_generated_dirty_blocks_apply_gate() -> None:
+    m = _load()
+    decision = _governor_decision(
+        task_id="apply_candidate",
+        category="SELF_BUILD_LOOP_WIRING",
+        lane="APPLY_CODE_SAFE",
+        scope_mode="APPLY",
+    )
+    state = m.build_loop_state(
+        _inputs(
+            decision,
+            repo_state=_repo_state(False),
+            approval_gate={"approval_status": "approved", "explicit_human_approval": True, "scope_confirmed": True},
+            dirty_tree_classifier=_dirty_tree(
+                overall="SAFE_DIRTY",
+                dirty_count=1,
+                safe_for_dry_run=True,
+                safe_for_apply=False,
+            ),
+        )
+    )
+
+    gate = m.evaluate_loop_gates(state)
+
+    assert gate["status"] == "requires_cleanup"
+    assert "DRY_RUN only" in gate["reason"]
+    assert gate["safe_to_dispatch"] is False
+
+
+def test_security_dirty_blocks_closed_loop_gate() -> None:
+    m = _load()
+    state = m.build_loop_state(
+        _inputs(
+            _governor_decision(),
+            repo_state=_repo_state(False),
+            dirty_tree_classifier=_dirty_tree(
+                overall="SECURITY_SOS_DIRTY",
+                dirty_count=1,
+                safe_for_dry_run=False,
+                safe_for_apply=False,
+                sos_required=True,
+            ),
+        )
+    )
+
+    gate = m.evaluate_loop_gates(state)
+
+    assert gate["status"] == "blocked"
+    assert "SOS" in gate["reason"]
+    assert gate["safe_to_dispatch"] is False
+
+
+def test_protected_dirty_blocks_closed_loop_gate() -> None:
+    m = _load()
+    state = m.build_loop_state(
+        _inputs(
+            _governor_decision(),
+            repo_state=_repo_state(False),
+            dirty_tree_classifier=_dirty_tree(
+                overall="PROTECTED_AUTHORITY_DIRTY",
+                dirty_count=1,
+                safe_for_dry_run=False,
+                safe_for_apply=False,
+                protected_stop_required=True,
+            ),
+        )
+    )
+
+    gate = m.evaluate_loop_gates(state)
+
+    assert gate["status"] == "blocked"
+    assert "protected authority" in gate["reason"]
     assert gate["safe_to_dispatch"] is False
 
 

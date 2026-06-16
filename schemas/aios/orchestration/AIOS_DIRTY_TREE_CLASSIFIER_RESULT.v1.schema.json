@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AIOS Dirty Tree Classifier Result v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "generated_utc",
+    "repo_root",
+    "status_source",
+    "dirty_count",
+    "overall_classification",
+    "safe_for_dry_run",
+    "safe_for_apply",
+    "sos_required",
+    "protected_stop_required",
+    "review_required",
+    "category_counts",
+    "dirty_files",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_DIRTY_TREE_CLASSIFIER_RESULT.v1"
+    },
+    "generated_utc": {
+      "type": "string"
+    },
+    "repo_root": {
+      "type": "string"
+    },
+    "status_source": {
+      "type": "string"
+    },
+    "git_status_error": {
+      "type": ["string", "null"]
+    },
+    "dirty_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "overall_classification": {
+      "enum": [
+        "CLEAN",
+        "SAFE_DIRTY",
+        "SAFE_EVIDENCE_DIRTY",
+        "SAFE_REPORT_DIRTY",
+        "SAFE_SANDBOX_PREVIEW_DIRTY",
+        "REVIEW_REQUIRED_DIRTY",
+        "PROTECTED_AUTHORITY_DIRTY",
+        "SECURITY_SOS_DIRTY",
+        "UNKNOWN_DIRTY"
+      ]
+    },
+    "safe_for_dry_run": {
+      "type": "boolean"
+    },
+    "safe_for_apply": {
+      "type": "boolean"
+    },
+    "sos_required": {
+      "type": "boolean"
+    },
+    "protected_stop_required": {
+      "type": "boolean"
+    },
+    "review_required": {
+      "type": "boolean"
+    },
+    "category_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "dirty_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "path",
+          "git_code",
+          "classification",
+          "reason",
+          "security_indicators",
+          "safe_for_dry_run",
+          "safe_for_apply",
+          "next_safe_action"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "git_code": {
+            "type": "string"
+          },
+          "classification": {
+            "enum": [
+              "SAFE_EVIDENCE_DIRTY",
+              "SAFE_REPORT_DIRTY",
+              "SAFE_SANDBOX_PREVIEW_DIRTY",
+              "REVIEW_REQUIRED_DIRTY",
+              "PROTECTED_AUTHORITY_DIRTY",
+              "SECURITY_SOS_DIRTY",
+              "UNKNOWN_DIRTY"
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "security_indicators": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "safe_for_dry_run": {
+            "type": "boolean"
+          },
+          "safe_for_apply": {
+            "type": "boolean"
+          },
+          "next_safe_action": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "prints_secret_values",
+        "writes_files",
+        "mutates_repo",
+        "allows_apply",
+        "allows_protected_action"
+      ],
+      "properties": {
+        "prints_secret_values": {
+          "const": false
+        },
+        "writes_files": {
+          "const": false
+        },
+        "mutates_repo": {
+          "const": false
+        },
+        "allows_apply": {
+          "const": false
+        },
+        "allows_protected_action": {
+          "const": false
+        },
+        "uses_live_git_status": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

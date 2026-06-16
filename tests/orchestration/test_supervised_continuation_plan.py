@@ -198,6 +198,35 @@ def test_repo_dirty_state_transitions_to_review_required(tmp_path):
     assert res["dirty_or_untracked_count"] >= 1
 
 
+def test_safe_report_dirty_state_can_still_propose_dry_run_continuation(tmp_path):
+    root = Path(tmp_path)
+    fake_repo = root / "workspace_safe_report_dirty"
+    fake_repo.mkdir()
+    subprocess.check_call(["git", "init"], cwd=str(fake_repo), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.check_call(["git", "checkout", "-b", "main"], cwd=str(fake_repo), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    report_path = fake_repo / "Reports" / "sandbox" / "preview.json"
+    report_path.parent.mkdir(parents=True)
+    report_path.write_text('{"status":"preview"}', encoding="utf-8")
+
+    recommender_dir = root / "helpers_safe_report_dirty"
+    recommender_dir.mkdir()
+    recommender_script = _write_fake_recommender(recommender_dir)
+
+    res = _load_plan(
+        repo_root=fake_repo,
+        forex_script=recommender_script,
+        campaign_script="",
+    )
+
+    assert res["continuation_status"] == "READY_FOR_APPROVAL"
+    assert res["execution_allowed"] is False
+    assert res["human_approval_required"] is True
+    assert res["can_continue_without_anthony"] is False
+    assert res["safe_dirty_continuation_allowed"] is True
+    assert res["dirty_tree_classification"]["overall_classification"] == "SAFE_DIRTY"
+    assert res["dirty_tree_classification"]["safe_for_apply"] is False
+
+
 def test_plan_command_is_read_only_for_current_repo():
     pre = subprocess.check_output(["git", "status", "--short", "--untracked-files=all"], text=True, cwd=str(SCRIPT.parents[2]))
     _ = _load_plan()

@@ -38,6 +38,12 @@ The controller may propose a next goal only when the latest cycle state is `PASS
 
 If the latest state is `BLOCKED`, `WARN`, missing, stale, malformed, ambiguous, or contains true blocker evidence, the controller must classify it as `TRUE_BLOCKED` or `STOPPED` and write nothing. If validator or QA evidence failed, the controller must classify it as `FAILED_VALIDATION` and write nothing.
 
+## Dirty Evidence Continuation Boundary
+
+Dirty files under approved generated evidence, report, or sandbox preview roots do not automatically block READ_ONLY or DRY_RUN continuation. The dirty tree classifier must still list the exact files, classification, reason, security indicators, and next safe action.
+
+Dirty APPLY remains blocked. Unknown dirty files require review, protected authority dirty files stop continuation, and secret, broker, live-order, webhook, production, dashboard mutation, scheduler, daemon, or worker-launch indicators escalate to SOS without printing secret values.
+
 ## Proposal Gate
 
 Every self-continuation output is an approval item under:

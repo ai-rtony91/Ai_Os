@@ -80,6 +80,29 @@ function Invoke-JsonCommand {
     }
 }
 
+function Invoke-DirtyTreeClassification {
+    param([string]$RepoRootPath)
+
+    $classifierPath = Join-Path $PSScriptRoot "Get-AiOsDirtyTreeClassification.DRY_RUN.ps1"
+    $classification = Invoke-JsonCommand -Path $classifierPath -Arguments @("-OutputJson", "-RepoRoot", $RepoRootPath)
+    if ($classification -and -not (Has-MemberValue -Object $classification -Name "_aios_parse_error")) {
+        return $classification
+    }
+    return [pscustomobject]@{
+        schema = "AIOS_DIRTY_TREE_CLASSIFIER_RESULT.v1"
+        repo_root = $RepoRootPath
+        overall_classification = "UNKNOWN_DIRTY"
+        dirty_count = 0
+        safe_for_dry_run = $false
+        safe_for_apply = $false
+        sos_required = $false
+        protected_stop_required = $false
+        review_required = $true
+        dirty_files = @()
+        next_safe_action = "Review dirty-tree classifier failure before continuation."
+    }
+}
+
 function Has-MemberValue {
     param($Object, [string]$Name)
     if ($null -eq $Object) { return $false }
@@ -109,6 +132,13 @@ $repoRoot = Resolve-RepoRoot -CandidateRoot $RepoRoot
 
 $gitStatusRaw = @(git -C $repoRoot status --short --untracked-files=all 2>$null)
 $dirtyOrUntrackedCount = $gitStatusRaw.Count
+$dirtyTreeClassification = Invoke-DirtyTreeClassification -RepoRootPath $repoRoot
+$safeDirtyContinuationAllowed = (
+    $dirtyOrUntrackedCount -gt 0 -and
+    $dirtyTreeClassification.safe_for_dry_run -eq $true -and
+    $dirtyTreeClassification.sos_required -ne $true -and
+    $dirtyTreeClassification.protected_stop_required -ne $true
+)
 $branch = (git -C $repoRoot branch --show-current 2>$null).Trim()
 if ([string]::IsNullOrWhiteSpace($branch)) { $branch = "UNKNOWN" }
 
@@ -173,15 +203,28 @@ elseif ($forexPlan -and $forexHasParseError) {
     $continuationStatus = "BLOCKED"
 }
 
-if ($dirtyOrUntrackedCount -gt 0) {
-    $continuationStatus = "REVIEW_REQUIRED"
-    if ($safeToApprove) {
-        $reason = "Repository is not clean. Review dirty/untracked changes before proposing or executing next packet work."
-        $safeToApprove = $false
+if ($dirtyOrUntrackedCount -gt 0 -and -not $safeDirtyContinuationAllowed) {
+    if ($dirtyTreeClassification.sos_required -eq $true) {
+        $continuationStatus = "BLOCKED"
+        $reason = "Dirty tree classifier found security SOS indicators. Stop continuation and review without printing secret values."
+    }
+    elseif ($dirtyTreeClassification.protected_stop_required -eq $true) {
+        $continuationStatus = "BLOCKED"
+        $reason = "Dirty tree classifier found protected authority files. Stop before continuation."
     }
     else {
-        $reason = "Repository is not clean and no clean-domain recommendation is currently applicable."
+        $continuationStatus = "REVIEW_REQUIRED"
+        if ($safeToApprove) {
+            $reason = "Repository dirty state includes unknown or review-required files. Review dirty/untracked changes before proposing or executing next packet work."
+        }
+        else {
+            $reason = "Repository dirty state includes unknown or review-required files and no clean-domain recommendation is currently applicable."
+        }
     }
+    $safeToApprove = $false
+}
+elseif ($safeDirtyContinuationAllowed -and $safeToApprove) {
+    $reason = "{0} Dirty generated evidence is safe for READ_ONLY/DRY_RUN continuation only; APPLY remains blocked while dirty files exist." -f $reason
 }
 
 if (-not (Test-Path -LiteralPath $registryPath -PathType Leaf)) {
@@ -240,6 +283,8 @@ $result = [pscustomobject]@{
     repo_root = $repoRoot
     branch = $branch
     dirty_or_untracked_count = $dirtyOrUntrackedCount
+    dirty_tree_classification = $dirtyTreeClassification
+    safe_dirty_continuation_allowed = $safeDirtyContinuationAllowed
     active_packet_id = $activePacketId
     campaign_readiness = $campaignReadiness
     domain = $domain
