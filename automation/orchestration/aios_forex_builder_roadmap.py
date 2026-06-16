@@ -13,6 +13,10 @@ TODAY_MILESTONE = (
 )
 
 CANONICAL_SPEC_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
+OOS_REPAIR_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1"
+LOW_VOL_EDGE_REDESIGN_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1"
+STRESS_REPAIR_V2_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V2"
+PRESECURITY_GATE_PACKET_ID = "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
 
 VALIDATOR = "python -m pytest -p no:cacheprovider tests/orchestration/test_aios_forex_builder_roadmap.py -q"
 
@@ -39,6 +43,9 @@ def _alignment() -> dict[str, Any]:
         "non_live_only": True,
         "blocked_boundaries": FORBIDDEN_LANES,
         "requires_future_gates_before_execution": True,
+        "security_gate_required_before_broker_paper": True,
+        "required_security_packet": PRESECURITY_GATE_PACKET_ID,
+        "security_gate_reason": "broker-paper requires secrets/network/broker boundaries before adapter work",
     }
 
 
@@ -522,6 +529,30 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             ],
         ),
         _candidate(
+            packet_id="PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1",
+            title="Redesign low-vol paper-forward edge controls",
+            lane="paper-forward-low-vol-edge-redesign",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/oos_repair.py",
+                "automation/forex_engine/oos_expansion.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_REPAIR.md",
+                "tests/forex_engine/test_oos_repair.py",
+                "tests/forex_engine/test_oos_expansion.py",
+            ],
+            purpose=(
+                "Redesign low-volatility edge quality after OOS repair remains WATCHLIST. "
+                "This is paper-only local evidence work, not broker integration, credentials, "
+                "order execution, scheduler, daemon, or live trading."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_oos_repair.py tests/forex_engine/test_oos_expansion.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
             packet_id="PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V2",
             title="Repair remaining stress survival WATCHLIST blockers",
             lane="paper-forward-stress-repair-v2",
@@ -542,6 +573,28 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             ),
             validators=[
                 "python -m pytest -p no:cacheprovider tests/forex_engine/test_stress_repair.py tests/forex_engine/test_paper_forward_stress.py tests/forex_engine/test_oos_expansion.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id="PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
+            title="Define broker-paper pre-security gate",
+            lane="broker-paper-presecurity-gate",
+            priority="low",
+            milestone_value="medium",
+            risk_level="medium",
+            required_files=[
+                "docs/security/AIOS_BROKER_PAPER_PRESECURITY_GATE.md",
+                "tests/forex_engine/test_broker_paper_sandbox_readiness.py",
+                "tests/forex_engine/test_month_end_readiness.py",
+            ],
+            purpose=(
+                "Define secrets, network, broker, account, kill-switch, and audit boundaries before "
+                "any future broker-paper adapter work. This packet must not implement secrets, broker "
+                "connections, network calls, paper orders, live orders, scheduler, daemon, or trading execution."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_broker_paper_sandbox_readiness.py tests/forex_engine/test_month_end_readiness.py -q",
                 VALIDATOR,
             ],
         ),
@@ -589,9 +642,73 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
     ]
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _candidate_by_id(candidates: list[dict[str, Any]], packet_id: str) -> dict[str, Any] | None:
+    for candidate in candidates:
+        if candidate.get("packet_id") == packet_id:
+            return candidate
+    return None
+
+
+def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
+    payload = _as_dict(evidence)
+    oos_repair = _as_dict(payload.get("oos_repair"))
+    stress_repair = _as_dict(payload.get("stress_repair"))
+    oos_classification = str(
+        payload.get("oos_repair_classification")
+        or oos_repair.get("repaired_classification")
+        or oos_repair.get("classification")
+        or "not_run"
+    )
+    stress_classification = str(
+        payload.get("stress_repair_classification")
+        or stress_repair.get("repaired_classification")
+        or stress_repair.get("classification")
+        or "not_run"
+    )
+    if oos_classification == "WATCHLIST":
+        selected = LOW_VOL_EDGE_REDESIGN_PACKET_ID
+        reason = "OOS repair remains WATCHLIST, so low-vol edge quality must be redesigned before broker-paper readiness."
+    elif oos_classification == "PAPER_FORWARD_READY" and stress_classification == "WATCHLIST":
+        selected = STRESS_REPAIR_V2_PACKET_ID
+        reason = "OOS repair passed, but stress repair remains WATCHLIST."
+    elif oos_classification == "PAPER_FORWARD_READY" and stress_classification == "PAPER_FORWARD_READY":
+        selected = PRESECURITY_GATE_PACKET_ID
+        reason = "OOS and stress repair passed, so broker-paper must stop at pre-security gate before adapter work."
+    else:
+        selected = OOS_REPAIR_PACKET_ID
+        reason = "After PR #750, the current selected packet remains OOS repair until repair evidence is supplied."
+    return {
+        "current_selected_packet_after_pr_750": OOS_REPAIR_PACKET_ID,
+        "observed_oos_repair_classification": oos_classification,
+        "observed_stress_repair_classification": stress_classification,
+        "next_safe_packet": selected,
+        "reason": reason,
+        "conditional_next_packets": {
+            "oos_repair_watchlist": LOW_VOL_EDGE_REDESIGN_PACKET_ID,
+            "oos_pass_stress_watchlist": STRESS_REPAIR_V2_PACKET_ID,
+            "oos_and_stress_pass": PRESECURITY_GATE_PACKET_ID,
+        },
+        "forbidden_next_packets": [
+            "broker integration",
+            "credentials",
+            "order execution",
+            "live trading",
+            "scheduler/daemon trading",
+        ],
+        "security_gate_required_before_broker_paper": True,
+        "required_security_packet": PRESECURITY_GATE_PACKET_ID,
+        "security_gate_reason": "broker-paper requires secrets/network/broker boundaries before adapter work",
+    }
+
+
 def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
     candidates = _roadmap_candidates()
     next_candidate = candidates[0]
+    repair_routing = _conditional_repair_routing(_evidence)
 
     return {
         "schema": SCHEMA,
@@ -602,6 +719,13 @@ def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
         "candidates": candidates,
         "forbidden_lanes": FORBIDDEN_LANES,
         "next_recommended_candidate": next_candidate,
+        "current_selected_packet": OOS_REPAIR_PACKET_ID,
+        "post_oos_repair_routing": repair_routing,
+        "post_oos_repair_next_safe_packet": repair_routing["next_safe_packet"],
+        "post_oos_repair_next_safe_candidate": _candidate_by_id(candidates, str(repair_routing["next_safe_packet"])),
+        "security_gate_required_before_broker_paper": True,
+        "required_security_packet": PRESECURITY_GATE_PACKET_ID,
+        "security_gate_reason": "broker-paper requires secrets/network/broker boundaries before adapter work",
         "commands_executed": [],
         "files_written": [],
         "workers_dispatched": False,

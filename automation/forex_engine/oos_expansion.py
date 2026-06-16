@@ -85,7 +85,10 @@ def build_expanded_oos_plan(fixture_ids: list[str] | None = None) -> dict[str, A
     return plan
 
 
-def run_expanded_oos_validation(fixture_ids: list[str] | None = None) -> dict[str, Any]:
+def run_expanded_oos_validation(
+    fixture_ids: list[str] | None = None,
+    oos_repair_result: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     plan = build_expanded_oos_plan(fixture_ids)
     policy = dict(plan["policy"])
     split_results = [_evaluate_split(split, policy) for split in list(plan["splits"])]
@@ -113,6 +116,8 @@ def run_expanded_oos_validation(fixture_ids: list[str] | None = None) -> dict[st
         "protected_gate_required": True,
         "safety": oos_expansion_boundary_summary(),
     }
+    if oos_repair_result is not None:
+        result = _with_oos_repair_result(result, oos_repair_result, policy)
     result["classification"] = classify_expanded_oos(result)
     result["next_safe_action"] = _next_safe_action(result["classification"], result["blockers"])
     result["expanded_oos_summary"] = summarize_expanded_oos(result)
@@ -133,6 +138,14 @@ def summarize_expanded_oos(result: dict[str, Any]) -> dict[str, Any]:
         "degradation_pct": float(payload.get("degradation_pct", payload.get("max_degradation_pct", 100.0))),
         "weakest_split": weakest,
         "weakest_split_id": str(dict(weakest).get("split_id") or "none"),
+        "oos_repair_classification": str(payload.get("oos_repair_classification") or "not_run"),
+        "original_max_degradation_pct": float(
+            payload.get("original_max_degradation_pct", payload.get("max_degradation_pct", 100.0))
+        ),
+        "repaired_max_degradation_pct": float(
+            payload.get("repaired_max_degradation_pct", payload.get("max_degradation_pct", 100.0))
+        ),
+        "degradation_improvement_pct": float(payload.get("degradation_improvement_pct", 0.0)),
         "classification": classify_expanded_oos(payload),
         "blockers": list(payload.get("blockers") or []),
         "broker_paper_contract_ready": bool(payload.get("broker_paper_contract_ready", False)),
@@ -161,7 +174,33 @@ def classify_expanded_oos(result: dict[str, Any]) -> str:
         return "FAIL"
     if any(str(item.get("classification")) == "FAIL" for item in split_results):
         return "WATCHLIST"
+    repair = dict(payload.get("oos_repair") or {})
+    repair_passed = False
+    if repair:
+        repair_classification = str(
+            payload.get("oos_repair_classification")
+            or repair.get("repaired_classification")
+            or repair.get("classification")
+            or "FAIL"
+        )
+        if repair_classification in FORBIDDEN_EXPANDED_OOS_CLASSIFICATIONS or repair.get("live_ready") is True:
+            return "FAIL"
+        if repair_classification == "FAIL":
+            return "FAIL"
+        if repair_classification == "WATCHLIST":
+            return "WATCHLIST"
+        repair_passed = repair_classification == "PAPER_FORWARD_READY"
     blockers = list(payload.get("blockers") or [])
+    if repair_passed:
+        repaired_degradation = float(payload.get("max_degradation_pct", payload.get("degradation_pct", 100.0)))
+        consistency = float(payload.get("heldout_consistency_pct", 0.0))
+        non_repaired_blockers = _blockers_outside_repaired_degradation(blockers)
+        if (
+            repaired_degradation <= DEFAULT_EXPANDED_OOS_POLICY["maximum_degradation_pct"]
+            and consistency >= DEFAULT_EXPANDED_OOS_POLICY["minimum_heldout_consistency_pct"]
+            and not non_repaired_blockers
+        ):
+            return "PAPER_FORWARD_READY"
     if blockers or any(str(item.get("classification")) == "WATCHLIST" for item in split_results):
         return "WATCHLIST"
     if float(payload.get("heldout_consistency_pct", 0.0)) < DEFAULT_EXPANDED_OOS_POLICY["minimum_heldout_consistency_pct"]:
@@ -378,6 +417,75 @@ def _expanded_oos_blockers(
             blockers.append(f"{item.get('split_id')}:watchlist")
         blockers.extend([f"{item.get('split_id')}:{blocker}" for blocker in list(item.get("blockers") or [])])
     return _unique(blockers)
+
+
+def _with_oos_repair_result(
+    result: dict[str, Any],
+    repair_result: dict[str, Any],
+    policy: dict[str, Any],
+) -> dict[str, Any]:
+    payload = dict(result)
+    repair = dict(repair_result)
+    repair_classification = str(
+        repair.get("repaired_classification")
+        or repair.get("classification")
+        or "FAIL"
+    )
+    original_max = float(
+        repair.get(
+            "original_max_degradation_pct",
+            payload.get("max_degradation_pct", payload.get("degradation_pct", 100.0)),
+        )
+    )
+    repaired_max = float(
+        repair.get(
+            "repaired_max_degradation_pct",
+            payload.get("max_degradation_pct", payload.get("degradation_pct", 100.0)),
+        )
+    )
+    improvement = float(repair.get("degradation_improvement_pct", max(0.0, original_max - repaired_max)))
+    blockers = list(payload.get("blockers") or [])
+    if repair.get("live_ready") is True or repair_classification in FORBIDDEN_EXPANDED_OOS_CLASSIFICATIONS:
+        blockers.append("oos_repair_forbidden_readiness")
+    if repaired_max > original_max:
+        blockers.append("oos_repair_worsened_degradation")
+    if repair_classification == "FAIL":
+        blockers.append("oos_repair_failed")
+    elif repair_classification == "WATCHLIST":
+        blockers.append("oos_repair_watchlist")
+    if repaired_max > float(policy["maximum_degradation_pct"]):
+        blockers.append("oos_repair_degradation_exceeds_policy")
+    if improvement <= 0.0 and original_max > float(policy["maximum_degradation_pct"]):
+        blockers.append("oos_repair_missing_degradation_improvement")
+    payload.update(
+        {
+            "oos_repair": repair,
+            "oos_repair_classification": repair_classification,
+            "original_max_degradation_pct": round(original_max, 4),
+            "repaired_max_degradation_pct": round(repaired_max, 4),
+            "degradation_improvement_pct": round(improvement, 4),
+            "max_degradation_pct": round(repaired_max, 4),
+            "degradation_pct": round(repaired_max, 4),
+            "blockers": _unique(blockers),
+            "broker_paper_contract_ready": False,
+            "live_ready": False,
+            "protected_gate_required": True,
+        }
+    )
+    return payload
+
+
+def _blockers_outside_repaired_degradation(blockers: list[str]) -> list[str]:
+    allowed_fragments = (
+        "expanded_oos_degradation_exceeds_policy",
+        "oos_repair_degradation_exceeds_policy",
+        ":watchlist",
+    )
+    return [
+        str(blocker)
+        for blocker in blockers
+        if not any(fragment in str(blocker) for fragment in allowed_fragments)
+    ]
 
 
 def _ranked_splits(split_results: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:

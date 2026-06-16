@@ -132,6 +132,12 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["degradation_pct"] >= 0.0
     assert review["expanded_oos_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["oos_repair_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert review["original_max_degradation_pct"] >= review["repaired_max_degradation_pct"]
+    assert review["degradation_improvement_pct"] >= 0.0
+    assert review["weakest_split"]
+    assert review["security_gate_required_before_broker_paper"] is True
+    assert review["required_security_packet"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
     assert review["evidence_summary"]["expanded_oos_classification"] in {
         "FAIL",
         "WATCHLIST",
@@ -140,6 +146,18 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     }
     assert review["evidence_summary"]["expanded_oos_heldout_consistency_pct"] >= 0.0
     assert review["evidence_summary"]["expanded_oos_degradation_pct"] >= 0.0
+    assert review["evidence_summary"]["oos_repair_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "PAPER_FORWARD_READY",
+        "not_run",
+    }
+    assert (
+        review["evidence_summary"]["original_max_degradation_pct"]
+        >= review["evidence_summary"]["repaired_max_degradation_pct"]
+    )
+    assert review["evidence_summary"]["degradation_improvement_pct"] >= 0.0
+    assert review["evidence_summary"]["weakest_oos_split"]
     assert review["evidence_summary"]["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["evidence_summary"]["repaired_stress_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert "repaired_worst_stress_pnl" in review["evidence_summary"]
@@ -153,8 +171,13 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["broker_paper_sandbox_contract_ready"] in {True, False}
     assert review["evidence_summary"]["broker_integration_active"] is False
     assert review["evidence_summary"]["credentials_required_now"] is False
+    assert review["evidence_summary"]["security_gate_required_before_broker_paper"] is True
+    assert review["evidence_summary"]["required_security_packet"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
     assert "broker integration is not approved" in review["live_trade_blockers"]
-    assert "live readiness requires separate future approval" in review["next_safe_action"]
+    assert (
+        "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1" in review["next_safe_action"]
+        or "live readiness requires separate future approval" in review["next_safe_action"]
+    )
 
 
 def test_module_has_no_network_broker_env_or_file_write_behavior() -> None:

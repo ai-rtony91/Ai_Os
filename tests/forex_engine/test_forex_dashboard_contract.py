@@ -79,6 +79,10 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert dashboard["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert dashboard["expanded_oos_heldout_consistency_pct"] >= 0.0
     assert dashboard["expanded_oos_degradation_pct"] >= 0.0
+    assert dashboard["oos_repair_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert dashboard["original_max_degradation_pct"] >= dashboard["repaired_max_degradation_pct"]
+    assert dashboard["degradation_improvement_pct"] >= 0.0
+    assert dashboard["weakest_oos_split"]
     assert dashboard["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",
         "WATCHLIST",
@@ -94,6 +98,9 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert any("Stress/OOS:" in line for line in lines)
     assert any("Repair:" in line for line in lines)
     assert any("OOS+:" in line for line in lines)
+    assert any("OOS repair:" in line for line in lines)
+    assert any("Repaired degradation:" in line for line in lines)
+    assert any("Weakest:" in line for line in lines)
     assert any("Sandbox contract:" in line for line in lines)
     assert any("Repaired worst PnL:" in line for line in lines)
     assert any("Live ready: false" in line for line in lines)
