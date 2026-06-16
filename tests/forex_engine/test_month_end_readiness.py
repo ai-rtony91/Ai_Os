@@ -102,13 +102,13 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["broker_paper_sandbox_ready"] is False
     assert review["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["repaired_stress_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
-    assert review["broker_paper_contract_ready"] in {True, False}
+    assert review["broker_paper_contract_ready"] is False
     assert review["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",
         "WATCHLIST",
         "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
     }
-    assert review["broker_paper_sandbox_contract_ready"] in {True, False}
+    assert review["broker_paper_sandbox_contract_ready"] is False
     assert review["live_trade_ready"] is False
     assert review["protected_gate_required"] is True
     assert review["broker_integration_active"] is False
@@ -137,9 +137,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["low_vol_policy_action"] in {"NO_TRADE_GATE", "REDUCED_SIZE", "EDGE_REDESIGN", "WATCHLIST", "not_run"}
     assert review["redesigned_max_degradation_pct"] >= 0.0
     assert review["low_vol_rejected_intents"] >= 0
+    assert review["presecurity_gate_classification"] in {"FAIL", "WATCHLIST", "PRESECURITY_READY", "not_run"}
+    assert review["credential_boundary_required"] is True
+    assert review["kill_switch_required"] is True
+    assert review["max_loss_guard_required"] is True
+    assert review["audit_log_required"] is True
     assert review["original_max_degradation_pct"] >= review["repaired_max_degradation_pct"]
     assert review["degradation_improvement_pct"] >= 0.0
     assert review["weakest_split"]
+    assert review["broker_paper_contract_ready"] is False
+    assert review["broker_paper_sandbox_contract_ready"] is False
     assert review["security_gate_required_before_broker_paper"] is True
     assert review["required_security_packet"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
     assert review["evidence_summary"]["expanded_oos_classification"] in {
@@ -171,6 +178,16 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     }
     assert review["evidence_summary"]["redesigned_max_degradation_pct"] >= 0.0
     assert review["evidence_summary"]["low_vol_rejected_intents"] >= 0
+    assert review["evidence_summary"]["presecurity_gate_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "PRESECURITY_READY",
+        "not_run",
+    }
+    assert review["evidence_summary"]["credential_boundary_required"] is True
+    assert review["evidence_summary"]["kill_switch_required"] is True
+    assert review["evidence_summary"]["max_loss_guard_required"] is True
+    assert review["evidence_summary"]["audit_log_required"] is True
     assert (
         review["evidence_summary"]["original_max_degradation_pct"]
         >= review["evidence_summary"]["repaired_max_degradation_pct"]
@@ -180,14 +197,14 @@ def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> No
     assert review["evidence_summary"]["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert review["evidence_summary"]["repaired_stress_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert "repaired_worst_stress_pnl" in review["evidence_summary"]
-    assert review["evidence_summary"]["broker_paper_contract_ready"] in {True, False}
+    assert review["evidence_summary"]["broker_paper_contract_ready"] is False
     assert review["evidence_summary"]["broker_paper_sandbox_ready"] is False
     assert review["evidence_summary"]["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",
         "WATCHLIST",
         "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET",
     }
-    assert review["evidence_summary"]["broker_paper_sandbox_contract_ready"] in {True, False}
+    assert review["evidence_summary"]["broker_paper_sandbox_contract_ready"] is False
     assert review["evidence_summary"]["broker_integration_active"] is False
     assert review["evidence_summary"]["credentials_required_now"] is False
     assert review["evidence_summary"]["security_gate_required_before_broker_paper"] is True

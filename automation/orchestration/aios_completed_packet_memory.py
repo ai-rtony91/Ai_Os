@@ -551,6 +551,36 @@ DEFAULT_COMPLETED_PACKETS = [
         "source": "default_completed_memory",
     },
     {
+        "packet_id": "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1",
+        "title": "Add low-vol edge redesign",
+        "lane": "forex-low-vol-edge-redesign",
+        "landed_pr": "#753",
+        "completion_reason": (
+            "low-vol edge redesign landed with paper-only low-vol no-trade/reduced-size policy, "
+            "audit fields, and broker/live blocked"
+        ),
+        "completed_files": [
+            "automation/forex_engine/low_vol_edge_redesign.py",
+            "automation/forex_engine/run_low_vol_edge_redesign_demo.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_LOW_VOL_EDGE_REDESIGN.md",
+            "tests/forex_engine/test_low_vol_edge_redesign.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/low_vol_edge_redesign.py",
+            "automation/forex_engine/run_low_vol_edge_redesign_demo.py",
+            "automation/forex_engine/oos_repair.py",
+            "automation/forex_engine/oos_expansion.py",
+            "automation/forex_engine/broker_paper_sandbox_readiness.py",
+            "automation/forex_engine/month_end_readiness.py",
+            "automation/forex_engine/forex_dashboard_contract.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_LOW_VOL_EDGE_REDESIGN.md",
+            "tests/forex_engine/test_low_vol_edge_redesign.py",
+            "tests/forex_engine/test_oos_repair.py",
+            "tests/forex_engine/test_oos_expansion.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
         "packet_id": "AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
         "alternate_packet_ids": [
             "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",
@@ -773,6 +803,17 @@ def _normalize_completed_packet_record(record: dict[str, Any]) -> dict[str, Any]
                 "completion_reason": (
                     "backup reports now separate copied snapshot metrics from dev-work delta, daily work metrics, "
                     "timeslot work metrics, and report-only courtesy SOS"
+                ),
+            }
+        )
+    if _packet_id(normalized) == "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1":
+        normalized.update(
+            {
+                "landed_pr": "#753",
+                "title": "Add low-vol edge redesign",
+                "completion_reason": (
+                    "low-vol edge redesign landed with paper-only low-vol no-trade/reduced-size policy, "
+                    "audit fields, and broker/live blocked"
                 ),
             }
         )
