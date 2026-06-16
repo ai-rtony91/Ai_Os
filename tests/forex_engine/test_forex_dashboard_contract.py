@@ -4,6 +4,7 @@ from pathlib import Path
 
 from automation.forex_engine import backtest_harness
 from automation.forex_engine import forex_dashboard_contract
+from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import risk_contract
 
@@ -58,7 +59,7 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     dashboard = forex_dashboard_contract.build_forex_dashboard_v2_summary(summary)
     lines = forex_dashboard_contract.format_forex_dashboard_v2_lines(dashboard)
 
-    assert dashboard["fixture_count"] == 9
+    assert dashboard["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
     assert dashboard["paper_forward_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
     assert dashboard["aggregate_paper_pnl"] >= 0.0
     assert dashboard["return_pct"] >= 0.0
@@ -74,6 +75,10 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert dashboard["stress_repair_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert dashboard["stress_repair_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert "repaired_worst_stress_pnl" in dashboard
+    assert dashboard["expanded_oos_status"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert dashboard["expanded_oos_classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert dashboard["expanded_oos_heldout_consistency_pct"] >= 0.0
+    assert dashboard["expanded_oos_degradation_pct"] >= 0.0
     assert dashboard["broker_paper_sandbox_readiness_status"] in {
         "NOT_READY",
         "WATCHLIST",
@@ -88,6 +93,7 @@ def test_dashboard_v2_summary_is_compact_and_live_blocked() -> None:
     assert any("Capture:" in line for line in lines)
     assert any("Stress/OOS:" in line for line in lines)
     assert any("Repair:" in line for line in lines)
+    assert any("OOS+:" in line for line in lines)
     assert any("Sandbox contract:" in line for line in lines)
     assert any("Repaired worst PnL:" in line for line in lines)
     assert any("Live ready: false" in line for line in lines)

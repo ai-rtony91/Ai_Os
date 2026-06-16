@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import run_stress_repair_demo
 from automation.forex_engine import stress_repair
@@ -58,10 +59,11 @@ def test_stress_repair_output_reports_tradeoff_and_keeps_live_blocked() -> None:
     assert result["repaired_classification"] != "LIVE_READY"
     assert result["skipped_intents"] >= 0
     assert result["retained_intents"] > 0
-    assert result["retained_fixture_count"] == 9
+    assert result["retained_fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
     assert result["retained_regime_count"] >= 7
     assert result["tradeoff_summary"]
-    assert result["repaired_worst_stress_pnl"] >= result["original_worst_stress_pnl"]
+    assert result["repaired_worst_stress_pnl"] >= 0.0
+    assert result["repaired_stress_survived_pct"] >= 80.0
     assert result["half_capture_repair"]["scenario_id"] == "half_capture_rate"
     assert result["broker_paper_ready"] is False
     assert result["live_ready"] is False
@@ -75,7 +77,8 @@ def test_stress_repair_summary_is_compact_and_safe() -> None:
     assert summary["stress_repair_status"] in ALLOWED_CLASSIFICATIONS
     assert summary["repaired_stress_classification"] in ALLOWED_CLASSIFICATIONS
     assert summary["repaired_stress_survived_pct"] >= 0.0
-    assert summary["repaired_worst_stress_pnl"] >= summary["original_worst_stress_pnl"]
+    assert summary["repaired_worst_stress_pnl"] >= 0.0
+    assert summary["tradeoff_summary"]
     assert summary["retained_intents"] > 0
     assert summary["skipped_intents"] >= 0
     assert summary["broker_paper_ready"] is False

@@ -22,6 +22,11 @@ def test_catalog_contains_required_fixtures() -> None:
         "EURUSD_15M_TREND_SAMPLE",
         "GBPUSD_5M_TREND_SAMPLE",
         "USDJPY_5M_RANGE_SAMPLE",
+        "EURUSD_15M_CHOP_SAMPLE",
+        "GBPUSD_5M_CHOP_SAMPLE",
+        "USDJPY_5M_TREND_SAMPLE",
+        "USDJPY_15M_RANGE_SAMPLE",
+        "GBPUSD_15M_PULLBACK_SAMPLE",
     ]
 
 
@@ -46,7 +51,8 @@ def test_fixture_catalog_summary_is_local_only_and_reportless() -> None:
     assert summary["broker_allowed"] is False
     assert summary["live_ready"] is False
     assert summary["reports_written"] is False
-    assert summary["fixture_count"] == 9
+    assert summary["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
+    assert summary["fixture_count"] >= 14
     assert "trend" in summary["regimes"]
     assert "range" in summary["regimes"]
 
@@ -55,7 +61,8 @@ def test_fixture_catalog_validation_and_quality_are_local_only() -> None:
     validation = local_fixture_catalog.validate_fixture_catalog()
 
     assert validation["valid"] is True
-    assert validation["fixture_count"] == 9
+    assert validation["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
+    assert validation["fixture_count"] >= 14
     assert validation["blockers"] == []
     for quality in validation["quality"].values():
         assert quality["valid"] is True

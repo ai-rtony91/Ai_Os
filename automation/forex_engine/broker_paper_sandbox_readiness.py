@@ -39,6 +39,7 @@ def evaluate_broker_paper_sandbox_readiness(
     stress_oos: dict[str, Any] | None = None,
     risk_governor: dict[str, Any] | None = None,
     stress_repair: dict[str, Any] | None = None,
+    expanded_oos: dict[str, Any] | None = None,
     policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     active_policy = default_broker_paper_sandbox_readiness_policy()
@@ -52,11 +53,13 @@ def evaluate_broker_paper_sandbox_readiness(
         or {}
     )
     active_stress_repair = dict(stress_repair or active_evidence.get("stress_repair") or {})
+    active_expanded_oos = dict(expanded_oos or active_evidence.get("expanded_oos") or {})
     evidence_gates = _evidence_gates(
         active_evidence,
         active_stress_oos,
         active_risk_governor,
         active_stress_repair,
+        active_expanded_oos,
         active_policy,
     )
     passed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is True]
@@ -74,12 +77,15 @@ def evaluate_broker_paper_sandbox_readiness(
             active_stress_oos,
             active_risk_governor,
             active_stress_repair,
+            active_expanded_oos,
         ),
         "required_future_protected_approvals": _required_future_protected_approvals(),
         "forbidden_current_actions": _forbidden_current_actions(),
         "broker_paper_sandbox_contract_ready": False,
         "stress_repair_status": active_stress_repair.get("stress_repair_status", "not_run"),
         "stress_repair_classification": active_stress_repair.get("repaired_classification", "not_run"),
+        "expanded_oos_status": active_expanded_oos.get("classification", "not_run"),
+        "expanded_oos_classification": active_expanded_oos.get("classification", "not_run"),
         "live_trade_ready": False,
         "real_order_ready": False,
         "broker_integration_active": False,
@@ -214,6 +220,7 @@ def _evidence_gates(
     stress_oos: dict[str, Any],
     risk_governor: dict[str, Any],
     stress_repair: dict[str, Any],
+    expanded_oos: dict[str, Any],
     policy: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     multi = dict(evidence.get("multi_fixture_paper_forward_summary") or {})
@@ -231,6 +238,7 @@ def _evidence_gates(
         stress_classification = "PAPER_FORWARD_READY"
     if repair_classification == "PAPER_FORWARD_READY" and combined_classification == "WATCHLIST":
         combined_classification = "PAPER_FORWARD_READY"
+    expanded_oos_classification = str(expanded_oos.get("classification") or "")
     gates = {
         "minimum_fixture_count": _minimum(int(multi.get("fixture_count", 0)), policy["minimum_fixture_count"]),
         "minimum_regime_count": _minimum(int(regime.get("total_regimes", 0)), policy["minimum_regime_count"]),
@@ -268,6 +276,12 @@ def _evidence_gates(
     }
     if repair_classification:
         gates["stress_repair_classification"] = _classification_gate(repair_classification)
+    if expanded_oos_classification:
+        gates["expanded_oos_classification"] = _classification_gate(expanded_oos_classification)
+        gates["expanded_oos_consistency_pct"] = _minimum(
+            float(expanded_oos.get("heldout_consistency_pct", 0.0)),
+            policy["minimum_oos_consistency_pct"],
+        )
     return gates
 
 
@@ -334,6 +348,7 @@ def _blockers(
     stress_oos: dict[str, Any],
     risk_governor: dict[str, Any],
     stress_repair: dict[str, Any],
+    expanded_oos: dict[str, Any],
 ) -> list[str]:
     blockers = []
     for name, gate in evidence_gates.items():
@@ -345,6 +360,7 @@ def _blockers(
     blockers.extend([str(item) for item in list(stress_oos.get("blockers") or [])])
     blockers.extend([str(item) for item in list(risk_governor.get("blockers") or [])])
     blockers.extend([str(item) for item in list(stress_repair.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(expanded_oos.get("blockers") or [])])
     return _unique(blockers)
 
 
@@ -398,6 +414,8 @@ def _next_safe_action(readiness_status: str, blockers: list[str]) -> str:
     if readiness_status == CONTRACT_READY:
         return "Prepare protected adapter-stub contract only; no broker integration, credentials, network, or orders are approved."
     if readiness_status == WATCHLIST:
+        if any("expanded_oos" in blocker for blocker in blockers):
+            return "Repair expanded OOS blockers before any protected broker-paper sandbox adapter-stub contract."
         return "Repair WATCHLIST stress/OOS evidence before any protected broker-paper sandbox adapter-stub contract."
     if blockers:
         return f"Resolve readiness blocker: {blockers[0]}; broker-paper and live execution remain blocked."

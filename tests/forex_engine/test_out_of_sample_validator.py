@@ -30,7 +30,8 @@ def test_out_of_sample_validation_reports_heldout_and_leave_one_results() -> Non
     result = out_of_sample_validator.run_out_of_sample_validation()
 
     assert result["mode"] == "PAPER_ONLY"
-    assert result["fixture_count"] == 9
+    assert result["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
+    assert result["fixture_count"] >= 14
     assert result["heldout_count"] > 0
     assert result["train_like_count"] > 0
     assert result["heldout_pnl"] >= 0.0
@@ -51,7 +52,8 @@ def test_out_of_sample_summary_is_compact_and_never_live_ready() -> None:
     result = out_of_sample_validator.run_out_of_sample_validation()
     summary = out_of_sample_validator.summarize_oos_validation(result)
 
-    assert summary["fixture_count"] == 9
+    assert summary["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
+    assert summary["fixture_count"] >= 14
     assert summary["heldout_count"] == result["heldout_count"]
     assert summary["classification"] in ALLOWED_CLASSIFICATIONS
     assert summary["classification"] != "LIVE_READY"
