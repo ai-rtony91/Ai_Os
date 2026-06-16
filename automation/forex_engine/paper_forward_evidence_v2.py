@@ -6,6 +6,7 @@ from automation.forex_engine import evidence_bundle_runner
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import forex_dashboard_contract
 from automation.forex_engine import local_fixture_catalog
+from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import month_end_readiness
 from automation.forex_engine import opportunity_capture
 from automation.forex_engine import oos_expansion
@@ -71,7 +72,12 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
     stress_repair_result = stress_repair.apply_local_stress_repair_policy(bundle)
     expanded_oos = oos_expansion.run_expanded_oos_validation(active_fixture_ids)
     oos_repair_result = oos_repair.apply_oos_repair_policy(expanded_oos)
-    expanded_oos = oos_expansion.run_expanded_oos_validation(active_fixture_ids, oos_repair_result)
+    low_vol_edge_result = low_vol_edge_redesign.apply_low_vol_edge_redesign(oos_repair_result)
+    expanded_oos = oos_expansion.run_expanded_oos_validation(
+        active_fixture_ids,
+        oos_repair_result,
+        low_vol_edge_result,
+    )
     sandbox_readiness = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
         evidence=bundle,
         stress_oos=combined_gate,
@@ -79,6 +85,7 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
         stress_repair=stress_repair_result,
         expanded_oos=expanded_oos,
         oos_repair=oos_repair_result,
+        low_vol_edge_redesign=low_vol_edge_result,
     )
     bundle.update(
         {
@@ -98,6 +105,8 @@ def build_paper_forward_evidence_v2(fixture_ids: list[str] | tuple[str, ...] | N
             "expanded_oos_summary": oos_expansion.summarize_expanded_oos(expanded_oos),
             "oos_repair": oos_repair_result,
             "oos_repair_summary": oos_repair.summarize_oos_repair(oos_repair_result),
+            "low_vol_edge_redesign": low_vol_edge_result,
+            "low_vol_edge_summary": low_vol_edge_redesign.summarize_low_vol_edge_redesign(low_vol_edge_result),
             "broker_paper_sandbox_readiness": sandbox_readiness,
             "starting_balance": opportunity_report["starting_balance"],
             "ending_balance": opportunity_report["ending_balance"],
@@ -142,6 +151,13 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
         payload.get("oos_repair_summary")
         or oos_repair.summarize_oos_repair(oos_repair_result)
         if oos_repair_result
+        else {}
+    )
+    low_vol_edge_result = dict(payload.get("low_vol_edge_redesign") or {})
+    low_vol_edge_summary = dict(
+        payload.get("low_vol_edge_summary")
+        or low_vol_edge_redesign.summarize_low_vol_edge_redesign(low_vol_edge_result)
+        if low_vol_edge_result
         else {}
     )
     sandbox_readiness = dict(payload.get("broker_paper_sandbox_readiness") or {})
@@ -201,6 +217,14 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
             "oos_repair_classification",
             oos_repair_result.get("repaired_classification", oos_repair_result.get("classification", "not_run")),
         ),
+        "low_vol_edge_classification": low_vol_edge_summary.get(
+            "low_vol_edge_classification",
+            low_vol_edge_result.get("classification", "not_run"),
+        ),
+        "low_vol_policy_action": low_vol_edge_summary.get(
+            "low_vol_policy_action",
+            low_vol_edge_result.get("low_vol_policy_action", "not_run"),
+        ),
         "original_max_degradation_pct": float(
             oos_repair_summary.get(
                 "original_max_degradation_pct",
@@ -226,6 +250,24 @@ def summarize_paper_forward_evidence_v2(bundle: dict[str, Any]) -> dict[str, Any
                     "weakest_split_after",
                     dict(expanded_oos.get("weakest_split") or {}).get("split_id", "none"),
                 ),
+            )
+        ),
+        "redesigned_max_degradation_pct": float(
+            low_vol_edge_summary.get(
+                "redesigned_max_degradation_pct",
+                low_vol_edge_result.get("redesigned_max_degradation_pct", 0.0),
+            )
+        ),
+        "degradation_improvement_from_repair_pct": float(
+            low_vol_edge_summary.get(
+                "degradation_improvement_from_repair_pct",
+                low_vol_edge_result.get("degradation_improvement_from_repair_pct", 0.0),
+            )
+        ),
+        "low_vol_rejected_intents": int(
+            low_vol_edge_summary.get(
+                "rejected_low_vol_intents",
+                low_vol_edge_summary.get("low_vol_rejected_intents", low_vol_edge_result.get("rejected_low_vol_intents", 0)),
             )
         ),
         "broker_paper_sandbox_readiness_status": sandbox_readiness.get("readiness_status", "not_run"),
@@ -261,6 +303,7 @@ def classify_paper_forward_evidence_v2(bundle: dict[str, Any]) -> str:
     combined_gate = dict(payload.get("combined_stress_oos_gate") or {})
     expanded_oos = dict(payload.get("expanded_oos") or {})
     oos_repair_result = dict(payload.get("oos_repair") or {})
+    low_vol_edge_result = dict(payload.get("low_vol_edge_redesign") or {})
     classifications = [
         str(multi.get("classification") or "FAIL"),
         str(regime.get("classification") or "FAIL"),
@@ -280,6 +323,8 @@ def classify_paper_forward_evidence_v2(bundle: dict[str, Any]) -> str:
                 or "FAIL"
             )
         )
+    if low_vol_edge_result:
+        classifications.append(str(low_vol_edge_result.get("classification") or "FAIL"))
     if not catalog.get("valid", False):
         return "FAIL"
     if any(item not in ALLOWED_V2_CLASSIFICATIONS for item in classifications):
@@ -382,6 +427,7 @@ def _bundle_blockers(bundle: dict[str, Any]) -> list[str]:
     repair = dict(bundle.get("stress_repair") or {})
     expanded_oos = dict(bundle.get("expanded_oos") or {})
     oos_repair_result = dict(bundle.get("oos_repair") or {})
+    low_vol_edge_result = dict(bundle.get("low_vol_edge_redesign") or {})
     blockers = []
     blockers.extend([str(item) for item in list(catalog.get("blockers") or [])])
     blockers.extend([str(item) for item in list(multi.get("blockers") or [])])
@@ -395,6 +441,7 @@ def _bundle_blockers(bundle: dict[str, Any]) -> list[str]:
     blockers.extend([str(item) for item in list(repair.get("blockers") or [])])
     blockers.extend([str(item) for item in list(expanded_oos.get("blockers") or [])])
     blockers.extend([str(item) for item in list(oos_repair_result.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(low_vol_edge_result.get("blockers") or [])])
     blockers.extend([str(item) for item in list(sandbox_readiness.get("blockers") or [])])
     return _unique(blockers)
 

@@ -90,6 +90,8 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
             payload.get("expanded_oos_degradation_pct", payload.get("degradation_pct", 0.0))
         ),
         "oos_repair_classification": str(payload.get("oos_repair_classification") or "not_run"),
+        "low_vol_edge_classification": str(payload.get("low_vol_edge_classification") or "not_run"),
+        "low_vol_policy_action": str(payload.get("low_vol_policy_action") or "not_run"),
         "original_max_degradation_pct": float(
             payload.get("original_max_degradation_pct", payload.get("expanded_oos_degradation_pct", 0.0))
         ),
@@ -100,6 +102,15 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
             )
         ),
         "degradation_improvement_pct": float(payload.get("degradation_improvement_pct", 0.0)),
+        "redesigned_max_degradation_pct": float(
+            payload.get(
+                "redesigned_max_degradation_pct",
+                payload.get("repaired_max_degradation_pct", payload.get("expanded_oos_degradation_pct", 0.0)),
+            )
+        ),
+        "low_vol_rejected_intents": int(
+            payload.get("low_vol_rejected_intents", payload.get("rejected_low_vol_intents", 0))
+        ),
         "weakest_oos_split": str(payload.get("weakest_oos_split") or payload.get("weakest_split") or "none"),
         "broker_paper_sandbox_readiness_status": str(
             payload.get("broker_paper_sandbox_readiness_status") or "not_run"
@@ -136,7 +147,10 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
             f"Repair: {payload.get('stress_repair_classification', 'not_run')} | "
             f"OOS+: {payload.get('expanded_oos_classification', 'not_run')} | "
             f"OOS repair: {payload.get('oos_repair_classification', 'not_run')} | "
+            f"Low-vol: {payload.get('low_vol_edge_classification', 'not_run')}/"
+            f"{payload.get('low_vol_policy_action', 'not_run')} | "
             f"Repaired degradation: {payload.get('repaired_max_degradation_pct', payload.get('expanded_oos_degradation_pct', 0.0))} | "
+            f"Redesigned: {payload.get('redesigned_max_degradation_pct', payload.get('repaired_max_degradation_pct', 0.0))} | "
             f"Weakest: {payload.get('weakest_oos_split', 'none')}"
         ),
         (

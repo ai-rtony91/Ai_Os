@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from automation.forex_engine import broker_paper_sandbox_readiness
+from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import oos_expansion
 from automation.forex_engine import oos_repair
 from automation.forex_engine import paper_forward_evidence_v2
@@ -53,6 +54,8 @@ def _strong_contract_inputs() -> tuple[dict[str, object], dict[str, object], dic
         "live_ready": False,
         "protected_gate_required": True,
     }
+    evidence.pop("low_vol_edge_redesign", None)
+    evidence.pop("low_vol_edge_summary", None)
 
     stress_oos = dict(evidence["combined_stress_oos_gate"])
     stress_oos.update(
@@ -209,6 +212,30 @@ def test_readiness_accepts_oos_repair_and_blocks_contract_when_repair_is_watchli
     assert result["broker_paper_contract_ready"] is False
     assert result["live_trade_ready"] is False
     assert result["security_gate_required_before_broker_paper"] is True
+
+
+def test_readiness_includes_low_vol_redesign_and_requires_presecurity_gate() -> None:
+    evidence, stress_oos, risk_governor = _strong_contract_inputs()
+    low_vol = low_vol_edge_redesign.apply_low_vol_edge_redesign(evidence["oos_repair"])
+
+    result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=evidence,
+        stress_oos=stress_oos,
+        risk_governor=risk_governor,
+        stress_repair=evidence["stress_repair"],
+        expanded_oos=evidence["expanded_oos"],
+        oos_repair=evidence["oos_repair"],
+        low_vol_edge_redesign=low_vol,
+    )
+
+    assert result["readiness_status"] == "WATCHLIST"
+    assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["low_vol_edge_classification"] == "PAPER_FORWARD_READY"
+    assert result["low_vol_policy_action"] == "NO_TRADE_GATE"
+    assert result["redesigned_max_degradation_pct"] <= result["repaired_max_degradation_pct"]
+    assert result["low_vol_rejected_intents"] > 0
+    assert "gate_watchlist:presecurity_gate_landed_before_broker_paper" in result["blockers"]
+    assert result["live_trade_ready"] is False
 
 
 @pytest.mark.parametrize(

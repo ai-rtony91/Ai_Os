@@ -491,6 +491,66 @@ DEFAULT_COMPLETED_PACKETS = [
         "source": "default_completed_memory",
     },
     {
+        "packet_id": "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1",
+        "title": "Add OOS repair gate",
+        "lane": "paper-forward-oos-repair",
+        "landed_pr": "#751",
+        "completion_reason": (
+            "OOS repair gate landed with low-vol filters, reduced sizing, degradation improvement, "
+            "WATCHLIST preservation, and broker-paper kept blocked"
+        ),
+        "completed_files": [
+            "automation/forex_engine/oos_repair.py",
+            "automation/forex_engine/run_oos_repair_demo.py",
+            "automation/forex_engine/oos_expansion.py",
+            "automation/forex_engine/broker_paper_sandbox_readiness.py",
+            "automation/forex_engine/month_end_readiness.py",
+            "automation/forex_engine/forex_dashboard_contract.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_REPAIR.md",
+            "tests/forex_engine/test_oos_repair.py",
+        ],
+        "required_files": [
+            "automation/forex_engine/oos_repair.py",
+            "automation/forex_engine/run_oos_repair_demo.py",
+            "automation/forex_engine/oos_expansion.py",
+            "automation/forex_engine/out_of_sample_validator.py",
+            "automation/forex_engine/local_fixture_catalog.py",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_REPAIR.md",
+            "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md",
+            "tests/forex_engine/test_oos_repair.py",
+            "tests/forex_engine/test_oos_expansion.py",
+            "tests/forex_engine/test_out_of_sample_validator.py",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
+        "packet_id": "PKT-AIOS-T9-BACKUP-DAILY-WORK-METRICS-SOS-V1",
+        "title": "Add T9 backup daily work metrics and courtesy SOS",
+        "lane": "backup-reporting-hardening",
+        "landed_pr": "#752",
+        "completion_reason": (
+            "backup reports now separate copied snapshot metrics from dev-work delta, daily work metrics, "
+            "timeslot work metrics, and report-only courtesy SOS"
+        ),
+        "completed_files": [
+            "automation/orchestration/backups/Get-AiOsBackupWorkDelta.ps1",
+            "automation/orchestration/backups/New-AiOsBackupCourtesySos.ps1",
+            "automation/orchestration/backups/Start-AiOsPostMainUpdateBackup.DRY_RUN.ps1",
+            "automation/orchestration/daily_snapshot/New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1",
+            "scripts/backup/Start-AiOsT9SnapshotBackup.ps1",
+            "docs/AI_OS/operations/T9_BACKUP_DAILY_WORK_METRICS_POLICY.md",
+        ],
+        "required_files": [
+            "automation/orchestration/backups/Get-AiOsBackupWorkDelta.ps1",
+            "automation/orchestration/backups/New-AiOsBackupCourtesySos.ps1",
+            "automation/orchestration/backups/Start-AiOsPostMainUpdateBackup.DRY_RUN.ps1",
+            "automation/orchestration/daily_snapshot/New-AiOsDailyAutomationSnapshot.DRY_RUN.ps1",
+            "scripts/backup/Start-AiOsT9SnapshotBackup.ps1",
+            "docs/AI_OS/operations/T9_BACKUP_DAILY_WORK_METRICS_POLICY.md",
+        ],
+        "source": "default_completed_memory",
+    },
+    {
         "packet_id": "AIOS-EDGE-PROOF-BUILDER-MASTER-V1",
         "alternate_packet_ids": [
             "PKT-AIOS-FOREX-EDGE-PROOF-SUPERTREND-V1",
@@ -692,6 +752,28 @@ def _normalize_completed_packet_record(record: dict[str, Any]) -> dict[str, Any]
                     "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md",
                     "tests/forex_engine/test_oos_expansion.py",
                 ],
+            }
+        )
+    if _packet_id(normalized) == "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1":
+        normalized.update(
+            {
+                "landed_pr": "#751",
+                "title": "Add OOS repair gate",
+                "completion_reason": (
+                    "OOS repair gate landed with low-vol filters, reduced sizing, degradation improvement, "
+                    "WATCHLIST preservation, and broker-paper kept blocked"
+                ),
+            }
+        )
+    if _packet_id(normalized) == "PKT-AIOS-T9-BACKUP-DAILY-WORK-METRICS-SOS-V1":
+        normalized.update(
+            {
+                "landed_pr": "#752",
+                "title": "Add T9 backup daily work metrics and courtesy SOS",
+                "completion_reason": (
+                    "backup reports now separate copied snapshot metrics from dev-work delta, daily work metrics, "
+                    "timeslot work metrics, and report-only courtesy SOS"
+                ),
             }
         )
     return normalized

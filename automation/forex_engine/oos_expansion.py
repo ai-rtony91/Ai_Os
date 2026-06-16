@@ -88,6 +88,7 @@ def build_expanded_oos_plan(fixture_ids: list[str] | None = None) -> dict[str, A
 def run_expanded_oos_validation(
     fixture_ids: list[str] | None = None,
     oos_repair_result: dict[str, Any] | None = None,
+    low_vol_edge_result: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     plan = build_expanded_oos_plan(fixture_ids)
     policy = dict(plan["policy"])
@@ -118,6 +119,8 @@ def run_expanded_oos_validation(
     }
     if oos_repair_result is not None:
         result = _with_oos_repair_result(result, oos_repair_result, policy)
+    if low_vol_edge_result is not None:
+        result = _with_low_vol_edge_result(result, low_vol_edge_result, policy)
     result["classification"] = classify_expanded_oos(result)
     result["next_safe_action"] = _next_safe_action(result["classification"], result["blockers"])
     result["expanded_oos_summary"] = summarize_expanded_oos(result)
@@ -139,6 +142,8 @@ def summarize_expanded_oos(result: dict[str, Any]) -> dict[str, Any]:
         "weakest_split": weakest,
         "weakest_split_id": str(dict(weakest).get("split_id") or "none"),
         "oos_repair_classification": str(payload.get("oos_repair_classification") or "not_run"),
+        "low_vol_edge_classification": str(payload.get("low_vol_edge_classification") or "not_run"),
+        "low_vol_policy_action": str(payload.get("low_vol_policy_action") or "not_run"),
         "original_max_degradation_pct": float(
             payload.get("original_max_degradation_pct", payload.get("max_degradation_pct", 100.0))
         ),
@@ -146,6 +151,17 @@ def summarize_expanded_oos(result: dict[str, Any]) -> dict[str, Any]:
             payload.get("repaired_max_degradation_pct", payload.get("max_degradation_pct", 100.0))
         ),
         "degradation_improvement_pct": float(payload.get("degradation_improvement_pct", 0.0)),
+        "redesigned_max_degradation_pct": float(
+            payload.get("redesigned_max_degradation_pct", payload.get("repaired_max_degradation_pct", payload.get("max_degradation_pct", 100.0)))
+        ),
+        "degradation_improvement_from_repair_pct": float(payload.get("degradation_improvement_from_repair_pct", 0.0)),
+        "low_vol_rejected_intents": int(payload.get("low_vol_rejected_intents", 0)),
+        "security_gate_required_before_broker_paper": bool(
+            payload.get("security_gate_required_before_broker_paper", True)
+        ),
+        "required_security_packet": str(
+            payload.get("required_security_packet") or "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
+        ),
         "classification": classify_expanded_oos(payload),
         "blockers": list(payload.get("blockers") or []),
         "broker_paper_contract_ready": bool(payload.get("broker_paper_contract_ready", False)),
@@ -172,7 +188,18 @@ def classify_expanded_oos(result: dict[str, Any]) -> str:
         return "FAIL"
     if any(str(item.get("classification")) in FORBIDDEN_EXPANDED_OOS_CLASSIFICATIONS for item in split_results):
         return "FAIL"
-    if any(str(item.get("classification")) == "FAIL" for item in split_results):
+    low_vol_edge = dict(payload.get("low_vol_edge_redesign") or {})
+    low_vol_classification = str(
+        payload.get("low_vol_edge_classification")
+        or low_vol_edge.get("classification")
+        or ""
+    )
+    if low_vol_classification in FORBIDDEN_EXPANDED_OOS_CLASSIFICATIONS or low_vol_edge.get("live_ready") is True:
+        return "FAIL"
+    if low_vol_classification == "FAIL":
+        return "FAIL"
+    low_vol_passed = low_vol_classification == "PAPER_FORWARD_READY"
+    if _has_unrepaired_split_failures(split_results, low_vol_passed):
         return "WATCHLIST"
     repair = dict(payload.get("oos_repair") or {})
     repair_passed = False
@@ -187,10 +214,20 @@ def classify_expanded_oos(result: dict[str, Any]) -> str:
             return "FAIL"
         if repair_classification == "FAIL":
             return "FAIL"
-        if repair_classification == "WATCHLIST":
+        if repair_classification == "WATCHLIST" and not low_vol_passed:
             return "WATCHLIST"
         repair_passed = repair_classification == "PAPER_FORWARD_READY"
     blockers = list(payload.get("blockers") or [])
+    if low_vol_passed:
+        low_vol_degradation = float(payload.get("max_degradation_pct", payload.get("degradation_pct", 100.0)))
+        consistency = float(payload.get("heldout_consistency_pct", 0.0))
+        non_low_vol_blockers = _blockers_outside_low_vol_redesign(blockers)
+        if (
+            low_vol_degradation <= DEFAULT_EXPANDED_OOS_POLICY["maximum_degradation_pct"]
+            and consistency >= DEFAULT_EXPANDED_OOS_POLICY["minimum_heldout_consistency_pct"]
+            and not non_low_vol_blockers
+        ):
+            return "PAPER_FORWARD_READY"
     if repair_passed:
         repaired_degradation = float(payload.get("max_degradation_pct", payload.get("degradation_pct", 100.0)))
         consistency = float(payload.get("heldout_consistency_pct", 0.0))
@@ -201,7 +238,7 @@ def classify_expanded_oos(result: dict[str, Any]) -> str:
             and not non_repaired_blockers
         ):
             return "PAPER_FORWARD_READY"
-    if blockers or any(str(item.get("classification")) == "WATCHLIST" for item in split_results):
+    if blockers or _has_unrepaired_split_watchlist(split_results, low_vol_passed):
         return "WATCHLIST"
     if float(payload.get("heldout_consistency_pct", 0.0)) < DEFAULT_EXPANDED_OOS_POLICY["minimum_heldout_consistency_pct"]:
         return "WATCHLIST"
@@ -475,6 +512,65 @@ def _with_oos_repair_result(
     return payload
 
 
+def _with_low_vol_edge_result(
+    result: dict[str, Any],
+    low_vol_edge_result: dict[str, Any],
+    policy: dict[str, Any],
+) -> dict[str, Any]:
+    payload = dict(result)
+    redesign = dict(low_vol_edge_result)
+    redesign_classification = str(redesign.get("classification") or "FAIL")
+    repaired_max = float(
+        redesign.get(
+            "repaired_max_degradation_pct",
+            payload.get("repaired_max_degradation_pct", payload.get("max_degradation_pct", 100.0)),
+        )
+    )
+    redesigned_max = float(redesign.get("redesigned_max_degradation_pct", repaired_max))
+    improvement_from_repair = float(
+        redesign.get("degradation_improvement_from_repair_pct", max(0.0, repaired_max - redesigned_max))
+    )
+    blockers = list(payload.get("blockers") or [])
+    if redesign.get("live_ready") is True or redesign_classification in FORBIDDEN_EXPANDED_OOS_CLASSIFICATIONS:
+        blockers.append("low_vol_redesign_forbidden_readiness")
+    if redesigned_max > repaired_max:
+        blockers.append("low_vol_redesign_worsened_degradation")
+    if redesign_classification == "FAIL":
+        blockers.append("low_vol_redesign_failed")
+    elif redesign_classification == "WATCHLIST":
+        blockers.append("low_vol_redesign_watchlist")
+    if redesigned_max > float(policy["maximum_degradation_pct"]):
+        blockers.append("low_vol_redesign_degradation_exceeds_policy")
+    if improvement_from_repair <= 0.0 and repaired_max > float(policy["maximum_degradation_pct"]):
+        blockers.append("low_vol_redesign_missing_degradation_improvement")
+    if redesign_classification == "PAPER_FORWARD_READY" and redesigned_max <= float(policy["maximum_degradation_pct"]):
+        blockers = _blockers_outside_low_vol_redesign(blockers)
+    payload.update(
+        {
+            "low_vol_edge_redesign": redesign,
+            "low_vol_edge_classification": redesign_classification,
+            "low_vol_policy_action": str(redesign.get("low_vol_policy_action") or "WATCHLIST"),
+            "redesigned_max_degradation_pct": round(redesigned_max, 4),
+            "degradation_improvement_from_original_pct": float(
+                redesign.get("degradation_improvement_from_original_pct", payload.get("degradation_improvement_pct", 0.0))
+            ),
+            "degradation_improvement_from_repair_pct": round(improvement_from_repair, 4),
+            "low_vol_rejected_intents": int(redesign.get("rejected_low_vol_intents", 0)),
+            "low_vol_trade_allowed_count": int(redesign.get("low_vol_trade_allowed_count", 0)),
+            "no_trade_low_vol_count": int(redesign.get("no_trade_low_vol_count", 0)),
+            "max_degradation_pct": round(redesigned_max, 4),
+            "degradation_pct": round(redesigned_max, 4),
+            "blockers": _unique(blockers),
+            "broker_paper_contract_ready": False,
+            "live_ready": False,
+            "protected_gate_required": True,
+            "security_gate_required_before_broker_paper": True,
+            "required_security_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
+        }
+    )
+    return payload
+
+
 def _blockers_outside_repaired_degradation(blockers: list[str]) -> list[str]:
     allowed_fragments = (
         "expanded_oos_degradation_exceeds_policy",
@@ -486,6 +582,41 @@ def _blockers_outside_repaired_degradation(blockers: list[str]) -> list[str]:
         for blocker in blockers
         if not any(fragment in str(blocker) for fragment in allowed_fragments)
     ]
+
+
+def _blockers_outside_low_vol_redesign(blockers: list[str]) -> list[str]:
+    allowed_fragments = (
+        "expanded_oos_degradation_exceeds_policy",
+        "oos_repair_degradation_exceeds_policy",
+        "oos_repair_watchlist",
+        "holdout_by_regime:low_vol",
+        "low_vol_redesign_degradation_exceeds_policy",
+    )
+    return [
+        str(blocker)
+        for blocker in blockers
+        if not any(fragment in str(blocker) for fragment in allowed_fragments)
+    ]
+
+
+def _has_unrepaired_split_failures(split_results: list[dict[str, Any]], low_vol_passed: bool) -> bool:
+    for item in split_results:
+        if str(item.get("classification")) != "FAIL":
+            continue
+        if low_vol_passed and str(item.get("split_id")) == "holdout_by_regime:low_vol":
+            continue
+        return True
+    return False
+
+
+def _has_unrepaired_split_watchlist(split_results: list[dict[str, Any]], low_vol_passed: bool) -> bool:
+    for item in split_results:
+        if str(item.get("classification")) != "WATCHLIST":
+            continue
+        if low_vol_passed and str(item.get("split_id")) == "holdout_by_regime:low_vol":
+            continue
+        return True
+    return False
 
 
 def _ranked_splits(split_results: list[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any]]:

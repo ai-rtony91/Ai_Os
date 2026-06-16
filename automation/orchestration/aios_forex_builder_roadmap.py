@@ -15,6 +15,7 @@ TODAY_MILESTONE = (
 CANONICAL_SPEC_PACKET_ID = "PKT-AIOS-FOREX-BUILDER-CANONICAL-SPEC"
 OOS_REPAIR_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-OOS-REPAIR-V1"
 LOW_VOL_EDGE_REDESIGN_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1"
+LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-RESEARCH-V2"
 STRESS_REPAIR_V2_PACKET_ID = "PKT-AIOS-PAPER-FORWARD-STRESS-REPAIR-V2"
 PRESECURITY_GATE_PACKET_ID = "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
 
@@ -536,9 +537,15 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
             milestone_value="medium",
             risk_level="low",
             required_files=[
+                "automation/forex_engine/low_vol_edge_redesign.py",
+                "automation/forex_engine/run_low_vol_edge_redesign_demo.py",
                 "automation/forex_engine/oos_repair.py",
                 "automation/forex_engine/oos_expansion.py",
-                "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_REPAIR.md",
+                "automation/forex_engine/broker_paper_sandbox_readiness.py",
+                "automation/forex_engine/month_end_readiness.py",
+                "automation/forex_engine/forex_dashboard_contract.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_LOW_VOL_EDGE_REDESIGN.md",
+                "tests/forex_engine/test_low_vol_edge_redesign.py",
                 "tests/forex_engine/test_oos_repair.py",
                 "tests/forex_engine/test_oos_expansion.py",
             ],
@@ -548,7 +555,29 @@ def _roadmap_candidates() -> list[dict[str, Any]]:
                 "order execution, scheduler, daemon, or live trading."
             ),
             validators=[
-                "python -m pytest -p no:cacheprovider tests/forex_engine/test_oos_repair.py tests/forex_engine/test_oos_expansion.py -q",
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_low_vol_edge_redesign.py tests/forex_engine/test_oos_repair.py tests/forex_engine/test_oos_expansion.py -q",
+                VALIDATOR,
+            ],
+        ),
+        _candidate(
+            packet_id=LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID,
+            title="Research deeper low-vol paper-forward edge",
+            lane="paper-forward-low-vol-edge-research-v2",
+            priority="low",
+            milestone_value="medium",
+            risk_level="low",
+            required_files=[
+                "automation/forex_engine/low_vol_edge_redesign.py",
+                "automation/forex_engine/oos_expansion.py",
+                "docs/trading_lab/AIOS_FOREX_BUILDER_LOW_VOL_EDGE_REDESIGN.md",
+                "tests/forex_engine/test_low_vol_edge_redesign.py",
+            ],
+            purpose=(
+                "Continue local-only low-vol research if no-trade or redesigned low-vol evidence remains WATCHLIST. "
+                "No broker integration, credentials, order execution, scheduler, daemon, or live trading."
+            ),
+            validators=[
+                "python -m pytest -p no:cacheprovider tests/forex_engine/test_low_vol_edge_redesign.py tests/forex_engine/test_oos_expansion.py -q",
                 VALIDATOR,
             ],
         ),
@@ -656,6 +685,7 @@ def _candidate_by_id(candidates: list[dict[str, Any]], packet_id: str) -> dict[s
 def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
     payload = _as_dict(evidence)
     oos_repair = _as_dict(payload.get("oos_repair"))
+    low_vol_edge = _as_dict(payload.get("low_vol_edge_redesign"))
     stress_repair = _as_dict(payload.get("stress_repair"))
     oos_classification = str(
         payload.get("oos_repair_classification")
@@ -669,28 +699,45 @@ def _conditional_repair_routing(evidence: Any | None) -> dict[str, Any]:
         or stress_repair.get("classification")
         or "not_run"
     )
-    if oos_classification == "WATCHLIST":
-        selected = LOW_VOL_EDGE_REDESIGN_PACKET_ID
-        reason = "OOS repair remains WATCHLIST, so low-vol edge quality must be redesigned before broker-paper readiness."
-    elif oos_classification == "PAPER_FORWARD_READY" and stress_classification == "WATCHLIST":
+    low_vol_classification = str(
+        payload.get("low_vol_edge_classification")
+        or low_vol_edge.get("classification")
+        or "not_run"
+    )
+    if low_vol_classification == "WATCHLIST":
+        selected = LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
+        reason = "Low-vol redesign remains WATCHLIST, so deeper low-vol edge research is the next safe packet."
+    elif low_vol_classification == "PAPER_FORWARD_READY" and stress_classification == "WATCHLIST":
         selected = STRESS_REPAIR_V2_PACKET_ID
-        reason = "OOS repair passed, but stress repair remains WATCHLIST."
-    elif oos_classification == "PAPER_FORWARD_READY" and stress_classification == "PAPER_FORWARD_READY":
+        reason = "Low-vol redesign passed, but stress repair remains WATCHLIST."
+    elif (
+        low_vol_classification == "PAPER_FORWARD_READY"
+        and oos_classification == "PAPER_FORWARD_READY"
+        and stress_classification == "PAPER_FORWARD_READY"
+    ):
         selected = PRESECURITY_GATE_PACKET_ID
-        reason = "OOS and stress repair passed, so broker-paper must stop at pre-security gate before adapter work."
+        reason = "Low-vol, OOS, and stress repair passed, so broker-paper must stop at pre-security gate before adapter work."
+    elif oos_classification == "PAPER_FORWARD_READY" and low_vol_classification == "not_run":
+        selected = LOW_VOL_EDGE_REDESIGN_PACKET_ID
+        reason = "OOS repair passed or is supplied, but low-vol redesign evidence has not been supplied yet."
     else:
-        selected = OOS_REPAIR_PACKET_ID
-        reason = "After PR #750, the current selected packet remains OOS repair until repair evidence is supplied."
+        selected = LOW_VOL_EDGE_REDESIGN_PACKET_ID
+        reason = "After PR #751/#752, the current selected packet is low-vol edge redesign."
     return {
         "current_selected_packet_after_pr_750": OOS_REPAIR_PACKET_ID,
+        "current_selected_packet_after_pr_751_752": LOW_VOL_EDGE_REDESIGN_PACKET_ID,
         "observed_oos_repair_classification": oos_classification,
+        "observed_low_vol_edge_classification": low_vol_classification,
         "observed_stress_repair_classification": stress_classification,
         "next_safe_packet": selected,
         "reason": reason,
         "conditional_next_packets": {
             "oos_repair_watchlist": LOW_VOL_EDGE_REDESIGN_PACKET_ID,
+            "low_vol_redesign_watchlist": LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID,
             "oos_pass_stress_watchlist": STRESS_REPAIR_V2_PACKET_ID,
+            "low_vol_pass_stress_watchlist": STRESS_REPAIR_V2_PACKET_ID,
             "oos_and_stress_pass": PRESECURITY_GATE_PACKET_ID,
+            "low_vol_oos_and_stress_pass": PRESECURITY_GATE_PACKET_ID,
         },
         "forbidden_next_packets": [
             "broker integration",
@@ -719,10 +766,13 @@ def build_forex_builder_roadmap(_evidence: Any | None = None) -> dict[str, Any]:
         "candidates": candidates,
         "forbidden_lanes": FORBIDDEN_LANES,
         "next_recommended_candidate": next_candidate,
-        "current_selected_packet": OOS_REPAIR_PACKET_ID,
+        "current_selected_packet": LOW_VOL_EDGE_REDESIGN_PACKET_ID,
         "post_oos_repair_routing": repair_routing,
         "post_oos_repair_next_safe_packet": repair_routing["next_safe_packet"],
         "post_oos_repair_next_safe_candidate": _candidate_by_id(candidates, str(repair_routing["next_safe_packet"])),
+        "post_low_vol_redesign_routing": repair_routing,
+        "post_low_vol_redesign_next_safe_packet": repair_routing["next_safe_packet"],
+        "post_low_vol_redesign_next_safe_candidate": _candidate_by_id(candidates, str(repair_routing["next_safe_packet"])),
         "security_gate_required_before_broker_paper": True,
         "required_security_packet": PRESECURITY_GATE_PACKET_ID,
         "security_gate_reason": "broker-paper requires secrets/network/broker boundaries before adapter work",
