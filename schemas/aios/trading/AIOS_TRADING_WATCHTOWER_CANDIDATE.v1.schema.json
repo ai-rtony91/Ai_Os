@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_TRADING_WATCHTOWER_CANDIDATE.v1.schema.json",
+  "title": "AIOS Trading Watchtower Candidate v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "symbol",
+    "direction",
+    "confidence",
+    "risk_score",
+    "regime",
+    "reason",
+    "invalidation_level",
+    "priority_rank",
+    "total_score",
+    "score_breakdown",
+    "penalties",
+    "status",
+    "next_safe_action",
+    "paper_only",
+    "read_only",
+    "execution_allowed",
+    "broker_allowed",
+    "order_submission_allowed",
+    "live_trading_allowed"
+  ],
+  "properties": {
+    "schema": { "const": "AIOS_TRADING_WATCHTOWER_CANDIDATE.v1" },
+    "symbol": { "type": "string", "minLength": 1 },
+    "direction": { "enum": ["LONG", "SHORT"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "risk_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "regime": {
+      "enum": ["TREND_UP", "TREND_DOWN", "RANGE", "HIGH_VOL", "LOW_VOL", "UNKNOWN"]
+    },
+    "reason": { "type": "string", "minLength": 1 },
+    "invalidation_level": { "type": ["number", "string", "null"] },
+    "priority_rank": { "type": "integer", "minimum": 0 },
+    "total_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "score_breakdown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "confidence",
+        "evidence_quality",
+        "regime_alignment",
+        "stop_quality",
+        "volatility_context",
+        "risk_component"
+      ],
+      "properties": {
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidence_quality": { "type": "number", "minimum": 0, "maximum": 1 },
+        "regime_alignment": { "type": "number", "minimum": 0, "maximum": 1 },
+        "stop_quality": { "type": "number", "minimum": 0, "maximum": 1 },
+        "volatility_context": { "type": "number", "minimum": 0, "maximum": 1 },
+        "risk_component": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "penalties": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "status": { "enum": ["WATCHING", "CANDIDATE_FOUND", "HIGH_PRIORITY"] },
+    "next_safe_action": { "type": "string", "minLength": 1 },
+    "paper_only": { "const": true },
+    "read_only": { "const": true },
+    "execution_allowed": { "const": false },
+    "broker_allowed": { "const": false },
+    "order_submission_allowed": { "const": false },
+    "live_trading_allowed": { "const": false }
+  }
+}

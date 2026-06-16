@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_TRADING_WATCHTOWER_RESULT.v1.schema.json",
+  "title": "AIOS Trading Watchtower Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "component",
+    "mode",
+    "paper_only",
+    "read_only",
+    "execution_allowed",
+    "broker_allowed",
+    "order_submission_allowed",
+    "live_trading_allowed",
+    "candidate_count",
+    "valid_candidate_count",
+    "rejected_candidate_count",
+    "rejected_candidates",
+    "market_radar",
+    "candidate_targets",
+    "priority_targets",
+    "market_regime",
+    "watchtower_status",
+    "next_best_setup",
+    "security_integration",
+    "ranking",
+    "safety",
+    "next_safe_action"
+  ],
+  "properties": {
+    "schema": { "const": "AIOS_TRADING_WATCHTOWER_RESULT.v1" },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "component": { "const": "trading_watchtower" },
+    "mode": { "const": "PAPER_ONLY_READ_ONLY" },
+    "paper_only": { "const": true },
+    "read_only": { "const": true },
+    "execution_allowed": { "const": false },
+    "broker_allowed": { "const": false },
+    "order_submission_allowed": { "const": false },
+    "live_trading_allowed": { "const": false },
+    "candidate_count": { "type": "integer", "minimum": 0 },
+    "valid_candidate_count": { "type": "integer", "minimum": 0 },
+    "rejected_candidate_count": { "type": "integer", "minimum": 0 },
+    "rejected_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["index", "reason_code", "safe_to_rank"],
+        "properties": {
+          "index": { "type": "integer", "minimum": 0 },
+          "symbol": { "type": "string" },
+          "reason_code": { "type": "string", "minLength": 1 },
+          "safe_to_rank": { "const": false }
+        }
+      }
+    },
+    "market_radar": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["symbol", "direction", "regime", "priority_rank", "total_score", "status"],
+        "properties": {
+          "symbol": { "type": "string", "minLength": 1 },
+          "direction": { "enum": ["LONG", "SHORT"] },
+          "regime": {
+            "enum": ["TREND_UP", "TREND_DOWN", "RANGE", "HIGH_VOL", "LOW_VOL", "UNKNOWN"]
+          },
+          "priority_rank": { "type": "integer", "minimum": 1 },
+          "total_score": { "type": "number", "minimum": 0, "maximum": 100 },
+          "status": { "enum": ["WATCHING", "CANDIDATE_FOUND", "HIGH_PRIORITY"] }
+        }
+      }
+    },
+    "candidate_targets": {
+      "type": "array",
+      "items": { "$ref": "AIOS_TRADING_WATCHTOWER_CANDIDATE.v1.schema.json" }
+    },
+    "priority_targets": {
+      "type": "array",
+      "items": { "$ref": "AIOS_TRADING_WATCHTOWER_CANDIDATE.v1.schema.json" }
+    },
+    "market_regime": {
+      "enum": ["TREND_UP", "TREND_DOWN", "RANGE", "HIGH_VOL", "LOW_VOL", "UNKNOWN"]
+    },
+    "watchtower_status": {
+      "enum": ["NO_SETUP", "WATCHING", "CANDIDATE_FOUND", "HIGH_PRIORITY", "INVALIDATED", "REVIEW_REQUIRED"]
+    },
+    "next_best_setup": {
+      "anyOf": [
+        { "$ref": "AIOS_TRADING_WATCHTOWER_CANDIDATE.v1.schema.json" },
+        { "type": "null" }
+      ]
+    },
+    "security_integration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_present", "review_required", "triggers", "next_safe_action"],
+      "properties": {
+        "evidence_present": { "type": "boolean" },
+        "review_required": { "type": "boolean" },
+        "triggers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "next_safe_action": { "type": "string", "minLength": 1 }
+      }
+    },
+    "ranking": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ranking_method",
+        "highest_total_score_first",
+        "high_priority_threshold",
+        "candidate_threshold",
+        "penalizes_stale_missing_unknown_evidence"
+      ],
+      "properties": {
+        "ranking_method": { "type": "string", "minLength": 1 },
+        "highest_total_score_first": { "const": true },
+        "high_priority_threshold": { "type": "number" },
+        "candidate_threshold": { "type": "number" },
+        "penalizes_stale_missing_unknown_evidence": { "const": true }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paper_only",
+        "read_only",
+        "execution_allowed",
+        "broker_allowed",
+        "order_submission_allowed",
+        "live_trading_allowed",
+        "writes_outputs_by_default",
+        "requires_api_keys",
+        "broker_modules_called",
+        "paper_orders_submitted",
+        "live_orders_submitted",
+        "network_access",
+        "external_webhooks",
+        "dashboard_mutation",
+        "scheduler_activation",
+        "daemon_activation",
+        "worker_launch"
+      ],
+      "properties": {
+        "paper_only": { "const": true },
+        "read_only": { "const": true },
+        "execution_allowed": { "const": false },
+        "broker_allowed": { "const": false },
+        "order_submission_allowed": { "const": false },
+        "live_trading_allowed": { "const": false },
+        "writes_outputs_by_default": { "const": false },
+        "requires_api_keys": { "const": false },
+        "broker_modules_called": { "const": false },
+        "paper_orders_submitted": { "const": false },
+        "live_orders_submitted": { "const": false },
+        "network_access": { "const": false },
+        "external_webhooks": { "const": false },
+        "dashboard_mutation": { "const": false },
+        "scheduler_activation": { "const": false },
+        "daemon_activation": { "const": false },
+        "worker_launch": { "const": false }
+      }
+    },
+    "next_safe_action": { "type": "string", "minLength": 1 },
+    "failure_reason": { "type": "string" },
+    "repo_root": { "type": "string" }
+  }
+}
