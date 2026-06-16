@@ -6,6 +6,7 @@ import pytest
 
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import paper_forward_evidence_v2
+from automation.forex_engine import stress_repair
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -23,6 +24,13 @@ def _strong_contract_inputs() -> tuple[dict[str, object], dict[str, object], dic
     evidence = dict(bundle)
     evidence["blockers"] = []
     evidence["classification"] = "PAPER_FORWARD_READY"
+    evidence["stress_repair"] = {
+        "repaired_classification": "PAPER_FORWARD_READY",
+        "stress_repair_status": "PAPER_FORWARD_READY",
+        "blockers": [],
+        "live_ready": False,
+        "protected_gate_required": True,
+    }
 
     stress_oos = dict(evidence["combined_stress_oos_gate"])
     stress_oos.update(
@@ -65,6 +73,8 @@ def test_default_readiness_result_is_watchlist_and_contract_only() -> None:
     assert result["readiness_status"] in ALLOWED_STATUSES
     assert result["readiness_status"] != "LIVE_READY"
     assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["stress_repair_status"] in {"WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
+    assert result["stress_repair_classification"] in {"WATCHLIST", "PAPER_FORWARD_READY", "not_run"}
     assert result["live_trade_ready"] is False
     assert result["real_order_ready"] is False
     assert result["broker_integration_active"] is False
@@ -105,6 +115,24 @@ def test_strong_evidence_can_return_contract_ready() -> None:
     assert result["broker_integration_active"] is False
     assert result["credentials_required_now"] is False
     assert result["protected_gate_required"] is True
+
+
+def test_readiness_accepts_stress_repair_result_and_stays_watchlist_when_repair_is_watchlist() -> None:
+    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    repair = stress_repair.apply_local_stress_repair_policy(bundle)
+
+    result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=bundle,
+        stress_oos=bundle["combined_stress_oos_gate"],
+        risk_governor=bundle["risk_governor"],
+        stress_repair=repair,
+    )
+
+    assert result["readiness_status"] == "WATCHLIST"
+    assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["stress_repair_status"] == repair["stress_repair_status"]
+    assert "gate_watchlist:stress_repair_classification" in result["blockers"]
+    assert result["live_trade_ready"] is False
 
 
 @pytest.mark.parametrize(
