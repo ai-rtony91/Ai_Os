@@ -254,6 +254,8 @@ A runner preview is read-only. It must not edit target files, install packages, 
 
 Dirty generated evidence, reports, and sandbox previews may remain present during READ_ONLY or DRY_RUN preview when the dirty tree classifier marks every dirty file safe for DRY_RUN. That classification never approves APPLY. Unknown dirty files require review, protected authority dirty files stop, and security indicators require SOS escalation.
 
+Runner preview must also respect the Preemptive Security Layer. `WATCH` security state is DRY_RUN-only. `STOP`, `REVIEW_REQUIRED`, or `SOS` security state blocks APPLY and protected actions. HUD-ready fields are display evidence only and must not become dashboard mutation controls or live response buttons.
+
 A runner preview should:
 
 1. Select one task only.

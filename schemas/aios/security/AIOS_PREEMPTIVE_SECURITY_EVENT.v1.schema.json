@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_PREEMPTIVE_SECURITY_EVENT.v1.schema.json",
+  "title": "AIOS Preemptive Security Event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "event_id",
+    "category",
+    "severity",
+    "source_type",
+    "source_path",
+    "source_role",
+    "reason",
+    "indicators",
+    "confidence",
+    "action",
+    "matched_values_printed",
+    "values_redacted",
+    "contributes_to_stop",
+    "blocked_actions",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_PREEMPTIVE_SECURITY_EVENT.v1"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "CANARY_TRIP",
+        "SECRET_EXPOSURE_RISK",
+        "BROKER_AUTHORITY_RISK",
+        "LIVE_TRADING_RISK",
+        "REAL_ORDER_RISK",
+        "WEBHOOK_RISK",
+        "PRODUCTION_DEPLOY_RISK",
+        "DASHBOARD_MUTATION_RISK",
+        "SCHEDULER_DAEMON_RISK",
+        "WORKER_LAUNCH_RISK",
+        "PROTECTED_AUTHORITY_RISK",
+        "UNKNOWN_SECURITY_RISK"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["CLEAR", "WATCH", "REVIEW", "STOP", "SOS"]
+    },
+    "source_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_path": {
+      "type": "string"
+    },
+    "source_role": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "indicators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "matched_values_printed": {
+      "type": "boolean",
+      "const": false
+    },
+    "values_redacted": {
+      "type": "boolean",
+      "const": true
+    },
+    "contributes_to_stop": {
+      "type": "boolean"
+    },
+    "blocked_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only",
+        "secret_values_redacted",
+        "network_access",
+        "broker_access",
+        "live_trading",
+        "production_mutation",
+        "dashboard_mutation",
+        "scheduler_activation",
+        "worker_launch"
+      ],
+      "properties": {
+        "read_only": { "type": "boolean", "const": true },
+        "secret_values_redacted": { "type": "boolean", "const": true },
+        "network_access": { "type": "boolean", "const": false },
+        "broker_access": { "type": "boolean", "const": false },
+        "live_trading": { "type": "boolean", "const": false },
+        "production_mutation": { "type": "boolean", "const": false },
+        "dashboard_mutation": { "type": "boolean", "const": false },
+        "scheduler_activation": { "type": "boolean", "const": false },
+        "worker_launch": { "type": "boolean", "const": false }
+      }
+    }
+  }
+}
