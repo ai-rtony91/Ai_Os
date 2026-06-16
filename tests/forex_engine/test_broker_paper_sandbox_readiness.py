@@ -6,6 +6,7 @@ import pytest
 
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import broker_paper_adapter_stub_contract
+from automation.forex_engine import broker_paper_dryrun_intent_ledger
 from automation.forex_engine import broker_paper_presecurity_gate
 from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import oos_expansion
@@ -114,6 +115,16 @@ def test_default_readiness_result_is_watchlist_and_contract_only() -> None:
         "not_run",
     }
     assert result["broker_paper_stub_contract_ready"] is False
+    assert result["broker_paper_dryrun_ledger_classification"] in {
+        "FAIL",
+        "WATCHLIST",
+        "DRYRUN_LEDGER_READY",
+        "not_run",
+    }
+    assert result["broker_paper_dryrun_ledger_ready"] is False
+    assert result["dryrun_ledger_records"] >= 0
+    assert result["dryrun_ledger_accepted"] >= 0
+    assert result["dryrun_ledger_rejected"] >= 0
     assert result["credential_boundary_required"] is True
     assert result["kill_switch_required"] is True
     assert result["max_loss_guard_required"] is True
@@ -224,15 +235,67 @@ def test_stub_contract_ready_routes_only_to_dryrun_intent_ledger() -> None:
         adapter_stub_contract=stub,
     )
 
-    assert result["readiness_status"] == "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET"
+    assert result["readiness_status"] == "WATCHLIST"
     assert result["presecurity_gate_classification"] == "PRESECURITY_READY"
     assert result["broker_paper_stub_contract_classification"] == "STUB_CONTRACT_READY"
     assert result["adapter_stub_contract_ready"] is True
     assert result["broker_paper_stub_contract_ready"] is True
+    assert result["broker_paper_dryrun_ledger_classification"] == "not_run"
+    assert result["broker_paper_dryrun_ledger_ready"] is False
     assert result["next_safe_packet"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
+    assert "gate_watchlist:broker_paper_dryrun_ledger_present" in result["blockers"]
+    assert result["broker_paper_sandbox_contract_ready"] is False
+    assert result["broker_paper_contract_ready"] is False
     assert result["broker_paper_orders_allowed"] is False
     assert result["network_api_allowed"] is False
     assert result["credentials_allowed"] is False
+    assert result["live_orders_allowed"] is False
+    assert result["live_trade_ready"] is False
+
+
+def test_dryrun_intent_ledger_ready_routes_only_to_dryrun_risk_governor() -> None:
+    evidence, stress_oos, risk_governor = _strong_contract_inputs()
+    presecurity = broker_paper_presecurity_gate.evaluate_broker_paper_presecurity_gate()
+    stub = broker_paper_adapter_stub_contract.simulate_broker_paper_stub_adapter(
+        {
+            "symbol": "EURUSD_FAKE",
+            "side": "buy",
+            "quantity_units": 1000,
+            "order_type": "market_stub",
+            "stop_loss_pips": 8.0,
+            "take_profit_pips": 12.0,
+            "max_loss_usd": 10.0,
+            "dry_run": True,
+            "approved_by_operator": True,
+        }
+    )
+    ledger = broker_paper_dryrun_intent_ledger.replay_dryrun_intent_batch()
+
+    result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=evidence,
+        stress_oos=stress_oos,
+        risk_governor=risk_governor,
+        stress_repair=evidence["stress_repair"],
+        expanded_oos=evidence["expanded_oos"],
+        oos_repair=evidence["oos_repair"],
+        presecurity_gate=presecurity,
+        adapter_stub_contract=stub,
+        dryrun_intent_ledger=ledger,
+    )
+
+    assert result["readiness_status"] == "CONTRACT_READY_FOR_PROTECTED_BROKER_PAPER_SANDBOX_PACKET"
+    assert result["adapter_stub_contract_ready"] is True
+    assert result["broker_paper_stub_contract_ready"] is True
+    assert result["broker_paper_dryrun_ledger_classification"] == "DRYRUN_LEDGER_READY"
+    assert result["broker_paper_dryrun_ledger_ready"] is True
+    assert result["dryrun_ledger_records"] == 2
+    assert result["dryrun_ledger_accepted"] == 1
+    assert result["dryrun_ledger_rejected"] == 1
+    assert result["next_safe_packet"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1"
+    assert result["broker_paper_orders_allowed"] is False
+    assert result["network_api_allowed"] is False
+    assert result["credentials_allowed"] is False
+    assert result["broker_sdk_allowed"] is False
     assert result["live_orders_allowed"] is False
     assert result["live_trade_ready"] is False
 
@@ -357,6 +420,7 @@ def test_boundary_summary_blocks_broker_paper_live_credentials_network_and_order
     assert summary["security_gate_required_before_broker_paper"] is True
     assert summary["required_security_packet"] == "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1"
     assert summary["next_safe_packet_after_stub_contract"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
+    assert summary["next_safe_packet_after_dryrun_ledger"] == "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1"
 
 
 def test_demo_function_exists_and_prints_safety_note(capsys) -> None:

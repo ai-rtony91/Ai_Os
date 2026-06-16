@@ -39,6 +39,8 @@ PRESECURITY_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-REPAIR-V1
 SANDBOX_ADAPTER_STUB_PACKET_ID = "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT"
 SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-SANDBOX-ADAPTER-STUB-CONTRACT-REPAIR-V1"
 DRYRUN_INTENT_LEDGER_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-V1"
+DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-INTENT-LEDGER-REPAIR-V1"
+DRYRUN_RISK_GOVERNOR_PACKET_ID = "PKT-AIOS-BROKER-PAPER-DRYRUN-RISK-GOVERNOR-V1"
 APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID = "PKT-AIOS-APPROVED-EXECUTOR-LOCAL-APPLY-LOOP"
 
 
@@ -118,7 +120,7 @@ def test_today_goal_alignment_is_present_and_aligned() -> None:
 def test_roadmap_candidates_are_emitted() -> None:
     candidates = roadmap_candidates()
 
-    assert len(candidates) == 27
+    assert len(candidates) == 29
 
 
 def test_first_candidate_is_canonical_spec_packet() -> None:
@@ -147,7 +149,7 @@ def test_data_schemas_candidate_exists_and_points_to_schema_contracts() -> None:
 def test_monthly_forex_candidates_appear_in_safe_order() -> None:
     packet_ids = [candidate["packet_id"] for candidate in roadmap_candidates()]
 
-    assert packet_ids[:27] == [
+    assert packet_ids[:29] == [
         CANONICAL_SPEC_PACKET_ID,
         DATA_SCHEMAS_PACKET_ID,
         BACKTEST_PACKET_ID,
@@ -172,6 +174,8 @@ def test_monthly_forex_candidates_appear_in_safe_order() -> None:
         SANDBOX_ADAPTER_STUB_PACKET_ID,
         SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID,
         DRYRUN_INTENT_LEDGER_PACKET_ID,
+        DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID,
+        DRYRUN_RISK_GOVERNOR_PACKET_ID,
         PRESECURITY_REPAIR_PACKET_ID,
         STRESS_REPAIR_V2_PACKET_ID,
         APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID,
@@ -254,8 +258,17 @@ def test_paper_forward_evidence_and_readiness_candidates_exist() -> None:
     assert "tests/forex_engine/test_broker_paper_adapter_stub_contract.py" in candidates[SANDBOX_ADAPTER_STUB_PACKET_ID]["required_files"]
     assert "automation/forex_engine/broker_paper_adapter_stub_contract.py" in candidates[SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID]["required_files"]
     assert "tests/forex_engine/test_broker_paper_adapter_stub_contract.py" in candidates[SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/broker_paper_dryrun_intent_ledger.py" in candidates[DRYRUN_INTENT_LEDGER_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/run_broker_paper_dryrun_intent_ledger_demo.py" in candidates[DRYRUN_INTENT_LEDGER_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/broker_paper_sandbox_readiness.py" in candidates[DRYRUN_INTENT_LEDGER_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/month_end_readiness.py" in candidates[DRYRUN_INTENT_LEDGER_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/forex_dashboard_contract.py" in candidates[DRYRUN_INTENT_LEDGER_PACKET_ID]["required_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_BROKER_PAPER_DRYRUN_INTENT_LEDGER.md" in candidates[DRYRUN_INTENT_LEDGER_PACKET_ID]["required_files"]
     assert "tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py" in candidates[DRYRUN_INTENT_LEDGER_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/broker_paper_dryrun_intent_ledger.py" in candidates[DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_broker_paper_dryrun_intent_ledger.py" in candidates[DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID]["required_files"]
+    assert "automation/forex_engine/broker_paper_dryrun_risk_governor.py" in candidates[DRYRUN_RISK_GOVERNOR_PACKET_ID]["required_files"]
+    assert "tests/forex_engine/test_broker_paper_dryrun_risk_governor.py" in candidates[DRYRUN_RISK_GOVERNOR_PACKET_ID]["required_files"]
     assert "docs/orchestration/AIOS_APPROVED_EXECUTOR_LOCAL_APPLY_LOOP.md" in candidates[APPROVED_EXECUTOR_LOCAL_APPLY_PACKET_ID]["required_files"]
 
 
@@ -345,11 +358,12 @@ def test_roadmap_routes_after_oos_repair_and_requires_presecurity_gate() -> None
     result = roadmap_result()
     routing = result["post_oos_repair_routing"]
 
-    assert result["current_selected_packet"] == SANDBOX_ADAPTER_STUB_PACKET_ID
+    assert result["current_selected_packet"] == DRYRUN_INTENT_LEDGER_PACKET_ID
     assert routing["current_selected_packet_after_pr_750"] == OOS_REPAIR_PACKET_ID
     assert routing["current_selected_packet_after_pr_751_752"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
     assert routing["current_selected_packet_after_pr_753"] == PRESECURITY_GATE_PACKET_ID
     assert routing["current_selected_packet_after_pr_754"] == SANDBOX_ADAPTER_STUB_PACKET_ID
+    assert routing["current_selected_packet_after_pr_755"] == DRYRUN_INTENT_LEDGER_PACKET_ID
     assert routing["conditional_next_packets"]["oos_repair_watchlist"] == LOW_VOL_EDGE_REDESIGN_PACKET_ID
     assert routing["conditional_next_packets"]["low_vol_redesign_watchlist"] == LOW_VOL_EDGE_RESEARCH_V2_PACKET_ID
     assert routing["conditional_next_packets"]["oos_pass_stress_watchlist"] == STRESS_REPAIR_V2_PACKET_ID
@@ -360,6 +374,9 @@ def test_roadmap_routes_after_oos_repair_and_requires_presecurity_gate() -> None
     assert routing["conditional_next_packets"]["stub_contract_fail"] == SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID
     assert routing["conditional_next_packets"]["stub_contract_watchlist"] == SANDBOX_ADAPTER_STUB_REPAIR_PACKET_ID
     assert routing["conditional_next_packets"]["stub_contract_pass"] == DRYRUN_INTENT_LEDGER_PACKET_ID
+    assert routing["conditional_next_packets"]["dryrun_ledger_fail"] == DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID
+    assert routing["conditional_next_packets"]["dryrun_ledger_watchlist"] == DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID
+    assert routing["conditional_next_packets"]["dryrun_ledger_pass"] == DRYRUN_RISK_GOVERNOR_PACKET_ID
     assert result["security_gate_required_before_broker_paper"] is True
     assert result["required_security_packet"] == PRESECURITY_GATE_PACKET_ID
     assert "broker-paper requires secrets/network/broker boundaries" in result["security_gate_reason"]
@@ -465,6 +482,38 @@ def test_roadmap_selects_dryrun_intent_ledger_when_adapter_stub_passes() -> None
 
     assert result["post_adapter_stub_contract_next_safe_packet"] == DRYRUN_INTENT_LEDGER_PACKET_ID
     assert result["post_adapter_stub_contract_next_safe_candidate"]["packet_id"] == DRYRUN_INTENT_LEDGER_PACKET_ID
+
+
+def test_roadmap_selects_dryrun_ledger_repair_when_ledger_fails_or_watchlists() -> None:
+    module = load_module("aios_forex_builder_roadmap", MODULE_PATH)
+    for classification in ("FAIL", "WATCHLIST"):
+        result = module.build_forex_builder_roadmap(
+            {
+                "presecurity_gate": {"classification": "PRESECURITY_READY"},
+                "broker_paper_adapter_stub_contract": {"classification": "STUB_CONTRACT_READY"},
+                "broker_paper_dryrun_intent_ledger": {"classification": classification},
+            }
+        )
+
+        assert result["post_dryrun_intent_ledger_next_safe_packet"] == DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID
+        assert (
+            result["post_dryrun_intent_ledger_next_safe_candidate"]["packet_id"]
+            == DRYRUN_INTENT_LEDGER_REPAIR_PACKET_ID
+        )
+
+
+def test_roadmap_selects_dryrun_risk_governor_when_ledger_passes() -> None:
+    module = load_module("aios_forex_builder_roadmap", MODULE_PATH)
+    result = module.build_forex_builder_roadmap(
+        {
+            "presecurity_gate": {"classification": "PRESECURITY_READY"},
+            "broker_paper_adapter_stub_contract": {"classification": "STUB_CONTRACT_READY"},
+            "broker_paper_dryrun_intent_ledger": {"classification": "DRYRUN_LEDGER_READY"},
+        }
+    )
+
+    assert result["post_dryrun_intent_ledger_next_safe_packet"] == DRYRUN_RISK_GOVERNOR_PACKET_ID
+    assert result["post_dryrun_intent_ledger_next_safe_candidate"]["packet_id"] == DRYRUN_RISK_GOVERNOR_PACKET_ID
 
 
 def test_output_is_compatible_with_candidate_adapter_and_packet_queue_planner() -> None:
