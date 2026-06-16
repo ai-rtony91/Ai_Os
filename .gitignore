@@ -17,6 +17,14 @@ archive/reports_legacy/daily/MORNING_BRIEF_*.md
 archive/reports_legacy/dry_runs/
 archive/reports_legacy/security/
 
+# AI_OS generated local runtime/review artifacts
+Reports/aios_control_plane/
+Reports/aios_resume/
+Reports/autonomy_decision_governor/
+Reports/sandbox/
+automation/orchestration/work_packets/preview/
+control/review_bridge/
+
 # Raw local telemetry intake
 Reports/telemetry/session_archives/inbox_evidence/
 Reports/telemetry/session_archives/inbox_screenshots/
