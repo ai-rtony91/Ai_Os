@@ -127,6 +127,41 @@ function Get-ApprovalSummaryReadout {
     }
 }
 
+function Get-AutonomousContinuationReadout {
+    $enginePath = "automation/orchestration/continuation/Get-AiOsAutonomousJobContinuation.DRY_RUN.ps1"
+    if (-not (Test-Path -LiteralPath $enginePath -PathType Leaf)) {
+        return [ordered]@{
+            available = $false
+            state = "UNAVAILABLE"
+            security_state = "UNKNOWN"
+            can_continue = $false
+            next_safe_action = "Autonomous job continuation wrapper is unavailable."
+        }
+    }
+    try {
+        $readout = Invoke-AiOsQuietJsonCommand -Path $enginePath -Arguments @("-OutputJson")
+        if (-not $readout) {
+            throw "autonomous continuation produced no JSON output"
+        }
+        $security = if ($readout.security_snapshot) { $readout.security_snapshot } else { $null }
+        return [ordered]@{
+            available = $true
+            state = [string]$readout.state
+            security_state = if ($security -and $security.overall_state) { [string]$security.overall_state } else { "UNKNOWN" }
+            can_continue = [bool]$readout.safe_to_continue_without_human
+            next_safe_action = [string]$readout.next_safe_action
+        }
+    } catch {
+        return [ordered]@{
+            available = $false
+            state = "REVIEW_REQUIRED"
+            security_state = "UNKNOWN"
+            can_continue = $false
+            next_safe_action = "Review autonomous continuation readout failure before choosing the next command."
+        }
+    }
+}
+
 $runtimeStatePath = "automation/runtime/state/AIOS_RUNTIME_STATE.json"
 $activePacketRoot = "automation/orchestration/work_packets/active"
 $runtimeHealthScript = "automation/orchestration/health/Test-AiOsRuntimeHealth.DRY_RUN.ps1"
@@ -143,6 +178,7 @@ $runtimeHealthReadout = Invoke-AiOsQuietJsonCommand -Path $runtimeHealthScript -
 $campaignReadout = Invoke-AiOsQuietJsonCommand -Path $campaignNextTaskScript -Arguments @("-OutputJson")
 $selfBuildDecision = Get-SelfBuildDecisionReadout
 $approvalSummary = Get-ApprovalSummaryReadout
+$autonomousContinuation = Get-AutonomousContinuationReadout
 $gitStatus = @(git status --short)
 $commitPackageReadout = if ($gitStatus.Count -gt 0) {
     Invoke-AiOsQuietJsonCommand -Path $commitPackageRecommendationScript -Arguments @("-OutputJson")
@@ -287,6 +323,11 @@ $result = [ordered]@{
     approval_completed_count = $approvalSummary.completed_count
     approval_safe_state = $approvalSummary.safe_state
     approval_next_review_action = $approvalSummary.next_review_action
+    autonomous_continuation_available = $autonomousContinuation.available
+    autonomous_continuation_state = $autonomousContinuation.state
+    autonomous_continuation_security_state = $autonomousContinuation.security_state
+    autonomous_continuation_allowed = $autonomousContinuation.can_continue
+    autonomous_continuation_next_safe_action = $autonomousContinuation.next_safe_action
     approvals_performed = "NO"
     approval_inbox_mutated = "NO"
     apply_gate_mutated = "NO"
@@ -330,6 +371,10 @@ Write-Host "APPROVAL STATE SUMMARY:"
 Write-Host "available=$($result.approval_summary_available); pending=$($result.approval_pending_count); blocked=$($result.approval_blocked_count); completed=$($result.approval_completed_count); safe_state=$($result.approval_safe_state)"
 Write-Host "APPROVAL NEXT REVIEW ACTION:"
 Write-Host $result.approval_next_review_action
+Write-Host "AUTONOMOUS CONTINUATION:"
+Write-Host "available=$($result.autonomous_continuation_available); state=$($result.autonomous_continuation_state); security=$($result.autonomous_continuation_security_state); allowed=$($result.autonomous_continuation_allowed)"
+Write-Host "AUTONOMOUS NEXT SAFE ACTION:"
+Write-Host $result.autonomous_continuation_next_safe_action
 Write-Host "Approvals performed: NO"
 Write-Host "Approval inbox mutated: NO"
 Write-Host "Apply gate mutated: NO"

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_AUTONOMOUS_JOB_CONTINUATION_STATE.v1.schema.json",
+  "title": "AIOS Autonomous Job Continuation State V1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "cycle_id",
+    "component",
+    "mode",
+    "repo_root",
+    "branch",
+    "state",
+    "state_history",
+    "selected_task",
+    "validators",
+    "validator_status",
+    "repair_count",
+    "security_snapshot",
+    "dirty_signature",
+    "security_signature",
+    "task_signature",
+    "approval_snapshot",
+    "resume",
+    "evidence",
+    "execution",
+    "safe_to_continue_without_human",
+    "stop_reason",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "const": "AIOS_AUTONOMOUS_JOB_CONTINUATION_STATE.v1"
+    },
+    "generated_at_utc": {
+      "type": "string"
+    },
+    "cycle_id": {
+      "type": "string",
+      "pattern": "^AIOS-AJC-"
+    },
+    "component": {
+      "const": "autonomous_job_continuation"
+    },
+    "mode": {
+      "const": "DRY_RUN_READ_ONLY"
+    },
+    "repo_root": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "BOOT",
+        "RECON",
+        "TASK_SELECTION",
+        "DRY_RUN_EXECUTION",
+        "VALIDATION",
+        "REPAIR_ATTEMPT",
+        "CONTINUE",
+        "REVIEW_REQUIRED",
+        "STOP",
+        "SOS"
+      ]
+    },
+    "state_history": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "selected_task": {
+      "type": "object"
+    },
+    "validators": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validator_status": {
+      "type": "string"
+    },
+    "repair_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "security_snapshot": {
+      "type": "object",
+      "required": [
+        "overall_state",
+        "safe_for_dry_run",
+        "safe_for_apply",
+        "sos_required",
+        "stop_required",
+        "review_required"
+      ]
+    },
+    "dirty_signature": {
+      "type": "string"
+    },
+    "security_signature": {
+      "type": "string"
+    },
+    "task_signature": {
+      "type": "string"
+    },
+    "approval_snapshot": {
+      "type": "object"
+    },
+    "resume": {
+      "type": "object",
+      "required": ["requested", "can_resume", "reason"]
+    },
+    "evidence": {
+      "type": "object"
+    },
+    "execution": {
+      "type": "object",
+      "required": [
+        "executed_commands",
+        "allowlisted_action",
+        "mutation_performed",
+        "apply_performed",
+        "protected_action_performed",
+        "worker_launch_performed",
+        "scheduler_performed",
+        "daemon_performed"
+      ]
+    },
+    "safe_to_continue_without_human": {
+      "type": "boolean"
+    },
+    "stop_reason": {
+      "type": ["string", "null"]
+    },
+    "next_safe_action": {
+      "type": "string"
+    },
+    "safety": {
+      "type": "object"
+    }
+  }
+}

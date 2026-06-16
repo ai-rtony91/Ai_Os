@@ -46,6 +46,22 @@ Dirty APPLY remains blocked. Unknown dirty files require review, protected autho
 
 The Preemptive Security Layer may downgrade generated safety-report mentions to `WATCH` when they do not imply enablement, secret exposure, executable authority, or live action. `WATCH` permits READ_ONLY/DRY_RUN continuation only. `STOP`, `REVIEW_REQUIRED`, or `SOS` security state blocks APPLY and requires review or escalation.
 
+## Autonomous Job Continuation V1
+
+Autonomous Job Continuation V1 may continue only READ_ONLY or DRY_RUN work when current evidence proves the cycle is safe. It must consult the Preemptive Security Layer, Dirty Tree Classifier, Decision Governor, approval evidence, and validator evidence before every cycle.
+
+The V1 state machine is:
+
+```text
+BOOT -> RECON -> TASK_SELECTION -> DRY_RUN_EXECUTION -> VALIDATION -> CONTINUE
+                                      \-> REPAIR_ATTEMPT -> VALIDATION
+                                      \-> REVIEW_REQUIRED | STOP | SOS
+```
+
+Continuation stops for `SOS`, required approval, secret or broker authority risk, live trading, production action, unknown state, protected authority conflict, or validator exhaustion. A failed validator permits at most one deterministic validator-focused repair preview; if validation still fails, continuation stops.
+
+Resume is allowed only when the repo root, branch, dirty signature, security signature, and task signature still match the previous continuation state. The continuation engine emits evidence with `cycle_id`, `state`, selected task, validators, repair count, security snapshot, dirty signature, and `next_safe_action`. Evidence does not approve APPLY, staging, commit, push, PR, merge, worker launch, scheduler or daemon activation, broker/API use, live trading, production, dashboard mutation, or destructive cleanup.
+
 ## Proposal Gate
 
 Every self-continuation output is an approval item under:

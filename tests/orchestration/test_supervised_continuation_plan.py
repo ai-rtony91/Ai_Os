@@ -123,6 +123,8 @@ def test_clean_repo_yields_ready_for_approval_with_recommendation(tmp_path):
     assert res["execution_allowed"] is False
     assert res["human_approval_required"] is True
     assert res["can_continue_without_anthony"] is False
+    assert res["autonomous_continuation_state"] in {"CONTINUE", "REVIEW_REQUIRED", "STOP", "SOS", "UNKNOWN"}
+    assert res["autonomous_continuation_allowed"] is False
     assert res["continuation_status"] == "READY_FOR_APPROVAL"
     assert res["recommended_next_packet_id"] == "AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1"
     assert res["recommended_next_packet_title"] == "feat(forex): add paper learning action router"
@@ -223,6 +225,7 @@ def test_safe_report_dirty_state_can_still_propose_dry_run_continuation(tmp_path
     assert res["human_approval_required"] is True
     assert res["can_continue_without_anthony"] is False
     assert res["safe_dirty_continuation_allowed"] is True
+    assert res["autonomous_job_continuation"]["schema"] == "AIOS_AUTONOMOUS_JOB_CONTINUATION_STATE.v1"
     assert res["dirty_tree_classification"]["overall_classification"] == "SAFE_DIRTY"
     assert res["dirty_tree_classification"]["safe_for_apply"] is False
 

@@ -92,3 +92,49 @@ def test_safety_blocker_routes_to_sos_stop():
     )
     assert controller["action_type"] == "sos_stop"
     assert controller["sos_required"] is True
+
+
+def test_autonomous_job_stop_blocks_controller_before_productive_routing():
+    module = load_module(CONTROLLER_PATH, "aios_continuation_controller")
+    controller = module.build_continuation_controller(
+        resume_state={"goal": "forex-paper-bot"},
+        control_plane_status={"next_component": "forex_paper_execution_simulator"},
+        bounded_executor_handoff=ready_handoff("build_forex_risk_controls"),
+        bounded_executor_ready={"status": "ready_for_human_review"},
+        mode_registry=registry(),
+        user_goal="forex-paper-bot",
+        autonomous_job_state={
+            "state": "STOP",
+            "safe_to_continue_without_human": False,
+            "stop_reason": "security_stop",
+            "next_safe_action": "Stop for security review.",
+            "security_snapshot": {"overall_state": "STOP"},
+        },
+    )
+
+    assert controller["continuation_status"] == "blocked"
+    assert controller["reason_code"] == "autonomous_job_stop"
+    assert controller["autonomous_job_continuation_state"] == "STOP"
+    assert controller["productive_executor_available"] is False
+
+
+def test_autonomous_job_continue_is_read_only_evidence_not_approval():
+    module = load_module(CONTROLLER_PATH, "aios_continuation_controller")
+    controller = module.build_continuation_controller(
+        resume_state={"goal": "forex-paper-bot"},
+        control_plane_status={"current_goal": "forex-paper-bot", "next_component": "forex_paper_execution_simulator"},
+        bounded_executor_handoff=ready_handoff(),
+        bounded_executor_ready={"status": "ready_for_human_review"},
+        mode_registry=registry(),
+        user_goal="forex-paper-bot",
+        autonomous_job_state={
+            "state": "CONTINUE",
+            "safe_to_continue_without_human": True,
+            "next_safe_action": "Continue DRY_RUN work.",
+            "security_snapshot": {"overall_state": "CLEAR"},
+        },
+    )
+
+    assert controller["autonomous_continuation_allowed"] is True
+    assert controller["continuation_status"] == "ready_to_prepare_packet"
+    assert controller["approval_required"]["commit"] is True

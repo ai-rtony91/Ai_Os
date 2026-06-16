@@ -256,6 +256,12 @@ Dirty generated evidence, reports, and sandbox previews may remain present durin
 
 Runner preview must also respect the Preemptive Security Layer. `WATCH` security state is DRY_RUN-only. `STOP`, `REVIEW_REQUIRED`, or `SOS` security state blocks APPLY and protected actions. HUD-ready fields are display evidence only and must not become dashboard mutation controls or live response buttons.
 
+Autonomous Job Continuation V1 is a runner-preview extension, not a worker launcher. It may move through `BOOT`, `RECON`, `TASK_SELECTION`, `DRY_RUN_EXECUTION`, `VALIDATION`, `REPAIR_ATTEMPT`, and `CONTINUE` only for READ_ONLY/DRY_RUN work. It moves to `REVIEW_REQUIRED`, `STOP`, or `SOS` when security, dirty tree, governor, approval, resume, or validator evidence is unsafe or unknown.
+
+The one-repair-attempt rule is narrow: one deterministic validator-focused repair preview may be recorded after a validator failure. The runner must validate again immediately. A second failure, unknown repair result, or changed resume signature stops the continuation cycle.
+
+Continuation evidence must include the cycle id, state, selected task, validators, repair count, security snapshot, dirty signature, resume decision, and next safe action. The evidence is read-only and cannot authorize APPLY, staging, commit, push, PR, merge, scheduler, daemon, worker launch, broker/API, live trading, production, dashboard mutation, or destructive cleanup.
+
 A runner preview should:
 
 1. Select one task only.
