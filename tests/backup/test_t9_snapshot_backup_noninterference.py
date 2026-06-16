@@ -125,3 +125,16 @@ def test_console_output_reports_no_active_repo_mutation_and_lock_path():
         "active_repo_mutation = NO",
     ]:
         assert expected in text
+
+
+def test_t9_report_schema_separates_backup_copy_and_work_metrics():
+    text = SCRIPT_PATH.read_text(encoding="utf-8")
+
+    for expected in [
+        "backup_copied_metrics",
+        "dev_work_delta_metrics",
+        "daily_work_metrics",
+        "timeslot_work_metrics",
+        "courtesy_sos",
+    ]:
+        assert expected in text

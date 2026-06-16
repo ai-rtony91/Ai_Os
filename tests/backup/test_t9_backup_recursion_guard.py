@@ -55,7 +55,7 @@ Invoke-Expression $functionBlock
 Test-AiOsRelativePathExcluded `
     -RelativePath '{relative_path}' `
     -ExcludedFolderNames @('.git','node_modules','snapshots','current_mirror','AIOS_BACKUP*','secrets','credentials') `
-    -ExcludedFilePatterns @('.env','.env.*','*secret*','*credential*','*.key','*.pem')
+    -ExcludedFilePatterns @('.env','*.env','.env.*','*.pem','*.key','id_rsa','id_ed25519','*.pfx','*.p12','*secret*','*secrets*','*credential*')
 """
     completed = subprocess.run(
         [_powershell_exe(), "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", command],
@@ -131,6 +131,9 @@ def test_candidate_backup_folder_pattern_blocks():
 
 def test_delta_candidate_excludes_secret_env_and_snapshot_paths():
     assert _run_relative_exclusion(r".env") is True
+    assert _run_relative_exclusion(r"local.env") is True
+    assert _run_relative_exclusion(r"id_rsa") is True
+    assert _run_relative_exclusion(r"client.pfx") is True
     assert _run_relative_exclusion(r"secrets\api.key") is True
     assert _run_relative_exclusion(r"snapshots\old\file.txt") is True
 
