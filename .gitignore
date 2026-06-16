@@ -13,6 +13,7 @@ Reports/security/
 Reports/dry_runs/
 Reports/generated/
 Reports/runtime/
+Reports/dashboard_state/*.md
 archive/reports_legacy/daily/MORNING_BRIEF_*.md
 archive/reports_legacy/dry_runs/
 archive/reports_legacy/security/
