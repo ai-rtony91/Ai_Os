@@ -40,6 +40,7 @@ def evaluate_broker_paper_sandbox_readiness(
     risk_governor: dict[str, Any] | None = None,
     stress_repair: dict[str, Any] | None = None,
     expanded_oos: dict[str, Any] | None = None,
+    oos_repair: dict[str, Any] | None = None,
     policy: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     active_policy = default_broker_paper_sandbox_readiness_policy()
@@ -54,12 +55,14 @@ def evaluate_broker_paper_sandbox_readiness(
     )
     active_stress_repair = dict(stress_repair or active_evidence.get("stress_repair") or {})
     active_expanded_oos = dict(expanded_oos or active_evidence.get("expanded_oos") or {})
+    active_oos_repair = dict(oos_repair or active_evidence.get("oos_repair") or {})
     evidence_gates = _evidence_gates(
         active_evidence,
         active_stress_oos,
         active_risk_governor,
         active_stress_repair,
         active_expanded_oos,
+        active_oos_repair,
         active_policy,
     )
     passed_gates = [name for name, gate in evidence_gates.items() if gate["passed"] is True]
@@ -78,24 +81,41 @@ def evaluate_broker_paper_sandbox_readiness(
             active_risk_governor,
             active_stress_repair,
             active_expanded_oos,
+            active_oos_repair,
         ),
         "required_future_protected_approvals": _required_future_protected_approvals(),
         "forbidden_current_actions": _forbidden_current_actions(),
         "broker_paper_sandbox_contract_ready": False,
+        "broker_paper_contract_ready": False,
         "stress_repair_status": active_stress_repair.get("stress_repair_status", "not_run"),
         "stress_repair_classification": active_stress_repair.get("repaired_classification", "not_run"),
         "expanded_oos_status": active_expanded_oos.get("classification", "not_run"),
         "expanded_oos_classification": active_expanded_oos.get("classification", "not_run"),
+        "oos_repair_status": active_oos_repair.get(
+            "repaired_classification",
+            active_oos_repair.get("classification", "not_run"),
+        ),
+        "oos_repair_classification": active_oos_repair.get(
+            "repaired_classification",
+            active_oos_repair.get("classification", "not_run"),
+        ),
+        "original_max_degradation_pct": float(active_oos_repair.get("original_max_degradation_pct", 0.0)),
+        "repaired_max_degradation_pct": float(active_oos_repair.get("repaired_max_degradation_pct", 0.0)),
+        "degradation_improvement_pct": float(active_oos_repair.get("degradation_improvement_pct", 0.0)),
         "live_trade_ready": False,
         "real_order_ready": False,
         "broker_integration_active": False,
         "credentials_required_now": False,
         "protected_gate_required": True,
         "future_broker_paper_packet_requires_approval": True,
+        "security_gate_required_before_broker_paper": True,
+        "required_security_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
+        "security_gate_reason": "broker-paper requires secrets/network/broker boundaries before adapter work",
         "safety": broker_paper_sandbox_boundary_summary(),
     }
     result["readiness_status"] = classify_broker_paper_sandbox_readiness(result)
     result["broker_paper_sandbox_contract_ready"] = result["readiness_status"] == CONTRACT_READY
+    result["broker_paper_contract_ready"] = result["broker_paper_sandbox_contract_ready"]
     result["next_safe_action"] = _next_safe_action(result["readiness_status"], result["blockers"])
     assert_no_broker_paper_side_effects(result)
     return result
@@ -156,6 +176,8 @@ def broker_paper_sandbox_boundary_summary() -> dict[str, Any]:
         "protected_gate_required": True,
         "reports_written": False,
         "files_written": [],
+        "security_gate_required_before_broker_paper": True,
+        "required_security_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
     }
 
 
@@ -221,6 +243,7 @@ def _evidence_gates(
     risk_governor: dict[str, Any],
     stress_repair: dict[str, Any],
     expanded_oos: dict[str, Any],
+    oos_repair: dict[str, Any],
     policy: dict[str, Any],
 ) -> dict[str, dict[str, Any]]:
     multi = dict(evidence.get("multi_fixture_paper_forward_summary") or {})
@@ -239,6 +262,11 @@ def _evidence_gates(
     if repair_classification == "PAPER_FORWARD_READY" and combined_classification == "WATCHLIST":
         combined_classification = "PAPER_FORWARD_READY"
     expanded_oos_classification = str(expanded_oos.get("classification") or "")
+    oos_repair_classification = str(
+        oos_repair.get("repaired_classification")
+        or oos_repair.get("classification")
+        or ""
+    )
     gates = {
         "minimum_fixture_count": _minimum(int(multi.get("fixture_count", 0)), policy["minimum_fixture_count"]),
         "minimum_regime_count": _minimum(int(regime.get("total_regimes", 0)), policy["minimum_regime_count"]),
@@ -282,6 +310,17 @@ def _evidence_gates(
             float(expanded_oos.get("heldout_consistency_pct", 0.0)),
             policy["minimum_oos_consistency_pct"],
         )
+    if oos_repair_classification:
+        gates["oos_repair_classification"] = _classification_gate(oos_repair_classification)
+        gates["oos_repair_degradation_improved"] = _boolean_gate(
+            float(oos_repair.get("degradation_improvement_pct", 0.0)) > 0.0,
+            float(oos_repair.get("degradation_improvement_pct", 0.0)) > 0.0,
+            True,
+        )
+        gates["oos_repair_degradation_policy"] = _maximum_watchlist(
+            float(oos_repair.get("repaired_max_degradation_pct", 100.0)),
+            float(oos_repair.get("repair_plan", {}).get("max_allowed_degradation_pct", 35.0)),
+        )
     return gates
 
 
@@ -317,6 +356,17 @@ def _classification_gate(classification: str) -> dict[str, Any]:
     }
 
 
+def _maximum_watchlist(actual: float, threshold: float) -> dict[str, Any]:
+    passed_policy = float(actual) <= float(threshold)
+    return {
+        "passed": True,
+        "actual": round(float(actual), 4),
+        "threshold": round(float(threshold), 4),
+        "comparator": "<=",
+        "classification": "PAPER_FORWARD_READY" if passed_policy else "WATCHLIST",
+    }
+
+
 def _boolean_gate(passed: bool, actual: bool, expected: bool) -> dict[str, Any]:
     return {
         "passed": bool(passed),
@@ -349,6 +399,7 @@ def _blockers(
     risk_governor: dict[str, Any],
     stress_repair: dict[str, Any],
     expanded_oos: dict[str, Any],
+    oos_repair: dict[str, Any],
 ) -> list[str]:
     blockers = []
     for name, gate in evidence_gates.items():
@@ -361,6 +412,7 @@ def _blockers(
     blockers.extend([str(item) for item in list(risk_governor.get("blockers") or [])])
     blockers.extend([str(item) for item in list(stress_repair.get("blockers") or [])])
     blockers.extend([str(item) for item in list(expanded_oos.get("blockers") or [])])
+    blockers.extend([str(item) for item in list(oos_repair.get("blockers") or [])])
     return _unique(blockers)
 
 
@@ -412,8 +464,10 @@ def _forbidden_current_actions() -> list[str]:
 
 def _next_safe_action(readiness_status: str, blockers: list[str]) -> str:
     if readiness_status == CONTRACT_READY:
-        return "Prepare protected adapter-stub contract only; no broker integration, credentials, network, or orders are approved."
+        return "Run the pre-security broker-paper gate before any adapter, credential, network, or order work."
     if readiness_status == WATCHLIST:
+        if any("oos_repair" in blocker for blocker in blockers):
+            return "Repair low-vol OOS degradation before any protected broker-paper sandbox contract."
         if any("expanded_oos" in blocker for blocker in blockers):
             return "Repair expanded OOS blockers before any protected broker-paper sandbox adapter-stub contract."
         return "Repair WATCHLIST stress/OOS evidence before any protected broker-paper sandbox adapter-stub contract."

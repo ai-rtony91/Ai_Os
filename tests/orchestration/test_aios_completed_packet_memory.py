@@ -367,7 +367,7 @@ def test_default_memory_includes_stress_oos_completion() -> None:
     result = build_result(candidate_packets=[])
 
     assert "PKT-AIOS-PAPER-FORWARD-STRESS-AND-OUT-OF-SAMPLE-V1" in result["completed_packet_ids"]
-    records = load_module().DEFAULT_COMPLETED_PACKETS
+    records = load_module()._completed_memory_records({})
     stress_oos = [
         record
         for record in records
@@ -437,18 +437,29 @@ def test_default_memory_includes_oos_expansion_completion() -> None:
     result = build_result(candidate_packets=[])
 
     assert "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1" in result["completed_packet_ids"]
-    records = load_module().DEFAULT_COMPLETED_PACKETS
+    records = load_module()._completed_memory_records({})
     expansion = [
         record
         for record in records
         if record["packet_id"] == "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1"
     ][0]
-    assert expansion["title"] == "Add paper-forward OOS expansion"
+    assert expansion["landed_pr"] == "#750"
+    assert expansion["title"] == "Add expanded OOS validation"
     assert expansion["lane"] == "paper-forward-oos-expansion"
+    assert (
+        expansion["completion_reason"]
+        == "expanded deterministic OOS validation landed with 14 fixtures, 29 splits, low-vol degradation blocker exposed, and broker-paper kept blocked"
+    )
     assert "automation/forex_engine/oos_expansion.py" in expansion["completed_files"]
     assert "automation/forex_engine/run_oos_expansion_demo.py" in expansion["completed_files"]
     assert "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md" in expansion["completed_files"]
     assert "tests/forex_engine/test_oos_expansion.py" in expansion["completed_files"]
+    assert expansion["completed_files"] == [
+        "automation/forex_engine/oos_expansion.py",
+        "automation/forex_engine/run_oos_expansion_demo.py",
+        "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md",
+        "tests/forex_engine/test_oos_expansion.py",
+    ]
 
 
 def test_default_memory_includes_landed_supertrend_edge_proof_builder() -> None:

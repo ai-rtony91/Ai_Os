@@ -453,7 +453,7 @@ DEFAULT_COMPLETED_PACKETS = [
     },
     {
         "packet_id": "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1",
-        "title": "Add paper-forward OOS expansion",
+        "title": "Add expanded OOS validation",
         "lane": "paper-forward-oos-expansion",
         "completion_reason": "expanded deterministic OOS validation landed with broader fixtures, regime/symbol/timeframe holdouts, degradation scoring, readiness/dashboard propagation, docs, and tests",
         "completed_files": [
@@ -675,6 +675,28 @@ def _record_from_value(value: Any, source: str) -> dict[str, Any]:
     }
 
 
+def _normalize_completed_packet_record(record: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(record)
+    if _packet_id(normalized) == "PKT-AIOS-PAPER-FORWARD-OOS-EXPANSION-V1":
+        normalized.update(
+            {
+                "landed_pr": "#750",
+                "title": "Add expanded OOS validation",
+                "completion_reason": (
+                    "expanded deterministic OOS validation landed with 14 fixtures, 29 splits, "
+                    "low-vol degradation blocker exposed, and broker-paper kept blocked"
+                ),
+                "completed_files": [
+                    "automation/forex_engine/oos_expansion.py",
+                    "automation/forex_engine/run_oos_expansion_demo.py",
+                    "docs/trading_lab/AIOS_FOREX_BUILDER_OOS_EXPANSION.md",
+                    "tests/forex_engine/test_oos_expansion.py",
+                ],
+            }
+        )
+    return normalized
+
+
 def _completed_memory_records(payload: dict[str, Any]) -> list[dict[str, Any]]:
     records = [dict(record) for record in DEFAULT_COMPLETED_PACKETS]
     for item in _as_items(payload.get("completed_packet_ids")):
@@ -685,7 +707,7 @@ def _completed_memory_records(payload: dict[str, Any]) -> list[dict[str, Any]]:
         records.append(_record_from_value(item, "landed_prs"))
     for item in _as_items(payload.get("commit_history_summary")):
         records.append(_record_from_value(item, "commit_history_summary"))
-    return records
+    return [_normalize_completed_packet_record(record) for record in records]
 
 
 def _cycle_ledger_records(payload: dict[str, Any]) -> list[dict[str, Any]]:

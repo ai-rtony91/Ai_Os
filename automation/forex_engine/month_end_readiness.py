@@ -73,15 +73,20 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     stress_repair_summary = dict(bundle.get("stress_repair_summary") or {})
     expanded_oos = dict(bundle.get("expanded_oos") or {})
     expanded_oos_summary = dict(bundle.get("expanded_oos_summary") or expanded_oos.get("expanded_oos_summary") or {})
+    oos_repair = dict(bundle.get("oos_repair") or {})
+    oos_repair_summary = dict(bundle.get("oos_repair_summary") or {})
     oos_result = dict(bundle.get("out_of_sample_validation") or bundle.get("oos_result") or {})
     oos_summary = dict(oos_result.get("oos_summary") or {})
     combined_gate = dict(bundle.get("combined_stress_oos_gate") or {})
     sandbox_readiness = dict(bundle.get("broker_paper_sandbox_readiness") or {})
     if not sandbox_readiness:
         sandbox_readiness = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
-            bundle,
-            combined_gate,
-            risk_governor,
+            evidence=bundle,
+            stress_oos=combined_gate,
+            risk_governor=risk_governor,
+            stress_repair=stress_repair,
+            expanded_oos=expanded_oos,
+            oos_repair=oos_repair,
         )
     stress_blockers = [
         str(blocker)
@@ -96,6 +101,7 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             *_text_list(paper_stress.get("blockers")),
             *_text_list(stress_repair.get("blockers")),
             *_text_list(expanded_oos.get("blockers")),
+            *_text_list(oos_repair.get("blockers")),
             *_text_list(oos_result.get("blockers")),
             *_text_list(combined_gate.get("blockers")),
             *_text_list(sandbox_readiness.get("blockers")),
@@ -104,6 +110,12 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
     )
     risk_governor_classification = str(risk_governor.get("classification") or classification)
     combined_stress_oos_classification = str(combined_gate.get("combined_classification") or "not_run")
+    oos_repair_classification = str(
+        oos_repair_summary.get("oos_repair_classification")
+        or oos_repair.get("repaired_classification")
+        or oos_repair.get("classification")
+        or "not_run"
+    )
     stress_oos_ready = combined_stress_oos_classification == "PAPER_FORWARD_READY"
     paper_forward_ready = (
         classification == "PAPER_FORWARD_READY"
@@ -125,6 +137,34 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             "classification",
             expanded_oos.get("classification", "not_run"),
         ),
+        "oos_repair_classification": oos_repair_classification,
+        "original_max_degradation_pct": float(
+            oos_repair_summary.get(
+                "original_max_degradation_pct",
+                oos_repair.get("original_max_degradation_pct", expanded_oos.get("original_max_degradation_pct", 0.0)),
+            )
+        ),
+        "repaired_max_degradation_pct": float(
+            oos_repair_summary.get(
+                "repaired_max_degradation_pct",
+                oos_repair.get("repaired_max_degradation_pct", expanded_oos.get("repaired_max_degradation_pct", 0.0)),
+            )
+        ),
+        "degradation_improvement_pct": float(
+            oos_repair_summary.get(
+                "degradation_improvement_pct",
+                oos_repair.get("degradation_improvement_pct", expanded_oos.get("degradation_improvement_pct", 0.0)),
+            )
+        ),
+        "weakest_split": str(
+            oos_repair_summary.get(
+                "weakest_split",
+                oos_repair.get(
+                    "weakest_split_after",
+                    dict(expanded_oos.get("weakest_split") or {}).get("split_id", "none"),
+                ),
+            )
+        ),
         "broker_paper_contract_ready": bool(
             sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
         ),
@@ -136,6 +176,8 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
         "credentials_required_now": False,
         "live_trade_ready": False,
         "protected_gate_required": True,
+        "security_gate_required_before_broker_paper": True,
+        "required_security_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
         "evidence_summary": {
             "fixture_count": int(multi_summary.get("fixture_count", 0)),
             "regime_count": int(regime.get("total_regimes", 0)),
@@ -206,6 +248,34 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             "expanded_oos_degradation_pct": float(
                 expanded_oos_summary.get("degradation_pct", expanded_oos.get("degradation_pct", 0.0))
             ),
+            "oos_repair_classification": oos_repair_classification,
+            "original_max_degradation_pct": float(
+                oos_repair_summary.get(
+                    "original_max_degradation_pct",
+                    oos_repair.get("original_max_degradation_pct", expanded_oos.get("original_max_degradation_pct", 0.0)),
+                )
+            ),
+            "repaired_max_degradation_pct": float(
+                oos_repair_summary.get(
+                    "repaired_max_degradation_pct",
+                    oos_repair.get("repaired_max_degradation_pct", expanded_oos.get("repaired_max_degradation_pct", 0.0)),
+                )
+            ),
+            "degradation_improvement_pct": float(
+                oos_repair_summary.get(
+                    "degradation_improvement_pct",
+                    oos_repair.get("degradation_improvement_pct", expanded_oos.get("degradation_improvement_pct", 0.0)),
+                )
+            ),
+            "weakest_oos_split": str(
+                oos_repair_summary.get(
+                    "weakest_split",
+                    oos_repair.get(
+                        "weakest_split_after",
+                        dict(expanded_oos.get("weakest_split") or {}).get("split_id", "none"),
+                    ),
+                )
+            ),
             "broker_paper_sandbox_ready": False,
             "broker_paper_contract_ready": bool(
                 sandbox_readiness.get("broker_paper_sandbox_contract_ready", False)
@@ -216,13 +286,15 @@ def build_month_end_readiness_v2_review(evidence_bundle: dict[str, Any]) -> dict
             ),
             "broker_integration_active": False,
             "credentials_required_now": False,
+            "security_gate_required_before_broker_paper": True,
+            "required_security_packet": "PKT-AIOS-BROKER-PAPER-PRESECURITY-GATE-V1",
             "symbols": list(catalog.get("symbols") or []),
             "timeframes": list(catalog.get("timeframes") or []),
         },
         "blockers": local_blockers,
         "blocked": _unique([*local_blockers, *LIVE_TRADE_BLOCKERS]),
         "live_trade_blockers": list(LIVE_TRADE_BLOCKERS),
-        "next_safe_action": _next_safe_action_v2(paper_forward_ready, local_blockers),
+        "next_safe_action": _next_safe_action_v2(paper_forward_ready, local_blockers, oos_repair_classification),
         "live_ready": False,
     }
     schemas.assert_no_live_permissions(review)
@@ -279,9 +351,11 @@ def _next_safe_action(paper_forward_ready: bool, blockers: list[str]) -> str:
     return "Collect missing evidence and rerun the local readiness review."
 
 
-def _next_safe_action_v2(paper_forward_ready: bool, blockers: list[str]) -> str:
+def _next_safe_action_v2(paper_forward_ready: bool, blockers: list[str], oos_repair_classification: str = "not_run") -> str:
     if paper_forward_ready:
-        return "Prepare broker-paper sandbox readiness contract only; live readiness requires separate future approval."
+        return "Run the broker-paper pre-security gate before any adapter work; live readiness requires separate future approval."
+    if oos_repair_classification == "WATCHLIST":
+        return "Run PKT-AIOS-PAPER-FORWARD-LOW-VOL-EDGE-REDESIGN-V1 before broker-paper readiness."
     if blockers:
         return "Resolve V2 local evidence blockers before claiming paper-forward readiness; live readiness requires separate future approval."
     return "Collect stronger multi-regime local evidence and rerun V2 readiness review; live readiness requires separate future approval."

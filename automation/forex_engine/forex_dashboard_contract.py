@@ -89,6 +89,18 @@ def build_forex_dashboard_v2_summary(evidence_summary: dict[str, Any]) -> dict[s
         "expanded_oos_degradation_pct": float(
             payload.get("expanded_oos_degradation_pct", payload.get("degradation_pct", 0.0))
         ),
+        "oos_repair_classification": str(payload.get("oos_repair_classification") or "not_run"),
+        "original_max_degradation_pct": float(
+            payload.get("original_max_degradation_pct", payload.get("expanded_oos_degradation_pct", 0.0))
+        ),
+        "repaired_max_degradation_pct": float(
+            payload.get(
+                "repaired_max_degradation_pct",
+                payload.get("expanded_oos_degradation_pct", payload.get("degradation_pct", 0.0)),
+            )
+        ),
+        "degradation_improvement_pct": float(payload.get("degradation_improvement_pct", 0.0)),
+        "weakest_oos_split": str(payload.get("weakest_oos_split") or payload.get("weakest_split") or "none"),
         "broker_paper_sandbox_readiness_status": str(
             payload.get("broker_paper_sandbox_readiness_status") or "not_run"
         ),
@@ -123,8 +135,9 @@ def format_forex_dashboard_v2_lines(summary: dict[str, Any]) -> list[str]:
             f"Stress/OOS: {payload.get('combined_stress_oos_classification', 'not_run')} | "
             f"Repair: {payload.get('stress_repair_classification', 'not_run')} | "
             f"OOS+: {payload.get('expanded_oos_classification', 'not_run')} | "
-            f"Heldout: {payload.get('expanded_oos_heldout_consistency_pct', payload.get('heldout_consistency_pct', 0.0))} | "
-            f"Degradation: {payload.get('expanded_oos_degradation_pct', payload.get('degradation_pct', 0.0))}"
+            f"OOS repair: {payload.get('oos_repair_classification', 'not_run')} | "
+            f"Repaired degradation: {payload.get('repaired_max_degradation_pct', payload.get('expanded_oos_degradation_pct', 0.0))} | "
+            f"Weakest: {payload.get('weakest_oos_split', 'none')}"
         ),
         (
             f"Sandbox contract: {payload.get('broker_paper_sandbox_readiness_status', 'not_run')} | "

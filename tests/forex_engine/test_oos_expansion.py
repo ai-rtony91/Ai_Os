@@ -5,6 +5,7 @@ from pathlib import Path
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import oos_expansion
+from automation.forex_engine import oos_repair
 from automation.forex_engine import run_oos_expansion_demo
 
 
@@ -92,6 +93,45 @@ def test_broker_paper_ready_remains_false_when_expanded_oos_is_watchlist() -> No
     assert readiness["expanded_oos_classification"] == "WATCHLIST"
     assert readiness["live_trade_ready"] is False
     assert readiness["protected_gate_required"] is True
+
+
+def test_expanded_oos_accepts_repair_result_and_preserves_watchlist_when_repair_is_watchlist() -> None:
+    expanded = oos_expansion.run_expanded_oos_validation()
+    repair = oos_repair.apply_oos_repair_policy(expanded)
+    repaired = oos_expansion.run_expanded_oos_validation(oos_repair_result=repair)
+    summary = oos_expansion.summarize_expanded_oos(repaired)
+
+    assert repaired["oos_repair_classification"] == repair["repaired_classification"]
+    assert repaired["original_max_degradation_pct"] >= repaired["repaired_max_degradation_pct"]
+    assert repaired["degradation_improvement_pct"] >= 0.0
+    assert repaired["classification"] == "WATCHLIST"
+    assert "oos_repair_degradation_exceeds_policy" in repaired["blockers"]
+    assert summary["oos_repair_classification"] == repair["repaired_classification"]
+    assert summary["repaired_max_degradation_pct"] == repaired["repaired_max_degradation_pct"]
+    assert repaired["broker_paper_contract_ready"] is False
+    assert repaired["live_ready"] is False
+    assert repaired["protected_gate_required"] is True
+
+
+def test_expanded_oos_can_advance_to_paper_forward_ready_only_when_repair_clears_policy() -> None:
+    expanded = oos_expansion.run_expanded_oos_validation()
+    repair = {
+        "repaired_classification": "PAPER_FORWARD_READY",
+        "classification": "PAPER_FORWARD_READY",
+        "original_max_degradation_pct": expanded["max_degradation_pct"],
+        "repaired_max_degradation_pct": 20.0,
+        "degradation_improvement_pct": expanded["max_degradation_pct"] - 20.0,
+        "blockers": [],
+        "broker_paper_ready": False,
+        "broker_paper_contract_ready": False,
+        "live_ready": False,
+        "protected_gate_required": True,
+    }
+    repaired = oos_expansion.run_expanded_oos_validation(oos_repair_result=repair)
+
+    assert repaired["classification"] == "PAPER_FORWARD_READY"
+    assert repaired["max_degradation_pct"] == 20.0
+    assert repaired["live_ready"] is False
 
 
 def test_boundary_summary_blocks_broker_network_orders_and_live() -> None:
