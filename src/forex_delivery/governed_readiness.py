@@ -58,7 +58,77 @@ REQUIRED_EXCEPTION_FIELDS = (
     "timestamp",
     "account_mode",
     "paper_live_mode_confirmation",
+    "one_order_only",
+    "no_retry_loop",
+    "no_autonomous_reentry",
+    "kill_switch_confirmed",
+    "timeout_confirmed",
+    "final_disarm_confirmed",
+    "rollback_plan_confirmed",
+    "post_trade_journal_path",
+    "reconciliation_proof",
+    "evidence_bundle_complete",
+    "demo_or_practice_broker_proof",
+    "credential_boundary_confirmed",
+    "account_id_boundary_confirmed",
+    "live_endpoint_denial_confirmed",
 )
+
+LIVE_ARMING_BOOLEAN_GATES = (
+    "one_order_only",
+    "no_retry_loop",
+    "no_autonomous_reentry",
+    "kill_switch_confirmed",
+    "timeout_confirmed",
+    "final_disarm_confirmed",
+    "rollback_plan_confirmed",
+    "reconciliation_proof",
+    "evidence_bundle_complete",
+    "demo_or_practice_broker_proof",
+    "credential_boundary_confirmed",
+    "account_id_boundary_confirmed",
+    "live_endpoint_denial_confirmed",
+)
+
+LIVE_ARMING_SAFE_TEXT_GATES = (
+    "broker_path",
+    "instrument",
+    "side",
+    "units_or_notional_limit",
+    "maximum_loss",
+    "daily_loss_cap",
+    "stop_loss",
+    "order_type",
+    "approval_window",
+    "evidence_bundle_path",
+    "arming_step",
+    "stop_point",
+    "human_owner_approval",
+    "timestamp",
+    "account_mode",
+    "paper_live_mode_confirmation",
+    "post_trade_journal_path",
+)
+
+UNSAFE_REVIEW_MARKERS = (
+    "todo",
+    "tbd",
+    "placeholder",
+    "unknown",
+    "ambiguous",
+    "expired",
+    "unsafe",
+)
+
+UNSAFE_TRUE_FLAGS = {
+    "retry_loop": "retry_loop_must_not_be_enabled",
+    "autonomous_reentry": "autonomous_reentry_must_not_be_enabled",
+    "scheduler_enabled": "scheduler_must_not_be_enabled",
+    "daemon_enabled": "daemon_must_not_be_enabled",
+    "order_route_enabled": "order_route_must_not_be_enabled",
+    "trade_route_enabled": "trade_route_must_not_be_enabled",
+    "live_endpoint_enabled": "live_endpoint_must_not_be_enabled",
+}
 
 CHAIN_LINKS = (
     "BROKER CONNECT",
@@ -82,18 +152,54 @@ CHAIN_LINKS = (
 
 FORBIDDEN_LIVE_FIELDS = {
     "credentials",
+    "credential",
     "token",
     "tokens",
     "api_key",
+    "apikey",
     "password",
     "secret",
     "account_id",
     "account_identifier",
+    "broker_order_identifier",
     "broker_order_id",
+    "raw_broker_payload",
     "raw_live_payload",
+    "broker_payload",
     "live_payload",
     "private_account_data",
 }
+
+FORBIDDEN_LIVE_FIELD_MARKERS = (
+    "credential",
+    "api_key",
+    "apikey",
+    "token",
+    "password",
+    "secret",
+    "private_key",
+    "account_id",
+    "account_identifier",
+    "broker_order_id",
+    "broker_order_identifier",
+    "raw_broker_payload",
+    "raw_live_payload",
+    "broker_payload",
+    "live_payload",
+    "private_account_data",
+)
+
+FORBIDDEN_VALUE_MARKERS = (
+    "sk-",
+    "bearer ",
+    "authorization:",
+    "begin private key",
+    "api_key=",
+    "apikey=",
+    "password=",
+    "token=",
+    "secret=",
+)
 
 
 class LiveExecutionBlocked(RuntimeError):
@@ -369,14 +475,69 @@ def build_live_arming_checklist(approval_fields: dict[str, Any]) -> dict[str, An
     ]
     blocker_reasons = [f"missing_required_field:{field}" for field in missing]
     blocker_reasons.extend([f"forbidden_field:{field}" for field in forbidden])
+    passed_gates: list[str] = []
+    failed_gates: list[str] = []
+
+    if missing:
+        failed_gates.append("required_exception_fields_present")
+    else:
+        passed_gates.append("required_exception_fields_present")
+
+    if forbidden:
+        failed_gates.append("no_forbidden_live_fields")
+    else:
+        passed_gates.append("no_forbidden_live_fields")
+
     if str(fields.get("paper_live_mode_confirmation") or "").upper() != "LIVE":
         blocker_reasons.append("paper_live_mode_confirmation_must_be_live_for_arming_review")
+        failed_gates.append("paper_live_mode_confirmation")
+    else:
+        passed_gates.append("paper_live_mode_confirmation")
     if str(fields.get("account_mode") or "").upper() != "LIVE":
         blocker_reasons.append("account_mode_must_be_live_for_arming_review")
+        failed_gates.append("account_mode")
+    else:
+        passed_gates.append("account_mode")
     if str(fields.get("human_owner_approval") or "") != "Anthony Meza":
         blocker_reasons.append("human_owner_approval_must_name_anthony_meza")
+        failed_gates.append("human_owner_approval")
+    else:
+        passed_gates.append("human_owner_approval")
+
+    for field_name in LIVE_ARMING_BOOLEAN_GATES:
+        if _field_present(fields, field_name) and fields[field_name] is True:
+            passed_gates.append(field_name)
+        else:
+            failed_gates.append(field_name)
+            blocker_reasons.append(f"{field_name}_must_be_true")
+
+    for field_name in LIVE_ARMING_SAFE_TEXT_GATES:
+        if not _field_present(fields, field_name):
+            continue
+        unsafe_reasons = _unsafe_text_value_reasons(fields[field_name])
+        if unsafe_reasons:
+            failed_gates.append(field_name)
+            blocker_reasons.extend(
+                f"unsafe_or_ambiguous_field:{field_name}:{reason}"
+                for reason in unsafe_reasons
+            )
+        elif field_name not in passed_gates:
+            passed_gates.append(field_name)
+
+    for field_name, reason in UNSAFE_TRUE_FLAGS.items():
+        if fields.get(field_name) is True:
+            failed_gates.append(field_name)
+            blocker_reasons.append(reason)
+
+    passed_gates = sorted(set(passed_gates))
+    failed_gates = sorted(set(failed_gates))
 
     ready_for_human_review = not blocker_reasons
+    next_required_action = (
+        "human_owner_review_only_live_execution_remains_blocked"
+        if ready_for_human_review
+        else "complete_sanitized_live_arming_review_package"
+    )
     return {
         "schema": "AIOS_FOREX_DELIVERY_LIVE_ARMING_CHECKLIST.v1",
         "ready_for_human_review": ready_for_human_review,
@@ -387,7 +548,10 @@ def build_live_arming_checklist(approval_fields: dict[str, Any]) -> dict[str, An
         "credential_material_present": False,
         "required_fields": list(REQUIRED_EXCEPTION_FIELDS),
         "missing_fields": missing,
-        "blocker_reasons": blocker_reasons,
+        "passed_gates": passed_gates,
+        "failed_gates": failed_gates,
+        "blocker_reasons": sorted(set(blocker_reasons)),
+        "next_required_action": next_required_action,
         "stop_point": (
             "Live order remains blocked until Human Owner activates the Single "
             "Live Micro-Trade Exception with all required RISK_POLICY.md fields."
@@ -551,15 +715,48 @@ def _field_present(fields: dict[str, Any], field_name: str) -> bool:
     return field_name in fields and fields[field_name] not in (None, "", [], {})
 
 
-def _find_forbidden_fields(value: Any) -> list[str]:
+def _find_forbidden_fields(value: Any, *, path: str = "") -> list[str]:
     found: set[str] = set()
     if isinstance(value, dict):
         for key, nested in value.items():
-            key_text = str(key).lower()
-            if key_text in FORBIDDEN_LIVE_FIELDS:
-                found.add(key_text)
-            found.update(_find_forbidden_fields(nested))
+            key_text = str(key)
+            key_path = f"{path}.{key_text}" if path else key_text
+            normalized_key = key_text.lower()
+            if _forbidden_key_name(normalized_key):
+                found.add(key_path)
+            found.update(_find_forbidden_fields(nested, path=key_path))
     elif isinstance(value, list):
-        for item in value:
-            found.update(_find_forbidden_fields(item))
+        for index, item in enumerate(value):
+            item_path = f"{path}[{index}]" if path else f"[{index}]"
+            found.update(_find_forbidden_fields(item, path=item_path))
+    elif _looks_like_forbidden_value(value):
+        found.add(path or "<value>")
     return sorted(found)
+
+
+def _forbidden_key_name(key_text: str) -> bool:
+    if key_text in REQUIRED_EXCEPTION_FIELDS:
+        return False
+    if key_text in FORBIDDEN_LIVE_FIELDS:
+        return True
+    return any(marker in key_text for marker in FORBIDDEN_LIVE_FIELD_MARKERS)
+
+
+def _looks_like_forbidden_value(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    normalized = value.strip().lower()
+    if any(marker in normalized for marker in FORBIDDEN_VALUE_MARKERS):
+        return True
+    parts = normalized.split("-")
+    return len(parts) >= 3 and all(part.isdigit() for part in parts[:3])
+
+
+def _unsafe_text_value_reasons(value: Any) -> list[str]:
+    if not isinstance(value, str):
+        return []
+    normalized = value.strip().lower()
+    reasons = [marker for marker in UNSAFE_REVIEW_MARKERS if marker in normalized]
+    if _looks_like_forbidden_value(value):
+        reasons.append("forbidden_value_shape")
+    return reasons

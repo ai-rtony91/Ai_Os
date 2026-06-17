@@ -64,7 +64,7 @@ def test_malformed_credential_rejection_fails_closed() -> None:
         _example_handoff(
             external_auth_reference_format="RAW_AUTH_VALUE",
             auth_material_location="REPO_FILE",
-            api_key="EXAMPLE_NOT_A_REAL_VALUE",
+            api_key="EXAMPLE",
         )
     )
 
