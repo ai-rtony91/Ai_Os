@@ -34,6 +34,14 @@ DRY_RUN
 
 `review package` means evidence is complete enough for operator review. It does not execute merge, commit, push, or APPLY.
 
+## Single Live Micro-Trade Exception Routing Boundary
+
+For any future Single Live Micro-Trade Exception, APPLY routing can prepare review packages only. It cannot approve, arm, extend, retry, re-enter, execute, release credential handles, or satisfy the exception.
+
+The exception remains blocked unless `RISK_POLICY.md` is satisfied by explicit Human Owner approval that is one-shot, non-transferable, expiring, packet-bound, and scoped to the exact exception fields. Generic route fields such as `approval_status`, `approved_by_human`, `APPROVED`, or `approval_granted` are not sufficient by themselves.
+
+Routing evidence, review packages, validator summaries, reports, telemetry, queues, and generated artifacts must not contain credentials, broker order IDs, account identifiers, live payloads, private account data, or secret values.
+
 ## Required Evidence
 
 Each route should include:

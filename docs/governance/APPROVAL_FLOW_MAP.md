@@ -35,6 +35,16 @@ Binding a gate to a packet is not approval. Human Owner approval requires both f
 
 Until both fields are set by Anthony Meza, the chain verdict remains pending or blocked and no APPLY authority is granted.
 
+### Single Live Micro-Trade Exception Approval Boundary
+
+For ordinary APPLY gates, `approved_by_human=true` and `approval_status=approved_for_apply` are required fields. For any future Single Live Micro-Trade Exception, those fields are not sufficient by themselves.
+
+The exception must satisfy `RISK_POLICY.md`: explicit Human Owner approval, one-shot scope, non-transferable authority, expiration, packet binding, broker path, instrument, side, units or notional limit, maximum loss, daily loss cap, stop loss, order type, approval window, evidence bundle, arming step, and stop point.
+
+The approval chain, approval inbox, gate files, validators, dashboards, queues, routers, telemetry, reports, generated evidence, launchers, terminals, and worker output cannot approve, arm, extend, retry, re-enter, execute, release credential handles, or satisfy the exception unless the current Human Owner approval and every `RISK_POLICY.md` gate are present.
+
+Approval artifacts must not contain credentials, broker order IDs, account identifiers, live payloads, private account data, or secret values.
+
 ## 4. Evidence And Projection Boundaries
 
 These surfaces may be read as evidence or projection input, but they are not active approval authority:

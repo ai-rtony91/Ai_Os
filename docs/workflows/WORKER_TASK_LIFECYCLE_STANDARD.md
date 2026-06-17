@@ -18,6 +18,16 @@ A worker, runner, queue, packet, or validator may recommend a next safe action. 
 
 Approval status is separate from queue status. The lifecycle answers "where is this task in the queue?" Approval status answers "has the operator approved the gated action?"
 
+## Single Live Micro-Trade Exception Lifecycle Boundary
+
+For any future Single Live Micro-Trade Exception, lifecycle state remains queue evidence only. `current_status`, `approval_status`, `ready_for_apply`, `validation_passed`, `apply_completed`, `done`, or any legacy status projection cannot approve, arm, extend, retry, re-enter, execute, release credential handles, or satisfy the exception.
+
+Approval must be explicit, Human Owner-bound, one-shot, non-transferable, expiring, packet-bound, and compliant with `RISK_POLICY.md`. Generic fields such as `approval_status`, `approved_by_human`, `APPROVED`, or `approval_granted` are not enough by themselves.
+
+Lifecycle transitions must not trigger hidden scheduler, daemon, runtime, broker, credential, or live-trading execution. A fill, rejection, error, timeout, approval expiry, validator result, dashboard state, or queue update cannot create retry authority or autonomous re-entry.
+
+Lifecycle records and workflow artifacts must not contain credentials, broker order IDs, account identifiers, live payloads, private account data, or secret values.
+
 ## Lifecycle Overview
 
 A controlled worker task should move through this general path:

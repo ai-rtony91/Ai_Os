@@ -30,6 +30,16 @@ Only the user can approve APPLY, protected edits, commit, push, merge, deploymen
 
 Queue status and approval status are separate. Output surfaces should show both when relevant: `current_status` for lifecycle position, and approval state for whether a gated action has operator approval.
 
+## Single Live Micro-Trade Exception Output Boundary
+
+For any future Single Live Micro-Trade Exception, worker output, generated packets, reports, summaries, SITREPs, terminal banners, launchers, handoff packets, queue views, and dashboard projections remain evidence or communication only.
+
+Those outputs cannot approve, arm, extend, retry, re-enter, execute, release credential handles, or satisfy the exception. They also cannot convert generated evidence into approval or use workflow text to route around Human Owner approval.
+
+Approval must be explicit, Human Owner-bound, one-shot, non-transferable, expiring, packet-bound, and compliant with `RISK_POLICY.md`. Generic fields or labels such as `approval_status`, `approved_by_human`, `APPROVED`, `approval_granted`, `ready`, `passed`, or `done` are not enough to satisfy a live micro-trade exception.
+
+Worker output and generated evidence must not include credentials, broker order IDs, account identifiers, live payloads, private account data, or secret values.
+
 ## Required Identity Header
 
 Every worker output should begin with an identity header that includes:
