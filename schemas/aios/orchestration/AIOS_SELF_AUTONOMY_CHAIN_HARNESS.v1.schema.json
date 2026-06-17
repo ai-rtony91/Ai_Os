@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_SELF_AUTONOMY_CHAIN_HARNESS.v1",
+  "title": "AIOS Self-Autonomy Chain Harness V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "component",
+    "mode",
+    "chain_id",
+    "verdict",
+    "chain_state",
+    "goal",
+    "first_blocking_component",
+    "readiness",
+    "plan",
+    "dry_run_execution",
+    "apply_gate",
+    "review_loop",
+    "component_verdicts",
+    "component_states",
+    "human_approval_required",
+    "explicit_human_approval_present",
+    "apply_review_ready",
+    "self_approval_allowed",
+    "apply_allowed",
+    "apply_performed",
+    "commands_executed",
+    "files_written",
+    "mutations_performed",
+    "executable_packet_emitted",
+    "execution_token_emitted",
+    "codex_prompt_emitted",
+    "worker_launch_allowed",
+    "scheduler_allowed",
+    "daemon_allowed",
+    "broker_allowed",
+    "live_trading_allowed",
+    "production_allowed",
+    "dashboard_mutation_allowed",
+    "commit_allowed",
+    "push_allowed",
+    "merge_allowed",
+    "blockers",
+    "evidence_inputs",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": { "const": "AIOS_SELF_AUTONOMY_CHAIN_HARNESS.v1" },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "component": { "const": "self_autonomy_chain_harness" },
+    "mode": { "const": "READ_ONLY_CHAIN_INTEGRATION_HARNESS" },
+    "chain_id": { "type": "string", "minLength": 1 },
+    "verdict": {
+      "enum": [
+        "CHAIN_REVIEW_COMPLETE",
+        "CHAIN_HUMAN_APPROVAL_REQUIRED",
+        "CHAIN_APPLY_REVIEW_READY",
+        "BLOCKED_CHAIN_INPUT_MISSING",
+        "BLOCKED_CHAIN_UNSAFE_INPUT",
+        "BLOCKED_CHAIN_EXECUTABLE_INPUT",
+        "BLOCKED_CHAIN_COMPONENT_FAILURE",
+        "BLOCKED_CHAIN_NO_SAFE_OUTCOME"
+      ]
+    },
+    "chain_state": { "type": "string", "minLength": 1 },
+    "goal": { "type": "string" },
+    "first_blocking_component": {
+      "anyOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "null" }
+      ]
+    },
+    "readiness": { "type": "object" },
+    "plan": { "type": "object" },
+    "dry_run_execution": { "type": "object" },
+    "apply_gate": { "type": "object" },
+    "review_loop": { "type": "object" },
+    "component_verdicts": {
+      "type": "object",
+      "required": ["readiness", "plan", "dry_run_execution", "apply_gate", "review_loop"],
+      "additionalProperties": false,
+      "properties": {
+        "readiness": { "type": "string" },
+        "plan": { "type": "string" },
+        "dry_run_execution": { "type": "string" },
+        "apply_gate": { "type": "string" },
+        "review_loop": { "type": "string" }
+      }
+    },
+    "component_states": {
+      "type": "object",
+      "required": ["readiness", "plan", "dry_run_execution", "apply_gate", "review_loop"],
+      "additionalProperties": false,
+      "properties": {
+        "readiness": { "type": "string" },
+        "plan": { "type": "string" },
+        "dry_run_execution": { "type": "string" },
+        "apply_gate": { "type": "string" },
+        "review_loop": { "type": "string" }
+      }
+    },
+    "human_approval_required": { "type": "boolean" },
+    "explicit_human_approval_present": { "type": "boolean" },
+    "apply_review_ready": { "type": "boolean" },
+    "self_approval_allowed": { "const": false },
+    "apply_allowed": { "const": false },
+    "apply_performed": { "const": false },
+    "commands_executed": { "const": false },
+    "files_written": { "const": false },
+    "mutations_performed": { "const": false },
+    "executable_packet_emitted": { "const": false },
+    "execution_token_emitted": { "const": false },
+    "codex_prompt_emitted": { "const": false },
+    "worker_launch_allowed": { "const": false },
+    "scheduler_allowed": { "const": false },
+    "daemon_allowed": { "const": false },
+    "broker_allowed": { "const": false },
+    "live_trading_allowed": { "const": false },
+    "production_allowed": { "const": false },
+    "dashboard_mutation_allowed": { "const": false },
+    "commit_allowed": { "const": false },
+    "push_allowed": { "const": false },
+    "merge_allowed": { "const": false },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "evidence_inputs": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "next_safe_action": { "type": "string", "minLength": 1 },
+    "safety": { "type": "object" }
+  }
+}
