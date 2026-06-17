@@ -21,6 +21,25 @@ AI_OS should preserve enough evidence to reconstruct security-relevant actions, 
 | Rejected action | timestamp, reason, requested action |
 | Trading/broker blocked action | timestamp, reason, requested action |
 
+## Single Live Micro-Trade Exception Audit Boundary
+
+Audit logs for any future Single Live Micro-Trade Exception must be append-only and sanitized.
+
+Allowed audit events are limited to:
+- request
+- review
+- approval
+- rejection
+- expiry
+- arming
+- kill switch state
+- daily loss gate
+- credential-handle release or denial
+- order terminal result
+- final disarm
+
+Only redacted identifiers and pass/fail facts are allowed. Audit logs must not contain secrets, account IDs, broker order IDs, live payloads, raw request bodies, credential values, private account data, or secret material.
+
 ## Minimum Requirements
 
 - Logs must not contain secrets.
