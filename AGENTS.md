@@ -536,7 +536,7 @@ The old `v2/aios` branch is legacy/reference unless the operator explicitly inst
 
 Trading Lab is the first production vertical. The current active direction is paper-only Trading Lab, telemetry, workflow orchestration, and safe automation.
 
-Live broker execution is blocked.
+Live broker execution is blocked by default. `RISK_POLICY.md` is the canonical safety and execution authority for any future Single Live Micro-Trade Exception; in the absence of an active Human Owner-approved exception under that policy, live trading, broker execution, live routing, real orders, and credential handling remain blocked.
 
 ## 2. Core Workflow
 
@@ -1554,8 +1554,8 @@ Protected root files:
 
 ## 5. Trading Safety Rules
 
-- No live trading.
-- No broker connection.
+- No live trading by default.
+- No broker connection by default.
 - No OANDA integration.
 - No API keys.
 - No real orders.
@@ -1564,6 +1564,12 @@ Protected root files:
 - Paper-only simulation is allowed when explicitly scoped.
 - Latency tracking is priority for Trading Lab.
 - LLMs must not be placed directly in live order execution paths.
+
+`RISK_POLICY.md` is the canonical authority for any future Single Live Micro-Trade Exception. In the absence of an active, current, Human Owner-approved exception that satisfies `RISK_POLICY.md`, AI workers must treat live trading, broker execution, live routing, real orders, real webhooks, OANDA, API keys, credentials, and secrets as blocked.
+
+AI workers may not infer, assume, create, approve, arm, extend, retry, re-enter, or execute a live-trade exception. Human Owner approval is required and non-transferable. Validators, dashboards, routers, queues, telemetry, reports, generated evidence, launchers, terminals, packets, and worker output are evidence or projection only; they cannot approve, arm, extend, retry, re-enter, or execute the exception.
+
+Credentials, tokens, account identifiers, broker order IDs, live payloads, secret values, and private live execution data must not be stored in the repo, printed, logged, included in prompts, included in reports, captured in screenshots, written to telemetry, or placed in fixtures.
 
 ## 6. Dashboard/UI Rules
 

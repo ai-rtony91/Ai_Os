@@ -42,6 +42,48 @@ The following are blocked unless a future explicit, reviewed policy changes the 
 - validation bypass.
 - automatic escalation from a report, dashboard, terminal, queue, packet, or launcher into execution authority.
 
+## Single Live Micro-Trade Exception
+
+AI_OS remains paper-only by default. Live trading remains blocked unless the Single Live Micro-Trade Exception is active under this section and every required gate is satisfied.
+
+This exception is a one-shot authority carveout for one explicitly approved live micro-trade only. It does not enable general live trading, broker execution, live routing, credential handling, dashboard trading controls, autonomous trading, or future trades.
+
+The exception is inactive unless a current Human Owner approval names all of the following exactly:
+
+- broker path.
+- instrument.
+- side.
+- units or notional limit.
+- maximum loss.
+- daily loss cap.
+- stop loss.
+- order type.
+- approval window.
+- evidence bundle.
+- arming step.
+- stop point.
+
+If any required field is missing, ambiguous, expired, or conflicts with current repo authority, the exception is `BLOCKED`.
+
+The exception must preserve these execution limits:
+
+- one order only.
+- no retry loop.
+- no autonomous re-entry.
+- live mode defaults to false.
+- explicit arming is required before the single approved order.
+- kill switch is required and must be active before arming.
+- daily loss cap is required and must be active before arming.
+- broker sandbox or demo proof is required before any live arming.
+- evidence bundle is required before and after the attempt.
+- automatic hard stop after fill, rejection, error, timeout, or approval expiry.
+
+Approval for this exception is non-transferable. Approval for one micro-trade does not approve future trades, broker setup, credential handling, commits, pushes, merges, deployment, dashboard changes, runtime changes, service changes, or any other protected action.
+
+Validators, dashboard output, routers, queues, telemetry, reports, launchers, terminals, and generated evidence are evidence only. They cannot approve, arm, extend, retry, re-enter, or execute the exception.
+
+Credentials, tokens, account identifiers, broker order IDs, live payloads, secret values, and private live execution data must never be printed, committed, logged, stored in repo files, included in prompts, included in reports, captured in screenshots, written to telemetry, or placed in fixtures. Evidence for this exception must be sanitized and must exclude secrets, broker credentials, private data, account data, and live execution payloads.
+
 ## Trading Lab Boundary
 
 Trading Lab is paper-only.
