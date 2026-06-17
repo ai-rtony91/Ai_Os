@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_SELF_AUTONOMY_DRY_RUN_EXECUTION.v1.schema.json",
+  "title": "AIOS Self-Autonomy Dry-Run Execution v1",
+  "description": "Read-only simulation result for an M12 non-executable dry-run preview. This schema grants no command execution, file write, Reports output, approval mutation, queue mutation, runtime mutation, worker launch, scheduler, broker, live-trading, production, dashboard mutation, commit, push, or merge authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "component",
+    "mode",
+    "execution_id",
+    "inherited_plan_id",
+    "inherited_plan_verdict",
+    "inherited_plan_state",
+    "verdict",
+    "execution_state",
+    "simulated",
+    "commands_executed",
+    "files_written",
+    "mutations_performed",
+    "executable_packet_emitted",
+    "execution_token_emitted",
+    "codex_prompt_emitted",
+    "apply_allowed",
+    "worker_launch_allowed",
+    "scheduler_allowed",
+    "daemon_allowed",
+    "broker_allowed",
+    "live_trading_allowed",
+    "production_allowed",
+    "dashboard_mutation_allowed",
+    "commit_allowed",
+    "push_allowed",
+    "merge_allowed",
+    "preview_valid",
+    "preview_executable",
+    "allowed_paths",
+    "forbidden_paths",
+    "validator_chain",
+    "simulated_steps",
+    "simulated_findings",
+    "blockers",
+    "evidence_inputs",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_SELF_AUTONOMY_DRY_RUN_EXECUTION.v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "component": {
+      "type": "string",
+      "const": "self_autonomy_dry_run_executor"
+    },
+    "mode": {
+      "type": "string",
+      "const": "READ_ONLY_DRY_RUN_SIMULATOR"
+    },
+    "execution_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inherited_plan_id": {
+      "type": "string"
+    },
+    "inherited_plan_verdict": {
+      "type": "string"
+    },
+    "inherited_plan_state": {
+      "type": "string"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "DRY_RUN_SIMULATION_COMPLETE",
+        "BLOCKED_PLAN_MISSING",
+        "BLOCKED_PLAN_NOT_READY",
+        "BLOCKED_PREVIEW_MISSING",
+        "BLOCKED_EXECUTABLE_PREVIEW",
+        "BLOCKED_UNSAFE_SCOPE",
+        "BLOCKED_SCOPE_UNKNOWN",
+        "BLOCKED_VALIDATORS_UNKNOWN",
+        "BLOCKED_NOT_DRY_RUN",
+        "BLOCKED_NO_SAFE_EXECUTION_SIMULATION"
+      ]
+    },
+    "execution_state": {
+      "type": "string",
+      "enum": ["SIMULATED", "BLOCKED"]
+    },
+    "simulated": {
+      "type": "boolean"
+    },
+    "commands_executed": {
+      "type": "boolean",
+      "const": false
+    },
+    "files_written": {
+      "type": "boolean",
+      "const": false
+    },
+    "mutations_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "executable_packet_emitted": {
+      "type": "boolean",
+      "const": false
+    },
+    "execution_token_emitted": {
+      "type": "boolean",
+      "const": false
+    },
+    "codex_prompt_emitted": {
+      "type": "boolean",
+      "const": false
+    },
+    "apply_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "worker_launch_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "scheduler_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "daemon_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "broker_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "live_trading_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "production_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "dashboard_mutation_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "commit_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "push_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "merge_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "preview_valid": {
+      "type": "boolean"
+    },
+    "preview_executable": {
+      "type": "boolean"
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "forbidden_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validator_chain": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "simulated_steps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "simulated_findings": {
+      "type": "object"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "schema"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "schema": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only",
+        "side_effect_free",
+        "simulation_only",
+        "commands_executed",
+        "files_written",
+        "reports_written",
+        "network_access",
+        "secrets_accessed",
+        "runtime_mutation",
+        "approval_mutation",
+        "queue_mutation"
+      ],
+      "properties": {
+        "read_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "side_effect_free": {
+          "type": "boolean",
+          "const": true
+        },
+        "simulation_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "commands_executed": {
+          "type": "boolean",
+          "const": false
+        },
+        "files_written": {
+          "type": "boolean",
+          "const": false
+        },
+        "reports_written": {
+          "type": "boolean",
+          "const": false
+        },
+        "network_access": {
+          "type": "boolean",
+          "const": false
+        },
+        "secrets_accessed": {
+          "type": "boolean",
+          "const": false
+        },
+        "runtime_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "queue_mutation": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  }
+}
