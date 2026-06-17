@@ -1,0 +1,149 @@
+{
+  "schema": "AIOS_LIVE_MICRO_TRADE_PACKET_FIXTURE.v1",
+  "fixture_id": "LIVE_MICRO_TRADE_PACKET_001_EXAMPLE",
+  "fixture_mode": "CONTRACT_EVIDENCE_ONLY",
+  "packet_status": "NOT_ARMED",
+  "trade_packet": {
+    "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+    "approval_window": {
+      "starts_at_utc": "2026-01-01T00:00:00Z",
+      "expires_at_utc": "2099-01-01T00:00:00Z"
+    },
+    "broker_path": "human-owner-controlled-external-vault-reference",
+    "instrument": "EUR_USD",
+    "side": "buy",
+    "units": 1,
+    "max_loss": 1.0,
+    "daily_loss_cap": 2.0,
+    "stop_loss": 1.0,
+    "order_type": "market",
+    "evidence_bundle_id": "LIVE-MICRO-TRADE-EVIDENCE-001",
+    "kill_switch_required": true,
+    "approval_nonce_hash": "sha256:example-approval-nonce-hash-redacted",
+    "arming_step": "manual-human-owner-arm-after-final-readiness-review",
+    "stop_point": "hard-disarm-after-terminal-result-or-window-expiry",
+    "live_mode": false,
+    "one_order_only": true,
+    "retry_allowed": false,
+    "autonomous_reentry_allowed": false
+  },
+  "approval": {
+    "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+    "human_owner": "Anthony",
+    "approval_type": "single_live_micro_trade_exception",
+    "approval_window": {
+      "starts_at_utc": "2026-01-01T00:00:00Z",
+      "expires_at_utc": "2099-01-01T00:00:00Z"
+    },
+    "broker_path": "human-owner-controlled-external-vault-reference",
+    "instrument": "EUR_USD",
+    "side": "buy",
+    "units": 1,
+    "max_loss": 1.0,
+    "daily_loss_cap": 2.0,
+    "stop_loss": 1.0,
+    "order_type": "market",
+    "evidence_bundle_id": "LIVE-MICRO-TRADE-EVIDENCE-001",
+    "approval_nonce_hash": "sha256:example-approval-nonce-hash-redacted",
+    "arming_step": "manual-human-owner-arm-after-final-readiness-review",
+    "stop_point": "hard-disarm-after-terminal-result-or-window-expiry",
+    "non_transferable": true,
+    "expires_after_use": true,
+    "validator_authority": false,
+    "dashboard_authority": false,
+    "router_authority": false
+  },
+  "broker_truth_status": {
+    "account_balance_status": "SANITIZED_SNAPSHOT_PRESENT",
+    "available_margin_status": "SANITIZED_SNAPSHOT_PRESENT",
+    "open_positions_status": "SANITIZED_WITHIN_SCOPE_PROOF",
+    "current_exposure_status": "SANITIZED_WITHIN_LIMIT_PROOF",
+    "live_price_or_quote_status": "SANITIZED_QUOTE_PRESENT",
+    "spread_status": "SANITIZED_SPREAD_PRESENT",
+    "order_status": "NOT_SUBMITTED",
+    "fill_or_reject_status": "NOT_ATTEMPTED",
+    "daily_realized_pnl_status": "SANITIZED_WITHIN_CAP_PROOF",
+    "truth_source_status": "STATUS_ONLY_NO_NUMERIC_VALUES"
+  },
+  "evidence_bundle": {
+    "evidence_bundle_id": "LIVE-MICRO-TRADE-EVIDENCE-001",
+    "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+    "broker_sandbox_or_demo_proof": true,
+    "risk_gate_passed": true,
+    "kill_switch_active": true,
+    "daily_loss_cap_active": true,
+    "approval_hash_verified": true,
+    "sanitized": true,
+    "broker_truth_status_present": true,
+    "status_only_values": true
+  },
+  "audit_events": [
+    {
+      "event_type": "request",
+      "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+      "sanitized": true,
+      "redacted_identifiers_only": true,
+      "contains_private_data": false
+    },
+    {
+      "event_type": "approval",
+      "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+      "sanitized": true,
+      "redacted_identifiers_only": true,
+      "contains_private_data": false
+    },
+    {
+      "event_type": "final_disarm",
+      "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+      "sanitized": true,
+      "redacted_identifiers_only": true,
+      "contains_private_data": false
+    }
+  ],
+  "arming_state": {
+    "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+    "approval_nonce_hash": "sha256:example-approval-nonce-hash-redacted",
+    "evidence_bundle_id": "LIVE-MICRO-TRADE-EVIDENCE-001",
+    "kill_switch_active": true,
+    "daily_loss_cap_active": true,
+    "evidence_bundle_present": true,
+    "approval_hash_verified": true,
+    "approval_window_active": true,
+    "one_order_remaining": true,
+    "armed": true,
+    "orders_remaining": 1,
+    "live_mode": false,
+    "retry_allowed": false,
+    "autonomous_reentry_allowed": false
+  },
+  "disarm_state": {
+    "packet_id": "AIOS-LIVE-COUNTDOWN-02A-SANITIZED-TRADE-PACKET-FIXTURE-APPLY-001",
+    "terminal_state": "validation_mismatch",
+    "disarmed": true,
+    "final": true,
+    "live_mode": false,
+    "retry_allowed": false,
+    "autonomous_reentry_allowed": false
+  },
+  "safety_flags": {
+    "live_mode": false,
+    "one_order_only": true,
+    "retry_allowed": false,
+    "autonomous_reentry_allowed": false,
+    "credential_material_present": false,
+    "broker_api_enabled": false,
+    "live_execution_enabled": false,
+    "dashboard_authority": false,
+    "validator_authority": false,
+    "router_authority": false,
+    "broker_sdk_allowed": false,
+    "network_allowed": false,
+    "runtime_context_access_allowed": false,
+    "subprocess_allowed": false,
+    "scheduler_allowed": false,
+    "daemon_allowed": false,
+    "order_submitted": false,
+    "paper_trade_simulated": false,
+    "real_trade_simulated": false
+  }
+}
