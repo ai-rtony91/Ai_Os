@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_SELF_AUTONOMY_PLAN.v1.schema.json",
+  "title": "AIOS Self-Autonomy Plan v1",
+  "description": "Read-only, non-executable planning output derived from a human goal and an M11 readiness gate. This schema grants no execution, approval, queue, runtime, worker-launch, scheduler, broker, live-trading, production, dashboard mutation, commit, push, or merge authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "component",
+    "mode",
+    "goal",
+    "normalized_goal",
+    "plan_id",
+    "verdict",
+    "plan_state",
+    "inherited_readiness_verdict",
+    "inherited_readiness_state",
+    "planning_allowed",
+    "dry_run_preview_allowed",
+    "apply_preview_allowed",
+    "apply_allowed",
+    "worker_launch_allowed",
+    "scheduler_allowed",
+    "daemon_allowed",
+    "broker_allowed",
+    "live_trading_allowed",
+    "production_allowed",
+    "dashboard_mutation_allowed",
+    "commit_allowed",
+    "push_allowed",
+    "merge_allowed",
+    "risk_level",
+    "blockers",
+    "required_human_approval",
+    "non_executable_packet_preview",
+    "evidence_inputs",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_SELF_AUTONOMY_PLAN.v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "component": {
+      "type": "string",
+      "const": "self_autonomy_planner"
+    },
+    "mode": {
+      "type": "string",
+      "const": "READ_ONLY_NON_EXECUTABLE_PLANNER"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "normalized_goal": {
+      "type": "string"
+    },
+    "plan_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "PLAN_READY_DRY_RUN_PREVIEW",
+        "BLOCKED_GOAL_MISSING",
+        "BLOCKED_GOAL_UNSAFE",
+        "BLOCKED_READINESS_MISSING",
+        "BLOCKED_READINESS_NOT_READY",
+        "BLOCKED_APPLY_REVIEW_NOT_PLANNER_SCOPE",
+        "BLOCKED_SCOPE_UNKNOWN",
+        "BLOCKED_NO_SAFE_PLAN"
+      ]
+    },
+    "plan_state": {
+      "type": "string",
+      "enum": ["DRY_RUN_PREVIEW_READY", "BLOCKED"]
+    },
+    "inherited_readiness_verdict": {
+      "type": "string"
+    },
+    "inherited_readiness_state": {
+      "type": "string"
+    },
+    "planning_allowed": {
+      "type": "boolean"
+    },
+    "dry_run_preview_allowed": {
+      "type": "boolean"
+    },
+    "apply_preview_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "apply_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "worker_launch_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "scheduler_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "daemon_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "broker_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "live_trading_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "production_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "dashboard_mutation_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "commit_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "push_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "merge_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["LOW", "GREEN", "MEDIUM", "HIGH", "BLOCKED", "UNKNOWN"]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "required_human_approval": {
+      "type": "boolean",
+      "const": true
+    },
+    "non_executable_packet_preview": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/non_executable_packet_preview"
+        }
+      ]
+    },
+    "evidence_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "schema"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "schema": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only",
+        "side_effect_free",
+        "commands_executed",
+        "files_written",
+        "runtime_mutation",
+        "approval_mutation",
+        "queue_mutation",
+        "executable_packet_emitted",
+        "execution_token_emitted",
+        "codex_prompt_emitted"
+      ],
+      "properties": {
+        "read_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "side_effect_free": {
+          "type": "boolean",
+          "const": true
+        },
+        "commands_executed": {
+          "type": "boolean",
+          "const": false
+        },
+        "files_written": {
+          "type": "boolean",
+          "const": false
+        },
+        "runtime_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "queue_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "executable_packet_emitted": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_token_emitted": {
+          "type": "boolean",
+          "const": false
+        },
+        "codex_prompt_emitted": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "non_executable_packet_preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "executable",
+        "execution_token_present",
+        "codex_prompt_present",
+        "mode",
+        "lane",
+        "packet_id_suggestion",
+        "mission_summary",
+        "allowed_paths",
+        "forbidden_paths",
+        "validator_chain",
+        "stop_point",
+        "rollback_note",
+        "final_report_fields",
+        "protected_actions",
+        "human_approval_required_before_execution"
+      ],
+      "properties": {
+        "executable": {
+          "type": "boolean",
+          "const": false
+        },
+        "execution_token_present": {
+          "type": "boolean",
+          "const": false
+        },
+        "codex_prompt_present": {
+          "type": "boolean",
+          "const": false
+        },
+        "mode": {
+          "type": "string",
+          "const": "DRY_RUN"
+        },
+        "lane": {
+          "type": "string",
+          "const": "DRY_RUN"
+        },
+        "packet_id_suggestion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "mission_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "allowed_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "forbidden_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "validator_chain": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stop_point": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rollback_note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "final_report_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "protected_actions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "git_add",
+            "git_commit",
+            "git_push",
+            "pr_create",
+            "merge",
+            "scheduler_activation",
+            "worker_launch",
+            "runtime_mutation",
+            "broker_or_live_trading"
+          ],
+          "properties": {
+            "git_add": {
+              "type": "boolean",
+              "const": false
+            },
+            "git_commit": {
+              "type": "boolean",
+              "const": false
+            },
+            "git_push": {
+              "type": "boolean",
+              "const": false
+            },
+            "pr_create": {
+              "type": "boolean",
+              "const": false
+            },
+            "merge": {
+              "type": "boolean",
+              "const": false
+            },
+            "scheduler_activation": {
+              "type": "boolean",
+              "const": false
+            },
+            "worker_launch": {
+              "type": "boolean",
+              "const": false
+            },
+            "runtime_mutation": {
+              "type": "boolean",
+              "const": false
+            },
+            "broker_or_live_trading": {
+              "type": "boolean",
+              "const": false
+            }
+          }
+        },
+        "human_approval_required_before_execution": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    }
+  }
+}
