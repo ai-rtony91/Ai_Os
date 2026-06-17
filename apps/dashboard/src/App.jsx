@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import operatorStatusFixture from "../mock-data/aios-operator-status-v1.example.json";
 import mockRuntimeVisibility from "../mock-data/aios-runtime-visibility-v1.example.json";
 import { autonomyBridgeStatePayload } from "virtual:aios-autonomy-bridge-state";
@@ -12,92 +12,202 @@ import {
 } from "./runtimeVisibilityClient";
 import "./App.css";
 
-const packetFilters = ["all", "dispatch", "wait_for_approval", "retry", "manual_review"];
+const CLASSIFICATION = Object.freeze({
+  READ_ONLY: "READ_ONLY",
+  REQUEST: "REQUEST",
+  PROTECTED: "PROTECTED",
+  FORBIDDEN: "FORBIDDEN"
+});
 
-const zoneDefinitions = [
-  {
-    id: "mars",
-    label: "Mars Lab",
-    eyebrow: "Build world",
-    status: "REVIEW",
-    planetClass: "mars",
-    summary: "Codex lanes, PRs, workers, tests, packets, build status, and local dev tools.",
-    objective: "Convert active dashboard work into validated, reviewable engineering packets.",
-    signals: ["Codex lanes", "PR checks", "Worker evidence", "Build status"]
-  },
-  {
-    id: "moon",
-    label: "Moon Control",
-    eyebrow: "Mission control",
-    status: "NEEDS_APPROVAL",
-    planetClass: "moon",
-    summary: "AI_OS health, approvals, scheduler evidence, EdgeMark, and critical alerts.",
-    objective: "Keep safety state visible before any runtime or protected action.",
-    signals: ["AI_OS health", "Approvals", "Scheduler display", "EdgeMark"]
-  },
-  {
-    id: "earth",
-    label: "Earth Hub",
-    eyebrow: "Workspace",
-    status: "PAPER_SAFE",
-    planetClass: "earth",
-    summary: "Personal apps, contacts, notes, school/work/Microsoft, and user workspace.",
-    objective: "Keep personal workspace calm, readable, and separate from privileged controls.",
-    signals: ["Personal apps", "Notes", "School/work", "Contacts"]
-  },
-  {
-    id: "galaxy",
-    label: "Galaxy Intelligence",
-    eyebrow: "Research map",
-    status: "UNKNOWN",
-    planetClass: "galaxy",
-    summary: "AI agents, memory, research, automation map, strategy, and roadmap.",
-    objective: "Map intelligence work without implying live AI calls or private prompt storage.",
-    signals: ["Agents", "Memory", "Research", "Roadmap"]
-  },
-  {
-    id: "vault",
-    label: "Black Hole Vault",
-    eyebrow: "Restricted",
-    status: "BLOCKED",
-    planetClass: "vault",
-    summary: "Secrets boundary, broker/live block, restricted references, and emergency warnings.",
-    objective: "Keep dangerous capabilities locked behind governance and human approval.",
-    signals: ["No secrets", "Broker blocked", "Live blocked", "Restricted"]
-  }
-];
-
-const advancedCategories = [
-  "raw telemetry",
-  "queues",
-  "approvals",
-  "scheduler",
-  "runtime",
-  "GitHub PR/checks",
-  "workers",
-  "debug JSON",
-  "logs",
-  "security state",
-  "state freshness"
-];
+const LIVE_TRADING_ALLOWED = false;
+const MUTATION_ALLOWED = false;
+const EXECUTION_ALLOWED = false;
 
 const mockVisibilityDisplay = mapRuntimeVisibilityDisplayModel(mockRuntimeVisibility, {
   sourceLabel: RUNTIME_VISIBILITY_SOURCE_LABELS.MOCK_DATA
 });
 
-const operatorStatusPanels = [
-  operatorStatusFixture.registry_safety,
-  operatorStatusFixture.telemetry_status,
-  operatorStatusFixture.worker_status,
-  operatorStatusFixture.pr_branch_status,
-  operatorStatusFixture.next_safe_action
+const autonomyBridgeState = autonomyBridgeStatePayload.data ?? {};
+
+const safeButtons = [
+  {
+    id: "status",
+    label: "Refresh Status",
+    type: "READ_ONLY",
+    panel: "status",
+    summary: "Refreshes the existing read-only runtime visibility source."
+  },
+  {
+    id: "next-safe-action",
+    label: "Show Next Safe Action",
+    type: "READ_ONLY",
+    panel: "nextSafeAction",
+    summary: "Displays the next safe action from current evidence."
+  },
+  {
+    id: "countdown",
+    label: "Show Countdown",
+    type: "READ_ONLY",
+    panel: "countdown",
+    summary: "Shows Live Countdown progress without changing state."
+  },
+  {
+    id: "trading-readiness",
+    label: "Show Trading Readiness",
+    type: "READ_ONLY",
+    panel: "trading",
+    summary: "Displays trading gates as paper-only and locked."
+  },
+  {
+    id: "evidence",
+    label: "Show Dashboard Evidence",
+    type: "READ_ONLY",
+    panel: "evidence",
+    summary: "Shows source labels, freshness, and display-only evidence."
+  },
+  {
+    id: "blockers",
+    label: "Show Blockers",
+    type: "READ_ONLY",
+    panel: "blockers",
+    summary: "Lists blocked actions and unsafe boundaries."
+  },
+  {
+    id: "approval",
+    label: "View Approval Required",
+    type: "READ_ONLY",
+    panel: "approval",
+    summary: "Shows protected actions that require Human Owner approval."
+  },
+  {
+    id: "kill-switch",
+    label: "View Kill Switch State",
+    type: "READ_ONLY",
+    panel: "killSwitch",
+    summary: "Displays kill switch visibility without exposing control authority."
+  },
+  {
+    id: "risk-gate",
+    label: "View Risk Gate State",
+    type: "READ_ONLY",
+    panel: "riskGate",
+    summary: "Displays the risk gate as evidence-only until stronger proof is supplied."
+  }
 ];
 
-const autonomyBridgeState = autonomyBridgeStatePayload.data ?? {};
-const autonomyBridgeCards = Array.isArray(autonomyBridgeState.dashboard_cards)
-  ? autonomyBridgeState.dashboard_cards
-  : [];
-const autonomyBridgeSourceIsLive = autonomyBridgeStatePayload.sourceLabel === "LIVE";
+const requestButtons = [
+  {
+    id: "work-request",
+    label: "Create Work Request",
+    prompt: "Create a governed AIOS work request preview."
+  },
+  {
+    id: "packet-draft",
+    label: "Draft Packet",
+    prompt: "Draft a non-executable packet preview for human review."
+  }
+];
+
+const protectedActions = [
+  {
+    id: "arm-live-mode",
+    label: "Arm Live Mode",
+    state: "LOCKED",
+    reason: "Live mode requires a separate approved boundary-change packet."
+  },
+  {
+    id: "approve-apply",
+    label: "Approve APPLY",
+    state: "APPROVAL_REQUIRED",
+    reason: "Approval remains Human Owner authority and is not mutated here."
+  },
+  {
+    id: "broker-sandbox",
+    label: "Trigger Broker Sandbox",
+    state: "LOCKED",
+    reason: "Broker sandbox action is not wired from the frontend."
+  },
+  {
+    id: "start-runtime",
+    label: "Start Runtime",
+    state: "LOCKED",
+    reason: "Runtime controls require backend policy and approval gates."
+  },
+  {
+    id: "stop-runtime",
+    label: "Stop Runtime",
+    state: "LOCKED",
+    reason: "Stop controls are displayed as protected, not executed."
+  },
+  {
+    id: "execute-live-micro-trade",
+    label: "Execute Live Micro-Trade",
+    state: "LOCKED",
+    reason: "Live trade execution remains blocked."
+  }
+];
+
+const tradingReadiness = [
+  { label: "Paper proof", state: "NEEDS_REVIEW" },
+  { label: "Risk governor", state: "NEEDS_REVIEW" },
+  { label: "Daily loss", state: "NEEDS_REVIEW" },
+  { label: "Kill switch", state: "VISIBLE_LOCKED" },
+  { label: "Broker sandbox/demo", state: "LOCKED" },
+  { label: "Live arm", state: "LOCKED" },
+  { label: "Human approval", state: "REQUIRED" },
+  { label: "Live trade allowed", state: "FALSE" }
+];
+
+const forbiddenRequestPatterns = [
+  /place\s+.*live\s+trade/i,
+  /disable\s+.*risk/i,
+  /disable\s+.*kill/i,
+  /bypass\s+approval/i,
+  /broker\s+key/i,
+  /credential/i,
+  /secret/i,
+  /force\s+merge/i,
+  /force\s+push/i,
+  /shell/i,
+  /raw\s+.*command/i,
+  /execute\s+.*raw/i
+];
+
+const protectedRequestPatterns = [
+  /arm\s+live/i,
+  /live\s+mode/i,
+  /live\s+micro/i,
+  /approve/i,
+  /\bapply\b/i,
+  /broker\s+sandbox/i,
+  /start\s+runtime/i,
+  /stop\s+runtime/i,
+  /worker\s+launch/i,
+  /scheduler/i,
+  /\bcommit\b/i,
+  /\bpush\b/i,
+  /\bmerge\b/i,
+  /\bdeploy/i
+];
+
+const readOnlyRequestPatterns = [
+  /\bshow\b/i,
+  /\bview\b/i,
+  /\binspect\b/i,
+  /\bstatus\b/i,
+  /readiness/i,
+  /evidence/i,
+  /blocker/i,
+  /next\s+safe/i,
+  /countdown/i,
+  /kill\s+switch/i,
+  /risk\s+gate/i
+];
+
+function asNumber(value, fallback = 0) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : fallback;
+}
 
 function formatTime(value) {
   if (!value) {
@@ -111,57 +221,46 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
-function formatDuration(ms) {
-  if (ms === undefined || ms === null) {
-    return "UNKNOWN";
+function normalizeStatus(value) {
+  const normalized = String(value ?? "UNKNOWN").toUpperCase();
+
+  if (["READY", "PASS", "CLEAR", "GREEN", "HEALTHY"].includes(normalized)) {
+    return "READY";
   }
 
-  const absMs = Math.abs(ms);
-  const minutes = Math.floor(absMs / 60000);
-  const seconds = Math.floor((absMs % 60000) / 1000);
-  const value = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  if (["BLOCKED", "FAIL", "CRITICAL", "DEGRADED"].includes(normalized)) {
+    return "BLOCKED";
+  }
 
-  return ms < 0 ? `${value} overdue` : value;
+  if (["STALE", "REVIEW", "NEEDS_APPROVAL", "APPROVAL_REQUIRED"].includes(normalized)) {
+    return "NEEDS_REVIEW";
+  }
+
+  return normalized || "UNKNOWN";
 }
 
 function statusTone(value) {
-  const normalized = String(value).toLowerCase();
+  const normalized = String(value ?? "UNKNOWN").toUpperCase();
 
-  if (
-    ["critical", "blocked", "hard", "expired", "manual_review", "degraded"].includes(
-      normalized
-    )
-  ) {
+  if (normalized.includes("BLOCKED") || normalized.includes("FAIL") || normalized.includes("FALSE")) {
     return "danger";
   }
 
   if (
-    [
-      "warning",
-      "soft",
-      "stale",
-      "retry",
-      "wait_for_approval",
-      "paused",
-      "needs_approval",
-      "review"
-    ].includes(normalized)
+    normalized.includes("REVIEW") ||
+    normalized.includes("REQUIRED") ||
+    normalized.includes("LOCKED") ||
+    normalized.includes("STALE") ||
+    normalized.includes("UNKNOWN")
   ) {
     return "warn";
   }
 
   if (
-    ["active", "running", "dispatch", "none", "low", "fresh", "ready", "paper_safe"].includes(
-      normalized
-    )
-  ) {
-    return "good";
-  }
-
-  if (
-    ["pass", "mock_data", "display_only", "not_connected", "not_evaluated", "model_preview"].includes(
-      normalized
-    )
+    normalized.includes("READY") ||
+    normalized.includes("PASS") ||
+    normalized.includes("VISIBLE") ||
+    normalized.includes("READ_ONLY")
   ) {
     return "good";
   }
@@ -169,31 +268,145 @@ function statusTone(value) {
   return "neutral";
 }
 
-function metricTone(value, tone) {
-  return value === "UNKNOWN" ? "neutral" : tone;
+function countBlockingSignals(runtimeVisibility) {
+  const blockedPackets = asNumber(runtimeVisibility.executionLedger.blockedPacketCount);
+  const poisonPackets = asNumber(runtimeVisibility.health.poisonPackets);
+  const retryablePackets = asNumber(runtimeVisibility.health.retryablePackets);
+  const alertCount = Array.isArray(runtimeVisibility.alerts) ? runtimeVisibility.alerts.length : 0;
+
+  return blockedPackets + poisonPackets + retryablePackets + alertCount;
 }
 
-function normalizeStatusValue(value) {
-  const normalized = String(value ?? "UNKNOWN").toLowerCase();
+function buildPortalModel(runtimeVisibility) {
+  const bridgeMetrics = autonomyBridgeState.dashboard_cards?.[0]?.metrics ?? {};
+  const approvalNeededCount =
+    bridgeMetrics.approval_needed ??
+    autonomyBridgeState.approval_needed_count ??
+    runtimeVisibility.executionLedger.approvalCount;
+  const blockedCount =
+    bridgeMetrics.blocked ??
+    autonomyBridgeState.blocked_count ??
+    countBlockingSignals(runtimeVisibility);
+  const sourceIsMock = runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.MOCK_DATA;
+  const sourceUnknown = runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.UNKNOWN;
+  const staleEvidence = runtimeVisibility.runtime.freshness === "stale" || sourceIsMock || sourceUnknown;
+  const systemStatus = normalizeStatus(
+    staleEvidence ? "NEEDS_REVIEW" : Number(blockedCount) > 0 ? "BLOCKED" : runtimeVisibility.runtime.status
+  );
 
-  if (["blocked", "critical", "hard", "expired", "degraded"].includes(normalized)) {
-    return "BLOCKED";
+  return {
+    systemStatus,
+    sourceLabel: runtimeVisibility.sourceLabel ?? "UNKNOWN",
+    evidenceState: staleEvidence ? "NEEDS_REVIEW" : "DISPLAY_ONLY",
+    freshness: runtimeVisibility.runtime.freshness ?? "UNKNOWN",
+    generatedAt: runtimeVisibility.generatedAt ?? "UNKNOWN",
+    currentMission: "Minimalist AIOS operator portal with display-only governance.",
+    countdown: "20/22",
+    lockedState: "LOCKED_READ_ONLY",
+    nextSafeAction:
+      autonomyBridgeState.next_safe_action ??
+      runtimeVisibility.nextSafeAction ??
+      "Review evidence before any protected action.",
+    approvalNeededCount,
+    blockedCount,
+    runtimeStatus: runtimeVisibility.runtime.status ?? "UNKNOWN",
+    queueSource: runtimeVisibility.runtime.queueSource ?? "UNKNOWN",
+    lastTickAt: runtimeVisibility.runtime.lastTickAt ?? null,
+    evidenceSourcePath:
+      runtimeVisibility.ledgerAuthority?.workLedger?.path ??
+      "apps/dashboard/mock-data/aios-runtime-visibility-v1.example.json",
+    killSwitchState: "VISIBLE_LOCKED",
+    riskGateState: "NEEDS_REVIEW",
+    humanApprovalState: "REQUIRED"
+  };
+}
+
+function classifyRequest(request) {
+  const text = request.trim();
+
+  if (!text) {
+    return CLASSIFICATION.REQUEST;
   }
 
-  if (["needs_approval", "wait_for_approval", "warning", "warn", "review"].includes(normalized)) {
-    return "NEEDS_APPROVAL";
+  if (forbiddenRequestPatterns.some((pattern) => pattern.test(text))) {
+    return CLASSIFICATION.FORBIDDEN;
   }
 
-  if (["ready", "pass", "active", "fresh", "paper_safe"].includes(normalized)) {
-    return "READY";
+  if (protectedRequestPatterns.some((pattern) => pattern.test(text))) {
+    return CLASSIFICATION.PROTECTED;
   }
 
-  return "UNKNOWN";
+  if (readOnlyRequestPatterns.some((pattern) => pattern.test(text))) {
+    return CLASSIFICATION.READ_ONLY;
+  }
+
+  return CLASSIFICATION.REQUEST;
+}
+
+function previewForRequest(request, classification, model, timestamp) {
+  const trimmed = request.trim();
+  const base = trimmed || "No request text supplied.";
+
+  if (classification === CLASSIFICATION.FORBIDDEN) {
+    return {
+      request: base,
+      classification,
+      interpretation: "This request overlaps a forbidden dashboard control boundary.",
+      blockedActions: [
+        "frontend_execution",
+        "broker_or_secret_action",
+        "approval_bypass",
+        "raw_command_execution"
+      ],
+      approvalRequired: true,
+      nextSafeAction: "Stop and reframe the request as read-only inspection or a governed work request.",
+      timestamp
+    };
+  }
+
+  if (classification === CLASSIFICATION.PROTECTED) {
+    return {
+      request: base,
+      classification,
+      interpretation: "This request describes a protected action. The dashboard can display the gate only.",
+      blockedActions: [
+        "direct_apply",
+        "runtime_mutation",
+        "approval_mutation",
+        "broker_or_live_trading_action"
+      ],
+      approvalRequired: true,
+      nextSafeAction: "Create a scoped packet and obtain Human Owner approval before any action.",
+      timestamp
+    };
+  }
+
+  if (classification === CLASSIFICATION.READ_ONLY) {
+    return {
+      request: base,
+      classification,
+      interpretation: "This request can be handled as read-only dashboard inspection.",
+      blockedActions: ["execution", "mutation", "protected_action"],
+      approvalRequired: false,
+      nextSafeAction: model.nextSafeAction,
+      timestamp
+    };
+  }
+
+  return {
+    request: base,
+    classification,
+    interpretation: "This request becomes a local intent preview only.",
+    blockedActions: ["execution", "mutation", "approval_mutation", "worker_launch"],
+    approvalRequired: true,
+    nextSafeAction: "Review the preview, then create an approved work packet if action is needed.",
+    timestamp
+  };
 }
 
 function Metric({ label, value, tone = "neutral" }) {
   return (
-    <div className={`metric ${tone}`}>
+    <div className={`metric metric-${tone}`}>
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
@@ -201,1084 +414,476 @@ function Metric({ label, value, tone = "neutral" }) {
 }
 
 function StatusPill({ value }) {
-  return <span className={`pill ${statusTone(value)}`}>{value}</span>;
+  return <span className={`statusPill status-${statusTone(value)}`}>{value}</span>;
 }
 
-function Section({ title, action, children }) {
+function Panel({ title, eyebrow, children, className = "" }) {
   return (
-    <section className="section">
-      <div className="sectionHeader">
-        <h2>{title}</h2>
-        {action}
-      </div>
+    <section className={`panel ${className}`.trim()}>
+      {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
+      <h2>{title}</h2>
       {children}
     </section>
   );
 }
 
-function UnavailableMessage({ children }) {
-  return <p className="nextAction">{children}</p>;
-}
-
-function buildCriticalAlerts(runtimeVisibility, approvalNeededCount, blockedCount) {
-  const runtimeAlerts = Array.isArray(runtimeVisibility.alerts) ? runtimeVisibility.alerts : [];
-  const criticalRuntimeAlerts = runtimeAlerts.filter((alert) =>
-    ["critical", "blocked", "warning"].includes(String(alert.severity).toLowerCase())
-  );
-
-  const alerts = criticalRuntimeAlerts.slice(0, 2).map((alert) => ({
-    label: alert.category ?? "runtime",
-    status: alert.severity ?? "UNKNOWN",
-    message: alert.message ?? "Runtime alert unavailable."
-  }));
-
-  if (approvalNeededCount !== "UNKNOWN" && Number(approvalNeededCount) > 0) {
-    alerts.push({
-      label: "approval",
-      status: "NEEDS_APPROVAL",
-      message: `${approvalNeededCount} item(s) need Anthony review before protected action.`
-    });
-  }
-
-  if (blockedCount !== "UNKNOWN" && Number(blockedCount) > 0) {
-    alerts.push({
-      label: "blocked",
-      status: "BLOCKED",
-      message: `${blockedCount} blocked item(s) remain stopped.`
-    });
-  }
-
-  if (alerts.length === 0) {
-    alerts.push({
-      label: "evidence",
-      status: "UNKNOWN",
-      message: "No critical alert source is currently verified."
-    });
-  }
-
-  return alerts.slice(0, 4);
-}
-
-function deriveAiosEdgeMark(runtimeVisibility, approvalNeededCount, blockedCount) {
-  const reasons = [];
-  let score = 78;
-
-  if (runtimeVisibility.runtime.freshness === "stale") {
-    score -= 12;
-    reasons.push("stale runtime evidence penalty");
-  }
-
-  if (runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.MOCK_DATA) {
-    score -= 10;
-    reasons.push("fixture source lowers confidence");
-  }
-
-  if (Number(approvalNeededCount) > 0) {
-    score -= 8;
-    reasons.push("approval gate pending");
-  }
-
-  if (Number(blockedCount) > 0) {
-    score -= 12;
-    reasons.push("blocked items visible");
-  }
-
-  if (!runtimeVisibility.health.healthy) {
-    score -= 8;
-    reasons.push("automation health requires review");
-  }
-
-  reasons.push("live trading remains blocked");
-  reasons.push("broker execution remains blocked");
-
-  const safeScore = Math.max(0, Math.min(100, score));
-
-  if (runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.UNKNOWN) {
-    return {
-      value: "UNKNOWN",
-      label: "UNKNOWN UNTIL WIRED",
-      band: "UNKNOWN",
-      confidence: "LOW",
-      reasons: ["source unavailable", "missing data is not success"]
-    };
-  }
-
-  return {
-    value: safeScore,
-    label: "MODEL PREVIEW",
-    band: safeScore >= 90 ? "READY" : safeScore >= 70 ? "REVIEW" : safeScore >= 40 ? "NEEDS_APPROVAL" : "BLOCKED",
-    confidence: runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.MOCK_DATA ? "FIXTURE" : "READ_ONLY",
-    reasons: reasons.slice(0, 5)
-  };
-}
-
-function buildPlanetaryDashboardModel(runtimeVisibility) {
-  const bridgeMetrics = autonomyBridgeCards[0]?.metrics ?? {};
-  const winsCount = bridgeMetrics.wins ?? autonomyBridgeState.wins_count ?? "UNKNOWN";
-  const blockedCount =
-    bridgeMetrics.blocked ??
-    autonomyBridgeState.blocked_count ??
-    runtimeVisibility.executionLedger.blockedPacketCount;
-  const approvalNeededCount =
-    bridgeMetrics.approval_needed ??
-    autonomyBridgeState.approval_needed_count ??
-    runtimeVisibility.executionLedger.approvalCount;
-  const nightSupervisorStatus =
-    autonomyBridgeState.night_supervisor_status ??
-    autonomyBridgeState.supervisor_status ??
-    "UNKNOWN";
-  const nextSafeAction =
-    autonomyBridgeState.next_safe_action ??
-    runtimeVisibility.nextSafeAction ??
-    "Review evidence before protected action.";
-  const globalStatus = normalizeStatusValue(
-    Number(blockedCount) > 0
-      ? "BLOCKED"
-      : Number(approvalNeededCount) > 0
-        ? "NEEDS_APPROVAL"
-        : runtimeVisibility.runtime.status
-  );
-
-  return {
-    winsCount,
-    blockedCount,
-    approvalNeededCount,
-    nightSupervisorStatus,
-    nextSafeAction,
-    globalStatus,
-    edgeMark: deriveAiosEdgeMark(runtimeVisibility, approvalNeededCount, blockedCount),
-    criticalAlerts: buildCriticalAlerts(runtimeVisibility, approvalNeededCount, blockedCount),
-    objective: "Turn AI_OS into a realistic planetary command system while keeping all protected actions gated.",
-    mode: "paper-safe",
-    sourceLabel: runtimeVisibility.sourceLabel,
-    freshness: runtimeVisibility.runtime.freshness
-  };
-}
-
-function useAiosInputNavigation(zoneIds, activeZoneId, setActiveZoneId, handlers) {
-  useEffect(() => {
-    function moveZone(delta) {
-      const currentIndex = Math.max(zoneIds.indexOf(activeZoneId), 0);
-      const nextIndex = (currentIndex + delta + zoneIds.length) % zoneIds.length;
-      const nextZoneId = zoneIds[nextIndex];
-
-      setActiveZoneId(nextZoneId);
-      window.requestAnimationFrame(() => {
-        document.querySelector(`[data-zone-id="${nextZoneId}"]`)?.focus();
-      });
-    }
-
-    function handleKeyDown(event) {
-      const key = event.key.toLowerCase();
-      const target = event.target;
-      const isTypingTarget =
-        target instanceof HTMLInputElement ||
-        target instanceof HTMLTextAreaElement ||
-        target instanceof HTMLSelectElement;
-
-      if (event.key === "Escape") {
-        if (handlers.closeTopLayer()) {
-          event.preventDefault();
-        }
-        return;
-      }
-
-      if (isTypingTarget) {
-        return;
-      }
-
-      if (["arrowright", "arrowdown", "d", "s"].includes(key)) {
-        event.preventDefault();
-        moveZone(1);
-      }
-
-      if (["arrowleft", "arrowup", "a", "w"].includes(key)) {
-        event.preventDefault();
-        moveZone(-1);
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeZoneId, handlers, setActiveZoneId, zoneIds]);
-}
-
-function useGamepadPresence() {
-  const [gamepadConnected, setGamepadConnected] = useState(false);
-
-  useEffect(() => {
-    function refreshGamepadState() {
-      const pads = navigator.getGamepads?.() ?? [];
-      setGamepadConnected(Array.from(pads).some(Boolean));
-    }
-
-    function handleConnected() {
-      setGamepadConnected(true);
-    }
-
-    function handleDisconnected() {
-      refreshGamepadState();
-    }
-
-    window.addEventListener("gamepadconnected", handleConnected);
-    window.addEventListener("gamepaddisconnected", handleDisconnected);
-    refreshGamepadState();
-
-    return () => {
-      window.removeEventListener("gamepadconnected", handleConnected);
-      window.removeEventListener("gamepaddisconnected", handleDisconnected);
-    };
-  }, []);
-
-  return gamepadConnected;
-}
-
-function AiosEdgeMarkPanel({ edgeMark }) {
+function StatusHeader({ model, refreshStatus, loading }) {
   return (
-    <section className="edgeMarkPanel" aria-labelledby="edgemark-title">
+    <header className="portalHeader">
       <div>
-        <p className="eyebrow">AIOS EdgeMark</p>
-        <h2 id="edgemark-title">{edgeMark.label}</h2>
+        <p className="eyebrow">AIOS operator portal</p>
+        <h1>AIOS</h1>
+        <p className="headerSummary">
+          Minimal control surface. Display state, request intent, preserve governance.
+        </p>
       </div>
-      <div className="edgeScore">
-        <strong>{edgeMark.value}</strong>
-        <span>{edgeMark.band}</span>
+      <div className="headerActions" aria-label="AIOS status">
+        <StatusPill value={model.systemStatus} />
+        <StatusPill value={model.lockedState} />
+        <StatusPill value={model.evidenceState} />
+        <button className="button button-readonly" type="button" onClick={refreshStatus}>
+          {loading ? "Checking..." : "Refresh Status"}
+        </button>
       </div>
-      <p className="edgeConfidence">Confidence: {edgeMark.confidence}</p>
-      <ul>
-        {edgeMark.reasons.map((reason) => (
-          <li key={reason}>{reason}</li>
-        ))}
-      </ul>
-    </section>
+    </header>
   );
 }
 
-function SafetyStatusStrip({ model }) {
-  const safetyItems = [
-    ["Live trading", "BLOCKED"],
-    ["Broker", "BLOCKED"],
-    ["Secrets", "SAFE"],
-    ["Source", model.sourceLabel],
-    ["Freshness", model.freshness]
+function RequestComposer({
+  requestText,
+  setRequestText,
+  submitRequest,
+  createRequestPreview
+}) {
+  return (
+    <Panel title="What do you want AIOS to do?" eyebrow="Command input" className="requestPanel">
+      <form className="requestForm" onSubmit={submitRequest}>
+        <label className="requestLabel" htmlFor="operator-request">
+          Anthony request
+        </label>
+        <textarea
+          id="operator-request"
+          value={requestText}
+          onChange={(event) => setRequestText(event.target.value)}
+          placeholder="Ask for status, evidence, blockers, readiness, or a governed work request."
+          rows={5}
+        />
+        <div className="requestActions">
+          <button className="button button-primary" type="submit">
+            Submit Request
+          </button>
+          {requestButtons.map((button) => (
+            <button
+              className="button button-request"
+              key={button.id}
+              type="button"
+              onClick={() => createRequestPreview(button.prompt)}
+            >
+              {button.label}
+            </button>
+          ))}
+        </div>
+      </form>
+      <p className="guardrailText">
+        Request submission creates a local preview only. It does not execute commands or mutate AIOS state.
+      </p>
+    </Panel>
+  );
+}
+
+function SafeActionButtons({ buttons, selectedPanel, selectPanel, refreshStatus }) {
+  return (
+    <Panel title="Safe buttons" eyebrow="Read-only actions" className="buttonsPanel">
+      <div className="buttonGrid">
+        {buttons.map((button) => (
+          <button
+            className={`button button-readonly ${selectedPanel === button.panel ? "selected" : ""}`}
+            key={button.id}
+            type="button"
+            onClick={button.id === "status" ? refreshStatus : () => selectPanel(button.panel)}
+          >
+            <span>{button.label}</span>
+            <small>{button.type}</small>
+          </button>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function OutputPanel({ selectedOutput, selectedPanel, lastIntentPreview, model }) {
+  const fallbackOutput = {
+    title: "Portal ready",
+    summary: "Submit a request or choose a read-only button to inspect AIOS state.",
+    details: [
+      `Selected panel: ${selectedPanel}`,
+      `Next safe action: ${model.nextSafeAction}`,
+      "Execution allowed: false",
+      "Mutation allowed: false"
+    ]
+  };
+  const output = selectedOutput ?? fallbackOutput;
+
+  return (
+    <Panel title="AIOS response" eyebrow="Output panel" className="outputPanel">
+      <div className="outputBox">
+        <h3>{output.title}</h3>
+        <p>{output.summary}</p>
+        <ul>
+          {output.details.map((detail) => (
+            <li key={detail}>{detail}</li>
+          ))}
+        </ul>
+      </div>
+      {lastIntentPreview ? (
+        <div className="previewBox">
+          <div className="panelTopline">
+            <h3>Latest intent preview</h3>
+            <StatusPill value={lastIntentPreview.classification} />
+          </div>
+          <dl className="previewGrid">
+            <div>
+              <dt>Request</dt>
+              <dd>{lastIntentPreview.request}</dd>
+            </div>
+            <div>
+              <dt>Interpretation</dt>
+              <dd>{lastIntentPreview.interpretation}</dd>
+            </div>
+            <div>
+              <dt>Approval required</dt>
+              <dd>{String(lastIntentPreview.approvalRequired)}</dd>
+            </div>
+            <div>
+              <dt>Timestamp</dt>
+              <dd>{lastIntentPreview.timestamp}</dd>
+            </div>
+          </dl>
+          <p className="nextSafeAction">{lastIntentPreview.nextSafeAction}</p>
+        </div>
+      ) : null}
+    </Panel>
+  );
+}
+
+function BlockerPanel({ model, lastIntentPreview }) {
+  const blockers = [
+    "live_trading_allowed=false",
+    "broker_allowed=false",
+    "approval_mutation_allowed=false",
+    "worker_launch_allowed=false",
+    "scheduler_allowed=false",
+    "execution_allowed=false",
+    "mutation_allowed=false",
+    ...(lastIntentPreview?.blockedActions ?? [])
   ];
 
   return (
-    <section className="safetyStrip" aria-label="AI_OS safety state">
-      {safetyItems.map(([label, value]) => (
-        <div className="safetyItem" key={label}>
-          <span>{label}</span>
-          <StatusPill value={value} />
+    <Panel title="Blockers" eyebrow="Fail-closed state">
+      <div className="metricRow">
+        <Metric label="Blocked count" value={model.blockedCount ?? "UNKNOWN"} tone="warn" />
+        <Metric label="Evidence state" value={model.evidenceState} tone={statusTone(model.evidenceState)} />
+      </div>
+      <ul className="blockedList">
+        {[...new Set(blockers)].map((blocker) => (
+          <li key={blocker}>{blocker}</li>
+        ))}
+      </ul>
+    </Panel>
+  );
+}
+
+function ApprovalPanel() {
+  return (
+    <Panel title="Approval required" eyebrow="Protected gates">
+      <div className="protectedList">
+        {protectedActions.map((action) => (
+          <article className="protectedAction" key={action.id}>
+            <div>
+              <h3>{action.label}</h3>
+              <p>{action.reason}</p>
+            </div>
+            <button className="button button-locked" type="button" disabled>
+              {action.state}
+            </button>
+          </article>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function TradingReadinessStrip() {
+  return (
+    <section className="readinessStrip" aria-label="Trading readiness">
+      {tradingReadiness.map((item) => (
+        <div className="readinessItem" key={item.label}>
+          <span>{item.label}</span>
+          <strong className={`stateText state-${statusTone(item.state)}`}>{item.state}</strong>
         </div>
       ))}
     </section>
   );
 }
 
-function CriticalAlertsPanel({ alerts }) {
+function EvidencePanel({ runtimeVisibility, model }) {
+  const operatorPanels = [
+    operatorStatusFixture.registry_safety,
+    operatorStatusFixture.telemetry_status,
+    operatorStatusFixture.worker_status,
+    operatorStatusFixture.next_safe_action
+  ].filter(Boolean);
+
   return (
-    <section className="criticalAlerts" aria-labelledby="critical-alerts-title">
-      <div className="panelTitleRow">
-        <p className="eyebrow">Critical only</p>
-        <h2 id="critical-alerts-title">Alerts</h2>
+    <Panel title="Dashboard evidence" eyebrow="Display-only sources" className="evidencePanel">
+      <div className="evidenceGrid">
+        <Metric label="Source" value={model.sourceLabel} tone={statusTone(model.sourceLabel)} />
+        <Metric label="Freshness" value={model.freshness} tone={statusTone(model.freshness)} />
+        <Metric label="Runtime" value={model.runtimeStatus} tone={statusTone(model.runtimeStatus)} />
+        <Metric label="Last tick" value={formatTime(model.lastTickAt)} />
       </div>
-      <div className="alertStack">
-        {alerts.map((alert) => (
-          <article className="alertCard" key={`${alert.label}-${alert.message}`}>
-            <StatusPill value={alert.status} />
-            <div>
-              <strong>{alert.label}</strong>
-              <p>{alert.message}</p>
-            </div>
+      <dl className="evidenceDetails">
+        <div>
+          <dt>Schema</dt>
+          <dd>{runtimeVisibility.schema ?? "UNKNOWN"}</dd>
+        </div>
+        <div>
+          <dt>Generated</dt>
+          <dd>{model.generatedAt}</dd>
+        </div>
+        <div>
+          <dt>Queue source</dt>
+          <dd>{model.queueSource}</dd>
+        </div>
+        <div>
+          <dt>Evidence path</dt>
+          <dd>{model.evidenceSourcePath}</dd>
+        </div>
+      </dl>
+      <div className="operatorEvidenceList">
+        {operatorPanels.map((panel) => (
+          <article key={panel.label}>
+            <span>{panel.label}</span>
+            <strong>{panel.status}</strong>
+            <p>{panel.summary}</p>
           </article>
         ))}
       </div>
+    </Panel>
+  );
+}
+
+function MissionCards({ model }) {
+  return (
+    <section className="missionGrid" aria-label="Mission status">
+      <Panel title="Current mission" eyebrow="Mission card">
+        <p>{model.currentMission}</p>
+      </Panel>
+      <Panel title="Countdown" eyebrow="Live countdown">
+        <div className="largeValue">{model.countdown}</div>
+        <p>Minimalist dashboard APPLY in progress. Live boundary remains locked.</p>
+      </Panel>
+      <Panel title="Locked / armed" eyebrow="Authority state">
+        <div className="largeValue small">{model.lockedState}</div>
+        <p>Frontend has no execution, mutation, broker, scheduler, or approval authority.</p>
+      </Panel>
+      <Panel title="Next safe action" eyebrow="Operator guidance">
+        <p className="nextSafeAction">{model.nextSafeAction}</p>
+      </Panel>
     </section>
   );
 }
 
-function PlanetZoneNode({ zone, isActive, isSelected, onFocus, onSelect }) {
+function SafetyStatePanel({ model }) {
   return (
-    <button
-      className={`planetNode ${zone.planetClass} ${isActive ? "active" : ""} ${
-        isSelected ? "selected" : ""
-      }`}
-      data-zone-id={zone.id}
-      type="button"
-      onClick={() => onSelect(zone.id)}
-      onFocus={() => onFocus(zone.id)}
-      aria-pressed={isSelected}
-    >
-      <span className="planetVisual" aria-hidden="true">
-        <span className="planetCore" />
-      </span>
-      <span className="zoneCopy">
-        <span className="eyebrow">{zone.eyebrow}</span>
-        <strong>{zone.label}</strong>
-        <small>{zone.summary}</small>
-        <span className="zoneStatus">
-          <StatusPill value={zone.status} />
-        </span>
-      </span>
-    </button>
-  );
-}
-
-function PlanetaryScene({ zones, activeZoneId, selectedZoneId, onFocusZone, onSelectZone }) {
-  return (
-    <section className="planetaryScene" aria-label="Planetary zone navigation">
-      <div className="starfield" aria-hidden="true" />
-      <div className="orbitalPath pathOne" aria-hidden="true" />
-      <div className="orbitalPath pathTwo" aria-hidden="true" />
-      <div className="orbitalPath pathThree" aria-hidden="true" />
-      <div className="zoneMap">
-        {zones.map((zone) => (
-          <PlanetZoneNode
-            key={zone.id}
-            zone={zone}
-            isActive={activeZoneId === zone.id}
-            isSelected={selectedZoneId === zone.id}
-            onFocus={onFocusZone}
-            onSelect={onSelectZone}
-          />
-        ))}
+    <Panel title="Safety state" eyebrow="Read-only guarantees">
+      <div className="safetyGrid">
+        <Metric label="Execution" value={String(EXECUTION_ALLOWED)} tone="danger" />
+        <Metric label="Mutation" value={String(MUTATION_ALLOWED)} tone="danger" />
+        <Metric label="Live trading" value={String(LIVE_TRADING_ALLOWED)} tone="danger" />
+        <Metric label="Kill switch" value={model.killSwitchState} tone="warn" />
+        <Metric label="Risk gate" value={model.riskGateState} tone="warn" />
+        <Metric label="Human approval" value={model.humanApprovalState} tone="warn" />
       </div>
-    </section>
-  );
-}
-
-function ZoneDetailPanel({ zone }) {
-  return (
-    <section className="zoneDetailPanel" aria-labelledby="zone-detail-title">
-      <div className="panelTitleRow">
-        <p className="eyebrow">Selected zone</p>
-        <h2 id="zone-detail-title">{zone.label}</h2>
-      </div>
-      <p>{zone.objective}</p>
-      <div className="signalGrid">
-        {zone.signals.map((signal) => (
-          <span key={signal}>{signal}</span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function MissionObjectivePanel({ model }) {
-  return (
-    <section className="missionObjectivePanel" aria-labelledby="mission-objective-title">
-      <div>
-        <p className="eyebrow">Current objective</p>
-        <h2 id="mission-objective-title">{model.objective}</h2>
-      </div>
-      <div className="nextActionBox">
-        <span>Next allowed action</span>
-        <strong>{model.nextSafeAction}</strong>
-      </div>
-    </section>
-  );
-}
-
-function PaperLeaguePanel() {
-  const categories = [
-    "risk-adjusted return",
-    "lowest drawdown",
-    "consistency streak",
-    "execution quality",
-    "EdgeMark progression"
-  ];
-
-  return (
-    <section className="paperLeaguePanel" aria-labelledby="paper-league-title">
-      <div className="panelTitleRow">
-        <p className="eyebrow">Paper League</p>
-        <h2 id="paper-league-title">Simulated only</h2>
-      </div>
-      <p>
-        Paper League is display-only in Phase 1. No real-money competition, broker action,
-        live orders, or external leaderboard writes.
-      </p>
-      <div className="leagueCategories">
-        {categories.map((category) => (
-          <span key={category}>{category}</span>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-function AstronautModeTile() {
-  return (
-    <section className="astronautTile" aria-labelledby="astronaut-title">
-      <div className="helmetPreview" aria-hidden="true" />
-      <div>
-        <p className="eyebrow">Future immersive mode</p>
-        <h2 id="astronaut-title">Astronaut Mode locked</h2>
-        <p>Phase 1 does not implement movement, engine dependencies, or UE5 files.</p>
-      </div>
-      <StatusPill value="LOCKED" />
-    </section>
-  );
-}
-
-function InputHelpOverlay({ open, gamepadConnected, onClose }) {
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className="overlayBackdrop" role="presentation" onMouseDown={onClose}>
-      <section
-        className="inputHelpOverlay"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="input-help-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <div className="drawerTitle">
-          <div>
-            <p className="eyebrow">Controls</p>
-            <h2 id="input-help-title">Command navigation</h2>
-          </div>
-          <button className="iconButton" type="button" onClick={onClose} aria-label="Close controls">
-            X
-          </button>
-        </div>
-        <div className="controlGrid">
-          <div>
-            <strong>Keyboard</strong>
-            <p>Tab, arrows/WASD, Enter, Space, Escape.</p>
-          </div>
-          <div>
-            <strong>Mouse</strong>
-            <p>Hover and click zones. No destructive click actions.</p>
-          </div>
-          <div>
-            <strong>Xbox</strong>
-            <p>D-pad/left stick, A select, B back, X Advanced, Y search later.</p>
-          </div>
-        </div>
-        <div className="controllerState">
-          <StatusPill value={gamepadConnected ? "GAMEPAD_DETECTED" : "GAMEPAD_HELP_ONLY"} />
-          <span>No controller action can commit, push, trade, approve, or mutate queues.</span>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function OperatorStatusPanel({ panel }) {
-  const detailRows = [
-    ["Source", panel.source],
-    ["Branch", panel.branch],
-    ["Base", panel.base],
-    ["Merge", panel.merge_state],
-    ["Collector", panel.collector_state],
-    ["Latest event", panel.latest_event_at ? formatTime(panel.latest_event_at) : null],
-    ["Active workers", panel.active_workers],
-    ["Blocked workers", panel.blocked_workers],
-    ["Action type", panel.action_type]
-  ].filter(([, value]) => value !== undefined && value !== null && value !== "");
-
-  return (
-    <article className="operatorStatusCard">
-      <div className="operatorStatusTop">
-        <h3>{panel.label}</h3>
-        <StatusPill value={panel.status} />
-      </div>
-      <p>{panel.summary}</p>
-      {detailRows.length > 0 ? (
-        <dl className="operatorStatusMeta">
-          {detailRows.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-      {panel.blocked_actions?.length ? (
-        <ul className="blockedList">
-          {panel.blocked_actions.map((action) => (
-            <li key={action}>{action}</li>
-          ))}
-        </ul>
-      ) : null}
-    </article>
-  );
-}
-
-function AutonomyBridgeCard({ card }) {
-  const metrics = card.metrics ?? {};
-
-  return (
-    <article className="autonomyBridgeCard">
-      <div className="operatorStatusTop">
-        <h3>{card.title ?? "Autonomy Bridge"}</h3>
-        <StatusPill value={card.status ?? "UNKNOWN"} />
-      </div>
-      <p>{card.summary ?? autonomyBridgeState.plain_summary ?? "No bridge summary available."}</p>
-      <div className="metricsGrid autonomyMetrics">
-        <Metric label="Wins" value={metrics.wins ?? autonomyBridgeState.wins_count ?? "UNKNOWN"} />
-        <Metric
-          label="Blocked"
-          value={metrics.blocked ?? autonomyBridgeState.blocked_count ?? "UNKNOWN"}
-          tone={metricTone(metrics.blocked ?? autonomyBridgeState.blocked_count, "danger")}
-        />
-        <Metric
-          label="Approval needed"
-          value={metrics.approval_needed ?? autonomyBridgeState.approval_needed_count ?? "UNKNOWN"}
-          tone={metricTone(
-            metrics.approval_needed ?? autonomyBridgeState.approval_needed_count,
-            "warn"
-          )}
-        />
-        <Metric
-          label="Worker notes"
-          value={metrics.worker_notes ?? autonomyBridgeState.worker_notes_count ?? "UNKNOWN"}
-        />
-      </div>
-      <p className="nextAction">{card.next_action ?? autonomyBridgeState.next_safe_action}</p>
-    </article>
-  );
-}
-
-function AdvancedDrawer({
-  open,
-  onClose,
-  runtimeVisibility,
-  filteredPackets,
-  failedGroups,
-  eventQuery,
-  setEventQuery,
-  packetFilter,
-  setPacketFilter,
-  isLocalApiReadOnly
-}) {
-  const healthTone = runtimeVisibility.health.healthy ? "good" : "danger";
-  const ledgerAuthority = runtimeVisibility.ledgerAuthority ?? {};
-  const workLedger = ledgerAuthority.workLedger ?? {};
-  const nightSupervisorLedger = ledgerAuthority.nightSupervisorLedger ?? {};
-
-  if (!open) {
-    return null;
-  }
-
-  return (
-    <div className="drawerBackdrop" role="presentation" onMouseDown={onClose}>
-      <aside
-        className="advancedDrawer"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="advanced-drawer-title"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <div className="drawerTitle">
-          <div>
-            <p className="eyebrow">Operator advanced</p>
-            <h2 id="advanced-drawer-title">Raw detail drawer</h2>
-          </div>
-          <button className="iconButton" type="button" onClick={onClose} aria-label="Close Advanced drawer">
-            X
-          </button>
-        </div>
-
-        <div className="advancedCategoryGrid" aria-label="Advanced categories">
-          {advancedCategories.map((category) => (
-            <span key={category}>{category}</span>
-          ))}
-        </div>
-
-        <main className="runtimeGrid">
-          <Section title="Runtime Status">
-            <div className="metricsGrid">
-              <Metric label="Runtime ID" value={runtimeVisibility.runtime.runtimeId} />
-              <Metric
-                label="Status"
-                value={runtimeVisibility.runtime.status}
-                tone={statusTone(runtimeVisibility.runtime.status)}
-              />
-              <Metric
-                label="Freshness"
-                value={runtimeVisibility.runtime.freshness}
-                tone={statusTone(runtimeVisibility.runtime.freshness)}
-              />
-              <Metric label="Queue source" value={runtimeVisibility.runtime.queueSource} />
-              <Metric label="Last tick" value={formatTime(runtimeVisibility.runtime.lastTickAt)} />
-              <Metric label="Last event" value={formatTime(runtimeVisibility.telemetry.lastEventAt)} />
-            </div>
-          </Section>
-
-          <Section title="Health Summary">
-            <div className="metricsGrid">
-              <Metric
-                label="Runtime"
-                value={runtimeVisibility.health.healthy ? "Healthy" : "Attention"}
-                tone={healthTone}
-              />
-              <Metric label="Scheduler actions" value={runtimeVisibility.health.schedulerActions} />
-              <Metric
-                label="Expired workers"
-                value={runtimeVisibility.health.expiredWorkers}
-                tone={metricTone(runtimeVisibility.health.expiredWorkers, "danger")}
-              />
-              <Metric
-                label="Poison packets"
-                value={runtimeVisibility.health.poisonPackets}
-                tone={metricTone(runtimeVisibility.health.poisonPackets, "danger")}
-              />
-              <Metric
-                label="Retryable packets"
-                value={runtimeVisibility.health.retryablePackets}
-                tone={metricTone(runtimeVisibility.health.retryablePackets, "warn")}
-              />
-              <Metric
-                label="Reclaimable"
-                value={runtimeVisibility.health.reclaimablePackets}
-                tone={metricTone(runtimeVisibility.health.reclaimablePackets, "warn")}
-              />
-            </div>
-          </Section>
-
-          <Section title="Queue Counters">
-            <div className="queueStrip">
-              {Object.entries(runtimeVisibility.queue).map(([key, value]) => (
-                <Metric key={key} label={key.replaceAll("_", " ")} value={value} />
-              ))}
-            </div>
-          </Section>
-
-          <Section
-            title="Active Packets"
-            action={
-              isLocalApiReadOnly ? null : (
-                <div className="segmented">
-                  {packetFilters.map((filter) => (
-                    <button
-                      key={filter}
-                      className={filter === packetFilter ? "selected" : ""}
-                      onClick={() => setPacketFilter(filter)}
-                      type="button"
-                    >
-                      {filter.replaceAll("_", " ")}
-                    </button>
-                  ))}
-                </div>
-              )
-            }
-          >
-            {isLocalApiReadOnly ? (
-              <UnavailableMessage>
-                Active packet state is not available from LOCAL_API_READ_ONLY.
-              </UnavailableMessage>
-            ) : (
-              <div className="table">
-                <div className="tableRow tableHead">
-                  <span>Packet</span>
-                  <span>Status</span>
-                  <span>Risk</span>
-                  <span>Last update</span>
-                  <span>Reason</span>
-                </div>
-                {filteredPackets.map((packet) => (
-                  <div className="tableRow" key={packet.packetId}>
-                    <strong>{packet.packetId}</strong>
-                    <StatusPill value={packet.action ?? packet.status} />
-                    <span>{packet.risk ?? "UNKNOWN"}</span>
-                    <span>{formatTime(packet.lastUpdatedAt)}</span>
-                    <span>{packet.reason ?? packet.lastEventType ?? "No scheduler reason"}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Section>
-
-          <Section title="Failed Packets">
-            {isLocalApiReadOnly ? (
-              <UnavailableMessage>
-                Failure grouping is not available from LOCAL_API_READ_ONLY.
-              </UnavailableMessage>
-            ) : (
-              <>
-                <div className="failureSplit">
-                  <Metric label="Retryable" value={failedGroups.retryable.length} tone="warn" />
-                  <Metric label="Manual review" value={failedGroups.poison.length} tone="danger" />
-                </div>
-                <div className="stackList">
-                  {failedGroups.all.map((packet) => (
-                    <article className="listItem" key={packet.packetId}>
-                      <div>
-                        <strong>{packet.packetId}</strong>
-                        <p>{packet.reason}</p>
-                      </div>
-                      <div className="itemMeta">
-                        <StatusPill value={packet.retryable ? "retryable" : "manual_review"} />
-                        <span>{packet.failureCount} failures</span>
-                        <span>{packet.source}</span>
-                        <span>{formatTime(packet.lastFailedAt)}</span>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </>
-            )}
-          </Section>
-
-          <Section title="Worker Leases">
-            {isLocalApiReadOnly ? (
-              <UnavailableMessage>
-                Worker lease state is not exposed by LOCAL_API_READ_ONLY.
-              </UnavailableMessage>
-            ) : (
-              <div className="workerGrid">
-                {runtimeVisibility.workers.map((worker) => (
-                  <article className="workerCard" key={worker.workerId}>
-                    <div className="workerTop">
-                      <strong>{worker.workerId}</strong>
-                      <StatusPill value={worker.leaseState} />
-                    </div>
-                    <p>{worker.packetId ?? "No active packet"}</p>
-                    <div className="workerMeta">
-                      <span>Heartbeat {formatTime(worker.lastHeartbeatAt)}</span>
-                      <span>Age {formatDuration(worker.heartbeatAgeMs)}</span>
-                      <span>Lease {worker.leaseExpiresAt ? formatTime(worker.leaseExpiresAt) : "UNKNOWN"}</span>
-                      <span>Expires in {formatDuration(worker.leaseExpiresInMs)}</span>
-                      <span>{worker.reclaimablePacket ? "Packet reclaimable" : "Lease normal"}</span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </Section>
-
-          <Section title="Backpressure Alerts">
-            <div className={`backpressure ${statusTone(runtimeVisibility.backpressure.level)}`}>
-              <div>
-                <strong>{runtimeVisibility.backpressure.reason}</strong>
-                <p>Allowed concurrent packets: {runtimeVisibility.backpressure.allowedConcurrentPackets}</p>
-              </div>
-              <StatusPill value={runtimeVisibility.backpressure.level} />
-            </div>
-            <div className="pressureGrid">
-              {isLocalApiReadOnly ? (
-                <Metric label="Backpressure inputs" value="UNKNOWN" />
-              ) : (
-                Object.entries(runtimeVisibility.backpressure.pressureInputs).map(([key, value]) => (
-                  <Metric key={key} label={key} value={value} />
-                ))
-              )}
-            </div>
-            <div className="alerts">
-              {runtimeVisibility.alerts.map((alert) => (
-                <div className="alert" key={`${alert.category}-${alert.message}`}>
-                  <StatusPill value={alert.severity} />
-                  <span>{alert.message}</span>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Section
-            title="Telemetry Log"
-            action={
-              <input
-                className="search"
-                value={eventQuery}
-                onChange={(event) => setEventQuery(event.target.value)}
-                placeholder="Filter telemetry"
-                aria-label="Filter telemetry events"
-              />
-            }
-          >
-            <div className="ledgerSummary">
-              <Metric label="Events" value={runtimeVisibility.telemetry.eventCount} />
-              <Metric label="Invalid lines" value={runtimeVisibility.telemetry.invalidLineCount} />
-              <Metric
-                label="Work ledger"
-                value={workLedger.status ?? "UNKNOWN"}
-                tone={statusTone(workLedger.status ?? "UNKNOWN")}
-              />
-              <Metric label="Work events" value={workLedger.eventCount ?? "UNKNOWN"} />
-              <Metric
-                label="Night ledger"
-                value={nightSupervisorLedger.status ?? "UNKNOWN"}
-                tone={statusTone(nightSupervisorLedger.status ?? "UNKNOWN")}
-              />
-              <Metric label="Night events" value={nightSupervisorLedger.eventCount ?? "UNKNOWN"} />
-            </div>
-            <p className="nextAction">
-              {ledgerAuthority.proofBoundary ?? "Ledger evidence is display-only."}
-            </p>
-            <div className="eventList">
-              {runtimeVisibility.telemetry.recentEvents
-                .filter((event) => {
-                  const query = eventQuery.trim().toLowerCase();
-
-                  if (!query) {
-                    return true;
-                  }
-
-                  return [event.eventType, event.source, event.summary, event.packetId]
-                    .filter(Boolean)
-                    .some((value) => String(value).toLowerCase().includes(query));
-                })
-                .map((event) => (
-                  <article className="eventItem" key={event.eventId}>
-                    <div>
-                      <strong>{event.eventType}</strong>
-                      <p>{event.summary}</p>
-                    </div>
-                    <div className="itemMeta">
-                      <span>{event.source}</span>
-                      <span>{event.packetId ?? "No packet"}</span>
-                      <span>{formatTime(event.ts)}</span>
-                    </div>
-                  </article>
-                ))}
-            </div>
-          </Section>
-
-          <Section title="Execution Ledger">
-            {isLocalApiReadOnly ? (
-              <UnavailableMessage>
-                Execution ledger summary is not available from LOCAL_API_READ_ONLY.
-              </UnavailableMessage>
-            ) : (
-              <div className="ledgerSummary">
-                <Metric label="Packets" value={runtimeVisibility.executionLedger.packetCount} />
-                <Metric label="Approvals" value={runtimeVisibility.executionLedger.approvalCount} />
-                <Metric
-                  label="Blocked"
-                  value={runtimeVisibility.executionLedger.blockedPacketCount}
-                  tone="warn"
-                />
-                <Metric
-                  label="Applied"
-                  value={runtimeVisibility.executionLedger.appliedPacketCount}
-                  tone="good"
-                />
-              </div>
-            )}
-            <p className="nextAction">{runtimeVisibility.nextSafeAction}</p>
-          </Section>
-
-          <Section title="Operator Fixture">
-            <div className="operatorStatusGrid">
-              {operatorStatusPanels.map((panel) => (
-                <OperatorStatusPanel key={panel.label} panel={panel} />
-              ))}
-            </div>
-          </Section>
-
-          <Section title="Autonomy Bridge">
-            <div className="bridgeSourceRow">
-              <StatusPill value={autonomyBridgeSourceIsLive ? "LIVE" : "sample"} />
-              <StatusPill value={`source: ${autonomyBridgeStatePayload.sourcePath}`} />
-              <StatusPill value={`schema: ${autonomyBridgeState.schema ?? "UNKNOWN"}`} />
-            </div>
-            {autonomyBridgeStatePayload.fallbackReason ? (
-              <div className="warningStrip bridgeWarning">
-                <span>Live bridge state unavailable; showing sample data.</span>
-              </div>
-            ) : null}
-            <div className="autonomyBridgeGrid">
-              {autonomyBridgeCards.length > 0 ? (
-                autonomyBridgeCards.map((card) => (
-                  <AutonomyBridgeCard key={card.title ?? "autonomy-bridge-card"} card={card} />
-                ))
-              ) : (
-                <AutonomyBridgeCard card={{ title: "Night Supervisor Brief" }} />
-              )}
-            </div>
-          </Section>
-        </main>
-      </aside>
-    </div>
-  );
-}
-
-function PlanetaryCommandShell({
-  model,
-  zones,
-  activeZoneId,
-  selectedZoneId,
-  setActiveZoneId,
-  setSelectedZoneId,
-  openAdvanced,
-  openInputHelp
-}) {
-  const selectedZone = zones.find((zone) => zone.id === selectedZoneId) ?? zones[0];
-
-  return (
-    <div className="commandShell">
-      <header className="commandHeader">
-        <div className="brandBlock">
-          <p className="eyebrow">AI_OS planetary command</p>
-          <h1>AIOS</h1>
-          <p>Intelligent. Adaptive. Yours.</p>
-        </div>
-        <div className="commandHeaderStatus" aria-label="Global status">
-          <StatusPill value={model.globalStatus} />
-          <StatusPill value={model.mode} />
-          <StatusPill value={model.edgeMark.label} />
-          <button className="headerButton" type="button" onClick={openInputHelp}>
-            Controls
-          </button>
-          <button className="headerButton primary" type="button" onClick={openAdvanced}>
-            Advanced
-          </button>
-        </div>
-      </header>
-
-      <SafetyStatusStrip model={model} />
-
-      <main className="planetaryLayout">
-        <section className="commandIntro" aria-labelledby="command-intro-title">
-          <p className="eyebrow">Realistic command system</p>
-          <h2 id="command-intro-title">Cinematic planetary operations shell</h2>
-          <p>
-            AI_OS is displayed as a realistic, governance-bound command environment. The
-            first screen keeps safety, status, objective, and next allowed action above raw
-            telemetry.
-          </p>
-        </section>
-
-        <AiosEdgeMarkPanel edgeMark={model.edgeMark} />
-        <CriticalAlertsPanel alerts={model.criticalAlerts} />
-        <MissionObjectivePanel model={model} />
-
-        <PlanetaryScene
-          zones={zones}
-          activeZoneId={activeZoneId}
-          selectedZoneId={selectedZoneId}
-          onFocusZone={setActiveZoneId}
-          onSelectZone={setSelectedZoneId}
-        />
-
-        <ZoneDetailPanel zone={selectedZone} />
-        <PaperLeaguePanel />
-        <AstronautModeTile />
-      </main>
-    </div>
+    </Panel>
   );
 }
 
 export default function App() {
   const [runtimeVisibility, setRuntimeVisibility] = useState(mockVisibilityDisplay);
-  const [visibilityLoading, setVisibilityLoading] = useState(true);
-  const [packetFilter, setPacketFilter] = useState("all");
-  const [eventQuery, setEventQuery] = useState("");
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [inputHelpOpen, setInputHelpOpen] = useState(false);
-  const [activeZoneId, setActiveZoneId] = useState(zoneDefinitions[0].id);
-  const [selectedZoneId, setSelectedZoneId] = useState(zoneDefinitions[0].id);
-  const handlersRef = useRef({
-    closeTopLayer: () => false
-  });
-  const stableInputHandlers = useMemo(
-    () => ({
-      closeTopLayer: () => handlersRef.current.closeTopLayer()
-    }),
-    []
-  );
-  const gamepadConnected = useGamepadPresence();
+  const [visibilityLoading, setVisibilityLoading] = useState(false);
+  const [requestText, setRequestText] = useState("");
+  const [selectedOutput, setSelectedOutput] = useState(null);
+  const [lastIntentPreview, setLastIntentPreview] = useState(null);
+  const [selectedPanel, setSelectedPanel] = useState("status");
 
-  useEffect(() => {
+  const model = useMemo(() => buildPortalModel(runtimeVisibility), [runtimeVisibility]);
+
+  const refreshRuntimeVisibility = useCallback(() => {
+    setVisibilityLoading(true);
     const config = getRuntimeVisibilityClientConfig();
-    fetchRuntimeVisibilityReadOnly(config)
+
+    return fetchRuntimeVisibilityReadOnly(config)
       .then((result) => {
         setRuntimeVisibility(
           mapRuntimeVisibilityDisplayModel(result.data, { sourceLabel: result.sourceLabel })
         );
       })
       .catch(() => {
-        // API unavailable: retain mock data already in state.
+        setSelectedOutput({
+          title: "Runtime visibility fallback",
+          summary: "Local API read-only source is unavailable. Fixture evidence remains displayed.",
+          details: [
+            "Source: MOCK_DATA",
+            "Evidence state: NEEDS_REVIEW",
+            "No mutation was attempted."
+          ]
+        });
       })
       .finally(() => setVisibilityLoading(false));
   }, []);
 
-  useEffect(() => {
-    handlersRef.current = {
-      closeTopLayer: () => {
-        if (inputHelpOpen) {
-          setInputHelpOpen(false);
-          return true;
-        }
-
-        if (advancedOpen) {
-          setAdvancedOpen(false);
-          return true;
-        }
-
-        if (selectedZoneId !== activeZoneId) {
-          setSelectedZoneId(activeZoneId);
-          return true;
-        }
-
-        return false;
+  function outputForPanel(panel) {
+    const panelOutputs = {
+      status: {
+        title: "Status",
+        summary: "AIOS status is displayed from read-only runtime visibility evidence.",
+        details: [
+          `System status: ${model.systemStatus}`,
+          `Runtime status: ${model.runtimeStatus}`,
+          `Evidence state: ${model.evidenceState}`
+        ]
+      },
+      nextSafeAction: {
+        title: "Next safe action",
+        summary: model.nextSafeAction,
+        details: ["Review evidence first.", "Protected actions require separate approval."]
+      },
+      countdown: {
+        title: "Countdown",
+        summary: "Live Countdown 20/22 dashboard APPLY.",
+        details: ["Goal: minimalist operator portal.", "Live boundary: locked."]
+      },
+      trading: {
+        title: "Trading readiness",
+        summary: "Trading readiness is visible only. Live trading remains false.",
+        details: tradingReadiness.map((item) => `${item.label}: ${item.state}`)
+      },
+      evidence: {
+        title: "Dashboard evidence",
+        summary: "Evidence is sourced from fixture/API read models.",
+        details: [
+          `Source label: ${model.sourceLabel}`,
+          `Generated: ${model.generatedAt}`,
+          `Evidence path: ${model.evidenceSourcePath}`
+        ]
+      },
+      blockers: {
+        title: "Blockers",
+        summary: "Protected actions are blocked by default.",
+        details: [
+          "execution_allowed=false",
+          "mutation_allowed=false",
+          "live_trading_allowed=false",
+          "approval_mutation_allowed=false"
+        ]
+      },
+      approval: {
+        title: "Approval required",
+        summary: "Human Owner approval is required before protected actions.",
+        details: protectedActions.map((action) => `${action.label}: ${action.state}`)
+      },
+      killSwitch: {
+        title: "Kill switch state",
+        summary: "Kill switch state is visible but not controllable from this dashboard.",
+        details: ["State: VISIBLE_LOCKED", "Direct frontend control: false"]
+      },
+      riskGate: {
+        title: "Risk gate state",
+        summary: "Risk gate is displayed as NEEDS_REVIEW until stronger evidence is supplied.",
+        details: ["Risk gate: NEEDS_REVIEW", "Bad orders remain blocked by policy."]
       }
     };
-  }, [activeZoneId, advancedOpen, inputHelpOpen, selectedZoneId]);
 
-  useAiosInputNavigation(
-    zoneDefinitions.map((zone) => zone.id),
-    activeZoneId,
-    setActiveZoneId,
-    stableInputHandlers
-  );
+    return panelOutputs[panel] ?? panelOutputs.status;
+  }
 
-  const isLocalApiReadOnly =
-    runtimeVisibility.sourceLabel === RUNTIME_VISIBILITY_SOURCE_LABELS.LOCAL_API_READ_ONLY;
+  function selectPanel(panel) {
+    setSelectedPanel(panel);
+    setSelectedOutput(outputForPanel(panel));
+  }
 
-  const filteredPackets = useMemo(() => {
-    if (packetFilter === "all") {
-      return runtimeVisibility.activePackets;
-    }
+  function createPreviewFromText(text) {
+    const classification = classifyRequest(text);
+    const preview = previewForRequest(text, classification, model, new Date().toISOString());
+    setLastIntentPreview(preview);
+    setSelectedOutput({
+      title: "Intent preview",
+      summary: preview.interpretation,
+      details: [
+        `Classification: ${preview.classification}`,
+        `Approval required: ${preview.approvalRequired}`,
+        `Next safe action: ${preview.nextSafeAction}`
+      ]
+    });
+    setSelectedPanel("intentPreview");
+  }
 
-    return runtimeVisibility.activePackets.filter((packet) => packet.action === packetFilter);
-  }, [packetFilter, runtimeVisibility.activePackets]);
+  function submitRequest(event) {
+    event.preventDefault();
+    createPreviewFromText(requestText);
+  }
 
-  const failedGroups = runtimeVisibility.failedPackets;
-  const model = useMemo(() => buildPlanetaryDashboardModel(runtimeVisibility), [runtimeVisibility]);
+  function createRequestPreview(prompt) {
+    setRequestText(prompt);
+    createPreviewFromText(prompt);
+  }
 
   return (
     <div className="runtimePage">
-      {visibilityLoading ? (
-        <div className="loadingStatus" role="status">
-          <StatusPill value="loading" />
-          <span>Checking read-only runtime visibility.</span>
+      <main className="operatorPortal">
+        <StatusHeader
+          loading={visibilityLoading}
+          model={model}
+          refreshStatus={refreshRuntimeVisibility}
+        />
+
+        <MissionCards model={model} />
+        <TradingReadinessStrip />
+
+        <div className="portalGrid">
+          <div className="primaryColumn">
+            <RequestComposer
+              createRequestPreview={createRequestPreview}
+              requestText={requestText}
+              setRequestText={setRequestText}
+              submitRequest={submitRequest}
+            />
+            <OutputPanel
+              lastIntentPreview={lastIntentPreview}
+              model={model}
+              selectedOutput={selectedOutput}
+              selectedPanel={selectedPanel}
+            />
+          </div>
+
+          <aside className="sideColumn" aria-label="Read-only control surface">
+            <SafeActionButtons
+              buttons={safeButtons}
+              refreshStatus={refreshRuntimeVisibility}
+              selectedPanel={selectedPanel}
+              selectPanel={selectPanel}
+            />
+            <SafetyStatePanel model={model} />
+          </aside>
         </div>
-      ) : null}
 
-      <PlanetaryCommandShell
-        model={model}
-        zones={zoneDefinitions}
-        activeZoneId={activeZoneId}
-        selectedZoneId={selectedZoneId}
-        setActiveZoneId={setActiveZoneId}
-        setSelectedZoneId={setSelectedZoneId}
-        openAdvanced={() => setAdvancedOpen(true)}
-        openInputHelp={() => setInputHelpOpen(true)}
-      />
-
-      <AdvancedDrawer
-        open={advancedOpen}
-        onClose={() => setAdvancedOpen(false)}
-        runtimeVisibility={runtimeVisibility}
-        filteredPackets={filteredPackets}
-        failedGroups={failedGroups}
-        eventQuery={eventQuery}
-        setEventQuery={setEventQuery}
-        packetFilter={packetFilter}
-        setPacketFilter={setPacketFilter}
-        isLocalApiReadOnly={isLocalApiReadOnly}
-      />
-
-      <InputHelpOverlay
-        open={inputHelpOpen}
-        gamepadConnected={gamepadConnected}
-        onClose={() => setInputHelpOpen(false)}
-      />
+        <div className="reviewGrid">
+          <BlockerPanel lastIntentPreview={lastIntentPreview} model={model} />
+          <ApprovalPanel />
+          <EvidencePanel model={model} runtimeVisibility={runtimeVisibility} />
+        </div>
+      </main>
     </div>
   );
 }
