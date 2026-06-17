@@ -249,7 +249,7 @@ def test_live_execution_rejection() -> None:
 
 
 def test_payload_with_secret_like_fields_fails_closed() -> None:
-    result = _adapter().create_order(_order(api_key="EXAMPLE_NOT_A_REAL_VALUE"))
+    result = _adapter().create_order(_order(api_key="EXAMPLE"))
 
     assert result["status"] == "PAPER_ORDER_REJECTED"
     assert "forbidden_field:api_key" in result["blockers"]

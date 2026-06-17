@@ -36,6 +36,50 @@ from forex_delivery.governed_readiness import (  # noqa: E402
 )
 
 
+def _base_live_exception_fields():
+    return {
+        "broker_path": "external-operator-controlled-oanda-practice-reference",
+        "instrument": "EUR_USD",
+        "side": "BUY",
+        "units_or_notional_limit": 1,
+        "maximum_loss": 1.0,
+        "daily_loss_cap": 2.0,
+        "stop_loss": 1.075,
+        "order_type": "MARKET",
+        "approval_window": "2026-06-17T00:00:00Z/2026-06-17T00:05:00Z",
+        "evidence_bundle_path": "Reports/forex_delivery/sanitized-evidence-bundle.md",
+        "arming_step": "manual-human-owner-arm",
+        "stop_point": "stop-after-fill-rejection-error-timeout-expiry-or-manual-kill",
+        "human_owner_approval": "Anthony Meza",
+        "timestamp": "2026-06-17T00:00:00Z",
+        "account_mode": "LIVE",
+        "paper_live_mode_confirmation": "LIVE",
+    }
+
+
+def _complete_sanitized_live_review_package():
+    fields = _base_live_exception_fields()
+    fields.update(
+        {
+            "one_order_only": True,
+            "no_retry_loop": True,
+            "no_autonomous_reentry": True,
+            "kill_switch_confirmed": True,
+            "timeout_confirmed": True,
+            "final_disarm_confirmed": True,
+            "rollback_plan_confirmed": True,
+            "post_trade_journal_path": "Reports/forex_delivery/sanitized-terminal-journal.md",
+            "reconciliation_proof": True,
+            "evidence_bundle_complete": True,
+            "demo_or_practice_broker_proof": True,
+            "credential_boundary_confirmed": True,
+            "account_id_boundary_confirmed": True,
+            "live_endpoint_denial_confirmed": True,
+        }
+    )
+    return fields
+
+
 def test_missing_external_broker_path_fails_safely():
     checklist = build_live_arming_checklist(
         {
@@ -79,9 +123,125 @@ def test_live_mode_refuses_without_exact_approval_fields():
 
     assert checklist["ready_for_human_review"] is False
     assert checklist["live_execution_allowed"] is False
+    assert checklist["order_submit_allowed"] is False
+    assert checklist["broker_request_sent"] is False
+    assert checklist["network_used"] is False
+    assert checklist["passed_gates"] == ["no_forbidden_live_fields"]
+    assert "required_exception_fields_present" in checklist["failed_gates"]
     assert len(checklist["missing_fields"]) >= 16
     with pytest.raises(LiveExecutionBlocked):
         submit_live_order({})
+
+
+def test_existing_required_fields_alone_are_not_review_ready():
+    checklist = build_live_arming_checklist(_base_live_exception_fields())
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert "kill_switch_confirmed" in checklist["missing_fields"]
+    assert "final_disarm_confirmed" in checklist["missing_fields"]
+    assert "evidence_bundle_complete" in checklist["missing_fields"]
+    assert "kill_switch_confirmed" in checklist["failed_gates"]
+    assert checklist["next_required_action"] == "complete_sanitized_live_arming_review_package"
+
+
+def test_complete_sanitized_review_package_is_ready_for_human_review_only():
+    checklist = build_live_arming_checklist(_complete_sanitized_live_review_package())
+
+    assert checklist["ready_for_human_review"] is True
+    assert checklist["live_execution_allowed"] is False
+    assert checklist["order_submit_allowed"] is False
+    assert checklist["broker_request_sent"] is False
+    assert checklist["network_used"] is False
+    assert checklist["missing_fields"] == []
+    assert checklist["failed_gates"] == []
+    assert "kill_switch_confirmed" in checklist["passed_gates"]
+    assert "final_disarm_confirmed" in checklist["passed_gates"]
+    assert (
+        checklist["next_required_action"]
+        == "human_owner_review_only_live_execution_remains_blocked"
+    )
+
+
+def test_credentials_fail_closed_even_with_complete_review_package():
+    fields = _complete_sanitized_live_review_package()
+    fields["credential_value"] = "not-a-real-demo-value"
+
+    checklist = build_live_arming_checklist(fields)
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert "no_forbidden_live_fields" in checklist["failed_gates"]
+    assert "forbidden_field:credential_value" in checklist["blocker_reasons"]
+
+
+def test_account_identifiers_fail_closed_even_with_complete_review_package():
+    fields = _complete_sanitized_live_review_package()
+    fields["account_id"] = "not-a-real-account-reference"
+
+    checklist = build_live_arming_checklist(fields)
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert "no_forbidden_live_fields" in checklist["failed_gates"]
+    assert "forbidden_field:account_id" in checklist["blocker_reasons"]
+
+
+def test_retry_true_fails_closed_even_with_no_retry_confirmation():
+    fields = _complete_sanitized_live_review_package()
+    fields["retry_loop"] = True
+
+    checklist = build_live_arming_checklist(fields)
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert "retry_loop" in checklist["failed_gates"]
+    assert "retry_loop_must_not_be_enabled" in checklist["blocker_reasons"]
+
+
+def test_autonomous_reentry_true_fails_closed():
+    fields = _complete_sanitized_live_review_package()
+    fields["autonomous_reentry"] = True
+
+    checklist = build_live_arming_checklist(fields)
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert "autonomous_reentry" in checklist["failed_gates"]
+    assert "autonomous_reentry_must_not_be_enabled" in checklist["blocker_reasons"]
+
+
+def test_missing_kill_switch_fails_closed():
+    fields = _complete_sanitized_live_review_package()
+    fields.pop("kill_switch_confirmed")
+
+    checklist = build_live_arming_checklist(fields)
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert "kill_switch_confirmed" in checklist["missing_fields"]
+    assert "kill_switch_confirmed" in checklist["failed_gates"]
+
+
+def test_missing_final_disarm_fails_closed():
+    fields = _complete_sanitized_live_review_package()
+    fields.pop("final_disarm_confirmed")
+
+    checklist = build_live_arming_checklist(fields)
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert "final_disarm_confirmed" in checklist["missing_fields"]
+    assert "final_disarm_confirmed" in checklist["failed_gates"]
+
+
+def test_live_submit_remains_blocked_after_review_ready_package():
+    checklist = build_live_arming_checklist(_complete_sanitized_live_review_package())
+
+    assert checklist["ready_for_human_review"] is True
+    assert checklist["live_execution_allowed"] is False
+    with pytest.raises(LiveExecutionBlocked):
+        submit_live_order(_complete_sanitized_live_review_package())
 
 
 def test_non_allowlisted_pair_is_rejected():
