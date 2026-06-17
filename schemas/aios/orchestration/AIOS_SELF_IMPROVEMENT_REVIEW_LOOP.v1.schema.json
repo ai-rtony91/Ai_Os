@@ -1,0 +1,331 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_SELF_IMPROVEMENT_REVIEW_LOOP.v1.schema.json",
+  "title": "AIOS Self-Improvement Review Loop v1",
+  "description": "Read-only recommendations-only review of M11/M12/M13/M14 outcome evidence. This schema grants no self-approval, APPLY, command execution, file write, Reports output, runtime mutation, approval mutation, queue mutation, worker launch, scheduler, broker, live-trading, production, dashboard mutation, commit, push, or merge authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "component",
+    "mode",
+    "review_id",
+    "verdict",
+    "review_state",
+    "outcome_count",
+    "success_count",
+    "blocker_count",
+    "dominant_pattern",
+    "recommendations",
+    "non_executable_recommendations_only",
+    "human_approval_required_before_action",
+    "self_approval_allowed",
+    "apply_allowed",
+    "apply_performed",
+    "commands_executed",
+    "files_written",
+    "mutations_performed",
+    "executable_packet_emitted",
+    "execution_token_emitted",
+    "codex_prompt_emitted",
+    "worker_launch_allowed",
+    "scheduler_allowed",
+    "daemon_allowed",
+    "broker_allowed",
+    "live_trading_allowed",
+    "production_allowed",
+    "dashboard_mutation_allowed",
+    "commit_allowed",
+    "push_allowed",
+    "merge_allowed",
+    "blockers",
+    "evidence_inputs",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_SELF_IMPROVEMENT_REVIEW_LOOP.v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "component": {
+      "type": "string",
+      "const": "self_improvement_review_loop"
+    },
+    "mode": {
+      "type": "string",
+      "const": "READ_ONLY_RECOMMENDATIONS_ONLY"
+    },
+    "review_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "REVIEW_COMPLETE_RECOMMENDATIONS_ONLY",
+        "REVIEW_COMPLETE_NO_ACTION",
+        "BLOCKED_OUTCOMES_MISSING",
+        "BLOCKED_OUTCOMES_MALFORMED",
+        "BLOCKED_UNSAFE_CONTENT",
+        "BLOCKED_EXECUTABLE_CONTENT",
+        "BLOCKED_NO_SAFE_REVIEW"
+      ]
+    },
+    "review_state": {
+      "type": "string",
+      "enum": ["COMPLETE", "BLOCKED"]
+    },
+    "outcome_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "success_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "blocker_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "dominant_pattern": {
+      "type": "string"
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/recommendation"
+      }
+    },
+    "non_executable_recommendations_only": {
+      "type": "boolean",
+      "const": true
+    },
+    "human_approval_required_before_action": {
+      "type": "boolean",
+      "const": true
+    },
+    "self_approval_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "apply_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "apply_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "commands_executed": {
+      "type": "boolean",
+      "const": false
+    },
+    "files_written": {
+      "type": "boolean",
+      "const": false
+    },
+    "mutations_performed": {
+      "type": "boolean",
+      "const": false
+    },
+    "executable_packet_emitted": {
+      "type": "boolean",
+      "const": false
+    },
+    "execution_token_emitted": {
+      "type": "boolean",
+      "const": false
+    },
+    "codex_prompt_emitted": {
+      "type": "boolean",
+      "const": false
+    },
+    "worker_launch_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "scheduler_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "daemon_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "broker_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "live_trading_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "production_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "dashboard_mutation_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "commit_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "push_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "merge_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "schema"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "schema": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only",
+        "side_effect_free",
+        "recommendations_only",
+        "self_approval_allowed",
+        "commands_executed",
+        "files_written",
+        "reports_written",
+        "runtime_mutation",
+        "approval_mutation",
+        "queue_mutation"
+      ],
+      "properties": {
+        "read_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "side_effect_free": {
+          "type": "boolean",
+          "const": true
+        },
+        "recommendations_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_approval_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "commands_executed": {
+          "type": "boolean",
+          "const": false
+        },
+        "files_written": {
+          "type": "boolean",
+          "const": false
+        },
+        "reports_written": {
+          "type": "boolean",
+          "const": false
+        },
+        "runtime_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "queue_mutation": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  },
+  "$defs": {
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recommendation_id",
+        "category",
+        "priority",
+        "summary",
+        "rationale",
+        "human_approval_required",
+        "executable",
+        "allowed_next_step_type",
+        "blocked_actions"
+      ],
+      "properties": {
+        "recommendation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "human_approval_required": {
+          "type": "boolean"
+        },
+        "executable": {
+          "type": "boolean",
+          "const": false
+        },
+        "allowed_next_step_type": {
+          "type": "string"
+        },
+        "blocked_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
