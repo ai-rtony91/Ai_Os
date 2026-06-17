@@ -56,6 +56,16 @@ Every frontend-safe projection should expose these fields:
 
 Frontend readers must treat missing envelope fields as `NEEDS_REVIEW`, not as implicit permission. Visual affordances should default to review, inspect, or copy-only behavior. Buttons that stage files, commit, push, merge, mutate approvals, move packets, claim locks, launch workers, start runtimes, schedule tasks, touch broker/live trading, or access secrets are outside this display contract.
 
+## Single Live Micro-Trade Projection Boundary
+
+For any future Single Live Micro-Trade Exception, projected dashboard state, runtime visibility, telemetry projections, queue projections, validator projections, approval projections, worker output projections, launchers, reports, and generated evidence remain display-only unless `RISK_POLICY.md` explicitly grants authority through the current Human Owner-approved exception.
+
+Projection fields cannot approve, arm, extend, retry, re-enter, execute, release credential handles, or satisfy the exception. Generic fields such as `approval_status`, `approved_by_human`, `APPROVED`, `approval_granted`, `ready`, `passed`, `live_ready`, or `execution_allowed` must be treated as evidence requiring review, not as authority for a live micro-trade.
+
+Projected state must keep live trading blocked unless the current packet-bound exception satisfies `RISK_POLICY.md`. Projection logic must not create retry authority, autonomous re-entry, hidden scheduler or daemon execution, broker setup, credential access, or live execution controls.
+
+Projected state and workflow artifacts must not contain credentials, broker order IDs, account identifiers, live payloads, private account data, or secret values.
+
 ## Source Type Defaults
 
 - `automation/orchestration/work_packets/active`, `blocked`, and `complete` are canonical packet lifecycle evidence; only `active` should be rendered as live work without an explicit state filter.

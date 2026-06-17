@@ -28,6 +28,16 @@ Validators must not:
 - start background work, startup tasks, or autonomous loops.
 - convert a recommendation into approval.
 
+## Single Live Micro-Trade Exception Boundary
+
+For any future Single Live Micro-Trade Exception, validator output remains evidence only. A validator `PASS`, clean validator chain, missing blocker report, confidence score, recommendation, or generated validation receipt cannot approve, arm, extend, retry, re-enter, execute, release credential handles, or satisfy the exception.
+
+The exception must remain governed by `RISK_POLICY.md`. Approval must be explicit, Human Owner-bound, one-shot, non-transferable, expiring, packet-bound, and compliant with every required `RISK_POLICY.md` exception gate.
+
+Generic approval-like fields such as `approval_status`, `approved_by_human`, `APPROVED`, or `approval_granted` are not sufficient to satisfy a live micro-trade exception. Validators must treat those fields as evidence to inspect, not as authority.
+
+Validator evidence for this exception must not contain credentials, broker order IDs, account identifiers, live payloads, private account data, or secret values.
+
 ## Read-Only Validator Rule
 
 Validators default to read-only DRY_RUN behavior.

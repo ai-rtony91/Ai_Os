@@ -18,6 +18,16 @@ A router, registry, launcher, dashboard button, helper list, terminal output, lo
 
 Only the user can approve APPLY or any protected action.
 
+## Single Live Micro-Trade Exception Router Boundary
+
+For any future Single Live Micro-Trade Exception, router, registry, queue, launcher, dashboard, helper, terminal, report, and telemetry output remains evidence or projection only.
+
+Routers and registries cannot route around Human Owner approval, transform evidence into execution authority, approve or arm the exception, release credential handles, extend approval, retry after a terminal result, re-enter autonomously, or start hidden scheduler, daemon, or background execution paths.
+
+Approval must be explicit, Human Owner-bound, one-shot, non-transferable, expiring, packet-bound, and compliant with `RISK_POLICY.md`. Generic fields such as `approval_status`, `approved_by_human`, `APPROVED`, or `approval_granted` do not satisfy the live micro-trade exception by themselves.
+
+Workflow artifacts must not contain credentials, broker order IDs, account identifiers, live payloads, private account data, or secret values.
+
 ## Router Scope
 
 A workflow router may:
