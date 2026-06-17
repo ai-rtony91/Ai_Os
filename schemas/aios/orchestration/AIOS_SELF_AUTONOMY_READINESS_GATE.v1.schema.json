@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/orchestration/AIOS_SELF_AUTONOMY_READINESS_GATE.v1.schema.json",
+  "title": "AIOS Self-Autonomy Readiness Gate v1",
+  "description": "Read-only readiness aggregate over existing AI_OS safety, continuation, dirty-tree, governor, validator, approval, and rollback evidence. This schema grants no execution, worker launch, scheduler, daemon, broker, live-trading, production, dashboard mutation, commit, push, or merge authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "generated_at_utc",
+    "component",
+    "mode",
+    "verdict",
+    "readiness_state",
+    "observe_allowed",
+    "planning_allowed",
+    "dry_run_allowed",
+    "apply_allowed",
+    "apply_review_allowed",
+    "worker_launch_allowed",
+    "scheduler_allowed",
+    "daemon_allowed",
+    "broker_allowed",
+    "live_trading_allowed",
+    "production_allowed",
+    "dashboard_mutation_allowed",
+    "commit_allowed",
+    "push_allowed",
+    "merge_allowed",
+    "goal_clear",
+    "allowed_files_known",
+    "forbidden_files_known",
+    "risk_level",
+    "risk_low_enough",
+    "validators_known",
+    "rollback_path_known",
+    "protected_action_requires_human",
+    "approval_required",
+    "explicit_approval_present",
+    "blockers",
+    "evidence_inputs",
+    "next_safe_action",
+    "safety"
+  ],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "AIOS_SELF_AUTONOMY_READINESS_GATE.v1"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "minLength": 1
+    },
+    "component": {
+      "type": "string",
+      "const": "self_autonomy_readiness_gate"
+    },
+    "mode": {
+      "type": "string",
+      "const": "READ_ONLY_EVIDENCE_AGGREGATE"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "READY_FOR_PLANNING",
+        "READY_FOR_DRY_RUN_ONLY",
+        "APPLY_REVIEW_REQUIRED",
+        "BLOCKED_SECURITY",
+        "BLOCKED_APPROVAL",
+        "BLOCKED_VALIDATOR",
+        "BLOCKED_DIRTY_TREE",
+        "BLOCKED_EVIDENCE_MISSING",
+        "BLOCKED_NO_SAFE_NEXT_ACTION"
+      ]
+    },
+    "readiness_state": {
+      "type": "string",
+      "enum": ["PLANNING_READY", "DRY_RUN_READY", "APPLY_REVIEW", "BLOCKED"]
+    },
+    "observe_allowed": {
+      "type": "boolean"
+    },
+    "planning_allowed": {
+      "type": "boolean"
+    },
+    "dry_run_allowed": {
+      "type": "boolean"
+    },
+    "apply_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "apply_review_allowed": {
+      "type": "boolean"
+    },
+    "worker_launch_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "scheduler_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "daemon_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "broker_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "live_trading_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "production_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "dashboard_mutation_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "commit_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "push_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "merge_allowed": {
+      "type": "boolean",
+      "const": false
+    },
+    "goal_clear": {
+      "type": "boolean"
+    },
+    "allowed_files_known": {
+      "type": "boolean"
+    },
+    "forbidden_files_known": {
+      "type": "boolean"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["LOW", "GREEN", "MEDIUM", "HIGH", "BLOCKED", "UNKNOWN"]
+    },
+    "risk_low_enough": {
+      "type": "boolean"
+    },
+    "validators_known": {
+      "type": "boolean"
+    },
+    "rollback_path_known": {
+      "type": "boolean"
+    },
+    "protected_action_requires_human": {
+      "type": "boolean"
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "explicit_approval_present": {
+      "type": "boolean"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "schema"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "schema": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "next_safe_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only",
+        "evidence_only",
+        "side_effect_free",
+        "commands_executed",
+        "network_access",
+        "secrets_accessed",
+        "runtime_mutation",
+        "second_autonomy_authority",
+        "approval_mutation",
+        "queue_mutation",
+        "repo_mutation"
+      ],
+      "properties": {
+        "read_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "evidence_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "side_effect_free": {
+          "type": "boolean",
+          "const": true
+        },
+        "commands_executed": {
+          "type": "boolean",
+          "const": false
+        },
+        "network_access": {
+          "type": "boolean",
+          "const": false
+        },
+        "secrets_accessed": {
+          "type": "boolean",
+          "const": false
+        },
+        "runtime_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "second_autonomy_authority": {
+          "type": "boolean",
+          "const": false
+        },
+        "approval_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "queue_mutation": {
+          "type": "boolean",
+          "const": false
+        },
+        "repo_mutation": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    }
+  }
+}
