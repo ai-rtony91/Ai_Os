@@ -28,6 +28,7 @@ from automation.forex_engine.oanda_demo_runtime_handoff import (  # noqa: E402
 )
 from forex_delivery.governed_readiness import (  # noqa: E402
     LiveExecutionBlocked,
+    build_demo_connection_proof_preflight_dry_run,
     build_demo_runtime_readiness_dry_run,
     build_live_arming_checklist,
     build_order_payload,
@@ -97,6 +98,30 @@ def _complete_demo_runtime_dry_run_fields():
         "timeout_seconds": 10,
         "one_shot_stop_requirement": True,
         "evidence_bundle_path": "Reports/forex_delivery/sanitized-demo-runtime-proof.md",
+        "human_owner_approval_future_proof": "Anthony Meza",
+    }
+
+
+def _complete_demo_connection_preflight_dry_run_fields():
+    return {
+        "broker_family_label": "OANDA_PRACTICE",
+        "demo_practice_mode_confirmed": True,
+        "runtime_auth_reference_label": "SANITIZED_REFERENCE_ONLY",
+        "external_connector_readiness_flag": True,
+        "protected_action_approval_status": False,
+        "network_approval_status": False,
+        "endpoint_class": "OANDA_PRACTICE_DEMO",
+        "account_identifier_status": "ABSENT",
+        "credential_material_status": "ABSENT",
+        "order_route_approval": False,
+        "market_data_fetch_approval": False,
+        "timeout_seconds": 10,
+        "one_shot_stop_requirement": True,
+        "retry_count": 0,
+        "scheduler_enabled": False,
+        "daemon_enabled": False,
+        "webhook_enabled": False,
+        "evidence_bundle_path": "Reports/forex_delivery/sanitized-demo-connection-preflight.md",
         "human_owner_approval_future_proof": "Anthony Meza",
     }
 
@@ -262,6 +287,154 @@ def test_complete_sanitized_demo_runtime_fixture_passes_dry_run_readiness_only()
     assert readiness["live_execution_allowed"] is False
     assert readiness["credential_material_present"] is False
     assert readiness["runtime_handoff"]["runtime_handoff_ready"] is True
+
+
+def test_demo_connection_preflight_missing_protected_action_approval_fails_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields.pop("protected_action_approval_status")
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["proof_executable_now"] is False
+    assert preflight["connection_attempt_performed"] is False
+    assert "protected_action_approval_status" in preflight["missing_fields"]
+    assert "protected_action_approval_status" in preflight["failed_gates"]
+
+
+def test_demo_connection_preflight_missing_runtime_auth_reference_fails_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields.pop("runtime_auth_reference_label")
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["broker_request_sent"] is False
+    assert preflight["network_used"] is False
+    assert "runtime_auth_reference_label" in preflight["missing_fields"]
+    assert "runtime_auth_reference_label" in preflight["failed_gates"]
+
+
+def test_demo_connection_preflight_credential_like_values_fail_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "token=not-a-real-value"
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["credentials_used"] is False
+    assert preflight["credential_material_present"] is False
+    assert "no_forbidden_demo_connection_preflight_fields" in preflight["failed_gates"]
+    assert "forbidden_field:runtime_auth_reference_label" in preflight["blocker_reasons"]
+
+
+def test_demo_connection_preflight_account_id_like_values_fail_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "123-456-789"
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["account_access_allowed"] is False
+    assert preflight["order_placed"] is False
+    assert "forbidden_field:runtime_auth_reference_label" in preflight["blocker_reasons"]
+
+
+def test_demo_connection_preflight_live_endpoint_references_fail_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields["endpoint_class"] = "OANDA_LIVE"
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["live_endpoint_allowed"] is False
+    assert "endpoint_class" in preflight["failed_gates"]
+    assert "endpoint_class_must_be_demo_or_practice_only" in preflight["blocker_reasons"]
+
+
+def test_demo_connection_preflight_network_approval_false_keeps_proof_non_executable():
+    preflight = build_demo_connection_proof_preflight_dry_run(
+        _complete_demo_connection_preflight_dry_run_fields()
+    )
+
+    assert preflight["demo_connection_preflight_ready"] is True
+    assert preflight["protected_action_approval_status"] is False
+    assert preflight["network_approval_status"] is False
+    assert preflight["proof_executable_now"] is False
+    assert preflight["network_allowed"] is False
+    assert preflight["network_used"] is False
+    assert preflight["connection_attempt_performed"] is False
+
+
+def test_demo_connection_preflight_order_route_approval_attempts_fail_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields["order_route_approval"] = True
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["order_route_allowed"] is False
+    assert preflight["order_placed"] is False
+    assert "order_route_approval" in preflight["failed_gates"]
+    assert "order_route_approval_must_remain_false" in preflight["blocker_reasons"]
+
+
+def test_demo_connection_preflight_market_data_fetch_approval_attempts_fail_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields["market_data_fetch_approval"] = True
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["market_data_allowed"] is False
+    assert preflight["market_data_fetched"] is False
+    assert "market_data_fetch_approval" in preflight["failed_gates"]
+    assert "market_data_fetch_approval_must_remain_false" in preflight["blocker_reasons"]
+
+
+def test_demo_connection_preflight_retry_count_above_zero_fails_closed():
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields["retry_count"] = 1
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight["retry_loop_present"] is False
+    assert "retry_count" in preflight["failed_gates"]
+    assert "retry_count_must_be_zero" in preflight["blocker_reasons"]
+
+
+@pytest.mark.parametrize("flag_name", ["scheduler_enabled", "daemon_enabled", "webhook_enabled"])
+def test_demo_connection_preflight_scheduler_daemon_webhook_flags_fail_closed(flag_name):
+    fields = _complete_demo_connection_preflight_dry_run_fields()
+    fields[flag_name] = True
+
+    preflight = build_demo_connection_proof_preflight_dry_run(fields)
+
+    assert preflight["demo_connection_preflight_ready"] is False
+    assert preflight[flag_name] is False
+    assert flag_name in preflight["failed_gates"]
+
+
+def test_complete_sanitized_demo_connection_preflight_passes_dry_run_readiness_only():
+    preflight = build_demo_connection_proof_preflight_dry_run(
+        _complete_demo_connection_preflight_dry_run_fields()
+    )
+
+    assert preflight["demo_connection_preflight_ready"] is True
+    assert preflight["future_demo_connection_proof_review_ready"] is True
+    assert preflight["dry_run_only"] is True
+    assert preflight["proof_executable_now"] is False
+    assert preflight["broker_connection_allowed"] is False
+    assert preflight["connection_attempt_performed"] is False
+    assert preflight["broker_request_sent"] is False
+    assert preflight["network_used"] is False
+    assert preflight["market_data_fetched"] is False
+    assert preflight["credentials_used"] is False
+    assert preflight["credential_material_present"] is False
+    assert preflight["order_placed"] is False
+    assert preflight["live_execution_allowed"] is False
+    assert preflight["demo_runtime_readiness"]["demo_runtime_ready"] is True
 
 
 def test_complete_sanitized_review_package_is_ready_for_human_review_only():
