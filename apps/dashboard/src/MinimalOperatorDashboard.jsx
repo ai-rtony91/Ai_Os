@@ -70,11 +70,53 @@ function StatusBadge({ value }) {
   return <span className={`statusBadge status-${statusTone(value)}`}>{value}</span>;
 }
 
-function Field({ label, value, tone }) {
+function dataSourceForPair(pair) {
+  return {
+    label:
+      pair?.explanation?.dataSourceLabel ??
+      dashboardFixture.dataSource?.DISPLAY_LABEL ??
+      dashboardFixture.source ??
+      "UNVERIFIED",
+    liveTradingAllowed:
+      pair?.explanation?.liveTradingAllowedFromThisData ??
+      dashboardFixture.dataSource?.LIVE_TRADING_ALLOWED_FROM_THIS_DATA ??
+      false,
+    blockReason:
+      pair?.explanation?.blockReason ??
+      dashboardFixture.dataSource?.BLOCK_REASON ??
+      "Source permission is not approved for live trade decisions."
+  };
+}
+
+function DataLabel({ source, compact = false }) {
+  const liveAllowed = Boolean(source?.liveTradingAllowed);
+
+  return (
+    <div className={`dataLabel ${compact ? "compactLabel" : ""}`}>
+      <StatusBadge value={source?.label ?? "UNVERIFIED"} />
+      <span>{`LIVE_TRADING_ALLOWED_FROM_THIS_DATA: ${String(liveAllowed)}`}</span>
+      {!liveAllowed ? <small>{source?.blockReason ?? "Data is blocked for live decisions."}</small> : null}
+    </div>
+  );
+}
+
+function LabeledValue({ value, source, strong = false }) {
+  const ValueTag = strong ? "strong" : "span";
+
+  return (
+    <div className="labeledValue">
+      <ValueTag>{value}</ValueTag>
+      <DataLabel compact source={source} />
+    </div>
+  );
+}
+
+function Field({ label, value, tone, source = dataSourceForPair() }) {
   return (
     <div className="field">
       <span>{label}</span>
       <strong className={`tone-${tone ?? statusTone(value)}`}>{value}</strong>
+      <DataLabel compact source={source} />
     </div>
   );
 }
@@ -100,10 +142,13 @@ function Watchlist({ pairs, selectedPair, onSelectPair }) {
             <tr>
               <th>Rank</th>
               <th>Pair</th>
+              <th>Price</th>
               <th>Score</th>
               <th>Confidence</th>
               <th>Trend</th>
               <th>Supertrend</th>
+              <th>Volatility</th>
+              <th>Session</th>
               <th>Updated</th>
               <th>Action</th>
             </tr>
@@ -111,21 +156,40 @@ function Watchlist({ pairs, selectedPair, onSelectPair }) {
           <tbody>
             {pairs.map((pair) => {
               const selected = pair.pair === selectedPair;
+              const source = dataSourceForPair(pair);
 
               return (
                 <tr className={selected ? "selectedRow" : ""} key={pair.pair}>
                   <td>{pair.rank}</td>
                   <td>
-                    <strong>{formatPair(pair.pair)}</strong>
+                    <LabeledValue source={source} strong value={formatPair(pair.pair)} />
                     {selected ? <span className="selectedMark">Selected</span> : null}
                   </td>
-                  <td>{pair.opportunityScore}</td>
-                  <td>{pair.confidence}</td>
-                  <td>{pair.trend}</td>
+                  <td>
+                    <LabeledValue source={source} value={pair.fixturePrice} />
+                  </td>
+                  <td>
+                    <LabeledValue source={source} value={pair.opportunityScore} />
+                  </td>
+                  <td>
+                    <LabeledValue source={source} value={pair.confidence} />
+                  </td>
+                  <td>
+                    <LabeledValue source={source} value={pair.trend} />
+                  </td>
                   <td>
                     <StatusBadge value={pair.supertrend} />
+                    <DataLabel compact source={source} />
                   </td>
-                  <td>{formatTime(pair.lastUpdated)}</td>
+                  <td>
+                    <LabeledValue source={source} value={pair.volatility} />
+                  </td>
+                  <td>
+                    <LabeledValue source={source} value={pair.session} />
+                  </td>
+                  <td>
+                    <LabeledValue source={source} value={formatTime(pair.lastUpdated)} />
+                  </td>
                   <td>
                     <button
                       className="viewButton"
@@ -147,6 +211,7 @@ function Watchlist({ pairs, selectedPair, onSelectPair }) {
 
 function SelectedPairPanel({ pair }) {
   const points = chartPolyline(pair.chart);
+  const source = dataSourceForPair(pair);
 
   return (
     <Panel title="Selected Pair / Chart Data" eyebrow="Fixture chart handoff">
@@ -154,6 +219,7 @@ function SelectedPairPanel({ pair }) {
         <div>
           <span>Selected pair</span>
           <strong>{formatPair(pair.pair)}</strong>
+          <DataLabel source={source} />
         </div>
         <StatusBadge value="FIXTURE_NOT_LIVE" />
       </div>
@@ -179,13 +245,14 @@ function SelectedPairPanel({ pair }) {
             />
           ))}
         </svg>
+        <DataLabel source={source} />
       </div>
 
       <div className="fieldGrid">
-        <Field label="Fixture price" value={pair.fixturePrice} tone="neutral" />
-        <Field label="Trend direction" value={pair.trend} />
-        <Field label="Volatility" value={pair.volatility} />
-        <Field label="Session" value={pair.session} tone="neutral" />
+        <Field label="Fixture price" source={source} value={pair.fixturePrice} tone="neutral" />
+        <Field label="Trend direction" source={source} value={pair.trend} />
+        <Field label="Volatility" source={source} value={pair.volatility} />
+        <Field label="Session" source={source} value={pair.session} tone="neutral" />
       </div>
 
       <div className="explanationBox">
@@ -211,8 +278,9 @@ function FactorList({ title, items, tone = "neutral" }) {
 
 function OpportunityExplanationPanel({ pair, riskPl, exitReadiness, bridges }) {
   const explanation = pair.explanation ?? {};
-  const dataSourceLabel = explanation.dataSourceLabel ?? "FIXTURE_NOT_LIVE";
-  const liveTradingAllowed = Boolean(explanation.liveTradingAllowedFromThisData);
+  const source = dataSourceForPair(pair);
+  const dataSourceLabel = source.label;
+  const liveTradingAllowed = Boolean(source.liveTradingAllowed);
 
   return (
     <Panel title="Opportunity Explanation" eyebrow="AIOS selected-pair reasoning" className="opportunityPanel">
@@ -220,6 +288,7 @@ function OpportunityExplanationPanel({ pair, riskPl, exitReadiness, bridges }) {
         <div>
           <span>Selected pair</span>
           <strong>{formatPair(pair.pair)}</strong>
+          <DataLabel source={source} />
         </div>
         <div className="headerBadges">
           <StatusBadge value={dataSourceLabel} />
@@ -228,17 +297,18 @@ function OpportunityExplanationPanel({ pair, riskPl, exitReadiness, bridges }) {
       </div>
 
       <div className="fieldGrid compact">
-        <Field label="Opportunity score" value={pair.opportunityScore} tone="good" />
-        <Field label="Confidence score" value={pair.confidence} tone="good" />
-        <Field label="Supertrend" value={pair.supertrend ?? "UNKNOWN"} />
-        <Field label="Volatility" value={pair.volatility ?? "UNKNOWN"} />
-        <Field label="Session" value={pair.session ?? "UNKNOWN"} tone="neutral" />
+        <Field label="Opportunity score" source={source} value={pair.opportunityScore} tone="good" />
+        <Field label="Confidence score" source={source} value={pair.confidence} tone="good" />
+        <Field label="Supertrend" source={source} value={pair.supertrend ?? "UNKNOWN"} />
+        <Field label="Volatility" source={source} value={pair.volatility ?? "UNKNOWN"} />
+        <Field label="Session" source={source} value={pair.session ?? "UNKNOWN"} tone="neutral" />
         <Field
           label="Spread / slippage"
+          source={source}
           value={explanation.spreadSlippageStatus ?? "UNVERIFIED_FIXTURE"}
         />
-        <Field label="P/L readiness" value={explanation.plReadiness ?? "BLOCKED_FIXTURE"} />
-        <Field label="Exit readiness" value={explanation.exitReadiness ?? exitReadiness.autoExitStatus} />
+        <Field label="P/L readiness" source={source} value={explanation.plReadiness ?? "BLOCKED_FIXTURE"} />
+        <Field label="Exit readiness" source={source} value={explanation.exitReadiness ?? exitReadiness.autoExitStatus} />
       </div>
 
       <div className="rankReason">
@@ -252,8 +322,8 @@ function OpportunityExplanationPanel({ pair, riskPl, exitReadiness, bridges }) {
       </div>
 
       <div className="decisionGrid">
-        <Field label="Safe / blocked decision" value={explanation.safeDecision ?? bridges.safeStatus} />
-        <Field label="Current position" value={riskPl.currentPosition} tone="neutral" />
+        <Field label="Safe / blocked decision" source={source} value={explanation.safeDecision ?? bridges.safeStatus} />
+        <Field label="Current position" source={source} value={riskPl.currentPosition} tone="neutral" />
       </div>
 
       <div className="blockReason">
@@ -270,31 +340,41 @@ function OpportunityExplanationPanel({ pair, riskPl, exitReadiness, bridges }) {
 }
 
 function RiskPlPanel({ riskPl }) {
+  const source = dataSourceForPair();
+
   return (
     <Panel title="Risk / P&L" eyebrow="Sanitized fixture values">
       <div className="fieldGrid">
-        <Field label="Realized P/L" value={riskPl.realizedPl} tone="neutral" />
-        <Field label="Unrealized P/L" value={riskPl.unrealizedPl} tone="neutral" />
-        <Field label="Risk cap" value={riskPl.riskCap} tone="warn" />
-        <Field label="Position size" value={riskPl.positionSize} tone="warn" />
-        <Field label="Current position" value={riskPl.currentPosition} tone="neutral" />
+        <Field label="Realized P/L" source={source} value={riskPl.realizedPl} tone="neutral" />
+        <Field label="Unrealized P/L" source={source} value={riskPl.unrealizedPl} tone="neutral" />
+        <Field label="Risk cap" source={source} value={riskPl.riskCap} tone="warn" />
+        <Field label="Position size" source={source} value={riskPl.positionSize} tone="warn" />
+        <Field label="Current position" source={source} value={riskPl.currentPosition} tone="neutral" />
       </div>
     </Panel>
   );
 }
 
 function ExitReadinessPanel({ exitReadiness }) {
+  const source = dataSourceForPair();
+
   return (
     <Panel title="Exit Readiness" eyebrow="Entry blocked without exit plan">
       <div className="readinessSummary">
         <span>Auto-exit status</span>
-        <StatusBadge value={exitReadiness.autoExitStatus} />
+        <div className="labeledValue">
+          <StatusBadge value={exitReadiness.autoExitStatus} />
+          <DataLabel compact source={source} />
+        </div>
       </div>
       <div className="controlList">
         {exitReadiness.controls.map((control) => (
           <div className="controlRow" key={control.label}>
             <span>{control.label}</span>
-            <StatusBadge value={control.status} />
+            <div className="labeledValue">
+              <StatusBadge value={control.status} />
+              <DataLabel compact source={source} />
+            </div>
           </div>
         ))}
       </div>
@@ -307,14 +387,16 @@ function ExitReadinessPanel({ exitReadiness }) {
 }
 
 function BridgeSafetyPanel({ bridges }) {
+  const source = dataSourceForPair();
+
   return (
     <Panel title="Bridges / Safety" eyebrow="Fail-closed summary">
       <div className="fieldGrid">
-        <Field label="Secret bridge" value={bridges.secretBridge} />
-        <Field label="Broker bridge" value={bridges.brokerBridge} />
-        <Field label="Kill switch" value={bridges.killSwitch} />
-        <Field label="Safe / blocked" value={bridges.safeStatus} />
-        <Field label="SOS" value={bridges.sos} tone="neutral" />
+        <Field label="Secret bridge" source={source} value={bridges.secretBridge} />
+        <Field label="Broker bridge" source={source} value={bridges.brokerBridge} />
+        <Field label="Kill switch" source={source} value={bridges.killSwitch} />
+        <Field label="Safe / blocked" source={source} value={bridges.safeStatus} />
+        <Field label="SOS" source={source} value={bridges.sos} tone="neutral" />
       </div>
       <div className="nextAction">
         <span>Next action</span>
@@ -346,6 +428,7 @@ export default function MinimalOperatorDashboard() {
   );
   const [selectedPair, setSelectedPair] = useState(dashboardFixture.selectedPair);
   const selected = pairs.find((pair) => pair.pair === selectedPair) ?? pairs[0];
+  const selectedSource = dataSourceForPair(selected);
 
   return (
     <main className="minimalOperatorDashboard">
@@ -366,10 +449,10 @@ export default function MinimalOperatorDashboard() {
       </header>
 
       <section className="statusBand" aria-label="Current dashboard status">
-        <Field label="Selected pair" value={formatPair(selected.pair)} tone="neutral" />
-        <Field label="Opportunity score" value={selected.opportunityScore} tone="good" />
-        <Field label="Confidence" value={selected.confidence} tone="good" />
-        <Field label="Last update" value={formatTime(selected.lastUpdated)} tone="neutral" />
+        <Field label="Selected pair" source={selectedSource} value={formatPair(selected.pair)} tone="neutral" />
+        <Field label="Opportunity score" source={selectedSource} value={selected.opportunityScore} tone="good" />
+        <Field label="Confidence" source={selectedSource} value={selected.confidence} tone="good" />
+        <Field label="Last update" source={selectedSource} value={formatTime(selected.lastUpdated)} tone="neutral" />
       </section>
 
       <div className="dashboardGrid">

@@ -106,6 +106,42 @@ button {
   white-space: nowrap;
 }
 
+.dataLabel {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dataLabel span:not(.statusBadge) {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.dataLabel small {
+  color: var(--warn);
+  flex-basis: 100%;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.compactLabel {
+  gap: 4px;
+}
+
+.compactLabel .statusBadge {
+  font-size: 10px;
+  min-height: 24px;
+  padding: 4px 7px;
+}
+
+.compactLabel small {
+  display: none;
+}
+
 .status-good {
   background: rgba(73, 194, 125, 0.12);
   border-color: rgba(73, 194, 125, 0.52);
@@ -181,7 +217,7 @@ button {
 
 table {
   border-collapse: collapse;
-  min-width: 820px;
+  min-width: 1180px;
   width: 100%;
 }
 
@@ -207,6 +243,18 @@ td {
 
 td strong {
   color: var(--text);
+}
+
+.labeledValue {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.labeledValue > span:first-child,
+.labeledValue > strong:first-child {
+  color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .selectedRow {

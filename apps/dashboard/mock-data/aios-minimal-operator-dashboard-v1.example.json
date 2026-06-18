@@ -3,6 +3,17 @@
   "source": "FIXTURE_NOT_LIVE",
   "mode": "READ_ONLY",
   "generatedAt": "2026-06-18T13:45:00-04:00",
+  "dataSource": {
+    "DATA_SOURCE_TYPE": "FIXTURE_NOT_LIVE",
+    "DATA_SOURCE_NAME": "AIOS minimal operator dashboard fixture",
+    "DATA_SOURCE_PERMISSION": "DISPLAY_ONLY_FIXTURE",
+    "DATA_TIMESTAMP_UTC": "2026-06-18T17:45:00Z",
+    "DATA_STALENESS_SECONDS": 0,
+    "MARKET_DATA_STATUS": "BLOCKED",
+    "LIVE_TRADING_ALLOWED_FROM_THIS_DATA": false,
+    "DISPLAY_LABEL": "FIXTURE_NOT_LIVE",
+    "BLOCK_REASON": "Fixture data is display-only and cannot drive live trading decisions."
+  },
   "selectedPair": "EUR_USD",
   "watchlist": [
     {
