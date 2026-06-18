@@ -33,6 +33,15 @@ AI_OS may receive only value-free confirmations and labels such as:
 - auth reference status: `EXTERNAL_OPERATOR_CONTROLLED_RUNTIME_ONLY`
 - account reference status: `EXTERNAL_OPERATOR_CONTROLLED_RUNTIME_ONLY`
 - connector availability: `PRESENT` or `MISSING`
+- connector handle status: `CALLABLE_VALUE_FREE_HANDLE_PRESENT` or `MISSING`
+
+## Callable Connector Handle Requirement
+
+The protected runner can use only an already-constructed callable connector handle. The handle must expose the expected connection method to the runner without exposing credential values, account IDs, endpoint values, endpoint URLs, raw broker payloads, screenshots, order IDs, exact balances, or private account data.
+
+The handle must remain operator-controlled and must not be represented as a dictionary containing credential-like keys, account-like keys, endpoint-value keys, token values, secret values, live endpoint flags, order-route flags, retry flags, scheduler flags, daemon flags, webhook flags, or raw payload fields.
+
+If the handle is missing, non-callable, live, endpoint-value-bearing, credential-bearing, account-ID-bearing, order-capable, retry-capable, or raw-payload-bearing, the protected runner must fail closed before broker contact.
 
 ## Safe Operator Rules
 
@@ -52,6 +61,7 @@ Before a future proof packet can make one OANDA practice/demo connection proof a
 
 - Fresh Human Owner approval for exactly one status-only OANDA practice/demo connection proof.
 - External runtime connector is available outside AI_OS and outside Codex visibility.
+- Callable value-free connector handle is available to the protected runner.
 - Practice/demo endpoint class only.
 - One-shot proof only.
 - Retry count is zero.

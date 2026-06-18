@@ -95,6 +95,20 @@ FORBIDDEN_ATTEMPT_FIELD_NAMES = {
     "token",
 }
 
+RUNTIME_CONNECTOR_HANDLE_FORBIDDEN_FIELD_NAMES = {
+    *FORBIDDEN_ATTEMPT_FIELD_NAMES,
+    "api_base_url",
+    "api_endpoint",
+    "base_url",
+    "broker_endpoint",
+    "endpoint_url",
+    "endpoint_uri",
+    "endpoint_value",
+    "live_endpoint",
+    "oanda_endpoint",
+    "practice_endpoint",
+}
+
 FORBIDDEN_VALUE_MARKERS = (
     *oanda_demo_connection_probe.FORBIDDEN_VALUE_MARKERS,
     "authorization:",
@@ -281,9 +295,16 @@ def build_runtime_connector_boundary_contract() -> dict[str, Any]:
         "connector_receives_credentials_from_repo": False,
         "connector_may_return_raw_payload": False,
         "connector_must_return_sanitized_status_only": True,
+        "connector_handle_must_be_callable": True,
+        "connector_handle_must_be_value_free": True,
+        "connector_handle_sensitive_metadata_rejected": True,
+        "connector_handle_endpoint_values_rejected": True,
         "connector_call_limit": 1,
         "stop_after_first_result_required": True,
         "forbidden_attempt_field_names": sorted(FORBIDDEN_ATTEMPT_FIELD_NAMES),
+        "forbidden_connector_handle_field_names": sorted(
+            RUNTIME_CONNECTOR_HANDLE_FORBIDDEN_FIELD_NAMES
+        ),
         **_blocked_capabilities(),
     }
     assert_no_oanda_demo_protected_connection_attempt_side_effects(contract)
@@ -303,6 +324,7 @@ def build_sanitized_connection_attempt_evidence_schema() -> dict[str, Any]:
             "NETWORK_ERROR_SANITIZED",
             "TIMEOUT_SANITIZED",
             "RUNTIME_CONNECTOR_MISSING_SANITIZED",
+            "RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED",
             "UNSANITIZED_CONNECTOR_RESULT_REJECTED",
             "BLOCKED_FAIL_CLOSED",
         ],
@@ -490,6 +512,20 @@ def run_oanda_demo_protected_connection_attempt(
             classification="FAIL_CLOSED",
             outcome="RUNTIME_CONNECTOR_MISSING_SANITIZED",
             blockers=["external_runtime_connector_required"],
+            connection_attempt_performed=False,
+            attempt_count=0,
+            status_family="not_sent",
+        )
+
+    connector_handle_blockers = _runtime_connector_handle_blockers(runtime_connector)
+    if connector_handle_blockers:
+        return _build_attempt_result(
+            payload=payload,
+            preflight=preflight,
+            status=ATTEMPT_BLOCKED,
+            classification="FAIL_CLOSED",
+            outcome="RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED",
+            blockers=connector_handle_blockers,
             connection_attempt_performed=False,
             attempt_count=0,
             status_family="not_sent",
@@ -907,6 +943,86 @@ def _runtime_connector_request(payload: dict[str, Any]) -> dict[str, Any]:
         "sanitized": True,
         **_blocked_capabilities(),
     }
+
+
+def _runtime_connector_handle_blockers(runtime_connector: Any) -> list[str]:
+    blockers: list[str] = []
+    if runtime_connector is None:
+        return ["external_runtime_connector_required"]
+
+    if not callable(getattr(runtime_connector, "attempt_connection", None)):
+        blockers.append("runtime_connector_not_callable")
+
+    metadata = _runtime_connector_handle_metadata(runtime_connector)
+    forbidden_fields = _runtime_connector_handle_forbidden_field_paths(metadata)
+    credential_like_values = _credential_like_value_paths(metadata)
+    live_references = _live_reference_paths(metadata)
+    unsafe_true_fields = _unique(
+        [
+            *_unsafe_connector_true_field_paths(metadata),
+            *_unauthorized_true_field_paths(metadata),
+        ]
+    )
+
+    if forbidden_fields:
+        blockers.append("runtime_connector_handle_forbidden_sensitive_field_detected")
+        blockers.extend(
+            [f"runtime_connector_handle_forbidden_field:{field}" for field in forbidden_fields]
+        )
+    if credential_like_values:
+        blockers.append("runtime_connector_handle_credential_like_value_detected")
+        blockers.extend(
+            [
+                f"runtime_connector_handle_credential_like_value:{field}"
+                for field in credential_like_values
+            ]
+        )
+    if live_references:
+        blockers.append("runtime_connector_handle_live_reference_detected")
+        blockers.extend(
+            [f"runtime_connector_handle_live_reference:{field}" for field in live_references]
+        )
+    if unsafe_true_fields:
+        blockers.append("runtime_connector_handle_unsafe_side_effect_detected")
+        blockers.extend(
+            [
+                f"runtime_connector_handle_unsafe_true_field:{field}"
+                for field in unsafe_true_fields
+            ]
+        )
+    return _unique(blockers)
+
+
+def _runtime_connector_handle_metadata(runtime_connector: Any) -> dict[str, Any]:
+    if isinstance(runtime_connector, dict):
+        return dict(runtime_connector)
+    if isinstance(runtime_connector, list):
+        return {"items": list(runtime_connector)}
+    if isinstance(runtime_connector, tuple):
+        return {"items": list(runtime_connector)}
+    try:
+        metadata = vars(runtime_connector)
+    except TypeError:
+        return {}
+    return {str(key): value for key, value in metadata.items() if not callable(value)}
+
+
+def _runtime_connector_handle_forbidden_field_paths(value: Any, prefix: str = "") -> list[str]:
+    paths: list[str] = []
+    if isinstance(value, dict):
+        for key, nested in value.items():
+            key_text = str(key)
+            path = f"{prefix}.{key_text}" if prefix else key_text
+            normalized = _normalize_key(key_text)
+            if normalized in RUNTIME_CONNECTOR_HANDLE_FORBIDDEN_FIELD_NAMES:
+                paths.append(path)
+            paths.extend(_runtime_connector_handle_forbidden_field_paths(nested, path))
+    elif isinstance(value, list):
+        for index, nested in enumerate(value):
+            paths.extend(
+                _runtime_connector_handle_forbidden_field_paths(nested, f"{prefix}[{index}]")
+            )
+    return _unique(paths)
 
 
 def _runtime_handoff_intake_payload_from_attempt(payload: dict[str, Any]) -> dict[str, Any]:
