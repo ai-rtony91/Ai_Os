@@ -1,0 +1,438 @@
+:root {
+  --page: #090a08;
+  --surface: #141511;
+  --surface-strong: #1b1d17;
+  --surface-soft: #202219;
+  --line: #383a31;
+  --line-strong: #5b604e;
+  --text: #f3f0e8;
+  --muted: #aaa79c;
+  --muted-strong: #d2ccbc;
+  --good: #49c27d;
+  --warn: #d9a441;
+  --danger: #e65f55;
+  --neutral: #5bbecb;
+  --focus: #84d2de;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--page);
+  color: var(--text);
+}
+
+button {
+  color: inherit;
+  font: inherit;
+}
+
+.minimalOperatorDashboard {
+  background:
+    linear-gradient(180deg, rgba(9, 10, 8, 0.98), rgba(13, 13, 10, 1)),
+    var(--page);
+  display: grid;
+  gap: 16px;
+  margin-inline: auto;
+  min-height: 100vh;
+  padding: 22px;
+}
+
+.dashboardHeader {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  min-height: 126px;
+  padding: 18px;
+}
+
+.dashboardHeader h1,
+.operatorPanel h2,
+.panelHeading p,
+.dashboardHeader p,
+.field span,
+.field strong,
+.explanationBox p,
+.blockReason p,
+.nextAction p {
+  margin: 0;
+}
+
+.dashboardHeader h1 {
+  font-size: clamp(36px, 5vw, 64px);
+  letter-spacing: 0;
+  line-height: 0.95;
+}
+
+.dashboardHeader p {
+  color: var(--muted-strong);
+  max-width: 760px;
+}
+
+.kicker,
+.panelHeading p {
+  color: var(--neutral);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.headerBadges {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.statusBadge {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 28px;
+  padding: 5px 9px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.status-good {
+  background: rgba(73, 194, 125, 0.12);
+  border-color: rgba(73, 194, 125, 0.52);
+  color: var(--good);
+}
+
+.status-warn {
+  background: rgba(217, 164, 65, 0.12);
+  border-color: rgba(217, 164, 65, 0.52);
+  color: var(--warn);
+}
+
+.status-danger {
+  background: rgba(230, 95, 85, 0.12);
+  border-color: rgba(230, 95, 85, 0.52);
+  color: var(--danger);
+}
+
+.status-neutral {
+  background: rgba(91, 190, 203, 0.12);
+  border-color: rgba(91, 190, 203, 0.5);
+  color: var(--neutral);
+}
+
+.statusBand {
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.dashboardGrid {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(440px, 1.25fr) minmax(360px, 1fr) minmax(320px, 0.8fr);
+}
+
+.operatorPanel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 15px;
+}
+
+.watchlistPanel {
+  grid-row: span 2;
+}
+
+.panelHeading {
+  display: grid;
+  gap: 4px;
+}
+
+.panelHeading h2 {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.tableShell {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  min-width: 820px;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+td {
+  color: var(--muted-strong);
+  font-size: 13px;
+}
+
+td strong {
+  color: var(--text);
+}
+
+.selectedRow {
+  background: rgba(91, 190, 203, 0.08);
+}
+
+.selectedMark {
+  color: var(--neutral);
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  margin-top: 3px;
+  text-transform: uppercase;
+}
+
+.viewButton {
+  background: rgba(91, 190, 203, 0.1);
+  border: 1px solid rgba(91, 190, 203, 0.46);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  min-height: 34px;
+  padding: 7px 10px;
+}
+
+.viewButton:hover,
+.viewButton:focus-visible {
+  border-color: var(--focus);
+  outline: 2px solid rgba(132, 210, 222, 0.24);
+  outline-offset: 2px;
+}
+
+.selectedPairHeader {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-bottom: 12px;
+}
+
+.selectedPairHeader div {
+  display: grid;
+  gap: 5px;
+}
+
+.selectedPairHeader span,
+.explanationBox span,
+.blockReason span,
+.nextAction span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.selectedPairHeader strong {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.chartShell {
+  background: #0d0e0b;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-height: 172px;
+  padding: 12px;
+}
+
+.chartShell svg {
+  display: block;
+  height: 148px;
+  width: 100%;
+}
+
+.chartGridLine {
+  fill: none;
+  stroke: rgba(210, 204, 188, 0.14);
+  stroke-width: 1;
+}
+
+.chartLine {
+  fill: none;
+  stroke: var(--good);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.chartPoint {
+  fill: var(--neutral);
+  stroke: #0d0e0b;
+  stroke-width: 1.5;
+}
+
+.fieldGrid {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.field {
+  background: var(--surface-soft);
+  display: grid;
+  gap: 7px;
+  min-height: 72px;
+  padding: 12px;
+}
+
+.field span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.field strong {
+  color: var(--text);
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.tone-good {
+  color: var(--good) !important;
+}
+
+.tone-warn {
+  color: var(--warn) !important;
+}
+
+.tone-danger {
+  color: var(--danger) !important;
+}
+
+.tone-neutral {
+  color: var(--neutral) !important;
+}
+
+.explanationBox,
+.blockReason,
+.nextAction {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 7px;
+  padding-top: 12px;
+}
+
+.explanationBox p,
+.blockReason p,
+.nextAction p {
+  color: var(--muted-strong);
+  line-height: 1.45;
+}
+
+.readinessSummary,
+.controlRow {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 42px;
+}
+
+.readinessSummary span,
+.controlRow span {
+  color: var(--muted-strong);
+  font-weight: 800;
+}
+
+.controlList {
+  display: grid;
+}
+
+.workflowList {
+  counter-reset: workflow;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.workflowList li {
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted-strong);
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  min-height: 34px;
+}
+
+.workflowList li::before {
+  color: var(--neutral);
+  content: counter(workflow, decimal-leading-zero);
+  counter-increment: workflow;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+@media (max-width: 1180px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .watchlistPanel {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 780px) {
+  .minimalOperatorDashboard {
+    padding: 12px;
+  }
+
+  .dashboardHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .headerBadges {
+    justify-content: flex-start;
+  }
+
+  .statusBand,
+  .dashboardGrid,
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+}
