@@ -17,6 +17,30 @@
       "lastUpdated": "2026-06-18T13:45:00-04:00",
       "fixturePrice": "1.0874",
       "reason": "Bullish fixture trend with moderate volatility and clear session liquidity.",
+      "explanation": {
+        "dataSourceLabel": "FIXTURE_NOT_LIVE",
+        "dataSourceType": "FIXTURE_NOT_LIVE",
+        "liveTradingAllowedFromThisData": false,
+        "rankingReason": "Ranked first because fixture score, confidence, trend, Supertrend, and session context are the strongest in the current watchlist.",
+        "bullishFactors": [
+          "Opportunity score is above the strong threshold.",
+          "Supertrend fixture status is Bullish.",
+          "Trend direction is Bullish.",
+          "Session context is London/New York overlap."
+        ],
+        "riskFactors": [
+          "Fixture data is not live market data.",
+          "Secret bridge is missing.",
+          "Broker bridge is blocked.",
+          "Auto-exit is blocked until live reconciliation and risk boundary are approved."
+        ],
+        "spreadSlippageStatus": "UNVERIFIED_FIXTURE",
+        "plReadiness": "BLOCKED_FIXTURE",
+        "exitReadiness": "BLOCKED",
+        "safeDecision": "BLOCKED",
+        "blockReason": "FIXTURE_NOT_LIVE data cannot drive live trading decisions.",
+        "nextSafeAction": "Review the fixture explanation only. Do not trade until live-permitted data, P/L truth, auto-exit, secret bridge, broker bridge, and kill switch gates pass."
+      },
       "chart": [1.0834, 1.0842, 1.0839, 1.0851, 1.0862, 1.0858, 1.0874]
     },
     {
@@ -31,6 +55,29 @@
       "lastUpdated": "2026-06-18T13:45:00-04:00",
       "fixturePrice": "1.2742",
       "reason": "Strong fixture momentum, but Supertrend confirmation is neutral.",
+      "explanation": {
+        "dataSourceLabel": "FIXTURE_NOT_LIVE",
+        "dataSourceType": "FIXTURE_NOT_LIVE",
+        "liveTradingAllowedFromThisData": false,
+        "rankingReason": "Ranked second because fixture momentum and confidence are strong, but Supertrend confirmation is neutral.",
+        "bullishFactors": [
+          "Opportunity score is above 80.",
+          "Trend direction is Bullish.",
+          "Session context is London/New York overlap."
+        ],
+        "riskFactors": [
+          "Supertrend fixture status is Neutral.",
+          "Volatility context is Elevated.",
+          "Fixture data is not live market data.",
+          "Broker bridge is blocked."
+        ],
+        "spreadSlippageStatus": "UNVERIFIED_FIXTURE",
+        "plReadiness": "BLOCKED_FIXTURE",
+        "exitReadiness": "BLOCKED",
+        "safeDecision": "BLOCKED",
+        "blockReason": "Neutral Supertrend and FIXTURE_NOT_LIVE data block any live decision.",
+        "nextSafeAction": "Use the chart handoff for review only. Wait for live-permitted data and exit readiness before any trade workflow."
+      },
       "chart": [1.2681, 1.2694, 1.2710, 1.2706, 1.2722, 1.2731, 1.2742]
     },
     {
@@ -45,6 +92,29 @@
       "lastUpdated": "2026-06-18T13:45:00-04:00",
       "fixturePrice": "156.23",
       "reason": "Fixture trend is aligned, but session context is less favorable than top-ranked pairs.",
+      "explanation": {
+        "dataSourceLabel": "FIXTURE_NOT_LIVE",
+        "dataSourceType": "FIXTURE_NOT_LIVE",
+        "liveTradingAllowedFromThisData": false,
+        "rankingReason": "Ranked third because bullish fixture trend and Supertrend align, but session context and score are weaker than the top pairs.",
+        "bullishFactors": [
+          "Supertrend fixture status is Bullish.",
+          "Trend direction is Bullish.",
+          "Volatility context is Moderate."
+        ],
+        "riskFactors": [
+          "Fixture data is not live market data.",
+          "Session context is New York only.",
+          "P/L truth is not connected to live broker evidence.",
+          "Secret bridge is missing."
+        ],
+        "spreadSlippageStatus": "UNVERIFIED_FIXTURE",
+        "plReadiness": "BLOCKED_FIXTURE",
+        "exitReadiness": "BLOCKED",
+        "safeDecision": "BLOCKED",
+        "blockReason": "Live data permission, P/L truth, and auto-exit readiness are not active.",
+        "nextSafeAction": "Inspect the fixture chart only and keep the setup blocked until live-permitted data is available."
+      },
       "chart": [155.62, 155.80, 155.74, 155.91, 156.04, 156.15, 156.23]
     },
     {
@@ -59,6 +129,29 @@
       "lastUpdated": "2026-06-18T13:45:00-04:00",
       "fixturePrice": "169.87",
       "reason": "Trend and Supertrend align, but volatility raises risk-review priority.",
+      "explanation": {
+        "dataSourceLabel": "FIXTURE_NOT_LIVE",
+        "dataSourceType": "FIXTURE_NOT_LIVE",
+        "liveTradingAllowedFromThisData": false,
+        "rankingReason": "Ranked fourth because bullish fixture signals are present, but elevated volatility lowers confidence.",
+        "bullishFactors": [
+          "Supertrend fixture status is Bullish.",
+          "Trend direction is Bullish.",
+          "Opportunity score remains above watch threshold."
+        ],
+        "riskFactors": [
+          "Volatility context is Elevated.",
+          "Fixture data is not live market data.",
+          "Spread/slippage status is unverified.",
+          "Broker bridge is blocked."
+        ],
+        "spreadSlippageStatus": "UNVERIFIED_FIXTURE",
+        "plReadiness": "BLOCKED_FIXTURE",
+        "exitReadiness": "BLOCKED",
+        "safeDecision": "BLOCKED",
+        "blockReason": "Elevated volatility and FIXTURE_NOT_LIVE data require blocking live trade decisions.",
+        "nextSafeAction": "Review risk only. Do not proceed without live spread/slippage gates and exit readiness."
+      },
       "chart": [168.94, 169.12, 169.28, 169.17, 169.45, 169.66, 169.87]
     },
     {
@@ -73,6 +166,28 @@
       "lastUpdated": "2026-06-18T13:45:00-04:00",
       "fixturePrice": "0.6518",
       "reason": "Stable fixture data, but trend quality is weaker than higher-ranked pairs.",
+      "explanation": {
+        "dataSourceLabel": "FIXTURE_NOT_LIVE",
+        "dataSourceType": "FIXTURE_NOT_LIVE",
+        "liveTradingAllowedFromThisData": false,
+        "rankingReason": "Ranked fifth because volatility is low, but sideways trend and neutral Supertrend reduce setup quality.",
+        "bullishFactors": [
+          "Volatility context is Low.",
+          "Fixture price movement is stable."
+        ],
+        "riskFactors": [
+          "Trend direction is Sideways.",
+          "Supertrend fixture status is Neutral.",
+          "Opportunity score is below strong threshold.",
+          "Fixture data is not live market data."
+        ],
+        "spreadSlippageStatus": "UNVERIFIED_FIXTURE",
+        "plReadiness": "BLOCKED_FIXTURE",
+        "exitReadiness": "BLOCKED",
+        "safeDecision": "BLOCKED",
+        "blockReason": "Sideways trend, neutral Supertrend, and fixture-only data block action.",
+        "nextSafeAction": "Keep on watchlist only. Wait for stronger signal alignment and live-permitted data."
+      },
       "chart": [0.6509, 0.6511, 0.6510, 0.6514, 0.6513, 0.6516, 0.6518]
     },
     {
@@ -87,6 +202,27 @@
       "lastUpdated": "2026-06-18T13:45:00-04:00",
       "fixturePrice": "1.3711",
       "reason": "Fixture data remains watchable, but score and confidence are below action threshold.",
+      "explanation": {
+        "dataSourceLabel": "FIXTURE_NOT_LIVE",
+        "dataSourceType": "FIXTURE_NOT_LIVE",
+        "liveTradingAllowedFromThisData": false,
+        "rankingReason": "Ranked sixth because score and confidence are the weakest in the fixture watchlist.",
+        "bullishFactors": [
+          "Volatility context is Moderate."
+        ],
+        "riskFactors": [
+          "Trend direction is Bearish.",
+          "Supertrend fixture status is Neutral.",
+          "Opportunity score is near low-priority range.",
+          "Fixture data is not live market data."
+        ],
+        "spreadSlippageStatus": "UNVERIFIED_FIXTURE",
+        "plReadiness": "BLOCKED_FIXTURE",
+        "exitReadiness": "BLOCKED",
+        "safeDecision": "BLOCKED",
+        "blockReason": "Low fixture rank and FIXTURE_NOT_LIVE data block any trade decision.",
+        "nextSafeAction": "No action. Keep blocked unless future live-permitted data and stronger ranking appear."
+      },
       "chart": [1.3740, 1.3732, 1.3728, 1.3721, 1.3724, 1.3718, 1.3711]
     }
   ],

@@ -196,6 +196,79 @@ function SelectedPairPanel({ pair }) {
   );
 }
 
+function FactorList({ title, items, tone = "neutral" }) {
+  return (
+    <div className={`factorList factor-${tone}`}>
+      <h3>{title}</h3>
+      <ul>
+        {(items ?? ["UNKNOWN"]).map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function OpportunityExplanationPanel({ pair, riskPl, exitReadiness, bridges }) {
+  const explanation = pair.explanation ?? {};
+  const dataSourceLabel = explanation.dataSourceLabel ?? "FIXTURE_NOT_LIVE";
+  const liveTradingAllowed = Boolean(explanation.liveTradingAllowedFromThisData);
+
+  return (
+    <Panel title="Opportunity Explanation" eyebrow="AIOS selected-pair reasoning" className="opportunityPanel">
+      <div className="explanationHeader">
+        <div>
+          <span>Selected pair</span>
+          <strong>{formatPair(pair.pair)}</strong>
+        </div>
+        <div className="headerBadges">
+          <StatusBadge value={dataSourceLabel} />
+          <StatusBadge value={liveTradingAllowed ? "LIVE_DATA_ALLOWED" : "LIVE_DATA_BLOCKED"} />
+        </div>
+      </div>
+
+      <div className="fieldGrid compact">
+        <Field label="Opportunity score" value={pair.opportunityScore} tone="good" />
+        <Field label="Confidence score" value={pair.confidence} tone="good" />
+        <Field label="Supertrend" value={pair.supertrend ?? "UNKNOWN"} />
+        <Field label="Volatility" value={pair.volatility ?? "UNKNOWN"} />
+        <Field label="Session" value={pair.session ?? "UNKNOWN"} tone="neutral" />
+        <Field
+          label="Spread / slippage"
+          value={explanation.spreadSlippageStatus ?? "UNVERIFIED_FIXTURE"}
+        />
+        <Field label="P/L readiness" value={explanation.plReadiness ?? "BLOCKED_FIXTURE"} />
+        <Field label="Exit readiness" value={explanation.exitReadiness ?? exitReadiness.autoExitStatus} />
+      </div>
+
+      <div className="rankReason">
+        <span>Why AIOS ranked this pair</span>
+        <p>{explanation.rankingReason ?? pair.reason}</p>
+      </div>
+
+      <div className="factorGrid">
+        <FactorList title="Bullish factors" items={explanation.bullishFactors} tone="good" />
+        <FactorList title="Bearish / risk factors" items={explanation.riskFactors} tone="danger" />
+      </div>
+
+      <div className="decisionGrid">
+        <Field label="Safe / blocked decision" value={explanation.safeDecision ?? bridges.safeStatus} />
+        <Field label="Current position" value={riskPl.currentPosition} tone="neutral" />
+      </div>
+
+      <div className="blockReason">
+        <span>Block reason</span>
+        <p>{explanation.blockReason ?? exitReadiness.blockReason}</p>
+      </div>
+
+      <div className="nextAction">
+        <span>Next safe action</span>
+        <p>{explanation.nextSafeAction ?? bridges.nextAction}</p>
+      </div>
+    </Panel>
+  );
+}
+
 function RiskPlPanel({ riskPl }) {
   return (
     <Panel title="Risk / P&L" eyebrow="Sanitized fixture values">
@@ -302,6 +375,12 @@ export default function MinimalOperatorDashboard() {
       <div className="dashboardGrid">
         <Watchlist pairs={pairs} selectedPair={selected.pair} onSelectPair={setSelectedPair} />
         <SelectedPairPanel pair={selected} />
+        <OpportunityExplanationPanel
+          bridges={dashboardFixture.bridges}
+          exitReadiness={dashboardFixture.exitReadiness}
+          pair={selected}
+          riskPl={dashboardFixture.riskPl}
+        />
         <RiskPlPanel riskPl={dashboardFixture.riskPl} />
         <ExitReadinessPanel exitReadiness={dashboardFixture.exitReadiness} />
         <BridgeSafetyPanel bridges={dashboardFixture.bridges} />
