@@ -84,6 +84,49 @@ def test_missing_runtime_auth_reference_rejected() -> None:
     assert result["credential_material_present"] is False
 
 
+def test_missing_connector_fails_closed() -> None:
+    result = attempt.run_oanda_demo_protected_connection_attempt(_approved_attempt())
+
+    assert result["outcome"] == "RUNTIME_CONNECTOR_MISSING_SANITIZED"
+    assert "external_runtime_connector_required" in result["blockers"]
+    assert result["connection_attempt_performed"] is False
+    assert result["broker_request_sent"] is False
+    assert result["network_used"] is False
+
+
+def test_non_callable_connector_fails_closed() -> None:
+    result = attempt.run_oanda_demo_protected_connection_attempt(
+        _approved_attempt(),
+        runtime_connector={"connector_label": "OANDA_PRACTICE_DEMO"},
+    )
+
+    assert result["outcome"] == "RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED"
+    assert "runtime_connector_not_callable" in result["blockers"]
+    assert result["connection_attempt_performed"] is False
+    assert result["attempt_count"] == 0
+
+
+def test_sensitive_connector_handle_payload_fails_closed_without_echoing_values() -> None:
+    result = attempt.run_oanda_demo_protected_connection_attempt(
+        _approved_attempt(),
+        runtime_connector={
+            "connector_label": "OANDA_PRACTICE_DEMO",
+            "access_token": "SHOULD_NOT_PERSIST",
+            "endpoint_url": "SHOULD_NOT_PERSIST",
+        },
+    )
+    serialized = json.dumps(result)
+
+    assert result["outcome"] == "RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED"
+    assert "runtime_connector_not_callable" in result["blockers"]
+    assert "runtime_connector_handle_forbidden_field:access_token" in result["blockers"]
+    assert "runtime_connector_handle_forbidden_field:endpoint_url" in result["blockers"]
+    assert "SHOULD_NOT_PERSIST" not in serialized
+    assert result["connection_attempt_performed"] is False
+    assert result["contains_real_credentials"] is False
+    assert result["contains_account_identifier"] is False
+
+
 def test_credential_like_input_rejected_without_persistence() -> None:
     result = attempt.run_oanda_demo_protected_connection_attempt(
         _approved_attempt(runtime_auth_value="Bearer NOT_A_REAL_VALUE"),
@@ -207,6 +250,7 @@ def test_sanitized_success_evidence() -> None:
     assert result["raw_broker_payload_persisted"] is False
     assert "raw_response" not in serialized
     assert "account_id" not in connector_request
+    assert "endpoint_url" not in connector_request
     assert "runtime_auth_value" not in connector_request
 
 
@@ -226,48 +270,72 @@ def test_sanitized_failure_evidence() -> None:
 
 
 def test_no_credential_persistence_from_connector_result() -> None:
+    connector = RecordingConnector(
+        {"connected": True, "auth_proof": True, "access_token": "SHOULD_NOT_PERSIST"}
+    )
     result = attempt.run_oanda_demo_protected_connection_attempt(
         _approved_attempt(),
-        runtime_connector=RecordingConnector(
-            {"connected": True, "auth_proof": True, "access_token": "SHOULD_NOT_PERSIST"}
-        ),
+        runtime_connector=connector,
     )
     serialized = json.dumps(result)
 
-    assert result["outcome"] == "UNSANITIZED_CONNECTOR_RESULT_REJECTED"
-    assert "connector_result_forbidden_field:access_token" in result["blockers"]
+    assert result["outcome"] == "RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED"
+    assert "runtime_connector_handle_forbidden_field:result.access_token" in result["blockers"]
     assert "SHOULD_NOT_PERSIST" not in serialized
+    assert connector.calls == []
+    assert result["connection_attempt_performed"] is False
     assert result["contains_real_credentials"] is False
 
 
 def test_no_account_id_persistence_from_connector_result() -> None:
+    connector = RecordingConnector(
+        {"connected": True, "auth_proof": True, "account_id": "ACCOUNT_SHOULD_NOT_PERSIST"}
+    )
     result = attempt.run_oanda_demo_protected_connection_attempt(
         _approved_attempt(),
-        runtime_connector=RecordingConnector(
-            {"connected": True, "auth_proof": True, "account_id": "ACCOUNT_SHOULD_NOT_PERSIST"}
-        ),
+        runtime_connector=connector,
     )
     serialized = json.dumps(result)
 
-    assert result["outcome"] == "UNSANITIZED_CONNECTOR_RESULT_REJECTED"
-    assert "connector_result_forbidden_field:account_id" in result["blockers"]
+    assert result["outcome"] == "RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED"
+    assert "runtime_connector_handle_forbidden_field:result.account_id" in result["blockers"]
     assert "ACCOUNT_SHOULD_NOT_PERSIST" not in serialized
+    assert connector.calls == []
+    assert result["connection_attempt_performed"] is False
     assert result["contains_account_identifier"] is False
 
 
 def test_no_raw_broker_payload_persistence_from_connector_result() -> None:
+    connector = RecordingConnector(
+        {"connected": True, "auth_proof": True, "raw_response": "FULL_RAW_BODY"}
+    )
     result = attempt.run_oanda_demo_protected_connection_attempt(
         _approved_attempt(),
-        runtime_connector=RecordingConnector(
-            {"connected": True, "auth_proof": True, "raw_response": "FULL_RAW_BODY"}
-        ),
+        runtime_connector=connector,
     )
     serialized = json.dumps(result)
 
-    assert result["outcome"] == "UNSANITIZED_CONNECTOR_RESULT_REJECTED"
-    assert "connector_result_forbidden_field:raw_response" in result["blockers"]
+    assert result["outcome"] == "RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED"
+    assert "runtime_connector_handle_forbidden_field:result.raw_response" in result["blockers"]
     assert "FULL_RAW_BODY" not in serialized
+    assert connector.calls == []
+    assert result["connection_attempt_performed"] is False
     assert result["raw_broker_payload_persisted"] is False
+
+
+def test_live_endpoint_indicator_on_connector_handle_fails_closed() -> None:
+    connector = RecordingConnector()
+    connector.live_endpoint_requested = True
+
+    result = attempt.run_oanda_demo_protected_connection_attempt(
+        _approved_attempt(),
+        runtime_connector=connector,
+    )
+
+    assert result["outcome"] == "RUNTIME_CONNECTOR_HANDLE_REJECTED_SANITIZED"
+    assert "runtime_connector_handle_unsafe_true_field:live_endpoint_requested" in result["blockers"]
+    assert connector.calls == []
+    assert result["live_endpoint_used"] is False
 
 
 def test_one_shot_stop_behavior() -> None:
