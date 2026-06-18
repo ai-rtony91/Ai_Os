@@ -28,6 +28,7 @@ from automation.forex_engine.oanda_demo_runtime_handoff import (  # noqa: E402
 )
 from forex_delivery.governed_readiness import (  # noqa: E402
     LiveExecutionBlocked,
+    build_demo_runtime_readiness_dry_run,
     build_live_arming_checklist,
     build_order_payload,
     run_governed_paper_flow,
@@ -78,6 +79,26 @@ def _complete_sanitized_live_review_package():
         }
     )
     return fields
+
+
+def _complete_demo_runtime_dry_run_fields():
+    return {
+        "broker_family_label": "OANDA_PRACTICE",
+        "practice_demo_mode_confirmed": True,
+        "runtime_auth_reference_label": "SANITIZED_REFERENCE_ONLY",
+        "external_connector_readiness_flag": True,
+        "network_approval_status": False,
+        "account_identifier_status": "ABSENT",
+        "endpoint_class": "OANDA_PRACTICE_DEMO",
+        "no_order_route_approval": True,
+        "no_live_endpoint": True,
+        "no_credential_value": True,
+        "no_account_id_value": True,
+        "timeout_seconds": 10,
+        "one_shot_stop_requirement": True,
+        "evidence_bundle_path": "Reports/forex_delivery/sanitized-demo-runtime-proof.md",
+        "human_owner_approval_future_proof": "Anthony Meza",
+    }
 
 
 def test_missing_external_broker_path_fails_safely():
@@ -158,6 +179,89 @@ def test_missing_human_owner_approval_fails_closed():
     assert checklist["network_used"] is False
     assert "human_owner_approval" in checklist["missing_fields"]
     assert "human_owner_approval" in checklist["failed_gates"]
+
+
+def test_demo_runtime_missing_runtime_auth_reference_fails_closed():
+    fields = _complete_demo_runtime_dry_run_fields()
+    fields.pop("runtime_auth_reference_label")
+
+    readiness = build_demo_runtime_readiness_dry_run(fields)
+
+    assert readiness["demo_runtime_ready"] is False
+    assert readiness["broker_request_sent"] is False
+    assert readiness["network_used"] is False
+    assert readiness["order_placed"] is False
+    assert "runtime_auth_reference_label" in readiness["missing_fields"]
+    assert "runtime_auth_reference_label" in readiness["failed_gates"]
+
+
+def test_demo_runtime_credential_like_values_fail_closed():
+    fields = _complete_demo_runtime_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "token=not-a-real-value"
+
+    readiness = build_demo_runtime_readiness_dry_run(fields)
+
+    assert readiness["demo_runtime_ready"] is False
+    assert readiness["broker_request_sent"] is False
+    assert readiness["network_used"] is False
+    assert "no_forbidden_demo_runtime_fields" in readiness["failed_gates"]
+    assert "forbidden_field:runtime_auth_reference_label" in readiness["blocker_reasons"]
+
+
+def test_demo_runtime_account_id_like_values_fail_closed():
+    fields = _complete_demo_runtime_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "123-456-789"
+
+    readiness = build_demo_runtime_readiness_dry_run(fields)
+
+    assert readiness["demo_runtime_ready"] is False
+    assert readiness["account_access_allowed"] is False
+    assert readiness["order_placed"] is False
+    assert "forbidden_field:runtime_auth_reference_label" in readiness["blocker_reasons"]
+
+
+def test_demo_runtime_live_endpoint_references_fail_closed():
+    fields = _complete_demo_runtime_dry_run_fields()
+    fields["endpoint_class"] = "OANDA_LIVE"
+
+    readiness = build_demo_runtime_readiness_dry_run(fields)
+
+    assert readiness["demo_runtime_ready"] is False
+    assert readiness["live_endpoint_allowed"] is False
+    assert "endpoint_class" in readiness["failed_gates"]
+    assert "endpoint_class_must_be_demo_or_practice_only" in readiness["blocker_reasons"]
+
+
+def test_demo_runtime_order_route_approval_attempts_fail_closed():
+    fields = _complete_demo_runtime_dry_run_fields()
+    fields["order_route_approval"] = True
+
+    readiness = build_demo_runtime_readiness_dry_run(fields)
+
+    assert readiness["demo_runtime_ready"] is False
+    assert readiness["order_route_allowed"] is False
+    assert readiness["order_placed"] is False
+    assert "order_route_approval" in readiness["failed_gates"]
+    assert "order_route_approval_attempt_blocked" in readiness["blocker_reasons"]
+
+
+def test_complete_sanitized_demo_runtime_fixture_passes_dry_run_readiness_only():
+    readiness = build_demo_runtime_readiness_dry_run(
+        _complete_demo_runtime_dry_run_fields()
+    )
+
+    assert readiness["demo_runtime_ready"] is True
+    assert readiness["future_broker_demo_proof_review_ready"] is True
+    assert readiness["dry_run_only"] is True
+    assert readiness["broker_connection_allowed"] is False
+    assert readiness["connection_attempt_performed"] is False
+    assert readiness["broker_request_sent"] is False
+    assert readiness["network_used"] is False
+    assert readiness["order_submit_allowed"] is False
+    assert readiness["order_placed"] is False
+    assert readiness["live_execution_allowed"] is False
+    assert readiness["credential_material_present"] is False
+    assert readiness["runtime_handoff"]["runtime_handoff_ready"] is True
 
 
 def test_complete_sanitized_review_package_is_ready_for_human_review_only():

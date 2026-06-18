@@ -32,6 +32,10 @@ from automation.forex_engine.oanda_demo_runtime_handoff_intake import (
     evaluate_oanda_demo_runtime_handoff_intake,
 )
 from automation.forex_engine.oanda_demo_runtime_handoff import (
+    AUTH_MATERIAL_LOCATION as OANDA_RUNTIME_AUTH_MATERIAL_LOCATION,
+    AUTH_REFERENCE_FORMAT as OANDA_RUNTIME_AUTH_REFERENCE_FORMAT,
+    HANDOFF_MODE as OANDA_RUNTIME_HANDOFF_MODE,
+    HANDOFF_SCOPE as OANDA_RUNTIME_HANDOFF_SCOPE,
     build_oanda_demo_runtime_handoff_contract_set,
     evaluate_oanda_demo_runtime_handoff,
 )
@@ -110,6 +114,40 @@ LIVE_ARMING_SAFE_TEXT_GATES = (
     "post_trade_journal_path",
 )
 
+DEMO_RUNTIME_REQUIRED_FIELDS = (
+    "broker_family_label",
+    "practice_demo_mode_confirmed",
+    "runtime_auth_reference_label",
+    "external_connector_readiness_flag",
+    "network_approval_status",
+    "account_identifier_status",
+    "endpoint_class",
+    "no_order_route_approval",
+    "no_live_endpoint",
+    "no_credential_value",
+    "no_account_id_value",
+    "timeout_seconds",
+    "one_shot_stop_requirement",
+    "evidence_bundle_path",
+    "human_owner_approval_future_proof",
+)
+
+DEMO_RUNTIME_ALLOWED_BROKER_FAMILY_LABELS = (
+    "OANDA_PRACTICE",
+    "OANDA_PRACTICE_DEMO",
+)
+
+DEMO_RUNTIME_ALLOWED_ENDPOINT_CLASSES = (
+    "OANDA_PRACTICE",
+    "OANDA_PRACTICE_DEMO",
+    "PRACTICE_REFERENCE_ONLY",
+)
+
+DEMO_RUNTIME_ACCOUNT_IDENTIFIER_STATUSES = (
+    "ABSENT",
+    "SANITIZED",
+)
+
 UNSAFE_REVIEW_MARKERS = (
     "todo",
     "tbd",
@@ -168,6 +206,10 @@ FORBIDDEN_LIVE_FIELDS = {
     "broker_payload",
     "live_payload",
     "private_account_data",
+    "endpoint_value",
+    "endpoint_url",
+    "live_endpoint_value",
+    "live_endpoint_url",
 }
 
 FORBIDDEN_LIVE_FIELD_MARKERS = (
@@ -559,6 +601,208 @@ def build_live_arming_checklist(approval_fields: dict[str, Any]) -> dict[str, An
     }
 
 
+def build_demo_runtime_readiness_dry_run(readiness_fields: dict[str, Any]) -> dict[str, Any]:
+    """Validate value-free demo/runtime readiness metadata without broker access."""
+
+    fields = dict(readiness_fields or {})
+    forbidden = _find_forbidden_fields(fields)
+    missing = [
+        field_name
+        for field_name in DEMO_RUNTIME_REQUIRED_FIELDS
+        if not _field_present(fields, field_name)
+    ]
+    blocker_reasons = [f"missing_required_field:{field}" for field in missing]
+    blocker_reasons.extend([f"forbidden_field:{field}" for field in forbidden])
+    passed_gates: list[str] = []
+    failed_gates: list[str] = []
+
+    if missing:
+        failed_gates.append("required_demo_runtime_fields_present")
+    else:
+        passed_gates.append("required_demo_runtime_fields_present")
+
+    if forbidden:
+        failed_gates.append("no_forbidden_demo_runtime_fields")
+    else:
+        passed_gates.append("no_forbidden_demo_runtime_fields")
+
+    broker_family = _normalize_demo_runtime_label(fields.get("broker_family_label"))
+    endpoint_class = _normalize_demo_runtime_label(fields.get("endpoint_class"))
+    account_identifier_status = _normalize_demo_runtime_label(
+        fields.get("account_identifier_status")
+    )
+    timeout_seconds = _int_or_none(fields.get("timeout_seconds"))
+
+    if broker_family in DEMO_RUNTIME_ALLOWED_BROKER_FAMILY_LABELS:
+        passed_gates.append("broker_family_label")
+    else:
+        failed_gates.append("broker_family_label")
+        blocker_reasons.append("broker_family_label_must_be_oanda_practice")
+
+    if fields.get("practice_demo_mode_confirmed") is True:
+        passed_gates.append("practice_demo_mode_confirmed")
+    else:
+        failed_gates.append("practice_demo_mode_confirmed")
+        blocker_reasons.append("practice_demo_mode_confirmation_required")
+
+    runtime_label_unsafe = _unsafe_text_value_reasons(
+        fields.get("runtime_auth_reference_label")
+    )
+    if _field_present(fields, "runtime_auth_reference_label") and not runtime_label_unsafe:
+        passed_gates.append("runtime_auth_reference_label")
+    else:
+        failed_gates.append("runtime_auth_reference_label")
+        blocker_reasons.append("runtime_auth_reference_label_required")
+        blocker_reasons.extend(
+            f"unsafe_runtime_auth_reference_label:{reason}"
+            for reason in runtime_label_unsafe
+        )
+
+    if fields.get("external_connector_readiness_flag") is True:
+        passed_gates.append("external_connector_readiness_flag")
+    else:
+        failed_gates.append("external_connector_readiness_flag")
+        blocker_reasons.append("external_connector_readiness_confirmation_required")
+
+    if fields.get("network_approval_status") is False:
+        passed_gates.append("network_approval_status")
+    else:
+        failed_gates.append("network_approval_status")
+        blocker_reasons.append("network_approval_status_must_remain_false_for_dry_run")
+
+    if account_identifier_status in DEMO_RUNTIME_ACCOUNT_IDENTIFIER_STATUSES:
+        passed_gates.append("account_identifier_status")
+    else:
+        failed_gates.append("account_identifier_status")
+        blocker_reasons.append("account_identifier_status_must_be_absent_or_sanitized")
+
+    if endpoint_class in DEMO_RUNTIME_ALLOWED_ENDPOINT_CLASSES and "LIVE" not in endpoint_class:
+        passed_gates.append("endpoint_class")
+    else:
+        failed_gates.append("endpoint_class")
+        blocker_reasons.append("endpoint_class_must_be_demo_or_practice_only")
+
+    for field_name, reason in (
+        ("no_order_route_approval", "order_route_approval_must_be_absent"),
+        ("no_live_endpoint", "live_endpoint_must_be_absent"),
+        ("no_credential_value", "credential_value_must_be_absent"),
+        ("no_account_id_value", "account_id_value_must_be_absent"),
+        ("one_shot_stop_requirement", "one_shot_stop_requirement_must_be_confirmed"),
+    ):
+        if fields.get(field_name) is True:
+            passed_gates.append(field_name)
+        else:
+            failed_gates.append(field_name)
+            blocker_reasons.append(reason)
+
+    if timeout_seconds is not None and timeout_seconds > 0:
+        passed_gates.append("timeout_seconds")
+    else:
+        failed_gates.append("timeout_seconds")
+        blocker_reasons.append("timeout_seconds_required")
+
+    evidence_path_unsafe = _unsafe_text_value_reasons(fields.get("evidence_bundle_path"))
+    if _field_present(fields, "evidence_bundle_path") and not evidence_path_unsafe:
+        passed_gates.append("evidence_bundle_path")
+    else:
+        failed_gates.append("evidence_bundle_path")
+        blocker_reasons.append("sanitized_evidence_bundle_path_required")
+        blocker_reasons.extend(
+            f"unsafe_evidence_bundle_path:{reason}" for reason in evidence_path_unsafe
+        )
+
+    if str(fields.get("human_owner_approval_future_proof") or "") == "Anthony Meza":
+        passed_gates.append("human_owner_approval_future_proof")
+    else:
+        failed_gates.append("human_owner_approval_future_proof")
+        blocker_reasons.append("human_owner_future_proof_approval_must_name_anthony_meza")
+
+    if fields.get("order_route_approval") is True or fields.get("order_route_requested") is True:
+        failed_gates.append("order_route_approval")
+        blocker_reasons.append("order_route_approval_attempt_blocked")
+    if fields.get("live_endpoint_requested") is True or fields.get("live_endpoint_enabled") is True:
+        failed_gates.append("live_endpoint")
+        blocker_reasons.append("live_endpoint_attempt_blocked")
+
+    endpoint_classification = _demo_runtime_endpoint_classification(endpoint_class)
+    runtime_handoff = evaluate_oanda_demo_runtime_handoff(
+        {
+            "broker_id": "OANDA",
+            "account_mode": "PRACTICE_DEMO",
+            "environment": endpoint_classification,
+            "endpoint_classification": endpoint_classification,
+            "handoff_scope": OANDA_RUNTIME_HANDOFF_SCOPE,
+            "handoff_mode": OANDA_RUNTIME_HANDOFF_MODE,
+            "metadata_intake_authorized": True,
+            "runtime_reference_present": _field_present(
+                fields, "runtime_auth_reference_label"
+            ),
+            "runtime_reference_format": OANDA_RUNTIME_AUTH_REFERENCE_FORMAT,
+            "auth_material_location": OANDA_RUNTIME_AUTH_MATERIAL_LOCATION,
+            "runtime_boundary_confirmed": True,
+            "repo_storage_confirmed_absent": True,
+            "account_identifier_present": False,
+            "credential_value_present": False,
+            "no_account_id_storage_confirmed": fields.get("no_account_id_value") is True,
+            "no_auth_value_storage_confirmed": fields.get("no_credential_value") is True,
+            "audit_logging_acknowledged": True,
+        }
+    )
+
+    if runtime_handoff.get("runtime_handoff_ready") is True:
+        passed_gates.append("runtime_handoff")
+    else:
+        failed_gates.append("runtime_handoff")
+        blocker_reasons.append("runtime_handoff_required")
+        blocker_reasons.extend(
+            f"runtime_handoff_blocker:{blocker}"
+            for blocker in list(runtime_handoff.get("blockers") or [])
+        )
+
+    passed_gates = sorted(set(passed_gates))
+    failed_gates = sorted(set(failed_gates))
+    blocker_reasons = sorted(set(blocker_reasons))
+    demo_runtime_ready = not blocker_reasons
+
+    return {
+        "schema": "AIOS_FOREX_DELIVERY_DEMO_RUNTIME_READINESS_DRY_RUN.v1",
+        "demo_runtime_ready": demo_runtime_ready,
+        "future_broker_demo_proof_review_ready": demo_runtime_ready,
+        "dry_run_only": True,
+        "broker_connection_allowed": False,
+        "connection_attempt_allowed": False,
+        "connection_attempt_performed": False,
+        "broker_request_sent": False,
+        "network_allowed": False,
+        "network_used": False,
+        "network_api_allowed": False,
+        "credentials_allowed": False,
+        "credentials_used": False,
+        "credential_material_present": False,
+        "account_access_allowed": False,
+        "order_route_allowed": False,
+        "order_submit_allowed": False,
+        "order_placed": False,
+        "live_endpoint_allowed": False,
+        "live_execution_allowed": False,
+        "required_fields": list(DEMO_RUNTIME_REQUIRED_FIELDS),
+        "missing_fields": missing,
+        "passed_gates": passed_gates,
+        "failed_gates": failed_gates,
+        "blocker_reasons": blocker_reasons,
+        "runtime_handoff": runtime_handoff,
+        "next_required_action": (
+            "future_human_owner_demo_connection_proof_packet_review"
+            if demo_runtime_ready
+            else "complete_sanitized_demo_runtime_readiness_dry_run_fields"
+        ),
+        "stop_point": (
+            "Dry-run readiness validation only; no broker connection, credential access, "
+            "network call, market-data fetch, paper order, or live order is authorized."
+        ),
+    }
+
+
 def submit_live_order(_: dict[str, Any] | None = None) -> None:
     """Fail closed for any live-order attempt."""
 
@@ -689,6 +933,16 @@ def _default_order_request() -> dict[str, Any]:
     }
 
 
+def _normalize_demo_runtime_label(value: Any) -> str:
+    return str(value or "").strip().upper().replace("-", "_").replace(" ", "_")
+
+
+def _demo_runtime_endpoint_classification(endpoint_class: str) -> str:
+    if endpoint_class in {"OANDA_PRACTICE", "OANDA_PRACTICE_DEMO"}:
+        return "OANDA_PRACTICE_DEMO"
+    return "PRACTICE_REFERENCE_ONLY"
+
+
 def _normalize_pair(value: Any) -> str:
     return str(value or "").strip().upper().replace("/", "_").replace("-", "_")
 
@@ -736,6 +990,8 @@ def _find_forbidden_fields(value: Any, *, path: str = "") -> list[str]:
 
 def _forbidden_key_name(key_text: str) -> bool:
     if key_text in REQUIRED_EXCEPTION_FIELDS:
+        return False
+    if key_text in DEMO_RUNTIME_REQUIRED_FIELDS:
         return False
     if key_text in FORBIDDEN_LIVE_FIELDS:
         return True
