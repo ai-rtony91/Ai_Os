@@ -839,3 +839,114 @@ td strong {
     flex-direction: column;
   }
 }
+
+/* Watchlist containment: keep chips, labels, and actions inside each row. */
+.watchlistPanel {
+  overflow: hidden;
+}
+
+.watchlistItem {
+  align-items: start;
+  grid-template-areas:
+    "rank pair action"
+    "rank metrics metrics"
+    "rank status status";
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  min-height: auto;
+  overflow: hidden;
+  row-gap: 7px;
+}
+
+.watchlistItem > * {
+  min-width: 0;
+}
+
+.watchlistRank {
+  align-self: start;
+  grid-area: rank;
+}
+
+.watchlistPairBlock {
+  grid-area: pair;
+}
+
+.watchlistPairBlock strong,
+.watchlistPairBlock span,
+.watchlistMetric strong,
+.watchlistMetric span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.watchlistMetrics {
+  grid-area: metrics;
+  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  width: 100%;
+}
+
+.watchlistMetric {
+  min-height: 38px;
+  min-width: 0;
+}
+
+.watchlistStatus {
+  align-items: center;
+  display: grid;
+  gap: 5px;
+  grid-area: status;
+  grid-template-columns: auto minmax(0, 1fr);
+  width: 100%;
+}
+
+.watchlistStatus .dataLabel {
+  min-width: 0;
+}
+
+.watchlistStatus .statusBadge {
+  max-width: 100%;
+  text-align: center;
+  white-space: normal;
+}
+
+.watchlistStatus .dataLabel span:not(.statusBadge) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.watchlistAction {
+  grid-area: action;
+  justify-self: end;
+  max-width: 100%;
+}
+
+@media (max-width: 1180px) {
+  .watchlistItem {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+
+  .watchlistStatus,
+  .watchlistAction {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 780px) {
+  .watchlistItem {
+    grid-template-areas:
+      "rank pair"
+      "metrics metrics"
+      "status status"
+      "action action";
+    grid-template-columns: 30px minmax(0, 1fr);
+  }
+
+  .watchlistMetrics,
+  .watchlistStatus,
+  .watchlistAction {
+    grid-column: auto;
+  }
+
+  .watchlistAction {
+    justify-self: start;
+  }
+}
