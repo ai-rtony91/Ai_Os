@@ -161,6 +161,10 @@ button {
   grid-row: span 2;
 }
 
+.opportunityPanel {
+  grid-column: span 2;
+}
+
 .panelHeading {
   display: grid;
   gap: 4px;
@@ -236,7 +240,8 @@ td strong {
   outline-offset: 2px;
 }
 
-.selectedPairHeader {
+.selectedPairHeader,
+.explanationHeader {
   align-items: center;
   border-bottom: 1px solid var(--line);
   display: flex;
@@ -245,12 +250,15 @@ td strong {
   padding-bottom: 12px;
 }
 
-.selectedPairHeader div {
+.selectedPairHeader div,
+.explanationHeader > div:first-child {
   display: grid;
   gap: 5px;
 }
 
 .selectedPairHeader span,
+.explanationHeader span,
+.rankReason span,
 .explanationBox span,
 .blockReason span,
 .nextAction span {
@@ -262,6 +270,11 @@ td strong {
 
 .selectedPairHeader strong {
   font-size: 30px;
+  line-height: 1;
+}
+
+.explanationHeader strong {
+  font-size: 26px;
   line-height: 1;
 }
 
@@ -306,6 +319,10 @@ td strong {
   overflow: hidden;
 }
 
+.fieldGrid.compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .field {
   background: var(--surface-soft);
   display: grid;
@@ -344,6 +361,7 @@ td strong {
 }
 
 .explanationBox,
+.rankReason,
 .blockReason,
 .nextAction {
   border-top: 1px solid var(--line);
@@ -353,10 +371,48 @@ td strong {
 }
 
 .explanationBox p,
+.rankReason p,
 .blockReason p,
 .nextAction p {
   color: var(--muted-strong);
   line-height: 1.45;
+}
+
+.factorGrid,
+.decisionGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.factorList {
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.factorList h3 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.factorList ul {
+  color: var(--muted-strong);
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.factor-good {
+  border-color: rgba(73, 194, 125, 0.38);
+}
+
+.factor-danger {
+  border-color: rgba(230, 95, 85, 0.38);
 }
 
 .readinessSummary,
@@ -410,6 +466,10 @@ td strong {
     grid-template-columns: 1fr 1fr;
   }
 
+  .opportunityPanel {
+    grid-column: 1 / -1;
+  }
+
   .watchlistPanel {
     grid-column: 1 / -1;
     grid-row: auto;
@@ -432,7 +492,15 @@ td strong {
 
   .statusBand,
   .dashboardGrid,
-  .fieldGrid {
+  .fieldGrid,
+  .fieldGrid.compact,
+  .factorGrid,
+  .decisionGrid {
     grid-template-columns: 1fr;
+  }
+
+  .explanationHeader {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
