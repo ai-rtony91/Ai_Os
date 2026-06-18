@@ -332,7 +332,9 @@ button {
 }
 
 .watchlistPanel {
-  align-self: stretch;
+  align-content: start;
+  align-self: start;
+  justify-content: stretch;
   min-width: 0;
 }
 
@@ -351,8 +353,15 @@ button {
 }
 
 .watchlistList {
+  align-content: start;
+  align-self: start;
   display: grid;
   gap: 8px;
+  justify-content: stretch;
+}
+
+.watchlistPanel .panelHeading {
+  align-self: start;
 }
 
 .watchlistItem {
