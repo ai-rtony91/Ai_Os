@@ -1,0 +1,144 @@
+{
+  "schema": "aios.minimal_operator_dashboard.fixture.v1",
+  "source": "FIXTURE_NOT_LIVE",
+  "mode": "READ_ONLY",
+  "generatedAt": "2026-06-18T13:45:00-04:00",
+  "selectedPair": "EUR_USD",
+  "watchlist": [
+    {
+      "rank": 1,
+      "pair": "EUR_USD",
+      "opportunityScore": 86,
+      "confidence": 78,
+      "trend": "Bullish",
+      "supertrend": "Bullish",
+      "volatility": "Moderate",
+      "session": "London/New York overlap",
+      "lastUpdated": "2026-06-18T13:45:00-04:00",
+      "fixturePrice": "1.0874",
+      "reason": "Bullish fixture trend with moderate volatility and clear session liquidity.",
+      "chart": [1.0834, 1.0842, 1.0839, 1.0851, 1.0862, 1.0858, 1.0874]
+    },
+    {
+      "rank": 2,
+      "pair": "GBP_USD",
+      "opportunityScore": 81,
+      "confidence": 74,
+      "trend": "Bullish",
+      "supertrend": "Neutral",
+      "volatility": "Elevated",
+      "session": "London/New York overlap",
+      "lastUpdated": "2026-06-18T13:45:00-04:00",
+      "fixturePrice": "1.2742",
+      "reason": "Strong fixture momentum, but Supertrend confirmation is neutral.",
+      "chart": [1.2681, 1.2694, 1.2710, 1.2706, 1.2722, 1.2731, 1.2742]
+    },
+    {
+      "rank": 3,
+      "pair": "USD_JPY",
+      "opportunityScore": 77,
+      "confidence": 72,
+      "trend": "Bullish",
+      "supertrend": "Bullish",
+      "volatility": "Moderate",
+      "session": "New York",
+      "lastUpdated": "2026-06-18T13:45:00-04:00",
+      "fixturePrice": "156.23",
+      "reason": "Fixture trend is aligned, but session context is less favorable than top-ranked pairs.",
+      "chart": [155.62, 155.80, 155.74, 155.91, 156.04, 156.15, 156.23]
+    },
+    {
+      "rank": 4,
+      "pair": "EUR_JPY",
+      "opportunityScore": 73,
+      "confidence": 68,
+      "trend": "Bullish",
+      "supertrend": "Bullish",
+      "volatility": "Elevated",
+      "session": "New York",
+      "lastUpdated": "2026-06-18T13:45:00-04:00",
+      "fixturePrice": "169.87",
+      "reason": "Trend and Supertrend align, but volatility raises risk-review priority.",
+      "chart": [168.94, 169.12, 169.28, 169.17, 169.45, 169.66, 169.87]
+    },
+    {
+      "rank": 5,
+      "pair": "AUD_USD",
+      "opportunityScore": 68,
+      "confidence": 64,
+      "trend": "Sideways",
+      "supertrend": "Neutral",
+      "volatility": "Low",
+      "session": "New York",
+      "lastUpdated": "2026-06-18T13:45:00-04:00",
+      "fixturePrice": "0.6518",
+      "reason": "Stable fixture data, but trend quality is weaker than higher-ranked pairs.",
+      "chart": [0.6509, 0.6511, 0.6510, 0.6514, 0.6513, 0.6516, 0.6518]
+    },
+    {
+      "rank": 6,
+      "pair": "USD_CAD",
+      "opportunityScore": 61,
+      "confidence": 59,
+      "trend": "Bearish",
+      "supertrend": "Neutral",
+      "volatility": "Moderate",
+      "session": "New York",
+      "lastUpdated": "2026-06-18T13:45:00-04:00",
+      "fixturePrice": "1.3711",
+      "reason": "Fixture data remains watchable, but score and confidence are below action threshold.",
+      "chart": [1.3740, 1.3732, 1.3728, 1.3721, 1.3724, 1.3718, 1.3711]
+    }
+  ],
+  "riskPl": {
+    "realizedPl": "$0.00",
+    "unrealizedPl": "$0.00",
+    "riskCap": "$25.00 fixture cap",
+    "positionSize": "1000 fixture units",
+    "currentPosition": "No live position"
+  },
+  "exitReadiness": {
+    "autoExitStatus": "BLOCKED",
+    "blockReason": "Fixture display only. Human-approved risk boundary and live broker reconciliation are not active.",
+    "controls": [
+      {
+        "label": "Stop-loss present",
+        "status": "PRESENT_FIXTURE"
+      },
+      {
+        "label": "Take-profit policy",
+        "status": "PRESENT_FIXTURE"
+      },
+      {
+        "label": "Trailing stop policy",
+        "status": "PRESENT_FIXTURE"
+      },
+      {
+        "label": "Max-time policy",
+        "status": "PRESENT_FIXTURE"
+      }
+    ]
+  },
+  "bridges": {
+    "secretBridge": "MISSING",
+    "brokerBridge": "BLOCKED",
+    "killSwitch": "VISIBLE_LOCKED",
+    "safeStatus": "BLOCKED",
+    "nextAction": "Review the ranked pair and chart. No trade can proceed until risk boundary, auto-exit, P/L truth, secret bridge, broker bridge, and kill switch gates are ready.",
+    "sos": "NOT_REQUIRED"
+  },
+  "workflow": [
+    "Watchlist",
+    "Pair Ranking",
+    "Pair Selection",
+    "Chart Opens",
+    "AIOS Explains Opportunity",
+    "Human Approves Risk Boundary",
+    "Auto Exit Ready?",
+    "P/L Truth Ready?",
+    "Secret Bridge Ready?",
+    "Broker Bridge Armed?",
+    "Kill Switch Armed?",
+    "AIOS Manages Trade"
+  ]
+}
