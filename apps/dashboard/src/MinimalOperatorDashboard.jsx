@@ -456,18 +456,28 @@ export default function MinimalOperatorDashboard() {
       </section>
 
       <div className="dashboardGrid">
-        <Watchlist pairs={pairs} selectedPair={selected.pair} onSelectPair={setSelectedPair} />
-        <SelectedPairPanel pair={selected} />
-        <OpportunityExplanationPanel
-          bridges={dashboardFixture.bridges}
-          exitReadiness={dashboardFixture.exitReadiness}
-          pair={selected}
-          riskPl={dashboardFixture.riskPl}
-        />
-        <RiskPlPanel riskPl={dashboardFixture.riskPl} />
-        <ExitReadinessPanel exitReadiness={dashboardFixture.exitReadiness} />
-        <BridgeSafetyPanel bridges={dashboardFixture.bridges} />
-        <WorkflowPanel workflow={dashboardFixture.workflow} />
+        <section className="primaryWorkArea" aria-label="Pair selection and explanation">
+          <Watchlist pairs={pairs} selectedPair={selected.pair} onSelectPair={setSelectedPair} />
+          <div className="analysisStack">
+            <SelectedPairPanel pair={selected} />
+            <OpportunityExplanationPanel
+              bridges={dashboardFixture.bridges}
+              exitReadiness={dashboardFixture.exitReadiness}
+              pair={selected}
+              riskPl={dashboardFixture.riskPl}
+            />
+          </div>
+        </section>
+
+        <section className="safetyWorkArea" aria-label="Risk, exit, and bridge safety">
+          <RiskPlPanel riskPl={dashboardFixture.riskPl} />
+          <ExitReadinessPanel exitReadiness={dashboardFixture.exitReadiness} />
+          <BridgeSafetyPanel bridges={dashboardFixture.bridges} />
+        </section>
+
+        <div className="workflowCompact">
+          <WorkflowPanel workflow={dashboardFixture.workflow} />
+        </div>
       </div>
     </main>
   );

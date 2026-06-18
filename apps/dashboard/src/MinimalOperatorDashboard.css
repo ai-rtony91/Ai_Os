@@ -34,10 +34,10 @@ button {
     linear-gradient(180deg, rgba(9, 10, 8, 0.98), rgba(13, 13, 10, 1)),
     var(--page);
   display: grid;
-  gap: 16px;
+  gap: 12px;
   margin-inline: auto;
   min-height: 100vh;
-  padding: 22px;
+  padding: 16px;
 }
 
 .dashboardHeader {
@@ -46,10 +46,10 @@ button {
   border: 1px solid var(--line);
   border-radius: 8px;
   display: flex;
-  gap: 18px;
+  gap: 14px;
   justify-content: space-between;
-  min-height: 126px;
-  padding: 18px;
+  min-height: 82px;
+  padding: 12px 14px;
 }
 
 .dashboardHeader h1,
@@ -65,9 +65,9 @@ button {
 }
 
 .dashboardHeader h1 {
-  font-size: clamp(36px, 5vw, 64px);
+  font-size: clamp(30px, 3vw, 42px);
   letter-spacing: 0;
-  line-height: 0.95;
+  line-height: 1;
 }
 
 .dashboardHeader p {
@@ -97,11 +97,11 @@ button {
   border: 1px solid var(--line);
   border-radius: 999px;
   display: inline-flex;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
   justify-content: center;
-  min-height: 28px;
-  padding: 5px 9px;
+  min-height: 24px;
+  padding: 4px 8px;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -110,7 +110,7 @@ button {
   align-items: flex-start;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .dataLabel span:not(.statusBadge) {
@@ -123,19 +123,19 @@ button {
 .dataLabel small {
   color: var(--warn);
   flex-basis: 100%;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   line-height: 1.25;
 }
 
 .compactLabel {
-  gap: 4px;
+  gap: 3px;
 }
 
 .compactLabel .statusBadge {
-  font-size: 10px;
-  min-height: 24px;
-  padding: 4px 7px;
+  font-size: 9px;
+  min-height: 20px;
+  padding: 3px 6px;
 }
 
 .compactLabel small {
@@ -179,8 +179,130 @@ button {
 .dashboardGrid {
   align-items: start;
   display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(440px, 1.25fr) minmax(360px, 1fr) minmax(320px, 0.8fr);
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+.primaryWorkArea {
+  align-items: start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(500px, 1.08fr) minmax(420px, 0.92fr);
+}
+
+.analysisStack {
+  display: grid;
+  gap: 12px;
+}
+
+.safetyWorkArea {
+  align-items: stretch;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.workflowCompact {
+  display: grid;
+}
+
+/* Density overrides: preserve safety labels while flattening the page into operator scan zones. */
+.minimalOperatorDashboard .selectedPairHeader {
+  gap: 10px;
+  padding: 10px;
+}
+
+.minimalOperatorDashboard .chartShell {
+  min-height: 134px;
+  padding: 9px;
+}
+
+.minimalOperatorDashboard .chartShell svg {
+  height: 112px;
+}
+
+.minimalOperatorDashboard .fieldGrid {
+  gap: 8px;
+}
+
+.minimalOperatorDashboard .field {
+  gap: 5px;
+  min-height: 58px;
+  padding: 9px;
+}
+
+.minimalOperatorDashboard .field strong {
+  font-size: 16px;
+  line-height: 1.15;
+}
+
+.minimalOperatorDashboard .factorGrid,
+.minimalOperatorDashboard .decisionGrid {
+  gap: 8px;
+}
+
+.minimalOperatorDashboard .factorList,
+.minimalOperatorDashboard .explanationBox,
+.minimalOperatorDashboard .blockReason,
+.minimalOperatorDashboard .nextAction {
+  gap: 7px;
+  padding: 9px;
+}
+
+.minimalOperatorDashboard .workflowList {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.minimalOperatorDashboard .workflowList li {
+  border-bottom: 0;
+  border-right: 1px solid var(--line);
+  font-size: 12px;
+  gap: 7px;
+  grid-template-columns: 24px 1fr;
+  min-height: 34px;
+  padding: 7px 8px;
+}
+
+.minimalOperatorDashboard .workflowList li:last-child {
+  border-right: 0;
+}
+
+@media (max-width: 1180px) {
+  .minimalOperatorDashboard .primaryWorkArea,
+  .minimalOperatorDashboard .safetyWorkArea {
+    grid-template-columns: 1fr;
+  }
+
+  .minimalOperatorDashboard .workflowList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .minimalOperatorDashboard .workflowList li:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .minimalOperatorDashboard .workflowList li:nth-child(n + 4) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 780px) {
+  .minimalOperatorDashboard {
+    padding: 10px;
+  }
+
+  .minimalOperatorDashboard .workflowList {
+    grid-template-columns: 1fr;
+  }
+
+  .minimalOperatorDashboard .workflowList li,
+  .minimalOperatorDashboard .workflowList li:nth-child(3n) {
+    border-right: 0;
+  }
+
+  .minimalOperatorDashboard .workflowList li + li {
+    border-top: 1px solid var(--line);
+  }
 }
 
 .operatorPanel {
@@ -188,17 +310,17 @@ button {
   border: 1px solid var(--line);
   border-radius: 8px;
   display: grid;
-  gap: 14px;
+  gap: 10px;
   min-width: 0;
-  padding: 15px;
+  padding: 11px;
 }
 
 .watchlistPanel {
-  grid-row: span 2;
+  min-width: 0;
 }
 
 .opportunityPanel {
-  grid-column: span 2;
+  min-width: 0;
 }
 
 .panelHeading {
@@ -207,7 +329,7 @@ button {
 }
 
 .panelHeading h2 {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.2;
 }
 
@@ -217,14 +339,14 @@ button {
 
 table {
   border-collapse: collapse;
-  min-width: 1180px;
+  min-width: 1060px;
   width: 100%;
 }
 
 th,
 td {
   border-bottom: 1px solid var(--line);
-  padding: 10px 8px;
+  padding: 7px 6px;
   text-align: left;
   vertical-align: middle;
 }
@@ -238,7 +360,7 @@ th {
 
 td {
   color: var(--muted-strong);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 td strong {
@@ -247,7 +369,7 @@ td strong {
 
 .labeledValue {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 
