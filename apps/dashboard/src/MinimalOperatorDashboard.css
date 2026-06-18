@@ -37,7 +37,8 @@ button {
   gap: 12px;
   margin-inline: auto;
   min-height: 100vh;
-  padding: 16px;
+  padding: 14px;
+  width: min(100%, 1440px);
 }
 
 .dashboardHeader {
@@ -172,7 +173,7 @@ button {
   border-radius: 8px;
   display: grid;
   gap: 1px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr 0.75fr 0.75fr 0.85fr 1.35fr 0.8fr;
   overflow: hidden;
 }
 
@@ -187,7 +188,7 @@ button {
   align-items: start;
   display: grid;
   gap: 12px;
-  grid-template-columns: minmax(500px, 1.08fr) minmax(420px, 0.92fr);
+  grid-template-columns: minmax(360px, 0.82fr) minmax(560px, 1.18fr);
 }
 
 .analysisStack {
@@ -316,6 +317,7 @@ button {
 }
 
 .watchlistPanel {
+  align-self: stretch;
   min-width: 0;
 }
 
@@ -331,6 +333,129 @@ button {
 .panelHeading h2 {
   font-size: 16px;
   line-height: 1.2;
+}
+
+.watchlistList {
+  display: grid;
+  gap: 8px;
+}
+
+.watchlistItem {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 34px minmax(84px, 0.55fr) minmax(230px, 1.35fr) minmax(150px, 0.75fr) auto;
+  min-height: 68px;
+  padding: 8px 9px;
+  text-align: left;
+  width: 100%;
+}
+
+.watchlistItem:hover,
+.watchlistItem:focus-visible {
+  border-color: var(--focus);
+  outline: 2px solid rgba(132, 210, 222, 0.2);
+  outline-offset: 1px;
+}
+
+.selectedWatchlistItem {
+  background: rgba(91, 190, 203, 0.1);
+  border-color: rgba(91, 190, 203, 0.62);
+}
+
+.watchlistRank {
+  align-items: center;
+  background: rgba(91, 190, 203, 0.14);
+  border: 1px solid rgba(91, 190, 203, 0.4);
+  border-radius: 999px;
+  color: var(--neutral);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.watchlistPairBlock {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.watchlistPairBlock strong {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.05;
+}
+
+.watchlistPairBlock span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.watchlistMetrics {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(5, minmax(48px, 1fr));
+  min-width: 0;
+}
+
+.watchlistMetric {
+  background: rgba(9, 10, 8, 0.28);
+  border: 1px solid rgba(210, 204, 188, 0.12);
+  border-radius: 7px;
+  display: grid;
+  gap: 2px;
+  min-height: 42px;
+  padding: 5px 6px;
+}
+
+.watchlistMetric span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.watchlistMetric strong {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.watchlistStatus {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.watchlistStatus .dataLabel span:not(.statusBadge) {
+  font-size: 8px;
+  line-height: 1.05;
+}
+
+.watchlistAction {
+  align-items: center;
+  border: 1px solid rgba(91, 190, 203, 0.42);
+  border-radius: 999px;
+  color: var(--neutral);
+  display: inline-flex;
+  font-size: 10px;
+  font-weight: 900;
+  justify-content: center;
+  min-height: 24px;
+  padding: 4px 7px;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .tableShell {
@@ -632,17 +757,25 @@ td strong {
 }
 
 @media (max-width: 1180px) {
-  .dashboardGrid {
-    grid-template-columns: 1fr 1fr;
+  .primaryWorkArea,
+  .safetyWorkArea {
+    grid-template-columns: 1fr;
   }
 
-  .opportunityPanel {
-    grid-column: 1 / -1;
+  .watchlistItem {
+    grid-template-columns: 32px minmax(88px, 0.55fr) minmax(220px, 1fr);
   }
 
-  .watchlistPanel {
-    grid-column: 1 / -1;
-    grid-row: auto;
+  .watchlistStatus {
+    align-items: center;
+    display: grid;
+    grid-column: 2 / 4;
+    grid-template-columns: auto 1fr;
+  }
+
+  .watchlistAction {
+    grid-column: 1 / 4;
+    justify-self: start;
   }
 }
 
@@ -661,12 +794,25 @@ td strong {
   }
 
   .statusBand,
-  .dashboardGrid,
   .fieldGrid,
   .fieldGrid.compact,
   .factorGrid,
   .decisionGrid {
     grid-template-columns: 1fr;
+  }
+
+  .watchlistItem {
+    grid-template-columns: 30px 1fr;
+  }
+
+  .watchlistMetrics,
+  .watchlistStatus,
+  .watchlistAction {
+    grid-column: 1 / -1;
+  }
+
+  .watchlistMetrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .explanationHeader {

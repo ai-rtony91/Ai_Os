@@ -111,6 +111,15 @@ function LabeledValue({ value, source, strong = false }) {
   );
 }
 
+function WatchlistMetric({ label, value, tone }) {
+  return (
+    <span className="watchlistMetric">
+      <span>{label}</span>
+      <strong className={`tone-${tone ?? statusTone(value)}`}>{value}</strong>
+    </span>
+  );
+}
+
 function Field({ label, value, tone, source = dataSourceForPair() }) {
   return (
     <div className="field">
@@ -136,74 +145,39 @@ function Panel({ title, eyebrow, children, className = "" }) {
 function Watchlist({ pairs, selectedPair, onSelectPair }) {
   return (
     <Panel title="Watchlist" eyebrow="Ranked opportunities" className="watchlistPanel">
-      <div className="tableShell" role="region" aria-label="Ranked fixture pair watchlist">
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Pair</th>
-              <th>Price</th>
-              <th>Score</th>
-              <th>Confidence</th>
-              <th>Trend</th>
-              <th>Supertrend</th>
-              <th>Volatility</th>
-              <th>Session</th>
-              <th>Updated</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pairs.map((pair) => {
-              const selected = pair.pair === selectedPair;
-              const source = dataSourceForPair(pair);
+      <div className="watchlistList" role="list" aria-label="Ranked fixture pair watchlist">
+        {pairs.map((pair) => {
+          const selected = pair.pair === selectedPair;
+          const source = dataSourceForPair(pair);
 
-              return (
-                <tr className={selected ? "selectedRow" : ""} key={pair.pair}>
-                  <td>{pair.rank}</td>
-                  <td>
-                    <LabeledValue source={source} strong value={formatPair(pair.pair)} />
-                    {selected ? <span className="selectedMark">Selected</span> : null}
-                  </td>
-                  <td>
-                    <LabeledValue source={source} value={pair.fixturePrice} />
-                  </td>
-                  <td>
-                    <LabeledValue source={source} value={pair.opportunityScore} />
-                  </td>
-                  <td>
-                    <LabeledValue source={source} value={pair.confidence} />
-                  </td>
-                  <td>
-                    <LabeledValue source={source} value={pair.trend} />
-                  </td>
-                  <td>
-                    <StatusBadge value={pair.supertrend} />
-                    <DataLabel compact source={source} />
-                  </td>
-                  <td>
-                    <LabeledValue source={source} value={pair.volatility} />
-                  </td>
-                  <td>
-                    <LabeledValue source={source} value={pair.session} />
-                  </td>
-                  <td>
-                    <LabeledValue source={source} value={formatTime(pair.lastUpdated)} />
-                  </td>
-                  <td>
-                    <button
-                      className="viewButton"
-                      type="button"
-                      onClick={() => onSelectPair(pair.pair)}
-                    >
-                      View Chart
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+          return (
+            <button
+              aria-pressed={selected}
+              className={`watchlistItem ${selected ? "selectedWatchlistItem" : ""}`}
+              key={pair.pair}
+              type="button"
+              onClick={() => onSelectPair(pair.pair)}
+            >
+              <span className="watchlistRank">{pair.rank}</span>
+              <span className="watchlistPairBlock">
+                <strong>{formatPair(pair.pair)}</strong>
+                <span>{formatTime(pair.lastUpdated)}</span>
+              </span>
+              <span className="watchlistMetrics">
+                <WatchlistMetric label="Score" tone="good" value={pair.opportunityScore} />
+                <WatchlistMetric label="Conf" tone="good" value={pair.confidence} />
+                <WatchlistMetric label="Trend" value={pair.trend} />
+                <WatchlistMetric label="Price" tone="neutral" value={pair.fixturePrice} />
+                <WatchlistMetric label="Vol" value={pair.volatility} />
+              </span>
+              <span className="watchlistStatus">
+                <StatusBadge value={pair.supertrend} />
+                <DataLabel compact source={source} />
+              </span>
+              <span className="watchlistAction">{selected ? "Selected" : "View Chart"}</span>
+            </button>
+          );
+        })}
       </div>
     </Panel>
   );
@@ -452,6 +426,8 @@ export default function MinimalOperatorDashboard() {
         <Field label="Selected pair" source={selectedSource} value={formatPair(selected.pair)} tone="neutral" />
         <Field label="Opportunity score" source={selectedSource} value={selected.opportunityScore} tone="good" />
         <Field label="Confidence" source={selectedSource} value={selected.confidence} tone="good" />
+        <Field label="Safe / blocked" source={selectedSource} value={dashboardFixture.bridges.safeStatus} />
+        <Field label="Next action" source={selectedSource} value={dashboardFixture.bridges.nextAction} tone="warn" />
         <Field label="Last update" source={selectedSource} value={formatTime(selected.lastUpdated)} tone="neutral" />
       </section>
 
