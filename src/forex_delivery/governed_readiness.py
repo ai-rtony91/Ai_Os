@@ -206,6 +206,32 @@ DEMO_CONNECTION_APPROVAL_REVIEW_REJECTED = "REJECTED"
 DEMO_CONNECTION_APPROVAL_REVIEW_INCOMPLETE = "INCOMPLETE"
 DEMO_CONNECTION_APPROVAL_REVIEW_READY = "READY_FOR_HUMAN_REVIEW"
 
+DEMO_CONNECTION_REQUEST_DRAFT_REQUIRED_FIELDS = (
+    "broker_family_label",
+    "demo_practice_mode_confirmed",
+    "runtime_auth_reference_label",
+    "external_connector_readiness_flag",
+    "protected_action_approval_requested",
+    "network_approval_requested",
+    "endpoint_class",
+    "account_identifier_status",
+    "credential_material_status",
+    "order_route_approval",
+    "market_data_fetch_approval",
+    "timeout_seconds",
+    "one_shot_stop_requirement",
+    "retry_count",
+    "scheduler_enabled",
+    "daemon_enabled",
+    "webhook_enabled",
+    "evidence_bundle_path",
+    "human_owner_review",
+    "future_proof_stop_point",
+)
+
+DEMO_CONNECTION_REQUEST_DRAFT_INVALID = "INVALID"
+DEMO_CONNECTION_REQUEST_DRAFT_READY = "DRAFT_READY"
+
 UNSAFE_REVIEW_MARKERS = (
     "todo",
     "tbd",
@@ -1441,6 +1467,147 @@ def build_demo_connection_proof_approval_review_dry_run(
     }
 
 
+def build_demo_connection_proof_request_draft_dry_run(
+    draft_fields: dict[str, Any],
+) -> dict[str, Any]:
+    """Classify a sanitized future proof request draft without executing it."""
+
+    fields = dict(draft_fields or {})
+    forbidden = _find_forbidden_fields(fields)
+    missing = [
+        field_name
+        for field_name in DEMO_CONNECTION_REQUEST_DRAFT_REQUIRED_FIELDS
+        if not _field_present(fields, field_name)
+    ]
+    invalid_reasons = [f"missing_required_field:{field}" for field in missing]
+    invalid_reasons.extend([f"forbidden_field:{field}" for field in forbidden])
+    passed_gates: list[str] = []
+    failed_gates: list[str] = []
+
+    if missing:
+        failed_gates.append("required_demo_connection_request_draft_fields_present")
+    else:
+        passed_gates.append("required_demo_connection_request_draft_fields_present")
+
+    if forbidden:
+        failed_gates.append("no_forbidden_demo_connection_request_draft_fields")
+    else:
+        passed_gates.append("no_forbidden_demo_connection_request_draft_fields")
+
+    approval_review = build_demo_connection_proof_approval_review_dry_run(
+        {
+            "broker_family_label": fields.get("broker_family_label"),
+            "demo_practice_mode_confirmed": fields.get("demo_practice_mode_confirmed"),
+            "runtime_auth_reference_label": fields.get("runtime_auth_reference_label"),
+            "external_connector_readiness_flag": fields.get(
+                "external_connector_readiness_flag"
+            ),
+            "protected_action_approval_requested": fields.get(
+                "protected_action_approval_requested"
+            ),
+            "network_approval_requested": fields.get("network_approval_requested"),
+            "endpoint_class": fields.get("endpoint_class"),
+            "account_identifier_status": fields.get("account_identifier_status"),
+            "credential_material_status": fields.get("credential_material_status"),
+            "order_route_approval": fields.get("order_route_approval"),
+            "market_data_fetch_approval": fields.get("market_data_fetch_approval"),
+            "timeout_seconds": fields.get("timeout_seconds"),
+            "one_shot_stop_requirement": fields.get("one_shot_stop_requirement"),
+            "retry_count": fields.get("retry_count"),
+            "scheduler_enabled": fields.get("scheduler_enabled"),
+            "daemon_enabled": fields.get("daemon_enabled"),
+            "webhook_enabled": fields.get("webhook_enabled"),
+            "evidence_bundle_path": fields.get("evidence_bundle_path"),
+            "human_owner_review": fields.get("human_owner_review"),
+            "future_proof_stop_point": fields.get("future_proof_stop_point"),
+        }
+    )
+
+    review_classification = str(approval_review.get("review_classification") or "")
+    if review_classification == DEMO_CONNECTION_APPROVAL_REVIEW_REJECTED:
+        invalid_reasons.append("approval_review_rejected")
+        invalid_reasons.extend(
+            f"approval_review_rejected:{reason}"
+            for reason in list(approval_review.get("rejected_reasons") or [])
+        )
+        failed_gates.append("approval_review")
+    elif review_classification == DEMO_CONNECTION_APPROVAL_REVIEW_INCOMPLETE:
+        invalid_reasons.append("approval_review_incomplete")
+        invalid_reasons.extend(
+            f"approval_review_incomplete:{reason}"
+            for reason in list(approval_review.get("incomplete_reasons") or [])
+        )
+        failed_gates.append("approval_review")
+    elif review_classification == DEMO_CONNECTION_APPROVAL_REVIEW_READY:
+        passed_gates.append("approval_review")
+    else:
+        invalid_reasons.append("approval_review_unknown")
+        failed_gates.append("approval_review")
+
+    invalid_reasons = sorted(set(invalid_reasons))
+    passed_gates = sorted(set(passed_gates))
+    failed_gates = sorted(set(failed_gates))
+    classification = (
+        DEMO_CONNECTION_REQUEST_DRAFT_INVALID
+        if invalid_reasons
+        else DEMO_CONNECTION_REQUEST_DRAFT_READY
+    )
+
+    return {
+        "schema": "AIOS_FOREX_DELIVERY_DEMO_CONNECTION_PROOF_REQUEST_DRAFT_DRY_RUN.v1",
+        "request_draft_classification": classification,
+        "draft_ready": classification == DEMO_CONNECTION_REQUEST_DRAFT_READY,
+        "dry_run_only": True,
+        "placeholders_and_labels_only": classification == DEMO_CONNECTION_REQUEST_DRAFT_READY,
+        "real_values_allowed": False,
+        "proof_executable_now": False,
+        "approval_state_mutated": False,
+        "approval_state_changed": False,
+        "protected_action_approval_granted": False,
+        "network_approval_granted": False,
+        "broker_connection_allowed": False,
+        "connection_attempt_allowed": False,
+        "connection_attempt_performed": False,
+        "broker_request_sent": False,
+        "network_allowed": False,
+        "network_api_allowed": False,
+        "network_used": False,
+        "market_data_allowed": False,
+        "market_data_requested": False,
+        "market_data_fetched": False,
+        "credentials_allowed": False,
+        "credentials_used": False,
+        "credential_material_present": False,
+        "account_access_allowed": False,
+        "order_route_allowed": False,
+        "order_submit_allowed": False,
+        "order_placed": False,
+        "scheduler_enabled": False,
+        "daemon_enabled": False,
+        "webhook_enabled": False,
+        "retry_loop_present": False,
+        "autonomous_reentry_present": False,
+        "live_endpoint_allowed": False,
+        "live_execution_allowed": False,
+        "required_fields": list(DEMO_CONNECTION_REQUEST_DRAFT_REQUIRED_FIELDS),
+        "missing_fields": missing,
+        "passed_gates": passed_gates,
+        "failed_gates": failed_gates,
+        "invalid_reasons": invalid_reasons,
+        "approval_review_preview": approval_review,
+        "next_required_action": (
+            "human_owner_review_request_draft_only"
+            if classification == DEMO_CONNECTION_REQUEST_DRAFT_READY
+            else "repair_sanitized_request_draft"
+        ),
+        "stop_point": (
+            "Request-draft dry-run only; no approval is granted or mutated, and no "
+            "broker connection, credential access, network call, market-data fetch, "
+            "paper order, or live order is authorized."
+        ),
+    }
+
+
 def submit_live_order(_: dict[str, Any] | None = None) -> None:
     """Fail closed for any live-order attempt."""
 
@@ -1634,6 +1801,8 @@ def _forbidden_key_name(key_text: str) -> bool:
     if key_text in DEMO_CONNECTION_PREFLIGHT_REQUIRED_FIELDS:
         return False
     if key_text in DEMO_CONNECTION_APPROVAL_REVIEW_REQUIRED_FIELDS:
+        return False
+    if key_text in DEMO_CONNECTION_REQUEST_DRAFT_REQUIRED_FIELDS:
         return False
     if key_text in FORBIDDEN_LIVE_FIELDS:
         return True
