@@ -422,19 +422,18 @@ export default function MinimalOperatorDashboard() {
         </div>
       </header>
 
-      <section className="statusBand" aria-label="Current dashboard status">
-        <Field label="Selected pair" source={selectedSource} value={formatPair(selected.pair)} tone="neutral" />
-        <Field label="Opportunity score" source={selectedSource} value={selected.opportunityScore} tone="good" />
-        <Field label="Confidence" source={selectedSource} value={selected.confidence} tone="good" />
-        <Field label="Safe / blocked" source={selectedSource} value={dashboardFixture.bridges.safeStatus} />
-        <Field label="Next action" source={selectedSource} value={dashboardFixture.bridges.nextAction} tone="warn" />
-        <Field label="Last update" source={selectedSource} value={formatTime(selected.lastUpdated)} tone="neutral" />
-      </section>
-
       <div className="dashboardGrid">
         <section className="primaryWorkArea" aria-label="Pair selection and explanation">
           <Watchlist pairs={pairs} selectedPair={selected.pair} onSelectPair={setSelectedPair} />
           <div className="analysisStack">
+            <section className="statusBand" aria-label="Current dashboard status">
+              <Field label="Selected pair" source={selectedSource} value={formatPair(selected.pair)} tone="neutral" />
+              <Field label="Opportunity score" source={selectedSource} value={selected.opportunityScore} tone="good" />
+              <Field label="Confidence" source={selectedSource} value={selected.confidence} tone="good" />
+              <Field label="Safe / blocked" source={selectedSource} value={dashboardFixture.bridges.safeStatus} />
+              <Field label="Next action" source={selectedSource} value={dashboardFixture.bridges.nextAction} tone="warn" />
+              <Field label="Last update" source={selectedSource} value={formatTime(selected.lastUpdated)} tone="neutral" />
+            </section>
             <SelectedPairPanel pair={selected} />
             <OpportunityExplanationPanel
               bridges={dashboardFixture.bridges}
