@@ -31,6 +31,7 @@ from forex_delivery.governed_readiness import (  # noqa: E402
     build_demo_connection_proof_approval_review_dry_run,
     build_demo_connection_proof_execution_packet_draft_dry_run,
     build_demo_connection_proof_preflight_dry_run,
+    build_demo_connection_proof_protected_action_approval_record_draft_dry_run,
     build_demo_connection_proof_protected_action_approval_review_dry_run,
     build_demo_connection_proof_protected_action_gate_dry_run,
     build_demo_connection_proof_request_draft_dry_run,
@@ -209,6 +210,19 @@ def _complete_demo_connection_protected_action_approval_review_dry_run_fields():
             "protected_action_approval_requested": True,
             "network_approval_requested": True,
             "evidence_bundle_path": "Reports/forex_delivery/sanitized-approval-review.md",
+        }
+    )
+    return fields
+
+
+def _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields():
+    fields = dict(_complete_demo_connection_protected_action_approval_review_dry_run_fields())
+    fields.update(
+        {
+            "approval_review_status": "APPROVAL_REVIEW_READY",
+            "approval_record_id": "PENDING_SEPARATE_APPROVAL_RECORD_ID",
+            "approval_timestamp": "PENDING_SEPARATE_APPROVAL_TIMESTAMP",
+            "evidence_bundle_path": "Reports/forex_delivery/sanitized-approval-record-draft.md",
         }
     )
     return fields
@@ -1331,6 +1345,282 @@ def test_sanitized_demo_connection_protected_action_approval_review_is_ready_onl
     assert review["execution_packet_draft_preview"][
         "execution_packet_draft_classification"
     ] == "DRAFT_READY_FOR_HUMAN_REVIEW"
+
+
+def test_demo_connection_approval_record_draft_missing_approval_review_fails_closed():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields.pop("approval_review_status")
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "INCOMPLETE"
+    assert record["approval_record_draft_ready"] is False
+    assert record["approval_record_created"] is False
+    assert record["approval_granted"] is False
+    assert "approval_review_status" in record["missing_fields"]
+
+
+def test_demo_connection_approval_record_draft_missing_execution_draft_fails_closed():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields.pop("execution_packet_draft_status")
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "INCOMPLETE"
+    assert record["approval_record_draft_ready"] is False
+    assert record["execution_packet_executable_now"] is False
+    assert "execution_packet_draft_status" in record["missing_fields"]
+
+
+def test_demo_connection_approval_record_draft_missing_gate_fails_closed():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields.pop("protected_action_gate_status")
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "INCOMPLETE"
+    assert record["approval_record_draft_ready"] is False
+    assert record["proof_executable_now"] is False
+    assert "protected_action_gate_status" in record["missing_fields"]
+
+
+def test_demo_connection_approval_record_draft_missing_request_fails_closed():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields.pop("request_draft_status")
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "INCOMPLETE"
+    assert record["approval_record_draft_ready"] is False
+    assert record["connection_attempt_performed"] is False
+    assert "request_draft_status" in record["missing_fields"]
+
+
+def test_demo_connection_approval_record_draft_real_approval_values_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["human_owner_approval"] = "Anthony Meza approved execution"
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["approval_record_authorizing"] is False
+    assert record["approval_granted"] is False
+    assert "human_owner_approval_must_remain_placeholder_only" in record[
+        "rejected_reasons"
+    ]
+
+
+def test_demo_connection_approval_record_draft_real_record_ids_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["approval_record_id"] = "APR-2026-06-18-001"
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["approval_record_created"] is False
+    assert "approval_record_id_must_remain_placeholder_only" in record["rejected_reasons"]
+
+
+def test_demo_connection_approval_record_draft_real_timestamps_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["approval_timestamp"] = "2026-06-18T12:00:00Z"
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["approval_record_persisted"] is False
+    assert "approval_timestamp_must_remain_placeholder_only" in record["rejected_reasons"]
+
+
+def test_demo_connection_approval_record_draft_approval_mutation_is_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["approval_mutation"] = True
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["approval_state_mutated"] is False
+    assert "approval_mutation_must_be_false" in record["rejected_reasons"]
+
+
+def test_demo_connection_approval_record_draft_real_commands_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["execution_command"] = "python automation/forex_engine/probe.py --connect"
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["command_execution_allowed"] is False
+    assert record["command_executed"] is False
+    assert "execution_command_must_remain_placeholder_only" in record["rejected_reasons"]
+
+
+def test_demo_connection_approval_record_draft_credential_like_values_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "token=not-a-real-value"
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["credentials_used"] is False
+    assert record["credential_material_present"] is False
+    assert any("runtime_auth_reference_label" in reason for reason in record["rejected_reasons"])
+
+
+def test_demo_connection_approval_record_draft_account_id_like_values_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["account_identifier_status"] = "123-456-789"
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["account_access_allowed"] is False
+    assert any("account_identifier_status" in reason for reason in record["rejected_reasons"])
+
+
+def test_demo_connection_approval_record_draft_live_endpoints_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["endpoint_class"] = "OANDA_LIVE"
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["live_endpoint_allowed"] is False
+    assert "endpoint_class_must_be_demo_or_practice_only" in record["rejected_reasons"]
+
+
+def test_demo_connection_approval_record_draft_order_routes_are_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["order_route_approval"] = True
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["order_route_allowed"] is False
+    assert record["order_placed"] is False
+    assert "order_route_approval_must_remain_false" in record["rejected_reasons"]
+
+
+def test_demo_connection_approval_record_draft_market_data_fetch_is_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["market_data_fetch_approval"] = True
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["market_data_fetched"] is False
+    assert "market_data_fetch_approval_must_remain_false" in record["rejected_reasons"]
+
+
+def test_demo_connection_approval_record_draft_retry_above_zero_is_rejected():
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields["retry_count"] = 1
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["retry_loop_present"] is False
+    assert "retry_count_must_be_zero" in record["rejected_reasons"]
+
+
+@pytest.mark.parametrize(
+    "field_name,reason",
+    [
+        ("scheduler_enabled", "scheduler_must_remain_false"),
+        ("daemon_enabled", "daemon_must_remain_false"),
+        ("webhook_enabled", "webhook_must_remain_false"),
+    ],
+)
+def test_demo_connection_approval_record_draft_background_flags_are_rejected(
+    field_name, reason
+):
+    fields = _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    fields[field_name] = True
+
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        fields
+    )
+
+    assert record["approval_record_draft_classification"] == "REJECTED"
+    assert record["scheduler_enabled"] is False
+    assert record["daemon_enabled"] is False
+    assert record["webhook_enabled"] is False
+    assert reason in record["rejected_reasons"]
+
+
+def test_sanitized_demo_connection_approval_record_draft_is_ready_only():
+    record = build_demo_connection_proof_protected_action_approval_record_draft_dry_run(
+        _complete_demo_connection_protected_action_approval_record_draft_dry_run_fields()
+    )
+
+    assert record["approval_record_draft_classification"] == (
+        "APPROVAL_RECORD_DRAFT_READY"
+    )
+    assert record["approval_record_draft_ready"] is True
+    assert record["approval_record_authorizing"] is False
+    assert record["approval_record_created"] is False
+    assert record["approval_record_persisted"] is False
+    assert record["approval_grant_allowed"] is False
+    assert record["approval_granted"] is False
+    assert record["execution_packet_executable_now"] is False
+    assert record["proof_executable_now"] is False
+    assert record["approval_state_mutated"] is False
+    assert record["approval_state_changed"] is False
+    assert record["protected_action_approval_granted"] is False
+    assert record["network_approval_granted"] is False
+    assert record["command_execution_allowed"] is False
+    assert record["command_executed"] is False
+    assert record["connector_command_allowed"] is False
+    assert record["connector_command_executed"] is False
+    assert record["shell_used"] is False
+    assert record["broker_connection_allowed"] is False
+    assert record["connection_attempt_allowed"] is False
+    assert record["connection_attempt_performed"] is False
+    assert record["broker_request_sent"] is False
+    assert record["network_used"] is False
+    assert record["market_data_fetched"] is False
+    assert record["credentials_used"] is False
+    assert record["credential_material_present"] is False
+    assert record["account_access_allowed"] is False
+    assert record["order_placed"] is False
+    assert record["scheduler_enabled"] is False
+    assert record["daemon_enabled"] is False
+    assert record["webhook_enabled"] is False
+    assert record["retry_loop_present"] is False
+    assert record["live_execution_allowed"] is False
+    assert record["approval_review_preview"][
+        "protected_action_approval_review_classification"
+    ] == "APPROVAL_REVIEW_READY"
 
 
 def test_complete_sanitized_review_package_is_ready_for_human_review_only():
