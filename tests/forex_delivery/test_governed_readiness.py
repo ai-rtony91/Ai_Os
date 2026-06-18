@@ -30,6 +30,7 @@ from forex_delivery.governed_readiness import (  # noqa: E402
     LiveExecutionBlocked,
     build_demo_connection_proof_approval_review_dry_run,
     build_demo_connection_proof_preflight_dry_run,
+    build_demo_connection_proof_request_draft_dry_run,
     build_demo_runtime_readiness_dry_run,
     build_live_arming_checklist,
     build_order_payload,
@@ -150,6 +151,10 @@ def _complete_demo_connection_approval_review_dry_run_fields():
         "human_owner_review": "Anthony Meza",
         "future_proof_stop_point": "stop-before-any-broker-facing-action-unless-separately-approved",
     }
+
+
+def _complete_demo_connection_request_draft_dry_run_fields():
+    return dict(_complete_demo_connection_approval_review_dry_run_fields())
 
 
 def test_missing_external_broker_path_fails_safely():
@@ -608,6 +613,86 @@ def test_complete_sanitized_demo_connection_approval_review_is_review_ready_only
     assert (
         review["demo_connection_preflight_preview"]["demo_connection_preflight_ready"]
         is True
+    )
+
+
+def test_demo_connection_request_draft_credential_like_values_are_invalid():
+    fields = _complete_demo_connection_request_draft_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "token=not-a-real-value"
+
+    draft = build_demo_connection_proof_request_draft_dry_run(fields)
+
+    assert draft["request_draft_classification"] == "INVALID"
+    assert draft["draft_ready"] is False
+    assert draft["credentials_used"] is False
+    assert draft["credential_material_present"] is False
+    assert any("runtime_auth_reference_label" in reason for reason in draft["invalid_reasons"])
+
+
+def test_demo_connection_request_draft_account_id_like_values_are_invalid():
+    fields = _complete_demo_connection_request_draft_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "123-456-789"
+
+    draft = build_demo_connection_proof_request_draft_dry_run(fields)
+
+    assert draft["request_draft_classification"] == "INVALID"
+    assert draft["account_access_allowed"] is False
+    assert draft["order_placed"] is False
+    assert any("runtime_auth_reference_label" in reason for reason in draft["invalid_reasons"])
+
+
+def test_demo_connection_request_draft_live_endpoints_are_invalid():
+    fields = _complete_demo_connection_request_draft_dry_run_fields()
+    fields["endpoint_class"] = "OANDA_LIVE"
+
+    draft = build_demo_connection_proof_request_draft_dry_run(fields)
+
+    assert draft["request_draft_classification"] == "INVALID"
+    assert draft["live_endpoint_allowed"] is False
+    assert "approval_review_rejected:endpoint_class_must_be_demo_or_practice_only" in draft[
+        "invalid_reasons"
+    ]
+
+
+def test_demo_connection_request_draft_order_routes_are_invalid():
+    fields = _complete_demo_connection_request_draft_dry_run_fields()
+    fields["order_route_approval"] = True
+
+    draft = build_demo_connection_proof_request_draft_dry_run(fields)
+
+    assert draft["request_draft_classification"] == "INVALID"
+    assert draft["order_route_allowed"] is False
+    assert draft["order_placed"] is False
+    assert "approval_review_rejected:order_route_approval_must_remain_false" in draft[
+        "invalid_reasons"
+    ]
+
+
+def test_sanitized_demo_connection_request_draft_is_draft_ready_only():
+    draft = build_demo_connection_proof_request_draft_dry_run(
+        _complete_demo_connection_request_draft_dry_run_fields()
+    )
+
+    assert draft["request_draft_classification"] == "DRAFT_READY"
+    assert draft["draft_ready"] is True
+    assert draft["placeholders_and_labels_only"] is True
+    assert draft["real_values_allowed"] is False
+    assert draft["proof_executable_now"] is False
+    assert draft["approval_state_mutated"] is False
+    assert draft["protected_action_approval_granted"] is False
+    assert draft["network_approval_granted"] is False
+    assert draft["broker_connection_allowed"] is False
+    assert draft["connection_attempt_performed"] is False
+    assert draft["broker_request_sent"] is False
+    assert draft["network_used"] is False
+    assert draft["market_data_fetched"] is False
+    assert draft["credentials_used"] is False
+    assert draft["credential_material_present"] is False
+    assert draft["order_placed"] is False
+    assert draft["live_execution_allowed"] is False
+    assert (
+        draft["approval_review_preview"]["review_classification"]
+        == "READY_FOR_HUMAN_REVIEW"
     )
 
 
