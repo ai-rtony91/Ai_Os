@@ -19,7 +19,14 @@ Status: sanitized template only. This file contains no live account data and no 
 
 ## Evidence Exclusions
 
-The evidence bundle must not contain API keys, tokens, passwords, private keys, account identifiers, broker order identifiers, raw live payloads, private account data, screenshots with private data, or unredacted broker data.
+The evidence bundle must contain sanitized proof only.
+
+It must not contain:
+
+- Account IDs, partial account IDs, masked account IDs, or account identifiers.
+- API keys, tokens, passwords, private keys, secrets, credential values, or live endpoint secrets.
+- Endpoint values, raw live payloads, raw broker payloads, private account data, screenshots with private data, or unredacted broker data.
+- Order IDs, fill IDs, transaction IDs, or broker order identifiers unless explicitly sanitized into status-only evidence with no broker or private values.
 
 ## Required Evidence Events
 

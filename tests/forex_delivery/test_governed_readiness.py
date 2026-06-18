@@ -145,6 +145,21 @@ def test_existing_required_fields_alone_are_not_review_ready():
     assert checklist["next_required_action"] == "complete_sanitized_live_arming_review_package"
 
 
+def test_missing_human_owner_approval_fails_closed():
+    fields = _complete_sanitized_live_review_package()
+    fields.pop("human_owner_approval")
+
+    checklist = build_live_arming_checklist(fields)
+
+    assert checklist["ready_for_human_review"] is False
+    assert checklist["live_execution_allowed"] is False
+    assert checklist["order_submit_allowed"] is False
+    assert checklist["broker_request_sent"] is False
+    assert checklist["network_used"] is False
+    assert "human_owner_approval" in checklist["missing_fields"]
+    assert "human_owner_approval" in checklist["failed_gates"]
+
+
 def test_complete_sanitized_review_package_is_ready_for_human_review_only():
     checklist = build_live_arming_checklist(_complete_sanitized_live_review_package())
 
