@@ -28,6 +28,7 @@ from automation.forex_engine.oanda_demo_runtime_handoff import (  # noqa: E402
 )
 from forex_delivery.governed_readiness import (  # noqa: E402
     LiveExecutionBlocked,
+    build_demo_connection_proof_approval_review_dry_run,
     build_demo_connection_proof_preflight_dry_run,
     build_demo_runtime_readiness_dry_run,
     build_live_arming_checklist,
@@ -123,6 +124,31 @@ def _complete_demo_connection_preflight_dry_run_fields():
         "webhook_enabled": False,
         "evidence_bundle_path": "Reports/forex_delivery/sanitized-demo-connection-preflight.md",
         "human_owner_approval_future_proof": "Anthony Meza",
+    }
+
+
+def _complete_demo_connection_approval_review_dry_run_fields():
+    return {
+        "broker_family_label": "OANDA_PRACTICE",
+        "demo_practice_mode_confirmed": True,
+        "runtime_auth_reference_label": "SANITIZED_REFERENCE_ONLY",
+        "external_connector_readiness_flag": True,
+        "protected_action_approval_requested": True,
+        "network_approval_requested": True,
+        "endpoint_class": "OANDA_PRACTICE_DEMO",
+        "account_identifier_status": "ABSENT",
+        "credential_material_status": "ABSENT",
+        "order_route_approval": False,
+        "market_data_fetch_approval": False,
+        "timeout_seconds": 10,
+        "one_shot_stop_requirement": True,
+        "retry_count": 0,
+        "scheduler_enabled": False,
+        "daemon_enabled": False,
+        "webhook_enabled": False,
+        "evidence_bundle_path": "Reports/forex_delivery/sanitized-demo-connection-approval-review.md",
+        "human_owner_review": "Anthony Meza",
+        "future_proof_stop_point": "stop-before-any-broker-facing-action-unless-separately-approved",
     }
 
 
@@ -435,6 +461,154 @@ def test_complete_sanitized_demo_connection_preflight_passes_dry_run_readiness_o
     assert preflight["order_placed"] is False
     assert preflight["live_execution_allowed"] is False
     assert preflight["demo_runtime_readiness"]["demo_runtime_ready"] is True
+
+
+def test_demo_connection_approval_review_missing_human_owner_review_is_incomplete():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields.pop("human_owner_review")
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "INCOMPLETE"
+    assert review["ready_for_human_review"] is False
+    assert review["proof_executable_now"] is False
+    assert review["approval_state_mutated"] is False
+    assert "human_owner_review" in review["missing_fields"]
+
+
+def test_demo_connection_approval_review_missing_protected_action_request_is_incomplete():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields.pop("protected_action_approval_requested")
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "INCOMPLETE"
+    assert review["connection_attempt_performed"] is False
+    assert review["approval_state_changed"] is False
+    assert "protected_action_approval_requested" in review["missing_fields"]
+
+
+def test_demo_connection_approval_review_missing_network_request_is_incomplete():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields.pop("network_approval_requested")
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "INCOMPLETE"
+    assert review["network_used"] is False
+    assert review["approval_state_mutated"] is False
+    assert "network_approval_requested" in review["missing_fields"]
+
+
+def test_demo_connection_approval_review_credential_like_values_are_rejected():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "token=not-a-real-value"
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "REJECTED"
+    assert review["credentials_used"] is False
+    assert review["credential_material_present"] is False
+    assert "forbidden_field:runtime_auth_reference_label" in review["rejected_reasons"]
+
+
+def test_demo_connection_approval_review_account_id_like_values_are_rejected():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "123-456-789"
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "REJECTED"
+    assert review["account_access_allowed"] is False
+    assert review["order_placed"] is False
+    assert "forbidden_field:runtime_auth_reference_label" in review["rejected_reasons"]
+
+
+def test_demo_connection_approval_review_live_endpoint_references_are_rejected():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields["endpoint_class"] = "OANDA_LIVE"
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "REJECTED"
+    assert review["live_endpoint_allowed"] is False
+    assert "endpoint_class_must_be_demo_or_practice_only" in review["rejected_reasons"]
+
+
+def test_demo_connection_approval_review_order_route_approval_attempts_are_rejected():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields["order_route_approval"] = True
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "REJECTED"
+    assert review["order_route_allowed"] is False
+    assert review["order_placed"] is False
+    assert "order_route_approval_must_remain_false" in review["rejected_reasons"]
+
+
+def test_demo_connection_approval_review_market_data_fetch_attempts_are_rejected():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields["market_data_fetch_approval"] = True
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "REJECTED"
+    assert review["market_data_allowed"] is False
+    assert review["market_data_fetched"] is False
+    assert "market_data_fetch_approval_must_remain_false" in review["rejected_reasons"]
+
+
+def test_demo_connection_approval_review_retry_count_above_zero_is_rejected():
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields["retry_count"] = 1
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "REJECTED"
+    assert review["retry_loop_present"] is False
+    assert "retry_count_must_be_zero" in review["rejected_reasons"]
+
+
+@pytest.mark.parametrize("flag_name", ["scheduler_enabled", "daemon_enabled", "webhook_enabled"])
+def test_demo_connection_approval_review_scheduler_daemon_webhook_flags_are_rejected(
+    flag_name,
+):
+    fields = _complete_demo_connection_approval_review_dry_run_fields()
+    fields[flag_name] = True
+
+    review = build_demo_connection_proof_approval_review_dry_run(fields)
+
+    assert review["review_classification"] == "REJECTED"
+    assert review[flag_name] is False
+    assert flag_name in review["failed_gates"]
+
+
+def test_complete_sanitized_demo_connection_approval_review_is_review_ready_only():
+    review = build_demo_connection_proof_approval_review_dry_run(
+        _complete_demo_connection_approval_review_dry_run_fields()
+    )
+
+    assert review["review_classification"] == "READY_FOR_HUMAN_REVIEW"
+    assert review["ready_for_human_review"] is True
+    assert review["proof_executable_now"] is False
+    assert review["approval_state_mutated"] is False
+    assert review["approval_state_changed"] is False
+    assert review["protected_action_approval_granted"] is False
+    assert review["network_approval_granted"] is False
+    assert review["broker_connection_allowed"] is False
+    assert review["connection_attempt_performed"] is False
+    assert review["broker_request_sent"] is False
+    assert review["network_used"] is False
+    assert review["market_data_fetched"] is False
+    assert review["credentials_used"] is False
+    assert review["credential_material_present"] is False
+    assert review["order_placed"] is False
+    assert review["live_execution_allowed"] is False
+    assert (
+        review["demo_connection_preflight_preview"]["demo_connection_preflight_ready"]
+        is True
+    )
 
 
 def test_complete_sanitized_review_package_is_ready_for_human_review_only():
