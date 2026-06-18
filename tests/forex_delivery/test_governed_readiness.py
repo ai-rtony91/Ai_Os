@@ -30,6 +30,7 @@ from forex_delivery.governed_readiness import (  # noqa: E402
     LiveExecutionBlocked,
     build_demo_connection_proof_approval_review_dry_run,
     build_demo_connection_proof_preflight_dry_run,
+    build_demo_connection_proof_protected_action_gate_dry_run,
     build_demo_connection_proof_request_draft_dry_run,
     build_demo_runtime_readiness_dry_run,
     build_live_arming_checklist,
@@ -155,6 +156,33 @@ def _complete_demo_connection_approval_review_dry_run_fields():
 
 def _complete_demo_connection_request_draft_dry_run_fields():
     return dict(_complete_demo_connection_approval_review_dry_run_fields())
+
+
+def _complete_demo_connection_protected_action_gate_dry_run_fields():
+    return {
+        "request_draft_status": "DRAFT_READY",
+        "broker_family_label": "OANDA_PRACTICE",
+        "demo_practice_mode_confirmed": True,
+        "runtime_auth_reference_label": "SANITIZED_REFERENCE_ONLY",
+        "external_connector_readiness_flag": True,
+        "protected_action_review": "REQUESTED_FOR_HUMAN_OWNER_REVIEW_ONLY",
+        "human_owner_review": "Anthony Meza",
+        "approval_mutation": False,
+        "network_execution": False,
+        "credential_material_status": "ABSENT",
+        "account_identifier_status": "ABSENT",
+        "endpoint_class": "OANDA_PRACTICE_DEMO",
+        "order_route_approval": False,
+        "market_data_fetch_approval": False,
+        "scheduler_enabled": False,
+        "daemon_enabled": False,
+        "webhook_enabled": False,
+        "retry_count": 0,
+        "one_shot_stop_requirement": True,
+        "timeout_seconds": 10,
+        "evidence_bundle_path": "Reports/forex_delivery/sanitized-protected-action-gate.md",
+        "future_proof_stop_point": "stop-before-any-broker-facing-action-unless-separately-approved",
+    }
 
 
 def test_missing_external_broker_path_fails_safely():
@@ -694,6 +722,177 @@ def test_sanitized_demo_connection_request_draft_is_draft_ready_only():
         draft["approval_review_preview"]["review_classification"]
         == "READY_FOR_HUMAN_REVIEW"
     )
+
+
+def test_demo_connection_protected_action_gate_missing_draft_ready_fails_closed():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields.pop("request_draft_status")
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "INCOMPLETE"
+    assert gate["review_ready"] is False
+    assert gate["proof_executable_now"] is False
+    assert gate["connection_attempt_performed"] is False
+    assert "request_draft_status" in gate["missing_fields"]
+
+
+def test_demo_connection_protected_action_gate_missing_human_owner_review_fails_closed():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields.pop("human_owner_review")
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "INCOMPLETE"
+    assert gate["review_ready"] is False
+    assert gate["approval_state_mutated"] is False
+    assert "human_owner_review" in gate["missing_fields"]
+
+
+def test_demo_connection_protected_action_gate_missing_protected_review_fails_closed():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields.pop("protected_action_review")
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "INCOMPLETE"
+    assert gate["review_ready"] is False
+    assert gate["protected_action_approval_granted"] is False
+    assert "protected_action_review" in gate["missing_fields"]
+
+
+def test_demo_connection_protected_action_gate_approval_mutation_is_rejected():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields["approval_mutation"] = True
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["approval_state_mutated"] is False
+    assert "approval_mutation_must_be_false" in gate["rejected_reasons"]
+
+
+def test_demo_connection_protected_action_gate_credential_like_values_are_rejected():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields["runtime_auth_reference_label"] = "token=not-a-real-value"
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["credentials_used"] is False
+    assert gate["credential_material_present"] is False
+    assert any("runtime_auth_reference_label" in reason for reason in gate["rejected_reasons"])
+
+
+def test_demo_connection_protected_action_gate_account_id_like_values_are_rejected():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields["account_identifier_status"] = "123-456-789"
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["account_access_allowed"] is False
+    assert "account_identifier_status" in gate["rejected_reasons"][0] or any(
+        "account_identifier_status" in reason for reason in gate["rejected_reasons"]
+    )
+
+
+def test_demo_connection_protected_action_gate_live_endpoints_are_rejected():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields["endpoint_class"] = "OANDA_LIVE"
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["live_endpoint_allowed"] is False
+    assert "endpoint_class_must_be_demo_or_practice_only" in gate["rejected_reasons"]
+
+
+def test_demo_connection_protected_action_gate_order_routes_are_rejected():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields["order_route_approval"] = True
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["order_route_allowed"] is False
+    assert gate["order_placed"] is False
+    assert "order_route_approval_must_remain_false" in gate["rejected_reasons"]
+
+
+def test_demo_connection_protected_action_gate_market_data_fetch_is_rejected():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields["market_data_fetch_approval"] = True
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["market_data_fetched"] is False
+    assert "market_data_fetch_approval_must_remain_false" in gate["rejected_reasons"]
+
+
+def test_demo_connection_protected_action_gate_retry_above_zero_is_rejected():
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields["retry_count"] = 1
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["retry_loop_present"] is False
+    assert "retry_count_must_be_zero" in gate["rejected_reasons"]
+
+
+@pytest.mark.parametrize(
+    "field_name,reason",
+    [
+        ("scheduler_enabled", "scheduler_must_remain_false"),
+        ("daemon_enabled", "daemon_must_remain_false"),
+        ("webhook_enabled", "webhook_must_remain_false"),
+    ],
+)
+def test_demo_connection_protected_action_gate_background_flags_are_rejected(
+    field_name, reason
+):
+    fields = _complete_demo_connection_protected_action_gate_dry_run_fields()
+    fields[field_name] = True
+
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(fields)
+
+    assert gate["protected_action_gate_classification"] == "REJECTED"
+    assert gate["scheduler_enabled"] is False
+    assert gate["daemon_enabled"] is False
+    assert gate["webhook_enabled"] is False
+    assert reason in gate["rejected_reasons"]
+
+
+def test_sanitized_demo_connection_protected_action_gate_is_review_ready_only():
+    gate = build_demo_connection_proof_protected_action_gate_dry_run(
+        _complete_demo_connection_protected_action_gate_dry_run_fields()
+    )
+
+    assert gate["protected_action_gate_classification"] == "REVIEW_READY"
+    assert gate["review_ready"] is True
+    assert gate["proof_executable_now"] is False
+    assert gate["approval_state_mutated"] is False
+    assert gate["approval_state_changed"] is False
+    assert gate["protected_action_approval_granted"] is False
+    assert gate["network_approval_granted"] is False
+    assert gate["broker_connection_allowed"] is False
+    assert gate["connection_attempt_allowed"] is False
+    assert gate["connection_attempt_performed"] is False
+    assert gate["broker_request_sent"] is False
+    assert gate["network_used"] is False
+    assert gate["market_data_fetched"] is False
+    assert gate["credentials_used"] is False
+    assert gate["credential_material_present"] is False
+    assert gate["account_access_allowed"] is False
+    assert gate["order_placed"] is False
+    assert gate["scheduler_enabled"] is False
+    assert gate["daemon_enabled"] is False
+    assert gate["webhook_enabled"] is False
+    assert gate["retry_loop_present"] is False
+    assert gate["live_execution_allowed"] is False
+    assert gate["request_draft_preview"]["request_draft_classification"] == "DRAFT_READY"
 
 
 def test_complete_sanitized_review_package_is_ready_for_human_review_only():
