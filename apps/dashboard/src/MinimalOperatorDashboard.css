@@ -403,6 +403,7 @@ button {
 }
 
 .causeEffectPanel,
+.bridgeStatusPanel,
 .historyList,
 .readinessSummaryPanel,
 .readinessSectionList {
@@ -444,6 +445,10 @@ button {
 
 .readinessGrid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.bridgeStatusGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .readinessField {
@@ -686,6 +691,7 @@ button {
   .hubGrid,
   .detailGrid,
   .systemDetailGrid,
+  .bridgeStatusGrid,
   .simpleGrid,
   .readinessSectionList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -732,6 +738,7 @@ button {
   .detailGrid,
   .fieldGrid,
   .systemDetailGrid,
+  .bridgeStatusGrid,
   .simpleGrid,
   .readinessSectionList,
   .readinessGrid {

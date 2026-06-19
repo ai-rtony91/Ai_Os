@@ -296,14 +296,65 @@ function DataLabel({ source, compact = false }) {
   );
 }
 
+function buildReadOnlyBridgeStatus() {
+  const bridge = dashboardFixture.readOnlyLiveDataBridge ?? {};
+  const dataSource = dashboardFixture.dataSource ?? {};
+  const brokerState = bridge.broker_state ?? {};
+  const positions = bridge.positions ?? {};
+  const riskPl = bridge.risk_pl ?? {};
+  const tradingHistory = bridge.trading_history ?? {};
+  const executionReadiness = bridge.execution_readiness ?? {};
+  const sourceType =
+    bridge.source_type ??
+    normalizeDataSourceType(dataSource.DATA_SOURCE_TYPE ?? dashboardFixture.source);
+  const sourceLabel =
+    bridge.source_label ??
+    dataSource.DISPLAY_LABEL ??
+    dashboardFixture.source ??
+    "NO_READ_MODEL_AVAILABLE";
+  const blockReason =
+    bridge.block_reason ??
+    dataSource.BLOCK_REASON ??
+    "No sanitized read-only live data bridge model is loaded.";
+
+  return {
+    sourceType,
+    sourceLabel,
+    freshnessUtc: bridge.freshness_utc ?? dataSource.DATA_TIMESTAMP_UTC ?? dashboardFixture.generatedAt,
+    staleStatus: bridge.stale_status ?? dataSource.MARKET_DATA_STATUS ?? "BLOCKED",
+    brokerReachable: brokerState.account_reachable ?? false,
+    positionsReconciled: positions.positions_reconciled ?? false,
+    plAvailable: riskPl.daily_pl_available ?? false,
+    tradingHistoryAvailable: tradingHistory.trading_history_available ?? false,
+    liveExecutionAllowed: false,
+    nextSafeAction:
+      executionReadiness.next_safe_action ??
+      "run read-only live data bridge.",
+    blockReason
+  };
+}
+
+function bridgeDataLabelSource() {
+  const bridge = buildReadOnlyBridgeStatus();
+
+  return {
+    label: bridge.sourceLabel,
+    liveTradingAllowed: false,
+    blockReason: bridge.blockReason,
+    timestamp: bridge.freshnessUtc,
+    stalenessSeconds: undefined
+  };
+}
+
 function buildLiveReadinessModel(pair) {
   const dataSource = dashboardFixture.dataSource ?? {};
   const bridges = dashboardFixture.bridges ?? {};
   const riskPl = dashboardFixture.riskPl ?? {};
   const exitReadiness = dashboardFixture.exitReadiness ?? {};
   const explanation = pair?.explanation ?? {};
+  const bridgeStatus = buildReadOnlyBridgeStatus();
   const sourceType = normalizeDataSourceType(
-    explanation.dataSourceType ?? dataSource.DATA_SOURCE_TYPE ?? dashboardFixture.source
+    bridgeStatus.sourceType ?? explanation.dataSourceType ?? dataSource.DATA_SOURCE_TYPE ?? dashboardFixture.source
   );
   const liveSourceAllowed = Boolean(dataSource.LIVE_TRADING_ALLOWED_FROM_THIS_DATA);
   const selectedPair = formatPair(pair?.pair ?? dashboardFixture.selectedPair);
@@ -327,21 +378,19 @@ function buildLiveReadinessModel(pair) {
     sections: [
       {
         title: "Live data readiness",
-        status: liveSourceAllowed ? "VALID" : "BLOCKED",
+        status: bridgeStatus.sourceLabel === "OANDA_READ_ONLY_SANITIZED" ? "READ_ONLY_VALID" : "BLOCKED",
         rows: [
-          { label: "Data source name", value: dataSource.DATA_SOURCE_NAME ?? "UNVERIFIED" },
+          { label: "Data source name", value: bridgeStatus.sourceLabel },
           { label: "Source type", value: sourceType },
           {
             label: "Freshness timestamp",
-            value: dataSource.DATA_TIMESTAMP_UTC ?? dashboardFixture.generatedAt ?? "UNKNOWN"
+            value: bridgeStatus.freshnessUtc ?? "UNKNOWN"
           },
-          { label: "Stale/valid status", value: dataSource.MARKET_DATA_STATUS ?? "BLOCKED" },
+          { label: "Stale/valid status", value: bridgeStatus.staleStatus },
           { label: "Live trading allowed from this source", value: liveSourceAllowed },
           {
             label: "Block reason",
-            value:
-              dataSource.BLOCK_REASON ??
-              "Data source is not approved for live trade decisions."
+            value: bridgeStatus.blockReason
           },
           { label: "No secrets printed", value: true, tone: "good" },
           { label: "No account IDs printed", value: true, tone: "good" }
@@ -349,17 +398,19 @@ function buildLiveReadinessModel(pair) {
       },
       {
         title: "Broker state readiness",
-        status: "BLOCKED",
+        status: bridgeStatus.brokerReachable ? "READ_ONLY_AVAILABLE" : "BLOCKED",
         rows: [
-          { label: "Account reachable", value: false },
+          { label: "Account reachable", value: bridgeStatus.brokerReachable },
           { label: "Broker mode", value: "UNKNOWN" },
-          { label: "Open positions reconciled", value: false },
+          { label: "Open positions reconciled", value: bridgeStatus.positionsReconciled },
           { label: "Pending orders reconciled", value: false },
-          { label: "Daily P/L available", value: false },
+          { label: "Daily P/L available", value: bridgeStatus.plAvailable },
           { label: "Margin/risk availability", value: false },
           {
             label: "Block reason",
-            value: "Broker bridge is blocked and no sanitized account reconciliation is available."
+            value: bridgeStatus.brokerReachable
+              ? "Read-only broker state is available; execution remains blocked."
+              : "Broker bridge is blocked and no sanitized account reconciliation is available."
           }
         ]
       },
@@ -424,7 +475,7 @@ function buildLiveReadinessModel(pair) {
       },
       {
         title: "Trading history writeback readiness",
-        status: "BLOCKED",
+        status: bridgeStatus.tradingHistoryAvailable ? "READ_ONLY_AVAILABLE" : "BLOCKED",
         rows: [
           { label: "Opened trade evidence row", value: "REQUIRED" },
           { label: "Close realized P/L record", value: "REQUIRED" },
@@ -433,10 +484,12 @@ function buildLiveReadinessModel(pair) {
             value:
               "pair, side, units, entry time, exit time, duration, realized P/L, exit reason, slippage, source, freshness"
           },
-          { label: "History writeback available", value: false },
+          { label: "History writeback available", value: bridgeStatus.tradingHistoryAvailable },
           {
             label: "Block reason",
-            value: "Live execution is blocked until sanitized trade-history writeback is available."
+            value: bridgeStatus.tradingHistoryAvailable
+              ? "Sanitized read-only history is available; live execution remains blocked."
+              : "Live execution is blocked until sanitized trade-history writeback is available."
           }
         ]
       }
@@ -514,6 +567,32 @@ function CauseEffectPanel({ contract, source = dataSourceForPair() }) {
           <span>Effect</span>
           <p>{contract.effect}</p>
         </div>
+      </div>
+      <DataLabel source={source} />
+    </section>
+  );
+}
+
+function BridgeStatusPanel() {
+  const bridge = buildReadOnlyBridgeStatus();
+  const source = bridgeDataLabelSource();
+
+  return (
+    <section className="panel bridgeStatusPanel" aria-label="Read-only live data bridge status">
+      <div className="panelHeading">
+        <p>Read-only bridge</p>
+        <h3>{bridge.sourceLabel}</h3>
+      </div>
+      <div className="fieldGrid bridgeStatusGrid">
+        <ReadinessRow label="Source type" value={bridge.sourceType} tone="neutral" />
+        <ReadinessRow label="Freshness" value={bridge.freshnessUtc ?? "UNKNOWN"} tone="neutral" />
+        <ReadinessRow label="Broker reachable" value={bridge.brokerReachable} />
+        <ReadinessRow label="Positions reconciled" value={bridge.positionsReconciled} />
+        <ReadinessRow label="P/L available" value={bridge.plAvailable} />
+        <ReadinessRow label="Trading history available" value={bridge.tradingHistoryAvailable} />
+        <ReadinessRow label="Live execution allowed" value={bridge.liveExecutionAllowed} />
+        <ReadinessRow label="Next safe action" value={bridge.nextSafeAction} tone="warn" />
+        <ReadinessRow label="Block reason" value={bridge.blockReason} />
       </div>
       <DataLabel source={source} />
     </section>
@@ -703,6 +782,7 @@ function WatchlistScreen({ pairs, selectedPair, onBack, onViewPair }) {
       </div>
 
       <CauseEffectPanel contract={OPERATION_CONTRACTS.watchlist} source={dataSourceForPair()} />
+      <BridgeStatusPanel />
 
       <div className="watchlistList" role="list" aria-label="Ranked fixture pair watchlist">
         {pairs.map((pair) => {
@@ -923,6 +1003,7 @@ function SystemPage({ onBack }) {
       </div>
 
       <SystemDetailPanel item={selectedDetail} source={source} />
+      <BridgeStatusPanel />
     </section>
   );
 }
@@ -962,6 +1043,7 @@ function PositionPage({ riskPl, onBack }) {
   return (
     <SimpleStatusPage backLabel="READ_ONLY" title="Position" onBack={onBack}>
       <CauseEffectPanel contract={OPERATION_CONTRACTS.position} source={source} />
+      <BridgeStatusPanel />
       <Field compact label="Position" source={source} value={riskPl.currentPosition} tone="neutral" />
       <Field compact label="Units" source={source} value={riskPl.positionSize} tone="warn" />
       <Field compact label="Entry price" source={source} value="UNAVAILABLE" tone="warn" />
@@ -977,6 +1059,7 @@ function RiskPage({ riskPl, onBack }) {
   return (
     <SimpleStatusPage backLabel="FIXTURE_NOT_LIVE" title="Risk / P&L" onBack={onBack}>
       <CauseEffectPanel contract={OPERATION_CONTRACTS.risk} source={source} />
+      <BridgeStatusPanel />
       <Field compact label="Daily loss cap" source={source} value={riskPl.riskCap} tone="warn" />
       <Field compact label="Max position size" source={source} value={riskPl.positionSize} tone="warn" />
       <Field compact label="Realized P/L" source={source} value={riskPl.realizedPl} tone="neutral" />
@@ -993,6 +1076,7 @@ function ExitPage({ exitReadiness, onBack }) {
   return (
     <SimpleStatusPage backLabel={exitReadiness.autoExitStatus} title="Exit" onBack={onBack}>
       <CauseEffectPanel contract={OPERATION_CONTRACTS.exit} source={source} />
+      <BridgeStatusPanel />
       <section className="panel notePanel" aria-label="Exit page meaning">
         <div className="panelHeading">
           <p>Meaning</p>
@@ -1051,6 +1135,7 @@ function TradingHistoryPage({ onBack }) {
       onBack={onBack}
     >
       <CauseEffectPanel contract={OPERATION_CONTRACTS.history} source={source} />
+      <BridgeStatusPanel />
       {history.length === 0 ? (
         <section className="panel notePanel" aria-label="Trading history unavailable">
           <div className="panelHeading">
@@ -1123,6 +1208,7 @@ function ExecutionReadinessPage({ pair, onBack }) {
   return (
     <SimpleStatusPage backLabel="LIVE_READY: false" title="Execution Readiness" onBack={onBack}>
       <CauseEffectPanel contract={OPERATION_CONTRACTS.readiness} source={source} />
+      <BridgeStatusPanel />
       <section className="panel readinessSummaryPanel" aria-label="Overall execution readiness">
         <div className="panelHeading">
           <p>Overall status</p>
