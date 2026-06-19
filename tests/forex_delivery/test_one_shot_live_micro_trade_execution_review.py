@@ -36,6 +36,45 @@ def read_only_evidence() -> dict[str, object]:
     }
 
 
+def sanitized_reconciled_read_only_evidence() -> dict[str, object]:
+    return {
+        "source_type": "broker-live-read-only",
+        "source_label": "OANDA_READ_ONLY_SANITIZED",
+        "freshness_utc": "2026-06-19T00:00:00Z",
+        "stale_status": "VALID",
+        "broker_state": {
+            "account_reachable": True,
+            "open_position_count": 0,
+            "open_positions_reconciled": True,
+            "daily_pl_available": False,
+            "daily_pl_ledger_available": False,
+            "realized_pl": "1.25",
+            "unrealized_pl": "0.00",
+            "margin_risk_available": True,
+        },
+        "positions": {
+            "open_position_count": 0,
+            "positions_reconciled": True,
+        },
+        "risk_pl": {
+            "daily_pl_available": False,
+            "daily_pl_ledger_available": False,
+            "realized_pl": "1.25",
+            "unrealized_pl": "0.00",
+            "margin_risk_available": True,
+        },
+        "trading_history": {
+            "trading_history_available": False,
+            "block_reason": "real broker history writeback not verified",
+        },
+        "capabilities": {
+            "broker_write_calls_allowed": False,
+            "order_placement_allowed": False,
+            "close_trade_allowed": False,
+        },
+    }
+
+
 def paper_evidence() -> dict[str, object]:
     return {
         "selected_pair": "EUR_USD",
@@ -108,6 +147,31 @@ def test_paper_and_arming_evidence_are_recognized_without_execution():
     assert "paper_entry_created" in result["evidence_present"]
     assert "read_only_bridge_fixture_source_not_live_permitted" in result["blocked_reasons"]
     assert result["live_trade_placed"] is False
+
+
+def test_reconciled_read_only_evidence_removes_only_account_position_blockers():
+    paper = paper_evidence()
+    paper["paper_units"] = 1000
+    result = build_one_shot_live_micro_trade_execution_review_result(
+        read_only_evidence=sanitized_reconciled_read_only_evidence(),
+        paper_loop_evidence=paper,
+        arming_gate_evidence=arming_evidence(),
+        generated_at_utc="2026-06-19T00:00:00Z",
+    )
+
+    assert result["EXECUTION_REVIEW_READY"] is False
+    assert result["live_execution_allowed"] is False
+    assert result["live_trade_placed"] is False
+    assert result["proposed_units"] == 1
+    assert "broker_account_not_reachable_in_read_only_evidence" not in result["blocked_reasons"]
+    assert "open_positions_not_reconciled_in_read_only_evidence" not in result["blocked_reasons"]
+    assert "open_live_position_state_not_reconciled" not in result["blocked_reasons"]
+    assert "daily_pl_not_available_in_read_only_evidence" in result["blocked_reasons"]
+    assert "real_trading_history_unavailable_or_blocked" in result["blocked_reasons"]
+    assert "real_trading_history_writeback_not_verified" in result["blocked_reasons"]
+    serialized = str(result)
+    for forbidden in ("OANDA_API_TOKEN", "OANDA_ACCOUNT_ID", "accountID", "orderID", "transactionID"):
+        assert forbidden not in serialized
 
 
 def test_required_future_execution_phrase_and_next_packet_are_present():

@@ -190,8 +190,21 @@ def build_one_shot_live_micro_trade_execution_review_result(
 
 def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, Any]:
     approval = build_read_only_evidence_approval_model(model)
-    if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is True:
+    approval_source_valid = (
+        str(approval.get("source_type", "")).lower() == "broker-live-read-only"
+        and "SANITIZED" in str(approval.get("source_label", "")).upper()
+        and str(approval.get("stale_status", "")).upper() == "VALID"
+    )
+    if approval_source_valid:
         blockers = []
+        if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is not True:
+            blockers.append("read_only_data_not_approved_for_future_live_execution")
+        if approval.get("broker_account_reachable") is not True:
+            blockers.append("broker_account_not_reachable_in_read_only_evidence")
+        if approval.get("open_positions_reconciled") is not True:
+            blockers.append("open_positions_not_reconciled_in_read_only_evidence")
+        if approval.get("daily_pl_available") is not True:
+            blockers.append("daily_pl_not_available_in_read_only_evidence")
         if approval.get("trading_history_available") is not True:
             blockers.append("real_trading_history_unavailable_or_blocked")
         return {
@@ -279,6 +292,7 @@ def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, An
     positions_reconciled = first_present_nested(
         model,
         "broker_state.open_positions_reconciled",
+        "positions.positions_reconciled",
         "positions.open_positions_reconciled",
         "open_positions_reconciled",
         "positions_reconciled",
