@@ -372,13 +372,26 @@ const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
   { id: "runtime-status", label: "/api/runtime/status", path: "/api/runtime/status" },
   { id: "runtime-health", label: "/api/runtime/health", path: "/api/runtime/health" },
   { id: "runtime-visibility", label: "/api/runtime/visibility", path: "/api/runtime/visibility" },
-  { id: "runtime-control", label: "/api/runtime/control", path: "/api/runtime/control" }
+  { id: "runtime-control", label: "/api/runtime/control", path: "/api/runtime/control" },
+  {
+    id: "forex-paper-sandbox-status",
+    label: "/api/forex/paper-sandbox/status",
+    path: "/api/forex/paper-sandbox/status"
+  }
 ];
 
 const SAFE_STATUS_SUMMARY_KEYS = [
   "status",
   "state",
   "mode",
+  "paper_preview_ready",
+  "sandbox_demo_connected",
+  "live_execution_allowed",
+  "broker_connected",
+  "order_route_enabled",
+  "close_route_enabled",
+  "auto_trade_enabled",
+  "next_safe_step",
   "ok",
   "healthy",
   "running",
@@ -393,6 +406,16 @@ const SAFE_STATUS_SUMMARY_KEYS = [
   "generatedAt",
   "generated_at",
   "timestamp"
+];
+
+const FOREX_PAPER_SANDBOX_BACKEND_STATUS_ROWS = [
+  { label: "📄 PAPER PREVIEW", value: "READY", tone: "good" },
+  { label: "🧪 SANDBOX/DEMO", value: "NOT CONNECTED", tone: "warn" },
+  { label: "🛑 LIVE", value: "BLOCKED", tone: "danger" },
+  { label: "🏦 BROKER", value: "NOT CONNECTED", tone: "warn" },
+  { label: "🚦 ORDER ROUTE", value: "DISABLED", tone: "danger" },
+  { label: "⏏️ CLOSE ROUTE", value: "DISABLED", tone: "danger" },
+  { label: "🤖 AUTO TRADE", value: "OFF", tone: "warn" }
 ];
 
 function normalizeDataSourceType(value) {
@@ -1356,6 +1379,36 @@ function HomeScreen({ onNavigate }) {
   );
 }
 
+function ForexPaperSandboxBackendStatusCard({ endpointResult }) {
+  const sourceStatus = endpointResult?.ok ? "BACKEND STATUS READABLE" : "BACKEND OFFLINE / NOT CONNECTED";
+  const httpStatus = endpointResult?.httpStatus ?? "NOT_CHECKED";
+
+  return (
+    <div className="forexPaperSandboxBackendCard" aria-label="Paper/Sandbox Backend Status">
+      <div className="forexPaperSandboxBackendHeader">
+        <div className="panelHeading">
+          <p>Paper/Sandbox Backend Status</p>
+          <h3>{sourceStatus}</h3>
+        </div>
+        <strong>{`HTTP: ${httpStatus}`}</strong>
+      </div>
+
+      <div className="forexPaperSandboxBackendGrid" aria-label="Paper sandbox backend safe status">
+        {FOREX_PAPER_SANDBOX_BACKEND_STATUS_ROWS.map((row) => (
+          <div className={`forexPaperSandboxBackendItem tone-${row.tone}`} key={`${row.label}-${row.value}`}>
+            <span>{row.label}</span>
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <p className="forexPaperSandboxBackendRoute">
+        READ-ONLY LOCAL STATUS: /api/forex/paper-sandbox/status / NO ORDER OR CLOSE ROUTE
+      </p>
+    </div>
+  );
+}
+
 function SafeDashboardStatusPanel() {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [status, setStatus] = useState({
@@ -1364,6 +1417,7 @@ function SafeDashboardStatusPanel() {
     phase: "idle"
   });
   const online = status.endpoints.some((endpoint) => endpoint.ok);
+  const forexPaperSandboxResult = status.endpoints.find((item) => item.id === "forex-paper-sandbox-status");
   const nextSafeStep = online
     ? "Wire paper/sandbox trading status, still no live orders."
     : "Start local orchestrator/runtime status service.";
@@ -1428,6 +1482,8 @@ function SafeDashboardStatusPanel() {
         <span>GET IN / GET OUT STILL BLOCKED</span>
         <span>{`NEXT: ${nextSafeStep}`}</span>
       </div>
+
+      <ForexPaperSandboxBackendStatusCard endpointResult={forexPaperSandboxResult} />
 
       <div className="forexSafeEndpointGrid" aria-label="Safe dashboard status endpoints">
         {SAFE_DASHBOARD_STATUS_ENDPOINTS.map((endpoint) => {

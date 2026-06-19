@@ -491,6 +491,7 @@ body {
 .forexEmergencyState,
 .forexPaperSandboxPanel,
 .forexSafeStatusPanel,
+.forexPaperSandboxBackendCard,
 .forexNextSafeStepStrip,
 .forexTradingLadder {
   border: 1px solid rgba(167, 139, 250, 0.24);
@@ -550,7 +551,8 @@ body {
 }
 
 .forexSafeStatusFlags,
-.forexSafeEndpointGrid {
+.forexSafeEndpointGrid,
+.forexPaperSandboxBackendGrid {
   display: grid;
   gap: 8px;
 }
@@ -573,6 +575,91 @@ body {
   line-height: 1.15;
   overflow-wrap: anywhere;
   text-transform: uppercase;
+}
+
+.forexPaperSandboxBackendCard {
+  display: grid;
+  gap: 9px;
+  border-color: rgba(88, 215, 255, 0.28);
+  background:
+    linear-gradient(135deg, rgba(18, 13, 55, 0.58), rgba(6, 5, 19, 0.62)),
+    radial-gradient(circle at top left, rgba(88, 215, 255, 0.12), transparent 14rem);
+  padding: 9px;
+}
+
+.forexPaperSandboxBackendHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.forexPaperSandboxBackendHeader > strong,
+.forexPaperSandboxBackendRoute {
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexPaperSandboxBackendHeader > strong {
+  border: 1px solid rgba(88, 215, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(88, 215, 255, 0.08);
+  padding: 6px 8px;
+}
+
+.forexPaperSandboxBackendGrid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.forexPaperSandboxBackendItem {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(88, 215, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(31, 26, 70, 0.62);
+  padding: 7px;
+}
+
+.forexPaperSandboxBackendItem.tone-good {
+  border-color: rgba(51, 240, 162, 0.42);
+  background: rgba(51, 240, 162, 0.1);
+}
+
+.forexPaperSandboxBackendItem.tone-warn {
+  border-color: rgba(255, 191, 76, 0.44);
+  background: rgba(255, 191, 76, 0.1);
+}
+
+.forexPaperSandboxBackendItem.tone-danger {
+  border-color: rgba(255, 93, 115, 0.44);
+  background: rgba(255, 93, 115, 0.1);
+}
+
+.forexPaperSandboxBackendItem span {
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexPaperSandboxBackendItem strong {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.forexPaperSandboxBackendRoute {
+  margin: 0;
+  color: var(--muted);
 }
 
 .forexSafeEndpointGrid {
@@ -912,6 +999,7 @@ body {
   .forexStatusStrip,
   .forexCriticalStrip,
   .forexSafeEndpointGrid,
+  .forexPaperSandboxBackendGrid,
   .forexSafeStatusFlags,
   .forexPaperSandboxSteps,
   .forexPaperSandboxCriticalStrip,
@@ -941,6 +1029,7 @@ body {
   .forexCriticalStrip,
   .forexCommandGrid,
   .forexSafeEndpointGrid,
+  .forexPaperSandboxBackendGrid,
   .forexSafeStatusFlags,
   .forexPaperSandboxActions,
   .forexPaperSandboxSteps,
@@ -954,11 +1043,13 @@ body {
 
   .forexPaperSandboxHeader,
   .aiosForexBrandBanner,
+  .forexPaperSandboxBackendHeader,
   .forexSafeStatusHeader {
     align-items: stretch;
   }
 
   .forexPaperSandboxHeader > strong,
+  .forexPaperSandboxBackendHeader > strong,
   .forexRefreshStatusButton {
     width: 100%;
     justify-content: center;
