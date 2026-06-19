@@ -9,6 +9,7 @@ const {
   getRuntimeStatus,
   getVisibilitySnapshot
 } = require("./runtimeApiService");
+const { getForexPaperSandboxStatus } = require("./forexPaperSandboxStatus");
 const {
   getBridgeHealth,
   getLatestReports,
@@ -28,6 +29,10 @@ app.use(express.json());
 // Quick check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, service: "orchestrator", ts: Date.now() });
+});
+
+app.get("/api/forex/paper-sandbox/status", (req, res) => {
+  res.json(getForexPaperSandboxStatus());
 });
 
 app.get("/health", (req, res) => {
