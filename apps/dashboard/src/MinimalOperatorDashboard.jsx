@@ -133,6 +133,99 @@ const OPERATION_CONTRACTS = {
   }
 };
 
+const FOREX_COMMAND_STATUSES = [
+  { label: "LIVE", value: "BLOCKED", tone: "danger" },
+  { label: "MODE", value: "DASHBOARD_ONLY", tone: "neutral" },
+  { label: "BROKER", value: "NOT_CONNECTED", tone: "warn" },
+  { label: "ORDER ROUTE", value: "DISABLED", tone: "danger" },
+  { label: "CLOSE ROUTE", value: "DISABLED", tone: "danger" },
+  { label: "AUTO TRADE", value: "OFF", tone: "warn" }
+];
+
+const FOREX_CRITICAL_INFO = [
+  { label: "Selected pair", value: `${formatPair(dashboardFixture.selectedPair)} placeholder` },
+  { label: "Setup quality", value: "PENDING SCAN" },
+  { label: "Max loss", value: "APPROVAL REQUIRED" },
+  { label: "Daily cap", value: "APPROVAL REQUIRED" },
+  { label: "Stop-loss", value: "REQUIRED" },
+  { label: "Final disarm", value: "REQUIRED" }
+];
+
+const FOREX_COMMAND_CONTROLS = [
+  {
+    id: "get-in",
+    icon: "🚀",
+    label: "GET IN",
+    state: "BLOCKED",
+    disabled: true,
+    message: "GET IN is blocked. Live order submission requires future protected Human Owner approval."
+  },
+  {
+    id: "get-out",
+    icon: "🛑",
+    label: "GET OUT",
+    state: "BLOCKED",
+    disabled: true,
+    message: "GET OUT is blocked. Close routes are disabled and no live position action exists here."
+  },
+  {
+    id: "arm-disarm",
+    icon: "🟣",
+    label: "ARM / DISARM",
+    state: "LOCAL ONLY",
+    message: "Arm/disarm selection is dashboard-only. Final disarm remains required before any future review."
+  },
+  {
+    id: "kill-switch",
+    icon: "☠️",
+    label: "KILL SWITCH",
+    state: "VISIBLE",
+    message: "Kill switch is visible as an operator control surface marker. It does not call a broker."
+  },
+  {
+    id: "panic-flatten",
+    icon: "🚨",
+    label: "PANIC FLATTEN / EMERGENCY EXIT",
+    state: "PLACEHOLDER",
+    message: "Emergency exit is a placeholder. No close-trade action, order route, or broker write path is wired."
+  },
+  {
+    id: "pair-scanner",
+    icon: "🔎",
+    label: "Pair Scanner",
+    state: "VIEW",
+    message: "Pair scanner points the operator toward the local watchlist read-model only."
+  },
+  {
+    id: "candidate-filter",
+    icon: "🧪",
+    label: "Candidate Filter",
+    state: "VIEW",
+    message: "Candidate filter is a local dashboard mode marker for reviewing candidates."
+  },
+  {
+    id: "risk-gate",
+    icon: "🛡️",
+    label: "Risk Gate",
+    state: "REQUIRED",
+    message: "Risk gate remains required. Max loss, daily cap, and stop-loss proof are not execution wiring."
+  },
+  {
+    id: "reconciliation",
+    icon: "🧾",
+    label: "Reconciliation",
+    state: "REQUIRED",
+    message: "Reconciliation is a read-only evidence status marker. It does not access accounts or broker payloads."
+  },
+  {
+    id: "signal-status",
+    icon: "🤖",
+    label: "AIOS Signal Status",
+    state: "WATCHING",
+    message: "AIOS signal status is dashboard-only and cannot submit a live trade from this screen."
+  }
+];
+
 function normalizeDataSourceType(value) {
   const text = String(value ?? "").toUpperCase();
 
@@ -989,12 +1082,80 @@ function HomeScreen({ onNavigate }) {
   );
 }
 
+function ForexCommandSurface() {
+  const [selectedCommandId, setSelectedCommandId] = useState("signal-status");
+  const selectedCommand =
+    FOREX_COMMAND_CONTROLS.find((control) => control.id === selectedCommandId) ??
+    FOREX_COMMAND_CONTROLS[FOREX_COMMAND_CONTROLS.length - 1];
+
+  return (
+    <section className="panel forexCommandSurface" aria-label="Forex Command Surface">
+      <div className="forexCommandHeader">
+        <div className="panelHeading">
+          <p>Forex Command Surface</p>
+          <h3>Trade Command Dock</h3>
+        </div>
+        <strong>LIVE EXECUTION BLOCKED UNTIL FUTURE PROTECTED APPROVAL</strong>
+      </div>
+
+      <div className="forexStatusStrip" aria-label="Forex command safety status">
+        {FOREX_COMMAND_STATUSES.map((status) => (
+          <div className={`forexStatusPill tone-${status.tone}`} key={`${status.label}-${status.value}`}>
+            <span>{status.label}</span>
+            <strong>{status.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className="forexCriticalStrip" aria-label="Critical forex command information">
+        {FOREX_CRITICAL_INFO.map((item) => (
+          <div className="forexCriticalItem" key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className="forexCommandGrid" aria-label="Urgent trade controls">
+        {FOREX_COMMAND_CONTROLS.map((control) => {
+          const isActive = control.id === selectedCommandId;
+
+          return (
+            <button
+              aria-pressed={isActive}
+              className={`forexCommandButton ${isActive ? "activeForexCommandButton" : ""}`}
+              disabled={control.disabled}
+              key={control.id}
+              title={control.message}
+              type="button"
+              onClick={() => setSelectedCommandId(control.id)}
+            >
+              <span aria-hidden="true" className="forexCommandIcon">
+                {control.icon}
+              </span>
+              <span className="forexCommandText">{control.label}</span>
+              <strong>{control.state}</strong>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="forexCommandNotice" aria-live="polite">
+        <span>{selectedCommand.label}</span>
+        <strong>{selectedCommand.message}</strong>
+      </div>
+    </section>
+  );
+}
+
 function ForexHub({ onBack, onNavigate }) {
   return (
     <section className="screen" aria-label="Forex Bot">
       <div className="screenTop">
         <BackButton onClick={onBack} />
       </div>
+
+      <ForexCommandSurface />
 
       <div className="hubGrid">
         <DoorCard icon={ICONS.watchlist} title="Watchlist" onClick={() => onNavigate(VIEWS.WATCHLIST)} />
