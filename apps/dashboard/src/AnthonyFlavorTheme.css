@@ -1,0 +1,158 @@
+:root {
+  --page: #060513;
+  --surface: #111027;
+  --surface-strong: #18143a;
+  --surface-soft: #1f1a46;
+  --line: #3b3372;
+  --text: #f7f4ff;
+  --muted: #a9a2cf;
+  --muted-strong: #d8d1ff;
+  --good: #33f0a2;
+  --warn: #ffbf4c;
+  --danger: #ff5d73;
+  --neutral: #58d7ff;
+  --focus: #a78bfa;
+}
+
+body {
+  background:
+    radial-gradient(circle at 10% 0%, rgba(88, 215, 255, 0.18), transparent 30rem),
+    radial-gradient(circle at 88% 12%, rgba(167, 139, 250, 0.18), transparent 32rem),
+    #060513;
+}
+
+.minimalOperatorDashboard {
+  background:
+    radial-gradient(circle at 12% 4%, rgba(88, 215, 255, 0.18), transparent 28rem),
+    radial-gradient(circle at 88% 10%, rgba(167, 139, 250, 0.18), transparent 30rem),
+    linear-gradient(180deg, rgba(6, 5, 19, 0.99), rgba(10, 8, 31, 1));
+}
+
+.dashboardHeader,
+.breadcrumb,
+.screen,
+.panel,
+.watchlistItem {
+  background: rgba(17, 16, 39, 0.88);
+  border-color: rgba(167, 139, 250, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(88, 215, 255, 0.04),
+    0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+.dashboardHeader {
+  background:
+    linear-gradient(135deg, rgba(24, 20, 58, 0.94), rgba(12, 10, 34, 0.94)),
+    radial-gradient(circle at top right, rgba(88, 215, 255, 0.2), transparent 18rem);
+}
+
+.pageIdentityGlyph,
+.doorCardIconOnly,
+.systemEmojiButton span {
+  filter:
+    drop-shadow(0 0 14px rgba(88, 215, 255, 0.28))
+    drop-shadow(0 0 28px rgba(167, 139, 250, 0.18));
+}
+
+.kicker,
+.panelHeading p,
+.field span,
+.scorePair span {
+  color: var(--neutral);
+}
+
+.statusBadge,
+.breadcrumb button,
+.backButton,
+.viewButton {
+  border-color: rgba(88, 215, 255, 0.42);
+  background: rgba(88, 215, 255, 0.08);
+  color: var(--neutral);
+}
+
+.status-good {
+  background: rgba(51, 240, 162, 0.12);
+  border-color: rgba(51, 240, 162, 0.5);
+  color: var(--good);
+}
+
+.status-warn {
+  background: rgba(255, 191, 76, 0.12);
+  border-color: rgba(255, 191, 76, 0.5);
+  color: var(--warn);
+}
+
+.status-danger {
+  background: rgba(255, 93, 115, 0.12);
+  border-color: rgba(255, 93, 115, 0.52);
+  color: var(--danger);
+}
+
+.status-neutral {
+  background: rgba(88, 215, 255, 0.12);
+  border-color: rgba(88, 215, 255, 0.52);
+  color: var(--neutral);
+}
+
+.interactiveDoorCard:hover,
+.interactiveDoorCard:focus-visible {
+  background: radial-gradient(circle, rgba(88, 215, 255, 0.16), transparent 68%);
+  box-shadow:
+    0 0 30px rgba(88, 215, 255, 0.14),
+    0 0 48px rgba(167, 139, 250, 0.1);
+}
+
+.systemEmojiButton {
+  background: rgba(31, 26, 70, 0.8);
+}
+
+.systemEmojiButton:hover,
+.systemEmojiButton:focus-visible,
+.activeSystemEmojiButton {
+  border-color: var(--focus);
+  background: rgba(88, 215, 255, 0.1);
+}
+
+.causeEffectGrid div,
+.blockedReason,
+.scorePair,
+.chartShell,
+.field,
+.controlRow {
+  background: rgba(31, 26, 70, 0.76);
+  border-color: rgba(167, 139, 250, 0.18);
+}
+
+.chartShell {
+  background:
+    linear-gradient(180deg, rgba(10, 8, 31, 0.94), rgba(6, 5, 19, 0.96)),
+    radial-gradient(circle at center, rgba(88, 215, 255, 0.08), transparent 18rem);
+}
+
+.chartGridLine {
+  stroke: rgba(216, 209, 255, 0.15);
+}
+
+.chartLine {
+  stroke: var(--good);
+  filter: drop-shadow(0 0 8px rgba(51, 240, 162, 0.28));
+}
+
+.chartPoint {
+  fill: var(--neutral);
+  stroke: #060513;
+}
+
+.selectedWatchlistItem {
+  background: rgba(88, 215, 255, 0.12);
+  border-color: rgba(88, 215, 255, 0.64);
+}
+
+.interactiveDoorCard:focus-visible,
+.watchlistItem:focus-within,
+.watchlistItem:hover,
+.breadcrumb button:focus-visible,
+.backButton:focus-visible,
+.viewButton:focus-visible {
+  outline-color: rgba(167, 139, 250, 0.28);
+}
