@@ -287,7 +287,7 @@ button {
 }
 
 .hubGrid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .doorCard {
@@ -403,7 +403,9 @@ button {
 }
 
 .causeEffectPanel,
-.historyList {
+.historyList,
+.readinessSummaryPanel,
+.readinessSectionList {
   grid-column: 1 / -1;
 }
 
@@ -432,6 +434,52 @@ button {
 .historyList {
   display: grid;
   gap: 10px;
+}
+
+.readinessSectionList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.readinessGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.readinessField {
+  min-height: 58px;
+}
+
+.blockedReasonList {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.blockedReason {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  background: var(--surface-soft);
+}
+
+.blockedReason span {
+  color: var(--danger);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.blockedReason p {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .watchlistList {
@@ -638,7 +686,8 @@ button {
   .hubGrid,
   .detailGrid,
   .systemDetailGrid,
-  .simpleGrid {
+  .simpleGrid,
+  .readinessSectionList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -683,7 +732,9 @@ button {
   .detailGrid,
   .fieldGrid,
   .systemDetailGrid,
-  .simpleGrid {
+  .simpleGrid,
+  .readinessSectionList,
+  .readinessGrid {
     grid-template-columns: 1fr;
   }
 

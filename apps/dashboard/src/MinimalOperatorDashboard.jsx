@@ -13,7 +13,8 @@ const VIEWS = {
   POSITION: "position",
   RISK: "risk",
   EXIT: "exit",
-  HISTORY: "history"
+  HISTORY: "history",
+  READINESS: "readiness"
 };
 
 const ICONS = {
@@ -27,6 +28,7 @@ const ICONS = {
   risk: "📊",
   exit: "⏏️",
   history: "🧾",
+  readiness: "🚦",
   detail: "🔎"
 };
 
@@ -75,7 +77,8 @@ const VIEW_LABELS = {
   [VIEWS.POSITION]: "Position",
   [VIEWS.RISK]: "Risk / P&L",
   [VIEWS.EXIT]: "Exit",
-  [VIEWS.HISTORY]: "Trading History"
+  [VIEWS.HISTORY]: "Trading History",
+  [VIEWS.READINESS]: "Execution Readiness"
 };
 
 const VIEW_ICONS = {
@@ -89,7 +92,8 @@ const VIEW_ICONS = {
   [VIEWS.POSITION]: ICONS.position,
   [VIEWS.RISK]: ICONS.risk,
   [VIEWS.EXIT]: ICONS.exit,
-  [VIEWS.HISTORY]: ICONS.history
+  [VIEWS.HISTORY]: ICONS.history,
+  [VIEWS.READINESS]: ICONS.readiness
 };
 
 const FOREX_CHILD_VIEWS = new Set([
@@ -98,7 +102,8 @@ const FOREX_CHILD_VIEWS = new Set([
   VIEWS.POSITION,
   VIEWS.RISK,
   VIEWS.EXIT,
-  VIEWS.HISTORY
+  VIEWS.HISTORY,
+  VIEWS.READINESS
 ]);
 
 const OPERATION_CONTRACTS = {
@@ -121,8 +126,34 @@ const OPERATION_CONTRACTS = {
   history: {
     cause: "Request sanitized closed-trade and execution-evidence read-model.",
     effect: "Display closed trades, realized P/L, exit reason, protection controls used, slippage, evidence status, source, and freshness."
+  },
+  readiness: {
+    cause: "Request the live-capable execution readiness bridge projection.",
+    effect: "Display live data, broker, signal, risk, exit, and history-writeback gates with LIVE_READY, blockers, and next safe action."
   }
 };
+
+function normalizeDataSourceType(value) {
+  const text = String(value ?? "").toUpperCase();
+
+  if (text.includes("FIXTURE") || text.includes("STALE") || text.includes("UNVERIFIED")) {
+    return "fixture";
+  }
+
+  if (text.includes("PAPER") || text.includes("DEMO")) {
+    return "paper";
+  }
+
+  if (text.includes("BROKER") && text.includes("EXECUTION")) {
+    return "broker-live-execution";
+  }
+
+  if (text.includes("LIVE") || text.includes("BROKER")) {
+    return "broker-live-read-only";
+  }
+
+  return "fixture";
+}
 
 function statusTone(value) {
   const text = String(value ?? "").toUpperCase();
@@ -217,6 +248,17 @@ function StatusBadge({ value }) {
   return <span className={`statusBadge status-${statusTone(value)}`}>{value}</span>;
 }
 
+function ReadinessRow({ label, value, tone }) {
+  const displayValue = typeof value === "boolean" ? String(value) : value;
+
+  return (
+    <div className="field readinessField">
+      <span>{label}</span>
+      <strong className={`tone-${tone ?? statusTone(displayValue)}`}>{displayValue}</strong>
+    </div>
+  );
+}
+
 function dataSourceForPair(pair) {
   const dataSource = dashboardFixture.dataSource ?? {};
 
@@ -252,6 +294,154 @@ function DataLabel({ source, compact = false }) {
       ) : null}
     </div>
   );
+}
+
+function buildLiveReadinessModel(pair) {
+  const dataSource = dashboardFixture.dataSource ?? {};
+  const bridges = dashboardFixture.bridges ?? {};
+  const riskPl = dashboardFixture.riskPl ?? {};
+  const exitReadiness = dashboardFixture.exitReadiness ?? {};
+  const explanation = pair?.explanation ?? {};
+  const sourceType = normalizeDataSourceType(
+    explanation.dataSourceType ?? dataSource.DATA_SOURCE_TYPE ?? dashboardFixture.source
+  );
+  const liveSourceAllowed = Boolean(dataSource.LIVE_TRADING_ALLOWED_FROM_THIS_DATA);
+  const selectedPair = formatPair(pair?.pair ?? dashboardFixture.selectedPair);
+  const blockReasons = [
+    "Real market data source is not approved for live trade decisions.",
+    "Broker/account state has not been reconciled.",
+    "Signal logic and expected edge evidence are not connected.",
+    "Risk governor has not approved a live trade boundary.",
+    "Pre-entry exit plan and auto-exit readiness are blocked.",
+    "Trading history writeback is not available for real closed-trade evidence.",
+    "Human Owner has not explicitly armed live execution."
+  ];
+
+  return {
+    liveReady: false,
+    actionMode: "READ_ONLY",
+    liveButton: "NOT_PRESENT",
+    nextSafeAction:
+      "Connect permitted read-only data and broker reconciliation in a later packet, then run paper signal execution before any live arming gate.",
+    blockReasons,
+    sections: [
+      {
+        title: "Live data readiness",
+        status: liveSourceAllowed ? "VALID" : "BLOCKED",
+        rows: [
+          { label: "Data source name", value: dataSource.DATA_SOURCE_NAME ?? "UNVERIFIED" },
+          { label: "Source type", value: sourceType },
+          {
+            label: "Freshness timestamp",
+            value: dataSource.DATA_TIMESTAMP_UTC ?? dashboardFixture.generatedAt ?? "UNKNOWN"
+          },
+          { label: "Stale/valid status", value: dataSource.MARKET_DATA_STATUS ?? "BLOCKED" },
+          { label: "Live trading allowed from this source", value: liveSourceAllowed },
+          {
+            label: "Block reason",
+            value:
+              dataSource.BLOCK_REASON ??
+              "Data source is not approved for live trade decisions."
+          },
+          { label: "No secrets printed", value: true, tone: "good" },
+          { label: "No account IDs printed", value: true, tone: "good" }
+        ]
+      },
+      {
+        title: "Broker state readiness",
+        status: "BLOCKED",
+        rows: [
+          { label: "Account reachable", value: false },
+          { label: "Broker mode", value: "UNKNOWN" },
+          { label: "Open positions reconciled", value: false },
+          { label: "Pending orders reconciled", value: false },
+          { label: "Daily P/L available", value: false },
+          { label: "Margin/risk availability", value: false },
+          {
+            label: "Block reason",
+            value: "Broker bridge is blocked and no sanitized account reconciliation is available."
+          }
+        ]
+      },
+      {
+        title: "Signal readiness",
+        status: "BLOCKED",
+        rows: [
+          { label: "Selected pair", value: selectedPair, tone: "neutral" },
+          { label: "Strategy name", value: "UNCONNECTED" },
+          { label: "Signal side", value: "NONE" },
+          {
+            label: "Confidence",
+            value: pair?.confidence ? `${pair.confidence}% fixture confidence` : "UNVERIFIED"
+          },
+          { label: "Expected edge evidence path", value: "UNAVAILABLE" },
+          { label: "Backtest/paper evidence required", value: true, tone: "warn" },
+          {
+            label: "Spread/slippage status",
+            value: explanation.spreadSlippageStatus ?? "UNVERIFIED"
+          },
+          {
+            label: "Block reason",
+            value: "No approved live signal logic or expected-edge evidence is connected."
+          }
+        ]
+      },
+      {
+        title: "Risk readiness",
+        status: "BLOCKED",
+        rows: [
+          { label: "Max units", value: riskPl.positionSize ?? "NOT_APPROVED" },
+          { label: "Max trade risk", value: riskPl.riskCap ?? "NOT_APPROVED" },
+          { label: "Daily loss cap", value: riskPl.riskCap ?? "NOT_APPROVED" },
+          { label: "One-position rule", value: "REQUIRED_NOT_ARMED" },
+          { label: "No revenge-loop rule", value: "REQUIRED_NOT_ARMED" },
+          { label: "No duplicate-entry rule", value: "REQUIRED_NOT_ARMED" },
+          { label: "Kill switch required", value: bridges.killSwitch ?? "REQUIRED" },
+          { label: "Risk governor approval", value: false },
+          {
+            label: "Block reason",
+            value: "Risk governor has not approved a live trade boundary."
+          }
+        ]
+      },
+      {
+        title: "Exit readiness",
+        status: exitReadiness.autoExitStatus ?? "BLOCKED",
+        rows: [
+          { label: "Stop-loss before or with entry", value: "REQUIRED_NOT_LIVE_READY" },
+          { label: "Take-profit policy", value: "REQUIRED_NOT_LIVE_READY" },
+          { label: "Trailing-stop policy", value: "REQUIRED_NOT_LIVE_READY" },
+          { label: "Max-time policy", value: "REQUIRED_NOT_LIVE_READY" },
+          { label: "Auto-exit readiness", value: exitReadiness.autoExitStatus ?? "BLOCKED" },
+          { label: "Manual close fallback", value: "REQUIRED" },
+          {
+            label: "Block reason",
+            value:
+              exitReadiness.blockReason ??
+              "Exit readiness is not approved for live execution."
+          }
+        ]
+      },
+      {
+        title: "Trading history writeback readiness",
+        status: "BLOCKED",
+        rows: [
+          { label: "Opened trade evidence row", value: "REQUIRED" },
+          { label: "Close realized P/L record", value: "REQUIRED" },
+          {
+            label: "Required row fields",
+            value:
+              "pair, side, units, entry time, exit time, duration, realized P/L, exit reason, slippage, source, freshness"
+          },
+          { label: "History writeback available", value: false },
+          {
+            label: "Block reason",
+            value: "Live execution is blocked until sanitized trade-history writeback is available."
+          }
+        ]
+      }
+    ]
+  };
 }
 
 function Field({ label, value, tone, source = dataSourceForPair(), compact = false }) {
@@ -494,6 +684,11 @@ function ForexHub({ onBack, onNavigate }) {
           icon={ICONS.history}
           title="Trading History"
           onClick={() => onNavigate(VIEWS.HISTORY)}
+        />
+        <DoorCard
+          icon={ICONS.readiness}
+          title="Execution Readiness"
+          onClick={() => onNavigate(VIEWS.READINESS)}
         />
       </div>
     </section>
@@ -899,6 +1094,64 @@ function TradingHistoryPage({ onBack }) {
   );
 }
 
+function ReadinessSection({ section, source }) {
+  return (
+    <section className="panel readinessPanel" aria-label={section.title}>
+      <div className="panelHeading">
+        <p>{section.title}</p>
+        <h3>{section.status}</h3>
+      </div>
+      <div className="fieldGrid readinessGrid">
+        {section.rows.map((row) => (
+          <ReadinessRow
+            key={`${section.title}-${row.label}`}
+            label={row.label}
+            tone={row.tone}
+            value={row.value}
+          />
+        ))}
+      </div>
+      <DataLabel compact source={source} />
+    </section>
+  );
+}
+
+function ExecutionReadinessPage({ pair, onBack }) {
+  const source = dataSourceForPair(pair);
+  const readiness = buildLiveReadinessModel(pair);
+
+  return (
+    <SimpleStatusPage backLabel="LIVE_READY: false" title="Execution Readiness" onBack={onBack}>
+      <CauseEffectPanel contract={OPERATION_CONTRACTS.readiness} source={source} />
+      <section className="panel readinessSummaryPanel" aria-label="Overall execution readiness">
+        <div className="panelHeading">
+          <p>Overall status</p>
+          <h3>{`LIVE_READY: ${String(readiness.liveReady)}`}</h3>
+        </div>
+        <div className="fieldGrid readinessGrid">
+          <ReadinessRow label="Action mode" value={readiness.actionMode} tone="good" />
+          <ReadinessRow label="Live BUY/SELL button" value={readiness.liveButton} tone="good" />
+          <ReadinessRow label="Next safe action" value={readiness.nextSafeAction} tone="warn" />
+        </div>
+        <div className="blockedReasonList" aria-label="Blocked reasons">
+          {readiness.blockReasons.map((reason) => (
+            <div className="blockedReason" key={reason}>
+              <span>Blocked</span>
+              <p>{reason}</p>
+            </div>
+          ))}
+        </div>
+        <DataLabel source={source} />
+      </section>
+      <div className="readinessSectionList">
+        {readiness.sections.map((section) => (
+          <ReadinessSection key={section.title} section={section} source={source} />
+        ))}
+      </div>
+    </SimpleStatusPage>
+  );
+}
+
 export default function MinimalOperatorDashboard() {
   const pairs = useMemo(
     () =>
@@ -971,6 +1224,10 @@ export default function MinimalOperatorDashboard() {
 
       {view === VIEWS.HISTORY ? (
         <TradingHistoryPage onBack={() => setView(VIEWS.FOREX)} />
+      ) : null}
+
+      {view === VIEWS.READINESS ? (
+        <ExecutionReadinessPage pair={selected} onBack={() => setView(VIEWS.FOREX)} />
       ) : null}
     </main>
   );
