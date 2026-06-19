@@ -339,6 +339,65 @@ button {
   gap: 10px;
 }
 
+.systemEmojiGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(48px, 1fr));
+  gap: 10px;
+}
+
+.systemEmojiButton {
+  min-width: 0;
+  min-height: 98px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  appearance: none;
+  background: var(--surface-soft);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.systemEmojiButton span {
+  font-size: 36px;
+  line-height: 1;
+  filter: drop-shadow(0 0 16px rgba(91, 190, 203, 0.2));
+}
+
+.systemEmojiButton:hover,
+.systemEmojiButton:focus-visible,
+.activeSystemEmojiButton {
+  border-color: var(--focus);
+  background: rgba(91, 190, 203, 0.08);
+}
+
+.systemEmojiButton:hover {
+  transform: translateY(-1px);
+}
+
+.systemEmojiButton:focus-visible {
+  outline: 2px solid rgba(132, 210, 222, 0.22);
+  outline-offset: 2px;
+}
+
+.systemDetailPanel {
+  min-width: 0;
+  display: grid;
+}
+
+.systemDetailGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.systemDetailField span,
+.systemDetailField strong {
+  overflow-wrap: anywhere;
+}
+
 .notePanel {
   grid-column: 1 / -1;
 }
@@ -578,6 +637,7 @@ button {
   .doorGrid,
   .hubGrid,
   .detailGrid,
+  .systemDetailGrid,
   .simpleGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -622,8 +682,22 @@ button {
   .causeEffectGrid,
   .detailGrid,
   .fieldGrid,
+  .systemDetailGrid,
   .simpleGrid {
     grid-template-columns: 1fr;
+  }
+
+  .systemEmojiGrid {
+    gap: 8px;
+  }
+
+  .systemEmojiButton {
+    min-height: 64px;
+    padding: 8px;
+  }
+
+  .systemEmojiButton span {
+    font-size: 28px;
   }
 
   .watchlistItem {
