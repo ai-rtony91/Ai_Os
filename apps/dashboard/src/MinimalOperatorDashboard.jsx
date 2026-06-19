@@ -15,17 +15,54 @@ const VIEWS = {
   EXIT: "exit"
 };
 
+const ICONS = {
+  operator: "🎛️",
+  forex: "🤖",
+  system: "🖥️",
+  safety: "🛡️",
+  settings: "⚙️",
+  watchlist: "🎯",
+  position: "📍",
+  risk: "📊",
+  exit: "⏏️",
+  detail: "🔎",
+  price: "💱",
+  chart: "📈",
+  analytics: "🧠",
+  decision: "⚖️",
+  ready: "✅",
+  blocked: "⛔",
+  fixture: "🧪",
+  locked: "🔒",
+  readOnly: "👁️",
+  hidden: "🕶️",
+  killSwitch: "⏻"
+};
+
 const VIEW_LABELS = {
-  [VIEWS.HOME]: "Home",
+  [VIEWS.HOME]: "Operator",
   [VIEWS.FOREX]: "Forex Bot",
   [VIEWS.WATCHLIST]: "Watchlist",
   [VIEWS.DETAIL]: "Pair Detail",
   [VIEWS.SYSTEM]: "System",
   [VIEWS.SAFETY]: "Safety",
   [VIEWS.SETTINGS]: "Settings",
-  [VIEWS.POSITION]: "Current Position",
+  [VIEWS.POSITION]: "Position",
   [VIEWS.RISK]: "Risk / P&L",
   [VIEWS.EXIT]: "Exit"
+};
+
+const VIEW_ICONS = {
+  [VIEWS.HOME]: ICONS.operator,
+  [VIEWS.FOREX]: ICONS.forex,
+  [VIEWS.WATCHLIST]: ICONS.watchlist,
+  [VIEWS.DETAIL]: ICONS.detail,
+  [VIEWS.SYSTEM]: ICONS.system,
+  [VIEWS.SAFETY]: ICONS.safety,
+  [VIEWS.SETTINGS]: ICONS.settings,
+  [VIEWS.POSITION]: ICONS.position,
+  [VIEWS.RISK]: ICONS.risk,
+  [VIEWS.EXIT]: ICONS.exit
 };
 
 const FOREX_CHILD_VIEWS = new Set([
@@ -62,6 +99,63 @@ function statusTone(value) {
   }
 
   return "neutral";
+}
+
+function statusIcon(value) {
+  const text = String(value ?? "").toUpperCase();
+
+  if (text.includes("BLOCKED") || text.includes("MISSING") || text === "FALSE") {
+    return ICONS.blocked;
+  }
+
+  if (text.includes("FIXTURE")) {
+    return ICONS.fixture;
+  }
+
+  if (text.includes("LOCKED")) {
+    return ICONS.locked;
+  }
+
+  if (text.includes("READ_ONLY")) {
+    return ICONS.readOnly;
+  }
+
+  if (text.includes("READY") || text.includes("PRESENT")) {
+    return ICONS.ready;
+  }
+
+  if (text.includes("HIDDEN") || text.includes("NO_SECRETS") || text.includes("NOT_DISPLAYED")) {
+    return ICONS.hidden;
+  }
+
+  return null;
+}
+
+function viewLabel(view) {
+  return VIEW_LABELS[view] ?? "Dashboard";
+}
+
+function viewIcon(view) {
+  return VIEW_ICONS[view] ?? ICONS.operator;
+}
+
+function IconLabel({ icon, label, className = "" }) {
+  return (
+    <span className={["iconLabel", className].filter(Boolean).join(" ")}>
+      <span aria-hidden="true" className="iconGlyph">
+        {icon}
+      </span>
+      <span>{label}</span>
+    </span>
+  );
+}
+
+function BackButton({ onClick }) {
+  return (
+    <button className="backButton" type="button" onClick={onClick}>
+      ← Back
+    </button>
+  );
 }
 
 function formatPair(pair) {
@@ -101,7 +195,18 @@ function chartPolyline(points) {
 }
 
 function StatusBadge({ value }) {
-  return <span className={`statusBadge status-${statusTone(value)}`}>{value}</span>;
+  const icon = statusIcon(value);
+
+  return (
+    <span className={`statusBadge status-${statusTone(value)}`}>
+      {icon ? (
+        <span aria-hidden="true" className="statusBadgeIcon">
+          {icon}
+        </span>
+      ) : null}
+      <span>{value}</span>
+    </span>
+  );
 }
 
 function dataSourceForPair(pair) {
@@ -151,7 +256,9 @@ function ShellHeader({ view }) {
     <header className="dashboardHeader">
       <div>
         <p className="kicker">AIOS</p>
-        <h1>{view === VIEWS.HOME ? "Operator" : VIEW_LABELS[view]}</h1>
+        <h1>
+          <IconLabel icon={viewIcon(view)} label={viewLabel(view)} />
+        </h1>
       </div>
       <div className="headerBadges" aria-label="Dashboard safety labels">
         <StatusBadge value={dashboardFixture.mode} />
@@ -176,7 +283,7 @@ function Breadcrumb({ view, selected, onNavigate }) {
   if (view === VIEWS.DETAIL) {
     crumbs.push(formatPair(selected.pair));
   } else if (view !== VIEWS.HOME && view !== VIEWS.FOREX && view !== VIEWS.WATCHLIST) {
-    crumbs.push(VIEW_LABELS[view]);
+    crumbs.push(viewLabel(view));
   }
 
   return (
@@ -209,11 +316,16 @@ function Breadcrumb({ view, selected, onNavigate }) {
   );
 }
 
-function DoorCard({ title, detail, badge, onClick, disabled = false }) {
+function DoorCard({ title, detail, badge, icon, onClick, disabled = false }) {
   const content = (
     <>
-      <span>{detail}</span>
-      <strong>{title}</strong>
+      <span className="doorCardDetail">{detail}</span>
+      <span className="doorCardTitle">
+        <span aria-hidden="true" className="doorCardIcon">
+          {icon}
+        </span>
+        <strong>{title}</strong>
+      </span>
       {badge ? <StatusBadge value={badge} /> : null}
     </>
   );
@@ -233,10 +345,22 @@ function HomeScreen({ onNavigate }) {
   return (
     <section className="screen homeScreen" aria-label="Home">
       <div className="doorGrid">
-        <DoorCard detail="Open" title="Forex Bot" onClick={() => onNavigate(VIEWS.FOREX)} />
-        <DoorCard badge="READY" detail="Open" title="System" onClick={() => onNavigate(VIEWS.SYSTEM)} />
-        <DoorCard badge={dashboardFixture.bridges.safeStatus} detail="Open" title="Safety" onClick={() => onNavigate(VIEWS.SAFETY)} />
-        <DoorCard badge={dashboardFixture.source} detail="Open" title="Settings" onClick={() => onNavigate(VIEWS.SETTINGS)} />
+        <DoorCard icon={ICONS.forex} detail="Open" title="Forex Bot" onClick={() => onNavigate(VIEWS.FOREX)} />
+        <DoorCard icon={ICONS.system} badge="READY" detail="Open" title="System" onClick={() => onNavigate(VIEWS.SYSTEM)} />
+        <DoorCard
+          icon={ICONS.safety}
+          badge={dashboardFixture.bridges.safeStatus}
+          detail="Open"
+          title="Safety"
+          onClick={() => onNavigate(VIEWS.SAFETY)}
+        />
+        <DoorCard
+          icon={ICONS.settings}
+          badge={dashboardFixture.source}
+          detail="Open"
+          title="Settings"
+          onClick={() => onNavigate(VIEWS.SETTINGS)}
+        />
       </div>
     </section>
   );
@@ -246,17 +370,23 @@ function ForexHub({ riskPl, exitReadiness, onBack, onNavigate }) {
   return (
     <section className="screen" aria-label="Forex Bot">
       <div className="screenTop">
-        <button className="backButton" type="button" onClick={onBack}>
-          Back
-        </button>
-        <h2>Forex Bot</h2>
+        <BackButton onClick={onBack} />
+        <h2>
+          <IconLabel icon={ICONS.forex} label="Forex Bot" />
+        </h2>
       </div>
 
       <div className="hubGrid">
-        <DoorCard detail="Open" title="Watchlist" onClick={() => onNavigate(VIEWS.WATCHLIST)} />
-        <DoorCard detail="Open" title="Current Position" onClick={() => onNavigate(VIEWS.POSITION)} />
-        <DoorCard detail="Open" title="Risk / P&L" onClick={() => onNavigate(VIEWS.RISK)} />
-        <DoorCard badge={exitReadiness.autoExitStatus} detail="Open" title="Exit" onClick={() => onNavigate(VIEWS.EXIT)} />
+        <DoorCard icon={ICONS.watchlist} detail="Open" title="Watchlist" onClick={() => onNavigate(VIEWS.WATCHLIST)} />
+        <DoorCard icon={ICONS.position} detail="Open" title="Position" onClick={() => onNavigate(VIEWS.POSITION)} />
+        <DoorCard icon={ICONS.risk} detail="Open" title="Risk / P&L" onClick={() => onNavigate(VIEWS.RISK)} />
+        <DoorCard
+          icon={ICONS.exit}
+          badge={exitReadiness.autoExitStatus}
+          detail="Open"
+          title="Exit"
+          onClick={() => onNavigate(VIEWS.EXIT)}
+        />
       </div>
     </section>
   );
@@ -266,10 +396,10 @@ function WatchlistScreen({ pairs, selectedPair, onBack, onViewPair }) {
   return (
     <section className="screen" aria-label="Watchlist">
       <div className="screenTop">
-        <button className="backButton" type="button" onClick={onBack}>
-          Back
-        </button>
-        <h2>Watchlist</h2>
+        <BackButton onClick={onBack} />
+        <h2>
+          <IconLabel icon={ICONS.watchlist} label="Watchlist" />
+        </h2>
       </div>
 
       <div className="watchlistList" role="list" aria-label="Ranked fixture pair watchlist">
@@ -311,7 +441,9 @@ function ChartPanel({ pair, source }) {
   return (
     <section className="panel chartPanel" aria-label={`${formatPair(pair.pair)} fixture chart`}>
       <div className="panelHeading">
-        <p>Chart</p>
+        <p>
+          <IconLabel icon={ICONS.chart} label="Chart" />
+        </p>
         <h3>{pair.fixturePrice}</h3>
       </div>
       <div className="chartShell">
@@ -347,7 +479,9 @@ function AnalyticsPanel({ pair }) {
   return (
     <section className="panel" aria-label="Analytics">
       <div className="panelHeading">
-        <p>Analytics</p>
+        <p>
+          <IconLabel icon={ICONS.analytics} label="Analytics" />
+        </p>
         <h3>Opportunity</h3>
       </div>
       <p className="shortText">{explanation.rankingReason ?? pair.reason}</p>
@@ -365,7 +499,9 @@ function RiskPanel({ riskPl }) {
   return (
     <section className="panel" aria-label="Risk and P/L">
       <div className="panelHeading">
-        <p>Risk</p>
+        <p>
+          <IconLabel icon={ICONS.risk} label="Risk" />
+        </p>
         <h3>P/L</h3>
       </div>
       <div className="fieldGrid">
@@ -384,7 +520,9 @@ function ExitPanel({ exitReadiness }) {
   return (
     <section className="panel" aria-label="Exit readiness">
       <div className="panelHeading">
-        <p>Exit</p>
+        <p>
+          <IconLabel icon={ICONS.exit} label="Exit" />
+        </p>
         <h3>{exitReadiness.autoExitStatus}</h3>
       </div>
       <div className="controlList">
@@ -407,7 +545,9 @@ function DecisionPanel({ pair, bridges, exitReadiness }) {
   return (
     <section className="panel decisionPanel" aria-label="Decision">
       <div className="panelHeading">
-        <p>Decision</p>
+        <p>
+          <IconLabel icon={ICONS.decision} label="Decision" />
+        </p>
         <h3>{explanation.safeDecision ?? bridges.safeStatus}</h3>
       </div>
       <p className="shortText">{explanation.nextSafeAction ?? bridges.nextAction}</p>
@@ -423,17 +563,19 @@ function PairDetail({ pair, riskPl, exitReadiness, bridges, onBack }) {
   return (
     <section className="screen detailScreen" aria-label="Pair Detail">
       <div className="screenTop">
-        <button className="backButton" type="button" onClick={onBack}>
-          Back
-        </button>
-        <h2>{formatPair(pair.pair)}</h2>
+        <BackButton onClick={onBack} />
+        <h2>
+          <IconLabel icon={ICONS.detail} label={formatPair(pair.pair)} />
+        </h2>
         <StatusBadge value={bridges.safeStatus} />
       </div>
 
       <div className="detailGrid">
         <section className="panel pricePanel" aria-label="Price">
           <div className="panelHeading">
-            <p>Price</p>
+            <p>
+              <IconLabel icon={ICONS.price} label="Price" />
+            </p>
             <h3>{pair.fixturePrice}</h3>
           </div>
           <div className="miniGrid">
@@ -452,14 +594,14 @@ function PairDetail({ pair, riskPl, exitReadiness, bridges, onBack }) {
   );
 }
 
-function SimpleStatusPage({ title, backLabel, onBack, children }) {
+function SimpleStatusPage({ title, icon, backLabel, onBack, children }) {
   return (
     <section className="screen" aria-label={title}>
       <div className="screenTop">
-        <button className="backButton" type="button" onClick={onBack}>
-          Back
-        </button>
-        <h2>{title}</h2>
+        <BackButton onClick={onBack} />
+        <h2>
+          <IconLabel icon={icon} label={title} />
+        </h2>
         <StatusBadge value={backLabel} />
       </div>
       <div className="simpleGrid">{children}</div>
@@ -471,7 +613,7 @@ function SystemPage({ onBack }) {
   const source = dataSourceForPair();
 
   return (
-    <SimpleStatusPage backLabel="READ_ONLY" title="System" onBack={onBack}>
+    <SimpleStatusPage icon={ICONS.system} backLabel="READ_ONLY" title="System" onBack={onBack}>
       <Field compact label="Dashboard" source={source} value="READY" tone="good" />
       <Field compact label="Mode" source={source} value={dashboardFixture.mode} />
       <Field compact label="Data" source={source} value={dashboardFixture.source} />
@@ -485,7 +627,7 @@ function SafetyPage({ onBack }) {
   const source = dataSourceForPair();
 
   return (
-    <SimpleStatusPage backLabel="BLOCKED" title="Safety" onBack={onBack}>
+    <SimpleStatusPage icon={ICONS.safety} backLabel="BLOCKED" title="Safety" onBack={onBack}>
       <Field compact label="Live trading" source={source} value="BLOCKED" />
       <Field compact label="Source labels" source={source} value="REQUIRED" tone="warn" />
       <Field compact label="Secrets" source={source} value="HIDDEN" tone="good" />
@@ -499,7 +641,7 @@ function SettingsPage({ bridges, onBack }) {
   const source = dataSourceForPair();
 
   return (
-    <SimpleStatusPage backLabel="NO_SECRETS" title="Settings" onBack={onBack}>
+    <SimpleStatusPage icon={ICONS.settings} backLabel="NO_SECRETS" title="Settings" onBack={onBack}>
       <Field compact label="Secret bridge" source={source} value={bridges.secretBridge} />
       <Field compact label="Broker bridge" source={source} value={bridges.brokerBridge} />
       <Field compact label="API keys" source={source} value="HIDDEN" tone="good" />
@@ -514,7 +656,7 @@ function PositionPage({ riskPl, onBack }) {
   const source = dataSourceForPair();
 
   return (
-    <SimpleStatusPage backLabel="READ_ONLY" title="Current Position" onBack={onBack}>
+    <SimpleStatusPage icon={ICONS.position} backLabel="READ_ONLY" title="Position" onBack={onBack}>
       <Field compact label="Position" source={source} value={riskPl.currentPosition} tone="neutral" />
       <Field compact label="Units" source={source} value={riskPl.positionSize} tone="warn" />
       <Field compact label="Realized P/L" source={source} value={riskPl.realizedPl} tone="neutral" />
@@ -527,7 +669,7 @@ function RiskPage({ riskPl, onBack }) {
   const source = dataSourceForPair();
 
   return (
-    <SimpleStatusPage backLabel="FIXTURE_NOT_LIVE" title="Risk / P&L" onBack={onBack}>
+    <SimpleStatusPage icon={ICONS.risk} backLabel="FIXTURE_NOT_LIVE" title="Risk / P&L" onBack={onBack}>
       <Field compact label="Risk cap" source={source} value={riskPl.riskCap} tone="warn" />
       <Field compact label="Position size" source={source} value={riskPl.positionSize} tone="warn" />
       <Field compact label="Realized P/L" source={source} value={riskPl.realizedPl} tone="neutral" />
@@ -541,14 +683,16 @@ function ExitPage({ exitReadiness, onBack }) {
   const source = dataSourceForPair();
 
   return (
-    <SimpleStatusPage backLabel={exitReadiness.autoExitStatus} title="Exit" onBack={onBack}>
+    <SimpleStatusPage icon={ICONS.exit} backLabel={exitReadiness.autoExitStatus} title="Exit" onBack={onBack}>
       {exitReadiness.controls.map((control) => (
         <Field compact key={control.label} label={control.label} source={source} value={control.status} />
       ))}
       <Field compact label="Auto-exit" source={source} value={exitReadiness.autoExitStatus} />
       <section className="panel notePanel" aria-label="Exit block reason">
         <div className="panelHeading">
-          <p>Block reason</p>
+          <p>
+            <IconLabel icon={ICONS.blocked} label="Block reason" />
+          </p>
           <h3>{exitReadiness.autoExitStatus}</h3>
         </div>
         <p className="shortText">{exitReadiness.blockReason}</p>
