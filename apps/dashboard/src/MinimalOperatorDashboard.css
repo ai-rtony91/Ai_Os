@@ -275,6 +275,10 @@ button {
 }
 
 .homeScreen {
+  min-height: min(430px, calc(100vh - 110px));
+  border: 0;
+  background: transparent;
+  padding: 18px 0;
   place-content: center;
 }
 
