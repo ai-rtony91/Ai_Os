@@ -78,6 +78,15 @@ button {
   letter-spacing: 0;
 }
 
+.pageIdentityGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 48px;
+  text-shadow: 0 0 18px rgba(136, 166, 255, 0.22);
+}
+
 .kicker,
 .panelHeading p,
 .field span,
