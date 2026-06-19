@@ -2,6 +2,13 @@ import { useMemo, useState } from "react";
 import dashboardFixture from "../mock-data/aios-minimal-operator-dashboard-v1.example.json";
 import "./MinimalOperatorDashboard.css";
 
+const VIEWS = {
+  HOME: "home",
+  FOREX: "forex",
+  WATCHLIST: "watchlist",
+  DETAIL: "detail"
+};
+
 function statusTone(value) {
   const text = String(value ?? "").toUpperCase();
 
@@ -95,110 +102,190 @@ function DataLabel({ source, compact = false }) {
     <div className={`dataLabel ${compact ? "compactLabel" : ""}`}>
       <StatusBadge value={source?.label ?? "UNVERIFIED"} />
       <span>{`LIVE_TRADING_ALLOWED_FROM_THIS_DATA: ${String(liveAllowed)}`}</span>
-      {!liveAllowed ? <small>{source?.blockReason ?? "Data is blocked for live decisions."}</small> : null}
+      {!compact && !liveAllowed ? (
+        <small>{source?.blockReason ?? "Data is blocked for live decisions."}</small>
+      ) : null}
     </div>
   );
 }
 
-function LabeledValue({ value, source, strong = false }) {
-  const ValueTag = strong ? "strong" : "span";
-
-  return (
-    <div className="labeledValue">
-      <ValueTag>{value}</ValueTag>
-      <DataLabel compact source={source} />
-    </div>
-  );
-}
-
-function WatchlistMetric({ label, value, tone }) {
-  return (
-    <span className="watchlistMetric">
-      <span>{label}</span>
-      <strong className={`tone-${tone ?? statusTone(value)}`}>{value}</strong>
-    </span>
-  );
-}
-
-function Field({ label, value, tone, source = dataSourceForPair() }) {
+function Field({ label, value, tone, source = dataSourceForPair(), compact = false }) {
   return (
     <div className="field">
       <span>{label}</span>
       <strong className={`tone-${tone ?? statusTone(value)}`}>{value}</strong>
-      <DataLabel compact source={source} />
+      <DataLabel compact={compact} source={source} />
     </div>
   );
 }
 
-function Panel({ title, eyebrow, children, className = "" }) {
+function ShellHeader({ view }) {
   return (
-    <section className={`operatorPanel ${className}`.trim()}>
-      <div className="panelHeading">
-        {eyebrow ? <p>{eyebrow}</p> : null}
-        <h2>{title}</h2>
+    <header className="dashboardHeader">
+      <div>
+        <p className="kicker">AIOS</p>
+        <h1>{view === VIEWS.HOME ? "Operator" : "Forex Bot"}</h1>
       </div>
-      {children}
+      <div className="headerBadges" aria-label="Dashboard safety labels">
+        <StatusBadge value={dashboardFixture.mode} />
+        <StatusBadge value={dashboardFixture.source} />
+        <StatusBadge value={dashboardFixture.bridges.safeStatus} />
+      </div>
+    </header>
+  );
+}
+
+function Breadcrumb({ view, selected, onNavigate }) {
+  const crumbs = ["Home"];
+
+  if (view !== VIEWS.HOME) {
+    crumbs.push("Forex Bot");
+  }
+
+  if (view === VIEWS.WATCHLIST || view === VIEWS.DETAIL) {
+    crumbs.push("Watchlist");
+  }
+
+  if (view === VIEWS.DETAIL) {
+    crumbs.push(formatPair(selected.pair));
+  }
+
+  return (
+    <nav className="breadcrumb" aria-label="Dashboard breadcrumb">
+      {crumbs.map((crumb, index) => {
+        const isLast = index === crumbs.length - 1;
+        const target =
+          crumb === "Home"
+            ? VIEWS.HOME
+            : crumb === "Forex Bot"
+              ? VIEWS.FOREX
+              : crumb === "Watchlist"
+                ? VIEWS.WATCHLIST
+                : VIEWS.DETAIL;
+
+        return (
+          <button
+            aria-current={isLast ? "page" : undefined}
+            className={isLast ? "activeCrumb" : ""}
+            disabled={isLast}
+            key={`${crumb}-${index}`}
+            type="button"
+            onClick={() => onNavigate(target)}
+          >
+            {crumb}
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+function DoorCard({ title, detail, badge, onClick }) {
+  const content = (
+    <>
+      <span>{detail}</span>
+      <strong>{title}</strong>
+      {badge ? <StatusBadge value={badge} /> : null}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button className="doorCard" type="button" onClick={onClick}>
+        {content}
+      </button>
+    );
+  }
+
+  return <div className="doorCard">{content}</div>;
+}
+
+function HomeScreen({ onOpenForex }) {
+  return (
+    <section className="screen homeScreen" aria-label="Home">
+      <div className="doorGrid">
+        <DoorCard detail="Open" title="Forex Bot" onClick={onOpenForex} />
+        <DoorCard badge={dashboardFixture.mode} detail="System" title="Status" />
+        <DoorCard badge={dashboardFixture.bridges.safeStatus} detail="Safety" title="Blocked" />
+        <DoorCard badge={dashboardFixture.source} detail="Settings" title="Locked" />
+      </div>
     </section>
   );
 }
 
-function Watchlist({ pairs, selectedPair, onSelectPair }) {
+function ForexHub({ riskPl, exitReadiness, onBack, onOpenWatchlist }) {
   return (
-    <Panel title="Watchlist" eyebrow="Ranked opportunities" className="watchlistPanel">
+    <section className="screen" aria-label="Forex Bot">
+      <div className="screenTop">
+        <button className="backButton" type="button" onClick={onBack}>
+          Back
+        </button>
+        <h2>Forex Bot</h2>
+      </div>
+
+      <div className="hubGrid">
+        <DoorCard detail="Open" title="Watchlist" onClick={onOpenWatchlist} />
+        <DoorCard detail="Current Position" title={riskPl.currentPosition} />
+        <DoorCard detail="Risk / P&L" title={riskPl.riskCap} />
+        <DoorCard badge={exitReadiness.autoExitStatus} detail="Exit" title="Readiness" />
+      </div>
+    </section>
+  );
+}
+
+function WatchlistScreen({ pairs, selectedPair, onBack, onViewPair }) {
+  return (
+    <section className="screen" aria-label="Watchlist">
+      <div className="screenTop">
+        <button className="backButton" type="button" onClick={onBack}>
+          Back
+        </button>
+        <h2>Watchlist</h2>
+      </div>
+
       <div className="watchlistList" role="list" aria-label="Ranked fixture pair watchlist">
         {pairs.map((pair) => {
           const selected = pair.pair === selectedPair;
           const source = dataSourceForPair(pair);
 
           return (
-            <button
-              aria-pressed={selected}
-              className={`watchlistItem ${selected ? "selectedWatchlistItem" : ""}`}
-              key={pair.pair}
-              type="button"
-              onClick={() => onSelectPair(pair.pair)}
-            >
-              <span className="watchlistRank">{pair.rank}</span>
-              <span className="watchlistPairBlock">
-                <strong>{formatPair(pair.pair)}</strong>
-                <span>{formatTime(pair.lastUpdated)}</span>
+            <div className={`watchlistItem ${selected ? "selectedWatchlistItem" : ""}`} key={pair.pair}>
+              <strong className="pairName">{formatPair(pair.pair)}</strong>
+              <span className="scorePair">
+                <span>Score</span>
+                <strong>{pair.opportunityScore}</strong>
               </span>
-              <span className="watchlistMetrics">
-                <WatchlistMetric label="Score" tone="good" value={pair.opportunityScore} />
-                <WatchlistMetric label="Conf" tone="good" value={pair.confidence} />
-                <WatchlistMetric label="Trend" value={pair.trend} />
-                <WatchlistMetric label="Price" tone="neutral" value={pair.fixturePrice} />
-                <WatchlistMetric label="Vol" value={pair.volatility} />
+              <span className="scorePair">
+                <span>Confidence</span>
+                <strong>{pair.confidence}</strong>
               </span>
-              <span className="watchlistStatus">
-                <StatusBadge value={pair.supertrend} />
-                <DataLabel compact source={source} />
-              </span>
-              <span className="watchlistAction">{selected ? "Selected" : "View Chart"}</span>
-            </button>
+              <StatusBadge value={pair.trend} />
+              <DataLabel compact source={source} />
+              <button
+                className="viewButton"
+                type="button"
+                onClick={() => onViewPair(pair.pair)}
+              >
+                View
+              </button>
+            </div>
           );
         })}
       </div>
-    </Panel>
+    </section>
   );
 }
 
-function SelectedPairPanel({ pair }) {
+function ChartPanel({ pair, source }) {
   const points = chartPolyline(pair.chart);
-  const source = dataSourceForPair(pair);
 
   return (
-    <Panel title="Selected Pair / Chart Data" eyebrow="Fixture chart handoff">
-      <div className="selectedPairHeader">
-        <div>
-          <span>Selected pair</span>
-          <strong>{formatPair(pair.pair)}</strong>
-          <DataLabel source={source} />
-        </div>
-        <StatusBadge value="FIXTURE_NOT_LIVE" />
+    <section className="panel chartPanel" aria-label={`${formatPair(pair.pair)} fixture chart`}>
+      <div className="panelHeading">
+        <p>Chart</p>
+        <h3>{pair.fixturePrice}</h3>
       </div>
-
-      <div className="chartShell" aria-label={`${formatPair(pair.pair)} fixture chart`}>
+      <div className="chartShell">
         <svg viewBox="0 0 340 132" role="img" aria-label="Fixture price line">
           <polyline className="chartGridLine" points="14,104 326,104" />
           <polyline className="chartGridLine" points="14,66 326,66" />
@@ -219,176 +306,120 @@ function SelectedPairPanel({ pair }) {
             />
           ))}
         </svg>
-        <DataLabel source={source} />
       </div>
-
-      <div className="fieldGrid">
-        <Field label="Fixture price" source={source} value={pair.fixturePrice} tone="neutral" />
-        <Field label="Trend direction" source={source} value={pair.trend} />
-        <Field label="Volatility" source={source} value={pair.volatility} />
-        <Field label="Session" source={source} value={pair.session} tone="neutral" />
-      </div>
-
-      <div className="explanationBox">
-        <span>AIOS explanation</span>
-        <p>{pair.reason}</p>
-      </div>
-    </Panel>
+      <DataLabel source={source} />
+    </section>
   );
 }
 
-function FactorList({ title, items, tone = "neutral" }) {
-  return (
-    <div className={`factorList factor-${tone}`}>
-      <h3>{title}</h3>
-      <ul>
-        {(items ?? ["UNKNOWN"]).map((item) => (
-          <li key={item}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function OpportunityExplanationPanel({ pair, riskPl, exitReadiness, bridges }) {
+function AnalyticsPanel({ pair }) {
   const explanation = pair.explanation ?? {};
-  const source = dataSourceForPair(pair);
-  const dataSourceLabel = source.label;
-  const liveTradingAllowed = Boolean(source.liveTradingAllowed);
 
   return (
-    <Panel title="Opportunity Explanation" eyebrow="AIOS selected-pair reasoning" className="opportunityPanel">
-      <div className="explanationHeader">
-        <div>
-          <span>Selected pair</span>
-          <strong>{formatPair(pair.pair)}</strong>
-          <DataLabel source={source} />
-        </div>
-        <div className="headerBadges">
-          <StatusBadge value={dataSourceLabel} />
-          <StatusBadge value={liveTradingAllowed ? "LIVE_DATA_ALLOWED" : "LIVE_DATA_BLOCKED"} />
-        </div>
+    <section className="panel" aria-label="Analytics">
+      <div className="panelHeading">
+        <p>Analytics</p>
+        <h3>Opportunity</h3>
       </div>
-
-      <div className="fieldGrid compact">
-        <Field label="Opportunity score" source={source} value={pair.opportunityScore} tone="good" />
-        <Field label="Confidence score" source={source} value={pair.confidence} tone="good" />
-        <Field label="Supertrend" source={source} value={pair.supertrend ?? "UNKNOWN"} />
-        <Field label="Volatility" source={source} value={pair.volatility ?? "UNKNOWN"} />
-        <Field label="Session" source={source} value={pair.session ?? "UNKNOWN"} tone="neutral" />
-        <Field
-          label="Spread / slippage"
-          source={source}
-          value={explanation.spreadSlippageStatus ?? "UNVERIFIED_FIXTURE"}
-        />
-        <Field label="P/L readiness" source={source} value={explanation.plReadiness ?? "BLOCKED_FIXTURE"} />
-        <Field label="Exit readiness" source={source} value={explanation.exitReadiness ?? exitReadiness.autoExitStatus} />
+      <p className="shortText">{explanation.rankingReason ?? pair.reason}</p>
+      <div className="miniGrid">
+        <StatusBadge value={pair.supertrend} />
+        <StatusBadge value={explanation.spreadSlippageStatus ?? "UNVERIFIED_FIXTURE"} />
       </div>
-
-      <div className="rankReason">
-        <span>Why AIOS ranked this pair</span>
-        <p>{explanation.rankingReason ?? pair.reason}</p>
-      </div>
-
-      <div className="factorGrid">
-        <FactorList title="Bullish factors" items={explanation.bullishFactors} tone="good" />
-        <FactorList title="Bearish / risk factors" items={explanation.riskFactors} tone="danger" />
-      </div>
-
-      <div className="decisionGrid">
-        <Field label="Safe / blocked decision" source={source} value={explanation.safeDecision ?? bridges.safeStatus} />
-        <Field label="Current position" source={source} value={riskPl.currentPosition} tone="neutral" />
-      </div>
-
-      <div className="blockReason">
-        <span>Block reason</span>
-        <p>{explanation.blockReason ?? exitReadiness.blockReason}</p>
-      </div>
-
-      <div className="nextAction">
-        <span>Next safe action</span>
-        <p>{explanation.nextSafeAction ?? bridges.nextAction}</p>
-      </div>
-    </Panel>
+    </section>
   );
 }
 
-function RiskPlPanel({ riskPl }) {
+function RiskPanel({ riskPl }) {
   const source = dataSourceForPair();
 
   return (
-    <Panel title="Risk / P&L" eyebrow="Sanitized fixture values">
+    <section className="panel" aria-label="Risk and P/L">
+      <div className="panelHeading">
+        <p>Risk</p>
+        <h3>P/L</h3>
+      </div>
       <div className="fieldGrid">
-        <Field label="Realized P/L" source={source} value={riskPl.realizedPl} tone="neutral" />
-        <Field label="Unrealized P/L" source={source} value={riskPl.unrealizedPl} tone="neutral" />
-        <Field label="Risk cap" source={source} value={riskPl.riskCap} tone="warn" />
-        <Field label="Position size" source={source} value={riskPl.positionSize} tone="warn" />
-        <Field label="Current position" source={source} value={riskPl.currentPosition} tone="neutral" />
+        <Field compact label="Realized" source={source} value={riskPl.realizedPl} tone="neutral" />
+        <Field compact label="Unrealized" source={source} value={riskPl.unrealizedPl} tone="neutral" />
+        <Field compact label="Cap" source={source} value={riskPl.riskCap} tone="warn" />
+        <Field compact label="Position" source={source} value={riskPl.currentPosition} tone="neutral" />
       </div>
-    </Panel>
+    </section>
   );
 }
 
-function ExitReadinessPanel({ exitReadiness }) {
+function ExitPanel({ exitReadiness }) {
   const source = dataSourceForPair();
 
   return (
-    <Panel title="Exit Readiness" eyebrow="Entry blocked without exit plan">
-      <div className="readinessSummary">
-        <span>Auto-exit status</span>
-        <div className="labeledValue">
-          <StatusBadge value={exitReadiness.autoExitStatus} />
-          <DataLabel compact source={source} />
-        </div>
+    <section className="panel" aria-label="Exit readiness">
+      <div className="panelHeading">
+        <p>Exit</p>
+        <h3>{exitReadiness.autoExitStatus}</h3>
       </div>
       <div className="controlList">
         {exitReadiness.controls.map((control) => (
           <div className="controlRow" key={control.label}>
             <span>{control.label}</span>
-            <div className="labeledValue">
-              <StatusBadge value={control.status} />
-              <DataLabel compact source={source} />
-            </div>
+            <StatusBadge value={control.status} />
           </div>
         ))}
       </div>
-      <div className="blockReason">
-        <span>Block reason</span>
-        <p>{exitReadiness.blockReason}</p>
-      </div>
-    </Panel>
+      <DataLabel compact source={source} />
+    </section>
   );
 }
 
-function BridgeSafetyPanel({ bridges }) {
-  const source = dataSourceForPair();
+function DecisionPanel({ pair, bridges, exitReadiness }) {
+  const source = dataSourceForPair(pair);
+  const explanation = pair.explanation ?? {};
 
   return (
-    <Panel title="Bridges / Safety" eyebrow="Fail-closed summary">
-      <div className="fieldGrid">
-        <Field label="Secret bridge" source={source} value={bridges.secretBridge} />
-        <Field label="Broker bridge" source={source} value={bridges.brokerBridge} />
-        <Field label="Kill switch" source={source} value={bridges.killSwitch} />
-        <Field label="Safe / blocked" source={source} value={bridges.safeStatus} />
-        <Field label="SOS" source={source} value={bridges.sos} tone="neutral" />
+    <section className="panel decisionPanel" aria-label="Decision">
+      <div className="panelHeading">
+        <p>Decision</p>
+        <h3>{explanation.safeDecision ?? bridges.safeStatus}</h3>
       </div>
-      <div className="nextAction">
-        <span>Next action</span>
-        <p>{bridges.nextAction}</p>
-      </div>
-    </Panel>
+      <p className="shortText">{explanation.nextSafeAction ?? bridges.nextAction}</p>
+      <p className="shortText">{explanation.blockReason ?? exitReadiness.blockReason}</p>
+      <DataLabel source={source} />
+    </section>
   );
 }
 
-function WorkflowPanel({ workflow }) {
+function PairDetail({ pair, riskPl, exitReadiness, bridges, onBack }) {
+  const source = dataSourceForPair(pair);
+
   return (
-    <Panel title="Operator Workflow" eyebrow="Read-only gate sequence">
-      <ol className="workflowList">
-        {workflow.map((step) => (
-          <li key={step}>{step}</li>
-        ))}
-      </ol>
-    </Panel>
+    <section className="screen detailScreen" aria-label="Pair Detail">
+      <div className="screenTop">
+        <button className="backButton" type="button" onClick={onBack}>
+          Back
+        </button>
+        <h2>{formatPair(pair.pair)}</h2>
+        <StatusBadge value={bridges.safeStatus} />
+      </div>
+
+      <div className="detailGrid">
+        <section className="panel pricePanel" aria-label="Price">
+          <div className="panelHeading">
+            <p>Price</p>
+            <h3>{pair.fixturePrice}</h3>
+          </div>
+          <div className="miniGrid">
+            <StatusBadge value={pair.trend} />
+            <StatusBadge value={pair.session} />
+          </div>
+          <DataLabel source={source} />
+        </section>
+        <ChartPanel pair={pair} source={source} />
+        <AnalyticsPanel pair={pair} />
+        <RiskPanel riskPl={riskPl} />
+        <ExitPanel exitReadiness={exitReadiness} />
+        <DecisionPanel bridges={bridges} exitReadiness={exitReadiness} pair={pair} />
+      </div>
+    </section>
   );
 }
 
@@ -400,60 +431,49 @@ export default function MinimalOperatorDashboard() {
       ),
     []
   );
+  const [view, setView] = useState(VIEWS.HOME);
   const [selectedPair, setSelectedPair] = useState(dashboardFixture.selectedPair);
   const selected = pairs.find((pair) => pair.pair === selectedPair) ?? pairs[0];
-  const selectedSource = dataSourceForPair(selected);
+
+  function openPair(pair) {
+    setSelectedPair(pair);
+    setView(VIEWS.DETAIL);
+  }
 
   return (
     <main className="minimalOperatorDashboard">
-      <header className="dashboardHeader">
-        <div>
-          <p className="kicker">AIOS Minimal Operator Dashboard</p>
-          <h1>Forex Control View</h1>
-          <p>
-            Read-only vertical slice for watchlist ranking, pair review, P/L visibility,
-            exit readiness, and bridge safety.
-          </p>
-        </div>
-        <div className="headerBadges" aria-label="Dashboard safety labels">
-          <StatusBadge value={dashboardFixture.mode} />
-          <StatusBadge value={dashboardFixture.source} />
-          <StatusBadge value={dashboardFixture.bridges.safeStatus} />
-        </div>
-      </header>
+      <ShellHeader view={view} />
+      <Breadcrumb selected={selected} view={view} onNavigate={setView} />
 
-      <div className="dashboardGrid">
-        <section className="primaryWorkArea" aria-label="Pair selection and explanation">
-          <Watchlist pairs={pairs} selectedPair={selected.pair} onSelectPair={setSelectedPair} />
-          <div className="analysisStack">
-            <section className="statusBand" aria-label="Current dashboard status">
-              <Field label="Selected pair" source={selectedSource} value={formatPair(selected.pair)} tone="neutral" />
-              <Field label="Opportunity score" source={selectedSource} value={selected.opportunityScore} tone="good" />
-              <Field label="Confidence" source={selectedSource} value={selected.confidence} tone="good" />
-              <Field label="Safe / blocked" source={selectedSource} value={dashboardFixture.bridges.safeStatus} />
-              <Field label="Next action" source={selectedSource} value={dashboardFixture.bridges.nextAction} tone="warn" />
-              <Field label="Last update" source={selectedSource} value={formatTime(selected.lastUpdated)} tone="neutral" />
-            </section>
-            <SelectedPairPanel pair={selected} />
-            <OpportunityExplanationPanel
-              bridges={dashboardFixture.bridges}
-              exitReadiness={dashboardFixture.exitReadiness}
-              pair={selected}
-              riskPl={dashboardFixture.riskPl}
-            />
-          </div>
-        </section>
+      {view === VIEWS.HOME ? <HomeScreen onOpenForex={() => setView(VIEWS.FOREX)} /> : null}
 
-        <section className="safetyWorkArea" aria-label="Risk, exit, and bridge safety">
-          <RiskPlPanel riskPl={dashboardFixture.riskPl} />
-          <ExitReadinessPanel exitReadiness={dashboardFixture.exitReadiness} />
-          <BridgeSafetyPanel bridges={dashboardFixture.bridges} />
-        </section>
+      {view === VIEWS.FOREX ? (
+        <ForexHub
+          exitReadiness={dashboardFixture.exitReadiness}
+          riskPl={dashboardFixture.riskPl}
+          onBack={() => setView(VIEWS.HOME)}
+          onOpenWatchlist={() => setView(VIEWS.WATCHLIST)}
+        />
+      ) : null}
 
-        <div className="workflowCompact">
-          <WorkflowPanel workflow={dashboardFixture.workflow} />
-        </div>
-      </div>
+      {view === VIEWS.WATCHLIST ? (
+        <WatchlistScreen
+          pairs={pairs}
+          selectedPair={selected.pair}
+          onBack={() => setView(VIEWS.FOREX)}
+          onViewPair={openPair}
+        />
+      ) : null}
+
+      {view === VIEWS.DETAIL ? (
+        <PairDetail
+          bridges={dashboardFixture.bridges}
+          exitReadiness={dashboardFixture.exitReadiness}
+          pair={selected}
+          riskPl={dashboardFixture.riskPl}
+          onBack={() => setView(VIEWS.WATCHLIST)}
+        />
+      ) : null}
     </main>
   );
 }
