@@ -101,28 +101,6 @@ button {
   justify-content: flex-end;
 }
 
-.iconLabel {
-  min-width: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.42em;
-}
-
-.iconGlyph {
-  flex: 0 0 auto;
-  line-height: 1;
-}
-
-.dashboardHeader h1 .iconGlyph,
-.screenTop h2 .iconGlyph {
-  font-size: 0.82em;
-  filter: drop-shadow(0 0 10px rgba(91, 190, 203, 0.26));
-}
-
-.panelHeading .iconLabel {
-  gap: 0.36em;
-}
-
 .statusBadge {
   min-height: 24px;
   display: inline-flex;
@@ -136,12 +114,6 @@ button {
   font-weight: 900;
   text-transform: uppercase;
   white-space: nowrap;
-}
-
-.statusBadgeIcon {
-  flex: 0 0 auto;
-  font-size: 11px;
-  line-height: 1;
 }
 
 .status-good {
