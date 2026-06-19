@@ -459,6 +459,41 @@ function armingGateDataLabelSource() {
   };
 }
 
+function buildExecutionReviewStatus() {
+  return {
+    dataLabel: "EXECUTION_REVIEW_DRY_RUN",
+    executionReviewReady: false,
+    liveExecutionAllowed: false,
+    liveTradePlaced: false,
+    requiredHumanPhrase:
+      "I AUTHORIZE ONE LIVE MICRO TRADE EXECUTION WITH MAXIMUM MICRO RISK",
+    evidencePresent: [
+      "read-only bridge evidence evaluated when report is available",
+      "paper loop evidence evaluated when report is available",
+      "arming gate evidence evaluated when report is available",
+    ],
+    evidenceMissing: [
+      "future execution phrase is not provided in this review packet",
+      "separate one-shot execution packet is not approved here",
+      "live broker write path remains unavailable by design",
+    ],
+    blockedReasons: [
+      "execution review packet is not an execution packet",
+      "live execution remains blocked",
+      "broker write calls are not allowed",
+    ],
+    nextSafeAction:
+      "Review sanitized evidence, resolve blockers, and require a separate Human Owner-approved execution packet before any live micro-trade can be considered.",
+    nextPacketCandidate:
+      "AIOS-FOREX-ONE-SHOT-LIVE-MICRO-TRADE-EXECUTION-V1",
+  };
+}
+
+function executionReviewDataLabelSource() {
+  const executionReview = buildExecutionReviewStatus();
+  return executionReview.dataLabel;
+}
+
 function buildLiveReadinessModel(pair) {
   const dataSource = dashboardFixture.dataSource ?? {};
   const bridges = dashboardFixture.bridges ?? {};
@@ -468,6 +503,8 @@ function buildLiveReadinessModel(pair) {
   const bridgeStatus = buildReadOnlyBridgeStatus();
   const paperLoopStatus = buildPaperLoopStatus();
   const armingGateStatus = buildArmingGateStatus();
+  const executionReviewStatus = buildExecutionReviewStatus();
+  void executionReviewStatus;
   const sourceType = normalizeDataSourceType(
     bridgeStatus.sourceType ?? explanation.dataSourceType ?? dataSource.DATA_SOURCE_TYPE ?? dashboardFixture.source
   );
@@ -1411,6 +1448,65 @@ function ReadinessSection({ section, source }) {
   );
 }
 
+function ExecutionReviewStatusPanel() {
+  const executionReview = buildExecutionReviewStatus();
+  const summaryRows = [
+    {
+      label: "EXECUTION_REVIEW_READY",
+      value: String(executionReview.executionReviewReady).toUpperCase(),
+    },
+    {
+      label: "LIVE_EXECUTION_ALLOWED",
+      value: String(executionReview.liveExecutionAllowed).toUpperCase(),
+    },
+    {
+      label: "LIVE_TRADE_PLACED",
+      value: String(executionReview.liveTradePlaced).toUpperCase(),
+    },
+    {
+      label: "NEXT PACKET CANDIDATE",
+      value: executionReview.nextPacketCandidate,
+    },
+  ];
+
+  return (
+    <section className="executionReviewStatusPanel" aria-labelledby="execution-review-status-title">
+      <div className="readinessSectionHeader">
+        <h3 id="execution-review-status-title">One-shot execution review</h3>
+        <span>{executionReview.executionReviewReady ? "READY" : "BLOCKED"}</span>
+      </div>
+      <div className="executionReviewGrid">
+        {summaryRows.map((row) => (
+          <div className="readinessField" key={row.label}>
+            <span>{row.label}</span>
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </div>
+      <div className="readinessField">
+        <span>REQUIRED HUMAN PHRASE</span>
+        <strong>{executionReview.requiredHumanPhrase}</strong>
+      </div>
+      <div className="readinessField">
+        <span>EVIDENCE PRESENT</span>
+        <strong>{executionReview.evidencePresent.join("; ")}</strong>
+      </div>
+      <div className="readinessField">
+        <span>EVIDENCE MISSING</span>
+        <strong>{executionReview.evidenceMissing.join("; ")}</strong>
+      </div>
+      <div className="readinessField">
+        <span>BLOCKED REASONS</span>
+        <strong>{executionReview.blockedReasons.join("; ")}</strong>
+      </div>
+      <div className="readinessField">
+        <span>NEXT SAFE ACTION</span>
+        <strong>{executionReview.nextSafeAction}</strong>
+      </div>
+    </section>
+  );
+}
+
 function ExecutionReadinessPage({ pair, onBack }) {
   const source = dataSourceForPair(pair);
   const readiness = buildLiveReadinessModel(pair);
@@ -1421,6 +1517,7 @@ function ExecutionReadinessPage({ pair, onBack }) {
       <BridgeStatusPanel />
       <PaperLoopStatusPanel />
       <ArmingGateStatusPanel />
+      <ExecutionReviewStatusPanel />
       <section className="panel readinessSummaryPanel" aria-label="Overall execution readiness">
         <div className="panelHeading">
           <p>Overall status</p>
