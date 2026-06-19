@@ -266,6 +266,12 @@ button {
 
 .interactiveDoorCard {
   border-color: rgba(91, 190, 203, 0.34);
+  cursor: pointer;
+}
+
+.disabledDoorCard {
+  cursor: default;
+  opacity: 0.76;
 }
 
 .doorCard strong {
@@ -279,6 +285,16 @@ button {
   max-width: 100%;
   justify-self: start;
   white-space: normal;
+}
+
+.simpleGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.notePanel {
+  grid-column: 1 / -1;
 }
 
 .watchlistList {
@@ -483,7 +499,8 @@ button {
 @media (max-width: 980px) {
   .doorGrid,
   .hubGrid,
-  .detailGrid {
+  .detailGrid,
+  .simpleGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -525,7 +542,8 @@ button {
   .doorGrid,
   .hubGrid,
   .detailGrid,
-  .fieldGrid {
+  .fieldGrid,
+  .simpleGrid {
     grid-template-columns: 1fr;
   }
 
