@@ -83,6 +83,7 @@ def build_live_micro_trade_arming_gate_result(
     read_only_eval = evaluate_read_only_evidence(read_only_model)
     paper_eval = evaluate_paper_evidence(paper_model)
     risk_eval = evaluate_risk_requirements(
+        read_only_eval=read_only_eval,
         max_units=max_units,
         max_trade_risk=max_trade_risk,
         daily_loss_cap=daily_loss_cap,
@@ -269,6 +270,7 @@ def evaluate_paper_evidence(model: Mapping[str, Any]) -> dict[str, Any]:
 
 def evaluate_risk_requirements(
     *,
+    read_only_eval: Mapping[str, Any] | None = None,
     max_units: int,
     max_trade_risk: float,
     daily_loss_cap: float,
@@ -279,7 +281,8 @@ def evaluate_risk_requirements(
         "broker_account_live_state_not_reconciled_for_execution",
         "no_open_live_position_reconciliation_missing",
     ]
-    approval = dict(read_only_eval.get("read_only_evidence_approval") or {})
+    approval_source = dict(read_only_eval or {})
+    approval = dict(approval_source.get("read_only_evidence_approval") or {})
     if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is True:
         if approval.get("broker_account_reachable") is True:
             blockers = [
