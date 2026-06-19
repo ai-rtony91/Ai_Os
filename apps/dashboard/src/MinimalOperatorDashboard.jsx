@@ -152,8 +152,8 @@ function IconLabel({ icon, label, className = "" }) {
 
 function BackButton({ onClick }) {
   return (
-    <button className="backButton" type="button" onClick={onClick}>
-      ← Back
+    <button aria-label="Back" className="backButton iconOnlyButton" title="Back" type="button" onClick={onClick}>
+      <span aria-hidden="true">←</span>
     </button>
   );
 }
@@ -270,20 +270,20 @@ function ShellHeader({ view }) {
 }
 
 function Breadcrumb({ view, selected, onNavigate }) {
-  const crumbs = ["Home"];
+  const crumbs = [{ label: "Home", icon: ICONS.operator }];
 
   if (view === VIEWS.FOREX || FOREX_CHILD_VIEWS.has(view)) {
-    crumbs.push("Forex Bot");
+    crumbs.push({ label: "Forex Bot", icon: ICONS.forex });
   }
 
   if (view === VIEWS.WATCHLIST || view === VIEWS.DETAIL) {
-    crumbs.push("Watchlist");
+    crumbs.push({ label: "Watchlist", icon: ICONS.watchlist });
   }
 
   if (view === VIEWS.DETAIL) {
-    crumbs.push(formatPair(selected.pair));
+    crumbs.push({ label: formatPair(selected.pair), icon: ICONS.detail, showLabel: true });
   } else if (view !== VIEWS.HOME && view !== VIEWS.FOREX && view !== VIEWS.WATCHLIST) {
-    crumbs.push(viewLabel(view));
+    crumbs.push({ label: viewLabel(view), icon: viewIcon(view) });
   }
 
   return (
@@ -291,24 +291,27 @@ function Breadcrumb({ view, selected, onNavigate }) {
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1;
         const target =
-          crumb === "Home"
+          crumb.label === "Home"
             ? VIEWS.HOME
-            : crumb === "Forex Bot"
+            : crumb.label === "Forex Bot"
               ? VIEWS.FOREX
-              : crumb === "Watchlist"
+              : crumb.label === "Watchlist"
                 ? VIEWS.WATCHLIST
                 : view;
 
         return (
           <button
             aria-current={isLast ? "page" : undefined}
+            aria-label={crumb.label}
             className={isLast ? "activeCrumb" : ""}
             disabled={isLast}
-            key={`${crumb}-${index}`}
+            key={`${crumb.label}-${index}`}
+            title={crumb.label}
             type="button"
             onClick={() => onNavigate(target)}
           >
-            {crumb}
+            <span aria-hidden="true">{crumb.icon}</span>
+            {crumb.showLabel ? <span>{crumb.label}</span> : null}
           </button>
         );
       })}
@@ -316,48 +319,67 @@ function Breadcrumb({ view, selected, onNavigate }) {
   );
 }
 
-function DoorCard({ title, detail, badge, icon, onClick, disabled = false }) {
+function DoorCard({ title, icon, onClick, disabled = false }) {
   const content = (
-    <>
-      <span className="doorCardDetail">{detail}</span>
-      <span className="doorCardTitle">
-        <span aria-hidden="true" className="doorCardIcon">
-          {icon}
-        </span>
-        <strong>{title}</strong>
-      </span>
-      {badge ? <StatusBadge value={badge} /> : null}
-    </>
+    <span aria-hidden="true" className="doorCardIconOnly">
+      {icon}
+    </span>
   );
 
   if (onClick && !disabled) {
     return (
-      <button className="doorCard interactiveDoorCard" type="button" onClick={onClick}>
+      <button
+        aria-label={title}
+        className="doorCard interactiveDoorCard"
+        title={title}
+        type="button"
+        onClick={onClick}
+      >
         {content}
       </button>
     );
   }
 
-  return <div className={`doorCard ${disabled ? "disabledDoorCard" : ""}`}>{content}</div>;
+  return (
+    <div
+      aria-label={title}
+      className={`doorCard ${disabled ? "disabledDoorCard" : ""}`}
+      title={title}
+    >
+      {content}
+    </div>
+  );
+}
+
+function PairViewButton({ pair, onViewPair }) {
+  const label = `View ${formatPair(pair)} details`;
+
+  return (
+    <button
+      aria-label={label}
+      className="viewButton iconOnlyButton"
+      title={label}
+      type="button"
+      onClick={() => onViewPair(pair)}
+    >
+      <span aria-hidden="true">{ICONS.detail}</span>
+    </button>
+  );
 }
 
 function HomeScreen({ onNavigate }) {
   return (
     <section className="screen homeScreen" aria-label="Home">
       <div className="doorGrid">
-        <DoorCard icon={ICONS.forex} detail="Open" title="Forex Bot" onClick={() => onNavigate(VIEWS.FOREX)} />
-        <DoorCard icon={ICONS.system} badge="READY" detail="Open" title="System" onClick={() => onNavigate(VIEWS.SYSTEM)} />
+        <DoorCard icon={ICONS.forex} title="Forex Bot" onClick={() => onNavigate(VIEWS.FOREX)} />
+        <DoorCard icon={ICONS.system} title="System" onClick={() => onNavigate(VIEWS.SYSTEM)} />
         <DoorCard
           icon={ICONS.safety}
-          badge={dashboardFixture.bridges.safeStatus}
-          detail="Open"
           title="Safety"
           onClick={() => onNavigate(VIEWS.SAFETY)}
         />
         <DoorCard
           icon={ICONS.settings}
-          badge={dashboardFixture.source}
-          detail="Open"
           title="Settings"
           onClick={() => onNavigate(VIEWS.SETTINGS)}
         />
@@ -366,7 +388,7 @@ function HomeScreen({ onNavigate }) {
   );
 }
 
-function ForexHub({ riskPl, exitReadiness, onBack, onNavigate }) {
+function ForexHub({ onBack, onNavigate }) {
   return (
     <section className="screen" aria-label="Forex Bot">
       <div className="screenTop">
@@ -377,13 +399,11 @@ function ForexHub({ riskPl, exitReadiness, onBack, onNavigate }) {
       </div>
 
       <div className="hubGrid">
-        <DoorCard icon={ICONS.watchlist} detail="Open" title="Watchlist" onClick={() => onNavigate(VIEWS.WATCHLIST)} />
-        <DoorCard icon={ICONS.position} detail="Open" title="Position" onClick={() => onNavigate(VIEWS.POSITION)} />
-        <DoorCard icon={ICONS.risk} detail="Open" title="Risk / P&L" onClick={() => onNavigate(VIEWS.RISK)} />
+        <DoorCard icon={ICONS.watchlist} title="Watchlist" onClick={() => onNavigate(VIEWS.WATCHLIST)} />
+        <DoorCard icon={ICONS.position} title="Position" onClick={() => onNavigate(VIEWS.POSITION)} />
+        <DoorCard icon={ICONS.risk} title="Risk / P&L" onClick={() => onNavigate(VIEWS.RISK)} />
         <DoorCard
           icon={ICONS.exit}
-          badge={exitReadiness.autoExitStatus}
-          detail="Open"
           title="Exit"
           onClick={() => onNavigate(VIEWS.EXIT)}
         />
@@ -420,13 +440,7 @@ function WatchlistScreen({ pairs, selectedPair, onBack, onViewPair }) {
               </span>
               <StatusBadge value={pair.trend} />
               <DataLabel compact source={source} />
-              <button
-                className="viewButton"
-                type="button"
-                onClick={() => onViewPair(pair.pair)}
-              >
-                View
-              </button>
+              <PairViewButton pair={pair.pair} onViewPair={onViewPair} />
             </div>
           );
         })}
@@ -728,8 +742,6 @@ export default function MinimalOperatorDashboard() {
 
       {view === VIEWS.FOREX ? (
         <ForexHub
-          exitReadiness={dashboardFixture.exitReadiness}
-          riskPl={dashboardFixture.riskPl}
           onBack={() => setView(VIEWS.HOME)}
           onNavigate={setView}
         />
