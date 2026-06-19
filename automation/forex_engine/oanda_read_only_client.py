@@ -52,7 +52,7 @@ class OandaReadOnlyClient:
     def __repr__(self) -> str:
         return (
             "OandaReadOnlyClient(environment="
-            f"{self.environment!r}, token='PRESENT_OR_MISSING', account_id='MASKED')"
+            f"{self.environment!r}, credential_status='PRESENT_OR_MISSING', account_id='MASKED')"
         )
 
     def request_json(
