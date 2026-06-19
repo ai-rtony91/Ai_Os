@@ -187,7 +187,8 @@ button {
 
 .breadcrumb button,
 .backButton,
-.viewButton {
+.viewButton,
+.doorCardAction {
   min-height: 30px;
   cursor: pointer;
   border: 1px solid rgba(91, 190, 203, 0.42);
@@ -209,11 +210,13 @@ button {
 
 .doorCard:hover,
 .doorCard:focus-visible,
+.doorCard:focus-within,
 .watchlistItem:focus-within,
 .watchlistItem:hover,
 .breadcrumb button:focus-visible,
 .backButton:focus-visible,
-.viewButton:focus-visible {
+.viewButton:focus-visible,
+.doorCardAction:focus-visible {
   border-color: var(--focus);
   outline: 2px solid rgba(132, 210, 222, 0.22);
   outline-offset: 2px;
@@ -261,8 +264,8 @@ button {
   text-align: left;
 }
 
-button.doorCard {
-  cursor: pointer;
+.interactiveDoorCard {
+  border-color: rgba(91, 190, 203, 0.34);
 }
 
 .doorCard strong {
@@ -270,6 +273,12 @@ button.doorCard {
   font-size: clamp(22px, 2.4vw, 34px);
   line-height: 1;
   overflow-wrap: anywhere;
+}
+
+.doorCardAction {
+  max-width: 100%;
+  justify-self: start;
+  white-space: normal;
 }
 
 .watchlistList {
