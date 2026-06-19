@@ -67,7 +67,6 @@ button {
 .panel h3,
 .panel p,
 .doorCard span,
-.doorCard strong,
 .field span,
 .field strong,
 .shortText {
@@ -82,7 +81,6 @@ button {
 
 .kicker,
 .panelHeading p,
-.doorCardDetail,
 .field span,
 .scorePair span {
   color: var(--neutral);
@@ -216,8 +214,7 @@ button {
 
 .breadcrumb button,
 .backButton,
-.viewButton,
-.doorCardAction {
+.viewButton {
   min-height: 30px;
   display: inline-flex;
   align-items: center;
@@ -247,11 +244,28 @@ button {
 .watchlistItem:hover,
 .breadcrumb button:focus-visible,
 .backButton:focus-visible,
-.viewButton:focus-visible,
-.doorCardAction:focus-visible {
+.viewButton:focus-visible {
   border-color: var(--focus);
   outline: 2px solid rgba(132, 210, 222, 0.22);
   outline-offset: 2px;
+}
+
+.breadcrumb button {
+  min-width: 34px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.breadcrumb button span + span {
+  font-size: 11px;
+  line-height: 1;
+}
+
+.iconOnlyButton {
+  width: 36px;
+  padding-inline: 0;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .screen {
@@ -287,13 +301,11 @@ button {
 }
 
 .doorCard {
-  min-height: 132px;
+  min-height: 148px;
   display: grid;
-  align-content: space-between;
-  justify-items: start;
-  gap: 10px;
-  padding: 14px;
-  text-align: left;
+  place-items: center;
+  padding: 18px;
+  text-align: center;
 }
 
 .interactiveDoorCard {
@@ -319,39 +331,21 @@ button {
   opacity: 0.76;
 }
 
-.doorCardTitle {
-  min-width: 0;
-  width: 100%;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: end;
-  gap: 10px;
-}
-
-.doorCardIcon {
-  width: 36px;
-  height: 36px;
+.doorCardIconOnly {
+  width: 74px;
+  height: 74px;
   display: inline-grid;
   place-items: center;
-  border: 1px solid rgba(91, 190, 203, 0.3);
+  border: 1px solid rgba(91, 190, 203, 0.42);
   border-radius: 8px;
-  background: rgba(9, 10, 8, 0.44);
-  box-shadow: inset 0 0 0 1px rgba(210, 204, 188, 0.04);
-  font-size: 22px;
+  background:
+    linear-gradient(180deg, rgba(91, 190, 203, 0.12), rgba(9, 10, 8, 0.42)),
+    rgba(9, 10, 8, 0.44);
+  box-shadow:
+    inset 0 0 0 1px rgba(210, 204, 188, 0.04),
+    0 0 24px rgba(91, 190, 203, 0.12);
+  font-size: 42px;
   line-height: 1;
-}
-
-.doorCard strong {
-  color: var(--text);
-  font-size: clamp(22px, 2.4vw, 34px);
-  line-height: 1;
-  overflow-wrap: anywhere;
-}
-
-.doorCardAction {
-  max-width: 100%;
-  justify-self: start;
-  white-space: normal;
 }
 
 .simpleGrid {
