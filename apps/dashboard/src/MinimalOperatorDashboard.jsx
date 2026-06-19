@@ -189,11 +189,14 @@ function Field({ label, value, tone, source = dataSourceForPair(), compact = fal
 }
 
 function ShellHeader({ view }) {
+  const label = viewLabel(view);
+
   return (
     <header className="dashboardHeader">
       <div>
-        <p className="kicker">AIOS</p>
-        <h1>{viewLabel(view)}</h1>
+        <h1 aria-label={label} className="pageIdentityGlyph" title={label}>
+          <span aria-hidden="true">{viewIcon(view)}</span>
+        </h1>
       </div>
       <div className="headerBadges" aria-label="Dashboard safety labels">
         <StatusBadge value={dashboardFixture.mode} />
@@ -334,7 +337,6 @@ function ForexHub({ onBack, onNavigate }) {
     <section className="screen" aria-label="Forex Bot">
       <div className="screenTop">
         <BackButton onClick={onBack} />
-        <h2>Forex Bot</h2>
       </div>
 
       <div className="hubGrid">
@@ -356,7 +358,6 @@ function WatchlistScreen({ pairs, selectedPair, onBack, onViewPair }) {
     <section className="screen" aria-label="Watchlist">
       <div className="screenTop">
         <BackButton onClick={onBack} />
-        <h2>Watchlist</h2>
       </div>
 
       <div className="watchlistList" role="list" aria-label="Ranked fixture pair watchlist">
@@ -536,7 +537,6 @@ function SimpleStatusPage({ title, backLabel, onBack, children }) {
     <section className="screen" aria-label={title}>
       <div className="screenTop">
         <BackButton onClick={onBack} />
-        <h2>{title}</h2>
         <StatusBadge value={backLabel} />
       </div>
       <div className="simpleGrid">{children}</div>
