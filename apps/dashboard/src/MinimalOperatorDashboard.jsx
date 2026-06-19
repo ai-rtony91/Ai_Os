@@ -377,6 +377,11 @@ const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
     id: "forex-paper-sandbox-status",
     label: "/api/forex/paper-sandbox/status",
     path: "/api/forex/paper-sandbox/status"
+  },
+  {
+    id: "forex-paper-order-preview",
+    label: "/api/forex/paper-sandbox/order-preview",
+    path: "/api/forex/paper-sandbox/order-preview"
   }
 ];
 
@@ -384,6 +389,11 @@ const SAFE_STATUS_SUMMARY_KEYS = [
   "status",
   "state",
   "mode",
+  "preview_status",
+  "selected_pair",
+  "side",
+  "units",
+  "order_type",
   "paper_preview_ready",
   "sandbox_demo_connected",
   "live_execution_allowed",
@@ -391,6 +401,11 @@ const SAFE_STATUS_SUMMARY_KEYS = [
   "order_route_enabled",
   "close_route_enabled",
   "auto_trade_enabled",
+  "stop_loss_required",
+  "take_profit_required",
+  "max_loss_required",
+  "order_sent",
+  "trade_placed",
   "next_safe_step",
   "ok",
   "healthy",
@@ -528,6 +543,21 @@ function summarizeSafeStatusPayload(payload) {
   return rows.length > 0 ? rows : [{ label: "response", value: "JSON_RECEIVED" }];
 }
 
+function collectSafeStatusFields(payload) {
+  if (!isSafePlainObject(payload)) {
+    return {};
+  }
+
+  return SAFE_STATUS_SUMMARY_KEYS.reduce((fields, key) => {
+    const safeText = safePrimitiveText(findSafeValue(payload, key));
+    if (safeText) {
+      fields[key] = safeText;
+    }
+
+    return fields;
+  }, {});
+}
+
 async function readSafeStatusBody(response) {
   const contentType = response.headers.get("content-type") ?? "";
 
@@ -556,6 +586,7 @@ async function fetchSafeDashboardStatusEndpoint(endpoint, signal) {
       ...endpoint,
       httpStatus: response.status,
       ok: response.ok,
+      safeFields: collectSafeStatusFields(payload),
       summary: summarizeSafeStatusPayload(payload)
     };
   } catch (error) {
@@ -563,6 +594,7 @@ async function fetchSafeDashboardStatusEndpoint(endpoint, signal) {
       ...endpoint,
       httpStatus: "UNAVAILABLE",
       ok: false,
+      safeFields: {},
       summary: [
         {
           label: "status",
@@ -571,6 +603,79 @@ async function fetchSafeDashboardStatusEndpoint(endpoint, signal) {
       ]
     };
   }
+}
+
+function safeEndpointField(endpointResult, key, fallback) {
+  if (!endpointResult?.ok) {
+    return fallback;
+  }
+
+  return endpointResult.safeFields?.[key] ?? fallback;
+}
+
+function statusText(value) {
+  return String(value ?? "")
+    .replaceAll("_", " ")
+    .toUpperCase();
+}
+
+function requiredText(value) {
+  return String(value).toLowerCase() === "true" ? "REQUIRED" : "NOT REQUIRED";
+}
+
+function yesNoText(value) {
+  return String(value).toLowerCase() === "true" ? "YES" : "NO";
+}
+
+function liveExecutionText(value) {
+  return String(value).toLowerCase() === "true" ? "ALLOWED" : "BLOCKED";
+}
+
+function buildPaperOrderPreviewEngineRows(endpointResult) {
+  const pair = safeEndpointField(endpointResult, "selected_pair", "EUR_USD");
+  const side = safeEndpointField(endpointResult, "side", "BUY");
+  const units = safeEndpointField(endpointResult, "units", "1");
+  const orderType = statusText(safeEndpointField(endpointResult, "order_type", "MARKET_PREVIEW_ONLY"));
+  const stopLoss = requiredText(safeEndpointField(endpointResult, "stop_loss_required", "true"));
+  const maxLoss = requiredText(safeEndpointField(endpointResult, "max_loss_required", "true"));
+  const orderSent = yesNoText(safeEndpointField(endpointResult, "order_sent", "false"));
+  const live = liveExecutionText(safeEndpointField(endpointResult, "live_execution_allowed", "false"));
+
+  return [
+    { label: "PAIR", value: pair, tone: "good" },
+    { label: "SIDE", value: side, tone: "good" },
+    { label: "UNITS", value: units, tone: "good" },
+    { label: "TYPE", value: orderType, tone: "warn" },
+    { label: "STOP LOSS", value: stopLoss, tone: "warn" },
+    { label: "MAX LOSS", value: maxLoss, tone: "warn" },
+    { label: "ORDER SENT", value: orderSent, tone: "danger" },
+    { label: "LIVE", value: live, tone: "danger" }
+  ];
+}
+
+function buildPaperOrderPreviewRows(endpointResult) {
+  if (!endpointResult?.ok) {
+    return PAPER_ORDER_PREVIEW_ROWS;
+  }
+
+  const orderSent = yesNoText(safeEndpointField(endpointResult, "order_sent", "false"));
+  const status = orderSent === "YES" ? "BLOCKED_UNEXPECTED_ORDER_STATE" : "PREVIEW_ONLY_NO_ORDER_SENT";
+
+  return [
+    { label: "Pair", value: safeEndpointField(endpointResult, "selected_pair", "EUR_USD") },
+    { label: "Side", value: safeEndpointField(endpointResult, "side", "BUY") },
+    { label: "Units", value: safeEndpointField(endpointResult, "units", "1") },
+    { label: "Stop Loss", value: requiredText(safeEndpointField(endpointResult, "stop_loss_required", "true")) },
+    {
+      label: "Take Profit",
+      value:
+        String(safeEndpointField(endpointResult, "take_profit_required", "false")).toLowerCase() === "true"
+          ? "REQUIRED"
+          : "NOT SET / placeholder"
+    },
+    { label: "Max Loss", value: requiredText(safeEndpointField(endpointResult, "max_loss_required", "true")) },
+    { label: "Status", value: status }
+  ];
 }
 
 function viewLabel(view) {
@@ -1409,7 +1514,38 @@ function ForexPaperSandboxBackendStatusCard({ endpointResult }) {
   );
 }
 
-function SafeDashboardStatusPanel() {
+function PaperOrderPreviewEngineCard({ endpointResult }) {
+  const sourceStatus = endpointResult?.ok ? "PREVIEW ENGINE READABLE" : "PREVIEW ENGINE LOCAL FALLBACK";
+  const httpStatus = endpointResult?.httpStatus ?? "NOT_CHECKED";
+  const rows = buildPaperOrderPreviewEngineRows(endpointResult);
+
+  return (
+    <div className="forexPaperOrderPreviewEngineCard" aria-label="Paper Order Preview Engine">
+      <div className="forexPaperOrderPreviewEngineHeader">
+        <div className="panelHeading">
+          <p>Paper Order Preview Engine</p>
+          <h3>{sourceStatus}</h3>
+        </div>
+        <strong>{`HTTP: ${httpStatus}`}</strong>
+      </div>
+
+      <div className="forexPaperOrderPreviewEngineGrid" aria-label="Paper order preview engine fields">
+        {rows.map((row) => (
+          <div className={`forexPaperOrderPreviewEngineItem tone-${row.tone}`} key={`${row.label}-${row.value}`}>
+            <span>{row.label}</span>
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <p className="forexPaperOrderPreviewEngineRoute">
+        READ-ONLY LOCAL PREVIEW: /api/forex/paper-sandbox/order-preview / NO ORDER SENT
+      </p>
+    </div>
+  );
+}
+
+function SafeDashboardStatusPanel({ onSafeStatusUpdate }) {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [status, setStatus] = useState({
     checkedAt: null,
@@ -1448,6 +1584,7 @@ function SafeDashboardStatusPanel() {
           endpoints: endpointResults,
           phase: "complete"
         });
+        onSafeStatusUpdate?.(endpointResults);
       }
     }
 
@@ -1458,7 +1595,7 @@ function SafeDashboardStatusPanel() {
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [refreshNonce]);
+  }, [onSafeStatusUpdate, refreshNonce]);
 
   return (
     <section className="forexSafeStatusPanel" aria-label="Safe dashboard runtime status">
@@ -1515,10 +1652,10 @@ function SafeDashboardStatusPanel() {
   );
 }
 
-function PaperSandboxTradePathwayPanel() {
+function PaperSandboxTradePathwayPanel({ paperOrderPreviewResult }) {
   const [previewMode, setPreviewMode] = useState("paper-preview");
   const isPaperPreview = previewMode === "paper-preview";
-  const previewRows = isPaperPreview ? PAPER_ORDER_PREVIEW_ROWS : SANDBOX_DRY_RUN_ROWS;
+  const previewRows = isPaperPreview ? buildPaperOrderPreviewRows(paperOrderPreviewResult) : SANDBOX_DRY_RUN_ROWS;
   const previewTitle = isPaperPreview ? "PAPER ORDER PREVIEW" : "SANDBOX DRY RUN";
 
   return (
@@ -1610,9 +1747,11 @@ function ForexCommandSurface() {
     FOREX_COMMAND_INTENTS.AIOS_SIGNAL_STATUS
   );
   const [localEmergencyMode, setLocalEmergencyMode] = useState(false);
+  const [safeStatusEndpoints, setSafeStatusEndpoints] = useState([]);
   const selectedCommand =
     FOREX_COMMAND_CONTROLS.find((control) => control.intent === selectedCommandIntent) ??
     FOREX_COMMAND_CONTROLS[FOREX_COMMAND_CONTROLS.length - 1];
+  const paperOrderPreviewResult = safeStatusEndpoints.find((item) => item.id === "forex-paper-order-preview");
 
   function selectCommandIntent(control) {
     setSelectedCommandIntent(control.intent);
@@ -1640,9 +1779,11 @@ function ForexCommandSurface() {
         ))}
       </div>
 
-      <SafeDashboardStatusPanel />
+      <SafeDashboardStatusPanel onSafeStatusUpdate={setSafeStatusEndpoints} />
 
-      <PaperSandboxTradePathwayPanel />
+      <PaperOrderPreviewEngineCard endpointResult={paperOrderPreviewResult} />
+
+      <PaperSandboxTradePathwayPanel paperOrderPreviewResult={paperOrderPreviewResult} />
 
       <div className="forexCriticalStrip" aria-label="Critical forex command information">
         {FOREX_CRITICAL_INFO.map((item) => (
