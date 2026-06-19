@@ -48,6 +48,45 @@ def read_only_evidence() -> dict[str, object]:
     }
 
 
+def sanitized_reconciled_read_only_evidence() -> dict[str, object]:
+    return {
+        "source_type": "broker-live-read-only",
+        "source_label": "OANDA_READ_ONLY_SANITIZED",
+        "freshness_utc": "2026-06-19T00:00:00Z",
+        "stale_status": "VALID",
+        "broker_state": {
+            "account_reachable": True,
+            "open_position_count": 0,
+            "open_positions_reconciled": True,
+            "daily_pl_available": False,
+            "daily_pl_ledger_available": False,
+            "realized_pl": "1.25",
+            "unrealized_pl": "0.00",
+            "margin_risk_available": True,
+        },
+        "positions": {
+            "open_position_count": 0,
+            "positions_reconciled": True,
+        },
+        "risk_pl": {
+            "daily_pl_available": False,
+            "daily_pl_ledger_available": False,
+            "realized_pl": "1.25",
+            "unrealized_pl": "0.00",
+            "margin_risk_available": True,
+        },
+        "trading_history": {
+            "trading_history_available": False,
+            "block_reason": "real broker history writeback not verified",
+        },
+        "capabilities": {
+            "broker_write_calls_allowed": False,
+            "order_placement_allowed": False,
+            "close_trade_allowed": False,
+        },
+    }
+
+
 def test_default_gate_is_not_armable_and_never_allows_execution():
     result = build_live_micro_trade_arming_gate_result(
         read_only_evidence={},
@@ -88,6 +127,26 @@ def test_paper_evidence_reduces_paper_blockers_but_does_not_execute():
     assert result["LIVE_ARMABLE"] is False
     assert result["live_execution_allowed"] is False
     assert result["order_placement_allowed"] is False
+
+
+def test_reconciled_read_only_evidence_removes_only_account_position_blockers():
+    result = build_live_micro_trade_arming_gate_result(
+        read_only_evidence=sanitized_reconciled_read_only_evidence(),
+        paper_evidence=paper_evidence(),
+        human_phrase=REQUIRED_HUMAN_PHRASE,
+    )
+
+    assert result["LIVE_ARMABLE"] is False
+    assert result["live_execution_allowed"] is False
+    assert "broker_account_not_reachable" not in result["blocked_reasons"]
+    assert "positions_not_reconciled" not in result["blocked_reasons"]
+    assert "broker_account_live_state_not_reconciled_for_execution" not in result["blocked_reasons"]
+    assert "no_open_live_position_reconciliation_missing" not in result["blocked_reasons"]
+    assert "daily_pl_not_available" in result["blocked_reasons"]
+    assert "real_trading_history_unavailable_or_blocked" in result["blocked_reasons"]
+    serialized = str(result)
+    for forbidden in ("OANDA_API_TOKEN", "OANDA_ACCOUNT_ID", "accountID", "orderID", "transactionID"):
+        assert forbidden not in serialized
 
 
 def test_required_human_phrase_is_present_in_model():

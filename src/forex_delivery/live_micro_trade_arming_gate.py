@@ -140,8 +140,19 @@ def build_live_micro_trade_arming_gate_result(
 
 def evaluate_read_only_evidence(model: Mapping[str, Any]) -> dict[str, Any]:
     approval = build_read_only_evidence_approval_model(model)
-    if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is True:
+    approval_source_valid = (
+        str(approval.get("source_type", "")).lower() == "broker-live-read-only"
+        and "SANITIZED" in str(approval.get("source_label", "")).upper()
+        and str(approval.get("stale_status", "")).upper() == "VALID"
+    )
+    if approval_source_valid:
         blockers = []
+        if approval.get("broker_account_reachable") is not True:
+            blockers.append("broker_account_not_reachable")
+        if approval.get("open_positions_reconciled") is not True:
+            blockers.append("positions_not_reconciled")
+        if approval.get("daily_pl_available") is not True:
+            blockers.append("daily_pl_not_available")
         if approval.get("trading_history_available") is not True:
             blockers.append("real_trading_history_unavailable_or_blocked")
         return {
@@ -283,19 +294,18 @@ def evaluate_risk_requirements(
     ]
     approval_source = dict(read_only_eval or {})
     approval = dict(approval_source.get("read_only_evidence_approval") or {})
-    if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is True:
-        if approval.get("broker_account_reachable") is True:
-            blockers = [
-                blocker
-                for blocker in blockers
-                if blocker != "broker_account_live_state_not_reconciled_for_execution"
-            ]
-        if approval.get("open_positions_reconciled") is True:
-            blockers = [
-                blocker
-                for blocker in blockers
-                if blocker != "no_open_live_position_reconciliation_missing"
-            ]
+    if approval.get("broker_account_reachable") is True:
+        blockers = [
+            blocker
+            for blocker in blockers
+            if blocker != "broker_account_live_state_not_reconciled_for_execution"
+        ]
+    if approval.get("open_positions_reconciled") is True:
+        blockers = [
+            blocker
+            for blocker in blockers
+            if blocker != "no_open_live_position_reconciliation_missing"
+        ]
 
     return {
         "max_units": max_units,
