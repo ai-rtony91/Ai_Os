@@ -8,6 +8,7 @@ permission.
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -106,16 +107,6 @@ def build_read_only_evidence_approval_model(
     if broker_account_reachable and open_position_count is not None:
         open_positions_reconciled = True
 
-    daily_pl_available = coerce_bool(
-        first_present_nested(
-            model,
-            "broker_state.daily_pl_available",
-            "risk_pl.daily_pl_available",
-            "daily_pl_available",
-            "pl_available",
-            default=False,
-        )
-    )
     realized_pl = first_present_nested(
         model,
         "broker_state.realized_pl",
@@ -130,6 +121,20 @@ def build_read_only_evidence_approval_model(
     )
     realized_pl_available = is_available_value(realized_pl)
     unrealized_pl_available = is_available_value(unrealized_pl)
+    account_pl_available = realized_pl_available or unrealized_pl_available
+    daily_pl_available = coerce_bool(
+        first_present_nested(
+            model,
+            "broker_state.daily_pl_ledger_available",
+            "risk_pl.daily_pl_ledger_available",
+            "daily_pl_ledger_available",
+            "daily_pl.available",
+            default=False,
+        )
+    )
+    daily_pl_block_reason = (
+        "NONE" if daily_pl_available else "daily P/L ledger not verified"
+    )
     margin_risk_available = coerce_bool(
         first_present_nested(
             model,
@@ -155,7 +160,18 @@ def build_read_only_evidence_approval_model(
         "history_rows",
         default=[],
     )
-    trading_history_writeback_verified = trading_history_available and bool(history_rows)
+    trading_history_evidence_path = str(
+        first_present_nested(
+            model,
+            "trading_history.evidence_path",
+            "trading_history.sanitized_evidence_path",
+            "sanitized_evidence_path",
+            default="",
+        )
+    )
+    trading_history_writeback_verified = (
+        source_type == APPROVED_SOURCE_TYPE and trading_history_available and bool(history_rows)
+    )
     trading_history_block_reason = str(
         first_present_nested(
             model,
@@ -232,6 +248,8 @@ def build_read_only_evidence_approval_model(
     else:
         evidence_missing.append("daily_pl_available")
         blocked_reasons.append("daily_pl_not_available_in_read_only_evidence")
+        if account_pl_available:
+            evidence_present.append("account_pl_available")
 
     if realized_pl_available:
         evidence_present.append("realized_pl_available")
@@ -305,11 +323,15 @@ def build_read_only_evidence_approval_model(
         "open_positions_reconciled": open_positions_reconciled,
         "open_position_count": open_position_count if open_position_count is not None else 0,
         "daily_pl_available": daily_pl_available,
+        "daily_pl_block_reason": daily_pl_block_reason,
+        "account_pl_available": account_pl_available,
         "realized_pl_available": realized_pl_available,
         "unrealized_pl_available": unrealized_pl_available,
         "margin_risk_available": margin_risk_available,
         "trading_history_available": trading_history_available,
         "trading_history_writeback_verified": trading_history_writeback_verified,
+        "trading_history_evidence_path": trading_history_evidence_path or "MISSING",
+        "trading_history_block_reason": trading_history_block_reason or "NONE",
         "block_reason": "NONE" if approved else unique(blocked_reasons)[0],
         "blocked_reasons": unique(blocked_reasons),
         "evidence_present": unique(evidence_present),
@@ -369,13 +391,17 @@ def build_sanitized_report(result: Mapping[str, Any]) -> str:
         f"- broker_account_reachable: {result.get('broker_account_reachable')}\n"
         f"- open_positions_reconciled: {result.get('open_positions_reconciled')}\n"
         f"- open_position_count: {result.get('open_position_count')}\n"
+        f"- account_pl_available: {result.get('account_pl_available')}\n"
         f"- daily_pl_available: {result.get('daily_pl_available')}\n"
+        f"- daily_pl_block_reason: {result.get('daily_pl_block_reason')}\n"
         f"- realized_pl_available: {result.get('realized_pl_available')}\n"
         f"- unrealized_pl_available: {result.get('unrealized_pl_available')}\n"
         f"- margin_risk_available: {result.get('margin_risk_available')}\n"
         f"- trading_history_available: {result.get('trading_history_available')}\n"
         f"- trading_history_writeback_verified: "
         f"{result.get('trading_history_writeback_verified')}\n\n"
+        f"- trading_history_evidence_path: {result.get('trading_history_evidence_path')}\n"
+        f"- trading_history_block_reason: {result.get('trading_history_block_reason')}\n\n"
         "## Evidence Present\n"
         f"{present}\n\n"
         "## Evidence Missing\n"
@@ -423,10 +449,14 @@ def cli_summary(result: Mapping[str, Any]) -> dict[str, Any]:
         "broker_account_reachable": result.get("broker_account_reachable"),
         "open_positions_reconciled": result.get("open_positions_reconciled"),
         "open_position_count": result.get("open_position_count"),
+        "account_pl_available": result.get("account_pl_available"),
         "daily_pl_available": result.get("daily_pl_available"),
+        "daily_pl_block_reason": result.get("daily_pl_block_reason"),
         "trading_history_writeback_verified": result.get(
             "trading_history_writeback_verified"
         ),
+        "trading_history_evidence_path": result.get("trading_history_evidence_path"),
+        "trading_history_block_reason": result.get("trading_history_block_reason"),
         "blocked_reasons": result.get("blocked_reasons", []),
         "blockers_removed_when_satisfied": result.get(
             "blockers_removed_when_satisfied", []
@@ -459,10 +489,12 @@ def load_evidence_model(path: Path) -> dict[str, Any]:
 
 
 def assert_approval_sanitized(payload: Mapping[str, Any]) -> None:
-    serialized = json.dumps(payload, sort_keys=True)
-    for marker in forbidden_markers():
-        if marker in serialized:
-            raise ValueError(f"Unsafe secret or identifier marker present: {marker}")
+    unsafe_markers = collect_unsafe_private_markers(payload)
+    if unsafe_markers:
+        raise ValueError(
+            "Unsafe secret or identifier marker present: "
+            f"{', '.join(sorted(set(unsafe_markers)))}"
+        )
     for field in (
         "live_execution_allowed",
         "broker_write_calls_allowed",
@@ -474,23 +506,77 @@ def assert_approval_sanitized(payload: Mapping[str, Any]) -> None:
 
 
 def payload_has_no_forbidden_identifiers(payload: Mapping[str, Any]) -> bool:
-    serialized = json.dumps(payload, sort_keys=True)
-    return all(marker not in serialized for marker in forbidden_markers())
+    return not collect_unsafe_private_markers(payload)
 
 
-def forbidden_markers() -> tuple[str, ...]:
-    return (
-        "OANDA_API_TOKEN",
-        "OANDA_ACCOUNT_ID",
-        "Authorization",
-        "Bearer ",
-        "accountID",
-        "account_id_value",
-        "orderID",
-        "order_id_value",
-        "transactionID",
-        "transaction_id_value",
-        "rawBroker",
+def collect_unsafe_private_markers(value: Any, key_path: str = "") -> list[str]:
+    markers: list[str] = []
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            normalized_key = normalize_private_key(key)
+            child_path = f"{key_path}.{normalized_key}" if key_path else normalized_key
+            if normalized_key in {
+                "rawbrokerpayload",
+                "rawbrokerresponse",
+                "rawbroker",
+            } and child not in {False, None, "", "false", "FALSE", "not recorded"}:
+                markers.append(normalized_key)
+            markers.extend(collect_unsafe_private_markers(child, child_path))
+        return markers
+    if isinstance(value, list):
+        for item in value:
+            markers.extend(collect_unsafe_private_markers(item, key_path))
+        return markers
+    if value in {False, None}:
+        return markers
+    text = str(value).strip()
+    if not text:
+        return markers
+    lowered = text.lower()
+    normalized_path = normalize_private_key(key_path)
+
+    if "bearer " in lowered or "authorization:" in lowered:
+        markers.append("token_value")
+    if "raw broker" in lowered and "not recorded" not in lowered:
+        markers.append("raw_broker_payload")
+    if looks_like_account_identifier(text):
+        markers.append("account_identifier_value")
+    if normalized_path.endswith("accountid") or normalized_path.endswith("accountidentifier"):
+        if not is_safe_status_value(text):
+            markers.append("account_identifier_value")
+    if normalized_path.endswith("orderid") or normalized_path.endswith("orderidentifier"):
+        if not is_safe_status_value(text):
+            markers.append("order_identifier_value")
+    if normalized_path.endswith("transactionid") or normalized_path.endswith("transactionidentifier"):
+        if not is_safe_status_value(text):
+            markers.append("transaction_identifier_value")
+    return markers
+
+
+def normalize_private_key(value: Any) -> str:
+    return re.sub(r"[^a-z0-9]", "", str(value).lower())
+
+
+def is_safe_status_value(value: str) -> bool:
+    return value.strip().upper() in {
+        "FALSE",
+        "NONE",
+        "NO",
+        "NOT_RECORDED",
+        "PASS_NO_SECRET_VALUES_RECORDED",
+        "PASS_NO_ACCOUNT_IDENTIFIER_VALUES_RECORDED",
+        "PASS_NO_ORDER_IDENTIFIER_VALUES_RECORDED",
+        "PASS_NO_TRANSACTION_IDENTIFIER_VALUES_RECORDED",
+        "NO_ACCOUNT_IDS_OUTPUT",
+        "NO_ORDER_IDS_OUTPUT",
+        "NO_TRANSACTION_IDS_OUTPUT",
+    }
+
+
+def looks_like_account_identifier(value: str) -> bool:
+    return bool(
+        re.fullmatch(r"\d{3}-\d{3}-\d{6,}-\d{3}", value.strip())
+        or re.fullmatch(r"[A-Z0-9]{12,}", value.strip())
     )
 
 

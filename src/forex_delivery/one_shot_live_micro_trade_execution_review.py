@@ -203,7 +203,9 @@ def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, An
             "broker_account_reachable": approval.get("broker_account_reachable") is True,
             "open_positions_reconciled": approval.get("open_positions_reconciled") is True,
             "open_position_count": approval.get("open_position_count", 0),
+            "account_pl_available": approval.get("account_pl_available") is True,
             "daily_pl_available": approval.get("daily_pl_available") is True,
+            "daily_pl_block_reason": approval.get("daily_pl_block_reason"),
             "realized_pl_available": approval.get("realized_pl_available") is True,
             "unrealized_pl_available": approval.get("unrealized_pl_available") is True,
             "margin_risk_available": approval.get("margin_risk_available") is True,
@@ -212,6 +214,7 @@ def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, An
                 "trading_history_writeback_verified"
             )
             is True,
+            "trading_history_evidence_path": approval.get("trading_history_evidence_path"),
             "trading_history_block_reason": str(approval.get("block_reason", "NONE")),
             "evidence_present": ["read_only_evidence_approved_for_future_live_review"]
             + list(approval.get("evidence_present") or []),
@@ -282,10 +285,30 @@ def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, An
     )
     daily_pl_available = first_present_nested(
         model,
-        "broker_state.daily_pl_available",
-        "risk_pl.daily_pl_available",
-        "daily_pl_available",
-        "pl_available",
+        "broker_state.daily_pl_ledger_available",
+        "risk_pl.daily_pl_ledger_available",
+        "daily_pl_ledger_available",
+        "daily_pl.available",
+    )
+    realized_pl = first_present_nested(
+        model,
+        "broker_state.realized_pl",
+        "risk_pl.realized_pl",
+        "realized_pl",
+    )
+    unrealized_pl = first_present_nested(
+        model,
+        "broker_state.unrealized_pl",
+        "risk_pl.unrealized_pl",
+        "unrealized_pl",
+    )
+    account_pl_available = is_available_value(realized_pl) or is_available_value(
+        unrealized_pl
+    )
+    daily_pl_block_reason = (
+        "NONE"
+        if coerce_bool(daily_pl_available)
+        else "daily P/L ledger not verified"
     )
     trading_history_available = first_present_nested(
         model,
@@ -339,6 +362,8 @@ def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, An
         present.append("daily_pl_available")
     else:
         blockers.append("daily_pl_not_available_in_read_only_evidence")
+        if account_pl_available:
+            present.append("account_pl_available")
 
     if trading_history_available is None:
         missing.append("trading_history_availability")
@@ -355,8 +380,12 @@ def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, An
         "live_trading_allowed_from_this_data": live_from_data,
         "broker_account_reachable": bool(coerce_bool(broker_reachable)),
         "open_positions_reconciled": bool(coerce_bool(positions_reconciled)),
+        "account_pl_available": account_pl_available,
         "daily_pl_available": bool(coerce_bool(daily_pl_available)),
+        "daily_pl_block_reason": daily_pl_block_reason,
         "trading_history_available": bool(coerce_bool(trading_history_available)),
+        "trading_history_writeback_verified": False,
+        "trading_history_evidence_path": "MISSING",
         "trading_history_block_reason": str(trading_history_block_reason),
         "evidence_present": present,
         "evidence_missing": unique(missing),
@@ -998,6 +1027,12 @@ def upper_text(value: Any) -> str:
 def has_policy(value: Any) -> bool:
     text = upper_text(value)
     return bool(text and text not in {"MISSING", "FALSE", "NONE", "NULL"})
+
+
+def is_available_value(value: Any) -> bool:
+    if value is None:
+        return False
+    return str(value).strip().upper() not in {"", "MISSING", "UNAVAILABLE", "NONE", "NULL"}
 
 
 def utc_now_iso() -> str:
