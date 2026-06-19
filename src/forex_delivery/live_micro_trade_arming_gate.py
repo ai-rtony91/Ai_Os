@@ -13,6 +13,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
+from src.forex_delivery.read_only_evidence_approval import (
+    build_read_only_evidence_approval_model,
+)
+
 
 SCHEMA = "AIOS_FOREX_LIVE_MICRO_TRADE_ARMING_GATE.v1"
 REPORT_TITLE = "AIOS Forex Live Micro-Trade Arming Gate Dry Run V1"
@@ -134,6 +138,33 @@ def build_live_micro_trade_arming_gate_result(
 
 
 def evaluate_read_only_evidence(model: Mapping[str, Any]) -> dict[str, Any]:
+    approval = build_read_only_evidence_approval_model(model)
+    if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is True:
+        blockers = []
+        if approval.get("trading_history_available") is not True:
+            blockers.append("real_trading_history_unavailable_or_blocked")
+        return {
+            "source_type": approval.get("source_type"),
+            "source_label": approval.get("source_label"),
+            "freshness_utc": approval.get("freshness_utc"),
+            "source_valid": True,
+            "account_reachable": approval.get("broker_account_reachable") is True,
+            "positions_reconciled": approval.get("open_positions_reconciled") is True,
+            "open_position_count": approval.get("open_position_count", 0),
+            "pl_available": approval.get("daily_pl_available") is True,
+            "trading_history_available": approval.get("trading_history_available") is True,
+            "trading_history_writeback_verified": approval.get(
+                "trading_history_writeback_verified"
+            )
+            is True,
+            "evidence_present": ["read_only_evidence_approved_for_future_live_review"]
+            + list(approval.get("evidence_present") or []),
+            "evidence_missing": list(approval.get("evidence_missing") or []),
+            "blocked_reasons": unique(blockers),
+            "live_execution_allowed": False,
+            "read_only_evidence_approval": approval,
+        }
+
     present: list[str] = []
     missing: list[str] = []
     blockers: list[str] = []
@@ -248,6 +279,21 @@ def evaluate_risk_requirements(
         "broker_account_live_state_not_reconciled_for_execution",
         "no_open_live_position_reconciliation_missing",
     ]
+    approval = dict(read_only_eval.get("read_only_evidence_approval") or {})
+    if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is True:
+        if approval.get("broker_account_reachable") is True:
+            blockers = [
+                blocker
+                for blocker in blockers
+                if blocker != "broker_account_live_state_not_reconciled_for_execution"
+            ]
+        if approval.get("open_positions_reconciled") is True:
+            blockers = [
+                blocker
+                for blocker in blockers
+                if blocker != "no_open_live_position_reconciliation_missing"
+            ]
+
     return {
         "max_units": max_units,
         "max_trade_risk": max_trade_risk,

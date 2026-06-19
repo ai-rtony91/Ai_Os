@@ -11,6 +11,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
 
+from src.forex_delivery.read_only_evidence_approval import (
+    build_read_only_evidence_approval_model,
+)
+
 
 SCHEMA = "AIOS_FOREX_ONE_SHOT_LIVE_MICRO_TRADE_EXECUTION_REVIEW.v1"
 REQUIRED_HUMAN_PHRASE = (
@@ -185,6 +189,37 @@ def build_one_shot_live_micro_trade_execution_review_result(
 
 
 def evaluate_read_only_bridge_evidence(model: Mapping[str, Any]) -> dict[str, Any]:
+    approval = build_read_only_evidence_approval_model(model)
+    if approval.get("READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW") is True:
+        blockers = []
+        if approval.get("trading_history_available") is not True:
+            blockers.append("real_trading_history_unavailable_or_blocked")
+        return {
+            "status": "PRESENT_BLOCKED" if blockers else "PRESENT",
+            "source_type": str(approval.get("source_type", "")).upper(),
+            "source_label": approval.get("source_label"),
+            "freshness_utc": approval.get("freshness_utc"),
+            "live_trading_allowed_from_this_data": False,
+            "broker_account_reachable": approval.get("broker_account_reachable") is True,
+            "open_positions_reconciled": approval.get("open_positions_reconciled") is True,
+            "open_position_count": approval.get("open_position_count", 0),
+            "daily_pl_available": approval.get("daily_pl_available") is True,
+            "realized_pl_available": approval.get("realized_pl_available") is True,
+            "unrealized_pl_available": approval.get("unrealized_pl_available") is True,
+            "margin_risk_available": approval.get("margin_risk_available") is True,
+            "trading_history_available": approval.get("trading_history_available") is True,
+            "trading_history_writeback_verified": approval.get(
+                "trading_history_writeback_verified"
+            )
+            is True,
+            "trading_history_block_reason": str(approval.get("block_reason", "NONE")),
+            "evidence_present": ["read_only_evidence_approved_for_future_live_review"]
+            + list(approval.get("evidence_present") or []),
+            "evidence_missing": list(approval.get("evidence_missing") or []),
+            "blocked_reasons": unique(blockers),
+            "read_only_evidence_approval": approval,
+        }
+
     present: list[str] = []
     missing: list[str] = []
     blockers: list[str] = []
@@ -635,8 +670,8 @@ def evaluate_trading_history_writeback(
     else:
         blockers.append("paper_trading_history_writeback_missing")
 
-    if coerce_bool(read_only_status.get("trading_history_available")):
-        present.append("real_trading_history_available")
+    if coerce_bool(read_only_status.get("trading_history_writeback_verified")):
+        present.append("real_trading_history_writeback_verified")
     else:
         blockers.append("real_trading_history_writeback_not_verified")
 
@@ -647,6 +682,9 @@ def evaluate_trading_history_writeback(
         ),
         "real_history_available": coerce_bool(
             read_only_status.get("trading_history_available")
+        ),
+        "real_history_writeback_verified": coerce_bool(
+            read_only_status.get("trading_history_writeback_verified")
         ),
         "evidence_present": present,
         "evidence_missing": [],
