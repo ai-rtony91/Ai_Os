@@ -4,7 +4,6 @@
   --surface-strong: #1b1d17;
   --surface-soft: #202219;
   --line: #383a31;
-  --line-strong: #5b604e;
   --text: #f3f0e8;
   --muted: #aaa79c;
   --muted-strong: #d2ccbc;
@@ -30,56 +29,62 @@ button {
 }
 
 .minimalOperatorDashboard {
-  background:
-    linear-gradient(180deg, rgba(9, 10, 8, 0.98), rgba(13, 13, 10, 1)),
-    var(--page);
-  display: grid;
-  gap: 10px;
-  margin-inline: auto;
+  width: min(100%, 1180px);
   min-height: 100vh;
-  padding: 12px 14px 14px;
-  width: min(100%, 1440px);
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  margin-inline: auto;
+  padding: 16px;
+  background:
+    radial-gradient(circle at top left, rgba(91, 190, 203, 0.1), transparent 26rem),
+    linear-gradient(180deg, rgba(9, 10, 8, 0.98), rgba(13, 13, 10, 1));
+}
+
+.dashboardHeader,
+.breadcrumb,
+.screen,
+.panel,
+.doorCard,
+.watchlistItem {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(20, 21, 17, 0.94);
 }
 
 .dashboardHeader {
-  align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
+  min-height: 66px;
   display: flex;
-  gap: 14px;
+  align-items: center;
   justify-content: space-between;
-  min-height: 68px;
-  padding: 9px 12px;
+  gap: 16px;
+  padding: 10px 12px;
 }
 
 .dashboardHeader h1,
-.operatorPanel h2,
-.panelHeading p,
 .dashboardHeader p,
+.screen h2,
+.panel h3,
+.panel p,
+.doorCard span,
+.doorCard strong,
 .field span,
 .field strong,
-.explanationBox p,
-.blockReason p,
-.nextAction p {
+.shortText {
   margin: 0;
 }
 
 .dashboardHeader h1 {
-  font-size: clamp(26px, 2.4vw, 36px);
-  letter-spacing: 0;
+  font-size: clamp(28px, 3vw, 42px);
   line-height: 1;
-}
-
-.dashboardHeader p {
-  color: var(--muted-strong);
-  font-size: 12px;
-  line-height: 1.3;
-  max-width: 760px;
+  letter-spacing: 0;
 }
 
 .kicker,
-.panelHeading p {
+.panelHeading p,
+.doorCard span,
+.field span,
+.scorePair span {
   color: var(--neutral);
   font-size: 11px;
   font-weight: 900;
@@ -87,79 +92,47 @@ button {
   text-transform: uppercase;
 }
 
-.headerBadges {
-  align-items: center;
+.headerBadges,
+.miniGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+}
+
+.headerBadges {
   justify-content: flex-end;
 }
 
 .statusBadge {
+  min-height: 24px;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   border: 1px solid var(--line);
   border-radius: 999px;
-  display: inline-flex;
+  padding: 4px 8px;
   font-size: 10px;
   font-weight: 900;
-  justify-content: center;
-  min-height: 24px;
-  padding: 4px 8px;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
-.dataLabel {
-  align-items: flex-start;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.dataLabel span:not(.statusBadge) {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.dataLabel small {
-  color: var(--warn);
-  flex-basis: 100%;
-  font-size: 10px;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.compactLabel {
-  gap: 3px;
-}
-
-.compactLabel .statusBadge {
-  font-size: 9px;
-  min-height: 20px;
-  padding: 3px 6px;
-}
-
-.compactLabel small {
-  display: none;
-}
-
 .status-good {
   background: rgba(73, 194, 125, 0.12);
-  border-color: rgba(73, 194, 125, 0.52);
+  border-color: rgba(73, 194, 125, 0.5);
   color: var(--good);
 }
 
 .status-warn {
   background: rgba(217, 164, 65, 0.12);
-  border-color: rgba(217, 164, 65, 0.52);
+  border-color: rgba(217, 164, 65, 0.5);
   color: var(--warn);
 }
 
 .status-danger {
   background: rgba(230, 95, 85, 0.12);
-  border-color: rgba(230, 95, 85, 0.52);
+  border-color: rgba(230, 95, 85, 0.5);
   color: var(--danger);
 }
 
@@ -169,221 +142,159 @@ button {
   color: var(--neutral);
 }
 
-.statusBand {
-  background: var(--surface-strong);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  display: grid;
-  gap: 1px;
-  grid-template-columns: 1fr 0.75fr 0.75fr 0.85fr 1.35fr 0.8fr;
-  overflow: hidden;
-}
-
-.dashboardGrid {
-  align-items: start;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr;
-}
-
-.primaryWorkArea {
-  align-items: start;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(360px, 0.82fr) minmax(560px, 1.18fr);
-}
-
-.analysisStack {
-  display: grid;
-  gap: 10px;
-}
-
-.analysisStack .statusBand {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.analysisStack .statusBand .field {
-  min-height: 50px;
-  padding: 7px 8px;
-}
-
-.analysisStack .statusBand .field:nth-child(5) {
-  grid-column: span 2;
-}
-
-.safetyWorkArea {
-  align-items: stretch;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.workflowCompact {
-  display: grid;
-}
-
-/* Density overrides: preserve safety labels while flattening the page into operator scan zones. */
-.minimalOperatorDashboard .selectedPairHeader {
-  gap: 10px;
-  padding: 10px;
-}
-
-.minimalOperatorDashboard .chartShell {
-  min-height: 134px;
-  padding: 9px;
-}
-
-.minimalOperatorDashboard .chartShell svg {
-  height: 112px;
-}
-
-.minimalOperatorDashboard .fieldGrid {
-  gap: 8px;
-}
-
-.minimalOperatorDashboard .field {
-  gap: 5px;
-  min-height: 58px;
-  padding: 9px;
-}
-
-.minimalOperatorDashboard .field strong {
-  font-size: 16px;
-  line-height: 1.15;
-}
-
-.minimalOperatorDashboard .factorGrid,
-.minimalOperatorDashboard .decisionGrid {
-  gap: 8px;
-}
-
-.minimalOperatorDashboard .factorList,
-.minimalOperatorDashboard .explanationBox,
-.minimalOperatorDashboard .blockReason,
-.minimalOperatorDashboard .nextAction {
-  gap: 7px;
-  padding: 9px;
-}
-
-.minimalOperatorDashboard .workflowList {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
-.minimalOperatorDashboard .workflowList li {
-  border-bottom: 0;
-  border-right: 1px solid var(--line);
-  font-size: 12px;
-  gap: 7px;
-  grid-template-columns: 24px 1fr;
-  min-height: 34px;
-  padding: 7px 8px;
-}
-
-.minimalOperatorDashboard .workflowList li:last-child {
-  border-right: 0;
-}
-
-@media (max-width: 1180px) {
-  .minimalOperatorDashboard .primaryWorkArea,
-  .minimalOperatorDashboard .safetyWorkArea {
-    grid-template-columns: 1fr;
-  }
-
-  .minimalOperatorDashboard .workflowList {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .minimalOperatorDashboard .workflowList li:nth-child(3n) {
-    border-right: 0;
-  }
-
-  .minimalOperatorDashboard .workflowList li:nth-child(n + 4) {
-    border-top: 1px solid var(--line);
-  }
-}
-
-@media (max-width: 780px) {
-  .minimalOperatorDashboard {
-    padding: 10px;
-  }
-
-  .minimalOperatorDashboard .workflowList {
-    grid-template-columns: 1fr;
-  }
-
-  .minimalOperatorDashboard .workflowList li,
-  .minimalOperatorDashboard .workflowList li:nth-child(3n) {
-    border-right: 0;
-  }
-
-  .minimalOperatorDashboard .workflowList li + li {
-    border-top: 1px solid var(--line);
-  }
-}
-
-.operatorPanel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
+.dataLabel {
   min-width: 0;
-  padding: 11px;
-}
-
-.watchlistPanel {
-  align-content: start;
-  align-self: start;
-  justify-content: stretch;
-  min-width: 0;
-}
-
-.opportunityPanel {
-  min-width: 0;
-}
-
-.panelHeading {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 4px;
 }
 
-.panelHeading h2 {
-  font-size: 16px;
+.dataLabel span:not(.statusBadge) {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
   line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.dataLabel small {
+  flex-basis: 100%;
+  color: var(--warn);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.compactLabel .statusBadge {
+  min-height: 20px;
+  padding: 3px 6px;
+  font-size: 9px;
+}
+
+.compactLabel span:not(.statusBadge) {
+  font-size: 9px;
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 7px;
+}
+
+.breadcrumb button,
+.backButton,
+.viewButton {
+  min-height: 30px;
+  cursor: pointer;
+  border: 1px solid rgba(91, 190, 203, 0.42);
+  border-radius: 999px;
+  background: rgba(91, 190, 203, 0.08);
+  padding: 5px 10px;
+  color: var(--neutral);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.breadcrumb button:disabled {
+  cursor: default;
+  border-color: var(--line);
+  color: var(--muted);
+  background: rgba(210, 204, 188, 0.05);
+}
+
+.doorCard:hover,
+.doorCard:focus-visible,
+.watchlistItem:focus-within,
+.watchlistItem:hover,
+.breadcrumb button:focus-visible,
+.backButton:focus-visible,
+.viewButton:focus-visible {
+  border-color: var(--focus);
+  outline: 2px solid rgba(132, 210, 222, 0.22);
+  outline-offset: 2px;
+}
+
+.screen {
+  min-height: min(560px, calc(100vh - 132px));
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 14px;
+}
+
+.homeScreen {
+  place-content: center;
+}
+
+.screenTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.screenTop h2 {
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.doorGrid,
+.hubGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.doorCard {
+  min-height: 132px;
+  display: grid;
+  align-content: space-between;
+  justify-items: start;
+  gap: 10px;
+  padding: 14px;
+  text-align: left;
+}
+
+button.doorCard {
+  cursor: pointer;
+}
+
+.doorCard strong {
+  color: var(--text);
+  font-size: clamp(22px, 2.4vw, 34px);
+  line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .watchlistList {
-  align-content: start;
-  align-self: start;
   display: grid;
   gap: 8px;
-  justify-content: stretch;
-}
-
-.watchlistPanel .panelHeading {
-  align-self: start;
 }
 
 .watchlistItem {
-  align-items: center;
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  cursor: pointer;
+  min-width: 0;
   display: grid;
+  grid-template-columns:
+    minmax(94px, 1.1fr)
+    minmax(74px, 0.6fr)
+    minmax(92px, 0.7fr)
+    minmax(90px, 0.8fr)
+    minmax(210px, 1.4fr)
+    auto;
+  align-items: center;
   gap: 8px;
-  grid-template-columns: 34px minmax(84px, 0.55fr) minmax(230px, 1.35fr) minmax(150px, 0.75fr) auto;
-  min-height: 68px;
-  padding: 8px 9px;
-  text-align: left;
-  width: 100%;
+  padding: 8px;
+  overflow: hidden;
 }
 
-.watchlistItem:hover,
-.watchlistItem:focus-visible {
-  border-color: var(--focus);
-  outline: 2px solid rgba(132, 210, 222, 0.2);
-  outline-offset: 1px;
+.watchlistItem > * {
+  min-width: 0;
 }
 
 .selectedWatchlistItem {
@@ -391,224 +302,81 @@ button {
   border-color: rgba(91, 190, 203, 0.62);
 }
 
-.watchlistRank {
-  align-items: center;
-  background: rgba(91, 190, 203, 0.14);
-  border: 1px solid rgba(91, 190, 203, 0.4);
-  border-radius: 999px;
-  color: var(--neutral);
-  display: inline-flex;
-  font-size: 12px;
-  font-weight: 900;
-  height: 28px;
-  justify-content: center;
-  width: 28px;
-}
-
-.watchlistPairBlock {
-  display: grid;
-  gap: 3px;
-  min-width: 0;
-}
-
-.watchlistPairBlock strong {
+.pairName {
   color: var(--text);
-  font-size: 15px;
-  line-height: 1.05;
+  font-size: 18px;
+  line-height: 1;
 }
 
-.watchlistPairBlock span {
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.watchlistMetrics {
-  display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(5, minmax(48px, 1fr));
-  min-width: 0;
-}
-
-.watchlistMetric {
-  background: rgba(9, 10, 8, 0.28);
-  border: 1px solid rgba(210, 204, 188, 0.12);
-  border-radius: 7px;
+.scorePair {
   display: grid;
   gap: 2px;
-  min-height: 42px;
-  padding: 5px 6px;
+  padding: 6px;
+  border: 1px solid rgba(210, 204, 188, 0.12);
+  border-radius: 7px;
+  background: rgba(9, 10, 8, 0.28);
 }
 
-.watchlistMetric span {
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 900;
+.scorePair strong {
+  color: var(--text);
+  font-size: 15px;
   line-height: 1;
-  text-transform: uppercase;
-}
-
-.watchlistMetric strong {
-  color: var(--text);
-  font-size: 12px;
-  line-height: 1.1;
-  overflow-wrap: anywhere;
-}
-
-.watchlistStatus {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-
-.watchlistStatus .dataLabel span:not(.statusBadge) {
-  font-size: 8px;
-  line-height: 1.05;
-}
-
-.watchlistAction {
-  align-items: center;
-  border: 1px solid rgba(91, 190, 203, 0.42);
-  border-radius: 999px;
-  color: var(--neutral);
-  display: inline-flex;
-  font-size: 10px;
-  font-weight: 900;
-  justify-content: center;
-  min-height: 24px;
-  padding: 4px 7px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.tableShell {
-  overflow-x: auto;
-}
-
-table {
-  border-collapse: collapse;
-  min-width: 1060px;
-  width: 100%;
-}
-
-th,
-td {
-  border-bottom: 1px solid var(--line);
-  padding: 7px 6px;
-  text-align: left;
-  vertical-align: middle;
-}
-
-th {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-td {
-  color: var(--muted-strong);
-  font-size: 12px;
-}
-
-td strong {
-  color: var(--text);
-}
-
-.labeledValue {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-}
-
-.labeledValue > span:first-child,
-.labeledValue > strong:first-child {
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
-
-.selectedRow {
-  background: rgba(91, 190, 203, 0.08);
-}
-
-.selectedMark {
-  color: var(--neutral);
-  display: block;
-  font-size: 11px;
-  font-weight: 900;
-  margin-top: 3px;
-  text-transform: uppercase;
 }
 
 .viewButton {
-  background: rgba(91, 190, 203, 0.1);
-  border: 1px solid rgba(91, 190, 203, 0.46);
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 900;
-  min-height: 34px;
-  padding: 7px 10px;
+  justify-self: end;
+  white-space: nowrap;
 }
 
-.viewButton:hover,
-.viewButton:focus-visible {
-  border-color: var(--focus);
-  outline: 2px solid rgba(132, 210, 222, 0.24);
-  outline-offset: 2px;
-}
-
-.selectedPairHeader,
-.explanationHeader {
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  padding-bottom: 12px;
-}
-
-.selectedPairHeader div,
-.explanationHeader > div:first-child {
+.detailGrid {
   display: grid;
-  gap: 5px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
 
-.selectedPairHeader span,
-.explanationHeader span,
-.rankReason span,
-.explanationBox span,
-.blockReason span,
-.nextAction span {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.selectedPairHeader strong {
-  font-size: 30px;
-  line-height: 1;
-}
-
-.explanationHeader strong {
-  font-size: 26px;
-  line-height: 1;
-}
-
-.chartShell {
-  background: #0d0e0b;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  min-height: 172px;
+.panel {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
   padding: 12px;
 }
 
+.panelHeading {
+  display: grid;
+  gap: 4px;
+}
+
+.panelHeading h3 {
+  color: var(--text);
+  font-size: 22px;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.pricePanel,
+.chartPanel {
+  grid-column: span 1;
+}
+
+.decisionPanel {
+  grid-column: span 2;
+}
+
+.chartShell {
+  min-height: 150px;
+  display: grid;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d0e0b;
+  padding: 8px;
+}
+
 .chartShell svg {
-  display: block;
-  height: 148px;
   width: 100%;
+  height: 132px;
+  display: block;
 }
 
 .chartGridLine {
@@ -633,33 +401,57 @@ td strong {
 
 .fieldGrid {
   display: grid;
-  gap: 1px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
   overflow: hidden;
-}
-
-.fieldGrid.compact {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--line);
+  border-radius: 8px;
 }
 
 .field {
-  background: var(--surface-soft);
+  min-width: 0;
+  min-height: 66px;
   display: grid;
-  gap: 7px;
-  min-height: 72px;
-  padding: 12px;
-}
-
-.field span {
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 900;
-  text-transform: uppercase;
+  gap: 5px;
+  padding: 8px;
+  background: var(--surface-soft);
 }
 
 .field strong {
   color: var(--text);
   font-size: 15px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.controlList {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.controlRow {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 8px;
+  background: var(--surface-soft);
+}
+
+.controlRow span {
+  color: var(--muted-strong);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.shortText {
+  color: var(--muted-strong);
+  font-size: 13px;
+  line-height: 1.45;
   overflow-wrap: anywhere;
 }
 
@@ -679,136 +471,35 @@ td strong {
   color: var(--neutral) !important;
 }
 
-.explanationBox,
-.rankReason,
-.blockReason,
-.nextAction {
-  border-top: 1px solid var(--line);
-  display: grid;
-  gap: 7px;
-  padding-top: 12px;
-}
-
-.explanationBox p,
-.rankReason p,
-.blockReason p,
-.nextAction p {
-  color: var(--muted-strong);
-  line-height: 1.45;
-}
-
-.factorGrid,
-.decisionGrid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.factorList {
-  background: var(--surface-soft);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-}
-
-.factorList h3 {
-  font-size: 14px;
-  margin: 0;
-}
-
-.factorList ul {
-  color: var(--muted-strong);
-  display: grid;
-  gap: 7px;
-  margin: 0;
-  padding-left: 18px;
-}
-
-.factor-good {
-  border-color: rgba(73, 194, 125, 0.38);
-}
-
-.factor-danger {
-  border-color: rgba(230, 95, 85, 0.38);
-}
-
-.readinessSummary,
-.controlRow {
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  min-height: 42px;
-}
-
-.readinessSummary span,
-.controlRow span {
-  color: var(--muted-strong);
-  font-weight: 800;
-}
-
-.controlList {
-  display: grid;
-}
-
-.workflowList {
-  counter-reset: workflow;
-  display: grid;
-  gap: 8px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.workflowList li {
-  align-items: center;
-  border-bottom: 1px solid var(--line);
-  color: var(--muted-strong);
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  min-height: 34px;
-}
-
-.workflowList li::before {
-  color: var(--neutral);
-  content: counter(workflow, decimal-leading-zero);
-  counter-increment: workflow;
-  font-size: 11px;
-  font-weight: 900;
-}
-
-@media (max-width: 1180px) {
-  .primaryWorkArea,
-  .safetyWorkArea {
-    grid-template-columns: 1fr;
+@media (max-width: 980px) {
+  .doorGrid,
+  .hubGrid,
+  .detailGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .watchlistItem {
-    grid-template-columns: 32px minmax(88px, 0.55fr) minmax(220px, 1fr);
+    grid-template-columns: minmax(100px, 1fr) repeat(2, minmax(76px, 0.6fr)) auto;
   }
 
-  .watchlistStatus {
-    align-items: center;
-    display: grid;
-    grid-column: 2 / 4;
-    grid-template-columns: auto 1fr;
-  }
-
-  .watchlistAction {
-    grid-column: 1 / 4;
+  .watchlistItem .dataLabel,
+  .watchlistItem .viewButton {
+    grid-column: 1 / -1;
     justify-self: start;
+  }
+
+  .decisionPanel {
+    grid-column: 1 / -1;
   }
 }
 
-@media (max-width: 780px) {
+@media (max-width: 680px) {
   .minimalOperatorDashboard {
-    padding: 12px;
+    padding: 10px;
   }
 
-  .dashboardHeader {
+  .dashboardHeader,
+  .screenTop {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -817,145 +508,29 @@ td strong {
     justify-content: flex-start;
   }
 
-  .statusBand,
-  .fieldGrid,
-  .fieldGrid.compact,
-  .factorGrid,
-  .decisionGrid {
+  .screen {
+    min-height: auto;
+    padding: 10px;
+  }
+
+  .doorGrid,
+  .hubGrid,
+  .detailGrid,
+  .fieldGrid {
     grid-template-columns: 1fr;
   }
 
-  .analysisStack .statusBand .field:nth-child(5) {
-    grid-column: auto;
-  }
-
   .watchlistItem {
-    grid-template-columns: 30px 1fr;
+    grid-template-columns: 1fr;
   }
 
-  .watchlistMetrics,
-  .watchlistStatus,
-  .watchlistAction {
-    grid-column: 1 / -1;
-  }
-
-  .watchlistMetrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .explanationHeader {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
-
-/* Watchlist containment: keep chips, labels, and actions inside each row. */
-.watchlistPanel {
-  overflow: hidden;
-}
-
-.watchlistItem {
-  align-items: start;
-  grid-template-areas:
-    "rank pair action"
-    "rank metrics metrics"
-    "rank status status";
-  grid-template-columns: 32px minmax(0, 1fr) auto;
-  min-height: auto;
-  overflow: hidden;
-  row-gap: 7px;
-}
-
-.watchlistItem > * {
-  min-width: 0;
-}
-
-.watchlistRank {
-  align-self: start;
-  grid-area: rank;
-}
-
-.watchlistPairBlock {
-  grid-area: pair;
-}
-
-.watchlistPairBlock strong,
-.watchlistPairBlock span,
-.watchlistMetric strong,
-.watchlistMetric span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.watchlistMetrics {
-  grid-area: metrics;
-  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
-  width: 100%;
-}
-
-.watchlistMetric {
-  min-height: 38px;
-  min-width: 0;
-}
-
-.watchlistStatus {
-  align-items: center;
-  display: grid;
-  gap: 5px;
-  grid-area: status;
-  grid-template-columns: auto minmax(0, 1fr);
-  width: 100%;
-}
-
-.watchlistStatus .dataLabel {
-  min-width: 0;
-}
-
-.watchlistStatus .statusBadge {
-  max-width: 100%;
-  text-align: center;
-  white-space: normal;
-}
-
-.watchlistStatus .dataLabel span:not(.statusBadge) {
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.watchlistAction {
-  grid-area: action;
-  justify-self: end;
-  max-width: 100%;
-}
-
-@media (max-width: 1180px) {
-  .watchlistItem {
-    grid-template-columns: 32px minmax(0, 1fr) auto;
-  }
-
-  .watchlistStatus,
-  .watchlistAction {
-    grid-column: auto;
-  }
-}
-
-@media (max-width: 780px) {
-  .watchlistItem {
-    grid-template-areas:
-      "rank pair"
-      "metrics metrics"
-      "status status"
-      "action action";
-    grid-template-columns: 30px minmax(0, 1fr);
-  }
-
-  .watchlistMetrics,
-  .watchlistStatus,
-  .watchlistAction {
-    grid-column: auto;
-  }
-
-  .watchlistAction {
+  .viewButton {
     justify-self: start;
+  }
+
+  .pricePanel,
+  .chartPanel,
+  .decisionPanel {
+    grid-column: auto;
   }
 }
