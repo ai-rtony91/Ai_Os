@@ -151,79 +151,178 @@ const FOREX_CRITICAL_INFO = [
   { label: "Final disarm", value: "REQUIRED" }
 ];
 
+const FOREX_COMMAND_INTENTS = {
+  GET_IN: "GET_IN",
+  GET_OUT: "GET_OUT",
+  ARM_DISARM: "ARM_DISARM",
+  KILL_SWITCH: "KILL_SWITCH",
+  PANIC_FLATTEN: "PANIC_FLATTEN",
+  PAIR_SCANNER: "PAIR_SCANNER",
+  CANDIDATE_FILTER: "CANDIDATE_FILTER",
+  RISK_GATE: "RISK_GATE",
+  RECONCILIATION: "RECONCILIATION",
+  AIOS_SIGNAL_STATUS: "AIOS_SIGNAL_STATUS"
+};
+
 const FOREX_COMMAND_CONTROLS = [
   {
     id: "get-in",
+    intent: FOREX_COMMAND_INTENTS.GET_IN,
     icon: "🚀",
     label: "GET IN",
     state: "BLOCKED",
-    disabled: true,
+    mode: "TRADE_INTENT_BLOCKED",
+    blockedReasons: [
+      "live_execution_blocked",
+      "broker_not_connected",
+      "order_route_disabled",
+      "risk_gate_not_approved",
+      "human_approval_required"
+    ],
+    missingEvidence: [
+      "protected live approval packet",
+      "risk gate proof",
+      "broker connection approval",
+      "order route approval"
+    ],
+    nextSafeStep: "Keep GET IN blocked and review safe backend status/API wiring next.",
     message: "GET IN is blocked. Live order submission requires future protected Human Owner approval."
   },
   {
     id: "get-out",
+    intent: FOREX_COMMAND_INTENTS.GET_OUT,
     icon: "🛑",
     label: "GET OUT",
     state: "BLOCKED",
-    disabled: true,
+    mode: "CLOSE_INTENT_BLOCKED",
+    blockedReasons: [
+      "close_route_disabled",
+      "broker_not_connected",
+      "final_disarm_required",
+      "live_safe_close_packet_not_approved"
+    ],
+    missingEvidence: [
+      "live-safe close packet approval",
+      "final disarm proof",
+      "broker connection approval",
+      "close route approval"
+    ],
+    nextSafeStep: "Keep GET OUT blocked and use approved manual/broker path until execution wiring exists.",
     message: "GET OUT is blocked. Close routes are disabled and no live position action exists here."
   },
   {
     id: "arm-disarm",
+    intent: FOREX_COMMAND_INTENTS.ARM_DISARM,
     icon: "🟣",
     label: "ARM / DISARM",
     state: "LOCAL ONLY",
+    mode: "ARMING_REVIEW",
+    blockedReasons: ["future_protected_approval_required", "final_disarm_required"],
+    missingEvidence: ["fresh Human Owner approval", "final disarm proof"],
+    nextSafeStep: "Review arming status locally; do not arm live execution from the dashboard.",
     message: "Arm/disarm selection is dashboard-only. Final disarm remains required before any future review."
   },
   {
     id: "kill-switch",
+    intent: FOREX_COMMAND_INTENTS.KILL_SWITCH,
     icon: "☠️",
     label: "KILL SWITCH",
     state: "VISIBLE",
+    mode: "LOCAL_EMERGENCY",
+    emergency: true,
+    blockedReasons: ["no_broker_call_sent", "no_order_sent", "no_close_sent"],
+    missingEvidence: ["approved kill-switch backend wiring", "broker/manual path confirmation"],
+    nextSafeStep: "Use the approved broker/manual path until execution wiring exists.",
     message: "Kill switch is visible as an operator control surface marker. It does not call a broker."
   },
   {
     id: "panic-flatten",
+    intent: FOREX_COMMAND_INTENTS.PANIC_FLATTEN,
     icon: "🚨",
     label: "PANIC FLATTEN / EMERGENCY EXIT",
     state: "PLACEHOLDER",
+    mode: "LOCAL_EMERGENCY",
+    emergency: true,
+    blockedReasons: ["close_route_disabled", "no_broker_call_sent", "no_order_sent", "no_close_sent"],
+    missingEvidence: ["approved emergency close route", "live-safe close packet approval"],
+    nextSafeStep: "Use the approved broker/manual path until execution wiring exists.",
     message: "Emergency exit is a placeholder. No close-trade action, order route, or broker write path is wired."
   },
   {
     id: "pair-scanner",
+    intent: FOREX_COMMAND_INTENTS.PAIR_SCANNER,
     icon: "🔎",
     label: "Pair Scanner",
     state: "VIEW",
+    mode: "SCANNER",
+    blockedReasons: ["scanner_is_dashboard_only", "live_execution_blocked"],
+    missingEvidence: ["safe backend status/API feed"],
+    nextSafeStep: "Use the local watchlist read-model and wire safe backend status/API next.",
     message: "Pair scanner points the operator toward the local watchlist read-model only."
   },
   {
     id: "candidate-filter",
+    intent: FOREX_COMMAND_INTENTS.CANDIDATE_FILTER,
     icon: "🧪",
     label: "Candidate Filter",
     state: "VIEW",
+    mode: "FILTER",
+    blockedReasons: ["candidate_filter_is_dashboard_only", "live_execution_blocked"],
+    missingEvidence: ["safe candidate status feed", "approved risk-gate evidence"],
+    nextSafeStep: "Filter candidates locally, then connect safe backend status/API in a later packet.",
     message: "Candidate filter is a local dashboard mode marker for reviewing candidates."
   },
   {
     id: "risk-gate",
+    intent: FOREX_COMMAND_INTENTS.RISK_GATE,
     icon: "🛡️",
     label: "Risk Gate",
     state: "REQUIRED",
+    mode: "RISK",
+    blockedReasons: ["risk_gate_not_approved", "max_loss_not_final", "daily_cap_not_final"],
+    missingEvidence: ["max loss proof", "daily cap proof", "stop-loss proof"],
+    nextSafeStep: "Review local risk fields and keep live trade submission blocked.",
     message: "Risk gate remains required. Max loss, daily cap, and stop-loss proof are not execution wiring."
   },
   {
     id: "reconciliation",
+    intent: FOREX_COMMAND_INTENTS.RECONCILIATION,
     icon: "🧾",
     label: "Reconciliation",
     state: "REQUIRED",
+    mode: "RECONCILIATION",
+    blockedReasons: ["broker_readonly_evidence_required", "account_values_not_loaded"],
+    missingEvidence: ["sanitized read-only account evidence", "sanitized position/P&L/margin evidence"],
+    nextSafeStep: "Collect sanitized read-only evidence and keep private broker data out of the dashboard.",
     message: "Reconciliation is a read-only evidence status marker. It does not access accounts or broker payloads."
   },
   {
     id: "signal-status",
+    intent: FOREX_COMMAND_INTENTS.AIOS_SIGNAL_STATUS,
     icon: "🤖",
     label: "AIOS Signal Status",
     state: "WATCHING",
+    mode: "SIGNAL_STATUS",
+    blockedReasons: ["signal_is_dashboard_only", "live_execution_blocked"],
+    missingEvidence: ["safe signal status feed", "paper/demo proof path"],
+    nextSafeStep: "Watch AIOS signal status locally and wire safe backend status/API next.",
     message: "AIOS signal status is dashboard-only and cannot submit a live trade from this screen."
   }
+];
+
+const FOREX_NEXT_SAFE_STEPS = [
+  "Design landed",
+  "Command surface visible",
+  "Intent state local only",
+  "Next: wire dashboard to safe backend status/API"
+];
+
+const AIOS_TRADING_LADDER = [
+  { label: "UI", value: "ACTIVE", tone: "good" },
+  { label: "Paper", value: "NEXT", tone: "neutral" },
+  { label: "Demo Read-Only", value: "NEXT", tone: "neutral" },
+  { label: "One-Shot Live", value: "PROTECTED", tone: "warn" },
+  { label: "Auto Live", value: "FUTURE", tone: "danger" }
 ];
 
 function normalizeDataSourceType(value) {
@@ -1083,10 +1182,18 @@ function HomeScreen({ onNavigate }) {
 }
 
 function ForexCommandSurface() {
-  const [selectedCommandId, setSelectedCommandId] = useState("signal-status");
+  const [selectedCommandIntent, setSelectedCommandIntent] = useState(
+    FOREX_COMMAND_INTENTS.AIOS_SIGNAL_STATUS
+  );
+  const [localEmergencyMode, setLocalEmergencyMode] = useState(false);
   const selectedCommand =
-    FOREX_COMMAND_CONTROLS.find((control) => control.id === selectedCommandId) ??
+    FOREX_COMMAND_CONTROLS.find((control) => control.intent === selectedCommandIntent) ??
     FOREX_COMMAND_CONTROLS[FOREX_COMMAND_CONTROLS.length - 1];
+
+  function selectCommandIntent(control) {
+    setSelectedCommandIntent(control.intent);
+    setLocalEmergencyMode(Boolean(control.emergency));
+  }
 
   return (
     <section className="panel forexCommandSurface" aria-label="Forex Command Surface">
@@ -1118,17 +1225,24 @@ function ForexCommandSurface() {
 
       <div className="forexCommandGrid" aria-label="Urgent trade controls">
         {FOREX_COMMAND_CONTROLS.map((control) => {
-          const isActive = control.id === selectedCommandId;
+          const isActive = control.intent === selectedCommandIntent;
 
           return (
             <button
               aria-pressed={isActive}
-              className={`forexCommandButton ${isActive ? "activeForexCommandButton" : ""}`}
-              disabled={control.disabled}
+              aria-disabled={control.state === "BLOCKED" ? "true" : undefined}
+              className={[
+                "forexCommandButton",
+                isActive ? "activeForexCommandButton" : "",
+                control.state === "BLOCKED" ? "blockedForexCommandButton" : "",
+                control.emergency ? "emergencyForexCommandButton" : ""
+              ]
+                .filter(Boolean)
+                .join(" ")}
               key={control.id}
               title={control.message}
               type="button"
-              onClick={() => setSelectedCommandId(control.id)}
+              onClick={() => selectCommandIntent(control)}
             >
               <span aria-hidden="true" className="forexCommandIcon">
                 {control.icon}
@@ -1140,9 +1254,56 @@ function ForexCommandSurface() {
         })}
       </div>
 
-      <div className="forexCommandNotice" aria-live="polite">
-        <span>{selectedCommand.label}</span>
-        <strong>{selectedCommand.message}</strong>
+      <section className="forexCommandIntentPanel" aria-label="Command Intent" aria-live="polite">
+        <div className="panelHeading">
+          <p>Command Intent</p>
+          <h3>{selectedCommand.intent}</h3>
+        </div>
+        <div className="forexIntentGrid">
+          <div>
+            <span>Selected button</span>
+            <strong>{selectedCommand.label}</strong>
+          </div>
+          <div>
+            <span>AIOS mode</span>
+            <strong>{selectedCommand.mode}</strong>
+          </div>
+          <div>
+            <span>Blocked because</span>
+            <strong>{selectedCommand.blockedReasons.join(", ")}</strong>
+          </div>
+          <div>
+            <span>Missing evidence</span>
+            <strong>{selectedCommand.missingEvidence.join(", ")}</strong>
+          </div>
+          <div className="forexIntentWide">
+            <span>Next safe step</span>
+            <strong>{selectedCommand.nextSafeStep}</strong>
+          </div>
+        </div>
+      </section>
+
+      {localEmergencyMode ? (
+        <div className="forexEmergencyState" aria-label="Local dashboard emergency mode">
+          <span>LOCAL DASHBOARD EMERGENCY MODE</span>
+          <strong>No broker call sent. No order sent. No close sent.</strong>
+          <p>Operator must use approved broker/manual path until execution wiring exists.</p>
+        </div>
+      ) : null}
+
+      <div className="forexNextSafeStepStrip" aria-label="Next safe step">
+        {FOREX_NEXT_SAFE_STEPS.map((step) => (
+          <span key={step}>{step}</span>
+        ))}
+      </div>
+
+      <div className="forexTradingLadder" aria-label="AIOS Trading Ladder">
+        {AIOS_TRADING_LADDER.map((item) => (
+          <div className={`forexLadderItem tone-${item.tone}`} key={`${item.label}-${item.value}`}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </div>
+        ))}
       </div>
     </section>
   );

@@ -368,9 +368,169 @@ body {
   padding: 10px;
 }
 
+.blockedForexCommandButton {
+  cursor: pointer;
+  border-color: rgba(255, 93, 115, 0.5);
+  background:
+    linear-gradient(180deg, rgba(72, 21, 48, 0.72), rgba(24, 11, 31, 0.88)),
+    radial-gradient(circle at top, rgba(255, 93, 115, 0.14), transparent 9rem);
+  box-shadow: inset 0 0 0 1px rgba(255, 93, 115, 0.08);
+  opacity: 0.9;
+}
+
+.blockedForexCommandButton:hover,
+.blockedForexCommandButton:focus-visible {
+  border-color: rgba(255, 93, 115, 0.7);
+  box-shadow:
+    0 0 20px rgba(255, 93, 115, 0.14),
+    inset 0 0 0 1px rgba(255, 93, 115, 0.12);
+}
+
+.blockedForexCommandButton strong {
+  border-color: rgba(255, 93, 115, 0.46);
+  background: rgba(255, 93, 115, 0.12);
+  color: var(--danger);
+}
+
+.emergencyForexCommandButton {
+  border-color: rgba(255, 191, 76, 0.52);
+}
+
+.forexCommandIntentPanel,
+.forexEmergencyState,
+.forexNextSafeStepStrip,
+.forexTradingLadder {
+  border: 1px solid rgba(167, 139, 250, 0.24);
+  border-radius: 8px;
+  background: rgba(6, 5, 19, 0.34);
+}
+
+.forexCommandIntentPanel {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+}
+
+.forexIntentGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.forexIntentGrid > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(88, 215, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(31, 26, 70, 0.66);
+  padding: 8px;
+}
+
+.forexIntentWide {
+  grid-column: 1 / -1;
+}
+
+.forexIntentGrid span,
+.forexEmergencyState span,
+.forexNextSafeStepStrip span,
+.forexLadderItem span {
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.forexIntentGrid strong,
+.forexEmergencyState strong,
+.forexLadderItem strong {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.forexEmergencyState {
+  display: grid;
+  gap: 5px;
+  border-color: rgba(255, 191, 76, 0.48);
+  background:
+    linear-gradient(135deg, rgba(89, 49, 18, 0.5), rgba(44, 18, 42, 0.58)),
+    radial-gradient(circle at top left, rgba(255, 191, 76, 0.18), transparent 15rem);
+  padding: 10px;
+}
+
+.forexEmergencyState span {
+  color: var(--warn);
+}
+
+.forexEmergencyState p {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.forexNextSafeStepStrip,
+.forexTradingLadder {
+  display: grid;
+  gap: 6px;
+}
+
+.forexNextSafeStepStrip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 8px;
+}
+
+.forexNextSafeStepStrip span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(88, 215, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(88, 215, 255, 0.08);
+  padding: 6px 8px;
+  color: var(--muted-strong);
+  overflow-wrap: anywhere;
+}
+
+.forexTradingLadder {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 8px;
+}
+
+.forexLadderItem {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(88, 215, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(31, 26, 70, 0.62);
+  padding: 7px;
+}
+
+.forexLadderItem.tone-good {
+  border-color: rgba(51, 240, 162, 0.42);
+  background: rgba(51, 240, 162, 0.1);
+}
+
+.forexLadderItem.tone-warn {
+  border-color: rgba(255, 191, 76, 0.44);
+  background: rgba(255, 191, 76, 0.1);
+}
+
+.forexLadderItem.tone-danger {
+  border-color: rgba(255, 93, 115, 0.44);
+  background: rgba(255, 93, 115, 0.1);
+}
+
 @media (max-width: 980px) {
   .forexStatusStrip,
-  .forexCriticalStrip {
+  .forexCriticalStrip,
+  .forexNextSafeStepStrip,
+  .forexTradingLadder {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -392,7 +552,10 @@ body {
 
   .forexStatusStrip,
   .forexCriticalStrip,
-  .forexCommandGrid {
+  .forexCommandGrid,
+  .forexIntentGrid,
+  .forexNextSafeStepStrip,
+  .forexTradingLadder {
     grid-template-columns: 1fr;
   }
 
