@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import dashboardFixture from "../mock-data/aios-minimal-operator-dashboard-v1.example.json";
+import aiosForexBotSymbolBanner from "./assets/aios-forex-bot-symbol-banner.png";
 import "./MinimalOperatorDashboard.css";
 
 const VIEWS = {
@@ -185,7 +186,7 @@ const FOREX_COMMAND_CONTROLS = [
       "broker connection approval",
       "order route approval"
     ],
-    nextSafeStep: "Keep GET IN blocked and review safe backend status/API wiring next.",
+    nextSafeStep: "Next safe ladder step: PAPER ORDER PREVIEW.",
     message: "GET IN is blocked. Live order submission requires future protected Human Owner approval."
   },
   {
@@ -207,7 +208,7 @@ const FOREX_COMMAND_CONTROLS = [
       "broker connection approval",
       "close route approval"
     ],
-    nextSafeStep: "Keep GET OUT blocked and use approved manual/broker path until execution wiring exists.",
+    nextSafeStep: "Next safe ladder step: PAPER/SANDBOX CLOSE PREVIEW. Close execution remains disabled.",
     message: "GET OUT is blocked. Close routes are disabled and no live position action exists here."
   },
   {
@@ -323,6 +324,47 @@ const AIOS_TRADING_LADDER = [
   { label: "Demo Read-Only", value: "NEXT", tone: "neutral" },
   { label: "One-Shot Live", value: "PROTECTED", tone: "warn" },
   { label: "Auto Live", value: "FUTURE", tone: "danger" }
+];
+
+const PAPER_SANDBOX_PATHWAY_STEPS = [
+  { label: "Paper Preview", value: "READY_NEXT", tone: "good" },
+  { label: "Sandbox/Demo", value: "NOT_CONNECTED", tone: "warn" },
+  { label: "Live One-Shot", value: "PROTECTED", tone: "warn" },
+  { label: "Auto Live", value: "FUTURE_BLOCKED", tone: "danger" }
+];
+
+const PAPER_SANDBOX_CRITICAL_STRIP = [
+  "LIVE BLOCKED",
+  "PAPER NEXT",
+  "SANDBOX NEXT",
+  "BROKER NOT CONNECTED",
+  "ORDER ROUTE DISABLED",
+  "CLOSE ROUTE DISABLED"
+];
+
+const PAPER_ORDER_PREVIEW_ROWS = [
+  { label: "Pair", value: `${formatPair(dashboardFixture.selectedPair)} placeholder` },
+  { label: "Side", value: "BUY/SELL placeholder" },
+  { label: "Units", value: "1 micro / placeholder" },
+  { label: "Stop Loss", value: "REQUIRED" },
+  { label: "Take Profit", value: "NOT SET / placeholder" },
+  { label: "Max Loss", value: "REQUIRED" },
+  { label: "Status", value: "PREVIEW_ONLY_NO_ORDER_SENT" }
+];
+
+const SANDBOX_DRY_RUN_ROWS = [
+  { label: "Selection", value: "SANDBOX_DRY_RUN_SELECTED" },
+  { label: "Broker", value: "broker_not_connected" },
+  { label: "Order route", value: "no_order_route" },
+  { label: "Close route", value: "no_close_route" },
+  { label: "Live execution", value: "no_live_execution" }
+];
+
+const AIOS_FOREX_BRAND_PILLS = [
+  "⚡ SIGNAL",
+  "📡 TOWER",
+  "🌐 GLOBAL",
+  "💎 CAPITAL"
 ];
 
 const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
@@ -1417,6 +1459,96 @@ function SafeDashboardStatusPanel() {
   );
 }
 
+function PaperSandboxTradePathwayPanel() {
+  const [previewMode, setPreviewMode] = useState("paper-preview");
+  const isPaperPreview = previewMode === "paper-preview";
+  const previewRows = isPaperPreview ? PAPER_ORDER_PREVIEW_ROWS : SANDBOX_DRY_RUN_ROWS;
+  const previewTitle = isPaperPreview ? "PAPER ORDER PREVIEW" : "SANDBOX DRY RUN";
+
+  return (
+    <section className="forexPaperSandboxPanel" aria-label="Paper/Sandbox Trade Pathway">
+      <div className="forexPaperSandboxHeader">
+        <div className="panelHeading">
+          <p>Paper/Sandbox Trade Pathway</p>
+          <h3>UI intent → paper preview → sandbox/demo → protected one-shot live → future auto-live</h3>
+        </div>
+        <strong>PREVIEW ONLY / NO ORDER SENT</strong>
+      </div>
+
+      <div className="forexPaperSandboxSteps" aria-label="Paper and sandbox ladder status">
+        {PAPER_SANDBOX_PATHWAY_STEPS.map((step) => (
+          <div className={`forexPaperSandboxStep tone-${step.tone}`} key={`${step.label}-${step.value}`}>
+            <span>{step.label}</span>
+            <strong>{step.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className="forexPaperSandboxActions" aria-label="Paper sandbox preview controls">
+        <button
+          aria-pressed={isPaperPreview}
+          className={`forexPaperSandboxButton ${isPaperPreview ? "activePaperSandboxButton" : ""}`}
+          type="button"
+          onClick={() => setPreviewMode("paper-preview")}
+        >
+          📄 PAPER ORDER PREVIEW
+        </button>
+        <button
+          aria-pressed={!isPaperPreview}
+          className={`forexPaperSandboxButton ${!isPaperPreview ? "activePaperSandboxButton" : ""}`}
+          type="button"
+          onClick={() => setPreviewMode("sandbox-dry-run")}
+        >
+          🧪 SANDBOX DRY RUN
+        </button>
+      </div>
+
+      <div className="forexPaperSandboxCriticalStrip" aria-label="Critical paper sandbox operator strip">
+        {PAPER_SANDBOX_CRITICAL_STRIP.map((item) => (
+          <span key={item}>{item}</span>
+        ))}
+      </div>
+
+      <div className="forexPaperSandboxPreview" aria-live="polite">
+        <div className="panelHeading">
+          <p>Selected local preview</p>
+          <h3>{previewTitle}</h3>
+        </div>
+        <div className="forexPaperSandboxPreviewGrid">
+          {previewRows.map((row) => (
+            <div key={`${previewMode}-${row.label}`}>
+              <span>{row.label}</span>
+              <strong>{row.value}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AiosForexBrandBanner() {
+  return (
+    <section className="aiosForexBrandBanner" aria-label="AIOS Forex Bot preview brand layer">
+      <img
+        alt="AIOS.FOREX.BOT preview symbol banner"
+        className="aiosForexBrandImage"
+        src={aiosForexBotSymbolBanner}
+      />
+      <div className="aiosForexBrandText">
+        <span className="aiosForexBrandPreview">PREVIEW BRAND LAYER</span>
+        <h3>AIOS.FOREX.BOT</h3>
+        <div className="aiosForexBrandPills" aria-label="AIOS Forex Bot concept labels">
+          {AIOS_FOREX_BRAND_PILLS.map((pill) => (
+            <span key={pill}>{pill}</span>
+          ))}
+        </div>
+        <p>Customizable cockpit identity. Replaceable before final brand lock.</p>
+      </div>
+    </section>
+  );
+}
+
 function ForexCommandSurface() {
   const [selectedCommandIntent, setSelectedCommandIntent] = useState(
     FOREX_COMMAND_INTENTS.AIOS_SIGNAL_STATUS
@@ -1441,6 +1573,8 @@ function ForexCommandSurface() {
         <strong>LIVE EXECUTION BLOCKED UNTIL FUTURE PROTECTED APPROVAL</strong>
       </div>
 
+      <AiosForexBrandBanner />
+
       <div className="forexStatusStrip" aria-label="Forex command safety status">
         {FOREX_COMMAND_STATUSES.map((status) => (
           <div className={`forexStatusPill tone-${status.tone}`} key={`${status.label}-${status.value}`}>
@@ -1451,6 +1585,8 @@ function ForexCommandSurface() {
       </div>
 
       <SafeDashboardStatusPanel />
+
+      <PaperSandboxTradePathwayPanel />
 
       <div className="forexCriticalStrip" aria-label="Critical forex command information">
         {FOREX_CRITICAL_INFO.map((item) => (

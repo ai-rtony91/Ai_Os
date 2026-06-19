@@ -192,6 +192,97 @@ body {
   text-transform: uppercase;
 }
 
+.aiosForexBrandBanner {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(132px, 0.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(88, 215, 255, 0.34);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(6, 5, 19, 0.56), rgba(31, 26, 70, 0.64)),
+    radial-gradient(circle at 14% 12%, rgba(88, 215, 255, 0.18), transparent 18rem),
+    radial-gradient(circle at 90% 0%, rgba(167, 139, 250, 0.2), transparent 20rem);
+  padding: 10px;
+  box-shadow:
+    inset 0 0 0 1px rgba(167, 139, 250, 0.08),
+    0 0 28px rgba(88, 215, 255, 0.08);
+}
+
+.aiosForexBrandImage {
+  width: 100%;
+  max-height: 112px;
+  display: block;
+  object-fit: contain;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  border-radius: 8px;
+  background: rgba(6, 5, 19, 0.38);
+  filter:
+    drop-shadow(0 0 14px rgba(88, 215, 255, 0.24))
+    drop-shadow(0 0 24px rgba(167, 139, 250, 0.18));
+}
+
+.aiosForexBrandText {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.aiosForexBrandText h3,
+.aiosForexBrandText p {
+  margin: 0;
+}
+
+.aiosForexBrandText h3 {
+  color: var(--text);
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 900;
+  line-height: 0.95;
+  overflow-wrap: anywhere;
+  text-shadow:
+    0 0 16px rgba(88, 215, 255, 0.28),
+    0 0 28px rgba(167, 139, 250, 0.18);
+}
+
+.aiosForexBrandText p {
+  color: var(--muted-strong);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.aiosForexBrandPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.aiosForexBrandPills span,
+.aiosForexBrandPreview {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid rgba(88, 215, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(88, 215, 255, 0.08);
+  padding: 5px 8px;
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.aiosForexBrandPreview {
+  border-color: rgba(255, 191, 76, 0.42);
+  background: rgba(255, 191, 76, 0.1);
+  color: var(--warn);
+}
+
 .forexStatusStrip,
 .forexCriticalStrip,
 .forexCommandGrid {
@@ -398,6 +489,7 @@ body {
 
 .forexCommandIntentPanel,
 .forexEmergencyState,
+.forexPaperSandboxPanel,
 .forexSafeStatusPanel,
 .forexNextSafeStepStrip,
 .forexTradingLadder {
@@ -537,6 +629,164 @@ body {
   color: var(--muted);
 }
 
+.forexPaperSandboxPanel {
+  display: grid;
+  gap: 10px;
+  border-color: rgba(51, 240, 162, 0.3);
+  background:
+    linear-gradient(135deg, rgba(6, 5, 19, 0.48), rgba(23, 45, 62, 0.38)),
+    radial-gradient(circle at top left, rgba(51, 240, 162, 0.12), transparent 18rem);
+  padding: 10px;
+}
+
+.forexPaperSandboxHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.forexPaperSandboxHeader > strong {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(51, 240, 162, 0.44);
+  border-radius: 999px;
+  background: rgba(51, 240, 162, 0.1);
+  padding: 6px 10px;
+  color: var(--good);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.forexPaperSandboxSteps,
+.forexPaperSandboxActions,
+.forexPaperSandboxCriticalStrip,
+.forexPaperSandboxPreviewGrid {
+  display: grid;
+  gap: 8px;
+}
+
+.forexPaperSandboxSteps {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.forexPaperSandboxStep,
+.forexPaperSandboxPreviewGrid > div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  border: 1px solid rgba(88, 215, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(31, 26, 70, 0.62);
+  padding: 8px;
+}
+
+.forexPaperSandboxStep.tone-good {
+  border-color: rgba(51, 240, 162, 0.42);
+  background: rgba(51, 240, 162, 0.1);
+}
+
+.forexPaperSandboxStep.tone-warn {
+  border-color: rgba(255, 191, 76, 0.44);
+  background: rgba(255, 191, 76, 0.1);
+}
+
+.forexPaperSandboxStep.tone-danger {
+  border-color: rgba(255, 93, 115, 0.44);
+  background: rgba(255, 93, 115, 0.1);
+}
+
+.forexPaperSandboxActions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.forexPaperSandboxButton {
+  min-height: 42px;
+  cursor: pointer;
+  border: 1px solid rgba(88, 215, 255, 0.34);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(31, 26, 70, 0.86), rgba(12, 10, 34, 0.94)),
+    radial-gradient(circle at top, rgba(51, 240, 162, 0.1), transparent 11rem);
+  padding: 9px 10px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.forexPaperSandboxButton:hover,
+.forexPaperSandboxButton:focus-visible,
+.activePaperSandboxButton {
+  border-color: rgba(51, 240, 162, 0.7);
+  box-shadow: 0 0 20px rgba(51, 240, 162, 0.14);
+}
+
+.forexPaperSandboxButton:hover {
+  transform: translateY(-1px);
+}
+
+.forexPaperSandboxButton:focus-visible {
+  outline: 2px solid rgba(167, 139, 250, 0.38);
+  outline-offset: 2px;
+}
+
+.forexPaperSandboxCriticalStrip {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.forexPaperSandboxCriticalStrip span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 191, 76, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 191, 76, 0.08);
+  padding: 6px 8px;
+  color: var(--muted-strong);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexPaperSandboxPreview {
+  display: grid;
+  gap: 8px;
+}
+
+.forexPaperSandboxPreviewGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.forexPaperSandboxStep span,
+.forexPaperSandboxPreviewGrid span {
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.forexPaperSandboxStep strong,
+.forexPaperSandboxPreviewGrid strong {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
 .forexCommandIntentPanel {
   display: grid;
   gap: 10px;
@@ -663,6 +913,9 @@ body {
   .forexCriticalStrip,
   .forexSafeEndpointGrid,
   .forexSafeStatusFlags,
+  .forexPaperSandboxSteps,
+  .forexPaperSandboxCriticalStrip,
+  .forexPaperSandboxPreviewGrid,
   .forexNextSafeStepStrip,
   .forexTradingLadder {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -689,18 +942,27 @@ body {
   .forexCommandGrid,
   .forexSafeEndpointGrid,
   .forexSafeStatusFlags,
+  .forexPaperSandboxActions,
+  .forexPaperSandboxSteps,
+  .forexPaperSandboxCriticalStrip,
+  .forexPaperSandboxPreviewGrid,
   .forexIntentGrid,
   .forexNextSafeStepStrip,
   .forexTradingLadder {
     grid-template-columns: 1fr;
   }
 
+  .forexPaperSandboxHeader,
+  .aiosForexBrandBanner,
   .forexSafeStatusHeader {
     align-items: stretch;
   }
 
+  .forexPaperSandboxHeader > strong,
   .forexRefreshStatusButton {
     width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .forexCommandButton {
@@ -710,5 +972,13 @@ body {
     align-items: center;
     justify-items: start;
     text-align: left;
+  }
+
+  .aiosForexBrandBanner {
+    grid-template-columns: 1fr;
+  }
+
+  .aiosForexBrandImage {
+    max-height: 150px;
   }
 }
