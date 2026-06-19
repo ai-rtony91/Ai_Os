@@ -180,7 +180,7 @@ function Breadcrumb({ view, selected, onNavigate }) {
   );
 }
 
-function DoorCard({ title, detail, badge, onClick }) {
+function DoorCard({ title, detail, badge, onClick, actionLabel = "Open" }) {
   const content = (
     <>
       <span>{detail}</span>
@@ -189,22 +189,23 @@ function DoorCard({ title, detail, badge, onClick }) {
     </>
   );
 
-  if (onClick) {
-    return (
-      <button className="doorCard" type="button" onClick={onClick}>
-        {content}
-      </button>
-    );
-  }
-
-  return <div className="doorCard">{content}</div>;
+  return (
+    <article className={`doorCard ${onClick ? "interactiveDoorCard" : ""}`}>
+      {content}
+      {onClick ? (
+        <button className="doorCardAction" type="button" onClick={onClick}>
+          {actionLabel}
+        </button>
+      ) : null}
+    </article>
+  );
 }
 
 function HomeScreen({ onOpenForex }) {
   return (
     <section className="screen homeScreen" aria-label="Home">
       <div className="doorGrid">
-        <DoorCard detail="Open" title="Forex Bot" onClick={onOpenForex} />
+        <DoorCard actionLabel="Open Forex Bot" detail="Open" title="Forex Bot" onClick={onOpenForex} />
         <DoorCard badge={dashboardFixture.mode} detail="System" title="Status" />
         <DoorCard badge={dashboardFixture.bridges.safeStatus} detail="Safety" title="Blocked" />
         <DoorCard badge={dashboardFixture.source} detail="Settings" title="Locked" />
@@ -224,7 +225,7 @@ function ForexHub({ riskPl, exitReadiness, onBack, onOpenWatchlist }) {
       </div>
 
       <div className="hubGrid">
-        <DoorCard detail="Open" title="Watchlist" onClick={onOpenWatchlist} />
+        <DoorCard actionLabel="Open Watchlist" detail="Open" title="Watchlist" onClick={onOpenWatchlist} />
         <DoorCard detail="Current Position" title={riskPl.currentPosition} />
         <DoorCard detail="Risk / P&L" title={riskPl.riskCap} />
         <DoorCard badge={exitReadiness.autoExitStatus} detail="Exit" title="Readiness" />
