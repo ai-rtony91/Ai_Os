@@ -47,7 +47,11 @@ def fixture_evidence() -> dict[str, object]:
     }
 
 
-def sanitized_oanda_evidence(*, daily_pl_available: bool = True, rows: bool = True) -> dict[str, object]:
+def sanitized_oanda_evidence(
+    *, daily_pl_available: bool = True, account_pl_available: bool = True, rows: bool = True
+) -> dict[str, object]:
+    realized_pl = "1.25" if account_pl_available else "UNAVAILABLE"
+    unrealized_pl = "0.00" if account_pl_available else "UNAVAILABLE"
     return {
         "source_type": "broker-live-read-only",
         "source_label": "OANDA_READ_ONLY_SANITIZED",
@@ -58,8 +62,9 @@ def sanitized_oanda_evidence(*, daily_pl_available: bool = True, rows: bool = Tr
             "open_position_count": 0,
             "open_positions_reconciled": True,
             "daily_pl_available": daily_pl_available,
-            "realized_pl": "1.25" if daily_pl_available else "UNAVAILABLE",
-            "unrealized_pl": "0.00",
+            "daily_pl_ledger_available": daily_pl_available,
+            "realized_pl": realized_pl,
+            "unrealized_pl": unrealized_pl,
             "margin_risk_available": True,
         },
         "positions": {
@@ -68,8 +73,9 @@ def sanitized_oanda_evidence(*, daily_pl_available: bool = True, rows: bool = Tr
         },
         "risk_pl": {
             "daily_pl_available": daily_pl_available,
-            "realized_pl": "1.25" if daily_pl_available else "UNAVAILABLE",
-            "unrealized_pl": "0.00",
+            "daily_pl_ledger_available": daily_pl_available,
+            "realized_pl": realized_pl,
+            "unrealized_pl": unrealized_pl,
             "margin_risk_available": True,
         },
         "trading_history": {
@@ -161,7 +167,42 @@ def test_daily_pl_blocker_is_removed_only_when_daily_pl_is_available():
     )
 
     assert result["READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW"] is False
+    assert result["account_pl_available"] is True
+    assert result["daily_pl_available"] is False
+    assert result["daily_pl_block_reason"] == "daily P/L ledger not verified"
     assert "daily_pl_not_available_in_read_only_evidence" in result["blocked_reasons"]
+
+
+def test_safe_status_field_names_do_not_trigger_private_identifier_blocker():
+    evidence = sanitized_oanda_evidence()
+    evidence["OANDA_ACCOUNT_ID_STATUS"] = "NOT_RECORDED"
+    evidence["no_account_id_status"] = "PASS_NO_ACCOUNT_IDENTIFIER_VALUES_RECORDED"
+    evidence["no_order_id_status"] = "PASS_NO_ORDER_IDENTIFIER_VALUES_RECORDED"
+    evidence["no_transaction_id_status"] = "PASS_NO_TRANSACTION_IDENTIFIER_VALUES_RECORDED"
+    evidence["ACCOUNT_ID_RECORDED"] = False
+    evidence["RAW_BROKER_PAYLOAD_RECORDED"] = False
+
+    result = build_read_only_evidence_approval_model(
+        evidence, generated_at_utc="2026-06-19T00:00:00Z"
+    )
+
+    assert result["READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW"] is True
+    assert "secret_or_private_identifier_marker_present" not in result["blocked_reasons"]
+
+
+def test_actual_unsafe_private_values_still_block_approval():
+    evidence = sanitized_oanda_evidence()
+    evidence["runtime_headers"] = {"Authorization": "Bearer FAKE_RUNTIME_TOKEN"}
+    evidence["account_identifier"] = "ACCOUNT-IDENTIFIER-RAW-VALUE"
+    evidence["order_identifier"] = "ORDER-IDENTIFIER-RAW-VALUE"
+    evidence["transaction_identifier"] = "TRANSACTION-IDENTIFIER-RAW-VALUE"
+
+    result = build_read_only_evidence_approval_model(
+        evidence, generated_at_utc="2026-06-19T00:00:00Z"
+    )
+
+    assert result["READ_ONLY_EVIDENCE_APPROVED_FOR_FUTURE_LIVE_REVIEW"] is False
+    assert "secret_or_private_identifier_marker_present" in result["blocked_reasons"]
 
 
 def test_trading_history_writeback_remains_blocked_unless_verified():
