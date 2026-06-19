@@ -30,6 +30,40 @@ const ICONS = {
   detail: "🔎"
 };
 
+const SYSTEM_DETAIL_ITEMS = [
+  {
+    id: "dashboard",
+    emoji: "📊",
+    label: "DASHBOARD",
+    value: "READY",
+    tone: "good"
+  },
+  {
+    id: "mode",
+    emoji: "⚙️",
+    label: "MODE",
+    value: dashboardFixture.mode
+  },
+  {
+    id: "data",
+    emoji: "🧾",
+    label: "DATA",
+    value: dashboardFixture.source
+  },
+  {
+    id: "broker",
+    emoji: "🏦",
+    label: "BROKER",
+    value: dashboardFixture.bridges.brokerBridge
+  },
+  {
+    id: "liveApis",
+    emoji: "🔌",
+    label: "LIVE APIS",
+    value: "BLOCKED"
+  }
+];
+
 const VIEW_LABELS = {
   [VIEWS.HOME]: "Operator",
   [VIEWS.FOREX]: "Forex Bot",
@@ -227,6 +261,54 @@ function Field({ label, value, tone, source = dataSourceForPair(), compact = fal
       <strong className={`tone-${tone ?? statusTone(value)}`}>{value}</strong>
       <DataLabel compact={compact} source={source} />
     </div>
+  );
+}
+
+function SystemDetailField({ label, value, tone }) {
+  return (
+    <div className="field systemDetailField">
+      <span>{label}</span>
+      <strong className={`tone-${tone ?? statusTone(value)}`}>{value}</strong>
+    </div>
+  );
+}
+
+function SystemDetailPanel({ item, source }) {
+  const liveAllowed = Boolean(source?.liveTradingAllowed);
+  const rows = [
+    {
+      label: item.label,
+      value: item.value,
+      tone: item.tone
+    },
+    {
+      label: "SOURCE",
+      value: source?.label ?? "UNVERIFIED"
+    },
+    {
+      label: "FRESHNESS",
+      value: formatFreshness(source),
+      tone: "neutral"
+    },
+    {
+      label: "LIVE_TRADING_ALLOWED_FROM_THIS_DATA",
+      value: String(liveAllowed)
+    }
+  ];
+
+  return (
+    <section className="systemDetailPanel" aria-label={`${item.label} detail`}>
+      <div className="fieldGrid systemDetailGrid">
+        {rows.map((row) => (
+          <SystemDetailField
+            key={row.label}
+            label={row.label}
+            tone={row.tone}
+            value={row.value}
+          />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -613,15 +695,40 @@ function SimpleStatusPage({ title, backLabel, onBack, children }) {
 
 function SystemPage({ onBack }) {
   const source = dataSourceForPair();
+  const [selectedDetailId, setSelectedDetailId] = useState(SYSTEM_DETAIL_ITEMS[0].id);
+  const selectedDetail =
+    SYSTEM_DETAIL_ITEMS.find((item) => item.id === selectedDetailId) ?? SYSTEM_DETAIL_ITEMS[0];
 
   return (
-    <SimpleStatusPage backLabel="READ_ONLY" title="System" onBack={onBack}>
-      <Field compact label="Dashboard" source={source} value="READY" tone="good" />
-      <Field compact label="Mode" source={source} value={dashboardFixture.mode} />
-      <Field compact label="Data" source={source} value={dashboardFixture.source} />
-      <Field compact label="Broker" source={source} value={dashboardFixture.bridges.brokerBridge} />
-      <Field compact label="Live APIs" source={source} value="BLOCKED" />
-    </SimpleStatusPage>
+    <section className="screen" aria-label="System">
+      <div className="screenTop">
+        <BackButton onClick={onBack} />
+        <h2>System</h2>
+        <StatusBadge value="READ_ONLY" />
+      </div>
+
+      <div className="systemEmojiGrid" aria-label="System status controls">
+        {SYSTEM_DETAIL_ITEMS.map((item) => {
+          const isActive = item.id === selectedDetail.id;
+
+          return (
+            <button
+              aria-label={item.label}
+              aria-pressed={isActive}
+              className={`systemEmojiButton ${isActive ? "activeSystemEmojiButton" : ""}`}
+              key={item.id}
+              title={item.label}
+              type="button"
+              onClick={() => setSelectedDetailId(item.id)}
+            >
+              <span aria-hidden="true">{item.emoji}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <SystemDetailPanel item={selectedDetail} source={source} />
+    </section>
   );
 }
 
