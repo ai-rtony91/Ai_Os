@@ -12,6 +12,7 @@ Execution review means AIOS evaluates sanitized evidence from the read-only brid
 - Paper signal execution loop evidence exists and includes signal side, risk approval, paper entry, exit plan, paper close/reconcile, realized paper P/L, trading history writeback, and `live_execution_allowed: false`.
 - Live micro-trade arming gate evidence exists and includes `LIVE_ARMABLE`, the arming phrase, and false broker write, order placement, close trade, and live execution flags.
 - Final live prerequisites are reviewed: micro-sized units, max trade risk, daily loss cap, kill switch, one-position rule, no duplicate entry, no revenge loop, stop-loss, take-profit or waiver, max-time policy, manual broker UI fallback, trading history writeback, and no unreconciled duplicate live position.
+- Proposed live micro units are aligned to the live micro-trade arming gate `max_units`. If the arming report omits `max_units`, the execution review defaults the maximum live micro size to `1`. Paper simulation unit size is not reused as proposed live size.
 
 ## What Remains Blocked
 
