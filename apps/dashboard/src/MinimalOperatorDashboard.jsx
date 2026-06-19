@@ -286,10 +286,16 @@ function Breadcrumb({ view, selected, onNavigate }) {
     crumbs.push({ label: viewLabel(view), icon: viewIcon(view) });
   }
 
+  const visibleCrumbs = view === VIEWS.DETAIL ? crumbs : crumbs.slice(0, -1);
+
+  if (visibleCrumbs.length === 0) {
+    return null;
+  }
+
   return (
     <nav className="breadcrumb" aria-label="Dashboard breadcrumb">
-      {crumbs.map((crumb, index) => {
-        const isLast = index === crumbs.length - 1;
+      {visibleCrumbs.map((crumb, index) => {
+        const isLast = index === visibleCrumbs.length - 1 && crumb.showLabel;
         const target =
           crumb.label === "Home"
             ? VIEWS.HOME
