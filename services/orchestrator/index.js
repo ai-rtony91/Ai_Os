@@ -9,6 +9,7 @@ const {
   getRuntimeStatus,
   getVisibilitySnapshot
 } = require("./runtimeApiService");
+const { getForexPaperOrderPreview } = require("./forexPaperOrderPreview");
 const { getForexPaperSandboxStatus } = require("./forexPaperSandboxStatus");
 const {
   getBridgeHealth,
@@ -33,6 +34,10 @@ app.get("/api/health", (req, res) => {
 
 app.get("/api/forex/paper-sandbox/status", (req, res) => {
   res.json(getForexPaperSandboxStatus());
+});
+
+app.get("/api/forex/paper-sandbox/order-preview", (req, res) => {
+  res.json(getForexPaperOrderPreview());
 });
 
 app.get("/health", (req, res) => {
