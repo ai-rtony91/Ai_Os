@@ -45,7 +45,6 @@ button {
 .breadcrumb,
 .screen,
 .panel,
-.doorCard,
 .watchlistItem {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -238,7 +237,6 @@ button {
   background: rgba(210, 204, 188, 0.05);
 }
 
-.interactiveDoorCard:hover,
 .interactiveDoorCard:focus-visible,
 .watchlistItem:focus-within,
 .watchlistItem:hover,
@@ -302,6 +300,10 @@ button {
 
 .doorCard {
   min-height: 148px;
+  border: 0;
+  border-radius: 8px;
+  appearance: none;
+  background: transparent;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -310,20 +312,18 @@ button {
 
 .interactiveDoorCard {
   position: relative;
-  border-color: rgba(91, 190, 203, 0.34);
   cursor: pointer;
+  transition:
+    background 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
 }
 
-.interactiveDoorCard::after {
-  content: "";
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
-  left: 12px;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(91, 190, 203, 0.88), transparent);
-  opacity: 0.52;
+.interactiveDoorCard:hover,
+.interactiveDoorCard:focus-visible {
+  background: radial-gradient(circle, rgba(91, 190, 203, 0.1), transparent 68%);
+  box-shadow: 0 0 26px rgba(91, 190, 203, 0.1);
+  transform: translateY(-1px);
 }
 
 .disabledDoorCard {
@@ -336,14 +336,7 @@ button {
   height: 74px;
   display: inline-grid;
   place-items: center;
-  border: 1px solid rgba(91, 190, 203, 0.42);
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, rgba(91, 190, 203, 0.12), rgba(9, 10, 8, 0.42)),
-    rgba(9, 10, 8, 0.44);
-  box-shadow:
-    inset 0 0 0 1px rgba(210, 204, 188, 0.04),
-    0 0 24px rgba(91, 190, 203, 0.12);
+  filter: drop-shadow(0 0 18px rgba(91, 190, 203, 0.22));
   font-size: 42px;
   line-height: 1;
 }
