@@ -90,11 +90,8 @@ def build_one_shot_live_micro_trade_execution_review_result(
     proposed_side = normalize_side(
         first_present(paper_model, "signal_side", "side", default=DEFAULT_PROPOSED_SIDE)
     )
-    proposed_units = coerce_int(
-        first_present(paper_model, "paper_units", "units", default=DEFAULT_PROPOSED_UNITS),
-        DEFAULT_PROPOSED_UNITS,
-    )
-    max_units = min(proposed_units, DEFAULT_PROPOSED_UNITS)
+    max_units = resolve_max_live_micro_units(arming_model)
+    proposed_units = resolve_proposed_live_micro_units(max_units)
     max_trade_risk = coerce_float(
         first_present(
             paper_model,
@@ -671,6 +668,27 @@ def evaluate_future_execution_phrase(phrase: str | None) -> dict[str, Any]:
         "evidence_missing": ["future_execution_human_phrase"],
         "blocked_reasons": ["future_execution_human_phrase_not_provided"],
     }
+
+
+def resolve_max_live_micro_units(arming_model: Mapping[str, Any]) -> int:
+    max_units = coerce_int(
+        first_present_nested(
+            arming_model,
+            "max_units",
+            "risk_gate_status.max_units",
+            default=DEFAULT_PROPOSED_UNITS,
+        ),
+        DEFAULT_PROPOSED_UNITS,
+    )
+    if max_units < 0:
+        return 0
+    return min(max_units, DEFAULT_PROPOSED_UNITS)
+
+
+def resolve_proposed_live_micro_units(max_units: int) -> int:
+    if max_units < DEFAULT_PROPOSED_UNITS:
+        return max_units
+    return DEFAULT_PROPOSED_UNITS
 
 
 def build_sanitized_report(result: Mapping[str, Any]) -> str:

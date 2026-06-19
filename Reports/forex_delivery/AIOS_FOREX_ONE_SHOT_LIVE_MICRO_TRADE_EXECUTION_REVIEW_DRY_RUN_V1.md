@@ -6,7 +6,7 @@
 - live_trade_placed: False
 - selected_pair: EUR_USD
 - proposed_side: BUY
-- proposed_units: 1000
+- proposed_units: 1
 - max_trade_risk: 1.0
 
 ## Evidence Present
@@ -14,6 +14,7 @@
 - read_only_source_type_present
 - read_only_source_label_present
 - read_only_freshness_present
+- broker_account_reachable
 - paper_signal_execution_loop_evidence_report
 - paper_signal_side_recorded
 - paper_risk_gate_approved
@@ -30,6 +31,7 @@
 - arming_gate_broker_write_calls_false
 - arming_gate_order_placement_false
 - arming_gate_close_trade_false
+- micro_sized_max_units
 - max_trade_risk_present
 - daily_loss_cap_present
 - one_position_rule_required
@@ -48,14 +50,11 @@
 - future_execution_human_phrase
 
 ## Blockers
-- read_only_bridge_fixture_source_not_live_permitted
 - read_only_data_not_approved_for_future_live_execution
-- broker_account_not_reachable_in_read_only_evidence
 - open_positions_not_reconciled_in_read_only_evidence
 - daily_pl_not_available_in_read_only_evidence
 - real_trading_history_unavailable_or_blocked
 - live_micro_trade_arming_gate_not_armable
-- proposed_units_exceed_micro_trade_limit
 - open_live_position_state_not_reconciled
 - auto_exit_readiness_not_implemented_for_live_execution
 - real_trading_history_writeback_not_verified
@@ -82,14 +81,11 @@ Do not execute. Resolve blocked evidence, refresh sanitized read-only bridge and
 {
   "EXECUTION_REVIEW_READY": false,
   "blocked_reasons": [
-    "read_only_bridge_fixture_source_not_live_permitted",
     "read_only_data_not_approved_for_future_live_execution",
-    "broker_account_not_reachable_in_read_only_evidence",
     "open_positions_not_reconciled_in_read_only_evidence",
     "daily_pl_not_available_in_read_only_evidence",
     "real_trading_history_unavailable_or_blocked",
     "live_micro_trade_arming_gate_not_armable",
-    "proposed_units_exceed_micro_trade_limit",
     "open_live_position_state_not_reconciled",
     "auto_exit_readiness_not_implemented_for_live_execution",
     "real_trading_history_writeback_not_verified",
@@ -99,14 +95,14 @@ Do not execute. Resolve blocked evidence, refresh sanitized read-only bridge and
   "broker_write_calls_allowed": false,
   "close_trade_allowed": false,
   "evidence_path": "Reports\\forex_delivery\\AIOS_FOREX_ONE_SHOT_LIVE_MICRO_TRADE_EXECUTION_REVIEW_DRY_RUN_V1.md",
-  "generated_at_utc": "2026-06-19T16:30:17Z",
+  "generated_at_utc": "2026-06-19T16:43:00Z",
   "live_execution_allowed": false,
   "live_trade_placed": false,
   "next_packet_candidate": "AIOS-FOREX-ONE-SHOT-LIVE-MICRO-TRADE-EXECUTION-V1",
   "next_safe_action": "Do not execute. Resolve blocked evidence, refresh sanitized read-only bridge and paper evidence, review arming status, and require separate Human Owner approval before any future execution packet.",
   "order_placement_allowed": false,
   "proposed_side": "BUY",
-  "proposed_units": 1000,
+  "proposed_units": 1,
   "required_human_phrase": "I AUTHORIZE ONE LIVE MICRO TRADE EXECUTION WITH MAXIMUM MICRO RISK",
   "selected_pair": "EUR_USD"
 }

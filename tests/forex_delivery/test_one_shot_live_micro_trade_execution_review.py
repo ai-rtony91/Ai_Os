@@ -58,6 +58,7 @@ def paper_evidence() -> dict[str, object]:
 def arming_evidence(live_armable: bool = False) -> dict[str, object]:
     return {
         "LIVE_ARMABLE": live_armable,
+        "max_units": 1,
         "required_human_phrase": "I AUTHORIZE ONE LIVE MICRO TRADE DRY-RUN ARMING REVIEW",
         "live_execution_allowed": False,
         "broker_write_calls_allowed": False,
@@ -80,19 +81,27 @@ def test_default_review_is_not_ready_and_never_allows_execution():
     assert result["broker_write_calls_allowed"] is False
     assert result["order_placement_allowed"] is False
     assert result["close_trade_allowed"] is False
+    assert result["proposed_units"] == 1
+    assert result["proposed_units"] <= result["max_units"]
     assert "read_only_live_data_bridge_evidence_report_missing" in result["blocked_reasons"]
 
 
 def test_paper_and_arming_evidence_are_recognized_without_execution():
+    paper = paper_evidence()
+    paper["paper_units"] = 1000
     result = build_one_shot_live_micro_trade_execution_review_result(
         read_only_evidence=read_only_evidence(),
-        paper_loop_evidence=paper_evidence(),
+        paper_loop_evidence=paper,
         arming_gate_evidence=arming_evidence(live_armable=False),
         future_execution_phrase=REQUIRED_HUMAN_PHRASE,
         generated_at_utc="2026-06-19T00:00:00Z",
     )
 
     assert result["EXECUTION_REVIEW_READY"] is False
+    assert result["proposed_units"] == 1
+    assert result["max_units"] == 1
+    assert result["proposed_units"] <= result["max_units"]
+    assert "proposed_units_exceed_micro_trade_limit" not in result["blocked_reasons"]
     assert result["paper_loop_status"]["paper_entry_created"] is True
     assert result["paper_loop_status"]["trading_history_row_written"] is True
     assert result["arming_gate_status"]["LIVE_ARMABLE"] is False
@@ -112,6 +121,27 @@ def test_required_future_execution_phrase_and_next_packet_are_present():
     assert result["required_human_phrase"] == REQUIRED_HUMAN_PHRASE
     assert result["next_packet_candidate"] == NEXT_PACKET_CANDIDATE
     assert "future_execution_human_phrase_not_provided" in result["blocked_reasons"]
+
+
+def test_missing_arming_max_units_defaults_to_one_micro_unit():
+    arming = arming_evidence()
+    del arming["max_units"]
+    paper = paper_evidence()
+    paper["paper_units"] = 1000
+
+    result = build_one_shot_live_micro_trade_execution_review_result(
+        read_only_evidence=read_only_evidence(),
+        paper_loop_evidence=paper,
+        arming_gate_evidence=arming,
+        generated_at_utc="2026-06-19T00:00:00Z",
+    )
+
+    assert result["max_units"] == 1
+    assert result["proposed_units"] == 1
+    assert result["proposed_units"] <= result["max_units"]
+    assert "proposed_units_exceed_micro_trade_limit" not in result["blocked_reasons"]
+    assert result["live_execution_allowed"] is False
+    assert result["live_trade_placed"] is False
 
 
 def test_report_and_cli_summary_are_sanitized():
