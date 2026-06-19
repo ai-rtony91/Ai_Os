@@ -12,7 +12,8 @@ const VIEWS = {
   SETTINGS: "settings",
   POSITION: "position",
   RISK: "risk",
-  EXIT: "exit"
+  EXIT: "exit",
+  HISTORY: "history"
 };
 
 const ICONS = {
@@ -25,6 +26,7 @@ const ICONS = {
   position: "📍",
   risk: "📊",
   exit: "⏏️",
+  history: "🧾",
   detail: "🔎"
 };
 
@@ -38,7 +40,8 @@ const VIEW_LABELS = {
   [VIEWS.SETTINGS]: "Settings",
   [VIEWS.POSITION]: "Position",
   [VIEWS.RISK]: "Risk / P&L",
-  [VIEWS.EXIT]: "Exit"
+  [VIEWS.EXIT]: "Exit",
+  [VIEWS.HISTORY]: "Trading History"
 };
 
 const VIEW_ICONS = {
@@ -51,7 +54,8 @@ const VIEW_ICONS = {
   [VIEWS.SETTINGS]: ICONS.settings,
   [VIEWS.POSITION]: ICONS.position,
   [VIEWS.RISK]: ICONS.risk,
-  [VIEWS.EXIT]: ICONS.exit
+  [VIEWS.EXIT]: ICONS.exit,
+  [VIEWS.HISTORY]: ICONS.history
 };
 
 const FOREX_CHILD_VIEWS = new Set([
@@ -59,8 +63,32 @@ const FOREX_CHILD_VIEWS = new Set([
   VIEWS.DETAIL,
   VIEWS.POSITION,
   VIEWS.RISK,
-  VIEWS.EXIT
+  VIEWS.EXIT,
+  VIEWS.HISTORY
 ]);
+
+const OPERATION_CONTRACTS = {
+  watchlist: {
+    cause: "Request latest available watchlist and opportunity snapshot from the AIOS read-model source.",
+    effect: "Display ranked pairs, score, confidence, trend, source, freshness, and live-trading permission."
+  },
+  position: {
+    cause: "Request broker/account position reconciliation read-model.",
+    effect: "Display open position, units, entry price if available, realized P/L, unrealized P/L, freshness, and source."
+  },
+  risk: {
+    cause: "Request risk governor and P/L truth read-model.",
+    effect: "Display daily loss cap, max position size, realized P/L, unrealized P/L, risk status, and blocked/allowed state."
+  },
+  exit: {
+    cause: "Request exit readiness and readiness-plan evaluation for any current open trade.",
+    effect: "Display stop-loss, take-profit, trailing stop, max-time policy, auto-exit readiness, and block reason."
+  },
+  history: {
+    cause: "Request sanitized closed-trade and execution-evidence read-model.",
+    effect: "Display closed trades, realized P/L, exit reason, protection controls used, slippage, evidence status, source, and freshness."
+  }
+};
 
 function statusTone(value) {
   const text = String(value ?? "").toUpperCase();
@@ -121,6 +149,15 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+function formatFreshness(source) {
+  const timestamp = source?.timestamp ? formatTime(source.timestamp) : "UNKNOWN";
+  const staleness = Number.isFinite(source?.stalenessSeconds)
+    ? `${source.stalenessSeconds}s`
+    : "UNKNOWN";
+
+  return `${timestamp} / ${staleness}`;
+}
+
 function chartPolyline(points) {
   if (!Array.isArray(points) || points.length === 0) {
     return "";
@@ -147,20 +184,24 @@ function StatusBadge({ value }) {
 }
 
 function dataSourceForPair(pair) {
+  const dataSource = dashboardFixture.dataSource ?? {};
+
   return {
     label:
       pair?.explanation?.dataSourceLabel ??
-      dashboardFixture.dataSource?.DISPLAY_LABEL ??
+      dataSource.DISPLAY_LABEL ??
       dashboardFixture.source ??
       "UNVERIFIED",
     liveTradingAllowed:
       pair?.explanation?.liveTradingAllowedFromThisData ??
-      dashboardFixture.dataSource?.LIVE_TRADING_ALLOWED_FROM_THIS_DATA ??
+      dataSource.LIVE_TRADING_ALLOWED_FROM_THIS_DATA ??
       false,
     blockReason:
       pair?.explanation?.blockReason ??
-      dashboardFixture.dataSource?.BLOCK_REASON ??
-      "Source permission is not approved for live trade decisions."
+      dataSource.BLOCK_REASON ??
+      "Source permission is not approved for live trade decisions.",
+    timestamp: pair?.lastUpdated ?? dataSource.DATA_TIMESTAMP_UTC ?? dashboardFixture.generatedAt,
+    stalenessSeconds: dataSource.DATA_STALENESS_SECONDS
   };
 }
 
@@ -170,6 +211,7 @@ function DataLabel({ source, compact = false }) {
   return (
     <div className={`dataLabel ${compact ? "compactLabel" : ""}`}>
       <StatusBadge value={source?.label ?? "UNVERIFIED"} />
+      <span>{`Freshness: ${formatFreshness(source)}`}</span>
       <span>{`LIVE_TRADING_ALLOWED_FROM_THIS_DATA: ${String(liveAllowed)}`}</span>
       {!compact && !liveAllowed ? (
         <small>{source?.blockReason ?? "Data is blocked for live decisions."}</small>
@@ -185,6 +227,24 @@ function Field({ label, value, tone, source = dataSourceForPair(), compact = fal
       <strong className={`tone-${tone ?? statusTone(value)}`}>{value}</strong>
       <DataLabel compact={compact} source={source} />
     </div>
+  );
+}
+
+function CauseEffectPanel({ contract, source = dataSourceForPair() }) {
+  return (
+    <section className="panel causeEffectPanel" aria-label="Button cause and effect contract">
+      <div className="causeEffectGrid">
+        <div>
+          <span>Cause</span>
+          <p>{contract.cause}</p>
+        </div>
+        <div>
+          <span>Effect</span>
+          <p>{contract.effect}</p>
+        </div>
+      </div>
+      <DataLabel source={source} />
+    </section>
   );
 }
 
@@ -348,6 +408,11 @@ function ForexHub({ onBack, onNavigate }) {
           title="Exit"
           onClick={() => onNavigate(VIEWS.EXIT)}
         />
+        <DoorCard
+          icon={ICONS.history}
+          title="Trading History"
+          onClick={() => onNavigate(VIEWS.HISTORY)}
+        />
       </div>
     </section>
   );
@@ -359,6 +424,8 @@ function WatchlistScreen({ pairs, selectedPair, onBack, onViewPair }) {
       <div className="screenTop">
         <BackButton onClick={onBack} />
       </div>
+
+      <CauseEffectPanel contract={OPERATION_CONTRACTS.watchlist} source={dataSourceForPair()} />
 
       <div className="watchlistList" role="list" aria-label="Ranked fixture pair watchlist">
         {pairs.map((pair) => {
@@ -592,8 +659,10 @@ function PositionPage({ riskPl, onBack }) {
 
   return (
     <SimpleStatusPage backLabel="READ_ONLY" title="Position" onBack={onBack}>
+      <CauseEffectPanel contract={OPERATION_CONTRACTS.position} source={source} />
       <Field compact label="Position" source={source} value={riskPl.currentPosition} tone="neutral" />
       <Field compact label="Units" source={source} value={riskPl.positionSize} tone="warn" />
+      <Field compact label="Entry price" source={source} value="UNAVAILABLE" tone="warn" />
       <Field compact label="Realized P/L" source={source} value={riskPl.realizedPl} tone="neutral" />
       <Field compact label="Unrealized P/L" source={source} value={riskPl.unrealizedPl} tone="neutral" />
     </SimpleStatusPage>
@@ -605,10 +674,12 @@ function RiskPage({ riskPl, onBack }) {
 
   return (
     <SimpleStatusPage backLabel="FIXTURE_NOT_LIVE" title="Risk / P&L" onBack={onBack}>
-      <Field compact label="Risk cap" source={source} value={riskPl.riskCap} tone="warn" />
-      <Field compact label="Position size" source={source} value={riskPl.positionSize} tone="warn" />
+      <CauseEffectPanel contract={OPERATION_CONTRACTS.risk} source={source} />
+      <Field compact label="Daily loss cap" source={source} value={riskPl.riskCap} tone="warn" />
+      <Field compact label="Max position size" source={source} value={riskPl.positionSize} tone="warn" />
       <Field compact label="Realized P/L" source={source} value={riskPl.realizedPl} tone="neutral" />
       <Field compact label="Unrealized P/L" source={source} value={riskPl.unrealizedPl} tone="neutral" />
+      <Field compact label="Risk status" source={source} value="BLOCKED" tone="danger" />
       <Field compact label="Live trading allowed" source={source} value="false" />
     </SimpleStatusPage>
   );
@@ -619,6 +690,16 @@ function ExitPage({ exitReadiness, onBack }) {
 
   return (
     <SimpleStatusPage backLabel={exitReadiness.autoExitStatus} title="Exit" onBack={onBack}>
+      <CauseEffectPanel contract={OPERATION_CONTRACTS.exit} source={source} />
+      <section className="panel notePanel" aria-label="Exit page meaning">
+        <div className="panelHeading">
+          <p>Meaning</p>
+          <h3>Readiness only</h3>
+        </div>
+        <p className="shortText">
+          Exit evaluates whether a trade is protected and exit-ready. This page does not close trades.
+        </p>
+      </section>
       {exitReadiness.controls.map((control) => (
         <Field compact key={control.label} label={control.label} source={source} value={control.status} />
       ))}
@@ -631,6 +712,82 @@ function ExitPage({ exitReadiness, onBack }) {
         <p className="shortText">{exitReadiness.blockReason}</p>
         <DataLabel compact source={source} />
       </section>
+    </SimpleStatusPage>
+  );
+}
+
+function tradeValue(trade, keys, fallback = "UNAVAILABLE") {
+  for (const key of keys) {
+    if (trade?.[key] !== undefined && trade?.[key] !== null && trade?.[key] !== "") {
+      return trade[key];
+    }
+  }
+
+  return fallback;
+}
+
+function TradingHistoryPage({ onBack }) {
+  const source = dataSourceForPair();
+  const history = Array.isArray(dashboardFixture.tradingHistory)
+    ? dashboardFixture.tradingHistory
+    : [];
+  const rows =
+    history.length > 0
+      ? history
+      : [
+          {
+            pair: "UNAVAILABLE",
+            evidenceStatus: "NO_REAL_HISTORY_AVAILABLE",
+            sourceLabel: "FIXTURE_NOT_LIVE"
+          }
+        ];
+
+  return (
+    <SimpleStatusPage
+      backLabel={history.length > 0 ? "READ_ONLY" : "NO_REAL_HISTORY_AVAILABLE"}
+      title="Trading History"
+      onBack={onBack}
+    >
+      <CauseEffectPanel contract={OPERATION_CONTRACTS.history} source={source} />
+      {history.length === 0 ? (
+        <section className="panel notePanel" aria-label="Trading history unavailable">
+          <div className="panelHeading">
+            <p>Trading History</p>
+            <h3>NO_REAL_HISTORY_AVAILABLE</h3>
+          </div>
+          <p className="shortText">
+            No sanitized real closed-trade history is available to this dashboard. Fixture/demo state is
+            read-only and cannot prove live execution.
+          </p>
+          <DataLabel source={source} />
+        </section>
+      ) : null}
+      <div className="historyList" role="list" aria-label="Closed trade history">
+        {rows.map((trade, index) => (
+          <section className="panel historyCard" key={`${trade.pair ?? "trade"}-${index}`} role="listitem">
+            <div className="panelHeading">
+              <p>Closed trade</p>
+              <h3>{formatPair(tradeValue(trade, ["pair"], "UNKNOWN"))}</h3>
+            </div>
+            <div className="fieldGrid">
+              <Field compact label="Pair" source={source} value={formatPair(tradeValue(trade, ["pair"]))} />
+              <Field compact label="Side" source={source} value={tradeValue(trade, ["side"])} />
+              <Field compact label="Units" source={source} value={tradeValue(trade, ["units"])} />
+              <Field compact label="Entry time" source={source} value={tradeValue(trade, ["entryTime"])} />
+              <Field compact label="Exit time" source={source} value={tradeValue(trade, ["exitTime"])} />
+              <Field compact label="Duration" source={source} value={tradeValue(trade, ["duration"])} />
+              <Field compact label="Realized P/L" source={source} value={tradeValue(trade, ["realizedPl", "realizedPL"])} />
+              <Field compact label="Exit reason" source={source} value={tradeValue(trade, ["exitReason"])} />
+              <Field compact label="Stop-loss used" source={source} value={tradeValue(trade, ["stopLossUsed"])} />
+              <Field compact label="Take-profit used" source={source} value={tradeValue(trade, ["takeProfitUsed"])} />
+              <Field compact label="Trailing used" source={source} value={tradeValue(trade, ["trailingStopUsed"])} />
+              <Field compact label="Max-time used" source={source} value={tradeValue(trade, ["maxTimeUsed"])} />
+              <Field compact label="Slippage" source={source} value={tradeValue(trade, ["slippage"])} />
+              <Field compact label="Evidence status" source={source} value={tradeValue(trade, ["evidenceStatus"])} />
+            </div>
+          </section>
+        ))}
+      </div>
     </SimpleStatusPage>
   );
 }
@@ -703,6 +860,10 @@ export default function MinimalOperatorDashboard() {
 
       {view === VIEWS.EXIT ? (
         <ExitPage exitReadiness={dashboardFixture.exitReadiness} onBack={() => setView(VIEWS.FOREX)} />
+      ) : null}
+
+      {view === VIEWS.HISTORY ? (
+        <TradingHistoryPage onBack={() => setView(VIEWS.FOREX)} />
       ) : null}
     </main>
   );
