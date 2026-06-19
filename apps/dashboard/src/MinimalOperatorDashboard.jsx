@@ -346,6 +346,72 @@ function bridgeDataLabelSource() {
   };
 }
 
+function buildPaperLoopStatus() {
+  const loop = dashboardFixture.paperSignalExecutionLoop ?? {};
+  const dashboardStatus = loop.dashboard_status ?? {};
+  const history = loop.trading_history ?? {};
+  const reconciliation = loop.reconciliation ?? {};
+  const historyRows = Array.isArray(history.history_rows) ? history.history_rows : [];
+  const latestRow = historyRows[0] ?? {};
+  const paperLoopAvailable =
+    dashboardStatus.PAPER_LOOP_AVAILABLE ??
+    loop.PAPER_LOOP_AVAILABLE ??
+    history.trading_history_row_written ??
+    false;
+
+  return {
+    paperLoopAvailable,
+    lastPaperSignal:
+      dashboardStatus.last_paper_signal ??
+      loop.signal_side ??
+      "UNAVAILABLE",
+    lastPaperTradeStatus:
+      dashboardStatus.last_paper_trade_status ??
+      reconciliation.paper_trade_status ??
+      "NO_PAPER_LOOP_READ_MODEL",
+    lastPaperRealizedPl:
+      dashboardStatus.last_paper_realized_pl ??
+      reconciliation.realized_paper_pl ??
+      loop.realized_paper_pl ??
+      "UNAVAILABLE",
+    historyWritebackStatus:
+      dashboardStatus.history_writeback_status ??
+      (paperLoopAvailable ? "PAPER_HISTORY_WRITTEN" : "PAPER_HISTORY_UNAVAILABLE"),
+    liveExecutionAllowed: false,
+    evidencePath:
+      loop.evidence_path ??
+      history.evidence_path ??
+      "Reports/forex_delivery/AIOS_FOREX_PAPER_SIGNAL_EXECUTION_LOOP_DRY_RUN_V1.md",
+    sourceLabel:
+      loop.source_label ??
+      latestRow.source_label ??
+      "PAPER_SIMULATION_STATUS",
+    freshnessUtc:
+      loop.freshness_utc ??
+      latestRow.freshness_utc ??
+      dashboardFixture.generatedAt,
+    nextSafeAction:
+      dashboardStatus.next_safe_action ??
+      loop.next_safe_action ??
+      "run paper signal execution loop.",
+    blockReason: paperLoopAvailable
+      ? "Paper loop evidence is available for review only; live execution remains blocked."
+      : "No sanitized paper loop read-model is loaded."
+  };
+}
+
+function paperLoopDataLabelSource() {
+  const paperLoop = buildPaperLoopStatus();
+
+  return {
+    label: paperLoop.sourceLabel,
+    liveTradingAllowed: false,
+    blockReason: paperLoop.blockReason,
+    timestamp: paperLoop.freshnessUtc,
+    stalenessSeconds: undefined
+  };
+}
+
 function buildLiveReadinessModel(pair) {
   const dataSource = dashboardFixture.dataSource ?? {};
   const bridges = dashboardFixture.bridges ?? {};
@@ -353,6 +419,7 @@ function buildLiveReadinessModel(pair) {
   const exitReadiness = dashboardFixture.exitReadiness ?? {};
   const explanation = pair?.explanation ?? {};
   const bridgeStatus = buildReadOnlyBridgeStatus();
+  const paperLoopStatus = buildPaperLoopStatus();
   const sourceType = normalizeDataSourceType(
     bridgeStatus.sourceType ?? explanation.dataSourceType ?? dataSource.DATA_SOURCE_TYPE ?? dashboardFixture.source
   );
@@ -367,6 +434,13 @@ function buildLiveReadinessModel(pair) {
     "Trading history writeback is not available for real closed-trade evidence.",
     "Human Owner has not explicitly armed live execution."
   ];
+  if (!paperLoopStatus.paperLoopAvailable) {
+    blockReasons.splice(
+      blockReasons.length - 1,
+      0,
+      "Paper signal execution loop evidence is not loaded."
+    );
+  }
 
   return {
     liveReady: false,
@@ -435,6 +509,19 @@ function buildLiveReadinessModel(pair) {
             label: "Block reason",
             value: "No approved live signal logic or expected-edge evidence is connected."
           }
+        ]
+      },
+      {
+        title: "Paper signal loop readiness",
+        status: paperLoopStatus.paperLoopAvailable ? "PAPER_AVAILABLE" : "BLOCKED",
+        rows: [
+          { label: "PAPER_LOOP_AVAILABLE", value: paperLoopStatus.paperLoopAvailable },
+          { label: "Last paper signal", value: paperLoopStatus.lastPaperSignal },
+          { label: "Last paper trade status", value: paperLoopStatus.lastPaperTradeStatus },
+          { label: "Last paper realized P/L", value: paperLoopStatus.lastPaperRealizedPl },
+          { label: "History writeback status", value: paperLoopStatus.historyWritebackStatus },
+          { label: "Live execution allowed", value: false },
+          { label: "Next safe action", value: paperLoopStatus.nextSafeAction, tone: "warn" }
         ]
       },
       {
@@ -593,6 +680,32 @@ function BridgeStatusPanel() {
         <ReadinessRow label="Live execution allowed" value={bridge.liveExecutionAllowed} />
         <ReadinessRow label="Next safe action" value={bridge.nextSafeAction} tone="warn" />
         <ReadinessRow label="Block reason" value={bridge.blockReason} />
+      </div>
+      <DataLabel source={source} />
+    </section>
+  );
+}
+
+function PaperLoopStatusPanel() {
+  const paperLoop = buildPaperLoopStatus();
+  const source = paperLoopDataLabelSource();
+
+  return (
+    <section className="panel paperLoopStatusPanel" aria-label="Paper signal execution loop status">
+      <div className="panelHeading">
+        <p>Paper loop</p>
+        <h3>{`PAPER_LOOP_AVAILABLE: ${String(paperLoop.paperLoopAvailable)}`}</h3>
+      </div>
+      <div className="fieldGrid paperLoopGrid">
+        <ReadinessRow label="PAPER_LOOP_AVAILABLE" value={paperLoop.paperLoopAvailable} />
+        <ReadinessRow label="Last paper signal" value={paperLoop.lastPaperSignal} />
+        <ReadinessRow label="Last paper trade status" value={paperLoop.lastPaperTradeStatus} />
+        <ReadinessRow label="Last paper realized P/L" value={paperLoop.lastPaperRealizedPl} />
+        <ReadinessRow label="History writeback status" value={paperLoop.historyWritebackStatus} />
+        <ReadinessRow label="Live execution allowed" value={paperLoop.liveExecutionAllowed} />
+        <ReadinessRow label="Evidence path" value={paperLoop.evidencePath} tone="neutral" />
+        <ReadinessRow label="Next safe action" value={paperLoop.nextSafeAction} tone="warn" />
+        <ReadinessRow label="Block reason" value={paperLoop.blockReason} />
       </div>
       <DataLabel source={source} />
     </section>
@@ -1136,6 +1249,7 @@ function TradingHistoryPage({ onBack }) {
     >
       <CauseEffectPanel contract={OPERATION_CONTRACTS.history} source={source} />
       <BridgeStatusPanel />
+      <PaperLoopStatusPanel />
       {history.length === 0 ? (
         <section className="panel notePanel" aria-label="Trading history unavailable">
           <div className="panelHeading">
@@ -1209,6 +1323,7 @@ function ExecutionReadinessPage({ pair, onBack }) {
     <SimpleStatusPage backLabel="LIVE_READY: false" title="Execution Readiness" onBack={onBack}>
       <CauseEffectPanel contract={OPERATION_CONTRACTS.readiness} source={source} />
       <BridgeStatusPanel />
+      <PaperLoopStatusPanel />
       <section className="panel readinessSummaryPanel" aria-label="Overall execution readiness">
         <div className="panelHeading">
           <p>Overall status</p>
