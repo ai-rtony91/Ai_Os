@@ -398,11 +398,143 @@ body {
 
 .forexCommandIntentPanel,
 .forexEmergencyState,
+.forexSafeStatusPanel,
 .forexNextSafeStepStrip,
 .forexTradingLadder {
   border: 1px solid rgba(167, 139, 250, 0.24);
   border-radius: 8px;
   background: rgba(6, 5, 19, 0.34);
+}
+
+.forexSafeStatusPanel {
+  display: grid;
+  gap: 10px;
+  border-color: rgba(88, 215, 255, 0.32);
+  background:
+    linear-gradient(135deg, rgba(6, 5, 19, 0.48), rgba(31, 26, 70, 0.5)),
+    radial-gradient(circle at top right, rgba(88, 215, 255, 0.12), transparent 18rem);
+  padding: 10px;
+}
+
+.forexSafeStatusHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.forexRefreshStatusButton {
+  min-height: 34px;
+  cursor: pointer;
+  border: 1px solid rgba(88, 215, 255, 0.44);
+  border-radius: 999px;
+  background: rgba(88, 215, 255, 0.1);
+  padding: 7px 11px;
+  color: var(--neutral);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.forexRefreshStatusButton:hover,
+.forexRefreshStatusButton:focus-visible {
+  border-color: rgba(88, 215, 255, 0.78);
+  box-shadow: 0 0 18px rgba(88, 215, 255, 0.14);
+}
+
+.forexRefreshStatusButton:hover {
+  transform: translateY(-1px);
+}
+
+.forexRefreshStatusButton:focus-visible {
+  outline: 2px solid rgba(167, 139, 250, 0.38);
+  outline-offset: 2px;
+}
+
+.forexSafeStatusFlags,
+.forexSafeEndpointGrid {
+  display: grid;
+  gap: 8px;
+}
+
+.forexSafeStatusFlags {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.forexSafeStatusFlags span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(51, 240, 162, 0.26);
+  border-radius: 999px;
+  background: rgba(51, 240, 162, 0.08);
+  padding: 6px 8px;
+  color: var(--muted-strong);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexSafeEndpointGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.forexSafeEndpointCard {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(88, 215, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(31, 26, 70, 0.62);
+  padding: 8px;
+}
+
+.forexSafeEndpointCard > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.forexSafeEndpointCard span,
+.forexSafeEndpointCard small,
+.forexSafeStatusTimestamp {
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexSafeEndpointCard strong {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.forexSafeEndpointCard p,
+.forexSafeStatusTimestamp {
+  margin: 0;
+}
+
+.forexSafeEndpointCard p {
+  display: grid;
+  gap: 2px;
+}
+
+.forexSafeStatusTimestamp {
+  color: var(--muted);
 }
 
 .forexCommandIntentPanel {
@@ -529,6 +661,8 @@ body {
 @media (max-width: 980px) {
   .forexStatusStrip,
   .forexCriticalStrip,
+  .forexSafeEndpointGrid,
+  .forexSafeStatusFlags,
   .forexNextSafeStepStrip,
   .forexTradingLadder {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -553,10 +687,20 @@ body {
   .forexStatusStrip,
   .forexCriticalStrip,
   .forexCommandGrid,
+  .forexSafeEndpointGrid,
+  .forexSafeStatusFlags,
   .forexIntentGrid,
   .forexNextSafeStepStrip,
   .forexTradingLadder {
     grid-template-columns: 1fr;
+  }
+
+  .forexSafeStatusHeader {
+    align-items: stretch;
+  }
+
+  .forexRefreshStatusButton {
+    width: 100%;
   }
 
   .forexCommandButton {

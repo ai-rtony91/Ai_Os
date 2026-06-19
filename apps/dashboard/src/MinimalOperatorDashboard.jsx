@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dashboardFixture from "../mock-data/aios-minimal-operator-dashboard-v1.example.json";
 import "./MinimalOperatorDashboard.css";
 
@@ -325,6 +325,34 @@ const AIOS_TRADING_LADDER = [
   { label: "Auto Live", value: "FUTURE", tone: "danger" }
 ];
 
+const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
+  { id: "api-health", label: "/api/health", path: "/api/health" },
+  { id: "runtime-status", label: "/api/runtime/status", path: "/api/runtime/status" },
+  { id: "runtime-health", label: "/api/runtime/health", path: "/api/runtime/health" },
+  { id: "runtime-visibility", label: "/api/runtime/visibility", path: "/api/runtime/visibility" },
+  { id: "runtime-control", label: "/api/runtime/control", path: "/api/runtime/control" }
+];
+
+const SAFE_STATUS_SUMMARY_KEYS = [
+  "status",
+  "state",
+  "mode",
+  "ok",
+  "healthy",
+  "running",
+  "runtimeStatus",
+  "runtime_status",
+  "health",
+  "visibility",
+  "control",
+  "sourcePath",
+  "updatedAt",
+  "updated_at",
+  "generatedAt",
+  "generated_at",
+  "timestamp"
+];
+
 function normalizeDataSourceType(value) {
   const text = String(value ?? "").toUpperCase();
 
@@ -373,6 +401,111 @@ function statusTone(value) {
   }
 
   return "neutral";
+}
+
+function isSafePlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function safePrimitiveText(value) {
+  if (typeof value === "string") {
+    return value.slice(0, 84);
+  }
+
+  if (typeof value === "number" || typeof value === "boolean") {
+    return String(value);
+  }
+
+  return null;
+}
+
+function findSafeValue(payload, key) {
+  if (!isSafePlainObject(payload)) {
+    return undefined;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(payload, key)) {
+    return payload[key];
+  }
+
+  for (const containerKey of ["runtime", "health", "visibility", "control", "summary", "status"]) {
+    const nested = payload[containerKey];
+    if (isSafePlainObject(nested) && Object.prototype.hasOwnProperty.call(nested, key)) {
+      return nested[key];
+    }
+  }
+
+  return undefined;
+}
+
+function summarizeSafeStatusPayload(payload) {
+  const primitivePayload = safePrimitiveText(payload);
+  if (primitivePayload) {
+    return [{ label: "response", value: primitivePayload }];
+  }
+
+  if (!isSafePlainObject(payload)) {
+    return [{ label: "response", value: "NO_SAFE_SUMMARY" }];
+  }
+
+  const rows = [];
+  for (const key of SAFE_STATUS_SUMMARY_KEYS) {
+    const safeText = safePrimitiveText(findSafeValue(payload, key));
+    if (safeText) {
+      rows.push({ label: key, value: safeText });
+    }
+
+    if (rows.length >= 4) {
+      break;
+    }
+  }
+
+  return rows.length > 0 ? rows : [{ label: "response", value: "JSON_RECEIVED" }];
+}
+
+async function readSafeStatusBody(response) {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  if (!contentType.toLowerCase().includes("application/json")) {
+    return { status: response.statusText || "NON_JSON_RESPONSE" };
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    return { status: "JSON_PARSE_FAILED" };
+  }
+}
+
+async function fetchSafeDashboardStatusEndpoint(endpoint, signal) {
+  try {
+    const response = await fetch(endpoint.path, {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+      method: "GET",
+      signal
+    });
+    const payload = await readSafeStatusBody(response);
+
+    return {
+      ...endpoint,
+      httpStatus: response.status,
+      ok: response.ok,
+      summary: summarizeSafeStatusPayload(payload)
+    };
+  } catch (error) {
+    return {
+      ...endpoint,
+      httpStatus: "UNAVAILABLE",
+      ok: false,
+      summary: [
+        {
+          label: "status",
+          value: error?.name === "AbortError" ? "TIMEOUT_OR_ABORTED" : "NO_CONNECTION"
+        }
+      ]
+    };
+  }
 }
 
 function viewLabel(view) {
@@ -1181,6 +1314,109 @@ function HomeScreen({ onNavigate }) {
   );
 }
 
+function SafeDashboardStatusPanel() {
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const [status, setStatus] = useState({
+    checkedAt: null,
+    endpoints: [],
+    phase: "idle"
+  });
+  const online = status.endpoints.some((endpoint) => endpoint.ok);
+  const nextSafeStep = online
+    ? "Wire paper/sandbox trading status, still no live orders."
+    : "Start local orchestrator/runtime status service.";
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 3500);
+    let active = true;
+
+    async function loadSafeDashboardStatus() {
+      setStatus((current) => ({
+        ...current,
+        phase: "loading"
+      }));
+
+      const endpointResults = await Promise.all(
+        SAFE_DASHBOARD_STATUS_ENDPOINTS.map((endpoint) =>
+          fetchSafeDashboardStatusEndpoint(endpoint, controller.signal)
+        )
+      );
+
+      if (active) {
+        setStatus({
+          checkedAt: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit"
+          }),
+          endpoints: endpointResults,
+          phase: "complete"
+        });
+      }
+    }
+
+    loadSafeDashboardStatus().finally(() => window.clearTimeout(timeout));
+
+    return () => {
+      active = false;
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [refreshNonce]);
+
+  return (
+    <section className="forexSafeStatusPanel" aria-label="Safe dashboard runtime status">
+      <div className="forexSafeStatusHeader">
+        <div className="panelHeading">
+          <p>Safe Status Wiring</p>
+          <h3>{online ? "ORCHESTRATOR: ONLINE" : "ORCHESTRATOR: OFFLINE / NOT CONNECTED"}</h3>
+        </div>
+        <button
+          className="forexRefreshStatusButton"
+          type="button"
+          onClick={() => setRefreshNonce((value) => value + 1)}
+        >
+          🔄 REFRESH STATUS
+        </button>
+      </div>
+
+      <div className="forexSafeStatusFlags" aria-label="Safe status guardrails">
+        <span>{status.phase === "loading" ? "STATUS: CHECKING" : "DASHBOARD STILL SAFE"}</span>
+        <span>NO BROKER ROUTE ENABLED</span>
+        <span>GET IN / GET OUT STILL BLOCKED</span>
+        <span>{`NEXT: ${nextSafeStep}`}</span>
+      </div>
+
+      <div className="forexSafeEndpointGrid" aria-label="Safe dashboard status endpoints">
+        {SAFE_DASHBOARD_STATUS_ENDPOINTS.map((endpoint) => {
+          const result = status.endpoints.find((item) => item.id === endpoint.id);
+          const rows = result?.summary ?? [{ label: "status", value: "NOT_CHECKED" }];
+
+          return (
+            <div className="forexSafeEndpointCard" key={endpoint.id}>
+              <div>
+                <span>{endpoint.label}</span>
+                <strong>{result?.ok ? "ONLINE" : "OFFLINE"}</strong>
+              </div>
+              <small>{`HTTP: ${result?.httpStatus ?? "NOT_CHECKED"}`}</small>
+              {rows.map((row) => (
+                <p key={`${endpoint.id}-${row.label}`}>
+                  <span>{row.label}</span>
+                  <strong>{row.value}</strong>
+                </p>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="forexSafeStatusTimestamp">
+        {status.checkedAt ? `Last safe status check: ${status.checkedAt}` : "Safe status has not been checked yet."}
+      </p>
+    </section>
+  );
+}
+
 function ForexCommandSurface() {
   const [selectedCommandIntent, setSelectedCommandIntent] = useState(
     FOREX_COMMAND_INTENTS.AIOS_SIGNAL_STATUS
@@ -1213,6 +1449,8 @@ function ForexCommandSurface() {
           </div>
         ))}
       </div>
+
+      <SafeDashboardStatusPanel />
 
       <div className="forexCriticalStrip" aria-label="Critical forex command information">
         {FOREX_CRITICAL_INFO.map((item) => (
