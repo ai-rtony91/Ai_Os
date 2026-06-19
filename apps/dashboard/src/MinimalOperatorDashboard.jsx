@@ -129,7 +129,7 @@ const OPERATION_CONTRACTS = {
   },
   readiness: {
     cause: "Request the live-capable execution readiness bridge projection.",
-    effect: "Display live data, broker, signal, risk, exit, and history-writeback gates with LIVE_READY, blockers, and next safe action."
+    effect: "Display live data, broker, signal, risk, exit, history-writeback, and arming-review gates with LIVE_READY, blockers, and next safe action."
   }
 };
 
@@ -412,6 +412,53 @@ function paperLoopDataLabelSource() {
   };
 }
 
+function buildArmingGateStatus() {
+  const gate = dashboardFixture.liveMicroTradeArmingGate ?? {};
+  const blockedReasons = Array.isArray(gate.blocked_reasons)
+    ? gate.blocked_reasons
+    : [
+        "read_only_source_not_live_tradable_or_not_valid",
+        "broker_account_not_reachable",
+        "positions_not_reconciled",
+        "daily_pl_not_available",
+        "real_trading_history_unavailable_or_blocked",
+        "required_human_phrase_not_provided"
+      ];
+
+  return {
+    liveArmable: gate.LIVE_ARMABLE ?? false,
+    liveExecutionAllowed: false,
+    requiredHumanPhrase:
+      gate.required_human_phrase ??
+      "I AUTHORIZE ONE LIVE MICRO TRADE DRY-RUN ARMING REVIEW",
+    blockedReasons,
+    nextSafeAction:
+      gate.next_safe_action ??
+      "Resolve arming blockers, review evidence, and keep live execution blocked until a separate approved one-shot execution packet exists.",
+    nextPacketCandidate:
+      gate.next_packet_candidate ??
+      "AIOS-FOREX-ONE-SHOT-LIVE-MICRO-TRADE-EXECUTION-V1",
+    sourceLabel: gate.source_label ?? "LIVE_ARMING_GATE_REVIEW_ONLY",
+    freshnessUtc: gate.generated_at_utc ?? dashboardFixture.generatedAt,
+    blockReason:
+      blockedReasons.length > 0
+        ? blockedReasons.join("; ")
+        : "Arming review has no blockers, but execution still requires a separate packet."
+  };
+}
+
+function armingGateDataLabelSource() {
+  const armingGate = buildArmingGateStatus();
+
+  return {
+    label: armingGate.sourceLabel,
+    liveTradingAllowed: false,
+    blockReason: armingGate.blockReason,
+    timestamp: armingGate.freshnessUtc,
+    stalenessSeconds: undefined
+  };
+}
+
 function buildLiveReadinessModel(pair) {
   const dataSource = dashboardFixture.dataSource ?? {};
   const bridges = dashboardFixture.bridges ?? {};
@@ -420,6 +467,7 @@ function buildLiveReadinessModel(pair) {
   const explanation = pair?.explanation ?? {};
   const bridgeStatus = buildReadOnlyBridgeStatus();
   const paperLoopStatus = buildPaperLoopStatus();
+  const armingGateStatus = buildArmingGateStatus();
   const sourceType = normalizeDataSourceType(
     bridgeStatus.sourceType ?? explanation.dataSourceType ?? dataSource.DATA_SOURCE_TYPE ?? dashboardFixture.source
   );
@@ -439,6 +487,13 @@ function buildLiveReadinessModel(pair) {
       blockReasons.length - 1,
       0,
       "Paper signal execution loop evidence is not loaded."
+    );
+  }
+  if (!armingGateStatus.liveArmable) {
+    blockReasons.splice(
+      blockReasons.length - 1,
+      0,
+      "Live micro-trade arming gate is not armable."
     );
   }
 
@@ -522,6 +577,17 @@ function buildLiveReadinessModel(pair) {
           { label: "History writeback status", value: paperLoopStatus.historyWritebackStatus },
           { label: "Live execution allowed", value: false },
           { label: "Next safe action", value: paperLoopStatus.nextSafeAction, tone: "warn" }
+        ]
+      },
+      {
+        title: "Live micro-trade arming gate",
+        status: armingGateStatus.liveArmable ? "ARMING_REVIEW_READY" : "BLOCKED",
+        rows: [
+          { label: "LIVE_ARMABLE", value: armingGateStatus.liveArmable },
+          { label: "LIVE_EXECUTION_ALLOWED", value: armingGateStatus.liveExecutionAllowed },
+          { label: "Required Human phrase", value: armingGateStatus.requiredHumanPhrase },
+          { label: "Next safe action", value: armingGateStatus.nextSafeAction, tone: "warn" },
+          { label: "Next packet candidate", value: armingGateStatus.nextPacketCandidate, tone: "neutral" }
         ]
       },
       {
@@ -706,6 +772,36 @@ function PaperLoopStatusPanel() {
         <ReadinessRow label="Evidence path" value={paperLoop.evidencePath} tone="neutral" />
         <ReadinessRow label="Next safe action" value={paperLoop.nextSafeAction} tone="warn" />
         <ReadinessRow label="Block reason" value={paperLoop.blockReason} />
+      </div>
+      <DataLabel source={source} />
+    </section>
+  );
+}
+
+function ArmingGateStatusPanel() {
+  const armingGate = buildArmingGateStatus();
+  const source = armingGateDataLabelSource();
+
+  return (
+    <section className="panel armingGateStatusPanel" aria-label="Live micro-trade arming gate status">
+      <div className="panelHeading">
+        <p>Arming gate</p>
+        <h3>{`LIVE_ARMABLE: ${String(armingGate.liveArmable)}`}</h3>
+      </div>
+      <div className="fieldGrid armingGateGrid">
+        <ReadinessRow label="LIVE_ARMABLE" value={armingGate.liveArmable} />
+        <ReadinessRow label="LIVE_EXECUTION_ALLOWED" value={armingGate.liveExecutionAllowed} />
+        <ReadinessRow label="Required Human phrase" value={armingGate.requiredHumanPhrase} tone="warn" />
+        <ReadinessRow label="Next safe action" value={armingGate.nextSafeAction} tone="warn" />
+        <ReadinessRow label="Next packet candidate" value={armingGate.nextPacketCandidate} tone="neutral" />
+      </div>
+      <div className="blockedReasonList" aria-label="Arming gate blocked reasons">
+        {armingGate.blockedReasons.map((reason) => (
+          <div className="blockedReason" key={`arming-${reason}`}>
+            <span>Blocked</span>
+            <p>{reason}</p>
+          </div>
+        ))}
       </div>
       <DataLabel source={source} />
     </section>
@@ -1324,6 +1420,7 @@ function ExecutionReadinessPage({ pair, onBack }) {
       <CauseEffectPanel contract={OPERATION_CONTRACTS.readiness} source={source} />
       <BridgeStatusPanel />
       <PaperLoopStatusPanel />
+      <ArmingGateStatusPanel />
       <section className="panel readinessSummaryPanel" aria-label="Overall execution readiness">
         <div className="panelHeading">
           <p>Overall status</p>

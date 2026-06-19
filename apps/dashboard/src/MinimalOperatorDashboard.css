@@ -405,6 +405,7 @@ button {
 .causeEffectPanel,
 .bridgeStatusPanel,
 .paperLoopStatusPanel,
+.armingGateStatusPanel,
 .historyList,
 .readinessSummaryPanel,
 .readinessSectionList {
@@ -449,7 +450,8 @@ button {
 }
 
 .bridgeStatusGrid,
-.paperLoopGrid {
+.paperLoopGrid,
+.armingGateGrid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -695,6 +697,7 @@ button {
   .systemDetailGrid,
   .bridgeStatusGrid,
   .paperLoopGrid,
+  .armingGateGrid,
   .simpleGrid,
   .readinessSectionList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -743,6 +746,7 @@ button {
   .systemDetailGrid,
   .bridgeStatusGrid,
   .paperLoopGrid,
+  .armingGateGrid,
   .simpleGrid,
   .readinessSectionList,
   .readinessGrid {
