@@ -202,3 +202,25 @@ def test_module_source_is_paper_only_no_network_or_broker_runtime_calls():
         "bearer ",
     ):
         assert token not in source
+
+
+def test_engine_spine_lifecycle_opens_and_closes_winning_trade():
+    from automation.forex_engine.paper_trade_lifecycle import close_paper_trade, create_paper_trade, open_paper_trade
+
+    trade = create_paper_trade("t-win", "EURUSD", "buy", 1.1, 1.095, 1.11, 20000.0, 100.0, 1.0)
+    opened = open_paper_trade(trade)
+    closed = close_paper_trade(opened, 1.11, "take_profit")
+    assert opened["status"] == "active"
+    assert closed["status"] == "closed"
+    assert closed["realized_pl"] == 200.0
+
+
+def test_engine_spine_lifecycle_opens_and_closes_losing_trade():
+    from automation.forex_engine.paper_trade_lifecycle import close_paper_trade, create_paper_trade, open_paper_trade
+
+    trade = create_paper_trade("t-loss", "GBPUSD", "sell", 1.25, 1.255, 1.24, 20000.0, 100.0, 1.0)
+    opened = open_paper_trade(trade)
+    closed = close_paper_trade(opened, 1.255, "stop_loss")
+    assert opened["status"] == "active"
+    assert closed["status"] == "closed"
+    assert closed["realized_pl"] == -100.0

@@ -493,3 +493,135 @@ def paper_trade_from_dict(payload: Dict[str, Any]) -> PaperTradeLifecycle:
         lifecycle_history=list(trade_payload.get("lifecycle_history", [])),
         metadata=dict(trade_payload.get("metadata", {})),
     )
+
+
+def _paper_trade_realized_pl(trade: Mapping[str, Any], exit_price: float) -> float:
+    entry = float(trade.get("entry", 0.0))
+    units = float(trade.get("units", 0.0))
+    if trade.get("direction") == "sell":
+        return round((entry - float(exit_price)) * units, 8)
+    return round((float(exit_price) - entry) * units, 8)
+
+
+def create_paper_trade(
+    trade_id: str,
+    symbol: str,
+    direction: str,
+    entry: float,
+    stop: float,
+    target: float,
+    units: float,
+    risk_dollars: float,
+    risk_percent: float,
+    timestamp: str = "2026-01-01T00:00:00Z",
+    status: str = "candidate",
+) -> Dict[str, Any]:
+    """Create a simple serializable paper trade for engine-spine workflows."""
+    reasons: list[str] = []
+    if status not in PAPER_TRADE_STATUSES:
+        reasons.append("invalid_status")
+    if direction not in {"buy", "sell"}:
+        reasons.append("invalid_direction")
+    if float(units) <= 0:
+        reasons.append("invalid_units")
+    if stop == entry:
+        reasons.append("invalid_stop")
+    return {
+        "trade_id": trade_id,
+        "symbol": symbol,
+        "direction": direction,
+        "entry": round(float(entry), 8),
+        "stop": round(float(stop), 8),
+        "target": round(float(target), 8),
+        "units": round(float(units), 8),
+        "risk_dollars": round(float(risk_dollars), 8),
+        "risk_percent": round(float(risk_percent), 8),
+        "status": status,
+        "created_at": timestamp,
+        "opened_at": None,
+        "closed_at": None,
+        "close_reason": None,
+        "realized_pl": 0.0,
+        "valid": not reasons,
+        "rejection_reasons": reasons,
+        "paper_only": True,
+    }
+
+
+def open_paper_trade(
+    trade: Mapping[str, Any],
+    timestamp: str = "2026-01-01T00:00:00Z",
+) -> Dict[str, Any]:
+    """Open a candidate, previewed, or queued paper trade."""
+    result = dict(trade)
+    if result.get("status") not in {"candidate", "previewed", "queued", "opened"}:
+        result["valid"] = False
+        result["rejection_reasons"] = list(result.get("rejection_reasons", [])) + ["invalid_open_transition"]
+        return result
+    result["status"] = "active"
+    result["opened_at"] = timestamp
+    result["valid"] = True
+    result["rejection_reasons"] = []
+    return result
+
+
+def close_paper_trade(
+    trade: Mapping[str, Any],
+    exit_price: float,
+    close_reason: str,
+    timestamp: str = "2026-01-01T00:00:00Z",
+) -> Dict[str, Any]:
+    """Close an active paper trade and calculate realized P/L."""
+    result = dict(trade)
+    if result.get("status") not in {"active", "opened"}:
+        result["valid"] = False
+        result["rejection_reasons"] = list(result.get("rejection_reasons", [])) + ["invalid_close_transition"]
+        return result
+    result["status"] = "closed"
+    result["exit"] = round(float(exit_price), 8)
+    result["closed_at"] = timestamp
+    result["close_reason"] = close_reason
+    result["realized_pl"] = _paper_trade_realized_pl(result, float(exit_price))
+    result["valid"] = True
+    result["rejection_reasons"] = []
+    return result
+
+
+def process_price_update(
+    trade: Mapping[str, Any],
+    price: float,
+    timestamp: str = "2026-01-01T00:00:00Z",
+    manual_close: bool = False,
+    expired: bool = False,
+) -> Dict[str, Any]:
+    """Process a deterministic price update for stop, target, expiry, or manual close."""
+    result = dict(trade)
+    if result.get("status") not in {"active", "opened"}:
+        result["valid"] = False
+        result["rejection_reasons"] = list(result.get("rejection_reasons", [])) + ["trade_not_active"]
+        return result
+    direction = result.get("direction")
+    close_reason_value: str | None = None
+    price_value = float(price)
+    if manual_close:
+        close_reason_value = "manual_close"
+    elif expired:
+        close_reason_value = "expiry"
+    elif direction == "buy" and price_value <= float(result["stop"]):
+        close_reason_value = "stop_loss"
+        price_value = float(result["stop"])
+    elif direction == "buy" and price_value >= float(result["target"]):
+        close_reason_value = "take_profit"
+        price_value = float(result["target"])
+    elif direction == "sell" and price_value >= float(result["stop"]):
+        close_reason_value = "stop_loss"
+        price_value = float(result["stop"])
+    elif direction == "sell" and price_value <= float(result["target"]):
+        close_reason_value = "take_profit"
+        price_value = float(result["target"])
+    if close_reason_value:
+        return close_paper_trade(result, price_value, close_reason_value, timestamp)
+    result["last_price"] = round(price_value, 8)
+    result["valid"] = True
+    result["rejection_reasons"] = []
+    return result
