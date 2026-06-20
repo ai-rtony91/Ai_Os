@@ -62,7 +62,7 @@ def evaluate_paper_to_demo_promotion(
 
     trade_count = _count(replay, "trade_count", "total_trades", "completed_trades", "replayed_trades", list_key="trades")
     session_count = _count(replay, "session_count", "total_sessions", "replayed_sessions", list_key="sessions")
-    if session_count == 0:
+    if replay and session_count == 0:
         session_count = _count(supervisor, "session_count", "total_sessions", "completed_sessions", list_key="sessions")
 
     minimum_trade_count_met = trade_count >= limit_cfg["minimum_trade_count"]
