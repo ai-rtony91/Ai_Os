@@ -1,169 +1,118 @@
-const express = require("express");
-const cors = require("cors");
-const multer = require("multer");
+const express = require('express');
 const {
-  getAuditTimeline,
-  getControlSummary,
-  getQueueStatus,
-  getRuntimeHealth,
-  getRuntimeStatus,
-  getVisibilitySnapshot
-} = require("./runtimeApiService");
-const { getForexApprovalPackageStatus } = require("./forexApprovalPackageStatus");
-const { getForexDemoConnectorProofIntakeSample } = require("./forexDemoConnectorProofIntake");
-const { getForexDemoConnectorProofStatus } = require("./forexDemoConnectorProofStatus");
-const { getForexPaperOrderPreview } = require("./forexPaperOrderPreview");
-const { getForexPaperSandboxStatus } = require("./forexPaperSandboxStatus");
-const { getForexReconciliationStatus } = require("./forexReconciliationStatus");
-const { getForexRiskGateStatus } = require("./forexRiskGateStatus");
-const { getForexSixBulletStatus } = require("./forexSixBulletStatus");
+  buildForexDashboardTruthStatus
+} = require('./forexDashboardTruthStatus');
 const {
-  getBridgeHealth,
-  getLatestReports,
-  getQueuePreview,
-  getWorkersPreview,
-  previewApproval,
-  previewSos,
-  validatePacketDraft
-} = require("./appServiceBridge");
+  buildForexDemoConnectorProofClosure
+} = require('./forexDemoConnectorProofClosure');
 
-const app = express();
-const upload = multer({ storage: multer.memoryStorage() });
+const router = express.Router();
 
-app.use(cors());
-app.use(express.json());
-
-// Quick check endpoint
-app.get("/api/health", (req, res) => {
-  res.json({ ok: true, service: "orchestrator", ts: Date.now() });
+const noopReplay = () => ({
+  allowed: false,
+  decision: 'blocked',
+  blocked_reason: 'missing_or_invalid_session_replay',
+  blocked_reasons: ['NO_RUNTIME_EVIDENCE'],
+  warnings: ['NO_RUNTIME_EVIDENCE'],
+  paper_only: true,
+  mode: 'PAPER_ONLY',
+  session_id: null,
+  evidence_path: 'relative:in-memory',
+  source: 'forex_dashboard_truth_status',
+  safety: {
+    paper_only: true,
+    broker: false,
+    live_trading: false,
+    credentials: false,
+    real_orders: false,
+    network_access: false
+  },
+  next_safe_action: 'START_RUNTIME_SESSION_AND_REPLAY'
 });
 
-app.get("/api/forex/paper-sandbox/status", (req, res) => {
-  res.json(getForexPaperSandboxStatus());
-});
-
-app.get("/api/forex/paper-sandbox/order-preview", (req, res) => {
-  res.json(getForexPaperOrderPreview());
-});
-
-app.get("/api/forex/six-bullet/status", (req, res) => {
-  res.json(getForexSixBulletStatus());
-});
-
-app.get("/api/forex/risk-gate/status", (req, res) => {
-  res.json(getForexRiskGateStatus());
-});
-
-app.get("/api/forex/approval-package/status", (req, res) => {
-  res.json(getForexApprovalPackageStatus());
-});
-
-app.get("/api/forex/reconciliation/status", (req, res) => {
-  res.json(getForexReconciliationStatus());
-});
-
-app.get("/api/forex/demo-connector/proof-status", (req, res) => {
-  res.json(getForexDemoConnectorProofStatus());
-});
-
-app.get("/api/forex/demo-connector/proof-intake/sample", (req, res) => {
-  res.json(getForexDemoConnectorProofIntakeSample());
-});
-
-app.get("/health", (req, res) => {
-  res.json(getBridgeHealth());
-});
-
-app.post("/packets", (req, res) => {
-  res.json(validatePacketDraft(req.body));
-});
-
-app.get("/queue", (req, res) => {
-  res.json(getQueuePreview());
-});
-
-app.post("/approvals", (req, res) => {
-  res.json(previewApproval(req.body));
-});
-
-app.get("/workers", (req, res) => {
-  res.json(getWorkersPreview());
-});
-
-app.get("/reports/latest", (req, res) => {
-  res.json(getLatestReports());
-});
-
-app.post("/sos", (req, res) => {
-  res.json(previewSos(req.body));
-});
-
-app.get("/api/runtime/status", (req, res) => {
-  res.json(getRuntimeStatus());
-});
-
-app.get("/api/runtime/queue", (req, res) => {
-  res.json(getQueueStatus());
-});
-
-app.get("/api/runtime/audit", (req, res) => {
-  res.json(getAuditTimeline({ recent: req.query.recent }));
-});
-
-app.get("/api/runtime/health", (req, res) => {
-  res.json(getRuntimeHealth({ staleHeartbeatMinutes: req.query.staleHeartbeatMinutes }));
-});
-
-app.get("/api/runtime/visibility", (req, res) => {
-  res.json(getVisibilitySnapshot());
-});
-
-app.get("/api/runtime/control", (req, res) => {
-  res.json(getControlSummary());
-});
-
-// Pipeline endpoint (accepts 2 uploads)
-app.post(
-  "/api/pipeline/run",
-  upload.fields([
-    { name: "whitepaper", maxCount: 1 },
-    { name: "readme", maxCount: 1 },
-  ]),
-  (req, res) => {
-    const wp = req.files?.whitepaper?.[0];
-    const rm = req.files?.readme?.[0];
-
-    if (!wp || !rm) {
-      return res.status(400).json({
-        ok: false,
-        error: "Missing required uploads: whitepaper + readme",
-      });
+router.get('/health', (_req, res) => {
+  res.json({
+    allowed: true,
+    decision: 'allowed',
+    paper_only: true,
+    mode: 'PAPER_ONLY',
+    service: 'forex-dashboard-truth-status',
+    safety: {
+      paper_only: true,
+      broker: false,
+      live_trading: false,
+      credentials: false,
+      real_orders: false,
+      network_access: false
     }
-
-    // Planned pipeline stages only; this endpoint does not execute them yet.
-    const stages = [
-      { key: "validate", label: "Validate inputs", status: "PLANNED_NOT_EXECUTED" },
-      { key: "parse", label: "Parse intent & constraints", status: "PLANNED_NOT_EXECUTED" },
-      { key: "classify", label: "Classify project type", status: "PLANNED_NOT_EXECUTED" },
-      { key: "scaffold", label: "Generate scaffold", status: "PLANNED_NOT_EXECUTED" },
-      { key: "done", label: "Done", status: "PLANNED_NOT_EXECUTED" },
-    ];
-
-    return res.json({
-      ok: true,
-      status: "STUB",
-      received: {
-        whitepaper: { name: wp.originalname, size: wp.size, type: wp.mimetype },
-        readme: { name: rm.originalname, size: rm.size, type: rm.mimetype },
-      },
-      stages,
-      message:
-        "Pipeline run endpoint accepts inputs, but it is currently a stub and does not execute pipeline stages yet.",
-    });
-  }
-);
-
-const PORT = 5050;
-app.listen(PORT, () => {
-  console.log(`[orchestrator] listening on http://localhost:${PORT}`);
+  });
 });
+
+router.get('/api/forex/session-status', (req, res) => {
+  const sessionId = req.query.sessionId || req.query.session_id || null;
+  const evidence = req.body && req.body.evidence ? req.body.evidence : null;
+  const status = buildForexDashboardTruthStatus({
+    session_id: sessionId,
+    evidence
+  });
+
+  res.json(status);
+});
+
+router.get('/api/forex/replay-status', (req, res) => {
+  const sessionId = req.query.sessionId || req.query.session_id || null;
+  const replayStatus = noopReplay();
+  const proofClosure = buildForexDemoConnectorProofClosure(sessionId, replayStatus);
+  res.json({
+    allowed: true,
+    decision: 'allowed',
+    blocked_reason: 'none',
+    blocked_reasons: [],
+    warnings: [],
+    paper_only: true,
+    mode: 'PAPER_ONLY',
+    session_id: sessionId,
+    source: 'proof_closure_only',
+    replay_status: replayStatus,
+    proof_closure: proofClosure,
+    next_safe_action: 'USE_SESSION_STATUS_ENDPOINT',
+    safety: {
+      paper_only: true,
+      broker: false,
+      live_trading: false,
+      credentials: false,
+      real_orders: false,
+      network_access: false
+    }
+  });
+});
+
+router.get('/forex/status', (req, res) => {
+  const sessionId = req.query.sessionId || req.query.session_id || null;
+  const proofClosure = buildForexDemoConnectorProofClosure(sessionId, null);
+  res.json({
+    status: 'display_only',
+    source: 'legacy_route_mapped_to_projection',
+    allowed: true,
+    decision: 'allowed',
+    blocked_reason: 'none',
+    blocked_reasons: [],
+    warnings: ['LEGACY_ROUTE_MAPPED_TO_DISPLAY_ONLY'],
+    paper_only: true,
+    mode: 'PAPER_ONLY',
+    session_id: sessionId,
+    proof_closure: proofClosure,
+    next_safe_action: 'USE_SESSION_STATUS_ENDPOINT',
+    safety: {
+      paper_only: true,
+      broker: false,
+      live_trading: false,
+      credentials: false,
+      real_orders: false,
+      network_access: false
+    }
+  });
+});
+
+module.exports = router;
+module.exports.router = router;
