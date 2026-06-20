@@ -216,7 +216,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "arm-disarm",
     intent: FOREX_COMMAND_INTENTS.ARM_DISARM,
     icon: "🟣",
-    label: "ARM / DISARM",
+    label: "ARM",
     state: "LOCAL ONLY",
     mode: "ARMING_REVIEW",
     blockedReasons: ["future_protected_approval_required", "final_disarm_required"],
@@ -228,7 +228,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "kill-switch",
     intent: FOREX_COMMAND_INTENTS.KILL_SWITCH,
     icon: "☠️",
-    label: "KILL SWITCH",
+    label: "KILL",
     state: "VISIBLE",
     mode: "LOCAL_EMERGENCY",
     emergency: true,
@@ -241,7 +241,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "panic-flatten",
     intent: FOREX_COMMAND_INTENTS.PANIC_FLATTEN,
     icon: "🚨",
-    label: "PANIC FLATTEN / EMERGENCY EXIT",
+    label: "PANIC",
     state: "PLACEHOLDER",
     mode: "LOCAL_EMERGENCY",
     emergency: true,
@@ -254,7 +254,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "pair-scanner",
     intent: FOREX_COMMAND_INTENTS.PAIR_SCANNER,
     icon: "🔎",
-    label: "Pair Scanner",
+    label: "SCAN",
     state: "VIEW",
     mode: "SCANNER",
     blockedReasons: ["scanner_is_dashboard_only", "live_execution_blocked"],
@@ -266,7 +266,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "demo-connector-proof",
     intent: FOREX_COMMAND_INTENTS.DEMO_CONNECTOR_PROOF,
     icon: "🧪",
-    label: "DEMO CONNECTOR PROOF",
+    label: "DEMO",
     state: "PARTIAL",
     mode: "STATUS_ONLY_NO_CONNECTOR_CALL",
     blockedReasons: [
@@ -286,7 +286,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "candidate-filter",
     intent: FOREX_COMMAND_INTENTS.CANDIDATE_FILTER,
     icon: "🧪",
-    label: "Candidate Filter",
+    label: "FILTER",
     state: "VIEW",
     mode: "FILTER",
     blockedReasons: ["candidate_filter_is_dashboard_only", "live_execution_blocked"],
@@ -298,7 +298,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "risk-gate",
     intent: FOREX_COMMAND_INTENTS.RISK_GATE,
     icon: "🛡️",
-    label: "Risk Gate",
+    label: "RISK",
     state: "REQUIRED",
     mode: "RISK",
     blockedReasons: ["risk_gate_not_approved", "max_loss_not_final", "daily_cap_not_final"],
@@ -310,7 +310,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "reconciliation",
     intent: FOREX_COMMAND_INTENTS.RECONCILIATION,
     icon: "🧾",
-    label: "Reconciliation",
+    label: "RECON",
     state: "REQUIRED",
     mode: "RECONCILIATION",
     blockedReasons: ["broker_readonly_evidence_required", "account_values_not_loaded"],
@@ -322,7 +322,7 @@ const FOREX_COMMAND_CONTROLS = [
     id: "signal-status",
     intent: FOREX_COMMAND_INTENTS.AIOS_SIGNAL_STATUS,
     icon: "🤖",
-    label: "AIOS Signal Status",
+    label: "SIGNAL",
     state: "WATCHING",
     mode: "SIGNAL_STATUS",
     blockedReasons: ["signal_is_dashboard_only", "live_execution_blocked"],
@@ -386,6 +386,52 @@ const AIOS_FOREX_BRAND_PILLS = [
   "📡 TOWER",
   "🌐 GLOBAL",
   "💎 CAPITAL"
+];
+
+const FOREX_COCKPIT_ROOMS = [
+  { id: "HOME", icon: "🏠", label: "HOME", tone: "home" },
+  { id: "TRADE", icon: "🚀", label: "TRADE", tone: "trade" },
+  { id: "SCAN", icon: "🔎", label: "SCAN", tone: "scan" },
+  { id: "FILTER", icon: "🎛️", label: "FILTER", tone: "filter" },
+  { id: "RISK", icon: "⚠️", label: "RISK", tone: "risk" },
+  { id: "MANAGE", icon: "🧭", label: "MANAGE", tone: "manage" },
+  { id: "EXIT", icon: "⏏️", label: "EXIT", tone: "exit" },
+  { id: "JOURNAL", icon: "🧾", label: "JOURNAL", tone: "journal" },
+  { id: "SETTINGS", icon: "⚙️", label: "SETTINGS", tone: "settings" },
+  { id: "DIAGNOSTICS", icon: "🧪", label: "DIAGNOSTICS", tone: "diagnostics" }
+];
+
+const FOREX_SCAN_CANDIDATES = ["EUR_USD", "GBP_USD", "USD_JPY", "AUD_USD", "USD_CAD"];
+
+const FOREX_TRADE_MODES = [
+  { id: "PAPER", icon: "📄", label: "PAPER" },
+  { id: "SANDBOX", icon: "🧪", label: "SANDBOX" },
+  { id: "LIVE_LOCKED", icon: "🔒", label: "LIVE LOCKED" }
+];
+
+const FOREX_COMPACT_STATUS = [
+  { label: "LIVE", value: "BLOCKED", tone: "danger" },
+  { label: "BROKER", value: "NOT CONNECTED", tone: "warn" },
+  { label: "ORDER", value: "DISABLED", tone: "danger" },
+  { label: "CLOSE", value: "DISABLED", tone: "danger" },
+  { label: "AUTO", value: "OFF", tone: "warn" },
+  { label: "PAPER", value: "READY", tone: "good" }
+];
+
+const FOREX_RISK_REQUIREMENTS = [
+  "max loss required",
+  "daily cap required",
+  "stop loss required",
+  "kill switch required",
+  "final disarm required"
+];
+
+const FOREX_JOURNAL_REQUIREMENTS = [
+  "reconciliation required",
+  "daily P/L required",
+  "closed-history writeback required",
+  "final disarm required",
+  "no raw broker payloads"
 ];
 
 const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
@@ -608,6 +654,36 @@ function statusTone(value) {
   }
 
   return "neutral";
+}
+
+function marketSignalVisual(value) {
+  const text = String(value ?? "").toUpperCase();
+
+  if (text.includes("BULLISH")) {
+    return {
+      icon: "📈",
+      label: "Bullish",
+      tone: "marketSignalBullish"
+    };
+  }
+
+  if (text.includes("SIDEWAYS") || text.includes("NEUTRAL")) {
+    return {
+      icon: "↔️",
+      label: text.includes("NEUTRAL") ? "Neutral" : "Sideways",
+      tone: "marketSignalSideways"
+    };
+  }
+
+  if (text.includes("BEARISH")) {
+    return {
+      icon: "📉",
+      label: "Bearish",
+      tone: "marketSignalBearish"
+    };
+  }
+
+  return null;
 }
 
 function isSafePlainObject(value) {
@@ -938,6 +1014,22 @@ function chartPolyline(points) {
 }
 
 function StatusBadge({ value }) {
+  const marketSignal = marketSignalVisual(value);
+
+  if (marketSignal) {
+    return (
+      <span
+        aria-label={`Signal direction: ${marketSignal.label}`}
+        className={`statusBadge marketSignalChip ${marketSignal.tone}`}
+        title={marketSignal.label}
+      >
+        <span aria-hidden="true" className="marketSignalIcon">
+          {marketSignal.icon}
+        </span>
+      </span>
+    );
+  }
+
   return <span className={`statusBadge status-${statusTone(value)}`}>{value}</span>;
 }
 
@@ -1911,7 +2003,7 @@ function ForexSixBulletCompletionBoard({
   );
 }
 
-function SafeDashboardStatusPanel({ onSafeStatusUpdate }) {
+function SafeDashboardStatusPanel({ externalRefreshNonce = 0, onSafeStatusUpdate }) {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [status, setStatus] = useState({
     checkedAt: null,
@@ -1961,7 +2053,7 @@ function SafeDashboardStatusPanel({ onSafeStatusUpdate }) {
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [onSafeStatusUpdate, refreshNonce]);
+  }, [externalRefreshNonce, onSafeStatusUpdate, refreshNonce]);
 
   return (
     <section className="forexSafeStatusPanel" aria-label="Safe dashboard runtime status">
@@ -1975,7 +2067,10 @@ function SafeDashboardStatusPanel({ onSafeStatusUpdate }) {
           type="button"
           onClick={() => setRefreshNonce((value) => value + 1)}
         >
-          🔄 REFRESH STATUS
+          <span aria-hidden="true" className="forexRefreshStatusIcon">
+            🔄
+          </span>
+          <span>REFRESH</span>
         </button>
       </div>
 
@@ -2053,7 +2148,7 @@ function PaperSandboxTradePathwayPanel({ paperOrderPreviewResult }) {
           <span aria-hidden="true" className="forexPaperSandboxButtonIcon">
             📄
           </span>
-          <span className="forexPaperSandboxButtonText">PAPER ORDER PREVIEW</span>
+          <span className="forexPaperSandboxButtonText">PAPER</span>
         </button>
         <button
           aria-pressed={!isPaperPreview}
@@ -2064,7 +2159,7 @@ function PaperSandboxTradePathwayPanel({ paperOrderPreviewResult }) {
           <span aria-hidden="true" className="forexPaperSandboxButtonIcon">
             🧪
           </span>
-          <span className="forexPaperSandboxButtonText">SANDBOX DRY RUN</span>
+          <span className="forexPaperSandboxButtonText">SANDBOX</span>
         </button>
       </div>
 
@@ -2092,33 +2187,673 @@ function PaperSandboxTradePathwayPanel({ paperOrderPreviewResult }) {
   );
 }
 
-function AiosForexBrandBanner() {
+function AiosForexBrandCrest() {
   return (
-    <section className="aiosForexBrandBanner" aria-label="AIOS Forex Bot preview brand layer">
-      <img
-        alt="AIOS.FOREX.BOT preview symbol banner"
-        className="aiosForexBrandImage"
-        src={aiosForexBotSymbolBanner}
-      />
-      <div className="aiosForexBrandText">
-        <span className="aiosForexBrandPreview">PREVIEW BRAND LAYER</span>
-        <h3>AIOS.FOREX.BOT</h3>
-        <div className="aiosForexBrandPills" aria-label="AIOS Forex Bot concept labels">
-          {AIOS_FOREX_BRAND_PILLS.map((pill) => (
-            <span key={pill}>{pill}</span>
+    <div className="aiosForexBrandCrest" aria-label="AIOS Forex Bot preview crest">
+      <strong>AIOS.FOREX.BOT</strong>
+    </div>
+  );
+}
+
+function CommandPathDock({ currentRoom, onEnterRoom }) {
+  return (
+    <nav className="forexCommandPathDock" aria-label="Command Path Dock">
+      {FOREX_COCKPIT_ROOMS.map((room) => {
+        const isActive = room.id === currentRoom;
+
+        return (
+          <button
+            aria-pressed={isActive}
+            className={[
+              "forexPathButton",
+              `forexPath-${room.tone}`,
+              isActive ? "activeForexPathButton" : ""
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            key={room.id}
+            title={`${room.label} command room`}
+            type="button"
+            onClick={() => onEnterRoom(room.id)}
+          >
+            <span aria-hidden="true" className="forexPathIcon">
+              {room.icon}
+            </span>
+            <strong>{room.label}</strong>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+function CompactStatusStrip() {
+  return (
+    <div className="forexCompactStatusStrip" aria-label="Critical forex command status">
+      {FOREX_COMPACT_STATUS.map((status) => (
+        <div className={`forexCompactStatusPill tone-${status.tone}`} key={`${status.label}-${status.value}`}>
+          <span>{status.label}</span>
+          <strong>{status.value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LocalModeSelector({ selectedMode, onSelectMode }) {
+  return (
+    <div className="forexModeSelector" aria-label="Paper sandbox live locked mode selector">
+      {FOREX_TRADE_MODES.map((mode) => (
+        <button
+          aria-pressed={mode.id === selectedMode}
+          className={[
+            "forexModeButton",
+            mode.id === selectedMode ? "activeForexModeButton" : "",
+            mode.id === "LIVE_LOCKED" ? "lockedForexModeButton" : ""
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          disabled={mode.id === "LIVE_LOCKED"}
+          key={mode.id}
+          type="button"
+          onClick={() => onSelectMode(mode.id)}
+        >
+          <span aria-hidden="true">{mode.icon}</span>
+          <strong>{mode.label}</strong>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function PositionSizeStepper({ positionSize, onDecrease, onIncrease }) {
+  return (
+    <div className="forexPositionStepper" aria-label="Position size preview stepper">
+      <button aria-label="Decrease position size" type="button" onClick={onDecrease}>
+        ▼
+      </button>
+      <div className="forexPositionReadout">
+        <strong>{positionSize}</strong>
+        <span>MICRO / PREVIEW</span>
+      </div>
+      <button aria-label="Increase position size" type="button" onClick={onIncrease}>
+        ▲
+      </button>
+    </div>
+  );
+}
+
+function nextRoomFor(currentRoom, getInIntentOn = false) {
+  const nextRooms = {
+    HOME: "TRADE",
+    TRADE: getInIntentOn ? "DIAGNOSTICS" : "SCAN",
+    SCAN: "FILTER",
+    FILTER: "RISK",
+    RISK: "TRADE",
+    MANAGE: "EXIT",
+    EXIT: "JOURNAL",
+    JOURNAL: "HOME",
+    SETTINGS: "HOME",
+    DIAGNOSTICS: "HOME"
+  };
+
+  return nextRooms[currentRoom] ?? "HOME";
+}
+
+function nextActionFor({ currentRoom, emergencyMode, getInIntentOn, getOutIntentOn, isArmed }) {
+  if (emergencyMode) {
+    return "VERIFY SAFETY / NO ROUTES ENABLED";
+  }
+
+  if (!isArmed) {
+    return "ARM LOCALLY BEFORE PAPER PREVIEW";
+  }
+
+  if (getInIntentOn) {
+    return "REVIEW PAPER ORDER PREVIEW";
+  }
+
+  if (getOutIntentOn) {
+    return "REVIEW EXIT / RECONCILIATION";
+  }
+
+  if (currentRoom === "HOME") {
+    return "SELECT A COMMAND PATH";
+  }
+
+  return "CONTINUE THROUGH CURRENT ROOM";
+}
+
+function CurrentTradeIntentStrip({
+  currentRoom,
+  emergencyMode,
+  getInIntentOn,
+  getOutIntentOn,
+  isArmed,
+  positionSize,
+  selectedMode,
+  selectedPair,
+  selectedSide
+}) {
+  const nextAction = nextActionFor({
+    currentRoom,
+    emergencyMode,
+    getInIntentOn,
+    getOutIntentOn,
+    isArmed
+  });
+  const fields = [
+    ["ROOM", currentRoom],
+    ["PAIR", formatPair(selectedPair)],
+    ["SIDE", selectedSide],
+    ["SIZE", `${positionSize} MICRO`],
+    ["MODE", selectedMode],
+    ["ARM", isArmed ? "ARMED" : "DISARMED"],
+    ["GET IN", getInIntentOn ? "ON" : "OFF"],
+    ["GET OUT", getOutIntentOn ? "ON" : "OFF"],
+    ["EMERGENCY", emergencyMode ? "ON" : "OFF"],
+    ["NEXT", nextAction]
+  ];
+
+  return (
+    <section className="forexCurrentIntentStrip" aria-label="Current Trade Intent">
+      {fields.map(([label, value]) => (
+        <div className={label === "NEXT" ? "forexCurrentIntentNext" : ""} key={`${label}-${value}`}>
+          <span>{label}</span>
+          <strong>{value}</strong>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function ActivePathPanel({
+  armed,
+  canGoBack,
+  currentRoom,
+  emergencyMode,
+  getInIntentOn,
+  getOutIntentOn,
+  onBack,
+  onCommandIntent,
+  onContinue,
+  onEnterRoom,
+  onEmergencyModeChange,
+  onRefreshStatus,
+  onSafeStatusUpdate,
+  onSelectedModeChange,
+  onSelectedPairChange,
+  onSelectedSideChange,
+  onToggleArmed,
+  onToggleGetIn,
+  onToggleGetOut,
+  paperOrderPreviewResult,
+  safeStatusRefreshNonce,
+  positionSize,
+  approvalPackageResult,
+  reconciliationResult,
+  riskGateResult,
+  sixBulletResult,
+  demoConnectorProofResult,
+  demoConnectorIntakeResult,
+  selectedMode,
+  selectedCandidate,
+  selectedSignal,
+  selectedPair,
+  selectedSide,
+  setSelectedCandidate,
+  setPositionSize,
+  setSelectedSignal
+}) {
+  const room = FOREX_COCKPIT_ROOMS.find((item) => item.id === currentRoom) ?? FOREX_COCKPIT_ROOMS[0];
+  const modeLabel = FOREX_TRADE_MODES.find((mode) => mode.id === selectedMode)?.label ?? selectedMode;
+
+  function selectCommand(intent) {
+    onCommandIntent(intent);
+  }
+
+  function renderHomePath() {
+    const homeActions = [
+      { room: "TRADE", icon: "🚀", label: "Trade now" },
+      { room: "SCAN", icon: "🔎", label: "Scan pairs" },
+      { room: "FILTER", icon: "🎛️", label: "Filter setup" },
+      { room: "RISK", icon: "⚠️", label: "Check risk" },
+      { room: "EXIT", icon: "⏏️", label: "Prepare exit" },
+      { room: "DIAGNOSTICS", icon: "🧪", label: "Diagnostics" }
+    ];
+
+    return (
+      <>
+        <div className="forexPathSubhead">
+          <span>Choose your next action</span>
+          <strong>HOME COCKPIT</strong>
+        </div>
+        <div className="forexHomeActionGrid">
+          {homeActions.map((action) => (
+            <button
+              className="forexHomeActionButton"
+              key={action.room}
+              type="button"
+              onClick={() => onEnterRoom(action.room)}
+            >
+              <span aria-hidden="true" className="forexPathIcon">
+                {action.icon}
+              </span>
+              <strong>{action.label}</strong>
+            </button>
           ))}
         </div>
-        <p>Customizable cockpit identity. Replaceable before final brand lock.</p>
+      </>
+    );
+  }
+
+  function renderPairSelector() {
+    return (
+      <div className="forexControlGroup">
+        <span>PAIR</span>
+        <div className="forexChipGrid">
+          {FOREX_SCAN_CANDIDATES.map((pair) => (
+            <button
+              aria-pressed={pair === selectedPair}
+              className={`forexSelectionChip ${pair === selectedPair ? "activeForexSelectionChip" : ""}`}
+              key={pair}
+              type="button"
+              onClick={() => {
+                onSelectedPairChange(pair);
+                setSelectedCandidate(pair);
+                selectCommand(FOREX_COMMAND_INTENTS.PAIR_SCANNER);
+              }}
+            >
+              {formatPair(pair)}
+            </button>
+          ))}
+        </div>
       </div>
+    );
+  }
+
+  function renderTradePath() {
+    return (
+      <>
+        <div className="forexTradePad">
+          {renderPairSelector()}
+
+          <div className="forexControlGroup">
+            <span>DIRECTION</span>
+            <div className="forexSideSelector">
+              {["BUY", "SELL"].map((side) => (
+                <button
+                  aria-pressed={side === selectedSide}
+                  className={[
+                    "forexSideButton",
+                    side === "BUY" ? "buyForexButton" : "sellForexButton",
+                    side === selectedSide ? "activeForexSideButton" : ""
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  key={side}
+                  type="button"
+                  onClick={() => onSelectedSideChange(side)}
+                >
+                  <span aria-hidden="true">{side === "BUY" ? "📈" : "📉"}</span>
+                  <strong>{side}</strong>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="forexControlGroup">
+            <span>SIZE</span>
+            <PositionSizeStepper
+              positionSize={positionSize}
+              onDecrease={() => setPositionSize((value) => Math.max(1, value - 1))}
+              onIncrease={() => setPositionSize((value) => Math.min(10, value + 1))}
+            />
+          </div>
+
+          <div className="forexControlGroup">
+            <span>ARM</span>
+            <button
+              className={`forexOperatorToggle protectedLocalIntent ${armed ? "armedLocalIntent" : ""}`}
+              type="button"
+              onClick={() => {
+                onToggleArmed();
+                selectCommand(FOREX_COMMAND_INTENTS.ARM_DISARM);
+              }}
+            >
+              <span aria-hidden="true">🟣</span>
+              <strong>{armed ? "ARMED" : "DISARMED"}</strong>
+            </button>
+          </div>
+
+          <div className="forexControlGroup">
+            <span>GET IN</span>
+            <button
+              className={`forexOperatorToggle getInLocalIntent ${getInIntentOn ? "activeLocalIntent" : ""}`}
+              type="button"
+              onClick={() => {
+                onToggleGetIn();
+                selectCommand(FOREX_COMMAND_INTENTS.GET_IN);
+              }}
+            >
+              <span aria-hidden="true">🚀</span>
+              <strong>{getInIntentOn ? "ON" : "OFF"}</strong>
+            </button>
+            <small>{armed ? "LOCAL INTENT ONLY / ORDER DISABLED" : "BLOCKED: DISARMED / ORDER DISABLED"}</small>
+            {getInIntentOn ? (
+              <small>GET IN LOCAL INTENT ON / ORDER ROUTE DISABLED / LIVE BLOCKED</small>
+            ) : null}
+          </div>
+
+          <div className="forexControlGroup">
+            <span>GET OUT</span>
+            <button
+              className={`forexOperatorToggle getOutLocalIntent ${getOutIntentOn ? "activeDangerIntent" : ""}`}
+              type="button"
+              onClick={() => {
+                onToggleGetOut();
+                selectCommand(FOREX_COMMAND_INTENTS.GET_OUT);
+              }}
+            >
+              <span aria-hidden="true">🛑</span>
+              <strong>{getOutIntentOn ? "ON" : "OFF"}</strong>
+            </button>
+            <small>{armed ? "LOCAL INTENT ONLY / CLOSE DISABLED" : "BLOCKED: DISARMED / CLOSE DISABLED"}</small>
+            {getOutIntentOn ? (
+              <small>GET OUT LOCAL INTENT ON / CLOSE ROUTE DISABLED / LIVE BLOCKED</small>
+            ) : null}
+          </div>
+        </div>
+
+        <LocalModeSelector selectedMode={selectedMode} onSelectMode={onSelectedModeChange} />
+
+        <div className="forexIntentSummary" aria-label="Current local trade intent summary">
+          <span>CURRENT INTENT</span>
+          <strong>{`${formatPair(selectedPair)} / ${selectedSide} / ${positionSize} MICRO / ${modeLabel}`}</strong>
+          <small>PREVIEW ONLY. NO ORDER SENT. LIVE BLOCKED.</small>
+        </div>
+      </>
+    );
+  }
+
+  function renderScanPath() {
+    return (
+      <>
+        <div className="forexPathSubhead">
+          <span>Pick a pair to evaluate</span>
+          <strong>{`PAIR SCANNER / ${formatPair(selectedCandidate)} / PREVIEW ONLY`}</strong>
+        </div>
+        {renderPairSelector()}
+      </>
+    );
+  }
+
+  function renderFilterPath() {
+    const signalOptions = [
+      { id: "BULLISH", icon: "📈", label: "bullish", tone: "marketSignalBullish" },
+      { id: "SIDEWAYS", icon: "〰️", label: "sideways", tone: "marketSignalSideways" },
+      { id: "BEARISH", icon: "📉", label: "bearish", tone: "marketSignalBearish" },
+      { id: "NEUTRAL", icon: "⚪", label: "neutral", tone: "marketSignalSideways" }
+    ];
+
+    return (
+      <>
+        <div className="forexPathSubhead">
+          <span>{`Selected pair: ${formatPair(selectedPair)}`}</span>
+          <strong>FILTER RESULT: PREVIEW ONLY</strong>
+        </div>
+        <div className="forexSignalOnlyRow" aria-label="Candidate filter signal direction">
+          {signalOptions.map((signal) => (
+            <button
+              aria-label={`Filter ${signal.label}`}
+              aria-pressed={signal.id === selectedSignal}
+              className={[
+                "forexSignalOnlyChip",
+                signal.tone,
+                signal.id === selectedSignal ? "activeSignalOnlyChip" : ""
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              key={signal.id}
+              title={signal.label}
+              type="button"
+              onClick={() => {
+                setSelectedSignal(signal.id);
+                selectCommand(FOREX_COMMAND_INTENTS.CANDIDATE_FILTER);
+              }}
+            >
+              <span aria-hidden="true" className="marketSignalIcon">
+                {signal.icon}
+              </span>
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  function renderRiskPath() {
+    return (
+      <>
+        <div className="forexStatusTileGrid">
+          {FOREX_RISK_REQUIREMENTS.map((item) => (
+            <div className="forexStatusTile caution" key={item}>
+              <span>{item}</span>
+              <strong>REQUIRED</strong>
+            </div>
+          ))}
+          <div className="forexStatusTile protected">
+            <span>risk status</span>
+            <strong>BLOCKED / PROTECTED</strong>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function renderManagePath() {
+    return (
+      <div className="forexStatusTileGrid">
+        {[
+          ["open position", "NONE"],
+          ["broker", "NOT CONNECTED"],
+          ["order route", "DISABLED"],
+          ["close route", "DISABLED"],
+          ["auto trade", "OFF"]
+        ].map(([label, value]) => (
+          <div className="forexStatusTile" key={label}>
+            <span>{label}</span>
+            <strong>{value}</strong>
+          </div>
+        ))}
+        <button className="forexInlineRefreshButton" type="button" onClick={onRefreshStatus}>
+          <span aria-hidden="true">🔄</span>
+          <strong>REFRESH STATUS</strong>
+        </button>
+      </div>
+    );
+  }
+
+  function renderExitPath() {
+    return (
+      <div className="forexTradePad">
+        <div className="forexControlGroup">
+          <span>GET OUT</span>
+          <button
+            className={`forexOperatorToggle getOutLocalIntent ${getOutIntentOn ? "activeDangerIntent" : ""}`}
+            type="button"
+            onClick={() => {
+              onToggleGetOut();
+              selectCommand(FOREX_COMMAND_INTENTS.GET_OUT);
+            }}
+          >
+            <span aria-hidden="true">🛑</span>
+            <strong>{getOutIntentOn ? "ON" : "OFF"}</strong>
+          </button>
+        </div>
+        <div className="forexControlGroup">
+          <span>PANIC</span>
+          <button
+            className="forexOperatorToggle dangerLocalIntent"
+            type="button"
+            onClick={() => {
+              onEmergencyModeChange(true);
+              selectCommand(FOREX_COMMAND_INTENTS.PANIC_FLATTEN);
+            }}
+          >
+            <span aria-hidden="true">🚨</span>
+            <strong>PANIC FLATTEN</strong>
+          </button>
+        </div>
+        <div className="forexControlGroup">
+          <span>KILL</span>
+          <button
+            className="forexOperatorToggle dangerLocalIntent"
+            type="button"
+            onClick={() => {
+              onEmergencyModeChange(true);
+              selectCommand(FOREX_COMMAND_INTENTS.KILL_SWITCH);
+            }}
+          >
+            <span aria-hidden="true">☠️</span>
+            <strong>KILL SWITCH</strong>
+          </button>
+        </div>
+        <div className="forexStatusTile caution">
+          <span>final disarm</span>
+          <strong>REQUIRED</strong>
+        </div>
+        <div className="forexStatusTile danger">
+          <span>close route</span>
+          <strong>DISABLED / NO CLOSE SENT</strong>
+        </div>
+      </div>
+    );
+  }
+
+  function renderJournalPath() {
+    return (
+      <div className="forexStatusTileGrid">
+        {FOREX_JOURNAL_REQUIREMENTS.map((item) => (
+          <div className="forexStatusTile caution" key={item}>
+            <span>{item}</span>
+            <strong>REQUIRED</strong>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  function renderSettingsPath() {
+    return (
+      <>
+        <AiosForexBrandCrest />
+        <LocalModeSelector selectedMode={selectedMode} onSelectMode={onSelectedModeChange} />
+        <div className="forexStatusTileGrid">
+          {[
+            ["paper mode", "SELECTED"],
+            ["sandbox", "NEXT"],
+            ["live", "LOCKED"],
+            ["visual identity", "EDITABLE"],
+            ["credentials", "NO STORAGE"]
+          ].map(([label, value]) => (
+            <div className="forexStatusTile protected" key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  function renderDiagnosticsPath() {
+    return (
+      <div className="forexDiagnosticsRoom" aria-label="Diagnostics room">
+        <div className="forexPathSubhead">
+          <span>Diagnostics</span>
+          <strong>BACKEND / EVIDENCE DETAIL ON REQUEST</strong>
+        </div>
+        <SafeDashboardStatusPanel
+          externalRefreshNonce={safeStatusRefreshNonce}
+          onSafeStatusUpdate={onSafeStatusUpdate}
+        />
+        <PaperSandboxTradePathwayPanel paperOrderPreviewResult={paperOrderPreviewResult} />
+        <PaperOrderPreviewEngineCard endpointResult={paperOrderPreviewResult} />
+        <DemoConnectorProofCard endpointResult={demoConnectorProofResult} />
+        <DemoConnectorEvidenceIntakeCard endpointResult={demoConnectorIntakeResult} />
+        <ForexSixBulletCompletionBoard
+          approvalPackageResult={approvalPackageResult}
+          reconciliationResult={reconciliationResult}
+          riskGateResult={riskGateResult}
+          sixBulletResult={sixBulletResult}
+        />
+      </div>
+    );
+  }
+
+  const pathContent = {
+    HOME: renderHomePath,
+    TRADE: renderTradePath,
+    SCAN: renderScanPath,
+    FILTER: renderFilterPath,
+    RISK: renderRiskPath,
+    MANAGE: renderManagePath,
+    EXIT: renderExitPath,
+    JOURNAL: renderJournalPath,
+    SETTINGS: renderSettingsPath,
+    DIAGNOSTICS: renderDiagnosticsPath
+  };
+
+  return (
+    <section className="forexActivePathPanel" aria-label="Active Path Panel">
+      <div className="forexActivePathHeader">
+        <div>
+          <span>{`AIOS.FOREX.BOT / ${currentRoom}`}</span>
+          <h3>
+            <span aria-hidden="true">{room.icon}</span>
+            {room.label}
+          </h3>
+        </div>
+        <div className="forexRoomNavActions">
+          <button className="forexPathNextButton" disabled={!canGoBack} type="button" onClick={onBack}>
+            <span aria-hidden="true">◀</span>
+            <strong>BACK</strong>
+          </button>
+          <button className="forexPathNextButton" type="button" onClick={onContinue}>
+            <span aria-hidden="true">▶</span>
+            <strong>{`NEXT: ${nextRoomFor(currentRoom, getInIntentOn)}`}</strong>
+          </button>
+        </div>
+      </div>
+      <div className="forexActivePathBody">{pathContent[currentRoom]?.()}</div>
+      {emergencyMode ? (
+        <div className="forexPathWarning">
+          <span>LOCAL DASHBOARD EMERGENCY MODE</span>
+          <strong>NO BROKER CALL. NO ORDER SENT. NO CLOSE SENT.</strong>
+        </div>
+      ) : null}
     </section>
   );
 }
 
 function ForexCommandSurface() {
   const [selectedCommandIntent, setSelectedCommandIntent] = useState(
-    FOREX_COMMAND_INTENTS.AIOS_SIGNAL_STATUS
+    FOREX_COMMAND_INTENTS.GET_IN
   );
-  const [localEmergencyMode, setLocalEmergencyMode] = useState(false);
+  const [currentRoom, setCurrentRoom] = useState("HOME");
+  const [roomHistory, setRoomHistory] = useState([]);
+  const [selectedPair, setSelectedPair] = useState("EUR_USD");
+  const [selectedSide, setSelectedSide] = useState("BUY");
+  const [positionSize, setPositionSize] = useState(1);
+  const [armed, setArmed] = useState(false);
+  const [getInIntentOn, setGetInIntentOn] = useState(false);
+  const [getOutIntentOn, setGetOutIntentOn] = useState(false);
+  const [emergencyMode, setEmergencyMode] = useState(false);
+  const [selectedMode, setSelectedMode] = useState("PAPER");
+  const [selectedSignal, setSelectedSignal] = useState("NEUTRAL");
+  const [selectedCandidate, setSelectedCandidate] = useState("EUR_USD");
+  const [safeStatusRefreshNonce, setSafeStatusRefreshNonce] = useState(0);
   const [safeStatusEndpoints, setSafeStatusEndpoints] = useState([]);
   const selectedCommand =
     FOREX_COMMAND_CONTROLS.find((control) => control.intent === selectedCommandIntent) ??
@@ -2134,141 +2869,111 @@ function ForexCommandSurface() {
   const demoConnectorIntakeResult = safeStatusEndpoints.find(
     (item) => item.id === "forex-demo-connector-proof-intake-sample"
   );
+  const criticalInfo = [
+    { label: "Pair", value: `${formatPair(selectedPair)} preview` },
+    { label: "Side", value: selectedSide },
+    { label: "Size", value: `${positionSize} MICRO` },
+    { label: "Mode", value: selectedMode },
+    { label: "Stop-loss", value: "REQUIRED" },
+    { label: "Final disarm", value: "REQUIRED" }
+  ];
 
-  function selectCommandIntent(control) {
-    setSelectedCommandIntent(control.intent);
-    setLocalEmergencyMode(Boolean(control.emergency));
+  function selectCommandIntent(intent) {
+    const control = FOREX_COMMAND_CONTROLS.find((item) => item.intent === intent);
+    setSelectedCommandIntent(control?.intent ?? intent);
+    if (control?.emergency) {
+      setEmergencyMode(true);
+    }
+  }
+
+  function enterRoom(room) {
+    setCurrentRoom((current) => {
+      if (current === room) {
+        return current;
+      }
+      setRoomHistory((history) => [...history, current]);
+      return room;
+    });
+  }
+
+  function goBackRoom() {
+    setRoomHistory((history) => {
+      if (history.length === 0) {
+        return history;
+      }
+      const previousRoom = history[history.length - 1];
+      setCurrentRoom(previousRoom);
+      return history.slice(0, -1);
+    });
+  }
+
+  function continueRoom() {
+    enterRoom(nextRoomFor(currentRoom, getInIntentOn));
   }
 
   return (
-    <section className="panel forexCommandSurface" aria-label="Forex Command Surface">
+    <section
+      className="panel forexCommandSurface"
+      aria-label="Forex Command Surface"
+      style={{ "--aios-forex-bot-bg": `url(${aiosForexBotSymbolBanner})` }}
+    >
       <div className="forexCommandHeader">
-        <div className="panelHeading">
-          <p>Forex Command Surface</p>
-          <h3>Trade Command Dock</h3>
-        </div>
-        <strong>LIVE EXECUTION BLOCKED UNTIL FUTURE PROTECTED APPROVAL</strong>
+        <AiosForexBrandCrest />
       </div>
 
-      <AiosForexBrandBanner />
+      <CompactStatusStrip />
 
-      <div className="forexStatusStrip" aria-label="Forex command safety status">
-        {FOREX_COMMAND_STATUSES.map((status) => (
-          <div className={`forexStatusPill tone-${status.tone}`} key={`${status.label}-${status.value}`}>
-            <span>{status.label}</span>
-            <strong>{status.value}</strong>
-          </div>
-        ))}
-      </div>
+      <CommandPathDock currentRoom={currentRoom} onEnterRoom={enterRoom} />
 
-      <SafeDashboardStatusPanel onSafeStatusUpdate={setSafeStatusEndpoints} />
-
-      <PaperOrderPreviewEngineCard endpointResult={paperOrderPreviewResult} />
-
-      <DemoConnectorProofCard endpointResult={demoConnectorProofResult} />
-
-      <DemoConnectorEvidenceIntakeCard endpointResult={demoConnectorIntakeResult} />
-
-      <ForexSixBulletCompletionBoard
+      <ActivePathPanel
+        armed={armed}
+        canGoBack={roomHistory.length > 0}
+        currentRoom={currentRoom}
+        emergencyMode={emergencyMode}
+        getInIntentOn={getInIntentOn}
+        getOutIntentOn={getOutIntentOn}
         approvalPackageResult={approvalPackageResult}
+        demoConnectorIntakeResult={demoConnectorIntakeResult}
+        demoConnectorProofResult={demoConnectorProofResult}
+        paperOrderPreviewResult={paperOrderPreviewResult}
+        positionSize={positionSize}
         reconciliationResult={reconciliationResult}
         riskGateResult={riskGateResult}
+        selectedMode={selectedMode}
+        selectedCandidate={selectedCandidate}
+        selectedPair={selectedPair}
+        selectedSignal={selectedSignal}
+        selectedSide={selectedSide}
         sixBulletResult={sixBulletResult}
+        setSelectedCandidate={setSelectedCandidate}
+        setPositionSize={setPositionSize}
+        setSelectedSignal={setSelectedSignal}
+        onBack={goBackRoom}
+        onCommandIntent={selectCommandIntent}
+        onContinue={continueRoom}
+        onEnterRoom={enterRoom}
+        onEmergencyModeChange={setEmergencyMode}
+        onRefreshStatus={() => setSafeStatusRefreshNonce((value) => value + 1)}
+        onSelectedModeChange={setSelectedMode}
+        onSelectedPairChange={setSelectedPair}
+        onSelectedSideChange={setSelectedSide}
+        onToggleArmed={() => setArmed((value) => !value)}
+        onToggleGetIn={() => setGetInIntentOn((value) => !value)}
+        onToggleGetOut={() => setGetOutIntentOn((value) => !value)}
       />
 
-      <PaperSandboxTradePathwayPanel paperOrderPreviewResult={paperOrderPreviewResult} />
+      <CurrentTradeIntentStrip
+        currentRoom={currentRoom}
+        emergencyMode={emergencyMode}
+        getInIntentOn={getInIntentOn}
+        getOutIntentOn={getOutIntentOn}
+        isArmed={armed}
+        positionSize={positionSize}
+        selectedMode={selectedMode}
+        selectedPair={selectedPair}
+        selectedSide={selectedSide}
+      />
 
-      <div className="forexCriticalStrip" aria-label="Critical forex command information">
-        {FOREX_CRITICAL_INFO.map((item) => (
-          <div className="forexCriticalItem" key={item.label}>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
-          </div>
-        ))}
-      </div>
-
-      <div className="forexCommandGrid" aria-label="Urgent trade controls">
-        {FOREX_COMMAND_CONTROLS.map((control) => {
-          const isActive = control.intent === selectedCommandIntent;
-
-          return (
-            <button
-              aria-pressed={isActive}
-              aria-disabled={control.state === "BLOCKED" ? "true" : undefined}
-              className={[
-                "forexCommandButton",
-                isActive ? "activeForexCommandButton" : "",
-                control.state === "BLOCKED" ? "blockedForexCommandButton" : "",
-                control.emergency ? "emergencyForexCommandButton" : ""
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              key={control.id}
-              title={control.message}
-              type="button"
-              onClick={() => selectCommandIntent(control)}
-            >
-              <span aria-hidden="true" className="forexCommandIcon">
-                {control.icon}
-              </span>
-              <span className="forexCommandText">{control.label}</span>
-              <strong>{control.state}</strong>
-            </button>
-          );
-        })}
-      </div>
-
-      <section className="forexCommandIntentPanel" aria-label="Command Intent" aria-live="polite">
-        <div className="panelHeading">
-          <p>Command Intent</p>
-          <h3>{selectedCommand.intent}</h3>
-        </div>
-        <div className="forexIntentGrid">
-          <div>
-            <span>Selected button</span>
-            <strong>{selectedCommand.label}</strong>
-          </div>
-          <div>
-            <span>AIOS mode</span>
-            <strong>{selectedCommand.mode}</strong>
-          </div>
-          <div>
-            <span>Blocked because</span>
-            <strong>{selectedCommand.blockedReasons.join(", ")}</strong>
-          </div>
-          <div>
-            <span>Missing evidence</span>
-            <strong>{selectedCommand.missingEvidence.join(", ")}</strong>
-          </div>
-          <div className="forexIntentWide">
-            <span>Next safe step</span>
-            <strong>{selectedCommand.nextSafeStep}</strong>
-          </div>
-        </div>
-      </section>
-
-      {localEmergencyMode ? (
-        <div className="forexEmergencyState" aria-label="Local dashboard emergency mode">
-          <span>LOCAL DASHBOARD EMERGENCY MODE</span>
-          <strong>No broker call sent. No order sent. No close sent.</strong>
-          <p>Operator must use approved broker/manual path until execution wiring exists.</p>
-        </div>
-      ) : null}
-
-      <div className="forexNextSafeStepStrip" aria-label="Next safe step">
-        {FOREX_NEXT_SAFE_STEPS.map((step) => (
-          <span key={step}>{step}</span>
-        ))}
-      </div>
-
-      <div className="forexTradingLadder" aria-label="AIOS Trading Ladder">
-        {AIOS_TRADING_LADDER.map((item) => (
-          <div className={`forexLadderItem tone-${item.tone}`} key={`${item.label}-${item.value}`}>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
