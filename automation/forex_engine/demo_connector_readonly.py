@@ -61,8 +61,11 @@ def evaluate_demo_connector_snapshot(
     out["paper_only"] = True
 
     stale_input = snapshot.get("stale", False)
+    read_timestamp = snapshot.get("last_read_timestamp")
+    if read_timestamp is None:
+        read_timestamp = snapshot.get("data_timestamp", snapshot.get("timestamp"))
     stale_from_timestamp, age_seconds = _evaluate_data_age(
-        snapshot.get("last_read_timestamp"), now_timestamp, max_data_age_seconds
+        read_timestamp, now_timestamp, max_data_age_seconds
     )
     out["data_age_seconds"] = age_seconds
     out["fresh"] = not stale_from_timestamp if age_seconds is not None else (not bool(stale_input))
