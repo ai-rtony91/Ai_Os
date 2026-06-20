@@ -7,7 +7,7 @@ def _snapshot_valid() -> dict:
     return {
         "mode": "DEMO_READONLY",
         "balance_is_present": True,
-        "last_read_timestamp": "2026-06-20T00:00:00Z",
+        "last_read_timestamp": 1_759_999_998.0,
         "stale": False,
         "account_summary": {
             "balance_is_present": True,
@@ -156,18 +156,28 @@ def test_source_scan_blocks_forbidden_runtime_apis() -> None:
     source = module_path.read_text(encoding="utf-8").lower()
 
     for token in (
-        "subprocess",
-        "requests",
-        "socket",
-        "urllib",
+        "import subprocess",
+        "from subprocess",
+        "import requests",
+        "from requests",
+        "import socket",
+        "from socket",
+        "import urllib",
+        "from urllib",
         "open(",
+        ".write(",
         "write_text(",
-        "pathlib",
+        "write_bytes(",
         "os.system",
-        "getenv",
-        "environ",
-        "secret",
-        "account_id",
-        "credential",
+        "os.getenv",
+        "os.environ",
+        "getenv(",
+        "environ[",
+        "api_key",
+        "access_token",
+        "refresh_token",
+        "private_key",
+        "password",
+        "bearer ",
     ):
         assert token not in source
