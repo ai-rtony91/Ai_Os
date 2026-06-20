@@ -160,6 +160,7 @@ const FOREX_COMMAND_INTENTS = {
   PANIC_FLATTEN: "PANIC_FLATTEN",
   PAIR_SCANNER: "PAIR_SCANNER",
   CANDIDATE_FILTER: "CANDIDATE_FILTER",
+  DEMO_CONNECTOR_PROOF: "DEMO_CONNECTOR_PROOF",
   RISK_GATE: "RISK_GATE",
   RECONCILIATION: "RECONCILIATION",
   AIOS_SIGNAL_STATUS: "AIOS_SIGNAL_STATUS"
@@ -260,6 +261,26 @@ const FOREX_COMMAND_CONTROLS = [
     missingEvidence: ["safe backend status/API feed"],
     nextSafeStep: "Use the local watchlist read-model and wire safe backend status/API next.",
     message: "Pair scanner points the operator toward the local watchlist read-model only."
+  },
+  {
+    id: "demo-connector-proof",
+    intent: FOREX_COMMAND_INTENTS.DEMO_CONNECTOR_PROOF,
+    icon: "🧪",
+    label: "DEMO CONNECTOR PROOF",
+    state: "PARTIAL",
+    mode: "STATUS_ONLY_NO_CONNECTOR_CALL",
+    blockedReasons: [
+      "value_free_callable_handle_missing",
+      "sanitized_terminal_demo_result_missing",
+      "broker_demo_connector_proof_not_complete"
+    ],
+    missingEvidence: [
+      "value-free callable connector handle",
+      "practice/demo-only proof",
+      "sanitized terminal proof result"
+    ],
+    nextSafeStep: "Supply value-free callable handle; keep Codex and repo away from broker values.",
+    message: "Demo connector proof is a local status intent. No connector call, broker call, or market data request is sent."
   },
   {
     id: "candidate-filter",
@@ -402,6 +423,11 @@ const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
     id: "forex-reconciliation-status",
     label: "/api/forex/reconciliation/status",
     path: "/api/forex/reconciliation/status"
+  },
+  {
+    id: "forex-demo-connector-proof-status",
+    label: "/api/forex/demo-connector/proof-status",
+    path: "/api/forex/demo-connector/proof-status"
   }
 ];
 
@@ -426,6 +452,20 @@ const SAFE_STATUS_SUMMARY_KEYS = [
   "max_loss_required",
   "order_sent",
   "trade_placed",
+  "bullet",
+  "proof_mode",
+  "connector_handle_present",
+  "connector_handle_required",
+  "practice_demo_only_required",
+  "sanitized_terminal_result_required",
+  "credentials_allowed",
+  "account_ids_allowed",
+  "endpoint_values_allowed",
+  "raw_broker_payloads_allowed",
+  "market_data_allowed",
+  "retry_loop_enabled",
+  "scheduler_enabled",
+  "daemon_enabled",
   "done_count",
   "partial_count",
   "next_target",
@@ -707,6 +747,10 @@ function yesNoText(value) {
 
 function liveExecutionText(value) {
   return String(value).toLowerCase() === "true" ? "ALLOWED" : "BLOCKED";
+}
+
+function enabledDisabledText(value) {
+  return String(value).toLowerCase() === "true" ? "ENABLED" : "DISABLED";
 }
 
 function buildPaperOrderPreviewEngineRows(endpointResult) {
@@ -1690,6 +1734,63 @@ function PaperOrderPreviewEngineCard({ endpointResult }) {
   );
 }
 
+function DemoConnectorProofCard({ endpointResult }) {
+  const httpStatus = endpointResult?.httpStatus ?? "NOT_CHECKED";
+  const handlePresent = yesNoText(safeEndpointField(endpointResult, "connector_handle_present", "false"));
+  const handleStatus = handlePresent === "YES" ? "PRESENT" : "REQUIRED";
+  const rows = [
+    { label: "BULLET B", value: safeEndpointField(endpointResult, "status", "PARTIAL"), tone: "warn" },
+    { label: "HANDLE", value: handleStatus, tone: "warn" },
+    {
+      label: "DEMO ONLY",
+      value: requiredText(safeEndpointField(endpointResult, "practice_demo_only_required", "true")),
+      tone: "warn"
+    },
+    {
+      label: "SANITIZED RESULT",
+      value: requiredText(safeEndpointField(endpointResult, "sanitized_terminal_result_required", "true")),
+      tone: "warn"
+    },
+    {
+      label: "ORDER ROUTE",
+      value: enabledDisabledText(safeEndpointField(endpointResult, "order_route_enabled", "false")),
+      tone: "danger"
+    },
+    {
+      label: "LIVE",
+      value: liveExecutionText(safeEndpointField(endpointResult, "live_execution_allowed", "false")),
+      tone: "danger"
+    },
+    { label: "NEXT", value: "SUPPLY VALUE-FREE CALLABLE HANDLE", tone: "good" }
+  ];
+
+  return (
+    <section className="forexDemoConnectorProofCard" aria-label="Demo Connector Proof">
+      <div className="forexDemoConnectorProofHeader">
+        <div className="panelHeading">
+          <p>Demo Connector Proof</p>
+          <h3>Bullet B: Protected Broker-Demo Runtime Connector Proof</h3>
+        </div>
+        <strong>{`HTTP: ${httpStatus}`}</strong>
+      </div>
+
+      <div className="forexDemoConnectorProofNotice">
+        <span>STATUS ONLY — NO CONNECTOR CALL SENT</span>
+        <span>{statusText(safeEndpointField(endpointResult, "proof_mode", "STATUS_ONLY_NO_CONNECTOR_CALL"))}</span>
+      </div>
+
+      <div className="forexDemoConnectorProofGrid" aria-label="Demo connector proof status fields">
+        {rows.map((row) => (
+          <div className={`forexDemoConnectorProofItem tone-${row.tone}`} key={`${row.label}-${row.value}`}>
+            <span>{row.label}</span>
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ForexSixBulletCompletionBoard({
   sixBulletResult,
   riskGateResult,
@@ -1972,6 +2073,9 @@ function ForexCommandSurface() {
   const riskGateResult = safeStatusEndpoints.find((item) => item.id === "forex-risk-gate-status");
   const approvalPackageResult = safeStatusEndpoints.find((item) => item.id === "forex-approval-package-status");
   const reconciliationResult = safeStatusEndpoints.find((item) => item.id === "forex-reconciliation-status");
+  const demoConnectorProofResult = safeStatusEndpoints.find(
+    (item) => item.id === "forex-demo-connector-proof-status"
+  );
 
   function selectCommandIntent(control) {
     setSelectedCommandIntent(control.intent);
@@ -2002,6 +2106,8 @@ function ForexCommandSurface() {
       <SafeDashboardStatusPanel onSafeStatusUpdate={setSafeStatusEndpoints} />
 
       <PaperOrderPreviewEngineCard endpointResult={paperOrderPreviewResult} />
+
+      <DemoConnectorProofCard endpointResult={demoConnectorProofResult} />
 
       <ForexSixBulletCompletionBoard
         approvalPackageResult={approvalPackageResult}
