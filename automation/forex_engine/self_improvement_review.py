@@ -137,11 +137,13 @@ def _aggregate_rejections(evidence: Dict[str, Any], replay: Dict[str, Any], supe
     rejected_setups = 0
     risk_failures = 0
     rejection_summary: Dict[str, int] = {}
+    replay_reason_set: set[str] = set()
 
     replay_rejections = replay.get("blocked_reasons") or replay.get("rejections") or []
     for item in _as_list(replay_rejections):
         reason = str(item)
         rejection_summary[reason] = rejection_summary.get(reason, 0) + 1
+        replay_reason_set.add(reason)
         if "risk" in reason.lower():
             risk_failures += 1
         if "setup" in reason.lower() or "duplicate" in reason.lower():
@@ -150,11 +152,14 @@ def _aggregate_rejections(evidence: Dict[str, Any], replay: Dict[str, Any], supe
     evidence_rejections = evidence.get("rejected_reasons") or evidence.get("rejection_reasons") or []
     for item in _as_list(evidence_rejections):
         reason = str(item)
-        rejection_summary[reason] = rejection_summary.get(reason, 0) + 1
+        if reason in replay_reason_set:
+            continue
+        rejection_summary[reason] = 1
         if "risk" in reason.lower():
             risk_failures += 1
         if "setup" in reason.lower() or "duplicate" in reason.lower():
             rejected_setups += 1
+        replay_reason_set.add(reason)
 
     queue_rejections = supervisor.get("rejected_candidates") or supervisor.get("risk_rejections") or []
     for item in _as_list(queue_rejections):
@@ -164,11 +169,14 @@ def _aggregate_rejections(evidence: Dict[str, Any], replay: Dict[str, Any], supe
                 reason = "candidate_rejected"
         else:
             reason = str(item)
+        if reason in replay_reason_set:
+            continue
         rejection_summary[reason] = rejection_summary.get(reason, 0) + 1
         if "risk" in reason.lower():
             risk_failures += 1
         if "setup" in reason.lower() or "duplicate" in reason.lower():
             rejected_setups += 1
+        replay_reason_set.add(reason)
 
     return rejected_setups, risk_failures, rejection_summary
 
