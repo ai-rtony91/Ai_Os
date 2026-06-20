@@ -75,7 +75,7 @@ def evaluate_live_multi_trade_expansion_gate(
     if readiness.get("live_ready") is not True:
         blocked_reasons.append(REASON_LIVE_READINESS_REVIEW_MISSING)
         missing_evidence.append("live_readiness_review")
-    if not _kill_switch_present(proof, readiness, limits, approval):
+    if not _kill_switch_present(proof, readiness, limits):
         blocked_reasons.append(REASON_KILL_SWITCH_MISSING)
         missing_evidence.append("kill_switch_proof")
     if not _rollback_present(proof, readiness, limits, approval):
@@ -326,3 +326,4 @@ def _safety_dict() -> dict[str, bool]:
         "real_orders": False,
         "network_submit": False,
     }
+
