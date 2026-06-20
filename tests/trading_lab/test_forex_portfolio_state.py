@@ -62,6 +62,8 @@ def test_buy_record_creates_long_position_and_cash_balance():
     )
     assert result["allowed"] is True
     assert result["cash_balance"] == 1005.0
+    assert result["current_balance"] == 1005.0
+    assert result["starting_balance"] == 1000.0
     assert result["realized_pnl"] == 5.0
     assert result["trade_count"] == 1
     assert result["open_positions"]["EURUSD"]["side"] == "long"
@@ -76,6 +78,7 @@ def test_sell_record_creates_short_position_and_realized_pnl():
     result = module.build_portfolio_state([sell_record()], account_snapshot={"balance": 2000.0})
     assert result["allowed"] is True
     assert result["cash_balance"] == 2012.5
+    assert result["current_balance"] == 2012.5
     assert result["open_positions"]["GBPUSD"]["side"] == "short"
     assert result["open_positions"]["GBPUSD"]["units"] == -500.0
     assert result["realized_pnl"] == 12.5
@@ -123,27 +126,24 @@ def test_unrealized_pnl_uses_market_price_when_provided():
     assert result["unrealized_pnl"] == 1.0
 
 
-def test_daily_loss_blocks_next_trade():
+def test_legacy_gates_still_work():
     module = load_module()
-    result = module.build_portfolio_state(
+    loss_result = module.build_portfolio_state(
         [buy_record(pnl=-25.0)],
         limits={"daily_loss_limit": 20.0},
     )
-    assert result["allowed"] is True
-    assert result["daily_loss_used"] == 25.0
-    assert result["next_trade_allowed"] is False
-    assert result["next_trade_blocked_reason"] == "daily_loss_limit_hit"
+    assert loss_result["allowed"] is True
+    assert loss_result["daily_loss_used"] == 25.0
+    assert loss_result["next_trade_allowed"] is False
+    assert loss_result["next_trade_blocked_reason"] == "daily_loss_limit_hit"
 
-
-def test_max_trades_blocks_next_trade():
-    module = load_module()
-    result = module.build_portfolio_state(
+    trade_limit_result = module.build_portfolio_state(
         [buy_record(), sell_record()],
         limits={"max_trades_per_day": 2},
     )
-    assert result["trade_count"] == 2
-    assert result["next_trade_allowed"] is False
-    assert result["next_trade_blocked_reason"] == "max_trades_limit_hit"
+    assert trade_limit_result["trade_count"] == 2
+    assert trade_limit_result["next_trade_allowed"] is False
+    assert trade_limit_result["next_trade_blocked_reason"] == "max_trades_limit_hit"
 
 
 def test_exposure_blocks_next_trade():
@@ -198,7 +198,134 @@ def test_unsafe_flags_blocked_with_scanner_safe_values():
         assert result["blocked_reason"] == f"unsafe_flag_{flag}"
 
 
-def test_source_has_no_network_file_write_or_subprocess_usage():
+def test_additional_account_state_fields_are_returned():
+    module = load_module()
+    result = module.build_portfolio_state(
+        [buy_record(pnl=2.0)],
+        account_snapshot={
+            "starting_balance": 500.0,
+            "cash_balance": 500.0,
+            "max_daily_loss": 200.0,
+            "session_count": 1,
+            "last_update_timestamp": "2026-06-20T00:00:00Z",
+        },
+    )
+    assert result["starting_balance"] == 500.0
+    assert result["current_balance"] == 502.0
+    assert result["equity"] == 502.0
+    assert result["drawdown"] == 0.0
+    assert result["available_risk"] == 200.0
+    assert result["max_daily_loss"] == 200.0
+    assert result["open_risk"] == 1100.0
+    assert result["session_count"] == 1
+    assert result["last_update_timestamp"] == "2026-06-20T00:00:00Z"
+
+
+def test_winning_trade_increases_current_balance():
+    module = load_module()
+    result = module.build_portfolio_state([buy_record(pnl=7.5)], account_snapshot={"cash_balance": 100.0})
+    assert result["current_balance"] == 107.5
+    assert result["cash_balance"] == 107.5
+
+
+def test_losing_trade_increases_daily_loss_and_drawdown():
+    module = load_module()
+    result = module.build_portfolio_state(
+        [buy_record(pnl=-5.0)],
+        account_snapshot={"starting_balance": 1000.0, "cash_balance": 1000.0},
+    )
+    assert result["daily_loss_used"] == 5.0
+    assert result["equity"] == 995.0
+    assert result["drawdown"] == 5.0
+    assert result["drawdown_percent"] == 0.5
+
+
+def test_available_risk_floors_at_zero():
+    module = load_module()
+    result = module.build_portfolio_state(
+        [buy_record(pnl=-30.0, units=1000, price=1.1)],
+        account_snapshot={
+            "cash_balance": 1000.0,
+            "starting_balance": 1000.0,
+            "max_daily_loss": 20.0,
+        },
+    )
+    assert result["available_risk"] == 0.0
+
+
+def test_negative_starting_balance_is_blocked():
+    module = load_module()
+    result = module.build_portfolio_state([], account_snapshot={"starting_balance": -100.0})
+    assert result["allowed"] is False
+    assert result["blocked_reason"] == "negative_starting_balance"
+
+
+def test_negative_cash_or_current_balance_is_blocked():
+    module = load_module()
+    neg_cash = module.build_portfolio_state([], account_snapshot={"cash_balance": -1.0})
+    assert neg_cash["allowed"] is False
+    assert neg_cash["blocked_reason"] == "negative_cash_balance"
+
+    neg_current = module.build_portfolio_state([], account_snapshot={"cash_balance": 10.0, "current_balance": -1.0})
+    assert neg_current["allowed"] is False
+    assert neg_current["blocked_reason"] == "negative_current_balance"
+
+
+def test_negative_max_daily_loss_is_blocked():
+    module = load_module()
+    result = module.build_portfolio_state([], account_snapshot={"cash_balance": 100.0, "max_daily_loss": -5.0})
+    assert result["allowed"] is False
+    assert result["blocked_reason"] == "negative_max_daily_loss"
+
+
+def test_negative_open_risk_is_blocked_when_account_snapshot_supplies_it():
+    module = load_module()
+    result = module.build_portfolio_state(
+        [buy_record()],
+        account_snapshot={
+            "cash_balance": 1000.0,
+            "starting_balance": 1000.0,
+            "max_daily_loss": 100.0,
+            "open_risk": -10.0,
+        },
+    )
+    assert result["allowed"] is False
+    assert result["blocked_reason"] == "negative_open_risk"
+
+
+def test_invalid_session_count_is_blocked():
+    module = load_module()
+    result = module.build_portfolio_state([], account_snapshot={"cash_balance": 100.0, "session_count": -1})
+    assert result["allowed"] is False
+    assert result["blocked_reason"] == "invalid_session_count"
+
+
+def test_invalid_last_update_timestamp_type_is_blocked():
+    module = load_module()
+    result = module.build_portfolio_state([], account_snapshot={"cash_balance": 100.0, "last_update_timestamp": {"oops": 1}})
+    assert result["allowed"] is False
+    assert result["blocked_reason"] == "invalid_timestamp_type"
+
+
+def test_source_has_no_network_file_write_or_broker_behavior():
     source = MODULE_PATH.read_text(encoding="utf-8").lower()
-    for forbidden in ["subprocess", "requests", "socket", "urllib", "open(", ".write_text", "pathlib"]:
+    forbidden_terms = [
+        "subprocess",
+        "requests",
+        "socket",
+        "urllib",
+        "open(",
+        ".write_text",
+        "pathlib",
+        "os.system",
+        "importlib",
+        "http://",
+        "https://",
+        "broker_sdk",
+        "ccxt",
+        "oanda",
+        " requests",
+    ]
+    for forbidden in forbidden_terms:
         assert forbidden not in source
+
