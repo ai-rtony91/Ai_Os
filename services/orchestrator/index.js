@@ -10,6 +10,7 @@ const {
   getVisibilitySnapshot
 } = require("./runtimeApiService");
 const { getForexApprovalPackageStatus } = require("./forexApprovalPackageStatus");
+const { getForexDemoConnectorProofStatus } = require("./forexDemoConnectorProofStatus");
 const { getForexPaperOrderPreview } = require("./forexPaperOrderPreview");
 const { getForexPaperSandboxStatus } = require("./forexPaperSandboxStatus");
 const { getForexReconciliationStatus } = require("./forexReconciliationStatus");
@@ -58,6 +59,10 @@ app.get("/api/forex/approval-package/status", (req, res) => {
 
 app.get("/api/forex/reconciliation/status", (req, res) => {
   res.json(getForexReconciliationStatus());
+});
+
+app.get("/api/forex/demo-connector/proof-status", (req, res) => {
+  res.json(getForexDemoConnectorProofStatus());
 });
 
 app.get("/health", (req, res) => {
