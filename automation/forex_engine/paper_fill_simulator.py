@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import hashlib
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from typing import Any, Mapping
 
 from automation.forex_engine.order_preview import ORDER_PREVIEW_ALLOWED
@@ -184,21 +184,88 @@ def _build_trade_payload(order_preview: Mapping[str, Any], fill_price: float, op
 
 
 def _safe_apply_transition(trade: Any, status: str, timestamp: float, reason: str) -> Any:
-    try:
-        return transition_paper_trade(trade, status, timestamp=timestamp, reason=reason)
-    except TypeError:
-        return transition_paper_trade(trade, status, timestamp, reason)
-    except Exception:
-        raise
+    return transition_paper_trade(trade, status, timestamp=timestamp, reason=reason)
 
 
 def _safe_build_trade(payload: dict[str, Any]) -> Any:
+    allowed_keys = {
+        "trade_id",
+        "pair",
+        "direction",
+        "entry_type",
+        "entry_price",
+        "stop_loss",
+        "take_profit",
+        "units",
+        "dollar_risk",
+        "percent_risk",
+        "status",
+        "created_timestamp",
+        "opened_timestamp",
+        "closed_timestamp",
+        "close_reason",
+        "realized_pnl",
+        "evidence_path",
+        "blocked_reason",
+        "lifecycle_history",
+        "metadata",
+    }
+    build_payload = {key: value for key, value in payload.items() if key in allowed_keys}
     try:
-        return build_paper_trade(payload)
+        return build_paper_trade(build_payload)
     except TypeError:
-        return build_paper_trade(**payload)
+        return build_paper_trade(**build_payload)
     except Exception:
         raise
+
+
+def _safe_trade_to_dict(trade: Any, fallback: Mapping[str, Any]) -> dict[str, Any]:
+    if isinstance(trade, Mapping):
+        return dict(trade)
+    try:
+        return paper_trade_to_dict(trade)
+    except Exception:
+        if is_dataclass(trade):
+            try:
+                return asdict(trade)
+            except Exception:
+                return dict(fallback)
+        return dict(fallback)
+
+
+def _trade_status(trade: Any, fallback: str = "candidate") -> str:
+    if isinstance(trade, Mapping):
+        return str(trade.get("status") or fallback)
+    return str(getattr(trade, "status", fallback))
+
+
+def _trade_history(trade: Any, fallback: list[str]) -> list[Any]:
+    if isinstance(trade, Mapping):
+        history = trade.get("lifecycle_history")
+        return list(history) if isinstance(history, list) else list(fallback)
+    history = getattr(trade, "lifecycle_history", None)
+    return list(history) if isinstance(history, list) else list(fallback)
+
+
+def _ordered_blocked_reasons(reasons: list[str]) -> list[str]:
+    priority = [
+        REASON_PREVIEW_NOT_APPROVED,
+        REASON_NON_PAPER_MODE,
+        REASON_LIVE_TRADING_BLOCKED,
+        REASON_MISSING_PAIR,
+        REASON_MISSING_DIRECTION,
+        REASON_MISSING_UNITS,
+        REASON_MISSING_ENTRY_PRICE,
+        REASON_EVIDENCE_PATH_INVALID,
+        REASON_SPREAD_TOO_HIGH,
+        REASON_SLIPPAGE_TOO_HIGH,
+        REASON_INVALID_FILL_PRICE,
+        REASON_LIFECYCLE_BUILD_FAILED,
+    ]
+    unique = _dedupe(reasons)
+    ordered = [reason for reason in priority if reason in unique]
+    ordered.extend(reason for reason in unique if reason not in ordered)
+    return ordered
 
 
 @dataclass(frozen=True)
@@ -314,6 +381,7 @@ def simulate_paper_fill(
     if not preview_allowed or approval_state != "paper_preview_ready":
         blocked_reasons.append(REASON_PREVIEW_NOT_APPROVED)
     if paper_only is False:
+        blocked_reasons.append(REASON_PREVIEW_NOT_APPROVED)
         blocked_reasons.append(REASON_NON_PAPER_MODE)
     if mode in {"live", "demo", "broker"}:
         blocked_reasons.append(REASON_LIVE_TRADING_BLOCKED)
@@ -336,12 +404,12 @@ def simulate_paper_fill(
 
     if direction == "buy":
         if ask is not None:
-            fill_price = ask + slippage
+            fill_price = round(ask + slippage, 12)
         else:
             fill_price = requested_price
     elif direction == "sell":
         if bid is not None:
-            fill_price = bid - slippage
+            fill_price = round(bid - slippage, 12)
         else:
             fill_price = requested_price
     else:
@@ -374,9 +442,11 @@ def simulate_paper_fill(
         lifecycle_result = {}
         history: list[str] = []
         trade_status = ""
-        if isinstance(trade_obj, Mapping):
+        if blocked_reasons:
+            pass
+        elif trade_obj is not None:
             try:
-                if preview.get("trade_id"):
+                if isinstance(trade_obj, Mapping) and preview.get("trade_id"):
                     trade_obj["trade_id"] = preview.get("trade_id")
             except Exception:
                 pass
@@ -386,20 +456,57 @@ def simulate_paper_fill(
                 try:
                     trade_obj = _safe_apply_transition(trade_obj, status, ts_float, "paper_fill")
                     history.append(status)
-                    try:
-                        trade_status = trade_obj.status  # type: ignore[attr-defined]
-                    except Exception:
-                        trade_status = status
+                    trade_status = _trade_status(trade_obj, status)
                 except Exception:
-                    trade_obj = trade_obj
+                    blocked_reasons.append(REASON_LIFECYCLE_BUILD_FAILED)
                     history.append(f"transition_failed:{status}")
+                    break
             if hasattr(trade_obj, "lifecycle_history"):
                 lifecycle_result["history"] = list(getattr(trade_obj, "lifecycle_history"))
             else:
-                lifecycle_result["history"] = history
+                lifecycle_result["history"] = _trade_history(trade_obj, history)
         else:
             history = []
             trade_status = "candidate"
+
+        if blocked_reasons:
+            blocked_reasons = _ordered_blocked_reasons(blocked_reasons)
+            return PaperFillDecision(
+                allowed=False,
+                decision=PAPER_FILL_BLOCKED,
+                blocked_reason=blocked_reasons[0],
+                blocked_reasons=blocked_reasons,
+                warnings=warnings,
+                paper_only=True,
+                mode=PAPER_FILL_MODE,
+                fill_id="blocked",
+                preview_id=_coerce_lower(preview.get("preview_id")) or str(preview.get("preview_id") or "unknown"),
+                trade_id=_coerce_lower(preview.get("trade_id")),
+                pair=pair,
+                direction=direction,
+                entry_type=entry_type,
+                requested_price=requested_price,
+                fill_price=None,
+                filled_units=units or 0.0,
+                slippage=slippage,
+                spread=spread,
+                opened_timestamp=None,
+                status="candidate",
+                trade={},
+                lifecycle_result={},
+                evidence={},
+                evidence_path=evidence_path_value,
+                safety=_safe_safety_dict(),
+                next_safe_action=_next_safe_action(blocked_reasons[0]),
+                metadata={
+                    "config": config,
+                    "now_timestamp": ts_float,
+                    "reason": "lifecycle_failed",
+                    "market_state_present": isinstance(market_state, Mapping),
+                    "direction": direction,
+                    **dict(metadata_payload),
+                },
+            ).to_dict()
 
         if not history:
             history = []
@@ -409,25 +516,13 @@ def simulate_paper_fill(
         lifecycle_result.setdefault("status", trade_status)
         lifecycle_result.setdefault("history", history)
 
+        trade_output = _safe_trade_to_dict(trade_obj, fill_payload)
         preview_trade = {
-            "trade": paper_trade_to_dict(trade_obj) if "paper_trade_to_dict" in globals() else dict(trade_obj) if isinstance(trade_obj, Mapping) else {},
-            "status": trade_status,
-            "lifecycle_history": history,
+            "trade": dict(trade_output),
+            "status": trade_status or _trade_status(trade_obj, "active"),
+            "history": history,
+            "lifecycle_history": _trade_history(trade_obj, history),
         }
-
-        trade_output = {}
-        if hasattr(trade_obj, "to_dict"):
-            try:
-                trade_output = trade_obj.to_dict()
-            except Exception:
-                try:
-                    trade_output = paper_trade_to_dict(trade_obj)
-                except Exception:
-                    trade_output = dict(fill_payload)
-        elif isinstance(trade_obj, Mapping):
-            trade_output = dict(trade_obj)
-        else:
-            trade_output = dict(fill_payload)
 
         if not isinstance(trade_output, Mapping):
             trade_output = {}
@@ -496,7 +591,7 @@ def simulate_paper_fill(
         ).to_dict()
         return result
 
-    blocked_reasons = _dedupe(blocked_reasons)
+    blocked_reasons = _ordered_blocked_reasons(blocked_reasons)
     return PaperFillDecision(
         allowed=False,
         decision=PAPER_FILL_BLOCKED,

@@ -412,7 +412,22 @@ def generate_strategy_candidates(
 
     closes = _extract_candle_series(candles)
     if not closes:
-        return _block(output, REJECTION_REASON_INVALID_CANDLE_DATA, "supply_numeric_candle_data")
+        active_names = [s for s in strategy_names if s in {"moving_average_trend", "breakout"}]
+        for strategy_name in active_names:
+            output["rejected_candidates"].append(
+                _mark_rejected_candidate(strategy_name, pair, REJECTION_REASON_INVALID_CANDLE_DATA)
+            )
+        output["rejected_count"] = len(output["rejected_candidates"])
+        output["selected_count"] = 0
+        output["next_safe_action"] = "supply_numeric_candle_data"
+        output["evidence"] = {
+            "pair": output["pair"],
+            "strategy_count": output["strategy_count"],
+            "selected_count": output["selected_count"],
+            "rejected_count": output["rejected_count"],
+            "no_trade_count": output["no_trade_count"],
+        }
+        return output
 
     timestamp = _safe_number(data.get("timestamp", data.get("data_timestamp")) ) or 0.0
     min_score = limit_cfg["min_score"]

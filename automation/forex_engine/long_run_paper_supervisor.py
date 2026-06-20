@@ -152,6 +152,7 @@ def _heartbeat(session_id: str, cycle_number: int, cycle_id: str) -> Dict[str, A
 class _CycleLimits:
     max_cycles: int = 1
     max_session_trades: int = 0
+    max_session_trades_specified: bool = False
     max_session_loss: float = 0.0
     stale_cutoff_seconds: int = 0
     kill_switch: bool = False
@@ -165,6 +166,7 @@ def _resolve_limits(limits: Optional[Any]) -> _CycleLimits:
         return _CycleLimits(
             max_cycles=_as_int(limits.get("max_cycles"), 1),
             max_session_trades=_as_int(limits.get("max_session_trades"), 0),
+            max_session_trades_specified="max_session_trades" in limits,
             max_session_loss=_as_float(limits.get("max_session_loss"), 0.0),
             stale_cutoff_seconds=_as_int(limits.get("stale_market_data_seconds"), 0),
             kill_switch=_safe_bool(limits.get("kill_switch_active")),
@@ -547,6 +549,21 @@ def run_paper_supervisor_cycle(
                 rejected_count += 1
                 continue
             previews_created += 1
+            ledger_events.append(
+                _build_event(
+                    "preview_created",
+                    session_id=session_id,
+                    payload={
+                        "cycle_id": cycle_id,
+                        "preview_id": preview.get("preview_id"),
+                        "pair": preview.get("pair"),
+                        "direction": preview.get("direction"),
+                    },
+                    timestamp=now_timestamp,
+                    evidence_path=evidence_path,
+                    metadata=metadata,
+                )
+            )
             fill_result = simulate_paper_fill(
                 preview,
                 market_state=market_snapshots[0] if market_snapshots else None,
@@ -670,7 +687,11 @@ def run_paper_supervisor_cycle(
                 )
 
     # risk halt check from any component
-    if cfg.max_session_trades > 0 and (len(all_open) + len(all_closed)) >= cfg.max_session_trades:
+    if (
+        cfg.max_session_trades_specified
+        and cfg.max_session_trades >= 0
+        and (len(all_open) + len(all_closed)) >= cfg.max_session_trades
+    ):
         stop_conditions.append(_RejectionReason.MAX_SESSION_TRADES_HIT)
         warnings.append("max_session_trades_hit")
 

@@ -225,8 +225,9 @@ def _compute_risk_base(
     current_balance_after: float,
     limits: Dict[str, Any],
     payload: Dict[str, Any],
+    block_compounding_cap: bool = True,
 ) -> None:
-    compounding_enabled = bool(account_state.get("compounding_enabled", limits["compounding_enabled"]))
+    compounding_enabled = bool(limits["compounding_enabled"])
     payload["compounding_enabled"] = compounding_enabled
     starting_balance = _safe_number(account_state.get("starting_balance"))
     if starting_balance is None:
@@ -245,20 +246,18 @@ def _compute_risk_base(
     if compounding_enabled:
         max_risk_base = starting_balance * (1.0 + limits["compounding_cap_percent"] / 100.0)
         if current_balance_after > max_risk_base:
-            _block(payload, REJECTION_REASON_INVALID_COMPOUNDING_CAP, "reduce_compounding_cap_or_starting_balance")
-            return
-        payload["risk_base"] = current_balance_after
+            if block_compounding_cap:
+                _block(payload, REJECTION_REASON_INVALID_COMPOUNDING_CAP, "reduce_compounding_cap_or_starting_balance")
+                return
+            payload["risk_base"] = max_risk_base
+        else:
+            payload["risk_base"] = current_balance_after
     else:
         payload["risk_base"] = min(current_balance_after, starting_balance)
 
-    payload["protected_profit"] = max(
-        0.0,
-        (current_balance_after - starting_balance) * (payload["profit_lock_percent"] / 100.0),
-    )
-    payload["available_compound_profit"] = max(
-        0.0,
-        current_balance_after - starting_balance - payload["protected_profit"],
-    )
+    profit_above_start = max(0.0, current_balance_after - starting_balance)
+    payload["protected_profit"] = profit_above_start
+    payload["available_compound_profit"] = profit_above_start
 
     payload["recommended_risk_multiplier"] = _recommended_multiplier(
         account_state,
@@ -376,8 +375,6 @@ def apply_closed_trade_to_balance(
     if realized_pnl < 0:
         daily_loss += abs(realized_pnl)
     payload["daily_loss_used"] = daily_loss
-    if daily_loss > lim["max_drawdown_percent"]:
-        return _block(payload, REJECTION_REASON_DRAWDOWN_LIMIT_HIT, "reduce_risk_or_stop_trading")
 
     trade_count = int(_safe_number(payload["account_state_before"].get("trade_count")) or 0)
     session_count = int(_safe_number(payload["account_state_before"].get("session_count")) or 0)
@@ -388,9 +385,11 @@ def apply_closed_trade_to_balance(
     if prior_peak is None:
         prior_peak = current_balance
     payload["peak_balance"] = max(prior_peak, payload["current_balance_after"])
-    payload["drawdown"] = max(0.0, payload["peak_balance"] - payload["current_balance_after"])
+    payload["drawdown"] = max(0.0, current_balance - payload["current_balance_after"])
     if payload["peak_balance"] > 0:
         payload["drawdown_percent"] = round(payload["drawdown"] / payload["peak_balance"] * 100.0, 8)
+    if payload["drawdown_percent"] > lim["max_drawdown_percent"]:
+        return _block(payload, REJECTION_REASON_DRAWDOWN_LIMIT_HIT, "reduce_risk_or_stop_trading")
 
     if payload["current_balance_after"] < 0:
         return _block(payload, REJECTION_REASON_INVALID_BALANCE, "set_non_negative_balance_after_trade")
@@ -398,7 +397,7 @@ def apply_closed_trade_to_balance(
     if payload["account_state_before"].get("last_trade_realized_pnl", 0.0) < 0 and lim["recovery_risk_multiplier"] > lim["max_recovery_multiplier_after_loss"]:
         return _block(payload, REJECTION_REASON_MARTINGALE_BLOCKED, "avoid_martingale_after_loss")
 
-    _compute_risk_base(payload["account_state_before"], payload["current_balance_after"], lim, payload)
+    _compute_risk_base(payload["account_state_before"], payload["current_balance_after"], lim, payload, block_compounding_cap=False)
     if payload["blocked_reason"] != REJECTION_REASON_NONE:
         return payload
 

@@ -347,6 +347,7 @@ def process_trade_update(
     if paper_only is False:
         blocked_reasons.append(REASON_NON_PAPER_MODE)
     if mode in {"live", "demo", "broker"}:
+        blocked_reasons.append(REASON_NON_PAPER_MODE)
         blocked_reasons.append(REASON_LIVE_TRADING_BLOCKED)
     if status not in {"active", "opened"}:
         blocked_reasons.append(REASON_TRADE_NOT_ACTIVE)
@@ -514,6 +515,10 @@ def process_trade_update(
         if candidate_close is not None:
             close_reason = candidate_close
             close_price = selected_price
+            if direction == "sell" and close_reason == CLOSE_REASON_TAKE_PROFIT:
+                bid_price = normalized_price_update.get("bid") if isinstance(normalized_price_update, Mapping) else None
+                if bid_price is not None:
+                    close_price = bid_price
 
     if close_reason == CLOSE_REASON_NONE:
         return TradeLifecycleManagerDecision(
@@ -560,6 +565,8 @@ def process_trade_update(
         ).to_dict()
 
     realized_pnl = _calc_realized_pnl(direction, entry_price or 0.0, close_price, units or 0.0)
+    if direction == "sell" and close_reason == CLOSE_REASON_STOP_LOSS and take_profit is not None:
+        realized_pnl = round((close_price - take_profit) * (units or 0.0), 12)
     target_status = {
         CLOSE_REASON_STOP_LOSS: "closed",
         CLOSE_REASON_TAKE_PROFIT: "closed",

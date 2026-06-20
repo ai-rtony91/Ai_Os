@@ -149,8 +149,8 @@ def _apply_rounding(units: float, increment: float, allow_fractional: bool) -> f
         return units
     factor = units / increment
     if allow_fractional:
-        return round(factor) * increment
-    return (factor // 1) * increment
+        return round(round(factor) * increment, 12)
+    return round((factor // 1) * increment, 12)
 
 
 @dataclass(frozen=True)
@@ -369,7 +369,7 @@ def calculate_position_size(
 
     stop_distance = None
     if entry_price is not None and stop_loss is not None:
-        stop_distance = abs(entry_price - stop_loss)
+        stop_distance = round(abs(entry_price - stop_loss), 12)
         if stop_distance <= 0:
             blocked_reasons.append(REASON_INVALID_STOP_DISTANCE)
 
@@ -424,7 +424,7 @@ def calculate_position_size(
     raw_units = 0.0
     units = 0.0
     estimated_loss_at_stop = 0.0
-    if stop_distance is not None and stop_distance > 0 and pip_value is not None and risk_dollars >= 0:
+    if stop_distance is not None and stop_distance > 0 and pip_value is not None and pip_value > 0 and risk_dollars >= 0:
         if risk_dollars > 0:
             raw_units = risk_dollars / (stop_distance * pip_value)
             units = _apply_rounding(raw_units, limits_cfg.rounding_increment, limits_cfg.allow_fractional_units)
