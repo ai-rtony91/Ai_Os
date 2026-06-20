@@ -179,7 +179,7 @@ def _metrics_from_inputs(session_replay: Optional[Dict[str, Any]], evidence: Dic
         "max_drawdown": abs(_pick_metric(session_replay, evidence, "max_drawdown", 0.0)),
         "max_drawdown_pct": _pick_metric(session_replay, evidence, "max_drawdown_pct", _pick_metric(session_replay, evidence, "max_drawdown_percent", 0.0)),
         "gross_profit": _pick_metric(session_replay, evidence, "gross_profit", 0.0),
-        "gross_loss": abs(_pick_metric(session_replay, evidence, "gross_loss", _pick_metric(session_replay, evidence, "gross_loss_abs", 0.0)),
+        "gross_loss": abs(_pick_metric(session_replay, evidence, "gross_loss", _pick_metric(session_replay, evidence, "gross_loss_abs", 0.0))),
         "win_rate_pct": _pick_metric(session_replay, evidence, "win_rate_pct", 0.0),
         "trades_closed": _pick_metric(session_replay, evidence, "trades_closed", _to_float(supervisor.get("trades_closed"), 0.0)),
         "trade_count_metric": _pick_metric(session_replay, evidence, "trade_count", _to_float(supervisor.get("cycle_summary", {}).get("trades_opened"), 0.0)),
