@@ -276,9 +276,9 @@ def normalize_market_snapshot(
     if ask < bid:
         return _block(payload, REJECTION_INVALID_SPREAD, "fix_ask_not_below_bid")
 
-    spread = ask - bid
+    spread = round(ask - bid, 12)
     pip = _pip_size(pair)
-    spread_pips = spread / pip
+    spread_pips = round(spread / pip, 12)
     if lim["max_spread_pips"] > 0 and spread_pips > lim["max_spread_pips"]:
         return _block(payload, REJECTION_SPREAD_TOO_HIGH, "reduce_spread_or_use_other_source")
 
@@ -294,7 +294,7 @@ def normalize_market_snapshot(
 
     payload["bid"] = bid
     payload["ask"] = ask
-    payload["mid"] = (bid + ask) / 2.0
+    payload["mid"] = round((bid + ask) / 2.0, 12)
     payload["spread"] = spread
     payload["spread_pips"] = spread_pips
     payload["pip_size"] = pip

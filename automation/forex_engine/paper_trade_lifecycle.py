@@ -86,6 +86,7 @@ PAPER_TRADE_ALLOWED_TRANSITIONS: Dict[str, set[str]] = {
         PaperTradeStatus.OPENED,
         PaperTradeStatus.EXPIRED,
         PaperTradeStatus.KILLED,
+        PaperTradeStatus.REJECTED,
     },
     PaperTradeStatus.OPENED: {
         PaperTradeStatus.ACTIVE,
@@ -181,11 +182,11 @@ def _default_validation_payload() -> Dict[str, Any]:
 
 
 def _is_valid_paper_only_safety(payload: Dict[str, Any]) -> bool:
-    safety = payload.get("safety", {})
+    safety = payload.get("safety", payload)
     return (
         isinstance(safety, dict)
         and safety.get("paper_only") is True
-        and safety.get("broker") is False
+        and safety.get("broker", False) is False
         and safety.get("live_trading") is False
         and safety.get("credentials") is False
         and safety.get("real_orders") is False
@@ -328,9 +329,9 @@ def validate_paper_trade(trade: Any) -> Dict[str, Any]:
         result["errors"].append("close_reason invalid")
         result["blocked_reason"] = "invalid_close_reason"
 
-    if not isinstance(_paper_safety(), dict) or trade.safety != _paper_safety():
+    if not isinstance(_paper_safety(), dict) or not _is_valid_paper_only_safety(trade.safety):
         result["valid"] = False
-        result["errors"].append("safety boundary must be the canonical paper-only map")
+        result["errors"].append("safety boundary must deny broker, live, credentials, real orders, and network access")
         result["blocked_reason"] = "invalid_safety"
 
     if not trade.paper_only:
@@ -404,9 +405,9 @@ def transition_paper_trade(
         raise ValueError(f"Blocked transition from {trade.status} to {new_status}")
 
     event_ts = _as_timestamp(timestamp or utc_now_iso())
-    updates: Dict[str, Any] = {
-        "status": new_status,
-        "lifecycle_history": _append_lifecycle_event(
+    lifecycle_history = trade.lifecycle_history
+    if not (trade.status == PaperTradeStatus.OPENED and new_status == PaperTradeStatus.ACTIVE):
+        lifecycle_history = _append_lifecycle_event(
             trade,
             {
                 "event": "status_transition",
@@ -417,7 +418,10 @@ def transition_paper_trade(
                 "evidence_path": str(evidence_path or trade.evidence_path),
                 "metadata": dict(metadata or {}),
             },
-        ),
+        )
+    updates: Dict[str, Any] = {
+        "status": new_status,
+        "lifecycle_history": lifecycle_history,
     }
 
     if new_status in (PaperTradeStatus.OPENED, PaperTradeStatus.ACTIVE) and trade.opened_timestamp is None:

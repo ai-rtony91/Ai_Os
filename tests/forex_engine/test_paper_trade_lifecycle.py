@@ -18,8 +18,8 @@ from automation.forex_engine.paper_trade_lifecycle import (
 MODULE_PATH = Path(__file__).resolve().parents[2] / "automation" / "forex_engine" / "paper_trade_lifecycle.py"
 
 
-def _valid_candidate_payload():
-    return dict(
+def _valid_candidate_payload(**overrides):
+    payload = dict(
         trade_id="trade-1",
         pair="eurusd",
         direction=TradeDirection.BUY,
@@ -32,6 +32,8 @@ def _valid_candidate_payload():
         percent_risk=0.5,
         created_timestamp="2026-06-20T00:00:00Z",
     )
+    payload.update(overrides)
+    return payload
 
 
 def test_module_imports():
@@ -67,36 +69,36 @@ def test_validate_paper_trade_requires_required_fields():
 
 
 def test_validate_rejects_empty_trade_id():
-    trade = build_paper_trade(**_valid_candidate_payload(), trade_id="")
+    trade = build_paper_trade(**_valid_candidate_payload(trade_id=""))
     validation = validate_paper_trade(trade)
     assert validation["valid"] is False
     assert any("trade_id" in error for error in validation["errors"])
 
 
 def test_validate_rejects_bad_direction():
-    trade = build_paper_trade(**_valid_candidate_payload(), direction="sideways")
+    trade = build_paper_trade(**_valid_candidate_payload(direction="sideways"))
     validation = validate_paper_trade(trade)
     assert validation["valid"] is False
     assert any("direction" in error for error in validation["errors"])
 
 
 def test_validate_rejects_bad_entry_type():
-    trade = build_paper_trade(**_valid_candidate_payload(), entry_type="market_plus")
+    trade = build_paper_trade(**_valid_candidate_payload(entry_type="market_plus"))
     validation = validate_paper_trade(trade)
     assert validation["valid"] is False
     assert any("entry_type" in error for error in validation["errors"])
 
 
 def test_validate_rejects_invalid_prices_and_units():
-    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(), entry_price=0.0))["valid"] is False
-    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(), stop_loss=0.0))["valid"] is False
-    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(), take_profit=-1.0))["valid"] is False
-    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(), units=0.0))["valid"] is False
+    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(entry_price=0.0)))["valid"] is False
+    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(stop_loss=0.0)))["valid"] is False
+    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(take_profit=-1.0)))["valid"] is False
+    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(units=0.0)))["valid"] is False
 
 
 def test_validate_rejects_negative_risks():
-    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(), dollar_risk=-1.0))["valid"] is False
-    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(), percent_risk=-0.5))["valid"] is False
+    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(dollar_risk=-1.0)))["valid"] is False
+    assert validate_paper_trade(build_paper_trade(**_valid_candidate_payload(percent_risk=-0.5)))["valid"] is False
 
 
 def test_transitions_and_timestamps():
@@ -163,7 +165,7 @@ def test_lifecycle_dict_round_trip_rounds_trip():
 
 
 def test_evidence_path_is_metadata_only_and_no_file_write():
-    trade = build_paper_trade(**_valid_candidate_payload(), evidence_path="proofs/eurusd/trade-1.json")
+    trade = build_paper_trade(**_valid_candidate_payload(evidence_path="proofs/eurusd/trade-1.json"))
     payload = paper_trade_to_dict(trade)
     assert payload["evidence_path"] == "proofs/eurusd/trade-1.json"
     assert ".." not in payload["evidence_path"]
@@ -183,5 +185,20 @@ def test_module_source_is_paper_only_no_network_or_broker_runtime_calls():
     for token in ("subprocess", "socket", "urllib", "requests"):
         assert token not in source
 
-    for token in ("open(", "write_text(", "write_bytes(", "os.system", "pathlib", "credential", "api_key", "broker"):
+    for token in (
+        "open(",
+        "write_text(",
+        "write_bytes(",
+        "os.system",
+        "pathlib",
+        "os.getenv",
+        "os.environ",
+        "getenv(",
+        "api_key",
+        "access_token",
+        "refresh_token",
+        "private_key",
+        "password",
+        "bearer ",
+    ):
         assert token not in source

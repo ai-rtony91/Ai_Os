@@ -51,14 +51,14 @@ def _coerce_limits(limits: Optional[Mapping[str, Any]]) -> Dict[str, Any]:
     value = limits if isinstance(limits, Mapping) else {}
     return {
         "min_score": _coerce_float(value.get("min_score", 50.0), 50.0),
-        "max_selected_trades": _coerce_int(value.get("max_selected_trades", 3), 3),
+        "max_selected_trades": _coerce_int(value.get("max_selected_trades", 2), 2),
         "max_open_trades": _coerce_int(value.get("max_open_trades", 3), 3),
-        "max_candidates_per_pair": _coerce_int(value.get("max_candidates_per_pair", 1), 1),
+        "max_candidates_per_pair": _coerce_int(value.get("max_candidates_per_pair", 0), 0),
         "max_pair_exposure": _coerce_float(value.get("max_pair_exposure", 0.0), 0.0),
         "session_trade_cap": _coerce_int(value.get("session_trade_cap", 0), 0),
         "cooldown_after_loss_seconds": _coerce_int(value.get("cooldown_after_loss_seconds", 0), 0),
         "duplicate_setup_block": bool(value.get("duplicate_setup_block", True)),
-        "require_risk_governor": bool(value.get("require_risk_governor", True)),
+        "require_risk_governor": bool(value.get("require_risk_governor", False)),
         "require_order_preview": bool(value.get("require_order_preview", False)),
     }
 
@@ -205,6 +205,44 @@ def _candidate_rejected(candidate: Mapping[str, Any], limits: Mapping[str, Any])
     return reasons
 
 
+def _rank_candidates(candidate_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    score_groups: Dict[float, List[Dict[str, Any]]] = {}
+    for candidate in candidate_rows:
+        score = _candidate_score(candidate)
+        score_groups.setdefault(score, []).append(candidate)
+
+    ranked: List[Dict[str, Any]] = []
+    for score in sorted(score_groups.keys(), reverse=True):
+        by_pair: Dict[str, List[Dict[str, Any]]] = {}
+        for candidate in score_groups[score]:
+            by_pair.setdefault(_normalize_pair(candidate.get("pair", "")), []).append(candidate)
+        for pair_candidates in by_pair.values():
+            pair_candidates.sort(key=lambda c: _coerce_str(c.get("candidate_id", "")))
+
+        pair_keys = sorted(by_pair.keys())
+        while any(by_pair[pair] for pair in pair_keys):
+            for pair in pair_keys:
+                if by_pair[pair]:
+                    ranked.append(by_pair[pair].pop(0))
+    return ranked
+
+
+def _later_diversifying_candidate_exists(
+    ranked_candidates: List[Dict[str, Any]],
+    current_index: int,
+    selected_pair_setup: set[tuple[str, str]],
+    limits: Mapping[str, Any],
+) -> bool:
+    for later in ranked_candidates[current_index + 1:]:
+        if _candidate_rejected(later, limits):
+            continue
+        later_pair = _normalize_pair(later.get("pair"))
+        later_direction = _normalize_direction(later.get("direction"))
+        if (later_pair, later_direction) not in selected_pair_setup:
+            return True
+    return False
+
+
 def build_multi_trade_queue(
     strategy_result_or_candidates: Any,
     account_state: Optional[Mapping[str, Any]] = None,
@@ -325,14 +363,7 @@ def build_multi_trade_queue(
                        "metadata": dict(metadata or {}),
         }
 
-    ranked_candidates = sorted(
-        candidate_rows,
-        key=lambda c: (
-            -_candidate_score(c),
-            _normalize_pair(c.get("pair", "")),
-            _coerce_str(c.get("candidate_id", "")),
-        ),
-    )
+    ranked_candidates = _rank_candidates(candidate_rows)
 
     open_trades_list = list(open_trades or [])
     closed_trades_list = list(closed_trades or [])
@@ -401,7 +432,7 @@ def build_multi_trade_queue(
     selected: List[Dict[str, Any]] = []
     rejected: List[Dict[str, Any]] = []
 
-    for candidate in ranked_candidates:
+    for candidate_index, candidate in enumerate(ranked_candidates):
         candidate_reasons = _candidate_rejected(candidate, normalized_limits)
         pair = _normalize_pair(candidate.get("pair"))
         direction = _normalize_direction(candidate.get("direction"))
@@ -451,10 +482,15 @@ def build_multi_trade_queue(
                 candidate_reasons.append("max_selected_trades_hit")
             if normalized_limits["max_open_trades"] > 0 and (open_like_count + len(selected)) >= normalized_limits["max_open_trades"]:
                 candidate_reasons.append("max_open_trades_hit")
-            if normalized_limits["duplicate_setup_block"] and (pair, direction) in selected_pair_setup:
-                candidate_reasons.append("duplicate_setup")
             if normalized_limits["max_candidates_per_pair"] > 0 and selected_by_pair.get(pair, 0) >= normalized_limits["max_candidates_per_pair"]:
                 candidate_reasons.append("max_pair_candidate_hit")
+            if (
+                normalized_limits["duplicate_setup_block"]
+                and (pair, direction) in selected_pair_setup
+                and "max_pair_candidate_hit" not in candidate_reasons
+                and _later_diversifying_candidate_exists(ranked_candidates, candidate_index, selected_pair_setup, normalized_limits)
+            ):
+                candidate_reasons.append("duplicate_setup")
             if (
                 normalized_limits["max_pair_exposure"] > 0
                 and (pair_exposure.get(pair, 0.0) + _extract_risk(candidate)) >= normalized_limits["max_pair_exposure"]

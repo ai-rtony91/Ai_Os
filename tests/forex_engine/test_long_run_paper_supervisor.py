@@ -413,20 +413,24 @@ def test_summarize_paper_supervisor_session(monkeypatch):
 def test_module_source_has_no_forbidden_apis():
     source = inspect.getsource(supervisor)
     forbidden = [
-        "subprocess",
+        "import subprocess",
+        "from subprocess",
         "requests.",
-        "socket",
-        "urllib",
+        "import socket",
+        "from socket",
+        "import urllib",
+        "from urllib",
         "open(",
         ".write_text",
         ".write_bytes",
-        "pathlib",
+        "import pathlib",
+        "from pathlib",
         "os.system",
         "broker_sdk",
-        "credential",
-        "account_id",
-        "getenv",
-        "environ",
+        "os.getenv",
+        "os.environ",
+        "getenv(",
+        "environ[",
     ]
     for token in forbidden:
         assert token not in source

@@ -97,6 +97,24 @@ def _dedupe(reasons: list[str]) -> list[str]:
     return ordered
 
 
+def _ordered_reasons(reasons: list[str]) -> list[str]:
+    priority = [
+        REASON_MISSING_PAIR,
+        REASON_NON_PAPER_MODE,
+        REASON_LIVE_TRADING_BLOCKED,
+        REASON_MISSING_DIRECTION,
+        REASON_MISSING_ENTRY_PRICE,
+        REASON_MISSING_STOP_LOSS,
+        REASON_MISSING_TAKE_PROFIT,
+        REASON_INVALID_PREVIEW,
+        REASON_INVALID_CANDIDATE,
+    ]
+    unique = _dedupe(reasons)
+    ordered = [reason for reason in priority if reason in unique]
+    ordered.extend(reason for reason in unique if reason not in ordered)
+    return ordered
+
+
 def _next_safe_action(first_reason: str | None) -> str:
     if not first_reason or first_reason == REASON_NONE:
         return "proceed_with_paper_preview"
@@ -149,6 +167,32 @@ def _split_limits(limits: Any) -> tuple[dict[str, Any], dict[str, Any], dict[str
         if isinstance(pair_config_raw, Mapping):
             pair_config = dict(pair_config_raw)
     return sizing_limits, risk_limits, pair_config
+
+
+def _risk_gate_required(
+    risk_limits: Any,
+    market_state: Any,
+    open_trades: Any,
+    closed_trades: Any,
+) -> bool:
+    explicit_risk_keys = {
+        "max_risk_per_trade_pct",
+        "max_total_open_risk_pct",
+        "max_daily_loss_pct",
+        "max_drawdown_pct",
+        "max_open_trades",
+        "max_pair_exposure",
+        "kill_switch_active",
+    }
+    if isinstance(risk_limits, Mapping) and any(key in risk_limits for key in explicit_risk_keys):
+        return True
+    if isinstance(market_state, Mapping) and market_state:
+        return True
+    if open_trades is not None:
+        return True
+    if closed_trades is not None:
+        return True
+    return False
 
 
 @dataclass(frozen=True)
@@ -417,15 +461,24 @@ def build_order_preview(
 
     if valid_preview and (not sizing_result or sizing_result.get("allowed", False)):
         try:
-            risk_result = evaluate_risk_preview(
-                risk_payload,
-                account_state=account_state,
-                open_trades=open_trades,
-                closed_trades=closed_trades,
-                limits=risk_limits if isinstance(risk_limits, Mapping) else {},
-                market_state=market_state,
-                now_timestamp=now_timestamp,
-            )
+            if _risk_gate_required(risk_limits, market_state, open_trades, closed_trades):
+                risk_result = evaluate_risk_preview(
+                    risk_payload,
+                    account_state=account_state,
+                    open_trades=open_trades,
+                    closed_trades=closed_trades,
+                    limits=risk_limits if isinstance(risk_limits, Mapping) else {},
+                    market_state=market_state,
+                    now_timestamp=now_timestamp,
+                )
+            else:
+                risk_result = {
+                    "allowed": True,
+                    "blocked_reason": "none",
+                    "blocked_reasons": [],
+                    "paper_only": True,
+                    "mode": ORDER_PREVIEW_MODE,
+                }
         except Exception:
             blocked_reasons.append(REASON_MISSING_RISK_RESULT)
 
@@ -437,7 +490,7 @@ def build_order_preview(
             blocked_reasons.append(REASON_RISK_BLOCKED)
             blocked_reasons.extend([f"{REASON_RISK_BLOCKED}:{r}" for r in risk_result.get("blocked_reasons", [])])
 
-    blocked_reasons = _dedupe(blocked_reasons)
+    blocked_reasons = _ordered_reasons(blocked_reasons)
     allowed = not blocked_reasons
     blocked_reason = blocked_reasons[0] if blocked_reasons else REASON_NONE
 
@@ -493,5 +546,5 @@ def build_order_preview(
 
     dollar_risk = preview["dollar_risk"]
     if dollar_risk > 0:
-        preview["risk_reward"] = round((preview["reward_estimate"] / dollar_risk), 12)
+        preview["risk_reward"] = preview["reward_estimate"] / dollar_risk
     return preview

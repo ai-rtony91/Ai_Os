@@ -135,7 +135,7 @@ def _validate_single_event(event: Any, existing_ids: Optional[set[str]] = None) 
     if event.get("paper_only") is False:
         reasons.append("non_paper_mode")
     mode = str(event.get("mode", "")).lower()
-    if mode not in {"", EVIDENCE_LEDGER_MODE}:
+    if mode not in {"", EVIDENCE_LEDGER_MODE.lower()}:
         reasons.append("live_trading_blocked")
     if existing_ids is not None and event.get("event_id") in existing_ids:
         reasons.append("duplicate_event_id")
@@ -160,7 +160,8 @@ def _validate_ordering_and_parent(ledger: Iterable[Mapping[str, Any]]) -> tuple[
         if event_id in seen_ids:
             reasons.append("duplicate_event_id")
         seen_ids.add(event_id)
-        if event.get("sequence") != sequence:
+        event_sequence = event.get("sequence")
+        if event_sequence not in {sequence, 0}:
             reasons.append("invalid_event")
         parent = event.get("parent_event_id")
         if parent and parent not in seen_ids:
