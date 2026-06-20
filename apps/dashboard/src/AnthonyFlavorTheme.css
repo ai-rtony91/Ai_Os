@@ -3441,3 +3441,36 @@ html body .forexPathButton:active .forexPathIcon::after {
     font-size: clamp(1.4rem, 6.5vw, 1.82rem) !important;
   }
 }
+
+/* Room dock fit repair. */
+html body .forexPathButton {
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+}
+
+html body .forexPathButton .forexPathIcon {
+  flex: 0 0 auto !important;
+  max-width: 100% !important;
+}
+
+html body .forexPathButton strong {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  display: block !important;
+  overflow: hidden !important;
+  text-align: center !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 680px) {
+  html body .forexPathButton {
+    gap: 5px !important;
+    padding: 7px 5px !important;
+  }
+
+  html body .forexPathButton strong {
+    font-size: clamp(0.46rem, 2vw, 0.58rem) !important;
+  }
+}
