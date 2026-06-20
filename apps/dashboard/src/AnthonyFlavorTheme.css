@@ -3390,3 +3390,56 @@ html body .activeSignalOnlyChip {
       linear-gradient(90deg, rgba(0, 2, 10, 0.97), rgba(4, 0, 20, 0.68) 52%, rgba(0, 2, 10, 0.97)) !important;
   }
 }
+
+/* Room icon fill scale pass. */
+html body .forexPathButton .forexPathIcon,
+html body .forexHomeActionButton .forexPathIcon,
+html body .forexPathNextButton .forexPathIcon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  line-height: 1 !important;
+}
+
+html body .forexPathButton .forexPathIcon::after {
+  width: 82% !important;
+  height: 82% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  font-size: clamp(1.62rem, 2.55vw, 2.12rem) !important;
+  line-height: 1 !important;
+  transform: scale(1.08) !important;
+  transform-origin: center center !important;
+}
+
+html body .forexHomeActionButton .forexPathIcon,
+html body .forexPathNextButton .forexPathIcon {
+  font-size: clamp(1.64rem, 2.55vw, 2.08rem) !important;
+  padding: 0.16rem !important;
+}
+
+html body .forexPathButton:hover .forexPathIcon::after,
+html body .forexPathButton:focus-visible .forexPathIcon::after {
+  transform: scale(1.13) !important;
+}
+
+html body .forexPathButton:active .forexPathIcon::after {
+  transform: scale(1.02) !important;
+}
+
+@media (max-width: 680px) {
+  html body .forexPathButton .forexPathIcon::after {
+    font-size: clamp(1.38rem, 6.5vw, 1.84rem) !important;
+    transform: scale(1.05) !important;
+  }
+
+  html body .forexHomeActionButton .forexPathIcon,
+  html body .forexPathNextButton .forexPathIcon {
+    font-size: clamp(1.4rem, 6.5vw, 1.82rem) !important;
+  }
+}
