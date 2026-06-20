@@ -2464,7 +2464,10 @@ function ActivePathPanel({
                 selectCommand(FOREX_COMMAND_INTENTS.PAIR_SCANNER);
               }}
             >
-              {formatPair(pair)}
+          <span aria-hidden="true" className="forexPairIcon">
+            {({ EUR_USD: "💶", GBP_USD: "💷", USD_JPY: "💴", AUD_USD: "🇦🇺", USD_CAD: "🇨🇦" }[pair] ?? "💱")}
+          </span>
+          <strong>{formatPair(pair)}</strong>
             </button>
           ))}
         </div>
