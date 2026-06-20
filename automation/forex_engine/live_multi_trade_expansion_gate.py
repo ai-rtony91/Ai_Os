@@ -184,7 +184,6 @@ def _runtime_blockers(value: Mapping[str, Any]) -> list[str]:
 def _kill_switch_present(*payloads: Mapping[str, Any]) -> bool:
     return any(
         payload.get("kill_switch_proof") is True
-        or payload.get("kill_switch_ok") is True
         or payload.get("kill_switch_verified") is True
         for payload in payloads
     )
