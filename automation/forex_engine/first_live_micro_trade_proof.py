@@ -63,11 +63,11 @@ def build_first_live_micro_trade_proof(
         missing_evidence.append("paper_to_demo_promotion")
     if not runner or runner.get("allowed") is not True:
         missing_evidence.append("demo_multi_trade_runner")
-    if not reconciliation or reconciliation.get("allowed") is not True or (
+    reconciliation_missing = not reconciliation or reconciliation.get("allowed") is not True or (
         reconciliation.get("matched") is not True and reconciliation.get("match_score") != 1.0
-    ):
+    )
+    if reconciliation_missing:
         missing_evidence.append("demo_reconciliation")
-        blocked_reasons.append(REASON_RECONCILIATION_MISSING)
     if not limits:
         missing_evidence.append("risk_limits")
     if not approval or approval.get("approved") is not True:
@@ -88,13 +88,16 @@ def build_first_live_micro_trade_proof(
     if max_risk_pct is None or max_risk_pct > 1.0:
         blocked_reasons.append(REASON_EXCESSIVE_RISK)
 
+    reconciliation_only_missing = missing_evidence == ["demo_reconciliation"]
     if missing_evidence:
         blocked_reasons.append(REASON_MISSING_EVIDENCE)
+    if reconciliation_missing and reconciliation_only_missing:
+        blocked_reasons.append(REASON_RECONCILIATION_MISSING)
 
     for payload in (readiness, promotion, runner, reconciliation, limits, approval):
         blocked_reasons.extend(_runtime_blockers(payload))
 
-    blocked_reasons = _dedupe(blocked_reasons)
+    blocked_reasons = _ordered_blockers(blocked_reasons)
     missing_evidence = _dedupe(missing_evidence)
     proof_complete = not blocked_reasons
 
@@ -226,6 +229,21 @@ def _dedupe(items: list[str]) -> list[str]:
     for item in items:
         if item and item not in ordered:
             ordered.append(item)
+    return ordered
+
+
+def _ordered_blockers(items: list[str]) -> list[str]:
+    priority = [
+        REASON_HUMAN_APPROVAL_MISSING,
+        REASON_KILL_SWITCH_MISSING,
+        REASON_ROLLBACK_MISSING,
+        REASON_EXCESSIVE_RISK,
+        REASON_MISSING_EVIDENCE,
+        REASON_RECONCILIATION_MISSING,
+    ]
+    unique = _dedupe(items)
+    ordered = [reason for reason in priority if reason in unique]
+    ordered.extend(reason for reason in unique if reason not in ordered)
     return ordered
 
 
