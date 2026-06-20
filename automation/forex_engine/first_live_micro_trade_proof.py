@@ -239,11 +239,16 @@ def _ordered_blockers(items: list[str]) -> list[str]:
         REASON_ROLLBACK_MISSING,
         REASON_EXCESSIVE_RISK,
         REASON_MISSING_EVIDENCE,
-        REASON_RECONCILIATION_MISSING,
     ]
     unique = _dedupe(items)
     ordered = [reason for reason in priority if reason in unique]
-    ordered.extend(reason for reason in unique if reason not in ordered)
+    ordered.extend(
+        reason
+        for reason in unique
+        if reason not in ordered and reason != REASON_RECONCILIATION_MISSING
+    )
+    if REASON_RECONCILIATION_MISSING in unique:
+        ordered.append(REASON_RECONCILIATION_MISSING)
     return ordered
 
 
