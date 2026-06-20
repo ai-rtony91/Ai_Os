@@ -133,6 +133,11 @@ def _pick_metric(replay: Dict[str, Any], evidence: Dict[str, Any], key: str, def
     return default
 
 
+def _is_duplicate_setup_reason(reason: str) -> bool:
+    normalized = reason.strip().lower()
+    return normalized in {"duplicate_setup", "duplicate_setups"}
+
+
 def _aggregate_rejections(evidence: Dict[str, Any], replay: Dict[str, Any], supervisor: Dict[str, Any]) -> tuple:
     rejected_setups = 0
     risk_failures = 0
@@ -141,23 +146,27 @@ def _aggregate_rejections(evidence: Dict[str, Any], replay: Dict[str, Any], supe
 
     replay_rejections = replay.get("blocked_reasons") or replay.get("rejections") or []
     for item in _as_list(replay_rejections):
-        reason = str(item)
+        reason = str(item).strip().lower()
+        if not reason:
+            continue
         rejection_summary[reason] = rejection_summary.get(reason, 0) + 1
         replay_reason_set.add(reason)
         if "risk" in reason.lower():
             risk_failures += 1
-        if "setup" in reason.lower() or "duplicate" in reason.lower():
+        if _is_duplicate_setup_reason(reason):
             rejected_setups += 1
 
     evidence_rejections = evidence.get("rejected_reasons") or evidence.get("rejection_reasons") or []
     for item in _as_list(evidence_rejections):
-        reason = str(item)
+        reason = str(item).strip().lower()
+        if not reason or reason == "candidate_rejected":
+            continue
         if reason in replay_reason_set:
             continue
         rejection_summary[reason] = 1
         if "risk" in reason.lower():
             risk_failures += 1
-        if "setup" in reason.lower() or "duplicate" in reason.lower():
+        if _is_duplicate_setup_reason(reason):
             rejected_setups += 1
         replay_reason_set.add(reason)
 
@@ -165,16 +174,17 @@ def _aggregate_rejections(evidence: Dict[str, Any], replay: Dict[str, Any], supe
     for item in _as_list(queue_rejections):
         if isinstance(item, dict):
             reason = str(item.get("reason", item.get("rejected_reason", "")))
-            if not reason:
-                reason = "candidate_rejected"
         else:
             reason = str(item)
+        reason = reason.strip().lower()
+        if not reason or reason == "candidate_rejected":
+            continue
         if reason in replay_reason_set:
             continue
         rejection_summary[reason] = rejection_summary.get(reason, 0) + 1
         if "risk" in reason.lower():
             risk_failures += 1
-        if "setup" in reason.lower() or "duplicate" in reason.lower():
+        if _is_duplicate_setup_reason(reason):
             rejected_setups += 1
         replay_reason_set.add(reason)
 
@@ -254,7 +264,7 @@ def _propose_safe_improvement(
             "strategy_candidate_logic",
             ["test_no_trade_signal_reason_codes", "test_candidate_filter_reduces_false_positives"],
         )
-    if _to_int(rejection_summary.get("duplicate_setup", 0), 0) > 0:
+    if _to_int(rejection_summary.get("duplicate_setup", 0), 0) > 0 or _to_int(rejection_summary.get("duplicate_setups", 0), 0) > 0:
         return (
             _SAFE_IMPROVEMENTS["add_duplicate_setup_block_regression"],
             "queue_rules",
@@ -519,7 +529,6 @@ def _build_success(
     quality: Dict[str, Any],
     risk_failures: int,
     rejection_summary: Dict[str, int],
-    rejection_setup_summary: Dict[str, int],
     strategy_performance: Dict[str, Any],
     risk_failure_metrics: Dict[str, Any],
     winning_summary: Dict[str, Any],
@@ -531,6 +540,7 @@ def _build_success(
     win_rate: float,
     net_pnl: float,
     max_drawdown: float,
+    rejection_setup_summary: Optional[Dict[str, int]] = None,
 ) -> Dict[str, Any]:
     output = _build_base(
         allowed=True,
@@ -547,6 +557,7 @@ def _build_success(
         risk_failures=risk_failures,
         rejection_summary=rejection_summary,
         tests=tests,
+        rejection_setup_summary=rejection_setup_summary,
         evidence_used=evidence_used,
         recommended_improvement=recommended_improvement,
         recommended_scope=recommended_scope,
@@ -664,6 +675,7 @@ def _build_base(
     approval_required: bool,
     approval_reason: str,
     no_live_setting_change: bool = False,
+    rejection_setup_summary: Optional[Dict[str, int]] = None,
 ) -> Dict[str, Any]:
     return {
         "allowed": bool(allowed),
@@ -685,7 +697,7 @@ def _build_base(
         "rejection_summary": dict(rejection_summary),
         "winning_trade_summary": dict(winning_summary),
         "losing_trade_summary": dict(losing_summary),
-        "rejected_setup_summary": {"duplicate_setups": 0},
+        "rejected_setup_summary": rejection_setup_summary if rejection_setup_summary is not None else {"duplicate_setups": 0},
         "strategy_performance_metrics": dict(strategy_performance),
         "risk_failure_metrics": dict(risk_failure_metrics),
         "recommended_improvement": recommended_improvement,
