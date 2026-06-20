@@ -4,30 +4,54 @@ from automation.forex_engine import evidence_ledger, session_replay
 
 
 def _market_data_event(event_type="market_data_accepted", **kwargs):
-    return evidence_ledger.build_ledger_event(event_type, payload={"pair": "EURUSD"}, session_id="session-1", timestamp=1.0, **kwargs)
+    explicit_session_id = kwargs.pop("session_id", None)
+    kwargs.pop("timestamp", None)
+    kwargs.pop("payload", None)
+    session_id = explicit_session_id or "session-1"
+    return evidence_ledger.build_ledger_event(event_type, payload={"pair": "EURUSD"}, session_id=session_id, timestamp=1.0, **kwargs)
 
 
 def _candidate_event(event_type="strategy_candidate_created", candidate_id="c1", **kwargs):
-    return evidence_ledger.build_ledger_event(event_type, payload={"candidate_id": candidate_id}, session_id="session-1", timestamp=2.0, **kwargs)
+    explicit_session_id = kwargs.pop("session_id", None)
+    kwargs.pop("timestamp", None)
+    kwargs.pop("payload", None)
+    session_id = explicit_session_id or "session-1"
+    return evidence_ledger.build_ledger_event(event_type, payload={"candidate_id": candidate_id}, session_id=session_id, timestamp=2.0, **kwargs)
 
 
 def _preview_event(event_type="preview_created", candidate_id="c1", **kwargs):
-    return evidence_ledger.build_ledger_event(event_type, payload={"candidate_id": candidate_id}, session_id="session-1", timestamp=3.0, **kwargs)
+    explicit_session_id = kwargs.pop("session_id", None)
+    kwargs.pop("timestamp", None)
+    kwargs.pop("payload", None)
+    session_id = explicit_session_id or "session-1"
+    return evidence_ledger.build_ledger_event(event_type, payload={"candidate_id": candidate_id}, session_id=session_id, timestamp=3.0, **kwargs)
 
 
 def _risk_event(event_type="risk_accepted", candidate_id="c1", **kwargs):
-    return evidence_ledger.build_ledger_event(event_type, payload={"candidate_id": candidate_id, "dollar_risk": 120.0}, session_id="session-1", timestamp=4.0, **kwargs)
+    explicit_session_id = kwargs.pop("session_id", None)
+    kwargs.pop("timestamp", None)
+    kwargs.pop("payload", None)
+    session_id = explicit_session_id or "session-1"
+    return evidence_ledger.build_ledger_event(event_type, payload={"candidate_id": candidate_id, "dollar_risk": 120.0}, session_id=session_id, timestamp=4.0, **kwargs)
 
 
 def _trade_event(event_type, trade_id="t1", realized=None, **kwargs):
+    explicit_session_id = kwargs.pop("session_id", None)
+    kwargs.pop("timestamp", None)
+    kwargs.pop("payload", None)
+    session_id = explicit_session_id or "session-1"
     payload = {"trade_id": trade_id}
     if realized is not None:
         payload["realized_pnl"] = realized
-    return evidence_ledger.build_ledger_event(event_type, payload=payload, session_id="session-1", timestamp=5.0, **kwargs)
+    return evidence_ledger.build_ledger_event(event_type, payload=payload, session_id=session_id, timestamp=5.0, **kwargs)
 
 
-def _balance_event(value):
-    return evidence_ledger.build_ledger_event("balance_updated", payload={"current_balance": value}, session_id="session-1", timestamp=6.0)
+def _balance_event(value, **kwargs):
+    explicit_session_id = kwargs.pop("session_id", None)
+    kwargs.pop("timestamp", None)
+    kwargs.pop("payload", None)
+    session_id = explicit_session_id or "session-1"
+    return evidence_ledger.build_ledger_event("balance_updated", payload={"current_balance": value}, session_id=session_id, timestamp=6.0, **kwargs)
 
 
 def _build_valid_ledger():

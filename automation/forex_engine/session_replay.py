@@ -59,6 +59,18 @@ def _to_event_id(value: Any) -> str:
     return "" if value is None else str(value)
 
 
+def _event_session_id(event: Mapping[str, Any]) -> str:
+    event_session = event.get("session_id")
+    if event_session:
+        return str(event_session)
+    payload = event.get("payload")
+    if isinstance(payload, Mapping):
+        payload_session_id = payload.get("session_id")
+        if payload_session_id:
+            return str(payload_session_id)
+    return ""
+
+
 def _safe_bool(value: Any, default: bool) -> bool:
     if isinstance(value, bool):
         return value
@@ -85,7 +97,7 @@ def _safe_validate_event(event: Mapping[str, Any], required_ids: set[str]) -> Li
     mode = str(event.get("mode", "")).lower()
     if mode not in {"", SESSION_REPLAY_MODE}:
         reasons.append("live_trading_blocked")
-    if not _to_event_id(event.get("session_id")):
+    if not _event_session_id(event):
         reasons.append("missing_session_id")
     event_id = _to_event_id(event.get("event_id"))
     if not event_id:
@@ -100,7 +112,7 @@ def _safe_validate_event(event: Mapping[str, Any], required_ids: set[str]) -> Li
 def _coerce_events(ledger: Optional[Iterable[Any]]) -> Optional[List[Mapping[str, Any]]]:
     if ledger is None:
         return []
-    if not isinstance(ledger, Iterable):
+    if not isinstance(ledger, (list, tuple)):
         return None
     return [event for event in ledger if isinstance(event, Mapping)]
 
@@ -207,9 +219,10 @@ def build_session_replay(
             "metadata": dict(metadata or {}),
         }
 
-    summary = replay_ledger(events, session_id=session_id)
     # Filter once more for strict deterministic order in output.
-    filtered = [event for event in events if session_id is None or event.get("session_id") == session_id]
+    filtered = [event for event in events if session_id is None or _event_session_id(event) == session_id]
+
+    summary = replay_ledger(filtered, session_id=session_id)
 
     warnings: List[str] = []
     reasons: List[str] = []
@@ -223,7 +236,11 @@ def build_session_replay(
         reasons.append("missing_session_id")
         warnings.append("missing_session_id")
 
-    counts_by_event_type: Dict[str, int] = summary.get("counts_by_event_type", {})
+    counts_by_event_type: Dict[str, int] = {}
+    for event in filtered:
+        if isinstance(event, Mapping):
+            event_type = event.get("event_type") or ""
+            counts_by_event_type[event_type] = counts_by_event_type.get(event_type, 0) + 1
 
     total_candidates = counts_by_event_type.get("strategy_candidate_created", 0) + counts_by_event_type.get("candidate_rejected", 0)
     accepted_candidates = counts_by_event_type.get("strategy_candidate_created", 0)
