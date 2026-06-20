@@ -3292,16 +3292,8 @@ html body .forexCommandPathDock {
 }
 
 html body .forexCommandPathDock::before {
-  content: "";
-  position: absolute;
-  inset: 50% 5% auto;
-  height: 1px;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.38) 34%, rgba(221, 214, 254, 0.5) 50%, rgba(173, 92, 255, 0.38) 66%, transparent);
-  box-shadow:
-    0 0 18px rgba(0, 229, 255, 0.28),
-    0 0 28px rgba(173, 92, 255, 0.22);
+  content: none !important;
+  display: none !important;
 }
 
 html body .forexPathButton,
@@ -3395,22 +3387,28 @@ html body .activeSignalOnlyChip {
 html body .forexPathButton .forexPathIcon,
 html body .forexHomeActionButton .forexPathIcon,
 html body .forexPathNextButton .forexPathIcon {
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  text-align: center !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
   line-height: 1 !important;
 }
 
 html body .forexPathButton .forexPathIcon::after {
+  position: absolute !important;
+  inset: 0 !important;
+  margin: auto !important;
   width: 82% !important;
   height: 82% !important;
-  display: inline-flex !important;
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  text-align: center !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
+  object-fit: contain !important;
   font-size: clamp(1.62rem, 2.55vw, 2.12rem) !important;
   line-height: 1 !important;
   transform: scale(1.08) !important;
