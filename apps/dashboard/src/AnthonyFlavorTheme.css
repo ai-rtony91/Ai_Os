@@ -412,11 +412,106 @@ body {
 }
 
 .forexCommandIcon {
+  position: relative;
+  isolation: isolate;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(88, 215, 255, 0.42);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.16), transparent 30%),
+    radial-gradient(circle at center, rgba(88, 215, 255, 0.18), transparent 62%),
+    linear-gradient(145deg, rgba(12, 10, 34, 0.92), rgba(31, 26, 70, 0.84));
   font-size: 30px;
   line-height: 1;
+  box-shadow:
+    0 0 0 1px rgba(167, 139, 250, 0.12),
+    0 0 18px rgba(88, 215, 255, 0.18),
+    inset 0 0 18px rgba(88, 215, 255, 0.1);
   filter:
     drop-shadow(0 0 10px rgba(88, 215, 255, 0.3))
     drop-shadow(0 0 18px rgba(167, 139, 250, 0.22));
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease,
+    filter 140ms ease;
+}
+
+.forexCommandIcon::before,
+.forexCommandIcon::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.forexCommandIcon::before {
+  inset: 4px;
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  border-top-color: rgba(88, 215, 255, 0.72);
+  border-bottom-color: rgba(51, 240, 162, 0.26);
+  opacity: 0.82;
+  transform: rotate(-24deg);
+}
+
+.forexCommandIcon::after {
+  inset: 10px;
+  border: 1px solid rgba(88, 215, 255, 0.2);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent 58%);
+  opacity: 0.62;
+}
+
+.forexCommandButton:hover .forexCommandIcon,
+.forexCommandButton:focus-visible .forexCommandIcon,
+.activeForexCommandButton .forexCommandIcon {
+  border-color: rgba(88, 215, 255, 0.84);
+  box-shadow:
+    0 0 0 1px rgba(167, 139, 250, 0.22),
+    0 0 24px rgba(88, 215, 255, 0.3),
+    0 0 38px rgba(167, 139, 250, 0.16),
+    inset 0 0 20px rgba(88, 215, 255, 0.15);
+  filter:
+    drop-shadow(0 0 12px rgba(88, 215, 255, 0.4))
+    drop-shadow(0 0 22px rgba(167, 139, 250, 0.3));
+  transform: translateY(-1px);
+}
+
+.blockedForexCommandButton .forexCommandIcon {
+  border-color: rgba(255, 93, 115, 0.5);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.12), transparent 30%),
+    radial-gradient(circle at center, rgba(255, 93, 115, 0.16), transparent 64%),
+    linear-gradient(145deg, rgba(36, 11, 31, 0.92), rgba(70, 21, 52, 0.72));
+  box-shadow:
+    0 0 0 1px rgba(255, 93, 115, 0.12),
+    0 0 18px rgba(255, 93, 115, 0.14),
+    inset 0 0 18px rgba(255, 93, 115, 0.1);
+}
+
+.blockedForexCommandButton .forexCommandIcon::before {
+  border-color: rgba(255, 93, 115, 0.28);
+  border-top-color: rgba(255, 191, 76, 0.46);
+}
+
+.emergencyForexCommandButton .forexCommandIcon {
+  border-color: rgba(255, 93, 115, 0.72);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.14), transparent 30%),
+    radial-gradient(circle at center, rgba(255, 93, 115, 0.28), transparent 62%),
+    linear-gradient(145deg, rgba(52, 11, 24, 0.96), rgba(94, 24, 41, 0.84));
+  box-shadow:
+    0 0 0 1px rgba(255, 191, 76, 0.2),
+    0 0 22px rgba(255, 93, 115, 0.26),
+    inset 0 0 20px rgba(255, 93, 115, 0.18);
+}
+
+.emergencyForexCommandButton .forexCommandIcon::before {
+  border-color: rgba(255, 93, 115, 0.38);
+  border-top-color: rgba(255, 191, 76, 0.72);
 }
 
 .forexCommandText {
@@ -494,6 +589,7 @@ body {
 .forexPaperSandboxBackendCard,
 .forexPaperOrderPreviewEngineCard,
 .forexDemoConnectorProofCard,
+.forexDemoConnectorIntakeCard,
 .forexSixBulletBoard,
 .forexNextSafeStepStrip,
 .forexTradingLadder {
@@ -559,6 +655,8 @@ body {
 .forexPaperOrderPreviewEngineGrid,
 .forexDemoConnectorProofGrid,
 .forexDemoConnectorProofNotice,
+.forexDemoConnectorIntakeGrid,
+.forexDemoConnectorIntakeNotice,
 .forexSixBulletGrid,
 .forexSixBulletSummary,
 .forexCompletionCardGrid,
@@ -852,6 +950,101 @@ body {
   overflow-wrap: anywhere;
 }
 
+.forexDemoConnectorIntakeCard {
+  display: grid;
+  gap: 10px;
+  border-color: rgba(167, 139, 250, 0.34);
+  background:
+    linear-gradient(135deg, rgba(24, 13, 55, 0.62), rgba(6, 5, 19, 0.64)),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.16), transparent 16rem),
+    radial-gradient(circle at bottom left, rgba(88, 215, 255, 0.1), transparent 18rem);
+  padding: 10px;
+}
+
+.forexDemoConnectorIntakeHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.forexDemoConnectorIntakeHeader > strong {
+  border: 1px solid rgba(167, 139, 250, 0.34);
+  border-radius: 999px;
+  background: rgba(167, 139, 250, 0.1);
+  padding: 6px 8px;
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexDemoConnectorIntakeNotice {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.forexDemoConnectorIntakeNotice span {
+  min-width: 0;
+  border: 1px solid rgba(255, 191, 76, 0.42);
+  border-radius: 999px;
+  background: rgba(255, 191, 76, 0.1);
+  padding: 6px 8px;
+  color: var(--warn);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexDemoConnectorIntakeGrid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.forexDemoConnectorIntakeItem {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(167, 139, 250, 0.22);
+  border-radius: 8px;
+  background: rgba(31, 26, 70, 0.62);
+  padding: 7px;
+}
+
+.forexDemoConnectorIntakeItem.tone-good {
+  border-color: rgba(51, 240, 162, 0.42);
+  background: rgba(51, 240, 162, 0.1);
+}
+
+.forexDemoConnectorIntakeItem.tone-warn {
+  border-color: rgba(255, 191, 76, 0.44);
+  background: rgba(255, 191, 76, 0.1);
+}
+
+.forexDemoConnectorIntakeItem.tone-danger {
+  border-color: rgba(255, 93, 115, 0.44);
+  background: rgba(255, 93, 115, 0.1);
+}
+
+.forexDemoConnectorIntakeItem span {
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexDemoConnectorIntakeItem strong {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
 .forexSixBulletBoard {
   display: grid;
   gap: 10px;
@@ -1130,6 +1323,11 @@ body {
 
 .forexPaperSandboxButton {
   min-height: 42px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  gap: 8px;
   cursor: pointer;
   border: 1px solid rgba(88, 215, 255, 0.34);
   border-radius: 8px;
@@ -1163,6 +1361,72 @@ body {
 .forexPaperSandboxButton:focus-visible {
   outline: 2px solid rgba(167, 139, 250, 0.38);
   outline-offset: 2px;
+}
+
+.forexPaperSandboxButtonIcon {
+  position: relative;
+  isolation: isolate;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(51, 240, 162, 0.42);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.15), transparent 32%),
+    radial-gradient(circle at center, rgba(51, 240, 162, 0.16), transparent 62%),
+    linear-gradient(145deg, rgba(12, 10, 34, 0.92), rgba(23, 45, 62, 0.82));
+  font-size: 18px;
+  line-height: 1;
+  box-shadow:
+    0 0 0 1px rgba(88, 215, 255, 0.12),
+    0 0 16px rgba(51, 240, 162, 0.16),
+    inset 0 0 14px rgba(51, 240, 162, 0.1);
+  filter:
+    drop-shadow(0 0 8px rgba(51, 240, 162, 0.28))
+    drop-shadow(0 0 14px rgba(88, 215, 255, 0.18));
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.forexPaperSandboxButtonIcon::before,
+.forexPaperSandboxButtonIcon::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.forexPaperSandboxButtonIcon::before {
+  inset: 3px;
+  border: 1px solid rgba(88, 215, 255, 0.34);
+  border-top-color: rgba(51, 240, 162, 0.68);
+  transform: rotate(28deg);
+}
+
+.forexPaperSandboxButtonIcon::after {
+  inset: 8px;
+  border: 1px solid rgba(51, 240, 162, 0.18);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.09), transparent 58%);
+}
+
+.forexPaperSandboxButtonText {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.forexPaperSandboxButton:hover .forexPaperSandboxButtonIcon,
+.forexPaperSandboxButton:focus-visible .forexPaperSandboxButtonIcon,
+.activePaperSandboxButton .forexPaperSandboxButtonIcon {
+  border-color: rgba(51, 240, 162, 0.78);
+  box-shadow:
+    0 0 0 1px rgba(88, 215, 255, 0.18),
+    0 0 20px rgba(51, 240, 162, 0.26),
+    inset 0 0 16px rgba(51, 240, 162, 0.16);
+  transform: translateY(-1px);
 }
 
 .forexPaperSandboxCriticalStrip {
@@ -1340,6 +1604,8 @@ body {
   .forexPaperOrderPreviewEngineGrid,
   .forexDemoConnectorProofGrid,
   .forexDemoConnectorProofNotice,
+  .forexDemoConnectorIntakeGrid,
+  .forexDemoConnectorIntakeNotice,
   .forexSixBulletGrid,
   .forexSixBulletSummary,
   .forexCompletionCardGrid,
@@ -1376,6 +1642,8 @@ body {
   .forexPaperOrderPreviewEngineGrid,
   .forexDemoConnectorProofGrid,
   .forexDemoConnectorProofNotice,
+  .forexDemoConnectorIntakeGrid,
+  .forexDemoConnectorIntakeNotice,
   .forexSixBulletGrid,
   .forexSixBulletSummary,
   .forexCompletionCardGrid,
@@ -1396,6 +1664,7 @@ body {
   .forexPaperSandboxBackendHeader,
   .forexPaperOrderPreviewEngineHeader,
   .forexDemoConnectorProofHeader,
+  .forexDemoConnectorIntakeHeader,
   .forexSixBulletHeader,
   .forexSafeStatusHeader {
     align-items: stretch;
@@ -1405,6 +1674,7 @@ body {
   .forexPaperSandboxBackendHeader > strong,
   .forexPaperOrderPreviewEngineHeader > strong,
   .forexDemoConnectorProofHeader > strong,
+  .forexDemoConnectorIntakeHeader > strong,
   .forexSixBulletHeader > strong,
   .forexRefreshStatusButton {
     width: 100%;
@@ -1419,6 +1689,12 @@ body {
     align-items: center;
     justify-items: start;
     text-align: left;
+  }
+
+  .forexCommandIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
   }
 
   .aiosForexBrandBanner {

@@ -428,6 +428,11 @@ const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
     id: "forex-demo-connector-proof-status",
     label: "/api/forex/demo-connector/proof-status",
     path: "/api/forex/demo-connector/proof-status"
+  },
+  {
+    id: "forex-demo-connector-proof-intake-sample",
+    label: "/api/forex/demo-connector/proof-intake/sample",
+    path: "/api/forex/demo-connector/proof-intake/sample"
   }
 ];
 
@@ -454,6 +459,10 @@ const SAFE_STATUS_SUMMARY_KEYS = [
   "trade_placed",
   "bullet",
   "proof_mode",
+  "intake_status",
+  "can_close_bullet_b",
+  "sample_only",
+  "broker_call_sent",
   "connector_handle_present",
   "connector_handle_required",
   "practice_demo_only_required",
@@ -1791,6 +1800,46 @@ function DemoConnectorProofCard({ endpointResult }) {
   );
 }
 
+function DemoConnectorEvidenceIntakeCard({ endpointResult }) {
+  const sourceStatus = endpointResult?.ok ? "INTAKE SAMPLE READABLE" : "INTAKE SAMPLE LOCAL FALLBACK";
+  const httpStatus = endpointResult?.httpStatus ?? "NOT_CHECKED";
+  const rows = [
+    { label: "INTAKE", value: safeEndpointField(endpointResult, "intake_status", "BLOCKED"), tone: "danger" },
+    { label: "CAN CLOSE B", value: yesNoText(safeEndpointField(endpointResult, "can_close_bullet_b", "false")), tone: "danger" },
+    { label: "SAMPLE ONLY", value: yesNoText(safeEndpointField(endpointResult, "sample_only", "true")), tone: "warn" },
+    { label: "BROKER CALL", value: yesNoText(safeEndpointField(endpointResult, "broker_call_sent", "false")), tone: "danger" },
+    { label: "ORDER SENT", value: yesNoText(safeEndpointField(endpointResult, "order_sent", "false")), tone: "danger" },
+    { label: "LIVE", value: liveExecutionText(safeEndpointField(endpointResult, "live_execution_allowed", "false")), tone: "danger" },
+    { label: "NEXT", value: "PROVIDE SANITIZED TERMINAL DEMO PROOF", tone: "good" }
+  ];
+
+  return (
+    <section className="forexDemoConnectorIntakeCard" aria-label="Demo Connector Evidence Intake">
+      <div className="forexDemoConnectorIntakeHeader">
+        <div className="panelHeading">
+          <p>Demo Connector Evidence Intake</p>
+          <h3>{sourceStatus}</h3>
+        </div>
+        <strong>{`HTTP: ${httpStatus}`}</strong>
+      </div>
+
+      <div className="forexDemoConnectorIntakeNotice">
+        <span>EVIDENCE EVALUATOR ONLY</span>
+        <span>NO BROKER / CONNECTOR CALL</span>
+      </div>
+
+      <div className="forexDemoConnectorIntakeGrid" aria-label="Demo connector evidence intake sample fields">
+        {rows.map((row) => (
+          <div className={`forexDemoConnectorIntakeItem tone-${row.tone}`} key={`${row.label}-${row.value}`}>
+            <span>{row.label}</span>
+            <strong>{row.value}</strong>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ForexSixBulletCompletionBoard({
   sixBulletResult,
   riskGateResult,
@@ -2001,7 +2050,10 @@ function PaperSandboxTradePathwayPanel({ paperOrderPreviewResult }) {
           type="button"
           onClick={() => setPreviewMode("paper-preview")}
         >
-          📄 PAPER ORDER PREVIEW
+          <span aria-hidden="true" className="forexPaperSandboxButtonIcon">
+            📄
+          </span>
+          <span className="forexPaperSandboxButtonText">PAPER ORDER PREVIEW</span>
         </button>
         <button
           aria-pressed={!isPaperPreview}
@@ -2009,7 +2061,10 @@ function PaperSandboxTradePathwayPanel({ paperOrderPreviewResult }) {
           type="button"
           onClick={() => setPreviewMode("sandbox-dry-run")}
         >
-          🧪 SANDBOX DRY RUN
+          <span aria-hidden="true" className="forexPaperSandboxButtonIcon">
+            🧪
+          </span>
+          <span className="forexPaperSandboxButtonText">SANDBOX DRY RUN</span>
         </button>
       </div>
 
@@ -2076,6 +2131,9 @@ function ForexCommandSurface() {
   const demoConnectorProofResult = safeStatusEndpoints.find(
     (item) => item.id === "forex-demo-connector-proof-status"
   );
+  const demoConnectorIntakeResult = safeStatusEndpoints.find(
+    (item) => item.id === "forex-demo-connector-proof-intake-sample"
+  );
 
   function selectCommandIntent(control) {
     setSelectedCommandIntent(control.intent);
@@ -2108,6 +2166,8 @@ function ForexCommandSurface() {
       <PaperOrderPreviewEngineCard endpointResult={paperOrderPreviewResult} />
 
       <DemoConnectorProofCard endpointResult={demoConnectorProofResult} />
+
+      <DemoConnectorEvidenceIntakeCard endpointResult={demoConnectorIntakeResult} />
 
       <ForexSixBulletCompletionBoard
         approvalPackageResult={approvalPackageResult}
