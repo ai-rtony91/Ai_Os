@@ -9,8 +9,12 @@ const {
   getRuntimeStatus,
   getVisibilitySnapshot
 } = require("./runtimeApiService");
+const { getForexApprovalPackageStatus } = require("./forexApprovalPackageStatus");
 const { getForexPaperOrderPreview } = require("./forexPaperOrderPreview");
 const { getForexPaperSandboxStatus } = require("./forexPaperSandboxStatus");
+const { getForexReconciliationStatus } = require("./forexReconciliationStatus");
+const { getForexRiskGateStatus } = require("./forexRiskGateStatus");
+const { getForexSixBulletStatus } = require("./forexSixBulletStatus");
 const {
   getBridgeHealth,
   getLatestReports,
@@ -38,6 +42,22 @@ app.get("/api/forex/paper-sandbox/status", (req, res) => {
 
 app.get("/api/forex/paper-sandbox/order-preview", (req, res) => {
   res.json(getForexPaperOrderPreview());
+});
+
+app.get("/api/forex/six-bullet/status", (req, res) => {
+  res.json(getForexSixBulletStatus());
+});
+
+app.get("/api/forex/risk-gate/status", (req, res) => {
+  res.json(getForexRiskGateStatus());
+});
+
+app.get("/api/forex/approval-package/status", (req, res) => {
+  res.json(getForexApprovalPackageStatus());
+});
+
+app.get("/api/forex/reconciliation/status", (req, res) => {
+  res.json(getForexReconciliationStatus());
 });
 
 app.get("/health", (req, res) => {

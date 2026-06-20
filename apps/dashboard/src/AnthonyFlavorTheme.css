@@ -493,6 +493,7 @@ body {
 .forexSafeStatusPanel,
 .forexPaperSandboxBackendCard,
 .forexPaperOrderPreviewEngineCard,
+.forexSixBulletBoard,
 .forexNextSafeStepStrip,
 .forexTradingLadder {
   border: 1px solid rgba(167, 139, 250, 0.24);
@@ -554,7 +555,11 @@ body {
 .forexSafeStatusFlags,
 .forexSafeEndpointGrid,
 .forexPaperSandboxBackendGrid,
-.forexPaperOrderPreviewEngineGrid {
+.forexPaperOrderPreviewEngineGrid,
+.forexSixBulletGrid,
+.forexSixBulletSummary,
+.forexCompletionCardGrid,
+.forexCompletionStatusRows {
   display: grid;
   gap: 8px;
 }
@@ -747,6 +752,153 @@ body {
 .forexPaperOrderPreviewEngineRoute {
   margin: 0;
   color: var(--muted);
+}
+
+.forexSixBulletBoard {
+  display: grid;
+  gap: 10px;
+  border-color: rgba(88, 215, 255, 0.34);
+  background:
+    linear-gradient(135deg, rgba(6, 5, 19, 0.62), rgba(31, 26, 70, 0.58)),
+    radial-gradient(circle at top left, rgba(88, 215, 255, 0.14), transparent 16rem),
+    radial-gradient(circle at bottom right, rgba(167, 139, 250, 0.14), transparent 18rem);
+  padding: 10px;
+}
+
+.forexSixBulletHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.forexSixBulletHeader > strong {
+  border: 1px solid rgba(88, 215, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(88, 215, 255, 0.08);
+  padding: 6px 8px;
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexSixBulletSummary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.forexSixBulletSummary span {
+  min-width: 0;
+  border: 1px solid rgba(51, 240, 162, 0.26);
+  border-radius: 999px;
+  background: rgba(51, 240, 162, 0.08);
+  padding: 6px 8px;
+  color: var(--muted-strong);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexSixBulletGrid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.forexSixBulletItem,
+.forexCompletionStatusCard,
+.forexCompletionStatusRow {
+  min-width: 0;
+  border: 1px solid rgba(88, 215, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(31, 26, 70, 0.62);
+}
+
+.forexSixBulletItem {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+}
+
+.forexSixBulletItem.tone-good,
+.forexCompletionStatusRow.tone-good {
+  border-color: rgba(51, 240, 162, 0.42);
+  background: rgba(51, 240, 162, 0.1);
+}
+
+.forexSixBulletItem.tone-warn,
+.forexCompletionStatusRow.tone-warn {
+  border-color: rgba(255, 191, 76, 0.44);
+  background: rgba(255, 191, 76, 0.1);
+}
+
+.forexSixBulletItem.tone-danger,
+.forexCompletionStatusRow.tone-danger {
+  border-color: rgba(255, 93, 115, 0.44);
+  background: rgba(255, 93, 115, 0.1);
+}
+
+.forexSixBulletItem span,
+.forexSixBulletItem small,
+.forexCompletionStatusCardHeader span,
+.forexCompletionStatusRow span {
+  color: var(--neutral);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.forexSixBulletItem strong,
+.forexCompletionStatusCardHeader strong,
+.forexCompletionStatusRow strong {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.forexSixBulletItem > span {
+  width: fit-content;
+  min-width: 24px;
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  border-radius: 999px;
+  background: rgba(167, 139, 250, 0.1);
+  padding: 4px 7px;
+  color: var(--text);
+  text-align: center;
+}
+
+.forexCompletionCardGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.forexCompletionStatusCard {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+}
+
+.forexCompletionStatusCardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.forexCompletionStatusRows {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.forexCompletionStatusRow {
+  display: grid;
+  gap: 3px;
+  padding: 7px;
 }
 
 .forexSafeEndpointGrid {
@@ -1088,6 +1240,9 @@ body {
   .forexSafeEndpointGrid,
   .forexPaperSandboxBackendGrid,
   .forexPaperOrderPreviewEngineGrid,
+  .forexSixBulletGrid,
+  .forexSixBulletSummary,
+  .forexCompletionCardGrid,
   .forexSafeStatusFlags,
   .forexPaperSandboxSteps,
   .forexPaperSandboxCriticalStrip,
@@ -1119,6 +1274,10 @@ body {
   .forexSafeEndpointGrid,
   .forexPaperSandboxBackendGrid,
   .forexPaperOrderPreviewEngineGrid,
+  .forexSixBulletGrid,
+  .forexSixBulletSummary,
+  .forexCompletionCardGrid,
+  .forexCompletionStatusRows,
   .forexSafeStatusFlags,
   .forexPaperSandboxActions,
   .forexPaperSandboxSteps,
@@ -1134,6 +1293,7 @@ body {
   .aiosForexBrandBanner,
   .forexPaperSandboxBackendHeader,
   .forexPaperOrderPreviewEngineHeader,
+  .forexSixBulletHeader,
   .forexSafeStatusHeader {
     align-items: stretch;
   }
@@ -1141,6 +1301,7 @@ body {
   .forexPaperSandboxHeader > strong,
   .forexPaperSandboxBackendHeader > strong,
   .forexPaperOrderPreviewEngineHeader > strong,
+  .forexSixBulletHeader > strong,
   .forexRefreshStatusButton {
     width: 100%;
     justify-content: center;

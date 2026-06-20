@@ -208,7 +208,7 @@ const FOREX_COMMAND_CONTROLS = [
       "broker connection approval",
       "close route approval"
     ],
-    nextSafeStep: "Next safe ladder step: PAPER/SANDBOX CLOSE PREVIEW. Close execution remains disabled.",
+    nextSafeStep: "Next safe ladder step: RECONCILIATION / FINAL DISARM. Close execution remains disabled.",
     message: "GET OUT is blocked. Close routes are disabled and no live position action exists here."
   },
   {
@@ -382,6 +382,26 @@ const SAFE_DASHBOARD_STATUS_ENDPOINTS = [
     id: "forex-paper-order-preview",
     label: "/api/forex/paper-sandbox/order-preview",
     path: "/api/forex/paper-sandbox/order-preview"
+  },
+  {
+    id: "forex-six-bullet-status",
+    label: "/api/forex/six-bullet/status",
+    path: "/api/forex/six-bullet/status"
+  },
+  {
+    id: "forex-risk-gate-status",
+    label: "/api/forex/risk-gate/status",
+    path: "/api/forex/risk-gate/status"
+  },
+  {
+    id: "forex-approval-package-status",
+    label: "/api/forex/approval-package/status",
+    path: "/api/forex/approval-package/status"
+  },
+  {
+    id: "forex-reconciliation-status",
+    label: "/api/forex/reconciliation/status",
+    path: "/api/forex/reconciliation/status"
   }
 ];
 
@@ -406,6 +426,25 @@ const SAFE_STATUS_SUMMARY_KEYS = [
   "max_loss_required",
   "order_sent",
   "trade_placed",
+  "done_count",
+  "partial_count",
+  "next_target",
+  "no_live_authority",
+  "risk_gate_status",
+  "approval_package_status",
+  "reconciliation_status",
+  "A_EXTERNAL_CREDENTIAL_ACCOUNT_BOUNDARY",
+  "B_PROTECTED_BROKER_DEMO_RUNTIME_CONNECTOR_PROOF",
+  "C_LIVE_ENDPOINT_DENIAL_PRACTICE_DEMO_ALLOWLIST_PROOF",
+  "D_RISK_CAP_KILL_SWITCH_FINAL_DISARM_PROOF",
+  "E_HUMAN_OWNER_LIVE_MICRO_TRADE_APPROVAL_PACKAGE",
+  "F_POST_TRADE_JOURNAL_RECONCILIATION_PROOF",
+  "human_owner_required",
+  "daily_loss_cap_required",
+  "kill_switch_required",
+  "final_disarm_required",
+  "broker_read_only_evidence_required",
+  "closed_history_writeback_required",
   "next_safe_step",
   "ok",
   "healthy",
@@ -431,6 +470,45 @@ const FOREX_PAPER_SANDBOX_BACKEND_STATUS_ROWS = [
   { label: "🚦 ORDER ROUTE", value: "DISABLED", tone: "danger" },
   { label: "⏏️ CLOSE ROUTE", value: "DISABLED", tone: "danger" },
   { label: "🤖 AUTO TRADE", value: "OFF", tone: "warn" }
+];
+
+const FOREX_SIX_BULLET_BOARD_ROWS = [
+  {
+    bullet: "A",
+    label: "Credential Boundary",
+    key: "A_EXTERNAL_CREDENTIAL_ACCOUNT_BOUNDARY",
+    fallback: "DONE"
+  },
+  {
+    bullet: "B",
+    label: "Demo Connector Proof",
+    key: "B_PROTECTED_BROKER_DEMO_RUNTIME_CONNECTOR_PROOF",
+    fallback: "PARTIAL"
+  },
+  {
+    bullet: "C",
+    label: "Live Denial / Demo Allowlist",
+    key: "C_LIVE_ENDPOINT_DENIAL_PRACTICE_DEMO_ALLOWLIST_PROOF",
+    fallback: "DONE"
+  },
+  {
+    bullet: "D",
+    label: "Risk / Kill / Disarm",
+    key: "D_RISK_CAP_KILL_SWITCH_FINAL_DISARM_PROOF",
+    fallback: "PARTIAL"
+  },
+  {
+    bullet: "E",
+    label: "Owner Approval Package",
+    key: "E_HUMAN_OWNER_LIVE_MICRO_TRADE_APPROVAL_PACKAGE",
+    fallback: "PARTIAL"
+  },
+  {
+    bullet: "F",
+    label: "Journal / Reconciliation",
+    key: "F_POST_TRADE_JOURNAL_RECONCILIATION_PROOF",
+    fallback: "PARTIAL"
+  }
 ];
 
 function normalizeDataSourceType(value) {
@@ -508,7 +586,7 @@ function findSafeValue(payload, key) {
     return payload[key];
   }
 
-  for (const containerKey of ["runtime", "health", "visibility", "control", "summary", "status"]) {
+  for (const containerKey of ["runtime", "health", "visibility", "control", "summary", "status", "bullets"]) {
     const nested = payload[containerKey];
     if (isSafePlainObject(nested) && Object.prototype.hasOwnProperty.call(nested, key)) {
       return nested[key];
@@ -675,6 +753,73 @@ function buildPaperOrderPreviewRows(endpointResult) {
     },
     { label: "Max Loss", value: requiredText(safeEndpointField(endpointResult, "max_loss_required", "true")) },
     { label: "Status", value: status }
+  ];
+}
+
+function completionStatusTone(value) {
+  const text = String(value ?? "").toUpperCase();
+  if (text === "DONE" || text === "SAFE" || text === "YES") {
+    return "good";
+  }
+
+  if (text.includes("PARTIAL") || text.includes("REQUIRED") || text.includes("NOT CURRENT")) {
+    return "warn";
+  }
+
+  if (text.includes("BLOCKED") || text.includes("FALSE") || text.includes("NO")) {
+    return "danger";
+  }
+
+  return "neutral";
+}
+
+function buildForexCompletionStatusCards({
+  sixBulletResult,
+  riskGateResult,
+  approvalPackageResult,
+  reconciliationResult
+}) {
+  return [
+    {
+      title: "Six Bullet Status",
+      endpointResult: sixBulletResult,
+      rows: [
+        { label: "DONE", value: safeEndpointField(sixBulletResult, "done_count", "2"), tone: "good" },
+        { label: "PARTIAL", value: safeEndpointField(sixBulletResult, "partial_count", "4"), tone: "warn" },
+        { label: "LIVE", value: liveExecutionText(safeEndpointField(sixBulletResult, "live_execution_allowed", "false")), tone: "danger" },
+        { label: "SAFE", value: yesNoText(safeEndpointField(sixBulletResult, "no_live_authority", "true")), tone: "good" }
+      ]
+    },
+    {
+      title: "Risk Gate",
+      endpointResult: riskGateResult,
+      rows: [
+        { label: "STATUS", value: statusText(safeEndpointField(riskGateResult, "risk_gate_status", "BLOCKED_PENDING_APPROVAL")), tone: "danger" },
+        { label: "STOP LOSS", value: requiredText(safeEndpointField(riskGateResult, "stop_loss_required", "true")), tone: "warn" },
+        { label: "FINAL DISARM", value: requiredText(safeEndpointField(riskGateResult, "final_disarm_required", "true")), tone: "warn" },
+        { label: "LIVE", value: liveExecutionText(safeEndpointField(riskGateResult, "live_execution_allowed", "false")), tone: "danger" }
+      ]
+    },
+    {
+      title: "Approval Package",
+      endpointResult: approvalPackageResult,
+      rows: [
+        { label: "STATUS", value: statusText(safeEndpointField(approvalPackageResult, "approval_package_status", "NOT_CURRENT")), tone: "warn" },
+        { label: "OWNER", value: requiredText(safeEndpointField(approvalPackageResult, "human_owner_required", "true")), tone: "warn" },
+        { label: "TIMESTAMP", value: requiredText(safeEndpointField(approvalPackageResult, "absolute_timestamp_required", "true")), tone: "warn" },
+        { label: "LIVE", value: liveExecutionText(safeEndpointField(approvalPackageResult, "live_execution_allowed", "false")), tone: "danger" }
+      ]
+    },
+    {
+      title: "Reconciliation",
+      endpointResult: reconciliationResult,
+      rows: [
+        { label: "STATUS", value: statusText(safeEndpointField(reconciliationResult, "reconciliation_status", "PARTIAL")), tone: "warn" },
+        { label: "READ-ONLY", value: requiredText(safeEndpointField(reconciliationResult, "broker_read_only_evidence_required", "true")), tone: "warn" },
+        { label: "FINAL DISARM", value: requiredText(safeEndpointField(reconciliationResult, "final_disarm_required", "true")), tone: "warn" },
+        { label: "LIVE", value: liveExecutionText(safeEndpointField(reconciliationResult, "live_execution_allowed", "false")), tone: "danger" }
+      ]
+    }
   ];
 }
 
@@ -1545,6 +1690,77 @@ function PaperOrderPreviewEngineCard({ endpointResult }) {
   );
 }
 
+function ForexSixBulletCompletionBoard({
+  sixBulletResult,
+  riskGateResult,
+  approvalPackageResult,
+  reconciliationResult
+}) {
+  const boardRows = FOREX_SIX_BULLET_BOARD_ROWS.map((row) => {
+    const value = safeEndpointField(sixBulletResult, row.key, row.fallback);
+    return {
+      ...row,
+      value,
+      tone: completionStatusTone(value)
+    };
+  });
+  const statusCards = buildForexCompletionStatusCards({
+    sixBulletResult,
+    riskGateResult,
+    approvalPackageResult,
+    reconciliationResult
+  });
+  const sixBulletHttp = sixBulletResult?.httpStatus ?? "NOT_CHECKED";
+
+  return (
+    <section className="forexSixBulletBoard" aria-label="Six Bullet Completion Board">
+      <div className="forexSixBulletHeader">
+        <div className="panelHeading">
+          <p>Six Bullet Completion Board</p>
+          <h3>NEXT TARGET: B - DEMO CONNECTOR PROOF</h3>
+        </div>
+        <strong>{`SIX BULLET HTTP: ${sixBulletHttp}`}</strong>
+      </div>
+
+      <div className="forexSixBulletSummary" aria-label="Six bullet completion summary">
+        <span>DONE: {safeEndpointField(sixBulletResult, "done_count", "2")}</span>
+        <span>PARTIAL: {safeEndpointField(sixBulletResult, "partial_count", "4")}</span>
+        <span>SAFE: NO LIVE AUTHORITY</span>
+        <span>NEXT: B - DEMO CONNECTOR PROOF</span>
+      </div>
+
+      <div className="forexSixBulletGrid" aria-label="A-F six bullet statuses">
+        {boardRows.map((row) => (
+          <div className={`forexSixBulletItem tone-${row.tone}`} key={row.key}>
+            <span>{row.bullet}</span>
+            <strong>{row.value}</strong>
+            <small>{row.label}</small>
+          </div>
+        ))}
+      </div>
+
+      <div className="forexCompletionCardGrid" aria-label="Forex completion status cards">
+        {statusCards.map((card) => (
+          <div className="forexCompletionStatusCard" key={card.title}>
+            <div className="forexCompletionStatusCardHeader">
+              <strong>{card.title}</strong>
+              <span>{card.endpointResult?.ok ? "ONLINE" : "LOCAL FALLBACK"}</span>
+            </div>
+            <div className="forexCompletionStatusRows">
+              {card.rows.map((row) => (
+                <div className={`forexCompletionStatusRow tone-${row.tone}`} key={`${card.title}-${row.label}`}>
+                  <span>{row.label}</span>
+                  <strong>{row.value}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function SafeDashboardStatusPanel({ onSafeStatusUpdate }) {
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [status, setStatus] = useState({
@@ -1752,6 +1968,10 @@ function ForexCommandSurface() {
     FOREX_COMMAND_CONTROLS.find((control) => control.intent === selectedCommandIntent) ??
     FOREX_COMMAND_CONTROLS[FOREX_COMMAND_CONTROLS.length - 1];
   const paperOrderPreviewResult = safeStatusEndpoints.find((item) => item.id === "forex-paper-order-preview");
+  const sixBulletResult = safeStatusEndpoints.find((item) => item.id === "forex-six-bullet-status");
+  const riskGateResult = safeStatusEndpoints.find((item) => item.id === "forex-risk-gate-status");
+  const approvalPackageResult = safeStatusEndpoints.find((item) => item.id === "forex-approval-package-status");
+  const reconciliationResult = safeStatusEndpoints.find((item) => item.id === "forex-reconciliation-status");
 
   function selectCommandIntent(control) {
     setSelectedCommandIntent(control.intent);
@@ -1782,6 +2002,13 @@ function ForexCommandSurface() {
       <SafeDashboardStatusPanel onSafeStatusUpdate={setSafeStatusEndpoints} />
 
       <PaperOrderPreviewEngineCard endpointResult={paperOrderPreviewResult} />
+
+      <ForexSixBulletCompletionBoard
+        approvalPackageResult={approvalPackageResult}
+        reconciliationResult={reconciliationResult}
+        riskGateResult={riskGateResult}
+        sixBulletResult={sixBulletResult}
+      />
 
       <PaperSandboxTradePathwayPanel paperOrderPreviewResult={paperOrderPreviewResult} />
 
