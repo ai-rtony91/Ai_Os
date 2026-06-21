@@ -146,6 +146,11 @@ def run_demo_phase_operator_review_packet(
     repeated_risk_violations = 0 if repeated_risk_violation_count is None else max(0, int(repeated_risk_violation_count))
     safety_ok = _safe(safety)
 
+    if risk_violation and repeated_risk_violations >= 2:
+        escalation_level = ESCALATION_SUSPENSION
+    elif risk_violation:
+        escalation_level = ESCALATION_RISK
+
     if not safety_ok:
         operator_review_required = True
         recommended_operator_decision = DECISION_REJECT_DEMO_ADVANCEMENT
@@ -158,6 +163,9 @@ def run_demo_phase_operator_review_packet(
         operator_review_required = True
         recommended_operator_decision = DECISION_SUSPEND_DEMO_PHASE
     elif risk_violation and escalation.get("operator_review_required") is True:
+        operator_review_required = True
+        recommended_operator_decision = DECISION_REQUEST_MORE_EVIDENCE
+    elif risk_violation:
         operator_review_required = True
         recommended_operator_decision = DECISION_REQUEST_MORE_EVIDENCE
     elif missing_evidence:
