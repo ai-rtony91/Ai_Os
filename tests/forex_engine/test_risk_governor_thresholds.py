@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
+import pytest
+
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 from automation.forex_engine import opportunity_capture
-from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import risk_governor_thresholds
 from automation.forex_engine import run_risk_governor_demo
 
@@ -14,8 +17,22 @@ DEMO_PATH = REPO_ROOT / "automation" / "forex_engine" / "run_risk_governor_demo.
 ALLOWED_CLASSIFICATIONS = {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
 
 
+@pytest.fixture(scope="session")
+def _cached_bundle() -> dict[str, object]:
+    return get_paper_forward_v2_bundle()
+
+
+@pytest.fixture(autouse=True)
+def _patch_risk_demo(_cached_bundle: dict[str, object], monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        run_risk_governor_demo.paper_forward_evidence_v2,
+        "build_paper_forward_evidence_v2",
+        lambda: deepcopy(_cached_bundle),
+    )
+
+
 def _bundle() -> dict[str, object]:
-    return paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    return get_paper_forward_v2_bundle()
 
 
 def _report(bundle: dict[str, object]) -> dict[str, object]:
@@ -47,7 +64,8 @@ def test_default_policy_exists_with_required_thresholds() -> None:
 
 def test_evaluates_v2_evidence_and_keeps_live_blocked() -> None:
     bundle = _bundle()
-    result = risk_governor_thresholds.evaluate_risk_governor_thresholds(bundle)
+    report = _report(bundle)
+    result = risk_governor_thresholds.evaluate_risk_governor_thresholds(bundle, report)
 
     assert result["mode"] == "PAPER_ONLY"
     assert result["classification"] in ALLOWED_CLASSIFICATIONS
@@ -114,19 +132,21 @@ def test_blocks_excessive_drawdown_and_cost_drag() -> None:
 
 
 def test_run_cost_stress_scenarios_is_local_estimated_and_live_blocked() -> None:
-    stress = risk_governor_thresholds.run_cost_stress_scenarios(_bundle())
-
-    assert stress["mode"] == "PAPER_ONLY"
-    assert stress["estimated"] is True
+    bundle = _bundle()
+    report = _report(bundle)
+    stress = risk_governor_thresholds.run_cost_stress_scenarios(bundle, scenarios=None)
     assert len(stress["scenario_results"]) == 5
     for scenario in stress["scenario_results"]:
         assert scenario["classification"] in ALLOWED_CLASSIFICATIONS
         assert scenario["live_ready"] is False
         assert scenario["protected_gate_required"] is True
+    assert stress["mode"] == "PAPER_ONLY"
+    assert stress["estimated"] is True
 
 
 def test_assert_live_blocked_rejects_live_ready() -> None:
-    result = risk_governor_thresholds.evaluate_risk_governor_thresholds(_bundle())
+    bundle = _bundle()
+    result = risk_governor_thresholds.evaluate_risk_governor_thresholds(bundle, _report(bundle))
     bad = dict(result)
     bad["live_ready"] = True
 

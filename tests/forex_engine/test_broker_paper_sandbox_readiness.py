@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -28,6 +29,47 @@ ALLOWED_STATUSES = {
     "DRYRUN_REPLAY_HARNESS_READY",
     "DRYRUN_REPLAY_EVIDENCE_READY",
 }
+
+
+@pytest.fixture(scope="session")
+def _cached_default_readiness():
+    evidence = get_paper_forward_v2_bundle()
+    return broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
+        evidence=evidence,
+        stress_oos=evidence["combined_stress_oos_gate"],
+        risk_governor=evidence["risk_governor"],
+        stress_repair=evidence["stress_repair"],
+        expanded_oos=evidence["expanded_oos"],
+        oos_repair=evidence["oos_repair"],
+    )
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_readiness(
+    _cached_default_readiness,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness
+    cached = deepcopy(_cached_default_readiness)
+
+    def _cached_readiness(*args, **kwargs):
+        if (
+            not args
+            and not kwargs
+        ):
+            return deepcopy(cached)
+        if (
+            all(value is None for value in kwargs.values())
+            and len(args) == 0
+        ):
+            return deepcopy(cached)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(
+        broker_paper_sandbox_readiness,
+        "evaluate_broker_paper_sandbox_readiness",
+        _cached_readiness,
+    )
 
 
 def _strong_contract_inputs() -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
