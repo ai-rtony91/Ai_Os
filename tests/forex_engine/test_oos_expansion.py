@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 from tests.forex_engine.forex_evidence_cache import get_expanded_oos_validation
@@ -9,6 +10,7 @@ from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import oos_expansion
 from automation.forex_engine import oos_repair
 from automation.forex_engine import run_oos_expansion_demo
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -26,6 +28,26 @@ REQUIRED_SPLIT_TYPES = {
     "stress_repaired_holdout",
     "rotating_train_test_windows",
 }
+
+
+@pytest.fixture(scope="session")
+def _cached_oos_validation() -> dict[str, object]:
+    return get_expanded_oos_validation()
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_oos_validation(
+    _cached_oos_validation: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_run = oos_expansion.run_expanded_oos_validation
+
+    def _run_default_oos(*args: object, **kwargs: object) -> dict[str, object]:
+        if args or kwargs:
+            return original_run(*args, **kwargs)
+        return deepcopy(_cached_oos_validation)
+
+    monkeypatch.setattr(oos_expansion, "run_expanded_oos_validation", _run_default_oos)
 
 
 def test_expanded_oos_plan_includes_required_split_types() -> None:
@@ -137,7 +159,7 @@ def test_expanded_oos_accepts_low_vol_redesign_result() -> None:
 
 
 def test_expanded_oos_can_advance_to_paper_forward_ready_only_when_repair_clears_policy() -> None:
-    expanded = oos_expansion.run_expanded_oos_validation()
+    expanded = get_expanded_oos_validation()
     repair = {
         "repaired_classification": "PAPER_FORWARD_READY",
         "classification": "PAPER_FORWARD_READY",

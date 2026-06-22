@@ -2,17 +2,43 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from copy import deepcopy
 from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import run_paper_forward_evidence_v2_demo
 from automation.forex_engine import schema_contracts as schemas
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "forex_engine" / "paper_forward_evidence_v2.py"
 DEMO_PATH = REPO_ROOT / "automation" / "forex_engine" / "run_paper_forward_evidence_v2_demo.py"
 ALLOWED_CLASSIFICATIONS = {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+
+
+@pytest.fixture(scope="session")
+def _cached_v2_bundle() -> dict[str, object]:
+    return get_paper_forward_v2_bundle()
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_v2_builder(
+    _cached_v2_bundle: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_builder = paper_forward_evidence_v2.build_paper_forward_evidence_v2
+
+    def _build_default(*args: object, **kwargs: object) -> dict[str, object]:
+        if args or kwargs:
+            return original_builder(*args, **kwargs)
+        return deepcopy(_cached_v2_bundle)
+
+    monkeypatch.setattr(
+        paper_forward_evidence_v2,
+        "build_paper_forward_evidence_v2",
+        _build_default,
+    )
 
 
 def test_required_v2_fixtures_exist_and_validate() -> None:

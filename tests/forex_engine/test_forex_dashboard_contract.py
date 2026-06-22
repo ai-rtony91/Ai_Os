@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 from automation.forex_engine import backtest_harness
@@ -7,9 +8,36 @@ from automation.forex_engine import forex_dashboard_contract
 from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import risk_contract
+import pytest
+
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 
 
 MODULE_PATH = Path(__file__).resolve().parents[2] / "automation" / "forex_engine" / "forex_dashboard_contract.py"
+
+
+@pytest.fixture(scope="session")
+def _cached_v2_bundle() -> dict[str, object]:
+    return get_paper_forward_v2_bundle()
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_v2_builder(
+    _cached_v2_bundle: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_builder = paper_forward_evidence_v2.build_paper_forward_evidence_v2
+
+    def _build_v2(*args: object, **kwargs: object) -> dict[str, object]:
+        if args or kwargs:
+            return original_builder(*args, **kwargs)
+        return deepcopy(_cached_v2_bundle)
+
+    monkeypatch.setattr(
+        paper_forward_evidence_v2,
+        "build_paper_forward_evidence_v2",
+        _build_v2,
+    )
 
 
 def test_dashboard_contract_produces_compact_state() -> None:
