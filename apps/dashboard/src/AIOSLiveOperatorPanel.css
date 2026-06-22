@@ -1,0 +1,212 @@
+.aiosLiveOperatorPanel {
+  background:
+    linear-gradient(135deg, rgba(12, 35, 28, 0.96), rgba(11, 22, 36, 0.94)),
+    radial-gradient(circle at top right, rgba(90, 255, 190, 0.16), transparent 34%);
+  border: 1px solid rgba(158, 255, 215, 0.22);
+  border-radius: 28px;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  color: #edfdf6;
+  margin: 28px 0;
+  overflow: hidden;
+  padding: clamp(20px, 3vw, 34px);
+}
+
+.liveOperatorTopline {
+  align-items: start;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.liveOperatorEyebrow {
+  color: #8fffd0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+}
+
+.liveOperatorTopline h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 5vw, 4.8rem);
+  line-height: 0.92;
+  margin: 0;
+  max-width: 880px;
+}
+
+.liveOperatorTopline p {
+  color: rgba(237, 253, 246, 0.78);
+  line-height: 1.55;
+  margin: 14px 0 0;
+  max-width: 680px;
+}
+
+.liveBridgeBadge {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 10px 14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.liveBridgeBadge-ready {
+  background: rgba(59, 214, 146, 0.18);
+  color: #9effd7;
+}
+
+.liveBridgeBadge-review {
+  background: rgba(255, 204, 102, 0.16);
+  color: #ffd47f;
+}
+
+.liveBridgeBadge-blocked {
+  background: rgba(255, 112, 112, 0.16);
+  color: #ff9a9a;
+}
+
+.liveNoticeGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+}
+
+.liveNoticeGrid article,
+.liveTruthCell,
+.liveOperatorFooter,
+.liveNextAction {
+  background: rgba(255, 255, 255, 0.065);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 20px;
+}
+
+.liveNoticeGrid article {
+  padding: 18px;
+}
+
+.liveNoticeGrid span,
+.liveTruthCell span,
+.liveNextAction span {
+  color: rgba(237, 253, 246, 0.62);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.liveNoticeGrid strong {
+  display: block;
+  font-size: 1.12rem;
+  margin-top: 8px;
+}
+
+.liveNoticeGrid p {
+  color: rgba(237, 253, 246, 0.72);
+  margin: 8px 0 0;
+}
+
+.liveTruthGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.liveTruthCell {
+  min-height: 92px;
+  padding: 15px;
+}
+
+.liveTruthCell strong {
+  display: block;
+  font-size: clamp(1rem, 2.4vw, 1.35rem);
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+}
+
+.liveTruthCell-ready {
+  border-color: rgba(98, 255, 185, 0.36);
+}
+
+.liveTruthCell-review {
+  border-color: rgba(255, 204, 102, 0.36);
+}
+
+.liveTruthCell-blocked {
+  border-color: rgba(255, 112, 112, 0.36);
+}
+
+.liveOperatorFooter {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+  margin-top: 18px;
+  padding: 18px;
+}
+
+.liveOperatorFooter h3 {
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.liveOperatorFooter ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.liveOperatorFooter li {
+  color: rgba(237, 253, 246, 0.8);
+}
+
+.liveNextAction {
+  padding: 18px;
+}
+
+.liveNextAction strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.42;
+  margin-top: 10px;
+}
+
+@media (max-width: 920px) {
+  .liveOperatorTopline,
+  .liveOperatorFooter {
+    grid-template-columns: 1fr;
+  }
+
+  .liveBridgeBadge {
+    width: fit-content;
+  }
+
+  .liveTruthGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 430px) {
+  .aiosLiveOperatorPanel {
+    border-radius: 20px;
+    margin: 18px 0;
+    padding: 16px;
+  }
+
+  .liveNoticeGrid,
+  .liveTruthGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .liveTruthCell {
+    min-height: auto;
+  }
+}
+

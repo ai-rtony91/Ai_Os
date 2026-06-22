@@ -10,6 +10,7 @@ import {
   fetchRuntimeVisibilityReadOnly,
   getRuntimeVisibilityClientConfig
 } from "./runtimeVisibilityClient";
+import AIOSLiveOperatorPanel from "./AIOSLiveOperatorPanel";
 import "./App.css";
 
 const CLASSIFICATION = Object.freeze({
@@ -850,6 +851,7 @@ export default function App() {
 
         <MissionCards model={model} />
         <TradingReadinessStrip />
+        <AIOSLiveOperatorPanel />
 
         <div className="portalGrid">
           <div className="primaryColumn">

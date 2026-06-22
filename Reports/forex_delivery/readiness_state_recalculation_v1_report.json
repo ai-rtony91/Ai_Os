@@ -1,0 +1,697 @@
+{
+  "blockers_before": [
+    "candidate_not_approved_for_demo_validation",
+    "demo_contract_not_complete",
+    "demo_validation_contract_not_complete",
+    "live_review_certificate_not_review_ready",
+    "missing_account_boundary_proof",
+    "missing_approval_trace",
+    "missing_credential_boundary_proof",
+    "missing_demo_validation_proof",
+    "missing_evidence_freshness",
+    "missing_external_runtime_connector_proof",
+    "missing_final_disarm_proof",
+    "missing_human_review_ready",
+    "missing_kill_switch_proof",
+    "missing_live_readiness_candidate",
+    "missing_one_shot_controls",
+    "missing_post_trade_journal_path",
+    "missing_reconciliation_proof",
+    "missing_replay_proof",
+    "missing_replayability_proof",
+    "missing_risk_limits",
+    "missing_rollback_proof",
+    "missing_validation_results",
+    "mitigation_worsened",
+    "one_shot_exception_package_not_review_ready",
+    "paper_evidence_not_ready",
+    "stale_or_incomplete_evidence",
+    "walk_forward_failed"
+  ],
+  "blockers_cleared": [],
+  "blockers_remaining": [
+    "candidate_not_approved_for_demo_validation",
+    "demo_contract_not_complete",
+    "demo_validation_contract_not_complete",
+    "live_review_certificate_not_review_ready",
+    "missing_account_boundary_proof",
+    "missing_approval_trace",
+    "missing_credential_boundary_proof",
+    "missing_demo_validation_proof",
+    "missing_evidence_freshness",
+    "missing_external_runtime_connector_proof",
+    "missing_final_disarm_proof",
+    "missing_human_review_ready",
+    "missing_kill_switch_proof",
+    "missing_live_readiness_candidate",
+    "missing_one_shot_controls",
+    "missing_post_trade_journal_path",
+    "missing_reconciliation_proof",
+    "missing_replay_proof",
+    "missing_replayability_proof",
+    "missing_risk_limits",
+    "missing_rollback_proof",
+    "missing_validation_results",
+    "mitigation_worsened",
+    "one_shot_exception_package_not_review_ready",
+    "paper_evidence_not_ready",
+    "stale_or_incomplete_evidence",
+    "walk_forward_failed"
+  ],
+  "bridge_payload": {
+    "candidate_bridge_verdict": "REJECTED",
+    "canonical_review_bundle": {
+      "blockers": [
+        "walk_forward_failed",
+        "paper_evidence_not_ready",
+        "mitigation_worsened"
+      ],
+      "candidate": {
+        "candidate_id": "c1-eur-buy",
+        "demo_validation_proof": false,
+        "direction": "LONG",
+        "expectancy": 200.0,
+        "freshness_proof": {
+          "age_hours": 0.0,
+          "timestamp": "2026-06-22T21:25:10.556358+00:00"
+        },
+        "kill_switch_proof": true,
+        "max_drawdown": 0.0,
+        "mitigation_status": "worse",
+        "pair": "EURUSD",
+        "paper_evidence_status": "pending",
+        "profit_factor": 999.0,
+        "reconciliation_proof": false,
+        "replay_proof": false,
+        "risk_proof": true,
+        "rollback_proof": false,
+        "sample_size": 21,
+        "strategy": "paper_long_run_supervisor_v2",
+        "walk_forward_proof": false,
+        "walk_forward_status": "failed",
+        "win_rate": 1.0
+      },
+      "candidate_id": "c1-eur-buy",
+      "next_safe_action": "Reject candidate and re-optimize candidate metrics.",
+      "safety_gaps": [],
+      "verdict": "BLOCKED_INCOMPLETE_EVIDENCE"
+    },
+    "closed_blockers": [
+      "missing_demo_validation_proof",
+      "missing_reconciliation_proof",
+      "missing_replay_proof",
+      "missing_rollback_proof"
+    ],
+    "demo_contract_gaps": [],
+    "enriched_candidate": {
+      "candidate_id": "c1-eur-buy",
+      "demo_validation_proof": true,
+      "direction": "LONG",
+      "expectancy": 200.0,
+      "freshness_proof": {
+        "age_hours": 1
+      },
+      "kill_switch_proof": true,
+      "max_drawdown": 0.0,
+      "mitigation_status": "worse",
+      "pair": "EURUSD",
+      "paper_evidence_status": "pending",
+      "profit_factor": 999.0,
+      "reconciliation_proof": true,
+      "replay_proof": true,
+      "risk_proof": true,
+      "rollback_proof": true,
+      "sample_size": 21,
+      "strategy": "paper_long_run_supervisor_v2",
+      "walk_forward_status": "failed",
+      "win_rate": 1.0
+    },
+    "human_review_gaps": [],
+    "live_trading_authorized": false,
+    "mode": "LOCAL_APPLY",
+    "next_safe_action": "Reject candidate and re-optimize candidate metrics.",
+    "packet_id": "AIOS_FOREX_PROOF_BUNDLE_TO_CANDIDATE_BRIDGE_V1",
+    "proof_bundle_ready_for_candidate_bridge": true,
+    "remaining_blockers": [
+      "walk_forward_failed",
+      "paper_evidence_not_ready",
+      "mitigation_worsened"
+    ],
+    "review_package_gaps": [],
+    "safety": {
+      "account_id_present": false,
+      "broker_connected": false,
+      "credentials_used": false,
+      "demo_trading": false,
+      "is_safe": true,
+      "live_trading": false,
+      "live_trading_authorized": false,
+      "network_used": false,
+      "order_execution": false,
+      "paper_only": true,
+      "safety_gaps": []
+    },
+    "safety_gaps": [],
+    "selected_candidate_id": "c1-eur-buy",
+    "selected_direction": "LONG",
+    "selected_strategy": "paper_long_run_supervisor_v2",
+    "source_candidate_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+    "source_proof_bundle_status": "PROOF_BUNDLE_COMPLETE",
+    "strategy_quality_gaps": [
+      "walk_forward_failed",
+      "paper_evidence_not_ready",
+      "mitigation_worsened"
+    ]
+  },
+  "candidate_id": "c1-eur-buy",
+  "demo_contract_present": false,
+  "demo_readiness_pct": 50.0,
+  "evidence_completion_pct": 50.0,
+  "forex_completion_pct": 40.0,
+  "journey_payload": {
+    "candidate_bridge_status": "PROOF_BUNDLE_COMPLETE",
+    "candidate_bridge_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+    "candidate_demo_review_blockers": [
+      "missing_replay_proof",
+      "missing_reconciliation_proof",
+      "missing_rollback_proof",
+      "missing_demo_validation_proof",
+      "walk_forward_failed",
+      "paper_evidence_not_ready",
+      "mitigation_worsened"
+    ],
+    "candidate_demo_review_next_safe_action": "Collect missing/valid proofs and refresh stale evidence before rerunning review.",
+    "candidate_demo_review_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+    "candidate_journey_state": "REVIEW_CHAIN_INCOMPLETE",
+    "candidate_selection_reason": "champion_better_than_anchor",
+    "canonical_review_bundle": {
+      "blockers": [
+        "walk_forward_failed",
+        "missing_replay_proof",
+        "missing_reconciliation_proof",
+        "missing_rollback_proof",
+        "missing_demo_validation_proof",
+        "paper_evidence_not_ready",
+        "mitigation_worsened"
+      ],
+      "candidate": {
+        "candidate_id": "c1-eur-buy",
+        "demo_validation_proof": false,
+        "direction": "LONG",
+        "expectancy": 200.0,
+        "freshness_proof": {
+          "age_hours": 0.0,
+          "timestamp": "2026-06-22T21:25:10.557356+00:00"
+        },
+        "kill_switch_proof": true,
+        "max_drawdown": 0.0,
+        "mitigation_status": "worse",
+        "pair": "EURUSD",
+        "paper_evidence_status": "pending",
+        "profit_factor": 999.0,
+        "reconciliation_proof": false,
+        "replay_proof": false,
+        "risk_proof": true,
+        "rollback_proof": false,
+        "sample_size": 21,
+        "strategy": "paper_long_run_supervisor_v2",
+        "walk_forward_proof": false,
+        "walk_forward_status": "failed",
+        "win_rate": 1.0
+      },
+      "candidate_id": "c1-eur-buy",
+      "next_safe_action": "Collect missing/valid proofs and refresh stale evidence before rerunning review.",
+      "safety_gaps": [],
+      "verdict": "BLOCKED_INCOMPLETE_EVIDENCE"
+    },
+    "closed_blockers": [],
+    "demo_validation_contract": {
+      "blockers": [
+        "missing_validation_results",
+        "candidate_not_approved_for_demo_validation"
+      ],
+      "contract_summary": {
+        "candidate_approved": false,
+        "candidate_id": "c1-eur-buy",
+        "candidate_state": "DEMO_CANDIDATE_ACTIVE",
+        "maximum_drawdown": 10.0,
+        "minimum_evidence_score": 0.75,
+        "minimum_positive_expectancy": 0.01,
+        "minimum_profit_factor": 1.1,
+        "minimum_validation_sessions": 3,
+        "minimum_validation_trades": 20,
+        "risk_failures_present": false
+      },
+      "demo_validation_contract_completed": false,
+      "demo_validation_contract_status": "DEMO_CONTRACT_MORE_EVIDENCE_REQUIRED",
+      "live_readiness_candidate": false,
+      "metric_summary": {
+        "validation_evidence_score": 0.0,
+        "validation_expectancy": 0.0,
+        "validation_loss_count": 0,
+        "validation_max_drawdown": 0.0,
+        "validation_profit_factor": 0.0,
+        "validation_realized_pl": 0.0,
+        "validation_session_count": 0,
+        "validation_trade_count": 0,
+        "validation_win_count": 0
+      },
+      "next_safe_action": "collect_more_validation_results",
+      "required_next_packets": [
+        "collect_more_validation_results",
+        "run_validation_session_batch",
+        "refresh_live_readiness_packet"
+      ],
+      "safety": {
+        "account_identifiers_accessed": false,
+        "broker_connection_active": false,
+        "capital_allocated": false,
+        "credentials_accessed": false,
+        "live_trading_authorized": false,
+        "network_access": false,
+        "operator_review_required": true,
+        "order_execution_enabled": false
+      },
+      "warnings": []
+    },
+    "enriched_candidate": {
+      "candidate_id": "c1-eur-buy",
+      "demo_validation_proof": false,
+      "direction": "LONG",
+      "expectancy": 200.0,
+      "freshness_proof": {
+        "age_hours": 0.0,
+        "timestamp": "2026-06-22T21:25:10.557356+00:00"
+      },
+      "kill_switch_proof": true,
+      "max_drawdown": 0.0,
+      "mitigation_status": "worse",
+      "pair": "EURUSD",
+      "paper_evidence_status": "pending",
+      "profit_factor": 999.0,
+      "reconciliation_proof": false,
+      "replay_proof": false,
+      "risk_proof": true,
+      "rollback_proof": false,
+      "sample_size": 21,
+      "strategy": "paper_long_run_supervisor_v2",
+      "walk_forward_status": "failed",
+      "win_rate": 1.0
+    },
+    "final_next_safe_action": "collect_and_align_chain_stages",
+    "final_state": "REVIEW_CHAIN_INCOMPLETE",
+    "final_verdict": "REVIEW_CHAIN_INCOMPLETE",
+    "human_live_review_ready": false,
+    "journey_completed": false,
+    "live_micro_trade_review_ready": false,
+    "live_review_readiness_certificate": {
+      "blockers": [
+        "demo_validation_contract_not_complete",
+        "one_shot_exception_package_not_review_ready",
+        "missing_live_readiness_candidate",
+        "missing_approval_trace",
+        "missing_risk_limits",
+        "missing_kill_switch_proof",
+        "missing_rollback_proof",
+        "missing_reconciliation_proof",
+        "missing_evidence_freshness",
+        "missing_replayability_proof",
+        "missing_final_disarm_proof",
+        "missing_post_trade_journal_path",
+        "stale_or_incomplete_evidence"
+      ],
+      "certificate_completed": false,
+      "certificate_status": "LIVE_REVIEW_CERTIFICATE_INCOMPLETE",
+      "certificate_summary": {
+        "demo_contract_complete": false,
+        "one_shot_review_ready": false,
+        "ready": false,
+        "status": "LIVE_REVIEW_CERTIFICATE_INCOMPLETE"
+      },
+      "human_live_review_ready": false,
+      "live_micro_trade_review_ready": false,
+      "live_trading_authorized": false,
+      "next_safe_action": "collect_and_refresh_missing_evidence",
+      "readiness_summary": {
+        "approval_present": false,
+        "demo_complete": false,
+        "evidence_fresh": false,
+        "one_shot_review_ready": false,
+        "risk_limits_present": false
+      },
+      "required_next_packets": [
+        "collect_missing_evidence",
+        "refresh_risk_controls",
+        "repair_live_readiness_inputs"
+      ],
+      "safety": {
+        "account_identifiers_accessed": false,
+        "broker_connection_active": false,
+        "capital_allocated": false,
+        "credentials_accessed": false,
+        "execution_authority_granted": false,
+        "final_disarm_required": true,
+        "live_trading_authorized": false,
+        "manual_arming_required": true,
+        "network_access": false,
+        "no_autonomous_reentry": true,
+        "no_retry_loop": true,
+        "one_shot_only": true,
+        "operator_review_required": true,
+        "order_execution_enabled": false,
+        "review_certificate_only": true
+      },
+      "source_summary": {
+        "demo_alias_used": "demo_validation_contract",
+        "one_shot_alias_used": "one_shot_exception_package"
+      },
+      "warnings": []
+    },
+    "live_trading_authorized": false,
+    "mode": "LOCAL_APPLY",
+    "next_safe_action": "collect_and_align_chain_stages",
+    "one_shot_exception_package": {
+      "blockers": [
+        "demo_contract_not_complete",
+        "missing_live_readiness_candidate",
+        "missing_approval_trace",
+        "missing_risk_limits",
+        "missing_kill_switch_proof",
+        "missing_rollback_proof",
+        "missing_reconciliation_proof",
+        "missing_external_runtime_connector_proof",
+        "missing_credential_boundary_proof",
+        "missing_account_boundary_proof",
+        "missing_replayability_proof",
+        "missing_final_disarm_proof",
+        "missing_one_shot_controls",
+        "missing_evidence_freshness",
+        "missing_post_trade_journal_path",
+        "demo_contract_not_complete"
+      ],
+      "exception_package_completed": true,
+      "exception_package_status": "ONE_SHOT_EXCEPTION_BLOCKED",
+      "live_micro_trade_review_ready": false,
+      "next_safe_action": "resolve_blockers_before_review",
+      "package_summary": {
+        "control_summary": {},
+        "maximum_evidence_age_minutes": 60.0,
+        "status": "ONE_SHOT_EXCEPTION_BLOCKED"
+      },
+      "proof_summary": {
+        "evidence_freshness_ok": false,
+        "kill_switch_present": false,
+        "reconciliation_present": false,
+        "rollback_present": false
+      },
+      "required_next_packets": [
+        "clear_unsafe_conditions",
+        "revalidate_evidence_inputs",
+        "restore_authorization_controls"
+      ],
+      "risk_summary": {
+        "daily_loss_cap": -1.0,
+        "maximum_loss": -1.0,
+        "order_type": "",
+        "risk_limits": {},
+        "stop_loss": -1.0,
+        "units_or_notional_limit": -1.0
+      },
+      "safety": {
+        "account_identifiers_accessed": false,
+        "broker_connection_active": false,
+        "capital_allocated": false,
+        "credentials_accessed": false,
+        "final_disarm_required": true,
+        "live_trading_authorized": false,
+        "manual_arming_required": true,
+        "network_access": false,
+        "no_autonomous_reentry": true,
+        "no_retry_loop": true,
+        "one_shot_only": true,
+        "operator_review_required": true,
+        "order_execution_enabled": false
+      },
+      "warnings": []
+    },
+    "orchestrator_payload": {
+      "blockers": [
+        "demo_validation_contract_not_complete",
+        "one_shot_exception_package_not_review_ready",
+        "live_review_certificate_not_review_ready",
+        "missing_live_readiness_candidate",
+        "missing_human_review_ready"
+      ],
+      "chain_summary": {
+        "candidate_demo_review": {
+          "present": false,
+          "selected_candidate_id": "",
+          "selected_direction": "",
+          "selected_strategy": "",
+          "verdict": ""
+        },
+        "certificate_status": "LIVE_REVIEW_CERTIFICATE_INCOMPLETE",
+        "cross_stage_conflict": false,
+        "demo_status": "DEMO_CONTRACT_MORE_EVIDENCE_REQUIRED",
+        "one_shot_status": "ONE_SHOT_EXCEPTION_BLOCKED"
+      },
+      "human_live_review_ready": false,
+      "live_micro_trade_review_ready": false,
+      "live_trading_authorized": false,
+      "next_safe_action": "collect_and_align_chain_stages",
+      "readiness_summary": {
+        "candidate_demo_review_blocker": null,
+        "candidate_demo_review_continue": false,
+        "candidate_demo_review_incomplete_evidence": false,
+        "candidate_demo_review_ready": false,
+        "candidate_demo_review_rejected": false,
+        "certificate_ready": false,
+        "demo_ready": false,
+        "human_review_ready": false,
+        "live_readiness_candidate": false,
+        "one_shot_ready": false,
+        "review_ready": false,
+        "selected_candidate_id": "",
+        "selected_direction": "",
+        "selected_strategy": ""
+      },
+      "required_next_packets": [
+        "collect_missing_chain_outputs",
+        "repair_stage_consistency",
+        "retest_readiness"
+      ],
+      "review_chain_completed": false,
+      "review_chain_status": "REVIEW_CHAIN_INCOMPLETE",
+      "safety": {
+        "account_identifiers_accessed": false,
+        "broker_connection_active": false,
+        "capital_allocated": false,
+        "credentials_accessed": false,
+        "execution_authority_granted": false,
+        "final_disarm_required": true,
+        "live_trading_authorized": false,
+        "manual_arming_required": true,
+        "network_access": false,
+        "no_autonomous_reentry": true,
+        "no_retry_loop": true,
+        "one_shot_only": true,
+        "operator_review_required": true,
+        "order_execution_enabled": false,
+        "review_chain_only": true
+      },
+      "stage_summary": {
+        "candidate_demo_review": {
+          "blockers": [],
+          "present": false,
+          "verdict": ""
+        },
+        "certificate": {
+          "completed": false,
+          "present": true,
+          "status": "LIVE_REVIEW_CERTIFICATE_INCOMPLETE"
+        },
+        "demo": {
+          "completed": false,
+          "present": true,
+          "status": "DEMO_CONTRACT_MORE_EVIDENCE_REQUIRED"
+        },
+        "one_shot": {
+          "completed": true,
+          "present": true,
+          "status": "ONE_SHOT_EXCEPTION_BLOCKED"
+        }
+      },
+      "warnings": []
+    },
+    "packet_id": "AIOS_FOREX_REVIEW_READY_STAGE_CHAIN_CONTINUITY_V1",
+    "proof_bundle_ready_for_candidate_bridge": true,
+    "remaining_blockers": [
+      "walk_forward_failed",
+      "missing_replay_proof",
+      "missing_reconciliation_proof",
+      "missing_rollback_proof",
+      "missing_demo_validation_proof",
+      "paper_evidence_not_ready",
+      "mitigation_worsened",
+      "missing_validation_results",
+      "candidate_not_approved_for_demo_validation",
+      "demo_contract_not_complete",
+      "missing_live_readiness_candidate",
+      "missing_approval_trace",
+      "missing_risk_limits",
+      "missing_kill_switch_proof",
+      "missing_external_runtime_connector_proof",
+      "missing_credential_boundary_proof",
+      "missing_account_boundary_proof",
+      "missing_replayability_proof",
+      "missing_final_disarm_proof",
+      "missing_one_shot_controls",
+      "missing_evidence_freshness",
+      "missing_post_trade_journal_path",
+      "demo_validation_contract_not_complete",
+      "one_shot_exception_package_not_review_ready",
+      "stale_or_incomplete_evidence",
+      "live_review_certificate_not_review_ready",
+      "missing_human_review_ready"
+    ],
+    "review_bundle": {
+      "blockers": [
+        "missing_replay_proof",
+        "missing_reconciliation_proof",
+        "missing_rollback_proof",
+        "missing_demo_validation_proof",
+        "walk_forward_failed",
+        "paper_evidence_not_ready",
+        "mitigation_worsened"
+      ],
+      "candidate_id": "c1-eur-buy",
+      "direction": "long",
+      "metrics": {
+        "expectancy": 200.0,
+        "max_drawdown": 0.0,
+        "mitigation_status": "worse",
+        "paper_evidence_status": "pending",
+        "profit_factor": 999.0,
+        "sample_size": 21,
+        "walk_forward_status": "fail",
+        "win_rate": 1.0
+      },
+      "next_safe_action": "Collect missing/valid proofs and refresh stale evidence before rerunning review.",
+      "pair": "EURUSD",
+      "proofs": {
+        "demo_validation": {
+          "evidence": false,
+          "reason": "explicit_false",
+          "status": false
+        },
+        "freshness": {
+          "evidence": {
+            "age_hours": 0.0,
+            "timestamp": "2026-06-22T21:25:10.557356+00:00"
+          },
+          "reason": null,
+          "status": true
+        },
+        "kill_switch": {
+          "evidence": true,
+          "reason": null,
+          "status": true
+        },
+        "reconciliation": {
+          "evidence": false,
+          "reason": "explicit_false",
+          "status": false
+        },
+        "replay": {
+          "evidence": false,
+          "reason": "explicit_false",
+          "status": false
+        },
+        "risk": {
+          "evidence": true,
+          "reason": null,
+          "status": true
+        },
+        "rollback": {
+          "evidence": false,
+          "reason": "explicit_false",
+          "status": false
+        }
+      },
+      "strategy": "paper_long_run_supervisor_v2",
+      "thresholds": {
+        "max_drawdown": 0.12,
+        "max_freshness_age_hours": 30,
+        "min_expectancy": 0.0,
+        "min_profit_factor": 1.1,
+        "min_sample_size": 30,
+        "min_win_rate": 0.4,
+        "require_all_proofs": true,
+        "require_mitigation_not_worse": true,
+        "require_walk_forward_pass": true
+      },
+      "verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+      "walk_forward": "fail",
+      "walk_forward_detail": "walk-forward evidence materially failed"
+    },
+    "review_chain_blockers": [
+      "demo_validation_contract_not_complete",
+      "one_shot_exception_package_not_review_ready",
+      "live_review_certificate_not_review_ready",
+      "missing_live_readiness_candidate",
+      "missing_human_review_ready"
+    ],
+    "review_chain_next_safe_action": "collect_and_align_chain_stages",
+    "review_chain_required_next_packets": [
+      "collect_missing_chain_outputs",
+      "repair_stage_consistency",
+      "retest_readiness"
+    ],
+    "review_chain_status": "REVIEW_CHAIN_INCOMPLETE",
+    "safety": {
+      "account_id_present": false,
+      "broker_connected": false,
+      "credentials_used": false,
+      "demo_trading": false,
+      "live_trading": false,
+      "live_trading_authorized": false,
+      "network_used": false,
+      "order_execution": false,
+      "paper_only": true
+    },
+    "selected_candidate_id": "c1-eur-buy",
+    "selected_direction": "LONG",
+    "selected_strategy": "paper_long_run_supervisor_v2",
+    "source_candidate_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+    "source_modules": [
+      "automation/forex_engine/candidate_intake_demo_review_bridge.py",
+      "automation/forex_engine/canonical_demo_review_evidence_bridge.py",
+      "automation/forex_engine/review_chain_orchestrator.py"
+    ],
+    "source_proof_bundle_status": "PROOF_BUNDLE_COMPLETE"
+  },
+  "live_readiness_pct": 33.33,
+  "live_trading_authorized": false,
+  "mode": "LOCAL_APPLY",
+  "next_safe_action": "collect_and_align_chain_stages",
+  "one_shot_package_present": true,
+  "packet_id": "AIOS_FOREX_READINESS_STATE_RECALCULATION_V1",
+  "promotion_readiness_pct": 40.0,
+  "proof_bundle_consumed": true,
+  "readiness_certificate_present": false,
+  "review_chain_ready": false,
+  "review_state": "REVIEW_CHAIN_INCOMPLETE",
+  "safety": {
+    "account_id_present": false,
+    "broker_connected": false,
+    "credentials_used": false,
+    "demo_trading": false,
+    "is_safe": true,
+    "live_trading": false,
+    "live_trading_authorized": false,
+    "network_used": false,
+    "order_execution": false,
+    "paper_only": true,
+    "safety_gaps": []
+  }
+}

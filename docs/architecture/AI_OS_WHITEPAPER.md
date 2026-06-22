@@ -162,16 +162,16 @@ Every use case follows the same rule: authority first, scope second, validation 
 
 Trading Lab is the first production vertical.
 
-AI_OS may help humans build a paper-only trading environment by:
+AI_OS may help humans build a paper-first trading environment by:
 
 - separating research from execution
 - validating signal and risk workflows
 - tracking paper results and latency
 - preserving broker boundaries
 - producing operator-readable evidence
-- keeping live execution disabled unless a future reviewed policy explicitly approves it
+- keeping general live execution blocked unless a reviewed, explicit, governed exception applies
 
-AI_OS must not place real trades, handle broker credentials, enable live execution, or route real orders. LLMs must not be placed directly in live order execution paths.
+General live trading remains blocked. Broker credentials, account identifiers, real orders, webhooks, schedulers, daemons, and uncontrolled automation remain blocked. A single governed live micro-trade exception may exist only through `AIOS_FOREX_FINAL_LIVE_OPERATOR_BRIDGE_V1`, with explicit human approval, runtime-only credentials, one-order-only enforcement, micro-size enforcement, stop loss, take profit, max loss gate, daily stop gate, kill-switch state validation, sanitized evidence, and no credential or account persistence. LLMs must not be placed directly in live order execution paths.
 
 ## Long-Term Direction
 

@@ -1,0 +1,33 @@
+{
+  "schema": "AIOS_LIVE_OPERATOR_PANEL_V1_EXAMPLE",
+  "fixture_data": true,
+  "broker_call_performed": false,
+  "order_executed": false,
+  "credentials_present": false,
+  "account_id_present": false,
+  "production_authority": false,
+  "mode": "GOVERNED_SINGLE_LIVE_MICRO_TRADE_EXCEPTION",
+  "live_bridge_status": "FINAL_LIVE_OPERATOR_BRIDGE_REVIEW_REQUIRED",
+  "balance": 10000.0,
+  "equity": 10000.0,
+  "realized_pl": 0.0,
+  "open_risk": 0.0,
+  "active_trades": 0,
+  "instrument": "EUR_USD",
+  "side": "BUY",
+  "units": 1000,
+  "stop_loss": "fixture_required_not_live",
+  "take_profit": "fixture_required_not_live",
+  "max_loss_gate": "CLEAR",
+  "daily_stop_gate": "CLEAR",
+  "kill_switch": "DISABLED",
+  "broker_connector_status": "OANDA_LIVE_CONNECTOR_CONFIG_REVIEW_REQUIRED",
+  "evidence_freshness": "fixture_only_not_runtime",
+  "blockers": [
+    "protected_live_action_not_authorized_in_dashboard",
+    "dashboard_cannot_place_order",
+    "runtime_credentials_not_present"
+  ],
+  "next_safe_action": "Review sanitized evidence, then use a separate protected live action packet if Anthony explicitly authorizes runtime execution."
+}
+
