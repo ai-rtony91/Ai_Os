@@ -57,11 +57,35 @@ def test_oos_expanded_and_low_vol_cached_by_default(monkeypatch: pytest.MonkeyPa
     assert calls["low_vol"] == 1
 
 
-def test_opportunity_capture_cache_path_is_registered() -> None:
+def test_opportunity_capture_cache_path_is_registered(monkeypatch: pytest.MonkeyPatch) -> None:
     cache.clear_cache()
+    def fake_builder(*_args, **_kwargs):
+        return {
+            "mode": "PAPER_ONLY",
+            "blockers": [],
+            "opportunity_capture": {"aggregate_paper_pnl": 0.0},
+            "combined_stress_oos_gate": {
+                "stress_classification": "PAPER_FORWARD_READY",
+                "oos_classification": "PAPER_FORWARD_READY",
+                "combined_classification": "PAPER_FORWARD_READY",
+                "blockers": [],
+            },
+            "risk_governor": {"classification": "PAPER_FORWARD_READY", "blockers": []},
+            "expanded_oos": {"classification": "PAPER_FORWARD_READY", "blockers": [], "live_ready": False},
+            "oos_repair": {"repaired_classification": "PAPER_FORWARD_READY"},
+            "stress_repair": {"stress_repair_status": "PAPER_FORWARD_READY"},
+        }
+
+    monkeypatch.setattr(
+        cache.paper_forward_evidence_v2,
+        "build_paper_forward_evidence_v2",
+        fake_builder,
+    )
+
     input_bundle = cache.get_paper_forward_v2_bundle()
     assert cache.get_opportunity_capture(input_bundle)["mode"] == "PAPER_ONLY"
     assert cache.get_opportunity_capture(input_bundle)["mode"] == "PAPER_ONLY"
+    cache.clear_cache()
 
 
 def test_known_evidence_paths() -> None:
@@ -71,8 +95,32 @@ def test_known_evidence_paths() -> None:
     assert cache.KNOWN_EVIDENCE_PATHS["opportunity_capture"].endswith("opportunity_capture.py")
 
 
-def test_cache_speed_smoke_for_default_bundle() -> None:
+def test_cache_speed_smoke_for_default_bundle(monkeypatch: pytest.MonkeyPatch) -> None:
     cache.clear_cache()
+    calls = {"count": 0}
+
+    def fake_builder(*_args, **_kwargs):
+        calls["count"] += 1
+        return {
+            "mode": "PAPER_ONLY",
+            "fixture_count": 10,
+            "fixture_ids": [],
+            "combined_stress_oos_gate": {
+                "stress_classification": "PAPER_FORWARD_READY",
+                "oos_classification": "PAPER_FORWARD_READY",
+                "combined_classification": "PAPER_FORWARD_READY",
+                "blockers": [],
+            },
+            "risk_governor": {"classification": "PAPER_FORWARD_READY", "blockers": []},
+            "expanded_oos": {"classification": "PAPER_FORWARD_READY", "blockers": [], "live_ready": False},
+            "oos_repair": {"repaired_classification": "PAPER_FORWARD_READY"},
+            "stress_repair": {"stress_repair_status": "PAPER_FORWARD_READY"},
+            "blockers": [],
+            "opportunity_capture": {"aggregate_paper_pnl": 0.0},
+        }
+
+    monkeypatch.setattr(cache.paper_forward_evidence_v2, "build_paper_forward_evidence_v2", fake_builder)
+
     start = time.perf_counter()
     _ = cache.get_paper_forward_v2_bundle()
     first_ms = (time.perf_counter() - start) * 1000.0
@@ -80,5 +128,6 @@ def test_cache_speed_smoke_for_default_bundle() -> None:
     start = time.perf_counter()
     _ = cache.get_paper_forward_v2_bundle()
     second_ms = (time.perf_counter() - start) * 1000.0
-
+    assert calls["count"] == 1
     assert second_ms <= first_ms + 5.0
+    cache.clear_cache()
