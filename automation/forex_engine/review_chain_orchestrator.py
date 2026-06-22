@@ -2,6 +2,13 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping
 
+from automation.forex_engine.canonical_demo_review_evidence_bridge import (
+    BLOCKED_INCOMPLETE_EVIDENCE,
+    DEMO_REVIEW_READY,
+    PAPER_CONTINUE,
+    REJECTED,
+)
+
 REVIEW_CHAIN_BLOCKED = "REVIEW_CHAIN_BLOCKED"
 REVIEW_CHAIN_INCOMPLETE = "REVIEW_CHAIN_INCOMPLETE"
 REVIEW_CHAIN_REVIEW_READY = "REVIEW_CHAIN_REVIEW_READY"
@@ -20,6 +27,13 @@ def _read_first(mapping: Mapping[str, Any], aliases: Iterable[str], default: Any
         if key in mapping:
             return mapping[key]
     return default
+
+
+def _read_optional_bool(mapping: Mapping[str, Any], aliases: Iterable[str]) -> tuple[bool | None, bool]:
+    for key in aliases:
+        if key in mapping:
+            return _to_bool(mapping[key], default=False), True
+    return None, False
 
 
 def _to_bool(value: Any, default: bool = False) -> bool:
@@ -42,6 +56,46 @@ def _as_map(value: Any) -> Mapping[str, Any] | None:
 def _append(blockers: list[str], value: str) -> None:
     if value not in blockers:
         blockers.append(value)
+
+
+def _read_candidate_demo_review_payload(state: Mapping[str, Any]) -> Mapping[str, Any] | None:
+    for key in (
+        "candidate_demo_review_bridge",
+        "candidate_intake_demo_review",
+        "demo_review_bundle",
+        "canonical_demo_review_bundle",
+    ):
+        payload = _as_map(state.get(key))
+        if payload is not None:
+            return payload
+    return None
+
+
+def _normalize_candidate_demo_review_payload(payload: Mapping[str, Any]) -> dict[str, Any]:
+    nested = _as_map(payload.get("demo_review_bundle")) or _as_map(payload.get("canonical_demo_review_bundle"))
+    source = nested if nested is not None else payload
+    blockers = _read_first(source, ("blockers",), default=[])
+    if not isinstance(blockers, list):
+        blockers = list(blockers) if blockers is not None else []
+
+    return {
+        "present": True,
+        "verdict": str(_read_first(source, ("verdict",), default="")).strip(),
+        "blockers": blockers,
+        "next_safe_action": str(_read_first(source, ("next_safe_action",), default="")),
+        "selected_candidate_id": str(
+            _read_first(
+                payload,
+                (
+                    "selected_candidate_id",
+                    "candidate_id",
+                ),
+                default="",
+            )
+        ),
+        "selected_strategy": str(_read_first(payload, ("selected_strategy", "strategy"), default="")),
+        "selected_direction": str(_read_first(payload, ("selected_direction", "direction"), default="")),
+    }
 
 
 def _next_action_and_packets(status: str) -> tuple[str, list[str]]:
@@ -75,6 +129,13 @@ def orchestrate_forex_review_chain(
 
     blockers: list[str] = []
     warnings: list[str] = []
+
+    candidate_review_payload = _read_candidate_demo_review_payload(state)
+    candidate_review = (
+        _normalize_candidate_demo_review_payload(candidate_review_payload)
+        if candidate_review_payload is not None
+        else None
+    )
 
     demo = _as_map(_read_first(state, ("demo_validation_contract", "demo_contract"), default=None))
     if demo is None:
@@ -137,9 +198,20 @@ def orchestrate_forex_review_chain(
         elif cert_status != LIVE_REVIEW_CERTIFICATE_REVIEW_READY or not cert_completed or not cert_human_ready or not cert_trade_ready:
             _append(blockers, "live_review_certificate_not_review_ready")
 
-    live_readiness_candidate = _to_bool(_read_first(state, ("live_readiness_candidate", "candidate_ready"), default=False), default=False)
-    if not live_readiness_candidate:
-        _append(blockers, "missing_live_readiness_candidate")
+    state_live_readiness_candidate, state_live_readiness_present = _read_optional_bool(
+        state,
+        ("live_readiness_candidate", "candidate_ready"),
+    )
+    if candidate_review is not None and candidate_review.get("verdict") == DEMO_REVIEW_READY:
+        if state_live_readiness_present and not state_live_readiness_candidate:
+            live_readiness_candidate = False
+            _append(blockers, "missing_live_readiness_candidate")
+        else:
+            live_readiness_candidate = True
+    else:
+        live_readiness_candidate = bool(state_live_readiness_candidate)
+        if not live_readiness_candidate:
+            _append(blockers, "missing_live_readiness_candidate")
 
     human_review_ready = _to_bool(_read_first(state, ("human_live_review_ready", "human_review_ready"), default=False), default=False)
     if not human_review_ready:
@@ -182,7 +254,11 @@ def orchestrate_forex_review_chain(
         default=False,
     )
     order_execution = _to_bool(
-        _read_first(state, ("unsafe_order_execution_detected", "order_execution_enabled_detected", "order_execution_enabled"), default=False),
+        _read_first(
+            state,
+            ("unsafe_order_execution_detected", "order_execution_enabled_detected", "order_execution_enabled"),
+            default=False,
+        ),
         default=False,
     )
     live_trading_auth = _to_bool(
@@ -223,6 +299,19 @@ def orchestrate_forex_review_chain(
         if flag:
             _append(blockers, blocker)
 
+    candidate_bridge_blocker: str | None = None
+    candidate_bridge_incomplete = False
+    if candidate_review is not None:
+        candidate_verdict = candidate_review.get("verdict", "")
+        if candidate_verdict == REJECTED:
+            candidate_bridge_blocker = "candidate_demo_review_rejected"
+        elif candidate_verdict == PAPER_CONTINUE:
+            candidate_bridge_blocker = "candidate_demo_review_continue"
+            candidate_bridge_incomplete = True
+        elif candidate_verdict == BLOCKED_INCOMPLETE_EVIDENCE:
+            candidate_bridge_blocker = "candidate_demo_review_incomplete_evidence"
+            candidate_bridge_incomplete = True
+
     if any(blocker in blockers for blocker in ("demo_validation_contract_rejected", "one_shot_exception_package_rejected", "live_review_certificate_rejected")):
         review_status = REVIEW_CHAIN_REJECTED
     elif any(
@@ -239,6 +328,10 @@ def orchestrate_forex_review_chain(
         )
     ):
         review_status = REVIEW_CHAIN_BLOCKED
+    elif candidate_bridge_blocker == "candidate_demo_review_rejected":
+        review_status = REVIEW_CHAIN_REJECTED
+    elif candidate_bridge_blocker in {"candidate_demo_review_continue", "candidate_demo_review_incomplete_evidence"}:
+        review_status = REVIEW_CHAIN_INCOMPLETE
     elif any(
         blocker in blockers
         for blocker in (
@@ -259,6 +352,11 @@ def orchestrate_forex_review_chain(
         review_status = REVIEW_CHAIN_INCOMPLETE
     else:
         review_status = REVIEW_CHAIN_REVIEW_READY
+
+    if candidate_bridge_blocker is not None:
+        _append(blockers, candidate_bridge_blocker)
+        if candidate_bridge_incomplete:
+            _append(blockers, "candidate_demo_review_blocked")
 
     chain_ready = review_status == REVIEW_CHAIN_REVIEW_READY
     next_safe_action, required_next_packets = _next_action_and_packets(review_status)
@@ -299,11 +397,23 @@ def orchestrate_forex_review_chain(
             "one_shot_status": one_shot_status,
             "certificate_status": cert_status,
             "cross_stage_conflict": bool("cross_stage_status_conflict" in blockers),
+            "candidate_demo_review": {
+                "present": candidate_review is not None,
+                "verdict": candidate_review.get("verdict", "") if candidate_review else "",
+                "selected_candidate_id": candidate_review.get("selected_candidate_id", "") if candidate_review else "",
+                "selected_strategy": candidate_review.get("selected_strategy", "") if candidate_review else "",
+                "selected_direction": candidate_review.get("selected_direction", "") if candidate_review else "",
+            },
         },
         "stage_summary": {
             "demo": {"present": demo is not None, "completed": demo_completed, "status": demo_status},
             "one_shot": {"present": one_shot is not None, "completed": one_shot_completed, "status": one_shot_status},
             "certificate": {"present": cert is not None, "completed": cert_completed, "status": cert_status},
+            "candidate_demo_review": {
+                "present": candidate_review is not None,
+                "verdict": candidate_review.get("verdict", "") if candidate_review else "",
+                "blockers": list(candidate_review.get("blockers", [])) if candidate_review else [],
+            },
         },
         "readiness_summary": {
             "review_ready": chain_ready,
@@ -312,6 +422,15 @@ def orchestrate_forex_review_chain(
             "certificate_ready": cert_status == LIVE_REVIEW_CERTIFICATE_REVIEW_READY and cert_completed and cert_human_ready and cert_trade_ready,
             "live_readiness_candidate": live_readiness_candidate,
             "human_review_ready": human_review_ready,
+            "candidate_demo_review_ready": candidate_review is not None and candidate_review.get("verdict") == DEMO_REVIEW_READY,
+            "candidate_demo_review_continue": candidate_bridge_incomplete,
+            "candidate_demo_review_rejected": candidate_review is not None and candidate_review.get("verdict") == REJECTED,
+            "candidate_demo_review_incomplete_evidence": candidate_review is not None
+            and candidate_review.get("verdict") == BLOCKED_INCOMPLETE_EVIDENCE,
+            "candidate_demo_review_blocker": candidate_bridge_blocker,
+            "selected_candidate_id": candidate_review.get("selected_candidate_id", "") if candidate_review else "",
+            "selected_strategy": candidate_review.get("selected_strategy", "") if candidate_review else "",
+            "selected_direction": candidate_review.get("selected_direction", "") if candidate_review else "",
         },
         "safety": safety,
     }

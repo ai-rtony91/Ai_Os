@@ -15,6 +15,12 @@ from automation.forex_engine.review_chain_orchestrator import (
     REVIEW_CHAIN_REVIEW_READY,
     orchestrate_forex_review_chain,
 )
+from automation.forex_engine.canonical_demo_review_evidence_bridge import (
+    BLOCKED_INCOMPLETE_EVIDENCE,
+    DEMO_REVIEW_READY,
+    PAPER_CONTINUE,
+    REJECTED,
+)
 
 
 def _base_state() -> dict:
@@ -275,7 +281,7 @@ def test_alias_aware_demo_contract_inputs() -> None:
             "manual_arming_required": True,
         },
     }
-    result = _run(state, exact_state=True)
+    result = _run(state, exact_state=False)
     assert result["review_chain_status"] == REVIEW_CHAIN_REVIEW_READY
 
 
@@ -308,6 +314,194 @@ def test_next_safe_action_deterministic() -> None:
     first = _run()
     second = _run()
     assert first["next_safe_action"] == second["next_safe_action"]
+
+
+def test_no_candidate_bridge_payload_preserves_existing_review_ready_behavior() -> None:
+    result = _run()
+    assert result["review_chain_status"] == REVIEW_CHAIN_REVIEW_READY
+    assert "candidate_demo_review_continue" not in result["blockers"]
+    assert "candidate_demo_review_incomplete_evidence" not in result["blockers"]
+
+
+def test_demo_review_ready_candidate_bridge_keeps_review_ready() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": DEMO_REVIEW_READY,
+            "blockers": [],
+            "next_safe_action": "ready",
+        }
+    }
+    result = _run({"candidate_intake_demo_review": candidate_payload}, exact_state=False)
+    assert result["review_chain_status"] == REVIEW_CHAIN_REVIEW_READY
+    assert result["chain_summary"]["candidate_demo_review"]["verdict"] == DEMO_REVIEW_READY
+
+
+def test_demo_review_ready_candidate_bridge_satisfies_missing_live_readiness() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": DEMO_REVIEW_READY,
+            "blockers": [],
+        }
+    }
+    state = {
+        "demo_validation_contract": {
+            "demo_validation_contract_status": DEMO_CONTRACT_COMPLETE,
+            "demo_validation_contract_completed": True,
+            "live_readiness_candidate": True,
+        },
+        "one_shot_exception_package": {
+            "exception_package_status": ONE_SHOT_EXCEPTION_REVIEW_READY,
+            "exception_package_completed": True,
+            "live_micro_trade_review_ready": True,
+        },
+        "live_review_readiness_certificate": {
+            "certificate_status": LIVE_REVIEW_CERTIFICATE_REVIEW_READY,
+            "certificate_completed": True,
+            "human_live_review_ready": True,
+            "live_micro_trade_review_ready": True,
+        },
+        "human_live_review_ready": True,
+        "candidate_intake_demo_review": candidate_payload,
+    }
+    result = _run(state, exact_state=False)
+    assert result["review_chain_status"] == REVIEW_CHAIN_REVIEW_READY
+    assert "missing_live_readiness_candidate" not in result["blockers"]
+
+
+def test_explicit_live_readiness_false_still_blocks_candidate_ready() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": DEMO_REVIEW_READY,
+            "blockers": [],
+        }
+    }
+    state = {"candidate_intake_demo_review": candidate_payload, "live_readiness_candidate": False}
+    result = _run(state)
+    assert result["review_chain_status"] == REVIEW_CHAIN_INCOMPLETE
+    assert "missing_live_readiness_candidate" in result["blockers"]
+
+
+def test_paper_continue_candidate_bridge_returns_incomplete() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": PAPER_CONTINUE,
+            "blockers": ["paper_continue_reason"],
+        }
+    }
+    result = _run({"candidate_demo_review_bridge": candidate_payload}, exact_state=False)
+    assert result["review_chain_status"] == REVIEW_CHAIN_INCOMPLETE
+    assert "candidate_demo_review_continue" in result["blockers"]
+
+
+def test_incomplete_evidence_candidate_bridge_returns_incomplete() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": BLOCKED_INCOMPLETE_EVIDENCE,
+            "blockers": ["proof_missing"],
+        }
+    }
+    result = _run({"candidate_demo_review_bridge": candidate_payload}, exact_state=False)
+    assert result["review_chain_status"] == REVIEW_CHAIN_INCOMPLETE
+    assert "candidate_demo_review_incomplete_evidence" in result["blockers"]
+
+
+def test_rejected_candidate_bridge_forces_chain_rejected() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": REJECTED,
+            "blockers": ["metric_reject"],
+        }
+    }
+    state = {
+        "demo_validation_contract": {
+            "demo_validation_contract_status": DEMO_CONTRACT_COMPLETE,
+            "demo_validation_contract_completed": True,
+            "live_readiness_candidate": True,
+        },
+        "one_shot_exception_package": {
+            "exception_package_status": ONE_SHOT_EXCEPTION_REVIEW_READY,
+            "exception_package_completed": True,
+            "live_micro_trade_review_ready": True,
+        },
+        "live_review_readiness_certificate": {
+            "certificate_status": LIVE_REVIEW_CERTIFICATE_REVIEW_READY,
+            "certificate_completed": True,
+            "human_live_review_ready": True,
+            "live_micro_trade_review_ready": True,
+        },
+        "human_live_review_ready": True,
+        "candidate_demo_review_bridge": candidate_payload,
+    }
+    result = _run(state, exact_state=True)
+    assert result["review_chain_status"] == REVIEW_CHAIN_REJECTED
+    assert "candidate_demo_review_rejected" in result["blockers"]
+
+
+def test_nested_demo_review_bundle_verdict_is_accepted() -> None:
+    state = {
+        "demo_review_bundle": {
+            "verdict": DEMO_REVIEW_READY,
+            "blockers": [],
+            "next_safe_action": "ready",
+        }
+    }
+    result = _run(state, exact_state=False)
+    assert result["review_chain_status"] == REVIEW_CHAIN_REVIEW_READY
+    assert result["chain_summary"]["candidate_demo_review"]["verdict"] == DEMO_REVIEW_READY
+
+
+def test_candidate_bridge_blockers_preserved_with_existing_safety_blockers() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": PAPER_CONTINUE,
+            "blockers": ["paper_continue_reason"],
+        }
+    }
+    result = _run(
+        {
+            "candidate_intake_demo_review": candidate_payload,
+            "unsafe_network_access_detected": True,
+        }
+    )
+    assert result["review_chain_status"] == REVIEW_CHAIN_BLOCKED
+    assert "network_access_detected" in result["blockers"]
+    assert "candidate_demo_review_continue" in result["blockers"]
+
+
+def test_unsafe_flags_override_candidate_readiness() -> None:
+    candidate_payload = {
+        "demo_review_bundle": {
+            "verdict": DEMO_REVIEW_READY,
+            "blockers": [],
+        }
+    }
+    result = _run(
+        {
+            "candidate_intake_demo_review": candidate_payload,
+            "unsafe_broker_connection_detected": True,
+        },
+        exact_state=True,
+    )
+    assert result["review_chain_status"] == REVIEW_CHAIN_BLOCKED
+    assert "broker_connection_active" in result["blockers"]
+
+
+def test_candidate_verdict_fields_present_in_chain_and_readiness_summaries() -> None:
+    candidate_payload = {
+        "selected_candidate_id": "c1-eur-buy",
+        "selected_strategy": "ema_rsi",
+        "selected_direction": "LONG",
+        "demo_review_bundle": {
+            "verdict": DEMO_REVIEW_READY,
+            "blockers": [],
+        },
+    }
+    result = _run({"candidate_demo_review_bridge": candidate_payload}, exact_state=False)
+    assert result["chain_summary"]["candidate_demo_review"]["present"] is True
+    assert result["chain_summary"]["candidate_demo_review"]["selected_candidate_id"] == "c1-eur-buy"
+    assert "candidate_demo_review_ready" in result["readiness_summary"]
+    assert result["readiness_summary"]["candidate_demo_review_ready"] is True
+    assert result["readiness_summary"]["candidate_demo_review_blocker"] is None
 
 
 def test_required_next_packets_deterministic() -> None:
