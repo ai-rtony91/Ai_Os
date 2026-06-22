@@ -5,15 +5,16 @@
 - strategy: `paper_long_run_supervisor_v2`
 - direction: `LONG`
 - closed trade count: `20`
-- score: `300000.00000000`
-- expectation: `200.00`
+- sample-size gate cleared: `True`
+- expectancy: `200.00`
 - profit factor: `999.00`
-- drawdown: `0.00`
+- max drawdown: `0.00`
 - win rate: `1.00`
 - consecutive wins: `20`
 - consecutive losses: `0`
 - promotion status: `PROFIT_OBJECTIVE_READY`
-- blockers: `none`
+- blocker reasons: `none`
 
-## Deterministic result
-- `c1-eur-buy` is the deterministic best candidate from sorted scoring.
+## Safety
+- paper-only: True
+- no broker / no network / no credentials / no account IDs / no order execution / no demo trading / no live trading
