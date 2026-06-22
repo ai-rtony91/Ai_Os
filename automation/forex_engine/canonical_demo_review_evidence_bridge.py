@@ -47,16 +47,25 @@ PROOF_FIELDS = (
     "freshness",
 )
 
+PROOF_ALIASES: dict[str, tuple[str, ...]] = {
+    "replay": ("replay", "replay_proof", "session_replay"),
+    "reconciliation": ("reconciliation", "reconciliation_proof", "recon"),
+    "kill_switch": ("kill_switch", "kill_switch_proof", "killswitch", "kill-switch"),
+    "rollback": ("rollback", "rollback_proof", "roll_back"),
+    "risk": ("risk", "risk_proof", "risk_evidence"),
+    "demo_validation": ("demo_validation", "demo_validation_proof", "demo"),
+    "freshness": ("freshness", "freshness_proof", "evidence_freshness", "evidence_age"),
+}
 
 def _first_match(data: Mapping[str, Any], aliases: Iterable[str]) -> Any:
     for key in aliases:
         if key in data:
-        # Normalize case for dict lookups done by user.
             return data[key]
     lowered = {str(k).lower().replace(" ", "_"): v for k, v in data.items()}
     for key in aliases:
-        if key.lower() in lowered:
-            return lowered[key.lower()]
+        normalized_key = key.lower().replace("-", "_").replace(" ", "_")
+        if normalized_key in lowered:
+            return lowered[normalized_key]
     return None
 
 
@@ -202,15 +211,8 @@ def _normalize_candidate_identity(candidate: Mapping[str, Any]) -> tuple[str, st
 
 def _proof_key_matches(candidate: Mapping[str, Any], proof_name: str) -> bool:
     aliases = {
-        "replay": ("replay", "replay_proof", "session_replay"),
-        "reconciliation": ("reconciliation", "reconciliation_proof", "recon"),
-        "kill_switch": ("kill_switch", "kill_switch_proof", "killswitch"),
-        "rollback": ("rollback", "rollback_proof", "roll_back"),
-        "risk": ("risk", "risk_proof", "risk_evidence"),
-        "demo_validation": ("demo_validation", "demo_validation_proof", "demo"),
-        "freshness": ("freshness", "freshness_proof", "freshness_seconds", "evidence_age"),
-        "walk_forward": ("walk_forward", "walk_forward_proof", "walkforward"),
-        "paper_evidence": ("paper_evidence", "paper_evidence_proof"),
+        "walk_forward": ("walk_forward", "walk_forward_status", "walk_forward_proof", "walkforward_status"),
+        "paper_evidence": ("paper_evidence", "paper_evidence_status", "paper_evidence_proof"),
         "mitigation": ("mitigation", "mitigation_status"),
     }
     lookup = [proof_name] + list(aliases.get(proof_name, ()))
@@ -250,22 +252,9 @@ def build_review_bundle(
     }
 
     proof_values = {
-        "replay": candidate.get("replay") if "replay" in candidate else candidate.get("replay_proof"),
-        "reconciliation": candidate.get("reconciliation") if "reconciliation" in candidate else candidate.get("reconciliation_proof"),
-        "kill_switch": candidate.get("kill_switch") if "kill_switch" in candidate else candidate.get("kill_switch_proof"),
-        "rollback": candidate.get("rollback") if "rollback" in candidate else candidate.get("rollback_proof"),
-        "risk": candidate.get("risk") if "risk" in candidate else candidate.get("risk_proof"),
-        "demo_validation": candidate.get("demo_validation") if "demo_validation" in candidate else candidate.get("demo_validation_proof"),
-        "freshness": candidate.get("freshness") if _proof_key_matches(candidate, "freshness") else candidate.get("freshness_proof"),
+        key: _first_match(candidate, aliases)
+        for key, aliases in PROOF_ALIASES.items()
     }
-
-    # Optional proofs can be normalized from standard aliases but remain explicit.
-    if "walk_forward_status" in candidate:
-        proof_values["walk_forward"] = candidate.get("walk_forward")
-    if "paper_evidence_status" in candidate:
-        proof_values["paper_evidence"] = candidate.get("paper_evidence_status")
-    if "mitigation_status" in candidate:
-        proof_values["mitigation"] = candidate.get("mitigation_status")
 
     proofs = {
         key: _normalize_proof(
@@ -274,7 +263,6 @@ def build_review_bundle(
             now=datetime.now(timezone.utc),
         )
         for key, value in proof_values.items()
-        if value is not None or key in {"replay", "reconciliation", "kill_switch", "rollback"}
     }
 
     # Ensure all PROOF_FIELDS exist in normalized output.
@@ -286,7 +274,9 @@ def build_review_bundle(
     if metrics["walk_forward_status"] is not None:
         metrics["walk_forward_status"] = wf_status_norm if wf_status_norm != "" else metrics["walk_forward_status"]
 
-    blockers: list[str] = []
+    metric_reject_blockers: list[str] = []
+    proof_blockers: list[str] = []
+    continuation_blockers: list[str] = []
 
     expectancy = metrics["expectancy"]
     profit_factor = metrics["profit_factor"]
@@ -306,51 +296,51 @@ def build_review_bundle(
         status = proofs.get(proof_key, {}).get("status", False)
         if proof_key == "freshness":
             if not status:
-                blockers.append("stale_freshness_or_missing")
+                proof_blockers.append("stale_freshness_or_missing")
         elif not status:
-            blockers.append(f"missing_{proof_key}_proof")
+            proof_blockers.append(f"missing_{proof_key}_proof")
 
     # Reject blockers from deterministic thresholds.
     if expectancy is None:
-        blockers.append("missing_expectancy")
+        metric_reject_blockers.append("missing_expectancy")
     elif expectancy <= config.min_expectancy:
-        blockers.append("negative_or_zero_expectancy")
+        metric_reject_blockers.append("negative_or_zero_expectancy")
 
     if profit_factor is None:
-        blockers.append("missing_profit_factor")
+        metric_reject_blockers.append("missing_profit_factor")
     elif profit_factor < config.min_profit_factor:
-        blockers.append("profit_factor_below_minimum")
+        metric_reject_blockers.append("profit_factor_below_minimum")
 
     if max_drawdown is None:
-        blockers.append("missing_max_drawdown")
+        metric_reject_blockers.append("missing_max_drawdown")
     elif max_drawdown > config.max_drawdown:
-        blockers.append("excessive_drawdown")
+        metric_reject_blockers.append("excessive_drawdown")
 
     if win_rate is None:
-        blockers.append("missing_win_rate")
+        metric_reject_blockers.append("missing_win_rate")
     elif win_rate < config.min_win_rate:
-        blockers.append("low_win_rate")
+        metric_reject_blockers.append("low_win_rate")
 
     if _proof_key_matches(candidate, "paper_evidence") and paper_evidence_status is None:
-        blockers.append("missing_paper_evidence_status")
+        proof_blockers.append("missing_paper_evidence_status")
     elif isinstance(paper_evidence_status, str) and paper_evidence_status.strip().lower() not in {"pass", "passed", "ready"}:
-        blockers.append("paper_evidence_not_ready")
+        continuation_blockers.append("paper_evidence_not_ready")
 
     if _proof_key_matches(candidate, "mitigation") and mitigation_status is None:
-        blockers.append("missing_mitigation_status")
+        continuation_blockers.append("missing_mitigation_status")
     elif config.require_mitigation_not_worse and isinstance(mitigation_status, str):
         if mitigation_status.strip().lower() in {"worse", "regression", "declining", "failed"}:
-            blockers.append("mitigation_worsened")
+            continuation_blockers.append("mitigation_worsened")
 
     if config.require_walk_forward_pass and not walk_forward_pass:
         if wf_status_norm == "warn":
-            blockers.append("walk_forward_warning_not_ready")
+            continuation_blockers.append("walk_forward_warning_not_ready")
         elif wf_status_norm == "pending":
-            blockers.append("walk_forward_pending")
+            continuation_blockers.append("walk_forward_pending")
         else:
-            blockers.append("walk_forward_failed")
+            metric_reject_blockers.append("walk_forward_failed")
 
-    if config.require_all_proofs and blockers:
+    if config.require_all_proofs and proof_blockers:
         verdict: Verdict = BLOCKED_INCOMPLETE_EVIDENCE
         next_safe_action = "Collect missing/valid proofs and refresh stale evidence before rerunning review."
         return {
@@ -359,7 +349,7 @@ def build_review_bundle(
             "pair": pair,
             "direction": direction,
             "verdict": verdict,
-            "blockers": blockers,
+            "blockers": proof_blockers + metric_reject_blockers + continuation_blockers,
             "next_safe_action": next_safe_action,
             "metrics": metrics,
             "proofs": proofs,
@@ -368,7 +358,35 @@ def build_review_bundle(
             "walk_forward_detail": wf_msg,
         }
 
-    if expectancy is not None and expectancy < 0:
+    if metric_reject_blockers:
+        verdict = REJECTED
+        if metric_reject_blockers == ["missing_expectancy"]:
+            verdict = BLOCKED_INCOMPLETE_EVIDENCE
+            next_safe_action = "Collect missing expectation evidence and rerun review."
+        elif metric_reject_blockers == ["missing_profit_factor"]:
+            verdict = BLOCKED_INCOMPLETE_EVIDENCE
+            next_safe_action = "Collect missing profit-factor evidence and rerun review."
+        elif metric_reject_blockers == ["missing_max_drawdown"]:
+            verdict = BLOCKED_INCOMPLETE_EVIDENCE
+            next_safe_action = "Collect missing drawdown evidence and rerun review."
+        else:
+            next_safe_action = "Reject candidate and re-optimize candidate metrics."
+        return {
+            "candidate_id": candidate_id,
+            "strategy": strategy,
+            "pair": pair,
+            "direction": direction,
+            "verdict": verdict,
+            "blockers": proof_blockers + metric_reject_blockers + continuation_blockers,
+            "next_safe_action": next_safe_action,
+            "metrics": metrics,
+            "proofs": proofs,
+            "thresholds": asdict(config),
+            "walk_forward": wf_status_norm,
+            "walk_forward_detail": wf_msg,
+        }
+
+    if expectancy is not None and expectancy <= 0:
         verdict = REJECTED
         next_safe_action = "Reject candidate and route to strategy re-optimization."
     elif profit_factor is not None and profit_factor < config.min_profit_factor:
@@ -392,7 +410,7 @@ def build_review_bundle(
     elif (
         expectancy is not None
         and expectancy > config.min_expectancy
-        and not blockers
+        and not proof_blockers
         and walk_forward_pass
         and (sample_size is None or int(sample_size) >= config.min_sample_size)
         and (win_rate is None or float(win_rate) >= config.min_win_rate)
@@ -405,9 +423,8 @@ def build_review_bundle(
 
     # Safety net: any negative expectancy or clear loss gate remains rejected.
     if expectancy is not None and expectancy <= 0 and verdict != REJECTED:
-        if verdict == DEMO_REVIEW_READY:
-            verdict = REJECTED
-            next_safe_action = "Reject candidate due to non-positive expectancy."
+        verdict = REJECTED
+        next_safe_action = "Reject candidate due to non-positive expectancy."
 
     return {
         "candidate_id": candidate_id,
@@ -415,7 +432,7 @@ def build_review_bundle(
         "pair": pair,
         "direction": direction,
         "verdict": verdict,
-        "blockers": blockers,
+        "blockers": proof_blockers + metric_reject_blockers + continuation_blockers,
         "next_safe_action": next_safe_action,
         "metrics": metrics,
         "proofs": proofs,

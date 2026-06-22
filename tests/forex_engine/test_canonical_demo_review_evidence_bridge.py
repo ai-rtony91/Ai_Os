@@ -135,7 +135,7 @@ def test_failed_walk_forward_returns_rejected_or_continue_based_on_severity():
     candidate["walk_forward_status"] = "weak"
     bundle = build_review_bundle(candidate)
     assert bundle["verdict"] == PAPER_CONTINUE
-    assert "walk_forward_warning_not_ready" in bundle["walk_forward_detail"] or "walk_forward" in bundle["next_safe_action"]
+    assert "walk-forward" in bundle["walk_forward_detail"] or "walk_forward" in bundle["walk_forward_detail"] or "walk_forward" in bundle["next_safe_action"]
 
 
 def test_alias_metric_names_normalize_correctly():

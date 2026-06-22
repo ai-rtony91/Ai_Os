@@ -82,3 +82,13 @@ The module normalizes candidate metrics/proofs and emits a single bundled verdic
 - This implementation introduces no demo trade.
 - This implementation introduces no live trade.
 - This implementation introduces no order execution.
+
+## Repair Note (V1 Repair Packet)
+- Fixed freshness proof alias bug by routing `freshness_proof` (and `evidence_freshness`/`evidence_age`) through the shared proof alias helper.
+- Reworked proof lookup to use a single alias-aware helper for all mandatory proofs instead of one-off chains.
+- Corrected verdict precedence to enforce:
+  - `BLOCKED_INCOMPLETE_EVIDENCE` only for missing/stale mandatory proofs or hard missing core evidence,
+  - `REJECTED` for hard metric and walk-forward failures,
+  - `PAPER_CONTINUE` for weak/marginal signal maturity or sample-size insufficiency,
+  - `DEMO_REVIEW_READY` only when all hard gates pass.
+- Validation rerun status is tracked in the latest repair pass.
