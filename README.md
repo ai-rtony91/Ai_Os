@@ -6,7 +6,7 @@ It is not an autonomous replacement for human judgment. It is a structured proje
 
 AI_OS aims for industrial-standard, professional-grade repo hygiene and automation discipline: scoped changes, traceable evidence, validation before claims, and clear safety boundaries by default.
 
-Trading Lab is the first production vertical. It is paper-only. Live broker execution, real orders, broker credentials, and uncontrolled automation are blocked.
+Trading Lab is the first production vertical. General live trading remains blocked. Broker credentials, account identifiers, real orders, webhooks, schedulers, daemons, and uncontrolled automation remain blocked. A single governed live micro-trade exception may exist only through `AIOS_FOREX_FINAL_LIVE_OPERATOR_BRIDGE_V1` with explicit human approval, runtime-only credentials, one-order-only enforcement, micro-size enforcement, stop loss, take profit, max loss gate, daily stop gate, kill-switch state validation, sanitized evidence, and no credential or account persistence.
 
 ## Current Status
 
@@ -17,7 +17,7 @@ Trading Lab is the first production vertical. It is paper-only. Live broker exec
   - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
   - `C:\Dev\Ai.Os_OLD_DO_NOT_USE`
   - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
-- Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, and paper-only Trading Lab
+- Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, paper-first Trading Lab, and governed live-exception bridge evidence
 - Operating model: Phase -> Stage -> Workload Pack -> Task ID -> DRY_RUN/APPLY -> validation -> selective commit
 - Commit/push rule: never commit or push unless explicitly approved
 
@@ -239,7 +239,7 @@ Use a branch for a meaningful work batch. Finish, validate, report, and close th
 
 ## Trading Lab Boundary
 
-Trading Lab is the first production vertical, but it remains paper-only.
+Trading Lab is the first production vertical. General live trading remains blocked by default.
 
 Allowed when explicitly scoped:
 
@@ -250,11 +250,17 @@ Allowed when explicitly scoped:
 - paper route previews
 - local-only telemetry
 
+Single governed live exception:
+
+- A single governed live micro-trade exception may exist only through `AIOS_FOREX_FINAL_LIVE_OPERATOR_BRIDGE_V1`.
+- It requires explicit human approval, runtime-only credentials, one-order-only enforcement, micro-size enforcement, stop loss, take profit, max loss gate, daily stop gate, kill-switch state validation, sanitized evidence, and no credential or account persistence.
+
 Blocked:
 
-- live broker execution
-- real orders
-- OANDA integration
+- general live broker execution
+- real orders outside the governed single-live-micro-trade exception
+- broker credentials or account identifiers in repo files
+- webhooks, schedulers, daemons, and uncontrolled automation
 - broker credentials or API keys
 - LLMs directly in live order execution paths
 

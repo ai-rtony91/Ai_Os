@@ -1,0 +1,89 @@
+{
+  "candidate_bridge_verdict": "REJECTED",
+  "canonical_review_bundle": {
+    "blockers": [
+      "missing_sample_size",
+      "missing_expectancy",
+      "missing_profit_factor",
+      "missing_max_drawdown",
+      "missing_win_rate",
+      "paper_evidence_not_ready",
+      "walk_forward_pending"
+    ],
+    "candidate": {
+      "candidate_id": "c1-eur-buy"
+    },
+    "candidate_id": "c1-eur-buy",
+    "next_safe_action": "Reject candidate and re-optimize candidate metrics.",
+    "safety_gaps": [],
+    "verdict": null
+  },
+  "closed_blockers": [
+    "missing_demo_validation_proof",
+    "missing_reconciliation_proof",
+    "missing_replay_proof",
+    "missing_rollback_proof"
+  ],
+  "demo_contract_gaps": [],
+  "enriched_candidate": {
+    "candidate_id": "c1-eur-buy",
+    "demo_validation_proof": true,
+    "direction": "unknown",
+    "expectancy": null,
+    "freshness_proof": {
+      "age_hours": 1
+    },
+    "kill_switch_proof": true,
+    "max_drawdown": null,
+    "mitigation_status": "pending",
+    "pair": "unknown",
+    "paper_evidence_status": "pending",
+    "profit_factor": null,
+    "reconciliation_proof": true,
+    "replay_proof": true,
+    "risk_proof": true,
+    "rollback_proof": true,
+    "sample_size": null,
+    "strategy": "unknown",
+    "walk_forward_status": "pending",
+    "win_rate": null
+  },
+  "human_review_gaps": [],
+  "live_trading_authorized": false,
+  "mode": "LOCAL_APPLY",
+  "next_safe_action": "Reject candidate and re-optimize candidate metrics.",
+  "packet_id": "AIOS_FOREX_PROOF_BUNDLE_TO_CANDIDATE_BRIDGE_V1",
+  "proof_bundle_ready_for_candidate_bridge": true,
+  "remaining_blockers": [
+    "missing_sample_size",
+    "missing_expectancy",
+    "missing_profit_factor",
+    "missing_max_drawdown",
+    "missing_win_rate",
+    "paper_evidence_not_ready",
+    "walk_forward_pending"
+  ],
+  "review_package_gaps": [],
+  "safety": {
+    "account_id_present": false,
+    "broker_connected": false,
+    "credentials_used": false,
+    "demo_trading": false,
+    "is_safe": true,
+    "live_trading": false,
+    "live_trading_authorized": false,
+    "network_used": false,
+    "order_execution": false,
+    "paper_only": true,
+    "safety_gaps": []
+  },
+  "safety_gaps": [],
+  "selected_candidate_id": "c1-eur-buy",
+  "selected_direction": null,
+  "selected_strategy": null,
+  "source_candidate_verdict": null,
+  "source_proof_bundle_status": "PROOF_BUNDLE_COMPLETE",
+  "strategy_quality_gaps": [
+    "paper_evidence_not_ready"
+  ]
+}
