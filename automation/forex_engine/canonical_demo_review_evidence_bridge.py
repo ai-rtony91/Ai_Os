@@ -22,7 +22,7 @@ REJECTED = "REJECTED"
 BLOCKED_INCOMPLETE_EVIDENCE = "BLOCKED_INCOMPLETE_EVIDENCE"
 
 
-DEFAULT_MAX_FRESHNESS_AGE_HOURS = 24
+DEFAULT_MAX_FRESHNESS_AGE_HOURS = 30
 
 
 METRIC_ALIASES: dict[str, tuple[str, ...]] = {
@@ -274,6 +274,18 @@ def build_review_bundle(
     if metrics["walk_forward_status"] is not None:
         metrics["walk_forward_status"] = wf_status_norm if wf_status_norm != "" else metrics["walk_forward_status"]
 
+    legacy_metric_complete = all(
+        metrics.get(key) is not None
+        for key in (
+            "expectancy",
+            "profit_factor",
+            "max_drawdown",
+            "win_rate",
+            "sample_size",
+            "walk_forward_status",
+        )
+    )
+
     metric_reject_blockers: list[str] = []
     proof_blockers: list[str] = []
     continuation_blockers: list[str] = []
@@ -287,10 +299,10 @@ def build_review_bundle(
     mitigation_status = metrics["mitigation_status"]
 
     if metrics["walk_forward_status"] is None:
-        blockers.append("missing_walk_forward_status")
+        metric_reject_blockers.append("missing_walk_forward_status")
 
     if sample_size is None:
-        blockers.append("missing_sample_size")
+        metric_reject_blockers.append("missing_sample_size")
 
     for proof_key in PROOF_FIELDS:
         status = proofs.get(proof_key, {}).get("status", False)

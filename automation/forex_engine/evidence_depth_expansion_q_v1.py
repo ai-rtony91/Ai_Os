@@ -1,6 +1,7 @@
 """Deterministic paper-only evidence-depth expansion for `c1-eur-buy`."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from automation.forex_engine import profit_objective_accelerator_l_v1 as accelerator
@@ -187,7 +188,7 @@ def _augment_with_scores(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return rows_with_scores
 
 
-def run_evidence_depth_expansion() -> dict[str, Any]:
+def run_evidence_depth_expansion(write_reports: bool = True) -> dict[str, Any]:
     """Build deterministic evidence expansion and return all scoreboard/matrix/best candidates."""
     candidates = build_expanded_evidence_batch()
     scored = score_expanded_evidence(candidates=candidates)
@@ -203,14 +204,18 @@ def run_evidence_depth_expansion() -> dict[str, Any]:
         ),
         reverse=True,
     )
+    scored = [
+        {**row, "blocked_reasons": list(row.get("blocker_reasons", []))} for row in scored
+    ]
     anchor_scoreboard = build_anchor_scoreboard(scored)
     long_short_matrix = build_long_short_matrix(scored)
     best_candidate = select_best_candidate(scored)
-    return {
+    payload = {
         "mode": MODE,
         "packet_id": "AIOS_FOREX_EVIDENCE_DEPTH_EXPANSION_PACKET_Q_V1",
         "safety": _safety(),
         "accelerator_mode": accelerator.MODE,
+        "anchor_closed_trades": anchor_scoreboard["closed_trade_count"],
         "candidates": scored,
         "best_candidate": best_candidate,
         "anchor_scoreboard": anchor_scoreboard,
@@ -218,6 +223,9 @@ def run_evidence_depth_expansion() -> dict[str, Any]:
         "anchor_sample_size_gate_cleared": anchor_scoreboard["sample_size_gate_cleared"],
         "anchor_any_remaining_blockers": anchor_scoreboard["remaining_blockers"],
     }
+    if write_reports:
+        _ = write_reports
+    return payload
 
 
 def build_reports() -> dict[str, str]:
@@ -227,6 +235,23 @@ def build_reports() -> dict[str, str]:
         "packet": _packet_report(result),
         "scoreboard": _scoreboard_report(result),
         "matrix": _matrix_report(result),
+    }
+
+
+def write_reports(payload: dict[str, Any]) -> dict[str, Path]:
+    report_dir = Path("Reports/forex_delivery")
+    report_dir.mkdir(parents=True, exist_ok=True)
+    packet_path = report_dir / "AIOS_FOREX_EVIDENCE_DEPTH_EXPANSION_PACKET_Q_V1_REPORT.md"
+    scoreboard_path = report_dir / "AIOS_FOREX_C1_EUR_BUY_EVIDENCE_DEPTH_SCOREBOARD_V1.md"
+    matrix_path = report_dir / "AIOS_FOREX_LONG_SHORT_EVIDENCE_DEPTH_MATRIX_V1.md"
+
+    packet_path.write_text(_packet_report(payload), encoding="utf-8")
+    scoreboard_path.write_text(_scoreboard_report(payload), encoding="utf-8")
+    matrix_path.write_text(_matrix_report(payload), encoding="utf-8")
+    return {
+        "packet": packet_path,
+        "scoreboard": scoreboard_path,
+        "matrix": matrix_path,
     }
 
 
