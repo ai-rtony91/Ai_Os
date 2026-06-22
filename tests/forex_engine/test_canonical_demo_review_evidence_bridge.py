@@ -13,7 +13,7 @@ from automation.forex_engine.canonical_demo_review_evidence_bridge import (
 
 
 BASE_THRESHOLD = BridgeThresholds()
-NOW = datetime(2026, 6, 21, 12, 0, 0, tzinfo=timezone.utc)
+NOW = datetime.now(timezone.utc)
 
 
 def _fixture_for_c1_eur_buy() -> dict:
@@ -190,3 +190,4 @@ def test_bundle_includes_stable_keys():
         "thresholds",
     }
     assert expected_keys.issubset(set(bundle.keys()))
+

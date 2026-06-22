@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
+import pytest
+
 from automation.forex_engine import local_fixture_catalog
-from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import run_stress_repair_demo
 from automation.forex_engine import stress_repair
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -14,8 +17,36 @@ DEMO_PATH = REPO_ROOT / "automation" / "forex_engine" / "run_stress_repair_demo.
 ALLOWED_CLASSIFICATIONS = {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
 
 
+@pytest.fixture(scope="session")
+def _cached_bundle() -> dict[str, object]:
+    return get_paper_forward_v2_bundle()
+
+
+@pytest.fixture(scope="session")
+def _cached_repair_result(_cached_bundle: dict[str, object]) -> dict[str, object]:
+    return stress_repair.apply_local_stress_repair_policy(_cached_bundle)
+
+
+@pytest.fixture(autouse=True)
+def _patch_stress_default_references(
+    _cached_bundle: dict[str, object],
+    _cached_repair_result: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        stress_repair,
+        "_build_default_evidence_bundle",
+        lambda: deepcopy(_cached_bundle),
+    )
+    monkeypatch.setattr(
+        run_stress_repair_demo.stress_repair,
+        "apply_local_stress_repair_policy",
+        lambda *_args, **_kwargs: deepcopy(_cached_repair_result),
+    )
+
+
 def test_stress_repair_module_diagnoses_current_watchlist_blockers() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     diagnosis = stress_repair.diagnose_stress_blockers(
         bundle["paper_forward_stress"],
         bundle["broker_paper_sandbox_readiness"],
@@ -31,7 +62,7 @@ def test_stress_repair_module_diagnoses_current_watchlist_blockers() -> None:
 
 
 def test_repair_plan_includes_half_capture_repair_and_conservative_knobs() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     plan = stress_repair.build_stress_repair_plan(
         bundle["paper_forward_stress"],
         bundle["opportunity_capture"],
@@ -50,7 +81,7 @@ def test_repair_plan_includes_half_capture_repair_and_conservative_knobs() -> No
 
 
 def test_stress_repair_output_reports_tradeoff_and_keeps_live_blocked() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     result = stress_repair.apply_local_stress_repair_policy(bundle)
 
     assert result["mode"] == "PAPER_ONLY"

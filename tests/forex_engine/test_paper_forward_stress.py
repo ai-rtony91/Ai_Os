@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
-from automation.forex_engine import paper_forward_evidence_v2
+import pytest
+
 from automation.forex_engine import paper_forward_stress
+from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import run_stress_and_oos_demo
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -24,6 +28,34 @@ REQUIRED_SCENARIOS = {
 }
 
 
+@pytest.fixture(scope="session")
+def _cached_bundle() -> dict[str, object]:
+    return get_paper_forward_v2_bundle()
+
+
+@pytest.fixture(autouse=True)
+def _patch_stress_default_bundle(
+    _cached_bundle: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    cached = deepcopy(_cached_bundle)
+    monkeypatch.setattr(
+        paper_forward_stress,
+        "_build_default_evidence_bundle",
+        lambda: dict(cached),
+    )
+    monkeypatch.setattr(
+        paper_forward_evidence_v2,
+        "build_paper_forward_evidence_v2",
+        lambda: dict(cached),
+    )
+    monkeypatch.setattr(
+        run_stress_and_oos_demo.paper_forward_evidence_v2,
+        "build_paper_forward_evidence_v2",
+        lambda: dict(cached),
+    )
+
+
 def test_default_stress_scenarios_include_required_cases() -> None:
     scenarios = paper_forward_stress.default_stress_scenarios()
     scenario_ids = {scenario["scenario_id"] for scenario in scenarios}
@@ -33,7 +65,7 @@ def test_default_stress_scenarios_include_required_cases() -> None:
 
 
 def test_paper_forward_stress_result_includes_required_scenarios() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     result = paper_forward_stress.run_paper_forward_stress(bundle)
     scenario_ids = {scenario["scenario_id"] for scenario in result["scenario_results"]}
 
@@ -62,7 +94,7 @@ def test_stress_scenario_outputs_are_simulated_only_and_never_live_ready() -> No
 
 
 def test_stress_summary_and_combined_gate_block_live_readiness() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     stress = bundle["paper_forward_stress"]
     oos = bundle["out_of_sample_validation"]
     gate = paper_forward_stress.build_stress_oos_gate(stress, oos, bundle["risk_governor"])

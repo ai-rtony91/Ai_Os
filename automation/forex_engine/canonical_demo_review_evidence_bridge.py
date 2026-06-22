@@ -457,3 +457,4 @@ def build_review_bundle(
 def has_demo_ready(candidate: Mapping[str, Any], thresholds: BridgeThresholds | None = None) -> bool:
     """Return True when candidate verdict is `DEMO_REVIEW_READY`."""
     return build_review_bundle(candidate, thresholds)["verdict"] == DEMO_REVIEW_READY
+
