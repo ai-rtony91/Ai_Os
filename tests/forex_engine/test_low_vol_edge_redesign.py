@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from tests.forex_engine.forex_evidence_cache import get_expanded_oos_validation
+from tests.forex_engine.forex_evidence_cache import get_low_vol_edge_redesign
 from automation.forex_engine import low_vol_edge_redesign
-from automation.forex_engine import oos_expansion
 from automation.forex_engine import oos_repair
 from automation.forex_engine import run_low_vol_edge_redesign_demo
 
@@ -19,7 +20,7 @@ def test_low_vol_edge_module_exists() -> None:
 
 
 def test_diagnosis_identifies_holdout_low_vol_degradation() -> None:
-    expanded = oos_expansion.run_expanded_oos_validation()
+    expanded = get_expanded_oos_validation()
     repair = oos_repair.apply_oos_repair_policy(expanded)
     diagnosis = low_vol_edge_redesign.diagnose_low_vol_edge(repair, expanded)
 
@@ -47,7 +48,7 @@ def test_policy_includes_no_trade_gate_and_sizing_controls() -> None:
 
 
 def test_redesign_result_reports_degradation_rejections_and_audit() -> None:
-    result = low_vol_edge_redesign.apply_low_vol_edge_redesign()
+    result = get_low_vol_edge_redesign()
 
     assert result["original_max_degradation_pct"] >= result["repaired_max_degradation_pct"]
     assert result["repaired_max_degradation_pct"] >= result["redesigned_max_degradation_pct"]
@@ -65,7 +66,7 @@ def test_redesign_result_reports_degradation_rejections_and_audit() -> None:
 
 
 def test_summary_and_classification_stay_inside_allowed_contract() -> None:
-    result = low_vol_edge_redesign.apply_low_vol_edge_redesign()
+    result = get_low_vol_edge_redesign()
     summary = low_vol_edge_redesign.summarize_low_vol_edge_redesign(result)
 
     assert result["classification"] in ALLOWED_CLASSIFICATIONS
