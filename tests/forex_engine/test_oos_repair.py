@@ -1,16 +1,59 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 from automation.forex_engine import oos_expansion
 from automation.forex_engine import oos_repair
 from automation.forex_engine import run_oos_repair_demo
+from tests.forex_engine.forex_evidence_cache import get_expanded_oos_validation
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "forex_engine" / "oos_repair.py"
 DEMO_PATH = REPO_ROOT / "automation" / "forex_engine" / "run_oos_repair_demo.py"
 ALLOWED_CLASSIFICATIONS = {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+
+
+@pytest.fixture(scope="session")
+def _cached_expanded_oos_validation() -> dict[str, object]:
+    return get_expanded_oos_validation()
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_expanded_oos(
+    _cached_expanded_oos_validation: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_expanded = oos_expansion.run_expanded_oos_validation
+
+    def _run_default_expanded(*args: object, **kwargs: object) -> dict[str, object]:
+        if args or kwargs:
+            return original_expanded(*args, **kwargs)
+        return deepcopy(_cached_expanded_oos_validation)
+
+    monkeypatch.setattr(oos_expansion, "run_expanded_oos_validation", _run_default_expanded)
+
+
+@pytest.fixture(scope="session")
+def _cached_oos_repair_result() -> dict[str, object]:
+    return oos_repair.apply_oos_repair_policy()
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_oos_repair(
+    _cached_oos_repair_result: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_repair = oos_repair.apply_oos_repair_policy
+
+    def _repair_default(*args: object, **kwargs: object) -> dict[str, object]:
+        if args or kwargs:
+            return original_repair(*args, **kwargs)
+        return deepcopy(_cached_oos_repair_result)
+
+    monkeypatch.setattr(oos_repair, "apply_oos_repair_policy", _repair_default)
 
 
 def test_oos_repair_module_exists() -> None:
