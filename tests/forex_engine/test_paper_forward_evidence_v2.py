@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import run_paper_forward_evidence_v2_demo
@@ -37,7 +38,7 @@ def test_fixture_catalog_is_local_only() -> None:
 
 
 def test_evidence_v2_bundle_includes_fixture_summary_and_regime_consistency() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
 
     assert bundle["mode"] == "PAPER_ONLY"
     assert bundle["fixture_catalog_summary"]["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
@@ -69,7 +70,7 @@ def test_evidence_v2_bundle_includes_fixture_summary_and_regime_consistency() ->
 
 
 def test_multi_fixture_v2_ledgers_are_simulated_only() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     per_fixture = bundle["multi_fixture_paper_forward"]["per_fixture_results"]
 
     assert per_fixture
@@ -82,7 +83,7 @@ def test_multi_fixture_v2_ledgers_are_simulated_only() -> None:
 
 
 def test_evidence_v2_summary_is_compact_and_never_live_ready() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     summary = paper_forward_evidence_v2.summarize_paper_forward_evidence_v2(bundle)
 
     assert summary["fixture_count"] == len(local_fixture_catalog.REQUIRED_FIXTURE_IDS)
@@ -122,7 +123,7 @@ def test_evidence_v2_summary_is_compact_and_never_live_ready() -> None:
 
 
 def test_month_end_readiness_v2_keeps_live_trade_ready_false() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     review = bundle["month_end_readiness_review"]
 
     assert review["classification"] in ALLOWED_CLASSIFICATIONS

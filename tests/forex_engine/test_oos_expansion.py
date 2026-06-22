@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from tests.forex_engine.forex_evidence_cache import get_expanded_oos_validation
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import local_fixture_catalog
 from automation.forex_engine import low_vol_edge_redesign
@@ -42,7 +43,7 @@ def test_expanded_oos_plan_includes_required_split_types() -> None:
 
 
 def test_expanded_oos_validation_runs_locally_and_reports_degradation() -> None:
-    result = oos_expansion.run_expanded_oos_validation()
+    result = get_expanded_oos_validation()
     summary = oos_expansion.summarize_expanded_oos(result)
 
     assert result["mode"] == "PAPER_ONLY"
@@ -63,7 +64,7 @@ def test_expanded_oos_validation_runs_locally_and_reports_degradation() -> None:
 
 
 def test_each_expanded_oos_split_is_simulated_only() -> None:
-    result = oos_expansion.run_expanded_oos_validation()
+    result = get_expanded_oos_validation()
 
     for split in result["split_results"]:
         assert split["split_id"]
@@ -81,7 +82,7 @@ def test_each_expanded_oos_split_is_simulated_only() -> None:
 
 
 def test_broker_paper_ready_remains_false_when_expanded_oos_is_watchlist() -> None:
-    expanded = oos_expansion.run_expanded_oos_validation()
+    expanded = get_expanded_oos_validation()
     expanded["classification"] = "WATCHLIST"
     expanded["blockers"] = ["expanded_oos_degradation_exceeds_policy"]
 
@@ -97,7 +98,7 @@ def test_broker_paper_ready_remains_false_when_expanded_oos_is_watchlist() -> No
 
 
 def test_expanded_oos_accepts_repair_result_and_preserves_watchlist_when_repair_is_watchlist() -> None:
-    expanded = oos_expansion.run_expanded_oos_validation()
+    expanded = get_expanded_oos_validation()
     repair = oos_repair.apply_oos_repair_policy(expanded)
     repaired = oos_expansion.run_expanded_oos_validation(oos_repair_result=repair)
     summary = oos_expansion.summarize_expanded_oos(repaired)
@@ -115,7 +116,7 @@ def test_expanded_oos_accepts_repair_result_and_preserves_watchlist_when_repair_
 
 
 def test_expanded_oos_accepts_low_vol_redesign_result() -> None:
-    expanded = oos_expansion.run_expanded_oos_validation()
+    expanded = get_expanded_oos_validation()
     repair = oos_repair.apply_oos_repair_policy(expanded)
     low_vol = low_vol_edge_redesign.apply_low_vol_edge_redesign(repair)
     redesigned = oos_expansion.run_expanded_oos_validation(

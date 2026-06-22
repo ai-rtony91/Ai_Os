@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from tests.forex_engine.forex_evidence_cache import get_opportunity_capture
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 from automation.forex_engine import opportunity_capture
-from automation.forex_engine import paper_forward_evidence_v2
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -15,8 +16,8 @@ def test_calculates_capture_rate() -> None:
 
 
 def test_calculates_opportunity_capture_from_v2_evidence() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
-    report = opportunity_capture.calculate_opportunity_capture(bundle)
+    bundle = get_paper_forward_v2_bundle()
+    report = get_opportunity_capture(bundle)
 
     assert report["mode"] == "PAPER_ONLY"
     assert report["total_intents"] > 0
@@ -84,8 +85,8 @@ def test_handles_missing_fields_conservatively() -> None:
 
 
 def test_opportunity_capture_summary_is_compact_and_live_blocked() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
-    report = opportunity_capture.calculate_opportunity_capture(bundle)
+    bundle = get_paper_forward_v2_bundle()
+    report = get_opportunity_capture(bundle)
     summary = opportunity_capture.opportunity_capture_summary(report)
 
     assert summary["mode"] == "PAPER_ONLY"

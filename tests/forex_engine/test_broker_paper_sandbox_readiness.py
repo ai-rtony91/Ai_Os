@@ -4,6 +4,9 @@ from pathlib import Path
 
 import pytest
 
+from tests.forex_engine.forex_evidence_cache import get_expanded_oos_validation
+from tests.forex_engine.forex_evidence_cache import get_low_vol_edge_redesign
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 from automation.forex_engine import broker_paper_sandbox_readiness
 from automation.forex_engine import broker_paper_adapter_stub_contract
 from automation.forex_engine import broker_paper_dryrun_intent_ledger
@@ -11,10 +14,7 @@ from automation.forex_engine import broker_paper_dryrun_replay_evidence_gate
 from automation.forex_engine import broker_paper_dryrun_replay_harness
 from automation.forex_engine import broker_paper_dryrun_risk_governor
 from automation.forex_engine import broker_paper_presecurity_gate
-from automation.forex_engine import low_vol_edge_redesign
-from automation.forex_engine import oos_expansion
 from automation.forex_engine import oos_repair
-from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import stress_repair
 
 
@@ -31,7 +31,7 @@ ALLOWED_STATUSES = {
 
 
 def _strong_contract_inputs() -> tuple[dict[str, object], dict[str, object], dict[str, object]]:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     evidence = dict(bundle)
     evidence["blockers"] = []
     evidence["classification"] = "PAPER_FORWARD_READY"
@@ -550,7 +550,7 @@ def test_dryrun_replay_evidence_gate_ready_routes_only_to_adapter_plan_approval_
 
 
 def test_readiness_accepts_stress_repair_result_and_stays_watchlist_when_repair_is_watchlist() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     repair = stress_repair.apply_local_stress_repair_policy(bundle)
 
     result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
@@ -568,8 +568,8 @@ def test_readiness_accepts_stress_repair_result_and_stays_watchlist_when_repair_
 
 
 def test_readiness_accepts_expanded_oos_and_blocks_contract_when_oos_is_watchlist() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
-    expanded = oos_expansion.run_expanded_oos_validation()
+    bundle = get_paper_forward_v2_bundle()
+    expanded = get_expanded_oos_validation()
     expanded["classification"] = "WATCHLIST"
     expanded["blockers"] = ["expanded_oos_degradation_exceeds_policy"]
 
@@ -589,8 +589,8 @@ def test_readiness_accepts_expanded_oos_and_blocks_contract_when_oos_is_watchlis
 
 
 def test_readiness_accepts_oos_repair_and_blocks_contract_when_repair_is_watchlist() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
-    expanded = oos_expansion.run_expanded_oos_validation()
+    bundle = get_paper_forward_v2_bundle()
+    expanded = get_expanded_oos_validation()
     repair = oos_repair.apply_oos_repair_policy(expanded)
 
     result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
@@ -613,7 +613,7 @@ def test_readiness_accepts_oos_repair_and_blocks_contract_when_repair_is_watchli
 
 def test_readiness_includes_low_vol_redesign_and_requires_presecurity_gate() -> None:
     evidence, stress_oos, risk_governor = _strong_contract_inputs()
-    low_vol = low_vol_edge_redesign.apply_low_vol_edge_redesign(evidence["oos_repair"])
+    low_vol = get_low_vol_edge_redesign(evidence["oos_repair"])
 
     result = broker_paper_sandbox_readiness.evaluate_broker_paper_sandbox_readiness(
         evidence=evidence,
