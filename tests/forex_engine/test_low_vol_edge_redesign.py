@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 from tests.forex_engine.forex_evidence_cache import get_expanded_oos_validation
@@ -7,12 +8,37 @@ from tests.forex_engine.forex_evidence_cache import get_low_vol_edge_redesign
 from automation.forex_engine import low_vol_edge_redesign
 from automation.forex_engine import oos_repair
 from automation.forex_engine import run_low_vol_edge_redesign_demo
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MODULE_PATH = REPO_ROOT / "automation" / "forex_engine" / "low_vol_edge_redesign.py"
 DEMO_PATH = REPO_ROOT / "automation" / "forex_engine" / "run_low_vol_edge_redesign_demo.py"
 ALLOWED_CLASSIFICATIONS = {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
+
+
+@pytest.fixture(scope="session")
+def _cached_low_vol_result() -> dict[str, object]:
+    return get_low_vol_edge_redesign()
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_low_vol_apply(
+    _cached_low_vol_result: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_apply = low_vol_edge_redesign.apply_low_vol_edge_redesign
+
+    def _apply_default(*args: object, **kwargs: object) -> dict[str, object]:
+        if args or kwargs:
+            return original_apply(*args, **kwargs)
+        return deepcopy(_cached_low_vol_result)
+
+    monkeypatch.setattr(
+        low_vol_edge_redesign,
+        "apply_low_vol_edge_redesign",
+        _apply_default,
+    )
 
 
 def test_low_vol_edge_module_exists() -> None:

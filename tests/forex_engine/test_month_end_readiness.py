@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from pathlib import Path
 
 from automation.forex_engine import backtest_harness
@@ -12,9 +13,41 @@ from automation.forex_engine import paper_forward_evidence_v2
 from automation.forex_engine import paper_forward_simulator
 from automation.forex_engine import risk_contract
 from automation.forex_engine import schema_contracts as schemas
+import pytest
+
+from tests.forex_engine.forex_evidence_cache import get_paper_forward_v2_bundle
 
 
 MODULE_PATH = Path(__file__).resolve().parents[2] / "automation" / "forex_engine" / "month_end_readiness.py"
+
+
+@pytest.fixture(scope="session")
+def _cached_month_end_bundle() -> dict[str, object]:
+    return evidence_bundle()
+
+
+@pytest.fixture(scope="session")
+def _cached_v2_bundle() -> dict[str, object]:
+    return get_paper_forward_v2_bundle()
+
+
+@pytest.fixture(autouse=True)
+def _patch_default_month_end_references(
+    _cached_v2_bundle: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_build = paper_forward_evidence_v2.build_paper_forward_evidence_v2
+
+    def _build_default_v2(*args: object, **kwargs: object) -> dict[str, object]:
+        if args or kwargs:
+            return original_build(*args, **kwargs)
+        return deepcopy(_cached_v2_bundle)
+
+    monkeypatch.setattr(
+        paper_forward_evidence_v2,
+        "build_paper_forward_evidence_v2",
+        _build_default_v2,
+    )
 
 
 def evidence_bundle() -> dict[str, object]:
@@ -51,8 +84,10 @@ def evidence_bundle() -> dict[str, object]:
     return evidence_aggregator.aggregate_forex_evidence(backtest, walk, gate, paper_summary)
 
 
-def test_month_end_readiness_blocks_live_trading_without_protected_approval() -> None:
-    bundle = evidence_bundle()
+def test_month_end_readiness_blocks_live_trading_without_protected_approval(
+    _cached_month_end_bundle: dict[str, object],
+) -> None:
+    bundle = _cached_month_end_bundle
     dashboard = forex_dashboard_contract.build_forex_dashboard_state(
         backtest_result=bundle["backtest_result"],
         risk_gate=bundle["risk_gate"],
@@ -69,8 +104,10 @@ def test_month_end_readiness_blocks_live_trading_without_protected_approval() ->
     assert review["next_safe_action"]
 
 
-def test_month_end_readiness_reports_complete_and_blocked_sections() -> None:
-    review = month_end_readiness.build_month_end_readiness_review(evidence_bundle())
+def test_month_end_readiness_reports_complete_and_blocked_sections(
+    _cached_month_end_bundle: dict[str, object],
+) -> None:
+    review = month_end_readiness.build_month_end_readiness_review(_cached_month_end_bundle)
 
     assert "backtest result" in review["complete"]
     assert "cost model" in review["complete"]
@@ -92,7 +129,7 @@ def test_month_end_readiness_accepts_local_evidence_bundle_runner_output() -> No
 
 
 def test_month_end_readiness_accepts_v2_evidence_and_blocks_live_trading() -> None:
-    bundle = paper_forward_evidence_v2.build_paper_forward_evidence_v2()
+    bundle = get_paper_forward_v2_bundle()
     review = month_end_readiness.build_month_end_readiness_v2_review(bundle)
 
     assert review["classification"] in {"FAIL", "WATCHLIST", "PAPER_FORWARD_READY"}
