@@ -24,6 +24,7 @@ from automation.forex_engine.read_only_live_data_sanitizer import (
     sanitize_positions,
     sanitize_pricing,
     sanitize_trading_history,
+    build_money_strip_payload,
     source_fields,
     utc_now_iso,
 )
@@ -188,19 +189,28 @@ class ReadOnlyLiveDataBridge:
             "rows": [],
             "block_reason": "No sanitized real closed-trade history is available.",
         }
+        market = {
+            **context,
+            "selected_pair": self.selected_pair,
+            "price_snapshot_available": False,
+            "block_reason": block_reason,
+        }
         return self._aggregate_model(
             context=context,
-            market={
-                **context,
-                "selected_pair": self.selected_pair,
-                "price_snapshot_available": False,
-                "block_reason": block_reason,
-            },
+            market=market,
             broker_state=broker_state,
             positions=positions,
             risk_pl=risk_pl,
             exit_readiness=self._exit_readiness(context, positions),
             trading_history=history,
+            money_strip=build_money_strip_payload(
+                source_context=context,
+                broker_mode=broker_mode,
+                broker_state=broker_state,
+                positions=positions,
+                risk_pl=risk_pl,
+                market=market,
+            ),
             token_present=token_present,
             account_present=account_present,
         )
@@ -266,6 +276,14 @@ class ReadOnlyLiveDataBridge:
             broker_state=broker_state,
             positions=positions,
             risk_pl=risk_pl,
+            money_strip=build_money_strip_payload(
+                source_context=context,
+                broker_mode=broker_mode,
+                broker_state=broker_state,
+                positions=positions,
+                risk_pl=risk_pl,
+                market=market,
+            ),
             exit_readiness=self._exit_readiness(context, positions),
             trading_history=history,
             token_present=token_present,
@@ -304,6 +322,7 @@ class ReadOnlyLiveDataBridge:
         broker_state: dict[str, Any],
         positions: dict[str, Any],
         risk_pl: dict[str, Any],
+        money_strip: dict[str, Any],
         exit_readiness: dict[str, Any],
         trading_history: dict[str, Any],
         token_present: bool,
@@ -333,6 +352,7 @@ class ReadOnlyLiveDataBridge:
             "broker_state": broker_state,
             "positions": positions,
             "risk_pl": risk_pl,
+            "money_strip": money_strip,
             "exit_readiness": exit_readiness,
             "trading_history": trading_history,
             "execution_readiness": execution_readiness,
