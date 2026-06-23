@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
+import PreservedLegacyModules from './PreservedLegacyModules.jsx';
 
 const initialTruthState = {
   allowed: false,
@@ -125,6 +126,7 @@ const MinimalOperatorDashboard = () => {
       <p style={{ color: '#444', marginBottom: '1rem' }}>
         DISPLAY_ONLY. This view reflects server-side paper/session/evidence projection only.
       </p>
+      <PreservedLegacyModules />
       {error && (
         <p style={{ color: '#b00020' }}>{`Error: ${error}`}</p>
       )}
