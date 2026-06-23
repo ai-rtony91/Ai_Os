@@ -144,13 +144,13 @@ def test_dashboard_fixture_data_does_not_count_as_broker_proof(monkeypatch, tmp_
 
 def test_credentials_and_account_ids_are_redacted(monkeypatch, tmp_path):
     use_tmp_repo(monkeypatch, tmp_path)
-    proof = current_proof(account_id="123456789", api_key="secret-key")
+    proof = current_proof(account_id="123456789", api_key="EXAMPLE_SECRET_KEY_DO_NOT_USE")
 
     result = closer.run_broker_proof_ticket_closure({"broker_proof": proof})
     serialized = json.dumps(result, sort_keys=True)
 
     assert "123456789" not in serialized
-    assert "secret-key" not in serialized
+    assert "EXAMPLE_SECRET_KEY_DO_NOT_USE" not in serialized
     assert result["sanitization"]["sensitive_input_rejected_or_redacted"] is True
     assert any("account_id" in field for field in result["sanitization"]["redacted_fields"])
 
@@ -176,3 +176,4 @@ def test_report_writing_only_writes_allowed_report_paths(monkeypatch, tmp_path):
 
     assert written_names == set(closer.REPORT_FILENAMES.values())
     assert not (reports / closer.OPTIONAL_READY_REPORT).exists()
+

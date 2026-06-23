@@ -202,13 +202,13 @@ def test_22_6_requested_range_stays_planning_without_broker_session_support(monk
 
 def test_credentials_account_ids_and_broker_order_ids_are_redacted(monkeypatch, tmp_path):
     use_tmp_repo(monkeypatch, tmp_path)
-    state = complete_state(account_id="123456", api_key="LEAKME-API-KEY", broker_order_id="ORDER-1")
+    state = complete_state(account_id="123456", api_key="EXAMPLE_LEAKME_API_KEY", broker_order_id="ORDER-1")
 
     result = wrapup.run_profit_campaign_go_live_wrapup(state)
     serialized = str(result)
 
     assert "123456" not in serialized
-    assert "LEAKME-API-KEY" not in serialized
+    assert "EXAMPLE_LEAKME_API_KEY" not in serialized
     assert "ORDER-1" not in serialized
     assert result["sanitization"]["sensitive_input_rejected_or_redacted"] is True
 
@@ -224,3 +224,4 @@ def test_write_reports_creates_required_reports_and_optional_v3_only_when_all_ga
     assert "AIOS_FOREX_UPTIME_RANGE_PLANNER_80_22_5_22_6_V1.md" in written_names
     assert result["optional_ready_report"]["created"] is True
     assert (reports / "AIOS_FOREX_READY_FOR_HUMAN_ARMING_CANDIDATE_V3.md").exists()
+

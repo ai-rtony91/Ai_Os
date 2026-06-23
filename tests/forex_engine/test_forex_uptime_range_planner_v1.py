@@ -107,7 +107,7 @@ def test_credentials_and_account_ids_are_redacted():
         {
             "requested_range": "22/6",
             "account_id": "123456",
-            "api_key": "secret",
+            "api_key": "EXAMPLE_SECRET_VALUE",
         }
     )
 
@@ -126,3 +126,4 @@ def test_write_report_only_writes_allowed_path(monkeypatch, tmp_path):
         "AIOS_FOREX_UPTIME_RANGE_PLANNER_80_22_5_22_6_V1.md"
     }
     assert (reports / "AIOS_FOREX_UPTIME_RANGE_PLANNER_80_22_5_22_6_V1.md").exists()
+

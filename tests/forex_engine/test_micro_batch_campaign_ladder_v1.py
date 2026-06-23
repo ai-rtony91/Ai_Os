@@ -107,13 +107,13 @@ def test_two_proven_50_percent_campaigns_can_prove_repeatability():
 
 
 def test_credentials_account_ids_and_broker_order_ids_are_redacted():
-    payload = campaign(account_id="123456", api_key="LEAKME-API-KEY", broker_order_id="ORDER-1")
+    payload = campaign(account_id="123456", api_key="EXAMPLE_LEAKME_API_KEY", broker_order_id="ORDER-1")
 
     result = ladder.run_micro_batch_campaign_ladder({"campaigns": [payload]})
     serialized = json.dumps(result, sort_keys=True)
 
     assert "123456" not in serialized
-    assert "LEAKME-API-KEY" not in serialized
+    assert "EXAMPLE_LEAKME_API_KEY" not in serialized
     assert "ORDER-1" not in serialized
     assert result["sanitization"]["sensitive_input_rejected_or_redacted"] is True
 
@@ -135,3 +135,4 @@ def test_write_reports_only_writes_allowed_paths(monkeypatch, tmp_path):
     written_names = {Path(path).name for path in result["reports"]["written"]}
 
     assert written_names == {path.name for path in ladder.REPORT_PATHS.values()}
+
