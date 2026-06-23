@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Withdrawal gate</title>
+  <desc id="desc">Human-approved withdrawal gate with locked transfer rail.</desc>
+  <rect x="20" y="36" width="56" height="38" rx="8" fill="#0d1724" stroke="#75bfff" stroke-width="3"/>
+  <path d="M33 36v-8c0-9 6-15 15-15s15 6 15 15v8" fill="none" stroke="#49c18f" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="48" cy="55" r="7" fill="#08101a" stroke="#f4c95d" stroke-width="3"/>
+  <path d="M48 62v7" stroke="#f4c95d" stroke-width="4" stroke-linecap="round"/>
+  <path d="M17 23h17M17 23l7-7M17 23l7 7" fill="none" stroke="#edf7ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M62 23h17M79 23l-7-7M79 23l-7 7" fill="none" stroke="#edf7ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

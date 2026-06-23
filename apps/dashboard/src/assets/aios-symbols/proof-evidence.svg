@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Proof evidence</title>
+  <desc id="desc">Ledger stack and verified evidence lens.</desc>
+  <rect width="96" height="96" rx="22" fill="#0a1018"/>
+  <path d="M27 18h35l10 10v50H27Z" fill="#111b2b" stroke="#75bfff" stroke-width="2.5"/>
+  <path d="M62 18v12h12" fill="none" stroke="#75bfff" stroke-width="2.5"/>
+  <path d="M35 42h25M35 53h20M35 64h18" stroke="#edf7ff" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="67" cy="66" r="12" fill="#0f201b" stroke="#49c18f" stroke-width="3"/>
+  <path d="M61 66l4 4 9-11" fill="none" stroke="#49c18f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

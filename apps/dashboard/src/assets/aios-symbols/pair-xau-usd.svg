@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 96" role="img" aria-labelledby="title desc">
+  <title id="title">XAU/USD pair</title>
+  <desc id="desc">Gold prism and dollar lane identity for XAU/USD without official marks.</desc>
+  <rect width="144" height="96" rx="22" fill="#100d07"/>
+  <path d="M28 58 48 26 70 58Z" fill="#e7b84b" stroke="#fff0a8" stroke-width="3"/>
+  <path d="M48 26v32M28 58h42" stroke="#8a641d" stroke-width="2"/>
+  <path d="M78 36h38M78 48h38M78 60h38" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="106" cy="48" r="15" fill="none" stroke="#7c5cff" stroke-width="3"/>
+  <text x="72" y="84" text-anchor="middle" fill="#edf7ff" font-family="Arial, sans-serif" font-size="18" font-weight="700">XAU/USD</text>
+</svg>

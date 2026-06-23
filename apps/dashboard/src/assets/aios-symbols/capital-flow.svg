@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Capital flow</title>
+  <desc id="desc">Sanitized treasury lanes routing capital between alias buckets.</desc>
+  <circle cx="22" cy="48" r="11" fill="#0d1724" stroke="#75bfff" stroke-width="3"/>
+  <circle cx="74" cy="24" r="11" fill="#0d1724" stroke="#49c18f" stroke-width="3"/>
+  <circle cx="74" cy="72" r="11" fill="#0d1724" stroke="#f4c95d" stroke-width="3"/>
+  <path d="M34 44c13-4 19-15 28-18" fill="none" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M34 52c13 4 19 15 28 18" fill="none" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M57 20l8 5-8 5M57 66l8 5-8 5" fill="none" stroke="#edf7ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M18 48h8M70 24h8M70 72h8" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+</svg>

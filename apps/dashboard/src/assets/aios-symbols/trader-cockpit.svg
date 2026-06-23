@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Trader cockpit</title>
+  <desc id="desc">Trader console grid with candlestick lanes and cockpit lens geometry.</desc>
+  <rect width="96" height="96" rx="22" fill="#08101a"/>
+  <rect x="16" y="20" width="64" height="50" rx="8" fill="#0d1724" stroke="#75bfff" stroke-width="2.5"/>
+  <path d="M24 58h48M24 44h48M24 30h48M36 24v42M52 24v42M68 24v42" stroke="#20344f" stroke-width="1.5"/>
+  <path d="M29 55v-17M45 55V31M61 55V43" stroke="#49c18f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M31 38h8M47 31h8M63 43h8" stroke="#edf7ff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M26 78h44" stroke="#7c5cff" stroke-width="4" stroke-linecap="round"/>
+</svg>

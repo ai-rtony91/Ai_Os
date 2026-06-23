@@ -25,7 +25,12 @@
       "queue_mutation",
       "broker_execution",
       "live_trading",
-      "secret_access"
+      "secret_access",
+      "capital_movement",
+      "deposit_execution",
+      "withdrawal_execution",
+      "bank_api_call",
+      "payment_processor_call"
     ],
     "next_safe_action": "Review fixture-backed runtime visibility as display-only evidence before any protected action.",
     "approval_required": true,
@@ -55,7 +60,12 @@
         "queue_mutation",
         "broker_execution",
         "live_trading",
-        "secret_access"
+        "secret_access",
+        "capital_movement",
+        "deposit_execution",
+        "withdrawal_execution",
+        "bank_api_call",
+        "payment_processor_call"
       ],
       "next_safe_action": "Review runtime status from fixture evidence only.",
       "approval_required": true,
@@ -84,7 +94,12 @@
         "queue_mutation",
         "broker_execution",
         "live_trading",
-        "secret_access"
+        "secret_access",
+        "capital_movement",
+        "deposit_execution",
+        "withdrawal_execution",
+        "bank_api_call",
+        "payment_processor_call"
       ],
       "next_safe_action": "Review queue counters as display-only fixture evidence.",
       "approval_required": true,
@@ -94,6 +109,24 @@
       "safe_for_frontend_display": true
     }
   ],
+  "capital_flow_projection": {
+    "display_state": "DISPLAY_ONLY",
+    "authority_state": "DISPLAY_ONLY",
+    "money_cockpit_status": "MONEY_COCKPIT_DISPLAY_ONLY",
+    "capital_flow_status": "CAPITAL_FLOW_DISPLAY_ONLY",
+    "treasury_automation_status": "TREASURY_AUTOMATION_POLICY_ONLY",
+    "money_relevance_status": "MONEY_RELEVANT_VISIBLE",
+    "money_ladder_status": "MONEY_LADDER_100K_GOAL_SIMULATION_ONLY",
+    "range_simulation_status": "RANGE_SIMULATION_READY_0_99_TO_100000",
+    "goal_ceiling_status": "SIMULATION_CEILING_NOT_GUARANTEE",
+    "account_aliases_only": true,
+    "execution_allowed": false,
+    "real_money_movement_allowed": false,
+    "broker_bank_payment_calls_allowed": false,
+    "human_approval_required": true,
+    "future_connector_proof_required": true,
+    "next_safe_action": "Review the capital-flow policy simulation; real transfers remain blocked."
+  },
   "runtime": {
     "runtimeId": "runtime-local-001",
     "status": "degraded",

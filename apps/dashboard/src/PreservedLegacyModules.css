@@ -19,7 +19,7 @@
   color: var(--legacy-text);
   display: grid;
   gap: 16px;
-  padding: 18px;
+  padding: 16px;
 }
 
 .legacySurfaceHeader {
@@ -38,6 +38,13 @@
   color: var(--legacy-muted);
 }
 
+.legacySurfaceIconRow {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .legacyStatusChips {
   align-items: center;
   display: flex;
@@ -47,8 +54,16 @@
 
 .legacyModuleGrid {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.legacyModuleGrid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.legacyModuleGrid-duo {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .legacyModuleCard {
@@ -58,7 +73,8 @@
   display: grid;
   gap: 14px;
   min-width: 0;
-  padding: 16px;
+  padding: 14px;
+  scroll-margin-top: 16px;
 }
 
 .legacyModuleCardHead {
@@ -68,8 +84,34 @@
   justify-content: space-between;
 }
 
+.legacyModuleTitleBlock {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.legacyModuleIcon {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(117, 191, 255, 0.24), transparent 55%),
+    linear-gradient(180deg, rgba(18, 24, 34, 0.98), rgba(8, 11, 16, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.28);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(117, 191, 255, 0.06),
+    0 12px 22px rgba(0, 0, 0, 0.24);
+  color: var(--legacy-text);
+  display: inline-flex;
+  font-size: 18px;
+  height: 44px;
+  justify-content: center;
+  min-width: 44px;
+  text-shadow: 0 0 14px rgba(117, 191, 255, 0.22);
+}
+
 .legacyModuleCardHead h3 {
   margin: 0;
+  font-size: 14px;
 }
 
 .legacyUtilityBody {
@@ -151,8 +193,8 @@
 }
 
 .legacyDockHint {
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.35;
   margin: 0;
 }
 
@@ -173,7 +215,7 @@
   border-radius: 12px;
   background: #02040a;
   aspect-ratio: 16 / 9;
-  min-height: 190px;
+  min-height: 180px;
   overflow: hidden;
 }
 
@@ -181,7 +223,7 @@
 .legacyPlayerMount iframe {
   display: block;
   height: 100%;
-  min-height: 190px;
+  min-height: 180px;
   width: 100%;
 }
 
@@ -204,14 +246,17 @@
 
 .legacyPlayerNote,
 .legacyPlayerMeta {
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.35;
   margin: 0;
 }
 
 .legacyModuleCard .statusPill {
   background: rgba(255, 255, 255, 0.04);
   border-color: var(--legacy-line);
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 10px;
 }
 
 .legacyModuleCard .status-good {

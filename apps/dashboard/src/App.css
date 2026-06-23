@@ -40,17 +40,21 @@ button {
 
 .runtimePage {
   background:
+    radial-gradient(circle at 50% -10%, rgba(117, 191, 255, 0.16), transparent 32%),
+    radial-gradient(circle at 12% 78%, rgba(73, 193, 143, 0.1), transparent 26%),
     linear-gradient(180deg, rgba(10, 14, 20, 0.96), rgba(7, 9, 13, 1)),
     var(--bg);
   min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
 }
 
 .operatorPortal {
   display: grid;
   gap: 18px;
   margin-inline: auto;
-  max-width: 1320px;
-  padding: 24px;
+  max-width: 1160px;
+  padding: 16px;
 }
 
 .portalHeader {
@@ -83,7 +87,7 @@ p {
 
 h1 {
   color: var(--text);
-  font-size: clamp(42px, 6vw, 78px);
+  font-size: clamp(32px, 4.3vw, 56px);
   letter-spacing: 0;
   line-height: 0.9;
   margin: 0 0 8px;
@@ -91,7 +95,7 @@ h1 {
 
 h2 {
   color: var(--text);
-  font-size: 18px;
+  font-size: 15px;
   line-height: 1.2;
   margin: 0 0 12px;
 }
@@ -109,9 +113,21 @@ p {
   margin-bottom: 0;
 }
 
+.srOnly {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  white-space: nowrap;
+}
+
 .headerSummary {
   color: var(--muted-strong);
-  max-width: 620px;
+  max-width: 720px;
 }
 
 .headerActions {
@@ -134,6 +150,12 @@ p {
   padding: 6px 10px;
   text-transform: uppercase;
   white-space: nowrap;
+  gap: 6px;
+}
+
+.statusPill .aiosSymbol {
+  height: 18px;
+  width: 18px;
 }
 
 .status-good {
@@ -485,6 +507,978 @@ dd {
   gap: 12px;
 }
 
+.dashboardShell {
+  gap: 14px;
+}
+
+.dashboardShell.is-home {
+  max-width: 1120px;
+  min-height: 100vh;
+  place-content: center;
+}
+
+.dashboardShell.is-deep {
+  padding-bottom: 28px;
+  padding-top: 16px;
+}
+
+.dashboardShell > * {
+  scroll-margin-top: 16px;
+}
+
+.frontDoor {
+  display: grid;
+  min-width: 0;
+  position: relative;
+}
+
+.frontDoor::before {
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(117, 191, 255, 0.2) 48%, transparent 100%),
+    radial-gradient(circle, rgba(73, 193, 143, 0.32), transparent 64%);
+  border-radius: 999px;
+  box-shadow:
+    0 0 64px rgba(117, 191, 255, 0.24),
+    0 0 120px rgba(73, 193, 143, 0.12);
+  content: '';
+  height: min(68vh, 520px);
+  left: 50%;
+  opacity: 0.26;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  animation: hubVoltage 3.8s ease-in-out infinite;
+}
+
+.frontDoor::after {
+  border: 1px solid rgba(117, 191, 255, 0.1);
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 34px rgba(117, 191, 255, 0.08),
+    0 0 46px rgba(73, 193, 143, 0.08);
+  content: '';
+  height: min(74vw, 760px);
+  left: 50%;
+  opacity: 0.32;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(74vw, 760px);
+}
+
+.frontDoorGrid {
+  background: transparent;
+  border: 0;
+  gap: 16px;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.deepPage {
+  display: grid;
+  gap: 14px;
+}
+
+.deepPageTopline {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.deepBackButton {
+  justify-self: start;
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 22px;
+  height: 46px;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0;
+  width: 46px;
+}
+
+.loginPhase,
+.dashboardIntro,
+.dashboardNotice,
+.dashboardSectionBlock {
+  background: var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.loginPhase {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.accessGateGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.accessGateCard {
+  align-items: center;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(117, 191, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(17, 24, 36, 0.98), rgba(8, 11, 16, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.18);
+  border-radius: 14px;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.accessGateIcon {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 24px;
+  height: 48px;
+  justify-content: center;
+  min-width: 48px;
+}
+
+.accessGateCard strong {
+  color: var(--warn);
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+
+.accessGateCard small {
+  color: var(--muted-strong);
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.dashboardSectionHead {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.phaseSummaryBadges {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.loginSignals {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.loginSignalBlock {
+  background: linear-gradient(180deg, rgba(20, 26, 36, 0.96), rgba(12, 16, 24, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.loginSignalBlock span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.loginSignalBlock strong {
+  color: var(--text);
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.loginSignalBlock small {
+  color: var(--muted-strong);
+  line-height: 1.45;
+}
+
+.loginPhaseNote {
+  align-items: flex-start;
+  background: linear-gradient(180deg, rgba(19, 24, 34, 0.96), rgba(11, 15, 22, 0.96));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+.loginPhaseNote p {
+  color: var(--muted-strong);
+}
+
+.futurePortalRail {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  background:
+    linear-gradient(180deg, rgba(14, 19, 28, 0.96), rgba(8, 11, 16, 0.98)),
+    var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.futurePortalHead {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+}
+
+.futurePortalGlyph {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(117, 191, 255, 0.28), transparent 55%),
+    linear-gradient(180deg, rgba(20, 28, 40, 0.98), rgba(8, 12, 18, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.26);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(117, 191, 255, 0.06),
+    0 14px 24px rgba(0, 0, 0, 0.22);
+  color: var(--text);
+  display: inline-flex;
+  font-size: 20px;
+  height: 44px;
+  justify-content: center;
+  min-width: 44px;
+  text-shadow: 0 0 16px rgba(117, 191, 255, 0.24);
+}
+
+.futurePortalWordmark {
+  display: grid;
+  gap: 8px;
+}
+
+.futurePortalGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.portalTile {
+  align-items: flex-start;
+  background:
+    linear-gradient(180deg, rgba(20, 28, 40, 0.98), rgba(11, 15, 22, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.16);
+  border-radius: 14px;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  cursor: not-allowed;
+  display: grid;
+  gap: 8px;
+  min-height: 112px;
+  min-width: 0;
+  padding: 12px;
+  text-align: left;
+}
+
+.portalTile:disabled {
+  color: var(--text);
+  opacity: 1;
+}
+
+.portalTileIcon {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent 50%),
+    rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 8px 16px rgba(0, 0, 0, 0.16);
+  display: inline-flex;
+  font-size: 20px;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.portalTileWordmark {
+  display: grid;
+  gap: 4px;
+}
+
+.portalTileWordmark strong {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.15;
+}
+
+.portalTileWordmark small {
+  color: var(--muted-strong);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.portalTileStatus {
+  margin-top: auto;
+  min-height: 26px;
+  padding: 3px 8px;
+  font-size: 9px;
+}
+
+.portalTile-neutral {
+  border-color: rgba(117, 191, 255, 0.18);
+}
+
+.portalTile-good {
+  border-color: rgba(73, 193, 143, 0.26);
+}
+
+.portalTile-warn {
+  border-color: rgba(232, 186, 64, 0.3);
+}
+
+.portalTile-danger {
+  border-color: rgba(239, 107, 107, 0.3);
+}
+
+.commandHeader {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.commandGlyph,
+.dashboardIntroIcon,
+.dashboardSectionEmoji,
+.legacyModuleIcon {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(117, 191, 255, 0.32), transparent 55%),
+    linear-gradient(180deg, rgba(20, 28, 40, 0.98), rgba(8, 12, 18, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.34);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 1px rgba(117, 191, 255, 0.08),
+    0 18px 32px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  display: inline-flex;
+  justify-content: center;
+  text-shadow: 0 0 16px rgba(117, 191, 255, 0.28);
+}
+
+.commandGlyph {
+  font-size: 24px;
+  height: 60px;
+  min-width: 60px;
+}
+
+.commandWordmark,
+.dashboardWordmark {
+  display: grid;
+  gap: 8px;
+}
+
+.badgeWall,
+.safetyBadgeWall,
+.legacySurfaceIconRow,
+.legacyStatusChips {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badgeWall .statusPill,
+.safetyBadgeWall .statusPill,
+.legacySurfaceHeader .statusPill {
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 10px;
+}
+
+.dashboardIntroLead {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+}
+
+.dashboardIntroIcon {
+  font-size: 24px;
+  height: 60px;
+  min-width: 60px;
+}
+
+.dashboardSectionTitleBlock {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.dashboardSectionEmoji {
+  font-size: 20px;
+  height: 44px;
+  min-width: 44px;
+}
+
+.phaseButton .statusPill {
+  font-size: 9px;
+  min-height: 24px;
+  padding: 3px 7px;
+}
+
+.phaseLabel {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.phaseDetail {
+  color: var(--muted-strong);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.phaseStrip {
+  align-items: stretch;
+  background:
+    linear-gradient(180deg, rgba(14, 19, 28, 0.96), rgba(8, 11, 16, 0.98)),
+    var(--surface-muted);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 12px;
+}
+
+.phaseButton {
+  align-items: flex-start;
+  background:
+    linear-gradient(180deg, rgba(21, 29, 42, 0.98), rgba(11, 15, 22, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.18);
+  border-radius: 18px;
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  min-height: 150px;
+  padding: 14px;
+  text-align: left;
+  width: 100%;
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  position: relative;
+}
+
+.frontDoorGrid .phaseButton {
+  align-items: center;
+  gap: 12px;
+  justify-items: center;
+  min-height: clamp(210px, 24vw, 280px);
+  padding: clamp(18px, 2.3vw, 28px);
+  text-align: center;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.frontDoorGrid .phaseButton::before {
+  background:
+    radial-gradient(circle at top left, rgba(117, 191, 255, 0.2), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(73, 193, 143, 0.11), transparent 44%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.035), transparent 42%);
+}
+
+.frontDoorGrid .phaseEmoji {
+  border-color: rgba(117, 191, 255, 0.2);
+  box-shadow:
+    0 0 0 1px rgba(117, 191, 255, 0.08),
+    0 0 34px rgba(117, 191, 255, 0.2),
+    0 18px 30px rgba(0, 0, 0, 0.28);
+  font-size: clamp(56px, 6.6vw, 88px);
+  height: clamp(104px, 11vw, 142px);
+  width: clamp(104px, 11vw, 142px);
+}
+
+.frontDoorGrid .phaseLabel {
+  color: var(--muted-strong);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  opacity: 0.52;
+  position: absolute;
+  bottom: 16px;
+  left: 18px;
+  right: 18px;
+}
+
+.frontDoorGrid .phaseDetail,
+.frontDoorGrid .phaseStatus {
+  display: none;
+}
+
+.frontDoorGrid .phaseButton:hover,
+.frontDoorGrid .phaseButton:focus-visible {
+  transform: translateY(-3px) scale(1.01);
+}
+
+.phaseButton::before {
+  border-radius: 18px;
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  background:
+    radial-gradient(circle at top left, rgba(117, 191, 255, 0.16), transparent 38%),
+    radial-gradient(circle at bottom right, rgba(73, 193, 143, 0.08), transparent 42%);
+}
+
+.phaseButton > * {
+  position: relative;
+  z-index: 1;
+}
+
+.phaseButton:hover,
+.phaseButton:focus-visible,
+.phaseButton.is-active {
+  border-color: rgba(117, 191, 255, 0.64);
+  box-shadow:
+    0 20px 34px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(117, 191, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  outline: 2px solid rgba(117, 191, 255, 0.22);
+  outline-offset: 2px;
+}
+
+.phaseEmoji {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12), transparent 45%),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 12px 22px rgba(0, 0, 0, 0.22);
+  display: inline-flex;
+  font-size: 34px;
+  height: 62px;
+  justify-content: center;
+  line-height: 1;
+  width: 62px;
+  text-shadow: 0 0 18px rgba(117, 191, 255, 0.28);
+}
+
+.dashboardFlow {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboardIntro {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 14px;
+}
+
+.dashboardNotice {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.pairBand {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(16, 21, 31, 0.98), rgba(8, 11, 16, 0.98)),
+    var(--surface-muted);
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.pairBandHead {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.pairBandGlyph {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(117, 191, 255, 0.26), transparent 55%),
+    linear-gradient(180deg, rgba(20, 28, 40, 0.98), rgba(8, 12, 18, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.24);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(117, 191, 255, 0.06),
+    0 14px 24px rgba(0, 0, 0, 0.22);
+  color: var(--text);
+  display: inline-flex;
+  font-size: 20px;
+  height: 44px;
+  justify-content: center;
+  min-width: 44px;
+  text-shadow: 0 0 16px rgba(117, 191, 255, 0.24);
+}
+
+.pairGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.pairTile {
+  align-items: center;
+  background: linear-gradient(180deg, rgba(20, 28, 40, 0.98), rgba(11, 15, 22, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.16);
+  border-radius: 14px;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 11px 12px;
+  text-align: center;
+}
+
+.pairTileIcons {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.pairTileIcon {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.1), transparent 50%),
+    rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02),
+    0 8px 16px rgba(0, 0, 0, 0.16);
+  display: inline-flex;
+  font-size: 17px;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.pairTileCode {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pairTile-good {
+  border-color: rgba(73, 193, 143, 0.3);
+}
+
+.pairTile-warn {
+  border-color: rgba(232, 186, 64, 0.32);
+}
+
+.pairTile-neutral {
+  border-color: rgba(117, 191, 255, 0.18);
+}
+
+.forexVisualConsole {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.36fr);
+  padding: 14px;
+  background:
+    radial-gradient(circle at 82% 24%, rgba(73, 193, 143, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(13, 19, 29, 0.98), rgba(6, 9, 14, 0.98));
+}
+
+.forexChartShell {
+  background:
+    linear-gradient(rgba(117, 191, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(117, 191, 255, 0.07) 1px, transparent 1px),
+    radial-gradient(circle at 22% 28%, rgba(73, 193, 143, 0.14), transparent 28%),
+    #060a10;
+  background-size:
+    100% 34px,
+    44px 100%,
+    auto,
+    auto;
+  border: 1px solid rgba(117, 191, 255, 0.2);
+  border-radius: 16px;
+  min-height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.forexChartGrid {
+  inset: 18px;
+  position: absolute;
+}
+
+.forexChartGrid span {
+  background: linear-gradient(90deg, transparent, rgba(117, 191, 255, 0.4), transparent);
+  height: 1px;
+  left: 0;
+  position: absolute;
+  right: 0;
+}
+
+.forexChartGrid span:nth-child(1) {
+  top: 18%;
+}
+
+.forexChartGrid span:nth-child(2) {
+  top: 42%;
+}
+
+.forexChartGrid span:nth-child(3) {
+  top: 66%;
+}
+
+.forexChartGrid span:nth-child(4) {
+  top: 84%;
+}
+
+.forexEmptyState {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  inset: 0;
+  justify-items: center;
+  padding: 24px;
+  position: absolute;
+  text-align: center;
+}
+
+.forexEmptyState span {
+  font-size: 42px;
+  filter: drop-shadow(0 0 18px rgba(117, 191, 255, 0.26));
+}
+
+.forexEmptyState strong {
+  color: var(--warn);
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.forexEmptyState small {
+  color: var(--muted-strong);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.futureGlyphDeck {
+  align-content: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.futureGlyph {
+  align-items: center;
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.1), transparent 42%),
+    linear-gradient(180deg, rgba(18, 26, 38, 0.98), rgba(7, 10, 15, 0.98));
+  border: 1px solid rgba(117, 191, 255, 0.22);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 14px 26px rgba(0, 0, 0, 0.22);
+  color: var(--neutral);
+  display: inline-flex;
+  font-size: 34px;
+  height: 96px;
+  justify-content: center;
+  line-height: 1;
+  overflow: hidden;
+  position: relative;
+  text-shadow: 0 0 18px rgba(117, 191, 255, 0.3);
+}
+
+.futureGlyph::after {
+  background: linear-gradient(180deg, transparent, rgba(117, 191, 255, 0.28), transparent);
+  content: '';
+  height: 120%;
+  left: 50%;
+  opacity: 0.32;
+  position: absolute;
+  top: -10%;
+  width: 1px;
+}
+
+.futureGlyph-tower {
+  color: var(--good);
+}
+
+.futureGlyph-globe,
+.futureGlyph-coin {
+  animation: glyphSpin 18s linear infinite;
+}
+
+.futureGlyph-bolt {
+  animation: glyphPulse 2.6s ease-in-out infinite;
+  color: var(--warn);
+}
+
+@keyframes glyphSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glyphPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(231, 184, 75, 0.22));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 22px rgba(231, 184, 75, 0.46));
+  }
+}
+
+@keyframes hubVoltage {
+  0%,
+  100% {
+    opacity: 0.18;
+    filter: drop-shadow(0 0 12px rgba(117, 191, 255, 0.18));
+  }
+
+  50% {
+    opacity: 0.34;
+    filter: drop-shadow(0 0 28px rgba(117, 191, 255, 0.34));
+  }
+}
+
+.dashboardSectionsGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.dashboardSectionBlock {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  background:
+    linear-gradient(180deg, rgba(17, 22, 32, 0.98), rgba(10, 13, 19, 0.98)),
+    var(--surface-muted);
+  box-shadow:
+    0 14px 26px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.dashboardSectionBlock h2 {
+  margin-bottom: 0;
+}
+
+.detailList {
+  display: grid;
+  gap: 8px;
+}
+
+.detailRow {
+  border-top: 1px solid rgba(117, 191, 255, 0.08);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-top: 8px;
+}
+
+.detailRow:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.detailLabel {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.detailValue {
+  color: var(--text);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.legacyModuleTitleBlock {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.legacyModuleIcon {
+  font-size: 18px;
+  height: 44px;
+  min-width: 44px;
+}
+
+.legacyModuleCardHead h3 {
+  font-size: 14px;
+}
+
+.detailValue-good {
+  color: var(--good);
+}
+
+.detailValue-warn {
+  color: var(--warn);
+}
+
+.detailValue-danger {
+  color: var(--danger);
+}
+
+.detailValue-neutral {
+  color: var(--text);
+}
+
+.utilitySection {
+  display: grid;
+  gap: 12px;
+}
+
 @media (max-width: 1120px) {
   .missionGrid,
   .reviewGrid {
@@ -497,6 +1491,20 @@ dd {
 
   .portalGrid {
     grid-template-columns: 1fr;
+  }
+
+  .loginSignals,
+  .accessGateGrid,
+  .phaseStrip,
+  .futurePortalGrid,
+  .pairGrid,
+  .dashboardSectionsGrid,
+  .forexVisualConsole {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboardIntro {
+    flex-direction: column;
   }
 }
 
@@ -520,12 +1528,815 @@ dd {
   .previewGrid,
   .evidenceDetails,
   .safetyGrid,
-  .evidenceGrid {
+    .evidenceGrid,
+    .loginSignals,
+    .accessGateGrid,
+    .phaseStrip,
+    .futurePortalGrid,
+    .pairGrid,
+    .dashboardSectionsGrid,
+    .forexVisualConsole,
+    .futureGlyphDeck {
     grid-template-columns: 1fr;
   }
 
   .protectedAction {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .dashboardSectionHead,
+  .phaseSummaryBadges,
+  .dashboardNoticeTopline {
+    justify-content: flex-start;
+  }
+
+  .loginPhaseNote,
+  .detailRow {
+    flex-direction: column;
+  }
+
+  .detailValue {
+    text-align: left;
+  }
+}
+
+.status-locked {
+  background: rgba(127, 184, 232, 0.08);
+  border-color: rgba(127, 184, 232, 0.42);
+  color: var(--neutral);
+}
+
+.traderCockpitShell {
+  gap: 14px;
+  max-width: 1280px;
+  padding-bottom: 24px;
+}
+
+.cockpitTopbar {
+  align-items: center;
+  background:
+    linear-gradient(180deg, rgba(16, 21, 31, 0.98), rgba(9, 12, 18, 0.98));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 16px;
+}
+
+.cockpitTitleBlock,
+.sectionTitleRow,
+.tileHead,
+.selectedPairHead,
+.drawerSummaryLabel {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cockpitTitleBlock {
+  align-items: flex-start;
+}
+
+.cockpitTopbar h1 {
+  font-size: clamp(30px, 4vw, 48px);
+  line-height: 1;
+}
+
+.cockpitTopbarChips,
+.cockpitNav,
+.cockpitSectionHead,
+.cockpitDrawer summary {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cockpitTopbarChips {
+  justify-content: flex-end;
+}
+
+.cockpitNav {
+  background: rgba(12, 18, 27, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.cockpitNav a {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--muted-strong);
+  font-size: 12px;
+  font-weight: 900;
+  padding: 8px 10px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.cockpitNav a:focus-visible,
+.cockpitNav a:hover {
+  border-color: var(--focus);
+  color: var(--text);
+  outline: 2px solid rgba(117, 191, 255, 0.2);
+  outline-offset: 2px;
+}
+
+.cockpitGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+}
+
+.cockpitSection,
+.cockpitDrawer {
+  background:
+    linear-gradient(180deg, rgba(17, 22, 32, 0.98), rgba(10, 13, 19, 0.98));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  min-width: 0;
+  padding: 14px;
+}
+
+.cockpitSection {
+  display: grid;
+  gap: 12px;
+}
+
+.cockpitSectionHead {
+  justify-content: space-between;
+}
+
+.sectionTitleRow {
+  align-items: flex-start;
+}
+
+.cockpitSectionHead h2 {
+  margin-bottom: 0;
+}
+
+.cockpitSummaryGrid,
+.cockpitDataGrid,
+.drawerGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cockpitSummaryTile,
+.nextActionBand,
+.selectedPair,
+.cockpitDataRow,
+.blockedActionList,
+.liveBridgeDrawer {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.cockpitSummaryTile {
+  display: grid;
+  gap: 10px;
+  min-height: 132px;
+  padding: 12px;
+}
+
+.tileHead {
+  align-items: flex-start;
+}
+
+.cockpitSummaryTile span,
+.selectedPair span,
+.nextActionBand span,
+.cockpitDataRow span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.cockpitSummaryTile strong,
+.selectedPair strong,
+.nextActionBand strong {
+  color: var(--text);
+  display: block;
+  font-size: 18px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.cockpitSummaryTile p,
+.selectedPair p {
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.nextActionBand {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.traderGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(220px, 0.55fr) minmax(0, 1fr);
+}
+
+.selectedPair {
+  align-content: center;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.selectedPairHead {
+  align-items: center;
+}
+
+.selectedPair strong {
+  font-size: clamp(32px, 4vw, 54px);
+}
+
+.riskStack {
+  display: grid;
+  gap: 8px;
+}
+
+.cockpitDataRow {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(110px, 0.72fr) minmax(0, 1fr) auto;
+  min-height: 48px;
+  padding: 9px 10px;
+}
+
+.cockpitDataRow strong {
+  color: var(--text);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.cockpitDataRow .statusPill,
+.cockpitSummaryTile .statusPill {
+  font-size: 10px;
+  min-height: 26px;
+  padding: 4px 8px;
+}
+
+.tradeLedgerHero {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.tradeLedgerIdentity {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+.tradeLedgerIdentity span,
+.tradeLedgerMetricTopline span,
+.metadataGroupCard h3 {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.tradeLedgerIdentity strong {
+  color: var(--text);
+  display: block;
+  font-size: clamp(22px, 2.8vw, 34px);
+  line-height: 1;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.tradeLedgerIdentity p {
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 8px;
+}
+
+.tradeLedgerStatusRail {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 170px;
+}
+
+.tradeLedgerGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tradeLedgerMetric {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(73, 193, 143, 0.08), transparent 34%),
+    rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-height: 116px;
+  min-width: 0;
+  padding: 11px;
+}
+
+.tradeLedgerMetricTopline {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tradeLedgerMetric strong {
+  color: var(--text);
+  display: block;
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.tradeLedgerMetric .statusPill,
+.metadataGroupCard .statusPill {
+  font-size: 10px;
+  justify-self: start;
+  min-height: 26px;
+  padding: 4px 8px;
+}
+
+.tradeMetadataDrawer {
+  background: rgba(255, 255, 255, 0.018);
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.tradeMetadataDrawer summary {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+  list-style: none;
+  padding: 12px;
+}
+
+.tradeMetadataDrawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.tradeMetadataDrawer[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.metadataGroupGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 12px;
+}
+
+.metadataGroupCard {
+  background:
+    linear-gradient(180deg, rgba(18, 24, 34, 0.94), rgba(9, 12, 18, 0.96));
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.metadataGroupCard header {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.metadataGroupCard h3 {
+  color: var(--text);
+  margin: 0;
+}
+
+.metadataRows {
+  display: grid;
+  gap: 8px;
+}
+
+.capitalFlowHero {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.capitalFlowTruthList {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.capitalFlowTruthList span,
+.capitalFlowAliasGrid span,
+.capitalFlowRecommendationList span,
+.capitalFlowEmpty {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  color: var(--muted-strong);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 9px 10px;
+}
+
+.capitalFlowMetricGrid .tradeLedgerMetric {
+  background:
+    radial-gradient(circle at 14% 0%, rgba(244, 201, 93, 0.09), transparent 34%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.capitalFlowStatusGrid {
+  margin-top: 2px;
+}
+
+.capitalFlowDrawerGrid {
+  align-items: start;
+}
+
+.capitalFlowAliasGrid,
+.capitalFlowRecommendationList,
+.capitalFlowRequestList,
+.capitalFlowScenarioGrid {
+  display: grid;
+  gap: 8px;
+}
+
+.capitalFlowAliasGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.capitalFlowScenarioGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.capitalFlowScenario {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 9px;
+}
+
+.capitalFlowScenario span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.capitalFlowScenario strong {
+  color: var(--text);
+  font-size: 16px;
+}
+
+.capitalFlowScenario small {
+  color: var(--focus);
+  font-size: 10px;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.capitalFlowScenario p {
+  color: var(--muted-strong);
+  font-size: 11px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.capitalFlowRequest {
+  background:
+    linear-gradient(180deg, rgba(18, 24, 34, 0.94), rgba(9, 12, 18, 0.96));
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.capitalFlowRequest span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.capitalFlowRequest strong {
+  color: var(--text);
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+
+.capitalFlowRequest p {
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.pairCodeRail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pairCodeChip {
+  align-items: center;
+  background: rgba(127, 184, 232, 0.08);
+  border: 1px solid rgba(127, 184, 232, 0.24);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 900;
+  gap: 7px;
+  padding: 7px 9px;
+}
+
+.pairCodeChip-symbol {
+  background:
+    radial-gradient(circle at 18% 30%, rgba(117, 191, 255, 0.1), transparent 48%),
+    rgba(127, 184, 232, 0.08);
+  border-color: rgba(117, 191, 255, 0.3);
+  padding: 5px 10px 5px 6px;
+}
+
+.capabilityGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.capabilityAnswer {
+  background:
+    linear-gradient(90deg, rgba(239, 107, 107, 0.12), rgba(117, 191, 255, 0.04));
+  border: 1px solid rgba(239, 107, 107, 0.32);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.capabilityAnswer span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.capabilityAnswer strong {
+  color: var(--danger);
+  font-size: clamp(22px, 3vw, 34px);
+  line-height: 1;
+}
+
+.capabilityCard,
+.truthStatementList {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.capabilityCard {
+  display: grid;
+  gap: 10px;
+  min-height: 132px;
+  padding: 12px;
+}
+
+.capabilityCard span,
+.truthStatementList span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.capabilityCard strong {
+  color: var(--text);
+  display: block;
+  font-size: 16px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.capabilityCard p {
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.truthStatementList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+}
+
+.truthStatementList span {
+  background: rgba(239, 107, 107, 0.08);
+  border: 1px solid rgba(239, 107, 107, 0.24);
+  border-radius: 999px;
+  color: var(--muted-strong);
+  padding: 7px 9px;
+}
+
+.cockpitSecondaryRail {
+  display: grid;
+  gap: 12px;
+}
+
+.cockpitDrawer {
+  padding: 0;
+}
+
+.cockpitDrawer summary {
+  cursor: pointer;
+  justify-content: space-between;
+  list-style: none;
+  padding: 14px;
+}
+
+.cockpitDrawer summary::-webkit-details-marker {
+  display: none;
+}
+
+.cockpitDrawer summary > span:first-child {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.drawerSummaryLabel {
+  align-items: center;
+}
+
+.cockpitDrawer[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.cockpitDrawer > :not(summary) {
+  margin: 14px;
+}
+
+.drawerGrid article,
+.blockedActionList {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.drawerGrid h3,
+.blockedActionList h3 {
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.blockedActionList ul {
+  color: var(--muted-strong);
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.blockedActionList li {
+  overflow-wrap: anywhere;
+}
+
+.liveBridgeDrawer {
+  padding: 0;
+}
+
+.liveBridgeDrawer summary {
+  padding: 12px;
+}
+
+.utilityDock .legacyPreserveSurface {
+  border-radius: 8px;
+  margin: 0;
+}
+
+.legacyPreserveSurface .legacyModuleIcon {
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 900;
+  height: 36px;
+  letter-spacing: 0;
+  min-width: 44px;
+  padding-inline: 8px;
+  text-shadow: none;
+}
+
+@media (max-width: 1120px) {
+  .cockpitGrid,
+  .traderGrid,
+  .capitalFlowTruthList,
+  .metadataGroupGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .traderCockpitShell {
+    padding: 10px;
+  }
+
+  .cockpitTopbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cockpitTitleBlock,
+  .sectionTitleRow {
+    align-items: flex-start;
+  }
+
+  .cockpitTopbarChips,
+  .cockpitNav {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .cockpitNav {
+    overflow-x: auto;
+  }
+
+  .cockpitNav a {
+    flex: 0 0 auto;
+  }
+
+  .cockpitSummaryGrid,
+  .cockpitDataGrid,
+  .drawerGrid,
+  .capabilityGrid,
+  .tradeLedgerGrid,
+  .capitalFlowAliasGrid,
+  .capitalFlowScenarioGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tradeLedgerHero,
+  .capitalFlowHero,
+  .metadataGroupCard header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .tradeLedgerStatusRail {
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .cockpitDataRow {
+    align-items: flex-start;
+    grid-template-columns: 1fr;
+  }
+
+  .cockpitDataRow .statusPill {
+    justify-self: start;
   }
 }

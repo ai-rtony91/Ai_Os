@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Balance ladder</title>
+  <desc id="desc">Sanitized balance ladder from micro test range to high control float.</desc>
+  <path d="M25 78V18M71 78V18" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M25 26h46M25 38h46M25 50h46M25 62h46M25 74h46" stroke="#20344f" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="25" cy="74" r="6" fill="#0d1724" stroke="#49c18f" stroke-width="3"/>
+  <circle cx="71" cy="26" r="6" fill="#0d1724" stroke="#f4c95d" stroke-width="3"/>
+  <path d="M37 74c10-6 17-19 24-43" fill="none" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M56 32l7-5 4 8" fill="none" stroke="#edf7ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
