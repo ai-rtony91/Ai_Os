@@ -111,6 +111,15 @@ function copyStaticDashboardRuntime() {
           force: true,
         })
       }
+
+      // Azure App Service should serve the canonical static preview at the root URL.
+      cpSync(
+        path.resolve(rootDir, 'AIOS_STATIC_PREVIEW.html'),
+        path.join(outDir, 'index.html'),
+        {
+          force: true,
+        },
+      )
     },
   }
 }
