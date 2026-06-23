@@ -1,0 +1,252 @@
+.legacyPreserveSurface {
+  --legacy-accent: #38bdf8;
+  --legacy-accent-soft: rgba(56, 189, 248, 0.14);
+  --legacy-glow: rgba(56, 189, 248, 0.18);
+  --legacy-line: rgba(88, 118, 160, 0.34);
+  --legacy-surface: rgba(10, 14, 22, 0.96);
+  --legacy-surface-strong: rgba(5, 8, 13, 0.96);
+  --legacy-muted: #95a7bb;
+  --legacy-text: #eaf4ff;
+  border: 1px solid var(--legacy-line);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 10% 0%, var(--legacy-accent-soft), transparent 30%),
+    radial-gradient(circle at 90% 0%, rgba(173, 92, 255, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(10, 14, 22, 0.98), rgba(5, 7, 11, 0.99));
+  box-shadow:
+    0 28px 60px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: var(--legacy-text);
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.legacySurfaceHeader {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.legacySurfaceSummary,
+.legacyUtilityNote,
+.legacyDockHint,
+.legacyPlayerNote,
+.legacyPlayerMeta {
+  color: var(--legacy-muted);
+}
+
+.legacyStatusChips {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.legacyModuleGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.legacyModuleCard {
+  border: 1px solid var(--legacy-line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--legacy-surface), var(--legacy-surface-strong));
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+}
+
+.legacyModuleCardHead {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.legacyModuleCardHead h3 {
+  margin: 0;
+}
+
+.legacyUtilityBody {
+  display: grid;
+  gap: 12px;
+}
+
+.legacySelectField {
+  display: grid;
+  gap: 8px;
+}
+
+.legacySelectField span,
+.legacyVolumeRow span,
+.legacyDockEyebrow {
+  color: var(--legacy-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.legacySelectField select {
+  appearance: none;
+  background: rgba(3, 6, 12, 0.92);
+  border: 1px solid var(--legacy-line);
+  border-radius: 10px;
+  color: var(--legacy-text);
+  padding: 10px 12px;
+}
+
+.legacySelectField select:focus-visible {
+  border-color: var(--legacy-accent);
+  outline: 2px solid var(--legacy-glow);
+  outline-offset: 2px;
+}
+
+.legacySoftRefreshButton,
+.legacyExpandButton {
+  align-self: start;
+}
+
+.legacyDockTopline {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.legacyDockTopline strong {
+  color: var(--legacy-text);
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.legacyDockControls {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.legacyDockButton {
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 62px;
+}
+
+.legacyDockButton.is-active {
+  border-color: var(--legacy-accent);
+  box-shadow: inset 0 0 0 1px var(--legacy-glow);
+}
+
+.legacyDockButton small {
+  text-transform: uppercase;
+}
+
+.legacyDockHint {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.legacyPlayerPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.legacyPlayerPanel.is-collapsed .legacyPlayerFrame,
+.legacyPlayerPanel.is-collapsed .legacyVolumeRow,
+.legacyPlayerPanel.is-collapsed .legacyPlayerNote,
+.legacyPlayerPanel.is-collapsed .legacyPlayerMeta {
+  display: none;
+}
+
+.legacyPlayerFrame {
+  border: 1px solid var(--legacy-line);
+  border-radius: 12px;
+  background: #02040a;
+  aspect-ratio: 16 / 9;
+  min-height: 190px;
+  overflow: hidden;
+}
+
+.legacyPlayerMount,
+.legacyPlayerMount iframe {
+  display: block;
+  height: 100%;
+  min-height: 190px;
+  width: 100%;
+}
+
+.legacyVolumeRow {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: max-content minmax(0, 1fr) max-content;
+}
+
+.legacyVolumeRow input[type='range'] {
+  accent-color: var(--legacy-accent);
+  width: 100%;
+}
+
+.legacyVolumeRow strong {
+  color: var(--legacy-text);
+  font-size: 12px;
+}
+
+.legacyPlayerNote,
+.legacyPlayerMeta {
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.legacyModuleCard .statusPill {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--legacy-line);
+}
+
+.legacyModuleCard .status-good {
+  color: #49c18f;
+}
+
+.legacyModuleCard .status-neutral {
+  color: var(--legacy-accent);
+}
+
+.legacyModuleCard .status-warn {
+  color: #f6c453;
+}
+
+@media (max-width: 1180px) {
+  .legacyModuleGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .legacySurfaceHeader {
+    flex-direction: column;
+  }
+
+  .legacyDockControls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .legacyVolumeRow {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .legacyVolumeRow strong {
+    justify-self: start;
+  }
+}
