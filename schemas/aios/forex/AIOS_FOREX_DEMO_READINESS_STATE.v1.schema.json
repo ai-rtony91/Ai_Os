@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_FOREX_DEMO_READINESS_STATE.v1.schema.json",
+  "title": "AIOS Forex Demo Readiness State V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "ready",
+    "demo_preparation_ready",
+    "demo_preview_ready",
+    "broker_gate_status",
+    "evidence_depth_status",
+    "risk_policy_status",
+    "order_intent_preview_status",
+    "candidate_id",
+    "strategy_id",
+    "instrument",
+    "direction",
+    "blockers",
+    "warnings",
+    "next_safe_action",
+    "execution_allowed",
+    "ready_to_execute",
+    "demo_order_allowed",
+    "live_autonomy_allowed",
+    "short_side_enabled",
+    "broker_mutation_allowed",
+    "order_execution_allowed",
+    "safety_summary"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "AUTONOMOUS_BLOCKED_BY_BROKER_GATE",
+        "AUTONOMOUS_BLOCKED_BY_EVIDENCE_DEPTH",
+        "AUTONOMOUS_BLOCKED_BY_RISK",
+        "AUTONOMOUS_BLOCKED_BY_POLICY",
+        "AUTONOMOUS_BLOCKED_BY_EXECUTION_ARMING",
+        "AUTONOMOUS_DEMO_PREPARATION_READY",
+        "AUTONOMOUS_DEMO_READY_PREVIEW_ONLY"
+      ]
+    },
+    "ready": { "type": "boolean" },
+    "demo_preparation_ready": { "type": "boolean" },
+    "demo_preview_ready": { "type": "boolean" },
+    "broker_gate_status": { "type": ["string", "null"] },
+    "evidence_depth_status": { "type": ["string", "null"] },
+    "risk_policy_status": { "type": ["string", "null"] },
+    "order_intent_preview_status": { "type": ["string", "null"] },
+    "supervisor_status": { "type": ["string", "null"] },
+    "candidate_id": { "type": ["string", "null"] },
+    "strategy_id": { "type": ["string", "null"] },
+    "instrument": { "type": ["string", "null"] },
+    "direction": { "type": ["string", "null"] },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "next_safe_action": { "type": "string" },
+    "execution_allowed": { "const": false },
+    "ready_to_execute": { "const": false },
+    "demo_order_allowed": { "const": false },
+    "live_autonomy_allowed": { "const": false },
+    "short_side_enabled": { "const": false },
+    "broker_mutation_allowed": { "const": false },
+    "order_execution_allowed": { "const": false },
+    "safety_summary": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
