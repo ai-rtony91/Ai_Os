@@ -48,7 +48,7 @@ def _deterministic_candidate_profiles() -> list[dict[str, Any]]:
             "candidate_id": ANCHOR_CANDIDATE_ID,
             "strategy_id": ANCHOR_STRATEGY_ID,
             "direction": ANCHOR_DIRECTION,
-            "trade_pnl_list": [200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0],
+            "trade_pnl_list": [200.0] * 30,
             "candidate_label": "baseline_anchor",
         },
         {

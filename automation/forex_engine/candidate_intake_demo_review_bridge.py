@@ -249,7 +249,12 @@ def build_internal_proofs(
     mitigation_payload: Mapping[str, Any],
 ) -> dict[str, bool | dict[str, Any]]:
     _ = discovery_payload
-    sample_size = _safe_int(selected.get("sample_size", 0))
+    sample_size = _safe_int(
+        selected.get(
+            "sample_size",
+            selected.get("closed_trade_count", 0),
+        )
+    )
     expectancy = _safe_float(selected.get("expectancy", 0.0))
     max_drawdown = _safe_float(selected.get("max_drawdown", 0.0))
     metrics_ok = expectation_positive = expectancy > 0.0

@@ -6,13 +6,13 @@ Deterministic paper-only expansion for anchor candidate `c1-eur-buy` with both L
 ## Anchor
 - strategy: `paper_long_run_supervisor_v2`
 - candidate: `c1-eur-buy`
-- closed trade count: `20`
+- closed trade count: `30`
 - sample-size gate cleared: `True`
 - expectancy: `200.00`
 - profit factor: `999.00`
 - max drawdown: `0.00`
 - win rate: `1.00`
-- consecutive wins: `20`
+- consecutive wins: `30`
 - consecutive losses: `0`
 - promotion status: `PROFIT_OBJECTIVE_READY`
 - blocker reasons: `none`
