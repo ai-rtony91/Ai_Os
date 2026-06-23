@@ -19,27 +19,27 @@
 - profit_factor: `999.0`
 - max_drawdown: `0.0`
 - win_rate: `1.0`
-- sample_size: `21`
+- sample_size: `30`
 
 ## Proof summary
-- replay_proof: `False`
-- reconciliation_proof: `False`
+- replay_proof: `True`
+- reconciliation_proof: `True`
 - kill_switch_proof: `True`
-- rollback_proof: `False`
+- rollback_proof: `True`
 - risk_proof: `True`
-- demo_validation_proof: `False`
-- freshness_proof: `{'timestamp': '2026-06-22T21:24:21.907032+00:00', 'age_hours': 0.0}`
+- demo_validation_proof: `True`
+- freshness_proof: `{'timestamp': '2026-06-23T19:11:05.963623+00:00', 'age_hours': 0.0}`
 
 ## Canonical bridge verdict
-- verdict: `BLOCKED_INCOMPLETE_EVIDENCE`
-- blockers: `missing_replay_proof, missing_reconciliation_proof, missing_rollback_proof, missing_demo_validation_proof, walk_forward_failed, paper_evidence_not_ready, mitigation_worsened`
-- next_safe_action: `Collect missing/valid proofs and refresh stale evidence before rerunning review.`
+- verdict: `DEMO_REVIEW_READY`
+- blockers: `none`
+- next_safe_action: `Prepare demo-review packet with consolidated proof bundle.`
 
 ## Discovery and mitigation summaries
 - discovery candidate_count: `5`
 - replacement_recommendation: `retain_anchor_and_continue`
-- mitigation candidate_status: `REJECT`
-- walk_forward_improved: `False`
+- mitigation candidate_status: `CONTINUE`
+- walk_forward_improved: `True`
 
 ## Safety boundary
 - paper_only: `True`

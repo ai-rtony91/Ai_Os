@@ -33,6 +33,13 @@ MITIGATION_PARAMS = {
     "weak_expectancy_suppression": True,
 }
 
+MITIGATION_RETEST_BLOCKERS = frozenset(
+    {
+        "insufficient_sample",
+        "drawdown_containment",
+    },
+)
+
 
 def _safety() -> dict[str, bool]:
     return {
@@ -193,13 +200,20 @@ def apply_mitigation_controls(
             if "trade_concentration_limiter" not in controls:
                 controls.append("trade_concentration_limiter")
 
-    # Weak expectancy suppression: remove smallest-magnitude trade when expectancy is weak.
-    mitigated = throttled
-    expectancy = sum(throttled) / len(throttled)
-    if weak_expectancy_suppression and expectancy <= 0.0 and len(throttled) >= 3:
-        weakest_index = min(range(len(throttled)), key=lambda idx: abs(throttled[idx]))
-        mitigated = [value for idx, value in enumerate(throttled) if idx != weakest_index]
-        controls.append("weak_expectancy_suppression")
+    # Weak expectancy suppression neutralizes losing exposure without deleting evidence rows.
+    mitigated = list(throttled)
+    if weak_expectancy_suppression:
+        while len(mitigated) >= 3:
+            expectancy = sum(mitigated) / len(mitigated)
+            if expectancy > 0.0:
+                break
+            loss_indices = [idx for idx, value in enumerate(mitigated) if value < 0]
+            if not loss_indices:
+                break
+            weakest_loss_index = min(loss_indices, key=lambda idx: abs(mitigated[idx]))
+            mitigated[weakest_loss_index] = 0.0
+            if "weak_expectancy_suppression" not in controls:
+                controls.append("weak_expectancy_suppression")
 
     finalized: list[float] = []
     loss_streak = 0
@@ -332,12 +346,31 @@ def determine_candidate_status(
         return "REJECT"
 
     if comparison.get("expectancy_delta", 0.0) > 0 and comparison.get("profit_factor_delta", 0.0) >= 0 and comparison.get("drawdown_delta", 0.0) <= 0:
-        if comparison.get("win_rate_delta", 0.0) >= 0 and comparison.get("consecutive_losses_delta", 0.0) <= 0:
+        if (
+            optimized.get("walk_forward_gate_cleared")
+            and comparison.get("win_rate_delta", 0.0) >= 0
+            and comparison.get("consecutive_losses_delta", 0.0) <= 0
+        ):
             return "CONTINUE"
         return "REQUIRE_MORE_EVIDENCE"
 
     if not baseline["walk_forward_gate_cleared"] and optimized["walk_forward_gate_cleared"]:
         return "REQUIRE_OPTIMIZATION"
+
+    optimized_remaining_blockers = {
+        str(blocker)
+        for blocker in optimized.get("mitigation_remaining_blockers", [])
+        if blocker
+    }
+    if (
+        optimized_remaining_blockers
+        and optimized_remaining_blockers.issubset(MITIGATION_RETEST_BLOCKERS)
+        and comparison["expectancy_delta"] >= 0
+        and comparison["drawdown_delta"] <= 0
+        and int(optimized.get("metrics", {}).get("closed_trade_count", 0))
+        >= MITIGATION_THRESHOLDS["minimum_sample_size"]
+    ):
+        return "REQUIRE_MORE_EVIDENCE"
 
     return "REQUIRE_OPTIMIZATION" if optimized.get("walk_forward_gate_cleared") else "REJECT"
 

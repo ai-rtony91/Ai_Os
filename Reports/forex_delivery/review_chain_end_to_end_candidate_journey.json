@@ -1,17 +1,9 @@
 {
   "candidate_bridge_status": "PROOF_BUNDLE_COMPLETE",
   "candidate_bridge_verdict": "REJECTED",
-  "candidate_demo_review_blockers": [
-    "missing_replay_proof",
-    "missing_reconciliation_proof",
-    "missing_rollback_proof",
-    "missing_demo_validation_proof",
-    "walk_forward_failed",
-    "paper_evidence_not_ready",
-    "mitigation_worsened"
-  ],
-  "candidate_demo_review_next_safe_action": "Collect missing/valid proofs and refresh stale evidence before rerunning review.",
-  "candidate_demo_review_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+  "candidate_demo_review_blockers": [],
+  "candidate_demo_review_next_safe_action": "Prepare demo-review packet with consolidated proof bundle.",
+  "candidate_demo_review_verdict": "DEMO_REVIEW_READY",
   "candidate_journey_state": "REVIEW_CHAIN_INCOMPLETE",
   "candidate_selection_reason": "champion_better_than_anchor",
   "canonical_review_bundle": {

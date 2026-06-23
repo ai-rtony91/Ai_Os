@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from . import canonical_demo_review_evidence_bridge
-from .candidate_intake_demo_review_bridge import run_candidate_intake_demo_review_bridge
+from . import candidate_intake_demo_review_bridge
 
 PacketResult = Dict[str, Any]
 
@@ -159,7 +159,7 @@ def run_proof_bundle_to_candidate_bridge(
         candidate_payload = dict(candidate_payload)
         if not candidate_payload:
             try:
-                intake_payload = run_candidate_intake_demo_review_bridge(write_reports=False)
+                intake_payload = candidate_intake_demo_review_bridge.run_candidate_intake_demo_review_bridge(write_reports=False)
             except Exception:
                 intake_payload = {}
             candidate_payload = dict(intake_payload.get("normalized_candidate") or intake_payload.get("candidate") or {})

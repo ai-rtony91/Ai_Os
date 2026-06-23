@@ -17,7 +17,7 @@ def test_anchor_present_with_expanded_depth():
     anchor = next(row for row in rows if row["candidate_id"] == "c1-eur-buy")
     assert anchor["strategy_id"] == "paper_long_run_supervisor_v2"
     assert anchor["direction"] == "LONG"
-    assert anchor["closed_trade_count"] >= 20
+    assert anchor["closed_trade_count"] >= 30
     assert anchor["expectancy"] == 200.0
     assert anchor["profit_factor"] == 999.0
     assert anchor["max_drawdown"] == 0.0
@@ -42,7 +42,7 @@ def test_accelerator_via_profit_objective_is_used():
 def test_anchor_sample_gate_clear_and_no_other_gates_blocked():
     result = _run()
     assert result["anchor_sample_size_gate_cleared"] is True
-    assert result["anchor_closed_trades"] >= 20
+    assert result["anchor_closed_trades"] >= 30
     assert result["anchor_any_remaining_blockers"] is False
 
 

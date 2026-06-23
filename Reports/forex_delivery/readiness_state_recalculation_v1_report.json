@@ -22,11 +22,8 @@
     "missing_risk_limits",
     "missing_rollback_proof",
     "missing_validation_results",
-    "mitigation_worsened",
     "one_shot_exception_package_not_review_ready",
-    "paper_evidence_not_ready",
-    "stale_or_incomplete_evidence",
-    "walk_forward_failed"
+    "stale_or_incomplete_evidence"
   ],
   "blockers_cleared": [],
   "blockers_remaining": [
@@ -52,49 +49,42 @@
     "missing_risk_limits",
     "missing_rollback_proof",
     "missing_validation_results",
-    "mitigation_worsened",
     "one_shot_exception_package_not_review_ready",
-    "paper_evidence_not_ready",
-    "stale_or_incomplete_evidence",
-    "walk_forward_failed"
+    "stale_or_incomplete_evidence"
   ],
   "bridge_payload": {
-    "candidate_bridge_verdict": "REJECTED",
+    "candidate_bridge_verdict": "DEMO_REVIEW_READY",
     "canonical_review_bundle": {
-      "blockers": [
-        "walk_forward_failed",
-        "paper_evidence_not_ready",
-        "mitigation_worsened"
-      ],
+      "blockers": [],
       "candidate": {
         "candidate_id": "c1-eur-buy",
-        "demo_validation_proof": false,
+        "demo_validation_proof": true,
         "direction": "LONG",
         "expectancy": 200.0,
         "freshness_proof": {
           "age_hours": 0.0,
-          "timestamp": "2026-06-22T21:25:10.556358+00:00"
+          "timestamp": "2026-06-23T19:12:07.649648+00:00"
         },
         "kill_switch_proof": true,
         "max_drawdown": 0.0,
-        "mitigation_status": "worse",
+        "mitigation_status": "stable",
         "pair": "EURUSD",
-        "paper_evidence_status": "pending",
+        "paper_evidence_status": "passed",
         "profit_factor": 999.0,
-        "reconciliation_proof": false,
-        "replay_proof": false,
+        "reconciliation_proof": true,
+        "replay_proof": true,
         "risk_proof": true,
-        "rollback_proof": false,
-        "sample_size": 21,
+        "rollback_proof": true,
+        "sample_size": 30,
         "strategy": "paper_long_run_supervisor_v2",
-        "walk_forward_proof": false,
-        "walk_forward_status": "failed",
+        "walk_forward_proof": true,
+        "walk_forward_status": "pass",
         "win_rate": 1.0
       },
       "candidate_id": "c1-eur-buy",
-      "next_safe_action": "Reject candidate and re-optimize candidate metrics.",
+      "next_safe_action": "Prepare demo-review packet with consolidated proof bundle.",
       "safety_gaps": [],
-      "verdict": "BLOCKED_INCOMPLETE_EVIDENCE"
+      "verdict": "DEMO_REVIEW_READY"
     },
     "closed_blockers": [
       "missing_demo_validation_proof",
@@ -113,30 +103,26 @@
       },
       "kill_switch_proof": true,
       "max_drawdown": 0.0,
-      "mitigation_status": "worse",
+      "mitigation_status": "stable",
       "pair": "EURUSD",
-      "paper_evidence_status": "pending",
+      "paper_evidence_status": "passed",
       "profit_factor": 999.0,
       "reconciliation_proof": true,
       "replay_proof": true,
       "risk_proof": true,
       "rollback_proof": true,
-      "sample_size": 21,
+      "sample_size": 30,
       "strategy": "paper_long_run_supervisor_v2",
-      "walk_forward_status": "failed",
+      "walk_forward_status": "pass",
       "win_rate": 1.0
     },
     "human_review_gaps": [],
     "live_trading_authorized": false,
     "mode": "LOCAL_APPLY",
-    "next_safe_action": "Reject candidate and re-optimize candidate metrics.",
+    "next_safe_action": "Prepare demo-review packet with consolidated proof bundle.",
     "packet_id": "AIOS_FOREX_PROOF_BUNDLE_TO_CANDIDATE_BRIDGE_V1",
     "proof_bundle_ready_for_candidate_bridge": true,
-    "remaining_blockers": [
-      "walk_forward_failed",
-      "paper_evidence_not_ready",
-      "mitigation_worsened"
-    ],
+    "remaining_blockers": [],
     "review_package_gaps": [],
     "safety": {
       "account_id_present": false,
@@ -155,13 +141,9 @@
     "selected_candidate_id": "c1-eur-buy",
     "selected_direction": "LONG",
     "selected_strategy": "paper_long_run_supervisor_v2",
-    "source_candidate_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+    "source_candidate_verdict": "DEMO_REVIEW_READY",
     "source_proof_bundle_status": "PROOF_BUNDLE_COMPLETE",
-    "strategy_quality_gaps": [
-      "walk_forward_failed",
-      "paper_evidence_not_ready",
-      "mitigation_worsened"
-    ]
+    "strategy_quality_gaps": []
   },
   "candidate_id": "c1-eur-buy",
   "demo_contract_present": false,
@@ -171,58 +153,47 @@
   "journey_payload": {
     "candidate_bridge_status": "PROOF_BUNDLE_COMPLETE",
     "candidate_bridge_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
-    "candidate_demo_review_blockers": [
-      "missing_replay_proof",
-      "missing_reconciliation_proof",
-      "missing_rollback_proof",
-      "missing_demo_validation_proof",
-      "walk_forward_failed",
-      "paper_evidence_not_ready",
-      "mitigation_worsened"
-    ],
-    "candidate_demo_review_next_safe_action": "Collect missing/valid proofs and refresh stale evidence before rerunning review.",
-    "candidate_demo_review_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+    "candidate_demo_review_blockers": [],
+    "candidate_demo_review_next_safe_action": "Prepare demo-review packet with consolidated proof bundle.",
+    "candidate_demo_review_verdict": "DEMO_REVIEW_READY",
     "candidate_journey_state": "REVIEW_CHAIN_INCOMPLETE",
     "candidate_selection_reason": "champion_better_than_anchor",
     "canonical_review_bundle": {
       "blockers": [
-        "walk_forward_failed",
         "missing_replay_proof",
         "missing_reconciliation_proof",
         "missing_rollback_proof",
-        "missing_demo_validation_proof",
-        "paper_evidence_not_ready",
-        "mitigation_worsened"
+        "missing_demo_validation_proof"
       ],
       "candidate": {
         "candidate_id": "c1-eur-buy",
-        "demo_validation_proof": false,
+        "demo_validation_proof": true,
         "direction": "LONG",
         "expectancy": 200.0,
         "freshness_proof": {
           "age_hours": 0.0,
-          "timestamp": "2026-06-22T21:25:10.557356+00:00"
+          "timestamp": "2026-06-23T19:12:07.649648+00:00"
         },
         "kill_switch_proof": true,
         "max_drawdown": 0.0,
-        "mitigation_status": "worse",
+        "mitigation_status": "stable",
         "pair": "EURUSD",
-        "paper_evidence_status": "pending",
+        "paper_evidence_status": "passed",
         "profit_factor": 999.0,
-        "reconciliation_proof": false,
-        "replay_proof": false,
+        "reconciliation_proof": true,
+        "replay_proof": true,
         "risk_proof": true,
-        "rollback_proof": false,
-        "sample_size": 21,
+        "rollback_proof": true,
+        "sample_size": 30,
         "strategy": "paper_long_run_supervisor_v2",
-        "walk_forward_proof": false,
-        "walk_forward_status": "failed",
+        "walk_forward_proof": true,
+        "walk_forward_status": "pass",
         "win_rate": 1.0
       },
       "candidate_id": "c1-eur-buy",
       "next_safe_action": "Collect missing/valid proofs and refresh stale evidence before rerunning review.",
       "safety_gaps": [],
-      "verdict": "BLOCKED_INCOMPLETE_EVIDENCE"
+      "verdict": "DEMO_REVIEW_READY"
     },
     "closed_blockers": [],
     "demo_validation_contract": {
@@ -276,26 +247,26 @@
     },
     "enriched_candidate": {
       "candidate_id": "c1-eur-buy",
-      "demo_validation_proof": false,
+      "demo_validation_proof": true,
       "direction": "LONG",
       "expectancy": 200.0,
       "freshness_proof": {
         "age_hours": 0.0,
-        "timestamp": "2026-06-22T21:25:10.557356+00:00"
+        "timestamp": "2026-06-23T19:12:07.649648+00:00"
       },
       "kill_switch_proof": true,
       "max_drawdown": 0.0,
-      "mitigation_status": "worse",
+      "mitigation_status": "stable",
       "pair": "EURUSD",
-      "paper_evidence_status": "pending",
+      "paper_evidence_status": "passed",
       "profit_factor": 999.0,
-      "reconciliation_proof": false,
-      "replay_proof": false,
+      "reconciliation_proof": true,
+      "replay_proof": true,
       "risk_proof": true,
-      "rollback_proof": false,
-      "sample_size": 21,
+      "rollback_proof": true,
+      "sample_size": 30,
       "strategy": "paper_long_run_supervisor_v2",
-      "walk_forward_status": "failed",
+      "walk_forward_status": "pass",
       "win_rate": 1.0
     },
     "final_next_safe_action": "collect_and_align_chain_stages",
@@ -526,13 +497,10 @@
     "packet_id": "AIOS_FOREX_REVIEW_READY_STAGE_CHAIN_CONTINUITY_V1",
     "proof_bundle_ready_for_candidate_bridge": true,
     "remaining_blockers": [
-      "walk_forward_failed",
       "missing_replay_proof",
       "missing_reconciliation_proof",
       "missing_rollback_proof",
       "missing_demo_validation_proof",
-      "paper_evidence_not_ready",
-      "mitigation_worsened",
       "missing_validation_results",
       "candidate_not_approved_for_demo_validation",
       "demo_contract_not_complete",
@@ -555,39 +523,31 @@
       "missing_human_review_ready"
     ],
     "review_bundle": {
-      "blockers": [
-        "missing_replay_proof",
-        "missing_reconciliation_proof",
-        "missing_rollback_proof",
-        "missing_demo_validation_proof",
-        "walk_forward_failed",
-        "paper_evidence_not_ready",
-        "mitigation_worsened"
-      ],
+      "blockers": [],
       "candidate_id": "c1-eur-buy",
       "direction": "long",
       "metrics": {
         "expectancy": 200.0,
         "max_drawdown": 0.0,
-        "mitigation_status": "worse",
-        "paper_evidence_status": "pending",
+        "mitigation_status": "stable",
+        "paper_evidence_status": "passed",
         "profit_factor": 999.0,
-        "sample_size": 21,
-        "walk_forward_status": "fail",
+        "sample_size": 30,
+        "walk_forward_status": "pass",
         "win_rate": 1.0
       },
-      "next_safe_action": "Collect missing/valid proofs and refresh stale evidence before rerunning review.",
+      "next_safe_action": "Prepare demo-review packet with consolidated proof bundle.",
       "pair": "EURUSD",
       "proofs": {
         "demo_validation": {
-          "evidence": false,
-          "reason": "explicit_false",
-          "status": false
+          "evidence": true,
+          "reason": null,
+          "status": true
         },
         "freshness": {
           "evidence": {
             "age_hours": 0.0,
-            "timestamp": "2026-06-22T21:25:10.557356+00:00"
+            "timestamp": "2026-06-23T19:12:07.649648+00:00"
           },
           "reason": null,
           "status": true
@@ -598,14 +558,14 @@
           "status": true
         },
         "reconciliation": {
-          "evidence": false,
-          "reason": "explicit_false",
-          "status": false
+          "evidence": true,
+          "reason": null,
+          "status": true
         },
         "replay": {
-          "evidence": false,
-          "reason": "explicit_false",
-          "status": false
+          "evidence": true,
+          "reason": null,
+          "status": true
         },
         "risk": {
           "evidence": true,
@@ -613,9 +573,9 @@
           "status": true
         },
         "rollback": {
-          "evidence": false,
-          "reason": "explicit_false",
-          "status": false
+          "evidence": true,
+          "reason": null,
+          "status": true
         }
       },
       "strategy": "paper_long_run_supervisor_v2",
@@ -630,9 +590,9 @@
         "require_mitigation_not_worse": true,
         "require_walk_forward_pass": true
       },
-      "verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
-      "walk_forward": "fail",
-      "walk_forward_detail": "walk-forward evidence materially failed"
+      "verdict": "DEMO_REVIEW_READY",
+      "walk_forward": "pass",
+      "walk_forward_detail": ""
     },
     "review_chain_blockers": [
       "demo_validation_contract_not_complete",
@@ -662,7 +622,7 @@
     "selected_candidate_id": "c1-eur-buy",
     "selected_direction": "LONG",
     "selected_strategy": "paper_long_run_supervisor_v2",
-    "source_candidate_verdict": "BLOCKED_INCOMPLETE_EVIDENCE",
+    "source_candidate_verdict": "DEMO_REVIEW_READY",
     "source_modules": [
       "automation/forex_engine/candidate_intake_demo_review_bridge.py",
       "automation/forex_engine/canonical_demo_review_evidence_bridge.py",

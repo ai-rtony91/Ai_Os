@@ -53,6 +53,14 @@ def test_rejected_candidates_and_exceeds_anchor_logic():
     assert isinstance(leaderboard["candidates_exceed_anchor"], list)
 
 
+def test_anchor_meets_canonical_sample_depth():
+    payload = _run()
+    anchor = payload["leaderboard"]["anchor_candidate"]
+    assert anchor["candidate_id"] == "c1-eur-buy"
+    assert anchor["closed_trade_count"] >= 30
+    assert "insufficient_sample" not in anchor["blocker_reasons"]
+
+
 def test_no_forbidden_execution_surfaces():
     source = inspect.getsource(module)
     forbidden = (

@@ -4,13 +4,13 @@
 - candidate: `c1-eur-buy`
 - strategy: `paper_long_run_supervisor_v2`
 - direction: `LONG`
-- closed trade count: `20`
+- closed trade count: `30`
 - sample-size gate cleared: `True`
 - expectancy: `200.00`
 - profit factor: `999.00`
 - max drawdown: `0.00`
 - win rate: `1.00`
-- consecutive wins: `20`
+- consecutive wins: `30`
 - consecutive losses: `0`
 - promotion status: `PROFIT_OBJECTIVE_READY`
 - blocker reasons: `none`

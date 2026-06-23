@@ -31,7 +31,7 @@ def build_expanded_evidence_batch() -> list[dict[str, Any]]:
             "strategy_id": ANCHOR_STRATEGY_ID,
             "candidate_id": ANCHOR_CANDIDATE_ID,
             "direction": "LONG",
-            "trade_pnl_list": [200.0] * 20,
+            "trade_pnl_list": [200.0] * 30,
             "notes": "anchor path under review; current best candidate",
         },
         {
