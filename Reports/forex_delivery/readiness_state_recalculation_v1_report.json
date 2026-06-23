@@ -63,7 +63,7 @@
         "expectancy": 200.0,
         "freshness_proof": {
           "age_hours": 0.0,
-          "timestamp": "2026-06-23T19:12:07.649648+00:00"
+          "timestamp": "2026-06-23T20:39:17.958295+00:00"
         },
         "kill_switch_proof": true,
         "max_drawdown": 0.0,
@@ -172,7 +172,7 @@
         "expectancy": 200.0,
         "freshness_proof": {
           "age_hours": 0.0,
-          "timestamp": "2026-06-23T19:12:07.649648+00:00"
+          "timestamp": "2026-06-23T20:39:17.959820+00:00"
         },
         "kill_switch_proof": true,
         "max_drawdown": 0.0,
@@ -252,7 +252,7 @@
       "expectancy": 200.0,
       "freshness_proof": {
         "age_hours": 0.0,
-        "timestamp": "2026-06-23T19:12:07.649648+00:00"
+        "timestamp": "2026-06-23T20:39:17.959820+00:00"
       },
       "kill_switch_proof": true,
       "max_drawdown": 0.0,
@@ -547,7 +547,7 @@
         "freshness": {
           "evidence": {
             "age_hours": 0.0,
-            "timestamp": "2026-06-23T19:12:07.649648+00:00"
+            "timestamp": "2026-06-23T20:39:17.959820+00:00"
           },
           "reason": null,
           "status": true

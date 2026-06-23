@@ -28,7 +28,7 @@
 - rollback_proof: `True`
 - risk_proof: `True`
 - demo_validation_proof: `True`
-- freshness_proof: `{'timestamp': '2026-06-23T19:11:05.963623+00:00', 'age_hours': 0.0}`
+- freshness_proof: `{'timestamp': '2026-06-23T20:38:21.970985+00:00', 'age_hours': 0.0}`
 
 ## Canonical bridge verdict
 - verdict: `DEMO_REVIEW_READY`
