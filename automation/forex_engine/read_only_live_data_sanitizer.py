@@ -119,6 +119,15 @@ def sanitize_account_summary(
 ) -> dict[str, Any]:
     account = _payload_body(payload, "account")
     reachable = bool(account)
+    balance = _safe_text(_first_present(account, "balance", "accountBalance", "NAV", "balanceCurrency"))
+    nav = _safe_text(_first_present(account, "nav", "NAV", "netAssetValue"))
+    equity = _safe_text(_first_present(account, "equity", "accountEquity", "equityCurrency"))
+    currency = _safe_text(_first_present(account, "currency", "accountCurrency"))
+    margin_available = _safe_text(
+        _first_present(account, "marginAvailable", "margin_available", "marginAvailableHomeCurrency")
+    )
+    margin_used = _safe_text(_first_present(account, "marginUsed", "margin_used", "marginInUse"))
+    withdrawal_limit = _safe_text(_first_present(account, "withdrawalLimit", "withdrawal_limit", "withdrawableFunds"))
     open_position_count = _int_or_none(
         _first_present(account, "openPositionCount", "positionCount", "open_position_count")
     )
@@ -136,12 +145,22 @@ def sanitize_account_summary(
         else "Broker/account summary is unavailable from the read-only source."
     )
 
+    margin_percent = _calc_margin_used_percent(margin_used, margin_available)
     return {
         **source_context,
         "broker_mode": broker_mode,
         "account_reachable": reachable,
         "open_position_count": open_position_count,
         "pending_order_count": pending_order_count,
+        "open_trade_count": _int_or_none(_first_present(account, "openTradeCount", "open_trade_count")),
+        "balance": balance,
+        "nav": nav,
+        "equity": equity,
+        "currency": currency,
+        "margin_available": margin_available,
+        "margin_used": margin_used,
+        "margin_used_percent": margin_percent,
+        "withdrawal_limit": withdrawal_limit,
         "open_positions_reconciled": open_position_count is not None,
         "pending_orders_reconciled": pending_order_count is not None,
         "daily_pl_available": realized_pl != "UNAVAILABLE",
@@ -246,6 +265,7 @@ def sanitize_pricing(
         "instrument": _safe_text(selected.get("instrument")) if selected else selected_pair,
         "bid": bid,
         "ask": ask,
+        "spread": _safe_text(_spread_from_bids_asks(selected)) if selected else "UNAVAILABLE",
         "mid": mid,
         "price_time": _safe_text(selected.get("time")) if selected else "UNAVAILABLE",
         "block_reason": (
@@ -313,6 +333,49 @@ def assert_no_forbidden_output(
         if value and str(value) in text:
             raise ValueError("Sanitized read model contains a forbidden runtime value")
     return True
+
+
+def build_money_strip_payload(
+    broker_mode: str,
+    *,
+    source_context: dict[str, Any],
+    broker_state: dict[str, Any],
+    positions: dict[str, Any],
+    risk_pl: dict[str, Any],
+    market: dict[str, Any],
+) -> dict[str, Any]:
+    """Build a compact, read-only money strip model."""
+
+    return {
+        **source_context,
+        "mode": "READ_ONLY",
+        "broker": "OANDA",
+        "broker_mode": broker_mode,
+        "status": "LIVE" if broker_state.get("account_reachable") is True else "BLOCKED",
+        "source_label": source_context.get("source_label", "NO_READ_MODEL_AVAILABLE"),
+        "freshness_utc": source_context.get("freshness_utc"),
+        "stale_status": source_context.get("stale_status"),
+        "balance": broker_state.get("balance", "UNAVAILABLE"),
+        "nav": broker_state.get("nav", "UNAVAILABLE"),
+        "equity": broker_state.get("equity", "UNAVAILABLE"),
+        "currency": broker_state.get("currency", "UNAVAILABLE"),
+        "margin_available": broker_state.get("margin_available", "UNAVAILABLE"),
+        "margin_used": broker_state.get("margin_used", "UNAVAILABLE"),
+        "margin_used_percent": broker_state.get("margin_used_percent", "UNAVAILABLE"),
+        "realized_pl": risk_pl.get("realized_pl", "UNAVAILABLE"),
+        "unrealized_pl": risk_pl.get("unrealized_pl", "UNAVAILABLE"),
+        "open_trade_count": positions.get("open_trade_count", 0),
+        "open_position_count": positions.get("open_position_count", 0),
+        "pending_order_count": broker_state.get("pending_order_count", 0),
+        "selected_pair": market.get("selected_pair", "UNAVAILABLE"),
+        "bid": market.get("bid", "UNAVAILABLE"),
+        "ask": market.get("ask", "UNAVAILABLE"),
+        "spread": market.get("spread", "UNAVAILABLE"),
+        "execution_allowed": False,
+        "order_placement_allowed": False,
+        "live_order_allowed": False,
+        "withdrawal_limit": broker_state.get("withdrawal_limit", "UNAVAILABLE"),
+    }
 
 
 def _safe_position(position: dict[str, Any]) -> dict[str, Any]:
@@ -390,6 +453,30 @@ def _mid_price(bid: str, ask: str) -> str:
         return f"{(float(bid) + float(ask)) / 2:.5f}"
     except (TypeError, ValueError):
         return "UNAVAILABLE"
+
+
+def _spread_from_bids_asks(price: dict[str, Any] | None) -> str:
+    bid = _price_from_bucket(price, "bids")
+    ask = _price_from_bucket(price, "asks")
+    if bid == "UNAVAILABLE" or ask == "UNAVAILABLE":
+        return "UNAVAILABLE"
+    try:
+        return f"{(float(ask) - float(bid)):.5f}"
+    except (TypeError, ValueError):
+        return "UNAVAILABLE"
+
+
+def _calc_margin_used_percent(margin_used: Any, margin_available: Any) -> str:
+    try:
+        if margin_used in ("UNAVAILABLE", "", None) or margin_available in ("UNAVAILABLE", "", None):
+            return "UNAVAILABLE"
+        used = float(margin_used)
+        available = float(margin_available)
+        if available <= 0:
+            return "UNAVAILABLE"
+    except (TypeError, ValueError):
+        return "UNAVAILABLE"
+    return f"{(used / available) * 100:.2f}%"
 
 
 def _side_from_units(value: Any) -> str:
