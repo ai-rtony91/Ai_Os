@@ -3,6 +3,7 @@ import operatorStatusFixture from '../mock-data/aios-operator-status-v1.example.
 import mockRuntimeVisibility from '../mock-data/aios-runtime-visibility-v1.example.json';
 import AiosSymbol from './AiosSymbol.jsx';
 import AIOSLiveOperatorPanel from './AIOSLiveOperatorPanel.jsx';
+import BrokerMoneyStrip from './BrokerMoneyStrip.jsx';
 import PreservedLegacyModules from './PreservedLegacyModules.jsx';
 import './App.css';
 
@@ -969,6 +970,7 @@ export default function MinimalOperatorDashboard() {
 
         <nav className="cockpitNav" aria-label="Cockpit sections">
           <a href="#command-center">Command</a>
+          <a href="#broker-money-strip">Money Strip</a>
           <a href="#trader-cockpit">Trader</a>
           <a href="#trade-metadata-matrix">Ledger</a>
           <a href="#money-cockpit">Money</a>
@@ -977,6 +979,8 @@ export default function MinimalOperatorDashboard() {
           <a href="#site-access-state">Access</a>
           <a href="#proof-safety">Proof</a>
         </nav>
+
+        <BrokerMoneyStrip />
 
         <div className="cockpitGrid">
           <CommandCenter />

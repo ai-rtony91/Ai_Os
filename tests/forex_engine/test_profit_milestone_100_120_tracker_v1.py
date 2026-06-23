@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import sys
 
@@ -8,6 +9,15 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
+
+DASHBOARD_MONEY_STRIP = REPO_ROOT / "apps" / "dashboard" / "src" / "BrokerMoneyStrip.jsx"
+DASHBOARD_MONEY_FIXTURE = (
+    REPO_ROOT
+    / "apps"
+    / "dashboard"
+    / "mock-data"
+    / "aios-oanda-money-strip-v1.example.json"
+)
 
 from automation.forex_engine.profit_milestone_100_120_tracker_v1 import (  # noqa: E402
     TARGET_BLOCKED_BY_BROKER,
@@ -202,3 +212,44 @@ def test_read_only_money_strip_exposes_money_fields_without_execution():
     assert money_strip["execution_allowed"] is False
     assert money_strip["order_placement_allowed"] is False
     assert money_strip["live_order_allowed"] is False
+
+
+def test_dashboard_money_strip_has_no_direct_oanda_or_credentials():
+    source = DASHBOARD_MONEY_STRIP.read_text(encoding="utf-8")
+    lowered = source.lower()
+
+    assert "/api/forex/oanda/money-strip" in source
+    assert "api-fxtrade" not in lowered
+    assert "api-fxpractice" not in lowered
+    assert "https://api" not in lowered
+    assert "oanda_api_token" not in lowered
+    assert "oanda_account_id" not in lowered
+    assert "authorization" not in lowered
+    assert ".env" not in lowered
+
+
+def test_dashboard_money_strip_shows_exec_off_without_order_buttons():
+    source = DASHBOARD_MONEY_STRIP.read_text(encoding="utf-8")
+    lowered = source.lower()
+
+    assert "EXEC OFF" in source
+    assert "<button" not in lowered
+    assert ">BUY<" not in source
+    assert ">SELL<" not in source
+    assert ">CLOSE<" not in source
+
+
+def test_dashboard_money_strip_fixture_is_blocked_and_read_only():
+    fixture = json.loads(DASHBOARD_MONEY_FIXTURE.read_text(encoding="utf-8"))
+    text = json.dumps(fixture).lower()
+
+    assert fixture["status"] == "BLOCKED"
+    assert fixture["balance"] == "UNKNOWN"
+    assert fixture["execution_allowed"] is False
+    assert fixture["order_placement_allowed"] is False
+    assert fixture["demo_order_allowed"] is False
+    assert fixture["live_order_allowed"] is False
+    assert fixture["broker_mutation_allowed"] is False
+    assert "token" not in text
+    assert "account_id" not in text
+    assert "raw broker payload" not in text
