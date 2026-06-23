@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Status locked</title>
+  <desc id="desc">Steel lock core indicating protected or locked state.</desc>
+  <rect width="96" height="96" rx="22" fill="#081018"/>
+  <path d="M31 42V31c0-12 8-20 17-20s17 8 17 20v11" fill="none" stroke="#7fb8e8" stroke-width="6" stroke-linecap="round"/>
+  <rect x="24" y="39" width="48" height="39" rx="8" fill="#132132" stroke="#edf7ff" stroke-width="2.5"/>
+  <circle cx="48" cy="57" r="5" fill="#75bfff"/>
+  <path d="M48 62v9" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+</svg>

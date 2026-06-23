@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Fast path</title>
+  <desc id="desc">Runtime fast path geometry with electric route lines.</desc>
+  <rect width="96" height="96" rx="22" fill="#0b0f16"/>
+  <path d="M22 62h21L34 82l40-50H53l9-18Z" fill="#e7b84b" stroke="#edf7ff" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M12 32h28M12 46h20M12 60h12" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M68 64h16" stroke="#49c18f" stroke-width="4" stroke-linecap="round"/>
+</svg>

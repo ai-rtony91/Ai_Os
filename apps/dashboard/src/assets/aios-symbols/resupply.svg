@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Resupply</title>
+  <desc id="desc">Reserve alias resupplying the trading float through a gated lane.</desc>
+  <rect x="16" y="19" width="25" height="58" rx="7" fill="#0d1724" stroke="#49c18f" stroke-width="3"/>
+  <rect x="57" y="27" width="24" height="42" rx="7" fill="#0d1724" stroke="#75bfff" stroke-width="3"/>
+  <path d="M22 35h13M22 48h13M22 61h13" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M63 41h12M63 54h12" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M57 48H41" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M47 40l-8 8 8 8" fill="none" stroke="#75bfff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="49" cy="48" r="7" fill="#08101a" stroke="#f4c95d" stroke-width="3"/>
+</svg>

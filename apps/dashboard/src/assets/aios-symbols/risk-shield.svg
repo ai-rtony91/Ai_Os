@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Risk shield</title>
+  <desc id="desc">Shield and guard rail geometry for risk and safety state.</desc>
+  <rect width="96" height="96" rx="22" fill="#08100d"/>
+  <path d="M48 13 74 24v20c0 19-10 31-26 40-16-9-26-21-26-40V24Z" fill="#0f201b" stroke="#49c18f" stroke-width="3"/>
+  <path d="M35 48h26M35 36h26M35 60h18" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M64 58 72 66" stroke="#e7b84b" stroke-width="4" stroke-linecap="round"/>
+</svg>

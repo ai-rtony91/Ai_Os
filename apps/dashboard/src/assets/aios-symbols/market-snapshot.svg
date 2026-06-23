@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Market snapshot</title>
+  <desc id="desc">Market state frame with candle lanes and freshness pulse.</desc>
+  <rect x="16" y="20" width="64" height="50" rx="8" fill="#0d1724" stroke="#75bfff" stroke-width="3"/>
+  <path d="M24 58h48M24 46h48M24 34h48" stroke="#20344f" stroke-width="2"/>
+  <path d="M32 54V38M48 56V30M64 54V42" stroke="#49c18f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M29 38h6M45 30h6M61 42h6" stroke="#edf7ff" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="73" cy="23" r="9" fill="#08101a" stroke="#e8ba40" stroke-width="3"/>
+  <path d="M73 18v5l4 3" fill="none" stroke="#e8ba40" stroke-width="3" stroke-linecap="round"/>
+</svg>

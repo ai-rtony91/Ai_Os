@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Trade sequence</title>
+  <desc id="desc">Ordered trade sequence nodes connected through an audit lane.</desc>
+  <path d="M22 26h52M22 48h52M22 70h52" stroke="#20344f" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="24" cy="26" r="9" fill="#0d1724" stroke="#49c18f" stroke-width="3"/>
+  <circle cx="48" cy="48" r="9" fill="#0d1724" stroke="#75bfff" stroke-width="3"/>
+  <circle cx="72" cy="70" r="9" fill="#0d1724" stroke="#7c5cff" stroke-width="3"/>
+  <path d="M27 26h17M51 48h17" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M19 63l5 7 7-12" fill="none" stroke="#49c18f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

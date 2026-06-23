@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 96" role="img" aria-labelledby="title desc">
+  <title id="title">BTC/USD pair</title>
+  <desc id="desc">Abstract crypto grid and dollar lane identity for BTC/USD without copied logos.</desc>
+  <rect width="144" height="96" rx="22" fill="#090d16"/>
+  <circle cx="45" cy="47" r="22" fill="#111b2b" stroke="#e7b84b" stroke-width="3"/>
+  <path d="M33 47h24M45 35v24M37 39l16 16M53 39 37 55" stroke="#e7b84b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M80 34h36M80 48h36M80 62h36" stroke="#75bfff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M94 28v40M108 28v40" stroke="#263f5e" stroke-width="2"/>
+  <text x="72" y="84" text-anchor="middle" fill="#edf7ff" font-family="Arial, sans-serif" font-size="18" font-weight="700">BTC/USD</text>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Funds sweep</title>
+  <desc id="desc">Profit sweep rail moving excess capital into a protected vault alias.</desc>
+  <rect x="15" y="25" width="28" height="46" rx="7" fill="#0d1724" stroke="#75bfff" stroke-width="3"/>
+  <rect x="58" y="18" width="23" height="60" rx="6" fill="#0d1724" stroke="#49c18f" stroke-width="3"/>
+  <path d="M22 38h14M22 48h14M22 58h10" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M64 34h11M64 46h11M64 58h11" stroke="#edf7ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M43 48h17" stroke="#f4c95d" stroke-width="4" stroke-linecap="round"/>
+  <path d="M54 40l8 8-8 8" fill="none" stroke="#f4c95d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M61 24h17" stroke="#49c18f" stroke-width="3" stroke-linecap="round"/>
+</svg>

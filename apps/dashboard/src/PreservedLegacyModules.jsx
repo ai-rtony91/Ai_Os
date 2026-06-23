@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import './PreservedLegacyModules.css';
 
 const THEME_OPTIONS = [
-  { value: 'default', label: 'Default AI_OS Dark' },
-  { value: 'terminal-green', label: 'Terminal Green' },
-  { value: 'cyan-command', label: 'Cyan Command' },
-  { value: 'amber-warning', label: 'Amber Warning' },
+  { value: 'default', label: 'Default' },
+  { value: 'terminal-green', label: 'Green' },
+  { value: 'cyan-command', label: 'Cyan' },
+  { value: 'amber-warning', label: 'Amber' },
   { value: 'high-contrast', label: 'High Contrast' },
 ];
 
@@ -49,9 +49,9 @@ const STORAGE_KEYS = {
 };
 
 const YOUTUBE_API_URL = 'https://www.youtube.com/iframe_api';
-const LOCAL_SERVER_COMMAND = 'Local HTTP preview: python -m http.server 8080';
-const LOCAL_FILE_FALLBACK = 'Embedded playback unavailable in local file preview. Use local server preview.';
-const RESUME_MESSAGE = 'Press Play to resume';
+const LOCAL_SERVER_COMMAND = 'Local server.';
+const LOCAL_FILE_FALLBACK = 'Local preview.';
+const RESUME_MESSAGE = 'Ready';
 
 const TRACKS = [
   { videoId: 'VFzsSbdS7Sk', playlistId: 'RDVFzsSbdS7Sk', title: 'AI_OS Dock Track' },
@@ -137,13 +137,18 @@ function ControlButton({ active = false, label, onClick, stateLabel, title }) {
   );
 }
 
-function LegacyModuleCard({ eyebrow, title, children, statusClass = 'status-neutral' }) {
+function LegacyModuleCard({ id, marker, eyebrow, title, children, statusClass = 'status-neutral' }) {
   return (
-    <article className="legacyModuleCard">
+    <article id={id} className="legacyModuleCard">
       <div className="legacyModuleCardHead">
-        <div>
-          <p className="eyebrow">{eyebrow}</p>
-          <h3>{title}</h3>
+        <div className="legacyModuleTitleBlock">
+          <span className="legacyModuleIcon" aria-hidden="true">
+            {marker}
+          </span>
+          <div>
+            <p className="eyebrow">{eyebrow}</p>
+            <h3>{title}</h3>
+          </div>
         </div>
         <span className={`statusPill ${statusClass}`}>{eyebrow}</span>
       </div>
@@ -152,7 +157,7 @@ function LegacyModuleCard({ eyebrow, title, children, statusClass = 'status-neut
   );
 }
 
-export default function PreservedLegacyModules() {
+export default function PreservedLegacyModules({ focus = 'all' }) {
   const savedRadioState = useState(() => readSavedRadioState())[0];
   const [theme, setTheme] = useState(() => readStoredTheme());
   const [dockCollapsed, setDockCollapsed] = useState(() => readStoredDockCollapsed(savedRadioState));
@@ -172,51 +177,7 @@ export default function PreservedLegacyModules() {
   const singleFallbackAttemptedRef = useRef(false);
   const hydratedRef = useRef(false);
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(STORAGE_KEYS.theme, theme);
-    } catch {
-      // Visual preference only; ignore unavailable storage.
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.dataset.aiosLegacyTheme = theme;
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    hydratedRef.current = true;
-  }, []);
-
-  useEffect(() => {
-    if (!hydratedRef.current) {
-      return;
-    }
-
-    saveRadioState();
-  }, [dockCollapsed, isPlaying, muted, volume]);
-
-  useEffect(() => {
-    const handlePageHide = () => {
-      saveRadioState();
-    };
-
-    window.addEventListener('pagehide', handlePageHide);
-    return () => window.removeEventListener('pagehide', handlePageHide);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (typeof playerRef.current?.destroy === 'function') {
-        playerRef.current.destroy();
-      }
-      playerRef.current = null;
-    };
-  }, []);
-
-  function saveRadioState(overrides = {}) {
+  const saveRadioState = useCallback((overrides = {}) => {
     try {
       const player = playerRef.current;
       const snapshot = {
@@ -247,7 +208,51 @@ export default function PreservedLegacyModules() {
     } catch {
       // Safe UI/player state only; ignore unavailable storage.
     }
-  }
+  }, [dockCollapsed, isPlaying, muted, volume]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STORAGE_KEYS.theme, theme);
+    } catch {
+      // Visual preference only; ignore unavailable storage.
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.dataset.aiosLegacyTheme = theme;
+    }
+  }, [theme]);
+
+  useEffect(() => {
+    hydratedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!hydratedRef.current) {
+      return;
+    }
+
+    saveRadioState();
+  }, [saveRadioState]);
+
+  useEffect(() => {
+    const handlePageHide = () => {
+      saveRadioState();
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+    return () => window.removeEventListener('pagehide', handlePageHide);
+  }, [saveRadioState]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof playerRef.current?.destroy === 'function') {
+        playerRef.current.destroy();
+      }
+      playerRef.current = null;
+    };
+  }, []);
 
   function applyPreviewState() {
     if (IS_FILE_PREVIEW) {
@@ -366,6 +371,22 @@ export default function PreservedLegacyModules() {
       return;
     }
 
+    function waitForYouTubeApi(attempt = 0) {
+      if (window.YT?.Player) {
+        scriptLoadingRef.current = false;
+        createPlayer();
+        return;
+      }
+
+      if (attempt >= 40) {
+        scriptLoadingRef.current = false;
+        setRadioStatus('Embed unavailable inside AI_OS.');
+        return;
+      }
+
+      window.setTimeout(() => waitForYouTubeApi(attempt + 1), 125);
+    }
+
     if (window.YT?.Player) {
       createPlayer();
       return;
@@ -376,13 +397,10 @@ export default function PreservedLegacyModules() {
     }
 
     scriptLoadingRef.current = true;
-    window.onYouTubeIframeAPIReady = () => {
-      scriptLoadingRef.current = false;
-      createPlayer();
-    };
 
     const existingScript = document.querySelector('script[data-aios-youtube-api="true"]');
     if (existingScript) {
+      waitForYouTubeApi();
       return;
     }
 
@@ -390,6 +408,11 @@ export default function PreservedLegacyModules() {
     script.async = true;
     script.src = YOUTUBE_API_URL;
     script.dataset.aiosYoutubeApi = 'true';
+    script.addEventListener('load', () => waitForYouTubeApi());
+    script.addEventListener('error', () => {
+      scriptLoadingRef.current = false;
+      setRadioStatus('Embed unavailable inside AI_OS.');
+    });
     document.head.appendChild(script);
   }
 
@@ -511,136 +534,145 @@ export default function PreservedLegacyModules() {
     return THEME_PALETTES[theme] ?? THEME_PALETTES.default;
   }
 
-  const selectedThemeLabel =
-    THEME_OPTIONS.find((option) => option.value === theme)?.label ?? 'Default AI_OS Dark';
+  const showUtilities = focus === 'all' || focus === 'utilities';
+  const showDock = focus === 'all' || focus === 'music';
+  const showMusic = focus === 'all' || focus === 'music';
+  const visibleModuleCount = [showUtilities, showDock, showMusic].filter(Boolean).length;
+  const gridClass = visibleModuleCount === 1 ? 'legacyModuleGrid-single' : 'legacyModuleGrid-duo';
 
   return (
     <section
       className="legacyPreserveSurface"
-      aria-label="Preserved legacy dashboard modules"
+      aria-label="Preserved local dashboard modules"
       style={themeStyle()}
     >
       <div className="legacySurfaceHeader">
-        <div>
-          <p className="eyebrow">Legacy preservation lane</p>
-          <h2>Utilities, Dock, and Music Player</h2>
-          <p className="legacySurfaceSummary">
-            Mounted from the older dashboard so the new deployment page can keep the same controls
-            without deleting the source page yet.
-          </p>
+        <div className="legacySurfaceIconRow" aria-label="Preserved modules">
+          {showUtilities && <span className="statusPill status-good">UTILITIES</span>}
+          {showDock && <span className="statusPill status-neutral">DOCK</span>}
+          {showMusic && <span className="statusPill status-warn">MUSIC</span>}
         </div>
-
-        <div className="legacyStatusChips" aria-label="Preserved modules">
-          <span className="statusPill status-good">Utilities</span>
-          <span className="statusPill status-neutral">Dock</span>
-          <span className="statusPill status-warn">Music Player</span>
+        <div className="legacyStatusChips" aria-label="Local only">
+          <span className="statusPill status-neutral">LOCAL</span>
+          <span className="statusPill status-good">DISPLAY_ONLY</span>
         </div>
       </div>
 
-      <div className="legacyModuleGrid">
-        <LegacyModuleCard eyebrow="Utilities" title="Dashboard Utilities" statusClass="status-good">
-          <div className="legacyUtilityBody">
-            <label className="legacySelectField" htmlFor="dashboardThemeSelector">
-              <span>Theme</span>
-              <select
-                id="dashboardThemeSelector"
-                value={theme}
-                onChange={(event) => setTheme(event.target.value)}
+      <div className={`legacyModuleGrid ${gridClass}`}>
+        {showUtilities && (
+          <LegacyModuleCard
+            id="utilities-module"
+            marker="UTIL"
+            eyebrow="Utilities"
+            title="Tools"
+            statusClass="status-good"
+          >
+            <div className="legacyUtilityBody">
+              <label className="legacySelectField" htmlFor="dashboardThemeSelector">
+                <span>Theme</span>
+                <select
+                  id="dashboardThemeSelector"
+                  aria-label="Theme"
+                  value={theme}
+                  onChange={(event) => setTheme(event.target.value)}
+                >
+                  {THEME_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <button className="button button-readonly legacySoftRefreshButton" type="button" onClick={handleSoftRefresh}>
+                Soft Refresh
+              </button>
+            </div>
+          </LegacyModuleCard>
+        )}
+
+        {showDock && (
+          <LegacyModuleCard
+            id="dock-module"
+            marker="DOCK"
+            eyebrow="Dock"
+            title="Controls"
+            statusClass="status-neutral"
+          >
+            <div className="legacyDockTopline">
+              <div>
+                <p className="legacyDockEyebrow">Dock #1</p>
+                <strong>{radioStatus}</strong>
+              </div>
+
+              <button
+                className="button button-readonly legacyExpandButton"
+                type="button"
+                onClick={() => handleDockControl('expand')}
               >
-                {THEME_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <button className="button button-readonly legacySoftRefreshButton" type="button" onClick={handleSoftRefresh}>
-              Soft Refresh
-            </button>
-
-            <p className="legacyUtilityNote">
-              Theme selection persists locally. Soft refresh reapplies the saved state without touching
-              any backend or broker path.
-            </p>
-          </div>
-        </LegacyModuleCard>
-
-        <LegacyModuleCard eyebrow="Dock" title="Music Dock" statusClass="status-neutral">
-          <div className="legacyDockTopline">
-            <div>
-              <p className="legacyDockEyebrow">Music Dock #1</p>
-              <strong>{radioStatus}</strong>
+                {dockCollapsed ? 'Expand Dock' : 'Minimize Dock'}
+              </button>
             </div>
 
-            <button
-              className="button button-readonly legacyExpandButton"
-              type="button"
-              onClick={() => handleDockControl('expand')}
-            >
-              {dockCollapsed ? 'Expand Dock' : 'Minimize Dock'}
-            </button>
-          </div>
-
-          <div className={`legacyDockControls ${dockCollapsed ? 'is-collapsed' : ''}`}>
-            <ControlButton
-              label="Previous"
-              stateLabel="Track"
-              title="Previous track"
-              onClick={() => handleDockControl('back')}
-            />
-            <ControlButton
-              active={isPlaying}
-              label={isPlaying ? 'Pause' : 'Play'}
-              stateLabel={radioStatus}
-              title={isPlaying ? 'Pause Dock Player' : 'Play Dock Player'}
-              onClick={() => handleDockControl('play')}
-            />
-            <ControlButton
-              label="Next"
-              stateLabel="Track"
-              title="Next track"
-              onClick={() => handleDockControl('next')}
-            />
-            <ControlButton
-              active={muted}
-              label={muted ? 'Unmute' : 'Mute'}
-              stateLabel={muted ? 'Muted' : 'Audio'}
-              title={muted ? 'Unmute Dock Player' : 'Mute Dock Player'}
-              onClick={() => handleDockControl('mute')}
-            />
-          </div>
-
-          <p className="legacyDockHint">
-            The dock keeps the player mounted and only hides the expanded body when collapsed.
-          </p>
-        </LegacyModuleCard>
-
-        <LegacyModuleCard eyebrow="Music Player" title="YouTube Player" statusClass="status-warn">
-          <div className={`legacyPlayerPanel ${dockCollapsed ? 'is-collapsed' : ''}`}>
-            <div className="legacyPlayerFrame" aria-label="Dock music player">
-              <div ref={playerMountRef} className="legacyPlayerMount" />
-            </div>
-
-            <label className="legacyVolumeRow" aria-label="Dock player volume">
-              <span>Volume</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={volume}
-                onChange={(event) => handleVolumeChange(event.target.value)}
+            <div className={`legacyDockControls ${dockCollapsed ? 'is-collapsed' : ''}`}>
+              <ControlButton
+                label="Previous"
+                stateLabel="Track"
+                title="Previous track"
+                onClick={() => handleDockControl('back')}
               />
-              <strong>{volume}</strong>
-            </label>
+              <ControlButton
+                active={isPlaying}
+                label={isPlaying ? 'Pause' : 'Play'}
+                stateLabel={radioStatus}
+                title={isPlaying ? 'Pause Dock Player' : 'Play Dock Player'}
+                onClick={() => handleDockControl('play')}
+              />
+              <ControlButton
+                label="Next"
+                stateLabel="Track"
+                title="Next track"
+                onClick={() => handleDockControl('next')}
+              />
+              <ControlButton
+                active={muted}
+                label={muted ? 'Unmute' : 'Mute'}
+                stateLabel={muted ? 'Muted' : 'Audio'}
+                title={muted ? 'Unmute Dock Player' : 'Mute Dock Player'}
+                onClick={() => handleDockControl('mute')}
+              />
+            </div>
+          </LegacyModuleCard>
+        )}
 
-            <p className="legacyPlayerNote">{previewNote}</p>
-            <p className="legacyPlayerMeta">
-              Saved theme: {selectedThemeLabel}. Player state remains local-only and does not include
-              credentials or account identifiers.
-            </p>
-          </div>
-        </LegacyModuleCard>
+        {showMusic && (
+          <LegacyModuleCard
+            id="music-module"
+            marker="MUSIC"
+            eyebrow="Music"
+            title="Player"
+            statusClass="status-warn"
+          >
+            <div className={`legacyPlayerPanel ${dockCollapsed ? 'is-collapsed' : ''}`}>
+              <div className="legacyPlayerFrame" aria-label="Dock music player">
+                <div ref={playerMountRef} className="legacyPlayerMount" />
+              </div>
+
+              <label className="legacyVolumeRow" aria-label="Dock player volume">
+                <span>Volume</span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={volume}
+                  onChange={(event) => handleVolumeChange(event.target.value)}
+                />
+                <strong>{volume}</strong>
+              </label>
+              <p className="legacyPlayerNote">{previewNote}</p>
+            </div>
+          </LegacyModuleCard>
+        )}
       </div>
     </section>
   );

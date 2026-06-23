@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Status review</title>
+  <desc id="desc">Amber diagnostic scan ring indicating review or unknown state.</desc>
+  <rect width="96" height="96" rx="22" fill="#151006"/>
+  <circle cx="48" cy="48" r="31" fill="#281d08" stroke="#e7b84b" stroke-width="3" stroke-dasharray="12 7"/>
+  <path d="M48 24v30" stroke="#edf7ff" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="48" cy="70" r="5" fill="#edf7ff"/>
+  <path d="M22 29 14 21M74 29l8-8M22 67l-8 8M74 67l8 8" stroke="#e7b84b" stroke-width="2" stroke-linecap="round"/>
+</svg>

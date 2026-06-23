@@ -210,3 +210,73 @@
   }
 }
 
+.proofDrawer .aiosLiveOperatorPanel {
+  background:
+    linear-gradient(180deg, rgba(14, 20, 28, 0.98), rgba(8, 11, 16, 0.98));
+  border-color: var(--line);
+  border-radius: 8px;
+  box-shadow: none;
+  margin: 0;
+  padding: 14px;
+}
+
+.proofDrawer .liveOperatorTopline {
+  gap: 12px;
+}
+
+.proofDrawer .liveOperatorEyebrow {
+  color: var(--neutral);
+  letter-spacing: 0;
+}
+
+.proofDrawer .liveOperatorTopline h2 {
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.proofDrawer .liveOperatorTopline p,
+.proofDrawer .liveNoticeGrid p,
+.proofDrawer .liveOperatorFooter li {
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.proofDrawer .liveNoticeGrid,
+.proofDrawer .liveTruthGrid {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.proofDrawer .liveTruthGrid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.proofDrawer .liveNoticeGrid article,
+.proofDrawer .liveTruthCell,
+.proofDrawer .liveOperatorFooter,
+.proofDrawer .liveNextAction {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(117, 191, 255, 0.12);
+  border-radius: 8px;
+}
+
+.proofDrawer .liveTruthCell {
+  min-height: 72px;
+  padding: 10px;
+}
+
+.proofDrawer .liveTruthCell strong,
+.proofDrawer .liveNextAction strong {
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.proofDrawer .liveOperatorFooter {
+  gap: 10px;
+  grid-template-columns: 1fr;
+  margin-top: 12px;
+  padding: 12px;
+}
+

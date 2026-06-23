@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Status blocked</title>
+  <desc id="desc">Red sealed gate geometry indicating blocked or failed state.</desc>
+  <rect width="96" height="96" rx="22" fill="#17090b"/>
+  <circle cx="48" cy="48" r="31" fill="#2a1014" stroke="#ef6b6b" stroke-width="3"/>
+  <path d="M29 29 67 67M67 29 29 67" stroke="#edf7ff" stroke-width="7" stroke-linecap="round"/>
+  <path d="M20 48h13M63 48h13" stroke="#ef6b6b" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 96" role="img" aria-labelledby="title desc">
+  <title id="title">EUR/USD pair</title>
+  <desc id="desc">Abstract twin currency lane for EUR/USD without flags.</desc>
+  <rect width="144" height="96" rx="22" fill="#08101a"/>
+  <path d="M20 34h104M20 62h104" stroke="#263f5e" stroke-width="4" stroke-linecap="round"/>
+  <path d="M31 34h37M76 62h37" stroke="#75bfff" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="40" cy="48" r="18" fill="#0d1724" stroke="#49c18f" stroke-width="3"/>
+  <circle cx="104" cy="48" r="18" fill="#0d1724" stroke="#7c5cff" stroke-width="3"/>
+  <text x="72" y="84" text-anchor="middle" fill="#edf7ff" font-family="Arial, sans-serif" font-size="18" font-weight="700">EUR/USD</text>
+</svg>

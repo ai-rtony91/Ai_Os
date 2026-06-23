@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">AIOS core</title>
+  <desc id="desc">Abstract orbital command core with cyan and violet AIOS lens geometry.</desc>
+  <rect width="96" height="96" rx="24" fill="#08101a"/>
+  <circle cx="48" cy="48" r="27" fill="none" stroke="#75bfff" stroke-width="2.5"/>
+  <ellipse cx="48" cy="48" rx="38" ry="14" fill="none" stroke="#7c5cff" stroke-width="2" transform="rotate(-28 48 48)"/>
+  <ellipse cx="48" cy="48" rx="38" ry="14" fill="none" stroke="#49c18f" stroke-width="2" transform="rotate(28 48 48)"/>
+  <path d="M48 22 62 48 48 74 34 48Z" fill="#0d1a2b" stroke="#edf7ff" stroke-width="2"/>
+  <circle cx="48" cy="48" r="7" fill="#75bfff"/>
+  <path d="M48 10v10M48 76v10M10 48h10M76 48h10" stroke="#edf7ff" stroke-width="2" stroke-linecap="round"/>
+</svg>
