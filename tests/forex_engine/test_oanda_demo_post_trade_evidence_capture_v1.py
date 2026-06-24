@@ -197,7 +197,7 @@ def test_missing_owner_evidence_confirmation_blocks():
 
 
 def test_token_account_key_in_broker_call_result_rejects():
-    result = evaluate(broker_call_result=broker_call_result(token="SECRET"))
+    result = evaluate(broker_call_result=broker_call_result(token="demo_SECRET"))
     assert result["status"] == EVIDENCE_REJECTED
     assert "broker_call_forbidden_token_field" in result["blockers"]
 
