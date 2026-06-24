@@ -179,7 +179,7 @@ def test_missing_owner_confirmation_blocks():
 
 
 def test_token_account_key_in_capture_result_rejects():
-    result = evaluate(post_trade_capture_result=post_trade_capture(token="SECRET"))
+    result = evaluate(post_trade_capture_result=post_trade_capture(token="demo_SECRET"))
     assert result["status"] == BUCKET_REJECTED
     assert "post_trade_capture_forbidden_token_field" in result["blockers"]
 
