@@ -242,7 +242,7 @@ def test_order_payload_containing_account_id_blocks():
 
 
 def test_order_payload_containing_token_blocks():
-    result = evaluate(sanitized_order_payload=order_payload(token="secret-token"))
+    result = evaluate(sanitized_order_payload=order_payload(token="demo_secret-token"))
     assert result["status"] == FINAL_WIRE_BLOCKED_ORDER_PAYLOAD
     assert "order_payload_forbidden_token_field" in result["blockers"]
 
