@@ -136,17 +136,42 @@ BOOL_FIELDS = {
     "profit_evidence",
 }
 
+SAFE_INTERNAL_BROKER_EVIDENCE_STATUS = "OWNER_RUN_READ_ONLY_EVIDENCE_CLASSIFIED"
+SAFE_NESTED_SOURCE_KEYS = (
+    "monitor_payload",
+    "monitor_result",
+    "pl_payload",
+    "pl_result",
+    "owner_read_result",
+)
+
 FIELD_ALIASES = {
     "trade_id": ("trade_id", "tradeID", "tradeId", "expected_trade_id", "id"),
     "instrument": ("instrument", "pair"),
     "side": ("side", "direction"),
-    "units": ("units", "currentUnits", "current_units"),
-    "entry_price": ("entry_price", "entry", "price", "open_price"),
-    "realized_pl": ("realized_pl", "realizedPL", "pl", "profitLoss"),
-    "unrealized_pl": ("unrealized_pl", "unrealizedPL", "trueUnrealizedPL"),
+    "units": ("units", "currentUnits", "current_units", "signed_units"),
+    "entry_price": ("entry_price", "entry", "price", "open_price", "openTradePrice"),
+    "realized_pl": (
+        "realized_pl",
+        "realizedPL",
+        "realized_profit_loss",
+        "pl",
+        "profitLoss",
+    ),
+    "unrealized_pl": (
+        "unrealized_pl",
+        "unrealizedPL",
+        "unrealized_profit_loss",
+        "trueUnrealizedPL",
+    ),
     "open_trade_count": ("open_trade_count", "openTradeCount"),
     "open_position_count": ("open_position_count", "openPositionCount"),
-    "monitor_bucket": ("monitor_bucket", "status_bucket", "current_bucket_result"),
+    "monitor_bucket": (
+        "monitor_bucket",
+        "current_bucket_result",
+        "status_bucket",
+        "pl_result_bucket",
+    ),
     "result_bucket": (
         "result_bucket",
         "pl_result_bucket",
@@ -160,8 +185,15 @@ FIELD_ALIASES = {
     "evidence_timestamp_utc": (
         "evidence_timestamp_utc",
         "timestamp_utc",
+        "broker_read_timestamp_utc",
+        "read_timestamp_utc",
+        "owner_read_timestamp_utc",
+        "capture_timestamp_utc",
+        "pl_capture_timestamp_utc",
+        "timestamp",
         "time",
         "lastTransactionTime",
+        "last_transaction_time",
     ),
     "evidence_source": ("evidence_source", "source"),
 }
@@ -782,39 +814,69 @@ def _merged_monitor_pl_output(
         monitor_payload.get("broker_network_call_performed") is True
     )
     return {
-        "trade_id": _field_value(pl_result, "trade_id", monitor_result.get("trade_id")),
-        "instrument": _field_value(
+        "trade_id": _field_alias_value(
             pl_result,
-            "instrument",
-            monitor_result.get("instrument"),
+            monitor_result,
+            field="trade_id",
         ),
-        "side": _field_value(pl_result, "side", monitor_result.get("side")),
-        "units": _field_value(pl_result, "units", monitor_result.get("units")),
-        "entry_price": _field_value(
+        "instrument": _field_alias_value(
             pl_result,
-            "entry_price",
-            monitor_result.get("entry_price"),
+            monitor_result,
+            field="instrument",
         ),
-        "realized_pl": _field_value(
+        "side": _field_alias_value(pl_result, monitor_result, field="side"),
+        "units": _field_alias_value(pl_result, monitor_result, field="units"),
+        "entry_price": _field_alias_value(
             pl_result,
-            "realized_pl",
-            monitor_result.get("realized_pl"),
+            monitor_result,
+            field="entry_price",
         ),
-        "unrealized_pl": _field_value(
+        "realized_pl": _field_alias_value(
             pl_result,
-            "unrealized_pl",
-            monitor_result.get("unrealized_pl"),
+            monitor_result,
+            field="realized_pl",
         ),
-        "open_trade_count": monitor_result.get("open_trade_count"),
-        "open_position_count": monitor_result.get("open_position_count"),
-        "monitor_bucket": monitor_result.get("status_bucket"),
-        "result_bucket": pl_result.get("result_bucket"),
+        "unrealized_pl": _field_alias_value(
+            pl_result,
+            monitor_result,
+            field="unrealized_pl",
+        ),
+        "open_trade_count": _field_alias_value(
+            pl_result,
+            monitor_result,
+            field="open_trade_count",
+        ),
+        "open_position_count": _field_alias_value(
+            pl_result,
+            monitor_result,
+            field="open_position_count",
+        ),
+        "monitor_bucket": _field_alias_value(
+            monitor_result,
+            pl_result,
+            field="monitor_bucket",
+        ),
+        "result_bucket": _field_alias_value(
+            pl_result,
+            monitor_result,
+            field="result_bucket",
+        ),
         "repeat_proof_lane_status": pl_result.get("repeat_proof_lane_status"),
         "repeat_proof_eligible": pl_result.get("repeat_proof_eligible") is True,
         "profit_evidence": pl_result.get("profit_evidence") is True,
         "broker_read_mode": pl_result.get("broker_read_mode"),
-        "broker_evidence_status": pl_result.get("broker_evidence_status"),
-        "evidence_timestamp_utc": monitor_result.get("evidence_timestamp_utc"),
+        "broker_evidence_status": _field_alias_value(
+            pl_result,
+            monitor_result,
+            monitor_payload,
+            field="broker_evidence_status",
+        ),
+        "evidence_timestamp_utc": _field_alias_value(
+            monitor_result,
+            pl_result,
+            monitor_payload,
+            field="evidence_timestamp_utc",
+        ),
         "evidence_source": (
             monitor_result.get("evidence_source")
             or pl_result.get("source")
@@ -921,14 +983,25 @@ def _field_value(
     return default
 
 
+def _field_alias_value(
+    *sources: Mapping[str, Any],
+    field: str,
+    default: Any = None,
+) -> Any:
+    value = _first_safe_value(
+        *sources,
+        keys=FIELD_ALIASES.get(field, (field,)),
+    )
+    return value if value is not None else default
+
+
 def _normalized_output(owner_read_result: Mapping[str, Any]) -> dict[str, Any]:
-    primary = _primary_payload(owner_read_result)
+    sources = _safe_source_mappings(owner_read_result)
     normalized: dict[str, Any] = {}
 
     for field in REQUIRED_SANITIZED_OUTPUT_FIELDS:
         value = _first_safe_value(
-            primary,
-            owner_read_result,
+            *sources,
             keys=FIELD_ALIASES.get(field, (field,)),
         )
         normalized_value = _normalize_required_field(field, value)
@@ -936,11 +1009,67 @@ def _normalized_output(owner_read_result: Mapping[str, Any]) -> dict[str, Any]:
             normalized[field] = normalized_value
 
     for field in SAFE_AUDIT_EXPORT_FIELDS:
-        value = _first_safe_value(primary, owner_read_result, keys=(field,))
+        value = _first_safe_value(*sources, keys=(field,))
         if isinstance(value, bool):
             normalized[field] = value
 
-    return normalized
+    return _complete_deterministic_safe_fields(normalized)
+
+
+def _safe_source_mappings(owner_read_result: Mapping[str, Any]) -> tuple[Mapping[str, Any], ...]:
+    sources: list[Mapping[str, Any]] = []
+
+    def add_source(candidate: Any) -> None:
+        if not isinstance(candidate, Mapping):
+            return
+        if any(candidate is existing for existing in sources):
+            return
+        sources.append(candidate)
+
+    primary = _primary_payload(owner_read_result)
+    add_source(primary)
+    add_source(owner_read_result)
+
+    for container in tuple(sources):
+        for key in SAFE_NESTED_SOURCE_KEYS:
+            add_source(container.get(key))
+
+    return tuple(sources)
+
+
+def _complete_deterministic_safe_fields(candidate: Mapping[str, Any]) -> dict[str, Any]:
+    completed = dict(candidate)
+    if _missing_value(completed.get("side")):
+        side = _side_from_signed_units(completed.get("units"))
+        if side is not None:
+            completed["side"] = side
+
+    if (
+        _missing_value(completed.get("broker_evidence_status"))
+        and completed.get("broker_read_performed") is True
+        and _all_required_fields_present_except(completed, "broker_evidence_status")
+    ):
+        completed["broker_evidence_status"] = SAFE_INTERNAL_BROKER_EVIDENCE_STATUS
+
+    return completed
+
+
+def _side_from_signed_units(value: Any) -> str | None:
+    units = _coerce_int(value)
+    if units is None or units == 0:
+        return None
+    return "long" if units > 0 else "short"
+
+
+def _all_required_fields_present_except(
+    candidate: Mapping[str, Any],
+    excluded_field: str,
+) -> bool:
+    return all(
+        field == excluded_field
+        or (field in candidate and not _missing_value(candidate.get(field)))
+        for field in REQUIRED_SANITIZED_OUTPUT_FIELDS
+    )
 
 
 def _primary_payload(owner_read_result: Mapping[str, Any]) -> Mapping[str, Any]:
