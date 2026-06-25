@@ -61,6 +61,43 @@ def complete_owner_read_result() -> dict:
     }
 
 
+def packet12d_alias_owner_read_result() -> dict:
+    return {
+        "trade_id": 320,
+        "instrument": "EUR_USD",
+        "signed_units": "-1",
+        "openTradePrice": "1.13596",
+        "realizedPL": "0.0000",
+        "trueUnrealizedPL": "-0.0004",
+        "openTradeCount": 1,
+        "openPositionCount": 1,
+        "current_bucket_result": "OPEN_UNREALIZED_NEGATIVE",
+        "pl_capture_classification": "NO_PROFIT_EVIDENCE_OPEN_NEGATIVE",
+        "repeat_proof_lane_status": "NOT_STARTED_NO_PROFIT_EVIDENCE",
+        "repeat_proof_eligible": False,
+        "profit_evidence": False,
+        "broker_read_mode": "OWNER_RUN_READ_ONLY_BROKER_REQUESTED",
+        "lastTransactionTime": "2026-06-25T00:00:00Z",
+        "evidence_source": "OWNER_RUN_OPEN_TRADE_MONITOR_PL_REFRESH_HELPER",
+        "broker_network_call_performed": True,
+        "broker_read_performed": True,
+        "live_endpoint_used": False,
+        "order_placement_performed": False,
+        "order_mutation_performed": False,
+        "order_close_performed": False,
+        "position_mutation_performed": False,
+        "trade_mutation_performed": False,
+        "raw_broker_payload_persisted": False,
+        "secrets_written": False,
+        "credential_read_performed": False,
+        "account_id_read_performed": False,
+        "no_new_order_placed": True,
+        "no_live_trade_placed": True,
+        "no_broker_state_modified": True,
+        "no_secrets_written": True,
+    }
+
+
 def write_json(path: Path, payload: dict) -> Path:
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
@@ -210,6 +247,55 @@ def test_complete_safe_injected_owner_read_result_writes_json_when_requested(tmp
     assert output.exists()
 
 
+def test_packet12d_alias_output_completes_required_fields_and_writes_json(tmp_path):
+    output = tmp_path / "owner_read_output.json"
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_read_result=packet12d_alias_owner_read_result(),
+        write_json=True,
+        json_path=str(output),
+    )
+    exported = json.loads(output.read_text(encoding="utf-8"))
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_WRITTEN
+    )
+    assert result["json_written"] is True
+    assert result["sanitized_output_ready"] is True
+    assert result["required_fields_present"] is True
+    assert result["missing_required_fields"] == []
+    assert exported["side"] == "short"
+    assert exported["units"] == -1
+    assert exported["entry_price"] == "1.13596"
+    assert exported["realized_pl"] == "0.0000"
+    assert exported["unrealized_pl"] == "-0.0004"
+    assert exported["monitor_bucket"] == "OPEN_UNREALIZED_NEGATIVE"
+    assert exported["result_bucket"] == "NO_PROFIT_EVIDENCE_OPEN_NEGATIVE"
+    assert exported["broker_evidence_status"] == (
+        generator.SAFE_INTERNAL_BROKER_EVIDENCE_STATUS
+    )
+    assert exported["evidence_timestamp_utc"] == "2026-06-25T00:00:00Z"
+
+
+def test_packet12d_alias_output_still_blocks_when_true_market_field_absent(tmp_path):
+    payload = packet12d_alias_owner_read_result()
+    payload.pop("openTradePrice")
+    output = tmp_path / "owner_read_output.json"
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_read_result=payload,
+        write_json=True,
+        json_path=str(output),
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_MISSING_FIELDS
+    )
+    assert result["json_written"] is False
+    assert "entry_price" in result["missing_required_fields"]
+    assert not output.exists()
+
+
 def test_exported_json_contains_only_accepted_safe_fields(tmp_path):
     payload = complete_owner_read_result()
     payload["local_note"] = "not exported"
@@ -245,6 +331,68 @@ def test_proven_safe_helper_output_is_reduced_to_sanitized_fields_only(tmp_path)
 
     assert set(exported) <= generator.EXPORT_FIELD_SET
     assert "local_note" not in exported
+
+
+def test_merged_monitor_pl_helper_output_writes_required_packet12d_fields(tmp_path):
+    monitor_payload = {
+        "broker_network_call_performed": True,
+        "lastTransactionTime": "2026-06-25T00:00:00Z",
+        "live_endpoint_used": False,
+        "order_placement_performed": False,
+        "order_mutation_performed": False,
+        "order_close_performed": False,
+        "position_mutation_performed": False,
+        "trade_mutation_performed": False,
+        "secrets_written": False,
+    }
+    monitor_result = {
+        "tradeID": 320,
+        "pair": "EUR_USD",
+        "currentUnits": "-1",
+        "openTradePrice": "1.13596",
+        "openTradeCount": 1,
+        "openPositionCount": 1,
+        "current_bucket_result": "OPEN_UNREALIZED_NEGATIVE",
+    }
+    pl_result = {
+        "realizedPL": "0.0000",
+        "trueUnrealizedPL": "-0.0004",
+        "pl_result_bucket": "NO_PROFIT_EVIDENCE_OPEN_NEGATIVE",
+        "repeat_proof_lane_status": "NOT_STARTED_NO_PROFIT_EVIDENCE",
+        "repeat_proof_eligible": False,
+        "profit_evidence": False,
+        "broker_read_mode": "OWNER_RUN_READ_ONLY_BROKER_REQUESTED",
+        "source": "OWNER_RUN_OPEN_TRADE_MONITOR_PL_REFRESH_HELPER",
+    }
+    helper_output = generator._merged_monitor_pl_output(
+        monitor_payload,
+        monitor_result,
+        pl_result,
+    )
+    output = tmp_path / "owner_read_output.json"
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=lambda: helper_output,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+        write_json=True,
+        json_path=str(output),
+    )
+    exported = json.loads(output.read_text(encoding="utf-8"))
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_WRITTEN
+    )
+    assert result["json_written"] is True
+    assert result["broker_read_performed"] is True
+    assert exported["side"] == "short"
+    assert exported["monitor_bucket"] == "OPEN_UNREALIZED_NEGATIVE"
+    assert exported["result_bucket"] == "NO_PROFIT_EVIDENCE_OPEN_NEGATIVE"
+    assert exported["broker_evidence_status"] == (
+        generator.SAFE_INTERNAL_BROKER_EVIDENCE_STATUS
+    )
+    assert exported["evidence_timestamp_utc"] == "2026-06-25T00:00:00Z"
 
 
 def test_raw_helper_output_is_never_persisted(tmp_path):
