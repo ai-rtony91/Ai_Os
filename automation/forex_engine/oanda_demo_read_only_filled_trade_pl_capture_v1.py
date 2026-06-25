@@ -142,6 +142,7 @@ def evaluate_oanda_demo_read_only_filled_trade_pl_capture_v1(
     vault_records: list[dict[str, Any]] = []
     read_results: list[dict[str, Any]] = []
     pl_evidence: dict[str, Any] = {}
+    non_blocking_read_failures: list[str] = []
 
     if context_blockers:
         status = BLOCKED_BY_UNSAFE_CONTEXT
@@ -198,20 +199,24 @@ def evaluate_oanda_demo_read_only_filled_trade_pl_capture_v1(
                     for endpoint in endpoint_plan["endpoints"]
                 ]
                 failures = _read_failures(read_results)
-                if failures:
+                pl_evidence = _build_pl_evidence(
+                    read_results,
+                    related_transaction_ids=transaction_ids,
+                    order_create_transaction_id=order_create_id,
+                    order_fill_transaction_id=order_fill_id,
+                    instrument=trade_instrument,
+                    client_order_id=client_id,
+                )
+                blocking_failures = _blocking_read_failures(failures, pl_evidence)
+                non_blocking_read_failures = [
+                    failure for failure in failures if failure not in blocking_failures
+                ]
+                if blocking_failures:
                     status = BLOCKED_BY_UNSAFE_ENDPOINT
                     pl_classification = BLOCKED_BY_READ_ONLY_PL_CAPTURE_FAILURE
-                    blockers = _unique(blockers + failures)
+                    blockers = _unique(blockers + blocking_failures)
                 else:
                     status = READ_ONLY_FILLED_TRADE_PL_CAPTURE_ATTEMPTED
-                    pl_evidence = _build_pl_evidence(
-                        read_results,
-                        related_transaction_ids=transaction_ids,
-                        order_create_transaction_id=order_create_id,
-                        order_fill_transaction_id=order_fill_id,
-                        instrument=trade_instrument,
-                        client_order_id=client_id,
-                    )
                     pl_classification = _classify_pl_evidence(pl_evidence)
 
     result: dict[str, Any] = {
@@ -220,6 +225,7 @@ def evaluate_oanda_demo_read_only_filled_trade_pl_capture_v1(
         "status": status,
         "pl_capture_classification": pl_classification,
         "blockers": blockers,
+        "read_only_capture_non_blocking_failures": non_blocking_read_failures,
         "warnings": _warnings(status),
         "owner_filled_trade_evidence": {
             "orderCreateTransaction_id": order_create_id,
@@ -347,6 +353,12 @@ def validate_oanda_demo_read_only_filled_trade_pl_capture_endpoint_url_v1(
                 "openPositions",
                 "transactions",
             }
+        )
+        or (
+            len(path_parts) == 5
+            and path_parts[0:2] == ["v3", "accounts"]
+            and _present(path_parts[2])
+            and path_parts[3:5] == ["transactions", "idrange"]
         )
     )
     if not allowed_shape:
@@ -486,7 +498,7 @@ def _endpoint_plan_from_context(
                 "name": "transactions_window",
                 "method": "GET",
                 "url": (
-                    f"{base_url}/v3/accounts/{account_id}/transactions"
+                    f"{base_url}/v3/accounts/{account_id}/transactions/idrange"
                     f"?{tx_query}"
                 ),
             },
@@ -590,6 +602,34 @@ def _read_failures(read_results: Sequence[Mapping[str, Any]]) -> list[str]:
         if result.get("status_code") != 200:
             failures.append(f"{endpoint_name}_status_not_200")
     return _unique(failures)
+
+
+def _blocking_read_failures(
+    failures: Sequence[str],
+    pl_evidence: Mapping[str, Any],
+) -> list[str]:
+    if not _has_open_trade_or_position_evidence(pl_evidence):
+        return list(failures)
+    return [
+        failure
+        for failure in failures
+        if not _is_optional_transaction_window_read_failure(failure)
+    ]
+
+
+def _has_open_trade_or_position_evidence(pl_evidence: Mapping[str, Any]) -> bool:
+    return bool(
+        pl_evidence.get("open_trade_evidence")
+        or pl_evidence.get("open_position_evidence")
+    )
+
+
+def _is_optional_transaction_window_read_failure(failure: str) -> bool:
+    return failure in {
+        "missing_endpoint_result_transactions_window",
+        "transactions_window_network_call_not_performed",
+        "transactions_window_status_not_200",
+    }
 
 
 def _build_pl_evidence(
@@ -847,7 +887,7 @@ def _allowed_endpoint_templates() -> list[str]:
         ),
         (
             "GET https://api-fxpractice.oanda.com/v3/accounts/"
-            "<runtime_account_id>/transactions"
+            "<runtime_account_id>/transactions/idrange?from=<id>&to=<id>"
         ),
     ]
 

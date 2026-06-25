@@ -358,7 +358,7 @@ def _template_payload() -> dict[str, Any]:
             ),
             (
                 f"GET {PRACTICE_API_BASE_URL}/v3/accounts/"
-                "<runtime_account_id>/transactions"
+                "<runtime_account_id>/transactions/idrange?from=<id>&to=<id>"
             ),
         ],
         "pl_classifications": [
