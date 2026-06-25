@@ -77,12 +77,16 @@ def test_default_result_does_not_call_broker_and_reports_not_requested():
     result = generator.generate_owner_run_sanitized_broker_read_output()
 
     assert result["output_status"] == (
-        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_NOT_REQUESTED
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_READY_FOR_OWNER_RUN
     )
+    assert result["safe_owner_read_helper_status"] == (
+        generator.SAFE_OWNER_READ_HELPER_BOUND
+    )
+    assert result["safe_owner_read_helper_bound"] is True
     assert result["owner_run_read_broker_now"] is False
     assert result["broker_read_performed"] is False
     assert result["broker_network_call_performed"] is False
-    assert result["next_action"] == generator.DEFAULT_NEXT_ACTION
+    assert result["next_action"] == generator.OWNER_RUN_READY_NEXT_ACTION
 
 
 def test_default_does_not_write_json(tmp_path):
@@ -93,6 +97,72 @@ def test_default_does_not_write_json(tmp_path):
 
     assert result["json_written"] is False
     assert not (tmp_path / "owner_read_output.json").exists()
+
+
+def test_helper_is_not_called_when_owner_run_flag_is_absent():
+    calls: list[str] = []
+
+    def helper() -> dict:
+        calls.append("called")
+        return complete_owner_read_result()
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_read_helper=helper,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+    )
+
+    assert calls == []
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_READY_FOR_OWNER_RUN
+    )
+    assert result["safe_owner_read_helper_bound"] is True
+
+
+def test_owner_run_flag_with_no_proven_safe_helper_fails_closed(monkeypatch):
+    def blocked_binding() -> dict:
+        return generator._unbound_safe_owner_read_helper(
+            generator.SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE,
+            "mock_unproven_helper",
+            "mock_helper_not_proven_safe",
+        )
+
+    monkeypatch.setattr(
+        generator,
+        "_resolve_safe_owner_read_helper",
+        blocked_binding,
+    )
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        write_json=True,
+        json_path="never_written.json",
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_NOT_PROVEN_SAFE
+    )
+    assert result["safe_owner_read_helper_bound"] is False
+    assert result["broker_read_performed"] is False
+    assert result["broker_network_call_performed"] is False
+
+
+def test_proven_safe_helper_can_be_injected_and_marked_bound():
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=complete_owner_read_result,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_READY
+    )
+    assert result["safe_owner_read_helper_status"] == (
+        generator.SAFE_OWNER_READ_HELPER_BOUND
+    )
+    assert result["safe_owner_read_helper_name"] == "mock_safe_owner_read_helper"
+    assert result["safe_owner_read_helper_bound"] is True
 
 
 def test_missing_required_fields_blocks_output():
@@ -156,6 +226,46 @@ def test_exported_json_contains_only_accepted_safe_fields(tmp_path):
     assert "local_note" not in exported
     assert "credential_read_performed" not in exported
     assert "account_id_read_performed" not in exported
+
+
+def test_proven_safe_helper_output_is_reduced_to_sanitized_fields_only(tmp_path):
+    payload = complete_owner_read_result()
+    payload["local_note"] = "not exported"
+    output = tmp_path / "owner_read_output.json"
+
+    generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=lambda: payload,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+        write_json=True,
+        json_path=str(output),
+    )
+    exported = json.loads(output.read_text(encoding="utf-8"))
+
+    assert set(exported) <= generator.EXPORT_FIELD_SET
+    assert "local_note" not in exported
+
+
+def test_raw_helper_output_is_never_persisted(tmp_path):
+    payload = complete_owner_read_result()
+    payload["raw_response"] = {"forbidden": "payload"}
+    output = tmp_path / "owner_read_output.json"
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=lambda: payload,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+        write_json=True,
+        json_path=str(output),
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_REJECTED_RAW_PAYLOAD_RISK
+    )
+    assert result["json_written"] is False
+    assert not output.exists()
 
 
 def test_exported_json_works_with_packet12b_capture_wrapper(tmp_path):
@@ -230,6 +340,38 @@ def test_raw_payload_raw_response_fields_reject():
         assert field in result["rejected_forbidden_fields"]
 
 
+def test_helper_output_with_forbidden_fields_rejects():
+    payload = complete_owner_read_result()
+    payload["secret"] = "forbidden"
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=lambda: payload,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_REJECTED_SECRET_RISK
+    )
+
+
+def test_helper_output_with_raw_payload_markers_rejects():
+    payload = complete_owner_read_result()
+    payload["raw_payload"] = {"forbidden": "payload"}
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=lambda: payload,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_REJECTED_RAW_PAYLOAD_RISK
+    )
+
+
 def test_nested_forbidden_fields_reject():
     payload = complete_owner_read_result()
     payload["nested"] = {"authorization": "forbidden"}
@@ -256,6 +398,23 @@ def test_unsafe_audit_true_flags_reject():
         generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_REJECTED_UNSAFE_AUDIT_FLAG
     )
     assert "order_close_performed" in result["unsafe_audit_flags"]
+
+
+def test_helper_output_with_unsafe_audit_flags_rejects():
+    payload = complete_owner_read_result()
+    payload["trade_mutation_performed"] = True
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=lambda: payload,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_REJECTED_UNSAFE_AUDIT_FLAG
+    )
+    assert "trade_mutation_performed" in result["unsafe_audit_flags"]
 
 
 def test_safe_audit_false_flags_pass():
@@ -292,13 +451,37 @@ def test_fake_mock_numbers_are_not_invented():
     assert "dashboard_fake_account_balance" in result["rejected_forbidden_fields"]
 
 
+def test_complete_safe_helper_output_writes_json_with_owner_run_flag(tmp_path):
+    output = tmp_path / "owner_read_output.json"
+
+    result = generator.generate_owner_run_sanitized_broker_read_output(
+        owner_run_read_broker_now=True,
+        owner_read_helper=complete_owner_read_result,
+        owner_read_helper_name="mock_safe_owner_read_helper",
+        owner_read_helper_proven_safe=True,
+        write_json=True,
+        json_path=str(output),
+    )
+
+    assert result["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_WRITTEN
+    )
+    assert result["broker_read_performed"] is True
+    assert result["broker_network_call_performed"] is True
+    assert output.exists()
+
+
 def test_cli_default_emits_json_without_broker_call():
     code, payload = run_script(["--json"])
 
     assert code == 0
     assert payload["output_status"] == (
-        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_NOT_REQUESTED
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_READY_FOR_OWNER_RUN
     )
+    assert payload["safe_owner_read_helper_status"] == (
+        generator.SAFE_OWNER_READ_HELPER_BOUND
+    )
+    assert payload["safe_owner_read_helper_bound"] is True
     assert payload["json_written"] is False
     assert payload["owner_run_read_broker_now"] is False
     assert payload["broker_read_performed"] is False
@@ -334,7 +517,22 @@ def test_cli_with_owner_read_result_file_writes_json_only_when_safe(tmp_path):
     assert output.exists()
 
 
-def test_cli_with_owner_run_read_broker_now_without_helper_fails_closed(tmp_path):
+def test_cli_owner_run_flag_path_is_covered_with_mocked_helper_only(
+    tmp_path,
+    monkeypatch,
+):
+    def mocked_binding() -> dict:
+        return generator._bound_safe_owner_read_helper(
+            "mock_safe_owner_read_helper",
+            complete_owner_read_result,
+        )
+
+    monkeypatch.setattr(
+        generator,
+        "_resolve_safe_owner_read_helper",
+        mocked_binding,
+    )
+
     output = tmp_path / "owner_read_output.json"
 
     code, payload = run_script(
@@ -349,8 +547,49 @@ def test_cli_with_owner_run_read_broker_now_without_helper_fails_closed(tmp_path
 
     assert code == 0
     assert payload["output_status"] == (
-        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_NO_SAFE_OWNER_READ_HELPER
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_WRITTEN
     )
+    assert payload["safe_owner_read_helper_name"] == "mock_safe_owner_read_helper"
+    assert payload["safe_owner_read_helper_bound"] is True
+    assert payload["json_written"] is True
+    assert payload["broker_read_performed"] is True
+    assert payload["broker_network_call_performed"] is True
+    assert output.exists()
+
+
+def test_cli_with_owner_run_read_broker_now_without_proven_helper_fails_closed(
+    tmp_path,
+    monkeypatch,
+):
+    def blocked_binding() -> dict:
+        return generator._unbound_safe_owner_read_helper(
+            generator.SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE,
+            "mock_unproven_helper",
+            "mock_helper_not_proven_safe",
+        )
+
+    monkeypatch.setattr(
+        generator,
+        "_resolve_safe_owner_read_helper",
+        blocked_binding,
+    )
+    output = tmp_path / "owner_read_output.json"
+
+    code, payload = run_script(
+        [
+            "--owner-run-read-broker-now",
+            "--write-json",
+            "--json-path",
+            str(output),
+            "--json",
+        ],
+    )
+
+    assert code == 0
+    assert payload["output_status"] == (
+        generator.OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_NOT_PROVEN_SAFE
+    )
+    assert payload["safe_owner_read_helper_bound"] is False
     assert payload["json_written"] is False
     assert payload["broker_read_performed"] is False
     assert payload["broker_network_call_performed"] is False
@@ -367,6 +606,9 @@ def test_report_writer_includes_safety_statements(tmp_path):
     )
     text = report.read_text(encoding="utf-8")
 
+    assert "- safe_owner_read_helper_status:" in text
+    assert "- safe_owner_read_helper_name:" in text
+    assert "- safe_owner_read_helper_bound:" in text
     assert "- no new order placed" in text
     assert "- no live trade placed" in text
     assert "- no broker state modified" in text
