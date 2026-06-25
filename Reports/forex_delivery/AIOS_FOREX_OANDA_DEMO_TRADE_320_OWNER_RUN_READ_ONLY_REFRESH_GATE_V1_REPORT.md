@@ -1,15 +1,15 @@
 # AIOS FOREX OANDA DEMO TRADE 320 OWNER RUN READ ONLY REFRESH GATE V1 REPORT
 
 - packet_name: AIOS FOREX OANDA DEMO TRADE 320 OWNER RUN READ ONLY BROKER REFRESH GATE V1
-- repo_branch: feature/forex-oanda-demo-trade-320-owner-run-read-only-refresh-gate-v1
+- repo_branch: main
 - pr_1075_anchor: Add OANDA demo trade 320 read-only PL refresh
 - trade_320_anchor: EUR_USD long 1 entry 1.13596 TP 321 SL 322
-- gate_status: OWNER_RUN_FLAG_REQUIRED
+- gate_status: BROKER_EVIDENCE_BLOCKED
 - broker_read_allowed_now: no
-- owner_run_flag_required: yes
-- broker_read_mode: NOT_REQUESTED
-- next_action: RUN_OWNER_READ_ONLY_REFRESH_WITH_EXPLICIT_FLAG_OR_KEEP_OFFLINE_MONITORING
-- blockers: owner_run_read_broker_now_flag_required
+- owner_run_flag_required: no
+- broker_read_mode: OWNER_RUN_READ_ONLY_BROKER_REQUESTED
+- next_action: KEEP_OFFLINE_MONITORING_AND_REPAIR_READ_ONLY_HELPER
+- blockers: broker_evidence_blocked_broker_evidence_blocked, broker_blocker_broker_evidence_blocked_true, broker_blocker_evidence_status_indicates_broker_blocked
 
 ## Dashboard Real Data Doctrine
 
