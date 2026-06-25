@@ -136,6 +136,25 @@ RAW_PAYLOAD_KEY_TERMS = (
     "live_payload",
 )
 
+SAFE_AUDIT_FIELD_NAMES = {
+    "broker_network_call_performed",
+    "broker_read_allowed_by_default",
+    "broker_read_must_be_get_only",
+    "broker_read_requires_owner_flag",
+    "no_broker_state_modified",
+    "no_live_trade_placed",
+    "no_new_order_placed",
+    "no_secret_write_required",
+    "no_secrets_written",
+    "order_close_performed",
+    "order_mutation_performed",
+    "order_placement_performed",
+    "position_mutation_performed",
+    "sanitized_evidence_only",
+    "secrets_written",
+    "trade_mutation_performed",
+}
+
 MUTATION_TRUE_FIELDS = (
     "order_placement_performed",
     "order_close_performed",
@@ -656,7 +675,10 @@ def _is_broker_blocked_status(value: Any) -> bool:
 
 def _secret_key(key: str) -> bool:
     key_text = key.lower()
-    if key_text in {"credential_name", "credential_names"}:
+    if key_text in SAFE_AUDIT_FIELD_NAMES or key_text in {
+        "credential_name",
+        "credential_names",
+    }:
         return False
     return key_text in REJECTED_SECRET_FIELD_NAMES or any(
         term in key_text for term in SECRET_KEY_TERMS
@@ -708,4 +730,3 @@ def _safe_label(value: Any) -> str:
 
 def _true_false(value: Any) -> str:
     return "true" if value is True else "false"
-
