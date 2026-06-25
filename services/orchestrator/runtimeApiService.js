@@ -1,5 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const {
+  createRuntimeVisibilityCache
+} = require("./runtimeVisibilityCache");
 
 const repoRoot = path.resolve(__dirname, "..", "..");
 const runtimeDir = path.join(repoRoot, "telemetry", "runtime");
@@ -32,6 +35,19 @@ const FRONTEND_BLOCKED_ACTIONS = Object.freeze([
   "live_trading",
   "secret_access"
 ]);
+const VISIBILITY_CACHE_MAX_AGE_MS = 1000;
+const visibilityDependencyPaths = Object.freeze([
+  runtimeStatePath,
+  runtimeHeartbeatPath,
+  runtimeProcessPath,
+  telemetryLedgerPath,
+  nightSupervisorLedgerPath,
+  dispatcherQueuePath
+]);
+const visibilitySnapshotCache = createRuntimeVisibilityCache({
+  dependencyPaths: visibilityDependencyPaths,
+  maxAgeMs: VISIBILITY_CACHE_MAX_AGE_MS
+});
 
 function nowIso() {
   return new Date().toISOString();
@@ -418,7 +434,11 @@ function getRuntimeHealth(options = {}) {
   };
 }
 
-function getVisibilitySnapshot() {
+function getVisibilityDependencyPaths() {
+  return [...visibilityDependencyPaths];
+}
+
+function buildVisibilitySnapshot() {
   const status = getRuntimeStatus();
   const queue = getQueueStatus();
   const audit = getAuditTimeline({ recent: 20 });
@@ -497,6 +517,19 @@ function getVisibilitySnapshot() {
   };
 }
 
+function getVisibilitySnapshot(options = {}) {
+  const builder = () => buildVisibilitySnapshot();
+
+  if (options.useCache === false) {
+    return builder();
+  }
+
+  return visibilitySnapshotCache.getSnapshot(builder, {
+    dependencyPaths: getVisibilityDependencyPaths(),
+    maxAgeMs: options.maxAgeMs
+  });
+}
+
 function getControlSummary() {
   return {
     schema: "aios.runtime_control_api.v1",
@@ -519,6 +552,7 @@ module.exports = {
   getAuditTimeline,
   getRuntimeHealth,
   getVisibilitySnapshot,
+  getVisibilityDependencyPaths,
   getLedgerAuthority,
   getControlSummary
 };
