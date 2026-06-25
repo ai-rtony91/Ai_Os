@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from contextlib import redirect_stdout
+from io import StringIO
+import inspect
 from pathlib import Path
 from typing import Any
 
@@ -187,14 +190,47 @@ OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_REJECTED_UNSAFE_AUDIT_FLAG = (
 OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_NO_SAFE_OWNER_READ_HELPER = (
     "OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_NO_SAFE_OWNER_READ_HELPER"
 )
+OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_READY_FOR_OWNER_RUN = (
+    "OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_READY_FOR_OWNER_RUN"
+)
+OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_IMPORT_FAILED = (
+    "OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_IMPORT_FAILED"
+)
+OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_NOT_PROVEN_SAFE = (
+    "OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_NOT_PROVEN_SAFE"
+)
+OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_RETURNED_UNSAFE_SHAPE = (
+    "OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_RETURNED_UNSAFE_SHAPE"
+)
 
-DEFAULT_NEXT_ACTION = "OWNER_MAY_RUN_WITH_OWNER_RUN_READ_BROKER_NOW"
+SAFE_OWNER_READ_HELPER_NOT_BOUND = "SAFE_OWNER_READ_HELPER_NOT_BOUND"
+SAFE_OWNER_READ_HELPER_BOUND = "SAFE_OWNER_READ_HELPER_BOUND"
+SAFE_OWNER_READ_HELPER_IMPORT_FAILED = "SAFE_OWNER_READ_HELPER_IMPORT_FAILED"
+SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE = "SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE"
+SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE = (
+    "SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE"
+)
+SAFE_OWNER_READ_HELPER_NAME = (
+    "scripts.run_oanda_demo_open_trade_monitor_v1.main + "
+    "automation.forex_engine.oanda_demo_trade_320_read_only_pl_refresh_v1."
+    "refresh_trade_320_pl_result"
+)
+
+DEFAULT_NEXT_ACTION = (
+    "OWNER_MAY_RUN_WITH_OWNER_RUN_READ_BROKER_NOW_AFTER_SAFE_HELPER_BOUND"
+)
+OWNER_RUN_READY_NEXT_ACTION = "OWNER_RUN_READ_ONLY_SANITIZED_BROKER_OUTPUT_COMMAND"
 READY_NEXT_ACTION = "RUN_PACKET_12B_CAPTURE_WRAPPER_WITH_SANITIZED_OUTPUT"
 MISSING_NEXT_ACTION = "OWNER_READ_HELPER_MUST_CAPTURE_REQUIRED_FIELDS_WITHOUT_RAW_PAYLOAD"
 SECRET_NEXT_ACTION = "STOP_REMOVE_SECRET_MARKERS_AND_RETRY"
 RAW_NEXT_ACTION = "STOP_REMOVE_RAW_PAYLOAD_MARKERS_AND_RETRY"
 UNSAFE_AUDIT_NEXT_ACTION = "STOP_FIX_UNSAFE_AUDIT_FLAGS_AND_RETRY"
 NO_HELPER_NEXT_ACTION = "OWNER_READ_HELPER_INTEGRATION_NOT_PROVEN_SAFE"
+HELPER_IMPORT_NEXT_ACTION = "RESTORE_SAFE_OWNER_READ_HELPER_IMPORT"
+HELPER_NOT_PROVEN_NEXT_ACTION = "STOP_REVIEW_OWNER_READ_HELPER_SAFETY_PROOF"
+HELPER_UNSAFE_SHAPE_NEXT_ACTION = (
+    "STOP_FIX_OWNER_READ_HELPER_SANITIZED_RETURN_SHAPE"
+)
 
 OWNER_SIDE_PACKET_12C_COMMAND = (
     "python scripts/forex_delivery/"
@@ -235,14 +271,77 @@ def generate_owner_run_sanitized_broker_read_output(
     write_json: bool = False,
     json_path: str | None = None,
     owner_read_result: dict | None = None,
+    owner_read_helper: Callable[[], dict[str, Any]] | None = None,
+    owner_read_helper_name: str | None = None,
+    owner_read_helper_proven_safe: bool | None = None,
 ) -> dict[str, Any]:
     output_path = json_path or DEFAULT_JSON_PATH
+    helper_binding = _safe_owner_read_helper_binding(
+        owner_read_helper=owner_read_helper,
+        owner_read_helper_name=owner_read_helper_name,
+        owner_read_helper_proven_safe=owner_read_helper_proven_safe,
+    )
     if owner_read_result is None:
         if owner_run_read_broker_now:
+            if helper_binding.get("safe_owner_read_helper_bound") is not True:
+                return _result(
+                    output_status=_unbound_helper_output_status(helper_binding),
+                    json_written=False,
+                    json_path=output_path,
+                    sanitized_output_ready=False,
+                    required_fields_present=False,
+                    missing_required_fields=[],
+                    rejected_forbidden_fields=[],
+                    unsafe_audit_flags=[],
+                    candidate={},
+                    owner_run_read_broker_now=owner_run_read_broker_now,
+                    helper_binding=helper_binding,
+                    next_action=_unbound_helper_next_action(helper_binding),
+                )
+            try:
+                owner_read_result = helper_binding["runner"]()
+            except Exception as exc:  # pragma: no cover - defensive owner-run guard
+                helper_binding = _unbound_safe_owner_read_helper(
+                    SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE,
+                    str(helper_binding.get("safe_owner_read_helper_name") or "UNKNOWN"),
+                    f"helper_execution_failed_{type(exc).__name__}",
+                )
+                return _result(
+                    output_status=(
+                        OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_RETURNED_UNSAFE_SHAPE
+                    ),
+                    json_written=False,
+                    json_path=output_path,
+                    sanitized_output_ready=False,
+                    required_fields_present=False,
+                    missing_required_fields=[],
+                    rejected_forbidden_fields=[],
+                    unsafe_audit_flags=[],
+                    candidate={},
+                    owner_run_read_broker_now=owner_run_read_broker_now,
+                    helper_binding=helper_binding,
+                    next_action=HELPER_UNSAFE_SHAPE_NEXT_ACTION,
+                )
+        else:
+            if helper_binding.get("safe_owner_read_helper_bound") is True:
+                return _result(
+                    output_status=(
+                        OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_READY_FOR_OWNER_RUN
+                    ),
+                    json_written=False,
+                    json_path=output_path,
+                    sanitized_output_ready=False,
+                    required_fields_present=False,
+                    missing_required_fields=[],
+                    rejected_forbidden_fields=[],
+                    unsafe_audit_flags=[],
+                    candidate={},
+                    owner_run_read_broker_now=owner_run_read_broker_now,
+                    helper_binding=helper_binding,
+                    next_action=OWNER_RUN_READY_NEXT_ACTION,
+                )
             return _result(
-                output_status=(
-                    OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_NO_SAFE_OWNER_READ_HELPER
-                ),
+                output_status=OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_NOT_REQUESTED,
                 json_written=False,
                 json_path=output_path,
                 sanitized_output_ready=False,
@@ -252,26 +351,16 @@ def generate_owner_run_sanitized_broker_read_output(
                 unsafe_audit_flags=[],
                 candidate={},
                 owner_run_read_broker_now=owner_run_read_broker_now,
-                next_action=NO_HELPER_NEXT_ACTION,
+                helper_binding=helper_binding,
+                next_action=DEFAULT_NEXT_ACTION,
             )
-        return _result(
-            output_status=OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_NOT_REQUESTED,
-            json_written=False,
-            json_path=output_path,
-            sanitized_output_ready=False,
-            required_fields_present=False,
-            missing_required_fields=[],
-            rejected_forbidden_fields=[],
-            unsafe_audit_flags=[],
-            candidate={},
-            owner_run_read_broker_now=owner_run_read_broker_now,
-            next_action=DEFAULT_NEXT_ACTION,
-        )
 
     if not isinstance(owner_read_result, Mapping):
         return _result(
             output_status=(
-                OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_MISSING_FIELDS
+                OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_RETURNED_UNSAFE_SHAPE
+                if owner_run_read_broker_now
+                else OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_MISSING_FIELDS
             ),
             json_written=False,
             json_path=output_path,
@@ -282,7 +371,12 @@ def generate_owner_run_sanitized_broker_read_output(
             unsafe_audit_flags=[],
             candidate={},
             owner_run_read_broker_now=owner_run_read_broker_now,
-            next_action=MISSING_NEXT_ACTION,
+            helper_binding=helper_binding,
+            next_action=(
+                HELPER_UNSAFE_SHAPE_NEXT_ACTION
+                if owner_run_read_broker_now
+                else MISSING_NEXT_ACTION
+            ),
         )
 
     safety = _input_safety(owner_read_result)
@@ -339,6 +433,7 @@ def generate_owner_run_sanitized_broker_read_output(
         unsafe_audit_flags=safety["unsafe_audit_flags"],
         candidate=candidate,
         owner_run_read_broker_now=owner_run_read_broker_now,
+        helper_binding=helper_binding,
         next_action=next_action,
     )
 
@@ -348,12 +443,18 @@ def run_owner_run_sanitized_broker_read_output_generator(
     write_json: bool = False,
     json_path: str | None = None,
     owner_read_result: dict | None = None,
+    owner_read_helper: Callable[[], dict[str, Any]] | None = None,
+    owner_read_helper_name: str | None = None,
+    owner_read_helper_proven_safe: bool | None = None,
 ) -> dict[str, Any]:
     return generate_owner_run_sanitized_broker_read_output(
         owner_run_read_broker_now=owner_run_read_broker_now,
         write_json=write_json,
         json_path=json_path,
         owner_read_result=owner_read_result,
+        owner_read_helper=owner_read_helper,
+        owner_read_helper_name=owner_read_helper_name,
+        owner_read_helper_proven_safe=owner_read_helper_proven_safe,
     )
 
 
@@ -371,9 +472,22 @@ def render_owner_run_sanitized_broker_read_output_generator_report(
             "",
             f"- packet_name: {PACKET_NAME}",
             f"- packet_id: {PACKET_ID}",
-            "- pr_1088_anchor: owner-read required sanitized fields capture",
+            "- pr_1089_anchor: owner-run sanitized broker read output generator",
+            "- packet_12d_update: safe owner-read helper binding",
             f"- repo_branch: {branch}",
             f"- output_status: {_display(result.get('output_status'))}",
+            (
+                "- safe_owner_read_helper_status: "
+                f"{_display(result.get('safe_owner_read_helper_status'))}"
+            ),
+            (
+                "- safe_owner_read_helper_name: "
+                f"{_display(result.get('safe_owner_read_helper_name'))}"
+            ),
+            (
+                "- safe_owner_read_helper_bound: "
+                f"{_yes_no(result.get('safe_owner_read_helper_bound'))}"
+            ),
             f"- json_written: {_yes_no(result.get('json_written'))}",
             f"- json_path: {_display(result.get('json_path'))}",
             (
@@ -420,7 +534,7 @@ def render_owner_run_sanitized_broker_read_output_generator_report(
             "",
             "## Owner-Side Commands",
             "",
-            "### Packet 12C",
+            "### Packet 12D",
             "",
             f"- {OWNER_SIDE_PACKET_12C_COMMAND}",
             "",
@@ -482,6 +596,329 @@ def write_owner_run_sanitized_broker_read_output_generator_report(
         encoding="utf-8",
     )
     return path
+
+
+def _safe_owner_read_helper_binding(
+    *,
+    owner_read_helper: Callable[[], dict[str, Any]] | None,
+    owner_read_helper_name: str | None,
+    owner_read_helper_proven_safe: bool | None,
+) -> dict[str, Any]:
+    if owner_read_helper is not None:
+        helper_name = owner_read_helper_name or "injected_owner_read_helper"
+        if owner_read_helper_proven_safe is not True:
+            return _unbound_safe_owner_read_helper(
+                SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE,
+                helper_name,
+                "injected_helper_not_marked_proven_safe",
+            )
+        if not callable(owner_read_helper):
+            return _unbound_safe_owner_read_helper(
+                SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE,
+                helper_name,
+                "injected_helper_not_callable",
+            )
+        return _bound_safe_owner_read_helper(helper_name, owner_read_helper)
+    return _resolve_safe_owner_read_helper()
+
+
+def _resolve_safe_owner_read_helper() -> dict[str, Any]:
+    helper_name = SAFE_OWNER_READ_HELPER_NAME
+    try:
+        from automation.forex_engine.oanda_demo_read_only_filled_trade_pl_capture_v1 import (  # noqa: E501
+            LIVE_API_HOST,
+            PRACTICE_API_BASE_URL,
+            default_oanda_demo_read_only_filled_trade_pl_capture_context_v1,
+            validate_oanda_demo_read_only_filled_trade_pl_capture_endpoint_url_v1,
+        )
+        from automation.forex_engine.oanda_demo_trade_320_read_only_pl_refresh_v1 import (
+            refresh_trade_320_pl_result,
+        )
+        from scripts.forex_delivery.run_oanda_demo_read_only_filled_trade_pl_capture_v1 import (
+            REQUIRED_EXECUTE_CONFIRMATIONS,
+        )
+        from scripts.run_oanda_demo_open_trade_monitor_v1 import (
+            main as monitor_main,
+        )
+    except Exception as exc:  # pragma: no cover - defensive import boundary
+        return _unbound_safe_owner_read_helper(
+            SAFE_OWNER_READ_HELPER_IMPORT_FAILED,
+            helper_name,
+            f"safe_helper_import_failed_{type(exc).__name__}",
+        )
+
+    blockers = _safe_helper_proof_blockers(
+        monitor_main=monitor_main,
+        required_confirmations=REQUIRED_EXECUTE_CONFIRMATIONS,
+        capture_context=default_oanda_demo_read_only_filled_trade_pl_capture_context_v1(),
+        practice_api_base_url=PRACTICE_API_BASE_URL,
+        live_api_host=LIVE_API_HOST,
+        endpoint_validator=validate_oanda_demo_read_only_filled_trade_pl_capture_endpoint_url_v1,
+    )
+    if blockers:
+        return _unbound_safe_owner_read_helper(
+            SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE,
+            helper_name,
+            ",".join(blockers),
+        )
+
+    def runner() -> dict[str, Any]:
+        return _run_bound_open_trade_monitor_pl_refresh_helper(
+            monitor_main=monitor_main,
+            refresh_trade_320_pl_result=refresh_trade_320_pl_result,
+        )
+
+    return _bound_safe_owner_read_helper(helper_name, runner)
+
+
+def _safe_helper_proof_blockers(
+    *,
+    monitor_main: Callable[..., int],
+    required_confirmations: Mapping[str, str],
+    capture_context: Mapping[str, Any],
+    practice_api_base_url: str,
+    live_api_host: str,
+    endpoint_validator: Callable[..., list[str]],
+) -> list[str]:
+    blockers: list[str] = []
+    signature = inspect.signature(monitor_main)
+    if "argv" not in signature.parameters:
+        blockers.append("monitor_main_must_accept_argv")
+
+    required_flags = {
+        "--i-confirm-demo-only",
+        "--i-confirm-read-only-pl-capture",
+        "--i-confirm-windows-vault-only",
+        "--i-confirm-no-env-file",
+        "--i-confirm-no-repo-persistence",
+        "--i-confirm-no-live-endpoint",
+        "--i-confirm-no-order",
+        "--i-confirm-no-close-trade",
+        "--i-confirm-no-mutation",
+        "--i-confirm-no-second-order",
+        "--i-confirm-no-profit-claim",
+    }
+    observed_flags = set(required_confirmations.values())
+    missing_flags = sorted(required_flags - observed_flags)
+    if missing_flags:
+        blockers.extend(f"missing_confirmation_{_safe_label(flag)}" for flag in missing_flags)
+
+    expected_true = (
+        "demo_only",
+        "windows_vault_only",
+        "read_only_pl_capture_only",
+        "no_env_file",
+        "no_repo_persistence",
+        "no_live_credentials",
+        "no_order_placement",
+        "no_order_close",
+        "no_order_mutation",
+        "no_trade_mutation",
+        "no_position_mutation",
+        "no_second_order_attempt",
+    )
+    for field in expected_true:
+        if capture_context.get(field) is not True:
+            blockers.append(f"context_{field}_required")
+    if capture_context.get("broker") != "OANDA_DEMO":
+        blockers.append("context_broker_must_be_oanda_demo")
+    if capture_context.get("environment") != "DEMO":
+        blockers.append("context_environment_must_be_demo")
+    if capture_context.get("live_mode") is True:
+        blockers.append("context_live_mode_must_be_false")
+    if capture_context.get("live_credentials_allowed") is True:
+        blockers.append("context_live_credentials_allowed_must_be_false")
+    if capture_context.get("profit_claimed") is True:
+        blockers.append("context_profit_claim_must_be_false")
+    if live_api_host in str(capture_context.get("demo_api_base_url", "")):
+        blockers.append("context_demo_api_base_url_must_not_be_live")
+
+    practice_url = f"{practice_api_base_url}/v3/accounts"
+    if endpoint_validator(practice_url, method="GET"):
+        blockers.append("practice_accounts_endpoint_must_validate")
+    live_url = f"https://{live_api_host}/v3/accounts"
+    if not endpoint_validator(live_url, method="GET"):
+        blockers.append("live_accounts_endpoint_must_be_blocked")
+    return _unique(blockers)
+
+
+def _run_bound_open_trade_monitor_pl_refresh_helper(
+    *,
+    monitor_main: Callable[..., int],
+    refresh_trade_320_pl_result: Callable[[dict | None], dict[str, Any]],
+) -> dict[str, Any]:
+    stream = StringIO()
+    with redirect_stdout(stream):
+        monitor_main(
+            [
+                "--owner-run-read-broker-now",
+                "--expected-trade-id",
+                "320",
+                "--json",
+            ],
+        )
+    monitor_payload = _json_mapping(stream.getvalue())
+    monitor_result = monitor_payload.get("result")
+    if not isinstance(monitor_result, Mapping):
+        return {
+            "helper_capture_status": SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE,
+            "broker_network_call_performed": (
+                monitor_payload.get("broker_network_call_performed") is True
+            ),
+            "broker_read_performed": False,
+            "blockers": ["owner_read_monitor_result_missing"],
+        }
+
+    pl_result = refresh_trade_320_pl_result(dict(monitor_result))
+    return _merged_monitor_pl_output(monitor_payload, monitor_result, pl_result)
+
+
+def _merged_monitor_pl_output(
+    monitor_payload: Mapping[str, Any],
+    monitor_result: Mapping[str, Any],
+    pl_result: Mapping[str, Any],
+) -> dict[str, Any]:
+    broker_network_call_performed = (
+        monitor_payload.get("broker_network_call_performed") is True
+    )
+    return {
+        "trade_id": _field_value(pl_result, "trade_id", monitor_result.get("trade_id")),
+        "instrument": _field_value(
+            pl_result,
+            "instrument",
+            monitor_result.get("instrument"),
+        ),
+        "side": _field_value(pl_result, "side", monitor_result.get("side")),
+        "units": _field_value(pl_result, "units", monitor_result.get("units")),
+        "entry_price": _field_value(
+            pl_result,
+            "entry_price",
+            monitor_result.get("entry_price"),
+        ),
+        "realized_pl": _field_value(
+            pl_result,
+            "realized_pl",
+            monitor_result.get("realized_pl"),
+        ),
+        "unrealized_pl": _field_value(
+            pl_result,
+            "unrealized_pl",
+            monitor_result.get("unrealized_pl"),
+        ),
+        "open_trade_count": monitor_result.get("open_trade_count"),
+        "open_position_count": monitor_result.get("open_position_count"),
+        "monitor_bucket": monitor_result.get("status_bucket"),
+        "result_bucket": pl_result.get("result_bucket"),
+        "repeat_proof_lane_status": pl_result.get("repeat_proof_lane_status"),
+        "repeat_proof_eligible": pl_result.get("repeat_proof_eligible") is True,
+        "profit_evidence": pl_result.get("profit_evidence") is True,
+        "broker_read_mode": pl_result.get("broker_read_mode"),
+        "broker_evidence_status": pl_result.get("broker_evidence_status"),
+        "evidence_timestamp_utc": monitor_result.get("evidence_timestamp_utc"),
+        "evidence_source": (
+            monitor_result.get("evidence_source")
+            or pl_result.get("source")
+            or "owner_run_open_trade_monitor_pl_refresh_helper"
+        ),
+        "broker_network_call_performed": broker_network_call_performed,
+        "broker_read_performed": broker_network_call_performed,
+        "live_endpoint_used": monitor_payload.get("live_endpoint_used") is True,
+        "order_placement_performed": (
+            monitor_payload.get("order_placement_performed") is True
+        ),
+        "order_mutation_performed": (
+            monitor_payload.get("order_mutation_performed") is True
+        ),
+        "order_close_performed": monitor_payload.get("order_close_performed") is True,
+        "position_mutation_performed": (
+            monitor_payload.get("position_mutation_performed") is True
+        ),
+        "trade_mutation_performed": (
+            monitor_payload.get("trade_mutation_performed") is True
+        ),
+        "raw_broker_payload_persisted": False,
+        "secrets_written": monitor_payload.get("secrets_written") is True,
+        "no_new_order_placed": True,
+        "no_live_trade_placed": True,
+        "no_broker_state_modified": True,
+        "no_secrets_written": True,
+    }
+
+
+def _bound_safe_owner_read_helper(
+    helper_name: str,
+    runner: Callable[[], dict[str, Any]],
+) -> dict[str, Any]:
+    return {
+        "safe_owner_read_helper_status": SAFE_OWNER_READ_HELPER_BOUND,
+        "safe_owner_read_helper_name": helper_name,
+        "safe_owner_read_helper_bound": True,
+        "safe_owner_read_helper_blockers": [],
+        "runner": runner,
+    }
+
+
+def _unbound_safe_owner_read_helper(
+    status: str,
+    helper_name: str,
+    blocker: str,
+) -> dict[str, Any]:
+    return {
+        "safe_owner_read_helper_status": status,
+        "safe_owner_read_helper_name": helper_name,
+        "safe_owner_read_helper_bound": False,
+        "safe_owner_read_helper_blockers": [blocker],
+    }
+
+
+def _unbound_helper_output_status(helper_binding: Mapping[str, Any]) -> str:
+    status = helper_binding.get("safe_owner_read_helper_status")
+    if status == SAFE_OWNER_READ_HELPER_IMPORT_FAILED:
+        return OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_IMPORT_FAILED
+    if status == SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE:
+        return OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_NOT_PROVEN_SAFE
+    if status == SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE:
+        return (
+            OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_HELPER_RETURNED_UNSAFE_SHAPE
+        )
+    return OWNER_RUN_SANITIZED_BROKER_READ_OUTPUT_BLOCKED_NO_SAFE_OWNER_READ_HELPER
+
+
+def _unbound_helper_next_action(helper_binding: Mapping[str, Any]) -> str:
+    status = helper_binding.get("safe_owner_read_helper_status")
+    if status == SAFE_OWNER_READ_HELPER_IMPORT_FAILED:
+        return HELPER_IMPORT_NEXT_ACTION
+    if status == SAFE_OWNER_READ_HELPER_NOT_PROVEN_SAFE:
+        return HELPER_NOT_PROVEN_NEXT_ACTION
+    if status == SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE:
+        return HELPER_UNSAFE_SHAPE_NEXT_ACTION
+    return NO_HELPER_NEXT_ACTION
+
+
+def _json_mapping(raw: str) -> dict[str, Any]:
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        return {
+            "helper_capture_status": SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE,
+            "blockers": ["owner_read_helper_json_parse_failed"],
+        }
+    if isinstance(parsed, dict):
+        return parsed
+    return {
+        "helper_capture_status": SAFE_OWNER_READ_HELPER_RETURNED_UNSAFE_SHAPE,
+        "blockers": ["owner_read_helper_json_root_not_object"],
+    }
+
+
+def _field_value(
+    source: Mapping[str, Any],
+    field: str,
+    default: Any = None,
+) -> Any:
+    if field in source and source.get(field) is not None:
+        return source.get(field)
+    return default
 
 
 def _normalized_output(owner_read_result: Mapping[str, Any]) -> dict[str, Any]:
@@ -685,12 +1122,25 @@ def _result(
     unsafe_audit_flags: Sequence[str],
     candidate: Mapping[str, Any],
     owner_run_read_broker_now: bool,
+    helper_binding: Mapping[str, Any] | None,
     next_action: str,
 ) -> dict[str, Any]:
+    binding = helper_binding or {}
     return {
         "packet_name": PACKET_NAME,
         "packet_id": PACKET_ID,
         "output_status": output_status,
+        "safe_owner_read_helper_status": binding.get(
+            "safe_owner_read_helper_status",
+            SAFE_OWNER_READ_HELPER_NOT_BOUND,
+        ),
+        "safe_owner_read_helper_name": binding.get(
+            "safe_owner_read_helper_name",
+            "NONE",
+        ),
+        "safe_owner_read_helper_bound": (
+            binding.get("safe_owner_read_helper_bound") is True
+        ),
         "json_written": json_written,
         "json_path": json_path,
         "sanitized_output_ready": sanitized_output_ready,
