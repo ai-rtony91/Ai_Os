@@ -2,7 +2,7 @@
 
 Status: APPLY documentation scaffold  
 Mode: docs-only  
-Trading mode: paper-only
+Trading mode: default paper/simulation or approved demo-review stage
 
 ## Objective
 
@@ -33,5 +33,5 @@ This stage is documentation only.
 
 It does not create live config, account changes, installed software, secrets, credentials, or trading execution.
 
-Trading Lab remains paper-only.
+Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage.
 

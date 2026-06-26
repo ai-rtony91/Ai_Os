@@ -12,7 +12,7 @@ Stage 15.2 adds repo-level Codex operating instructions through the root `AGENTS
 
 AI_OS needs this layer now because the project is moving into production intelligence, telemetry, workflow orchestration, and multi-worker coordination. Repeating the same safety rules and Big Pack Mode guidance in every prompt creates drift. A repo-level instruction file makes the baseline rules easier to load consistently.
 
-For multi-worker Codex windows, this file helps each worker start from the same operating model. Workers should see the same paper-only trading boundary, protected path rules, validator expectations, telemetry scope, and selective commit discipline.
+For multi-worker Codex windows, this file helps each worker start from the same operating model. Workers should see the same default paper/simulation trading boundary, broker gates, protected path rules, validator expectations, telemetry scope, and selective commit discipline.
 
 This reduces repeated prompting by placing stable instructions in the repository instead of requiring every workload pack to restate all behavior rules. Prompts can still add task-specific allowed paths, blocked paths, and validation commands.
 

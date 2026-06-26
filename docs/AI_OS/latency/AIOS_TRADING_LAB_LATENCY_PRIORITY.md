@@ -8,7 +8,7 @@ State the Trading Lab latency priority inside AI_OS latency optimization.
 Trading Lab latency remains priority #1.
 
 Reason:
-Trusted/proven profitability depends on paper-only signal evidence, latency-aware validation, and reliable operator handoff before any future trading escalation.
+Trusted/proven profitability depends on paper/simulation signal evidence, latency-aware validation, and reliable operator handoff before any future trading escalation.
 
 ## Hard Boundary
 
@@ -16,7 +16,7 @@ Trusted/proven profitability depends on paper-only signal evidence, latency-awar
 - Broker execution remains blocked.
 - OANDA remains blocked.
 - Real orders remain blocked.
-- Paper-only analysis remains the active lane until validation gates prove trust.
+- Paper/simulation analysis remains the active lane until validation gates prove trust and governance approves another stage.
 
 ## Latency Before Features
 

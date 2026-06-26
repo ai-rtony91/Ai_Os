@@ -326,7 +326,7 @@ Out of scope:
 - hidden background services,
 - deployment or publishing automation.
 
-Trading Lab dashboard surfaces must remain paper-only unless a separate governance change approves otherwise.
+Trading Lab dashboard surfaces must display the current approved execution stage and broker-gate status. They must not imply live execution unless a separate governance change approves otherwise.
 
 ## Human Review Items
 

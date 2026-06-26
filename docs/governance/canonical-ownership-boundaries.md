@@ -65,12 +65,12 @@ Generated artifacts may be active evidence, but they are not active authority. A
 |---|---|---|---|
 | `apps/dashboard/` | Dashboard application | KEEP ACTIVE | UI source, package metadata, and wired fixtures |
 | `apps/dashboard/mock-data/` | Dashboard fixtures | NEEDS USER DECISION | Split wired fixtures from stale/mock-only fixtures before cleanup |
-| `apps/trading_lab/` | Trading Lab app | KEEP ACTIVE | Paper-only app package, data, tests, and docs |
+| `apps/trading_lab/` | Trading Lab app | KEEP ACTIVE | Default paper/simulation app package, data, tests, and docs |
 | `aios/modules/trader/` | Paper trader module | NEEDS USER DECISION | Currently tested by `tests/trader/`; canonical long-term role undecided |
 
 App rule:
 
-Dashboard and Trading Lab cleanup must not alter runtime wiring, assets, safety boundaries, paper-only behavior, or package/import paths without validation.
+Dashboard and Trading Lab cleanup must not alter runtime wiring, assets, safety boundaries, default paper/simulation behavior, or package/import paths without validation.
 
 ## Canonical archive/reference owners
 
@@ -104,6 +104,6 @@ Stop before moving or rewriting when:
 - A file is read by `scripts/control/`.
 - A file is read by `services/orchestrator/runtimeApiService.js`.
 - A file is read by `automation/orchestration/workers/`, `work_packets/`, or `approval_inbox/`.
-- A file participates in Trading Lab paper-only safety tests.
+- A file participates in Trading Lab default paper/simulation or broker-gate safety tests.
 - A file is a protected root governance file.
 - A file may contain generated state that is still evidence.

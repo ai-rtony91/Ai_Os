@@ -47,11 +47,11 @@ No AI_OS document, dashboard panel, telemetry record, validator result, packet, 
 
 ## Relationship to Trading Lab
 
-Trading Lab remains paper-only. PR #648 completed the Trading Lab paper boundary review state.
+Trading Lab / Forex is broker-capable only behind governance; current Forex/OANDA surfaces remain paper/sandbox by default. PR #648 completed the Trading Lab paper boundary review state.
 
 That completion only allows a Forex/OANDA documentation-boundary review. It does not authorize live broker integration. It does not authorize OANDA implementation. It does not authorize broker credentials, webhooks, real orders, live account connectivity, runtime launch, worker launch, scheduler launch, queue mutation, or approval mutation.
 
-Trading Lab paper evidence may support future review of Forex paper/sandbox evidence, but it must not become a bridge into live broker execution.
+Trading Lab paper evidence may support future broker-readiness review of Forex paper/sandbox evidence, but it must not become a bridge into live broker execution without governed approval.
 
 ## Relationship to telemetry
 
@@ -72,7 +72,7 @@ Current evidence shows the active Forex surfaces use patterns such as:
 - sandbox-model-only broker shaping with network disabled and credentials not loaded;
 - tests that reject live mode, credential-like metadata, and external network behavior.
 
-Those surfaces are allowed only as local paper/sandbox evidence. They do not create broker authority. They do not create OANDA authority. They do not create live trading readiness.
+Those surfaces are allowed only as local paper/sandbox evidence. They do not create broker authority. They do not create OANDA authority. They do not create live trading authorization.
 
 ## Future path
 

@@ -16,7 +16,7 @@ The Home Portal is the first approved landing page after Cloudflare Access, Micr
 
 ## Trading Lab
 
-Trading Lab remains paper-only.
+Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage.
 
 Secure access does not enable broker login, live orders, OANDA, Webull, or trading execution.
 

@@ -153,7 +153,7 @@ There should be one active workflow document per job. Duplicates from `docs/AI_O
 | `docs/AI_OS/security/` | CLEAN-era security source | MERGE INTO CANONICAL | Promote selected current security docs only |
 | `docs/AI_OS/brokers/` | Broker boundary source | MERGE INTO CANONICAL | Preserve no-live-trading boundaries; do not create live execution path |
 | `docs/AI_OS/execution/` | Execution boundary source | MERGE INTO CANONICAL | Preserve execution safety rules |
-| `docs/AI_OS/trading/` | Trading boundary source | MERGE INTO CANONICAL | Preserve paper-only and no-live-order rules |
+| `docs/AI_OS/trading/` | Trading boundary source | MERGE INTO CANONICAL | Preserve default paper/simulation safety and no-live-order rules; do not confuse default state with platform identity |
 
 Security rule:
 
@@ -165,7 +165,7 @@ No file in `docs/AI_OS/`, `apps/`, `services/`, `automation/`, or `scripts/` may
 |---|---|---|---|
 | `apps/` | User-facing applications | KEEP ACTIVE | Dashboard and Trading Lab app home |
 | `apps/dashboard/` | Dashboard/control-plane app | KEEP ACTIVE | Current dashboard remains fixture-driven until API migration is separately approved |
-| `apps/trading_lab/` | Paper-only Trading Lab app | KEEP ACTIVE | Active vertical; likely long-term Trading Lab package owner; no live broker execution |
+| `apps/trading_lab/` | Trading Lab / Forex app | KEEP ACTIVE | Active vertical; default paper/simulation behavior; no live broker execution unless separately governed |
 | `services/` | Backend/runtime services | KEEP ACTIVE | Runtime, dispatcher, policy, telemetry, validation services; `services/orchestrator/` is future read-only dashboard API owner |
 | `automation/` | Orchestration automation | KEEP ACTIVE | System automation and operator orchestration |
 | `scripts/` | Developer/operator helper scripts | KEEP ACTIVE | Simple commands and wrappers; `scripts/control/` owns runtime reader/control scripts |

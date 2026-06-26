@@ -57,7 +57,7 @@ Trading Lab responsibilities:
 - Strategy builder for organizing ideas and trading rules.
 - Signal engine design for future signal generation and review.
 - Backtesting workflow for evidence-based strategy testing.
-- Mock execution path for simulation only.
+- Mock execution path for simulation-stage review.
 - Reporting for daily summaries, checkpoints, results, and errors.
 - Validation loops for strategy readiness, risk review, and deployment gates.
 - Analytics for performance, risk, and iteration quality.
@@ -87,7 +87,7 @@ Expansion should not bypass safety. New modules should plug into existing worksp
 - A modular tab-based dashboard.
 - A Trading Lab module.
 - A telemetry and validation surface.
-- A mock execution environment.
+- A mock/simulation execution environment.
 - An AI context assistant console.
 - A strategy management and planning system.
 - A reporting and checkpoint system.
@@ -131,8 +131,8 @@ Trading Lab principles:
 - Trading proves whether AI_OS can organize a high-stakes workflow.
 - Measurable outcomes matter more than interface decoration.
 - Telemetry and validation loops must guide decisions.
-- Broker execution remains blocked until validation exists.
-- Mock-first development is required before paper or live execution.
+- General broker execution remains blocked until governance, validation, explicit owner approval, risk controls, and stop controls exist.
+- Mock-first development is required before paper, supervised demo, or broker execution stages.
 - Risk policy must be visible, documented, and enforced.
 
 Trading Lab should demonstrate that AI_OS can handle real project pressure while still keeping human approval authority intact.

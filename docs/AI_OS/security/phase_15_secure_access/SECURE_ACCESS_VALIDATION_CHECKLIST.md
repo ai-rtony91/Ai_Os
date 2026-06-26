@@ -17,7 +17,7 @@ Docs must not contain secret-like assignment strings, private key material, or t
 
 ## Trading Safety Checks
 
-- Trading Lab remains paper-only.
+- Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage unless separately governed.
 - No broker login.
 - No live orders.
 - No OANDA/Webull.

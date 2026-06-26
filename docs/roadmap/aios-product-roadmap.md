@@ -16,7 +16,7 @@ Near-term product focus:
 - compact canonical docs,
 - safe orchestration,
 - dashboard visibility,
-- paper-only Trading Lab,
+- Trading Lab / Forex broker-readiness progression,
 - validation and governance before automation expansion.
 
 ## Dashboard Direction
@@ -38,7 +38,7 @@ Medium-term operator control center direction:
 
 - command-center layout with stable status, work, safety, telemetry, and assistance panels,
 - validator-first display logic,
-- paper-only Trading Lab readiness visibility,
+- Trading Lab / Forex readiness visibility,
 - local telemetry and work-intelligence panels,
 - mobile-readable status stack,
 - restrained theme system with clear PASS/WARN/FAIL/BLOCKED/UNKNOWN states.
@@ -98,7 +98,7 @@ Legacy docs should be archived only after useful doctrine is extracted.
 
 ## Trading Lab Direction
 
-Trading Lab is a paper-only proving ground.
+Trading Lab is a governed proving ground for paper simulation, backtesting, supervised demo review, broker-readiness evidence, and risk-controlled progression.
 
 Allowed direction:
 

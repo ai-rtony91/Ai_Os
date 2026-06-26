@@ -31,5 +31,4 @@ Future benchmarks must measure:
 - Future benchmark configs must not include secrets.
 - Future benchmark targets must be AI_OS-owned fixtures or explicitly authorized local endpoints unless separately approved.
 
-Trusted/proven profitability remains the top priority. Provider benchmarks must support AI_OS trusted/proven profitability by measuring safety, correctness, latency, and cost. They must not distract from paper-only Trading Lab validation or create pressure toward unproven live execution.
-
+Trusted/proven profitability remains the top priority. Provider benchmarks must support AI_OS trusted/proven profitability by measuring safety, correctness, latency, and cost. They must not distract from Trading Lab / Forex evidence validation or create pressure toward unproven live execution.

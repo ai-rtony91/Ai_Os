@@ -55,7 +55,7 @@ Principles:
 - show corrupted or conflicting data as `INVALID DATA`,
 - show stale data explicitly,
 - keep protected-file and blocked-action warnings near the top,
-- keep Trading Lab language paper-only,
+- keep Trading Lab language aligned to the current approved execution stage and broker gates,
 - keep controls read-only until a separate approved APPLY pass creates executable behavior,
 - prefer compact, repeatable panels over decorative dashboard clutter.
 
@@ -235,7 +235,7 @@ Preserved mobile/accessibility ideas:
 
 - Decide whether dashboard docs should become implementation specs or product concepts.
 - Confirm which dashboard data sources are allowed.
-- Ensure any Trading Lab panel says paper-only.
+- Ensure any Trading Lab panel displays the current approved execution stage and broker gate status.
 - Confirm app docs in `apps/dashboard` remain separate from legacy planning docs.
 - Decide whether to create a compact dashboard data-contract spec before archiving `docs/AI_OS/dashboard`.
 - Decide whether AI assistant and command-center action concepts remain mock-only or become future approved workflows.

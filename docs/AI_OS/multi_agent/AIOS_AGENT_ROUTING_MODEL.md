@@ -45,7 +45,7 @@ Review tasks may route to Claude later.
 
 Safety tasks route to the risk gate and validators.
 
-Trading Lab tasks route through paper-only checks.
+Trading Lab tasks route through default paper/simulation checks and broker-gate checks.
 
 ## Blocked Routes
 

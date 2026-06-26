@@ -28,5 +28,5 @@ This documentation does not enable configuration changes, installs, live Cloudfl
 
 ## Trading Lab Boundary
 
-Even after admin re-check, Trading Lab remains paper-only until a separate future approval explicitly changes trading mode.
+Even after admin re-check, Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage until a separate future approval explicitly changes trading mode.
 

@@ -40,7 +40,7 @@ Skills must not bypass:
 - approval gates
 - validator chains
 - protected action gates
-- Trading Lab paper-only safety
+- Trading Lab default paper/simulation safety
 - Night Supervisor runtime boundaries
 - clean-state verification
 

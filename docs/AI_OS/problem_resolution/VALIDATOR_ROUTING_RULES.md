@@ -7,7 +7,7 @@ Validator routes:
 - UI-only: dashboard boundary check, readability check, mobile layout check.
 - Logic-only: state consistency check, no hidden execution check.
 - Mock-data-only: JSON parse check and fixture-only check.
-- Trading-Lab-only: Trading Lab DRY_RUN validator and paper-only boundary check.
+- Trading-Lab-only: Trading Lab DRY_RUN validator, default paper/simulation boundary check, and broker-gate check.
 - Connector/API-only: connector boundary check, API boundary check, secrets check.
 - Mixed scope: change collision check.
 - Orchestrator changes: orchestrator readiness check.

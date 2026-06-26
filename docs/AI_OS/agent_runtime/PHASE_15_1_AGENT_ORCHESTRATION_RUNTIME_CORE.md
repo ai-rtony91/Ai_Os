@@ -94,7 +94,7 @@ This phase creates agent runtime docs, schema, queue, status, gap log, ownership
 
 Future phases may add a local paper bot runner, local chart panel, TradingView external handoff buttons, TradersPost external handoff buttons, stronger validator chains, and a dashboard runtime status panel.
 
-Those future phases must stay paper-only unless a separate reviewed and approved safety phase changes the boundary.
+Those future phases must stay in paper/simulation or approved demo-review stages unless a separate reviewed and approved safety phase changes the boundary.
 
 ## Next Safe Action
 

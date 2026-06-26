@@ -1,10 +1,10 @@
 # Trading Lab Change Boundary
 
-Trading Lab is the paper-only research and validation area for trading-related work.
+Trading Lab / Forex is the governed research, validation, paper simulation, demo-review, and broker-readiness area for trading-related work.
 
 Allowed by default in approved scopes:
 
-- paper-only docs
+- paper/simulation docs
 - mock signals
 - mock risk records
 - mock scorecards
