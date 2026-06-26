@@ -6,6 +6,8 @@ AI_OS is a governed automation platform for helping humans build and manage proj
 
 This whitepaper defines the long-term architectural vision. It is not a claim that AI_OS is conscious, sentient, AGI, or independently autonomous. AI_OS is a controlled system for AI-assisted systems engineering.
 
+For Trading Lab / Forex, AI_OS is a governed, human-controlled, broker-capable trading system and execution platform framework. AI_OS is the platform. Backtesting, paper simulation, supervised demo, and governed broker execution are execution stages inside the platform, not the full identity of AI_OS.
+
 ## Core Idea
 
 AI_OS exists to turn intent into safe project work.
@@ -146,7 +148,7 @@ This gives AI_OS a path to become more stable without pretending to be self-awar
 
 AI_OS may eventually help build and manage:
 
-- trading bots and paper-trading research systems
+- governed trading systems, backtesting, paper simulation, supervised demo review, and broker-readiness evidence
 - orchestration systems
 - dashboards
 - automation systems
@@ -160,16 +162,21 @@ Every use case follows the same rule: authority first, scope second, validation 
 
 ## Trading Lab Example
 
-Trading Lab is the first production vertical.
+Trading Lab / Forex is the first production vertical.
 
-AI_OS may help humans build a paper-first trading environment by:
+AI_OS may help humans build a governed trading system and execution platform framework through staged capabilities:
 
 - separating research from execution
 - validating signal and risk workflows
 - tracking paper results and latency
 - preserving broker boundaries
+- producing broker-readiness evidence
+- supporting owner approval workflows and dashboard truth
+- designing governed broker execution pathways without default activation
 - producing operator-readable evidence
 - keeping general live execution blocked unless a reviewed, explicit, governed exception applies
+
+Blocked by default does not mean non-broker-capable. Paper simulation is a stage, not the system identity. Broker execution requires governed approval and safety controls.
 
 General live trading remains blocked. Broker credentials, account identifiers, real orders, webhooks, schedulers, daemons, and uncontrolled automation remain blocked. A single governed live micro-trade exception may exist only through `AIOS_FOREX_FINAL_LIVE_OPERATOR_BRIDGE_V1`, with explicit human approval, runtime-only credentials, one-order-only enforcement, micro-size enforcement, stop loss, take profit, max loss gate, daily stop gate, kill-switch state validation, sanitized evidence, and no credential or account persistence. LLMs must not be placed directly in live order execution paths.
 
@@ -200,9 +207,10 @@ AI_OS is not:
 - magical intelligence
 - unchecked autonomy
 - a replacement for human judgment
-- a live trading system
-- a broker execution platform
-- a secret manager
+- an uncontrolled live trading bot
+- a permission-free broker execution bypass
+- a credential store or secret manager
+- a direct LLM live-order controller
 - a tool for bypassing validation or approval
 
 AI_OS should not claim capabilities it cannot safely prove.

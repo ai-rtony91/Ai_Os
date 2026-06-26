@@ -4,9 +4,11 @@ AI_OS is a governed AI-assisted operating environment for building, managing, an
 
 It is not an autonomous replacement for human judgment. It is a structured project operating system: humans set direction, AI workers perform bounded work, governance defines safe behavior, and validation proves what changed.
 
+For Trading Lab / Forex, AI_OS is a governed, human-controlled, broker-capable trading system and execution platform framework. AI_OS is the platform. Backtesting, paper simulation, supervised demo, and governed broker execution are execution stages inside the platform, not the full identity of AI_OS.
+
 AI_OS aims for industrial-standard, professional-grade repo hygiene and automation discipline: scoped changes, traceable evidence, validation before claims, and clear safety boundaries by default.
 
-Trading Lab is the first production vertical. General live trading remains blocked. Broker credentials, account identifiers, real orders, webhooks, schedulers, daemons, and uncontrolled automation remain blocked. A single governed live micro-trade exception may exist only through `AIOS_FOREX_FINAL_LIVE_OPERATOR_BRIDGE_V1` with explicit human approval, runtime-only credentials, one-order-only enforcement, micro-size enforcement, stop loss, take profit, max loss gate, daily stop gate, kill-switch state validation, sanitized evidence, and no credential or account persistence.
+Trading Lab / Forex is the first production vertical. AI_OS may support paper simulation, backtesting, signal validation, risk controls, supervised demo review, broker-readiness evidence, owner approval workflows, dashboard truth, and governed broker execution pathways. General live trading remains blocked. Broker credentials, account identifiers, real orders, webhooks, schedulers, daemons, and uncontrolled automation remain blocked. A single governed live micro-trade exception may exist only through `AIOS_FOREX_FINAL_LIVE_OPERATOR_BRIDGE_V1` with explicit human approval, runtime-only credentials, one-order-only enforcement, micro-size enforcement, stop loss, take profit, max loss gate, daily stop gate, kill-switch state validation, sanitized evidence, and no credential or account persistence.
 
 ## Current Status
 
@@ -17,7 +19,7 @@ Trading Lab is the first production vertical. General live trading remains block
   - `C:\Dev\Ai_Os_OLD_DO_NOT_USE`
   - `C:\Dev\Ai.Os_OLD_DO_NOT_USE`
   - `C:\Users\mylab\OneDrive\GitHub\AI_OS_V2_OLD_DO_NOT_USE`
-- Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, paper-first Trading Lab, and governed live-exception bridge evidence
+- Current focus: front-door documentation, source-of-truth clarity, worker orchestration, telemetry, safe workflows, Trading Lab / Forex stage work, governed broker-readiness evidence, and dashboard truth
 - Operating model: Phase -> Stage -> Workload Pack -> Task ID -> DRY_RUN/APPLY -> validation -> selective commit
 - Commit/push rule: never commit or push unless explicitly approved
 
@@ -135,10 +137,10 @@ The system is designed to make complex work easier to control, not to remove hum
 AI_OS is not:
 
 - AGI, sentience, consciousness, or magical autonomy
-- a live trading engine
-- a broker execution layer
-- a secret manager
-- a permission bypass
+- an uncontrolled live trading bot
+- a permission-free broker execution bypass
+- a credential store or secret manager
+- a direct LLM live-order controller
 - a reason to skip validation
 - a place for duplicate source-of-truth documents
 
@@ -239,7 +241,7 @@ Use a branch for a meaningful work batch. Finish, validate, report, and close th
 
 ## Trading Lab Boundary
 
-Trading Lab is the first production vertical. General live trading remains blocked by default.
+Trading Lab / Forex is the first production vertical. AI_OS is the platform; backtesting, paper simulation, supervised demo, and governed broker execution are execution stages inside it. General live trading remains blocked by default.
 
 Allowed when explicitly scoped:
 
@@ -248,6 +250,11 @@ Allowed when explicitly scoped:
 - latency tracking
 - signal validation
 - paper route previews
+- supervised demo review
+- broker-readiness evidence
+- owner approval workflows
+- dashboard truth
+- governed broker execution pathway design and evidence, without activating broker execution
 - local-only telemetry
 
 Single governed live exception:
