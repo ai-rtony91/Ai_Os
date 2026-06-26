@@ -57,6 +57,35 @@ If a template, workflow, report, telemetry item, generated output, or example co
 
 Changes to packet law, authority hierarchy, validation requirements, prompt routing, execution token requirements, identity requirements, or AI assistant conduct belong in `AGENTS.md` or an explicitly delegated authority file. Templates must not create new governance law.
 
+## AIOS Development Hierarchy And Governance Doctrine Rule
+
+`AGENTS.md` remains the top repository authority for AIOS packet governance, assistant conduct, protected-action gates, and authority delegation.
+
+AIOS uses this governed development hierarchy:
+
+```text
+Mission -> Program -> Epic -> Bucket -> Packet -> Apply -> Validation -> Report -> Pull Request -> Merge -> Main
+```
+
+Every future governed AIOS packet must declare this identity chain:
+
+- Mission ID.
+- Mission Name.
+- Program ID.
+- Program Name.
+- Epic ID.
+- Epic Name.
+- Bucket ID.
+- Bucket Name.
+- Packet ID.
+- Packet Name.
+
+`AGENTS.md` delegates detailed hierarchy and identity doctrine to `docs/governance/AIOS-DEVELOPMENT-HIERARCHY-AND-GOVERNANCE-DOCTRINE-V1.md`.
+
+That delegated doctrine governs hierarchy and identity only. It cannot override `AGENTS.md`, `RISK_POLICY.md`, security policy, protected paths, owner approval gates, or fail-closed rules.
+
+The normal repository path is One Packet -> One PR. Exceptions are allowed only for owner-approved tiny docs-only or maintenance bundles when repo policy permits, and those exceptions must not weaken risk, security, protected-path, validation, evidence, commit, push, PR, merge, or approval gates.
+
 ## ChatGPT Generated Packet Validation Gate
 
 Authority status: this section is authoritative. If any future governance document conflicts with this section, this section wins.
