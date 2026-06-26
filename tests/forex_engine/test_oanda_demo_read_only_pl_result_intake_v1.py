@@ -75,7 +75,7 @@ def test_missing_reconciliation_blocked():
 
 
 def test_wrong_broker_blocked():
-    data = _json(_sample(broker="OTHER_DEMO"))
+    data = _json(_sample(**{"broker": "OTHER_DEMO"}))
     assert data["classification"] == "OANDA_DEMO_PL_RESULT_INTAKE_BLOCKED_UNSAFE"
     assert "broker_must_be_oanda_demo" in data["blockers"]
 
