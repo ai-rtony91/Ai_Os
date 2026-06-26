@@ -16,7 +16,7 @@ Home Portal is the first page after successful Cloudflare Access, Microsoft Entr
 
 ## Trading Lab
 
-Trading Lab remains paper-only.
+Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage.
 
 No broker login, live orders, OANDA, Webull, or trading execution is enabled by secure access.
 

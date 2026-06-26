@@ -24,4 +24,4 @@ Task Intake -> Crew Roles -> Work Packet Queue -> Worker Assignment -> File Lock
 
 Crew Core may inspect, normalize, preview, and recommend. It must not approve APPLY, mutate files, stage files, commit, push, connect brokers, handle API keys, create real webhooks, or place real orders.
 
-Trading Lab Builder is paper-only until a future Human Owner packet changes that boundary.
+Trading Lab Builder defaults to paper/simulation work until a future Human Owner packet changes that boundary.

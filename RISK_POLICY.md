@@ -44,7 +44,7 @@ The following are blocked unless a future explicit, reviewed policy changes the 
 
 ## Single Live Micro-Trade Exception
 
-AI_OS remains paper-only by default. Live trading remains blocked unless the Single Live Micro-Trade Exception is active under this section and every required gate is satisfied.
+AI_OS is broker-capable by architecture, but paper simulation, backtesting, and supervised demo operation remain the default execution state. Live broker execution remains blocked unless the Single Live Micro-Trade Exception is active under this section and every required gate is satisfied.
 
 This exception is a one-shot authority carveout for one explicitly approved live micro-trade only. It does not enable general live trading, broker execution, live routing, credential handling, dashboard trading controls, autonomous trading, or future trades.
 
@@ -86,7 +86,7 @@ Credentials, tokens, account identifiers, broker order IDs, live payloads, secre
 
 ## Trading Lab Boundary
 
-Trading Lab is paper-only.
+Trading Lab / Forex is broker-capable by architecture only behind governance. Paper simulation, backtesting, and supervised demo review remain the default execution state unless a separately approved governed exception satisfies this policy.
 
 Allowed when explicitly scoped:
 
@@ -198,7 +198,7 @@ Audit evidence must not contain secrets, broker credentials, private data, or li
 These documents support this root policy with implementation detail:
 
 - `AGENTS.md` - agent operating behavior and protected-action rules.
-- `README.md` - AI_OS front-door context, project boundary, and paper-only Trading Lab statement.
+- `README.md` - AI_OS front-door context, project boundary, and Trading Lab / Forex default-execution-state statement.
 - `docs/security/approval-model.md` - approval workflow details.
 - `docs/security/threat-model.md` - threat categories and required security controls.
 - `docs/security/secret-prevention.md` - secret-handling procedures.

@@ -31,9 +31,9 @@ Chat should not guess the next task when Campaign Registry exists. It should ask
 
 ## Current Trading Boundary
 
-Trading Lab is paper-only.
+Trading Lab / Forex is broker-capable by architecture. Paper simulation, backtesting, and supervised demo review remain the current default execution state.
 
-Forex, OANDA, broker paths, live orders, API keys, secrets, and credentials remain blocked unless the Human Owner changes policy through governance.
+OANDA, broker API calls, live orders, API keys, secrets, and credentials remain blocked unless the Human Owner changes policy through governance. Forex work may progress only through governed documentation, evidence, risk, demo-review, and broker-readiness stages.
 
 ## External Assistant Correction
 
@@ -60,5 +60,5 @@ It must re-check current repo context first:
 Claude should phrase current state as:
 
 ```text
-AI_OS is the current system on repo ai-rtony91/Ai_Os, branch main. V2 is historical/migration context only. Campaign Registry is the current next-task source, and Crew Core now reads Campaign Registry output. Trading Lab remains paper-only, and Forex/OANDA/live-order/API-key paths remain blocked unless Human Owner governance changes the boundary.
+AI_OS is the current system on repo ai-rtony91/Ai_Os, branch main. V2 is historical/migration context only. Campaign Registry is the current next-task source, and Crew Core now reads Campaign Registry output. Trading Lab / Forex is broker-capable by architecture with paper simulation and supervised demo review as the current default execution state; OANDA/live-order/API-key paths remain blocked unless Human Owner governance changes the boundary.
 ```

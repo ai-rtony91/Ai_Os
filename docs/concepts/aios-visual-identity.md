@@ -102,7 +102,7 @@ Visual identity work must not:
 - imply unapproved APPLY behavior,
 - make mock data look like trusted runtime truth.
 
-Trading Lab panels must remain paper-only unless a separate approved governance change explicitly says otherwise.
+Trading Lab panels must present the current approved execution stage honestly: paper/simulation when applicable, broker-readiness or governed demo stages only when separately approved, and no live execution claims without governance.
 
 ## Archive Rule
 

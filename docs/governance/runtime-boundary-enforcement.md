@@ -88,7 +88,7 @@ Stop and classify `BLOCKED` when:
 - A hardcoded path is found in runtime, orchestration, dashboard, or Trading Lab code.
 - A generated file is used by a validator, dashboard fixture, or API adapter.
 - A duplicate doc is cited as the source for an active canonical doc.
-- A Trading Lab file participates in paper-only safety checks.
+- A Trading Lab file participates in default paper/simulation or broker-gate safety checks.
 - A file may be proof, telemetry, or audit evidence and no retention policy exists.
 
 ## Approved Phase 3 outcome

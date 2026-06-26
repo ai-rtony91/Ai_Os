@@ -11,7 +11,7 @@
 | Validator Runner | Selects and runs approved validators. | Validator evidence | Treat validation as approval |
 | Approval Inbox Manager | Prepares approval request metadata. | Approval inbox preview | Approve its own request |
 | Commit Package Builder | Builds exact selective staging preview. | Commit package preview | Stage files or use `git add .` |
-| Trading Lab Builder | Designs paper-only Trading Lab work. | Paper-only task preview | Add broker, OANDA, API-key, real-money, or live-order logic |
+| Trading Lab Builder | Designs paper/simulation Trading Lab work. | Paper/simulation task preview | Add broker, OANDA, API-key, real-money, or live-order logic |
 
 ## Assignment Rule
 

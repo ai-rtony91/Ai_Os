@@ -210,7 +210,7 @@ Future-assessment checklist:
 - Problem discovered: Forex Paper Lab had report-only planning fragments but no canonical paper bot build contract.
 - Fix applied: Added `docs/AI_OS/trading_laboratory/AI_OS_FOREX_PAPER_BOT_CONTRACT.md` as a docs-only contract before runner/runtime work.
 - Expected outcome: Future Forex work starts from fixture price input, paper signal intake, validation, risk gate, paper ledger, report output, Pi5 display, and validator boundaries.
-- Regression checks: Future Forex work must remain paper-only unless separately approved.
+- Regression checks: Future Forex work must preserve paper/simulation and demo gates unless separately approved; broker-capable progression must stay governed.
 - Reopen conditions: Reopen if broker/OANDA/live market/real order/webhook paths appear in a paper lane.
 
 #### Industrial-Standard / Professional-Grade Quality Bar

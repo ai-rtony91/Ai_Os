@@ -63,7 +63,7 @@ The human operator is the final approval authority.
 
 ## Trading Lab Boundary
 
-Trading Lab remains paper-only.
+Trading Lab / Forex defaults to paper simulation and supervised demo review unless separately governed and approved.
 
 Future multi-agent routing may help review paper signals, paper route previews, risk gates, scorecards, and validation reports. It must not enable broker execution, real account connection, OANDA, real webhooks, real orders, or live trading.
 

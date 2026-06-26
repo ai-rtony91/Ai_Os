@@ -2,14 +2,14 @@
 
 Status: governed repo-side readiness packet.
 
-This packet supports Forex Delivery readiness without granting live execution authority. It connects the existing paper-only Trading Lab and broker-sandbox evidence to the future Single Live Micro-Trade Exception review path.
+This packet supports Forex Delivery readiness without granting live execution authority. It connects the existing Trading Lab / Forex paper, demo-review, and broker-sandbox evidence to the future Single Live Micro-Trade Exception review path.
 
 ## Authority Constraints
 
 - `AGENTS.md` is the highest local Codex conduct and packet governance authority.
-- `README.md` states Trading Lab is paper-only and blocks live broker execution, real orders, broker credentials, and uncontrolled automation.
+- `README.md` states Trading Lab / Forex is staged inside broker-capable AI_OS architecture and blocks live broker execution, real orders, broker credentials, and uncontrolled automation unless governed approval exists.
 - `RISK_POLICY.md` blocks live trading, broker execution, OANDA or live order execution, real webhook execution, real orders, and broker credentials unless the Single Live Micro-Trade Exception is active.
-- `docs/governance/AI_OS_REPO_MEMORY.md` records Forex Paper Bot work as paper-only unless separately approved.
+- `docs/governance/AI_OS_REPO_MEMORY.md` records Forex Paper Bot work as paper/simulation gated unless separately approved.
 
 ## Existing Repo Components Used As Evidence
 

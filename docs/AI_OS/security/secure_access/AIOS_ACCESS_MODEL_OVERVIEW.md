@@ -22,9 +22,9 @@ Cloudflare Access is the front door that blocks unauthenticated visitors before 
 
 ## Trading Safety
 
-Secure access protects the app. It does not change trading mode.
+Secure access protects the app. It does not change trading mode or grant broker authority.
 
-Trading Lab remains paper-only:
+Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage unless separate governed approval changes it:
 
 - no broker login
 - no live orders

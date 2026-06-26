@@ -30,5 +30,4 @@ The Pi car voice agent may speak, listen, summarize, and propose actions in a fu
 
 ## Trading Boundary
 
-Trading Lab remains paper-only until validation gates prove trust. Broker execution, OANDA, live trading, and real orders remain blocked.
-
+Trading Lab / Forex defaults to paper simulation and supervised demo review until validation gates prove trust and governance approves the next stage. Broker execution, OANDA, live trading, and real orders remain blocked.

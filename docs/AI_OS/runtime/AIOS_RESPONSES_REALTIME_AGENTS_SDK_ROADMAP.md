@@ -31,5 +31,4 @@ AI_OS has local Phase 16, Phase 17, and Phase 18 scaffolds for bridge planning, 
 
 ## North Star
 
-Trusted, proven profitability remains the North Star. Runtime expansion must support evidence quality, validator trust, operator workload reduction, and safe paper-only Trading Lab progress.
-
+Trusted, proven profitability remains the North Star. Runtime expansion must support evidence quality, validator trust, operator workload reduction, and safe Trading Lab / Forex evidence and broker-readiness progress.

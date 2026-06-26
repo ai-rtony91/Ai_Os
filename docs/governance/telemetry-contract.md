@@ -266,11 +266,11 @@ Dashboard telemetry views must:
 
 ## TRADING LAB RELATIONSHIP
 
-Trading Lab remains paper-only.
+Trading Lab / Forex uses paper/simulation and evidence stages by default.
 
-The Trading Lab paper boundary stays blocked until the telemetry/reporting evidence boundary is reviewed. Telemetry may later support paper evidence, latency evidence, validator evidence, and replayable audit trails, but it must not route live trading, broker, webhook, OANDA, real order, account, credential, or live execution data.
+The Trading Lab telemetry boundary stays blocked from execution until the telemetry/reporting evidence boundary is reviewed. Telemetry may later support paper evidence, demo-review evidence, latency evidence, validator evidence, broker-readiness evidence, and replayable audit trails, but it must not route live trading, broker, webhook, OANDA, real order, account, credential, or live execution data.
 
-No telemetry event, dashboard view, report, replay output, or validator result may unlock live broker execution. Any future Trading Lab telemetry work must preserve the paper-only boundary and must keep live broker, OANDA, webhook, real order, credential, and secret paths blocked.
+No telemetry event, dashboard view, report, replay output, or validator result may unlock live broker execution. Any future Trading Lab telemetry work must preserve default execution blocks and keep live broker, OANDA, webhook, real order, credential, and secret paths blocked unless separately governed and approved.
 
 ## RISK CONTROLS
 

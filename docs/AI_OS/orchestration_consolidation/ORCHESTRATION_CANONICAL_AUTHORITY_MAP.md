@@ -73,7 +73,7 @@ goal intake
 - Skills authority: reviewed developer-level bundles only.
 - Computer-use authority: future isolated human-in-loop capability only.
 - Pi car voice authority: listen, speak, explain, and propose actions only.
-- Trading Lab authority: paper-only until trust gates pass.
+- Trading Lab authority: default paper/simulation or approved demo-review stages until trust gates and governance approve another stage.
 
 ### Non-Canonical Files Remain Untouched
 

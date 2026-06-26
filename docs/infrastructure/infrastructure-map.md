@@ -21,7 +21,7 @@ This map covers infrastructure and operating surfaces visible in the repository 
 | GitHub checks | `.github/workflows/ci.yml` | Basic CI validation on pull requests and pushes to `main` | This is CI, not deployment tooling. |
 | Dependency update config | `.github/dependabot.yml` | Weekly dependency update config for GitHub Actions, npm, and pip | Operational status in GitHub settings is UNKNOWN. |
 | Dashboard app | `apps/dashboard/` | Browser-based dashboard surface | React/Vite project observed. `apps/dashboard/assets/` is protected by local rules. |
-| Trading Lab app | `apps/trading_lab/` | Paper-only Trading Lab application code and tests | Live broker execution remains blocked by policy. |
+| Trading Lab app | `apps/trading_lab/` | Trading Lab / Forex application code and tests | Default paper/simulation behavior; live broker execution remains blocked by policy unless separately governed. |
 | Core Python modules | `aios/` | AI_OS Python modules, including trader-related paper components | Exact production boundary is UNKNOWN. |
 | Agent runtime | `agent/` | Local execution agent/runtime area | Detailed runtime activation path is UNKNOWN. |
 | Services | `services/` | Approvals, dispatcher, orchestrator, policy, runtime, telemetry, validation | Service deployment target is UNKNOWN. |
@@ -52,7 +52,7 @@ This map covers infrastructure and operating surfaces visible in the repository 
 - Human decision before commit, push, merge, delete, move, rename, credential changes, or trading execution changes.
 - Manual selection of the current phase, stage, workload pack, task ID, mode, validator chain, and stop point.
 - Manual review of generated reports before they are treated as evidence.
-- Manual confirmation that Trading Lab remains paper-only.
+- Manual confirmation that Trading Lab / Forex stage labels match the approved default-execution or broker-readiness state.
 - Manual GitHub settings verification for branch protection, secret scanning, and required checks.
 
 ## Future IaC Candidates

@@ -563,9 +563,13 @@ If a tool only sees `ai-rtony91/Ai_Os`, that is correct. It must switch/check br
 
 The old `v2/aios` branch is legacy/reference unless the operator explicitly instructs otherwise.
 
-Trading Lab is the first production vertical. The current active direction is paper-only Trading Lab, telemetry, workflow orchestration, and safe automation.
+Trading Lab / Forex is the first production vertical. AI_OS is a governed, human-controlled, broker-capable trading system and execution platform framework; paper simulation, backtesting, supervised demo review, broker-readiness evidence, owner approval workflows, dashboard truth, risk controls, and governed broker execution are stages or capabilities inside the platform, not the platform identity itself.
 
 Live broker execution is blocked by default. `RISK_POLICY.md` is the canonical safety and execution authority for any future Single Live Micro-Trade Exception; in the absence of an active Human Owner-approved exception under that policy, live trading, broker execution, live routing, real orders, and credential handling remain blocked.
+
+## AIOS Documentation Identity Alignment Rule
+
+All AIOS documentation must remain consistent with the canonical AIOS architecture. AIOS is a governed, human-controlled, broker-capable trading system and execution platform framework. Backtesting, paper simulation, supervised demo, broker-readiness evidence, owner approval workflows, dashboard truth, risk controls, and governed broker execution are stages or capabilities inside the platform, not the platform identity itself. Documentation must preserve owner approval, risk controls, broker gates, kill-switch requirements, audit evidence, credential restrictions, and live-execution restrictions.
 
 ## 2. Core Workflow
 

@@ -21,7 +21,7 @@ Primary control: the bridge may draft, classify, and summarize. It must not exec
 | OAI-BRIDGE-006 | Bridge creates duplicate authority. | MEDIUM | Run duplicate-intent search before new docs or folders; link to existing source docs. | MITIGATED |
 | OAI-BRIDGE-007 | Bridge launches workers or starts background automation. | HIGH | Planning layer only; worker launch blocked until separate governance. | BLOCKED |
 | OAI-BRIDGE-008 | Bridge writes approval records or changes packet state. | HIGH | Approval summaries only; approval inbox mutation blocked. | BLOCKED |
-| OAI-BRIDGE-009 | Bridge enables broker, OANDA, live trading, webhooks, or real orders. | CRITICAL | Mark any such scope `BLOCKED`; Trading Lab remains paper-only. | BLOCKED |
+| OAI-BRIDGE-009 | Bridge enables broker, OANDA, live trading, webhooks, or real orders. | CRITICAL | Mark any such scope `BLOCKED`; Trading Lab / Forex stays in default paper/simulation or approved demo-review stages unless separately governed. | BLOCKED |
 | OAI-BRIDGE-010 | Validator success is interpreted as execution permission. | HIGH | Validators are evidence only; protected actions require explicit human approval. | BLOCKED from auto-execution |
 | OAI-BRIDGE-011 | Generated packet has incomplete identity or stop fields. | MEDIUM | Packet must include identity marker, supervisor, worker, zone, lane, paths, approval authority, validator chain, and stop point. | REVIEW_REQUIRED |
 | OAI-BRIDGE-012 | Future APPLY expands into runtime or schema paths without approval. | MEDIUM | First APPLY stays inside approved docs/fixtures path; expanded schema path requires explicit scope expansion. | REVIEW_REQUIRED |

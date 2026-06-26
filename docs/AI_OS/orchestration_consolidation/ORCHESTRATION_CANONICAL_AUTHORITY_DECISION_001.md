@@ -46,13 +46,12 @@ goal intake
 | Skills authority | Skills are reviewed developer-level bundles only. | Unreviewed Skill execution remains blocked. |
 | Computer-use authority | Computer-use is future isolated human-in-loop capability only. | No unsafe click, submit, delete, trading, broker, Pi, or irreversible action without approval. |
 | Pi car voice authority | Pi car voice can listen, speak, explain, and propose actions. | It cannot move motors, GPIO, wheels, servos, camera, or hardware without future gates. |
-| Trading Lab authority | Trading Lab remains paper-only. | Broker/OANDA/live trading stays blocked until trust gates prove safety. |
+| Trading Lab authority | Trading Lab / Forex defaults to paper/simulation or approved demo-review stages. | Broker/OANDA/live trading stays blocked until trust gates prove safety and governance approves another stage. |
 
 ## Safety Rules
 
 - No file is deleted or moved until references are mapped, replacement authority is named, a validator confirms no active runtime dependency, and the Human Owner approves APPLY.
 - Non-canonical files remain untouched until later APPLY packets explicitly mark, update, move, archive, or delete them.
 - Night Supervisor remains preview/report-only until controlled-run gates pass.
-- Trading Lab remains paper-only until trust gates pass.
+- Trading Lab / Forex remains in default paper/simulation or approved demo-review stages until trust gates pass and governance approves another stage.
 - OpenAI CLI may draft packets but cannot execute, mutate repo, start runtime, or bypass dispatcher, validators, and human approval.
-

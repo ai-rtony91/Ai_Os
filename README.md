@@ -193,7 +193,7 @@ Every work session should end with:
 | `automation/` | Orchestration scripts, worker routing, approval gates, validators |
 | `services/` | Runtime, dispatcher, policy, telemetry, and orchestrator services |
 | `scripts/` | Developer and operator helper commands |
-| `apps/` | User-facing apps, including dashboard and paper-only Trading Lab |
+| `apps/` | User-facing apps, including dashboard and Trading Lab / Forex surfaces |
 | `telemetry/` | Runtime state, work ledgers, visibility data, and generated evidence |
 | `archive/` | Historical/reference-only material, not active authority |
 

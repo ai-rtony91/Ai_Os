@@ -46,7 +46,7 @@ Priority processing cannot override:
 
 - human approval
 - validator gates
-- Trading Lab paper-only safety
+- Trading Lab default paper/simulation safety
 - broker/OANDA/live trading blocks
 - Pi GPIO/motor blocks
 - Night Supervisor runtime boundaries

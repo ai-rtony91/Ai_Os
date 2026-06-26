@@ -26,13 +26,13 @@ This is not autonomous trading. It is not live execution. It is not a broker con
 
 ## Why It Exists
 
-AI_OS already has Trading Lab paper-only work, dashboard mock data, validators, reports, and product planning. This runtime gives those pieces a safer routing layer so larger builds can happen without losing the one-button-one-task discipline.
+AI_OS already has Trading Lab paper/simulation work, dashboard mock data, validators, reports, broker-readiness planning, and product planning. This runtime gives those pieces a safer routing layer so larger builds can happen without losing the one-button-one-task discipline.
 
 One-button-one-task means one approved work packet runs at a time, with clear allowed paths, blocked paths, expected output, and validation before the next step.
 
 ## Future Support
 
-This runtime can support future paper-only Trading Lab work, chart panels, TradingView handoff planning, TradersPost handoff planning, validators, summaries, and business setup checklists. Those future steps still require user approval before APPLY, commit, push, install, login, or any risky action.
+This runtime can support future paper/simulation Trading Lab work, chart panels, TradingView handoff planning, TradersPost handoff planning, validators, summaries, broker-readiness review, and business setup checklists. Those future steps still require user approval before APPLY, commit, push, install, login, or any risky action.
 
 ## Current Status
 

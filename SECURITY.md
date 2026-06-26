@@ -4,7 +4,7 @@
 
 AI_OS is safety-scaffolded for local development, validation, orchestration, and reviewed automation.
 
-AI_OS must not be used for live broker execution, unattended trading, credential handling, or production deployment without explicit reviewed approval.
+Unauthorized, uncontrolled, unattended, or permission-free live broker execution is blocked. Governed broker-capable architecture may exist only behind explicit reviewed approval, safety gates, runtime-only credential handling, sanitized evidence, and operator control. Credential handling and production deployment require explicit reviewed approval and must follow `RISK_POLICY.md`.
 
 ## Vulnerability Reporting
 

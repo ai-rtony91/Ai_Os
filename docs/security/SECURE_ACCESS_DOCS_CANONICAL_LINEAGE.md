@@ -17,9 +17,9 @@ No secure access folder is archive-ready in this pass.
 
 ## Preserved Boundary
 
-Secure access protects AI_OS access. It does not change trading mode.
+Secure access protects AI_OS access. It does not grant trading mode changes or broker authority.
 
-Trading Lab remains paper-only:
+Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage unless a separate governed approval changes it:
 
 - no broker login.
 - no live orders.

@@ -6,7 +6,7 @@ AI_OS red teaming tests whether AI_OS agents, prompts, tools, schemas, dispatch 
 
 Red teaming is required before autonomy because AI_OS is moving toward OpenAI runtime integration, dispatcher routing, Night Supervisor preview, future tool search, future computer use, future Realtime Pi car voice, future Skills, and future model/provider benchmarking. These systems must prove they can block bypass attempts before they become executable.
 
-Trusted/proven profitability remains the top priority. Red-team work must protect profitability by preventing unsafe automation, not distract from paper-only Trading Lab validation or promote unproven live execution.
+Trusted/proven profitability remains the top priority. Red-team work must protect profitability by preventing unsafe automation, not distract from Trading Lab / Forex evidence validation or promote unproven live execution.
 
 ## Evals vs Red Teaming
 
@@ -77,4 +77,3 @@ red_team_case -> red_team_result -> improvement_loop -> Codex handoff -> PR
 ```
 
 Validator PASS is evidence only. It does not authorize APPLY, commit, push, PR creation, merge, live trading, Promptfoo execution, dependency installation, or Night Supervisor runtime start.
-

@@ -53,10 +53,9 @@ The Manager owns:
 Every run state must preserve:
 
 - trusted/proven profitability priority
-- paper-only trading until gates pass
+- default paper/simulation trading until gates pass
 - no broker/OANDA/live trading
 - no secrets
 - no uncontrolled autonomy
 - no Pi GPIO/motor action
 - no Night Supervisor runtime modification
-

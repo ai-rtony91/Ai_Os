@@ -7,7 +7,7 @@ Common categories:
 - UI-only: visual layout, labels, spacing, icons, clutter, mobile readability.
 - Logic-only: state changes, button behavior, playback state, panel open/close behavior.
 - Mock-data-only: fixture JSON, example data, fake status values.
-- Trading-Lab-only: paper-only Trading Lab docs, mock signals, risk gates, scorecards.
+- Trading-Lab-only: Trading Lab paper/simulation docs, mock signals, risk gates, scorecards, and broker-gate checks.
 - Connector/API-only: planned connection to another app or service.
 - Validator gap: missing or weak validation.
 - Mixed scope: more than one unrelated area is touched.

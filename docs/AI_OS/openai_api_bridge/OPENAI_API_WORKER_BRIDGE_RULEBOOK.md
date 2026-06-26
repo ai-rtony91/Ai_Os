@@ -141,7 +141,7 @@ Rules:
 
 ## Trading Safety
 
-Trading Lab remains paper-only.
+Trading Lab / Forex defaults to paper simulation and supervised demo review unless separately governed and approved.
 
 Blocked:
 

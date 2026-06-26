@@ -5,7 +5,7 @@ Define how AI_OS optimizes latency across autonomy, packet generation, Codex val
 
 ## North Star
 
-Trading Lab latency remains priority #1 because trusted/proven profitability depends on timely signal handling, clear evidence, and paper-only validation before any future escalation.
+Trading Lab latency remains priority #1 because trusted/proven profitability depends on timely signal handling, clear evidence, and paper/simulation validation before any future escalation.
 
 Trusted/proven profitability outranks feature expansion.
 
@@ -20,7 +20,7 @@ Trusted/proven profitability outranks feature expansion.
 - User-facing progress must show current lane, blocker, and next safe action.
 - Priority processing is reserved for future high-value user-facing latency-sensitive requests only.
 - Priority processing must not be used for evals, batch jobs, ETL, nightly reports, telemetry bulk work, or routine background processing.
-- Priority processing must not bypass approvals, validators, Trading Lab paper-only safety, broker/OANDA blocks, live-trading blocks, Pi GPIO/motor blocks, or clean-state checks.
+- Priority processing must not bypass approvals, validators, Trading Lab default paper/simulation safety, broker/OANDA blocks, live-trading blocks, Pi GPIO/motor blocks, or clean-state checks.
 
 ## AI_OS Latency Targets
 
@@ -43,7 +43,7 @@ Latency optimization must not bypass:
 - validator chains
 - approval gates
 - protected main PR lane
-- paper-only Trading Lab status
+- Trading Lab default paper/simulation or approved demo-review status
 - no broker/OANDA/live trading rule
 - no Pi GPIO/motor rule
 - no Night Supervisor runtime modification rule

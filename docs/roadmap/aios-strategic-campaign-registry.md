@@ -43,7 +43,7 @@ The registry uses this hierarchy:
 campaign -> phase -> stage -> packet candidate
 ```
 
-- A `campaign` is a strategic outcome such as governance, orchestration, telemetry, dashboard visibility, paper-only Trading Lab, or supervised autonomy.
+- A `campaign` is a strategic outcome such as governance, orchestration, telemetry, dashboard visibility, Trading Lab / Forex progression, or supervised autonomy.
 - A `phase` groups related work inside a campaign.
 - A `stage` is the smallest roadmap unit that can become a DRY_RUN packet candidate.
 - A `next_packet_candidate` is a proposed packet ID or work package name. It is not approval.
@@ -90,9 +90,9 @@ Timeline values must stay in checkpoint ranges:
 
 ## Safety Boundaries
 
-Trading Lab remains paper-only.
+Trading Lab / Forex defaults to paper simulation, backtesting, supervised demo review, and broker-readiness evidence.
 
-Forex/OANDA remains documentation-boundary only unless a future Human Owner approved policy explicitly changes the boundary.
+Forex/OANDA live broker execution remains blocked unless a future Human Owner approved policy explicitly changes the boundary.
 
 The registry must not create or imply:
 

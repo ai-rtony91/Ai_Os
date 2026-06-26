@@ -2,7 +2,7 @@
 
 Status: APPLY documentation scaffold  
 Mode: docs-only  
-Trading mode: paper-only
+Trading mode: default paper/simulation or approved demo-review stage
 
 ## Objective
 
@@ -27,5 +27,5 @@ AI_OS = protected app behind the door
 
 This stage is architecture documentation only. It does not create live Cloudflare configuration, live Azure configuration, account changes, installed tools, credentials, secrets, or trading execution.
 
-Trading Lab remains paper-only. Secure access does not enable live trading.
+Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage. Secure access does not enable live trading.
 

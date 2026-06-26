@@ -105,7 +105,7 @@ attention; it does not grant permission to proceed.
 5. Validator failure or missing validator evidence outranks feature work.
 6. Queue blocker or backlog outranks dashboard and Trading Lab polish.
 7. Self-build loop wiring outranks dashboard surfacing.
-8. Trading Lab work stays paper-only.
+8. Trading Lab work stays in default paper/simulation or approved demo-review stages unless separately governed.
 9. Dashboard or reporting surfacing stays lower priority until closed-loop
    autonomy evidence exists.
 10. If no safe next step is provable, the governor blocks and reports.

@@ -159,7 +159,7 @@ West APPLY gate requirements:
 - approval-gate validation.
 - stop-point validation.
 - PR-lane validation before push or PR.
-- paper-only trading boundary validation.
+- default paper/simulation and broker-gate trading boundary validation.
 
 West packet routing must stop when lock, validator, approval, ownership, or stop-point status is missing, unclear, stale, rejected, or conflicting. West packet routing must stop after the packet-defined output and must not continue into side quests.
 

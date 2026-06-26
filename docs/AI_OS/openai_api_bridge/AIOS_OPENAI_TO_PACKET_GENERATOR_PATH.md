@@ -31,5 +31,4 @@ The future real adapter must:
 
 OpenAI may draft. Codex executes only after a complete tokenized packet, validator evidence, and human approval where required.
 
-Trusted/proven profitability remains above feature expansion. OpenAI integration must reduce manual relay work and improve packet quality without weakening paper-only trading safety.
-
+Trusted/proven profitability remains above feature expansion. OpenAI integration must reduce manual relay work and improve packet quality without weakening default paper/simulation trading safety or broker gates.

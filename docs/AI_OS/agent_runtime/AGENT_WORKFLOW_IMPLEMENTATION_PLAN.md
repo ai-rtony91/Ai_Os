@@ -67,7 +67,7 @@ Minor agents fill gaps only inside the assigned major agent scope:
 
 ## Trading Lab Compatibility
 
-The workflow supports future paper-only Trading Lab tasks:
+The workflow supports future paper/simulation Trading Lab tasks:
 
 - paper signal intake
 - paper bot runner

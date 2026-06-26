@@ -121,7 +121,7 @@ Any future elevation must be DRY_RUN reviewed, APPLY scoped, validated, and huma
 - Broker connections are blocked unless a separate reviewed policy explicitly allows them.
 - OANDA integration is blocked.
 - API keys and secrets must not be collected or persisted.
-- Trading Lab work is paper-only unless explicitly scoped otherwise by approved governance.
+- Trading Lab work defaults to paper simulation, backtesting, and supervised demo review unless explicitly scoped otherwise by approved governance.
 - LLMs must not be placed directly in live order execution paths.
 
 ## Agent Roles

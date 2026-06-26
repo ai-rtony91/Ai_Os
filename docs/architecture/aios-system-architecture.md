@@ -16,7 +16,7 @@ Core rules:
 - Default to DRY_RUN until APPLY is explicitly approved.
 - Human approval is required before protected edits, commits, pushes, deletes, moves, renames, secrets work, deployment, or trading execution.
 - Archive is historical memory, not active runtime.
-- Trading Lab remains paper-only. Broker/OANDA/live execution remains blocked.
+- Trading Lab / Forex is broker-capable by architecture, while paper simulation, backtesting, and supervised demo review remain the default execution state. Broker/OANDA/live execution remains blocked unless separately governed and approved.
 
 ## Main Layers
 
@@ -57,14 +57,14 @@ Planned but not proven complete:
 - runtime summaries and dashboard-facing telemetry,
 - secure access model for future hosted or portal use,
 - product roadmap with modular AI_OS capabilities,
-- paper-only Trading Lab as the first serious vertical.
+- governed Trading Lab / Forex as the first serious vertical, with paper simulation, demo review, and broker-readiness evidence staged inside it.
 
 ## Human-Review Items
 
 - Define whether `dispatcher` is an active subsystem name or legacy vocabulary under orchestration.
 - Decide which service/runtime components are active versus scaffold.
 - Confirm which docs become canonical and which `docs/AI_OS` folders move to archive.
-- Keep broker/trading language paper-only until separate governance changes approve otherwise.
+- Keep broker/trading language aligned with broker-capable architecture and default execution blocks until separate governance approves a bounded broker stage.
 
 ## Architecture Risks
 

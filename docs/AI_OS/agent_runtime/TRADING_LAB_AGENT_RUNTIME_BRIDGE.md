@@ -41,5 +41,5 @@ Future builds can be routed through the runtime:
 - Validator chain
 - Dashboard status panel
 
-All of these remain paper-only or local-planning-only until the user approves a separate APPLY step.
+All of these remain paper/simulation or local-planning-only until the user approves a separate APPLY step.
 

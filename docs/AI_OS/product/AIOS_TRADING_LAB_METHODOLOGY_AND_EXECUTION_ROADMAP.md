@@ -128,7 +128,7 @@ Indicator rules:
 
 ## 8. Execution Safety Rules
 
-Live broker execution remains blocked until validation exists.
+General live broker execution remains blocked until governance, validation, explicit owner approval, risk controls, runtime-only credentials, sanitized evidence, and stop controls exist.
 
 Required before any live broker execution:
 
@@ -143,7 +143,7 @@ Required before any live broker execution:
 - Telemetry and reporting are active.
 - Human approval gate is explicit.
 
-Until those conditions are met, Trading Lab must remain mock-first and paper-first only.
+Until those conditions are met, current implementation stages must remain mock-first and paper-first. That stage discipline does not make AI_OS permanently paper-only or non-broker-capable.
 
 ## 9. MVP Roadmap
 

@@ -8,7 +8,7 @@ This is not an OANDA API client. It does not import an OANDA SDK, connect to OAN
 
 Repo evidence identifies OANDA as the existing broker target reference:
 
-- `README.md` blocks OANDA integration in the paper-only Trading Lab boundary.
+- `README.md` blocks OANDA/live broker integration unless governed approval and required risk gates exist.
 - `RISK_POLICY.md` blocks OANDA or live order execution by default.
 - `docs/forex/AIOS_FOREX_DELIVERY_GOVERNED_PACKET.md` references the existing Forex and OANDA boundary.
 - `Reports/forex_delivery/AIOS_FOREX_DELIVERY_GOVERNED_APPLY_V2_REPORT.md` records that no OANDA integration was added in the governed readiness packet.

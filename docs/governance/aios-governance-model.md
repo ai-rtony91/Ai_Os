@@ -63,7 +63,7 @@ Current policy:
 - no API keys or secrets,
 - no real orders,
 - no real webhook execution,
-- paper-only Trading Lab work only when explicitly scoped.
+- paper/simulation Trading Lab work only when explicitly scoped, with any broker-capable progression separately governed and approved.
 
 Any old document suggesting live broker execution is treated as historical or unreviewed until MAIN CONTROL says otherwise.
 

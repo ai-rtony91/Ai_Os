@@ -21,7 +21,7 @@ Use this as a planning checklist only.
 
 ## Trading Safety
 
-- Trading Lab remains paper-only.
+- Trading Lab / Forex remains in the default paper/simulation or approved demo-review stage unless separately governed.
 - No broker login.
 - No live orders.
 - No OANDA/Webull connection.

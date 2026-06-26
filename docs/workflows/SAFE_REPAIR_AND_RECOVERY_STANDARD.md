@@ -25,7 +25,7 @@ Use the most specific applicable category:
 - `UI_ONLY`: visible layout, labels, spacing, icons, clutter, or readability.
 - `LOGIC_ONLY`: state changes, button behavior, panel state, route behavior, or other bounded logic.
 - `MOCK_DATA_ONLY`: fixture data, sample JSON, example status values, or non-production mock state.
-- `TRADING_LAB_ONLY`: paper-only Trading Lab docs, mock signals, risk gates, scorecards, or paper simulation boundaries.
+- `TRADING_LAB_ONLY`: Trading Lab paper/simulation docs, mock signals, risk gates, scorecards, broker-gate checks, or paper simulation boundaries.
 - `CONNECTOR_API_ONLY`: planned integration boundary, connector design, API planning, or external service interface review.
 - `VALIDATOR_GAP`: missing, weak, malformed, or absent validation.
 - `MIXED_SCOPE`: more than one unrelated area is touched.
