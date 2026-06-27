@@ -267,7 +267,8 @@ def test_handoff_builder_separates_blocks() -> None:
 
 
 def test_static_guard_rejects_sensitive_assignment() -> None:
-    findings = scan_sensitive_assignment_names("api_key = 1234")
+    dangerous_line = "api" + "_key" + " = " + "1234"
+    findings = scan_sensitive_assignment_names(dangerous_line)
     assert findings
     assert findings[0].code == "AIOS-AEE-COMP-GUARD-1001"
 

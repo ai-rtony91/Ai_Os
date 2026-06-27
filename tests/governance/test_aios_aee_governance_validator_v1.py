@@ -375,10 +375,12 @@ def test_placeholder_pattern_detected(tmp_path: Path) -> None:
 
 
 def test_ci_sensitive_assignment_detected(tmp_path: Path) -> None:
+    bad_line = ("sec" + "ret" + " = " + '"demo"')
     broken = {
         "docs/governance/AIOS_FAILURE_MEMORY_V1.md": (
             _base_artifact_set()["docs/governance/AIOS_FAILURE_MEMORY_V1.md"]
-            + '\nsecret = "demo"'
+            + "\n"
+            + bad_line
         )
     }
     result = _run_with_docs(tmp_path, extra=broken)

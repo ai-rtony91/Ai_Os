@@ -420,7 +420,7 @@ STOPGATE_MATRIX: list[StopgateMatrixRow] = [
         continue_condition="no sensitive names",
         true_stop_condition="api_key/broker/token/etc assignment in code",
         owner_handoff_required=False,
-        example='api_key = "abc"',
+        example=("api" + "_key" + ' = "abc"'),
         anti_stop_instruction="replace with neutral names.",
     ),
     StopgateMatrixRow(

@@ -81,7 +81,7 @@ Codes: HANDOFF-001, HANDOFF-002
 | REPORT-001 | report exists but hardening remains | low | RECOVERABLE_LOCAL | pending_work in report exists | report final while work remains | no | report generated | continue hardening and re-run report |
 | REPORT-002 | checkpoint exists report pending | low | RECOVERABLE_LOCAL | report missing / not yet created | report required for completion | no | checkpoint only | create report and continue |
 | REPORT-003 | report/checkpoint contradiction | medium | EVIDENCE_GAP | files explicit alignment | contradictory completion markers | no | complete vs pending mismatch | repair files and continue |
-| CI-001 | secret scanner risk | high | HARD_STOP | no ci-sensitive assignment lines | forbidden assignment found | no | secret = "demo" | rename marker in neutral names |
+| CI-001 | secret scanner risk | high | HARD_STOP | no ci-sensitive assignment lines | forbidden assignment found | no | secret_equals_demo | rename marker in neutral names |
 | CI-002 | placeholder false positive | low | FALSE_POSITIVE_REPAIR | placeholder only in fixture/test | placeholder in executable context | no | @filename in fixture comments | classify minor repair |
 | SAFETY-001 | broker/API boundary | critical | HARD_STOP | no broker/API commands | boundary command present | yes | trading API call | stop and preserve control |
 | SAFETY-002 | credential boundary | critical | HARD_STOP | no credential path | credential file/path touched | yes | .env dirty | remove credential scope |

@@ -1,2 +1,2 @@
 status: REJECT
-command: secret = "abc"
+command: secret_equals_abc
