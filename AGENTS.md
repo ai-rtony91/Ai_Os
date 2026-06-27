@@ -444,6 +444,23 @@ SAFE NEXT COMMAND:
 STATUS: DRY_RUN COMPLETE, NO FILES CHANGED
 ```
 
+## AIOS Autonomous Execution Doctrine Pointer
+
+Autonomous execution, failure recovery, campaign arbitration, checkpoint/resume, isolated worktree execution, long-campaign operating mode, protected publishing handoff, and GitHub CI failure recovery doctrine are governed by:
+
+- `docs/governance/AIOS_AUTONOMOUS_EXECUTION_AND_FAILURE_RECOVERY_DOCTRINE_V1.md`
+- `docs/governance/AIOS_CAMPAIGN_ARBITRATION_DOCTRINE_V1.md`
+- `docs/governance/AIOS_FAILURE_MEMORY_V1.md`
+- `docs/workflows/AIOS_AUTONOMOUS_EXECUTION_ENGINE_V1.md`
+- `docs/workflows/AIOS_FAILURE_RECOVERY_PLAYBOOKS_V1.md`
+- `docs/workflows/AIOS_CAMPAIGN_CHECKPOINT_AND_RESUME_V1.md`
+- `docs/workflows/AIOS_ISOLATED_WORKTREE_CAMPAIGN_EXECUTION_V1.md`
+- `docs/workflows/AIOS_LONG_CAMPAIGN_CODEX_OPERATING_MODE_V1.md`
+- `docs/workflows/AIOS_PROTECTED_PUBLISHING_HANDOFF_V1.md`
+- `docs/workflows/AIOS_GITHUB_CI_FAILURE_RECOVERY_V1.md`
+
+This doctrine expands recovery behavior only inside approved packet scope and never overrides protected gates.
+
 ## AI_OS Operator Guardian Doctrine
 
 AI_OS agents must act as disciplined operator guardians for Anthony and AI_OS.
