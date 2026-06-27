@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "AIOS_FOREX_MASTER_EVIDENCE_INPUT.v1.schema.json",
+  "title": "AIOS Forex Master Evidence Input V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_type",
+    "source_label",
+    "collected_at",
+    "sanitized",
+    "walk_forward_oos",
+    "persistent_profitability",
+    "observation_22h6d",
+    "broker_readonly",
+    "safety"
+  ],
+  "properties": {
+    "schema_version": { "const": "AIOS_FOREX_MASTER_EVIDENCE_INPUT.v1" },
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "sanitized_repository_evidence",
+        "sanitized_broker_read_only_evidence",
+        "owner_supplied_sanitized_summary"
+      ]
+    },
+    "source_label": {
+      "type": "string",
+      "minLength": 1,
+      "not": { "const": "FIXTURE_NOT_LIVE" }
+    },
+    "collected_at": { "type": "string", "minLength": 1 },
+    "sanitized": { "const": true },
+    "walk_forward_oos": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "windows_total",
+        "windows_passed",
+        "oos_segments_total",
+        "oos_segments_passed",
+        "min_pass_rate",
+        "max_drawdown",
+        "max_allowed_drawdown",
+        "evidence_age_days",
+        "max_evidence_age_days"
+      ],
+      "properties": {
+        "windows_total": { "type": "number", "exclusiveMinimum": 0 },
+        "windows_passed": { "type": "number", "minimum": 0 },
+        "oos_segments_total": { "type": "number", "exclusiveMinimum": 0 },
+        "oos_segments_passed": { "type": "number", "minimum": 0 },
+        "min_pass_rate": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "max_drawdown": { "type": "number", "minimum": 0 },
+        "max_allowed_drawdown": { "type": "number", "exclusiveMinimum": 0 },
+        "evidence_age_days": { "type": "number", "minimum": 0 },
+        "max_evidence_age_days": { "type": "number", "minimum": 0 }
+      }
+    },
+    "persistent_profitability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "closed_trade_count",
+        "min_closed_trade_count",
+        "expectancy",
+        "min_expectancy",
+        "profit_factor",
+        "min_profit_factor",
+        "max_drawdown",
+        "max_allowed_drawdown",
+        "consecutive_profitable_periods",
+        "min_profitable_periods",
+        "after_costs",
+        "evidence_age_days",
+        "max_evidence_age_days"
+      ],
+      "properties": {
+        "closed_trade_count": { "type": "number", "exclusiveMinimum": 0 },
+        "min_closed_trade_count": { "type": "number", "exclusiveMinimum": 0 },
+        "expectancy": { "type": "number" },
+        "min_expectancy": { "type": "number", "minimum": 0 },
+        "profit_factor": { "type": "number" },
+        "min_profit_factor": { "type": "number", "minimum": 1 },
+        "max_drawdown": { "type": "number", "minimum": 0 },
+        "max_allowed_drawdown": { "type": "number", "exclusiveMinimum": 0 },
+        "consecutive_profitable_periods": { "type": "number", "minimum": 0 },
+        "min_profitable_periods": { "type": "number", "exclusiveMinimum": 0 },
+        "after_costs": { "const": true },
+        "evidence_age_days": { "type": "number", "minimum": 0 },
+        "max_evidence_age_days": { "type": "number", "minimum": 0 }
+      }
+    },
+    "observation_22h6d": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observed_hours",
+        "required_hours",
+        "observed_sessions",
+        "required_sessions",
+        "observed_days",
+        "required_days",
+        "interruption_count",
+        "max_interruption_count",
+        "manual_override_count",
+        "max_manual_override_count",
+        "evidence_age_days",
+        "max_evidence_age_days"
+      ],
+      "properties": {
+        "observed_hours": { "type": "number", "minimum": 0 },
+        "required_hours": { "type": "number", "minimum": 22 },
+        "observed_sessions": { "type": "number", "minimum": 0 },
+        "required_sessions": { "type": "number", "minimum": 6 },
+        "observed_days": { "type": "number", "minimum": 0 },
+        "required_days": { "type": "number", "minimum": 6 },
+        "interruption_count": { "type": "number", "minimum": 0 },
+        "max_interruption_count": { "type": "number", "minimum": 0 },
+        "manual_override_count": { "type": "number", "minimum": 0 },
+        "max_manual_override_count": { "type": "number", "minimum": 0 },
+        "evidence_age_days": { "type": "number", "minimum": 0 },
+        "max_evidence_age_days": { "type": "number", "minimum": 0 }
+      }
+    },
+    "broker_readonly": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "read_only_evidence_approved_for_future_live_review",
+        "broker_live_read_only_source_type",
+        "sanitized_broker_source_label",
+        "broker_account_reachable",
+        "open_positions_reconciled",
+        "daily_pl_available",
+        "realized_pl_available",
+        "unrealized_pl_available",
+        "margin_risk_available",
+        "valid_stale_status",
+        "future_execution_human_phrase",
+        "trading_history_writeback_verified"
+      ],
+      "properties": {
+        "read_only_evidence_approved_for_future_live_review": { "const": true },
+        "broker_live_read_only_source_type": { "type": "string", "minLength": 1 },
+        "sanitized_broker_source_label": {
+          "type": "string",
+          "minLength": 1,
+          "not": { "const": "FIXTURE_NOT_LIVE" }
+        },
+        "broker_account_reachable": { "const": true },
+        "open_positions_reconciled": { "const": true },
+        "daily_pl_available": { "const": true },
+        "realized_pl_available": { "const": true },
+        "unrealized_pl_available": { "const": true },
+        "margin_risk_available": { "const": true },
+        "valid_stale_status": { "const": true },
+        "future_execution_human_phrase": { "type": "string", "minLength": 1 },
+        "trading_history_writeback_verified": { "const": true }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "broker_execution_allowed",
+        "broker_connection_allowed",
+        "broker_api_call_allowed",
+        "live_trading_allowed",
+        "demo_trading_allowed",
+        "order_submission_allowed",
+        "credential_access_allowed",
+        "account_access_allowed",
+        "money_movement_allowed",
+        "scheduler_allowed",
+        "daemon_allowed",
+        "webhook_allowed",
+        "autonomous_trading_allowed",
+        "owner_approval_created"
+      ],
+      "properties": {
+        "broker_execution_allowed": { "const": false },
+        "broker_connection_allowed": { "const": false },
+        "broker_api_call_allowed": { "const": false },
+        "live_trading_allowed": { "const": false },
+        "demo_trading_allowed": { "const": false },
+        "order_submission_allowed": { "const": false },
+        "credential_access_allowed": { "const": false },
+        "account_access_allowed": { "const": false },
+        "money_movement_allowed": { "const": false },
+        "scheduler_allowed": { "const": false },
+        "daemon_allowed": { "const": false },
+        "webhook_allowed": { "const": false },
+        "autonomous_trading_allowed": { "const": false },
+        "owner_approval_created": { "const": false }
+      }
+    }
+  }
+}

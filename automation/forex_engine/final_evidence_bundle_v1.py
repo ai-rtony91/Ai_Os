@@ -86,6 +86,9 @@ BROKER_READONLY_DISCOVERY_PATTERN = re.compile(
     r"(?i)(READ_ONLY_EVIDENCE|READ[-_ ]ONLY.*BROKER|source_type:|broker_account_reachable|"
     r"broker_reachable|trading_history_writeback_verified|read-only preflight)"
 )
+META_EVIDENCE_REPORT_NAME_PATTERN = re.compile(
+    r"(?i)(MASTER_EVIDENCE_CLOSURE|MASTER_CLOSURE|MASTER_CONVERGENCE|MASTER_OWNER_CONSOLIDATED)"
+)
 
 PROTECTED_PERMISSION_FLAGS = {
     "broker_execution_allowed": False,
@@ -652,7 +655,26 @@ def _source_field_is_blocking(key: str, value: str) -> bool:
         "vacation_mode_execution_allowed",
     }:
         return _safe_bool(value) is True
+    if _private_field_declares_absence(value):
+        return False
     return True
+
+
+def _private_field_declares_absence(value: str) -> bool:
+    lowered = value.strip().strip("`").strip().lower()
+    return lowered in {
+        "not included",
+        "not present",
+        "not provided",
+        "excluded",
+        "redacted",
+        "none",
+        "null",
+        "false",
+        "no",
+        "n/a",
+        "na",
+    }
 
 
 def _evidence_chain(
@@ -893,6 +915,8 @@ def _candidate_report_paths(
     if not root.exists():
         return paths
     for path in sorted(root.glob("*.md")):
+        if META_EVIDENCE_REPORT_NAME_PATTERN.search(path.name):
+            continue
         if path.resolve() in seen:
             continue
         try:
