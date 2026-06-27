@@ -120,7 +120,7 @@ def test_master_aggregate_report_is_not_reingested_as_broker_evidence(tmp_path: 
                 "- source_type: fixture",
                 "- broker_account_reachable: False",
                 "- trading_history_writeback_verified: False",
-                "- secret_or_private_identifier_marker_present",
+                "- private_identifier_marker_present",
             ]
         ),
         encoding="utf-8",

@@ -643,8 +643,8 @@ def _broker_readonly_blocker_summary(blockers: Any) -> list[str]:
         summary.append("broker_readonly.source_is_fixture_not_live")
     if any("partial" in item.lower() or "left to finish" in item.lower() for item in values):
         summary.append("broker_readonly.historical_partial_reports_present")
-    if any("secret_or_private_identifier_marker_present" in item for item in values):
-        summary.append("broker_readonly.secret_or_private_identifier_marker_present")
+    if any("private_identifier_marker_present" in item for item in values):
+        summary.append("broker_readonly.private_identifier_marker_present")
     if values and not summary:
         summary.append(f"broker_readonly.blocker_count:{len(values)}")
     return summary

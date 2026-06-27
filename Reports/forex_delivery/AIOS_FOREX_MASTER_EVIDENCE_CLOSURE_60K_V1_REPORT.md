@@ -2,10 +2,10 @@
 
 ## Packet
 - packet_id: AIOS-FOREX-MASTER-EVIDENCE-CLOSURE-EXECUTOR-60K-V1
-- generated_at: 2026-06-27T17:23:53-04:00
+- generated_at: 2026-06-27T17:34:47-04:00
 - branch: lane/forex-master-evidence-closure-60k-v1
 - base_commit: 9cdf16b2d98b50ab2db22805c027e79bb2f9077e
-- current_commit: 9cdf16b2d98b50ab2db22805c027e79bb2f9077e
+- current_commit: 74bce8bfbde8fc0aa0b4106cc1db595f7f436291
 - pr_baseline: 9cdf16b2 fix(forex): preserve integration hardening updates (#1152)
 
 ## Summary
@@ -71,7 +71,7 @@
 - broker_readonly.read_only_evidence_not_approved_for_future_live_review
 - broker_readonly.source_is_fixture_not_live
 - broker_readonly.historical_partial_reports_present
-- broker_readonly.secret_or_private_identifier_marker_present
+- broker_readonly.private_identifier_marker_present
 - final_closure.upstream_evidence_not_ready
 
 ## External Dependencies
@@ -160,7 +160,7 @@
 - broker_readonly.read_only_evidence_not_approved_for_future_live_review
 - broker_readonly.source_is_fixture_not_live
 - broker_readonly.historical_partial_reports_present
-- broker_readonly.secret_or_private_identifier_marker_present
+- broker_readonly.private_identifier_marker_present
 - final_closure.upstream_evidence_not_ready
 
 ## Validators
