@@ -175,8 +175,11 @@ def test_dashboard_exposes_bridge_status_without_browser_network_calls():
     dashboard_path = REPO_ROOT / "apps" / "dashboard" / "src" / "MinimalOperatorDashboard.jsx"
     source = dashboard_path.read_text(encoding="utf-8")
 
-    assert "BridgeStatusPanel" in source
-    assert "run read-only live data bridge" in source
+    assert "READ ONLY" in source
+    assert "EXEC OFF" in source
+    assert "BROKER LOCKED" in source
+    assert "Trading execution remains locked" in source
+    assert "no order controls" in source
     for forbidden in ("fetch(", "XMLHttpRequest", "axios", "OANDA_API_TOKEN", "OANDA_ACCOUNT_ID"):
         assert forbidden not in source
 

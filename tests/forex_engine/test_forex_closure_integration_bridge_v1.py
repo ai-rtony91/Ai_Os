@@ -39,6 +39,12 @@ def test_safe_review_path_runs_full_chain() -> None:
 
     assert result["status"] == FOREX_CLOSURE_CHAIN_REVIEW_READY
     assert result["blockers"] == []
+    assert result["stage_statuses"]["candidate_scoring"] == "REVIEW_READY"
+    assert result["stage_statuses"]["persistent_profitability"] == "PERSISTENT_PROFITABILITY_READY"
+    assert (
+        result["stage_statuses"]["compounding_policy"]
+        == "SUPERVISED_COMPOUNDING_POLICY_REVIEW_READY"
+    )
     assert result["stage_statuses"]["dashboard_truth"] == "DASHBOARD_TRUTH_DISPLAY_READY"
     assert_permissions_false(result)
 
@@ -76,6 +82,18 @@ def test_stale_candidate_evidence_blocks_chain() -> None:
     assert_permissions_false(result)
 
 
+def test_candidate_scoring_block_blocks_chain() -> None:
+    payload = build_sample_integration_input()
+    payload["candidate"]["required_evidence_complete"] = False
+
+    result = run_forex_closure_integration_bridge(payload)
+
+    assert result["status"] == FOREX_CLOSURE_CHAIN_BLOCKED
+    assert result["stage_statuses"]["candidate_scoring"] == "BLOCKED_BY_EVIDENCE"
+    assert any("candidate_scoring" in item for item in result["blockers"])
+    assert_permissions_false(result)
+
+
 def test_unsafe_flag_blocks_chain() -> None:
     payload = build_sample_integration_input()
     payload["candidate"]["live_trading_allowed"] = True
@@ -96,4 +114,20 @@ def test_operator_halt_integration_fails_closed() -> None:
     assert result["status"] == FOREX_CLOSURE_CHAIN_BLOCKED
     assert result["stage_statuses"]["stop"] == "STOP_REQUIRED"
     assert any("operator halt" in item for item in result["blockers"])
+    assert_permissions_false(result)
+
+
+def test_compounding_without_owner_approval_blocks_chain() -> None:
+    payload = build_sample_integration_input()
+    payload["compounding_policy"]["compounding_requested"] = True
+    payload["compounding_policy"]["owner_compounding_approval_present"] = False
+
+    result = run_forex_closure_integration_bridge(payload)
+
+    assert result["status"] == FOREX_CLOSURE_CHAIN_BLOCKED
+    assert (
+        result["stage_statuses"]["compounding_policy"]
+        == "SUPERVISED_COMPOUNDING_POLICY_BLOCKED"
+    )
+    assert any("compounding requested without owner approval" in item for item in result["blockers"])
     assert_permissions_false(result)

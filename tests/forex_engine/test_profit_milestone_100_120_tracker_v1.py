@@ -10,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-DASHBOARD_MONEY_STRIP = REPO_ROOT / "apps" / "dashboard" / "src" / "BrokerMoneyStrip.jsx"
+DASHBOARD_MINIMAL_OPERATOR = REPO_ROOT / "apps" / "dashboard" / "src" / "MinimalOperatorDashboard.jsx"
 DASHBOARD_MONEY_FIXTURE = (
     REPO_ROOT
     / "apps"
@@ -215,10 +215,13 @@ def test_read_only_money_strip_exposes_money_fields_without_execution():
 
 
 def test_dashboard_money_strip_has_no_direct_oanda_or_credentials():
-    source = DASHBOARD_MONEY_STRIP.read_text(encoding="utf-8")
+    source = DASHBOARD_MINIMAL_OPERATOR.read_text(encoding="utf-8")
     lowered = source.lower()
 
-    assert "/api/forex/oanda/money-strip" in source
+    assert "READ ONLY" in source
+    assert "EXEC OFF" in source
+    assert "BROKER LOCKED" in source
+    assert "Trading execution remains locked" in source
     assert "api-fxtrade" not in lowered
     assert "api-fxpractice" not in lowered
     assert "https://api" not in lowered
@@ -229,14 +232,16 @@ def test_dashboard_money_strip_has_no_direct_oanda_or_credentials():
 
 
 def test_dashboard_money_strip_shows_exec_off_without_order_buttons():
-    source = DASHBOARD_MONEY_STRIP.read_text(encoding="utf-8")
+    source = DASHBOARD_MINIMAL_OPERATOR.read_text(encoding="utf-8")
     lowered = source.lower()
 
     assert "EXEC OFF" in source
-    assert "<button" not in lowered
+    assert "READ ONLY" in source
+    assert "BROKER LOCKED" in source
     assert ">BUY<" not in source
     assert ">SELL<" not in source
     assert ">CLOSE<" not in source
+    assert "order controls" in lowered
 
 
 def test_dashboard_money_strip_fixture_is_blocked_and_read_only():

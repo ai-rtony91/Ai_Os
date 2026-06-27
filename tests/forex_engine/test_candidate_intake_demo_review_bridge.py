@@ -161,7 +161,8 @@ def test_write_reports_disabled_returns_no_report_field():
     assert Path("Reports/forex_delivery").exists()
 
 
-def test_write_reports_enabled_writes_report_path():
+def test_write_reports_enabled_writes_report_path(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     payload = module.run_candidate_intake_demo_review_bridge(write_reports=True)
     report = payload["report"]
     assert isinstance(report, str)

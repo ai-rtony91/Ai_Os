@@ -200,10 +200,11 @@ def test_dashboard_references_arming_status_without_browser_broker_calls():
     dashboard_path = REPO_ROOT / "apps" / "dashboard" / "src" / "MinimalOperatorDashboard.jsx"
     source = dashboard_path.read_text(encoding="utf-8")
 
-    assert "buildArmingGateStatus" in source
-    assert "ArmingGateStatusPanel" in source
-    assert "LIVE_ARMABLE" in source
-    assert REQUIRED_HUMAN_PHRASE in source
+    assert "READ ONLY" in source
+    assert "EXEC OFF" in source
+    assert "BROKER LOCKED" in source
+    assert "Trading execution remains locked" in source
+    assert "no order controls" in source
     for forbidden in ("fetch(", "XMLHttpRequest", "axios", "OANDA_API_TOKEN", "OANDA_ACCOUNT_ID"):
         assert forbidden not in source
 
