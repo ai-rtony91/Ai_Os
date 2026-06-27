@@ -76,7 +76,7 @@ def reject_broad_git_add(block_text: str) -> list[str]:
     issues: list[str] = []
     if "git add ." in lowered.replace("  ", " "):
         issues.append("git add . is not allowed")
-    if re.search(r"\bgit\s+add\s+-a\b", lowered) or re.search(r"\bgit\s+add\s+-A\b", lowered):
+    if re.search(r"\bgit\s+add\s+--all\b", lowered) or re.search(r"\bgit\s+add\s+-a\b", lowered) or re.search(r"\bgit\s+add\s+-A\b", lowered):
         issues.append("git add -A is not allowed")
     return issues
 

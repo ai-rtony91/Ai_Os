@@ -227,6 +227,11 @@ def test_handoff_builder_rejects_broad_git_add_a() -> None:
     assert any("git add -A" in item for item in issues)
 
 
+def test_handoff_builder_rejects_broad_git_add_all() -> None:
+    issues = reject_broad_git_add("git add --all")
+    assert any("git add -A is not allowed" in item for item in issues)
+
+
 def test_handoff_builder_rejects_placeholder_command() -> None:
     issues = reject_placeholder_commands("python -m pytest {path}/test.py")
     assert issues
@@ -291,6 +296,12 @@ def test_static_guard_rejects_missing_safety_boundary() -> None:
 
 def test_static_guard_detects_report_checkpoint_contradiction() -> None:
     findings = scan_report_checkpoint_contradiction("final_status: complete", "current_phase: running")
+    assert findings
+    assert findings[0].code == "AIOS-AEE-COMP-GUARD-1010"
+
+
+def test_static_guard_does_not_treat_incomplete_as_complete() -> None:
+    findings = scan_report_checkpoint_contradiction("final_status: complete", "current_phase: incomplete")
     assert findings
     assert findings[0].code == "AIOS-AEE-COMP-GUARD-1010"
 

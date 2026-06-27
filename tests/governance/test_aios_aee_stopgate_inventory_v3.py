@@ -11,6 +11,7 @@ from automation.governance.aios_aee_stopgate_inventory_v3 import (
     result_to_jsonable_dict,
     result_to_markdown,
     result_to_operator_text,
+    scan_report_checkpoint_consistency,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -196,6 +197,16 @@ def test_checkpoint_report_mismatch_repair() -> None:
         validator_checkpoint_path="nonexistent/checkpoint.md",
     )
     assert result.continuation_status == "RECOVERABLE_LOCAL" or result.continuation_status == "EVIDENCE_GAP"
+
+
+def test_stopgate_scan_checkpoint_incomplete_not_exact_complete(tmp_path: Path) -> None:
+    report = tmp_path / "report.md"
+    checkpoint = tmp_path / "checkpoint.md"
+    report.write_text("final_status: incomplete", encoding="utf-8")
+    checkpoint.write_text("current_phase: phase 1 complete", encoding="utf-8")
+    status, codes, _ = scan_report_checkpoint_consistency(tmp_path, str(report), str(checkpoint))
+    assert status == "EVIDENCE_GAP"
+    assert codes == ["REPORT-003"]
 
 
 def test_protected_action_ready_local_work_remains() -> None:

@@ -722,8 +722,14 @@ def scan_report_checkpoint_consistency(
     if "pending_work" in report_text or "pending_work" in checkpoint_text:
         return "RECOVERABLE_LOCAL", ["REPORT-001"], ["hardening remains"]
 
-    complete_report = "complete" in report_text
-    complete_checkpoint = "complete" in checkpoint_text
+    complete_report = any(
+        line.lower().startswith("final_status:") and re.search(r"\bcomplete\b", line.lower())
+        for line in report_text.splitlines()
+    )
+    complete_checkpoint = any(
+        line.lower().startswith("current_phase:") and re.search(r"\bcomplete\b", line.lower())
+        for line in checkpoint_text.splitlines()
+    )
     if complete_report != complete_checkpoint:
         return "EVIDENCE_GAP", ["REPORT-003"], ["contradictory completion markers"]
 

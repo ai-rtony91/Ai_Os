@@ -25,6 +25,7 @@ PLACEHOLDER_PATTERN = re.compile(
 )
 BROAD_GIT_ADD_PATTERNS = (
     re.compile(r"(?m)^\s*git\s+add\s+\.\s*$", re.IGNORECASE),
+    re.compile(r"(?m)^\s*git\s+add\s+--all\s*$", re.IGNORECASE),
     re.compile(r"(?m)^\s*git\s+add\s+-A\s*$", re.IGNORECASE),
     re.compile(r"(?m)^\s*git\s+add\s+-a\s*$", re.IGNORECASE),
 )
@@ -189,7 +190,7 @@ def scan_report_checkpoint_contradiction(
         if line.lower().startswith("final_status:"):
             report_status = line.split(":", 1)[1].strip().lower()
     for line in checkpoint_text.splitlines():
-        if line.lower().startswith("current_phase:") and "complete" in line.lower():
+        if line.lower().startswith("current_phase:") and re.search(r"\bcomplete\b", line.lower()):
             checkpoint_complete = True
     if report_status == "complete" and not checkpoint_complete:
         return [
@@ -266,4 +267,3 @@ def result_to_operator_text(findings: Iterable[StaticGuardFinding]) -> str:
     fails = sum(1 for item in items if item.severity == "FAIL")
     warns = sum(1 for item in items if item.severity == "WARN")
     return f"findings_fail={fails} findings_warn={warns}"
-
