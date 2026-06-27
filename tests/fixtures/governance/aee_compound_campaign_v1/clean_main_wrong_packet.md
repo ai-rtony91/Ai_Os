@@ -1,0 +1,3 @@
+status: WRONG_PACKET_FOR_CLEAN_MAIN
+branch: main
+dirty_file: automation/governance/aios_aee_governance_validator_v1.py

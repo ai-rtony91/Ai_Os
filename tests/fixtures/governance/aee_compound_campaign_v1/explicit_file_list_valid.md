@@ -1,0 +1,2 @@
+status: PASS
+files: tests/governance/test_aios_aee_compound_campaign_v1.py, automation/governance/aios_aee_campaign_state_classifier_v1.py
