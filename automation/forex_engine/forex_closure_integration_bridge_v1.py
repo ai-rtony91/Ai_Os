@@ -14,6 +14,11 @@ from automation.forex_engine.broker_health_readonly_v1 import (
     build_sample_snapshot,
     evaluate_broker_health_readonly,
 )
+from automation.forex_engine.candidate_scoring_v1 import (
+    REVIEW_READY as CANDIDATE_REVIEW_READY,
+    candidate_score_to_jsonable_dict,
+    score_candidates,
+)
 from automation.forex_engine.dashboard_truth_summary_v1 import (
     DASHBOARD_TRUTH_DISPLAY_READY,
     build_dashboard_truth_summary,
@@ -25,6 +30,11 @@ from automation.forex_engine.profitability_evidence_v1 import (
     build_sample_thresholds,
     build_sample_walk_forward_summaries,
     evaluate_profitability_evidence,
+)
+from automation.forex_engine.persistent_profitability_evidence_v1 import (
+    PERSISTENT_PROFITABILITY_READY,
+    build_sample_persistent_profitability_summary,
+    evaluate_persistent_profitability_evidence,
 )
 from automation.forex_engine.risk_budget_engine_v1 import (
     RISK_BUDGET_ACCEPTED,
@@ -42,6 +52,11 @@ from automation.forex_engine.supervised_demo_intent_card_v1 import (
     DEMO_INTENT_OWNER_REVIEW_READY,
     evaluate_supervised_demo_intent_card,
 )
+from automation.forex_engine.supervised_compounding_policy_v1 import (
+    SUPERVISED_COMPOUNDING_POLICY_REVIEW_READY,
+    build_sample_compounding_policy_input,
+    evaluate_supervised_compounding_policy,
+)
 
 
 FOREX_CLOSURE_INTEGRATION_BRIDGE_VERSION = "forex_closure_integration_bridge_v1"
@@ -52,18 +67,34 @@ FOREX_CLOSURE_CHAIN_INCOMPLETE = "FOREX_CLOSURE_CHAIN_INCOMPLETE"
 
 PROTECTED_PERMISSION_FLAGS = {
     "broker_execution_allowed": False,
+    "broker_connection_allowed": False,
+    "broker_api_call_allowed": False,
     "live_trading_allowed": False,
     "order_submission_allowed": False,
     "credential_access_allowed": False,
     "account_access_allowed": False,
+    "money_movement_allowed": False,
+    "all_money_control_allowed": False,
+    "bank_movement_allowed": False,
+    "withdrawal_allowed": False,
+    "deposit_allowed": False,
+    "compounding_allowed": False,
+    "compounding_execution_allowed": False,
+    "autonomous_compounding_allowed": False,
+    "scheduler_allowed": False,
+    "daemon_allowed": False,
+    "webhook_allowed": False,
     "dashboard_execution_authority": False,
     "owner_approval_created": False,
 }
 
 READY_STAGE_STATUSES = {
+    "candidate_scoring": CANDIDATE_REVIEW_READY,
     "risk": RISK_BUDGET_ACCEPTED,
     "broker": BROKER_HEALTH_REVIEW_READY,
     "profitability": PROFITABILITY_EVIDENCE_REVIEW_READY,
+    "persistent_profitability": PERSISTENT_PROFITABILITY_READY,
+    "compounding_policy": SUPERVISED_COMPOUNDING_POLICY_REVIEW_READY,
     "stop": REVIEW_ONLY_RESUME,
     "demo_intent": DEMO_INTENT_OWNER_REVIEW_READY,
     "dashboard_truth": DASHBOARD_TRUTH_DISPLAY_READY,
@@ -76,6 +107,15 @@ def build_sample_integration_input() -> dict[str, Any]:
         {
             "instrument": "EUR_USD_SANITIZED_REVIEW",
             "direction": "long_review",
+            "max_drawdown": 0.02,
+            "regime_alignment_score": 88,
+            "risk_quality_score": 92,
+            "evidence_quality_score": 90,
+            "demo_readiness_score": 86,
+            "operator_confidence_score": 80,
+            "evidence_present": True,
+            "required_evidence_complete": True,
+            "demo_readiness": True,
             "max_evidence_age_days": 7,
         }
     )
@@ -87,6 +127,8 @@ def build_sample_integration_input() -> dict[str, Any]:
         "replay_summaries": build_sample_replay_summaries(),
         "walk_forward_summaries": build_sample_walk_forward_summaries(),
         "profitability_thresholds": build_sample_thresholds(),
+        "persistent_profitability_summary": build_sample_persistent_profitability_summary(),
+        "compounding_policy": build_sample_compounding_policy_input(),
         "dashboard_state": build_sample_dashboard_state(),
         "operator_halt_state": build_sample_operator_halt_state(),
     }
@@ -103,6 +145,7 @@ def run_forex_closure_integration_bridge(
         active = dict(payload)
 
     candidate = active.get("candidate")
+    candidate_scoring = _score_candidate_stage(candidate)
     risk = evaluate_risk_budget(candidate, active.get("risk_caps"))
     broker = evaluate_broker_health_readonly(active.get("broker_snapshot"))
     profitability = evaluate_profitability_evidence(
@@ -110,6 +153,13 @@ def run_forex_closure_integration_bridge(
         active.get("replay_summaries"),
         active.get("walk_forward_summaries"),
         active.get("profitability_thresholds"),
+    )
+    persistent_profitability = evaluate_persistent_profitability_evidence(
+        active.get("persistent_profitability_summary")
+    )
+    compounding_policy = evaluate_supervised_compounding_policy(
+        persistent_profitability,
+        active.get("compounding_policy"),
     )
     stop = evaluate_stop_pause_resume(
         risk,
@@ -136,9 +186,12 @@ def run_forex_closure_integration_bridge(
     )
 
     stage_results = {
+        "candidate_scoring": candidate_scoring,
         "risk": risk,
         "broker": broker,
         "profitability": profitability,
+        "persistent_profitability": persistent_profitability,
+        "compounding_policy": compounding_policy,
         "stop": stop,
         "demo_intent": demo_intent,
         "dashboard_truth": dashboard_truth,
@@ -194,6 +247,26 @@ def result_to_operator_text(result: Mapping[str, Any]) -> str:
         return "Forex closure chain is review-ready only. Final readiness evidence is still required."
     blockers = result.get("blockers") or ["closure chain incomplete"]
     return "Forex closure chain blocked: " + "; ".join(str(item) for item in blockers)
+
+
+def _score_candidate_stage(candidate: Any) -> dict[str, Any]:
+    if not isinstance(candidate, Mapping):
+        return {
+            "status": FOREX_CLOSURE_CHAIN_INCOMPLETE,
+            "blockers": ["candidate is required for scoring"],
+        }
+    scores = score_candidates([candidate])
+    if not scores:
+        return {
+            "status": FOREX_CLOSURE_CHAIN_INCOMPLETE,
+            "blockers": ["candidate scoring produced no result"],
+        }
+    result = candidate_score_to_jsonable_dict(scores[0])
+    result["status"] = result["decision"]
+    result.pop("safety", None)
+    result["permissions"] = dict(PROTECTED_PERMISSION_FLAGS)
+    result.update(PROTECTED_PERMISSION_FLAGS)
+    return result
 
 
 def _stage_blockers(stage_results: Mapping[str, Mapping[str, Any]]) -> list[str]:

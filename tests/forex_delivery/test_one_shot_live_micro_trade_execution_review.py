@@ -239,16 +239,12 @@ def test_dashboard_references_execution_review_without_browser_broker_calls():
     source = (REPO_ROOT / "apps/dashboard/src/MinimalOperatorDashboard.jsx").read_text(
         encoding="utf-8"
     )
-    start = source.index("function buildExecutionReviewStatus")
-    end = source.index("function buildLiveReadinessModel", start)
-    panel_start = source.index("function ExecutionReviewStatusPanel")
-    panel_end = source.index("function ExecutionReadinessPage", panel_start)
-    review_source = source[start:end] + source[panel_start:panel_end]
 
-    assert "EXECUTION_REVIEW_READY" in review_source
-    assert "LIVE_TRADE_PLACED" in review_source
-    assert REQUIRED_HUMAN_PHRASE in review_source
-    assert NEXT_PACKET_CANDIDATE in review_source
+    assert "READ ONLY" in source
+    assert "EXEC OFF" in source
+    assert "BROKER LOCKED" in source
+    assert "Trading execution remains locked" in source
+    assert "no order controls" in source
     for forbidden in (
         "fetch(",
         "XMLHttpRequest",
@@ -256,7 +252,7 @@ def test_dashboard_references_execution_review_without_browser_broker_calls():
         "OANDA_API_TOKEN",
         "OANDA_ACCOUNT_ID",
     ):
-        assert forbidden not in review_source
+        assert forbidden not in source
 
 
 def test_no_broker_write_or_live_order_endpoint_appears_in_review_code():

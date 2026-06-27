@@ -16,10 +16,23 @@ READINESS_READY_STATUS = "FOREX_FINAL_READINESS_REVIEW_READY"
 
 PROTECTED_PERMISSION_FLAGS = {
     "broker_execution_allowed": False,
+    "broker_connection_allowed": False,
+    "broker_api_call_allowed": False,
     "live_trading_allowed": False,
     "order_submission_allowed": False,
     "credential_access_allowed": False,
     "account_access_allowed": False,
+    "money_movement_allowed": False,
+    "all_money_control_allowed": False,
+    "bank_movement_allowed": False,
+    "withdrawal_allowed": False,
+    "deposit_allowed": False,
+    "compounding_allowed": False,
+    "compounding_execution_allowed": False,
+    "autonomous_compounding_allowed": False,
+    "scheduler_allowed": False,
+    "daemon_allowed": False,
+    "webhook_allowed": False,
     "dashboard_execution_authority": False,
     "owner_approval_created": False,
 }
@@ -41,19 +54,34 @@ SECRET_OR_ACCOUNT_FIELD_FRAGMENTS = (
     "raw_order_id",
     "raw_transaction_id",
     "raw_payload",
+    "order_payload",
 )
 
 UNSAFE_TRUE_FIELDS = (
     "broker_execution_allowed",
+    "broker_connection_allowed",
+    "broker_api_call_allowed",
     "live_trading_allowed",
     "order_submission_allowed",
     "credential_access_allowed",
     "account_access_allowed",
+    "money_movement_allowed",
+    "all_money_control_allowed",
+    "bank_movement_allowed",
+    "withdrawal_allowed",
+    "deposit_allowed",
+    "compounding_allowed",
+    "compounding_execution_allowed",
+    "autonomous_compounding_allowed",
+    "scheduler_allowed",
+    "daemon_allowed",
+    "webhook_allowed",
     "dashboard_execution_authority",
     "owner_approval_created",
     "execution_allowed",
     "trade_allowed",
     "broker_access_allowed",
+    "real_money_allowed",
 )
 
 

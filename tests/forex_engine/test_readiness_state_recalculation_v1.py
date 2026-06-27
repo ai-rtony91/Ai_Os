@@ -75,7 +75,8 @@ def test_readiness_state_recalculation_v1_next_safe_action_exists():
     assert payload["next_safe_action"] != ""
 
 
-def test_readiness_state_recalculation_v1_write_report_path_under_reports():
+def test_readiness_state_recalculation_v1_write_report_path_under_reports(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
     payload = readiness_v1.run_readiness_state_recalculation_v1(write_reports=True)
     report_path = Path(payload["report_path"])
     assert report_path.is_absolute() is False
