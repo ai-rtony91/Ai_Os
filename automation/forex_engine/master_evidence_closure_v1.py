@@ -540,9 +540,9 @@ def _category_statuses(
     walk = str(intakes.get("walk_forward", {}).get("status", "UNKNOWN"))
     profit = str(intakes.get("profitability", {}).get("status", "UNKNOWN"))
     observation = str(intakes.get("observation", {}).get("status", "UNKNOWN"))
-    broker = "BROKER_READONLY_READY" if auxiliary.get("sanitized_broker_readonly_evidence", {}).get("ready") is True else "BROKER_READONLY_EXTERNAL_EVIDENCE_REQUIRED"
+    broker_status = "BROKER_READONLY_READY" if auxiliary.get("sanitized_broker_readonly_evidence", {}).get("ready") is True else "BROKER_READONLY_EXTERNAL_EVIDENCE_REQUIRED"
     return {
-        "broker read-only": broker,
+        "broker read-only": broker_status,
         "replay": replay,
         "walk-forward": walk,
         "OOS": walk,

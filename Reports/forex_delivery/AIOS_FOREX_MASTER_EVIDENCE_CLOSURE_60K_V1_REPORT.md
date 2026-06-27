@@ -2,10 +2,10 @@
 
 ## Packet
 - packet_id: AIOS-FOREX-MASTER-EVIDENCE-CLOSURE-EXECUTOR-60K-V1
-- generated_at: 2026-06-27T17:34:47-04:00
+- generated_at: 2026-06-27T17:40:20-04:00
 - branch: lane/forex-master-evidence-closure-60k-v1
 - base_commit: 9cdf16b2d98b50ab2db22805c027e79bb2f9077e
-- current_commit: 74bce8bfbde8fc0aa0b4106cc1db595f7f436291
+- current_commit: 79e63950ed666ce28c4fad25812afd0bc78998c6
 - pr_baseline: 9cdf16b2 fix(forex): preserve integration hardening updates (#1152)
 
 ## Summary
