@@ -1,0 +1,448 @@
+{
+  "generated_at": "2026-06-28T00:00:00Z",
+  "scoring_model": {
+    "max_score": 100,
+    "categories": {
+      "expectancy_evidence": 20,
+      "profit_factor_evidence": 15,
+      "win_loss_evidence": 10,
+      "drawdown_evidence": 10,
+      "sample_size_evidence": 15,
+      "walk_forward_oos_evidence": 15,
+      "execution_demo_relevance": 10,
+      "safety_risk_compatibility": 5
+    },
+    "rule": "A category receives credit only when source-backed evidence exists and supports progression. Missing fields, failed walk-forward/OOS proof, and source conflicts score 0 for the affected category."
+  },
+  "candidate_count": 12,
+  "candidates": [
+    {
+      "candidate_id": "c1-eur-buy",
+      "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_EVIDENCE_DEPTH_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_WALK_FORWARD_STABILITY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_DEPTH_PACKET_R_V1_REPORT.md",
+        "Reports/forex_delivery/AIOS_FOREX_BEST_PROFIT_CANDIDATE_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_LEADERBOARD_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 200.0,
+        "profit_factor": 999.0,
+        "win_rate": 1.0,
+        "max_drawdown": 0.0,
+        "sample_size": 30,
+        "walk_forward": "failed: 1 passing window and 3 failing windows",
+        "safety": "paper-only evidence with broker, network, credentials, account IDs, order execution, demo trading, and live trading blocked"
+      },
+      "scores": {
+        "expectancy_evidence": 20,
+        "profit_factor_evidence": 15,
+        "win_loss_evidence": 10,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 15,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 85,
+      "status": "NEEDS_MORE_EVIDENCE",
+      "rejection_or_gap_reason": "Best current P1 paper-profit anchor, but walk-forward/OOS proof is not usable for P3: wf-02, wf-03, and wf-04 fail, and reports conflict on readiness.",
+      "next_required_evidence": [
+        "Resolve the readiness conflict across bridge, recalculation, and C1 walk-forward artifacts.",
+        "Produce stable walk-forward/OOS evidence with passing windows.",
+        "Close drawdown_containment and insufficient_sample blockers."
+      ]
+    },
+    {
+      "candidate_id": "c5-gbp-buy",
+      "candidate_name": "paper_continuation_supervisor_v2 LONG",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_LEADERBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_NEXT_CANDIDATE_DISCOVERY_PACKET_U_V1_REPORT.md",
+        "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_REPLACEMENT_ANALYSIS_V1.md",
+        "automation/forex_engine/next_candidate_discovery_u_v1.py"
+      ],
+      "evidence_summary": {
+        "expectancy": 70.0,
+        "profit_factor": 2.56,
+        "win_rate": 0.8667,
+        "max_drawdown": 1.5385,
+        "sample_size": 15,
+        "walk_forward": "missing",
+        "safety": "paper-only discovery path"
+      },
+      "scores": {
+        "expectancy_evidence": 20,
+        "profit_factor_evidence": 15,
+        "win_loss_evidence": 10,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 70,
+      "status": "NEEDS_MORE_EVIDENCE",
+      "rejection_or_gap_reason": "Runner-up paper candidate has positive metrics but only 15 trades and no walk-forward/OOS proof.",
+      "next_required_evidence": [
+        "Expand sample size.",
+        "Run candidate-specific walk-forward/OOS proof.",
+        "Produce source-backed drawdown containment evidence."
+      ]
+    },
+    {
+      "candidate_id": "c2-usd-buy",
+      "candidate_name": "paper_momentum_supervisor_v3 LONG",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_LEADERBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md",
+        "automation/forex_engine/next_candidate_discovery_u_v1.py"
+      ],
+      "evidence_summary": {
+        "expectancy": 18.2105,
+        "profit_factor": 3.26,
+        "win_rate": 0.7,
+        "max_drawdown": 0.0,
+        "sample_size": 20,
+        "walk_forward": "missing",
+        "safety": "paper-only candidate profile"
+      },
+      "scores": {
+        "expectancy_evidence": 20,
+        "profit_factor_evidence": 15,
+        "win_loss_evidence": 10,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 70,
+      "status": "NEEDS_MORE_EVIDENCE",
+      "rejection_or_gap_reason": "Positive paper metrics exist, but sample sufficiency is not settled across reports and walk-forward/OOS proof is missing.",
+      "next_required_evidence": [
+        "Reconcile sample count against the active promotion threshold.",
+        "Run walk-forward/OOS proof.",
+        "Confirm portfolio stability across batches."
+      ]
+    },
+    {
+      "candidate_id": "c3-eur-sell",
+      "candidate_name": "paper_mean_reversion_v2 SHORT",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_LEADERBOARD_V1.md",
+        "automation/forex_engine/next_candidate_discovery_u_v1.py"
+      ],
+      "evidence_summary": {
+        "expectancy": 10.0,
+        "profit_factor": 5.6667,
+        "win_rate": 0.8125,
+        "max_drawdown": 0.0,
+        "sample_size": 16,
+        "walk_forward": "missing",
+        "safety": "paper-only candidate profile"
+      },
+      "scores": {
+        "expectancy_evidence": 20,
+        "profit_factor_evidence": 15,
+        "win_loss_evidence": 10,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 70,
+      "status": "NEEDS_MORE_EVIDENCE",
+      "rejection_or_gap_reason": "Positive paper metrics exist, but sample size is below current proof depth and no walk-forward/OOS proof was found.",
+      "next_required_evidence": [
+        "Expand sample size.",
+        "Run walk-forward/OOS proof.",
+        "Compare against the current anchor candidate after proof expansion."
+      ]
+    },
+    {
+      "candidate_id": "c3-nzd-buy",
+      "candidate_name": "paper_long_run_supervisor_v2 LONG",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_EDGE_DISCOVERY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 200.0,
+        "profit_factor": 999.0,
+        "win_rate": 1.0,
+        "max_drawdown": 0.0,
+        "sample_size": 1,
+        "walk_forward": "missing",
+        "safety": "local paper fixture path"
+      },
+      "scores": {
+        "expectancy_evidence": 20,
+        "profit_factor_evidence": 15,
+        "win_loss_evidence": 10,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 70,
+      "status": "REJECTED_INSUFFICIENT_SAMPLE",
+      "rejection_or_gap_reason": "Strong one-shot paper metrics, but current reports reject it for insufficient sample.",
+      "next_required_evidence": [
+        "Expand closed-trade sample.",
+        "Run walk-forward/OOS proof.",
+        "Re-score after sample expansion."
+      ]
+    },
+    {
+      "candidate_id": "c4-jpy-buy",
+      "candidate_name": "paper_breakout_supervisor_v2 LONG",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_LEADERBOARD_V1.md",
+        "automation/forex_engine/next_candidate_discovery_u_v1.py"
+      ],
+      "evidence_summary": {
+        "expectancy": -10.125,
+        "profit_factor": 2.1667,
+        "win_rate": 0.4375,
+        "max_drawdown": 0.0,
+        "sample_size": 16,
+        "walk_forward": "missing",
+        "safety": "paper-only candidate profile"
+      },
+      "scores": {
+        "expectancy_evidence": 0,
+        "profit_factor_evidence": 15,
+        "win_loss_evidence": 0,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 40,
+      "status": "REJECTED_NEGATIVE_EXPECTANCY",
+      "rejection_or_gap_reason": "Candidate leaderboard marks negative_expectancy.",
+      "next_required_evidence": [
+        "Reject or redesign before further proof work.",
+        "Do not promote without positive expectancy evidence."
+      ]
+    },
+    {
+      "candidate_id": "c1-gbp-sell",
+      "candidate_name": "paper_long_run_supervisor_v2 SHORT",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_EDGE_DISCOVERY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 0.0,
+        "profit_factor": 0.0,
+        "win_rate": 0.0,
+        "max_drawdown": 0.0,
+        "sample_size": 0,
+        "walk_forward": "missing",
+        "safety": "local paper fixture path"
+      },
+      "scores": {
+        "expectancy_evidence": 0,
+        "profit_factor_evidence": 0,
+        "win_loss_evidence": 0,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 25,
+      "status": "REJECTED_LOW_PROFIT_FACTOR",
+      "rejection_or_gap_reason": "Top-10 and failure analysis list insufficient sample with non-productive profit-factor geometry.",
+      "next_required_evidence": [
+        "Reject or rebuild before further proof work."
+      ]
+    },
+    {
+      "candidate_id": "c1-aud-buy",
+      "candidate_name": "paper_long_run_supervisor_v2 LONG",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_EDGE_DISCOVERY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 0.0,
+        "profit_factor": 0.0,
+        "win_rate": 0.0,
+        "max_drawdown": 0.0,
+        "sample_size": 0,
+        "walk_forward": "missing",
+        "safety": "local paper fixture path"
+      },
+      "scores": {
+        "expectancy_evidence": 0,
+        "profit_factor_evidence": 0,
+        "win_loss_evidence": 0,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 25,
+      "status": "REJECTED_LOW_PROFIT_FACTOR",
+      "rejection_or_gap_reason": "Top-10 and failure analysis list insufficient sample, non-positive expectancy, and low profit factor.",
+      "next_required_evidence": [
+        "Reject or rebuild before further proof work."
+      ]
+    },
+    {
+      "candidate_id": "c2-eur-sell",
+      "candidate_name": "paper_long_run_supervisor_v2 SHORT",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_EDGE_DISCOVERY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 0.0,
+        "profit_factor": 0.0,
+        "win_rate": 0.0,
+        "max_drawdown": 0.0,
+        "sample_size": 0,
+        "walk_forward": "missing",
+        "safety": "local paper fixture path"
+      },
+      "scores": {
+        "expectancy_evidence": 0,
+        "profit_factor_evidence": 0,
+        "win_loss_evidence": 0,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 25,
+      "status": "REJECTED_LOW_PROFIT_FACTOR",
+      "rejection_or_gap_reason": "Top-10 and failure analysis list insufficient sample with non-productive profit-factor geometry.",
+      "next_required_evidence": [
+        "Reject or rebuild before further proof work."
+      ]
+    },
+    {
+      "candidate_id": "c2-cad-buy",
+      "candidate_name": "paper_long_run_supervisor_v2 LONG",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_EDGE_DISCOVERY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 0.0,
+        "profit_factor": 0.0,
+        "win_rate": 0.0,
+        "max_drawdown": 0.0,
+        "sample_size": 0,
+        "walk_forward": "missing",
+        "safety": "local paper fixture path"
+      },
+      "scores": {
+        "expectancy_evidence": 0,
+        "profit_factor_evidence": 0,
+        "win_loss_evidence": 0,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 25,
+      "status": "REJECTED_LOW_PROFIT_FACTOR",
+      "rejection_or_gap_reason": "Top-10 and failure analysis list insufficient sample, non-positive expectancy, and low profit factor.",
+      "next_required_evidence": [
+        "Reject or rebuild before further proof work."
+      ]
+    },
+    {
+      "candidate_id": "c3-chf-sell",
+      "candidate_name": "paper_long_run_supervisor_v2 SHORT",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_EDGE_DISCOVERY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 0.0,
+        "profit_factor": 0.0,
+        "win_rate": 0.0,
+        "max_drawdown": 0.0,
+        "sample_size": 0,
+        "walk_forward": "missing",
+        "safety": "local paper fixture path"
+      },
+      "scores": {
+        "expectancy_evidence": 0,
+        "profit_factor_evidence": 0,
+        "win_loss_evidence": 0,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 25,
+      "status": "REJECTED_LOW_PROFIT_FACTOR",
+      "rejection_or_gap_reason": "Top-10 and failure analysis list insufficient sample with non-productive profit-factor geometry.",
+      "next_required_evidence": [
+        "Reject or rebuild before further proof work."
+      ]
+    },
+    {
+      "candidate_id": "c3-eur-dup",
+      "candidate_name": "paper_long_run_supervisor_v2 LONG duplicate-control candidate",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_TOP_10_PROFIT_CANDIDATES_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_EDGE_DISCOVERY_SCOREBOARD_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_GATE_FAILURE_ANALYSIS_V1.md"
+      ],
+      "evidence_summary": {
+        "expectancy": 0.0,
+        "profit_factor": 0.0,
+        "win_rate": 0.0,
+        "max_drawdown": 0.0,
+        "sample_size": 0,
+        "walk_forward": "missing",
+        "safety": "local paper fixture path"
+      },
+      "scores": {
+        "expectancy_evidence": 0,
+        "profit_factor_evidence": 0,
+        "win_loss_evidence": 0,
+        "drawdown_evidence": 10,
+        "sample_size_evidence": 0,
+        "walk_forward_oos_evidence": 0,
+        "execution_demo_relevance": 10,
+        "safety_risk_compatibility": 5
+      },
+      "total_score": 25,
+      "status": "REJECTED_LOW_PROFIT_FACTOR",
+      "rejection_or_gap_reason": "Top-10 and failure analysis list insufficient sample, non-positive expectancy, and low profit factor.",
+      "next_required_evidence": [
+        "Reject or rebuild before further proof work."
+      ]
+    }
+  ],
+  "best_candidate": {
+    "candidate_id": "c1-eur-buy",
+    "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+    "total_score": 85,
+    "status": "NEEDS_MORE_EVIDENCE"
+  },
+  "campaign_status": "MORE_EVIDENCE_REQUIRED"
+}
