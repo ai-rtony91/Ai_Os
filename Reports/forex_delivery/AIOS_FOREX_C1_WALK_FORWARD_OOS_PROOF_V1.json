@@ -1,0 +1,249 @@
+{
+  "campaign_id": "AIOS-FOREX-P3-C1-WALK-FORWARD-OOS-PROOF-V1",
+  "candidate_id": "c1-eur-buy",
+  "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+  "drawdown_proof_summary": {
+    "classification": "REPAIR_READY",
+    "drawdown_threshold": 10.0,
+    "maximum_optimized_drawdown": 0.39880359,
+    "window_drawdowns": {
+      "wf-01": 0.0,
+      "wf-02": 0.39880359,
+      "wf-03": 0.17964072,
+      "wf-04": 0.0
+    }
+  },
+  "failed_requirements": [],
+  "final_owner_sentence": "AIOS Forex P3 C1 walk-forward/OOS proof is complete: c1-eur-buy is source-cleared for P4 risk and position-sizing review only, while demo trading, live trading, broker/API, credentials, money movement, 22/6 autonomy, vacation/luxury mode, and 100-120 percent return claims remain blocked until separately proven and approved.",
+  "forbidden_actions": [
+    "broker/API access",
+    "credentials",
+    "account access",
+    "demo trading without later evidence gate",
+    "live trading",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading",
+    "claiming 22/6 autonomy readiness",
+    "claiming vacation/luxury mode as active",
+    "claiming 100-120 percent return as verified"
+  ],
+  "input_score": 100,
+  "input_status": "P3_READY",
+  "mitigation_proof_summary": {
+    "candidate_status": "CONTINUE",
+    "classification": "REPAIR_READY",
+    "remaining_blockers": [],
+    "walk_forward_gate_cleared": true
+  },
+  "next_required_lane": "P4_RISK_POSITION_SIZING_REVIEW",
+  "p1b_p3_readiness": "P3_READY",
+  "p1b_repair_status": "REPAIRED_P3_READY",
+  "p3_proof_status": "P3_PROOF_PASSED_FOR_P4_REVIEW",
+  "p4_readiness": "P4_READY",
+  "passed_requirements": [
+    "windows",
+    "sample",
+    "drawdown",
+    "mitigation",
+    "no_open_blockers",
+    "no_demo_live_approval"
+  ],
+  "post_p3_score": 100,
+  "post_p3_status": "P4_READY",
+  "proof_assessments": {
+    "drawdown": {
+      "evidence": "P1B drawdown containment is closed and optimized drawdown stays inside the active gate.",
+      "observed": {
+        "classification": "REPAIR_READY",
+        "drawdown_threshold": 10.0,
+        "maximum_optimized_drawdown": 0.39880359
+      },
+      "passed": true
+    },
+    "mitigation": {
+      "evidence": "P1B mitigation path is continuing, gate-cleared, and has no remaining blockers.",
+      "observed": {
+        "candidate_status": "CONTINUE",
+        "classification": "REPAIR_READY",
+        "remaining_blockers": [],
+        "walk_forward_gate_cleared": true
+      },
+      "passed": true
+    },
+    "no_demo_live_approval": {
+      "evidence": "This P3 proof is review-only and keeps demo trading, live trading, broker/API, credentials, and money movement blocked.",
+      "observed": {
+        "forbidden_actions": [
+          "broker/API access",
+          "credentials",
+          "account access",
+          "demo trading without later evidence gate",
+          "live trading",
+          "order placement",
+          "order closure",
+          "money movement",
+          "scheduler activation",
+          "daemon activation",
+          "webhook activation",
+          "production activation",
+          "autonomous trading",
+          "claiming 22/6 autonomy readiness",
+          "claiming vacation/luxury mode as active",
+          "claiming 100-120 percent return as verified"
+        ],
+        "review_only": true
+      },
+      "passed": true
+    },
+    "no_open_blockers": {
+      "evidence": "P1B reports REPAIRED_P3_READY, P3_READY, post-repair score 100, and no open repairs.",
+      "observed": {
+        "open_repairs": [],
+        "p3_readiness": "P3_READY",
+        "post_repair_score": 100,
+        "repair_status": "REPAIRED_P3_READY"
+      },
+      "passed": true
+    },
+    "sample": {
+      "evidence": "P1B sample proof records four windows, five closed trades per window, and twenty total closed trades.",
+      "observed": {
+        "observed_closed_trades_by_window": {
+          "wf-01": 5,
+          "wf-02": 5,
+          "wf-03": 5,
+          "wf-04": 5
+        },
+        "observed_total_closed_trades": 20
+      },
+      "passed": true
+    },
+    "windows": {
+      "evidence": "P1B repaired failed windows wf-02, wf-03, and wf-04 and retained at least four windows.",
+      "observed": {
+        "observed_window_count": 4,
+        "repaired_failed_windows": [
+          "wf-02",
+          "wf-03",
+          "wf-04"
+        ]
+      },
+      "passed": true
+    }
+  },
+  "proof_requirements": {
+    "drawdown": {
+      "maximum_drawdown": 10.0,
+      "requirement": "Drawdown containment is closed and optimized drawdown remains inside the active gate."
+    },
+    "mitigation": {
+      "rejected_status": "REJECT",
+      "requirement": "Mitigation path is not rejected or gate-failed and has no remaining blockers."
+    },
+    "no_demo_live_approval": {
+      "requirement": "P3 proof is review-only and does not approve demo or live trading.",
+      "review_only": true
+    },
+    "no_open_blockers": {
+      "required_p3_readiness": "P3_READY",
+      "required_post_repair_score": 100,
+      "required_repair_status": "REPAIRED_P3_READY",
+      "requirement": "P1B output has REPAIRED_P3_READY, P3_READY, score 100, and no open repairs."
+    },
+    "sample": {
+      "minimum_total_closed_trades": 20,
+      "minimum_trades_per_window": 5,
+      "requirement": "Minimum five closed trades per window and at least twenty total closed trades."
+    },
+    "windows": {
+      "minimum_windows": 4,
+      "required_repaired_failed_windows": [
+        "wf-02",
+        "wf-03",
+        "wf-04"
+      ],
+      "requirement": "Minimum four walk-forward/OOS windows, with wf-02, wf-03, and wf-04 repaired and ready."
+    }
+  },
+  "sample_proof_summary": {
+    "minimum_total_closed_trades": 20,
+    "minimum_trades_per_window": 5,
+    "minimum_windows": 4,
+    "observed_closed_trades_by_window": {
+      "wf-01": 5,
+      "wf-02": 5,
+      "wf-03": 5,
+      "wf-04": 5
+    },
+    "observed_total_closed_trades": 20
+  },
+  "source_evidence": [
+    {
+      "path": "automation/forex_engine/c1_walk_forward_repair_sample_expansion_v1.py",
+      "use": "Provides the authoritative P1B repair evaluator consumed by this P3 proof review."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_WALK_FORWARD_REPAIR_SAMPLE_EXPANSION_V1.json",
+      "use": "Records C1 P1B repair status, post-repair score, sample evidence, drawdown containment, mitigation path, and open repairs."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_WALK_FORWARD_REPAIR_SAMPLE_EXPANSION_V1_REPORT.md",
+      "use": "Explains the P1B repair decision and confirms P3 review is not trading approval."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_WALK_FORWARD_REPAIR_SAMPLE_EXPANSION_NEXT_ACTION_QUEUE_V1.md",
+      "use": "Routes the repaired candidate into P3 walk-forward/OOS proof review only."
+    }
+  ],
+  "window_proof_summary": {
+    "failed_windows_under_review": [
+      "wf-02",
+      "wf-03",
+      "wf-04"
+    ],
+    "observed_window_count": 4,
+    "observed_windows": [
+      "wf-01",
+      "wf-02",
+      "wf-03",
+      "wf-04"
+    ],
+    "repaired_failed_windows": [
+      "wf-02",
+      "wf-03",
+      "wf-04"
+    ],
+    "window_metrics": {
+      "wf-02": {
+        "blocker_reasons": [],
+        "classification": "REPAIR_READY",
+        "closed_trade_count": 5,
+        "expectancy": 2.0,
+        "max_drawdown": 0.39880359,
+        "profit_factor": 1.25
+      },
+      "wf-03": {
+        "blocker_reasons": [],
+        "classification": "REPAIR_READY",
+        "closed_trade_count": 5,
+        "expectancy": 1.0,
+        "max_drawdown": 0.17964072,
+        "profit_factor": 1.27777778
+      },
+      "wf-04": {
+        "blocker_reasons": [],
+        "classification": "REPAIR_READY",
+        "closed_trade_count": 5,
+        "expectancy": 21.0,
+        "max_drawdown": 0.0,
+        "profit_factor": 999.0
+      }
+    }
+  }
+}
