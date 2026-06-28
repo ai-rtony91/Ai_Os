@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-complete-review-ready",
+  "evidence_completeness": 0.95,
+  "sample_count": 120,
+  "expectancy": 1.6,
+  "profit_factor": 1.8,
+  "drawdown": 0.11,
+  "risk_control_score": 0.92,
+  "auditability": 0.88,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}

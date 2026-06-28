@@ -1,0 +1,7 @@
+{
+  "catalog_version": "1.0",
+  "items": {
+    "owner approval evidence": {"name":"owner approval evidence","classification":"OWNER_EVIDENCE_REQUIRED","reason":"owner signature missing","source":"local","evidence_present":false},
+    "candidate evidence": {"name":"candidate evidence","classification":"ALREADY_PRESENT","reason":"present","source":"local","evidence_present":true}
+  }
+}

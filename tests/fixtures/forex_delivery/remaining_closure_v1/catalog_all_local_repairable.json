@@ -1,0 +1,22 @@
+{
+  "catalog_version": "1.0",
+  "items": {
+    "candidate evidence": {"name":"candidate evidence","classification":"LOCAL_REPAIRABLE","reason":"local backtest artifacts exist","source":"local"},
+    "walk-forward evidence": {"name":"walk-forward evidence","classification":"LOCAL_REPAIRABLE","reason":"walk-forward evidence missing" ,"source":"local"},
+    "out-of-sample evidence": {"name":"out-of-sample evidence","classification":"LOCAL_REPAIRABLE","reason":"out-of-sample evidence missing","source":"local"},
+    "demo trade telemetry": {"name":"demo trade telemetry","classification":"LOCAL_REPAIRABLE","reason":"demo telemetry missing","source":"local"},
+    "broker snapshot evidence": {"name":"broker snapshot evidence","classification":"LOCAL_REPAIRABLE","reason":"local stub snapshot missing","source":"local"},
+    "execution readiness evidence": {"name":"execution readiness evidence","classification":"LOCAL_REPAIRABLE","reason":"execution evidence missing","source":"local"},
+    "risk control evidence": {"name":"risk control evidence","classification":"LOCAL_REPAIRABLE","reason":"risk evidence missing","source":"local"},
+    "expectancy/profit-factor evidence": {"name":"expectancy/profit-factor evidence","classification":"LOCAL_REPAIRABLE","reason":"profitability evidence missing","source":"local"},
+    "drawdown evidence": {"name":"drawdown evidence","classification":"LOCAL_REPAIRABLE","reason":"drawdown evidence missing","source":"local"},
+    "sample sufficiency evidence": {"name":"sample sufficiency evidence","classification":"LOCAL_REPAIRABLE","reason":"sample evidence missing","source":"local"},
+    "owner approval evidence": {"name":"owner approval evidence","classification":"LOCAL_REPAIRABLE","reason":"owner packet needed","source":"local"},
+    "live exception evidence": {"name":"live exception evidence","classification":"LOCAL_REPAIRABLE","reason":"exception evidence missing","source":"local"},
+    "credential boundary evidence": {"name":"credential boundary evidence","classification":"LOCAL_REPAIRABLE","reason":"boundary evidence missing","source":"local"},
+    "kill-switch evidence": {"name":"kill-switch evidence","classification":"LOCAL_REPAIRABLE","reason":"kill-switch evidence missing","source":"local"},
+    "monitoring/alert evidence": {"name":"monitoring/alert evidence","classification":"LOCAL_REPAIRABLE","reason":"alert evidence missing","source":"local"},
+    "audit log evidence": {"name":"audit log evidence","classification":"LOCAL_REPAIRABLE","reason":"audit logs missing","source":"local"},
+    "final bundle evidence": {"name":"final bundle evidence","classification":"LOCAL_REPAIRABLE","reason":"bundle evidence missing","source":"local"}
+  }
+}

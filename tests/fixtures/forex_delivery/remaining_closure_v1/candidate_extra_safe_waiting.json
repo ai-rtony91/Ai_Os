@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-extra-safe-waiting",
+  "evidence_completeness": 0.95,
+  "sample_count": 140,
+  "expectancy": 1.9,
+  "profit_factor": 2.2,
+  "drawdown": 0.06,
+  "risk_control_score": 0.97,
+  "auditability": 0.93,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}

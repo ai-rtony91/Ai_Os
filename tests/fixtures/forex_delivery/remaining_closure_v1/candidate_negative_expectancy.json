@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-negative-expectancy",
+  "evidence_completeness": 0.96,
+  "sample_count": 105,
+  "expectancy": -0.35,
+  "profit_factor": 1.5,
+  "drawdown": 0.14,
+  "risk_control_score": 0.86,
+  "auditability": 0.8,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}
