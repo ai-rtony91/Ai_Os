@@ -1,0 +1,35 @@
+{
+  "fixture_version": "1.0",
+  "packet_id": "AIOS-FOREX-ALL-LANES-GOALS-COMPLETION-CAMPAIGN-V1",
+  "fixture_id": "ALL-LANES-FIXTURE-005",
+  "category": "broker_demo_permission_required",
+  "expected_status": "LIVE_OR_BROKER_PERMISSION_REQUIRED",
+  "goal": {
+    "goal_id": "FIXTURE-GOAL-005",
+    "source_file_path": "tests/fixtures/forex_delivery/all_lanes_goals_completion_campaign_v1/fixture_005.json",
+    "source_type": "fixture",
+    "current_status": "LIVE_OR_BROKER_PERMISSION_REQUIRED",
+    "blocker_class": "broker_demo_permission_required",
+    "repo_actionable": false,
+    "protected_owner_required": true,
+    "external_evidence_required": true,
+    "safety_class": "LIVE_OR_BROKER_BLOCKED",
+    "proposed_closure_action": "Fixture validates deterministic all-lanes campaign classification only.",
+    "target_artifact": "Reports/forex_delivery/AIOS_FOREX_ALL_LANES_GOALS_COMPLETION_CAMPAIGN_V1_REPORT.md",
+    "validation_required": [
+      "campaign pytest",
+      "strict CLI report run"
+    ],
+    "completion_status": "LIVE_OR_BROKER_PERMISSION_REQUIRED"
+  },
+  "safety": {
+    "local_only": true,
+    "broker_api_calls": false,
+    "credential_access": false,
+    "demo_live_execution": false,
+    "order_execution": false,
+    "money_movement": false,
+    "production_activation": false,
+    "profit_claims": false
+  }
+}
