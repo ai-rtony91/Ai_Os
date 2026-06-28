@@ -438,6 +438,40 @@ def _p13_blocked_owner_input(p12_result: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _collect_p13_local_validation_failures(owner_input: dict[str, Any]) -> list[str]:
+    failures: list[str] = []
+
+    for field_name in (
+        "broker_api_access_authorized",
+        "credential_access_authorized",
+        "broker_api_connection_authorized_now",
+        "credential_access_authorized_now",
+        "order_submission_authorized_now",
+        "execution_command_authorized_now",
+        "execution_command_authorized",
+        "demo_order_placement_authorized",
+        "live_trading_authorized",
+        "money_movement_authorized",
+        "autonomy_approval",
+    ):
+        if owner_input.get(field_name, False) is True:
+            failures.append(f"{field_name}_must_be_false")
+
+    for field_name in (
+        "protected_owner_command_release_review",
+        "protected_command_release_review",
+        "protected_final_rehearsal_required",
+        "owner_execution_card_required",
+        "credential_handling_review",
+        "broker_connection_review",
+        "final_protected_command_release_review",
+    ):
+        if owner_input.get(field_name, False) is not True:
+            failures.append(f"{field_name}_required")
+
+    return failures
+
+
 def _p13_blocked_p12_repair(
     p12_result: dict[str, Any],
     checks: dict[str, bool] | None = None,
@@ -570,10 +604,13 @@ def evaluate_c1_owner_run_protected_demo_order_command_release_review(
     if owner_input is None:
         return _p13_blocked_owner_input(p12_result)
 
+    p13_local_failures = _collect_p13_local_validation_failures(owner_input)
     if (
         p12_result.get("p12_command_packet_status") != P12_VALID_STATUS
         or p12_result.get("protected_owner_command_status") != "P13_READY"
     ):
+        if p13_local_failures:
+            return _p13_failed(p12_result, {}, _empty_checks(), p13_local_failures)
         return _p13_blocked_p12_repair(p12_result)
 
     if not _enforce_forbidden_authorities(owner_input):
