@@ -1,0 +1,268 @@
+{
+  "campaign_id": "AIOS-FOREX-P1B-C1-WALK-FORWARD-REPAIR-SAMPLE-EXPANSION-V1",
+  "candidate_id": "c1-eur-buy",
+  "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+  "closed_repairs": [
+    "wf-02",
+    "wf-03",
+    "wf-04",
+    "drawdown_containment",
+    "insufficient_sample",
+    "mitigation_path"
+  ],
+  "drawdown_containment_decision": {
+    "calculated_repair": {
+      "drawdown_threshold": 10.0,
+      "maximum_optimized_drawdown": 0.39880359,
+      "window_drawdowns": {
+        "wf-01": 0.0,
+        "wf-02": 0.39880359,
+        "wf-03": 0.17964072,
+        "wf-04": 0.0
+      }
+    },
+    "classification": "REPAIR_READY",
+    "decision": "Drawdown containment closes because optimized drawdown stays inside the 10.00 gate.",
+    "next_action": "Carry drawdown containment into P3 proof review only.",
+    "repair_route": "drawdown_guard_verification",
+    "source_files": [
+      "Reports/forex_delivery/AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md",
+      "automation/forex_engine/mitigation_optimization_t_v1.py"
+    ],
+    "starting_evidence": "Baseline repair queue left drawdown_containment open and wf-04 recorded 75.20 drawdown.",
+    "target": "drawdown_containment"
+  },
+  "failed_windows": [
+    "wf-02",
+    "wf-03",
+    "wf-04"
+  ],
+  "final_owner_sentence": "AIOS Forex P1B C1 walk-forward repair is complete: c1-eur-buy is source-cleared for P3 walk-forward/OOS proof review only, while live trading, broker/API, credentials, money movement, 22/6 autonomy, vacation/luxury mode, and 100-120 percent return claims remain blocked until separately proven and approved.",
+  "forbidden_actions": [
+    "broker/API access",
+    "credentials",
+    "account access",
+    "demo trade without evidence gate",
+    "live trading",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading",
+    "claiming 22/6 autonomy readiness",
+    "claiming vacation/luxury mode as active",
+    "claiming 100-120 percent return as verified"
+  ],
+  "input_score": 85,
+  "input_status": "NEEDS_MORE_EVIDENCE",
+  "mitigation_candidate_status": "CONTINUE",
+  "mitigation_path_decision": {
+    "calculated_repair": {
+      "candidate_status": "CONTINUE",
+      "remaining_blockers": [],
+      "walk_forward_gate_cleared": true
+    },
+    "classification": "REPAIR_READY",
+    "decision": "Mitigation path closes because the deterministic local mitigation output reports a cleared gate and no remaining blockers.",
+    "next_action": "Route C1 to P3 walk-forward/OOS proof review only.",
+    "repair_route": "mitigation_gate_recheck",
+    "source_files": [
+      "Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_ROOT_CAUSE_DRYRUN_V2.md",
+      "automation/forex_engine/mitigation_optimization_t_v1.py"
+    ],
+    "starting_evidence": "Root-cause evidence previously identified candidate_status REJECT and walk_forward_gate_cleared false.",
+    "target": "mitigation_path"
+  },
+  "mitigation_walk_forward_improved": true,
+  "next_required_lane": "P3_WALK_FORWARD_OOS_PROOF",
+  "open_repairs": [],
+  "p3_readiness": "P3_READY",
+  "post_repair_score": 100,
+  "post_repair_status": "P3_READY",
+  "repair_assessments": {
+    "drawdown_containment": {
+      "calculated_repair": {
+        "drawdown_threshold": 10.0,
+        "maximum_optimized_drawdown": 0.39880359,
+        "window_drawdowns": {
+          "wf-01": 0.0,
+          "wf-02": 0.39880359,
+          "wf-03": 0.17964072,
+          "wf-04": 0.0
+        }
+      },
+      "classification": "REPAIR_READY",
+      "decision": "Drawdown containment closes because optimized drawdown stays inside the 10.00 gate.",
+      "next_action": "Carry drawdown containment into P3 proof review only.",
+      "repair_route": "drawdown_guard_verification",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md",
+        "automation/forex_engine/mitigation_optimization_t_v1.py"
+      ],
+      "starting_evidence": "Baseline repair queue left drawdown_containment open and wf-04 recorded 75.20 drawdown.",
+      "target": "drawdown_containment"
+    },
+    "insufficient_sample": {
+      "calculated_repair": {
+        "minimum_trades_per_window": 5,
+        "minimum_windows": 4,
+        "observed_closed_trades_by_window": {
+          "wf-01": 5,
+          "wf-02": 5,
+          "wf-03": 5,
+          "wf-04": 5
+        },
+        "observed_total_closed_trades": 20,
+        "observed_windows": 4
+      },
+      "classification": "REPAIR_READY",
+      "decision": "Sample sufficiency closes because optimized evidence has four windows with at least five closed trades each.",
+      "next_action": "Carry the 4-window and 5-trade minimum into P3 proof review only.",
+      "repair_route": "sample_expansion_verification",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md",
+        "automation/forex_engine/mitigation_optimization_t_v1.py"
+      ],
+      "starting_evidence": "Baseline repair queue left optimized wf-02, wf-03, and wf-04 blocked by insufficient_sample.",
+      "target": "insufficient_sample"
+    },
+    "mitigation_path": {
+      "calculated_repair": {
+        "candidate_status": "CONTINUE",
+        "remaining_blockers": [],
+        "walk_forward_gate_cleared": true
+      },
+      "classification": "REPAIR_READY",
+      "decision": "Mitigation path closes because the deterministic local mitigation output reports a cleared gate and no remaining blockers.",
+      "next_action": "Route C1 to P3 walk-forward/OOS proof review only.",
+      "repair_route": "mitigation_gate_recheck",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_ROOT_CAUSE_DRYRUN_V2.md",
+        "automation/forex_engine/mitigation_optimization_t_v1.py"
+      ],
+      "starting_evidence": "Root-cause evidence previously identified candidate_status REJECT and walk_forward_gate_cleared false.",
+      "target": "mitigation_path"
+    },
+    "wf-02": {
+      "calculated_repair": {
+        "blocker_reasons": [],
+        "closed_trade_count": 5,
+        "expectancy": 2.0,
+        "max_drawdown": 0.39880359,
+        "profit_factor": 1.25
+      },
+      "classification": "REPAIR_READY",
+      "decision": "wf-02 repair clears: optimized evidence has 5 trades, expectancy 2.00, profit factor 1.25, drawdown 0.40, and blockers none.",
+      "next_action": "Carry this repaired window into P3 walk-forward/OOS proof review only.",
+      "repair_route": "deterministic_mitigation_repair",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_FAILURE_ROOT_CAUSE_MATRIX_V1.md",
+        "automation/forex_engine/mitigation_optimization_t_v1.py"
+      ],
+      "starting_evidence": "Baseline wf-02 failed with expectancy -0.80, profit factor 0.93, and negative_expectancy plus low_profit_factor blockers.",
+      "target": "wf-02"
+    },
+    "wf-03": {
+      "calculated_repair": {
+        "blocker_reasons": [],
+        "closed_trade_count": 5,
+        "expectancy": 1.0,
+        "max_drawdown": 0.17964072,
+        "profit_factor": 1.27777778
+      },
+      "classification": "REPAIR_READY",
+      "decision": "wf-03 repair clears: optimized evidence has 5 trades, expectancy 1.00, profit factor 1.28, drawdown 0.18, and blockers none.",
+      "next_action": "Carry this repaired window into P3 walk-forward/OOS proof review only.",
+      "repair_route": "deterministic_mitigation_repair",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_FAILURE_ROOT_CAUSE_MATRIX_V1.md",
+        "automation/forex_engine/mitigation_optimization_t_v1.py"
+      ],
+      "starting_evidence": "Baseline wf-03 failed with expectancy -2.00, profit factor 0.61, and negative_expectancy plus low_profit_factor blockers.",
+      "target": "wf-03"
+    },
+    "wf-04": {
+      "calculated_repair": {
+        "blocker_reasons": [],
+        "closed_trade_count": 5,
+        "expectancy": 21.0,
+        "max_drawdown": 0.0,
+        "profit_factor": 999.0
+      },
+      "classification": "REPAIR_READY",
+      "decision": "wf-04 repair clears: optimized evidence has 5 trades, expectancy 21.00, profit factor 999.00, drawdown 0.00, and blockers none.",
+      "next_action": "Carry this repaired window into P3 walk-forward/OOS proof review only.",
+      "repair_route": "deterministic_mitigation_repair",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_FAILURE_ROOT_CAUSE_MATRIX_V1.md",
+        "automation/forex_engine/mitigation_optimization_t_v1.py"
+      ],
+      "starting_evidence": "Baseline wf-04 failed with expectancy -1499.00, profit factor 0.01, drawdown 75.20, and excessive_drawdown blocker.",
+      "target": "wf-04"
+    }
+  },
+  "repair_status": "REPAIRED_P3_READY",
+  "routed_repairs": [
+    {
+      "repair_id": "p3_walk_forward_oos_proof_review",
+      "required_action": "Run P3 walk-forward/OOS proof review only with all trading and broker actions still blocked.",
+      "route": "P3_WALK_FORWARD_OOS_PROOF"
+    }
+  ],
+  "sample_expansion_target": {
+    "classification": "REPAIR_READY",
+    "minimum_total_closed_trades": 20,
+    "minimum_trades_per_window": 5,
+    "minimum_windows": 4,
+    "observed_closed_trades_by_window": {
+      "wf-01": 5,
+      "wf-02": 5,
+      "wf-03": 5,
+      "wf-04": 5
+    },
+    "observed_total_closed_trades": 20,
+    "p3_review_requirement": "Use at least four walk-forward/OOS windows with at least five closed trades per window before any further promotion.",
+    "sample_status": "CLOSED_FOR_P1B_REPAIR"
+  },
+  "source_evidence": [
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_EVIDENCE_GAP_CLOSURE_V1.json",
+      "use": "Defines C1 starting blockers, score 85, P3 NOT_READY, and failed windows wf-02, wf-03, and wf-04."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_EVIDENCE_GAP_CLOSURE_V1_REPORT.md",
+      "use": "Confirms C1 remains best current candidate while failed windows and drawdown, sample, and mitigation blockers remain open."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+      "use": "Provides baseline failed-window metrics before repair."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_FAILURE_ROOT_CAUSE_MATRIX_V1.md",
+      "use": "Classifies the baseline root causes for failed windows."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_ROOT_CAUSE_DRYRUN_V2.md",
+      "use": "Identifies the prior mitigation-path reject state and walk-forward gate failure."
+    },
+    {
+      "path": "automation/forex_engine/mitigation_optimization_t_v1.py",
+      "use": "Calculates deterministic local mitigation repair output without broker, credential, account, order, or trading action."
+    }
+  ],
+  "starting_gap_closure_status": "PARTIAL_CLOSURE_NEXT_REPAIR_REQUIRED",
+  "starting_open_gaps": [
+    "wf_02_failed_window",
+    "wf_03_failed_window",
+    "wf_04_failed_window",
+    "drawdown_containment",
+    "insufficient_sample",
+    "mitigation_path"
+  ]
+}
