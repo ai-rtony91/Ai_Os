@@ -1,0 +1,237 @@
+{
+  "candidate_id": "c1-eur-buy",
+  "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+  "closed_gaps": [
+    "readiness_conflict",
+    "p3_readiness"
+  ],
+  "evidence_sources": [
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_PROFIT_EVIDENCE_COMPRESSION_P1_P2_V1.json",
+      "use": "Sets c1-eur-buy as best candidate with score 85 and NEEDS_MORE_EVIDENCE."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_PROFIT_CANDIDATE_SCOREBOARD_P1_P2_V1.json",
+      "use": "Scores C1 at 85, gives zero walk-forward/OOS credit, and requires more evidence."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_PROFIT_EVIDENCE_COMPRESSION_P1_P2_V1_REPORT.md",
+      "use": "States C1 is best current candidate but not P3-ready."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_PROFIT_EVIDENCE_GAP_QUEUE_P1_P2_V1.md",
+      "use": "Lists missing non-conflicting readiness, passing walk-forward/OOS proof, drawdown containment, and sample depth."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_EVIDENCE_DEPTH_SCOREBOARD_V1.md",
+      "use": "Provides strong P1 anchor metrics: 30 trades, expectancy 200.00, profit factor 999.00, and drawdown 0.00."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_WALK_FORWARD_STABILITY_SCOREBOARD_V1.md",
+      "use": "Reports 4 windows, 3 failing windows, stable expectancy -325.45, drawdown 75.20, and blocker clearance false."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_FAILURE_REGIME_SCOREBOARD_V1.md",
+      "use": "Identifies failed windows wf-02, wf-03, wf-04 and verdict REQUIRE_OPTIMIZATION."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+      "use": "Provides per-window failure metrics and walk-forward gate cleared false."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_FAILURE_ROOT_CAUSE_MATRIX_V1.md",
+      "use": "Confirms systemic failures in expectancy, profit factor, win rate, and loss profile."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md",
+      "use": "Shows optimized rows still blocked by insufficient_sample and drawdown_containment."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_ROOT_CAUSE_DRYRUN_V2.md",
+      "use": "Identifies mitigation candidate_status REJECT and walk_forward_gate_cleared false."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_DEPTH_PACKET_R_V1_REPORT.md",
+      "use": "Confirms 1 passing window, 3 failing windows, and remaining walk-forward blockers."
+    },
+    {
+      "path": "Reports/forex_delivery/readiness_state_recalculation_v1_report.json",
+      "use": "Contains readiness-looking bridge fields but unresolved review-chain blockers."
+    },
+    {
+      "path": "Reports/forex_delivery/review_chain_end_to_end_candidate_journey.json",
+      "use": "Reports candidate journey incomplete and candidate bridge rejected."
+    },
+    {
+      "path": "Reports/forex_delivery/proof_bundle_to_candidate_bridge_report.json",
+      "use": "Reports candidate bridge rejected with missing metrics and paper evidence not ready."
+    }
+  ],
+  "final_owner_sentence": "AIOS Forex P1 C1 EUR BUY evidence-gap closure is complete: c1-eur-buy remains the best current candidate but is not P3-ready, and the next required lane is C1 walk-forward repair and sample expansion; live trading, broker/API, credentials, money movement, 22/6 autonomy, vacation/luxury mode, and 100-120 percent return claims remain blocked until separately proven and approved.",
+  "forbidden_actions": [
+    "broker/API access",
+    "credentials",
+    "account access",
+    "demo trade without evidence gate",
+    "live trading",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading",
+    "claiming 22/6 autonomy readiness",
+    "claiming vacation/luxury mode as active",
+    "claiming 100-120 percent return as verified"
+  ],
+  "gap_assessments": {
+    "drawdown_containment": {
+      "classification": "OPEN_REPAIR_REQUIRED",
+      "decision": "Drawdown containment is not source-cleared.",
+      "evidence": "Before/after evidence leaves drawdown_containment open and wf-04 records 75.20 drawdown.",
+      "next_action": "Close drawdown_containment with source-backed passing evidence.",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_WALK_FORWARD_STABILITY_SCOREBOARD_V1.md"
+      ],
+      "status": "blocker_remaining"
+    },
+    "insufficient_sample": {
+      "classification": "OPEN_REPAIR_REQUIRED",
+      "decision": "Anchor sample depth does not clear post-repair window sample depth.",
+      "evidence": "Optimized wf-02, wf-03, and wf-04 rows remain blocked by insufficient_sample.",
+      "next_action": "Close insufficient_sample with source-backed passing evidence.",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_EVIDENCE_GAP_QUEUE_P1_P2_V1.md"
+      ],
+      "status": "blocker_remaining"
+    },
+    "mitigation_path": {
+      "classification": "ROUTED_REPAIR_REQUIRED",
+      "decision": "Mitigation path cannot promote C1 until it improves real candidate performance.",
+      "evidence": "Root-cause evidence identifies candidate_status REJECT and walk_forward_gate_cleared false.",
+      "next_action": "Route to C1 walk-forward repair and sample expansion.",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_ROOT_CAUSE_DRYRUN_V2.md",
+        "Reports/forex_delivery/AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md"
+      ],
+      "status": "candidate_status_reject"
+    },
+    "p3_readiness": {
+      "classification": "CLOSED_AS_NOT_READY",
+      "decision": "P3 walk-forward/OOS proof review is blocked until C1 repair evidence passes.",
+      "evidence": "No source-backed non-conflicting passing walk-forward/OOS proof exists for C1.",
+      "next_action": "Run P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION before any P3 lane.",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_PROFIT_EVIDENCE_COMPRESSION_P1_P2_V1_REPORT.md",
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_DEPTH_PACKET_R_V1_REPORT.md",
+        "Reports/forex_delivery/proof_bundle_to_candidate_bridge_report.json"
+      ],
+      "status": "not_ready"
+    },
+    "readiness_conflict": {
+      "classification": "CLOSED_AS_STRICT_NOT_READY_DECISION",
+      "decision": "Use strict precedence and classify C1 as NOT_READY for P3.",
+      "evidence": "Some bridge fields present readiness-looking metrics, but review-chain, candidate bridge, and C1-specific walk-forward evidence keep the candidate in a blocked evidence state.",
+      "next_action": "No readiness promotion; continue to repair lane.",
+      "source_files": [
+        "Reports/forex_delivery/readiness_state_recalculation_v1_report.json",
+        "Reports/forex_delivery/review_chain_end_to_end_candidate_journey.json",
+        "Reports/forex_delivery/proof_bundle_to_candidate_bridge_report.json",
+        "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_WALK_FORWARD_STABILITY_SCOREBOARD_V1.md"
+      ],
+      "status": "source_precedence_resolved"
+    },
+    "wf_02_failed_window": {
+      "classification": "OPEN_REPAIR_REQUIRED",
+      "decision": "Cannot clear P3 while wf-02 remains failed.",
+      "evidence": "wf-02 expectancy -0.80, profit factor 0.93, blockers negative_expectancy and low_profit_factor.",
+      "next_action": "Repair or replace wf-02 with source-backed passing evidence.",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_FAILURE_ROOT_CAUSE_MATRIX_V1.md"
+      ],
+      "status": "failed_window"
+    },
+    "wf_03_failed_window": {
+      "classification": "OPEN_REPAIR_REQUIRED",
+      "decision": "Cannot clear P3 while wf-03 remains failed.",
+      "evidence": "wf-03 expectancy -2.00, profit factor 0.61, blockers negative_expectancy and low_profit_factor.",
+      "next_action": "Repair or replace wf-03 with source-backed passing evidence.",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_FAILURE_ROOT_CAUSE_MATRIX_V1.md"
+      ],
+      "status": "failed_window"
+    },
+    "wf_04_failed_window": {
+      "classification": "OPEN_REPAIR_REQUIRED",
+      "decision": "Cannot clear P3 while wf-04 remains failed.",
+      "evidence": "wf-04 expectancy -1499.00, profit factor 0.01, drawdown 75.20, and excessive_drawdown blocker.",
+      "next_action": "Repair or replace wf-04 with source-backed passing evidence.",
+      "source_files": [
+        "Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
+        "Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_FAILURE_REGIME_SCOREBOARD_V1.md"
+      ],
+      "status": "failed_window"
+    }
+  },
+  "gap_closure_status": "PARTIAL_CLOSURE_NEXT_REPAIR_REQUIRED",
+  "input_score": 85,
+  "input_status": "NEEDS_MORE_EVIDENCE",
+  "next_required_lane": "P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION",
+  "open_gaps": [
+    "wf_02_failed_window",
+    "wf_03_failed_window",
+    "wf_04_failed_window",
+    "drawdown_containment",
+    "insufficient_sample",
+    "mitigation_path"
+  ],
+  "p3_readiness": "NOT_READY",
+  "post_closure_score": 85,
+  "post_closure_status": "NEEDS_MORE_EVIDENCE",
+  "routed_gaps": [
+    {
+      "gap_id": "wf_02_failed_window",
+      "required_action": "repair or replace failed wf-02 window",
+      "route": "P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION"
+    },
+    {
+      "gap_id": "wf_03_failed_window",
+      "required_action": "repair or replace failed wf-03 window",
+      "route": "P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION"
+    },
+    {
+      "gap_id": "wf_04_failed_window",
+      "required_action": "repair or replace failed wf-04 window",
+      "route": "P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION"
+    },
+    {
+      "gap_id": "drawdown_containment",
+      "required_action": "close drawdown_containment with source-backed evidence",
+      "route": "P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION"
+    },
+    {
+      "gap_id": "insufficient_sample",
+      "required_action": "close insufficient_sample with source-backed evidence",
+      "route": "P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION"
+    },
+    {
+      "gap_id": "mitigation_path",
+      "required_action": "repair mitigation path without bypassing walk-forward gates",
+      "route": "P1B_C1_WALK_FORWARD_REPAIR_AND_SAMPLE_EXPANSION"
+    }
+  ],
+  "strict_evidence_precedence": [
+    "Failed walk-forward/OOS evidence overrides anchor metrics.",
+    "Candidate-specific failure regime overrides general best-candidate optimism.",
+    "Root-cause and before/after comparison artifacts override older readiness claims.",
+    "Explicit blockers override implied readiness.",
+    "Paper-only evidence cannot authorize demo or live trading.",
+    "Strong P1 metrics can select a best candidate but cannot create P3 readiness by themselves."
+  ]
+}
