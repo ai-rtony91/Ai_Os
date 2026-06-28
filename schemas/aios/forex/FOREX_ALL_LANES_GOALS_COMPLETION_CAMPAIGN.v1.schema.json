@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aios.local/schemas/forex/FOREX_ALL_LANES_GOALS_COMPLETION_CAMPAIGN.v1.schema.json",
+  "title": "AIOS Forex All-Lanes Goals Completion Campaign V1",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "packet_id",
+    "generated_at",
+    "branch",
+    "goal_count",
+    "status_counts",
+    "goals",
+    "safety"
+  ],
+  "properties": {
+    "manifest_version": {
+      "type": "string"
+    },
+    "packet_id": {
+      "const": "AIOS-FOREX-ALL-LANES-GOALS-COMPLETION-CAMPAIGN-V1"
+    },
+    "generated_at": {
+      "type": "string"
+    },
+    "branch": {
+      "type": "string"
+    },
+    "goal_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status_counts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "goals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "goal_id",
+          "source_file_path",
+          "source_type",
+          "current_status",
+          "blocker_class",
+          "repo_actionable",
+          "protected_owner_required",
+          "external_evidence_required",
+          "safety_class",
+          "proposed_closure_action",
+          "target_artifact",
+          "validation_required",
+          "completion_status"
+        ],
+        "properties": {
+          "goal_id": {
+            "type": "string"
+          },
+          "source_file_path": {
+            "type": "string"
+          },
+          "source_type": {
+            "enum": [
+              "module",
+              "script",
+              "test",
+              "report",
+              "doc",
+              "schema",
+              "branch",
+              "epic",
+              "fixture"
+            ]
+          },
+          "current_status": {
+            "enum": [
+              "CLOSED_ON_MAIN",
+              "CLOSED_BY_THIS_CAMPAIGN",
+              "NEEDS_REPO_WORK",
+              "OWNER_PROTECTED_BOUNDARY",
+              "EXTERNAL_EVIDENCE_REQUIRED",
+              "LIVE_OR_BROKER_PERMISSION_REQUIRED",
+              "SAFETY_BLOCKED",
+              "DEFERRED_WITH_REASON",
+              "UNKNOWN_REQUIRES_OWNER_REVIEW"
+            ]
+          },
+          "blocker_class": {
+            "type": "string"
+          },
+          "repo_actionable": {
+            "type": "boolean"
+          },
+          "protected_owner_required": {
+            "type": "boolean"
+          },
+          "external_evidence_required": {
+            "type": "boolean"
+          },
+          "safety_class": {
+            "type": "string"
+          },
+          "proposed_closure_action": {
+            "type": "string"
+          },
+          "target_artifact": {
+            "type": "string"
+          },
+          "validation_required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "completion_status": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "required": [
+        "local_only",
+        "broker_api_calls",
+        "credential_access",
+        "demo_live_execution",
+        "order_execution",
+        "money_movement",
+        "production_activation",
+        "profit_claims"
+      ],
+      "properties": {
+        "local_only": {
+          "const": true
+        },
+        "broker_api_calls": {
+          "const": false
+        },
+        "credential_access": {
+          "const": false
+        },
+        "demo_live_execution": {
+          "const": false
+        },
+        "order_execution": {
+          "const": false
+        },
+        "money_movement": {
+          "const": false
+        },
+        "production_activation": {
+          "const": false
+        },
+        "profit_claims": {
+          "const": false
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

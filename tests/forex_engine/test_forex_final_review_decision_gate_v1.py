@@ -966,9 +966,21 @@ def test_cli_writes_default_reports_only_to_reports_dir(tmp_path) -> None:
     assert "Reports/forex_delivery" not in str(tmp_path / "handoff.md")
 
 
-def test_cli_strict_accepts_default_evidence_path() -> None:
-    output = orchestrator_runner.run_cli(["--strict", "--write-report", "--report-path", str(tmp_path := REPO_ROOT / "Reports\\forex_delivery\\cli_check.md")])
-    assert tmp_path.exists()
+def test_cli_strict_accepts_default_evidence_path(tmp_path) -> None:
+    report_path = tmp_path / "cli_check.md"
+    checkpoint_path = tmp_path / "cli_check_checkpoint.md"
+    output = orchestrator_runner.run_cli(
+        [
+            "--strict",
+            "--write-report",
+            "--report-path",
+            str(report_path),
+            "--checkpoint-report-path",
+            str(checkpoint_path),
+        ],
+    )
+    assert report_path.exists()
+    assert checkpoint_path.exists()
 
 
 def test_evidence_loader_does_not_read_env_or_network_tokens() -> None:
