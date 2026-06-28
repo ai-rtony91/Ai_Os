@@ -1,0 +1,375 @@
+{
+  "audit_requirements": {
+    "audit_report_required": true,
+    "manual_owner_review_required": true,
+    "must_exclude": [
+      "secrets",
+      "credentials",
+      "account identifiers",
+      "broker order identifiers",
+      "private execution payloads"
+    ],
+    "required_artifacts": [
+      "P5 supervised demo-trade readiness JSON",
+      "P5 supervised demo-trade readiness owner report",
+      "P5 next action queue",
+      "P6 owner report",
+      "P6 JSON evidence",
+      "P6 next action queue",
+      "owner-supplied sanitized broker/account snapshot",
+      "owner approval decision record"
+    ]
+  },
+  "blocked_actions": [
+    "demo-order placement",
+    "live trading",
+    "broker/API access",
+    "credential access",
+    "account access",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading",
+    "claiming owner approval has been granted",
+    "claiming demo-order placement authority",
+    "claiming live trading authority",
+    "claiming 22/6 autonomy readiness",
+    "claiming vacation/luxury mode as active",
+    "claiming 100-120 percent return as verified"
+  ],
+  "campaign_id": "AIOS-FOREX-P6-C1-DEMO-ORDER-INTENT-OWNER-APPROVAL-GATE-V1",
+  "candidate_id": "c1-eur-buy",
+  "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+  "demo_order_intent_card": {
+    "audit_artifacts_required": [
+      "P6 owner report",
+      "P6 JSON evidence",
+      "P6 next action queue",
+      "owner-supplied sanitized broker/account snapshot",
+      "owner approval decision record"
+    ],
+    "broker_api_access_blocked": true,
+    "candidate_id": "c1-eur-buy",
+    "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+    "credential_access_blocked": true,
+    "daily_stop_verification_required": true,
+    "demo_order_placement_authorized": false,
+    "intended_instrument": "EUR_USD",
+    "intended_side": "BUY",
+    "kill_switch_verification_required": true,
+    "live_trading_blocked": true,
+    "max_daily_loss_percent": 1.0,
+    "max_open_positions": 1,
+    "max_orders_per_signal": 1,
+    "max_risk_per_trade_percent": 0.25,
+    "max_weekly_loss_percent": 2.0,
+    "minimum_reward_to_risk": 1.2,
+    "money_movement_blocked": true,
+    "no_autonomy_approval": true,
+    "one_order_rule_verification_required": true,
+    "order_type_status": "OWNER_SELECTION_REQUIRED",
+    "owner_approval_required": true,
+    "owner_approval_status": "OWNER_ACTION_REQUIRED",
+    "sanitized_snapshot_required": true,
+    "stop_loss_formula_required": true,
+    "stop_loss_required": true,
+    "take_profit_formula_required": true,
+    "take_profit_required": true,
+    "units_formula": "units = risk_amount / stop_loss_value_per_unit",
+    "units_formula_only": true,
+    "weekly_stop_verification_required": true
+  },
+  "failed_requirements": [],
+  "final_owner_sentence": "AIOS Forex P6 C1 demo-order intent owner-approval gate is complete: c1-eur-buy has a review-only demo-order intent card prepared for owner decision, while demo-order placement, live trading, broker/API, credentials, money movement, 22/6 autonomy, vacation/luxury mode, and 100-120 percent return claims remain blocked until separately proven and approved.",
+  "forbidden_actions": [
+    "demo-order placement",
+    "live trading",
+    "broker/API access",
+    "credential access",
+    "account access",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading",
+    "claiming owner approval has been granted",
+    "claiming demo-order placement authority",
+    "claiming live trading authority",
+    "claiming 22/6 autonomy readiness",
+    "claiming vacation/luxury mode as active",
+    "claiming 100-120 percent return as verified"
+  ],
+  "input_score": 100,
+  "input_status": "P6_READY",
+  "kill_switch_verification": {
+    "kill_switch_verification_required": true,
+    "owner_snapshot_required": true,
+    "required_state": "active and untriggered before owner approval can continue",
+    "rule": "Any trigger keeps the owner gate from advancing until repair evidence is generated and the relevant review lane is rerun.",
+    "triggers": [
+      "missing sanitized broker/account snapshot",
+      "missing owner approval",
+      "missing order type selection",
+      "missing stop loss",
+      "missing take profit",
+      "reward-to-risk below 1.20",
+      "risk per trade above 0.25 percent",
+      "daily loss at or above 1.00 percent",
+      "weekly loss at or above 2.00 percent",
+      "more than one open position",
+      "more than one order for the same signal",
+      "credential, account, broker/API, order, scheduler, daemon, webhook, production, or autonomy path detected"
+    ]
+  },
+  "next_required_lane": "P6A_OWNER_SUPPLY_SANITIZED_SNAPSHOT_AND_APPROVAL_DECISION",
+  "one_order_verification": {
+    "max_open_positions": 1,
+    "max_orders_per_signal": 1,
+    "no_retry_loop": true,
+    "one_order_rule_verification_required": true,
+    "owner_snapshot_required": true,
+    "rule": "Owner-supplied sanitized evidence must show no more than one open position and no more than one order for the same signal before any later demo-order authority can be considered."
+  },
+  "owner_action_status": "OWNER_ACTION_REQUIRED",
+  "owner_approval_requirement": {
+    "approval_granted": false,
+    "approval_scope": "P6 demo-order intent owner-approval gate only",
+    "approved_by_this_packet": false,
+    "demo_order_placement_authorized": false,
+    "owner_approval_required": true,
+    "owner_approval_status": "OWNER_ACTION_REQUIRED",
+    "required_before_any_demo_order": true,
+    "required_decision_fields": [
+      "explicit owner approval decision",
+      "intended instrument confirmation",
+      "intended side confirmation",
+      "order type selection",
+      "units formula review",
+      "stop loss review",
+      "take profit review",
+      "reward-to-risk review",
+      "one-order rule verification",
+      "daily-stop verification",
+      "weekly-stop verification",
+      "kill-switch verification"
+    ]
+  },
+  "p5_p6_readiness": "P6_READY",
+  "p5_review_status": "P5_SUPERVISED_DEMO_READINESS_PASSED_FOR_P6_OWNER_APPROVAL",
+  "p6_entry_assessment": {
+    "checks": {
+      "broker_api_blocked": true,
+      "credential_access_blocked": true,
+      "demo_order_placement_blocked": true,
+      "failed_requirements_empty": true,
+      "live_trading_blocked": true,
+      "next_required_lane": true,
+      "owner_approval_required": true,
+      "p5_review_status": true,
+      "p6_readiness": true,
+      "post_p5_score": true,
+      "sanitized_snapshot_required": true
+    },
+    "observed": {
+      "demo_readiness_policy": {
+        "audit_report_required": true,
+        "broker_api_access_blocked": true,
+        "credential_access_blocked": true,
+        "daily_stop_required": true,
+        "demo_account_only": true,
+        "kill_switch_required": true,
+        "live_trading_blocked": true,
+        "manual_owner_review_required": true,
+        "max_daily_loss_percent": 1.0,
+        "max_open_positions": 1,
+        "max_orders_per_signal": 1,
+        "max_risk_per_trade_percent": 0.25,
+        "max_weekly_loss_percent": 2.0,
+        "minimum_reward_to_risk": 1.2,
+        "money_movement_blocked": true,
+        "no_autonomy_approval": true,
+        "no_demo_order_placement_in_this_packet": true,
+        "one_order_rule_required": true,
+        "order_placement_blocked": true,
+        "owner_approval_required": true,
+        "reward_to_risk_required": true,
+        "sanitized_broker_account_snapshot_required": true,
+        "tp_sl_required": true,
+        "weekly_stop_required": true
+      },
+      "failed_requirements": [],
+      "next_required_lane": "P6_DEMO_ORDER_INTENT_OWNER_APPROVAL_GATE",
+      "owner_approval_gate": {
+        "approval_scope": "P6 demo-order intent owner-approval gate only",
+        "approved_by_this_packet": false,
+        "owner_approval_required": true,
+        "required_before_any_demo_order": true,
+        "required_p6_fields": [
+          "instrument",
+          "side",
+          "order type",
+          "units formula",
+          "stop loss",
+          "take profit",
+          "reward-to-risk",
+          "sanitized broker/account snapshot",
+          "one-order rule verification",
+          "daily-stop verification",
+          "kill-switch verification"
+        ],
+        "rule": "The owner must review a later P6 intent card before any demo-order placement can be considered."
+      },
+      "p5_review_status": "P5_SUPERVISED_DEMO_READINESS_PASSED_FOR_P6_OWNER_APPROVAL",
+      "p6_readiness": "P6_READY",
+      "post_p5_score": 100,
+      "snapshot_requirement": {
+        "allowed_snapshot_fields": [
+          "demo-account marker",
+          "sanitized equity value or bracket",
+          "current open position count",
+          "current same-signal order count",
+          "daily realized loss percent",
+          "weekly realized loss percent",
+          "kill-switch state"
+        ],
+        "forbidden_snapshot_fields": [
+          "API keys",
+          "tokens",
+          "passwords",
+          "broker credentials",
+          "account identifiers",
+          "broker order identifiers",
+          "raw live account data",
+          "private execution payloads"
+        ],
+        "present_in_this_packet": false,
+        "purpose": "Provide enough demo-account state for owner review without exposing secrets, credentials, account identifiers, broker order identifiers, or private execution payloads.",
+        "required_before": "P6 demo-order intent owner-approval gate can calculate or review any account-specific position size.",
+        "sanitized_broker_account_snapshot_required": true,
+        "status": "REQUIRED_FOR_P6_OWNER_REVIEW"
+      }
+    },
+    "passed": true
+  },
+  "p6_gate_status": "P6_DEMO_ORDER_INTENT_GATE_CREATED_OWNER_ACTION_REQUIRED",
+  "passed_requirements": [
+    "p5_entry_condition",
+    "p6_intent_card_fields",
+    "sanitized_snapshot_requirement",
+    "owner_approval_requirement",
+    "demo_order_placement_block",
+    "broker_api_credential_live_blocks",
+    "one_order_verification_required",
+    "tp_sl_verification_required",
+    "stop_rule_verification_required",
+    "kill_switch_verification_required",
+    "audit_requirements_defined",
+    "no_autonomy_approval"
+  ],
+  "post_p6_score": 100,
+  "post_p6_status": "OWNER_ACTION_REQUIRED",
+  "pre_order_safety_checks": {
+    "broker_api_access_blocked": true,
+    "checks_required_before_any_later_demo_order": [
+      "sanitized broker/account snapshot supplied by owner",
+      "explicit owner approval decision recorded",
+      "order type selected by owner",
+      "units formula reviewed without account-specific sizing in this packet",
+      "stop loss formula reviewed",
+      "take profit formula reviewed",
+      "reward-to-risk at or above minimum",
+      "one-order rule verified",
+      "daily-stop state verified",
+      "weekly-stop state verified",
+      "kill-switch state verified"
+    ],
+    "credential_access_blocked": true,
+    "demo_order_placement_authorized": false,
+    "limits": {
+      "max_daily_loss_percent": 1.0,
+      "max_open_positions": 1,
+      "max_orders_per_signal": 1,
+      "max_risk_per_trade_percent": 0.25,
+      "max_weekly_loss_percent": 2.0,
+      "minimum_reward_to_risk": 1.2
+    },
+    "live_trading_blocked": true,
+    "money_movement_blocked": true,
+    "no_autonomy_approval": true,
+    "status": "OWNER_ACTION_REQUIRED"
+  },
+  "sanitized_snapshot_requirement": {
+    "allowed_snapshot_fields": [
+      "demo-account marker",
+      "sanitized equity value or bracket",
+      "current open position count",
+      "current same-signal order count",
+      "daily realized loss percent",
+      "weekly realized loss percent",
+      "kill-switch state"
+    ],
+    "collected_in_this_packet": false,
+    "forbidden_snapshot_fields": [
+      "API keys",
+      "tokens",
+      "passwords",
+      "broker credentials",
+      "account identifiers",
+      "broker order identifiers",
+      "raw live account data",
+      "private execution payloads"
+    ],
+    "purpose": "Provide enough demo-account state for owner review without exposing secrets, credentials, account identifiers, broker order identifiers, or private execution payloads.",
+    "required_before_account_specific_units": true,
+    "requires_sanitized_broker_account_snapshot": true,
+    "sanitized_broker_account_snapshot_required": true,
+    "status": "OWNER_SUPPLIED_SANITIZED_SNAPSHOT_REQUIRED"
+  },
+  "source_evidence": [
+    {
+      "path": "automation/forex_engine/c1_supervised_demo_trade_readiness_review_v1.py",
+      "use": "Provides the authoritative P5 supervised demo-readiness evaluator consumed by this P6 owner-approval gate."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_SUPERVISED_DEMO_TRADE_READINESS_REVIEW_V1.json",
+      "use": "Records P5 review status, P6 readiness, score, failed requirements, and next lane."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_SUPERVISED_DEMO_TRADE_READINESS_REVIEW_V1_REPORT.md",
+      "use": "Explains the source-backed P5 decision and preserves the no demo-order or live-trading boundary."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_SUPERVISED_DEMO_TRADE_READINESS_REVIEW_NEXT_ACTION_QUEUE_V1.md",
+      "use": "Routes the source-cleared candidate into P6 demo-order intent owner-approval gate only."
+    },
+    {
+      "path": "RISK_POLICY.md",
+      "use": "Defines the root safety boundary for trading, credentials, broker access, order action, and fail-closed behavior."
+    }
+  ],
+  "stop_rule_verification": {
+    "daily_stop_verification_required": true,
+    "max_daily_loss_percent": 1.0,
+    "max_weekly_loss_percent": 2.0,
+    "owner_snapshot_required": true,
+    "rule": "Owner-supplied sanitized evidence must show daily and weekly loss state remains inside the defined limits before any later demo-order authority can be considered.",
+    "weekly_stop_verification_required": true
+  },
+  "tp_sl_verification": {
+    "minimum_reward_to_risk": 1.2,
+    "rule": "Owner review must confirm stop loss, take profit, and at least 1.20 reward-to-risk before any later demo-order authority can be considered.",
+    "stop_loss_formula_required": true,
+    "stop_loss_required": true,
+    "take_profit_formula_required": true,
+    "take_profit_required": true,
+    "verification_required": true
+  },
+  "trader_meaning": "AIOS is preparing a review-only demo-order intent card for the EUR/USD buy setup so the owner can inspect the proposed trade requirements before any demo order is allowed."
+}
