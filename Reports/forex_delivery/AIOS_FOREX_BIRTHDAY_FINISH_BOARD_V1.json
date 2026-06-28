@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-06-28T04:44:59Z",
-  "target_date": "2026-07-06",
+  "generated_at": "2026-06-28T04:53:46Z",
+  "target_date": "2026-06-30",
   "repo": {
     "name": "ai-rtony91/Ai_Os",
     "worktree": "C:\\Dev\\Ai.Os",
@@ -14,8 +14,8 @@
     "observed_before_output_write": true,
     "raw": [
       "## main...origin/main",
-      "?? scripts/forex_delivery/Invoke-AiOsForexBirthdayFinishCampaign.ps1",
-      "?? tests/forex_delivery/test_forex_birthday_finish_campaign.py"
+      " M Reports/forex_delivery/AIOS_FOREX_BIRTHDAY_FINISH_BOARD_V1.json",
+      " M Reports/forex_delivery/AIOS_FOREX_BIRTHDAY_FINISH_CAMPAIGN_V1_REPORT.md"
     ],
     "clean": false,
     "synced_to_origin_main": true
