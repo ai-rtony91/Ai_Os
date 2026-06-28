@@ -155,10 +155,41 @@ RAW_LIVE_ACCOUNT_FIELDS = (
     "live_balance",
     "live_position_data",
 )
+P7_OWNER_INPUT_FIELDS = (
+    "owner_decision",
+    "demo_account_marker",
+    "sanitized_equity_value_or_bracket",
+    "current_open_position_count",
+    "current_same_signal_order_count",
+    "daily_realized_loss_percent",
+    "weekly_realized_loss_percent",
+    "kill_switch_state",
+    "timestamp_utc",
+    "owner_attestation",
+    "intended_instrument_confirmation",
+    "intended_side_confirmation",
+    "order_type_selection",
+    "units_formula_review",
+    "stop_loss_review",
+    "take_profit_review",
+    "reward_to_risk_review",
+    "one_order_rule_verification",
+    "daily_stop_verification",
+    "weekly_stop_verification",
+    "kill_switch_verification",
+)
 
 
 def _empty_bridge_checks() -> dict[str, bool]:
     return {name: False for name in BRIDGE_CHECK_NAMES}
+
+
+def _project_owner_input_for_p7(owner_input: dict[str, Any]) -> dict[str, Any]:
+    return {
+        field_name: owner_input[field_name]
+        for field_name in P7_OWNER_INPUT_FIELDS
+        if field_name in owner_input
+    }
 
 
 def _field_absent(owner_input: dict[str, Any], field_names: tuple[str, ...]) -> bool:
@@ -365,7 +396,10 @@ def evaluate_c1_supervised_demo_broker_account_readiness_bridge(
 ) -> dict[str, Any]:
     """Return the deterministic P8 broker/account readiness bridge result."""
 
-    p7_result = evaluate_c1_dry_run_mock_execution_rehearsal(owner_input)
+    p7_owner_input = (
+        None if owner_input is None else _project_owner_input_for_p7(owner_input)
+    )
+    p7_result = evaluate_c1_dry_run_mock_execution_rehearsal(p7_owner_input)
     p7_status = p7_result.get("p7_rehearsal_status")
     mock_status = p7_result.get("mock_rehearsal_status")
     input_score = p7_result.get("post_p7_score")
