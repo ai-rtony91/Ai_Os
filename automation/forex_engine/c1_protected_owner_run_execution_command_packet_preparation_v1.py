@@ -548,7 +548,18 @@ def evaluate_c1_protected_owner_run_execution_command_packet_preparation(
             p12_local_failed_requirements.append("credential_handling_review_marked")
         if owner_input.get("broker_connection_review") is not True:
             p12_local_failed_requirements.append("broker_connection_review_marked")
-        for field_name in TRUE_FORBIDDEN_AUTH_FIELDS:
+        for field_name in (
+            "broker_api_access_authorized",
+            "credential_access_authorized",
+            "broker_api_connection_authorized_now",
+            "credential_access_authorized_now",
+            "order_submission_authorized_now",
+            "execution_command_authorized_now",
+            "demo_order_placement_authorized",
+            "live_trading_authorized",
+            "money_movement_authorized",
+            "autonomy_approval",
+        ):
             if owner_input.get(field_name, False) is True:
                 p12_local_failed_requirements.append(f"{field_name}_must_be_false")
         if p12_local_failed_requirements:
