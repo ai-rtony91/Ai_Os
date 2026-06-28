@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-missing-walk-forward",
+  "evidence_completeness": 0.72,
+  "sample_count": 88,
+  "expectancy": 1.4,
+  "profit_factor": 1.7,
+  "drawdown": 0.18,
+  "risk_control_score": 0.84,
+  "auditability": 0.74,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}

@@ -1,0 +1,7 @@
+{
+  "catalog_version": "1.0",
+  "items": {
+    "broker snapshot evidence": {"name":"broker snapshot evidence","classification":"BROKER_API_REQUIRED","reason":"snapshot missing","source":"local","evidence_present":false},
+    "candidate evidence": {"name":"candidate evidence","classification":"ALREADY_PRESENT","reason":"present","source":"local","evidence_present":true}
+  }
+}

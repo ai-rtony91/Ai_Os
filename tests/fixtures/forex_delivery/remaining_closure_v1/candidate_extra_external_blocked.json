@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-extra-external-blocked",
+  "evidence_completeness": 0.94,
+  "sample_count": 140,
+  "expectancy": 1.7,
+  "profit_factor": 2.1,
+  "drawdown": 0.08,
+  "risk_control_score": 0.94,
+  "auditability": 0.88,
+  "broker_evidence_ready": false,
+  "owner_approval_required": false,
+  "external_blocker": true,
+  "safety_blocked": false
+}

@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-broker-evidence-required",
+  "evidence_completeness": 0.86,
+  "sample_count": 90,
+  "expectancy": 1.5,
+  "profit_factor": 1.6,
+  "drawdown": 0.12,
+  "risk_control_score": 0.8,
+  "auditability": 0.7,
+  "broker_evidence_ready": false,
+  "owner_approval_required": false,
+  "external_blocker": true,
+  "safety_blocked": false
+}

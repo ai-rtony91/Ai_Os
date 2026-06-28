@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-extra-profitable",
+  "evidence_completeness": 0.97,
+  "sample_count": 160,
+  "expectancy": 2.0,
+  "profit_factor": 2.5,
+  "drawdown": 0.05,
+  "risk_control_score": 0.99,
+  "auditability": 0.95,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}

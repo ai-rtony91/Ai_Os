@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-trading-execution-required-blocked",
+  "evidence_completeness": 0.83,
+  "sample_count": 92,
+  "expectancy": 1.55,
+  "profit_factor": 1.75,
+  "drawdown": 0.13,
+  "risk_control_score": 0.82,
+  "auditability": 0.76,
+  "broker_evidence_ready": true,
+  "owner_approval_required": true,
+  "external_blocker": true,
+  "safety_blocked": false
+}

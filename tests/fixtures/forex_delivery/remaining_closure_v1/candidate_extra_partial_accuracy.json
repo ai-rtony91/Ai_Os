@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-extra-partial-accuracy",
+  "evidence_completeness": 0.62,
+  "sample_count": 90,
+  "expectancy": 1.0,
+  "profit_factor": 1.25,
+  "drawdown": 0.21,
+  "risk_control_score": 0.55,
+  "auditability": 0.6,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}

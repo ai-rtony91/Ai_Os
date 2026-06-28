@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-low-profit-factor",
+  "evidence_completeness": 0.9,
+  "sample_count": 110,
+  "expectancy": 0.4,
+  "profit_factor": 0.96,
+  "drawdown": 0.11,
+  "risk_control_score": 0.91,
+  "auditability": 0.82,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}

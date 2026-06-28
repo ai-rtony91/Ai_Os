@@ -1,0 +1,22 @@
+{
+  "catalog_version": "1.0",
+  "items": {
+    "candidate evidence": {"name":"candidate evidence","classification":"ALREADY_PRESENT","reason":"present","source":"local","evidence_present":true},
+    "walk-forward evidence": {"name":"walk-forward evidence","classification":"BROKER_API_REQUIRED","reason":"needs external evidence","source":"local","evidence_present":false},
+    "out-of-sample evidence": {"name":"out-of-sample evidence","classification":"LOCAL_REPAIRABLE","reason":"local replay pending","source":"local","evidence_present":false},
+    "demo trade telemetry": {"name":"demo trade telemetry","classification":"TRADING_EXECUTION_REQUIRED","reason":"missing","source":"local","evidence_present":false},
+    "broker snapshot evidence": {"name":"broker snapshot evidence","classification":"CREDENTIAL_REQUIRED","reason":"missing tokenized snapshot","source":"local","evidence_present":false},
+    "execution readiness evidence": {"name":"execution readiness evidence","classification":"PROTECTED_PUBLISH_REQUIRED","reason":"needs protected route","source":"local","evidence_present":false},
+    "risk control evidence": {"name":"risk control evidence","classification":"LOCAL_REPAIRABLE","reason":"risk evidence missing","source":"local","evidence_present":false},
+    "expectancy/profit-factor evidence": {"name":"expectancy/profit-factor evidence","classification":"LOCAL_REPAIRABLE","reason":"profit evidence missing","source":"local","evidence_present":false},
+    "drawdown evidence": {"name":"drawdown evidence","classification":"LOCAL_REPAIRABLE","reason":"missing","source":"local","evidence_present":false},
+    "sample sufficiency evidence": {"name":"sample sufficiency evidence","classification":"LOCAL_REPAIRABLE","reason":"missing","source":"local","evidence_present":false},
+    "owner approval evidence": {"name":"owner approval evidence","classification":"OWNER_EVIDENCE_REQUIRED","reason":"missing","source":"local","evidence_present":false},
+    "live exception evidence": {"name":"live exception evidence","classification":"LOCAL_REPAIRABLE","reason":"missing","source":"local","evidence_present":false},
+    "credential boundary evidence": {"name":"credential boundary evidence","classification":"CREDENTIAL_REQUIRED","reason":"missing","source":"local","evidence_present":false},
+    "kill-switch evidence": {"name":"kill-switch evidence","classification":"LOCAL_REPAIRABLE","reason":"missing","source":"local","evidence_present":false},
+    "monitoring/alert evidence": {"name":"monitoring/alert evidence","classification":"LOCAL_REPAIRABLE","reason":"missing","source":"local","evidence_present":false},
+    "audit log evidence": {"name":"audit log evidence","classification":"LOCAL_REPAIRABLE","reason":"missing","source":"local","evidence_present":false},
+    "final bundle evidence": {"name":"final bundle evidence","classification":"LOCAL_REPAIRABLE","reason":"missing","source":"local","evidence_present":false}
+  }
+}

@@ -1,0 +1,49 @@
+# Forex Remaining Closure Inventory V1
+
+- known_landed_forex_components:
+  - `automation/forex_engine/forex_missing_evidence_catalog_v1.py`
+  - `automation/forex_engine/forex_owner_evidence_pack_builder_v1.py`
+  - `automation/forex_engine/forex_evidence_quality_validator_v1.py`
+  - `automation/forex_engine/forex_review_ready_candidate_selector_v1.py`
+  - `automation/forex_engine/forex_final_bundle_readiness_projector_v1.py`
+- `scripts/forex_delivery/run_forex_owner_evidence_pack_builder_v1.py`
+- `scripts/forex_delivery/run_forex_evidence_quality_validator_v1.py`
+- `scripts/forex_delivery/run_forex_review_ready_candidate_selector_v1.py`
+- `scripts/forex_delivery/run_forex_final_bundle_readiness_projector_v1.py`
+- current_evidence_gap_status:
+  - catalog indicates at least three external/evidence blockers
+  - owner evidence packet has multiple request candidates
+- report_data_artifacts_found:
+  - prior closure and evidence reports in `Reports/forex_delivery`
+- deterministic_local_modules_found:
+  - new modules use local deterministic parsing only
+- docs work completed:
+  - `docs/workflows/AIOS_FOREX_REMAINING_CLOSURE_LONGRUN_CAMPAIGN_V1.md`
+- tests_found:
+  - `tests/forex_engine/test_forex_remaining_closure_longrun_v1.py`
+  - 40 local assertions
+- scripts_found:
+  - `run_forex_owner_evidence_pack_builder_v1.py`
+  - `run_forex_evidence_quality_validator_v1.py`
+  - `run_forex_review_ready_candidate_selector_v1.py`
+  - `run_forex_final_bundle_readiness_projector_v1.py`
+- blockers:
+  - broker/api evidence families remain incomplete
+  - missing external owner-provided evidence payloads
+  - protected publish/merge actions not yet authorized
+- next_local_work_opportunities:
+  - await owner-provided external evidence payloads
+  - rerun readiness projection with owner returns
+  - owner approval handoff into publish lane
+- external_only_evidence_blockers:
+  - broker snapshot evidence
+  - execution readiness evidence
+  - credential boundary evidence
+- broker_api_trading_blockers:
+  - no broker/API calls in this lane
+  - no demo or live execution triggered
+  - no money movement commands
+- exact_recommended_remaining_lanes:
+  - fixture_buildout
+  - integration_test_authoring
+  - hardening_pass_runs

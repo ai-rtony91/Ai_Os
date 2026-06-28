@@ -1,0 +1,14 @@
+{
+  "candidate_id": "candidate-extra-low-risk",
+  "evidence_completeness": 0.89,
+  "sample_count": 85,
+  "expectancy": 1.1,
+  "profit_factor": 1.45,
+  "drawdown": 0.10,
+  "risk_control_score": 0.77,
+  "auditability": 0.9,
+  "broker_evidence_ready": true,
+  "owner_approval_required": false,
+  "external_blocker": false,
+  "safety_blocked": false
+}
