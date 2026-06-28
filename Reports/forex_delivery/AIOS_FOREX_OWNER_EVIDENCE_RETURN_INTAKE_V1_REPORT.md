@@ -1,0 +1,104 @@
+# Forex Owner Evidence Return Intake V1
+Generated: 2026-06-28T00:34:18.062515+00:00
+Status: INTAKE_PARTIAL
+- strict_mode: True
+- total_items: 17
+- requested_items: 17
+- missing_items: 17
+- owner_required_families: owner approval evidence
+
+## Missing Requested Families
+- candidate evidence
+- walk-forward evidence
+- out-of-sample evidence
+- demo trade telemetry
+- broker snapshot evidence
+- execution readiness evidence
+- risk control evidence
+- expectancy/profit-factor evidence
+- drawdown evidence
+- sample sufficiency evidence
+- owner approval evidence
+- live exception evidence
+- credential boundary evidence
+- kill-switch evidence
+- monitoring/alert evidence
+- audit log evidence
+- final bundle evidence
+
+## External Blockers
+- demo trade telemetry
+- broker snapshot evidence
+- execution readiness evidence
+- live exception evidence
+- credential boundary evidence
+
+## Requested Items
+- candidate evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: candidate_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- walk-forward evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: walk_forward_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- out-of-sample evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: out_of_sample_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- demo trade telemetry (TRADING_EXECUTION_REQUIRED) -> evidence_present: False
+  - requested: True
+  - expected_filename: demo_trade_telemetry_owner_evidence.md
+  - reason: execution readiness evidence required
+- broker snapshot evidence (BROKER_API_REQUIRED) -> evidence_present: False
+  - requested: True
+  - expected_filename: broker_snapshot_evidence_owner_evidence.md
+  - reason: external broker evidence required
+- execution readiness evidence (TRADING_EXECUTION_REQUIRED) -> evidence_present: False
+  - requested: True
+  - expected_filename: execution_readiness_evidence_owner_evidence.md
+  - reason: execution readiness evidence required
+- risk control evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: risk_control_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- expectancy/profit-factor evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: expectancy_profit_factor_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- drawdown evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: drawdown_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- sample sufficiency evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: sample_sufficiency_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- owner approval evidence (OWNER_EVIDENCE_REQUIRED) -> evidence_present: False
+  - requested: True
+  - expected_filename: owner_approval_evidence_owner_evidence.md
+  - reason: owner evidence requested before readiness
+- live exception evidence (PROTECTED_PUBLISH_REQUIRED) -> evidence_present: False
+  - requested: True
+  - expected_filename: live_exception_evidence_owner_evidence.md
+  - reason: protected publish route evidence required
+- credential boundary evidence (CREDENTIAL_REQUIRED) -> evidence_present: False
+  - requested: True
+  - expected_filename: credential_boundary_evidence_owner_evidence.md
+  - reason: credential boundary evidence required
+- kill-switch evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: kill_switch_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- monitoring/alert evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: monitoring_alert_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- audit log evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: audit_log_evidence_owner_evidence.md
+  - reason: local review and closure repair required
+- final bundle evidence (LOCAL_REPAIRABLE) -> evidence_present: False
+  - requested: True
+  - expected_filename: final_bundle_evidence_owner_evidence.md
+  - reason: local review and closure repair required
