@@ -1,0 +1,141 @@
+{
+  "generated_at": "2026-06-28T05:01:19Z",
+  "target_date": "2026-06-30",
+  "slice_id": "SLICE2_OWNER_BOUNDARY_DECISION",
+  "slice_name": "Owner-Protected Boundary Decision",
+  "repo": "ai-rtony91/Ai_Os",
+  "branch": "main",
+  "git_status": {
+    "preflight_status": "## main...origin/main",
+    "head_matches_origin_main": true,
+    "dirty_files": []
+  },
+  "raw_goal_count": 1998,
+  "repo_actionable_open_count": 0,
+  "owner_protected_count": 3,
+  "extraction_status": "ITEMS_EXTRACTED_FROM_MANIFEST_OWNER_PROTECTED_BOUNDARY",
+  "owner_decision": "APPROVE_NEXT_REVIEW_ONLY",
+  "owner_protected_items": [
+    {
+      "item_id": "FOREX-GOAL-AUTOMATION-FOREX-ENGINE-FOREX-READINESS-CHECKPOINT-LED-EDDCC6C75A",
+      "source_status": "OWNER_PROTECTED_BOUNDARY",
+      "completion_status": "OWNER_PROTECTED_BOUNDARY",
+      "source_file_path": "automation/forex_engine/forex_readiness_checkpoint_ledger_v1.py",
+      "source_type": "module",
+      "blocker_class": "owner_protected_authority_boundary",
+      "safety_class": "OWNER_PROTECTED",
+      "matched_terms": [
+        "blocker",
+        "evidence",
+        "forex",
+        "owner",
+        "readiness"
+      ],
+      "proposed_closure_action": "Human Owner must review and explicitly approve any protected boundary movement.",
+      "decision": "APPROVE_NEXT_REVIEW_ONLY",
+      "allowed_next_action": "Classify for next review only; no execution or access authority is granted.",
+      "blocked_actions": [
+        "broker/API access",
+        "credentials",
+        "account access",
+        "demo trade",
+        "live trade",
+        "order placement",
+        "order closure",
+        "money movement",
+        "scheduler activation",
+        "daemon activation",
+        "webhook activation",
+        "production activation",
+        "autonomous trading"
+      ]
+    },
+    {
+      "item_id": "FOREX-GOAL-DOCS-WORKFLOWS-AI-OS-PR-HANDOFF-REPORTER-MD-72A5E9E12A",
+      "source_status": "OWNER_PROTECTED_BOUNDARY",
+      "completion_status": "OWNER_PROTECTED_BOUNDARY",
+      "source_file_path": "docs/workflows/AI_OS_PR_HANDOFF_REPORTER.md",
+      "source_type": "doc",
+      "blocker_class": "owner_protected_authority_boundary",
+      "safety_class": "OWNER_PROTECTED",
+      "matched_terms": [
+        "dashboard",
+        "evidence",
+        "handoff",
+        "protected",
+        "required",
+        "risk"
+      ],
+      "proposed_closure_action": "Human Owner must review and explicitly approve any protected boundary movement.",
+      "decision": "APPROVE_NEXT_REVIEW_ONLY",
+      "allowed_next_action": "Classify for next review only; no execution or access authority is granted.",
+      "blocked_actions": [
+        "broker/API access",
+        "credentials",
+        "account access",
+        "demo trade",
+        "live trade",
+        "order placement",
+        "order closure",
+        "money movement",
+        "scheduler activation",
+        "daemon activation",
+        "webhook activation",
+        "production activation",
+        "autonomous trading"
+      ]
+    },
+    {
+      "item_id": "FOREX-GOAL-DOCS-WORKFLOWS-AIOS-SCREEN-VOICE-AUDIO-ALERT-WORKFLOW--5107F3C683",
+      "source_status": "OWNER_PROTECTED_BOUNDARY",
+      "completion_status": "OWNER_PROTECTED_BOUNDARY",
+      "source_file_path": "docs/workflows/AIOS_SCREEN_VOICE_AUDIO_ALERT_WORKFLOW.md",
+      "source_type": "doc",
+      "blocker_class": "owner_protected_authority_boundary",
+      "safety_class": "OWNER_PROTECTED",
+      "matched_terms": [
+        "authority"
+      ],
+      "proposed_closure_action": "Human Owner must review and explicitly approve any protected boundary movement.",
+      "decision": "APPROVE_NEXT_REVIEW_ONLY",
+      "allowed_next_action": "Classify for next review only; no execution or access authority is granted.",
+      "blocked_actions": [
+        "broker/API access",
+        "credentials",
+        "account access",
+        "demo trade",
+        "live trade",
+        "order placement",
+        "order closure",
+        "money movement",
+        "scheduler activation",
+        "daemon activation",
+        "webhook activation",
+        "production activation",
+        "autonomous trading"
+      ]
+    }
+  ],
+  "allowed_next_actions": [
+    "classification",
+    "queue movement",
+    "next-review planning"
+  ],
+  "forbidden_actions": [
+    "broker/API access",
+    "credentials",
+    "account access",
+    "demo trade",
+    "live trade",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading"
+  ],
+  "slice_status": "COMPLETE_FOR_NEXT_REVIEW_ONLY",
+  "final_owner_sentence": "AIOS Forex Slice 2 is complete for next-review only: owner-protected boundary items 3 are approved for review classification, while broker/API, credentials, demo/live trading, money movement, production, and autonomy remain blocked."
+}
