@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-06-28T00:00:00Z",
+  "target_date": "2026-06-30",
+  "slice_id": "SLICE3_EXTERNAL_EVIDENCE_REVIEW",
+  "slice_name": "External Evidence Review",
+  "repo": "ai-rtony91/Ai_Os",
+  "branch": "main",
+  "git_status": {
+    "preflight_status": "## main...origin/main",
+    "head_matches_origin_main": true,
+    "dirty_files_before_slice3_write": []
+  },
+  "raw_goal_count": 1998,
+  "repo_actionable_open_count": 0,
+  "owner_protected_count": 3,
+  "external_evidence_required_count": 1,
+  "extraction_status": "COUNT_VERIFIED_ITEM_NOT_EXTRACTABLE",
+  "evidence_review_decision": "APPROVE_SANITIZED_EVIDENCE_REVIEW_ONLY",
+  "external_evidence_items": [
+    {
+      "item_id": "EXTERNAL_EVIDENCE_ITEM_1_SOURCE_NOT_EXTRACTABLE",
+      "source_status": "EXTERNAL_EVIDENCE_REQUIRED",
+      "completion_status": "EXTERNAL_EVIDENCE_REQUIRED",
+      "current_status": "EXTERNAL_EVIDENCE_REQUIRED",
+      "source_type": "manifest_status_count",
+      "source_file_path": "SOURCE_NOT_EXTRACTABLE",
+      "evidence_status": "SANITIZED_EVIDENCE_REVIEW_REQUIRED",
+      "decision": "APPROVE_SANITIZED_EVIDENCE_REVIEW_ONLY",
+      "allowed_next_action": "Sanitized evidence review classification only; no account, credential, broker/API, order, money, production, or autonomy authority is granted.",
+      "sanitization_requirements": [
+        "sanitized evidence only",
+        "value-free evidence only",
+        "non-secret evidence only",
+        "no credentials",
+        "no account identifiers",
+        "no private payloads",
+        "no raw broker responses",
+        "no private account screenshots",
+        "no API tokens",
+        "no account numbers",
+        "no private live order IDs",
+        "no evidence that enables trading or account access"
+      ],
+      "blocked_actions": [
+        "broker/API access",
+        "credentials",
+        "account access",
+        "demo trade",
+        "live trade",
+        "order placement",
+        "order closure",
+        "money movement",
+        "scheduler activation",
+        "daemon activation",
+        "webhook activation",
+        "production activation",
+        "autonomous trading",
+        "raw private evidence",
+        "account identifiers",
+        "credential persistence"
+      ]
+    }
+  ],
+  "allowed_next_actions": [
+    "sanitized evidence classification",
+    "value-free evidence review",
+    "non-secret evidence review",
+    "queue movement",
+    "next-review planning"
+  ],
+  "forbidden_actions": [
+    "broker/API access",
+    "credentials",
+    "account access",
+    "demo trade",
+    "live trade",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading",
+    "raw private evidence",
+    "account identifiers",
+    "credential persistence"
+  ],
+  "slice_status": "COMPLETE_FOR_SANITIZED_EVIDENCE_REVIEW_ONLY",
+  "handoff_to_next_slice": "Slice 4 Broker/Live Boundary Review",
+  "final_owner_sentence": "AIOS Forex Slice 3 is complete for sanitized evidence review only: external-evidence boundary item 1 is approved for sanitized review classification, while broker/API, credentials, account access, demo/live trading, money movement, production, and autonomy remain blocked."
+}
