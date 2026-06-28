@@ -1,0 +1,137 @@
+{
+  "active_allowed_paths": [
+    "automation/forex_engine/forex_full_overnight_work_runner_v1.py",
+    "scripts/forex_delivery/run_forex_full_overnight_work_runner_v1.py",
+    "scripts/forex_delivery/validate_forex_full_overnight_work_runner_v1.ps1",
+    "scripts/forex_delivery/publish_forex_full_overnight_work_runner_v1.ps1",
+    "scripts/forex_delivery/Invoke-ForexFullOvernightWorkRunner.V1.ps1",
+    "docs/governance/programs/contracts/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_V1.json",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_NEXT_ACTION_QUEUE_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_CHECKPOINT_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_ACTIVE_PACKET_QUEUE_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_EXTERNAL_GATE_STOP_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_OWNER_HANDOFF_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_FULL_OVERNIGHT_WORK_RUNNER_NEXT_CODEX_PROMPT_V1.md",
+    "tests/forex_engine/test_forex_full_overnight_work_runner_v1.py"
+  ],
+  "active_anchor": "PR_1196_OVERNIGHT_CONTRACT_MERGED",
+  "active_anchor_map": {
+    "PR_1192_P14_FINAL_REHEARSAL": "landed on main in prior repo-safe preparation lane",
+    "PR_1193_CONTINUOUS_BRIDGE_CONTROLLER": "landed on main and anchors flow bridge control",
+    "PR_1194_FLOW1_ACTIVE_EXECUTION_AUTHORITY": "landed on main and anchors flow 1 authority",
+    "PR_1196_OVERNIGHT_END_TO_END_CONTRACT": "landed on main and anchors full overnight end-to-end contract"
+  },
+  "active_packet_id": null,
+  "active_packet_queue": [
+    {
+      "depends_on": [
+        "PR_1196_OVERNIGHT_CONTRACT_MERGED",
+        "PR_1194_FLOW1_MERGED"
+      ],
+      "external_gate_reason": "owner-supervised demo evidence and broker snapshot may be required",
+      "external_gate_required": true,
+      "flow_id": "FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE",
+      "next_on_success": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+      "packet_id": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+      "packet_source_path": "Reports/forex_delivery/AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1.md",
+      "repo_safe": true
+    },
+    {
+      "depends_on": [
+        "FLOW2_EVIDENCE_OUTPUT"
+      ],
+      "external_gate_reason": "Flow 2 evidence output required",
+      "external_gate_required": true,
+      "flow_id": "FLOW_3_PROFIT_LOOP_LIVE_WEEK_VACATION_GATE",
+      "next_on_success": "AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1",
+      "packet_id": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+      "packet_source_path": "Reports/forex_delivery/AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1.md",
+      "repo_safe": true
+    },
+    {
+      "depends_on": [
+        "FLOW3_PROFIT_LOOP_OUTPUT"
+      ],
+      "external_gate_reason": "explicit owner approval, broker gate, credential gate, and evidence gate required",
+      "external_gate_required": true,
+      "flow_id": "LIVE_EXCEPTION_AND_REAL_MONEY_GATE",
+      "next_on_success": "EXTERNAL_GATE_STOP_REAL_MONEY_REQUIRES_OWNER_APPROVAL",
+      "packet_id": "AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1",
+      "packet_source_path": "Reports/forex_delivery/AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1.md",
+      "repo_safe": true
+    }
+  ],
+  "active_packet_queue_text": "# AIOS Forex Full Overnight Work Runner Active Packet Queue V1\n\n## Packet List\n1. AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1 | FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE\n   source: Reports/forex_delivery/AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1.md\n   depends_on: PR_1196_OVERNIGHT_CONTRACT_MERGED, PR_1194_FLOW1_MERGED\n   next_on_success: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1\n\n2. AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1 | FLOW_3_PROFIT_LOOP_LIVE_WEEK_VACATION_GATE\n   source: Reports/forex_delivery/AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1.md\n   depends_on: FLOW2_EVIDENCE_OUTPUT\n   next_on_success: AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1\n\n3. AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1 | LIVE_EXCEPTION_AND_REAL_MONEY_GATE\n   source: Reports/forex_delivery/AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1.md\n   depends_on: FLOW3_PROFIT_LOOP_OUTPUT\n   next_on_success: EXTERNAL_GATE_STOP_REAL_MONEY_REQUIRES_OWNER_APPROVAL\n",
+  "allow_publish_after_validation": true,
+  "checkpoint": {
+    "blocked_gate_if_any": null,
+    "checkpoint_timestamp": "2026-06-28T23:44:28.457403+00:00",
+    "completed_packets": [],
+    "current_anchor": "PR_1196_OVERNIGHT_CONTRACT_MERGED",
+    "dirty_scope_status": "UNCLASSIFIED",
+    "next_owner_action": "SELECT_NEXT_PACKET: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+    "next_packet_id": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+    "next_required_flow": "FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE",
+    "publish_status": "NOT_READY_VALIDATION_REQUIRED",
+    "queue_index": 0,
+    "validation_status": "READY_TO_VALIDATE"
+  },
+  "completed_packets": [],
+  "external_authorization_flags": {
+    "autonomous_trading_authorized": false,
+    "broker_api_access_authorized": false,
+    "broker_connection_authorized": false,
+    "credential_access_authorized": false,
+    "demo_order_placement_authorized": false,
+    "live_trading_authorized": false,
+    "money_movement_authorized": false,
+    "order_submission_authorized": false,
+    "runtime_22h6d_activated": false,
+    "vacation_mode_activated": false
+  },
+  "external_gate_stop": null,
+  "external_gate_stop_text": "# AIOS Forex Full Overnight Work Runner External Gate Stop V1\n\n## Active Gate Stop Rules\n- gate_id: OWNER_INPUT_REQUIRED\n  reason: Owner action and attestation are required before repo-safe loop advances.\n  owner_action_required: Supply owner_attestation and the requested action in host input.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: BROKER_SNAPSHOT_REQUIRED\n  reason: Flow 2 evidence workflow may require a supervisor-led broker snapshot.\n  owner_action_required: Run Flow 2 packet and supply snapshot evidence package.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: BROKER_CONNECTION_REQUIRED\n  reason: Live exception path requires broker connection authorization outside this runner.\n  owner_action_required: Prepare external broker-connection proof packet outside repo-safe runner.\n  repo_safe_work_completed: False\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: CREDENTIAL_GATE_REQUIRED\n  reason: Credential proof remains external to this packet.\n  owner_action_required: Run external credential gate packet before live exception.\n  repo_safe_work_completed: False\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: DEMO_EXECUTION_AUTHORITY_REQUIRED\n  reason: Flow 2 supervised evidence remains owner-directed and not auto-executed.\n  owner_action_required: Run Flow 2 evidence packet with owner supervision.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: TRADE_EVIDENCE_REQUIRED\n  reason: Trade evidence bundle is needed before Flow 3 readiness actions.\n  owner_action_required: Supply evidence from supervised demo output packet.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: REALIZED_PL_REQUIRED\n  reason: Flow 3 readiness controls depend on realized P/L inputs.\n  owner_action_required: Run follow-up evidence packet with realized P/L proof.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: LIVE_EXCEPTION_REQUIRED\n  reason: Live exception packet is an external bridge with explicit owner and policy gates.\n  owner_action_required: Run AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1 when ready.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: REAL_MONEY_APPROVAL_REQUIRED\n  reason: Capital transition cannot be inferred by repo-only automation.\n  owner_action_required: Obtain explicit owner approval packet for live capital movement.\n  repo_safe_work_completed: False\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: RUNTIME_SUPERVISOR_REQUIRED\n  reason: Runtime supervisor proof is required for sustained objective operation.\n  owner_action_required: Run external runtime supervisor packet and return evidence.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: SOS_ALERT_PROOF_REQUIRED\n  reason: SOS alert proof must be externally asserted before gate crossing.\n  owner_action_required: Collect SOS proof from escalation packet output.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n\n- gate_id: VACATION_MODE_PROOF_REQUIRED\n  reason: Vacation-mode target status cannot be set by runner alone.\n  owner_action_required: Collect vacation-mode readiness proof packet.\n  repo_safe_work_completed: True\n  next_packet_after_gate: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1\n  do_not_cross_inside_runner: True\n",
+  "external_trading_authority_status": "BLOCKED",
+  "flow1_anchor": "PR_1194_FLOW1_MERGED",
+  "max_runner_cycles": 12,
+  "max_runner_cycles_default": 12,
+  "max_runner_minutes": 480,
+  "max_runner_minutes_default": 480,
+  "next_owner_action": "SELECT_NEXT_PACKET: AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+  "next_packet_id": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+  "next_required_flow": "FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE",
+  "overnight_loop_status": "NOT_STARTED_HOST_RUNNER_REQUIRED",
+  "owner_attestation": false,
+  "owner_live_capital_intent_usd": 1000,
+  "path_classification": null,
+  "publish_status": "NOT_READY_VALIDATION_REQUIRED",
+  "queue_index": 0,
+  "repo_safe_work_status": "READY_TO_CONTINUE",
+  "requested_max_open_positions": 4,
+  "requested_quantity_scale": 4.0,
+  "runner_action": "NONE",
+  "runner_mode": "HOST_LOOP_READY",
+  "runner_status": "FULL_OVERNIGHT_RUNNER_READY_FOR_OWNER_HOST_EXECUTION",
+  "runtime_objective": "22_HOURS_PER_DAY_6_DAYS_PER_WEEK",
+  "selected_next_packet": {
+    "depends_on": [
+      "PR_1196_OVERNIGHT_CONTRACT_MERGED",
+      "PR_1194_FLOW1_MERGED"
+    ],
+    "external_gate_reason": "owner-supervised demo evidence and broker snapshot may be required",
+    "external_gate_required": true,
+    "flow_id": "FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE",
+    "next_on_success": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+    "packet_id": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+    "packet_source_path": "Reports/forex_delivery/AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1.md",
+    "repo_safe": true
+  },
+  "sos_alert_contract_status": "REQUIRED_GATE_PENDING",
+  "target_return_band": "100_TO_120_PERCENT",
+  "target_return_claim_status": "TARGET_NOT_YET_VERIFIED",
+  "untracked_file_policy": "CLASSIFY_AND_ALLOW_ONLY_ACTIVE_SCOPE",
+  "vacation_mode_status": "TARGET_DEFINED_GATE_PENDING",
+  "validation_status": "READY_TO_VALIDATE"
+}
