@@ -1,0 +1,339 @@
+{
+  "anchor_status": "FLOW1_PR_1194_MERGED",
+  "autonomous_trading_authorized": false,
+  "broker_api_access_authorized": false,
+  "broker_connection_authorized": false,
+  "continuation_ledger": [
+    {
+      "action": "collect_owner_input",
+      "next_required_packet": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+      "step": 1
+    },
+    {
+      "action": "prepare_flow3_packet",
+      "next_required_packet": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+      "step": 2
+    },
+    {
+      "action": "prepare_live_exception_bridge",
+      "next_required_packet": "AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1",
+      "step": 3
+    }
+  ],
+  "credential_access_authorized": false,
+  "demo_order_placement_authorized": false,
+  "dependency_order": [
+    {
+      "depends_on": [
+        "Flow 1 PR #1194"
+      ],
+      "flow_id": "FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE",
+      "produces": [
+        "supervised_demo_evidence_contract",
+        "broker_snapshot_capture_contract",
+        "TP_SL_state_capture_contract",
+        "realized_PL_capture_contract",
+        "no_duplicate_order_evidence_contract",
+        "no_runaway_exposure_contract",
+        "post_trade_countdown_update_contract"
+      ]
+    },
+    {
+      "depends_on": [
+        "Flow 2 evidence output"
+      ],
+      "flow_id": "FLOW_3_PROFIT_LOOP_LIVE_WEEK_VACATION_GATE",
+      "produces": [
+        "result_classification_contract",
+        "next_candidate_selection_contract",
+        "countdown_progress_update_contract",
+        "live_week_readiness_contract",
+        "runtime_22h6d_readiness_contract",
+        "vacation_mode_readiness_contract"
+      ]
+    },
+    {
+      "depends_on": [
+        "Flow 3 proof output",
+        "explicit owner approval",
+        "broker gate",
+        "credential gate",
+        "risk gate",
+        "evidence gate"
+      ],
+      "flow_id": "LIVE_EXCEPTION_AND_REAL_MONEY_GATE",
+      "produces": [
+        "live_exception_packet_contract",
+        "real_money_readiness_bridge"
+      ]
+    },
+    {
+      "depends_on": [
+        "Flow 3 proof output",
+        "SOS proof",
+        "kill switch proof",
+        "pause/resume proof",
+        "no duplicate order proof"
+      ],
+      "flow_id": "RUNTIME_SUPERVISOR_AND_SOS_GATE",
+      "produces": [
+        "22h6d_runtime_eligibility_contract",
+        "vacation_mode_eligibility_contract"
+      ]
+    }
+  ],
+  "execution_command_authorized": false,
+  "external_gate_registry": [
+    {
+      "blocked_capability": "Owner action acceptance is required before close-cycle continuation.",
+      "continuation_after_gate": "Proceed directly to Flow 2 with host validation evidence.",
+      "gate_name": "owner_input_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+      "required_external_evidence": "None. Repo-safe evidence prepared by this contract.",
+      "required_owner_input": "overnight_action with acceptance booleans and owner_attestation.",
+      "safe_repo_work_completed": "dependency order, contracts, and continuation ledger prepared.",
+      "validator_to_confirm_gate_closed": "evaluate returns OVERNIGHT_CONTRACT_READY_TO_ENFORCE_FLOW2.",
+      "why_gate_blocks_end_to_end_completion": "Without acceptance, safe enforce/proceed state is not established."
+    },
+    {
+      "blocked_capability": "Flow 2 evidence bundle requires broker/demo snapshot.",
+      "continuation_after_gate": "Flow 2 evidence handoff transitions into Flow 3.",
+      "gate_name": "broker_snapshot_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+      "required_external_evidence": "Broker snapshot artifact from supervised demo evidence packet.",
+      "required_owner_input": "Owner-supervised snapshot capture authority packet.",
+      "safe_repo_work_completed": "Flow 2 required inputs and outputs are defined.",
+      "validator_to_confirm_gate_closed": "Flow 2 evidence_bundle output includes snapshot capture contract.",
+      "why_gate_blocks_end_to_end_completion": "Countdowns and contracts cannot update without snapshot input."
+    },
+    {
+      "blocked_capability": "Live exception contract cannot claim real-money readiness.",
+      "continuation_after_gate": "Prepare live exception bridge handoff after proof.",
+      "gate_name": "broker_connection_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1",
+      "required_external_evidence": "Broker readiness evidence from dedicated gate packet.",
+      "required_owner_input": "Owner-approved broker connection packet and owner review.",
+      "safe_repo_work_completed": "Live exception contract defines broker connection gate dependency.",
+      "validator_to_confirm_gate_closed": "Live exception contract checks broker_connection_gate status in evidence packet.",
+      "why_gate_blocks_end_to_end_completion": "Proof bridge requires broker connection verification."
+    },
+    {
+      "blocked_capability": "Live credentials cannot be loaded in this packet.",
+      "continuation_after_gate": "Cross into live exception packet after proof.",
+      "gate_name": "credential_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1",
+      "required_external_evidence": "Credential gate handoff artifact from external packet.",
+      "required_owner_input": "Owner accepts credential vault review and policy control.",
+      "safe_repo_work_completed": "All external authorization flags are false.",
+      "validator_to_confirm_gate_closed": "Live exception contract remains not-authorized until external proof arrives.",
+      "why_gate_blocks_end_to_end_completion": "No credential gate means live operations are not safe."
+    },
+    {
+      "blocked_capability": "Flow 2 cannot run without supervised demo execution.",
+      "continuation_after_gate": "Run Flow 2 handoff and move to candidate loop.",
+      "gate_name": "supervised_demo_execution_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+      "required_external_evidence": "Supervised execution handoff artifact.",
+      "required_owner_input": "Owner attestation and supervision packet.",
+      "safe_repo_work_completed": "Flow 2 contract and contract outputs are prepared.",
+      "validator_to_confirm_gate_closed": "Flow 2 output contains evidence_bundle.",
+      "why_gate_blocks_end_to_end_completion": "Evidence-based promotion needs supervised evidence first."
+    },
+    {
+      "blocked_capability": "No trade state evidence without trade packet execution.",
+      "continuation_after_gate": "Generate countdown and classification state updates.",
+      "gate_name": "trade_evidence_capture_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_FLOW_2",
+      "required_external_evidence": "TP/SL, realized P/L, and trade state records.",
+      "required_owner_input": "Owner confirms evidence handoff readiness.",
+      "safe_repo_work_completed": "Flow 2 required outputs include evidence bundle and next_flow_handoff.",
+      "validator_to_confirm_gate_closed": "Flow 2 contract lists evidence_bundle output.",
+      "why_gate_blocks_end_to_end_completion": "Flow 3 classification requires trade evidence."
+    },
+    {
+      "blocked_capability": "No realized P/L proof is available in this packet.",
+      "continuation_after_gate": "Flow 3 candidate and readiness contracts can proceed.",
+      "gate_name": "realized_pl_capture_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+      "required_external_evidence": "Close-result output from trusted read-only evidence packet.",
+      "required_owner_input": "Owner confirms closed trade evidence and no duplicate order guard.",
+      "safe_repo_work_completed": "Realized PL capture contract included in Flow 2 dependencies.",
+      "validator_to_confirm_gate_closed": "Flow 3 payload contains countdown_progress_update_contract.",
+      "why_gate_blocks_end_to_end_completion": "Profit loop readiness depends on closed trade P/L data."
+    },
+    {
+      "blocked_capability": "Countdown cannot update without post-trade evidence.",
+      "continuation_after_gate": "Flow 3 reads countdown_progress updates.",
+      "gate_name": "profit_countdown_update_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+      "required_external_evidence": "Post-trade evidence bundle after Flow 2 run.",
+      "required_owner_input": "Owner review on no-runaway-exposure and duplicate checks.",
+      "safe_repo_work_completed": "Dependency output includes post_trade_countdown_update_contract.",
+      "validator_to_confirm_gate_closed": "Flow 2 outputs include countdown_update.",
+      "why_gate_blocks_end_to_end_completion": "Progress controls need periodic post-trade updates."
+    },
+    {
+      "blocked_capability": "Candidate quality cannot update without score evidence.",
+      "continuation_after_gate": "Prepare runtime and vacation readiness checks.",
+      "gate_name": "flow3_candidate_selection_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+      "required_external_evidence": "Flow 2 evidence bundle with candidate score inputs.",
+      "required_owner_input": "Owner accepts candidate review handoff.",
+      "safe_repo_work_completed": "Flow 3 outputs include candidate_update and next_candidate.",
+      "validator_to_confirm_gate_closed": "Flow 3 contract validator reports next_candidate output.",
+      "why_gate_blocks_end_to_end_completion": "Flow 3 result_classification depends on candidate scoring."
+    },
+    {
+      "blocked_capability": "Live exception is an explicit external bridge.",
+      "continuation_after_gate": "Owner and policy review before live exception handoff.",
+      "gate_name": "live_exception_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1",
+      "required_external_evidence": "Real-money gate evidence bundle.",
+      "required_owner_input": "Owner approves live exception checklist and governance packet.",
+      "safe_repo_work_completed": "Live exception contract is prepared with false live authorization fields.",
+      "validator_to_confirm_gate_closed": "Live exception bridge status moves to real_money_readiness_bridge with proof.",
+      "why_gate_blocks_end_to_end_completion": "No live capital execution without this bridge."
+    },
+    {
+      "blocked_capability": "Real money readiness is not authorized by this packet.",
+      "continuation_after_gate": "Proceed only after proof packet and owner sign-off.",
+      "gate_name": "real_money_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_LIVE_EXCEPTION_GATE_V1",
+      "required_external_evidence": "Evidence board and policy-ready packet.",
+      "required_owner_input": "Owner approves capital transition criteria.",
+      "safe_repo_work_completed": "All external authorization flags are false.",
+      "validator_to_confirm_gate_closed": "Live exception contract real_money_authorized_by_this_contract remains false.",
+      "why_gate_blocks_end_to_end_completion": "Targeted progress cannot claim real-money state without evidence."
+    },
+    {
+      "blocked_capability": "22h/6d runtime readiness requires external supervisor proof.",
+      "continuation_after_gate": "Proceed with readiness handoff.",
+      "gate_name": "runtime_supervisor_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+      "required_external_evidence": "Runtime supervisor verification evidence.",
+      "required_owner_input": "Owner confirms runtime controls and stop policy.",
+      "safe_repo_work_completed": "Flow 3 includes runtime_readiness_status output.",
+      "validator_to_confirm_gate_closed": "Flow 3 outputs runtime_readiness_status.",
+      "why_gate_blocks_end_to_end_completion": "Objective execution state is target-defined only."
+    },
+    {
+      "blocked_capability": "SOS contract requires escalation evidence.",
+      "continuation_after_gate": "Continue to candidate and runtime readiness.",
+      "gate_name": "sos_alert_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+      "required_external_evidence": "SOS escalation evidence and pause/resume handoff.",
+      "required_owner_input": "Owner review of pause/resume and SOS policy.",
+      "safe_repo_work_completed": "sos_alert_contract_status is set to REQUIRED_GATE_PENDING.",
+      "validator_to_confirm_gate_closed": "Flow 3 and runtime gate include sos readiness checks.",
+      "why_gate_blocks_end_to_end_completion": "Kill-switch escalation cannot be proven without SOS evidence."
+    },
+    {
+      "blocked_capability": "Vacation-mode activation is a target state only.",
+      "continuation_after_gate": "Progress to readiness gate and bridge ledger.",
+      "gate_name": "vacation_mode_gate",
+      "next_packet_to_cross_gate": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW3_IMPLEMENTATION_V1",
+      "required_external_evidence": "Vacation mode readiness packet evidence.",
+      "required_owner_input": "Owner confirms vacation mode target intent and controls.",
+      "safe_repo_work_completed": "vacation_mode_status set to TARGET_DEFINED_GATE_PENDING.",
+      "validator_to_confirm_gate_closed": "Flow 3 outputs vacation_mode_readiness_status.",
+      "why_gate_blocks_end_to_end_completion": "This packet cannot activate vacation mode."
+    },
+    {
+      "blocked_capability": "Hosting and merge evidence has not run.",
+      "continuation_after_gate": "Move to next report queue entry after merge.",
+      "gate_name": "publish_clean_merge_gate",
+      "next_packet_to_cross_gate": "owner_publish_ready",
+      "required_external_evidence": "VALIDATION_PASSED and PUBLISH_COMPLETE_CLEAN outputs.",
+      "required_owner_input": "Owner runs validator and publish scripts.",
+      "safe_repo_work_completed": "validate and publish scripts are written in script path.",
+      "validator_to_confirm_gate_closed": "publish script output indicates clean merge handoff.",
+      "why_gate_blocks_end_to_end_completion": "Packet cannot be considered landed without host validation."
+    }
+  ],
+  "external_trading_authority_status": "BLOCKED",
+  "flow2_contract": {
+    "contract_status": "PREPARED",
+    "external_authority_required": true,
+    "flow_id": "FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE",
+    "objective": "capture supervised demo evidence and update countdown",
+    "order_execution_authorized_by_this_contract": false,
+    "outputs": [
+      "evidence_bundle",
+      "countdown_update",
+      "duplicate_order_status",
+      "runaway_exposure_status",
+      "next_flow_handoff"
+    ],
+    "required_inputs": [
+      "Flow 1 output",
+      "owner-supervised demo authorization",
+      "broker/demo snapshot",
+      "trade state evidence",
+      "TP/SL state",
+      "realized P/L"
+    ]
+  },
+  "flow2_contract_status": "PREPARED",
+  "flow3_contract": {
+    "contract_status": "PREPARED",
+    "external_authority_required": true,
+    "flow_id": "FLOW_3_PROFIT_LOOP_LIVE_WEEK_VACATION_GATE",
+    "live_trading_authorized_by_this_contract": false,
+    "objective": "classify result, update candidate quality, and prepare promotion gates",
+    "outputs": [
+      "result_classification",
+      "candidate_update",
+      "next_candidate",
+      "live_week_readiness_status",
+      "runtime_readiness_status",
+      "vacation_mode_readiness_status"
+    ],
+    "required_inputs": [
+      "Flow 2 evidence bundle",
+      "closed trade result",
+      "countdown update",
+      "candidate score inputs"
+    ]
+  },
+  "flow3_contract_status": "PREPARED",
+  "input_validation_status": "OWNER_INPUT_REQUIRED",
+  "live_exception_contract": {
+    "contract_status": "PREPARED_NOT_AUTHORIZED",
+    "flow_id": "LIVE_EXCEPTION_AND_REAL_MONEY_GATE",
+    "live_authorized_by_this_contract": false,
+    "objective": "define real-money activation requirements",
+    "owner_live_capital_intent_usd": 1000,
+    "real_money_authorized_by_this_contract": false,
+    "required_inputs": [
+      "explicit owner approval",
+      "broker connection gate",
+      "credential gate",
+      "risk gate",
+      "evidence gate",
+      "live exception checklist"
+    ],
+    "target_return_band": "100_TO_120_PERCENT"
+  },
+  "live_exception_contract_status": "PREPARED_NOT_AUTHORIZED",
+  "live_trading_authorized": false,
+  "money_movement_authorized": false,
+  "next_required_flow": "FLOW_2_SUPERVISED_DEMO_EVIDENCE_COUNTDOWN_CAPTURE",
+  "next_required_packet": "AIOS_FOREX_NEXT_CODEX_PACKET_FLOW2_IMPLEMENTATION_V1",
+  "order_submission_authorized": false,
+  "overnight_action": null,
+  "overnight_contract_mode": "PAUSE_READY",
+  "overnight_contract_status": "OVERNIGHT_CONTRACT_BLOCKED_OWNER_INPUT_REQUIRED",
+  "owner_attestation": false,
+  "owner_live_capital_intent_usd": 1000,
+  "publish_status": "NOT_READY_VALIDATION_REQUIRED",
+  "repo_safe_work_status": "READY_TO_CONTINUE",
+  "requested_max_open_positions": 4,
+  "requested_quantity_scale": 4.0,
+  "runtime_22h6d_activated": false,
+  "runtime_objective": "22_HOURS_PER_DAY_6_DAYS_PER_WEEK",
+  "sos_alert_contract_status": "REQUIRED_GATE_PENDING",
+  "target_return_band": "100_TO_120_PERCENT",
+  "target_return_claim_status": "TARGET_NOT_YET_VERIFIED",
+  "vacation_mode_activated": false,
+  "vacation_mode_status": "TARGET_DEFINED_GATE_PENDING"
+}
