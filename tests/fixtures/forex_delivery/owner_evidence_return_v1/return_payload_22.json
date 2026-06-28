@@ -1,0 +1,7 @@
+{
+  "family": "broker snapshot evidence",
+  "classification": "BROKER_API_REQUIRED",
+  "evidence_present": true,
+  "sample_count": 59,
+  "status": "complete"
+}

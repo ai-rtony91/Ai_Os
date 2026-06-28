@@ -1,0 +1,7 @@
+{
+  "family": "demo trade telemetry",
+  "classification": "TRADING_EXECUTION_REQUIRED",
+  "evidence_present": false,
+  "sample_count": 34,
+  "status": "missing"
+}

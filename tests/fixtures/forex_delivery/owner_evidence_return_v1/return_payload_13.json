@@ -1,0 +1,7 @@
+{
+  "family": "credential boundary evidence",
+  "classification": "CREDENTIAL_REQUIRED",
+  "evidence_present": false,
+  "sample_count": 35,
+  "status": "missing"
+}
