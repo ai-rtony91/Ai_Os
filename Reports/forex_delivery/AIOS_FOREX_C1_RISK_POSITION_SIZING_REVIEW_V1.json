@@ -1,0 +1,222 @@
+{
+  "broker_account_dependency_block": {
+    "blocked": true,
+    "p5_requirement": "A later supervised demo-readiness review must supply a sanitized broker/account snapshot before any real position size can be calculated.",
+    "reason": "This P4 review defines formulas and guardrails only; it must not read credentials, balances, account identifiers, broker data, or live prices."
+  },
+  "campaign_id": "AIOS-FOREX-P4-C1-RISK-POSITION-SIZING-REVIEW-V1",
+  "candidate_id": "c1-eur-buy",
+  "candidate_name": "paper_long_run_supervisor_v2 LONG EURUSD",
+  "daily_stop_rules": {
+    "calculation_dependency": "Requires a sanitized broker/account snapshot in P5 before account-specific calculation.",
+    "daily_stop_rule": true,
+    "max_daily_loss_percent": 1.0,
+    "reset_condition": "Owner-reviewed next-session reset is required.",
+    "trigger": "Stop new orders for the review day if realized loss plus open risk reaches 1.00 percent of account equity."
+  },
+  "failed_requirements": [],
+  "final_owner_sentence": "AIOS Forex P4 C1 risk and position-sizing review is complete: c1-eur-buy is source-cleared for P5 supervised demo-trade readiness review only, while demo trading, live trading, broker/API, credentials, money movement, 22/6 autonomy, vacation/luxury mode, and 100-120 percent return claims remain blocked until separately proven and approved.",
+  "forbidden_actions": [
+    "broker/API access",
+    "credentials",
+    "account access",
+    "demo trading without later evidence gate",
+    "live trading",
+    "order placement",
+    "order closure",
+    "money movement",
+    "scheduler activation",
+    "daemon activation",
+    "webhook activation",
+    "production activation",
+    "autonomous trading",
+    "claiming 22/6 autonomy readiness",
+    "claiming vacation/luxury mode as active",
+    "claiming 100-120 percent return as verified"
+  ],
+  "input_score": 100,
+  "input_status": "P4_READY",
+  "kill_switch_rules": {
+    "kill_switch_required": true,
+    "rule": "Any trigger blocks progression until the issue is reviewed and the P4 or P5 evidence is rerun.",
+    "triggers": [
+      "missing stop loss",
+      "missing take profit",
+      "risk per trade above 0.25 percent",
+      "daily loss at or above 1.00 percent",
+      "weekly loss at or above 2.00 percent",
+      "three consecutive losses",
+      "more than one open position",
+      "more than one order for the same signal",
+      "strategy drawdown above 5.00 percent",
+      "broker/account dependency requested before sanitized P5 snapshot",
+      "credential, account, broker/API, order, scheduler, daemon, webhook, production, or autonomy path detected"
+    ]
+  },
+  "max_loss_rules": {
+    "max_consecutive_losses": 3,
+    "max_daily_loss_percent": 1.0,
+    "max_risk_per_trade_percent": 0.25,
+    "max_strategy_drawdown_percent": 5.0,
+    "max_weekly_loss_percent": 2.0,
+    "rule": "Loss exposure must stay inside the per-trade, daily, weekly, consecutive-loss, and strategy-drawdown gates before P5 can review supervised demo-trade readiness."
+  },
+  "next_required_lane": "P5_SUPERVISED_DEMO_TRADE_READINESS_REVIEW",
+  "one_order_rules": {
+    "max_open_positions": 1,
+    "max_orders_per_signal": 1,
+    "no_retry_loop": true,
+    "one_order_rule": true,
+    "rule": "The C1 signal may have no more than one open position and no more than one order per signal during later supervised review."
+  },
+  "p3_p4_readiness": "P4_READY",
+  "p3_proof_status": "P3_PROOF_PASSED_FOR_P4_REVIEW",
+  "p4_entry_assessment": {
+    "checks": {
+      "failed_requirements_empty": true,
+      "next_required_lane": true,
+      "p3_proof_status": true,
+      "p4_readiness": true,
+      "post_p3_score": true,
+      "review_only_boundary": true
+    },
+    "observed": {
+      "failed_requirements": [],
+      "next_required_lane": "P4_RISK_POSITION_SIZING_REVIEW",
+      "p3_proof_status": "P3_PROOF_PASSED_FOR_P4_REVIEW",
+      "p4_readiness": "P4_READY",
+      "post_p3_score": 100,
+      "review_only_boundary": [
+        "account access",
+        "autonomous trading",
+        "broker/API access",
+        "claiming 100-120 percent return as verified",
+        "claiming 22/6 autonomy readiness",
+        "claiming vacation/luxury mode as active",
+        "credentials",
+        "daemon activation",
+        "demo trading without later evidence gate",
+        "live trading",
+        "money movement",
+        "order closure",
+        "order placement",
+        "production activation",
+        "scheduler activation",
+        "webhook activation"
+      ]
+    },
+    "passed": true
+  },
+  "p4_review_status": "P4_RISK_POSITION_SIZING_PASSED_FOR_P5_REVIEW",
+  "p5_readiness": "P5_READY",
+  "passed_requirements": [
+    "p3_entry_condition",
+    "required_risk_rules_present",
+    "conservative_defaults",
+    "formula_only_position_sizing",
+    "broker_account_dependency_block",
+    "no_demo_live_approval"
+  ],
+  "position_sizing_formula": {
+    "blocked_inputs": [
+      "real account equity in this P4 review",
+      "broker balances",
+      "broker credentials",
+      "live prices",
+      "account identifiers"
+    ],
+    "formula_only": true,
+    "position_size_formula": "position_size = risk_amount / stop_loss_value_per_unit",
+    "real_sizing_block": "Real sizing is blocked until a later supervised demo-readiness review supplies a sanitized broker/account snapshot.",
+    "required_inputs": [
+      "account_equity",
+      "max_risk_per_trade_percent",
+      "stop_loss_value_per_unit"
+    ],
+    "risk_amount_formula": "risk_amount = account_equity * (max_risk_per_trade_percent / 100)"
+  },
+  "post_p4_score": 100,
+  "post_p4_status": "P5_READY",
+  "risk_policy": {
+    "broker_account_dependency_block": {
+      "blocked": true,
+      "p5_requirement": "A later supervised demo-readiness review must supply a sanitized broker/account snapshot before any real position size can be calculated.",
+      "reason": "This P4 review defines formulas and guardrails only; it must not read credentials, balances, account identifiers, broker data, or live prices."
+    },
+    "daily_stop_rule": true,
+    "kill_switch_triggers": [
+      "missing stop loss",
+      "missing take profit",
+      "risk per trade above 0.25 percent",
+      "daily loss at or above 1.00 percent",
+      "weekly loss at or above 2.00 percent",
+      "three consecutive losses",
+      "more than one open position",
+      "more than one order for the same signal",
+      "strategy drawdown above 5.00 percent",
+      "broker/account dependency requested before sanitized P5 snapshot",
+      "credential, account, broker/API, order, scheduler, daemon, webhook, production, or autonomy path detected"
+    ],
+    "max_consecutive_losses": 3,
+    "max_daily_loss_percent": 1.0,
+    "max_open_positions": 1,
+    "max_orders_per_signal": 1,
+    "max_risk_per_trade_percent": 0.25,
+    "max_strategy_drawdown_percent": 5.0,
+    "max_weekly_loss_percent": 2.0,
+    "minimum_reward_to_risk": 1.2,
+    "no_demo_live_approval": true,
+    "one_order_rule": true,
+    "position_size_formula": "position_size = risk_amount / stop_loss_value_per_unit",
+    "stop_loss_required": true,
+    "take_profit_required": true,
+    "weekly_stop_rule": true
+  },
+  "risk_rule_assessments": {
+    "broker_account_dependency_block": {
+      "evidence": "Real sizing is blocked until P5 supplies a sanitized broker/account snapshot.",
+      "passed": true
+    },
+    "conservative_defaults": {
+      "evidence": "Risk defaults cap exposure at 0.25 percent per trade, 1.00 percent daily, 2.00 percent weekly, three consecutive losses, one open position, one order per signal, mandatory TP/SL, at least 1.20 reward-to-risk, and 5.00 percent strategy drawdown.",
+      "passed": true
+    },
+    "formula_only_position_sizing": {
+      "evidence": "Position sizing is formula-only and requires account_equity and stop_loss_value_per_unit without reading broker data.",
+      "passed": true
+    },
+    "no_demo_live_approval": {
+      "evidence": "P4 defines review policy only and does not approve demo trading, live trading, broker/API access, credentials, order placement, or money movement.",
+      "passed": true
+    },
+    "required_risk_rules_present": {
+      "evidence": "All required P4 risk policy keys must exist.",
+      "missing_rules": [],
+      "passed": true
+    }
+  },
+  "source_evidence": [
+    {
+      "path": "automation/forex_engine/c1_walk_forward_oos_proof_v1.py",
+      "use": "Provides the authoritative P3 proof evaluator consumed by this P4 risk review."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_WALK_FORWARD_OOS_PROOF_V1.json",
+      "use": "Records P3 proof status, P4 readiness, score, failed requirements, and next lane."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_WALK_FORWARD_OOS_PROOF_V1_REPORT.md",
+      "use": "Explains the source-backed P3 decision and preserves the no demo or live trading boundary."
+    },
+    {
+      "path": "Reports/forex_delivery/AIOS_FOREX_C1_WALK_FORWARD_OOS_PROOF_NEXT_ACTION_QUEUE_V1.md",
+      "use": "Routes the source-cleared candidate into P4 risk and position-sizing review only."
+    }
+  ],
+  "tp_sl_guardrails": {
+    "minimum_reward_to_risk": 1.2,
+    "rule": "Every later supervised demo-trade review candidate must include a stop loss, take profit, and at least 1.20 reward-to-risk before any order approval can be considered.",
+    "stop_loss_required": true,
+    "take_profit_required": true
+  }
+}
