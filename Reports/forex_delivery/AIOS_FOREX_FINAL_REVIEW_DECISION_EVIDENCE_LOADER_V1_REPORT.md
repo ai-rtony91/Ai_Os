@@ -1,0 +1,454 @@
+# Forex Final Review Decision Evidence Loader V1
+Generated: 2026-06-28T01:45:03.817679+00:00
+Record count: 73
+Evidence count: 102
+Most critical status: SAFETY_REJECTED
+
+## Status counts
+- EVIDENCE_MISSING: 11
+- EVIDENCE_READY: 25
+- EVIDENCE_REPAIR_REQUIRED: 4
+- EXTERNAL_EVIDENCE_REQUIRED: 8
+- OWNER_EVIDENCE_REQUIRED: 9
+- PROTECTED_AUTHORITY_REQUIRED: 8
+- SAFETY_REJECTED: 8
+
+## Records
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_33.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_34.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_35.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_36.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_37.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_38.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_39.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_40.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_41.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_42.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_owner_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_ready_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_02.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_REPAIR_REQUIRED
+  - source_status: local repair required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_03.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_04.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_05.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_06.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_07.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: evidence missing
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_08.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_09.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_10.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_REPAIR_REQUIRED
+  - source_status: local repair required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_11.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: owner evidence required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_12.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_13.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_14.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_15.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: evidence missing
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_16.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_17.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\extra_evidence_18.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_REPAIR_REQUIRED
+  - source_status: local repair required
+  - redaction_status: unknown
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_review_candidate_deferred_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: invalid_json
+  - redaction_status: unknown
+  - evidence_count: 0
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_review_candidate_external_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: invalid_json
+  - redaction_status: unknown
+  - evidence_count: 0
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_review_candidate_local_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: invalid_json
+  - redaction_status: unknown
+  - evidence_count: 0
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_review_candidate_owner_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: invalid_json
+  - redaction_status: unknown
+  - evidence_count: 0
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_review_candidate_protected_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: invalid_json
+  - redaction_status: unknown
+  - evidence_count: 0
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_review_candidate_ready_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: invalid_json
+  - redaction_status: unknown
+  - evidence_count: 0
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_review_candidate_safety_01.json [json]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: invalid_json
+  - redaction_status: unknown
+  - evidence_count: 0
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\boundary_trade_command_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: EVIDENCE_READY
+  - redaction_status: not_redacted
+  - evidence_count: 1
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\demo_handoff_external_required_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\demo_handoff_local_repair_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\demo_handoff_owner_required_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\demo_handoff_protected_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\demo_handoff_review_ready_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\demo_handoff_safety_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_43.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_44.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_45.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_46.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_47.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_48.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_49.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_50.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_51.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_52.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_53.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_54.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\edge_variant_55.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_external_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EXTERNAL_EVIDENCE_REQUIRED
+  - source_status: external evidence required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_missing_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: evidence missing
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_protected_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: PROTECTED_AUTHORITY_REQUIRED
+  - source_status: protected authority required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_ready_02.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 3
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_repair_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_REPAIR_REQUIRED
+  - source_status: local repair required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\evidence_safety_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_ownerauth_approval_ready_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_ownerauth_missing_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_ownerauth_protected_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_ownerauth_review_required_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\final_ownerauth_safety_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: ready
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\ownerauth_approval_ready_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: OWNER_EVIDENCE_REQUIRED
+  - source_status: approval required by owner
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\ownerauth_missing_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_MISSING
+  - source_status: missing evidence
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\ownerauth_protected_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: protected dependency required
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\ownerauth_review_required_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: EVIDENCE_READY
+  - source_status: EVIDENCE_READY
+  - redaction_status: not_redacted
+  - evidence_count: 2
+- C:\Dev\Ai.Os\tests\fixtures\forex_delivery\final_review_decision_gate_v1\ownerauth_safety_01.md [markdown]
+  - source_family: final_review_decision_gate_v1
+  - status: SAFETY_REJECTED
+  - source_status: safety blocked
+  - redaction_status: not_redacted
+  - evidence_count: 2
