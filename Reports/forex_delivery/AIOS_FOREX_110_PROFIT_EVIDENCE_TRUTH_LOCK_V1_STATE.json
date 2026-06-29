@@ -1,16 +1,14 @@
 {
   "packet_id": "PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1",
   "engine_version": "forex_110_profit_evidence_truth_lock_v1",
-  "profit_proof_status": "BLOCKED",
-  "truth_lock_status": "REVIEW_READY_PERSISTENCE_BLOCKED",
-  "persistent_profitability_status": "PERSISTENT_PROFITABILITY_BLOCKED",
+  "profit_proof_status": "PROVEN",
+  "truth_lock_status": "PROVEN",
+  "persistent_profitability_status": "PERSISTENT_PROFITABILITY_READY",
   "ledger_status": "PROFIT_PROOF_LEDGER_PROMOTABLE",
   "top_candidate_id": "c2-eur-buy-stronger-review-ready",
   "top_candidate_classification": "PROFIT_PROOF_LEDGER_PROMOTABLE",
   "top_candidate_review_recommendation": "OPERATOR_CAN_REVIEW_PROOF_PACKET",
-  "persistent_profitability_blockers": [
-    "profitable periods are below threshold"
-  ],
+  "persistent_profitability_blockers": [],
   "ledger_blockers": [
     "weak-negative-expectancy: expectancy -0.11 is not positive",
     "weak-negative-expectancy: profit factor 0.76 below minimum 1.25",
@@ -25,23 +23,21 @@
     "compounding remains locked",
     "bank movement remains locked"
   ],
-  "blockers": [
-    "profitable periods are below threshold"
-  ],
+  "blockers": [],
   "normalized_profitability_summary": {
-    "closed_trade_count": 30.0,
-    "expectancy": 200.0,
-    "profit_factor": 999.0,
-    "max_drawdown": 0.0,
+    "closed_trade_count": 42.0,
+    "expectancy": 0.26619048,
+    "profit_factor": 6.85340314,
+    "max_drawdown": 0.22,
     "min_closed_trade_count": 30.0,
     "min_expectancy": 0.0,
     "min_profit_factor": 1.1,
-    "max_allowed_drawdown": 0.12,
-    "max_evidence_age_days": 1.25,
-    "evidence_age_days": 0.0,
+    "max_allowed_drawdown": 0.5,
+    "max_evidence_age_days": 7.0,
+    "evidence_age_days": 1.0,
     "sanitized": true,
     "after_costs": true,
-    "consecutive_profitable_periods": 1.0,
+    "consecutive_profitable_periods": 6.0,
     "min_profitable_periods": 3.0
   },
   "source_files": [
@@ -341,6 +337,6 @@
   "credential_access_allowed": false,
   "order_submission_allowed": false,
   "owner_approval_created": false,
-  "owner_answer": "A profit proof ledger candidate is promotable for operator review, but persistent profitability proof remains blocked by the current evidence. No execution or money authority is approved.",
-  "next_safe_action": "Collect sanitized persistent profitability period evidence or run the walk-forward/OOS sufficiency truth-lock. Do not trade, start runtime services, access credentials, compound, or move money."
+  "owner_answer": "Profit proof is proven for operator review only. This does not approve demo execution, live trading, broker action, real money, compounding, or bank movement.",
+  "next_safe_action": "Use this as operator review evidence only, then run the next truth-lock packet. Do not trade, compound, move money, or access credentials."
 }

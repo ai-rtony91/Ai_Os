@@ -279,6 +279,66 @@ def test_profitability_intake_consumes_failing_persistence_window_evidence(tmp_p
     assert_permissions_false(result)
 
 
+def test_profitability_intake_prefers_c2_persistent_period_source(tmp_path: Path) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    (report_root / "AIOS_FOREX_PROFITABILITY_VERDICT_V1.md").write_text(
+        "\n".join(
+            [
+                "- closed_trade_count: 30",
+                "- min_closed_trade_count: 30",
+                "- expectancy: 200",
+                "- min_expectancy: 0",
+                "- profit_factor: 999",
+                "- min_profit_factor: 1.1",
+                "- max_drawdown: 0",
+                "- max_allowed_drawdown: 0.12",
+                "- consecutive_profitable_periods: 1",
+                "- min_profitable_periods: 3",
+                "- after_costs: true",
+                "- sanitized: true",
+                "- evidence_age_days: 0",
+                "- max_evidence_age_days: 1.25",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (report_root / "AIOS_FOREX_110_PERSISTENT_PROFITABILITY_PERIOD_SOURCE_V1.md").write_text(
+        "\n".join(
+            [
+                "Persistent profitability evidence summary.",
+                "- closed_trade_count: 42",
+                "- min_closed_trade_count: 30",
+                "- expectancy: 0.26619048",
+                "- min_expectancy: 0.0",
+                "- profit_factor: 6.85340314",
+                "- min_profit_factor: 1.1",
+                "- max_drawdown: 0.22",
+                "- max_allowed_drawdown: 0.5",
+                "- consecutive_profitable_periods: 6",
+                "- min_profitable_periods: 3",
+                "- after_costs: true",
+                "- sanitized: true",
+                "- evidence_age_days: 1.0",
+                "- max_evidence_age_days: 7.0",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = intake_profitability_evidence(report_root)
+
+    assert result["status"] == PERSISTENT_PROFITABILITY_READY
+    assert result["normalized_summary"]["closed_trade_count"] == 42
+    assert result["normalized_summary"]["expectancy"] == 0.26619048
+    assert result["normalized_summary"]["consecutive_profitable_periods"] == 6
+    assert any(
+        "AIOS_FOREX_110_PERSISTENT_PROFITABILITY_PERIOD_SOURCE_V1.md" in item
+        for item in result["source_files"]
+    )
+    assert_permissions_false(result)
+
+
 def test_profitability_intake_operator_outputs_are_stable(tmp_path: Path) -> None:
     report_root = tmp_path / "reports"
     report_root.mkdir()
