@@ -1,0 +1,53 @@
+{
+  "packet_id": "PKT-FOREX-OWNER-SAFETY-EVIDENCE-INTAKE-VERIFICATION-PREP-V1",
+  "packet_name": "Build Owner Safety Evidence Intake Verification Prep V1",
+  "template_version": "V1",
+  "required_controls": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "controls": {
+    "kill_switch_state": {
+      "evidence_present": false,
+      "evidence_type": "",
+      "sanitized_artifact_path": "",
+      "owner_attestation": "",
+      "evidence_timestamp_utc": "",
+      "freshness_window_hours": 24,
+      "contains_secret_or_account_identifier": false,
+      "notes": ""
+    },
+    "daily_stop_state": {
+      "evidence_present": false,
+      "evidence_type": "",
+      "sanitized_artifact_path": "",
+      "owner_attestation": "",
+      "evidence_timestamp_utc": "",
+      "freshness_window_hours": 24,
+      "contains_secret_or_account_identifier": false,
+      "notes": ""
+    },
+    "max_loss_state": {
+      "evidence_present": false,
+      "evidence_type": "",
+      "sanitized_artifact_path": "",
+      "owner_attestation": "",
+      "evidence_timestamp_utc": "",
+      "freshness_window_hours": 24,
+      "contains_secret_or_account_identifier": false,
+      "notes": ""
+    },
+    "monitoring_ready": {
+      "evidence_present": false,
+      "evidence_type": "",
+      "sanitized_artifact_path": "",
+      "owner_attestation": "",
+      "evidence_timestamp_utc": "",
+      "freshness_window_hours": 24,
+      "contains_secret_or_account_identifier": false,
+      "notes": ""
+    }
+  }
+}
