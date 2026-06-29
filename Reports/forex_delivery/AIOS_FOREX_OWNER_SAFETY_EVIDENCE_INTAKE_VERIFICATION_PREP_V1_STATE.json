@@ -1,0 +1,108 @@
+{
+  "packet_id": "PKT-FOREX-OWNER-SAFETY-EVIDENCE-INTAKE-VERIFICATION-PREP-V1",
+  "packet_name": "Build Owner Safety Evidence Intake Verification Prep V1",
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "mission_name": "Governed Forex Finish Line",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "program_name": "Forex Profit Autonomy System",
+  "epic_id": "EPC-FOREX-OWNER-SAFETY-EVIDENCE-INTAKE-001",
+  "epic_name": "Owner Safety Evidence Intake And Verification Prep",
+  "bucket_id": "BKT-FOREX-OWNER-SAFETY-EVIDENCE-INTAKE-001",
+  "bucket_name": "Owner Safety Evidence Intake Template And Classifier",
+  "status": "OWNER_SAFETY_EVIDENCE_INTAKE_REQUIRED",
+  "current_timestamp_utc": "2026-06-29T08:41:39Z",
+  "required_controls": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "control_evaluations": {
+    "kill_switch_state": {
+      "status": "MISSING",
+      "evidence_metadata": {
+        "evidence_present": false,
+        "evidence_type": "",
+        "sanitized_artifact_path": "",
+        "owner_attestation": "",
+        "evidence_timestamp_utc": "",
+        "freshness_window_hours": 24,
+        "contains_secret_or_account_identifier": false,
+        "notes": ""
+      },
+      "reason": "Owner evidence not yet provided for this control."
+    },
+    "daily_stop_state": {
+      "status": "MISSING",
+      "evidence_metadata": {
+        "evidence_present": false,
+        "evidence_type": "",
+        "sanitized_artifact_path": "",
+        "owner_attestation": "",
+        "evidence_timestamp_utc": "",
+        "freshness_window_hours": 24,
+        "contains_secret_or_account_identifier": false,
+        "notes": ""
+      },
+      "reason": "Owner evidence not yet provided for this control."
+    },
+    "max_loss_state": {
+      "status": "MISSING",
+      "evidence_metadata": {
+        "evidence_present": false,
+        "evidence_type": "",
+        "sanitized_artifact_path": "",
+        "owner_attestation": "",
+        "evidence_timestamp_utc": "",
+        "freshness_window_hours": 24,
+        "contains_secret_or_account_identifier": false,
+        "notes": ""
+      },
+      "reason": "Owner evidence not yet provided for this control."
+    },
+    "monitoring_ready": {
+      "status": "MISSING",
+      "evidence_metadata": {
+        "evidence_present": false,
+        "evidence_type": "",
+        "sanitized_artifact_path": "",
+        "owner_attestation": "",
+        "evidence_timestamp_utc": "",
+        "freshness_window_hours": 24,
+        "contains_secret_or_account_identifier": false,
+        "notes": ""
+      },
+      "reason": "Owner evidence not yet provided for this control."
+    }
+  },
+  "missing_controls": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "present_unverified_controls": [],
+  "stale_controls": [],
+  "invalid_controls": [],
+  "owner_evidence_completion_percent": 0.0,
+  "verification_claimed": false,
+  "verification_mechanism_available": false,
+  "next_safe_action": "Owner must fill the intake template with current sanitized evidence for all controls.",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "order_execution": false,
+  "live_trading_authorized": false,
+  "input_error_present": false,
+  "input_error_type": null,
+  "input_error_path": null,
+  "safety_boundary": {
+    "broker_api_allowed": false,
+    "credentials_allowed": false,
+    "order_execution_allowed": false,
+    "live_trading_authorized": false,
+    "scheduler_allowed": false,
+    "daemon_allowed": false,
+    "webhook_allowed": false,
+    "account_identifier_persistence_allowed": false
+  }
+}
