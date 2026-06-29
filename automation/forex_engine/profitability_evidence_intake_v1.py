@@ -33,6 +33,11 @@ PROFITABILITY_REPORTS = (
     "AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
     "AIOS_FOREX_DEMO_READINESS_PROFIT_TRUST_SPINE_V1.md",
 )
+HIGH_PRECEDENCE_PROFITABILITY_REPORTS = frozenset(
+    {
+        "AIOS_FOREX_110_PERSISTENT_PROFITABILITY_PERIOD_SOURCE_V1.md",
+    }
+)
 PROFITABILITY_DISCOVERY_PATTERN = re.compile(
     r"(?i)(persistent profitability|profitability|profit proof|profit[_ -]?factor|"
     r"expectancy|net_pnl_after_costs|after[-_ ]cost|consecutive profitable)"
@@ -55,7 +60,11 @@ def intake_profitability_evidence(report_root: str | Path = DEFAULT_REPORT_ROOT)
 
     for path in _candidate_report_paths(root, PROFITABILITY_REPORTS, PROFITABILITY_DISCOVERY_PATTERN):
         sources.append(_display_path(path))
-        _merge_if_present(summary, _summary_from_markdown(path.read_text(encoding="utf-8"), notes))
+        parsed = _summary_from_markdown(path.read_text(encoding="utf-8"), notes)
+        if path.name in HIGH_PRECEDENCE_PROFITABILITY_REPORTS:
+            _merge_with_precedence(summary, parsed)
+        else:
+            _merge_if_present(summary, parsed)
 
     notes = _active_parse_notes(notes, summary)
     result = profitability_result_to_jsonable_dict(evaluate_persistent_profitability_evidence(summary or None))
@@ -387,6 +396,12 @@ def _active_parse_notes(notes: list[str], summary: Mapping[str, Any]) -> list[st
 def _merge_if_present(target: dict[str, Any], incoming: Mapping[str, Any]) -> None:
     for key, value in incoming.items():
         if key not in target and value is not None:
+            target[key] = value
+
+
+def _merge_with_precedence(target: dict[str, Any], incoming: Mapping[str, Any]) -> None:
+    for key, value in incoming.items():
+        if value is not None:
             target[key] = value
 
 
