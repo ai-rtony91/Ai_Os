@@ -28,11 +28,11 @@ $status = git status --short
 $invalid = @()
 foreach ($line in $status) {
     if (-not $line) { continue }
-    $trimmed = $line.ToString().Trim()
-    if ($trimmed.Length -lt 4) {
+    $raw = $line.ToString()
+    if ($raw.Length -lt 4) {
         continue
     }
-    $path = $trimmed.Substring(3).Trim()
+    $path = $raw.Substring(3).Trim()
     if ([string]::IsNullOrWhiteSpace($path)) {
         continue
     }
