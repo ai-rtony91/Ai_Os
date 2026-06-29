@@ -1,7 +1,7 @@
 {
-  "orchestrator_status": "CHAINABLE_FOREX_ORCHESTRATOR_READY_FOR_HOURS_REPO_ONLY",
+  "orchestrator_status": "OWNER_WAKE_REQUIRED_FOR_PROTECTED_FOREX_BOUNDARY",
   "current_stage": "first read-only broker probe review",
-  "next_stage": "first read-only broker probe review",
+  "next_stage": "broker connection proof",
   "stage_graph": [
     {
       "name": "first read-only broker probe review",
@@ -336,16 +336,29 @@
       ]
     }
   ],
-  "safe_for_hours": true,
-  "hours_ready": true,
-  "owner_wake_required": false,
-  "owner_wake_reason": "",
-  "protected_action_detected": false,
-  "protected_action_reasons": [],
+  "safe_for_hours": false,
+  "hours_ready": false,
+  "owner_wake_required": true,
+  "owner_wake_reason": "Next stage requires protected owner approval boundary: owner approval, broker contact, credentials, .env access, account identifiers",
+  "protected_action_detected": true,
+  "protected_action_reasons": [
+    "owner approval",
+    "broker contact",
+    "credentials",
+    ".env access",
+    "account identifiers"
+  ],
   "ultimate_finish_line": "22hr/day 6day/week governed operating readiness",
-  "remaining_stage_count": 13,
-  "repo_only_remaining_stage_count": 1,
+  "remaining_stage_count": 12,
+  "completed_repo_only_stage_count": 1,
+  "completed_repo_only_stages": [
+    "first read-only broker probe review"
+  ],
+  "repo_only_remaining_stage_count": 0,
   "external_blocker_stage_count": 12,
+  "protected_stage_count": 12,
+  "forex_completion_percent": 7.69,
+  "current_autonomy_level": "PROTECTED_OWNER_BOUNDARY_REQUIRED",
   "next_packet_path": "Reports/forex_delivery/AIOS_FOREX_FULL_CHAINABLE_FINISH_LINE_ORCHESTRATOR_NEXT_CODEX_PACKET_V2.md",
   "next_packet_mode": "DRY_RUN",
   "next_packet_governance_valid": true,

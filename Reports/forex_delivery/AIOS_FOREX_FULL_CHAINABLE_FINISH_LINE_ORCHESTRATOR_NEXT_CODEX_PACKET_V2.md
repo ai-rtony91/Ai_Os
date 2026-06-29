@@ -4,10 +4,10 @@ AI_OS EXECUTION TOKEN
 AI_OS BOOTSTRAP REQUIRED
 
 CONTRACT TITLE
-AIOS_FOREX_FIRST_READ_ONLY_BROKER_PROBE_REVIEW_RELAY_DRY_RUN_V2
+AIOS_FOREX_BROKER_CONNECTION_PROOF_PROTECTED_BOUNDARY_REVIEW_V1
 
 IDENTITY MARKER
-AIOS_FOREX_FIRST_READ_ONLY_BROKER_PROBE_REVIEW_RELAY_DRY_RUN_V2
+AIOS_FOREX_BROKER_CONNECTION_PROOF_PROTECTED_BOUNDARY_REVIEW_V1
 
 SUPERVISOR IDENTITY
 ChatGPT planning supervisor
@@ -16,10 +16,10 @@ WORKER IDENTITY
 Codex
 
 PACKET ID
-PKT-FOREX-FIRST-READ-ONLY-BROKER-PROBE-REVIEW-RELAY-DRY-RUN-V2
+PKT-FOREX-BROKER-CONNECTION-PROOF-PROTECTED-BOUNDARY-REVIEW-V1
 
 PACKET NAME
-First Read-Only Broker Probe Review Relay Dry Run V2
+Broker Connection Proof Protected Boundary Review V1
 
 MODE
 DRY_RUN
@@ -28,7 +28,7 @@ ZONE
 Trading Lab / Forex
 
 LANE
-First Read-Only Broker Probe Review Relay Dry Run
+Forex Protected Broker Connection Boundary
 
 WORKTREE
 C:\Dev\Ai.Os
@@ -49,47 +49,43 @@ PROGRAM NAME
 Forex Profit Autonomy System
 
 EPIC ID
-EPC-FOREX-BROKER-PROBE-SCOPE-REVIEW-001
+EPC-FOREX-BROKER-CONNECTION-PROOF-001
 
 EPIC NAME
-Value-Free Broker Probe Scope Review
+Broker Connection Proof Protected Boundary
 
 BUCKET ID
-BKT-FOREX-FIRST-READ-ONLY-BROKER-PROBE-REVIEW-001
+BKT-FOREX-BROKER-CONNECTION-PROOF-PROTECTED-BOUNDARY-001
 
 BUCKET NAME
-First Read-Only Broker Probe Review
+Owner Approval Gate For Broker Connection Proof
 
 APPROVAL AUTHORITY
-Anthony is the only authority for APPLY, commit, push, PR, merge, broker contact, credential use, .env access, account identifier use, demo action, live action, order execution, scheduler activation, daemon activation, webhook activation, background-loop activation, and live trading authorization.
-A later Human Owner message that explicitly approves APPLY is required before any file write.
-A later Human Owner message that explicitly approves broker contact is required before any broker contact.
-A later Human Owner message that explicitly approves credential use is required before any credential use.
-A later Human Owner message that explicitly approves .env access is required before any .env access.
-A later Human Owner message that explicitly approves account identifier use is required before any account identifier use.
-A later Human Owner message that explicitly approves commit is required before commit.
-A later Human Owner message that explicitly approves push is required before push.
-A later Human Owner message that explicitly approves merge is required before merge.
+Anthony is the only authority for broker contact, credentials, .env access, account identifiers, demo action, live action, order execution, scheduler activation, daemon activation, webhook activation, background-loop activation, APPLY, commit, push, PR, merge, and live trading authorization.
+This packet is DRY_RUN-only and does not approve any protected action.
+Anthony explicitly approves commit before any commit.
+Anthony explicitly approves push before any push.
+Anthony explicitly approves merge before any merge.
 
 MISSION
-Perform a DRY_RUN-only relay review for the first read-only broker probe path from current repo evidence.
-
-This packet may inspect only listed local artifacts.
-This packet must not create files.
-This packet must not modify files.
-This packet must not contact a broker.
-This packet must not use credentials.
-This packet must not read .env.
-This packet must not use account identifiers.
-This packet must not inspect private broker data.
-This packet must not authorize demo action.
-This packet must not authorize live micro action.
-This packet must not authorize live trading.
-This packet must not start scheduler, daemon, webhook, or background loop.
-This packet must not place orders.
-This packet must not commit.
-This packet must not push.
-This packet must not create PR.
+Review the protected boundary now reached after exhausting repo-only Forex finish-line work.
+Confirm that the next stage is broker connection proof and that it requires Human Owner approval before broker contact, credentials, .env access, account identifiers, or broker account status inspection.
+Do not execute the broker connection proof.
+Do not contact a broker.
+Do not use credentials.
+Do not read .env.
+Do not use account identifiers.
+Do not inspect private broker data.
+Do not authorize demo action.
+Do not authorize live micro action.
+Do not authorize live trading.
+Do not start scheduler, daemon, webhook, or background loop.
+Do not place orders.
+Do not create files.
+Do not edit files.
+Do not commit.
+Do not push.
+Do not create PR.
 
 PREFLIGHT
 cd C:\Dev\Ai.Os
@@ -139,13 +135,15 @@ unrelated tests
 any path outside C:\Dev\Ai.Os except temporary validation paths
 
 REQUIRED BEHAVIOR
-Confirm the orchestrator current stage is first read-only broker probe review.
-Confirm next protected boundary remains owner approval before broker contact, credentials, .env access, account identifiers, demo action, live action, order execution, scheduler, daemon, webhook, or background loop.
+Confirm completed repo-only stage count is 1.
+Confirm remaining repo-only stage count is 0.
+Confirm protected stage count is 12.
+Confirm the next protected boundary is broker connection proof.
 Confirm all safety booleans remain false.
-Report whether the next non-repo-only stage requires OWNER_WAKE_REQUIRED.
+Report that OWNER_WAKE_REQUIRED is true before any broker-facing action.
 
 SAFE NEXT ACTION
-Stop after DRY_RUN relay review. Keep protected Forex boundary locked unless Anthony provides explicit later approval in a complete tokenized packet.
+Stop and request Human Owner approval for the exact broker connection proof scope before any broker contact, credential use, .env access, account identifier use, private broker data inspection, order execution, demo action, live action, scheduler, daemon, webhook, or background loop.
 
 VALIDATOR CHAIN
 python -m json.tool Reports/forex_delivery/AIOS_FOREX_FULL_CHAINABLE_FINISH_LINE_ORCHESTRATOR_V2_STATE.json
@@ -153,8 +151,8 @@ python -m json.tool Reports/forex_delivery/AIOS_FOREX_OWNER_APPROVAL_VALUE_FREE_
 git status --short --branch
 
 STOP POINT
-Stop after DRY_RUN relay review and final report.
-Do not edit files.
+Stop after DRY_RUN protected boundary review and final report.
+Do not execute broker connection proof.
 Do not contact broker.
 Do not use credentials.
 Do not read .env.
@@ -168,7 +166,10 @@ FINAL REPORT FORMAT
 STATUS:
 CURRENT_BRANCH:
 CURRENT_HEAD:
-CURRENT_STAGE:
+COMPLETED_REPO_ONLY_STAGE_COUNT:
+REMAINING_REPO_ONLY_STAGE_COUNT:
+PROTECTED_STAGE_COUNT:
+CURRENT_AUTONOMY_LEVEL:
 NEXT_PROTECTED_BOUNDARY:
 OWNER_WAKE_REQUIRED:
 BROKER_API_USED:

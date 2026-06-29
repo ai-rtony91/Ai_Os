@@ -31,6 +31,8 @@ STATUS_READY = "CHAINABLE_FOREX_ORCHESTRATOR_READY_FOR_HOURS_REPO_ONLY"
 STATUS_OWNER_WAKE = "OWNER_WAKE_REQUIRED_FOR_PROTECTED_FOREX_BOUNDARY"
 STATUS_FAIL_CLOSED = "CHAINABLE_FOREX_ORCHESTRATOR_FAIL_CLOSED"
 ULTIMATE_FINISH_LINE = "22hr/day 6day/week governed operating readiness"
+FIRST_REPO_ONLY_STAGE = "first read-only broker probe review"
+FIRST_PROTECTED_STAGE = "broker connection proof"
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORTS_DIR = ROOT / "Reports" / "forex_delivery"
@@ -179,7 +181,8 @@ def run_forex_full_chainable_finish_line_orchestrator_v2(
     source_errors = source_state.get("source_errors", [])
     stage_graph = build_stage_graph()
     current_stage = detect_current_stage(source_state)
-    next_stage = select_next_stage(stage_graph, current_stage)
+    completed_repo_only_stages = detect_completed_repo_only_stages(source_state)
+    next_stage = select_next_stage(stage_graph, current_stage, completed_repo_only_stages)
     packet_builder = packet_builder or build_next_codex_packet
 
     draft_result = {
@@ -237,8 +240,13 @@ def run_forex_full_chainable_finish_line_orchestrator_v2(
         "protected_action_reasons": protected_action_reasons,
         "ultimate_finish_line": ULTIMATE_FINISH_LINE,
         "remaining_stage_count": len(remaining_stages),
+        "completed_repo_only_stage_count": len(completed_repo_only_stages),
+        "completed_repo_only_stages": list(completed_repo_only_stages),
         "repo_only_remaining_stage_count": len(repo_only_remaining),
         "external_blocker_stage_count": len(external_blockers),
+        "protected_stage_count": len(external_blockers),
+        "forex_completion_percent": calculate_completion_percent(stage_graph, remaining_stages),
+        "current_autonomy_level": current_autonomy_level(repo_only_remaining, external_blockers),
         "next_packet_path": _relative_path(DEFAULT_NEXT_PACKET_OUTPUT_PATH),
         "next_packet_mode": "DRY_RUN",
         "next_packet_governance_valid": next_packet_governance_valid,
@@ -338,20 +346,76 @@ def detect_current_stage(source_state: Mapping[str, Any]) -> str:
     selected_packet = str(summary.get("selected_next_safe_packet") or "")
     current_phase = str(summary.get("current_phase") or "")
     if selected_packet == "FIRST_READ_ONLY_BROKER_PROBE_REVIEW_DRY_RUN":
-        return "first read-only broker probe review"
+        return FIRST_REPO_ONLY_STAGE
     if current_phase == "BROKER_PROBE_SCOPE_APPROVAL_REQUIRED":
-        return "first read-only broker probe review"
-    return "first read-only broker probe review"
+        return FIRST_REPO_ONLY_STAGE
+    return FIRST_REPO_ONLY_STAGE
+
+
+def detect_completed_repo_only_stages(source_state: Mapping[str, Any]) -> tuple[str, ...]:
+    """Detect repo-only stages already reduced to a protected owner boundary."""
+    summary = _mapping(source_state.get("summary"))
+    owner_state = _mapping(source_state.get("owner_approval_state"))
+    scope_state = _mapping(source_state.get("scope_review_state"))
+    owner_review_ready = (
+        owner_state.get("owner_approval_review_status")
+        == "VALUE_FREE_BROKER_PROBE_SCOPE_READY_FOR_OWNER_APPROVAL"
+    )
+    owner_boundary_reached = owner_state.get("owner_approval_status") == "OWNER_APPROVAL_REQUIRED"
+    next_packet_ready = bool(owner_state.get("next_packet_ready"))
+    scope_review_ready = (
+        scope_state.get("broker_probe_scope_status")
+        == "VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_READY_FOR_OWNER_APPROVAL"
+        or summary.get("source_scope_review_status")
+        == "VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_READY_FOR_OWNER_APPROVAL"
+    )
+    current_phase_at_boundary = (
+        summary.get("current_phase") == "BROKER_PROBE_SCOPE_APPROVAL_REQUIRED"
+    )
+    if (
+        owner_review_ready
+        and owner_boundary_reached
+        and next_packet_ready
+        and scope_review_ready
+        and current_phase_at_boundary
+    ):
+        return (FIRST_REPO_ONLY_STAGE,)
+    return ()
 
 
 def select_next_stage(
     stage_graph: list[dict[str, Any]],
     current_stage: str,
+    completed_stage_names: tuple[str, ...] = (),
 ) -> dict[str, Any]:
-    for stage in stage_graph:
+    completed = set(completed_stage_names)
+    for index, stage in enumerate(stage_graph):
         if stage["name"] == current_stage:
+            if stage["name"] in completed and index + 1 < len(stage_graph):
+                return stage_graph[index + 1]
             return stage
     return stage_graph[0]
+
+
+def calculate_completion_percent(
+    stage_graph: list[dict[str, Any]],
+    remaining_stages: list[dict[str, Any]],
+) -> float:
+    if not stage_graph:
+        return 0.0
+    completed_count = max(len(stage_graph) - len(remaining_stages), 0)
+    return round((completed_count / len(stage_graph)) * 100, 2)
+
+
+def current_autonomy_level(
+    repo_only_remaining: list[dict[str, Any]],
+    external_blockers: list[dict[str, Any]],
+) -> str:
+    if repo_only_remaining:
+        return "REPO_ONLY_AUTONOMY_ACTIVE"
+    if external_blockers:
+        return "PROTECTED_OWNER_BOUNDARY_REQUIRED"
+    return "FOREX_FINISH_LINE_REPO_COMPLETE"
 
 
 def remaining_stage_slice(stage_graph: list[dict[str, Any]], stage_name: str) -> list[dict[str, Any]]:
@@ -388,6 +452,11 @@ def build_report_markdown(result: Mapping[str, Any]) -> str:
         f"Current head: {_git_value('log', '-1', '--oneline')}",
         f"Current stage: {result.get('current_stage')}",
         f"Next stage: {result.get('next_stage')}",
+        f"Completed repo-only stages: {result.get('completed_repo_only_stage_count')}",
+        f"Remaining repo-only stages: {result.get('repo_only_remaining_stage_count')}",
+        f"Protected stages: {result.get('protected_stage_count')}",
+        f"Forex completion percent: {result.get('forex_completion_percent')}",
+        f"Current autonomy level: {result.get('current_autonomy_level')}",
         f"Ultimate finish line: {result.get('ultimate_finish_line')}",
         f"Safe for hours: {result.get('safe_for_hours')}",
         f"Hours ready: {result.get('hours_ready')}",
@@ -438,6 +507,9 @@ def build_report_markdown(result: Mapping[str, Any]) -> str:
 
 def build_next_codex_packet(result: Mapping[str, Any]) -> str:
     branch = "resolve after preflight"
+    next_stage = str(result.get("next_stage") or FIRST_REPO_ONLY_STAGE)
+    if next_stage == FIRST_PROTECTED_STAGE:
+        return build_protected_boundary_packet(result, branch)
     return f"""CODEX-ONLY PROMPT
 
 AI_OS EXECUTION TOKEN
@@ -627,6 +699,197 @@ GIT_STATUS:
 """
 
 
+def build_protected_boundary_packet(result: Mapping[str, Any], branch: str) -> str:
+    return f"""CODEX-ONLY PROMPT
+
+AI_OS EXECUTION TOKEN
+AI_OS BOOTSTRAP REQUIRED
+
+CONTRACT TITLE
+AIOS_FOREX_BROKER_CONNECTION_PROOF_PROTECTED_BOUNDARY_REVIEW_V1
+
+IDENTITY MARKER
+AIOS_FOREX_BROKER_CONNECTION_PROOF_PROTECTED_BOUNDARY_REVIEW_V1
+
+SUPERVISOR IDENTITY
+ChatGPT planning supervisor
+
+WORKER IDENTITY
+Codex
+
+PACKET ID
+PKT-FOREX-BROKER-CONNECTION-PROOF-PROTECTED-BOUNDARY-REVIEW-V1
+
+PACKET NAME
+Broker Connection Proof Protected Boundary Review V1
+
+MODE
+DRY_RUN
+
+ZONE
+Trading Lab / Forex
+
+LANE
+Forex Protected Broker Connection Boundary
+
+WORKTREE
+C:\\Dev\\Ai.Os
+
+BRANCH
+{branch}
+
+MISSION ID
+{MISSION_ID}
+
+MISSION NAME
+{MISSION_NAME}
+
+PROGRAM ID
+{PROGRAM_ID}
+
+PROGRAM NAME
+{PROGRAM_NAME}
+
+EPIC ID
+EPC-FOREX-BROKER-CONNECTION-PROOF-001
+
+EPIC NAME
+Broker Connection Proof Protected Boundary
+
+BUCKET ID
+BKT-FOREX-BROKER-CONNECTION-PROOF-PROTECTED-BOUNDARY-001
+
+BUCKET NAME
+Owner Approval Gate For Broker Connection Proof
+
+APPROVAL AUTHORITY
+Anthony is the only authority for broker contact, credentials, .env access, account identifiers, demo action, live action, order execution, scheduler activation, daemon activation, webhook activation, background-loop activation, APPLY, commit, push, PR, merge, and live trading authorization.
+This packet is DRY_RUN-only and does not approve any protected action.
+Anthony explicitly approves commit before any commit.
+Anthony explicitly approves push before any push.
+Anthony explicitly approves merge before any merge.
+
+MISSION
+Review the protected boundary now reached after exhausting repo-only Forex finish-line work.
+Confirm that the next stage is broker connection proof and that it requires Human Owner approval before broker contact, credentials, .env access, account identifiers, or broker account status inspection.
+Do not execute the broker connection proof.
+Do not contact a broker.
+Do not use credentials.
+Do not read .env.
+Do not use account identifiers.
+Do not inspect private broker data.
+Do not authorize demo action.
+Do not authorize live micro action.
+Do not authorize live trading.
+Do not start scheduler, daemon, webhook, or background loop.
+Do not place orders.
+Do not create files.
+Do not edit files.
+Do not commit.
+Do not push.
+Do not create PR.
+
+PREFLIGHT
+cd C:\\Dev\\Ai.Os
+pwd
+git status --short --branch
+git branch --show-current
+git log -1 --oneline
+
+READ FIRST
+AGENTS.md
+README.md
+RISK_POLICY.md
+docs/governance/AI_OS_REPO_MEMORY.md
+docs/governance/aios-identity-and-lane-governance.md
+
+READ SOURCE ARTIFACTS
+Reports/forex_delivery/AIOS_FOREX_FULL_CHAINABLE_FINISH_LINE_ORCHESTRATOR_V2_STATE.json
+Reports/forex_delivery/AIOS_FOREX_OWNER_APPROVAL_VALUE_FREE_BROKER_PROBE_REVIEW_V1_STATE.json
+Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_V1_STATE.json
+Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json
+
+ALLOWED PATHS
+Reports/forex_delivery/AIOS_FOREX_FULL_CHAINABLE_FINISH_LINE_ORCHESTRATOR_V2_STATE.json
+Reports/forex_delivery/AIOS_FOREX_OWNER_APPROVAL_VALUE_FREE_BROKER_PROBE_REVIEW_V1_STATE.json
+Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_V1_STATE.json
+Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json
+
+FORBIDDEN PATHS
+AGENTS.md
+README.md
+RISK_POLICY.md
+.env
+secrets
+credentials
+broker account identifiers
+broker modules
+order modules
+demo execution modules
+live execution modules
+scheduler files
+daemon files
+webhook files
+background loops
+dashboard mutation files
+unrelated docs
+unrelated tests
+any path outside C:\\Dev\\Ai.Os except temporary validation paths
+
+REQUIRED BEHAVIOR
+Confirm completed repo-only stage count is {result.get('completed_repo_only_stage_count')}.
+Confirm remaining repo-only stage count is {result.get('repo_only_remaining_stage_count')}.
+Confirm protected stage count is {result.get('protected_stage_count')}.
+Confirm the next protected boundary is {FIRST_PROTECTED_STAGE}.
+Confirm all safety booleans remain false.
+Report that OWNER_WAKE_REQUIRED is true before any broker-facing action.
+
+SAFE NEXT ACTION
+Stop and request Human Owner approval for the exact broker connection proof scope before any broker contact, credential use, .env access, account identifier use, private broker data inspection, order execution, demo action, live action, scheduler, daemon, webhook, or background loop.
+
+VALIDATOR CHAIN
+python -m json.tool Reports/forex_delivery/AIOS_FOREX_FULL_CHAINABLE_FINISH_LINE_ORCHESTRATOR_V2_STATE.json
+python -m json.tool Reports/forex_delivery/AIOS_FOREX_OWNER_APPROVAL_VALUE_FREE_BROKER_PROBE_REVIEW_V1_STATE.json
+git status --short --branch
+
+STOP POINT
+Stop after DRY_RUN protected boundary review and final report.
+Do not execute broker connection proof.
+Do not contact broker.
+Do not use credentials.
+Do not read .env.
+Do not use account identifiers.
+Do not authorize demo, live micro, live trading, scheduler, daemon, webhook, background loop, or order execution.
+Do not commit.
+Do not push.
+Do not create PR.
+
+FINAL REPORT FORMAT
+STATUS:
+CURRENT_BRANCH:
+CURRENT_HEAD:
+COMPLETED_REPO_ONLY_STAGE_COUNT:
+REMAINING_REPO_ONLY_STAGE_COUNT:
+PROTECTED_STAGE_COUNT:
+CURRENT_AUTONOMY_LEVEL:
+NEXT_PROTECTED_BOUNDARY:
+OWNER_WAKE_REQUIRED:
+BROKER_API_USED:
+CREDENTIALS_USED:
+ENV_READ:
+ACCOUNT_IDENTIFIERS_USED:
+ORDER_EXECUTION:
+DEMO_AUTHORIZED:
+LIVE_AUTHORIZED:
+SCHEDULER_STARTED:
+DAEMON_STARTED:
+WEBHOOK_STARTED:
+BACKGROUND_LOOP_STARTED:
+NEXT_SAFE_ACTION:
+GIT_STATUS:
+"""
+
+
 def _next_safe_action(result: Mapping[str, Any]) -> str:
     if result.get("owner_wake_required"):
         return (
@@ -688,9 +951,12 @@ __all__ = [
     "ULTIMATE_FINISH_LINE",
     "VALIDATOR_CHAIN",
     "build_next_codex_packet",
+    "build_protected_boundary_packet",
     "build_report_markdown",
     "build_stage_graph",
+    "calculate_completion_percent",
     "detect_current_stage",
+    "detect_completed_repo_only_stages",
     "protected_reasons",
     "run_forex_full_chainable_finish_line_orchestrator_v2",
     "select_next_stage",
