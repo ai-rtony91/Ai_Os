@@ -1,0 +1,73 @@
+{
+  "applied_evidence_fields": [],
+  "blocked_evidence_fields": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "bucket_id": "BKT-FOREX-SANITIZED-EVIDENCE-INTAKE-001",
+  "controller_bucket_status": "BUCKET_MAX_LOSS_HOLD",
+  "controller_candidate_status": "AUTONOMY_BLOCKED",
+  "controller_next_autonomy_action": "HOLD_FOR_RISK_RESET",
+  "epic_id": "EPC-FOREX-AUTONOMY-COMPLETION-001",
+  "intake_status": "NO_EVIDENCE_APPLIED",
+  "missing_evidence_fields": [
+    "profitability_evidence_status",
+    "sample_size",
+    "walk_forward_windows",
+    "profit_factor",
+    "expectancy",
+    "max_drawdown",
+    "live_bridge_eligibility",
+    "tp_sl_present",
+    "evidence_age_days",
+    "owner_approval_status"
+  ],
+  "mission_id": "MISSION-AIOS-FOREX-AUTONOMY-COMPLETION-V1",
+  "next_safe_action": "Critical safety blockers are present; gather critical safety evidence and pause evidence progression until safety gates are resolved.",
+  "packet_id": "PKT-FOREX-AUTONOMY-COMPLETION-SANITIZED-EVIDENCE-INTAKE-UPDATE-V1",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "rejected_evidence_fields": [],
+  "rerun_recommended": false,
+  "safety_boundary": {
+    "account_identifier_persistence_allowed": false,
+    "broker_api_allowed": false,
+    "credentials_allowed": false,
+    "daemon_allowed": false,
+    "order_execution_allowed": false,
+    "scheduler_allowed": false,
+    "webhook_allowed": false
+  },
+  "updated_governor_input_preview": {
+    "broker_readiness": true,
+    "daily_stop_state": "UNKNOWN",
+    "evidence_age_days": 40,
+    "expectancy": -0.1,
+    "kill_switch_state": "UNKNOWN",
+    "live_bridge_eligibility": false,
+    "live_bridge_external_evidence": false,
+    "live_exception_requested": false,
+    "max_drawdown": 0.21,
+    "max_loss_state": "UNSET",
+    "monitoring_ready": false,
+    "order_count_last_24h": 0,
+    "owner_approval_status": "PENDING",
+    "owner_live_micro_exception_approved": false,
+    "profit_factor": 1.0,
+    "profitability_evidence_status": "PENDING",
+    "realized_broker_evidence": false,
+    "sample_size": 12,
+    "tp_sl_present": false,
+    "walk_forward_windows": 1
+  },
+  "validator_chain": [
+    "python -m py_compile automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py",
+    "python -m py_compile scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py",
+    "python -m pytest tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py -q",
+    "python scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py --write-state --write-report --write-input-template",
+    "python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json",
+    "python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json",
+    "git diff --check -- automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_NEXT_CODEX_PACKET_V1.md"
+  ]
+}
