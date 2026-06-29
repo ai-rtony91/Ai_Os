@@ -1,0 +1,373 @@
+{
+  "schema_version": "aios.forex_110_vacation_grade_profit_engine.v1",
+  "packet_id": "PKT-FOREX-110-VACATION-GRADE-PROFIT-ENGINE-V1",
+  "owner_corrected_definition": "FOREX 110 means vacation-grade Forex readiness: the owner could eventually deposit real money, step away, and return to an evidence-backed expected profit outcome, while AIOS operates under strict risk controls, broker gates, audit logs, kill switches, and owner-approved escalation boundaries.",
+  "forex_110_definition": "Forex 110 is not repo polish, dashboard polish, or theoretical readiness. Forex 110 means real-money-capable readiness after proof, safety, and owner approval, or the shortest exact packet chain required to reach that standard.",
+  "vacation_grade_definition": "Vacation-grade readiness requires persistent profitability proof, validated good-day return target of 25% to 100%, validated excellent / phenomenal-day target up to 120%, broker-read-only evidence, demo execution readiness, real-money gates, 22H/day 6D/week runtime readiness, risk controls, dashboard truth, auditability, and owner approval before real-money execution.",
+  "one_man_operator_mode": {
+    "status": "REVIEW_REQUIRED",
+    "lanes": [
+      "Profit Proof",
+      "Return Target Validation",
+      "Broker + Runtime Evidence",
+      "Safety / Real-Money Gate",
+      "Dashboard Truth / Owner Control"
+    ],
+    "rule": "Exactly five lanes; no corporate sprawl; owner approval gates remain required."
+  },
+  "current_truth_summary": "Vacation-grade readiness is BLOCKED. Profitability is NOT_PROVEN. The 25% to 100% good-day return target is NOT_PROVEN. The up to 120% phenomenal-day return target is NOT_PROVEN. 22H/day 6D/week operation is NOT_PROVEN. Broker-read-only evidence is PARTIAL. Demo execution is BLOCKED. Live real-money readiness is BLOCKED. Risk controls are BLOCKED. Dashboard truth is PARTIAL.",
+  "vacation_grade_status": "BLOCKED",
+  "profitability_status": "NOT_PROVEN",
+  "good_day_return_target_status": "NOT_PROVEN",
+  "phenomenal_day_return_target_status": "NOT_PROVEN",
+  "twenty_two_hour_six_day_status": "NOT_PROVEN",
+  "broker_readonly_evidence_status": "PARTIAL",
+  "demo_execution_status": "BLOCKED",
+  "live_real_money_status": "BLOCKED",
+  "risk_control_status": "BLOCKED",
+  "dashboard_truth_status": "PARTIAL",
+  "already_built": [
+    "Reports/forex_delivery/AIOS_FOREX_110_REAL_COMPLETION_REFOCUS_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_110_REAL_COMPLETION_REFOCUS_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_NEXT_CODEX_PACKET_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_NEXT_CODEX_PACKET_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_DASHBOARD_TRUTH_WIRING_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_SPRINT2B_DASHBOARD_TRUTH_SPEC_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_STATISTICAL_PROFIT_PROOF_GATE_MANUAL_FINALIZATION_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_STATISTICAL_PROFIT_PROOF_GATE_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_TRUSTED_PROFIT_22_6_EPIC_REPORT_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_TRUSTED_PROFIT_22_6_READINESS_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_UPTIME_RANGE_PLANNER_80_22_5_22_6_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_VACATION_MODE_FINAL_READINESS_DECISION_MANUAL_FINALIZATION_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_VACATION_MODE_FINAL_READINESS_DECISION_V1.md",
+    "automation/forex_engine/broker_connection_proof_boundary_readiness_v1.py",
+    "automation/forex_engine/dashboard_truth_summary_v1.py",
+    "automation/forex_engine/evidence_depth_walkforward_sufficiency_v1.py",
+    "automation/forex_engine/forex_critical_safety_evidence_closure_v1.py",
+    "automation/forex_engine/forex_statistical_profit_proof_gate_v1.py",
+    "automation/forex_engine/forex_uptime_range_planner_v1.py",
+    "automation/forex_engine/forex_vacation_mode_final_readiness_decision_v1.py",
+    "automation/forex_engine/trusted_profit_22_6_readiness_v1.py",
+    "docs/trading_lab/forex/BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1.md",
+    "docs/trading_lab/forex/EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1.md",
+    "docs/trading_lab/forex/FOREX_110_REAL_COMPLETION_REFOCUS_V1.md",
+    "scripts/forex_delivery/run_broker_connection_proof_boundary_readiness_v1.py",
+    "scripts/forex_delivery/run_dashboard_truth_summary_v1.py",
+    "scripts/forex_delivery/run_evidence_depth_walkforward_sufficiency_v1.py",
+    "scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py",
+    "scripts/forex_delivery/run_forex_statistical_profit_proof_gate_v1.py",
+    "scripts/forex_delivery/run_forex_vacation_mode_final_readiness_decision_v1.py",
+    "scripts/forex_delivery/run_trusted_profit_22_6_readiness_v1.py",
+    "tests/forex_engine/test_broker_connection_proof_boundary_readiness_v1.py",
+    "tests/forex_engine/test_dashboard_truth_summary_v1.py",
+    "tests/forex_engine/test_evidence_depth_walkforward_sufficiency_v1.py",
+    "tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py",
+    "tests/forex_engine/test_forex_statistical_profit_proof_gate_v1.py",
+    "tests/forex_engine/test_forex_uptime_range_planner_v1.py",
+    "tests/forex_engine/test_forex_vacation_mode_final_readiness_decision_v1.py",
+    "tests/forex_engine/test_trusted_profit_22_6_readiness_v1.py"
+  ],
+  "actually_proven": [],
+  "not_yet_proven": [
+    "profitability_status",
+    "good_day_return_target_status",
+    "phenomenal_day_return_target_status",
+    "twenty_two_hour_six_day_status",
+    "broker_readonly_evidence_status",
+    "demo_execution_status",
+    "live_real_money_status",
+    "risk_control_status",
+    "dashboard_truth_status"
+  ],
+  "five_lane_completion_map": [
+    {
+      "lane_name": "Profit Proof",
+      "current_status": "NOT_PROVEN",
+      "evidence_found": [
+        "statistical profit proof gate",
+        "walk-forward/OOS evidence files"
+      ],
+      "evidence_missing": [
+        "persistent positive expectancy after costs",
+        "sufficient independent sample size",
+        "drawdown-aware profit proof"
+      ],
+      "blockers": [
+        "Persistent profitability is not proven to vacation-grade standard.",
+        "Profit proof is not enough to support real-money step-away operation."
+      ],
+      "required_artifacts": [
+        "current profit proof ledger",
+        "walk-forward/OOS summary",
+        "after-cost expectancy report"
+      ],
+      "required_tests": [
+        "pytest profit proof gate",
+        "JSON schema validation",
+        "diff check"
+      ],
+      "completion_definition": "Persistent positive expectancy is proven across sufficient out-of-sample evidence after costs and drawdown controls.",
+      "next_packet": "PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1",
+      "evidence_scan_file_count": 2483
+    },
+    {
+      "lane_name": "Return Target Validation",
+      "current_status": "NOT_PROVEN",
+      "evidence_found": [
+        "owner target language captured"
+      ],
+      "evidence_missing": [
+        "25% to 100% good-day return validation",
+        "up to 120% phenomenal-day validation",
+        "risk-adjusted target realism proof"
+      ],
+      "blockers": [
+        "25% to 100% return target is not proven by repo evidence.",
+        "120% return target is not proven by repo evidence."
+      ],
+      "required_artifacts": [
+        "return target validation harness",
+        "candidate-by-candidate return distribution",
+        "failure analysis for unmet target bands"
+      ],
+      "required_tests": [
+        "target harness unit tests",
+        "state JSON parse",
+        "report readback"
+      ],
+      "completion_definition": "Good-day and phenomenal-day targets are validated or explicitly rejected by deterministic evidence.",
+      "next_packet": "PKT-FOREX-110-RETURN-TARGET-VALIDATION-HARNESS-V1",
+      "evidence_scan_file_count": 2483
+    },
+    {
+      "lane_name": "Broker + Runtime Evidence",
+      "current_status": "NOT_PROVEN",
+      "evidence_found": [
+        "broker-read-only evidence artifacts",
+        "22H/6D planning artifacts"
+      ],
+      "evidence_missing": [
+        "complete sanitized broker-read-only evidence",
+        "sustained 22H/day 6D/week runtime proof",
+        "fresh runtime observation metrics"
+      ],
+      "blockers": [
+        "Broker-read-only evidence is partial, not complete.",
+        "22H/day 6D/week operation is not proven."
+      ],
+      "required_artifacts": [
+        "sanitized broker-read-only bundle",
+        "runtime observation ledger",
+        "freshness and interruption summary"
+      ],
+      "required_tests": [
+        "broker-read-only fixture tests",
+        "runtime readiness tests",
+        "no network checks"
+      ],
+      "completion_definition": "Broker-read-only evidence is complete and 22H/6D runtime readiness is proven without credential reads or broker contact.",
+      "next_packet": "PKT-FOREX-110-WALK-FORWARD-OOS-SUFFICIENCY-CLOSURE-V1",
+      "evidence_scan_file_count": 2483
+    },
+    {
+      "lane_name": "Safety / Real-Money Gate",
+      "current_status": "BLOCKED",
+      "evidence_found": [
+        "risk gate artifacts",
+        "live exception authority remains blocked"
+      ],
+      "evidence_missing": [
+        "owner approval gate",
+        "kill switch",
+        "max loss",
+        "daily stop",
+        "one-order-only",
+        "SLTP",
+        "post-trade evidence",
+        "emergency stop"
+      ],
+      "blockers": [
+        "Live real-money readiness remains blocked.",
+        "Final risk-control closure is not proven."
+      ],
+      "required_artifacts": [
+        "risk budget final gate",
+        "kill-switch evidence",
+        "daily stop and max-loss evidence",
+        "SLTP and one-order-only proof"
+      ],
+      "required_tests": [
+        "risk gate unit tests",
+        "protected action gate review",
+        "RISK_POLICY readback"
+      ],
+      "completion_definition": "All real-money controls are proven fail-closed and owner approval is required before any execution.",
+      "next_packet": "PKT-FOREX-110-RISK-BUDGET-KILL-SWITCH-MAX-LOSS-FINAL-GATE-V1",
+      "evidence_scan_file_count": 2483
+    },
+    {
+      "lane_name": "Dashboard Truth / Owner Control",
+      "current_status": "PARTIAL",
+      "evidence_found": [
+        "dashboard truth summary artifacts",
+        "display-only dashboard contracts"
+      ],
+      "evidence_missing": [
+        "single owner view",
+        "truthful blocked/partial/proven state",
+        "no execution controls",
+        "one-man next action"
+      ],
+      "blockers": [
+        "Dashboard truth is partial and must not imply vacation-grade readiness.",
+        "Owner control view needs exact blocker and next-packet display."
+      ],
+      "required_artifacts": [
+        "Forex 110 state JSON",
+        "owner-facing dashboard truth projection",
+        "blocked action display"
+      ],
+      "required_tests": [
+        "dashboard truth tests",
+        "state projection schema validation",
+        "operator view readback"
+      ],
+      "completion_definition": "The dashboard tells the truth: can trade, profit proof, return targets, step-away status, blockers, and next action.",
+      "next_packet": "PKT-FOREX-110-DEMO-TO-LIVE-OWNER-APPROVAL-FINAL-EVIDENCE-BUNDLE-V1",
+      "evidence_scan_file_count": 2483
+    }
+  ],
+  "blockers_by_lane": {
+    "Profit Proof": [
+      "Persistent profitability is not proven to vacation-grade standard.",
+      "Profit proof is not enough to support real-money step-away operation."
+    ],
+    "Return Target Validation": [
+      "25% to 100% return target is not proven by repo evidence.",
+      "120% return target is not proven by repo evidence."
+    ],
+    "Broker + Runtime Evidence": [
+      "Broker-read-only evidence is partial, not complete.",
+      "22H/day 6D/week operation is not proven."
+    ],
+    "Safety / Real-Money Gate": [
+      "Live real-money readiness remains blocked.",
+      "Final risk-control closure is not proven."
+    ],
+    "Dashboard Truth / Owner Control": [
+      "Dashboard truth is partial and must not imply vacation-grade readiness.",
+      "Owner control view needs exact blocker and next-packet display."
+    ]
+  },
+  "required_evidence_by_lane": {
+    "Profit Proof": [
+      "persistent positive expectancy after costs",
+      "sufficient independent sample size",
+      "drawdown-aware profit proof"
+    ],
+    "Return Target Validation": [
+      "25% to 100% good-day return validation",
+      "up to 120% phenomenal-day validation",
+      "risk-adjusted target realism proof"
+    ],
+    "Broker + Runtime Evidence": [
+      "complete sanitized broker-read-only evidence",
+      "sustained 22H/day 6D/week runtime proof",
+      "fresh runtime observation metrics"
+    ],
+    "Safety / Real-Money Gate": [
+      "owner approval gate",
+      "kill switch",
+      "max loss",
+      "daily stop",
+      "one-order-only",
+      "SLTP",
+      "post-trade evidence",
+      "emergency stop"
+    ],
+    "Dashboard Truth / Owner Control": [
+      "single owner view",
+      "truthful blocked/partial/proven state",
+      "no execution controls",
+      "one-man next action"
+    ]
+  },
+  "shortest_packet_chain": [
+    {
+      "order": 1,
+      "packet_id": "PKT-FOREX-110-01-PROFIT-EVIDENCE-TRUTH-LOCK-V1",
+      "packet_name": "Profit Evidence Truth Lock",
+      "goal": "Prove or fail persistent profitability with current repo evidence."
+    },
+    {
+      "order": 2,
+      "packet_id": "PKT-FOREX-110-02-RETURN-TARGET-VALIDATION-HARNESS-V1",
+      "packet_name": "Return Target Validation Harness",
+      "goal": "Validate 25% to 100% good-day and up to 120% phenomenal-day return targets."
+    },
+    {
+      "order": 3,
+      "packet_id": "PKT-FOREX-110-03-WALK-FORWARD-OOS-SUFFICIENCY-CLOSURE-V1",
+      "packet_name": "Walk-Forward / OOS Sufficiency Closure",
+      "goal": "Close out-of-sample sample size, pass-count, and regime sufficiency."
+    },
+    {
+      "order": 4,
+      "packet_id": "PKT-FOREX-110-04-BROKER-READ-ONLY-EVIDENCE-CLOSURE-V1",
+      "packet_name": "Broker Read-Only Evidence Closure",
+      "goal": "Complete sanitized broker-read-only evidence without credentials or account inspection."
+    },
+    {
+      "order": 5,
+      "packet_id": "PKT-FOREX-110-05-22H-6D-RUNTIME-READINESS-HARNESS-V1",
+      "packet_name": "22H/6D Runtime Readiness Harness",
+      "goal": "Prove sustained 22H/day 6D/week operation readiness from local evidence."
+    },
+    {
+      "order": 6,
+      "packet_id": "PKT-FOREX-110-06-RISK-BUDGET-KILL-SWITCH-MAX-LOSS-FINAL-GATE-V1",
+      "packet_name": "Risk Budget / Kill Switch / Max-Loss Final Gate",
+      "goal": "Prove kill switch, max loss, daily stop, one-order-only, SLTP, and audit controls."
+    },
+    {
+      "order": 7,
+      "packet_id": "PKT-FOREX-110-07-DEMO-TO-LIVE-OWNER-APPROVAL-FINAL-FOREX-110-EVIDENCE-BUNDLE-V1",
+      "packet_name": "Demo-to-Live Owner Approval + Final Forex 110 Evidence Bundle",
+      "goal": "Assemble final owner approval and evidence bundle without starting demo/live."
+    }
+  ],
+  "next_best_packet": {
+    "order": 1,
+    "packet_id": "PKT-FOREX-110-01-PROFIT-EVIDENCE-TRUTH-LOCK-V1",
+    "packet_name": "Profit Evidence Truth Lock",
+    "goal": "Prove or fail persistent profitability with current repo evidence."
+  },
+  "blocked_actions": {
+    "env_read": true,
+    "credential_read": true,
+    "broker_contact": true,
+    "broker_account_inspection": true,
+    "order_execution": true,
+    "demo_trade_start": true,
+    "live_trade_start": true,
+    "scheduler_start": true,
+    "daemon_start": true,
+    "webhook_start": true,
+    "background_loop_start": true,
+    "server_start": true,
+    "tunnel_start": true,
+    "deployment": true,
+    "bitwarden_start": true,
+    "vaultwarden_start": true,
+    "fake_profit_claim": true,
+    "fake_return_expectancy_claim": true,
+    "fake_vacation_grade_claim": true
+  },
+  "safe_next_action": "Run Profit Evidence Truth Lock next. Do not trade, do not start demo/live execution, do not contact broker APIs, and do not claim vacation-grade readiness until evidence closes all blockers."
+}
