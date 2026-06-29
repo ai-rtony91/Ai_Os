@@ -1,0 +1,104 @@
+{
+  "consumer_status": "STRUCTURAL_OWNER_SAFETY_EVIDENCE_CONSUMED_BROKER_LOCKED",
+  "current_branch": "main",
+  "current_head": "91ea323f",
+  "source_artifact_verifier_status": "OWNER_SAFETY_EVIDENCE_ARTIFACTS_STRUCTURALLY_VERIFIED",
+  "source_artifact_verifier_state": "Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_ARTIFACT_VERIFIER_V1_STATE.json",
+  "source_artifact_verifier_report": "Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_ARTIFACT_VERIFIER_V1_REPORT.md",
+  "consumer_scope": "Consume structurally verified owner-sanitized safety evidence artifacts into the finish-line safety-closure consumer only.",
+  "artifact_verification_scope": "Local structural verification of owner-sanitized artifact files, metadata freshness, approved path boundary, and no-secret/no-account declarations only.",
+  "consumed_controls": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "failed_controls": [],
+  "warning_controls": [],
+  "control_results": {
+    "daily_stop_state": {
+      "source_status": "STRUCTURALLY_VERIFIED",
+      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "freshness_window_hours": 24,
+      "operational_control_verified": false,
+      "broker_api_used": false,
+      "credentials_used": false,
+      "order_execution": false,
+      "live_trading_authorized": false
+    },
+    "kill_switch_state": {
+      "source_status": "STRUCTURALLY_VERIFIED",
+      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "freshness_window_hours": 24,
+      "operational_control_verified": false,
+      "broker_api_used": false,
+      "credentials_used": false,
+      "order_execution": false,
+      "live_trading_authorized": false
+    },
+    "max_loss_state": {
+      "source_status": "STRUCTURALLY_VERIFIED",
+      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "freshness_window_hours": 24,
+      "operational_control_verified": false,
+      "broker_api_used": false,
+      "credentials_used": false,
+      "order_execution": false,
+      "live_trading_authorized": false
+    },
+    "monitoring_ready": {
+      "source_status": "STRUCTURALLY_VERIFIED",
+      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "freshness_window_hours": 24,
+      "operational_control_verified": false,
+      "broker_api_used": false,
+      "credentials_used": false,
+      "order_execution": false,
+      "live_trading_authorized": false
+    }
+  },
+  "finish_line_safety_closure": {
+    "structural_owner_evidence_consumed": true,
+    "operational_control_verified": false,
+    "broker_readiness_claimed": false,
+    "demo_action_authorized": false,
+    "live_micro_authorized": false,
+    "live_trading_authorized": false
+  },
+  "safety_boundary": {
+    "broker_api_allowed": false,
+    "credentials_allowed": false,
+    "account_identifier_persistence_allowed": false,
+    "demo_action_allowed": false,
+    "live_micro_allowed": false,
+    "live_trading_authorized": false,
+    "order_execution_allowed": false,
+    "scheduler_allowed": false,
+    "daemon_allowed": false,
+    "webhook_allowed": false
+  },
+  "operational_control_verified": false,
+  "broker_api_used": false,
+  "credentials_used": false,
+  "order_execution": false,
+  "live_trading_authorized": false,
+  "owner_intake_modified": false,
+  "evidence_artifacts_modified": false,
+  "evidence_invented": false,
+  "next_safe_action": "Use this consumer state as finish-line safety-closure evidence input only; keep broker, demo, live micro, live trading, scheduler, daemon, webhook, credentials, broker API, and order execution locked.",
+  "validator_chain": [
+    "python -m json.tool Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_ARTIFACT_VERIFIER_V1_STATE.json",
+    "git diff --check -- Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_SAFETY_CLOSURE_CONSUMER_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_SAFETY_CLOSURE_CONSUMER_V1_REPORT.md",
+    "git status --short --branch"
+  ],
+  "packet_id": "PKT-FOREX-FINISH-LINE-SAFETY-CLOSURE-CONSUMER-UPDATE-V1",
+  "packet_name": "Update Finish-Line Safety-Closure Consumer From Structurally Verified Owner Evidence",
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "mission_name": "Governed Forex Finish Line",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "program_name": "Forex Profit Autonomy System",
+  "epic_id": "EPC-FOREX-FINISH-LINE-SAFETY-CLOSURE-CONSUMER-UPDATE-001",
+  "epic_name": "Finish-Line Safety-Closure Consumer Update",
+  "bucket_id": "BKT-FOREX-FINISH-LINE-SAFETY-CLOSURE-CONSUMER-UPDATE-001",
+  "bucket_name": "Consume Structurally Verified Owner Safety Evidence"
+}
