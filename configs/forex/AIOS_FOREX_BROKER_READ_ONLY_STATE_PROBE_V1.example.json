@@ -1,0 +1,27 @@
+{
+  "broker_name": "OANDA",
+  "broker_environment": "practice_demo",
+  "credential_reference": "OWNER_RUNTIME_SECRET_REFERENCE_REQUIRED",
+  "account_reference": "OWNER_MASKED_ACCOUNT_REFERENCE_REQUIRED",
+  "network_mode_for_this_packet": "DISABLED",
+  "read_only_capabilities": [
+    "account_snapshot_read",
+    "pricing_snapshot_read",
+    "instrument_catalog_read",
+    "trade_history_read"
+  ],
+  "forbidden_mutating_capabilities": [
+    "order_create",
+    "order_modify",
+    "order_cancel",
+    "position_close",
+    "account_transfer"
+  ],
+  "session_window_hours": 22,
+  "session_window_days_per_week": 6,
+  "contains_secret_material": false,
+  "broker_api_called_by_this_packet": false,
+  "orders_allowed_by_this_packet": false,
+  "demo_authorized_by_this_packet": false,
+  "live_authorized_by_this_packet": false
+}
