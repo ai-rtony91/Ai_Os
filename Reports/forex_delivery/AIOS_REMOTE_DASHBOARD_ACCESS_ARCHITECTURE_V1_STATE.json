@@ -1,0 +1,159 @@
+{
+  "schema": "aios.remote_dashboard_access_architecture.v1",
+  "packet_id": "PKT-AIOS-REMOTE-DASHBOARD-ACCESS-ARCHITECTURE-V1",
+  "mode": "LOCAL_APPLY",
+  "zone": "Remote dashboard access architecture",
+  "worker_identity": "Codex",
+  "lane": "AIOS remote dashboard access",
+  "worktree": "C:\\Dev\\Ai.Os",
+  "branch": "main",
+  "generated_date": "2026-06-29",
+  "canonical_dashboard_surface": "FOREX_DASHBOARD_RUNTIME_UI_V1",
+  "canonical_dashboard_policy": "SINGLE_CANONICAL_SURFACE_ONLY",
+  "target_is_static_image": false,
+  "target_is_one_off_static_website": false,
+  "target_is_remote_readonly_dashboard_route": true,
+  "remote_access_modes": [
+    {
+      "mode": "LOCAL_ONLY_STATIC_PREVIEW",
+      "status": "EXISTS",
+      "description": "Current local static dashboard preview from repo artifacts.",
+      "network_reachable": false,
+      "production_ready": false,
+      "approval_required_before_use": false
+    },
+    {
+      "mode": "LAN_READONLY_SERVER",
+      "status": "FUTURE_STEP",
+      "description": "Authenticated local network read-only dashboard server.",
+      "network_reachable": true,
+      "production_ready": false,
+      "approval_required_before_use": true
+    },
+    {
+      "mode": "TAILSCALE_READONLY_ROUTE",
+      "status": "FUTURE_STEP",
+      "description": "Private mesh route proof for mobile read-only access.",
+      "network_reachable": true,
+      "production_ready": false,
+      "approval_required_before_use": true
+    },
+    {
+      "mode": "AUTHENTICATED_REMOTE_HOST",
+      "status": "FUTURE_STEP",
+      "description": "Authenticated HTTPS remote host serving read-only dashboard data.",
+      "network_reachable": true,
+      "production_ready": false,
+      "approval_required_before_use": true
+    },
+    {
+      "mode": "FUTURE_PRODUCTION_DASHBOARD",
+      "status": "FUTURE_STEP",
+      "description": "Production-hardened dashboard after auth, HTTPS, route safety, audit display, and owner approval gates are complete.",
+      "network_reachable": true,
+      "production_ready": false,
+      "approval_required_before_use": true
+    }
+  ],
+  "required_remote_protections": {
+    "authentication_required": true,
+    "https_or_private_mesh_route_required": true,
+    "read_only_dashboard_api": true,
+    "no_secrets_in_frontend": true,
+    "no_broker_account_identifiers": true,
+    "no_order_controls": true,
+    "no_demo_live_authorization_controls": true,
+    "no_scheduler_daemon_webhook_background_loop_controls": true,
+    "kill_switch_display_only": true,
+    "source_freshness_labels": true,
+    "audit_log_display_only": true
+  },
+  "current_status": {
+    "static_dashboard_package_exists": true,
+    "mobile_remote_access_production_ready": false,
+    "public_remote_server_approved": false,
+    "tunnel_approved": false,
+    "deployment_approved": false,
+    "services_started_by_packet": false,
+    "ports_exposed_by_packet": false,
+    "tailscale_started_by_packet": false,
+    "cloudflare_tunnel_started_by_packet": false
+  },
+  "observed_existing_contracts": {
+    "current_runtime_ui_type": "STATIC_LOCAL_CLICKABLE_EMOJI_HTML",
+    "current_dashboard_status": "FOREX_DASHBOARD_RUNTIME_UI_READY",
+    "frontend_runtime_visibility_api_url": "/api/runtime/visibility",
+    "frontend_required_api_schema": "aios.runtime_visibility_api.v1",
+    "frontend_required_api_mode": "READ_ONLY",
+    "orchestrator_visibility_mode": "READ_ONLY",
+    "orchestrator_frontend_contract_execution_allowed": false,
+    "orchestrator_frontend_contract_mutation_allowed": false
+  },
+  "blocked_actions": {
+    "deploy": true,
+    "public_port_exposure": true,
+    "start_services": true,
+    "start_tunnels": true,
+    "tailscale_serve_or_funnel": true,
+    "cloudflare_tunnel": true,
+    "broker_demo_live_paths": true,
+    "env_read": true,
+    "credential_read": true,
+    "bitwarden_start": true,
+    "add_secrets": true,
+    "execution_controls": true,
+    "broker_controls": true,
+    "live_trading_controls": true
+  },
+  "broker_boundary": {
+    "status": "PROTECTED_AND_SEPARATE",
+    "broker_api_used": false,
+    "credentials_used": false,
+    "account_identifiers_allowed_in_dashboard": false,
+    "order_controls_allowed": false,
+    "demo_authorization_controls_allowed": false,
+    "live_authorization_controls_allowed": false
+  },
+  "bitwarden_status": {
+    "bitwarden_started": false,
+    "vaultwarden_started": false,
+    "secrets_migration_started": false,
+    "token_storage_started": false,
+    "status": "LOCKED"
+  },
+  "next_implementation_sequence": [
+    {
+      "step": "A",
+      "name": "read-only local dashboard server",
+      "status": "NEXT_SAFE_IMPLEMENTATION_TARGET"
+    },
+    {
+      "step": "B",
+      "name": "authenticated local network access",
+      "status": "FUTURE_AFTER_A"
+    },
+    {
+      "step": "C",
+      "name": "Tailscale/private route proof",
+      "status": "FUTURE_AFTER_B_WITH_OWNER_APPROVAL"
+    },
+    {
+      "step": "D",
+      "name": "remote host proof",
+      "status": "FUTURE_AFTER_C_WITH_OWNER_APPROVAL"
+    },
+    {
+      "step": "E",
+      "name": "production hardening",
+      "status": "FUTURE_AFTER_D"
+    },
+    {
+      "step": "F",
+      "name": "owner approval before any always-on exposure",
+      "status": "REQUIRED_GATE"
+    }
+  ],
+  "final_status": "REMOTE_DASHBOARD_ARCHITECTURE_DEFINED",
+  "commit_status": "NO_COMMIT",
+  "push_status": "NO_PUSH"
+}
