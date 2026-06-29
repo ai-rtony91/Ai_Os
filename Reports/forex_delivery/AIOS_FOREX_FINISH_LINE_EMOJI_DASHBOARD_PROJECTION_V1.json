@@ -1,0 +1,72 @@
+{
+  "controller": {
+    "emoji": "🚦",
+    "status": "ACTIVE",
+    "locked": false,
+    "context_box_required": false,
+    "context_box_text": ""
+  },
+  "evidence": {
+    "emoji": "📄",
+    "status": "MISSING",
+    "locked": false,
+    "context_box_required": true,
+    "context_box_text": "Evidence gaps: evidence_age_days, evidence_age_days=40 exceeds freshness limit 14."
+  },
+  "safety": {
+    "emoji": "🛡️",
+    "status": "BLOCKED",
+    "locked": true,
+    "context_box_required": true,
+    "context_box_text": "Safety gaps: kill_switch_state, daily_stop_state, max_loss_state, more."
+  },
+  "broker": {
+    "emoji": "🏦",
+    "status": "LOCKED",
+    "locked": true,
+    "context_box_required": true,
+    "context_box_text": "Broker probe waits for safety closure."
+  },
+  "proof": {
+    "emoji": "📈",
+    "status": "LOCKED",
+    "locked": true,
+    "context_box_required": true,
+    "context_box_text": "Proof waits for sanitized evidence."
+  },
+  "live_micro": {
+    "emoji": "🧪",
+    "status": "LOCKED",
+    "locked": true,
+    "context_box_required": true,
+    "context_box_text": "Owner exception and proof ledger required."
+  },
+  "live_trading": {
+    "emoji": "⛔",
+    "status": "LOCKED",
+    "locked": true,
+    "context_box_required": true,
+    "context_box_text": "Finish readiness 0.0%."
+  },
+  "vacation_mode": {
+    "emoji": "🏖️",
+    "status": "LOCKED",
+    "locked": true,
+    "context_box_required": true,
+    "context_box_text": "Requires sustained 22h/6d evidence."
+  },
+  "audit": {
+    "emoji": "🧾",
+    "status": "PROJECTION_ONLY",
+    "locked": false,
+    "context_box_required": false,
+    "context_box_text": ""
+  },
+  "next_action": {
+    "emoji": "➡️",
+    "status": "READY",
+    "locked": false,
+    "context_box_required": true,
+    "context_box_text": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monit..."
+  }
+}

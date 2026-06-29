@@ -1,0 +1,107 @@
+{
+  "blocked_controls": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "broker_api_used": false,
+  "bucket_id": "BKT-FOREX-CRITICAL-SAFETY-CLOSURE-001",
+  "bucket_name": "Forex Critical Safety Evidence Closure",
+  "closure_status": "SAFETY_CLOSURE_OPEN",
+  "control_evaluations": {
+    "daily_stop_state": {
+      "label": "daily stop",
+      "reason": "Finish Line Mission Controller reports this control as a critical safety blocker.",
+      "status": "BLOCKED"
+    },
+    "kill_switch_state": {
+      "label": "kill switch",
+      "reason": "Finish Line Mission Controller reports this control as a critical safety blocker.",
+      "status": "BLOCKED"
+    },
+    "max_loss_state": {
+      "label": "max loss",
+      "reason": "Finish Line Mission Controller reports this control as a critical safety blocker.",
+      "status": "BLOCKED"
+    },
+    "monitoring_ready": {
+      "label": "monitoring",
+      "reason": "Finish Line Mission Controller reports this control as a critical safety blocker.",
+      "status": "BLOCKED"
+    }
+  },
+  "controller_finish_line_readiness_percent": 0.0,
+  "controller_phase": "CRITICAL_SAFETY_EVIDENCE_CLOSURE",
+  "controller_routing_recommendation": "REMAIN_IN_SAFETY_CLOSURE",
+  "controller_selected_mode": "SAFETY_CLOSURE",
+  "controller_starting_line_readiness_percent": 100.0,
+  "controller_status": "SAFETY_CLOSURE_REQUIRED",
+  "credentials_used": false,
+  "epic_id": "EPC-FOREX-CRITICAL-SAFETY-CLOSURE-001",
+  "epic_name": "Critical Safety Evidence Closure",
+  "evidence_freshness": {
+    "freshness_blockers": [
+      "evidence_age_days"
+    ],
+    "reason": "Controller missing evidence fields include evidence_age_days.",
+    "source_artifacts": {
+      "completion_state": "Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json",
+      "p1_hardening_report": "Reports/forex_delivery/AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md",
+      "sanitized_evidence_intake_state": "Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json"
+    },
+    "status": "STALE_OR_MISSING"
+  },
+  "evidence_invented": false,
+  "governing_recommendation": "HOLD_FOR_CRITICAL_SAFETY_EVIDENCE",
+  "live_trading_authorized": false,
+  "missing_controls": [],
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "mission_name": "Governed Forex Finish Line",
+  "next_safe_action": "Close controller-reported critical safety blockers for kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready; keep broker, demo, live micro, live trading, and vacation modes locked.",
+  "order_execution": false,
+  "packet_id": "PKT-FOREX-CRITICAL-SAFETY-CLOSURE-V1",
+  "present_controls": [],
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "program_name": "Forex Profit Autonomy System",
+  "readiness_delta": 100.0,
+  "remaining_blockers": [
+    "kill_switch_state:BLOCKED",
+    "daily_stop_state:BLOCKED",
+    "max_loss_state:BLOCKED",
+    "monitoring_ready:BLOCKED"
+  ],
+  "safety_boundary": {
+    "account_identifier_persistence_allowed": false,
+    "broker_api_allowed": false,
+    "credentials_allowed": false,
+    "daemon_allowed": false,
+    "live_trading_authorized": false,
+    "order_execution_allowed": false,
+    "scheduler_allowed": false,
+    "webhook_allowed": false
+  },
+  "safety_completion_percent": 0.0,
+  "source_artifacts": {
+    "completion_state": "Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json",
+    "p1_hardening_report": "Reports/forex_delivery/AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md",
+    "sanitized_evidence_intake_state": "Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json"
+  },
+  "source_controller": {
+    "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+    "mode": "SAFETY_CLOSURE",
+    "packet_id": "PKT-FOREX-FINISH-LINE-MISSION-CONTROLLER-V1",
+    "phase": "CRITICAL_SAFETY_EVIDENCE_CLOSURE",
+    "status": "SAFETY_CLOSURE_REQUIRED"
+  },
+  "unknown_controls": [],
+  "validator_chain": [
+    "python -m py_compile automation/forex_engine/forex_critical_safety_evidence_closure_v1.py scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py",
+    "python -m pytest tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py -q",
+    "python scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py --write-state --write-report",
+    "python -m json.tool Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json",
+    "git diff --check",
+    "git status --short --branch"
+  ],
+  "verified_controls": []
+}

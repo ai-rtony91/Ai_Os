@@ -1,0 +1,193 @@
+{
+  "acceptable_evidence_types_by_control": {
+    "daily_stop_state": [
+      "sanitized daily-stop configuration export",
+      "sanitized daily risk-state report",
+      "approved local preflight output with no secrets or account identifiers",
+      "owner checklist entry tied to a timestamped evidence artifact"
+    ],
+    "kill_switch_state": [
+      "sanitized safety-control status export",
+      "sanitized screenshot of the kill-switch state",
+      "approved local preflight output with no secrets or account identifiers",
+      "owner checklist entry tied to a timestamped evidence artifact"
+    ],
+    "max_loss_state": [
+      "sanitized max-loss configuration export",
+      "sanitized risk-threshold report",
+      "approved local preflight output with no secrets or account identifiers",
+      "owner checklist entry tied to a timestamped evidence artifact"
+    ],
+    "monitoring_ready": [
+      "sanitized monitoring readiness report",
+      "sanitized alert or review-surface proof",
+      "approved local preflight output with no secrets or account identifiers",
+      "owner checklist entry tied to a timestamped evidence artifact"
+    ]
+  },
+  "broker_api_used": false,
+  "bucket_id": "BKT-FOREX-OWNER-SAFETY-EVIDENCE-COLLECTION-001",
+  "bucket_name": "Owner Critical Safety Evidence Collection",
+  "controller_phase": "CRITICAL_SAFETY_EVIDENCE_CLOSURE",
+  "controller_status": "SAFETY_CLOSURE_REQUIRED",
+  "credentials_used": false,
+  "critical_safety_closure_status": "SAFETY_CLOSURE_OPEN",
+  "epic_id": "EPC-FOREX-OWNER-SAFETY-EVIDENCE-COLLECTION-001",
+  "epic_name": "Owner Safety Evidence Collection",
+  "evidence_freshness_requirement": {
+    "daily_stop_state": "Current owner review session or within 24 hours of progression request; refresh after risk-rule changes.",
+    "kill_switch_state": "Current owner review session or within 24 hours of progression request; refresh after safety-control changes.",
+    "max_loss_state": "Current owner review session or within 24 hours of progression request; refresh after risk-threshold changes.",
+    "monitoring_ready": "Current owner review session or within 24 hours of progression request; refresh after monitoring, alerting, or dashboard changes."
+  },
+  "evidence_invented": false,
+  "evidence_verification_required_later": true,
+  "evidence_verified_by_this_packet": false,
+  "live_trading_authorized": false,
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "mission_name": "Governed Forex Finish Line",
+  "next_safe_action": "Owner must provide current sanitized safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready; keep broker, demo, live micro, live trading, and vacation modes locked.",
+  "order_execution": false,
+  "owner_evidence_collection_status": "OWNER_EVIDENCE_REQUIRED",
+  "owner_evidence_complete": [],
+  "owner_evidence_completion_percent": 0.0,
+  "owner_evidence_missing": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "owner_evidence_required": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "packet_id": "PKT-FOREX-OWNER-SAFETY-EVIDENCE-COLLECTION-V1",
+  "packet_name": "Build Owner Safety Evidence Collection V1",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "program_name": "Forex Profit Autonomy System",
+  "required_evidence_by_control": {
+    "daily_stop_state": [
+      "Owner-provided current daily-stop state showing the daily loss or halt rule is configured and not unknown.",
+      "Evidence that daily-stop enforcement would block progression after the configured daily limit is reached."
+    ],
+    "kill_switch_state": [
+      "Owner-provided current kill-switch state showing the emergency stop control exists, is reachable, and is in the expected safe state.",
+      "Evidence that the kill switch can block progression before broker, demo, live micro, or live trading modes are considered."
+    ],
+    "max_loss_state": [
+      "Owner-provided current max-loss state showing the max-loss threshold is configured, bounded, and not unknown.",
+      "Evidence that max-loss enforcement would block progression before unacceptable drawdown or loss exposure."
+    ],
+    "monitoring_ready": [
+      "Owner-provided current monitoring readiness evidence showing an operator-visible monitoring path exists.",
+      "Evidence that alerts, logs, or owner review surfaces can detect safety-control failure before progression."
+    ]
+  },
+  "required_evidence_by_control_detail": {
+    "daily_stop_state": {
+      "acceptable_evidence_types": [
+        "sanitized daily-stop configuration export",
+        "sanitized daily risk-state report",
+        "approved local preflight output with no secrets or account identifiers",
+        "owner checklist entry tied to a timestamped evidence artifact"
+      ],
+      "current_status": "BLOCKED",
+      "evidence_freshness_requirement": "Current owner review session or within 24 hours of progression request; refresh after risk-rule changes.",
+      "governing_recommendation": "OWNER_MUST_PROVIDE_EVIDENCE_FOR_BLOCKED_CONTROL",
+      "missing_status": "OWNER_EVIDENCE_MISSING",
+      "required_owner_evidence": [
+        "Owner-provided current daily-stop state showing the daily loss or halt rule is configured and not unknown.",
+        "Evidence that daily-stop enforcement would block progression after the configured daily limit is reached."
+      ],
+      "verification_required": true
+    },
+    "kill_switch_state": {
+      "acceptable_evidence_types": [
+        "sanitized safety-control status export",
+        "sanitized screenshot of the kill-switch state",
+        "approved local preflight output with no secrets or account identifiers",
+        "owner checklist entry tied to a timestamped evidence artifact"
+      ],
+      "current_status": "BLOCKED",
+      "evidence_freshness_requirement": "Current owner review session or within 24 hours of progression request; refresh after safety-control changes.",
+      "governing_recommendation": "OWNER_MUST_PROVIDE_EVIDENCE_FOR_BLOCKED_CONTROL",
+      "missing_status": "OWNER_EVIDENCE_MISSING",
+      "required_owner_evidence": [
+        "Owner-provided current kill-switch state showing the emergency stop control exists, is reachable, and is in the expected safe state.",
+        "Evidence that the kill switch can block progression before broker, demo, live micro, or live trading modes are considered."
+      ],
+      "verification_required": true
+    },
+    "max_loss_state": {
+      "acceptable_evidence_types": [
+        "sanitized max-loss configuration export",
+        "sanitized risk-threshold report",
+        "approved local preflight output with no secrets or account identifiers",
+        "owner checklist entry tied to a timestamped evidence artifact"
+      ],
+      "current_status": "BLOCKED",
+      "evidence_freshness_requirement": "Current owner review session or within 24 hours of progression request; refresh after risk-threshold changes.",
+      "governing_recommendation": "OWNER_MUST_PROVIDE_EVIDENCE_FOR_BLOCKED_CONTROL",
+      "missing_status": "OWNER_EVIDENCE_MISSING",
+      "required_owner_evidence": [
+        "Owner-provided current max-loss state showing the max-loss threshold is configured, bounded, and not unknown.",
+        "Evidence that max-loss enforcement would block progression before unacceptable drawdown or loss exposure."
+      ],
+      "verification_required": true
+    },
+    "monitoring_ready": {
+      "acceptable_evidence_types": [
+        "sanitized monitoring readiness report",
+        "sanitized alert or review-surface proof",
+        "approved local preflight output with no secrets or account identifiers",
+        "owner checklist entry tied to a timestamped evidence artifact"
+      ],
+      "current_status": "BLOCKED",
+      "evidence_freshness_requirement": "Current owner review session or within 24 hours of progression request; refresh after monitoring, alerting, or dashboard changes.",
+      "governing_recommendation": "OWNER_MUST_PROVIDE_EVIDENCE_FOR_BLOCKED_CONTROL",
+      "missing_status": "OWNER_EVIDENCE_MISSING",
+      "required_owner_evidence": [
+        "Owner-provided current monitoring readiness evidence showing an operator-visible monitoring path exists.",
+        "Evidence that alerts, logs, or owner review surfaces can detect safety-control failure before progression."
+      ],
+      "verification_required": true
+    }
+  },
+  "safety_boundary": {
+    "account_identifier_persistence_allowed": false,
+    "broker_api_allowed": false,
+    "credentials_allowed": false,
+    "daemon_allowed": false,
+    "live_trading_authorized": false,
+    "order_execution_allowed": false,
+    "scheduler_allowed": false,
+    "webhook_allowed": false
+  },
+  "source_artifacts": {
+    "critical_safety_closure_state": "Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json",
+    "finish_line_controller_state": "Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json"
+  },
+  "source_controller": {
+    "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+    "mode": "SAFETY_CLOSURE",
+    "packet_id": "PKT-FOREX-FINISH-LINE-MISSION-CONTROLLER-V1",
+    "phase": "CRITICAL_SAFETY_EVIDENCE_CLOSURE",
+    "status": "SAFETY_CLOSURE_REQUIRED"
+  },
+  "validator_chain": [
+    "python -m py_compile automation/forex_engine/forex_owner_safety_evidence_collection_v1.py scripts/forex_delivery/run_forex_owner_safety_evidence_collection_v1.py tests/forex_engine/test_forex_owner_safety_evidence_collection_v1.py",
+    "python -m pytest tests/forex_engine/test_forex_owner_safety_evidence_collection_v1.py -q",
+    "python scripts/forex_delivery/run_forex_owner_safety_evidence_collection_v1.py --write-state --write-report",
+    "python -m json.tool Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_V1_STATE.json",
+    "git diff --check -- automation/forex_engine/forex_owner_safety_evidence_collection_v1.py scripts/forex_delivery/run_forex_owner_safety_evidence_collection_v1.py tests/forex_engine/test_forex_owner_safety_evidence_collection_v1.py Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_NEXT_CODEX_PACKET_V1.md",
+    "git status --short --branch"
+  ],
+  "verification_required_by_control": {
+    "daily_stop_state": true,
+    "kill_switch_state": true,
+    "max_loss_state": true,
+    "monitoring_ready": true
+  }
+}
