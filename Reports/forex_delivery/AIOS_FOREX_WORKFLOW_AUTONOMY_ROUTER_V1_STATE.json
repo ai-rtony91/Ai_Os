@@ -1,0 +1,84 @@
+{
+  "router_version": "1.0",
+  "packet_id": "PKT-FOREX-WORKFLOW-AUTONOMY-ROUTER-V1",
+  "packet_name": "Build Forex Workflow Autonomy Router V1",
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "mission_name": "Governed Forex Finish Line",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "program_name": "Forex Profit Autonomy System",
+  "epic_id": "EPC-FOREX-WORKFLOW-AUTONOMY-ROUTER-001",
+  "epic_name": "Forex Workflow Autonomy Router",
+  "bucket_id": "BKT-FOREX-WORKFLOW-AUTONOMY-ROUTER-001",
+  "bucket_name": "Single Next-Safe-Action Forex Router",
+  "workflow_status": "WORKFLOW_BLOCKED_ON_OWNER_SAFETY_EVIDENCE",
+  "active_phase": "SAFETY_EVIDENCE_CLOSURE_PENDING",
+  "active_blocker": "kill_switch_state",
+  "active_lane": "OWNER_SAFETY_EVIDENCE_CLOSURE",
+  "active_blockers": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "locked_modes": {
+    "broker_probe": true,
+    "demo_proof": true,
+    "live_micro": true,
+    "live_trading": true,
+    "vacation_mode": true
+  },
+  "next_safe_action": "Owner must provide or repair owner-sanitized evidence for kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready; keep broker, demo, live micro, live trading, and vacation modes locked.",
+  "next_packet_path": "C:\\Dev\\Ai.Os\\Reports\\forex_delivery\\AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_NEXT_CODEX_PACKET_V1.md",
+  "safety_boundary": {
+    "order_execution_allowed": false,
+    "broker_api_allowed": false,
+    "credentials_allowed": false,
+    "live_trading_authorized": false,
+    "account_identifier_persistence_allowed": false,
+    "scheduler_allowed": false,
+    "daemon_allowed": false,
+    "webhook_allowed": false
+  },
+  "source_artifacts": {
+    "owner_safety_discovery_report": "Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_DISCOVERY_V1_REPORT.md",
+    "owner_safety_collection_state": "Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_V1_STATE.json",
+    "owner_safety_verification_prep_state": "Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_INTAKE_VERIFICATION_PREP_V1_STATE.json",
+    "critical_safety_closure_state": "Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json",
+    "finish_line_state": "Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json",
+    "autonomy_completion_governor_state": "Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json"
+  },
+  "decision_reasons": [
+    "Owner safety evidence controls are still missing or blocked: kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready",
+    "Finish-line next-safe guidance: Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready; keep broker, demo, live micro, live trading, and vacation modes locked.",
+    "Closure next-safe guidance: Close controller-reported critical safety blockers for kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready; keep broker, demo, live micro, live trading, and vacation modes locked.",
+    "Discovery candidate weak for kill_switch_state: status=DISCOVERED_WEAK_CANDIDATE, safe_to_cite=false",
+    "Discovery candidate weak for daily_stop_state: status=DISCOVERED_WEAK_CANDIDATE, safe_to_cite=false",
+    "Discovery candidate weak for max_loss_state: status=DISCOVERED_WEAK_CANDIDATE, safe_to_cite=false",
+    "Discovery candidate weak for monitoring_ready: status=DISCOVERED_WEAK_CANDIDATE, safe_to_cite=false"
+  ],
+  "current_branch": "main",
+  "current_head": "29b53f21e411ced485084060e2bf59b76edc15c8",
+  "validator_chain": [
+    "python -m py_compile automation/forex_engine/forex_workflow_autonomy_router_v1.py scripts/forex_delivery/run_forex_workflow_autonomy_router_v1.py",
+    "python -m pytest tests/forex_engine/test_forex_workflow_autonomy_router_v1.py -q",
+    "python scripts/forex_delivery/run_forex_workflow_autonomy_router_v1.py --write-state --write-report --write-next-packet",
+    "python -m json.tool Reports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_V1_STATE.json",
+    "python automation/validators/aios_governance_validator.py --input Reports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_NEXT_CODEX_PACKET_V1.md",
+    "git diff --check -- automation/forex_engine/forex_workflow_autonomy_router_v1.py scripts/forex_delivery/run_forex_workflow_autonomy_router_v1.py tests/forex_engine/test_forex_workflow_autonomy_router_v1.py Reports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_NEXT_CODEX_PACKET_V1.md",
+    "git status --short --branch"
+  ],
+  "owner_safety_evidence_missing": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "evidence_invented": false,
+  "evidence_verified_by_this_packet": false,
+  "owner_intake_modified": false,
+  "broker_api_used": false,
+  "credentials_used": false,
+  "order_execution": false,
+  "live_trading_authorized": false,
+  "next_packet_text": "CODEX-ONLY PROMPT\n\nAI_OS EXECUTION TOKEN\nAI_OS BOOTSTRAP REQUIRED\n\nCONTRACT TITLE\nAIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_TO_COLLECTION_CHECKLIST_V1\n\nIDENTITY MARKER\nAIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_TO_COLLECTION_CHECKLIST_V1\n\nSUPERVISOR IDENTITY\nChatGPT planning supervisor\n\nWORKER IDENTITY\nCodex\n\nMODE\nDRY_RUN\n\nZONE\nTrading Lab / Forex\n\nLANE\nForex Workflow Autonomy Router\n\nWORKTREE\nC:\\Dev\\Ai.Os\n\nBRANCH\nresolve after preflight\n\nMISSION / PROGRAM / EPIC / BUCKET / PACKET IDENTITY\nMission ID: MISSION-AIOS-FOREX-FINISH-LINE-V1\nMission Name: Governed Forex Finish Line\nProgram ID: PROGRAM-FOREX-PROFIT-AUTONOMY-V1\nProgram Name: Forex Profit Autonomy System\nEpic ID: EPC-FOREX-WORKFLOW-AUTONOMY-ROUTER-001\nEpic Name: Forex Workflow Autonomy Router\nBucket ID: BKT-FOREX-WORKFLOW-AUTONOMY-ROUTER-001\nBucket Name: Single Next-Safe-Action Forex Router\nPacket ID: PKT-FOREX-WORKFLOW-AUTONOMY-ROUTER-V1\nPacket Name: Build Forex Workflow Autonomy Router V1\n\nAPPROVAL AUTHORITY\nAnthony is the only authority for approvals, execution, and evidence changes.\nDo not modify owner safety intake template JSON.\n\nPREFLIGHT\ncd C:\\Dev\\Ai.Os\ngit status --short --branch\ngit branch --show-current\ngit log -1 --oneline\n\nALLOWED PATHS\nautomation/forex_engine/forex_workflow_autonomy_router_v1.py\nscripts/forex_delivery/run_forex_workflow_autonomy_router_v1.py\ntests/forex_engine/test_forex_workflow_autonomy_router_v1.py\nReports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_V1_STATE.json\nReports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_V1_REPORT.md\nReports/forex_delivery/AIOS_FOREX_WORKFLOW_AUTONOMY_ROUTER_NEXT_CODEX_PACKET_V1.md\nReports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_V1_STATE.json\nReports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_V1_REPORT.md\n\nFORBIDDEN PATHS\nAGENTS.md\nREADME.md\nWHITEPAPER.md\ndocs/architecture/AI_OS_WHITEPAPER.md\nRISK_POLICY.md\n.env\nsecrets\ncredential files\nbroker account identifiers\nbroker modules\nscheduler files\ndaemon files\nwebhook files\ndashboard mutation files\nunrelated docs\nunrelated tests\nany path outside C:\\Dev\\Ai.Os\n\nMISSION\nProduce a structured owner-sanitized evidence collection checklist/report only, then pause. Do not fill owner intake template fields automatically.\n\nRULES\nDo not invent evidence.\nDo not mark evidence verified.\nDo not use broker API.\nDo not use credentials.\nDo not authorize live trading.\nDo not place trades.\nDo not read .env.\nDo not modify owner intake JSON template.\nDo not start schedulers, daemons, loops, webhooks, or background workers.\nDo not create PR.\n\nVALIDATOR CHAIN\npython scripts/forex_delivery/run_forex_owner_safety_evidence_collection_v1.py --write-state --write-report\npython -m json.tool Reports/forex_delivery/AIOS_FOREX_OWNER_SAFETY_EVIDENCE_COLLECTION_V1_STATE.json\ngit status --short --branch\n\nSAFE NEXT ACTION\nRun the owner-safety evidence collection packet to generate a checklist/report, then keep broker_probe: locked, demo_proof: locked, live_micro: locked, live_trading: locked, vacation_mode: locked.\n\nSTOP POINT\nStop after generating collection checklist/report. Do not mutate owner evidence template, do not verify evidence, and do not authorize any execution mode.\n\nFINAL REPORT FORMAT\nWORKFLOW_STATUS:\nACTIVE_PHASE:\nACTIVE_LANE:\nACTIVE_BLOCKER:\nLOCKED_MODES:\nNEXT_SAFE_ACTION:\nORDER_EXECUTION:\nBROKER_API_USED:\nCREDENTIALS_USED:\nLIVE_TRADING_AUTHORIZED:\nGIT_STATUS:\n"
+}
