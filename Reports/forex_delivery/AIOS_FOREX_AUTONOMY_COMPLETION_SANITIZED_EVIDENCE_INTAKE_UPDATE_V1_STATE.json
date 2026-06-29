@@ -28,6 +28,8 @@
   "next_safe_action": "Critical safety blockers are present; gather critical safety evidence and pause evidence progression until safety gates are resolved.",
   "packet_id": "PKT-FOREX-AUTONOMY-COMPLETION-SANITIZED-EVIDENCE-INTAKE-UPDATE-V1",
   "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "rejected_base_governor_input_field_count": 0,
+  "rejected_base_governor_input_fields": [],
   "rejected_evidence_fields": [],
   "rerun_recommended": false,
   "safety_boundary": {
@@ -68,6 +70,6 @@
     "python scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py --write-state --write-report --write-input-template",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json",
-    "git diff --check -- automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_NEXT_CODEX_PACKET_V1.md"
+    "git diff --check -- automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_NEXT_CODEX_PACKET_V1.md Reports/forex_delivery/AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md"
   ]
 }

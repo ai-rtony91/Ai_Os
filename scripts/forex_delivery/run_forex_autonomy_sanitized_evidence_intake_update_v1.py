@@ -18,6 +18,7 @@ from automation.forex_engine.forex_autonomy_sanitized_evidence_intake_update_v1 
     DEFAULT_STATE_OUTPUT_PATH,
     DEFAULT_REPORT_OUTPUT_PATH,
     FORBIDDEN_INPUT_PATH_FRAGMENTS,
+    build_safe_output_result_payload,
     run_forex_autonomy_sanitized_evidence_intake_update_v1,
 )
 
@@ -85,7 +86,14 @@ def main(argv: list[str] | None = None) -> int:
         write_input_template=args.write_input_template,
         write_input_template_path=DEFAULT_INPUT_TEMPLATE_PATH,
     )
-    sys.stdout.write(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    sys.stdout.write(
+        json.dumps(
+            build_safe_output_result_payload(result, include_safety_boundary=False),
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
     return 0
 
 
@@ -97,4 +105,3 @@ def _reject_forbidden_input_path(path: Path) -> None:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

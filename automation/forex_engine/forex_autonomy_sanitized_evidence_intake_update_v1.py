@@ -31,7 +31,7 @@ VALIDATOR_CHAIN = (
     "python scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py --write-state --write-report --write-input-template",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json",
-    "git diff --check -- automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_NEXT_CODEX_PACKET_V1.md",
+    "git diff --check -- automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_NEXT_CODEX_PACKET_V1.md Reports/forex_delivery/AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md",
 )
 
 FORBIDDEN_INPUT_PATH_FRAGMENTS = (
@@ -53,13 +53,26 @@ FORBIDDEN_INPUT_PATH_FRAGMENTS = (
 FORBIDDEN_FIELD_NAME_FRAGMENTS = (
     "account",
     "credential",
+    "credentials",
     "token",
     "password",
+    "secret",
     "key",
     "api",
     "oanda",
     "broker_id",
     "account_id",
+)
+SUPPRESSED_FIELD_NAMES_OUTPUT_MARKER = "field_names_suppressed_for_output"
+CANDIDATE_ID_FORBIDDEN_VALUE_FRAGMENTS = (
+    "account",
+    "token",
+    "secret",
+    "credential",
+    "password",
+    "api",
+    "oanda",
+    "broker",
 )
 
 ALLOWED_EVIDENCE_FIELDS = (
@@ -84,6 +97,7 @@ ALLOWED_EVIDENCE_FIELDS = (
     "owner_live_micro_exception_approved",
     "realized_broker_evidence",
 )
+SAFE_GOVERNOR_INPUT_FIELDS = ("candidate_id", *ALLOWED_EVIDENCE_FIELDS)
 
 ALLOWED_SAFETY_STATES = {"ARMED", "READY", "ENABLED"}
 GOVERNOR_MISSING_GATE_FIELDS = {
@@ -176,12 +190,20 @@ def run_forex_autonomy_sanitized_evidence_intake_update_v1(
         state.get("next_autonomy_action"), default="UNKNOWN"
     )
 
-    updated_preview = dict(governor_input)
+    (
+        sanitized_governor_input,
+        rejected_base_governor_input_fields,
+    ) = _sanitize_base_governor_input(governor_input)
+    rejected_base_governor_input_fields = _dedupe_list(
+        rejected_base_governor_input_fields
+    )
+
+    updated_preview = dict(sanitized_governor_input)
     applied_fields: list[str] = []
     rejected_fields: list[str] = []
     intake_status = INTAKE_NO_EVIDENCE
     missing_evidence_fields, blocked_evidence_fields = _classify_evidence_gaps(
-        governor_input
+        sanitized_governor_input
     )
 
     if evidence_payload:
@@ -193,7 +215,7 @@ def run_forex_autonomy_sanitized_evidence_intake_update_v1(
             owner_approval_status = _canonical_status(
                 evidence_payload.get(
                     "owner_approval_status",
-                    governor_input.get("owner_approval_status"),
+                    sanitized_governor_input.get("owner_approval_status"),
                 )
             )
             if (
@@ -256,6 +278,10 @@ def run_forex_autonomy_sanitized_evidence_intake_update_v1(
         "blocked_evidence_fields": _dedupe_list(blocked_evidence_fields),
         "applied_evidence_fields": _dedupe_list(applied_fields),
         "rejected_evidence_fields": _dedupe_list(rejected_fields),
+        "rejected_base_governor_input_fields": rejected_base_governor_input_fields,
+        "rejected_base_governor_input_field_count": len(
+            rejected_base_governor_input_fields
+        ),
         "updated_governor_input_preview": _sorted_payload(updated_preview),
         "rerun_recommended": bool(rerun_recommended),
         "next_safe_action": next_safe_action,
@@ -275,7 +301,7 @@ def run_forex_autonomy_sanitized_evidence_intake_update_v1(
             else DEFAULT_STATE_OUTPUT_PATH
         )
         state_output.write_text(
-            json.dumps(result, indent=2, sort_keys=True),
+            json.dumps(build_safe_output_result_payload(result), indent=2, sort_keys=True),
             encoding="utf-8",
         )
         result["state_output_path"] = str(state_output)
@@ -320,6 +346,23 @@ def run_forex_autonomy_sanitized_evidence_intake_update_v1(
     return result
 
 
+def build_safe_output_result_payload(
+    result: Mapping[str, Any],
+    *,
+    include_safety_boundary: bool = True,
+) -> dict[str, Any]:
+    payload = dict(result)
+    payload["rejected_evidence_fields"] = _safe_field_names_for_output(
+        payload.get("rejected_evidence_fields", ())
+    )
+    payload["rejected_base_governor_input_fields"] = _safe_field_names_for_output(
+        payload.get("rejected_base_governor_input_fields", ())
+    )
+    if not include_safety_boundary:
+        payload.pop("safety_boundary", None)
+    return payload
+
+
 def _build_report_markdown(
     *,
     result: Mapping[str, Any],
@@ -358,7 +401,15 @@ def _build_report_markdown(
     lines.extend(
         [
             f"Applied evidence fields: {result['applied_evidence_fields']}",
-            f"Rejected evidence fields: {result['rejected_evidence_fields']}",
+            (
+                "Rejected evidence fields: "
+                f"{_safe_field_names_for_output(result['rejected_evidence_fields'])}"
+            ),
+            "Rejected base governor input field names: suppressed from persisted report output",
+            (
+                "Rejected base governor input field count: "
+                f"{result.get('rejected_base_governor_input_field_count', 0)}"
+            ),
             f"Rerun recommended: {result['rerun_recommended']}",
             f"Next safe action: {result['next_safe_action']}",
             "Safety boundary:",
@@ -381,11 +432,58 @@ def _sorted_keys(payload: Mapping[str, Any]) -> list[str]:
     return sorted(payload.keys(), key=str.lower)
 
 
+def _sanitize_base_governor_input(
+    governor_input: Mapping[str, Any],
+) -> tuple[dict[str, Any], list[str]]:
+    sanitized: dict[str, Any] = {}
+    rejected: list[str] = []
+
+    for key, value in governor_input.items():
+        if not isinstance(key, str):
+            rejected.append(str(key))
+            continue
+        normalized_key = key.strip()
+        if normalized_key in SAFE_GOVERNOR_INPUT_FIELDS:
+            if normalized_key == "candidate_id":
+                safe_candidate_id = _safe_candidate_id(value)
+                if safe_candidate_id is None:
+                    rejected.append(normalized_key)
+                    continue
+                sanitized[normalized_key] = safe_candidate_id
+                continue
+            sanitized[normalized_key] = value
+        else:
+            rejected.append(normalized_key)
+
+    return sanitized, _dedupe_list(rejected)
+
+
+def _safe_candidate_id(value: Any) -> str | int | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if not isinstance(value, str):
+        return None
+    normalized = value.strip()
+    if not normalized:
+        return None
+    lowered = normalized.lower()
+    if any(
+        fragment in lowered for fragment in CANDIDATE_ID_FORBIDDEN_VALUE_FRAGMENTS
+    ):
+        return None
+    return normalized
+
+
 def _classify_evidence_gaps(
     governor_input: Mapping[str, Any],
 ) -> tuple[list[str], list[str]]:
     missing: list[str] = []
     blocked: list[str] = []
+    order_count_gap = _classify_order_count_gap(
+        governor_input.get("order_count_last_24h")
+    )
 
     if _canonical_status(governor_input.get("profitability_evidence_status")) != "READY":
         missing.append("profitability_evidence_status")
@@ -428,6 +526,11 @@ def _classify_evidence_gaps(
     if not _as_bool_or_none(governor_input.get("monitoring_ready"), default=False):
         blocked.append("monitoring_ready")
 
+    if order_count_gap == "missing":
+        missing.append("order_count_last_24h")
+    elif order_count_gap == "blocked":
+        blocked.append("order_count_last_24h")
+
     evidence_age_days = _as_float(governor_input.get("evidence_age_days"))
     if (
         evidence_age_days is None
@@ -438,7 +541,10 @@ def _classify_evidence_gaps(
     if _canonical_status(governor_input.get("owner_approval_status")) == "PENDING":
         missing.append("owner_approval_status")
 
-    governor_missing, governor_blocked = _classify_governor_failed_gates(governor_input)
+    governor_missing, governor_blocked = _classify_governor_failed_gates(
+        _governor_input_with_safe_order_count(governor_input),
+        skip_order_count_gate=order_count_gap is not None,
+    )
     missing.extend(governor_missing)
     blocked.extend(governor_blocked)
 
@@ -447,6 +553,8 @@ def _classify_evidence_gaps(
 
 def _classify_governor_failed_gates(
     governor_input: Mapping[str, Any],
+    *,
+    skip_order_count_gate: bool = False,
 ) -> tuple[list[str], list[str]]:
     governor_result = governor.evaluate_supervised_autonomy_candidate(governor_input)
     failed_gates = tuple(str(gate) for gate in governor_result.get("failed_gates", ()))
@@ -455,6 +563,8 @@ def _classify_governor_failed_gates(
 
     for gate in failed_gates:
         if gate == governor.GATE_ORDER_COUNT:
+            if skip_order_count_gate:
+                continue
             count = _as_float(governor_input.get("order_count_last_24h"))
             target = missing if count is None else blocked
             target.append("order_count_last_24h")
@@ -500,7 +610,7 @@ def _validate_evidence_payload(
             continue
         normalized_key = key.strip()
         lowered = normalized_key.lower()
-        if any(marker in lowered for marker in FORBIDDEN_FIELD_NAME_FRAGMENTS):
+        if _is_sensitive_field_name(lowered):
             rejected.append(normalized_key)
             continue
         if normalized_key not in ALLOWED_EVIDENCE_FIELDS:
@@ -525,11 +635,14 @@ def _validate_evidence_fields(evidence_payload: Mapping[str, Any]) -> list[str]:
             errors.append(key)
             continue
 
-        if key in {"sample_size", "walk_forward_windows", "order_count_last_24h", "evidence_age_days"}:
+        if key in {"sample_size", "walk_forward_windows", "evidence_age_days"}:
             if not isinstance(value, (int, float)) or isinstance(value, bool):
                 errors.append(key)
                 continue
-            if key != "order_count_last_24h" and value < 0:
+            if value < 0:
+                errors.append(key)
+        elif key == "order_count_last_24h":
+            if not _is_non_negative_integer(value):
                 errors.append(key)
         elif key in {"max_drawdown", "profit_factor", "expectancy"}:
             if not isinstance(value, (int, float)) or isinstance(value, bool):
@@ -559,6 +672,49 @@ def _validate_evidence_fields(evidence_payload: Mapping[str, Any]) -> list[str]:
         else:
             errors.append(key)
     return _dedupe_list(errors)
+
+
+def _is_non_negative_integer(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _classify_order_count_gap(value: Any) -> str | None:
+    if value is None:
+        return "missing"
+    if not _is_non_negative_integer(value):
+        return "blocked"
+    if value > governor.MAX_ORDERS_24H:
+        return "blocked"
+    return None
+
+
+def _governor_input_with_safe_order_count(
+    governor_input: Mapping[str, Any],
+) -> dict[str, Any]:
+    payload = dict(governor_input)
+    order_count = payload.get("order_count_last_24h")
+    if order_count is not None and not _is_non_negative_integer(order_count):
+        payload["order_count_last_24h"] = None
+    return payload
+
+
+def _is_sensitive_field_name(field_name: str) -> bool:
+    lowered = field_name.strip().lower()
+    return any(marker in lowered for marker in FORBIDDEN_FIELD_NAME_FRAGMENTS)
+
+
+def _safe_field_names_for_output(field_names: Iterable[Any]) -> list[str]:
+    safe_names: list[str] = []
+    sensitive_seen = False
+    for field_name in field_names:
+        name = str(field_name)
+        if _is_sensitive_field_name(name):
+            sensitive_seen = True
+            continue
+        safe_names.append(name)
+    if sensitive_seen:
+        safe_names.append(SUPPRESSED_FIELD_NAMES_OUTPUT_MARKER)
+    return _dedupe_list(safe_names)
 
 
 def _as_float(value: Any) -> float | None:
@@ -688,4 +844,5 @@ __all__ = [
     "DEFAULT_GOVERNOR_INPUT_JSON_PATH",
     "DEFAULT_INPUT_TEMPLATE_PATH",
     "DEFAULT_STATE_OUTPUT_PATH",
+    "build_safe_output_result_payload",
 ]

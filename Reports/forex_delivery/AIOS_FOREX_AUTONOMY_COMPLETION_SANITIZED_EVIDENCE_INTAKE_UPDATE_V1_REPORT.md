@@ -2,7 +2,7 @@
 
 Status: NO_EVIDENCE_APPLIED
 Current branch: main
-Current head: a7b2e026e37b997b50b2001529ea230a1a450a08
+Current head: 9537a853434de33d15cf4798bab81ad4f0d77f3a
 Input files used: C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json, C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_LIVE_MICRO_EXCEPTION_GOVERNOR_INPUT_TEMPLATE_V1.json
 Evidence update file used: None
 
@@ -28,6 +28,8 @@ Blocked evidence fields:
 - monitoring_ready
 Applied evidence fields: []
 Rejected evidence fields: []
+Rejected base governor input field names: suppressed from persisted report output
+Rejected base governor input field count: 0
 Rerun recommended: False
 Next safe action: Critical safety blockers are present; gather critical safety evidence and pause evidence progression until safety gates are resolved.
 Safety boundary:
@@ -46,4 +48,4 @@ Validators:
 - python scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py --write-state --write-report --write-input-template
 - python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json
 - python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json
-- git diff --check -- automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_NEXT_CODEX_PACKET_V1.md
+- git diff --check -- automation/forex_engine/forex_autonomy_sanitized_evidence_intake_update_v1.py scripts/forex_delivery/run_forex_autonomy_sanitized_evidence_intake_update_v1.py tests/forex_engine/test_forex_autonomy_sanitized_evidence_intake_update_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_INPUT_TEMPLATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_NEXT_CODEX_PACKET_V1.md Reports/forex_delivery/AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md

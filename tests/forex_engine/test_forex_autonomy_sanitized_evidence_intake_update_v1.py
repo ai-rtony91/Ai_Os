@@ -5,6 +5,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from automation.forex_engine import (
     forex_autonomy_sanitized_evidence_intake_update_v1 as intake,
     supervised_autonomy_governor_v1 as governor,
@@ -90,6 +92,120 @@ def _governor_ready_input(**overrides: object) -> dict[str, object]:
     return payload
 
 
+def _governor_ready_input_with_restricted_fields() -> dict[str, object]:
+    return _governor_ready_input(
+        account_id="acct-not-for-output",
+        api_key="key-not-for-output",
+        token="token-not-for-output",
+        password="password-not-for-output",
+        secret_value="secret-not-for-output",
+        credential_path="credential-not-for-output",
+        oanda_account="oanda-not-for-output",
+        broker_id="broker-not-for-output",
+    )
+
+
+@pytest.mark.parametrize("candidate_id", ["candidate-safe-123", 12345])
+def test_safe_candidate_id_from_base_governor_input_survives_outputs(
+    tmp_path: Path, candidate_id: str | int
+):
+    state_output = tmp_path / "state-output.json"
+
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(candidate_id=candidate_id),
+        write_state=True,
+        write_state_path=state_output,
+    )
+
+    assert result["updated_governor_input_preview"]["candidate_id"] == candidate_id
+    assert "candidate_id" not in result["rejected_base_governor_input_fields"]
+
+    state_payload = json.loads(state_output.read_text(encoding="utf-8"))
+    assert state_payload["updated_governor_input_preview"]["candidate_id"] == candidate_id
+
+    state_path = tmp_path / "state.json"
+    base_path = tmp_path / "base.json"
+    state_path.write_text(json.dumps(_state_mapping()), encoding="utf-8")
+    base_path.write_text(
+        json.dumps(_governor_ready_input(candidate_id=candidate_id)),
+        encoding="utf-8",
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER_PATH),
+            "--state-json",
+            str(state_path),
+            "--governor-input-json",
+            str(base_path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    stdout_payload = json.loads(completed.stdout)
+    assert stdout_payload["updated_governor_input_preview"]["candidate_id"] == candidate_id
+
+
+def test_safe_sample_input_candidate_id_is_preserved():
+    sample_input = governor.safe_sample_input()
+
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=sample_input,
+    )
+
+    assert (
+        result["updated_governor_input_preview"]["candidate_id"]
+        == sample_input["candidate_id"]
+    )
+    assert "candidate_id" not in result["rejected_base_governor_input_fields"]
+
+
+@pytest.mark.parametrize(
+    "candidate_id",
+    [
+        "candidate-account-123",
+        "candidate-token-123",
+        "candidate-secret-123",
+        "candidate-credential-123",
+        "candidate-password-123",
+        "candidate-api-123",
+        "candidate-oanda-123",
+        "candidate-broker-123",
+    ],
+)
+def test_candidate_id_with_sensitive_fragments_is_rejected(candidate_id: str):
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(candidate_id=candidate_id),
+    )
+
+    assert "candidate_id" not in result["updated_governor_input_preview"]
+    assert "candidate_id" in result["rejected_base_governor_input_fields"]
+    safe_output = json.dumps(
+        intake.build_safe_output_result_payload(result),
+        sort_keys=True,
+    )
+    assert candidate_id not in safe_output
+
+
+@pytest.mark.parametrize(
+    "candidate_id",
+    [None, True, 1.5, ["candidate-safe-123"], {"candidate": "candidate-safe-123"}],
+)
+def test_non_string_non_int_candidate_id_is_rejected(candidate_id: object):
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(candidate_id=candidate_id),
+    )
+
+    assert "candidate_id" not in result["updated_governor_input_preview"]
+    assert "candidate_id" in result["rejected_base_governor_input_fields"]
+
+
 def test_default_run_no_evidence_applied():
     result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
         state_json=STATE_PATH,
@@ -143,6 +259,21 @@ def test_order_count_last_24h_missing_is_governor_gap():
     assert result["rerun_recommended"] is False
 
 
+@pytest.mark.parametrize("value", [10.9, -0.1])
+def test_base_order_count_invalid_values_block_ready_preview(value: object):
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(order_count_last_24h=value),
+        evidence_mapping={"profitability_evidence_status": "READY"},
+    )
+
+    assert result["intake_status"] == intake.INTAKE_SANITIZED_APPLIED
+    assert "order_count_last_24h" in (
+        result["missing_evidence_fields"] + result["blocked_evidence_fields"]
+    )
+    assert result["rerun_recommended"] is False
+
+
 def test_order_count_last_24h_above_governor_max_is_blocked_gap():
     result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
         state_mapping=_state_mapping(),
@@ -153,6 +284,34 @@ def test_order_count_last_24h_above_governor_max_is_blocked_gap():
 
     assert "order_count_last_24h" in result["blocked_evidence_fields"]
     assert result["missing_evidence_fields"] == []
+    assert result["rerun_recommended"] is False
+
+
+@pytest.mark.parametrize("value", [0, governor.MAX_ORDERS_24H])
+def test_order_count_last_24h_valid_limits_remain_accepted(value: int):
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(order_count_last_24h=value),
+        evidence_mapping={"profitability_evidence_status": "READY"},
+    )
+
+    assert result["intake_status"] == intake.INTAKE_SANITIZED_APPLIED
+    assert result["missing_evidence_fields"] == []
+    assert result["blocked_evidence_fields"] == []
+    assert result["rerun_recommended"] is True
+
+
+def test_order_count_last_24h_above_limit_blocks_ready_preview():
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(
+            order_count_last_24h=governor.MAX_ORDERS_24H + 1
+        ),
+        evidence_mapping={"profitability_evidence_status": "READY"},
+    )
+
+    assert result["intake_status"] == intake.INTAKE_SANITIZED_APPLIED
+    assert "order_count_last_24h" in result["blocked_evidence_fields"]
     assert result["rerun_recommended"] is False
 
 
@@ -347,6 +506,120 @@ def test_forbidden_sensitive_evidence_keys_are_rejected():
 
     assert result["intake_status"] == intake.INTAKE_SANITIZED_REJECTED
     assert "account_id" in result["rejected_evidence_fields"]
+
+
+def test_base_input_filtering_removes_restricted_names_from_preview_and_outputs(
+    tmp_path: Path,
+):
+    state_output = tmp_path / "state-output.json"
+    report_output = tmp_path / "report-output.md"
+    restricted_names = {
+        "account_id",
+        "api_key",
+        "token",
+        "password",
+        "secret_value",
+        "credential_path",
+        "oanda_account",
+        "broker_id",
+    }
+
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input_with_restricted_fields(),
+        write_state=True,
+        write_state_path=state_output,
+        write_report=True,
+        write_report_path=report_output,
+    )
+
+    assert restricted_names.issubset(
+        set(result["rejected_base_governor_input_fields"])
+    )
+    for name in restricted_names:
+        assert name not in result["updated_governor_input_preview"]
+
+    state_payload = json.loads(state_output.read_text(encoding="utf-8"))
+    state_text = json.dumps(state_payload, sort_keys=True)
+    report_text = report_output.read_text(encoding="utf-8")
+    report_lines = report_text.splitlines()
+    assert state_payload["safety_boundary"]["account_identifier_persistence_allowed"] is False
+    assert state_payload["safety_boundary"]["credentials_allowed"] is False
+    for name in restricted_names:
+        assert f'"{name}"' not in state_text
+        assert f"- {name}" not in report_lines
+        assert f"{name}: " not in report_text
+        if name != "account_id":
+            assert name not in report_text
+
+
+def test_runner_stdout_omits_suppressed_base_names(tmp_path: Path):
+    state_path = tmp_path / "state.json"
+    base_path = tmp_path / "base.json"
+    state_path.write_text(json.dumps(_state_mapping()), encoding="utf-8")
+    base_path.write_text(
+        json.dumps(_governor_ready_input_with_restricted_fields()),
+        encoding="utf-8",
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER_PATH),
+            "--state-json",
+            str(state_path),
+            "--governor-input-json",
+            str(base_path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    payload = json.loads(completed.stdout)
+
+    assert "safety_boundary" not in payload
+    for name in {
+        "account_id",
+        "api_key",
+        "token",
+        "password",
+        "secret_value",
+        "credential_path",
+        "oanda_account",
+        "broker_id",
+    }:
+        assert name not in completed.stdout
+
+
+@pytest.mark.parametrize("value", [10.9, -0.1, -1, "1", True])
+def test_evidence_mapping_order_count_invalid_values_are_rejected(value: object):
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(),
+        evidence_mapping={"order_count_last_24h": value},
+    )
+
+    assert result["intake_status"] == intake.INTAKE_SANITIZED_REJECTED
+    assert "order_count_last_24h" in result["rejected_evidence_fields"]
+    assert result["rerun_recommended"] is False
+
+
+def test_evidence_json_order_count_float_is_rejected(tmp_path: Path):
+    evidence_path = tmp_path / "evidence.json"
+    evidence_path.write_text(
+        json.dumps({"order_count_last_24h": 10.9}),
+        encoding="utf-8",
+    )
+
+    result = intake.run_forex_autonomy_sanitized_evidence_intake_update_v1(
+        state_mapping=_state_mapping(),
+        governor_input_mapping=_governor_ready_input(),
+        evidence_json=evidence_path,
+    )
+
+    assert result["intake_status"] == intake.INTAKE_SANITIZED_REJECTED
+    assert "order_count_last_24h" in result["rejected_evidence_fields"]
+    assert result["rerun_recommended"] is False
 
 
 def test_no_credentials_account_identifiers_env_broker_api_fields_are_not_accepted():
