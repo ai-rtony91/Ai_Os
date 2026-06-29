@@ -1,0 +1,58 @@
+{
+  "packet_id": "PKT-FOREX-110-TOP-CANDIDATE-WALKFORWARD-OOS-EVIDENCE-COLLECTION-V1",
+  "mode": "LOCAL_APPLY",
+  "lane": "forex-110-walkforward-oos-evidence-collection",
+  "worktree": "C:\\Dev\\Ai.Os",
+  "branch_observed": "main",
+  "status": "BLOCKED_MISSING_TOP_CANDIDATE_OOS_EVIDENCE",
+  "top_candidate_id": "c2-eur-buy-stronger-review-ready",
+  "top_candidate_source": "Reports/forex_delivery/AIOS_FOREX_110_PROFIT_EVIDENCE_TRUTH_LOCK_V1_STATE.json",
+  "profit_truth_lock_status": "REVIEW_READY_PERSISTENCE_BLOCKED",
+  "profit_proof_status": "BLOCKED",
+  "walk_forward_intake_status": "WALK_FORWARD_OOS_INCOMPLETE",
+  "walk_forward_oos_status": "BLOCKED_TOP_CANDIDATE_MISMATCH",
+  "truth_lock_status": "REVIEW_READY_WALKFORWARD_OOS_CANDIDATE_MISMATCH",
+  "profit_persistence_unlocked": false,
+  "top_candidate_alignment": "MISMATCHED",
+  "walkforward_source_candidate_ids": [
+    "c1-eur-buy"
+  ],
+  "missing_evidence": [
+    "oos_segments_total",
+    "oos_segments_passed",
+    "top-candidate aligned walk-forward/OOS source"
+  ],
+  "normalized_walkforward_oos_summary": {
+    "windows_total": 4.0,
+    "windows_passed": 1.0,
+    "min_pass_rate": 1.0,
+    "max_drawdown": 75.2,
+    "max_allowed_drawdown": 0.12,
+    "sanitized": true,
+    "evidence_age_days": 0.0,
+    "max_evidence_age_days": 1.25
+  },
+  "evidence_limits": [
+    "No real sanitized OOS segment counts for the top candidate were found in repository reports.",
+    "Existing c2 walk-forward/OOS-ready values are test/sample data and were not promoted into proof."
+  ],
+  "validators_run": [
+    "git status --short --branch",
+    "python scripts\\forex_delivery\\run_walk_forward_evidence_intake_v1.py --json",
+    "python scripts\\forex_delivery\\run_forex_110_walkforward_oos_sufficiency_truth_lock_v1.py --write-state --write-report"
+  ],
+  "permissions": {
+    "next_demo_trade_allowed": false,
+    "broker_action_allowed": false,
+    "real_money_allowed": false,
+    "compounding_allowed": false,
+    "bank_movement_allowed": false,
+    "live_trading_allowed": false,
+    "credential_access_allowed": false,
+    "order_submission_allowed": false,
+    "owner_approval_created": false
+  },
+  "safe_next_action": "Provide sanitized top-candidate walk-forward/OOS evidence with candidate, windows_total, windows_passed, oos_segments_total, oos_segments_passed, min_pass_rate, max_drawdown, max_allowed_drawdown, sanitized, evidence_age_days, and max_evidence_age_days, then rerun the Forex 110 walk-forward/OOS sufficiency truth-lock.",
+  "commit_status": "NO_COMMIT",
+  "push_status": "NO_PUSH"
+}
