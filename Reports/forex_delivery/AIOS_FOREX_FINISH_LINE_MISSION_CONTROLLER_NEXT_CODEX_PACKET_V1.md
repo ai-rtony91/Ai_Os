@@ -4,16 +4,16 @@ AI_OS EXECUTION TOKEN
 AI_OS BOOTSTRAP REQUIRED
 
 IDENTITY MARKER
-PKT-FOREX-CRITICAL-SAFETY-EVIDENCE-CLOSURE-DRY-RUN-V1
+PKT-FOREX-VALUE-FREE-BROKER-PROBE-SCOPE-REVIEW-DRY-RUN-V1
 
 SUPERVISOR IDENTITY
 ChatGPT planning supervisor
 
 PACKET ID
-PKT-FOREX-CRITICAL-SAFETY-EVIDENCE-CLOSURE-DRY-RUN-V1
+PKT-FOREX-VALUE-FREE-BROKER-PROBE-SCOPE-REVIEW-DRY-RUN-V1
 
 PACKET NAME
-Critical Safety Evidence Closure Dry Run V1
+Value-Free Broker Probe Scope Review Dry Run V1
 
 MODE
 DRY_RUN
@@ -25,7 +25,7 @@ WORKER IDENTITY
 Codex
 
 LANE
-Forex critical safety evidence closure
+Forex value-free broker probe scope review
 
 WORKTREE
 C:\Dev\Ai.Os
@@ -42,11 +42,11 @@ Epic ID: EPC-FOREX-FINISH-LINE-CONTROLLER-001
 Epic Name: One Script Forex Finish Line Controller
 Bucket ID: BKT-FOREX-FINISH-LINE-CONTROLLER-001
 Bucket Name: Finish Line Mission Controller And Emoji Dashboard Projection
-Packet ID: PKT-FOREX-CRITICAL-SAFETY-EVIDENCE-CLOSURE-DRY-RUN-V1
-Packet Name: Critical Safety Evidence Closure Dry Run V1
+Packet ID: PKT-FOREX-VALUE-FREE-BROKER-PROBE-SCOPE-REVIEW-DRY-RUN-V1
+Packet Name: Value-Free Broker Probe Scope Review Dry Run V1
 
 MISSION
-Inspect the current blocked safety fields and produce a closure plan for kill switch, daily stop, max loss, and monitoring evidence.
+Perform a read-only, owner-approved value-free broker probe scope review using structural safety-closure evidence only.
 
 PREFLIGHT
 cd C:\Dev\Ai.Os
@@ -55,12 +55,9 @@ git branch --show-current
 git log -1 --oneline
 
 ALLOWED PATHS
-automation/forex_engine/forex_critical_safety_evidence_closure_v1.py
-scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py
-tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py
-Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json
-Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_REPORT.md
-Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_NEXT_CODEX_PACKET_V1.md
+Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_V1_STATE.json
+Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_V1_REPORT.md
+Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_NEXT_CODEX_PACKET_V1.md
 
 FORBIDDEN PATHS
 AGENTS.md
@@ -86,20 +83,18 @@ A later Human Owner message that explicitly approves commit is required before c
 A later Human Owner message that explicitly approves push is required before push.
 
 VALIDATOR CHAIN
-python -m py_compile automation/forex_engine/forex_critical_safety_evidence_closure_v1.py scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py
-python -m pytest tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py -q
-python scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py
-python -m json.tool Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json
+python -m json.tool Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json
 git status --short --branch
 
 SAFE NEXT ACTION
-Create a read-only closure plan for the remaining critical safety evidence blockers. Do not advance broker, demo, live micro, live trading, or vacation mode.
+Require owner-approved value-free broker probe scope review with no broker API call, no credentials, no .env read, no account identifiers, no demo action, no live micro authorization, no live trading, no scheduler, no daemon, no webhook, and no order execution.
 
 RULES
-Create a read-only closure plan for the remaining critical safety evidence blockers. Do not advance broker, demo, live micro, live trading, or vacation mode.
+Require owner-approved value-free broker probe scope review with no broker API call, no credentials, no .env read, no account identifiers, no demo action, no live micro authorization, no live trading, no scheduler, no daemon, no webhook, and no order execution.
 Do not place trades.
 Do not use broker API.
 Do not use credentials.
+Do not read .env.
 Do not authorize live trading.
 Do not start schedulers, daemons, loops, webhooks, or background workers.
 Do not commit.
@@ -107,7 +102,7 @@ Do not push.
 Do not create PR.
 
 STOP POINT
-Stop after read-only safety evidence closure plan and final report.
+Stop after read-only broker probe scope review plan and final report. Do not contact any broker.
 
 FINAL REPORT FORMAT
 STATUS:

@@ -1,10 +1,10 @@
 {
-  "controller_status": "STARTING_LINE_READY_WITH_SAFETY_BLOCKERS",
-  "selected_mode": "STARTING_LINE",
-  "current_phase": "SAFETY_EVIDENCE_CLOSURE_PENDING",
-  "next_safe_action": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready; keep broker, demo, live micro, live trading, and vacation modes locked.",
+  "controller_status": "SAFETY_CLOSURE_CONSUMED_BROKER_SCOPE_REQUIRED",
+  "selected_mode": "SAFETY_CLOSURE",
+  "current_phase": "BROKER_PROBE_SCOPE_APPROVAL_REQUIRED",
+  "next_safe_action": "Require owner-approved value-free broker probe scope review with no broker API call; keep broker probe, demo proof, live micro, live trading, vacation mode, scheduler, daemon, webhook, credentials, .env, account persistence, and order execution locked.",
   "starting_line_readiness_percent": 100.0,
-  "finish_line_readiness_percent": 0.0,
+  "finish_line_readiness_percent": 11.11,
   "live_trading_finish_line_target": {
     "target": "Proof-of-life profit evidence, owner-approved real-money live micro path, and sustained supervised operation.",
     "supervised_operation_target": "22 hours/day, 6 days/week",
@@ -46,16 +46,8 @@
     "SAFETY_CLOSURE"
   ],
   "blocker_summary": {
-    "critical_safety_blockers": [
-      "kill_switch_state",
-      "daily_stop_state",
-      "max_loss_state",
-      "monitoring_ready"
-    ],
-    "missing_evidence_fields": [
-      "evidence_age_days",
-      "evidence_age_days=40 exceeds freshness limit 14"
-    ],
+    "critical_safety_blockers": [],
+    "missing_evidence_fields": [],
     "governor_blockers": [
       "profitability evidence is not complete",
       "sample_size=12 is below minimum 30",
@@ -85,7 +77,6 @@
     "intake_status": "NO_EVIDENCE_APPLIED",
     "rerun_recommended": false,
     "missing_finish_line_gates": [
-      "critical_safety_evidence_closed",
       "broker_probe_readiness_approved",
       "demo_proof_exists",
       "owner_live_micro_exception_approved",
@@ -106,17 +97,17 @@
     },
     "evidence": {
       "emoji": "📄",
-      "status": "MISSING",
+      "status": "READY",
       "locked": false,
-      "context_box_required": true,
-      "context_box_text": "Evidence gaps: evidence_age_days, evidence_age_days=40 exceeds freshness limit 14."
+      "context_box_required": false,
+      "context_box_text": ""
     },
     "safety": {
       "emoji": "🛡️",
-      "status": "BLOCKED",
-      "locked": true,
-      "context_box_required": true,
-      "context_box_text": "Safety gaps: kill_switch_state, daily_stop_state, max_loss_state, more."
+      "status": "READY",
+      "locked": false,
+      "context_box_required": false,
+      "context_box_text": ""
     },
     "broker": {
       "emoji": "🏦",
@@ -144,7 +135,7 @@
       "status": "LOCKED",
       "locked": true,
       "context_box_required": true,
-      "context_box_text": "Finish readiness 0.0%."
+      "context_box_text": "Finish readiness 11.11%."
     },
     "vacation_mode": {
       "emoji": "🏖️",
@@ -165,18 +156,16 @@
       "status": "READY",
       "locked": false,
       "context_box_required": true,
-      "context_box_text": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monit..."
+      "context_box_text": "Require owner-approved value-free broker probe scope review with no broker API call; keep bro..."
     }
   },
   "context_boxes": {
-    "evidence": "Evidence gaps: evidence_age_days, evidence_age_days=40 exceeds freshness limit 14.",
-    "safety": "Safety gaps: kill_switch_state, daily_stop_state, max_loss_state, more.",
     "broker": "Broker probe waits for safety closure.",
     "proof": "Proof waits for sanitized evidence.",
     "live_micro": "Owner exception and proof ledger required.",
-    "live_trading": "Finish readiness 0.0%.",
+    "live_trading": "Finish readiness 11.11%.",
     "vacation_mode": "Requires sustained 22h/6d evidence.",
-    "next_action": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monit..."
+    "next_action": "Require owner-approved value-free broker probe scope review with no broker API call; keep bro..."
   },
   "safety_boundary": {
     "order_execution_allowed": false,
@@ -188,6 +177,15 @@
     "webhook_allowed": false,
     "live_trading_authorized": false
   },
+  "safety_closure_consumer_status": "STRUCTURAL_OWNER_SAFETY_EVIDENCE_CONSUMED_BROKER_LOCKED",
+  "structural_owner_safety_evidence_consumed": true,
+  "structural_owner_safety_evidence_controls": [
+    "kill_switch_state",
+    "daily_stop_state",
+    "max_loss_state",
+    "monitoring_ready"
+  ],
+  "operational_control_verified": false,
   "starting_line_inputs": {
     "autonomy_completion_controller_available": true,
     "sanitized_evidence_intake_available": true,
@@ -196,7 +194,7 @@
     "next_safe_action_known": true
   },
   "finish_line_gates": {
-    "critical_safety_evidence_closed": false,
+    "critical_safety_evidence_closed": true,
     "broker_probe_readiness_approved": false,
     "demo_proof_exists": false,
     "owner_live_micro_exception_approved": false,
@@ -209,13 +207,14 @@
   "source_artifacts": {
     "completion_state": "Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json",
     "sanitized_evidence_intake_state": "Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_SANITIZED_EVIDENCE_INTAKE_UPDATE_V1_STATE.json",
-    "p1_hardening_report": "Reports/forex_delivery/AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md"
+    "p1_hardening_report": "Reports/forex_delivery/AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md",
+    "safety_closure_consumer_state": "Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_SAFETY_CLOSURE_CONSUMER_V1_STATE.json"
   },
   "dashboard_projection_notice": "Projection only; report artifacts remain source of truth.",
   "validator_chain": [
     "python -m py_compile automation/forex_engine/forex_finish_line_mission_controller_v1.py scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py",
     "python -m pytest tests/forex_engine/test_forex_finish_line_mission_controller_v1.py -q",
-    "python scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py --mode STARTING_LINE --write-state --write-report --write-dashboard",
+    "python scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py --mode SAFETY_CLOSURE --write-state --write-report --write-dashboard",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_EMOJI_DASHBOARD_PROJECTION_V1.json",
     "git diff --check -- automation/forex_engine/forex_finish_line_mission_controller_v1.py scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py tests/forex_engine/test_forex_finish_line_mission_controller_v1.py Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_EMOJI_DASHBOARD_PROJECTION_V1.json Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_NEXT_CODEX_PACKET_V1.md",

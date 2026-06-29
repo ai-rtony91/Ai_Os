@@ -62,6 +62,9 @@ DEFAULT_INTAKE_STATE_PATH = (
 DEFAULT_P1_HARDENING_REPORT_PATH = (
     REPORTS_DIR / "AIOS_FOREX_SANITIZED_EVIDENCE_INTAKE_P1_HARDENING_V1_REPORT.md"
 )
+DEFAULT_SAFETY_CLOSURE_CONSUMER_STATE_PATH = (
+    REPORTS_DIR / "AIOS_FOREX_FINISH_LINE_SAFETY_CLOSURE_CONSUMER_V1_STATE.json"
+)
 DEFAULT_STATE_OUTPUT_PATH = (
     REPORTS_DIR / "AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json"
 )
@@ -118,7 +121,7 @@ EMOJI_BY_TILE = {
 VALIDATOR_CHAIN = (
     "python -m py_compile automation/forex_engine/forex_finish_line_mission_controller_v1.py scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py",
     "python -m pytest tests/forex_engine/test_forex_finish_line_mission_controller_v1.py -q",
-    "python scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py --mode STARTING_LINE --write-state --write-report --write-dashboard",
+    "python scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py --mode SAFETY_CLOSURE --write-state --write-report --write-dashboard",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json",
     "python -m json.tool Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_EMOJI_DASHBOARD_PROJECTION_V1.json",
     "git diff --check -- automation/forex_engine/forex_finish_line_mission_controller_v1.py scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py tests/forex_engine/test_forex_finish_line_mission_controller_v1.py Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_EMOJI_DASHBOARD_PROJECTION_V1.json Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_NEXT_CODEX_PACKET_V1.md",
@@ -175,6 +178,13 @@ SAFETY_AGE_OR_STALE_BLOCKER_MARKERS = (
     "freshness",
     "stale",
 )
+VALID_SAFETY_CLOSURE_CONSUMER_STATUS = (
+    "STRUCTURAL_OWNER_SAFETY_EVIDENCE_CONSUMED_BROKER_LOCKED"
+)
+VALID_SOURCE_ARTIFACT_VERIFIER_STATUS = (
+    "OWNER_SAFETY_EVIDENCE_ARTIFACTS_STRUCTURALLY_VERIFIED"
+)
+SAFETY_CLOSURE_REJECTION_BLOCKER = "safety_closure_consumer_state"
 
 
 def run_forex_finish_line_mission_controller_v1(
@@ -183,6 +193,16 @@ def run_forex_finish_line_mission_controller_v1(
     selected_mode = _normalize_mode(mode)
     completion_state = _load_json_mapping(DEFAULT_COMPLETION_STATE_PATH)
     intake_state = _load_json_mapping(DEFAULT_INTAKE_STATE_PATH)
+    safety_closure_consumer_state = _load_json_mapping(
+        DEFAULT_SAFETY_CLOSURE_CONSUMER_STATE_PATH
+    )
+    safety_closure_consumer = _safety_closure_consumer_summary(
+        safety_closure_consumer_state
+    )
+    safety_closure_consumed = (
+        selected_mode == SAFETY_CLOSURE
+        and bool(safety_closure_consumer["structural_owner_safety_evidence_consumed"])
+    )
 
     readiness_inputs = _build_starting_line_inputs(
         completion_state=completion_state,
@@ -196,36 +216,53 @@ def run_forex_finish_line_mission_controller_v1(
         intake_state=intake_state,
         missing_evidence_fields=missing_evidence_fields,
     )
+    effective_critical_safety_blockers = list(critical_safety_blockers)
+    if safety_closure_consumed:
+        effective_critical_safety_blockers = [
+            blocker
+            for blocker in effective_critical_safety_blockers
+            if blocker not in CRITICAL_SAFETY_CONTROL_FIELDS
+        ]
+        effective_safety_missing_evidence_fields = []
+    elif selected_mode == SAFETY_CLOSURE:
+        effective_critical_safety_blockers = _dedupe_list(
+            effective_critical_safety_blockers + [SAFETY_CLOSURE_REJECTION_BLOCKER]
+        )
+
     finish_line_gates = _build_finish_line_gates(
         completion_state=completion_state,
         intake_state=intake_state,
-        critical_safety_blockers=critical_safety_blockers,
+        critical_safety_blockers=effective_critical_safety_blockers,
         missing_evidence_fields=effective_safety_missing_evidence_fields,
+        structural_owner_safety_evidence_consumed=safety_closure_consumed,
     )
     finish_line_readiness_percent = _finish_line_readiness_percent(finish_line_gates)
 
     controller_status = _controller_status(
         selected_mode,
-        critical_safety_blockers,
+        effective_critical_safety_blockers,
         effective_safety_missing_evidence_fields,
+        safety_closure_consumed,
     )
     current_phase = _current_phase(
         selected_mode,
-        critical_safety_blockers,
+        effective_critical_safety_blockers,
         effective_safety_missing_evidence_fields,
+        safety_closure_consumed,
     )
     next_safe_action = _next_safe_action(
         selected_mode=selected_mode,
-        critical_safety_blockers=critical_safety_blockers,
+        critical_safety_blockers=effective_critical_safety_blockers,
         missing_evidence_fields=effective_safety_missing_evidence_fields,
         intake_state=intake_state,
         completion_state=completion_state,
+        structural_owner_safety_evidence_consumed=safety_closure_consumed,
     )
 
     blocker_summary = _build_blocker_summary(
         completion_state=completion_state,
         intake_state=intake_state,
-        critical_safety_blockers=critical_safety_blockers,
+        critical_safety_blockers=effective_critical_safety_blockers,
         missing_evidence_fields=effective_safety_missing_evidence_fields,
         finish_line_gates=finish_line_gates,
     )
@@ -249,12 +286,23 @@ def run_forex_finish_line_mission_controller_v1(
         "emoji_dashboard_projection": {},
         "context_boxes": {},
         "safety_boundary": dict(SAFETY_BOUNDARY),
+        "safety_closure_consumer_status": safety_closure_consumer[
+            "safety_closure_consumer_status"
+        ],
+        "structural_owner_safety_evidence_consumed": safety_closure_consumed,
+        "structural_owner_safety_evidence_controls": (
+            list(CRITICAL_SAFETY_CONTROL_FIELDS) if safety_closure_consumed else []
+        ),
+        "operational_control_verified": False,
         "starting_line_inputs": readiness_inputs,
         "finish_line_gates": finish_line_gates,
         "source_artifacts": {
             "completion_state": _relative_path(DEFAULT_COMPLETION_STATE_PATH),
             "sanitized_evidence_intake_state": _relative_path(DEFAULT_INTAKE_STATE_PATH),
             "p1_hardening_report": _relative_path(DEFAULT_P1_HARDENING_REPORT_PATH),
+            "safety_closure_consumer_state": _relative_path(
+                DEFAULT_SAFETY_CLOSURE_CONSUMER_STATE_PATH
+            ),
         },
         "dashboard_projection_notice": "Projection only; report artifacts remain source of truth.",
         "validator_chain": list(VALIDATOR_CHAIN),
@@ -271,7 +319,7 @@ def run_forex_finish_line_mission_controller_v1(
     dashboard = _build_emoji_dashboard_projection(
         selected_mode=selected_mode,
         controller_status=controller_status,
-        critical_safety_blockers=critical_safety_blockers,
+        critical_safety_blockers=effective_critical_safety_blockers,
         missing_evidence_fields=effective_safety_missing_evidence_fields,
         next_safe_action=next_safe_action,
         finish_line_readiness_percent=finish_line_readiness_percent,
@@ -357,6 +405,9 @@ def build_next_codex_packet(result: Mapping[str, Any]) -> str:
     blocker_summary = _mapping(result.get("blocker_summary"))
     critical_blockers = _string_list(blocker_summary.get("critical_safety_blockers"))
     missing_evidence_fields = _string_list(blocker_summary.get("missing_evidence_fields"))
+    structural_safety_consumed = bool(
+        result.get("structural_owner_safety_evidence_consumed")
+    )
     allowed_paths = (
         "automation/forex_engine/forex_finish_line_mission_controller_v1.py",
         "scripts/forex_delivery/run_forex_finish_line_mission_controller_v1.py",
@@ -371,7 +422,34 @@ def build_next_codex_packet(result: Mapping[str, Any]) -> str:
         "python -m json.tool Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_EMOJI_DASHBOARD_PROJECTION_V1.json",
         "git status --short --branch",
     )
-    if critical_blockers:
+    if structural_safety_consumed:
+        packet_name = "Value-Free Broker Probe Scope Review Dry Run V1"
+        packet_id = "PKT-FOREX-VALUE-FREE-BROKER-PROBE-SCOPE-REVIEW-DRY-RUN-V1"
+        lane = "Forex value-free broker probe scope review"
+        allowed_paths = (
+            "Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_V1_STATE.json",
+            "Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_V1_REPORT.md",
+            "Reports/forex_delivery/AIOS_FOREX_VALUE_FREE_BROKER_PROBE_SCOPE_REVIEW_NEXT_CODEX_PACKET_V1.md",
+        )
+        validator_chain = (
+            "python -m json.tool Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_MISSION_CONTROLLER_V1_STATE.json",
+            "git status --short --branch",
+        )
+        mission = (
+            "Perform a read-only, owner-approved value-free broker probe scope review "
+            "using structural safety-closure evidence only."
+        )
+        stop_point = (
+            "Stop after read-only broker probe scope review plan and final report. "
+            "Do not contact any broker."
+        )
+        next_action = (
+            "Require owner-approved value-free broker probe scope review with no "
+            "broker API call, no credentials, no .env read, no account identifiers, "
+            "no demo action, no live micro authorization, no live trading, no scheduler, "
+            "no daemon, no webhook, and no order execution."
+        )
+    elif critical_blockers:
         packet_name = "Critical Safety Evidence Closure Dry Run V1"
         packet_id = "PKT-FOREX-CRITICAL-SAFETY-EVIDENCE-CLOSURE-DRY-RUN-V1"
         lane = "Forex critical safety evidence closure"
@@ -524,6 +602,7 @@ def build_next_codex_packet(result: Mapping[str, Any]) -> str:
         "Do not place trades.\n"
         "Do not use broker API.\n"
         "Do not use credentials.\n"
+        "Do not read .env.\n"
         "Do not authorize live trading.\n"
         "Do not start schedulers, daemons, loops, webhooks, or background workers.\n"
         "Do not commit.\n"
@@ -583,12 +662,59 @@ def _build_starting_line_inputs(
     }
 
 
+def _safety_closure_consumer_summary(
+    consumer_state: Mapping[str, Any],
+) -> dict[str, Any]:
+    finish_line_safety_closure = _mapping(
+        consumer_state.get("finish_line_safety_closure")
+    )
+    consumed_controls = _string_list(consumer_state.get("consumed_controls"))
+    expected_controls = set(CRITICAL_SAFETY_CONTROL_FIELDS)
+    required_false_fields = (
+        "operational_control_verified",
+        "broker_api_used",
+        "credentials_used",
+        "order_execution",
+        "live_trading_authorized",
+    )
+
+    valid = bool(
+        consumer_state
+        and _text(consumer_state.get("consumer_status"))
+        == VALID_SAFETY_CLOSURE_CONSUMER_STATUS
+        and _text(consumer_state.get("source_artifact_verifier_status"))
+        == VALID_SOURCE_ARTIFACT_VERIFIER_STATUS
+        and finish_line_safety_closure.get("structural_owner_evidence_consumed")
+        is True
+        and set(consumed_controls) == expected_controls
+        and all(consumer_state.get(field) is False for field in required_false_fields)
+        and all(
+            finish_line_safety_closure.get(field) is False
+            for field in (
+                "operational_control_verified",
+                "broker_readiness_claimed",
+                "demo_action_authorized",
+                "live_micro_authorized",
+                "live_trading_authorized",
+            )
+        )
+    )
+    return {
+        "safety_closure_consumer_status": _text(
+            consumer_state.get("consumer_status")
+        )
+        or "MISSING",
+        "structural_owner_safety_evidence_consumed": valid,
+    }
+
+
 def _build_finish_line_gates(
     *,
     completion_state: Mapping[str, Any],
     intake_state: Mapping[str, Any],
     critical_safety_blockers: list[str],
     missing_evidence_fields: list[str],
+    structural_owner_safety_evidence_consumed: bool = False,
 ) -> dict[str, bool]:
     updated_preview = _mapping(intake_state.get("updated_governor_input_preview"))
     safety_missing_evidence_fields = _safety_missing_evidence_fields(
@@ -596,25 +722,32 @@ def _build_finish_line_gates(
         intake_state=intake_state,
         missing_evidence_fields=missing_evidence_fields,
     )
-    critical_safety_closed = (
-        "blocked_evidence_fields" in intake_state
-        and not critical_safety_blockers
-        and not safety_missing_evidence_fields
+    critical_safety_closed = bool(
+        structural_owner_safety_evidence_consumed
+        or (
+            "blocked_evidence_fields" in intake_state
+            and not critical_safety_blockers
+            and not safety_missing_evidence_fields
+        )
     )
     broker_gate_status = _text(completion_state.get("broker_gate_status")).upper()
     candidate_status = _text(completion_state.get("candidate_status")).upper()
     return {
         "critical_safety_evidence_closed": critical_safety_closed,
         "broker_probe_readiness_approved": (
-            critical_safety_closed and broker_gate_status == "BROKER_GATE_READY"
+            not structural_owner_safety_evidence_consumed
+            and critical_safety_closed
+            and broker_gate_status == "BROKER_GATE_READY"
         ),
         "demo_proof_exists": (
-            critical_safety_closed
+            not structural_owner_safety_evidence_consumed
+            and critical_safety_closed
             and candidate_status
             in {"DEMO_SUPERVISED_READY", "LIVE_MICRO_EXCEPTION_REVIEW_READY"}
         ),
         "owner_live_micro_exception_approved": (
-            critical_safety_closed
+            not structural_owner_safety_evidence_consumed
+            and critical_safety_closed
             and _as_bool(updated_preview.get("owner_live_micro_exception_approved"))
         ),
         "proof_ledger_exists": False,
@@ -760,10 +893,13 @@ def _controller_status(
     mode: str,
     critical_safety_blockers: list[str],
     missing_evidence_fields: list[str],
+    structural_owner_safety_evidence_consumed: bool = False,
 ) -> str:
     if mode in LOCKED_EXECUTION_MODES:
         return "MODE_LOCKED"
     if mode == SAFETY_CLOSURE:
+        if structural_owner_safety_evidence_consumed:
+            return "SAFETY_CLOSURE_CONSUMED_BROKER_SCOPE_REQUIRED"
         if critical_safety_blockers:
             return "SAFETY_CLOSURE_REQUIRED"
         if missing_evidence_fields:
@@ -780,10 +916,13 @@ def _current_phase(
     mode: str,
     critical_safety_blockers: list[str],
     missing_evidence_fields: list[str],
+    structural_owner_safety_evidence_consumed: bool = False,
 ) -> str:
     if mode in LOCKED_EXECUTION_MODES:
         return f"{mode}_HOLD"
     if mode == SAFETY_CLOSURE:
+        if structural_owner_safety_evidence_consumed:
+            return "BROKER_PROBE_SCOPE_APPROVAL_REQUIRED"
         if critical_safety_blockers:
             return "CRITICAL_SAFETY_EVIDENCE_CLOSURE"
         if missing_evidence_fields:
@@ -803,9 +942,18 @@ def _next_safe_action(
     missing_evidence_fields: list[str],
     intake_state: Mapping[str, Any],
     completion_state: Mapping[str, Any],
+    structural_owner_safety_evidence_consumed: bool = False,
 ) -> str:
     if selected_mode in LOCKED_EXECUTION_MODES:
         return f"{LOCKED_MODE_REASONS[selected_mode]} Run STARTING_LINE or SAFETY_CLOSURE only."
+
+    if selected_mode == SAFETY_CLOSURE and structural_owner_safety_evidence_consumed:
+        return (
+            "Require owner-approved value-free broker probe scope review with no "
+            "broker API call; keep broker probe, demo proof, live micro, live trading, "
+            "vacation mode, scheduler, daemon, webhook, credentials, .env, account "
+            "persistence, and order execution locked."
+        )
 
     if critical_safety_blockers:
         fields = ", ".join(critical_safety_blockers)
