@@ -1,0 +1,33 @@
+{
+  "available_evidence": [
+    "flow2_evidence_countdown_complete",
+    "paper_trade_sample_present",
+    "profitability_evaluator_present",
+    "walkforward_validation_present",
+    "strategy_harness_present",
+    "negative_expectancy_block_reviewed",
+    "demo_readiness_report_present",
+    "broker_demo_adapter_present",
+    "protected_demo_order_gate_present",
+    "max_loss_policy_present",
+    "daily_stop_policy_present",
+    "position_size_policy_present",
+    "broker_readiness_checklist_present",
+    "account_capability_review_present",
+    "live_arming_checklist_present",
+    "final_governance_review_present"
+  ],
+  "broker_gate": true,
+  "broker_ready": false,
+  "human_gate": false,
+  "missing_evidence": [],
+  "next_action": "PREPARE_BROKER_READINESS_REVIEW",
+  "owner_approved": false,
+  "pipeline_id": "AIOS_FOREX_PROMOTION_PIPELINE_V1",
+  "required_owner_actions": [
+    "Complete broker/account readiness evidence and explicit broker approval path."
+  ],
+  "safety_boundary": "No broker/API access, no credentials, no demo-order placement, no live trading, no money movement, no scheduler installation, no daemon installation, and no webhook creation are performed.",
+  "selected_gate_id": "BROKER_ACCOUNT_READINESS",
+  "status": "BROKER_READINESS_REQUIRED"
+}
