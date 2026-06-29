@@ -1,0 +1,22 @@
+{
+  "profitability_evidence_status": "PENDING",
+  "sample_size": 12,
+  "walk_forward_windows": 1,
+  "max_drawdown": 0.21,
+  "profit_factor": 1.0,
+  "expectancy": -0.1,
+  "broker_readiness": true,
+  "live_bridge_eligibility": false,
+  "kill_switch_state": "UNKNOWN",
+  "daily_stop_state": "UNKNOWN",
+  "max_loss_state": "UNSET",
+  "order_count_last_24h": 0,
+  "tp_sl_present": false,
+  "monitoring_ready": false,
+  "evidence_age_days": 40,
+  "owner_approval_status": "PENDING",
+  "live_exception_requested": false,
+  "live_bridge_external_evidence": false,
+  "owner_live_micro_exception_approved": false,
+  "realized_broker_evidence": false
+}
