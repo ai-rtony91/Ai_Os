@@ -1,0 +1,51 @@
+{
+  "queue_status": "FINITE_REPO_SAFE_QUEUE_READY",
+  "completed_buckets": [
+    "evidence_depth_walkforward_sufficiency",
+    "candidate_selector_hardening",
+    "promotion_rejection_gate_strengthening",
+    "demo_readiness_decision"
+  ],
+  "next_repo_safe_buckets": [
+    {
+      "bucket_id": "BKT-FOREX-EVIDENCE-DEPTH-EXPANSION-002",
+      "name": "additional deterministic walkforward evidence samples",
+      "protected": false
+    },
+    {
+      "bucket_id": "BKT-FOREX-CANDIDATE-REVIEW-PACKET-002",
+      "name": "owner-review packet refinement without broker contact",
+      "protected": false
+    },
+    {
+      "bucket_id": "BKT-FOREX-DEMO-READINESS-EVIDENCE-002",
+      "name": "demo readiness evidence checklist hardening",
+      "protected": false
+    }
+  ],
+  "protected_boundaries": [
+    "broker contact",
+    "credentials",
+    ".env access",
+    "account identifiers",
+    "account inspection",
+    "demo execution",
+    "live execution",
+    "orders",
+    "scheduler daemon webhook worker watcher listener background loop"
+  ],
+  "recommended_next_packet": "Reports/forex_delivery/AIOS_FOREX_EVIDENCE_CANDIDATE_DEMO_READINESS_NEXT_CODEX_PACKET_V1.md",
+  "safe_next_action": "Run only the next repo-safe evidence packet before any protected broker boundary.",
+  "packet_id": "PKT-FOREX-EVIDENCE-CANDIDATE-DEMO-READINESS-CONSOLIDATED-V1",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "env_read": false,
+  "account_identifiers_used": false,
+  "order_execution": false,
+  "demo_authorized": false,
+  "live_authorized": false,
+  "scheduler_started": false,
+  "daemon_started": false,
+  "webhook_started": false,
+  "background_loop_started": false
+}

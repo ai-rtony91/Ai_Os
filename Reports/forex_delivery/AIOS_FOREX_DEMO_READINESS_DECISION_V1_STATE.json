@@ -1,0 +1,43 @@
+{
+  "demo_readiness_status": "DEMO_READINESS_OWNER_AND_PROOF_BLOCKED",
+  "selected_candidate": {
+    "candidate_id": "CANDIDATE-EURUSD-C1",
+    "trade_count": 42,
+    "expectancy": 0.34,
+    "profit_factor": 1.62,
+    "max_drawdown_percent": 7.5,
+    "walkforward_evidence": true,
+    "evidence_depth_score": 86,
+    "mitigation_worsened": false,
+    "owner_review_ready": true,
+    "score": 137
+  },
+  "evidence_status": "EVIDENCE_DEPTH_SUFFICIENT_REVIEW_READY",
+  "candidate_selector_status": "REVIEW_READY_CANDIDATE_SELECTED",
+  "demo_allowed": false,
+  "owner_review_required": true,
+  "broker_connection_required": true,
+  "protected_boundary": "owner_review_and_protected_broker_connection_proof",
+  "demo_blockers": [
+    "owner_review_required",
+    "protected_broker_connection_proof_required"
+  ],
+  "readiness_reasons": [
+    "evidence_status:EVIDENCE_DEPTH_SUFFICIENT_REVIEW_READY",
+    "candidate_selector_status:REVIEW_READY_CANDIDATE_SELECTED",
+    "demo_execution_remains_blocked_without_owner_review_and_protected_broker_proof"
+  ],
+  "safe_next_action": "Complete owner review and protected broker proof outside this repo-safe packet; do not authorize demo execution here.",
+  "packet_id": "PKT-FOREX-EVIDENCE-CANDIDATE-DEMO-READINESS-CONSOLIDATED-V1",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "env_read": false,
+  "account_identifiers_used": false,
+  "order_execution": false,
+  "demo_authorized": false,
+  "live_authorized": false,
+  "scheduler_started": false,
+  "daemon_started": false,
+  "webhook_started": false,
+  "background_loop_started": false
+}
