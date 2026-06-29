@@ -78,6 +78,34 @@ FORBIDDEN_OUTPUT_FRAGMENTS = {
 }
 
 
+def _valid_safety_closure_consumer_state() -> dict:
+    return {
+        "consumer_status": "STRUCTURAL_OWNER_SAFETY_EVIDENCE_CONSUMED_BROKER_LOCKED",
+        "source_artifact_verifier_status": (
+            "OWNER_SAFETY_EVIDENCE_ARTIFACTS_STRUCTURALLY_VERIFIED"
+        ),
+        "consumed_controls": [
+            "kill_switch_state",
+            "daily_stop_state",
+            "max_loss_state",
+            "monitoring_ready",
+        ],
+        "finish_line_safety_closure": {
+            "structural_owner_evidence_consumed": True,
+            "operational_control_verified": False,
+            "broker_readiness_claimed": False,
+            "demo_action_authorized": False,
+            "live_micro_authorized": False,
+            "live_trading_authorized": False,
+        },
+        "operational_control_verified": False,
+        "broker_api_used": False,
+        "credentials_used": False,
+        "order_execution": False,
+        "live_trading_authorized": False,
+    }
+
+
 def test_starting_line_runs_without_execution_actions():
     result = controller.run_forex_finish_line_mission_controller_v1()
 
@@ -87,6 +115,147 @@ def test_starting_line_runs_without_execution_actions():
     assert result["next_safe_action"]
     assert all(value is False for value in result["safety_boundary"].values())
     assert result["safety_boundary"] == controller.SAFETY_BOUNDARY
+
+
+def test_safety_closure_consumes_valid_consumer_state():
+    result = controller.run_forex_finish_line_mission_controller_v1(
+        mode=controller.SAFETY_CLOSURE
+    )
+
+    assert (
+        result["controller_status"]
+        == "SAFETY_CLOSURE_CONSUMED_BROKER_SCOPE_REQUIRED"
+    )
+    assert result["current_phase"] == "BROKER_PROBE_SCOPE_APPROVAL_REQUIRED"
+    assert result["finish_line_gates"]["critical_safety_evidence_closed"] is True
+    assert (
+        "critical_safety_evidence_closed"
+        not in result["blocker_summary"]["missing_finish_line_gates"]
+    )
+    for blocker in [
+        "kill_switch_state",
+        "daily_stop_state",
+        "max_loss_state",
+        "monitoring_ready",
+    ]:
+        assert blocker not in result["blocker_summary"]["critical_safety_blockers"]
+    assert result["safety_closure_consumer_status"] == (
+        "STRUCTURAL_OWNER_SAFETY_EVIDENCE_CONSUMED_BROKER_LOCKED"
+    )
+    assert result["structural_owner_safety_evidence_consumed"] is True
+    assert result["structural_owner_safety_evidence_controls"] == [
+        "kill_switch_state",
+        "daily_stop_state",
+        "max_loss_state",
+        "monitoring_ready",
+    ]
+    assert result["operational_control_verified"] is False
+
+
+def test_safety_closure_consumption_keeps_all_later_modes_and_gates_locked():
+    result = controller.run_forex_finish_line_mission_controller_v1(
+        mode=controller.SAFETY_CLOSURE
+    )
+    gates = result["finish_line_gates"]
+
+    assert gates["broker_probe_readiness_approved"] is False
+    assert gates["demo_proof_exists"] is False
+    assert gates["owner_live_micro_exception_approved"] is False
+    assert gates["live_trading_owner_authorization_exists"] is False
+    assert result["locked_modes"][controller.BROKER_PROBE_LOCKED]
+    assert result["locked_modes"][controller.DEMO_PROOF_LOCKED]
+    assert result["locked_modes"][controller.LIVE_MICRO_LOCKED]
+    assert result["locked_modes"][controller.LIVE_TRADING_LOCKED]
+    assert result["locked_modes"][controller.VACATION_MODE_LOCKED]
+    assert result["emoji_dashboard_projection"]["broker"]["locked"] is True
+    assert result["emoji_dashboard_projection"]["proof"]["locked"] is True
+    assert result["emoji_dashboard_projection"]["live_micro"]["locked"] is True
+    assert result["emoji_dashboard_projection"]["live_trading"]["locked"] is True
+    assert result["emoji_dashboard_projection"]["vacation_mode"]["locked"] is True
+
+
+def test_missing_safety_closure_consumer_keeps_safety_closure_required(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        controller,
+        "DEFAULT_SAFETY_CLOSURE_CONSUMER_STATE_PATH",
+        tmp_path / "missing-consumer.json",
+    )
+
+    result = controller.run_forex_finish_line_mission_controller_v1(
+        mode=controller.SAFETY_CLOSURE
+    )
+
+    assert result["controller_status"] == "SAFETY_CLOSURE_REQUIRED"
+    assert result["finish_line_gates"]["critical_safety_evidence_closed"] is False
+    assert result["structural_owner_safety_evidence_consumed"] is False
+
+
+def test_failed_safety_closure_consumer_keeps_safety_closure_required(
+    tmp_path,
+    monkeypatch,
+):
+    consumer_path = tmp_path / "failed-consumer.json"
+    failed_state = _valid_safety_closure_consumer_state()
+    failed_state["consumer_status"] = "FAILED"
+    consumer_path.write_text(json.dumps(failed_state), encoding="utf-8")
+    monkeypatch.setattr(
+        controller,
+        "DEFAULT_SAFETY_CLOSURE_CONSUMER_STATE_PATH",
+        consumer_path,
+    )
+
+    result = controller.run_forex_finish_line_mission_controller_v1(
+        mode=controller.SAFETY_CLOSURE
+    )
+
+    assert result["controller_status"] == "SAFETY_CLOSURE_REQUIRED"
+    assert result["finish_line_gates"]["critical_safety_evidence_closed"] is False
+    assert result["structural_owner_safety_evidence_consumed"] is False
+
+
+def test_safety_closure_consumer_claiming_operational_control_is_rejected(
+    tmp_path,
+    monkeypatch,
+):
+    consumer_path = tmp_path / "operational-control-consumer.json"
+    invalid_state = _valid_safety_closure_consumer_state()
+    invalid_state["operational_control_verified"] = True
+    consumer_path.write_text(json.dumps(invalid_state), encoding="utf-8")
+    monkeypatch.setattr(
+        controller,
+        "DEFAULT_SAFETY_CLOSURE_CONSUMER_STATE_PATH",
+        consumer_path,
+    )
+
+    result = controller.run_forex_finish_line_mission_controller_v1(
+        mode=controller.SAFETY_CLOSURE
+    )
+
+    assert result["controller_status"] == "SAFETY_CLOSURE_REQUIRED"
+    assert result["finish_line_gates"]["critical_safety_evidence_closed"] is False
+    assert result["operational_control_verified"] is False
+    assert result["structural_owner_safety_evidence_consumed"] is False
+
+
+def test_safety_closure_consumption_keeps_safety_boundary_false():
+    result = controller.run_forex_finish_line_mission_controller_v1(
+        mode=controller.SAFETY_CLOSURE
+    )
+
+    for field in [
+        "broker_api_allowed",
+        "credentials_allowed",
+        "order_execution_allowed",
+        "live_trading_authorized",
+        "scheduler_allowed",
+        "daemon_allowed",
+        "webhook_allowed",
+        "account_identifier_persistence_allowed",
+    ]:
+        assert result["safety_boundary"][field] is False
 
 
 @pytest.mark.parametrize("mode", controller.LOCKED_EXECUTION_MODES)
@@ -222,6 +391,59 @@ def test_runner_writes_valid_artifacts():
     assert "Do not use broker API." in next_packet_text
     assert "Do not use credentials." in next_packet_text
     assert "Do not authorize live trading." in next_packet_text
+    validation = aios_governance_validator.validate_packet_text(
+        next_packet_text,
+        str(NEXT_PACKET_OUTPUT_PATH),
+    )
+    assert validation["status"] == "PASS"
+
+
+def test_runner_writes_safety_closure_consumed_artifacts_and_next_packet():
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(RUNNER_PATH),
+            "--mode",
+            controller.SAFETY_CLOSURE,
+            "--write-state",
+            "--write-report",
+            "--write-dashboard",
+        ],
+        check=True,
+        capture_output=True,
+        encoding="utf-8",
+        text=True,
+    )
+    stdout_payload = json.loads(completed.stdout)
+
+    state_payload = json.loads(STATE_OUTPUT_PATH.read_text(encoding="utf-8"))
+    dashboard_payload = json.loads(DASHBOARD_OUTPUT_PATH.read_text(encoding="utf-8"))
+    report_text = REPORT_OUTPUT_PATH.read_text(encoding="utf-8")
+    next_packet_text = NEXT_PACKET_OUTPUT_PATH.read_text(encoding="utf-8")
+
+    assert stdout_payload["state_output_path"] == str(STATE_OUTPUT_PATH)
+    assert stdout_payload["report_output_path"] == str(REPORT_OUTPUT_PATH)
+    assert stdout_payload["dashboard_output_path"] == str(DASHBOARD_OUTPUT_PATH)
+    assert state_payload["selected_mode"] == controller.SAFETY_CLOSURE
+    assert state_payload["controller_status"] == (
+        "SAFETY_CLOSURE_CONSUMED_BROKER_SCOPE_REQUIRED"
+    )
+    assert state_payload["current_phase"] == "BROKER_PROBE_SCOPE_APPROVAL_REQUIRED"
+    assert state_payload["finish_line_gates"]["critical_safety_evidence_closed"] is True
+    assert state_payload["operational_control_verified"] is False
+    assert state_payload["safety_boundary"] == controller.SAFETY_BOUNDARY
+    assert state_payload["emoji_dashboard_projection"] == dashboard_payload
+    assert "SAFETY_CLOSURE_CONSUMED_BROKER_SCOPE_REQUIRED" in report_text
+    assert next_packet_text.startswith("CODEX-ONLY PROMPT")
+    assert "Value-Free Broker Probe Scope Review Dry Run V1" in next_packet_text
+    assert "MODE\nDRY_RUN" in next_packet_text
+    assert "Do not use broker API." in next_packet_text
+    assert "Do not use credentials." in next_packet_text
+    assert "Do not read .env." in next_packet_text
+    assert "Do not authorize live trading." in next_packet_text
+    assert "Do not place trades." in next_packet_text
+    assert "broker API call" in next_packet_text
+
     validation = aios_governance_validator.validate_packet_text(
         next_packet_text,
         str(NEXT_PACKET_OUTPUT_PATH),
