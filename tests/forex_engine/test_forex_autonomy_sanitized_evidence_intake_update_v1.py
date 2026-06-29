@@ -95,9 +95,9 @@ def _governor_ready_input(**overrides: object) -> dict[str, object]:
 def _governor_ready_input_with_restricted_fields() -> dict[str, object]:
     return _governor_ready_input(
         account_id="acct-not-for-output",
-        api_key="key-not-for-output",
-        token="token-not-for-output",
-        password="password-not-for-output",
+        api_key="EXAMPLE_key_not_for_output",
+        token="EXAMPLE_token_not_for_output",
+        password="EXAMPLE_password_not_for_output",
         secret_value="secret-not-for-output",
         credential_path="credential-not-for-output",
         oanda_account="oanda-not-for-output",
