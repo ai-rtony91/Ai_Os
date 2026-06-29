@@ -32,7 +32,7 @@ foreach ($line in $statusLines) {
     if ($trimmed.Length -lt 4) {
         continue
     }
-    $path = $trimmed.Substring(3).Trim()
+    $path = $line.ToString().Substring(3).Trim()
     if ([string]::IsNullOrWhiteSpace($path)) {
         continue
     }
