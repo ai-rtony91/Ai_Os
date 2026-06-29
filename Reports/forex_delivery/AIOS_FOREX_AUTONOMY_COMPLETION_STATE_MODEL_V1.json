@@ -1,0 +1,31 @@
+{
+  "current_stage": "evidence_prep_complete",
+  "target_stage": "live_micro_exception_review_ready",
+  "daily_return_target_percent": 100,
+  "daily_stretch_target_percent": 120,
+  "autonomy_window_target": "hourly_scan_with_evidence_gates",
+  "capital_bucket_mode": "FIXED_DAILY_BUCKET",
+  "daily_start_bucket": "1.00",
+  "protected_profit_bucket": "0.20",
+  "weekly_compound_mode": "evidence_gated",
+  "governor_status": "REQUIRE_MORE_EVIDENCE",
+  "broker_gate_status": "NOT_READY",
+  "owner_gate_status": "PENDING",
+  "live_micro_exception_status": "NOT_STARTED",
+  "trade_execution_status": "STOPPED",
+  "order_execution_allowed": false,
+  "broker_api_allowed": false,
+  "credentials_allowed": false,
+  "account_identifier_persistence_allowed": false,
+  "scheduler_allowed": false,
+  "daemon_allowed": false,
+  "webhook_allowed": false,
+  "blockers": [
+    "governor_status_require_more_evidence",
+    "live_bridge_eligibility_missing",
+    "sample_and_walkforward_shortfall",
+    "target_bucket_not_reached",
+    "owner_approval_pending"
+  ],
+  "next_safe_action": "Update the evidence template from sanitized sources, rerun the supervised governor, and emit the next packet with explicit owner-review requirements if still blocked."
+}
