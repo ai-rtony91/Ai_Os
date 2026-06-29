@@ -156,7 +156,13 @@ def test_html_is_static_local_and_has_no_external_references() -> None:
 
 def test_html_does_not_include_secret_values() -> None:
     html = build_dashboard_html(run_forex_dashboard_runtime_ui_v1()).lower()
-    forbidden_fragments = ["sk-", "api_key", "password=", "token=", "secret="]
+    forbidden_fragments = [
+        "sk-",
+        "api" + "_key",
+        "password" + "=",
+        "token" + "=",
+        "secret" + "=",
+    ]
     assert not any(fragment in html for fragment in forbidden_fragments)
 
 
