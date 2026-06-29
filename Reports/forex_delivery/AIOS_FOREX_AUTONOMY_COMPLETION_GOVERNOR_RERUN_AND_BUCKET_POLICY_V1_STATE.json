@@ -1,0 +1,58 @@
+{
+  "broker_gate_status": "LIVE_BRIDGE_NOT_READY",
+  "bucket_blockers": [
+    "governor_status_require_more_evidence",
+    "live_bridge_eligibility_missing",
+    "sample_and_walkforward_shortfall",
+    "target_bucket_not_reached",
+    "owner_approval_pending",
+    "max_loss_state_hold"
+  ],
+  "bucket_id": "BKT-FOREX-GOVERNOR-RERUN-001",
+  "bucket_status": "BUCKET_MAX_LOSS_HOLD",
+  "candidate_status": "AUTONOMY_BLOCKED",
+  "capital_bucket_mode": "FIXED_DAILY_BUCKET",
+  "daily_return_target_percent": 100.0,
+  "daily_stretch_target_percent": 120.0,
+  "epic_id": "EPC-FOREX-AUTONOMY-COMPLETION-001",
+  "governor_blockers": [
+    "profitability evidence is not complete",
+    "sample_size=12 is below minimum 30",
+    "walk_forward_windows=1 is below minimum 2",
+    "max_drawdown=0.21 exceeds threshold 0.15",
+    "profit_factor=1.00 below threshold 2.00",
+    "expectancy=-0.10 below threshold 0.50",
+    "live bridge evidence is not available",
+    "kill switch state is 'UNKNOWN'",
+    "daily stop state is 'UNKNOWN'",
+    "max loss state is not configured",
+    "take-profit / stop-loss evidence is missing",
+    "monitoring readiness is false",
+    "evidence_age_days=40 exceeds freshness limit 14",
+    "owner approval is pending"
+  ],
+  "live_micro_exception_status": "LIVE_MICRO_REVIEW_BLOCKED",
+  "mission_id": "MISSION-AIOS-FOREX-AUTONOMY-COMPLETION-V1",
+  "next_autonomy_action": "HOLD_FOR_RISK_RESET",
+  "next_safe_action": "Hold until risk reset evidence (max-loss / daily-stop / kill-switch) clears.",
+  "owner_gate_status": "OWNER_GATE_PENDING",
+  "packet_id": "PKT-FOREX-AUTONOMY-COMPLETION-GOVERNOR-RERUN-AND-BUCKET-POLICY-V1",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "safety_boundary": {
+    "account_identifier_persistence_allowed": false,
+    "broker_api_allowed": false,
+    "credentials_allowed": false,
+    "daemon_allowed": false,
+    "order_execution_allowed": false,
+    "scheduler_allowed": false,
+    "webhook_allowed": false
+  },
+  "validator_chain": [
+    "python -m py_compile automation/forex_engine/forex_autonomy_completion_governor_rerun_and_bucket_policy_v1.py",
+    "python -m py_compile scripts/forex_delivery/run_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1.py",
+    "python -m pytest tests/forex_engine/test_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1.py -q",
+    "python scripts/forex_delivery/run_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1.py",
+    "python -m json.tool Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json",
+    "git diff --check -- automation/forex_engine/forex_autonomy_completion_governor_rerun_and_bucket_policy_v1.py scripts/forex_delivery/run_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1.py tests/forex_engine/test_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1.py Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_REPORT.md Reports/forex_delivery/AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_NEXT_CODEX_PACKET_V1.md"
+  ]
+}
