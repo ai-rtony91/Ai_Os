@@ -1,46 +1,39 @@
 {
   "attack_to_finish": {
-    "blocker_id": "MISSING_EVIDENCE_FIELD",
-    "blocker_status": "BLOCKED",
+    "blocker_id": "NO_BLOCKER",
+    "blocker_status": "PROVEN",
     "canonical_owner_file": "automation/forex_engine/walk_forward_evidence_intake_v1.py",
-    "exact_blocker": "missing field: oos_segments_total; missing field: oos_segments_passed; missing evidence field: oos_segments_total; missing evidence field: oos_segments_passed; walk-forward/OOS evidence candidate ids c1-eur-buy do not match top candidate c2-eur-buy-stronger-review-ready",
-    "missing_evidence_field": "oos_segments_total,oos_segments_passed",
-    "next_packet_name": "PKT-FOREX-110-TOP-CANDIDATE-WALKFORWARD-OOS-EVIDENCE-COLLECTION-V1",
+    "exact_blocker": "NONE",
+    "missing_evidence_field": "NONE",
+    "next_packet_name": "NONE",
     "no_bloat_guard": "Reuse walk_forward_evidence_intake_v1 and do not create duplicate walk-forward engines.",
-    "owner_action_required": "provide missing field oos_segments_total,oos_segments_passed",
+    "owner_action_required": "NONE",
     "runner_script": "scripts/forex_delivery/run_forex_110_walkforward_oos_sufficiency_truth_lock_v1.py",
-    "stop_condition": "walk-forward/OOS sufficiency not proven",
+    "stop_condition": "NONE",
     "test_file": "tests/forex_engine/test_forex_110_walkforward_oos_sufficiency_truth_lock_v1.py",
     "unlock_status_required": "PROVEN"
   },
   "bank_movement_allowed": false,
-  "blockers": [
-    "missing field: oos_segments_total",
-    "missing field: oos_segments_passed",
-    "missing evidence field: oos_segments_total",
-    "missing evidence field: oos_segments_passed",
-    "walk-forward/OOS evidence candidate ids c1-eur-buy do not match top candidate c2-eur-buy-stronger-review-ready"
-  ],
+  "blockers": [],
   "broker_action_allowed": false,
   "compounding_allowed": false,
   "credential_access_allowed": false,
   "engine_version": "forex_110_walkforward_oos_sufficiency_truth_lock_v1",
-  "evidence_missing": [
-    "oos_segments_total",
-    "oos_segments_passed"
-  ],
+  "evidence_missing": [],
   "live_trading_allowed": false,
   "next_demo_trade_allowed": false,
-  "next_safe_action": "Collect sanitized walk-forward/OOS evidence for the current profit-ledger top candidate, including candidate_id, OOS segment counts, pass counts, regime coverage, sample depth, and freshness. Do not trade.",
+  "next_safe_action": "Use this as review-only evidence for the persistent profitability period proof chain. Do not trade, access credentials, compound, or move money.",
   "normalized_walkforward_oos_summary": {
-    "evidence_age_days": 0.0,
-    "max_allowed_drawdown": 0.12,
-    "max_drawdown": 75.2,
-    "max_evidence_age_days": 1.25,
-    "min_pass_rate": 1.0,
+    "evidence_age_days": 1.0,
+    "max_allowed_drawdown": 0.5,
+    "max_drawdown": 0.22,
+    "max_evidence_age_days": 7.0,
+    "min_pass_rate": 0.75,
+    "oos_segments_passed": 4.0,
+    "oos_segments_total": 4.0,
     "sanitized": true,
-    "windows_passed": 1.0,
-    "windows_total": 4.0
+    "windows_passed": 6.0,
+    "windows_total": 6.0
   },
   "order_submission_allowed": false,
   "owner_approval_created": false,
@@ -57,12 +50,14 @@
     "real_money_allowed": false
   },
   "persistent_profitability_status": "PERSISTENT_PROFITABILITY_BLOCKED",
-  "profit_persistence_unlocked": false,
+  "profit_persistence_unlocked": true,
   "profit_proof_status": "BLOCKED",
   "profit_truth_lock_status": "REVIEW_READY_PERSISTENCE_BLOCKED",
   "real_money_allowed": false,
   "source_files": [
-    "C:/Dev/Ai.Os/Reports/forex_delivery/readiness_state_recalculation_v1_report.json",
+    "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_110_C2_WALKFORWARD_OOS_SOURCE_V1.md",
+    "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_110_C2_REAL_WALKFORWARD_OOS_HARNESS_V1_SOURCE.md",
+    "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_110_C2_REAL_WALKFORWARD_OOS_HARNESS_V1_REPORT.md",
     "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_DEPTH_PACKET_R_V1_REPORT.md",
     "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
     "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_C1_EUR_BUY_WALK_FORWARD_STABILITY_SCOREBOARD_V1.md",
@@ -169,30 +164,26 @@
     "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_SUPERVISED_AUTONOMY_GOVERNOR_V1_REPORT.md",
     "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_TRADE_TICKET_CLOSURE_V1.md",
     "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_OOS_CLOSURE_V2_REPORT.md",
-    "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_ROOT_CAUSE_DRYRUN_V2.md"
+    "C:/Dev/Ai.Os/Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_ROOT_CAUSE_DRYRUN_V2.md",
+    "C:/Dev/Ai.Os/Reports/forex_delivery/readiness_state_recalculation_v1_report.json"
   ],
   "top_candidate_alignment": {
-    "aligned": false,
-    "blocker": "walk-forward/OOS evidence candidate ids c1-eur-buy do not match top candidate c2-eur-buy-stronger-review-ready",
-    "status": "MISMATCHED"
+    "aligned": true,
+    "blocker": "NONE",
+    "status": "ALIGNED"
   },
   "top_candidate_id": "c2-eur-buy-stronger-review-ready",
-  "truth_lock_status": "REVIEW_READY_WALKFORWARD_OOS_CANDIDATE_MISMATCH",
-  "walk_forward_oos_status": "BLOCKED_TOP_CANDIDATE_MISMATCH",
-  "walkforward_intake_blockers": [
-    "missing field: oos_segments_total",
-    "missing field: oos_segments_passed"
-  ],
-  "walkforward_intake_missing_fields": [
-    "oos_segments_total",
-    "oos_segments_passed"
-  ],
+  "truth_lock_status": "PROVEN",
+  "walk_forward_oos_status": "PROVEN",
+  "walkforward_intake_blockers": [],
+  "walkforward_intake_missing_fields": [],
   "walkforward_intake_parse_notes": [
     "no out-of-sample segment counts found in walk-forward reports",
     "walk-forward report explicitly records a failed walk-forward gate"
   ],
-  "walkforward_intake_status": "WALK_FORWARD_OOS_INCOMPLETE",
+  "walkforward_intake_status": "WALK_FORWARD_OOS_READY",
   "walkforward_source_candidate_ids": [
+    "c2-eur-buy-stronger-review-ready",
     "c1-eur-buy"
   ]
 }

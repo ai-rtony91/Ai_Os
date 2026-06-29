@@ -118,7 +118,7 @@ def collect_c2_walkforward_oos_source(
     candidates = _scan_candidate_sources(base, roots)
     valid_sources = [item for item in candidates if item["source_is_real_sanitized_local"]]
     conflicts = _conflicting_real_sources(valid_sources)
-    source = valid_sources[0] if len(valid_sources) == 1 else None
+    source = valid_sources[0] if valid_sources and not conflicts else None
     sample_refs = [item["path"] for item in candidates if item["source_is_test_or_sample"]]
 
     if conflicts:
@@ -424,7 +424,7 @@ def _find_key(value: Any, target_key: str) -> Any:
 
 def _key_values(text: str) -> dict[str, str]:
     values: dict[str, str] = {}
-    pattern = re.compile(r"(?im)^\s*-?\s*([A-Za-z0-9 _/\-]+):\s*`?([^`\n]+?)`?\s*\.?\s*$")
+    pattern = re.compile(r"(?im)^\s*-?\s*([A-Za-z0-9 _/\-_]+):\s*`?([^`\n]+?)`?\s*\.?\s*$")
     for match in pattern.finditer(text):
         values[_key(match.group(1))] = match.group(2).strip()
     return values

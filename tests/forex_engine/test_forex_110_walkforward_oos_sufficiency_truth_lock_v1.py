@@ -139,6 +139,39 @@ def test_truth_lock_blocks_missing_oos_counts(tmp_path: Path) -> None:
     assert_permissions_false(result)
 
 
+def test_truth_lock_prefers_c2_source_over_older_c1_report(tmp_path: Path) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    write_profitability_report(report_root)
+    write_walkforward_report(report_root, candidate_id="c1-eur-buy")
+    (report_root / "AIOS_FOREX_110_C2_WALKFORWARD_OOS_SOURCE_V1.md").write_text(
+        "\n".join(
+            [
+                "- candidate: `c2-eur-buy-stronger-review-ready`",
+                "- windows_total: 6",
+                "- windows_passed: 6",
+                "- oos_segments_total: 4",
+                "- oos_segments_passed: 4",
+                "- min_pass_rate: 0.75",
+                "- max_drawdown: 0.22",
+                "- max_allowed_drawdown: 0.5",
+                "- sanitized: true",
+                "- evidence_age_days: 1",
+                "- max_evidence_age_days: 7",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = run_walkforward_oos_sufficiency_truth_lock(report_root)
+
+    assert result["walk_forward_oos_status"] == WALK_FORWARD_OOS_PROVEN
+    assert result["normalized_walkforward_oos_summary"]["windows_total"] == 6.0
+    assert result["normalized_walkforward_oos_summary"]["max_allowed_drawdown"] == 0.5
+    assert result["profit_persistence_unlocked"] is True
+    assert_permissions_false(result)
+
+
 def test_report_markdown_contains_attack_to_finish(tmp_path: Path) -> None:
     report_root = tmp_path / "reports"
     report_root.mkdir()
