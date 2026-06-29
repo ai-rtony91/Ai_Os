@@ -1,0 +1,267 @@
+{
+  "canonical_dashboard_id": "FOREX_DASHBOARD_RUNTIME_UI_V1",
+  "canonical_dashboard_surfaces": [
+    "FOREX_DASHBOARD_RUNTIME_UI_V1"
+  ],
+  "duplicate_dashboard_policy": "SINGLE_CANONICAL_SURFACE_ONLY",
+  "owner_visual_design_required": true,
+  "dashboard_visual_handoff_status": "HANDOFF_REQUIRED_BEFORE_FINAL_VISUAL_IMPLEMENTATION",
+  "no_alternate_dashboard_variants": true,
+  "no_extra_dashboard_examples": true,
+  "dashboard_package_files": [
+    "Reports/forex_delivery/AIOS_FOREX_DASHBOARD_RUNTIME_UI_V1_PREVIEW.html",
+    "Reports/forex_delivery/AIOS_FOREX_DASHBOARD_RUNTIME_UI_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_DASHBOARD_RUNTIME_UI_V1_STATE.json",
+    "automation/forex_engine/forex_dashboard_runtime_ui_v1.py",
+    "docs/trading_lab/forex/dashboard/FOREX_DASHBOARD_RUNTIME_UI_V1.html",
+    "docs/trading_lab/forex/dashboard/FOREX_DASHBOARD_RUNTIME_UI_V1.md",
+    "scripts/forex_delivery/run_forex_dashboard_runtime_ui_v1.py",
+    "tests/forex_engine/test_forex_dashboard_runtime_ui_v1.py"
+  ],
+  "dashboard_status": "FOREX_DASHBOARD_RUNTIME_UI_READY",
+  "forex_110_complete": true,
+  "source_artifacts_present": {
+    "Reports\\forex_delivery\\AIOS_FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1_STATE.json": true,
+    "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md": true,
+    "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_EMOJI_WINDOW_MAP_FINAL_V1.md": true,
+    "Reports\\forex_delivery\\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md": true,
+    "Reports\\forex_delivery\\AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json": true,
+    "Reports\\forex_delivery\\AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json": true,
+    "Reports\\forex_delivery\\AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json": true,
+    "Reports\\forex_delivery\\AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json": true
+  },
+  "missing_source_artifacts": [],
+  "runtime_ui_type": "STATIC_LOCAL_CLICKABLE_EMOJI_HTML",
+  "html_preview_path": "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_RUNTIME_UI_V1_PREVIEW.html",
+  "dashboard_windows": [
+    {
+      "emoji": "🏛️",
+      "title": "Command Center",
+      "short_label": "Command Center",
+      "default_summary": "Forex 110 completion, blocker state, and next safe action.",
+      "detail_summary": "The repo-safe Forex 110 gate is complete. Broker/live work remains protected and separate.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md"
+      ],
+      "criticality": "critical",
+      "hidden_by_default_fields": [
+        "raw completion state",
+        "full report text"
+      ]
+    },
+    {
+      "emoji": "🛡️",
+      "title": "Safety Gate",
+      "short_label": "Safety Gate",
+      "default_summary": "Protected actions are blocked in this local dashboard preview.",
+      "detail_summary": "Broker contact, credentials, account identifiers, order paths, demo/live authorization, and automation starts remain blocked.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md",
+        "Reports\\forex_delivery\\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md"
+      ],
+      "criticality": "critical",
+      "hidden_by_default_fields": [
+        "full blocked-action list",
+        "raw safety notes"
+      ]
+    },
+    {
+      "emoji": "🎯",
+      "title": "Candidate",
+      "short_label": "Candidate",
+      "default_summary": "Selected candidate is review-ready, not execution-authorized.",
+      "detail_summary": "Candidate evidence is summarized for owner review without authorizing demo or live trading.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json"
+      ],
+      "criticality": "normal",
+      "hidden_by_default_fields": [
+        "candidate metrics",
+        "rejected candidates",
+        "selection reasons"
+      ]
+    },
+    {
+      "emoji": "📊",
+      "title": "Evidence",
+      "short_label": "Evidence",
+      "default_summary": "Evidence status is visible without raw-data overload.",
+      "detail_summary": "Evidence depth, walk-forward sufficiency, and blockers stay inside detail panels.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md"
+      ],
+      "criticality": "normal",
+      "hidden_by_default_fields": [
+        "walk-forward counts",
+        "evidence quality flags",
+        "raw scoring"
+      ]
+    },
+    {
+      "emoji": "🚧",
+      "title": "Broker Boundary",
+      "short_label": "Broker Boundary",
+      "default_summary": "Broker connection proof is owner-gated and separate.",
+      "detail_summary": "This dashboard reads local reports only and does not contact broker systems or inspect account state.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md",
+        "Reports\\forex_delivery\\AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json"
+      ],
+      "criticality": "critical",
+      "hidden_by_default_fields": [
+        "owner input checklist",
+        "protected boundary detail"
+      ]
+    },
+    {
+      "emoji": "💰",
+      "title": "Profit Readiness",
+      "short_label": "Profit Readiness",
+      "default_summary": "Profit readiness is display-only.",
+      "detail_summary": "Profit readiness depends on governed evidence and owner review; it does not authorize demo/live action.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json"
+      ],
+      "criticality": "normal",
+      "hidden_by_default_fields": [
+        "profit factors",
+        "drawdown metrics",
+        "promotion blockers"
+      ]
+    },
+    {
+      "emoji": "📁",
+      "title": "Reports",
+      "short_label": "Reports",
+      "default_summary": "Report index for the local evidence used by this UI.",
+      "detail_summary": "All source artifacts are local repo files. Heavy reports stay behind this detail window.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md",
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_EMOJI_WINDOW_MAP_FINAL_V1.md",
+        "Reports\\forex_delivery\\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md",
+        "Reports\\forex_delivery\\AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json"
+      ],
+      "criticality": "normal",
+      "hidden_by_default_fields": [
+        "full artifact contents",
+        "raw report dumps"
+      ]
+    },
+    {
+      "emoji": "🆘",
+      "title": "SOS",
+      "short_label": "SOS",
+      "default_summary": "Escalate only if protected boundaries are violated or source artifacts go missing.",
+      "detail_summary": "This is a stop signal surface, not an alert sender or runtime notification system.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md",
+        "Reports\\forex_delivery\\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md"
+      ],
+      "criticality": "critical",
+      "hidden_by_default_fields": [
+        "full stop rules",
+        "operator escalation detail"
+      ]
+    },
+    {
+      "emoji": "⚙️",
+      "title": "Settings",
+      "short_label": "Settings",
+      "default_summary": "Display preferences only; no execution controls.",
+      "detail_summary": "Settings are visual/local only in this static HTML and do not persist or trigger actions.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md",
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_EMOJI_WINDOW_MAP_FINAL_V1.md"
+      ],
+      "criticality": "low",
+      "hidden_by_default_fields": [
+        "visual preferences",
+        "panel behavior notes"
+      ]
+    },
+    {
+      "emoji": "🔒",
+      "title": "Secrets Later",
+      "short_label": "Secrets Later",
+      "default_summary": "Bitwarden remains locked until owner confirmation after Forex 110.",
+      "detail_summary": "Bitwarden, Vaultwarden, secrets migration, and token storage are not started by this packet.",
+      "source_artifacts": [
+        "Reports\\forex_delivery\\AIOS_FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1_STATE.json",
+        "Reports\\forex_delivery\\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md"
+      ],
+      "criticality": "critical",
+      "hidden_by_default_fields": [
+        "future secret-manager planning",
+        "owner confirmation requirements"
+      ]
+    }
+  ],
+  "default_visible_summary": {
+    "critical_status": "Forex 110% complete - broker/live work remains protected.",
+    "active_blocker": "Broker, live, demo, secrets, Bitwarden, Vaultwarden, and background automation actions are blocked.",
+    "next_safe_action": "Open the static local HTML preview and review display-only Forex state.",
+    "safety_state": "Repo-safe local dashboard preview only."
+  },
+  "hidden_detail_rules": [
+    "Hide raw broker data behind report/detail windows.",
+    "Hide raw trade data behind report/detail windows.",
+    "Hide raw metadata behind report/detail windows.",
+    "Hide long validator logs behind report/detail windows.",
+    "Hide internal state dumps behind report/detail windows."
+  ],
+  "critical_display_rules": [
+    "Show critical status by default.",
+    "Show active blocker by default.",
+    "Show next safe action by default.",
+    "Show safety state by default.",
+    "Do not show secret values.",
+    "Do not show broker account identifiers.",
+    "Do not show order execution data.",
+    "Do not show demo or live authorization controls."
+  ],
+  "protected_boundary_summary": {
+    "status": "PROTECTED_AND_SEPARATE",
+    "broker_contact": "blocked",
+    "account_inspection": "blocked",
+    "orders": "blocked",
+    "demo_live_authorization": "blocked"
+  },
+  "protected_broker_boundary_status": "PROTECTED_AND_SEPARATE",
+  "bitwarden_lock_summary": {
+    "bitwarden_unlocked": false,
+    "status": "LOCKED_UNTIL_OWNER_CONFIRMS_AFTER_FOREX_110",
+    "vaultwarden_unlocked": false,
+    "secrets_migration_allowed": false,
+    "token_storage_allowed": false
+  },
+  "bitwarden_status": "LOCKED_UNTIL_OWNER_CONFIRMS_AFTER_FOREX_110",
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "epic_id": "EPC-FOREX-AUTONOMY-COMPLETION-001",
+  "bucket_id": "BKT-FOREX-DASHBOARD-RUNTIME-UI-001",
+  "packet_id": "PKT-FOREX-DASHBOARD-RUNTIME-UI-V1",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "env_read": false,
+  "account_identifiers_used": false,
+  "order_execution": false,
+  "demo_authorized": false,
+  "live_authorized": false,
+  "scheduler_started": false,
+  "daemon_started": false,
+  "webhook_started": false,
+  "background_loop_started": false,
+  "bitwarden_started": false,
+  "vaultwarden_started": false,
+  "secrets_migration_started": false,
+  "token_storage_started": false
+}

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forex Dashboard Runtime UI V1</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --ink: #1f2933;
+      --muted: #52616f;
+      --line: #c8d2dc;
+      --accent: #0f766e;
+      --warn: #9a3412;
+      --danger: #991b1b;
+      --focus: #1d4ed8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+    .banner {
+      padding: 14px 18px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .banner.primary { border-left: 8px solid var(--accent); }
+    .banner.locked { border-left: 8px solid var(--warn); }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .summary-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 14px;
+      min-height: 120px;
+    }
+    .summary-box strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      text-transform: uppercase;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 18px 0;
+    }
+    .window-card {
+      min-height: 176px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 16px;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .window-card:hover,
+    .window-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.16);
+    }
+    .window-card:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+    .emoji { font-size: 2.4rem; line-height: 1; }
+    .card-title { font-weight: 700; font-size: 1.05rem; }
+    .card-summary { color: var(--muted); font-size: 0.94rem; }
+    .detail-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 8px solid var(--accent);
+      padding: 18px;
+      margin-top: 12px;
+      border-radius: 8px;
+    }
+    .detail-panel:focus { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .criticality { color: var(--danger); font-weight: 700; }
+    .blocked {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      padding: 14px 18px;
+      margin-top: 18px;
+    }
+    code { overflow-wrap: anywhere; }
+    @media (max-width: 900px) {
+      .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 20px, 1180px); padding-top: 14px; }
+      .summary, .grid { grid-template-columns: 1fr; }
+      .window-card { min-height: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="banner primary">Forex 110% complete — broker/live work remains protected.</div>
+    <div class="banner locked">Bitwarden locked until owner confirmation after Forex 110.</div>
+    <section class="summary" aria-label="Default visible summary">
+      <div class="summary-box"><strong>Critical Status</strong>Forex 110% complete - broker/live work remains protected.</div>
+      <div class="summary-box"><strong>Blockers</strong>Broker, live, demo, secrets, Bitwarden, Vaultwarden, and background automation actions are blocked.</div>
+      <div class="summary-box"><strong>Next Safe Action</strong>Open the static local HTML preview and review display-only Forex state.</div>
+      <div class="summary-box"><strong>Safety State</strong>Repo-safe local dashboard preview only.</div>
+    </section>
+    <section class="grid" aria-label="Clickable dashboard windows">
+      <button class="window-card" type="button" data-panel="panel-0" aria-controls="panel-0"><span class="emoji" aria-hidden="true">🏛️</span><span class="card-title">Command Center</span><span class="card-summary">Forex 110 completion, blocker state, and next safe action.</span></button><button class="window-card" type="button" data-panel="panel-1" aria-controls="panel-1"><span class="emoji" aria-hidden="true">🛡️</span><span class="card-title">Safety Gate</span><span class="card-summary">Protected actions are blocked in this local dashboard preview.</span></button><button class="window-card" type="button" data-panel="panel-2" aria-controls="panel-2"><span class="emoji" aria-hidden="true">🎯</span><span class="card-title">Candidate</span><span class="card-summary">Selected candidate is review-ready, not execution-authorized.</span></button><button class="window-card" type="button" data-panel="panel-3" aria-controls="panel-3"><span class="emoji" aria-hidden="true">📊</span><span class="card-title">Evidence</span><span class="card-summary">Evidence status is visible without raw-data overload.</span></button><button class="window-card" type="button" data-panel="panel-4" aria-controls="panel-4"><span class="emoji" aria-hidden="true">🚧</span><span class="card-title">Broker Boundary</span><span class="card-summary">Broker connection proof is owner-gated and separate.</span></button><button class="window-card" type="button" data-panel="panel-5" aria-controls="panel-5"><span class="emoji" aria-hidden="true">💰</span><span class="card-title">Profit Readiness</span><span class="card-summary">Profit readiness is display-only.</span></button><button class="window-card" type="button" data-panel="panel-6" aria-controls="panel-6"><span class="emoji" aria-hidden="true">📁</span><span class="card-title">Reports</span><span class="card-summary">Report index for the local evidence used by this UI.</span></button><button class="window-card" type="button" data-panel="panel-7" aria-controls="panel-7"><span class="emoji" aria-hidden="true">🆘</span><span class="card-title">SOS</span><span class="card-summary">Escalate only if protected boundaries are violated or source artifacts go missing.</span></button><button class="window-card" type="button" data-panel="panel-8" aria-controls="panel-8"><span class="emoji" aria-hidden="true">⚙️</span><span class="card-title">Settings</span><span class="card-summary">Display preferences only; no execution controls.</span></button><button class="window-card" type="button" data-panel="panel-9" aria-controls="panel-9"><span class="emoji" aria-hidden="true">🔒</span><span class="card-title">Secrets Later</span><span class="card-summary">Bitwarden remains locked until owner confirmation after Forex 110.</span></button>
+    </section>
+    <section aria-live="polite">
+      <section class="detail-panel" id="panel-0" tabindex="-1" hidden><h2>🏛️ Command Center</h2><p>The repo-safe Forex 110 gate is complete. Broker/live work remains protected and separate.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md</li></ul><h3>Hidden By Default</h3><ul><li>raw completion state</li>
+<li>full report text</li></ul><p class="criticality">Criticality: critical</p></section><section class="detail-panel" id="panel-1" tabindex="-1" hidden><h2>🛡️ Safety Gate</h2><p>Broker contact, credentials, account identifiers, order paths, demo/live authorization, and automation starts remain blocked.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md</li>
+<li>Reports\forex_delivery\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md</li></ul><h3>Hidden By Default</h3><ul><li>full blocked-action list</li>
+<li>raw safety notes</li></ul><p class="criticality">Criticality: critical</p></section><section class="detail-panel" id="panel-2" tabindex="-1" hidden><h2>🎯 Candidate</h2><p>Candidate evidence is summarized for owner review without authorizing demo or live trading.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json</li></ul><h3>Hidden By Default</h3><ul><li>candidate metrics</li>
+<li>rejected candidates</li>
+<li>selection reasons</li></ul><p class="criticality">Criticality: normal</p></section><section class="detail-panel" id="panel-3" tabindex="-1" hidden><h2>📊 Evidence</h2><p>Evidence depth, walk-forward sufficiency, and blockers stay inside detail panels.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md</li></ul><h3>Hidden By Default</h3><ul><li>walk-forward counts</li>
+<li>evidence quality flags</li>
+<li>raw scoring</li></ul><p class="criticality">Criticality: normal</p></section><section class="detail-panel" id="panel-4" tabindex="-1" hidden><h2>🚧 Broker Boundary</h2><p>This dashboard reads local reports only and does not contact broker systems or inspect account state.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md</li>
+<li>Reports\forex_delivery\AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json</li></ul><h3>Hidden By Default</h3><ul><li>owner input checklist</li>
+<li>protected boundary detail</li></ul><p class="criticality">Criticality: critical</p></section><section class="detail-panel" id="panel-5" tabindex="-1" hidden><h2>💰 Profit Readiness</h2><p>Profit readiness depends on governed evidence and owner review; it does not authorize demo/live action.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json</li></ul><h3>Hidden By Default</h3><ul><li>profit factors</li>
+<li>drawdown metrics</li>
+<li>promotion blockers</li></ul><p class="criticality">Criticality: normal</p></section><section class="detail-panel" id="panel-6" tabindex="-1" hidden><h2>📁 Reports</h2><p>All source artifacts are local repo files. Heavy reports stay behind this detail window.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_EMOJI_WINDOW_MAP_FINAL_V1.md</li>
+<li>Reports\forex_delivery\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md</li>
+<li>Reports\forex_delivery\AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json</li></ul><h3>Hidden By Default</h3><ul><li>full artifact contents</li>
+<li>raw report dumps</li></ul><p class="criticality">Criticality: normal</p></section><section class="detail-panel" id="panel-7" tabindex="-1" hidden><h2>🆘 SOS</h2><p>This is a stop signal surface, not an alert sender or runtime notification system.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md</li>
+<li>Reports\forex_delivery\AIOS_FOREX_FINAL_PROTECTED_BROKER_BOUNDARY_HANDOFF_V1.md</li></ul><h3>Hidden By Default</h3><ul><li>full stop rules</li>
+<li>operator escalation detail</li></ul><p class="criticality">Criticality: critical</p></section><section class="detail-panel" id="panel-8" tabindex="-1" hidden><h2>⚙️ Settings</h2><p>Settings are visual/local only in this static HTML and do not persist or trigger actions.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_EMOJI_WINDOW_MAP_FINAL_V1.md</li></ul><h3>Hidden By Default</h3><ul><li>visual preferences</li>
+<li>panel behavior notes</li></ul><p class="criticality">Criticality: low</p></section><section class="detail-panel" id="panel-9" tabindex="-1" hidden><h2>🔒 Secrets Later</h2><p>Bitwarden, Vaultwarden, secrets migration, and token storage are not started by this packet.</p><h3>Source Artifacts</h3><ul><li>Reports\forex_delivery\AIOS_FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1_STATE.json</li>
+<li>Reports\forex_delivery\AIOS_FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md</li></ul><h3>Hidden By Default</h3><ul><li>future secret-manager planning</li>
+<li>owner confirmation requirements</li></ul><p class="criticality">Criticality: critical</p></section>
+    </section>
+    <section class="blocked">
+      <h2>Protected Boundary</h2>
+      <p>Broker contact, credentials, .env reads, account identifiers, account inspection, orders, demo/live authorization, scheduler, daemon, webhook, background loop, Bitwarden, Vaultwarden, secrets migration, and token storage are blocked.</p>
+      <p>Protected false flags: broker_api_used, credentials_used, env_read, account_identifiers_used, order_execution, demo_authorized, live_authorized, scheduler_started, daemon_started, webhook_started, background_loop_started, bitwarden_started, vaultwarden_started, secrets_migration_started, token_storage_started</p>
+    </section>
+  </main>
+  <script>
+    const cards = Array.from(document.querySelectorAll('.window-card'));
+    const panels = Array.from(document.querySelectorAll('.detail-panel'));
+    function showPanel(id) {
+      panels.forEach((panel) => { panel.hidden = panel.id !== id; });
+      cards.forEach((card) => { card.classList.toggle('active', card.dataset.panel === id); });
+      const active = document.getElementById(id);
+      if (active) { active.focus(); }
+    }
+    cards.forEach((card) => {
+      card.addEventListener('click', () => showPanel(card.dataset.panel));
+    });
+    if (cards[0]) { showPanel(cards[0].dataset.panel); }
+  </script>
+</body>
+</html>
