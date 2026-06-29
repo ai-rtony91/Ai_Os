@@ -1,0 +1,39 @@
+{
+  "input": {
+    "broker_name": "OANDA",
+    "broker_environment": "practice_demo",
+    "config_template_present": true,
+    "owner_runtime_config_present": false,
+    "credential_reference_declared": false,
+    "credential_material_present": false,
+    "account_reference_declared": false,
+    "read_only_capabilities_declared": true,
+    "mutating_capabilities_blocked": true,
+    "network_disabled_for_packet": true,
+    "broker_api_called": false,
+    "credentials_read": false,
+    "env_read": false,
+    "order_execution": false,
+    "demo_authorized": false,
+    "live_authorized": false,
+    "session_window_hours": 22,
+    "session_window_days_per_week": 6
+  },
+  "result": {
+    "probe_status": "OWNER_RUNTIME_CONFIG_REQUIRED",
+    "current_stage": "broker_read_only_state_probe",
+    "next_stage": "owner_runtime_config_handoff",
+    "blockers": [
+      "owner_runtime_config_present is False"
+    ],
+    "broker_name": "OANDA",
+    "broker_environment": "practice_demo",
+    "broker_api_called": false,
+    "credentials_read": false,
+    "env_read": false,
+    "order_execution": false,
+    "demo_authorized": false,
+    "live_authorized": false,
+    "safe_next_action": "Hand off owner runtime config reference and path to runner scope."
+  }
+}
