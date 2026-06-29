@@ -107,7 +107,7 @@ git diff --check -- automation/forex_engine/forex_owner_safety_evidence_intake_v
 git status --short --branch
 
 SAFE NEXT ACTION
-Owner must fill the intake template with current sanitized evidence for all controls. Then route to later verification packet only when explicit verification mechanism is available.
+Sanitized evidence is present for all four controls and currently unverified; route to later verification only after explicit verification mechanisms are run. Then route to later verification packet only when explicit verification mechanism is available.
 
 STOP POINT
 Stop after validators and final report.
@@ -117,13 +117,13 @@ Do not create PR.
 
 FINAL REPORT FORMAT
 CURRENT_BRANCH:main
-CURRENT_HEAD:9fd22029
-MISSING_CONTROLS:kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready
-PRESENT_UNVERIFIED_CONTROLS:
+CURRENT_HEAD:755f1bb0
+MISSING_CONTROLS:none
+PRESENT_UNVERIFIED_CONTROLS:kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready
 STALE_CONTROLS:
 INVALID_CONTROLS:
-OWNER_EVIDENCE_COMPLETION_PERCENT:0.0
-NEXT_RESULT_STATUS:OWNER_SAFETY_EVIDENCE_INTAKE_REQUIRED
+OWNER_EVIDENCE_COMPLETION_PERCENT:100.0
+NEXT_RESULT_STATUS:OWNER_SAFETY_EVIDENCE_PRESENT_UNVERIFIED
 VERIFICATION_CLAIMED:False
 BROKER_API_USED:False
 CREDENTIALS_USED:False
