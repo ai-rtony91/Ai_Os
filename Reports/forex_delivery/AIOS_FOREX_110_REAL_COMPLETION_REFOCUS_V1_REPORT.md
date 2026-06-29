@@ -294,3 +294,66 @@ Reuse existing profit evaluator, strategy evaluation, walk-forward/OOS, mitigati
 Safe next action:
 
 Run the next packet in DRY_RUN first. Do not trade, start demo/live execution, contact broker APIs, read credentials, start runtime processes, move money, or create parallel Forex 110 artifacts.
+
+## 9. End-Session High-Speed Profit / Compounding Closure V1
+
+Latest closure packet:
+
+`PKT-FOREX-110-END-SESSION-HIGH-SPEED-PROFIT-COMPOUNDING-CLOSURE-V1`
+
+Latest closure report:
+
+`Reports/forex_delivery/AIOS_FOREX_110_END_SESSION_HIGH_SPEED_PROFIT_COMPOUNDING_CLOSURE_V1_REPORT.md`
+
+Latest closure state:
+
+`Reports/forex_delivery/AIOS_FOREX_110_END_SESSION_HIGH_SPEED_PROFIT_COMPOUNDING_CLOSURE_V1_STATE.json`
+
+Current truth after end-session closure:
+
+| Gate | Status |
+|---|---|
+| profit_proof_status | `NOT_PROVEN` |
+| return_target_proof_status | `NOT_PROVEN` |
+| 22h_6d_proof_status | `NOT_PROVEN` |
+| broker_readonly_proof_status | `PARTIAL` |
+| safety_risk_proof_status | `BLOCKED` |
+| latency_proof_status | `REVIEW_REQUIRED` |
+| compounding_status | `BLOCKED` |
+| broker_bank_money_rail_status | `PARTIAL` |
+| vacation_grade_completion_status | `BLOCKED` |
+
+Validation summary:
+
+- required focused tests run: 33
+- tests passed: 32
+- tests failed: 1
+- tests missing: 0
+- existing safe local runners run: 23
+- runners passed: 23
+- runners failed: 0
+- runners missing: 0
+- runners skipped: 0
+
+Failed validator:
+
+- `tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py`: 2 failed, 7 passed.
+
+Owner answer remains unchanged in the only safe direction:
+
+- Can it trade today? No.
+- Can it trade profitably today? Not proven.
+- Can I deposit money today? No.
+- Can I leave it overnight today? No.
+- Can it compound today? No.
+- Can it move broker-to-bank today? No.
+- Is high-speed execution proven today? No.
+- Is Forex 110 complete? No.
+
+Exact remaining blocker:
+
+Persistent profit proof, 25%-100% and up-to-120% return proof, real 22H/6D observation proof, complete sanitized broker-read-only evidence, critical safety closure, current execution-path latency proof, compounding approval, and separate financial-rail approval.
+
+Safe next action:
+
+Run `PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1`. Do not trade, start demo/live execution, contact brokers, read credentials, move money, compound, start runtime services, stage, commit, push, PR, or merge.
