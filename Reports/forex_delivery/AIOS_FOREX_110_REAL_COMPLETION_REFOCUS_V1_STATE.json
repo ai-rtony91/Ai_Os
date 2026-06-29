@@ -1,0 +1,158 @@
+{
+  "schema_version": "aios.forex_110_real_completion_refocus.v1",
+  "packet_id": "PKT-FOREX-110-REFocus-REAL-COMPLETION-GAP-LOCK-V1",
+  "owner_corrected_definition": "Forex 110 means true Forex completion toward profitable supervised/autonomous operation, not repo-safe completion or dashboard polish.",
+  "forex_110_definition": "Forex 110 is reached only when profit proof, 22H/day 6D/week readiness, broker/demo/live gate evidence, safety controls, dashboard truth, and one-man operator control are either proven by repository evidence or locked with exact blockers.",
+  "profitability_claim_status": "NOT_PROVEN",
+  "return_expectancy_claim_status": "NOT_PROVEN",
+  "twenty_two_hour_six_day_status": "NOT_PROVEN",
+  "demo_execution_status": "BLOCKED",
+  "live_execution_status": "BLOCKED",
+  "broker_readonly_evidence_status": "PARTIAL",
+  "persistent_profitability_status": "NOT_PROVEN",
+  "walkforward_oos_status": "PARTIAL",
+  "risk_control_status": "BLOCKED",
+  "dashboard_truth_status": "PARTIAL",
+  "one_man_operator_mode": {
+    "status": "REVIEW_REQUIRED",
+    "preserved_by": [
+      "five-lane completion path",
+      "owner approval gates",
+      "no corporate sprawl",
+      "no autonomous execution authority expansion",
+      "dashboard display-only boundary"
+    ]
+  },
+  "current_truth_summary": "Prior Forex 110 artifacts prove a repo-safe and dashboard-UX gate only. Current repo evidence does not prove profitable supervised/autonomous operation, 100% to 120% return expectancy, completed 22H/6D observation, demo execution readiness, live readiness, complete sanitized broker-read-only evidence, persistent profitability, or final safety-control closure.",
+  "blockers": [
+    {
+      "lane": "Profit Proof",
+      "status": "BLOCKED",
+      "blockers": [
+        "persistent profitability is below proof threshold",
+        "100% to 120% return expectancy is not proven by current repository evidence",
+        "walk-forward/OOS segment total and pass counts are missing or incomplete"
+      ],
+      "evidence": [
+        "Reports/forex_delivery/AIOS_FOREX_REAL_EVIDENCE_INTAKE_V1_REPORT.md",
+        "Reports/forex_delivery/AIOS_FOREX_CONTINUOUS_EVIDENCE_ADVANCEMENT_V1_REPORT.md",
+        "Reports/forex_delivery/AIOS_FOREX_READINESS_MATRIX_V1_REPORT.md"
+      ]
+    },
+    {
+      "lane": "Broker Evidence",
+      "status": "BLOCKED",
+      "blockers": [
+        "sanitized broker-read-only evidence is partial or fixture-bound",
+        "broker account reachability, open positions reconciliation, daily P/L, realized P/L, unrealized P/L, margin risk, and trading-history writeback are not complete",
+        "broker contact, credentials, environment reads, account inspection, and orders remain blocked"
+      ],
+      "evidence": [
+        "Reports/forex_delivery/AIOS_FOREX_REAL_EVIDENCE_INTAKE_V1_REPORT.md",
+        "Reports/forex_delivery/AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json",
+        "docs/security/AIOS_SECURITY_360_BASELINE_V1.md"
+      ]
+    },
+    {
+      "lane": "22H/6D Runtime Readiness",
+      "status": "BLOCKED",
+      "blockers": [
+        "real observed-hours/session/day metrics are missing",
+        "interruption, manual override, and evidence freshness fields are missing",
+        "planning doctrine exists but completed repository-backed observation proof does not"
+      ],
+      "evidence": [
+        "Reports/forex_delivery/AIOS_FOREX_22H6D_OBSERVATION_CLOSURE_V2_REPORT.md",
+        "Reports/forex_delivery/AIOS_FOREX_REAL_EVIDENCE_INTAKE_V1_REPORT.md"
+      ]
+    },
+    {
+      "lane": "Safety/Risk Final Gate",
+      "status": "BLOCKED",
+      "blockers": [
+        "kill switch state is blocked",
+        "daily stop state is blocked",
+        "max loss state is blocked",
+        "monitoring readiness is blocked",
+        "RISK_POLICY.md live exception is not active"
+      ],
+      "evidence": [
+        "Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json",
+        "RISK_POLICY.md"
+      ]
+    },
+    {
+      "lane": "Dashboard Truth / Owner Control",
+      "status": "PARTIAL",
+      "blockers": [
+        "prior dashboard 110 framing can imply completion optimism",
+        "dashboard must show real readiness blockers by default",
+        "dashboard remains display-only and must not expose execution controls"
+      ],
+      "evidence": [
+        "docs/trading_lab/forex/FOREX_110_COMPLETION_AND_BITWARDEN_UNLOCK_GATE_V1.md",
+        "docs/trading_lab/forex/FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md",
+        "docs/governance/source-of-truth-map.md",
+        "Reports/forex_delivery/AIOS_FOREX_CROSS_REFERENCE_VALIDATION_V1_REPORT.md"
+      ]
+    }
+  ],
+  "required_evidence": [
+    "current walk-forward/OOS segment total and passed counts",
+    "after-cost, drawdown-aware persistent profitability proof meeting the threshold",
+    "100% to 120% return expectancy proof or explicit failure analysis",
+    "22H/6D observed hours, sessions, days, interruption counts, manual override counts, freshness, and sanitized source labels",
+    "sanitized broker-read-only account reachability, positions, daily P/L, realized P/L, unrealized P/L, margin risk, and trading-history writeback proof",
+    "kill switch, daily stop, max loss, monitoring, one-order-only, stop loss, and take profit final-gate proof",
+    "dashboard state that shows blocked/partial/proven truth without execution controls"
+  ],
+  "next_packet_chain": [
+    {
+      "order": 1,
+      "lane": "Profit Proof",
+      "packet": "PKT-FOREX-110-PROFIT-PROOF-REAL-EVIDENCE-CLOSURE-V1",
+      "goal": "Collect and validate walk-forward/OOS counts, persistent profitability, and 100% to 120% expectancy proof or exact failure blockers."
+    },
+    {
+      "order": 2,
+      "lane": "Broker Evidence",
+      "packet": "PKT-FOREX-110-SANITIZED-BROKER-READONLY-EVIDENCE-V1",
+      "goal": "Create sanitized broker-read-only evidence without credentials, account identifiers, account inspection beyond approval, orders, demo start, or live start."
+    },
+    {
+      "order": 3,
+      "lane": "22H/6D Runtime Readiness",
+      "packet": "PKT-FOREX-110-22H6D-OBSERVATION-EVIDENCE-CLOSURE-V1",
+      "goal": "Collect completed 22H/6D observation metrics and freshness proof."
+    },
+    {
+      "order": 4,
+      "lane": "Safety/Risk Final Gate",
+      "packet": "PKT-FOREX-110-SAFETY-RISK-FINAL-GATE-V1",
+      "goal": "Prove kill switch, max loss, daily stop, one-order-only, SLTP, and monitoring controls remain fail-closed."
+    },
+    {
+      "order": 5,
+      "lane": "Dashboard Truth / Owner Control",
+      "packet": "PKT-FOREX-110-DASHBOARD-TRUTH-OWNER-CONTROL-V1",
+      "goal": "Make dashboard truth reflect proven/partial/blocked readiness without corporate sprawl or execution controls."
+    }
+  ],
+  "safe_next_action": "Run PKT-FOREX-110-PROFIT-PROOF-REAL-EVIDENCE-CLOSURE-V1 next; do not trade, do not start demo/live execution, and do not contact broker APIs.",
+  "blocked_actions": {
+    "broker_contact": true,
+    "credential_read": true,
+    "env_read": true,
+    "order_execution": true,
+    "demo_trade_start": true,
+    "live_trade_start": true,
+    "scheduler_start": true,
+    "daemon_start": true,
+    "webhook_start": true,
+    "background_loop_start": true,
+    "server_start": true,
+    "tunnel_start": true,
+    "bitwarden_start": true,
+    "vaultwarden_start": true
+  }
+}
