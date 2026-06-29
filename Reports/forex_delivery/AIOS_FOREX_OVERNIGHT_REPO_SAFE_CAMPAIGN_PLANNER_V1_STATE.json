@@ -1,0 +1,109 @@
+{
+  "campaign_status": "REPO_SAFE_OVERNIGHT_BUILD_STAGE_READY",
+  "current_branch_expected": "forex-broker-boundary-readiness-v1",
+  "current_head_expected": "ecec9b60 or newer from PR #1221",
+  "repo_safe_work_units": [
+    {
+      "name": "broker boundary readiness state/report/packet",
+      "output": "deterministic local readiness evidence"
+    },
+    {
+      "name": "reusable autonomy pattern documentation",
+      "output": "cross-lane autonomy skeleton documentation"
+    },
+    {
+      "name": "overnight repo-safe campaign planner state/report/packet",
+      "output": "finite future repo-safe work queue"
+    },
+    {
+      "name": "owner-review packet refinement and evidence packaging",
+      "output": "DRY_RUN packet for human review only"
+    },
+    {
+      "name": "repo-safe validator hardening packet",
+      "output": "tests for boundary booleans and next-packet safety"
+    }
+  ],
+  "completed_work_units": [
+    "broker boundary readiness state/report/packet",
+    "reusable autonomy pattern documentation",
+    "overnight repo-safe campaign planner state/report/packet"
+  ],
+  "remaining_repo_safe_work_units": [
+    "owner-review packet refinement and evidence packaging",
+    "repo-safe validator hardening packet"
+  ],
+  "protected_boundaries": [
+    {
+      "name": "broker connection proof",
+      "reason": "requires owner approval, broker contact, credentials, .env access, and account identifiers"
+    }
+  ],
+  "next_repo_safe_stage": "owner-review packet refinement and evidence packaging",
+  "next_protected_boundary": "broker connection proof",
+  "owner_wake_required": true,
+  "stash_policy": {
+    "stash_detected": true,
+    "stash_preserved": true,
+    "stash_applied": false,
+    "stash_pop_used": false,
+    "stash_drop_used": false
+  },
+  "failure_reduction_rules": [
+    "use current clean branch only",
+    "use finite work queue only",
+    "write state/report/next-packet artifacts only",
+    "stop before broker/API/credential/account/order/runtime boundaries",
+    "stage exact allowed paths only"
+  ],
+  "overnight_run_limits": {
+    "finite_queue": true,
+    "infinite_loop": false,
+    "scheduler_started": false,
+    "daemon_started": false,
+    "webhook_started": false,
+    "background_loop_started": false,
+    "requires_new_human_approval_for_protected_boundary": true
+  },
+  "reusable_autonomy_pattern": {
+    "identity_chain": "Mission -> Program -> Epic -> Bucket -> Packet",
+    "preflight": "verify path, branch, clean worktree, no staged files, current head, stash metadata",
+    "scope": "edit only allowed paths and keep forbidden paths explicit",
+    "outputs": [
+      "state JSON",
+      "human report",
+      "next Codex packet"
+    ],
+    "protected_boundary_stop": "stop before broker/API/credential/account/order/runtime actions",
+    "validation": [
+      "py_compile",
+      "focused pytest",
+      "json.tool",
+      "governance validator",
+      "git diff --check"
+    ],
+    "commit_flow": "stage exact files, inspect cached diff, commit once, stop before push/PR/merge"
+  },
+  "recommended_next_packet": "Reports/forex_delivery/AIOS_FOREX_OVERNIGHT_REPO_SAFE_CAMPAIGN_PLANNER_NEXT_CODEX_PACKET_V1.md",
+  "safe_next_action": "Use the generated repo-safe next packet only for bounded local artifact work. Stop before broker connection proof or any scheduler, daemon, webhook, worker, watcher, listener, or background loop.",
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "mission_name": "Governed Forex Finish Line",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "program_name": "Forex Profit Autonomy System",
+  "epic_id": "EPC-FOREX-AUTONOMY-COMPLETION-001",
+  "epic_name": "Autonomy Completion",
+  "bucket_id": "BKT-FOREX-OVERNIGHT-REPO-SAFE-BUILD-001",
+  "bucket_name": "Overnight Repo-Safe Broker Boundary And Autonomy Reuse Build Stage",
+  "packet_id": "PKT-FOREX-OVERNIGHT-REPO-SAFE-CAMPAIGN-PLANNER-V1",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "env_read": false,
+  "account_identifiers_used": false,
+  "order_execution": false,
+  "demo_authorized": false,
+  "live_authorized": false,
+  "scheduler_started": false,
+  "daemon_started": false,
+  "webhook_started": false,
+  "background_loop_started": false
+}
