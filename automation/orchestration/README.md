@@ -48,6 +48,8 @@ Display and status tools should prefer these approved active paths first:
 - commit packages: `automation/orchestration/commit_packages/`
 - orchestration runtime bundle: `automation/orchestration/runtime/Get-AiOsRuntimeStateBundle.DRY_RUN.ps1`
 - runtime next-command recommendation: `automation/runtime/recommendation/Get-AiOsNextCommand.ps1`
+- attack-to-finish completion contract: `docs/governance/AIOS_ATTACK_TO_FINISH_CONTRACT_V1.md`
+- attack-to-finish schema: `schemas/aios/orchestration/AIOS_ATTACK_TO_FINISH_CONTRACT.v1.schema.json`
 - frontend-safe state projection contract: `schemas/aios/orchestration/STATE_PROJECTION_RULES.md`
 - runtime visibility read-model schema: `schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.json`
 - operator status: `automation/orchestration/control/Get-AiOsOperatorControlLoop.DRY_RUN.ps1`
@@ -88,6 +90,8 @@ Append-only ledgers, runtime logs, and telemetry artifacts are evidence/audit re
 Validator-chain output is evidence and validation guidance only; validators do not grant APPLY authority.
 
 Worker registry, worker profiles, lock registry, lane status, and path-conflict policy remain worker-boundary enforcement mechanisms.
+
+ATTACK-TO-FINISH output is completion evidence and routing metadata only. Completion packets must use `docs/governance/AIOS_ATTACK_TO_FINISH_CONTRACT_V1.md` and `schemas/aios/orchestration/AIOS_ATTACK_TO_FINISH_CONTRACT.v1.schema.json` to name the exact blocker, owner file, validator/test, runner/script, missing evidence field, unlock status, next packet, owner action, stop condition, and no-bloat guard.
 
 State projection and frontend display boundaries are defined in `schemas/aios/orchestration/STATE_PROJECTION_RULES.md`, `schemas/aios/orchestration/RUNTIME_VISIBILITY_SCHEMA.json`, and `schemas/aios/orchestration/runtime_state_bundle.schema.json`.
 

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-os.local/schemas/aios/orchestration/AIOS_ATTACK_TO_FINISH_CONTRACT.v1.schema.json",
+  "title": "AIOS Attack-To-Finish Contract V1",
+  "description": "Universal AIOS completion contract. Evidence and routing metadata only; grants no APPLY, approval, execution, commit, push, merge, broker, live-trading, credential, scheduler, daemon, dashboard-mutation, production, or destructive-action authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ATTACK_TO_FINISH"
+  ],
+  "properties": {
+    "ATTACK_TO_FINISH": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocker_id",
+        "blocker_status",
+        "exact_blocker",
+        "canonical_owner_file",
+        "test_file",
+        "runner_script",
+        "missing_evidence_field",
+        "unlock_status_required",
+        "next_packet_name",
+        "owner_action_required",
+        "stop_condition",
+        "no_bloat_guard"
+      ],
+      "properties": {
+        "blocker_id": {
+          "type": "string",
+          "enum": [
+            "BRANCH_MISMATCH",
+            "DIRTY_STATE_OUTSIDE_ALLOWED_FILES",
+            "MISSING_CANONICAL_OWNER",
+            "DUPLICATE_OWNER_RISK",
+            "MISSING_VALIDATOR",
+            "UNSAFE_RUNNER",
+            "CREDENTIAL_API_BROKER_BANK_LIVE_ACTION_RISK",
+            "FAILED_VALIDATOR",
+            "UNCLEAR_UNLOCK_CONDITION",
+            "UNCLEAR_OWNER_APPROVAL_REQUIREMENT",
+            "MISSING_EVIDENCE_FIELD",
+            "PACKET_CHAIN_GAP",
+            "NO_BLOCKER"
+          ]
+        },
+        "blocker_status": {
+          "$ref": "#/$defs/status"
+        },
+        "exact_blocker": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_owner_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "test_file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runner_script": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_evidence_field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unlock_status_required": {
+          "$ref": "#/$defs/status"
+        },
+        "next_packet_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "owner_action_required": {
+          "type": "string",
+          "minLength": 1
+        },
+        "stop_condition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "no_bloat_guard": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "PROVEN",
+        "PARTIAL",
+        "NOT_PROVEN",
+        "BLOCKED",
+        "REVIEW_REQUIRED",
+        "READY_FOR_OWNER_REVIEW",
+        "OWNER_APPROVED",
+        "COMPLETE"
+      ]
+    }
+  }
+}
