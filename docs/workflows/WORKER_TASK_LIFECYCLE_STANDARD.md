@@ -340,3 +340,9 @@ The next safe action should be one of:
 - a stop point.
 
 The next safe action must not be commit, push, merge, deployment, live trading, broker execution, secret handling, auto-repair, or uncontrolled automation unless the user has separately approved that protected action.
+
+## Attack-To-Finish Completion Requirement
+
+Every future completion packet must include an `ATTACK_TO_FINISH` block governed by `docs/governance/AIOS_ATTACK_TO_FINISH_CONTRACT_V1.md` and validated against `schemas/aios/orchestration/AIOS_ATTACK_TO_FINISH_CONTRACT.v1.schema.json` when machine validation is required.
+
+The block must name the exact blocker, canonical owner file, test or validator, runner or script, missing evidence field, unlock status, next packet, owner action, stop condition, and no-bloat guard. It remains evidence and routing metadata only; it does not approve APPLY, commit, push, merge, live trading, broker execution, credential handling, production mutation, worker launch, scheduler creation, daemon creation, or dashboard mutation.

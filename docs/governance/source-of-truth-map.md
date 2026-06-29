@@ -15,6 +15,7 @@ These ownership decisions are approved for planning and future cleanup packets. 
 | Root identity | `README.md`, `AGENTS.md`, and protected root docs | Root authority wins over drafts, archives, generated reports, and CLEAN-era source material |
 | Governance/docs authority | `docs/governance/`, `docs/workflows/`, `docs/security/`, `docs/architecture/`, `docs/audits/` | Update existing canonical docs before creating new authority |
 | Orchestration | `automation/orchestration/` and `automation/orchestration/README.md` with named canonical subfolders | Keep old/example/reference files until references are checked |
+| Attack-to-finish completion contract | `docs/governance/AIOS_ATTACK_TO_FINISH_CONTRACT_V1.md` with schema `schemas/aios/orchestration/AIOS_ATTACK_TO_FINISH_CONTRACT.v1.schema.json` | Future completion packets must emit exact blocker, owner, validator, runner, evidence, unlock, next-packet, owner-action, stop-condition, and no-bloat fields |
 | Campaign registry | `automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json` and `automation/orchestration/campaign_registry/Get-AiOsCampaignNextTask.DRY_RUN.ps1` | Campaign selection is read-only routing evidence unless a separate APPLY packet changes registry state |
 | Worker registry | `automation/orchestration/workers/AIOS_WORKER_REGISTRY.json` | Treat other registries as presentation, legacy, or REVIEW_REQUIRED until validated |
 | Worker inbox | `automation/orchestration/workers/inbox/AIOS_WORKER_INBOX.json` | Protect active inbox state from cleanup |
