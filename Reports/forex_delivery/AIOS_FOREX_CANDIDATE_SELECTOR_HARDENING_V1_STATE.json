@@ -1,0 +1,65 @@
+{
+  "selector_status": "REVIEW_READY_CANDIDATE_SELECTED",
+  "candidates_evaluated": 3,
+  "selected_candidate": {
+    "candidate_id": "CANDIDATE-EURUSD-C1",
+    "trade_count": 42,
+    "expectancy": 0.34,
+    "profit_factor": 1.62,
+    "max_drawdown_percent": 7.5,
+    "walkforward_evidence": true,
+    "evidence_depth_score": 86,
+    "mitigation_worsened": false,
+    "owner_review_ready": true,
+    "score": 137
+  },
+  "rejected_candidates": [
+    {
+      "candidate_id": "CANDIDATE-GBPUSD-WEAK",
+      "reasons": [
+        "insufficient_sample",
+        "low_profit_factor",
+        "missing_walk_forward_evidence",
+        "weak_evidence_depth",
+        "missing_owner_review_readiness"
+      ]
+    },
+    {
+      "candidate_id": "CANDIDATE-USDJPY-DRAWDOWN",
+      "reasons": [
+        "excessive_drawdown",
+        "mitigation_worsened"
+      ]
+    }
+  ],
+  "rejection_reasons": {
+    "CANDIDATE-GBPUSD-WEAK": [
+      "insufficient_sample",
+      "low_profit_factor",
+      "missing_walk_forward_evidence",
+      "weak_evidence_depth",
+      "missing_owner_review_readiness"
+    ],
+    "CANDIDATE-USDJPY-DRAWDOWN": [
+      "excessive_drawdown",
+      "mitigation_worsened"
+    ]
+  },
+  "selection_reason": "highest_scored_candidate_after_sample_expectancy_profit_factor_drawdown_walkforward_depth_mitigation_and_owner_review_gates",
+  "best_candidate_score": 137,
+  "promotion_allowed": true,
+  "promotion_blockers": [],
+  "safe_next_action": "Send selected review-ready candidate to owner review gate.",
+  "packet_id": "PKT-FOREX-EVIDENCE-CANDIDATE-DEMO-READINESS-CONSOLIDATED-V1",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "env_read": false,
+  "account_identifiers_used": false,
+  "order_execution": false,
+  "demo_authorized": false,
+  "live_authorized": false,
+  "scheduler_started": false,
+  "daemon_started": false,
+  "webhook_started": false,
+  "background_loop_started": false
+}

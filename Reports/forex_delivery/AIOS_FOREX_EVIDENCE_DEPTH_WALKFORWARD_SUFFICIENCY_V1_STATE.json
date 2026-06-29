@@ -1,0 +1,42 @@
+{
+  "sufficiency_status": "INSUFFICIENT_EVIDENCE_DEPTH_BLOCKED",
+  "minimum_required_trade_count": 30,
+  "observed_trade_count": 24,
+  "minimum_required_walkforward_windows": 6,
+  "observed_walkforward_windows": 4,
+  "insufficient_sample_block": true,
+  "walkforward_gate_cleared": false,
+  "evidence_depth_score": 73,
+  "evidence_quality_flags": [
+    "trade_count_below_minimum",
+    "walkforward_windows_below_minimum",
+    "evidence_depth_score_below_promotion_threshold"
+  ],
+  "promotion_allowed": false,
+  "promotion_blockers": [
+    "insufficient_sample",
+    "walkforward_window_insufficiency",
+    "weak_evidence_depth"
+  ],
+  "required_next_evidence": [
+    "add_more_reviewed_trade_samples_until_minimum_count_is_met",
+    "add_more_walkforward_windows_until_minimum_window_count_is_met",
+    "raise_evidence_depth_score_before_promotion"
+  ],
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "epic_id": "EPC-FOREX-AUTONOMY-COMPLETION-001",
+  "bucket_id": "BKT-FOREX-EVIDENCE-CANDIDATE-DEMO-READINESS-001",
+  "packet_id": "PKT-FOREX-EVIDENCE-CANDIDATE-DEMO-READINESS-CONSOLIDATED-V1",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "env_read": false,
+  "account_identifiers_used": false,
+  "order_execution": false,
+  "demo_authorized": false,
+  "live_authorized": false,
+  "scheduler_started": false,
+  "daemon_started": false,
+  "webhook_started": false,
+  "background_loop_started": false
+}
