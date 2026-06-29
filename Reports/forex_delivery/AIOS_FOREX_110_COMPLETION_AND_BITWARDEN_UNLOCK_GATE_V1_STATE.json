@@ -1,0 +1,150 @@
+{
+  "gate_status": "FOREX_110_REPO_SAFE_GATE_COMPLETE",
+  "forex_repo_safe_completion_percent": 100,
+  "dashboard_extra_completion_percent": 10,
+  "total_forex_completion_percent": 110,
+  "forex_110_complete": true,
+  "bitwarden_unlocked": false,
+  "bitwarden_blocked_reason": "Bitwarden, Vaultwarden, secrets migration, and token storage remain locked inside this packet. Planning may begin only after this Forex 110 gate is merged to main and owner confirms.",
+  "required_forex_artifacts": [
+    "Reports/forex_delivery/AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_OVERNIGHT_REPO_SAFE_CAMPAIGN_PLANNER_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_NEXT_REPO_SAFE_QUEUE_V1_STATE.json"
+  ],
+  "required_forex_artifacts_present": {
+    "Reports/forex_delivery/AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json": true,
+    "Reports/forex_delivery/AIOS_FOREX_OVERNIGHT_REPO_SAFE_CAMPAIGN_PLANNER_V1_STATE.json": true,
+    "Reports/forex_delivery/AIOS_FOREX_EVIDENCE_DEPTH_WALKFORWARD_SUFFICIENCY_V1_STATE.json": true,
+    "Reports/forex_delivery/AIOS_FOREX_CANDIDATE_SELECTOR_HARDENING_V1_STATE.json": true,
+    "Reports/forex_delivery/AIOS_FOREX_DEMO_READINESS_DECISION_V1_STATE.json": true,
+    "Reports/forex_delivery/AIOS_FOREX_NEXT_REPO_SAFE_QUEUE_V1_STATE.json": true
+  },
+  "missing_forex_artifacts": [],
+  "dashboard_end_user_contract_status": {
+    "status": "DEFINED",
+    "required_contract_docs": [
+      "docs/trading_lab/forex/FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md",
+      "docs/trading_lab/forex/FOREX_DASHBOARD_EMOJI_WINDOW_MAP_FINAL_V1.md"
+    ],
+    "required_contract_docs_present": {
+      "docs/trading_lab/forex/FOREX_DASHBOARD_END_USER_FINAL_UX_V1.md": true,
+      "docs/trading_lab/forex/FOREX_DASHBOARD_EMOJI_WINDOW_MAP_FINAL_V1.md": true
+    }
+  },
+  "dashboard_emoji_windows": [
+    {
+      "emoji": "🏛️",
+      "label": "Command Center",
+      "default": "overall Forex 110 status and next safe action"
+    },
+    {
+      "emoji": "🛡️",
+      "label": "Safety Gate",
+      "default": "blocked/protected action state"
+    },
+    {
+      "emoji": "🎯",
+      "label": "Candidate",
+      "default": "selected candidate readiness summary"
+    },
+    {
+      "emoji": "📊",
+      "label": "Evidence",
+      "default": "evidence sufficiency summary"
+    },
+    {
+      "emoji": "🚧",
+      "label": "Broker Boundary",
+      "default": "owner-gated broker boundary state"
+    },
+    {
+      "emoji": "💰",
+      "label": "Profit Readiness",
+      "default": "profit readiness status only"
+    },
+    {
+      "emoji": "📁",
+      "label": "Reports",
+      "default": "report index and expandable detail windows"
+    },
+    {
+      "emoji": "🆘",
+      "label": "SOS",
+      "default": "critical stop/blocker escalation only"
+    },
+    {
+      "emoji": "⚙️",
+      "label": "Settings",
+      "default": "display preferences without execution controls"
+    },
+    {
+      "emoji": "🔒",
+      "label": "Secrets Later",
+      "default": "Bitwarden remains locked until merge and owner confirmation"
+    }
+  ],
+  "dashboard_critical_display_rules": [
+    "Show critical status by default.",
+    "Show active blocker by default.",
+    "Show next safe action by default.",
+    "Show safety state by default.",
+    "Do not show secret values.",
+    "Do not show broker account identifiers.",
+    "Do not show order execution data.",
+    "Do not show demo or live authorization controls."
+  ],
+  "dashboard_hidden_heavy_data_rules": [
+    "Hide raw broker data behind report/detail windows.",
+    "Hide raw trade data behind report/detail windows.",
+    "Hide raw metadata behind report/detail windows.",
+    "Hide long validator logs behind report/detail windows.",
+    "Hide internal state dumps behind report/detail windows."
+  ],
+  "dashboard_overwhelm_prevention_rules": [
+    "Use emoji/picture-style clickable button and window labels.",
+    "Keep the first view to critical information only.",
+    "No dashboard chaos.",
+    "No micro-data overload.",
+    "No broker-heavy raw data in the default view."
+  ],
+  "protected_broker_boundary_status": "PROTECTED_AND_SEPARATE",
+  "protected_broker_boundary_handoff": {
+    "status": "OWNER_GATED",
+    "blocked_actions": [
+      "broker contact",
+      "credential use",
+      ".env access",
+      "account identifier use",
+      "broker account inspection",
+      "order execution",
+      "demo authorization",
+      "live authorization",
+      "scheduler daemon webhook worker watcher listener background loop"
+    ]
+  },
+  "next_project_allowed": "Bitwarden planning may begin only after this Forex 110 gate is merged to main and owner confirms.",
+  "safe_next_action": "Review this local commit, open a PR when ready, merge the Forex 110 gate to main, then request owner confirmation before any Bitwarden planning begins.",
+  "mission_id": "MISSION-AIOS-FOREX-FINISH-LINE-V1",
+  "program_id": "PROGRAM-FOREX-PROFIT-AUTONOMY-V1",
+  "epic_id": "EPC-FOREX-AUTONOMY-COMPLETION-001",
+  "bucket_id": "BKT-FOREX-110-COMPLETION-BITWARDEN-LOCK-001",
+  "packet_id": "PKT-FOREX-110-COMPLETION-AND-BITWARDEN-UNLOCK-GATE-V1",
+  "broker_api_used": false,
+  "credentials_used": false,
+  "env_read": false,
+  "account_identifiers_used": false,
+  "order_execution": false,
+  "demo_authorized": false,
+  "live_authorized": false,
+  "scheduler_started": false,
+  "daemon_started": false,
+  "webhook_started": false,
+  "background_loop_started": false,
+  "bitwarden_started": false,
+  "vaultwarden_started": false,
+  "secrets_migration_started": false,
+  "token_storage_started": false
+}
