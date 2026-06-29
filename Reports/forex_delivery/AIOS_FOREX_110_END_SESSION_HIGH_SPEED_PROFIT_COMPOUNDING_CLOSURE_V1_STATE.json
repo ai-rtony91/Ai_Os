@@ -1,0 +1,595 @@
+{
+  "schema_version": "aios.forex_110.end_session_high_speed_profit_compounding_closure.v1",
+  "packet_id": "PKT-FOREX-110-END-SESSION-HIGH-SPEED-PROFIT-COMPOUNDING-CLOSURE-V1",
+  "end_session_closure_status": "BLOCKED",
+  "gate_statuses": {
+    "profit_proof_status": "NOT_PROVEN",
+    "return_target_proof_status": "NOT_PROVEN",
+    "22h_6d_proof_status": "NOT_PROVEN",
+    "broker_readonly_proof_status": "PARTIAL",
+    "safety_risk_proof_status": "BLOCKED",
+    "latency_proof_status": "REVIEW_REQUIRED",
+    "compounding_status": "BLOCKED",
+    "broker_bank_money_rail_status": "PARTIAL",
+    "vacation_grade_completion_status": "BLOCKED"
+  },
+  "tests_run": [
+    "tests/forex_engine/test_profitability_evidence_intake_v1.py",
+    "tests/forex_engine/test_persistent_profitability_evidence_v1.py",
+    "tests/forex_engine/test_profit_validation_loop_v1.py",
+    "tests/forex_engine/test_profit_proof_ledger_v1.py",
+    "tests/forex_engine/test_paper_profitability_evaluator.py",
+    "tests/forex_engine/test_strategy_evaluation_harness.py",
+    "tests/forex_engine/test_strategy_proof_engine_v1.py",
+    "tests/forex_engine/test_walk_forward_oos_evidence_v1.py",
+    "tests/forex_engine/test_walk_forward_evidence_intake_v1.py",
+    "tests/forex_engine/test_walkforward_validation_harness.py",
+    "tests/forex_engine/test_walk_forward_depth_r_v1.py",
+    "tests/forex_engine/test_profit_milestone_100_120_tracker_v1.py",
+    "tests/forex_engine/test_expectancy_ticket_gate_closure_v1.py",
+    "tests/forex_engine/test_next_trade_eligibility_repeat_proof_gate_v1.py",
+    "tests/forex_engine/test_broker_connection_proof_boundary_readiness_v1.py",
+    "tests/forex_engine/test_broker_read_only_snapshot_contract_v1.py",
+    "tests/forex_engine/test_sanitized_broker_snapshot_intake_v1.py",
+    "tests/forex_engine/test_broker_health_readonly_v1.py",
+    "tests/forex_engine/test_supervised_observation_22h6d_evidence_v1.py",
+    "tests/forex_engine/test_observation_evidence_intake_v1.py",
+    "tests/forex_engine/test_trusted_profit_22_6_readiness_v1.py",
+    "tests/forex_engine/test_forex_uptime_range_planner_v1.py",
+    "tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py",
+    "tests/forex_engine/test_risk_budget_engine_v1.py",
+    "tests/forex_engine/test_risk_governor.py",
+    "tests/forex_engine/test_risk_contract.py",
+    "tests/forex_engine/test_c1_demo_order_intent_owner_approval_gate_v1.py",
+    "tests/forex_engine/test_stop_pause_resume_engine_v1.py",
+    "tests/forex_engine/test_trade_latency_baseline_reporter_v1.py",
+    "tests/forex_engine/test_broker_balance_bucket_equity_separation_v1.py",
+    "tests/forex_engine/test_balance_compounding.py",
+    "tests/forex_engine/test_dashboard_truth_summary_v1.py",
+    "tests/forex_engine/test_forex_dashboard_contract.py"
+  ],
+  "tests_passed": [
+    "tests/forex_engine/test_profitability_evidence_intake_v1.py",
+    "tests/forex_engine/test_persistent_profitability_evidence_v1.py",
+    "tests/forex_engine/test_profit_validation_loop_v1.py",
+    "tests/forex_engine/test_profit_proof_ledger_v1.py",
+    "tests/forex_engine/test_paper_profitability_evaluator.py",
+    "tests/forex_engine/test_strategy_evaluation_harness.py",
+    "tests/forex_engine/test_strategy_proof_engine_v1.py",
+    "tests/forex_engine/test_walk_forward_oos_evidence_v1.py",
+    "tests/forex_engine/test_walk_forward_evidence_intake_v1.py",
+    "tests/forex_engine/test_walkforward_validation_harness.py",
+    "tests/forex_engine/test_walk_forward_depth_r_v1.py",
+    "tests/forex_engine/test_profit_milestone_100_120_tracker_v1.py",
+    "tests/forex_engine/test_expectancy_ticket_gate_closure_v1.py",
+    "tests/forex_engine/test_next_trade_eligibility_repeat_proof_gate_v1.py",
+    "tests/forex_engine/test_broker_connection_proof_boundary_readiness_v1.py",
+    "tests/forex_engine/test_broker_read_only_snapshot_contract_v1.py",
+    "tests/forex_engine/test_sanitized_broker_snapshot_intake_v1.py",
+    "tests/forex_engine/test_broker_health_readonly_v1.py",
+    "tests/forex_engine/test_supervised_observation_22h6d_evidence_v1.py",
+    "tests/forex_engine/test_observation_evidence_intake_v1.py",
+    "tests/forex_engine/test_trusted_profit_22_6_readiness_v1.py",
+    "tests/forex_engine/test_forex_uptime_range_planner_v1.py",
+    "tests/forex_engine/test_risk_budget_engine_v1.py",
+    "tests/forex_engine/test_risk_governor.py",
+    "tests/forex_engine/test_risk_contract.py",
+    "tests/forex_engine/test_c1_demo_order_intent_owner_approval_gate_v1.py",
+    "tests/forex_engine/test_stop_pause_resume_engine_v1.py",
+    "tests/forex_engine/test_trade_latency_baseline_reporter_v1.py",
+    "tests/forex_engine/test_broker_balance_bucket_equity_separation_v1.py",
+    "tests/forex_engine/test_balance_compounding.py",
+    "tests/forex_engine/test_dashboard_truth_summary_v1.py",
+    "tests/forex_engine/test_forex_dashboard_contract.py"
+  ],
+  "tests_failed": [
+    {
+      "test": "tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py",
+      "result": "2 failed, 7 passed",
+      "failed_cases": [
+        "test_current_controller_output_keeps_all_critical_controls_blocked",
+        "test_runner_writes_state_report_and_next_packet"
+      ]
+    }
+  ],
+  "tests_missing": [],
+  "runners_run": [
+    "scripts/forex_delivery/run_profitability_evidence_intake_v1.py",
+    "scripts/forex_delivery/run_persistent_profitability_evidence_v1.py",
+    "scripts/forex_delivery/run_profit_validation_loop_v1.py",
+    "scripts/forex_delivery/run_profit_proof_ledger_v1.py",
+    "scripts/forex_delivery/run_forex_statistical_profit_proof_gate_v1.py",
+    "scripts/forex_delivery/run_strategy_proof_engine_v1.py",
+    "scripts/forex_delivery/run_walk_forward_oos_evidence_v1.py",
+    "scripts/forex_delivery/run_walk_forward_evidence_intake_v1.py",
+    "scripts/forex_delivery/run_evidence_depth_walkforward_sufficiency_v1.py",
+    "scripts/forex_delivery/run_next_trade_eligibility_repeat_proof_gate_v1.py",
+    "scripts/forex_delivery/run_risk_budget_engine_v1.py",
+    "scripts/forex_delivery/run_broker_connection_proof_boundary_readiness_v1.py",
+    "scripts/forex_delivery/run_sanitized_broker_snapshot_intake_v1.py",
+    "scripts/forex_delivery/run_broker_health_readonly_v1.py",
+    "scripts/forex_delivery/run_supervised_observation_22h6d_evidence_v1.py",
+    "scripts/forex_delivery/run_observation_evidence_intake_v1.py",
+    "scripts/forex_delivery/run_trusted_profit_22_6_readiness_v1.py",
+    "scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py",
+    "scripts/forex_delivery/run_forex_owner_safety_evidence_artifact_verifier_v1.py",
+    "scripts/forex_delivery/run_dashboard_truth_summary_v1.py",
+    "scripts/forex_delivery/run_broker_balance_bucket_equity_separation_v1.py",
+    "scripts/forex_delivery/run_funding_readiness_transfer_gate_v1.py",
+    "scripts/forex_delivery/run_forex_110_vacation_grade_profit_engine_v1.py"
+  ],
+  "runners_passed": [
+    "scripts/forex_delivery/run_profitability_evidence_intake_v1.py",
+    "scripts/forex_delivery/run_persistent_profitability_evidence_v1.py",
+    "scripts/forex_delivery/run_profit_validation_loop_v1.py",
+    "scripts/forex_delivery/run_profit_proof_ledger_v1.py",
+    "scripts/forex_delivery/run_forex_statistical_profit_proof_gate_v1.py",
+    "scripts/forex_delivery/run_strategy_proof_engine_v1.py",
+    "scripts/forex_delivery/run_walk_forward_oos_evidence_v1.py",
+    "scripts/forex_delivery/run_walk_forward_evidence_intake_v1.py",
+    "scripts/forex_delivery/run_evidence_depth_walkforward_sufficiency_v1.py",
+    "scripts/forex_delivery/run_next_trade_eligibility_repeat_proof_gate_v1.py",
+    "scripts/forex_delivery/run_risk_budget_engine_v1.py",
+    "scripts/forex_delivery/run_broker_connection_proof_boundary_readiness_v1.py",
+    "scripts/forex_delivery/run_sanitized_broker_snapshot_intake_v1.py",
+    "scripts/forex_delivery/run_broker_health_readonly_v1.py",
+    "scripts/forex_delivery/run_supervised_observation_22h6d_evidence_v1.py",
+    "scripts/forex_delivery/run_observation_evidence_intake_v1.py",
+    "scripts/forex_delivery/run_trusted_profit_22_6_readiness_v1.py",
+    "scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py",
+    "scripts/forex_delivery/run_forex_owner_safety_evidence_artifact_verifier_v1.py",
+    "scripts/forex_delivery/run_dashboard_truth_summary_v1.py",
+    "scripts/forex_delivery/run_broker_balance_bucket_equity_separation_v1.py",
+    "scripts/forex_delivery/run_funding_readiness_transfer_gate_v1.py",
+    "scripts/forex_delivery/run_forex_110_vacation_grade_profit_engine_v1.py"
+  ],
+  "runners_failed": [],
+  "runners_missing": [],
+  "runners_skipped": [],
+  "reports_read": [
+    "Reports/forex_delivery/AIOS_FOREX_110_REAL_COMPLETION_REFOCUS_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_110_VACATION_GRADE_PROFIT_ENGINE_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_REAL_EVIDENCE_INTAKE_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_PROFIT_PROOF_LEDGER_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_PROFITABILITY_VERDICT_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_STATISTICAL_PROFIT_PROOF_GATE_V1.md",
+    "Reports/forex_delivery/AIOS_FOREX_READINESS_MATRIX_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_WALKFORWARD_OOS_CLOSURE_V2_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_REPLAY_WALKFORWARD_PROFITABILITY_EVIDENCE_VALIDATION_V1_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_22H6D_OBSERVATION_CLOSURE_V2_REPORT.md",
+    "Reports/forex_delivery/AIOS_FOREX_TRADE_LATENCY_BASELINE_REPORTER_V1_REPORT.md"
+  ],
+  "states_read": [
+    "Reports/forex_delivery/AIOS_FOREX_110_REAL_COMPLETION_REFOCUS_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_110_VACATION_GRADE_PROFIT_ENGINE_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_BROKER_CONNECTION_PROOF_BOUNDARY_READINESS_V1_STATE.json",
+    "Reports/forex_delivery/AIOS_FOREX_CRITICAL_SAFETY_EVIDENCE_CLOSURE_V1_STATE.json"
+  ],
+  "evidence_found": [
+    "local deterministic replay/profit/walk-forward chain exists",
+    "profit proof ledger exists",
+    "statistical proof gate sample can return ready while blocking execution authority",
+    "strategy proof and candidate review-only evidence exists",
+    "broker-read-only boundary and sanitized intake gates exist",
+    "22H/6D parsers and planning gates exist",
+    "risk budget/governor/owner-approval/stop-pause-resume controls exist",
+    "latency reporter exists",
+    "balance compounding and funding readiness review-only gates exist",
+    "dashboard truth summary tests pass"
+  ],
+  "evidence_missing": [
+    "persistent positive expectancy after costs with sufficient current sample",
+    "walk-forward/OOS sufficiency and current segment counts in final evidence",
+    "repeatable 25% to 100% good-day return proof",
+    "repeatable up-to-120% phenomenal-day return proof",
+    "real 22H/6D observed hours/sessions/days/interruption/manual override/freshness evidence",
+    "complete sanitized broker-read-only source label/freshness/reachability/positions/P&L/margin/history writeback evidence",
+    "critical safety proof for kill switch, daily stop, max loss, and monitoring",
+    "current end-to-end execution-path latency evidence",
+    "realized-profit proof and owner-approved compounding gate",
+    "separate owner financial-rail approval for deposits, withdrawals, and broker/bank transfers"
+  ],
+  "next_packet_chain": [
+    "PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1",
+    "PKT-FOREX-110-RETURN-TARGET-VALIDATION-TRUTH-LOCK-V1",
+    "PKT-FOREX-110-WALKFORWARD-OOS-SUFFICIENCY-TRUTH-LOCK-V1",
+    "PKT-FOREX-110-CRITICAL-SAFETY-EVIDENCE-REPAIR-V1",
+    "PKT-FOREX-110-BROKER-READONLY-EVIDENCE-CLOSURE-V1",
+    "PKT-FOREX-110-LATENCY-EXECUTION-PATH-PROOF-V1",
+    "PKT-FOREX-110-DEMO-AUTHORIZATION-GO-NOGO-V1",
+    "PKT-FOREX-110-LIVE-MICRO-EXCEPTION-GO-NOGO-V1",
+    "PKT-FOREX-110-COMPOUNDING-GATE-GO-NOGO-V1",
+    "PKT-FOREX-110-VACATION-MODE-ARMING-GO-NOGO-V1"
+  ],
+  "attack_to_finish": [
+    {
+      "priority": 1,
+      "gate": "profit_proof",
+      "exact_blocker": "Persistent profitability is below the owner standard; current repo evidence does not prove positive expectancy after costs with sufficient current sample and drawdown bounds.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/persistent_profitability_evidence_v1.py",
+        "automation/forex_engine/profitability_evidence_intake_v1.py",
+        "automation/forex_engine/profit_proof_ledger_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_persistent_profitability_evidence_v1.py",
+        "tests/forex_engine/test_profitability_evidence_intake_v1.py",
+        "tests/forex_engine/test_profit_proof_ledger_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_persistent_profitability_evidence_v1.py",
+        "scripts/forex_delivery/run_profitability_evidence_intake_v1.py",
+        "scripts/forex_delivery/run_profit_proof_ledger_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "persistent_profitability_proof",
+        "positive_expectancy_after_costs",
+        "minimum_profitable_periods",
+        "consecutive_profitable_periods",
+        "max_drawdown_threshold_met",
+        "profit_factor_threshold_met"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "profit_proof_status=PROVEN",
+      "exact_next_packet_name": "PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1",
+      "exact_owner_action_required": "Provide or approve only sanitized realized/paper evidence sources for profit proof; no broker/API/credential action."
+    },
+    {
+      "priority": 2,
+      "gate": "return_target_proof",
+      "exact_blocker": "25%-100% good-day return and up-to-120% phenomenal-day return are target language only; repeatable risk-adjusted proof is missing.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/profit_milestone_100_120_tracker_v1.py",
+        "automation/forex_engine/expectancy_ticket_gate_closure_v1.py",
+        "automation/forex_engine/next_trade_eligibility_repeat_proof_gate_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_profit_milestone_100_120_tracker_v1.py",
+        "tests/forex_engine/test_expectancy_ticket_gate_closure_v1.py",
+        "tests/forex_engine/test_next_trade_eligibility_repeat_proof_gate_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_forex_statistical_profit_proof_gate_v1.py",
+        "scripts/forex_delivery/run_next_trade_eligibility_repeat_proof_gate_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "good_day_return_25_100_repeatable",
+        "phenomenal_day_return_120_repeatable",
+        "return_distribution_by_candidate",
+        "risk_adjusted_target_realism",
+        "target_band_failure_analysis"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "return_target_proof_status=PROVEN",
+      "exact_next_packet_name": "PKT-FOREX-110-RETURN-TARGET-VALIDATION-TRUTH-LOCK-V1",
+      "exact_owner_action_required": "Approve target validation as proof/reject work only; do not approve trading or compounding from target evidence."
+    },
+    {
+      "priority": 3,
+      "gate": "walk_forward_oos_sufficiency",
+      "exact_blocker": "Final evidence still lacks current walk-forward/OOS sufficiency and segment counts in the closure chain.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/walk_forward_evidence_intake_v1.py",
+        "automation/forex_engine/walk_forward_oos_evidence_v1.py",
+        "automation/forex_engine/walk_forward_depth_r_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_walk_forward_evidence_intake_v1.py",
+        "tests/forex_engine/test_walk_forward_oos_evidence_v1.py",
+        "tests/forex_engine/test_walk_forward_depth_r_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_walk_forward_evidence_intake_v1.py",
+        "scripts/forex_delivery/run_walk_forward_oos_evidence_v1.py",
+        "scripts/forex_delivery/run_evidence_depth_walkforward_sufficiency_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "oos_segments_total",
+        "oos_segments_passed",
+        "walk_forward_windows_total",
+        "walk_forward_windows_passed",
+        "regime_coverage",
+        "sample_depth_r"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "walk_forward_oos_status=PROVEN",
+      "exact_next_packet_name": "PKT-FOREX-110-WALKFORWARD-OOS-SUFFICIENCY-TRUTH-LOCK-V1",
+      "exact_owner_action_required": "Provide sanitized walk-forward/OOS source evidence if repo evidence is incomplete."
+    },
+    {
+      "priority": 4,
+      "gate": "risk_and_safety_closure",
+      "exact_blocker": "Critical safety closure is not proven; focused safety test failed and kill switch, daily stop, max loss, and monitoring remain blocked.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/forex_critical_safety_evidence_closure_v1.py",
+        "automation/forex_engine/risk_budget_engine_v1.py",
+        "automation/forex_engine/risk_governor.py",
+        "automation/forex_engine/stop_pause_resume_engine_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_forex_critical_safety_evidence_closure_v1.py",
+        "tests/forex_engine/test_risk_budget_engine_v1.py",
+        "tests/forex_engine/test_risk_governor.py",
+        "tests/forex_engine/test_stop_pause_resume_engine_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_forex_critical_safety_evidence_closure_v1.py",
+        "scripts/forex_delivery/run_risk_budget_engine_v1.py",
+        "scripts/forex_delivery/run_forex_owner_safety_evidence_artifact_verifier_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "kill_switch_state",
+        "daily_stop_state",
+        "max_loss_state",
+        "monitoring_ready",
+        "evidence_age_days",
+        "one_order_only_proof",
+        "sltp_proof",
+        "emergency_stop_proof"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "safety_risk_proof_status=PROVEN",
+      "exact_next_packet_name": "PKT-FOREX-110-CRITICAL-SAFETY-EVIDENCE-REPAIR-V1",
+      "exact_owner_action_required": "Collect/approve sanitized owner safety evidence for the blocked controls; no execution approval."
+    },
+    {
+      "priority": 5,
+      "gate": "broker_readonly_proof",
+      "exact_blocker": "Broker-read-only evidence is partial; sanitized read-only source, freshness, reachability, P/L, position, margin, and writeback proof are missing.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/broker_connection_proof_boundary_readiness_v1.py",
+        "automation/forex_engine/broker_read_only_snapshot_contract_v1.py",
+        "automation/forex_engine/sanitized_broker_snapshot_intake_v1.py",
+        "automation/forex_engine/broker_health_readonly_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_broker_connection_proof_boundary_readiness_v1.py",
+        "tests/forex_engine/test_broker_read_only_snapshot_contract_v1.py",
+        "tests/forex_engine/test_sanitized_broker_snapshot_intake_v1.py",
+        "tests/forex_engine/test_broker_health_readonly_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_broker_connection_proof_boundary_readiness_v1.py",
+        "scripts/forex_delivery/run_sanitized_broker_snapshot_intake_v1.py",
+        "scripts/forex_delivery/run_broker_health_readonly_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "sanitized_broker_source_label",
+        "broker_account_reachable",
+        "open_positions_reconciled",
+        "daily_pl_available",
+        "realized_pl_available",
+        "unrealized_pl_available",
+        "margin_risk_available",
+        "trading_history_writeback_verified"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "broker_readonly_proof_status=PROVEN",
+      "exact_next_packet_name": "PKT-FOREX-110-BROKER-READONLY-EVIDENCE-CLOSURE-V1",
+      "exact_owner_action_required": "Provide explicit owner approval for sanitized read-only evidence collection scope; do not provide credentials to repo."
+    },
+    {
+      "priority": 6,
+      "gate": "latency_proof",
+      "exact_blocker": "High-speed execution is not proven; current market-data-to-broker-boundary latency evidence is missing; exact runner scripts/forex_delivery/run_trade_latency_baseline_reporter_v1.py is missing.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/trade_latency_baseline_reporter_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_trade_latency_baseline_reporter_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "MISSING_RUNNER: scripts/forex_delivery/run_trade_latency_baseline_reporter_v1.py",
+        "python -m pytest tests/forex_engine/test_trade_latency_baseline_reporter_v1.py -q"
+      ],
+      "exact_evidence_field_missing": [
+        "quote_received_utc",
+        "signal_generated_utc",
+        "risk_gate_started_utc",
+        "risk_gate_completed_utc",
+        "order_submit_started_utc",
+        "order_filled_utc",
+        "total_trade_cycle_ms",
+        "latency_threshold_decision"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "latency_proof_status=PROVEN",
+      "exact_next_packet_name": "PKT-FOREX-110-LATENCY-EXECUTION-PATH-PROOF-V1",
+      "exact_owner_action_required": "Provide sanitized timestamp evidence from an approved dry-run/demo evidence dictionary only."
+    },
+    {
+      "priority": 7,
+      "gate": "demo_authorization",
+      "exact_blocker": "Demo execution remains blocked until profit, OOS, broker read-only, safety, latency, and owner approval gates are proven.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/c1_demo_order_intent_owner_approval_gate_v1.py",
+        "automation/forex_engine/c1_supervised_demo_trade_readiness_review_v1.py",
+        "automation/forex_engine/supervised_demo_owner_approval_packet_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_c1_demo_order_intent_owner_approval_gate_v1.py",
+        "tests/forex_engine/test_c1_supervised_demo_trade_readiness_review_v1.py",
+        "tests/forex_engine/test_supervised_demo_owner_approval_packet_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_c1_demo_order_intent_owner_approval_gate_v1.py",
+        "scripts/forex_delivery/run_c1_supervised_demo_trade_readiness_review_v1.py",
+        "scripts/forex_delivery/run_supervised_demo_owner_approval_packet_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "owner_demo_approval_phrase",
+        "demo_trade_readiness_review_ready",
+        "sanitized_broker_snapshot_ready",
+        "risk_controls_proven",
+        "one_order_only_demo_scope"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "demo_execution_status=REVIEW_READY then owner-approved DEMO_AUTHORIZED for one scoped action",
+      "exact_next_packet_name": "PKT-FOREX-110-DEMO-AUTHORIZATION-GO-NOGO-V1",
+      "exact_owner_action_required": "Anthony must explicitly approve the exact supervised demo scope, command, stop point, and evidence bundle."
+    },
+    {
+      "priority": 8,
+      "gate": "live_micro_exception",
+      "exact_blocker": "Live micro execution is blocked by RISK_POLICY.md; no current complete owner-approved exception exists.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/oanda_supervised_live_microtrade_final_gate_v1.py",
+        "automation/forex_engine/live_micro_trade_contract.py",
+        "automation/forex_engine/oanda_supervised_live_microtrade_owner_runbook_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_oanda_supervised_live_microtrade_final_gate_v1.py",
+        "tests/forex_engine/test_live_micro_trade_contract.py",
+        "tests/forex_delivery/test_live_micro_trade_arming_gate.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_oanda_supervised_live_microtrade_final_gate_v1.py",
+        "scripts/forex_delivery/run_live_micro_trade_arming_gate.py"
+      ],
+      "exact_evidence_field_missing": [
+        "broker_path",
+        "instrument",
+        "side",
+        "units_or_notional_limit",
+        "maximum_loss",
+        "daily_loss_cap",
+        "stop_loss",
+        "order_type",
+        "approval_window",
+        "evidence_bundle",
+        "arming_step",
+        "stop_point"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "live_micro_exception_status=OWNER_APPROVED_ONE_SHOT_READY; general live remains BLOCKED",
+      "exact_next_packet_name": "PKT-FOREX-110-LIVE-MICRO-EXCEPTION-GO-NOGO-V1",
+      "exact_owner_action_required": "Anthony must provide current-session explicit one-shot live micro exception approval with every RISK_POLICY.md field."
+    },
+    {
+      "priority": 9,
+      "gate": "compounding_gate",
+      "exact_blocker": "Compounding is blocked until realized-profit proof, drawdown cap, max-loss, daily stop, compounding cap, and owner approval are proven.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/forex_supervised_compounding_policy_gate_v1.py",
+        "automation/forex_engine/balance_compounding.py",
+        "automation/forex_engine/compounding_capital_bucket_supervisor_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_forex_supervised_compounding_policy_gate_v1.py",
+        "tests/forex_engine/test_balance_compounding.py",
+        "tests/forex_engine/test_compounding_capital_bucket_supervisor_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_forex_supervised_compounding_policy_gate_v1.py",
+        "scripts/forex_delivery/run_broker_balance_bucket_equity_separation_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "realized_profit_proof",
+        "profit_lock_threshold_met",
+        "drawdown_cap",
+        "max_loss_state",
+        "daily_stop_state",
+        "compounding_cap",
+        "owner_compounding_approval"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "compounding_status=PROVEN_FOR_OWNER_REVIEW; execution still requires separate approval",
+      "exact_next_packet_name": "PKT-FOREX-110-COMPOUNDING-GATE-GO-NOGO-V1",
+      "exact_owner_action_required": "Anthony must explicitly approve compounding review after profit/safety proof; no automatic reinvestment."
+    },
+    {
+      "priority": 10,
+      "gate": "vacation_mode_armed",
+      "exact_blocker": "Vacation-grade operation is blocked until profit, return targets, OOS, safety, broker, latency, demo/live evidence, compounding, owner approval, and money-rail readiness are proven.",
+      "exact_canonical_owner_file_to_extend": [
+        "automation/forex_engine/forex_vacation_mode_readiness_orchestrator_v1.py",
+        "automation/forex_engine/forex_vacation_mode_final_readiness_decision_v1.py",
+        "automation/forex_engine/forex_110_vacation_grade_profit_engine_v1.py"
+      ],
+      "exact_test_file_to_run": [
+        "tests/forex_engine/test_forex_vacation_mode_readiness_orchestrator_v1.py",
+        "tests/forex_engine/test_forex_vacation_mode_final_readiness_decision_v1.py",
+        "tests/forex_engine/test_forex_110_vacation_grade_profit_engine_v1.py"
+      ],
+      "exact_runner_script_to_run": [
+        "scripts/forex_delivery/run_forex_vacation_mode_readiness_orchestrator_v1.py",
+        "scripts/forex_delivery/run_forex_vacation_mode_final_readiness_decision_v1.py",
+        "scripts/forex_delivery/run_forex_110_vacation_grade_profit_engine_v1.py"
+      ],
+      "exact_evidence_field_missing": [
+        "profit_proof_status",
+        "return_target_proof_status",
+        "walk_forward_oos_status",
+        "safety_risk_proof_status",
+        "broker_readonly_proof_status",
+        "latency_proof_status",
+        "compounding_status",
+        "owner_vacation_mode_approval",
+        "money_rail_readiness"
+      ],
+      "exact_status_needed_to_unlock_next_mode": "vacation_grade_completion_status=PROVEN and separate VACATION_MODE_ARMED_OWNER_APPROVED; active vacation mode remains blocked until separate activation",
+      "exact_next_packet_name": "PKT-FOREX-110-VACATION-MODE-ARMING-GO-NOGO-V1",
+      "exact_owner_action_required": "Anthony must explicitly approve vacation-mode arming after every upstream gate is proven; money movement remains separately approved."
+    }
+  ],
+  "canonical_owner_to_extend_by_gate": {
+    "profit_proof": "automation/forex_engine/profitability_evidence_intake_v1.py; automation/forex_engine/persistent_profitability_evidence_v1.py; automation/forex_engine/profit_validation_loop_v1.py; automation/forex_engine/profit_proof_ledger_v1.py",
+    "return_target_proof": "automation/forex_engine/profit_milestone_100_120_tracker_v1.py; automation/forex_engine/expectancy_ticket_gate_closure_v1.py; automation/forex_engine/next_trade_eligibility_repeat_proof_gate_v1.py",
+    "22h_6d_proof": "automation/forex_engine/supervised_observation_22h6d_evidence_v1.py; automation/forex_engine/observation_evidence_intake_v1.py; automation/forex_engine/trusted_profit_22_6_readiness_v1.py",
+    "broker_readonly_proof": "automation/forex_engine/broker_connection_proof_boundary_readiness_v1.py; automation/forex_engine/broker_read_only_snapshot_contract_v1.py; automation/forex_engine/sanitized_broker_snapshot_intake_v1.py; automation/forex_engine/broker_health_readonly_v1.py",
+    "safety_risk_proof": "automation/forex_engine/forex_critical_safety_evidence_closure_v1.py; automation/forex_engine/risk_budget_engine_v1.py; automation/forex_engine/risk_governor.py; automation/forex_engine/c1_demo_order_intent_owner_approval_gate_v1.py; automation/forex_engine/stop_pause_resume_engine_v1.py",
+    "latency_proof": "automation/forex_engine/trade_latency_baseline_reporter_v1.py",
+    "compounding": "automation/forex_engine/balance_compounding.py; automation/forex_engine/broker_balance_bucket_equity_separation_v1.py; automation/forex_engine/risk_budget_engine_v1.py",
+    "broker_bank_money_rail": "automation/forex_engine/broker_balance_bucket_equity_separation_v1.py; scripts/forex_delivery/run_funding_readiness_transfer_gate_v1.py",
+    "vacation_grade_completion": "Reports/forex_delivery/AIOS_FOREX_110_REAL_COMPLETION_REFOCUS_V1_STATE.json"
+  },
+  "exact_next_fix_by_gate": {
+    "profit_proof": "Run PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1 and close persistent after-cost profitability with current walk-forward/OOS proof.",
+    "return_target_proof": "Generate current return-distribution evidence and prove or reject 25%-100% and up-to-120% target bands under risk controls.",
+    "22h_6d_proof": "Collect sanitized real 22H/6D observation metrics and rerun observation/final evidence gates.",
+    "broker_readonly_proof": "Collect owner-approved sanitized broker read-only evidence without credentials/account identifiers and rerun broker closure.",
+    "safety_risk_proof": "Repair critical safety closure so kill switch, daily stop, max loss, monitoring, and related control tests pass.",
+    "latency_proof": "Feed current sanitized execution-path timestamps into the latency reporter and record threshold decision.",
+    "compounding": "Close profit and safety gates, then run supervised compounding policy gate for owner review only.",
+    "broker_bank_money_rail": "Create a separate owner financial-rail approval packet before any deposit, withdrawal, or transfer action.",
+    "vacation_grade_completion": "Do not claim completion until every upstream gate is PROVEN and owner approval is current."
+  },
+  "owner_operator_answer": {
+    "can_trade_today": "No. Demo/live/order execution remain blocked.",
+    "can_trade_profitably_today": "Not proven. Profit proof and return targets are not proven.",
+    "can_deposit_money_today": "No. Deposit execution remains blocked and needs separate owner financial-rail approval.",
+    "can_leave_overnight_today": "No. 22H/6D readiness is not proven.",
+    "can_compound_today": "No. Compounding remains blocked.",
+    "can_move_broker_to_bank_today": "No. Broker-to-bank transfer remains blocked.",
+    "is_high_speed_execution_proven_today": "No. Latency reporter exists, but current execution-path latency proof is not present.",
+    "is_forex_110_complete": "No. Vacation-grade completion remains blocked.",
+    "exact_blocker_remains": "Persistent profit proof, return target proof, 22H/6D observation proof, complete broker-read-only evidence, critical safety closure, latency proof, compounding approval, and money-rail approval.",
+    "exact_packet_next": "PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1"
+  },
+  "blocked_actions": {
+    "env_read": true,
+    "credential_read": true,
+    "token_read": true,
+    "api_key_read": true,
+    "broker_contact": true,
+    "broker_account_inspection": true,
+    "bank_contact": true,
+    "bank_account_inspection": true,
+    "payment_api_contact": true,
+    "order_execution": true,
+    "demo_trade_start": true,
+    "live_trade_start": true,
+    "deposit_execution": true,
+    "withdrawal_execution": true,
+    "broker_to_bank_transfer": true,
+    "bank_to_broker_transfer": true,
+    "scheduler_start": true,
+    "daemon_start": true,
+    "webhook_start": true,
+    "background_loop_start": true,
+    "server_start": true,
+    "tunnel_start": true,
+    "deployment": true,
+    "fake_profit_claim": true,
+    "fake_return_expectancy_claim": true,
+    "fake_vacation_grade_claim": true,
+    "duplicate_dashboard_creation": true,
+    "duplicate_readiness_matrix_creation": true,
+    "duplicate_broker_lane_creation": true,
+    "duplicate_safety_gate_creation": true,
+    "duplicate_profit_engine_creation": true,
+    "parallel_evidence_lane_creation": true
+  },
+  "safe_next_action": "Run PKT-FOREX-110-PROFIT-EVIDENCE-TRUTH-LOCK-V1. Do not trade, start demo/live execution, contact brokers, read credentials, move money, compound, start runtime services, stage, commit, push, PR, or merge."
+}
