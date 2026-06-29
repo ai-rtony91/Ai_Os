@@ -18,6 +18,9 @@ WALK_FORWARD_EVIDENCE_INTAKE_VERSION = "walk_forward_evidence_intake_v1"
 DEFAULT_REPORT_ROOT = Path("Reports/forex_delivery")
 READINESS_JSON = "readiness_state_recalculation_v1_report.json"
 WALK_FORWARD_REPORTS = (
+    "AIOS_FOREX_110_C2_WALKFORWARD_OOS_SOURCE_V1.md",
+    "AIOS_FOREX_110_C2_REAL_WALKFORWARD_OOS_HARNESS_V1_SOURCE.md",
+    "AIOS_FOREX_110_C2_REAL_WALKFORWARD_OOS_HARNESS_V1_REPORT.md",
     "AIOS_FOREX_WALK_FORWARD_DEPTH_PACKET_R_V1_REPORT.md",
     "AIOS_FOREX_WALK_FORWARD_WINDOW_MATRIX_V1.md",
     "AIOS_FOREX_C1_EUR_BUY_WALK_FORWARD_STABILITY_SCOREBOARD_V1.md",
@@ -41,16 +44,16 @@ def intake_walk_forward_evidence(report_root: str | Path = DEFAULT_REPORT_ROOT) 
     notes: list[str] = []
     summary: dict[str, Any] = {}
 
+    for path in _candidate_report_paths(root, WALK_FORWARD_REPORTS, WALK_FORWARD_DISCOVERY_PATTERN):
+        sources.append(_display_path(path))
+        text = path.read_text(encoding="utf-8")
+        _merge_if_present(summary, _summary_from_markdown(text, notes))
+
     readiness_path = root / READINESS_JSON
     readiness = _read_json(readiness_path)
     if readiness:
         sources.append(_display_path(readiness_path))
         _merge_if_present(summary, _thresholds_from_readiness_json(readiness))
-
-    for path in _candidate_report_paths(root, WALK_FORWARD_REPORTS, WALK_FORWARD_DISCOVERY_PATTERN):
-        sources.append(_display_path(path))
-        text = path.read_text(encoding="utf-8")
-        _merge_if_present(summary, _summary_from_markdown(text, notes))
 
     result = walk_forward_result_to_jsonable_dict(evaluate_walk_forward_oos_evidence(summary or None))
     return {
@@ -274,7 +277,7 @@ def _oos_segment_counts_from_tables(text: str) -> dict[str, float]:
 
 def _key_values(text: str) -> dict[str, str]:
     values: dict[str, str] = {}
-    pattern = re.compile(r"(?im)^\s*-?\s*([A-Za-z0-9 _/\-]+):\s*`?([^`\n]+?)`?\s*\.?\s*$")
+    pattern = re.compile(r"(?im)^\s*-?\s*([A-Za-z0-9 _/\-_]+):\s*`?([^`\n]+?)`?\s*\.?\s*$")
     for match in pattern.finditer(text):
         values[_key(match.group(1))] = match.group(2).strip()
     return values
