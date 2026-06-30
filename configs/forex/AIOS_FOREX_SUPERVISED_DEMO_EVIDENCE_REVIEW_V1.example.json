@@ -1,0 +1,19 @@
+{
+  "default_mode": "dry_run",
+  "current_stage": "demo_evidence_review",
+  "next_stage_after_success": "owner_micro_live_exception_approval",
+    "state_report_path": "Reports/forex_delivery/AIOS_FOREX_SUPERVISED_DEMO_EVIDENCE_REVIEW_V1_STATE.json",
+    "report_path": "Reports/forex_delivery/AIOS_FOREX_SUPERVISED_DEMO_EVIDENCE_REVIEW_V1_REPORT.md",
+  "supervised_demo_order_execution_by_this_packet": true,
+  "live_order_execution_by_this_packet": false,
+  "money_movement_by_this_packet": false,
+  "broker_api_called_by_this_packet": true,
+  "state_report_present_required": true,
+  "requires_redaction_verification": true,
+  "requires_max_one_order_verification": true,
+  "order_endpoint_redacted_by_default": true,
+  "account_id_redacted_by_default": true,
+  "scheduler_started_by_this_packet": false,
+  "daemon_started_by_this_packet": false,
+  "webhook_started_by_this_packet": false
+}
