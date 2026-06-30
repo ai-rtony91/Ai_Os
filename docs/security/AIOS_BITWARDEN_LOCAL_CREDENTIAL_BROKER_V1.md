@@ -9,8 +9,11 @@ Stop repeated Bitwarden master-password prompts by storing a Windows owner-local
 - `Register-AiosBitwardenLocalCredential.ps1` saves the Bitwarden master password to:
   `$env:LOCALAPPDATA\AIOS\Security\bitwarden-master-password.dpapi`
 - The file is encrypted with Windows DPAPI in current-user scope via
-  `ConvertFrom-SecureString`.
+  `ConvertFrom-SecureString` and written as stable single-line ASCII content using
+  `System.IO.File.WriteAllText`.
 - The file stays outside repo at `%LOCALAPPDATA%`.
+- If the stored blob becomes malformed, remove and re-register it with
+  `Register-AiosBitwardenLocalCredential.ps1` before running start helper again.
 
 ## Risk
 
@@ -49,7 +52,15 @@ Treat `AIOS` runtime access as local-user privileged, not globally trusted.
 ## Implementation notes
 
 - Start helper uses local DPAPI blob when `Env:BW_SESSION` is missing.
+- Start helper trims whitespace and BOM (`[char]0xFEFF`) from DPAPI text before
+  decryption, and exits with safe status if decryption fails.
 - Start helper calls only `bw unlock --passwordenv BW_PASSWORD --raw`.
 - Start helper clears `BW_PASSWORD` immediately and only leaves `BW_SESSION` in the current shell session.
 - `Clear-AiosBitwardenSession.ps1` clears both environment variables and calls `bw lock`.
 - Local credential file removal is handled only by `Remove-AiosBitwardenLocalCredential.ps1`.
+- If decryption fails, start helper must return:
+  - `AIOS_BITWARDEN_SESSION_READY=false`
+  - `BW_SESSION_PRESENT=false`
+  - `LOCAL_CREDENTIAL_PRESENT=true`
+  - `SAFE_NEXT_ACTION=re-register local credential`
+- The helper must never crash on malformed DPAPI blobs (fail-closed behavior).

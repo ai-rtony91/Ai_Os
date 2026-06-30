@@ -16,7 +16,8 @@ try {
         New-Item -Path $credentialDirectory -ItemType Directory -Force | Out-Null
     }
 
-    $masterPassword | ConvertFrom-SecureString | Set-Content -Path $credentialPath -Encoding UTF8
+    $encryptedCredential = ConvertFrom-SecureString -SecureString $masterPassword
+    [System.IO.File]::WriteAllText($credentialPath, $encryptedCredential, [System.Text.Encoding]::ASCII)
     $registered = $true
 
     try {

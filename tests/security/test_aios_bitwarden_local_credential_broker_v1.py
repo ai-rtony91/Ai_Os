@@ -27,7 +27,15 @@ def test_register_script_stores_in_localappdata_dpapi_file() -> None:
     assert "$env:LOCALAPPDATA" in text
     assert "AIOS\\Security" in text
     assert "bitwarden-master-password.dpapi" in text
-    assert "Set-Content" in text
+    assert "WriteAllText" in text
+
+
+def test_register_script_writes_stable_ascii_single_line_dpapi_blob() -> None:
+    text = _read(REGISTER_HELPER)
+    assert "ConvertFrom-SecureString -SecureString" in text
+    assert "[System.IO.File]::WriteAllText" in text
+    assert "[System.Text.Encoding]::ASCII" in text
+    assert "Set-Content" not in text
 
 
 def test_register_script_uses_secure_prompt_and_encrypt() -> None:
@@ -39,11 +47,32 @@ def test_register_script_uses_secure_prompt_and_encrypt() -> None:
 
 def test_register_script_does_not_print_secret_literals() -> None:
     text = _read(REGISTER_HELPER).lower()
-    assert "convertfrom-securestring | set-content" in text
+    assert "convertfrom-securestring -securestring" in text
+    assert "writealltext" in text
     assert "asplaintext" not in text
     assert "write-output" in text
     assert "aios_bitwarden_local_credential_registered" in text
     assert not re.search(r'Write-Output\s+.*\$\w+_password', text)
+
+
+def test_start_helper_normalizes_dpapi_blob_before_decrypt() -> None:
+    text = _read(START_HELPER)
+    assert "([string]$encryptedCredential).Trim()" in text
+    assert ".Trim([char]0xFEFF)" in text
+
+
+def test_start_helper_uses_explicit_securestring_parameter() -> None:
+    text = _read(START_HELPER)
+    assert "ConvertTo-SecureString -String $encryptedCredential -ErrorAction Stop" in text
+
+
+def test_start_helper_catches_malformed_dpapi_and_requests_reregister() -> None:
+    text = _read(START_HELPER).lower()
+    assert "catch" in text
+    assert "safe_next_action=re-register local credential" in text
+    assert "aios_bitwarden_session_ready=false" in text
+    assert "bw_session_present=false" in text
+    assert "local_credential_present=true" in text
 
 
 def test_start_helper_uses_passwordenv_and_never_plain_unlock() -> None:
@@ -67,6 +96,14 @@ def test_start_helper_does_not_decrypt_or_write_repo_file() -> None:
     assert "bitwarden-master-password.dpapi" in text
     assert "C:\\Dev\\Ai.Os" not in text
     assert "bw_session" in text.lower()
+
+
+def test_test_helper_uses_normalized_dpapi_read_path_and_string_securestring() -> None:
+    text = _read(TEST_HELPER)
+    assert "Get-Content -LiteralPath $credentialPath -Raw -ErrorAction Stop" in text
+    assert "([string]$encryptedCredential).Trim()" in text
+    assert "Trim([char]0xFEFF)" in text
+    assert "ConvertTo-SecureString -String $encryptedCredential -ErrorAction Stop" in text
 
 
 def test_clear_helper_removes_credentials_in_process() -> None:
