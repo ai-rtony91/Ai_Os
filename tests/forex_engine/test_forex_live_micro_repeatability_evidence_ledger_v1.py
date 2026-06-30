@@ -196,7 +196,7 @@ def test_multiple_snapshots_aggregate_pnl_and_counts(tmp_path):
 
 
 def test_output_contains_fingerprints_no_raw_secrets(tmp_path):
-    token = "TOK_SECRET_ABC123"
+    token = "EXAMPLE_TOKEN_PLACEHOLDER"
     account = "ACC-000-111111-001"
     session = "SESSION-XYZ-999"
     state = tmp_path / "state.json"
@@ -225,3 +225,4 @@ def test_no_live_or_money_or_scheduler_flags(tmp_path):
     assert payload["input"]["scheduler_started"] is False
     assert payload["input"]["daemon_started"] is False
     assert payload["input"]["webhook_started"] is False
+
