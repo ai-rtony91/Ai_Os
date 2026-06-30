@@ -1,0 +1,40 @@
+{
+  "input": {
+    "accounts_probe_called": false,
+    "bitwarden_cli_available": false,
+    "bitwarden_item_read_success": false,
+    "bitwarden_update_attempted": false,
+    "bitwarden_update_requested": false,
+    "bitwarden_update_success": false,
+    "broker_api_called": false,
+    "bw_session_present": false,
+    "daemon_started": false,
+    "live_order_execution": false,
+    "money_movement": false,
+    "order_endpoint_called": false,
+    "owner_flag_present": false,
+    "post_request_called": false,
+    "scheduler_started": false,
+    "webhook_started": false
+  },
+  "module": "run_forex_oanda_live_account_binding_repair_v1",
+  "packet_id": "AIOS-FOREX-OANDA-LIVE-ACCOUNT-BINDING-REPAIR-V1",
+  "result": {
+    "account_binding_repair_status": "ACCOUNT_BINDING_REPAIR_OWNER_RUNTIME_REQUIRED",
+    "account_binding_update_status": "",
+    "blockers": [
+      "owner runtime flag is required"
+    ],
+    "safe_next_action": "Run with --owner-approved-readonly-account-binding-inspect for read-only inspection or --owner-approved-update-bitwarden-account-binding plus --select-visible-account-index for live account binding repair."
+  },
+  "runtime_summary": {
+    "account_list_count": 0,
+    "accounts_status_code": null,
+    "configured_account_fingerprint": null,
+    "configured_account_visible": false,
+    "safe_next_action": "Run with owner runtime flag.",
+    "selected_account_fingerprint": null,
+    "selected_visible_account_index": null,
+    "visible_account_fingerprints": []
+  }
+}

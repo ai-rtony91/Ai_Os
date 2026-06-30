@@ -10,7 +10,7 @@
 - (none)
 
 ## Repo-safe gate state
-- live_order_execution: false
+- live_order_execution: true
 - demo_order_execution: false
 - money_movement: false
 - broker_api_called: true
@@ -25,5 +25,5 @@
 - order_attempt_requested: true
 - order_attempted: true
 - order_attempt_count: 1
-- order_status: not_created
-- order_status_code: 403
+- order_status: created
+- order_status_code: 201

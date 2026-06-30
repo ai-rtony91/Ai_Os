@@ -52,7 +52,7 @@
     "demo_order_execution": false,
     "env_file_read": false,
     "live_item_ref": "AIOS / OANDA / Live / Broker Runtime",
-    "live_order_execution": false,
+    "live_order_execution": true,
     "micro_live_status": "CONTROLLED_MICRO_LIVE_EXCEPTION_READY",
     "money_movement": false,
     "next_stage": "owner_execute_one_controlled_micro_live_order",
@@ -100,7 +100,7 @@
     "next_stage_after_success": "micro_live_evidence_review",
     "order_attempt_count": 1,
     "order_attempt_requested": true,
-    "order_attempt_success": false,
+    "order_attempt_success": true,
     "order_attempted": true,
     "order_endpoint": "https://api-fxtrade.oanda.com/v3/accounts/REDACTED_ACCOUNT_ID/orders",
     "order_intent_summary": "instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK",
@@ -120,10 +120,150 @@
       }
     },
     "order_response": {
-      "errorMessage": "The provided request was forbidden."
+      "lastTransactionID": "476",
+      "orderCreateTransaction": {
+        "accountID": "REDACTED_ACCOUNT_ID",
+        "batchID": "473",
+        "id": "473",
+        "instrument": "EUR_USD",
+        "positionFill": "DEFAULT",
+        "reason": "CLIENT_ORDER",
+        "requestID": "169607165892033746",
+        "stopLossOnFill": {
+          "distance": "0.00100",
+          "timeInForce": "GTC",
+          "triggerMode": "TOP_OF_BOOK"
+        },
+        "takeProfitOnFill": {
+          "distance": "0.00200",
+          "timeInForce": "GTC"
+        },
+        "time": "2026-06-30T04:30:33.198512548Z",
+        "timeInForce": "FOK",
+        "type": "MARKET_ORDER",
+        "units": "1",
+        "userID": 20533959
+      },
+      "orderFillTransaction": {
+        "accountBalance": "594.7610",
+        "accountID": "REDACTED_ACCOUNT_ID",
+        "baseFinancing": "0",
+        "batchID": "473",
+        "commission": "0.0000",
+        "financing": "0.0000",
+        "fullPrice": {
+          "asks": [
+            {
+              "liquidity": "500000",
+              "price": "1.13973"
+            },
+            {
+              "liquidity": "2500000",
+              "price": "1.13975"
+            },
+            {
+              "liquidity": "2000000",
+              "price": "1.13976"
+            },
+            {
+              "liquidity": "5000000",
+              "price": "1.13977"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.13980"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.13983"
+            }
+          ],
+          "bids": [
+            {
+              "liquidity": "500000",
+              "price": "1.13957"
+            },
+            {
+              "liquidity": "500000",
+              "price": "1.13956"
+            },
+            {
+              "liquidity": "2000000",
+              "price": "1.13955"
+            },
+            {
+              "liquidity": "2000000",
+              "price": "1.13954"
+            },
+            {
+              "liquidity": "5000000",
+              "price": "1.13953"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.13951"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.13948"
+            }
+          ],
+          "closeoutAsk": "1.13983",
+          "closeoutBid": "1.13948",
+          "timestamp": "2026-06-30T04:30:29.621446458Z"
+        },
+        "fullVWAP": "1.13973",
+        "gainQuoteHomeConversionFactor": "1",
+        "guaranteedExecutionFee": "0.0000",
+        "halfSpreadCost": "0.0001",
+        "homeConversionFactors": {
+          "gainBaseHome": {
+            "factor": "1.1282535"
+          },
+          "gainQuoteHome": {
+            "factor": "1"
+          },
+          "lossBaseHome": {
+            "factor": "1.1510465"
+          },
+          "lossQuoteHome": {
+            "factor": "1"
+          }
+        },
+        "id": "474",
+        "instrument": "EUR_USD",
+        "lossQuoteHomeConversionFactor": "1",
+        "orderID": "473",
+        "pl": "0.0000",
+        "price": "1.13973",
+        "quoteGuaranteedExecutionFee": "0",
+        "quotePL": "0",
+        "reason": "MARKET_ORDER",
+        "requestID": "169607165892033746",
+        "requestedUnits": "1",
+        "time": "2026-06-30T04:30:33.198512548Z",
+        "tradeOpened": {
+          "guaranteedExecutionFee": "0.0000",
+          "halfSpreadCost": "0.0001",
+          "initialMarginRequired": "0.0228",
+          "price": "1.13973",
+          "quoteGuaranteedExecutionFee": "0",
+          "tradeID": "474",
+          "units": "1"
+        },
+        "type": "ORDER_FILL",
+        "units": "1",
+        "userID": 20533959
+      },
+      "relatedTransactionIDs": [
+        "473",
+        "474",
+        "475",
+        "476"
+      ]
     },
-    "order_status": "not_created",
-    "order_status_code": 403,
+    "order_status": "created",
+    "order_status_code": 201,
     "owner_approved_controlled_micro_live_exception": true,
     "owner_micro_live_exception_approval_granted": true,
     "proposed_trade_risk_within_limit": true,
