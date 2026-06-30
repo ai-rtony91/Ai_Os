@@ -1,20 +1,21 @@
 # AIOS Forex Controlled Micro-Live Exception Runner V1 Report
 
 ## Packet evaluation
-- micro_live_status: OWNER_RUNTIME_LIVE_FLAG_REQUIRED
+- micro_live_status: LIVE_RUNTIME_CREDENTIAL_ACCESS_REQUIRED
 - current_stage: controlled_micro_live_exception_runner
-- next_stage: owner_run_controlled_micro_live_exception
-- runtime_mode: dry_run
-- safe_next_action: Run this packet with --owner-approved-controlled-micro-live-exception.
+- next_stage: owner_unlock_bitwarden_live_runtime
+- runtime_mode: owner_approved_controlled_micro_live_exception
+- safe_next_action: Resolve BW_SESSION, Bitwarden CLI availability, and live runtime credentials.
 - blockers:
-- live_runtime_owner_flag is False
+- bitwarden_item_read_success is False
+- live_credential_values_available_to_runtime is False
 
 ## Repo-safe gate state
 - live_order_execution: false
 - demo_order_execution: false
 - money_movement: false
 - broker_api_called: false
-- bitwarden_cli_called: false
+- bitwarden_cli_called: true
 - credentials_read: false
 - env_file_read: false
 - scheduler_started: false

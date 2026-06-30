@@ -5,6 +5,7 @@ import subprocess
 import sys
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 from automation.forex_engine.forex_controlled_micro_live_exception_runner_v1 import (
     CONTROLLED_MICRO_LIVE_EXCEPTION_READY,
@@ -246,6 +247,61 @@ def test_practice_endpoint_is_rejected(monkeypatch, tmp_path: Path):
     assert payload["runtime_summary"]["order_status"] == "not_attempted"
 
 
+def test_owner_runtime_uses_active_bw_session_for_bitwarden_item_read(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    fake_bw_item = json.dumps(
+        {
+            "fields": [
+                {"name": "broker_api_token", "value": "live-token-1"},
+                {"name": "broker_account_id", "value": "acct-1"},
+                {"name": "endpoint", "value": "https://api-fxtrade.oanda.com"},
+                {"name": "environment", "value": "live"},
+                {"name": "allowed_mode", "value": "controlled_micro_live_exception_only"},
+            ],
+        },
+    )
+    captured: dict[str, object] = {}
+
+    def fake_run(command: list[str], **kwargs: object) -> object:
+        captured["command"] = command
+        captured["env"] = kwargs.get("env")
+        return SimpleNamespace(returncode=0, stdout=fake_bw_item, stderr="")
+
+    monkeypatch.setattr(runtime_script.shutil, "which", lambda _: "bw")
+    monkeypatch.setenv("BW_SESSION", "session-token")
+    monkeypatch.setattr(runtime_script.subprocess, "run", fake_run)
+    monkeypatch.setattr(
+        runtime_script,
+        "_post_json_request",
+        lambda request_payload: ({}, 200, True),
+    )
+
+    payload = runtime_script.run_forex_controlled_micro_live_exception_runner_v1(
+        owner_approved_controlled_micro_live_exception=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=True,
+    )
+
+    command = captured.get("command")
+    env = captured.get("env")
+    assert isinstance(command, list)
+    assert isinstance(env, dict)
+    assert command == [
+        "bw",
+        "get",
+        "item",
+        "AIOS / OANDA / Live / Broker Runtime",
+        "--session",
+        "session-token",
+    ]
+    assert env.get("BW_SESSION") == "session-token"
+    assert payload["input"]["bitwarden_item_read_success"] is True
+    assert payload["result"]["micro_live_status"] == CONTROLLED_MICRO_LIVE_EXCEPTION_READY
+
+
 def test_build_order_payload_emits_market_and_units_orientation():
     buy_input = _runtime_ready_input()
     buy_payload = runtime_script._build_order_payload(buy_input)
@@ -259,6 +315,48 @@ def test_build_order_payload_emits_market_and_units_orientation():
     zero_input = _runtime_ready_input(units=0)
     zero_payload = runtime_script._build_order_payload(zero_input)
     assert zero_payload["order"]["units"] == "1"
+
+
+def test_report_and_state_do_not_write_raw_runtime_secrets(tmp_path: Path, monkeypatch) -> None:
+    fake_item = {
+        "broker_api_token": "very-secret-live-token",
+        "broker_account_id": "very-secret-account-id",
+        "endpoint": "https://api-fxtrade.oanda.com",
+        "environment": "live",
+        "allowed_mode": "controlled_micro_live_exception_only",
+    }
+
+    monkeypatch.setattr(runtime_script.shutil, "which", lambda _: "bw")
+    monkeypatch.setenv("BW_SESSION", "session-token")
+    monkeypatch.setattr(
+        runtime_script,
+        "_read_broker_runtime_item",
+        lambda: fake_item,
+    )
+    monkeypatch.setattr(
+        runtime_script,
+        "_post_json_request",
+        lambda request_payload: ({"orderId": "abc"}, 201, True),
+    )
+
+    state_path = tmp_path / "state.json"
+    report_path = tmp_path / "report.md"
+    payload = runtime_script.run_forex_controlled_micro_live_exception_runner_v1(
+        owner_approved_controlled_micro_live_exception=True,
+        state_output=state_path,
+        report_output=report_path,
+        write_report=True,
+    )
+
+    assert payload["result"]["micro_live_status"] == CONTROLLED_MICRO_LIVE_EXCEPTION_READY
+    assert payload["runtime_summary"]["order_attempt_success"] is True
+
+    state_text = state_path.read_text(encoding="utf-8")
+    report_text = report_path.read_text(encoding="utf-8")
+    assert "very-secret-live-token" not in state_text
+    assert "very-secret-account-id" not in state_text
+    assert "very-secret-live-token" not in report_text
+    assert "very-secret-account-id" not in report_text
 
 
 def test_max_one_order_attempt_is_enforced(monkeypatch, tmp_path: Path):

@@ -97,11 +97,20 @@ def _parse_bitwarden_item_fields(raw_output: str) -> dict[str, str]:
 
 
 def _read_broker_runtime_item() -> dict[str, str]:
+    bw_session = os.getenv("BW_SESSION")
+    command = ["bw", "get", "item", BROKER_ITEM_NAME]
+    if bw_session:
+        command.extend(["--session", bw_session])
+    process_env = os.environ.copy()
+    if bw_session:
+        process_env["BW_SESSION"] = bw_session
+
     result = subprocess.run(
-        ["bw", "get", "item", BROKER_ITEM_NAME],
+        command,
         capture_output=True,
         text=True,
         check=False,
+        env=process_env,
     )
     if result.returncode != 0:
         return {}
