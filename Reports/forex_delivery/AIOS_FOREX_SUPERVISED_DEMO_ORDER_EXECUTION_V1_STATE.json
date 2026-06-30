@@ -3,13 +3,13 @@
     "allowed_mode_is_demo_only": true,
     "audit_log_enabled": true,
     "audit_log_write_success": true,
-    "bitwarden_cli_available": false,
+    "bitwarden_cli_available": true,
     "bitwarden_cli_called": false,
-    "bitwarden_item_read_success": false,
+    "bitwarden_item_read_success": true,
     "broker_api_called": false,
     "broker_runtime_read_only_auth_proven": true,
-    "bw_session_present": false,
-    "credential_values_available_to_runtime": false,
+    "bw_session_present": true,
+    "credential_values_available_to_runtime": true,
     "credentials_read": false,
     "daemon_started": false,
     "daily_loss_within_limit": true,
@@ -29,10 +29,10 @@
     "max_trade_risk_defined": true,
     "money_movement": false,
     "order_type": "market",
-    "owner_runtime_order_flag": false,
-    "owner_supervised_demo_approval": false,
+    "owner_runtime_order_flag": true,
+    "owner_supervised_demo_approval": true,
     "proposed_trade_risk_within_limit": true,
-    "runtime_mode": "dry_run",
+    "runtime_mode": "owner_approved_supervised_demo_order",
     "scheduler_started": false,
     "side": "buy",
     "stop_loss_defined": true,
@@ -45,22 +45,20 @@
   "packet_id": "PKT-FOREX-SUPERVISED-DEMO-ORDER-EXECUTION-V1",
   "result": {
     "bitwarden_cli_called": false,
-    "blockers": [
-      "owner_supervised_demo_approval is False"
-    ],
-    "broker_api_called": false,
+    "blockers": [],
+    "broker_api_called": true,
     "credentials_read": false,
     "current_stage": "supervised_demo_order_execution",
     "daemon_started": false,
-    "demo_order_execution": false,
-    "demo_order_status": "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED",
+    "demo_order_execution": true,
+    "demo_order_status": "SUPERVISED_DEMO_ORDER_READY",
     "env_file_read": false,
     "live_order_execution": false,
     "money_movement": false,
-    "next_stage": "owner_supervised_demo_approval",
+    "next_stage": "owner_execute_one_supervised_demo_order",
     "order_intent_summary": "instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK",
-    "runtime_mode": "dry_run",
-    "safe_next_action": "Collect owner supervised demo approval and rerun with approval context.",
+    "runtime_mode": "owner_approved_supervised_demo_order",
+    "safe_next_action": "Execute owner-approved supervised demo order runtime path.",
     "scheduler_started": false,
     "webhook_started": false
   },
@@ -70,31 +68,31 @@
       "read_only_until_owner_demo_approval",
       "supervised_demo_only"
     ],
-    "bitwarden_cli_available": false,
+    "bitwarden_cli_available": true,
     "bitwarden_cli_called": false,
     "bitwarden_cli_required": true,
-    "bitwarden_item_read_success": false,
+    "bitwarden_item_read_success": true,
     "broker": "OANDA",
-    "broker_api_called": false,
+    "broker_api_called": true,
     "broker_item_reference_payload": {
-      "allowed_mode": null,
+      "allowed_mode": "read_only_until_owner_demo_approval",
       "broker": "OANDA",
       "broker_account_id": "REDACTED_ACCOUNT_ID",
       "broker_api_token": "REDACTED_TOKEN",
       "endpoint": "https://api-fxpractice.oanda.com",
-      "environment": null,
-      "owner": null
+      "environment": "practice_demo",
+      "owner": "Anthony"
     },
     "broker_runtime_item_ref": "AIOS / OANDA / Practice Demo / Broker Runtime",
-    "bw_session_present": false,
+    "bw_session_present": true,
     "bw_session_required": true,
-    "credential_values_available_to_runtime": false,
+    "credential_values_available_to_runtime": true,
     "current_stage": "supervised_demo_order_execution",
     "daemon_started": false,
     "daemon_started_by_this_packet": false,
-    "demo_order_execution": false,
-    "demo_order_status": "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED",
-    "demo_order_status_ready": "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED",
+    "demo_order_execution": true,
+    "demo_order_status": "SUPERVISED_DEMO_ORDER_READY",
+    "demo_order_status_ready": "SUPERVISED_DEMO_ORDER_READY",
     "endpoint_is_oanda_practice": true,
     "environment_is_practice_demo": true,
     "instrument": "EUR_USD",
@@ -102,27 +100,183 @@
     "live_order_execution_by_this_packet": false,
     "max_orders_per_run": 1,
     "money_movement": false,
-    "next_safe_action": "Collect owner supervised demo approval and rerun with approval context.",
-    "next_stage": "owner_supervised_demo_approval",
+    "next_safe_action": "Execute owner-approved supervised demo order runtime path.",
+    "next_stage": "owner_execute_one_supervised_demo_order",
     "next_stage_after_success": "supervised_demo_evidence_review",
-    "order_attempt_count": 0,
-    "order_attempt_requested": false,
-    "order_attempt_success": false,
-    "order_attempted": false,
-    "order_endpoint": null,
+    "order_attempt_count": 1,
+    "order_attempt_requested": true,
+    "order_attempt_success": true,
+    "order_attempted": true,
+    "order_endpoint": "https://api-fxpractice.oanda.com/v3/accounts/REDACTED_ACCOUNT_ID/orders",
     "order_intent_summary": "instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK",
-    "order_payload": null,
-    "order_response": {},
-    "order_status": "not_attempted",
-    "order_status_code": 0,
+    "order_payload": {
+      "order": {
+        "instrument": "EUR_USD",
+        "positionFill": "DEFAULT",
+        "stopLossOnFill": {
+          "distance": "0.0050"
+        },
+        "takeProfitOnFill": {
+          "distance": "0.0100"
+        },
+        "timeInForce": "FOK",
+        "type": "MARKET",
+        "units": "1"
+      }
+    },
+    "order_response": {
+      "lastTransactionID": "342",
+      "orderCreateTransaction": {
+        "accountID": "REDACTED_ACCOUNT_ID",
+        "batchID": "339",
+        "id": "339",
+        "instrument": "EUR_USD",
+        "positionFill": "DEFAULT",
+        "reason": "CLIENT_ORDER",
+        "requestID": "115563927935613679",
+        "stopLossOnFill": {
+          "distance": "0.00500",
+          "timeInForce": "GTC",
+          "triggerMode": "TOP_OF_BOOK"
+        },
+        "takeProfitOnFill": {
+          "distance": "0.01000",
+          "timeInForce": "GTC"
+        },
+        "time": "2026-06-30T01:41:58.418840627Z",
+        "timeInForce": "FOK",
+        "type": "MARKET_ORDER",
+        "units": "1",
+        "userID": 38382514
+      },
+      "orderFillTransaction": {
+        "accountBalance": "99939.8455",
+        "accountID": "REDACTED_ACCOUNT_ID",
+        "baseFinancing": "0",
+        "batchID": "339",
+        "commission": "0.0000",
+        "financing": "0.0000",
+        "fullPrice": {
+          "asks": [
+            {
+              "liquidity": "500000",
+              "price": "1.14101"
+            },
+            {
+              "liquidity": "2500000",
+              "price": "1.14103"
+            },
+            {
+              "liquidity": "2000000",
+              "price": "1.14104"
+            },
+            {
+              "liquidity": "5000000",
+              "price": "1.14105"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.14108"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.14111"
+            }
+          ],
+          "bids": [
+            {
+              "liquidity": "500000",
+              "price": "1.14085"
+            },
+            {
+              "liquidity": "500000",
+              "price": "1.14084"
+            },
+            {
+              "liquidity": "2000000",
+              "price": "1.14083"
+            },
+            {
+              "liquidity": "2000000",
+              "price": "1.14082"
+            },
+            {
+              "liquidity": "5000000",
+              "price": "1.14081"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.14079"
+            },
+            {
+              "liquidity": "10000000",
+              "price": "1.14076"
+            }
+          ],
+          "closeoutAsk": "1.14111",
+          "closeoutBid": "1.14076",
+          "timestamp": "2026-06-30T01:41:56.251684416Z"
+        },
+        "fullVWAP": "1.14101",
+        "gainQuoteHomeConversionFactor": "1",
+        "guaranteedExecutionFee": "0.0000",
+        "halfSpreadCost": "0.0001",
+        "homeConversionFactors": {
+          "gainBaseHome": {
+            "factor": "1.1295207"
+          },
+          "gainQuoteHome": {
+            "factor": "1"
+          },
+          "lossBaseHome": {
+            "factor": "1.1523393"
+          },
+          "lossQuoteHome": {
+            "factor": "1"
+          }
+        },
+        "id": "340",
+        "instrument": "EUR_USD",
+        "lossQuoteHomeConversionFactor": "1",
+        "orderID": "339",
+        "pl": "0.0000",
+        "price": "1.14101",
+        "quoteGuaranteedExecutionFee": "0",
+        "quotePL": "0",
+        "reason": "MARKET_ORDER",
+        "requestID": "115563927935613679",
+        "requestedUnits": "1",
+        "time": "2026-06-30T01:41:58.418840627Z",
+        "tradeOpened": {
+          "guaranteedExecutionFee": "0.0000",
+          "halfSpreadCost": "0.0001",
+          "initialMarginRequired": "0.0228",
+          "price": "1.14101",
+          "quoteGuaranteedExecutionFee": "0",
+          "tradeID": "340",
+          "units": "1"
+        },
+        "type": "ORDER_FILL",
+        "units": "1",
+        "userID": 38382514
+      },
+      "relatedTransactionIDs": [
+        "339",
+        "340",
+        "341",
+        "342"
+      ]
+    },
+    "order_status": "created",
+    "order_status_code": 201,
     "order_type": "market",
-    "owner_approved_supervised_demo_order": false,
+    "owner_approved_supervised_demo_order": true,
     "parsed_item_fields": {
-      "allowed_mode": false,
+      "allowed_mode": true,
       "broker_account_id": "REDACTED_ACCOUNT_ID",
       "broker_api_token": "REDACTED_TOKEN",
-      "endpoint": false,
-      "environment": false
+      "endpoint": true,
+      "environment": true
     },
     "required_item_fields": [
       "broker_api_token",
@@ -131,22 +285,20 @@
       "environment",
       "allowed_mode"
     ],
-    "runtime_enabled": false,
+    "runtime_enabled": true,
     "runtime_endpoint": "https://api-fxpractice.oanda.com",
     "runtime_flag": "--owner-approved-supervised-demo-order",
     "runtime_item_reference_payload": {
-      "allowed_mode": null,
+      "allowed_mode": "read_only_until_owner_demo_approval",
       "broker": "OANDA",
       "broker_account_id": "REDACTED_ACCOUNT_ID",
       "broker_api_token": "REDACTED_TOKEN",
       "endpoint": "https://api-fxpractice.oanda.com",
-      "environment": null,
-      "owner": null
+      "environment": "practice_demo",
+      "owner": "Anthony"
     },
-    "runtime_mode": "dry_run",
-    "runtime_order_blockers": [
-      "owner_supervised_demo_approval is False"
-    ],
+    "runtime_mode": "owner_approved_supervised_demo_order",
+    "runtime_order_blockers": [],
     "runtime_stage": "supervised_demo_order_execution",
     "scheduler_started": false,
     "scheduler_started_by_this_packet": false,
