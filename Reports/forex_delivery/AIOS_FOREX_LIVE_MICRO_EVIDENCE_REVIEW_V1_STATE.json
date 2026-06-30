@@ -1,0 +1,71 @@
+{
+  "input": {
+    "allowed_mode_is_micro_live_only": true,
+    "bitwarden_cli_available": true,
+    "bitwarden_item_read_success": true,
+    "broker_api_called": true,
+    "bw_session_present": true,
+    "daemon_started": false,
+    "demo_order_execution": false,
+    "endpoint_is_oanda_fxtrade": true,
+    "environment_is_live": true,
+    "live_credential_values_available_to_runtime": true,
+    "live_order_execution": false,
+    "money_movement": false,
+    "open_positions_probe_called": true,
+    "open_trades_probe_called": true,
+    "order_endpoint_called": false,
+    "owner_flag_present": true,
+    "position_close_called": false,
+    "post_request_called": false,
+    "prior_live_order_created_evidence_present": true,
+    "readonly_get_only_enforced": true,
+    "scheduler_started": false,
+    "summary_probe_called": true,
+    "trade_close_called": false,
+    "trades_probe_called": true,
+    "transactions_probe_called": false,
+    "webhook_started": false
+  },
+  "module": "run_forex_live_micro_evidence_review_v1",
+  "packet_id": "PKT-FOREX-LIVE-MICRO-EVIDENCE-REVIEW-V1",
+  "result": {
+    "blockers": [],
+    "current_stage": "live_micro_evidence_review",
+    "evidence_status": "LIVE_MICRO_EVIDENCE_PROFIT_NEGATIVE",
+    "next_stage": "owner_continue_repeatability",
+    "safe_next_action": "Capture post-live evidence persistence across sessions and continue repeatability testing."
+  },
+  "runtime_summary": {
+    "instrument": "EUR_USD",
+    "open_position_found": false,
+    "open_positions_status_code": 200,
+    "open_trade_found": true,
+    "open_trades_status_code": 200,
+    "pnl_classification": "negative",
+    "position_count": 1,
+    "position_fingerprints": [
+      "sha256:cfdf108c1549"
+    ],
+    "prior_order_status": "created",
+    "prior_order_status_code": 201,
+    "redacted_account_id": "REDACTED_ACCOUNT_ID",
+    "risk_controls_observed": false,
+    "safe_next_action": "Capture post-live evidence persistence across sessions and continue repeatability testing.",
+    "side": "buy",
+    "sl_observed": false,
+    "sl_tp_observed": false,
+    "summary_status_code": 200,
+    "time_in_force": "FOK",
+    "tp_observed": false,
+    "trade_count": 1,
+    "trade_fingerprints": [
+      "sha256:98144d79af44"
+    ],
+    "trades_status_code": 200,
+    "transactions_status_code": null,
+    "units": "",
+    "unrealized_pl_available": true,
+    "unrealized_pl_value": -0.0001
+  }
+}
