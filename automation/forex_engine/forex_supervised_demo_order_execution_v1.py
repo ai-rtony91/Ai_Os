@@ -9,6 +9,7 @@ from typing import Any
 PACKET_ID = "AIOS-FOREX-SUPERVISED-DEMO-ORDER-EXECUTION-V1"
 CURRENT_STAGE = "supervised_demo_order_execution"
 RUNTIME_MODE_DRY_RUN = "dry_run"
+RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER = "owner_approved_supervised_demo_order"
 
 PREREQUISITES_REQUIRED = "PREREQUISITES_REQUIRED"
 OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED = "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED"
@@ -77,6 +78,7 @@ class SupervisedDemoOrderInput:
     scheduler_started: bool
     daemon_started: bool
     webhook_started: bool
+    runtime_mode: str
 
 
 @dataclass(frozen=True)
@@ -104,6 +106,7 @@ def build_default_input(
     *,
     owner_supervised_demo_approval: bool = False,
     owner_runtime_order_flag: bool = False,
+    runtime_mode: str = RUNTIME_MODE_DRY_RUN,
 ) -> SupervisedDemoOrderInput:
     return SupervisedDemoOrderInput(
         broker_runtime_read_only_auth_proven=True,
@@ -145,6 +148,7 @@ def build_default_input(
         scheduler_started=False,
         daemon_started=False,
         webhook_started=False,
+        runtime_mode=runtime_mode,
     )
 
 
@@ -153,6 +157,7 @@ def evaluate_supervised_demo_order_execution(
 ) -> SupervisedDemoOrderResult:
     blockers: list[str] = []
     current_stage = CURRENT_STAGE
+    runtime_mode = _runtime_mode(input_data.runtime_mode)
 
     if not _prerequisites_ready(input_data):
         blockers.extend(_prerequisite_blockers(input_data))
@@ -161,7 +166,7 @@ def evaluate_supervised_demo_order_execution(
             current_stage=current_stage,
             next_stage=NEXT_STAGE_COMPLETE_PRIOR_LANES,
             blockers=blockers,
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(PREREQUISITES_REQUIRED),
@@ -173,7 +178,7 @@ def evaluate_supervised_demo_order_execution(
             current_stage=current_stage,
             next_stage=NEXT_STAGE_OWNER_SUPERVISED_DEMO_APPROVAL,
             blockers=["owner_supervised_demo_approval is False"],
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(
@@ -187,19 +192,22 @@ def evaluate_supervised_demo_order_execution(
             current_stage=current_stage,
             next_stage=NEXT_STAGE_OWNER_RUN_SUPERVISED_DEMO_ORDER,
             blockers=["owner_runtime_order_flag is False"],
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(OWNER_RUNTIME_ORDER_FLAG_REQUIRED),
         )
 
-    if _protected_boundary_flags(input_data):
+    if (
+        runtime_mode == RUNTIME_MODE_DRY_RUN
+        and _protected_boundary_flags(input_data)
+    ):
         return _result(
             demo_order_status=PROTECTED_BOUNDARY_VIOLATION,
             current_stage=current_stage,
             next_stage=NEXT_STAGE_OWNER_REVIEW,
             blockers=_protected_boundary_blockers(input_data),
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(PROTECTED_BOUNDARY_VIOLATION),
@@ -225,7 +233,7 @@ def evaluate_supervised_demo_order_execution(
             current_stage=current_stage,
             next_stage=NEXT_STAGE_OWNER_UNLOCK_BITWARDEN,
             blockers=blockers,
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(RUNTIME_CREDENTIAL_ACCESS_REQUIRED),
@@ -248,7 +256,7 @@ def evaluate_supervised_demo_order_execution(
             current_stage=current_stage,
             next_stage=NEXT_STAGE_REPAIR_DEMO_BOUNDARY,
             blockers=blockers,
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(PRACTICE_DEMO_BOUNDARY_REQUIRED),
@@ -265,7 +273,7 @@ def evaluate_supervised_demo_order_execution(
             current_stage=current_stage,
             next_stage=NEXT_STAGE_OWNER_REVIEW_REQUIRED,
             blockers=blockers,
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(KILL_SWITCH_BLOCKED),
@@ -277,7 +285,7 @@ def evaluate_supervised_demo_order_execution(
             current_stage=current_stage,
             next_stage=NEXT_STAGE_REPAIR_EXECUTION_CONTROLS,
             blockers=_execution_control_blockers(input_data),
-            runtime_mode=RUNTIME_MODE_DRY_RUN,
+            runtime_mode=runtime_mode,
             order_intent_summary=_order_intent_summary(input_data),
             input_data=input_data,
             safe_next_action=_safe_next_action(EXECUTION_CONTROL_BLOCKED),
@@ -288,7 +296,7 @@ def evaluate_supervised_demo_order_execution(
         current_stage=current_stage,
         next_stage=NEXT_STAGE_OWNER_EXECUTE_ONE_ORDER,
         blockers=[],
-        runtime_mode=RUNTIME_MODE_DRY_RUN,
+        runtime_mode=runtime_mode,
         order_intent_summary=_order_intent_summary(input_data),
         input_data=input_data,
         safe_next_action=_safe_next_action(SUPERVISED_DEMO_ORDER_READY),
@@ -404,6 +412,12 @@ def _execution_control_blockers(input_data: SupervisedDemoOrderInput) -> list[st
     return blockers
 
 
+def _runtime_mode(runtime_mode: str | None) -> str:
+    if runtime_mode == RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER:
+        return runtime_mode
+    return RUNTIME_MODE_DRY_RUN
+
+
 def _order_intent_summary(input_data: SupervisedDemoOrderInput) -> str:
     return (
         f"instrument={input_data.instrument}, units={input_data.units}, "
@@ -493,4 +507,5 @@ __all__ = [
     "SUPERVISED_DEMO_ORDER_READY",
     "DEFAULT_RUNTIME_ALLOWED_MODES",
     "RUNTIME_MODE_DRY_RUN",
+    "RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER",
 ]

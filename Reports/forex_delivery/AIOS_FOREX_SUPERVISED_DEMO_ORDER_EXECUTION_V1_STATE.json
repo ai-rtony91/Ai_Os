@@ -32,6 +32,7 @@
     "owner_runtime_order_flag": false,
     "owner_supervised_demo_approval": false,
     "proposed_trade_risk_within_limit": true,
+    "runtime_mode": "dry_run",
     "scheduler_started": false,
     "side": "buy",
     "stop_loss_defined": true,
@@ -92,6 +93,7 @@
     "order_attempted": false,
     "order_endpoint": null,
     "order_payload": null,
+    "owner_approved_supervised_demo_order": false,
     "required_item_fields": [
       "broker_api_token",
       "broker_account_id",
@@ -102,6 +104,7 @@
     "runtime_enabled": false,
     "runtime_endpoint": "https://api-fxpractice.oanda.com",
     "runtime_flag": "--owner-approved-supervised-demo-order",
+    "runtime_mode": "dry_run",
     "runtime_order_blockers": [
       "owner_supervised_demo_approval is False"
     ],

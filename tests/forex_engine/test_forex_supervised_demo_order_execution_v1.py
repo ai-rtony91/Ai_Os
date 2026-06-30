@@ -15,10 +15,13 @@ from automation.forex_engine.forex_supervised_demo_order_execution_v1 import (
     KILL_SWITCH_BLOCKED,
     EXECUTION_CONTROL_BLOCKED,
     SUPERVISED_DEMO_ORDER_READY,
+    RUNTIME_MODE_DRY_RUN,
+    RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER,
     SupervisedDemoOrderInput,
     build_default_input,
     evaluate_supervised_demo_order_execution,
 )
+from scripts.forex_delivery import run_forex_supervised_demo_order_execution_v1 as runtime_script
 from scripts.forex_delivery.run_forex_supervised_demo_order_execution_v1 import (
     run_forex_supervised_demo_order_execution_v1,
 )
@@ -127,6 +130,37 @@ def test_protected_boundary_flags_block():
         assert result.live_order_execution is False
         assert result.money_movement is False
         assert result.scheduler_started is False
+
+
+def test_owner_approved_runtime_mode_allows_runtime_flags_and_reaches_ready():
+    result = evaluate_supervised_demo_order_execution(
+        _input(
+            owner_supervised_demo_approval=True,
+            owner_runtime_order_flag=True,
+            runtime_mode=RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER,
+            bw_session_present=True,
+            bitwarden_cli_available=True,
+            bitwarden_item_read_success=True,
+            credential_values_available_to_runtime=True,
+            broker_api_called=True,
+            bitwarden_cli_called=True,
+            credentials_read=True,
+            demo_order_execution=False,
+            live_order_execution=False,
+            money_movement=False,
+            scheduler_started=False,
+            daemon_started=False,
+            webhook_started=False,
+            endpoint_is_oanda_practice=True,
+            environment_is_practice_demo=True,
+            allowed_mode_is_demo_only=True,
+        ),
+    )
+    assert result.demo_order_status == SUPERVISED_DEMO_ORDER_READY
+    assert result.runtime_mode == RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER
+    assert result.broker_api_called is True
+    assert result.bitwarden_cli_called is True
+    assert result.credentials_read is True
 
 
 def test_missing_runtime_access_blocked():
@@ -265,6 +299,24 @@ def test_output_gates_and_actions_are_false_in_runtime_ready():
     assert result.webhook_started is False
 
 
+def test_run_default_dry_run_returns_owner_approval_required(tmp_path: Path):
+    state_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_STATE.json"
+    report_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_REPORT.md"
+    result = run_forex_supervised_demo_order_execution_v1(
+        owner_approved_supervised_demo_order=False,
+        state_output=state_path,
+        report_output=report_path,
+        write_report=True,
+    )
+    assert result["result"]["demo_order_status"] == OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED
+    assert result["result"]["runtime_mode"] == RUNTIME_MODE_DRY_RUN
+    assert result["result"]["next_stage"] == "owner_supervised_demo_approval"
+    assert result["runtime_summary"]["runtime_enabled"] is False
+    assert result["runtime_summary"]["owner_approved_supervised_demo_order"] is False
+    assert result["result"]["live_order_execution"] is False
+    assert result["result"]["money_movement"] is False
+
+
 def test_runner_dry_run_writes_state_and_report(tmp_path: Path):
     state_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_STATE.json"
     report_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_REPORT.md"
@@ -282,8 +334,122 @@ def test_runner_dry_run_writes_state_and_report(tmp_path: Path):
     assert state["result"]["next_stage"] == "owner_supervised_demo_approval"
     assert state["result"]["live_order_execution"] is False
     assert state["result"]["money_movement"] is False
+    assert state["runtime_summary"]["owner_approved_supervised_demo_order"] is False
+    assert state["runtime_summary"]["runtime_mode"] == RUNTIME_MODE_DRY_RUN
     assert "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED" in report_path.read_text(encoding="utf-8")
+    assert "owner_approved_supervised_demo_order: false" in report_path.read_text(
+        encoding="utf-8",
+    )
     assert payload["result"]["demo_order_status"] == OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED
+
+
+def test_runner_state_and_report_are_overwritten_by_latest_run(tmp_path: Path):
+    state_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_STATE.json"
+    report_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_REPORT.md"
+    stale_state = {"stale": True}
+    stale_report = "stale-report"
+    state_path.write_text(json.dumps(stale_state), encoding="utf-8")
+    report_path.write_text(stale_report, encoding="utf-8")
+
+    payload = run_forex_supervised_demo_order_execution_v1(
+        owner_approved_supervised_demo_order=True,
+        state_output=state_path,
+        report_output=report_path,
+        write_report=True,
+    )
+
+    assert state_path.exists()
+    assert report_path.exists()
+    parsed_state = json.loads(state_path.read_text(encoding="utf-8"))
+    assert parsed_state != stale_state
+    assert parsed_state["result"] == payload["result"]
+    assert parsed_state["runtime_summary"]["runtime_enabled"] is True
+    assert "owner_approved_supervised_demo_order" in report_path.read_text(encoding="utf-8")
+
+
+def test_run_owner_approved_without_session_requires_runtime_credentials(tmp_path: Path):
+    state_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_STATE.json"
+    report_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_REPORT.md"
+    payload = run_forex_supervised_demo_order_execution_v1(
+        owner_approved_supervised_demo_order=True,
+        state_output=state_path,
+        report_output=report_path,
+        write_report=True,
+    )
+    assert payload["result"]["demo_order_status"] == RUNTIME_CREDENTIAL_ACCESS_REQUIRED
+    assert (
+        payload["result"]["runtime_mode"]
+        == RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER
+    )
+    assert payload["runtime_summary"]["runtime_enabled"] is True
+    assert payload["runtime_summary"]["owner_approved_supervised_demo_order"] is True
+    assert payload["result"]["next_stage"] == "owner_unlock_bitwarden_cli"
+
+
+def test_run_owner_approved_supervised_demo_order_attempts_one_order(
+    tmp_path: Path,
+    monkeypatch,
+):
+    state_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_STATE.json"
+    report_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_REPORT.md"
+
+    fake_bw_output = json.dumps(
+        {
+            "fields": [
+                {"name": "broker_api_token", "value": "demo-token"},
+                {"name": "broker_account_id", "value": "demo-account"},
+                {"name": "endpoint", "value": "https://api-fxpractice.oanda.com"},
+                {"name": "environment", "value": "practice_demo"},
+                {"name": "allowed_mode", "value": "read_only_until_owner_demo_approval"},
+            ],
+        },
+    )
+
+    class FakeCompleted:
+        returncode = 0
+        stdout = fake_bw_output
+
+    monkeypatch.setenv("BW_SESSION", "session-token")
+    monkeypatch.setattr(runtime_script.shutil, "which", lambda _: "bw")
+    monkeypatch.setattr(
+        runtime_script.subprocess,
+        "run",
+        lambda *args, **kwargs: FakeCompleted(),
+    )
+    monkeypatch.setattr(
+        runtime_script,
+        "_post_json_request",
+        lambda request_payload: (
+            {"orderId": "order-1"},
+            201,
+            True,
+        ),
+    )
+
+    payload = runtime_script.run_forex_supervised_demo_order_execution_v1(
+        owner_approved_supervised_demo_order=True,
+        state_output=state_path,
+        report_output=report_path,
+        write_report=True,
+    )
+
+    assert (
+        payload["runtime_summary"]["runtime_mode"]
+        == RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER
+    )
+    assert payload["runtime_summary"]["owner_approved_supervised_demo_order"] is True
+    assert payload["result"]["demo_order_status"] == SUPERVISED_DEMO_ORDER_READY
+    assert payload["runtime_summary"]["order_attempt_requested"] is True
+    assert payload["runtime_summary"]["order_attempted"] is True
+    assert payload["runtime_summary"]["order_attempt_count"] == 1
+    assert payload["runtime_summary"]["order_attempt_success"] is True
+    assert payload["result"]["broker_api_called"] is True
+    assert payload["result"]["demo_order_execution"] is True
+    assert payload["result"]["live_order_execution"] is False
+    assert payload["result"]["money_movement"] is False
+    assert payload["result"]["scheduler_started"] is False
+    assert payload["result"]["daemon_started"] is False
+    assert payload["result"]["webhook_started"] is False
 
 
 def test_config_template_has_expected_no_secret_fields():
