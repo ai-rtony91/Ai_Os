@@ -1,0 +1,22 @@
+{
+  "broker_runtime_item_ref": "AIOS / OANDA / Practice Demo / Broker Runtime",
+  "field_refs": {
+    "broker_api_token": "broker_api_token",
+    "broker_account_id": "broker_account_id",
+    "endpoint": "endpoint",
+    "environment": "environment",
+    "allowed_mode": "allowed_mode"
+  },
+  "expected_endpoint": "https://api-fxpractice.oanda.com",
+  "expected_environment": "practice_demo",
+  "expected_allowed_mode": "read_only_until_owner_demo_approval",
+  "default_mode": "dry_run",
+  "owner_runtime_flag": "--owner-approved-read-only-probe",
+  "requires_bw_session_env": true,
+  "raw_secret_values_allowed": false,
+  "env_file_read_allowed": false,
+  "order_execution_allowed": false,
+  "demo_authorized_by_this_packet": false,
+  "live_authorized_by_this_packet": false,
+  "next_stage_after_success": "execution_control_stack"
+}
