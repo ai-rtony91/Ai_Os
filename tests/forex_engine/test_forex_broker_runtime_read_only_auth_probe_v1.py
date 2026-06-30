@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from dataclasses import replace
@@ -179,20 +179,20 @@ def test_runtime_success_returns_proven_and_advances():
 
 def test_all_outputs_redact_token_and_account():
     payload = {
-        "level1": "TOKEN-abc-123",
+        "level1": "EXAMPLE_REDACTION_MARKER_A",
         "level2": {
-            "account": "ACC-999",
-            "list": ["keep", "TOKEN-abc-123", {"nested_account": "ACC-999"}],
+            "account": "EXAMPLE_REDACTION_MARKER_B",
+            "list": ["keep", "EXAMPLE_REDACTION_MARKER_A", {"nested_account": "EXAMPLE_REDACTION_MARKER_B"}],
         },
     }
     redacted = redact_sensitive_values(
         payload,
-        token="TOKEN-abc-123",
-        account_id="ACC-999",
+        token = "EXAMPLE_REDACTION_MARKER_A",
+        account_id = "EXAMPLE_REDACTION_MARKER_B",
     )
     payload_text = json.dumps(redacted)
-    assert "TOKEN-abc-123" not in payload_text
-    assert "ACC-999" not in payload_text
+    assert "EXAMPLE_REDACTION_MARKER_A" not in payload_text
+    assert "EXAMPLE_REDACTION_MARKER_B" not in payload_text
     assert "REDACTED_TOKEN" in payload_text
     assert "REDACTED_ACCOUNT_ID" in payload_text
 
@@ -265,3 +265,4 @@ def test_doc_mentions_runtime_owner_boundary_contract():
         "cannot authorize live trading",
     ]:
         assert phrase in text
+
