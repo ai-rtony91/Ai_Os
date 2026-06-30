@@ -18,9 +18,24 @@ if ($ValidateUnlock -and $credentialPresent) {
     $securePassword = $null
     $bstr = [IntPtr]::Zero
     $plainPassword = [string]::Empty
+    $encryptedCredential = [string]::Empty
 
     try {
-        $securePassword = Get-Content -Path $credentialPath -Raw -ErrorAction Stop | ConvertTo-SecureString
+        $encryptedCredential = Get-Content -LiteralPath $credentialPath -Raw -ErrorAction Stop
+        $encryptedCredential = ([string]$encryptedCredential).Trim()
+        $encryptedCredential = $encryptedCredential.Trim([char]0xFEFF)
+
+        if ([string]::IsNullOrWhiteSpace($encryptedCredential)) {
+            $validateSuccess = $false
+            return
+        }
+
+        try {
+            $securePassword = ConvertTo-SecureString -String $encryptedCredential -ErrorAction Stop
+        } catch {
+            $validateSuccess = $false
+            return
+        }
         $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
         try {
             $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)

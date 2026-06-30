@@ -29,9 +29,31 @@ $bwSessionPresent = $false
 $securePassword = $null
 $bstr = [IntPtr]::Zero
 $plainPassword = [string]::Empty
+$encryptedCredential = [string]::Empty
 
 try {
-    $securePassword = Get-Content -Path $credentialPath -Raw -ErrorAction Stop | ConvertTo-SecureString
+    $encryptedCredential = Get-Content -LiteralPath $credentialPath -Raw -ErrorAction Stop
+    $encryptedCredential = ([string]$encryptedCredential).Trim()
+    $encryptedCredential = $encryptedCredential.Trim([char]0xFEFF)
+
+    if ([string]::IsNullOrWhiteSpace($encryptedCredential)) {
+        Write-Output "AIOS_BITWARDEN_SESSION_READY=false"
+        Write-Output "BW_SESSION_PRESENT=false"
+        Write-Output "LOCAL_CREDENTIAL_PRESENT=true"
+        Write-Output "SAFE_NEXT_ACTION=re-register local credential"
+        return
+    }
+
+    try {
+        $securePassword = ConvertTo-SecureString -String $encryptedCredential -ErrorAction Stop
+    } catch {
+        Write-Output "AIOS_BITWARDEN_SESSION_READY=false"
+        Write-Output "BW_SESSION_PRESENT=false"
+        Write-Output "LOCAL_CREDENTIAL_PRESENT=true"
+        Write-Output "SAFE_NEXT_ACTION=re-register local credential"
+        return
+    }
+
     $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
     try {
         $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)

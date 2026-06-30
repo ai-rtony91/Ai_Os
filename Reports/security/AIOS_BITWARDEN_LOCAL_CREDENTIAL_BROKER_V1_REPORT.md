@@ -18,6 +18,9 @@
 - No repo writes for `BW_SESSION`, `BW_PASSWORD`, master password, API tokens, account IDs, or vault JSON.
 - Local credential remains at owner scope under `%LOCALAPPDATA%`, not under `C:\Dev\Ai.Os`.
 - Password is only loaded into process environment briefly and cleared before returning.
+- DPAPI blob is now persisted as normalized single-line ASCII to reduce fragile parsing.
+- Malformed local credential blobs are treated as a safe failure state and trigger
+  `SAFE_NEXT_ACTION=re-register local credential` instead of crashing.
 
 ## Validation evidence
 
