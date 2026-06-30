@@ -132,16 +132,16 @@ def test_reserve_buckets_are_protected() -> None:
 
 
 def test_sensitive_financial_data_is_blocked_and_not_echoed() -> None:
-    secret = "987654321"
+    redacted_numeric_value = "REDACTED_ROUTING_NUMBER"
     result = evaluate(
         {
             "balance_bucket": "1000",
-            "routing_number": secret,
+            "routing_number": redacted_numeric_value,
         }
     )
     assert result["blocked_reasons"] == ["sensitive_financial_data_provided"]
     assert "routing_number" not in repr(result)
-    assert secret not in repr(result)
+    assert redacted_numeric_value not in repr(result)
 
 
 def test_owner_approval_requirements_are_reflected_in_actions() -> None:

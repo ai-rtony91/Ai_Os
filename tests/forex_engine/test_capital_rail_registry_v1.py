@@ -170,7 +170,7 @@ def test_selects_lowest_cost_and_fastest_rail_with_tie_break() -> None:
 
 
 def test_no_sensitive_values_exposed() -> None:
-    secret = "secret-token-000"
+    redacted_token_value = "REDACTED_TOKEN_VALUE"
     result = evaluate(
         {
             "rails": [
@@ -180,12 +180,12 @@ def test_no_sensitive_values_exposed() -> None:
                     "active": True,
                     "withdrawal_supported": True,
                     "same_name_verified": True,
-                    "token": secret,
+                    "token": redacted_token_value,
                 }
             ]
         }
     )
-    assert secret not in repr(result)
+    assert redacted_token_value not in repr(result)
 
 
 def test_safety_prevents_money_or_bank_or_broker_execution() -> None:
