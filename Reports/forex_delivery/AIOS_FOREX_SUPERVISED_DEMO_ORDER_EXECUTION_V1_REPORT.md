@@ -7,10 +7,10 @@
 - runtime_mode: dry_run
 - safe_next_action: Collect owner supervised demo approval and rerun with approval context.
 - blockers:
-- owner_supervised_demo_approval is False
+  - owner_supervised_demo_approval is False
 
 ## Runtime gate state
-- runtime_enabled: False
+- runtime_enabled: false
 - runtime_flag: --owner-approved-supervised-demo-order
 - live_order_execution: false
 - money_movement: false
@@ -20,10 +20,14 @@
 - owner_approved_supervised_demo_order: false
 - broker: OANDA
 - endpoint: https://api-fxpractice.oanda.com
-- order_attempt_requested: False
-- order_attempted: False
+- broker_account_id: REDACTED_ACCOUNT_ID
+- broker_api_token: REDACTED_TOKEN
+- order_attempt_requested: false
+- order_attempted: false
 - order_attempt_count: 0
-- order_attempt_success: False
+- order_attempt_success: false
+- order_endpoint: None
+
 ## Order intent
 - order_intent_summary: instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK
 - max_orders_per_run: 1

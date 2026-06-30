@@ -65,7 +65,7 @@
     "webhook_started": false
   },
   "runtime_summary": {
-    "allowed_mode_is_demo_only": false,
+    "allowed_mode_is_demo_only": true,
     "allowed_modes": [
       "read_only_until_owner_demo_approval",
       "supervised_demo_only"
@@ -76,24 +76,54 @@
     "bitwarden_item_read_success": false,
     "broker": "OANDA",
     "broker_api_called": false,
+    "broker_item_reference_payload": {
+      "allowed_mode": null,
+      "broker": "OANDA",
+      "broker_account_id": "REDACTED_ACCOUNT_ID",
+      "broker_api_token": "REDACTED_TOKEN",
+      "endpoint": "https://api-fxpractice.oanda.com",
+      "environment": null,
+      "owner": null
+    },
     "broker_runtime_item_ref": "AIOS / OANDA / Practice Demo / Broker Runtime",
     "bw_session_present": false,
     "bw_session_required": true,
     "credential_values_available_to_runtime": false,
     "current_stage": "supervised_demo_order_execution",
-    "default_mode": "dry_run",
+    "daemon_started": false,
+    "daemon_started_by_this_packet": false,
+    "demo_order_execution": false,
     "demo_order_status": "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED",
-    "endpoint_is_oanda_practice": false,
-    "environment_is_practice_demo": false,
+    "demo_order_status_ready": "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED",
+    "endpoint_is_oanda_practice": true,
+    "environment_is_practice_demo": true,
+    "instrument": "EUR_USD",
+    "live_order_execution": false,
+    "live_order_execution_by_this_packet": false,
+    "max_orders_per_run": 1,
+    "money_movement": false,
     "next_safe_action": "Collect owner supervised demo approval and rerun with approval context.",
     "next_stage": "owner_supervised_demo_approval",
+    "next_stage_after_success": "supervised_demo_evidence_review",
     "order_attempt_count": 0,
     "order_attempt_requested": false,
     "order_attempt_success": false,
     "order_attempted": false,
     "order_endpoint": null,
+    "order_intent_summary": "instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK",
     "order_payload": null,
+    "order_response": {},
+    "order_status": "not_attempted",
+    "order_status_code": 0,
+    "order_type": "market",
     "owner_approved_supervised_demo_order": false,
+    "parsed_item_fields": {
+      "allowed_mode": false,
+      "broker_account_id": "REDACTED_ACCOUNT_ID",
+      "broker_api_token": "REDACTED_TOKEN",
+      "endpoint": false,
+      "environment": false
+    },
     "required_item_fields": [
       "broker_api_token",
       "broker_account_id",
@@ -104,13 +134,27 @@
     "runtime_enabled": false,
     "runtime_endpoint": "https://api-fxpractice.oanda.com",
     "runtime_flag": "--owner-approved-supervised-demo-order",
+    "runtime_item_reference_payload": {
+      "allowed_mode": null,
+      "broker": "OANDA",
+      "broker_account_id": "REDACTED_ACCOUNT_ID",
+      "broker_api_token": "REDACTED_TOKEN",
+      "endpoint": "https://api-fxpractice.oanda.com",
+      "environment": null,
+      "owner": null
+    },
     "runtime_mode": "dry_run",
     "runtime_order_blockers": [
       "owner_supervised_demo_approval is False"
     ],
     "runtime_stage": "supervised_demo_order_execution",
+    "scheduler_started": false,
+    "scheduler_started_by_this_packet": false,
     "session_window_days_per_week": 6,
     "session_window_hours": 22,
-    "target": "live 22hr/day 6day/week autonomous execution"
+    "side": "buy",
+    "target": "live 22hr/day 6day/week autonomous execution",
+    "webhook_started": false,
+    "webhook_started_by_this_packet": false
   }
 }
