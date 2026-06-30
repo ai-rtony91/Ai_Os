@@ -1,0 +1,47 @@
+{
+  "input": {
+    "accounts_probe_called": false,
+    "allowed_mode_is_micro_live_only": false,
+    "bitwarden_cli_available": false,
+    "bitwarden_item_read_success": false,
+    "broker_api_called": false,
+    "bw_session_present": false,
+    "daemon_started": false,
+    "endpoint_is_oanda_fxtrade": false,
+    "environment_is_live": false,
+    "live_credential_values_available_to_runtime": false,
+    "live_order_execution": false,
+    "money_movement": false,
+    "order_endpoint_called": false,
+    "orders_endpoint_blocked": true,
+    "owner_flag_present": false,
+    "post_request_called": false,
+    "read_only_probe_count": 0,
+    "readonly_get_only_enforced": true,
+    "scheduler_started": false,
+    "summary_probe_called": false,
+    "webhook_started": false
+  },
+  "module": "run_forex_oanda_live_403_readonly_classifier_v1",
+  "packet_id": "AIOS-FOREX-OANDA-LIVE-403-READONLY-CLASSIFIER-V1",
+  "result": {
+    "blockers": [
+      "OANDA_LIVE_403_CLASSIFIER_CREDENTIAL_ACCESS_REQUIRED"
+    ],
+    "classifier_status": "OANDA_LIVE_403_CLASSIFIER_OWNER_RUNTIME_REQUIRED",
+    "current_stage": "oanda_live_403_readonly_classifier_v1",
+    "next_stage": "owner_runtime_flag_required",
+    "safe_next_action": "Run with owner runtime flag."
+  },
+  "runtime_summary": {
+    "account_list_count": 0,
+    "accounts_status_code": null,
+    "configured_account_visible": false,
+    "forbidden_reason_guess": "",
+    "read_only_probe_count": 0,
+    "redacted_account_id": "REDACTED_ACCOUNT_ID",
+    "redacted_endpoint": "https://api-fxtrade.oanda.com",
+    "safe_next_action": "Run with owner runtime flag.",
+    "summary_status_code": null
+  }
+}
