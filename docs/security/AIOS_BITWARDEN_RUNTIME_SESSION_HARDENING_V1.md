@@ -25,6 +25,10 @@ repo files or reports.
   - avoid printing session keys, vault contents, or item values.
   - call `bw unlock --raw` only when `Env:BW_SESSION` is missing or empty.
   - never persist credentials in any repo file.
+- Start helper behavior in-session:
+  - dot-source only: `. .\scripts\security\Start-AiosBitwardenSession.ps1`.
+  - owner is prompted for a Bitwarden unlock at most once per PowerShell session.
+  - once `BW_SESSION` is set, repeated runner calls in the same shell reuse it.
 - `Clear-AiosBitwardenSession.ps1` must:
   - remove `Env:BW_SESSION`.
   - call `bw lock`.
