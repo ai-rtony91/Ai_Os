@@ -515,3 +515,142 @@ def test_docs_mention_no_live_authorization_and_single_demo_order():
     ]
     for phrase in phrases:
         assert phrase in text
+
+
+def test_build_order_payload_uses_market_type_uppercase():
+    input_data = build_default_input(
+        owner_supervised_demo_approval=True,
+        owner_runtime_order_flag=True,
+    )
+    input_data = input_data.__class__(
+        **{**input_data.__dict__, "order_type": "market"},
+    )
+    payload = runtime_script._build_order_payload(input_data)
+    assert payload["order"]["type"] == "MARKET"
+
+
+def test_build_order_payload_units_follow_side_orientation():
+    buy_input = build_default_input(
+        owner_supervised_demo_approval=True,
+        owner_runtime_order_flag=True,
+    )
+    buy_input = buy_input.__class__(**{**buy_input.__dict__, "side": "buy"})
+    assert int(runtime_script._build_order_payload(buy_input)["order"]["units"]) > 0
+
+    sell_input = build_default_input(
+        owner_supervised_demo_approval=True,
+        owner_runtime_order_flag=True,
+    )
+    sell_input = sell_input.__class__(
+        **{**sell_input.__dict__, "side": "sell", "units": 1},
+    )
+    assert int(runtime_script._build_order_payload(sell_input)["order"]["units"]) < 0
+
+    units_default_input = build_default_input(
+        owner_supervised_demo_approval=True,
+        owner_runtime_order_flag=True,
+    )
+    units_default_input = units_default_input.__class__(
+        **{**units_default_input.__dict__, "units": 0},
+    )
+    assert runtime_script._build_order_payload(units_default_input)["order"]["units"] == "1"
+
+
+def test_recursive_sanitizer_redacts_runtime_secrets(tmp_path: Path):
+    sensitive = {
+        "broker_api_token": "topsecret",
+        "broker_account_id": "12345",
+        "order_endpoint": "https://api-fxpractice.oanda.com/v3/accounts/12345/orders",
+        "request": {
+            "Authorization": "Bearer abcdefg",
+            "AccountId": {
+                "value": "account-999",
+            },
+        },
+        "details": {
+            "accountID": "raw-id",
+            "account_id": "raw-id",
+            "nested": [
+                {"accountId": "nested-id"},
+                "Bearer qwerty",
+            ],
+            "bw_session": "should-not-pass",
+        },
+    }
+    sanitized = runtime_script._redact_runtime_state(sensitive)
+    assert sanitized["broker_api_token"] == "REDACTED_TOKEN"
+    assert sanitized["broker_account_id"] == "REDACTED_ACCOUNT_ID"
+    assert (
+        sanitized["order_endpoint"]
+        == "https://api-fxpractice.oanda.com/v3/accounts/REDACTED_ACCOUNT_ID/orders"
+    )
+    assert sanitized["request"]["Authorization"] == "REDACTED_TOKEN"
+    assert sanitized["request"]["AccountId"] == "REDACTED_ACCOUNT_ID"
+    assert sanitized["details"]["accountID"] == "REDACTED_ACCOUNT_ID"
+    assert sanitized["details"]["account_id"] == "REDACTED_ACCOUNT_ID"
+    assert sanitized["details"]["nested"][0]["accountId"] == "REDACTED_ACCOUNT_ID"
+    assert sanitized["details"]["nested"][1] == "REDACTED_TOKEN"
+    assert "bw_session" not in sanitized
+
+
+def test_persisted_runtime_report_redacts_order_endpoint_and_tokens(tmp_path: Path, monkeypatch):
+    state_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_STATE.json"
+    report_path = tmp_path / "AIOS_FOREX_SUPERVISED_DEMO_ORDER_EXECUTION_V1_REPORT.md"
+
+    fake_bw_output = json.dumps(
+        {
+            "fields": [
+                {"name": "broker_api_token", "value": "demo-token"},
+                {"name": "broker_account_id", "value": "101-001-38382514-001"},
+                {"name": "endpoint", "value": "https://api-fxpractice.oanda.com"},
+                {"name": "environment", "value": "practice_demo"},
+                {"name": "allowed_mode", "value": "read_only_until_owner_demo_approval"},
+                {"name": "owner", "value": "Anthony"},
+            ],
+        },
+    )
+
+    class FakeCompleted:
+        returncode = 0
+        stdout = fake_bw_output
+
+    monkeypatch.setenv("BW_SESSION", "session-token")
+    monkeypatch.setattr(runtime_script.shutil, "which", lambda _: "bw")
+    monkeypatch.setattr(
+        runtime_script.subprocess,
+        "run",
+        lambda *args, **kwargs: FakeCompleted(),
+    )
+    monkeypatch.setattr(
+        runtime_script,
+        "_post_json_request",
+        lambda request_payload: (
+            {"errorCode": "oanda::rest::core::InvalidParameterException"},
+            400,
+            False,
+        ),
+    )
+
+    payload = runtime_script.run_forex_supervised_demo_order_execution_v1(
+        owner_approved_supervised_demo_order=True,
+        state_output=state_path,
+        report_output=report_path,
+        write_report=True,
+    )
+
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    report = report_path.read_text(encoding="utf-8")
+
+    assert payload["runtime_summary"]["order_attempt_count"] == 1
+    assert payload["runtime_summary"]["order_status_code"] == 400
+    assert (
+        "101-001-38382514-001"
+        not in json.dumps(state).replace("/", "")
+    )
+    assert (
+        "101-001-38382514-001"
+        not in report.replace("/", "")
+    )
+    assert payload["runtime_summary"]["order_payload"]["order"]["type"] == "MARKET"
+    assert "REDACTED_TOKEN" in report
+    assert "REDACTED_ACCOUNT_ID" in report
