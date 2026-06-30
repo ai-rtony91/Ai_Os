@@ -1,0 +1,59 @@
+{
+  "input": {
+    "bitwarden_called": false,
+    "broker_api_called": false,
+    "daemon_started": false,
+    "evidence_files_found": [
+      "Reports\\forex_delivery\\AIOS_FOREX_LIVE_MICRO_EVIDENCE_REVIEW_V1_STATE.json"
+    ],
+    "evidence_files_missing": [],
+    "evidence_state_paths": [
+      "Reports\\forex_delivery\\AIOS_FOREX_LIVE_MICRO_EVIDENCE_REVIEW_V1_STATE.json"
+    ],
+    "live_order_execution": false,
+    "local_only": true,
+    "money_movement": false,
+    "order_endpoint_called": false,
+    "position_close_called": false,
+    "post_request_called": false,
+    "scheduler_started": false,
+    "trade_close_called": false,
+    "webhook_started": false
+  },
+  "module": "run_forex_live_micro_repeatability_evidence_ledger_v1",
+  "packet_id": "PKT-FOREX-LIVE-MICRO-REPEATABILITY-EVIDENCE-LEDGER-V1",
+  "result": {
+    "blockers": [],
+    "current_stage": "live_micro_repeatability_evidence_ledger",
+    "next_stage": "owner_supervised_repeatability_decision",
+    "repeatability_status": "LIVE_MICRO_REPEATABILITY_OPEN_TRADE_STILL_NEGATIVE",
+    "safe_next_action": "Capture a later snapshot to confirm whether P/L recovers or degrades."
+  },
+  "runtime_summary": {
+    "blockers": [],
+    "closed_or_not_visible_count": 0,
+    "evidence_fingerprints": [
+      "sha256:8bd8e2890e6d64b5dcc011439928e5e3560a4b5cdd7eacec2e12d0c7c9b94f31"
+    ],
+    "forbidden_action_flags_clear": true,
+    "latest_pnl_classification": "negative",
+    "latest_pnl_value": -0.0002,
+    "latest_snapshot_path": "Reports\\forex_delivery\\AIOS_FOREX_LIVE_MICRO_EVIDENCE_REVIEW_V1_STATE.json",
+    "live_execution_flags_clear": true,
+    "money_movement_clear": true,
+    "open_trade_seen_count": 1,
+    "pnl_values": [
+      -0.0002
+    ],
+    "profit_flat_count": 0,
+    "profit_negative_count": 1,
+    "profit_positive_count": 0,
+    "readiness_for_next_supervised_decision": true,
+    "risk_controls_consistent": true,
+    "safe_next_action": "Capture a later snapshot to confirm whether P/L recovers or degrades.",
+    "sltp_complete_count": 1,
+    "sltp_latest_complete": true,
+    "sltp_missing_count": 0,
+    "snapshot_count": 1
+  }
+}
