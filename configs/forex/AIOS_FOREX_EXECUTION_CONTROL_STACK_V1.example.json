@@ -1,0 +1,18 @@
+{
+  "broker_runtime_read_only_auth_proven": true,
+  "default_mode": "dry_run",
+  "kill_switch_enabled": true,
+  "kill_switch_triggered": false,
+  "max_daily_loss_amount": 25.00,
+  "max_trade_risk_amount": 2.00,
+  "duplicate_order_guard_enabled": true,
+  "audit_log_enabled": true,
+  "stop_loss_required": true,
+  "take_profit_required": true,
+  "demo_authorized_by_this_packet": false,
+  "live_authorized_by_this_packet": false,
+  "order_execution_by_this_packet": false,
+  "broker_api_called_by_this_packet": false,
+  "credentials_read_by_this_packet": false,
+  "next_stage_after_success": "supervised_demo_order_execution"
+}
