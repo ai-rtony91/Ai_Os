@@ -384,6 +384,7 @@ def run_forex_controlled_micro_live_exception_runner_v1(
                 "headers": {"Authorization": f"Bearer {token}"},
                 "order_payload": order_payload,
             }
+            order_endpoint = final_order_endpoint
             order_response, order_status_code, order_attempt_success = _post_json_request(
                 request_payload,
             )
@@ -491,16 +492,18 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> dict[str, Any]:
     args = _parse_args(argv)
-    return run_forex_controlled_micro_live_exception_runner_v1(
+    payload = run_forex_controlled_micro_live_exception_runner_v1(
         owner_approved_controlled_micro_live_exception=args.owner_approved_controlled_micro_live_exception,
         state_output=args.state_output,
         report_output=args.report_output,
         write_report=True,
     )
+    print(json.dumps(_redact_runtime_state(payload), indent=2))
+    return payload
 
 
 if __name__ == "__main__":
-    print(json.dumps(main(), indent=2))
+    main()
     raise SystemExit(0)
 
 

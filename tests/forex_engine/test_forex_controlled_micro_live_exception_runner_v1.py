@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import json
 import subprocess
 import sys
@@ -33,6 +34,10 @@ from automation.forex_engine.forex_controlled_micro_live_exception_runner_v1 imp
     NEXT_STAGE_OWNER_MICRO_LIVE_EXCEPTION_APPROVAL,
 )
 from scripts.forex_delivery import run_forex_controlled_micro_live_exception_runner_v1 as runtime_script
+
+START_SESSION_HELPER = Path("scripts/security/Start-AiosBitwardenSession.ps1")
+CLEAR_SESSION_HELPER = Path("scripts/security/Clear-AiosBitwardenSession.ps1")
+SESSION_HELPER_DOC = Path("docs/security/AIOS_BITWARDEN_RUNTIME_SESSION_HARDENING_V1.md")
 
 
 def _input(**changes: object) -> ControlledMicroLiveExceptionInput:
@@ -353,10 +358,95 @@ def test_report_and_state_do_not_write_raw_runtime_secrets(tmp_path: Path, monke
 
     state_text = state_path.read_text(encoding="utf-8")
     report_text = report_path.read_text(encoding="utf-8")
+    state_payload = json.loads(state_text)
     assert "very-secret-live-token" not in state_text
     assert "very-secret-account-id" not in state_text
     assert "very-secret-live-token" not in report_text
     assert "very-secret-account-id" not in report_text
+    assert "session-token" not in state_text
+    assert "session-token" not in report_text
+    assert "Authorization" not in state_text
+    assert "Bearer" not in state_text
+    assert "Authorization" not in report_text
+    assert "Bearer" not in report_text
+    assert state_payload["runtime_summary"]["order_endpoint"] == "https://api-fxtrade.oanda.com/v3/accounts/REDACTED_ACCOUNT_ID/orders"
+
+
+def test_main_outputs_redacted_stdout_payload(monkeypatch, tmp_path: Path, capsys) -> None:
+    fake_item = {
+        "broker_api_token": "super-secret-live-token",
+        "broker_account_id": "super-secret-account-id",
+        "endpoint": "https://api-fxtrade.oanda.com",
+        "environment": "live",
+        "allowed_mode": "controlled_micro_live_exception_only",
+    }
+
+    monkeypatch.setattr(runtime_script.shutil, "which", lambda _: "bw")
+    monkeypatch.setenv("BW_SESSION", "session-token-must-not-escape")
+    monkeypatch.setattr(
+        runtime_script,
+        "_read_broker_runtime_item",
+        lambda: fake_item,
+    )
+    monkeypatch.setattr(
+        runtime_script,
+        "_post_json_request",
+        lambda request_payload: ({"orderId": "abc"}, 201, True),
+    )
+
+    payload = runtime_script.main(
+        [
+            "--owner-approved-controlled-micro-live-exception",
+            "--state-output",
+            str(tmp_path / "runner_state.json"),
+            "--report-output",
+            str(tmp_path / "runner_report.md"),
+        ],
+    )
+
+    rendered = capsys.readouterr().out
+    printed_payload = json.loads(rendered)
+    state_payload = json.loads((tmp_path / "runner_state.json").read_text(encoding="utf-8"))
+    report_text = (tmp_path / "runner_report.md").read_text(encoding="utf-8")
+
+    assert printed_payload["runtime_summary"]["order_endpoint"] == "https://api-fxtrade.oanda.com/v3/accounts/REDACTED_ACCOUNT_ID/orders"
+    assert printed_payload == state_payload
+    assert "super-secret-live-token" not in rendered
+    assert "super-secret-account-id" not in rendered
+    assert "session-token-must-not-escape" not in rendered
+    assert "Bearer super-secret-live-token" not in rendered
+    assert "session-token-must-not-escape" not in json.dumps(state_payload, sort_keys=True)
+    assert "Bearer" not in report_text
+    assert "REDACTED_TOKEN" in rendered
+    assert payload["result"]["micro_live_status"] == CONTROLLED_MICRO_LIVE_EXCEPTION_READY
+
+
+def test_bitwarden_session_helper_scripts_and_documentation_are_safe() -> None:
+    assert START_SESSION_HELPER.exists()
+    assert CLEAR_SESSION_HELPER.exists()
+    assert SESSION_HELPER_DOC.exists()
+
+    start_text = START_SESSION_HELPER.read_text(encoding="utf-8")
+    clear_text = CLEAR_SESSION_HELPER.read_text(encoding="utf-8")
+    doc_text = SESSION_HELPER_DOC.read_text(encoding="utf-8")
+
+    assert "bw status" in start_text.lower()
+    assert "bw unlock --raw" in start_text.lower()
+    assert "aios_bitwarden_session_ready" in start_text.lower()
+    assert "bw_session_present" in start_text.lower()
+    assert "AIOS_BITWARDEN_SESSION_READY" in start_text
+    assert "BW_SESSION_PRESENT" in start_text
+    assert "env:bw_session" in clear_text.lower()
+    assert "bw lock" in clear_text.lower()
+    assert not re.search(r"\b(super-secret|very-secret|api token|master password)\b", start_text.lower())
+    assert "bw unlock --raw" in start_text
+    assert "BW_SESSION_PRESENT" in doc_text
+    assert "bitwarden master password" in doc_text.lower()
+    assert "do not store bw_session in repo" in doc_text.lower()
+    assert ". .\\scripts\\security\\start-aiosbitwardensession.ps1" in doc_text.lower()
+    assert ". .\\scripts\\security\\clear-aiosbitwardensession.ps1" in doc_text.lower()
+    assert "controlled micro-live runner must print redacted stdout only" in doc_text.lower()
+    assert "rotate any token that was pasted to console" in doc_text.lower()
 
 
 def test_max_one_order_attempt_is_enforced(monkeypatch, tmp_path: Path):
