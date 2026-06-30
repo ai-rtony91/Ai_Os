@@ -1,13 +1,13 @@
 {
   "input": {
-    "allowed_mode_is_micro_live_only": true,
+    "allowed_mode_is_micro_live_only": false,
     "audit_log_enabled": true,
     "audit_log_write_success": true,
     "bitwarden_cli_available": true,
     "bitwarden_cli_called": true,
-    "bitwarden_item_read_success": true,
+    "bitwarden_item_read_success": false,
     "broker_api_called": false,
-    "bw_session_present": true,
+    "bw_session_present": false,
     "credentials_read": false,
     "daemon_started": false,
     "daily_loss_cap_defined": true,
@@ -20,7 +20,7 @@
     "instrument": "EUR_USD",
     "kill_switch_enabled": true,
     "kill_switch_triggered": false,
-    "live_credential_values_available_to_runtime": true,
+    "live_credential_values_available_to_runtime": false,
     "live_endpoint_is_oanda_fxtrade": true,
     "live_order_execution": false,
     "live_runtime_owner_flag": true,
@@ -44,8 +44,12 @@
   "packet_id": "AIOS-FOREX-CONTROLLED-MICRO-LIVE-EXCEPTION-RUNNER-V1",
   "result": {
     "bitwarden_cli_called": true,
-    "blockers": [],
-    "broker_api_called": true,
+    "blockers": [
+      "bw_session_present is False",
+      "bitwarden_item_read_success is False",
+      "live_credential_values_available_to_runtime is False"
+    ],
+    "broker_api_called": false,
     "credentials_read": false,
     "current_stage": "controlled_micro_live_exception_runner",
     "daemon_started": false,
@@ -53,12 +57,12 @@
     "env_file_read": false,
     "live_item_ref": "AIOS / OANDA / Live / Broker Runtime",
     "live_order_execution": false,
-    "micro_live_status": "CONTROLLED_MICRO_LIVE_EXCEPTION_READY",
+    "micro_live_status": "LIVE_RUNTIME_CREDENTIAL_ACCESS_REQUIRED",
     "money_movement": false,
-    "next_stage": "owner_execute_one_controlled_micro_live_order",
+    "next_stage": "owner_unlock_bitwarden_live_runtime",
     "order_intent_summary": "instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK",
     "runtime_mode": "owner_approved_controlled_micro_live_exception",
-    "safe_next_action": "Execute at most one owner-run controlled micro-live OANDA order.",
+    "safe_next_action": "Resolve BW_SESSION, Bitwarden CLI availability, and live runtime credentials.",
     "scheduler_started": false,
     "webhook_started": false
   },
@@ -68,21 +72,21 @@
     "runtime_item_reference": "AIOS / OANDA / Live / Broker Runtime"
   },
   "runtime_summary": {
-    "allowed_mode_is_micro_live_only": true,
+    "allowed_mode_is_micro_live_only": false,
     "audit_log_enabled": true,
     "audit_log_write_success": true,
     "bitwarden_cli_available": true,
-    "bitwarden_item_read_success": true,
+    "bitwarden_item_read_success": false,
     "broker_item_reference_payload": {
-      "allowed_mode": "controlled_micro_live_exception_only",
+      "allowed_mode": null,
       "broker": "OANDA",
       "broker_account_id": "REDACTED_ACCOUNT_ID",
       "broker_api_token": "REDACTED_TOKEN",
       "endpoint": "https://api-fxtrade.oanda.com",
-      "environment": "live"
+      "environment": null
     },
-    "bw_session_present": true,
-    "credential_values_available_to_runtime": true,
+    "bw_session_present": false,
+    "credential_values_available_to_runtime": false,
     "current_stage": "controlled_micro_live_exception_runner",
     "daily_loss_cap_defined": true,
     "daily_loss_within_limit": true,
@@ -96,49 +100,33 @@
     "max_one_live_order_enforced": true,
     "max_orders_per_run": 1,
     "micro_size_only": true,
-    "next_stage": "owner_execute_one_controlled_micro_live_order",
+    "next_stage": "owner_unlock_bitwarden_live_runtime",
     "next_stage_after_success": "micro_live_evidence_review",
-    "order_attempt_count": 1,
-    "order_attempt_requested": true,
+    "order_attempt_count": 0,
+    "order_attempt_requested": false,
     "order_attempt_success": false,
-    "order_attempted": true,
+    "order_attempted": false,
     "order_endpoint": null,
     "order_intent_summary": "instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK",
-    "order_payload": {
-      "order": {
-        "instrument": "EUR_USD",
-        "positionFill": "DEFAULT",
-        "stopLossOnFill": {
-          "distance": "0.0010"
-        },
-        "takeProfitOnFill": {
-          "distance": "0.0020"
-        },
-        "timeInForce": "FOK",
-        "type": "MARKET",
-        "units": "1"
-      }
-    },
-    "order_response": {
-      "errorMessage": "The provided request was forbidden."
-    },
-    "order_status": "not_created",
-    "order_status_code": 403,
+    "order_payload": null,
+    "order_response": null,
+    "order_status": "not_attempted",
+    "order_status_code": 0,
     "owner_approved_controlled_micro_live_exception": true,
     "owner_micro_live_exception_approval_granted": true,
     "proposed_trade_risk_within_limit": true,
     "runtime_enabled": true,
     "runtime_flag": "--owner-approved-controlled-micro-live-exception",
     "runtime_item_reference_payload": {
-      "allowed_mode": "controlled_micro_live_exception_only",
+      "allowed_mode": null,
       "broker": "OANDA",
       "broker_account_id": "REDACTED_ACCOUNT_ID",
       "broker_api_token": "REDACTED_TOKEN",
       "endpoint": "https://api-fxtrade.oanda.com",
-      "environment": "live"
+      "environment": null
     },
     "runtime_mode": "owner_approved_controlled_micro_live_exception",
-    "safe_next_action": "Execute at most one owner-run controlled micro-live OANDA order.",
+    "safe_next_action": "Resolve BW_SESSION, Bitwarden CLI availability, and live runtime credentials.",
     "stop_loss_defined": true,
     "supervised_demo_evidence_clean": true,
     "take_profit_defined": true,

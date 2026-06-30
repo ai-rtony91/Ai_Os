@@ -9,16 +9,10 @@ $status = [ordered]@{
 }
 
 try {
-    $statusRaw = & bw status 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "bw status failed" }
-
-    $statusObject = $statusRaw | ConvertFrom-Json -ErrorAction Stop
-    if ($statusObject.status -eq "unlocked") {
-        if ($env:BW_SESSION) {
-            $status.BW_SESSION_PRESENT = $true
-            $status.AIOS_BITWARDEN_SESSION_READY = $true
-        }
-    } elseif ($statusObject.status -eq "locked") {
+    if (-not [string]::IsNullOrWhiteSpace([string]$env:BW_SESSION)) {
+        $status.BW_SESSION_PRESENT = $true
+        $status.AIOS_BITWARDEN_SESSION_READY = $true
+    } else {
         $unlockedSession = (& bw unlock --raw 2>&1 | Out-String).Trim()
         if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($unlockedSession)) {
             $env:BW_SESSION = $unlockedSession
