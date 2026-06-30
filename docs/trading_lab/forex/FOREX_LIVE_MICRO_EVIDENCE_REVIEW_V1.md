@@ -27,6 +27,30 @@ live micro execution is visible and whether the realized outcome is profitable.
   `READONLY_REVIEW_READY`.
 - If broker credentials or endpoint contract are invalid, classify repair or credential stages.
 
+## SL/TP evidence-depth repair behavior
+- `prior_order_payload` and `prior_order_response` are now inspected for read-only SL/TP intent:
+  - `stopLossOnFill`
+  - `takeProfitOnFill`
+  - `stopLossOrderID` / `takeProfitOrderID`
+  - `stopLossOrder` / `takeProfitOrder` when present in prior payload objects
+  - `trailingStopLossOrder` / `trailingStopLossOrderID` as stop-side evidence
+- `openTrades` payload is now inspected for the matching EUR_USD trade:
+  - `stopLossOrder`, `takeProfitOrder`, and `stopLossOrderID` / `takeProfitOrderID`
+  - `trailingStopLossOrder`, `trailingStopLossOrderID`
+- `trades` payload is a fallback only when `openTrades` trade details do not already expose SL/TP evidence.
+- Evidence fields are fingerprinted (`sha256:first12`) and stored in summary fields to avoid exposing raw IDs.
+
+### Position-source limitation
+- `openPositions` proves exposure only (units / PL context). It is not used as SL/TP evidence by itself.
+- A position match without matching SL/TP artifacts does not set `sl_observed`, `tp_observed`,
+  or `sltp_evidence_complete`.
+
+### `sltp_evidence_complete`
+- `sltp_evidence_complete` is `True` only when both:
+  - stop-side evidence exists (`sl_observed`), including fixed SL or trailing SL
+  - TP evidence exists (`tp_observed`)
+- This packet is still not proof of repeatable profitability; it only proves that SL/TP config is visible in broker read-only evidence.
+
 ## Why this is not autonomy
 One controlled micro proof is a visibility check only. It is not profitable-autonomy evidence.
 It does not prove repeatable profit across sessions.

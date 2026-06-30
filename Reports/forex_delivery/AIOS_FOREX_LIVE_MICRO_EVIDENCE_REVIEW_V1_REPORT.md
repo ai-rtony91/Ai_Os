@@ -54,15 +54,24 @@ Post-live-proof evidence review for one controlled micro-live order. This packet
 - open_position_found: False
 - trade_count: 1
 - position_count: 1
+- trades_count: 1
 - trade_fingerprints: ['sha256:98144d79af44']
 - position_fingerprints: ['sha256:cfdf108c1549']
 - unrealized_pl_available: True
-- unrealized_pl_value: -0.0001
+- unrealized_pl_value: -0.0002
 - pnl_classification: negative
-- risk_controls_observed: False
-- sl_tp_observed: False
-- sl_observed: False
-- tp_observed: False
+- risk_controls_observed: True
+- sl_tp_observed: True
+- sl_observed: True
+- tp_observed: True
+- sltp_evidence_sources: ['open_trades']
+- sl_source: open_trades
+- tp_source: open_trades
+- sl_fingerprint: sha256:fc5a72b2dcaa
+- tp_fingerprint: sha256:717449c97979
+- trailing_sl_observed: False
+- trailing_sl_fingerprint: None
+- sltp_evidence_complete: True
 - redacted_account_id: REDACTED_ACCOUNT_ID
 - safe_next_action: Capture post-live evidence persistence across sessions and continue repeatability testing.
 

@@ -50,22 +50,33 @@
     "prior_order_status": "created",
     "prior_order_status_code": 201,
     "redacted_account_id": "REDACTED_ACCOUNT_ID",
-    "risk_controls_observed": false,
+    "risk_controls_observed": true,
     "safe_next_action": "Capture post-live evidence persistence across sessions and continue repeatability testing.",
     "side": "buy",
-    "sl_observed": false,
-    "sl_tp_observed": false,
+    "sl_fingerprint": "sha256:fc5a72b2dcaa",
+    "sl_observed": true,
+    "sl_source": "open_trades",
+    "sl_tp_observed": true,
+    "sltp_evidence_complete": true,
+    "sltp_evidence_sources": [
+      "open_trades"
+    ],
     "summary_status_code": 200,
     "time_in_force": "FOK",
-    "tp_observed": false,
+    "tp_fingerprint": "sha256:717449c97979",
+    "tp_observed": true,
+    "tp_source": "open_trades",
     "trade_count": 1,
     "trade_fingerprints": [
       "sha256:98144d79af44"
     ],
+    "trades_count": 1,
     "trades_status_code": 200,
+    "trailing_sl_fingerprint": null,
+    "trailing_sl_observed": false,
     "transactions_status_code": null,
     "units": "",
     "unrealized_pl_available": true,
-    "unrealized_pl_value": -0.0001
+    "unrealized_pl_value": -0.0002
   }
 }
