@@ -1,32 +1,32 @@
 # AIOS Forex Supervised Demo Order Execution V1 Report
 
 ## Packet evaluation
-- demo_order_status: OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED
+- demo_order_status: SUPERVISED_DEMO_ORDER_READY
 - current_stage: supervised_demo_order_execution
-- next_stage: owner_supervised_demo_approval
-- runtime_mode: dry_run
-- safe_next_action: Collect owner supervised demo approval and rerun with approval context.
+- next_stage: owner_execute_one_supervised_demo_order
+- runtime_mode: owner_approved_supervised_demo_order
+- safe_next_action: Execute owner-approved supervised demo order runtime path.
 - blockers:
-  - owner_supervised_demo_approval is False
+- (none)
 
 ## Runtime gate state
-- runtime_enabled: false
+- runtime_enabled: true
 - runtime_flag: --owner-approved-supervised-demo-order
 - live_order_execution: false
 - money_movement: false
 - scheduler_started: false
 - daemon_started: false
 - webhook_started: false
-- owner_approved_supervised_demo_order: false
+- owner_approved_supervised_demo_order: true
 - broker: OANDA
 - endpoint: https://api-fxpractice.oanda.com
 - broker_account_id: REDACTED_ACCOUNT_ID
 - broker_api_token: REDACTED_TOKEN
-- order_attempt_requested: false
-- order_attempted: false
-- order_attempt_count: 0
-- order_attempt_success: false
-- order_endpoint: None
+- order_attempt_requested: true
+- order_attempted: true
+- order_attempt_count: 1
+- order_attempt_success: true
+- order_endpoint: https://api-fxpractice.oanda.com/v3/accounts/REDACTED_ACCOUNT_ID/orders
 
 ## Order intent
 - order_intent_summary: instrument=EUR_USD, units=1, side=buy, order_type=market, time_in_force=FOK
