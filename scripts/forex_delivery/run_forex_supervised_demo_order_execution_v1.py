@@ -25,6 +25,7 @@ except Exception:
 from automation.forex_engine.forex_supervised_demo_order_execution_v1 import (  # noqa: E402
     DEFAULT_RUNTIME_ALLOWED_MODES,
     RUNTIME_MODE_DRY_RUN,
+    RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER,
     SupervisedDemoOrderInput,
     build_default_input,
     evaluate_supervised_demo_order_execution,
@@ -101,11 +102,20 @@ def run_forex_supervised_demo_order_execution_v1(
     write_report: bool = True,
 ) -> dict[str, Any]:
     runtime_credentials: dict[str, str] = {}
+    runtime_mode = (
+        RUNTIME_MODE_OWNER_APPROVED_SUPERVISED_DEMO_ORDER
+        if owner_approved_supervised_demo_order
+        else RUNTIME_MODE_DRY_RUN
+    )
     demo_input = build_default_input(
         owner_supervised_demo_approval=owner_approved_supervised_demo_order,
         owner_runtime_order_flag=owner_approved_supervised_demo_order,
+        runtime_mode=runtime_mode,
     )
-    runtime_summary: dict[str, Any] = _runtime_summary_defaults(owner_approved_supervised_demo_order)
+    runtime_summary: dict[str, Any] = _runtime_summary_defaults(
+        owner_approved_supervised_demo_order=owner_approved_supervised_demo_order,
+        runtime_mode=runtime_mode,
+    )
 
     if owner_approved_supervised_demo_order:
         demo_input, runtime_summary, runtime_credentials = _load_runtime_credentials(
@@ -155,11 +165,19 @@ def run_forex_supervised_demo_order_execution_v1(
     )
 
 
-def _runtime_summary_defaults(runtime_enabled: bool) -> dict[str, Any]:
+def _runtime_summary_defaults(
+    *,
+    owner_approved_supervised_demo_order: bool,
+    runtime_mode: str,
+) -> dict[str, Any]:
     return {
+        "runtime_mode": runtime_mode,
         "default_mode": RUNTIME_MODE_DRY_RUN,
         "runtime_flag": RUNTIME_FLAG,
-        "runtime_enabled": runtime_enabled,
+        "runtime_enabled": bool(owner_approved_supervised_demo_order),
+        "owner_approved_supervised_demo_order": bool(
+            owner_approved_supervised_demo_order,
+        ),
         "runtime_stage": "supervised_demo_order_execution",
         "broker": "OANDA",
         "runtime_endpoint": BROKER_API_BASE_ENDPOINT,
@@ -252,7 +270,7 @@ def _load_runtime_credentials(
         "allowed_mode": bool(allowed_mode),
     }
     runtime_summary["broker_item_reference_payload"] = _redact_runtime_payload(
-        parsed_fields=parsed_fields
+        parsed_fields
     )
 
     return (
@@ -476,6 +494,8 @@ def _build_report_markdown(payload: dict[str, Any]) -> str:
         "- scheduler_started: false\n"
         "- daemon_started: false\n"
         "- webhook_started: false\n"
+        f"- owner_approved_supervised_demo_order: "
+        f"{str(payload['runtime_summary']['owner_approved_supervised_demo_order']).lower()}\n"
         f"- broker: {payload['runtime_summary']['broker']}\n"
         f"- endpoint: {payload['runtime_summary']['runtime_endpoint']}\n"
         f"- order_attempt_requested: {payload['runtime_summary']['order_attempt_requested']}\n"

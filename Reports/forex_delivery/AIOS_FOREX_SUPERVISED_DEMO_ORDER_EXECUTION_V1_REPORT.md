@@ -17,6 +17,7 @@
 - scheduler_started: false
 - daemon_started: false
 - webhook_started: false
+- owner_approved_supervised_demo_order: false
 - broker: OANDA
 - endpoint: https://api-fxpractice.oanda.com
 - order_attempt_requested: False
