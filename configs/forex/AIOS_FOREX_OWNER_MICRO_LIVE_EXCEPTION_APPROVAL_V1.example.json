@@ -1,0 +1,22 @@
+{
+  "default_mode": "dry_run",
+  "current_stage": "owner_micro_live_exception_approval",
+  "next_stage_after_success": "controlled_micro_live_exception_runner",
+  "micro_live_max_orders": 1,
+  "micro_live_size_policy": "minimum_owner_approved_size_only",
+  "supervised_demo_evidence_required": true,
+  "owner_live_money_risk_ack_required": true,
+  "kill_switch_required": true,
+  "daily_loss_cap_required": true,
+  "trade_risk_cap_required": true,
+  "audit_log_required": true,
+  "live_order_execution_by_this_packet": false,
+  "money_movement_by_this_packet": false,
+  "broker_api_called_by_this_packet": false,
+  "bitwarden_cli_called_by_this_packet": false,
+  "credentials_read_by_this_packet": false,
+  "env_file_read_by_this_packet": false,
+  "scheduler_started_by_this_packet": false,
+  "daemon_started_by_this_packet": false,
+  "webhook_started_by_this_packet": false
+}
