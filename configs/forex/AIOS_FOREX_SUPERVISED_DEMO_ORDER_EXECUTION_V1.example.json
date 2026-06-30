@@ -1,0 +1,20 @@
+{
+  "default_mode": "dry_run",
+  "runtime_flag": "--owner-approved-supervised-demo-order",
+  "broker": "OANDA",
+  "environment": "practice_demo",
+  "endpoint": "https://api-fxpractice.oanda.com",
+  "instrument": "EUR_USD",
+  "units": 1,
+  "side": "buy",
+  "order_type": "market",
+  "time_in_force": "FOK",
+  "stop_loss_required": true,
+  "take_profit_required": true,
+  "max_orders_per_run": 1,
+  "live_order_execution_by_this_packet": false,
+  "scheduler_started_by_this_packet": false,
+  "daemon_started_by_this_packet": false,
+  "webhook_started_by_this_packet": false,
+  "next_stage_after_success": "supervised_demo_evidence_review"
+}
