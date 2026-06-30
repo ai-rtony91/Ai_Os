@@ -430,10 +430,11 @@ def test_bitwarden_session_helper_scripts_and_documentation_are_safe() -> None:
     clear_text = CLEAR_SESSION_HELPER.read_text(encoding="utf-8")
     doc_text = SESSION_HELPER_DOC.read_text(encoding="utf-8")
 
-    assert "bw status" in start_text.lower()
     assert "bw unlock --raw" in start_text.lower()
+    assert "bw status" not in start_text.lower()
     assert "aios_bitwarden_session_ready" in start_text.lower()
     assert "bw_session_present" in start_text.lower()
+    assert "env:bw_session" in start_text.lower()
     assert "AIOS_BITWARDEN_SESSION_READY" in start_text
     assert "BW_SESSION_PRESENT" in start_text
     assert "env:bw_session" in clear_text.lower()
