@@ -104,8 +104,8 @@ def run_forex_live_micro_evidence_review_v1(
     runtime_summary["time_in_force"] = str(prior_state.get("time_in_force", "FOK"))
     runtime_summary["risk_controls_observed"] = _risk_controls_observed(prior_state)
     runtime_summary["sl_tp_observed"] = runtime_summary["risk_controls_observed"]
-    runtime_summary["sl_observed"] = runtime_summary["risk_controls_observed"]
-    runtime_summary["tp_observed"] = runtime_summary["risk_controls_observed"]
+    runtime_summary["sl_observed"] = False
+    runtime_summary["tp_observed"] = False
 
     if not owner_approved_readonly_live_micro_evidence_review:
         return _build_result(
@@ -429,8 +429,10 @@ def run_forex_live_micro_evidence_review_v1(
         runtime_summary["trades_probe_called"] = False
     open_trades = _extract_items(open_trades_payload, "trades")
     open_positions = _extract_items(open_positions_payload, "positions")
+    trades = _extract_items(trades_payload, "trades")
     runtime_summary["trade_count"] = len(open_trades)
     runtime_summary["position_count"] = len(open_positions)
+    runtime_summary["trades_count"] = len(trades)
 
     maybe_tx_id = _extract_safe_transaction_id(prior_state)
     if maybe_tx_id:
@@ -450,6 +452,14 @@ def run_forex_live_micro_evidence_review_v1(
 
     open_trade = _find_matching_euro_trade(open_trades, runtime_summary["side"])
     open_position = _find_matching_euro_position(open_positions, runtime_summary["side"])
+    trades_match = _find_matching_euro_trade(trades, runtime_summary["side"])
+    sltp_evidence = _collect_sltp_evidence(
+        prior_state=prior_state,
+        open_trade=open_trade,
+        fallback_trade=trades_match,
+    )
+    runtime_summary.update(sltp_evidence)
+    runtime_summary["risk_controls_observed"] = runtime_summary["sl_tp_observed"]
 
     trade_fingerprints: list[str] = []
     for trade in open_trades:
@@ -887,6 +897,168 @@ def _risk_controls_observed(prior_state: dict[str, Any]) -> bool:
     )
 
 
+def _collect_sltp_evidence(
+    *,
+    prior_state: Mapping[str, Any],
+    open_trade: Mapping[str, Any] | None,
+    fallback_trade: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    evidence: dict[str, Any] = {
+        "sltp_evidence_complete": False,
+        "sl_tp_observed": False,
+        "sl_observed": False,
+        "tp_observed": False,
+        "sl_source": None,
+        "tp_source": None,
+        "sl_fingerprint": None,
+        "tp_fingerprint": None,
+        "trailing_sl_observed": False,
+        "trailing_sl_fingerprint": None,
+        "sltp_evidence_sources": [],
+    }
+
+    prior_order_payload = _first_mapping(prior_state.get("order_payload"), ("order_payload", "order_payload"))
+    prior_order = prior_order_payload.get("order", {})
+    prior_order_response = _first_mapping(prior_state.get("order_response"), ("order_response", "order_response"))
+    order_create = _first_mapping(
+        prior_order_response.get("orderCreateTransaction", {}),
+        ("order_response", "orderCreateTransaction"),
+    )
+    order_fill = _first_mapping(
+        prior_order_response.get("orderFillTransaction", {}),
+        ("order_response", "orderFillTransaction"),
+    )
+
+    _merge_sltp_evidence(
+        source="prior_order_payload",
+        trade=prior_order,
+        target=evidence,
+    )
+    _merge_sltp_evidence(
+        source="prior_order_payload",
+        trade=prior_order_response,
+        target=evidence,
+    )
+    _merge_sltp_evidence(
+        source="prior_order_payload",
+        trade=order_create,
+        target=evidence,
+    )
+    _merge_sltp_evidence(
+        source="prior_order_payload",
+        trade=order_fill,
+        target=evidence,
+    )
+    if isinstance(open_trade, Mapping):
+        _merge_sltp_evidence(
+            source="open_trades",
+            trade=open_trade,
+            target=evidence,
+        )
+    if (
+        isinstance(fallback_trade, Mapping)
+        and _trade_has_sltp_evidence(fallback_trade)
+        and (
+            open_trade is None
+            or not _trade_has_sltp_evidence(open_trade)
+        )
+    ):
+        _merge_sltp_evidence(
+            source="trades",
+            trade=fallback_trade,
+            target=evidence,
+        )
+
+    evidence["sl_tp_observed"] = evidence["sl_observed"] or evidence["tp_observed"]
+    evidence["sltp_evidence_complete"] = bool(
+        evidence["sl_observed"] and evidence["tp_observed"],
+    )
+    evidence["risk_controls_observed"] = evidence["sl_tp_observed"]
+    return evidence
+
+
+def _trade_has_sltp_evidence(trade: Mapping[str, Any] | None) -> bool:
+    if not isinstance(trade, Mapping):
+        return False
+    signals = _collect_sltp_signals(trade)
+    return bool(signals["fixed_sl_fingerprint"]) or bool(
+        signals["trailing_sl_fingerprint"],
+    ) or bool(signals["tp_fingerprint"])
+
+
+def _collect_sltp_signals(trade: Mapping[str, Any]) -> dict[str, str | None]:
+    fixed_sl_signals = [
+        trade.get("stopLossOrder"),
+        trade.get("stopLossOnFill"),
+        trade.get("stopLossOrderID"),
+    ]
+    trailing_sl_signals = [
+        trade.get("trailingStopLossOrder"),
+        trade.get("trailingStopLossOrderID"),
+    ]
+    take_profit_signals = [
+        trade.get("takeProfitOrder"),
+        trade.get("takeProfitOnFill"),
+        trade.get("takeProfitOrderID"),
+    ]
+    fixed_sl_fingerprint = _first_fingerprint(fixed_sl_signals)
+    trailing_sl_fingerprint = _first_fingerprint(trailing_sl_signals)
+    tp_fingerprint = _first_fingerprint(take_profit_signals)
+    return {
+        "fixed_sl_fingerprint": fixed_sl_fingerprint,
+        "trailing_sl_fingerprint": trailing_sl_fingerprint,
+        "tp_fingerprint": tp_fingerprint,
+        "sl_observed": bool(
+            fixed_sl_fingerprint
+            or trailing_sl_fingerprint,
+        ),
+        "trailing_observed": bool(trailing_sl_fingerprint),
+        "tp_observed": bool(tp_fingerprint),
+    }
+
+
+def _merge_sltp_evidence(
+    *,
+    source: str,
+    trade: Mapping[str, Any],
+    target: dict[str, Any],
+) -> None:
+    signals = _collect_sltp_signals(trade)
+    if signals["sl_observed"] and not target["sl_observed"]:
+        target["sl_observed"] = True
+        target["sl_fingerprint"] = signals["fixed_sl_fingerprint"]
+        target["sl_source"] = source
+    if signals["trailing_observed"] and not target["trailing_sl_observed"]:
+        target["trailing_sl_observed"] = True
+        target["trailing_sl_fingerprint"] = signals["trailing_sl_fingerprint"]
+    if signals["tp_observed"] and not target["tp_observed"]:
+        target["tp_observed"] = True
+        target["tp_fingerprint"] = signals["tp_fingerprint"]
+        target["tp_source"] = source
+
+    if signals["sl_observed"] or signals["tp_observed"]:
+        sources = target["sltp_evidence_sources"]
+        if isinstance(sources, list) and source not in sources:
+            sources.append(source)
+
+
+def _first_fingerprint(values: Sequence[Any]) -> str | None:
+    for value in values:
+        if isinstance(value, Mapping):
+            serialized = json.dumps(value, sort_keys=True)
+        elif value is None:
+            continue
+        else:
+            value_text = str(value).strip()
+            if not value_text:
+                continue
+            serialized = value_text
+        fingerprint = _fingerprint(serialized)
+        if fingerprint:
+            return fingerprint
+    return None
+
+
 def _extract_items(payload: Any, key: str) -> list[dict[str, Any]]:
     if not isinstance(payload, Mapping):
         return []
@@ -1047,6 +1219,7 @@ def _initial_runtime_summary() -> RuntimeSummary:
         "open_position_found": False,
         "trade_count": 0,
         "position_count": 0,
+        "trades_count": 0,
         "trade_fingerprints": [],
         "position_fingerprints": [],
         "unrealized_pl_available": False,
@@ -1056,6 +1229,14 @@ def _initial_runtime_summary() -> RuntimeSummary:
         "sl_tp_observed": False,
         "sl_observed": False,
         "tp_observed": False,
+        "sl_source": None,
+        "tp_source": None,
+        "sl_fingerprint": None,
+        "tp_fingerprint": None,
+        "trailing_sl_observed": False,
+        "trailing_sl_fingerprint": None,
+        "sltp_evidence_sources": [],
+        "sltp_evidence_complete": False,
         "redacted_account_id": REDACTED_ACCOUNT_ID,
         "safe_next_action": "Run evidence review.",
     }
@@ -1199,6 +1380,7 @@ def _build_report(payload: Mapping[str, Any]) -> str:
         f"- open_position_found: {runtime_summary.get('open_position_found')}\n"
         f"- trade_count: {runtime_summary.get('trade_count')}\n"
         f"- position_count: {runtime_summary.get('position_count')}\n"
+        f"- trades_count: {runtime_summary.get('trades_count')}\n"
         f"- trade_fingerprints: {runtime_summary.get('trade_fingerprints')}\n"
         f"- position_fingerprints: {runtime_summary.get('position_fingerprints')}\n"
         f"- unrealized_pl_available: {runtime_summary.get('unrealized_pl_available')}\n"
@@ -1208,6 +1390,14 @@ def _build_report(payload: Mapping[str, Any]) -> str:
         f"- sl_tp_observed: {runtime_summary.get('sl_tp_observed')}\n"
         f"- sl_observed: {runtime_summary.get('sl_observed')}\n"
         f"- tp_observed: {runtime_summary.get('tp_observed')}\n"
+        f"- sltp_evidence_sources: {runtime_summary.get('sltp_evidence_sources')}\n"
+        f"- sl_source: {runtime_summary.get('sl_source')}\n"
+        f"- tp_source: {runtime_summary.get('tp_source')}\n"
+        f"- sl_fingerprint: {runtime_summary.get('sl_fingerprint')}\n"
+        f"- tp_fingerprint: {runtime_summary.get('tp_fingerprint')}\n"
+        f"- trailing_sl_observed: {runtime_summary.get('trailing_sl_observed')}\n"
+        f"- trailing_sl_fingerprint: {runtime_summary.get('trailing_sl_fingerprint')}\n"
+        f"- sltp_evidence_complete: {runtime_summary.get('sltp_evidence_complete')}\n"
         f"- redacted_account_id: {runtime_summary.get('redacted_account_id')}\n"
         f"- safe_next_action: {runtime_summary.get('safe_next_action')}\n\n"
         "## Allowed probes\n"

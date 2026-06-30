@@ -407,3 +407,337 @@ def test_stdout_and_state_and_report_are_redacted(monkeypatch, tmp_path, capsys)
     assert ACCOUNT_ID not in report_text
     assert SESSION not in report_text
     assert "sha256:" in report_text
+
+
+def _write_prior_state(path: Path, data: dict) -> None:
+    path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def test_prior_order_payload_stoploss_on_fill_marks_sl_observed(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    prior = {
+        "order_payload": {
+            "order": {
+                "stopLossOnFill": {
+                    "price": "1.2345",
+                },
+            },
+        },
+    }
+    prior_state = tmp_path / "prior.json"
+    _write_prior_state(prior_state, prior)
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        prior_runner_state_path=prior_state,
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=_mock_open_evidence_payload(open_trades=[], open_positions=[]),
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["sl_observed"] is True
+    assert runtime_summary["sl_source"] == "prior_order_payload"
+    assert runtime_summary["sl_tp_observed"] is True
+    assert runtime_summary["tp_observed"] is False
+    assert runtime_summary["sl_fingerprint"].startswith("sha256:")
+
+
+def test_prior_order_payload_takeprofit_on_fill_marks_tp_observed(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    prior = {
+        "order_payload": {
+            "order": {
+                "takeProfitOnFill": {
+                    "price": "1.3456",
+                },
+            },
+        },
+    }
+    prior_state = tmp_path / "prior.json"
+    _write_prior_state(prior_state, prior)
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        prior_runner_state_path=prior_state,
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=_mock_open_evidence_payload(open_trades=[], open_positions=[]),
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["tp_observed"] is True
+    assert runtime_summary["tp_source"] == "prior_order_payload"
+    assert runtime_summary["tp_fingerprint"].startswith("sha256:")
+
+
+def test_open_trades_stoploss_order_marks_sl_observed_and_fingerprint(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[
+            {
+                "id": "trade-100",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+                "stopLossOrder": {
+                    "id": "SL-RAW-ID-100",
+                    "price": "1.1000",
+                },
+            }
+        ],
+        open_positions=[],
+    )
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["open_trade_found"] is True
+    assert runtime_summary["sl_observed"] is True
+    assert runtime_summary["sl_source"] == "open_trades"
+    assert runtime_summary["sl_fingerprint"].startswith("sha256:")
+    assert runtime_summary["sl_fingerprint"] != "SL-RAW-ID-100"
+
+
+def test_open_trades_takeprofit_order_marks_tp_observed_and_fingerprint(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[
+            {
+                "id": "trade-200",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+                "takeProfitOrder": {
+                    "id": "TP-RAW-ID-200",
+                    "price": "1.3000",
+                },
+            }
+        ],
+        open_positions=[],
+    )
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["tp_observed"] is True
+    assert runtime_summary["tp_source"] == "open_trades"
+    assert runtime_summary["tp_fingerprint"].startswith("sha256:")
+    assert runtime_summary["tp_fingerprint"] != "TP-RAW-ID-200"
+
+
+def test_open_trades_order_id_signals_generate_fingerprints_not_raw_ids(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    raw_sl_id = "SL-ID-RAW-001"
+    raw_tp_id = "TP-ID-RAW-001"
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[
+            {
+                "id": "trade-300",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+                "stopLossOrderID": raw_sl_id,
+                "takeProfitOrderID": raw_tp_id,
+            }
+        ],
+        open_positions=[],
+    )
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["sltp_evidence_complete"] is True
+    assert runtime_summary["sl_observed"] is True
+    assert runtime_summary["tp_observed"] is True
+    assert runtime_summary["sl_fingerprint"] != raw_sl_id
+    assert runtime_summary["tp_fingerprint"] != raw_tp_id
+    assert runtime_summary["sl_fingerprint"].startswith("sha256:")
+    assert runtime_summary["tp_fingerprint"].startswith("sha256:")
+
+
+def test_trailing_stoploss_order_marks_trailing_sl_observed(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[
+            {
+                "id": "trade-400",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+                "trailingStopLossOrder": {
+                    "distance": "0.0015",
+                },
+            }
+        ],
+        open_positions=[],
+    )
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["trailing_sl_observed"] is True
+    assert runtime_summary["sl_observed"] is True
+    assert runtime_summary["trailing_sl_fingerprint"].startswith("sha256:")
+
+
+def test_trades_payload_supplies_takeprofit_when_open_trades_has_no_sltp(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[
+            {
+                "id": "trade-500",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+            }
+        ],
+        trades=[
+            {
+                "id": "trade-500",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+                "takeProfitOrder": {
+                    "price": "1.5000",
+                },
+            }
+        ],
+        open_positions=[],
+    )
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["open_trade_found"] is True
+    assert runtime_summary["tp_observed"] is True
+    assert runtime_summary["tp_source"] == "trades"
+    assert runtime_summary["sl_observed"] is False
+
+
+def test_open_positions_do_not_create_false_sltp_proof(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[],
+        open_positions=[
+            {
+                "instrument": INSTRUMENT,
+                "long": {
+                    "units": "1",
+                    "unrealizedPL": "1.0",
+                },
+                "short": {
+                    "units": "0",
+                    "unrealizedPL": "0",
+                },
+            }
+        ],
+        trades=[],
+    )
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert payload["result"]["evidence_status"] == review.PROFIT_POSITIVE
+    assert runtime_summary["open_position_found"] is True
+    assert runtime_summary["sltp_evidence_complete"] is False
+    assert runtime_summary["sl_observed"] is False
+    assert runtime_summary["tp_observed"] is False
+
+
+def test_sltp_evidence_complete_requires_both_stop_and_tp(monkeypatch, tmp_path):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[
+            {
+                "id": "trade-700",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+                "stopLossOrder": {"price": "1.1000"},
+                "takeProfitOrder": {"price": "1.2000"},
+            }
+        ],
+        open_positions=[],
+    )
+    payload = _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=tmp_path / "state.json",
+        report_output=tmp_path / "report.md",
+        write_report=False,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    runtime_summary = payload["runtime_summary"]
+    assert runtime_summary["sltp_evidence_complete"] is True
+    assert runtime_summary["sltp_evidence_sources"] == ["open_trades"]
+
+
+def test_raw_order_ids_not_in_stdout_state_or_report(monkeypatch, tmp_path, capsys):
+    monkeypatch.setenv("BW_SESSION", SESSION)
+    monkeypatch.setattr(review.shutil, "which", lambda *_args, **_kwargs: "/bin/bw")
+    raw_sl_id = "SL-RAW-ID-REDACTION"
+    raw_tp_id = "TP-RAW-ID-REDACTION"
+    state = tmp_path / "state.json"
+    report = tmp_path / "report.md"
+    mock_http = _mock_open_evidence_payload(
+        open_trades=[
+            {
+                "id": "trade-800",
+                "instrument": INSTRUMENT,
+                "currentUnits": "1",
+                "stopLossOrderID": raw_sl_id,
+                "takeProfitOrderID": raw_tp_id,
+            }
+        ],
+        open_positions=[],
+    )
+    _run_default(
+        owner_approved_readonly_live_micro_evidence_review=True,
+        state_output=state,
+        report_output=report,
+        write_report=True,
+        _read_bw_item=_read_bw_item_ok,
+        _safe_http_request=mock_http,
+    )
+    stdout = capsys.readouterr().out
+    state_text = state.read_text(encoding="utf-8")
+    report_text = report.read_text(encoding="utf-8")
+    assert raw_sl_id not in stdout
+    assert raw_tp_id not in stdout
+    assert raw_sl_id not in state_text
+    assert raw_tp_id not in state_text
+    assert raw_sl_id not in report_text
+    assert raw_tp_id not in report_text
