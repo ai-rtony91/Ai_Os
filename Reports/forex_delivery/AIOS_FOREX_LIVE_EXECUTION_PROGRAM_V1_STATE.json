@@ -1,0 +1,82 @@
+{
+  "input": {
+    "audit_log_enabled": true,
+    "autonomous_22h_6d_enabled": false,
+    "bitwarden_cli_called": false,
+    "broker_api_called": false,
+    "broker_runtime_read_only_auth_proven": true,
+    "credentials_read": false,
+    "daemon_started": false,
+    "demo_order_execution": false,
+    "duplicate_order_guard_enabled": true,
+    "env_file_read": false,
+    "execution_control_stack_landed": true,
+    "execution_control_stack_ready": false,
+    "kill_switch_enabled": true,
+    "kill_switch_triggered": false,
+    "live_order_execution": false,
+    "live_order_execution_enabled": false,
+    "live_order_lane_enabled": false,
+    "max_daily_loss_defined": true,
+    "max_trade_risk_defined": true,
+    "micro_live_evidence_clean": false,
+    "micro_live_order_executed": false,
+    "micro_live_order_execution": false,
+    "micro_live_order_runtime_enabled": false,
+    "money_movement": false,
+    "owner_live_trading_approval": false,
+    "owner_micro_live_exception_approval": false,
+    "owner_supervised_demo_approval": false,
+    "scheduler_started": false,
+    "session_window_days_per_week": 6,
+    "session_window_hours": 22,
+    "stop_loss_required": true,
+    "supervised_demo_evidence_clean": false,
+    "supervised_demo_order_executed": false,
+    "supervised_demo_order_runtime_enabled": false,
+    "take_profit_required": true,
+    "webhook_started": false
+  },
+  "module": "forex_live_execution_program_v1",
+  "packet_id": "PKT-FOREX-LIVE-EXECUTION-PROGRAM-V1",
+  "program_summary": {
+    "current_stage": "execution_control_stack",
+    "default_mode": "dry_run",
+    "execution_path": [
+      "broker_runtime_read_only_auth_probe",
+      "execution_control_stack"
+    ],
+    "next_stage": "owner_supervised_demo_approval",
+    "program_status": "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED",
+    "runtime_mode": "dry_run",
+    "session_window_days_per_week": 6,
+    "session_window_hours": 22,
+    "target": "live 22hr/day 6day/week autonomous execution"
+  },
+  "result": {
+    "autonomous_22h_6d_authorized": false,
+    "bitwarden_cli_called": false,
+    "blockers": [
+      "execution_control_stack_ready is False"
+    ],
+    "broker_api_called": false,
+    "credentials_read": false,
+    "current_stage": "execution_control_stack",
+    "daemon_started": false,
+    "demo_order_execution": false,
+    "env_file_read": false,
+    "execution_path": [
+      "broker_runtime_read_only_auth_probe",
+      "execution_control_stack"
+    ],
+    "live_order_execution": false,
+    "micro_live_order_execution": false,
+    "money_movement": false,
+    "next_stage": "owner_supervised_demo_approval",
+    "program_status": "OWNER_SUPERVISED_DEMO_APPROVAL_REQUIRED",
+    "runtime_mode": "dry_run",
+    "safe_next_action": "Collect owner supervised demo approval and run owner-approved demo order runtime separately.",
+    "scheduler_started": false,
+    "webhook_started": false
+  }
+}
