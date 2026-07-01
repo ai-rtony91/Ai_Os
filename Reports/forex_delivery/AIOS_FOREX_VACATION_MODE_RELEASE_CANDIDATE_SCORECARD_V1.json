@@ -1,0 +1,92 @@
+{
+  "schema": "AIOS_FOREX_VACATION_MODE_RELEASE_CANDIDATE_SCORECARD_V1",
+  "mode": "READ_ONLY_METADATA_ONLY_VACATION_MODE_RELEASE_CANDIDATE_SCORECARD",
+  "status": "SCORECARD_BLOCKED_BY_EXTERNAL_EVIDENCE",
+  "ready": false,
+  "score_areas": {
+    "product_policy_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "financial_risk_disclosure_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "privacy_data_safety_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "permissions_model_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "store_claims_policy_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "owner_consent_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "entry_gate_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "position_supervisor_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "exit_gate_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "alerting_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "evidence_bundle_readiness": {
+      "status": "BLOCKED_PENDING_EXTERNAL_EVIDENCE",
+      "ready": false
+    },
+    "broker_receipt_readiness": {
+      "status": "BLOCKED_PENDING_SANITIZED_EVIDENCE",
+      "ready": false
+    },
+    "realized_pnl_reconciliation_readiness": {
+      "status": "BLOCKED_PENDING_RECONCILIATION",
+      "ready": false
+    },
+    "legal_compliance_review_readiness": {
+      "status": "BLOCKED_PENDING_OWNER_REVIEW",
+      "ready": false
+    },
+    "mobile_control_plane_readiness": {
+      "status": "READY",
+      "ready": true
+    },
+    "release_packaging_readiness": {
+      "status": "BLOCKED_PENDING_MOBILE_PR",
+      "ready": false
+    },
+    "final_release_candidate_readiness": {
+      "status": "BLOCKED",
+      "ready": false
+    }
+  },
+  "ready_area_count": 11,
+  "total_area_count": 17,
+  "final_release_candidate_readiness_percent": 64.71,
+  "final_release_candidate_ready": false,
+  "legal_compliance_review_ready": false,
+  "broker_live_evidence_ready": false,
+  "sell_ready_claimed": false,
+  "blockers": [
+    "evidence_bundle_readiness",
+    "broker_receipt_readiness",
+    "realized_pnl_reconciliation_readiness",
+    "legal_compliance_review_readiness",
+    "release_packaging_readiness",
+    "final_release_candidate_readiness"
+  ],
+  "owner_next_action": "Review metadata control-plane skeleton; complete external evidence, legal/compliance, and mobile packaging blockers before release review."
+}
