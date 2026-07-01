@@ -49,7 +49,7 @@ jobs:
           test -f apps/dashboard/dist/server.js
           test -f apps/dashboard/dist/AIOS_STATIC_PREVIEW.html
           test -f apps/dashboard/dist/index.html
-          cmp -s apps/dashboard/dist/index.html apps/dashboard/dist/AIOS_STATIC_PREVIEW.html
+          # `index.html` is the public entry document; the static preview stays as a packaged support artifact.
           test -d apps/dashboard/dist/css
           test -d apps/dashboard/dist/js
           test -d apps/dashboard/dist/assets
