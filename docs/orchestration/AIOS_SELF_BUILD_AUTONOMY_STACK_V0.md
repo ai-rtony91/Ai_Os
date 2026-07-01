@@ -59,7 +59,9 @@ The one-action execute gate can report final explicit execution-gate readiness a
 
 The one-action local APPLY executor can report local executor dry-run readiness after the full gate chain aligns. It defaults to `DRY_RUN`, receives `executor_options.execute: false`, does not receive a real command runner from the driver, and reports `command_executed: false`.
 
-The one-action execution result collector is the next preview-only self-build-core queue item after the local APPLY executor. It is queued but not built yet.
+The one-action execution result collector consumes local APPLY executor evidence and apply result verifier evidence after the executor stage. It can classify the outcome as `blocked`, `rejected`, or `collected`; it does not execute commands, write result files, stage, commit, push, or merge.
+
+In the current DRY_RUN driver flow, the collector reports `collector_status: blocked` because no local APPLY command has executed. After a separately approved injected one-action local APPLY execution and passed verifier evidence, it can report `collector_status: collected` with `result_safe_to_package: true`.
 
 Start command:
 

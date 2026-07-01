@@ -177,6 +177,12 @@ def test_driver_parses_wake_json_and_stops_without_approved_scope():
     assert report["one_action_local_apply_executor"]["executor_mode"] == "DRY_RUN"
     assert report["one_action_local_apply_executor"]["command_executed"] is False
     assert report["one_action_local_apply_executor"]["command_returncode"] is None
+    assert report["one_action_execution_result_collector"]["schema"] == (
+        "AIOS_SELF_BUILD_ONE_ACTION_EXECUTION_RESULT_COLLECTOR.v1"
+    )
+    assert report["one_action_execution_result_collector"]["collector_status"] == "blocked"
+    assert report["one_action_execution_result_collector"]["command_executed"] is False
+    assert "command_not_executed" in report["one_action_execution_result_collector"]["rejection_reasons"]
 
 
 def test_driver_previews_one_action_execution_controller_with_approved_scope(tmp_path):
@@ -252,6 +258,8 @@ def test_driver_never_executes_generated_codex_or_apply_commands(tmp_path):
     assert report["one_action_execute_gate"]["commands_executed"] is False
     assert report["one_action_local_apply_executor"]["command_executed"] is False
     assert report["one_action_local_apply_executor"]["command_returncode"] is None
+    assert report["one_action_execution_result_collector"]["collector_status"] == "blocked"
+    assert report["one_action_execution_result_collector"]["command_executed"] is False
 
 
 def test_valid_anthony_approval_marks_one_action_apply_runner_preview_ready_but_executes_nothing(tmp_path):
@@ -322,6 +330,8 @@ def test_valid_anthony_approval_marks_one_action_apply_runner_preview_ready_but_
     assert report["one_action_local_apply_executor"]["command_execution_allowed"] is True
     assert report["one_action_local_apply_executor"]["command_executed"] is False
     assert report["one_action_local_apply_executor"]["command_returncode"] is None
+    assert report["one_action_execution_result_collector"]["command_executed"] is False
+    assert report["one_action_execution_result_collector"]["collector_status"] == "blocked"
     assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
 
 
@@ -451,6 +461,9 @@ def test_valid_anthony_approval_marks_one_action_execute_gate_armed_but_executes
     assert report["one_action_local_apply_executor"]["command_executed"] is False
     assert report["one_action_local_apply_executor"]["command_returncode"] is None
     assert report["one_action_local_apply_executor"]["post_execution_evidence"]["command_runner_called"] is False
+    assert report["one_action_execution_result_collector"]["collector_status"] == "blocked"
+    assert report["one_action_execution_result_collector"]["command_executed"] is False
+    assert "command_not_executed" in report["one_action_execution_result_collector"]["rejection_reasons"]
     assert report["safety"]["local_apply_executed"] is False
     assert report["safety"]["generated_commands_executed"] is False
     assert report["safety"]["files_written"] is False
@@ -479,6 +492,11 @@ def test_completed_local_apply_executor_selects_execution_result_collector_next(
     assert all(value is False for value in report["selected_queue_item"]["protected_action_flags"].values())
     assert report["one_action_local_apply_executor"]["command_executed"] is False
     assert report["one_action_local_apply_executor"]["command_returncode"] is None
+    assert report["one_action_execution_result_collector"]["schema"] == (
+        "AIOS_SELF_BUILD_ONE_ACTION_EXECUTION_RESULT_COLLECTOR.v1"
+    )
+    assert report["one_action_execution_result_collector"]["collector_status"] == "blocked"
+    assert report["one_action_execution_result_collector"]["command_executed"] is False
 
 
 def test_driver_handles_sandbox_1312_as_blocker_not_sos():

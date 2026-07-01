@@ -499,6 +499,25 @@ def run_self_build_dry_run_driver(
         one_action_local_apply_executor.get("safety", {}).get("commands_executed", False)
     )
 
+    result_collector_module = _load_sibling("aios_self_build_one_action_execution_result_collector")
+    one_action_execution_result_collector = (
+        result_collector_module.build_self_build_one_action_execution_result_collector(
+            selected_queue_item if isinstance(selected_queue_item, dict) else {},
+            apply_approval,
+            local_apply_executor_bridge,
+            single_action_executor,
+            one_action_execution_controller,
+            one_action_apply_runner,
+            one_action_execute_gate,
+            one_action_local_apply_executor,
+            apply_result_verifier,
+            [],
+        )
+    )
+    one_action_execution_result_collector["commands_executed"] = bool(
+        one_action_execution_result_collector.get("safety", {}).get("commands_executed", False)
+    )
+
     no_scope_review = preview_approved_scope in {None, ""} and readiness_status == "review_required"
     next_safe_action = (
         "Stop for Anthony self-build readiness review. Re-run with --preview-approved-scope self-build-core to preview only."
@@ -535,6 +554,7 @@ def run_self_build_dry_run_driver(
         "local_executor_request": local_executor_request,
         "one_action_local_executor_options": one_action_local_executor_options,
         "one_action_local_apply_executor": one_action_local_apply_executor,
+        "one_action_execution_result_collector": one_action_execution_result_collector,
         "morning_summary": (
             f"AIOS self-build DRY_RUN: wake_passed={wake_validation_passed}, "
             f"readiness={readiness_status}, selected_action={selected_next_action}."
