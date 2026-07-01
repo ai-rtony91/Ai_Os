@@ -1,0 +1,166 @@
+{
+  "campaign_id": "AIOS_FOREX_PROOF_LANE_PARALLEL_CAMPAIGN_V1",
+  "branch": "feature/forex-proof-lane-parallel-campaign-v1",
+  "base_head": "9e0c6d0fdf747fc3721eccde28cd559cbf940496",
+  "started_at_utc": "2026-07-01T18:13:19.1525541Z",
+  "mode": "APPLY",
+  "hard_stop_conditions": [
+    "repo path is not C:\\Dev\\Ai.Os",
+    "campaign starts from a branch other than main",
+    "main is not synced with origin/main",
+    "staged files exist before campaign start",
+    "unclassified dirty files exist before campaign start",
+    "AGENTS/RISK/governance authority conflicts with this packet",
+    ".env/secrets/credentials/account IDs are needed",
+    "broker/demo/live endpoint call would be required",
+    "order placement/position close would be required",
+    "real notification dispatch would be required",
+    "destructive file operation would be required",
+    "validator failure is outside campaign scope",
+    "merge/check failure",
+    "git/index lock problem persists after one safe retry",
+    "Codex cannot guarantee exact-file staging"
+  ],
+  "global_safety_boundaries": [
+    "Do not access .env",
+    "Do not access secrets or credentials",
+    "Do not access account IDs",
+    "Do not run network calls",
+    "Do not call OANDA or any broker endpoint",
+    "Do not call demo broker APIs",
+    "Do not call live broker APIs",
+    "Do not place orders or close positions",
+    "Do not enable scheduler, daemon, or autonomous execution",
+    "Do not send notifications",
+    "Do not weaken gates",
+    "Do not create production or live readiness claims",
+    "Do not edit unrelated files",
+    "Do not use broad git add",
+    "Do not remove paper or demo lanes",
+    "Do not mutate credential, login, or account flows",
+    "Do not claim GPU acceleration unless an actual GPU workload exists",
+    "Do not claim institutional readiness",
+    "Do not claim broker-verified PnL"
+  ],
+  "owned_output_files": [
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_PARALLEL_CAMPAIGN_MANIFEST_V1.json",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_READINESS_MAP_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_RECEIPT_SCHEMA_GAP_MAP_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DRAWDOWN_KILL_SWITCH_BOUNDARY_MAP_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_REPEATABILITY_LEDGER_PLAN_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DEMO_PROOF_REHEARSAL_DRY_RUN_MAP_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DASHBOARD_SOURCE_OF_TRUTH_PROJECTION_MAP_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_VALIDATION_ACCELERATION_PLAN_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_CAMPAIGN_CLOSURE_V1.md",
+    "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_NEXT_CODEX_PACKET_V1.md"
+  ],
+  "path_ownership": {
+    "exclusive_write_root": "Reports/forex_delivery/proof_lane_campaign_v1/",
+    "owned_write_paths": [
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_PARALLEL_CAMPAIGN_MANIFEST_V1.json",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_READINESS_MAP_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_RECEIPT_SCHEMA_GAP_MAP_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DRAWDOWN_KILL_SWITCH_BOUNDARY_MAP_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_REPEATABILITY_LEDGER_PLAN_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DEMO_PROOF_REHEARSAL_DRY_RUN_MAP_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DASHBOARD_SOURCE_OF_TRUTH_PROJECTION_MAP_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_VALIDATION_ACCELERATION_PLAN_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_CAMPAIGN_CLOSURE_V1.md",
+      "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_NEXT_CODEX_PACKET_V1.md"
+    ],
+    "shared_read_only_roots": [
+      "AGENTS.md",
+      "RISK_POLICY.md",
+      "README.md",
+      "WHITEPAPER.md",
+      "automation/",
+      "tests/",
+      "docs/",
+      "schemas/",
+      "Reports/"
+    ],
+    "forbidden_paths": [
+      ".env",
+      "credentials/",
+      "secrets/",
+      "broker/",
+      "live-trading/",
+      "runtime/",
+      "scheduler/",
+      "daemon/",
+      "notifications/"
+    ]
+  },
+  "fronts": [
+    {
+      "front_id": "A",
+      "name": "Proof Lane Readiness Map",
+      "output": "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_PROOF_LANE_READINESS_MAP_V1.md",
+      "write_scope": "report only",
+      "execution_type": "read-only recon plus report"
+    },
+    {
+      "front_id": "B",
+      "name": "Receipt Schema Gap Map",
+      "output": "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_RECEIPT_SCHEMA_GAP_MAP_V1.md",
+      "write_scope": "report only",
+      "execution_type": "read-only recon plus report"
+    },
+    {
+      "front_id": "C",
+      "name": "Drawdown and Kill-Switch Boundary Map",
+      "output": "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DRAWDOWN_KILL_SWITCH_BOUNDARY_MAP_V1.md",
+      "write_scope": "report only",
+      "execution_type": "read-only code inspection plus report"
+    },
+    {
+      "front_id": "D",
+      "name": "Repeatability Ledger Plan",
+      "output": "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_REPEATABILITY_LEDGER_PLAN_V1.md",
+      "write_scope": "report only",
+      "execution_type": "read-only planning report"
+    },
+    {
+      "front_id": "E",
+      "name": "Demo Proof Rehearsal Dry-Run Map",
+      "output": "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DEMO_PROOF_REHEARSAL_DRY_RUN_MAP_V1.md",
+      "write_scope": "report only",
+      "execution_type": "dry-run planning report"
+    },
+    {
+      "front_id": "F",
+      "name": "Dashboard Source-of-Truth Projection Map",
+      "output": "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_DASHBOARD_SOURCE_OF_TRUTH_PROJECTION_MAP_V1.md",
+      "write_scope": "report only",
+      "execution_type": "read-only projection report"
+    },
+    {
+      "front_id": "G",
+      "name": "Validation Acceleration Plan",
+      "output": "Reports/forex_delivery/proof_lane_campaign_v1/AIOS_FOREX_VALIDATION_ACCELERATION_PLAN_V1.md",
+      "write_scope": "report only",
+      "execution_type": "validation planning report"
+    }
+  ],
+  "validation_plan": [
+    "python -m compileall -q -j 0 automation tests scripts",
+    "python -m pytest tests/forex_engine/ -q",
+    "python -m pytest tests/security/test_aios_bitwarden_local_credential_broker_v1.py -q",
+    "git diff --check",
+    "Optional if xdist is installed: python -m pytest tests/forex_engine/ -q -n auto"
+  ],
+  "claim_boundaries": [
+    "Paper-only proof preparation is allowed.",
+    "Demo-proof readiness may be discussed only as preparation.",
+    "Live trading, broker calls, profit claims, and readiness claims are blocked.",
+    "Receipt, ledger, dashboard, and validation work must remain non-secret and non-network."
+  ],
+  "finalization_plan": [
+    "Stage only the owned output files.",
+    "Commit with the approved message.",
+    "Push the feature branch.",
+    "Create the PR and watch checks.",
+    "Merge only if checks pass.",
+    "Return to main and verify clean sync."
+  ]
+}
