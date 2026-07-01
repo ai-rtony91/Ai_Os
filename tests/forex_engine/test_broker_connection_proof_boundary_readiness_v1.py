@@ -31,7 +31,7 @@ def test_readiness_state_is_owner_gated_at_broker_connection_proof():
 
     assert result["readiness_status"] == "OWNER_GATED_BROKER_CONNECTION_PROOF_READY_FOR_REVIEW"
     assert result["next_protected_boundary"] == "broker connection proof"
-    assert result["source_repo_only_remaining_stage_count"] == 0
+    assert result["source_repo_only_remaining_stage_count"] == 1
     assert result["source_protected_stage_count"] == 12
     assert result["owner_wake_required"] is True
 

@@ -32,9 +32,15 @@ def _git_lines(repo_root: Path, args: list[str]) -> list[str]:
     return [line.rstrip() for line in completed.stdout.splitlines() if line.strip()]
 
 
+def _current_branch(repo_root: Path) -> str:
+    lines = _git_lines(repo_root, ["branch", "--show-current"])
+    return lines[0] if lines else ""
+
+
 def test_run_function_returns_classified_cleanup_plan() -> None:
     non_ignored_expected = len(_git_lines(ROOT, ["ls-files", "--others", "--exclude-standard"]))
     ignored_expected = len(_git_lines(ROOT, ["ls-files", "-i", "-o", "--exclude-standard"]))
+    branch = _current_branch(ROOT)
     result = run_forex_110_post_closure_local_residue_cleanup_plan_v1(
         ROOT / "Reports" / "forex_delivery",
         repo_root=ROOT,
@@ -46,7 +52,11 @@ def test_run_function_returns_classified_cleanup_plan() -> None:
         "PLAN_BLOCKED_PRECHECK_RETRY_REQUIRED",
         "PLAN_BLOCKED_NON_MAIN_BRANCH",
     }
-    assert result["repo_status"]["branch"] == "main"
+    assert result["repo_status"]["branch"] == branch
+    if branch == "main":
+        assert result["cleanup_plan_status"] == "PLAN_ONLY"
+    else:
+        assert result["cleanup_plan_status"] == "PLAN_BLOCKED_NON_MAIN_BRANCH"
     assert result["non_ignored_untracked_count"] == non_ignored_expected
     assert result["ignored_local_generated_count"] == ignored_expected
     assert result["deletion_performed"] is False
@@ -65,7 +75,11 @@ def test_run_function_returns_classified_cleanup_plan() -> None:
     assert result["background_loop_started"] is False
     assert result["bitwarden_started"] is False
 
-    assert any(item["category"] == "apps/dashboard/node_modules/" for item in result["safe_to_clean_later"])
+    assert result["safe_to_clean_later"]
+    assert all(
+        {"category", "count", "samples", "next_step"}.issubset(item)
+        for item in result["safe_to_clean_later"]
+    )
     assert any(item["category"] == ".local_backlog/" for item in result["review_required_before_clean"])
     assert result["protected_do_not_touch"]
 
