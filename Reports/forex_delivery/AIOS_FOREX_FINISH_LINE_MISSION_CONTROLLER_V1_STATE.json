@@ -1,10 +1,10 @@
 {
-  "controller_status": "SAFETY_CLOSURE_CONSUMED_BROKER_SCOPE_REQUIRED",
-  "selected_mode": "SAFETY_CLOSURE",
-  "current_phase": "BROKER_PROBE_SCOPE_APPROVAL_REQUIRED",
-  "next_safe_action": "Require owner-approved value-free broker probe scope review with no broker API call; keep broker probe, demo proof, live micro, live trading, vacation mode, scheduler, daemon, webhook, credentials, .env, account persistence, and order execution locked.",
+  "controller_status": "STARTING_LINE_READY_WITH_SAFETY_BLOCKERS",
+  "selected_mode": "STARTING_LINE",
+  "current_phase": "SAFETY_EVIDENCE_CLOSURE_PENDING",
+  "next_safe_action": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monitoring_ready; keep broker, demo, live micro, live trading, and vacation modes locked.",
   "starting_line_readiness_percent": 100.0,
-  "finish_line_readiness_percent": 11.11,
+  "finish_line_readiness_percent": 0.0,
   "live_trading_finish_line_target": {
     "target": "Proof-of-life profit evidence, owner-approved real-money live micro path, and sustained supervised operation.",
     "supervised_operation_target": "22 hours/day, 6 days/week",
@@ -46,8 +46,16 @@
     "SAFETY_CLOSURE"
   ],
   "blocker_summary": {
-    "critical_safety_blockers": [],
-    "missing_evidence_fields": [],
+    "critical_safety_blockers": [
+      "kill_switch_state",
+      "daily_stop_state",
+      "max_loss_state",
+      "monitoring_ready"
+    ],
+    "missing_evidence_fields": [
+      "evidence_age_days",
+      "evidence_age_days=40 exceeds freshness limit 14"
+    ],
     "governor_blockers": [
       "profitability evidence is not complete",
       "sample_size=12 is below minimum 30",
@@ -77,6 +85,7 @@
     "intake_status": "NO_EVIDENCE_APPLIED",
     "rerun_recommended": false,
     "missing_finish_line_gates": [
+      "critical_safety_evidence_closed",
       "broker_probe_readiness_approved",
       "demo_proof_exists",
       "owner_live_micro_exception_approved",
@@ -97,17 +106,17 @@
     },
     "evidence": {
       "emoji": "📄",
-      "status": "READY",
+      "status": "MISSING",
       "locked": false,
-      "context_box_required": false,
-      "context_box_text": ""
+      "context_box_required": true,
+      "context_box_text": "Evidence gaps: evidence_age_days, evidence_age_days=40 exceeds freshness limit 14."
     },
     "safety": {
       "emoji": "🛡️",
-      "status": "READY",
-      "locked": false,
-      "context_box_required": false,
-      "context_box_text": ""
+      "status": "BLOCKED",
+      "locked": true,
+      "context_box_required": true,
+      "context_box_text": "Safety gaps: kill_switch_state, daily_stop_state, max_loss_state, more."
     },
     "broker": {
       "emoji": "🏦",
@@ -135,7 +144,7 @@
       "status": "LOCKED",
       "locked": true,
       "context_box_required": true,
-      "context_box_text": "Finish readiness 11.11%."
+      "context_box_text": "Finish readiness 0.0%."
     },
     "vacation_mode": {
       "emoji": "🏖️",
@@ -156,16 +165,18 @@
       "status": "READY",
       "locked": false,
       "context_box_required": true,
-      "context_box_text": "Require owner-approved value-free broker probe scope review with no broker API call; keep bro..."
+      "context_box_text": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monit..."
     }
   },
   "context_boxes": {
+    "evidence": "Evidence gaps: evidence_age_days, evidence_age_days=40 exceeds freshness limit 14.",
+    "safety": "Safety gaps: kill_switch_state, daily_stop_state, max_loss_state, more.",
     "broker": "Broker probe waits for safety closure.",
     "proof": "Proof waits for sanitized evidence.",
     "live_micro": "Owner exception and proof ledger required.",
-    "live_trading": "Finish readiness 11.11%.",
+    "live_trading": "Finish readiness 0.0%.",
     "vacation_mode": "Requires sustained 22h/6d evidence.",
-    "next_action": "Require owner-approved value-free broker probe scope review with no broker API call; keep bro..."
+    "next_action": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monit..."
   },
   "safety_boundary": {
     "order_execution_allowed": false,
@@ -178,13 +189,8 @@
     "live_trading_authorized": false
   },
   "safety_closure_consumer_status": "STRUCTURAL_OWNER_SAFETY_EVIDENCE_CONSUMED_BROKER_LOCKED",
-  "structural_owner_safety_evidence_consumed": true,
-  "structural_owner_safety_evidence_controls": [
-    "kill_switch_state",
-    "daily_stop_state",
-    "max_loss_state",
-    "monitoring_ready"
-  ],
+  "structural_owner_safety_evidence_consumed": false,
+  "structural_owner_safety_evidence_controls": [],
   "operational_control_verified": false,
   "starting_line_inputs": {
     "autonomy_completion_controller_available": true,
@@ -194,7 +200,7 @@
     "next_safe_action_known": true
   },
   "finish_line_gates": {
-    "critical_safety_evidence_closed": true,
+    "critical_safety_evidence_closed": false,
     "broker_probe_readiness_approved": false,
     "demo_proof_exists": false,
     "owner_live_micro_exception_approved": false,

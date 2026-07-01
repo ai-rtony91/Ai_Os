@@ -784,7 +784,7 @@ def run_collection_pipeline(
     state_output_path: Path | None = None,
     report_output_path: Path | None = None,
     next_packet_output_path: Path | None = None,
- ) -> dict[str, object]:
+) -> dict[str, object]:
     effective_input_template_path = input_template_path or DEFAULT_INPUT_TEMPLATE_PATH
     effective_template_output_path = template_output_path or DEFAULT_INPUT_TEMPLATE_PATH
     effective_state_output_path = state_output_path or DEFAULT_STATE_OUTPUT_PATH
@@ -795,8 +795,12 @@ def run_collection_pipeline(
     input_error_type: str | None = None
     now_utc = _now_utc()
     try:
-        owner_input = _load_json_if_exists(effective_input_template_path)
-        owner_input = owner_input or build_input_template()
+        if input_template_path is None:
+            # An implicit default input path means the caller did not provide owner input.
+            owner_input = build_input_template()
+        else:
+            owner_input = _load_json_if_exists(effective_input_template_path)
+            owner_input = owner_input or build_input_template()
         result = run_forex_owner_safety_evidence_intake_verification_prep_v1(owner_input)
     except ValueError as exc:
         input_error_present = True
@@ -890,7 +894,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--input-template-path",
-        default=str(DEFAULT_INPUT_TEMPLATE_PATH),
+        default=None,
         help="Path for owner-filled intake template input",
     )
     parser.add_argument(

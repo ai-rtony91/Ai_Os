@@ -14,6 +14,7 @@ from typing import Any, Mapping
 
 from .forex_finish_line_mission_controller_v1 import (
     SAFETY_CLOSURE,
+    STARTING_LINE,
     run_forex_finish_line_mission_controller_v1,
 )
 
@@ -94,8 +95,17 @@ def run_forex_critical_safety_evidence_closure_v1(
     source_output = (
         dict(controller_output)
         if controller_output is not None
-        else run_forex_finish_line_mission_controller_v1(mode=SAFETY_CLOSURE)
+        else dict(
+            run_forex_finish_line_mission_controller_v1(mode=STARTING_LINE)
+        )
     )
+    if controller_output is None:
+        source_output["selected_mode"] = SAFETY_CLOSURE
+        source_output["controller_status"] = "SAFETY_CLOSURE_REQUIRED"
+        source_output["current_phase"] = "CRITICAL_SAFETY_EVIDENCE_CLOSURE"
+        finish_line_gates = dict(_mapping(source_output.get("finish_line_gates")))
+        finish_line_gates["critical_safety_evidence_closed"] = False
+        source_output["finish_line_gates"] = finish_line_gates
     controller_status = _text(source_output.get("controller_status"), STATUS_UNKNOWN)
     controller_phase = _text(source_output.get("current_phase"), STATUS_UNKNOWN)
     blocker_summary = _mapping(source_output.get("blocker_summary"))

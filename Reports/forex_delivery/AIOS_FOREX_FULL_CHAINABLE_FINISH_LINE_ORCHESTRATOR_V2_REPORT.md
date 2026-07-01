@@ -1,8 +1,8 @@
 # AIOS Forex Full Chainable Finish-Line Orchestrator V2 Report
 
 Status: CHAINABLE_FOREX_ORCHESTRATOR_READY_FOR_HOURS_REPO_ONLY
-Current branch: feature/aios-crop-to-kitchen-dryrun-apply-merge-v2
-Current head: f9f5f3ca docs(product): add AIOS Forex Play Store-grade policy layer (#1291)
+Current branch: main
+Current head: 8f6aa500 fix(forex): add vacation mode control plane (#1293)
 Current stage: first read-only broker probe review
 Next stage: first read-only broker probe review
 Completed repo-only stages: 0

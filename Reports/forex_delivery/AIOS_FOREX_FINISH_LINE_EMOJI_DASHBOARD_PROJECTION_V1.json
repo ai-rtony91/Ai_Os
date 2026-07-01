@@ -8,17 +8,17 @@
   },
   "evidence": {
     "emoji": "📄",
-    "status": "READY",
+    "status": "MISSING",
     "locked": false,
-    "context_box_required": false,
-    "context_box_text": ""
+    "context_box_required": true,
+    "context_box_text": "Evidence gaps: evidence_age_days, evidence_age_days=40 exceeds freshness limit 14."
   },
   "safety": {
     "emoji": "🛡️",
-    "status": "READY",
-    "locked": false,
-    "context_box_required": false,
-    "context_box_text": ""
+    "status": "BLOCKED",
+    "locked": true,
+    "context_box_required": true,
+    "context_box_text": "Safety gaps: kill_switch_state, daily_stop_state, max_loss_state, more."
   },
   "broker": {
     "emoji": "🏦",
@@ -46,7 +46,7 @@
     "status": "LOCKED",
     "locked": true,
     "context_box_required": true,
-    "context_box_text": "Finish readiness 11.11%."
+    "context_box_text": "Finish readiness 0.0%."
   },
   "vacation_mode": {
     "emoji": "🏖️",
@@ -67,6 +67,6 @@
     "status": "READY",
     "locked": false,
     "context_box_required": true,
-    "context_box_text": "Require owner-approved value-free broker probe scope review with no broker API call; keep bro..."
+    "context_box_text": "Close critical safety evidence for kill_switch_state, daily_stop_state, max_loss_state, monit..."
   }
 }

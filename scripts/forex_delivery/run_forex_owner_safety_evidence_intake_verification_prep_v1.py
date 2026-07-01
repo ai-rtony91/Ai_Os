@@ -15,7 +15,11 @@ from automation.forex_engine import forex_owner_safety_evidence_intake_verificat
 
 def main() -> None:
     args = module.parse_args()
-    input_path = Path(args.input_template_path)
+    input_path = (
+        Path(args.input_template_path)
+        if args.input_template_path is not None
+        else None
+    )
     template_output = Path(args.template_output_path)
     state_output = Path(args.state_output_path)
     report_output = Path(args.report_output_path)
