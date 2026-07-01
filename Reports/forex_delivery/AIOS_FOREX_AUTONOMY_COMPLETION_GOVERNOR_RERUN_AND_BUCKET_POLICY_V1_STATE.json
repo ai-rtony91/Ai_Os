@@ -12,8 +12,9 @@
   "bucket_status": "BUCKET_MAX_LOSS_HOLD",
   "candidate_status": "AUTONOMY_BLOCKED",
   "capital_bucket_mode": "FIXED_DAILY_BUCKET",
-  "daily_return_target_percent": 100.0,
-  "daily_stretch_target_percent": 120.0,
+  "cumulative_return_percent": null,
+  "cumulative_return_target_percent_high": 120.0,
+  "cumulative_return_target_percent_low": 100.0,
   "epic_id": "EPC-FOREX-AUTONOMY-COMPLETION-001",
   "governor_blockers": [
     "profitability evidence is not complete",

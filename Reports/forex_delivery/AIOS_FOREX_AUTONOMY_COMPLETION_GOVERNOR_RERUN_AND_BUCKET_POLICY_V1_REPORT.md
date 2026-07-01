@@ -2,7 +2,7 @@
 
 Status: AUTONOMY_BLOCKED
 Current branch: main
-Current head: 761d529cb402642fe494d4dde2a42f84a89ca0ff
+Current head: 807c0e058297875325713e537455e14f204d3c82
 Input files used: C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_AUTONOMY_COMPLETION_STATE_MODEL_V1.json, C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_LIVE_MICRO_EXCEPTION_GOVERNOR_INPUT_TEMPLATE_V1.json
 
 Governor status: AUTONOMY_BLOCKED
@@ -11,6 +11,11 @@ Next autonomy action: HOLD_FOR_RISK_RESET
 Owner gate status: OWNER_GATE_PENDING
 Broker gate status: LIVE_BRIDGE_NOT_READY
 Live micro exception status: LIVE_MICRO_REVIEW_BLOCKED
+
+Cumulative band semantics:
+- cumulative_return_percent: None
+- cumulative_return_target_percent_low: 100.0
+- cumulative_return_target_percent_high: 120.0
 
 Safety boundary:
 - order_execution_allowed: False

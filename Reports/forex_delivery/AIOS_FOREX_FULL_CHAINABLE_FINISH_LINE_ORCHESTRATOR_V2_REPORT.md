@@ -1,8 +1,8 @@
 # AIOS Forex Full Chainable Finish-Line Orchestrator V2 Report
 
 Status: CHAINABLE_FOREX_ORCHESTRATOR_READY_FOR_HOURS_REPO_ONLY
-Current branch: feature/forex-profit-production-next-gate-v1
-Current head: 0463de22 Add Forex profit production next gate v1
+Current branch: main
+Current head: 807c0e05 Add humanoid fund drip-bucket config and alert tone guide (#1301)
 Current stage: first read-only broker probe review
 Next stage: first read-only broker probe review
 Completed repo-only stages: 0

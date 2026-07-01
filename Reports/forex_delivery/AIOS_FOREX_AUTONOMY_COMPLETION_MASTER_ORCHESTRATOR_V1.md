@@ -105,7 +105,7 @@ Live-money autonomy means:
 - Any unexpected live API signal -> mark invalid state and stop the lane.
 
 ## Stop conditions
-- `daily_return_target_percent >= 100` or `>= 120` (if stretch review is enabled) AND configured close-of-day sweep completed.
+- `cumulative_return_percent >= 100` or `>= 120` (if stretch review is enabled) AND configured close-of-day sweep completed.
 - Any max-loss stop condition or risk gate fail.
 - No valid governor output.
 - Missing or stale owner-gate fields.

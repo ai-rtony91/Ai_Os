@@ -6,15 +6,16 @@
 - All execution-side capabilities remain blocked in this phase.
 
 ## Core targets
-- `daily_return_target_percent`: `100`
-- `daily_stretch_target_percent`: `120`
+- `cumulative_return_percent`: measured against the owner's baseline, not a daily rate
+- `cumulative_return_target_percent_low`: `100`
+- `cumulative_return_target_percent_high`: `120`
 - `fixed_daily_starting_risk_bucket_percent`: `1.00`
 - `protected_profit_bucket_percent`: `0.20`
 - `weekly_review_bucket_percent`: `0.40`
 - `capital_bucket_mode`: `FIXED_DAILY_BUCKET`
 
-The two target percentages are completion metrics, not trade commands.  
-`100` means planned bucket completion.
+The two cumulative target percentages are completion metrics, not trade commands.
+`100` means planned bucket completion on the owner's cumulative band.
 `120` means stretch review condition for controlled governance review only.
 
 ## Bucket definitions
@@ -35,7 +36,7 @@ The two target percentages are completion metrics, not trade commands.
 
 ## Control rules
 - `stop_after_target_rule`
-  - If daily bucket completes at `100`, pause any new proposal creation for the current cycle.
+  - If the cumulative bucket completes at `100`, pause any new proposal creation for the current cycle.
   - Sweep protected profit bucket before resuming.
 - `stop_after_max_loss_rule`
   - On configured max-loss gate fail, freeze lane and hold execution proposals.

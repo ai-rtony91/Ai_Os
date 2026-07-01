@@ -1,8 +1,9 @@
 {
   "current_stage": "evidence_prep_complete",
   "target_stage": "live_micro_exception_review_ready",
-  "daily_return_target_percent": 100,
-  "daily_stretch_target_percent": 120,
+  "cumulative_return_percent": null,
+  "cumulative_return_target_percent_low": 100,
+  "cumulative_return_target_percent_high": 120,
   "autonomy_window_target": "hourly_scan_with_evidence_gates",
   "capital_bucket_mode": "FIXED_DAILY_BUCKET",
   "daily_start_bucket": "1.00",
