@@ -1,0 +1,12 @@
+[AIOS SOS - ATM MILESTONE REACHED]  #AIOS_SOS
+Your demo profit bucket tipped: $250.00 (threshold $200.00).
+Target band 100-120% reached on baseline $1000.00.
+NOTHING HAS MOVED. This is an instruction, not an action.
+
+WHAT TO DO NEXT - reply with ONE:
+  APPROVE  -> AIOS logs an owner-reviewed withdrawal proposal (still no money moves;
+              it queues a proposal you action by hand at your broker/bank).
+  HOLD     -> keep compounding in-account; bucket keeps filling.
+  ADJUST   -> reply ADJUST <number> to set a new tip threshold in USD.
+
+Nothing further happens until you reply. Money movement stays OFF by policy.
