@@ -137,6 +137,9 @@ def run_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1(
         state, governor_input, candidate_status, governor_result, bucket_status
     )
     broker_gate_status = _classify_broker_gate_status(governor_input, governor_result)
+    cumulative_return_percent, cumulative_return_target_low, cumulative_return_target_high = (
+        _resolve_cumulative_return_band(state)
+    )
 
     result = {
         "candidate_status": candidate_status,
@@ -149,12 +152,9 @@ def run_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1(
         "live_micro_exception_status": _classify_live_micro_exception_status(
             candidate_status
         ),
-        "daily_return_target_percent": _to_float(
-            state.get("daily_return_target_percent"), default=100.0
-        ),
-        "daily_stretch_target_percent": _to_float(
-            state.get("daily_stretch_target_percent"), default=120.0
-        ),
+        "cumulative_return_percent": cumulative_return_percent,
+        "cumulative_return_target_percent_low": cumulative_return_target_low,
+        "cumulative_return_target_percent_high": cumulative_return_target_high,
         "capital_bucket_mode": _text(
             state.get("capital_bucket_mode", "FIXED_DAILY_BUCKET"),
             default="FIXED_DAILY_BUCKET",
@@ -335,10 +335,8 @@ def _classify_bucket_status(
     governor_result: Mapping[str, Any],
 ) -> str:
     failed_gates = _to_lower_set(governor_result.get("failed_gates", []))
-    realized_return = _to_float(state.get("daily_return_percent"), default=None)
-    daily_return_target = _to_float(state.get("daily_return_target_percent"), default=100.0)
-    daily_stretch_target = _to_float(
-        state.get("daily_stretch_target_percent"), default=120.0
+    realized_return, cumulative_return_target_low, cumulative_return_target_high = (
+        _resolve_cumulative_return_band(state)
     )
 
     if candidate_status == LIVE_MICRO_EXCEPTION_REVIEW_READY:
@@ -351,9 +349,9 @@ def _classify_bucket_status(
     if governor.GATE_MAX_LOSS in failed_gates or max_loss_hold:
         return BUCKET_MAX_LOSS_HOLD
 
-    if realized_return is not None and realized_return >= daily_stretch_target:
+    if realized_return is not None and realized_return >= cumulative_return_target_high:
         return BUCKET_TARGET_HOLD
-    if realized_return is not None and realized_return >= daily_return_target:
+    if realized_return is not None and realized_return >= cumulative_return_target_low:
         return BUCKET_TARGET_HOLD
 
     if candidate_status == LIVE_BLOCKED_BY_POLICY:
@@ -377,15 +375,13 @@ def _classify_bucket_blockers(
 
     blockers: list[str] = _string_list(state.get("blockers", []))
 
-    realized_return = _to_float(state.get("daily_return_percent"), default=None)
-    target = _to_float(state.get("daily_return_target_percent"), default=100.0)
-    stretch = _to_float(state.get("daily_stretch_target_percent"), default=120.0)
+    realized_return, target, stretch = _resolve_cumulative_return_band(state)
 
     if bucket_status == BUCKET_TARGET_HOLD:
         if realized_return is not None and realized_return >= stretch:
-            blockers.append("daily_stretch_target_reached")
+            blockers.append("cumulative_return_target_high_reached")
         elif realized_return is not None and realized_return >= target:
-            blockers.append("daily_return_target_reached")
+            blockers.append("cumulative_return_target_low_reached")
         else:
             blockers.append("target_bucket_not_reached")
     if bucket_status == BUCKET_MAX_LOSS_HOLD:
@@ -421,6 +417,17 @@ def _build_report_markdown(
         f"Owner gate status: {result.get('owner_gate_status')}",
         f"Broker gate status: {result.get('broker_gate_status')}",
         f"Live micro exception status: {result.get('live_micro_exception_status')}",
+        "",
+        "Cumulative band semantics:",
+        f"- cumulative_return_percent: {result.get('cumulative_return_percent')}",
+        (
+            "- cumulative_return_target_percent_low: "
+            f"{result.get('cumulative_return_target_percent_low')}"
+        ),
+        (
+            "- cumulative_return_target_percent_high: "
+            f"{result.get('cumulative_return_target_percent_high')}"
+        ),
         "",
         "Safety boundary:",
         f"- order_execution_allowed: {result['safety_boundary']['order_execution_allowed']}",
@@ -526,6 +533,36 @@ def _as_bool(value: Any) -> bool:
     if isinstance(value, (int, float)):
         return bool(value)
     return str(value).strip().lower() in {"1", "true", "yes", "on", "armed", "ready", "enabled"}
+
+
+def _resolve_cumulative_return_band(state: Mapping[str, Any]) -> tuple[float | None, float, float]:
+    cumulative_return_percent = _to_float(
+        state.get("cumulative_return_percent"),
+        default=None,
+    )
+
+    cumulative_return_target_low = _to_float(
+        state.get("cumulative_return_target_percent_low"),
+        default=_to_float(state.get("target_return_band_low_pct"), default=100.0),
+    )
+    if cumulative_return_target_low is None:
+        cumulative_return_target_low = 100.0
+
+    cumulative_return_target_high = _to_float(
+        state.get("cumulative_return_target_percent_high"),
+        default=_to_float(state.get("target_return_band_high_pct"), default=120.0),
+    )
+    if cumulative_return_target_high is None:
+        cumulative_return_target_high = 120.0
+
+    if cumulative_return_target_high < cumulative_return_target_low:
+        cumulative_return_target_high = cumulative_return_target_low
+
+    return (
+        cumulative_return_percent,
+        cumulative_return_target_low,
+        cumulative_return_target_high,
+    )
 
 
 __all__ = [

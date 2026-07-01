@@ -132,15 +132,34 @@ def test_live_micro_exception_review_ready_routes_owner_review_without_execution
 def test_bucket_target_reached_routes_to_target_hold():
     result = controller.run_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1(
         state_mapping={
-            "daily_return_percent": 100,
-            "daily_return_target_percent": 100,
-            "daily_stretch_target_percent": 120,
+            "cumulative_return_percent": 100,
+            "cumulative_return_target_percent_low": 100,
+            "cumulative_return_target_percent_high": 120,
             "capital_bucket_mode": "FIXED_DAILY_BUCKET",
         },
         governor_input_mapping=_policy_ready_governor_input(),
     )
 
     assert result["bucket_status"] == controller.BUCKET_TARGET_HOLD
+    assert result["cumulative_return_percent"] == 100.0
+    assert result["cumulative_return_target_percent_low"] == 100.0
+    assert result["cumulative_return_target_percent_high"] == 120.0
+    assert result["bucket_blockers"] == ["cumulative_return_target_low_reached"]
+
+
+def test_bucket_stretch_target_reached_routes_to_target_hold():
+    result = controller.run_forex_autonomy_completion_governor_rerun_and_bucket_policy_v1(
+        state_mapping={
+            "cumulative_return_percent": 120,
+            "cumulative_return_target_percent_low": 100,
+            "cumulative_return_target_percent_high": 120,
+            "capital_bucket_mode": "FIXED_DAILY_BUCKET",
+        },
+        governor_input_mapping=_policy_ready_governor_input(),
+    )
+
+    assert result["bucket_status"] == controller.BUCKET_TARGET_HOLD
+    assert result["bucket_blockers"] == ["cumulative_return_target_high_reached"]
 
 
 def test_max_loss_state_routes_to_max_loss_hold():
