@@ -1,0 +1,76 @@
+{
+  "schema": "aios.humanoid.fund_config.v1",
+  "mode": "TRACK_AND_ALERT_ONLY",
+  "goal": {
+    "name": "HUMANOID_ROBOT",
+    "default_target": "Unitree G1",
+    "target_usd": 16000,
+    "note": "Owner-editable. R1 ~ 6000 USD entry option; G1 EDU ~ 40000; H1 ~ 90000."
+  },
+  "funding_lanes": {
+    "lane_a_personal": {
+      "enabled": true,
+      "type": "FIXED_PERSONAL_AUTO_TRANSFER",
+      "amount_usd_per_month": 0,
+      "note": "Owner sets amount. Must survive forex earning 0. Manual entries recorded to ledger by owner action."
+    },
+    "lane_b_forex_verified": {
+      "enabled": false,
+      "type": "VERIFIED_LIVE_FOREX_PROFIT_SWEEP",
+      "sweep_percent_of_realized_live_profit": 50,
+      "activation_requires": [
+        "real demo track record (30+ trades, 2+ walk-forward windows, <=14d fresh)",
+        "brake trip-proof evidence",
+        "owner live arming per RISK_POLICY",
+        "realized (not unrealized) live profit"
+      ],
+      "note": "Stays disabled and 0 USD until live is legitimately armed and profitable. No autonomous money movement ever - alert-and-instruct only."
+    },
+    "lane_c_windfalls": {
+      "enabled": true,
+      "type": "MANUAL_WINDFALL_DEPOSIT",
+      "note": "Owner records windfalls manually."
+    }
+  },
+  "drip_bucket": {
+    "pattern": "TIPPING_BUCKET_RAIN_GAUGE",
+    "bucket_size_usd": 200,
+    "behavior": "every verified deposit drips into the bucket; when the bucket reaches bucket_size_usd it TIPS: total moves to the fund ledger and a BUCKET_TIP alert fires with the running fund total and percent-to-target",
+    "note": "Same pattern as the forex profit tipping bucket (min_profit_to_sweep_usd=200 in atm_milestone_config.json) - one mental model everywhere."
+  },
+  "milestones": {
+    "percents_of_target": [25, 50, 75, 100],
+    "behavior": "crossing each percent fires a JACKPOT alert; 100 percent = humanoid purchase decision alert (owner buys, never automation)"
+  },
+  "alerts": {
+    "channel": "ntfy",
+    "topics_ref": "control/secrets/humanoid_ntfy_topics.json (gitignored - topic name is the access key, never commit it)",
+    "events": {
+      "DRIP": {
+        "topic_key": "drip_topic",
+        "priority": "min",
+        "tone_design": "silent or default - no noise for routine drips",
+        "tags": "droplet"
+      },
+      "BUCKET_TIP": {
+        "topic_key": "bucket_tip_topic",
+        "priority": "high",
+        "tone_design": "MONEY COUNTER - bill-counter shuffle whirr ending in double high-pitch beep (counting complete, payout decision ready)",
+        "tags": "dollar,moneybag"
+      },
+      "JACKPOT_MILESTONE": {
+        "topic_key": "jackpot_topic",
+        "priority": "max",
+        "tone_design": "CASINO JACKPOT - slot machine coin cascade plus fanfare (milestone crossed)",
+        "tags": "slot_machine,tada"
+      }
+    },
+    "note": "ntfy Android assigns a custom sound PER TOPIC on the phone (Settings > Subscribed topic > Notification sound). Owner downloads a money-counter mp3 and a jackpot mp3 once and binds them; see docs/finance/HUMANOID_FUND_AND_ALERT_TONES.md."
+  },
+  "ledger_path": "telemetry/humanoid/humanoid_fund_ledger.jsonl",
+  "money_movement_allowed": false,
+  "bank_access_allowed": false,
+  "note": "Tracking and alerting only. This config never moves money. Owner performs every transfer and the purchase.",
+  "attested_by_owner": "Anthony, 2026-07-01 (structure approved; lane A amount and topic names pending owner fill-in)",
+  "generated_at": "2026-07-01T00:00:00Z"
+}
