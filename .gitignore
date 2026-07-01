@@ -146,6 +146,11 @@ automation/orchestration/notifications/*.local.json
 automation/orchestration/notifications/secrets/
 automation/orchestration/notifications/state/
 
+# AI_OS alert channel secrets
+control/secrets/*
+!control/secrets/
+!control/secrets/alert_channels.example.json
+
 # AI_OS generated morning digest evidence
 telemetry/morning_digest/
 
