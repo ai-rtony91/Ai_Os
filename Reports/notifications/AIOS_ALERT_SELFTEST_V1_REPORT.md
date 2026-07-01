@@ -1,7 +1,7 @@
 # AIOS Alert Self-Test v1 Report
 
 - Packet: AIOS-P29
-- Generated UTC: 2026-07-01T19:00:05Z
+- Generated UTC: 2026-07-01T19:17:23Z
 - Mode: DRY_RUN
 - Status: channel_not_configured
 - Config source: control/secrets/alert_channels.example.json
@@ -32,7 +32,7 @@
 {
   "schema": "AIOS_ALERT_SELFTEST_RECEIPT.v1",
   "packet_id": "AIOS-P29",
-  "generated_at_utc": "2026-07-01T19:00:05Z",
+  "generated_at_utc": "2026-07-01T19:17:23Z",
   "mode": "DRY_RUN",
   "status": "channel_not_configured",
   "config_source": "control/secrets/alert_channels.example.json",
