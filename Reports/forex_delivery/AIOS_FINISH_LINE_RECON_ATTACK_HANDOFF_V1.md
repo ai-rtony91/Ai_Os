@@ -25,4 +25,3 @@ READY_FOR_FINALIZATION
 
 ## Safe Next Action
 - Stage only the explicit allowed files from this fix set, then commit if commit/push/PR execution is authorized for this session.
-
