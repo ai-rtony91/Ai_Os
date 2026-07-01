@@ -1,0 +1,84 @@
+{
+  "schema": "AIOS_FOREX_FINAL_LIVE_READINESS_SCORECARD_V1",
+  "generated_for_packet": "AIOS_FOREX_BROKER_VERIFIED_LIVE_PROFIT_PROOF_MILESTONE_V1",
+  "bands": {
+    "ready": {
+      "percent_min": 100,
+      "status": "READY"
+    },
+    "review_ready": {
+      "percent_min": 80,
+      "status": "REVIEW_READY"
+    },
+    "blocked": {
+      "percent_min": 0,
+      "status": "BLOCKED"
+    }
+  },
+  "scorecard": {
+    "governance_readiness": {
+      "percent": 100,
+      "status": "READY"
+    },
+    "risk_readiness": {
+      "percent": 100,
+      "status": "READY"
+    },
+    "market_readiness": {
+      "percent": 80,
+      "status": "REQUIRES_CURRENT_MARKET_EVIDENCE"
+    },
+    "broker_read_only_readiness": {
+      "percent": 0,
+      "status": "BLOCKED_BY_EXTERNAL_SANITIZED_BROKER_EVIDENCE"
+    },
+    "atm_milestone_readiness": {
+      "percent": 100,
+      "status": "P26_PRESENT_LOCALLY"
+    },
+    "proof_ledger_readiness": {
+      "percent": 80,
+      "status": "LOCAL_CONTRACT_READY_EXTERNAL_RESULT_REQUIRED"
+    },
+    "live_micro_trade_owner_packet_readiness": {
+      "percent": 100,
+      "status": "OWNER_PACKET_READY_REVIEW_ONLY"
+    },
+    "receipt_intake_contract_readiness": {
+      "percent": 100,
+      "status": "LIVE_RECEIPT_EVIDENCE_CONTRACT_READY"
+    },
+    "post_trade_review_readiness": {
+      "percent": 80,
+      "status": "CONTRACT_READY_AWAITS_POST_LIVE_EVIDENCE"
+    },
+    "repeat_attempt_gate_readiness": {
+      "percent": 100,
+      "status": "REPEAT_BLOCKED_UNTIL_REVIEW"
+    },
+    "final_milestone_readiness": {
+      "percent": 80,
+      "status": "BLOCKED_BY_EXACT_MISSING_EVIDENCE"
+    }
+  },
+  "final_status": "BLOCKED_BY_EXACT_MISSING_EVIDENCE",
+  "missing_external_evidence": [
+    "sanitized_read_only_broker_state",
+    "owner_live_action_decision_outside_codex",
+    "sanitized_live_entry_receipt_if_owner_acts",
+    "sanitized_live_exit_receipt_if_owner_acts",
+    "realized_pnl_after_costs_if_owner_acts",
+    "post_trade_review_if_owner_acts"
+  ],
+  "safety": {
+    "codex_did_not_trade": true,
+    "aios_did_not_trade_in_this_packet": true,
+    "no_broker_call": true,
+    "no_credentials": true,
+    "no_money_movement": true,
+    "no_scheduler": true,
+    "no_daemon": true,
+    "no_webhook": true,
+    "no_profit_promise": true
+  }
+}
