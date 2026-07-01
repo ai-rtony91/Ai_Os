@@ -1,0 +1,12 @@
+{
+  "schema": "aios.forex.atm_milestone_config.v1",
+  "mode": "DEMO_ONLY",
+  "baseline_equity_usd": 1000,
+  "target_return_band_low_pct": 100,
+  "target_return_band_high_pct": 120,
+  "min_profit_to_sweep_usd": 200,
+  "money_movement_allowed": false,
+  "bank_access_allowed": false,
+  "note": "Owner-editable thresholds. Editing this file does NOT move money. It only sets where the tipping-bucket tips and where the SOS alert fires.",
+  "generated_at": "2026-07-01T09:45:51Z"
+}
