@@ -111,7 +111,7 @@ def test_kill_switch_is_separate_false_blocks():
 
 def test_sensitive_data_blocks_and_does_not_echo_raw_value():
     result = evaluate_forex_vacation_mode_owner_toggle_contract_v1(
-        _payload("ON", api_key="sk-private-value")
+        _payload("ON", api_key="EXAMPLE_NOT_A_REAL_VALUE")
     )
 
     assert result["status"] == BLOCKED_BY_SENSITIVE_DATA
