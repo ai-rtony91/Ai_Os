@@ -7,11 +7,9 @@ $credentialDirectory = Join-Path -Path $env:LOCALAPPDATA -ChildPath "AIOS\Securi
 $credentialPath = Join-Path -Path $credentialDirectory -ChildPath "bitwarden-master-password.dpapi"
 
 $bwSession = $env:BW_SESSION
-if ($null -ne $bwSession -and $bwSession.Trim().Length -gt 0) {
+if (-not [string]::IsNullOrWhiteSpace($bwSession)) {
     Write-Output "AIOS_BITWARDEN_SESSION_READY=true"
     Write-Output "BW_SESSION_PRESENT=true"
-    Write-Output ("LOCAL_CREDENTIAL_PRESENT={0}" -f (Test-Path -LiteralPath $credentialPath).ToString().ToLower())
-    Write-Output "SAFE_NEXT_ACTION=ready"
     return
 }
 
@@ -33,6 +31,9 @@ $encryptedCredential = [string]::Empty
 
 try {
     $encryptedCredential = Get-Content -LiteralPath $credentialPath -Raw -ErrorAction Stop
+    if ($null -eq $encryptedCredential) {
+        $encryptedCredential = [string]::Empty
+    }
     $encryptedCredential = ([string]$encryptedCredential).Trim()
     $encryptedCredential = $encryptedCredential.Trim([char]0xFEFF)
 
@@ -85,6 +86,8 @@ try {
 
 if ($sessionReady) {
     Write-Output "AIOS_BITWARDEN_SESSION_READY=true"
+    Write-Output "BW_SESSION_PRESENT=true"
+    return
 } else {
     Write-Output "AIOS_BITWARDEN_SESSION_READY=false"
 }

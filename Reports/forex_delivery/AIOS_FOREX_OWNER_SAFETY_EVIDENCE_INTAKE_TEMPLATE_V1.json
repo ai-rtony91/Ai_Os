@@ -14,7 +14,7 @@
       "evidence_type": "owner checklist entry tied to a timestamped evidence artifact",
       "sanitized_artifact_path": "Reports/forex_delivery/owner_safety_evidence/KILL_SWITCH_STATE_SANITIZED_V1.md",
       "owner_attestation": "Owner reviewed this sanitized artifact and confirms it contains no secrets or account identifiers.",
-      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "evidence_timestamp_utc": "2026-07-01T15:25:37Z",
       "freshness_window_hours": 24,
       "contains_secret_or_account_identifier": false,
       "notes": "Current owner review session evidence."
@@ -24,7 +24,7 @@
       "evidence_type": "owner checklist entry tied to a timestamped evidence artifact",
       "sanitized_artifact_path": "Reports/forex_delivery/owner_safety_evidence/DAILY_STOP_STATE_SANITIZED_V1.md",
       "owner_attestation": "Owner reviewed this sanitized artifact and confirms it contains no secrets or account identifiers.",
-      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "evidence_timestamp_utc": "2026-07-01T15:25:37Z",
       "freshness_window_hours": 24,
       "contains_secret_or_account_identifier": false,
       "notes": "Current owner review session evidence."
@@ -34,7 +34,7 @@
       "evidence_type": "owner checklist entry tied to a timestamped evidence artifact",
       "sanitized_artifact_path": "Reports/forex_delivery/owner_safety_evidence/MAX_LOSS_STATE_SANITIZED_V1.md",
       "owner_attestation": "Owner reviewed this sanitized artifact and confirms it contains no secrets or account identifiers.",
-      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "evidence_timestamp_utc": "2026-07-01T15:25:37Z",
       "freshness_window_hours": 24,
       "contains_secret_or_account_identifier": false,
       "notes": "Current owner review session evidence."
@@ -44,7 +44,7 @@
       "evidence_type": "owner checklist entry tied to a timestamped evidence artifact",
       "sanitized_artifact_path": "Reports/forex_delivery/owner_safety_evidence/MONITORING_READY_SANITIZED_V1.md",
       "owner_attestation": "Owner reviewed this sanitized artifact and confirms it contains no secrets or account identifiers.",
-      "evidence_timestamp_utc": "2026-06-29T09:43:35Z",
+      "evidence_timestamp_utc": "2026-07-01T15:25:37Z",
       "freshness_window_hours": 24,
       "contains_secret_or_account_identifier": false,
       "notes": "Current owner review session evidence."
