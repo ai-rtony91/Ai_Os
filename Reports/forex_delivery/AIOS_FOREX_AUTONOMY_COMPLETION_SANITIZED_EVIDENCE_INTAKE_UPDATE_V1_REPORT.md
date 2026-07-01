@@ -2,7 +2,7 @@
 
 Status: NO_EVIDENCE_APPLIED
 Current branch: feature/forex-profit-production-next-gate-v1
-Current head: f488785c10fc950088d3ea5b752fbbab55d45ece
+Current head: 0463de22ecf85d553f039e4bb5464c25cfd8478a
 Input files used: C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json, C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_LIVE_MICRO_EXCEPTION_GOVERNOR_INPUT_TEMPLATE_V1.json
 Evidence update file used: None
 

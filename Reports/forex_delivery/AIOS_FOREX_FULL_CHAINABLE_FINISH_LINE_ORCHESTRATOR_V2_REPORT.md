@@ -2,7 +2,7 @@
 
 Status: CHAINABLE_FOREX_ORCHESTRATOR_READY_FOR_HOURS_REPO_ONLY
 Current branch: feature/forex-profit-production-next-gate-v1
-Current head: f488785c docs(dashboard): close external dashboard and sos provider gap (#1299)
+Current head: 0463de22 Add Forex profit production next gate v1
 Current stage: first read-only broker probe review
 Next stage: first read-only broker probe review
 Completed repo-only stages: 0
@@ -14,7 +14,7 @@ Ultimate finish line: 22hr/day 6day/week governed operating readiness
 Safe for hours: True
 Hours ready: True
 Owner wake required: False
-Owner wake reason:
+Owner wake reason: 
 
 Stage graph:
 - first read-only broker probe review: repo_only=True, safe_for_hours=True, protected_action=False

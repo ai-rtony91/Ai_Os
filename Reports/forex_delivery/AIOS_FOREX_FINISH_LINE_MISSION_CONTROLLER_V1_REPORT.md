@@ -2,7 +2,7 @@
 
 Status: STARTING_LINE_READY_WITH_SAFETY_BLOCKERS
 Current branch: feature/forex-profit-production-next-gate-v1
-Current head: f488785c10fc950088d3ea5b752fbbab55d45ece
+Current head: 0463de22ecf85d553f039e4bb5464c25cfd8478a
 Selected mode: STARTING_LINE
 Starting-line readiness: 100.0%
 Finish-line readiness: 0.0%

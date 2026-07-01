@@ -2,7 +2,7 @@
 
 Status: SAFETY_CLOSURE_OPEN
 Current branch: feature/forex-profit-production-next-gate-v1
-Current head: f488785c10fc950088d3ea5b752fbbab55d45ece
+Current head: 0463de22ecf85d553f039e4bb5464c25cfd8478a
 Controller status: SAFETY_CLOSURE_REQUIRED
 Controller phase: CRITICAL_SAFETY_EVIDENCE_CLOSURE
 Safety completion percent: 0.0%
