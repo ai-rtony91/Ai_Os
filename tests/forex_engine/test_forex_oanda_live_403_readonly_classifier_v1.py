@@ -18,15 +18,18 @@ ITEM = {
 }
 
 
-def _run_start_helper(env: dict[str, str]) -> str:
-    result = subprocess.run(
+def _run_start_helper(
+    env: dict[str, str],
+    *,
+    runner: Any = subprocess.run,
+) -> str:
+    result = runner(
         [
             "powershell",
-            "-NoProfile",
             "-ExecutionPolicy",
             "Bypass",
-            "-Command",
-            f'. "{START_HELPER_PATH}"',
+            "-File",
+            str(START_HELPER_PATH),
         ],
         capture_output=True,
         text=True,
@@ -95,13 +98,40 @@ def test_start_helper_uses_existing_bw_session(monkeypatch, tmp_path):
 
 
 def test_start_helper_missing_bw_session_uses_direct_assignment(monkeypatch, tmp_path):
-    fake_bw = tmp_path / "bw.bat"
-    fake_bw.write_text("@echo live-session-token", encoding="utf-8")
+    localappdata_root = tmp_path / "localappdata"
     env = os.environ.copy()
     env.pop("BW_SESSION", None)
+    env["LOCALAPPDATA"] = str(localappdata_root)
     env["PATH"] = f"{tmp_path};{env.get('PATH', '')}"
-    output = _run_start_helper(env)
+    captured: dict[str, Any] = {}
+
+    def fake_run(
+        command: list[str],
+        *,
+        capture_output: bool,
+        text: bool,
+        check: bool,
+        env: dict[str, str],
+    ) -> subprocess.CompletedProcess[str]:
+        captured["command"] = command
+        captured["env"] = env
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout="AIOS_BITWARDEN_SESSION_READY=true\nBW_SESSION_PRESENT=true\n",
+        )
+
+    output = _run_start_helper(env, runner=fake_run)
     lines = [line for line in output.splitlines() if line]
+    assert captured["command"] == [
+        "powershell",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        str(START_HELPER_PATH),
+    ]
+    assert captured["env"]["LOCALAPPDATA"] == str(localappdata_root)
+    assert "BW_SESSION" not in captured["env"]
     assert lines == [
         "AIOS_BITWARDEN_SESSION_READY=true",
         "BW_SESSION_PRESENT=true",

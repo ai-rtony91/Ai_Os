@@ -430,7 +430,7 @@ def test_bitwarden_session_helper_scripts_and_documentation_are_safe() -> None:
     clear_text = CLEAR_SESSION_HELPER.read_text(encoding="utf-8")
     doc_text = SESSION_HELPER_DOC.read_text(encoding="utf-8")
 
-    assert "bw unlock --raw" in start_text.lower()
+    assert "bw unlock --passwordenv bw_password --raw" in start_text.lower()
     assert "bw status" not in start_text.lower()
     assert "aios_bitwarden_session_ready" in start_text.lower()
     assert "bw_session_present" in start_text.lower()
@@ -440,7 +440,7 @@ def test_bitwarden_session_helper_scripts_and_documentation_are_safe() -> None:
     assert "env:bw_session" in clear_text.lower()
     assert "bw lock" in clear_text.lower()
     assert not re.search(r"\b(super-secret|very-secret|api token|master password)\b", start_text.lower())
-    assert "bw unlock --raw" in start_text
+    assert "bw unlock --passwordenv BW_PASSWORD --raw" in start_text
     assert "BW_SESSION_PRESENT" in doc_text
     assert "bitwarden master password" in doc_text.lower()
     assert "do not store bw_session in repo" in doc_text.lower()

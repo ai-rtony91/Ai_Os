@@ -75,14 +75,14 @@ def test_current_stage_detected_from_existing_planner_state():
 def test_first_read_only_broker_probe_review_selected_when_repo_only():
     result = orchestrator.run_forex_full_chainable_finish_line_orchestrator_v2()
 
-    assert result["next_stage"] == "broker connection proof"
-    assert result["orchestrator_status"] == orchestrator.STATUS_OWNER_WAKE
-    assert result["completed_repo_only_stage_count"] == 1
-    assert result["repo_only_remaining_stage_count"] == 0
+    assert result["next_stage"] == "first read-only broker probe review"
+    assert result["orchestrator_status"] == orchestrator.STATUS_READY
+    assert result["completed_repo_only_stage_count"] == 0
+    assert result["repo_only_remaining_stage_count"] == 1
     assert result["protected_stage_count"] == 12
-    assert result["safe_for_hours"] is False
-    assert result["hours_ready"] is False
-    assert result["owner_wake_required"] is True
+    assert result["safe_for_hours"] is True
+    assert result["hours_ready"] is True
+    assert result["owner_wake_required"] is False
 
 
 @pytest.mark.parametrize(
@@ -166,14 +166,14 @@ def test_runner_writes_state_report_and_next_packet():
     assert stdout_payload["state_output_path"] == str(STATE_OUTPUT_PATH)
     assert stdout_payload["report_output_path"] == str(REPORT_OUTPUT_PATH)
     assert stdout_payload["next_packet_output_path"] == str(NEXT_PACKET_OUTPUT_PATH)
-    assert state_payload["orchestrator_status"] == orchestrator.STATUS_OWNER_WAKE
-    assert state_payload["repo_only_remaining_stage_count"] == 0
-    assert state_payload["next_stage"] == "broker connection proof"
+    assert state_payload["orchestrator_status"] == orchestrator.STATUS_READY
+    assert state_payload["repo_only_remaining_stage_count"] == 1
+    assert state_payload["next_stage"] == "first read-only broker probe review"
     assert report_text.startswith(
         "# AIOS Forex Full Chainable Finish-Line Orchestrator V2 Report"
     )
     assert next_packet_text.startswith("CODEX-ONLY PROMPT")
-    assert "AIOS_FOREX_BROKER_CONNECTION_PROOF_PROTECTED_BOUNDARY_REVIEW_V1" in next_packet_text
+    assert "AIOS_FOREX_FIRST_READ_ONLY_BROKER_PROBE_REVIEW_RELAY_DRY_RUN_V2" in next_packet_text
 
 
 def test_generated_next_packet_passes_governance_validator():
@@ -191,9 +191,9 @@ def test_generated_next_packet_passes_governance_validator():
 def test_repo_only_stage_completion_detected_from_owner_approval_boundary():
     result = orchestrator.run_forex_full_chainable_finish_line_orchestrator_v2()
 
-    assert result["completed_repo_only_stages"] == ["first read-only broker probe review"]
-    assert result["current_autonomy_level"] == "PROTECTED_OWNER_BOUNDARY_REQUIRED"
-    assert result["forex_completion_percent"] == 7.69
+    assert result["completed_repo_only_stages"] == []
+    assert result["current_autonomy_level"] == "REPO_ONLY_AUTONOMY_ACTIVE"
+    assert result["forex_completion_percent"] == 0.0
 
 
 def test_state_contains_required_safety_false_fields():
