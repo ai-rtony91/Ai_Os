@@ -1,8 +1,8 @@
 # AIOS Forex Autonomy Completion Sanitized Evidence Intake Update V1 Report
 
 Status: NO_EVIDENCE_APPLIED
-Current branch: main
-Current head: 8f6aa500e535b9db5c3f96b761965498bd02c825
+Current branch: feature/forex-profit-production-next-gate-v1
+Current head: f488785c10fc950088d3ea5b752fbbab55d45ece
 Input files used: C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_AUTONOMY_COMPLETION_GOVERNOR_RERUN_AND_BUCKET_POLICY_V1_STATE.json, C:\Dev\Ai.Os\Reports\forex_delivery\AIOS_FOREX_LIVE_MICRO_EXCEPTION_GOVERNOR_INPUT_TEMPLATE_V1.json
 Evidence update file used: None
 

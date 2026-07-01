@@ -1,8 +1,8 @@
 # AIOS Forex Critical Safety Evidence Closure V1 Report
 
 Status: SAFETY_CLOSURE_OPEN
-Current branch: main
-Current head: 8f6aa500e535b9db5c3f96b761965498bd02c825
+Current branch: feature/forex-profit-production-next-gate-v1
+Current head: f488785c10fc950088d3ea5b752fbbab55d45ece
 Controller status: SAFETY_CLOSURE_REQUIRED
 Controller phase: CRITICAL_SAFETY_EVIDENCE_CLOSURE
 Safety completion percent: 0.0%

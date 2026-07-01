@@ -1,8 +1,8 @@
 # AIOS Forex Full Chainable Finish-Line Orchestrator V2 Report
 
 Status: CHAINABLE_FOREX_ORCHESTRATOR_READY_FOR_HOURS_REPO_ONLY
-Current branch: main
-Current head: 8f6aa500 fix(forex): add vacation mode control plane (#1293)
+Current branch: feature/forex-profit-production-next-gate-v1
+Current head: f488785c docs(dashboard): close external dashboard and sos provider gap (#1299)
 Current stage: first read-only broker probe review
 Next stage: first read-only broker probe review
 Completed repo-only stages: 0
