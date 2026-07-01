@@ -1,8 +1,8 @@
 # AIOS Forex Owner Safety Evidence Collection V1 Report
 
 Status: OWNER_EVIDENCE_REQUIRED
-Current branch: main
-Current head: 8f6aa500e535b9db5c3f96b761965498bd02c825
+Current branch: feature/forex-profit-production-next-gate-v1
+Current head: 0463de22ecf85d553f039e4bb5464c25cfd8478a
 Controller status: SAFETY_CLOSURE_REQUIRED
 Controller phase: CRITICAL_SAFETY_EVIDENCE_CLOSURE
 Critical safety closure status: SAFETY_CLOSURE_OPEN

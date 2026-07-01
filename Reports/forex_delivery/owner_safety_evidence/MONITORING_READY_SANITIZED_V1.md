@@ -1,10 +1,10 @@
-\# MONITORING READY SANITIZED V1
+# MONITORING READY SANITIZED V1
 
+Control: monitoring_ready
 
+Attested state: true
 
-Control: monitoring\_ready
-
-Evidence type: owner checklist entry tied to a timestamped evidence artifact
+Evidence type: owner attestation tied to committed monitoring surfaces
 
 Sanitized: yes
 
@@ -20,21 +20,14 @@ Order execution: no
 
 Live trading authorized: no
 
-
-
 Owner statement:
 
-I reviewed the current AIOS Forex workflow state. Monitoring readiness evidence is required before progression. This artifact is sanitized and contains no credentials, account identifiers, broker tokens, or live-order data.
-
-
+I reviewed and attested the demo-scope monitoring readiness on 2026-07-01. Monitoring surfaces are the finish-line dashboard projection (Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_EMOJI_DASHBOARD_PROJECTION_V1.json) and the owner ntfy alert channel (topic masked and gitignored), recorded in control/forex/forex_safety_controls_config.json. This artifact is sanitized and contains no credentials, account identifiers, broker tokens, or live-order data.
 
 Evidence:
 
-Monitoring readiness remains required before broker, demo, live micro, or live trading progression. Owner review surface must remain available before any progression.
-
-
+Monitoring readiness is true for demo-scope operation per control/forex/forex_safety_controls_config.json. The owner review surface is available before any progression. This attestation covers demo scope only and does not authorize broker, live micro, or live trading progression.
 
 Owner attestation:
 
-Owner confirms this is a sanitized evidence artifact for current review only.
-
+Owner (Anthony) explicitly attested monitoring readiness on 2026-07-01.

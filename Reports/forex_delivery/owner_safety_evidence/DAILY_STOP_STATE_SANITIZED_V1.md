@@ -1,10 +1,10 @@
-\# DAILY STOP STATE SANITIZED V1
+# DAILY STOP STATE SANITIZED V1
 
+Control: daily_stop_state
 
+Attested state: ENABLED
 
-Control: daily\_stop\_state
-
-Evidence type: owner checklist entry tied to a timestamped evidence artifact
+Evidence type: owner attestation tied to a committed configuration artifact
 
 Sanitized: yes
 
@@ -20,21 +20,14 @@ Order execution: no
 
 Live trading authorized: no
 
-
-
 Owner statement:
 
-I reviewed the current AIOS Forex workflow state. Daily-stop safety evidence is required before progression. This artifact is sanitized and contains no credentials, account identifiers, broker tokens, or live-order data.
-
-
+I reviewed and attested the demo-scope daily stop configuration on 2026-07-01: warning alert at 15 USD realized daily loss, hard daily halt at 30 USD (3% of the 1000 USD baseline), recorded in control/forex/forex_safety_controls_config.json. This artifact is sanitized and contains no credentials, account identifiers, broker tokens, or live-order data.
 
 Evidence:
 
-Daily-stop progression remains blocked until owner-provided sanitized evidence confirms the daily halt/loss-control rule is configured and not unknown.
-
-
+Daily stop state is ENABLED for demo-scope operation per control/forex/forex_safety_controls_config.json (daily_loss_warning_usd=15, daily_loss_stop_usd=30). A brake trip-proof test remains REQUIRED before any live arming. This attestation covers demo scope only.
 
 Owner attestation:
 
-Owner confirms this is a sanitized evidence artifact for current review only.
-
+Owner (Anthony) explicitly attested this configuration and these values on 2026-07-01.

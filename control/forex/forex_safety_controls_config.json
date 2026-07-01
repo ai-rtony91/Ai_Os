@@ -1,0 +1,37 @@
+{
+  "schema": "aios.forex.safety_controls_config.v1",
+  "mode": "DEMO_ONLY",
+  "baseline_equity_usd": 1000,
+  "kill_switch": {
+    "state": "ARMED",
+    "mechanism": "STOP_FLAG_FILE_HONORED_BY_STOP_PAUSE_RESUME_ENGINE",
+    "engine": "automation/forex_engine/stop_pause_resume_engine_v1.py",
+    "note": "Owner or system drops STOP flag; engine halts all demo cycles. Trip-proof test still required before live."
+  },
+  "daily_stop": {
+    "state": "ENABLED",
+    "daily_loss_warning_usd": 15,
+    "daily_loss_stop_usd": 30,
+    "percent_of_baseline_stop": 3.0,
+    "behavior": "ntfy warning alert when realized daily loss reaches 15 USD; halt all demo trading for the day at 30 USD"
+  },
+  "max_loss": {
+    "state": "ENABLED",
+    "max_total_loss_usd": 150,
+    "percent_of_baseline": 15.0,
+    "behavior": "halt all operation and require owner reset when cumulative drawdown reaches limit; matches governor max_drawdown threshold 0.15"
+  },
+  "monitoring": {
+    "ready": true,
+    "surfaces": [
+      "Reports/forex_delivery/AIOS_FOREX_FINISH_LINE_EMOJI_DASHBOARD_PROJECTION_V1.json",
+      "ntfy owner alert channel (topic masked, gitignored)"
+    ]
+  },
+  "money_movement_allowed": false,
+  "bank_access_allowed": false,
+  "live_capital_action_authorized": false,
+  "note": "Owner-editable demo-scope safety thresholds. Editing this file does NOT move money and does NOT arm live trading. Brake trip-proof tests remain required before any live arming.",
+  "attested_by_owner": "Anthony, 2026-07-01, values daily_warning_usd=15 daily_stop_usd=30 max_total_loss_usd=150 selected explicitly",
+  "generated_at": "2026-07-01T00:00:00Z"
+}

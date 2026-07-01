@@ -1,0 +1,6 @@
+{
+  "kill_switch_state": "ARMED",
+  "daily_stop_state": "ENABLED",
+  "max_loss_state": "ENABLED",
+  "monitoring_ready": true
+}
