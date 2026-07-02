@@ -28,10 +28,17 @@ from forex_delivery.paper_signal_execution_loop import build_paper_signal_execut
 def _seed_mock_ledger(repo_root: Path) -> Path:
     ledger_path = repo_root / "telemetry" / "forex" / "demo_proof_ledger.jsonl"
     ledger_path.parent.mkdir(parents=True, exist_ok=True)
-    ledger_path.write_text(
-        (ROOT / "telemetry" / "forex" / "demo_proof_ledger.jsonl").read_text(encoding="utf-8"),
-        encoding="utf-8",
-    )
+    source_lines = (ROOT / "telemetry" / "forex" / "demo_proof_ledger.jsonl").read_text(encoding="utf-8").splitlines()
+    mock_lines = []
+    for raw_line in source_lines:
+        line = raw_line.strip()
+        if not line:
+            continue
+        row = json.loads(line)
+        if row.get("record_type") == RECORD_TYPE_REAL_DEMO_DAY:
+            continue
+        mock_lines.append(json.dumps(row, sort_keys=True))
+    ledger_path.write_text("\n".join(mock_lines) + "\n", encoding="utf-8")
     return ledger_path
 
 
