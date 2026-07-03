@@ -24,11 +24,17 @@ The orchestrator blocks unresolved dirty worktree state before validation stages
 
 ## Evidence Control
 
-The workflow detects whether today’s UTC evidence exists but does not append evidence automatically.
+The workflow detects whether today's UTC evidence exists but does not append evidence automatically.
 
 ## Safety Blocks
 
 No broker calls, no live orders, no credential access, no .env reads, no money movement, no automatic evidence append, no automatic merge, and no trading authority expansion.
+
+## Review Closure
+
+The stage-label interpolation repair was applied by using `${Stage}:CLEAN_BEFORE` and `${Stage}:CLEAN_AFTER` in the orchestrator script.
+
+Feature-branch local execution can still stop at `VERDICT_REQUIRES_MAIN_BRANCH` because the existing verdict script intentionally requires `main`. That is expected. The scheduled workflow runs only from `main` after merge.
 
 ## Remaining Owner Action
 
