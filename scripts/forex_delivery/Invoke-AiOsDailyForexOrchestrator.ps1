@@ -152,6 +152,12 @@ function Write-OrchestratorReports {
     $branch = (& git branch --show-current).Trim()
     $sha = (& git rev-parse --short HEAD).Trim()
 
+    $artifactJson = python -m automation.forex_engine.daily_forex_orchestrator_artifact_v1 --repo-root $script:RepoRoot
+    if ($LASTEXITCODE -ne 0) {
+        throw "ROLLING_CONTINUITY_ARTIFACT_HELPER_FAILED"
+    }
+    $artifactSummary = $artifactJson | ConvertFrom-Json -AsHashtable
+
     $payload = [ordered]@{
         schema = "aios.daily_forex_orchestrator.v1"
         status = $script:ReportStatus
@@ -161,6 +167,8 @@ function Write-OrchestratorReports {
         branch = $branch
         commit_sha = $sha
         report_utc = [DateTime]::UtcNow.ToString("o")
+        rolling_continuity = $artifactSummary
+        maintenance = $artifactSummary.maintenance
         safety = [ordered]@{
             broker_calls_allowed = $false
             live_orders_allowed = $false
@@ -169,6 +177,7 @@ function Write-OrchestratorReports {
             money_movement_allowed = $false
             automatic_evidence_append_allowed = $false
             automatic_merge_allowed = $false
+            safety_statement = $artifactSummary.safety_statement
         }
         steps = $script:Steps
     }
@@ -188,8 +197,18 @@ function Write-OrchestratorReports {
         "branch: $($payload.branch)"
         "commit_sha: $($payload.commit_sha)"
         "report_utc: $($payload.report_utc)"
+"real_demo_day_count: $($payload.rolling_continuity.real_demo_day_count)"
+"consecutive_real_demo_day_count: $($payload.rolling_continuity.consecutive_real_demo_day_count)"
+"missing_dates: $($payload.rolling_continuity.missing_dates -join ',')"
+"next_required_evidence_date: $($payload.rolling_continuity.next_required_evidence_date)"
+"five_day_window_status: $($payload.rolling_continuity.five_day_window_status)"
+"thirty_day_window_status: $($payload.rolling_continuity.thirty_day_window_status)"
+"rolling_continuity_status: $($payload.rolling_continuity.rolling_continuity_status)"
+"maintenance_status: $($payload.maintenance.status)"
+"maintenance_next_best_packet: $($payload.maintenance.next_best_packet)"
+"maintenance_blockers: $($payload.maintenance.blockers -join ',')"
         ""
-        "Safety: no broker calls, no live orders, no credentials, no .env reads, no money movement, no automatic evidence append, no automatic merge."
+        "Safety: $($payload.safety.safety_statement)"
     ) | Set-Content -LiteralPath $mdPath -Encoding UTF8
 
     Write-Output "REPORT_JSON=$jsonPath"
