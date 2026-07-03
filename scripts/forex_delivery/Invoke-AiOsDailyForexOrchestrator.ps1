@@ -87,7 +87,7 @@ function Invoke-Checked {
         [string[]]$Arguments
     )
 
-    Assert-CleanGit -Stage "$Stage:CLEAN_BEFORE"
+    Assert-CleanGit -Stage "${Stage}:CLEAN_BEFORE"
 
     $output = @(& $Command @Arguments 2>&1)
     $exitCode = $LASTEXITCODE
@@ -105,7 +105,7 @@ function Invoke-Checked {
         throw "$Stage FAILED:$exitCode"
     }
 
-    Assert-CleanGit -Stage "$Stage:CLEAN_AFTER"
+    Assert-CleanGit -Stage "${Stage}:CLEAN_AFTER"
     Add-StepRecord -Stage $Stage -Status "PASS" -CleanupAction "NONE" -GitStatusBefore @() -GitStatusAfter @(Get-GitStatusShort)
 }
 
