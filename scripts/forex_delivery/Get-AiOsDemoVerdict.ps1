@@ -1,6 +1,10 @@
 param()
 
-Set-Location -LiteralPath "C:/Dev/Ai.Os"
+$ErrorActionPreference = "Stop"
+$scriptDir = Split-Path -Parent $PSCommandPath
+$repoRoot = (Resolve-Path -LiteralPath (Join-Path $scriptDir "../..")).Path
+Set-Location -LiteralPath $repoRoot
+$env:AIOS_REPO_ROOT = $repoRoot
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Get-Location).Path
@@ -20,7 +24,8 @@ import json
 import sys
 from pathlib import Path
 
-repo_root = Path(r"C:/Dev/Ai.Os")
+import os
+repo_root = Path(os.environ["AIOS_REPO_ROOT"])
 src_root = repo_root / "src"
 for path in (repo_root, src_root):
     if str(path) not in sys.path:
