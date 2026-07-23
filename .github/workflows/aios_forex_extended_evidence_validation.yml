@@ -1,0 +1,128 @@
+name: AIOS Forex Extended Evidence Validation
+
+on:
+  pull_request:
+    paths:
+      - "automation/forex_engine/forex_extended_evidence_campaign_v1.py"
+      - "tests/forex_engine/test_forex_extended_evidence_campaign_v1.py"
+      - "scripts/forex_delivery/Get-AiOsExtendedEvidenceVerdict.ps1"
+      - "scripts/forex_delivery/Invoke-AiOsDailyForexOrchestrator.ps1"
+      - ".github/workflows/aios_forex_extended_evidence_validation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aios-forex-extended-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  targeted-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Compile extended evidence files
+        run: |
+          python -m py_compile \
+            automation/forex_engine/forex_extended_evidence_campaign_v1.py \
+            tests/forex_engine/test_forex_extended_evidence_campaign_v1.py
+
+      - name: Run extended evidence tests
+        run: python -m pytest tests/forex_engine/test_forex_extended_evidence_campaign_v1.py -q
+
+      - name: Run related profit gate tests
+        run: python -m pytest tests/forex_engine/test_forex_profit_production_next_gate_v1.py -q
+
+  forex-regression-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout PR merge result
+        uses: actions/checkout@v4
+        with:
+          path: head
+
+      - name: Checkout main baseline
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: base
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+
+      - name: Run baseline and proposed Forex suites
+        shell: bash
+        run: |
+          set +e
+          (cd base && python -m pytest tests/forex_engine -q --tb=no) > base_forex_suite.log 2>&1
+          base_code=$?
+          (cd head && python -m pytest tests/forex_engine -q --tb=no) > head_forex_suite.log 2>&1
+          head_code=$?
+          set -e
+          printf '%s\n' "$base_code" > base_exit_code.txt
+          printf '%s\n' "$head_code" > head_exit_code.txt
+
+      - name: Enforce no new Forex regressions
+        shell: python
+        run: |
+          import re
+          from pathlib import Path
+
+          pattern = re.compile(r"^(?:FAILED|ERROR)\s+(\S+)", re.MULTILINE)
+
+          base_log = Path("base_forex_suite.log").read_text(encoding="utf-8", errors="replace")
+          head_log = Path("head_forex_suite.log").read_text(encoding="utf-8", errors="replace")
+          base_code = int(Path("base_exit_code.txt").read_text().strip())
+          head_code = int(Path("head_exit_code.txt").read_text().strip())
+
+          base_failures = set(pattern.findall(base_log))
+          head_failures = set(pattern.findall(head_log))
+          new_failures = sorted(head_failures - base_failures)
+
+          print(f"BASE_EXIT_CODE={base_code}")
+          print(f"HEAD_EXIT_CODE={head_code}")
+          print(f"BASE_FAILURE_COUNT={len(base_failures)}")
+          print(f"HEAD_FAILURE_COUNT={len(head_failures)}")
+          print(f"NEW_FAILURE_COUNT={len(new_failures)}")
+
+          if head_code != 0 and not head_failures:
+              raise SystemExit("HEAD_SUITE_FAILED_WITHOUT_CLASSIFIED_TEST_IDS")
+          if base_code == 0 and head_code != 0:
+              raise SystemExit("HEAD_SUITE_REGRESSED_FROM_GREEN_BASELINE")
+          if new_failures:
+              print("NEW_FAILURES:")
+              print("\n".join(new_failures))
+              raise SystemExit("NEW_FOREX_REGRESSIONS_DETECTED")
+
+          print("NO_NEW_FOREX_REGRESSIONS")
+
+      - name: Upload comparison logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forex-regression-comparison-logs
+          path: |
+            base_forex_suite.log
+            head_forex_suite.log
+            base_exit_code.txt
+            head_exit_code.txt
+          if-no-files-found: error
+          retention-days: 7
