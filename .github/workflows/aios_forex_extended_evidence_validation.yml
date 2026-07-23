@@ -61,4 +61,31 @@ jobs:
         run: python -m pip install --disable-pip-version-check pytest
 
       - name: Run full Forex suite
-        run: python -m pytest tests/forex_engine -q
+        id: full_forex
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          python -m pytest tests/forex_engine -q > full_forex_suite.log 2>&1
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          exit "$code"
+
+      - name: Upload full Forex suite log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-forex-suite-log
+          path: full_forex_suite.log
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Print failure tail
+        if: steps.full_forex.outcome != 'success'
+        run: tail -n 120 full_forex_suite.log
+
+      - name: Enforce full Forex suite result
+        if: always()
+        shell: bash
+        run: |
+          test "${{ steps.full_forex.outcome }}" = "success"
