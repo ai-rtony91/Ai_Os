@@ -197,16 +197,16 @@ function Write-OrchestratorReports {
         "branch: $($payload.branch)"
         "commit_sha: $($payload.commit_sha)"
         "report_utc: $($payload.report_utc)"
-"real_demo_day_count: $($payload.rolling_continuity.real_demo_day_count)"
-"consecutive_real_demo_day_count: $($payload.rolling_continuity.consecutive_real_demo_day_count)"
-"missing_dates: $($payload.rolling_continuity.missing_dates -join ',')"
-"next_required_evidence_date: $($payload.rolling_continuity.next_required_evidence_date)"
-"five_day_window_status: $($payload.rolling_continuity.five_day_window_status)"
-"thirty_day_window_status: $($payload.rolling_continuity.thirty_day_window_status)"
-"rolling_continuity_status: $($payload.rolling_continuity.rolling_continuity_status)"
-"maintenance_status: $($payload.maintenance.status)"
-"maintenance_next_best_packet: $($payload.maintenance.next_best_packet)"
-"maintenance_blockers: $($payload.maintenance.blockers -join ',')"
+        "real_demo_day_count: $($payload.rolling_continuity.real_demo_day_count)"
+        "consecutive_real_demo_day_count: $($payload.rolling_continuity.consecutive_real_demo_day_count)"
+        "missing_dates: $($payload.rolling_continuity.missing_dates -join ',')"
+        "next_required_evidence_date: $($payload.rolling_continuity.next_required_evidence_date)"
+        "five_day_window_status: $($payload.rolling_continuity.five_day_window_status)"
+        "thirty_day_window_status: $($payload.rolling_continuity.thirty_day_window_status)"
+        "rolling_continuity_status: $($payload.rolling_continuity.rolling_continuity_status)"
+        "maintenance_status: $($payload.maintenance.status)"
+        "maintenance_next_best_packet: $($payload.maintenance.next_best_packet)"
+        "maintenance_blockers: $($payload.maintenance.blockers -join ',')"
         ""
         "Safety: $($payload.safety.safety_statement)"
     ) | Set-Content -LiteralPath $mdPath -Encoding UTF8
@@ -224,6 +224,7 @@ try {
 
     Invoke-Checked -Stage "PYTEST_DEMO_DAY_RUNNER" -Command "python" -Arguments @("-m", "pytest", "tests/forex_engine/test_demo_day_evidence_runner_v11_script.py", "-q")
     Invoke-Checked -Stage "DEMO_VERDICT" -Command "pwsh" -Arguments @("-NoProfile", "-File", "scripts/forex_delivery/Get-AiOsDemoVerdict.ps1")
+    Invoke-Checked -Stage "EXTENDED_EVIDENCE_VERDICT" -Command "pwsh" -Arguments @("-NoProfile", "-File", "scripts/forex_delivery/Get-AiOsExtendedEvidenceVerdict.ps1")
     Invoke-Checked -Stage "GIT_DIFF_CHECK" -Command "git" -Arguments @("diff", "--check")
 
     Assert-CleanGit -Stage "FINAL"
