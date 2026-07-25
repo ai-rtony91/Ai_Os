@@ -16,6 +16,7 @@ if str(SRC_ROOT) not in sys.path:
 
 from automation.forex_engine.forex_demo_run_day_recorder_v1 import (  # noqa: E402
     LEDGER_NEVER_LIVE_FLAGS,
+    RECORD_TYPE_PAPER_SIMULATION_DAY,
     RECORD_TYPE_REAL_DEMO_DAY,
     build_demo_verdict_snapshot,
     load_demo_ledger_entries,
@@ -58,7 +59,7 @@ def test_summary_ignores_mock_rows_before_any_real_demo_day(tmp_path: Path) -> N
     assert summary["verdict_status"] == "EARNING"
 
 
-def test_record_real_demo_day_appends_and_keeps_never_live_flags_false(tmp_path: Path) -> None:
+def test_record_paper_simulation_day_appends_without_counting_as_real_demo_evidence(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
     _seed_mock_ledger(repo_root)
@@ -78,27 +79,27 @@ def test_record_real_demo_day_appends_and_keeps_never_live_flags_false(tmp_path:
     new_entry = ledger_entries[-1]
 
     assert len(ledger_entries) == 4
-    assert summary["real_demo_day_count"] == 1
-    assert summary["mock_entries_superseded_by_real_run"] == 3
-    assert summary["days_recorded_toward_verdict"] == 1
-    assert summary["trades_accumulated"] == 1
-    assert summary["windows"] == 1
+    assert summary["real_demo_day_count"] == 0
+    assert summary["mock_entries_superseded_by_real_run"] == 4
+    assert summary["days_recorded_toward_verdict"] == 0
+    assert summary["trades_accumulated"] == 0
+    assert summary["windows"] == 0
     assert receipt["appended"] is True
     assert receipt["session_summary"]["fills"] == 1
     assert receipt["session_summary"]["wins"] == 1
     assert receipt["session_summary"]["losses"] == 0
-    assert receipt["days_recorded_toward_verdict"] == 1
-    assert receipt["trades_accumulated_toward_verdict"] == 1
-    assert receipt["windows_toward_verdict"] == 1
+    assert receipt["days_recorded_toward_verdict"] == 0
+    assert receipt["trades_accumulated_toward_verdict"] == 0
+    assert receipt["windows_toward_verdict"] == 0
     assert new_entry["schema"] == "aios.forex.demo_proof_ledger.v1"
-    assert new_entry["record_type"] == RECORD_TYPE_REAL_DEMO_DAY
+    assert new_entry["record_type"] == RECORD_TYPE_PAPER_SIMULATION_DAY
     assert new_entry["date"] == "2026-07-02"
     assert new_entry["trade_rows"]
     assert all(not bool(new_entry[field]) for field in LEDGER_NEVER_LIVE_FLAGS)
     assert all(not bool(receipt[field]) for field in LEDGER_NEVER_LIVE_FLAGS)
 
 
-def test_duplicate_real_demo_day_same_date_is_rejected(tmp_path: Path) -> None:
+def test_duplicate_paper_simulation_day_same_date_is_rejected(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
     _seed_mock_ledger(repo_root)
@@ -113,7 +114,7 @@ def test_duplicate_real_demo_day_same_date_is_rejected(tmp_path: Path) -> None:
         baseline_equity_usd=1000.0,
     )
 
-    with pytest.raises(ValueError, match="duplicate_real_demo_day_entry:2026-07-02"):
+    with pytest.raises(ValueError, match="duplicate_demo_day_entry:2026-07-02"):
         record_forex_demo_run_day(
             repo_root,
             session_result,
@@ -123,3 +124,20 @@ def test_duplicate_real_demo_day_same_date_is_rejected(tmp_path: Path) -> None:
             baseline_equity_usd=1000.0,
         )
 
+
+def test_historically_mislabeled_paper_simulation_entry_is_not_real_demo_evidence() -> None:
+    summary = summarize_demo_ledger(
+        [
+            {
+                "record_type": RECORD_TYPE_REAL_DEMO_DAY,
+                "session_mode": "PAPER_SIMULATION",
+                "date": "2026-07-02",
+                "trade_rows": [{"realized_paper_pl": 1.2}],
+            }
+        ],
+        as_of_utc="2026-07-02T09:30:00Z",
+    )
+
+    assert summary["real_demo_day_count"] == 0
+    assert summary["trades_accumulated"] == 0
+    assert summary["mock_entry_count"] == 1
