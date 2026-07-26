@@ -21,6 +21,15 @@ def test_current_day_detector_recognizes_only_supported_evidence_record_types() 
 
     assert '$supportedRecordTypes = @("REAL_DEMO_DAY", "PAPER_SIMULATION_DAY")' in function
     assert "$supportedRecordTypes -contains [string]$obj.record_type" in function
+    assert "$recordTypeMatches[[string]$obj.record_type]++" in function
+
+
+def test_current_day_detector_keeps_paper_and_real_statuses_distinct() -> None:
+    function = _evidence_day_function()
+
+    assert '"TODAY_REAL_DEMO_EVIDENCE_PRESENT"' in function
+    assert '"TODAY_PAPER_SIMULATION_PRESENT"' in function
+    assert '"TODAY_EVIDENCE_PRESENT"' not in function
 
 
 def test_current_day_detector_remains_date_bound_and_read_only() -> None:
@@ -30,6 +39,19 @@ def test_current_day_detector_remains_date_bound_and_read_only() -> None:
     assert "Get-Content -LiteralPath $ledger" in function
     for mutation_command in ("Set-Content", "Add-Content", "Out-File", "Invoke-RestMethod"):
         assert mutation_command not in function
+
+
+def test_invalid_json_remains_fail_closed_after_the_complete_ledger_scan() -> None:
+    function = _evidence_day_function()
+
+    parse_warning = function.index(
+        'if ($parseWarnings -gt 0) { $script:EvidenceStatus = "LEDGER_PARSE_WARNING" }'
+    )
+    missing_evidence = function.index(
+        'elseif ($matches -eq 0) { $script:EvidenceStatus = "MISSING_TODAY_EVIDENCE" }'
+    )
+    assert "$parseWarnings++" in function
+    assert parse_warning < missing_evidence
 
 
 def test_orchestrator_preserves_both_read_only_verdict_stages() -> None:
