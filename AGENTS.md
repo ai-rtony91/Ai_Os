@@ -545,6 +545,60 @@ When Anthony is needed, surface only:
 
 Instruction Ownership still applies to mixed pasted blocks and human-facing handoffs. Safety gates, approval gates, secrets, broker/API, live trading, production, commit, push, merge, and destructive actions remain strict.
 
+## AI_OS Owner View Report Policy
+
+Every Codex report for Anthony must begin with this Owner View before the normal technical report:
+
+```text
+WHAT HAPPENED:
+One short sentence.
+
+IS IT SAFE:
+YES, NO, or WAIT.
+
+WHAT DO I DO NEXT:
+Give Anthony one clear action only.
+
+HOW CLOSE ARE WE:
+Estimated readiness: <percentage>.
+
+WHICH MODE SHOULD I USE:
+INSTANT, HIGH, or PRO.
+```
+
+The readiness percentage is an estimate, not a certification or promise. Label it `Estimated readiness`, base it on current repository evidence, and briefly identify the measured milestone when ambiguity is possible. Do not invent precision when evidence is incomplete. Use `UNKNOWN` instead of a percentage when the repository cannot support a reasonable estimate.
+
+Mode guide:
+
+- `INSTANT` means check and explain. Use it for screenshots, status, CI results, PR checks, merge-or-repair decisions, and simple next steps.
+- `HIGH` means fix and build. Use it for one bug, one bounded code change, tests, repair prompts, and small multi-file work.
+- `PRO` means plan and solve large work. Use it for full repository review, architecture, automation design, complex blocker chains, and long multi-step work.
+- After coding is finished, recommend returning to `INSTANT`.
+
+Owner View language must:
+
+- use short sentences and common words.
+- be readable without advanced developer knowledge.
+- explain a technical word the first time it appears.
+- avoid long logs unless Anthony asks for them.
+- provide one safest next action, not many choices.
+- put the most important answer first.
+- preserve all required technical details below the Owner View.
+
+Use these plain-language meanings when the terms appear:
+
+- Paper: pretend-money testing.
+- Demo or practice: broker testing with fake money.
+- Live: real money.
+- Profit: money left after losses, fees, and costs.
+- SHA: Git's fingerprint for one saved version.
+- PR: a request to add code into `main`.
+- CI: automatic tests run by GitHub.
+- Merge: add approved code into `main`.
+- Close without merge: cancel the PR.
+
+The Owner View is a presentation layer only. It does not replace, remove, rename, or weaken any existing success, failure, DRY_RUN, evidence-bundle, execution-receipt, validator, approval, safety, commit, push, PR, merge, broker, credential, or trading requirement. Put the existing required report format under a `TECHNICAL DETAILS:` heading after the Owner View.
+
 ## 1. Project Identity
 
 This repository is AI_OS.

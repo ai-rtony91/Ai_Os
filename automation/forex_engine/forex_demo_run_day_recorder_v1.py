@@ -9,6 +9,7 @@ from typing import Any, Mapping, Sequence
 
 SCHEMA = "aios.forex.demo_proof_ledger.v1"
 RECORD_TYPE_REAL_DEMO_DAY = "REAL_DEMO_DAY"
+RECORD_TYPE_PAPER_SIMULATION_DAY = "PAPER_SIMULATION_DAY"
 LEDGER_RELATIVE_PATH = Path("telemetry/forex/demo_proof_ledger.jsonl")
 
 DEFAULT_BASELINE_EQUITY_USD = 1000.0
@@ -72,8 +73,8 @@ def summarize_demo_ledger(
     as_of_utc: str | datetime | date | None = None,
 ) -> dict[str, Any]:
     ledger_entries = [dict(entry) for entry in (entries or []) if isinstance(entry, Mapping)]
-    real_entries = [entry for entry in ledger_entries if _record_type(entry) == RECORD_TYPE_REAL_DEMO_DAY]
-    mock_entries = [entry for entry in ledger_entries if _record_type(entry) != RECORD_TYPE_REAL_DEMO_DAY]
+    real_entries = [entry for entry in ledger_entries if _is_real_demo_entry(entry)]
+    mock_entries = [entry for entry in ledger_entries if not _is_real_demo_entry(entry)]
     as_of_date = _coerce_date(as_of_utc) if as_of_utc is not None else _utc_date()
 
     trade_rows = _flatten_trade_rows(real_entries)
@@ -204,11 +205,8 @@ def record_forex_demo_run_day(
     session_day = _coerce_date(session_date) if session_date is not None else recorded_at_dt.date()
     session_day_text = session_day.isoformat()
 
-    if any(
-        _record_type(entry) == RECORD_TYPE_REAL_DEMO_DAY and str(entry.get("date")) == session_day_text
-        for entry in existing_entries
-    ):
-        raise ValueError(f"duplicate_real_demo_day_entry:{session_day_text}")
+    if any(str(entry.get("date")) == session_day_text for entry in existing_entries):
+        raise ValueError(f"duplicate_demo_day_entry:{session_day_text}")
 
     new_entry = _build_real_demo_day_entry(
         session_result,
@@ -272,6 +270,7 @@ def _build_real_demo_day_entry(
     existing_entries: Sequence[Mapping[str, Any]],
     baseline_equity_usd: float,
 ) -> dict[str, Any]:
+    record_type = _record_type_for_session(session_result)
     trade_rows = _session_trade_rows(session_result)
     fills = _session_fill_count(session_result, trade_rows)
     wins, losses = _wins_losses(trade_rows, session_result)
@@ -289,7 +288,7 @@ def _build_real_demo_day_entry(
         *[dict(entry) for entry in existing_entries if isinstance(entry, Mapping)],
         {
             "schema": SCHEMA,
-            "record_type": RECORD_TYPE_REAL_DEMO_DAY,
+            "record_type": record_type,
             "date": session_date.isoformat(),
             "recorded_at_utc": _utc_datetime_text(recorded_at_utc),
             "trade_rows": trade_rows,
@@ -307,7 +306,7 @@ def _build_real_demo_day_entry(
 
     entry = {
         "schema": SCHEMA,
-        "record_type": RECORD_TYPE_REAL_DEMO_DAY,
+        "record_type": record_type,
         "date": session_date.isoformat(),
         "recorded_at_utc": _utc_datetime_text(recorded_at_utc),
         "session_mode": str(session_result.get("mode") or "PAPER_SIMULATION"),
@@ -610,6 +609,19 @@ def _row_pnl(row: Mapping[str, Any]) -> float:
 
 def _record_type(entry: Mapping[str, Any]) -> str:
     return str(entry.get("record_type") or "")
+
+
+def _is_real_demo_entry(entry: Mapping[str, Any]) -> bool:
+    return (
+        _record_type(entry) == RECORD_TYPE_REAL_DEMO_DAY
+        and str(entry.get("session_mode") or "").upper() != "PAPER_SIMULATION"
+    )
+
+
+def _record_type_for_session(session_result: Mapping[str, Any]) -> str:
+    if str(session_result.get("mode") or "PAPER_SIMULATION").upper() == "PAPER_SIMULATION":
+        return RECORD_TYPE_PAPER_SIMULATION_DAY
+    return RECORD_TYPE_REAL_DEMO_DAY
 
 
 def _first_text(mapping: Mapping[str, Any], *keys: str, default: str = "") -> str:
