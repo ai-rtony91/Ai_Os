@@ -22,6 +22,13 @@ VALIDATOR = (
     / "packet_generator"
     / "Test-AiOsCodexPacket.DRY_RUN.ps1"
 )
+CONTRACT = (
+    REPO_ROOT
+    / "automation"
+    / "orchestration"
+    / "packet_generator"
+    / "AiOsCodexPacketContract.ps1"
+)
 
 
 def _run_ps(script: Path, args: list[str]) -> str:
@@ -140,6 +147,7 @@ def _run_validator(packet_text: str) -> dict:
 def test_generator_emits_mandatory_headers():
     result = _run_generator()
     assert result["schema"] == "AIOS_CODEX_PACKET_GENERATOR.v1"
+    assert result["contract_schema"] == "AIOS_CODEX_PACKET_CONTRACT.v1"
     assert result["packet_valid"] is True
     packet = result["generated_packet_text"]
 
@@ -176,6 +184,20 @@ def test_generator_emits_mandatory_headers():
 
     assert "automation/orchestration/packet_generator/New-AiOsCodexPacket.DRY_RUN.ps1" in packet
     assert "broker/OANDA/webhook/order/secrets paths" in packet
+    assert "engineering work packet" in packet
+
+
+def test_shared_contract_is_the_single_required_field_manifest():
+    contract_text = CONTRACT.read_text(encoding="utf-8")
+    generator_text = GENERATOR.read_text(encoding="utf-8")
+    validator_text = VALIDATOR.read_text(encoding="utf-8")
+
+    assert "required_fields = @(" in contract_text
+    assert "Get-AiOsCodexPacketContract" in generator_text
+    assert "Get-AiOsCodexPacketContract" in validator_text
+    assert "$required = @($packetContract.required_fields)" in validator_text
+    assert "\n        required_fields = @(" not in generator_text
+    assert "\n        required_fields = @(" not in validator_text
 
 
 def test_array_binding_uses_scalar_identity_fields():
@@ -245,6 +267,16 @@ def test_validator_detects_missing_stop_point():
     validated = _run_validator(malformed)
     assert validated["packet_valid"] is False
     assert "STOP POINT" in validated["missing_required_fields"]
+
+
+def test_terminology_drift_is_warning_only():
+    result = _run_generator()
+    packet = result["generated_packet_text"] + "\nLegacy explanation: task pack\n"
+    validated = _run_validator(packet)
+
+    assert validated["packet_valid"] is True
+    assert validated["terminology_warnings"]
+    assert "task pack" in validated["terminology_warnings"][0]
 
 
 def test_from_continuation_plan_can_produce_skeleton():

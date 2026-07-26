@@ -7,6 +7,7 @@
   "task_id": "",
   "title": "",
   "intent": "",
+  "terminology_preference": "software-engineering terminology for new explanatory prose",
   "mission": "",
   "mode": "DRY_RUN",
   "owner_lane": "",
