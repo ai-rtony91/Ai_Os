@@ -117,13 +117,14 @@ function Test-EvidenceDay {
     }
 
     $today = [DateTime]::UtcNow.ToString("yyyy-MM-dd")
+    $supportedRecordTypes = @("REAL_DEMO_DAY", "PAPER_SIMULATION_DAY")
     $matches = 0
 
     foreach ($line in Get-Content -LiteralPath $ledger) {
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
         try {
             $obj = $line | ConvertFrom-Json -ErrorAction Stop
-            if ($obj.record_type -eq "REAL_DEMO_DAY" -and [string]$obj.date -eq $today) {
+            if ($supportedRecordTypes -contains [string]$obj.record_type -and [string]$obj.date -eq $today) {
                 $matches++
             }
         }
