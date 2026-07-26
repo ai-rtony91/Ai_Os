@@ -279,13 +279,29 @@ def test_terminology_drift_is_warning_only():
     assert "task pack" in validated["terminology_warnings"][0]
 
 
-def test_from_continuation_plan_can_produce_skeleton():
+def test_from_continuation_plan_can_produce_skeleton(tmp_path: Path):
+    continuation_plan = tmp_path / "Get-TestContinuationPlan.DRY_RUN.ps1"
+    continuation_plan.write_text(
+        """[ordered]@{
+    recommended_next_packet_id = "AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1"
+    domain = "FOREX_ENGINE"
+    recommended_lane = "PAPER_LEARNING_ACTION_ROUTER"
+    recommended_next_packet_title = "feat(forex): add paper learning action router"
+    recommended_files = @("tests/orchestration/test_codex_packet_generator.py")
+    required_validators = @("git diff --check")
+    exact_next_safe_action = "Stop after generating the deterministic test packet."
+} | ConvertTo-Json -Depth 10
+""",
+        encoding="utf-8",
+    )
+
     result = _run_generator(
         PacketId="",
         Zone="",
         Lane="",
         Mission="",
         FromContinuationPlan=True,
+        ContinuationPlanScript=str(continuation_plan),
         ReadFirst=[],
     )
     packet = result["generated_packet_text"]
