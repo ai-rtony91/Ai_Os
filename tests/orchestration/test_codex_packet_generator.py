@@ -353,6 +353,7 @@ def test_state_aligned_routine_controller_resolves_complete_apply_packet():
     result = _run_generator(StateAlignedRoutineEngineeringController=True)
     packet = result["generated_packet_text"]
 
+    assert result["schema"] == "AIOS_CODEX_PACKET_GENERATOR.v1"
     assert result["packet_valid"] is True
     assert "AIOS-STATE-ALIGNED-ROUTINE-ENGINEERING-CONTROLLER-V2" in packet
     assert _get_field(packet, "MODE") == "APPLY"

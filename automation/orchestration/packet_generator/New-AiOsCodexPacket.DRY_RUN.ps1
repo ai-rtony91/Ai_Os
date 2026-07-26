@@ -313,7 +313,8 @@ if ([string]::IsNullOrWhiteSpace($resolvedStopPoint)) { $missing += "STOP POINT"
 
 $packetValid = $missing.Count -eq 0
 
-$schemaText = if ($StateAlignedRoutineEngineeringController) { $profile.identity_marker } else { "AIOS_CODEX_PACKET_GENERATOR.v1" }
+$schemaText = "AIOS_CODEX_PACKET_GENERATOR.v1"
+$identityMarker = if ($StateAlignedRoutineEngineeringController) { $profile.identity_marker } else { $schemaText }
 $generatedPacketText = @"
 CODEX-ONLY PROMPT
 
@@ -325,7 +326,7 @@ Read README.md second.
 If unavailable, stop and report missing authority context.
 
 IDENTITY MARKER:
-$schemaText
+$identityMarker
 
 SUPERVISOR IDENTITY:
 $resolvedSupervisorIdentity
