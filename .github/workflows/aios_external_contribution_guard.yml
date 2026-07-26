@@ -51,7 +51,7 @@ jobs:
           blocked_paths=()
           for path in "${changed_paths[@]}"; do
             case "$path" in
-              AGENTS.md|RISK_POLICY.md|SECURITY.md|.github/CODEOWNERS|.github/workflows/*|docs/governance/*|docs/security/*|secrets/*|credentials/*|.env|.env.*|*.pem|*.key|*.p12|*.pfx|broker/*|*oanda*|*credential*|*live_order*|*live-trade*|*live_trade*|*withdraw*|*deposit*|*webhook*)
+              AGENTS.md|RISK_POLICY.md|SECURITY.md|.github/CODEOWNERS|.github/workflows/*|docs/governance/*|docs/security/*|secrets/*|credentials/*|.env|.env.*|*.pem|*.key|*.p12|*.pfx|broker/*|automation/forex_engine/*live*|automation/forex_engine/*oanda*|scripts/forex_delivery/*live*|scripts/forex_delivery/*order_execution*|*oanda*|*credential*|*live_order*|*live-trade*|*live_trade*|*withdraw*|*deposit*|*webhook*)
                 blocked_paths+=("$path")
                 ;;
             esac
@@ -74,7 +74,7 @@ jobs:
 
           secret_pattern='-----BEGIN ([A-Z0-9 ]+ )?PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{20,}|sk-(proj-)?[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{35}|xox[baprs]-[0-9A-Za-z-]{10,}'
 
-          if printf '%s\n' "$added_lines" | grep -E --quiet "$secret_pattern"; then
+          if printf '%s\n' "$added_lines" | grep -E --quiet -e "$secret_pattern"; then
             echo "::error::High-confidence secret pattern detected in added lines. Remove and rotate the exposed credential before continuing."
             exit 1
           fi
