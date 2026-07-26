@@ -1,0 +1,64 @@
+name: AIOS Engineering Terminology Windows Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "automation/orchestration/packet_generator/**"
+      - "automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json"
+      - "docs/workflows/CODEX_OPENAI_CLI_PACKET_TEMPLATE.md"
+      - "tests/orchestration/test_codex_packet_generator.py"
+      - ".github/workflows/aios_engineering_terminology_windows_validation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: engineering-terminology-windows-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-packet-generator:
+    name: Validate packet generator on Windows
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout pull request
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pytest
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+
+      - name: Validate JSON template
+        shell: pwsh
+        run: |
+          python -c "import json, pathlib; json.loads(pathlib.Path(r'automation/orchestration/work_packets/templates/AIOS_WORK_PACKET.template.json').read_text(encoding='utf-8')); print('JSON_VALID')"
+
+      - name: Compile targeted test
+        shell: pwsh
+        run: |
+          python -m py_compile tests/orchestration/test_codex_packet_generator.py
+
+      - name: Run packet-generator tests
+        shell: pwsh
+        run: |
+          python -m pytest tests/orchestration/test_codex_packet_generator.py -q -p no:cacheprovider
+
+      - name: Confirm clean repository
+        shell: pwsh
+        run: |
+          $status = git status --porcelain
+          if ($status) {
+            $status
+            throw "WORKTREE_DIRTY_AFTER_TESTS"
+          }

@@ -25,6 +25,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+. (Join-Path $PSScriptRoot "AiOsCodexPacketContract.ps1")
+$packetContract = Get-AiOsCodexPacketContract
+
 function Format-List {
     param([string[]]$Values, [string]$Fallback)
     if ($null -eq $Values -or $Values.Count -eq 0 -or ($Values.Count -eq 1 -and [string]::IsNullOrWhiteSpace($Values[0]))) {
@@ -326,7 +329,8 @@ FORBIDDEN PATHS:
 $(Format-List -Values $resolvedForbidden -Fallback "No forbidden paths provided")
 
 IMPLEMENTATION:
-- generate a deterministic Codex-ready packet text
+- generate a deterministic Codex-ready engineering work packet
+- use software-engineering terminology for new explanatory prose
 - no file writes from this DRY_RUN generator
 - execution_allowed = false
 - can_continue_without_anthony = false
@@ -369,6 +373,8 @@ PASS / BLOCKED
 
 $result = [ordered]@{
     schema                  = $schemaText
+    contract_schema         = $packetContract.schema
+    terminology_preference  = $packetContract.terminology.preferred
     generated_packet_text    = $generatedPacketText
     packet_valid            = [bool]$packetValid
     missing_required_fields = @($missing)

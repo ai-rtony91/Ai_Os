@@ -22,6 +22,13 @@ VALIDATOR = (
     / "packet_generator"
     / "Test-AiOsCodexPacket.DRY_RUN.ps1"
 )
+CONTRACT = (
+    REPO_ROOT
+    / "automation"
+    / "orchestration"
+    / "packet_generator"
+    / "AiOsCodexPacketContract.ps1"
+)
 
 
 def _run_ps(script: Path, args: list[str]) -> str:
@@ -140,6 +147,7 @@ def _run_validator(packet_text: str) -> dict:
 def test_generator_emits_mandatory_headers():
     result = _run_generator()
     assert result["schema"] == "AIOS_CODEX_PACKET_GENERATOR.v1"
+    assert result["contract_schema"] == "AIOS_CODEX_PACKET_CONTRACT.v1"
     assert result["packet_valid"] is True
     packet = result["generated_packet_text"]
 
@@ -176,6 +184,20 @@ def test_generator_emits_mandatory_headers():
 
     assert "automation/orchestration/packet_generator/New-AiOsCodexPacket.DRY_RUN.ps1" in packet
     assert "broker/OANDA/webhook/order/secrets paths" in packet
+    assert "engineering work packet" in packet
+
+
+def test_shared_contract_is_the_single_required_field_manifest():
+    contract_text = CONTRACT.read_text(encoding="utf-8")
+    generator_text = GENERATOR.read_text(encoding="utf-8")
+    validator_text = VALIDATOR.read_text(encoding="utf-8")
+
+    assert "required_fields = @(" in contract_text
+    assert "Get-AiOsCodexPacketContract" in generator_text
+    assert "Get-AiOsCodexPacketContract" in validator_text
+    assert "$required = @($packetContract.required_fields)" in validator_text
+    assert "\n        required_fields = @(" not in generator_text
+    assert "\n        required_fields = @(" not in validator_text
 
 
 def test_array_binding_uses_scalar_identity_fields():
@@ -247,13 +269,39 @@ def test_validator_detects_missing_stop_point():
     assert "STOP POINT" in validated["missing_required_fields"]
 
 
-def test_from_continuation_plan_can_produce_skeleton():
+def test_terminology_drift_is_warning_only():
+    result = _run_generator()
+    packet = result["generated_packet_text"] + "\nLegacy explanation: task pack\n"
+    validated = _run_validator(packet)
+
+    assert validated["packet_valid"] is True
+    assert validated["terminology_warnings"]
+    assert "task pack" in validated["terminology_warnings"][0]
+
+
+def test_from_continuation_plan_can_produce_skeleton(tmp_path: Path):
+    continuation_plan = tmp_path / "Get-TestContinuationPlan.DRY_RUN.ps1"
+    continuation_plan.write_text(
+        """[ordered]@{
+    recommended_next_packet_id = "AIOS-FOREX-PAPER-LEARNING-ACTION-ROUTER-APPLY-V1"
+    domain = "FOREX_ENGINE"
+    recommended_lane = "PAPER_LEARNING_ACTION_ROUTER"
+    recommended_next_packet_title = "feat(forex): add paper learning action router"
+    recommended_files = @("tests/orchestration/test_codex_packet_generator.py")
+    required_validators = @("git diff --check")
+    exact_next_safe_action = "Stop after generating the deterministic test packet."
+} | ConvertTo-Json -Depth 10
+""",
+        encoding="utf-8",
+    )
+
     result = _run_generator(
         PacketId="",
         Zone="",
         Lane="",
         Mission="",
         FromContinuationPlan=True,
+        ContinuationPlanScript=str(continuation_plan),
         ReadFirst=[],
     )
     packet = result["generated_packet_text"]

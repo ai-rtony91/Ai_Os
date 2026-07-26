@@ -10,7 +10,7 @@ Authority boundary:
 - Any conflict between this template and `AGENTS.md` must be resolved in favor of `AGENTS.md`.
 - Changes to packet law belong in `AGENTS.md`, not this template.
 
-This file is a usage artifact. It helps draft packets; it does not define governance, packet law, execution requirements, identity requirements, validation requirements, or approval requirements.
+This file is a usage artifact. It helps draft engineering work packets; it does not define governance, packet law, execution requirements, identity requirements, validation requirements, or approval requirements. Use software-engineering terminology in new explanatory prose while preserving the mandatory compatibility labels shown below.
 
 Use the risk tier from `AGENTS.md` to decide how much packet structure is required. Lower-risk read-only work needs less packet structure; APPLY, promotion, production, live, secret, broker/API, commit, push, merge, and destructive actions remain strict.
 
