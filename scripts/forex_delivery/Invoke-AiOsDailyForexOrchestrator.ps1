@@ -117,24 +117,32 @@ function Test-EvidenceDay {
     }
 
     $today = [DateTime]::UtcNow.ToString("yyyy-MM-dd")
-    $matches = 0
+    $supportedRecordTypes = @("REAL_DEMO_DAY", "PAPER_SIMULATION_DAY")
+    $recordTypeMatches = @{
+        REAL_DEMO_DAY = 0
+        PAPER_SIMULATION_DAY = 0
+    }
+    $parseWarnings = 0
 
     foreach ($line in Get-Content -LiteralPath $ledger) {
         if ([string]::IsNullOrWhiteSpace($line)) { continue }
         try {
             $obj = $line | ConvertFrom-Json -ErrorAction Stop
-            if ($obj.record_type -eq "REAL_DEMO_DAY" -and [string]$obj.date -eq $today) {
-                $matches++
+            if ($supportedRecordTypes -contains [string]$obj.record_type -and [string]$obj.date -eq $today) {
+                $recordTypeMatches[[string]$obj.record_type]++
             }
         }
         catch {
-            $script:EvidenceStatus = "LEDGER_PARSE_WARNING"
+            $parseWarnings++
         }
     }
 
-    if ($matches -eq 0) { $script:EvidenceStatus = "MISSING_TODAY_EVIDENCE" }
-    elseif ($matches -eq 1) { $script:EvidenceStatus = "TODAY_EVIDENCE_PRESENT" }
-    else { $script:EvidenceStatus = "DUPLICATE_EVIDENCE_BLOCKED" }
+    $matches = $recordTypeMatches.REAL_DEMO_DAY + $recordTypeMatches.PAPER_SIMULATION_DAY
+    if ($parseWarnings -gt 0) { $script:EvidenceStatus = "LEDGER_PARSE_WARNING" }
+    elseif ($matches -eq 0) { $script:EvidenceStatus = "MISSING_TODAY_EVIDENCE" }
+    elseif ($matches -gt 1) { $script:EvidenceStatus = "DUPLICATE_EVIDENCE_BLOCKED" }
+    elseif ($recordTypeMatches.REAL_DEMO_DAY -eq 1) { $script:EvidenceStatus = "TODAY_REAL_DEMO_EVIDENCE_PRESENT" }
+    else { $script:EvidenceStatus = "TODAY_PAPER_SIMULATION_PRESENT" }
 }
 
 function Write-OrchestratorReports {
