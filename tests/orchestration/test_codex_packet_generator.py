@@ -110,6 +110,15 @@ def _run_generator(output_json: bool = True, **kwargs: object) -> dict:
         ("-Branch", "feature/codex-packet-generator-v1"),
         ("-ApprovalAuthority", "Anthony approves this scoped packet."),
         ("-PacketId", "AIOS-CODEX-PACKET-GENERATOR-APPLY-V1"),
+        ("-PacketName", "Build canonical Codex packet generator"),
+        ("-MissionId", "MISSION-AIOS-001"),
+        ("-MissionName", "AI_OS Product Engineering"),
+        ("-ProgramId", "PRG-AIOS-AUTOMATION-001"),
+        ("-ProgramName", "AI_OS Engineering Automation"),
+        ("-EpicId", "EPC-PACKET-GENERATOR-001"),
+        ("-EpicName", "Canonical Packet Generation"),
+        ("-BucketId", "BKT-PACKET-GENERATOR-001"),
+        ("-BucketName", "Packet Contract"),
         ("-Worktree", str(REPO_ROOT)),
         ("-StartBranch", "main"),
         ("-AllowedMutationFiles", [
@@ -129,6 +138,7 @@ def _run_generator(output_json: bool = True, **kwargs: object) -> dict:
             "git diff --check",
             "python -m pytest tests/forex_engine -q -p no:cacheprovider",
         ]),
+        ("-StopPoint", "Stop after validation and before merge."),
     ]
     if output_json:
         args.append(("-OutputJson", True))
@@ -147,7 +157,7 @@ def _run_validator(packet_text: str) -> dict:
 def test_generator_emits_mandatory_headers():
     result = _run_generator()
     assert result["schema"] == "AIOS_CODEX_PACKET_GENERATOR.v1"
-    assert result["contract_schema"] == "AIOS_CODEX_PACKET_CONTRACT.v1"
+    assert result["contract_schema"] == "AIOS_CODEX_PACKET_CONTRACT.v2"
     assert result["packet_valid"] is True
     packet = result["generated_packet_text"]
 
@@ -269,6 +279,23 @@ def test_validator_detects_missing_stop_point():
     assert "STOP POINT" in validated["missing_required_fields"]
 
 
+def test_validator_rejects_present_but_empty_required_field():
+    result = _run_generator()
+    malformed = result["generated_packet_text"].replace(
+        "MISSION NAME:\nAI_OS Product Engineering", "MISSION NAME:\n"
+    )
+    validated = _run_validator(malformed)
+    assert validated["packet_valid"] is False
+    assert "MISSION NAME" in validated["empty_or_placeholder_fields"]
+
+
+def test_validator_requires_codex_marker_on_first_line():
+    result = _run_generator()
+    validated = _run_validator("intro\n" + result["generated_packet_text"])
+    assert validated["packet_valid"] is False
+    assert validated["codex_marker_is_first_line"] is False
+
+
 def test_terminology_drift_is_warning_only():
     result = _run_generator()
     packet = result["generated_packet_text"] + "\nLegacy explanation: task pack\n"
@@ -320,3 +347,28 @@ def test_dry_run_does_not_write_files():
         ["git", "status", "--short", "--untracked-files=all"], text=True, cwd=str(REPO_ROOT)
     )
     assert pre == post
+
+
+def test_state_aligned_routine_controller_resolves_complete_apply_packet():
+    result = _run_generator(StateAlignedRoutineEngineeringController=True)
+    packet = result["generated_packet_text"]
+
+    assert result["packet_valid"] is True
+    assert "AIOS-STATE-ALIGNED-ROUTINE-ENGINEERING-CONTROLLER-V2" in packet
+    assert _get_field(packet, "MODE") == "APPLY"
+    assert _get_field(packet, "ZONE") == "EAST"
+    assert _get_field(packet, "LANE") == "GOVERNANCE_AUTOMATION"
+    assert _get_field(packet, "BRANCH") == subprocess.check_output(
+        ["git", "branch", "--show-current"], text=True, cwd=str(REPO_ROOT)
+    ).strip()
+    assert _get_field(packet, "WORKTREE") == str(REPO_ROOT)
+    assert "MISSION-AIOS-001" in packet
+    assert "PRG-AIOS-AUTONOMY-001" in packet
+    assert "EPC-ROUTINE-ENGINEERING-CONTROLLER-001" in packet
+    assert "BKT-ROUTINE-ACTION-BUNDLE-001" in packet
+    assert "all files outside ALLOWED MUTATION FILES ONLY" in packet
+    assert "Do not merge." in packet
+
+    validated = _run_validator(packet)
+    assert validated["packet_valid"] is True
+    assert validated["missing_required_fields"] == []

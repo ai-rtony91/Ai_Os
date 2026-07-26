@@ -61,10 +61,31 @@ function Find-MissingFields {
     return @($missing)
 }
 
+function Get-EmptyFields {
+    param([string]$Text)
+
+    $normalized = ($Text -replace "`r`n", "`n") -replace "`r", "`n"
+    $lines = @($normalized -split "`n")
+    $empty = @()
+    foreach ($field in @($packetContract.required_fields)) {
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            if ($lines[$i].Trim() -ne ($field + ":")) { continue }
+            $next = if ($i + 1 -lt $lines.Count) { $lines[$i + 1].Trim() } else { "" }
+            if ([string]::IsNullOrWhiteSpace($next) -or $next -match "^(TODO|TBD|UNKNOWN|UNSPECIFIED|None provided|No .+ provided)$") {
+                $empty += $field
+            }
+            break
+        }
+    }
+    return @($empty | Sort-Object -Unique)
+}
+
 $rawPacketText = Read-Text -Text $PacketText -Path $PacketPath
 $missing = Find-MissingFields -Text $rawPacketText
 $missing = @($missing)
-$packetValid = $missing.Count -eq 0
+$empty = @(Get-EmptyFields -Text $rawPacketText)
+$invalidFirstLine = (@(($rawPacketText -replace "`r`n", "`n") -split "`n")[0]).Trim() -ne "CODEX-ONLY PROMPT"
+$packetValid = $missing.Count -eq 0 -and $empty.Count -eq 0 -and -not $invalidFirstLine
 $terminologyWarnings = @()
 foreach ($term in @($packetContract.terminology.drift_terms)) {
     if ($rawPacketText.IndexOf($term, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
@@ -76,6 +97,8 @@ $result = [ordered]@{
     schema = "AIOS_CODEX_PACKET_VALIDATOR.v1"
     packet_valid = [bool]$packetValid
     missing_required_fields = @($missing)
+    empty_or_placeholder_fields = @($empty)
+    codex_marker_is_first_line = (-not $invalidFirstLine)
     terminology_warnings = @($terminologyWarnings)
     writes_files = $false
     execution_allowed = $false
