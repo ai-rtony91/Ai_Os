@@ -1,0 +1,28 @@
+{
+  "schema": "AIOS_FIRST_WITHDRAWABLE_DOLLAR_EXECUTION_RECEIPTS.v1",
+  "execution_receipts": [
+    {
+      "packet_id": "PKT-FOREX-FIRST-DOLLAR-COUNTDOWN-CLI-EVIDENCE-V1",
+      "canonical": true,
+      "merged": true,
+      "pr_id": "1326",
+      "head_commit_sha": "a3cc080e674da9d0fe278a67ec8ffbff867e4224",
+      "merge_commit_sha": "aa5c654b86326a37367b7152fb1f5efe132ac8e3",
+      "evidence_provenance": "GITHUB_CONNECTOR_VERIFIED_PR_1326",
+      "test_command": "python -m pytest tests/orchestration/test_aios_work_countdown_v1.py tests/forex_engine/test_first_withdrawable_dollar_v1.py -q",
+      "test_conclusion": "passed",
+      "ci_check_id": "CI_RUN_30309666368_AND_AIOS_GOVERNANCE_RUN_30309666395",
+      "ci_conclusion": "success",
+      "engineering_hours": 3.0,
+      "engineering_hours_provenance": "MIDPOINT_OF_REPOSITORY_RECORDED_2_TO_4_HOUR_ESTIMATE_NOT_MEASURED_WALL_CLOCK_TIME"
+    }
+  ],
+  "expected_packet_count": 2,
+  "remaining_hours": {
+    "low": 2.0,
+    "best": 4.0,
+    "high": 8.0
+  },
+  "external_dependencies": [],
+  "owner_action_required": false
+}

@@ -310,10 +310,31 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root")
     parser.add_argument("--evidence", help="Explicit packet evidence JSON")
+    first_dollar_source = parser.add_mutually_exclusive_group()
+    first_dollar_source.add_argument(
+        "--first-withdrawable-dollar-evidence",
+        help="Explicit First Withdrawable Dollar execution-receipt evidence JSON",
+    )
+    first_dollar_source.add_argument(
+        "--first-withdrawable-dollar-evidence-file",
+        help="Path to First Withdrawable Dollar execution-receipt evidence JSON",
+    )
     parser.add_argument("--output", help="Optional output JSON path")
     args = parser.parse_args(argv)
     evidence = json.loads(args.evidence) if args.evidence is not None else None
-    result = build_work_countdown(evidence, repo_root=args.repo_root)
+    first_dollar_evidence = None
+    if args.first_withdrawable_dollar_evidence is not None:
+        first_dollar_evidence = json.loads(args.first_withdrawable_dollar_evidence)
+    elif args.first_withdrawable_dollar_evidence_file is not None:
+        evidence_path = Path(args.first_withdrawable_dollar_evidence_file)
+        first_dollar_evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    if first_dollar_evidence is not None and not isinstance(first_dollar_evidence, dict):
+        parser.error("First Withdrawable Dollar evidence must be a JSON object")
+    result = build_work_countdown(
+        evidence,
+        repo_root=args.repo_root,
+        first_withdrawable_dollar_state=first_dollar_evidence,
+    )
     rendered = stable_json(result)
     if args.output:
         Path(args.output).write_text(rendered, encoding="utf-8")
