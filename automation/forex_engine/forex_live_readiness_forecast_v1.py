@@ -12,6 +12,8 @@ SCHEMA = "AIOS_FOREX_LIVE_READINESS_FORECAST.v1"
 MODE = "READ_ONLY_EVIDENCE_FORECAST"
 MILESTONE = "FIRST_SINGLE_LIVE_MICRO_TRADE_REVIEW_AND_ATTEMPT_ELIGIBILITY"
 STATUSES = {"PASS", "BLOCKED", "NOT_VERIFIED", "STALE", "CONFLICT", "WAITING_OWNER", "WAITING_EXTERNAL"}
+GENUINE_DEMO_SCHEMA = "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE.v1"
+GENUINE_DEMO_CRITERIA = {"DEMO_GENUINE_MARKET_EVIDENCE", "DEMO_EVIDENCE_FRESH", "DEMO_METRICS_COMPLETE", "DEMO_SYSTEM_MINIMUM", "DEMO_RECEIPT_READY", "POST_TRADE_REVIEW_READY"}
 
 # Each criterion occurs once. Categories are the numerical denominator; stages are
 # the critical-path ordering. File presence never passes a criterion by itself.
@@ -106,7 +108,31 @@ def _as_of(value: str | None) -> str:
     return text
 
 
-def load_forex_live_readiness_evidence(repo_root: str | Path, explicit_evidence: Mapping[str, Any] | None = None) -> dict[str, Any]:
+def _load_genuine_demo_evidence(root: Path, source: str | Path | None) -> dict[str, Any]:
+    if source is None:
+        return {}
+    candidate = Path(source)
+    path = candidate.resolve() if candidate.is_absolute() else (root / candidate).resolve()
+    if path != root and root not in path.parents:
+        raise ValueError("genuine demo evidence path must remain inside repository")
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if value.get("schema") != GENUINE_DEMO_SCHEMA:
+        raise ValueError("unsupported genuine demo evidence schema")
+    forecast_input = value.get("forecast_input")
+    if not isinstance(forecast_input, Mapping) or forecast_input.get("schema") != GENUINE_DEMO_SCHEMA:
+        raise ValueError("invalid genuine demo forecast input")
+    ids = forecast_input.get("criterion_ids")
+    if not isinstance(ids, list) or len(ids) != len(set(ids)):
+        raise ValueError("duplicate genuine demo criterion IDs")
+    if set(ids) - GENUINE_DEMO_CRITERIA:
+        raise ValueError("unsupported genuine demo criterion ID")
+    criteria = forecast_input.get("criteria")
+    if not isinstance(criteria, Mapping) or set(criteria) - GENUINE_DEMO_CRITERIA:
+        raise ValueError("unsupported genuine demo criterion mapping")
+    return {"criterion_ids": ids, "criteria": dict(criteria)}
+
+
+def load_forex_live_readiness_evidence(repo_root: str | Path, explicit_evidence: Mapping[str, Any] | None = None, genuine_demo_evidence: str | Path | None = None) -> dict[str, Any]:
     """Inventory local sources and sanitized caller evidence; perform no external access."""
     root = Path(repo_root).resolve()
     sources = [{"path": path, "present": (root / path).is_file()} for path in CANONICAL_PATHS]
@@ -118,11 +144,17 @@ def load_forex_live_readiness_evidence(repo_root: str | Path, explicit_evidence:
             previous = candidate if candidate.get("schema") == SCHEMA else None
         except (OSError, UnicodeError, json.JSONDecodeError):
             previous = None
+    sanitized = dict(explicit_evidence or {})
+    direct = _load_genuine_demo_evidence(root, genuine_demo_evidence)
+    if direct:
+        existing = sanitized.get("criteria") if isinstance(sanitized.get("criteria"), Mapping) else {}
+        sanitized["criteria"] = {**existing, **direct["criteria"]}
+        sanitized["criterion_ids"] = direct["criterion_ids"]
     return {
         "schema": "AIOS_FOREX_LIVE_READINESS_EVIDENCE.v1",
         "repo_root": root.as_posix(),
         "sources": sources,
-        "sanitized_evidence": dict(explicit_evidence or {}),
+        "sanitized_evidence": sanitized,
         "previous_state": previous,
         "network_accessed": False,
         "broker_accessed": False,
@@ -215,6 +247,8 @@ def build_forex_live_readiness_forecast(evidence_bundle: Mapping[str, Any], *, a
     total = len(criteria)
     passed = counts["pass"]
     percent = round(passed / total * 100, 2) if total and not duplicates else 0.0
+    percent = min(max(percent, 0.0), 100.0)
+    remaining_percent = round(100.0 - percent, 2)
     categories: dict[str, dict[str, Any]] = {}
     for category in sorted({item["category"] for item in criteria}):
         selected = [item for item in criteria if item["category"] == category]
@@ -248,7 +282,7 @@ def build_forex_live_readiness_forecast(evidence_bundle: Mapping[str, Any], *, a
     critical_path = {"completed_stages": completed_stages, "current_stage": current_stage, "next_stage": next_stage, "blocked_stages": blocked_stages, "critical_path": list(STAGES), "parallel_safe_work": sorted(executable), "sequential_only_work": list(STAGES), "highest_blocker": highest["blocker"] if highest else None, "highest_blocker_source": highest["source_path"] if highest else None, "highest_blocker_closure_condition": highest["closure_condition"] if highest else None, "next_verified_task": executable[0] if executable else (highest["criterion_id"] if highest else None)}
     summary = {"criteria_total": total, "criteria_passed": passed, "criteria_remaining": total - passed, "criteria_blocked": counts["blocked"], "criteria_not_verified": counts["not_verified"], "criteria_stale": counts["stale"], "criteria_waiting_owner": counts["waiting_owner"], "criteria_waiting_external": counts["waiting_external"]}
     daily = _daily_delta(evidence_bundle.get("previous_state") if isinstance(evidence_bundle.get("previous_state"), Mapping) else None, criteria, as_of_utc, percent, current_stage)
-    return {"schema": SCHEMA, "mode": MODE, "as_of_utc": as_of_utc, "milestone_scope": MILESTONE, "live_status": "NOT_READY" if duplicates or conflicts else live_status, "live_readiness_evidence_percent": percent, "criteria_summary": summary, "category_scores": categories, "criteria": criteria, "duplicate_criterion_ids": duplicates, "critical_path": critical_path, "highest_blocker": critical_path["highest_blocker"], "next_verified_task": critical_path["next_verified_task"], "forecast": forecast, "daily_delta": daily, "source_inventory": evidence_bundle.get("sources", []), "source_conflicts": conflicts, "evidence_limitations": ["Local procedure or implementation presence does not prove live runtime readiness.", "PAPER_SIMULATION, fixtures, examples, synthetic data, and mocks receive no live-readiness credit."], "owner_action_required": waiting_owner, "external_dependencies": sorted(waiting_external), "permissions": _permissions(), "protected_actions": _protected_actions()}
+    return {"schema": SCHEMA, "mode": MODE, "as_of_utc": as_of_utc, "milestone_scope": MILESTONE, "live_status": "NOT_READY" if duplicates or conflicts else live_status, "live_readiness_evidence_percent": percent, "remaining_to_first_trade_percent": remaining_percent, "criteria_summary": summary, "category_scores": categories, "criteria": criteria, "duplicate_criterion_ids": duplicates, "critical_path": critical_path, "highest_blocker": critical_path["highest_blocker"], "next_verified_task": critical_path["next_verified_task"], "forecast": forecast, "daily_delta": daily, "source_inventory": evidence_bundle.get("sources", []), "source_conflicts": conflicts, "evidence_limitations": ["Local procedure or implementation presence does not prove live runtime readiness.", "PAPER_SIMULATION, fixtures, examples, synthetic data, and mocks receive no live-readiness credit."], "owner_action_required": waiting_owner, "external_dependencies": sorted(waiting_external), "permissions": _permissions(), "protected_actions": _protected_actions()}
 
 
 def render_forex_live_readiness_report(state: Mapping[str, Any]) -> str:
@@ -262,6 +296,19 @@ def render_forex_live_readiness_report(state: Mapping[str, Any]) -> str:
     def lines(items: Sequence[Mapping[str, Any]]) -> str:
         return "\n".join(f"- {marker[item['status']]} `{item['criterion_id']}` — {item['status']}: {item['closure_condition']}" for item in items) or "- None."
     return f"""# 🚦 AIOS FOREX — WHEN CAN WE GO LIVE?
+
+## 👤 OWNER VIEW
+- 🎯 Target: first evidence-backed governed live Forex micro-trade review
+- 📉 Remaining-to-First-Trade: {state['remaining_to_first_trade_percent']}%
+- 📈 Live-Readiness evidence: {state['live_readiness_evidence_percent']}%
+- 🧩 Criteria passed: {summary['criteria_passed']}
+- 🧱 Criteria remaining: {summary['criteria_remaining']}
+- ⛔ Highest blocker: {state['highest_blocker'] or 'None verified.'}
+- ▶️ Next verified task: `{state['next_verified_task'] or 'NOT_VERIFIED'}`
+- 🔐 Owner approval status: {'REQUIRED' if state['owner_action_required'] else 'NOT_CURRENTLY_REQUIRED'}
+- 🌐 External dependencies: {state['external_dependencies']}
+- ⚠️ Confidence: evidence-backed repository state only
+- 🛑 live_execution_authorized false
 
 ## 🔴 CURRENT ANSWER
 `{state['live_status']}`. General live trading remains out of scope and unauthorized.
@@ -341,8 +388,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--state-output")
     parser.add_argument("--report-output")
     parser.add_argument("--evidence", default="{}", help="Sanitized JSON evidence")
+    parser.add_argument("--genuine-demo-evidence")
     args = parser.parse_args(argv)
-    bundle = load_forex_live_readiness_evidence(args.repo_root, json.loads(args.evidence))
+    bundle = load_forex_live_readiness_evidence(args.repo_root, json.loads(args.evidence), args.genuine_demo_evidence)
     state = build_forex_live_readiness_forecast(bundle, as_of_date=args.as_of_date)
     rendered = stable_json(state)
     if args.state_output:

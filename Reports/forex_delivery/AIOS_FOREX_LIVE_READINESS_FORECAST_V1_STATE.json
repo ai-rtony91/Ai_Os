@@ -49,9 +49,9 @@
   },
   "criteria": [
     {
-      "blocker": "DEMO_GENUINE_MARKET_EVIDENCE is NOT_VERIFIED",
+      "blocker": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "category": "demo_evidence",
-      "closure_condition": "Supply current sanitized PASS evidence for DEMO_GENUINE_MARKET_EVIDENCE.",
+      "closure_condition": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "counted_for_progress": false,
       "criterion_id": "DEMO_GENUINE_MARKET_EVIDENCE",
       "description": "Demo Genuine Market Evidence",
@@ -60,15 +60,15 @@
       "external_dependency": false,
       "owner_action_required": false,
       "source_path": null,
-      "source_schema": null,
-      "source_type": "unavailable",
+      "source_schema": "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE.v1",
+      "source_type": "genuine_demo_intake",
       "stage": "DEMO_EVIDENCE",
       "status": "NOT_VERIFIED"
     },
     {
-      "blocker": "DEMO_EVIDENCE_FRESH is NOT_VERIFIED",
+      "blocker": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "category": "demo_evidence",
-      "closure_condition": "Supply current sanitized PASS evidence for DEMO_EVIDENCE_FRESH.",
+      "closure_condition": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "counted_for_progress": false,
       "criterion_id": "DEMO_EVIDENCE_FRESH",
       "description": "Demo Evidence Fresh",
@@ -77,15 +77,15 @@
       "external_dependency": false,
       "owner_action_required": false,
       "source_path": null,
-      "source_schema": null,
-      "source_type": "unavailable",
+      "source_schema": "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE.v1",
+      "source_type": "genuine_demo_intake",
       "stage": "DEMO_EVIDENCE",
       "status": "NOT_VERIFIED"
     },
     {
-      "blocker": "DEMO_METRICS_COMPLETE is NOT_VERIFIED",
+      "blocker": "Capture complete closed-trade metrics.",
       "category": "demo_evidence",
-      "closure_condition": "Supply current sanitized PASS evidence for DEMO_METRICS_COMPLETE.",
+      "closure_condition": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "counted_for_progress": false,
       "criterion_id": "DEMO_METRICS_COMPLETE",
       "description": "Demo Metrics Complete",
@@ -94,15 +94,15 @@
       "external_dependency": false,
       "owner_action_required": false,
       "source_path": null,
-      "source_schema": null,
-      "source_type": "unavailable",
+      "source_schema": "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE.v1",
+      "source_type": "genuine_demo_intake",
       "stage": "DEMO_EVIDENCE",
       "status": "NOT_VERIFIED"
     },
     {
-      "blocker": "DEMO_SYSTEM_MINIMUM is NOT_VERIFIED",
+      "blocker": "Complete the canonical demo minimum.",
       "category": "demo_evidence",
-      "closure_condition": "Supply current sanitized PASS evidence for DEMO_SYSTEM_MINIMUM.",
+      "closure_condition": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "counted_for_progress": false,
       "criterion_id": "DEMO_SYSTEM_MINIMUM",
       "description": "Demo System Minimum",
@@ -111,8 +111,8 @@
       "external_dependency": false,
       "owner_action_required": false,
       "source_path": null,
-      "source_schema": null,
-      "source_type": "unavailable",
+      "source_schema": "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE.v1",
+      "source_type": "genuine_demo_intake",
       "stage": "DEMO_EVIDENCE",
       "status": "NOT_VERIFIED"
     },
@@ -202,9 +202,9 @@
       "status": "NOT_VERIFIED"
     },
     {
-      "blocker": "DEMO_RECEIPT_READY is NOT_VERIFIED",
+      "blocker": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "category": "demo_evidence",
-      "closure_condition": "Supply current sanitized PASS evidence for DEMO_RECEIPT_READY.",
+      "closure_condition": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "counted_for_progress": false,
       "criterion_id": "DEMO_RECEIPT_READY",
       "description": "Demo Receipt Ready",
@@ -213,15 +213,15 @@
       "external_dependency": false,
       "owner_action_required": false,
       "source_path": null,
-      "source_schema": null,
-      "source_type": "unavailable",
+      "source_schema": "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE.v1",
+      "source_type": "genuine_demo_intake",
       "stage": "LIVE_MICRO_REVIEW_EVIDENCE",
       "status": "NOT_VERIFIED"
     },
     {
-      "blocker": "POST_TRADE_REVIEW_READY is NOT_VERIFIED",
+      "blocker": "Capture terminal evidence and post-trade review.",
       "category": "demo_evidence",
-      "closure_condition": "Supply current sanitized PASS evidence for POST_TRADE_REVIEW_READY.",
+      "closure_condition": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
       "counted_for_progress": false,
       "criterion_id": "POST_TRADE_REVIEW_READY",
       "description": "Post Trade Review Ready",
@@ -230,8 +230,8 @@
       "external_dependency": false,
       "owner_action_required": false,
       "source_path": null,
-      "source_schema": null,
-      "source_type": "unavailable",
+      "source_schema": "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE.v1",
+      "source_type": "genuine_demo_intake",
       "stage": "LIVE_MICRO_REVIEW_EVIDENCE",
       "status": "NOT_VERIFIED"
     },
@@ -766,8 +766,8 @@
       "PROTECTED_ATTEMPT_WINDOW"
     ],
     "current_stage": "DEMO_EVIDENCE",
-    "highest_blocker": "DEMO_GENUINE_MARKET_EVIDENCE is NOT_VERIFIED",
-    "highest_blocker_closure_condition": "Supply current sanitized PASS evidence for DEMO_GENUINE_MARKET_EVIDENCE.",
+    "highest_blocker": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
+    "highest_blocker_closure_condition": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
     "highest_blocker_source": null,
     "next_stage": "PROFITABILITY_EVIDENCE",
     "next_verified_task": "DEMO_GENUINE_MARKET_EVIDENCE",
@@ -791,11 +791,11 @@
     "criteria_reopened_today": [],
     "critical_path_change": null,
     "current_as_of_utc": "2026-07-27T00:00:00Z",
-    "daily_delta_status": "BASELINE_CREATED",
+    "daily_delta_status": "COMPARED",
     "forecast_change": null,
     "new_blockers_today": [],
-    "previous_as_of_utc": null,
-    "readiness_percent_change": null
+    "previous_as_of_utc": "2026-07-27T00:00:00Z",
+    "readiness_percent_change": 0.0
   },
   "duplicate_criterion_ids": [],
   "evidence_limitations": [
@@ -819,7 +819,7 @@
     "protected_live_attempt_window": null,
     "protected_live_attempt_window_status": "NOT_VERIFIED"
   },
-  "highest_blocker": "DEMO_GENUINE_MARKET_EVIDENCE is NOT_VERIFIED",
+  "highest_blocker": "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT",
   "live_readiness_evidence_percent": 0.0,
   "live_status": "EVIDENCE_COLLECTION_REQUIRED",
   "milestone_scope": "FIRST_SINGLE_LIVE_MICRO_TRADE_REVIEW_AND_ATTEMPT_ELIGIBILITY",
@@ -846,6 +846,7 @@
     "scheduler_creation": false,
     "worker_dispatch": false
   },
+  "remaining_to_first_trade_percent": 100.0,
   "schema": "AIOS_FOREX_LIVE_READINESS_FORECAST.v1",
   "source_conflicts": [],
   "source_inventory": [
