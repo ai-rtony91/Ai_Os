@@ -685,7 +685,11 @@ def evaluate_final_exit_requirements(model: Mapping[str, Any]) -> dict[str, Any]
         missing.append("manual_broker_ui_fallback")
         blockers.append("manual_broker_ui_fallback_missing")
 
-    blockers.append("auto_exit_readiness_not_implemented_for_live_execution")
+    auto_exit_ready = coerce_bool(
+        first_present(model, "AUTO_EXIT_LIVE_READY", "auto_exit_readiness", default=False)
+    )
+    if not auto_exit_ready:
+        blockers.append("auto_exit_readiness_not_implemented_for_live_execution")
 
     return {
         "status": "PRESENT_BLOCKED" if blockers else "PRESENT",
@@ -693,7 +697,7 @@ def evaluate_final_exit_requirements(model: Mapping[str, Any]) -> dict[str, Any]
         "take_profit_policy_or_waiver": str(take_profit),
         "max_time_policy": str(max_time),
         "manual_broker_ui_fallback_required": has_policy(manual_fallback),
-        "auto_exit_readiness": False,
+        "auto_exit_readiness": auto_exit_ready,
         "evidence_present": present,
         "evidence_missing": unique(missing),
         "blocked_reasons": unique(blockers),

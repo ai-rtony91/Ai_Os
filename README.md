@@ -1,5 +1,9 @@
 # AI_OS
 
+## Primary Business Anchor
+
+AI_OS has one primary measurable business anchor: **First Withdrawable Dollar**. It is complete only when a real owner-approved OANDA trade closes with at least $1.00 net realized profit after fees and costs, broker evidence confirms the funds are withdrawable, and the Human Owner approves and submits the withdrawal to the already linked bank destination. Existing phases, milestones, programs, epics, buckets, workflows, and packets remain dependencies and compatibility contracts. Credentials, live trading, real orders or closures, withdrawals, and money movement remain separately owner-gated under `RISK_POLICY.md`.
+
 AI_OS is a governed AI-assisted operating environment for building, managing, and improving projects through human-readable prompts, scoped worker lanes, canonical authority files, and validation before mutation.
 
 It is not an autonomous replacement for human judgment. It is a structured project operating system: humans set direction, AI workers perform bounded work, governance defines safe behavior, and validation proves what changed.

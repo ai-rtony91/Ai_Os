@@ -1,5 +1,14 @@
 param(
     [string]$PacketId = "",
+    [string]$PacketName = "",
+    [string]$MissionId = "",
+    [string]$MissionName = "",
+    [string]$ProgramId = "",
+    [string]$ProgramName = "",
+    [string]$EpicId = "",
+    [string]$EpicName = "",
+    [string]$BucketId = "",
+    [string]$BucketName = "",
     [ValidateSet("DRY_RUN", "APPLY")]
     [string]$Mode = "DRY_RUN",
     [string]$Zone = "",
@@ -16,6 +25,7 @@ param(
     [string]$StopPoint = "",
     [string]$SupervisorIdentity = "ChatGPT Planning Supervisor under Anthony Human Owner",
     [string]$WorkerIdentity = "Codex CLI local executor inside C:\Dev\Ai.Os",
+    [switch]$StateAlignedRoutineEngineeringController,
     [switch]$OutputJson,
     [switch]$AsPromptBlock,
     [switch]$FromContinuationPlan,
@@ -27,6 +37,40 @@ $ErrorActionPreference = "Stop"
 
 . (Join-Path $PSScriptRoot "AiOsCodexPacketContract.ps1")
 $packetContract = Get-AiOsCodexPacketContract
+
+if ($StateAlignedRoutineEngineeringController) {
+    $profile = $packetContract.profiles.state_aligned_routine_engineering_controller
+    $repoRoot = (& git rev-parse --show-toplevel 2>$null)
+    $currentBranch = (& git branch --show-current 2>$null)
+    if ([string]::IsNullOrWhiteSpace($repoRoot) -or [string]::IsNullOrWhiteSpace($currentBranch)) {
+        throw "State-aligned controller requires a resolvable Git worktree and checked-out branch."
+    }
+    $PacketId = $profile.packet_id
+    $PacketName = $profile.packet_name
+    $MissionId = $profile.mission_id
+    $MissionName = $profile.mission_name
+    $ProgramId = $profile.program_id
+    $ProgramName = $profile.program_name
+    $EpicId = $profile.epic_id
+    $EpicName = $profile.epic_name
+    $BucketId = $profile.bucket_id
+    $BucketName = $profile.bucket_name
+    $Mode = $profile.mode
+    $Zone = $profile.zone
+    $Lane = $profile.lane
+    $Mission = "Implement the state-aligned routine engineering controller without weakening governance."
+    $Worktree = $repoRoot.Trim()
+    $StartBranch = $currentBranch.Trim()
+    $Branch = $currentBranch.Trim()
+    $ApprovalAuthority = $profile.approval_authority
+    $AllowedMutationFiles = @($profile.allowed_mutation_files)
+    $ForbiddenPaths = @($profile.forbidden_paths)
+    $ReadFirst = @("AGENTS.md", "README.md", "RISK_POLICY.md", "automation/orchestration/packet_generator/AiOsCodexPacketContract.ps1")
+    $Validators = @($profile.validators)
+    $StopPoint = $profile.stop_point
+    $SupervisorIdentity = $profile.supervisor_identity
+    $WorkerIdentity = $profile.worker_identity
+}
 
 function Format-List {
     param([string[]]$Values, [string]$Fallback)
@@ -247,14 +291,30 @@ $resolvedStopPoint = if ([string]::IsNullOrWhiteSpace($resolvedStopPoint) -and $
 
 $missing = @()
 if ([string]::IsNullOrWhiteSpace($resolvedPacketId)) { $missing += "PACKET ID" }
+if ([string]::IsNullOrWhiteSpace($PacketName)) { $missing += "PACKET NAME" }
+if ([string]::IsNullOrWhiteSpace($MissionId)) { $missing += "MISSION ID" }
+if ([string]::IsNullOrWhiteSpace($MissionName)) { $missing += "MISSION NAME" }
+if ([string]::IsNullOrWhiteSpace($ProgramId)) { $missing += "PROGRAM ID" }
+if ([string]::IsNullOrWhiteSpace($ProgramName)) { $missing += "PROGRAM NAME" }
+if ([string]::IsNullOrWhiteSpace($EpicId)) { $missing += "EPIC ID" }
+if ([string]::IsNullOrWhiteSpace($EpicName)) { $missing += "EPIC NAME" }
+if ([string]::IsNullOrWhiteSpace($BucketId)) { $missing += "BUCKET ID" }
+if ([string]::IsNullOrWhiteSpace($BucketName)) { $missing += "BUCKET NAME" }
 if ([string]::IsNullOrWhiteSpace($resolvedZone)) { $missing += "ZONE" }
 if ([string]::IsNullOrWhiteSpace($resolvedLane)) { $missing += "LANE" }
 if ([string]::IsNullOrWhiteSpace($resolvedMission)) { $missing += "MISSION" }
 if ([string]::IsNullOrWhiteSpace($resolvedBranch)) { $missing += "BRANCH" }
+if ([string]::IsNullOrWhiteSpace($resolvedWorktree)) { $missing += "WORKTREE" }
+if ([string]::IsNullOrWhiteSpace($resolvedApprovalAuthority)) { $missing += "APPROVAL AUTHORITY" }
+if (@($resolvedAllowed).Count -eq 0) { $missing += "ALLOWED MUTATION FILES ONLY" }
+if (@($resolvedForbidden).Count -eq 0) { $missing += "FORBIDDEN PATHS" }
+if (@($resolvedValidators).Count -eq 0) { $missing += "VALIDATOR CHAIN" }
+if ([string]::IsNullOrWhiteSpace($resolvedStopPoint)) { $missing += "STOP POINT" }
 
 $packetValid = $missing.Count -eq 0
 
 $schemaText = "AIOS_CODEX_PACKET_GENERATOR.v1"
+$identityMarker = if ($StateAlignedRoutineEngineeringController) { $profile.identity_marker } else { $schemaText }
 $generatedPacketText = @"
 CODEX-ONLY PROMPT
 
@@ -266,7 +326,7 @@ Read README.md second.
 If unavailable, stop and report missing authority context.
 
 IDENTITY MARKER:
-$schemaText
+$identityMarker
 
 SUPERVISOR IDENTITY:
 $resolvedSupervisorIdentity
@@ -276,6 +336,33 @@ $resolvedWorkerIdentity
 
 PACKET ID:
 $resolvedPacketId
+
+MISSION ID:
+$MissionId
+
+MISSION NAME:
+$MissionName
+
+PROGRAM ID:
+$ProgramId
+
+PROGRAM NAME:
+$ProgramName
+
+EPIC ID:
+$EpicId
+
+EPIC NAME:
+$EpicName
+
+BUCKET ID:
+$BucketId
+
+BUCKET NAME:
+$BucketName
+
+PACKET NAME:
+$PacketName
 
 MODE:
 $resolvedMode
@@ -308,13 +395,13 @@ PREFLIGHT
 
 REQUIRED PREFLIGHT STATE:
 - path must be $resolvedWorktree
-- branch must be $resolvedStartBranch before branch creation
+- remain on observed branch $resolvedStartBranch; do not switch merely to satisfy packet wording
 - repository must be clean
 
 BRANCH PLAN:
-1. Start on $resolvedStartBranch.
-2. Verify branch safety and state.
-3. Create/switch to branch $resolvedBranch.
+1. Use the observed, platform-managed branch $resolvedStartBranch.
+2. Verify branch safety and state without requiring a local main reference or remote.
+3. Do not switch branches merely to satisfy packet wording.
 4. Apply only the allowed mutation files.
 5. Validate using VALIDATOR CHAIN.
 6. Commit exact files only.
