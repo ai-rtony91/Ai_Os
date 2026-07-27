@@ -15,6 +15,8 @@ from automation.orchestration.aios_candidate_packet_evidence_adapter import (
 from automation.orchestration.aios_packet_queue_planner import build_packet_queue_planner
 
 SCHEMA = "AIOS_WORK_COUNTDOWN.v1"
+BASELINE_SCHEMA = "AIOS_ENGINEERING_HOUR_BASELINE.v1"
+DEFAULT_BASELINE = Path(__file__).with_name("baselines") / "AIOS_ENGINEERING_HOUR_BASELINE_V1.json"
 INVENTORY_SCHEMA = "AIOS_CANONICAL_WORK_PACKET_INVENTORY.v1"
 MODE = "READ_ONLY"
 CALCULATION_SCOPE = "CANONICAL_EXPLICIT_WORK_PACKETS"
@@ -71,6 +73,8 @@ def _record(path: Path, root: Path, folder_state: str, payload: Mapping[str, Any
         "conflicts": list(payload.get("conflicts") or []),
         "safety_flags": list(payload.get("safety_flags") or []),
         "engineering_stage": str(payload.get("engineering_stage") or payload.get("stage") or folder_state).strip(),
+        "engineering_hours": dict(payload.get("engineering_hours") or {}),
+        "execution_receipt": dict(payload.get("execution_receipt") or {}),
     }
 
 
@@ -203,6 +207,142 @@ def _task(packet: Mapping[str, Any]) -> dict[str, Any]:
     return {"packet_id": str(packet.get("packet_id") or ""), "title": str(packet.get("title") or ""), "status": _normalized_status(packet.get("status"))}
 
 
+def _hours(packet: Mapping[str, Any]) -> dict[str, float] | None:
+    """Return a valid low/best/high estimate, never an invented default."""
+    value = packet.get("engineering_hours")
+    if not isinstance(value, Mapping):
+        return None
+    aliases = {"low": "optimistic", "best": "most_likely", "high": "pessimistic"}
+    try:
+        result = {key: float(value[key] if key in value else value[alias]) for key, alias in aliases.items()}
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not (0 <= result["low"] <= result["best"] <= result["high"]):
+        return None
+    return result
+
+
+def load_engineering_hour_baseline(path: str | Path = DEFAULT_BASELINE) -> dict[str, Any]:
+    """Load the single versioned baseline contract without changing packet authority."""
+    payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if (
+        payload.get("schema") != BASELINE_SCHEMA
+        or not isinstance(payload.get("packets"), list)
+        or not isinstance(payload.get("version"), int)
+        or payload["version"] < 1
+        or not str(payload.get("change_explanation") or "").strip()
+    ):
+        raise ValueError("invalid AIOS engineering-hour baseline contract")
+    packet_ids = [str(item.get("packet_id") or "") for item in payload["packets"] if isinstance(item, Mapping)]
+    if len(packet_ids) != len(payload["packets"]) or len(set(packet_ids)) != len(packet_ids) or not all(packet_ids):
+        raise ValueError("baseline packet IDs must be present and unique")
+    return payload
+
+
+def _apply_baseline(packets: list[dict[str, Any]], baseline: Mapping[str, Any]) -> list[dict[str, Any]]:
+    estimates = {str(item.get("packet_id") or ""): item for item in baseline.get("packets", []) if isinstance(item, Mapping)}
+    result = []
+    for packet in packets:
+        calibrated = dict(packet)
+        entry = estimates.get(str(packet.get("packet_id") or ""))
+        if entry:
+            calibrated["engineering_hours"] = dict(entry.get("engineering_hours") or {})
+            calibrated["execution_receipt"] = dict(entry.get("execution_receipt") or {})
+            calibrated["forecast_evidence"] = dict(entry)
+        result.append(calibrated)
+    return result
+
+
+def _receipt(packet: Mapping[str, Any], receipts: Mapping[str, Any]) -> Mapping[str, Any]:
+    candidate = receipts.get(str(packet.get("packet_id") or ""))
+    if isinstance(candidate, Mapping) and candidate:
+        return candidate
+    embedded = packet.get("execution_receipt")
+    if isinstance(embedded, Mapping) and embedded:
+        return embedded
+    return {}
+
+
+def _merged_and_validated(packet: Mapping[str, Any], receipts: Mapping[str, Any]) -> bool:
+    """Credit delivery only when a receipt proves both validation and merge."""
+    receipt = _receipt(packet, receipts)
+    validation = _normalized_status(receipt.get("validation_status") or receipt.get("validator_status"))
+    merge = _normalized_status(receipt.get("merge_status") or receipt.get("pr_status"))
+    return validation in {"pass", "passed", "validated"} and merge in {"merge", "merged"}
+
+
+def _forecast(packets: list[dict[str, Any]], receipts: Mapping[str, Any], baseline: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    packet_estimates = [(item, _hours(item)) for item in packets]
+    estimated = [(item, hours) for item, hours in packet_estimates if hours is not None]
+    referenced_dependencies = {
+        dependency
+        for item in packets
+        for dependency in (item.get("forecast_evidence") or {}).get("shared_dependency_ids", [])
+    }
+    catalog = (baseline or {}).get("shared_dependency_catalog") or {}
+    for dependency in sorted(referenced_dependencies):
+        value = catalog.get(dependency)
+        if isinstance(value, Mapping) and _hours({"engineering_hours": value}) is not None:
+            estimated.append(({"packet_id": f"SHARED:{dependency}", "title": dependency}, _hours({"engineering_hours": value})))
+    credited = [(item, hours) for item, hours in estimated if _merged_and_validated(item, receipts)]
+    remaining = [(item, hours) for item, hours in estimated if not _merged_and_validated(item, receipts)]
+
+    def total(items: list[tuple[dict[str, Any], dict[str, float]]]) -> dict[str, float]:
+        return {key: round(sum(hours[key] for _, hours in items), 2) for key in ("low", "best", "high")}
+
+    total_hours = total(estimated)
+    remaining_hours = total(remaining)
+    removed_hours = total(credited)
+    expected = lambda hours: round((hours["low"] + 4 * hours["best"] + hours["high"]) / 6.0, 2)
+    total_expected = round(sum(expected(hours) for _, hours in estimated), 2)
+    credited_expected = round(sum(expected(hours) for _, hours in credited), 2)
+    remaining_expected = round(total_expected - credited_expected, 2)
+    percentage = round(credited_expected * 100.0 / total_expected, 2) if total_expected else None
+    coverage = sum(hours is not None for _, hours in packet_estimates) / len(packets) if packets else 0.0
+    confidence_values = {"HIGH": 1.0, "MEDIUM": 0.7, "LOW": 0.4, "UNKNOWN": 0.0}
+    evidence_score = (
+        sum(confidence_values.get(str((item.get("forecast_evidence") or {}).get("confidence") or "HIGH").upper(), 0.0) for item, hours in packet_estimates if hours is not None)
+        / sum(hours is not None for _, hours in packet_estimates)
+        if any(hours is not None for _, hours in packet_estimates) else 0.0
+    )
+    confidence_score = round(coverage * evidence_score * 100.0, 1)
+    confidence = "HIGH" if confidence_score >= 85 else "MEDIUM" if confidence_score >= 60 else "LOW"
+    missing = sorted(str(item.get("packet_id") or "") for item in packets if _hours(item) is None)
+    credited_workflows = [
+        {
+            "packet_id": str(item.get("packet_id") or ""),
+            "expected_hours": expected(hours),
+            "merged_at": str(_receipt(item, receipts).get("merged_at") or ""),
+        }
+        for item, hours in credited
+        if not str(item.get("packet_id") or "").startswith("SHARED:")
+    ]
+    credited_workflows.sort(key=lambda item: (item["merged_at"], item["packet_id"]))
+    return {
+        "engineering_hours_remaining": remaining_hours if estimated else None,
+        "engineering_hours_removed_by_merged_validated_work": removed_hours if estimated else None,
+        "fifty_hour_work_weeks_remaining": (
+            {key: round(remaining_hours[key] / 50.0, 2) for key in ("low", "best", "high")}
+            if estimated else None
+        ),
+        "derived_completion_percentage": percentage,
+        "baseline_expected_engineering_hours": total_expected if estimated else None,
+        "completed_expected_engineering_hours": credited_expected if estimated else None,
+        "remaining_expected_engineering_hours": remaining_expected if estimated else None,
+        "forecast_confidence": confidence,
+        "estimate_coverage": {"estimated_packets": sum(hours is not None for _, hours in packet_estimates), "total_packets": len(packets)},
+        "confidence_score": confidence_score,
+        "packets_missing_engineering_hours": missing,
+        "credit_rule": "MERGED_AND_VALIDATED_EXECUTION_RECEIPTS_ONLY",
+        "external_wait_time_included_in_engineering_hours": False,
+        "five_largest_remaining_workflows": [
+            {"packet_id": str(item.get("packet_id") or ""), "expected_hours": expected(hours)}
+            for item, hours in sorted(remaining, key=lambda pair: (-expected(pair[1]), str(pair[0].get("packet_id") or "")))[:5]
+        ],
+        "credited_workflows": credited_workflows,
+    }
+
+
 def build_work_countdown(
     candidate_packet_evidence: Any = None,
     *, repo_root: str | Path | None = None,
@@ -211,6 +351,8 @@ def build_work_countdown(
     pr_state: Mapping[str, Any] | None = None,
     campaign_registry_context: Mapping[str, Any] | None = None,
     first_withdrawable_dollar_state: Mapping[str, Any] | None = None,
+    execution_receipts: Mapping[str, Any] | None = None,
+    engineering_hour_baseline: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     inventory = _explicit_inventory(candidate_packet_evidence)
     if inventory is None and candidate_packet_evidence is None and repo_root is not None:
@@ -224,6 +366,13 @@ def build_work_countdown(
         packets, authoritative = _legacy_packets(candidate_packet_evidence)
         inventory_status = "EXPLICIT_TEST_EVIDENCE" if authoritative else "UNSUPPLIED"
 
+    baseline = dict(engineering_hour_baseline or {})
+    if not baseline and repo_root is not None:
+        baseline_path = Path(repo_root).resolve() / "automation/orchestration/baselines/AIOS_ENGINEERING_HOUR_BASELINE_V1.json"
+        if baseline_path.is_file():
+            baseline = load_engineering_hour_baseline(baseline_path)
+    if baseline:
+        packets = _apply_baseline(packets, baseline)
     ids = [str(item.get("packet_id") or "").strip() for item in packets]
     duplicates = sorted(set((inventory or {}).get("duplicate_packet_ids", [])) | {value for value, count in Counter(ids).items() if value and count > 1})
     invalid = [item for item in packets if not str(item.get("packet_id") or "").strip() or _normalized_status(item.get("status")) not in KNOWN_STATUSES]
@@ -252,7 +401,11 @@ def build_work_countdown(
         next_task = _task(selected) if isinstance(selected, Mapping) else None
 
     provider = _provider_state()
+    forecast = _forecast(packets, execution_receipts or {}, baseline)
     fwd_state = dict(first_withdrawable_dollar_state or provider)
+    if _normalized_status(fwd_state.get("evidence_kind")) in {"simulated", "paper", "paper_simulation"}:
+        fwd_state["anchor_satisfied"] = False
+        fwd_state["next_verified_blocker"] = "GENUINE_DEMO_OR_BROKER_EVIDENCE_REQUIRED"
     next_blocker = fwd_state.get("next_verified_blocker") or fwd_state.get("blocker") or "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_PENDING_VERIFICATION"
     dependency_graph = {
         "canonical_work_packet_inventory": "AUTHORITY",
@@ -285,8 +438,29 @@ def build_work_countdown(
         "repository_state": dict(repository_state or {}), "validator_state": dict(validator_state or {}),
         "pr_state": dict(pr_state or {}), "campaign_registry_planning_context": dict(campaign_registry_context or {}),
         "first_withdrawable_dollar_state": fwd_state, "next_verified_blocker": next_blocker,
+        "forecast": forecast,
+        "engineering_hour_baseline": {
+            "schema": baseline.get("schema"), "baseline_id": baseline.get("baseline_id"),
+            "version": baseline.get("version"), "change_explanation": baseline.get("change_explanation"),
+        },
+        "engineering_hours_remaining": forecast["engineering_hours_remaining"],
+        "hours_removed_by_this_workflow": forecast["engineering_hours_removed_by_merged_validated_work"],
+        "hours_removed_by_latest_merged_workflow": (
+            forecast["credited_workflows"][-1]
+            if forecast["credited_workflows"]
+            else {"expected_hours": 0.0, "packet_id": None, "reason": "No packet-specific receipt proves both merge and validator PASS in baseline v1."}
+        ),
+        "fifty_hour_work_weeks_remaining": forecast["fifty_hour_work_weeks_remaining"],
+        "derived_completion_percentage": forecast["derived_completion_percentage"],
+        "forecast_confidence": forecast["forecast_confidence"],
+        "baseline_total_engineering_hours": ({key: round(forecast["engineering_hours_remaining"][key] + forecast["engineering_hours_removed_by_merged_validated_work"][key], 2) for key in ("low", "best", "high")} if forecast["engineering_hours_remaining"] is not None else None),
+        "completed_engineering_hours": forecast["completed_expected_engineering_hours"],
+        "five_largest_remaining_workflows": forecast["five_largest_remaining_workflows"],
+        "protected_owner_actions_remaining": list(baseline.get("protected_owner_actions") or []),
+        "external_elapsed_time_dependencies": list(baseline.get("external_elapsed_time_dependencies") or []),
         "owner_intervention_required": True,
-        "owner_view": {"status": data_quality, "inventory_status": inventory_status, "current_task": active[0] if active else None, "next_task": next_task, "next_verified_blocker": next_blocker},
+        "owner_action": "Provide the verified First Withdrawable Dollar provider evidence.",
+        "owner_view": {"status": data_quality, "inventory_status": inventory_status, "current_task": active[0] if active else None, "next_task": next_task, "next_verified_blocker": next_blocker, "owner_action": "Provide the verified First Withdrawable Dollar provider evidence."},
         "protected_actions": _protected_actions(),
     }
 

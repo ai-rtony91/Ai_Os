@@ -178,3 +178,73 @@ def test_stable_json_serialization(packet_repo: Path) -> None:
     result = module.build_work_countdown(repo_root=packet_repo)
     assert module.stable_json(result) == module.stable_json(result)
     assert json.loads(module.stable_json(result))["schema"] == "AIOS_WORK_COUNTDOWN.v1"
+
+
+def test_forecast_credits_only_merged_validated_receipts(packet_repo: Path) -> None:
+    module = load_module()
+    write_json(packet_repo, "complete", "landed.json", packet(
+        "LANDED", "complete", engineering_hours={"low": 5, "best": 10, "high": 15},
+    ))
+    write_json(packet_repo, "active", "open.json", packet(
+        "OPEN", "active", engineering_hours={"low": 10, "best": 20, "high": 30},
+    ))
+    receipts = {
+        "LANDED": {"validation_status": "PASSED", "pr_status": "MERGED", "merged_at": "2026-07-01T00:00:00Z"},
+        "OPEN": {"validation_status": "PASSED", "pr_status": "OPEN"},
+    }
+    result = module.build_work_countdown(repo_root=packet_repo, execution_receipts=receipts)
+    assert result["engineering_hours_remaining"] == {"low": 10.0, "best": 20.0, "high": 30.0}
+    assert result["hours_removed_by_this_workflow"] == {"low": 5.0, "best": 10.0, "high": 15.0}
+    assert result["fifty_hour_work_weeks_remaining"] == {"low": 0.2, "best": 0.4, "high": 0.6}
+    assert result["derived_completion_percentage"] == 33.33
+    assert result["forecast_confidence"] == "HIGH"
+    assert result["forecast"]["external_wait_time_included_in_engineering_hours"] is False
+    assert result["hours_removed_by_latest_merged_workflow"]["packet_id"] == "LANDED"
+
+
+def test_forecast_refuses_to_invent_missing_estimates(packet_repo: Path) -> None:
+    write_json(packet_repo, "active", "unknown.json", packet("UNKNOWN", "active"))
+    result = load_module().build_work_countdown(repo_root=packet_repo)
+    assert result["engineering_hours_remaining"] is None
+    assert result["derived_completion_percentage"] is None
+    assert result["forecast_confidence"] == "LOW"
+    assert result["forecast"]["packets_missing_engineering_hours"] == ["UNKNOWN"]
+    assert result["owner_action"] == "Provide the verified First Withdrawable Dollar provider evidence."
+
+
+def test_pert_shared_dependencies_versioning_and_low_confidence(packet_repo: Path) -> None:
+    module = load_module()
+    write_json(packet_repo, "active", "a.json", packet("A", "active"))
+    write_json(packet_repo, "active", "b.json", packet("B", "active"))
+    baseline = {
+        "schema": "AIOS_ENGINEERING_HOUR_BASELINE.v1",
+        "baseline_id": "BASELINE-1", "version": 1, "supersedes": None,
+        "change_explanation": "Initial evidence-calibrated forecast.",
+        "shared_dependency_catalog": {"COMMON": {"optimistic": 1, "most_likely": 2, "pessimistic": 7}},
+        "packets": [
+            {"packet_id": packet_id, "confidence": "LOW", "shared_dependency_ids": ["COMMON"],
+             "engineering_hours": {"optimistic": 1, "most_likely": 4, "pessimistic": 7}}
+            for packet_id in ("A", "B")
+        ],
+    }
+    result = module.build_work_countdown(repo_root=packet_repo, engineering_hour_baseline=baseline)
+    # Packet PERT is 4 hours each; the shared dependency PERT is 16/6 once, not once per packet.
+    assert result["forecast"]["baseline_expected_engineering_hours"] == 10.67
+    assert result["baseline_total_engineering_hours"] == {"low": 3.0, "best": 10.0, "high": 21.0}
+    assert result["engineering_hour_baseline"]["version"] == 1
+    assert result["engineering_hour_baseline"]["change_explanation"]
+    assert result["forecast"]["confidence_score"] == 40.0
+    assert result["forecast_confidence"] == "LOW"
+
+
+def test_simulation_cannot_satisfy_anchor_and_protected_actions_stay_gated(packet_repo: Path) -> None:
+    write_json(packet_repo, "active", "a.json", packet(
+        "A", "active", engineering_hours={"low": 1, "best": 2, "high": 3},
+    ))
+    result = load_module().build_work_countdown(
+        repo_root=packet_repo,
+        first_withdrawable_dollar_state={"evidence_kind": "PAPER_SIMULATION", "anchor_satisfied": True},
+    )
+    assert result["first_withdrawable_dollar_state"]["anchor_satisfied"] is False
+    assert result["next_verified_blocker"] == "GENUINE_DEMO_OR_BROKER_EVIDENCE_REQUIRED"
+    assert result["protected_actions"] and not any(result["protected_actions"].values())

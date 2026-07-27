@@ -1,5 +1,10 @@
 {
   "active_tasks": [],
+  "baseline_total_engineering_hours": {
+    "best": 244.0,
+    "high": 488.0,
+    "low": 122.0
+  },
   "blocked_tasks": [],
   "calculation_scope": "CANONICAL_EXPLICIT_WORK_PACKETS",
   "campaign_registry_planning_context": {
@@ -256,7 +261,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "brainstem-daily-start",
@@ -281,7 +288,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "rulebook-foundation",
@@ -306,7 +315,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
@@ -326,7 +337,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1",
@@ -346,7 +359,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN-V1",
@@ -366,7 +381,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN-V1",
@@ -386,7 +403,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST",
@@ -406,7 +425,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST",
@@ -426,7 +447,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST",
@@ -446,7 +469,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-COORDINATION-SPINE-V1",
@@ -466,7 +491,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
@@ -486,7 +513,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
@@ -506,7 +535,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
@@ -526,7 +557,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-M1-SPINE-TO-LOOP-PACKET-V1",
@@ -546,7 +579,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570",
@@ -566,7 +601,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST-V1",
@@ -586,7 +623,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST-V1",
@@ -606,7 +645,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
@@ -626,7 +667,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST",
@@ -646,7 +689,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
@@ -666,7 +711,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
@@ -686,7 +733,9 @@
         "blocked_files": [],
         "conflicts": [],
         "dependencies": [],
+        "engineering_hours": {},
         "engineering_stage": "complete",
+        "execution_receipt": {},
         "folder_state": "complete",
         "milestone_value": 0,
         "packet_id": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
@@ -720,6 +769,7 @@
     "schema": "AIOS_CANONICAL_WORK_PACKET_INVENTORY.v1",
     "source_files_modified": false
   },
+  "completed_engineering_hours": 0,
   "completed_packet_count": 22,
   "completed_tasks": [
     {
@@ -846,9 +896,33 @@
     "work_packets_blocked": "AUTHORITY",
     "work_packets_complete": "AUTHORITY"
   },
+  "derived_completion_percentage": 0.0,
+  "engineering_hour_baseline": {
+    "baseline_id": "AIOS-ENGINEERING-HOUR-BASELINE-001",
+    "change_explanation": "Initial auditable baseline for the 22 explicit canonical work packets.",
+    "schema": "AIOS_ENGINEERING_HOUR_BASELINE.v1",
+    "version": 1
+  },
+  "engineering_hours_remaining": {
+    "best": 244.0,
+    "high": 488.0,
+    "low": 122.0
+  },
   "engineering_stages_remaining": [],
   "evidence_limitation": "Scoped percentage covers explicit canonical packet IDs only; it is not whole-repository completion.",
   "evidence_status": "COMPLETE",
+  "external_elapsed_time_dependencies": [
+    {
+      "dependency": "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_EVIDENCE",
+      "included_in_engineering_hours": false,
+      "status": "WAITING_FOR_REMOTE_EVIDENCE"
+    },
+    {
+      "dependency": "market/broker/settlement/withdrawal-review/bank-transfer elapsed time",
+      "included_in_engineering_hours": false,
+      "status": "OWNER_OR_EXTERNAL"
+    }
+  ],
   "external_wait_state": {
     "excluded_from_engineering_stages": true,
     "items": [
@@ -861,22 +935,115 @@
     ],
     "waiting": true
   },
+  "fifty_hour_work_weeks_remaining": {
+    "best": 4.88,
+    "high": 9.76,
+    "low": 2.44
+  },
   "first_withdrawable_dollar_state": {
     "provider": "automation/forex_engine/first_withdrawable_dollar_v1.py",
     "provider_status": "EXTERNAL_PENDING_VERIFICATION",
     "verification_source": "GitHub",
     "verification_state": "WAITING_FOR_REMOTE_EVIDENCE"
   },
+  "five_largest_remaining_workflows": [
+    {
+      "expected_hours": 17.33,
+      "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST"
+    },
+    {
+      "expected_hours": 17.33,
+      "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1"
+    },
+    {
+      "expected_hours": 17.33,
+      "packet_id": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST"
+    },
+    {
+      "expected_hours": 17.33,
+      "packet_id": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST"
+    },
+    {
+      "expected_hours": 17.33,
+      "packet_id": "AIOS-COORDINATION-SPINE-V1"
+    }
+  ],
+  "forecast": {
+    "baseline_expected_engineering_hours": 264.3,
+    "completed_expected_engineering_hours": 0,
+    "confidence_score": 52.3,
+    "credit_rule": "MERGED_AND_VALIDATED_EXECUTION_RECEIPTS_ONLY",
+    "credited_workflows": [],
+    "derived_completion_percentage": 0.0,
+    "engineering_hours_remaining": {
+      "best": 244.0,
+      "high": 488.0,
+      "low": 122.0
+    },
+    "engineering_hours_removed_by_merged_validated_work": {
+      "best": 0,
+      "high": 0,
+      "low": 0
+    },
+    "estimate_coverage": {
+      "estimated_packets": 22,
+      "total_packets": 22
+    },
+    "external_wait_time_included_in_engineering_hours": false,
+    "fifty_hour_work_weeks_remaining": {
+      "best": 4.88,
+      "high": 9.76,
+      "low": 2.44
+    },
+    "five_largest_remaining_workflows": [
+      {
+        "expected_hours": 17.33,
+        "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST"
+      },
+      {
+        "expected_hours": 17.33,
+        "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1"
+      },
+      {
+        "expected_hours": 17.33,
+        "packet_id": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST"
+      },
+      {
+        "expected_hours": 17.33,
+        "packet_id": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST"
+      },
+      {
+        "expected_hours": 17.33,
+        "packet_id": "AIOS-COORDINATION-SPINE-V1"
+      }
+    ],
+    "forecast_confidence": "LOW",
+    "packets_missing_engineering_hours": [],
+    "remaining_expected_engineering_hours": 264.3
+  },
+  "forecast_confidence": "LOW",
+  "hours_removed_by_latest_merged_workflow": {
+    "expected_hours": 0.0,
+    "packet_id": null,
+    "reason": "No packet-specific receipt proves both merge and validator PASS in baseline v1."
+  },
+  "hours_removed_by_this_workflow": {
+    "best": 0,
+    "high": 0,
+    "low": 0
+  },
   "inventory_status": "PARTIAL",
   "mode": "READ_ONLY",
   "next_task": null,
   "next_verified_blocker": "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_PENDING_VERIFICATION",
+  "owner_action": "Provide the verified First Withdrawable Dollar provider evidence.",
   "owner_intervention_required": true,
   "owner_view": {
     "current_task": null,
     "inventory_status": "PARTIAL",
     "next_task": null,
     "next_verified_blocker": "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_PENDING_VERIFICATION",
+    "owner_action": "Provide the verified First Withdrawable Dollar provider evidence.",
     "status": "VALID"
   },
   "pr_state": {},
@@ -895,6 +1062,14 @@
     "scheduler_creation": false,
     "worker_dispatch": false
   },
+  "protected_owner_actions_remaining": [
+    "broker access",
+    "credential use",
+    "trade placement",
+    "withdrawal",
+    "bank transfer",
+    "money movement"
+  ],
   "queue_plan": {
     "approvals_mutated": false,
     "blocked_packets": [],
