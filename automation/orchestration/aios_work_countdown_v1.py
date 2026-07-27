@@ -310,10 +310,23 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root")
     parser.add_argument("--evidence", help="Explicit packet evidence JSON")
+    parser.add_argument(
+        "--first-withdrawable-dollar-evidence",
+        help="Explicit First Withdrawable Dollar execution-receipt evidence JSON",
+    )
     parser.add_argument("--output", help="Optional output JSON path")
     args = parser.parse_args(argv)
     evidence = json.loads(args.evidence) if args.evidence is not None else None
-    result = build_work_countdown(evidence, repo_root=args.repo_root)
+    first_dollar_evidence = (
+        json.loads(args.first_withdrawable_dollar_evidence)
+        if args.first_withdrawable_dollar_evidence is not None
+        else None
+    )
+    result = build_work_countdown(
+        evidence,
+        repo_root=args.repo_root,
+        first_withdrawable_dollar_state=first_dollar_evidence,
+    )
     rendered = stable_json(result)
     if args.output:
         Path(args.output).write_text(rendered, encoding="utf-8")

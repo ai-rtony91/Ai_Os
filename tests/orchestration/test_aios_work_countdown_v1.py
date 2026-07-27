@@ -209,3 +209,33 @@ def test_folder_completion_is_not_receipt_credit(packet_repo: Path) -> None:
     assert result["completion_percentage"] == 100.0
     assert result["hours_completed"] is None
     assert result["derived_completion_percentage"] is None
+
+
+def test_cli_routes_first_dollar_evidence_into_countdown(
+    packet_repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    write_json(packet_repo, "complete", "c.json", packet("C", "complete"))
+    receipt = {
+        "packet_id": "C", "canonical": True, "evidence_provenance": "receipt",
+        "pr_id": "1325", "merged": True, "merge_commit_sha": "65608879b0d5385",
+        "test_command": "pytest", "test_conclusion": "passed",
+        "ci_check_id": "ci-1325", "ci_conclusion": "success",
+        "engineering_hours": 3,
+    }
+    first_dollar_evidence = {
+        "execution_receipts": [receipt], "expected_packet_count": 1,
+        "remaining_hours": {"low": 2, "best": 4, "high": 8},
+        "highest_verified_blocker": "COLLECT_GENUINE_DEMO_PROFIT_EVIDENCE",
+    }
+
+    exit_code = load_module().main([
+        "--repo-root", str(packet_repo),
+        "--first-withdrawable-dollar-evidence", json.dumps(first_dollar_evidence),
+    ])
+
+    assert exit_code == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["hours_completed"] == 3
+    assert result["hours_remaining_best"] == 4
+    assert result["next_verified_blocker"] == "COLLECT_GENUINE_DEMO_PROFIT_EVIDENCE"
+    assert result["dependency_graph"]["first_withdrawable_dollar_external_provider"] == "EVIDENCE_PROJECTION"
