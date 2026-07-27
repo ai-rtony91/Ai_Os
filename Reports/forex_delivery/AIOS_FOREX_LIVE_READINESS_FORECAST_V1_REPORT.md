@@ -1,0 +1,150 @@
+# 🚦 AIOS FOREX — WHEN CAN WE GO LIVE?
+
+## 🔴 CURRENT ANSWER
+`EVIDENCE_COLLECTION_REQUIRED`. General live trading remains out of scope and unauthorized.
+
+## 📉 WHAT REMAINS
+40 of 40 unique criteria remain.
+
+- ⏳ `DEMO_GENUINE_MARKET_EVIDENCE` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_GENUINE_MARKET_EVIDENCE.
+- ⏳ `DEMO_EVIDENCE_FRESH` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_EVIDENCE_FRESH.
+- ⏳ `DEMO_METRICS_COMPLETE` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_METRICS_COMPLETE.
+- ⏳ `DEMO_SYSTEM_MINIMUM` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_SYSTEM_MINIMUM.
+- ⏳ `PROFIT_EXPECTANCY_POSITIVE` — NOT_VERIFIED: Supply current sanitized PASS evidence for PROFIT_EXPECTANCY_POSITIVE.
+- ⏳ `PROFIT_FACTOR_THRESHOLD` — NOT_VERIFIED: Supply current sanitized PASS evidence for PROFIT_FACTOR_THRESHOLD.
+- ⏳ `DRAWDOWN_THRESHOLD` — NOT_VERIFIED: Supply current sanitized PASS evidence for DRAWDOWN_THRESHOLD.
+- ⏳ `RISK_CONTROLS_PRESENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for RISK_CONTROLS_PRESENT.
+- ⏳ `RISK_CONTROLS_PASSED` — NOT_VERIFIED: Supply current sanitized PASS evidence for RISK_CONTROLS_PASSED.
+- ⏳ `DEMO_RECEIPT_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_RECEIPT_READY.
+- ⏳ `POST_TRADE_REVIEW_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for POST_TRADE_REVIEW_READY.
+- ⏳ `REPEATABILITY_THRESHOLD` — NOT_VERIFIED: Supply current sanitized PASS evidence for REPEATABILITY_THRESHOLD.
+- ⏳ `RISK_PER_TRADE_CAP` — NOT_VERIFIED: Supply current sanitized PASS evidence for RISK_PER_TRADE_CAP.
+- ⏳ `DAILY_LOSS_CAP` — NOT_VERIFIED: Supply current sanitized PASS evidence for DAILY_LOSS_CAP.
+- ⏳ `KILL_SWITCH_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for KILL_SWITCH_READY.
+- ⏳ `DAILY_LOSS_STOP_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for DAILY_LOSS_STOP_READY.
+- ⏳ `NO_SECRET_SCAN_CURRENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_SECRET_SCAN_CURRENT.
+- ⏳ `NO_ACCOUNT_ID_SCAN_CURRENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_ACCOUNT_ID_SCAN_CURRENT.
+- ⏳ `EXTERNAL_CREDENTIAL_BOUNDARY` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXTERNAL_CREDENTIAL_BOUNDARY.
+- ⏳ `EXTERNAL_ACCOUNT_REFERENCE_BOUNDARY` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXTERNAL_ACCOUNT_REFERENCE_BOUNDARY.
+- ⏳ `PRACTICE_ENDPOINT_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for PRACTICE_ENDPOINT_PROOF.
+- ⏳ `LIVE_ENDPOINT_DENIAL` — NOT_VERIFIED: Supply current sanitized PASS evidence for LIVE_ENDPOINT_DENIAL.
+- ⏳ `PROTECTED_RUNTIME_CONNECTOR` — NOT_VERIFIED: Supply current sanitized PASS evidence for PROTECTED_RUNTIME_CONNECTOR.
+- ⏳ `ONE_ORDER_ONLY` — NOT_VERIFIED: Supply current sanitized PASS evidence for ONE_ORDER_ONLY.
+- ⏳ `NO_RETRY_LOOP` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_RETRY_LOOP.
+- ⏳ `NO_AUTONOMOUS_REENTRY` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_AUTONOMOUS_REENTRY.
+- ⏳ `EXPLICIT_ARMING_STEP` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXPLICIT_ARMING_STEP.
+- ⏳ `TIMEOUT_CONTROL` — NOT_VERIFIED: Supply current sanitized PASS evidence for TIMEOUT_CONTROL.
+- ⏳ `FINAL_DISARM` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_DISARM.
+- ⏳ `ROLLBACK_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for ROLLBACK_PROOF.
+- ⏳ `PRE_TRADE_EVIDENCE_BUNDLE` — NOT_VERIFIED: Supply current sanitized PASS evidence for PRE_TRADE_EVIDENCE_BUNDLE.
+- ⏳ `POST_TRADE_EVIDENCE_BUNDLE` — NOT_VERIFIED: Supply current sanitized PASS evidence for POST_TRADE_EVIDENCE_BUNDLE.
+- ⏳ `POST_TRADE_JOURNAL` — NOT_VERIFIED: Supply current sanitized PASS evidence for POST_TRADE_JOURNAL.
+- ⏳ `RECONCILIATION_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for RECONCILIATION_PROOF.
+- ⏳ `OWNER_EXCEPTION_FIELDS_COMPLETE` — NOT_VERIFIED: Supply current sanitized PASS evidence for OWNER_EXCEPTION_FIELDS_COMPLETE.
+- ⏳ `OWNER_APPROVAL_VERIFIED` — NOT_VERIFIED: Supply current sanitized PASS evidence for OWNER_APPROVAL_VERIFIED.
+- ⏳ `APPROVAL_WINDOW_CURRENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for APPROVAL_WINDOW_CURRENT.
+- ⏳ `FINAL_VALIDATOR_EVIDENCE` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_VALIDATOR_EVIDENCE.
+- ⏳ `FINAL_EVIDENCE_FRESHNESS` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_EVIDENCE_FRESHNESS.
+- ⏳ `TERMINAL_HARD_STOP_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for TERMINAL_HARD_STOP_PROOF.
+
+## 📊 LIVE-READINESS EVIDENCE
+- Evidence-backed readiness: 0.0%
+- Passed: 0
+- Remaining: 40
+
+## ⏳ EARLIEST DEFENSIBLE WINDOW
+- Earliest evidence-review date: NOT_VERIFIED
+- Evidence days remaining: NOT_VERIFIED
+- Engineering hours remaining: NOT_VERIFIED
+- Protected attempt window: NOT_VERIFIED
+- Actual live trade date: NOT_AUTHORIZED
+
+## ⛔ HIGHEST BLOCKER
+DEMO_GENUINE_MARKET_EVIDENCE is NOT_VERIFIED
+
+## ▶️ NEXT VERIFIED TASK
+`DEMO_GENUINE_MARKET_EVIDENCE`
+
+## 🧱 CRITICAL PATH
+- Current stage: `DEMO_EVIDENCE`
+- Next stage: `PROFITABILITY_EVIDENCE`
+- Ordered stages: DEMO_EVIDENCE -> PROFITABILITY_EVIDENCE -> LIVE_MICRO_REVIEW_EVIDENCE -> RISK_AND_TERMINAL_SAFETY -> SENSITIVE_DATA_BOUNDARY -> PROTECTED_RUNTIME -> EXCEPTION_PACKAGE -> FINAL_VALIDATION -> HUMAN_OWNER_APPROVAL -> PROTECTED_ATTEMPT_WINDOW
+
+## 🟢 EXECUTABLE NOW
+- None verified.
+
+## 🟡 WAITING ON EVIDENCE
+- ⏳ `DEMO_GENUINE_MARKET_EVIDENCE` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_GENUINE_MARKET_EVIDENCE.
+- ⏳ `DEMO_EVIDENCE_FRESH` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_EVIDENCE_FRESH.
+- ⏳ `DEMO_METRICS_COMPLETE` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_METRICS_COMPLETE.
+- ⏳ `DEMO_SYSTEM_MINIMUM` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_SYSTEM_MINIMUM.
+- ⏳ `PROFIT_EXPECTANCY_POSITIVE` — NOT_VERIFIED: Supply current sanitized PASS evidence for PROFIT_EXPECTANCY_POSITIVE.
+- ⏳ `PROFIT_FACTOR_THRESHOLD` — NOT_VERIFIED: Supply current sanitized PASS evidence for PROFIT_FACTOR_THRESHOLD.
+- ⏳ `DRAWDOWN_THRESHOLD` — NOT_VERIFIED: Supply current sanitized PASS evidence for DRAWDOWN_THRESHOLD.
+- ⏳ `RISK_CONTROLS_PRESENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for RISK_CONTROLS_PRESENT.
+- ⏳ `RISK_CONTROLS_PASSED` — NOT_VERIFIED: Supply current sanitized PASS evidence for RISK_CONTROLS_PASSED.
+- ⏳ `DEMO_RECEIPT_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for DEMO_RECEIPT_READY.
+- ⏳ `POST_TRADE_REVIEW_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for POST_TRADE_REVIEW_READY.
+- ⏳ `REPEATABILITY_THRESHOLD` — NOT_VERIFIED: Supply current sanitized PASS evidence for REPEATABILITY_THRESHOLD.
+- ⏳ `RISK_PER_TRADE_CAP` — NOT_VERIFIED: Supply current sanitized PASS evidence for RISK_PER_TRADE_CAP.
+- ⏳ `DAILY_LOSS_CAP` — NOT_VERIFIED: Supply current sanitized PASS evidence for DAILY_LOSS_CAP.
+- ⏳ `KILL_SWITCH_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for KILL_SWITCH_READY.
+- ⏳ `DAILY_LOSS_STOP_READY` — NOT_VERIFIED: Supply current sanitized PASS evidence for DAILY_LOSS_STOP_READY.
+- ⏳ `NO_SECRET_SCAN_CURRENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_SECRET_SCAN_CURRENT.
+- ⏳ `NO_ACCOUNT_ID_SCAN_CURRENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_ACCOUNT_ID_SCAN_CURRENT.
+- ⏳ `EXTERNAL_CREDENTIAL_BOUNDARY` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXTERNAL_CREDENTIAL_BOUNDARY.
+- ⏳ `EXTERNAL_ACCOUNT_REFERENCE_BOUNDARY` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXTERNAL_ACCOUNT_REFERENCE_BOUNDARY.
+- ⏳ `PRACTICE_ENDPOINT_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for PRACTICE_ENDPOINT_PROOF.
+- ⏳ `LIVE_ENDPOINT_DENIAL` — NOT_VERIFIED: Supply current sanitized PASS evidence for LIVE_ENDPOINT_DENIAL.
+- ⏳ `PROTECTED_RUNTIME_CONNECTOR` — NOT_VERIFIED: Supply current sanitized PASS evidence for PROTECTED_RUNTIME_CONNECTOR.
+- ⏳ `ONE_ORDER_ONLY` — NOT_VERIFIED: Supply current sanitized PASS evidence for ONE_ORDER_ONLY.
+- ⏳ `NO_RETRY_LOOP` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_RETRY_LOOP.
+- ⏳ `NO_AUTONOMOUS_REENTRY` — NOT_VERIFIED: Supply current sanitized PASS evidence for NO_AUTONOMOUS_REENTRY.
+- ⏳ `EXPLICIT_ARMING_STEP` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXPLICIT_ARMING_STEP.
+- ⏳ `TIMEOUT_CONTROL` — NOT_VERIFIED: Supply current sanitized PASS evidence for TIMEOUT_CONTROL.
+- ⏳ `FINAL_DISARM` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_DISARM.
+- ⏳ `ROLLBACK_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for ROLLBACK_PROOF.
+- ⏳ `PRE_TRADE_EVIDENCE_BUNDLE` — NOT_VERIFIED: Supply current sanitized PASS evidence for PRE_TRADE_EVIDENCE_BUNDLE.
+- ⏳ `POST_TRADE_EVIDENCE_BUNDLE` — NOT_VERIFIED: Supply current sanitized PASS evidence for POST_TRADE_EVIDENCE_BUNDLE.
+- ⏳ `POST_TRADE_JOURNAL` — NOT_VERIFIED: Supply current sanitized PASS evidence for POST_TRADE_JOURNAL.
+- ⏳ `RECONCILIATION_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for RECONCILIATION_PROOF.
+- ⏳ `OWNER_EXCEPTION_FIELDS_COMPLETE` — NOT_VERIFIED: Supply current sanitized PASS evidence for OWNER_EXCEPTION_FIELDS_COMPLETE.
+- ⏳ `OWNER_APPROVAL_VERIFIED` — NOT_VERIFIED: Supply current sanitized PASS evidence for OWNER_APPROVAL_VERIFIED.
+- ⏳ `APPROVAL_WINDOW_CURRENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for APPROVAL_WINDOW_CURRENT.
+- ⏳ `FINAL_VALIDATOR_EVIDENCE` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_VALIDATOR_EVIDENCE.
+- ⏳ `FINAL_EVIDENCE_FRESHNESS` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_EVIDENCE_FRESHNESS.
+- ⏳ `TERMINAL_HARD_STOP_PROOF` — NOT_VERIFIED: Supply current sanitized PASS evidence for TERMINAL_HARD_STOP_PROOF.
+
+## 🔐 WAITING ON HUMAN OWNER
+- ⏳ `OWNER_EXCEPTION_FIELDS_COMPLETE` — NOT_VERIFIED: Supply current sanitized PASS evidence for OWNER_EXCEPTION_FIELDS_COMPLETE.
+- ⏳ `OWNER_APPROVAL_VERIFIED` — NOT_VERIFIED: Supply current sanitized PASS evidence for OWNER_APPROVAL_VERIFIED.
+- ⏳ `APPROVAL_WINDOW_CURRENT` — NOT_VERIFIED: Supply current sanitized PASS evidence for APPROVAL_WINDOW_CURRENT.
+
+## 🌐 WAITING ON EXTERNAL RUNTIME
+- ⏳ `EXTERNAL_CREDENTIAL_BOUNDARY` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXTERNAL_CREDENTIAL_BOUNDARY.
+- ⏳ `EXTERNAL_ACCOUNT_REFERENCE_BOUNDARY` — NOT_VERIFIED: Supply current sanitized PASS evidence for EXTERNAL_ACCOUNT_REFERENCE_BOUNDARY.
+- ⏳ `PROTECTED_RUNTIME_CONNECTOR` — NOT_VERIFIED: Supply current sanitized PASS evidence for PROTECTED_RUNTIME_CONNECTOR.
+
+## 🧪 VALIDATION STILL REQUIRED
+- ⏳ `FINAL_VALIDATOR_EVIDENCE` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_VALIDATOR_EVIDENCE.
+- ⏳ `FINAL_EVIDENCE_FRESHNESS` — NOT_VERIFIED: Supply current sanitized PASS evidence for FINAL_EVIDENCE_FRESHNESS.
+
+## 📅 CHANGE SINCE LAST REPORT
+- Status: `BASELINE_CREATED`
+- Criteria closed: []
+- Criteria reopened: []
+
+## ⚠️ CONFIDENCE AND LIMITATIONS
+- Local procedure or implementation presence does not prove live runtime readiness.
+- PAPER_SIMULATION, fixtures, examples, synthetic data, and mocks receive no live-readiness credit.
+
+## ✅ MATERIAL WORK CLOSED TODAY
+- None.
+
+## 🛑 NO-LIVE-AUTHORITY CONFIRMATION
+- Live execution authorized: false
+- Order submission authorized: false
+- Broker connection authorized: false
+- Credential access authorized: false
+- Money movement authorized: false
+- General live trading ready: false
