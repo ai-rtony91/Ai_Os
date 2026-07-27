@@ -1,0 +1,748 @@
+{
+  "baseline_id": "AIOS-ENGINEERING-HOUR-BASELINE-001",
+  "calibration_method": {
+    "completion_credit": "merged and validated execution receipt only",
+    "dependency_policy": "packet estimates are exclusive; shared_dependency_catalog is counted once",
+    "estimate_kind": "three_point_PERT",
+    "expected_formula": "(optimistic + 4 * most_likely + pessimistic) / 6",
+    "lines_changed_primary_estimator": false,
+    "primary_evidence": "packet scope, required implementation, validators, dependencies, and repository history",
+    "unknown_policy": "UNKNOWN when a three-point estimate cannot be supported"
+  },
+  "change_explanation": "Initial auditable baseline for the 22 explicit canonical work packets.",
+  "external_elapsed_time_dependencies": [
+    {
+      "dependency": "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_EVIDENCE",
+      "included_in_engineering_hours": false,
+      "status": "WAITING_FOR_REMOTE_EVIDENCE"
+    },
+    {
+      "dependency": "market/broker/settlement/withdrawal-review/bank-transfer elapsed time",
+      "included_in_engineering_hours": false,
+      "status": "OWNER_OR_EXTERNAL"
+    }
+  ],
+  "packets": [
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 2,
+        "optimistic": 1,
+        "pessimistic": 4
+      },
+      "estimation_reason": "Small legacy packet; source records a bounded start action but has no execution-duration receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/20260516-064500-brainstem-daily-start.json",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "brainstem-daily-start",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 2,
+        "optimistic": 1,
+        "pessimistic": 4
+      },
+      "estimation_reason": "Small legacy packet; source records a bounded foundation action but has no execution-duration receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/20260516-064502-rulebook-foundation.json",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "rulebook-foundation",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+      "protected_owner_actions": [
+        "external service activation"
+      ],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [
+        "Cloudflare provider response time (excluded from engineering hours)"
+      ],
+      "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1",
+      "protected_owner_actions": [
+        "credential handling",
+        "external provider configuration"
+      ],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 4,
+        "optimistic": 2,
+        "pessimistic": 8
+      },
+      "estimation_reason": "Bounded inspection/design workflow calibrated as a small review; repository packet defines scope and validators but has no elapsed-time receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [
+        "Cloudflare provider response time (excluded from engineering hours)"
+      ],
+      "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN-V1",
+      "protected_owner_actions": [
+        "credential handling",
+        "external provider configuration"
+      ],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 4,
+        "optimistic": 2,
+        "pessimistic": 8
+      },
+      "estimation_reason": "Bounded inspection/design workflow calibrated as a small review; repository packet defines scope and validators but has no elapsed-time receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [
+        "Cloudflare provider response time (excluded from engineering hours)"
+      ],
+      "packet_id": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN-V1",
+      "protected_owner_actions": [
+        "credential handling",
+        "external provider configuration"
+      ],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 4,
+        "optimistic": 2,
+        "pessimistic": 8
+      },
+      "estimation_reason": "Bounded inspection/design workflow calibrated as a small review; repository packet defines scope and validators but has no elapsed-time receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST",
+      "protected_owner_actions": [
+        "owner approval or authority change"
+      ],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-COORDINATION-SPINE-V1.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-COORDINATION-SPINE-V1",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 12,
+        "optimistic": 6,
+        "pessimistic": 24
+      },
+      "estimation_reason": "Harness/evidence workflow calibrated for implementation plus deterministic validation; market or soak elapsed time is excluded.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [
+        "soak observation elapsed time (excluded from engineering hours)"
+      ],
+      "packet_id": "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 12,
+        "optimistic": 6,
+        "pessimistic": 24
+      },
+      "estimation_reason": "Harness/evidence workflow calibrated for implementation plus deterministic validation; market or soak elapsed time is excluded.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [
+        "soak observation elapsed time (excluded from engineering hours)"
+      ],
+      "packet_id": "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 8,
+        "optimistic": 4,
+        "pessimistic": 16
+      },
+      "estimation_reason": "Validation/governance workflow calibrated as a medium bounded change with explicit validation surface but no elapsed-time receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+      "protected_owner_actions": [
+        "owner approval or authority change"
+      ],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-M1-SPINE-TO-LOOP-PACKET-V1.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-M1-SPINE-TO-LOOP-PACKET-V1",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 4,
+        "optimistic": 2,
+        "pessimistic": 8
+      },
+      "estimation_reason": "Bounded inspection/design workflow calibrated as a small review; repository packet defines scope and validators but has no elapsed-time receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST-V1",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST-V1",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 8,
+        "optimistic": 4,
+        "pessimistic": 16
+      },
+      "estimation_reason": "Validation/governance workflow calibrated as a medium bounded change with explicit validation surface but no elapsed-time receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+      "protected_owner_actions": [
+        "owner approval or authority change"
+      ],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "MEDIUM",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 8,
+        "optimistic": 4,
+        "pessimistic": 16
+      },
+      "estimation_reason": "Validation/governance workflow calibrated as a medium bounded change with explicit validation surface but no elapsed-time receipt.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    },
+    {
+      "confidence": "LOW",
+      "dependencies": [],
+      "dependency_accounting": "PACKET_EXCLUSIVE_HOURS; shared platform dependencies are not added again",
+      "dependency_evidence": "No machine-readable dependency was present in the canonical inventory record; shared work is excluded from packet-exclusive estimates.",
+      "engineering_hours": {
+        "most_likely": 16,
+        "optimistic": 8,
+        "pessimistic": 32
+      },
+      "estimation_reason": "Integration/implementation workflow calibrated as a multi-component bounded change; broad uncertainty reflects missing elapsed-time receipts.",
+      "evidence_source": [
+        "automation/orchestration/work_packets/complete/PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN.md",
+        "git history commit 9d1513f6 (repository presence only; not validation proof)"
+      ],
+      "execution_receipt": {
+        "credit_eligible": false,
+        "merge_status": "MERGED_REPOSITORY_PRESENCE",
+        "missing_evidence": "packet-specific merged PR plus passing validator/CI execution receipt",
+        "validation_status": "UNKNOWN"
+      },
+      "external_elapsed_time_dependencies": [],
+      "packet_id": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+      "protected_owner_actions": [],
+      "required_implementation": "Bounded workflow described by the canonical packet source.",
+      "shared_dependency_ids": [],
+      "status": "complete_folder_evidence_only",
+      "validators": [
+        "Canonical packet validator/readback requirements at evidence_source[0]"
+      ]
+    }
+  ],
+  "protected_owner_actions": [
+    "broker access",
+    "credential use",
+    "trade placement",
+    "withdrawal",
+    "bank transfer",
+    "money movement"
+  ],
+  "schema": "AIOS_ENGINEERING_HOUR_BASELINE.v1",
+  "shared_dependency_catalog": {},
+  "supersedes": null,
+  "version": 1
+}
