@@ -93,6 +93,35 @@ def test_highest_safe_milestone_packet_selected() -> None:
     assert_preview_only(plan)
 
 
+def test_anchor_distance_outranks_legacy_priority_and_unrelated_governance() -> None:
+    module = load_module()
+    plan = module.build_packet_queue_planner(
+        [
+            candidate(
+                packet_id="PKT-FAR",
+                priority="critical",
+                verified_anchor_distance=5,
+                removes_verified_anchor_dependency=True,
+            ),
+            candidate(
+                packet_id="PKT-CLOSE",
+                priority="low",
+                verified_anchor_distance=1,
+                removes_verified_anchor_dependency=True,
+                required_files=["automation/forex_engine/close.py"],
+            ),
+            candidate(
+                packet_id="PKT-GOV",
+                lane="governance-expansion",
+                verified_anchor_distance=0,
+                required_files=["docs/governance/unrelated.md"],
+            ),
+        ]
+    )
+    assert plan["selected_packet"]["packet_id"] == "PKT-CLOSE"
+    assert plan["selected_packet"]["verified_anchor_distance"] == 1
+
+
 def test_blocked_packet_not_selected() -> None:
     module = load_module()
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from typing import Any
+from automation.forex_engine.first_withdrawable_dollar_v1 import anchor_rank
 
 
 SCHEMA = "AIOS_PACKET_QUEUE_PLANNER.v1"
@@ -172,6 +173,9 @@ def _priority_score(value: Any) -> float:
 
 
 def _rank_score(candidate: dict[str, Any]) -> float:
+    anchor_declared, anchor_score = anchor_rank(candidate)
+    if anchor_declared:
+        return anchor_score
     priority = _priority_score(candidate.get("priority"))
     milestone = _numeric_score(candidate.get("milestone_value"), fallback=0.0)
     return priority * 1000.0 + milestone
@@ -322,6 +326,8 @@ def _evaluate_candidate(candidate: dict[str, Any], index: int) -> dict[str, Any]
         "dependencies": _as_items(candidate.get("dependencies")),
         "conflicts": conflicts,
         "safety_flags": candidate.get("safety_flags", []),
+        "verified_anchor_distance": candidate.get("verified_anchor_distance"),
+        "removes_verified_anchor_dependency": candidate.get("removes_verified_anchor_dependency", False),
         "rank_score": _rank_score(candidate),
         "candidate_status": candidate_status,
         "blocked_reasons": [*rejected_reasons, *blocked_reasons],
@@ -391,6 +397,10 @@ def _selected_packet_summary(item: dict[str, Any] | None) -> dict[str, Any] | No
         "dependencies": item["dependencies"],
         "conflicts": item["conflicts"],
         "safety_flags": item["safety_flags"],
+        "verified_anchor_distance": item["verified_anchor_distance"],
+        "removes_verified_anchor_dependency": item[
+            "removes_verified_anchor_dependency"
+        ],
     }
 
 

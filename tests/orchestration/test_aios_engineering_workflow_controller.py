@@ -85,3 +85,8 @@ def test_pr_absence_routes_to_single_pr_preparation():
     )
     assert report["next_task"] == "PREPARE_ONE_PULL_REQUEST"
     assert report["owner_intervention_required"] is True
+
+def test_report_identifies_anchor_blocker_without_claiming_completion():
+    report = build_engineering_workflow_report([_candidate()], repo_state_collector=_repo, anchor_evidence={})
+    assert report["primary_anchor"]["anchor_complete"] is False
+    assert report["next_verified_anchor_blocker"] == "PROVIDE_GENUINE_SANITIZED_REPRODUCIBLE_EVIDENCE"

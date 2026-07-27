@@ -18,6 +18,7 @@ from automation.orchestration.aios_candidate_packet_evidence_adapter import (
 from automation.orchestration.aios_github_pr_state import build_github_pr_state
 from automation.orchestration.aios_packet_queue_planner import build_packet_queue_planner
 from automation.orchestration.aios_repo_state_evidence import collect_repo_state
+from automation.forex_engine.first_withdrawable_dollar_v1 import evaluate_first_withdrawable_dollar
 
 
 SCHEMA = "AIOS_ENGINEERING_WORKFLOW_CONTROLLER.v1"
@@ -57,6 +58,7 @@ def build_engineering_workflow_report(
     *,
     pr_evidence: Any = "no checks reported",
     validator_results: dict[str, Any] | None = None,
+    anchor_evidence: dict[str, Any] | None = None,
     repo_root: str | Path | None = None,
     repo_state_collector: Callable[..., dict[str, Any]] = collect_repo_state,
 ) -> dict[str, Any]:
@@ -69,6 +71,7 @@ def build_engineering_workflow_report(
     validators = _validator_summary(selected, validator_results)
     pr = build_github_pr_state(pr_evidence)
     next_action = _next_action(repo, queue, validators, pr)
+    anchor = evaluate_first_withdrawable_dollar(anchor_evidence)
 
     return {
         "schema": SCHEMA,
@@ -81,6 +84,8 @@ def build_engineering_workflow_report(
         "validator_evidence": validators,
         "pr_ci_state": pr,
         "next_task": next_action,
+        "primary_anchor": anchor,
+        "next_verified_anchor_blocker": anchor["next_verified_blocker"],
         "owner_intervention_required": next_action in {
             "PREPARE_ONE_PULL_REQUEST",
             "READY_FOR_OWNER_MERGE_REVIEW",
@@ -103,12 +108,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pr-evidence", default='"no checks reported"', help="PR/CI evidence JSON.")
     parser.add_argument("--validator-results", default="{}", help="Validator result map JSON.")
     parser.add_argument("--repo-root", default=".")
+    parser.add_argument("--anchor-evidence", default="{}")
     args = parser.parse_args(argv)
     report = build_engineering_workflow_report(
         json.loads(args.candidates),
         pr_evidence=json.loads(args.pr_evidence),
         validator_results=json.loads(args.validator_results),
         repo_root=args.repo_root,
+        anchor_evidence=json.loads(args.anchor_evidence),
     )
     print(json.dumps(report, indent=2, sort_keys=False))
     return 0
