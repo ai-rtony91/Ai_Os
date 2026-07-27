@@ -178,3 +178,34 @@ def test_stable_json_serialization(packet_repo: Path) -> None:
     result = module.build_work_countdown(repo_root=packet_repo)
     assert module.stable_json(result) == module.stable_json(result)
     assert json.loads(module.stable_json(result))["schema"] == "AIOS_WORK_COUNTDOWN.v1"
+
+
+def test_countdown_consumes_explicit_first_dollar_evidence(packet_repo: Path) -> None:
+    write_json(packet_repo, "complete", "c.json", packet("C", "complete"))
+    receipt = {
+        "packet_id": "C", "canonical": True, "evidence_provenance": "receipt",
+        "pr_id": "1", "merged": True, "merge_commit_sha": "abcdef1234567",
+        "test_command": "pytest", "test_conclusion": "passed",
+        "ci_check_id": "ci-1", "ci_conclusion": "success", "engineering_hours": 25,
+    }
+    result = load_module().build_work_countdown(
+        repo_root=packet_repo,
+        first_withdrawable_dollar_state={
+            "execution_receipts": [receipt], "expected_packet_count": 1,
+            "remaining_hours": {"low": 25, "best": 75, "high": 125},
+        },
+    )
+    assert result["hours_completed"] == 25
+    assert result["hours_remaining_best"] == 75
+    assert result["weeks_remaining_50h_best"] == 1.5
+    assert result["derived_completion_percentage"] == 25.0
+    assert result["credited_packet_count"] == 1
+    assert result["dependency_graph"]["first_withdrawable_dollar_external_provider"] == "EVIDENCE_PROJECTION"
+
+
+def test_folder_completion_is_not_receipt_credit(packet_repo: Path) -> None:
+    write_json(packet_repo, "complete", "c.json", packet("C", "complete"))
+    result = load_module().build_work_countdown(repo_root=packet_repo)
+    assert result["completion_percentage"] == 100.0
+    assert result["hours_completed"] is None
+    assert result["derived_completion_percentage"] is None
