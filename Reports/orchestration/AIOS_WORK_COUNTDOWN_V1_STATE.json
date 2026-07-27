@@ -1,0 +1,944 @@
+{
+  "active_tasks": [],
+  "blocked_tasks": [],
+  "calculation_scope": "CANONICAL_EXPLICIT_WORK_PACKETS",
+  "campaign_registry_planning_context": {
+    "campaign_count": 9,
+    "excluded_from_packet_completion_percentage": true,
+    "mode": "PLANNING_AUTHORITY_ONLY",
+    "schema": "AIOS_STRATEGIC_CAMPAIGN_REGISTRY.v1",
+    "source": "automation/orchestration/campaign_registry/AIOS_STRATEGIC_CAMPAIGN_REGISTRY.json"
+  },
+  "canonical_work_packet_inventory": {
+    "active_packet_count": 0,
+    "blocked_packet_count": 0,
+    "complete_packet_count": 22,
+    "data_quality_blockers": [],
+    "data_quality_warnings": [
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "folder_status_mismatch",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record",
+      "excluded_legacy_record"
+    ],
+    "duplicate_packet_ids": [],
+    "excluded_legacy_records": [
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-DESIGN-V1.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-DESIGN-V1.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-FINAL-HUMAN-GATED-RUNTIME-BLOCKER-REVIEW.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-FINAL-HUMAN-GATED-RUNTIME-BLOCKER-REVIEW.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-FINAL-SCHEDULED-OBSERVE-ONLY-CLOSURE-REVIEW.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-FINAL-SCHEDULED-OBSERVE-ONLY-CLOSURE-REVIEW.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-FIRST-SCHEDULED-FIRE-PROOF-AFTER-SCHEDULER-ENABLE.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-FIRST-SCHEDULED-FIRE-PROOF-AFTER-SCHEDULER-ENABLE.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-HEARTBEAT-DIRTY-WRITE-GUARD-AFTER-FIRST-SCHEDULED-FIRE.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-HEARTBEAT-DIRTY-WRITE-GUARD-AFTER-FIRST-SCHEDULED-FIRE.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-PR528-DECISION-PACKET-DRAFTER-MERGE-REVIEW.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-PR528-DECISION-PACKET-DRAFTER-MERGE-REVIEW.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-REMOTE-SOS-DELIVERY-DESIGN-AND-PROOF.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-REMOTE-SOS-DELIVERY-DESIGN-AND-PROOF.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-SCHEDULED-FIRE-RETRY-AFTER-HEARTBEAT-GUARD.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SCHEDULED-FIRE-RETRY-AFTER-HEARTBEAT-GUARD.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-ENABLE-REQUEST-AFTER-DISABLED-REGISTRATION.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-ENABLE-REQUEST-AFTER-DISABLED-REGISTRATION.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-MANUAL-REGISTRATION-APPLY-REQUEST-AFTER-NTFY-SOS.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-MANUAL-REGISTRATION-APPLY-REQUEST-AFTER-NTFY-SOS.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-MANUAL-REGISTRATION-REVIEW-AFTER-NTFY-SOS.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-MANUAL-REGISTRATION-REVIEW-AFTER-NTFY-SOS.md"
+      },
+      {
+        "reason": "legacy_markdown_missing_explicit_packet_id",
+        "record_identity": "automation/orchestration/work_packets/complete/AIOS-SOS-DELIVERY-HUMAN-CONFIRMATION-REVIEW.md",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SOS-DELIVERY-HUMAN-CONFIRMATION-REVIEW.md"
+      }
+    ],
+    "explicit_packet_count": 22,
+    "files_scanned": 34,
+    "folder_status_mismatches": [
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1",
+        "packet_status": "dry_run_implementation_plan_complete,_no_provider_changes,_no_secrets_stored",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN-V1",
+        "packet_status": "dry_run_inventory_complete,_no_provider_changes,_no_secrets_stored",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN-V1",
+        "packet_status": "dry_run_provider_setup_review_complete,_no_provider_changes,_no_secrets_stored",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-COORDINATION-SPINE-V1",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-COORDINATION-SPINE-V1.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-M1-SPINE-TO-LOOP-PACKET-V1",
+        "packet_status": "safe_next_action:",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-M1-SPINE-TO-LOOP-PACKET-V1.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570",
+        "packet_status": "dry_run_complete,_no_files_changed",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST-V1",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST-V1",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
+        "packet_status": "dry_run_complete,_no_files_changed",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST.md"
+      },
+      {
+        "folder_state": "complete",
+        "packet_id": "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+        "packet_status": "dry_run_complete,_no_apply,_no_commit,_no_push",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md"
+      }
+    ],
+    "inventory_scope": [
+      "automation/orchestration/work_packets/active",
+      "automation/orchestration/work_packets/blocked",
+      "automation/orchestration/work_packets/complete"
+    ],
+    "inventory_source": "automation/orchestration/work_packets",
+    "inventory_status": "PARTIAL",
+    "missing_packet_ids": [
+      "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-DESIGN-V1.md",
+      "automation/orchestration/work_packets/complete/AIOS-FINAL-HUMAN-GATED-RUNTIME-BLOCKER-REVIEW.md",
+      "automation/orchestration/work_packets/complete/AIOS-FINAL-SCHEDULED-OBSERVE-ONLY-CLOSURE-REVIEW.md",
+      "automation/orchestration/work_packets/complete/AIOS-FIRST-SCHEDULED-FIRE-PROOF-AFTER-SCHEDULER-ENABLE.md",
+      "automation/orchestration/work_packets/complete/AIOS-HEARTBEAT-DIRTY-WRITE-GUARD-AFTER-FIRST-SCHEDULED-FIRE.md",
+      "automation/orchestration/work_packets/complete/AIOS-PR528-DECISION-PACKET-DRAFTER-MERGE-REVIEW.md",
+      "automation/orchestration/work_packets/complete/AIOS-REMOTE-SOS-DELIVERY-DESIGN-AND-PROOF.md",
+      "automation/orchestration/work_packets/complete/AIOS-SCHEDULED-FIRE-RETRY-AFTER-HEARTBEAT-GUARD.md",
+      "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-ENABLE-REQUEST-AFTER-DISABLED-REGISTRATION.md",
+      "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-MANUAL-REGISTRATION-APPLY-REQUEST-AFTER-NTFY-SOS.md",
+      "automation/orchestration/work_packets/complete/AIOS-SCHEDULER-MANUAL-REGISTRATION-REVIEW-AFTER-NTFY-SOS.md",
+      "automation/orchestration/work_packets/complete/AIOS-SOS-DELIVERY-HUMAN-CONFIRMATION-REVIEW.md"
+    ],
+    "mode": "READ_ONLY",
+    "parse_failures": [],
+    "records": [
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "brainstem-daily-start",
+        "packet_status": "complete",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [
+          "automation/orchestration/bootstrap/Start-AiOsDay.ps1",
+          "automation/orchestration/supervisor/Resolve-AiOsSupervisorAssignment.DRY_RUN.ps1"
+        ],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "json",
+        "source_path": "automation/orchestration/work_packets/complete/20260516-064500-brainstem-daily-start.json",
+        "status": "complete",
+        "title": "Brainstem Daily Start Route",
+        "validators": [
+          "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+        ]
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "rulebook-foundation",
+        "packet_status": "complete",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [
+          "docs/workflows/aios-operator-workflows.md",
+          "automation/orchestration/operator/AIOS_OPERATOR_RULES.json"
+        ],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "json",
+        "source_path": "automation/orchestration/work_packets/complete/20260516-064502-rulebook-foundation.json",
+        "status": "complete",
+        "title": "Rulebook Foundation",
+        "validators": [
+          "powershell -ExecutionPolicy Bypass -File automation\\orchestration\\bootstrap\\Test-AiOsWorkspaceBootstrap.DRY_RUN.ps1"
+        ]
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1",
+        "packet_status": "dry_run_implementation_plan_complete,_no_provider_changes,_no_secrets_stored",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN.md",
+        "status": "complete",
+        "title": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN-V1",
+        "packet_status": "dry_run_inventory_complete,_no_provider_changes,_no_secrets_stored",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN.md",
+        "status": "complete",
+        "title": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN-V1",
+        "packet_status": "dry_run_provider_setup_review_complete,_no_provider_changes,_no_secrets_stored",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN.md",
+        "status": "complete",
+        "title": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-COORDINATION-SPINE-V1",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-COORDINATION-SPINE-V1.md",
+        "status": "complete",
+        "title": "AIOS-COORDINATION-SPINE-V1",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-M1-SPINE-TO-LOOP-PACKET-V1",
+        "packet_status": "safe_next_action:",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-M1-SPINE-TO-LOOP-PACKET-V1.md",
+        "status": "complete",
+        "title": "AIOS-M1-SPINE-TO-LOOP-PACKET-V1",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570",
+        "packet_status": "dry_run_complete,_no_files_changed",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570.md",
+        "status": "complete",
+        "title": "AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST-V1",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST.md",
+        "status": "complete",
+        "title": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST-V1",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST.md",
+        "status": "complete",
+        "title": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST",
+        "packet_status": "complete,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
+        "packet_status": "dry_run_complete,_no_files_changed",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+        "packet_status": "dry_run_complete,_no_apply,_no_commit,_no_push",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST.md",
+        "status": "complete",
+        "title": "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+        "validators": []
+      },
+      {
+        "blocked_files": [],
+        "conflicts": [],
+        "dependencies": [],
+        "engineering_stage": "complete",
+        "folder_state": "complete",
+        "milestone_value": 0,
+        "packet_id": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+        "packet_status": "",
+        "priority": "normal",
+        "required_approvals": [],
+        "required_files": [],
+        "risk_level": "low",
+        "safety_flags": [],
+        "source_format": "markdown_legacy",
+        "source_path": "automation/orchestration/work_packets/complete/PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN.md",
+        "status": "complete",
+        "title": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+        "validators": []
+      }
+    ],
+    "scanned_folders": [
+      {
+        "exists": true,
+        "folder": "automation/orchestration/work_packets/active"
+      },
+      {
+        "exists": false,
+        "folder": "automation/orchestration/work_packets/blocked"
+      },
+      {
+        "exists": true,
+        "folder": "automation/orchestration/work_packets/complete"
+      }
+    ],
+    "schema": "AIOS_CANONICAL_WORK_PACKET_INVENTORY.v1",
+    "source_files_modified": false
+  },
+  "completed_packet_count": 22,
+  "completed_tasks": [
+    {
+      "packet_id": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-APP-SERVICE-BRIDGE-V0-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN-V1",
+      "status": "complete",
+      "title": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-IMPLEMENTATION-PLAN-DRY-RUN"
+    },
+    {
+      "packet_id": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN-V1",
+      "status": "complete",
+      "title": "AIOS-CLOUDFLARE-ACCESS-LOCKOUT-SAFE-LOGIN-INVENTORY-DRY-RUN"
+    },
+    {
+      "packet_id": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN-V1",
+      "status": "complete",
+      "title": "AIOS-CLOUDFLARE-ACCESS-PROVIDER-SETUP-REVIEW-DRY-RUN"
+    },
+    {
+      "packet_id": "AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-CONNECT-APPROVAL-INBOX-PROMOTION-DESIGN-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-CONNECT-RECOVERY-ORPHAN-INTO-LOOP-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-CONNECT-SPINE-INTO-LOOP-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-COORDINATION-SPINE-V1",
+      "status": "complete",
+      "title": "AIOS-COORDINATION-SPINE-V1"
+    },
+    {
+      "packet_id": "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-ENDURANCE-SOAK-HARNESS-FIRST-RUN-PROOF-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-ENDURANCE-T1-WEEKEND-CRASH-SURVIVAL-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-GOV-APPROVAL-AUTHORITY-HARDENING-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-M1-SPINE-TO-LOOP-PACKET-V1",
+      "status": "complete",
+      "title": "AIOS-M1-SPINE-TO-LOOP-PACKET-V1"
+    },
+    {
+      "packet_id": "AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570",
+      "status": "complete",
+      "title": "AIOS-OPEN-PR-BACKLOG-CLEANUP-REVIEW-AFTER-570"
+    },
+    {
+      "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST-V1",
+      "status": "complete",
+      "title": "AIOS-PLANETARY-GAME-DASHBOARD-IMPLEMENTATION-APPLY-REQUEST"
+    },
+    {
+      "packet_id": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST-V1",
+      "status": "complete",
+      "title": "AIOS-PLANETARY-GAME-DASHBOARD-REDESIGN-APPLY-REQUEST"
+    },
+    {
+      "packet_id": "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-SB-001-APPROVAL-INBOX-SCHEMA-VALIDATOR-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-SELFBUILD-COMPLETION-EVIDENCE-VALIDATOR-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-T2A-DISPATCH-LANE-WORKERSTATE-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST",
+      "status": "complete",
+      "title": "AIOS-T2B-ASSIGNMENT-LOCK-INTEGRATION-DRY-RUN-FIRST"
+    },
+    {
+      "packet_id": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN",
+      "status": "complete",
+      "title": "PKT-CREW-CAMPAIGN-BRIDGE-DRYRUN"
+    },
+    {
+      "packet_id": "brainstem-daily-start",
+      "status": "complete",
+      "title": "Brainstem Daily Start Route"
+    },
+    {
+      "packet_id": "rulebook-foundation",
+      "status": "complete",
+      "title": "Rulebook Foundation"
+    }
+  ],
+  "completion_percentage": 100.0,
+  "current_task": null,
+  "data_quality_status": "VALID",
+  "dependency_graph": {
+    "campaign_registry_planning_context": "PLANNING_CONTEXT",
+    "canonical_work_packet_inventory": "AUTHORITY",
+    "first_withdrawable_dollar_external_provider": "EXTERNAL_PENDING",
+    "unified_queue_index_projection": "READ_ONLY_PROJECTION",
+    "work_countdown_output": "READ_ONLY_PROJECTION",
+    "work_packets_active": "AUTHORITY",
+    "work_packets_blocked": "AUTHORITY",
+    "work_packets_complete": "AUTHORITY"
+  },
+  "engineering_stages_remaining": [],
+  "evidence_limitation": "Scoped percentage covers explicit canonical packet IDs only; it is not whole-repository completion.",
+  "evidence_status": "COMPLETE",
+  "external_wait_state": {
+    "excluded_from_engineering_stages": true,
+    "items": [
+      {
+        "provider": "automation/forex_engine/first_withdrawable_dollar_v1.py",
+        "provider_status": "EXTERNAL_PENDING_VERIFICATION",
+        "verification_source": "GitHub",
+        "verification_state": "WAITING_FOR_REMOTE_EVIDENCE"
+      }
+    ],
+    "waiting": true
+  },
+  "first_withdrawable_dollar_state": {
+    "provider": "automation/forex_engine/first_withdrawable_dollar_v1.py",
+    "provider_status": "EXTERNAL_PENDING_VERIFICATION",
+    "verification_source": "GitHub",
+    "verification_state": "WAITING_FOR_REMOTE_EVIDENCE"
+  },
+  "inventory_status": "PARTIAL",
+  "mode": "READ_ONLY",
+  "next_task": null,
+  "next_verified_blocker": "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_PENDING_VERIFICATION",
+  "owner_intervention_required": true,
+  "owner_view": {
+    "current_task": null,
+    "inventory_status": "PARTIAL",
+    "next_task": null,
+    "next_verified_blocker": "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_PENDING_VERIFICATION",
+    "status": "VALID"
+  },
+  "pr_state": {},
+  "protected_actions": {
+    "broker_access": false,
+    "credential_access": false,
+    "daemon_creation": false,
+    "git_commit": false,
+    "git_merge": false,
+    "git_push": false,
+    "git_stage": false,
+    "money_movement": false,
+    "order_placement": false,
+    "pr_create": false,
+    "queue_mutation": false,
+    "scheduler_creation": false,
+    "worker_dispatch": false
+  },
+  "queue_plan": {
+    "approvals_mutated": false,
+    "blocked_packets": [],
+    "codex_ready_packet_preview": {
+      "codex_prompt_text": "",
+      "packet_id": null,
+      "packet_ready": false,
+      "reason_code": "no_selected_packet",
+      "validator_chain": [],
+      "write_scope": []
+    },
+    "collision_status": {
+      "collisions": [],
+      "status": "clear"
+    },
+    "commands_executed": [],
+    "files_written": [],
+    "next_safe_action": "Add candidate packet evidence before planning queue selection.",
+    "queue_status": "empty",
+    "queues_mutated": false,
+    "ranked_packets": [],
+    "required_approvals": [],
+    "safety": {
+      "approval_mutation": false,
+      "branch_deletion": false,
+      "codex_launch": false,
+      "evidence_only": true,
+      "git_commit": false,
+      "git_merge": false,
+      "git_push": false,
+      "network_access": false,
+      "packet_execution": false,
+      "preview_only": true,
+      "queue_mutation": false,
+      "reports_written": false,
+      "worker_dispatch": false
+    },
+    "schema": "AIOS_PACKET_QUEUE_PLANNER.v1",
+    "selected_packet": null,
+    "workers_dispatched": false
+  },
+  "remaining_packet_count": 0,
+  "repository_state": {},
+  "schema": "AIOS_WORK_COUNTDOWN.v1",
+  "total_packet_count": 22,
+  "validator_state": {}
+}
