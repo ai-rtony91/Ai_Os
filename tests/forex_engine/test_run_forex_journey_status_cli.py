@@ -65,7 +65,9 @@ def test_exit_code_mapping_blocked() -> None:
 def test_cli_default_calls_journey_with_no_report(monkeypatch: Any) -> None:
     captured: dict[str, bool] = {"write_reports": None}
 
-    def _fake_journey(*, write_reports: bool = True) -> dict[str, Any]:
+    def _fake_journey(
+        *, write_reports: bool = True, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
         captured["write_reports"] = write_reports
         return _payload_fixture(cli.JOURNEY_INCOMPLETE)
 
@@ -80,7 +82,9 @@ def test_cli_default_calls_journey_with_no_report(monkeypatch: Any) -> None:
 def test_cli_write_report_passes_true(monkeypatch: Any) -> None:
     captured: dict[str, bool] = {"write_reports": None}
 
-    def _fake_journey(*, write_reports: bool = True) -> dict[str, Any]:
+    def _fake_journey(
+        *, write_reports: bool = True, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
         captured["write_reports"] = write_reports
         return _payload_fixture(cli.JOURNEY_INCOMPLETE)
 
@@ -95,7 +99,9 @@ def test_cli_write_report_passes_true(monkeypatch: Any) -> None:
 def test_cli_json_prints_valid_json(monkeypatch: Any) -> None:
     payload = _payload_fixture(cli.JOURNEY_REVIEW_READY)
 
-    def _fake_journey(*, write_reports: bool = True) -> dict[str, Any]:
+    def _fake_journey(
+        *, write_reports: bool = True, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
         return payload
 
     monkeypatch.setattr(cli, "run_review_chain_end_to_end_candidate_journey", _fake_journey)
@@ -120,7 +126,9 @@ def test_cli_json_prints_valid_json(monkeypatch: Any) -> None:
 def test_cli_json_contains_required_fields(monkeypatch: Any) -> None:
     payload = _payload_fixture(cli.JOURNEY_INCOMPLETE)
 
-    def _fake_journey(*, write_reports: bool = True) -> dict[str, Any]:
+    def _fake_journey(
+        *, write_reports: bool = True, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
         return payload
 
     monkeypatch.setattr(cli, "run_review_chain_end_to_end_candidate_journey", _fake_journey)
@@ -148,7 +156,9 @@ def test_cli_json_contains_required_fields(monkeypatch: Any) -> None:
 def test_cli_does_not_authorize_live_trading(monkeypatch: Any) -> None:
     payload = _payload_fixture(cli.JOURNEY_INCOMPLETE)
 
-    def _fake_journey(*, write_reports: bool = True) -> dict[str, Any]:
+    def _fake_journey(
+        *, write_reports: bool = True, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
         return payload
 
     monkeypatch.setattr(cli, "run_review_chain_end_to_end_candidate_journey", _fake_journey)
@@ -166,7 +176,9 @@ def test_cli_handles_missing_blocker_lists(monkeypatch: Any) -> None:
     payload["candidate_demo_review_blockers"] = None
     payload["review_chain_blockers"] = None
 
-    def _fake_journey(*, write_reports: bool = True) -> dict[str, Any]:
+    def _fake_journey(
+        *, write_reports: bool = True, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
         return payload
 
     monkeypatch.setattr(cli, "run_review_chain_end_to_end_candidate_journey", _fake_journey)
@@ -182,7 +194,9 @@ def test_cli_handles_missing_blocker_lists(monkeypatch: Any) -> None:
 def test_default_safety_flags_safe(monkeypatch: Any) -> None:
     payload = _payload_fixture(cli.JOURNEY_INCOMPLETE)
 
-    def _fake_journey(*, write_reports: bool = True) -> dict[str, Any]:
+    def _fake_journey(
+        *, write_reports: bool = True, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
         return payload
 
     monkeypatch.setattr(cli, "run_review_chain_end_to_end_candidate_journey", _fake_journey)
@@ -196,3 +210,29 @@ def test_default_safety_flags_safe(monkeypatch: Any) -> None:
     assert "demo_trading: False" in output
     assert "live_trading: False" in output
 
+def test_cli_consumes_repo_local_demo_validation_evidence(monkeypatch: Any) -> None:
+    evidence_path = cli.REPO_ROOT / "tmp_demo_validation_evidence.json"
+    evidence = {
+        "demo_candidate_record": {
+            "candidate_id": "c1-eur-buy",
+            "candidate_state": "DEMO_CANDIDATE_APPROVED_FOR_DEMO_VALIDATION",
+            "candidate_approved": True,
+        },
+        "demo_validation_results": [{"validation_session_count": 3}],
+    }
+    evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
+    captured: dict[str, Any] = {}
+
+    def _fake_journey(
+        *, write_reports: bool = False, demo_validation_payload: Any = None
+    ) -> dict[str, Any]:
+        captured["payload"] = demo_validation_payload
+        return _payload_fixture(cli.JOURNEY_INCOMPLETE)
+
+    monkeypatch.setattr(cli, "run_review_chain_end_to_end_candidate_journey", _fake_journey)
+    monkeypatch.setattr(cli.sys, "stdout", StringIO())
+    try:
+        assert cli.main(["--demo-validation-evidence", str(evidence_path)]) == 0
+    finally:
+        evidence_path.unlink(missing_ok=True)
+    assert captured["payload"] == evidence

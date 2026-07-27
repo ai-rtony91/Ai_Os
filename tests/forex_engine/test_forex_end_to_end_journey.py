@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import json
 
 from automation.forex_engine import campaign_evidence_accumulator as campaign_accumulator
 from automation.forex_engine import demo_candidate_lifecycle_manager as lifecycle
@@ -361,3 +362,77 @@ def test_journey_readiness_hardening_no_unsafe_execution_paths() -> None:
     assert result["safety"]["network_submit"] is False
     assert result["safety"]["broker_write"] is False
     assert result["safety"]["credentials"] is False
+
+
+def test_review_journey_consumes_sanitized_demo_validation_evidence() -> None:
+    from automation.forex_engine.review_chain_end_to_end_candidate_journey import (
+        run_candidate_journey,
+    )
+
+    payload = {
+        "demo_candidate_record": {
+            "candidate_id": "c1-eur-buy",
+            "candidate_state": "DEMO_CANDIDATE_APPROVED_FOR_DEMO_VALIDATION",
+            "candidate_approved": True,
+        },
+        "demo_validation_results": [
+            {
+                "validation_session_count": 3,
+                "validation_trade_count": 20,
+                "validation_expectancy": 0.12,
+                "validation_profit_factor": 1.3,
+                "validation_max_drawdown": 2.0,
+                "validation_evidence_score": 0.9,
+            }
+        ],
+    }
+
+    result = run_candidate_journey(demo_validation_payload=payload)
+
+    assert result["demo_validation_evidence_consumed"] is True
+    assert (
+        result["demo_validation_contract"]["demo_validation_contract_status"]
+        == demo_validation_contract.DEMO_CONTRACT_COMPLETE
+    )
+    assert result["live_trading_authorized"] is False
+
+
+def test_review_journey_automatically_reuses_canonical_demo_ledger(tmp_path) -> None:
+    from automation.forex_engine.review_chain_end_to_end_candidate_journey import (
+        run_candidate_journey,
+    )
+
+    ledger = tmp_path / "demo_proof_ledger.jsonl"
+    rows = []
+    for day in range(23, 28):
+        rows.append(
+            {
+                "record_type": "REAL_DEMO_DAY",
+                "date": f"2026-07-{day}",
+                "session_mode": "OANDA_PRACTICE",
+                "session_source": "broker_demo",
+                "fills": 6,
+                "windows_toward_verdict": 2,
+                "max_drawdown_pct": 2.0,
+                "trade_rows": [
+                    {"realized_pnl_usd": value}
+                    for value in (2.0, 1.0, 1.0, 2.0, -0.5, 1.0)
+                ],
+                "live_trading_allowed": False,
+                "live_order_execution_allowed": False,
+                "live_capital_action_authorized": False,
+                "money_movement_allowed": False,
+                "bank_access_allowed": False,
+            }
+        )
+    ledger.write_text("\n".join(json.dumps(row) for row in rows) + "\n", encoding="utf-8")
+
+    result = run_candidate_journey(demo_evidence_ledger_path=ledger)
+
+    assert result["demo_validation_evidence_consumed"] is True
+    assert result["demo_validation_evidence_source"] == "canonical_demo_proof_ledger"
+    assert (
+        result["demo_validation_contract"]["demo_validation_contract_status"]
+        == demo_validation_contract.DEMO_CONTRACT_COMPLETE
+    )
+    assert result["live_trading_authorized"] is False

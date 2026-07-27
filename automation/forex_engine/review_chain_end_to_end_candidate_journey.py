@@ -9,7 +9,7 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
 import json
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional
 
 from . import candidate_intake_demo_review_bridge
 from . import canonical_demo_review_evidence_bridge
@@ -17,10 +17,14 @@ from . import review_chain_orchestrator
 from .demo_validation_contract import evaluate_demo_validation_contract
 from .live_review_readiness_certificate import generate_live_review_readiness_certificate
 from .one_shot_exception_assembler import assemble_one_shot_exception_package
+from .forex_extended_evidence_campaign_v1 import evaluate_extended_evidence_campaign
 
 
 PacketResult = Dict[str, Any]
 CandidatePayload = Dict[str, Any]
+DEFAULT_DEMO_EVIDENCE_LEDGER = (
+    Path(__file__).resolve().parents[2] / "telemetry/forex/demo_proof_ledger.jsonl"
+)
 
 # Legacy/public constants
 JOURNEY_INCOMPLETE = "REVIEW_CHAIN_INCOMPLETE"
@@ -194,11 +198,39 @@ def _to_enriched_candidate(candidate: Optional[CandidatePayload], candidate_id: 
     }
 
 
+def _validation_payload_from_demo_ledger(
+    ledger_path: Path, candidate: Mapping[str, Any]
+) -> Dict[str, Any]:
+    campaign = evaluate_extended_evidence_campaign(ledger_path)
+    if not campaign.get("passed"):
+        return {}
+    summary = campaign.get("summary", {})
+    return {
+        "demo_candidate_record": {
+            **dict(candidate),
+            "candidate_state": "DEMO_CANDIDATE_APPROVED_FOR_DEMO_VALIDATION",
+            "candidate_approved": True,
+        },
+        "demo_validation_results": [
+            {
+                "validation_session_count": summary.get("market_demo_days", 0),
+                "validation_trade_count": summary.get("market_demo_trades", 0),
+                "validation_expectancy": summary.get("expectancy_per_trade", 0.0),
+                "validation_profit_factor": summary.get("profit_factor", 0.0),
+                "validation_max_drawdown": summary.get("max_drawdown_pct", 0.0),
+                "validation_evidence_score": 1.0,
+            }
+        ],
+    }
+
+
 def run_candidate_journey(
     candidate_id: str = "c1-eur-buy",
     *,
     write_reports: bool = False,
     proof_bundle_payload: Optional[Dict[str, Any]] = None,
+    demo_validation_payload: Optional[Dict[str, Any]] = None,
+    demo_evidence_ledger_path: Path = DEFAULT_DEMO_EVIDENCE_LEDGER,
 ) -> PacketResult:
     bridge_payload = run_proof_bundle_to_candidate_bridge(
         write_reports=write_reports, proof_bundle_payload=proof_bundle_payload
@@ -246,6 +278,30 @@ def run_candidate_journey(
         "paper_evidence_status": candidate.get("paper_evidence_status"),
         "mitigation_status": candidate.get("mitigation_status"),
     }
+    validation_payload = dict(demo_validation_payload or {})
+    validation_source = "explicit_payload" if validation_payload else "none"
+    if not validation_payload:
+        validation_payload = _validation_payload_from_demo_ledger(
+            demo_evidence_ledger_path, candidate
+        )
+        if validation_payload:
+            validation_source = "canonical_demo_proof_ledger"
+    if validation_payload:
+        chain_state["demo_candidate_record"] = validation_payload.get(
+            "demo_candidate_record", validation_payload.get("candidate_record", candidate)
+        )
+        chain_state["demo_validation_results"] = validation_payload.get(
+            "demo_validation_results", validation_payload.get("validation_results", [])
+        )
+        for safety_field in (
+            "broker_connection_detected",
+            "credential_access_detected",
+            "account_identifier_detected",
+            "order_execution_detected",
+            "live_trading_authorized",
+        ):
+            if safety_field in validation_payload:
+                chain_state[safety_field] = validation_payload[safety_field]
 
     chain_state["candidate_state"] = build_review_chain_state(
         candidate_intake_payload or {"candidate": candidate}
@@ -316,6 +372,8 @@ def run_candidate_journey(
         "enriched_candidate": candidate,
         "canonical_review_bundle": canonical_bundle,
         "demo_validation_contract": chain_state["demo_validation_contract"],
+        "demo_validation_evidence_consumed": bool(validation_payload),
+        "demo_validation_evidence_source": validation_source,
         "one_shot_exception_package": chain_state["one_shot_exception_package"],
         "live_review_readiness_certificate": chain_state["live_review_readiness_certificate"],
         "safety": chain_state.get("candidate_state", {}).get("safety", bridge_payload.get("safety", {})),
@@ -377,11 +435,15 @@ def run_review_chain_end_to_end_candidate_journey(
     *,
     write_reports: bool = False,
     proof_bundle_payload: Optional[Dict[str, Any]] = None,
+    demo_validation_payload: Optional[Dict[str, Any]] = None,
+    demo_evidence_ledger_path: Path = DEFAULT_DEMO_EVIDENCE_LEDGER,
 ) -> PacketResult:
     return run_candidate_journey(
         candidate_id=candidate_id,
         write_reports=write_reports,
         proof_bundle_payload=proof_bundle_payload,
+        demo_validation_payload=demo_validation_payload,
+        demo_evidence_ledger_path=demo_evidence_ledger_path,
     )
 
 
