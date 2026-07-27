@@ -26,6 +26,16 @@ def policy_evidence() -> dict[str, object]:
     }
 
 
+def close_protection_evidence() -> dict[str, object]:
+    return {
+        "status": "CLOSE_PROTECTION_POST_CLOSE_MAINTENANCE_READY",
+        "ready": True,
+        "live_trade_closed_by_this_module": False,
+        "broker_api_called_by_this_module": False,
+        "money_moved": False,
+    }
+
+
 def test_auto_exit_live_readiness_stays_false_even_with_policy_evidence():
     result = build_auto_exit_live_readiness_model(
         policy_evidence=policy_evidence(),
@@ -72,3 +82,19 @@ def test_auto_exit_report_and_summary_are_sanitized():
         "rawBroker",
     ):
         assert forbidden not in serialized
+
+
+def test_reviewed_close_protection_removes_engineering_readiness_blocker_only():
+    result = build_auto_exit_live_readiness_model(
+        policy_evidence=policy_evidence(),
+        close_protection_evidence=close_protection_evidence(),
+        generated_at_utc="2026-06-19T00:00:00Z",
+    )
+
+    assert result["AUTO_EXIT_LIVE_READY"] is True
+    assert result["close_protection_ready"] is True
+    assert "auto_exit_readiness_not_implemented_for_live_execution" not in result["blocked_reasons"]
+    assert "future_live_safe_close_packet_not_approved" in result["blocked_reasons"]
+    assert result["live_execution_allowed"] is False
+    assert result["broker_write_calls_allowed"] is False
+    assert result["close_trade_allowed"] is False

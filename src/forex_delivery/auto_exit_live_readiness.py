@@ -25,6 +25,7 @@ def build_auto_exit_live_readiness_model(
     *,
     repo_root: Path | None = None,
     policy_evidence: Mapping[str, Any] | None = None,
+    close_protection_evidence: Mapping[str, Any] | None = None,
     generated_at_utc: str | None = None,
 ) -> dict[str, Any]:
     root = repo_root or Path(__file__).resolve().parents[2]
@@ -50,6 +51,28 @@ def build_auto_exit_live_readiness_model(
             default="MANUAL_BROKER_UI_FALLBACK_REQUIRED",
         )
     )
+    close_protection = dict(close_protection_evidence or {})
+    close_protection_ready = (
+        close_protection.get("ready") is True
+        and str(close_protection.get("status", ""))
+        in {
+            "CLOSE_PROTECTION_READY",
+            "CLOSE_PROTECTION_NO_NEW_RISK_READY",
+            "CLOSE_PROTECTION_POST_CLOSE_MAINTENANCE_READY",
+        }
+        and close_protection.get("live_trade_closed_by_this_module") is False
+        and close_protection.get("broker_api_called_by_this_module") is False
+        and close_protection.get("money_moved") is False
+    )
+    auto_exit_ready = all(
+        (
+            stop_loss_ready,
+            take_profit_policy_ready,
+            max_time_policy_ready,
+            manual_fallback_ready,
+            close_protection_ready,
+        )
+    )
 
     blocked_reasons: list[str] = []
     if not stop_loss_ready:
@@ -60,12 +83,15 @@ def build_auto_exit_live_readiness_model(
         blocked_reasons.append("max_time_policy_missing_for_live_exit")
     if not manual_fallback_ready:
         blocked_reasons.append("manual_broker_ui_fallback_missing_for_live_exit")
-    blocked_reasons.append("auto_exit_readiness_not_implemented_for_live_execution")
+    if not close_protection_ready:
+        blocked_reasons.append("close_protection_evidence_not_ready")
+    if not auto_exit_ready:
+        blocked_reasons.append("auto_exit_readiness_not_implemented_for_live_execution")
     blocked_reasons.append("future_live_safe_close_packet_not_approved")
 
     result = {
         "schema": SCHEMA,
-        "AUTO_EXIT_LIVE_READY": False,
+        "AUTO_EXIT_LIVE_READY": auto_exit_ready,
         "live_execution_allowed": False,
         "stop_loss_required": True,
         "stop_loss_ready": stop_loss_ready,
@@ -74,6 +100,7 @@ def build_auto_exit_live_readiness_model(
         "max_time_policy_ready": max_time_policy_ready,
         "manual_broker_ui_fallback_required": True,
         "manual_broker_ui_fallback_ready": manual_fallback_ready,
+        "close_protection_ready": close_protection_ready,
         "auto_exit_write_calls_allowed": False,
         "broker_write_calls_allowed": False,
         "close_trade_allowed": False,
@@ -140,6 +167,7 @@ def cli_summary(result: Mapping[str, Any]) -> dict[str, Any]:
         "manual_broker_ui_fallback_required": result.get(
             "manual_broker_ui_fallback_required"
         ),
+        "close_protection_ready": result.get("close_protection_ready"),
         "auto_exit_write_calls_allowed": False,
         "broker_write_calls_allowed": False,
         "close_trade_allowed": False,
@@ -186,7 +214,6 @@ def assert_auto_exit_sanitized(payload: Mapping[str, Any]) -> None:
         if marker in serialized:
             raise ValueError(f"unsafe_auto_exit_marker:{marker}")
     for field in (
-        "AUTO_EXIT_LIVE_READY",
         "live_execution_allowed",
         "auto_exit_write_calls_allowed",
         "broker_write_calls_allowed",

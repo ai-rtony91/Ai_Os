@@ -15,6 +15,7 @@ from src.forex_delivery.one_shot_live_micro_trade_execution_review import (
     build_one_shot_live_micro_trade_execution_review_result,
     build_sanitized_report,
     cli_summary,
+    evaluate_final_exit_requirements,
 )
 
 
@@ -104,6 +105,17 @@ def arming_evidence(live_armable: bool = False) -> dict[str, object]:
         "order_placement_allowed": False,
         "close_trade_allowed": False,
     }
+
+
+def test_final_exit_requirements_consume_auto_exit_readiness_evidence():
+    evidence = paper_evidence()
+    evidence["AUTO_EXIT_LIVE_READY"] = True
+
+    result = evaluate_final_exit_requirements(evidence)
+
+    assert result["auto_exit_readiness"] is True
+    assert "auto_exit_readiness_not_implemented_for_live_execution" not in result["blocked_reasons"]
+    assert result["status"] == "PRESENT"
 
 
 def test_default_review_is_not_ready_and_never_allows_execution():
