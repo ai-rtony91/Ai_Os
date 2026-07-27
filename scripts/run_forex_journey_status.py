@@ -91,6 +91,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Persist journey report artifact.",
     )
+    parser.add_argument(
+        "--demo-validation-evidence",
+        type=Path,
+        help="Read a sanitized, repo-local demo validation evidence JSON file.",
+    )
     return parser
 
 
@@ -113,7 +118,24 @@ def _build_required_json_keys(payload: dict[str, Any]) -> dict[str, Any]:
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
-    payload = run_review_chain_end_to_end_candidate_journey(write_reports=bool(args.write_report))
+    demo_validation_payload = None
+    if args.demo_validation_evidence:
+        evidence_path = args.demo_validation_evidence.resolve()
+        try:
+            evidence_path.relative_to(REPO_ROOT.resolve())
+        except ValueError:
+            parser.error("demo validation evidence must be inside the repository")
+        try:
+            loaded = json.loads(evidence_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            parser.error(f"unable to read demo validation evidence: {exc}")
+        if not isinstance(loaded, dict):
+            parser.error("demo validation evidence must be a JSON object")
+        demo_validation_payload = loaded
+    payload = run_review_chain_end_to_end_candidate_journey(
+        write_reports=bool(args.write_report),
+        demo_validation_payload=demo_validation_payload,
+    )
     if args.json:
         json_payload = _build_required_json_keys(payload)
         sys.stdout.write(json.dumps(json_payload, indent=2, sort_keys=True))
@@ -134,4 +156,3 @@ __all__ = [
     "exit_code_for_final_verdict",
     "main",
 ]
-
