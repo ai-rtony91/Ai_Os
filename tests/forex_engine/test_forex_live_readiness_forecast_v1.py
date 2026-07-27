@@ -176,3 +176,25 @@ def test_all_permissions_and_protected_actions_remain_false() -> None:
     source = MODULE_PATH.read_text(encoding="utf-8").lower()
     for forbidden in ("requests", "urllib", "socket", "subprocess", "os.environ"):
         assert forbidden not in source
+
+
+def test_remaining_percentage_reconciles_and_zero_never_authorizes():
+    m = module(); evidence = pass_evidence(m, owner=True, external=True)
+    state = build(evidence)
+    assert round(state["live_readiness_evidence_percent"] + state["remaining_to_first_trade_percent"], 2) == 100.00
+    assert state["remaining_to_first_trade_percent"] == 0.0
+    assert state["permissions"]["live_execution_authorized"] is False
+
+
+def test_genuine_demo_intake_validates_schema_duplicates_and_scope(tmp_path: Path):
+    m = module(); root = tmp_path / "repo"; root.mkdir()
+    payload = {"schema": m.GENUINE_DEMO_SCHEMA, "forecast_input": {"schema": m.GENUINE_DEMO_SCHEMA, "criterion_ids": ["DEMO_GENUINE_MARKET_EVIDENCE"], "criteria": {"DEMO_GENUINE_MARKET_EVIDENCE": {"status": "PASS", "source_type": "genuine_demo_intake"}}}}
+    path = root / "intake.json"; path.write_text(json.dumps(payload))
+    bundle = m.load_forex_live_readiness_evidence(root, {"criteria": {"RISK_CONTROLS_PRESENT": {"status": "PASS"}}}, path)
+    assert "RISK_CONTROLS_PRESENT" in bundle["sanitized_evidence"]["criteria"]
+    payload["forecast_input"]["criterion_ids"] *= 2; path.write_text(json.dumps(payload))
+    import pytest
+    with pytest.raises(ValueError, match="duplicate"):
+        m.load_forex_live_readiness_evidence(root, {}, path)
+    with pytest.raises(ValueError, match="inside repository"):
+        m.load_forex_live_readiness_evidence(root, {}, tmp_path / "outside.json")
