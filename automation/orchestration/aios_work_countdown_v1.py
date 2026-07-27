@@ -13,6 +13,7 @@ from automation.orchestration.aios_candidate_packet_evidence_adapter import (
     build_candidate_packet_evidence,
 )
 from automation.orchestration.aios_packet_queue_planner import build_packet_queue_planner
+from automation.forex_engine.first_withdrawable_dollar_v1 import build_first_withdrawable_dollar
 
 SCHEMA = "AIOS_WORK_COUNTDOWN.v1"
 INVENTORY_SCHEMA = "AIOS_CANONICAL_WORK_PACKET_INVENTORY.v1"
@@ -252,7 +253,7 @@ def build_work_countdown(
         next_task = _task(selected) if isinstance(selected, Mapping) else None
 
     provider = _provider_state()
-    fwd_state = dict(first_withdrawable_dollar_state or provider)
+    fwd_state = build_first_withdrawable_dollar(first_withdrawable_dollar_state) if first_withdrawable_dollar_state is not None else dict(provider)
     next_blocker = fwd_state.get("next_verified_blocker") or fwd_state.get("blocker") or "FIRST_WITHDRAWABLE_DOLLAR_PROVIDER_PENDING_VERIFICATION"
     dependency_graph = {
         "canonical_work_packet_inventory": "AUTHORITY",
@@ -262,7 +263,7 @@ def build_work_countdown(
         "unified_queue_index_projection": "READ_ONLY_PROJECTION",
         "campaign_registry_planning_context": "PLANNING_CONTEXT",
         "work_countdown_output": "READ_ONLY_PROJECTION",
-        "first_withdrawable_dollar_external_provider": "EXTERNAL_PENDING",
+        "first_withdrawable_dollar_external_provider": "EVIDENCE_PROJECTION" if first_withdrawable_dollar_state is not None else "EXTERNAL_PENDING",
     }
     limitation = None
     if inventory_status == "PARTIAL":
@@ -285,7 +286,17 @@ def build_work_countdown(
         "repository_state": dict(repository_state or {}), "validator_state": dict(validator_state or {}),
         "pr_state": dict(pr_state or {}), "campaign_registry_planning_context": dict(campaign_registry_context or {}),
         "first_withdrawable_dollar_state": fwd_state, "next_verified_blocker": next_blocker,
-        "owner_intervention_required": True,
+        "hours_completed": fwd_state.get("hours_completed"),
+        "hours_remaining_low": fwd_state.get("hours_remaining_low"),
+        "hours_remaining_best": fwd_state.get("hours_remaining_best"),
+        "hours_remaining_high": fwd_state.get("hours_remaining_high"),
+        "weeks_remaining_50h_low": fwd_state.get("weeks_remaining_50h_low"),
+        "weeks_remaining_50h_best": fwd_state.get("weeks_remaining_50h_best"),
+        "weeks_remaining_50h_high": fwd_state.get("weeks_remaining_50h_high"),
+        "derived_completion_percentage": fwd_state.get("derived_completion_percentage"),
+        "confidence": fwd_state.get("confidence"), "confidence_basis": fwd_state.get("confidence_basis"),
+        "credited_packet_count": fwd_state.get("credited_packet_count"), "uncredited_packet_count": fwd_state.get("uncredited_packet_count"),
+        "owner_intervention_required": fwd_state.get("owner_action_required", True),
         "owner_view": {"status": data_quality, "inventory_status": inventory_status, "current_task": active[0] if active else None, "next_task": next_task, "next_verified_blocker": next_blocker},
         "protected_actions": _protected_actions(),
     }
