@@ -239,3 +239,47 @@ def test_cli_routes_first_dollar_evidence_into_countdown(
     assert result["hours_remaining_best"] == 4
     assert result["next_verified_blocker"] == "COLLECT_GENUINE_DEMO_PROFIT_EVIDENCE"
     assert result["dependency_graph"]["first_withdrawable_dollar_external_provider"] == "EVIDENCE_PROJECTION"
+
+
+def test_cli_reads_first_dollar_evidence_file(
+    packet_repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    write_json(packet_repo, "complete", "c.json", packet("C", "complete"))
+    evidence_path = packet_repo / "first-dollar-evidence.json"
+    evidence_path.write_text(json.dumps({
+        "execution_receipts": [{
+            "packet_id": "C", "canonical": True,
+            "evidence_provenance": "receipt", "pr_id": "1326",
+            "merged": True, "merge_commit_sha": "aa5c654b86326",
+            "test_command": "pytest", "test_conclusion": "passed",
+            "ci_check_id": "ci-1326", "ci_conclusion": "success",
+            "engineering_hours": 5,
+        }],
+        "expected_packet_count": 1,
+        "remaining_hours": {"low": 1, "best": 3, "high": 6},
+        "highest_verified_blocker": "COLLECT_GENUINE_DEMO_PROFIT_EVIDENCE",
+    }), encoding="utf-8")
+
+    exit_code = load_module().main([
+        "--repo-root", str(packet_repo),
+        "--first-withdrawable-dollar-evidence-file", str(evidence_path),
+    ])
+
+    assert exit_code == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result["hours_completed"] == 5
+    assert result["hours_remaining_best"] == 3
+    assert result["next_verified_blocker"] == "COLLECT_GENUINE_DEMO_PROFIT_EVIDENCE"
+
+
+def test_cli_rejects_two_first_dollar_evidence_sources(packet_repo: Path) -> None:
+    evidence_path = packet_repo / "first-dollar-evidence.json"
+    evidence_path.write_text("{}", encoding="utf-8")
+
+    with pytest.raises(SystemExit) as exc_info:
+        load_module().main([
+            "--first-withdrawable-dollar-evidence", "{}",
+            "--first-withdrawable-dollar-evidence-file", str(evidence_path),
+        ])
+
+    assert exc_info.value.code == 2

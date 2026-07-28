@@ -314,14 +314,30 @@ def main(argv: list[str] | None = None) -> int:
         "--first-withdrawable-dollar-evidence",
         help="Explicit First Withdrawable Dollar execution-receipt evidence JSON",
     )
+    parser.add_argument(
+        "--first-withdrawable-dollar-evidence-file",
+        type=Path,
+        help="Path to First Withdrawable Dollar execution-receipt evidence JSON",
+    )
     parser.add_argument("--output", help="Optional output JSON path")
     args = parser.parse_args(argv)
     evidence = json.loads(args.evidence) if args.evidence is not None else None
-    first_dollar_evidence = (
-        json.loads(args.first_withdrawable_dollar_evidence)
-        if args.first_withdrawable_dollar_evidence is not None
-        else None
-    )
+    if (
+        args.first_withdrawable_dollar_evidence is not None
+        and args.first_withdrawable_dollar_evidence_file is not None
+    ):
+        parser.error(
+            "use only one of --first-withdrawable-dollar-evidence and "
+            "--first-withdrawable-dollar-evidence-file"
+        )
+    if args.first_withdrawable_dollar_evidence_file is not None:
+        first_dollar_evidence = json.loads(
+            args.first_withdrawable_dollar_evidence_file.read_text(encoding="utf-8")
+        )
+    elif args.first_withdrawable_dollar_evidence is not None:
+        first_dollar_evidence = json.loads(args.first_withdrawable_dollar_evidence)
+    else:
+        first_dollar_evidence = None
     result = build_work_countdown(
         evidence,
         repo_root=args.repo_root,
