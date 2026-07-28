@@ -1,5 +1,6 @@
 param(
-    [string]$ReportDirectory = ""
+    [string]$ReportDirectory = "",
+    [switch]$ReportOnlyForTest
 )
 
 $ErrorActionPreference = "Stop"
@@ -137,6 +138,18 @@ function Test-EvidenceDay {
     else { $script:EvidenceStatus = "DUPLICATE_EVIDENCE_BLOCKED" }
 }
 
+
+function Get-ArtifactSummary {
+    $output = @(& python -m automation.forex_engine.daily_forex_orchestrator_artifact_v1 --repo-root $script:RepoRoot 2>&1)
+    if ($LASTEXITCODE -ne 0 -or -not $output) {
+        $script:FailureClass = "REPORT_ONLY_FAILURE"
+        $script:ValidationStatus = "FAIL"
+        $script:ReportStatus = "BLOCKED_OR_FAILED"
+        throw "ARTIFACT_SUMMARY_FAILED:$($output -join "`n")"
+    }
+    return (($output -join "`n") | ConvertFrom-Json -AsHashtable)
+}
+
 function Write-OrchestratorReports {
     if (-not $ReportDirectory) {
         if ($env:RUNNER_TEMP) {
@@ -152,6 +165,8 @@ function Write-OrchestratorReports {
     $branch = (& git branch --show-current).Trim()
     $sha = (& git rev-parse --short HEAD).Trim()
 
+    $artifactSummary = Get-ArtifactSummary
+
     $payload = [ordered]@{
         schema = "aios.daily_forex_orchestrator.v1"
         status = $script:ReportStatus
@@ -161,6 +176,9 @@ function Write-OrchestratorReports {
         branch = $branch
         commit_sha = $sha
         report_utc = [DateTime]::UtcNow.ToString("o")
+        rolling_continuity = $artifactSummary["rolling_continuity"]
+        maintenance_planner = $artifactSummary["maintenance_planner"]
+        explicit_safety_statement = $artifactSummary["explicit_safety_statement"]
         safety = [ordered]@{
             broker_calls_allowed = $false
             live_orders_allowed = $false
@@ -185,6 +203,13 @@ function Write-OrchestratorReports {
         "validation_status: $($payload.validation_status)"
         "failure_class: $($payload.failure_class)"
         "evidence_status: $($payload.evidence_status)"
+        "rolling_continuity_status: $($payload.rolling_continuity.rolling_continuity_status)"
+        "real_demo_day_count: $($payload.rolling_continuity.real_demo_day_count)"
+        "consecutive_real_demo_day_count: $($payload.rolling_continuity.consecutive_real_demo_day_count)"
+        "next_required_evidence_date: $($payload.rolling_continuity.next_required_evidence_date)"
+        "five_day_window_status: $($payload.rolling_continuity.five_day_window_status)"
+        "thirty_day_window_status: $($payload.rolling_continuity.thirty_day_window_status)"
+        "maintenance_next_best_packet: $($payload.maintenance_planner.next_best_packet)"
         "branch: $($payload.branch)"
         "commit_sha: $($payload.commit_sha)"
         "report_utc: $($payload.report_utc)"
@@ -200,14 +225,18 @@ try {
     $script:RepoRoot = Resolve-AiOsRepoRoot
     Set-Location -LiteralPath $script:RepoRoot
 
-    Assert-CleanGit -Stage "START"
+    if (-not $ReportOnlyForTest) {
+        Assert-CleanGit -Stage "START"
+    }
     Test-EvidenceDay
 
-    Invoke-Checked -Stage "PYTEST_DEMO_DAY_RUNNER" -Command "python" -Arguments @("-m", "pytest", "tests/forex_engine/test_demo_day_evidence_runner_v11_script.py", "-q")
-    Invoke-Checked -Stage "DEMO_VERDICT" -Command "pwsh" -Arguments @("-NoProfile", "-File", "scripts/forex_delivery/Get-AiOsDemoVerdict.ps1")
-    Invoke-Checked -Stage "GIT_DIFF_CHECK" -Command "git" -Arguments @("diff", "--check")
+    if (-not $ReportOnlyForTest) {
+        Invoke-Checked -Stage "PYTEST_DEMO_DAY_RUNNER" -Command "python" -Arguments @("-m", "pytest", "tests/forex_engine/test_demo_day_evidence_runner_v11_script.py", "-q")
+        Invoke-Checked -Stage "DEMO_VERDICT" -Command "pwsh" -Arguments @("-NoProfile", "-File", "scripts/forex_delivery/Get-AiOsDemoVerdict.ps1")
+        Invoke-Checked -Stage "GIT_DIFF_CHECK" -Command "git" -Arguments @("diff", "--check")
 
-    Assert-CleanGit -Stage "FINAL"
+        Assert-CleanGit -Stage "FINAL"
+    }
     Write-OrchestratorReports
     exit 0
 }

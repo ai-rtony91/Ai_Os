@@ -1,0 +1,50 @@
+name: AIOS Daily Forex Continuation Router
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "37 1 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  daily-forex-continuation-router:
+    name: Daily Forex Continuation Router
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pytest
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+
+      - name: Run router tests
+        run: python -m pytest tests/forex_engine/test_daily_forex_continuation_router_v1.py -q
+
+      - name: Run AIOS daily Forex continuation router
+        shell: pwsh
+        env:
+          AIOS_REPO_ROOT: ${{ github.workspace }}
+        run: |
+          pwsh -NoProfile -File scripts/forex_delivery/Invoke-AiOsDailyForexContinuationRouter.ps1 -ReportDirectory "$env:RUNNER_TEMP/aios_daily_forex_continuation_router"
+
+      - name: Upload continuation router artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aios-daily-forex-continuation-router
+          path: ${{ runner.temp }}/aios_daily_forex_continuation_router
+          if-no-files-found: warn
