@@ -248,6 +248,36 @@ function Read-AiOsTaskPacket {
         }
     }
 
+    $promptText = ""
+    if ($packet.PSObject.Properties["prompt_path"] -or $packet.PSObject.Properties["prompt_sha256"]) {
+        foreach ($field in @("prompt_path", "prompt_sha256", "prompt_text", "approval_required", "protected_action_flags")) {
+            if (-not $packet.PSObject.Properties[$field]) {
+                return [pscustomobject]@{ ok = $false; id = [string]$packet.id; reason = "PACKET_INCOMPLETE"; detail = "Prompt-backed task missing field: $field" }
+            }
+        }
+        $promptPath = [string]$packet.prompt_path
+        if (-not [System.IO.Path]::IsPathRooted($promptPath) -or -not (Test-Path -LiteralPath $promptPath -PathType Leaf)) {
+            return [pscustomobject]@{ ok = $false; id = [string]$packet.id; reason = "PROMPT_VALIDATION_FAILED"; detail = "Prompt path must be an existing absolute file." }
+        }
+        $actualDigest = (Get-FileHash -LiteralPath $promptPath -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($actualDigest -ne ([string]$packet.prompt_sha256).ToLowerInvariant()) {
+            return [pscustomobject]@{ ok = $false; id = [string]$packet.id; reason = "PROMPT_SHA256_MISMATCH"; detail = "Prompt digest changed before dispatch." }
+        }
+        $promptText = Get-Content -Raw -LiteralPath $promptPath
+        if ($promptText -ne [string]$packet.prompt_text) {
+            return [pscustomobject]@{ ok = $false; id = [string]$packet.id; reason = "PROMPT_CONTENT_MISMATCH"; detail = "Stored prompt content differs from source." }
+        }
+        if ([bool]$packet.approval_required) {
+            return [pscustomobject]@{ ok = $false; id = [string]$packet.id; reason = "APPROVAL_REQUIRED"; detail = "Protected prompt cannot be dispatched from inbox." }
+        }
+        $promptAllowed = @($promptText -split "\r?\n" | Select-String -Pattern '^\s*-\s+(.+)$' | ForEach-Object { $_.Matches[0].Groups[1].Value.Trim().Replace('\','/') })
+        foreach ($allowed in @($packet.allowed_paths)) {
+            if ([string]$allowed -notin $promptAllowed) {
+                return [pscustomobject]@{ ok = $false; id = [string]$packet.id; reason = "ALLOWED_PATH_MISMATCH"; detail = "Task allowed paths do not match the validated prompt." }
+            }
+        }
+    }
+
     return [pscustomobject]@{
         ok = $true
         packet = $packet
@@ -259,6 +289,7 @@ function Read-AiOsTaskPacket {
         tier = [string]$packet.tier
         mission = [string]$packet.mission
         allowed_paths = @($packet.allowed_paths | ForEach-Object { [string]$_ })
+        prompt_text = $promptText
     }
 }
 
@@ -336,10 +367,13 @@ function Invoke-AiOsProviderWorker {
         [Parameter(Mandatory = $true)][string[]]$ProviderArgs,
         [Parameter(Mandatory = $true)][string]$Tier,
         [Parameter(Mandatory = $true)][string]$Mission,
-        [Parameter(Mandatory = $true)][string[]]$AllowedPaths
+        [Parameter(Mandatory = $true)][string[]]$AllowedPaths,
+        [AllowEmptyString()][string]$PromptText = ""
     )
 
-    if ($Provider -eq "claude") {
+    if (-not [string]::IsNullOrWhiteSpace($PromptText)) {
+        $stdin = $PromptText
+    } elseif ($Provider -eq "claude") {
         $stdin = $Mission
     } else {
         $stdin = @(
@@ -525,7 +559,7 @@ function Complete-AiOsRelayWorkerPacket {
             Write-AiOsRelayLog "[WORKER] $($parsed.id) running -> inbox reason=FILE_LOCK_DEFERRED deferred_until=$($lock.defer_until_utc) path=$target"
             return "SKIPPED"
         }
-        $result = Invoke-AiOsProviderWorker -Worker $parsed.worker -Provider $parsed.provider -ProviderCommand $parsed.provider_command -ProviderArgs $parsed.provider_args -Tier $parsed.tier -Mission $parsed.mission -AllowedPaths $parsed.allowed_paths
+        $result = Invoke-AiOsProviderWorker -Worker $parsed.worker -Provider $parsed.provider -ProviderCommand $parsed.provider_command -ProviderArgs $parsed.provider_args -Tier $parsed.tier -Mission $parsed.mission -AllowedPaths $parsed.allowed_paths -PromptText $parsed.prompt_text
         $costRecord = Resolve-AiOsWorkerCostRecord -ProviderResult $result -DefaultEstimateUsd $DefaultEstimateUsd
         [void](& "$PSScriptRoot\..\cost\Add-AiOsCostLedgerEntry.ps1" -CycleId $cycleId -Cost $costRecord.cost_usd -InputTokens $costRecord.input_tokens -OutputTokens $costRecord.output_tokens -PacketId $parsed.id -Worker $parsed.worker -Estimated $costRecord.estimated -EstimateReason $costRecord.estimate_reason)
         Write-AiOsRelayLog "[WORKER] $($parsed.id) cost_ledger cost_usd=$($costRecord.cost_usd) estimated=$($costRecord.estimated) estimate_reason=$($costRecord.estimate_reason) cycle_id=$cycleId"

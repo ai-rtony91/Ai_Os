@@ -264,6 +264,12 @@ Lane: Forex / autonomy finisher / overnight continuous execution
 ## VALIDATOR CHAIN
 {validator_chain}
 
+## PREFLIGHT
+pwd
+git status --short --branch
+git diff --name-status
+git diff --cached --name-status
+
 ## STOP POINT
 {stop_point}
 
@@ -443,7 +449,8 @@ def _find_unknown_dirty_files(
 
 
 def collect_campaign_state(repo_root: str = "C:\\Dev\\Ai.Os") -> CampaignState:
-    root = Path(repo_root).resolve()
+    configured_root = Path(repo_root)
+    root = configured_root.resolve() if configured_root.exists() else Path.cwd().resolve()
     branch = _run_git_command(("branch", "--show-current"), root) or "unknown"
     head = _run_git_command(("rev-parse", "--short", "HEAD"), root) or "unknown"
     dirty_files = _collect_dirty_files(root)
@@ -471,7 +478,7 @@ def _read_or_default_state(state_path: Path) -> CampaignState:
         campaign_id=CAMPAIGN_ID,
         current_branch=collect_campaign_state().current_branch,
         head=collect_campaign_state().head,
-        dirty_files=_collect_dirty_files(Path("C:\\\\Dev\\\\Ai.Os")),
+        dirty_files=collect_campaign_state().dirty_files,
         completed_stage_ids=tuple(payload.get("completed_stage_ids", ())),
         active_stage_id=payload.get("selected_stage_id", ""),
         hard_blockers=tuple(payload.get("blockers", ())),
