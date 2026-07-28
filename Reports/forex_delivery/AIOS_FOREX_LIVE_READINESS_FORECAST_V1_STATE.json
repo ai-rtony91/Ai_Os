@@ -1,5 +1,5 @@
 {
-  "as_of_utc": "2026-07-27T00:00:00Z",
+  "as_of_utc": "2026-07-28T00:00:00Z",
   "category_scores": {
     "demo_evidence": {
       "criteria_passed": 0,
@@ -790,7 +790,7 @@
     "criteria_closed_today": [],
     "criteria_reopened_today": [],
     "critical_path_change": null,
-    "current_as_of_utc": "2026-07-27T00:00:00Z",
+    "current_as_of_utc": "2026-07-28T00:00:00Z",
     "daily_delta_status": "COMPARED",
     "forecast_change": null,
     "new_blockers_today": [],
