@@ -7,6 +7,7 @@ from typing import Any
 
 
 SCHEMA = "AIOS_CODEX_PACKET_BUILDER.v1"
+REPOSITORY_ALIGNED_SCHEMA = "AIOS_REPOSITORY_ALIGNED_APPLY_PACKET.v1"
 DEFAULT_RELAY_DIR = Path("Reports/aios_relay")
 DEFAULT_APPROVAL_AUTHORITY = (
     "Anthony Meza only approves staging, commit, push, merge, scheduler activation, "
@@ -43,6 +44,151 @@ SAFETY_BLOCKS = [
     "Codex launch/API calls BLOCKED",
     "git staging/commit/push/merge BLOCKED unless Anthony separately approves after report",
 ]
+
+
+def build_repository_aligned_apply_packet(
+    *,
+    repository_state: dict[str, Any] | None,
+    packet_identity: dict[str, str] | None,
+    mission: str,
+    allowed_paths: list[str],
+    validators: list[str],
+    forbidden_paths: list[str] | None = None,
+    approval_authority: str = DEFAULT_APPROVAL_AUTHORITY,
+) -> dict[str, Any]:
+    """Build an APPLY prompt only from explicit, clean repository evidence.
+
+    The function deliberately does not inspect Git itself.  A preflight collector can
+    supply its read-only evidence, which keeps packet generation deterministic and
+    prevents a packet author from inventing a branch or worktree.
+    """
+    state = repository_state if isinstance(repository_state, dict) else {}
+    identity = packet_identity if isinstance(packet_identity, dict) else {}
+    required_identity = (
+        "mission_id",
+        "mission_name",
+        "program_id",
+        "program_name",
+        "epic_id",
+        "epic_name",
+        "bucket_id",
+        "bucket_name",
+        "packet_id",
+        "packet_name",
+        "supervisor_identity",
+        "zone",
+        "worker_identity",
+        "lane",
+        "stop_point",
+    )
+    missing_identity = [field for field in required_identity if not str(identity.get(field, "")).strip()]
+    worktree = str(state.get("worktree", "")).strip()
+    branch = str(state.get("branch", "")).strip()
+    status_lines = [str(line).strip() for line in state.get("status_lines", []) if str(line).strip()]
+    scope = [str(path).strip() for path in allowed_paths if str(path).strip()]
+    checks = [str(command).strip() for command in validators if str(command).strip()]
+
+    reason = ""
+    details: dict[str, Any] = {}
+    if missing_identity:
+        reason = "identity_fields_missing"
+        details["missing_identity_fields"] = missing_identity
+    elif not worktree or not branch:
+        reason = "repository_state_missing"
+    elif status_lines:
+        reason = "repository_dirty"
+        details["dirty_files"] = status_lines
+    elif not mission.strip():
+        reason = "mission_missing"
+    elif not scope:
+        reason = "allowed_paths_missing"
+    elif not checks:
+        reason = "validator_chain_missing"
+
+    packet_id = str(identity.get("packet_id", "NONE"))
+    if reason:
+        return {
+            "schema": REPOSITORY_ALIGNED_SCHEMA,
+            "packet_ready": False,
+            "packet_id": packet_id,
+            "reason_code": reason,
+            "repository_state": {"worktree": worktree, "branch": branch, "status_lines": status_lines},
+            "codex_prompt_text": "",
+            "write_scope": scope,
+            "validator_chain": checks,
+            **details,
+            "next_safe_action": "Stop and resolve the reported preflight defect before generating an APPLY packet.",
+        }
+
+    denied = [str(path).strip() for path in (forbidden_paths or ["All paths outside ALLOWED PATHS."]) if str(path).strip()]
+    identity_lines = [
+        f"MISSION ID: {identity['mission_id']}",
+        f"MISSION NAME: {identity['mission_name']}",
+        f"PROGRAM ID: {identity['program_id']}",
+        f"PROGRAM NAME: {identity['program_name']}",
+        f"EPIC ID: {identity['epic_id']}",
+        f"EPIC NAME: {identity['epic_name']}",
+        f"BUCKET ID: {identity['bucket_id']}",
+        f"BUCKET NAME: {identity['bucket_name']}",
+        f"PACKET ID: {packet_id}",
+        f"PACKET NAME: {identity['packet_name']}",
+    ]
+    prompt = "\n".join(
+        [
+            "CODEX-ONLY PROMPT",
+            "",
+            "AI_OS EXECUTION TOKEN",
+            "AI_OS BOOTSTRAP REQUIRED",
+            "IDENTITY MARKER: AIOS_GOVERNED_APPLY_PACKET",
+            *identity_lines,
+            f"SUPERVISOR IDENTITY: {identity['supervisor_identity']}",
+            "MODE: APPLY",
+            f"ZONE: {identity['zone']}",
+            f"WORKER IDENTITY: {identity['worker_identity']}",
+            f"LANE: {identity['lane']}",
+            f"WORKTREE: {worktree}",
+            f"BRANCH: {branch}",
+            f"APPROVAL AUTHORITY: {approval_authority}",
+            "",
+            "PREFLIGHT EVIDENCE:",
+            f"Observed worktree: {worktree}",
+            f"Observed branch: {branch}",
+            "Observed dirty files: none",
+            "Re-run pwd, git status --short --branch, git branch --show-current, and git remote -v. Stop with AIOS-PROMPT-AUTH-STATE-MISMATCH if the observations differ.",
+            "",
+            "MISSION:",
+            mission.strip(),
+            "",
+            "ALLOWED PATHS:",
+            *scope,
+            "",
+            "FORBIDDEN PATHS:",
+            *denied,
+            "",
+            "VALIDATOR CHAIN:",
+            *checks,
+            "",
+            "FINAL REPORT FORMAT:",
+            "SUMMARY; WHAT CHANGED; FILES CHANGED; VALIDATION; REMAINING DIRTY FILES; SAFE NEXT COMMAND; STATUS.",
+            "",
+            f"STOP POINT: {identity['stop_point']}",
+            "Do not stage, commit, push, merge, access credentials, contact a broker, or place an order.",
+        ]
+    )
+    return {
+        "schema": REPOSITORY_ALIGNED_SCHEMA,
+        "packet_ready": True,
+        "packet_id": packet_id,
+        "reason_code": "packet_ready",
+        "repository_state": {"worktree": worktree, "branch": branch, "status_lines": []},
+        "identity_chain": {field: identity[field] for field in required_identity},
+        "codex_prompt_text": prompt,
+        "write_scope": scope,
+        "forbidden_paths": denied,
+        "validator_chain": checks,
+        "safety_blocks": list(SAFETY_BLOCKS),
+        "next_safe_action": "Present the repository-aligned packet for Human Owner review; do not execute it automatically.",
+    }
 
 
 def _blank_packet(reason_code: str) -> dict[str, Any]:
