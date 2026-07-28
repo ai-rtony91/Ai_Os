@@ -86,3 +86,76 @@ def test_source_has_no_command_or_external_call_imports():
     source = MODULE_PATH.read_text(encoding="utf-8")
     assert "subprocess" not in source
     assert "requests" not in source
+
+
+def repository_identity() -> dict[str, str]:
+    return {
+        "mission_id": "MISSION-FOREX-PROFIT-STAGES",
+        "mission_name": "Forex profit-stage completion",
+        "program_id": "PROGRAM-FOREX",
+        "program_name": "Trading Lab Forex",
+        "epic_id": "EPIC-PAPER-EVIDENCE",
+        "epic_name": "Paper profitability evidence",
+        "bucket_id": "BUCKET-PACKET-GENERATION",
+        "bucket_name": "Governed packet generation",
+        "packet_id": "PKT-FOREX-REPO-ALIGNED-APPLY-001",
+        "packet_name": "Repository-aligned APPLY packet",
+        "supervisor_identity": "Codex East Worksite Supervisor",
+        "zone": "EAST",
+        "worker_identity": "EAST_OCC_01",
+        "lane": "forex-paper-profit-stage-packet-generator",
+        "stop_point": "Report after validation; no protected Git or broker action.",
+    }
+
+
+def test_repository_aligned_builder_uses_observed_state_and_full_identity():
+    module = load_module()
+    packet = module.build_repository_aligned_apply_packet(
+        repository_state={"worktree": "/workspace/Ai_Os", "branch": "work", "status_lines": []},
+        packet_identity=repository_identity(),
+        mission="Implement the bounded paper-only profitability evidence stage.",
+        allowed_paths=["automation/orchestration/aios_codex_packet_builder.py"],
+        validators=["python -m pytest tests/orchestration/test_aios_codex_packet_builder.py"],
+    )
+
+    assert packet["packet_ready"] is True
+    assert packet["repository_state"]["branch"] == "work"
+    text = packet["codex_prompt_text"]
+    assert text.startswith("CODEX-ONLY PROMPT\n")
+    assert "BRANCH: work" in text
+    assert "MISSION ID: MISSION-FOREX-PROFIT-STAGES" in text
+    assert "STOP POINT:" in text
+    assert "FINAL REPORT FORMAT:" in text
+
+
+def test_repository_aligned_builder_fails_closed_for_dirty_repository():
+    module = load_module()
+    packet = module.build_repository_aligned_apply_packet(
+        repository_state={"worktree": "/workspace/Ai_Os", "branch": "work", "status_lines": [" M unsafe.py"]},
+        packet_identity=repository_identity(),
+        mission="Implement a bounded change.",
+        allowed_paths=["safe.py"],
+        validators=["python -m pytest"],
+    )
+
+    assert packet["packet_ready"] is False
+    assert packet["reason_code"] == "repository_dirty"
+    assert packet["codex_prompt_text"] == ""
+    assert packet["dirty_files"] == ["M unsafe.py"]
+
+
+def test_repository_aligned_builder_rejects_incomplete_identity():
+    module = load_module()
+    identity = repository_identity()
+    identity.pop("bucket_id")
+    packet = module.build_repository_aligned_apply_packet(
+        repository_state={"worktree": "/workspace/Ai_Os", "branch": "work", "status_lines": []},
+        packet_identity=identity,
+        mission="Implement a bounded change.",
+        allowed_paths=["safe.py"],
+        validators=["python -m pytest"],
+    )
+
+    assert packet["packet_ready"] is False
+    assert packet["reason_code"] == "identity_fields_missing"
+    assert packet["missing_identity_fields"] == ["bucket_id"]
