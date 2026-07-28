@@ -23,6 +23,9 @@ VALIDATOR_NAME = "aios_runtime_execution_queue_validator"
 SCHEMA = "AIOS_RUNTIME_EXECUTION_QUEUE_INTEGRITY.v1"
 EXPECTED_VIEW_SCHEMA = "AIOS_RUNTIME_EXECUTION_QUEUE.v1"
 CANONICAL_STATES = {"QUEUED", "RUNNING", "DONE", "ERROR", "BLOCKED", "DEFERRED"}
+CANONICAL_PRIORITIES = {"P0", "P1", "P2", "P3"}
+CANONICAL_MODES = {"DRY_RUN", "APPLY"}
+CANONICAL_APPROVAL_STATES = {"NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED"}
 
 
 def _now() -> str:
@@ -66,11 +69,43 @@ def validate_queue_view(view: Any, input_path: str = "<queue-view>") -> dict[str
     findings.append(_finding("RQV-004-IDS-PRESENT", True,
                              "Items with synthesized ids are surfaced (informational).", synthetic))
 
+    # 5. autonomous-development scheduling metadata is internally consistent
+    extended_contract = isinstance(view.get("contract"), dict)
+    invalid_contract = []
+    for item in items if extended_contract else []:
+        dependencies = item.get("depends_on")
+        attempt = item.get("attempt")
+        max_attempts = item.get("max_attempts")
+        valid = (
+            item.get("priority") in CANONICAL_PRIORITIES
+            and item.get("mode") in CANONICAL_MODES
+            and item.get("approval_state") in CANONICAL_APPROVAL_STATES
+            and isinstance(dependencies, list)
+            and item.get("id") not in dependencies
+            and isinstance(attempt, int) and not isinstance(attempt, bool) and attempt >= 0
+            and isinstance(max_attempts, int) and not isinstance(max_attempts, bool) and max_attempts >= 1
+            and attempt <= max_attempts
+        )
+        if not valid:
+            invalid_contract.append(item.get("id"))
+    findings.append(_finding("RQV-005-AUTONOMY-CONTRACT", not invalid_contract,
+                             "Autonomous workflow metadata is valid.", invalid_contract))
+
+    # 6. APPLY remains human-gated; normalization must never manufacture approval
+    ungated_apply = [
+        item.get("id") for item in items
+        if extended_contract
+        if item.get("mode") == "APPLY"
+        and (not item.get("approval_required") or item.get("approval_state") != "APPROVED")
+    ]
+    findings.append(_finding("RQV-006-APPLY-APPROVAL", not ungated_apply,
+                             "Every APPLY item carries explicit approval.", ungated_apply))
+
     return _result(findings, input_path)
 
 
 def _result(findings: list[dict], input_path: str, malformed: bool = False) -> dict[str, object]:
-    # BLOCK-severity checks are 000-003; 004 is informational only.
+    # All checks except 004 are blocking integrity checks.
     blocking = [f for f in findings if not f["passed"] and f["check_id"] != "RQV-004-IDS-PRESENT"]
     status = "BLOCK" if (blocking or malformed) else "PASS"
     return {

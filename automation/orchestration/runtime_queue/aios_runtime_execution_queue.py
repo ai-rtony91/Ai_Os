@@ -34,6 +34,9 @@ SCHEMA = "AIOS_RUNTIME_EXECUTION_QUEUE.v1"
 DEFAULT_REPORT_SUBDIR = Path("Reports") / "runtime_queue"
 
 CANONICAL_STATES = {"QUEUED", "RUNNING", "DONE", "ERROR", "BLOCKED", "DEFERRED"}
+CANONICAL_PRIORITIES = {"P0", "P1", "P2", "P3"}
+CANONICAL_MODES = {"DRY_RUN", "APPLY"}
+CANONICAL_APPROVAL_STATES = {"NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED"}
 
 STATE_SYNONYMS = {
     "pending": "QUEUED", "queued": "QUEUED", "waiting": "QUEUED", "new": "QUEUED",
@@ -94,6 +97,24 @@ def _first(raw: dict, *keys: str) -> Any:
     return None
 
 
+def _string_list(value: Any) -> list[str]:
+    """Return a deterministic string list without accepting scalar lookalikes."""
+    if not isinstance(value, list):
+        return []
+    return list(dict.fromkeys(str(item) for item in value if item not in (None, "")))
+
+
+def _nonnegative_int(value: Any, default: int) -> int:
+    """Normalize counters while rejecting booleans and negative values."""
+    if isinstance(value, bool):
+        return default
+    try:
+        normalized = int(value)
+    except (TypeError, ValueError):
+        return default
+    return normalized if normalized >= 0 else default
+
+
 def normalize_item(raw: Any, source: str, index: int) -> dict[str, object]:
     """Normalize one raw source record into a canonical queue item. Read-only."""
     raw = raw if isinstance(raw, dict) else {"value": raw}
@@ -105,8 +126,29 @@ def normalize_item(raw: Any, source: str, index: int) -> dict[str, object]:
     norm_state = STATE_SYNONYMS.get(str(raw_state).strip().lower(), str(raw_state).strip().upper())
 
     kind = _first(raw, "kind", "type", "worker", "provider", "lane") or "unknown"
-    allowed = raw.get("allowed_paths") if isinstance(raw.get("allowed_paths"), list) else []
+    allowed = _string_list(raw.get("allowed_paths"))
     created = _first(raw, "created_utc", "created_at", "created", "timestamp_utc")
+
+    priority = str(_first(raw, "priority", "queue_priority") or "P2").strip().upper()
+    if priority not in CANONICAL_PRIORITIES:
+        priority = "P2"
+    mode = str(_first(raw, "mode", "execution_mode") or "DRY_RUN").strip().upper()
+    if mode not in CANONICAL_MODES:
+        mode = "DRY_RUN"
+
+    approval_required = bool(raw.get("approval_required")) or mode == "APPLY"
+    default_approval = "PENDING" if approval_required else "NOT_REQUIRED"
+    approval_state = str(raw.get("approval_state") or default_approval).strip().upper()
+    if approval_state not in CANONICAL_APPROVAL_STATES:
+        approval_state = default_approval
+
+    attempt = _nonnegative_int(_first(raw, "attempt", "attempt_count"), 0)
+    max_attempts = max(1, _nonnegative_int(raw.get("max_attempts"), 1))
+    dependencies = _string_list(_first(raw, "depends_on", "dependencies"))
+    forbidden_paths = _string_list(raw.get("forbidden_paths"))
+    packet_id = _first(raw, "packet_id", "task_id", "command_id")
+    branch = _first(raw, "branch", "target_branch")
+    worktree = _first(raw, "worktree", "worktree_path")
 
     protected = bool(raw.get("protected_action")) or bool(PROTECTED_RE.search(json.dumps(raw, default=str)))
 
@@ -117,7 +159,18 @@ def normalize_item(raw: Any, source: str, index: int) -> dict[str, object]:
         "kind": str(kind),
         "state": norm_state,
         "raw_state": str(raw_state),
-        "allowed_paths": [str(p) for p in allowed],
+        "priority": priority,
+        "mode": mode,
+        "depends_on": dependencies,
+        "attempt": attempt,
+        "max_attempts": max_attempts,
+        "approval_required": approval_required,
+        "approval_state": approval_state,
+        "packet_id": str(packet_id) if packet_id is not None else None,
+        "branch": str(branch) if branch is not None else None,
+        "worktree": str(worktree) if worktree is not None else None,
+        "allowed_paths": allowed,
+        "forbidden_paths": forbidden_paths,
         "protected_action": protected,
         "created_utc": str(created) if created is not None else None,
     }
@@ -209,6 +262,15 @@ def build_queue_view(
         "state_counts": state_counts,
         "protected_item_count": sum(1 for it in items if it["protected_action"]),
         "canonical_states": sorted(CANONICAL_STATES),
+        "contract": {
+            "purpose": "autonomous_development_workflow",
+            "priority_order": ["P0", "P1", "P2", "P3"],
+            "modes": sorted(CANONICAL_MODES),
+            "approval_states": sorted(CANONICAL_APPROVAL_STATES),
+            "apply_requires_approval": True,
+            "dependency_semantics": "An item may run only after every depends_on item is DONE.",
+            "retry_semantics": "attempt must remain below max_attempts before another claim.",
+        },
         "safe_next_action": (
             "Read-only normalized view. Run the integrity validator before any later "
             "drain/wiring packet consumes it. This view enqueues, dispatches, and executes nothing."

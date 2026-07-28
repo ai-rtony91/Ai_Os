@@ -97,6 +97,67 @@ def test_protected_item_flagged(tmp_path):
     assert view["protected_item_count"] >= 1
 
 
+def test_autonomous_development_fields_are_normalized(tmp_path):
+    q = _q()
+    inbox = tmp_path / "relay" / "inbox"
+    inbox.mkdir(parents=True)
+    inbox.joinpath("build.task.json").write_text(json.dumps({
+        "id": "build-2",
+        "packet_id": "PKT-BUILD-2",
+        "status": "pending",
+        "priority": "p1",
+        "mode": "dry_run",
+        "depends_on": ["build-1", "build-1"],
+        "attempt_count": 1,
+        "max_attempts": 3,
+        "branch": "feature/build-2",
+        "worktree": "/workspace/build-2",
+        "allowed_paths": ["src/"],
+        "forbidden_paths": ["RISK_POLICY.md"],
+    }), encoding="utf-8")
+
+    view = q.build_queue_view(tmp_path)
+    item = view["items"][0]
+    assert item["priority"] == "P1"
+    assert item["mode"] == "DRY_RUN"
+    assert item["depends_on"] == ["build-1"]
+    assert item["attempt"] == 1 and item["max_attempts"] == 3
+    assert item["approval_state"] == "NOT_REQUIRED"
+    assert item["packet_id"] == "PKT-BUILD-2"
+    assert view["contract"]["purpose"] == "autonomous_development_workflow"
+
+
+def test_validator_blocks_apply_without_explicit_approval(tmp_path):
+    q, v = _q(), _v()
+    inbox = tmp_path / "relay" / "inbox"
+    inbox.mkdir(parents=True)
+    inbox.joinpath("apply.task.json").write_text(json.dumps({
+        "id": "apply-1", "mode": "APPLY", "approval_state": "PENDING"
+    }), encoding="utf-8")
+
+    result = v.validate_queue_view(q.build_queue_view(tmp_path))
+    assert result["status"] == "BLOCK"
+    assert "RQV-006-APPLY-APPROVAL" in result["blocking_findings"]
+
+
+def test_validator_blocks_invalid_retry_or_self_dependency():
+    q, v = _q(), _v()
+    item = q.normalize_item({"id": "bad"}, "test", 0)
+    item["depends_on"] = ["bad"]
+    item["attempt"] = 2
+    item["max_attempts"] = 1
+    view = {
+        "schema": q.SCHEMA,
+        "contract": {"purpose": "autonomous_development_workflow"},
+        "items": [item],
+        "id_collisions": [],
+    }
+
+    result = v.validate_queue_view(view)
+    assert result["status"] == "BLOCK"
+    assert "RQV-005-AUTONOMY-CONTRACT" in result["blocking_findings"]
+
+
 def test_missing_and_malformed_sources_are_failsoft(tmp_path):
     q = _q()
     # only a malformed command queue, nothing else
