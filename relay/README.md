@@ -84,3 +84,42 @@ New-Item -ItemType File -Path relay/STOP.flag -Force
 ```
 
 At the top of each poll loop, the worker exits cleanly when `relay/STOP.flag` exists. Delete the file before starting the next worker run.
+
+## Self-Consuming Codex Cycle V1
+
+The self-consuming bridge reuses the Forex campaign manager as the prompt
+generator and this relay as the only queue and worker. It does not introduce a
+second supervisor or packet authority:
+
+```text
+campaign manager -> validated prompt -> relay task -> existing Codex provider
+                 <- done/error/approval state <- output validation
+```
+
+`aios_codex_prompt_consumer_v1.py` requires a complete tokenized packet,
+computes its SHA-256 digest, preserves the exact prompt for standard input, and
+atomically writes one Codex task. It deduplicates that digest across `inbox`,
+`running`, `done`, `error`, and `approvals`. Protected actions are represented
+by explicit boolean flags; any true flag routes directly to `approvals`, while
+missing or malformed flags fail closed. Negative safety statements in prompt
+prose do not by themselves require approval.
+
+One-shot validation without task creation or Codex execution:
+
+```bash
+python automation/orchestration/relay/aios_self_consuming_codex_cycle_v1.py \
+  Reports/forex_delivery/AIOS_FOREX_AUTONOMOUS_CAMPAIGN_MANAGER_NEXT_CODEX_PROMPT_V1.md \
+  --dry-run
+```
+
+Bounded APPLY dispatch is limited by default to 12 cycles and 480 minutes, with
+one relay worker packet at a time and no parallel writes. It stops on
+`relay/STOP.flag`, approval, error, unchanged or duplicate prompts, unavailable
+Codex/PowerShell runtime, ambiguous state, workflow completion, or either
+limit. The existing relay timeout, cost, lock, output-validation, and lifecycle
+folders remain authoritative.
+
+The next PR-lifecycle handoff can be printed with `--print-next-packet`; it is
+generated as a DRY_RUN packet and is never executed by this cycle. This change
+does not activate a scheduler, service, GitHub workflow, broker integration, or
+live-trading path.
