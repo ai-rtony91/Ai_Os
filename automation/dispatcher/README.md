@@ -42,3 +42,11 @@ Dispatcher folders:
 - `recovery/` stores crash recovery state.
 - `validators/` stores DRY_RUN validation helpers.
 
+## Development dispatch preview
+
+`automation/orchestration/runtime_queue/aios_development_dispatcher.py` turns an
+`AIOS_RUNTIME_EXECUTION_QUEUE.v1` view into a deterministic, capacity-bounded
+claim preview. It honors priority, dependencies, retry limits, protected-action
+blocks, and APPLY approval state. The preview never changes a queue, launches a
+worker, grants approval, or performs broker/live execution; every selected item
+must still pass through the existing governed assignment and approval gates.
