@@ -1,5 +1,14 @@
 # AI_OS Orchestration
 
+## Platform V1 public API
+
+`automation.orchestration.platform` is the canonical integration surface for
+queue, dispatcher, packet builder/generator, resolver, orchestration spine,
+validation, reporting, and countdown behavior. Existing modules remain
+backward-compatible implementation and CLI surfaces. New callers should use the
+facade rather than duplicating component composition. See
+`docs/orchestration/AIOS_ORCHESTRATION_PLATFORM_V1_MIGRATION.md`.
+
 This folder holds safe control files for AI_OS worker coordination.
 
 The goal is simple: before a worker starts, AI_OS should know which packet the worker is allowed to handle, which paths are allowed, which paths are blocked, which approval gate applies, and which validation is required.
