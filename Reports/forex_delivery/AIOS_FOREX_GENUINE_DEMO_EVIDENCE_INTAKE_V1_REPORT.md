@@ -1,13 +1,13 @@
 # 🧪 AIOS FOREX — GENUINE DEMO EVIDENCE
 
 ## 🔴 CURRENT ANSWER
-`BLOCKED_SENSITIVE_DATA_RISK`
+`BLOCKED_GENUINE_DEMO_EVIDENCE_NOT_FOUND`
 
 ## ✅ QUALIFYING EVIDENCE
 0 qualifying record(s).
 
 ## 🚫 EXCLUDED EVIDENCE
-296 excluded record(s).
+1 excluded record(s).
 
 ## ⚠️ CONFLICTS AND DATA QUALITY
 0 conflict(s); 0 parse failure(s).

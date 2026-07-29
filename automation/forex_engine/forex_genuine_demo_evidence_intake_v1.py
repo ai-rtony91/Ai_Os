@@ -16,6 +16,7 @@ DEMO_CRITERIA = (
     "DEMO_SYSTEM_MINIMUM", "DEMO_RECEIPT_READY", "POST_TRADE_REVIEW_READY",
 )
 OWNER_TASK = "CAPTURE_ONE_SANITIZED_OANDA_PRACTICE_TRADE_RECEIPT"
+SANITIZED_INTAKE_DIRECTORY = "telemetry/forex/sanitized_oanda_practice_evidence"
 REQUIRED_FIELDS = (
     "evidence schema", "evidence timestamp", "session date", "broker family label",
     "environment DEMO or PRACTICE", "instrument", "side", "sanitized size or units",
@@ -28,7 +29,16 @@ REQUIRED_FIELDS = (
     "credential_values_recorded false", "account_identifiers_recorded false",
     "live_trading_allowed false", "money_movement_allowed false",
 )
-SENSITIVE_KEYS = {"access_token", "api_key", "account_id", "account_identifier", "broker_order_id", "authorization"}
+FALSE_SAFETY_FLAGS = (
+    "secret_values_recorded", "credential_values_recorded", "private_identifiers_recorded",
+    "account_identifiers_recorded", "raw_broker_payload_recorded", "live_trading_allowed",
+    "money_movement_allowed",
+)
+SENSITIVE_KEYS = {
+    "access_token", "api_key", "account_id", "account_identifier", "broker_order_id",
+    "authorization", "authorization_header", "raw_request", "raw_response", "balance",
+    "private_screenshot",
+}
 
 
 def _iso(value: str | None) -> datetime | None:
@@ -77,14 +87,23 @@ def classify_genuine_demo_source(source_path: str, payload: Any, *, as_of_date: 
                   record_type=get("record_type", "evidence_type", "day_type"),
                   trade_state=str(get("trade_state", "state") or "").upper() or None)
     trades = payload.get("trades")
-    record["trade_count"] = int(payload.get("trade_count", len(trades) if isinstance(trades, list) else 0) or 0)
+    try:
+        record["trade_count"] = int(payload.get("trade_count", len(trades) if isinstance(trades, list) else 0) or 0)
+    except (TypeError, ValueError, OverflowError):
+        record["trade_count"] = 0
     record["broker_origin_verified"] = payload.get("broker_origin_verified", payload.get("broker_origin_confirmation")) is True
-    false_flags = ("secret_values_recorded", "credential_values_recorded", "private_identifiers_recorded",
-                   "account_identifiers_recorded", "raw_broker_payload_recorded")
-    record["sanitized"] = payload.get("sanitized") is True or all(payload.get(key) is False for key in false_flags)
-    record["secret_values_present"] = any((key in SENSITIVE_KEYS or "credential" in key) and value not in (False, None, "") for key, value in flat)
+    record["sanitized"] = all(payload.get(key) is False for key in FALSE_SAFETY_FLAGS)
+    record["secret_values_present"] = any(
+        (key in SENSITIVE_KEYS or "credential" in key or "access_token" in key or "api_key" in key)
+        and value not in (False, None, "") for key, value in flat
+    )
     record["account_identifiers_present"] = any(("account_id" in key or "account_identifier" in key) and value not in (False, None, "") for key, value in flat)
-    record["raw_broker_payload_present"] = any(("raw_request" in key or "raw_response" in key or "raw_broker_payload" in key) and value not in (False, None, "") for key, value in flat)
+    record["raw_broker_payload_present"] = any(
+        ("raw_request" in key or "raw_response" in key or "raw_broker_payload" in key
+         or "broker_order_id" in key or "authorization" in key or "balance" in key
+         or "private_screenshot" in key) and value not in (False, None, "")
+        for key, value in flat
+    )
     record["fixture_markers_present"] = any(word in text for word in ("fixture", "synthetic", "mock", "initial_stub"))
     record["paper_markers_present"] = "paper_simulation" in text or "paper_signal_execution_loop" in text
     numbers = [value for _, value in flat if isinstance(value, (int, float)) and not isinstance(value, bool)]
@@ -111,7 +130,7 @@ def classify_genuine_demo_source(source_path: str, payload: Any, *, as_of_date: 
     if not record["finite_numeric_fields"]: reasons.append("non-finite numeric value")
     if not evidence_dt: reasons.append("evidence date missing")
     if record["freshness_days"] is not None and record["freshness_days"] > 7: reasons.append("stale evidence")
-    broker_ok = "oanda" in str(record["broker_family"]).lower()
+    broker_ok = str(record["broker_family"]).strip().upper() == "OANDA"
     environment_ok = str(record["environment"]).upper() in {"DEMO", "PRACTICE"}
     state_ok = record["trade_state"] in {"OPEN", "CLOSED"}
     if not broker_ok: reasons.append("supported broker-demo family not verified")
@@ -139,19 +158,14 @@ def classify_genuine_demo_source(source_path: str, payload: Any, *, as_of_date: 
 
 def load_genuine_demo_source_inventory(repo_root: str | Path, *, as_of_date: str | None = None) -> list[dict[str, Any]]:
     root = Path(repo_root).resolve()
-    delivery = root / "Reports/forex_delivery"
-    paths = [root / "telemetry/forex/demo_proof_ledger.jsonl"]
-    generated = {"AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE_V1_STATE.json", "AIOS_FOREX_GENUINE_DEMO_EVIDENCE_INTAKE_V1_REPORT.md", "AIOS_FOREX_LIVE_READINESS_FORECAST_V1_STATE.json", "AIOS_FOREX_LIVE_READINESS_FORECAST_V1_REPORT.md"}
-    paths += sorted(p for p in delivery.glob("*") if p.name not in generated and p.suffix.lower() in {".json", ".jsonl", ".md"} and ("DEMO" in p.name.upper() or "OANDA" in p.name.upper()))
+    intake = root / SANITIZED_INTAKE_DIRECTORY
+    paths = sorted(path for path in intake.glob("*.json") if path.is_file())
     inventory = []
     for path in paths:
         rel = path.relative_to(root).as_posix()
-        if path.suffix.lower() == ".md":
-            inventory.append(classify_genuine_demo_source(rel, {"record_type": "NARRATIVE", "text": path.read_text(encoding="utf-8", errors="replace")[:20000]}, as_of_date=as_of_date))
-            continue
         try:
             text = path.read_text(encoding="utf-8")
-            values = [json.loads(line) for line in text.splitlines() if line.strip()] if path.suffix.lower() == ".jsonl" else [json.loads(text)]
+            values = [json.loads(text)]
             for index, value in enumerate(values):
                 label = f"{rel}#{index + 1}" if len(values) > 1 else rel
                 inventory.append(classify_genuine_demo_source(label, value, as_of_date=as_of_date))

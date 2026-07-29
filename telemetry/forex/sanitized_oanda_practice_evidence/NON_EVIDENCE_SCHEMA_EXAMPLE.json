@@ -1,0 +1,17 @@
+{
+  "account_identifiers_recorded": false,
+  "broker_family": "OANDA",
+  "broker_origin_confirmation": false,
+  "credential_values_recorded": false,
+  "environment": "PRACTICE",
+  "evidence_timestamp": "2000-01-01T00:00:00Z",
+  "live_trading_allowed": false,
+  "money_movement_allowed": false,
+  "private_identifiers_recorded": false,
+  "raw_broker_payload_recorded": false,
+  "record_type": "NON_EVIDENCE_SCHEMA_EXAMPLE",
+  "schema": "AIOS_SANITIZED_DEMO_TRADE.v1",
+  "secret_values_recorded": false,
+  "trade_count": 0,
+  "trade_state": "OPEN"
+}
