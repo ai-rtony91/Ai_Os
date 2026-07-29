@@ -70,11 +70,42 @@ def test_incomplete_nonfinite_and_live_flags_fail_closed():
 
 
 def test_sensitive_account_and_raw_values_fail_without_echo():
-    for key in ("api_key", "account_id", "raw_response"):
+    for key in ("api_key", "account_id", "raw_response", "broker_order_id", "authorization_header", "balance", "private_screenshot"):
         payload = evidence(); payload[key] = "DO-NOT-ECHO"
         item = classify(payload)
         assert not item["accepted_for_genuine_demo"]
         assert "DO-NOT-ECHO" not in json.dumps(item)
+
+
+def test_every_safety_flag_must_be_explicitly_false():
+    m = module()
+    for key in m.FALSE_SAFETY_FLAGS:
+        payload = evidence(); payload.pop(key)
+        assert not classify(payload)["accepted_for_genuine_demo"]
+        payload = evidence(); payload[key] = True
+        assert not classify(payload)["accepted_for_genuine_demo"]
+
+
+def test_inventory_reads_only_approved_json_directory(tmp_path: Path):
+    root = tmp_path
+    approved = root / module().SANITIZED_INTAKE_DIRECTORY
+    approved.mkdir(parents=True)
+    (approved / "receipt.json").write_text(json.dumps(evidence()), encoding="utf-8")
+    (approved / "ignored.md").write_text(json.dumps(evidence()), encoding="utf-8")
+    elsewhere = root / "Reports/forex_delivery"; elsewhere.mkdir(parents=True)
+    (elsewhere / "OANDA_DEMO.json").write_text(json.dumps(evidence()), encoding="utf-8")
+    inventory = module().load_genuine_demo_source_inventory(root, as_of_date="2026-07-27")
+    assert len(inventory) == 1
+    assert inventory[0]["source_path"].startswith(module().SANITIZED_INTAKE_DIRECTORY)
+
+
+def test_non_evidence_example_receives_zero_credit():
+    path = ROOT / "telemetry/forex/sanitized_oanda_practice_evidence/NON_EVIDENCE_SCHEMA_EXAMPLE.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    item = classify(payload, path.relative_to(ROOT).as_posix())
+    assert not item["accepted_for_genuine_demo"]
+    state = module().build_genuine_demo_evidence_bundle([item], as_of_date="2026-07-27")
+    assert not any(criterion["counted_for_progress"] for criterion in state["criteria_evidence"])
 
 
 def test_bundle_open_receipt_passes_only_nonterminal_criteria():
