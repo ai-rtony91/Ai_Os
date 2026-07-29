@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema", "mode", "generated_at_utc", "status", "controller_registry", "task_catalog", "dependency_graph", "queue_plan", "economic_anchor", "coverage", "blockers", "next_verified_task", "owner_action_required", "permissions", "protected_actions", "evidence_limitations"],
+  "properties": {
+    "schema": {"const": "AIOS_CANONICAL_ORCHESTRATION_SPINE.v1"},
+    "mode": {"const": "READ_ONLY_ORCHESTRATION_PREVIEW"},
+    "queue_plan": {"type": "object", "required": ["queue_mutation_performed", "worker_dispatch_performed"], "properties": {"queue_mutation_performed": {"const": false}, "worker_dispatch_performed": {"const": false}}},
+    "protected_actions": {"type": "object", "additionalProperties": {"const": false}},
+    "permissions": {"type": "object", "additionalProperties": {"const": false}}
+  },
+  "additionalProperties": true
+}
