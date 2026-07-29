@@ -124,7 +124,11 @@ function Invoke-ContinuationPlan {
         return $null
     }
     try {
-        $raw = & powershell -NoProfile -ExecutionPolicy Bypass -File $ScriptPath -OutputJson
+        # Reuse the host that launched this generator. Windows PowerShell is
+        # named powershell.exe, while PowerShell on GitHub's Linux runners is
+        # named pwsh; hard-coding either name makes the other host fail.
+        $powerShellHost = (Get-Process -Id $PID).Path
+        $raw = & $powerShellHost -NoProfile -ExecutionPolicy Bypass -File $ScriptPath -OutputJson
         if ([string]::IsNullOrWhiteSpace($raw)) {
             return $null
         }

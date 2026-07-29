@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -31,9 +32,14 @@ CONTRACT = (
 )
 
 
+POWERSHELL = shutil.which("pwsh") or shutil.which("powershell")
+if POWERSHELL is None:
+    raise RuntimeError("Packet-generator tests require pwsh or Windows PowerShell on PATH.")
+
+
 def _run_ps(script: Path, args: list[str]) -> str:
     cmd = [
-        "powershell",
+        POWERSHELL,
         "-NoProfile",
         "-ExecutionPolicy",
         "Bypass",
@@ -56,7 +62,7 @@ def _ps_array(values: list[str]) -> str:
 
 def _run_ps_command(command: str) -> str:
     cmd = [
-        "powershell",
+        POWERSHELL,
         "-NoProfile",
         "-ExecutionPolicy",
         "Bypass",
