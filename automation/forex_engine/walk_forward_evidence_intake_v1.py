@@ -30,6 +30,26 @@ WALK_FORWARD_REPORTS = (
     "AIOS_FOREX_BEFORE_AFTER_WALK_FORWARD_COMPARISON_V1.md",
     "AIOS_FOREX_WALKFORWARD_VALIDATION_HARNESS_V1_REPORT.md",
 )
+HIGH_PRECEDENCE_WALK_FORWARD_REPORTS = frozenset(
+    {
+        "AIOS_FOREX_110_C2_WALKFORWARD_OOS_SOURCE_V1.md",
+        "AIOS_FOREX_110_C2_REAL_WALKFORWARD_OOS_HARNESS_V1_SOURCE.md",
+    }
+)
+REQUIRED_CANONICAL_WALK_FORWARD_FIELDS = frozenset(
+    {
+        "windows_total",
+        "windows_passed",
+        "oos_segments_total",
+        "oos_segments_passed",
+        "min_pass_rate",
+        "max_drawdown",
+        "max_allowed_drawdown",
+        "sanitized",
+        "evidence_age_days",
+        "max_evidence_age_days",
+    }
+)
 WALK_FORWARD_DISCOVERY_PATTERN = re.compile(
     r"(?i)(walk[- ]forward|out[_ -]of[_ -]sample|out-of-sample|\bOOS\b|"
     r"oos_segments|out_of_sample_folds)"
@@ -47,7 +67,12 @@ def intake_walk_forward_evidence(report_root: str | Path = DEFAULT_REPORT_ROOT) 
     for path in _candidate_report_paths(root, WALK_FORWARD_REPORTS, WALK_FORWARD_DISCOVERY_PATTERN):
         sources.append(_display_path(path))
         text = path.read_text(encoding="utf-8")
-        _merge_if_present(summary, _summary_from_markdown(text, notes))
+        parsed = _summary_from_markdown(text, notes)
+        if path.name in HIGH_PRECEDENCE_WALK_FORWARD_REPORTS:
+            if _eligible_canonical_walk_forward_summary(parsed):
+                _merge_with_precedence(summary, parsed)
+        else:
+            _merge_if_present(summary, parsed)
 
     readiness_path = root / READINESS_JSON
     readiness = _read_json(readiness_path)
@@ -374,6 +399,19 @@ def _merge_if_present(target: dict[str, Any], incoming: Mapping[str, Any]) -> No
     for key, value in incoming.items():
         if key not in target and value is not None:
             target[key] = value
+
+
+def _merge_with_precedence(target: dict[str, Any], incoming: Mapping[str, Any]) -> None:
+    for key, value in incoming.items():
+        if value is not None:
+            target[key] = value
+
+
+def _eligible_canonical_walk_forward_summary(summary: Mapping[str, Any]) -> bool:
+    return (
+        summary.get("sanitized") is True
+        and REQUIRED_CANONICAL_WALK_FORWARD_FIELDS.issubset(summary)
+    )
 
 
 def _path(data: Any, keys: tuple[str, ...], default: Any = None) -> Any:
