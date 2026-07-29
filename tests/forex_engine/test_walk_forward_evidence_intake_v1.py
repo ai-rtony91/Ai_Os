@@ -273,3 +273,83 @@ def test_walk_forward_intake_operator_outputs_are_stable(tmp_path: Path) -> None
     assert result_to_jsonable_dict(result)["status"] == WALK_FORWARD_OOS_READY
     assert "AIOS Forex Walk Forward Evidence Intake V1" in result_to_operator_text(result)
     assert_permissions_false(result)
+
+
+def test_walk_forward_intake_prefers_complete_canonical_c2_source(tmp_path: Path) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    (report_root / "AIOS_FOREX_WALK_FORWARD_DEPTH_PACKET_R_V1_REPORT.md").write_text(
+        "\n".join(
+            [
+                "- windows_total: 2",
+                "- windows_passed: 1",
+                "- oos_segments_total: 2",
+                "- oos_segments_passed: 1",
+                "- min_pass_rate: 1.0",
+                "- max_drawdown: 9",
+                "- max_allowed_drawdown: 1",
+                "- sanitized: true",
+                "- evidence_age_days: 9",
+                "- max_evidence_age_days: 1",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    canonical = report_root / "AIOS_FOREX_110_C2_WALKFORWARD_OOS_SOURCE_V1.md"
+    canonical.write_text(
+        "\n".join(
+            [
+                "- windows_total: 6",
+                "- windows_passed: 6",
+                "- oos_segments_total: 4",
+                "- oos_segments_passed: 4",
+                "- min_pass_rate: 0.75",
+                "- max_drawdown: 0.22",
+                "- max_allowed_drawdown: 0.5",
+                "- sanitized: true",
+                "- evidence_age_days: 1",
+                "- max_evidence_age_days: 7",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = intake_walk_forward_evidence(report_root)
+
+    assert result["status"] == WALK_FORWARD_OOS_READY
+    assert result["normalized_summary"] == {
+        "windows_total": 6,
+        "windows_passed": 6,
+        "oos_segments_total": 4,
+        "oos_segments_passed": 4,
+        "min_pass_rate": 0.75,
+        "max_drawdown": 0.22,
+        "max_allowed_drawdown": 0.5,
+        "sanitized": True,
+        "evidence_age_days": 1,
+        "max_evidence_age_days": 7,
+    }
+    assert canonical.as_posix() in result["source_files"]
+    assert_permissions_false(result)
+
+
+def test_walk_forward_intake_does_not_promote_incomplete_canonical_source(tmp_path: Path) -> None:
+    report_root = tmp_path / "reports"
+    report_root.mkdir()
+    (report_root / "AIOS_FOREX_110_C2_WALKFORWARD_OOS_SOURCE_V1.md").write_text(
+        "\n".join(
+            [
+                "- windows_total: 6",
+                "- windows_passed: 6",
+                "- sanitized: true",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    result = intake_walk_forward_evidence(report_root)
+
+    assert result["status"] == WALK_FORWARD_OOS_INCOMPLETE
+    assert result["normalized_summary"] == {}
+    assert "oos_segments_total" in result["missing_fields"]
+    assert_permissions_false(result)
