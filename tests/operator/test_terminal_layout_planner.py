@@ -1,0 +1,124 @@
+import copy
+import importlib.util
+import json
+from pathlib import Path
+
+import pytest
+
+
+ROOT = Path(__file__).resolve().parents[2]
+MODULE_PATH = ROOT / "automation" / "operator" / "terminal_layout_planner.py"
+PROFILE_PATH = (
+    ROOT
+    / "automation"
+    / "operator"
+    / "layout_profiles"
+    / "AIOS_TERMINAL_GRID_PROFILE.example.json"
+)
+
+
+def load_module():
+    spec = importlib.util.spec_from_file_location("terminal_layout_planner", MODULE_PATH)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.fixture
+def planner():
+    return load_module()
+
+
+@pytest.fixture
+def profile():
+    return json.loads(PROFILE_PATH.read_text(encoding="utf-8"))
+
+
+def test_example_profile_produces_gap_free_four_column_plan(planner, profile):
+    result = planner.build_terminal_layout_plan(profile)
+
+    assert result["schema"] == "AIOS_TERMINAL_LAYOUT_PLAN.v1"
+    assert result["status"] == "PLANNED_NOT_LAUNCHED"
+    assert [pane["bounds_px"] for pane in result["panes"]] == [
+        {"x": 0, "y": 0, "width": 860, "height": 1440},
+        {"x": 860, "y": 0, "width": 860, "height": 1440},
+        {"x": 1720, "y": 0, "width": 860, "height": 1440},
+        {"x": 2580, "y": 0, "width": 860, "height": 1440},
+    ]
+    assert not any(result["safety"].values())
+    assert all("startup_command" not in pane for pane in result["panes"])
+
+
+def test_uneven_dimensions_and_spans_have_no_rounding_gap(planner, profile):
+    profile["display"]["target_width_px"] = 10
+    profile["display"]["target_height_px"] = 7
+    profile["grid"] = {
+        "columns": 3,
+        "rows": 1,
+        "layout_strategy": "test grid",
+        "reserved_zones": [],
+    }
+    profile["panes"] = [copy.deepcopy(profile["panes"][0])]
+    profile["panes"][0]["grid_position"] = {
+        "column": 1,
+        "row": 1,
+        "column_span": 3,
+        "row_span": 1,
+    }
+
+    result = planner.build_terminal_layout_plan(profile)
+
+    assert result["panes"][0]["bounds_px"] == {
+        "x": 0,
+        "y": 0,
+        "width": 10,
+        "height": 7,
+    }
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        (lambda value: value.update(mode="apply"), "mode must be 'schema_only'"),
+        (
+            lambda value: value["trading_safety"].update(live_trading_enabled=True),
+            "live_trading_enabled must be false",
+        ),
+        (
+            lambda value: value["panes"][0].update(startup_command="pwsh"),
+            "startup_command must be null",
+        ),
+        (
+            lambda value: value["panes"][0]["blocked_actions"].remove("live_trading"),
+            "blocked_actions is missing: live_trading",
+        ),
+        (
+            lambda value: value["panes"][1].update(
+                grid_position={"column": 1, "row": 1, "column_span": 1, "row_span": 1}
+            ),
+            "overlaps another pane",
+        ),
+        (
+            lambda value: value["panes"][0]["grid_position"].update(column=5),
+            "outside the declared grid",
+        ),
+    ],
+)
+def test_unsafe_or_invalid_profiles_fail_closed(planner, profile, mutate, message):
+    mutate(profile)
+
+    with pytest.raises(planner.ProfileValidationError, match=message):
+        planner.build_terminal_layout_plan(profile)
+
+
+def test_cli_prints_plan_without_writing_files(planner, capsys, tmp_path, profile):
+    profile_path = tmp_path / "profile.json"
+    profile_path.write_text(json.dumps(profile), encoding="utf-8")
+    before = set(tmp_path.iterdir())
+
+    assert planner.main([str(profile_path)]) == 0
+
+    output = json.loads(capsys.readouterr().out)
+    assert output["status"] == "PLANNED_NOT_LAUNCHED"
+    assert set(tmp_path.iterdir()) == before
