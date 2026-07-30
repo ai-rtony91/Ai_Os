@@ -35,6 +35,12 @@ def profile():
     return json.loads(PROFILE_PATH.read_text(encoding="utf-8"))
 
 
+def test_example_profile_uses_canonical_working_directory(profile):
+    assert all(pane["working_directory"] == r"C:\Dev\Ai.Os" for pane in profile["panes"])
+    prohibited_legacy_root = "C:" + r"\Users\mylab\OneDrive\GitHub"
+    assert prohibited_legacy_root not in json.dumps(profile)
+
+
 def test_example_profile_produces_gap_free_four_column_plan(planner, profile):
     result = planner.build_terminal_layout_plan(profile)
 
@@ -168,3 +174,44 @@ def test_loader_rejects_oversized_profile_before_parsing(planner, tmp_path):
 
     with pytest.raises(planner.ProfileValidationError, match="must not exceed"):
         planner.load_and_plan(profile_path)
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda value: value.update(launcher_command="pwsh"),
+        lambda value: value["panes"][0].update(executable=True),
+        lambda value: value["panes"][0]["grid_position"].update(z_index=1),
+        lambda value: value["validation"].update(auto_approve=True),
+    ],
+)
+def test_profile_rejects_unsupported_fields(planner, profile, mutate):
+    mutate(profile)
+
+    with pytest.raises(planner.ProfileValidationError, match="contains unsupported fields"):
+        planner.build_terminal_layout_plan(profile)
+
+
+def test_profile_rejects_terminal_control_characters(planner, profile):
+    profile["panes"][0]["title"] = "Operator\x1b[2J"
+
+    with pytest.raises(planner.ProfileValidationError, match="must be a non-empty string"):
+        planner.build_terminal_layout_plan(profile)
+
+
+def test_loader_rejects_non_finite_json_numbers(planner, tmp_path):
+    profile_path = tmp_path / "profile.json"
+    profile_path.write_text('{"value": NaN}', encoding="utf-8")
+
+    with pytest.raises(planner.ProfileValidationError, match="non-finite JSON number"):
+        planner.load_and_plan(profile_path)
+
+
+def test_loader_rejects_symbolic_link(planner, tmp_path):
+    target = tmp_path / "profile.json"
+    target.write_text("{}", encoding="utf-8")
+    link = tmp_path / "profile-link.json"
+    link.symlink_to(target)
+
+    with pytest.raises(planner.ProfileValidationError, match="must not be a symbolic link"):
+        planner.load_and_plan(link)

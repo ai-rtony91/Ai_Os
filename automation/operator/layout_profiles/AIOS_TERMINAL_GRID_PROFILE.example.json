@@ -38,7 +38,7 @@
         "column_span": 1,
         "row_span": 1
       },
-      "working_directory": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "working_directory": "C:\\Dev\\Ai.Os",
       "startup_command": null,
       "allowed_actions": [
         "review_status",
@@ -67,7 +67,7 @@
         "column_span": 1,
         "row_span": 1
       },
-      "working_directory": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "working_directory": "C:\\Dev\\Ai.Os",
       "startup_command": null,
       "allowed_actions": [
         "dry_run_planning",
@@ -97,7 +97,7 @@
         "column_span": 1,
         "row_span": 1
       },
-      "working_directory": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "working_directory": "C:\\Dev\\Ai.Os",
       "startup_command": null,
       "allowed_actions": [
         "json_parse_check",
@@ -126,7 +126,7 @@
         "column_span": 1,
         "row_span": 1
       },
-      "working_directory": "C:\\Users\\mylab\\OneDrive\\GitHub\\ai-rtony91_Ai_Os_CLEAN",
+      "working_directory": "C:\\Dev\\Ai.Os",
       "startup_command": null,
       "allowed_actions": [
         "view_local_telemetry",
