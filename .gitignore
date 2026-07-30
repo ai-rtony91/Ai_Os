@@ -100,6 +100,7 @@ telemetry/onboarding/*.json
 .aios/onboarding/*.json
 .aios/auth/
 .aios/sessions/
+.aios/runtime/
 
 # Service build artifacts
 services/node_modules/

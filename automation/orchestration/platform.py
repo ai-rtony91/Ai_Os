@@ -68,6 +68,20 @@ class OrchestrationPlatform:
         """Build a deterministic, non-executing compound work plan."""
         return CompoundWorkBraidController(self.repo_root).build(**options)
 
+    def govern_autonomy(
+        self, evidence: dict[str, Any], *, generated_at_utc: str | None = None
+    ) -> dict[str, Any]:
+        """Return a non-mutating decision from the canonical autonomy governor."""
+        from automation.orchestration.aios_autonomy_decision_governor import choose_next_decision
+
+        return choose_next_decision(evidence, generated_at_utc=generated_at_utc)
+
+    def master_runtime(self, **options: Any) -> dict[str, Any]:
+        """Run the registered master-runtime coordinator through this facade."""
+        from automation.orchestration.aios_master_runtime_v1 import AIOSMasterRuntime
+
+        return AIOSMasterRuntime(self.repo_root, platform=self).execute(**options)
+
     def validate(self, state: dict[str, Any]) -> dict[str, Any]:
         """Validate the shared platform contract without granting execution authority."""
         defects: list[str] = []

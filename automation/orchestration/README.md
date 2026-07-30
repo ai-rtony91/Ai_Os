@@ -140,3 +140,6 @@ Do not delete or move orchestration files blindly. Before archiving any file, ve
 - `.github/`
 
 When uncertain, write an audit note instead of changing files.
+# Master runtime
+
+Use `python aios.py status|plan|run|resume|validate` from the repository root. The V1 master runtime is a deterministic coordinator over the existing `OrchestrationPlatform`, not a replacement for its component algorithms. Runtime checkpoints are local-only under `.aios/runtime/`.
