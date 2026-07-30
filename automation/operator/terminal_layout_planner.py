@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import stat
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -35,6 +37,22 @@ TRADING_SAFETY_FIELDS = {
     "real_orders_allowed",
 }
 
+PROFILE_FIELDS = {
+    "schema_version", "profile_id", "profile_name", "profile_type", "mode",
+    "local_only", "startup_persistence", "scheduled_tasks", "trading_safety",
+    "display", "grid", "panes", "validation", "notes",
+}
+DISPLAY_FIELDS = {"target_width_px", "target_height_px", "display_label", "scaling_note"}
+GRID_FIELDS = {"columns", "rows", "layout_strategy", "reserved_zones"}
+PANE_FIELDS = {
+    "pane_id", "title", "role", "grid_position", "working_directory",
+    "startup_command", "allowed_actions", "blocked_actions", "notes",
+}
+POSITION_FIELDS = {"column", "row", "column_span", "row_span"}
+VALIDATION_FIELDS = {
+    "json_parse_required", "launcher_required", "manual_review_required", "expected_checks",
+}
+
 
 class ProfileValidationError(ValueError):
     """Raised when a terminal grid profile is unsafe or malformed."""
@@ -58,7 +76,7 @@ def _array(value: Any, field: str) -> list[Any]:
 
 def _text_array(value: Any, field: str) -> list[str]:
     values = _array(value, field)
-    if not all(isinstance(item, str) and item.strip() for item in values):
+    if not all(_is_safe_text(item) for item in values):
         _fail(f"{field} must contain only non-empty strings")
     if len(values) != len(set(values)):
         _fail(f"{field} must not contain duplicates")
@@ -66,9 +84,24 @@ def _text_array(value: Any, field: str) -> list[str]:
 
 
 def _text(value: Any, field: str) -> str:
-    if not isinstance(value, str) or not value.strip():
+    if not _is_safe_text(value):
         _fail(f"{field} must be a non-empty string")
     return value
+
+
+def _is_safe_text(value: Any) -> bool:
+    """Return whether text is nonblank and safe to print in a terminal plan."""
+    return (
+        isinstance(value, str)
+        and bool(value.strip())
+        and not any(ord(character) < 32 or ord(character) == 127 for character in value)
+    )
+
+
+def _closed_object(mapping: dict[str, Any], allowed: set[str], field: str) -> None:
+    unexpected = set(mapping).difference(allowed)
+    if unexpected:
+        _fail(f"{field} contains unsupported fields: {', '.join(sorted(unexpected))}")
 
 
 def _positive_integer(value: Any, field: str) -> int:
@@ -99,6 +132,7 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
     """Validate *profile* and return a deterministic, non-executable plan."""
     if not isinstance(profile, dict):
         _fail("profile must be an object")
+    _closed_object(profile, PROFILE_FIELDS, "profile")
 
     profile_id = _text(_required(profile, "profile_id"), "profile.profile_id")
     profile_name = _text(_required(profile, "profile_name"), "profile.profile_name")
@@ -118,11 +152,13 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
             _fail(f"profile.{field} must be {str(expected).lower()}")
 
     safety = _object(_required(profile, "trading_safety"), "profile.trading_safety")
+    _closed_object(safety, TRADING_SAFETY_FIELDS, "profile.trading_safety")
     for field in sorted(TRADING_SAFETY_FIELDS):
         if _required(safety, field, "profile.trading_safety") is not False:
             _fail(f"profile.trading_safety.{field} must be false")
 
     display = _object(_required(profile, "display"), "profile.display")
+    _closed_object(display, DISPLAY_FIELDS, "profile.display")
     width = _bounded_positive_integer(
         _required(display, "target_width_px", "profile.display"),
         "profile.display.target_width_px",
@@ -137,6 +173,7 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
     _text(_required(display, "scaling_note", "profile.display"), "profile.display.scaling_note")
 
     grid = _object(_required(profile, "grid"), "profile.grid")
+    _closed_object(grid, GRID_FIELDS, "profile.grid")
     columns = _bounded_positive_integer(
         _required(grid, "columns", "profile.grid"),
         "profile.grid.columns",
@@ -167,6 +204,7 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
     for index, raw_pane in enumerate(panes):
         prefix = f"profile.panes[{index}]"
         pane = _object(raw_pane, prefix)
+        _closed_object(pane, PANE_FIELDS, prefix)
         pane_id = _text(_required(pane, "pane_id", prefix), f"{prefix}.pane_id")
         if pane_id in pane_ids:
             _fail(f"{prefix}.pane_id duplicates '{pane_id}'")
@@ -197,6 +235,7 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
         _text_array(_required(pane, "notes", prefix), f"{prefix}.notes")
 
         position = _object(_required(pane, "grid_position", prefix), f"{prefix}.grid_position")
+        _closed_object(position, POSITION_FIELDS, f"{prefix}.grid_position")
         column = _positive_integer(
             _required(position, "column", f"{prefix}.grid_position"),
             f"{prefix}.grid_position.column",
@@ -253,6 +292,7 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
         )
 
     validation = _object(_required(profile, "validation"), "profile.validation")
+    _closed_object(validation, VALIDATION_FIELDS, "profile.validation")
     for field, expected in (
         ("json_parse_required", True),
         ("launcher_required", False),
@@ -287,14 +327,23 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
 def load_and_plan(profile_path: Path) -> dict[str, Any]:
     """Load a JSON profile from disk and build its layout plan."""
     try:
-        if not profile_path.is_file():
-            _fail("profile path must be a regular file")
-        if profile_path.stat().st_size > MAX_PROFILE_BYTES:
+        if profile_path.is_symlink():
+            _fail("profile path must not be a symbolic link")
+        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+        descriptor = os.open(profile_path, flags)
+        with os.fdopen(descriptor, "rb") as profile_file:
+            metadata = os.fstat(profile_file.fileno())
+            if not stat.S_ISREG(metadata.st_mode):
+                _fail("profile path must be a regular file")
+            raw_profile = profile_file.read(MAX_PROFILE_BYTES + 1)
+        if len(raw_profile) > MAX_PROFILE_BYTES:
             _fail(f"profile must not exceed {MAX_PROFILE_BYTES} bytes")
         profile = json.loads(
-            profile_path.read_text(encoding="utf-8"), object_pairs_hook=_reject_duplicate_keys
+            raw_profile.decode("utf-8"),
+            object_pairs_hook=_reject_duplicate_keys,
+            parse_constant=_reject_non_finite_number,
         )
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ProfileValidationError(f"cannot read profile: {exc}") from exc
     return build_terminal_layout_plan(profile)
 
@@ -307,6 +356,10 @@ def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
             _fail(f"duplicate JSON key: {key}")
         result[key] = value
     return result
+
+
+def _reject_non_finite_number(value: str) -> NoReturn:
+    _fail(f"non-finite JSON number is not allowed: {value}")
 
 
 def main(argv: list[str] | None = None) -> int:
