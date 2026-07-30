@@ -13,6 +13,12 @@ from typing import Any, NoReturn
 
 
 SCHEMA = "AIOS_TERMINAL_LAYOUT_PLAN.v1"
+PROFILE_SCHEMA_VERSION = "1.0.0"
+PROFILE_TYPE = "terminal_grid_layout_profile"
+MAX_PROFILE_BYTES = 1_000_000
+MAX_DISPLAY_DIMENSION_PX = 100_000
+MAX_GRID_TRACKS = 100
+MAX_PANES = 1_000
 REQUIRED_BLOCKED_ACTIONS = {
     "live_trading",
     "broker_connection",
@@ -50,6 +56,15 @@ def _array(value: Any, field: str) -> list[Any]:
     return value
 
 
+def _text_array(value: Any, field: str) -> list[str]:
+    values = _array(value, field)
+    if not all(isinstance(item, str) and item.strip() for item in values):
+        _fail(f"{field} must contain only non-empty strings")
+    if len(values) != len(set(values)):
+        _fail(f"{field} must not contain duplicates")
+    return values
+
+
 def _text(value: Any, field: str) -> str:
     if not isinstance(value, str) or not value.strip():
         _fail(f"{field} must be a non-empty string")
@@ -60,6 +75,13 @@ def _positive_integer(value: Any, field: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         _fail(f"{field} must be a positive integer")
     return value
+
+
+def _bounded_positive_integer(value: Any, field: str, maximum: int) -> int:
+    result = _positive_integer(value, field)
+    if result > maximum:
+        _fail(f"{field} must not exceed {maximum}")
+    return result
 
 
 def _required(mapping: dict[str, Any], field: str, parent: str = "profile") -> Any:
@@ -80,8 +102,10 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
 
     profile_id = _text(_required(profile, "profile_id"), "profile.profile_id")
     profile_name = _text(_required(profile, "profile_name"), "profile.profile_name")
-    _text(_required(profile, "schema_version"), "profile.schema_version")
-    _text(_required(profile, "profile_type"), "profile.profile_type")
+    if _required(profile, "schema_version") != PROFILE_SCHEMA_VERSION:
+        _fail(f"profile.schema_version must be '{PROFILE_SCHEMA_VERSION}'")
+    if _required(profile, "profile_type") != PROFILE_TYPE:
+        _fail(f"profile.profile_type must be '{PROFILE_TYPE}'")
 
     if _required(profile, "mode") != "schema_only":
         _fail("profile.mode must be 'schema_only'")
@@ -99,28 +123,40 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
             _fail(f"profile.trading_safety.{field} must be false")
 
     display = _object(_required(profile, "display"), "profile.display")
-    width = _positive_integer(
+    width = _bounded_positive_integer(
         _required(display, "target_width_px", "profile.display"),
         "profile.display.target_width_px",
+        MAX_DISPLAY_DIMENSION_PX,
     )
-    height = _positive_integer(
+    height = _bounded_positive_integer(
         _required(display, "target_height_px", "profile.display"),
         "profile.display.target_height_px",
+        MAX_DISPLAY_DIMENSION_PX,
     )
     _text(_required(display, "display_label", "profile.display"), "profile.display.display_label")
     _text(_required(display, "scaling_note", "profile.display"), "profile.display.scaling_note")
 
     grid = _object(_required(profile, "grid"), "profile.grid")
-    columns = _positive_integer(
-        _required(grid, "columns", "profile.grid"), "profile.grid.columns"
+    columns = _bounded_positive_integer(
+        _required(grid, "columns", "profile.grid"),
+        "profile.grid.columns",
+        MAX_GRID_TRACKS,
     )
-    rows = _positive_integer(_required(grid, "rows", "profile.grid"), "profile.grid.rows")
+    rows = _bounded_positive_integer(
+        _required(grid, "rows", "profile.grid"), "profile.grid.rows", MAX_GRID_TRACKS
+    )
     _text(_required(grid, "layout_strategy", "profile.grid"), "profile.grid.layout_strategy")
-    _array(_required(grid, "reserved_zones", "profile.grid"), "profile.grid.reserved_zones")
+    reserved_zones = _array(
+        _required(grid, "reserved_zones", "profile.grid"), "profile.grid.reserved_zones"
+    )
+    if reserved_zones:
+        _fail("profile.grid.reserved_zones must be empty until reserved zones are supported")
 
     panes = _array(_required(profile, "panes"), "profile.panes")
     if not panes:
         _fail("profile.panes must contain at least one pane")
+    if len(panes) > MAX_PANES:
+        _fail(f"profile.panes must not contain more than {MAX_PANES} panes")
 
     x_edges = _track_edges(width, columns)
     y_edges = _track_edges(height, rows)
@@ -143,14 +179,22 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
         )
         if _required(pane, "startup_command", prefix) is not None:
             _fail(f"{prefix}.startup_command must be null")
-        _array(_required(pane, "allowed_actions", prefix), f"{prefix}.allowed_actions")
-        blocked = _array(_required(pane, "blocked_actions", prefix), f"{prefix}.blocked_actions")
-        if not all(isinstance(action, str) for action in blocked):
-            _fail(f"{prefix}.blocked_actions must contain only strings")
+        allowed = _text_array(
+            _required(pane, "allowed_actions", prefix), f"{prefix}.allowed_actions"
+        )
+        blocked = _text_array(
+            _required(pane, "blocked_actions", prefix), f"{prefix}.blocked_actions"
+        )
         missing_blocks = REQUIRED_BLOCKED_ACTIONS.difference(blocked)
         if missing_blocks:
             _fail(f"{prefix}.blocked_actions is missing: {', '.join(sorted(missing_blocks))}")
-        _array(_required(pane, "notes", prefix), f"{prefix}.notes")
+        conflicting_actions = set(allowed).intersection(blocked)
+        if conflicting_actions:
+            _fail(
+                f"{prefix}.allowed_actions conflicts with blocked_actions: "
+                f"{', '.join(sorted(conflicting_actions))}"
+            )
+        _text_array(_required(pane, "notes", prefix), f"{prefix}.notes")
 
         position = _object(_required(pane, "grid_position", prefix), f"{prefix}.grid_position")
         column = _positive_integer(
@@ -208,8 +252,19 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
             }
         )
 
-    _object(_required(profile, "validation"), "profile.validation")
-    _array(_required(profile, "notes"), "profile.notes")
+    validation = _object(_required(profile, "validation"), "profile.validation")
+    for field, expected in (
+        ("json_parse_required", True),
+        ("launcher_required", False),
+        ("manual_review_required", True),
+    ):
+        if _required(validation, field, "profile.validation") is not expected:
+            _fail(f"profile.validation.{field} must be {str(expected).lower()}")
+    _text_array(
+        _required(validation, "expected_checks", "profile.validation"),
+        "profile.validation.expected_checks",
+    )
+    _text_array(_required(profile, "notes"), "profile.notes")
 
     return {
         "schema": SCHEMA,
@@ -232,10 +287,26 @@ def build_terminal_layout_plan(profile: dict[str, Any]) -> dict[str, Any]:
 def load_and_plan(profile_path: Path) -> dict[str, Any]:
     """Load a JSON profile from disk and build its layout plan."""
     try:
-        profile = json.loads(profile_path.read_text(encoding="utf-8"))
+        if not profile_path.is_file():
+            _fail("profile path must be a regular file")
+        if profile_path.stat().st_size > MAX_PROFILE_BYTES:
+            _fail(f"profile must not exceed {MAX_PROFILE_BYTES} bytes")
+        profile = json.loads(
+            profile_path.read_text(encoding="utf-8"), object_pairs_hook=_reject_duplicate_keys
+        )
     except (OSError, json.JSONDecodeError) as exc:
         raise ProfileValidationError(f"cannot read profile: {exc}") from exc
     return build_terminal_layout_plan(profile)
+
+
+def _reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject ambiguous JSON objects instead of silently accepting the last value."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            _fail(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:

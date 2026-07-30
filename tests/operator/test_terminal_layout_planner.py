@@ -122,3 +122,49 @@ def test_cli_prints_plan_without_writing_files(planner, capsys, tmp_path, profil
     output = json.loads(capsys.readouterr().out)
     assert output["status"] == "PLANNED_NOT_LAUNCHED"
     assert set(tmp_path.iterdir()) == before
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        (lambda value: value.update(schema_version="2.0.0"), "schema_version must be"),
+        (lambda value: value["grid"]["reserved_zones"].append({}), "must be empty"),
+        (
+            lambda value: value["panes"][0]["allowed_actions"].append("live_trading"),
+            "conflicts with blocked_actions",
+        ),
+        (
+            lambda value: value["validation"].update(manual_review_required=False),
+            "manual_review_required must be true",
+        ),
+        (
+            lambda value: value["panes"][0]["notes"].append(7),
+            "notes must contain only non-empty strings",
+        ),
+        (
+            lambda value: value["display"].update(target_width_px=100_001),
+            "target_width_px must not exceed",
+        ),
+    ],
+)
+def test_untrusted_profile_metadata_fails_closed(planner, profile, mutate, message):
+    mutate(profile)
+
+    with pytest.raises(planner.ProfileValidationError, match=message):
+        planner.build_terminal_layout_plan(profile)
+
+
+def test_loader_rejects_duplicate_json_keys(planner, tmp_path):
+    profile_path = tmp_path / "profile.json"
+    profile_path.write_text('{"profile_id": "first", "profile_id": "second"}', encoding="utf-8")
+
+    with pytest.raises(planner.ProfileValidationError, match="duplicate JSON key: profile_id"):
+        planner.load_and_plan(profile_path)
+
+
+def test_loader_rejects_oversized_profile_before_parsing(planner, tmp_path):
+    profile_path = tmp_path / "profile.json"
+    profile_path.write_bytes(b" " * (planner.MAX_PROFILE_BYTES + 1))
+
+    with pytest.raises(planner.ProfileValidationError, match="must not exceed"):
+        planner.load_and_plan(profile_path)
