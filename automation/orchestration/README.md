@@ -9,6 +9,12 @@ backward-compatible implementation and CLI surfaces. New callers should use the
 facade rather than duplicating component composition. See
 `docs/orchestration/AIOS_ORCHESTRATION_PLATFORM_V1_MIGRATION.md`.
 
+`OrchestrationPlatform.compound_work_braid()` composes the canonical work-packet
+inventory into deterministic strands, braids, and execution cables. The
+controller is local planning only: it does not mutate a queue, dispatch a worker,
+execute its continuation packet, or grant protected authority. See
+`docs/orchestration/AIOS_COMPOUND_WORK_BRAID_V1.md`.
+
 This folder holds safe control files for AI_OS worker coordination.
 
 The goal is simple: before a worker starts, AI_OS should know which packet the worker is allowed to handle, which paths are allowed, which paths are blocked, which approval gate applies, and which validation is required.

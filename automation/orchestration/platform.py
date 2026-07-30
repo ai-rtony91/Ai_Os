@@ -20,6 +20,7 @@ from automation.orchestration.aios_work_countdown_v1 import (
     build_work_countdown,
     load_canonical_work_packet_inventory,
 )
+from automation.orchestration.aios_compound_work_braid_v1 import CompoundWorkBraidController
 from automation.orchestration.runtime_queue.aios_development_dispatcher import build_dispatch_plan
 from automation.orchestration.runtime_queue.aios_execution_packet_resolver import resolve_execution_packet
 
@@ -62,6 +63,10 @@ class OrchestrationPlatform:
     def countdown(self, evidence: Any | None = None, **options: Any) -> dict[str, Any]:
         source = evidence if evidence is not None else load_canonical_work_packet_inventory(self.repo_root)
         return build_work_countdown(source, **options)
+
+    def compound_work_braid(self, **options: Any) -> dict[str, Any]:
+        """Build a deterministic, non-executing compound work plan."""
+        return CompoundWorkBraidController(self.repo_root).build(**options)
 
     def validate(self, state: dict[str, Any]) -> dict[str, Any]:
         """Validate the shared platform contract without granting execution authority."""
