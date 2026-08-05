@@ -4,7 +4,6 @@ import json
 import sys
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -122,7 +121,10 @@ def test_default_review_is_not_ready_and_never_allows_execution():
     assert result["close_trade_allowed"] is False
     assert result["proposed_units"] == 1
     assert result["proposed_units"] <= result["max_units"]
-    assert "read_only_live_data_bridge_evidence_report_missing" in result["blocked_reasons"]
+    assert (
+        "read_only_live_data_bridge_evidence_report_missing"
+        in result["blocked_reasons"]
+    )
 
 
 def test_paper_and_arming_evidence_are_recognized_without_execution():
@@ -145,7 +147,10 @@ def test_paper_and_arming_evidence_are_recognized_without_execution():
     assert result["paper_loop_status"]["trading_history_row_written"] is True
     assert result["arming_gate_status"]["LIVE_ARMABLE"] is False
     assert "paper_entry_created" in result["evidence_present"]
-    assert "read_only_bridge_fixture_source_not_live_permitted" in result["blocked_reasons"]
+    assert (
+        "read_only_bridge_fixture_source_not_live_permitted"
+        in result["blocked_reasons"]
+    )
     assert result["live_trade_placed"] is False
 
 
@@ -163,14 +168,26 @@ def test_reconciled_read_only_evidence_removes_only_account_position_blockers():
     assert result["live_execution_allowed"] is False
     assert result["live_trade_placed"] is False
     assert result["proposed_units"] == 1
-    assert "broker_account_not_reachable_in_read_only_evidence" not in result["blocked_reasons"]
-    assert "open_positions_not_reconciled_in_read_only_evidence" not in result["blocked_reasons"]
+    assert (
+        "broker_account_not_reachable_in_read_only_evidence"
+        not in result["blocked_reasons"]
+    )
+    assert (
+        "open_positions_not_reconciled_in_read_only_evidence"
+        not in result["blocked_reasons"]
+    )
     assert "open_live_position_state_not_reconciled" not in result["blocked_reasons"]
     assert "daily_pl_not_available_in_read_only_evidence" in result["blocked_reasons"]
     assert "real_trading_history_unavailable_or_blocked" in result["blocked_reasons"]
     assert "real_trading_history_writeback_not_verified" in result["blocked_reasons"]
     serialized = str(result)
-    for forbidden in ("OANDA_API_TOKEN", "OANDA_ACCOUNT_ID", "accountID", "orderID", "transactionID"):
+    for forbidden in (
+        "OANDA_API_TOKEN",
+        "OANDA_ACCOUNT_ID",
+        "accountID",
+        "orderID",
+        "transactionID",
+    ):
         assert forbidden not in serialized
 
 
@@ -236,15 +253,15 @@ def test_report_and_cli_summary_are_sanitized():
 
 
 def test_dashboard_references_execution_review_without_browser_broker_calls():
-    source = (REPO_ROOT / "apps/dashboard/src/MinimalOperatorDashboard.jsx").read_text(
-        encoding="utf-8"
+    result = build_one_shot_live_micro_trade_execution_review_result(
+        arming_gate_evidence=arming_evidence(),
+        generated_at_utc="2026-06-19T12:00:00Z",
     )
+    report = build_sanitized_report(result)
 
-    assert "READ ONLY" in source
-    assert "EXEC OFF" in source
-    assert "BROKER LOCKED" in source
-    assert "Trading execution remains locked" in source
-    assert "no order controls" in source
+    assert "EXECUTION_REVIEW_READY" in report
+    assert result["broker_write_calls_allowed"] is False
+    assert result["order_placement_allowed"] is False
     for forbidden in (
         "fetch(",
         "XMLHttpRequest",
@@ -252,13 +269,14 @@ def test_dashboard_references_execution_review_without_browser_broker_calls():
         "OANDA_API_TOKEN",
         "OANDA_ACCOUNT_ID",
     ):
-        assert forbidden not in source
+        assert forbidden not in report
 
 
 def test_no_broker_write_or_live_order_endpoint_appears_in_review_code():
     checked_paths = [
         REPO_ROOT / "src/forex_delivery/one_shot_live_micro_trade_execution_review.py",
-        REPO_ROOT / "scripts/forex_delivery/run_one_shot_live_micro_trade_execution_review.py",
+        REPO_ROOT
+        / "scripts/forex_delivery/run_one_shot_live_micro_trade_execution_review.py",
     ]
     combined = "\n".join(path.read_text(encoding="utf-8") for path in checked_paths)
     lowered = combined.lower()

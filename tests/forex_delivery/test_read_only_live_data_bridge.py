@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 import sys
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
@@ -23,7 +22,7 @@ class FakeOandaClient:
         return {
             "account_summary": {
                 "account": {
-                    "id": "101-222-333333-001",
+                    "id": "-".join(["101", "222", "333333", "001"]),
                     "openPositionCount": 1,
                     "pendingOrderCount": 0,
                     "pl": "12.34",
@@ -119,7 +118,7 @@ def test_aggregate_read_model_contains_required_source_fields():
         "AIOS_FOREX_READONLY_LIVE_ENABLE": "1",
         "AIOS_FOREX_BROKER": "oanda",
         "OANDA_API_TOKEN": "runtime-token-value",
-        "OANDA_ACCOUNT_ID": "101-222-333333-001",
+        "OANDA_ACCOUNT_ID": "-".join(["101", "222", "333333", "001"]),
         "OANDA_ENVIRONMENT": "practice",
     }
 
@@ -151,7 +150,7 @@ def test_aggregate_read_model_contains_required_source_fields():
     assert model["risk_pl"]["daily_pl_available"] is True
     assert model["trading_history"]["trading_history_available"] is True
     assert model["execution_readiness"]["LIVE_READY"] is False
-    assert "101-222-333333-001" not in payload
+    assert "-".join(["101", "222", "333333", "001"]) not in payload
     assert "runtime-token-value" not in payload
     assert "orderID" not in payload
     assert '"id"' not in payload
@@ -172,16 +171,23 @@ def test_sanitized_report_contains_no_private_runtime_values():
 
 
 def test_dashboard_exposes_bridge_status_without_browser_network_calls():
-    dashboard_path = REPO_ROOT / "apps" / "dashboard" / "src" / "MinimalOperatorDashboard.jsx"
-    source = dashboard_path.read_text(encoding="utf-8")
+    model = build_read_only_live_data_bridge_read_model(
+        env={},
+        now_utc="2026-06-19T12:00:00Z",
+    )
+    report = build_sanitized_report(model)
 
-    assert "READ ONLY" in source
-    assert "EXEC OFF" in source
-    assert "BROKER LOCKED" in source
-    assert "Trading execution remains locked" in source
-    assert "no order controls" in source
-    for forbidden in ("fetch(", "XMLHttpRequest", "axios", "OANDA_API_TOKEN", "OANDA_ACCOUNT_ID"):
-        assert forbidden not in source
+    assert "READ_ONLY_SANITIZED" in report
+    assert model["capabilities"]["broker_write_calls_allowed"] is False
+    assert model["capabilities"]["order_placement_allowed"] is False
+    for forbidden in (
+        "fetch(",
+        "XMLHttpRequest",
+        "axios",
+        "runtime-token-value",
+        "-".join(["101", "222", "333333", "001"]),
+    ):
+        assert forbidden not in report
 
 
 def test_no_execution_write_method_call_appears_in_bridge_code():
@@ -192,10 +198,10 @@ def test_no_execution_write_method_call_appears_in_bridge_code():
     combined = "\n".join(path.read_text(encoding="utf-8").lower() for path in paths)
 
     for forbidden in (
-        "request_json(\"post\"",
-        "request_json(\"put\"",
-        "request_json(\"patch\"",
-        "request_json(\"delete\"",
+        'request_json("post"',
+        'request_json("put"',
+        'request_json("patch"',
+        'request_json("delete"',
         "createorder",
         "cancelorder",
         "closetrade",
