@@ -7,6 +7,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR = (
@@ -34,7 +36,10 @@ CONTRACT = (
 
 POWERSHELL = shutil.which("pwsh") or shutil.which("powershell")
 if POWERSHELL is None:
-    raise RuntimeError("Packet-generator tests require pwsh or Windows PowerShell on PATH.")
+    pytest.skip(
+        "Packet-generator tests require pwsh or Windows PowerShell on PATH.",
+        allow_module_level=True,
+    )
 
 
 def _run_ps(script: Path, args: list[str]) -> str:
