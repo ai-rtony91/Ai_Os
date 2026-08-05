@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 import sys
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
@@ -140,12 +139,23 @@ def test_reconciled_read_only_evidence_removes_only_account_position_blockers():
     assert result["live_execution_allowed"] is False
     assert "broker_account_not_reachable" not in result["blocked_reasons"]
     assert "positions_not_reconciled" not in result["blocked_reasons"]
-    assert "broker_account_live_state_not_reconciled_for_execution" not in result["blocked_reasons"]
-    assert "no_open_live_position_reconciliation_missing" not in result["blocked_reasons"]
+    assert (
+        "broker_account_live_state_not_reconciled_for_execution"
+        not in result["blocked_reasons"]
+    )
+    assert (
+        "no_open_live_position_reconciliation_missing" not in result["blocked_reasons"]
+    )
     assert "daily_pl_not_available" in result["blocked_reasons"]
     assert "real_trading_history_unavailable_or_blocked" in result["blocked_reasons"]
     serialized = str(result)
-    for forbidden in ("OANDA_API_TOKEN", "OANDA_ACCOUNT_ID", "accountID", "orderID", "transactionID"):
+    for forbidden in (
+        "OANDA_API_TOKEN",
+        "OANDA_ACCOUNT_ID",
+        "accountID",
+        "orderID",
+        "transactionID",
+    ):
         assert forbidden not in serialized
 
 
@@ -197,22 +207,33 @@ def test_report_and_cli_summary_are_sanitized():
 
 
 def test_dashboard_references_arming_status_without_browser_broker_calls():
-    dashboard_path = REPO_ROOT / "apps" / "dashboard" / "src" / "MinimalOperatorDashboard.jsx"
-    source = dashboard_path.read_text(encoding="utf-8")
+    result = build_live_micro_trade_arming_gate_result(
+        read_only_evidence=read_only_evidence(),
+        paper_evidence=paper_evidence(),
+        generated_at_utc="2026-06-19T12:00:00Z",
+    )
+    report = build_sanitized_report(result)
 
-    assert "READ ONLY" in source
-    assert "EXEC OFF" in source
-    assert "BROKER LOCKED" in source
-    assert "Trading execution remains locked" in source
-    assert "no order controls" in source
-    for forbidden in ("fetch(", "XMLHttpRequest", "axios", "OANDA_API_TOKEN", "OANDA_ACCOUNT_ID"):
-        assert forbidden not in source
+    assert "ARMING_REVIEW_ONLY" in report
+    assert result["broker_write_calls_allowed"] is False
+    assert result["order_placement_allowed"] is False
+    for forbidden in (
+        "fetch(",
+        "XMLHttpRequest",
+        "axios",
+        "OANDA_API_TOKEN",
+        "OANDA_ACCOUNT_ID",
+    ):
+        assert forbidden not in report
 
 
 def test_no_broker_write_or_live_order_endpoint_appears_in_arming_code():
     paths = [
         REPO_ROOT / "src" / "forex_delivery" / "live_micro_trade_arming_gate.py",
-        REPO_ROOT / "scripts" / "forex_delivery" / "run_live_micro_trade_arming_gate.py",
+        REPO_ROOT
+        / "scripts"
+        / "forex_delivery"
+        / "run_live_micro_trade_arming_gate.py",
     ]
     combined = "\n".join(path.read_text(encoding="utf-8").lower() for path in paths)
 

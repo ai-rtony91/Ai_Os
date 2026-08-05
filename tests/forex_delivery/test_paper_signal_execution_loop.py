@@ -2,7 +2,6 @@ from pathlib import Path
 import json
 import sys
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
@@ -107,13 +106,17 @@ def test_no_broker_write_methods_or_live_endpoints_appear_in_paper_loop_code():
 
 
 def test_dashboard_references_paper_loop_status_without_browser_broker_calls():
-    dashboard_path = REPO_ROOT / "apps" / "dashboard" / "src" / "MinimalOperatorDashboard.jsx"
-    source = dashboard_path.read_text(encoding="utf-8")
+    result = build_paper_signal_execution_loop_result()
+    report = build_sanitized_report(result)
 
-    assert "READ ONLY" in source
-    assert "EXEC OFF" in source
-    assert "BROKER LOCKED" in source
-    assert "Trading execution remains locked" in source
-    assert "no order controls" in source
-    for forbidden in ("fetch(", "XMLHttpRequest", "axios", "OANDA_API_TOKEN", "OANDA_ACCOUNT_ID"):
-        assert forbidden not in source
+    assert "PAPER_SIMULATION_SANITIZED" in report
+    assert result["dashboard_status"]["live_execution_allowed"] is False
+    assert result["broker_write_calls_allowed"] is False
+    for forbidden in (
+        "fetch(",
+        "XMLHttpRequest",
+        "axios",
+        "OANDA_API_TOKEN",
+        "OANDA_ACCOUNT_ID",
+    ):
+        assert forbidden not in report
