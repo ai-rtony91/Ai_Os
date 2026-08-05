@@ -9,7 +9,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
 ```json
 {
   "broker_reachable": false,
-  "freshness_utc": "2026-08-05T19:31:53Z",
+  "freshness_utc": "2026-08-05T20:45:33Z",
   "live_execution_allowed": false,
   "next_safe_action": "Run the read-only live data bridge, review sanitized readiness, then proceed to AIOS-FOREX-PAPER-SIGNAL-EXECUTION-LOOP-V1 before any live arming gate.",
   "pl_available": false,
@@ -31,7 +31,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
     "block_reason": "AIOS_FOREX_READONLY_LIVE_ENABLE is not 1; using fixture/readiness fallback.",
     "broker_mode": "not_enabled",
     "daily_pl_available": false,
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_trading_allowed_from_this_data": false,
     "margin_risk_available": false,
     "open_positions_reconciled": false,
@@ -65,7 +65,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
       "risk_governor_not_approved",
       "human_owner_live_execution_not_armed"
     ],
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_execution_allowed": false,
     "live_trading_allowed_from_this_data": false,
     "next_safe_action": "Run the read-only live data bridge, review sanitized readiness, then proceed to AIOS-FOREX-PAPER-SIGNAL-EXECUTION-LOOP-V1 before any live arming gate.",
@@ -78,7 +78,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
   "exit_readiness": {
     "auto_exit_ready": false,
     "block_reason": "No open position requiring live exit protection was reconciled.",
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_trading_allowed_from_this_data": false,
     "manual_close_fallback": "BROKER_UI_MANUAL_FALLBACK_REQUIRED",
     "max_time_policy_present": false,
@@ -91,11 +91,11 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
     "take_profit_policy_present": false,
     "trailing_stop_policy_present": false
   },
-  "freshness_utc": "2026-08-05T19:31:53Z",
+  "freshness_utc": "2026-08-05T20:45:33Z",
   "live_trading_allowed_from_this_data": false,
   "market": {
     "block_reason": "AIOS_FOREX_READONLY_LIVE_ENABLE is not 1; using fixture/readiness fallback.",
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_trading_allowed_from_this_data": false,
     "price_snapshot_available": false,
     "read_only": true,
@@ -116,7 +116,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
     "currency": "UNAVAILABLE",
     "equity": "UNAVAILABLE",
     "execution_allowed": false,
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_order_allowed": false,
     "live_trading_allowed_from_this_data": false,
     "margin_available": "UNAVAILABLE",
@@ -142,7 +142,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
   },
   "positions": {
     "block_reason": "AIOS_FOREX_READONLY_LIVE_ENABLE is not 1; using fixture/readiness fallback.",
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_trading_allowed_from_this_data": false,
     "open_position_count": 0,
     "open_trade_count": 0,
@@ -159,7 +159,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
   "risk_pl": {
     "block_reason": "AIOS_FOREX_READONLY_LIVE_ENABLE is not 1; using fixture/readiness fallback.",
     "daily_pl_available": false,
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_trading_allowed_from_this_data": false,
     "margin_available": "UNAVAILABLE",
     "margin_risk_available": false,
@@ -187,7 +187,7 @@ No live trade, BUY, SELL, close, order placement, broker write call, secret, acc
   "trading_history": {
     "block_reason": "No sanitized real closed-trade history is available.",
     "closed_trade_count": 0,
-    "freshness_utc": "2026-08-05T19:31:53Z",
+    "freshness_utc": "2026-08-05T20:45:33Z",
     "live_trading_allowed_from_this_data": false,
     "read_only": true,
     "rows": [],

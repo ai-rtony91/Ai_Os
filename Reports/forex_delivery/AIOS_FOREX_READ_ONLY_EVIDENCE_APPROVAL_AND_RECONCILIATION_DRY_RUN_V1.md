@@ -6,7 +6,7 @@
 - source_type: fixture
 - source_label: FIXTURE_NOT_LIVE
 - stale_status: BLOCKED
-- freshness_utc: 2026-08-05T19:31:53Z
+- freshness_utc: 2026-08-05T20:45:33Z
 
 ## Reconciliation Status
 - broker_account_reachable: False
@@ -88,7 +88,7 @@ Run the read-only live data bridge with permitted broker read-only inputs, then 
   "broker_account_reachable": false,
   "daily_pl_available": false,
   "daily_pl_block_reason": "daily P/L ledger not verified",
-  "freshness_utc": "2026-08-05T19:31:53Z",
+  "freshness_utc": "2026-08-05T20:45:33Z",
   "live_execution_allowed": false,
   "next_safe_action": "Run the read-only live data bridge with permitted broker read-only inputs, then rerun this approval evaluator. Do not execute trades.",
   "open_position_count": 0,
