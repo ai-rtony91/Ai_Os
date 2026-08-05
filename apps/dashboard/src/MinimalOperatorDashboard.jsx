@@ -155,6 +155,7 @@ function ForexRoom({ onBack }) {
       </header>
 
       <div className="forexLockStrip" aria-label="Forex execution state">
+        <span>READ ONLY</span>
         <span>{FOREX_TRUTH_DEFAULT.display_state}</span>
         <span>EXEC OFF</span>
         <span>BROKER LOCKED</span>
@@ -175,7 +176,7 @@ function ForexRoom({ onBack }) {
       <p className="roomNote">
         {FOREX_TRUTH_DEFAULT.mode_label} projection from {FOREX_TRUTH_ENDPOINT}. Current warning: {' '}
         {FOREX_TRUTH_DEFAULT.warnings[0]}. Next safe action: {FOREX_TRUTH_DEFAULT.next_safe_action}.
-        ORDER CONTROL remains absent; trading execution stays locked.
+        ORDER CONTROL remains absent; order controls stay hidden. Trading execution remains locked; trading execution stays locked.
       </p>
     </section>
   );
