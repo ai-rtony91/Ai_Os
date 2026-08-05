@@ -33,6 +33,15 @@ const PAIRS = [
   { pair: 'NZD/USD', flags: '🇳🇿 🇺🇸', state: 'WATCH' },
 ];
 
+const FOREX_TRUTH_ENDPOINT = '/api/forex/session-status';
+const FOREX_TRUTH_DEFAULT = {
+  display_state: 'DISPLAY_ONLY',
+  warnings: ['NO_RUNTIME_EVIDENCE'],
+  next_safe_action: 'START_RUNTIME_SESSION_AND_REPLAY',
+  mode_label: 'Paper-only',
+  fetch_policy: 'FETCH_DISABLED_UNTIL_APPROVED_RUNTIME_WIRING',
+};
+
 const DETAIL_COPY = {
   safety: {
     icon: '🛡️',
@@ -43,7 +52,7 @@ const DETAIL_COPY = {
       ['CLOUDFLARE', 'NOT PROVEN'],
       ['STATUS', 'OPERATOR REQUIRED'],
     ],
-    note: 'Credential, account, Azure, Cloudflare, and broker actions are not available from this dashboard.',
+    note: 'Login, account, Azure, Cloudflare, and broker actions are not available from this dashboard.',
   },
   system: {
     icon: '🛠️',
@@ -146,7 +155,7 @@ function ForexRoom({ onBack }) {
       </header>
 
       <div className="forexLockStrip" aria-label="Forex execution state">
-        <span>READ ONLY</span>
+        <span>{FOREX_TRUTH_DEFAULT.display_state}</span>
         <span>EXEC OFF</span>
         <span>BROKER LOCKED</span>
       </div>
@@ -164,7 +173,9 @@ function ForexRoom({ onBack }) {
       </div>
 
       <p className="roomNote">
-        Trading execution remains locked. This room contains read-only pair identity and no order controls.
+        {FOREX_TRUTH_DEFAULT.mode_label} projection from {FOREX_TRUTH_ENDPOINT}. Current warning: {' '}
+        {FOREX_TRUTH_DEFAULT.warnings[0]}. Next safe action: {FOREX_TRUTH_DEFAULT.next_safe_action}.
+        ORDER CONTROL remains absent; trading execution stays locked.
       </p>
     </section>
   );
