@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"aios_github_pr_validation_receipt_v1","type":"object","required":["schema","receipt_type","provenance"],"properties":{"schema":{"const":"AIOS_GITHUB_PR_VALIDATION_RECEIPT.v1"},"receipt_type":{"enum":["WORKFLOW_VALIDATION","PR_CLOSED"]},"provenance":{"const":"GITHUB_EVENT_PAYLOAD"}},"additionalProperties":true}
