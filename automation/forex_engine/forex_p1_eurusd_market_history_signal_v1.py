@@ -4,7 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Mapping
 
 from automation.forex_engine.models import Candle
@@ -19,6 +19,7 @@ SIGNAL_SCHEMA = "AIOS_P1_EURUSD_SIGNAL_DECISION.v1"
 INSTRUMENT = "EUR_USD"
 ENGINE_SYMBOL = "EURUSD"
 GRANULARITY = "M5"
+M5_CANDLE_DURATION = timedelta(minutes=5)
 MINIMUM_CANDLES = 3
 FRESHNESS_SECONDS = 300
 MINIMUM_REWARD_TO_RISK = 2.0
@@ -111,7 +112,9 @@ def validate_market_history(history: Mapping[str, Any], *, now: datetime | None 
     if history.get("first_observed_at_utc") != candles[0]["observed_at_utc"] or history.get("last_observed_at_utc") != candles[-1]["observed_at_utc"]:
         raise ValueError("history_time_boundary_mismatch")
     current = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-    if timestamps[-1] > current or (current - timestamps[-1]).total_seconds() > FRESHNESS_SECONDS:
+    latest_timestamp = timestamps[-1]
+    latest_completion = latest_timestamp + M5_CANDLE_DURATION
+    if latest_timestamp > current or (current - latest_completion).total_seconds() > FRESHNESS_SECONDS:
         raise ValueError("stale_history")
     result = dict(history); result["candles"] = normalized_candles
     return result
