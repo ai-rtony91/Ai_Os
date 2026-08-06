@@ -117,6 +117,29 @@ class OandaReadOnlyClient:
             params={"instruments": ",".join(instruments)},
         )
 
+    def candles(
+        self,
+        instrument: str,
+        *,
+        granularity: str,
+        count: int,
+        price: str = "M",
+    ) -> dict[str, Any]:
+        """Fetch a bounded candle window through the GET-only transport."""
+        if instrument != "EUR_USD":
+            raise ValueError("unsupported_candle_instrument")
+        if granularity != "M5":
+            raise ValueError("unsupported_candle_granularity")
+        if isinstance(count, bool) or not isinstance(count, int) or not 3 <= count <= 500:
+            raise ValueError("candle_count_out_of_bounds")
+        if price != "M":
+            raise ValueError("unsupported_candle_price")
+        return self.request_json(
+            "GET",
+            f"/v3/instruments/{instrument}/candles",
+            params={"granularity": granularity, "count": count, "price": price},
+        )
+
     def transactions(self) -> dict[str, Any]:
         return self.request_json(
             "GET",
