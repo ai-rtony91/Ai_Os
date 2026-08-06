@@ -33,6 +33,16 @@ def validated(value=None): return validate_market_history(value or history(), no
 def decision(value=None): return build_signal_state(validated(value), generated_at_utc="2026-08-06T05:30:00Z")
 
 
+def history_with_latest_timestamp(latest: datetime):
+    value = history()
+    for index, candle in enumerate(value["candles"]):
+        observed = latest - timedelta(minutes=5 * (len(value["candles"]) - 1 - index))
+        candle["observed_at_utc"] = observed.isoformat().replace("+00:00", "Z")
+    value["first_observed_at_utc"] = value["candles"][0]["observed_at_utc"]
+    value["last_observed_at_utc"] = value["candles"][-1]["observed_at_utc"]
+    return value
+
+
 def test_missing_history():
     with pytest.raises(ValueError, match="market_history_required"): validate_market_history(None)
 
@@ -55,6 +65,28 @@ def test_stale_and_insufficient_history():
     value["first_observed_at_utc"] = value["candles"][0]["observed_at_utc"]; value["last_observed_at_utc"] = value["candles"][-1]["observed_at_utc"]
     with pytest.raises(ValueError, match="stale_history"): validated(value)
     assert decision(history((1.1, 1.1001)))["status"] == "REQUIRE_MORE_HISTORY"
+
+
+def test_latest_completed_m5_candle_is_fresh_at_its_completion_time():
+    value = history_with_latest_timestamp(NOW - timedelta(minutes=5))
+    assert validated(value)["last_observed_at_utc"] == value["last_observed_at_utc"]
+
+
+def test_latest_completed_m5_candle_is_fresh_at_allowance_boundary():
+    value = history_with_latest_timestamp(NOW - timedelta(minutes=10))
+    assert validated(value)["last_observed_at_utc"] == value["last_observed_at_utc"]
+
+
+def test_latest_completed_m5_candle_is_rejected_after_allowance():
+    value = history_with_latest_timestamp(NOW - timedelta(minutes=10, seconds=1))
+    with pytest.raises(ValueError, match="stale_history"):
+        validated(value)
+
+
+def test_future_m5_candle_is_rejected():
+    value = history_with_latest_timestamp(NOW + timedelta(seconds=1))
+    with pytest.raises(ValueError, match="stale_history"):
+        validated(value)
 
 
 def test_duplicate_unsorted_and_invalid_ohlc():
