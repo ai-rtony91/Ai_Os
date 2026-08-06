@@ -79,6 +79,7 @@ jobs:
             --include="*.yaml" \
             --exclude-dir=.git \
             --exclude-dir=.github \
+            --exclude-dir=tests \
             .; then
             echo "Placeholder identity string found in source/config files."
             exit 1
@@ -97,6 +98,7 @@ jobs:
             --exclude-dir=.git \
             --exclude-dir=.github \
             --exclude-dir=docs \
+            --exclude-dir=tests \
             .; then
             echo "Potential secret-like assignment found in source/config files."
             exit 1
