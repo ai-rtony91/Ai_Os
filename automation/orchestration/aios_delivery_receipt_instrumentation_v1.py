@@ -1,7 +1,6 @@
 """Offline, fail-closed delivery receipt instrumentation for governed AIOS work."""
 from __future__ import annotations
 
-import hashlib
 import json
 import math
 import re
@@ -16,6 +15,7 @@ PROVENANCE = "MEASURED_REPOSITORY_INSTRUMENTATION"
 IDENTITY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,199}$")
 SENSITIVE_KEY = re.compile(r"(?:secret|password|credential|authorization|cookie|token|account.?id|broker.?order|raw.?payload)", re.I)
 SENSITIVE_VALUE = re.compile(r"(?:sk-[A-Za-z0-9]{12,}|bearer\s+\S+|-----BEGIN .*PRIVATE KEY-----)", re.I)
+PRIVATE_IDENTITY = re.compile(r"(?:account|credential|secret|token|cookie|authorization|broker.?order)", re.I)
 
 
 def stable_json(value: Any) -> str:
@@ -47,6 +47,7 @@ def _utc(value: str, label: str) -> tuple[datetime, str]:
 
 def _identity(value: str, label: str) -> str:
     if not isinstance(value, str) or not IDENTITY.fullmatch(value): raise ValueError(f"malformed {label}")
+    if PRIVATE_IDENTITY.search(value): raise ValueError(f"private identifier rejected: {label}")
     return value
 
 
@@ -97,6 +98,9 @@ def _terminal(runtime_dir: str | Path, terminal_dir: str | Path, *, task_id: str
         if ended < started: raise ValueError("terminal timestamp is earlier than start")
         elapsed = (ended - started).total_seconds(); measured = True; exclusion = None
     receipt = {"schema": TASK_SCHEMA, "task_id": task_id, "packet_id": packet_id, "status": status,
+               "lane": marker.get("lane") if marker else fields.pop("lane", None),
+               "branch": marker.get("branch") if marker else fields.pop("branch", None),
+               "starting_head": marker.get("starting_head") if marker else fields.pop("starting_head", None),
                "started_utc": started_text, ("completed_utc" if status == "COMPLETE" else "blocked_utc"): ended_text,
                "elapsed_seconds": elapsed, "elapsed_minutes": round(elapsed / 60, 6) if measured else None,
                "duration_measured": measured, "duration_exclusion_reason": exclusion, "provenance": PROVENANCE,
@@ -132,6 +136,12 @@ def validate_task_receipt(receipt: Mapping[str, Any]) -> dict[str, Any]:
         value = receipt.get("elapsed_seconds")
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0: raise ValueError("invalid measured duration")
     elif receipt.get("elapsed_seconds") is not None: raise ValueError("unmeasured duration must be null")
+    for key in ("files_changed_count", "lines_added", "lines_deleted", "tests_run", "tests_passed", "tests_failed", "tests_skipped", "blockers_found", "blockers_closed"):
+        if key in receipt and (isinstance(receipt[key], bool) or not isinstance(receipt[key], int) or receipt[key] < 0):
+            raise ValueError(f"{key} must be a non-negative integer")
+    if receipt["status"] == "BLOCKED":
+        if not receipt.get("blocker_reasons") or receipt.get("merged") is not False or receipt.get("completion_credit") is not False:
+            raise ValueError("blocked receipt cannot receive completion or merge credit")
     return dict(receipt)
 
 
@@ -149,24 +159,76 @@ def normalize_github_event_receipt(payload: Mapping[str, Any], *, own_workflow_n
         if workflow.get("name") == own_workflow_name: return None
         conclusion = workflow.get("conclusion")
         prs = sorted({int(p["number"]) for p in workflow.get("pull_requests", []) if isinstance(p, Mapping) and isinstance(p.get("number"), int)})
-        return {"schema": GITHUB_SCHEMA, "receipt_type": "WORKFLOW_VALIDATION", "repository": repo,
+        value = {"schema": GITHUB_SCHEMA, "receipt_type": "WORKFLOW_VALIDATION", "repository": repo,
                 "workflow_name": workflow.get("name"), "workflow_run_id": workflow.get("id"), "workflow_event": workflow.get("event"),
                 "workflow_status": workflow.get("status"), "workflow_conclusion": conclusion, "head_sha": workflow.get("head_sha"),
                 "head_branch": workflow.get("head_branch"), "associated_pr_numbers": prs, "run_created_at": workflow.get("created_at"),
                 "run_started_at": workflow.get("run_started_at"), "run_updated_at": workflow.get("updated_at"),
                 "validation_passed": conclusion == "success", "validation_available": conclusion is not None, "provenance": "GITHUB_EVENT_PAYLOAD"}
+        for key in ("run_created_at", "run_started_at", "run_updated_at"):
+            if value[key] is not None: _, value[key] = _utc(value[key], key)
+        return value
     if pr := payload.get("pull_request"):
-        return {"schema": GITHUB_SCHEMA, "receipt_type": "PR_CLOSED", "repository": repo, "pr_number": pr.get("number"),
+        value = {"schema": GITHUB_SCHEMA, "receipt_type": "PR_CLOSED", "repository": repo, "pr_number": pr.get("number"),
                 "created_at": pr.get("created_at"), "closed_at": pr.get("closed_at"), "merged_at": pr.get("merged_at"),
                 "merged": pr.get("merged") is True, "base_branch": pr.get("base", {}).get("ref"), "head_branch": pr.get("head", {}).get("ref"),
                 "base_sha": pr.get("base", {}).get("sha"), "head_sha": pr.get("head", {}).get("sha"),
                 "commit_count": pr.get("commits"), "provenance": "GITHUB_EVENT_PAYLOAD"}
+        for key in ("created_at", "closed_at", "merged_at"):
+            if value[key] is not None: _, value[key] = _utc(value[key], key)
+        return value
     raise ValueError("unsupported GitHub event payload")
 
 
 def rebuild_codex_delivery_metadata(receipts: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     values = [normalize_codex_task_receipt(item) for item in receipts]
     return sorted(values, key=lambda x: (x["task_id"], x["packet_id"]))
+
+
+def merge_codex_delivery_metadata(existing: Sequence[Mapping[str, Any]], receipt: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Preserve historical rows while upserting one normalized instrumentation row."""
+    normalized = normalize_codex_task_receipt(receipt)
+    identity = (normalized["task_id"], normalized["packet_id"])
+    result: list[dict[str, Any]] = []
+    replaced = False
+    for item in existing:
+        value = dict(item)
+        item_identity = (value.get("task_id"), value.get("packet_id"))
+        if item_identity == identity:
+            if stable_json(value) != stable_json(normalized):
+                raise ValueError("conflicting canonical Codex delivery metadata")
+            replaced = True
+        result.append(value)
+    if not replaced:
+        result.append(normalized)
+    return sorted(result, key=lambda value: (str(value.get("task_id", "")), str(value.get("packet_id", "")), stable_json(value)))
+
+
+def task_receipt_velocity_events(receipt: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Derive only evidence explicitly present in a valid terminal receipt."""
+    value = validate_task_receipt(receipt)
+    task_id, packet_id = value["task_id"], value["packet_id"]
+    common = {"schema": EVENT_SCHEMA, "task_id": task_id, "packet_id": packet_id,
+              "lane": value.get("lane"), "branch": value.get("branch"), "provenance": PROVENANCE}
+    events: list[dict[str, Any]] = []
+    if value.get("started_utc"):
+        events.append({**common, "event_id": f"TASK_STARTED|{task_id}|{packet_id}", "event_type": "TASK_STARTED",
+                       "timestamp_utc": value["started_utc"]})
+    terminal_type = "TASK_COMPLETED" if value["status"] == "COMPLETE" else "TASK_BLOCKED"
+    terminal_time = value.get("completed_utc") or value.get("blocked_utc")
+    terminal_event = {**common, "event_id": f"{terminal_type}|{task_id}|{packet_id}", "event_type": terminal_type,
+                      "timestamp_utc": terminal_time}
+    if value.get("elapsed_seconds") is not None: terminal_event["elapsed_seconds"] = value["elapsed_seconds"]
+    events.append(terminal_event)
+    if value.get("commit_created") is True and value.get("commit_sha"):
+        events.append({**common, "event_id": f"COMMIT_CREATED|{task_id}|{packet_id}|{value['commit_sha']}",
+                       "event_type": "COMMIT_CREATED", "timestamp_utc": terminal_time, "commit_sha": value["commit_sha"]})
+    validation = str(value.get("validation_status") or "").upper()
+    if validation in {"PASS", "PASSED", "SUCCESS"}:
+        events.append({**common, "event_id": f"VALIDATION_PASSED|{task_id}|{packet_id}", "event_type": "VALIDATION_PASSED", "timestamp_utc": terminal_time})
+    elif validation in {"FAIL", "FAILED", "FAILURE"}:
+        events.append({**common, "event_id": f"VALIDATION_FAILED|{task_id}|{packet_id}", "event_type": "VALIDATION_FAILED", "timestamp_utc": terminal_time})
+    return events
 
 
 def rebuild_github_pr_delivery_metadata(receipts: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:

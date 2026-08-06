@@ -193,6 +193,7 @@ def build_repository_aligned_apply_packet(
             "Before a terminal blocked report, when safe, run TASK TIMING BLOCKED.",
             f"TASK TIMING BLOCKED: {timing_blocked}",
             "Instrumentation failure is terminal and must not be bypassed or estimated.",
+            "STAGING AUTHORITY: Receipt metadata and the velocity log may be staged only when changed and only when staging is separately authorized; never stage .aios/runtime/engineering_timing/.",
             "",
             "FINAL REPORT FORMAT:",
             "SUMMARY; WHAT CHANGED; FILES CHANGED; VALIDATION; REMAINING DIRTY FILES; SAFE NEXT COMMAND; STATUS.",

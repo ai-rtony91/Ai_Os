@@ -1,8 +1,10 @@
 from __future__ import annotations
 import json
+import importlib.util
 from pathlib import Path
 import pytest
 from automation.orchestration.aios_delivery_receipt_instrumentation_v1 import *
+from automation.orchestration.aios_engineering_velocity_forecast_v1 import normalize_event
 
 START="2026-08-06T10:00:00Z"; END="2026-08-06T10:02:30Z"
 def start(tmp_path):
@@ -19,10 +21,12 @@ def test_complete_measures_and_is_idempotent(tmp_path):
     start(tmp_path); kw=dict(task_id="TASK-1",packet_id="PACKET-1",completed_utc=END,ending_head="b"*40)
     one=complete_task_timing(tmp_path/"run",tmp_path/"term",**kw); two=complete_task_timing(tmp_path/"run",tmp_path/"term",**kw)
     assert one==two and one["elapsed_seconds"]==150 and one["duration_measured"]
+    assert (one["lane"], one["branch"], one["starting_head"]) == ("LANE-1", "work", "a" * 40)
 
 def test_missing_start_has_null_duration(tmp_path):
     value=complete_task_timing(tmp_path/"run",tmp_path/"term",task_id="T",packet_id="P",completed_utc=END)
     assert value["elapsed_seconds"] is None and value["duration_exclusion_reason"]=="START_MARKER_UNAVAILABLE"
+    assert "elapsed_seconds" not in task_receipt_velocity_events(value)[0]
 
 def test_terminal_before_start_and_conflict_fail(tmp_path):
     start(tmp_path)
@@ -71,6 +75,40 @@ def test_event_dedup_and_metadata_byte_stability(tmp_path):
     assert append_velocity_event(tmp_path/"events",event); assert not append_velocity_event(tmp_path/"events",event)
     start(tmp_path); receipt=complete_task_timing(tmp_path/"run",tmp_path/"term",task_id="TASK-1",packet_id="PACKET-1",completed_utc=END)
     assert stable_json(rebuild_codex_delivery_metadata([receipt]))==stable_json(rebuild_codex_delivery_metadata([receipt]))
+    events=task_receipt_velocity_events(receipt)
+    assert [item["event_type"] for item in events] == ["TASK_STARTED", "TASK_COMPLETED"]
+    assert all(normalize_event(item) for item in events)
+
+def load_runner():
+    path=Path(__file__).parents[2]/"scripts/run_aios_delivery_receipt_instrumentation_v1.py"
+    spec=importlib.util.spec_from_file_location("receipt_runner",path); module=importlib.util.module_from_spec(spec)
+    assert spec.loader; spec.loader.exec_module(module); return module
+
+def test_cli_loader_rejects_duplicate_keys_symlink_oversize_and_outside(tmp_path):
+    runner=load_runner(); inside=runner.ROOT/".aios/runtime/loader-tests"; inside.mkdir(parents=True,exist_ok=True)
+    duplicate=inside/"duplicate.json"; duplicate.write_text('{"x":1,"x":2}')
+    with pytest.raises(ValueError,match="duplicate"): runner.load_json(duplicate)
+    oversized=inside/"oversized.json"; oversized.write_bytes(b" "*(runner.MAX_BYTES+1))
+    with pytest.raises(ValueError,match="oversized"): runner.load_json(oversized)
+    target=inside/"target.json"; target.write_text('{}'); link=inside/"link.json"
+    if link.exists() or link.is_symlink(): link.unlink()
+    link.symlink_to(target)
+    with pytest.raises(ValueError,match="symlink"): runner.load_json(link)
+    outside=tmp_path/"outside.json"; outside.write_text('{}')
+    with pytest.raises(ValueError,match="outside"): runner.load_json(outside)
+
+def test_merge_metadata_preserves_history_and_conflicts_fail():
+    receipt={"schema":TASK_SCHEMA,"task_id":"T","packet_id":"P","status":"COMPLETE","duration_measured":False,"elapsed_seconds":None,"provenance":PROVENANCE}
+    legacy={"task_id":"PR-1","elapsed_seconds":None}
+    merged=merge_codex_delivery_metadata([legacy],receipt)
+    assert legacy in merged and any(item.get("packet_id")=="P" for item in merged)
+    with pytest.raises(ValueError,match="conflicting"): merge_codex_delivery_metadata(merged,[*merged][-1] | {"validation_status":"PASS"})
+
+def test_private_identity_and_invalid_github_timestamp_fail():
+    with pytest.raises(ValueError,match="private identifier"):
+        start_task_timing("unused",task_id="account-123",packet_id="P",lane="L",branch="work",starting_head="a",started_utc=START)
+    payload=workflow(); payload["workflow_run"]["created_at"]="not-a-time"
+    with pytest.raises(ValueError,match="run_created_at"): normalize_github_event_receipt(payload)
 
 def test_workflow_is_read_only_nonrecursive_and_no_secrets():
     text=(Path(__file__).parents[2]/".github/workflows/aios_delivery_validation_receipts_v1.yml").read_text()

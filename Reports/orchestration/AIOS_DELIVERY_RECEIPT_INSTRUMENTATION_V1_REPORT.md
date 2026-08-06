@@ -4,7 +4,7 @@
 Governed APPLY tasks now receive runtime-only starts and COMPLETE or BLOCKED terminal receipts. Measured UTC evidence replaces owner duration estimates; missing start evidence always produces a null duration with an exclusion reason.
 
 ## Storage and local ingestion
-Start markers and terminal task evidence are stored under `.aios/runtime/engineering_timing/`; tracked Codex metadata and velocity events are rebuilt only through bounded local processing. GitHub produces sanitized downloadable artifacts. Those artifacts cannot modify repository contents and require explicit local ingestion.
+Start markers and terminal task evidence are stored under `.aios/runtime/engineering_timing/`; terminal CLI commands automatically upsert tracked Codex metadata and append deduplicated forecast-compatible velocity events. GitHub produces sanitized downloadable artifacts. Those artifacts cannot modify repository contents and require explicit local ingestion.
 
 ## GitHub validation receipts
 The receipt workflow reads `GITHUB_EVENT_PATH`, uses read-only permissions, rejects recursive processing of its own workflow, and uploads only the normalized receipt. It does not commit, push, comment, open issues, approve, or merge.

@@ -2,7 +2,7 @@
 
 This component records measured, offline evidence for governed APPLY work. The canonical Python packet builder inserts `task-start`, `task-complete`, and `task-blocked` commands. A failed start is a stop condition before mutation. DRY_RUN generation is unchanged and performs no timing write.
 
-Active starts are runtime-only files under `.aios/runtime/engineering_timing/`. A terminal receipt is accepted once per task and packet identity; identical retries are idempotent and conflicts fail closed. Missing start evidence yields a null duration and an exact exclusion reason, never an estimate.
+Active starts are runtime-only files under `.aios/runtime/engineering_timing/`. A terminal receipt is accepted once per task and packet identity; identical retries are idempotent and conflicts fail closed. Missing start evidence yields a null duration and an exact exclusion reason, never an estimate. Terminal CLI commands automatically upsert the tracked Codex metadata and append deduplicated forecast-compatible velocity events; validation and commit events are emitted only when the receipt contains that evidence.
 
 The GitHub workflow uses read-only permissions and event payload data to upload sanitized workflow-validation and closed-PR receipts. It skips its own workflow completion. Artifacts do not write back to the repository: an operator must download them and run bounded local `ingest-github-receipts` processing.
 
