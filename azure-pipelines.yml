@@ -1,0 +1,29 @@
+trigger:
+  branches:
+    include: ['*']
+pr:
+  branches:
+    include: ['*']
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+    persistCredentials: false
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.12'
+  - bash: |
+      set -euo pipefail
+      EXPECTED_SHA="${SYSTEM_PULLREQUEST_SOURCECOMMITID:-$BUILD_SOURCEVERSION}"
+      test "$EXPECTED_SHA" != ""
+      git checkout --detach "$EXPECTED_SHA"
+      test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      python scripts/ci/run_aios_dual_ci_validation_v1.py --expected-sha "$EXPECTED_SHA" --receipt-path "$(Build.ArtifactStagingDirectory)/aios-dual-ci-receipt.json"
+    displayName: Exact-SHA deterministic validation
+  - publish: $(Build.ArtifactStagingDirectory)/aios-dual-ci-receipt.json
+    artifact: aios-dual-ci-receipt
+    displayName: Retain sanitized validation receipt
+    condition: always()

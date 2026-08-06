@@ -3,26 +3,40 @@ name: AIOS Governance
 on:
   pull_request:
   push:
-    branches-ignore:
-      - main
+    branches-ignore: [main]
+
+permissions:
+  contents: read
 
 jobs:
   governance:
     runs-on: ubuntu-latest
     steps:
+      - name: Determine expected SHA
+        id: sha
+        shell: bash
+        env:
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_SHA: ${{ github.sha }}
+        run: echo "expected=${PR_HEAD_SHA:-$PUSH_SHA}" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.sha.outputs.expected }}
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - name: Compile governance bridge
+          python-version: '3.12'
+      - name: Run exact-SHA governance validation
+        env:
+          EXPECTED_SHA: ${{ steps.sha.outputs.expected }}
         run: |
-          python -m py_compile automation/bridge/aios_phase_bridge.py
-          python -m py_compile automation/validators/aios_governance_validator.py
-          python -m py_compile automation/orchestration/dispatcher/assignment_executor.py
-          python -m py_compile automation/validators/aios_worker_dispatcher_assignment_executor_validator.py
-          python -m py_compile automation/self_build/aios_self_build_inspector.py
-      - name: Run governance validator sample
-        run: python automation/validators/aios_governance_validator.py --sample-check
-      - name: Run worker dispatcher assignment executor validator sample
-        run: python automation/validators/aios_worker_dispatcher_assignment_executor_validator.py --sample-check
-
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python scripts/ci/run_aios_dual_ci_validation_v1.py --expected-sha "$EXPECTED_SHA" --receipt-path aios-dual-ci-receipt.json
+      - name: Retain sanitized validation receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aios-governance-dual-ci-receipt
+          path: aios-dual-ci-receipt.json
+          if-no-files-found: ignore

@@ -8,6 +8,35 @@ This is a governance and workflow specification. It does not stage files, commit
 
 The gate reduces repeated operator approval prompts only when the exact action is already proven safe. It does not authorize blind autopilot.
 
+## Dual-CI Resilience V1
+
+GitHub remains the canonical repository, pull-request, protected-main, and merge
+authority. Azure Pipelines is an independent, deterministic validation provider;
+its result is evidence only and grants no deployment, broker, credential, merge,
+or branch-protection authority.
+
+CI health and validation use these explicit states:
+
+- `GITHUB_CI_HEALTHY`
+- `GITHUB_ACTIONS_PROVIDER_OUTAGE`
+- `AZURE_CI_HEALTHY`
+- `AZURE_PIPELINE_PROVIDER_OUTAGE`
+- `CODE_VALIDATION_FAILED`
+- `EQUIVALENT_VALIDATION_PASS`
+- `SHA_MISMATCH_BLOCKED`
+- `MERGE_BLOCKED`
+
+A provider outage is not a code failure, and a code failure outranks an outage.
+SHA mismatch blocks every equivalence claim. Azure success cannot erase a GitHub
+code failure; GitHub success cannot erase an Azure code failure when Azure is
+required for the lane. Provider failure never transfers merge authority.
+
+`EQUIVALENT_VALIDATION_PASS` may be claimed only when both receipts have the same
+expected SHA, both checked-out SHAs equal it, runner SHA-256 values match, Python
+major/minor versions match, command ID sets match, and every required command
+passes. A merge remains `MERGE_BLOCKED` until required GitHub checks, repository
+governance, branch protection, and separate Human Owner approval all permit it.
+
 This gate is now part of the broader Protected Action Gate. It may confirm that a requested protected action is safe enough to present for execution, but it does not create Human Owner approval by itself.
 
 The exact-scope DRY_RUN helper is:
