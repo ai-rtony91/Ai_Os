@@ -1,0 +1,92 @@
+[
+  {
+    "completed_utc": "2026-08-05T22:38:11-04:00",
+    "delivery_title": "Build AIOS engineering velocity and completion forecast engine",
+    "elapsed_seconds": null,
+    "ending_head": "493ad71fa80b43ebe98fd896098c4cd00c107a83",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1364"
+  },
+  {
+    "completed_utc": "2026-08-05T22:17:21-04:00",
+    "delivery_title": "Build P1 supervised paper capture and replay workflow",
+    "elapsed_seconds": null,
+    "ending_head": "5c5ad417a248d67e2b4063ce49f28bc765a8eaff",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1363"
+  },
+  {
+    "completed_utc": "2026-08-05T21:57:55-04:00",
+    "delivery_title": "Build P1 supervised paper evidence pipeline",
+    "elapsed_seconds": null,
+    "ending_head": "0f3fb7d0b20069eea6e1f385af022492f2915eba",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1362"
+  },
+  {
+    "completed_utc": "2026-08-05T20:38:48-04:00",
+    "delivery_title": "Build Profit Track P1 strategy evidence",
+    "elapsed_seconds": null,
+    "ending_head": "fe9080e0e50c04056f0bf7db1cdfab45e200512e",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1361"
+  },
+  {
+    "completed_utc": "2026-08-05T17:23:25-04:00",
+    "delivery_title": "Complete repository-fixable Forex autonomy and readiness closure",
+    "elapsed_seconds": null,
+    "ending_head": "238531fa18f2802efd0f56f56297a6261233077f",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1360"
+  },
+  {
+    "completed_utc": "2026-08-05T17:01:07-04:00",
+    "delivery_title": "Add Forex pre-live blocker batch gate",
+    "elapsed_seconds": null,
+    "ending_head": "09357bb3f955fbf587968aa01af528bbbb5f2ccc",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1359"
+  },
+  {
+    "completed_utc": "2026-08-05T16:50:45-04:00",
+    "delivery_title": "Refresh pre-live forex readiness reports",
+    "elapsed_seconds": null,
+    "ending_head": "9acd7727f5edf42b41e5c5f5a409278855630726",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1358"
+  },
+  {
+    "completed_utc": "2026-08-05T16:44:35-04:00",
+    "delivery_title": "Close Forex autonomy evidence refresh batch",
+    "elapsed_seconds": null,
+    "ending_head": "7c8b18db3c4e7582f127b567850807c3d228c1a3",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1357"
+  },
+  {
+    "completed_utc": "2026-08-05T16:33:43-04:00",
+    "delivery_title": "Repair Forex test infrastructure",
+    "elapsed_seconds": null,
+    "ending_head": "acb6d327352e0542dcbcc8a521891fbc7ade8648",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1356"
+  },
+  {
+    "completed_utc": "2026-08-05T16:04:25-04:00",
+    "delivery_title": "Build Forex autonomy self-audit and repair routing cycle",
+    "elapsed_seconds": null,
+    "ending_head": "9e7c2bae3e8fdb2e16c5c42535574efd75018fb6",
+    "measurement_status": "DELIVERY_MEASURED_DURATION_UNAVAILABLE",
+    "provenance": "LOCAL_GIT_COMMIT",
+    "task_id": "PR-1355"
+  }
+]

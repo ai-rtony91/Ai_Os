@@ -13,7 +13,7 @@ AIOS engineering velocity forecast V1 completion
 {'task_duration': 0, 'selected_task_duration': 0, 'merged_pr_lead_time': 0} Event counts: {'BLOCKER_CLOSED': 0, 'BLOCKER_DISCOVERED': 0, 'COMMIT_CREATED': 0, 'EXTERNAL_GATE_CLOSED': 0, 'EXTERNAL_GATE_OPENED': 0, 'PR_CLOSED_UNMERGED': 0, 'PR_CREATED': 0, 'PR_MERGED': 0, 'RUNTIME_MILESTONE_VERIFIED': 0, 'TASK_BLOCKED': 0, 'TASK_COMPLETED': 1, 'TASK_STARTED': 0, 'VALIDATION_FAILED': 0, 'VALIDATION_PASSED': 0}.
 
 ## What data is missing?
-GITHUB_PR_METADATA, CODEX_TASK_METADATA, MEASURED_TASK_DURATION
+MEASURED_TASK_DURATION
 
 ## Current productivity rate
 Median task minutes: None; tasks per active day: 1.0; PRs merged per active day: 0.0.
@@ -28,7 +28,7 @@ Median task minutes: None; tasks per active day: 1.0; PRs merged per active day:
 {'low': 'UNKNOWN', 'best': 'UNKNOWN', 'high': 'UNKNOWN'}
 
 ## Confidence
-5/100 (LOW).
+25/100 (LOW).
 
 ## Critical-path blocker
 Path: ['BUILD_FORECAST', 'VALIDATE_FORECAST']. Highest blocker: BUILD_FORECAST.
