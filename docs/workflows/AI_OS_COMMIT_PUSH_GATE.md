@@ -267,3 +267,23 @@ Codex may treat `TIER_0_AUTO` and safe `TIER_1_LOW_RISK` commands as `Option 2` 
 Codex may stop asking the operator for repeated 1/2/3 choices for the same protected action only after this gate returns a `SAFE_TO_*` state for the exact protected action and the packet already contains the matching current-session Human Owner approval marker.
 
 Codex must still stop for `HUMAN_APPROVAL_REQUIRED` or `BLOCKED`.
+
+## Dual-CI Resilience Evidence
+
+GitHub Actions and Azure Pipelines run the same tracked-source validator and emit
+`AIOS_DUAL_CI_RECEIPT_V1` receipts. The receipts are evidence only:
+`merge_authorized` is always false, and Azure success never substitutes for a
+missing required GitHub check without separately approved governance.
+
+The operator-facing states are:
+
+- `GITHUB_CI_HEALTHY` and `AZURE_CI_HEALTHY`: that provider validated the exact source SHA.
+- `GITHUB_ACTIONS_PROVIDER_OUTAGE` and `AZURE_PIPELINE_PROVIDER_OUTAGE`: provider availability failed independently of code validation.
+- `CODE_VALIDATION_FAILED`: at least one deterministic shared command failed.
+- `EQUIVALENT_VALIDATION_PASS`: one GitHub receipt and one Azure receipt passed with identical validation identities and ordered commands.
+- `SHA_MISMATCH_BLOCKED`: the checked-out commit differs from the declared source commit.
+- `SHA_SOURCE_UNAVAILABLE_BLOCKED`: a valid exact source SHA was not available; Azure Pull Request builds never fall back to `Build.SourceVersion`.
+- `MERGE_BLOCKED`: required checks, approval, or equivalence evidence is absent or invalid.
+
+`EQUIVALENT_VALIDATION_PASS` does not authorize a merge. Human Owner approval
+and all existing protected-action gates remain required.
