@@ -212,13 +212,36 @@ def _task_samples(events: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     return samples
 
 
+def _codex_task_samples(items: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Normalize measured Codex delivery receipts without estimating missing time."""
+    samples: list[dict[str, Any]] = []
+    for item in items:
+        task_id = str(item.get("task_id") or item.get("packet_id") or "")
+        seconds = item.get("elapsed_seconds")
+        if seconds is None and item.get("started_utc") and item.get("completed_utc"):
+            seconds = (parse_timestamp(item["completed_utc"]) - parse_timestamp(item["started_utc"])).total_seconds()
+        if seconds is not None:
+            elapsed = _finite_number(seconds, "elapsed_seconds")
+            if elapsed < 0:
+                raise ValueError("elapsed_seconds cannot be negative")
+            if elapsed >= 1:
+                samples.append({
+                    "minutes": round(elapsed / 60, 3), "lane": item.get("lane"),
+                    "subsystem": item.get("subsystem"), "program": item.get("program"),
+                    "task_id": task_id,
+                })
+    return samples
+
+
 def build_forecast(project: Mapping[str, Any], events: Sequence[Mapping[str, Any]] = (), *, git_metadata: Mapping[str, Any] | None = None, github_pr_metadata: Sequence[Mapping[str, Any]] = (), codex_task_metadata: Sequence[Mapping[str, Any]] = (), calibration: Mapping[str, Any] | None = None, as_of_utc: str) -> dict[str, Any]:
     _sanitize(project); _sanitize(github_pr_metadata); _sanitize(codex_task_metadata)
     as_of = parse_timestamp(as_of_utc)
     dependencies = project.get("dependencies") or []
     critical_path = _cycle_and_path(dependencies)
     all_events = list(events)
-    samples = _task_samples(all_events)
+    event_samples = _task_samples(all_events)
+    codex_samples = _codex_task_samples(codex_task_metadata)
+    samples = event_samples + codex_samples
     lane = project.get("lane"); subsystem = project.get("subsystem"); program = project.get("hierarchy", {}).get("program") if isinstance(project.get("hierarchy"), Mapping) else None
     candidates = [sample for sample in samples if lane and sample.get("lane") == lane]
     source = "LANE_MEASURED_HISTORY"
@@ -261,7 +284,12 @@ def build_forecast(project: Mapping[str, Any], events: Sequence[Mapping[str, Any
     active_days = len({event["timestamp_utc"][:10] for event in all_events}) or 1
     prs = [dict(item) for item in github_pr_metadata]
     credited = sum(completion_credit(item) for item in prs)
-    pr_leads = [(parse_timestamp(item.get("merged_at") or item.get("merged_timestamp")) - parse_timestamp(item.get("created_at") or item.get("created_timestamp"))).total_seconds() / 60 for item in prs if item.get("merged_at") or item.get("merged_timestamp")]
+    pr_leads = [
+        (parse_timestamp(merged) - parse_timestamp(created)).total_seconds() / 60
+        for item in prs
+        if (merged := item.get("merged_at") or item.get("merged_timestamp"))
+        and (created := item.get("created_at") or item.get("created_timestamp"))
+    ]
     score = min(85, 15 + min(len(samples), 10) * 5 + (10 if enumerated else 0) + (10 if dependencies else 0) + (10 if prs else 0))
     warnings = []
     if owner_used: score -= 15; warnings.append("Owner-reported calibration used because fewer than five measured task samples exist.")
@@ -277,10 +305,10 @@ def build_forecast(project: Mapping[str, Any], events: Sequence[Mapping[str, Any
         "schema": SCHEMA, "generated_at_utc": as_of.isoformat().replace("+00:00", "Z"),
         "repository_fingerprint": git_metadata.get("repository_fingerprint", "UNAVAILABLE"), "branch": git_metadata.get("branch", "UNKNOWN"), "HEAD": git_metadata.get("head", "UNKNOWN"),
         "forecast_target": project.get("forecast_target", "UNKNOWN"), "hierarchy": dict(project.get("hierarchy") or {}),
-        "data_sources_used": sorted(["EVENT_LOG"] + (["GIT_COMMIT_METADATA"] if git_metadata else []) + (["GITHUB_PR_METADATA"] if prs else []) + [source]),
+        "data_sources_used": sorted(["EVENT_LOG"] + (["GIT_COMMIT_METADATA"] if git_metadata else []) + (["GITHUB_PR_METADATA"] if prs else []) + (["CODEX_TASK_METADATA"] if codex_task_metadata else []) + [source]),
         "data_sources_missing": [name for name, present in (("GITHUB_PR_METADATA", bool(prs)), ("CODEX_TASK_METADATA", bool(codex_task_metadata)), ("MEASURED_TASK_DURATION", bool(samples))) if not present],
         "event_counts": {key: counts.get(key, 0) for key in sorted(EVENT_TYPES)}, "valid_sample_counts": {"task_duration": len(samples), "selected_task_duration": stats["sample_count"], "merged_pr_lead_time": len(pr_leads)},
-        "excluded_event_counts": {"zero_or_subsecond_task_duration": sum(event["event_type"] == "TASK_COMPLETED" and float(event.get("elapsed_seconds", 1)) < 1 for event in all_events)}, "exclusion_reasons": ["Subsecond durations are automation receipts, not engineering-duration evidence."] if all_events and not samples else [],
+        "excluded_event_counts": {"zero_or_subsecond_task_duration": sum(event["event_type"] == "TASK_COMPLETED" and float(event.get("elapsed_seconds", 1)) < 1 for event in all_events) + sum(item.get("elapsed_seconds") is not None and float(item["elapsed_seconds"]) < 1 for item in codex_task_metadata)}, "exclusion_reasons": ["Subsecond durations are automation receipts, not engineering-duration evidence."] if (all_events or codex_task_metadata) and not samples else [],
         "observed_velocity": {"task_duration_minutes": stats, "selected_duration_source": source, "merged_pr_lead_time_minutes": robust_statistics(pr_leads), "tasks_completed_per_active_day": round(counts["TASK_COMPLETED"] / active_days, 3), "PRs_merged_per_active_day": round(counts["PR_MERGED"] / active_days, 3), "blocker_discovery_rate": round(counts["BLOCKER_DISCOVERED"] / active_days, 3), "blocker_closure_rate": round(counts["BLOCKER_CLOSED"] / max(1, counts["BLOCKER_DISCOVERED"]), 3), "validation_failure_rate": round(counts["VALIDATION_FAILED"] / max(1, counts["VALIDATION_FAILED"] + counts["VALIDATION_PASSED"]), 3), "rework_rate": round(sum(1 for item in prs if item.get("rework") is True) / max(1, len(prs)), 3)},
         "completion_credit": {"merged_and_validated": credited, "unverified_uncredited": len(prs) - credited},
         "remaining_work": remaining, "critical_path": critical_path, "highest_blocker": critical_path[0] if critical_path else None,

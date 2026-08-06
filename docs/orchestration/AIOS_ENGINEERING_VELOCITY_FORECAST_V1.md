@@ -15,7 +15,11 @@ Active engineering time is separate from review/merge latency, calendar time, ow
 ## Offline CLI
 
 ```text
-python scripts/run_aios_engineering_velocity_forecast_v1.py --repo-root . --project-input Reports/orchestration/AIOS_ENGINEERING_VELOCITY_FORECAST_INPUT_V1.example.json --event-log Reports/orchestration/AIOS_ENGINEERING_VELOCITY_EVENT_LOG_V1.jsonl --as-of-utc 2026-08-06T12:00:00Z --state-output Reports/orchestration/AIOS_ENGINEERING_VELOCITY_FORECAST_V1_STATE.json --report-output Reports/orchestration/AIOS_ENGINEERING_VELOCITY_FORECAST_V1_REPORT.md
+python scripts/run_aios_engineering_velocity_forecast_v1.py --repo-root . --project-input Reports/orchestration/AIOS_ENGINEERING_VELOCITY_FORECAST_INPUT_V1.example.json --event-log Reports/orchestration/AIOS_ENGINEERING_VELOCITY_EVENT_LOG_V1.jsonl --github-pr-metadata Reports/orchestration/AIOS_GITHUB_PR_DELIVERY_METADATA_V1.json --codex-task-metadata Reports/orchestration/AIOS_CODEX_TASK_DELIVERY_METADATA_V1.json --as-of-utc 2026-08-06T12:00:00Z --state-output Reports/orchestration/AIOS_ENGINEERING_VELOCITY_FORECAST_V1_STATE.json --report-output Reports/orchestration/AIOS_ENGINEERING_VELOCITY_FORECAST_V1_REPORT.md
 ```
 
 The Git collector uses only fixed read-only `git rev-parse`, `git branch --show-current`, and `git log` commands. Identical inputs, repository HEAD, and as-of timestamp produce byte-stable JSON.
+
+## Local delivery backfill
+
+The checked-in Codex and GitHub delivery metadata backfills contain only facts available from local Git history: delivery/merge timestamps, PR numbers parsed from commit subjects, commit SHAs, and titles. They deliberately record task duration and GitHub check validation as unavailable rather than estimating either value. Consequently, merged work remains uncredited until sanitized check evidence is supplied, and local delivery cadence is not misrepresented as active Codex engineering time.

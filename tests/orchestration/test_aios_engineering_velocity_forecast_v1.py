@@ -50,6 +50,21 @@ def test_merged_validated_work_gets_credit():
     assert completion_credit({"state": "MERGED", "validated": True}) is True
 
 
+def test_codex_receipts_supply_measured_duration_and_pr_without_created_time_is_safe():
+    tasks = [
+        {"packet_id": f"packet-{index}", "elapsed_seconds": minutes * 60, "lane": "lane"}
+        for index, minutes in enumerate([11, 12, 13, 14, 15])
+    ]
+    state = build_forecast(
+        project(), github_pr_metadata=[{"pr_number": 1364, "state": "MERGED", "merged_at": AS_OF}],
+        codex_task_metadata=tasks, calibration=CAL, as_of_utc=AS_OF,
+    )
+    assert state["observed_velocity"]["selected_duration_source"] == "LANE_MEASURED_HISTORY"
+    assert state["observed_velocity"]["task_duration_minutes"]["median"] == 13
+    assert state["observed_velocity"]["merged_pr_lead_time_minutes"]["sample_count"] == 0
+    assert "CODEX_TASK_METADATA" not in state["data_sources_missing"]
+
+
 def test_external_wait_is_separate_and_unknown_prevents_date():
     state = forecast(remaining_work=[{"id": "a", "category": "repository_fixable"}, {"id": "gate", "category": "external_evidence", "wait_minutes": None}])
     assert state["estimated_active_engineering_minutes"]["best"] == 20

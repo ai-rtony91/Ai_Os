@@ -1,5 +1,5 @@
 {
-  "HEAD": "5c5ad417a248d67e2b4063ce49f28bc765a8eaff",
+  "HEAD": "493ad71fa80b43ebe98fd896098c4cd00c107a83",
   "assumptions": [
     "Task-duration source: REPOSITORY_PERT_BASELINE.",
     "External waiting is excluded from active engineering time."
@@ -10,21 +10,21 @@
   "branch": "work",
   "completion_credit": {
     "merged_and_validated": 0,
-    "unverified_uncredited": 0
+    "unverified_uncredited": 10
   },
   "confidence_label": "LOW",
-  "confidence_score": 5,
+  "confidence_score": 25,
   "critical_path": [
     "BUILD_FORECAST",
     "VALIDATE_FORECAST"
   ],
   "data_sources_missing": [
-    "GITHUB_PR_METADATA",
-    "CODEX_TASK_METADATA",
     "MEASURED_TASK_DURATION"
   ],
   "data_sources_used": [
+    "CODEX_TASK_METADATA",
     "EVENT_LOG",
+    "GITHUB_PR_METADATA",
     "GIT_COMMIT_METADATA",
     "REPOSITORY_PERT_BASELINE"
   ],
@@ -88,7 +88,7 @@
   "low_estimate": {
     "active_engineering_minutes": 30.0
   },
-  "next_safe_action": "Collect five measured task-duration events and sanitized merged-PR validation metadata.",
+  "next_safe_action": "Collect five measured task-duration events and sanitized GitHub check validation metadata.",
   "observed_velocity": {
     "PRs_merged_per_active_day": 0.0,
     "blocker_closure_rate": 0.0,
@@ -138,7 +138,7 @@
     "repository_fixable": 2,
     "unknown": 0
   },
-  "repository_fingerprint": "8012e585f561059a9ad831a6a2840406f78dcca63a695e55c8244ded1dfd04d1",
+  "repository_fingerprint": "98dbec4628218071aa2b224b979c4efe7522192b7d91c1d7eb8fd609d28fd613",
   "schema": "AIOS_ENGINEERING_VELOCITY_FORECAST.v1",
   "valid_sample_counts": {
     "merged_pr_lead_time": 0,
@@ -146,7 +146,6 @@
     "task_duration": 0
   },
   "warnings": [
-    "Local GitHub PR metadata was not supplied.",
     "An external wait is unconstrained; calendar completion is UNKNOWN."
   ]
 }
