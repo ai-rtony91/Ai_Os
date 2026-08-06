@@ -31,7 +31,8 @@ def raw_candle(minutes: int, *, complete: bool = True, volume: int = 10, **mid):
 
 
 def payload(*candles):
-    return {"candles": list(candles or (raw_candle(10), raw_candle(5), raw_candle(1)))}
+    return {"instrument": "EUR_USD", "granularity": "M5",
+            "candles": list(candles or (raw_candle(10), raw_candle(5), raw_candle(1)))}
 
 
 def artifact():
@@ -74,6 +75,28 @@ def test_completed_extraction_discards_incomplete_and_uses_canonical_fields():
     assert "time" not in candles[0] and "mid" not in candles[0]
 
 
+def test_official_oanda_response_shape_is_accepted():
+    assert len(extract_canonical_completed_candles(payload())) == 3
+
+
+@pytest.mark.parametrize("change,reason", [
+    ({"instrument": None}, "raw_payload"),
+    ({"granularity": None}, "raw_payload"),
+    ({"candles": None}, "raw_payload"),
+    ({"instrument": "GBP_USD"}, "EUR_USD"),
+    ({"granularity": "M1"}, "M5"),
+    ({"extra": "rejected"}, "raw_payload"),
+])
+def test_official_oanda_response_contract_fails_closed(change, reason):
+    response = payload()
+    if next(iter(change.values())) is None:
+        response.pop(next(iter(change)))
+    else:
+        response.update(change)
+    with pytest.raises(ValueError, match=reason):
+        extract_canonical_completed_candles(response)
+
+
 def test_fewer_than_three_completed_candles_rejected():
     with pytest.raises(ValueError, match="REQUIRE_MORE_HISTORY"):
         extract_canonical_completed_candles(payload(raw_candle(5), raw_candle(1)))
@@ -100,7 +123,7 @@ def test_extra_raw_fields_and_private_identifiers_rejected():
     with pytest.raises(ValueError, match="fields"):
         extract_canonical_completed_candles(payload(candle, raw_candle(5), raw_candle(1)))
     with pytest.raises(ValueError, match="raw_payload"):
-        extract_canonical_completed_candles({"candles": [], "accountID": "secret"})
+        extract_canonical_completed_candles({**payload(), "accountID": "secret"})
 
 
 def test_artifact_exactly_matches_canonical_contract_and_validator():
@@ -120,7 +143,7 @@ def test_stale_history_rejected():
         candle["time"] = f"2020-01-01T00:{index:02d}:00Z"
     with pytest.raises(ValueError, match="stale"):
         validate_canonical_history_artifact(build_canonical_history_artifact(
-            extract_canonical_completed_candles({"candles": candles}), requested_count=3))
+            extract_canonical_completed_candles(payload(*candles)), requested_count=3))
 
 
 def test_fixture_and_synthetic_receive_zero_genuine_credit():

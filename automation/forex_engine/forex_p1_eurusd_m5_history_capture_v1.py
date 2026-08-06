@@ -78,8 +78,12 @@ def _price(value: Any, name: str) -> float:
 
 
 def extract_canonical_completed_candles(payload: Mapping[str, Any]) -> list[dict[str, Any]]:
-    if not isinstance(payload, Mapping) or set(payload) != {"candles"}:
+    if not isinstance(payload, Mapping) or set(payload) != {"instrument", "granularity", "candles"}:
         raise ValueError("raw_payload_shape_rejected")
+    if payload["instrument"] != INSTRUMENT:
+        raise ValueError("EUR_USD_required")
+    if payload["granularity"] != GRANULARITY:
+        raise ValueError("M5_required")
     raw = payload.get("candles")
     if not isinstance(raw, list):
         raise ValueError("candles_list_required")
