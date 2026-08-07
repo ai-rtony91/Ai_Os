@@ -9,9 +9,16 @@
   box-sizing: border-box;
 }
 
+html {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
 }
 
 button,

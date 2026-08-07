@@ -1,26 +1,26 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './MinimalOperatorDashboard.css';
 
 const HOME_ROOMS = [
   {
     id: 'safety',
-    icon: '🛡️',
-    label: 'Safety, security, and login boundary',
+    icon: '🔐',
+    label: 'Access',
   },
   {
     id: 'forex',
-    icon: '🤖',
-    label: 'Forex bot',
+    icon: '📈',
+    label: 'Forex Bot',
   },
   {
     id: 'system',
     icon: '🛠️',
-    label: 'System and tools',
+    label: 'Utilities',
   },
   {
     id: 'music',
     icon: '🎵',
-    label: 'Music and utilities',
+    label: 'Music',
   },
 ];
 
@@ -97,6 +97,7 @@ function IconHome({ onOpen }) {
             type="button"
           >
             <span aria-hidden="true">{room.icon}</span>
+            <span className="roomLabel">{room.label}</span>
           </button>
         ))}
       </nav>
@@ -104,24 +105,31 @@ function IconHome({ onOpen }) {
   );
 }
 
-function BackButton({ onClick }) {
+function BackButton({ buttonRef, onClick }) {
   return (
-    <button aria-label="Back to AIOS home" className="backButton" onClick={onClick} title="Back" type="button">
+    <button
+      aria-label="Back to AIOS home"
+      className="backButton"
+      onClick={onClick}
+      ref={buttonRef}
+      title="Back"
+      type="button"
+    >
       <span aria-hidden="true">←</span>
     </button>
   );
 }
 
-function DetailRoom({ room, onBack }) {
+function DetailRoom({ backButtonRef, room, onBack }) {
   if (room === 'forex') {
-    return <ForexRoom onBack={onBack} />;
+    return <ForexRoom backButtonRef={backButtonRef} onBack={onBack} />;
   }
 
   const detail = DETAIL_COPY[room];
 
   return (
     <section className="detailRoom" aria-labelledby={`${room}-title`}>
-      <BackButton onClick={onBack} />
+      <BackButton buttonRef={backButtonRef} onClick={onBack} />
       <header className="detailHeader">
         <span aria-hidden="true" className="detailIcon">
           {detail.icon}
@@ -143,10 +151,10 @@ function DetailRoom({ room, onBack }) {
   );
 }
 
-function ForexRoom({ onBack }) {
+function ForexRoom({ backButtonRef, onBack }) {
   return (
     <section className="detailRoom forexRoom" aria-labelledby="forex-title">
-      <BackButton onClick={onBack} />
+      <BackButton buttonRef={backButtonRef} onClick={onBack} />
       <header className="detailHeader">
         <span aria-hidden="true" className="detailIcon">
           🤖
@@ -184,15 +192,45 @@ function ForexRoom({ onBack }) {
 
 export default function MinimalOperatorDashboard() {
   const [activeRoom, setActiveRoom] = useState('home');
+  const backButtonRef = useRef(null);
+  const lastRoomButtonRef = useRef(null);
   const roomIds = useMemo(() => new Set(HOME_ROOMS.map((room) => room.id)), []);
   const isHome = activeRoom === 'home' || !roomIds.has(activeRoom);
+
+  const openRoom = (room) => {
+    lastRoomButtonRef.current = document.activeElement;
+    setActiveRoom(room);
+  };
+
+  const returnHome = () => setActiveRoom('home');
+
+  useEffect(() => {
+    if (!isHome) {
+      backButtonRef.current?.focus();
+      return undefined;
+    }
+
+    lastRoomButtonRef.current?.focus();
+    return undefined;
+  }, [isHome]);
+
+  useEffect(() => {
+    if (isHome) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') returnHome();
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isHome]);
 
   return (
     <main className="minimalOperatorDashboard" aria-label="AIOS minimal operator dashboard">
       {isHome ? (
-        <IconHome onOpen={setActiveRoom} />
+        <IconHome onOpen={openRoom} />
       ) : (
-        <DetailRoom room={activeRoom} onBack={() => setActiveRoom('home')} />
+        <DetailRoom backButtonRef={backButtonRef} room={activeRoom} onBack={returnHome} />
       )}
     </main>
   );

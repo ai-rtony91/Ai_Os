@@ -11,13 +11,18 @@
 
 html {
   background: #05070b;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  overflow-x: hidden;
 }
 
 #root {
   min-height: 100svh;
+  min-height: 100dvh;
+  min-width: 0;
 }
