@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import crypto from 'node:crypto'
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
 const port = Number(process.env.PORT || 8080)
@@ -14,6 +15,8 @@ const liveAutonomyBridgeStatePath = path.resolve(
   process.env.AIOS_AUTONOMY_BRIDGE_STATE_PATH
     || 'telemetry/night_supervisor/AUTONOMY_BRIDGE_STATE.json',
 )
+const dashboardProjectionPath = path.resolve(repoRootDir, '.aios/runtime/dashboard_measurement/AIOS_DASHBOARD_PROJECTION_V1.json')
+const projectionLimit = 250 * 1024
 
 const contentTypes = new Map([
   ['.html', 'text/html; charset=utf-8'],
@@ -53,6 +56,22 @@ function isLiveAutonomyBridgeStateRequest(requestUrl) {
   return parsedUrl.pathname === '/live-data/autonomy_bridge_state.json'
 }
 
+function isDashboardProjectionRequest(requestUrl) { return new URL(requestUrl, 'http://localhost').pathname === '/aios-dashboard-projection' }
+
+function serveDashboardProjection(request, response) {
+  if (!dashboardProjectionPath.startsWith(path.resolve(repoRootDir) + path.sep)) return sendText(response, 403, 'Forbidden')
+  fs.readFile(dashboardProjectionPath, (error, raw) => {
+    if (error || raw.length > projectionLimit) return sendText(response, error?.code === 'ENOENT' ? 404 : 503, 'Projection unavailable')
+    let projection
+    try { projection = JSON.parse(raw) } catch { return sendText(response, 503, 'Projection unavailable') }
+    if (projection.schema_version !== 'AIOS_DASHBOARD_PROJECTION_V1' || !projection.dimensions || !projection.receipts) return sendText(response, 503, 'Projection unavailable')
+    const etag = `"${crypto.createHash('sha256').update(raw).digest('hex')}"`
+    if (request.headers['if-none-match'] === etag) { response.writeHead(304, { etag }); response.end(); return }
+    response.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', etag, 'x-aios-projection-state': projection.projection_state || 'UNAVAILABLE' })
+    response.end(request.method === 'HEAD' ? undefined : raw)
+  })
+}
+
 const server = http.createServer((request, response) => {
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     sendText(response, 405, 'Method not allowed')
@@ -80,6 +99,8 @@ const server = http.createServer((request, response) => {
     })
     return
   }
+
+  if (isDashboardProjectionRequest(request.url)) { serveDashboardProjection(request, response); return }
 
   let filePath
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './MinimalOperatorDashboard.css';
+import MeasurementConsole from './components/aios_measurement/MeasurementConsole';
 
 const ROOMS = [
   { id: 'safety', icon: '🔐', label: 'Access' },
@@ -86,11 +87,7 @@ function Utilities() {
   return (
     <section className="surface" aria-labelledby="utilities-title">
       <div className="surfaceHeading"><div><p className="eyebrow">Local tools</p><h1 id="utilities-title">Utilities</h1></div><StatusPill>Safe mode</StatusPill></div>
-      <div className="metricGrid">
-        <article className="metric"><span>Runtime</span><strong>Display only</strong><small>No background services</small></article>
-        <article className="metric"><span>Scheduler</span><strong>Off</strong><small>No automated actions</small></article>
-        <article className="metric"><span>Webhooks</span><strong>Off</strong><small>No external calls</small></article>
-      </div>
+      <MeasurementConsole />
     </section>
   );
 }
