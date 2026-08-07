@@ -157,3 +157,4 @@ telemetry/morning_digest/
 
 # AI_OS local-only sensitive friction telemetry
 telemetry/human_ai_friction/
+.aios/runtime/dashboard_measurement/
