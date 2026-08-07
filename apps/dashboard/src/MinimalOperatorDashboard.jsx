@@ -1,103 +1,43 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './MinimalOperatorDashboard.css';
 
-const HOME_ROOMS = [
-  {
-    id: 'safety',
-    icon: '🔐',
-    label: 'Access',
-  },
-  {
-    id: 'forex',
-    icon: '📈',
-    label: 'Forex Bot',
-  },
-  {
-    id: 'system',
-    icon: '🛠️',
-    label: 'Utilities',
-  },
-  {
-    id: 'music',
-    icon: '🎵',
-    label: 'Music',
-  },
+const ROOMS = [
+  { id: 'safety', icon: '🔐', label: 'Access' },
+  { id: 'forex', icon: '📈', label: 'Forex Bot' },
+  { id: 'system', icon: '🛠️', label: 'Utilities' },
+  { id: 'music', icon: '🎵', label: 'Music' },
 ];
 
+const REASONING_LEVELS = ['Instant', 'Medium', 'High', 'Extra High', 'Pro'];
+const FOREX_SAFETY = ['READ ONLY', 'DISPLAY_ONLY', 'EXEC OFF', 'BROKER LOCKED'];
 const PAIRS = [
-  { pair: 'EUR/USD', flags: '🇪🇺 🇺🇸', state: 'WATCH' },
-  { pair: 'GBP/USD', flags: '🇬🇧 🇺🇸', state: 'WATCH' },
-  { pair: 'USD/JPY', flags: '🇺🇸 🇯🇵', state: 'WATCH' },
-  { pair: 'USD/CAD', flags: '🇺🇸 🇨🇦', state: 'WATCH' },
-  { pair: 'AUD/USD', flags: '🇦🇺 🇺🇸', state: 'WATCH' },
-  { pair: 'NZD/USD', flags: '🇳🇿 🇺🇸', state: 'WATCH' },
+  ['EUR/USD', '🇪🇺 🇺🇸'], ['GBP/USD', '🇬🇧 🇺🇸'], ['USD/JPY', '🇺🇸 🇯🇵'],
+  ['USD/CAD', '🇺🇸 🇨🇦'], ['AUD/USD', '🇦🇺 🇺🇸'], ['NZD/USD', '🇳🇿 🇺🇸'],
 ];
 
-const FOREX_TRUTH_ENDPOINT = '/api/forex/session-status';
-const FOREX_TRUTH_DEFAULT = {
-  display_state: 'DISPLAY_ONLY',
-  warnings: ['NO_RUNTIME_EVIDENCE'],
-  next_safe_action: 'START_RUNTIME_SESSION_AND_REPLAY',
-  mode_label: 'Paper-only',
-  fetch_policy: 'FETCH_DISABLED_UNTIL_APPROVED_RUNTIME_WIRING',
-};
+function StatusPill({ children, tone = 'neutral' }) {
+  return <span className={`statusPill statusPill--${tone}`}>{children}</span>;
+}
 
-const DETAIL_COPY = {
-  safety: {
-    icon: '🛡️',
-    title: 'Safety',
-    rows: [
-      ['LOGIN', 'PROTECTED'],
-      ['SSO', 'NOT PROVEN'],
-      ['CLOUDFLARE', 'NOT PROVEN'],
-      ['STATUS', 'OPERATOR REQUIRED'],
-    ],
-    note: 'Login, account, Azure, Cloudflare, and broker actions are not available from this dashboard.',
-  },
-  system: {
-    icon: '🛠️',
-    title: 'System',
-    rows: [
-      ['TOOLS', 'LOCAL'],
-      ['RUNTIME', 'DISPLAY ONLY'],
-      ['SCHEDULER', 'OFF'],
-      ['WEBHOOK', 'OFF'],
-    ],
-    note: 'System controls stay informational until Anthony approves a separate scoped lane.',
-  },
-  music: {
-    icon: '🎵',
-    title: 'Music',
-    rows: [
-      ['DOCK', 'TUCKED'],
-      ['UTILITY', 'LOCAL'],
-      ['AUTOPLAY', 'OFF'],
-      ['NETWORK', 'OFF'],
-    ],
-    note: 'Music and utility controls are kept out of the home screen to preserve the four-icon command surface.',
-  },
-};
-
-function IconHome({ onOpen }) {
+function Home({ onOpen }) {
   return (
-    <section className="minimalHome" aria-label="AIOS owner command rooms">
-      <header className="homeTopbar">
-        <span className="brandMark">AIOS</span>
-        <span className="executionLock">EXEC OFF</span>
-      </header>
-
-      <nav className="iconRoomGrid" aria-label="Primary dashboard rooms">
-        {HOME_ROOMS.map((room) => (
-          <button
-            aria-label={room.label}
-            className="iconRoomButton"
-            key={room.id}
-            onClick={() => onOpen(room.id)}
-            title={room.label}
-            type="button"
-          >
-            <span aria-hidden="true">{room.icon}</span>
-            <span className="roomLabel">{room.label}</span>
+    <section className="surface homeSurface" aria-labelledby="home-title">
+      <div className="heroCopy">
+        <p className="eyebrow">Owner overview</p>
+        <h1 id="home-title">AIOS</h1>
+        <p className="heroSummary">One view. Clear state. Human control.</p>
+      </div>
+      <div className="systemSummary" aria-label="Critical system status">
+        <div><span>System</span><strong>Local preview</strong></div>
+        <div><span>Execution</span><strong className="dangerText">Off</strong></div>
+        <div><span>Broker</span><strong className="dangerText">Locked</strong></div>
+      </div>
+      <nav className="destinationGrid" aria-label="Primary dashboard destinations">
+        {ROOMS.map((room) => (
+          <button className="destinationCard" key={room.id} onClick={() => onOpen(room.id)} type="button">
+            <span className="destinationIcon" aria-hidden="true">{room.icon}</span>
+            <span>{room.label}</span>
+            <span className="destinationArrow" aria-hidden="true">→</span>
           </button>
         ))}
       </nav>
@@ -105,133 +45,121 @@ function IconHome({ onOpen }) {
   );
 }
 
-function BackButton({ buttonRef, onClick }) {
+function Forex() {
   return (
-    <button
-      aria-label="Back to AIOS home"
-      className="backButton"
-      onClick={onClick}
-      ref={buttonRef}
-      title="Back"
-      type="button"
-    >
-      <span aria-hidden="true">←</span>
-    </button>
-  );
-}
-
-function DetailRoom({ backButtonRef, room, onBack }) {
-  if (room === 'forex') {
-    return <ForexRoom backButtonRef={backButtonRef} onBack={onBack} />;
-  }
-
-  const detail = DETAIL_COPY[room];
-
-  return (
-    <section className="detailRoom" aria-labelledby={`${room}-title`}>
-      <BackButton buttonRef={backButtonRef} onClick={onBack} />
-      <header className="detailHeader">
-        <span aria-hidden="true" className="detailIcon">
-          {detail.icon}
-        </span>
-        <h1 id={`${room}-title`}>{detail.title}</h1>
-      </header>
-
-      <div className="detailGrid" aria-label={`${detail.title} status`}>
-        {detail.rows.map(([label, value]) => (
-          <div className="statusTile" key={label}>
-            <span>{label}</span>
-            <strong>{value}</strong>
-          </div>
-        ))}
+    <section className="surface" aria-labelledby="forex-title">
+      <div className="surfaceHeading">
+        <div><p className="eyebrow">Paper-only view</p><h1 id="forex-title">Forex</h1></div>
+        <StatusPill tone="danger">Execution off</StatusPill>
       </div>
-
-      <p className="roomNote">{detail.note}</p>
+      <div className="metricGrid" aria-label="Forex status">
+        <article className="metric"><span>Mode</span><strong>Display only</strong><small>No runtime evidence</small></article>
+        <article className="metric"><span>Broker</span><strong>Locked</strong><small>Owner approval required</small></article>
+        <article className="metric"><span>Readiness</span><strong>Unknown</strong><small>Evidence not connected</small></article>
+      </div>
+      <div className="safetyStrip" aria-label="Forex safety locks">
+        {FOREX_SAFETY.map((state) => <StatusPill tone="danger" key={state}>{state}</StatusPill>)}
+      </div>
+      <div className="sectionTitle"><h2>Watchlist</h2><span>Read only</span></div>
+      <div className="pairGrid">
+        {PAIRS.map(([pair, flags]) => <article className="pair" key={pair}><span aria-hidden="true">{flags}</span><strong>{pair}</strong><StatusPill>Watch</StatusPill></article>)}
+      </div>
     </section>
   );
 }
 
-function ForexRoom({ backButtonRef, onBack }) {
+function Music() {
   return (
-    <section className="detailRoom forexRoom" aria-labelledby="forex-title">
-      <BackButton buttonRef={backButtonRef} onClick={onBack} />
-      <header className="detailHeader">
-        <span aria-hidden="true" className="detailIcon">
-          🤖
-        </span>
-        <h1 id="forex-title">Forex Bot</h1>
-      </header>
+    <section className="surface" aria-labelledby="music-title">
+      <div className="surfaceHeading"><div><p className="eyebrow">Music Companion</p><h1 id="music-title">Music</h1></div><StatusPill>Autoplay off</StatusPill></div>
+      <article className="musicPanel">
+        <div className="albumArt" aria-hidden="true">♫</div>
+        <div className="musicCopy"><span>Persistent player</span><strong>Library &amp; dock</strong><small>Track, position, volume and dock state are preserved in the companion.</small></div>
+        <a className="primaryAction" href="/AIOS_STATIC_PREVIEW.html#music">Open Music Companion</a>
+      </article>
+      <p className="compactNote">Soft Refresh remains available in the companion and does not use a browser reload. Playback never autostarts after a real refresh.</p>
+    </section>
+  );
+}
 
-      <div className="forexLockStrip" aria-label="Forex execution state">
-        <span>READ ONLY</span>
-        <span>{FOREX_TRUTH_DEFAULT.display_state}</span>
-        <span>EXEC OFF</span>
-        <span>BROKER LOCKED</span>
+function Utilities() {
+  return (
+    <section className="surface" aria-labelledby="utilities-title">
+      <div className="surfaceHeading"><div><p className="eyebrow">Local tools</p><h1 id="utilities-title">Utilities</h1></div><StatusPill>Safe mode</StatusPill></div>
+      <div className="metricGrid">
+        <article className="metric"><span>Runtime</span><strong>Display only</strong><small>No background services</small></article>
+        <article className="metric"><span>Scheduler</span><strong>Off</strong><small>No automated actions</small></article>
+        <article className="metric"><span>Webhooks</span><strong>Off</strong><small>No external calls</small></article>
       </div>
+    </section>
+  );
+}
 
-      <div className="pairGrid" aria-label="Read-only Forex pair watchlist">
-        {PAIRS.map((item) => (
-          <article className="pairBadge" key={item.pair}>
-            <span aria-hidden="true" className="pairFlags">
-              {item.flags}
-            </span>
-            <strong>{item.pair}</strong>
-            <small>{item.state}</small>
-          </article>
-        ))}
+function Access({ reasoning, onReasoningChange }) {
+  return (
+    <section className="surface" aria-labelledby="access-title">
+      <div className="surfaceHeading"><div><p className="eyebrow">Access &amp; settings</p><h1 id="access-title">Settings</h1></div><StatusPill tone="good">Protected</StatusPill></div>
+      <div className="settingsPanel">
+        <div className="settingCopy"><h2>Reasoning Level</h2><p>Adjust the visual planning depth. This display does not switch models.</p></div>
+        <fieldset className="reasoningControl">
+          <legend className="srOnly">Reasoning Level</legend>
+          {REASONING_LEVELS.map((level, index) => (
+            <label className={reasoning === index ? 'isSelected' : ''} key={level}>
+              <input checked={reasoning === index} name="reasoning" onChange={() => onReasoningChange(index)} type="radio" />
+              <span className="reasoningDot" aria-hidden="true" /><span>{level}</span>
+            </label>
+          ))}
+        </fieldset>
       </div>
-
-      <p className="roomNote">
-        {FOREX_TRUTH_DEFAULT.mode_label} projection from {FOREX_TRUTH_ENDPOINT}. Current warning: {' '}
-        {FOREX_TRUTH_DEFAULT.warnings[0]}. Next safe action: {FOREX_TRUTH_DEFAULT.next_safe_action}.
-        ORDER CONTROL remains absent; order controls stay hidden. Trading execution remains locked; trading execution stays locked.
-      </p>
+      <div className="metricGrid compactMetrics">
+        <article className="metric"><span>Login</span><strong>Protected</strong></article>
+        <article className="metric"><span>SSO</span><strong>Not proven</strong></article>
+        <article className="metric"><span>Theme</span><strong>Midnight Violet</strong></article>
+      </div>
     </section>
   );
 }
 
 export default function MinimalOperatorDashboard() {
   const [activeRoom, setActiveRoom] = useState('home');
+  const [reasoning, setReasoning] = useState(2);
   const backButtonRef = useRef(null);
   const lastRoomButtonRef = useRef(null);
-  const roomIds = useMemo(() => new Set(HOME_ROOMS.map((room) => room.id)), []);
-  const isHome = activeRoom === 'home' || !roomIds.has(activeRoom);
+  const roomIds = useMemo(() => new Set(ROOMS.map(({ id }) => id)), []);
+  const room = roomIds.has(activeRoom) ? activeRoom : 'home';
 
-  const openRoom = (room) => {
-    lastRoomButtonRef.current = document.activeElement;
-    setActiveRoom(room);
-  };
-
-  const returnHome = () => setActiveRoom('home');
+  const openRoom = (nextRoom) => { lastRoomButtonRef.current = document.activeElement; setActiveRoom(nextRoom); };
+  const goHome = () => setActiveRoom('home');
 
   useEffect(() => {
-    if (!isHome) {
-      backButtonRef.current?.focus();
-      return undefined;
-    }
-
-    lastRoomButtonRef.current?.focus();
-    return undefined;
-  }, [isHome]);
+    if (room === 'home') lastRoomButtonRef.current?.focus();
+    else backButtonRef.current?.focus();
+  }, [room]);
 
   useEffect(() => {
-    if (isHome) return undefined;
-
-    const handleEscape = (event) => {
-      if (event.key === 'Escape') returnHome();
-    };
-
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
-  }, [isHome]);
+    if (room === 'home') return undefined;
+    const onKeyDown = (event) => { if (event.key === 'Escape') goHome(); };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [room]);
 
   return (
-    <main className="minimalOperatorDashboard" aria-label="AIOS minimal operator dashboard">
-      {isHome ? (
-        <IconHome onOpen={openRoom} />
-      ) : (
-        <DetailRoom backButtonRef={backButtonRef} room={activeRoom} onBack={returnHome} />
-      )}
+    <main className="minimalOperatorDashboard" data-reasoning={reasoning}>
+      <div className="ambientGlow" aria-hidden="true" />
+      <header className="appBar">
+        <button className="brandButton" onClick={goHome} type="button" aria-label="AIOS home">AIOS<span>◆</span></button>
+        <div className="appStatus"><StatusPill tone="danger">Exec off</StatusPill><span className="reasoningReadout">Reasoning: {REASONING_LEVELS[reasoning]}</span></div>
+      </header>
+      {room !== 'home' && <button ref={backButtonRef} className="backButton" onClick={goHome} type="button" aria-label="Back to AIOS home">← <span>Home</span></button>}
+      {room === 'home' && <Home onOpen={openRoom} />}
+      {room === 'forex' && <Forex />}
+      {room === 'music' && <Music />}
+      {room === 'system' && <Utilities />}
+      {room === 'safety' && <Access reasoning={reasoning} onReasoningChange={setReasoning} />}
+      <nav className="mobileNav" aria-label="Mobile destinations">
+        <button className={room === 'home' ? 'active' : ''} onClick={goHome} type="button">⌂<span>Home</span></button>
+        {ROOMS.map(({ id, icon, label }) => <button className={room === id ? 'active' : ''} key={id} onClick={() => openRoom(id)} type="button"><span aria-hidden="true">{icon}</span><span>{label.replace(' Bot', '')}</span></button>)}
+      </nav>
     </main>
   );
 }
