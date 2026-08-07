@@ -3,26 +3,37 @@ name: AIOS Governance
 on:
   pull_request:
   push:
-    branches-ignore:
-      - main
+    branches-ignore: [main]
+
+permissions:
+  contents: read
 
 jobs:
   governance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - name: Resolve exact source SHA
+        id: source
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == pull_request ]]; then expected="$PR_HEAD_SHA"; else expected="$PUSH_SHA"; fi
+          [[ "$expected" =~ ^[0-9a-f]{40}$ ]] || { echo SHA_SOURCE_UNAVAILABLE_BLOCKED; exit 1; }
+          echo "sha=$expected" >> "$GITHUB_OUTPUT"
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
-      - name: Compile governance bridge
-        run: |
-          python -m py_compile automation/bridge/aios_phase_bridge.py
-          python -m py_compile automation/validators/aios_governance_validator.py
-          python -m py_compile automation/orchestration/dispatcher/assignment_executor.py
-          python -m py_compile automation/validators/aios_worker_dispatcher_assignment_executor_validator.py
-          python -m py_compile automation/self_build/aios_self_build_inspector.py
-      - name: Run governance validator sample
-        run: python automation/validators/aios_governance_validator.py --sample-check
-      - name: Run worker dispatcher assignment executor validator sample
-        run: python automation/validators/aios_worker_dispatcher_assignment_executor_validator.py --sample-check
-
+          python-version: '3.12'
+      - name: Shared Dual-CI validation
+        env:
+          EXPECTED_SHA: ${{ steps.source.outputs.sha }}
+          RECEIPT: ${{ runner.temp }}/aios-governance-receipt.json
+        run: python -B scripts/ci/run_aios_dual_ci_validation_v1.py --provider GITHUB_ACTIONS --expected-sha "$EXPECTED_SHA" --receipt "$RECEIPT"
